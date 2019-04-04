@@ -108,7 +108,7 @@ class MediaBrowser extends Component {
   };
 
   sourceChanged = () => {
-    if (this.inputRef && !isMobileVR) {
+    if (this.inputRef && !isMobile && !isMobileVR) {
       this.inputRef.focus();
     }
   };
@@ -137,6 +137,7 @@ class MediaBrowser extends Component {
 
     if (this._sendQueryTimeout) {
       clearTimeout(this._sendQueryTimeout);
+      this._sendQueryTimeout = null;
     }
 
     if (forceNow) {
@@ -146,6 +147,7 @@ class MediaBrowser extends Component {
       this._sendQueryTimeout = setTimeout(() => {
         // Drop filter for now, so entering text drops into "search all" mode
         this.props.mediaSearchStore.filterQueryNavigate("", query);
+        this._sendQueryTimeout = null;
       }, 500);
     }
 
@@ -232,7 +234,7 @@ class MediaBrowser extends Component {
                 </i>
                 <input
                   type="text"
-                  autoFocus={!isMobileVR}
+                  autoFocus={!isMobile && !isMobileVR}
                   ref={r => (this.inputRef = r)}
                   placeholder={formatMessage({
                     id: `media-browser.search-placeholder.${urlSource}`
@@ -241,7 +243,7 @@ class MediaBrowser extends Component {
                   onBlur={() => handleTextFieldBlur()}
                   onKeyDown={e => {
                     if (e.key === "Enter" && e.ctrlKey) {
-                      if (this.state.result && this.state.result.entries.length > 0) {
+                      if (this.state.result && this.state.result.entries.length > 0 && !this._sendQueryTimeout) {
                         this.handleEntryClicked(e, this.state.result.entries[0]);
                       } else if (this.state.query.trim() !== "") {
                         this.handleQueryUpdated(this.state.query, true);

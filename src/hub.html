@@ -202,7 +202,6 @@
                     class="interactable"
                     ammo-body="type: static; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 11;"
                     is-remote-hover-target
-                    hoverable-visuals="cursorController: #cursor-controller"
                 >
                 </a-entity>
             </template>
@@ -453,33 +452,35 @@
                         position="0.275 0.175 0"
                         class="ui video-volume-up-button"
                     ></a-image>
-                    <a-image
-                        is-remote-hover-target
-                        tags="singleActionButton: true; isHoverMenuChild: true;"
-                        icon-button="image: #video-seek-back; hoverImage: #video-seek-back-hover;"
-                        scale="0.1 0.1 0.1"
-                        position="-0.3 -0.125 0"
-                        class="ui video-seek-back-button"
-                        visible="false"
-                    ></a-image>
-                    <a-image
-                        is-remote-hover-target
-                        tags="singleActionButton: true; isHoverMenuChild: true;"
-                        icon-button="image: #video-pause; hoverImage: #video-pause-hover; activeImage: #video-play; activeHoverImage: #video-play-hover"
-                        scale="0.15 0.15 0.15"
-                        position="0 -0.125 0"
-                        class="ui video-playpause-button"
-                        visible="false"
-                    ></a-image>
-                    <a-image
-                        is-remote-hover-target
-                        tags="singleActionButton: true; isHoverMenuChild: true;"
-                        icon-button="image: #video-seek-forward; hoverImage: #video-seek-forward-hover;"
-                        scale="0.1 0.1 0.1"
-                        position="0.3 -0.125 0"
-                        class="ui video-seek-forward-button"
-                        visible="false"
-                    ></a-image>
+                    <a-entity class="video-playback">
+                        <a-image
+                            is-remote-hover-target
+                            tags="singleActionButton: true; isHoverMenuChild: true;"
+                            icon-button="image: #video-seek-back; hoverImage: #video-seek-back-hover;"
+                            scale="0.1 0.1 0.1"
+                            position="-0.3 -0.125 0"
+                            class="ui video-seek-back-button"
+                            visible="false"
+                        ></a-image>
+                        <a-image
+                            is-remote-hover-target
+                            tags="singleActionButton: true; isHoverMenuChild: true;"
+                            icon-button="image: #video-pause; hoverImage: #video-pause-hover; activeImage: #video-play; activeHoverImage: #video-play-hover"
+                            scale="0.15 0.15 0.15"
+                            position="0 -0.125 0"
+                            class="ui video-playpause-button"
+                            visible="false"
+                        ></a-image>
+                        <a-image
+                            is-remote-hover-target
+                            tags="singleActionButton: true; isHoverMenuChild: true;"
+                            icon-button="image: #video-seek-forward; hoverImage: #video-seek-forward-hover;"
+                            scale="0.1 0.1 0.1"
+                            position="0.3 -0.125 0"
+                            class="ui video-seek-forward-button"
+                            visible="false"
+                        ></a-image>
+                    </a-entity>
                 </a-entity>
             </template>
 
@@ -622,14 +623,22 @@
                 vr-mode-toggle-visibility
                 vr-mode-toggle-playing__hud-controller
             >
-                <a-entity in-world-hud rotation="30 0 0">
-
-                    <a-rounded height="0.08" width="0.2" color="#000000" position="-0.30 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
-                    <a-image scale="0.07 0.06 0.06" position="-0.23 0.165 0.001" src="#presence-count" material="alphaTest:0.1;"></a-image>
-                    <a-entity id="hud-presence-count" text="value:; width:1.1; align:center;" position="-0.155 0.165 0" matrix-auto-update="target: text;"></a-entity>
+                <a-entity visibility-while-frozen="withinDistance: 10; requireHoverOnNonMobile: false;" rotation="30 0 0">
                     <a-entity class="ui interactable-ui">
-                        <a-entity class="invite-btn" position="0.17 0.165 0" scale="0.5 0.5 0.5">
-                            <a-entity mixin="rounded-text-action-button" is-remote-hover-taget tags="singleActionButton: true;" slice9="width: 1.0" scale="0.8 0.8 1.0">
+                        <a-entity class="leave-btn" position="0 -0.2 0" scale="0.7 0.7 0.7" leave-room-button is-remote-hover-target tags="singleActionButton: true;">
+                            <a-entity mixin="rounded-text-action-button" slice9="width: 0.8" scale="0.8 0.8 1.0">
+                                <a-entity text=" value:leave room; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                            </a-entity>
+                        </a-entity>
+                    </a-entity>
+                </a-entity>
+                <a-entity in-world-hud visibility-while-frozen="withinDistance: 10; visible: false; requireHoverOnNonMobile: false;" rotation="30 0 0">
+                    <a-rounded height="0.08" width="0.2" color="#000000" position="-0.44 -0.045 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
+                    <a-image scale="0.07 0.06 0.06" position="-0.38 -0.005 0.001" src="#presence-count" material="alphaTest:0.1;"></a-image>
+                    <a-entity id="hud-presence-count" text="value:; width:1.1; align:center;" position="-0.30 -0.005 0" matrix-auto-update="target: text;"></a-entity>
+                    <a-entity class="ui interactable-ui">
+                        <a-entity class="invite-btn" position="0 0.18 0" scale="0.7 0.7 0.7" is-remote-hover-target tags="singleActionButton: true;">
+                            <a-entity mixin="rounded-text-action-button" slice9="width: 0.7" scale="0.8 0.8 1.0">
                                 <a-entity text=" value:invite; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                             </a-entity>
                         </a-entity>
@@ -833,7 +842,7 @@
                     textColor: #fff;
                     backgroundColor: #2f80ed;"
                 position="0 0 0.01">
-                <a-entity text="value:Lift your headset to continue; width:1; align:center;" position="0 0 0.01"></a-entity>
+                <a-entity text="value:View your desktop to continue; width:1; align:center;" position="0 0 0.01"></a-entity>
             </a-entity>
         </a-entity>
 

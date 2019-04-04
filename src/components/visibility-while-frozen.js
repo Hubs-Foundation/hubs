@@ -30,7 +30,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
 
       hoverableSearch = hoverableSearch.parentNode;
     }
-    if (!this.hoverable) {
+    if (!this.hoverable && this.data.requireHoverOnNonMobile) {
       console.error("Didn't find a remote hover target.");
     }
 
@@ -92,15 +92,21 @@ AFRAME.registerComponent("visibility-while-frozen", {
   play() {
     this.el.sceneEl.addEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.addEventListener("stateremoved", this.onStateChange);
-    this.hoverable.object3D.addEventListener("hovered", this.updateVisibility);
-    this.hoverable.object3D.addEventListener("unhovered", this.updateVisibility);
+
+    if (this.hoverable) {
+      this.hoverable.object3D.addEventListener("hovered", this.updateVisibility);
+      this.hoverable.object3D.addEventListener("unhovered", this.updateVisibility);
+    }
   },
 
   pause() {
     this.el.sceneEl.removeEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateChange);
-    this.hoverable.object3D.addEventListener("hovered", this.updateVisibility);
-    this.hoverable.object3D.addEventListener("unhovered", this.updateVisibility);
+
+    if (this.hoverable) {
+      this.hoverable.object3D.addEventListener("hovered", this.updateVisibility);
+      this.hoverable.object3D.addEventListener("unhovered", this.updateVisibility);
+    }
   }
 });
 

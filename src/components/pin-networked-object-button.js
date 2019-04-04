@@ -29,12 +29,12 @@ AFRAME.registerComponent("pin-networked-object-button", {
       this.targetEl.addEventListener("unpinned", this._updateUI);
     });
 
-    this.onHover = () => {
+    this.onHovered = () => {
       this.hovering = true;
       this._updateUI();
     };
 
-    this.onHoverOut = () => {
+    this.onUnhovered = () => {
       this.hovering = false;
       this._updateUI();
     };
@@ -49,14 +49,14 @@ AFRAME.registerComponent("pin-networked-object-button", {
 
   play() {
     this.el.object3D.addEventListener("interact", this.onClick);
-    this.el.object3D.addEventListener("hover", this.onHover);
-    this.el.object3D.addEventListener("unhover", this.onHoverOut);
+    this.el.object3D.addEventListener("hovered", this.onHovered);
+    this.el.object3D.addEventListener("unhovered", this.onUnhovered);
   },
 
   pause() {
     this.el.object3D.removeEventListener("interact", this.onClick);
-    this.el.object3D.removeEventListener("hover", this.onHover);
-    this.el.object3D.removeEventListener("unhover", this.onHoverOut);
+    this.el.object3D.removeEventListener("hovered", this.onHovered);
+    this.el.object3D.removeEventListener("unhovered", this.onUnhovered);
   },
 
   remove() {
@@ -70,14 +70,15 @@ AFRAME.registerComponent("pin-networked-object-button", {
   },
 
   _discordBridges() {
-    return []; // TODO mqp
     const presences = window.APP.hubChannel.presence.state;
     if (!presences) {
       return [];
     } else {
-      return Object.values(presences)
-        .flatMap(p => p.metas.map(m => m.context.discord))
-        .filter(ch => !!ch);
+      const channels = [];
+      for (const p of Object.values(presences)) {
+        Array.prototype.push.apply(channels, p.metas.map(m => m.context.discord).filter(ch => !!ch));
+      }
+      return channels;
     }
   },
 

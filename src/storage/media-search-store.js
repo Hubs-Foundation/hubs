@@ -2,7 +2,7 @@ import { EventTarget } from "event-target-shim";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 
-export const SOURCES = ["videos", "sketchfab", "poly", "scenes", "gifs", "images", "twitch"];
+export const SOURCES = ["youtube", "sketchfab", "poly", "scenes", "gifs", "images", "videos", "twitch"];
 
 const URL_SOURCE_TO_TO_API_SOURCE = {
   scenes: "scene_listings",
@@ -72,9 +72,10 @@ export default class MediaSearchStore extends EventTarget {
     if (this.lastSavedUrl === url) return;
 
     const res = await fetch(url);
+    const result = await res.json();
     if (this.requestIndex != currentRequestIndex) return;
 
-    this.result = await res.json();
+    this.result = result;
     this.nextCursor = this.result.meta.next_cursor;
     this.lastFetchedUrl = url;
     this.dispatchEvent(new CustomEvent("statechanged"));

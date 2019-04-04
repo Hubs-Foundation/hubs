@@ -2,79 +2,10 @@ import { paths } from "../systems/userinput/paths";
 import { sets } from "../systems/userinput/sets";
 import { getLastWorldPosition } from "../utils/three-utils";
 
-// Color code from https://codepen.io/njmcode/pen/axoyD/
-const rgb2hsl = function(color, out) {
-  const r = color[0] / 255;
-  const g = color[1] / 255;
-  const b = color[2] / 255;
-
-  const max = Math.max(r, g, b),
-    min = Math.min(r, g, b);
-  let h, s;
-  const l = (max + min) / 2;
-
-  if (max == min) {
-    h = s = 0; // achromatic
-  } else {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r:
-        h = (g - b) / d + (g < b ? 6 : 0);
-        break;
-      case g:
-        h = (b - r) / d + 2;
-        break;
-      case b:
-        h = (r - g) / d + 4;
-        break;
-    }
-    h /= 6;
-  }
-
-  out[0] = h;
-  out[1] = s;
-  out[2] = l;
-  return out;
-};
-
-const hue2rgb = function(p, q, t) {
-  if (t < 0) t += 1;
-  if (t > 1) t -= 1;
-  if (t < 1 / 6) return p + (q - p) * 6 * t;
-  if (t < 1 / 2) return q;
-  if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-  return p;
-};
-
-const hsl2rgb = function(color, out) {
-  const l = color[2];
-  const s = color[1];
-  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-  const p = 2 * l - q;
-  out[0] = hue2rgb(p, q, color[0] + 1 / 3);
-  out[1] = hue2rgb(p, q, color[0]);
-  out[2] = hue2rgb(p, q, color[0] - 1 / 3);
-  return out;
-};
-
-const _interpolateHSL = (function() {
-  const hsl1 = [0, 0, 0];
-  const hsl2 = [0, 0, 0];
-  return function _interpolateHSL(color1, color2, factor, out) {
-    rgb2hsl(color1, hsl1);
-    rgb2hsl(color2, hsl2);
-    for (let i = 0; i < 3; i++) {
-      hsl1[i] += factor * (hsl2[i] - hsl1[i]);
-    }
-    return hsl2rgb(hsl1, out);
-  };
-})();
-
 const HIGHLIGHT = new THREE.Color(23 / 255, 64 / 255, 118 / 255);
 const NO_HIGHLIGHT = new THREE.Color(190 / 255, 190 / 255, 190 / 255);
-const TRANSFORM_COLOR_1 = [150, 80, 150];
-const TRANSFORM_COLOR_2 = [23, 64, 118];
+const TRANSFORM_COLOR_1 = new THREE.Color(150 / 255, 80 / 255, 150 / 255);
+const TRANSFORM_COLOR_2 = new THREE.Color(23 / 255, 64 / 255, 118 / 255);
 AFRAME.registerComponent("cursor-controller", {
   schema: {
     cursor: { type: "selector" },
@@ -99,7 +30,6 @@ AFRAME.registerComponent("cursor-controller", {
     this.raycaster.firstHitOnly = true; // flag specific to three-mesh-bvh
     this.distance = this.data.far;
     this.color = new THREE.Color(0, 0, 0);
-    this.transformColor = [0, 0, 0];
 
     const lineGeometry = new THREE.BufferGeometry();
     lineGeometry.addAttribute("position", new THREE.BufferAttribute(new Float32Array(2 * 3), 3));
@@ -169,8 +99,7 @@ AFRAME.registerComponent("cursor-controller", {
       cursor.object3D.matrixNeedsUpdate = true;
 
       if (AFRAME.scenes[0].systems["transform-selected-object"].transforming) {
-        _interpolateHSL(TRANSFORM_COLOR_1, TRANSFORM_COLOR_2, 0.5 + 0.5 * Math.sin(t / 1000.0), this.transformColor);
-        this.color.setRGB(this.transformColor[0], this.transformColor[1], this.transformColor[2]);
+        this.color.copy(TRANSFORM_COLOR_1).lerpHSL(TRANSFORM_COLOR_2, 0.5 + 0.5 * Math.sin(t / 1000.0));
       } else if (intersection || isGrabbing) {
         this.color.copy(HIGHLIGHT);
       } else {

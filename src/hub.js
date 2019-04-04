@@ -48,6 +48,7 @@ import "./components/icon-button";
 import "./components/text-button";
 import "./components/block-button";
 import "./components/kick-button";
+import "./components/leave-room-button";
 import "./components/visible-if-permitted";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
@@ -406,6 +407,17 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     hubChannel.updateScene(e.detail);
   });
 
+  // Handle request for user gesture
+  scene.addEventListener("2d-interstitial-gesture-required", () => {
+    remountUI({
+      showInterstitialPrompt: true,
+      onInterstitialPromptClicked: () => {
+        scene.emit("2d-interstitial-gesture-complete");
+        remountUI({ showInterstitialPrompt: false, onInterstitialPromptClicked: null });
+      }
+    });
+  });
+
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   const connectToScene = async () => {
     scene.setAttribute("networked-scene", {
@@ -649,6 +661,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   scene.addEventListener("tips_changed", e => {
     remountUI({ activeTips: e.detail });
+  });
+
+  scene.addEventListener("leave_room_requested", () => {
+    scene.exitVR();
+    entryManager.exitScene("left");
+    remountUI({ roomUnavailableReason: "left" });
   });
 
   scene.addEventListener("camera_toggled", () => remountUI({}));
