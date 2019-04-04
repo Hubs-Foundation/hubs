@@ -17,6 +17,9 @@ export function getBox(entity, boxRoot) {
     entity.object3D.matrixNeedsUpdate = true;
   }
 
+  boxRoot.matrixWorldNeedsUpdate = true;
+  boxRoot.updateMatrices();
+
   return box;
 }
 
