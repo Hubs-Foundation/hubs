@@ -410,6 +410,7 @@ class UIRoot extends Component {
 
   toggleMute = () => {
     this.props.scene.emit("action_mute");
+    this.props.scene.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("toggle_mic");
   };
 
   toggleFreeze = () => {

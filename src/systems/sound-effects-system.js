@@ -14,6 +14,7 @@ import FREEZE from "../assets/sfx/Eb_blip.mp3";
 import TACK from "../assets/sfx/tack.mp3";
 import MEDIA_LOADED from "../assets/sfx/A_bendUp.mp3";
 import MEDIA_LOADING from "../assets/sfx/suspense.mp3";
+import { paths } from "./userinput/paths";
 
 function getBuffer(url, context) {
   return fetch(url)
@@ -97,6 +98,7 @@ export class SoundEffectsSystem {
       this.soundFor.set("pen_stop_draw", buffer);
       this.soundFor.set("pen_change_radius", buffer);
       this.soundFor.set("pen_change_color", buffer);
+      this.soundFor.set("toggle_mic", buffer);
     });
     getBuffer(TELEPORT_ARC, this.ctx).then(buffer => {
       this.sounds.teleportArc = buffer;
@@ -229,6 +231,11 @@ export class SoundEffectsSystem {
     this.tickTeleportSounds(this.teleporters.leftHand, this.teleporterState.leftHand);
     this.tickTeleportSounds(this.teleporters.rightHand, this.teleporterState.rightHand);
     this.tickTeleportSounds(this.teleporters.rightRemote, this.teleporterState.rightRemote);
+
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    if (userinput.get(paths.actions.muteMic)) {
+      playSound(this.sounds.tick, this.ctx);
+    }
 
     for (let i = 0; i < this.pendingEffects.length; i++) {
       playSound(this.soundFor.get(this.pendingEffects[i]), this.ctx);

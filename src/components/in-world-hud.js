@@ -33,6 +33,7 @@ AFRAME.registerComponent("in-world-hud", {
 
     this.onMicClick = () => {
       this.el.emit("action_mute");
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("toggle_mic");
     };
 
     this.onSpawnClick = () => {
