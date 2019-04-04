@@ -24,7 +24,7 @@ AFRAME.registerSystem("hubs-systems", {
   tick(t) {
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
-    systems.interaction.tick2();
+    systems.interaction.tick2(this.soundEffectsSystem);
     this.superSpawnerSystem.tick();
     this.cursorTargettingSystem.tick(t);
     this.constraintsSystem.tick();

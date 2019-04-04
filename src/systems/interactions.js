@@ -51,6 +51,12 @@ AFRAME.registerComponent("is-remote-hover-target", {
   }
 });
 
+function isUI(el) {
+  return (
+    el && el.components.tags && (el.components.tags.data.singleActionButton || el.components.tags.data.holdableButton)
+  );
+}
+
 AFRAME.registerSystem("interaction", {
   updateCursorIntersection: function(intersection) {
     this.rightRemoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
@@ -97,6 +103,23 @@ AFRAME.registerSystem("interaction", {
         spawning: null
       }
     };
+    this.previousState = {
+      leftHand: {
+        hovered: null,
+        held: null,
+        spawning: null
+      },
+      rightHand: {
+        hovered: null,
+        held: null,
+        spawning: null
+      },
+      rightRemote: {
+        hovered: null,
+        held: null,
+        spawning: null
+      }
+    };
 
     this.cursorController = document.querySelector("#cursor-controller");
   },
@@ -127,8 +150,13 @@ AFRAME.registerSystem("interaction", {
     }
   },
 
-  tick2() {
+  tick2(sfx) {
     if (!this.el.is("entered")) return;
+
+    Object.assign(this.previousState.rightHand, this.state.rightHand);
+    Object.assign(this.previousState.rightRemote, this.state.rightRemote);
+    Object.assign(this.previousState.leftHand, this.state.leftHand);
+
     this.rightHandTeleporter =
       this.rightHandTeleporter || document.querySelector("#player-right-controller").components["teleporter"];
 
@@ -146,6 +174,16 @@ AFRAME.registerSystem("interaction", {
     this.cursorController.components["cursor-controller"].enabled = enableRightRemote;
     if (!enableRightRemote) {
       this.state.rightRemote.hovered = null;
+    }
+
+    if (
+      this.state.leftHand.held !== this.previousState.leftHand.held ||
+      this.state.rightHand.held !== this.previousState.rightHand.held ||
+      this.state.rightRemote.held !== this.previousState.rightRemote.held ||
+      (isUI(this.state.rightRemote.hovered) &&
+        this.state.rightRemote.hovered !== this.previousState.rightRemote.hovered)
+    ) {
+      sfx.pendingEffects.push("hover_or_grab");
     }
 
     if (this.el.systems.userinput.get(paths.actions.logInteractionState)) {

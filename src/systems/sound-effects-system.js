@@ -40,39 +40,15 @@ function playSoundLooped(buffer, context) {
   return source;
 }
 
-function copy(current, prev) {
-  prev.held = current.held;
-  prev.hovered = current.hovered;
-}
-
-function isUI(el) {
-  return (
-    el && el.components.tags && (el.components.tags.data.singleActionButton || el.components.tags.data.holdableButton)
-  );
-}
-
 export class SoundEffectsSystem {
   constructor() {
-    this.prevInteractionState = {
-      leftHand: {
-        hovered: null,
-        held: null
-      },
-      rightHand: {
-        hovered: null,
-        held: null
-      },
-      rightRemote: {
-        hovered: null,
-        held: null
-      }
-    };
     this.ctx = THREE.AudioContext.getContext();
     this.pendingEffects = [];
     this.soundFor = new Map();
     this.sounds = {};
     getBuffer(TICK, this.ctx).then(buffer => {
       this.sounds.tick = buffer;
+      this.soundFor.set("hover_or_grab", buffer);
       this.soundFor.set("thaw", buffer);
       this.soundFor.set("pen_stop_draw", buffer);
       this.soundFor.set("pen_undo_draw", buffer);
@@ -163,19 +139,6 @@ export class SoundEffectsSystem {
 
   tick() {
     if (!this.shouldTick()) return;
-
-    const { leftHand, rightHand, rightRemote } = AFRAME.scenes[0].systems.interaction.state;
-    if (
-      leftHand.held !== this.prevInteractionState.leftHand.held ||
-      rightHand.held !== this.prevInteractionState.rightHand.held ||
-      rightRemote.held !== this.prevInteractionState.rightRemote.held ||
-      (isUI(rightRemote.hovered) && rightRemote.hovered !== this.prevInteractionState.rightRemote.hovered)
-    ) {
-      playSound(this.sounds.tick, this.ctx);
-    }
-    copy(leftHand, this.prevInteractionState.leftHand);
-    copy(rightHand, this.prevInteractionState.rightHand);
-    copy(rightRemote, this.prevInteractionState.rightRemote);
 
     const userinput = AFRAME.scenes[0].systems.userinput;
     if (userinput.get(paths.actions.muteMic)) {
