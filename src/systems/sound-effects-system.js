@@ -2,6 +2,9 @@
 import TICK from "../assets/sfx/tick.mp3";
 import TELEPORT_ARC from "../assets/sfx/teleportArc.mp3";
 import QUICK_TURN from "../assets/sfx/quickTurn.mp3";
+import TAP_MELLOW from "../assets/sfx/tap_mellow.mp3";
+import PEN_SPAWN from "../assets/sfx/PenSpawn.mp3";
+import PEN_DRAW from "../assets/sfx/PenDraw1.mp3";
 
 function getBuffer(url, context) {
   return fetch(url)
@@ -9,13 +12,19 @@ function getBuffer(url, context) {
     .then(arrayBuffer => context.decodeAudioData(arrayBuffer));
 }
 
-function playSound(buffer, context, loop) {
+function playSoundLooped(buffer, context) {
   const source = context.createBufferSource();
   source.buffer = buffer;
-  source.loop = !!loop;
+  source.loop = true;
   source.connect(context.destination);
   source.start();
-  return source;
+}
+
+function playSound(buffer, context) {
+  const source = context.createBufferSource();
+  source.buffer = buffer;
+  source.connect(context.destination);
+  source.start();
 }
 
 function copy(current, prev) {
@@ -65,9 +74,16 @@ export class SoundEffectsSystem {
       }
     };
     this.ctx = THREE.AudioContext.getContext();
+    this.pendingEffects = [];
+    this.soundFor = new Map();
     this.sounds = {};
     getBuffer(TICK, this.ctx).then(buffer => {
       this.sounds.tick = buffer;
+      this.soundFor.set("pen_stop_draw", buffer);
+      this.soundFor.set("pen_undo_draw", buffer);
+      this.soundFor.set("pen_stop_draw", buffer);
+      this.soundFor.set("pen_change_radius", buffer);
+      this.soundFor.set("pen_change_color", buffer);
     });
     getBuffer(TELEPORT_ARC, this.ctx).then(buffer => {
       this.sounds.teleportArc = buffer;
@@ -75,15 +91,35 @@ export class SoundEffectsSystem {
     getBuffer(QUICK_TURN, this.ctx).then(buffer => {
       this.sounds.teleportEnd = buffer;
     });
+    getBuffer(TAP_MELLOW, this.ctx).then(buffer => {
+      this.sounds.snapRotate = buffer;
+      this.soundFor.set("snap_rotate_left", buffer);
+      this.soundFor.set("snap_rotate_right", buffer);
+    });
+    getBuffer(PEN_SPAWN, this.ctx).then(buffer => {
+      this.sounds.spawnPen = buffer;
+      this.soundFor.set("spawn_pen", buffer);
+    });
+    getBuffer(PEN_DRAW, this.ctx).then(buffer => {
+      this.sounds.penStartDraw = buffer;
+      this.soundFor.set("pen_start_draw", buffer);
+    });
   }
 
   soundsReady() {
-    return this.sounds.tick && this.sounds.teleportArc && this.sounds.teleportEnd;
+    return (
+      this.sounds.tick &&
+      this.sounds.teleportArc &&
+      this.sounds.teleportEnd &&
+      this.sounds.snapRotate &&
+      this.sounds.spawnPen &&
+      this.sounds.penStartDraw
+    );
   }
 
   tickTeleportSounds(teleporter, state) {
     if (teleporter.isTeleporting && !state.teleporting) {
-      state.teleportArcSource = playSound(this.sounds.teleportArc, this.ctx, true);
+      state.teleportArcSource = playSoundLooped(this.sounds.teleportArc, this.ctx);
     } else if (!teleporter.isTeleporting && state.teleporting) {
       state.teleportArcSource.stop();
       state.teleportArcSource = null;
@@ -119,5 +155,10 @@ export class SoundEffectsSystem {
     this.tickTeleportSounds(this.teleporters.leftHand, this.teleporterState.leftHand);
     this.tickTeleportSounds(this.teleporters.rightHand, this.teleporterState.rightHand);
     this.tickTeleportSounds(this.teleporters.rightRemote, this.teleporterState.rightRemote);
+
+    for (let i = 0; i < this.pendingEffects.length; i++) {
+      playSound(this.soundFor.get(this.pendingEffects[i]), this.ctx);
+    }
+    this.pendingEffects.length = 0;
   }
 }

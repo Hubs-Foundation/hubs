@@ -105,6 +105,8 @@ AFRAME.registerComponent("pen", {
   tick(t, dt) {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const interaction = AFRAME.scenes[0].systems.interaction;
+    const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.pendingEffects;
+
     if (interaction.state.rightHand.held === this.el.parentNode) {
       this.grabberId = "player-right-controller";
     } else if (interaction.state.leftHand.held === this.el.parentNode) {
@@ -121,22 +123,28 @@ AFRAME.registerComponent("pen", {
       const paths = pathsMap[this.grabberId];
       if (userinput.get(paths.startDrawing)) {
         this._startDraw();
+        sfx.push("pen_start_draw");
       }
       if (userinput.get(paths.stopDrawing)) {
         this._endDraw();
+        sfx.push("pen_stop_draw");
       }
       if (userinput.get(paths.undoDrawing)) {
         this._undoDraw();
+        sfx.push("pen_undo_draw");
       }
       const penScaleMod = userinput.get(paths.scalePenTip);
       if (penScaleMod) {
         this._changeRadius(penScaleMod);
+        sfx.push("pen_change_radius");
       }
       if (userinput.get(paths.penNextColor)) {
         this._changeColor(1);
+        sfx.push("pen_change_color");
       }
       if (userinput.get(paths.penPrevColor)) {
         this._changeColor(-1);
+        sfx.push("pen_change_color");
       }
     }
 
@@ -176,14 +184,12 @@ AFRAME.registerComponent("pen", {
     this.currentDrawing = this.drawingManager.getDrawing(this);
     if (this.currentDrawing) {
       this._getNormal(this.normal, this.worldPosition, this.direction);
-      this.el.emit("start_draw");
       this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
     }
   },
 
   _endDraw() {
     if (this.currentDrawing) {
-      this.el.emit("stop_draw");
       this.timeSinceLastDraw = 0;
       this._getNormal(this.normal, this.worldPosition, this.direction);
       this.currentDrawing.endDraw(this.worldPosition, this.direction, this.normal);

@@ -100,7 +100,6 @@
             <a-asset-item id="quack"                                      src="./assets/sfx/quack.mp3"          response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="specialquack"                               src="./assets/sfx/specialquack.mp3"   response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-quack"                          src="./assets/sfx/quack.mp3"          response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-snap_rotate"                    src="./assets/sfx/tap_mellow.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-media_loaded"                   src="./assets/sfx/A_bendUp.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-media_loading"                  src="./assets/sfx/suspense.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hud_hover_start"                src="./assets/sfx/tick.mp3"  response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -114,14 +113,6 @@
             <a-asset-item id="sound_asset-toggle_freeze"                  src="./assets/sfx/Eb_blip.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-freeze"                         src="./assets/sfx/Eb_blip.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-thaw"                           src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-toggle_space_bubble"            src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-spawn_pen"                      src="./assets/sfx/PenSpawn.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-increase_pen_radius"            src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-decrease_pen_radius"            src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-next_pen_color"                 src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-prev_pen_color"                 src="./assets/sfx/tick.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-start_draw"                     src="./assets/sfx/PenDraw1.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-stop_draw"                      src="./assets/sfx/tick.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-camera_tool_took_snapshot"      src="./assets/sfx/PicSnapHey.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-welcome"                        src="./assets/sfx/welcome.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-chat"                           src="./assets/sfx/pop.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -310,13 +301,6 @@
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
-                    sound__next_pen_color="src: #sound_asset-next_pen_color; on: next_pen_color; poolSize: 2; positional: false;"
-                    sound__prev_pen_color="src: #sound_asset-prev_pen_color; on: prev_pen_color; poolSize: 2; positional: false;"
-                    sound__start_draw="src: #sound_asset-start_draw; on: start_draw; poolSize: 2;"
-                    sound__stop_draw="src: #sound_asset-stop_draw; on: stop_draw; poolSize: 2; positional: false;"
-                    sound__increase_pen_radius="src: #sound_asset-increase_pen_radius; on: increase_pen_radius; poolSize: 2; positional: false;"
-                    sound__decrease_pen_radius="src: #sound_asset-decrease_pen_radius; on: decrease_pen_radius; poolSize: 2; positional: false;"
-                    set-sounds-invisible
                     action-to-remove__pen="path: /actions/pen/remove;"
                     position-at-box-shape-border="target:.pen-menu"
 
@@ -688,10 +672,6 @@
                 set-yxz-order
                 matrix-auto-update
                 set-active-camera
-                sound__snap_rotate_left="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
-                scene-sound__snap_rotate_left="on: snap_rotate_left;"
-                sound__snap_rotate_right="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
-                scene-sound__snap_rotate_right="on: snap_rotate_right;"
                 sound__media_loaded="positional: false; src: #sound_asset-media_loaded; on: nothing; poolSize: 2;"
                 scene-sound__media_loaded="on: media-loaded;"
                 sound__media_loading="positional: false; src: #sound_asset-media_loading; on: nothing; poolSize: 2; loop: true; "
@@ -704,10 +684,6 @@
                 scene-sound__action_freeze="on: play_freeze_sound;"
                 sound__action_thaw="positional: false; src: #sound_asset-thaw; on: nothing; poolSize: 2;"
                 scene-sound__action_thaw="on: play_thaw_sound;"
-                sound__hud_action_space_bubble="positional: false; src: #sound_asset-toggle_space_bubble; on: nothing; poolSize: 2;"
-                scene-sound__hud_action_space_bubble="on: action_space_bubble;"
-                sound__hud_spawn_pen="positional: false; src: #sound_asset-spawn_pen; on: nothing; poolSize: 2;"
-                scene-sound__hud_spawn_pen="on: spawn_pen;"
                 sound__hud_hover_start="positional: false; src: #sound_asset-hud_hover_start; on: nothing; poolSize: 5;"
                 sound__hud_click="positional: false; src: #sound_asset-hud_click; on: nothing; poolSize: 1;"
                 scene-sound__hud_click="on: hud_click;"

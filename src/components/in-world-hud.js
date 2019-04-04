@@ -41,6 +41,7 @@ AFRAME.registerComponent("in-world-hud", {
 
     this.onPenClick = () => {
       this.el.emit("spawn_pen");
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("spawn_pen");
     };
 
     this.onCameraClick = () => {

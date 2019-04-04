@@ -78,12 +78,12 @@ AFRAME.registerComponent("character-controller", {
 
   snapRotateLeft: function() {
     this.pendingSnapRotationMatrix.copy(this.leftRotationMatrix);
-    this.el.emit("snap_rotate_left");
+    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("snap_rotate_left");
   },
 
   snapRotateRight: function() {
     this.pendingSnapRotationMatrix.copy(this.rightRotationMatrix);
-    this.el.emit("snap_rotate_right");
+    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("snap_rotate_right");
   },
 
   // We assume the rig is at the root, and its local position === its world position.
