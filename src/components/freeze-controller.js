@@ -44,10 +44,10 @@ AFRAME.registerComponent("freeze-controller", {
     if (!NAF.connection.adapter) return;
     NAF.connection.adapter.toggleFreeze();
     if (NAF.connection.adapter.frozen) {
-      this.el.emit("play_freeze_sound");
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("freeze");
       this.el.addState("frozen");
     } else {
-      this.el.emit("play_thaw_sound");
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("thaw");
       this.el.removeState("frozen");
     }
   }

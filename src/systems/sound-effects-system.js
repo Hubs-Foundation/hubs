@@ -10,6 +10,8 @@ import WELCOME from "../assets/sfx/welcome.mp3";
 import QUACK from "../assets/sfx/quack.mp3";
 import SPECIAL_QUACK from "../assets/sfx/specialquack.mp3";
 import POP from "../assets/sfx/pop.mp3";
+import FREEZE from "../assets/sfx/Eb_blip.mp3";
+import THAW from "../assets/sfx/tick.mp3";
 
 function getBuffer(url, context) {
   return fetch(url)
@@ -131,6 +133,14 @@ export class SoundEffectsSystem {
       this.sounds.chatMessage = buffer;
       this.soundFor.set("chat_message", buffer);
     });
+    getBuffer(FREEZE, this.ctx).then(buffer => {
+      this.sounds.freeze = buffer;
+      this.soundFor.set("freeze", buffer);
+    });
+    getBuffer(THAW, this.ctx).then(buffer => {
+      this.sounds.thaw = buffer;
+      this.soundFor.set("thaw", buffer);
+    });
   }
 
   shouldTick() {
@@ -146,7 +156,9 @@ export class SoundEffectsSystem {
         this.sounds.enterScene &&
         this.sounds.quack &&
         this.sounds.specialQuack &&
-        this.sounds.chatMessage);
+        this.sounds.chatMessage &&
+        this.sounds.freeze &&
+        this.sounds.thaw);
     return this.soundsAreReady;
   }
 

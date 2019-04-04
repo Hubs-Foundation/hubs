@@ -104,8 +104,6 @@
             <a-asset-item id="sound_asset-hud_click"                      src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-toggle_mute"                    src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-toggle_freeze"                  src="./assets/sfx/Eb_blip.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-freeze"                         src="./assets/sfx/Eb_blip.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-thaw"                           src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
 
             <template id="remote-avatar-template">
                 <a-entity networked-avatar ik-root player-info matrix-auto-update>
@@ -671,10 +669,6 @@
                 scene-sound__hud_action_mute="on: action_mute;"
                 sound__hud_action_freeze="positional: false; src: #sound_asset-toggle_freeze; on: nothing; poolSize: 2;"
                 scene-sound__hud_action_freeze="on: action_freeze;"
-                sound__action_freeze="positional: false; src: #sound_asset-freeze; on: nothing; poolSize: 2;"
-                scene-sound__action_freeze="on: play_freeze_sound;"
-                sound__action_thaw="positional: false; src: #sound_asset-thaw; on: nothing; poolSize: 2;"
-                scene-sound__action_thaw="on: play_thaw_sound;"
                 sound__hud_hover_start="positional: false; src: #sound_asset-hud_hover_start; on: nothing; poolSize: 5;"
                 sound__hud_click="positional: false; src: #sound_asset-hud_click; on: nothing; poolSize: 1;"
                 scene-sound__hud_click="on: hud_click;"
