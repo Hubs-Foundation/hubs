@@ -1,4 +1,6 @@
 /* global NAF */
+const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
+
 AFRAME.registerComponent("set-unowned-body-kinematic", {
   play() {
     this.setBodyKinematic = this.setBodyKinematic.bind(this);
@@ -9,7 +11,7 @@ AFRAME.registerComponent("set-unowned-body-kinematic", {
       this.hasBeenHereBefore = true;
 
       if (!NAF.utils.isMine(this.el)) {
-        this.el.setAttribute("ammo-body", { type: "kinematic" });
+        this.setBodyKinematic();
       }
     }
   },
@@ -17,6 +19,9 @@ AFRAME.registerComponent("set-unowned-body-kinematic", {
     this.el.removeEventListener("ownership-lost", this.setBodyKinematic);
   },
   setBodyKinematic() {
-    this.el.setAttribute("ammo-body", { type: "kinematic" });
+    this.el.setAttribute("ammo-body", { type: "kinematic", collisionFilterMask: COLLISION_LAYERS.INTERACTABLES });
+    if (this.el.components["sticky-object"]) {
+      this.el.components["sticky-object"].locked = true;
+    }
   }
 });
