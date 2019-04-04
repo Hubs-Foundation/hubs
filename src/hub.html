@@ -103,7 +103,6 @@
             <a-asset-item id="sound_asset-pinned"                         src="./assets/sfx/tack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hud_click"                      src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-toggle_mute"                    src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-toggle_freeze"                  src="./assets/sfx/Eb_blip.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
 
             <template id="remote-avatar-template">
                 <a-entity networked-avatar ik-root player-info matrix-auto-update>
@@ -667,8 +666,6 @@
                 scene-sound__media_loading="on: media-loading; off: media-loaded;"
                 sound__hud_action_mute="positional: false; src: #sound_asset-toggle_mute; on: nothing; poolSize: 2;"
                 scene-sound__hud_action_mute="on: action_mute;"
-                sound__hud_action_freeze="positional: false; src: #sound_asset-toggle_freeze; on: nothing; poolSize: 2;"
-                scene-sound__hud_action_freeze="on: action_freeze;"
                 sound__hud_hover_start="positional: false; src: #sound_asset-hud_hover_start; on: nothing; poolSize: 5;"
                 sound__hud_click="positional: false; src: #sound_asset-hud_click; on: nothing; poolSize: 1;"
                 scene-sound__hud_click="on: hud_click;"
