@@ -17,7 +17,6 @@ import "./components/animation";
 import "./components/animation-mixer";
 import "./components/audio-feedback";
 import "./components/loop-animation";
-import "./components/scene-sound";
 import "./components/environment-map";
 import "./gltf-component-mappings";
 import { avatars } from "./assets/avatars/avatars";
