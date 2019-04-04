@@ -85,6 +85,8 @@ export default class SceneEntryManager {
 
     this._spawnAvatar();
 
+    this.scene.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("enter_scene");
+
     if (isBotMode) {
       this._runBot(mediaStream);
       return;
@@ -499,7 +501,6 @@ export default class SceneEntryManager {
   _spawnAvatar = () => {
     this.playerRig.setAttribute("networked", "template: #remote-avatar-template; attachTemplateToLocal: false;");
     this.playerRig.setAttribute("networked-avatar", "");
-    this.playerRig.emit("entered");
   };
 
   _runBot = async mediaStream => {
