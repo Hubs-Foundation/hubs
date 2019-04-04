@@ -73,9 +73,9 @@ export default class MessageDispatch {
       case "duck":
         spawnChatMessage(DUCK_URL);
         if (Math.random() < 0.01) {
-          this.scene.emit("specialquack");
+          this.scene.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("special_quack");
         } else {
-          this.scene.emit("quack");
+          this.scene.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("quack");
         }
         break;
       case "debug":

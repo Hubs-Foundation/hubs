@@ -19,9 +19,9 @@ AFRAME.registerComponent("quack", {
   _handleGrabStart: function() {
     const rand = Math.random();
     if (rand < this.data.specialQuackPercentage) {
-      this.el.emit("specialquack");
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("special_quack");
     } else if (rand < this.data.quackPercentage) {
-      this.el.emit("quack");
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("quack");
     }
   }
 });

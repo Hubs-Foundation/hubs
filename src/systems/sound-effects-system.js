@@ -7,6 +7,8 @@ import PEN_SPAWN from "../assets/sfx/PenSpawn.mp3";
 import PEN_DRAW from "../assets/sfx/PenDraw1.mp3";
 import CAMERA_SNAPSHOT from "../assets/sfx/PicSnapHey.mp3";
 import WELCOME from "../assets/sfx/welcome.mp3";
+import QUACK from "../assets/sfx/quack.mp3";
+import SPECIAL_QUACK from "../assets/sfx/specialquack.mp3";
 
 function getBuffer(url, context) {
   return fetch(url)
@@ -114,19 +116,30 @@ export class SoundEffectsSystem {
       this.sounds.enterScene = buffer;
       this.soundFor.set("enter_scene", buffer);
     });
+    getBuffer(QUACK, this.ctx).then(buffer => {
+      this.sounds.quack = buffer;
+      this.soundFor.set("quack", buffer);
+    });
+    getBuffer(SPECIAL_QUACK, this.ctx).then(buffer => {
+      this.sounds.specialQuack = buffer;
+      this.soundFor.set("special_quack", buffer);
+    });
   }
 
-  soundsReady() {
-    return (
-      this.sounds.tick &&
-      this.sounds.teleportArc &&
-      this.sounds.teleportEnd &&
-      this.sounds.snapRotate &&
-      this.sounds.spawnPen &&
-      this.sounds.penStartDraw &&
-      this.sounds.cameraSnapshot &&
-      this.sounds.enterScene
-    );
+  shouldTick() {
+    this.soundsAreReady =
+      this.soundsAreReady ||
+      (this.sounds.tick &&
+        this.sounds.teleportArc &&
+        this.sounds.teleportEnd &&
+        this.sounds.snapRotate &&
+        this.sounds.spawnPen &&
+        this.sounds.penStartDraw &&
+        this.sounds.cameraSnapshot &&
+        this.sounds.enterScene &&
+        this.sounds.quack &&
+        this.sounds.specialQuack);
+    return this.soundsAreReady;
   }
 
   tickTeleportSounds(teleporter, state) {
@@ -141,7 +154,7 @@ export class SoundEffectsSystem {
   }
 
   tick() {
-    if (!this.soundsReady()) return;
+    if (!this.shouldTick()) return;
 
     const { leftHand, rightHand, rightRemote } = AFRAME.scenes[0].systems.interaction.state;
     if (

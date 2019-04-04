@@ -97,9 +97,6 @@
             <a-asset-item id="botrobert" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotRobert_Avatar-e9554880f3.gltf"></a-asset-item>
             <a-asset-item id="botwoody" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotWoody_Avatar-0140485a23.gltf"></a-asset-item>
 
-            <a-asset-item id="quack"                                      src="./assets/sfx/quack.mp3"          response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="specialquack"                               src="./assets/sfx/specialquack.mp3"   response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-quack"                          src="./assets/sfx/quack.mp3"          response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-media_loaded"                   src="./assets/sfx/A_bendUp.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-media_loading"                  src="./assets/sfx/suspense.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hud_hover_start"                src="./assets/sfx/tick.mp3"  response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -689,8 +686,6 @@
                 scene-sound__cursor_distance_change_blocked="on: cursor-distance-change-blocked;"
                 sound__log_chat_message="positional: false; src: #sound_asset-chat; on: nothing; poolSize: 2;"
                 scene-sound__log_chat_message="on: presence-log-chat;"
-                sound__quack="positional: false; src: #sound_asset-quack; on: nothing; poolSize: 2;"
-                scene-sound__quack="on: quack;"
                 set-sounds-invisible
             >
                 <a-entity
