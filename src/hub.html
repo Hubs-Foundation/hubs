@@ -97,10 +97,7 @@
             <a-asset-item id="botrobert" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotRobert_Avatar-e9554880f3.gltf"></a-asset-item>
             <a-asset-item id="botwoody" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotWoody_Avatar-0140485a23.gltf"></a-asset-item>
 
-            <a-asset-item id="sound_asset-media_loaded"                   src="./assets/sfx/A_bendUp.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-media_loading"                  src="./assets/sfx/suspense.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hud_hover_start"                src="./assets/sfx/tick.mp3"  response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-pinned"                         src="./assets/sfx/tack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hud_click"                      src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-toggle_mute"                    src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
 
@@ -660,10 +657,6 @@
                 set-yxz-order
                 matrix-auto-update
                 set-active-camera
-                sound__media_loaded="positional: false; src: #sound_asset-media_loaded; on: nothing; poolSize: 2;"
-                scene-sound__media_loaded="on: media-loaded;"
-                sound__media_loading="positional: false; src: #sound_asset-media_loading; on: nothing; poolSize: 2; loop: true; "
-                scene-sound__media_loading="on: media-loading; off: media-loaded;"
                 sound__hud_action_mute="positional: false; src: #sound_asset-toggle_mute; on: nothing; poolSize: 2;"
                 scene-sound__hud_action_mute="on: action_mute;"
                 sound__hud_hover_start="positional: false; src: #sound_asset-hud_hover_start; on: nothing; poolSize: 5;"

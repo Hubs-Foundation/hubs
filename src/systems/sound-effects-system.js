@@ -11,7 +11,9 @@ import QUACK from "../assets/sfx/quack.mp3";
 import SPECIAL_QUACK from "../assets/sfx/specialquack.mp3";
 import POP from "../assets/sfx/pop.mp3";
 import FREEZE from "../assets/sfx/Eb_blip.mp3";
-import THAW from "../assets/sfx/tick.mp3";
+import TACK from "../assets/sfx/tack.mp3";
+import MEDIA_LOADED from "../assets/sfx/A_bendUp.mp3";
+import MEDIA_LOADING from "../assets/sfx/suspense.mp3";
 
 function getBuffer(url, context) {
   return fetch(url)
@@ -34,6 +36,7 @@ function playSoundLooped(buffer, context) {
   source.loop = true;
   source.connect(context.destination);
   source.start();
+  return source;
 }
 
 function copy(current, prev) {
@@ -48,7 +51,7 @@ function isUI(el) {
 }
 
 export class SoundEffectsSystem {
-  constructor() {
+  constructor(scene) {
     this.teleporters = {
       leftHand: null,
       rightHand: null,
@@ -88,6 +91,7 @@ export class SoundEffectsSystem {
     this.sounds = {};
     getBuffer(TICK, this.ctx).then(buffer => {
       this.sounds.tick = buffer;
+      this.soundFor.set("thaw", buffer);
       this.soundFor.set("pen_stop_draw", buffer);
       this.soundFor.set("pen_undo_draw", buffer);
       this.soundFor.set("pen_stop_draw", buffer);
@@ -137,10 +141,35 @@ export class SoundEffectsSystem {
       this.sounds.freeze = buffer;
       this.soundFor.set("freeze", buffer);
     });
-    getBuffer(THAW, this.ctx).then(buffer => {
-      this.sounds.thaw = buffer;
-      this.soundFor.set("thaw", buffer);
+    getBuffer(TACK, this.ctx).then(buffer => {
+      this.sounds.pin = buffer;
+      this.soundFor.set("pin", buffer);
     });
+    getBuffer(MEDIA_LOADING, this.ctx).then(buffer => {
+      this.sounds.mediaLoading = buffer;
+    });
+    getBuffer(MEDIA_LOADED, this.ctx).then(buffer => {
+      this.sounds.mediaLoaded = buffer;
+      this.soundFor.set("media_loaded", buffer);
+    });
+
+    this.mediaLoadingSources = [];
+    this.onMediaLoading = () => {
+      this.mediaLoadingSources.push(playSoundLooped(this.sounds.mediaLoading, this.ctx));
+    };
+    this.onMediaLoaded = () => {
+      if (this.mediaLoadingSources.length) {
+        this.mediaLoadingSources.pop().stop();
+      }
+      this.pendingEffects.push("media_loaded");
+    };
+    scene.addEventListener("media-loaded", this.onMediaLoaded);
+    scene.addEventListener("media-loading", this.onMediaLoading);
+  }
+
+  cleanUp(scene) {
+    scene.removeEventListener("media-loaded", this.onMediaLoaded);
+    scene.removeEventListener("media-loading", this.onMediaLoading);
   }
 
   shouldTick() {
@@ -158,7 +187,9 @@ export class SoundEffectsSystem {
         this.sounds.specialQuack &&
         this.sounds.chatMessage &&
         this.sounds.freeze &&
-        this.sounds.thaw);
+        this.sounds.pin &&
+        this.sounds.mediaLoading &&
+        this.sounds.mediaLoaded);
     return this.soundsAreReady;
   }
 

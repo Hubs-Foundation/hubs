@@ -18,7 +18,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverMenuSystem = new HoverMenuSystem();
     this.superSpawnerSystem = new SuperSpawnerSystem();
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
-    this.soundEffectsSystem = new SoundEffectsSystem();
+    this.soundEffectsSystem = new SoundEffectsSystem(this.el);
   },
 
   tick(t) {
@@ -35,5 +35,10 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverMenuSystem.tick();
     this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
     this.soundEffectsSystem.tick();
+  },
+
+  remove() {
+    this.cursorTargettingSystem.remove();
+    this.soundEffectsSystem.cleanUp(this.el);
   }
 });
