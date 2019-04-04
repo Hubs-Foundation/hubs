@@ -44,7 +44,7 @@ AFRAME.registerComponent("hud-controller", {
     let t = 1 - THREE.Math.clamp(lookCutoff - pitch, 0, animRange) / animRange;
 
     // HUD is locked down while showing tooltip or if forced.
-    if (showTip || !this.store.state.activity.hasHoveredInWorldHud) {
+    if (showTip || forceHudVisible) {
       t = 1;
     }
 
