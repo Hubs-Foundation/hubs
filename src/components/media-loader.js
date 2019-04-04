@@ -117,11 +117,19 @@ AFRAME.registerComponent("media-loader", {
       this.loadingClip.play();
       this.loadingScaleClip.play();
     }
+    if (this.el.sceneEl.is("entered")) {
+      const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
+      this.loadingSound = sfx.playSoundLooped("media_loading");
+    }
     delete this.showLoaderTimeout;
   },
 
   clearLoadingTimeout() {
     clearTimeout(this.showLoaderTimeout);
+    if (this.loadingSound) {
+      this.loadingSound.stop();
+      this.loadingSound = null;
+    }
     if (this.loaderMixer) {
       this.loadingClip.stop();
       this.loadingScaleClip.stop();
@@ -150,6 +158,10 @@ AFRAME.registerComponent("media-loader", {
   onMediaLoaded(isModel = false) {
     const el = this.el;
     this.clearLoadingTimeout();
+
+    if (this.el.sceneEl.is("entered")) {
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("media_loaded");
+    }
 
     if (!el.components["animation-mixer"]) {
       generateMeshBVH(el.object3D);
@@ -392,6 +404,9 @@ AFRAME.registerComponent("media-pager", {
   remove() {
     if (this.toolbar) {
       this.toolbar.parentNode.removeChild(this.toolbar);
+    }
+    if (this.loadingSound) {
+      this.loadingSound.stop();
     }
   },
 

@@ -52,7 +52,7 @@ function isUI(el) {
 }
 
 export class SoundEffectsSystem {
-  constructor(scene) {
+  constructor() {
     this.prevInteractionState = {
       leftHand: {
         hovered: null,
@@ -132,29 +132,12 @@ export class SoundEffectsSystem {
     });
     getBuffer(MEDIA_LOADING, this.ctx).then(buffer => {
       this.sounds.mediaLoading = buffer;
+      this.soundFor.set("media_loading", buffer);
     });
     getBuffer(MEDIA_LOADED, this.ctx).then(buffer => {
       this.sounds.mediaLoaded = buffer;
       this.soundFor.set("media_loaded", buffer);
     });
-
-    this.mediaLoadingSources = [];
-    this.onMediaLoading = () => {
-      this.mediaLoadingSources.push(playSoundLooped(this.sounds.mediaLoading, this.ctx));
-    };
-    this.onMediaLoaded = () => {
-      if (this.mediaLoadingSources.length) {
-        this.mediaLoadingSources.pop().stop();
-      }
-      this.pendingEffects.push("media_loaded");
-    };
-    scene.addEventListener("media-loaded", this.onMediaLoaded);
-    scene.addEventListener("media-loading", this.onMediaLoading);
-  }
-
-  cleanUp(scene) {
-    scene.removeEventListener("media-loaded", this.onMediaLoaded);
-    scene.removeEventListener("media-loading", this.onMediaLoading);
   }
 
   shouldTick() {
