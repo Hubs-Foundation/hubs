@@ -108,7 +108,6 @@
             <a-asset-item id="sound_asset-toggle_freeze"                  src="./assets/sfx/Eb_blip.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-freeze"                         src="./assets/sfx/Eb_blip.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-thaw"                           src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-chat"                           src="./assets/sfx/pop.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
 
             <template id="remote-avatar-template">
                 <a-entity networked-avatar ik-root player-info matrix-auto-update>
@@ -684,8 +683,6 @@
                 scene-sound__cursor_distance_changed="on: cursor-distance-changed;"
                 sound__cursor_distance_change_blocked="positional: false; src: #sound_asset-cursor_distance_change_blocked; on: nothing; poolSize: 1;"
                 scene-sound__cursor_distance_change_blocked="on: cursor-distance-change-blocked;"
-                sound__log_chat_message="positional: false; src: #sound_asset-chat; on: nothing; poolSize: 2;"
-                scene-sound__log_chat_message="on: presence-log-chat;"
                 set-sounds-invisible
             >
                 <a-entity

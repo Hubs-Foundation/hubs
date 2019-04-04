@@ -793,7 +793,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     presenceLogEntries.push(entry);
     remountUI({ presenceLogEntries });
-    scene.emit(`presence-log-${entry.type}`);
+    if (entry.type === "chat") {
+      scene.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("chat_message");
+    }
 
     // Fade out and then remove
     setTimeout(() => {

@@ -9,6 +9,7 @@ import CAMERA_SNAPSHOT from "../assets/sfx/PicSnapHey.mp3";
 import WELCOME from "../assets/sfx/welcome.mp3";
 import QUACK from "../assets/sfx/quack.mp3";
 import SPECIAL_QUACK from "../assets/sfx/specialquack.mp3";
+import POP from "../assets/sfx/pop.mp3";
 
 function getBuffer(url, context) {
   return fetch(url)
@@ -124,6 +125,10 @@ export class SoundEffectsSystem {
       this.sounds.specialQuack = buffer;
       this.soundFor.set("special_quack", buffer);
     });
+    getBuffer(POP, this.ctx).then(buffer => {
+      this.sounds.chatMessage = buffer;
+      this.soundFor.set("chat_message", buffer);
+    });
   }
 
   shouldTick() {
@@ -138,7 +143,8 @@ export class SoundEffectsSystem {
         this.sounds.cameraSnapshot &&
         this.sounds.enterScene &&
         this.sounds.quack &&
-        this.sounds.specialQuack);
+        this.sounds.specialQuack &&
+        this.sounds.chatMessage);
     return this.soundsAreReady;
   }
 
