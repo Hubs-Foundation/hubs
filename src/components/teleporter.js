@@ -169,6 +169,7 @@ AFRAME.registerComponent("teleporter", {
 
   tick(t, dt) {
     const userinput = AFRAME.scenes[0].systems.userinput;
+    const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
     const { start, confirm, speed } = this.data;
     const object3D = this.el.object3D;
 
@@ -181,6 +182,7 @@ AFRAME.registerComponent("teleporter", {
       this.rayCurve.mesh.material.opacity = MISS_OPACITY;
       this.rayCurve.mesh.material.color.set(MISS_COLOR);
       this.rayCurve.mesh.material.needsUpdate = true;
+      this.teleportingSound = sfx.playSoundLooped("teleport_start");
     }
 
     if (!this.isTeleporting) {
@@ -192,13 +194,21 @@ AFRAME.registerComponent("teleporter", {
       this.isTeleporting = false;
       this.rayCurve.mesh.visible = false;
 
+      if (this.teleportingSound) {
+        this.teleportingSound.stop();
+        this.teleportingSound = null;
+      }
+
       if (!this.hit || this.timeTeleporting < DRAW_TIME_MS) {
+        // TODO: play teleport cancel sound effect
         return;
       }
 
       this.characterController =
         this.characterController || document.querySelector("#player-rig").components["character-controller"];
       this.characterController.teleportTo(this.hitPoint);
+
+      sfx.pendingEffects.push("teleport_end");
       return;
     }
 
@@ -267,10 +277,6 @@ AFRAME.registerComponent("teleporter", {
       this.torus.setAttribute("material", "opacity", hitEntityOpacity);
       this.cylinder.setAttribute("material", "opacity", hitEntityOpacity);
     }
-  },
-
-  playSound(sound) {
-    this.el.emit(sound);
   },
 
   createHitEntity() {

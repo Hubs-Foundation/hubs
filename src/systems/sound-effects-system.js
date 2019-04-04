@@ -53,11 +53,6 @@ function isUI(el) {
 
 export class SoundEffectsSystem {
   constructor(scene) {
-    this.teleporters = {
-      leftHand: null,
-      rightHand: null,
-      rightRemote: null
-    };
     this.prevInteractionState = {
       leftHand: {
         hovered: null,
@@ -70,20 +65,6 @@ export class SoundEffectsSystem {
       rightRemote: {
         hovered: null,
         held: null
-      }
-    };
-    this.teleporterState = {
-      leftHand: {
-        teleporting: false,
-        teleportArcSource: null
-      },
-      rightHand: {
-        teleporting: false,
-        teleportArcSource: null
-      },
-      rightRemote: {
-        teleporting: false,
-        teleportArcSource: null
       }
     };
     this.ctx = THREE.AudioContext.getContext();
@@ -102,9 +83,11 @@ export class SoundEffectsSystem {
     });
     getBuffer(TELEPORT_ARC, this.ctx).then(buffer => {
       this.sounds.teleportArc = buffer;
+      this.soundFor.set("teleport_start", buffer);
     });
     getBuffer(QUICK_TURN, this.ctx).then(buffer => {
       this.sounds.teleportEnd = buffer;
+      this.soundFor.set("teleport_end", buffer);
     });
     getBuffer(TAP_MELLOW, this.ctx).then(buffer => {
       this.sounds.snapRotate = buffer;
@@ -178,8 +161,8 @@ export class SoundEffectsSystem {
     this.soundsAreReady =
       this.soundsAreReady ||
       (this.sounds.tick &&
-        this.sounds.teleportArc &&
         this.sounds.teleportEnd &&
+        this.sounds.teleportArc &&
         this.sounds.snapRotate &&
         this.sounds.spawnPen &&
         this.sounds.penStartDraw &&
@@ -193,17 +176,6 @@ export class SoundEffectsSystem {
         this.sounds.mediaLoading &&
         this.sounds.mediaLoaded);
     return this.soundsAreReady;
-  }
-
-  tickTeleportSounds(teleporter, state) {
-    if (teleporter.isTeleporting && !state.teleporting) {
-      state.teleportArcSource = playSoundLooped(this.sounds.teleportArc, this.ctx);
-    } else if (!teleporter.isTeleporting && state.teleporting) {
-      state.teleportArcSource.stop();
-      state.teleportArcSource = null;
-      playSound(this.sounds.teleportEnd, this.ctx);
-    }
-    state.teleporting = teleporter.isTeleporting;
   }
 
   tick() {
@@ -222,16 +194,6 @@ export class SoundEffectsSystem {
     copy(rightHand, this.prevInteractionState.rightHand);
     copy(rightRemote, this.prevInteractionState.rightRemote);
 
-    this.teleporters.leftHand =
-      this.teleporters.leftHand || document.querySelector("#player-left-controller").components.teleporter;
-    this.teleporters.rightHand =
-      this.teleporters.rightHand || document.querySelector("#player-right-controller").components.teleporter;
-    this.teleporters.rightRemote =
-      this.teleporters.rightRemote || document.querySelector("#gaze-teleport").components.teleporter;
-    this.tickTeleportSounds(this.teleporters.leftHand, this.teleporterState.leftHand);
-    this.tickTeleportSounds(this.teleporters.rightHand, this.teleporterState.rightHand);
-    this.tickTeleportSounds(this.teleporters.rightRemote, this.teleporterState.rightRemote);
-
     const userinput = AFRAME.scenes[0].systems.userinput;
     if (userinput.get(paths.actions.muteMic)) {
       playSound(this.sounds.tick, this.ctx);
@@ -241,5 +203,10 @@ export class SoundEffectsSystem {
       playSound(this.soundFor.get(this.pendingEffects[i]), this.ctx);
     }
     this.pendingEffects.length = 0;
+  }
+
+  playSoundLooped(soundId) {
+    // TODO: Should we defer actually play the sound until tick?
+    return playSoundLooped(this.soundFor.get(soundId), this.ctx);
   }
 }
