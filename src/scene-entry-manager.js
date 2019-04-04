@@ -501,6 +501,7 @@ export default class SceneEntryManager {
   _spawnAvatar = () => {
     this.playerRig.setAttribute("networked", "template: #remote-avatar-template; attachTemplateToLocal: false;");
     this.playerRig.setAttribute("networked-avatar", "");
+    this.playerRig.emit("entered");
   };
 
   _runBot = async mediaStream => {
