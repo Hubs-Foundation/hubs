@@ -1,4 +1,4 @@
-/* global fetch */
+/* global fetch THREE AFRAME */
 import TICK from "../assets/sfx/tick.mp3";
 import TELEPORT_ARC from "../assets/sfx/teleportArc.mp3";
 import QUICK_TURN from "../assets/sfx/quickTurn.mp3";
