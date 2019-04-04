@@ -1428,12 +1428,6 @@ class UIRoot extends Component {
 
     const showVREntryButton = entered && isMobileVR;
 
-    const rootStyles = {
-      [styles.ui]: true,
-      "ui-root": true,
-      "in-modal-or-overlay": this.isInModalOrOverlay()
-    };
-
     const presenceLogEntries = this.props.presenceLogEntries || [];
 
     const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
