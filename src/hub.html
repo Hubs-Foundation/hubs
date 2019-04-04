@@ -101,8 +101,6 @@
             <a-asset-item id="sound_asset-media_loading"                  src="./assets/sfx/suspense.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hud_hover_start"                src="./assets/sfx/tick.mp3"  response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-pinned"                         src="./assets/sfx/tack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-cursor_distance_change_blocked" src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-cursor_distance_changed"        src="./assets/sfx/tick.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hud_click"                      src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-toggle_mute"                    src="./assets/sfx/tick.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-toggle_freeze"                  src="./assets/sfx/Eb_blip.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -680,10 +678,6 @@
                 sound__hud_hover_start="positional: false; src: #sound_asset-hud_hover_start; on: nothing; poolSize: 5;"
                 sound__hud_click="positional: false; src: #sound_asset-hud_click; on: nothing; poolSize: 1;"
                 scene-sound__hud_click="on: hud_click;"
-                sound__cursor_distance_changed="positional: false; src: #sound_asset-cursor_distance_changed; on: nothing; poolSize: 1;"
-                scene-sound__cursor_distance_changed="on: cursor-distance-changed;"
-                sound__cursor_distance_change_blocked="positional: false; src: #sound_asset-cursor_distance_change_blocked; on: nothing; poolSize: 1;"
-                scene-sound__cursor_distance_change_blocked="on: cursor-distance-change-blocked;"
                 set-sounds-invisible
             >
                 <a-entity
