@@ -27,11 +27,11 @@ function playSound(buffer, context) {
 }
 
 function playSoundLooped(buffer, context) {
-    const source = context.createBufferSource();
-    source.buffer = buffer;
-    source.loop = true;
-    source.connect(context.destination);
-    source.start();
+  const source = context.createBufferSource();
+  source.buffer = buffer;
+  source.loop = true;
+  source.connect(context.destination);
+  source.start();
 }
 
 function copy(current, prev) {
@@ -167,9 +167,7 @@ export class SoundEffectsSystem {
     const { leftHand, rightHand, rightRemote } = AFRAME.scenes[0].systems.interaction.state;
     if (
       leftHand.held !== this.prevInteractionState.leftHand.held ||
-      (isUI(leftHand.hovered) && leftHand.hovered !== this.prevInteractionState.leftHand.hovered) ||
       rightHand.held !== this.prevInteractionState.rightHand.held ||
-      (isUI(rightHand.hovered) && rightHand.hovered !== this.prevInteractionState.rightHand.hovered) ||
       rightRemote.held !== this.prevInteractionState.rightRemote.held ||
       (isUI(rightRemote.hovered) && rightRemote.hovered !== this.prevInteractionState.rightRemote.hovered)
     ) {
