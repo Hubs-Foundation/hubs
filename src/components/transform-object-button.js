@@ -38,31 +38,33 @@ AFRAME.registerComponent("transform-button", {
       if (!this.targetEl) {
         return;
       }
-      const hand = e.detail.hand;
-      hand.emit("haptic_pulse", { intensity: "high" });
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) {
         return;
       }
-      if (this.targetEl.components.body) {
-        this.targetEl.setAttribute("ammo-body", { type: "static" });
+      if (this.targetEl.body) {
+        this.targetEl.setAttribute("ammo-body", { type: "kinematic" });
       }
       this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];
-      this.transformSystem.startTransform(this.targetEl.object3D, hand, this.data);
-      e.preventDefault();
+      this.transformSystem.startTransform(
+        this.targetEl.object3D,
+        e.path === paths.actions.cursor.grab ? "cursor" : e.path === paths.actions.rightHand.grab ? "right" : "left",
+        this.data
+      );
     };
-    this.onGrabEnd = e => {
+    this.onGrabEnd = () => {
       this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];
       this.transformSystem.stopTransform();
-      e.preventDefault();
     };
   },
   play() {
-    this.el.addEventListener("grab-start", this.onGrabStart);
-    this.el.addEventListener("grab-end", this.onGrabEnd);
+    this.el.object3D.addEventListener("interact", this.onGrabStart);
+    this.el.object3D.addEventListener("holdable-button-down", this.onGrabStart);
+    this.el.object3D.addEventListener("holdable-button-up", this.onGrabEnd);
   },
   pause() {
-    this.el.removeEventListener("grab-start", this.onGrabStart);
-    this.el.removeEventListener("grab-end", this.onGrabEnd);
+    this.el.object3D.removeEventListener("interact", this.onGrabStart);
+    this.el.object3D.removeEventListener("holdable-button-down", this.onGrabStart);
+    this.el.object3D.removeEventListener("holdable-button-up", this.onGrabEnd);
   }
 });
 
@@ -156,7 +158,10 @@ AFRAME.registerSystem("transform-selected-object", {
 
   startTransform(target, hand, data) {
     this.target = target;
-    this.hand = hand.id === "cursor" ? document.querySelector("#player-right-controller").object3D : hand.object3D;
+    this.hand =
+      hand === "cursor" || hand === "right"
+        ? document.querySelector("#player-right-controller").object3D
+        : document.querySelector("#player-left-controller").object3D;
     this.mode = data.mode;
     this.transforming = true;
 
@@ -289,6 +294,7 @@ AFRAME.registerSystem("transform-selected-object", {
     if (this.mode === TRANSFORM_MODE.ALIGN) {
       this.el.camera.getWorldPosition(CAMERA_WORLD_POSITION);
       this.target.lookAt(CAMERA_WORLD_POSITION);
+      this.transforming = false;
       return;
     }
 

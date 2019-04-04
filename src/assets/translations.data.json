@@ -68,6 +68,7 @@
     "media-browser.search-placeholder.scenes": "Search Scenes...",
     "media-browser.search-placeholder.videos": "Search the web...",
     "media-browser.search-placeholder.images": "Search the web...",
+    "media-browser.search-placeholder.youtube": "Search for videos...",
     "media-browser.search-placeholder.gifs": "Search for GIFs...",
     "media-browser.search-placeholder.twitch": "Search for streams...",
     "media-browser.search-placeholder.sketchfab": "Search for models...",
@@ -80,11 +81,13 @@
     "media-browser.report_issue": "Report Issue",
     "media-browser.powered_by.images": "Search by Bing | ",
     "media-browser.powered_by.videos": "Search by Bing | ",
+    "media-browser.powered_by.youtube": "Search by Google | ",
     "media-browser.powered_by.gifs": "Search by Tenor | ",
     "media-browser.powered_by.sketchfab": "Search by Sketchfab | ",
     "media-browser.powered_by.poly": "Search by Google | ",
     "media-browser.powered_by.twitch": "Search by Twitch | ",
     "media-browser.powered_by.scenes": "Made with ",
+    "media-browser.nav_title.youtube": "YouTube",
     "media-browser.nav_title.videos": "Videos",
     "media-browser.nav_title.images": "Images",
     "media-browser.nav_title.gifs": "GIFs",
@@ -106,6 +109,7 @@
     "audio.granted-next": "Next",
     "exit.subtitle.exited": "Your session has ended. Refresh your browser to start a new one.",
     "exit.subtitle.closed": "This room is no longer available.",
+    "exit.subtitle.denied": "You are not permitted to join this room. Please request permission from the room creator.",
     "exit.subtitle.kicked": "You have been kicked from the room.",
     "exit.subtitle.left": "You have left the room.",
     "exit.subtitle.full": "This room is full, please try again later.",
@@ -194,6 +198,7 @@
     "settings.room-info": "Room & Scene Info",
     "settings.create-room": "New Room...",
     "settings.create-scene": "Get Spoke",
+    "settings.send-feedback": "Send Feedback",
     "settings.whats-new": "What's New",
     "settings.features": "Help",
     "settings.controls": "Controls",
@@ -252,6 +257,8 @@
     "loader.loading": "Loading ",
     "loader.object": "object",
     "loader.objects": "objects",
-    "change-scene-dialog.change-scene": "Change Scene"
+    "change-scene-dialog.change-scene": "Change Scene",
+    "interstitial.prompt": "Continue",
+    "feedback.prompt": "Feedback"
   }
 }

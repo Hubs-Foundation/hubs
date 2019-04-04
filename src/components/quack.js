@@ -9,11 +9,11 @@ AFRAME.registerComponent("quack", {
   },
 
   play: function() {
-    this.el.addEventListener("grab-start", this._handleGrabStart);
+    this.el.object3D.addEventListener("interact", this._handleGrabStart);
   },
 
   pause: function() {
-    this.el.removeEventListener("grab-start", this._handleGrabStart);
+    this.el.object3D.removeEventListener("interact", this._handleGrabStart);
   },
 
   _handleGrabStart: function() {

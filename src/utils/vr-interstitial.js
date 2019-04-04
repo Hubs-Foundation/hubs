@@ -1,7 +1,14 @@
 import { showFullScreenIfAvailable } from "./fullscreen";
+import screenfull from "screenfull";
 
 let _isIn2DInterstitial = false;
 const isMobileVR = AFRAME.utils.device.isMobileVR();
+
+const afterUserGesturePrompt = f => {
+  const scene = document.querySelector("a-scene");
+  scene.addEventListener("2d-interstitial-gesture-complete", f, { once: true });
+  scene.emit("2d-interstitial-gesture-required");
+};
 
 export function handleExitTo2DInterstitial(isLower) {
   const scene = document.querySelector("a-scene");
@@ -11,8 +18,9 @@ export function handleExitTo2DInterstitial(isLower) {
 
   if (isMobileVR) {
     // Immersive browser, exit VR.
-    scene.exitVR();
-    showFullScreenIfAvailable();
+    scene.exitVR().then(() => {
+      afterUserGesturePrompt(() => showFullScreenIfAvailable());
+    });
   } else {
     // Non-immersive browser, show notice
     const vrNotice = document.querySelector(".vr-notice");
@@ -31,7 +39,13 @@ export function handleReEntryToVRFrom2DInterstitial() {
 
   if (isMobileVR) {
     const scene = document.querySelector("a-scene");
-    scene.enterVR();
+
+    if (screenfull.isFullscreen) {
+      screenfull.exit();
+      afterUserGesturePrompt(() => scene.enterVR());
+    } else {
+      scene.enterVR();
+    }
   }
 }
 

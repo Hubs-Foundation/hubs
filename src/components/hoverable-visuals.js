@@ -25,20 +25,18 @@ AFRAME.registerComponent("hoverable-visuals", {
   tick(time) {
     if (!this.uniforms || !this.uniforms.size) return;
 
-    const { hoverers } = this.el.components["hoverable"];
     const isFrozen = this.el.sceneEl.is("frozen");
 
     let interactorOne, interactorTwo;
-    for (const hoverer of hoverers) {
-      if (hoverer.id === "player-left-controller") {
-        interactorOne = hoverer.object3D;
-      } else if (hoverer.id === "cursor") {
-        if (this.data.cursorController.components["cursor-controller"].enabled) {
-          interactorTwo = hoverer.object3D;
-        }
-      } else {
-        interactorTwo = hoverer.object3D;
-      }
+    const interaction = AFRAME.scenes[0].systems.interaction;
+    if (interaction.state.leftHand.hovered === this.el || interaction.state.leftHand.held === this.el) {
+      interactorOne = interaction.options.leftHand.entity.object3D;
+    }
+    if (interaction.state.rightRemote.hovered === this.el || interaction.state.rightRemote.held === this.el) {
+      interactorTwo = interaction.options.rightRemote.entity.object3D;
+    }
+    if (interaction.state.rightHand.hovered === this.el || interaction.state.rightHand.held === this.el) {
+      interactorTwo = interaction.options.rightHand.entity.object3D;
     }
 
     if (interactorOne) {

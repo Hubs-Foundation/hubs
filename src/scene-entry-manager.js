@@ -20,7 +20,6 @@ import { getAvatarSrc, getAvatarType } from "./assets/avatars/avatars";
 import { pushHistoryState } from "./utils/history";
 
 const isIOS = AFRAME.utils.device.isIOS();
-const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, availableVREntryTypes, history) {
@@ -160,8 +159,7 @@ export default class SceneEntryManager {
     this.scene.emit("username-changed", { username: displayName });
 
     const avatarSrc = await getAvatarSrc(avatarId);
-    this.playerRig.setAttribute("player-info", { avatarSrc });
-    this.playerRig.setAttribute("ik-root", "avatarType", getAvatarType(avatarId));
+    this.playerRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
   };
 
   _setupKicking = () => {
@@ -293,7 +291,6 @@ export default class SceneEntryManager {
         !(src instanceof MediaStream),
         true
       );
-
       orientation.then(or => {
         entity.setAttribute("offset-relative-to", {
           target: "#player-camera",
@@ -457,8 +454,8 @@ export default class SceneEntryManager {
       const entry = e.detail;
       if (entry.type === "scene_listing" && this.hubChannel.permissions.update_hub) return;
 
-      // If user has HMD lifted up, delay spawning for now. eventually show a modal
-      const spawnDelay = isIn2DInterstitial() ? (isMobileVR ? 1000 : 3000) : 0;
+      // If user has HMD lifted up or gone through interstitial, delay spawning for now. eventually show a modal
+      const spawnDelay = isIn2DInterstitial() ? 3000 : 0;
 
       setTimeout(() => {
         spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);

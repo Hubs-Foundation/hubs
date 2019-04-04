@@ -8,7 +8,6 @@ import en from "react-intl/locale-data/en";
 import MovingAverage from "moving-average";
 import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
-import loaderStyles from "../assets/stylesheets/loader.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
 import {
@@ -22,6 +21,7 @@ import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
 
 import { lang, messages } from "../utils/i18n";
+import Loader from "./loader";
 import AutoExitWarning from "./auto-exit-warning";
 import {
   TwoDEntryButton,
@@ -46,23 +46,20 @@ import RenameRoomDialog from "./rename-room-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
+import OAuthDialog from "./oauth-dialog.js";
+import LobbyChatBox from "./lobby-chat-box.js";
+import InWorldChatBox from "./in-world-chat-box.js";
 
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import SettingsMenu from "./settings-menu.js";
 import TwoDHUD from "./2d-hud";
-import ChatCommandHelp from "./chat-command-help";
-import { spawnChatMessage } from "./chat-message";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
-import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { handleTipClose } from "../systems/tips.js";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
-import { faCamera } from "@fortawesome/free-solid-svg-icons/faCamera";
-import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -119,7 +116,6 @@ if (toneClip.canPlayType("audio/webm")) {
 }
 
 class UIRoot extends Component {
-  doneWithInitialLoad = false;
   willCompileAndUploadMaterials = false;
 
   static propTypes = {
@@ -155,12 +151,16 @@ class UIRoot extends Component {
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
+    showOAuthDialog: PropTypes.bool,
+    oauthInfo: PropTypes.array,
     isCursorHoldingPen: PropTypes.bool,
     hasActiveCamera: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
     activeTips: PropTypes.object,
     location: PropTypes.object,
-    history: PropTypes.object
+    history: PropTypes.object,
+    showInterstitialPrompt: PropTypes.bool,
+    onInterstitialPromptClicked: PropTypes.func
   };
 
   state = {
@@ -170,6 +170,7 @@ class UIRoot extends Component {
     showInviteDialog: false,
     showPresenceList: false,
     showSettingsMenu: false,
+    discordTipDismissed: false,
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
@@ -177,8 +178,6 @@ class UIRoot extends Component {
     didConnectToNetworkedScene: false,
     noMoreLoadingUpdates: false,
     hideLoader: false,
-    loadingNum: 0,
-    loadedNum: 0,
 
     waitingOnAudio: false,
     shareScreen: false,
@@ -206,7 +205,6 @@ class UIRoot extends Component {
 
     exited: false,
 
-    pendingMessage: "",
     signedIn: false,
     videoShareMediaSource: null
   };
@@ -257,11 +255,6 @@ class UIRoot extends Component {
       },
       { once: true }
     );
-    this.props.scene.addEventListener("model-loading", this.onObjectLoading);
-    this.props.scene.addEventListener("image-loading", this.onObjectLoading);
-    this.props.scene.addEventListener("model-loaded", this.onObjectLoaded);
-    this.props.scene.addEventListener("image-loaded", this.onObjectLoaded);
-    this.props.scene.addEventListener("model-error", this.onObjectLoaded);
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
     this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
@@ -269,6 +262,8 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.addEventListener("exit", this.exit);
     const scene = this.props.scene;
+
+    this.props.store.addEventListener("statechanged", this.onStoreChanged);
 
     const unsubscribe = this.props.history.listen((location, action) => {
       const state = location.state;
@@ -356,32 +351,12 @@ class UIRoot extends Component {
     this.setState({ isSubscribed });
   };
 
+  onLoadingFinished = () => {
+    this.setState({ noMoreLoadingUpdates: true });
+  };
+
   onSceneLoaded = () => {
     this.setState({ sceneLoaded: true });
-  };
-
-  onObjectLoading = () => {
-    if (!this.doneWithInitialLoad && this.loadingTimeout) {
-      window.clearTimeout(this.loadingTimeout);
-      this.loadingTimeout = null;
-    }
-
-    this.setState(state => {
-      return { loadingNum: state.loadingNum + 1 };
-    });
-  };
-
-  onObjectLoaded = () => {
-    this.setState(state => {
-      return { loadedNum: state.loadedNum + 1 };
-    });
-
-    if (!this.doneWithInitialLoad && this.loadingTimeout) window.clearTimeout(this.loadingTimeout);
-
-    this.loadingTimeout = window.setTimeout(() => {
-      this.doneWithInitialLoad = true;
-      this.setState({ noMoreLoadingUpdates: true });
-    }, 1500);
   };
 
   // TODO: we need to come up with a cleaner way to handle the shared state between aframe and react than emmitting events and setting state on the scene
@@ -720,7 +695,7 @@ class UIRoot extends Component {
   };
 
   onAudioReadyButton = () => {
-    if (!this.state.enterVR) {
+    if (!this.state.enterInVR) {
       showFullScreenIfAvailable();
     }
 
@@ -831,17 +806,47 @@ class UIRoot extends Component {
     }
   };
 
-  sendMessage = e => {
-    e.preventDefault();
-    this.props.onSendMessage(this.state.pendingMessage);
-    this.setState({ pendingMessage: "" });
+  sendMessage = msg => {
+    this.props.onSendMessage(msg);
   };
 
   occupantCount = () => {
     return this.props.presences ? Object.entries(this.props.presences).length : 0;
   };
 
+  onStoreChanged = () => {
+    this.setState({ discordTipDismissed: this.props.store.state.confirmedDiscordRooms.includes(this.props.hubId) });
+  };
+
+  confirmDiscordBridge = () => {
+    this.props.store.update({ confirmedDiscordRooms: [this.props.hubId] });
+  };
+
+  discordBridges = () => {
+    if (!this.props.presences) {
+      return [];
+    } else {
+      const channels = [];
+      for (const p of Object.values(this.props.presences)) {
+        Array.prototype.push.apply(channels, p.metas.map(m => m.context.discord).filter(ch => !!ch));
+      }
+      return channels;
+    }
+  };
+
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
+
+  renderInterstitialPrompt = () => {
+    return (
+      <IntlProvider locale={lang} messages={messages}>
+        <div className={styles.interstitial} onClick={() => this.props.onInterstitialPromptClicked()}>
+          <div>
+            <FormattedMessage id="interstitial.prompt" />
+          </div>
+        </div>
+      </IntlProvider>
+    );
+  };
 
   renderExitedPane = () => {
     let subtitle = null;
@@ -933,42 +938,7 @@ class UIRoot extends Component {
     );
   };
 
-  renderLoader = () => {
-    const nomore = (
-      <h4 className={loaderStyles.loadingText}>
-        <FormattedMessage id="loader.entering_lobby" />
-      </h4>
-    );
-    const progress = this.state.loadingNum === 0 ? " " : `${this.state.loadedNum} / ${this.state.loadingNum} `;
-    const usual = (
-      <h4 className={loaderStyles.loadingText}>
-        <FormattedMessage id="loader.loading" />
-        {progress}
-        <FormattedMessage id={this.state.loadingNum !== 1 ? "loader.objects" : "loader.object"} />
-        ...
-      </h4>
-    );
-    return (
-      <IntlProvider locale={lang} messages={messages}>
-        <div className="loading-panel">
-          <img className="loading-panel__logo" src="../assets/images/hub-preview-light-no-shadow.png" />
-
-          {this.state.noMoreLoadingUpdates ? nomore : usual}
-
-          <div className="loader-wrap loader-bottom">
-            <div className="loader">
-              <div className="loader-center" />
-            </div>
-          </div>
-        </div>
-      </IntlProvider>
-    );
-  };
-
   renderEntryStartPanel = () => {
-    const textRows = this.state.pendingMessage.split("\n").length;
-    const pendingMessageTextareaHeight = textRows * 28 + "px";
-    const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
     const hasPush = navigator.serviceWorker && "PushManager" in window;
     const promptForNameAndAvatarBeforeEntry = !this.props.store.state.activity.hasChangedName;
 
@@ -1011,7 +981,10 @@ class UIRoot extends Component {
             <WithHoverSound>
               <div
                 className={entryStyles.chooseScene}
-                onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes")}
+                onClick={() => {
+                  showFullScreenIfAvailable();
+                  this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                }}
               >
                 <i>
                   <FontAwesomeIcon icon={faImage} />
@@ -1021,49 +994,11 @@ class UIRoot extends Component {
             </WithHoverSound>
           )}
 
-          <form onSubmit={this.sendMessage}>
-            <div
-              className={classNames({
-                [styles.messageEntry]: true,
-                [styles.messageEntryDisabled]: this.occupantCount() <= 1
-              })}
-              style={{ height: pendingMessageFieldHeight }}
-            >
-              <textarea
-                className={classNames([styles.messageEntryInput, "chat-focus-target"])}
-                value={this.state.pendingMessage}
-                rows={textRows}
-                style={{ height: pendingMessageTextareaHeight }}
-                onFocus={e => handleTextFieldFocus(e.target)}
-                onBlur={() => handleTextFieldBlur()}
-                onChange={e => this.setState({ pendingMessage: e.target.value })}
-                disabled={this.occupantCount() <= 1 ? true : false}
-                onKeyDown={e => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    this.sendMessage(e);
-                  } else if (e.key === "Escape") {
-                    e.target.blur();
-                  }
-                }}
-                placeholder={
-                  this.occupantCount() <= 1
-                    ? "Nobody is here yet..."
-                    : `Send message to ${this.occupantCount() - 1} other${this.occupantCount() - 1 > 1 ? "s" : ""}...`
-                }
-              />
-              <WithHoverSound>
-                <button
-                  className={classNames([styles.messageEntryButton, styles.messageEntrySubmit])}
-                  disabled={this.occupantCount() <= 1 ? true : false}
-                  type="submit"
-                >
-                  <i>
-                    <FontAwesomeIcon icon={faPaperPlane} />
-                  </i>
-                </button>
-              </WithHoverSound>
-            </div>
-          </form>
+          <LobbyChatBox
+            occupantCount={this.occupantCount()}
+            discordBridges={this.discordBridges()}
+            onSendMessage={this.sendMessage}
+          />
         </div>
 
         {hasPush && (
@@ -1379,8 +1314,25 @@ class UIRoot extends Component {
     const isLoading =
       (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) && !this.props.showSafariMicDialog;
 
+    const rootStyles = {
+      [styles.ui]: true,
+      "ui-root": true,
+      "in-modal-or-overlay": this.isInModalOrOverlay()
+    };
+
+    if (this.props.showOAuthDialog)
+      return (
+        <div className={classNames(rootStyles)}>
+          <OAuthDialog closable={false} oauthInfo={this.props.oauthInfo} />
+        </div>
+      );
     if (isExited) return this.renderExitedPane();
-    if (isLoading) return this.renderLoader();
+    if (isLoading) {
+      return (
+        <Loader scene={this.props.scene} finished={this.state.noMoreLoadingUpdates} onLoaded={this.onLoadingFinished} />
+      );
+    }
+    if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();
     if (this.props.isBotMode) return this.renderBotMode();
 
     const entered = this.state.entered;
@@ -1420,16 +1372,6 @@ class UIRoot extends Component {
 
     const showVREntryButton = entered && isMobileVR;
 
-    const textRows = this.state.pendingMessage.split("\n").length;
-    const pendingMessageTextareaHeight = textRows * 28 + "px";
-    const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
-
-    const rootStyles = {
-      [styles.ui]: true,
-      "ui-root": true,
-      "in-modal-or-overlay": this.isInModalOrOverlay()
-    };
-
     const presenceLogEntries = this.props.presenceLogEntries || [];
 
     const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
@@ -1437,6 +1379,10 @@ class UIRoot extends Component {
     // Allow scene picker pre-entry, otherwise wait until entry
     const showMediaBrowser = mediaSource && (mediaSource === "scenes" || this.state.entered);
     const hasTopTip = this.props.activeTips && this.props.activeTips.top;
+
+    const discordBridges = this.discordBridges();
+    const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
+    const showDiscordTip = discordBridges.length > 0 && !this.state.discordTipDismissed;
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1564,7 +1510,9 @@ class UIRoot extends Component {
             {entered && <PresenceLog inRoom={true} entries={presenceLogEntries} hubId={this.props.hubId} />}
             {entered &&
               this.props.activeTips &&
-              this.props.activeTips.bottom && (
+              this.props.activeTips.bottom &&
+              (!presenceLogEntries || presenceLogEntries.length === 0) &&
+              !showDiscordTip && (
                 <div className={styles.bottomTip}>
                   <button
                     className={styles.tipCancel}
@@ -1592,99 +1540,26 @@ class UIRoot extends Component {
                   )}
                 </div>
               )}
-            {entered && (
-              <form onSubmit={this.sendMessage}>
-                <div
-                  className={classNames({ [styles.messageEntryInRoom]: true, [styles.messageEntryOnMobile]: isMobile })}
-                  style={{ height: pendingMessageFieldHeight }}
-                >
-                  {this.state.pendingMessage.startsWith("/") && (
-                    <ChatCommandHelp matchingPrefix={this.state.pendingMessage.substring(1)} />
-                  )}
-                  <input
-                    id="message-entry-media-input"
-                    type="file"
-                    style={{ display: "none" }}
-                    accept={isMobile ? "image/*" : "*"}
-                    multiple
-                    onChange={e => {
-                      for (const file of e.target.files) {
-                        this.createObject(file);
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor="message-entry-media-input"
-                    title={"Upload"}
-                    className={classNames([
-                      styles.messageEntryButton,
-                      styles.messageEntryButtonInRoom,
-                      styles.messageEntryUpload
-                    ])}
-                  >
+            {entered &&
+              showDiscordTip && (
+                <div className={styles.bottomTip}>
+                  <button className={styles.tipCancel} onClick={() => this.confirmDiscordBridge()}>
                     <i>
-                      <FontAwesomeIcon icon={isMobile ? faCamera : faPlus} />
-                    </i>
-                  </label>
-                  <textarea
-                    style={{ height: pendingMessageTextareaHeight }}
-                    className={classNames([
-                      styles.messageEntryInput,
-                      styles.messageEntryInputInRoom,
-                      "chat-focus-target"
-                    ])}
-                    value={this.state.pendingMessage}
-                    rows={textRows}
-                    onFocus={e => {
-                      handleTextFieldFocus(e.target);
-                    }}
-                    onBlur={() => {
-                      handleTextFieldBlur();
-                    }}
-                    onChange={e => {
-                      e.stopPropagation();
-                      this.setState({ pendingMessage: e.target.value });
-                    }}
-                    onKeyDown={e => {
-                      if (e.key === "Enter" && !e.ctrlKey && !e.shiftKey) {
-                        this.sendMessage(e);
-                      } else if (e.key === "Enter" && e.ctrlKey) {
-                        spawnChatMessage(e.target.value);
-                        this.setState({ pendingMessage: "" });
-                        e.target.blur();
-                      } else if (e.key === "Escape") {
-                        e.target.blur();
-                      }
-                    }}
-                    placeholder="Send to room..."
-                  />
-                  <button
-                    className={classNames([styles.messageEntrySpawn])}
-                    onClick={() => {
-                      if (this.state.pendingMessage.length > 0) {
-                        spawnChatMessage(this.state.pendingMessage);
-                        this.setState({ pendingMessage: "" });
-                      } else {
-                        this.pushHistoryState("modal", "create");
-                      }
-                    }}
-                  />
-                  <button
-                    type="submit"
-                    className={classNames([
-                      styles.messageEntryButton,
-                      styles.messageEntryButtonInRoom,
-                      styles.messageEntrySubmit
-                    ])}
-                  >
-                    <i>
-                      <FontAwesomeIcon icon={faPaperPlane} />
+                      <FontAwesomeIcon icon={faTimes} />
                     </i>
                   </button>
+                  <div className={styles.tip}>
+                    {`Chat in this room is being bridged to ${discordSnippet} on Discord.`}
+                  </div>
                 </div>
-              </form>
+              )}
+            {entered && (
+              <InWorldChatBox
+                discordBridges={discordBridges}
+                onSendMessage={this.sendMessage}
+                onObjectCreated={this.createObject}
+              />
             )}
-
             {this.state.frozen && (
               <button className={styles.leaveButton} onClick={() => this.exit("left")}>
                 <FormattedMessage id="entry.leave-room" />
@@ -1842,17 +1717,11 @@ class UIRoot extends Component {
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
                 />
-                {this.props.isSupportAvailable && (
-                  <div className={styles.nagCornerButton}>
-                    <WithHoverSound>
-                      <StateLink stateKey="modal" stateValue="support" history={this.props.history}>
-                        <button>
-                          <FormattedMessage id="entry.invite-team-nag" />
-                        </button>
-                      </StateLink>
-                    </WithHoverSound>
-                  </div>
-                )}
+                <div className={styles.nagCornerButton}>
+                  <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
+                    <FormattedMessage id="feedback.prompt" />
+                  </a>
+                </div>
               </div>
             )}
           </div>

@@ -25,8 +25,7 @@ AFRAME.registerComponent("ik-root", {
   schema: {
     camera: { type: "string", default: ".camera" },
     leftController: { type: "string", default: ".left-controller" },
-    rightController: { type: "string", default: ".right-controller" },
-    avatarType: { type: "string", default: AVATAR_TYPES.LEGACY }
+    rightController: { type: "string", default: ".right-controller" }
   },
   update(oldData) {
     if (this.data.camera !== oldData.camera) {
@@ -242,7 +241,10 @@ AFRAME.registerComponent("ik-controller", {
 
     const { leftHand, rightHand } = this;
 
-    const handRotations = this.ikRoot.data.avatarType === AVATAR_TYPES.LEGACY ? LEGACY_HAND_ROTATIONS : HAND_ROTATIONS;
+    const handRotations =
+      this.ikRoot.el.components["player-info"].data.avatarType === AVATAR_TYPES.LEGACY
+        ? LEGACY_HAND_ROTATIONS
+        : HAND_ROTATIONS;
     this.updateHand(handRotations.left, leftHand, leftController.object3D, true, this.isInView);
     this.updateHand(handRotations.right, rightHand, rightController.object3D, false, this.isInView);
     this.forceIkUpdate = false;

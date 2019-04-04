@@ -110,7 +110,7 @@ body.vr-mode {
 :local(.nag-corner-button) {
   position: absolute;
   z-index: 1;
-  bottom: 42px;
+  bottom: 4px;
   width: 100%;
   display: flex;
   align-items: center;
@@ -118,26 +118,17 @@ body.vr-mode {
   height: 80px;
   pointer-events: none;
 
-  button {
-    @extend %default-font;
-    font-size: 1.3em;
-    font-weight: bold;
-    cursor: pointer;
-    min-width: 150px;
+  a {
+    @extend %action-button-secondary;
+    min-width: 120px;
     margin-right: 12px;
     margin-left: 12px;
     white-space: nowrap;
-    background: none;
     border: none;
     pointer-events: auto;
-    padding: 16px 28px;
-    height: 58px;
-    color: $light-text;
-    text-shadow: 0px 0px 4px rgba(0, 0, 0, 1.0);
-    text-decoration: underline;
   }
 
-  @media (max-width: 740px) {
+  @media (max-width: 1080px) {
     display: none;
   }
 }
@@ -199,154 +190,6 @@ body.vr-mode {
   color: $action-color;
 }
 
-:local(.message-entry) {
-  position: relative;
-  margin: 32px 24px 24px 24px;
-  height: 48px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: white;
-  border: 1px solid #e2e2e2;
-  border-radius: 16px;
-}
-
-:local(.message-entry-disabled) {
-  background-color: transparent;
-
-  :local(.message-entry-button) {
-    display: none;
-  }
-}
-
-:local(.message-entry-input) {
-  @extend %default-font;
-  pointer-events: auto;
-  appearance: none;
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  outline-style: none;
-  overflow: hidden;
-  resize: none;
-  background-color: transparent;
-  color: black;
-  padding: 8px 1.25em;
-  line-height: 28px;
-  font-size: 1.1em;
-  width: 100%;
-  border: 0px;
-  height: 32px;
-  flex: 10;
-}
-
-:local(.message-entry-input)::placeholder{
-  color: $dark-grey;
-  font-weight: 300;
-  font-style: italic;
-}
-
-:local(.message-entry-button) {
-  color: $action-color;
-  appearance: none;
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  outline-style: none;
-  background-color: white;
-  min-width: 40px;
-  height: 100%;
-  bottom: 0px;
-  border: 0px;
-  font-size: 1.5em;
-  cursor: pointer;
-  margin: 0px 10px;
-}
-
-:local(.message-entry-button):disabled {
-  color: $dark-grey;
-  background-color: transparent;
-}
-
-:local(.message-entry-button-in-room) {
-  color: $dark-grey;
-}
-
-:local(.message-entry-button-in-room):hover {
-  color: $action-color;
-}
-
-:local(.message-entry-upload) {
-  margin-bottom: 1px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-:local(.message-entry-in-room) {
-  position: absolute;
-  z-index: 2;
-  bottom: 20px;
-  left: 50%;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  width: 95%;
-  max-width: 700px;
-  height: 48px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(64, 64, 64, 0.55);
-  border-radius: 16px;
-  pointer-events: auto;
-  transition: opacity 0.15s linear;
-
-  :local(.message-entry-input-in-room) {
-    color: white;
-    padding: 8px 0px;
-    margin-left: 4px;
-  }
-
-  :local(.message-entry-spawn) {
-    @extend %action-button;
-    background-color: transparent;
-    height: 32px;
-    width: 32px;
-    bottom: 8px;
-    min-width: auto;
-    background-size: 100%;
-    background-image: url(../images/spawn_message_dark.png);
-    background-repeat: no-repeat;
-    padding: 0;
-  }
-
-  :local(.message-entry-spawn):hover {
-    background-image: url(../images/spawn_message_dark-hover.png);
-  }
-
-  :local(.message-entry-button-in-room) {
-    border: 0;
-    background-color: transparent;
-    margin-right: 10px;
-  }
-}
-
-:local(.message-entry-in-room):focus-within, :local(.message-entry-in-room):hover {
-  transition: background-color 0.15s linear;
-  background-color: $darker-grey;
-
-  :local(.message-entry-button-in-room) {
-    border: 0;
-    background-color: transparent;
-  }
-}
-
-:local(.message-entry-on-mobile) {
-  // Hide chatbox for joysticks
-  // Orientation selector fails here when keyboard pops up on shorter screens
-  @media (min-aspect-ratio: 15/9) {
-    display: none;
-  }
-}
-
 :local(.leave-button) {
   @extend %action-button;
   position: absolute;
@@ -395,7 +238,7 @@ body.vr-mode {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    
+
     :local(.split-tip-icon) {
       appearance: none;
       -moz-appearance: none;
@@ -432,5 +275,28 @@ body.vr-mode {
     :local(.object_recenter_button-icon) {
       background-image: url(../images/recenter.png);
     }
+  }
+}
+
+:local(.interstitial) {
+  @extend %default-font;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: $light-text;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3em;
+  pointer-events: auto;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 50;
+
+  div {
+    @extend %action-button;
+    width: 250px;
   }
 }

@@ -14,7 +14,12 @@ AFRAME.GLTFModelPlus.registerComponent("css-class", "css-class");
 AFRAME.GLTFModelPlus.registerComponent("interactable", "css-class", (el, componentName) => {
   el.setAttribute(componentName, "interactable");
 });
-AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner");
+AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner", (el, componentName, componentData) => {
+  //TODO: Do not automatically add these components
+  el.setAttribute("is-remote-hover-target", "");
+  el.setAttribute("is-hand-collision-target", "");
+  el.setAttribute(componentName, componentData);
+});
 AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
 AFRAME.GLTFModelPlus.registerComponent("media-loader", "media-loader");
 AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", el => {
@@ -86,7 +91,6 @@ AFRAME.GLTFModelPlus.registerComponent("visible", "visible", (el, componentName,
   }
 });
 AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point");
-AFRAME.GLTFModelPlus.registerComponent("hoverable", "hoverable");
 AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
 AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentName, componentData) => {
   const nav = AFRAME.scenes[0].systems.nav;
@@ -115,7 +119,13 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
     });
   }
 
-  el.setAttribute("media-loader", { src: componentData.src, resize: true, resolve: true, fileIsOwned: true });
+  el.setAttribute("media-loader", {
+    src: componentData.src,
+    resize: true,
+    resolve: true,
+    fileIsOwned: true,
+    animate: false
+  });
 
   if (componentData.pageIndex) {
     el.setAttribute("media-pager", { index: componentData.pageIndex });
@@ -131,13 +141,18 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 });
 
 function mediaInflator(el, componentName, componentData, components) {
+  let isControlled = true;
+
   if (components.networked) {
     // TODO: When non-hubs links can be traversed, make all link components controlled so you can open them.
-    const isControlled =
+    isControlled =
       componentData.controls || isHubsDestinationUrl(componentData.src) || isHubsDestinationUrl(componentData.href);
 
+    const hasVolume = componentName === "video";
+    const templateName = isControlled || hasVolume ? "#static-controlled-media" : "#static-media";
+
     el.setAttribute("networked", {
-      template: isControlled ? "#static-controlled-media" : "#static-media",
+      template: templateName,
       owner: "scene",
       persistent: true,
       networkId: components.networked.id
@@ -155,6 +170,7 @@ function mediaInflator(el, componentName, componentData, components) {
     mediaOptions.volume = componentData.volume;
     mediaOptions.loop = componentData.loop;
     mediaOptions.audioType = componentData.audioType;
+    mediaOptions.hidePlaybackControls = !isControlled;
 
     if (componentData.audioType === "pannernode") {
       mediaOptions.distanceModel = componentData.distanceModel;
@@ -176,6 +192,7 @@ function mediaInflator(el, componentName, componentData, components) {
     resize: true,
     resolve: true,
     fileIsOwned: true,
+    animate: false,
     mediaOptions
   });
 }
@@ -190,11 +207,17 @@ AFRAME.GLTFModelPlus.registerComponent("video", "video", mediaInflator, (name, p
 });
 AFRAME.GLTFModelPlus.registerComponent("link", "link", mediaInflator);
 
+AFRAME.GLTFModelPlus.registerComponent("hoverable", "is-remote-hover-target", el => {
+  el.setAttribute("is-remote-hover-target", "");
+  el.setAttribute("is-hand-collision-target", "");
+});
+
 AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName, componentData) => {
   el.setAttribute("media-loader", {
     src: componentData.src,
     resolve: true,
-    fileIsOwned: true
+    fileIsOwned: true,
+    animate: false
   });
   el.setAttribute("css-class", "interactable");
   el.setAttribute("super-spawner", {
@@ -207,7 +230,8 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
     type: TYPE.STATIC,
     collisionFlags: COLLISION_FLAG.NO_CONTACT_RESPONSE
   });
-  el.setAttribute("hoverable", "");
+  el.setAttribute("is-remote-hover-target", "");
+  el.setAttribute("is-hand-collision-target", "");
 });
 
 const publicComponents = {
