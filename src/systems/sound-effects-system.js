@@ -17,19 +17,21 @@ function getBuffer(url, context) {
     .then(arrayBuffer => context.decodeAudioData(arrayBuffer));
 }
 
-function playSoundLooped(buffer, context) {
+function playSound(buffer, context) {
+  // The nodes are very inexpensive to create, according to
+  // https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode
   const source = context.createBufferSource();
   source.buffer = buffer;
-  source.loop = true;
   source.connect(context.destination);
   source.start();
 }
 
-function playSound(buffer, context) {
-  const source = context.createBufferSource();
-  source.buffer = buffer;
-  source.connect(context.destination);
-  source.start();
+function playSoundLooped(buffer, context) {
+    const source = context.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    source.connect(context.destination);
+    source.start();
 }
 
 function copy(current, prev) {
