@@ -36,7 +36,6 @@ export default class RenameRoomDialog extends Component {
             required
             autoFocus
             autoComplete="off"
-            minLength={5}
             placeholder="Room name"
             value={this.state.name}
             onFocus={e => handleTextFieldFocus(e.target)}
