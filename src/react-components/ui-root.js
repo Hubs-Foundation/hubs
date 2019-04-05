@@ -1330,12 +1330,7 @@ class UIRoot extends Component {
     if (isExited) return this.renderExitedPane();
     if (isLoading) {
       return (
-        <Loader
-          scene={this.props.scene}
-          environmentSceneLoaded={this.props.environmentSceneLoaded}
-          finished={this.state.noMoreLoadingUpdates}
-          onLoaded={this.onLoadingFinished}
-        />
+        <Loader scene={this.props.scene} finished={this.state.noMoreLoadingUpdates} onLoaded={this.onLoadingFinished} />
       );
     }
     if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();

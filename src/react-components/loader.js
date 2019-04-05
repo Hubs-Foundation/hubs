@@ -7,7 +7,6 @@ import loaderStyles from "../assets/stylesheets/loader.scss";
 class Loader extends Component {
   static propTypes = {
     scene: PropTypes.object,
-    environmentSceneLoaded: PropTypes.bool,
     finished: PropTypes.bool,
     onLoaded: PropTypes.func
   };
@@ -64,7 +63,7 @@ class Loader extends Component {
   tryFinishLoading = () => {
     if (!this.doneWithInitialLoad && this.loadingTimeout) window.clearTimeout(this.loadingTimeout);
 
-    if (this.environmentSceneLoaded || this.props.environmentSceneLoaded) {
+    if (this.environmentSceneLoaded) {
       this.loadingTimeout = window.setTimeout(() => {
         this.doneWithInitialLoad = true;
         if (this.props.onLoaded) {
