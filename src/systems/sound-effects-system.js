@@ -1,7 +1,7 @@
 /* global fetch THREE */
 import URL_TICK from "../assets/sfx/tick.mp3";
-import URL_LOW_THUMP from "../assets/sfx/low-thump.wav";
-import URL_TELEPORT_LOOP from "../assets/sfx/teleport-loop.wav";
+import URL_LOW_THUMP from "../assets/sfx/low-thump.mp3";
+import URL_TELEPORT_LOOP from "../assets/sfx/teleport-loop.mp3";
 import URL_QUICK_TURN from "../assets/sfx/quickTurn.mp3";
 import URL_TAP_MELLOW from "../assets/sfx/tap_mellow.mp3";
 import URL_PEN_SPAWN from "../assets/sfx/PenSpawn.mp3";
