@@ -1,5 +1,6 @@
 /* global AFRAME Ammo NAF */
 import { paths } from "./userinput/paths";
+import { SOUND_HOVER_OR_GRAB } from "./sound-effects-system";
 
 const handCollisionTargets = new Map();
 AFRAME.registerComponent("is-hand-collision-target", {
@@ -183,7 +184,7 @@ AFRAME.registerSystem("interaction", {
       (isUI(this.state.rightRemote.hovered) &&
         this.state.rightRemote.hovered !== this.previousState.rightRemote.hovered)
     ) {
-      sfx.pendingEffects.push("hover_or_grab");
+      sfx.playSoundOneShot(SOUND_HOVER_OR_GRAB);
     }
 
     if (this.el.systems.userinput.get(paths.actions.logInteractionState)) {

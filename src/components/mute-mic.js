@@ -1,3 +1,6 @@
+import { paths } from "../systems/userinput/paths";
+import { SOUND_TOGGLE_MIC } from "../systems/sound-effects-system";
+
 const bindAllEvents = function(elements, events, f) {
   if (!elements || !elements.length) return;
   for (const el of elements) {
@@ -72,6 +75,15 @@ AFRAME.registerComponent("mute-mic", {
     if (this.el.is("muted")) {
       NAF.connection.adapter.enableMicrophone(true);
       this.el.removeState("muted");
+    }
+  },
+
+  tick() {
+    const userinput = this.el.sceneEl.systems.userinput;
+    const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
+    if (userinput.get(paths.actions.muteMic)) {
+      sfx.playSoundOneShot(SOUND_TOGGLE_MIC);
+      this.el.emit("action_mute");
     }
   }
 });

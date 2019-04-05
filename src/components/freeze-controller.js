@@ -1,4 +1,5 @@
 import { paths } from "../systems/userinput/paths";
+import { SOUND_FREEZE, SOUND_THAW } from "../systems/sound-effects-system";
 
 /**
  * Toggles freezing of network traffic on the given event.
@@ -44,10 +45,10 @@ AFRAME.registerComponent("freeze-controller", {
     if (!NAF.connection.adapter) return;
     NAF.connection.adapter.toggleFreeze();
     if (NAF.connection.adapter.frozen) {
-      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("freeze");
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_FREEZE);
       this.el.addState("frozen");
     } else {
-      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("thaw");
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_THAW);
       this.el.removeState("frozen");
     }
   }

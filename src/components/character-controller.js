@@ -1,4 +1,5 @@
 import { paths } from "../systems/userinput/paths";
+import { SOUND_SNAP_ROTATE } from "../systems/sound-effects-system";
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
@@ -78,12 +79,12 @@ AFRAME.registerComponent("character-controller", {
 
   snapRotateLeft: function() {
     this.pendingSnapRotationMatrix.copy(this.leftRotationMatrix);
-    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("snap_rotate_left");
+    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
   },
 
   snapRotateRight: function() {
     this.pendingSnapRotationMatrix.copy(this.rightRotationMatrix);
-    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("snap_rotate_right");
+    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
   },
 
   // We assume the rig is at the root, and its local position === its world position.

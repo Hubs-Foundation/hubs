@@ -116,6 +116,7 @@ import "./systems/ui-hotkeys";
 import "./systems/tips";
 import "./systems/interactions";
 import "./systems/hubs-systems";
+import { SOUND_CHAT_MESSAGE } from "./systems/sound-effects-system";
 
 import "./gltf-component-mappings";
 
@@ -793,7 +794,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     presenceLogEntries.push(entry);
     remountUI({ presenceLogEntries });
     if (entry.type === "chat") {
-      scene.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("chat_message");
+      scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CHAT_MESSAGE);
     }
 
     // Fade out and then remove

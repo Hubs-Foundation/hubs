@@ -11,6 +11,7 @@ import {
 import { addAnimationComponents } from "../utils/animation";
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
+import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
 
 const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
   SHAPE = PHYSICS_CONSTANTS.SHAPE,
@@ -118,17 +119,18 @@ AFRAME.registerComponent("media-loader", {
       this.loadingScaleClip.play();
     }
     if (this.el.sceneEl.is("entered")) {
-      const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
-      this.loadingSound = sfx.playSoundLooped("media_loading");
+      this.loadingSoundNode = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundLooped(
+        SOUND_MEDIA_LOADING
+      );
     }
     delete this.showLoaderTimeout;
   },
 
   clearLoadingTimeout() {
     clearTimeout(this.showLoaderTimeout);
-    if (this.loadingSound) {
-      this.loadingSound.stop();
-      this.loadingSound = null;
+    if (this.loadingSoundNode) {
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.stopSoundNode(this.loadingSoundNode);
+      this.loadingSoundNode = null;
     }
     if (this.loaderMixer) {
       this.loadingClip.stop();
@@ -160,7 +162,7 @@ AFRAME.registerComponent("media-loader", {
     this.clearLoadingTimeout();
 
     if (this.el.sceneEl.is("entered")) {
-      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.pendingEffects.push("media_loaded");
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_MEDIA_LOADED);
     }
 
     if (!el.components["animation-mixer"]) {
@@ -405,8 +407,9 @@ AFRAME.registerComponent("media-pager", {
     if (this.toolbar) {
       this.toolbar.parentNode.removeChild(this.toolbar);
     }
-    if (this.loadingSound) {
-      this.loadingSound.stop();
+    if (this.loadingSoundNode) {
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.stopSoundNode(this.loadingSoundNode);
+      this.loadingSoundNode = null;
     }
   },
 

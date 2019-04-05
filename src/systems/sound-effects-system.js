@@ -1,158 +1,118 @@
-/* global fetch THREE AFRAME */
-import TICK from "../assets/sfx/tick.mp3";
-import TELEPORT_ARC from "../assets/sfx/teleportArc.mp3";
-import QUICK_TURN from "../assets/sfx/quickTurn.mp3";
-import TAP_MELLOW from "../assets/sfx/tap_mellow.mp3";
-import PEN_SPAWN from "../assets/sfx/PenSpawn.mp3";
-import PEN_DRAW from "../assets/sfx/PenDraw1.mp3";
-import CAMERA_SNAPSHOT from "../assets/sfx/PicSnapHey.mp3";
-import WELCOME from "../assets/sfx/welcome.mp3";
-import QUACK from "../assets/sfx/quack.mp3";
-import SPECIAL_QUACK from "../assets/sfx/specialquack.mp3";
-import POP from "../assets/sfx/pop.mp3";
-import FREEZE from "../assets/sfx/Eb_blip.mp3";
-import TACK from "../assets/sfx/tack.mp3";
-import MEDIA_LOADED from "../assets/sfx/A_bendUp.mp3";
-import MEDIA_LOADING from "../assets/sfx/suspense.mp3";
-import { paths } from "./userinput/paths";
+/* global fetch THREE */
+import URL_TICK from "../assets/sfx/tick.mp3";
+import URL_TELEPORT_ARC from "../assets/sfx/teleportArc.mp3";
+import URL_QUICK_TURN from "../assets/sfx/quickTurn.mp3";
+import URL_TAP_MELLOW from "../assets/sfx/tap_mellow.mp3";
+import URL_PEN_SPAWN from "../assets/sfx/PenSpawn.mp3";
+import URL_PEN_DRAW from "../assets/sfx/PenDraw1.mp3";
+import URL_CAMERA_SNAPSHOT from "../assets/sfx/PicSnapHey.mp3";
+import URL_WELCOME from "../assets/sfx/welcome.mp3";
+import URL_QUACK from "../assets/sfx/quack.mp3";
+import URL_SPECIAL_QUACK from "../assets/sfx/specialquack.mp3";
+import URL_POP from "../assets/sfx/pop.mp3";
+import URL_FREEZE from "../assets/sfx/Eb_blip.mp3";
+import URL_TACK from "../assets/sfx/tack.mp3";
+import URL_MEDIA_LOADED from "../assets/sfx/A_bendUp.mp3";
+import URL_MEDIA_LOADING from "../assets/sfx/suspense.mp3";
 
-function getBuffer(url, context) {
+let soundEnum = 0;
+export const SOUND_HOVER_OR_GRAB = soundEnum++;
+export const SOUND_THAW = soundEnum++;
+export const SOUND_PEN_STOP_DRAW = soundEnum++;
+export const SOUND_PEN_UNDO_DRAW = soundEnum++;
+export const SOUND_PEN_CHANGE_RADIUS = soundEnum++;
+export const SOUND_PEN_CHANGE_COLOR = soundEnum++;
+export const SOUND_TOGGLE_MIC = soundEnum++;
+export const SOUND_TELEPORT_START = soundEnum++;
+export const SOUND_TELEPORT_END = soundEnum++;
+export const SOUND_SNAP_ROTATE = soundEnum++;
+export const SOUND_SPAWN_PEN = soundEnum++;
+export const SOUND_PEN_START_DRAW = soundEnum++;
+export const SOUND_CAMERA_TOOL_TOOK_SNAPSHOT = soundEnum++;
+export const SOUND_ENTER_SCENE = soundEnum++;
+export const SOUND_QUACK = soundEnum++;
+export const SOUND_SPECIAL_QUACK = soundEnum++;
+export const SOUND_CHAT_MESSAGE = soundEnum++;
+export const SOUND_FREEZE = soundEnum++;
+export const SOUND_PIN = soundEnum++;
+export const SOUND_MEDIA_LOADING = soundEnum++;
+export const SOUND_MEDIA_LOADED = soundEnum++;
+
+const audioBuffers = new Map();
+function load(url, context) {
   return fetch(url)
     .then(r => r.arrayBuffer())
-    .then(arrayBuffer => context.decodeAudioData(arrayBuffer));
-}
-
-function playSound(buffer, context) {
-  // The nodes are very inexpensive to create, according to
-  // https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode
-  const source = context.createBufferSource();
-  source.buffer = buffer;
-  source.connect(context.destination);
-  source.start();
-}
-
-function playSoundLooped(buffer, context) {
-  const source = context.createBufferSource();
-  source.buffer = buffer;
-  source.loop = true;
-  source.connect(context.destination);
-  source.start();
-  return source;
+    .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
+    .then(audioBuffer => audioBuffers.set(url, audioBuffer));
 }
 
 export class SoundEffectsSystem {
   constructor() {
-    this.ctx = THREE.AudioContext.getContext();
     this.pendingEffects = [];
-    this.soundFor = new Map();
-    this.sounds = {};
-    getBuffer(TICK, this.ctx).then(buffer => {
-      this.sounds.tick = buffer;
-      this.soundFor.set("hover_or_grab", buffer);
-      this.soundFor.set("thaw", buffer);
-      this.soundFor.set("pen_stop_draw", buffer);
-      this.soundFor.set("pen_undo_draw", buffer);
-      this.soundFor.set("pen_stop_draw", buffer);
-      this.soundFor.set("pen_change_radius", buffer);
-      this.soundFor.set("pen_change_color", buffer);
-      this.soundFor.set("toggle_mic", buffer);
-    });
-    getBuffer(TELEPORT_ARC, this.ctx).then(buffer => {
-      this.sounds.teleportArc = buffer;
-      this.soundFor.set("teleport_start", buffer);
-    });
-    getBuffer(QUICK_TURN, this.ctx).then(buffer => {
-      this.sounds.teleportEnd = buffer;
-      this.soundFor.set("teleport_end", buffer);
-    });
-    getBuffer(TAP_MELLOW, this.ctx).then(buffer => {
-      this.sounds.snapRotate = buffer;
-      this.soundFor.set("snap_rotate_left", buffer);
-      this.soundFor.set("snap_rotate_right", buffer);
-    });
-    getBuffer(PEN_SPAWN, this.ctx).then(buffer => {
-      this.sounds.spawnPen = buffer;
-      this.soundFor.set("spawn_pen", buffer);
-    });
-    getBuffer(PEN_DRAW, this.ctx).then(buffer => {
-      this.sounds.penStartDraw = buffer;
-      this.soundFor.set("pen_start_draw", buffer);
-    });
-    getBuffer(CAMERA_SNAPSHOT, this.ctx).then(buffer => {
-      this.sounds.cameraSnapshot = buffer;
-      this.soundFor.set("camera_tool_took_snapshot", buffer);
-    });
-    getBuffer(WELCOME, this.ctx).then(buffer => {
-      this.sounds.enterScene = buffer;
-      this.soundFor.set("enter_scene", buffer);
-    });
-    getBuffer(QUACK, this.ctx).then(buffer => {
-      this.sounds.quack = buffer;
-      this.soundFor.set("quack", buffer);
-    });
-    getBuffer(SPECIAL_QUACK, this.ctx).then(buffer => {
-      this.sounds.specialQuack = buffer;
-      this.soundFor.set("special_quack", buffer);
-    });
-    getBuffer(POP, this.ctx).then(buffer => {
-      this.sounds.chatMessage = buffer;
-      this.soundFor.set("chat_message", buffer);
-    });
-    getBuffer(FREEZE, this.ctx).then(buffer => {
-      this.sounds.freeze = buffer;
-      this.soundFor.set("freeze", buffer);
-    });
-    getBuffer(TACK, this.ctx).then(buffer => {
-      this.sounds.pin = buffer;
-      this.soundFor.set("pin", buffer);
-    });
-    getBuffer(MEDIA_LOADING, this.ctx).then(buffer => {
-      this.sounds.mediaLoading = buffer;
-      this.soundFor.set("media_loading", buffer);
-    });
-    getBuffer(MEDIA_LOADED, this.ctx).then(buffer => {
-      this.sounds.mediaLoaded = buffer;
-      this.soundFor.set("media_loaded", buffer);
+    this.audioContext = THREE.AudioContext.getContext();
+    const soundsAndUrls = [
+      [SOUND_HOVER_OR_GRAB, URL_TICK],
+      [SOUND_THAW, URL_TICK],
+      [SOUND_PEN_STOP_DRAW, URL_TICK],
+      [SOUND_PEN_UNDO_DRAW, URL_TICK],
+      [SOUND_PEN_CHANGE_RADIUS, URL_TICK],
+      [SOUND_PEN_CHANGE_COLOR, URL_TICK],
+      [SOUND_TOGGLE_MIC, URL_TICK],
+      [SOUND_TELEPORT_START, URL_TELEPORT_ARC],
+      [SOUND_TELEPORT_END, URL_QUICK_TURN],
+      [SOUND_SNAP_ROTATE, URL_TAP_MELLOW],
+      [SOUND_SPAWN_PEN, URL_PEN_SPAWN],
+      [SOUND_PEN_START_DRAW, URL_PEN_DRAW],
+      [SOUND_CAMERA_TOOL_TOOK_SNAPSHOT, URL_CAMERA_SNAPSHOT],
+      [SOUND_ENTER_SCENE, URL_WELCOME],
+      [SOUND_QUACK, URL_QUACK],
+      [SOUND_SPECIAL_QUACK, URL_SPECIAL_QUACK],
+      [SOUND_CHAT_MESSAGE, URL_POP],
+      [SOUND_FREEZE, URL_FREEZE],
+      [SOUND_PIN, URL_TACK],
+      [SOUND_MEDIA_LOADING, URL_MEDIA_LOADING],
+      [SOUND_MEDIA_LOADED, URL_MEDIA_LOADED]
+    ];
+    Promise.all(soundsAndUrls.map(a => load(a[1], this.audioContext))).then(() => {
+      this.sounds = new Map(soundsAndUrls.map(a => [a[0], audioBuffers.get(a[1])]));
     });
   }
 
-  shouldTick() {
-    this.soundsAreReady =
-      this.soundsAreReady ||
-      (this.sounds.tick &&
-        this.sounds.teleportEnd &&
-        this.sounds.teleportArc &&
-        this.sounds.snapRotate &&
-        this.sounds.spawnPen &&
-        this.sounds.penStartDraw &&
-        this.sounds.cameraSnapshot &&
-        this.sounds.enterScene &&
-        this.sounds.quack &&
-        this.sounds.specialQuack &&
-        this.sounds.chatMessage &&
-        this.sounds.freeze &&
-        this.sounds.pin &&
-        this.sounds.mediaLoading &&
-        this.sounds.mediaLoaded);
-    return this.soundsAreReady;
+  enqueueSound(sound, loop) {
+    if (!this.sounds) return null;
+    // The nodes are very inexpensive to create, according to
+    // https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode
+    const source = this.audioContext.createBufferSource();
+    source.buffer = this.sounds.get(sound);
+    source.connect(this.audioContext.destination);
+    source.loop = loop;
+    this.pendingEffects.push(source);
+    return source;
+  }
+
+  playSoundOneShot(sound) {
+    return this.enqueueSound(sound, false);
+  }
+
+  playSoundLooped(sound) {
+    return this.enqueueSound(sound, true);
+  }
+
+  stopSoundNode(node) {
+    const index = this.pendingEffects.indexOf(node);
+    if (index !== -1) {
+      this.pendingEffects.splice(index, 1);
+    } else {
+      node.stop();
+    }
   }
 
   tick() {
-    if (!this.shouldTick()) return;
-
-    const userinput = AFRAME.scenes[0].systems.userinput;
-    if (userinput.get(paths.actions.muteMic)) {
-      playSound(this.sounds.tick, this.ctx);
-    }
+    if (!this.sounds) return;
 
     for (let i = 0; i < this.pendingEffects.length; i++) {
-      playSound(this.soundFor.get(this.pendingEffects[i]), this.ctx);
+      this.pendingEffects[i].start();
     }
     this.pendingEffects.length = 0;
-  }
-
-  playSoundLooped(soundId) {
-    // TODO: Should we defer actually play the sound until tick?
-    return playSoundLooped(this.soundFor.get(soundId), this.ctx);
   }
 }
