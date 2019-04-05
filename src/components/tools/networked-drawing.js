@@ -446,7 +446,6 @@ AFRAME.registerComponent("networked-drawing", {
   })(),
 
   _endLine() {
-    this.el.emit("stop_draw");
     if (!this.drawStarted) return;
 
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) this._pushToNetworkBuffer(null);

@@ -5,6 +5,7 @@ import { SingleActionButtonSystem, HoldableButtonSystem, HoverButtonSystem } fro
 import { HoverMenuSystem } from "./hover-menu-system";
 import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
+import { SoundEffectsSystem } from "./sound-effects-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -17,12 +18,13 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverMenuSystem = new HoverMenuSystem();
     this.superSpawnerSystem = new SuperSpawnerSystem();
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
+    this.soundEffectsSystem = new SoundEffectsSystem();
   },
 
   tick(t) {
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
-    systems.interaction.tick2();
+    systems.interaction.tick2(this.soundEffectsSystem);
     this.superSpawnerSystem.tick();
     this.cursorTargettingSystem.tick(t);
     this.constraintsSystem.tick();
@@ -32,5 +34,10 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverButtonSystem.tick();
     this.hoverMenuSystem.tick();
     this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
+    this.soundEffectsSystem.tick();
+  },
+
+  remove() {
+    this.cursorTargettingSystem.remove();
   }
 });

@@ -1,4 +1,5 @@
 import { getPromotionTokenForFile } from "../utils/media-utils";
+import { SOUND_PIN } from "../systems/sound-effects-system";
 
 AFRAME.registerComponent("pin-networked-object-button", {
   schema: {
@@ -44,6 +45,9 @@ AFRAME.registerComponent("pin-networked-object-button", {
 
       const wasPinned = this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned;
       this.targetEl.setAttribute("pinnable", "pinned", !wasPinned);
+      if (!wasPinned) {
+        this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PIN);
+      }
     };
   },
 

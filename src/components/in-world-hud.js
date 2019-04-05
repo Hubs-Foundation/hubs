@@ -1,3 +1,4 @@
+import { SOUND_SPAWN_PEN } from "../systems/sound-effects-system";
 /**
  * HUD panel for muting, freezing, and space bubble controls.
  * @namespace ui
@@ -41,6 +42,7 @@ AFRAME.registerComponent("in-world-hud", {
 
     this.onPenClick = () => {
       this.el.emit("spawn_pen");
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPAWN_PEN);
     };
 
     this.onCameraClick = () => {

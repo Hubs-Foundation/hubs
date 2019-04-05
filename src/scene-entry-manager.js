@@ -18,6 +18,7 @@ import {
 import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./assets/avatars/avatars";
 import { pushHistoryState } from "./utils/history";
+import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 
 const isIOS = AFRAME.utils.device.isIOS();
 
@@ -84,6 +85,8 @@ export default class SceneEntryManager {
     if (qsTruthy("offline")) return;
 
     this._spawnAvatar();
+
+    this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_ENTER_SCENE);
 
     if (isBotMode) {
       this._runBot(mediaStream);

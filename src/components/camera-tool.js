@@ -1,6 +1,7 @@
 import { addMedia } from "../utils/media-utils";
 import { ObjectTypes } from "../object-types";
 import { paths } from "../systems/userinput/paths";
+import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 
 import cameraModelSrc from "../assets/camera_tool.glb";
 
@@ -327,7 +328,7 @@ AFRAME.registerComponent("camera-tool", {
             sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
           });
         });
-        sceneEl.emit("camera_tool_took_snapshot");
+        sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
         this.takeSnapshotNextTick = false;
         this.localSnapCount++;
       }

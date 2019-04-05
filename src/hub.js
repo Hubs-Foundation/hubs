@@ -66,7 +66,6 @@ import "./components/unmute-video-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/visible-to-owner";
 import "./components/camera-tool";
-import "./components/scene-sound";
 import "./components/emit-state-change";
 import "./components/action-to-event";
 import "./components/action-to-remove";
@@ -117,6 +116,7 @@ import "./systems/ui-hotkeys";
 import "./systems/tips";
 import "./systems/interactions";
 import "./systems/hubs-systems";
+import { SOUND_CHAT_MESSAGE } from "./systems/sound-effects-system";
 
 import "./gltf-component-mappings";
 
@@ -156,7 +156,6 @@ import "./components/scalable-when-grabbed";
 import "./components/networked-counter";
 import "./components/event-repeater";
 import "./components/set-yxz-order";
-import "./components/set-sounds-invisible";
 
 import "./components/cursor-controller";
 
@@ -793,7 +792,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     presenceLogEntries.push(entry);
     remountUI({ presenceLogEntries });
-    scene.emit(`presence-log-${entry.type}`);
+    if (entry.type === "chat") {
+      scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CHAT_MESSAGE);
+    }
 
     // Fade out and then remove
     setTimeout(() => {

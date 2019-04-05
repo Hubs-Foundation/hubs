@@ -1,4 +1,5 @@
 import { spawnChatMessage } from "./react-components/chat-message";
+import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "./systems/sound-effects-system";
 
 const DUCK_URL = "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf";
 
@@ -73,9 +74,9 @@ export default class MessageDispatch {
       case "duck":
         spawnChatMessage(DUCK_URL);
         if (Math.random() < 0.01) {
-          this.scene.emit("specialquack");
+          this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);
         } else {
-          this.scene.emit("quack");
+          this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_QUACK);
         }
         break;
       case "debug":

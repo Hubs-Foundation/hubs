@@ -1,5 +1,11 @@
 import { paths } from "../../systems/userinput/paths";
 import { getLastWorldPosition } from "../../utils/three-utils";
+import {
+  SOUND_PEN_START_DRAW,
+  SOUND_PEN_STOP_DRAW,
+  SOUND_PEN_UNDO_DRAW,
+  SOUND_PEN_CHANGE_COLOR
+} from "../../systems/sound-effects-system";
 
 const pathsMap = {
   "player-right-controller": {
@@ -105,6 +111,7 @@ AFRAME.registerComponent("pen", {
   tick(t, dt) {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const interaction = AFRAME.scenes[0].systems.interaction;
+
     if (interaction.state.rightHand.held === this.el.parentNode) {
       this.grabberId = "player-right-controller";
     } else if (interaction.state.leftHand.held === this.el.parentNode) {
@@ -118,15 +125,19 @@ AFRAME.registerComponent("pen", {
     getLastWorldPosition(this.el.object3D, this.worldPosition);
 
     if (this.grabberId && pathsMap[this.grabberId]) {
+      const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
       const paths = pathsMap[this.grabberId];
       if (userinput.get(paths.startDrawing)) {
         this._startDraw();
+        sfx.playSoundOneShot(SOUND_PEN_START_DRAW);
       }
       if (userinput.get(paths.stopDrawing)) {
         this._endDraw();
+        sfx.playSoundOneShot(SOUND_PEN_STOP_DRAW);
       }
       if (userinput.get(paths.undoDrawing)) {
         this._undoDraw();
+        sfx.playSoundOneShot(SOUND_PEN_UNDO_DRAW);
       }
       const penScaleMod = userinput.get(paths.scalePenTip);
       if (penScaleMod) {
@@ -134,9 +145,11 @@ AFRAME.registerComponent("pen", {
       }
       if (userinput.get(paths.penNextColor)) {
         this._changeColor(1);
+        sfx.playSoundOneShot(SOUND_PEN_CHANGE_COLOR);
       }
       if (userinput.get(paths.penPrevColor)) {
         this._changeColor(-1);
+        sfx.playSoundOneShot(SOUND_PEN_CHANGE_COLOR);
       }
     }
 
@@ -176,14 +189,12 @@ AFRAME.registerComponent("pen", {
     this.currentDrawing = this.drawingManager.getDrawing(this);
     if (this.currentDrawing) {
       this._getNormal(this.normal, this.worldPosition, this.direction);
-      this.el.emit("start_draw");
       this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
     }
   },
 
   _endDraw() {
     if (this.currentDrawing) {
-      this.el.emit("stop_draw");
       this.timeSinceLastDraw = 0;
       this._getNormal(this.normal, this.worldPosition, this.direction);
       this.currentDrawing.endDraw(this.worldPosition, this.direction, this.normal);
