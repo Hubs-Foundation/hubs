@@ -143,7 +143,6 @@ AFRAME.registerComponent("pen", {
       const penScaleMod = userinput.get(paths.scalePenTip);
       if (penScaleMod) {
         this._changeRadius(penScaleMod);
-        sfx.playSoundOneShot(SOUND_PEN_CHANGE_RADIUS);
       }
       if (userinput.get(paths.penNextColor)) {
         this._changeColor(1);

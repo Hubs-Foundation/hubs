@@ -21,7 +21,6 @@ export const SOUND_HOVER_OR_GRAB = soundEnum++;
 export const SOUND_THAW = soundEnum++;
 export const SOUND_PEN_STOP_DRAW = soundEnum++;
 export const SOUND_PEN_UNDO_DRAW = soundEnum++;
-export const SOUND_PEN_CHANGE_RADIUS = soundEnum++;
 export const SOUND_PEN_CHANGE_COLOR = soundEnum++;
 export const SOUND_TOGGLE_MIC = soundEnum++;
 export const SOUND_TELEPORT_START = soundEnum++;
@@ -49,7 +48,6 @@ export class SoundEffectsSystem {
       [SOUND_THAW, URL_TICK],
       [SOUND_PEN_STOP_DRAW, URL_TICK],
       [SOUND_PEN_UNDO_DRAW, URL_TICK],
-      [SOUND_PEN_CHANGE_RADIUS, URL_TICK],
       [SOUND_PEN_CHANGE_COLOR, URL_TICK],
       [SOUND_TOGGLE_MIC, URL_TICK],
       [SOUND_TELEPORT_START, URL_TELEPORT_LOOP],
