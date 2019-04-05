@@ -54,15 +54,13 @@ export default class InviteDialog extends Component {
     return (
       <div className={classNames({ [styles.dialog]: true, [styles.modal]: this.props.isModal })}>
         {!this.props.isModal && <div className={styles.attachPoint} />}
-        {this.props.isModal && (
-          <WithHoverSound>
-            <button className={styles.close} onClick={() => this.props.onClose()}>
-              <i>
-                <FontAwesomeIcon icon={faTimes} />
-              </i>
-            </button>
-          </WithHoverSound>
-        )}
+        <WithHoverSound>
+          <button className={styles.close} onClick={() => this.props.onClose()}>
+            <i>
+              <FontAwesomeIcon icon={faTimes} />
+            </i>
+          </button>
+        </WithHoverSound>
         <div>
           <FormattedMessage id={`invite.enter_via${this.props.isModal ? "_modal" : ""}`} />
           <WithHoverSound>
