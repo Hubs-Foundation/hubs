@@ -9,6 +9,7 @@ import MovingAverage from "moving-average";
 import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
+import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
 import {
   pushHistoryState,
@@ -1569,16 +1570,16 @@ class UIRoot extends Component {
             {!this.state.frozen && (
               <div
                 className={classNames({
-                  [styles.inviteContainer]: true,
-                  [styles.inviteContainerBelowHud]: entered,
-                  [styles.inviteContainerInverted]: this.state.showInviteDialog
+                  [inviteStyles.inviteContainer]: true,
+                  [inviteStyles.inviteContainerBelowHud]: entered,
+                  [inviteStyles.inviteContainerInverted]: this.state.showInviteDialog
                 })}
               >
                 {!showVREntryButton &&
                   !hasTopTip && (
                     <WithHoverSound>
                       <button
-                        className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
+                        className={classNames({ [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
                         onClick={() => this.toggleInviteDialog()}
                       >
                         <FormattedMessage id="entry.invite-others-nag" />
@@ -1590,7 +1591,7 @@ class UIRoot extends Component {
                   !hasTopTip &&
                   entered && (
                     <WithHoverSound>
-                      <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
+                      <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
                         <span>
                           {this.state.miniInviteActivated
                             ? navigator.share
