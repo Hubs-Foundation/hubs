@@ -51,62 +51,6 @@ body.vr-mode {
   @extend %unselectable;
 }
 
-:local(.invite-container) {
-  @extend %unselectable;
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin-top: 16px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  button {
-    @extend %action-button;
-    pointer-events: auto;
-  }
-
-  @media (max-height: 320px) {
-    display: none;
-  }
-
-  :local(.hide-small-screens) {
-    display: none;
-
-    @media (min-height: 737px) {
-      display: flex;
-    }
-  }
-
-  :local(.invite-mini-button) {
-    display: none;
-    background-color: $hud-panel-background;
-    height: 28px;
-    font-size: 0.8em;
-
-    @media (max-height: 736px) and (min-height: 325px) {
-      display: flex;
-    }
-
-    // Hide in landscape
-    @media (max-height: 736px) and (min-aspect-ratio: 15/9) {
-      display: none;
-    }
-  }
-}
-
-:local(.invite-container-inverted) {
-  button {
-    @extend %action-button-selected;
-  }
-}
-
-:local(.invite-container-below-hud) {
-  margin-top: 86px;
-}
-
 :local(.nag-corner-button) {
   position: absolute;
   z-index: 1;
