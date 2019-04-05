@@ -15,6 +15,12 @@ AFRAME.registerComponent("avatar-volume-controls", {
     this.volumeUpButton.object3D.addEventListener("interact", this.volumeUp);
     this.volumeDownButton.object3D.addEventListener("interact", this.volumeDown);
 
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      const source = networkedEl.querySelector("[networked-audio-source]");
+      this.audio = source.components["networked-audio-source"].sound;
+      this.update();
+    });
+
     this.updateVolumeLabel();
   },
 
@@ -31,7 +37,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
     this.changeVolumeBy(-0.1);
   },
 
-  async update() {
+  update() {
     if (this.audio) {
       this.audio.gain.gain.value = this.data.volume;
     }
@@ -43,15 +49,5 @@ AFRAME.registerComponent("avatar-volume-controls", {
       "value",
       this.data.volume === 0 ? "Muted" : VOLUME_LABELS[Math.floor(this.data.volume / 0.05)]
     );
-  },
-
-  tick() {
-    if (this.audio) return;
-
-    // Walk up to Spine and then search down.
-    const source = this.el.parentNode.parentNode.querySelector("[networked-audio-source]");
-    if (!source) return;
-
-    this.audio = source.components["networked-audio-source"].sound;
   }
 });
