@@ -493,7 +493,7 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("photo_taken", e => {
-      this.hubChannel.sendMessage({ src: e.detail }, "spawn");
+      this.hubChannel.sendMessage({ src: e.detail }, "photo");
     });
   };
 

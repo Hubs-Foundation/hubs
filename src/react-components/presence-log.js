@@ -68,7 +68,7 @@ export default class PresenceLog extends Component {
             maySpawn={e.maySpawn}
           />
         );
-      case "spawn":
+      case "photo":
         return (
           <PhotoMessage
             key={e.key}
