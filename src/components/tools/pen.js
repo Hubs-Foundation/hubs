@@ -4,7 +4,6 @@ import {
   SOUND_PEN_START_DRAW,
   SOUND_PEN_STOP_DRAW,
   SOUND_PEN_UNDO_DRAW,
-  SOUND_PEN_CHANGE_RADIUS,
   SOUND_PEN_CHANGE_COLOR
 } from "../../systems/sound-effects-system";
 
