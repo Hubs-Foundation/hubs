@@ -38,14 +38,6 @@ export const SOUND_PIN = soundEnum++;
 export const SOUND_MEDIA_LOADING = soundEnum++;
 export const SOUND_MEDIA_LOADED = soundEnum++;
 
-const audioBuffers = new Map();
-function load(url, context) {
-  return fetch(url)
-    .then(r => r.arrayBuffer())
-    .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
-    .then(audioBuffer => audioBuffers.set(url, audioBuffer));
-}
-
 export class SoundEffectsSystem {
   constructor() {
     this.pendingEffects = [];
@@ -73,8 +65,20 @@ export class SoundEffectsSystem {
       [SOUND_MEDIA_LOADING, URL_MEDIA_LOADING],
       [SOUND_MEDIA_LOADED, URL_MEDIA_LOADED]
     ];
-    Promise.all(soundsAndUrls.map(a => load(a[1], this.audioContext))).then(() => {
-      this.sounds = new Map(soundsAndUrls.map(a => [a[0], audioBuffers.get(a[1])]));
+    const loadedUrls = new Set();
+    const audioBuffers = new Map();
+    const load = url => {
+      if (loadedUrls.has(url)) {
+        return null;
+      }
+      loadedUrls.add(url);
+      return fetch(url)
+        .then(r => r.arrayBuffer())
+        .then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer))
+        .then(audioBuffer => audioBuffers.set(url, audioBuffer));
+    };
+    Promise.all(soundsAndUrls.map(([, url]) => load(url))).then(() => {
+      this.sounds = new Map(soundsAndUrls.map(([sound, url]) => [sound, audioBuffers.get(url)]));
     });
   }
 
