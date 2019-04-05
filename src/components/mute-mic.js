@@ -1,4 +1,3 @@
-import { paths } from "../systems/userinput/paths";
 import { SOUND_TOGGLE_MIC } from "../systems/sound-effects-system";
 
 const bindAllEvents = function(elements, events, f) {
@@ -77,5 +76,5 @@ AFRAME.registerComponent("mute-mic", {
       NAF.connection.adapter.enableMicrophone(true);
       this.el.removeState("muted");
     }
-  },
+  }
 });

@@ -1,6 +1,5 @@
 /* global fetch THREE */
 import URL_TICK from "../assets/sfx/tick.mp3";
-import URL_TELEPORT_ARC from "../assets/sfx/teleportArc.mp3";
 import URL_LOW_THUMP from "../assets/sfx/low-thump.wav";
 import URL_TELEPORT_LOOP from "../assets/sfx/teleport-loop.wav";
 import URL_QUICK_TURN from "../assets/sfx/quickTurn.mp3";
