@@ -3,7 +3,7 @@ import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
 import { paths } from "../systems/userinput/paths";
 
-const COLLISION_FLAG = require("aframe-physics-system/src/constants").COLLISION_FLAG;
+const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 
 /**
  * Spawns networked objects when grabbed or when a specified event is fired.
@@ -155,11 +155,11 @@ AFRAME.registerComponent("super-spawner", {
       this.el.object3D.scale.set(0.001, 0.001, 0.001);
       this.el.object3D.matrixNeedsUpdate = true;
       this.el.classList.remove("interactable");
-      this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAG.NO_CONTACT_RESPONSE });
+      this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.NONE });
       this.cooldownTimeout = setTimeout(() => {
         this.el.setAttribute("visible", true);
         this.el.classList.add("interactable");
-        this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAG.STATIC_OBJECT });
+        this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_SPAWNER });
         this.el.removeAttribute("animation__spawner-cooldown");
         this.el.setAttribute("animation__spawner-cooldown", {
           property: "scale",

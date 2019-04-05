@@ -1,5 +1,11 @@
-const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 /* global AFRAME */
+
+const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
+
+function almostEquals(epsilon, u, v) {
+  return Math.abs(u.x - v.x) < epsilon && Math.abs(u.y - v.y) < epsilon && Math.abs(u.z - v.z) < epsilon;
+}
+
 AFRAME.registerComponent("sticky-object", {
   schema: {
     autoLockOnLoad: { default: false },
@@ -10,6 +16,8 @@ AFRAME.registerComponent("sticky-object", {
   init() {
     this.onGrab = this.onGrab.bind(this);
     this.onRelease = this.onRelease.bind(this);
+    this.prevScale = this.el.object3D.scale.clone();
+    this.wasScaled = false;
   },
 
   tick() {
@@ -38,6 +46,15 @@ AFRAME.registerComponent("sticky-object", {
     this.heldLeftHand = heldLeftHand;
     this.heldRightHand = heldRightHand;
     this.heldRightRemote = heldRightRemote;
+
+    if (!almostEquals(0.001, this.prevScale, this.el.object3D.scale)) {
+      if ((this.heldLeftHand || this.heldRightHand || this.heldRightRemote) && !this.wasScaled) {
+        this.wasScaled = true;
+        this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.HANDS });
+      }
+
+      this.prevScale.copy(this.el.object3D.scale);
+    }
   },
 
   play() {
@@ -74,14 +91,15 @@ AFRAME.registerComponent("sticky-object", {
       this.setLocked(true);
     }
 
-    this.el.setAttribute("ammo-body", { collisionFilterGroup: COLLISION_LAYERS.DYNAMIC_OBJECTS });
+    this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE });
   },
 
   onGrab() {
     this.el.setAttribute("ammo-body", {
-      collisionFilterGroup: this.locked ? COLLISION_LAYERS.STICKY_OBJECTS : COLLISION_LAYERS.DYNAMIC_OBJECTS
+      collisionFilterMask: this.locked ? COLLISION_LAYERS.HANDS : COLLISION_LAYERS.DEFAULT_INTERACTABLE
     });
     this.setLocked(false);
+    this.wasScaled = false;
   },
 
   remove() {
