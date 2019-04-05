@@ -20,6 +20,7 @@ AFRAME.registerComponent("hud-controller", {
   },
   init() {
     this.onChildHovered = this.onChildHovered.bind(this);
+    this.removeHoverEvents = this.removeHoverEvents.bind(this);
     this.isYLocked = false;
     this.lockedHeadPositionY = 0;
     this.lookDir = new THREE.Vector3();
@@ -88,6 +89,10 @@ AFRAME.registerComponent("hud-controller", {
   },
 
   pause() {
+    this.removeHoverEvents();
+  },
+
+  removeHoverEvents() {
     for (let i = 0; i < this.hoverableChildren.length; i++) {
       this.hoverableChildren[i].object3D.removeEventListener("hovered", this.onChildHovered);
     }
@@ -96,6 +101,7 @@ AFRAME.registerComponent("hud-controller", {
   onChildHovered() {
     if (!this.store.state.activity.hasHoveredInWorldHud) {
       this.store.update({ activity: { hasHoveredInWorldHud: true } });
+      this.removeHoverEvents();
     }
   }
 });
