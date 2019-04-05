@@ -330,8 +330,5 @@ module.exports = (env, argv) => ({
         POSTGREST_SERVER: process.env.POSTGREST_SERVER
       })
     })
-  ],
-  node: {
-    fs: "empty"
-  }
+  ]
 });
