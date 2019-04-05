@@ -50,7 +50,7 @@ AFRAME.registerComponent("sticky-object", {
     if (!almostEquals(0.001, this.prevScale, this.el.object3D.scale)) {
       if ((this.heldLeftHand || this.heldRightHand || this.heldRightRemote) && !this.wasScaled) {
         this.wasScaled = true;
-        this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.NONE });
+        this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.HANDS });
       }
 
       this.prevScale.copy(this.el.object3D.scale);
@@ -96,7 +96,7 @@ AFRAME.registerComponent("sticky-object", {
 
   onGrab() {
     this.el.setAttribute("ammo-body", {
-      collisionFilterMask: this.locked ? COLLISION_LAYERS.NONE : COLLISION_LAYERS.DEFAULT_INTERACTABLE
+      collisionFilterMask: this.locked ? COLLISION_LAYERS.HANDS : COLLISION_LAYERS.DEFAULT_INTERACTABLE
     });
     this.setLocked(false);
     this.wasScaled = false;
