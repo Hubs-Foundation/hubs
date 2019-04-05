@@ -160,6 +160,7 @@ AFRAME.registerSystem("interaction", {
 
     this.rightHandTeleporter =
       this.rightHandTeleporter || document.querySelector("#player-right-controller").components["teleporter"];
+    this.gazeTeleporter = this.gazeTeleporter || document.querySelector("#gaze-teleport").components["teleporter"];
 
     this.tickInteractor(this.options.leftHand, this.state.leftHand);
     if (!this.state.rightRemote.held) {
@@ -171,7 +172,10 @@ AFRAME.registerSystem("interaction", {
     }
 
     const enableRightRemote =
-      !this.state.rightHand.hovered && !this.state.rightHand.held && !this.rightHandTeleporter.isTeleporting;
+      !this.state.rightHand.hovered &&
+      !this.state.rightHand.held &&
+      !this.rightHandTeleporter.isTeleporting &&
+      !this.gazeTeleporter.isTeleporting;
     this.cursorController.components["cursor-controller"].enabled = enableRightRemote;
     if (!enableRightRemote) {
       this.state.rightRemote.hovered = null;
