@@ -46,12 +46,13 @@ AFRAME.registerComponent("avatar-volume-controls", {
   },
 
   tick() {
-    if (!this.audio) {
-      // Walk up to Spine and then search down.
-      this.audio = this.el.parentNode.parentNode.querySelector("[networked-audio-source]").components[
-        "networked-audio-source"
-      ].sound;
-    }
+    if (this.audio) return;
+
+    // Walk up to Spine and then search down.
+    const source = this.el.parentNode.parentNode.querySelector("[networked-audio-source]");
+    if (!source) return;
+
+    this.audio = source.components["networked-audio-source"].sound;
   },
 
   remove() {}
