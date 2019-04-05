@@ -156,8 +156,6 @@ export default class SceneEntryManager {
   _updatePlayerRigWithProfile = async () => {
     const { avatarId, displayName } = this.store.state.profile;
 
-    const hudController = this.playerRig.querySelector("[hud-controller]");
-    hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });
     this.playerRig.setAttribute("player-info", { displayName });
     this.scene.emit("username-changed", { username: displayName });
 

@@ -15,8 +15,7 @@ AFRAME.registerComponent("hud-controller", {
     offset: { default: 0.7 }, // distance from hud above head,
     lookCutoff: { default: 20 }, // angle at which the hud should be "on",
     animRange: { default: 30 }, // degrees over which to animate the hud into view
-    yawCutoff: { default: 50 }, // yaw degrees at wich the hud should reoirent even if the user is looking up
-    showTip: { type: "bool" }
+    yawCutoff: { default: 50 } // yaw degrees at wich the hud should reoirent even if the user is looking up
   },
   init() {
     this.onChildHovered = this.onChildHovered.bind(this);
@@ -33,7 +32,7 @@ AFRAME.registerComponent("hud-controller", {
     const hud = this.el.object3D;
     const head = this.data.head.object3D;
 
-    const { offset, lookCutoff, animRange, yawCutoff, showTip } = this.data;
+    const { offset, lookCutoff, animRange, yawCutoff } = this.data;
 
     const pitch = head.rotation.x * THREE.Math.RAD2DEG;
     const yawDif = deltaAngle(head.rotation.y, hud.rotation.y) * THREE.Math.RAD2DEG;
@@ -45,7 +44,7 @@ AFRAME.registerComponent("hud-controller", {
     let t = 1 - THREE.Math.clamp(lookCutoff - pitch, 0, animRange) / animRange;
 
     // HUD is locked down while showing tooltip or if forced.
-    if (showTip || forceHudVisible) {
+    if (forceHudVisible) {
       t = 1;
     }
 
