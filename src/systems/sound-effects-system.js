@@ -1,6 +1,5 @@
 /* global fetch THREE */
 import URL_TICK from "../assets/sfx/tick.mp3";
-import URL_LOW_THUMP from "../assets/sfx/low-thump.mp3";
 import URL_TELEPORT_LOOP from "../assets/sfx/teleport-loop.mp3";
 import URL_QUICK_TURN from "../assets/sfx/quickTurn.mp3";
 import URL_TAP_MELLOW from "../assets/sfx/tap_mellow.mp3";
@@ -25,7 +24,6 @@ export const SOUND_PEN_CHANGE_COLOR = soundEnum++;
 export const SOUND_TOGGLE_MIC = soundEnum++;
 export const SOUND_TELEPORT_START = soundEnum++;
 export const SOUND_TELEPORT_END = soundEnum++;
-export const SOUND_TELEPORT_CANCEL = soundEnum++;
 export const SOUND_SNAP_ROTATE = soundEnum++;
 export const SOUND_SPAWN_PEN = soundEnum++;
 export const SOUND_PEN_START_DRAW = soundEnum++;
@@ -52,7 +50,6 @@ export class SoundEffectsSystem {
       [SOUND_TOGGLE_MIC, URL_TICK],
       [SOUND_TELEPORT_START, URL_TELEPORT_LOOP],
       [SOUND_TELEPORT_END, URL_QUICK_TURN],
-      [SOUND_TELEPORT_CANCEL, URL_LOW_THUMP],
       [SOUND_SNAP_ROTATE, URL_TAP_MELLOW],
       [SOUND_SPAWN_PEN, URL_PEN_SPAWN],
       [SOUND_PEN_START_DRAW, URL_PEN_DRAW],
