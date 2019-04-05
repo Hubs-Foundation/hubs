@@ -169,16 +169,20 @@ AFRAME.registerComponent("teleporter", {
     this.meshes = getMeshes(this.collisionEntities);
   },
 
+  remove() {
+    this.stopPlayingTeleportSound();
+  },
+
+  stopPlayingTeleportSound() {
+    if (this.teleportingSound) {
+      const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
+      sfx.stopSoundNode(this.teleportingSound.source);
+      this.teleportingSound = null;
+    }
+  },
+
   tick(t, dt) {
     const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
-    if (!this.teleportingSoundGain) {
-      const nodes = sfx.playOngoingSound(SOUND_TELEPORT_START);
-      if (nodes) {
-        this.teleportingSoundGain = nodes.gain;
-        this.teleportingSoundSource = nodes.source;
-        this.teleportingSoundGain.gain.value = 0;
-      }
-    }
     const userinput = AFRAME.scenes[0].systems.userinput;
     const { start, confirm, speed } = this.data;
     const object3D = this.el.object3D;
@@ -192,16 +196,17 @@ AFRAME.registerComponent("teleporter", {
       this.rayCurve.mesh.material.opacity = MISS_OPACITY;
       this.rayCurve.mesh.material.color.set(MISS_COLOR);
       this.rayCurve.mesh.material.needsUpdate = true;
-      if (this.teleportingSoundGain) {
-        this.teleportingSoundGain.gain.value = 0.001;
+      this.teleportingSound = sfx.playSoundLoopedWithGain(SOUND_TELEPORT_START);
+      if (this.teleportingSound) {
+        this.teleportingSound.gain.gain.value = 0.01;
       }
     }
 
     if (!this.isTeleporting) {
       return;
     }
-    if (this.teleportingSoundGain) {
-      this.teleportingSoundGain.gain.value = Math.min(this.teleportingSoundGain.gain.value + 0.0001 * dt, 0.2);
+    if (this.teleportingSound) {
+      this.teleportingSound.gain.gain.value = Math.min(this.teleportingSound.gain.gain.value + 0.0001 * dt, 0.2);
     }
 
     if (userinput.get(confirm)) {
@@ -209,8 +214,8 @@ AFRAME.registerComponent("teleporter", {
       this.isTeleporting = false;
       this.rayCurve.mesh.visible = false;
 
-      if (this.teleportingSoundGain) {
-        this.teleportingSoundGain.gain.value = 0;
+      if (this.teleportingSound) {
+        this.stopPlayingTeleportSound();
       }
 
       if (!this.hit || this.timeTeleporting < DRAW_TIME_MS) {

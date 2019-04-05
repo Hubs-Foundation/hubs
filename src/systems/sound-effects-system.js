@@ -106,13 +106,13 @@ export class SoundEffectsSystem {
     return this.enqueueSound(sound, true);
   }
 
-  playOngoingSound(sound) {
+  playSoundLoopedWithGain(sound) {
     const audioBuffer = this.sounds.get(sound);
     if (!audioBuffer) return null;
 
     const source = this.audioContext.createBufferSource();
     const gain = this.audioContext.createGain();
-    source.buffer = this.sounds.get(sound);
+    source.buffer = audioBuffer;
     source.connect(gain);
     gain.connect(this.audioContext.destination);
     source.loop = true;
