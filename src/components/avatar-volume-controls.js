@@ -6,7 +6,6 @@ AFRAME.registerComponent("avatar-volume-controls", {
   },
 
   init() {
-    console.log(this.el);
     this.volumeUp = this.volumeUp.bind(this);
     this.volumeDown = this.volumeDown.bind(this);
     this.changeVolumeBy = this.changeVolumeBy.bind(this);

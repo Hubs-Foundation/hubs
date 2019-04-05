@@ -1,13 +1,18 @@
 AFRAME.registerComponent("camera-focus-button", {
   schema: {
-    track: { default: false }
+    track: { default: false },
+    selector: { default: null }
   },
 
   init() {
     this.cameraSystem = this.el.sceneEl.systems["camera-tools"];
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.targetEl = networkedEl;
+      if (this.data.selector) {
+        this.targetEl = networkedEl.querySelector(this.data.selector);
+      } else {
+        this.targetEl = networkedEl;
+      }
     });
 
     this.onClick = () => {
