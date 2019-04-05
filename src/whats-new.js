@@ -26,7 +26,6 @@ function formatBody(pull) {
 class WhatsNew extends Component {
   state = {
     notes: [],
-    pageOffset: 0,
     hasMore: true,
     currentDate: null
   };
@@ -40,7 +39,7 @@ class WhatsNew extends Component {
       "state=closed",
       "base=master",
       "per_page=30",
-      `page=${page + this.state.pageOffset}`
+      `page=${page}`
     ].join("&");
     const resp = await fetch(`${endpoint}?${params}`, {
       headers: { authorization: `token ${token}` }
@@ -55,7 +54,8 @@ class WhatsNew extends Component {
     const merged = pulls.filter(x => x.merged_at && !!x.labels.find(l => l.name === "whats new"));
 
     if (!merged.length) {
-      this.setState({ pageOffset: this.state.pageOffset + 1 });
+      // Just trigger a render again so that InfiniteScroll will load the next page.
+      this.setState({});
       return;
     }
 
