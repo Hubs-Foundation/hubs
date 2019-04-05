@@ -23,6 +23,14 @@ class Loader extends Component {
     this.props.scene.addEventListener("model-loaded", this.onObjectLoaded);
     this.props.scene.addEventListener("image-loaded", this.onObjectLoaded);
     this.props.scene.addEventListener("model-error", this.onObjectLoaded);
+    this.props.scene.addEventListener(
+      "environment-scene-loaded",
+      () => {
+        this.environmentSceneLoaded = true;
+        this.tryFinishLoading();
+      },
+      { once: true }
+    );
   }
 
   componentWillUnmount() {
@@ -49,14 +57,20 @@ class Loader extends Component {
       return { loadedNum: state.loadedNum + 1 };
     });
 
+    this.tryFinishLoading();
+  };
+
+  tryFinishLoading = () => {
     if (!this.doneWithInitialLoad && this.loadingTimeout) window.clearTimeout(this.loadingTimeout);
 
-    this.loadingTimeout = window.setTimeout(() => {
-      this.doneWithInitialLoad = true;
-      if (this.props.onLoaded) {
-        this.props.onLoaded();
-      }
-    }, 1500);
+    if (this.environmentSceneLoaded) {
+      this.loadingTimeout = window.setTimeout(() => {
+        this.doneWithInitialLoad = true;
+        if (this.props.onLoaded) {
+          this.props.onLoaded();
+        }
+      }, 1500);
+    }
   };
 
   render() {
