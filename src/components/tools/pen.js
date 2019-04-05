@@ -208,7 +208,6 @@ AFRAME.registerComponent("pen", {
     if (drawing) {
       drawing.undoDraw();
       this.drawingManager.returnDrawing(this);
-      this.currentDrawing = null;
     }
   },
 
