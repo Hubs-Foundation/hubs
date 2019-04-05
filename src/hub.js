@@ -156,7 +156,6 @@ import "./components/scalable-when-grabbed";
 import "./components/networked-counter";
 import "./components/event-repeater";
 import "./components/set-yxz-order";
-import "./components/set-sounds-invisible";
 
 import "./components/cursor-controller";
 
