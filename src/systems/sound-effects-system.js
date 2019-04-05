@@ -1,6 +1,7 @@
 /* global fetch THREE */
 import URL_TICK from "../assets/sfx/tick.mp3";
 import URL_TELEPORT_ARC from "../assets/sfx/teleportArc.mp3";
+import URL_LOFI_TELEPORT from "../assets/sfx/lofi-teleport.mp3";
 import URL_QUICK_TURN from "../assets/sfx/quickTurn.mp3";
 import URL_TAP_MELLOW from "../assets/sfx/tap_mellow.mp3";
 import URL_PEN_SPAWN from "../assets/sfx/PenSpawn.mp3";
@@ -50,10 +51,7 @@ export class SoundEffectsSystem {
       [SOUND_PEN_CHANGE_RADIUS, URL_TICK],
       [SOUND_PEN_CHANGE_COLOR, URL_TICK],
       [SOUND_TOGGLE_MIC, URL_TICK],
-      [
-        SOUND_TELEPORT_START,
-        "https://hubs-proxy.com/https://r3---sn-pouxbg5-naje.googlevideo.com/videoplayback?signature=B4CB9C5FEE880031B74BBCBCFBA99FB601D775A8.D4D08161F63F0822F7329B203523816B282FF9C9&ipbits=0&itag=251&pcm2cms=yes&keepalive=yes&dur=220.981&mime=audio%2Fwebm&fvip=2&mv=m&pl=24&mt=1554432609&ms=au%2Crdu&id=o-AHsxsnh8BgHqzXxNk1aOn852naBEHAjn_THRD2NUgRTK&ei=2cKmXPyDMIOFkgb2kKLoDw&mn=sn-pouxbg5-naje%2Csn-n4v7knls&source=youtube&mm=31%2C29&gir=yes&expire=1554454329&ip=63.245.221.200&lmt=1539937917807763&requiressl=yes&clen=4065803&sparams=clen%2Cdur%2Cei%2Cgir%2Cid%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Ckeepalive%2Clmt%2Cmime%2Cmm%2Cmn%2Cms%2Cmv%2Cpcm2cms%2Cpl%2Crequiressl%2Csource%2Cexpire&txp=5511222&c=WEB&initcwndbps=4996250&key=yt6&ratebypass=yes"
-      ],
+      [SOUND_TELEPORT_START, URL_LOFI_TELEPORT],
       [SOUND_TELEPORT_END, URL_QUICK_TURN],
       [SOUND_SNAP_ROTATE, URL_TAP_MELLOW],
       [SOUND_SPAWN_PEN, URL_PEN_SPAWN],
