@@ -6,7 +6,7 @@ import HLS from "hls.js/dist/hls.light.js";
 import { proxiedUrlFor } from "../utils/media-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 
-const VOLUME_LABELS = [];
+export const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
   let s = "|";
   for (let j = 0; j <= 20; j++) {
