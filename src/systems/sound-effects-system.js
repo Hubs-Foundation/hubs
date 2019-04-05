@@ -130,8 +130,6 @@ export class SoundEffectsSystem {
   }
 
   tick() {
-    if (!this.sounds) return;
-
     for (let i = 0; i < this.pendingEffects.length; i++) {
       this.pendingEffects[i].start();
     }
