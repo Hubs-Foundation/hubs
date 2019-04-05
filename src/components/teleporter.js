@@ -198,7 +198,7 @@ AFRAME.registerComponent("teleporter", {
       this.rayCurve.mesh.material.needsUpdate = true;
       this.teleportingSound = sfx.playSoundLoopedWithGain(SOUND_TELEPORT_START);
       if (this.teleportingSound) {
-        this.teleportingSound.gain.gain.value = 0.01;
+        this.teleportingSound.gain.gain.value = 0.005;
       }
     }
 
@@ -206,7 +206,7 @@ AFRAME.registerComponent("teleporter", {
       return;
     }
     if (this.teleportingSound) {
-      this.teleportingSound.gain.gain.value = Math.min(this.teleportingSound.gain.gain.value + 0.0001 * dt, 0.2);
+      this.teleportingSound.gain.gain.value = Math.min(0.025, this.teleportingSound.gain.gain.value + 0.00002 * dt);
     }
 
     if (userinput.get(confirm)) {
