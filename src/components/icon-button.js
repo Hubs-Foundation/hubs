@@ -50,7 +50,7 @@ AFRAME.registerComponent("icon-button", {
 
     this.el.setAttribute("src", this.data[image]);
 
-    if (this.data.tooltip) {
+    if (this.data.tooltip && hovering) {
       this.data.tooltip.setAttribute("visible", this.hovering);
       this.data.tooltip
         .querySelector("[text]")
