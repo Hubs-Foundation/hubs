@@ -1,4 +1,4 @@
-import { SOUND_TOGGLE_MIC, SOUND_SPAWN_PEN } from "../systems/sound-effects-system";
+import { SOUND_SPAWN_PEN } from "../systems/sound-effects-system";
 /**
  * HUD panel for muting, freezing, and space bubble controls.
  * @namespace ui
@@ -34,7 +34,6 @@ AFRAME.registerComponent("in-world-hud", {
 
     this.onMicClick = () => {
       this.el.emit("action_mute");
-      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_TOGGLE_MIC);
     };
 
     this.onSpawnClick = () => {

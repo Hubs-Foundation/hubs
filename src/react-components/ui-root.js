@@ -58,7 +58,6 @@ import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../uti
 import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { handleTipClose } from "../systems/tips.js";
-import { SOUND_TOGGLE_MIC } from "../systems/sound-effects-system";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
@@ -411,7 +410,6 @@ class UIRoot extends Component {
 
   toggleMute = () => {
     this.props.scene.emit("action_mute");
-    this.props.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_TOGGLE_MIC);
   };
 
   toggleFreeze = () => {

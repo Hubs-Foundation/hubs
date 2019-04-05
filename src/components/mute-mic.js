@@ -54,6 +54,7 @@ AFRAME.registerComponent("mute-mic", {
 
   onToggle: function() {
     if (!NAF.connection.adapter) return;
+    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_TOGGLE_MIC);
     if (this.el.is("muted")) {
       NAF.connection.adapter.enableMicrophone(true);
       this.el.removeState("muted");
@@ -77,13 +78,4 @@ AFRAME.registerComponent("mute-mic", {
       this.el.removeState("muted");
     }
   },
-
-  tick() {
-    const userinput = this.el.sceneEl.systems.userinput;
-    const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
-    if (userinput.get(paths.actions.muteMic)) {
-      sfx.playSoundOneShot(SOUND_TOGGLE_MIC);
-      this.el.emit("action_mute");
-    }
-  }
 });
