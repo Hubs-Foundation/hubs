@@ -42,11 +42,10 @@ AFRAME.registerComponent("visibility-while-frozen", {
   },
 
   tick() {
-    if (!this.data.withinDistance) return;
-
     const isFrozen = this.el.sceneEl.is("frozen");
-    const isVisible = this.el.getAttribute("visible");
-    if (!isFrozen && !isVisible) return;
+    const isVisible = this.el.object3D.visible;
+    const shouldNotBeVisible = isFrozen === !this.data.visible;
+    if (!isVisible && shouldNotBeVisible) return;
 
     this.updateVisibility();
   },
@@ -57,7 +56,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
     let isWithinDistance = true;
     const isVisible = this.el.object3D.visible;
 
-    if (this.data.withinDistance !== undefined) {
+    if (this.data.withinDistance) {
       if (!isVisible) {
         // Edge case, if the object is not visible force a matrix update
         // since the main matrix update loop will not do it.
