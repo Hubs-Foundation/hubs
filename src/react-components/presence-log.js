@@ -6,6 +6,7 @@ import { FormattedMessage } from "react-intl";
 
 import ChatMessage from "./chat-message";
 import PhotoMessage from "./photo-message";
+import ImageMessage from "./image-message";
 
 export default class PresenceLog extends Component {
   static propTypes = {
@@ -21,7 +22,7 @@ export default class PresenceLog extends Component {
   domForEntry = e => {
     const entryClasses = {
       [styles.presenceLogEntry]: true,
-      [styles.presenceLogEntryWithButton]: e.type === "chat" && e.maySpawn,
+      [styles.presenceLogEntryWithButton]: (e.type === "chat" || e.type === "image") && e.maySpawn,
       [styles.presenceLogChat]: e.type === "chat",
       [styles.expired]: !!e.expired
     };
@@ -64,6 +65,16 @@ export default class PresenceLog extends Component {
             key={e.key}
             name={e.name}
             className={classNames(entryClasses)}
+            body={e.body}
+            maySpawn={e.maySpawn}
+          />
+        );
+      case "image":
+        return (
+          <ImageMessage
+            key={e.key}
+            name={e.name}
+            className={classNames(entryClasses, styles.media)}
             body={e.body}
             maySpawn={e.maySpawn}
           />
