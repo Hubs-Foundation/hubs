@@ -2,10 +2,10 @@ import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { isHubsDestinationUrl } from "./utils/media-utils";
 const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
-  COLLISION_FLAG = PHYSICS_CONSTANTS.COLLISION_FLAG,
   TYPE = PHYSICS_CONSTANTS.TYPE,
   SHAPE = PHYSICS_CONSTANTS.SHAPE,
   FIT = PHYSICS_CONSTANTS.FIT;
+const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
@@ -28,7 +28,8 @@ AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", el => {
   el.setAttribute("ammo-body", {
     mass: 0,
     type: TYPE.STATIC,
-    collisionFlags: COLLISION_FLAG.NO_CONTACT_RESPONSE
+    collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
+    collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
   });
 });
 AFRAME.GLTFModelPlus.registerComponent("ammo-shape", "ammo-shape");
@@ -228,7 +229,8 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
   el.setAttribute("ammo-body", {
     mass: 0,
     type: TYPE.STATIC,
-    collisionFlags: COLLISION_FLAG.NO_CONTACT_RESPONSE
+    collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
+    collisionFilterMask: COLLISION_LAYERS.DEFAULT_SPAWNER
   });
   el.setAttribute("is-remote-hover-target", "");
   el.setAttribute("is-hand-collision-target", "");

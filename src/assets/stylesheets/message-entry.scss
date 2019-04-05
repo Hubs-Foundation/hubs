@@ -1,0 +1,149 @@
+@import 'shared';
+
+:local(.message-entry) {
+  position: relative;
+  margin: 32px 24px 24px 24px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border: 1px solid #e2e2e2;
+  border-radius: 16px;
+}
+
+:local(.message-entry-disabled) {
+  background-color: transparent;
+
+  :local(.message-entry-button) {
+    display: none;
+  }
+}
+
+:local(.message-entry-input) {
+  @extend %default-font;
+  pointer-events: auto;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+  overflow: hidden;
+  resize: none;
+  background-color: transparent;
+  color: black;
+  padding: 8px 1.25em;
+  line-height: 28px;
+  font-size: 1.1em;
+  width: 100%;
+  border: 0px;
+  height: 32px;
+  flex: 10;
+}
+
+:local(.message-entry-input)::placeholder{
+  color: $dark-grey;
+  font-weight: 300;
+  font-style: italic;
+}
+
+:local(.message-entry-button) {
+  color: $action-color;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+  background-color: white;
+  min-width: 40px;
+  height: 100%;
+  bottom: 0px;
+  border: 0px;
+  font-size: 1.5em;
+  cursor: pointer;
+  margin: 0px 10px;
+}
+
+:local(.message-entry-button):disabled {
+  color: $dark-grey;
+  background-color: transparent;
+}
+
+:local(.message-entry-button-in-room) {
+  color: $dark-grey;
+}
+
+:local(.message-entry-button-in-room):hover {
+  color: $action-color;
+}
+
+:local(.message-entry-upload) {
+  margin-bottom: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:local(.message-entry-in-room) {
+  position: absolute;
+  z-index: 2;
+  bottom: 20px;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  width: 95%;
+  max-width: 700px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(64, 64, 64, 0.55);
+  border-radius: 16px;
+  pointer-events: auto;
+  transition: opacity 0.15s linear;
+
+  :local(.message-entry-input-in-room) {
+    color: white;
+    padding: 8px 0px;
+    margin-left: 4px;
+  }
+
+  :local(.message-entry-spawn) {
+    @extend %action-button;
+    background-color: transparent;
+    height: 32px;
+    width: 32px;
+    bottom: 8px;
+    min-width: auto;
+    background-size: 100%;
+    background-image: url(../images/spawn_message_dark.png);
+    background-repeat: no-repeat;
+    padding: 0;
+  }
+
+  :local(.message-entry-spawn):hover {
+    background-image: url(../images/spawn_message_dark-hover.png);
+  }
+
+  :local(.message-entry-button-in-room) {
+    border: 0;
+    background-color: transparent;
+    margin-right: 10px;
+  }
+}
+
+:local(.message-entry-in-room):focus-within, :local(.message-entry-in-room):hover {
+  transition: background-color 0.15s linear;
+  background-color: $darker-grey;
+
+  :local(.message-entry-button-in-room) {
+    border: 0;
+    background-color: transparent;
+  }
+}
+
+:local(.message-entry-on-mobile) {
+  // Hide chatbox for joysticks
+  // Orientation selector fails here when keyboard pops up on shorter screens
+  @media (min-aspect-ratio: 15/9) {
+    display: none;
+  }
+}
