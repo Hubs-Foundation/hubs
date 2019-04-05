@@ -170,8 +170,14 @@ AFRAME.registerComponent("teleporter", {
   },
 
   tick(t, dt) {
-    const userinput = AFRAME.scenes[0].systems.userinput;
     const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
+    if (!this.teleportingSoundGain && sfx.sounds) {
+      const { gain, source } = sfx.playOngoingSound(SOUND_TELEPORT_START);
+      this.teleportingSoundGain = gain;
+      this.teleportingSoundSource = source;
+      this.teleportingSoundGain.gain.value = 0;
+    }
+    const userinput = AFRAME.scenes[0].systems.userinput;
     const { start, confirm, speed } = this.data;
     const object3D = this.el.object3D;
 
@@ -184,7 +190,9 @@ AFRAME.registerComponent("teleporter", {
       this.rayCurve.mesh.material.opacity = MISS_OPACITY;
       this.rayCurve.mesh.material.color.set(MISS_COLOR);
       this.rayCurve.mesh.material.needsUpdate = true;
-      this.teleportingSound = sfx.playSoundLooped(SOUND_TELEPORT_START);
+      if (this.teleportingSoundGain) {
+        this.teleportingSoundGain.gain.value = 1;
+      }
     }
 
     if (!this.isTeleporting) {
@@ -196,9 +204,8 @@ AFRAME.registerComponent("teleporter", {
       this.isTeleporting = false;
       this.rayCurve.mesh.visible = false;
 
-      if (this.teleportingSound) {
-        sfx.stopSoundNode(this.teleportingSound);
-        this.teleportingSound = null;
+      if (this.teleportingSoundGain) {
+        this.teleportingSoundGain.gain.value = 0;
       }
 
       if (!this.hit || this.timeTeleporting < DRAW_TIME_MS) {
