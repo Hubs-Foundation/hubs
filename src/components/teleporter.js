@@ -171,11 +171,13 @@ AFRAME.registerComponent("teleporter", {
 
   tick(t, dt) {
     const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
-    if (!this.teleportingSoundGain && sfx.sounds) {
-      const { gain, source } = sfx.playOngoingSound(SOUND_TELEPORT_START);
-      this.teleportingSoundGain = gain;
-      this.teleportingSoundSource = source;
-      this.teleportingSoundGain.gain.value = 0;
+    if (!this.teleportingSoundGain) {
+      const nodes = sfx.playOngoingSound(SOUND_TELEPORT_START);
+      if (nodes) {
+        this.teleportingSoundGain = nodes.gain;
+        this.teleportingSoundSource = nodes.source;
+        this.teleportingSoundGain.gain.value = 0;
+      }
     }
     const userinput = AFRAME.scenes[0].systems.userinput;
     const { start, confirm, speed } = this.data;

@@ -66,29 +66,32 @@ export class SoundEffectsSystem {
       [SOUND_MEDIA_LOADING, URL_MEDIA_LOADING],
       [SOUND_MEDIA_LOADED, URL_MEDIA_LOADED]
     ];
-    const loadedUrls = new Set();
-    const audioBuffers = new Map();
+    const loading = new Map();
     const load = url => {
-      if (loadedUrls.has(url)) {
-        return null;
+      let audioBufferPromise = loading.get(url);
+      if (!audioBufferPromise) {
+        audioBufferPromise = fetch(url)
+          .then(r => r.arrayBuffer())
+          .then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer));
+        loading.set(url, audioBufferPromise);
       }
-      loadedUrls.add(url);
-      return fetch(url)
-        .then(r => r.arrayBuffer())
-        .then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer))
-        .then(audioBuffer => audioBuffers.set(url, audioBuffer));
+      return audioBufferPromise;
     };
-    Promise.all(soundsAndUrls.map(([, url]) => load(url))).then(() => {
-      this.sounds = new Map(soundsAndUrls.map(([sound, url]) => [sound, audioBuffers.get(url)]));
+    this.sounds = new Map();
+    soundsAndUrls.map(([sound, url]) => {
+      load(url).then(audioBuffer => {
+        this.sounds.set(sound, audioBuffer);
+      });
     });
   }
 
   enqueueSound(sound, loop) {
-    if (!this.sounds) return null;
+    const audioBuffer = this.sounds.get(sound);
+    if (!audioBuffer) return null;
     // The nodes are very inexpensive to create, according to
     // https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode
     const source = this.audioContext.createBufferSource();
-    source.buffer = this.sounds.get(sound);
+    source.buffer = audioBuffer;
     source.connect(this.audioContext.destination);
     source.loop = loop;
     this.pendingEffects.push(source);
@@ -104,7 +107,9 @@ export class SoundEffectsSystem {
   }
 
   playOngoingSound(sound) {
-    if (!this.sounds) return null;
+    const audioBuffer = this.sounds.get(sound);
+    if (!audioBuffer) return null;
+
     const source = this.audioContext.createBufferSource();
     const gain = this.audioContext.createGain();
     source.buffer = this.sounds.get(sound);
