@@ -6,6 +6,7 @@ const STORE_STATE_CACHE_KEY = Symbol();
 const OAUTH_FLOW_CREDENTIALS_KEY = "ret-oauth-flow-account-credentials";
 import { EventTarget } from "event-target-shim";
 import { generateDefaultProfile, generateRandomName } from "../utils/identity.js";
+import validate from "./validate";
 
 function isString(value) {
   return typeof value === "string" || value instanceof String;
@@ -13,29 +14,6 @@ function isString(value) {
 
 function isBoolean(value) {
   return typeof value === "boolean" || value instanceof Boolean;
-}
-
-// Recursively checks all values in the input to make sure they pass the predicates specified in the schema.
-// Throws an exception if any part of the input is invalid.
-function validate(input, schema) {
-  if (Array.isArray(schema)) {
-    if (!Array.isArray(input)) {
-      throw new Error(`Required array, found ${input}.`);
-    }
-    const itemSchema = schema[0];
-    for (const item of input) {
-      validate(item, itemSchema);
-    }
-  } else if (typeof schema === "object") {
-    if (!(typeof input === "object" && input !== null)) {
-      throw new Error(`Required object, found ${input}.`);
-    }
-    for (const key in schema) {
-      validate(input[key], schema[key]);
-    }
-  } else if (input != null && !schema(input)) {
-    throw new Error(`Invalid value for schema: ${input}.`);
-  }
 }
 
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
