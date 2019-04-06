@@ -1,93 +1,69 @@
-import { Validator } from "jsonschema";
 import merge from "deepmerge";
 import Cookies from "js-cookie";
 
 const LOCAL_STORE_KEY = "___hubs_store";
 const STORE_STATE_CACHE_KEY = Symbol();
 const OAUTH_FLOW_CREDENTIALS_KEY = "ret-oauth-flow-account-credentials";
-const validator = new Validator();
 import { EventTarget } from "event-target-shim";
 import { generateDefaultProfile, generateRandomName } from "../utils/identity.js";
+
+function isString(value) {
+  return typeof value === "string" || value instanceof String;
+}
+
+function isBoolean(value) {
+  return typeof value === "boolean" || value instanceof Boolean;
+}
 
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
 export const SCHEMA = {
-  id: "/HubsStore",
-
-  definitions: {
-    profile: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        displayName: { type: "string", pattern: "^[A-Za-z0-9-]{3,32}$" },
-        avatarId: { type: "string" },
-        personalAvatarId: { type: "string" }
-      }
-    },
-
-    credentials: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        token: { type: ["null", "string"] },
-        email: { type: ["null", "string"] }
-      }
-    },
-
-    activity: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        hasFoundFreeze: { type: "boolean" },
-        hasChangedName: { type: "boolean" },
-        lastEnteredAt: { type: "string" },
-        hasPinned: { type: "boolean" },
-        hasRotated: { type: "boolean" },
-        hasRecentered: { type: "boolean" },
-        hasScaled: { type: "boolean" },
-        hasHoveredInWorldHud: { type: "boolean" }
-      }
-    },
-
-    settings: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        lastUsedMicDeviceId: { type: "string" }
-      }
-    },
-
-    confirmedDiscordRooms: {
-      type: "array",
-      items: { type: "string" }
-    },
-
-    uploadPromotionTokens: {
-      type: "array",
-      items: {
-        type: "object",
-        additionalProperties: false,
-        properties: {
-          fileId: { type: "string" },
-          promotionToken: { type: "string" }
-        }
-      }
-    }
+  profile: {
+    displayName: isString,
+    avatarId: isString,
+    personalAvatarId: isString
   },
-
-  type: "object",
-
-  properties: {
-    profile: { $ref: "#/definitions/profile" },
-    credentials: { $ref: "#/definitions/credentials" },
-    activity: { $ref: "#/definitions/activity" },
-    settings: { $ref: "#/definitions/settings" },
-    confirmedDiscordRooms: { $ref: "#/definitions/confirmedDiscordRooms" },
-    uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" }
+  credentials: {
+    token: isString,
+    email: isString
   },
-
-  additionalProperties: false
+  activity: {
+    hasFoundFreeze: isBoolean,
+    hasChangedName: isBoolean,
+    lastEnteredAt: isString,
+    hasPinned: isBoolean,
+    hasRotated: isBoolean,
+    hasRecentered: isBoolean,
+    hasScaled: isBoolean,
+    hasHoveredInWorldHud: isBoolean
+  },
+  settings: {
+    lastUsedMicDeviceId: isString
+  },
+  confirmedDiscordRooms: [isString],
+  uploadPromotionTokens: [{ fileId: isString, promotionToken: isString }]
 };
+
+function validate(obj, schema) {
+  if (Array.isArray(schema)) {
+    if (!Array.isArray(obj)) {
+      throw new Error(`Required array, found ${obj}.`);
+    }
+    const itemSchema = schema[0];
+    for (const val of obj) {
+      validate(val, itemSchema);
+    }
+  } else if (typeof schema === "object") {
+    if (!(typeof obj === "object" && obj !== null)) {
+      throw new Error(`Required object, found ${obj}.`);
+    }
+    for (const key in schema) {
+      validate(obj[key], schema[key]);
+    }
+  } else if (obj != null && !schema(obj)) {
+    throw new Error(`Invalid value for schema: ${obj}.`);
+  }
+}
 
 export default class Store extends EventTarget {
   constructor() {
@@ -144,9 +120,10 @@ export default class Store extends EventTarget {
 
   update(newState, mergeOpts) {
     const finalState = merge(this.state, newState, mergeOpts);
-    const { valid } = validator.validate(finalState, SCHEMA);
 
-    if (!valid) {
+    try {
+      validate(finalState, SCHEMA);
+    } catch (e) {
       // Intentionally not including details about the state or validation result here, since we don't want to leak
       // sensitive data in the error message.
       throw new Error(`Write to store failed schema validation.`);

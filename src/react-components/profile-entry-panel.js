@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
-import { SCHEMA } from "../storage/store";
 import styles from "../assets/stylesheets/profile.scss";
 import classNames from "classnames";
 import hubLogo from "../assets/images/hub-preview-white.png";
@@ -172,7 +171,7 @@ class ProfileEntryPanel extends Component {
               onChange={e => this.setState({ displayName: e.target.value })}
               required
               spellCheck="false"
-              pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
+              pattern={"^[A-Za-z0-9-]{3,32}$"}
               title={formatMessage({ id: "profile.display_name.validation_warning" })}
               ref={inp => (this.nameInput = inp)}
             />
