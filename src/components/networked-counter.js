@@ -30,9 +30,7 @@ AFRAME.registerComponent("networked-counter", {
   },
 
   deregister(el) {
-    if (this.timestamps.has(el)) {
-      this.timestamps.delete(el);
-    }
+    this.timestamps.delete(el);
   },
 
   isHeld(el) {
