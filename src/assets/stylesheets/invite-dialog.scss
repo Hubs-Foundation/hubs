@@ -57,7 +57,7 @@
 }
 
 :local(.invite-container-inverted) {
-  button {
+  :local(.invite-button) {
     @extend %action-button-selected;
   }
 }
@@ -74,28 +74,10 @@
   align-items: center;
   justify-content: center;
 
-  button {
+  :local(.invite-button) {
     @extend %action-button;
     pointer-events: auto;
   }
-
-  :local(.close) {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    min-width: auto;
-    left: 12px;
-    font-size: 1.5em;
-    top: 12px;
-    appearance: none;
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    outline-style: none;
-    border: 0;
-    background-color: transparent;
-    color: white;
-  }
-
 
   @media (max-height: 320px) {
     display: none;
@@ -210,4 +192,21 @@
   button, a {
     margin: 0 12px;
   }
+}
+
+:local(.close) {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  min-width: auto;
+  left: 12px;
+  font-size: 1.5em;
+  top: 12px;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+  border: 0;
+  background-color: transparent;
+  color: white;
 }
