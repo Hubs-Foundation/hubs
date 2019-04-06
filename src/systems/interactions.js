@@ -2,14 +2,6 @@
 import { paths } from "./userinput/paths";
 import { SOUND_HOVER_OR_GRAB } from "./sound-effects-system";
 
-function findHandCollisionTarget(object3D) {
-  if (!object3D) return null;
-  if (object3D.el && object3D.el.components.tags && object3D.el.components.tags.data.isHandCollisionTarget) {
-    return object3D.el;
-  } else {
-    return findHandCollisionTarget(object3D.parent);
-  }
-}
 function findHandCollisionTargetForHand(body) {
   const driver = AFRAME.scenes[0].systems.physics.driver;
   const numManifolds = driver.dispatcher.getNumManifolds();
@@ -25,7 +17,11 @@ function findHandCollisionTargetForHand(body) {
     for (let j = 0; j < numContacts; j++) {
       const manifoldPoint = persistentManifold.getContactPoint(j);
       if (manifoldPoint.getDistance() <= 10e-6) {
-        return findHandCollisionTarget(driver.els.get(handPtr === body0ptr ? body1ptr : body0ptr).object3D);
+        const object3D = driver.els.get(handPtr === body0ptr ? body1ptr : body0ptr).object3D;
+        if (object3D.el && object3D.el.components.tags && object3D.el.components.tags.data.isHandCollisionTarget) {
+          return object3D.el;
+        }
+        return null;
       }
     }
   }
