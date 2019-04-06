@@ -1,8 +1,11 @@
 export class SingleActionButtonSystem {
   tick() {
     this.didInteractThisFrame = false;
-    const interaction = AFRAME.scenes[0].systems.interaction;
-    const userinput = AFRAME.scenes[0].systems.userinput;
+    const scene = AFRAME.scenes[0];
+    if (!scene) return;
+
+    const interaction = scene.systems.interaction;
+    const userinput = scene.systems.userinput;
     const state = interaction.state.rightRemote;
     const grab = interaction.options.rightRemote.grabPath;
     if (
@@ -22,7 +25,10 @@ export class SingleActionButtonSystem {
 
 export class HoldableButtonSystem {
   tick() {
-    const interaction = AFRAME.scenes[0].systems.interaction;
+    const scene = AFRAME.scenes[0];
+    if (!scene) return;
+
+    const interaction = scene.systems.interaction;
     const held = interaction.state.rightRemote.held;
     const options = interaction.options.rightRemote;
 
@@ -69,7 +75,9 @@ const HOVERED = { type: "hovered" };
 const UNHOVERED = { type: "unhovered" };
 export class HoverButtonSystem {
   tick() {
-    const interaction = AFRAME.scenes[0].systems.interaction;
+    const scene = AFRAME.scenes[0];
+    if (!scene) return;
+    const interaction = scene.systems.interaction;
     const button = getHoverableButton(interaction.state.rightRemote.hovered);
 
     if (this.prevButton && this.prevButton !== button) {

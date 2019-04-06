@@ -74,14 +74,17 @@ export class HapticFeedbackSystem {
   }
 
   tick(twoPointStretchingSystem, didClickButton) {
-    const userinput = AFRAME.scenes[0].systems.userinput;
+    const scene = AFRAME.scenes[0];
+    if (!scene) return;
+
+    const userinput = scene.systems.userinput;
     const leftActuator = userinput.get(paths.haptics.actuators.left);
     const rightActuator = userinput.get(paths.haptics.actuators.right);
     if (!leftActuator && !rightActuator) {
       return;
     }
 
-    const interaction = AFRAME.scenes[0].systems.interaction;
+    const interaction = scene.systems.interaction;
     const { leftHand, rightHand, rightRemote } = interaction.state;
     this.leftTeleporter =
       this.leftTeleporter || document.querySelector("#player-left-controller").components.teleporter;

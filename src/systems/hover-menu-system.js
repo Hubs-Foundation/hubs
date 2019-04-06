@@ -25,7 +25,9 @@ function findHoverMenu(hovered) {
 
 export class HoverMenuSystem {
   tick() {
-    const interaction = AFRAME.scenes[0].systems.interaction;
+    const scene = AFRAME.scenes[0];
+    if (!scene) return;
+    const interaction = scene.systems.interaction;
     const hoverMenu = findHoverMenu(interaction.state.rightRemote.hovered);
 
     if (this.prevHoverMenu && this.prevHoverMenu !== hoverMenu) {
