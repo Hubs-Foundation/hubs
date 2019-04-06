@@ -69,21 +69,18 @@ AFRAME.registerSystem("interaction", {
         entity: document.querySelector("#player-left-controller"),
         grabPath: paths.actions.leftHand.grab,
         dropPath: paths.actions.leftHand.drop,
-        constraintTag: "offersHandConstraint",
         hoverFn: findHandCollisionTargetForHand
       },
       rightHand: {
         entity: document.querySelector("#player-right-controller"),
         grabPath: paths.actions.rightHand.grab,
         dropPath: paths.actions.rightHand.drop,
-        constraintTag: "offersHandConstraint",
         hoverFn: findHandCollisionTargetForHand
       },
       rightRemote: {
         entity: document.querySelector("#cursor"),
         grabPath: paths.actions.cursor.grab,
         dropPath: paths.actions.cursor.drop,
-        constraintTag: "offersRemoteConstraint",
         hoverFn: this.getRightRemoteHoverTarget
       }
     };
