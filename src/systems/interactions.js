@@ -5,16 +5,16 @@ import { SOUND_HOVER_OR_GRAB } from "./sound-effects-system";
 const handCollisionTargets = new Map();
 AFRAME.registerComponent("is-hand-collision-target", {
   init: function() {
-    handCollisionTargets.set(this.el.object3D.uuid, this.el);
+    handCollisionTargets.set(this.el.object3D, this.el);
   },
   remove: function() {
-    handCollisionTargets.delete(this.el.object3D.uuid);
+    handCollisionTargets.delete(this.el.object3D);
   }
 });
-function findHandCollisionTarget(o) {
-  if (!o) return null;
-  const target = handCollisionTargets.get(o.uuid);
-  return target || findHandCollisionTarget(o.parent);
+function findHandCollisionTarget(object3D) {
+  if (!object3D) return null;
+  const target = handCollisionTargets.get(object3D);
+  return target || findHandCollisionTarget(object3D.parent);
 }
 function findHandCollisionTargetForHand(body) {
   const driver = AFRAME.scenes[0].systems.physics.driver;
@@ -38,17 +38,17 @@ function findHandCollisionTargetForHand(body) {
 }
 
 const remoteHoverTargets = new Map();
-function findRemoteHoverTarget(o) {
-  if (!o) return null;
-  const target = remoteHoverTargets.get(o.uuid);
-  return target || findRemoteHoverTarget(o.parent);
+function findRemoteHoverTarget(object3D) {
+  if (!object3D) return null;
+  const target = remoteHoverTargets.get(object3D);
+  return target || findRemoteHoverTarget(object3D.parent);
 }
 AFRAME.registerComponent("is-remote-hover-target", {
   init: function() {
-    remoteHoverTargets.set(this.el.object3D.uuid, this.el);
+    remoteHoverTargets.set(this.el.object3D, this.el);
   },
   remove: function() {
-    remoteHoverTargets.delete(this.el.object3D.uuid);
+    remoteHoverTargets.delete(this.el.object3D);
   }
 });
 
