@@ -56,7 +56,7 @@ export class ConstraintsSystem {
         });
         state.held.setAttribute("ammo-constraint__" + entityId, { target: "#" + entityId });
       } else {
-        // TODO communicate failure to obtain network ownership
+        console.log("Failed to obtain ownership while trying to create constraint on networked object.");
       }
     }
   }
