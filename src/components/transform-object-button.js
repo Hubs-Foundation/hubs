@@ -34,6 +34,7 @@ AFRAME.registerComponent("transform-button", {
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.targetEl = networkedEl;
     });
+    const rightHand = document.querySelector("#player-right-controller");
     this.onGrabStart = e => {
       if (!this.targetEl) {
         return;
@@ -47,7 +48,7 @@ AFRAME.registerComponent("transform-button", {
       this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];
       this.transformSystem.startTransform(
         this.targetEl.object3D,
-        e.path === paths.actions.cursor.grab ? "cursor" : e.path === paths.actions.rightHand.grab ? "right" : "left",
+        e.object3D.el.id === "cursor" ? rightHand.object3D : e.object3D,
         this.data
       );
     };
@@ -158,10 +159,7 @@ AFRAME.registerSystem("transform-selected-object", {
 
   startTransform(target, hand, data) {
     this.target = target;
-    this.hand =
-      hand === "cursor" || hand === "right"
-        ? document.querySelector("#player-right-controller").object3D
-        : document.querySelector("#player-left-controller").object3D;
+    this.hand = hand;
     this.mode = data.mode;
     this.transforming = true;
 
