@@ -1,11 +1,5 @@
 const ACTIVATION_STATE = require("aframe-physics-system/src/constants").ACTIVATION_STATE;
 
-function storeState(prev, curr) {
-  prev.held = curr.held;
-  prev.hovered = curr.hovered;
-  prev.spawning = curr.spawning;
-}
-
 export class ConstraintsSystem {
   constructor() {
     this.prevLeftHand = {
@@ -89,8 +83,8 @@ export class ConstraintsSystem {
       this.prevRightRemote
     );
 
-    storeState(this.prevLeftHand, interaction.state.leftHand);
-    storeState(this.prevRightHand, interaction.state.rightHand);
-    storeState(this.prevRightRemote, interaction.state.rightRemote);
+    Object.assign(this.prevLeftHand, interaction.state.leftHand);
+    Object.assign(this.prevRightHand, interaction.state.rightHand);
+    Object.assign(this.prevRightRemote, interaction.state.rightRemote);
   }
 }
