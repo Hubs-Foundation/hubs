@@ -1,4 +1,4 @@
-/* global NAF */
+/* global AFRAME NAF performance */
 AFRAME.registerComponent("owned-object-limiter", {
   schema: {
     counter: { type: "selector" }
@@ -17,7 +17,7 @@ AFRAME.registerComponent("owned-object-limiter", {
     this._syncCounterRegistration();
     const isHeld = this.isHeld(this.el);
     if (!isHeld && this.wasHeld && this.counter.timestamps.has(this.el)) {
-      this.counter.timestamps.set(this.el, Date.now());
+      this.counter.timestamps.set(this.el, performance.now());
     }
     this.wasHeld = isHeld;
   },

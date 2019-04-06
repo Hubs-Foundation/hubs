@@ -1,3 +1,4 @@
+/* global AFRAME performance */
 /**
  * Limits networked interactables to a maximum number at any given time
  * @namespace network
@@ -24,7 +25,7 @@ AFRAME.registerComponent("networked-counter", {
   register(el) {
     if (this.data.max <= 0 || this.timestamps.has(el)) return;
 
-    this.timestamps.set(el, Date.now());
+    this.timestamps.set(el, performance.now());
     this._destroyOldest();
   },
 
