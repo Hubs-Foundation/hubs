@@ -33,17 +33,13 @@ AFRAME.registerComponent("networked-counter", {
     this.timestamps.delete(el);
   },
 
-  isHeld(el) {
-    const { leftHand, rightHand, rightRemote } = this.el.sceneEl.systems.interaction.state;
-    return leftHand.held === el || rightHand.held === el || rightRemote.held === el;
-  },
-
   _destroyOldest() {
     if (this.timestamps.size > this.data.max) {
+      const interaction = this.el.sceneEl.systems.interaction;
       let oldestEl = null,
         minTs = Number.MAX_VALUE;
       this.timestamps.forEach((ts, el) => {
-        if (ts < minTs && !this.isHeld(el)) {
+        if (ts < minTs && !interaction.isHeld(el)) {
           oldestEl = el;
           minTs = ts;
         }

@@ -8,14 +8,9 @@ AFRAME.registerComponent("owned-object-limiter", {
     this.counter = this.data.counter.components["networked-counter"];
   },
 
-  isHeld(el) {
-    const { leftHand, rightHand, rightRemote } = this.el.sceneEl.systems.interaction.state;
-    return leftHand.held === el || rightHand.held === el || rightRemote.held === el;
-  },
-
   tick() {
     this._syncCounterRegistration();
-    const isHeld = this.isHeld(this.el);
+    const isHeld = this.el.sceneEl.systems.interaction.isHeld(this.el);
     if (!isHeld && this.wasHeld && this.counter.timestamps.has(this.el)) {
       this.counter.timestamps.set(this.el, performance.now());
     }

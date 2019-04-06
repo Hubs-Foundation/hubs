@@ -54,6 +54,10 @@ AFRAME.registerSystem("interaction", {
     this.rightRemoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
   },
 
+  isHeld(el) {
+    return this.state.leftHand.held === el || this.state.rightHand.held === el || this.state.rightRemote.held === el;
+  },
+
   init: function() {
     this.options = {
       leftHand: {
