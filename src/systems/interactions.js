@@ -2,19 +2,13 @@
 import { paths } from "./userinput/paths";
 import { SOUND_HOVER_OR_GRAB } from "./sound-effects-system";
 
-const handCollisionTargets = new Map();
-AFRAME.registerComponent("is-hand-collision-target", {
-  init: function() {
-    handCollisionTargets.set(this.el.object3D, this.el);
-  },
-  remove: function() {
-    handCollisionTargets.delete(this.el.object3D);
-  }
-});
 function findHandCollisionTarget(object3D) {
   if (!object3D) return null;
-  const target = handCollisionTargets.get(object3D);
-  return target || findHandCollisionTarget(object3D.parent);
+  if (object3D.el && object3D.el.components.tags && object3D.el.components.tags.data.isHandCollisionTarget) {
+    return object3D.el;
+  } else {
+    return findHandCollisionTarget(object3D.parent);
+  }
 }
 function findHandCollisionTargetForHand(body) {
   const driver = AFRAME.scenes[0].systems.physics.driver;

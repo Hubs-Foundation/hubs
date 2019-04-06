@@ -206,8 +206,7 @@
                     owned-object-limiter="counter: #media-counter"
                     set-unowned-body-kinematic
                     is-remote-hover-target
-                    is-hand-collision-target
-                    tags="isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
                     destroy-at-extreme-distances
                     scalable-when-grabbed
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
@@ -300,8 +299,7 @@
                     owned-object-limiter="counter: #pen-counter"
                     set-unowned-body-kinematic
                     is-remote-hover-target
-                    is-hand-collision-target
-                    tags="isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; isPen: true;"
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; isPen: true;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
@@ -337,8 +335,7 @@
                     ammo-body="type: dynamic; mass: 0.001; collisionFilterGroup: 1; collisionFilterMask: 8;"
                     camera-tool
                     is-remote-hover-target
-                    is-hand-collision-target
-                    tags="isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
