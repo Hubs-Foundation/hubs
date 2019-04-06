@@ -11,9 +11,6 @@ export const distanceBetweenStretchers = (() => {
 
 export class TwoPointStretchingSystem {
   constructor() {
-    this.heldLeftHand = null;
-    this.heldRightHand = null;
-    this.heldRightRemote = null;
     this.initialScale = new THREE.Vector3();
   }
 
@@ -48,8 +45,5 @@ export class TwoPointStretchingSystem {
     this.stretcherLeft = stretcherLeft;
     this.stretcherRight = stretcherRight;
 
-    this.heldLeftHand = leftHand.held;
-    this.heldRightHand = rightHand.held;
-    this.heldRightRemote = rightRemote.held;
   }
 }
