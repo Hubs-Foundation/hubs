@@ -1,3 +1,4 @@
+/* global require AFRAME THREE setTimeout clearTimeout */
 import { addMedia } from "../utils/media-utils";
 import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
@@ -119,7 +120,8 @@ AFRAME.registerComponent("super-spawner", {
 
     const userinput = AFRAME.scenes[0].systems.userinput;
     const interaction = AFRAME.scenes[0].systems.interaction;
-    const willAnimateFromCursor = this.data.animateFromCursor && userinput.get(paths.actions.rightHand.matrix);
+    const willAnimateFromCursor =
+      this.data.animateFromCursor && userinput.get(paths.actions.rightHand.matrix) && !AFRAME.utils.device.isMobileVR();
     if (!willAnimateFromCursor) {
       interaction.state.rightRemote.held = entity;
       interaction.state.rightRemote.spawning = true;
