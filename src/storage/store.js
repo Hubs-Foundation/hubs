@@ -15,6 +15,29 @@ function isBoolean(value) {
   return typeof value === "boolean" || value instanceof Boolean;
 }
 
+// Recursively checks all values in the input to make sure they pass the predicates specified in the schema.
+// Throws an exception if any part of the input is invalid.
+function validate(input, schema) {
+  if (Array.isArray(schema)) {
+    if (!Array.isArray(input)) {
+      throw new Error(`Required array, found ${input}.`);
+    }
+    const itemSchema = schema[0];
+    for (const item of input) {
+      validate(item, itemSchema);
+    }
+  } else if (typeof schema === "object") {
+    if (!(typeof input === "object" && input !== null)) {
+      throw new Error(`Required object, found ${input}.`);
+    }
+    for (const key in schema) {
+      validate(input[key], schema[key]);
+    }
+  } else if (input != null && !schema(input)) {
+    throw new Error(`Invalid value for schema: ${input}.`);
+  }
+}
+
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
 export const SCHEMA = {
@@ -43,27 +66,6 @@ export const SCHEMA = {
   confirmedDiscordRooms: [isString],
   uploadPromotionTokens: [{ fileId: isString, promotionToken: isString }]
 };
-
-function validate(obj, schema) {
-  if (Array.isArray(schema)) {
-    if (!Array.isArray(obj)) {
-      throw new Error(`Required array, found ${obj}.`);
-    }
-    const itemSchema = schema[0];
-    for (const val of obj) {
-      validate(val, itemSchema);
-    }
-  } else if (typeof schema === "object") {
-    if (!(typeof obj === "object" && obj !== null)) {
-      throw new Error(`Required object, found ${obj}.`);
-    }
-    for (const key in schema) {
-      validate(obj[key], schema[key]);
-    }
-  } else if (obj != null && !schema(obj)) {
-    throw new Error(`Invalid value for schema: ${obj}.`);
-  }
-}
 
 export default class Store extends EventTarget {
   constructor() {
