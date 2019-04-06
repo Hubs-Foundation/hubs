@@ -35,6 +35,7 @@ function findHandCollisionTargetForHand(body) {
       }
     }
   }
+  return null;
 }
 
 const remoteHoverTargets = new Map();
