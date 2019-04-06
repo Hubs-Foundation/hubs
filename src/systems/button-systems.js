@@ -3,16 +3,11 @@ export class SingleActionButtonSystem {
     this.didInteractThisFrame = false;
     const interaction = AFRAME.scenes[0].systems.interaction;
     const userinput = AFRAME.scenes[0].systems.userinput;
-    const state = interaction.state.rightRemote;
+    const hovered = interaction.state.rightRemote.hovered;
     const grab = interaction.options.rightRemote.grabPath;
-    if (
-      userinput.get(grab) &&
-      state.hovered &&
-      state.hovered.components.tags &&
-      state.hovered.components.tags.data.singleActionButton
-    ) {
+    if (hovered && userinput.get(grab) && hovered.components.tags && hovered.components.tags.data.singleActionButton) {
       this.didInteractThisFrame = true;
-      state.hovered.object3D.dispatchEvent({
+      hovered.object3D.dispatchEvent({
         type: "interact",
         path: grab
       });
