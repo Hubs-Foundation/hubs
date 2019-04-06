@@ -2,8 +2,10 @@
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 
 AFRAME.registerComponent("set-unowned-body-kinematic", {
-  play() {
+  init() {
     this.setBodyKinematic = this.setBodyKinematic.bind(this);
+  },
+  play() {
     this.el.addEventListener("ownership-lost", this.setBodyKinematic);
 
     if (!this.hasBeenHereBefore) {
