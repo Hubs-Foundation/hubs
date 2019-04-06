@@ -1,3 +1,4 @@
+/* global NAF AFRAME */
 const ACTIVATION_STATE = require("aframe-physics-system/src/constants").ACTIVATION_STATE;
 
 export class ConstraintsSystem {
@@ -21,13 +22,7 @@ export class ConstraintsSystem {
 
   tickInteractor(constraintTag, entityId, state, prevState) {
     if (prevState.held === state.held) {
-      if (
-        state.held &&
-        state.held.components.tags &&
-        state.held.components.tags.data[constraintTag] &&
-        prevState.spawning &&
-        !state.spawning
-      ) {
+      if (!state.spawning && prevState.spawning && state.held && state.held.components.tags.data[constraintTag]) {
         state.held.setAttribute("ammo-body", {
           type: "dynamic",
           activationState: ACTIVATION_STATE.DISABLE_DEACTIVATION
@@ -36,7 +31,7 @@ export class ConstraintsSystem {
       }
       return;
     }
-    if (prevState.held && prevState.held.components.tags && prevState.held.components.tags.data[constraintTag]) {
+    if (prevState.held && prevState.held.components.tags.data[constraintTag]) {
       prevState.held.removeAttribute("ammo-constraint__" + entityId);
       let hasAnotherConstraint = false;
       for (const componentName in prevState.held.components) {
@@ -48,7 +43,7 @@ export class ConstraintsSystem {
         prevState.held.setAttribute("ammo-body", { activationState: ACTIVATION_STATE.ACTIVE_TAG });
       }
     }
-    if (state.held && state.held.components.tags && state.held.components.tags.data[constraintTag] && !state.spawning) {
+    if (!state.spawning && state.held && state.held.components.tags.data[constraintTag]) {
       if (!state.held.components["networked"] || NAF.utils.isMine(state.held) || NAF.utils.takeOwnership(state.held)) {
         state.held.setAttribute("ammo-body", {
           type: "dynamic",
