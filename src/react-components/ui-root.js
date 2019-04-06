@@ -1579,7 +1579,10 @@ class UIRoot extends Component {
                   !hasTopTip && (
                     <WithHoverSound>
                       <button
-                        className={classNames({ [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
+                        className={classNames({
+                          [inviteStyles.inviteButton]: true,
+                          [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered
+                        })}
                         onClick={() => this.toggleInviteDialog()}
                       >
                         <FormattedMessage id="entry.invite-others-nag" />
