@@ -878,6 +878,8 @@ document.addEventListener("DOMContentLoaded", async () => {
               });
             }
           }
+
+          scene.emit("presence_updated", { sessionId, profile: meta.profile });
         });
 
         hubPhxPresence.onLeave((sessionId, current, info) => {

@@ -627,11 +627,6 @@ class UIRoot extends Component {
     }
   };
 
-  onProfileFinished = () => {
-    this.closeDialog();
-    this.props.hubChannel.sendProfileUpdate();
-  };
-
   beginOrSkipAudioSetup = () => {
     const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
 
@@ -1401,7 +1396,7 @@ class UIRoot extends Component {
                   signedIn={this.state.signedIn}
                   onSignIn={this.showSignInDialog}
                   onSignOut={this.signOut}
-                  finished={this.onProfileFinished}
+                  finished={this.closeDialog}
                   store={this.props.store}
                   debug={avatarEditorDebug}
                 />
@@ -1433,7 +1428,7 @@ class UIRoot extends Component {
                       }
                     });
 
-                    this.onProfileFinished();
+                    this.closeDialog();
                   }}
                   store={this.props.store}
                   signedIn={this.state.signedIn}
