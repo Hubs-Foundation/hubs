@@ -48,7 +48,7 @@ AFRAME.registerComponent("sticky-object", {
     this.heldRightRemote = heldRightRemote;
 
     if (!almostEquals(0.001, this.prevScale, this.el.object3D.scale)) {
-      if ((this.heldLeftHand || this.heldRightHand || this.heldRightRemote) && !this.wasScaled) {
+      if ((!this.el.components.networked || NAF.utils.isMine(this.el)) && !this.wasScaled) {
         this.wasScaled = true;
         this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.HANDS });
       }
