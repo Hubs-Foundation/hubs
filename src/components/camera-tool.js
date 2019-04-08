@@ -105,7 +105,7 @@ AFRAME.registerComponent("camera-tool", {
       this.el.setObject3D("mesh", mesh);
 
       const width = 0.28;
-      const geometry = new THREE.PlaneGeometry(width, width / this.camera.aspect);
+      const geometry = new THREE.PlaneBufferGeometry(width, width / this.camera.aspect);
 
       if (enableCameraViewport) {
         const screen = new THREE.Mesh(geometry, material);
