@@ -114,7 +114,7 @@ export default class AvatarEditor extends Component {
       // const gltf = parser.json;
       // Object.assign(gltf.scenes[0], {
       //   extensions: {
-      //     HUBS_components: {
+      //     MOZ_hubs_components: {
       //       "loop-animation": {
       //         clip: "idle_eyes"
       //       }
@@ -123,7 +123,7 @@ export default class AvatarEditor extends Component {
       // });
       // Object.assign(gltf.nodes.find(n => n.name === "Head"), {
       //   extensions: {
-      //     HUBS_components: {
+      //     MOZ_hubs_components: {
       //       "scale-audio-feedback": ""
       //     }
       //   }

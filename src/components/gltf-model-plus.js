@@ -80,7 +80,9 @@ function cloneGltf(gltf) {
 }
 
 function getHubsComponents(node) {
-  const hubsComponents = node.userData.gltfExtensions && node.userData.gltfExtensions.HUBS_components;
+  const hubsComponents =
+    node.userData.gltfExtensions &&
+    (node.userData.gltfExtensions.MOZ_hubs_components || node.userData.gltfExtensions.HUBS_components);
 
   // We can remove support for legacy components when our environment, avatar and interactable models are
   // updated to match Spoke output.
