@@ -189,7 +189,7 @@ export async function createInWorldLogMessage({ name, type, body }) {
     material.generateMipmaps = false;
     material.needsUpdate = true;
 
-    const geometry = new THREE.PlaneGeometry();
+    const geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
     const mesh = new THREE.Mesh(geometry, material);
     meshEntity.setObject3D("mesh", mesh);
     meshEntity.meshMaterial = material;
