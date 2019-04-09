@@ -927,7 +927,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hubPhxChannel.on("naf", data => {
     if (!NAF.connection.adapter) return;
-    NAF.connection.adapter.onData(data);
+    NAF.connection.adapter.onData(data, "reliable");
   });
 
   hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
