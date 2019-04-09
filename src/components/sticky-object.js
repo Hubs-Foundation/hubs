@@ -32,7 +32,7 @@ AFRAME.registerComponent("sticky-object", {
     this.wasHeld = isHeld;
 
     if (!almostEquals(0.001, this.prevScale, this.el.object3D.scale)) {
-      if (isHeld && !this.wasScaled) {
+      if ((!this.el.components.networked || NAF.utils.isMine(this.el)) && !this.wasScaled) {
         this.wasScaled = true;
         this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.HANDS });
       }
