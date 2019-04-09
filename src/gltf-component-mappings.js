@@ -29,7 +29,7 @@ AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", el => {
     mass: 0,
     type: TYPE.STATIC,
     collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
-    collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
+    collisionFilterMask: COLLISION_LAYERS.DEFAULT_SPAWNER
   });
 });
 AFRAME.GLTFModelPlus.registerComponent("ammo-shape", "ammo-shape");
