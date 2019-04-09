@@ -175,6 +175,9 @@ import detectConcurrentLoad from "./utils/concurrent-load-detector.js";
 
 import qsTruthy from "./utils/qs_truthy";
 
+const PHOENIX_RELIABLE_NAF = "phx-reliable";
+NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
+
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
 const isDebug = qsTruthy("debug");
@@ -747,8 +750,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  remountUI({ sessionId: socket.params().session_id });
-
   // Hub local channel
   const context = {
     mobile: isMobile || isMobileVR,
@@ -823,13 +824,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
-
+      socket.params().session_id = data.session_id;
       const hubPhxPresence = hubChannel.presence;
       let isInitialSync = true;
       const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
       hubPhxPresence.onSync(() => {
-        remountUI({ presences: hubPhxPresence.state });
+        remountUI({
+          sessionId: socket.params().session_id,
+          presences: hubPhxPresence.state
+        });
         const occupantCount = Object.entries(hubPhxPresence.state).length;
         vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
 
@@ -927,7 +931,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hubPhxChannel.on("naf", data => {
     if (!NAF.connection.adapter) return;
-    NAF.connection.adapter.onData(data, "reliable");
+    NAF.connection.adapter.onData(data, PHOENIX_RELIABLE_NAF);
   });
 
   hubPhxChannel.on("message", ({ session_id, type, body, from }) => {

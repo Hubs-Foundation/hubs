@@ -1,4 +1,3 @@
-import uuid from "uuid/v4";
 import { Socket } from "phoenix";
 import { generateHubName } from "../utils/name-generation";
 
@@ -23,9 +22,7 @@ export function connectToReticulum(debug = false) {
   const socketUrl = `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}/socket`;
   console.log(`Phoenix Socket URL: ${socketUrl}`);
 
-  const socketSettings = {
-    params: { session_id: uuid() }
-  };
+  const socketSettings = {};
 
   if (debug) {
     socketSettings.logger = (kind, msg, data) => {
