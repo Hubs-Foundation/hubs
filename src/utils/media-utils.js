@@ -362,6 +362,7 @@ export const traverseMeshesAndAddShapes = (function() {
         o.name !== "Floor_Plan" &&
         o.name !== "Ground_Plane"
       ) {
+        o.updateMatrices();
         vertexCount += o.geometry.attributes.position.count;
       }
     });
@@ -382,35 +383,13 @@ export const traverseMeshesAndAddShapes = (function() {
       });
       shapes.push({ id: shapePrefix + floorPlan.name, entity: floorPlan.el });
     } else if (vertexCount < vertexLimit) {
-      for (let i = 0; i < meshRoot.children.length; i++) {
-        const obj = meshRoot.children[i];
-
-        //ignore floor plan for spoke scenes, and make the ground plane a box.
-        if (obj.isGroup && obj.name !== "Floor_Plan") {
-          if (obj.name === "Ground_Plane") {
-            obj.el.object3DMap.mesh = obj;
-            obj.el.setAttribute(shapePrefix + obj.name, {
-              type: SHAPE.BOX,
-              margin: 0.01,
-              fit: FIT.ALL
-            });
-            shapes.push({ id: shapePrefix + obj.name, entity: obj.el });
-            continue;
-          }
-
-          if (!obj.el.object3DMap.mesh) {
-            obj.el.object3DMap.mesh = obj.parent;
-          }
-
-          obj.el.setAttribute(shapePrefix + obj.uuid, {
-            type: SHAPE.MESH,
-            margin: 0.01,
-            fit: FIT.COMPOUND
-          });
-          shapes.push({ id: shapePrefix + obj.uuid, entity: obj.el });
-        }
-      }
-      console.log(`traversing meshes and adding ${shapes.length} mesh shapes`);
+      el.setAttribute(shapePrefix + meshRoot.name, {
+        type: SHAPE.MESH,
+        margin: 0.01,
+        fit: FIT.COMPOUND
+      });
+      shapes.push({ id: shapePrefix + meshRoot.name, entity: el });
+      console.log("adding compound mesh shape");
     } else {
       el.setAttribute(shapePrefix + "defaultFloor", {
         type: SHAPE.BOX,
@@ -420,7 +399,7 @@ export const traverseMeshesAndAddShapes = (function() {
         fit: FIT.MANUAL
       });
       shapes.push({ id: shapePrefix + "defaultFloor", entity: el });
-      console.log(`adding default floor collision`);
+      console.log("adding default floor collision");
     }
     console.groupEnd();
   };
