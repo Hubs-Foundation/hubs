@@ -223,6 +223,10 @@ export default class HubChannel extends EventTarget {
     });
   };
 
+  mute = sessionId => {
+    this.channel.push("mute", { session_id: sessionId });
+  };
+
   kick = sessionId => {
     this.channel.push("kick", { session_id: sessionId });
   };
