@@ -209,7 +209,6 @@ AFRAME.registerComponent("camera-tool", {
 
   tock: (function() {
     const tempHeadScale = new THREE.Vector3();
-    const photoPos = new THREE.Vector3();
 
     return function tock() {
       const sceneEl = this.el.sceneEl;
