@@ -3,6 +3,8 @@ import { mapMaterials } from "../utils/material-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import MobileStandardMaterial from "../materials/MobileStandardMaterial";
 import { getCustomGLTFParserURLResolver } from "../utils/media-utils";
+import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
+THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const GLTFCache = {};
 
@@ -34,6 +36,25 @@ function parallelTraverse(a, b, callback) {
   for (let i = 0; i < a.children.length; i++) {
     parallelTraverse(a.children[i], b.children[i], callback);
   }
+}
+
+function generateMeshBVH(object3D) {
+  object3D.traverse(obj => {
+    // note that we might already have a bounds tree if this was a clone of an object with one
+    const hasBufferGeometry = obj.isMesh && obj.geometry.isBufferGeometry;
+    const hasBoundsTree = hasBufferGeometry && obj.geometry.boundsTree;
+    if (hasBufferGeometry && !hasBoundsTree && obj.geometry.attributes.position) {
+      const geo = obj.geometry;
+      const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
+      // only bother using memory and time making a BVH if there are a reasonable number of tris,
+      // and if there are too many it's too painful and large to tolerate doing it (at least until
+      // we put this in a web worker)
+      if (triCount > 1000 && triCount < 1000000) {
+        // note that bounds tree construction creates an index as a side effect if one doesn't already exist
+        geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 30 });
+      }
+    }
+  });
 }
 
 // Modified version of Don McCurdy's AnimationUtils.clone
@@ -364,6 +385,8 @@ AFRAME.registerComponent("gltf-model-plus", {
       if (gltf.animations.length > 0) {
         this.el.setAttribute("animation-mixer", {});
         this.el.components["animation-mixer"].initMixer(gltf.animations);
+      } else {
+        generateMeshBVH(this.model);
       }
 
       const indexToEntityMap = {};
