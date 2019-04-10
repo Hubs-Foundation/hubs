@@ -5,6 +5,7 @@ import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js/dist/hls.light.js";
 import { proxiedUrlFor, spawnMediaAround } from "../utils/media-utils";
 import { buildAbsoluteURL } from "url-toolkit";
+import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 
 export const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
@@ -429,18 +430,18 @@ AFRAME.registerComponent("media-video", {
   async snap() {
     if (this.isSnapping) return;
     this.isSnapping = true;
+    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
 
     const canvas = document.createElement("canvas");
     canvas.width = this.video.videoWidth;
     canvas.height = this.video.videoHeight;
     canvas.getContext("2d").drawImage(this.video, 0, 0, canvas.width, canvas.height);
     const blob = await new Promise(resolve => canvas.toBlob(resolve));
-    console.log(blob);
     const file = new File([blob], "snap.png", { type: "image/png" });
 
     this.localSnapCount++;
-    spawnMediaAround(this.el, file, this.localSnapCount);
-    this.isSnapping = false;
+    const { entity } = spawnMediaAround(this.el, file, this.localSnapCount);
+    entity.addEventListener("image-loaded", () => (this.isSnapping = false), { once: true });
   },
 
   togglePlaying() {
