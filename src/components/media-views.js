@@ -3,7 +3,7 @@ import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js/dist/hls.light.js";
-import { proxiedUrlFor } from "../utils/media-utils";
+import { proxiedUrlFor, spawnMediaAround } from "../utils/media-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 
 export const VOLUME_LABELS = [];
@@ -333,11 +333,14 @@ AFRAME.registerComponent("media-video", {
     this.seekBack = this.seekBack.bind(this);
     this.volumeUp = this.volumeUp.bind(this);
     this.volumeDown = this.volumeDown.bind(this);
+    this.snap = this.snap.bind(this);
     this.changeVolumeBy = this.changeVolumeBy.bind(this);
     this.togglePlaying = this.togglePlaying.bind(this);
 
     this.lastUpdate = 0;
     this.videoMutedAt = 0;
+    this.localSnapCount = 0;
+    this.isSnapping = false;
 
     this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", dirs: ["forward", "back"] });
     this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
@@ -352,6 +355,7 @@ AFRAME.registerComponent("media-video", {
       this.volumeDownButton = this.el.querySelector(".video-volume-down-button");
       this.seekForwardButton = this.el.querySelector(".video-seek-forward-button");
       this.seekBackButton = this.el.querySelector(".video-seek-back-button");
+      this.snapButton = this.el.querySelector(".video-snap-button");
       this.timeLabel = this.el.querySelector(".video-time-label");
       this.volumeLabel = this.el.querySelector(".video-volume-label");
 
@@ -360,6 +364,7 @@ AFRAME.registerComponent("media-video", {
       this.seekBackButton.object3D.addEventListener("interact", this.seekBack);
       this.volumeUpButton.object3D.addEventListener("interact", this.volumeUp);
       this.volumeDownButton.object3D.addEventListener("interact", this.volumeDown);
+      this.snapButton.object3D.addEventListener("interact", this.snap);
 
       this.updateVolumeLabel();
       this.updateHoverMenuBasedOnLiveState();
@@ -421,6 +426,23 @@ AFRAME.registerComponent("media-video", {
     this.changeVolumeBy(-0.1);
   },
 
+  async snap() {
+    if (this.isSnapping) return;
+    this.isSnapping = true;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = this.video.videoWidth;
+    canvas.height = this.video.videoHeight;
+    canvas.getContext("2d").drawImage(this.video, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise(resolve => canvas.toBlob(resolve));
+    console.log(blob);
+    const file = new File([blob], "snap.png", { type: "image/png" });
+
+    this.localSnapCount++;
+    spawnMediaAround(this.el, file, this.localSnapCount);
+    this.isSnapping = false;
+  },
+
   togglePlaying() {
     // See onPauseStateChanged for note about iOS
     if (isIOS && this.video.paused && NAF.utils.isMine(this.networkedEl)) {
@@ -462,6 +484,7 @@ AFRAME.registerComponent("media-video", {
       this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
 
       this.playPauseButton.object3D.visible = !!this.video;
+      this.snapButton.object3D.visible = !!this.video;
       this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
       this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
     }
@@ -644,6 +667,17 @@ AFRAME.registerComponent("media-video", {
     const volumeMod = userinput.get(paths.actions.cursor.mediaVolumeMod);
     if (interaction.state.rightRemote.hovered === this.el && volumeMod) {
       this.changeVolumeBy(volumeMod);
+    }
+
+    const heldLeftHand = interaction.state.leftHand.held === this.el;
+    const heldRightHand = interaction.state.rightHand.held === this.el;
+    const heldRightRemote = interaction.state.rightRemote.held === this.el;
+    if (
+      (heldLeftHand && userinput.get(interaction.options.leftHand.grabPath)) ||
+      (heldRightHand && userinput.get(interaction.options.rightHand.grabPath)) ||
+      (heldRightRemote && userinput.get(interaction.options.rightRemote.grabPath))
+    ) {
+      this.localSnapCount = 0;
     }
 
     if (this.hoverMenu && this.hoverMenu.object3D.visible && !this.videoIsLive) {
