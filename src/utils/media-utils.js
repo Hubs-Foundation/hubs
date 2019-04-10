@@ -407,14 +407,17 @@ export const traverseMeshesAndAddShapes = (function() {
 
 const mediaPos = new THREE.Vector3();
 
-export function spawnMediaAround(el, media, snapCount) {
+export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false) {
   const { entity, orientation } = addMedia(media, "#interactable-media", undefined, false);
 
   const pos = el.object3D.position;
 
   entity.object3D.position.set(pos.x, pos.y, pos.z);
   entity.object3D.rotation.copy(el.object3D.rotation);
-  entity.object3D.rotateY(Math.PI);
+
+  if (mirrorOrientation) {
+    entity.object3D.rotateY(Math.PI);
+  }
 
   // Generate photos in a circle around camera, starting from the bottom.
   // Prevent z-fighting but place behind viewfinder
