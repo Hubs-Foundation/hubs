@@ -2,13 +2,15 @@
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 
 AFRAME.registerComponent("set-unowned-body-kinematic", {
-  play() {
+  init() {
     this.setBodyKinematic = this.setBodyKinematic.bind(this);
+  },
+  play() {
     this.el.addEventListener("ownership-lost", this.setBodyKinematic);
 
-    if (!this.hasBeenHereBefore) {
+    if (!this.didThisOnce) {
       // Do this in play instead of init so that the ammo-body and networked components are done
-      this.hasBeenHereBefore = true;
+      this.didThisOnce = true;
 
       if (!NAF.utils.isMine(this.el)) {
         this.setBodyKinematic();

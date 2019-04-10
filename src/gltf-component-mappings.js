@@ -17,7 +17,7 @@ AFRAME.GLTFModelPlus.registerComponent("interactable", "css-class", (el, compone
 AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner", (el, componentName, componentData) => {
   //TODO: Do not automatically add these components
   el.setAttribute("is-remote-hover-target", "");
-  el.setAttribute("is-hand-collision-target", "");
+  el.setAttribute("tags", { isHandCollisionTarget: true });
   el.setAttribute(componentName, componentData);
 });
 AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
@@ -210,7 +210,7 @@ AFRAME.GLTFModelPlus.registerComponent("link", "link", mediaInflator);
 
 AFRAME.GLTFModelPlus.registerComponent("hoverable", "is-remote-hover-target", el => {
   el.setAttribute("is-remote-hover-target", "");
-  el.setAttribute("is-hand-collision-target", "");
+  el.setAttribute("tags", { isHandCollisionTarget: true });
 });
 
 AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName, componentData) => {
@@ -233,7 +233,7 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
     collisionFilterMask: COLLISION_LAYERS.DEFAULT_SPAWNER
   });
   el.setAttribute("is-remote-hover-target", "");
-  el.setAttribute("is-hand-collision-target", "");
+  el.setAttribute("tags", { isHandCollisionTarget: true });
 });
 
 const publicComponents = {

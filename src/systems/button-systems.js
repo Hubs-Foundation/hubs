@@ -3,18 +3,17 @@ export class SingleActionButtonSystem {
     this.didInteractThisFrame = false;
     const interaction = AFRAME.scenes[0].systems.interaction;
     const userinput = AFRAME.scenes[0].systems.userinput;
-    const state = interaction.state.rightRemote;
-    const grab = interaction.options.rightRemote.grabPath;
+    const hovered = interaction.state.rightRemote.hovered;
     if (
-      userinput.get(grab) &&
-      state.hovered &&
-      state.hovered.components.tags &&
-      state.hovered.components.tags.data.singleActionButton
+      hovered &&
+      userinput.get(interaction.options.rightRemote.grabPath) &&
+      hovered.components.tags &&
+      hovered.components.tags.data.singleActionButton
     ) {
       this.didInteractThisFrame = true;
-      state.hovered.object3D.dispatchEvent({
+      hovered.object3D.dispatchEvent({
         type: "interact",
-        path: grab
+        object3D: interaction.options.rightRemote.entity.object3D
       });
     }
   }
@@ -24,18 +23,17 @@ export class HoldableButtonSystem {
   tick() {
     const interaction = AFRAME.scenes[0].systems.interaction;
     const held = interaction.state.rightRemote.held;
-    const options = interaction.options.rightRemote;
 
     if (this.prevHeld && this.prevHeld !== held) {
       this.prevHeld.object3D.dispatchEvent({
         type: "holdable-button-up",
-        path: options.dropPath
+        object3D: interaction.options.rightRemote.entity.object3D
       });
     }
     if (held && this.prevHeld !== held) {
       held.object3D.dispatchEvent({
         type: "holdable-button-down",
-        path: options.grabPath
+        object3D: interaction.options.rightRemote.entity.object3D
       });
     }
 

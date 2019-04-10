@@ -22,30 +22,14 @@ AFRAME.registerComponent("sticky-object", {
 
   tick() {
     const interaction = AFRAME.scenes[0].systems.interaction;
-    const heldLeftHand = interaction.state.leftHand.held === this.el;
-    const heldRightHand = interaction.state.rightHand.held === this.el;
-    const heldRightRemote = interaction.state.rightRemote.held === this.el;
-
-    if (
-      !heldLeftHand &&
-      !heldRightHand &&
-      !heldRightRemote &&
-      (this.heldLeftHand || this.heldRightHand || this.heldRightRemote)
-    ) {
-      this.onRelease();
-    }
-
-    if (
-      (heldLeftHand && !this.heldLeftHand) ||
-      (heldRightHand && !this.heldRightHand) ||
-      (heldRightRemote && !this.heldRightRemote)
-    ) {
+    const isHeld = interaction.isHeld(this.el);
+    if (isHeld && !this.wasHeld) {
       this.onGrab();
     }
-
-    this.heldLeftHand = heldLeftHand;
-    this.heldRightHand = heldRightHand;
-    this.heldRightRemote = heldRightRemote;
+    if (this.wasHeld && !isHeld) {
+      this.onRelease();
+    }
+    this.wasHeld = isHeld;
 
     if (!almostEquals(0.001, this.prevScale, this.el.object3D.scale)) {
       if ((!this.el.components.networked || NAF.utils.isMine(this.el)) && !this.wasScaled) {
