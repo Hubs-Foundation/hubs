@@ -78,7 +78,7 @@ class MediaBrowser extends Component {
     onMediaSearchResultEntrySelected: PropTypes.func
   };
 
-  state = { query: "", facets: [], showNav: true, selectNextResult: false };
+  state = { query: "", facets: [], showNav: true, selectNextResult: false, clearStashedQueryOnClose: false };
 
   constructor(props) {
     super(props);
@@ -156,7 +156,17 @@ class MediaBrowser extends Component {
 
   handleEntryClicked = (evt, entry) => {
     evt.preventDefault();
-    this.selectEntry(entry);
+
+    if (!entry.lucky_query) {
+      this.selectEntry(entry);
+    } else {
+      // Entry has a pointer to another "i'm feeling lucky" query -- used for trending videos
+      //
+      // Also, mark the browser to clear the stashed query on close, since this is a temporary
+      // query we are running to get the result we want.
+      this.setState({ clearStashedQueryOnClose: true });
+      this.handleQueryUpdated(entry.lucky_query, true);
+    }
   };
 
   selectEntry = entry => {
@@ -195,6 +205,10 @@ class MediaBrowser extends Component {
   close = () => {
     showFullScreenIfWasFullScreen();
     this.pushExitMediaBrowserHistory();
+
+    if (this.state.clearStashedQueryOnClose) {
+      this.props.mediaSearchStore.clearStashedQuery();
+    }
   };
 
   handlePager = delta => {
