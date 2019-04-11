@@ -362,7 +362,6 @@ export const traverseMeshesAndAddShapes = (function() {
         o.name !== "Floor_Plan" &&
         o.name !== "Ground_Plane"
       ) {
-        o.updateMatrices();
         vertexCount += o.geometry.attributes.position.count;
       }
     });
