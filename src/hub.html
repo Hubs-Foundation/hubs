@@ -85,6 +85,8 @@
             <img id="video-play-hover" crossorigin="anonymous" src="./assets/video-overlay/play-hover.png">
             <img id="video-pause" crossorigin="anonymous" src="./assets/video-overlay/pause.png">
             <img id="video-pause-hover" crossorigin="anonymous" src="./assets/video-overlay/pause-hover.png">
+            <img id="video-snap" crossorigin="anonymous" src="./assets/video-overlay/snap.png">
+            <img id="video-snap-hover" crossorigin="anonymous" src="./assets/video-overlay/snap-hover.png">
 
             <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
             <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
@@ -416,14 +418,22 @@
             <!-- TODO: All of these positions are assuming 16:9 - need to actually reposition based on video resolution -->
             <template id="video-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
+                    <a-image
+                        is-remote-hover-target
+                        tags="singleActionButton: true; isHoverMenuChild: true;"
+                        icon-button="image: #video-snap; hoverImage: #video-snap-hover; activeImage: #videosnapplay; activeHoverImage: #video-snap-hover"
+                        scale="0.075 0.075 0.075"
+                        position="0 0.225 0"
+                        class="video-snap-button"
+                    ></a-image>
                     <a-entity class="video-time-label" text="value: 0; anchor: center; align: center; color: #aaa;" text-raycast-hack position="0 -0.24 0" scale="0.75 0.75 0.75"></a-entity>
-                    <a-entity class="video-volume-label" text="value: 0%; anchor: center; align: center; color: #ccc; letterSpacing: 4;" text-raycast-hack position="0.0 0.175 0.015" scale="1.25 1.25 1.25"></a-entity>
+                    <a-entity class="video-volume-label" text="value: 0%; anchor: center; align: center; color: #ccc; letterSpacing: 4;" text-raycast-hack position="0.0 0.14 0.015" scale="1.25 1.25 1.25"></a-entity>
                     <a-image
                         is-remote-hover-target
                         tags="singleActionButton: true; isHoverMenuChild: true;"
                         icon-button="image: #video-volume-down; hoverImage: #video-volume-down-hover;"
                         scale="0.075 0.075 0.075"
-                        position="-0.275 0.175 0"
+                        position="-0.275 0.14 0"
                         class="ui video-volume-down-button"
                     ></a-image>
                     <a-image
@@ -431,7 +441,7 @@
                         tags="singleActionButton: true; isHoverMenuChild: true;"
                         icon-button="image: #video-volume-up; hoverImage: #video-volume-up-hover;"
                         scale="0.075 0.075 0.075"
-                        position="0.275 0.175 0"
+                        position="0.275 0.14 0"
                         class="ui video-volume-up-button"
                     ></a-image>
                     <a-entity class="video-playback">

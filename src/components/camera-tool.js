@@ -1,4 +1,4 @@
-import { addMedia } from "../utils/media-utils";
+import { spawnMediaAround } from "../utils/media-utils";
 import { ObjectTypes } from "../object-types";
 import { paths } from "../systems/userinput/paths";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
@@ -209,7 +209,6 @@ AFRAME.registerComponent("camera-tool", {
 
   tock: (function() {
     const tempHeadScale = new THREE.Vector3();
-    const photoPos = new THREE.Vector3();
 
     return function tock() {
       const sceneEl = this.el.sceneEl;
@@ -281,53 +280,10 @@ AFRAME.registerComponent("camera-tool", {
         }
         renderer.readRenderTargetPixels(this.renderTarget, 0, 0, width, height, this.snapPixels);
         pixelsToPNG(this.snapPixels, width, height).then(file => {
-          const { entity, orientation } = addMedia(file, "#interactable-media", undefined, false);
+          const { orientation } = spawnMediaAround(this.el, file, this.localSnapCount, true);
 
-          const pos = this.el.object3D.position;
-
-          entity.object3D.position.set(pos.x, pos.y, pos.z);
-          entity.object3D.rotation.copy(this.el.object3D.rotation);
-          entity.object3D.rotateY(Math.PI);
-
-          // Generate photos in a circle around camera, starting from the bottom.
-          // Prevent z-fighting but place behind viewfinder
-          const idx = (this.localSnapCount % 6) + 3;
-
-          photoPos.set(
-            Math.cos(Math.PI * 2 * (idx / 6.0)) * 0.75,
-            Math.sin(Math.PI * 2 * (idx / 6.0)) * 0.75,
-            -0.05 + idx * 0.001
-          );
-
-          this.el.object3D.localToWorld(photoPos);
-          entity.object3D.visible = false;
-
-          entity.addEventListener(
-            "image-loaded",
-            () => {
-              entity.object3D.visible = true;
-              entity.setAttribute("animation__photo_pos", {
-                property: "position",
-                dur: 800,
-                from: { x: pos.x, y: pos.y, z: pos.z },
-                to: { x: photoPos.x, y: photoPos.y, z: photoPos.z },
-                easing: "easeOutElastic"
-              });
-            },
-            { once: true }
-          );
-
-          entity.object3D.matrixNeedsUpdate = true;
-
-          entity.addEventListener(
-            "media_resolved",
-            () => {
-              this.el.emit("photo_taken", entity.components["media-loader"].data.src);
-            },
-            { once: true }
-          );
           orientation.then(() => {
-            sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
+            this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
           });
         });
         sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
