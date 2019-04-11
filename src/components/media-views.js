@@ -200,10 +200,7 @@ function createVideoTexture(url, contentType) {
   });
 }
 
-function fitToTexture(el, texture) {
-  const ratio =
-    (texture.image.videoHeight || texture.image.height || 1.0) /
-    (texture.image.videoWidth || texture.image.width || 1.0);
+function scaleToAspectRatio(el, ratio) {
   const width = Math.min(1.0, 1.0 / ratio);
   const height = Math.min(1.0, ratio);
   el.object3DMap.mesh.scale.set(width, height, 1);
@@ -248,11 +245,13 @@ class TextureCache {
   cache = new Map();
 
   set(src, texture) {
+    const image = texture.image;
     this.cache.set(src, {
       texture,
+      ratio: (image.videoHeight || image.height) / (image.videoWidth || image.width),
       count: 0
     });
-    this.retain(src);
+    return this.retain(src);
   }
 
   has(src) {
@@ -260,14 +259,14 @@ class TextureCache {
   }
 
   get(src) {
-    return this.cache.get(src).texture;
+    return this.cache.get(src);
   }
 
   retain(src) {
     const cacheItem = this.cache.get(src);
     cacheItem.count++;
     // console.log("retain", src, cacheItem.count);
-    return cacheItem.texture;
+    return cacheItem;
   }
 
   release(src) {
@@ -629,7 +628,7 @@ AFRAME.registerComponent("media-video", {
     this.mesh.material.needsUpdate = true;
 
     if (projection === "flat") {
-      fitToTexture(this.el, texture);
+      scaleToAspectRatio(this.el, texture.image.videoHeight / texture.image.videoWidth);
     }
 
     this.updatePlaybackState(true);
@@ -741,6 +740,7 @@ AFRAME.registerComponent("media-image", {
 
   async update(oldData) {
     let texture;
+    let ratio = 1;
     try {
       const { src, contentType } = this.data;
       if (!src) return;
@@ -756,7 +756,9 @@ AFRAME.registerComponent("media-image", {
       }
 
       if (textureCache.has(src)) {
-        texture = textureCache.retain(src);
+        const cacheItem = textureCache.retain(src);
+        texture = cacheItem.texture;
+        ratio = cacheItem.ratio;
       } else {
         if (src === "error") {
           texture = errorTexture;
@@ -768,7 +770,9 @@ AFRAME.registerComponent("media-image", {
           throw new Error(`Unknown image content type: ${contentType}`);
         }
 
-        textureCache.set(src, texture);
+        const cacheItem = textureCache.set(src, texture);
+        ratio = cacheItem.ratio;
+        console.log(cacheItem);
 
         // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
         if (this.data.src !== src) {
@@ -806,7 +810,7 @@ AFRAME.registerComponent("media-image", {
     this.mesh.material.needsUpdate = true;
 
     if (projection === "flat") {
-      fitToTexture(this.el, texture);
+      scaleToAspectRatio(this.el, ratio);
     }
 
     this.el.emit("image-loaded", { src: this.data.src });

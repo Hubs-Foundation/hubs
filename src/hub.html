@@ -30,12 +30,12 @@
 <body>
     <a-scene
         loading-screen="enabled: false"
+        physics="gravity: -9.8; debug: false; driver: ammo; debugDrawMode: 1;"
         hubs-systems
         class="grab-cursor"
         renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: false;"
         shadow="type: pcfsoft"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
-        physics="gravity: -9.8; debug: false; driver: ammo; debugDrawMode: 1;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         action-to-event__mute="path: /actions/muteMic; event: action_mute;"
         freeze-controller="toggleEvent: action_freeze"
@@ -139,7 +139,10 @@
                                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" block-button position="0 0 .35">
                                             <a-entity text="value:Hide; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                                         </a-entity>
-                                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" visible-if-permitted="kick_users" kick-button position="0 -0.25 .35">
+                                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" visible-if-permitted="mute_users" mute-button position="0 -0.3 .35" scale="0.8 0.8 0.8">
+                                            <a-entity text="value:Mute; width:2.5; align:center;" text-raycast-hack visible-if-permitted="mute_users" position="0 0 0.01"></a-entity>
+                                        </a-entity>
+                                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" visible-if-permitted="kick_users" kick-button position="0 -0.5 .35" scale="0.8 0.8 0.8">
                                             <a-entity text="value:Kick; width:2.5; align:center;" text-raycast-hack visible-if-permitted="kick_users" position="0 0 0.01"></a-entity>
                                         </a-entity>
                                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: false; selector: .Head;" position="-0.40 0.375 0.35">
@@ -208,8 +211,7 @@
                     owned-object-limiter="counter: #media-counter"
                     set-unowned-body-kinematic
                     is-remote-hover-target
-                    is-hand-collision-target
-                    tags="isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
                     destroy-at-extreme-distances
                     scalable-when-grabbed
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
@@ -302,8 +304,7 @@
                     owned-object-limiter="counter: #pen-counter"
                     set-unowned-body-kinematic
                     is-remote-hover-target
-                    is-hand-collision-target
-                    tags="isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; isPen: true;"
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; isPen: true;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
@@ -339,8 +340,7 @@
                     ammo-body="type: dynamic; mass: 0.001; collisionFilterGroup: 1; collisionFilterMask: 8;"
                     camera-tool
                     is-remote-hover-target
-                    is-hand-collision-target
-                    tags="isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"

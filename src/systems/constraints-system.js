@@ -1,10 +1,5 @@
+/* global NAF AFRAME */
 const ACTIVATION_STATE = require("aframe-physics-system/src/constants").ACTIVATION_STATE;
-
-function storeState(prev, curr) {
-  prev.held = curr.held;
-  prev.hovered = curr.hovered;
-  prev.spawning = curr.spawning;
-}
 
 export class ConstraintsSystem {
   constructor() {
@@ -25,29 +20,19 @@ export class ConstraintsSystem {
     };
   }
 
-  tickInteractor(options, state, prevState) {
+  tickInteractor(constraintTag, entityId, state, prevState) {
     if (prevState.held === state.held) {
-      if (
-        state.held &&
-        state.held.components.tags &&
-        state.held.components.tags.data[options.constraintTag] &&
-        prevState.spawning &&
-        !state.spawning
-      ) {
+      if (!state.spawning && prevState.spawning && state.held && state.held.components.tags.data[constraintTag]) {
         state.held.setAttribute("ammo-body", {
           type: "dynamic",
           activationState: ACTIVATION_STATE.DISABLE_DEACTIVATION
         });
-        state.held.setAttribute("ammo-constraint__" + options.entity.id, { target: "#" + options.entity.id });
+        state.held.setAttribute("ammo-constraint__" + entityId, { target: "#" + entityId });
       }
       return;
     }
-    if (
-      prevState.held &&
-      prevState.held.components.tags &&
-      prevState.held.components.tags.data[options.constraintTag]
-    ) {
-      prevState.held.removeAttribute("ammo-constraint__" + options.entity.id);
+    if (prevState.held && prevState.held.components.tags.data[constraintTag]) {
+      prevState.held.removeAttribute("ammo-constraint__" + entityId);
       let hasAnotherConstraint = false;
       for (const componentName in prevState.held.components) {
         if (componentName.startsWith("ammo-constraint")) {
@@ -58,20 +43,15 @@ export class ConstraintsSystem {
         prevState.held.setAttribute("ammo-body", { activationState: ACTIVATION_STATE.ACTIVE_TAG });
       }
     }
-    if (
-      state.held &&
-      state.held.components.tags &&
-      state.held.components.tags.data[options.constraintTag] &&
-      !state.spawning
-    ) {
+    if (!state.spawning && state.held && state.held.components.tags.data[constraintTag]) {
       if (!state.held.components["networked"] || NAF.utils.isMine(state.held) || NAF.utils.takeOwnership(state.held)) {
         state.held.setAttribute("ammo-body", {
           type: "dynamic",
           activationState: ACTIVATION_STATE.DISABLE_DEACTIVATION
         });
-        state.held.setAttribute("ammo-constraint__" + options.entity.id, { target: "#" + options.entity.id });
+        state.held.setAttribute("ammo-constraint__" + entityId, { target: "#" + entityId });
       } else {
-        // TODO communicate failure to obtain network ownership
+        console.log("Failed to obtain ownership while trying to create constraint on networked object.");
       }
     }
   }
@@ -79,12 +59,27 @@ export class ConstraintsSystem {
   tick() {
     const interaction = AFRAME.scenes[0].systems.interaction;
 
-    this.tickInteractor(interaction.options.leftHand, interaction.state.leftHand, this.prevLeftHand);
-    this.tickInteractor(interaction.options.rightHand, interaction.state.rightHand, this.prevRightHand);
-    this.tickInteractor(interaction.options.rightRemote, interaction.state.rightRemote, this.prevRightRemote);
+    this.tickInteractor(
+      "offersHandConstraint",
+      interaction.options.leftHand.entity.id,
+      interaction.state.leftHand,
+      this.prevLeftHand
+    );
+    this.tickInteractor(
+      "offersHandConstraint",
+      interaction.options.rightHand.entity.id,
+      interaction.state.rightHand,
+      this.prevRightHand
+    );
+    this.tickInteractor(
+      "offersRemoteConstraint",
+      interaction.options.rightRemote.entity.id,
+      interaction.state.rightRemote,
+      this.prevRightRemote
+    );
 
-    storeState(this.prevLeftHand, interaction.state.leftHand);
-    storeState(this.prevRightHand, interaction.state.rightHand);
-    storeState(this.prevRightRemote, interaction.state.rightRemote);
+    Object.assign(this.prevLeftHand, interaction.state.leftHand);
+    Object.assign(this.prevRightHand, interaction.state.rightHand);
+    Object.assign(this.prevRightRemote, interaction.state.rightRemote);
   }
 }

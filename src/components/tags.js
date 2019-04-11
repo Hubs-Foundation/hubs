@@ -1,5 +1,6 @@
 AFRAME.registerComponent("tags", {
   schema: {
+    isHandCollisionTarget: { default: false },
     isHoldable: { default: false },
     offersHandConstraint: { default: false },
     offersRemoteConstraint: { default: false },
@@ -10,7 +11,7 @@ AFRAME.registerComponent("tags", {
   },
   update() {
     if (this.didUpdateOnce) {
-      console.error("Do not edit tags with .setAttribute");
+      console.warn("Do not edit tags with .setAttribute");
     }
     this.didUpdateOnce = true;
   }

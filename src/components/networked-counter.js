@@ -1,3 +1,4 @@
+/* global AFRAME performance */
 /**
  * Limits networked interactables to a maximum number at any given time
  * @namespace network
@@ -24,27 +25,21 @@ AFRAME.registerComponent("networked-counter", {
   register(el) {
     if (this.data.max <= 0 || this.timestamps.has(el)) return;
 
-    this.timestamps.set(el, Date.now());
+    this.timestamps.set(el, performance.now());
     this._destroyOldest();
   },
 
   deregister(el) {
-    if (this.timestamps.has(el)) {
-      this.timestamps.delete(el);
-    }
-  },
-
-  isHeld(el) {
-    const { leftHand, rightHand, rightRemote } = this.el.sceneEl.systems.interaction.state;
-    return leftHand.held === el || rightHand.held === el || rightRemote.held === el;
+    this.timestamps.delete(el);
   },
 
   _destroyOldest() {
     if (this.timestamps.size > this.data.max) {
+      const interaction = this.el.sceneEl.systems.interaction;
       let oldestEl = null,
         minTs = Number.MAX_VALUE;
       this.timestamps.forEach((ts, el) => {
-        if (ts < minTs && !this.isHeld(el)) {
+        if (ts < minTs && !interaction.isHeld(el)) {
           oldestEl = el;
           minTs = ts;
         }

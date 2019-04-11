@@ -82,6 +82,13 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
+  remove() {
+    if (this.loadingSoundNode) {
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.stopSoundNode(this.loadingSoundNode);
+      this.loadingSoundNode = null;
+    }
+  },
+
   onError() {
     this.el.removeAttribute("gltf-model-plus");
     this.el.removeAttribute("media-pager");
@@ -406,10 +413,6 @@ AFRAME.registerComponent("media-pager", {
   remove() {
     if (this.toolbar) {
       this.toolbar.parentNode.removeChild(this.toolbar);
-    }
-    if (this.loadingSoundNode) {
-      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.stopSoundNode(this.loadingSoundNode);
-      this.loadingSoundNode = null;
     }
   },
 

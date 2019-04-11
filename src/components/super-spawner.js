@@ -102,7 +102,7 @@ AFRAME.registerComponent("super-spawner", {
   },
 
   async onSpawnEvent() {
-    if (this.cooldownTimeout) {
+    if (this.cooldownTimeout || !this.el.sceneEl.is("entered")) {
       return;
     }
 

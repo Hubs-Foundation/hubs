@@ -163,8 +163,7 @@ AFRAME.registerSystem("userinput", {
   },
 
   toggleSet(set, value) {
-    const b = !!value;
-    this.pendingSetChanges.push({ set, value: b });
+    this.pendingSetChanges.push({ set, value: !!value });
   },
 
   init() {
