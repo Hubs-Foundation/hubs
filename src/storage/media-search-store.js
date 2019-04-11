@@ -147,6 +147,11 @@ export default class MediaSearchStore extends EventTarget {
     }
   };
 
+  clearStashedQuery = () => {
+    if (!this._stashedParams) return;
+    delete this._stashedParams.q;
+  };
+
   sourceNavigate = source => {
     this._sourceNavigate(source, false, true);
   };
