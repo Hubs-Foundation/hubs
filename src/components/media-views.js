@@ -199,7 +199,7 @@ function createVideoTexture(url, contentType) {
   });
 }
 
-function scaleToAspectRatio(el, texture, ratio) {
+function scaleToAspectRatio(el, ratio) {
   const width = Math.min(1.0, 1.0 / ratio);
   const height = Math.min(1.0, ratio);
   el.object3DMap.mesh.scale.set(width, height, 1);
@@ -247,9 +247,8 @@ class TextureCache {
     const image = texture.image;
     this.cache.set(src, {
       texture,
-      count: 0,
-      width: image.width || image.imageWidth || image.videoWidth,
-      height: image.height || image.imageHeight || image.videoHeight
+      ratio: (image.videoHeight || image.height) / (image.videoWidth || image.width),
+      count: 0
     });
     return this.retain(src);
   }
@@ -605,7 +604,7 @@ AFRAME.registerComponent("media-video", {
     this.mesh.material.needsUpdate = true;
 
     if (projection === "flat") {
-      scaleToAspectRatio(this.el, texture, texture.image.videoHeight / texture.image.videoWidth);
+      scaleToAspectRatio(this.el, texture.image.videoHeight / texture.image.videoWidth);
     }
 
     this.updatePlaybackState(true);
@@ -706,8 +705,7 @@ AFRAME.registerComponent("media-image", {
 
   async update(oldData) {
     let texture;
-    let width = 1;
-    let height = 1;
+    let ratio = 1;
     try {
       const { src, contentType } = this.data;
       if (!src) return;
@@ -725,8 +723,7 @@ AFRAME.registerComponent("media-image", {
       if (textureCache.has(src)) {
         const cacheItem = textureCache.retain(src);
         texture = cacheItem.texture;
-        width = cacheItem.width;
-        height = cacheItem.height;
+        ratio = cacheItem.ratio;
       } else {
         if (src === "error") {
           texture = errorTexture;
@@ -739,8 +736,7 @@ AFRAME.registerComponent("media-image", {
         }
 
         const cacheItem = textureCache.set(src, texture);
-        width = cacheItem.width;
-        height = cacheItem.height;
+        ratio = cacheItem.ratio;
         console.log(cacheItem);
 
         // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
@@ -779,7 +775,7 @@ AFRAME.registerComponent("media-image", {
     this.mesh.material.needsUpdate = true;
 
     if (projection === "flat") {
-      scaleToAspectRatio(this.el, texture, height / width);
+      scaleToAspectRatio(this.el, ratio);
     }
 
     this.el.emit("image-loaded", { src: this.data.src });
