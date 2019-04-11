@@ -7,6 +7,9 @@ import { proxiedUrlFor, spawnMediaAround } from "../utils/media-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 
+const ONCE_TRUE = { once: true };
+const TYPE_IMG_PNG = { type: "image/png" };
+
 export const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
   let s = "|";
@@ -341,6 +344,7 @@ AFRAME.registerComponent("media-video", {
     this.videoMutedAt = 0;
     this.localSnapCount = 0;
     this.isSnapping = false;
+    this.onSnapImageLoaded = () => (this.isSnapping = false);
 
     this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", dirs: ["forward", "back"] });
     this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
@@ -436,11 +440,11 @@ AFRAME.registerComponent("media-video", {
     canvas.height = this.video.videoHeight;
     canvas.getContext("2d").drawImage(this.video, 0, 0, canvas.width, canvas.height);
     const blob = await new Promise(resolve => canvas.toBlob(resolve));
-    const file = new File([blob], "snap.png", { type: "image/png" });
+    const file = new File([blob], "snap.png", TYPE_IMG_PNG);
 
     this.localSnapCount++;
     const { entity } = spawnMediaAround(this.el, file, this.localSnapCount);
-    entity.addEventListener("image-loaded", () => (this.isSnapping = false), { once: true });
+    entity.addEventListener("image-loaded", this.onSnapImageLoaded, ONCE_TRUE);
   },
 
   togglePlaying() {
@@ -669,16 +673,13 @@ AFRAME.registerComponent("media-video", {
       this.changeVolumeBy(volumeMod);
     }
 
-    const heldLeftHand = interaction.state.leftHand.held === this.el;
-    const heldRightHand = interaction.state.rightHand.held === this.el;
-    const heldRightRemote = interaction.state.rightRemote.held === this.el;
-    if (
-      (heldLeftHand && userinput.get(interaction.options.leftHand.grabPath)) ||
-      (heldRightHand && userinput.get(interaction.options.rightHand.grabPath)) ||
-      (heldRightRemote && userinput.get(interaction.options.rightRemote.grabPath))
-    ) {
+    const isHeld = interaction.isHeld(this.el);
+
+    if (this.wasHeld && !isHeld) {
       this.localSnapCount = 0;
     }
+
+    this.wasHeld = isHeld;
 
     if (this.hoverMenu && this.hoverMenu.object3D.visible && !this.videoIsLive) {
       this.timeLabel.setAttribute(
@@ -772,7 +773,6 @@ AFRAME.registerComponent("media-image", {
 
         const cacheItem = textureCache.set(src, texture);
         ratio = cacheItem.ratio;
-        console.log(cacheItem);
 
         // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
         if (this.data.src !== src) {
