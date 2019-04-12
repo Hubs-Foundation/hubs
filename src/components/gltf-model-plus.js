@@ -3,10 +3,12 @@ import { mapMaterials } from "../utils/material-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import MobileStandardMaterial from "../materials/MobileStandardMaterial";
 import { getCustomGLTFParserURLResolver } from "../utils/media-utils";
+import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const GLTFCache = {};
+const extractZipFile = promisifyWorker(new SketchfabZipWorker());
 
 function defaultInflator(el, componentName, componentData) {
   if (!AFRAME.components[componentName]) {
@@ -226,23 +228,12 @@ function attachTemplate(root, name, templateRoot) {
   }
 }
 
-function getFilesFromSketchfabZip(src) {
-  return new Promise((resolve, reject) => {
-    const worker = new SketchfabZipWorker();
-    worker.onmessage = e => {
-      const [success, fileMapOrError] = e.data;
-      (success ? resolve : reject)(fileMapOrError);
-    };
-    worker.postMessage(src);
-  });
-}
-
 async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   let gltfUrl = src;
   let fileMap;
 
   if (contentType.includes("model/gltf+zip") || contentType.includes("application/x-zip-compressed")) {
-    fileMap = await getFilesFromSketchfabZip(gltfUrl);
+    fileMap = await extractZipFile(gltfUrl);
     gltfUrl = fileMap["scene.gtlf"];
   }
 
