@@ -382,12 +382,12 @@ export const traverseMeshesAndAddShapes = (function() {
       });
       shapes.push({ id: shapePrefix + floorPlan.name, entity: floorPlan.el });
     } else if (vertexCount < vertexLimit) {
-      el.setAttribute(shapePrefix + meshRoot.name, {
+      el.setAttribute(shapePrefix + "environment", {
         type: SHAPE.MESH,
         margin: 0.01,
         fit: FIT.COMPOUND
       });
-      shapes.push({ id: shapePrefix + meshRoot.name, entity: el });
+      shapes.push({ id: shapePrefix + "environment", entity: el });
       console.log("adding compound mesh shape");
     } else {
       el.setAttribute(shapePrefix + "defaultFloor", {
