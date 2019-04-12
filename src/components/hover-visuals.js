@@ -17,7 +17,7 @@ AFRAME.registerComponent("hover-visuals", {
     this.uniforms = null;
   },
   tick() {
-    if (!this.uniforms || !this.uniforms.size) return;
+    if (!this.uniforms || !this.uniforms.length) return;
 
     // Push down loops to assist JIT:
     if (this.data.hand === "left") {
@@ -31,7 +31,8 @@ AFRAME.registerComponent("hover-visuals", {
     const elements = this.el.object3D.matrixWorld.elements;
     const interaction = AFRAME.scenes[0].systems.interaction;
 
-    for (const uniform of this.uniforms.values()) {
+    for (let i = 0, l = this.uniforms.length; i < l; i++) {
+      const uniform = this.uniforms[i];
       uniform.hubs_HighlightInteractorOne.value =
         !!interaction.state.leftHand.held || !!interaction.state.leftHand.hovered;
       uniform.hubs_InteractorOnePos.value[0] = elements[12];
@@ -44,7 +45,8 @@ AFRAME.registerComponent("hover-visuals", {
     const elements = this.el.object3D.matrixWorld.elements;
     const interaction = AFRAME.scenes[0].systems.interaction;
 
-    for (const uniform of this.uniforms.values()) {
+    for (let i = 0, l = this.uniforms.length; i < l; i++) {
+      const uniform = this.uniforms[i];
       uniform.hubs_HighlightInteractorTwo.value =
         !!interaction.state.rightHand.held || !!interaction.state.rightHand.hovered;
       uniform.hubs_InteractorTwoPos.value[0] = elements[12];
