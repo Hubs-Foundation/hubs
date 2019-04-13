@@ -234,7 +234,7 @@ function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
-  const isCursorHoldingPen = scene && scene.systems.userinput.activeSets.has(userinputSets.cursorHoldingPen);
+  const isCursorHoldingPen = scene && scene.systems.userinput.activeSets.includes(userinputSets.cursorHoldingPen);
   const hasActiveCamera = scene && !!scene.systems["camera-tools"].getMyCamera();
 
   ReactDOM.render(

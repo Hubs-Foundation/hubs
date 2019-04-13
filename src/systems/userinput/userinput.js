@@ -36,14 +36,20 @@ import { gamepadBindings } from "./bindings/generic-gamepad";
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "../../utils/vr-caps-detect";
 import { ArrayBackedSet } from "./array-backed-set";
 
-function intersection(setA, setB) {
-  const _intersection = new Set();
-  for (const elem of setB) {
-    if (setA.has(elem)) {
-      _intersection.add(elem);
+function intersectionSize(setA, setB) {
+  let size = 0;
+  for (let i = 0, il = setB.length; i < il; i++) {
+    const elem = setB[i];
+
+    for (let j = 0, jl = setA.length; j < jl; j++) {
+      if (elem === setA[j]) {
+        size++;
+        break;
+      }
     }
   }
-  return _intersection;
+
+  return size;
 }
 
 const satisfiesPath = (binding, path) => {
@@ -130,7 +136,7 @@ function computeMasks(bindings) {
 
 function isActive(binding, sets) {
   for (let i = 0; i < binding.sets.length; i++) {
-    if (sets.has(binding.sets[i])) {
+    if (sets.includes(binding.sets[i])) {
       return true;
     }
   }
@@ -199,8 +205,8 @@ AFRAME.registerSystem("userinput", {
       }
     };
 
-    this.prevActiveSets = new Set();
-    this.activeSets = new Set([sets.global]);
+    this.prevActiveSets = [];
+    this.activeSets = [sets.global];
     this.pendingSetChanges = [];
     this.xformStates = new Map();
     this.activeDevices = new ArrayBackedSet([new HudDevice()]);
@@ -349,19 +355,34 @@ AFRAME.registerSystem("userinput", {
       this.masks = computeMasks(this.sortedBindings);
     }
 
-    this.prevActiveSets.clear();
-    for (const item of this.activeSets) {
-      this.prevActiveSets.add(item);
+    this.prevActiveSets.length = 0;
+    for (let i = 0; i < this.activeSets.length; i++) {
+      const item = this.activeSets[i];
+
+      if (!this.prevActiveSets.includes(item)) {
+        this.prevActiveSets.push(item);
+      }
     }
     resolveActionSets();
     for (let i = 0, l = this.pendingSetChanges.length; i < l; i += 2) {
       const set = this.pendingSetChanges[i];
       const value = this.pendingSetChanges[i + 1];
-      this.activeSets[value ? "add" : "delete"](set);
+
+      if (value) {
+        if (!this.activeSets.includes(set)) {
+          this.activeSets.push(set);
+        }
+      } else {
+        const idx = this.activeSets.indexOf(set);
+
+        if (idx > -1) {
+          this.activeSets.splice(idx, 1);
+        }
+      }
     }
     const activeSetsChanged =
-      this.prevActiveSets.size !== this.activeSets.size ||
-      intersection(this.prevActiveSets, this.activeSets).size !== this.activeSets.size;
+      this.prevActiveSets.length !== this.activeSets.length ||
+      intersectionSize(this.prevActiveSets, this.activeSets) !== this.activeSets.length;
     this.pendingSetChanges.length = 0;
     if (registeredMappingsChanged || activeSetsChanged || (!this.actives && !this.masked)) {
       this.prevActives = this.actives;
