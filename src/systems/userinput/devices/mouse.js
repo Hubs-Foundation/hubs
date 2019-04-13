@@ -67,9 +67,11 @@ export class MouseDevice {
   write(frame) {
     this.movementXY = [0, 0]; // deltas
     this.wheel = 0; // delta
-    this.events.forEach(event => {
+
+    for (let i = 0; i < this.events.length; i++) {
+      const event = this.events[i];
       this.process(event);
-    });
+    }
 
     while (this.events.length) {
       this.events.pop();

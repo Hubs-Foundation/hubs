@@ -38,7 +38,8 @@ export class KeyboardDevice {
   }
 
   write(frame) {
-    this.events.forEach(event => {
+    for (let i = 0; i < this.events.length; i++) {
+      const event = this.events[i];
       if (event.type === "blur") {
         this.keys = {};
         this.seenKeys.clear();
@@ -47,7 +48,8 @@ export class KeyboardDevice {
       const key = event.key.toLowerCase();
       this.keys[key] = event.type === "keydown";
       this.seenKeys.add(key);
-    });
+    }
+
     this.events.length = 0;
 
     for (let i = 0; i < this.seenKeys.items.length; i++) {

@@ -21,6 +21,8 @@ AFRAME.registerComponent("wasd-to-analog2d", {
     this.onWasd = this.onWasd.bind(this);
     this.move = this.move.bind(this);
     this.onBlur = this.onBlur.bind(this);
+    this.target = [0, 0];
+    this.output = [0, 0];
   },
 
   play: function() {
@@ -58,11 +60,14 @@ AFRAME.registerComponent("wasd-to-analog2d", {
   },
 
   tick: function() {
-    this.target = [0, 0];
+    this.target[0] = 0;
+    this.target[1] = 0;
 
-    for (const key in this.keys) {
+    for (let i = 0; i < this.keys.length; i++) {
+      const key = this.keys[i];
       if (this.keys[key] && this.vectors[key]) {
-        this.target = [this.target[0] + this.vectors[key][0], this.target[1] + this.vectors[key][1]];
+        this.target[0] = this.target[0] + this.vectors[key][0];
+        this.target[1] = this.target[1] + this.vectors[key][1];
       }
     }
 
@@ -83,12 +88,10 @@ AFRAME.registerComponent("wasd-to-analog2d", {
     }
 
     const easeInSpeed = 0.25;
-    this.output = [
-      this.output[0] + easeInSpeed * (this.target[0] - this.output[0]),
-      this.output[1] + easeInSpeed * (this.target[1] - this.output[1])
-    ];
+    this.output[0] = this.output[0] + easeInSpeed * (this.target[0] - this.output[0]);
+    this.output[1] = this.output[1] + easeInSpeed * (this.target[1] - this.output[1]);
 
-    if (this.output !== [0, 0]) {
+    if (this.output[0] !== 0 || this.output[1] !== 0) {
       this.el.emit(this.data.analog2dOutputAction, {
         axis: this.output
       });
