@@ -163,7 +163,8 @@ AFRAME.registerSystem("userinput", {
   },
 
   toggleSet(set, value) {
-    this.pendingSetChanges.push({ set, value: !!value });
+    this.pendingSetChanges.push(set);
+    this.pendingSetChanges.push(!!value);
   },
 
   init() {
@@ -353,7 +354,9 @@ AFRAME.registerSystem("userinput", {
       this.prevActiveSets.add(item);
     }
     resolveActionSets();
-    for (const { set, value } of this.pendingSetChanges) {
+    for (let i = 0, l = this.pendingSetChanges.length; i < l; i += 2) {
+      const set = this.pendingSetChanges[i];
+      const value = this.pendingSetChanges[i + 1];
       this.activeSets[value ? "add" : "delete"](set);
     }
     const activeSetsChanged =

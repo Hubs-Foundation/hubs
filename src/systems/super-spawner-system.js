@@ -1,6 +1,5 @@
 import { addMedia } from "../utils/media-utils";
 import { ObjectContentOrigins } from "../object-types";
-import { waitForEvent } from "../utils/async-utils";
 
 // WARNING: This system mutates interaction system state!
 export class SuperSpawnerSystem {
@@ -8,47 +7,51 @@ export class SuperSpawnerSystem {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const superSpawner = state.hovered && state.hovered.components["super-spawner"];
     if (superSpawner && !superSpawner.cooldownTimeout && userinput.get(grabPath)) {
-      entity.object3D.updateMatrices();
-      entity.object3D.matrix.decompose(entity.object3D.position, entity.object3D.quaternion, entity.object3D.scale);
-      const data = superSpawner.data;
-      const spawnedEntity = addMedia(
-        data.src,
-        data.template,
-        ObjectContentOrigins.SPAWNER,
-        data.resolve,
-        data.resize,
-        false
-      ).entity;
-      spawnedEntity.object3D.position.copy(
-        data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
-      );
-      spawnedEntity.object3D.rotation.copy(
-        data.useCustomSpawnRotation ? data.spawnRotation : superSpawner.el.object3D.rotation
-      );
-      spawnedEntity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);
-      spawnedEntity.object3D.matrixNeedsUpdate = true;
-      state.held = spawnedEntity;
-
-      superSpawner.activateCooldown();
-      state.spawning = true;
-      // WARNING: waitForEvent is semantically different than entity.addEventListener("body-loaded", ...)
-      // and adding a callback fn via addEventListener will not work unless the callback function
-      // wraps its code in setTimeout(()=>{...}, 0)
-      spawnedEntity.addEventListener(
-        "body-loaded",
-        () => {
-          state.spawning = false;
-          spawnedEntity.object3D.position.copy(
-            data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
-          );
-          if (data.centerSpawnedObject) {
-            spawnedEntity.body.position.copy(entity.object3D.position);
-          }
-          spawnedEntity.object3D.matrixNeedsUpdate = true;
-        },
-        { once: true }
-      );
+      this.performSpawn(state, entity, grabPath, userinput, superSpawner);
     }
+  }
+
+  performSpawn(state, entity, grabPath, userinput, superSpawner) {
+    entity.object3D.updateMatrices();
+    entity.object3D.matrix.decompose(entity.object3D.position, entity.object3D.quaternion, entity.object3D.scale);
+    const data = superSpawner.data;
+    const spawnedEntity = addMedia(
+      data.src,
+      data.template,
+      ObjectContentOrigins.SPAWNER,
+      data.resolve,
+      data.resize,
+      false
+    ).entity;
+    spawnedEntity.object3D.position.copy(
+      data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
+    );
+    spawnedEntity.object3D.rotation.copy(
+      data.useCustomSpawnRotation ? data.spawnRotation : superSpawner.el.object3D.rotation
+    );
+    spawnedEntity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);
+    spawnedEntity.object3D.matrixNeedsUpdate = true;
+    state.held = spawnedEntity;
+
+    superSpawner.activateCooldown();
+    state.spawning = true;
+    // WARNING: waitForEvent is semantically different than entity.addEventListener("body-loaded", ...)
+    // and adding a callback fn via addEventListener will not work unless the callback function
+    // wraps its code in setTimeout(()=>{...}, 0)
+    spawnedEntity.addEventListener(
+      "body-loaded",
+      () => {
+        state.spawning = false;
+        spawnedEntity.object3D.position.copy(
+          data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
+        );
+        if (data.centerSpawnedObject) {
+          spawnedEntity.body.position.copy(entity.object3D.position);
+        }
+        spawnedEntity.object3D.matrixNeedsUpdate = true;
+      },
+      { once: true }
+    );
   }
 
   tick() {
