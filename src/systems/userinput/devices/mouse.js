@@ -65,7 +65,8 @@ export class MouseDevice {
   }
 
   write(frame) {
-    this.movementXY = [0, 0]; // deltas
+    this.movementXY[0] = 0; // deltas
+    this.movementXY[1] = 0; // deltas
     this.wheel = 0; // delta
 
     for (let i = 0; i < this.events.length; i++) {

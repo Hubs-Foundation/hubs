@@ -3,6 +3,9 @@
  * @namespace user-input
  * @component wasd-to-analog2d
  */
+
+const WASD = ["w", "a", "s", "d"];
+
 AFRAME.registerComponent("wasd-to-analog2d", {
   schema: {
     analog2dOutputAction: { default: "wasd_analog2d" }
@@ -63,8 +66,9 @@ AFRAME.registerComponent("wasd-to-analog2d", {
     this.target[0] = 0;
     this.target[1] = 0;
 
-    for (let i = 0; i < this.keys.length; i++) {
-      const key = this.keys[i];
+    for (let i = 0, l = WASD.length; i < l; i++) {
+      const key = WASD[i];
+
       if (this.keys[key] && this.vectors[key]) {
         this.target[0] = this.target[0] + this.vectors[key][0];
         this.target[1] = this.target[1] + this.vectors[key][1];
