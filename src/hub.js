@@ -19,6 +19,7 @@ import "aframe-slice9-component";
 import "./utils/audio-context-fix";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
+import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
@@ -544,6 +545,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.addEventListener("loaded", () => {
     const physicsSystem = scene.systems.physics;
     physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
+    patchThreeAllocations();
   });
 
   const authChannel = new AuthChannel(store);
