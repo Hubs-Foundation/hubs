@@ -74,9 +74,7 @@ export class MouseDevice {
       this.process(event);
     }
 
-    while (this.events.length) {
-      this.events.pop();
-    }
+    this.events.length = 0;
 
     frame.setVector2(paths.device.mouse.coords, this.coords[0], this.coords[1]);
     frame.setVector2(paths.device.mouse.movementXY, this.movementXY[0], this.movementXY[1]);

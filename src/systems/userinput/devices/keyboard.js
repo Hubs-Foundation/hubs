@@ -43,11 +43,11 @@ export class KeyboardDevice {
       if (event.type === "blur") {
         this.keys = {};
         this.seenKeys.clear();
-        return;
+      } else {
+        const key = event.key.toLowerCase();
+        this.keys[key] = event.type === "keydown";
+        this.seenKeys.add(key);
       }
-      const key = event.key.toLowerCase();
-      this.keys[key] = event.type === "keydown";
-      this.seenKeys.add(key);
     }
 
     this.events.length = 0;
