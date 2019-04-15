@@ -88,6 +88,7 @@ module.exports = (env, argv) => ({
     scene: path.join(__dirname, "src", "scene.js"),
     link: path.join(__dirname, "src", "link.js"),
     spoke: path.join(__dirname, "src", "spoke.js"),
+    discord: path.join(__dirname, "src", "discord.js"),
     admin: path.join(__dirname, "src", "admin.js"),
     "whats-new": path.join(__dirname, "src", "whats-new.js"),
     "avatar-selector": path.join(__dirname, "src", "avatar-selector.js")
@@ -273,6 +274,11 @@ module.exports = (env, argv) => ({
       filename: "spoke.html",
       template: path.join(__dirname, "src", "spoke.html"),
       chunks: ["vendor", "spoke"]
+    }),
+    new HTMLWebpackPlugin({
+      filename: "discord.html",
+      template: path.join(__dirname, "src", "discord.html"),
+      chunks: ["vendor", "discord"]
     }),
     new HTMLWebpackPlugin({
       filename: "whats-new.html",
