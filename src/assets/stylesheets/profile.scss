@@ -101,6 +101,18 @@
       .form-body {
         flex: 1;
       }
+      .split {
+        flex: 1;
+        display: flex;
+      }
+      .preview{
+        margin-left: 40px;
+      }
+      canvas {
+        width: 100%;
+        height: 100%;
+        border-radius: 20px;
+      }
     }
 
     .loading-panel {
