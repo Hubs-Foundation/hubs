@@ -834,6 +834,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
       if (isInitialJoin) {
+        store.addEventListener("statechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
         hubPhxPresence.onSync(() => {
           remountUI({
             sessionId: socket.params().session_id,

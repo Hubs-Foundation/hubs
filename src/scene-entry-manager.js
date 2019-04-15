@@ -154,8 +154,6 @@ export default class SceneEntryManager {
   };
 
   _updatePlayerInfoFromProfile = async () => {
-    this.hubChannel.sendProfileUpdate();
-
     const { avatarId } = this.store.state.profile;
     const avatarSrc = await getAvatarSrc(avatarId);
     this.playerRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
