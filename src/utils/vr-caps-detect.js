@@ -68,7 +68,7 @@ export async function getAvailableVREntryTypes() {
   try {
     // Skip getVRDisplays on desktop Chrome since the API is in a broken state there.
     // See https://github.com/mozilla/hubs/issues/892
-    if (browser.name !== "chrome" || isMobile) {
+    if (browser.name !== "chrome" || isMobile) {
       // We pull the displays on non-WebVR capable mobile browsers so we can pick up cardboard.
       displays = isWebVRCapableBrowser || isCardboardCapableBrowser ? await navigator.getVRDisplays() : [];
     }
