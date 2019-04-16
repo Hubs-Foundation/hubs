@@ -7,7 +7,6 @@ const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
 const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
-const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
 import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import {
@@ -51,10 +50,6 @@ export default class SceneEntryManager {
     const playerCamera = document.querySelector("#player-camera");
     playerCamera.removeAttribute("scene-preview-camera");
     playerCamera.object3D.position.set(0, playerHeight, 0);
-
-    // Get aframe inspector url using the webpack file-loader.
-    // Set the aframe-inspector url to our hosted copy.
-    this.scene.setAttribute("inspector", { url: aframeInspectorUrl });
 
     if (isDebug) {
       NAF.connection.adapter.session.options.verbose = true;

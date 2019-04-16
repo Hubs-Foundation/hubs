@@ -154,7 +154,6 @@ class AvatarSelector extends Component {
     return (
       <div className="avatar-selector">
         <a-scene
-          vr-mode-ui="enabled: false"
           ref={sce => (this.scene = sce)}
           background="color: #aaa"
           environment-map=""
