@@ -14,8 +14,12 @@
         // HACK Chrome on iOS breaks completely if we don't do this because a-frame's webvr-polyfill doesn't recognize
         // Google Chrome on iOS correctly. We can remove this when we upgrade a-frame past 0.8.2.
         if (!window.WebVRConfig) { window.WebVRConfig = {}; }
-        // HACK Another hack to fix a-frame's device detection in Chrome when WebXR or WebVR flags are enabled in
-        // chrome://flags. See https://github.com/mozilla/hubs/issues/892
+    </script>
+    <script>
+        /*
+        HACK Another hack to fix a-frame's device detection in Chrome when WebXR or WebVR flags are enabled in
+        chrome://flags. See https://github.com/mozilla/hubs/issues/892
+        */
         if (navigator.xr && !navigator.xr.requestDevice) {
             navigator.xr.requestDevice = () => Promise.reject({message: "Hubs: requestDevice not supported."});
         }
