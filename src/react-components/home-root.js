@@ -355,10 +355,16 @@ class HomeRoot extends Component {
 
                     <WithHoverSound>
                       <div className={styles.secondaryLink}>
+                        <div>
+                          <FormattedMessage id="home.add_to_discord_1" />
+                        </div>
+                        <img src={discordLogoSmall} />
                         <a href="/discord">
-                          <img src={discordLogoSmall} />
-                          <FormattedMessage id="home.add_to_discord" />
+                          <FormattedMessage id="home.add_to_discord_2" />
                         </a>
+                        <div>
+                          <FormattedMessage id="home.add_to_discord_3" />
+                        </div>
                       </div>
                     </WithHoverSound>
                   </div>

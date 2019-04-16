@@ -212,21 +212,19 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    font-weight: bold;
+    color: black;
+    margin-top: 8px;
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
 
     a { 
-      position: relative;
-
-      img {
-        position: absolute;
-        top: 0;
-        right: -26px;
-        width: 24px;
-        height: 24px;
-      }
-
-      margin-top: 8px;
       color: black;
-      font-weight: bold;
+      margin-right: 4px;
+      margin-left: 2px;
     }
   }
 
