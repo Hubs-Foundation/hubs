@@ -64,8 +64,17 @@ export async function getAvailableVREntryTypes() {
 
   const isCardboardCapableBrowser = !!(isMobile && !isIDevice && browser.name === "chrome" && !isSamsungBrowser);
 
-  // We pull the displays on non-WebVR capable mobile browsers so we can pick up cardboard.
-  const displays = isWebVRCapableBrowser || isCardboardCapableBrowser ? await navigator.getVRDisplays() : [];
+  let displays = [];
+  try {
+    // Skip getVRDisplays on desktop Chrome since the API is in a broken state there.
+    // See https://github.com/mozilla/hubs/issues/892
+    if (browser.name !== "chrome" || isMobile) {
+      // We pull the displays on non-WebVR capable mobile browsers so we can pick up cardboard.
+      displays = isWebVRCapableBrowser || isCardboardCapableBrowser ? await navigator.getVRDisplays() : [];
+    }
+  } catch (e) {
+    console.warn("navigator.getVRDisplays() failed", e);
+  }
 
   const isOculusBrowser = /Oculus/.test(ua);
 
