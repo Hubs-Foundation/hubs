@@ -105,5 +105,5 @@ export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace
 export function getPresenceProfileForSession(presences, sessionId) {
   const entry = Object.entries(presences || {}).find(([k]) => k === sessionId) || [];
   const presence = entry[1];
-  return (presence.metas && presence.metas[0].profile) || {};
+  return (presence && presence.metas && presence.metas[0].profile) || {};
 }
