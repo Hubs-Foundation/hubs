@@ -208,11 +208,22 @@ body {
     }
   }
 
-  :local(.have-code) {
+  :local(.secondary-link) {
     display: flex;
     justify-content: center;
+    align-items: center;
 
     a { 
+      position: relative;
+
+      img {
+        position: absolute;
+        top: 0;
+        right: -26px;
+        width: 24px;
+        height: 24px;
+      }
+
       margin-top: 8px;
       color: black;
       font-weight: bold;
