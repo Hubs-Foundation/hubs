@@ -216,7 +216,7 @@ function getFilesFromSketchfabZip(src) {
   });
 }
 
-async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
+export async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   let gltfUrl = src;
   let fileMap;
 
