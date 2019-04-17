@@ -6,6 +6,7 @@ import { HoverMenuSystem } from "./hover-menu-system";
 import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
+import { CaptureSystem } from "./capture-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -19,6 +20,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.superSpawnerSystem = new SuperSpawnerSystem();
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
     this.soundEffectsSystem = new SoundEffectsSystem();
+    this.captureSystem = new CaptureSystem(this.el);
   },
 
   tick(t) {
