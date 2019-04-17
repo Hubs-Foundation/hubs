@@ -77,16 +77,16 @@ export default class AvatarPreview extends Component {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xeaeaea);
 
-    const camera = new THREE.PerspectiveCamera(75, this.canvas.clientWidth / this.canvas.clientHeight, 0.1, 1000);
-    const controls = new THREE.OrbitControls(camera, this.canvas);
+    this.camera = new THREE.PerspectiveCamera(75, this.canvas.clientWidth / this.canvas.clientHeight, 0.1, 1000);
+    const controls = new THREE.OrbitControls(this.camera, this.canvas);
 
     const light = new THREE.DirectionalLight(0xfdf5c2, 3);
     light.position.set(0, 10, 10);
     this.scene.add(light);
     this.scene.add(new THREE.HemisphereLight(0xb1e3ff, 0xb1e3ff, 3));
 
-    camera.position.set(-0.2, 0.5, 0.5);
-    camera.matrixAutoUpdate = true;
+    this.camera.position.set(-0.2, 0.5, 0.5);
+    this.camera.matrixAutoUpdate = true;
 
     controls.target.set(0, 0.45, 0);
     controls.update();
@@ -100,14 +100,18 @@ export default class AvatarPreview extends Component {
     this.previewRenderer.setAnimationLoop(() => {
       const dt = clock.getDelta();
       this.mixer && this.mixer.update(dt);
-      this.previewRenderer.render(this.scene, camera);
+      this.previewRenderer.render(this.scene, this.camera);
     });
     window.addEventListener("resize", this.resize);
     this.resize();
   };
 
   resize = () => {
-    this.previewRenderer.setSize(this.canvas.parentElement.offsetWidth, this.canvas.parentElement.offsetHeight);
+    const width = this.canvas.parentElement.offsetWidth;
+    const height = this.canvas.parentElement.offsetHeight;
+    this.previewRenderer.setSize(width, height);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
   };
 
   componentWillUnmount = () => {
