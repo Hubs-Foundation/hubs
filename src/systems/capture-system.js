@@ -17,9 +17,11 @@ export class CaptureSystem {
         this.chunks.push(e.data);
       };
       this.recorder.onstop = () => {
-        const blob = new Blob(this.chunks, { type: "video/webm" });
+        if (this.chunks.length === 0) return;
+        const mimeType = this.chunks[0].type;
+        const blob = new Blob(this.chunks, { type: mimeType });
         this.chunks.length = 0;
-        this.scene.emit("add_media", new File([blob], "capture.webm", { type: "video/webm" }));
+        this.scene.emit("add_media", new File([blob], "capture", { type: mimeType }));
       };
     });
   }
