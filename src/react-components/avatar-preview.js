@@ -95,8 +95,11 @@ export default class AvatarPreview extends Component {
       this.scene.add(avatar);
     });
 
+    const clock = new THREE.Clock();
     this.previewRenderer = createRenderer(this.canvas);
     this.previewRenderer.setAnimationLoop(() => {
+      const dt = clock.getDelta();
+      this.mixer && this.mixer.update(dt);
       this.previewRenderer.render(this.scene, camera);
     });
     window.addEventListener("resize", this.resize);
@@ -121,8 +124,16 @@ export default class AvatarPreview extends Component {
     const gltf = await loadGLTF(avatar.base_gltf_url, "model/gltf");
 
     // On the bckend we look for a material called Bot_PBS, here we are looking for a mesh called Avatar.
-    // ``When we "officially" support uploading custom GLTFs we need to decide what we are going to key things on
+    // When we "officially" support uploading custom GLTFs we need to decide what we are going to key things on
     this.previewMesh = gltf.scene.getObjectByName("Avatar");
+
+    const idleAnimation = gltf.animations && gltf.animations.find(({ name }) => name === "idle_eyes");
+    if (idleAnimation) {
+      this.mixer = new THREE.AnimationMixer(this.previewMesh);
+      const action = this.mixer.clipAction(idleAnimation);
+      action.enabled = true;
+      action.setLoop(THREE.LoopRepeat, Infinity).play();
+    }
 
     const material = this.previewMesh.material;
     // We delete onUpdate here to opt out of the auto texture cleanup after GPU upload.
