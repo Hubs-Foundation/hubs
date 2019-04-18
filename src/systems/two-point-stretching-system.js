@@ -1,6 +1,6 @@
 /* global THREE AFRAME */
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
-const collisionFilterMask = { collisionFilterMask: COLLISION_LAYERS.HANDS };
+const COLLISION_FILTER_MASK_HANDS = { collisionFilterMask: COLLISION_LAYERS.HANDS };
 export const distanceBetweenStretchers = (() => {
   const a = new THREE.Vector3();
   const b = new THREE.Vector3();
@@ -37,7 +37,7 @@ export class TwoPointStretchingSystem {
         this.stretched = leftHand.held;
         this.initialScale.copy(this.stretched.object3D.scale);
         if (this.stretched.components["ammo-body"]) {
-          this.stretched.setAttribute("ammo-body", collisionFilterMask);
+          this.stretched.setAttribute("ammo-body", COLLISION_FILTER_MASK_HANDS);
         }
       }
 
