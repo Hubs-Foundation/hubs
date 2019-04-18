@@ -541,11 +541,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Physics needs to be ready before spawning anything.
   while (!scene.systems.physics.initialized) await nextTick();
 
-  scene.addEventListener("loaded", () => {
+  const onSceneLoaded = () => {
     const physicsSystem = scene.systems.physics;
     physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
     patchThreeAllocations();
-  });
+  };
+
+  if (scene.hasLoaded) {
+    onSceneLoaded();
+  } else {
+    scene.addEventListener("loaded", onSceneLoaded, { once: true });
+  }
 
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);
