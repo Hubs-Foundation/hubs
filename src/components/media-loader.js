@@ -375,7 +375,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "image-loaded",
           () => {
-            this.el.setAttribute("hover-menu__image", { template: "#link-hover-menu", dirs: ["forward", "back"] });
+            this.el.setAttribute("hover-menu__link", { template: "#link-hover-menu", dirs: ["forward", "back"] });
             this.onMediaLoaded();
           },
           { once: true }
