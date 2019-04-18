@@ -911,8 +911,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const permsToken = oauthFlowPermsToken || data.perms_token;
       hubChannel.setPermissionsFromToken(permsToken);
 
-      hubChannel.sendProfileUpdate();
-
       scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
