@@ -154,11 +154,11 @@ AFRAME.registerSystem("interaction", {
       this.rightHandTeleporter || document.querySelector("#player-right-controller").components["teleporter"];
     this.gazeTeleporter = this.gazeTeleporter || document.querySelector("#gaze-teleport").components["teleporter"];
 
-    if (this.el.is("vr-mode")) {
+    if (this.options.leftHand.entity.object3D.visible) {
       this.tickInteractor(this.options.leftHand, this.state.leftHand);
-      if (!this.state.rightRemote.held) {
-        this.tickInteractor(this.options.rightHand, this.state.rightHand);
-      }
+    }
+    if (this.options.rightHand.entity.object3D.visible && !this.state.rightRemote.held) {
+      this.tickInteractor(this.options.rightHand, this.state.rightHand);
     }
 
     if (!this.state.rightHand.held && !this.state.rightHand.hovered) {
