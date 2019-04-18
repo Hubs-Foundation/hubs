@@ -28,7 +28,6 @@ import { addAnimationComponents } from "./utils/animation";
 import Cookies from "js-cookie";
 
 import "./components/scene-components";
-import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
 import "./components/mute-mic";
 import "./components/bone-mute-state-indicator";
 import "./components/bone-visibility";
