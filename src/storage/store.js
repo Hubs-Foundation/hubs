@@ -40,6 +40,7 @@ export const SCHEMA = {
       properties: {
         hasFoundFreeze: { type: "boolean" },
         hasChangedName: { type: "boolean" },
+        hasAcceptedProfile: { type: "boolean" },
         lastEnteredAt: { type: "string" },
         hasPinned: { type: "boolean" },
         hasRotated: { type: "boolean" },
