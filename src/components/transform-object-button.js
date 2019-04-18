@@ -1,5 +1,6 @@
 import { paths } from "../systems/userinput/paths";
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
+const AMMO_BODY_ATTRIBUTES = { type: "kinematic", collisionFilterMask: COLLISION_LAYERS.HANDS };
 
 const TRANSFORM_MODE = {
   AXIS: "axis",
@@ -44,7 +45,7 @@ AFRAME.registerComponent("transform-button", {
         return;
       }
       if (this.targetEl.body) {
-        this.targetEl.setAttribute("ammo-body", { type: "kinematic", collisionFilterMask: COLLISION_LAYERS.HANDS });
+        this.targetEl.setAttribute("ammo-body", AMMO_BODY_ATTRIBUTES);
       }
       this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];
       this.transformSystem.startTransform(
