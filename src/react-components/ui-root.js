@@ -1602,7 +1602,7 @@ class UIRoot extends Component {
                   )}
                 {showVREntryButton && (
                   <WithHoverSound>
-                    <button onClick={() => this.props.scene.enterVR()}>
+                    <button className={inviteStyles.enterButton} onClick={() => this.props.scene.enterVR()}>
                       <FormattedMessage id="entry.enter-in-vr" />
                     </button>
                   </WithHoverSound>

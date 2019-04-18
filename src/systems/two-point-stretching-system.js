@@ -11,9 +11,6 @@ export const distanceBetweenStretchers = (() => {
 
 export class TwoPointStretchingSystem {
   constructor() {
-    this.heldLeftHand = null;
-    this.heldRightHand = null;
-    this.heldRightRemote = null;
     this.initialScale = new THREE.Vector3();
   }
 
@@ -22,34 +19,30 @@ export class TwoPointStretchingSystem {
     const { leftHand, rightHand, rightRemote } = interaction.state;
 
     const stretching = leftHand.held && (leftHand.held === rightHand.held || leftHand.held === rightRemote.held);
-    let stretcherLeft, stretcherRight;
+    let leftStretcher, rightStretcher;
     if (stretching) {
-      stretcherLeft = interaction.options.leftHand.entity.object3D;
-      stretcherRight =
+      leftStretcher = interaction.options.leftHand.entity.object3D;
+      rightStretcher =
         leftHand.held === rightHand.held
           ? interaction.options.rightHand.entity.object3D
           : interaction.options.rightRemote.entity.object3D;
       if (
-        this.stretcherLeft !== stretcherLeft ||
-        this.stretcherRight !== stretcherRight ||
+        leftStretcher !== this.previousLeftStretcher ||
+        rightStretcher !== this.previousRightStretcher ||
         leftHand.held !== this.stretched
       ) {
-        this.initialStretchDistance = distanceBetweenStretchers(stretcherLeft, stretcherRight);
+        this.initialStretchDistance = distanceBetweenStretchers(leftStretcher, rightStretcher);
         this.stretched = leftHand.held;
         this.initialScale.copy(this.stretched.object3D.scale);
       }
 
       this.stretched.object3D.scale
         .copy(this.initialScale)
-        .multiplyScalar(distanceBetweenStretchers(stretcherLeft, stretcherRight) / this.initialStretchDistance);
+        .multiplyScalar(distanceBetweenStretchers(leftStretcher, rightStretcher) / this.initialStretchDistance);
       this.stretched.object3D.matrixNeedsUpdate = true;
     }
 
-    this.stretcherLeft = stretcherLeft;
-    this.stretcherRight = stretcherRight;
-
-    this.heldLeftHand = leftHand.held;
-    this.heldRightHand = rightHand.held;
-    this.heldRightRemote = rightRemote.held;
+    this.previousLeftStretcher = leftStretcher;
+    this.previousRightStretcher = rightStretcher;
   }
 }

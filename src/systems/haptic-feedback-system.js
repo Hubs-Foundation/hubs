@@ -94,10 +94,8 @@ export class HapticFeedbackSystem {
     const buttonPressedStrength = didClickButton ? STRENGTH.BUTTON_PRESSED : 0;
     const stretchingStrength = determineStretchStrength(twoPointStretchingSystem);
 
-    const leftStrength = leftActuator ? Math.max(leftHandStrength, stretchingStrength) : 0;
-    const rightStrength = rightActuator
-      ? Math.max(rightHandStrength, rightRemoteStrength, stretchingStrength, buttonPressedStrength)
-      : 0;
+    const leftStrength = Math.max(leftHandStrength, stretchingStrength);
+    const rightStrength = Math.max(rightHandStrength, rightRemoteStrength, stretchingStrength, buttonPressedStrength);
 
     if (leftStrength && leftActuator) {
       leftActuator.pulse(leftStrength, 15);

@@ -7,6 +7,8 @@ export default function pinnedEntityToGltf(el) {
   const networkId = components.networked.data.networkId;
 
   const gltfComponents = {};
+  // TODO: Move to MOZ_hubs_components and include version number. Requires migration of existing room objects.
+  // Please do this before making a breaking change to the data stored here.
   const gltfNode = { name: networkId, extensions: { HUBS_components: gltfComponents } };
 
   // Adapted from three.js GLTFExporter
