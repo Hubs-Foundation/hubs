@@ -8,6 +8,7 @@ import { playVideoWithStopOnBlur } from "../utils/video-utils.js";
 import homeVideoWebM from "../assets/video/home.webm";
 import homeVideoMp4 from "../assets/video/home.mp4";
 import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
+import discordLogoSmall from "../assets/images/discord-logo-small.png";
 import mozLogo from "../assets/images/moz-logo-black.png";
 import classNames from "classnames";
 import { ENVIRONMENT_URLS } from "../assets/environments/environments";
@@ -345,10 +346,25 @@ class HomeRoot extends Component {
                 {(useOculusBrowserFTUE || this.state.environments.length > 1) && (
                   <div>
                     <WithHoverSound>
-                      <div className={styles.haveCode}>
+                      <div className={styles.secondaryLink}>
                         <a href="/link">
                           <FormattedMessage id="home.have_code" />
                         </a>
+                      </div>
+                    </WithHoverSound>
+
+                    <WithHoverSound>
+                      <div className={styles.secondaryLink}>
+                        <div>
+                          <FormattedMessage id="home.add_to_discord_1" />
+                        </div>
+                        <img src={discordLogoSmall} />
+                        <a href="/discord">
+                          <FormattedMessage id="home.add_to_discord_2" />
+                        </a>
+                        <div>
+                          <FormattedMessage id="home.add_to_discord_3" />
+                        </div>
                       </div>
                     </WithHoverSound>
                   </div>

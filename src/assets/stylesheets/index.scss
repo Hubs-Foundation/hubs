@@ -208,14 +208,23 @@ body {
     }
   }
 
-  :local(.have-code) {
+  :local(.secondary-link) {
     display: flex;
     justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: black;
+    margin-top: 8px;
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
 
     a { 
-      margin-top: 8px;
       color: black;
-      font-weight: bold;
+      margin-right: 4px;
+      margin-left: 2px;
     }
   }
 

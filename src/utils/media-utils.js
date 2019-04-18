@@ -362,7 +362,6 @@ export const traverseMeshesAndAddShapes = (function() {
         o.name !== "Floor_Plan" &&
         o.name !== "Ground_Plane"
       ) {
-        o.updateMatrices();
         vertexCount += o.geometry.attributes.position.count;
       }
     });
@@ -383,12 +382,12 @@ export const traverseMeshesAndAddShapes = (function() {
       });
       shapes.push({ id: shapePrefix + floorPlan.name, entity: floorPlan.el });
     } else if (vertexCount < vertexLimit) {
-      el.setAttribute(shapePrefix + meshRoot.name, {
+      el.setAttribute(shapePrefix + "environment", {
         type: SHAPE.MESH,
         margin: 0.01,
         fit: FIT.COMPOUND
       });
-      shapes.push({ id: shapePrefix + meshRoot.name, entity: el });
+      shapes.push({ id: shapePrefix + "environment", entity: el });
       console.log("adding compound mesh shape");
     } else {
       el.setAttribute(shapePrefix + "defaultFloor", {
@@ -404,6 +403,61 @@ export const traverseMeshesAndAddShapes = (function() {
     console.groupEnd();
   };
 })();
+
+const mediaPos = new THREE.Vector3();
+
+export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false) {
+  const { entity, orientation } = addMedia(media, "#interactable-media", undefined, false);
+
+  const pos = el.object3D.position;
+
+  entity.object3D.position.set(pos.x, pos.y, pos.z);
+  entity.object3D.rotation.copy(el.object3D.rotation);
+
+  if (mirrorOrientation) {
+    entity.object3D.rotateY(Math.PI);
+  }
+
+  // Generate photos in a circle around camera, starting from the bottom.
+  // Prevent z-fighting but place behind viewfinder
+  const idx = (snapCount % 6) + 3;
+
+  mediaPos.set(
+    Math.cos(Math.PI * 2 * (idx / 6.0)) * 0.75,
+    Math.sin(Math.PI * 2 * (idx / 6.0)) * 0.75,
+    -0.05 + idx * 0.001
+  );
+
+  el.object3D.localToWorld(mediaPos);
+  entity.object3D.visible = false;
+
+  entity.addEventListener(
+    "image-loaded",
+    () => {
+      entity.object3D.visible = true;
+      entity.setAttribute("animation__photo_pos", {
+        property: "position",
+        dur: 800,
+        from: { x: pos.x, y: pos.y, z: pos.z },
+        to: { x: mediaPos.x, y: mediaPos.y, z: mediaPos.z },
+        easing: "easeOutElastic"
+      });
+    },
+    { once: true }
+  );
+
+  entity.object3D.matrixNeedsUpdate = true;
+
+  entity.addEventListener(
+    "media_resolved",
+    () => {
+      el.emit("photo_taken", entity.components["media-loader"].data.src);
+    },
+    { once: true }
+  );
+
+  return { entity, orientation };
+}
 
 const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/scenes\/(\w+)\/?\S*/;
 const hubsRoomRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/(\w+)\/?\S*/;
