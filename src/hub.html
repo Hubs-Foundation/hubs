@@ -273,7 +273,7 @@
                                     position="0 0 0.001"
                                 ></a-image>
                             </a-entity>
-                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" open-media-button position="0.43 -0.375 0.01">
+                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" window-open-button position="0.43 -0.375 0.01">
                                 <a-entity text="value:open link; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
                             <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" clone-media-button position="-0.43 -0.375 0.01">
@@ -487,15 +487,32 @@
 
             <template id="hubs-destination-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
-                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.01">
+                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button="useScenePermissionTipSelector:.use-scene-permission-tip" position="0 -0.125 0.01">
                         <a-entity text="value:value; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    </a-entity>
+                    <a-entity
+                        class="use-scene-permission-tip"
+                        text="value:You do not have permission to change the scene.; width:1.15; align:center; color:#fff;"
+                        visible="false"
+                        text-raycast-hack
+                        slice9="
+                        color: #0F40A9;
+                        width: 1.2;
+                        height: 0.2;
+                        left: 56;
+                        top: 56;
+                        right: 58;
+                        bottom: 58;
+                        opacity: 1.0;
+                        src: #button"
+                        position="0 0.3 0.01">
                     </a-entity>
                 </a-entity>
             </template>
 
             <template id="link-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
-                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.01">
+                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" window-open-button position="0 -0.125 0.01">
                         <a-entity text="value:open link; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>

@@ -366,9 +366,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "image-loaded",
           () => {
-            const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
-
-            if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
+            if (isHubsRoomUrl(src) || isHubsSceneUrl(src)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#hubs-destination-hover-menu",
                 dirs: ["forward", "back"]

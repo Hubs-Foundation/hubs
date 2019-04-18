@@ -46,7 +46,8 @@ function getHoverableButton(hovered) {
   if (
     hovered.components["icon-button"] ||
     hovered.components["text-button"] ||
-    hovered.components["pin-networked-object-button"]
+    hovered.components["pin-networked-object-button"] ||
+    hovered.components["open-media-button"]
   )
     return hovered;
   // TODO: fix this so that we aren't looping thru children here. I just did this to accomodate the new rounded buttons
