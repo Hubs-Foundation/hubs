@@ -24,8 +24,7 @@ AFRAME.registerComponent("player-info", {
         this.playerSessionId = NAF.utils.getCreator(networkedEntity);
         const playerPresence = window.APP.hubChannel.presence.state[this.playerSessionId];
         if (playerPresence) {
-          this.displayName = playerPresence.metas[0].profile.displayName;
-          this.applyDisplayName();
+          this.updateDisplayNameFromPresenceMeta(playerPresence.metas[0]);
         }
       });
     }
@@ -48,7 +47,10 @@ AFRAME.registerComponent("player-info", {
     if (!this.playerSessionId) return;
     if (this.playerSessionId !== e.detail.sessionId) return;
 
-    this.displayName = e.detail.profile.displayName;
+    this.updateDisplayNameFromPresenceMeta(e.detail);
+  },
+  updateDisplayNameFromPresenceMeta(presenceMeta) {
+    this.displayName = presenceMeta.profile.displayName;
     this.applyDisplayName();
   },
   applyDisplayName() {

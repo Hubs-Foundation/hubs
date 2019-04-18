@@ -56,6 +56,7 @@ export class OculusTouchControllerDevice {
   }
 
   write(frame) {
+    this.gamepad = navigator.getGamepads()[this.gamepad.index];
     if (!this.gamepad.connected) return;
 
     this.buttonMap.forEach(b => {

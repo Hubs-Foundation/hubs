@@ -36,10 +36,6 @@ AFRAME.registerComponent("hover-menu", {
     this.applyHoverState();
   },
 
-  tick() {
-    this.applyHoverState();
-  },
-
   applyHoverState() {
     if (!this.menu) return;
     this.menu.object3D.visible = !this.el.sceneEl.is("frozen") && this.hovering;

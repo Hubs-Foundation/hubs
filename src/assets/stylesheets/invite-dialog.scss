@@ -79,6 +79,11 @@
     pointer-events: auto;
   }
 
+  :local(.enter-button) {
+    @extend %action-button;
+    pointer-events: auto;
+  }
+
   @media (max-height: 320px) {
     display: none;
   }
@@ -92,6 +97,8 @@
   }
 
   :local(.invite-mini-button) {
+    @extend %action-button;
+    pointer-events: auto;
     display: none;
     background-color: $hud-panel-background;
     height: 28px;

@@ -325,6 +325,9 @@ AFRAME.registerComponent("teleporter", {
     // Cylinder.
     this.cylinder = document.createElement("a-entity");
     this.cylinder.setAttribute("position", { x: 0, y: data.hitCylinderHeight / 2, z: 0 });
+    if (window.createImageBitmap !== undefined) {
+      this.cylinder.setAttribute("rotation", { x: 0, y: 0, z: 180 });
+    }
     this.cylinder.setAttribute("geometry", {
       primitive: "cylinder",
       segmentsHeight: 1,

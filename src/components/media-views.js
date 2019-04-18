@@ -3,8 +3,12 @@ import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js/dist/hls.light.js";
-import { proxiedUrlFor } from "../utils/media-utils";
+import { proxiedUrlFor, spawnMediaAround } from "../utils/media-utils";
 import { buildAbsoluteURL } from "url-toolkit";
+import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
+
+const ONCE_TRUE = { once: true };
+const TYPE_IMG_PNG = { type: "image/png" };
 
 export const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
@@ -199,10 +203,7 @@ function createVideoTexture(url, contentType) {
   });
 }
 
-function fitToTexture(el, texture) {
-  const ratio =
-    (texture.image.videoHeight || texture.image.height || 1.0) /
-    (texture.image.videoWidth || texture.image.width || 1.0);
+function scaleToAspectRatio(el, ratio) {
   const width = Math.min(1.0, 1.0 / ratio);
   const height = Math.min(1.0, ratio);
   el.object3DMap.mesh.scale.set(width, height, 1);
@@ -247,11 +248,13 @@ class TextureCache {
   cache = new Map();
 
   set(src, texture) {
+    const image = texture.image;
     this.cache.set(src, {
       texture,
+      ratio: (image.videoHeight || image.height) / (image.videoWidth || image.width),
       count: 0
     });
-    this.retain(src);
+    return this.retain(src);
   }
 
   has(src) {
@@ -259,14 +262,14 @@ class TextureCache {
   }
 
   get(src) {
-    return this.cache.get(src).texture;
+    return this.cache.get(src);
   }
 
   retain(src) {
     const cacheItem = this.cache.get(src);
     cacheItem.count++;
     // console.log("retain", src, cacheItem.count);
-    return cacheItem.texture;
+    return cacheItem;
   }
 
   release(src) {
@@ -333,11 +336,15 @@ AFRAME.registerComponent("media-video", {
     this.seekBack = this.seekBack.bind(this);
     this.volumeUp = this.volumeUp.bind(this);
     this.volumeDown = this.volumeDown.bind(this);
+    this.snap = this.snap.bind(this);
     this.changeVolumeBy = this.changeVolumeBy.bind(this);
     this.togglePlaying = this.togglePlaying.bind(this);
 
     this.lastUpdate = 0;
     this.videoMutedAt = 0;
+    this.localSnapCount = 0;
+    this.isSnapping = false;
+    this.onSnapImageLoaded = () => (this.isSnapping = false);
 
     this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", dirs: ["forward", "back"] });
     this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
@@ -352,6 +359,7 @@ AFRAME.registerComponent("media-video", {
       this.volumeDownButton = this.el.querySelector(".video-volume-down-button");
       this.seekForwardButton = this.el.querySelector(".video-seek-forward-button");
       this.seekBackButton = this.el.querySelector(".video-seek-back-button");
+      this.snapButton = this.el.querySelector(".video-snap-button");
       this.timeLabel = this.el.querySelector(".video-time-label");
       this.volumeLabel = this.el.querySelector(".video-volume-label");
 
@@ -360,6 +368,7 @@ AFRAME.registerComponent("media-video", {
       this.seekBackButton.object3D.addEventListener("interact", this.seekBack);
       this.volumeUpButton.object3D.addEventListener("interact", this.volumeUp);
       this.volumeDownButton.object3D.addEventListener("interact", this.volumeDown);
+      this.snapButton.object3D.addEventListener("interact", this.snap);
 
       this.updateVolumeLabel();
       this.updateHoverMenuBasedOnLiveState();
@@ -421,6 +430,23 @@ AFRAME.registerComponent("media-video", {
     this.changeVolumeBy(-0.1);
   },
 
+  async snap() {
+    if (this.isSnapping) return;
+    this.isSnapping = true;
+    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = this.video.videoWidth;
+    canvas.height = this.video.videoHeight;
+    canvas.getContext("2d").drawImage(this.video, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise(resolve => canvas.toBlob(resolve));
+    const file = new File([blob], "snap.png", TYPE_IMG_PNG);
+
+    this.localSnapCount++;
+    const { entity } = spawnMediaAround(this.el, file, this.localSnapCount);
+    entity.addEventListener("image-loaded", this.onSnapImageLoaded, ONCE_TRUE);
+  },
+
   togglePlaying() {
     // See onPauseStateChanged for note about iOS
     if (isIOS && this.video.paused && NAF.utils.isMine(this.networkedEl)) {
@@ -462,6 +488,7 @@ AFRAME.registerComponent("media-video", {
       this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
 
       this.playPauseButton.object3D.visible = !!this.video;
+      this.snapButton.object3D.visible = !!this.video;
       this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
       this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
     }
@@ -593,7 +620,7 @@ AFRAME.registerComponent("media-video", {
         // invert the geometry on the x-axis so that all of the faces point inward
         geometry.scale(-1, 1, 1);
       } else {
-        geometry = new THREE.PlaneGeometry();
+        geometry = new THREE.PlaneBufferGeometry();
         material.side = THREE.DoubleSide;
       }
 
@@ -605,7 +632,7 @@ AFRAME.registerComponent("media-video", {
     this.mesh.material.needsUpdate = true;
 
     if (projection === "flat") {
-      fitToTexture(this.el, texture);
+      scaleToAspectRatio(this.el, texture.image.videoHeight / texture.image.videoWidth);
     }
 
     this.updatePlaybackState(true);
@@ -645,6 +672,14 @@ AFRAME.registerComponent("media-video", {
     if (interaction.state.rightRemote.hovered === this.el && volumeMod) {
       this.changeVolumeBy(volumeMod);
     }
+
+    const isHeld = interaction.isHeld(this.el);
+
+    if (this.wasHeld && !isHeld) {
+      this.localSnapCount = 0;
+    }
+
+    this.wasHeld = isHeld;
 
     if (this.hoverMenu && this.hoverMenu.object3D.visible && !this.videoIsLive) {
       this.timeLabel.setAttribute(
@@ -706,6 +741,7 @@ AFRAME.registerComponent("media-image", {
 
   async update(oldData) {
     let texture;
+    let ratio = 1;
     try {
       const { src, contentType } = this.data;
       if (!src) return;
@@ -721,7 +757,9 @@ AFRAME.registerComponent("media-image", {
       }
 
       if (textureCache.has(src)) {
-        texture = textureCache.retain(src);
+        const cacheItem = textureCache.retain(src);
+        texture = cacheItem.texture;
+        ratio = cacheItem.ratio;
       } else {
         if (src === "error") {
           texture = errorTexture;
@@ -733,7 +771,8 @@ AFRAME.registerComponent("media-image", {
           throw new Error(`Unknown image content type: ${contentType}`);
         }
 
-        textureCache.set(src, texture);
+        const cacheItem = textureCache.set(src, texture);
+        ratio = cacheItem.ratio;
 
         // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
         if (this.data.src !== src) {
@@ -758,7 +797,7 @@ AFRAME.registerComponent("media-image", {
         // invert the geometry on the x-axis so that all of the faces point inward
         geometry.scale(-1, 1, 1);
       } else {
-        geometry = new THREE.PlaneGeometry();
+        geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
         material.side = THREE.DoubleSide;
       }
 
@@ -771,7 +810,7 @@ AFRAME.registerComponent("media-image", {
     this.mesh.material.needsUpdate = true;
 
     if (projection === "flat") {
-      fitToTexture(this.el, texture);
+      scaleToAspectRatio(this.el, ratio);
     }
 
     this.el.emit("image-loaded", { src: this.data.src });

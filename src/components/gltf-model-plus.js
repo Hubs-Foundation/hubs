@@ -80,7 +80,9 @@ function cloneGltf(gltf) {
 }
 
 function getHubsComponents(node) {
-  const hubsComponents = node.userData.gltfExtensions && node.userData.gltfExtensions.HUBS_components;
+  const hubsComponents =
+    node.userData.gltfExtensions &&
+    (node.userData.gltfExtensions.MOZ_hubs_components || node.userData.gltfExtensions.HUBS_components);
 
   // We can remove support for legacy components when our environment, avatar and interactable models are
   // updated to match Spoke output.
@@ -259,16 +261,7 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     }
   }
 
-  const gltf = await new Promise((resolve, reject) =>
-    parser.parse(
-      (scene, scenes, cameras, animations, json) => {
-        resolve({ scene, scenes, cameras, animations, json });
-      },
-      e => {
-        reject(e);
-      }
-    )
-  );
+  const gltf = await new Promise(parser.parse.bind(parser));
 
   gltf.scene.traverse(object => {
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults

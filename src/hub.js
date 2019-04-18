@@ -47,6 +47,7 @@ import "./components/freeze-controller";
 import "./components/icon-button";
 import "./components/text-button";
 import "./components/block-button";
+import "./components/mute-button";
 import "./components/kick-button";
 import "./components/leave-room-button";
 import "./components/visible-if-permitted";
@@ -911,8 +912,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const permsToken = oauthFlowPermsToken || data.perms_token;
       hubChannel.setPermissionsFromToken(permsToken);
 
-      hubChannel.sendProfileUpdate();
-
       scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
@@ -1007,6 +1006,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         name: userInfo.metas[0].profile.displayName,
         hubName: hub.name
       });
+    }
+  });
+
+  hubPhxChannel.on("mute", ({ session_id }) => {
+    if (session_id === NAF.clientId && !scene.is("muted")) {
+      scene.emit("action_mute");
     }
   });
 
