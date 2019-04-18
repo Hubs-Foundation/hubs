@@ -20,6 +20,7 @@ import {
 } from "../utils/history";
 import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
+import { getPresenceProfileForSession } from "../utils/phoenix-utils";
 
 import { lang, messages } from "../utils/i18n";
 import Loader from "./loader";
@@ -140,6 +141,7 @@ class UIRoot extends Component {
     hubId: PropTypes.string,
     hubName: PropTypes.string,
     hubScene: PropTypes.object,
+    hubIsBound: PropTypes.bool,
     isSupportAvailable: PropTypes.bool,
     presenceLogEntries: PropTypes.array,
     presences: PropTypes.object,
@@ -936,7 +938,8 @@ class UIRoot extends Component {
 
   renderEntryStartPanel = () => {
     const hasPush = navigator.serviceWorker && "PushManager" in window;
-    const promptForNameAndAvatarBeforeEntry = !this.props.store.state.activity.hasChangedName;
+    const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
+    const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
 
     return (
       <div className={entryStyles.entryPanel}>
@@ -1380,6 +1383,10 @@ class UIRoot extends Component {
     const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
     const showDiscordTip = discordBridges.length > 0 && !this.state.discordTipDismissed;
 
+    const displayNameOverride = this.props.hubIsBound
+      ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
+      : null;
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
@@ -1393,6 +1400,7 @@ class UIRoot extends Component {
               render={props => (
                 <ProfileEntryPanel
                   {...props}
+                  displayNameOverride={displayNameOverride}
                   signedIn={this.state.signedIn}
                   onSignIn={this.showSignInDialog}
                   onSignOut={this.signOut}
@@ -1417,6 +1425,7 @@ class UIRoot extends Component {
               render={props => (
                 <ProfileEntryPanel
                   {...props}
+                  displayNameOverride={displayNameOverride}
                   finished={() => {
                     const unsubscribe = this.props.history.listen(() => {
                       unsubscribe();

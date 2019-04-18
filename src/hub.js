@@ -920,7 +920,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       subscriptions.setHubChannel(hubChannel);
 
       subscriptions.setSubscribed(data.subscriptions.web_push);
-      remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
+
+      remountUI({
+        hubIsBound: data.hub_requires_oauth,
+        initialIsSubscribed: subscriptions.isSubscribed()
+      });
 
       await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
     })
