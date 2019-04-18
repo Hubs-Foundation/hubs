@@ -35,14 +35,14 @@ export default class MediaSearchStore extends EventTarget {
   setHistory(history) {
     this.history = history;
 
-    this.update(this.history.location);
+    this._update(this.history.location);
 
     this.history.listen(location => {
-      this.update(location);
+      this._update(location);
     });
   }
 
-  update = async location => {
+  _update = async location => {
     this.result = null;
     this.dispatchEvent(new CustomEvent("statechanged"));
 

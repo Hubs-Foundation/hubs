@@ -1,19 +1,22 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
-import { SCHEMA } from "../storage/store";
-import styles from "../assets/stylesheets/profile.scss";
 import classNames from "classnames";
+
+import styles from "../assets/stylesheets/profile.scss";
 import hubLogo from "../assets/images/hub-preview-white.png";
-import { WithHoverSound } from "./wrap-with-audio";
 import { AVATAR_TYPES, getAvatarType } from "../assets/avatars/avatars";
+import { SCHEMA } from "../storage/store";
+import { WithHoverSound } from "./wrap-with-audio";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 
+import AvatarSelector from "./avatar-selector";
 import AvatarEditor from "./avatar-editor";
 
 class ProfileEntryPanel extends Component {
   static propTypes = {
     store: PropTypes.object,
+    history: PropTypes.object,
     messages: PropTypes.object,
     finished: PropTypes.func,
     intl: PropTypes.object,
@@ -59,26 +62,11 @@ class ProfileEntryPanel extends Component {
     e.stopPropagation();
   };
 
-  setAvatarStateFromIframeMessage = e => {
-    if (e.source !== this.avatarSelector.contentWindow) {
-      return;
-    }
-    this.setState({ avatarId: e.data.avatarId });
-
-    // Send it back down to cause avatar picker UI to update.
-    this.sendAvatarStateToIframe();
-  };
-
-  sendAvatarStateToIframe = () => {
-    this.avatarSelector.contentWindow.postMessage({ avatarId: this.state.avatarId }, location.origin);
-  };
-
   componentDidMount() {
     // stop propagation so that avatar doesn't move when wasd'ing during text input.
     this.nameInput.addEventListener("keydown", this.stopPropagation);
     this.nameInput.addEventListener("keypress", this.stopPropagation);
     this.nameInput.addEventListener("keyup", this.stopPropagation);
-    window.addEventListener("message", this.setAvatarStateFromIframeMessage);
   }
 
   componentWillUnmount() {
@@ -86,7 +74,6 @@ class ProfileEntryPanel extends Component {
     this.nameInput.removeEventListener("keydown", this.stopPropagation);
     this.nameInput.removeEventListener("keypress", this.stopPropagation);
     this.nameInput.removeEventListener("keyup", this.stopPropagation);
-    window.removeEventListener("message", this.setAvatarStateFromIframeMessage);
   }
 
   render() {
@@ -104,19 +91,7 @@ class ProfileEntryPanel extends Component {
                 </div>
               </div>
             </div>
-            <iframe
-              className={styles.avatarSelector}
-              src={`/avatar-selector.html`}
-              ref={ifr => {
-                if (this.avatarSelector === ifr) return;
-                this.avatarSelector = ifr;
-                if (this.avatarSelector) {
-                  this.avatarSelector.onload = () => {
-                    this.sendAvatarStateToIframe();
-                  };
-                }
-              }}
-            />
+            <AvatarSelector {...this.props} avatarId={this.state.avatarId} />
           </div>
         );
         break;
