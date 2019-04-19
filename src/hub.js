@@ -19,6 +19,7 @@ import "aframe-slice9-component";
 import "./utils/audio-context-fix";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
+import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
@@ -27,7 +28,6 @@ import { addAnimationComponents } from "./utils/animation";
 import Cookies from "js-cookie";
 
 import "./components/scene-components";
-import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
 import "./components/mute-mic";
 import "./components/bone-mute-state-indicator";
 import "./components/bone-visibility";
@@ -542,10 +542,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Physics needs to be ready before spawning anything.
   while (!scene.systems.physics.initialized) await nextTick();
 
-  scene.addEventListener("loaded", () => {
+  const onSceneLoaded = () => {
     const physicsSystem = scene.systems.physics;
     physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
-  });
+    patchThreeAllocations();
+  };
+
+  if (scene.hasLoaded) {
+    onSceneLoaded();
+  } else {
+    scene.addEventListener("loaded", onSceneLoaded, { once: true });
+  }
 
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);

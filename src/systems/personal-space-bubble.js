@@ -84,6 +84,7 @@ AFRAME.registerSystem("personal-space-bubble", {
       // precondition for this stuff -- the bubbles and invaders need updated world matrices.
       // right now this is satisfied because we update the world matrices in the character controller
       for (let i = 0; i < this.invaders.length; i++) {
+        this.invaders[i].el.object3D.updateMatrices(); // We read matrixWorld below, update matrices here
         tempInvasionFlags[i] = false;
       }
 
@@ -91,6 +92,7 @@ AFRAME.registerSystem("personal-space-bubble", {
       for (let i = 0; i < this.bubbles.length; i++) {
         const bubble = this.bubbles[i];
 
+        bubble.el.object3D.updateMatrices();
         bubblePos.setFromMatrixPosition(bubble.el.object3D.matrixWorld);
 
         // Hide the invader if inside the bubble

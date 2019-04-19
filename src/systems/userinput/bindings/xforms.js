@@ -150,8 +150,9 @@ export const xforms = {
     }
   },
   all: function(frame, src, dest) {
-    for (const path in src) {
-      if (!frame.get(src[path])) {
+    for (let i = 0, l = src.length; i < l; i++) {
+      const path = src[i];
+      if (!frame.get(path)) {
         frame.setValueType(dest.value, false);
         return;
       }
@@ -159,8 +160,9 @@ export const xforms = {
     frame.setValueType(dest.value, true);
   },
   any: function(frame, src, dest) {
-    for (const path in src) {
-      if (frame.get(src[path])) {
+    for (let i = 0, l = src.length; i < l; i++) {
+      const path = src[i];
+      if (frame.get(path)) {
         frame.setValueType(dest.value, true);
         return;
       }

@@ -36,20 +36,24 @@ import { gamepadBindings } from "./bindings/generic-gamepad";
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "../../utils/vr-caps-detect";
 import { ArrayBackedSet } from "./array-backed-set";
 
-function intersectionSize(setA, setB) {
-  let size = 0;
-  for (let i = 0, il = setB.length; i < il; i++) {
-    const elem = setB[i];
+function arrayContentsDiffer(a, b) {
+  if (a.length !== b.length) return true;
 
-    for (let j = 0, jl = setA.length; j < jl; j++) {
-      if (elem === setA[j]) {
-        size++;
+  for (let i = 0, il = a.length; i < il; i++) {
+    const elem = a[i];
+    let found = false;
+
+    for (let j = 0, jl = b.length; j < jl; j++) {
+      if (elem === b[j]) {
+        found = true;
         break;
       }
     }
+
+    if (!found) return true;
   }
 
-  return size;
+  return false;
 }
 
 const satisfiesPath = (binding, path) => {
@@ -358,10 +362,7 @@ AFRAME.registerSystem("userinput", {
     this.prevActiveSets.length = 0;
     for (let i = 0; i < this.activeSets.length; i++) {
       const item = this.activeSets[i];
-
-      if (!this.prevActiveSets.includes(item)) {
-        this.prevActiveSets.push(item);
-      }
+      this.prevActiveSets.push(item);
     }
     resolveActionSets();
     for (let i = 0, l = this.pendingSetChanges.length; i < l; i += 2) {
@@ -380,9 +381,7 @@ AFRAME.registerSystem("userinput", {
         }
       }
     }
-    const activeSetsChanged =
-      this.prevActiveSets.length !== this.activeSets.length ||
-      intersectionSize(this.prevActiveSets, this.activeSets) !== this.activeSets.length;
+    const activeSetsChanged = arrayContentsDiffer(this.prevActiveSets, this.activeSets);
     this.pendingSetChanges.length = 0;
     if (registeredMappingsChanged || activeSetsChanged || (!this.actives && !this.masked)) {
       this.prevActives = this.actives;

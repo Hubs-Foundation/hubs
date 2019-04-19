@@ -324,6 +324,7 @@ AFRAME.registerComponent("media-video", {
   init() {
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
     this.tryUpdateVideoPlaybackState = this.tryUpdateVideoPlaybackState.bind(this);
+    this.updateSrc = this.updateSrc.bind(this);
 
     this.seekForward = this.seekForward.bind(this);
     this.seekBack = this.seekBack.bind(this);
@@ -526,11 +527,15 @@ AFRAME.registerComponent("media-video", {
   },
 
   async update(oldData) {
-    const { src } = this.data;
-
+    const src = this.data.src;
     this.updatePlaybackState();
 
     if (!src || src === oldData.src) return;
+    return this.updateSrc(oldData);
+  },
+
+  async updateSrc(oldData) {
+    const { src } = this.data;
 
     this.cleanUp();
     if (this.mesh && this.mesh.material) {
