@@ -831,7 +831,10 @@ class UIRoot extends Component {
   };
 
   onStoreChanged = () => {
-    this.setState({ discordTipDismissed: this.props.store.state.confirmedDiscordRooms.includes(this.props.hubId) });
+    const discordRoomConfirmed = this.props.store.state.confirmedDiscordRooms.includes(this.props.hubId);
+    if (discordRoomConfirmed !== this.state.discordTipDismissed) {
+      this.setState({ discordTipDismissed: discordRoomConfirmed });
+    }
   };
 
   confirmDiscordBridge = () => {
