@@ -292,8 +292,7 @@ AFRAME.registerSystem("userinput", {
         gamepadDevice = new WindowsMixedRealityControllerDevice(e.gamepad);
       } else if (e.gamepad.id === "Oculus Go Controller") {
         gamepadDevice = new OculusGoControllerDevice(e.gamepad);
-        // Note that FXR reports Vive Focus' controller as GearVR, so this is primarily to support that
-      } else if (e.gamepad.id === "Gear VR Controller") {
+      } else if (e.gamepad.id === "Gear VR Controller" || e.gamepad.id === "HTC Vive Focus Controller") {
         gamepadDevice = new GearVRControllerDevice(e.gamepad);
       } else if (e.gamepad.id === "Daydream Controller") {
         gamepadDevice = new DaydreamControllerDevice(e.gamepad);
