@@ -78,7 +78,7 @@
     "screenfull": "^4.0.1",
     "three": "github:mozillareality/three.js#hubs/master",
     "three-mesh-bvh": "^0.1.0",
-    "three-pathfinding": "github:mozillareality/three-pathfinding#hubs/master",
+    "three-pathfinding": "github:MozillaReality/three-pathfinding#hubs/master2",
     "three-to-cannon": "1.3.0",
     "uuid": "^3.2.1",
     "webrtc-adapter": "^6.0.2",
