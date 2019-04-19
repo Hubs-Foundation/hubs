@@ -85,13 +85,6 @@ class ProfileEntryPanel extends Component {
       case AVATAR_TYPES.LEGACY:
         panelBody = (
           <div className={styles.avatarSelectorContainer}>
-            <div className="loading-panel">
-              <div className="loader-wrap">
-                <div className="loader">
-                  <div className="loader-center" />
-                </div>
-              </div>
-            </div>
             <AvatarSelector {...this.props} avatarId={this.state.avatarId} />
           </div>
         );

@@ -57,10 +57,6 @@ export default class AvatarPreview extends Component {
     controls.target.set(0, 0.45, 0);
     controls.update();
 
-    this.loadPreviewAvatar(this.props.avatar).then(avatar => {
-      this.scene.add(avatar);
-    });
-
     const clock = new THREE.Clock();
     this.previewRenderer = createRenderer(this.canvas);
     this.previewRenderer.setAnimationLoop(() => {
@@ -70,6 +66,18 @@ export default class AvatarPreview extends Component {
     });
     window.addEventListener("resize", this.resize);
     this.resize();
+  };
+
+  componentDidUpdate = () => {
+    if (this.avatar) {
+      this.scene.remove(this.avatar);
+      this.avatar = null;
+    }
+    if (!this.props.avatar) return;
+    this.loadPreviewAvatar(this.props.avatar).then(avatar => {
+      this.avatar = avatar;
+      this.scene.add(avatar);
+    });
   };
 
   resize = () => {
@@ -86,16 +94,13 @@ export default class AvatarPreview extends Component {
     window.removeEventListener("resize", this.resize);
   };
 
-  shouldComponentUpdate() {
-    return false;
-  }
-
   loadPreviewAvatar = async avatar => {
+    if (!avatar) return;
     const gltf = await loadGLTF(avatar.base_gltf_url, "model/gltf");
 
     // On the bckend we look for a material called Bot_PBS, here we are looking for a mesh called Avatar.
     // When we "officially" support uploading custom GLTFs we need to decide what we are going to key things on
-    this.previewMesh = gltf.scene.getObjectByName("Avatar");
+    this.previewMesh = gltf.scene.getObjectByName("Avatar") || gltf.scene.getObjectByName("Bot_Skinned");
 
     const idleAnimation = gltf.animations && gltf.animations.find(({ name }) => name === "idle_eyes");
     if (idleAnimation) {
@@ -116,17 +121,19 @@ export default class AvatarPreview extends Component {
     };
 
     const imgFiles = avatar.files;
-    await Promise.all([
-      Promise.all(
-        Object.keys(this.originalMaps).map(
-          m => imgFiles[m] && loadImageBitmap(imgFiles[m]).then(this.applyMapToPreview.bind(this, m))
-        )
-      ),
-      createDefaultEnvironmentMap().then(t => {
-        this.previewMesh.material.envMap = t;
-        this.previewMesh.material.needsUpdate = true;
-      })
-    ]);
+    if (imgFiles) {
+      await Promise.all([
+        Promise.all(
+          Object.keys(this.originalMaps).map(
+            m => imgFiles[m] && loadImageBitmap(imgFiles[m]).then(this.applyMapToPreview.bind(this, m))
+          )
+        ),
+        createDefaultEnvironmentMap().then(t => {
+          this.previewMesh.material.envMap = t;
+          this.previewMesh.material.needsUpdate = true;
+        })
+      ]);
+    }
 
     return gltf.scene;
   };

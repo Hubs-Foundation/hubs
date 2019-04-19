@@ -76,7 +76,13 @@ class MediaBrowser extends Component {
     intl: PropTypes.object,
     hubChannel: PropTypes.object,
     onMediaSearchResultEntrySelected: PropTypes.func,
-    hideHeader: PropTypes.bool
+    showHeader: PropTypes.bool,
+    closeOnSelect: PropTypes.bool
+  };
+
+  static defaultProps = {
+    showHeader: true,
+    closeOnSelect: true
   };
 
   state = { query: "", facets: [], showNav: true, selectNextResult: false, clearStashedQueryOnClose: false };
@@ -173,7 +179,9 @@ class MediaBrowser extends Component {
   selectEntry = entry => {
     if (!this.props.onMediaSearchResultEntrySelected) return;
     this.props.onMediaSearchResultEntrySelected(entry);
-    this.close();
+    if (this.props.closeOnSelect) {
+      this.close();
+    }
   };
 
   handleSourceClicked = source => {
@@ -234,91 +242,91 @@ class MediaBrowser extends Component {
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
         <div className={classNames([styles.box, styles.darkened])}>
-          {!this.props.hideHeader && (
-          <div className={styles.header}>
-            <div className={styles.headerLeft}>
-              <a onClick={() => this.close()}>
-                <i>
-                  <FontAwesomeIcon icon={faTimes} />
-                </i>
-              </a>
-            </div>
-            <div className={styles.headerCenter}>
-              <div className={styles.search}>
-                <i>
-                  <FontAwesomeIcon icon={faSearch} />
-                </i>
-                <input
-                  type="text"
-                  autoFocus={!isMobile && !isMobileVR}
-                  ref={r => (this.inputRef = r)}
-                  placeholder={formatMessage({
-                    id: `media-browser.search-placeholder.${urlSource}`
-                  })}
-                  onFocus={e => handleTextFieldFocus(e.target)}
-                  onBlur={() => handleTextFieldBlur()}
-                  onKeyDown={e => {
-                    if (e.key === "Enter" && e.ctrlKey) {
-                      if (this.state.result && this.state.result.entries.length > 0 && !this._sendQueryTimeout) {
-                        this.handleEntryClicked(e, this.state.result.entries[0]);
-                      } else if (this.state.query.trim() !== "") {
-                        this.handleQueryUpdated(this.state.query, true);
-                        this.setState({ selectNextResult: true });
-                      } else {
-                        this.close();
-                      }
-                    } else if (e.key === "Escape" || (e.key === "Enter" && isMobile)) {
-                      e.target.blur();
-                    }
-                  }}
-                  value={this.state.query}
-                  onChange={e => this.handleQueryUpdated(e.target.value)}
-                />
-              </div>
-              <div className={styles.engineAttribution}>
-                {urlSource !== "scenes" && (
-                  <div className={styles.engineAttributionContents}>
-                    <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
-                    {PRIVACY_POLICY_LINKS[urlSource] && (
-                      <a href={PRIVACY_POLICY_LINKS[urlSource]} target="_blank" rel="noreferrer noopener">
-                        <FormattedMessage id="media-browser.privacy_policy" />
-                      </a>
-                    )}
-                  </div>
-                )}
-                {urlSource === "scenes" && (
-                  <div className={styles.engineAttributionContents}>
-                    <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
-                    <a href="/spoke" target="_blank" rel="noreferrer noopener">
-                      <FormattedMessage id="media-browser.spoke" />
-                    </a>
-                    |
-                    <a target="_blank" rel="noopener noreferrer" href="/?report">
-                      <FormattedMessage id="media-browser.report_issue" />
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className={styles.headerRight}>
-              {showCustomOption && (
-                <a onClick={() => this.showCustomMediaDialog(apiSource)} className={styles.createButton}>
+          {this.props.showHeader && (
+            <div className={styles.header}>
+              <div className={styles.headerLeft}>
+                <a onClick={() => this.close()}>
                   <i>
-                    <FontAwesomeIcon icon={faCloudUploadAlt} />
+                    <FontAwesomeIcon icon={faTimes} />
                   </i>
                 </a>
-              )}
-              {showCustomOption && (
-                <a onClick={() => this.showCustomMediaDialog(apiSource)} className={styles.createLink}>
-                  <FormattedMessage
-                    id={`media-browser.add_custom_${
-                      this.state.result && apiSource === "scene_listings" ? "scene" : "object"
-                    }`}
+              </div>
+              <div className={styles.headerCenter}>
+                <div className={styles.search}>
+                  <i>
+                    <FontAwesomeIcon icon={faSearch} />
+                  </i>
+                  <input
+                    type="text"
+                    autoFocus={!isMobile && !isMobileVR}
+                    ref={r => (this.inputRef = r)}
+                    placeholder={formatMessage({
+                      id: `media-browser.search-placeholder.${urlSource}`
+                    })}
+                    onFocus={e => handleTextFieldFocus(e.target)}
+                    onBlur={() => handleTextFieldBlur()}
+                    onKeyDown={e => {
+                      if (e.key === "Enter" && e.ctrlKey) {
+                        if (this.state.result && this.state.result.entries.length > 0 && !this._sendQueryTimeout) {
+                          this.handleEntryClicked(e, this.state.result.entries[0]);
+                        } else if (this.state.query.trim() !== "") {
+                          this.handleQueryUpdated(this.state.query, true);
+                          this.setState({ selectNextResult: true });
+                        } else {
+                          this.close();
+                        }
+                      } else if (e.key === "Escape" || (e.key === "Enter" && isMobile)) {
+                        e.target.blur();
+                      }
+                    }}
+                    value={this.state.query}
+                    onChange={e => this.handleQueryUpdated(e.target.value)}
                   />
-                </a>
-              )}
+                </div>
+                <div className={styles.engineAttribution}>
+                  {urlSource !== "scenes" && (
+                    <div className={styles.engineAttributionContents}>
+                      <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
+                      {PRIVACY_POLICY_LINKS[urlSource] && (
+                        <a href={PRIVACY_POLICY_LINKS[urlSource]} target="_blank" rel="noreferrer noopener">
+                          <FormattedMessage id="media-browser.privacy_policy" />
+                        </a>
+                      )}
+                    </div>
+                  )}
+                  {urlSource === "scenes" && (
+                    <div className={styles.engineAttributionContents}>
+                      <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
+                      <a href="/spoke" target="_blank" rel="noreferrer noopener">
+                        <FormattedMessage id="media-browser.spoke" />
+                      </a>
+                      |
+                      <a target="_blank" rel="noopener noreferrer" href="/?report">
+                        <FormattedMessage id="media-browser.report_issue" />
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className={styles.headerRight}>
+                {showCustomOption && (
+                  <a onClick={() => this.showCustomMediaDialog(apiSource)} className={styles.createButton}>
+                    <i>
+                      <FontAwesomeIcon icon={faCloudUploadAlt} />
+                    </i>
+                  </a>
+                )}
+                {showCustomOption && (
+                  <a onClick={() => this.showCustomMediaDialog(apiSource)} className={styles.createLink}>
+                    <FormattedMessage
+                      id={`media-browser.add_custom_${
+                        this.state.result && apiSource === "scene_listings" ? "scene" : "object"
+                      }`}
+                    />
+                  </a>
+                )}
+              </div>
             </div>
-          </div>
           )}
 
           {this.state.showNav && (
