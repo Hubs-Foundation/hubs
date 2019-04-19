@@ -639,7 +639,7 @@ AFRAME.registerComponent("media-video", {
       this.videoMutedAt = performance.now();
     }
 
-    this.el.emit("video-loaded");
+    this.el.emit("video-loaded", { projection: projection });
   },
 
   updateHoverMenuBasedOnLiveState() {
@@ -811,6 +811,6 @@ AFRAME.registerComponent("media-image", {
       scaleToAspectRatio(this.el, ratio);
     }
 
-    this.el.emit("image-loaded", { src: this.data.src });
+    this.el.emit("image-loaded", { src: this.data.src, projection: projection });
   }
 });
