@@ -4,18 +4,21 @@ import { guessContentType } from "../utils/media-utils";
 
 AFRAME.registerComponent("clone-media-button", {
   init() {
+    this.updateSrc = () => {
+      const src = (this.src = this.targetEl.components["media-loader"].data.src);
+      const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
+      this.el.object3D.visible = !!visible;
+    };
+
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.targetEl = networkedEl;
-
-      const { src } = this.targetEl.components["media-loader"].data;
-
-      if (guessContentType(src) === "video/vnd.hubs-webrtc") {
-        this.el.object3D.visible = false;
-      }
+      this.targetEl.addEventListener("media_resolved", this.updateSrc, { once: true });
+      this.updateSrc();
     });
 
     this.onClick = () => {
-      const { src, resize } = this.targetEl.components["media-loader"].data;
+      const src = this.src;
+      const { resize } = this.targetEl.components["media-loader"].data;
       const { entity } = addMedia(src, "#interactable-media", ObjectContentOrigins.URL, true, resize);
 
       entity.object3D.matrixNeedsUpdate = true;
