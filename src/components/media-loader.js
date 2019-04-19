@@ -5,8 +5,7 @@ import {
   resolveUrl,
   injectCustomShaderChunks,
   isHubsRoomUrl,
-  isHubsSceneUrl,
-  generateMeshBVH
+  isHubsSceneUrl
 } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
 import "three/examples/js/loaders/GLTFLoader";
@@ -170,10 +169,6 @@ AFRAME.registerComponent("media-loader", {
 
     if (this.el.sceneEl.is("entered")) {
       this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_MEDIA_LOADED);
-    }
-
-    if (!el.components["animation-mixer"]) {
-      generateMeshBVH(el.object3D);
     }
 
     const finish = () => {
