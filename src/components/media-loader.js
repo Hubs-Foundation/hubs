@@ -203,41 +203,51 @@ AFRAME.registerComponent("media-loader", {
   },
 
   addMeshScaleAnimation(mesh, initialScale, onComplete) {
+    const posX = mesh.position.x;
+    const posY = mesh.position.y;
+    const posZ = mesh.position.z;
+    const scaleX = mesh.scale.x;
+    const scaleY = mesh.scale.y;
+    const scaleZ = mesh.scale.z;
+
     const config = {
       duration: 400,
       easing: "easeOutElastic",
       elasticity: 400,
       loop: 0,
       round: false,
-      x: mesh.scale.x,
-      y: mesh.scale.y,
-      z: mesh.scale.z,
+      x: 1,
+      y: 1,
+      z: 1,
       targets: [initialScale],
       update: (function() {
+        const newScale = {};
         const lastValue = {};
         return function(anim) {
-          const value = anim.animatables[0].target;
+          const value = anim.animatables[0].target.x;
 
-          value.x = Math.max(0.0001, value.x);
-          value.y = Math.max(0.0001, value.y);
-          value.z = Math.max(0.0001, value.z);
+          newScale.x = Math.max(0.0001, value * scaleX);
+          newScale.y = Math.max(0.0001, value * scaleY);
+          newScale.z = Math.max(0.0001, value * scaleZ);
 
           // For animation timeline.
-          if (value.x === lastValue.x && value.y === lastValue.y && value.z === lastValue.z) {
+          if (newScale.x === lastValue.x && newScale.y === lastValue.y && newScale.z === lastValue.z) {
             return;
           }
 
-          lastValue.x = value.x;
-          lastValue.y = value.y;
-          lastValue.z = value.z;
+          lastValue.x = newScale.x;
+          lastValue.y = newScale.y;
+          lastValue.z = newScale.z;
 
-          mesh.scale.set(value.x, value.y, value.z);
+          mesh.scale.set(newScale.x, newScale.y, newScale.z);
+          mesh.position.set(value * posX, value * posY, value * posZ);
           mesh.matrixNeedsUpdate = true;
         };
       })(),
       complete: onComplete
     };
 
+    mesh.position.set(0, 0, 0);
     mesh.scale.copy(initialScale);
     mesh.matrixNeedsUpdate = true;
 
