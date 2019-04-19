@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
+import { proxiedUrlFor } from "../utils/media-utils";
 
 function spawnImage(url) {
   document.querySelector("a-scene").emit("add_media", url);
@@ -15,7 +16,7 @@ export default function ImageMessage({ name, body: { src: url }, className, mayS
       )}
       <div className={styles.mediaBody}>{name && <div className={styles.messageSource}>{name}:</div>}</div>
       <a href={url} target="_blank" rel="noopener noreferrer">
-        <img src={url} />
+        <img src={proxiedUrlFor(url)} />
       </a>
     </div>
   );
