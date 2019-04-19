@@ -73,36 +73,49 @@ AFRAME.registerSystem("personal-space-bubble", {
     }
   },
 
-  tick() {
-    if (!this.data.enabled) return;
+  tick: (function() {
+    const tempInvasionFlags = [];
 
-    // precondition for this stuff -- the bubbles and invaders need updated world matrices.
-    // right now this is satisfied because we update the world matrices in the character controller
+    return function() {
+      if (!this.data.enabled) return;
 
-    for (let i = 0; i < this.invaders.length; i++) {
-      this.invaders[i].setInvading(false);
-    }
+      tempInvasionFlags.length = 0;
 
-    // Loop through all of the space bubbles (usually one)
-    for (let i = 0; i < this.bubbles.length; i++) {
-      const bubble = this.bubbles[i];
+      // precondition for this stuff -- the bubbles and invaders need updated world matrices.
+      // right now this is satisfied because we update the world matrices in the character controller
+      for (let i = 0; i < this.invaders.length; i++) {
+        this.invaders[i].el.object3D.updateMatrices(); // We read matrixWorld below, update matrices here
+        tempInvasionFlags[i] = false;
+      }
 
-      bubblePos.setFromMatrixPosition(bubble.el.object3D.matrixWorld);
+      // Loop through all of the space bubbles (usually one)
+      for (let i = 0; i < this.bubbles.length; i++) {
+        const bubble = this.bubbles[i];
 
-      // Hide the invader if inside the bubble
-      for (let j = 0; j < this.invaders.length; j++) {
-        const invader = this.invaders[j];
+        bubble.el.object3D.updateMatrices();
+        bubblePos.setFromMatrixPosition(bubble.el.object3D.matrixWorld);
 
-        invaderPos.setFromMatrixPosition(invader.el.object3D.matrixWorld);
+        // Hide the invader if inside the bubble
+        for (let j = 0; j < this.invaders.length; j++) {
+          const invader = this.invaders[j];
 
-        const distanceSquared = bubblePos.distanceToSquared(invaderPos);
-        const radiusSum = bubble.data.radius + invader.data.radius;
-        if (distanceSquared < radiusSum * radiusSum) {
-          invader.setInvading(true);
+          invaderPos.setFromMatrixPosition(invader.el.object3D.matrixWorld);
+
+          const distanceSquared = bubblePos.distanceToSquared(invaderPos);
+          const radiusSum = bubble.data.radius + invader.data.radius;
+          if (distanceSquared < radiusSum * radiusSum) {
+            tempInvasionFlags[j] = true;
+          }
         }
       }
-    }
-  }
+
+      for (let i = 0; i < this.invaders.length; i++) {
+        if (this.invaders[i].invading !== tempInvasionFlags[i]) {
+          this.invaders[i].setInvading(tempInvasionFlags[i]);
+        }
+      }
+    };
+  })()
 });
 
 function createSphereGizmo(radius) {
@@ -182,6 +195,8 @@ AFRAME.registerComponent("personal-space-invader", {
   },
 
   setInvading(invading) {
+    if (this.invading === invading) return;
+
     if (this.targetMesh && this.targetMesh.material) {
       forEachMaterial(this.targetMesh, material => {
         material.opacity = invading ? this.data.invadingOpacity : 1;

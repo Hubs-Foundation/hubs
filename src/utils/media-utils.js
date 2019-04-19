@@ -245,7 +245,7 @@ export function injectCustomShaderChunks(obj) {
   const fragRegex = /\bgl_FragColor\b/;
   const validMaterials = ["MeshStandardMaterial", "MeshBasicMaterial", "MobileStandardMaterial"];
 
-  const shaderUniforms = new Map();
+  const shaderUniforms = [];
 
   obj.traverse(object => {
     if (!object.material) return;
@@ -308,7 +308,7 @@ export function injectCustomShaderChunks(obj) {
         flines.unshift("uniform float hubs_Time;");
         shader.fragmentShader = flines.join("\n");
 
-        shaderUniforms.set(newMaterial.uuid, shader.uniforms);
+        shaderUniforms.push(shader.uniforms);
       };
       newMaterial.needsUpdate = true;
       return newMaterial;
