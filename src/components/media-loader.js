@@ -221,10 +221,10 @@ AFRAME.registerComponent("media-loader", {
       sz: mesh.scale.z,
       targets: [initial],
       update: (function() {
-        const newScale = {};
         const lastValue = {};
         return function(anim) {
-          let { sx, sy, sz, px, py, pz } = anim.animatables[0].target;
+          const { px, py, pz } = anim.animatables[0].target;
+          let { sx, sy, sz } = anim.animatables[0].target;
 
           sx = Math.max(0.0001, sx);
           sy = Math.max(0.0001, sy);
