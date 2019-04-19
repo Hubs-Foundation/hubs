@@ -11,7 +11,6 @@ import styles from "../assets/stylesheets/profile.scss";
 
 const BOT_PARENT_AVATAR =
   location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
-const BOT_PARENT_AVATAR = "muKnhtJ";
 import AvatarPreview from "./avatar-preview";
 
 

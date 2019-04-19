@@ -4,6 +4,7 @@ import "three/examples/js/controls/OrbitControls";
 
 import { createDefaultEnvironmentMap } from "../components/environment-map";
 import { loadGLTF } from "../components/gltf-model-plus";
+import { disposeNode } from "../utils/three-utils";
 
 const TEXTURE_PROPS = {
   base_map: ["map"],
@@ -15,7 +16,7 @@ const TEXTURE_PROPS = {
 // This should match our aframe renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: false;"
 function createRenderer(canvas) {
   const context = canvas.getContext("webgl2", {
-    alpha: true,
+    alpha: false,
     depth: true,
     antialias: true,
     premultipliedAlpha: true,
@@ -28,41 +29,6 @@ function createRenderer(canvas) {
   renderer.gammaFactor = 2.2;
   renderer.physicallyCorrectLights = true;
   return renderer;
-}
-
-function disposeNode(node) {
-  if (node instanceof THREE.Mesh) {
-    if (node.geometry) {
-      node.geometry.dispose();
-    }
-    if (node.material) {
-      let materialArray;
-      if (node.material instanceof THREE.MeshFaceMaterial || node.material instanceof THREE.MultiMaterial) {
-        materialArray = node.material.materials;
-      } else if (node.material instanceof Array) {
-        materialArray = node.material;
-      }
-      if (materialArray) {
-        materialArray.forEach(function(mtrl) {
-          if (mtrl.map) mtrl.map.dispose();
-          if (mtrl.lightMap) mtrl.lightMap.dispose();
-          if (mtrl.bumpMap) mtrl.bumpMap.dispose();
-          if (mtrl.normalMap) mtrl.normalMap.dispose();
-          if (mtrl.specularMap) mtrl.specularMap.dispose();
-          if (mtrl.envMap) mtrl.envMap.dispose();
-          mtrl.dispose();
-        });
-      } else {
-        if (node.material.map) node.material.map.dispose();
-        if (node.material.lightMap) node.material.lightMap.dispose();
-        if (node.material.bumpMap) node.material.bumpMap.dispose();
-        if (node.material.normalMap) node.material.normalMap.dispose();
-        if (node.material.specularMap) node.material.specularMap.dispose();
-        if (node.material.envMap) node.material.envMap.dispose();
-        node.material.dispose();
-      }
-    }
-  }
 }
 
 const imgLoader = new THREE.ImageBitmapLoader();
@@ -91,7 +57,7 @@ export default class AvatarPreview extends Component {
     controls.target.set(0, 0.45, 0);
     controls.update();
 
-    this.loadPreviwAvatar(this.props.avatar).then(avatar => {
+    this.loadPreviewAvatar(this.props.avatar).then(avatar => {
       this.scene.add(avatar);
     });
 
@@ -124,7 +90,7 @@ export default class AvatarPreview extends Component {
     return false;
   }
 
-  loadPreviwAvatar = async avatar => {
+  loadPreviewAvatar = async avatar => {
     const gltf = await loadGLTF(avatar.base_gltf_url, "model/gltf");
 
     // On the bckend we look for a material called Bot_PBS, here we are looking for a mesh called Avatar.
