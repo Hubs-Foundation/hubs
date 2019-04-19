@@ -1,11 +1,13 @@
 import { EventTarget } from "event-target-shim";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
+import { avatars } from "../assets/avatars/avatars";
 
 export const SOURCES = ["videos", "sketchfab", "poly", "scenes", "gifs", "images", "twitch"];
 
 const URL_SOURCE_TO_TO_API_SOURCE = {
   scenes: "scene_listings",
+  avatars: "avatars",
   images: "bing_images",
   videos: "bing_videos",
   youtube: "youtube_videos",
@@ -66,19 +68,44 @@ export default class MediaSearchStore extends EventTarget {
     }
 
     searchParams.get("locale", navigator.languages[0]);
-    searchParams.set("source", URL_SOURCE_TO_TO_API_SOURCE[urlSource]);
+    const source = URL_SOURCE_TO_TO_API_SOURCE[urlSource];
+    searchParams.set("source", source);
 
     const url = getReticulumFetchUrl(`/api/v1/media/search?${searchParams.toString()}`);
     if (this.lastSavedUrl === url) return;
 
-    const res = await fetch(url);
-    const result = await res.json();
+    const result = await this._fetchMedia(url, source);
+
     if (this.requestIndex != currentRequestIndex) return;
 
     this.result = result;
     this.nextCursor = this.result.meta.next_cursor;
     this.lastFetchedUrl = url;
     this.dispatchEvent(new CustomEvent("statechanged"));
+  };
+
+  _fetchMedia = async (url, source) => {
+    if (source !== "avatars") {
+      const res = await fetch(url);
+      return await res.json();
+    } else {
+      return {
+        entries: avatars.map(avatar => ({
+          id: avatar.id,
+          name: avatar.name,
+          type: "avatar",
+          url: avatar.model,
+          images: {
+            preview: {
+              url: avatar.thumbnail,
+              width: 512,
+              height: 512
+            }
+          }
+        })),
+        meta: {}
+      };
+    }
   };
 
   pageNavigate = delta => {

@@ -75,7 +75,8 @@ class MediaBrowser extends Component {
     history: PropTypes.object,
     intl: PropTypes.object,
     hubChannel: PropTypes.object,
-    onMediaSearchResultEntrySelected: PropTypes.func
+    onMediaSearchResultEntrySelected: PropTypes.func,
+    hideHeader: PropTypes.bool
   };
 
   state = { query: "", facets: [], showNav: true, selectNextResult: false, clearStashedQueryOnClose: false };
@@ -233,6 +234,7 @@ class MediaBrowser extends Component {
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
         <div className={classNames([styles.box, styles.darkened])}>
+          {!this.props.hideHeader && (
           <div className={styles.header}>
             <div className={styles.headerLeft}>
               <a onClick={() => this.close()}>
@@ -317,6 +319,7 @@ class MediaBrowser extends Component {
               )}
             </div>
           </div>
+          )}
 
           {this.state.showNav && (
             <div className={styles.nav}>

@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl } from "react-intl";
 
-import { avatars } from "../assets/avatars/avatars";
 import MediaBrowser from "./media-browser";
 
 class AvatarSelector extends Component {
@@ -21,8 +20,7 @@ class AvatarSelector extends Component {
   render() {
     return (
       <div>
-        <MediaBrowser {...this.props} mediaSearchStore={this.mediaSearchStore} />
-        {avatars.map(avatar => <span key={avatar.id}>{avatar.id}</span>)}
+        <MediaBrowser {...this.props} hideHeader={true} mediaSearchStore={this.mediaSearchStore} />
       </div>
     );
   }
