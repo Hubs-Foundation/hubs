@@ -73,6 +73,8 @@
     .img-box {
       width: 50px;
       height: 50px;
+      min-width: 50px;
+      min-height: 50px;
       border-radius: 8px;
       margin-right: 5px;
       background: #eaeaea;
@@ -100,6 +102,22 @@
       align-items: center;
       .form-body {
         flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .split {
+        flex: 1;
+        display: flex;
+        min-height: 240px
+      }
+      .preview{
+        margin-left: 40px;
+      }
+      canvas {
+        width: 100%;
+        height: 100%;
+        border-radius: 20px;
       }
     }
 

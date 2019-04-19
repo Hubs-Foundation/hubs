@@ -11,6 +11,8 @@ import styles from "../assets/stylesheets/profile.scss";
 
 const BOT_PARENT_AVATAR =
   location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
+import AvatarPreview from "./avatar-preview";
+
 
 export default class AvatarEditor extends Component {
   static propTypes = {
@@ -19,6 +21,7 @@ export default class AvatarEditor extends Component {
     onSignOut: PropTypes.func,
     signedIn: PropTypes.bool,
     debug: PropTypes.bool,
+    preview: PropTypes.bool,
     onAvatarChanged: PropTypes.func,
     saveStateAndFinish: PropTypes.func
   };
@@ -163,6 +166,36 @@ export default class AvatarEditor extends Component {
   fileField = (name, label, accept, disabled = false, title) => (
     <div className={styles.fileInputRow} key={name} title={title}>
       <label htmlFor={`avatar-file_${name}`}>
+        <div className="img-box" />
+        <span>{label}</span>
+      </label>
+      <input
+        id={`avatar-file_${name}`}
+        type="file"
+        accept={accept}
+        disabled={disabled}
+        onChange={e => {
+          e.target.value = null;
+          this.inputFiles[name] = e.target.files[0];
+        }}
+      />
+      {this.state.avatar.files[name] && (
+        <a
+          onClick={() => {
+            this.inputFiles[name] = null;
+          }}
+        >
+          <i>
+            <FontAwesomeIcon icon={faTimes} />
+          </i>
+        </a>
+      )}
+    </div>
+  );
+
+  mapField = (name, label, accept, disabled = false, title) => (
+    <div className={styles.fileInputRow} key={name} title={title}>
+      <label htmlFor={`avatar-file_${name}`}>
         <div className="img-box">{this.state.avatar.files[name] && <img src={this.state.avatar.files[name]} />}</div>
         <span>{label}</span>
       </label>
@@ -172,17 +205,20 @@ export default class AvatarEditor extends Component {
         accept={accept}
         disabled={disabled}
         onChange={e => {
-          this.inputFiles[name] = e.target.files[0];
+          const file = e.target.files[0];
+          e.target.value = null;
+          this.inputFiles[name] = file;
           URL.revokeObjectURL(this.state.avatar.files[name]);
           this.setState({
             avatar: {
               ...this.state.avatar,
               files: {
                 ...this.state.avatar.files,
-                [name]: URL.createObjectURL(e.target.files[0])
+                [name]: URL.createObjectURL(file)
               }
             }
           });
+          createImageBitmap(file).then(this.avatarPreview.applyMapToPreview.bind(this, name));
         }}
       />
       {this.state.avatar.files[name] && (
@@ -199,6 +235,7 @@ export default class AvatarEditor extends Component {
                 }
               }
             });
+            this.avatarPreview.revertMap(name);
           }}
         >
           <i>
@@ -250,35 +287,39 @@ export default class AvatarEditor extends Component {
       return <div>Loading...</div>;
     }
 
-    const { debug } = this.props;
+    const { debug, preview } = this.props;
 
     return (
       <div className={classNames(styles.avatarSelectorContainer, "avatar-editor")}>
-        <div className="form-body">
-          {debug && this.textField("avatar_id", "Avatar ID", true)}
-          {debug && this.textField("parent_avatar_id", "Parent Avatar ID")}
-          {debug && this.textField("name", "Name")}
-          {debug && this.textField("description", "Description")}
-          {debug && this.checkbox("allow_remixing", "Allow Remixing")}
-          {debug && this.checkbox("allow_promotion", "Allow Promotion")}
-          {debug && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
+        <div className="split">
+          <div className="form-body">
+            {debug && this.textField("avatar_id", "Avatar ID", true)}
+            {debug && this.textField("parent_avatar_id", "Parent Avatar ID")}
+            {debug && this.textField("name", "Name")}
+            {debug && this.textField("description", "Description")}
+            {debug && this.checkbox("allow_remixing", "Allow Remixing")}
+            {debug && this.checkbox("allow_promotion", "Allow Promotion")}
+            {debug && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
 
-          {this.fileField("base_map", "Base Map", "image/*")}
-          {this.fileField("emissive_map", "Emissive Map", "image/*")}
-          {this.fileField("normal_map", "Normal Map", "image/*")}
+            {this.mapField("base_map", "Base Map", "image/*")}
+            {this.mapField("emissive_map", "Emissive Map", "image/*")}
+            {this.mapField("normal_map", "Normal Map", "image/*")}
 
-          {this.fileField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
+            {this.mapField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
 
-          {/* {this.fileField("ao_map", "AO Map", "images/\*", true)} */}
-          {/* {this.fileField("metallic_map", "Metallic Map", "image/\*", true)} */}
-          {/* {this.fileField("roughness_map", "Roughness Map", "image/\*", true)} */}
-
-          <div className={styles.info}>
-            <FormattedMessage id="avatar-editor.info" />
-            <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
-              <FormattedMessage id="avatar-editor.info-link" />
-            </a>
+            {/* {this.mapField("ao_map", "AO Map", "images/\*", true)} */}
+            {/* {this.mapField("metallic_map", "Metallic Map", "image/\*", true)} */}
+            {/* {this.mapField("roughness_map", "Roughness Map", "image/\*", true)} */}
           </div>
+          {preview && (
+            <AvatarPreview avatar={this.state.avatar} files={this.inputFiles} ref={p => (this.avatarPreview = p)} />
+          )}
+        </div>
+        <div className={styles.info}>
+          <FormattedMessage id="avatar-editor.info" />
+          <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
+            <FormattedMessage id="avatar-editor.info-link" />
+          </a>
         </div>
         <div>
           <input
