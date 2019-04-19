@@ -196,59 +196,59 @@ AFRAME.registerComponent("media-loader", {
     };
 
     if (this.data.animate) {
-      this.addMeshScaleAnimation(this.el.getObject3D("mesh"), { x: 0.001, y: 0.001, z: 0.001 }, finish);
+      this.addMeshAnimation(
+        this.el.getObject3D("mesh"),
+        { px: 0, py: 0, pz: 0, sx: 0.001, sy: 0.001, sz: 0.001 },
+        finish
+      );
     } else {
       finish();
     }
   },
 
-  addMeshScaleAnimation(mesh, initialScale, onComplete) {
-    const posX = mesh.position.x;
-    const posY = mesh.position.y;
-    const posZ = mesh.position.z;
-    const scaleX = mesh.scale.x;
-    const scaleY = mesh.scale.y;
-    const scaleZ = mesh.scale.z;
-
+  addMeshAnimation(mesh, initial, onComplete) {
     const config = {
       duration: 400,
       easing: "easeOutElastic",
       elasticity: 400,
       loop: 0,
       round: false,
-      x: 1,
-      y: 1,
-      z: 1,
-      targets: [initialScale],
+      px: mesh.position.x,
+      py: mesh.position.y,
+      pz: mesh.position.z,
+      sx: mesh.scale.x,
+      sy: mesh.scale.y,
+      sz: mesh.scale.z,
+      targets: [initial],
       update: (function() {
         const newScale = {};
         const lastValue = {};
         return function(anim) {
-          const value = anim.animatables[0].target.x;
+          let { sx, sy, sz, px, py, pz } = anim.animatables[0].target;
 
-          newScale.x = Math.max(0.0001, value * scaleX);
-          newScale.y = Math.max(0.0001, value * scaleY);
-          newScale.z = Math.max(0.0001, value * scaleZ);
+          sx = Math.max(0.0001, sx);
+          sy = Math.max(0.0001, sy);
+          sz = Math.max(0.0001, sz);
 
           // For animation timeline.
-          if (newScale.x === lastValue.x && newScale.y === lastValue.y && newScale.z === lastValue.z) {
+          if (sx === lastValue.x && sy === lastValue.y && sz === lastValue.z) {
             return;
           }
 
-          lastValue.x = newScale.x;
-          lastValue.y = newScale.y;
-          lastValue.z = newScale.z;
+          lastValue.x = sx;
+          lastValue.y = sy;
+          lastValue.z = sz;
 
-          mesh.scale.set(newScale.x, newScale.y, newScale.z);
-          mesh.position.set(value * posX, value * posY, value * posZ);
+          mesh.scale.set(sx, sy, sz);
+          mesh.position.set(px, py, pz);
           mesh.matrixNeedsUpdate = true;
         };
       })(),
       complete: onComplete
     };
 
-    mesh.position.set(0, 0, 0);
-    mesh.scale.copy(initialScale);
+    mesh.position.set(initial.px, initial.py, initial.pz);
+    mesh.scale.copy(initial.sx, initial.sy, initial.sz);
     mesh.matrixNeedsUpdate = true;
 
     return anime(config);
