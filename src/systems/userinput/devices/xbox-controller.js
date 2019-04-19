@@ -30,6 +30,7 @@ export class XboxControllerDevice {
   }
 
   write(frame) {
+    this.gamepad = navigator.getGamepads()[this.gamepad.index];
     if (this.gamepad.connected) {
       this.buttonMap.forEach(b => {
         const path = paths.device.xbox.button(b.name);
