@@ -15,6 +15,15 @@
         // Google Chrome on iOS correctly. We can remove this when we upgrade a-frame past 0.8.2.
         if (!window.WebVRConfig) { window.WebVRConfig = {}; }
     </script>
+    <script>
+        /*
+        HACK Another hack to fix a-frame's device detection in Chrome when WebXR or WebVR flags are enabled in
+        chrome://flags. See https://github.com/mozilla/hubs/issues/892
+        */
+        if (navigator.xr && !navigator.xr.requestDevice) {
+            navigator.xr.requestDevice = () => Promise.reject({message: "Hubs: requestDevice not supported."});
+        }
+    </script>
     <!-- Google Analytics -->
     <!-- NOTE GA tracking is disabled by default. You'll need to set the GA_TRACKING_ID build variable to enable it. -->
     <script>
@@ -415,6 +424,7 @@
             </template>
 
             <!-- TODO: All of these positions are assuming 16:9 - need to actually reposition based on video resolution -->
+
             <template id="video-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
                     <a-image
@@ -479,6 +489,14 @@
                 <a-entity class="ui interactable-ui hover-container" visible="false">
                     <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.01">
                         <a-entity text="value:value; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="link-hover-menu">
+                <a-entity class="ui interactable-ui hover-container" visible="false">
+                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.01">
+                        <a-entity text="value:open link; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
@@ -602,7 +620,6 @@
         <a-entity
             id="player-rig"
             spawn-controller="loadedEvent: entered; target: #player-rig"
-            wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
             player-info

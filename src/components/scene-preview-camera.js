@@ -7,6 +7,8 @@ function lerp(start, end, t) {
   return (1 - t) * start + t * end;
 }
 
+const newRot = new THREE.Quaternion();
+
 AFRAME.registerComponent("scene-preview-camera", {
   schema: {
     duration: { default: 90, type: "number" },
@@ -27,13 +29,13 @@ AFRAME.registerComponent("scene-preview-camera", {
     this.targetRotation.setFromEuler(targetRotDelta);
     this.targetRotation.premultiply(this.startRotation);
 
-    this.startTime = new Date().getTime();
+    this.startTime = performance.now();
     this.backwards = false;
     this.ranOnePass = false;
   },
 
   tick: function() {
-    let t = (new Date().getTime() - this.startTime) / (1000.0 * this.data.duration);
+    let t = (performance.now() - this.startTime) / (1000.0 * this.data.duration);
     t = Math.min(1.0, Math.max(0.0, t));
 
     if (!this.ranOnePass) {
@@ -46,7 +48,6 @@ AFRAME.registerComponent("scene-preview-camera", {
     const to = this.backwards ? this.startPoint : this.targetPoint;
     const fromRot = this.backwards ? this.targetRotation : this.startRotation;
     const toRot = this.backwards ? this.startRotation : this.targetRotation;
-    const newRot = new THREE.Quaternion();
 
     THREE.Quaternion.slerp(fromRot, toRot, newRot, t);
 
@@ -61,7 +62,7 @@ AFRAME.registerComponent("scene-preview-camera", {
     if (t >= 0.9999) {
       this.ranOnePass = true;
       this.backwards = !this.backwards;
-      this.startTime = new Date().getTime();
+      this.startTime = performance.now();
     }
   }
 });

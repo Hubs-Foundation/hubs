@@ -14,6 +14,7 @@ import { lang, messages } from "./utils/i18n";
 
 addLocaleData([...en]);
 const contactEmail = "hubs@mozilla.com";
+const contactSubject = "Hubs Discord Bot Invite";
 
 class DiscordLanding extends Component {
   componentDidMount() {}
@@ -45,7 +46,10 @@ class DiscordLanding extends Component {
                   <FormattedMessage id="discord.secondary_tagline" />
                 </div>
                 <div className={styles.actionButtons}>
-                  <a href={`mailto:${contactEmail}`} className={styles.downloadButton}>
+                  <a
+                    href={`mailto:${contactEmail}?subject=${encodeURIComponent(contactSubject)}`}
+                    className={styles.downloadButton}
+                  >
                     <div>
                       <FormattedMessage id="discord.contact_us" />
                     </div>

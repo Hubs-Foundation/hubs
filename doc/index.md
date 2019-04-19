@@ -58,7 +58,6 @@
     - [cursor-controller](#components/user-input/cursor-controller)
     - [hand-controls2](#components/user-input/hand-controls2)
     - [virtual-gamepad-controls](#components/user-input/virtual-gamepad-controls)
-    - [wasd-to-analog2d](#components/user-input/wasd-to-analog2d)
   - [vr-mode](#components/vr-mode)
     - [vr-mode-toggle-visibility](#components/vr-mode/vr-mode-toggle-visibility)
     - [vr-mode-toggle-playing](#components/vr-mode/vr-mode-toggle-playing)

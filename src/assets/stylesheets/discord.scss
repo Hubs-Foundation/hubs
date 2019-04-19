@@ -81,8 +81,12 @@ body {
   justify-content: center;
   width: 30vw;
 
-  @media(max-width: $breakpoint) {
+  @media(max-width: $narrow-breakpoint) {
     width: 320px;
+
+    img {
+      width: 100%;
+    }
   }
 }
 

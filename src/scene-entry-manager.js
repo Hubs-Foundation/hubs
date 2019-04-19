@@ -138,8 +138,8 @@ export default class SceneEntryManager {
   };
 
   _setupPlayerRig = () => {
-    this._updatePlayerRigWithProfile();
-    this.store.addEventListener("statechanged", this._updatePlayerRigWithProfile);
+    this._updatePlayerInfoFromProfile();
+    this.store.addEventListener("statechanged", this._updatePlayerInfoFromProfile);
 
     const avatarScale = parseInt(qs.get("avatar_scale"), 10);
 
@@ -148,12 +148,8 @@ export default class SceneEntryManager {
     }
   };
 
-  _updatePlayerRigWithProfile = async () => {
-    const { avatarId, displayName } = this.store.state.profile;
-
-    this.playerRig.setAttribute("player-info", { displayName });
-    this.scene.emit("username-changed", { username: displayName });
-
+  _updatePlayerInfoFromProfile = async () => {
+    const { avatarId } = this.store.state.profile;
     const avatarSrc = await getAvatarSrc(avatarId);
     this.playerRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
   };
@@ -488,7 +484,7 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("photo_taken", e => {
-      this.hubChannel.sendMessage({ src: e.detail }, "spawn");
+      this.hubChannel.sendMessage({ src: e.detail }, "photo");
     });
   };
 
