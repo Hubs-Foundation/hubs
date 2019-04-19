@@ -303,14 +303,6 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "image-loaded",
           () => {
-            const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
-
-            if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
-              this.el.setAttribute("hover-menu__hubs-item", {
-                template: "#hubs-destination-hover-menu",
-                dirs: ["forward", "back"]
-              });
-            }
             this.onMediaLoaded();
           },
           { once: true }
@@ -370,7 +362,16 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "image-loaded",
           () => {
-            this.el.setAttribute("hover-menu__link", { template: "#link-hover-menu", dirs: ["forward", "back"] });
+            const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
+
+            if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
+              this.el.setAttribute("hover-menu__hubs-item", {
+                template: "#hubs-destination-hover-menu",
+                dirs: ["forward", "back"]
+              });
+            } else {
+              this.el.setAttribute("hover-menu__link", { template: "#link-hover-menu", dirs: ["forward", "back"] });
+            }
             this.onMediaLoaded();
           },
           { once: true }
