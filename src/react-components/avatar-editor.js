@@ -91,7 +91,7 @@ export default class AvatarEditor extends Component {
   uploadAvatar = async e => {
     e.preventDefault();
 
-    if (this.inputFiles.glb) {
+    if (this.inputFiles.glb && this.inputFiles.glb instanceof File) {
       const gltfLoader = new THREE.GLTFLoader();
       const gltfUrl = URL.createObjectURL(this.inputFiles.glb);
       const onProgress = console.log;
@@ -131,7 +131,7 @@ export default class AvatarEditor extends Component {
     }
 
     const filesToUpload = ["gltf", "bin", "base_map", "emissive_map", "normal_map", "orm_map"].filter(
-      k => this.inputFiles[k] !== undefined
+      k => this.inputFiles[k] === null || this.inputFiles[k] instanceof File
     );
 
     this.setState({ uploading: true });
