@@ -186,9 +186,10 @@
   }
 
   :local(.display-name) {
-    font-size: 1.2em;
-    margin-right: 0.5em;
+    font-size: 14pt;
+    padding: 1em;
   }
+
   :local(.form-field-text) {
     @extend %form-field-on-white;
     @extend %default-font;

@@ -7,7 +7,6 @@ const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
 const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
-const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
 import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import {
@@ -51,10 +50,6 @@ export default class SceneEntryManager {
     const playerCamera = document.querySelector("#player-camera");
     playerCamera.removeAttribute("scene-preview-camera");
     playerCamera.object3D.position.set(0, playerHeight, 0);
-
-    // Get aframe inspector url using the webpack file-loader.
-    // Set the aframe-inspector url to our hosted copy.
-    this.scene.setAttribute("inspector", { url: aframeInspectorUrl });
 
     if (isDebug) {
       NAF.connection.adapter.session.options.verbose = true;
@@ -143,8 +138,8 @@ export default class SceneEntryManager {
   };
 
   _setupPlayerRig = () => {
-    this._updatePlayerRigWithProfile();
-    this.store.addEventListener("statechanged", this._updatePlayerRigWithProfile);
+    this._updatePlayerInfoFromProfile();
+    this.store.addEventListener("statechanged", this._updatePlayerInfoFromProfile);
 
     const avatarScale = parseInt(qs.get("avatar_scale"), 10);
 
@@ -153,12 +148,8 @@ export default class SceneEntryManager {
     }
   };
 
-  _updatePlayerRigWithProfile = async () => {
-    const { avatarId, displayName } = this.store.state.profile;
-
-    this.playerRig.setAttribute("player-info", { displayName });
-    this.scene.emit("username-changed", { username: displayName });
-
+  _updatePlayerInfoFromProfile = async () => {
+    const { avatarId } = this.store.state.profile;
     const avatarSrc = await getAvatarSrc(avatarId);
     this.playerRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
   };
@@ -493,7 +484,7 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("photo_taken", e => {
-      this.hubChannel.sendMessage({ src: e.detail }, "spawn");
+      this.hubChannel.sendMessage({ src: e.detail }, "photo");
     });
   };
 

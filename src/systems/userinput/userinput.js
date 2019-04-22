@@ -36,14 +36,24 @@ import { gamepadBindings } from "./bindings/generic-gamepad";
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "../../utils/vr-caps-detect";
 import { ArrayBackedSet } from "./array-backed-set";
 
-function intersection(setA, setB) {
-  const _intersection = new Set();
-  for (const elem of setB) {
-    if (setA.has(elem)) {
-      _intersection.add(elem);
+function arrayContentsDiffer(a, b) {
+  if (a.length !== b.length) return true;
+
+  for (let i = 0, il = a.length; i < il; i++) {
+    const elem = a[i];
+    let found = false;
+
+    for (let j = 0, jl = b.length; j < jl; j++) {
+      if (elem === b[j]) {
+        found = true;
+        break;
+      }
     }
+
+    if (!found) return true;
   }
-  return _intersection;
+
+  return false;
 }
 
 const satisfiesPath = (binding, path) => {
@@ -130,7 +140,7 @@ function computeMasks(bindings) {
 
 function isActive(binding, sets) {
   for (let i = 0; i < binding.sets.length; i++) {
-    if (sets.has(binding.sets[i])) {
+    if (sets.includes(binding.sets[i])) {
       return true;
     }
   }
@@ -163,7 +173,8 @@ AFRAME.registerSystem("userinput", {
   },
 
   toggleSet(set, value) {
-    this.pendingSetChanges.push({ set, value: !!value });
+    this.pendingSetChanges.push(set);
+    this.pendingSetChanges.push(!!value);
   },
 
   init() {
@@ -198,8 +209,8 @@ AFRAME.registerSystem("userinput", {
       }
     };
 
-    this.prevActiveSets = new Set();
-    this.activeSets = new Set([sets.global]);
+    this.prevActiveSets = [];
+    this.activeSets = [sets.global];
     this.pendingSetChanges = [];
     this.xformStates = new Map();
     this.activeDevices = new ArrayBackedSet([new HudDevice()]);
@@ -292,8 +303,7 @@ AFRAME.registerSystem("userinput", {
         gamepadDevice = new WindowsMixedRealityControllerDevice(e.gamepad);
       } else if (e.gamepad.id === "Oculus Go Controller") {
         gamepadDevice = new OculusGoControllerDevice(e.gamepad);
-        // Note that FXR reports Vive Focus' controller as GearVR, so this is primarily to support that
-      } else if (e.gamepad.id === "Gear VR Controller") {
+      } else if (e.gamepad.id === "Gear VR Controller" || e.gamepad.id === "HTC Vive Focus Controller") {
         gamepadDevice = new GearVRControllerDevice(e.gamepad);
       } else if (e.gamepad.id === "Daydream Controller") {
         gamepadDevice = new DaydreamControllerDevice(e.gamepad);
@@ -348,17 +358,29 @@ AFRAME.registerSystem("userinput", {
       this.masks = computeMasks(this.sortedBindings);
     }
 
-    this.prevActiveSets.clear();
-    for (const item of this.activeSets) {
-      this.prevActiveSets.add(item);
+    this.prevActiveSets.length = 0;
+    for (let i = 0; i < this.activeSets.length; i++) {
+      const item = this.activeSets[i];
+      this.prevActiveSets.push(item);
     }
     resolveActionSets();
-    for (const { set, value } of this.pendingSetChanges) {
-      this.activeSets[value ? "add" : "delete"](set);
+    for (let i = 0, l = this.pendingSetChanges.length; i < l; i += 2) {
+      const set = this.pendingSetChanges[i];
+      const value = this.pendingSetChanges[i + 1];
+
+      if (value) {
+        if (!this.activeSets.includes(set)) {
+          this.activeSets.push(set);
+        }
+      } else {
+        const idx = this.activeSets.indexOf(set);
+
+        if (idx > -1) {
+          this.activeSets.splice(idx, 1);
+        }
+      }
     }
-    const activeSetsChanged =
-      this.prevActiveSets.size !== this.activeSets.size ||
-      intersection(this.prevActiveSets, this.activeSets).size !== this.activeSets.size;
+    const activeSetsChanged = arrayContentsDiffer(this.prevActiveSets, this.activeSets);
     this.pendingSetChanges.length = 0;
     if (registeredMappingsChanged || activeSetsChanged || (!this.actives && !this.masked)) {
       this.prevActives = this.actives;

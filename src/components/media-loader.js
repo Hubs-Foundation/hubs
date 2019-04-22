@@ -5,8 +5,7 @@ import {
   resolveUrl,
   injectCustomShaderChunks,
   isHubsRoomUrl,
-  isHubsSceneUrl,
-  generateMeshBVH
+  isHubsSceneUrl
 } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
 import "three/examples/js/loaders/GLTFLoader";
@@ -172,10 +171,6 @@ AFRAME.registerComponent("media-loader", {
       this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_MEDIA_LOADED);
     }
 
-    if (!el.components["animation-mixer"]) {
-      generateMeshBVH(el.object3D);
-    }
-
     const finish = () => {
       if (isModel) {
         el.setAttribute("ammo-shape", { type: SHAPE.HULL });
@@ -257,6 +252,7 @@ AFRAME.registerComponent("media-loader", {
       let canonicalUrl = src;
       let accessibleUrl = src;
       let contentType = this.data.contentType;
+      let thumbnail;
 
       if (this.data.resolve) {
         const result = await resolveUrl(src);
@@ -266,6 +262,7 @@ AFRAME.registerComponent("media-loader", {
           canonicalUrl = location.protocol + canonicalUrl;
         }
         contentType = (result.meta && result.meta.expected_content_type) || contentType;
+        thumbnail = result.meta && result.meta.thumbnail && proxiedUrlFor(result.meta.thumbnail);
       }
 
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
@@ -306,14 +303,6 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "image-loaded",
           () => {
-            const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
-
-            if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
-              this.el.setAttribute("hover-menu__hubs-item", {
-                template: "#hubs-destination-hover-menu",
-                dirs: ["forward", "back"]
-              });
-            }
             this.onMediaLoaded();
           },
           { once: true }
@@ -366,6 +355,34 @@ AFRAME.registerComponent("media-loader", {
             modelToWorldScale: this.data.resize ? 0.0001 : 1.0
           })
         );
+      } else if (contentType.startsWith("text/html")) {
+        this.el.removeAttribute("gltf-model-plus");
+        this.el.removeAttribute("media-video");
+        this.el.removeAttribute("media-pager");
+        this.el.addEventListener(
+          "image-loaded",
+          () => {
+            const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
+
+            if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
+              this.el.setAttribute("hover-menu__hubs-item", {
+                template: "#hubs-destination-hover-menu",
+                dirs: ["forward", "back"]
+              });
+            } else {
+              this.el.setAttribute("hover-menu__link", { template: "#link-hover-menu", dirs: ["forward", "back"] });
+            }
+            this.onMediaLoaded();
+          },
+          { once: true }
+        );
+        this.el.setAttribute(
+          "media-image",
+          Object.assign({}, this.data.mediaOptions, { src: thumbnail, contentType: "image/png" })
+        );
+        if (this.el.components["position-at-box-shape-border__freeze"]) {
+          this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
+        }
       } else {
         throw new Error(`Unsupported content type: ${contentType}`);
       }

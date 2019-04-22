@@ -6,21 +6,19 @@ AFRAME.registerComponent("open-media-button", {
     this.label = this.el.querySelector("[text]");
 
     this.updateSrc = () => {
-      this.src = this.targetEl.components["media-loader"].data.src;
+      const src = (this.src = this.targetEl.components["media-loader"].data.src);
+      const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
+      this.el.object3D.visible = !!visible;
 
-      if (guessContentType(this.src) === "video/vnd.hubs-webrtc") {
-        this.el.object3D.visible = false;
+      if (visible) {
+        let label = "open link";
+        if (isHubsSceneUrl(src)) {
+          label = "use scene";
+        } else if (isHubsRoomUrl(src)) {
+          label = "visit room";
+        }
+        this.label.setAttribute("text", "value", label);
       }
-
-      let label = "open link";
-
-      if (isHubsSceneUrl(this.src)) {
-        label = "use scene";
-      } else if (isHubsRoomUrl(this.src)) {
-        label = "visit room";
-      }
-
-      this.label.setAttribute("text", "value", label);
     };
 
     this.onClick = () => {

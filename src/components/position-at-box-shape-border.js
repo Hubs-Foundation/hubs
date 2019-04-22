@@ -44,6 +44,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
   init() {
     this.cam = this.el.sceneEl.camera.el.object3D;
     this._updateBox = this._updateBox.bind(this);
+    this._setupTarget = this._setupTarget.bind(this);
     this.halfExtents = new THREE.Vector3();
     this.el.sceneEl.systems["frame-scheduler"].schedule(this._updateBox, "media-components");
   },
@@ -56,22 +57,26 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     this.dirs = this.data.dirs.map(d => dirs[d]);
   },
 
+  _setupTarget() {
+    this.targetEl = this.el.querySelector(this.data.target);
+    if (!this.targetEl) {
+      console.warn(`Race condition on position-at-box-shape-border on selector ${this.data.target}`);
+      return;
+    }
+
+    this.target = this.targetEl.object3D;
+
+    this.targetEl.addEventListener("animationcomplete", () => {
+      this.targetEl.removeAttribute("animation__show");
+    });
+
+    this.target.scale.setScalar(0.01); // To avoid "pop" of gigantic button first time
+    this.target.matrixNeedsUpdate = true;
+  },
+
   tick() {
     if (!this.target) {
-      this.targetEl = this.el.querySelector(this.data.target);
-      if (!this.targetEl) {
-        console.warn(`Race condition on position-at-box-shape-border on selector ${this.data.target}`);
-        return;
-      }
-
-      this.target = this.targetEl.object3D;
-
-      this.targetEl.addEventListener("animationcomplete", () => {
-        this.targetEl.removeAttribute("animation__show");
-      });
-
-      this.target.scale.setScalar(0.01); // To avoid "pop" of gigantic button first time
-      this.target.matrixNeedsUpdate = true;
+      this._setupTarget();
       return;
     }
 
@@ -79,7 +84,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
       return;
     }
 
-    const isVisible = this.targetEl.getAttribute("visible");
+    const isVisible = this.targetEl.object3D.visible;
     const opening = isVisible && !this.wasVisible;
     const scaleChanged =
       this.el.object3D.scale.x !== this.previousScaleX ||

@@ -49,7 +49,6 @@
         action-to-event__mute="path: /actions/muteMic; event: action_mute;"
         freeze-controller="toggleEvent: action_freeze"
         personal-space-bubble="debug: false;"
-        vr-mode-ui="enabled: false"
         stats-plus="false"
         rotate-selected-object
         environment-map="loadDefault: false"
@@ -425,6 +424,7 @@
             </template>
 
             <!-- TODO: All of these positions are assuming 16:9 - need to actually reposition based on video resolution -->
+
             <template id="video-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
                     <a-image
@@ -489,6 +489,14 @@
                 <a-entity class="ui interactable-ui hover-container" visible="false">
                     <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.01">
                         <a-entity text="value:value; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="link-hover-menu">
+                <a-entity class="ui interactable-ui hover-container" visible="false">
+                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.01">
+                        <a-entity text="value:open link; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
@@ -612,7 +620,6 @@
         <a-entity
             id="player-rig"
             spawn-controller="loadedEvent: entered; target: #player-rig"
-            wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
             player-info

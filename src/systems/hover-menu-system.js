@@ -3,7 +3,8 @@ function getSpecificHoverMenu(el) {
     el.components["hover-menu"] ||
     el.components["hover-menu__video"] ||
     el.components["hover-menu__camera"] ||
-    el.components["hover-menu__hubs-item"]
+    el.components["hover-menu__hubs-item"] ||
+    el.components["hover-menu__link"]
   );
 }
 

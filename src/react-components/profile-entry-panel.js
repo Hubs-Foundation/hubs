@@ -15,6 +15,7 @@ import AvatarEditor from "./avatar-editor";
 
 class ProfileEntryPanel extends Component {
   static propTypes = {
+    displayNameOverride: PropTypes.string,
     store: PropTypes.object,
     history: PropTypes.object,
     messages: PropTypes.object,
@@ -49,7 +50,8 @@ class ProfileEntryPanel extends Component {
     const hasChangedNowOrPreviously = hasChangedName || this.state.displayName !== displayName;
     this.props.store.update({
       activity: {
-        hasChangedName: hasChangedNowOrPreviously
+        hasChangedName: hasChangedNowOrPreviously,
+        hasAcceptedProfile: true
       },
       profile: {
         displayName: this.state.displayName,
@@ -64,17 +66,21 @@ class ProfileEntryPanel extends Component {
   };
 
   componentDidMount() {
-    // stop propagation so that avatar doesn't move when wasd'ing during text input.
-    this.nameInput.addEventListener("keydown", this.stopPropagation);
-    this.nameInput.addEventListener("keypress", this.stopPropagation);
-    this.nameInput.addEventListener("keyup", this.stopPropagation);
+    if (this.nameInput) {
+      // stop propagation so that avatar doesn't move when wasd'ing during text input.
+      this.nameInput.addEventListener("keydown", this.stopPropagation);
+      this.nameInput.addEventListener("keypress", this.stopPropagation);
+      this.nameInput.addEventListener("keyup", this.stopPropagation);
+    }
   }
 
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
-    this.nameInput.removeEventListener("keydown", this.stopPropagation);
-    this.nameInput.removeEventListener("keypress", this.stopPropagation);
-    this.nameInput.removeEventListener("keyup", this.stopPropagation);
+    if (this.nameInput) {
+      this.nameInput.removeEventListener("keydown", this.stopPropagation);
+      this.nameInput.removeEventListener("keypress", this.stopPropagation);
+      this.nameInput.removeEventListener("keyup", this.stopPropagation);
+    }
   }
 
   render() {
@@ -129,19 +135,23 @@ class ProfileEntryPanel extends Component {
             <label htmlFor="#profile-entry-display-name" className={styles.title}>
               <FormattedMessage id="profile.header" />
             </label>
-            <input
-              id="profile-entry-display-name"
-              className={styles.formFieldText}
-              value={this.state.displayName}
-              onFocus={e => handleTextFieldFocus(e.target)}
-              onBlur={() => handleTextFieldBlur()}
-              onChange={e => this.setState({ displayName: e.target.value })}
-              required
-              spellCheck="false"
-              pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
-              title={formatMessage({ id: "profile.display_name.validation_warning" })}
-              ref={inp => (this.nameInput = inp)}
-            />
+            {this.props.displayNameOverride ? (
+              <span className={styles.displayName}>{this.props.displayNameOverride}</span>
+            ) : (
+              <input
+                id="profile-entry-display-name"
+                className={styles.formFieldText}
+                value={this.state.displayName}
+                onFocus={e => handleTextFieldFocus(e.target)}
+                onBlur={() => handleTextFieldBlur()}
+                onChange={e => this.setState({ displayName: e.target.value })}
+                required
+                spellCheck="false"
+                pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
+                title={formatMessage({ id: "profile.display_name.validation_warning" })}
+                ref={inp => (this.nameInput = inp)}
+              />
+            )}
 
             <div className={styles.tabs}>
               <a

@@ -87,7 +87,7 @@ AFRAME.registerComponent("cursor-controller", {
       const { cursor, minDistance, far, camera } = this.data;
 
       const cursorModDelta = userinput.get(paths.actions.cursor.modDelta) || 0;
-      if (isGrabbing && !userinput.activeSets.has(sets.cursorHoldingUI)) {
+      if (isGrabbing && !userinput.activeSets.includes(sets.cursorHoldingUI)) {
         this.distance = THREE.Math.clamp(this.distance - cursorModDelta, minDistance, far);
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);
