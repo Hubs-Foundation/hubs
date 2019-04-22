@@ -23,7 +23,7 @@ AFRAME.registerComponent("hoverable-visuals", {
     this.boundingBox = null;
   },
   tick(time) {
-    if (!this.uniforms || !this.uniforms.size) return;
+    if (!this.uniforms || !this.uniforms.length) return;
 
     const isFrozen = this.el.sceneEl.is("frozen");
 
@@ -53,7 +53,8 @@ AFRAME.registerComponent("hoverable-visuals", {
       this.sweepParams[1] = worldY + scaledRadius;
     }
 
-    for (const uniform of this.uniforms.values()) {
+    for (let i = 0, l = this.uniforms.length; i < l; i++) {
+      const uniform = this.uniforms[i];
       uniform.hubs_EnableSweepingEffect.value = this.data.enableSweepingEffect;
       uniform.hubs_IsFrozen.value = isFrozen;
       uniform.hubs_SweepParams.value = this.sweepParams;

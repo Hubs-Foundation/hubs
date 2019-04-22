@@ -1,0 +1,76 @@
+import ReactDOM from "react-dom";
+import React, { Component } from "react";
+import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
+import styles from "./assets/stylesheets/discord.scss";
+import discordBotLogo from "./assets/images/discord-bot-logo.png";
+import discordBotSplash from "./assets/images/discord-bot-splash.png";
+
+import registerTelemetry from "./telemetry";
+
+registerTelemetry("/discord", "Discord Landing Page");
+
+import en from "react-intl/locale-data/en";
+import { lang, messages } from "./utils/i18n";
+
+addLocaleData([...en]);
+const contactEmail = "hubs@mozilla.com";
+const contactSubject = "Hubs Discord Bot Invite";
+
+class DiscordLanding extends Component {
+  componentDidMount() {}
+
+  render() {
+    return (
+      <IntlProvider locale={lang} messages={messages}>
+        <div className={styles.ui}>
+          <div className={styles.header}>
+            <div className={styles.headerLinks}>
+              <a href="/" rel="noreferrer noopener">
+                Try Hubs
+              </a>
+              <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
+                <FormattedMessage id="discord.community_link" />
+              </a>
+            </div>
+          </div>
+          <div className={styles.content}>
+            <div className={styles.heroPane}>
+              <div className={styles.heroMessage}>
+                <div className={styles.discordLogo}>
+                  <img src={discordBotLogo} />
+                </div>
+                <div className={styles.primaryTagline}>
+                  <FormattedMessage id="discord.primary_tagline" />
+                </div>
+                <div className={styles.secondaryTagline}>
+                  <FormattedMessage id="discord.secondary_tagline" />
+                </div>
+                <div className={styles.actionButtons}>
+                  <a
+                    href={`mailto:${contactEmail}?subject=${encodeURIComponent(contactSubject)}`}
+                    className={styles.downloadButton}
+                  >
+                    <div>
+                      <FormattedMessage id="discord.contact_us" />
+                    </div>
+                  </a>
+                </div>
+              </div>
+              <div className={styles.heroSplash}>
+                <img src={discordBotSplash} />
+                <div className={styles.splashTagline}>
+                  <FormattedMessage id="discord.splash_tag" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className={styles.bg} />
+        </div>
+      </IntlProvider>
+    );
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  ReactDOM.render(<DiscordLanding />, document.getElementById("ui-root"));
+});

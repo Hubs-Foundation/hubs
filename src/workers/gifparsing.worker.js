@@ -5,7 +5,7 @@
  *
  */
 
-const parseGIF = function(gif, successCB, errorCB) {
+const parseGIF = function(gif) {
   let pos = 0;
   const delayTimes = [];
   let graphicControl = null;
@@ -37,8 +37,7 @@ const parseGIF = function(gif, successCB, errorCB) {
             disposals.push((graphicControl[3] >> 2) & 0x07);
           }
         } else {
-          errorCB && errorCB("parseGIF: unknown label");
-          break;
+          throw new Error("parseGIF: unknown label");
         }
       } else if (blockId === 0x2c) {
         pos += 9;
@@ -47,28 +46,21 @@ const parseGIF = function(gif, successCB, errorCB) {
         const imageData = gif.subarray(offset, pos + 1);
         frames.push(URL.createObjectURL(new Blob([gifHeader, graphicControl, imageData])));
       } else {
-        errorCB && errorCB("parseGIF: unknown blockId");
-        break;
+        throw new Error("parseGIF: unknown blockId");
       }
       pos++;
     }
   } else {
-    errorCB && errorCB("parseGIF: no GIF89a");
+    throw new Error("parseGIF: no GIF89a");
   }
-  successCB && successCB(delayTimes, loopCnt, frames, disposals);
+  return { delayTimes, loopCnt, frames, disposals };
 };
 
-self.onmessage = e => {
-  parseGIF(
-    new Uint8Array(e.data),
-    (delays, loopcnt, frames, disposals) => {
-      self.postMessage([true, frames, delays, disposals]);
-      delete self.onmessage;
-    },
-    err => {
-      console.error("Error in gif parsing worker", err);
-      self.postMessage([false, err]);
-      delete self.onmessage;
-    }
-  );
+self.onmessage = msg => {
+  try {
+    const result = parseGIF(new Uint8Array(msg.data.payload));
+    self.postMessage({ id: msg.data.id, result });
+  } catch (e) {
+    self.postMessage({ id: msg.data.id, err: e.message });
+  }
 };

@@ -5,17 +5,16 @@ import {
   resolveUrl,
   injectCustomShaderChunks,
   isHubsRoomUrl,
-  isHubsSceneUrl,
-  generateMeshBVH
+  isHubsSceneUrl
 } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
 
-const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
-  SHAPE = PHYSICS_CONSTANTS.SHAPE,
-  FIT = PHYSICS_CONSTANTS.FIT;
+const anime = require("animejs");
+
+const SHAPE = require("aframe-physics-system/src/constants").SHAPE;
 
 const gltfLoader = new THREE.GLTFLoader();
 let loadingObject;
@@ -79,6 +78,13 @@ AFRAME.registerComponent("media-loader", {
   tick(t, dt) {
     if (this.loaderMixer) {
       this.loaderMixer.update(dt / 1000);
+    }
+  },
+
+  remove() {
+    if (this.loadingSoundNode) {
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.stopSoundNode(this.loadingSoundNode);
+      this.loadingSoundNode = null;
     }
   },
 
@@ -165,19 +171,13 @@ AFRAME.registerComponent("media-loader", {
       this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_MEDIA_LOADED);
     }
 
-    if (!el.components["animation-mixer"]) {
-      generateMeshBVH(el.object3D);
-    }
-
     const finish = () => {
       if (isModel) {
         el.setAttribute("ammo-shape", { type: SHAPE.HULL });
       } else {
         el.setAttribute("ammo-shape", {
           type: SHAPE.BOX,
-          halfExtents: { x: 0.5, y: 0.5, z: 0.02 },
-          margin: 0.1,
-          fit: FIT.MANUAL
+          minHalfExtent: 0.04
         });
       }
 
@@ -191,23 +191,52 @@ AFRAME.registerComponent("media-loader", {
     };
 
     if (this.data.animate) {
-      const [sx, sy, sz] = [el.object3D.scale.x, el.object3D.scale.y, el.object3D.scale.z];
-      el.object3D.scale.set(0.001, 0.001, 0.001);
-      el.object3D.matrixNeedsUpdate = true;
-
-      el.setAttribute("animation__spawn-start", {
-        property: "scale",
-        delay: 50,
-        dur: 350,
-        from: { x: 0.001, y: 0.001, z: 0.001 },
-        to: { x: sx, y: sy, z: sz },
-        easing: "easeOutElastic"
-      });
-
-      el.addEventListener("animationcomplete", finish, { once: true });
+      this.addMeshScaleAnimation(this.el.getObject3D("mesh"), { x: 0.001, y: 0.001, z: 0.001 }, finish);
     } else {
       finish();
     }
+  },
+
+  addMeshScaleAnimation(mesh, initialScale, onComplete) {
+    const config = {
+      duration: 400,
+      easing: "easeOutElastic",
+      elasticity: 400,
+      loop: 0,
+      round: false,
+      x: mesh.scale.x,
+      y: mesh.scale.y,
+      z: mesh.scale.z,
+      targets: [initialScale],
+      update: (function() {
+        const lastValue = {};
+        return function(anim) {
+          const value = anim.animatables[0].target;
+
+          value.x = Math.max(0.0001, value.x);
+          value.y = Math.max(0.0001, value.y);
+          value.z = Math.max(0.0001, value.z);
+
+          // For animation timeline.
+          if (value.x === lastValue.x && value.y === lastValue.y && value.z === lastValue.z) {
+            return;
+          }
+
+          lastValue.x = value.x;
+          lastValue.y = value.y;
+          lastValue.z = value.z;
+
+          mesh.scale.set(value.x, value.y, value.z);
+          mesh.matrixNeedsUpdate = true;
+        };
+      })(),
+      complete: onComplete
+    };
+
+    mesh.scale.copy(initialScale);
+    mesh.matrixNeedsUpdate = true;
+
+    return anime(config);
   },
 
   async update(oldData) {
@@ -223,6 +252,7 @@ AFRAME.registerComponent("media-loader", {
       let canonicalUrl = src;
       let accessibleUrl = src;
       let contentType = this.data.contentType;
+      let thumbnail;
 
       if (this.data.resolve) {
         const result = await resolveUrl(src);
@@ -232,6 +262,7 @@ AFRAME.registerComponent("media-loader", {
           canonicalUrl = location.protocol + canonicalUrl;
         }
         contentType = (result.meta && result.meta.expected_content_type) || contentType;
+        thumbnail = result.meta && result.meta.thumbnail && proxiedUrlFor(result.meta.thumbnail);
       }
 
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
@@ -272,14 +303,6 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "image-loaded",
           () => {
-            const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
-
-            if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
-              this.el.setAttribute("hover-menu__hubs-item", {
-                template: "#hubs-destination-hover-menu",
-                dirs: ["forward", "back"]
-              });
-            }
             this.onMediaLoaded();
           },
           { once: true }
@@ -332,6 +355,34 @@ AFRAME.registerComponent("media-loader", {
             modelToWorldScale: this.data.resize ? 0.0001 : 1.0
           })
         );
+      } else if (contentType.startsWith("text/html")) {
+        this.el.removeAttribute("gltf-model-plus");
+        this.el.removeAttribute("media-video");
+        this.el.removeAttribute("media-pager");
+        this.el.addEventListener(
+          "image-loaded",
+          () => {
+            const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
+
+            if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
+              this.el.setAttribute("hover-menu__hubs-item", {
+                template: "#hubs-destination-hover-menu",
+                dirs: ["forward", "back"]
+              });
+            } else {
+              this.el.setAttribute("hover-menu__link", { template: "#link-hover-menu", dirs: ["forward", "back"] });
+            }
+            this.onMediaLoaded();
+          },
+          { once: true }
+        );
+        this.el.setAttribute(
+          "media-image",
+          Object.assign({}, this.data.mediaOptions, { src: thumbnail, contentType: "image/png" })
+        );
+        if (this.el.components["position-at-box-shape-border__freeze"]) {
+          this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
+        }
       } else {
         throw new Error(`Unsupported content type: ${contentType}`);
       }
@@ -407,10 +458,6 @@ AFRAME.registerComponent("media-pager", {
     if (this.toolbar) {
       this.toolbar.parentNode.removeChild(this.toolbar);
     }
-    if (this.loadingSoundNode) {
-      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.stopSoundNode(this.loadingSoundNode);
-      this.loadingSoundNode = null;
-    }
   },
 
   onNext() {
@@ -429,7 +476,7 @@ AFRAME.registerComponent("media-pager", {
     const ammoShape = this.el.getAttribute("ammo-shape");
     if (!ammoShape) return;
 
-    this.toolbar.object3D.position.y = -ammoShape.halfExtents.y - 0.2;
+    this.toolbar.object3D.position.y = -0.7;
     this.toolbar.object3D.matrixNeedsUpdate = true;
   }
 });

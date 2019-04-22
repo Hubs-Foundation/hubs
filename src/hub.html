@@ -15,6 +15,15 @@
         // Google Chrome on iOS correctly. We can remove this when we upgrade a-frame past 0.8.2.
         if (!window.WebVRConfig) { window.WebVRConfig = {}; }
     </script>
+    <script>
+        /*
+        HACK Another hack to fix a-frame's device detection in Chrome when WebXR or WebVR flags are enabled in
+        chrome://flags. See https://github.com/mozilla/hubs/issues/892
+        */
+        if (navigator.xr && !navigator.xr.requestDevice) {
+            navigator.xr.requestDevice = () => Promise.reject({message: "Hubs: requestDevice not supported."});
+        }
+    </script>
     <!-- Google Analytics -->
     <!-- NOTE GA tracking is disabled by default. You'll need to set the GA_TRACKING_ID build variable to enable it. -->
     <script>
@@ -30,17 +39,16 @@
 <body>
     <a-scene
         loading-screen="enabled: false"
+        physics="gravity: -9.8; debug: false; driver: ammo; debugDrawMode: 1;"
         hubs-systems
         class="grab-cursor"
         renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: false;"
         shadow="type: pcfsoft"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
-        physics="gravity: -9.8; debug: false; driver: ammo; debugDrawMode: 1;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         action-to-event__mute="path: /actions/muteMic; event: action_mute;"
         freeze-controller="toggleEvent: action_freeze"
         personal-space-bubble="debug: false;"
-        vr-mode-ui="enabled: false"
         stats-plus="false"
         rotate-selected-object
         environment-map="loadDefault: false"
@@ -85,6 +93,8 @@
             <img id="video-play-hover" crossorigin="anonymous" src="./assets/video-overlay/play-hover.png">
             <img id="video-pause" crossorigin="anonymous" src="./assets/video-overlay/pause.png">
             <img id="video-pause-hover" crossorigin="anonymous" src="./assets/video-overlay/pause-hover.png">
+            <img id="video-snap" crossorigin="anonymous" src="./assets/video-overlay/snap.png">
+            <img id="video-snap-hover" crossorigin="anonymous" src="./assets/video-overlay/snap-hover.png">
 
             <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
             <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
@@ -137,7 +147,10 @@
                                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" block-button position="0 0 .35">
                                             <a-entity text="value:Hide; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                                         </a-entity>
-                                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" visible-if-permitted="kick_users" kick-button position="0 -0.25 .35">
+                                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" visible-if-permitted="mute_users" mute-button position="0 -0.3 .35" scale="0.8 0.8 0.8">
+                                            <a-entity text="value:Mute; width:2.5; align:center;" text-raycast-hack visible-if-permitted="mute_users" position="0 0 0.01"></a-entity>
+                                        </a-entity>
+                                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" visible-if-permitted="kick_users" kick-button position="0 -0.5 .35" scale="0.8 0.8 0.8">
                                             <a-entity text="value:Kick; width:2.5; align:center;" text-raycast-hack visible-if-permitted="kick_users" position="0 0 0.01"></a-entity>
                                         </a-entity>
                                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: false; selector: .Head;" position="-0.40 0.375 0.35">
@@ -206,8 +219,7 @@
                     owned-object-limiter="counter: #media-counter"
                     set-unowned-body-kinematic
                     is-remote-hover-target
-                    is-hand-collision-target
-                    tags="isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
                     destroy-at-extreme-distances
                     scalable-when-grabbed
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
@@ -300,8 +312,7 @@
                     owned-object-limiter="counter: #pen-counter"
                     set-unowned-body-kinematic
                     is-remote-hover-target
-                    is-hand-collision-target
-                    tags="isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; isPen: true;"
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; isPen: true;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
@@ -337,8 +348,7 @@
                     ammo-body="type: dynamic; mass: 0.001; collisionFilterGroup: 1; collisionFilterMask: 8;"
                     camera-tool
                     is-remote-hover-target
-                    is-hand-collision-target
-                    tags="isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
@@ -414,16 +424,25 @@
             </template>
 
             <!-- TODO: All of these positions are assuming 16:9 - need to actually reposition based on video resolution -->
+
             <template id="video-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
+                    <a-image
+                        is-remote-hover-target
+                        tags="singleActionButton: true; isHoverMenuChild: true;"
+                        icon-button="image: #video-snap; hoverImage: #video-snap-hover; activeImage: #videosnapplay; activeHoverImage: #video-snap-hover"
+                        scale="0.075 0.075 0.075"
+                        position="0 0.225 0"
+                        class="video-snap-button"
+                    ></a-image>
                     <a-entity class="video-time-label" text="value: 0; anchor: center; align: center; color: #aaa;" text-raycast-hack position="0 -0.24 0" scale="0.75 0.75 0.75"></a-entity>
-                    <a-entity class="video-volume-label" text="value: 0%; anchor: center; align: center; color: #ccc; letterSpacing: 4;" text-raycast-hack position="0.0 0.175 0.015" scale="1.25 1.25 1.25"></a-entity>
+                    <a-entity class="video-volume-label" text="value: 0%; anchor: center; align: center; color: #ccc; letterSpacing: 4;" text-raycast-hack position="0.0 0.14 0.015" scale="1.25 1.25 1.25"></a-entity>
                     <a-image
                         is-remote-hover-target
                         tags="singleActionButton: true; isHoverMenuChild: true;"
                         icon-button="image: #video-volume-down; hoverImage: #video-volume-down-hover;"
                         scale="0.075 0.075 0.075"
-                        position="-0.275 0.175 0"
+                        position="-0.275 0.14 0"
                         class="ui video-volume-down-button"
                     ></a-image>
                     <a-image
@@ -431,7 +450,7 @@
                         tags="singleActionButton: true; isHoverMenuChild: true;"
                         icon-button="image: #video-volume-up; hoverImage: #video-volume-up-hover;"
                         scale="0.075 0.075 0.075"
-                        position="0.275 0.175 0"
+                        position="0.275 0.14 0"
                         class="ui video-volume-up-button"
                     ></a-image>
                     <a-entity class="video-playback">
@@ -470,6 +489,14 @@
                 <a-entity class="ui interactable-ui hover-container" visible="false">
                     <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.01">
                         <a-entity text="value:value; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="link-hover-menu">
+                <a-entity class="ui interactable-ui hover-container" visible="false">
+                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.01">
+                        <a-entity text="value:open link; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
@@ -593,7 +620,6 @@
         <a-entity
             id="player-rig"
             spawn-controller="loadedEvent: entered; target: #player-rig"
-            wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
             player-info
@@ -606,23 +632,19 @@
                 vr-mode-toggle-playing__hud-controller
             >
                 <a-entity visibility-while-frozen="requireHoverOnNonMobile: false;" rotation="30 0 0">
-                    <a-entity class="ui interactable-ui">
-                        <a-entity class="leave-btn" position="0 -0.2 0" scale="0.7 0.7 0.7" leave-room-button is-remote-hover-target tags="singleActionButton: true;">
-                            <a-entity mixin="rounded-text-action-button" slice9="width: 0.8" scale="0.8 0.8 1.0">
-                                <a-entity text=" value:leave room; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
-                            </a-entity>
+                    <a-entity class="leave-btn" position="0 0 0" scale="0.7 0.7 0.7" leave-room-button is-remote-hover-target tags="singleActionButton: true;">
+                        <a-entity mixin="rounded-text-action-button" slice9="width: 0.8" scale="0.8 0.8 1.0">
+                            <a-entity text=" value:leave room; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                         </a-entity>
                     </a-entity>
                 </a-entity>
-                <a-entity in-world-hud visibility-while-frozen="visible: false; requireHoverOnNonMobile: false;" rotation="30 0 0">
+                <a-entity in-world-hud visibility-while-frozen="visible: false; requireHoverOnNonMobile: false;" rotation="30 0 0" >
                     <a-rounded height="0.08" width="0.2" color="#000000" position="-0.44 -0.045 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
                     <a-image scale="0.07 0.06 0.06" position="-0.38 -0.005 0.001" src="#presence-count" material="alphaTest:0.1;"></a-image>
                     <a-entity id="hud-presence-count" text="value:; width:1.1; align:center;" position="-0.30 -0.005 0" matrix-auto-update="target: text;"></a-entity>
-                    <a-entity class="ui interactable-ui">
-                        <a-entity class="invite-btn" position="0 0.18 0" scale="0.7 0.7 0.7" is-remote-hover-target tags="singleActionButton: true;">
-                            <a-entity mixin="rounded-text-action-button" slice9="width: 0.7" scale="0.8 0.8 1.0">
-                                <a-entity text=" value:invite; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
-                            </a-entity>
+                    <a-entity class="invite-btn" position="0 0.18 0" scale="0.7 0.7 0.7" is-remote-hover-target tags="singleActionButton: true;">
+                        <a-entity mixin="rounded-text-action-button" slice9="width: 0.7" scale="0.8 0.8 1.0">
+                            <a-entity text=" value:invite; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                         </a-entity>
                     </a-entity>
                 <a-image

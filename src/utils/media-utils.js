@@ -2,8 +2,6 @@ import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
-import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
-THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
 if (process.env.CORS_PROXY_SERVER) {
@@ -247,7 +245,7 @@ export function injectCustomShaderChunks(obj) {
   const fragRegex = /\bgl_FragColor\b/;
   const validMaterials = ["MeshStandardMaterial", "MeshBasicMaterial", "MobileStandardMaterial"];
 
-  const shaderUniforms = new Map();
+  const shaderUniforms = [];
 
   obj.traverse(object => {
     if (!object.material) return;
@@ -310,7 +308,7 @@ export function injectCustomShaderChunks(obj) {
         flines.unshift("uniform float hubs_Time;");
         shader.fragmentShader = flines.join("\n");
 
-        shaderUniforms.set(newMaterial.uuid, shader.uniforms);
+        shaderUniforms.push(shader.uniforms);
       };
       newMaterial.needsUpdate = true;
       return newMaterial;
@@ -322,25 +320,6 @@ export function injectCustomShaderChunks(obj) {
 
 export function getPromotionTokenForFile(fileId) {
   return window.APP.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
-}
-
-export function generateMeshBVH(object3D) {
-  object3D.traverse(obj => {
-    // note that we might already have a bounds tree if this was a clone of an object with one
-    const hasBufferGeometry = obj.isMesh && obj.geometry.isBufferGeometry;
-    const hasBoundsTree = hasBufferGeometry && obj.geometry.boundsTree;
-    if (hasBufferGeometry && !hasBoundsTree && obj.geometry.attributes.position) {
-      const geo = obj.geometry;
-      const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
-      // only bother using memory and time making a BVH if there are a reasonable number of tris,
-      // and if there are too many it's too painful and large to tolerate doing it (at least until
-      // we put this in a web worker)
-      if (triCount > 1000 && triCount < 1000000) {
-        // note that bounds tree construction creates an index as a side effect if one doesn't already exist
-        geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 30 });
-      }
-    }
-  });
 }
 
 export const traverseMeshesAndAddShapes = (function() {
@@ -362,7 +341,6 @@ export const traverseMeshesAndAddShapes = (function() {
         o.name !== "Floor_Plan" &&
         o.name !== "Ground_Plane"
       ) {
-        o.updateMatrices();
         vertexCount += o.geometry.attributes.position.count;
       }
     });
@@ -383,12 +361,12 @@ export const traverseMeshesAndAddShapes = (function() {
       });
       shapes.push({ id: shapePrefix + floorPlan.name, entity: floorPlan.el });
     } else if (vertexCount < vertexLimit) {
-      el.setAttribute(shapePrefix + meshRoot.name, {
+      el.setAttribute(shapePrefix + "environment", {
         type: SHAPE.MESH,
         margin: 0.01,
         fit: FIT.COMPOUND
       });
-      shapes.push({ id: shapePrefix + meshRoot.name, entity: el });
+      shapes.push({ id: shapePrefix + "environment", entity: el });
       console.log("adding compound mesh shape");
     } else {
       el.setAttribute(shapePrefix + "defaultFloor", {
@@ -404,6 +382,61 @@ export const traverseMeshesAndAddShapes = (function() {
     console.groupEnd();
   };
 })();
+
+const mediaPos = new THREE.Vector3();
+
+export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false) {
+  const { entity, orientation } = addMedia(media, "#interactable-media", undefined, false);
+
+  const pos = el.object3D.position;
+
+  entity.object3D.position.set(pos.x, pos.y, pos.z);
+  entity.object3D.rotation.copy(el.object3D.rotation);
+
+  if (mirrorOrientation) {
+    entity.object3D.rotateY(Math.PI);
+  }
+
+  // Generate photos in a circle around camera, starting from the bottom.
+  // Prevent z-fighting but place behind viewfinder
+  const idx = (snapCount % 6) + 3;
+
+  mediaPos.set(
+    Math.cos(Math.PI * 2 * (idx / 6.0)) * 0.75,
+    Math.sin(Math.PI * 2 * (idx / 6.0)) * 0.75,
+    -0.05 + idx * 0.001
+  );
+
+  el.object3D.localToWorld(mediaPos);
+  entity.object3D.visible = false;
+
+  entity.addEventListener(
+    "image-loaded",
+    () => {
+      entity.object3D.visible = true;
+      entity.setAttribute("animation__photo_pos", {
+        property: "position",
+        dur: 800,
+        from: { x: pos.x, y: pos.y, z: pos.z },
+        to: { x: mediaPos.x, y: mediaPos.y, z: mediaPos.z },
+        easing: "easeOutElastic"
+      });
+    },
+    { once: true }
+  );
+
+  entity.object3D.matrixNeedsUpdate = true;
+
+  entity.addEventListener(
+    "media_resolved",
+    () => {
+      el.emit("photo_taken", entity.components["media-loader"].data.src);
+    },
+    { once: true }
+  );
+
+  return { entity, orientation };
+}
 
 const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/scenes\/(\w+)\/?\S*/;
 const hubsRoomRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/(\w+)\/?\S*/;

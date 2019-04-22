@@ -18,12 +18,11 @@ async function fetchZipAndGetBlobs(src) {
   });
 }
 
-self.onmessage = async e => {
+self.onmessage = async msg => {
   try {
-    const fileMap = await fetchZipAndGetBlobs(e.data);
-    self.postMessage([true, fileMap]);
+    const result = await fetchZipAndGetBlobs(msg.data.payload);
+    self.postMessage({ id: msg.data.id, result });
   } catch (e) {
-    self.postMessage([false, e.message]);
+    self.postMessage({ id: msg.data.id, err: e.message });
   }
-  delete self.onmessage;
 };

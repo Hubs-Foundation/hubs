@@ -52,9 +52,9 @@ export class AppAwareMouseDevice {
       this.clickedOnAnything =
         (intersection &&
           intersection.object.el.matches(".pen, .pen *, .video, .video *, .interactable, .interactable *")) ||
-        userinput.activeSets.has(sets.cursorHoldingPen) ||
-        userinput.activeSets.has(sets.cursorHoldingInteractable) ||
-        userinput.activeSets.has(sets.cursorHoldingCamera);
+        userinput.activeSets.includes(sets.cursorHoldingPen) ||
+        userinput.activeSets.includes(sets.cursorHoldingInteractable) ||
+        userinput.activeSets.includes(sets.cursorHoldingCamera);
     }
     this.prevButtonLeft = buttonLeft;
 
