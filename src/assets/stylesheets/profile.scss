@@ -113,7 +113,13 @@
         min-height: 240px
       }
       .preview{
+        position: relative;
         margin-left: 40px;
+        .loader {
+          position: absolute;
+          left: calc(50% - 4.3em);
+          top: calc(50% - 4.5em);
+        }
       }
       canvas {
         width: 100%;

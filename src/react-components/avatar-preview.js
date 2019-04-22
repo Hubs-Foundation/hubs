@@ -13,6 +13,8 @@ const TEXTURE_PROPS = {
   orm_map: ["aoMap", "roughnessMap", "metalnessMap"]
 };
 
+const ALL_MAPS = Object.keys(TEXTURE_PROPS);
+
 // This should match our aframe renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: false;"
 function createRenderer(canvas) {
   const context = canvas.getContext("webgl2", {
@@ -31,13 +33,22 @@ function createRenderer(canvas) {
   return renderer;
 }
 
-const imgLoader = new THREE.ImageBitmapLoader();
-const loadImageBitmap = url => new Promise((resolve, reject) => imgLoader.load(url, resolve, null, reject));
+const createImageBitmapFromURL = url =>
+  fetch(url)
+    .then(r => r.blob())
+    .then(createImageBitmap);
 
 export default class AvatarPreview extends Component {
   static propTypes = {
     avatar: PropTypes.object
   };
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: true
+    };
+    this.imageBitmaps = {};
+  }
 
   componentDidMount = () => {
     this.scene = new THREE.Scene();
@@ -56,6 +67,8 @@ export default class AvatarPreview extends Component {
 
     this.controls.target.set(0, 0.45, 0);
     this.controls.update();
+
+    this.loadPreviewAvatar(this.props.avatar && this.props.avatar.base_gltf_url).then(this.setAvatar);
 
     const clock = new THREE.Clock();
     this.previewRenderer = createRenderer(this.canvas);
@@ -97,8 +110,10 @@ export default class AvatarPreview extends Component {
     const box = new THREE.Box3();
     const center = new THREE.Vector3();
     return avatar => {
+      if (!avatar) return;
       this.avatar = avatar;
       this.scene.add(avatar);
+      this.setState({ loading: false });
       box.setFromObject(this.avatar);
       box.getCenter(center);
       this.fitBoxInFrustum(this.camera, box, center);
@@ -106,15 +121,6 @@ export default class AvatarPreview extends Component {
       this.controls.update();
     };
   })();
-
-  componentDidUpdate = () => {
-    if (this.avatar) {
-      this.scene.remove(this.avatar);
-      this.avatar = null;
-    }
-    if (!this.props.avatar) return;
-    this.loadPreviewAvatar(this.props.avatar).then(this.setAvatar);
-  };
 
   resize = () => {
     const width = this.canvas.parentElement.offsetWidth;
@@ -127,13 +133,43 @@ export default class AvatarPreview extends Component {
   componentWillUnmount = () => {
     this.scene && this.scene.traverse(disposeNode);
     this.previewRenderer && this.previewRenderer.dispose();
+    Object.values(this.imageBitmaps).forEach(img => img.close());
     window.removeEventListener("resize", this.resize);
     clearInterval(this.resizeInterval);
   };
 
-  loadPreviewAvatar = async avatar => {
-    if (!avatar) return;
-    const gltf = await loadGLTF(avatar.base_gltf_url || avatar.gltf_url, "model/gltf");
+  componentDidUpdate = async oldProps => {
+    if (oldProps.avatar && this.props.avatar && oldProps.avatar.base_gltf_url !== this.props.avatar.base_gltf_url) {
+      if (this.avatar) {
+        this.scene.remove(this.avatar);
+        this.avatar = null;
+      }
+      await this.loadPreviewAvatar(this.props.avatar.base_gltf_url).then(this.setAvatar);
+    }
+
+    this.applyMaps(oldProps, this.props);
+  };
+
+  applyMaps(oldProps, newProps) {
+    return Promise.all(
+      ALL_MAPS.map(mapName => {
+        const applyMap = this.applyMapToPreview.bind(this, mapName);
+        if (oldProps[mapName] != newProps[mapName]) {
+          if (newProps[mapName] instanceof File) {
+            return createImageBitmap(newProps[mapName]).then(applyMap);
+          } else if (newProps[mapName]) {
+            return createImageBitmapFromURL(newProps[mapName]).then(applyMap);
+          } else {
+            return this.revertMap(mapName);
+          }
+        }
+      })
+    );
+  }
+
+  loadPreviewAvatar = async url => {
+    if (!url) return;
+    const gltf = await loadGLTF(url, "model/gltf");
 
     // On the bckend we look for a material called Bot_PBS, here we are looking for a mesh called Avatar.
     // When we "officially" support uploading custom GLTFs we need to decide what we are going to key things on
@@ -157,25 +193,22 @@ export default class AvatarPreview extends Component {
       orm_map: TEXTURE_PROPS["orm_map"].map(getImage)
     };
 
-    const imgFiles = avatar.files;
-    if (imgFiles) {
-      await Promise.all([
-        Promise.all(
-          Object.keys(this.originalMaps).map(
-            m => imgFiles[m] && loadImageBitmap(imgFiles[m]).then(this.applyMapToPreview.bind(this, m))
-          )
-        ),
-        createDefaultEnvironmentMap().then(t => {
-          this.previewMesh.material.envMap = t;
-          this.previewMesh.material.needsUpdate = true;
-        })
-      ]);
-    }
+    await Promise.all([
+      this.applyMaps({}, this.props), // Apply initial maps
+      createDefaultEnvironmentMap().then(t => {
+        this.previewMesh.material.envMap = t;
+        this.previewMesh.material.needsUpdate = true;
+      })
+    ]);
 
     return gltf.scene;
   };
 
   applyMapToPreview = (name, image) => {
+    if (this.imageBitmaps[name]) {
+      this.imageBitmaps[name].close();
+    }
+    this.imageBitmaps[name] = image;
     TEXTURE_PROPS[name].forEach(prop => {
       const texture = this.previewMesh.material[prop];
       texture.image = image;
@@ -184,6 +217,10 @@ export default class AvatarPreview extends Component {
   };
 
   revertMap = name => {
+    if (this.imageBitmaps[name]) {
+      this.imageBitmaps[name].close();
+    }
+    delete this.imageBitmaps[name];
     this.originalMaps[name].forEach((bm, i) => {
       const texture = this.previewMesh.material[TEXTURE_PROPS[name][i]];
       texture.image = bm;
@@ -194,6 +231,11 @@ export default class AvatarPreview extends Component {
   render() {
     return (
       <div className="preview">
+        {this.state.loading && (
+          <div className="loader">
+            <div className="loader-center" />
+          </div>
+        )}
         <canvas ref={c => (this.canvas = c)} />
       </div>
     );
