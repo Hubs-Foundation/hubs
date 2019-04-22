@@ -1407,6 +1407,7 @@ class UIRoot extends Component {
                   finished={this.closeDialog}
                   store={this.props.store}
                   debug={avatarEditorDebug}
+                  preview={!isMobile}
                 />
               )}
             />
@@ -1443,6 +1444,8 @@ class UIRoot extends Component {
                   signedIn={this.state.signedIn}
                   onSignIn={this.showSignInDialog}
                   onSignOut={this.signOut}
+                  debug={avatarEditorDebug}
+                  preview={!isMobile}
                 />
               )}
             />

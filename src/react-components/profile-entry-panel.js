@@ -21,7 +21,8 @@ class ProfileEntryPanel extends Component {
     onSignIn: PropTypes.func,
     onSignOut: PropTypes.func,
     signedIn: PropTypes.bool,
-    debug: PropTypes.bool
+    debug: PropTypes.bool,
+    preview: PropTypes.bool
   };
 
   constructor(props) {
@@ -136,6 +137,7 @@ class ProfileEntryPanel extends Component {
             onAvatarChanged={avatarId => this.setState({ avatarId })}
             saveStateAndFinish={this.saveStateAndFinish}
             debug={this.props.debug}
+            preview={this.props.preview}
           />
         );
         break;

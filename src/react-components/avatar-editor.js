@@ -7,6 +7,7 @@ import classNames from "classnames";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/profile.scss";
 
 const BOT_PARENT_AVATAR =
@@ -19,6 +20,7 @@ export default class AvatarEditor extends Component {
     onSignOut: PropTypes.func,
     signedIn: PropTypes.bool,
     debug: PropTypes.bool,
+    preview: PropTypes.bool,
     onAvatarChanged: PropTypes.func,
     saveStateAndFinish: PropTypes.func
   };
@@ -29,19 +31,7 @@ export default class AvatarEditor extends Component {
     // Blank avatar, used to create base avatar
     // this.state = { avatar: { name: "Base bot avatar", files: {} } };
 
-    this.inputFiles = {
-      glb: undefined,
-
-      base_map: undefined,
-      emissive_map: undefined,
-      normal_map: undefined,
-
-      ao_map: undefined,
-      metalic_map: undefined,
-      roughness_map: undefined,
-
-      orm_map: undefined
-    };
+    this.inputFiles = {};
   }
 
   componentDidMount = () => {
@@ -69,6 +59,8 @@ export default class AvatarEditor extends Component {
     });
 
     this.props.onAvatarChanged(avatar.avatar_id);
+
+    Object.assign(this.inputFiles, avatar.files);
 
     this.setState({ ...this.state, avatar });
   };
@@ -99,7 +91,7 @@ export default class AvatarEditor extends Component {
   uploadAvatar = async e => {
     e.preventDefault();
 
-    if (this.inputFiles.glb) {
+    if (this.inputFiles.glb && this.inputFiles.glb instanceof File) {
       const gltfLoader = new THREE.GLTFLoader();
       const gltfUrl = URL.createObjectURL(this.inputFiles.glb);
       const onProgress = console.log;
@@ -139,7 +131,7 @@ export default class AvatarEditor extends Component {
     }
 
     const filesToUpload = ["gltf", "bin", "base_map", "emissive_map", "normal_map", "orm_map"].filter(
-      k => this.inputFiles[k] !== undefined
+      k => this.inputFiles[k] === null || this.inputFiles[k] instanceof File
     );
 
     this.setState({ uploading: true });
@@ -163,6 +155,36 @@ export default class AvatarEditor extends Component {
   fileField = (name, label, accept, disabled = false, title) => (
     <div className={styles.fileInputRow} key={name} title={title}>
       <label htmlFor={`avatar-file_${name}`}>
+        <div className="img-box" />
+        <span>{label}</span>
+      </label>
+      <input
+        id={`avatar-file_${name}`}
+        type="file"
+        accept={accept}
+        disabled={disabled}
+        onChange={e => {
+          e.target.value = null;
+          this.inputFiles[name] = e.target.files[0];
+        }}
+      />
+      {this.state.avatar.files[name] && (
+        <a
+          onClick={() => {
+            this.inputFiles[name] = null;
+          }}
+        >
+          <i>
+            <FontAwesomeIcon icon={faTimes} />
+          </i>
+        </a>
+      )}
+    </div>
+  );
+
+  mapField = (name, label, accept, disabled = false, title) => (
+    <div className={styles.fileInputRow} key={name} title={title}>
+      <label htmlFor={`avatar-file_${name}`}>
         <div className="img-box">{this.state.avatar.files[name] && <img src={this.state.avatar.files[name]} />}</div>
         <span>{label}</span>
       </label>
@@ -172,14 +194,16 @@ export default class AvatarEditor extends Component {
         accept={accept}
         disabled={disabled}
         onChange={e => {
-          this.inputFiles[name] = e.target.files[0];
+          const file = e.target.files[0];
+          e.target.value = null;
+          this.inputFiles[name] = file;
           URL.revokeObjectURL(this.state.avatar.files[name]);
           this.setState({
             avatar: {
               ...this.state.avatar,
               files: {
                 ...this.state.avatar.files,
-                [name]: URL.createObjectURL(e.target.files[0])
+                [name]: URL.createObjectURL(file)
               }
             }
           });
@@ -250,35 +274,37 @@ export default class AvatarEditor extends Component {
       return <div>Loading...</div>;
     }
 
-    const { debug } = this.props;
+    const { debug, preview } = this.props;
 
     return (
       <div className={classNames(styles.avatarSelectorContainer, "avatar-editor")}>
-        <div className="form-body">
-          {debug && this.textField("avatar_id", "Avatar ID", true)}
-          {debug && this.textField("parent_avatar_id", "Parent Avatar ID")}
-          {debug && this.textField("name", "Name")}
-          {debug && this.textField("description", "Description")}
-          {debug && this.checkbox("allow_remixing", "Allow Remixing")}
-          {debug && this.checkbox("allow_promotion", "Allow Promotion")}
-          {debug && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
+        <div className="split">
+          <div className="form-body">
+            {debug && this.textField("avatar_id", "Avatar ID", true)}
+            {debug && this.textField("parent_avatar_id", "Parent Avatar ID")}
+            {debug && this.textField("name", "Name")}
+            {debug && this.textField("description", "Description")}
+            {debug && this.checkbox("allow_remixing", "Allow Remixing")}
+            {debug && this.checkbox("allow_promotion", "Allow Promotion")}
+            {debug && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
 
-          {this.fileField("base_map", "Base Map", "image/*")}
-          {this.fileField("emissive_map", "Emissive Map", "image/*")}
-          {this.fileField("normal_map", "Normal Map", "image/*")}
+            {this.mapField("base_map", "Base Map", "image/*")}
+            {this.mapField("emissive_map", "Emissive Map", "image/*")}
+            {this.mapField("normal_map", "Normal Map", "image/*")}
 
-          {this.fileField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
+            {this.mapField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
 
-          {/* {this.fileField("ao_map", "AO Map", "images/\*", true)} */}
-          {/* {this.fileField("metallic_map", "Metallic Map", "image/\*", true)} */}
-          {/* {this.fileField("roughness_map", "Roughness Map", "image/\*", true)} */}
-
-          <div className={styles.info}>
-            <FormattedMessage id="avatar-editor.info" />
-            <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
-              <FormattedMessage id="avatar-editor.info-link" />
-            </a>
+            {/* {this.mapField("ao_map", "AO Map", "images/\*", true)} */}
+            {/* {this.mapField("metallic_map", "Metallic Map", "image/\*", true)} */}
+            {/* {this.mapField("roughness_map", "Roughness Map", "image/\*", true)} */}
           </div>
+          {preview && <AvatarPreview avatar={this.state.avatar} {...this.inputFiles} />}
+        </div>
+        <div className={styles.info}>
+          <FormattedMessage id="avatar-editor.info" />
+          <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
+            <FormattedMessage id="avatar-editor.info-link" />
+          </a>
         </div>
         <div>
           <input
