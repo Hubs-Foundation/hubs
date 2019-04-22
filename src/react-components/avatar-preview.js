@@ -13,6 +13,8 @@ const TEXTURE_PROPS = {
   orm_map: ["aoMap", "roughnessMap", "metalnessMap"]
 };
 
+const ALL_MAPS = Object.keys(TEXTURE_PROPS);
+
 // This should match our aframe renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: false;"
 function createRenderer(canvas) {
   const context = canvas.getContext("webgl2", {
@@ -31,13 +33,22 @@ function createRenderer(canvas) {
   return renderer;
 }
 
-const imgLoader = new THREE.ImageBitmapLoader();
-const loadImageBitmap = url => new Promise((resolve, reject) => imgLoader.load(url, resolve, null, reject));
+const createImageBitmapFromURL = url =>
+  fetch(url)
+    .then(r => r.blob())
+    .then(createImageBitmap);
 
 export default class AvatarPreview extends Component {
   static propTypes = {
     avatar: PropTypes.object
   };
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: true
+    };
+    this.imageBitmaps = {};
+  }
 
   componentDidMount = () => {
     this.scene = new THREE.Scene();
@@ -59,6 +70,7 @@ export default class AvatarPreview extends Component {
 
     this.loadPreviewAvatar(this.props.avatar).then(avatar => {
       this.scene.add(avatar);
+      this.setState({ loading: false });
     });
 
     const clock = new THREE.Clock();
@@ -83,11 +95,35 @@ export default class AvatarPreview extends Component {
   componentWillUnmount = () => {
     this.scene && this.scene.traverse(disposeNode);
     this.previewRenderer && this.previewRenderer.dispose();
+    Object.values(this.imageBitmaps).forEach(img => img.close());
     window.removeEventListener("resize", this.resize);
   };
 
-  shouldComponentUpdate() {
-    return false;
+  componentDidUpdate = oldProps => {
+    this.applyMaps(oldProps, this.props);
+  };
+
+  applyMaps(oldProps, newProps) {
+    return Promise.all(
+      ALL_MAPS.map(mapName => {
+        const applyMap = this.applyMapToPreview.bind(this, mapName);
+        if (oldProps[mapName] != newProps[mapName]) {
+          if (newProps[mapName] instanceof File) {
+            return createImageBitmap(newProps[mapName]).then(applyMap);
+          } else if (newProps[mapName]) {
+            return createImageBitmapFromURL(newProps[mapName]).then(applyMap);
+          } else {
+            return this.revertMap(mapName);
+          }
+        }
+      })
+    );
+  }
+
+  shouldComponentUpdate(oldProps, oldState) {
+    return (
+      oldState.loading != this.state.loading || ALL_MAPS.some(mapName => oldProps[mapName] !== this.props[mapName])
+    );
   }
 
   loadPreviewAvatar = async avatar => {
@@ -115,13 +151,8 @@ export default class AvatarPreview extends Component {
       orm_map: TEXTURE_PROPS["orm_map"].map(getImage)
     };
 
-    const imgFiles = avatar.files;
     await Promise.all([
-      Promise.all(
-        Object.keys(this.originalMaps).map(
-          m => imgFiles[m] && loadImageBitmap(imgFiles[m]).then(this.applyMapToPreview.bind(this, m))
-        )
-      ),
+      this.applyMaps({}, this.props), // Apply initial maps
       createDefaultEnvironmentMap().then(t => {
         this.previewMesh.material.envMap = t;
         this.previewMesh.material.needsUpdate = true;
@@ -132,6 +163,10 @@ export default class AvatarPreview extends Component {
   };
 
   applyMapToPreview = (name, image) => {
+    if (this.imageBitmaps[name]) {
+      this.imageBitmaps[name].close();
+    }
+    this.imageBitmaps[name] = image;
     TEXTURE_PROPS[name].forEach(prop => {
       const texture = this.previewMesh.material[prop];
       texture.image = image;
@@ -140,6 +175,10 @@ export default class AvatarPreview extends Component {
   };
 
   revertMap = name => {
+    if (this.imageBitmaps[name]) {
+      this.imageBitmaps[name].close();
+    }
+    delete this.imageBitmaps[name];
     this.originalMaps[name].forEach((bm, i) => {
       const texture = this.previewMesh.material[TEXTURE_PROPS[name][i]];
       texture.image = bm;
@@ -150,6 +189,11 @@ export default class AvatarPreview extends Component {
   render() {
     return (
       <div className="preview">
+        {this.state.loading && (
+          <div className="loader">
+            <div className="loader-center" />
+          </div>
+        )}
         <canvas ref={c => (this.canvas = c)} />
       </div>
     );

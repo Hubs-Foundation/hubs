@@ -32,19 +32,7 @@ export default class AvatarEditor extends Component {
     // Blank avatar, used to create base avatar
     // this.state = { avatar: { name: "Base bot avatar", files: {} } };
 
-    this.inputFiles = {
-      glb: undefined,
-
-      base_map: undefined,
-      emissive_map: undefined,
-      normal_map: undefined,
-
-      ao_map: undefined,
-      metalic_map: undefined,
-      roughness_map: undefined,
-
-      orm_map: undefined
-    };
+    this.inputFiles = {};
   }
 
   componentDidMount = () => {
@@ -72,6 +60,8 @@ export default class AvatarEditor extends Component {
     });
 
     this.props.onAvatarChanged(avatar.avatar_id);
+
+    Object.assign(this.inputFiles, avatar.files);
 
     this.setState({ ...this.state, avatar });
   };
@@ -218,7 +208,6 @@ export default class AvatarEditor extends Component {
               }
             }
           });
-          createImageBitmap(file).then(this.avatarPreview.applyMapToPreview.bind(this, name));
         }}
       />
       {this.state.avatar.files[name] && (
@@ -235,7 +224,6 @@ export default class AvatarEditor extends Component {
                 }
               }
             });
-            this.avatarPreview.revertMap(name);
           }}
         >
           <i>
@@ -311,9 +299,7 @@ export default class AvatarEditor extends Component {
             {/* {this.mapField("metallic_map", "Metallic Map", "image/\*", true)} */}
             {/* {this.mapField("roughness_map", "Roughness Map", "image/\*", true)} */}
           </div>
-          {preview && (
-            <AvatarPreview avatar={this.state.avatar} files={this.inputFiles} ref={p => (this.avatarPreview = p)} />
-          )}
+          {preview && <AvatarPreview avatar={this.state.avatar} {...this.inputFiles} />}
         </div>
         <div className={styles.info}>
           <FormattedMessage id="avatar-editor.info" />
