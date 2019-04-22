@@ -1,7 +1,19 @@
 @import 'shared';
 
 :local(.avatar-selector-container) {
-  display: grid;
-  grid-template: 100% / 70% 30%;
   overflow-y: hidden;
+
+  @media (min-width: 1200px) {
+    display: grid;
+    grid-template: 100% / 80% 20%;
+  }
+
+  div {
+    margin: 0 0.5em;
+  }
+
+  .preview {
+    border-radius: 20px;
+    overflow: hidden;
+  }
 }

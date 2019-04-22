@@ -20,7 +20,7 @@ function createRenderer(canvas) {
     depth: true,
     antialias: true,
     premultipliedAlpha: true,
-    preserveDrawingBuffer: false,
+    preserveDrawingBuffer: true,
     powerPreference: "default"
   });
 
@@ -54,8 +54,6 @@ export default class AvatarPreview extends Component {
     this.camera.position.set(-0.2, 0.5, 0.5);
     this.camera.matrixAutoUpdate = true;
 
-    this.currBox = new THREE.Box3();
-    this.newBox = new THREE.Box3();
     this.controls.target.set(0, 0.45, 0);
     this.controls.update();
 
@@ -66,26 +64,56 @@ export default class AvatarPreview extends Component {
       this.mixer && this.mixer.update(dt);
       this.previewRenderer.render(this.scene, this.camera);
     });
-    window.addEventListener("resize", this.resize);
+    window.addEventListener("resize", () => {
+      this.resize();
+    });
+    this.resizeInterval = setInterval(
+      (() => {
+        let width = this.canvas.parentElement.offsetWidth;
+        let height = this.canvas.parentElement.offsetHeight;
+        return () => {
+          const newWidth = this.canvas.parentElement.offsetWidth;
+          const newHeight = this.canvas.parentElement.offsetHeight;
+          if (newWidth !== width || newHeight !== height) {
+            width = newWidth;
+            height = newHeight;
+            this.resize();
+          }
+        };
+      })(),
+      100
+    );
     this.resize();
   };
+
+  fitBoxInFrustum = (camera, box, center, margin = 0) => {
+    const extents = (box.max.y - box.min.y) / 2;
+    const angle = THREE.Math.degToRad(camera.fov / 2);
+    camera.position.copy(center);
+    camera.position.z = (extents / Math.tan(angle) + box.max.z - center.z) * (1 + margin);
+  };
+
+  setAvatar = (() => {
+    const box = new THREE.Box3();
+    const center = new THREE.Vector3();
+    return avatar => {
+      this.avatar = avatar;
+      this.scene.add(avatar);
+      box.setFromObject(this.avatar);
+      box.getCenter(center);
+      this.fitBoxInFrustum(this.camera, box, center);
+      this.controls.target.copy(center);
+      this.controls.update();
+    };
+  })();
 
   componentDidUpdate = () => {
     if (this.avatar) {
       this.scene.remove(this.avatar);
       this.avatar = null;
     }
-    this.resize();
     if (!this.props.avatar) return;
-    this.loadPreviewAvatar(this.props.avatar).then(avatar => {
-      this.avatar = avatar;
-      this.scene.add(avatar);
-      this.newBox.setFromObject(this.avatar);
-      this.newBox.getCenter(this.controls.target);
-      this.camera.position.copy(this.controls.target);
-      this.camera.position.z = this.newBox.max.z;
-      this.controls.update();
-    });
+    this.loadPreviewAvatar(this.props.avatar).then(this.setAvatar);
   };
 
   resize = () => {
@@ -100,6 +128,7 @@ export default class AvatarPreview extends Component {
     this.scene && this.scene.traverse(disposeNode);
     this.previewRenderer && this.previewRenderer.dispose();
     window.removeEventListener("resize", this.resize);
+    clearInterval(this.resizeInterval);
   };
 
   loadPreviewAvatar = async avatar => {

@@ -92,7 +92,6 @@ export default class MediaSearchStore extends EventTarget {
       return {
         entries: avatars.map(avatar => ({
           id: avatar.id,
-          name: avatar.name,
           type: "avatar",
           url: avatar.model,
           images: {

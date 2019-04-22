@@ -13,13 +13,26 @@ class AvatarSelector extends Component {
     onChange: PropTypes.func
   };
 
-  state = { avatar: null };
+  state = { avatar: null, showPreview: true };
 
   constructor(props) {
     super(props);
     this.mediaSearchStore = window.APP.mediaSearchStore;
     this.mediaSearchStore.sourceNavigateWithNoNav("avatars");
+    this.widthQuery = window.matchMedia("(min-width: 1200px)");
   }
+
+  componentDidMount = () => {
+    this.widthQuery.addListener(this.togglePreview);
+  };
+
+  componentWillUnmount = () => {
+    this.widthQuery.removeListener(this.togglePreview);
+  };
+
+  togglePreview = query => {
+    this.setState({ showPreview: query.matches });
+  };
 
   avatarSelected = entry => {
     this.setState({ avatar: { base_gltf_url: entry.url } });
@@ -35,7 +48,7 @@ class AvatarSelector extends Component {
           mediaSearchStore={this.mediaSearchStore}
           onMediaSearchResultEntrySelected={this.avatarSelected}
         />
-        <AvatarPreview avatar={this.state.avatar} />
+        {this.state.showPreview && <AvatarPreview avatar={this.state.avatar} />}
       </div>
     );
   }
