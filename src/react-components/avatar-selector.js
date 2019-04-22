@@ -4,6 +4,7 @@ import { injectIntl } from "react-intl";
 
 import MediaBrowser from "./media-browser";
 import AvatarPreview from "./avatar-preview";
+import styles from "../assets/stylesheets/avatar-selector.scss";
 
 class AvatarSelector extends Component {
   static propTypes = {
@@ -26,7 +27,7 @@ class AvatarSelector extends Component {
 
   render() {
     return (
-      <div>
+      <div className={styles.avatarSelectorContainer}>
         <MediaBrowser
           {...this.props}
           showHeader={false}

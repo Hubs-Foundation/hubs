@@ -3,10 +3,6 @@
 // Breakpoint at 801px for Oculus Browser 
 
 :local(.media-browser) {
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   justify-content: center;
   align-items: center;
   display: flex;
@@ -122,7 +118,7 @@
   :local(.header) {
     display: flex;
     align-items: flex-start;
-    width: 100vw;
+    width: 100%;
     max-width: 1720px;
     margin: 32px;
     margin-bottom: 24px;
@@ -251,7 +247,7 @@
 
 
   :local(.body) {
-    width: 100vw;
+    width: 100%;
     max-width: 1720px;
 
     :local(.tiles) {

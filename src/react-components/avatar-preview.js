@@ -44,7 +44,7 @@ export default class AvatarPreview extends Component {
     this.scene.background = new THREE.Color(0xeaeaea);
 
     this.camera = new THREE.PerspectiveCamera(75, this.canvas.clientWidth / this.canvas.clientHeight, 0.1, 1000);
-    const controls = new THREE.OrbitControls(this.camera, this.canvas);
+    this.controls = new THREE.OrbitControls(this.camera, this.canvas);
 
     const light = new THREE.DirectionalLight(0xfdf5c2, 3);
     light.position.set(0, 10, 10);
@@ -54,8 +54,10 @@ export default class AvatarPreview extends Component {
     this.camera.position.set(-0.2, 0.5, 0.5);
     this.camera.matrixAutoUpdate = true;
 
-    controls.target.set(0, 0.45, 0);
-    controls.update();
+    this.currBox = new THREE.Box3();
+    this.newBox = new THREE.Box3();
+    this.controls.target.set(0, 0.45, 0);
+    this.controls.update();
 
     const clock = new THREE.Clock();
     this.previewRenderer = createRenderer(this.canvas);
@@ -73,10 +75,16 @@ export default class AvatarPreview extends Component {
       this.scene.remove(this.avatar);
       this.avatar = null;
     }
+    this.resize();
     if (!this.props.avatar) return;
     this.loadPreviewAvatar(this.props.avatar).then(avatar => {
       this.avatar = avatar;
       this.scene.add(avatar);
+      this.newBox.setFromObject(this.avatar);
+      this.newBox.getCenter(this.controls.target);
+      this.camera.position.copy(this.controls.target);
+      this.camera.position.z = this.newBox.max.z;
+      this.controls.update();
     });
   };
 
@@ -96,7 +104,7 @@ export default class AvatarPreview extends Component {
 
   loadPreviewAvatar = async avatar => {
     if (!avatar) return;
-    const gltf = await loadGLTF(avatar.base_gltf_url, "model/gltf");
+    const gltf = await loadGLTF(avatar.base_gltf_url || avatar.gltf_url, "model/gltf");
 
     // On the bckend we look for a material called Bot_PBS, here we are looking for a mesh called Avatar.
     // When we "officially" support uploading custom GLTFs we need to decide what we are going to key things on

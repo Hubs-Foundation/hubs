@@ -83,11 +83,7 @@ class ProfileEntryPanel extends Component {
     let panelBody;
     switch (this.state.avatarType) {
       case AVATAR_TYPES.LEGACY:
-        panelBody = (
-          <div className={styles.avatarSelectorContainer}>
-            <AvatarSelector {...this.props} avatarId={this.state.avatarId} />
-          </div>
-        );
+        panelBody = <AvatarSelector {...this.props} avatarId={this.state.avatarId} />;
         break;
       case AVATAR_TYPES.SKINNABLE:
         panelBody = (
@@ -105,7 +101,7 @@ class ProfileEntryPanel extends Component {
         break;
       case AVATAR_TYPES.URL:
         panelBody = (
-          <div className={styles.avatarSelectorContainer}>
+          <div>
             <label htmlFor="#custom-avatar-url">Avatar GLTF/GLB </label>
             <input
               id="custom-avatar-url"
