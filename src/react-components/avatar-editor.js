@@ -7,12 +7,11 @@ import classNames from "classnames";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/profile.scss";
 
 const BOT_PARENT_AVATAR =
   location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
-import AvatarPreview from "./avatar-preview";
-
 
 export default class AvatarEditor extends Component {
   static propTypes = {
