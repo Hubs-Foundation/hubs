@@ -54,7 +54,7 @@ export default class AvatarPreview extends Component {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xeaeaea);
 
-    this.camera = new THREE.PerspectiveCamera(75, this.canvas.clientWidth / this.canvas.clientHeight, 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(55, this.canvas.clientWidth / this.canvas.clientHeight, 0.1, 1000);
     this.controls = new THREE.OrbitControls(this.camera, this.canvas);
 
     const light = new THREE.DirectionalLight(0xfdf5c2, 3);
@@ -104,6 +104,10 @@ export default class AvatarPreview extends Component {
     const angle = THREE.Math.degToRad(camera.fov / 2);
     camera.position.copy(center);
     camera.position.z = (extents / Math.tan(angle) + box.max.z - center.z) * (1 + margin);
+    camera.position.x += camera.position.z * 0.5;
+    camera.position.y += camera.position.z * 0.5;
+    camera.lookAt(center);
+    camera.translateZ(-camera.position.z * 0.2);
   };
 
   setAvatar = (() => {
