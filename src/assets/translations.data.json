@@ -15,7 +15,7 @@
     "sign-in.out": "Sign Out",
     "rename-room.message": "Enter the new name for the room.",
     "rename-room.rename": "Rename Room",
-    "close-room.message": "Closing this room will remove others from the room and prevent further entry. Are you sure?",
+    "close-room.message": "Closing this room will remove others from the room and close it permanently, shutting it down completely.\n\nAre you sure? This action cannot be undone.",
     "close-room.confirm": "Yes, Close Room",
     "close-room.cancel": "Cancel",
     "entry.room": "room",

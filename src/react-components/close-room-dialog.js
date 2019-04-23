@@ -5,7 +5,7 @@ import { FormattedMessage } from "react-intl";
 import styles from "../assets/stylesheets/close-room-dialog.scss";
 import DialogContainer from "./dialog-container";
 
-export default class RenameRoomDialog extends Component {
+export default class CloseRoomDialog extends Component {
   static propTypes = {
     onConfirm: PropTypes.func,
     onClose: PropTypes.func
