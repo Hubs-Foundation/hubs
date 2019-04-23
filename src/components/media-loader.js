@@ -163,7 +163,7 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
-  onMediaLoaded(isModel = false) {
+  onMediaLoaded(physicsShape = null) {
     const el = this.el;
     this.clearLoadingTimeout();
 
@@ -172,11 +172,9 @@ AFRAME.registerComponent("media-loader", {
     }
 
     const finish = () => {
-      if (isModel) {
-        el.setAttribute("ammo-shape", { type: SHAPE.HULL });
-      } else {
+      if (physicsShape) {
         el.setAttribute("ammo-shape", {
-          type: SHAPE.BOX,
+          type: physicsShape,
           minHalfExtent: 0.04
         });
       }
@@ -288,7 +286,13 @@ AFRAME.registerComponent("media-loader", {
         const startTime = hashTime || qsTime || 0;
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-image");
-        this.el.addEventListener("video-loaded", () => this.onMediaLoaded(), { once: true });
+        this.el.addEventListener(
+          "video-loaded",
+          detail => {
+            this.onMediaLoaded(detail.projection === "flat" ? SHAPE.BOX : null);
+          },
+          { once: true }
+        );
         this.el.setAttribute(
           "media-video",
           Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, time: startTime, contentType })
@@ -302,8 +306,8 @@ AFRAME.registerComponent("media-loader", {
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(
           "image-loaded",
-          () => {
-            this.onMediaLoaded();
+          detail => {
+            this.onMediaLoaded(detail.projection === "flat" ? SHAPE.BOX : null);
           },
           { once: true }
         );
@@ -323,7 +327,7 @@ AFRAME.registerComponent("media-loader", {
         // 2. we don't remove the media-image component -- media-pager uses that internally
         this.el.setAttribute("media-pager", Object.assign({}, this.data.mediaOptions, { src: canonicalUrl }));
         this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
-        this.el.addEventListener("preview-loaded", () => this.onMediaLoaded(), { once: true });
+        this.el.addEventListener("preview-loaded", () => this.onMediaLoaded(SHAPE.BOX), { once: true });
 
         if (this.el.components["position-at-box-shape-border__freeze"]) {
           this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
@@ -340,7 +344,7 @@ AFRAME.registerComponent("media-loader", {
           "model-loaded",
           () => {
             this.updateScale(this.data.resize);
-            this.onMediaLoaded(true);
+            this.onMediaLoaded(SHAPE.HULL);
             addAnimationComponents(this.el);
           },
           { once: true }
