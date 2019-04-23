@@ -288,8 +288,8 @@ AFRAME.registerComponent("media-loader", {
         this.el.removeAttribute("media-image");
         this.el.addEventListener(
           "video-loaded",
-          detail => {
-            this.onMediaLoaded(detail.projection === "flat" ? SHAPE.BOX : null);
+          e => {
+            this.onMediaLoaded(e.detail.projection === "flat" ? SHAPE.BOX : null);
           },
           { once: true }
         );
@@ -306,8 +306,8 @@ AFRAME.registerComponent("media-loader", {
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(
           "image-loaded",
-          detail => {
-            this.onMediaLoaded(detail.projection === "flat" ? SHAPE.BOX : null);
+          e => {
+            this.onMediaLoaded(e.detail.projection === "flat" ? SHAPE.BOX : null);
           },
           { once: true }
         );
