@@ -45,6 +45,7 @@ import SafariDialog from "./safari-dialog.js";
 import SafariMicDialog from "./safari-mic-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
 import RenameRoomDialog from "./rename-room-dialog.js";
+import CloseRoomDialog from "./close-room-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
@@ -1456,6 +1457,12 @@ class UIRoot extends Component {
               render={() =>
                 this.renderDialog(RenameRoomDialog, { onRename: name => this.props.hubChannel.rename(name) })
               }
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="close_room"
+              history={this.props.history}
+              render={() => this.renderDialog(CloseRoomDialog, { onConfirm: () => this.props.hubChannel.closeHub() })}
             />
             <StateRoute
               stateKey="modal"

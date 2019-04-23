@@ -6,6 +6,7 @@ import StateLink from "./state-link.js";
 import { resetTips } from "../systems/tips";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
+import { faDoorClosed } from "@fortawesome/free-solid-svg-icons/faDoorClosed";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
@@ -26,8 +27,9 @@ export default class SettingsMenu extends Component {
     const rowClasses = classNames([styles.row, styles.settingsRow]);
     const rowHeader = classNames([styles.row, styles.settingsRow, styles.rowHeader]);
     const showRoomSettings = !!this.props.hubChannel.permissions.update_hub;
+    const showCloseRoom = !!this.props.hubChannel.permissions.close_hub;
     const showRoomInfo = !!this.props.hubScene;
-    const showRoomSection = showRoomSettings || showRoomInfo;
+    const showRoomSection = showRoomSettings || showRoomInfo || showCloseRoom;
 
     // Draw self first
     return (
@@ -94,6 +96,25 @@ export default class SettingsMenu extends Component {
                     onClick={this.props.hideSettings}
                   >
                     <FormattedMessage id="settings.rename-room" />
+                  </StateLink>
+                </div>
+              </div>
+            )}
+            {showCloseRoom && (
+              <div className={rowClasses}>
+                <div className={styles.icon}>
+                  <i>
+                    <FontAwesomeIcon icon={faDoorClosed} />
+                  </i>
+                </div>
+                <div className={styles.listItem}>
+                  <StateLink
+                    stateKey="modal"
+                    stateValue="close_room"
+                    history={this.props.history}
+                    onClick={this.props.hideSettings}
+                  >
+                    <FormattedMessage id="settings.close-room" />
                   </StateLink>
                 </div>
               </div>

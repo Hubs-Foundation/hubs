@@ -681,6 +681,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   scene.addEventListener("camera_removed", () => remountUI({}));
 
+  scene.addEventListener("hub_closed", () => {
+    scene.exitVR();
+    entryManager.exitScene("closed");
+    remountUI({ roomUnavailableReason: "closed" });
+  });
+
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
   if (platformUnsupportedReason) {
@@ -1010,6 +1016,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         name: userInfo.metas[0].profile.displayName,
         hubName: hub.name
       });
+    }
+
+    if (hub.entry_mode === "deny") {
+      scene.emit("hub_closed");
     }
   });
 
