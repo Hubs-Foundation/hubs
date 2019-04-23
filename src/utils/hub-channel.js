@@ -129,6 +129,11 @@ export default class HubChannel extends EventTarget {
     this.channel.push("update_hub", { name });
   };
 
+  closeHub = () => {
+    if (!this._permissions.close_hub) return "unauthorized";
+    this.channel.push("close_hub", {});
+  };
+
   subscribe = subscription => {
     this.channel.push("subscribe", { subscription });
   };
