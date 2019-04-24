@@ -364,7 +364,7 @@ export const traverseMeshesAndAddShapes = (function() {
       el.setAttribute(shapePrefix + "environment", {
         type: SHAPE.MESH,
         margin: 0.01,
-        fit: FIT.COMPOUND
+        fit: FIT.ALL
       });
       shapes.push({ id: shapePrefix + "environment", entity: el });
       console.log("adding compound mesh shape");
