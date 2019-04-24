@@ -133,6 +133,7 @@ window.APP.RENDER_ORDER = {
 const store = window.APP.store;
 const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
+const NAF_FLUSH_INTERVAL = 100;
 
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
@@ -433,6 +434,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
       .connect()
       .then(() => {
         let newHostPollInterval = null;
+        let nafOutgoingMessageBuffer = [];
 
         scene.emit("didConnectToNetworkedScene");
         // When reconnecting, update the server URL if necessary
@@ -459,15 +461,61 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
           null
         );
 
-        NAF.connection.adapter.reliableTransport = (clientId, dataType, data) => {
+        const processOutgoingNAFMessage = (clientId, dataType, data) => {
           const payload = { dataType, data };
 
           if (clientId) {
             payload.clientId = clientId;
           }
 
-          hubChannel.channel.push("naf", payload);
+          let updatedInPlace = false;
+
+          if (data.networkId) {
+            if (!data.isFirstSync) {
+              // NAF component update
+              // If we had multiple syncs for a given component between flushes, coalesce them
+              // by merging the top level fields and taking the union of all the components
+              for (let i = 0; i < nafOutgoingMessageBuffer.length; i++) {
+                const item = nafOutgoingMessageBuffer[i];
+                if (item.data.isFirstSync) continue; // Don't coalesce first syncs, to be safe
+                if (item.data.networkId !== data.networkId) continue;
+
+                for (const k in data.components) {
+                  item.data.components[k] = data.components[k];
+                }
+
+                item.data.owner = data.owner;
+                item.data.lastOwnerTime = data.lastOwnerTime;
+                item.data.persistent = data.persistent;
+
+                updatedInPlace = true;
+                break;
+              }
+            }
+
+            if (!updatedInPlace) {
+              nafOutgoingMessageBuffer.push(payload);
+            }
+          } else {
+            // Non-component updates, just send immediately (eg drawings)
+            hubChannel.channel.push("naf", { d: [payload] });
+          }
         };
+
+        NAF.connection.adapter.reliableTransport = processOutgoingNAFMessage;
+        NAF.connection.adapter.unreliableTransport = processOutgoingNAFMessage;
+
+        setInterval(() => {
+          if (nafOutgoingMessageBuffer.length === 0) return;
+          hubChannel.channel.push("naf", { d: nafOutgoingMessageBuffer });
+
+          // If connection is open, it will be flushed immediately, so re-use memory.
+          if (hubChannel.channel.socket.connectionState() === "open") {
+            nafOutgoingMessageBuffer.length = 0;
+          } else {
+            nafOutgoingMessageBuffer = [];
+          }
+        }, NAF_FLUSH_INTERVAL);
       })
       .catch(connectError => {
         // hacky until we get return codes
@@ -955,7 +1003,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hubPhxChannel.on("naf", data => {
     if (!NAF.connection.adapter) return;
-    NAF.connection.adapter.onData(data, PHOENIX_RELIABLE_NAF);
+
+    for (let i = 0; i < data.d.length; i++) {
+      NAF.connection.adapter.onData(data.d[i], PHOENIX_RELIABLE_NAF);
+    }
   });
 
   hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
