@@ -376,7 +376,7 @@ AFRAME.registerComponent("media-loader", {
             } else {
               this.el.setAttribute("hover-menu__link", { template: "#link-hover-menu", dirs: ["forward", "back"] });
             }
-            this.onMediaLoaded();
+            this.onMediaLoaded(SHAPE.BOX);
           },
           { once: true }
         );
