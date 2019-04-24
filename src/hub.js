@@ -130,6 +130,7 @@ window.APP.RENDER_ORDER = {
   HUD_ICONS: 2,
   CURSOR: 3
 };
+window.APP.blockedIds = new Set();
 const store = window.APP.store;
 const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";

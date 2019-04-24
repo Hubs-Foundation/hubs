@@ -13,6 +13,7 @@ import StateLink from "./state-link.js";
 import { WithHoverSound } from "./wrap-with-audio";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+import { faEyeSlash } from "@fortawesome/free-solid-svg-icons/faEyeSlash";
 
 function getPresenceImage(ctx) {
   if (ctx && ctx.mobile) {
@@ -24,6 +25,15 @@ function getPresenceImage(ctx) {
   } else {
     return DesktopImage;
   }
+}
+
+function unblock(id) {
+  return function unblock() {
+    NAF.connection.adapter.unblock(id);
+    NAF.connection.entities.completeSync(id);
+    window.APP.blockedIds.delete(id);
+    this.forceUpdate();
+  };
 }
 
 export default class PresenceList extends Component {
@@ -42,6 +52,7 @@ export default class PresenceList extends Component {
     const context = meta.context;
     const profile = meta.profile;
     const image = getPresenceImage(context);
+    const unblockOnClick = unblock(sessionId).bind(this);
 
     return (
       <WithHoverSound key={sessionId}>
@@ -62,7 +73,16 @@ export default class PresenceList extends Component {
                 </i>
               </StateLink>
             ) : (
-              profile && profile.displayName
+              <div className={styles.self}>
+                {profile && profile.displayName}
+                {window.APP.blockedIds.has(sessionId) ? (
+                  <i onClick={unblockOnClick}>
+                    <FontAwesomeIcon icon={faEyeSlash} />
+                  </i>
+                ) : (
+                  <div />
+                )}
+              </div>
             )}
           </div>
           <div className={styles.presence}>

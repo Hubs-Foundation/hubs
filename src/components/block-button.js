@@ -23,11 +23,12 @@ AFRAME.registerComponent("block-button", {
 
   block(clientId) {
     NAF.connection.adapter.block(clientId);
+    window.APP.blockedIds.add(clientId);
   },
 
   // Currently unused
   unblock(clientId) {
     NAF.connection.adapter.unblock(clientId);
-    NAF.connection.entities.completeSync(clientId);
+    NAF.connection.entities.completeSync(clientId, true);
   }
 });
