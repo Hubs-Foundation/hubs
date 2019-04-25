@@ -459,15 +459,33 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
           null
         );
 
-        NAF.connection.adapter.reliableTransport = (clientId, dataType, data) => {
+        const sendViaPhoenix = (clientId, dataType, data) => {
           const payload = { dataType, data };
 
           if (clientId) {
             payload.clientId = clientId;
           }
 
-          hubChannel.channel.push("naf", payload);
+          if (hubChannel.channel.socket.connectionState() === "open") {
+            hubChannel.channel.push("naf", payload);
+          } else {
+            // Memory is re-used, so make a copy
+            hubChannel.channel.push("naf", AFRAME.utils.clone(payload));
+          }
         };
+
+        NAF.connection.adapter.reliableTransport = sendViaPhoenix;
+        NAF.connection.adapter.unreliableTransport = sendViaPhoenix;
+
+        const noopMessage = `["2", "0", "${hubChannel.channel.topic}", "noop", "{}"]`;
+
+        // Avoid TCP_NODELAY
+        // see: https://github.com/valsteen/socketio-nagle-experiment
+        setInterval(() => {
+          if (hubChannel.channel.socket.connectionState() === "open") {
+            hubChannel.channel.socket.conn.send(noopMessage);
+          }
+        }, 10);
       })
       .catch(connectError => {
         // hacky until we get return codes
