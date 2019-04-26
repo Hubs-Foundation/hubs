@@ -597,6 +597,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.addEventListener("enter-vr", () => {
     if (handleEarlyVRMode()) return true;
 
+    if (!isMobileVR) {
+      // Optimization, stop drawing UI if not visible
+      remountUI({ hide: true });
+    }
+
     document.body.classList.add("vr-mode");
 
     // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
@@ -630,6 +635,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.addEventListener("exit-vr", () => {
     document.body.classList.remove("vr-mode");
     document.body.classList.remove("vr-mode-stretch");
+
+    remountUI({ hide: false });
 
     // HACK: Oculus browser pauses videos when exiting VR mode, so we need to resume them after a timeout.
     if (/OculusBrowser/i.test(window.navigator.userAgent)) {
