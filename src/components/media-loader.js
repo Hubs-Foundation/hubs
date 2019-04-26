@@ -189,59 +189,49 @@ AFRAME.registerComponent("media-loader", {
     };
 
     if (this.data.animate) {
-      this.addMeshAnimation(
-        this.el.getObject3D("mesh"),
-        { px: 0, py: 0, pz: 0, sx: 0.001, sy: 0.001, sz: 0.001 },
-        finish
-      );
+      this.addMeshScaleAnimation(this.el.getObject3D("mesh"), { x: 0.001, y: 0.001, z: 0.001 }, finish);
     } else {
       finish();
     }
   },
 
-  addMeshAnimation(mesh, initial, onComplete) {
+  addMeshScaleAnimation(mesh, initialScale, onComplete) {
     const config = {
       duration: 400,
       easing: "easeOutElastic",
       elasticity: 400,
       loop: 0,
       round: false,
-      px: mesh.position.x,
-      py: mesh.position.y,
-      pz: mesh.position.z,
-      sx: mesh.scale.x,
-      sy: mesh.scale.y,
-      sz: mesh.scale.z,
-      targets: [initial],
+      x: mesh.scale.x,
+      y: mesh.scale.y,
+      z: mesh.scale.z,
+      targets: [initialScale],
       update: (function() {
         const lastValue = {};
         return function(anim) {
-          const { px, py, pz } = anim.animatables[0].target;
-          let { sx, sy, sz } = anim.animatables[0].target;
+          const value = anim.animatables[0].target;
 
-          sx = Math.max(0.0001, sx);
-          sy = Math.max(0.0001, sy);
-          sz = Math.max(0.0001, sz);
+          value.x = Math.max(0.0001, value.x);
+          value.y = Math.max(0.0001, value.y);
+          value.z = Math.max(0.0001, value.z);
 
           // For animation timeline.
-          if (sx === lastValue.x && sy === lastValue.y && sz === lastValue.z) {
+          if (value.x === lastValue.x && value.y === lastValue.y && value.z === lastValue.z) {
             return;
           }
 
-          lastValue.x = sx;
-          lastValue.y = sy;
-          lastValue.z = sz;
+          lastValue.x = value.x;
+          lastValue.y = value.y;
+          lastValue.z = value.z;
 
-          mesh.scale.set(sx, sy, sz);
-          mesh.position.set(px, py, pz);
+          mesh.scale.set(value.x, value.y, value.z);
           mesh.matrixNeedsUpdate = true;
         };
       })(),
       complete: onComplete
     };
 
-    mesh.position.set(initial.px, initial.py, initial.pz);
-    mesh.scale.copy(initial.sx, initial.sy, initial.sz);
+    mesh.scale.copy(initialScale);
     mesh.matrixNeedsUpdate = true;
 
     return anime(config);
