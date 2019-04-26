@@ -3,8 +3,6 @@ import { guessContentType } from "../utils/media-utils";
 
 AFRAME.registerComponent("window-open-button", {
   init() {
-    this.label = this.el.querySelector("[text]");
-
     this.updateSrc = () => {
       this.src = this.targetEl.components["media-loader"].data.src;
       this.el.object3D.visible = !!this.src;
