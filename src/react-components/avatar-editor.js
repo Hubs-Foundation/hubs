@@ -91,6 +91,8 @@ export default class AvatarEditor extends Component {
   uploadAvatar = async e => {
     e.preventDefault();
 
+    this.setState({ uploading: true });
+
     if (this.inputFiles.glb && this.inputFiles.glb instanceof File) {
       const gltfLoader = new THREE.GLTFLoader();
       const gltfUrl = URL.createObjectURL(this.inputFiles.glb);
@@ -130,11 +132,11 @@ export default class AvatarEditor extends Component {
       });
     }
 
-    const filesToUpload = ["gltf", "bin", "base_map", "emissive_map", "normal_map", "orm_map"].filter(
+    this.inputFiles.thumbnail = new File([await this.preview.snapshot()], "thumbnail.png", { type: "image/png" });
+
+    const filesToUpload = ["gltf", "bin", "base_map", "emissive_map", "normal_map", "orm_map", "thumbnail"].filter(
       k => this.inputFiles[k] === null || this.inputFiles[k] instanceof File
     );
-
-    this.setState({ uploading: true });
 
     const fileUploads = await Promise.all(filesToUpload.map(f => this.inputFiles[f] && upload(this.inputFiles[f])));
     const avatar = {
@@ -298,7 +300,7 @@ export default class AvatarEditor extends Component {
             {/* {this.mapField("metallic_map", "Metallic Map", "image/\*", true)} */}
             {/* {this.mapField("roughness_map", "Roughness Map", "image/\*", true)} */}
           </div>
-          {preview && <AvatarPreview avatar={this.state.avatar} {...this.inputFiles} />}
+          {preview && <AvatarPreview avatar={this.state.avatar} {...this.inputFiles} ref={p => (this.preview = p)} />}
         </div>
         <div className={styles.info}>
           <FormattedMessage id="avatar-editor.info" />

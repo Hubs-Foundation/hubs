@@ -85,26 +85,18 @@ export default class MediaSearchStore extends EventTarget {
   };
 
   _fetchMedia = async (url, source) => {
-    if (source !== "avatars") {
-      const res = await fetch(url);
-      return await res.json();
-    } else {
-      return {
-        entries: avatars.map(avatar => ({
-          id: avatar.id,
-          type: "avatar",
-          url: avatar.model,
-          images: {
-            preview: {
-              url: avatar.thumbnail,
-              width: 512,
-              height: 512
-            }
-          }
-        })),
-        meta: {}
-      };
+    if (source === "avatars") {
+      url += "&user=363050965407891470";
     }
+
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `bearer ${window.APP.store.state.credentials.token}`
+      }
+    });
+    return await res.json();
   };
 
   pageNavigate = delta => {

@@ -35,7 +35,7 @@ class AvatarSelector extends Component {
   };
 
   avatarSelected = entry => {
-    this.setState({ avatar: { base_gltf_url: entry.url } });
+    this.setState({ avatar: { base_gltf_url: entry.gltfs.avatar } });
   };
 
   render() {
