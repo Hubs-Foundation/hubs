@@ -418,7 +418,7 @@ class MediaBrowser extends Component {
             </a>
             <div className={styles.attribution}>
               <div className={styles.creator}>
-                {creator && !creator.name && <span>{creator}</span>}
+                {creator && creator.name === undefined && <span>{creator}</span>}
                 {creator && creator.name && !creator.url && <span>{creator.name}</span>}
                 {creator &&
                   creator.name &&
