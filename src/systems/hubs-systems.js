@@ -6,9 +6,13 @@ import { HoverMenuSystem } from "./hover-menu-system";
 import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
+import { LoadAndRenderOnceSystem } from "./load-and-render-once-system";
+import cameraModelSrc from "../assets/camera_tool.glb";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
+    this.loadAndRenderOnceSystem = new LoadAndRenderOnceSystem(this.el);
+
     this.cursorTargettingSystem = new CursorTargettingSystem();
     this.constraintsSystem = new ConstraintsSystem();
     this.twoPointStretchingSystem = new TwoPointStretchingSystem();
@@ -35,6 +39,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverMenuSystem.tick();
     this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
     this.soundEffectsSystem.tick();
+    this.loadAndRenderOnceSystem.tick();
   },
 
   remove() {
