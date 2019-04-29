@@ -597,7 +597,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.addEventListener("enter-vr", () => {
     if (handleEarlyVRMode()) return true;
 
-    if (!isMobileVR) {
+    if (isMobileVR) {
       // Optimization, stop drawing UI if not visible
       remountUI({ hide: true });
     }
