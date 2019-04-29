@@ -21,7 +21,7 @@ import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
-import { getReticulumFetchUrl } from "./utils/phoenix-utils";
+import { getReticulumFetchUrl, getReticulumMeta } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
@@ -712,6 +712,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
   }
+
+  getReticulumMeta().then(reticulumMeta => {
+    console.log(`Reticulum @ ${reticulumMeta.phx_host}: v${reticulumMeta.version} on ${reticulumMeta.pool}`);
+
+    if (
+      qs.get("required_ret_version") &&
+      (qs.get("required_ret_version") !== reticulumMeta.version || qs.get("required_ret_pool") !== reticulumMeta.pool)
+    ) {
+      remountUI({ roomUnavailableReason: "version_mismatch" });
+      setTimeout(() => document.location.reload(), 5000);
+      entryManager.exitScene();
+      return;
+    }
+  });
 
   if (isMobileVR) {
     remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
