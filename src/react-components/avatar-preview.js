@@ -70,6 +70,7 @@ export default class AvatarPreview extends Component {
 
     this.camera = new THREE.PerspectiveCamera(55, this.canvas.clientWidth / this.canvas.clientHeight, 0.1, 1000);
     this.controls = new THREE.OrbitControls(this.camera, this.canvas);
+    this.controls.enablePan = false;
 
     const light = new THREE.DirectionalLight(0xfdf5c2, 3);
     light.position.set(0, 10, 10);
@@ -116,12 +117,11 @@ export default class AvatarPreview extends Component {
     const center = new THREE.Vector3();
     return () => {
       box.setFromObject(this.avatar);
-      center.set(
-        (box.max.x - box.min.x) * 0.5 + box.min.x,
-        (box.max.y - box.min.y) * 0.5 + box.min.y,
-        (box.max.z - box.min.z) * 0.5 + box.min.z
-      );
+      box.getCenter(center);
       fitBoxInFrustum(this.camera, box, center);
+      // Shift the center vertically in order to frame the avatar nicely.
+      // We do this after fitting the bounding box in the frustum since we want to fit it around the true center, not
+      // the shifted center.
       center.y = (box.max.y - box.min.y) * 0.6 + box.min.y;
       this.controls.target.copy(center);
       this.controls.update();
