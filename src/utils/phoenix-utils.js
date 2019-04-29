@@ -48,6 +48,40 @@ export function getReticulumFetchUrl(path, absolute = false) {
   }
 }
 
+let reticulumMeta = null;
+let invalidatedReticulumMetaThisSession = false;
+
+export async function invalidateReticulumMeta() {
+  invalidatedReticulumMetaThisSession = true;
+  reticulumMeta = null;
+}
+
+export async function getReticulumMeta() {
+  if (!reticulumMeta) {
+    // Initially look up version based upon page, avoiding round-trip, otherwise fetch.
+    if (!invalidatedReticulumMetaThisSession && document.querySelector("meta[name='ret:version']")) {
+      reticulumMeta = {
+        version: document.querySelector("meta[name='ret:version']").getAttribute("value"),
+        pool: document.querySelector("meta[name='ret:pool']").getAttribute("value"),
+        phx_host: document.querySelector("meta[name='ret:phx_host']").getAttribute("value")
+      };
+    } else {
+      await fetch(getReticulumFetchUrl("/api/v1/meta")).then(async res => {
+        reticulumMeta = await res.json();
+      });
+    }
+  }
+
+  const qs = new URLSearchParams(location.search);
+  const phxHostOverride = qs.get("phx_host");
+
+  if (phxHostOverride) {
+    reticulumMeta.phx_host = phxHostOverride;
+  }
+
+  return reticulumMeta;
+}
+
 export function getLandingPageForPhoto(photoUrl) {
   const parsedUrl = new URL(photoUrl);
   return getReticulumFetchUrl(parsedUrl.pathname.replace(".png", ".html") + parsedUrl.search, true);
