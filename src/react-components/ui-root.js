@@ -250,6 +250,7 @@ class UIRoot extends Component {
   }
 
   componentDidMount() {
+    setTimeout(() => this.pushHistoryState("overlay", "profile"));
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     this.micLevelMovingAverage = MovingAverage(100);
     this.props.scene.addEventListener(
@@ -1377,7 +1378,7 @@ class UIRoot extends Component {
     const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
 
     // Allow scene picker pre-entry, otherwise wait until entry
-    const showMediaBrowser = mediaSource && (mediaSource === "scenes" || this.state.entered);
+    const showMediaBrowser = mediaSource && (["scenes", "avatars"].includes(mediaSource) || this.state.entered);
     const hasTopTip = this.props.activeTips && this.props.activeTips.top;
 
     const discordBridges = this.discordBridges();
@@ -1407,6 +1408,7 @@ class UIRoot extends Component {
                   onSignOut={this.signOut}
                   finished={this.closeDialog}
                   store={this.props.store}
+                  mediaSearchStore={this.props.mediaSearchStore}
                   debug={avatarEditorDebug}
                   preview={!isMobile}
                 />
@@ -1442,6 +1444,7 @@ class UIRoot extends Component {
                     this.closeDialog();
                   }}
                   store={this.props.store}
+                  mediaSearchStore={this.props.mediaSearchStore}
                   signedIn={this.state.signedIn}
                   onSignIn={this.showSignInDialog}
                   onSignOut={this.signOut}

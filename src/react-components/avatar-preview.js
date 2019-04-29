@@ -40,7 +40,7 @@ const createImageBitmapFromURL = url =>
 
 export default class AvatarPreview extends Component {
   static propTypes = {
-    avatar: PropTypes.object
+    avatarGltfUrl: PropTypes.string
   };
   constructor(props) {
     super(props);
@@ -68,10 +68,7 @@ export default class AvatarPreview extends Component {
     controls.target.set(0, 0.45, 0);
     controls.update();
 
-    this.loadPreviewAvatar(this.props.avatar).then(avatar => {
-      this.scene.add(avatar);
-      this.setState({ loading: false });
-    });
+    this.loadPreviewAvatar(this.props.avatarGltfUrl).then(this.setAvatar);
 
     const clock = new THREE.Clock();
     this.previewRenderer = createRenderer(this.canvas);
@@ -92,6 +89,11 @@ export default class AvatarPreview extends Component {
     this.camera.updateProjectionMatrix();
   };
 
+  setAvatar = avatar => {
+    this.scene.add(avatar);
+    this.setState({ loading: false });
+  };
+
   componentWillUnmount = () => {
     this.scene && this.scene.traverse(disposeNode);
     this.previewRenderer && this.previewRenderer.dispose();
@@ -99,7 +101,14 @@ export default class AvatarPreview extends Component {
     window.removeEventListener("resize", this.resize);
   };
 
-  componentDidUpdate = oldProps => {
+  componentDidUpdate = async oldProps => {
+    if (oldProps.avatarGltfUrl !== this.props.avatarGltfUrl) {
+      if (this.avatar) {
+        this.scene.remove(this.avatar);
+        this.avatar = null;
+      }
+      await this.loadPreviewAvatar(this.props.avatarGltfUrl).then(this.setAvatar);
+    }
     this.applyMaps(oldProps, this.props);
   };
 
@@ -120,18 +129,13 @@ export default class AvatarPreview extends Component {
     );
   }
 
-  shouldComponentUpdate(oldProps, oldState) {
-    return (
-      oldState.loading != this.state.loading || ALL_MAPS.some(mapName => oldProps[mapName] !== this.props[mapName])
-    );
-  }
-
-  loadPreviewAvatar = async avatar => {
-    const gltf = await loadGLTF(avatar.base_gltf_url, "model/gltf");
+  loadPreviewAvatar = async avatarGltfUrl => {
+    console.log("BPDEBUG loadPreviewAvatar", avatarGltfUrl);
+    const gltf = await loadGLTF(avatarGltfUrl, "model/gltf");
 
     // On the bckend we look for a material called Bot_PBS, here we are looking for a mesh called Avatar.
     // When we "officially" support uploading custom GLTFs we need to decide what we are going to key things on
-    this.previewMesh = gltf.scene.getObjectByName("Avatar");
+    this.previewMesh = gltf.scene.getObjectByName("Avatar") || gltf.scene.getObjectByName("Bot_Skinned");
 
     const idleAnimation = gltf.animations && gltf.animations.find(({ name }) => name === "idle_eyes");
     if (idleAnimation) {

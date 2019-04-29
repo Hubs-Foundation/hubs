@@ -9,12 +9,13 @@ import { WithHoverSound } from "./wrap-with-audio";
 import { AVATAR_TYPES, getAvatarType } from "../assets/avatars/avatars";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 
-import AvatarEditor from "./avatar-editor";
+import AvatarPreview from "./avatar-preview";
 
 class ProfileEntryPanel extends Component {
   static propTypes = {
     displayNameOverride: PropTypes.string,
     store: PropTypes.object,
+    mediaSearchStore: PropTypes.object,
     messages: PropTypes.object,
     finished: PropTypes.func,
     intl: PropTypes.object,
@@ -25,12 +26,18 @@ class ProfileEntryPanel extends Component {
     preview: PropTypes.bool
   };
 
+  state = {
+    avatarId: null,
+    displayName: null,
+    avatarGltfUrl: null
+  };
+
   constructor(props) {
     super(props);
     const { displayName, avatarId } = this.props.store.state.profile;
-    const avatarType = getAvatarType(avatarId);
-    this.state = { displayName, avatarId, avatarType };
+    this.state = { displayName, avatarId };
     this.props.store.addEventListener("statechanged", this.storeUpdated);
+    this.scene = document.querySelector("a-scene");
   }
 
   storeUpdated = () => {
@@ -62,18 +69,8 @@ class ProfileEntryPanel extends Component {
     e.stopPropagation();
   };
 
-  setAvatarStateFromIframeMessage = e => {
-    if (e.source !== this.avatarSelector.contentWindow) {
-      return;
-    }
-    this.setState({ avatarId: e.data.avatarId });
-
-    // Send it back down to cause avatar picker UI to update.
-    this.sendAvatarStateToIframe();
-  };
-
-  sendAvatarStateToIframe = () => {
-    this.avatarSelector.contentWindow.postMessage({ avatarId: this.state.avatarId }, location.origin);
+  setAvatarFromMediaResult = ({ detail: entry }) => {
+    this.setState({ avatarId: entry.id, avatarGltfUrl: entry.gltfs.avatar });
   };
 
   componentDidMount() {
@@ -83,7 +80,7 @@ class ProfileEntryPanel extends Component {
       this.nameInput.addEventListener("keypress", this.stopPropagation);
       this.nameInput.addEventListener("keyup", this.stopPropagation);
     }
-    window.addEventListener("message", this.setAvatarStateFromIframeMessage);
+    this.scene.addEventListener("action_selected_media_result_entry", this.setAvatarFromMediaResult);
   }
 
   componentWillUnmount() {
@@ -93,76 +90,11 @@ class ProfileEntryPanel extends Component {
       this.nameInput.removeEventListener("keypress", this.stopPropagation);
       this.nameInput.removeEventListener("keyup", this.stopPropagation);
     }
-    window.removeEventListener("message", this.setAvatarStateFromIframeMessage);
+    this.scene.removeEventListener("action_selected_media_result_entry", this.setAvatarFromMediaResult);
   }
 
   render() {
     const { formatMessage } = this.props.intl;
-
-    let panelBody;
-    switch (this.state.avatarType) {
-      case AVATAR_TYPES.LEGACY:
-        panelBody = (
-          <div className={styles.avatarSelectorContainer}>
-            <div className="loading-panel">
-              <div className="loader-wrap">
-                <div className="loader">
-                  <div className="loader-center" />
-                </div>
-              </div>
-            </div>
-            <iframe
-              className={styles.avatarSelector}
-              src={`/avatar-selector.html`}
-              ref={ifr => {
-                if (this.avatarSelector === ifr) return;
-                this.avatarSelector = ifr;
-                if (this.avatarSelector) {
-                  this.avatarSelector.onload = () => {
-                    this.sendAvatarStateToIframe();
-                  };
-                }
-              }}
-            />
-          </div>
-        );
-        break;
-      case AVATAR_TYPES.SKINNABLE:
-        panelBody = (
-          <AvatarEditor
-            signedIn={this.props.signedIn}
-            onSignIn={this.props.onSignIn}
-            onSignOut={this.props.onSignOut}
-            store={this.props.store}
-            onAvatarChanged={avatarId => this.setState({ avatarId })}
-            saveStateAndFinish={this.saveStateAndFinish}
-            debug={this.props.debug}
-            preview={this.props.preview}
-          />
-        );
-        break;
-      case AVATAR_TYPES.URL:
-        panelBody = (
-          <div className={styles.avatarSelectorContainer}>
-            <label htmlFor="#custom-avatar-url">Avatar GLTF/GLB </label>
-            <input
-              id="custom-avatar-url"
-              type="url"
-              required
-              className={styles.formFieldText}
-              value={this.state.avatarId}
-              onChange={e => this.setState({ avatarId: e.target.value })}
-            />
-            <div className={styles.info}>
-              <FormattedMessage id="profile.info" />
-              <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
-                <FormattedMessage id="profile.info-link" />
-              </a>
-            </div>
-          </div>
-        );
-        break;
-    }
 
     return (
       <div className={styles.profileEntry}>
@@ -189,27 +121,12 @@ class ProfileEntryPanel extends Component {
               />
             )}
 
-            <div className={styles.tabs}>
-              <a
-                onClick={() => this.setState({ avatarType: "legacy", avatarId: "botdefault" })}
-                className={classNames({ selected: this.state.avatarType === "legacy" })}
-              >
-                <FormattedMessage id="profile.tabs.legacy" />
-              </a>
-              <a
-                onClick={() => this.setState({ avatarType: "skinnable", avatarId: null })}
-                className={classNames({ selected: this.state.avatarType === "skinnable" })}
-              >
-                <FormattedMessage id="profile.tabs.skinnable" />
-              </a>
-              <a
-                onClick={() => this.setState({ avatarType: "url", avatarId: "" })}
-                className={classNames({ selected: this.state.avatarType === "url" })}
-              >
-                <FormattedMessage id="profile.tabs.url" />
-              </a>
-            </div>
-            {panelBody}
+            <a onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars")}>
+              <FormattedMessage id="profile.choose_avatar" />
+            </a>
+
+            <AvatarPreview avatarGltfUrl={this.state.avatarGltfUrl} />
+
             {this.state.avatarType !== AVATAR_TYPES.SKINNABLE && (
               <WithHoverSound>
                 <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
