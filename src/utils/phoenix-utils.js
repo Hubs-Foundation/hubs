@@ -49,11 +49,17 @@ export function getReticulumFetchUrl(path, absolute = false) {
 }
 
 let reticulumMeta = null;
+let invalidatedReticulumMetaThisSession = false;
+
+export async function invalidateReticulumMeta() {
+  invalidatedReticulumMetaThisSession = true;
+  reticulumMeta = null;
+}
 
 export async function getReticulumMeta() {
   if (!reticulumMeta) {
-    // Initially look up version based upon page, otherwise fetch.
-    if (document.querySelector("meta[name='ret:version']")) {
+    // Initially look up version based upon page, avoiding round-trip, otherwise fetch.
+    if (!invalidatedReticulumMetaThisSession && document.querySelector("meta[name='ret:version']")) {
       reticulumMeta = {
         version: document.querySelector("meta[name='ret:version']").getAttribute("value"),
         pool: document.querySelector("meta[name='ret:pool']").getAttribute("value"),

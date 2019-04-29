@@ -21,7 +21,7 @@ import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
-import { getReticulumFetchUrl, getReticulumMeta } from "./utils/phoenix-utils";
+import { getReticulumFetchUrl, getReticulumMeta, invalidateReticulumMeta } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
@@ -788,6 +788,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     hmd: availableVREntryTypes.isInHMD
   };
 
+  let retDeployReconnectInterval;
+  let ignorePresenceDueToRetDeploy = false; // Ignore presence messages for some grace period around ret re-connections.
+  const retReconnectMaxDelayMs = 15000;
+
   // Reticulum global channel
   const retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
   retPhxChannel
@@ -797,6 +801,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       subscriptions.setVapidPublicKey(null);
       console.error(res);
     });
+
+  retPhxChannel.on("notice", async data => {
+    // On Reticulum deploys, reconnect after a random delay until pool + version match deployed version/pool
+    if (data.event === "ret-deploy") {
+      console.log(`Reticulum deploy detected v${data.ret_version} on ${data.ret_pool}`);
+      ignorePresenceDueToRetDeploy = true;
+      clearInterval(retDeployReconnectInterval);
+
+      setTimeout(() => {
+        retDeployReconnectInterval = setInterval(async () => {
+          invalidateReticulumMeta();
+          const reticulumMeta = await getReticulumMeta();
+
+          if (reticulumMeta.pool === data.ret_pool && reticulumMeta.version === data.ret_version) {
+            console.log("Reticulum reconnection completed.");
+            clearInterval(retDeployReconnectInterval);
+            retPhxChannel.socket.conn.close();
+            setTimeout(() => (ignorePresenceDueToRetDeploy = false), retReconnectMaxDelayMs); // Restore presence messages after 30s once everyone has rejoined
+          }
+        }, 5000);
+      }, Math.floor(Math.random() * retReconnectMaxDelayMs));
+    }
+  });
 
   const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
   const joinPayload = {
@@ -912,7 +939,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               // New presence
               const meta = info.metas[0];
 
-              if (meta.presence && meta.profile.displayName) {
+              if (meta.presence && meta.profile.displayName && !ignorePresenceDueToRetDeploy) {
                 addToPresenceLog({
                   type: "join",
                   presence: meta.presence,
@@ -929,7 +956,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const meta = info.metas[0];
 
-            if (meta.profile.displayName) {
+            if (meta.profile.displayName && !ignorePresenceDueToRetDeploy) {
               addToPresenceLog({
                 type: "leave",
                 name: meta.profile.displayName
