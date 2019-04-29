@@ -41,7 +41,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
-    "aframe": "github:mozillareality/aframe#hubs/master",
+    "aframe": "github:mozillareality/aframe#no-default-lights",
     "aframe-billboard-component": "^2.0.0",
     "aframe-physics-system": "github:mozillareality/aframe-physics-system#hubs/ammo_driver",
     "aframe-rounded": "^1.0.3",

@@ -326,6 +326,7 @@ async function updateEnvironmentForHub(hub) {
       () => {
         //TODO: check if the environment was made with spoke to determine if a shape should be added
         traverseMeshesAndAddShapes(environmentEl);
+        sceneEl.emit("first-environment-loaded");
       },
       { once: true }
     );

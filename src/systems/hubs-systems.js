@@ -6,12 +6,31 @@ import { HoverMenuSystem } from "./hover-menu-system";
 import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
-import { LoadAndRenderOnceSystem } from "./load-and-render-once-system";
+import { proxiedUrlFor } from "../utils/media-utils";
+import { load, prepareForRender } from "../utils/preload";
 import cameraModelSrc from "../assets/camera_tool.glb";
+
+function preloadPenAndCamera(sceneEl) {
+  // Must wait for environment to load or else lights will uninitialized,
+  // and material programs will later be regenerated
+  sceneEl.addEventListener("first-environment-loaded", async () => {
+    const objects = [];
+
+    const pen = await load(
+      proxiedUrlFor("https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf")
+    );
+    pen.traverse(o => objects.push(o));
+
+    const camera = await load(cameraModelSrc);
+    camera.traverse(o => objects.push(o));
+
+    prepareForRender(sceneEl, objects);
+  });
+}
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
-    this.loadAndRenderOnceSystem = new LoadAndRenderOnceSystem(this.el);
+    preloadPenAndCamera(this.el);
 
     this.cursorTargettingSystem = new CursorTargettingSystem();
     this.constraintsSystem = new ConstraintsSystem();
@@ -39,7 +58,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverMenuSystem.tick();
     this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
     this.soundEffectsSystem.tick();
-    this.loadAndRenderOnceSystem.tick();
   },
 
   remove() {

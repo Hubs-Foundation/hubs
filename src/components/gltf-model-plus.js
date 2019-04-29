@@ -7,7 +7,7 @@ import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
-const GLTFCache = {};
+export const GLTFCache = {};
 const extractZipFile = promisifyWorker(new SketchfabZipWorker());
 
 function defaultInflator(el, componentName, componentData) {
