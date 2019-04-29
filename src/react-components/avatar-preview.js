@@ -40,12 +40,12 @@ const createImageBitmapFromURL = url =>
     .then(r => r.blob())
     .then(createImageBitmap);
 
-const DEFAULT_ORBIT_ANGLE = new THREE.Euler(-20 * THREE.Math.DEG2RAD, 30 * THREE.Math.DEG2RAD, 0);
+const DEFAULT_ORBIT_ANGLE = new THREE.Euler(-30 * THREE.Math.DEG2RAD, 30 * THREE.Math.DEG2RAD, 0);
 
 function fitBoxInFrustum(camera, box, center, orbitAngle = DEFAULT_ORBIT_ANGLE) {
-  const halfYExtents = (box.max.y - box.min.y) / 2;
+  const halfYExtents = Math.max(box.max.y - center.y, center.y - box.min.y);
   const halfVertFOV = THREE.Math.degToRad(camera.fov / 2);
-  camera.position.set(0, 0, halfYExtents / Math.tan(halfVertFOV));
+  camera.position.set(0, 0, halfYExtents / Math.tan(halfVertFOV) + box.max.z);
   camera.position.applyEuler(orbitAngle);
   camera.position.add(center);
   camera.matrixAutoUpdate = true;
@@ -116,11 +116,13 @@ export default class AvatarPreview extends Component {
     const center = new THREE.Vector3();
     return () => {
       box.setFromObject(this.avatar);
-      center.set((box.min.x + box.max.x) * 0.5, (box.min.y + box.max.y) * 0.6, (box.min.z + box.max.z) * 0.5);
-      const cube = new THREE.Mesh(new THREE.BoxBufferGeometry(0.2, 0.2, 0.2));
-      cube.position.copy(center);
-      this.scene.add(cube);
+      center.set(
+        (box.max.x - box.min.x) * 0.5 + box.min.x,
+        (box.max.y - box.min.y) * 0.5 + box.min.y,
+        (box.max.z - box.min.z) * 0.5 + box.min.z
+      );
       fitBoxInFrustum(this.camera, box, center);
+      center.y = (box.max.y - box.min.y) * 0.6 + box.min.y;
       this.controls.target.copy(center);
       this.controls.update();
     };
