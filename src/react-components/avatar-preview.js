@@ -1,10 +1,12 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import "three/examples/js/controls/OrbitControls";
+import classNames from "classnames";
 
 import { createDefaultEnvironmentMap } from "../components/environment-map";
 import { loadGLTF } from "../components/gltf-model-plus";
 import { disposeNode } from "../utils/three-utils";
+import styles from "../assets/stylesheets/avatar-preview.scss";
 
 const TEXTURE_PROPS = {
   base_map: ["map"],
@@ -38,15 +40,27 @@ const createImageBitmapFromURL = url =>
     .then(r => r.blob())
     .then(createImageBitmap);
 
+const DEFAULT_ORBIT_ANGLE = new THREE.Euler(-20 * THREE.Math.DEG2RAD, 30 * THREE.Math.DEG2RAD, 0);
+
+function fitBoxInFrustum(camera, box, center, orbitAngle = DEFAULT_ORBIT_ANGLE) {
+  const halfYExtents = (box.max.y - box.min.y) / 2;
+  const halfVertFOV = THREE.Math.degToRad(camera.fov / 2);
+  camera.position.set(0, 0, halfYExtents / Math.tan(halfVertFOV));
+  camera.position.applyEuler(orbitAngle);
+  camera.position.add(center);
+  camera.matrixAutoUpdate = true;
+  camera.lookAt(center);
+}
+
 export default class AvatarPreview extends Component {
   static propTypes = {
-    avatarGltfUrl: PropTypes.string
+    avatarGltfUrl: PropTypes.string,
+    className: PropTypes.string
   };
   constructor(props) {
     super(props);
-    this.state = {
-      loading: true
-    };
+    this.state = { loading: true };
+    this.avatar = null;
     this.imageBitmaps = {};
   }
 
@@ -54,8 +68,8 @@ export default class AvatarPreview extends Component {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xeaeaea);
 
-    this.camera = new THREE.PerspectiveCamera(75, this.canvas.clientWidth / this.canvas.clientHeight, 0.1, 1000);
-    const controls = new THREE.OrbitControls(this.camera, this.canvas);
+    this.camera = new THREE.PerspectiveCamera(55, this.canvas.clientWidth / this.canvas.clientHeight, 0.1, 1000);
+    this.controls = new THREE.OrbitControls(this.camera, this.canvas);
 
     const light = new THREE.DirectionalLight(0xfdf5c2, 3);
     light.position.set(0, 10, 10);
@@ -65,8 +79,8 @@ export default class AvatarPreview extends Component {
     this.camera.position.set(-0.2, 0.5, 0.5);
     this.camera.matrixAutoUpdate = true;
 
-    controls.target.set(0, 0.45, 0);
-    controls.update();
+    this.controls.target.set(0, 0.45, 0);
+    this.controls.update();
 
     this.loadPreviewAvatar(this.props.avatarGltfUrl).then(this.setAvatar);
 
@@ -90,9 +104,27 @@ export default class AvatarPreview extends Component {
   };
 
   setAvatar = avatar => {
+    if (!avatar) return;
+    this.avatar = avatar;
     this.scene.add(avatar);
+    this.resetCamera();
     this.setState({ loading: false });
   };
+
+  resetCamera = (() => {
+    const box = new THREE.Box3();
+    const center = new THREE.Vector3();
+    return () => {
+      box.setFromObject(this.avatar);
+      center.set((box.min.x + box.max.x) * 0.5, (box.min.y + box.max.y) * 0.6, (box.min.z + box.max.z) * 0.5);
+      const cube = new THREE.Mesh(new THREE.BoxBufferGeometry(0.2, 0.2, 0.2));
+      cube.position.copy(center);
+      this.scene.add(cube);
+      fitBoxInFrustum(this.camera, box, center);
+      this.controls.target.copy(center);
+      this.controls.update();
+    };
+  })();
 
   componentWillUnmount = () => {
     this.scene && this.scene.traverse(disposeNode);
@@ -130,12 +162,14 @@ export default class AvatarPreview extends Component {
   }
 
   loadPreviewAvatar = async avatarGltfUrl => {
-    console.log("BPDEBUG loadPreviewAvatar", avatarGltfUrl);
     const gltf = await loadGLTF(avatarGltfUrl, "model/gltf");
 
     // On the bckend we look for a material called Bot_PBS, here we are looking for a mesh called Avatar.
     // When we "officially" support uploading custom GLTFs we need to decide what we are going to key things on
-    this.previewMesh = gltf.scene.getObjectByName("Avatar") || gltf.scene.getObjectByName("Bot_Skinned");
+    this.previewMesh =
+      gltf.scene.getObjectByName("AvatarMesh") ||
+      gltf.scene.getObjectByName("Avatar") ||
+      gltf.scene.getObjectByName("Bot_Skinned");
 
     const idleAnimation = gltf.animations && gltf.animations.find(({ name }) => name === "idle_eyes");
     if (idleAnimation) {
@@ -192,7 +226,7 @@ export default class AvatarPreview extends Component {
 
   render() {
     return (
-      <div className="preview">
+      <div className={classNames(styles.preview, this.props.className)}>
         {this.state.loading && (
           <div className="loader">
             <div className="loader-center" />

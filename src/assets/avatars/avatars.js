@@ -66,14 +66,31 @@ export function getAvatarType(avatarId) {
   return AVATAR_TYPES.SKINNABLE;
 }
 
+function fetchAvatarGltfUrl(avatarId) {
+  return fetch(getReticulumFetchUrl(`/api/v1/avatars/${avatarId}`))
+    .then(r => r.json())
+    .then(({ avatars }) => avatars[0].gltf_url);
+}
+
 export async function getAvatarSrc(avatarId) {
   switch (getAvatarType(avatarId)) {
     case AVATAR_TYPES.LEGACY:
       return `#${avatarId}`;
     case AVATAR_TYPES.SKINNABLE:
-      return fetch(getReticulumFetchUrl(`/api/v1/avatars/${avatarId}`))
-        .then(r => r.json())
-        .then(({ avatars }) => avatars[0].gltf_url);
+      return fetchAvatarGltfUrl(avatarId);
+    default:
+      return avatarId;
   }
-  return avatarId;
+}
+
+export async function getAvatarGltfUrl(avatarId) {
+  switch (getAvatarType(avatarId)) {
+    case AVATAR_TYPES.LEGACY:
+      return avatars.find(avatar => avatar.id === avatarId).model;
+    case AVATAR_TYPES.SKINNABLE:
+      return fetchAvatarGltfUrl(avatarId);
+    default:
+      // Assume avatarId is already a URL.
+      return avatarId;
+  }
 }

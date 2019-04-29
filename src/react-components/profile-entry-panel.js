@@ -6,7 +6,7 @@ import styles from "../assets/stylesheets/profile.scss";
 import classNames from "classnames";
 import hubLogo from "../assets/images/hub-preview-white.png";
 import { WithHoverSound } from "./wrap-with-audio";
-import { AVATAR_TYPES, getAvatarType } from "../assets/avatars/avatars";
+import { AVATAR_TYPES, getAvatarGltfUrl } from "../assets/avatars/avatars";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 
 import AvatarPreview from "./avatar-preview";
@@ -73,7 +73,8 @@ class ProfileEntryPanel extends Component {
     this.setState({ avatarId: entry.id, avatarGltfUrl: entry.gltfs.avatar });
   };
 
-  componentDidMount() {
+  async componentDidMount() {
+    this.setState({ avatarGltfUrl: await getAvatarGltfUrl(this.state.avatarId) });
     if (this.nameInput) {
       // stop propagation so that avatar doesn't move when wasd'ing during text input.
       this.nameInput.addEventListener("keydown", this.stopPropagation);
@@ -125,7 +126,7 @@ class ProfileEntryPanel extends Component {
               <FormattedMessage id="profile.choose_avatar" />
             </a>
 
-            <AvatarPreview avatarGltfUrl={this.state.avatarGltfUrl} />
+            <AvatarPreview className={styles.preview} avatarGltfUrl={this.state.avatarGltfUrl} />
 
             {this.state.avatarType !== AVATAR_TYPES.SKINNABLE && (
               <WithHoverSound>
