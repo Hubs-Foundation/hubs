@@ -43,7 +43,7 @@
     "@fortawesome/react-fontawesome": "^0.1.0",
     "aframe": "github:mozillareality/aframe#hubs/master",
     "aframe-billboard-component": "^2.0.0",
-    "aframe-physics-system": "github:mozillareality/aframe-physics-system#hubs/ammo_driver",
+    "aframe-physics-system": "github:infinitelee/aframe-physics-system#feature/ammo_driver",
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "^1.0.0",
     "ammo.js": "github:mozillareality/ammo.js#hubs/master",
