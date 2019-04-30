@@ -148,8 +148,8 @@ export function getPresenceProfileForSession(presences, sessionId) {
 
 // Takes the given channel, and creates a new channel with the same bindings
 // with the given socket, joins it, and leaves the old channel after joining.
-export function migrateChannelToSocket(oldChannel, socket) {
-  const channel = socket.channel(oldChannel.topic, oldChannel.params);
+export function migrateChannelToSocket(oldChannel, socket, params) {
+  const channel = socket.channel(oldChannel.topic, params || oldChannel.params);
 
   for (let i = 0, l = oldChannel.bindings.length; i < l; i++) {
     const item = oldChannel.bindings[i];

@@ -373,7 +373,9 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     // Slight hack, to ensure correct presence state we need to re-send the entry event
     // on re-join. Ideally this would be updated into the channel socket state but this
     // would require significant changes to the hub channel events and socket management.
-    hubChannel.sendEntryEvent();
+    if (scene.is("entered")) {
+      hubChannel.sendEntryEvent();
+    }
 
     // Send complete sync on phoenix re-join.
     NAF.connection.entities.completeSync(null, true);
@@ -787,12 +789,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Hub local channel
-  const context = {
-    mobile: isMobile || isMobileVR,
-    hmd: availableVREntryTypes.isInHMD
-  };
-
   let retDeployReconnectInterval;
   const retReconnectMaxDelayMs = 15000;
 
@@ -805,6 +801,39 @@ document.addEventListener("DOMContentLoaded", async () => {
       subscriptions.setVapidPublicKey(null);
       console.error(res);
     });
+
+  const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
+
+  const oauthFlowPermsToken = Cookies.get(OAUTH_FLOW_PERMS_TOKEN_KEY);
+
+  if (oauthFlowPermsToken) {
+    Cookies.remove(OAUTH_FLOW_PERMS_TOKEN_KEY);
+  }
+
+  const createHubChannelParams = permsToken => {
+    const params = {
+      profile: store.state.profile,
+      push_subscription_endpoint: pushSubscriptionEndpoint,
+      auth_token: null,
+      perms_token: null,
+      context: {
+        mobile: isMobile || isMobileVR,
+        hmd: availableVREntryTypes.isInHMD
+      }
+    };
+
+    if (permsToken) {
+      params.perms_token = hubChannel.oauthFlowPermsToken;
+    }
+
+    const { token } = store.state.credentials;
+    if (token) {
+      console.log(`Logged into account ${jwtDecode(token).sub}`);
+      params.auth_token = token;
+    }
+
+    return params;
+  };
 
   const migrateToNewReticulumServer = async deployNotification => {
     // On Reticulum deploys, reconnect after a random delay until pool + version match deployed version/pool
@@ -825,7 +854,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           const oldSocket = retPhxChannel.socket;
           const socket = connectToReticulum(isDebug, oldSocket.params());
           retPhxChannel = await migrateChannelToSocket(retPhxChannel, socket);
-          await hubChannel.migrateToSocket(socket);
+          await hubChannel.migrateToSocket(socket, createHubChannelParams(oauthFlowPermsToken));
           authChannel.setSocket(socket);
           linkChannel.setSocket(socket);
 
@@ -849,28 +878,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
-  const joinPayload = {
-    profile: store.state.profile,
-    push_subscription_endpoint: pushSubscriptionEndpoint,
-    auth_token: null,
-    perms_token: null,
-    context
-  };
-
-  const oauthFlowPermsToken = Cookies.get(OAUTH_FLOW_PERMS_TOKEN_KEY);
-  if (oauthFlowPermsToken) {
-    Cookies.remove(OAUTH_FLOW_PERMS_TOKEN_KEY);
-    joinPayload.perms_token = oauthFlowPermsToken;
-  }
-
-  const { token } = store.state.credentials;
-  if (token) {
-    console.log(`Logged into account ${jwtDecode(token).sub}`);
-    joinPayload.auth_token = token;
-  }
-
-  const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
+  const hubPhxChannel = socket.channel(`hub:${hubId}`, createHubChannelParams());
 
   const presenceLogEntries = [];
   const addToPresenceLog = entry => {
@@ -943,13 +951,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const meta = info.metas[info.metas.length - 1];
 
-            // Skip if len > 1, may be re-connect
-            if (current && info.metas.length === 1) {
+            if (current) {
               // Change to existing presence
               const isSelf = sessionId === socket.params().session_id;
               const currentMeta = current.metas[0];
 
-              if (!isSelf && currentMeta.presence !== meta.presence && meta.profile.displayName) {
+              if (
+                !isSelf &&
+                currentMeta.presence !== meta.presence &&
+                meta.presence === "room" &&
+                meta.profile.displayName
+              ) {
                 addToPresenceLog({
                   type: "entered",
                   presence: meta.presence,

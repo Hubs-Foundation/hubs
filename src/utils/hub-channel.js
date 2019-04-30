@@ -31,7 +31,7 @@ export default class HubChannel extends EventTarget {
   }
 
   // Migrates this hub channel to a new phoenix channel and presence
-  async migrateToSocket(socket) {
+  async migrateToSocket(socket, params) {
     let presenceBindings;
 
     // Unbind presence, and then set up bindings after reconnect
@@ -47,7 +47,7 @@ export default class HubChannel extends EventTarget {
       this.presence.onSync(function() {});
     }
 
-    this.channel = await migrateChannelToSocket(this.channel, socket);
+    this.channel = await migrateChannelToSocket(this.channel, socket, params);
     this.presence = new Presence(this.channel);
 
     if (presenceBindings) {
