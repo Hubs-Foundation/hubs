@@ -68,13 +68,9 @@ AFRAME.registerComponent("player-info", {
       modelEl.addEventListener(
         "model-loaded",
         () => {
-          // wait for components to load?
-          setTimeout(() => {
-            const objects = [];
-            modelEl.object3D.traverse(o => objects.push(o));
-            prepareForRender(this.el.sceneEl, objects);
-            console.log(modelEl.object3D);
-          }, 0);
+          const objects = [];
+          modelEl.object3D.traverse(o => objects.push(o));
+          prepareForRender(this.el.sceneEl, objects);
         },
         {
           once: true
