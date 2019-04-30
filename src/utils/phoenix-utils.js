@@ -3,7 +3,7 @@ import { generateHubName } from "../utils/name-generation";
 
 import Store from "../storage/store";
 
-export function connectToReticulum(debug = false) {
+export function connectToReticulum(debug = false, params = null) {
   const qs = new URLSearchParams(location.search);
 
   const socketProtocol = qs.get("phx_protocol") || (document.location.protocol === "https:" ? "wss:" : "ws:");
@@ -28,6 +28,10 @@ export function connectToReticulum(debug = false) {
     socketSettings.logger = (kind, msg, data) => {
       console.log(`${kind}: ${msg}`, data);
     };
+  }
+
+  if (params) {
+    socketSettings.params = params;
   }
 
   const socket = new Socket(socketUrl, socketSettings);
@@ -140,4 +144,40 @@ export function getPresenceProfileForSession(presences, sessionId) {
   const entry = Object.entries(presences || {}).find(([k]) => k === sessionId) || [];
   const presence = entry[1];
   return (presence && presence.metas && presence.metas[0].profile) || {};
+}
+
+// Takes the given channel, and creates a new channel with the same bindings
+// with the given socket, joins it, and leaves the old channel after joining.
+export function migrateChannel(oldChannel, socket) {
+  const channel = socket.channel(oldChannel.topic, oldChannel.params);
+
+  for (let i = 0, l = oldChannel.bindings.length; i < l; i++) {
+    const item = oldChannel.bindings[i];
+    channel.on(item.event, item.callback);
+  }
+
+  for (let i = 0, l = oldChannel.pushBuffer.length; i < l; i++) {
+    const item = oldChannel.pushBuffer[i];
+    channel.push(item.event, item.payload, item.timeout);
+  }
+
+  return new Promise(resolve => {
+    const oldJoinPush = oldChannel.joinPush;
+    const joinPush = channel.join();
+
+    for (let i = 0, l = oldJoinPush.recHooks.length; i < l; i++) {
+      const item = oldJoinPush.recHooks[i];
+      joinPush.receive(item.status, item.callback);
+    }
+
+    joinPush.receive("ok", () => {
+      // Leave after a delay to ensure presence always has an entry. Clear all event handlers first so
+      // no duplicate messages come in.
+      oldChannel.bindings = [];
+
+      setTimeout(() => {
+        oldChannel.leave().receive("ok", () => resolve(channel));
+      }, 1000);
+    });
+  });
 }

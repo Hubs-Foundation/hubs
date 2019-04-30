@@ -21,7 +21,7 @@ import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
-import { getReticulumFetchUrl, getReticulumMeta, invalidateReticulumMeta } from "./utils/phoenix-utils";
+import { getReticulumFetchUrl, getReticulumMeta, invalidateReticulumMeta, migrateChannel } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
@@ -715,6 +715,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   getReticulumMeta().then(reticulumMeta => {
     console.log(`Reticulum @ ${reticulumMeta.phx_host}: v${reticulumMeta.version} on ${reticulumMeta.pool}`);
+    window.meta = reticulumMeta;
 
     if (
       qs.get("required_ret_version") &&
@@ -789,11 +790,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   let retDeployReconnectInterval;
-  let ignorePresenceDueToRetDeploy = false; // Ignore presence messages for some grace period around ret re-connections.
   const retReconnectMaxDelayMs = 15000;
 
   // Reticulum global channel
-  const retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
+  let retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
   retPhxChannel
     .join()
     .receive("ok", async data => subscriptions.setVapidPublicKey(data.vapid_public_key))
@@ -802,28 +802,38 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error(res);
     });
 
-  retPhxChannel.on("notice", async data => {
+  window.reconn = async data => {
     // On Reticulum deploys, reconnect after a random delay until pool + version match deployed version/pool
     if (data.event === "ret-deploy") {
       console.log(`Reticulum deploy detected v${data.ret_version} on ${data.ret_pool}`);
-      ignorePresenceDueToRetDeploy = true;
       clearInterval(retDeployReconnectInterval);
 
       setTimeout(() => {
-        retDeployReconnectInterval = setInterval(async () => {
+        const tryReconnect = async () => {
           invalidateReticulumMeta();
           const reticulumMeta = await getReticulumMeta();
 
           if (reticulumMeta.pool === data.ret_pool && reticulumMeta.version === data.ret_version) {
-            console.log("Reticulum reconnection completed.");
+            console.log("Reticulum reconnecting.");
             clearInterval(retDeployReconnectInterval);
-            retPhxChannel.socket.conn.close();
-            setTimeout(() => (ignorePresenceDueToRetDeploy = false), retReconnectMaxDelayMs); // Restore presence messages after 30s once everyone has rejoined
+            const oldSocket = retPhxChannel.socket;
+            const socket = connectToReticulum(isDebug, oldSocket.params());
+            retPhxChannel = await migrateChannel(retPhxChannel, socket);
+            const hubPhxChannel = await migrateChannel(hubChannel.channel, socket);
+            hubChannel.setPhoenixChannel(hubPhxChannel);
+            authChannel.setSocket(socket);
+            linkChannel.setSocket(socket);
+            oldSocket.teardown();
           }
-        }, 5000);
+        };
+
+        retDeployReconnectInterval = setInterval(tryReconnect, 5000);
+        tryReconnect();
       }, Math.floor(Math.random() * retReconnectMaxDelayMs));
     }
-  });
+  };
+
+  retPhxChannel.on("notice", window.reconn);
 
   const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
   const joinPayload = {
@@ -881,11 +891,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let isInitialJoin = true;
   let isInitialSync = true;
+
+  hubChannel.setPhoenixChannel(hubPhxChannel);
+
   hubPhxChannel
     .join()
     .receive("ok", async data => {
-      hubChannel.setPhoenixChannel(hubPhxChannel);
-
       socket.params().session_id = data.session_id;
       socket.params().session_token = data.session_token;
 
@@ -939,7 +950,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               // New presence
               const meta = info.metas[0];
 
-              if (meta.presence && meta.profile.displayName && !ignorePresenceDueToRetDeploy) {
+              if (meta.presence && meta.profile.displayName) {
                 addToPresenceLog({
                   type: "join",
                   presence: meta.presence,
@@ -956,7 +967,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const meta = info.metas[0];
 
-            if (meta.profile.displayName && !ignorePresenceDueToRetDeploy) {
+            if (meta.profile.displayName) {
               addToPresenceLog({
                 type: "leave",
                 name: meta.profile.displayName
