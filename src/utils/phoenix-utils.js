@@ -148,7 +148,7 @@ export function getPresenceProfileForSession(presences, sessionId) {
 
 // Takes the given channel, and creates a new channel with the same bindings
 // with the given socket, joins it, and leaves the old channel after joining.
-export function migrateChannel(oldChannel, socket) {
+export function migrateChannelToSocket(oldChannel, socket) {
   const channel = socket.channel(oldChannel.topic, oldChannel.params);
 
   for (let i = 0, l = oldChannel.bindings.length; i < l; i++) {
@@ -171,13 +171,9 @@ export function migrateChannel(oldChannel, socket) {
     }
 
     joinPush.receive("ok", () => {
-      // Leave after a delay to ensure presence always has an entry. Clear all event handlers first so
-      // no duplicate messages come in.
+      // Clear all event handlers first so no duplicate messages come in.
       oldChannel.bindings = [];
-
-      setTimeout(() => {
-        oldChannel.leave().receive("ok", () => resolve(channel));
-      }, 1000);
+      resolve(channel);
     });
   });
 }

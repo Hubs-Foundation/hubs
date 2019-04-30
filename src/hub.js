@@ -21,7 +21,12 @@ import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
-import { getReticulumFetchUrl, getReticulumMeta, invalidateReticulumMeta, migrateChannel } from "./utils/phoenix-utils";
+import {
+  getReticulumFetchUrl,
+  getReticulumMeta,
+  invalidateReticulumMeta,
+  migrateChannelToSocket
+} from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
@@ -715,7 +720,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   getReticulumMeta().then(reticulumMeta => {
     console.log(`Reticulum @ ${reticulumMeta.phx_host}: v${reticulumMeta.version} on ${reticulumMeta.pool}`);
-    window.meta = reticulumMeta;
 
     if (
       qs.get("required_ret_version") &&
@@ -802,38 +806,48 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error(res);
     });
 
-  window.reconn = async data => {
+  const migrateToNewReticulumServer = async deployNotification => {
     // On Reticulum deploys, reconnect after a random delay until pool + version match deployed version/pool
-    if (data.event === "ret-deploy") {
-      console.log(`Reticulum deploy detected v${data.ret_version} on ${data.ret_pool}`);
-      clearInterval(retDeployReconnectInterval);
+    console.log(`Reticulum deploy detected v${deployNotification.ret_version} on ${deployNotification.ret_pool}`);
+    clearInterval(retDeployReconnectInterval);
 
-      setTimeout(() => {
-        const tryReconnect = async () => {
-          invalidateReticulumMeta();
-          const reticulumMeta = await getReticulumMeta();
+    setTimeout(() => {
+      const tryReconnect = async () => {
+        invalidateReticulumMeta();
+        const reticulumMeta = await getReticulumMeta();
 
-          if (reticulumMeta.pool === data.ret_pool && reticulumMeta.version === data.ret_version) {
-            console.log("Reticulum reconnecting.");
-            clearInterval(retDeployReconnectInterval);
-            const oldSocket = retPhxChannel.socket;
-            const socket = connectToReticulum(isDebug, oldSocket.params());
-            retPhxChannel = await migrateChannel(retPhxChannel, socket);
-            const hubPhxChannel = await migrateChannel(hubChannel.channel, socket);
-            hubChannel.setPhoenixChannel(hubPhxChannel);
-            authChannel.setSocket(socket);
-            linkChannel.setSocket(socket);
+        if (
+          reticulumMeta.pool === deployNotification.ret_pool &&
+          reticulumMeta.version === deployNotification.ret_version
+        ) {
+          console.log("Reticulum reconnecting.");
+          clearInterval(retDeployReconnectInterval);
+          const oldSocket = retPhxChannel.socket;
+          const socket = connectToReticulum(isDebug, oldSocket.params());
+          retPhxChannel = await migrateChannelToSocket(retPhxChannel, socket);
+          await hubChannel.migrateToSocket(socket);
+          authChannel.setSocket(socket);
+          linkChannel.setSocket(socket);
+
+          // Disconnect old socket after a delay to ensure this user is always registered in presence.
+          setTimeout(() => {
+            console.log("Reconnection complete. Disconnecting old reticulum socket.");
             oldSocket.teardown();
-          }
-        };
+          }, 10000);
+        }
+      };
 
-        retDeployReconnectInterval = setInterval(tryReconnect, 5000);
-        tryReconnect();
-      }, Math.floor(Math.random() * retReconnectMaxDelayMs));
-    }
+      retDeployReconnectInterval = setInterval(tryReconnect, 5000);
+      tryReconnect();
+    }, Math.floor(Math.random() * retReconnectMaxDelayMs));
   };
 
-  retPhxChannel.on("notice", window.reconn);
+  retPhxChannel.on("notice", async data => {
+    // On Reticulum deploys, reconnect after a random delay until pool + version match deployed version/pool
+    if (data.event === "ret-deploy") {
+      await migrateToNewReticulumServer(data);
+    }
+  });
 
   const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
   const joinPayload = {
@@ -890,7 +904,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
 
   let isInitialJoin = true;
-  let isInitialSync = true;
 
   hubChannel.setPhoenixChannel(hubPhxChannel);
 
@@ -900,17 +913,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       socket.params().session_id = data.session_id;
       socket.params().session_token = data.session_token;
 
-      const hubPhxPresence = hubChannel.presence;
       const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
       if (isInitialJoin) {
         store.addEventListener("statechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
-        hubPhxPresence.onSync(() => {
+        hubChannel.presence.onSync(() => {
+          const presence = hubChannel.presence;
+
           remountUI({
             sessionId: socket.params().session_id,
-            presences: hubPhxPresence.state
+            presences: presence.state
           });
-          const occupantCount = Object.entries(hubPhxPresence.state).length;
+
+          const occupantCount = Object.entries(presence.state).length;
           vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
 
           if (occupantCount > 1) {
@@ -919,14 +934,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             scene.removeState("copresent");
           }
 
-          if (!isInitialSync) return;
-          // Wire up join/leave event handlers after initial sync.
-          isInitialSync = false;
+          // HACK - Set a flag on the presence object indicating if the initial sync has completed,
+          // which is used to determine if we should fire join/leave messages into the presence log.
+          presence.__hadInitialSync = true;
 
-          hubPhxPresence.onJoin((sessionId, current, info) => {
+          presence.onJoin((sessionId, current, info) => {
+            if (!hubChannel.presence.__hadInitialSync) return;
+
             const meta = info.metas[info.metas.length - 1];
 
-            if (current) {
+            // Skip if len > 1, may be re-connect
+            if (current && info.metas.length === 1) {
               // Change to existing presence
               const isSelf = sessionId === socket.params().session_id;
               const currentMeta = current.metas[0];
@@ -947,7 +965,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 });
               }
             } else if (info.metas.length === 1) {
-              // Skip if len > 1, may be re-connect
               // New presence
               const meta = info.metas[0];
 
@@ -963,7 +980,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             scene.emit("presence_updated", { sessionId, profile: meta.profile });
           });
 
-          hubPhxPresence.onLeave((sessionId, current, info) => {
+          presence.onLeave((sessionId, current, info) => {
+            if (!hubChannel.presence.__hadInitialSync) return;
             if (current && current.metas.length > 0) return;
 
             const meta = info.metas[0];
@@ -977,6 +995,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           });
         });
       }
+
       isInitialJoin = false;
 
       const permsToken = oauthFlowPermsToken || data.perms_token;

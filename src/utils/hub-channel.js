@@ -1,6 +1,7 @@
 import jwtDecode from "jwt-decode";
 import { EventTarget } from "event-target-shim";
 import { Presence } from "phoenix";
+import { migrateChannelToSocket } from "./phoenix-utils";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
@@ -27,6 +28,33 @@ export default class HubChannel extends EventTarget {
 
   get permissions() {
     return this._permissions;
+  }
+
+  // Migrates this hub channel to a new phoenix channel and presence
+  async migrateToSocket(socket) {
+    let presenceBindings;
+
+    // Unbind presence, and then set up bindings after reconnect
+    if (this.presence) {
+      presenceBindings = {
+        onJoin: this.presence.caller.onJoin,
+        onLeave: this.presence.caller.onLeave,
+        onSync: this.presence.caller.onSync
+      };
+
+      this.presence.onJoin(function() {});
+      this.presence.onLeave(function() {});
+      this.presence.onSync(function() {});
+    }
+
+    this.channel = await migrateChannelToSocket(this.channel, socket);
+    this.presence = new Presence(this.channel);
+
+    if (presenceBindings) {
+      this.presence.onJoin(presenceBindings.onJoin);
+      this.presence.onLeave(presenceBindings.onLeave);
+      this.presence.onSync(presenceBindings.onSync);
+    }
   }
 
   setPhoenixChannel = channel => {
