@@ -52,6 +52,7 @@ import RoomInfoDialog from "./room-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import LobbyChatBox from "./lobby-chat-box.js";
 import InWorldChatBox from "./in-world-chat-box.js";
+import AvatarEditor from "./avatar-editor";
 
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
@@ -1412,6 +1413,14 @@ class UIRoot extends Component {
                   debug={avatarEditorDebug}
                   preview={!isMobile}
                 />
+              )}
+            />
+            <StateRoute
+              stateKey="overlay"
+              stateValue="avatar-editor"
+              history={this.props.history}
+              render={props => (
+                <AvatarEditor />
               )}
             />
             {showMediaBrowser && (

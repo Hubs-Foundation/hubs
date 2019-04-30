@@ -332,15 +332,17 @@
           }
         }
 
-        :local(.image) {
+        :local(.tile-link) {
           width: 100%;
           display: block;
 
-          img {
+          :local(.tile-content) {
             background-color: $light-grey;
             border-radius: 12px;
             width: 100%;
             height: 100%;
+          }
+          img:local(.tile-content) {
             filter: brightness(1.1) contrast(1.1);
           }
         }

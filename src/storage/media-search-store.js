@@ -20,7 +20,8 @@ const URL_SOURCE_TO_TO_API_SOURCE = {
 export const MEDIA_SOURCE_DEFAULT_FILTERS = {
   gifs: "trending",
   sketchfab: "featured",
-  scenes: "featured"
+  scenes: "featured",
+  avatars: "featured"
 };
 
 const SEARCH_CONTEXT_PARAMS = ["q", "filter", "cursor"];
@@ -85,29 +86,14 @@ export default class MediaSearchStore extends EventTarget {
   };
 
   _fetchMedia = async (url, source) => {
-    if (source !== "avatars") {
-      const res = await fetch(url);
-      return await res.json();
-    } else {
-      return {
-        entries: avatars.map(avatar => ({
-          id: avatar.id,
-          type: "avatar",
-          url: avatar.model,
-          images: {
-            preview: {
-              url: avatar.thumbnail,
-              width: 512,
-              height: 512
-            }
-          },
-          gltfs: {
-            avatar: avatar.model
-          }
-        })),
-        meta: {}
-      };
-    }
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `bearer ${window.APP.store.state.credentials.token}`
+      }
+    });
+    return await res.json();
   };
 
   pageNavigate = delta => {

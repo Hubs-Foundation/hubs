@@ -1,10 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
-import styles from "../assets/stylesheets/media-browser.scss";
 import classNames from "classnames";
-import { scaledThumbnailUrlFor } from "../utils/media-utils";
-import { pushHistoryPath, pushHistoryState, sluglessPath } from "../utils/history";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
@@ -12,9 +9,14 @@ import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploa
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import styles from "../assets/stylesheets/media-browser.scss";
+import { scaledThumbnailUrlFor } from "../utils/media-utils";
+import { pushHistoryPath, pushHistoryState, sluglessPath } from "../utils/history";
 import { SOURCES } from "../storage/media-search-store";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { showFullScreenIfWasFullScreen } from "../utils/fullscreen";
+import StateLink from "./state-link";
 
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
@@ -66,6 +68,10 @@ const DEFAULT_FACETS = {
     { text: "People", params: { filter: "people" } },
     { text: "Scenes", params: { filter: "scenes" } },
     { text: "Transport", params: { filter: "transport" } }
+  ],
+  avatars: [
+    { text: "Featured", params: { filter: "featured" } },
+    { text: "My Avatars", params: { filter: "my-avatars" } }
   ]
 };
 
@@ -350,6 +356,13 @@ class MediaBrowser extends Component {
           <div className={styles.body}>
             <div className={classNames({ [styles.tiles]: true, [styles.tilesVariable]: isVariableWidth })}>
               {this.state.result && this.state.result.entries.map(this.entryToTile)}
+              {urlSource === "avatars" && (
+                <div className={styles.tile}>
+                  <StateLink stateKey="overlay" stateValue="avatar-editor" history={this.props.history} className={styles.tileLink}>
+                    <div className={styles.tileContent}>create a custom avatar</div>
+                  </StateLink>
+                </div>
+              )}
             </div>
 
             {this.state.result &&
@@ -400,10 +413,10 @@ class MediaBrowser extends Component {
           target="_blank"
           rel="noreferrer noopener"
           onClick={e => this.handleEntryClicked(e, entry)}
-          className={styles.image}
+          className={styles.tileLink}
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
         >
-          <img src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)} />
+          <img className={styles.tileContent} src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)} />
         </a>
         {!entry.type.endsWith("_image") && (
           <div className={styles.info}>
