@@ -10,22 +10,18 @@ import { proxiedUrlFor } from "../utils/media-utils";
 import { load, prepareForRender } from "../utils/preload";
 import cameraModelSrc from "../assets/camera_tool.glb";
 
-function preloadPenAndCamera(sceneEl) {
-  // Must wait for environment to load or else lights will uninitialized,
-  // and material programs will later be regenerated
-  sceneEl.addEventListener("first-environment-loaded", async () => {
-    const objects = [];
+async function preloadPenAndCamera(sceneEl) {
+  const objects = [];
 
-    const pen = await load(
-      proxiedUrlFor("https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf")
-    );
-    pen.traverse(o => objects.push(o));
+  const pen = await load(
+    proxiedUrlFor("https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf")
+  );
+  pen.traverse(o => objects.push(o));
 
-    const camera = await load(cameraModelSrc);
-    camera.traverse(o => objects.push(o));
+  const camera = await load(cameraModelSrc);
+  camera.traverse(o => objects.push(o));
 
-    prepareForRender(sceneEl, objects);
-  });
+  prepareForRender(sceneEl, objects);
 }
 
 AFRAME.registerSystem("hubs-systems", {
