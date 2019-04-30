@@ -164,7 +164,8 @@ class UIRoot extends Component {
     location: PropTypes.object,
     history: PropTypes.object,
     showInterstitialPrompt: PropTypes.bool,
-    onInterstitialPromptClicked: PropTypes.func
+    onInterstitialPromptClicked: PropTypes.func,
+    hide: PropTypes.bool
   };
 
   state = {
@@ -1309,6 +1310,8 @@ class UIRoot extends Component {
   };
 
   render() {
+    if (this.props.hide) return <div />;
+
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
 
     const isLoading =

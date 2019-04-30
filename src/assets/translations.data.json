@@ -125,6 +125,7 @@
     "presence.entered_room": "entered the room.",
     "presence.entered_lobby": "entered the lobby.",
     "presence.join_lobby": "joined the lobby.",
+    "presence.join_room": "joined the room.",
     "presence.leave": "left.",
     "presence.name_change": "is now known as",
     "presence.scene_change": "changed the scene to",
