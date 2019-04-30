@@ -1,5 +1,6 @@
 import { injectCustomShaderChunks } from "../utils/media-utils";
 import { AVATAR_TYPES } from "../assets/avatars/avatars";
+import { load, prepareForRender } from "../utils/preload";
 /**
  * Sets player info state, including avatar choice and display name.
  * @namespace avatar
@@ -64,6 +65,22 @@ AFRAME.registerComponent("player-info", {
 
     const modelEl = this.el.querySelector(".model");
     if (this.data.avatarSrc && modelEl) {
+      modelEl.addEventListener(
+        "model-loaded",
+        () => {
+          // wait for components to load?
+          setTimeout(() => {
+            const objects = [];
+            modelEl.object3D.traverse(o => objects.push(o));
+            prepareForRender(this.el.sceneEl, objects);
+            console.log(modelEl.object3D);
+          }, 0);
+        },
+        {
+          once: true
+        }
+      );
+
       modelEl.setAttribute("gltf-model-plus", "src", this.data.avatarSrc);
       this.el.sceneEl.systems["camera-tools"].avatarUpdated();
     }

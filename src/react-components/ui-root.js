@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { getAvatarType, getAvatarSrc } from "../assets/avatars/avatars";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
@@ -496,6 +497,14 @@ class UIRoot extends Component {
   };
 
   performDirectEntryFlow = async enterInVR => {
+    const avatarId = window.APP.store.state.profile.avatarId;
+    const playerRig = document.querySelector("#player-rig");
+
+    getAvatarSrc(avatarId).then(avatarSrc => {
+      playerRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
+    });
+    playerRig.querySelector(".model").object3D.visible = false;
+
     this.setState({ enterInVR, waitingOnAudio: true });
 
     const hasGrantedMic = await this.hasGrantedMicPermissions();
