@@ -429,55 +429,56 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     });
 
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
-    scene.components["networked-scene"]
-      .connect()
-      .then(() => {
-        let newHostPollInterval = null;
 
-        scene.emit("didConnectToNetworkedScene");
-        // When reconnecting, update the server URL if necessary
-        NAF.connection.adapter.setReconnectionListeners(
-          () => {
-            if (newHostPollInterval) return;
+    NAF.connection.onConnect(() => {
+      let newHostPollInterval = null;
 
-            newHostPollInterval = setInterval(async () => {
-              const currentServerURL = NAF.connection.adapter.serverUrl;
-              const newHubHost = await hubChannel.getHost();
-              const newServerURL = `wss://${newHubHost}`;
+      // When reconnecting, update the server URL if necessary
+      NAF.connection.adapter.setReconnectionListeners(
+        () => {
+          if (newHostPollInterval) return;
 
-              if (currentServerURL !== newServerURL) {
-                console.log("Connecting to new Janus server " + newServerURL);
-                scene.setAttribute("networked-scene", { serverURL: newServerURL });
-                NAF.connection.adapter.serverUrl = newServerURL;
-              }
-            }, 1000);
-          },
-          () => {
-            clearInterval(newHostPollInterval);
-            newHostPollInterval = null;
-          },
-          null
-        );
+          newHostPollInterval = setInterval(async () => {
+            const currentServerURL = NAF.connection.adapter.serverUrl;
+            const newHubHost = await hubChannel.getHost();
+            const newServerURL = `wss://${newHubHost}`;
 
-        NAF.connection.adapter.reliableTransport = (clientId, dataType, data) => {
-          const payload = { dataType, data };
+            if (currentServerURL !== newServerURL) {
+              console.log("Connecting to new Janus server " + newServerURL);
+              scene.setAttribute("networked-scene", { serverURL: newServerURL });
+              NAF.connection.adapter.serverUrl = newServerURL;
+            }
+          }, 1000);
+        },
+        () => {
+          clearInterval(newHostPollInterval);
+          newHostPollInterval = null;
+        },
+        null
+      );
 
-          if (clientId) {
-            payload.clientId = clientId;
-          }
+      NAF.connection.adapter.reliableTransport = (clientId, dataType, data) => {
+        const payload = { dataType, data };
 
-          hubChannel.channel.push("naf", payload);
-        };
-      })
-      .catch(connectError => {
-        // hacky until we get return codes
-        const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
-        console.error(connectError);
-        remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
-        entryManager.exitScene();
+        if (clientId) {
+          payload.clientId = clientId;
+        }
 
-        return;
-      });
+        hubChannel.channel.push("naf", payload);
+      };
+
+      scene.emit("didConnectToNetworkedScene");
+    });
+
+    scene.components["networked-scene"].connect().catch(connectError => {
+      // hacky until we get return codes
+      const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+      console.error(connectError);
+      remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
+      entryManager.exitScene();
+
+      return;
+    });
   };
 
   if (!isBotMode) {
