@@ -244,3 +244,13 @@ body.vr-mode {
     width: 250px;
   }
 }
+
+:local(.avatar-editor) {
+  position:absolute;
+  background: white;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+}

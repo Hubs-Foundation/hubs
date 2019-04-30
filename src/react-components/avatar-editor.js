@@ -8,10 +8,9 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import AvatarPreview from "./avatar-preview";
-import styles from "../assets/stylesheets/profile.scss";
+import styles from "../assets/stylesheets/avatar-editor.scss";
 
-const BOT_PARENT_AVATAR =
-  location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
+const BOT_PARENT_AVATAR = null//location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
 
 export default class AvatarEditor extends Component {
   static propTypes = {
@@ -22,7 +21,8 @@ export default class AvatarEditor extends Component {
     debug: PropTypes.bool,
     preview: PropTypes.bool,
     onAvatarChanged: PropTypes.func,
-    saveStateAndFinish: PropTypes.func
+    saveStateAndFinish: PropTypes.func,
+    className: PropTypes.string
   };
 
   constructor(props) {
@@ -262,7 +262,7 @@ export default class AvatarEditor extends Component {
   render() {
     if (!this.props.signedIn) {
       return (
-        <div className={classNames(styles.avatarSelectorContainer, "avatar-editor")}>
+        <div className={classNames(this.props.className)}>
           <a onClick={this.props.onSignIn}>
             <FormattedMessage id="sign-in.in" />
           </a>
@@ -271,13 +271,13 @@ export default class AvatarEditor extends Component {
     }
 
     if (!this.state.avatar) {
-      return <div>Loading...</div>;
+      return <div className={classNames(this.props.className)}>Loading...</div>;
     }
 
     const { debug, preview } = this.props;
 
     return (
-      <div className={classNames(styles.avatarSelectorContainer, "avatar-editor")}>
+      <div className={classNames(this.props.className)}>
         <div className="split">
           <div className="form-body">
             {debug && this.textField("avatar_id", "Avatar ID", true)}

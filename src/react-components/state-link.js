@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { pushHistoryState, replaceHistoryState } from "../utils/history";
+import { pushHistoryState, replaceHistoryState, popToBeginningOfHubHistory } from "../utils/history";
 
 function isModifiedEvent(event) {
   return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
@@ -14,6 +14,7 @@ class StateLink extends React.Component {
     history: PropTypes.object,
     innerRef: PropTypes.object,
     replace: PropTypes.bool,
+    popHistory: PropTypes.bool,
     stateKey: PropTypes.string,
     stateValue: PropTypes.string,
     target: PropTypes.string,
@@ -31,14 +32,18 @@ class StateLink extends React.Component {
     ) {
       event.preventDefault();
 
+      if (this.props.popHistory) {
+        popToBeginningOfHubHistory(history);
+      }
+
       const method = this.props.replace ? replaceHistoryState : pushHistoryState;
       method(history, this.props.stateKey, this.props.stateValue);
     }
   }
 
   render() {
-    const { innerRef, replace, stateKey, stateValue, history, ...rest } = this.props; // eslint-disable-line no-unused-vars
-    return <a {...rest} onClick={event => this.handleClick(event, this.props.history)} href="#" ref={innerRef} />;
+    const { innerRef, target, children } = this.props;
+    return <a target={target} children={children} onClick={event => this.handleClick(event, this.props.history)} href="#" ref={innerRef} />;
   }
 }
 

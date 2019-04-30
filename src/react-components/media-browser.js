@@ -358,7 +358,7 @@ class MediaBrowser extends Component {
               {this.state.result && this.state.result.entries.map(this.entryToTile)}
               {urlSource === "avatars" && (
                 <div className={styles.tile}>
-                  <StateLink stateKey="overlay" stateValue="avatar-editor" history={this.props.history} className={styles.tileLink}>
+                  <StateLink stateKey="overlay" stateValue="avatar-editor" history={this.props.history} className={styles.tileLink} popHistory={true}>
                     <div className={styles.tileContent}>create a custom avatar</div>
                   </StateLink>
                 </div>
