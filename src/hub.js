@@ -946,7 +946,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                   newName: meta.profile.displayName
                 });
               }
-            } else {
+            } else if (info.metas.length === 1) {
+              // Skip if len > 1, may be re-connect
               // New presence
               const meta = info.metas[0];
 
