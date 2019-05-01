@@ -38,7 +38,7 @@ export default class PresenceList extends Component {
   };
 
   domForPresence = ([sessionId, data]) => {
-    const meta = data.metas[0];
+    const meta = data.metas[data.metas.length - 1];
     const context = meta.context;
     const profile = meta.profile;
     const image = getPresenceImage(context);

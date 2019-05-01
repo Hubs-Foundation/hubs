@@ -21,7 +21,12 @@ import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
-import { getReticulumFetchUrl, getReticulumMeta, invalidateReticulumMeta } from "./utils/phoenix-utils";
+import {
+  getReticulumFetchUrl,
+  getReticulumMeta,
+  invalidateReticulumMeta,
+  migrateChannelToSocket
+} from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
@@ -368,7 +373,9 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     // Slight hack, to ensure correct presence state we need to re-send the entry event
     // on re-join. Ideally this would be updated into the channel socket state but this
     // would require significant changes to the hub channel events and socket management.
-    hubChannel.sendEntryEvent();
+    if (scene.is("entered")) {
+      hubChannel.sendEntryEvent();
+    }
 
     // Send complete sync on phoenix re-join.
     NAF.connection.entities.completeSync(null, true);
@@ -782,18 +789,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Hub local channel
-  const context = {
-    mobile: isMobile || isMobileVR,
-    hmd: availableVREntryTypes.isInHMD
-  };
-
   let retDeployReconnectInterval;
-  let ignorePresenceDueToRetDeploy = false; // Ignore presence messages for some grace period around ret re-connections.
   const retReconnectMaxDelayMs = 15000;
 
   // Reticulum global channel
-  const retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
+  let retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
   retPhxChannel
     .join()
     .receive("ok", async data => subscriptions.setVapidPublicKey(data.vapid_public_key))
@@ -802,51 +802,83 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error(res);
     });
 
+  const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
+
+  const oauthFlowPermsToken = Cookies.get(OAUTH_FLOW_PERMS_TOKEN_KEY);
+
+  if (oauthFlowPermsToken) {
+    Cookies.remove(OAUTH_FLOW_PERMS_TOKEN_KEY);
+  }
+
+  const createHubChannelParams = permsToken => {
+    const params = {
+      profile: store.state.profile,
+      push_subscription_endpoint: pushSubscriptionEndpoint,
+      auth_token: null,
+      perms_token: null,
+      context: {
+        mobile: isMobile || isMobileVR,
+        hmd: availableVREntryTypes.isInHMD
+      }
+    };
+
+    if (permsToken) {
+      params.perms_token = hubChannel.oauthFlowPermsToken;
+    }
+
+    const { token } = store.state.credentials;
+    if (token) {
+      console.log(`Logged into account ${jwtDecode(token).sub}`);
+      params.auth_token = token;
+    }
+
+    return params;
+  };
+
+  const migrateToNewReticulumServer = async deployNotification => {
+    // On Reticulum deploys, reconnect after a random delay until pool + version match deployed version/pool
+    console.log(`Reticulum deploy detected v${deployNotification.ret_version} on ${deployNotification.ret_pool}`);
+    clearInterval(retDeployReconnectInterval);
+
+    setTimeout(() => {
+      const tryReconnect = async () => {
+        invalidateReticulumMeta();
+        const reticulumMeta = await getReticulumMeta();
+
+        if (
+          reticulumMeta.pool === deployNotification.ret_pool &&
+          reticulumMeta.version === deployNotification.ret_version
+        ) {
+          console.log("Reticulum reconnecting.");
+          clearInterval(retDeployReconnectInterval);
+          const oldSocket = retPhxChannel.socket;
+          const socket = connectToReticulum(isDebug, oldSocket.params());
+          retPhxChannel = await migrateChannelToSocket(retPhxChannel, socket);
+          await hubChannel.migrateToSocket(socket, createHubChannelParams());
+          authChannel.setSocket(socket);
+          linkChannel.setSocket(socket);
+
+          // Disconnect old socket after a delay to ensure this user is always registered in presence.
+          setTimeout(() => {
+            console.log("Reconnection complete. Disconnecting old reticulum socket.");
+            oldSocket.teardown();
+          }, 10000);
+        }
+      };
+
+      retDeployReconnectInterval = setInterval(tryReconnect, 5000);
+      tryReconnect();
+    }, Math.floor(Math.random() * retReconnectMaxDelayMs));
+  };
+
   retPhxChannel.on("notice", async data => {
     // On Reticulum deploys, reconnect after a random delay until pool + version match deployed version/pool
     if (data.event === "ret-deploy") {
-      console.log(`Reticulum deploy detected v${data.ret_version} on ${data.ret_pool}`);
-      ignorePresenceDueToRetDeploy = true;
-      clearInterval(retDeployReconnectInterval);
-
-      setTimeout(() => {
-        retDeployReconnectInterval = setInterval(async () => {
-          invalidateReticulumMeta();
-          const reticulumMeta = await getReticulumMeta();
-
-          if (reticulumMeta.pool === data.ret_pool && reticulumMeta.version === data.ret_version) {
-            console.log("Reticulum reconnection completed.");
-            clearInterval(retDeployReconnectInterval);
-            retPhxChannel.socket.conn.close();
-            setTimeout(() => (ignorePresenceDueToRetDeploy = false), retReconnectMaxDelayMs); // Restore presence messages after 30s once everyone has rejoined
-          }
-        }, 5000);
-      }, Math.floor(Math.random() * retReconnectMaxDelayMs));
+      await migrateToNewReticulumServer(data);
     }
   });
 
-  const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
-  const joinPayload = {
-    profile: store.state.profile,
-    push_subscription_endpoint: pushSubscriptionEndpoint,
-    auth_token: null,
-    perms_token: null,
-    context
-  };
-
-  const oauthFlowPermsToken = Cookies.get(OAUTH_FLOW_PERMS_TOKEN_KEY);
-  if (oauthFlowPermsToken) {
-    Cookies.remove(OAUTH_FLOW_PERMS_TOKEN_KEY);
-    joinPayload.perms_token = oauthFlowPermsToken;
-  }
-
-  const { token } = store.state.credentials;
-  if (token) {
-    console.log(`Logged into account ${jwtDecode(token).sub}`);
-    joinPayload.auth_token = token;
-  }
-
-  const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
+  const hubPhxChannel = socket.channel(`hub:${hubId}`, createHubChannelParams(oauthFlowPermsToken));
 
   const presenceLogEntries = [];
   const addToPresenceLog = entry => {
@@ -880,26 +912,28 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
 
   let isInitialJoin = true;
-  let isInitialSync = true;
+
+  hubChannel.setPhoenixChannel(hubPhxChannel);
+
   hubPhxChannel
     .join()
     .receive("ok", async data => {
-      hubChannel.setPhoenixChannel(hubPhxChannel);
-
       socket.params().session_id = data.session_id;
       socket.params().session_token = data.session_token;
 
-      const hubPhxPresence = hubChannel.presence;
       const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
       if (isInitialJoin) {
         store.addEventListener("statechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
-        hubPhxPresence.onSync(() => {
+        hubChannel.presence.onSync(() => {
+          const presence = hubChannel.presence;
+
           remountUI({
             sessionId: socket.params().session_id,
-            presences: hubPhxPresence.state
+            presences: presence.state
           });
-          const occupantCount = Object.entries(hubPhxPresence.state).length;
+
+          const occupantCount = Object.entries(presence.state).length;
           vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
 
           if (occupantCount > 1) {
@@ -908,11 +942,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             scene.removeState("copresent");
           }
 
-          if (!isInitialSync) return;
-          // Wire up join/leave event handlers after initial sync.
-          isInitialSync = false;
+          // HACK - Set a flag on the presence object indicating if the initial sync has completed,
+          // which is used to determine if we should fire join/leave messages into the presence log.
+          presence.__hadInitialSync = true;
 
-          hubPhxPresence.onJoin((sessionId, current, info) => {
+          presence.onJoin((sessionId, current, info) => {
+            // Ignore presence join/leaves if this Presence has not yet had its initial sync (o/w the user
+            // will see join messages for every user.)
+            if (!hubChannel.presence.__hadInitialSync) return;
+
             const meta = info.metas[info.metas.length - 1];
 
             if (current) {
@@ -920,7 +958,12 @@ document.addEventListener("DOMContentLoaded", async () => {
               const isSelf = sessionId === socket.params().session_id;
               const currentMeta = current.metas[0];
 
-              if (!isSelf && currentMeta.presence !== meta.presence && meta.profile.displayName) {
+              if (
+                !isSelf &&
+                currentMeta.presence !== meta.presence &&
+                meta.presence === "room" &&
+                meta.profile.displayName
+              ) {
                 addToPresenceLog({
                   type: "entered",
                   presence: meta.presence,
@@ -935,11 +978,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                   newName: meta.profile.displayName
                 });
               }
-            } else {
+            } else if (info.metas.length === 1) {
               // New presence
               const meta = info.metas[0];
 
-              if (meta.presence && meta.profile.displayName && !ignorePresenceDueToRetDeploy) {
+              if (meta.presence && meta.profile.displayName) {
                 addToPresenceLog({
                   type: "join",
                   presence: meta.presence,
@@ -951,12 +994,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             scene.emit("presence_updated", { sessionId, profile: meta.profile });
           });
 
-          hubPhxPresence.onLeave((sessionId, current, info) => {
+          presence.onLeave((sessionId, current, info) => {
+            // Ignore presence join/leaves if this Presence has not yet had its initial sync
+            if (!hubChannel.presence.__hadInitialSync) return;
+
             if (current && current.metas.length > 0) return;
 
             const meta = info.metas[0];
 
-            if (meta.profile.displayName && !ignorePresenceDueToRetDeploy) {
+            if (meta.profile.displayName) {
               addToPresenceLog({
                 type: "leave",
                 name: meta.profile.displayName
@@ -965,6 +1011,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           });
         });
       }
+
       isInitialJoin = false;
 
       const permsToken = oauthFlowPermsToken || data.perms_token;
