@@ -436,46 +436,48 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     });
 
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
+
+    scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
+      let newHostPollInterval = null;
+
+      // When reconnecting, update the server URL if necessary
+      adapter.setReconnectionListeners(
+        () => {
+          if (newHostPollInterval) return;
+
+          newHostPollInterval = setInterval(async () => {
+            const currentServerURL = NAF.connection.adapter.serverUrl;
+            const newHubHost = await hubChannel.getHost();
+            const newServerURL = `wss://${newHubHost}`;
+
+            if (currentServerURL !== newServerURL) {
+              console.log("Connecting to new Janus server " + newServerURL);
+              scene.setAttribute("networked-scene", { serverURL: newServerURL });
+              adapter.serverUrl = newServerURL;
+            }
+          }, 1000);
+        },
+        () => {
+          clearInterval(newHostPollInterval);
+          newHostPollInterval = null;
+        },
+        null
+      );
+
+      adapter.reliableTransport = (clientId, dataType, data) => {
+        const payload = { dataType, data };
+
+        if (clientId) {
+          payload.clientId = clientId;
+        }
+
+        hubChannel.channel.push("naf", payload);
+      };
+    });
+
     scene.components["networked-scene"]
       .connect()
-      .then(() => {
-        let newHostPollInterval = null;
-
-        scene.emit("didConnectToNetworkedScene");
-        // When reconnecting, update the server URL if necessary
-        NAF.connection.adapter.setReconnectionListeners(
-          () => {
-            if (newHostPollInterval) return;
-
-            newHostPollInterval = setInterval(async () => {
-              const currentServerURL = NAF.connection.adapter.serverUrl;
-              const newHubHost = await hubChannel.getHost();
-              const newServerURL = `wss://${newHubHost}`;
-
-              if (currentServerURL !== newServerURL) {
-                console.log("Connecting to new Janus server " + newServerURL);
-                scene.setAttribute("networked-scene", { serverURL: newServerURL });
-                NAF.connection.adapter.serverUrl = newServerURL;
-              }
-            }, 1000);
-          },
-          () => {
-            clearInterval(newHostPollInterval);
-            newHostPollInterval = null;
-          },
-          null
-        );
-
-        NAF.connection.adapter.reliableTransport = (clientId, dataType, data) => {
-          const payload = { dataType, data };
-
-          if (clientId) {
-            payload.clientId = clientId;
-          }
-
-          hubChannel.channel.push("naf", payload);
-        };
-      })
+      .then(() => scene.emit("didConnectToNetworkedScene"))
       .catch(connectError => {
         // hacky until we get return codes
         const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
