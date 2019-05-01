@@ -60,7 +60,7 @@
     "jwt-decode": "^2.2.0",
     "markdown-it": "^8.4.2",
     "moving-average": "^1.0.0",
-    "naf-janus-adapter": "^2.0.1",
+    "naf-janus-adapter": "^2.0.2",
     "networked-aframe": "github:mozillareality/networked-aframe#master",
     "nipplejs": "github:mozillareality/nipplejs#mr-social-client/master",
     "phoenix": "github:gfodor/phoenix-js#master",
