@@ -978,10 +978,10 @@ class UIRoot extends Component {
         </div>
 
         <div className={entryStyles.center}>
-          {this.props.hubChannel.permissions.update_hub && (
+          {this.props.hubChannel.permissions.update_hub ? (
             <WithHoverSound>
               <div
-                className={entryStyles.chooseScene}
+                className={classNames([entryStyles.lobbyLabel, entryStyles.chooseScene])}
                 onClick={() => {
                   showFullScreenIfAvailable();
                   this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
@@ -993,6 +993,10 @@ class UIRoot extends Component {
                 <FormattedMessage id="entry.change-scene" />
               </div>
             </WithHoverSound>
+          ) : (
+            <div className={entryStyles.lobbyLabel}>
+              <FormattedMessage id="entry.in-lobby-notice" />
+            </div>
           )}
 
           <LobbyChatBox
