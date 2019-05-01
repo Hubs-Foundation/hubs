@@ -27,6 +27,7 @@ AFRAME.registerComponent("hoverable-visuals", {
 
     const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
     const isFrozen = this.el.sceneEl.is("frozen");
+    const hideDueToPinning = isPinned && !isFrozen;
 
     let interactorOne, interactorTwo;
     const interaction = AFRAME.scenes[0].systems.interaction;
@@ -53,8 +54,6 @@ AFRAME.registerComponent("hoverable-visuals", {
       this.sweepParams[0] = worldY - scaledRadius;
       this.sweepParams[1] = worldY + scaledRadius;
     }
-
-    const hideDueToPinning = isPinned && !isFrozen;
 
     for (let i = 0, l = this.uniforms.length; i < l; i++) {
       const uniform = this.uniforms[i];
