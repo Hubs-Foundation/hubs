@@ -29,7 +29,7 @@ export default class AvatarEditor extends Component {
     super(props);
     this.state = {};
     // Blank avatar, used to create base avatar
-    // this.state = { avatar: { name: "Base bot avatar", files: {} } };
+    this.state = { avatar: { name: "Base bot avatar", files: {} } };
 
     this.inputFiles = {};
   }
@@ -164,7 +164,7 @@ export default class AvatarEditor extends Component {
         accept={accept}
         disabled={disabled}
         onChange={e => {
-          e.target.value = null;
+          // e.target.value = null;
           this.inputFiles[name] = e.target.files[0];
         }}
       />

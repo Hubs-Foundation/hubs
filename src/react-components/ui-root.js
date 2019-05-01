@@ -1425,6 +1425,7 @@ class UIRoot extends Component {
                   className={styles.avatarEditor}
                   signedIn={this.state.signedIn}
                   store={this.props.store}
+                  debug={avatarEditorDebug}
                 />
               )}
             />
