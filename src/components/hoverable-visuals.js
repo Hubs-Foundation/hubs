@@ -26,8 +26,9 @@ AFRAME.registerComponent("hoverable-visuals", {
     if (!this.uniforms || !this.uniforms.length) return;
 
     const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
+    const isSpawner = !!this.el.components["super-spawner"];
     const isFrozen = this.el.sceneEl.is("frozen");
-    const hideDueToPinning = isPinned && !isFrozen;
+    const hideDueToPinning = !isSpawner && isPinned && !isFrozen;
 
     let interactorOne, interactorTwo;
     const interaction = AFRAME.scenes[0].systems.interaction;
