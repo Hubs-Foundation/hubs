@@ -23,6 +23,7 @@
     "entry.enter-room": "Enter Room",
     "entry.leave-room": "Leave Room",
     "entry.change-scene": "Choose a Scene",
+    "entry.in-lobby-notice": "You are viewing this room from the lobby.",
     "entry.screen-prefix": "Enter on ",
     "entry.desktop-screen": "Screen",
     "entry.mobile-screen": "Phone",
