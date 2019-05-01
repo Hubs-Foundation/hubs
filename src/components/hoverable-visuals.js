@@ -25,6 +25,7 @@ AFRAME.registerComponent("hoverable-visuals", {
   tick(time) {
     if (!this.uniforms || !this.uniforms.length) return;
 
+    const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
     const isFrozen = this.el.sceneEl.is("frozen");
 
     let interactorOne, interactorTwo;
@@ -55,7 +56,7 @@ AFRAME.registerComponent("hoverable-visuals", {
 
     for (let i = 0, l = this.uniforms.length; i < l; i++) {
       const uniform = this.uniforms[i];
-      uniform.hubs_EnableSweepingEffect.value = this.data.enableSweepingEffect;
+      uniform.hubs_EnableSweepingEffect.value = this.data.enableSweepingEffect && !(isPinned && !isFrozen);
       uniform.hubs_IsFrozen.value = isFrozen;
       uniform.hubs_SweepParams.value = this.sweepParams;
 
