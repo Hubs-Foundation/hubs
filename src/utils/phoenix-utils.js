@@ -148,6 +148,9 @@ export function getPresenceProfileForSession(presences, sessionId) {
 
 // Takes the given channel, and creates a new channel with the same bindings
 // with the given socket, joins it, and leaves the old channel after joining.
+//
+// NOTE: This function relies upon phoenix channel object internals, so this
+// function will need to be reviewed if/when we ever update phoenix.js
 export function migrateChannelToSocket(oldChannel, socket, params) {
   const channel = socket.channel(oldChannel.topic, params || oldChannel.params);
 
@@ -161,15 +164,15 @@ export function migrateChannelToSocket(oldChannel, socket, params) {
     channel.push(item.event, item.payload, item.timeout);
   }
 
+  const oldJoinPush = oldChannel.joinPush;
+  const joinPush = channel.join();
+
+  for (let i = 0, l = oldJoinPush.recHooks.length; i < l; i++) {
+    const item = oldJoinPush.recHooks[i];
+    joinPush.receive(item.status, item.callback);
+  }
+
   return new Promise(resolve => {
-    const oldJoinPush = oldChannel.joinPush;
-    const joinPush = channel.join();
-
-    for (let i = 0, l = oldJoinPush.recHooks.length; i < l; i++) {
-      const item = oldJoinPush.recHooks[i];
-      joinPush.receive(item.status, item.callback);
-    }
-
     joinPush.receive("ok", () => {
       // Clear all event handlers first so no duplicate messages come in.
       oldChannel.bindings = [];

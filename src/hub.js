@@ -854,7 +854,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           const oldSocket = retPhxChannel.socket;
           const socket = connectToReticulum(isDebug, oldSocket.params());
           retPhxChannel = await migrateChannelToSocket(retPhxChannel, socket);
-          await hubChannel.migrateToSocket(socket, createHubChannelParams(oauthFlowPermsToken));
+          await hubChannel.migrateToSocket(socket, createHubChannelParams());
           authChannel.setSocket(socket);
           linkChannel.setSocket(socket);
 
@@ -878,7 +878,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  const hubPhxChannel = socket.channel(`hub:${hubId}`, createHubChannelParams());
+  const hubPhxChannel = socket.channel(`hub:${hubId}`, createHubChannelParams(oauthFlowPermsToken));
 
   const presenceLogEntries = [];
   const addToPresenceLog = entry => {
@@ -947,6 +947,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           presence.__hadInitialSync = true;
 
           presence.onJoin((sessionId, current, info) => {
+            // Ignore presence join/leaves if this Presence has not yet had its initial sync (o/w the user
+            // will see join messages for every user.)
             if (!hubChannel.presence.__hadInitialSync) return;
 
             const meta = info.metas[info.metas.length - 1];
@@ -993,7 +995,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           });
 
           presence.onLeave((sessionId, current, info) => {
+            // Ignore presence join/leaves if this Presence has not yet had its initial sync
             if (!hubChannel.presence.__hadInitialSync) return;
+
             if (current && current.metas.length > 0) return;
 
             const meta = info.metas[0];
