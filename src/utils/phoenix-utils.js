@@ -59,7 +59,7 @@ export async function connectToReticulum(debug = false, params = null) {
 
     const reticulumMeta = await getReticulumMeta();
     socketHost = socketHost || reticulumMeta.phx_host;
-    socketPort = socketPort || "443"; // TODO phx_port
+    socketPort = socketPort || (process.env.RETICULUM_SERVER.includes("hubs.local") ? "4000" : "443"); // TODO phx_port
     return `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}`;
   };
 
