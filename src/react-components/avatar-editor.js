@@ -11,7 +11,7 @@ import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
 
 const AVATARS_API = "/api/v1/avatars";
-const BOT_PARENT_AVATAR = "xf9xkIY"; // "hiwSHgg"; //location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
+const BOT_PARENT_AVATAR = "FcjJywg"; // "xf9xkIY"; // "hiwSHgg"; //location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
 
 function emitAvatarChanged(avatarId) {
   window.dispatchEvent(new CustomEvent("avatar_editor_avatar_changed", { detail: { avatarId: avatarId } }));
@@ -103,7 +103,9 @@ export default class AvatarEditor extends Component {
       });
     }
 
-    const filesToUpload = ["gltf", "bin", "base_map", "emissive_map", "normal_map", "orm_map"].filter(
+    this.inputFiles.thumbnail = new File([await this.preview.snapshot()], "thumbnail.png", { type: "image/png" });
+
+    const filesToUpload = ["gltf", "bin", "base_map", "emissive_map", "normal_map", "orm_map", "thumbnail"].filter(
       k => this.inputFiles[k] === null || this.inputFiles[k] instanceof File
     );
 
@@ -271,7 +273,11 @@ export default class AvatarEditor extends Component {
             {/* {this.mapField("metallic_map", "Metallic Map", "image/\*", true)} */}
             {/* {this.mapField("roughness_map", "Roughness Map", "image/\*", true)} */}
           </div>
-          <AvatarPreview avatarGltfUrl={this.state.avatar.base_gltf_url} {...this.inputFiles} />
+          <AvatarPreview
+            avatarGltfUrl={this.state.avatar.base_gltf_url}
+            {...this.inputFiles}
+            ref={p => (this.preview = p)}
+          />
         </div>
         <div className={styles.info}>
           <FormattedMessage id="avatar-editor.info" />

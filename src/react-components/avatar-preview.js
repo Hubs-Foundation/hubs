@@ -17,10 +17,11 @@ const TEXTURE_PROPS = {
 
 const ALL_MAPS = Object.keys(TEXTURE_PROPS);
 
-// This should match our aframe renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: false;"
-function createRenderer(canvas) {
+// This should match our aframe renderer="antialias: true; colorManagement: true; sortObjects: true;
+// physicallyCorrectLights: true; webgl2: true; multiview: false;"
+function createRenderer(canvas, alpha = false) {
   const context = canvas.getContext("webgl2", {
-    alpha: false,
+    alpha,
     depth: true,
     antialias: true,
     premultipliedAlpha: true,
@@ -66,7 +67,6 @@ export default class AvatarPreview extends Component {
 
   componentDidMount = () => {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0xeaeaea);
 
     this.camera = new THREE.PerspectiveCamera(55, this.canvas.clientWidth / this.canvas.clientHeight, 0.1, 1000);
     this.controls = new THREE.OrbitControls(this.camera, this.canvas);
@@ -88,7 +88,16 @@ export default class AvatarPreview extends Component {
     }
 
     const clock = new THREE.Clock();
+
+    this.snapshotCanvas = document.createElement("canvas");
+    this.snapshotCanvas.width = 720;
+    this.snapshotCanvas.height = 1280;
+    this.snapshotCamera = new THREE.PerspectiveCamera(55, 720 / 1280, 0.1, 1000);
+    this.snapshotRenderer = createRenderer(this.snapshotCanvas, true);
+    this.snapshotRenderer.setClearAlpha(0);
+
     this.previewRenderer = createRenderer(this.canvas);
+    this.previewRenderer.setClearColor(0xeaeaea);
     this.previewRenderer.setAnimationLoop(() => {
       const dt = clock.getDelta();
       this.mixer && this.mixer.update(dt);
@@ -122,9 +131,10 @@ export default class AvatarPreview extends Component {
       box.getCenter(center);
       fitBoxInFrustum(this.camera, box, center);
       // Shift the center vertically in order to frame the avatar nicely.
-      // We do this after fitting the bounding box in the frustum since we want to fit it around the true center, not
-      // the shifted center.
+      // We do this after fitting the bounding box in the frustum since we want to fit it around the true center, but
+      // frame and rotate around the shifted center.
       center.y = (box.max.y - box.min.y) * 0.6 + box.min.y;
+      fitBoxInFrustum(this.snapshotCamera, box, center);
       this.controls.target.copy(center);
       this.controls.update();
     };
@@ -181,6 +191,7 @@ export default class AvatarPreview extends Component {
       const action = this.mixer.clipAction(idleAnimation);
       action.enabled = true;
       action.setLoop(THREE.LoopRepeat, Infinity).play();
+      this.idleAnimationAction = action;
     }
 
     const material = this.previewMesh.material;
@@ -225,6 +236,14 @@ export default class AvatarPreview extends Component {
       const texture = this.previewMesh.material[TEXTURE_PROPS[name][i]];
       texture.image = bm;
       texture.needsUpdate = true;
+    });
+  };
+
+  snapshot = () => {
+    return new Promise(resolve => {
+      this.idleAnimationAction && this.idleAnimationAction.reset();
+      this.snapshotRenderer.render(this.scene, this.snapshotCamera);
+      this.snapshotCanvas.toBlob(resolve);
     });
   };
 
