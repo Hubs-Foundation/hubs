@@ -13,7 +13,7 @@
 //
 // Also maintains a length key that can be used to find the length of the history chain
 // (across refreshes) for the current room.
-function pushOrUpdateHistory(history, replace, k, v, newPathname, newSearch) {
+function pushOrUpdateHistory(history, replace, k, v, detail, newPathname, newSearch) {
   let state = {};
   const newLength = ((history.location.state && history.location.state.__historyLength) || 0) + (replace ? 0 : 1);
 
@@ -23,6 +23,7 @@ function pushOrUpdateHistory(history, replace, k, v, newPathname, newSearch) {
 
     if (k) {
       state[k] = v;
+      state.detail = detail;
     }
   }
 
@@ -41,16 +42,16 @@ function pushOrUpdateHistory(history, replace, k, v, newPathname, newSearch) {
   method({ pathname, search, state });
 }
 
-export function pushHistoryState(history, k, v) {
-  pushOrUpdateHistory(history, false, k, v);
+export function pushHistoryState(history, k, v, detail) {
+  pushOrUpdateHistory(history, false, k, v, detail);
 }
 
-export function replaceHistoryState(history, k, v) {
-  pushOrUpdateHistory(history, true, k, v);
+export function replaceHistoryState(history, k, v, detail) {
+  pushOrUpdateHistory(history, true, k, v, detail);
 }
 
 export function pushHistoryPath(history, path, search) {
-  pushOrUpdateHistory(history, false, null, null, path, search);
+  pushOrUpdateHistory(history, false, null, null, null, path, search);
 }
 
 export function clearHistoryState(history) {
@@ -66,20 +67,23 @@ export function popToBeginningOfHubHistory(history, navigateToPriorPage) {
   const len = history.location.state.__historyLength;
   if (len === 0) return;
 
-  // After the go() completes, we push a duplicate history entry onto the stack
-  // in order to wipe out forward history. We also optionally go back -2 if we wanted
-  // to go back to the prior page.
-  const unsubscribe = history.listen(() => {
-    unsubscribe();
-    history.push({
-      pathname: history.location.pathname,
-      search: history.location.search,
-      state: { __historyLength: 0, __duplicate: true }
+  return new Promise(resolve => {
+    // After the go() completes, we push a duplicate history entry onto the stack
+    // in order to wipe out forward history. We also optionally go back -2 if we wanted
+    // to go back to the prior page.
+    const unsubscribe = history.listen(() => {
+      unsubscribe();
+      history.push({
+        pathname: history.location.pathname,
+        search: history.location.search,
+        state: { __historyLength: 0, __duplicate: true }
+      });
+      if (navigateToPriorPage) history.go(-2); // Go back to history entry before beginning.
+      resolve();
     });
-    if (navigateToPriorPage) history.go(-2); // Go back to history entry before beginning.
-  });
 
-  history.go(-len);
+    history.go(-len);
+  });
 }
 
 // This will pop the browser history to the entry before the first entry for this hubs room.

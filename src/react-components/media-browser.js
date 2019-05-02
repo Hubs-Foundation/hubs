@@ -8,6 +8,7 @@ import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
 import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploadAlt";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
+import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import styles from "../assets/stylesheets/media-browser.scss";
@@ -119,12 +120,15 @@ class MediaBrowser extends Component {
     }
   };
 
+  getUrlSource = searchParams =>
+    searchParams.get("media_source") || sluglessPath(this.props.history.location).substring(7);
+
   getStoreAndHistoryState = props => {
     const searchParams = new URLSearchParams(props.history.location.search);
     const result = props.mediaSearchStore.result;
 
     const newState = { result, query: this.state.query || searchParams.get("q") || "" };
-    const urlSource = searchParams.get("media_source") || sluglessPath(this.props.history.location).substring(7);
+    const urlSource = this.getUrlSource(searchParams);
     newState.showNav = !!(searchParams.get("media_nav") !== "false");
 
     if (result && result.suggestions && result.suggestions.length > 0) {
@@ -228,7 +232,7 @@ class MediaBrowser extends Component {
     const hasNext = this.state.result && !!this.state.result.meta.next_cursor;
     const searchParams = new URLSearchParams(this.props.history.location.search);
     const hasPrevious = searchParams.get("cursor");
-    const urlSource = searchParams.get("media_source") || sluglessPath(this.props.history.location).substring(7);
+    const urlSource = this.getUrlSource(searchParams);
     const apiSource = this.state.result && this.state.result.meta.source;
     const isVariableWidth = this.state.result && ["bing_images", "tenor"].includes(apiSource);
     const showCustomOption = apiSource !== "scene_listings" || this.props.hubChannel.permissions.update_hub;
@@ -355,7 +359,6 @@ class MediaBrowser extends Component {
 
           <div className={styles.body}>
             <div className={classNames({ [styles.tiles]: true, [styles.tilesVariable]: isVariableWidth })}>
-              {this.state.result && this.state.result.entries.map(this.entryToTile)}
               {urlSource === "avatars" && (
                 <div className={styles.tile}>
                   <StateLink
@@ -363,12 +366,13 @@ class MediaBrowser extends Component {
                     stateValue="avatar-editor"
                     history={this.props.history}
                     className={styles.tileLink}
-                    popHistory={true}
                   >
                     <div className={styles.tileContent}>create a custom avatar</div>
                   </StateLink>
                 </div>
               )}
+
+              {this.state.result && this.state.result.entries.map(this.entryToTile)}
             </div>
 
             {this.state.result &&
@@ -412,6 +416,8 @@ class MediaBrowser extends Component {
       (entry.attributions && entry.attributions.publisher && entry.attributions.publisher.name) ||
       PUBLISHER_FOR_ENTRY_TYPE[entry.type];
 
+    const urlSource = this.getUrlSource(new URLSearchParams(this.props.history.location.search));
+
     return (
       <div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`${entry.id}_${idx}`}>
         <a
@@ -424,6 +430,16 @@ class MediaBrowser extends Component {
         >
           <img className={styles.tileContent} src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)} />
         </a>
+        {urlSource === "avatars" && (
+          <StateLink
+            stateKey="overlay"
+            stateValue="avatar-editor"
+            stateDetail={{ avatarId: entry.id }}
+            history={this.props.history}
+          >
+            <FontAwesomeIcon icon={faPencilAlt} />
+          </StateLink>
+        )}
         {!entry.type.endsWith("_image") && (
           <div className={styles.info}>
             <a

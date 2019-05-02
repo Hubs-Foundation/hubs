@@ -18,12 +18,7 @@ class ProfileEntryPanel extends Component {
     mediaSearchStore: PropTypes.object,
     messages: PropTypes.object,
     finished: PropTypes.func,
-    intl: PropTypes.object,
-    onSignIn: PropTypes.func,
-    onSignOut: PropTypes.func,
-    signedIn: PropTypes.bool,
-    debug: PropTypes.bool,
-    preview: PropTypes.bool
+    intl: PropTypes.object
   };
 
   state = {

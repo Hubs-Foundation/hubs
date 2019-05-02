@@ -17,11 +17,13 @@ class StateLink extends React.Component {
     popHistory: PropTypes.bool,
     stateKey: PropTypes.string,
     stateValue: PropTypes.string,
+    stateDetail: PropTypes.object,
     target: PropTypes.string,
-    onClick: PropTypes.func
+    onClick: PropTypes.func,
+    children: PropTypes.node
   };
 
-  handleClick(event, history) {
+  async handleClick(event, history) {
     if (this.props.onClick) this.props.onClick(event);
 
     if (
@@ -33,17 +35,21 @@ class StateLink extends React.Component {
       event.preventDefault();
 
       if (this.props.popHistory) {
-        popToBeginningOfHubHistory(history);
+        await popToBeginningOfHubHistory(history);
       }
 
       const method = this.props.replace ? replaceHistoryState : pushHistoryState;
-      method(history, this.props.stateKey, this.props.stateValue);
+      method(history, this.props.stateKey, this.props.stateValue, this.props.stateDetail);
     }
   }
 
   render() {
     const { innerRef, target, children } = this.props;
-    return <a target={target} children={children} onClick={event => this.handleClick(event, this.props.history)} href="#" ref={innerRef} />;
+    return (
+      <a target={target} onClick={event => this.handleClick(event, this.props.history)} href="#" ref={innerRef}>
+        {children}
+      </a>
+    );
   }
 }
 

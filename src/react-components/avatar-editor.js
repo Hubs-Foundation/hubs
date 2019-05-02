@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
-import { getReticulumFetchUrl } from "../utils/phoenix-utils";
+import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
 import { upload } from "../utils/media-utils";
 import classNames from "classnames";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
@@ -10,83 +10,56 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
 
-const BOT_PARENT_AVATAR = "FcjJywg";//location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
+const AVATARS_API = "/api/v1/avatars";
+const BOT_PARENT_AVATAR = "xf9xkIY"; // "hiwSHgg"; //location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
+
+function emitAvatarChanged(avatarId) {
+  window.dispatchEvent(new CustomEvent("avatar_editor_avatar_changed", { detail: { avatarId: avatarId } }));
+}
+
+function getDefaultAvatarState() {
+  return { avatar: { parent_avatar_id: BOT_PARENT_AVATAR, files: {} } };
+}
 
 export default class AvatarEditor extends Component {
   static propTypes = {
-    store: PropTypes.object,
+    avatarId: PropTypes.string,
     onSignIn: PropTypes.func,
     onSignOut: PropTypes.func,
     signedIn: PropTypes.bool,
     debug: PropTypes.bool,
-    preview: PropTypes.bool,
-    onAvatarChanged: PropTypes.func,
-    saveStateAndFinish: PropTypes.func,
     className: PropTypes.string
   };
 
+  state = getDefaultAvatarState();
+
   constructor(props) {
     super(props);
-    this.state = {};
     // Blank avatar, used to create base avatar
     // this.state = { avatar: { name: "Base bot avatar", files: {} } };
 
     this.inputFiles = {};
   }
 
-  componentDidMount = () => {
-    if (this.props.signedIn && !this.state.avatar) {
-      return this.getPersonalAvatar();
+  componentDidMount = async () => {
+    if (this.props.avatarId) {
+      const avatar = await this.fetchAvatar(this.props.avatarId);
+      Object.assign(this.inputFiles, avatar.files);
+      this.setState({ avatar });
     }
   };
 
-  componentDidUpdate = () => {
-    if (this.props.signedIn && !this.state.avatar) {
-      return this.getPersonalAvatar();
-    }
+  fetchAvatar = avatarId => {
+    return fetchReticulumAuthenticated(`${AVATARS_API}/${avatarId}`).then(({ avatars }) => avatars[0]);
   };
 
-  getPersonalAvatar = async () => {
-    const { personalAvatarId } = this.props.store.state.profile;
-    const avatar = await (personalAvatarId
-      ? this.getAvatar(personalAvatarId)
-      : this.createOrUpdateAvatar({ name: "My Avatar", parent_avatar_id: BOT_PARENT_AVATAR }));
-
-    this.props.store.update({
-      profile: {
-        personalAvatarId: avatar.avatar_id
-      }
-    });
-
-    this.props.onAvatarChanged(avatar.avatar_id);
-
-    Object.assign(this.inputFiles, avatar.files);
-
-    this.setState({ ...this.state, avatar });
+  createOrUpdateAvatar = avatar => {
+    return fetchReticulumAuthenticated(
+      avatar.avatar_id ? `${AVATARS_API}/${avatar.avatar_id}` : AVATARS_API,
+      avatar.avatar_id ? "PUT" : "POST",
+      avatar
+    ).then(({ avatars }) => avatars[0]);
   };
-
-  getAvatar = avatarId =>
-    fetch(getReticulumFetchUrl(`/api/v1/avatars/${avatarId}`), {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: `bearer ${this.props.store.state.credentials.token}`
-      }
-    })
-      .then(r => r.json())
-      .then(({ avatars }) => avatars[0]);
-
-  createOrUpdateAvatar = avatar =>
-    fetch(getReticulumFetchUrl(avatar.avatar_id ? `/api/v1/avatars/${avatar.avatar_id}` : "/api/v1/avatars"), {
-      method: avatar.avatar_id ? "PUT" : "POST",
-      body: JSON.stringify({ avatar }),
-      headers: {
-        "Content-Type": "application/json",
-        authorization: `bearer ${this.props.store.state.credentials.token}`
-      }
-    })
-      .then(r => r.json())
-      .then(({ avatars }) => avatars[0]);
 
   uploadAvatar = async e => {
     e.preventDefault();
@@ -146,10 +119,14 @@ export default class AvatarEditor extends Component {
 
     await this.createOrUpdateAvatar(avatar);
 
-    this.props.onAvatarChanged(avatar.avatar_id);
+    emitAvatarChanged(avatar.avatar_id);
 
     this.setState({ uploading: false });
-    this.props.saveStateAndFinish();
+  };
+
+  deleteAvatar = e => {
+    e.preventDefault();
+    fetchReticulumAuthenticated(`${AVATARS_API}/${this.state.avatar.avatar_id}`, "DELETE");
   };
 
   fileField = (name, label, accept, disabled = false, title) => (
@@ -270,11 +247,7 @@ export default class AvatarEditor extends Component {
       );
     }
 
-    if (!this.state.avatar) {
-      return <div className={classNames(this.props.className)}>Loading...</div>;
-    }
-
-    const { debug, preview } = this.props;
+    const { debug } = this.props;
 
     return (
       <div className={classNames(this.props.className)}>
@@ -298,7 +271,7 @@ export default class AvatarEditor extends Component {
             {/* {this.mapField("metallic_map", "Metallic Map", "image/\*", true)} */}
             {/* {this.mapField("roughness_map", "Roughness Map", "image/\*", true)} */}
           </div>
-          {preview && <AvatarPreview avatar={this.state.avatar} {...this.inputFiles} />}
+          <AvatarPreview avatarGltfUrl={this.state.avatar.base_gltf_url} {...this.inputFiles} />
         </div>
         <div className={styles.info}>
           <FormattedMessage id="avatar-editor.info" />
@@ -312,9 +285,10 @@ export default class AvatarEditor extends Component {
             onClick={this.uploadAvatar}
             className={styles.formSubmit}
             type="submit"
-            value={this.state.uploading ? "Uploading..." : "Accept"}
+            value={this.state.uploading ? "Uploading..." : "Save"}
           />
         </div>
+        <a onClick={this.deleteAvatar}>delete avatar</a>
       </div>
     );
   }

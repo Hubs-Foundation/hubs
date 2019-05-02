@@ -83,7 +83,9 @@ export default class AvatarPreview extends Component {
     this.controls.target.set(0, 0.45, 0);
     this.controls.update();
 
-    this.loadPreviewAvatar(this.props.avatarGltfUrl).then(this.setAvatar);
+    if (this.props.avatarGltfUrl) {
+      this.loadPreviewAvatar(this.props.avatarGltfUrl).then(this.setAvatar);
+    }
 
     const clock = new THREE.Clock();
     this.previewRenderer = createRenderer(this.canvas);
