@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
 
-const BOT_PARENT_AVATAR = null//location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
+const BOT_PARENT_AVATAR = "FcjJywg";//location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
 
 export default class AvatarEditor extends Component {
   static propTypes = {
@@ -29,7 +29,7 @@ export default class AvatarEditor extends Component {
     super(props);
     this.state = {};
     // Blank avatar, used to create base avatar
-    this.state = { avatar: { name: "Base bot avatar", files: {} } };
+    // this.state = { avatar: { name: "Base bot avatar", files: {} } };
 
     this.inputFiles = {};
   }

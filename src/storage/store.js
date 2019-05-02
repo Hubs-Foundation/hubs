@@ -1,6 +1,7 @@
 import { Validator } from "jsonschema";
 import merge from "deepmerge";
 import Cookies from "js-cookie";
+import jwtDecode from "jwt-decode";
 
 const LOCAL_STORE_KEY = "___hubs_store";
 const STORE_STATE_CACHE_KEY = Symbol();
@@ -131,6 +132,14 @@ export default class Store extends EventTarget {
     }
 
     return this[STORE_STATE_CACHE_KEY];
+  }
+
+  get credentialsAccountId() {
+    if (this.state.credentials.token) {
+      return jwtDecode(this.state.credentials.token).sub;
+    } else {
+      return null;
+    }
   }
 
   resetConfirmedDiscordRooms() {

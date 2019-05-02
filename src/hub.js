@@ -89,7 +89,6 @@ import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
 import React from "react";
-import jwtDecode from "jwt-decode";
 import { Router, Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
 import UIRoot from "./react-components/ui-root";
@@ -797,7 +796,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const { token } = store.state.credentials;
   if (token) {
-    console.log(`Logged into account ${jwtDecode(token).sub}`);
+    console.log(`Logged into account ${store.credentialsAccountId}`);
     joinPayload.auth_token = token;
   }
 

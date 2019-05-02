@@ -72,6 +72,10 @@ export default class MediaSearchStore extends EventTarget {
     const source = URL_SOURCE_TO_TO_API_SOURCE[urlSource];
     searchParams.set("source", source);
 
+    if (source === "avatars") {
+      searchParams.set("user", window.APP.store.credentialsAccountId);
+    }
+
     const url = getReticulumFetchUrl(`/api/v1/media/search?${searchParams.toString()}`);
     if (this.lastSavedUrl === url) return;
 
@@ -85,7 +89,7 @@ export default class MediaSearchStore extends EventTarget {
     this.dispatchEvent(new CustomEvent("statechanged"));
   };
 
-  _fetchMedia = async (url, source) => {
+  _fetchMedia = async url => {
     const res = await fetch(url, {
       method: "GET",
       headers: {
