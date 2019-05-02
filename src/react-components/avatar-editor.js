@@ -18,7 +18,7 @@ function emitAvatarChanged(avatarId) {
 }
 
 function getDefaultAvatarState() {
-  return { avatar: { parent_avatar_id: BOT_PARENT_AVATAR, files: {} } };
+  return { avatar: { name: "My Avatar", parent_avatar_id: BOT_PARENT_AVATAR, files: {} } };
 }
 
 export default class AvatarEditor extends Component {
@@ -57,7 +57,7 @@ export default class AvatarEditor extends Component {
     return fetchReticulumAuthenticated(
       avatar.avatar_id ? `${AVATARS_API}/${avatar.avatar_id}` : AVATARS_API,
       avatar.avatar_id ? "PUT" : "POST",
-      avatar
+      { avatar }
     ).then(({ avatars }) => avatars[0]);
   };
 
