@@ -464,15 +464,27 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
         null
       );
 
-      adapter.reliableTransport = (clientId, dataType, data) => {
+      const sendViaPhoenix = reliable => (clientId, dataType, data) => {
         const payload = { dataType, data };
 
         if (clientId) {
           payload.clientId = clientId;
         }
 
-        hubChannel.channel.push("naf", payload);
+        const isOpen = hubChannel.channel.socket.connectionState() === "open";
+
+        if (isOpen || reliable) {
+          if (isOpen) {
+            hubChannel.channel.push("naf", payload);
+          } else {
+            // Memory is re-used, so make a copy
+            hubChannel.channel.push("naf", AFRAME.utils.clone(payload));
+          }
+        }
       };
+
+      adapter.reliableTransport = sendViaPhoenix(true);
+      adapter.unreliableTransport = sendViaPhoenix(false);
     });
 
     scene.components["networked-scene"]
