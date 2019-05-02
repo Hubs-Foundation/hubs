@@ -81,6 +81,8 @@ export async function connectToReticulum(debug = false, params = null) {
   const socket = new Socket(`${socketUrl}/socket`, socketSettings);
   socket.connect();
   socket.onError(async () => {
+    // On error, underlying reticulum node may have died, so rebalance by
+    // fetching a new healthy node to connect to.
     invalidateReticulumMeta();
 
     const endPointPath = new URL(socket.endPoint).pathname;
