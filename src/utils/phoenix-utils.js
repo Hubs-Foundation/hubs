@@ -3,43 +3,6 @@ import { generateHubName } from "../utils/name-generation";
 
 import Store from "../storage/store";
 
-export function connectToReticulum(debug = false, params = null) {
-  const qs = new URLSearchParams(location.search);
-
-  const socketProtocol = qs.get("phx_protocol") || (document.location.protocol === "https:" ? "wss:" : "ws:");
-  let socketHost = qs.get("phx_host");
-  let socketPort = qs.get("phx_port");
-
-  if (process.env.RETICULUM_SERVER) {
-    const [retHost, retPort] = process.env.RETICULUM_SERVER.split(":");
-    socketHost = socketHost || retHost || "";
-    socketPort = socketPort || retPort || "443";
-  } else {
-    socketHost = socketHost || document.location.hostname || "";
-    socketPort = socketPort || document.location.port || "443";
-  }
-
-  const socketUrl = `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}/socket`;
-  console.log(`Phoenix Socket URL: ${socketUrl}`);
-
-  const socketSettings = {};
-
-  if (debug) {
-    socketSettings.logger = (kind, msg, data) => {
-      console.log(`${kind}: ${msg}`, data);
-    };
-  }
-
-  if (params) {
-    socketSettings.params = params;
-  }
-
-  const socket = new Socket(socketUrl, socketSettings);
-  socket.connect();
-
-  return socket;
-}
-
 const resolverLink = document.createElement("a");
 export function getReticulumFetchUrl(path, absolute = false) {
   if (process.env.RETICULUM_SERVER) {
@@ -84,6 +47,52 @@ export async function getReticulumMeta() {
   }
 
   return reticulumMeta;
+}
+
+export async function connectToReticulum(debug = false, params = null) {
+  const qs = new URLSearchParams(location.search);
+
+  const getNewSocketUrl = async () => {
+    const socketProtocol = qs.get("phx_protocol") || (document.location.protocol === "https:" ? "wss:" : "ws:");
+    let socketHost = qs.get("phx_host");
+    let socketPort = qs.get("phx_port");
+
+    const reticulumMeta = await getReticulumMeta();
+    socketHost = socketHost || reticulumMeta.phx_host;
+    socketPort = socketPort || "443"; // TODO phx_port
+    return `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}`;
+  };
+
+  const socketUrl = await getNewSocketUrl();
+  console.log(`Phoenix Socket URL: ${socketUrl}`);
+
+  const socketSettings = {};
+
+  if (debug) {
+    socketSettings.logger = (kind, msg, data) => {
+      console.log(`${kind}: ${msg}`, data);
+    };
+  }
+
+  if (params) {
+    socketSettings.params = params;
+  }
+
+  const socket = new Socket(`${socketUrl}/socket`, socketSettings);
+  socket.connect();
+  socket.onError(async () => {
+    // On error, underlying reticulum node may have died, so rebalance by
+    // fetching a new healthy node to connect to.
+    invalidateReticulumMeta();
+
+    const endPointPath = new URL(socket.endPoint).pathname;
+    const newSocketUrl = await getNewSocketUrl();
+    const newEndPoint = `${newSocketUrl}${endPointPath}`;
+    console.log(`Socket error, changed endpoint to ${newEndPoint}`);
+    socket.endPoint = newEndPoint;
+  });
+
+  return socket;
 }
 
 export function getLandingPageForPhoto(photoUrl) {

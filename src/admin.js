@@ -61,7 +61,7 @@ const mountUI = async retPhxChannel => {
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const socket = connectToReticulum();
+  const socket = await connectToReticulum();
 
   // Refresh perms regularly
   setInterval(() => {

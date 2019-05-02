@@ -780,7 +780,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  const socket = connectToReticulum(isDebug);
+  const socket = await connectToReticulum(isDebug);
 
   socket.onClose(e => {
     // The socket should close normally if the server has explicitly killed it.
@@ -854,7 +854,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           console.log("Reticulum reconnecting.");
           clearInterval(retDeployReconnectInterval);
           const oldSocket = retPhxChannel.socket;
-          const socket = connectToReticulum(isDebug, oldSocket.params());
+          const socket = await connectToReticulum(isDebug, oldSocket.params());
           retPhxChannel = await migrateChannelToSocket(retPhxChannel, socket);
           await hubChannel.migrateToSocket(socket, createHubChannelParams());
           authChannel.setSocket(socket);
