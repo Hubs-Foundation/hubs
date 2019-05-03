@@ -17,7 +17,7 @@ store.init();
 const linkChannel = new LinkChannel(store);
 
 (async () => {
-  const socket = connectToReticulum();
+  const socket = await connectToReticulum();
   linkChannel.setSocket(socket);
 })();
 
