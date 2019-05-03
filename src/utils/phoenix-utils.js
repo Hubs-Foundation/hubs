@@ -57,18 +57,9 @@ export async function connectToReticulum(debug = false, params = null) {
     let socketHost = qs.get("phx_host");
     let socketPort = qs.get("phx_port");
 
-    if (process.env.RETICULUM_SERVER) {
-      const [retHost, retPort] = process.env.RETICULUM_SERVER.split(":");
-      socketHost = socketHost || retHost || "";
-      socketPort = socketPort || retPort || "443";
-    } else {
-      socketHost = socketHost || document.location.hostname || "";
-      socketPort = socketPort || document.location.port || "443";
-    }
-    // TODO fix
-    /*const reticulumMeta = await getReticulumMeta();
+    const reticulumMeta = await getReticulumMeta();
     socketHost = socketHost || reticulumMeta.phx_host;
-    socketPort = socketPort || (process.env.RETICULUM_SERVER.includes("hubs.local") ? "4000" : "443"); // TODO phx_port*/
+    socketPort = socketPort || (process.env.RETICULUM_SERVER.includes("hubs.local") ? "4000" : "443"); // TODO phx_port
     return `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}`;
   };
 
