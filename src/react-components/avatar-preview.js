@@ -41,13 +41,14 @@ const createImageBitmapFromURL = url =>
     .then(r => r.blob())
     .then(createImageBitmap);
 
-const DEFAULT_ORBIT_ANGLE = new THREE.Euler(-30 * THREE.Math.DEG2RAD, 30 * THREE.Math.DEG2RAD, 0);
+const ORBIT_ANGLE = new THREE.Euler(-30 * THREE.Math.DEG2RAD, 30 * THREE.Math.DEG2RAD, 0);
+const DEFAULT_MARGIN = 1;
 
-function fitBoxInFrustum(camera, box, center, orbitAngle = DEFAULT_ORBIT_ANGLE) {
+function fitBoxInFrustum(camera, box, center, margin = DEFAULT_MARGIN) {
   const halfYExtents = Math.max(box.max.y - center.y, center.y - box.min.y);
   const halfVertFOV = THREE.Math.degToRad(camera.fov / 2);
-  camera.position.set(0, 0, halfYExtents / Math.tan(halfVertFOV) + box.max.z);
-  camera.position.applyEuler(orbitAngle);
+  camera.position.set(0, 0, (halfYExtents / Math.tan(halfVertFOV) + box.max.z) * margin);
+  camera.position.applyEuler(ORBIT_ANGLE);
   camera.position.add(center);
   camera.matrixAutoUpdate = true;
   camera.lookAt(center);
@@ -129,12 +130,13 @@ export default class AvatarPreview extends Component {
     return () => {
       box.setFromObject(this.avatar);
       box.getCenter(center);
-      fitBoxInFrustum(this.camera, box, center);
+
       // Shift the center vertically in order to frame the avatar nicely.
-      // We do this after fitting the bounding box in the frustum since we want to fit it around the true center, but
-      // frame and rotate around the shifted center.
       center.y = (box.max.y - box.min.y) * 0.6 + box.min.y;
-      fitBoxInFrustum(this.snapshotCamera, box, center);
+
+      fitBoxInFrustum(this.camera, box, center);
+      fitBoxInFrustum(this.snapshotCamera, box, center, 0.7);
+
       this.controls.target.copy(center);
       this.controls.update();
     };
