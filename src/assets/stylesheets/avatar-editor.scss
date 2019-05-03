@@ -44,7 +44,7 @@
   }
 }
 
-.avatar-editor {
+:local(.avatar-editor) {
   display: flex;
   flex-direction: column;
   align-items: center;

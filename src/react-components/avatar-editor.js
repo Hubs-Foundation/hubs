@@ -252,7 +252,7 @@ export default class AvatarEditor extends Component {
     const { debug } = this.props;
 
     return (
-      <div className={classNames(this.props.className)}>
+      <div className={classNames(styles.avatarEditor, this.props.className)}>
         <div className="split">
           <div className="form-body">
             {debug && this.textField("avatar_id", "Avatar ID", true)}
