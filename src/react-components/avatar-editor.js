@@ -232,8 +232,8 @@ export default class AvatarEditor extends Component {
         id={`avatar-${name}`}
         type="checkbox"
         disabled={disabled}
-        value={this.state.avatar[name]}
-        onChange={e => this.setState({ avatar: { ...this.state.avatar, [name]: e.target.value } })}
+        checked={this.state.avatar[name]}
+        onChange={e => this.setState({ avatar: { ...this.state.avatar, [name]: e.target.checked } })}
       />
     </div>
   );
@@ -257,10 +257,10 @@ export default class AvatarEditor extends Component {
           <div className="form-body">
             {debug && this.textField("avatar_id", "Avatar ID", true)}
             {debug && this.textField("parent_avatar_id", "Parent Avatar ID")}
-            {debug && this.textField("name", "Name")}
-            {debug && this.textField("description", "Description")}
-            {debug && this.checkbox("allow_remixing", "Allow Remixing")}
-            {debug && this.checkbox("allow_promotion", "Allow Promotion")}
+            {this.textField("name", "Name")}
+            {this.textField("description", "Description")}
+            {this.checkbox("allow_remixing", "Allow Remixing")}
+            {this.checkbox("allow_promotion", "Allow Promotion")}
             {debug && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
 
             {this.mapField("base_map", "Base Map", "image/*")}
