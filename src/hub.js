@@ -428,8 +428,8 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     });
 
     // BPDEBUG
-    //scene.emit("didConnectToNetworkedScene");
-    //return;
+    scene.emit("didConnectToNetworkedScene");
+    return;
 
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
     scene.components["networked-scene"]
