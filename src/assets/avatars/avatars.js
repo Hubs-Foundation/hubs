@@ -72,7 +72,7 @@ function fetchAvatarGltfUrl(avatarId) {
     .then(({ avatars }) => avatars[0].gltf_url);
 }
 
-export async function getAvatarSrc(avatarId) {
+export function getAvatarSrc(avatarId) {
   switch (getAvatarType(avatarId)) {
     case AVATAR_TYPES.LEGACY:
       return `#${avatarId}`;
@@ -83,7 +83,7 @@ export async function getAvatarSrc(avatarId) {
   }
 }
 
-export async function getAvatarGltfUrl(avatarId) {
+export function getAvatarGltfUrl(avatarId) {
   switch (getAvatarType(avatarId)) {
     case AVATAR_TYPES.LEGACY:
       return avatars.find(avatar => avatar.id === avatarId).model;

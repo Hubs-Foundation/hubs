@@ -1,13 +1,17 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
+import classNames from "classnames";
+import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import { SCHEMA } from "../storage/store";
 import styles from "../assets/stylesheets/profile.scss";
-import classNames from "classnames";
 import hubLogo from "../assets/images/hub-preview-white.png";
 import { WithHoverSound } from "./wrap-with-audio";
-import { AVATAR_TYPES, getAvatarGltfUrl } from "../assets/avatars/avatars";
+import { AVATAR_TYPES, getAvatarGltfUrl, getAvatarType } from "../assets/avatars/avatars";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
+import StateLink from "./state-link";
 
 import AvatarPreview from "./avatar-preview";
 
@@ -18,27 +22,30 @@ class ProfileEntryPanel extends Component {
     mediaSearchStore: PropTypes.object,
     messages: PropTypes.object,
     finished: PropTypes.func,
-    intl: PropTypes.object
+    intl: PropTypes.object,
+    history: PropTypes.object
   };
 
   state = {
     avatarId: null,
+    avatarType: null,
     displayName: null,
     avatarGltfUrl: null
   };
 
   constructor(props) {
     super(props);
-    const { displayName, avatarId } = this.props.store.state.profile;
-    this.state = { displayName, avatarId };
+    this.state = this.getStateFromProfile();
     this.props.store.addEventListener("statechanged", this.storeUpdated);
     this.scene = document.querySelector("a-scene");
   }
 
-  storeUpdated = () => {
-    const { avatarId, displayName } = this.props.store.state.profile;
-    this.setState({ avatarId, displayName });
+  getStateFromProfile = () => {
+    const { displayName, avatarId } = this.props.store.state.profile;
+    return { displayName, avatarId, avatarType: getAvatarType(avatarId) };
   };
+
+  storeUpdated = () => this.setState(this.getStateFromProfile());
 
   saveStateAndFinish = e => {
     e && e.preventDefault();
@@ -123,11 +130,20 @@ class ProfileEntryPanel extends Component {
 
             <AvatarPreview className={styles.preview} avatarGltfUrl={this.state.avatarGltfUrl} />
 
-            {this.state.avatarType !== AVATAR_TYPES.SKINNABLE && (
-              <WithHoverSound>
-                <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
-              </WithHoverSound>
+            {this.state.avatarType === AVATAR_TYPES.SKINNABLE && (
+              <StateLink
+                stateKey="overlay"
+                stateValue="avatar-editor"
+                stateDetail={{ avatarId: this.state.avatarId }}
+                history={this.props.history}
+              >
+                <FontAwesomeIcon icon={faPencilAlt} />
+              </StateLink>
             )}
+
+            <WithHoverSound>
+              <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
+            </WithHoverSound>
             <div className={styles.links}>
               <WithHoverSound>
                 <a
