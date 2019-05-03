@@ -11,14 +11,10 @@ import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
 
 const AVATARS_API = "/api/v1/avatars";
-const BOT_PARENT_AVATAR = "FcjJywg"; // "xf9xkIY"; // "hiwSHgg"; //location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
+const BOT_PARENT_AVATAR = "xf9xkIY"; // "FcjJywg"; // // "hiwSHgg"; //location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
 
 function emitAvatarChanged(avatarId) {
   window.dispatchEvent(new CustomEvent("avatar_editor_avatar_changed", { detail: { avatarId: avatarId } }));
-}
-
-function getDefaultAvatarState() {
-  return { avatar: { name: "My Avatar", parent_avatar_id: BOT_PARENT_AVATAR, files: {} } };
 }
 
 export default class AvatarEditor extends Component {
@@ -31,7 +27,10 @@ export default class AvatarEditor extends Component {
     className: PropTypes.string
   };
 
-  state = getDefaultAvatarState();
+  state = {
+    avatar: { name: "My Avatar", parent_avatar_id: BOT_PARENT_AVATAR, files: {} },
+    previewGltfUrl: null
+  };
 
   constructor(props) {
     super(props);
@@ -45,7 +44,10 @@ export default class AvatarEditor extends Component {
     if (this.props.avatarId) {
       const avatar = await this.fetchAvatar(this.props.avatarId);
       Object.assign(this.inputFiles, avatar.files);
-      this.setState({ avatar });
+      this.setState({ avatar, previewGltfUrl: avatar.base_gltf_url });
+    } else {
+      const { base_gltf_url } = await this.fetchAvatar(BOT_PARENT_AVATAR);
+      this.setState({ previewGltfUrl: base_gltf_url });
     }
   };
 
@@ -274,7 +276,7 @@ export default class AvatarEditor extends Component {
             {/* {this.mapField("roughness_map", "Roughness Map", "image/\*", true)} */}
           </div>
           <AvatarPreview
-            avatarGltfUrl={this.state.avatar.base_gltf_url}
+            avatarGltfUrl={this.state.previewGltfUrl}
             {...this.inputFiles}
             ref={p => (this.preview = p)}
           />
