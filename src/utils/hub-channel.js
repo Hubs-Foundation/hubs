@@ -74,6 +74,7 @@ export default class HubChannel extends EventTarget {
   setPermissionsFromToken = token => {
     // Note: token is not verified.
     this._permissions = jwtDecode(token);
+    this.dispatchEvent(new CustomEvent("permissions-updated"));
 
     // Refresh the token 1 minute before it expires.
     const nextRefresh = new Date(this._permissions.exp * 1000 - 60 * 1000) - new Date();
@@ -223,6 +224,7 @@ export default class HubChannel extends EventTarget {
         .receive("ok", () => {
           this._permissions = {};
           this._signedIn = false;
+          this.dispatchEvent(new CustomEvent("permissions-updated"));
           resolve();
         })
         .receive("error", reject);
