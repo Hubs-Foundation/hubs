@@ -754,11 +754,7 @@ class UIRoot extends Component {
   closeDialog = () => {
     showFullScreenIfWasFullScreen();
 
-    if (this.state.dialog) {
-      this.setState({ dialog: null });
-    } else {
-      this.props.history.goBack();
-    }
+    this.setState({ dialog: null });
   };
 
   showNonHistoriedDialog = (DialogClass, props = {}) => {
@@ -788,6 +784,10 @@ class UIRoot extends Component {
   signOut = async () => {
     await this.props.authChannel.signOut(this.props.hubChannel);
     this.setState({ signedIn: false });
+  };
+
+  closeOverlay = () => {
+    popToBeginningOfHubHistory(this.props.history)
   };
 
   showWebRTCScreenshareUnsupportedDialog = () => {
@@ -1406,7 +1406,7 @@ class UIRoot extends Component {
                 <ProfileEntryPanel
                   {...props}
                   displayNameOverride={displayNameOverride}
-                  finished={this.closeDialog}
+                  finished={this.closeOverlay}
                   store={this.props.store}
                   mediaSearchStore={this.props.mediaSearchStore}
                 />
@@ -1453,7 +1453,7 @@ class UIRoot extends Component {
                       }
                     });
 
-                    this.closeDialog();
+                    this.closeOverlay();
                   }}
                   store={this.props.store}
                   mediaSearchStore={this.props.mediaSearchStore}
