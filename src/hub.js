@@ -407,7 +407,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   scene.addEventListener("action_selected_media_result_entry", e => {
     const entry = e.detail;
     if (entry.type !== "scene_listing") return;
-    if (!hubChannel.permissions.update_hub) return;
+    if (!hubChannel.can("update_hub")) return;
 
     hubChannel.updateScene(entry.url);
   });
@@ -575,7 +575,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const authChannel = new AuthChannel(store);
-  const hubChannel = new HubChannel(store);
+  const hubChannel = new HubChannel(store, hubId);
   const availableVREntryTypes = await getAvailableVREntryTypes();
   const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes, history);
   entryManager.onRequestAuthentication = (

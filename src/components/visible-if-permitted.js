@@ -3,6 +3,6 @@ AFRAME.registerComponent("visible-if-permitted", {
     type: "string"
   },
   init() {
-    this.el.object3D.visible = this.el.sceneEl.systems.permissions.can(this.data);
+    this.el.object3D.visible = this.el.sceneEl.systems.permissions.canOrWillIfCreator(this.data);
   }
 });

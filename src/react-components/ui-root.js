@@ -729,11 +729,7 @@ class UIRoot extends Component {
     this.pushHistoryState("overlay", "link");
     const { code, cancel, onFinished } = await this.props.linkChannel.generateCode();
     this.setState({ linkCode: code, linkCodeCancel: cancel });
-
-    onFinished.then(() => {
-      this.setState({ log: false, linkCode: null, linkCodeCancel: null });
-      this.props.history.goBack();
-    });
+    onFinished.then(() => this.setState({ log: false, linkCode: null, linkCodeCancel: null }));
   };
 
   showInviteDialog = () => {
@@ -951,7 +947,7 @@ class UIRoot extends Component {
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>
           <span>{this.props.hubName}</span>
-          {this.props.hubChannel.permissions.update_hub && (
+          {this.props.hubChannel.canOrWillIfCreator("update_hub") && (
             <StateLink
               stateKey="modal"
               stateValue="rename_room"
@@ -982,7 +978,7 @@ class UIRoot extends Component {
         </div>
 
         <div className={entryStyles.center}>
-          {this.props.hubChannel.permissions.update_hub ? (
+          {this.props.hubChannel.canOrWillIfCreator("update_hub") ? (
             <WithHoverSound>
               <div
                 className={classNames([entryStyles.lobbyLabel, entryStyles.chooseScene])}

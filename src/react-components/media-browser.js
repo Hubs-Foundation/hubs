@@ -225,7 +225,7 @@ class MediaBrowser extends Component {
     const urlSource = searchParams.get("media_source") || sluglessPath(this.props.history.location).substring(7);
     const apiSource = this.state.result && this.state.result.meta.source;
     const isVariableWidth = this.state.result && ["bing_images", "tenor"].includes(apiSource);
-    const showCustomOption = apiSource !== "scene_listings" || this.props.hubChannel.permissions.update_hub;
+    const showCustomOption = apiSource !== "scene_listings" || this.props.hubChannel.canOrWillIfCreator("update_hub");
 
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
     if (this.state.selectNextResult) return <div />;

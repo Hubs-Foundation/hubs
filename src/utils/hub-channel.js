@@ -14,10 +14,14 @@ function isSameDay(da, db) {
   return isSameMonth(da, db) && da.getDate() == db.getDate();
 }
 
+// Permissions that will be assumed if the user becomes the creator.
+const HUB_CREATOR_PERMISSIONS = ["update_hub", "close_hub", "mute_users", "kick_users"];
+
 export default class HubChannel extends EventTarget {
-  constructor(store) {
+  constructor(store, hubId) {
     super();
     this.store = store;
+    this.hubId = hubId;
     this._signedIn = !!this.store.state.credentials.token;
     this._permissions = {};
   }
@@ -26,8 +30,13 @@ export default class HubChannel extends EventTarget {
     return this._signedIn;
   }
 
-  get permissions() {
-    return this._permissions;
+  can(permission) {
+    return this._permissions && this._permissions[permission];
+  }
+
+  canOrWillIfCreator(permission) {
+    if (this._getCreatorAssignmentToken() && HUB_CREATOR_PERMISSIONS.includes(permission)) return true;
+    return this.can(permission);
   }
 
   // Migrates this hub channel to a new phoenix channel and presence
@@ -175,10 +184,20 @@ export default class HubChannel extends EventTarget {
     this.channel.push("message", { body, type });
   };
 
+  _getCreatorAssignmentToken = () => {
+    const creatorAssignmentTokenEntry =
+      this.store.state.creatorAssignmentTokens &&
+      this.store.state.creatorAssignmentTokens.find(t => t.hubId === this.hubId);
+
+    return creatorAssignmentTokenEntry && creatorAssignmentTokenEntry.creatorAssignmentToken;
+  };
+
   signIn = token => {
     return new Promise((resolve, reject) => {
+      const creator_assignment_token = this._getCreatorAssignmentToken();
+
       this.channel
-        .push("sign_in", { token })
+        .push("sign_in", { token, creator_assignment_token })
         .receive("ok", ({ perms_token }) => {
           this.setPermissionsFromToken(perms_token);
           this._signedIn = true;

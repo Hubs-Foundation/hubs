@@ -26,8 +26,8 @@ export default class SettingsMenu extends Component {
   render() {
     const rowClasses = classNames([styles.row, styles.settingsRow]);
     const rowHeader = classNames([styles.row, styles.settingsRow, styles.rowHeader]);
-    const showRoomSettings = !!this.props.hubChannel.permissions.update_hub;
-    const showCloseRoom = !!this.props.hubChannel.permissions.close_hub;
+    const showRoomSettings = !!this.props.hubChannel.canOrWillIfCreator("update_hub");
+    const showCloseRoom = !!this.props.hubChannel.permissions.canOrWillIfCreator("close_hub");
     const showRoomInfo = !!this.props.hubScene;
     const showRoomSection = showRoomSettings || showRoomInfo || showCloseRoom;
 
