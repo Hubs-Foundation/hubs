@@ -8,6 +8,8 @@
     "sign-in.auth-started": "Email sent!\n\nTo continue, go click on the link in the email using your phone, tablet, or PC.",
     "sign-in.pin": "You'll need to sign in to pin objects.",
     "sign-in.pin-complete": "You are now signed in.",
+    "sign-in.change-scene": "You'll need to sign in to change the scene.",
+    "sign-in.change-scene-complete": "You are now signed in.",
     "sign-in.unpin": "You'll need to sign in to un-pin objects.",
     "sign-in.unpin-complete": "You are now signed in.",
     "sign-in.as": "Signed in as",

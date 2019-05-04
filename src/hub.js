@@ -104,6 +104,7 @@ import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { traverseMeshesAndAddShapes, proxiedUrlFor } from "./utils/media-utils";
+import { handleExitTo2DInterstitial, handleReEntryToVRFrom2DInterstitial } from "./utils/vr-interstitial";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
@@ -578,23 +579,39 @@ document.addEventListener("DOMContentLoaded", async () => {
   const hubChannel = new HubChannel(store, hubId);
   const availableVREntryTypes = await getAvailableVREntryTypes();
   const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes, history);
-  entryManager.onRequestAuthentication = (
-    signInMessageId,
-    signInCompleteMessageId,
-    signInContinueTextId,
-    onContinueAfterSignIn
-  ) => {
+  const performConditionalSignIn = async (predicate, action, signInMessageId, signInCompleteMessageId, onFailure) => {
+    if (predicate()) return action();
+
+    const signInContinueTextId = scene.is("vr-mode") ? "entry.return-to-vr" : "dialog.close";
+
+    handleExitTo2DInterstitial(true);
+
     remountUI({
       showSignInDialog: true,
       signInMessageId,
       signInCompleteMessageId,
       signInContinueTextId,
-      onContinueAfterSignIn: () => {
+      onContinueAfterSignIn: async () => {
         remountUI({ showSignInDialog: false });
-        onContinueAfterSignIn();
+        let actionFailed = false;
+        if (predicate()) {
+          try {
+            await action();
+          } catch (e) {
+            actionFailed = true;
+          }
+        } else {
+          actionFailed = true;
+        }
+
+        if (actionFailed && onFailure) onFailure();
+        handleReEntryToVRFrom2DInterstitial();
       }
     });
   };
+
+  remountUI({ performConditionalSignIn });
+  entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();
 
   const linkChannel = new LinkChannel(store);

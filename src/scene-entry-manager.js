@@ -32,7 +32,7 @@ export default class SceneEntryManager {
     this.cursorController = document.querySelector("#cursor-controller");
     this.playerRig = document.querySelector("#player-rig");
     this._entered = false;
-    this.onRequestAuthentication = () => {};
+    this.performConditionalSignIn = () => {};
     this.history = history;
   }
 
@@ -217,45 +217,22 @@ export default class SceneEntryManager {
   };
 
   _signInAndPinOrUnpinElement = (el, pin) => {
-    const action = pin ? this._pinElement : this._unpinElement;
+    const action = pin ? async () => await this._pinElement(el) : async () => await this._unpinElement(el);
     const promptIdSuffix = pin ? "pin" : "unpin";
 
-    if (this.hubChannel.signedIn) {
-      action(el);
-    } else {
-      handleExitTo2DInterstitial(true);
-
-      const wasInVR = this.scene.is("vr-mode");
-      const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
-
-      this.onRequestAuthentication(
-        `sign-in.${promptIdSuffix}`,
-        `sign-in.${promptIdSuffix}-complete`,
-        continueTextId,
-        async () => {
-          let actionFailed = false;
-          if (this.hubChannel.signedIn) {
-            try {
-              await action(el);
-            } catch (e) {
-              actionFailed = true;
-            }
-          } else {
-            actionFailed = true;
-          }
-
-          if (actionFailed) {
-            // UI pins/un-pins the entity optimistically, so we undo that here.
-            // Note we have to disable the sign in flow here otherwise this will recurse.
-            this._disableSignInOnPinAction = true;
-            el.setAttribute("pinnable", "pinned", !pin);
-            this._disableSignInOnPinAction = false;
-          }
-
-          handleReEntryToVRFrom2DInterstitial();
-        }
-      );
-    }
+    this.performConditionalSignIn(
+      () => this.hubChannel.signedIn,
+      action,
+      `sign-in.${promptIdSuffix}`,
+      `sign-in.${promptIdSuffix}-complete`,
+      () => {
+        // UI pins/un-pins the entity optimistically, so we undo that here.
+        // Note we have to disable the sign in flow here otherwise this will recurse.
+        this._disableSignInOnPinAction = true;
+        el.setAttribute("pinnable", "pinned", !pin);
+        this._disableSignInOnPinAction = false;
+      }
+    );
   };
 
   _unpinElement = el => {

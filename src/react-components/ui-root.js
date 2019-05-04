@@ -165,6 +165,7 @@ class UIRoot extends Component {
     history: PropTypes.object,
     showInterstitialPrompt: PropTypes.bool,
     onInterstitialPromptClicked: PropTypes.func,
+    performConditionalSignIn: PropTypes.func,
     hide: PropTypes.bool
   };
 
@@ -983,8 +984,15 @@ class UIRoot extends Component {
               <div
                 className={classNames([entryStyles.lobbyLabel, entryStyles.chooseScene])}
                 onClick={() => {
-                  showFullScreenIfAvailable();
-                  this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                  this.props.performConditionalSignIn(
+                    () => this.props.hubChannel.can("update_hub"),
+                    () => {
+                      showFullScreenIfAvailable();
+                      this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                    },
+                    "sign-in.change-scene",
+                    "sign-in.change-scene-complete"
+                  );
                 }}
               >
                 <i>
