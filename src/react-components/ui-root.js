@@ -949,16 +949,21 @@ class UIRoot extends Component {
         <div className={entryStyles.name}>
           <span>{this.props.hubName}</span>
           {this.props.hubChannel.canOrWillIfCreator("update_hub") && (
-            <StateLink
-              stateKey="modal"
-              stateValue="rename_room"
-              history={this.props.history}
+            <button
+              onClick={() =>
+                this.props.performConditionalSignIn(
+                  () => this.props.hubChannel.can("update_hub"),
+                  () => this.pushHistoryState("modal", "rename_room"),
+                  "sign-in.rename-room",
+                  "sign-in.rename-room-complete"
+                )
+              }
               className={entryStyles.editButton}
             >
               <i>
                 <FontAwesomeIcon icon={faPencilAlt} />
               </i>
-            </StateLink>
+            </button>
           )}
           {this.props.hubScene && (
             <StateLink
@@ -1726,6 +1731,8 @@ class UIRoot extends Component {
                 hideSettings={() => this.setState({ showSettingsMenu: false })}
                 hubChannel={this.props.hubChannel}
                 hubScene={this.props.hubScene}
+                performConditionalSignIn={this.props.performConditionalSignIn}
+                pushHistoryState={this.pushHistoryState}
               />
             )}
 
