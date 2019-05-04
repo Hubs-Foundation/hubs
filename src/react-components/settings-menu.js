@@ -80,8 +80,7 @@ export default class SettingsMenu extends Component {
                           this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
                           this.props.hideSettings();
                         },
-                        "sign-in.change-scene",
-                        "sign-in.change-scene-complete"
+                        "change-scene"
                       );
                     }}
                   >
@@ -107,8 +106,7 @@ export default class SettingsMenu extends Component {
                           this.props.pushHistoryState("modal", "rename_room");
                           this.props.hideSettings();
                         },
-                        "sign-in.rename-room",
-                        "sign-in.rename-room-complete"
+                        "rename-room"
                       )
                     }
                   >
@@ -134,8 +132,7 @@ export default class SettingsMenu extends Component {
                           this.props.pushHistoryState("modal", "close_room");
                           this.props.hideSettings();
                         },
-                        "sign-in.close-room",
-                        "sign-in.close-room-complete"
+                        "close-room"
                       )
                     }
                   >

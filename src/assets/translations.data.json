@@ -17,7 +17,7 @@
     "sign-in.close-room": "You'll need to sign in to close the room.",
     "sign-in.close-room-complete": "You are now signed in.",
     "sign-in.mute-user": "You'll need to sign in to mute other users.",
-    "sign-in.muse-user-complete": "You are now signed in.",
+    "sign-in.mute-user-complete": "You are now signed in.",
     "sign-in.kick-user": "You'll need to sign in to kick other users.",
     "sign-in.kick-user-complete": "You are now signed in.",
     "sign-in.as": "Signed in as",

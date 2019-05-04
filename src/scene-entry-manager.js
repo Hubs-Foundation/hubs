@@ -218,21 +218,14 @@ export default class SceneEntryManager {
 
   _signInAndPinOrUnpinElement = (el, pin) => {
     const action = pin ? async () => await this._pinElement(el) : async () => await this._unpinElement(el);
-    const promptIdSuffix = pin ? "pin" : "unpin";
 
-    this.performConditionalSignIn(
-      () => this.hubChannel.signedIn,
-      action,
-      `sign-in.${promptIdSuffix}`,
-      `sign-in.${promptIdSuffix}-complete`,
-      () => {
-        // UI pins/un-pins the entity optimistically, so we undo that here.
-        // Note we have to disable the sign in flow here otherwise this will recurse.
-        this._disableSignInOnPinAction = true;
-        el.setAttribute("pinnable", "pinned", !pin);
-        this._disableSignInOnPinAction = false;
-      }
-    );
+    this.performConditionalSignIn(() => this.hubChannel.signedIn, action, pin ? "pin" : "unpin", () => {
+      // UI pins/un-pins the entity optimistically, so we undo that here.
+      // Note we have to disable the sign in flow here otherwise this will recurse.
+      this._disableSignInOnPinAction = true;
+      el.setAttribute("pinnable", "pinned", !pin);
+      this._disableSignInOnPinAction = false;
+    });
   };
 
   _unpinElement = el => {
@@ -307,6 +300,26 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_invite", () => {
       handleExitTo2DInterstitial(false);
       pushHistoryState(this.history, "overlay", "invite");
+    });
+
+    this.scene.addEventListener("action_kick_client", ({ detail: { clientId } }) => {
+      this.performConditionalSignIn(
+        () => this.hubChannel.can("kick_users"),
+        async () => {
+          const { permsToken } = await this.scene.systems.permissions.fetchPermissions();
+          NAF.connection.adapter.kick(clientId, permsToken);
+          window.APP.hubChannel.kick(clientId);
+        },
+        "kick-user"
+      );
+    });
+
+    this.scene.addEventListener("action_mute_client", ({ detail: { clientId } }) => {
+      this.performConditionalSignIn(
+        () => this.hubChannel.can("mute_users"),
+        () => window.APP.hubChannel.mute(clientId),
+        "mute-user"
+      );
     });
 
     document.addEventListener("paste", e => {

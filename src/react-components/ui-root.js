@@ -954,8 +954,7 @@ class UIRoot extends Component {
                 this.props.performConditionalSignIn(
                   () => this.props.hubChannel.can("update_hub"),
                   () => this.pushHistoryState("modal", "rename_room"),
-                  "sign-in.rename-room",
-                  "sign-in.rename-room-complete"
+                  "rename-room"
                 )
               }
               className={entryStyles.editButton}
@@ -995,8 +994,7 @@ class UIRoot extends Component {
                       showFullScreenIfAvailable();
                       this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
                     },
-                    "sign-in.change-scene",
-                    "sign-in.change-scene-complete"
+                    "change-scene"
                   );
                 }}
               >

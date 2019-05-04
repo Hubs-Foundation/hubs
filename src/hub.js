@@ -579,7 +579,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const hubChannel = new HubChannel(store, hubId);
   const availableVREntryTypes = await getAvailableVREntryTypes();
   const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes, history);
-  const performConditionalSignIn = async (predicate, action, signInMessageId, signInCompleteMessageId, onFailure) => {
+  const performConditionalSignIn = async (predicate, action, messageId, onFailure) => {
     if (predicate()) return action();
 
     const signInContinueTextId = scene.is("vr-mode") ? "entry.return-to-vr" : "dialog.close";
@@ -588,8 +588,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     remountUI({
       showSignInDialog: true,
-      signInMessageId,
-      signInCompleteMessageId,
+      signInMessageId: `sign-in.${messageId}`,
+      signInCompleteMessageId: `sign-in.${messageId}-complete`,
       signInContinueTextId,
       onContinueAfterSignIn: async () => {
         remountUI({ showSignInDialog: false });
