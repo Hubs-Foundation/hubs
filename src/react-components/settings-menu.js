@@ -99,6 +99,7 @@ export default class SettingsMenu extends Component {
                 </div>
                 <div className={styles.listItem}>
                   <a
+                    href="#"
                     onClick={() =>
                       this.props.performConditionalSignIn(
                         () => this.props.hubChannel.can("update_hub"),
@@ -125,6 +126,7 @@ export default class SettingsMenu extends Component {
                 </div>
                 <div className={styles.listItem}>
                   <a
+                    href="#"
                     onClick={() =>
                       this.props.performConditionalSignIn(
                         () => this.props.hubChannel.can("update_hub"),
