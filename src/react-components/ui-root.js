@@ -1436,6 +1436,7 @@ class UIRoot extends Component {
                 mediaSearchStore={this.props.mediaSearchStore}
                 hubChannel={this.props.hubChannel}
                 onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
+                performConditionalSignIn={this.props.performConditionalSignIn}
               />
             )}
             <StateRoute

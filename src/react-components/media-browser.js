@@ -75,7 +75,8 @@ class MediaBrowser extends Component {
     history: PropTypes.object,
     intl: PropTypes.object,
     hubChannel: PropTypes.object,
-    onMediaSearchResultEntrySelected: PropTypes.func
+    onMediaSearchResultEntrySelected: PropTypes.func,
+    performConditionalSignIn: PropTypes.func
   };
 
   state = { query: "", facets: [], showNav: true, selectNextResult: false, clearStashedQueryOnClose: false };
@@ -229,6 +230,13 @@ class MediaBrowser extends Component {
 
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
     if (this.state.selectNextResult) return <div />;
+    const handleCustomClicked = apiSource => {
+      this.props.performConditionalSignIn(
+        () => apiSource !== "scene_listings" || this.props.hubChannel.can("update_hub"),
+        () => this.showCustomMediaDialog(apiSource),
+        "change-scene"
+      );
+    };
 
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
@@ -300,14 +308,14 @@ class MediaBrowser extends Component {
             </div>
             <div className={styles.headerRight}>
               {showCustomOption && (
-                <a onClick={() => this.showCustomMediaDialog(apiSource)} className={styles.createButton}>
+                <a onClick={() => handleCustomClicked(apiSource)} className={styles.createButton}>
                   <i>
                     <FontAwesomeIcon icon={faCloudUploadAlt} />
                   </i>
                 </a>
               )}
               {showCustomOption && (
-                <a onClick={() => this.showCustomMediaDialog(apiSource)} className={styles.createLink}>
+                <a onClick={() => handleCustomClicked(apiSource)} className={styles.createLink}>
                   <FormattedMessage
                     id={`media-browser.add_custom_${
                       this.state.result && apiSource === "scene_listings" ? "scene" : "object"
