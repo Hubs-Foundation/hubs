@@ -730,7 +730,10 @@ class UIRoot extends Component {
     this.pushHistoryState("overlay", "link");
     const { code, cancel, onFinished } = await this.props.linkChannel.generateCode();
     this.setState({ linkCode: code, linkCodeCancel: cancel });
-    onFinished.then(() => this.setState({ log: false, linkCode: null, linkCodeCancel: null }));
+    onFinished.then(() => {
+      this.setState({ log: false, linkCode: null, linkCodeCancel: null });
+      this.props.history.goBack();
+    });
   };
 
   showInviteDialog = () => {
