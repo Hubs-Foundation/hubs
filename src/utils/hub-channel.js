@@ -30,10 +30,13 @@ export default class HubChannel extends EventTarget {
     return this._signedIn;
   }
 
+  // Returns true if this current session has the given permission.
   can(permission) {
     return this._permissions && this._permissions[permission];
   }
 
+  // Returns true if the current session has the given permission, *or* will get the permission
+  // if they sign in and become the creator.
   canOrWillIfCreator(permission) {
     if (this._getCreatorAssignmentToken() && HUB_CREATOR_PERMISSIONS.includes(permission)) return true;
     return this.can(permission);
