@@ -1005,7 +1005,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
             }
 
-            scene.emit("presence_updated", { sessionId, profile: meta.profile });
+            scene.emit("presence_updated", { sessionId, profile: meta.profile, perms: meta.perms });
           });
 
           presence.onLeave((sessionId, current, info) => {
