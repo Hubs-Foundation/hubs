@@ -1420,6 +1420,8 @@ class UIRoot extends Component {
                 <AvatarEditor
                   className={styles.avatarEditor}
                   signedIn={this.state.signedIn}
+                  onSignIn={this.showSignInDialog}
+                  onSave={() => this.props.history.goBack()}
                   store={this.props.store}
                   debug={avatarEditorDebug}
                   avatarId={props.location.state.detail && props.location.state.detail.avatarId}

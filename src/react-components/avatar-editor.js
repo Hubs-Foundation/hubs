@@ -21,7 +21,7 @@ export default class AvatarEditor extends Component {
   static propTypes = {
     avatarId: PropTypes.string,
     onSignIn: PropTypes.func,
-    onSignOut: PropTypes.func,
+    onSave: PropTypes.func,
     signedIn: PropTypes.bool,
     debug: PropTypes.bool,
     className: PropTypes.string
@@ -126,6 +126,8 @@ export default class AvatarEditor extends Component {
     emitAvatarChanged(avatar.avatar_id);
 
     this.setState({ uploading: false });
+
+    if (this.props.onSave) this.props.onSave();
   };
 
   deleteAvatar = e => {
