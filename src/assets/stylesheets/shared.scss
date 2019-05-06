@@ -118,6 +118,22 @@ $semi-bold: 600;
   }
 }
 
+%link-button {
+  text-decoration: underline;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+  border: 0;
+  background: none;
+  font-size: 1.0em;
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
 %action-button {
   @extend %default-font;
   appearance: none;

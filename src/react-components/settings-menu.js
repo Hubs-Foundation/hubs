@@ -129,7 +129,7 @@ export default class SettingsMenu extends Component {
                 <div className={styles.listItem}>
                   <StateLink
                     stateKey="modal"
-                    stateValue="info"
+                    stateValue="room_info"
                     history={this.props.history}
                     onClick={this.props.hideSettings}
                   >
