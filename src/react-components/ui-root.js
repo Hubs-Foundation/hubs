@@ -1443,17 +1443,13 @@ class UIRoot extends Component {
                   {...props}
                   displayNameOverride={displayNameOverride}
                   finished={() => {
-                    const unsubscribe = this.props.history.listen(() => {
-                      unsubscribe();
-
-                      if (this.props.forcedVREntryType) {
-                        this.handleForceEntry();
-                      } else {
-                        this.pushHistoryState("entry_step", "device");
-                      }
-                    });
-
                     this.closeOverlay();
+
+                    if (this.props.forcedVREntryType) {
+                      this.handleForceEntry();
+                    } else {
+                      this.pushHistoryState("entry_step", "device");
+                    }
                   }}
                   store={this.props.store}
                   mediaSearchStore={this.props.mediaSearchStore}
