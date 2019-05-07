@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import LaunchIcon from "@material-ui/icons/Launch";
 import { getReticulumFetchUrl } from "./../../utils/phoenix-utils";
+import { ReferenceField } from "react-admin";
 
 const styles = {
   ownedFileImage: {
@@ -11,12 +12,47 @@ const styles = {
     padding: 12
   },
 
-  sceneLink: {}
+  sceneLink: {},
+  avatarLink: {},
+
+  ownedFileImageAspect_square: {
+    width: 150,
+    height: 150
+  },
+  ownedFileImageAspect_tall: {
+    width: (150 * 9) / 16,
+    height: 150
+  }
 };
 
-export const OwnedFileImage = withStyles(styles)(({ record = {}, classes }) => {
+export function ConditionalReferenceField(props) {
+  const { source, record, defaultValue = false } = props;
+  return record && record[source] ? <ReferenceField {...props} /> : defaultValue;
+}
+
+const OwnedFileImageInternal = withStyles(styles)(({ record = {}, aspect, classes }) => {
   const src = getReticulumFetchUrl(`/files/${record.owned_file_uuid}`);
-  return <img src={src} className={classes.ownedFileImage} />;
+  return <img src={src} className={classes[`ownedFileImageAspect_${aspect}`]} />;
+});
+
+export const OwnedFileImage = withStyles(styles)(({ basePath, record, source, aspect, classes, defaultImage }) => {
+  const defaultValue = defaultImage ? (
+    <img src={defaultImage} className={classes[`ownedFileImageAspect_${aspect}`]} />
+  ) : (
+    false
+  );
+  return (
+    <ConditionalReferenceField
+      basePath={basePath}
+      source={source}
+      reference="owned_files"
+      linkType={false}
+      record={record}
+      defaultValue={defaultValue}
+    >
+      <OwnedFileImageInternal source="owned_file_uuid" aspect={aspect} />
+    </ConditionalReferenceField>
+  );
 });
 
 OwnedFileImage.propTypes = {

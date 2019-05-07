@@ -37,9 +37,7 @@ export const SceneListingEdit = props => (
 export const SceneListingList = props => (
   <List {...props} filters={<SceneListingFilter />}>
     <Datagrid>
-      <ReferenceField source="screenshot_owned_file_id" reference="owned_files" linkType={false}>
-        <OwnedFileImage source="owned_file_uuid" />
-      </ReferenceField>
+      <OwnedFileImage source="screenshot_owned_file_id" />
       <TextField source="name" />
       <TextField source="description" />
       <SceneLink source="scene_listing_sid" />

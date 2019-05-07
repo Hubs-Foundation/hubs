@@ -8,9 +8,7 @@ import { List, Datagrid, TextField, ReferenceField, DateField } from "react-admi
 export const PendingSceneList = props => (
   <List {...props}>
     <Datagrid>
-      <ReferenceField source="screenshot_owned_file_id" reference="owned_files" linkType={false}>
-        <OwnedFileImage source="owned_file_uuid" />
-      </ReferenceField>
+      <OwnedFileImage source="screenshot_owned_file_id" />
       <SceneLink source="scene_sid" />
       <TextField source="name" />
       <TextField source="description" />

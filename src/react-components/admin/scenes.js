@@ -40,9 +40,7 @@ export const SceneEdit = props => (
 export const SceneList = props => (
   <List {...props} filters={<SceneFilter />}>
     <Datagrid>
-      <ReferenceField source="screenshot_owned_file_id" reference="owned_files" linkType={false}>
-        <OwnedFileImage source="owned_file_uuid" />
-      </ReferenceField>
+      <OwnedFileImage source="screenshot_owned_file_id" />
       <TextField source="name" />
       <SceneLink source="scene_sid" />
       <BooleanField source="allow_remixing" />
