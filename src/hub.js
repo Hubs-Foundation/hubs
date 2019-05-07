@@ -104,6 +104,7 @@ import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { traverseMeshesAndAddShapes, proxiedUrlFor } from "./utils/media-utils";
+import { handleExitTo2DInterstitial, handleReEntryToVRFrom2DInterstitial } from "./utils/vr-interstitial";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
@@ -407,7 +408,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   scene.addEventListener("action_selected_media_result_entry", e => {
     const entry = e.detail;
     if (entry.type !== "scene_listing") return;
-    if (!hubChannel.permissions.update_hub) return;
+    if (!hubChannel.can("update_hub")) return;
 
     hubChannel.updateScene(entry.url);
   });
@@ -575,26 +576,42 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const authChannel = new AuthChannel(store);
-  const hubChannel = new HubChannel(store);
+  const hubChannel = new HubChannel(store, hubId);
   const availableVREntryTypes = await getAvailableVREntryTypes();
   const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes, history);
-  entryManager.onRequestAuthentication = (
-    signInMessageId,
-    signInCompleteMessageId,
-    signInContinueTextId,
-    onContinueAfterSignIn
-  ) => {
+  const performConditionalSignIn = async (predicate, action, messageId, onFailure) => {
+    if (predicate()) return action();
+
+    const signInContinueTextId = scene.is("vr-mode") ? "entry.return-to-vr" : "dialog.close";
+
+    handleExitTo2DInterstitial(true);
+
     remountUI({
       showSignInDialog: true,
-      signInMessageId,
-      signInCompleteMessageId,
+      signInMessageId: `sign-in.${messageId}`,
+      signInCompleteMessageId: `sign-in.${messageId}-complete`,
       signInContinueTextId,
-      onContinueAfterSignIn: () => {
+      onContinueAfterSignIn: async () => {
         remountUI({ showSignInDialog: false });
-        onContinueAfterSignIn();
+        let actionError = null;
+        if (predicate()) {
+          try {
+            await action();
+          } catch (e) {
+            actionError = e;
+          }
+        } else {
+          actionError = new Error("Predicate failed post sign-in");
+        }
+
+        if (actionError && onFailure) onFailure(actionError);
+        handleReEntryToVRFrom2DInterstitial();
       }
     });
   };
+
+  remountUI({ performConditionalSignIn });
+  entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();
 
   const linkChannel = new LinkChannel(store);
@@ -1082,7 +1099,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const name = getAuthor();
     const maySpawn = scene.is("entered");
 
-    const incomingMessage = { name, type, body, maySpawn };
+    const incomingMessage = { name, type, body, maySpawn, sessionId: session_id };
 
     if (scene.is("vr-mode")) {
       createInWorldLogMessage(incomingMessage);

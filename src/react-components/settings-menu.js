@@ -20,14 +20,16 @@ export default class SettingsMenu extends Component {
     hideSettings: PropTypes.func,
     mediaSearchStore: PropTypes.object,
     hubScene: PropTypes.object,
-    hubChannel: PropTypes.object
+    hubChannel: PropTypes.object,
+    performConditionalSignIn: PropTypes.func,
+    pushHistoryState: PropTypes.func
   };
 
   render() {
     const rowClasses = classNames([styles.row, styles.settingsRow]);
     const rowHeader = classNames([styles.row, styles.settingsRow, styles.rowHeader]);
-    const showRoomSettings = !!this.props.hubChannel.permissions.update_hub;
-    const showCloseRoom = !!this.props.hubChannel.permissions.close_hub;
+    const showRoomSettings = !!this.props.hubChannel.canOrWillIfCreator("update_hub");
+    const showCloseRoom = !!this.props.hubChannel.canOrWillIfCreator("close_hub");
     const showRoomInfo = !!this.props.hubScene;
     const showRoomSection = showRoomSettings || showRoomInfo || showCloseRoom;
 
@@ -71,9 +73,15 @@ export default class SettingsMenu extends Component {
                   <div
                     className={styles.listItemLink}
                     onClick={() => {
-                      showFullScreenIfAvailable();
-                      this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
-                      this.props.hideSettings();
+                      this.props.performConditionalSignIn(
+                        () => this.props.hubChannel.can("update_hub"),
+                        () => {
+                          showFullScreenIfAvailable();
+                          this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                          this.props.hideSettings();
+                        },
+                        "change-scene"
+                      );
                     }}
                   >
                     <FormattedMessage id="settings.change-scene" />
@@ -89,14 +97,23 @@ export default class SettingsMenu extends Component {
                   </i>
                 </div>
                 <div className={styles.listItem}>
-                  <StateLink
-                    stateKey="modal"
-                    stateValue="rename_room"
-                    history={this.props.history}
-                    onClick={this.props.hideSettings}
+                  <a
+                    href="#"
+                    onClick={e => {
+                      e.preventDefault();
+
+                      this.props.performConditionalSignIn(
+                        () => this.props.hubChannel.can("update_hub"),
+                        () => {
+                          this.props.pushHistoryState("modal", "rename_room");
+                          this.props.hideSettings();
+                        },
+                        "rename-room"
+                      );
+                    }}
                   >
                     <FormattedMessage id="settings.rename-room" />
-                  </StateLink>
+                  </a>
                 </div>
               </div>
             )}
@@ -108,14 +125,23 @@ export default class SettingsMenu extends Component {
                   </i>
                 </div>
                 <div className={styles.listItem}>
-                  <StateLink
-                    stateKey="modal"
-                    stateValue="close_room"
-                    history={this.props.history}
-                    onClick={this.props.hideSettings}
+                  <a
+                    href="#"
+                    onClick={e => {
+                      e.preventDefault();
+
+                      this.props.performConditionalSignIn(
+                        () => this.props.hubChannel.can("update_hub"),
+                        () => {
+                          this.props.pushHistoryState("modal", "close_room");
+                          this.props.hideSettings();
+                        },
+                        "close-room"
+                      );
+                    }}
                   >
                     <FormattedMessage id="settings.close-room" />
-                  </StateLink>
+                  </a>
                 </div>
               </div>
             )}

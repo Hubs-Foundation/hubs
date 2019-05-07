@@ -167,6 +167,7 @@ class UIRoot extends Component {
     history: PropTypes.object,
     showInterstitialPrompt: PropTypes.bool,
     onInterstitialPromptClicked: PropTypes.func,
+    performConditionalSignIn: PropTypes.func,
     hide: PropTypes.bool
   };
 
@@ -731,7 +732,6 @@ class UIRoot extends Component {
     this.pushHistoryState("overlay", "link");
     const { code, cancel, onFinished } = await this.props.linkChannel.generateCode();
     this.setState({ linkCode: code, linkCodeCancel: cancel });
-
     onFinished.then(() => {
       this.setState({ log: false, linkCode: null, linkCodeCancel: null });
       this.props.history.goBack();
@@ -953,17 +953,21 @@ class UIRoot extends Component {
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>
           <span>{this.props.hubName}</span>
-          {this.props.hubChannel.permissions.update_hub && (
-            <StateLink
-              stateKey="modal"
-              stateValue="rename_room"
-              history={this.props.history}
+          {this.props.hubChannel.canOrWillIfCreator("update_hub") && (
+            <button
+              onClick={() =>
+                this.props.performConditionalSignIn(
+                  () => this.props.hubChannel.can("update_hub"),
+                  () => this.pushHistoryState("modal", "rename_room"),
+                  "rename-room"
+                )
+              }
               className={entryStyles.editButton}
             >
               <i>
                 <FontAwesomeIcon icon={faPencilAlt} />
               </i>
-            </StateLink>
+            </button>
           )}
           {this.props.hubScene && (
             <StateLink
@@ -984,13 +988,19 @@ class UIRoot extends Component {
         </div>
 
         <div className={entryStyles.center}>
-          {this.props.hubChannel.permissions.update_hub ? (
+          {this.props.hubChannel.canOrWillIfCreator("update_hub") ? (
             <WithHoverSound>
               <div
                 className={classNames([entryStyles.lobbyLabel, entryStyles.chooseScene])}
                 onClick={() => {
-                  showFullScreenIfAvailable();
-                  this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                  this.props.performConditionalSignIn(
+                    () => this.props.hubChannel.can("update_hub"),
+                    () => {
+                      showFullScreenIfAvailable();
+                      this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                    },
+                    "change-scene"
+                  );
                 }}
               >
                 <i>
@@ -1434,6 +1444,7 @@ class UIRoot extends Component {
                 mediaSearchStore={this.props.mediaSearchStore}
                 hubChannel={this.props.hubChannel}
                 onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
+                performConditionalSignIn={this.props.performConditionalSignIn}
               />
             )}
             <StateRoute
@@ -1538,17 +1549,25 @@ class UIRoot extends Component {
                 history={this.props.history}
                 presences={this.props.presences}
                 hubChannel={this.props.hubChannel}
+                performConditionalSignIn={this.props.performConditionalSignIn}
               />
             )}
 
             {(!this.state.entered || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
-                <PresenceLog entries={presenceLogEntries} hubId={this.props.hubId} />
+                <PresenceLog entries={presenceLogEntries} hubId={this.props.hubId} history={this.props.history} />
                 <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
               </div>
             )}
 
-            {entered && <PresenceLog inRoom={true} entries={presenceLogEntries} hubId={this.props.hubId} />}
+            {entered && (
+              <PresenceLog
+                inRoom={true}
+                entries={presenceLogEntries}
+                hubId={this.props.hubId}
+                history={this.props.history}
+              />
+            )}
             {entered &&
               this.props.activeTips &&
               this.props.activeTips.bottom &&
@@ -1737,6 +1756,8 @@ class UIRoot extends Component {
                 hideSettings={() => this.setState({ showSettingsMenu: false })}
                 hubChannel={this.props.hubChannel}
                 hubScene={this.props.hubScene}
+                performConditionalSignIn={this.props.performConditionalSignIn}
+                pushHistoryState={this.pushHistoryState}
               />
             )}
 

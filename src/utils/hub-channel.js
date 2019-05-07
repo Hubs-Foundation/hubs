@@ -14,10 +14,14 @@ function isSameDay(da, db) {
   return isSameMonth(da, db) && da.getDate() == db.getDate();
 }
 
+// Permissions that will be assumed if the user becomes the creator.
+const HUB_CREATOR_PERMISSIONS = ["update_hub", "close_hub", "mute_users", "kick_users"];
+
 export default class HubChannel extends EventTarget {
-  constructor(store) {
+  constructor(store, hubId) {
     super();
     this.store = store;
+    this.hubId = hubId;
     this._signedIn = !!this.store.state.credentials.token;
     this._permissions = {};
     this._blockedSessionIds = new Set();
@@ -27,8 +31,16 @@ export default class HubChannel extends EventTarget {
     return this._signedIn;
   }
 
-  get permissions() {
-    return this._permissions;
+  // Returns true if this current session has the given permission.
+  can(permission) {
+    return this._permissions && this._permissions[permission];
+  }
+
+  // Returns true if the current session has the given permission, *or* will get the permission
+  // if they sign in and become the creator.
+  canOrWillIfCreator(permission) {
+    if (this._getCreatorAssignmentToken() && HUB_CREATOR_PERMISSIONS.includes(permission)) return true;
+    return this.can(permission);
   }
 
   // Migrates this hub channel to a new phoenix channel and presence
@@ -66,6 +78,7 @@ export default class HubChannel extends EventTarget {
   setPermissionsFromToken = token => {
     // Note: token is not verified.
     this._permissions = jwtDecode(token);
+    this.dispatchEvent(new CustomEvent("permissions_updated"));
 
     // Refresh the token 1 minute before it expires.
     const nextRefresh = new Date(this._permissions.exp * 1000 - 60 * 1000) - new Date();
@@ -176,10 +189,20 @@ export default class HubChannel extends EventTarget {
     this.channel.push("message", { body, type });
   };
 
+  _getCreatorAssignmentToken = () => {
+    const creatorAssignmentTokenEntry =
+      this.store.state.creatorAssignmentTokens &&
+      this.store.state.creatorAssignmentTokens.find(t => t.hubId === this.hubId);
+
+    return creatorAssignmentTokenEntry && creatorAssignmentTokenEntry.creatorAssignmentToken;
+  };
+
   signIn = token => {
     return new Promise((resolve, reject) => {
+      const creator_assignment_token = this._getCreatorAssignmentToken();
+
       this.channel
-        .push("sign_in", { token })
+        .push("sign_in", { token, creator_assignment_token })
         .receive("ok", ({ perms_token }) => {
           this.setPermissionsFromToken(perms_token);
           this._signedIn = true;
@@ -205,6 +228,7 @@ export default class HubChannel extends EventTarget {
         .receive("ok", () => {
           this._permissions = {};
           this._signedIn = false;
+          this.dispatchEvent(new CustomEvent("permissions_updated"));
           resolve();
         })
         .receive("error", reject);
@@ -267,7 +291,7 @@ export default class HubChannel extends EventTarget {
   };
 
   unhide = sessionId => {
-    if (!this.blockedSessionIds.has(sessionId)) return;
+    if (!this._blockedSessionIds.has(sessionId)) return;
     NAF.connection.adapter.unblock(sessionId);
     NAF.connection.entities.completeSync(sessionId);
     this._blockedSessionIds.delete(sessionId);

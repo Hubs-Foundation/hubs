@@ -21,12 +21,19 @@ export default class ClientInfoDialog extends Component {
     history: PropTypes.object,
     hubChannel: PropTypes.object,
     presences: PropTypes.object,
+    performConditionalSignIn: PropTypes.func,
     onClose: PropTypes.func
   };
 
   kick() {
-    const { clientId, hubChannel, onClose } = this.props;
-    hubChannel.kick(clientId);
+    const { clientId, performConditionalSignIn, hubChannel, onClose } = this.props;
+
+    performConditionalSignIn(
+      () => hubChannel.can("kick_users"),
+      async () => await hubChannel.kick(clientId),
+      "kick-user"
+    );
+
     onClose();
   }
 
@@ -37,8 +44,14 @@ export default class ClientInfoDialog extends Component {
   }
 
   mute() {
-    const { clientId, hubChannel, onClose } = this.props;
-    hubChannel.mute(clientId);
+    const { clientId, performConditionalSignIn, hubChannel, onClose } = this.props;
+
+    performConditionalSignIn(
+      () => hubChannel.can("mute_users"),
+      async () => await hubChannel.mute(clientId),
+      "mute-user"
+    );
+
     onClose();
   }
 
@@ -71,22 +84,22 @@ export default class ClientInfoDialog extends Component {
           </div>
           <div className={styles.clientActionButtons}>
             {!isHidden && (
-              <button onClick={this.hide}>
+              <button onClick={() => this.hide()}>
                 <FormattedMessage id="client-info.hide-button" />
               </button>
             )}
             {isHidden && (
-              <button onClick={this.unhide}>
+              <button onClick={() => this.unhide()}>
                 <FormattedMessage id="client-info.unhide-button" />
               </button>
             )}
             {mayMute && (
-              <button onClick={this.mute}>
+              <button onClick={() => this.mute()}>
                 <FormattedMessage id="client-info.mute-button" />
               </button>
             )}
             {mayKick && (
-              <button onClick={this.kick}>
+              <button onClick={() => this.kick()}>
                 <FormattedMessage id="client-info.kick-button" />
               </button>
             )}

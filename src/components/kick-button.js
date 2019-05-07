@@ -17,6 +17,6 @@ AFRAME.registerComponent("kick-button", {
   },
 
   async kick(clientId) {
-    await window.APP.hubChannel.kick(clientId);
+    this.el.sceneEl.emit("action_kick_client", { clientId });
   }
 });

@@ -27,6 +27,17 @@ function getPresenceImage(ctx) {
   }
 }
 
+export function navigateToClientInfo(history, clientId) {
+  const currentParams = new URLSearchParams(history.location.search);
+
+  if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
+    currentParams.set("client_id", clientId);
+    pushHistoryPath(history, history.location.pathname, currentParams.toString());
+  } else {
+    pushHistoryPath(history, withSlug(history.location, `/clients/${clientId}`), currentParams.toString());
+  }
+}
+
 export default class PresenceList extends Component {
   static propTypes = {
     presences: PropTypes.object,
@@ -39,18 +50,7 @@ export default class PresenceList extends Component {
   };
 
   navigateToClientInfo = clientId => {
-    const currentParams = new URLSearchParams(this.props.history.location.search);
-
-    if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
-      currentParams.set("client_id", clientId);
-      pushHistoryPath(this.props.history, this.props.history.location.pathname, currentParams.toString());
-    } else {
-      pushHistoryPath(
-        this.props.history,
-        withSlug(this.props.history.location, `/clients/${clientId}`),
-        currentParams.toString()
-      );
-    }
+    navigateToClientInfo(this.props.history, clientId);
   };
 
   domForPresence = ([sessionId, data]) => {
