@@ -593,18 +593,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       signInContinueTextId,
       onContinueAfterSignIn: async () => {
         remountUI({ showSignInDialog: false });
-        let actionFailed = false;
+        let actionError = null;
         if (predicate()) {
           try {
             await action();
           } catch (e) {
-            actionFailed = true;
+            actionError = e;
           }
         } else {
-          actionFailed = true;
+          actionError = new Error("Predicate failed post sign-in");
         }
 
-        if (actionFailed && onFailure) onFailure();
+        if (actionError && onFailure) onFailure(actionError);
         handleReEntryToVRFrom2DInterstitial();
       }
     });
