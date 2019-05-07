@@ -236,7 +236,7 @@ export default class AvatarEditor extends Component {
         id={`avatar-${name}`}
         type="checkbox"
         disabled={disabled}
-        checked={this.state.avatar[name]}
+        checked={!!this.state.avatar[name]}
         onChange={e => this.setState({ avatar: { ...this.state.avatar, [name]: e.target.checked } })}
       />
     </div>
