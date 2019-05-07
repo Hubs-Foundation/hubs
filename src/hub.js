@@ -1022,7 +1022,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
             }
 
-            scene.emit("presence_updated", { sessionId, profile: meta.profile, perms: meta.perms });
+            scene.emit("presence_updated", { sessionId, profile: meta.profile, roles: meta.roles });
           });
 
           presence.onLeave((sessionId, current, info) => {

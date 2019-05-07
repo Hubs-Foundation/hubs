@@ -42,7 +42,7 @@ export default class PresenceList extends Component {
     const context = meta.context;
     const profile = meta.profile;
     const image = getPresenceImage(context);
-    const isModerator = meta.perms && meta.perms.kick_users;
+    const isModerator = meta.roles && meta.roles.moderator;
     const badge = isModerator && (
       <span className={styles.moderatorBadge} title="Moderator">
         &#x2605;

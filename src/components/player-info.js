@@ -50,7 +50,7 @@ AFRAME.registerComponent("player-info", {
     this.updateDisplayNameFromPresenceMeta(e.detail);
   },
   updateDisplayNameFromPresenceMeta(presenceMeta) {
-    const isModerator = presenceMeta.perms && presenceMeta.perms.kick_users;
+    const isModerator = presenceMeta.roles && presenceMeta.roles.moderator;
     this.displayName = presenceMeta.profile.displayName + (isModerator ? " *" : "");
     this.applyDisplayName();
   },
