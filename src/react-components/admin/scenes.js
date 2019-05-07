@@ -1,6 +1,6 @@
 import React from "react";
 import { SceneLink, OwnedFileImage } from "./fields";
-import ApproveSceneButton from "./approve-scene-button";
+import { ApproveSceneButton } from "./approve-scene-button";
 
 import {
   List,

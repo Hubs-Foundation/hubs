@@ -1,6 +1,6 @@
 import React from "react";
 import { SceneLink, OwnedFileImage } from "./fields";
-import UnfeatureSceneListingButton from "./unfeature-scene-listing-button";
+import { FeatureSceneListingButton } from "./feature-scene-listing-button";
 
 import {
   List,
@@ -26,7 +26,7 @@ export const FeaturedSceneListingList = props => (
       <TextField source="description" />
       <TextField source="attributions" />
       <EditButton />
-      <UnfeatureSceneListingButton />
+      <FeatureSceneListingButton />
     </Datagrid>
   </List>
 );

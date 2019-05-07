@@ -2,31 +2,43 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Button from "@material-ui/core/Button";
-import { sceneListingFeature } from "./scene-actions";
+import { listingFeature, listingUnfeature } from "./listing-actions";
 
-class FeatureSceneListingButton extends Component {
-  handleClick = () => {
-    const { sceneListingFeature, record } = this.props;
-    sceneListingFeature(record.id, record);
-  };
+const isFeatured = record => (record.tags.tags || []).includes("featured");
 
-  render() {
-    if (this.props.record.tags.tags && this.props.record.tags.tags.includes("featured")) return null;
-
-    return (
-      <Button label="Feature" onClick={this.handleClick}>
-        Feature
-      </Button>
-    );
-  }
+function FeatureListingButton(props) {
+  const { feature, unfeature, record, resource } = props;
+  const featured = isFeatured(record);
+  const label = featured ? "Unfeature" : "Feature";
+  return (
+    <Button label={label} onClick={() => (featured ? unfeature : feature)(resource, record.id, record)}>
+      {label}
+    </Button>
+  );
 }
 
-FeatureSceneListingButton.propTypes = {
-  sceneListingFeature: PropTypes.func.isRequired,
+FeatureListingButton.propTypes = {
+  feature: PropTypes.func.isRequired,
+  unfeature: PropTypes.func.isRequired,
+  resource: PropTypes.string.isRequired,
   record: PropTypes.object
 };
 
-export default connect(
+const withStaticProps = staticProps => (stateProps, dispatchProps, ownProps) => ({
+  ...ownProps,
+  ...stateProps,
+  ...dispatchProps,
+  ...staticProps
+});
+
+export const FeatureSceneListingButton = connect(
   null,
-  { sceneListingFeature }
-)(FeatureSceneListingButton);
+  { feature: listingFeature, unfeature: listingUnfeature },
+  withStaticProps({ resource: "scene_listings" })
+)(FeatureListingButton);
+
+export const FeatureAvatarListingButton = connect(
+  null,
+  { feature: listingFeature, unfeature: listingUnfeature },
+  withStaticProps({ resource: "avatar_listings" })
+)(FeatureListingButton);
