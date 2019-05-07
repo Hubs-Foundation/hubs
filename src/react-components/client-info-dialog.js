@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/client-info-dialog.scss";
 import profileAvatarPlaceholder from "../assets/images/profile-avatar-placeholder.jpg";
+import { FormattedMessage } from "react-intl";
 import { sluglessPath } from "../utils/history";
 
 export function getClientInfoClientId(location) {
@@ -19,8 +20,33 @@ export default class ClientInfoDialog extends Component {
     clientId: PropTypes.string,
     history: PropTypes.object,
     hubChannel: PropTypes.object,
-    presences: PropTypes.object
+    presences: PropTypes.object,
+    onClose: PropTypes.func
   };
+
+  kick() {
+    const { clientId, hubChannel, onClose } = this.props;
+    hubChannel.kick(clientId);
+    onClose();
+  }
+
+  hide() {
+    const { clientId, onClose, hubChannel } = this.props;
+    hubChannel.hide(clientId);
+    onClose();
+  }
+
+  mute() {
+    const { clientId, hubChannel, onClose } = this.props;
+    hubChannel.mute(clientId);
+    onClose();
+  }
+
+  unhide() {
+    const { clientId, hubChannel, onClose } = this.props;
+    hubChannel.unhide(clientId);
+    onClose();
+  }
 
   render() {
     if (!this.props.presences) return null;
@@ -28,15 +54,45 @@ export default class ClientInfoDialog extends Component {
     const presence = Object.entries(this.props.presences).find(([k]) => k === this.props.clientId);
     if (!presence) return null;
 
+    const { hubChannel, clientId, onClose } = this.props;
     const metas = presence[1].metas;
     const meta = metas[metas.length - 1];
-    const title = <div className={styles.title}>{meta.profile.displayName}</div>;
+    const displayName = meta.profile.displayName;
+    const title = <div className={styles.title}>{displayName}</div>;
+    const mayKick = hubChannel.canOrWillIfCreator("kick_users");
+    const mayMute = hubChannel.canOrWillIfCreator("mute_users");
+    const isHidden = hubChannel.isHidden(clientId);
 
     return (
       <DialogContainer title={title} wide={true} {...this.props}>
         <div className={styles.roomInfo}>
           <div className={styles.clientProfileImage}>
             <img src={profileAvatarPlaceholder} />
+          </div>
+          <div className={styles.clientActionButtons}>
+            {!isHidden && (
+              <button onClick={this.hide}>
+                <FormattedMessage id="client-info.hide-button" />
+              </button>
+            )}
+            {isHidden && (
+              <button onClick={this.unhide}>
+                <FormattedMessage id="client-info.unhide-button" />
+              </button>
+            )}
+            {mayMute && (
+              <button onClick={this.mute}>
+                <FormattedMessage id="client-info.mute-button" />
+              </button>
+            )}
+            {mayKick && (
+              <button onClick={this.kick}>
+                <FormattedMessage id="client-info.kick-button" />
+              </button>
+            )}
+            <button className={styles.cancel} onClick={onClose}>
+              <FormattedMessage id="client-info.cancel" />
+            </button>
           </div>
         </div>
       </DialogContainer>

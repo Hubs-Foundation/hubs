@@ -164,6 +164,13 @@ $semi-bold: 600;
   color: $action-color;
 }
 
+%action-button-secondary-modal {
+  @extend %action-button;
+  background-color: #f4f4f4;
+  color: $action-color;
+}
+
+
 %action-button-selected {
   background: white;
   color: $action-color;

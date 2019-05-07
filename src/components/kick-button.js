@@ -17,8 +17,6 @@ AFRAME.registerComponent("kick-button", {
   },
 
   async kick(clientId) {
-    const { permsToken } = await this.el.sceneEl.systems.permissions.fetchPermissions();
-    NAF.connection.adapter.kick(clientId, permsToken);
-    window.APP.hubChannel.kick(clientId);
+    await window.APP.hubChannel.kick(clientId);
   }
 });

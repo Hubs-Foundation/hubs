@@ -180,7 +180,7 @@ export default class SceneEntryManager {
     });
 
     document.body.addEventListener("unblocked", ev => {
-      NAF.connection.entities.completeSync(ev.detail.clientId);
+      NAF.connection.entities.completeSync(ev.detail.clientId, true);
     });
   };
 

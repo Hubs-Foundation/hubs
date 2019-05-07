@@ -20,6 +20,7 @@ export default class HubChannel extends EventTarget {
     this.store = store;
     this._signedIn = !!this.store.state.credentials.token;
     this._permissions = {};
+    this._blockedSessionIds = new Set();
   }
 
   get signedIn() {
@@ -260,7 +261,23 @@ export default class HubChannel extends EventTarget {
     this.channel.push("mute", { session_id: sessionId });
   };
 
-  kick = sessionId => {
+  hide = sessionId => {
+    NAF.connection.adapter.block(sessionId);
+    this._blockedSessionIds.add(sessionId);
+  };
+
+  unhide = sessionId => {
+    if (!this.blockedSessionIds.has(sessionId)) return;
+    NAF.connection.adapter.unblock(sessionId);
+    NAF.connection.entities.completeSync(sessionId);
+    this._blockedSessionIds.delete(sessionId);
+  };
+
+  isHidden = sessionId => this._blockedSessionIds.has(sessionId);
+
+  kick = async sessionId => {
+    const permsToken = await this.fetchPermissions();
+    NAF.connection.adapter.kick(sessionId, permsToken);
     this.channel.push("kick", { session_id: sessionId });
   };
 

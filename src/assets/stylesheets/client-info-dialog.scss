@@ -51,3 +51,20 @@
   font-size: 1.8em;
   font-weight: bold;
 }
+
+:local(.client-action-buttons) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  button {
+    @extend %action-button-secondary-modal;
+    margin-top: 12px;
+    width: 150px;
+  }
+
+  :local(.cancel) {
+    @extend %action-button;
+  }
+}
