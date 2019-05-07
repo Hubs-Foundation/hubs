@@ -22,6 +22,7 @@ export default class AvatarEditor extends Component {
     avatarId: PropTypes.string,
     onSignIn: PropTypes.func,
     onSave: PropTypes.func,
+    onClose: PropTypes.func,
     signedIn: PropTypes.bool,
     debug: PropTypes.bool,
     className: PropTypes.string
@@ -243,62 +244,66 @@ export default class AvatarEditor extends Component {
   );
 
   render() {
-    if (!this.props.signedIn) {
-      return (
-        <div className={classNames(this.props.className)}>
+    const { debug } = this.props;
+    return (
+      <div className={classNames(styles.avatarEditor, this.props.className)}>
+        {this.props.onClose && (
+          <a onClick={this.props.onClose}>
+            <i>
+              <FontAwesomeIcon icon={faTimes} />
+            </i>
+          </a>
+        )}
+        {this.props.signedIn ? (
+          <div>
+            <div className="split">
+              <div className="form-body">
+                {debug && this.textField("avatar_id", "Avatar ID", true)}
+                {debug && this.textField("parent_avatar_id", "Parent Avatar ID")}
+                {this.textField("name", "Name")}
+                {this.textField("description", "Description")}
+                {this.checkbox("allow_remixing", "Allow Remixing")}
+                {this.checkbox("allow_promotion", "Allow Promotion")}
+                {debug && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
+
+                {this.mapField("base_map", "Base Map", "image/*")}
+                {this.mapField("emissive_map", "Emissive Map", "image/*")}
+                {this.mapField("normal_map", "Normal Map", "image/*")}
+
+                {this.mapField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
+
+                {/* {this.mapField("ao_map", "AO Map", "images/\*", true)} */}
+                {/* {this.mapField("metallic_map", "Metallic Map", "image/\*", true)} */}
+                {/* {this.mapField("roughness_map", "Roughness Map", "image/\*", true)} */}
+              </div>
+              <AvatarPreview
+                avatarGltfUrl={this.state.previewGltfUrl}
+                {...this.inputFiles}
+                ref={p => (this.preview = p)}
+              />
+            </div>
+            <div className={styles.info}>
+              <FormattedMessage id="avatar-editor.info" />
+              <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
+                <FormattedMessage id="avatar-editor.info-link" />
+              </a>
+            </div>
+            <div>
+              <input
+                disabled={this.state.uploading}
+                onClick={this.uploadAvatar}
+                className={styles.formSubmit}
+                type="submit"
+                value={this.state.uploading ? "Uploading..." : "Save"}
+              />
+            </div>
+            <a onClick={this.deleteAvatar}>delete avatar</a>
+          </div>
+        ) : (
           <a onClick={this.props.onSignIn}>
             <FormattedMessage id="sign-in.in" />
           </a>
-        </div>
-      );
-    }
-
-    const { debug } = this.props;
-
-    return (
-      <div className={classNames(styles.avatarEditor, this.props.className)}>
-        <div className="split">
-          <div className="form-body">
-            {debug && this.textField("avatar_id", "Avatar ID", true)}
-            {debug && this.textField("parent_avatar_id", "Parent Avatar ID")}
-            {this.textField("name", "Name")}
-            {this.textField("description", "Description")}
-            {this.checkbox("allow_remixing", "Allow Remixing")}
-            {this.checkbox("allow_promotion", "Allow Promotion")}
-            {debug && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
-
-            {this.mapField("base_map", "Base Map", "image/*")}
-            {this.mapField("emissive_map", "Emissive Map", "image/*")}
-            {this.mapField("normal_map", "Normal Map", "image/*")}
-
-            {this.mapField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
-
-            {/* {this.mapField("ao_map", "AO Map", "images/\*", true)} */}
-            {/* {this.mapField("metallic_map", "Metallic Map", "image/\*", true)} */}
-            {/* {this.mapField("roughness_map", "Roughness Map", "image/\*", true)} */}
-          </div>
-          <AvatarPreview
-            avatarGltfUrl={this.state.previewGltfUrl}
-            {...this.inputFiles}
-            ref={p => (this.preview = p)}
-          />
-        </div>
-        <div className={styles.info}>
-          <FormattedMessage id="avatar-editor.info" />
-          <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
-            <FormattedMessage id="avatar-editor.info-link" />
-          </a>
-        </div>
-        <div>
-          <input
-            disabled={this.state.uploading}
-            onClick={this.uploadAvatar}
-            className={styles.formSubmit}
-            type="submit"
-            value={this.state.uploading ? "Uploading..." : "Save"}
-          />
-        </div>
-        <a onClick={this.deleteAvatar}>delete avatar</a>
+        )}
       </div>
     );
   }

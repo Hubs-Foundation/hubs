@@ -754,7 +754,11 @@ class UIRoot extends Component {
   closeDialog = () => {
     showFullScreenIfWasFullScreen();
 
-    this.setState({ dialog: null });
+    if (this.state.dialog) {
+      this.setState({ dialog: null });
+    } else {
+      this.props.history.goBack();
+    }
   };
 
   showNonHistoriedDialog = (DialogClass, props = {}) => {
@@ -784,10 +788,6 @@ class UIRoot extends Component {
   signOut = async () => {
     await this.props.authChannel.signOut(this.props.hubChannel);
     this.setState({ signedIn: false });
-  };
-
-  closeOverlay = () => {
-    popToBeginningOfHubHistory(this.props.history)
   };
 
   showWebRTCScreenshareUnsupportedDialog = () => {
@@ -1406,7 +1406,7 @@ class UIRoot extends Component {
                 <ProfileEntryPanel
                   {...props}
                   displayNameOverride={displayNameOverride}
-                  finished={this.closeOverlay}
+                  finished={this.closeDialog}
                   store={this.props.store}
                   mediaSearchStore={this.props.mediaSearchStore}
                 />
@@ -1422,6 +1422,7 @@ class UIRoot extends Component {
                   signedIn={this.state.signedIn}
                   onSignIn={this.showSignInDialog}
                   onSave={() => this.props.history.goBack()}
+                  onClose={() => this.props.history.goBack()}
                   store={this.props.store}
                   debug={avatarEditorDebug}
                   avatarId={props.location.state.detail && props.location.state.detail.avatarId}
@@ -1445,7 +1446,7 @@ class UIRoot extends Component {
                   {...props}
                   displayNameOverride={displayNameOverride}
                   finished={() => {
-                    this.closeOverlay();
+                    this.closeDialog();
 
                     if (this.props.forcedVREntryType) {
                       this.handleForceEntry();

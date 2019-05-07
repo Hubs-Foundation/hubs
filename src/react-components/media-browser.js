@@ -214,7 +214,13 @@ class MediaBrowser extends Component {
 
   close = () => {
     showFullScreenIfWasFullScreen();
-    this.pushExitMediaBrowserHistory();
+
+    const urlSource = this.getUrlSource(new URLSearchParams(this.props.history.location.search));
+    if (urlSource === "avatars") {
+      this.props.history.goBack();
+    } else {
+      this.pushExitMediaBrowserHistory();
+    }
 
     if (this.state.clearStashedQueryOnClose) {
       this.props.mediaSearchStore.clearStashedQuery();
