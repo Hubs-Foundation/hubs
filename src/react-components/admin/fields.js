@@ -75,3 +75,19 @@ SceneLink.propTypes = {
   record: PropTypes.object,
   classes: PropTypes.object
 };
+
+export const AvatarLink = withStyles(styles)(({ source, record = {}, classes }) => {
+  const src = getReticulumFetchUrl(`/api/v1/avatars/${record.avatar_sid || record.avatar_listing_sid}`);
+  return (
+    <a href={src} className={classes.avatarLink} target="_blank" rel="noopener noreferrer">
+      {record[source]}
+      <LaunchIcon className={classes.icon} />
+    </a>
+  );
+});
+
+AvatarLink.propTypes = {
+  source: PropTypes.string.isRequired,
+  record: PropTypes.object,
+  classes: PropTypes.object
+};
