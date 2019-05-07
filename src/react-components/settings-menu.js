@@ -99,7 +99,9 @@ export default class SettingsMenu extends Component {
                 <div className={styles.listItem}>
                   <a
                     href="#"
-                    onClick={() =>
+                    onClick={e => {
+                      e.preventDefault();
+
                       this.props.performConditionalSignIn(
                         () => this.props.hubChannel.can("update_hub"),
                         () => {
@@ -107,8 +109,8 @@ export default class SettingsMenu extends Component {
                           this.props.hideSettings();
                         },
                         "rename-room"
-                      )
-                    }
+                      );
+                    }}
                   >
                     <FormattedMessage id="settings.rename-room" />
                   </a>
@@ -125,7 +127,9 @@ export default class SettingsMenu extends Component {
                 <div className={styles.listItem}>
                   <a
                     href="#"
-                    onClick={() =>
+                    onClick={e => {
+                      e.preventDefault();
+
                       this.props.performConditionalSignIn(
                         () => this.props.hubChannel.can("update_hub"),
                         () => {
@@ -133,8 +137,8 @@ export default class SettingsMenu extends Component {
                           this.props.hideSettings();
                         },
                         "close-room"
-                      )
-                    }
+                      );
+                    }}
                   >
                     <FormattedMessage id="settings.close-room" />
                   </a>
