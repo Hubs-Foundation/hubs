@@ -1,6 +1,6 @@
 import React from "react";
 import { AvatarLink, OwnedFileImage, ConditionalReferenceField } from "./fields";
-import { FeatureAvatarListingButton } from "./feature-scene-listing-button";
+import { FeatureAvatarListingButton } from "./feature-listing-buttons";
 
 import {
   List,

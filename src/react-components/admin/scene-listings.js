@@ -1,6 +1,6 @@
 import React from "react";
 import { SceneLink, OwnedFileImage } from "./fields";
-import { FeatureSceneListingButton } from "./feature-scene-listing-button";
+import { FeatureSceneListingButton } from "./feature-listing-buttons";
 
 import {
   List,
