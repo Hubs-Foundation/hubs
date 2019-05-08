@@ -32,7 +32,7 @@ export default class SceneEntryManager {
     this.cursorController = document.querySelector("#cursor-controller");
     this.playerRig = document.querySelector("#player-rig");
     this._entered = false;
-    this.onRequestAuthentication = () => {};
+    this.performConditionalSignIn = () => {};
     this.history = history;
   }
 
@@ -218,45 +218,15 @@ export default class SceneEntryManager {
   };
 
   _signInAndPinOrUnpinElement = (el, pin) => {
-    const action = pin ? this._pinElement : this._unpinElement;
-    const promptIdSuffix = pin ? "pin" : "unpin";
+    const action = pin ? () => this._pinElement(el) : async () => await this._unpinElement(el);
 
-    if (this.hubChannel.signedIn) {
-      action(el);
-    } else {
-      handleExitTo2DInterstitial(true);
-
-      const wasInVR = this.scene.is("vr-mode");
-      const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
-
-      this.onRequestAuthentication(
-        `sign-in.${promptIdSuffix}`,
-        `sign-in.${promptIdSuffix}-complete`,
-        continueTextId,
-        async () => {
-          let actionFailed = false;
-          if (this.hubChannel.signedIn) {
-            try {
-              await action(el);
-            } catch (e) {
-              actionFailed = true;
-            }
-          } else {
-            actionFailed = true;
-          }
-
-          if (actionFailed) {
-            // UI pins/un-pins the entity optimistically, so we undo that here.
-            // Note we have to disable the sign in flow here otherwise this will recurse.
-            this._disableSignInOnPinAction = true;
-            el.setAttribute("pinnable", "pinned", !pin);
-            this._disableSignInOnPinAction = false;
-          }
-
-          handleReEntryToVRFrom2DInterstitial();
-        }
-      );
-    }
+    this.performConditionalSignIn(() => this.hubChannel.signedIn, action, pin ? "pin" : "unpin", () => {
+      // UI pins/un-pins the entity optimistically, so we undo that here.
+      // Note we have to disable the sign in flow here otherwise this will recurse.
+      this._disableSignInOnPinAction = true;
+      el.setAttribute("pinnable", "pinned", !pin);
+      this._disableSignInOnPinAction = false;
+    });
   };
 
   _unpinElement = el => {
@@ -331,6 +301,26 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_invite", () => {
       handleExitTo2DInterstitial(false);
       pushHistoryState(this.history, "overlay", "invite");
+    });
+
+    this.scene.addEventListener("action_kick_client", ({ detail: { clientId } }) => {
+      this.performConditionalSignIn(
+        () => this.hubChannel.can("kick_users"),
+        async () => {
+          const { permsToken } = await this.scene.systems.permissions.fetchPermissions();
+          NAF.connection.adapter.kick(clientId, permsToken);
+          window.APP.hubChannel.kick(clientId);
+        },
+        "kick-user"
+      );
+    });
+
+    this.scene.addEventListener("action_mute_client", ({ detail: { clientId } }) => {
+      this.performConditionalSignIn(
+        () => this.hubChannel.can("mute_users"),
+        () => window.APP.hubChannel.mute(clientId),
+        "mute-user"
+      );
     });
 
     document.addEventListener("paste", e => {
@@ -445,7 +435,7 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_selected_media_result_entry", e => {
       // TODO spawn in space when no rights
       const entry = e.detail;
-      if (entry.type === "scene_listing" && this.hubChannel.permissions.update_hub) return;
+      if (entry.type === "scene_listing" && this.hubChannel.can("update_hub")) return;
 
       // If user has HMD lifted up or gone through interstitial, delay spawning for now. eventually show a modal
       const spawnDelay = isIn2DInterstitial() ? 3000 : 0;

@@ -165,7 +165,9 @@ class UIRoot extends Component {
     location: PropTypes.object,
     history: PropTypes.object,
     showInterstitialPrompt: PropTypes.bool,
-    onInterstitialPromptClicked: PropTypes.func
+    onInterstitialPromptClicked: PropTypes.func,
+    performConditionalSignIn: PropTypes.func,
+    hide: PropTypes.bool
   };
 
   state = {
@@ -737,7 +739,10 @@ class UIRoot extends Component {
     this.pushHistoryState("overlay", "link");
     const { code, cancel, onFinished } = await this.props.linkChannel.generateCode();
     this.setState({ linkCode: code, linkCodeCancel: cancel });
-    onFinished.then(() => this.setState({ log: false, linkCode: null, linkCodeCancel: null }));
+    onFinished.then(() => {
+      this.setState({ log: false, linkCode: null, linkCodeCancel: null });
+      this.props.history.goBack();
+    });
   };
 
   showInviteDialog = () => {
@@ -955,17 +960,21 @@ class UIRoot extends Component {
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>
           <span>{this.props.hubName}</span>
-          {this.props.hubChannel.permissions.update_hub && (
-            <StateLink
-              stateKey="modal"
-              stateValue="rename_room"
-              history={this.props.history}
+          {this.props.hubChannel.canOrWillIfCreator("update_hub") && (
+            <button
+              onClick={() =>
+                this.props.performConditionalSignIn(
+                  () => this.props.hubChannel.can("update_hub"),
+                  () => this.pushHistoryState("modal", "rename_room"),
+                  "rename-room"
+                )
+              }
               className={entryStyles.editButton}
             >
               <i>
                 <FontAwesomeIcon icon={faPencilAlt} />
               </i>
-            </StateLink>
+            </button>
           )}
           {this.props.hubScene && (
             <StateLink
@@ -986,13 +995,19 @@ class UIRoot extends Component {
         </div>
 
         <div className={entryStyles.center}>
-          {this.props.hubChannel.permissions.update_hub && (
+          {this.props.hubChannel.canOrWillIfCreator("update_hub") ? (
             <WithHoverSound>
               <div
-                className={entryStyles.chooseScene}
+                className={classNames([entryStyles.lobbyLabel, entryStyles.chooseScene])}
                 onClick={() => {
-                  showFullScreenIfAvailable();
-                  this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                  this.props.performConditionalSignIn(
+                    () => this.props.hubChannel.can("update_hub"),
+                    () => {
+                      showFullScreenIfAvailable();
+                      this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                    },
+                    "change-scene"
+                  );
                 }}
               >
                 <i>
@@ -1001,6 +1016,10 @@ class UIRoot extends Component {
                 <FormattedMessage id="entry.change-scene" />
               </div>
             </WithHoverSound>
+          ) : (
+            <div className={entryStyles.lobbyLabel}>
+              <FormattedMessage id="entry.in-lobby-notice" />
+            </div>
           )}
 
           <LobbyChatBox
@@ -1318,6 +1337,8 @@ class UIRoot extends Component {
   };
 
   render() {
+    if (this.props.hide) return <div />;
+
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
 
     const isLoading =
@@ -1427,6 +1448,7 @@ class UIRoot extends Component {
                 mediaSearchStore={this.props.mediaSearchStore}
                 hubChannel={this.props.hubChannel}
                 onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
+                performConditionalSignIn={this.props.performConditionalSignIn}
               />
             )}
             <StateRoute
@@ -1720,6 +1742,8 @@ class UIRoot extends Component {
                 hideSettings={() => this.setState({ showSettingsMenu: false })}
                 hubChannel={this.props.hubChannel}
                 hubScene={this.props.hubScene}
+                performConditionalSignIn={this.props.performConditionalSignIn}
+                pushHistoryState={this.pushHistoryState}
               />
             )}
 

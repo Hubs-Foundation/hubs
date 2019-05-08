@@ -177,3 +177,41 @@ THREE.Object3D.prototype.updateMatrixWorld = function(forceWorldUpdate, includeI
 
   if (this.childrenNeedMatrixWorldUpdate) this.childrenNeedMatrixWorldUpdate = false;
 };
+
+// Updates this function to use updateMatrices() to avoid extra matrix computations
+THREE.Object3D.prototype.lookAt = (function() {
+  // This method does not support objects having non-uniformly-scaled parent(s)
+
+  const q1 = new THREE.Quaternion();
+  const m1 = new THREE.Matrix4();
+  const target = new THREE.Vector3();
+  const position = new THREE.Vector3();
+
+  return function lookAt(x, y, z) {
+    if (x.isVector3) {
+      target.copy(x);
+    } else {
+      target.set(x, y, z);
+    }
+
+    const parent = this.parent;
+
+    this.updateMatrices(); // hubs change
+
+    position.setFromMatrixPosition(this.matrixWorld);
+
+    if (this.isCamera || this.isLight) {
+      m1.lookAt(position, target, this.up);
+    } else {
+      m1.lookAt(target, position, this.up);
+    }
+
+    this.quaternion.setFromRotationMatrix(m1);
+
+    if (parent) {
+      m1.extractRotation(parent.matrixWorld);
+      q1.setFromRotationMatrix(m1);
+      this.quaternion.premultiply(q1.inverse());
+    }
+  };
+})();

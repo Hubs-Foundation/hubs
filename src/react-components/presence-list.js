@@ -38,10 +38,16 @@ export default class PresenceList extends Component {
   };
 
   domForPresence = ([sessionId, data]) => {
-    const meta = data.metas[0];
+    const meta = data.metas[data.metas.length - 1];
     const context = meta.context;
     const profile = meta.profile;
     const image = getPresenceImage(context);
+    const isModerator = meta.roles && meta.roles.moderator;
+    const badge = isModerator && (
+      <span className={styles.moderatorBadge} title="Moderator">
+        &#x2605;
+      </span>
+    );
 
     return (
       <WithHoverSound key={sessionId}>
@@ -57,12 +63,16 @@ export default class PresenceList extends Component {
             {sessionId === this.props.sessionId ? (
               <StateLink className={styles.self} stateKey="overlay" stateValue="profile" history={this.props.history}>
                 {profile && profile.displayName}
+                {badge}
                 <i>
                   <FontAwesomeIcon icon={faPencilAlt} />
                 </i>
               </StateLink>
             ) : (
-              profile && profile.displayName
+              <span>
+                {profile && profile.displayName}
+                {badge}
+              </span>
             )}
           </div>
           <div className={styles.presence}>
