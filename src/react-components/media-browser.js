@@ -9,6 +9,7 @@ import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploa
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import styles from "../assets/stylesheets/media-browser.scss";
@@ -242,6 +243,7 @@ class MediaBrowser extends Component {
     const apiSource = this.state.result && this.state.result.meta.source;
     const isVariableWidth = this.state.result && ["bing_images", "tenor"].includes(apiSource);
     const showCustomOption = apiSource !== "scene_listings" || this.props.hubChannel.permissions.update_hub;
+    const [createAvatarWidth, createAvatarHeight] = this.getTileDimensions(false, true);
 
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
     if (this.state.selectNextResult) return <div />;
@@ -366,14 +368,20 @@ class MediaBrowser extends Component {
           <div className={styles.body}>
             <div className={classNames({ [styles.tiles]: true, [styles.tilesVariable]: isVariableWidth })}>
               {urlSource === "avatars" && (
-                <div className={styles.tile}>
+                <div
+                  style={{ width: `${createAvatarWidth}px`, height: `${createAvatarHeight}px` }}
+                  className={classNames(styles.tile, styles.createAvatar)}
+                >
                   <StateLink
                     stateKey="overlay"
                     stateValue="avatar-editor"
                     history={this.props.history}
                     className={styles.tileLink}
                   >
-                    <div className={styles.tileContent}>create a custom avatar</div>
+                    <div className={styles.tileContent}>
+                      <FontAwesomeIcon icon={faPlus} />
+                      <FormattedMessage id={`media-browser.create-avatar`} />
+                    </div>
                   </StateLink>
                 </div>
               )}
@@ -405,29 +413,33 @@ class MediaBrowser extends Component {
     );
   }
 
-  entryToTile = (entry, idx) => {
-    const imageSrc = entry.images.preview.url;
-    const creator = entry.attributions && entry.attributions.creator;
-    const isImage = entry.type.endsWith("_image");
-    const isAvatar = entry.type === "avatar";
-
+  getTileDimensions = (isImage, isAvatar, imageAspect) => {
     // Doing breakpointing here, so we can have proper image placeholder based upon dynamic aspect ratio
     const clientWidth = window.innerWidth;
     let imageHeight = clientWidth < 1079 ? (clientWidth < 768 ? (clientWidth < 400 ? 85 : 100) : 150) : 200;
     if (isAvatar) imageHeight = Math.floor(imageHeight * 1.5);
 
     // Aspect ratio can vary per image if its an image result. Avatars are a taller portrait aspect, o/w assume 720p
-    let imageAspect, imageWidth;
+    let imageWidth;
     if (isImage) {
-      imageAspect = entry.images.preview.width / entry.images.preview.height;
       imageWidth = Math.floor(Math.max(imageAspect * imageHeight, imageHeight * 0.85));
     } else if (isAvatar) {
-      imageAspect = 9 / 16;
-      imageWidth = Math.floor(imageAspect * imageHeight);
+      imageWidth = Math.floor((9 / 16) * imageHeight);
     } else {
-      imageAspect = 16 / 9;
-      imageWidth = Math.floor(Math.max(imageAspect * imageHeight, imageHeight * 0.85));
+      imageWidth = Math.floor(Math.max((16 / 9) * imageHeight, imageHeight * 0.85));
     }
+
+    return [imageWidth, imageHeight];
+  };
+
+  entryToTile = (entry, idx) => {
+    const imageSrc = entry.images.preview.url;
+    const creator = entry.attributions && entry.attributions.creator;
+    const isImage = entry.type.endsWith("_image");
+    const isAvatar = entry.type === "avatar";
+    const imageAspect = entry.images.preview.width / entry.images.preview.height;
+
+    const [imageWidth, imageHeight] = this.getTileDimensions(isImage, isAvatar, imageAspect);
 
     const publisherName =
       (entry.attributions && entry.attributions.publisher && entry.attributions.publisher.name) ||
@@ -445,10 +457,14 @@ class MediaBrowser extends Component {
           className={styles.tileLink}
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
         >
-          <img className={styles.tileContent} src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)} />
+          <img
+            className={classNames(styles.tileContent, styles.avatarTile)}
+            src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)}
+          />
         </a>
         {urlSource === "avatars" && (
           <StateLink
+            className={styles.editAvatar}
             stateKey="overlay"
             stateValue="avatar-editor"
             stateDetail={{ avatarId: entry.id }}

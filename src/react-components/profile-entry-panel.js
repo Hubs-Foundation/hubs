@@ -124,22 +124,28 @@ class ProfileEntryPanel extends Component {
               />
             )}
 
-            <a onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars")}>
+            <a
+              className={styles.chooseAvatar}
+              onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars")}
+            >
               <FormattedMessage id="profile.choose_avatar" />
             </a>
 
-            <AvatarPreview className={styles.preview} avatarGltfUrl={this.state.avatarGltfUrl} />
+            <div className={styles.preview}>
+              <AvatarPreview avatarGltfUrl={this.state.avatarGltfUrl} />
 
-            {this.state.avatarType === AVATAR_TYPES.SKINNABLE && (
-              <StateLink
-                stateKey="overlay"
-                stateValue="avatar-editor"
-                stateDetail={{ avatarId: this.state.avatarId }}
-                history={this.props.history}
-              >
-                <FontAwesomeIcon icon={faPencilAlt} />
-              </StateLink>
-            )}
+              {this.state.avatarType === AVATAR_TYPES.SKINNABLE && (
+                <StateLink
+                  stateKey="overlay"
+                  stateValue="avatar-editor"
+                  stateDetail={{ avatarId: this.state.avatarId }}
+                  history={this.props.history}
+                  className={styles.editAvatar}
+                >
+                  <FontAwesomeIcon icon={faPencilAlt} />
+                </StateLink>
+              )}
+            </div>
 
             <WithHoverSound>
               <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />

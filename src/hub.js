@@ -107,7 +107,7 @@ import "./systems/nav";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/permissions";
-import "./systems/exit-on-blur";
+// import "./systems/exit-on-blur";
 import "./systems/camera-tools";
 import "./systems/userinput/userinput";
 import "./systems/camera-mirror";

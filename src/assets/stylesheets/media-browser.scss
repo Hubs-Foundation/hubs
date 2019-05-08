@@ -269,6 +269,7 @@
       :local(.tile) {
         margin: 16px 8px;
         cursor: pointer;
+        position: relative;
 
         :local(.info) {
           margin-top: 4px;
@@ -344,6 +345,49 @@
           }
           img:local(.tile-content) {
             filter: brightness(1.1) contrast(1.1);
+          }
+          img:local(.avatar-tile) {
+            filter: none;
+            background-color: $lighter-grey;
+          }
+        }
+
+        :local(.edit-avatar) {
+          position: absolute;
+          top: 6px;
+          right: 7px;
+          color: black;
+          background: #ffffffde;
+          border-radius: 30px;
+          width: 30px;
+          height: 30px;
+          text-align: center;
+          line-height: 27px;
+        }
+      }
+    }
+
+    :local(.tile):local(.create-avatar) {
+      display: flex;
+      margin-top: -1em;
+
+      :local(.tile-link) {
+        flex: 1;
+        text-decoration: none;
+        :local(.tile-content) {
+          background-color: $lighter-grey;
+          display: flex;
+          align-items: center;
+          flex-direction: column;
+          justify-content: center;
+          text-align: center;
+          color: grey;
+          font-size: 14pt;
+          padding: 20pt;
+          box-sizing: border-box;
+          .fa-plus {
+            font-size: 20pt;
+            margin: 8px;
           }
         }
       }

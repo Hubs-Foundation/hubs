@@ -99,5 +99,22 @@
 
   :local(.preview) {
     flex: 1;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    position: relative;
+  }
+
+  :local(.choose-avatar) {
+    margin-bottom: 0.5em;
+    text-decoration: underline;
+  }
+
+  :local(.edit-avatar) {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: black;
+    font-size: 16pt;
   }
 }
