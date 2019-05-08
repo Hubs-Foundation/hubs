@@ -42,12 +42,16 @@ class AdminUI extends Component {
         <Resource name="pending_scenes" list={PendingSceneList} />
         <Resource name="scene_listings" list={SceneListingList} edit={SceneListingEdit} />
         <Resource name="featured_scene_listings" list={FeaturedSceneListingList} edit={FeaturedSceneListingEdit} />
-        <Resource name="pending_avatars" list={AvatarList} edit={AvatarEdit} />
+
+        <Resource name="pending_avatars" list={AvatarList} />
         <Resource name="avatar_listings" list={AvatarListingList} edit={AvatarListingEdit} />
+        <Resource name="featured_avatar_listings" list={AvatarListingList} edit={AvatarListingEdit} />
+
         <Resource name="accounts" list={AccountList} edit={AccountEdit} />
-        <Resource name="owned_files" />
         <Resource name="scenes" list={SceneList} edit={SceneEdit} />
         <Resource name="avatars" list={AvatarList} edit={AvatarEdit} />
+        <Resource name="owned_files" />
+
         <Resource name="hubs_metrics" list={ListGuesser} />
       </Admin>
     );
