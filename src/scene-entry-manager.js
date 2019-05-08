@@ -184,7 +184,7 @@ export default class SceneEntryManager {
     });
 
     document.body.addEventListener("unblocked", ev => {
-      NAF.connection.entities.completeSync(ev.detail.clientId);
+      NAF.connection.entities.completeSync(ev.detail.clientId, true);
     });
   };
 
@@ -309,11 +309,7 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_kick_client", ({ detail: { clientId } }) => {
       this.performConditionalSignIn(
         () => this.hubChannel.can("kick_users"),
-        async () => {
-          const { permsToken } = await this.scene.systems.permissions.fetchPermissions();
-          NAF.connection.adapter.kick(clientId, permsToken);
-          window.APP.hubChannel.kick(clientId);
-        },
+        async () => await window.APP.hubChannel.kick(clientId),
         "kick-user"
       );
     });

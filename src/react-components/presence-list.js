@@ -13,6 +13,7 @@ import StateLink from "./state-link.js";
 import { WithHoverSound } from "./wrap-with-audio";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+import { pushHistoryPath, withSlug } from "../utils/history";
 
 function getPresenceImage(ctx) {
   if (ctx && ctx.mobile) {
@@ -26,6 +27,17 @@ function getPresenceImage(ctx) {
   }
 }
 
+export function navigateToClientInfo(history, clientId) {
+  const currentParams = new URLSearchParams(history.location.search);
+
+  if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
+    currentParams.set("client_id", clientId);
+    pushHistoryPath(history, history.location.pathname, currentParams.toString());
+  } else {
+    pushHistoryPath(history, withSlug(history.location, `/clients/${clientId}`), currentParams.toString());
+  }
+}
+
 export default class PresenceList extends Component {
   static propTypes = {
     presences: PropTypes.object,
@@ -35,6 +47,10 @@ export default class PresenceList extends Component {
     email: PropTypes.string,
     onSignIn: PropTypes.func,
     onSignOut: PropTypes.func
+  };
+
+  navigateToClientInfo = clientId => {
+    navigateToClientInfo(this.props.history, clientId);
   };
 
   domForPresence = ([sessionId, data]) => {
@@ -69,10 +85,12 @@ export default class PresenceList extends Component {
                 </i>
               </StateLink>
             ) : (
-              <span>
-                {profile && profile.displayName}
+              <div>
+                <button className={styles.clientLink} onClick={() => this.navigateToClientInfo(sessionId)}>
+                  {profile && profile.displayName}
+                </button>
                 {badge}
-              </span>
+              </div>
             )}
           </div>
           <div className={styles.presence}>

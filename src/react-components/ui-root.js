@@ -21,6 +21,7 @@ import {
 import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
 import { getPresenceProfileForSession } from "../utils/phoenix-utils";
+import { getClientInfoClientId } from "./client-info-dialog";
 
 import { lang, messages } from "../utils/i18n";
 import Loader from "./loader";
@@ -49,6 +50,7 @@ import CloseRoomDialog from "./close-room-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
+import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import LobbyChatBox from "./lobby-chat-box.js";
 import InWorldChatBox from "./in-world-chat-box.js";
@@ -971,7 +973,7 @@ class UIRoot extends Component {
           {this.props.hubScene && (
             <StateLink
               stateKey="modal"
-              stateValue="info"
+              stateValue="room_info"
               history={this.props.history}
               className={entryStyles.infoButton}
             >
@@ -1416,6 +1418,9 @@ class UIRoot extends Component {
     const showMediaBrowser = mediaSource && (mediaSource === "scenes" || this.state.entered);
     const hasTopTip = this.props.activeTips && this.props.activeTips.top;
 
+    const clientInfoClientId = getClientInfoClientId(this.props.history.location);
+    const showClientInfo = !!clientInfoClientId;
+
     const discordBridges = this.discordBridges();
     const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
     const showDiscordTip = discordBridges.length > 0 && !this.state.discordTipDismissed;
@@ -1545,21 +1550,39 @@ class UIRoot extends Component {
             />
             <StateRoute
               stateKey="modal"
-              stateValue="info"
+              stateValue="room_info"
               history={this.props.history}
               render={() =>
                 this.renderDialog(RoomInfoDialog, { scene: this.props.hubScene, hubName: this.props.hubName })
               }
             />
 
+            {showClientInfo && (
+              <ClientInfoDialog
+                clientId={clientInfoClientId}
+                onClose={this.closeDialog}
+                history={this.props.history}
+                presences={this.props.presences}
+                hubChannel={this.props.hubChannel}
+                performConditionalSignIn={this.props.performConditionalSignIn}
+              />
+            )}
+
             {(!this.state.entered || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
-                <PresenceLog entries={presenceLogEntries} hubId={this.props.hubId} />
+                <PresenceLog entries={presenceLogEntries} hubId={this.props.hubId} history={this.props.history} />
                 <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
               </div>
             )}
 
-            {entered && <PresenceLog inRoom={true} entries={presenceLogEntries} hubId={this.props.hubId} />}
+            {entered && (
+              <PresenceLog
+                inRoom={true}
+                entries={presenceLogEntries}
+                hubId={this.props.hubId}
+                history={this.props.history}
+              />
+            )}
             {entered &&
               this.props.activeTips &&
               this.props.activeTips.bottom &&

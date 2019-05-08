@@ -284,6 +284,11 @@
     "discord.secondary_tagline": "No downloads or sign up. Full VR support too.",
     "discord.contact_us": "Request Beta Invite",
     "discord.community_link": "Hubs Discord",
-    "discord.splash_tag": "Designed for serious businessing."
+    "discord.splash_tag": "Designed for serious businessing.",
+    "client-info.kick-button": "Kick",
+    "client-info.hide-button": "Hide",
+    "client-info.unhide-button": "Un-hide ",
+    "client-info.mute-button": "Mute",
+    "client-info.cancel": "cancel"
   }
 }
