@@ -12,7 +12,6 @@ import {
   BooleanInput,
   Datagrid,
   TextField,
-  ReferenceField,
   DateField,
   BooleanField,
   Filter

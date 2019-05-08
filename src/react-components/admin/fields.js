@@ -33,6 +33,11 @@ export function ConditionalReferenceField(props) {
   return record && record[source] ? <ReferenceField {...props} /> : defaultValue;
 }
 
+ConditionalReferenceField.propTypes = {
+  ...ReferenceField.propTypes,
+  defaultValue: PropTypes.element
+};
+
 const OwnedFileImageInternal = withStyles(styles)(({ record = {}, aspect = "wide", classes }) => {
   const src = getReticulumFetchUrl(`/files/${record.owned_file_uuid}`);
   return <img src={src} className={classes[`ownedFileImageAspect_${aspect}`]} />;
