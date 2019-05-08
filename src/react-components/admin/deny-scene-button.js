@@ -3,14 +3,18 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Button from "@material-ui/core/Button";
 import { sceneReviewed } from "./scene-actions";
+import { avatarReviewed } from "./avatar-actions";
 
-class DenySceneButton extends Component {
+class DenyButton extends Component {
   handleClick = () => {
-    const { sceneReviewed, record } = this.props;
-    sceneReviewed(record.id);
+    const { reviewed, record } = this.props;
+    reviewed(record.id);
   };
 
   render() {
+    const { record } = this.props;
+    if (!(record.allow_promotion || record._allow_promotion)) return false;
+
     return (
       <Button label="Deny" onClick={this.handleClick}>
         Deny
@@ -19,12 +23,17 @@ class DenySceneButton extends Component {
   }
 }
 
-DenySceneButton.propTypes = {
-  sceneReviewed: PropTypes.func.isRequired,
+DenyButton.propTypes = {
+  reviewed: PropTypes.func.isRequired,
   record: PropTypes.object
 };
 
-export default connect(
+export const DenySceneButton = connect(
   null,
-  { sceneReviewed }
-)(DenySceneButton);
+  { reviewed: sceneReviewed }
+)(DenyButton);
+
+export const DenyAvatarButton = connect(
+  null,
+  { reviewed: avatarReviewed }
+)(DenyButton);

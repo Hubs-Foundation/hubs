@@ -1,6 +1,7 @@
 import React from "react";
 import { AvatarLink, OwnedFileImage, ConditionalReferenceField } from "./fields";
 import { ApproveAvatarButton } from "./approve-scene-button";
+import { DenyAvatarButton } from "./deny-scene-button";
 
 import {
   List,
@@ -12,7 +13,6 @@ import {
   BooleanInput,
   Datagrid,
   TextField,
-  ReferenceField,
   DateField,
   BooleanField,
   Filter
@@ -71,6 +71,7 @@ export const AvatarList = props => (
       <TextField source="state" />
       <EditButton />
       <ApproveAvatarButton />
+      <DenyAvatarButton />
     </Datagrid>
   </List>
 );
