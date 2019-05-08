@@ -1099,7 +1099,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const name = getAuthor();
     const maySpawn = scene.is("entered");
 
-    const incomingMessage = { name, type, body, maySpawn };
+    const incomingMessage = { name, type, body, maySpawn, sessionId: session_id };
 
     if (scene.is("vr-mode")) {
       createInWorldLogMessage(incomingMessage);

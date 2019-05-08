@@ -12,7 +12,8 @@ export default class PresenceLog extends Component {
   static propTypes = {
     entries: PropTypes.array,
     inRoom: PropTypes.bool,
-    hubId: PropTypes.string
+    hubId: PropTypes.string,
+    history: PropTypes.object
   };
 
   constructor(props) {
@@ -67,6 +68,8 @@ export default class PresenceLog extends Component {
             className={classNames(entryClasses)}
             body={e.body}
             maySpawn={e.maySpawn}
+            sessionId={e.sessionId}
+            history={this.props.history}
           />
         );
       case "image":
