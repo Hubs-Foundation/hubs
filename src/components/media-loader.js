@@ -53,6 +53,10 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
+
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.networkedEl = networkedEl;
+    });
   },
 
   updateScale: (function() {
@@ -124,7 +128,7 @@ AFRAME.registerComponent("media-loader", {
       this.loadingClip.play();
       this.loadingScaleClip.play();
     }
-    if (this.el.sceneEl.is("entered")) {
+    if (this.el.sceneEl.is("entered") && (!this.networkedEl || NAF.utils.isMine(this.networkedEl))) {
       this.loadingSoundNode = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundLooped(
         SOUND_MEDIA_LOADING
       );
