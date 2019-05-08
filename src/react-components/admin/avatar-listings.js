@@ -46,7 +46,7 @@ export const AvatarListingList = props => (
         defaultImage="https://asset-bundles-prod.reticulum.io/bots/avatar_unavailable.png"
       />
       <TextField source="name" />
-      <AvatarLink source="avatar_sid" />
+      <AvatarLink source="avatar_listing_sid" />
       <ConditionalReferenceField reference="avatar_listings" source="parent_avatar_listing_id">
         <TextField source="name" />
       </ConditionalReferenceField>
