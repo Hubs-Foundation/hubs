@@ -29,7 +29,7 @@ const styles = {
 };
 
 export function ConditionalReferenceField(props) {
-  const { source, record, defaultValue = false } = props;
+  const { source, record, defaultValue = <div /> } = props;
   return record && record[source] ? <ReferenceField {...props} /> : defaultValue;
 }
 
@@ -44,11 +44,6 @@ const OwnedFileImageInternal = withStyles(styles)(({ record = {}, aspect = "wide
 });
 
 export const OwnedFileImage = withStyles(styles)(({ basePath, record, source, aspect, classes, defaultImage }) => {
-  const defaultValue = defaultImage ? (
-    <img src={defaultImage} className={classes[`ownedFileImageAspect_${aspect}`]} />
-  ) : (
-    false
-  );
   return (
     <ConditionalReferenceField
       basePath={basePath}
@@ -56,7 +51,7 @@ export const OwnedFileImage = withStyles(styles)(({ basePath, record, source, as
       reference="owned_files"
       linkType={false}
       record={record}
-      defaultValue={defaultValue}
+      defaultValue={defaultImage && <img src={defaultImage} className={classes[`ownedFileImageAspect_${aspect}`]} />}
     >
       <OwnedFileImageInternal source="owned_file_uuid" aspect={aspect} />
     </ConditionalReferenceField>
