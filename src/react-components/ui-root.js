@@ -232,8 +232,12 @@ class UIRoot extends Component {
         this.setState({ signedIn });
       }
     }
-    if (prevProps.showSignInDialog !== showSignInDialog && showSignInDialog) {
-      this.showContextualSignInDialog();
+    if (prevProps.showSignInDialog !== showSignInDialog) {
+      if (showSignInDialog) {
+        this.showContextualSignInDialog();
+      } else {
+        this.closeDialog();
+      }
     }
     if (!this.willCompileAndUploadMaterials && this.state.noMoreLoadingUpdates) {
       this.willCompileAndUploadMaterials = true;
@@ -324,18 +328,12 @@ class UIRoot extends Component {
       onContinueAfterSignIn
     } = this.props;
 
-    const closeAndContinue = () => {
-      this.closeDialog();
-      showFullScreenIfWasFullScreen();
-      onContinueAfterSignIn();
-    };
-
     this.showNonHistoriedDialog(SignInDialog, {
       message: messages[signInMessageId],
       onSignIn: async email => {
         const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
 
-        this.showNonHistoriedDialog(SignInDialog, { authStarted: true, onClose: closeAndContinue });
+        this.showNonHistoriedDialog(SignInDialog, { authStarted: true, onClose: onContinueAfterSignIn });
 
         await authComplete;
 
@@ -344,11 +342,11 @@ class UIRoot extends Component {
           authComplete: true,
           message: messages[signInCompleteMessageId],
           continueText: messages[signInContinueTextId],
-          onClose: closeAndContinue,
-          onContinue: closeAndContinue
+          onClose: onContinueAfterSignIn,
+          onContinue: onContinueAfterSignIn
         });
       },
-      onClose: closeAndContinue
+      onClose: onContinueAfterSignIn
     });
   };
 

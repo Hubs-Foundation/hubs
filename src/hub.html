@@ -792,23 +792,21 @@
                 "
         ></a-entity>
 
-        <a-entity matrix-auto-update class="vr-notice" follow-in-fov="target: #player-camera; offset: 0 0 -0.8; angle: 39;" visible="false">
-            <a-entity class="ui interactable-ui" mixin="button-container">
-                <a-entity slice9="width: 0.9; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; opacity: 1.0; src: #button"
-                    text-button="
-                        textHoverColor: #fff;
-                        textColor: #fff;
-                        backgroundColor: #2f80ed;"
-                    position="0 0 0.01">
-                    <a-entity class="close-notice-button" close-vr-notice-button is-remote-hover-target tags="isHoverMenuChild: true; singleActionButton: true;" position="-0.35 0 0.01" scale="0.6 0.6 0.6">
-                        <a-image
-                            icon-button="image: #close-white; hoverImage: #close-white;"
-                            scale="0.075 0.075 0.075"
-                            position="0 0.005 0.01"
-                        ></a-image>
-                    </a-entity>
-                    <a-entity text="value:View your desktop to continue; width:1; align:center;" position="0.05 0 0.01"></a-entity>
+        <a-entity matrix-auto-update class="ui interactable-ui vr-notice" mixin="button-container" follow-in-fov="target: #player-camera; offset: 0 0 -0.8; angle: 39;" visible="false">
+            <a-entity slice9="width: 0.8; height: 0.25; left: 64; top: 64; right: 66; bottom: 66; opacity: 1.0; src: #button"
+                text-button="
+                    textHoverColor: #fff;
+                    textColor: #fff;
+                    backgroundColor: #2f80ed;"
+                position="0 0 0.01">
+                <a-entity class="close-notice-button" close-vr-notice-button is-remote-hover-target tags="singleActionButton: true;" position="0 -0.075 0.01" scale="0.6 0.6 0.6">
+                    <a-image
+                        icon-button="image: #close-white; hoverImage: #close-white;"
+                        scale="0.05 0.05 0.05"
+                        position="0 0.005 0.01"
+                    ></a-image>
                 </a-entity>
+                <a-entity text="value:View your desktop to continue; width:1; align:center;" position="0 0 0.01"></a-entity>
             </a-entity>
         </a-entity>
 
