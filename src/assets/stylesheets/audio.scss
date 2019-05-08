@@ -17,6 +17,29 @@
     @extend %bottom-action-button;
     @extend %wide-button;
   }
+  &__mute-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 12px 0;
+
+    input {
+      cursor: pointer;
+      @extend %checkbox;
+    }
+
+    input:checked {
+      @extend %checkbox-checked;
+    }
+
+    label {
+      cursor: pointer;
+      margin-right: 8px;
+    }
+
+    color: $darker-grey;
+  }
+
 
   &__title {
     @extend %top-title;
