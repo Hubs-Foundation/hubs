@@ -6,22 +6,25 @@ import { getReticulumFetchUrl } from "./../../utils/phoenix-utils";
 import { ReferenceField } from "react-admin";
 
 const styles = {
-  ownedFileImage: {
-    width: 200,
-    height: 150,
-    padding: 12
-  },
+  ownedFileImage: {},
 
   sceneLink: {},
   avatarLink: {},
 
   ownedFileImageAspect_square: {
     width: 150,
-    height: 150
+    height: 150,
+    padding: 12
+  },
+  ownedFileImageAspect_wide: {
+    width: 200,
+    height: 150,
+    padding: 12
   },
   ownedFileImageAspect_tall: {
     width: (150 * 9) / 16,
-    height: 150
+    height: 150,
+    padding: 12
   }
 };
 
@@ -30,7 +33,7 @@ export function ConditionalReferenceField(props) {
   return record && record[source] ? <ReferenceField {...props} /> : defaultValue;
 }
 
-const OwnedFileImageInternal = withStyles(styles)(({ record = {}, aspect, classes }) => {
+const OwnedFileImageInternal = withStyles(styles)(({ record = {}, aspect = "wide", classes }) => {
   const src = getReticulumFetchUrl(`/files/${record.owned_file_uuid}`);
   return <img src={src} className={classes[`ownedFileImageAspect_${aspect}`]} />;
 });

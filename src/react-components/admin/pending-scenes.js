@@ -1,9 +1,9 @@
 import React from "react";
-import { SceneLink, OwnedFileImage } from "./fields";
+import { SceneLink, OwnedFileImage, ConditionalReferenceField } from "./fields";
 import { ApproveSceneButton } from "./approve-scene-button";
-import DenySceneButton from "./deny-scene-button";
+import { DenySceneButton } from "./deny-scene-button";
 
-import { List, Datagrid, TextField, ReferenceField, DateField } from "react-admin";
+import { List, Datagrid, TextField, DateField } from "react-admin";
 
 export const PendingSceneList = props => (
   <List {...props}>
@@ -13,9 +13,9 @@ export const PendingSceneList = props => (
       <TextField source="name" />
       <TextField source="description" />
       <TextField source="attributions" />
-      <ReferenceField source="scene_listing_id" reference="scene_listings">
+      <ConditionalReferenceField source="scene_listing_id" reference="scene_listings">
         <TextField source="name" />
-      </ReferenceField>
+      </ConditionalReferenceField>
       <DateField source="updated_at" />
       <ApproveSceneButton />
       <DenySceneButton />

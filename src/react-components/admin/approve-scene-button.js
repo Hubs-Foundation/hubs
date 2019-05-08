@@ -20,7 +20,7 @@ class ApproveButton extends Component {
 
   render() {
     const { record } = this.props;
-    if (!record.allow_promotion) return false;
+    if (!(record.allow_promotion || record._allow_promotion)) return false;
 
     return (
       <Button label="Approve" onClick={this.handleClick}>
