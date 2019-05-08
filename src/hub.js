@@ -66,6 +66,7 @@ import "./components/pitch-yaw-rotator";
 import "./components/position-at-box-shape-border";
 import "./components/pinnable";
 import "./components/pin-networked-object-button";
+import "./components/drop-object-button";
 import "./components/remove-networked-object-button";
 import "./components/camera-focus-button";
 import "./components/mirror-camera-button";

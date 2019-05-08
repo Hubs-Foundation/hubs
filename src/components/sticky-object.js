@@ -4,8 +4,8 @@ const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 AFRAME.registerComponent("sticky-object", {
   schema: {
     autoLockOnLoad: { default: false },
-    autoLockOnRelease: { default: false },
-    autoLockSpeedLimit: { default: 0.5 } // Set to 0 to always autolock on release
+    modifyGravityOnRelease: { default: false },
+    gravitySpeedLimit: { default: 1.85 } // Set to 0 to never apply gravity
   },
 
   init() {
@@ -52,11 +52,26 @@ AFRAME.registerComponent("sticky-object", {
 
   onRelease() {
     if (
-      this.data.autoLockOnRelease &&
-      (this.data.autoLockSpeedLimit === 0 ||
-        this.el.components["ammo-body"].getVelocity().length() < this.data.autoLockSpeedLimit)
+      this.data.modifyGravityOnRelease &&
+      (this.data.gravitySpeedLimit === 0 ||
+        this.el.components["ammo-body"].getVelocity().length() < this.data.gravitySpeedLimit)
     ) {
-      this.setLocked(true);
+      // 0.7 0.15 0.5 0.3
+      this.el.setAttribute("ammo-body", {
+        gravity: { x: 0, y: 0, z: 0 },
+        angularDamping: 0.5,
+        linearDamping: 0.95,
+        linearSleepingThreshold: 0.1,
+        angularSleepingThreshold: 0.1
+      });
+    } else {
+      this.el.setAttribute("ammo-body", {
+        gravity: { x: 0, y: -1, z: 0 },
+        angularDamping: 0.01,
+        linearDamping: 0.01,
+        linearSleepingThreshold: 1.6,
+        angularSleepingThreshold: 2.5
+      });
     }
 
     this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE });
