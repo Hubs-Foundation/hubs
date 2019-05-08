@@ -22,6 +22,16 @@ AFRAME.registerComponent("sticky-object", {
     if (this.wasHeld && !isHeld) {
       this.onRelease();
     }
+
+    if (this._makeStaticWhenAtRest) {
+      const ammoBody = this.el.components["ammo-body"];
+
+      if (ammoBody.getVelocity().length() < 0.01) {
+        this.el.setAttribute("ammo-body", { type: "static" });
+        this._makeStaticWhenAtRest = false;
+      }
+    }
+
     this.wasHeld = isHeld;
   },
 
@@ -56,7 +66,6 @@ AFRAME.registerComponent("sticky-object", {
         this.data.gravitySpeedLimit === 0 ||
         this.el.components["ammo-body"].getVelocity().length() < this.data.gravitySpeedLimit
       ) {
-        // 0.7 0.15 0.5 0.3
         this.el.setAttribute("ammo-body", {
           gravity: { x: 0, y: 0, z: 0 },
           angularDamping: 0.5,
@@ -64,6 +73,8 @@ AFRAME.registerComponent("sticky-object", {
           linearSleepingThreshold: 0.1,
           angularSleepingThreshold: 0.1
         });
+
+        this._makeStaticWhenAtRest = true;
       } else {
         this.el.setAttribute("ammo-body", {
           gravity: { x: 0, y: -1, z: 0 },
