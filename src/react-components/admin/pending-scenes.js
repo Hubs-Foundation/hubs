@@ -1,7 +1,7 @@
 import React from "react";
 import { SceneLink, OwnedFileImage, ConditionalReferenceField } from "./fields";
-import { ApproveSceneButton } from "./approve-scene-button";
-import { DenySceneButton } from "./deny-scene-button";
+import { ApproveSceneButton } from "./approve-buttons";
+import { DenySceneButton } from "./deny-buttons";
 
 import { List, Datagrid, TextField, DateField } from "react-admin";
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { AvatarLink, OwnedFileImage, ConditionalReferenceField } from "./fields";
-import { ApproveAvatarButton } from "./approve-scene-button";
-import { DenyAvatarButton } from "./deny-scene-button";
+import { ApproveAvatarButton } from "./approve-buttons";
+import { DenyAvatarButton } from "./deny-buttons";
 
 import {
   List,
