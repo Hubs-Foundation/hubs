@@ -1198,12 +1198,14 @@ class UIRoot extends Component {
                 srcSet="../assets/images/level_background@2x.png 2x"
                 className="audio-setup-panel__levels__icon-part"
               />
-              <img
-                src="../assets/images/level_fill.png"
-                srcSet="../assets/images/level_fill@2x.png 2x"
-                className="audio-setup-panel__levels__icon-part"
-                style={micClip}
-              />
+              {!this.state.muteOnEntry && (
+                <img
+                  src="../assets/images/level_fill.png"
+                  srcSet="../assets/images/level_fill@2x.png 2x"
+                  className="audio-setup-panel__levels__icon-part"
+                  style={micClip}
+                />
+              )}
               {this.state.audioTrack && !this.state.muteOnEntry ? (
                 <img
                   src="../assets/images/mic_level.png"
