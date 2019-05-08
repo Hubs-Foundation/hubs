@@ -46,7 +46,7 @@ export default class SceneEntryManager {
     return this._entered;
   };
 
-  enterScene = async (mediaStream, enterInVR) => {
+  enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
     const playerCamera = document.querySelector("#player-camera");
     playerCamera.removeAttribute("scene-preview-camera");
     playerCamera.object3D.position.set(0, playerHeight, 0);
@@ -110,6 +110,10 @@ export default class SceneEntryManager {
     })();
 
     this.scene.addState("entered");
+
+    if (muteOnEntry) {
+      this.scene.emit("action_mute");
+    }
   };
 
   whenSceneLoaded = callback => {

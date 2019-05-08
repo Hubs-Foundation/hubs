@@ -171,6 +171,7 @@ class UIRoot extends Component {
 
   state = {
     enterInVR: false,
+    muteOnEntry: false,
     entered: false,
     dialog: null,
     showInviteDialog: false,
@@ -700,7 +701,7 @@ class UIRoot extends Component {
       showFullScreenIfAvailable();
     }
 
-    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.props.hubId);
+    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.muteOnEntry);
 
     const mediaStream = this.state.mediaStream;
 
@@ -1203,7 +1204,7 @@ class UIRoot extends Component {
                 className="audio-setup-panel__levels__icon-part"
                 style={micClip}
               />
-              {this.state.audioTrack ? (
+              {this.state.audioTrack && !this.state.muteOnEntry ? (
                 <img
                   src="../assets/images/mic_level.png"
                   srcSet="../assets/images/mic_level@2x.png 2x"
@@ -1216,11 +1217,12 @@ class UIRoot extends Component {
                   className="audio-setup-panel__levels__icon-part"
                 />
               )}
-              {this.state.audioTrack && (
-                <div className="audio-setup-panel__levels__test_label">
-                  <FormattedMessage id="audio.talk_to_test" />
-                </div>
-              )}
+              {this.state.audioTrack &&
+                !this.state.muteOnEntry && (
+                  <div className="audio-setup-panel__levels__test_label">
+                    <FormattedMessage id="audio.talk_to_test" />
+                  </div>
+                )}
             </div>
             <WithHoverSound>
               <div className="audio-setup-panel__levels__icon_clickable" onClick={this.playTestTone}>
@@ -1288,6 +1290,17 @@ class UIRoot extends Component {
               </span>
             </div>
           )}
+        </div>
+        <div className="audio-setup-panel__mute-container">
+          <input
+            id="mute-on-entry"
+            type="checkbox"
+            onChange={() => this.setState({ muteOnEntry: !this.state.muteOnEntry })}
+            checked={this.state.muteOnEntry}
+          />
+          <label htmlFor="mute-on-entry">
+            <FormattedMessage id="entry.mute-on-entry" />
+          </label>
         </div>
         <div className="audio-setup-panel__enter-button-container">
           <WithHoverSound>
