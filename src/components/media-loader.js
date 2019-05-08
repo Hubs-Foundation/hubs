@@ -286,7 +286,6 @@ AFRAME.registerComponent("media-loader", {
         const startTime = hashTime || qsTime || 0;
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-image");
-        this.el.setAttribute("sticky-object", { gravitySpeedLimit: 0 });
         this.el.addEventListener(
           "video-loaded",
           e => {
@@ -312,7 +311,6 @@ AFRAME.registerComponent("media-loader", {
           },
           { once: true }
         );
-        this.el.setAttribute("sticky-object", { gravitySpeedLimit: 0 });
         this.el.setAttribute(
           "media-image",
           Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, contentType })
@@ -328,7 +326,6 @@ AFRAME.registerComponent("media-loader", {
         // 1. we pass the canonical URL to the pager so it can easily make subresource URLs
         // 2. we don't remove the media-image component -- media-pager uses that internally
         this.el.setAttribute("media-pager", Object.assign({}, this.data.mediaOptions, { src: canonicalUrl }));
-        this.el.setAttribute("sticky-object", { gravitySpeedLimit: 0 });
         this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
         this.el.addEventListener("preview-loaded", () => this.onMediaLoaded(SHAPE.BOX), { once: true });
 
@@ -383,7 +380,6 @@ AFRAME.registerComponent("media-loader", {
           },
           { once: true }
         );
-        this.el.setAttribute("sticky-object", { gravitySpeedLimit: 0 });
         this.el.setAttribute(
           "media-image",
           Object.assign({}, this.data.mediaOptions, { src: thumbnail, contentType: "image/png" })
