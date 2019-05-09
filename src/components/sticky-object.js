@@ -89,7 +89,7 @@ AFRAME.registerComponent("sticky-object", {
 
   onRelease() {
     if (this.data.modifyGravityOnRelease) {
-      if (this.data.gravitySpeedLimit === 0 || this.ammoBody.getVelocity().length() < this.data.gravitySpeedLimit) {
+      if (this.data.gravitySpeedLimit === 0 || this.ammoBody.getVelocity().length2() < this.data.gravitySpeedLimit * this.data.gravitySpeedLimit) {
         this.el.setAttribute("ammo-body", {
           gravity: { x: 0, y: 0, z: 0 },
           angularDamping: this.data.reduceAngularFloat ? 0.98 : 0.5,
