@@ -7,7 +7,7 @@ AFRAME.registerComponent("sticky-object", {
     autoLockOnLoad: { default: false },
 
     // Make the object kinematic immediately upon release
-    lockOnRelease: { default: false },
+    autoLockOnRelease: { default: false },
 
     // On release, modify the gravity based upon gravitySpeedLimit. If less than this, let the object float
     // otherwise apply releaseGravity.
@@ -89,7 +89,10 @@ AFRAME.registerComponent("sticky-object", {
 
   onRelease() {
     if (this.data.modifyGravityOnRelease) {
-      if (this.data.gravitySpeedLimit === 0 || this.ammoBody.getVelocity().length2() < this.data.gravitySpeedLimit * this.data.gravitySpeedLimit) {
+      if (
+        this.data.gravitySpeedLimit === 0 ||
+        this.ammoBody.getVelocity().length2() < this.data.gravitySpeedLimit * this.data.gravitySpeedLimit
+      ) {
         this.el.setAttribute("ammo-body", {
           gravity: { x: 0, y: 0, z: 0 },
           angularDamping: this.data.reduceAngularFloat ? 0.98 : 0.5,
@@ -110,7 +113,7 @@ AFRAME.registerComponent("sticky-object", {
       }
     }
 
-    if (this.data.lockOnRelease) {
+    if (this.data.autoLockOnRelease) {
       this.setLocked(true);
     }
 
