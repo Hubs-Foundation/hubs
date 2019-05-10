@@ -131,9 +131,10 @@ export default class AvatarEditor extends Component {
     if (this.props.onSave) this.props.onSave();
   };
 
-  deleteAvatar = e => {
+  deleteAvatar = async e => {
     e.preventDefault();
-    fetchReticulumAuthenticated(`${AVATARS_API}/${this.state.avatar.avatar_id}`, "DELETE");
+    await fetchReticulumAuthenticated(`${AVATARS_API}/${this.state.avatar.avatar_id}`, "DELETE");
+    if (this.props.onSave) this.props.onSave();
   };
 
   fileField = (name, label, accept, disabled = false, title) => (
@@ -314,7 +315,16 @@ export default class AvatarEditor extends Component {
                 value={this.state.uploading ? "Uploading..." : "Save"}
               />
             </div>
-            <a onClick={this.deleteAvatar}>delete avatar</a>
+            <div className="delete-avatar">
+              {this.state.confirmDelete ? (
+                <span>
+                  are you sure? <a onClick={this.deleteAvatar}>yes</a> /{" "}
+                  <a onClick={() => this.setState({ confirmDelete: false })}>no</a>
+                </span>
+              ) : (
+                <a onClick={() => this.setState({ confirmDelete: true })}>delete avatar...</a>
+              )}
+            </div>
           </div>
         ) : (
           <a onClick={this.props.onSignIn}>

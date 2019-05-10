@@ -111,6 +111,14 @@
     border-radius: 20px;
   }
 
+  .delete-avatar {
+    color: $dark-grey;
+    a {
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  }
+
   .close-button {
     font-size: 1.6em;
   }

@@ -66,7 +66,15 @@ export function fetchReticulumAuthenticated(url, method = "GET", payload) {
   if (payload) {
     params.body = JSON.stringify(payload);
   }
-  return fetch(retUrl, params).then(r => r.json());
+  return fetch(retUrl, params).then(async r => {
+    const result = await r.text();
+    try {
+      return JSON.parse(result);
+    } catch (e) {
+      // Some reticulum responses, particularly DELETE requests, don't return json.
+      return result;
+    }
+  });
 }
 
 export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace) {
