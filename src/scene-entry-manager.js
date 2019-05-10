@@ -444,6 +444,7 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_selected_media_result_entry", e => {
       // TODO spawn in space when no rights
       const entry = e.detail;
+      if (["avatar", "avatar_listing"].includes(entry.type)) return;
       if (entry.type === "scene_listing" && this.hubChannel.permissions.update_hub) return;
 
       // If user has HMD lifted up or gone through interstitial, delay spawning for now. eventually show a modal
