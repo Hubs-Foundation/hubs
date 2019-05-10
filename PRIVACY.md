@@ -47,7 +47,7 @@ In this Privacy Notice, we explain what data may be accessible to Mozilla or oth
 - **Publishing Your Scene or Avatar**: When you publish a scene or avatar to Hubs, Mozilla will ask for your email address to send you a link to verify your email. Mozilla will receive and store your email address to allow you to log in and view your 3D Room models and Avatars. Mozilla stores a hashed version of email addresses you use to publish a scene, so the stored versions are not available in readable form. 
 - **Remixing and Promotion**: When you publish a scene or avatar to Hubs, you have the option to “Allow Remixing with Creative Commons [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/)” or allow Mozilla to promote your scene or avatar. If you choose one or both of these options, Mozilla will share your scene or avatar publicly and you will have the option of including attribution information, which will also be publicly available.
 
-- You can learn more by looking at the [code itself](https://github.com/mozillareality/spoke) for Spoke. 
+- You can learn more by looking at the [code itself](https://github.com/mozilla/spoke) for Spoke. 
 </details>
 
 <details open>
