@@ -166,13 +166,17 @@ export default class MediaSearchStore extends EventTarget {
     pushHistoryPath(this.history, location.pathname, searchParams.toString());
   };
 
-  getSearchClearedSearchParams = (location, keepSource) => {
+  getSearchClearedSearchParams = (location, keepSource, keepNav) => {
     const searchParams = new URLSearchParams(location.search);
 
     // Strip browsing query params
     searchParams.delete("q");
     searchParams.delete("filter");
     searchParams.delete("cursor");
+
+    if (!keepNav) {
+      searchParams.delete("media_nav");
+    }
 
     if (!keepSource) {
       searchParams.delete("media_source");
@@ -261,10 +265,10 @@ export default class MediaSearchStore extends EventTarget {
     return urlParams.get("media_source") || pathname.substring(7);
   };
 
-  pushExitMediaBrowserHistory = history => {
+  pushExitMediaBrowserHistory = (history, stashLastSearchParams = true) => {
     if (!history) history = this.history;
 
-    this._stashLastSearchParams(history.location);
+    if (stashLastSearchParams) this._stashLastSearchParams(history.location);
 
     const { pathname } = history.location;
     const hasMediaPath = sluglessPath(history.location).startsWith("/media");

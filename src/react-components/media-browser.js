@@ -191,7 +191,7 @@ class MediaBrowser extends Component {
   };
 
   handleFacetClicked = facet => {
-    const searchParams = this.getSearchClearedSearchParams(true);
+    const searchParams = this.getSearchClearedSearchParams(true, true);
 
     for (const [k, v] of Object.entries(facet.params)) {
       searchParams.set(k, v);
@@ -200,12 +200,12 @@ class MediaBrowser extends Component {
     pushHistoryPath(this.props.history, this.props.history.location.pathname, searchParams.toString());
   };
 
-  getSearchClearedSearchParams = keepSource => {
-    return this.props.mediaSearchStore.getSearchClearedSearchParams(this.props.history.location, keepSource);
+  getSearchClearedSearchParams = (keepSource, keepNav) => {
+    return this.props.mediaSearchStore.getSearchClearedSearchParams(this.props.history.location, keepSource, keepNav);
   };
 
-  pushExitMediaBrowserHistory = () => {
-    this.props.mediaSearchStore.pushExitMediaBrowserHistory();
+  pushExitMediaBrowserHistory = (stashLastSearchParams = true) => {
+    this.props.mediaSearchStore.pushExitMediaBrowserHistory(this.props.history, stashLastSearchParams);
   };
 
   showCustomMediaDialog = source => {
@@ -215,7 +215,8 @@ class MediaBrowser extends Component {
 
   close = () => {
     showFullScreenIfWasFullScreen();
-    this.pushExitMediaBrowserHistory();
+    const urlSource = this.getUrlSource(new URLSearchParams(this.props.history.location.search));
+    this.pushExitMediaBrowserHistory(urlSource !== "avatars");
     if (this.state.clearStashedQueryOnClose) {
       this.props.mediaSearchStore.clearStashedQuery();
     }
