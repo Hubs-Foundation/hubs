@@ -1426,6 +1426,7 @@ class UIRoot extends Component {
                   store={this.props.store}
                   debug={avatarEditorDebug}
                   avatarId={props.location.state.detail && props.location.state.detail.avatarId}
+                  hideDelete={props.location.state.detail && props.location.state.detail.hideDelete}
                 />
               )}
             />

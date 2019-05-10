@@ -24,6 +24,7 @@ export default class AvatarEditor extends Component {
     onSave: PropTypes.func,
     onClose: PropTypes.func,
     signedIn: PropTypes.bool,
+    hideDelete: PropTypes.bool,
     debug: PropTypes.bool,
     className: PropTypes.string
   };
@@ -149,7 +150,7 @@ export default class AvatarEditor extends Component {
         accept={accept}
         disabled={disabled}
         onChange={e => {
-          // e.target.value = null;
+          e.target.value = null;
           this.inputFiles[name] = e.target.files[0];
         }}
       />
@@ -315,16 +316,18 @@ export default class AvatarEditor extends Component {
                 value={this.state.uploading ? "Uploading..." : "Save"}
               />
             </div>
-            <div className="delete-avatar">
-              {this.state.confirmDelete ? (
-                <span>
-                  are you sure? <a onClick={this.deleteAvatar}>yes</a> /{" "}
-                  <a onClick={() => this.setState({ confirmDelete: false })}>no</a>
-                </span>
-              ) : (
-                <a onClick={() => this.setState({ confirmDelete: true })}>delete avatar...</a>
-              )}
-            </div>
+            {!this.props.hideDelete && (
+              <div className="delete-avatar">
+                {this.state.confirmDelete ? (
+                  <span>
+                    are you sure? <a onClick={this.deleteAvatar}>yes</a> /{" "}
+                    <a onClick={() => this.setState({ confirmDelete: false })}>no</a>
+                  </span>
+                ) : (
+                  <a onClick={() => this.setState({ confirmDelete: true })}>delete avatar...</a>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <a onClick={this.props.onSignIn}>

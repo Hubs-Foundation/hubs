@@ -72,7 +72,11 @@ class ProfileEntryPanel extends Component {
   };
 
   setAvatarFromMediaResult = ({ detail: entry }) => {
-    this.setState({ avatarId: entry.id, avatarGltfUrl: entry.gltfs.avatar });
+    this.setState({
+      avatarId: entry.id,
+      avatarType: getAvatarType(entry.id),
+      avatarGltfUrl: entry.gltfs.avatar
+    });
   };
 
   async componentDidMount() {
@@ -138,7 +142,7 @@ class ProfileEntryPanel extends Component {
                 <StateLink
                   stateKey="overlay"
                   stateValue="avatar-editor"
-                  stateDetail={{ avatarId: this.state.avatarId }}
+                  stateDetail={{ avatarId: this.state.avatarId, hideDelete: true }}
                   history={this.props.history}
                   className={styles.editAvatar}
                 >

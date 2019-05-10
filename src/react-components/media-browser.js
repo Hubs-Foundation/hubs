@@ -256,37 +256,39 @@ class MediaBrowser extends Component {
               </a>
             </div>
             <div className={styles.headerCenter}>
-              <div className={styles.search}>
-                <i>
-                  <FontAwesomeIcon icon={faSearch} />
-                </i>
-                <input
-                  type="text"
-                  autoFocus={!isMobile && !isMobileVR}
-                  ref={r => (this.inputRef = r)}
-                  placeholder={formatMessage({
-                    id: `media-browser.search-placeholder.${urlSource}`
-                  })}
-                  onFocus={e => handleTextFieldFocus(e.target)}
-                  onBlur={() => handleTextFieldBlur()}
-                  onKeyDown={e => {
-                    if (e.key === "Enter" && e.ctrlKey) {
-                      if (entries.length > 0 && !this._sendQueryTimeout) {
-                        this.handleEntryClicked(e, entries[0]);
-                      } else if (this.state.query.trim() !== "") {
-                        this.handleQueryUpdated(this.state.query, true);
-                        this.setState({ selectNextResult: true });
-                      } else {
-                        this.close();
+              {urlSource !== "avatars" && (
+                <div className={styles.search}>
+                  <i>
+                    <FontAwesomeIcon icon={faSearch} />
+                  </i>
+                  <input
+                    type="text"
+                    autoFocus={!isMobile && !isMobileVR}
+                    ref={r => (this.inputRef = r)}
+                    placeholder={formatMessage({
+                      id: `media-browser.search-placeholder.${urlSource}`
+                    })}
+                    onFocus={e => handleTextFieldFocus(e.target)}
+                    onBlur={() => handleTextFieldBlur()}
+                    onKeyDown={e => {
+                      if (e.key === "Enter" && e.ctrlKey) {
+                        if (entries.length > 0 && !this._sendQueryTimeout) {
+                          this.handleEntryClicked(e, entries[0]);
+                        } else if (this.state.query.trim() !== "") {
+                          this.handleQueryUpdated(this.state.query, true);
+                          this.setState({ selectNextResult: true });
+                        } else {
+                          this.close();
+                        }
+                      } else if (e.key === "Escape" || (e.key === "Enter" && isMobile)) {
+                        e.target.blur();
                       }
-                    } else if (e.key === "Escape" || (e.key === "Enter" && isMobile)) {
-                      e.target.blur();
-                    }
-                  }}
-                  value={this.state.query}
-                  onChange={e => this.handleQueryUpdated(e.target.value)}
-                />
-              </div>
+                    }}
+                    value={this.state.query}
+                    onChange={e => this.handleQueryUpdated(e.target.value)}
+                  />
+                </div>
+              )}
               <div className={styles.engineAttribution}>
                 {urlSource !== "scenes" && (
                   <div className={styles.engineAttributionContents}>

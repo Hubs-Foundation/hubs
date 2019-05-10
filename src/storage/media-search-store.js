@@ -123,7 +123,6 @@ export default class MediaSearchStore extends EventTarget {
       id: legacyAvatar.id,
       type: "avatar_listing",
       url: legacyAvatar.url,
-      name: legacyAvatar.id,
       images: { preview: { url: legacyAvatar.thumbnail, width: 720, height: 1280 } },
       gltfs: { avatar: legacyAvatar.model }
     };
