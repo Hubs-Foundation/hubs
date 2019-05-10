@@ -19,8 +19,7 @@ const URL_SOURCE_TO_TO_API_SOURCE = {
 export const MEDIA_SOURCE_DEFAULT_FILTERS = {
   gifs: "trending",
   sketchfab: "featured",
-  scenes: "featured",
-  avatars: "featured"
+  scenes: "featured"
 };
 
 const SEARCH_CONTEXT_PARAMS = ["q", "filter", "cursor"];
@@ -71,7 +70,7 @@ export default class MediaSearchStore extends EventTarget {
 
     let source;
     if (urlSource === "avatars") {
-      // Avatar are special since we want to request a user's avatars through a different endpoint vs avatar_listings.
+      // Avatar are special since we request avatars from a different source based on the facet.
       const filter = new URLSearchParams(location.search);
       source = filter.get("filter") === "my-avatars" ? "avatars" : "avatar_listings";
     } else {
@@ -216,7 +215,7 @@ export default class MediaSearchStore extends EventTarget {
     this._sourceNavigate(source, true, false);
   };
 
-  _sourceNavigate = (source, hideNav, useLastStashedParams) => {
+  _sourceNavigate = async (source, hideNav, useLastStashedParams) => {
     const currentQuery = new URLSearchParams(this.history.location.search).get("q");
     const searchParams = this.getSearchClearedSearchParams(this.history.location);
 
@@ -235,7 +234,10 @@ export default class MediaSearchStore extends EventTarget {
           }
         }
       } else {
-        if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
+        if (source === "avatars") {
+          const hasAccountWithAvatars = await this._hasAccountWithAvatars();
+          searchParams.set("filter", hasAccountWithAvatars ? "my-avatars" : "featured");
+        } else if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
           searchParams.set("filter", MEDIA_SOURCE_DEFAULT_FILTERS[source]);
         }
       }
@@ -254,6 +256,19 @@ export default class MediaSearchStore extends EventTarget {
     } else {
       pushHistoryPath(this.history, withSlug(this.history.location, `/media/${source}`), searchParams.toString());
     }
+  };
+
+  _hasAccountWithAvatars = async () => {
+    const { credentialsAccountId } = window.APP.store;
+    if (!credentialsAccountId) return false;
+
+    const searchParams = new URLSearchParams();
+    const source = "avatars";
+    searchParams.set("source", source);
+    searchParams.set("user", credentialsAccountId);
+    const url = getReticulumFetchUrl(`/api/v1/media/search?${searchParams.toString()}`);
+    const result = await this._fetchMedia(url, source);
+    return !!(result && result.entries) && result.entries.length > 0;
   };
 
   getUrlMediaSource = location => {
