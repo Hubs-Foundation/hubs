@@ -12,7 +12,8 @@ import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import {
   isIn2DInterstitial,
   handleExitTo2DInterstitial,
-  handleReEntryToVRFrom2DInterstitial
+  handleReEntryToVRFrom2DInterstitial,
+  forceExitFrom2DInterstitial
 } from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./assets/avatars/avatars";
@@ -297,12 +298,12 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("action_spawn", () => {
-      handleExitTo2DInterstitial(false);
+      handleExitTo2DInterstitial(false, () => window.APP.mediaSearchStore.pushExitMediaBrowserHistory());
       window.APP.mediaSearchStore.sourceNavigateToDefaultSource();
     });
 
     this.scene.addEventListener("action_invite", () => {
-      handleExitTo2DInterstitial(false);
+      handleExitTo2DInterstitial(false, () => this.history.goBack());
       pushHistoryState(this.history, "overlay", "invite");
     });
 
@@ -321,6 +322,8 @@ export default class SceneEntryManager {
         "mute-user"
       );
     });
+
+    this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
 
     document.addEventListener("paste", e => {
       if (e.target.matches("input, textarea") && document.activeElement === e.target) return;

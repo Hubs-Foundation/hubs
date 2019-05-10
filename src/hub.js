@@ -54,6 +54,7 @@ import "./components/text-button";
 import "./components/block-button";
 import "./components/mute-button";
 import "./components/kick-button";
+import "./components/close-vr-notice-button";
 import "./components/leave-room-button";
 import "./components/visible-if-permitted";
 import "./components/visibility-while-frozen";
@@ -585,7 +586,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const signInContinueTextId = scene.is("vr-mode") ? "entry.return-to-vr" : "dialog.close";
 
-    handleExitTo2DInterstitial(true);
+    handleExitTo2DInterstitial(true, () => remountUI({ showSignInDialog: false }));
 
     remountUI({
       showSignInDialog: true,
