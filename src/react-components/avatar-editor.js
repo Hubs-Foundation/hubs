@@ -137,7 +137,7 @@ export default class AvatarEditor extends Component {
   };
 
   fileField = (name, label, accept, disabled = false, title) => (
-    <div className={styles.fileInputRow} key={name} title={title}>
+    <div className="file-input-row" key={name} title={title}>
       <label htmlFor={`avatar-file_${name}`}>
         <div className="img-box" />
         <span>{label}</span>
@@ -167,7 +167,7 @@ export default class AvatarEditor extends Component {
   );
 
   mapField = (name, label, accept, disabled = false, title) => (
-    <div className={styles.fileInputRow} key={name} title={title}>
+    <div className="file-input-row" key={name} title={title}>
       <label htmlFor={`avatar-file_${name}`}>
         <div className="img-box">{this.state.avatar.files[name] && <img src={this.state.avatar.files[name]} />}</div>
         <span>{label}</span>
@@ -217,13 +217,28 @@ export default class AvatarEditor extends Component {
     </div>
   );
 
-  textField = (name, label, disabled) => (
+  textField = (name, placeholder, disabled, required) => (
     <div>
-      <label htmlFor={`#avatar-${name}`}>{label}</label>
       <input
         id={`avatar-${name}`}
         type="text"
         disabled={disabled}
+        required={required}
+        placeholder={placeholder}
+        className="text-field"
+        value={this.state.avatar[name] || ""}
+        onChange={e => this.setState({ avatar: { ...this.state.avatar, [name]: e.target.value } })}
+      />
+    </div>
+  );
+
+  textarea = (name, placeholder, disabled) => (
+    <div>
+      <textarea
+        id={`avatar-${name}`}
+        disabled={disabled}
+        placeholder={placeholder}
+        className="textarea"
         value={this.state.avatar[name] || ""}
         onChange={e => this.setState({ avatar: { ...this.state.avatar, [name]: e.target.value } })}
       />
@@ -231,15 +246,16 @@ export default class AvatarEditor extends Component {
   );
 
   checkbox = (name, label, disabled) => (
-    <div>
-      <label htmlFor={`#avatar-${name}`}>{label}</label>
+    <div className="checkbox-container">
       <input
         id={`avatar-${name}`}
         type="checkbox"
+        className="checkbox"
         disabled={disabled}
         checked={!!this.state.avatar[name]}
         onChange={e => this.setState({ avatar: { ...this.state.avatar, [name]: e.target.checked } })}
       />
+      <label htmlFor={`#avatar-${name}`}>{label}</label>
     </div>
   );
 
@@ -248,22 +264,20 @@ export default class AvatarEditor extends Component {
     return (
       <div className={classNames(styles.avatarEditor, this.props.className)}>
         {this.props.onClose && (
-          <a onClick={this.props.onClose}>
+          <a className="close-button" onClick={this.props.onClose}>
             <i>
               <FontAwesomeIcon icon={faTimes} />
             </i>
           </a>
         )}
         {this.props.signedIn ? (
-          <div>
+          <div className="center">
             <div className="split">
               <div className="form-body">
                 {debug && this.textField("avatar_id", "Avatar ID", true)}
                 {debug && this.textField("parent_avatar_id", "Parent Avatar ID")}
-                {this.textField("name", "Name")}
-                {this.textField("description", "Description")}
-                {this.checkbox("allow_remixing", "Allow Remixing")}
-                {this.checkbox("allow_promotion", "Allow Promotion")}
+                {this.textField("name", "Name", false, true)}
+                {debug && this.textarea("description", "Description")}
                 {debug && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
 
                 {this.mapField("base_map", "Base Map", "image/*")}
@@ -271,6 +285,9 @@ export default class AvatarEditor extends Component {
                 {this.mapField("normal_map", "Normal Map", "image/*")}
 
                 {this.mapField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
+
+                {debug && this.checkbox("allow_promotion", "Allow Promotion")}
+                {debug && this.checkbox("allow_remixing", "Allow Remixing")}
 
                 {/* {this.mapField("ao_map", "AO Map", "images/\*", true)} */}
                 {/* {this.mapField("metallic_map", "Metallic Map", "image/\*", true)} */}
@@ -282,7 +299,7 @@ export default class AvatarEditor extends Component {
                 ref={p => (this.preview = p)}
               />
             </div>
-            <div className={styles.info}>
+            <div className="info">
               <FormattedMessage id="avatar-editor.info" />
               <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
                 <FormattedMessage id="avatar-editor.info-link" />
@@ -292,7 +309,7 @@ export default class AvatarEditor extends Component {
               <input
                 disabled={this.state.uploading}
                 onClick={this.uploadAvatar}
-                className={styles.formSubmit}
+                className="form-submit"
                 type="submit"
                 value={this.state.uploading ? "Uploading..." : "Save"}
               />
