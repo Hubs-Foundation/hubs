@@ -39,7 +39,7 @@
 <body>
     <a-scene
         loading-screen="enabled: false"
-        physics="gravity: -9.8; debug: false; driver: ammo; debugDrawMode: 1; iterations: 4;"
+        physics="debug: false; driver: ammo; debugDrawMode: 1; iterations: 4;"
         hubs-systems
         class="grab-cursor"
         renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: false;"
@@ -79,6 +79,7 @@
             <img id="scale-action" crossorigin="anonymous" src="./assets/scale-action.png">
             <img id="rotate-action" crossorigin="anonymous" src="./assets/rotate-action.png">
             <img id="remove-action" crossorigin="anonymous" src="./assets/remove-action.png">
+            <img id="drop-action" crossorigin="anonymous" src="./assets/drop-action.png">
             <img id="recenter-action" crossorigin="anonymous" src="./assets/recenter-action.png">
 
             <img id="video-volume-down" crossorigin="anonymous" src="./assets/video-overlay/volume_down.png">
@@ -222,7 +223,7 @@
                     tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
                     destroy-at-extreme-distances
                     scalable-when-grabbed
-                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
+                    floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
                     set-yxz-order
                     matrix-auto-update
                     position-at-box-shape-border__freeze="target:.freeze-menu;"
@@ -266,9 +267,16 @@
                                     position="-0.125 0.005 0.01"
                                 ></a-image>
                             </a-entity>
-                            <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;"  class="hide-when-pinned" remove-networked-object-button position="0 -0.375 0.01">
+                            <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" class="hide-when-pinned" remove-networked-object-button position="0 -0.375 0.01">
                                 <a-image
                                     icon-button="image: #remove-action; hoverImage: #remove-action;"
+                                    scale="0.165 0.165 0.165"
+                                    position="0 0 0.001"
+                                ></a-image>
+                            </a-entity>
+                            <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" class="hide-when-pinned" drop-object-button position="0 -0.625 0.01">
+                                <a-image
+                                    icon-button="image: #drop-action; hoverImage: #drop-action;"
                                     scale="0.165 0.165 0.165"
                                     position="0 0 0.001"
                                 ></a-image>
@@ -313,7 +321,7 @@
                     set-unowned-body-kinematic
                     is-remote-hover-target
                     tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; isPen: true;"
-                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
+                    floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true; gravitySpeedLimit: 0; reduceAngularFloat: true;"
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
                     action-to-remove__pen="path: /actions/pen/remove;"
@@ -353,7 +361,7 @@
                     scale="0.5 0.5 0.5"
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
                     ammo-shape="type: box; fit: manual; halfExtents: 0.11 0.07 0.05; offset: 0 0.02 0;"
-                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
+                    floaty-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     owned-object-limiter="counter: #camera-counter"
                     set-unowned-body-kinematic
                     scalable-when-grabbed
