@@ -20,7 +20,8 @@ class StateLink extends React.Component {
     stateDetail: PropTypes.object,
     target: PropTypes.string,
     onClick: PropTypes.func,
-    children: PropTypes.node
+    children: PropTypes.node,
+    className: PropTypes.string
   };
 
   async handleClick(event, history) {

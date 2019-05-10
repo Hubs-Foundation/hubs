@@ -252,7 +252,7 @@ class UIRoot extends Component {
   }
 
   componentDidMount() {
-    setTimeout(() => this.pushHistoryState("overlay", "avatar-editor")); // BPDEBUG
+    //setTimeout(() => this.pushHistoryState("overlay", "profile")); // BPDEBUG
 
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     this.micLevelMovingAverage = MovingAverage(100);
@@ -1406,7 +1406,7 @@ class UIRoot extends Component {
                 <ProfileEntryPanel
                   {...props}
                   displayNameOverride={displayNameOverride}
-                  finished={this.closeDialog}
+                  finished={() => this.pushHistoryState()}
                   store={this.props.store}
                   mediaSearchStore={this.props.mediaSearchStore}
                 />
@@ -1446,9 +1446,8 @@ class UIRoot extends Component {
                   {...props}
                   displayNameOverride={displayNameOverride}
                   finished={() => {
-                    this.closeDialog();
-
                     if (this.props.forcedVREntryType) {
+                      this.pushHistoryState();
                       this.handleForceEntry();
                     } else {
                       this.pushHistoryState("entry_step", "device");

@@ -215,17 +215,7 @@ class MediaBrowser extends Component {
 
   close = () => {
     showFullScreenIfWasFullScreen();
-
-    const urlSource = this.getUrlSource(new URLSearchParams(this.props.history.location.search));
-
-    // We always arrive at the avatar browser through the profile panel,
-    // so go back to it on close instead of resetting history state.
-    if (urlSource === "avatars") {
-      this.props.history.goBack();
-    } else {
-      this.pushExitMediaBrowserHistory();
-    }
-
+    this.pushExitMediaBrowserHistory();
     if (this.state.clearStashedQueryOnClose) {
       this.props.mediaSearchStore.clearStashedQuery();
     }
@@ -449,8 +439,6 @@ class MediaBrowser extends Component {
     const publisherName =
       (entry.attributions && entry.attributions.publisher && entry.attributions.publisher.name) ||
       PUBLISHER_FOR_ENTRY_TYPE[entry.type];
-
-    const urlSource = this.getUrlSource(new URLSearchParams(this.props.history.location.search));
 
     return (
       <div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`${entry.id}_${idx}`}>
