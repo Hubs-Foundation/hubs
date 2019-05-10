@@ -77,7 +77,7 @@ class SpokeLanding extends Component {
       body: JSON.stringify({
         query: `
           {
-            repository(owner: "mozillareality", name: "spoke") {
+            repository(owner: "mozilla", name: "spoke") {
               releases(
                 orderBy: { field: CREATED_AT, direction: DESC },
                 first: 5
@@ -124,7 +124,7 @@ class SpokeLanding extends Component {
 
   render() {
     const platform = this.state.platform;
-    const releasesLink = "https://github.com/MozillaReality/Spoke/releases/latest";
+    const releasesLink = "https://github.com/mozilla/Spoke/releases/latest";
     const downloadLink = platform === "unsupported" ? releasesLink : this.state.downloadLinkForCurrentPlatform;
 
     return (
@@ -132,7 +132,7 @@ class SpokeLanding extends Component {
         <div className={styles.ui}>
           <div className={styles.header}>
             <div className={styles.headerLinks}>
-              <a href="https://github.com/mozillareality/spoke" rel="noopener noreferrer">
+              <a href="https://github.com/mozilla/spoke" rel="noopener noreferrer">
                 <FormattedMessage id="home.source_link" />
               </a>
               <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
