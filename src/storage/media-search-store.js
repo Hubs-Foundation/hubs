@@ -7,7 +7,6 @@ export const SOURCES = ["videos", "sketchfab", "poly", "scenes", "gifs", "images
 
 const URL_SOURCE_TO_TO_API_SOURCE = {
   scenes: "scene_listings",
-  avatars: "avatars",
   images: "bing_images",
   videos: "bing_videos",
   youtube: "youtube_videos",
@@ -69,7 +68,15 @@ export default class MediaSearchStore extends EventTarget {
     }
 
     searchParams.get("locale", navigator.languages[0]);
-    const source = URL_SOURCE_TO_TO_API_SOURCE[urlSource];
+
+    let source;
+    if (urlSource === "avatars") {
+      // Avatar are special since we want to request a user's avatars through a different endpoint vs avatar_listings.
+      const filter = new URLSearchParams(location.search);
+      source = filter.get("filter") === "my-avatars" ? "avatars" : "avatar_listings";
+    } else {
+      source = URL_SOURCE_TO_TO_API_SOURCE[urlSource];
+    }
     searchParams.set("source", source);
 
     if (source === "avatars") {
@@ -89,15 +96,38 @@ export default class MediaSearchStore extends EventTarget {
     this.dispatchEvent(new CustomEvent("statechanged"));
   };
 
-  _fetchMedia = async url => {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: `bearer ${window.APP.store.state.credentials.token}`
-      }
-    });
-    return await res.json();
+  _fetchMedia = async (url, source) => {
+    const headers = { "Content-Type": "application/json" };
+    const credentialsToken = window.APP.store.state.credentials.token;
+    if (credentialsToken) headers.authorization = `bearer ${credentialsToken}`;
+
+    const res = await fetch(url, { method: "GET", headers });
+    const body = await res.text();
+
+    let result;
+    try {
+      result = JSON.parse(body);
+    } catch (e) {
+      result = body;
+    }
+
+    if (source === "avatar_listings" && result.entries.length === 0) {
+      // If we don't have any featured avatars, use our static list of legacy avatars.
+      result = { entries: avatars.map(this._legacyAvatarToSearchEntry) };
+    }
+
+    return result;
+  };
+
+  _legacyAvatarToSearchEntry = legacyAvatar => {
+    return {
+      id: legacyAvatar.id,
+      type: "avatar_listing",
+      url: legacyAvatar.url,
+      name: legacyAvatar.id,
+      images: { preview: { url: legacyAvatar.thumbnail, width: 720, height: 1280 } },
+      gltfs: { avatar: legacyAvatar.model }
+    };
   };
 
   pageNavigate = delta => {
@@ -143,7 +173,6 @@ export default class MediaSearchStore extends EventTarget {
     searchParams.delete("q");
     searchParams.delete("filter");
     searchParams.delete("cursor");
-    searchParams.delete("media_nav");
 
     if (!keepSource) {
       searchParams.delete("media_source");

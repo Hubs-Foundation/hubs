@@ -217,6 +217,9 @@ class MediaBrowser extends Component {
     showFullScreenIfWasFullScreen();
 
     const urlSource = this.getUrlSource(new URLSearchParams(this.props.history.location.search));
+
+    // We always arrive at the avatar browser through the profile panel,
+    // so go back to it on close instead of resetting history state.
     if (urlSource === "avatars") {
       this.props.history.goBack();
     } else {
@@ -438,7 +441,7 @@ class MediaBrowser extends Component {
     const imageSrc = entry.images.preview.url;
     const creator = entry.attributions && entry.attributions.creator;
     const isImage = entry.type.endsWith("_image");
-    const isAvatar = entry.type === "avatar";
+    const isAvatar = ["avatar", "avatar_listing"].includes(entry.type);
     const imageAspect = entry.images.preview.width / entry.images.preview.height;
 
     const [imageWidth, imageHeight] = this.getTileDimensions(isImage, isAvatar, imageAspect);
@@ -464,7 +467,7 @@ class MediaBrowser extends Component {
             src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)}
           />
         </a>
-        {urlSource === "avatars" && (
+        {entry.type === "avatar" && (
           <StateLink
             className={styles.editAvatar}
             stateKey="overlay"
