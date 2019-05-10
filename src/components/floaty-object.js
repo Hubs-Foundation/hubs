@@ -1,7 +1,7 @@
 /* global AFRAME */
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 
-AFRAME.registerComponent("sticky-object", {
+AFRAME.registerComponent("floaty-object", {
   schema: {
     // Make the object locked/kinematic upon load
     autoLockOnLoad: { default: false },

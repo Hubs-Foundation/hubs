@@ -3,10 +3,10 @@ AFRAME.registerComponent("drop-object-button", {
     this.onClick = () => {
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) return;
 
-      this.targetEl.setAttribute("sticky-object", { modifyGravityOnRelease: false });
+      this.targetEl.setAttribute("floaty-object", { modifyGravityOnRelease: false });
       this.targetEl.setAttribute("ammo-body", {
         type: "dynamic",
-        gravity: { x: 0, y: -9.79, z: 0 }, // HACK setting to normal world gravity has bug in ammo-body not resetting via setGravity
+        gravity: { x: 0, y: -9.8, z: 0 },
         angularDamping: 0.01,
         linearDamping: 0.01,
         linearSleepingThreshold: 1.6,
