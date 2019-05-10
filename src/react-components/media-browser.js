@@ -236,14 +236,16 @@ class MediaBrowser extends Component {
 
   render() {
     const { formatMessage } = this.props.intl;
-    const hasNext = this.state.result && !!this.state.result.meta.next_cursor;
+    const hasMeta = !!(this.state.result && this.state.result.meta);
+    const hasNext = !!(hasMeta && this.state.result.meta.next_cursor) || false;
     const searchParams = new URLSearchParams(this.props.history.location.search);
     const hasPrevious = searchParams.get("cursor");
     const urlSource = this.getUrlSource(searchParams);
-    const apiSource = this.state.result && this.state.result.meta.source;
+    const apiSource = (hasMeta && this.state.result.meta.source) || null;
     const isVariableWidth = this.state.result && ["bing_images", "tenor"].includes(apiSource);
     const showCustomOption = apiSource !== "scene_listings" || this.props.hubChannel.permissions.update_hub;
     const [createAvatarWidth, createAvatarHeight] = this.getTileDimensions(false, true);
+    const entries = (this.state.result && this.state.result.entries) || [];
 
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
     if (this.state.selectNextResult) return <div />;
@@ -275,8 +277,8 @@ class MediaBrowser extends Component {
                   onBlur={() => handleTextFieldBlur()}
                   onKeyDown={e => {
                     if (e.key === "Enter" && e.ctrlKey) {
-                      if (this.state.result && this.state.result.entries.length > 0 && !this._sendQueryTimeout) {
-                        this.handleEntryClicked(e, this.state.result.entries[0]);
+                      if (entries.length > 0 && !this._sendQueryTimeout) {
+                        this.handleEntryClicked(e, entries[0]);
                       } else if (this.state.query.trim() !== "") {
                         this.handleQueryUpdated(this.state.query, true);
                         this.setState({ selectNextResult: true });
@@ -386,7 +388,7 @@ class MediaBrowser extends Component {
                 </div>
               )}
 
-              {this.state.result && this.state.result.entries.map(this.entryToTile)}
+              {entries.map(this.entryToTile)}
             </div>
 
             {this.state.result &&

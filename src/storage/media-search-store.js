@@ -84,7 +84,7 @@ export default class MediaSearchStore extends EventTarget {
     if (this.requestIndex != currentRequestIndex) return;
 
     this.result = result;
-    this.nextCursor = this.result.meta.next_cursor;
+    this.nextCursor = this.result.meta && this.result.meta.next_cursor;
     this.lastFetchedUrl = url;
     this.dispatchEvent(new CustomEvent("statechanged"));
   };
