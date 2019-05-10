@@ -155,7 +155,9 @@ export default class AvatarPreview extends Component {
         this.scene.remove(this.avatar);
         this.avatar = null;
       }
-      await this.loadPreviewAvatar(this.props.avatarGltfUrl).then(this.setAvatar);
+      if (this.props.avatarGltfUrl) {
+        await this.loadPreviewAvatar(this.props.avatarGltfUrl).then(this.setAvatar);
+      }
     }
     this.applyMaps(oldProps, this.props);
   };

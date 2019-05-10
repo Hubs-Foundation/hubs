@@ -66,10 +66,13 @@ export function getAvatarType(avatarId) {
   return AVATAR_TYPES.SKINNABLE;
 }
 
-function fetchAvatarGltfUrl(avatarId) {
-  return fetch(getReticulumFetchUrl(`/api/v1/avatars/${avatarId}`))
-    .then(r => r.json())
-    .then(({ avatars }) => avatars[0].gltf_url);
+async function fetchAvatarGltfUrl(avatarId) {
+  const resp = await fetch(getReticulumFetchUrl(`/api/v1/avatars/${avatarId}`));
+  if (resp.status === 404) {
+    return null;
+  } else {
+    return resp.json().then(({ avatars }) => avatars[0].gltf_url);
+  }
 }
 
 export function getAvatarSrc(avatarId) {
