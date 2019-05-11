@@ -74,6 +74,18 @@ export const SCHEMA = {
           promotionToken: { type: "string" }
         }
       }
+    },
+
+    creatorAssignmentTokens: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          hubId: { type: "string" },
+          creatorAssignmentToken: { type: "string" }
+        }
+      }
     }
   },
 
@@ -85,7 +97,8 @@ export const SCHEMA = {
     activity: { $ref: "#/definitions/activity" },
     settings: { $ref: "#/definitions/settings" },
     confirmedDiscordRooms: { $ref: "#/definitions/confirmedDiscordRooms" },
-    uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" }
+    uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" },
+    creatorAssignmentTokens: { $ref: "#/definitions/creatorAssignmentTokens" }
   },
 
   additionalProperties: false
@@ -104,7 +117,8 @@ export default class Store extends EventTarget {
       credentials: {},
       profile: {},
       confirmedDiscordRooms: [],
-      uploadPromotionTokens: []
+      uploadPromotionTokens: [],
+      creatorAssignmentTokens: []
     });
 
     const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);

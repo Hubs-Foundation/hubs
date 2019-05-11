@@ -78,7 +78,7 @@ class HomeRoot extends Component {
   }
 
   async verifyAuth() {
-    const socket = connectToReticulum();
+    const socket = await connectToReticulum();
     const channel = socket.channel(this.props.authTopic);
     await new Promise((resolve, reject) =>
       channel

@@ -14,7 +14,7 @@ registerTelemetry("/home", "Hubs Home Page");
 const { pathname } = document.location;
 const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathname.substring(1).split("/")[1]);
 
-(() => {
+(async () => {
   if (qs.get("new") !== null) {
     createAndRedirectToNewHub(
       null,
@@ -27,7 +27,7 @@ const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathna
 
   const store = new Store();
   const authChannel = new AuthChannel(store);
-  authChannel.setSocket(connectToReticulum());
+  authChannel.setSocket(await connectToReticulum());
 
   const root = (
     <HomeRoot

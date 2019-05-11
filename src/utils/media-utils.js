@@ -347,12 +347,12 @@ export const traverseMeshesAndAddShapes = (function() {
 
     console.group("traverseMeshesAndAddShapes");
 
-    console.log(`scene has ${vertexCount} vertices`);
+    console.log(`scene has ${vertexCount} vertices from meshes`);
 
     const floorPlan = meshRoot.children.find(obj => {
       return obj.name === "Floor_Plan";
     });
-    if (vertexCount > vertexLimit && floorPlan) {
+    if ((vertexCount > vertexLimit || vertexCount === 0) && floorPlan) {
       console.log(`vertex limit of ${vertexLimit} exceeded, using floor plan with mesh shape`);
       floorPlan.el.setAttribute(shapePrefix + floorPlan.name, {
         type: SHAPE.MESH,
@@ -360,11 +360,11 @@ export const traverseMeshesAndAddShapes = (function() {
         fit: FIT.ALL
       });
       shapes.push({ id: shapePrefix + floorPlan.name, entity: floorPlan.el });
-    } else if (vertexCount < vertexLimit) {
+    } else if (vertexCount < vertexLimit && vertexCount > 0) {
       el.setAttribute(shapePrefix + "environment", {
         type: SHAPE.MESH,
         margin: 0.01,
-        fit: FIT.COMPOUND
+        fit: FIT.ALL
       });
       shapes.push({ id: shapePrefix + "environment", entity: el });
       console.log("adding compound mesh shape");

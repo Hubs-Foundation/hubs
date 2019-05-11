@@ -22,6 +22,7 @@ import {
 import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
 import { getPresenceProfileForSession } from "../utils/phoenix-utils";
+import { getClientInfoClientId } from "./client-info-dialog";
 
 import { lang, messages } from "../utils/i18n";
 import Loader from "./loader";
@@ -50,6 +51,7 @@ import CloseRoomDialog from "./close-room-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
+import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import LobbyChatBox from "./lobby-chat-box.js";
 import InWorldChatBox from "./in-world-chat-box.js";
@@ -166,11 +168,14 @@ class UIRoot extends Component {
     location: PropTypes.object,
     history: PropTypes.object,
     showInterstitialPrompt: PropTypes.bool,
-    onInterstitialPromptClicked: PropTypes.func
+    onInterstitialPromptClicked: PropTypes.func,
+    performConditionalSignIn: PropTypes.func,
+    hide: PropTypes.bool
   };
 
   state = {
     enterInVR: false,
+    muteOnEntry: false,
     entered: false,
     dialog: null,
     showInviteDialog: false,
@@ -232,8 +237,12 @@ class UIRoot extends Component {
         this.setState({ signedIn });
       }
     }
-    if (prevProps.showSignInDialog !== showSignInDialog && showSignInDialog) {
-      this.showContextualSignInDialog();
+    if (prevProps.showSignInDialog !== showSignInDialog) {
+      if (showSignInDialog) {
+        this.showContextualSignInDialog();
+      } else {
+        this.closeDialog();
+      }
     }
     if (!this.willCompileAndUploadMaterials && this.state.noMoreLoadingUpdates) {
       this.willCompileAndUploadMaterials = true;
@@ -326,18 +335,12 @@ class UIRoot extends Component {
       onContinueAfterSignIn
     } = this.props;
 
-    const closeAndContinue = () => {
-      this.closeDialog();
-      showFullScreenIfWasFullScreen();
-      onContinueAfterSignIn();
-    };
-
     this.showNonHistoriedDialog(SignInDialog, {
       message: messages[signInMessageId],
       onSignIn: async email => {
         const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
 
-        this.showNonHistoriedDialog(SignInDialog, { authStarted: true, onClose: closeAndContinue });
+        this.showNonHistoriedDialog(SignInDialog, { authStarted: true, onClose: onContinueAfterSignIn });
 
         await authComplete;
 
@@ -346,11 +349,11 @@ class UIRoot extends Component {
           authComplete: true,
           message: messages[signInCompleteMessageId],
           continueText: messages[signInContinueTextId],
-          onClose: closeAndContinue,
-          onContinue: closeAndContinue
+          onClose: onContinueAfterSignIn,
+          onContinue: onContinueAfterSignIn
         });
       },
-      onClose: closeAndContinue
+      onClose: onContinueAfterSignIn
     });
   };
 
@@ -702,7 +705,7 @@ class UIRoot extends Component {
       showFullScreenIfAvailable();
     }
 
-    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.props.hubId);
+    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.muteOnEntry);
 
     const mediaStream = this.state.mediaStream;
 
@@ -732,7 +735,10 @@ class UIRoot extends Component {
     this.pushHistoryState("overlay", "link");
     const { code, cancel, onFinished } = await this.props.linkChannel.generateCode();
     this.setState({ linkCode: code, linkCodeCancel: cancel });
-    onFinished.then(() => this.setState({ log: false, linkCode: null, linkCodeCancel: null }));
+    onFinished.then(() => {
+      this.setState({ log: false, linkCode: null, linkCodeCancel: null });
+      this.props.history.goBack();
+    });
   };
 
   showInviteDialog = () => {
@@ -950,22 +956,26 @@ class UIRoot extends Component {
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>
           <span>{this.props.hubName}</span>
-          {this.props.hubChannel.permissions.update_hub && (
-            <StateLink
-              stateKey="modal"
-              stateValue="rename_room"
-              history={this.props.history}
+          {this.props.hubChannel.canOrWillIfCreator("update_hub") && (
+            <button
+              onClick={() =>
+                this.props.performConditionalSignIn(
+                  () => this.props.hubChannel.can("update_hub"),
+                  () => this.pushHistoryState("modal", "rename_room"),
+                  "rename-room"
+                )
+              }
               className={entryStyles.editButton}
             >
               <i>
                 <FontAwesomeIcon icon={faPencilAlt} />
               </i>
-            </StateLink>
+            </button>
           )}
           {this.props.hubScene && (
             <StateLink
               stateKey="modal"
-              stateValue="info"
+              stateValue="room_info"
               history={this.props.history}
               className={entryStyles.infoButton}
             >
@@ -981,13 +991,19 @@ class UIRoot extends Component {
         </div>
 
         <div className={entryStyles.center}>
-          {this.props.hubChannel.permissions.update_hub && (
+          {this.props.hubChannel.canOrWillIfCreator("update_hub") ? (
             <WithHoverSound>
               <div
-                className={entryStyles.chooseScene}
+                className={classNames([entryStyles.lobbyLabel, entryStyles.chooseScene])}
                 onClick={() => {
-                  showFullScreenIfAvailable();
-                  this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                  this.props.performConditionalSignIn(
+                    () => this.props.hubChannel.can("update_hub"),
+                    () => {
+                      showFullScreenIfAvailable();
+                      this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                    },
+                    "change-scene"
+                  );
                 }}
               >
                 <i>
@@ -996,6 +1012,10 @@ class UIRoot extends Component {
                 <FormattedMessage id="entry.change-scene" />
               </div>
             </WithHoverSound>
+          ) : (
+            <div className={entryStyles.lobbyLabel}>
+              <FormattedMessage id="entry.in-lobby-notice" />
+            </div>
           )}
 
           <LobbyChatBox
@@ -1182,13 +1202,15 @@ class UIRoot extends Component {
                 srcSet="../assets/images/level_background@2x.png 2x"
                 className="audio-setup-panel__levels__icon-part"
               />
-              <img
-                src="../assets/images/level_fill.png"
-                srcSet="../assets/images/level_fill@2x.png 2x"
-                className="audio-setup-panel__levels__icon-part"
-                style={micClip}
-              />
-              {this.state.audioTrack ? (
+              {!this.state.muteOnEntry && (
+                <img
+                  src="../assets/images/level_fill.png"
+                  srcSet="../assets/images/level_fill@2x.png 2x"
+                  className="audio-setup-panel__levels__icon-part"
+                  style={micClip}
+                />
+              )}
+              {this.state.audioTrack && !this.state.muteOnEntry ? (
                 <img
                   src="../assets/images/mic_level.png"
                   srcSet="../assets/images/mic_level@2x.png 2x"
@@ -1201,11 +1223,12 @@ class UIRoot extends Component {
                   className="audio-setup-panel__levels__icon-part"
                 />
               )}
-              {this.state.audioTrack && (
-                <div className="audio-setup-panel__levels__test_label">
-                  <FormattedMessage id="audio.talk_to_test" />
-                </div>
-              )}
+              {this.state.audioTrack &&
+                !this.state.muteOnEntry && (
+                  <div className="audio-setup-panel__levels__test_label">
+                    <FormattedMessage id="audio.talk_to_test" />
+                  </div>
+                )}
             </div>
             <WithHoverSound>
               <div className="audio-setup-panel__levels__icon_clickable" onClick={this.playTestTone}>
@@ -1274,6 +1297,17 @@ class UIRoot extends Component {
             </div>
           )}
         </div>
+        <div className="audio-setup-panel__mute-container">
+          <input
+            id="mute-on-entry"
+            type="checkbox"
+            onChange={() => this.setState({ muteOnEntry: !this.state.muteOnEntry })}
+            checked={this.state.muteOnEntry}
+          />
+          <label htmlFor="mute-on-entry">
+            <FormattedMessage id="entry.mute-on-entry" />
+          </label>
+        </div>
         <div className="audio-setup-panel__enter-button-container">
           <WithHoverSound>
             <button className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
@@ -1313,6 +1347,8 @@ class UIRoot extends Component {
   };
 
   render() {
+    if (this.props.hide) return <div />;
+
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
 
     const isLoading =
@@ -1384,6 +1420,9 @@ class UIRoot extends Component {
     const showMediaBrowser = mediaSource && (["scenes", "avatars"].includes(mediaSource) || this.state.entered);
     const hasTopTip = this.props.activeTips && this.props.activeTips.top;
 
+    const clientInfoClientId = getClientInfoClientId(this.props.history.location);
+    const showClientInfo = !!clientInfoClientId;
+
     const discordBridges = this.discordBridges();
     const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
     const showDiscordTip = discordBridges.length > 0 && !this.state.discordTipDismissed;
@@ -1436,6 +1475,7 @@ class UIRoot extends Component {
                 mediaSearchStore={this.props.mediaSearchStore}
                 hubChannel={this.props.hubChannel}
                 onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
+                performConditionalSignIn={this.props.performConditionalSignIn}
               />
             )}
             <StateRoute
@@ -1517,21 +1557,39 @@ class UIRoot extends Component {
             />
             <StateRoute
               stateKey="modal"
-              stateValue="info"
+              stateValue="room_info"
               history={this.props.history}
               render={() =>
                 this.renderDialog(RoomInfoDialog, { scene: this.props.hubScene, hubName: this.props.hubName })
               }
             />
 
+            {showClientInfo && (
+              <ClientInfoDialog
+                clientId={clientInfoClientId}
+                onClose={this.closeDialog}
+                history={this.props.history}
+                presences={this.props.presences}
+                hubChannel={this.props.hubChannel}
+                performConditionalSignIn={this.props.performConditionalSignIn}
+              />
+            )}
+
             {(!this.state.entered || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
-                <PresenceLog entries={presenceLogEntries} hubId={this.props.hubId} />
+                <PresenceLog entries={presenceLogEntries} hubId={this.props.hubId} history={this.props.history} />
                 <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
               </div>
             )}
 
-            {entered && <PresenceLog inRoom={true} entries={presenceLogEntries} hubId={this.props.hubId} />}
+            {entered && (
+              <PresenceLog
+                inRoom={true}
+                entries={presenceLogEntries}
+                hubId={this.props.hubId}
+                history={this.props.history}
+              />
+            )}
             {entered &&
               this.props.activeTips &&
               this.props.activeTips.bottom &&
@@ -1720,6 +1778,8 @@ class UIRoot extends Component {
                 hideSettings={() => this.setState({ showSettingsMenu: false })}
                 hubChannel={this.props.hubChannel}
                 hubScene={this.props.hubScene}
+                performConditionalSignIn={this.props.performConditionalSignIn}
+                pushHistoryState={this.pushHistoryState}
               />
             )}
 

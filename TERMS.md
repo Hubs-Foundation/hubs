@@ -24,7 +24,7 @@ When you submit information to Hubs or Spoke, you grant us a worldwide, royalty-
 You also represent and warrant that you have the authority to grant Mozilla all rights and permissions necessary for the operation of Hubs and Spoke. 
 
 To learn more about how Hubs operates, you can see the source code [here](https://github.com/mozilla/hubs).
-To learn more about how Spoke operates, you can see the source code [here](https://github.com/mozillareality/spoke).
+To learn more about how Spoke operates, you can see the source code [here](https://github.com/mozilla/spoke).
 
 Any ideas, suggestions, and feedback about Hubs or Spoke that you provide to us are entirely voluntary, and you agree that Mozilla may use such ideas, suggestions, and feedback without compensation or obligation to you.
 
@@ -38,7 +38,7 @@ Please also be aware of [Mozilla’s Community Participation Guidelines](https:/
 ### 4. Mozilla's Rights
 Mozilla does not grant you any intellectual property rights in Hubs or Spoke unless these Terms specifically say otherwise. For example, these Terms do not provide the right to use any of Mozilla’s copyrights, trade names, trademarks, service marks, logos, domain names, or other distinctive brand features.
 
-Mozilla distributes the Hubs and Spoke software under an open source license. To learn more, you can read the [license for Spoke]((https://github.com/mozillareality/spoke/blob/master/LICENSE)), and you can read the [license for Hubs](https://github.com/mozilla/hubs/blob/master/LICENSE) or read the [FAQ](https://www.mozilla.org/en-US/MPL/2.0/FAQ/).
+Mozilla distributes the Hubs and Spoke software under an open source license. To learn more, you can read the [license for Spoke]((https://github.com/mozilla/spoke/blob/master/LICENSE)), and you can read the [license for Hubs](https://github.com/mozilla/hubs/blob/master/LICENSE) or read the [FAQ](https://www.mozilla.org/en-US/MPL/2.0/FAQ/).
 
 ### 5. Services Interruption; Term; Termination
 We are continuing to develop Hubs and Spoke. As a result, we plan to upgrade and change them over time. To do this, we might have to temporarily suspend their service and it is not always possible for us to give notice. You will not be entitled to claim expenses or damages for such suspension or limitation of the use of Hubs or Spoke.

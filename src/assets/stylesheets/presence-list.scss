@@ -65,3 +65,13 @@
     color: $action-color;
   }
 }
+
+:local(.client-link) {
+  @extend %link-button;
+}
+
+:local(.moderator-badge) {
+  color: $action-color;
+  margin-left: 4px;
+  text-decoration: none;
+}

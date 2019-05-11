@@ -148,18 +148,26 @@
     width: 100%;
   }
 
-  :local(.choose-scene) {
+  :local(.lobby-label) {
     margin-top: 4px;
     margin-bottom: 32px;
     @extend %default-font;
-    font-size: 1.1em;
-    color: $action-color;
+    font-size: 0.8em;
     text-decoration: none;
     cursor: pointer;
-    font-weight: bold;
     display: flex;
+    color: $dark-grey;
     align-items: center;
     justify-content: center;
+    i {
+      margin-right: 8px;
+    }
+  }
+
+  :local(.choose-scene) {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: $action-color;
     i {
       margin-right: 8px;
     }

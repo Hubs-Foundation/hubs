@@ -63,9 +63,9 @@
 
   button {
     @extend %default-font;
+    @extend %link-button;
     font-weight: bold;
     color: black;
-    text-decoration: underline;
     text-decoration-color: $dark-grey;
     padding: 0;
     margin: 2px 12px;
@@ -73,13 +73,6 @@
     justify-content: flex-start;
     align-items: center;
     white-space: nowrap;
-    appearance: none;
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    background: transparent;
-    border: none;
-    outline-style: none;
-    cursor: pointer;
     text-align: center;
   }
 }

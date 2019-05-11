@@ -13,6 +13,7 @@ import StateLink from "./state-link.js";
 import { WithHoverSound } from "./wrap-with-audio";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+import { pushHistoryPath, withSlug } from "../utils/history";
 
 function getPresenceImage(ctx) {
   if (ctx && ctx.mobile) {
@@ -23,6 +24,17 @@ function getPresenceImage(ctx) {
     return DiscordImage;
   } else {
     return DesktopImage;
+  }
+}
+
+export function navigateToClientInfo(history, clientId) {
+  const currentParams = new URLSearchParams(history.location.search);
+
+  if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
+    currentParams.set("client_id", clientId);
+    pushHistoryPath(history, history.location.pathname, currentParams.toString());
+  } else {
+    pushHistoryPath(history, withSlug(history.location, `/clients/${clientId}`), currentParams.toString());
   }
 }
 
@@ -37,11 +49,21 @@ export default class PresenceList extends Component {
     onSignOut: PropTypes.func
   };
 
+  navigateToClientInfo = clientId => {
+    navigateToClientInfo(this.props.history, clientId);
+  };
+
   domForPresence = ([sessionId, data]) => {
-    const meta = data.metas[0];
+    const meta = data.metas[data.metas.length - 1];
     const context = meta.context;
     const profile = meta.profile;
     const image = getPresenceImage(context);
+    const isModerator = meta.roles && meta.roles.moderator;
+    const badge = isModerator && (
+      <span className={styles.moderatorBadge} title="Moderator">
+        &#x2605;
+      </span>
+    );
 
     return (
       <WithHoverSound key={sessionId}>
@@ -57,12 +79,18 @@ export default class PresenceList extends Component {
             {sessionId === this.props.sessionId ? (
               <StateLink className={styles.self} stateKey="overlay" stateValue="profile" history={this.props.history}>
                 {profile && profile.displayName}
+                {badge}
                 <i>
                   <FontAwesomeIcon icon={faPencilAlt} />
                 </i>
               </StateLink>
             ) : (
-              profile && profile.displayName
+              <div>
+                <button className={styles.clientLink} onClick={() => this.navigateToClientInfo(sessionId)}>
+                  {profile && profile.displayName}
+                </button>
+                {badge}
+              </div>
             )}
           </div>
           <div className={styles.presence}>

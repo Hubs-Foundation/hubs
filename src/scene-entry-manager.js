@@ -12,7 +12,8 @@ import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import {
   isIn2DInterstitial,
   handleExitTo2DInterstitial,
-  handleReEntryToVRFrom2DInterstitial
+  handleReEntryToVRFrom2DInterstitial,
+  forceExitFrom2DInterstitial
 } from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./assets/avatars/avatars";
@@ -32,7 +33,7 @@ export default class SceneEntryManager {
     this.cursorController = document.querySelector("#cursor-controller");
     this.playerRig = document.querySelector("#player-rig");
     this._entered = false;
-    this.onRequestAuthentication = () => {};
+    this.performConditionalSignIn = () => {};
     this.history = history;
   }
 
@@ -46,7 +47,7 @@ export default class SceneEntryManager {
     return this._entered;
   };
 
-  enterScene = async (mediaStream, enterInVR) => {
+  enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
     const playerCamera = document.querySelector("#player-camera");
     playerCamera.removeAttribute("scene-preview-camera");
     playerCamera.object3D.position.set(0, playerHeight, 0);
@@ -110,6 +111,10 @@ export default class SceneEntryManager {
     })();
 
     this.scene.addState("entered");
+
+    if (muteOnEntry) {
+      this.scene.emit("action_mute");
+    }
   };
 
   whenSceneLoaded = callback => {
@@ -180,7 +185,7 @@ export default class SceneEntryManager {
     });
 
     document.body.addEventListener("unblocked", ev => {
-      NAF.connection.entities.completeSync(ev.detail.clientId);
+      NAF.connection.entities.completeSync(ev.detail.clientId, true);
     });
   };
 
@@ -217,45 +222,15 @@ export default class SceneEntryManager {
   };
 
   _signInAndPinOrUnpinElement = (el, pin) => {
-    const action = pin ? this._pinElement : this._unpinElement;
-    const promptIdSuffix = pin ? "pin" : "unpin";
+    const action = pin ? () => this._pinElement(el) : async () => await this._unpinElement(el);
 
-    if (this.hubChannel.signedIn) {
-      action(el);
-    } else {
-      handleExitTo2DInterstitial(true);
-
-      const wasInVR = this.scene.is("vr-mode");
-      const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
-
-      this.onRequestAuthentication(
-        `sign-in.${promptIdSuffix}`,
-        `sign-in.${promptIdSuffix}-complete`,
-        continueTextId,
-        async () => {
-          let actionFailed = false;
-          if (this.hubChannel.signedIn) {
-            try {
-              await action(el);
-            } catch (e) {
-              actionFailed = true;
-            }
-          } else {
-            actionFailed = true;
-          }
-
-          if (actionFailed) {
-            // UI pins/un-pins the entity optimistically, so we undo that here.
-            // Note we have to disable the sign in flow here otherwise this will recurse.
-            this._disableSignInOnPinAction = true;
-            el.setAttribute("pinnable", "pinned", !pin);
-            this._disableSignInOnPinAction = false;
-          }
-
-          handleReEntryToVRFrom2DInterstitial();
-        }
-      );
-    }
+    this.performConditionalSignIn(() => this.hubChannel.signedIn, action, pin ? "pin" : "unpin", () => {
+      // UI pins/un-pins the entity optimistically, so we undo that here.
+      // Note we have to disable the sign in flow here otherwise this will recurse.
+      this._disableSignInOnPinAction = true;
+      el.setAttribute("pinnable", "pinned", !pin);
+      this._disableSignInOnPinAction = false;
+    });
   };
 
   _unpinElement = el => {
@@ -323,14 +298,32 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("action_spawn", () => {
-      handleExitTo2DInterstitial(false);
+      handleExitTo2DInterstitial(false, () => window.APP.mediaSearchStore.pushExitMediaBrowserHistory());
       window.APP.mediaSearchStore.sourceNavigateToDefaultSource();
     });
 
     this.scene.addEventListener("action_invite", () => {
-      handleExitTo2DInterstitial(false);
+      handleExitTo2DInterstitial(false, () => this.history.goBack());
       pushHistoryState(this.history, "overlay", "invite");
     });
+
+    this.scene.addEventListener("action_kick_client", ({ detail: { clientId } }) => {
+      this.performConditionalSignIn(
+        () => this.hubChannel.can("kick_users"),
+        async () => await window.APP.hubChannel.kick(clientId),
+        "kick-user"
+      );
+    });
+
+    this.scene.addEventListener("action_mute_client", ({ detail: { clientId } }) => {
+      this.performConditionalSignIn(
+        () => this.hubChannel.can("mute_users"),
+        () => window.APP.hubChannel.mute(clientId),
+        "mute-user"
+      );
+    });
+
+    this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
 
     document.addEventListener("paste", e => {
       if (e.target.matches("input, textarea") && document.activeElement === e.target) return;
@@ -445,7 +438,7 @@ export default class SceneEntryManager {
       // TODO spawn in space when no rights
       const entry = e.detail;
       if (["avatar", "avatar_listing"].includes(entry.type)) return;
-      if (entry.type === "scene_listing" && this.hubChannel.permissions.update_hub) return;
+      if (entry.type === "scene_listing" && this.hubChannel.can("update_hub")) return;
 
       // If user has HMD lifted up or gone through interstitial, delay spawning for now. eventually show a modal
       const spawnDelay = isIn2DInterstitial() ? 3000 : 0;
