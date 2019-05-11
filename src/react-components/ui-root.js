@@ -261,8 +261,6 @@ class UIRoot extends Component {
   }
 
   componentDidMount() {
-    //setTimeout(() => this.pushHistoryState("overlay", "profile")); // BPDEBUG
-
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     this.micLevelMovingAverage = MovingAverage(100);
     this.props.scene.addEventListener(

@@ -11,7 +11,8 @@ import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
 
 const AVATARS_API = "/api/v1/avatars";
-const BOT_PARENT_AVATAR = "xf9xkIY"; // "FcjJywg"; // // "hiwSHgg"; //location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
+const BOT_PARENT_AVATAR =
+  location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
 
 function emitAvatarChanged(avatarId) {
   window.dispatchEvent(new CustomEvent("avatar_editor_avatar_changed", { detail: { avatarId: avatarId } }));
