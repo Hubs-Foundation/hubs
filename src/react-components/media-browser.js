@@ -478,7 +478,7 @@ class MediaBrowser extends Component {
               className={styles.name}
               onClick={e => this.handleEntryClicked(e, entry)}
             >
-              {entry.name}
+              {entry.name || "\u00A0"}
             </a>
             <div className={styles.attribution}>
               <div className={styles.creator}>
