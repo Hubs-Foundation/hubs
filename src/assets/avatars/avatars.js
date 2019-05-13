@@ -1,4 +1,5 @@
 import { getReticulumFetchUrl } from "../../utils/phoenix-utils";
+import { proxiedUrlFor } from "../../utils/media-utils";
 
 export const avatars = [
   {
@@ -65,5 +66,5 @@ export async function getAvatarSrc(avatarId) {
         .then(r => r.json())
         .then(({ avatars }) => avatars[0].gltf_url);
   }
-  return avatarId;
+  return proxiedUrlFor(avatarId);
 }
