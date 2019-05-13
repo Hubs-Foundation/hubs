@@ -378,17 +378,18 @@ class MediaBrowser extends Component {
                   style={{ width: `${createAvatarWidth}px`, height: `${createAvatarHeight}px` }}
                   className={classNames(styles.tile, styles.createAvatar)}
                 >
-                  <StateLink
-                    stateKey="overlay"
-                    stateValue="avatar-editor"
-                    history={this.props.history}
+                  <a
+                    onClick={e => {
+                      e.preventDefault();
+                      window.dispatchEvent(new CustomEvent("action_create_avatar"));
+                    }}
                     className={styles.tileLink}
                   >
                     <div className={styles.tileContent}>
                       <FontAwesomeIcon icon={faPlus} />
                       <FormattedMessage id={`media-browser.create-avatar`} />
                     </div>
-                  </StateLink>
+                  </a>
                 </div>
               )}
 

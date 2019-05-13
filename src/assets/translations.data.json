@@ -20,6 +20,8 @@
     "sign-in.mute-user-complete": "You are now signed in.",
     "sign-in.kick-user": "You'll need to sign in to kick other users.",
     "sign-in.kick-user-complete": "You are now signed in.",
+    "sign-in.create-avatar": "You'll need to sign in to create avatars.",
+    "sign-in.create-avatar-complete": "You are now signed in.",
     "sign-in.as": "Signed in as",
     "sign-in.in": "Sign In",
     "sign-in.out": "Sign Out",
