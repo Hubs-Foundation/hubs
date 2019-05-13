@@ -16,6 +16,7 @@ $light-blue: #6FC0FD;
 $action-color: #FF3464;
 $action-color-light: #FF74A4;
 $action-color-transparent: rgba(255, 52, 100, 0.9);
+$spoke-action-color: #2F80ED;
 $hud-panel-background: rgba(79, 79, 79, 0.45);
 $spoke-action-color: $bright-blue;
 $semi-bold: 600;
@@ -179,6 +180,11 @@ $semi-bold: 600;
 %bottom-action-button {
   @extend %bottom-button;
   background: $action-color;
+}
+
+%spoke-action-button {
+  @extend %action-button;
+  background-color: $spoke-action-color;
 }
 
 %top-title {

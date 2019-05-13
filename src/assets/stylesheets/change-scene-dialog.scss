@@ -48,3 +48,21 @@
   text-overflow: ellipsis;
   width: 100%;
 }
+
+:local(.spoke-create) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid #e2e2e2;
+  margin-top: 64px;
+
+  div {
+    margin-top: 28px;
+  }
+
+  a {
+    @extend %spoke-action-button;
+    margin-top: 18px;
+  }
+}
