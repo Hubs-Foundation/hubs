@@ -6,7 +6,7 @@ import styles from "../assets/stylesheets/profile.scss";
 import classNames from "classnames";
 import hubLogo from "../assets/images/hub-preview-white.png";
 import { WithHoverSound } from "./wrap-with-audio";
-import { AVATAR_TYPES, getAvatarType } from "../assets/avatars/avatars";
+import { AVATAR_TYPES, getAvatarType } from "../utils/avatar-utils";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 
 import AvatarEditor from "./avatar-editor";
