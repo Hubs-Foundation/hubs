@@ -265,7 +265,7 @@ class MediaBrowser extends Component {
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
         <div className={classNames([styles.box, styles.darkened])}>
-          <div className={classNames(styles.header, {[styles.noSearch]: hideSearch})}>
+          <div className={classNames(styles.header, { [styles.noSearch]: hideSearch })}>
             <div className={styles.headerLeft}>
               <a onClick={() => this.close()}>
                 <i>
