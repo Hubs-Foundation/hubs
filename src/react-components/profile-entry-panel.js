@@ -152,7 +152,7 @@ class ProfileEntryPanel extends Component {
                 <StateLink
                   stateKey="overlay"
                   stateValue="avatar-editor"
-                  stateDetail={{ avatarId: this.state.avatarId, hideDelete: true }}
+                  stateDetail={{ avatarId: this.state.avatarId, hideDelete: true, returnToProfile: true }}
                   history={this.props.history}
                   className={styles.editAvatar}
                 >

@@ -1459,7 +1459,16 @@ class UIRoot extends Component {
                   className={styles.avatarEditor}
                   signedIn={this.state.signedIn}
                   onSignIn={this.showSignInDialog}
-                  onSave={() => this.props.history.goBack()}
+                  onSave={() => {
+                    if (props.location.state.detail && props.location.state.detail.returnToProfile) {
+                      this.props.history.goBack();
+                    } else {
+                      this.props.history.goBack();
+                      // We are returning to the media browser. Trigger an update so that the filter switches to
+                      // my-avatars, now that we've saved an avatar.
+                      this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars");
+                    }
+                  }}
                   onClose={() => this.props.history.goBack()}
                   store={this.props.store}
                   debug={avatarEditorDebug}
