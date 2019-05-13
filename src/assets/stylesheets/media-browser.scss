@@ -130,9 +130,19 @@
     height: 77px;
     min-height: 77px;
 
+    &:local(.no-search) {
+      height: auto;
+      min-height: auto;
+    }
+
     @media(max-width: 801px) {
       height: 55px;
       min-height: 55px;
+
+      &:local(.no-search) {
+        height: auto;
+        min-height: auto;
+      }
     }
   }
 

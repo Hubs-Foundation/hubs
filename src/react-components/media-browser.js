@@ -246,6 +246,7 @@ class MediaBrowser extends Component {
     const showCustomOption = apiSource !== "scene_listings" || this.props.hubChannel.canOrWillIfCreator("update_hub");
     const [createAvatarWidth, createAvatarHeight] = this.getTileDimensions(false, true);
     const entries = (this.state.result && this.state.result.entries) || [];
+    const hideSearch = urlSource === "avatars";
 
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
     if (this.state.selectNextResult) return <div />;
@@ -264,7 +265,7 @@ class MediaBrowser extends Component {
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
         <div className={classNames([styles.box, styles.darkened])}>
-          <div className={styles.header}>
+          <div className={classNames(styles.header, {[styles.noSearch]: hideSearch})}>
             <div className={styles.headerLeft}>
               <a onClick={() => this.close()}>
                 <i>
@@ -273,7 +274,7 @@ class MediaBrowser extends Component {
               </a>
             </div>
             <div className={styles.headerCenter}>
-              {urlSource !== "avatars" && (
+              {!hideSearch && (
                 <div className={styles.search}>
                   <i>
                     <FontAwesomeIcon icon={faSearch} />
