@@ -68,6 +68,7 @@
 
 :local(.client-link) {
   @extend %link-button;
+  @extend %default-font;
 }
 
 :local(.moderator-badge) {

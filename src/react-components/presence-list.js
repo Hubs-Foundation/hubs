@@ -58,6 +58,7 @@ export default class PresenceList extends Component {
     const context = meta.context;
     const profile = meta.profile;
     const image = getPresenceImage(context);
+    const isBot = context && context.discord;
     const isModerator = meta.roles && meta.roles.moderator;
     const badge = isModerator && (
       <span className={styles.moderatorBadge} title="Moderator">
@@ -86,9 +87,13 @@ export default class PresenceList extends Component {
               </StateLink>
             ) : (
               <div>
-                <button className={styles.clientLink} onClick={() => this.navigateToClientInfo(sessionId)}>
-                  {profile && profile.displayName}
-                </button>
+                {!isBot ? (
+                  <button className={styles.clientLink} onClick={() => this.navigateToClientInfo(sessionId)}>
+                    {profile && profile.displayName}
+                  </button>
+                ) : (
+                  <span>{profile && profile.displayName}</span>
+                )}
                 {badge}
               </div>
             )}
