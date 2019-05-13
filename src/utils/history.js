@@ -23,6 +23,8 @@ function pushOrUpdateHistory(history, replace, k, v, detail, newPathname, newSea
 
     if (k) {
       state[k] = v;
+      state.key = k;
+      state.value = v;
       state.detail = detail;
     }
   }

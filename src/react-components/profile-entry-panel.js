@@ -11,6 +11,7 @@ import hubLogo from "../assets/images/hub-preview-white.png";
 import { WithHoverSound } from "./wrap-with-audio";
 import { AVATAR_TYPES, getAvatarGltfUrl, getAvatarType } from "../assets/avatars/avatars";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
+import { replaceHistoryState } from "../utils/history";
 import StateLink from "./state-link";
 
 import AvatarPreview from "./avatar-preview";
@@ -23,7 +24,8 @@ class ProfileEntryPanel extends Component {
     messages: PropTypes.object,
     finished: PropTypes.func,
     intl: PropTypes.object,
-    history: PropTypes.object
+    history: PropTypes.object,
+    avatarId: PropTypes.string
   };
 
   state = {
@@ -36,6 +38,10 @@ class ProfileEntryPanel extends Component {
   constructor(props) {
     super(props);
     this.state = this.getStateFromProfile();
+    if (props.avatarId) {
+      this.state.avatarId = props.avatarId;
+      this.state.avatarType = getAvatarType(this.state.avatarId);
+    }
     this.props.store.addEventListener("statechanged", this.storeUpdated);
     this.scene = document.querySelector("a-scene");
   }
@@ -77,6 +83,10 @@ class ProfileEntryPanel extends Component {
       avatarType: getAvatarType(entry.id),
       avatarGltfUrl: entry.gltfs.avatar
     });
+    // Replace history state with the current avatar id since this component gets destroyed when we open the
+    // avatar editor and we want the back button to work. We read the history state back via the avatarId prop.
+    // We read the current state key from history since it could be "overlay" or "entry_step".
+    replaceHistoryState(this.props.history, this.props.history.location.state.key, "profile", { avatarId: entry.id });
   };
 
   async componentDidMount() {

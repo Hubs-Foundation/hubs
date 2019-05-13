@@ -1446,6 +1446,7 @@ class UIRoot extends Component {
                   finished={() => this.pushHistoryState()}
                   store={this.props.store}
                   mediaSearchStore={this.props.mediaSearchStore}
+                  avatarId={props.location.state.detail && props.location.state.detail.avatarId}
                 />
               )}
             />
@@ -1494,6 +1495,7 @@ class UIRoot extends Component {
                   }}
                   store={this.props.store}
                   mediaSearchStore={this.props.mediaSearchStore}
+                  avatarId={props.location.state.detail && props.location.state.detail.avatarId}
                 />
               )}
             />
