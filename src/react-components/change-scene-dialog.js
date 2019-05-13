@@ -77,7 +77,7 @@ export default class ChangeSceneDialog extends Component {
                 <div>
                   <FormattedMessage id="change-scene-dialog.create-in-spoke" />
                 </div>
-                <a href="/spoke" target="_blank" rel="noopener noreferrer">
+                <a href="/spoke/projects/new" target="_blank" rel="noopener noreferrer">
                   <FormattedMessage id="change-scene-dialog.new-spoke-project" />
                 </a>
               </div>
