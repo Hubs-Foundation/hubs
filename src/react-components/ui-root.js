@@ -39,6 +39,7 @@ import MediaBrowser from "./media-browser";
 
 import CreateObjectDialog from "./create-object-dialog.js";
 import ChangeSceneDialog from "./change-scene-dialog.js";
+import AvatarUrlDialog from "./avatar-url-dialog.js";
 import HelpDialog from "./help-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
@@ -753,6 +754,10 @@ class UIRoot extends Component {
 
   changeScene = url => {
     this.props.hubChannel.updateScene(url);
+  };
+
+  setAvatarUrl = url => {
+    this.props.store.update({ profile: { ...this.props.store.state.profile, ...{ avatarId: url } } });
   };
 
   closeDialog = () => {
@@ -1551,6 +1556,12 @@ class UIRoot extends Component {
               stateValue="change_scene"
               history={this.props.history}
               render={() => this.renderDialog(ChangeSceneDialog, { onChange: this.changeScene })}
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="avatar_url"
+              history={this.props.history}
+              render={() => this.renderDialog(AvatarUrlDialog, { onChange: this.setAvatarUrl })}
             />
             <StateRoute
               stateKey="modal"

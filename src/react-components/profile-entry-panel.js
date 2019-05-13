@@ -48,7 +48,12 @@ class ProfileEntryPanel extends Component {
 
   getStateFromProfile = () => {
     const { displayName, avatarId } = this.props.store.state.profile;
-    return { displayName, avatarId, avatarType: getAvatarType(avatarId) };
+    const avatarType = getAvatarType(avatarId);
+    const newState = { displayName, avatarId, avatarType };
+    if (avatarType === AVATAR_TYPES.URL) {
+      newState.avatarGltfUrl = avatarId;
+    }
+    return newState;
   };
 
   storeUpdated = () => this.setState(this.getStateFromProfile());

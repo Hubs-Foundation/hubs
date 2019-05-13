@@ -6,6 +6,7 @@ import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
 import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploadAlt";
+import { faLink } from "@fortawesome/free-solid-svg-icons/faLink";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
@@ -211,7 +212,11 @@ class MediaBrowser extends Component {
 
   showCustomMediaDialog = source => {
     this.pushExitMediaBrowserHistory();
-    pushHistoryState(this.props.history, "modal", source === "scene_listings" ? "change_scene" : "create");
+    pushHistoryState(
+      this.props.history,
+      "modal",
+      source === "scene_listings" ? "change_scene" : source === "avatars" ? "avatar_url" : "create"
+    );
   };
 
   close = () => {
@@ -245,11 +250,15 @@ class MediaBrowser extends Component {
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
     if (this.state.selectNextResult) return <div />;
     const handleCustomClicked = apiSource => {
-      this.props.performConditionalSignIn(
-        () => apiSource !== "scene_listings" || this.props.hubChannel.can("update_hub"),
-        () => this.showCustomMediaDialog(apiSource),
-        "change-scene"
-      );
+      if (urlSource === "avatars") {
+        this.showCustomMediaDialog(urlSource);
+      } else {
+        this.props.performConditionalSignIn(
+          () => apiSource !== "scene_listings" || this.props.hubChannel.can("update_hub"),
+          () => this.showCustomMediaDialog(apiSource),
+          "change-scene"
+        );
+      }
     };
 
     return (
@@ -326,7 +335,7 @@ class MediaBrowser extends Component {
               {showCustomOption && (
                 <a onClick={() => handleCustomClicked(apiSource)} className={styles.createButton}>
                   <i>
-                    <FontAwesomeIcon icon={faCloudUploadAlt} />
+                    <FontAwesomeIcon icon={["scenes", "avatars"].includes(urlSource) ? faLink : faCloudUploadAlt} />
                   </i>
                 </a>
               )}
@@ -334,7 +343,11 @@ class MediaBrowser extends Component {
                 <a onClick={() => handleCustomClicked(apiSource)} className={styles.createLink}>
                   <FormattedMessage
                     id={`media-browser.add_custom_${
-                      this.state.result && apiSource === "scene_listings" ? "scene" : "object"
+                      this.state.result && apiSource === "scene_listings"
+                        ? "scene"
+                        : urlSource === "avatars"
+                          ? "avatar"
+                          : "object"
                     }`}
                   />
                 </a>

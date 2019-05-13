@@ -297,10 +297,12 @@ export default class AvatarEditor extends Component {
               />
             </div>
             <div className="info">
-              <FormattedMessage id="avatar-editor.info" />
-              <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
-                <FormattedMessage id="avatar-editor.info-link" />
-              </a>
+              <p>
+                <FormattedMessage id="avatar-editor.info" />
+                <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
+                  <FormattedMessage id="avatar-editor.info-link" />
+                </a>
+              </p>
             </div>
             <div>
               <input
