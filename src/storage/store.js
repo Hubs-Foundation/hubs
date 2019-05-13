@@ -124,6 +124,7 @@ export default class Store extends EventTarget {
     const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
     if (oauthFlowCredentials) {
       this.update({ credentials: oauthFlowCredentials });
+      this.clearAvatar();
       Cookies.remove(OAUTH_FLOW_CREDENTIALS_KEY);
     }
   }
