@@ -214,7 +214,7 @@ export default class SceneEntryManager {
     } catch (e) {
       if (e.reason === "invalid_token") {
         await this.authChannel.signOut(this.hubChannel);
-        this._signInAndPinElement(el);
+        this._signInAndPinOrUnpinElement(el);
       } else {
         console.warn("Pin failed for unknown reason", e);
       }
