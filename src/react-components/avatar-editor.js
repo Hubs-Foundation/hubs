@@ -14,10 +14,6 @@ const AVATARS_API = "/api/v1/avatars";
 const BOT_PARENT_AVATAR =
   location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
 
-function emitAvatarChanged(avatarId) {
-  window.dispatchEvent(new CustomEvent("avatar_editor_avatar_changed", { detail: { avatarId: avatarId } }));
-}
-
 export default class AvatarEditor extends Component {
   static propTypes = {
     avatarId: PropTypes.string,
@@ -125,8 +121,6 @@ export default class AvatarEditor extends Component {
     };
 
     await this.createOrUpdateAvatar(avatar);
-
-    emitAvatarChanged(avatar.avatar_id);
 
     this.setState({ uploading: false });
 
