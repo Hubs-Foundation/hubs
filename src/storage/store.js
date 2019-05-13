@@ -140,6 +140,12 @@ export default class Store extends EventTarget {
     }
   };
 
+  clearAvatar = () => {
+    this.update({
+      profile: { ...(this.state.profile || {}), ...generateDefaultProfile() }
+    });
+  };
+
   get state() {
     if (!this.hasOwnProperty(STORE_STATE_CACHE_KEY)) {
       this[STORE_STATE_CACHE_KEY] = JSON.parse(localStorage.getItem(LOCAL_STORE_KEY));
