@@ -42,6 +42,7 @@ export default class AvatarEditor extends Component {
   componentDidMount = async () => {
     if (this.props.avatarId) {
       const avatar = await this.fetchAvatar(this.props.avatarId);
+      avatar.creatorAttribution = (avatar.attributions && avatar.attributions.creator) || "";
       Object.assign(this.inputFiles, avatar.files);
       this.setState({ avatar, previewGltfUrl: avatar.base_gltf_url });
     } else {
@@ -115,6 +116,9 @@ export default class AvatarEditor extends Component {
     const fileUploads = await Promise.all(filesToUpload.map(f => this.inputFiles[f] && upload(this.inputFiles[f])));
     const avatar = {
       ...this.state.avatar,
+      attributions: {
+        creator: this.state.avatar.creatorAttribution
+      },
       files: fileUploads
         .map((resp, i) => [filesToUpload[i], resp && [resp.file_id, resp.meta.access_token, resp.meta.promotion_token]])
         .reduce((o, [k, v]) => ({ ...o, [k]: v }), {})
@@ -242,7 +246,7 @@ export default class AvatarEditor extends Component {
     </div>
   );
 
-  checkbox = (name, label, disabled) => (
+  checkbox = (name, children, disabled) => (
     <div className="checkbox-container">
       <input
         id={`avatar-${name}`}
@@ -252,7 +256,7 @@ export default class AvatarEditor extends Component {
         checked={!!this.state.avatar[name]}
         onChange={e => this.setState({ avatar: { ...this.state.avatar, [name]: e.target.checked } })}
       />
-      <label htmlFor={`#avatar-${name}`}>{label}</label>
+      <label htmlFor={`#avatar-${name}`}>{children}</label>
     </div>
   );
 
@@ -283,8 +287,41 @@ export default class AvatarEditor extends Component {
 
                 {this.mapField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
 
-                {debug && this.checkbox("allow_promotion", "Allow Promotion")}
-                {debug && this.checkbox("allow_remixing", "Allow Remixing")}
+                <hr />
+
+                {this.checkbox(
+                  "allow_promotion",
+                  <span>
+                    Allow{" "}
+                    <a
+                      href="https://github.com/mozilla/hubs/blob/master/PROMOTION.md"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Promotion
+                    </a>
+                  </span>
+                )}
+                {this.checkbox(
+                  "allow_remixing",
+                  <span>
+                    Allow{" "}
+                    <a
+                      href="https://github.com/mozilla/hubs/blob/master/REMIXING.md"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Remixing
+                    </a>{" "}
+                    <span>
+                      (under{" "}
+                      <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">
+                        CC-BY 3.0
+                      </a>)
+                    </span>
+                  </span>
+                )}
+                {this.textField("creatorAttribution", "Your Attribution (optional)", false, false)}
 
                 {/* {this.mapField("ao_map", "AO Map", "images/\*", true)} */}
                 {/* {this.mapField("metallic_map", "Metallic Map", "image/\*", true)} */}
