@@ -321,7 +321,7 @@ export default class AvatarEditor extends Component {
                     <a onClick={() => this.setState({ confirmDelete: false })}>no</a>
                   </span>
                 ) : (
-                  <a onClick={() => this.setState({ confirmDelete: true })}>delete avatar...</a>
+                  <a onClick={() => this.setState({ confirmDelete: true })}>delete avatar</a>
                 )}
               </div>
             )}
