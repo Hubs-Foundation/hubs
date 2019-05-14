@@ -503,29 +503,31 @@ class MediaBrowser extends Component {
             >
               {entry.name || "\u00A0"}
             </a>
-            <div className={styles.attribution}>
-              <div className={styles.creator}>
-                {creator && creator.name === undefined && <span>{creator}</span>}
-                {creator && creator.name && !creator.url && <span>{creator.name}</span>}
-                {creator &&
-                  creator.name &&
-                  creator.url && (
-                    <a href={creator.url} target="_blank" rel="noopener noreferrer">
-                      {creator.name}
-                    </a>
-                  )}
-              </div>
-              {publisherName && (
-                <div className={styles.publisher}>
-                  <i>
-                    <FontAwesomeIcon icon={faExternalLinkAlt} />
-                  </i>
-                  &nbsp;<a href={entry.url} target="_blank" rel="noopener noreferrer">
-                    {publisherName}
-                  </a>
+            {!isAvatar && (
+              <div className={styles.attribution}>
+                <div className={styles.creator}>
+                  {creator && creator.name === undefined && <span>{creator}</span>}
+                  {creator && creator.name && !creator.url && <span>{creator.name}</span>}
+                  {creator &&
+                    creator.name &&
+                    creator.url && (
+                      <a href={creator.url} target="_blank" rel="noopener noreferrer">
+                        {creator.name}
+                      </a>
+                    )}
                 </div>
-              )}
-            </div>
+                {publisherName && (
+                  <div className={styles.publisher}>
+                    <i>
+                      <FontAwesomeIcon icon={faExternalLinkAlt} />
+                    </i>
+                    &nbsp;<a href={entry.url} target="_blank" rel="noopener noreferrer">
+                      {publisherName}
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
