@@ -116,7 +116,7 @@ import "./systems/nav";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/permissions";
-// import "./systems/exit-on-blur";
+import "./systems/exit-on-blur";
 import "./systems/camera-tools";
 import "./systems/userinput/userinput";
 import "./systems/camera-mirror";
@@ -438,8 +438,6 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
       serverURL: `wss://${hub.host}`,
       debug: !!isDebug
     });
-
-    scene.emit("didConnectToNetworkedScene"); return; // BPDEBUG
 
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
 
