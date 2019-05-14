@@ -45,13 +45,20 @@ AFRAME.registerComponent("is-remote-hover-target", {
 
 function isUI(el) {
   return (
-    el && el.components.tags && (el.components.tags.data.singleActionButton || el.components.tags.data.holdableButton)
+    el &&
+    (el.id === "player-hud" ||
+      (el.components.tags && (el.components.tags.data.singleActionButton || el.components.tags.data.holdableButton)))
   );
 }
 
 AFRAME.registerSystem("interaction", {
   updateCursorIntersection: function(intersection) {
     this.rightRemoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
+    if (this.rightRemoteHoverTarget) {
+      intersection.object.parent.worldToLocal(this.intersectionPoint.copy(intersection.point));
+    } else {
+      this.intersectionPoint.set(0, 0, 0);
+    }
   },
 
   isHeld(el) {
@@ -59,6 +66,7 @@ AFRAME.registerSystem("interaction", {
   },
 
   init: function() {
+    this.intersectionPoint = new THREE.Vector3();
     this.options = {
       leftHand: {
         entity: document.querySelector("#player-left-controller"),

@@ -64,7 +64,7 @@ AFRAME.registerComponent("hud-controller", {
     // TODO: come up with better huristics for this that maybe account for the user turning away from the hud "too far", also animate the position so that it doesnt just snap.
     const hudOutOfView = yawDif >= yawCutoff || pitch < lookCutoff - animRange / 2;
 
-    if (hudOutOfView) {
+    if (true || hudOutOfView) {
       this.lookDir.set(0, 0, -1);
       this.lookDir.applyQuaternion(head.quaternion);
       this.lookDir.add(head.position);

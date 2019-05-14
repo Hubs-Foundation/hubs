@@ -205,7 +205,7 @@ function scaleToAspectRatio(el, ratio) {
 
 const textureLoader = new THREE.TextureLoader();
 textureLoader.setCrossOrigin("anonymous");
-function createImageTexture(url) {
+export function createImageTexture(url) {
   return new Promise((resolve, reject) => {
     textureLoader.load(
       url,
