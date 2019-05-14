@@ -54,12 +54,6 @@ export default class ChangeSceneDialog extends Component {
                 GLB
               </a>.
             </p>
-            <p>
-              Want to create your own scene? Check out{" "}
-              <a href="/spoke" target="_blank" rel="noopener noreferrer">
-                Spoke
-              </a>!
-            </p>
           </div>
           <form onSubmit={this.onChangeClicked}>
             <div className={styles.changeSceneForm}>
@@ -78,6 +72,14 @@ export default class ChangeSceneDialog extends Component {
                 <button className={styles.actionButton}>
                   <FormattedMessage id="change-scene-dialog.change-scene" />
                 </button>
+              </div>
+              <div className={styles.spokeCreate}>
+                <div>
+                  <FormattedMessage id="change-scene-dialog.create-in-spoke" />
+                </div>
+                <a href="/spoke/projects/new" target="_blank" rel="noopener noreferrer">
+                  <FormattedMessage id="change-scene-dialog.new-spoke-project" />
+                </a>
               </div>
             </div>
           </form>
