@@ -6,6 +6,7 @@ import classNames from "classnames";
 import { createDefaultEnvironmentMap } from "../components/environment-map";
 import { loadGLTF } from "../components/gltf-model-plus";
 import { disposeNode } from "../utils/three-utils";
+import { createImageBitmap } from "../utils/image-bitmap-utils";
 import styles from "../assets/stylesheets/avatar-preview.scss";
 
 const TEXTURE_PROPS = {

@@ -1,4 +1,5 @@
 import { spawnMediaAround } from "../utils/media-utils";
+import { createImageBitmap } from "../utils/image-bitmap-utils";
 import { ObjectTypes } from "../object-types";
 import { paths } from "../systems/userinput/paths";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
@@ -18,29 +19,6 @@ const pathsMap = {
     takeSnapshot: paths.actions.cursor.takeSnapshot
   }
 };
-
-const createImageBitmap =
-  window.createImageBitmap ||
-  async function(data) {
-    return new Promise(resolve => {
-      // https://dev.to/nektro/createimagebitmap-polyfill-for-safari-and-edge-228
-      // https://gist.github.com/MonsieurV/fb640c29084c171b4444184858a91bc7
-
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      canvas.width = data.width;
-      canvas.height = data.height;
-      ctx.putImageData(data, 0, 0);
-      const dataURL = canvas.toDataURL();
-      const img = document.createElement("img");
-
-      img.addEventListener("load", function() {
-        resolve(this);
-      });
-
-      img.src = dataURL;
-    });
-  };
 
 const snapCanvas = document.createElement("canvas");
 async function pixelsToPNG(pixels, width, height) {
