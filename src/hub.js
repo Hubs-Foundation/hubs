@@ -409,7 +409,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
   scene.addEventListener("action_selected_media_result_entry", e => {
     const entry = e.detail;
-    if (entry.type !== "scene_listing") return;
+    if (entry.type !== "scene_listing" && entry.type !== "scene") return;
     if (!hubChannel.can("update_hub")) return;
 
     hubChannel.updateScene(entry.url);
