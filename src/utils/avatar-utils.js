@@ -15,19 +15,35 @@ export function getAvatarType(avatarId) {
   return AVATAR_TYPES.SKINNABLE;
 }
 
-console.log("loading avatars.js");
-export async function getAvatarSrc(avatarId) {
-  console.log("getAvatarSrc");
+async function fetchAvatarGltfUrl(avatarId) {
+  const resp = await fetch(getReticulumFetchUrl(`/api/v1/avatars/${avatarId}`));
+  if (resp.status === 404) {
+    return null;
+  } else {
+    return resp.json().then(({ avatars }) => avatars[0].gltf_url);
+  }
+}
+
+export function getAvatarSrc(avatarId) {
   switch (getAvatarType(avatarId)) {
     case AVATAR_TYPES.LEGACY:
       return `#${avatarId}`;
     case AVATAR_TYPES.SKINNABLE:
-      return fetch(getReticulumFetchUrl(`/api/v1/avatars/${avatarId}`))
-        .then(r => r.json())
-        .then(({ avatars }) => avatars[0].gltf_url);
+      return fetchAvatarGltfUrl(avatarId);
+    case AVATAR_TYPES.URL:
+      return proxiedUrlFor(avatarId);
+    default:
+      return avatarId;
+  }
+}
+
+export function getAvatarGltfUrl(avatarId) {
+  switch (getAvatarType(avatarId)) {
+    case AVATAR_TYPES.LEGACY:
+      return avatars.find(avatar => avatar.id === avatarId).model;
+    case AVATAR_TYPES.SKINNABLE:
+      return fetchAvatarGltfUrl(avatarId);
     case AVATAR_TYPES.URL:
       return proxiedUrlFor(avatarId);
   }
-
-  return avatarId;
 }

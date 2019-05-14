@@ -2,11 +2,12 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
-import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import MovingAverage from "moving-average";
 import screenfull from "screenfull";
+
+import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
@@ -38,6 +39,7 @@ import MediaBrowser from "./media-browser";
 
 import CreateObjectDialog from "./create-object-dialog.js";
 import ChangeSceneDialog from "./change-scene-dialog.js";
+import AvatarUrlDialog from "./avatar-url-dialog.js";
 import HelpDialog from "./help-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
@@ -54,6 +56,7 @@ import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import LobbyChatBox from "./lobby-chat-box.js";
 import InWorldChatBox from "./in-world-chat-box.js";
+import AvatarEditor from "./avatar-editor";
 
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
@@ -62,15 +65,15 @@ import TwoDHUD from "./2d-hud";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
 import { handleTipClose } from "../systems/tips.js";
+
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
-
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import qsTruthy from "../utils/qs_truthy";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
@@ -225,6 +228,9 @@ class UIRoot extends Component {
     }
 
     props.mediaSearchStore.setHistory(props.history);
+
+    // An exit handler that discards event arguments and can be cleaned up.
+    this.exitEventHandler = () => this.exit();
   }
 
   componentDidUpdate(prevProps) {
@@ -273,7 +279,7 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
     this.props.scene.addEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
-    this.props.scene.addEventListener("exit", this.exit);
+    this.props.scene.addEventListener("exit", this.exitEventHandler);
     const scene = this.props.scene;
 
     this.props.store.addEventListener("statechanged", this.onStoreChanged);
@@ -317,7 +323,7 @@ class UIRoot extends Component {
 
   componentWillUnmount() {
     this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
-    this.props.scene.removeEventListener("exit", this.exit);
+    this.props.scene.removeEventListener("exit", this.exitEventHandler);
     this.props.scene.removeEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.removeEventListener("share_video_disabled", this.onShareVideoDisabled);
   }
@@ -751,6 +757,10 @@ class UIRoot extends Component {
 
   changeScene = url => {
     this.props.hubChannel.updateScene(url);
+  };
+
+  setAvatarUrl = url => {
+    this.props.store.update({ profile: { ...this.props.store.state.profile, ...{ avatarId: url } } });
   };
 
   closeDialog = () => {
@@ -1413,7 +1423,7 @@ class UIRoot extends Component {
     const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
 
     // Allow scene picker pre-entry, otherwise wait until entry
-    const showMediaBrowser = mediaSource && (mediaSource === "scenes" || this.state.entered);
+    const showMediaBrowser = mediaSource && (["scenes", "avatars"].includes(mediaSource) || this.state.entered);
     const hasTopTip = this.props.activeTips && this.props.activeTips.top;
 
     const clientInfoClientId = getClientInfoClientId(this.props.history.location);
@@ -1441,13 +1451,37 @@ class UIRoot extends Component {
                 <ProfileEntryPanel
                   {...props}
                   displayNameOverride={displayNameOverride}
+                  finished={() => this.pushHistoryState()}
+                  store={this.props.store}
+                  mediaSearchStore={this.props.mediaSearchStore}
+                  avatarId={props.location.state.detail && props.location.state.detail.avatarId}
+                />
+              )}
+            />
+            <StateRoute
+              stateKey="overlay"
+              stateValue="avatar-editor"
+              history={this.props.history}
+              render={props => (
+                <AvatarEditor
+                  className={styles.avatarEditor}
                   signedIn={this.state.signedIn}
                   onSignIn={this.showSignInDialog}
-                  onSignOut={this.signOut}
-                  finished={this.closeDialog}
+                  onSave={() => {
+                    if (props.location.state.detail && props.location.state.detail.returnToProfile) {
+                      this.props.history.goBack();
+                    } else {
+                      this.props.history.goBack();
+                      // We are returning to the media browser. Trigger an update so that the filter switches to
+                      // my-avatars, now that we've saved an avatar.
+                      this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars");
+                    }
+                  }}
+                  onClose={() => this.props.history.goBack()}
                   store={this.props.store}
                   debug={avatarEditorDebug}
-                  preview={!isMobile}
+                  avatarId={props.location.state.detail && props.location.state.detail.avatarId}
+                  hideDelete={props.location.state.detail && props.location.state.detail.hideDelete}
                 />
               )}
             />
@@ -1469,24 +1503,16 @@ class UIRoot extends Component {
                   {...props}
                   displayNameOverride={displayNameOverride}
                   finished={() => {
-                    const unsubscribe = this.props.history.listen(() => {
-                      unsubscribe();
-
-                      if (this.props.forcedVREntryType) {
-                        this.handleForceEntry();
-                      } else {
-                        this.pushHistoryState("entry_step", "device");
-                      }
-                    });
-
-                    this.closeDialog();
+                    if (this.props.forcedVREntryType) {
+                      this.pushHistoryState();
+                      this.handleForceEntry();
+                    } else {
+                      this.pushHistoryState("entry_step", "device");
+                    }
                   }}
                   store={this.props.store}
-                  signedIn={this.state.signedIn}
-                  onSignIn={this.showSignInDialog}
-                  onSignOut={this.signOut}
-                  debug={avatarEditorDebug}
-                  preview={!isMobile}
+                  mediaSearchStore={this.props.mediaSearchStore}
+                  avatarId={props.location.state.detail && props.location.state.detail.avatarId}
                 />
               )}
             />
@@ -1533,6 +1559,12 @@ class UIRoot extends Component {
               stateValue="change_scene"
               history={this.props.history}
               render={() => this.renderDialog(ChangeSceneDialog, { onChange: this.changeScene })}
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="avatar_url"
+              history={this.props.history}
+              render={() => this.renderDialog(AvatarUrlDialog, { onChange: this.setAvatarUrl })}
             />
             <StateRoute
               stateKey="modal"

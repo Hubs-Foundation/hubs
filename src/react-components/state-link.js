@@ -16,11 +16,14 @@ class StateLink extends React.Component {
     replace: PropTypes.bool,
     stateKey: PropTypes.string,
     stateValue: PropTypes.string,
+    stateDetail: PropTypes.object,
     target: PropTypes.string,
-    onClick: PropTypes.func
+    onClick: PropTypes.func,
+    children: PropTypes.node,
+    className: PropTypes.string
   };
 
-  handleClick(event, history) {
+  async handleClick(event, history) {
     if (this.props.onClick) this.props.onClick(event);
 
     if (
@@ -30,15 +33,24 @@ class StateLink extends React.Component {
       !isModifiedEvent(event) // ignore clicks with modifier keys
     ) {
       event.preventDefault();
-
       const method = this.props.replace ? replaceHistoryState : pushHistoryState;
-      method(history, this.props.stateKey, this.props.stateValue);
+      method(history, this.props.stateKey, this.props.stateValue, this.props.stateDetail);
     }
   }
 
   render() {
-    const { innerRef, replace, stateKey, stateValue, history, ...rest } = this.props; // eslint-disable-line no-unused-vars
-    return <a {...rest} onClick={event => this.handleClick(event, this.props.history)} href="#" ref={innerRef} />;
+    const { innerRef, target, className, children } = this.props;
+    return (
+      <a
+        target={target}
+        className={className}
+        onClick={event => this.handleClick(event, this.props.history)}
+        href="#"
+        ref={innerRef}
+      >
+        {children}
+      </a>
+    );
   }
 }
 
