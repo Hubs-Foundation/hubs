@@ -50,7 +50,6 @@ function fitBoxInFrustum(camera, box, center, margin = DEFAULT_MARGIN) {
   camera.position.set(0, 0, (halfYExtents / Math.tan(halfVertFOV) + box.max.z) * margin);
   camera.position.applyEuler(ORBIT_ANGLE);
   camera.position.add(center);
-  camera.matrixAutoUpdate = true;
   camera.lookAt(center);
 }
 
@@ -94,6 +93,7 @@ export default class AvatarPreview extends Component {
     this.snapshotCanvas.width = 720;
     this.snapshotCanvas.height = 1280;
     this.snapshotCamera = new THREE.PerspectiveCamera(55, 720 / 1280, 0.1, 1000);
+    this.snapshotCamera.matrixAutoUpdate = true;
     this.snapshotRenderer = createRenderer(this.snapshotCanvas, true);
     this.snapshotRenderer.setClearAlpha(0);
 
@@ -245,9 +245,12 @@ export default class AvatarPreview extends Component {
 
   snapshot = () => {
     return new Promise(resolve => {
-      this.idleAnimationAction && this.idleAnimationAction.reset();
+      if (this.idleAnimationAction) this.idleAnimationAction.stop();
       this.snapshotRenderer.render(this.scene, this.snapshotCamera);
-      this.snapshotCanvas.toBlob(resolve);
+      this.snapshotCanvas.toBlob(blob => {
+        if (this.idleAnimationAction) this.idleAnimationAction.play();
+        resolve(blob);
+      });
     });
   };
 
