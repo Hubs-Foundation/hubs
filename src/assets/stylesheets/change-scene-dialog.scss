@@ -60,9 +60,10 @@
   div {
     margin-top: 28px;
   }
+}
 
-  a {
-    @extend %spoke-action-button;
-    margin-top: 18px;
-  }
+:local(.spoke-launch) {
+  @extend %spoke-action-button;
+  margin-top: 18px;
+  color: white !important; // TODO HACK because of dialog <a> style overriding color
 }
