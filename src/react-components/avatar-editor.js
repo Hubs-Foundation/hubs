@@ -145,8 +145,8 @@ export default class AvatarEditor extends Component {
         accept={accept}
         disabled={disabled}
         onChange={e => {
-          e.target.value = null;
           this.inputFiles[name] = e.target.files[0];
+          e.target.value = null;
         }}
       />
       {this.state.avatar.files[name] && (
