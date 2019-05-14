@@ -2,6 +2,7 @@ import { EventTarget } from "event-target-shim";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 import { avatars } from "../assets/avatars/avatars";
+import qsTruthy from "../utils/qs_truthy";
 
 export const SOURCES = ["videos", "sketchfab", "poly", "scenes", "gifs", "images", "twitch"];
 
@@ -96,6 +97,11 @@ export default class MediaSearchStore extends EventTarget {
   };
 
   _fetchMedia = async (url, source) => {
+    if (source === "avatar_listings" && !qsTruthy("use_avatar_listings")) {
+      // Use our legacy avatars until we are ready with real featured avatars.
+      return { entries: avatars.map(this._legacyAvatarToSearchEntry) };
+    }
+
     const headers = { "Content-Type": "application/json" };
     const credentialsToken = window.APP.store.state.credentials.token;
     if (credentialsToken) headers.authorization = `bearer ${credentialsToken}`;
@@ -108,11 +114,6 @@ export default class MediaSearchStore extends EventTarget {
       result = JSON.parse(body);
     } catch (e) {
       result = body;
-    }
-
-    if (source === "avatar_listings" && result.entries.length === 0) {
-      // If we don't have any featured avatars, use our static list of legacy avatars.
-      result = { entries: avatars.map(this._legacyAvatarToSearchEntry) };
     }
 
     return result;
