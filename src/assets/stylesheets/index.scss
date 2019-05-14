@@ -199,14 +199,11 @@ body {
   :local(.cta-buttons) {
     display: flex;
     :local(.primary-button) {
-      @extend %action-button;
-    }
-    :local(.secondary-button) {
-      @extend %action-button-secondary;
+      @extend %big-action-button;
     }
     :local(.cta-button) {
       font-size: 14pt;
-      width: 10em;
+      width: 20em;
       margin-right: 1em;
     }
   }
