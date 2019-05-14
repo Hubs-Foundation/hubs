@@ -116,7 +116,7 @@ import "./systems/nav";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/permissions";
-import "./systems/exit-on-blur";
+// import "./systems/exit-on-blur";
 import "./systems/camera-tools";
 import "./systems/userinput/userinput";
 import "./systems/camera-mirror";
@@ -240,6 +240,7 @@ if (document.location.pathname.includes("hub.html")) {
 }
 
 const history = createBrowserHistory({ basename: routerBaseName });
+window.APP.history = history;
 
 function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
@@ -437,6 +438,8 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
       serverURL: `wss://${hub.host}`,
       debug: !!isDebug
     });
+
+    scene.emit("didConnectToNetworkedScene"); return; // BPDEBUG
 
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
 

@@ -265,6 +265,8 @@ class UIRoot extends Component {
   }
 
   componentDidMount() {
+    //setTimeout(() => this.pushHistoryState("overlay", "avatar-editor")); // BPDEBUG
+
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     this.micLevelMovingAverage = MovingAverage(100);
     this.props.scene.addEventListener(
