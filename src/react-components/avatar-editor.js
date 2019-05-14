@@ -313,7 +313,7 @@ export default class AvatarEditor extends Component {
                     >
                       Remixing
                     </a>{" "}
-                    <span>
+                    <span className="license">
                       (under{" "}
                       <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">
                         CC-BY 3.0
@@ -321,13 +321,14 @@ export default class AvatarEditor extends Component {
                     </span>
                   </span>
                 )}
-                {this.textField("creatorAttribution", "Your Attribution (optional)", false, false)}
+                {this.textField("creatorAttribution", "Attribution (optional)", false, false)}
 
                 {/* {this.mapField("ao_map", "AO Map", "images/\*", true)} */}
                 {/* {this.mapField("metallic_map", "Metallic Map", "image/\*", true)} */}
                 {/* {this.mapField("roughness_map", "Roughness Map", "image/\*", true)} */}
               </div>
               <AvatarPreview
+                className="preview"
                 avatarGltfUrl={this.state.previewGltfUrl}
                 {...this.inputFiles}
                 ref={p => (this.preview = p)}

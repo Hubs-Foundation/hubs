@@ -103,6 +103,7 @@
     overflow: hidden;
     display: flex;
     position: relative;
+    max-width: 300px;
   }
 
   :local(.choose-avatar) {

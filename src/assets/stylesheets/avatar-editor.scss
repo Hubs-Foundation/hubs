@@ -8,12 +8,22 @@
   align-items: flex-start;
   height: 100%;
 
+  @media (max-width: 768px) {
+    padding: 0.5em;
+    flex-direction: column;
+    align-items: center;
+  }
+
   .info {
     display: flex;
     justify-content: center;
     width: 100%;
-    margin: 16px;
     color: $grey-text;
+
+    p {
+      margin: 0;
+      margin-bottom: 0.5em;
+    }
 
     a {
       color: $dark-grey-text;
@@ -27,13 +37,13 @@
     height: 100%;
     flex: 1;
     align-items: center;
+    overflow: auto;
   }
 
   .form-body {
-    flex: 1;
+    flex: 1.2;
     display: flex;
     flex-direction: column;
-    justify-content: center;
 
     .file-input-row {
       display: flex;
@@ -78,19 +88,47 @@
     .checkbox-container {
       display: flex;
       align-items: center;
-      margin: 5px;
+      margin: 5px 0;
 
       .checkbox {
         @extend %checkbox;
+        min-width: 2em;
+        min-height: 2em;
       }
       .checkbox:checked {
         @extend %checkbox-checked;
       }
     }
+
+    .license {
+      font-size: 8pt;
+    }
+
+    hr {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid $dark-grey;
+    }
+
+    a {
+      color: black;
+    }
+  }
+
+  .preview {
+    flex: 1;
+    margin-left: 2em;
+    height: 450px;
+    max-width: 200px;
+    @media (max-width: 768px) {
+      margin-left: 0.5em;
+    }
   }
 
   .form-submit {
     @extend %bottom-action-button;
+    margin: 0;
+    margin-bottom: 0.5em;
   }
   .form-submit:disabled {
     background-color: $action-color-light;
@@ -99,12 +137,9 @@
   .split {
     flex: 1;
     display: flex;
-    min-height: 240px;
-
-    > :nth-child(2) {
-      margin-left: 2em;
-    }
+    align-items: center;
   }
+
   canvas {
     width: 100%;
     height: 100%;
@@ -122,5 +157,9 @@
 
   .close-button {
     font-size: 1.6em;
+    align-self: flex-start;
+    @media (max-width: 768px) {
+      padding-left: 0.5em;
+    }
   }
 }

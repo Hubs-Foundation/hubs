@@ -34,6 +34,7 @@ function createRenderer(canvas, alpha = false) {
   renderer.gammaOutput = true;
   renderer.gammaFactor = 2.2;
   renderer.physicallyCorrectLights = true;
+  renderer.setPixelRatio(window.devicePixelRatio);
   return renderer;
 }
 
