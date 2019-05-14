@@ -287,6 +287,8 @@
     "loader.object": "object",
     "loader.objects": "objects",
     "change-scene-dialog.change-scene": "Change Scene",
+    "change-scene-dialog.create-in-spoke": "Or, create a new scene using Spoke.",
+    "change-scene-dialog.new-spoke-project": "Launch Spoke",
     "avatar-url-dialog.apply": "Apply",
     "interstitial.prompt": "Continue",
     "feedback.prompt": "Feedback",

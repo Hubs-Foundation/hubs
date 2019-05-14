@@ -9,7 +9,7 @@ import { SCHEMA } from "../storage/store";
 import styles from "../assets/stylesheets/profile.scss";
 import hubLogo from "../assets/images/hub-preview-white.png";
 import { WithHoverSound } from "./wrap-with-audio";
-import { AVATAR_TYPES, getAvatarGltfUrl, getAvatarType } from "../assets/avatars/avatars";
+import { AVATAR_TYPES, getAvatarGltfUrl, getAvatarType } from "../utils/avatar-utils";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { replaceHistoryState } from "../utils/history";
 import StateLink from "./state-link";
