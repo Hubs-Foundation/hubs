@@ -228,6 +228,9 @@ class UIRoot extends Component {
     }
 
     props.mediaSearchStore.setHistory(props.history);
+
+    // An exit handler that discards event arguments and can be cleaned up.
+    this.exitEventHandler = () => this.exit();
   }
 
   componentDidUpdate(prevProps) {
@@ -276,7 +279,7 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
     this.props.scene.addEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
-    this.props.scene.addEventListener("exit", () => this.exit());
+    this.props.scene.addEventListener("exit", this.exitEventHandler);
     const scene = this.props.scene;
 
     this.props.store.addEventListener("statechanged", this.onStoreChanged);
@@ -320,7 +323,7 @@ class UIRoot extends Component {
 
   componentWillUnmount() {
     this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
-    this.props.scene.removeEventListener("exit", this.exit);
+    this.props.scene.removeEventListener("exit", this.exitEventHandler);
     this.props.scene.removeEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.removeEventListener("share_video_disabled", this.onShareVideoDisabled);
   }
