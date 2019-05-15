@@ -16,12 +16,7 @@ const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathna
 
 (async () => {
   if (qs.get("new") !== null) {
-    createAndRedirectToNewHub(
-      null,
-      null,
-      "https://asset-bundles-prod.reticulum.io/rooms/atrium/Atrium.bundle.json",
-      true
-    );
+    createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, null, true);
     return;
   }
 

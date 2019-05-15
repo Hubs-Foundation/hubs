@@ -16,7 +16,7 @@ import {
   forceExitFrom2DInterstitial
 } from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
-import { getAvatarSrc, getAvatarType } from "./assets/avatars/avatars";
+import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { pushHistoryState } from "./utils/history";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 
@@ -214,7 +214,7 @@ export default class SceneEntryManager {
     } catch (e) {
       if (e.reason === "invalid_token") {
         await this.authChannel.signOut(this.hubChannel);
-        this._signInAndPinElement(el);
+        this._signInAndPinOrUnpinElement(el);
       } else {
         console.warn("Pin failed for unknown reason", e);
       }
@@ -437,7 +437,8 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_selected_media_result_entry", e => {
       // TODO spawn in space when no rights
       const entry = e.detail;
-      if (entry.type === "scene_listing" && this.hubChannel.can("update_hub")) return;
+      if (["avatar", "avatar_listing"].includes(entry.type)) return;
+      if ((entry.type === "scene_listing" || entry.type === "scene") && this.hubChannel.can("update_hub")) return;
 
       // If user has HMD lifted up or gone through interstitial, delay spawning for now. eventually show a modal
       const spawnDelay = isIn2DInterstitial() ? 3000 : 0;
