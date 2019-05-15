@@ -22,6 +22,6 @@ const linkChannel = new LinkChannel(store);
 })();
 
 ReactDOM.render(
-  <LinkRoot store={store} linkChannel={linkChannel} showHeadsetLinkOption={isMobileVR} />,
+  <LinkRoot store={store} linkChannel={linkChannel} />,
   document.getElementById("link-root")
 );
