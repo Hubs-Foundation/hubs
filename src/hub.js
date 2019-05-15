@@ -348,11 +348,12 @@ async function updateEnvironmentForHub(hub) {
     environmentEl.addEventListener(
       "model-loaded",
       () => {
-        // We've already entered, so move to new spawn point once new environment is loaded
         environmentEl.addEventListener(
           "model-loaded",
           () => {
             traverseMeshesAndAddShapes(environmentEl);
+
+            // We've already entered, so move to new spawn point once new environment is loaded
             if (sceneEl.is("entered")) {
               document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
             }
