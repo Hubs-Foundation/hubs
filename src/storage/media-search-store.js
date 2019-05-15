@@ -84,11 +84,6 @@ export default class MediaSearchStore extends EventTarget {
       searchParams.set("user", window.APP.store.credentialsAccountId);
     }
 
-    if (source === "scenes") {
-      // Leave space for the spoke create tile
-      searchParams.set("page_size", "23");
-    }
-
     const url = getReticulumFetchUrl(`/api/v1/media/search?${searchParams.toString()}`);
     if (this.lastSavedUrl === url) return;
 
