@@ -53,6 +53,10 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
+
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.networkedEl = networkedEl;
+    });
   },
 
   updateScale: (function() {
@@ -124,7 +128,7 @@ AFRAME.registerComponent("media-loader", {
       this.loadingClip.play();
       this.loadingScaleClip.play();
     }
-    if (this.el.sceneEl.is("entered")) {
+    if (this.el.sceneEl.is("entered") && (!this.networkedEl || NAF.utils.isMine(this.networkedEl))) {
       this.loadingSoundNode = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundLooped(
         SOUND_MEDIA_LOADING
       );
@@ -286,7 +290,7 @@ AFRAME.registerComponent("media-loader", {
         const startTime = hashTime || qsTime || 0;
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-image");
-        this.el.setAttribute("sticky-object", { autoLockSpeedLimit: 0 });
+        this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
         this.el.addEventListener(
           "video-loaded",
           e => {
@@ -312,7 +316,7 @@ AFRAME.registerComponent("media-loader", {
           },
           { once: true }
         );
-        this.el.setAttribute("sticky-object", { autoLockSpeedLimit: 0 });
+        this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
         this.el.setAttribute(
           "media-image",
           Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, contentType })
@@ -328,7 +332,7 @@ AFRAME.registerComponent("media-loader", {
         // 1. we pass the canonical URL to the pager so it can easily make subresource URLs
         // 2. we don't remove the media-image component -- media-pager uses that internally
         this.el.setAttribute("media-pager", Object.assign({}, this.data.mediaOptions, { src: canonicalUrl }));
-        this.el.setAttribute("sticky-object", { autoLockSpeedLimit: 0 });
+        this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
         this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
         this.el.addEventListener("preview-loaded", () => this.onMediaLoaded(SHAPE.BOX), { once: true });
 
@@ -383,7 +387,7 @@ AFRAME.registerComponent("media-loader", {
           },
           { once: true }
         );
-        this.el.setAttribute("sticky-object", { autoLockSpeedLimit: 0 });
+        this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
         this.el.setAttribute(
           "media-image",
           Object.assign({}, this.data.mediaOptions, { src: thumbnail, contentType: "image/png" })

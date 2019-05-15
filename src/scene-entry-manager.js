@@ -12,10 +12,11 @@ import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import {
   isIn2DInterstitial,
   handleExitTo2DInterstitial,
-  handleReEntryToVRFrom2DInterstitial
+  handleReEntryToVRFrom2DInterstitial,
+  forceExitFrom2DInterstitial
 } from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
-import { getAvatarSrc, getAvatarType } from "./assets/avatars/avatars";
+import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { pushHistoryState } from "./utils/history";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 
@@ -46,7 +47,7 @@ export default class SceneEntryManager {
     return this._entered;
   };
 
-  enterScene = async (mediaStream, enterInVR) => {
+  enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
     const playerCamera = document.querySelector("#player-camera");
     playerCamera.removeAttribute("scene-preview-camera");
     playerCamera.object3D.position.set(0, playerHeight, 0);
@@ -110,6 +111,10 @@ export default class SceneEntryManager {
     })();
 
     this.scene.addState("entered");
+
+    if (muteOnEntry) {
+      this.scene.emit("action_mute");
+    }
   };
 
   whenSceneLoaded = callback => {
@@ -181,7 +186,7 @@ export default class SceneEntryManager {
     });
 
     document.body.addEventListener("unblocked", ev => {
-      NAF.connection.entities.completeSync(ev.detail.clientId);
+      NAF.connection.entities.completeSync(ev.detail.clientId, true);
     });
   };
 
@@ -210,7 +215,7 @@ export default class SceneEntryManager {
     } catch (e) {
       if (e.reason === "invalid_token") {
         await this.authChannel.signOut(this.hubChannel);
-        this._signInAndPinElement(el);
+        this._signInAndPinOrUnpinElement(el);
       } else {
         console.warn("Pin failed for unknown reason", e);
       }
@@ -294,23 +299,19 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("action_spawn", () => {
-      handleExitTo2DInterstitial(false);
+      handleExitTo2DInterstitial(false, () => window.APP.mediaSearchStore.pushExitMediaBrowserHistory());
       window.APP.mediaSearchStore.sourceNavigateToDefaultSource();
     });
 
     this.scene.addEventListener("action_invite", () => {
-      handleExitTo2DInterstitial(false);
+      handleExitTo2DInterstitial(false, () => this.history.goBack());
       pushHistoryState(this.history, "overlay", "invite");
     });
 
     this.scene.addEventListener("action_kick_client", ({ detail: { clientId } }) => {
       this.performConditionalSignIn(
         () => this.hubChannel.can("kick_users"),
-        async () => {
-          const { permsToken } = await this.scene.systems.permissions.fetchPermissions();
-          NAF.connection.adapter.kick(clientId, permsToken);
-          window.APP.hubChannel.kick(clientId);
-        },
+        async () => await window.APP.hubChannel.kick(clientId),
         "kick-user"
       );
     });
@@ -322,6 +323,8 @@ export default class SceneEntryManager {
         "mute-user"
       );
     });
+
+    this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
 
     document.addEventListener("paste", e => {
       if (e.target.matches("input, textarea") && document.activeElement === e.target) return;
@@ -435,7 +438,8 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_selected_media_result_entry", e => {
       // TODO spawn in space when no rights
       const entry = e.detail;
-      if (entry.type === "scene_listing" && this.hubChannel.can("update_hub")) return;
+      if (["avatar", "avatar_listing"].includes(entry.type)) return;
+      if ((entry.type === "scene_listing" || entry.type === "scene") && this.hubChannel.can("update_hub")) return;
 
       // If user has HMD lifted up or gone through interstitial, delay spawning for now. eventually show a modal
       const spawnDelay = isIn2DInterstitial() ? 3000 : 0;

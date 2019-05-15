@@ -2,6 +2,8 @@ import { showFullScreenIfAvailable } from "./fullscreen";
 import screenfull from "screenfull";
 
 let _isIn2DInterstitial = false;
+let _exitAction = null;
+
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 const afterUserGesturePrompt = f => {
@@ -10,11 +12,12 @@ const afterUserGesturePrompt = f => {
   scene.emit("2d-interstitial-gesture-required");
 };
 
-export function handleExitTo2DInterstitial(isLower) {
+export function handleExitTo2DInterstitial(isLower, exitAction) {
   const scene = document.querySelector("a-scene");
   if (!scene.is("vr-mode")) return;
 
   _isIn2DInterstitial = true;
+  _exitAction = exitAction;
 
   if (isMobileVR) {
     // Immersive browser, exit VR.
@@ -51,4 +54,15 @@ export function handleReEntryToVRFrom2DInterstitial() {
 
 export function isIn2DInterstitial() {
   return _isIn2DInterstitial;
+}
+
+export function forceExitFrom2DInterstitial() {
+  if (!_isIn2DInterstitial) return;
+
+  if (_exitAction) {
+    _exitAction();
+    _exitAction = null;
+  }
+
+  handleReEntryToVRFrom2DInterstitial();
 }

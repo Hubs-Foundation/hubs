@@ -1,5 +1,5 @@
 import { injectCustomShaderChunks } from "../utils/media-utils";
-import { AVATAR_TYPES } from "../assets/avatars/avatars";
+import { AVATAR_TYPES } from "../utils/avatar-utils";
 import { prepareForRender } from "../utils/preload";
 /**
  * Sets player info state, including avatar choice and display name.

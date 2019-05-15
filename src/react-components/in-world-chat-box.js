@@ -9,6 +9,7 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { spawnChatMessage } from "./chat-message";
+import { pushHistoryState } from "../utils/history";
 
 const isMobile = AFRAME.utils.device.isMobile();
 
@@ -16,7 +17,8 @@ class InWorldChatBox extends Component {
   static propTypes = {
     discordBridges: PropTypes.array,
     onSendMessage: PropTypes.func,
-    onObjectCreated: PropTypes.func
+    onObjectCreated: PropTypes.func,
+    history: PropTypes.object
   };
 
   state = {
@@ -108,7 +110,7 @@ class InWorldChatBox extends Component {
                 spawnChatMessage(this.state.pendingMessage);
                 this.setState({ pendingMessage: "" });
               } else {
-                this.pushHistoryState("modal", "create");
+                pushHistoryState(this.props.history, "modal", "create");
               }
             }}
           />
