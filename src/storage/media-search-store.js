@@ -70,16 +70,17 @@ export default class MediaSearchStore extends EventTarget {
     searchParams.get("locale", navigator.languages[0]);
 
     let source;
-    if (urlSource === "avatars") {
-      // Avatar are special since we request avatars from a different source based on the facet.
+    if (urlSource === "avatars" || urlSource === "scenes") {
+      // Avatars + scenes are special since we request them from a different source based on the facet.
+      const singular = urlSource === "avatars" ? "avatar" : "scene";
       const filter = new URLSearchParams(location.search);
-      source = filter.get("filter") === "my-avatars" ? "avatars" : "avatar_listings";
+      source = filter.get("filter").startsWith("my-") ? `${singular}s` : `${singular}_listings`;
     } else {
       source = URL_SOURCE_TO_TO_API_SOURCE[urlSource];
     }
     searchParams.set("source", source);
 
-    if (source === "avatars") {
+    if (source === "avatars" || source === "scenes") {
       searchParams.set("user", window.APP.store.credentialsAccountId);
     }
 

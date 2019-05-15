@@ -438,7 +438,7 @@ export default class SceneEntryManager {
       // TODO spawn in space when no rights
       const entry = e.detail;
       if (["avatar", "avatar_listing"].includes(entry.type)) return;
-      if (entry.type === "scene_listing" && this.hubChannel.can("update_hub")) return;
+      if ((entry.type === "scene_listing" || entry.type === "scene") && this.hubChannel.can("update_hub")) return;
 
       // If user has HMD lifted up or gone through interstitial, delay spawning for now. eventually show a modal
       const spawnDelay = isIn2DInterstitial() ? 3000 : 0;

@@ -75,7 +75,8 @@ const DEFAULT_FACETS = {
   avatars: [
     { text: "Featured", params: { filter: "featured" } },
     { text: "My Avatars", params: { filter: "my-avatars" } }
-  ]
+  ],
+  scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }]
 };
 
 class MediaBrowser extends Component {
@@ -215,7 +216,11 @@ class MediaBrowser extends Component {
     pushHistoryState(
       this.props.history,
       "modal",
-      source === "scene_listings" ? "change_scene" : source === "avatars" ? "avatar_url" : "create"
+      source === "scene_listings" || source === "scenes"
+        ? "change_scene"
+        : source === "avatars"
+          ? "avatar_url"
+          : "create"
     );
   };
 
@@ -243,19 +248,21 @@ class MediaBrowser extends Component {
     const urlSource = this.getUrlSource(searchParams);
     const apiSource = (hasMeta && this.state.result.meta.source) || null;
     const isVariableWidth = this.state.result && ["bing_images", "tenor"].includes(apiSource);
-    const showCustomOption = apiSource !== "scene_listings" || this.props.hubChannel.canOrWillIfCreator("update_hub");
-    const [createAvatarWidth, createAvatarHeight] = this.getTileDimensions(false, true);
+    const isSceneApiType = apiSource === "scene_listings" || apiSource === "scenes";
+    const isAvatarApiType = apiSource === "avatar_listings" || apiSource === "avatars";
+    const showCustomOption = !isSceneApiType || this.props.hubChannel.canOrWillIfCreator("update_hub");
+    const [createTileWidth, createTileHeight] = this.getTileDimensions(false, urlSource === "avatars");
     const entries = (this.state.result && this.state.result.entries) || [];
     const hideSearch = urlSource === "avatars";
 
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
     if (this.state.selectNextResult) return <div />;
     const handleCustomClicked = apiSource => {
-      if (urlSource === "avatars") {
+      if (isAvatarApiType) {
         this.showCustomMediaDialog(urlSource);
       } else {
         this.props.performConditionalSignIn(
-          () => apiSource !== "scene_listings" || this.props.hubChannel.can("update_hub"),
+          () => !isSceneApiType || this.props.hubChannel.can("update_hub"),
           () => this.showCustomMediaDialog(apiSource),
           "change-scene"
         );
@@ -344,11 +351,7 @@ class MediaBrowser extends Component {
                 <a onClick={() => handleCustomClicked(apiSource)} className={styles.createLink}>
                   <FormattedMessage
                     id={`media-browser.add_custom_${
-                      this.state.result && apiSource === "scene_listings"
-                        ? "scene"
-                        : urlSource === "avatars"
-                          ? "avatar"
-                          : "object"
+                      this.state.result && isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object"
                     }`}
                   />
                 </a>
@@ -387,23 +390,32 @@ class MediaBrowser extends Component {
 
           <div className={styles.body}>
             <div className={classNames({ [styles.tiles]: true, [styles.tilesVariable]: isVariableWidth })}>
-              {urlSource === "avatars" && (
+              {(urlSource === "avatars" || urlSource === "scenes") && (
                 <div
-                  style={{ width: `${createAvatarWidth}px`, height: `${createAvatarHeight}px` }}
-                  className={classNames(styles.tile, styles.createAvatar)}
+                  style={{ width: `${createTileWidth}px`, height: `${createTileHeight}px` }}
+                  className={classNames(styles.tile, styles.createTile)}
                 >
-                  <a
-                    onClick={e => {
-                      e.preventDefault();
-                      window.dispatchEvent(new CustomEvent("action_create_avatar"));
-                    }}
-                    className={styles.tileLink}
-                  >
-                    <div className={styles.tileContent}>
-                      <FontAwesomeIcon icon={faPlus} />
-                      <FormattedMessage id={`media-browser.create-avatar`} />
-                    </div>
-                  </a>
+                  {urlSource === "scenes" ? (
+                    <a href="/spoke/projects/new" rel="noopener noreferrer" target="_blank" className={styles.tileLink}>
+                      <div className={styles.tileContent}>
+                        <FontAwesomeIcon icon={faPlus} />
+                        <FormattedMessage id="media-browser.create-scene" />
+                      </div>
+                    </a>
+                  ) : (
+                    <a
+                      onClick={e => {
+                        e.preventDefault();
+                        window.dispatchEvent(new CustomEvent("action_create_avatar"));
+                      }}
+                      className={styles.tileLink}
+                    >
+                      <div className={styles.tileContent}>
+                        <FontAwesomeIcon icon={faPlus} />
+                        <FormattedMessage id="media-browser.create-avatar" />
+                      </div>
+                    </a>
+                  )}
                 </div>
               )}
 
