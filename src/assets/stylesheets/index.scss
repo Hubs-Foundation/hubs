@@ -179,12 +179,14 @@ body {
     }
     :local(.blurb) {
       white-space: pre-wrap;
-      font-size: 17pt;
+      font-size: 18pt;
       margin: 0.5em 0;
       margin-bottom: 1em;
       align-self: flex-start;
 
       @media (max-width: 768px) {
+        align-self: auto;
+        font-size: 14pt;
         text-align: center;
       }
     }
