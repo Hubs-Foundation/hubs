@@ -65,16 +65,6 @@ AFRAME.registerComponent("player-info", {
 
     const modelEl = this.el.querySelector(".model");
     if (this.data.avatarSrc && modelEl) {
-      modelEl.addEventListener(
-        "model-loaded",
-        () => {
-          this.el.sceneEl.renderer.compileAndUploadMaterials(this.el.sceneEl.object3D, this.el.sceneEl.camera, [modelEl.object3D]);
-        },
-        {
-          once: true
-        }
-      );
-
       modelEl.setAttribute("gltf-model-plus", "src", this.data.avatarSrc);
       this.el.sceneEl.systems["camera-tools"].avatarUpdated();
     }

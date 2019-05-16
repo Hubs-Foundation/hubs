@@ -14,17 +14,18 @@ AFRAME.registerSystem("hubs-systems", {
   init() {
     Promise.all(
       [
-        "https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf",
+        proxiedUrlFor("https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf"),
         cameraModelSrc
       ].map(function(src) {
         return loadModel(
           src,
           "model/gltf",
-          window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness"
+          window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness",
+          true
         );
       })
     ).then(([pen, camera]) => {
-      this.el.renderer.compileAndUploadMaterials(this.el.object3D, this.el.camera, [pen.scenes[0], camera.scenes[0]]);
+      this.el.renderer.compileAndUploadMaterials(this.el.object3D, this.el.camera, [pen.scene, camera.scene]);
     });
 
     this.cursorTargettingSystem = new CursorTargettingSystem();

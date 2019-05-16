@@ -5,8 +5,7 @@ import { paths } from "../systems/userinput/paths";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 
 import cameraModelSrc from "../assets/camera_tool.glb";
-
-const cameraModelPromise = new Promise(resolve => new THREE.GLTFLoader().load(cameraModelSrc, resolve));
+import { loadModel } from "../components/gltf-model-plus";
 
 const pathsMap = {
   "player-right-controller": {
@@ -76,6 +75,12 @@ AFRAME.registerComponent("camera-tool", {
       }
     };
 
+    const cameraModelPromise = loadModel(
+      cameraModelSrc,
+      "model/gltf",
+      window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness",
+      true
+    );
     cameraModelPromise.then(model => {
       const mesh = model.scene.clone();
       mesh.scale.set(2, 2, 2);

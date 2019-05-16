@@ -300,8 +300,6 @@ export async function loadModel(src, contentType, technique, useCache) {
   if (useCache) {
     if (!GLTFCache[src]) {
       GLTFCache[src] = await loadGLTF(src, contentType, technique);
-    } else {
-      console.log(`Got ${src} from cache`);
     }
 
     return cloneGltf(GLTFCache[src]);

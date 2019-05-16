@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { getAvatarType, getAvatarSrc } from "../utils/avatar-utils";
+import { getAvatarSrc } from "../utils/avatar-utils";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
@@ -66,6 +66,7 @@ import TwoDHUD from "./2d-hud";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
 import { handleTipClose } from "../systems/tips.js";
+import { loadModel } from "../components/gltf-model-plus";
 
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
@@ -256,7 +257,9 @@ class UIRoot extends Component {
       window.requestAnimationFrame(() => {
         window.setTimeout(() => {
           if (!this.props.isBotMode) {
-            this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera, [this.props.scene.object3D]);
+            this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera, [
+              this.props.scene.object3D
+            ]);
           }
 
           this.setState({ hideLoader: true });
@@ -507,12 +510,21 @@ class UIRoot extends Component {
 
   performDirectEntryFlow = async enterInVR => {
     const avatarId = window.APP.store.state.profile.avatarId;
-    const playerRig = document.querySelector("#player-rig");
 
-    Promise.resolve(getAvatarSrc(avatarId)).then(avatarSrc => {
-      playerRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
-    });
-    playerRig.querySelector(".model").object3D.visible = false;
+    Promise.resolve(getAvatarSrc(avatarId))
+      .then(avatarSrc => {
+        return loadModel(
+          avatarSrc,
+          "model/gltf",
+          window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness",
+          true
+        );
+      })
+      .then(model => {
+        this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera, [
+          model.scene
+        ]);
+      });
 
     this.setState({ enterInVR, waitingOnAudio: true });
 

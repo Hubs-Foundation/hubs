@@ -141,7 +141,6 @@ export default class SceneEntryManager {
   };
 
   _setupPlayerRig = () => {
-    this.playerRig.querySelector(".model").object3D.visible = true;
     this._updatePlayerInfoFromProfile();
     this.store.addEventListener("statechanged", this._updatePlayerInfoFromProfile);
 
