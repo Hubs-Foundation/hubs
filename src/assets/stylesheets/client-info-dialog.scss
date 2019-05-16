@@ -30,6 +30,8 @@
 }
 
 :local(.client-profile-image) {
+  min-width: 200px;
+
   img {
     border-radius: 12px;
     width: auto;
