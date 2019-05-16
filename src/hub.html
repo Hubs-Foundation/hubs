@@ -636,7 +636,9 @@
             <a-entity
                 id="player-hud"
                 hud-controller="head: #player-camera;"
-                class="ui" 
+                vr-mode-toggle-class="class: ui"
+                vr-mode-toggle-visibility
+                vr-mode-toggle-playing__hud-controller
                 is-remote-hover-target
             >
                 <a-entity visibility-while-frozen="requireHoverOnNonMobile: false;" rotation="30 0 0">

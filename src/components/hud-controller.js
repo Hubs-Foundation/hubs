@@ -64,7 +64,7 @@ AFRAME.registerComponent("hud-controller", {
     // TODO: come up with better huristics for this that maybe account for the user turning away from the hud "too far", also animate the position so that it doesnt just snap.
     const hudOutOfView = yawDif >= yawCutoff || pitch < lookCutoff - animRange / 2;
 
-    if (true || hudOutOfView) {
+    if (hudOutOfView) {
       this.lookDir.set(0, 0, -1);
       this.lookDir.applyQuaternion(head.quaternion);
       this.lookDir.add(head.position);
@@ -76,6 +76,9 @@ AFRAME.registerComponent("hud-controller", {
     }
 
     hud.visible = !hudOutOfView || forceHudVisible;
+    if (hud.el.object3DMap.mesh) {
+      hud.el.object3DMap.mesh.visible = !hudOutOfView || forceHudVisible && !this.el.sceneEl.is("frozen");
+    }
     hud.position.y = (this.isYLocked ? this.lockedHeadPositionY : head.position.y) + offset + (1 - t) * offset;
     hud.rotation.x = (1 - t) * THREE.Math.DEG2RAD * 90;
     hud.matrixNeedsUpdate = true;

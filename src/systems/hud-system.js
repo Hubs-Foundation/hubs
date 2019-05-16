@@ -140,7 +140,9 @@ HudSystem.prototype.tick = (function() {
 
     const uCreate = hoverZone === BUTTON_CREATE ? U_CREATE_HOVERED : U_CREATE;
 
-    this.tooltip.object3D.visible = true;
+    const visible = !scene.is("frozen");
+    this.hud.visible = visible;
+    this.tooltip.object3D.visible = visible && hoverZone !== HUD_BACKGROUND;
     switch (hoverZone) {
       case HUD_ALPHA:
         // raycaster should go thru this object but i have not implemented that yet
@@ -189,8 +191,7 @@ HudSystem.prototype.tick = (function() {
           scene.emit("action_spawn");
           break;
         case BUTTON_PEN:
-          // length2 bug
-          //scene.emit("spawn_pen");
+          scene.emit("spawn_pen");
           scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPAWN_PEN);
           break;
         case BUTTON_CAMERA:
