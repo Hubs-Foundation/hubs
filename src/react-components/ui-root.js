@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { getAvatarType, getAvatarSrc } from "../assets/avatars/avatars";
+import { getAvatarType, getAvatarSrc } from "../utils/avatar-utils";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
@@ -256,7 +256,7 @@ class UIRoot extends Component {
       window.requestAnimationFrame(() => {
         window.setTimeout(() => {
           if (!this.props.isBotMode) {
-            this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
+            this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera, [this.props.scene.object3D]);
           }
 
           this.setState({ hideLoader: true });

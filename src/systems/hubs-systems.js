@@ -7,26 +7,19 @@ import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
 import { proxiedUrlFor } from "../utils/media-utils";
-import { load, prepareForRender } from "../utils/preload";
+import { load } from "../utils/preload";
 import cameraModelSrc from "../assets/camera_tool.glb";
-
-async function preloadPenAndCamera(sceneEl) {
-  const objects = [];
-
-  const pen = await load(
-    proxiedUrlFor("https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf")
-  );
-  pen.traverse(o => objects.push(o));
-
-  const camera = await load(cameraModelSrc);
-  camera.traverse(o => objects.push(o));
-
-  prepareForRender(sceneEl, objects);
-}
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
-    preloadPenAndCamera(this.el);
+    Promise.all([
+      load(
+        proxiedUrlFor("https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf")
+      ),
+      load(cameraModelSrc)
+    ]).then(([pen, camera]) => {
+      this.el.renderer.compileAndUploadMaterials(this.el.object3D, this.el.camera, [pen, camera]);
+    });
 
     this.cursorTargettingSystem = new CursorTargettingSystem();
     this.constraintsSystem = new ConstraintsSystem();

@@ -1,6 +1,5 @@
 import { injectCustomShaderChunks } from "../utils/media-utils";
 import { AVATAR_TYPES } from "../utils/avatar-utils";
-import { prepareForRender } from "../utils/preload";
 /**
  * Sets player info state, including avatar choice and display name.
  * @namespace avatar
@@ -69,9 +68,7 @@ AFRAME.registerComponent("player-info", {
       modelEl.addEventListener(
         "model-loaded",
         () => {
-          const objects = [];
-          modelEl.object3D.traverse(o => objects.push(o));
-          prepareForRender(this.el.sceneEl, objects);
+          this.el.sceneEl.renderer.compileAndUploadMaterials(this.el.sceneEl.object3D, this.el.sceneEl.camera, [modelEl.object3D]);
         },
         {
           once: true
