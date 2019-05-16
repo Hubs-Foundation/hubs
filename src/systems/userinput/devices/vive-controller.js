@@ -17,12 +17,20 @@ export class ViveControllerDevice {
     navigator.getVRDisplays();
     this.gamepad = gamepad;
 
-    this.buttonMap = [
-      { name: "touchpad", buttonId: 0 },
-      { name: "trigger", buttonId: 1 },
-      { name: "grip", buttonId: 2 },
-      { name: "top", buttonId: 3 }
-    ];
+    if (this.gamepad.id === "HTC Vive Focus Plus Controller") {
+      this.buttonMap = [
+        { name: "touchpad", buttonId: 0 },
+        { name: "trigger", buttonId: 1 },
+        { name: "grip", buttonId: 2 }
+      ];
+    } else {
+      this.buttonMap = [
+        { name: "touchpad", buttonId: 0 },
+        { name: "trigger", buttonId: 1 },
+        { name: "grip", buttonId: 2 },
+        { name: "top", buttonId: 3 }
+      ];
+    }
     this.axisMap = [{ name: "joyX", axisId: 0 }, { name: "joyY", axisId: 1 }];
 
     this.pose = new Pose();

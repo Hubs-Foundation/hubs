@@ -9,7 +9,6 @@ import { connectToReticulum } from "./utils/phoenix-utils";
 import Store from "./storage/store";
 
 registerTelemetry("/link", "Hubs Device Link");
-const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 const store = new Store();
 store.init();
@@ -21,7 +20,4 @@ const linkChannel = new LinkChannel(store);
   linkChannel.setSocket(socket);
 })();
 
-ReactDOM.render(
-  <LinkRoot store={store} linkChannel={linkChannel} />,
-  document.getElementById("link-root")
-);
+ReactDOM.render(<LinkRoot store={store} linkChannel={linkChannel} />, document.getElementById("link-root"));
