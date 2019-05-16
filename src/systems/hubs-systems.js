@@ -6,19 +6,25 @@ import { HoverMenuSystem } from "./hover-menu-system";
 import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
+import { loadModel } from "../components/gltf-model-plus";
 import { proxiedUrlFor } from "../utils/media-utils";
-import { load } from "../utils/preload";
 import cameraModelSrc from "../assets/camera_tool.glb";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
-    Promise.all([
-      load(
-        proxiedUrlFor("https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf")
-      ),
-      load(cameraModelSrc)
-    ]).then(([pen, camera]) => {
-      this.el.renderer.compileAndUploadMaterials(this.el.object3D, this.el.camera, [pen, camera]);
+    Promise.all(
+      [
+        "https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf",
+        cameraModelSrc
+      ].map(function(src) {
+        return loadModel(
+          src,
+          "model/gltf",
+          window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness"
+        );
+      })
+    ).then(([pen, camera]) => {
+      this.el.renderer.compileAndUploadMaterials(this.el.object3D, this.el.camera, [pen.scenes[0], camera.scenes[0]]);
     });
 
     this.cursorTargettingSystem = new CursorTargettingSystem();

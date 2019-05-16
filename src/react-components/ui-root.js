@@ -509,7 +509,7 @@ class UIRoot extends Component {
     const avatarId = window.APP.store.state.profile.avatarId;
     const playerRig = document.querySelector("#player-rig");
 
-    getAvatarSrc(avatarId).then(avatarSrc => {
+    Promise.resolve(getAvatarSrc(avatarId)).then(avatarSrc => {
       playerRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
     });
     playerRig.querySelector(".model").object3D.visible = false;

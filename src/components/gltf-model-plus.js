@@ -7,7 +7,7 @@ import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
-export const GLTFCache = {};
+const GLTFCache = {};
 const extractZipFile = promisifyWorker(new SketchfabZipWorker());
 
 function defaultInflator(el, componentName, componentData) {
@@ -296,6 +296,20 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress)
   return gltf;
 }
 
+export async function loadModel(src, contentType, technique, useCache) {
+  if (useCache) {
+    if (!GLTFCache[src]) {
+      GLTFCache[src] = await loadGLTF(src, contentType, technique);
+    } else {
+      console.log(`Got ${src} from cache`);
+    }
+
+    return cloneGltf(GLTFCache[src]);
+  } else {
+    return await loadGLTF(src, contentType, technique);
+  }
+}
+
 /**
  * Loads a GLTF model, optionally recursively "inflates" the child nodes of a model into a-entities and sets
  * whitelisted components on them if defined in the node's extras.
@@ -329,18 +343,6 @@ AFRAME.registerComponent("gltf-model-plus", {
     });
   },
 
-  async loadModel(src, contentType, technique, useCache) {
-    if (useCache) {
-      if (!GLTFCache[src]) {
-        GLTFCache[src] = await loadGLTF(src, contentType, technique);
-      }
-
-      return cloneGltf(GLTFCache[src]);
-    } else {
-      return await loadGLTF(src, contentType, technique);
-    }
-  },
-
   async applySrc(src, contentType) {
     try {
       // If the src attribute is a selector, get the url from the asset item.
@@ -361,7 +363,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       }
 
       this.el.emit("model-loading");
-      const gltf = await this.loadModel(src, contentType, this.preferredTechnique, this.data.useCache);
+      const gltf = await loadModel(src, contentType, this.preferredTechnique, this.data.useCache);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
