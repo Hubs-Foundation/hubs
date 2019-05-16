@@ -348,17 +348,18 @@ async function updateEnvironmentForHub(hub) {
     environmentEl.addEventListener(
       "model-loaded",
       () => {
-        if (sceneEl.is("entered")) {
-          // We've already entered, so move to new spawn point once new environment is loaded
-          environmentEl.addEventListener(
-            "model-loaded",
-            () => {
-              traverseMeshesAndAddShapes(environmentEl);
+        environmentEl.addEventListener(
+          "model-loaded",
+          () => {
+            traverseMeshesAndAddShapes(environmentEl);
+
+            // We've already entered, so move to new spawn point once new environment is loaded
+            if (sceneEl.is("entered")) {
               document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
-            },
-            { once: true }
-          );
-        }
+            }
+          },
+          { once: true }
+        );
 
         environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
       },

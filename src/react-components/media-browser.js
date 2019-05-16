@@ -396,7 +396,7 @@ class MediaBrowser extends Component {
                   className={classNames(styles.tile, styles.createTile)}
                 >
                   {urlSource === "scenes" ? (
-                    <a href="/spoke/projects/new" rel="noopener noreferrer" target="_blank" className={styles.tileLink}>
+                    <a href="/spoke/new" rel="noopener noreferrer" target="_blank" className={styles.tileLink}>
                       <div className={styles.tileContent}>
                         <FontAwesomeIcon icon={faPlus} />
                         <FormattedMessage id="media-browser.create-scene" />
