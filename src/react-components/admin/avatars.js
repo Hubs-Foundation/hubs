@@ -17,6 +17,13 @@ import {
   BooleanField,
   Filter
 } from "react-admin";
+import { withStyles } from "@material-ui/core/styles";
+
+// Quite ugly but simplest way to have AvatarPreview work is to import aframe.
+// We can technically untangle the dependencies for this, but doesn't seem worth it for admin.
+import "aframe";
+import AvatarPreview from "../avatar-preview";
+import { getReticulumFetchUrl } from "../../utils/phoenix-utils";
 
 const AvatarFilter = props => (
   <Filter {...props}>
@@ -38,13 +45,30 @@ export const AvatarEdit = props => (
   </Edit>
 );
 
+const styles = {
+  preview: {
+    flex: 1,
+    borderRadius: 20,
+    overflow: "hidden",
+    width: 200,
+    height: 200 * (16 / 9)
+  }
+};
+
+const Preview = withStyles(styles)(({ record, classes }) => (
+  <AvatarPreview
+    className={classes.preview}
+    avatarGltfUrl={getReticulumFetchUrl(`/api/v1/avatars/${record.avatar_sid}/avatar.gltf?v=${record.updated_at}`)}
+  />
+));
+
 const rowStyle = record => ({
   opacity: record.state === "removed" ? 0.3 : 1
 });
 
 export const AvatarList = props => (
   <List {...props} filters={<AvatarFilter />} bulkActionButtons={false}>
-    <Datagrid rowStyle={rowStyle}>
+    <Datagrid rowStyle={rowStyle} expand={<Preview />}>
       <OwnedFileImage
         source="thumbnail_owned_file_id"
         aspect="tall"
