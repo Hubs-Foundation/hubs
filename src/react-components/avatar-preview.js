@@ -6,7 +6,7 @@ import classNames from "classnames";
 import { createDefaultEnvironmentMap } from "../components/environment-map";
 import { loadGLTF } from "../components/gltf-model-plus";
 import { disposeNode } from "../utils/three-utils";
-import { createImageBitmap } from "../utils/image-bitmap-utils";
+import { createImageBitmap, disposeImageBitmap } from "../utils/image-bitmap-utils";
 import styles from "../assets/stylesheets/avatar-preview.scss";
 
 const TEXTURE_PROPS = {
@@ -20,7 +20,7 @@ const ALL_MAPS = Object.keys(TEXTURE_PROPS);
 
 // This should match our aframe renderer="antialias: true; colorManagement: true; sortObjects: true;
 // physicallyCorrectLights: true; webgl2: true; multiview: false;"
-function createRenderer(canvas, alpha = false) {
+function createRenderer(canvas, alpha = false, useDevicePixelRatio = true) {
   const context = canvas.getContext("webgl2", {
     alpha,
     depth: true,
@@ -30,11 +30,13 @@ function createRenderer(canvas, alpha = false) {
     powerPreference: "default"
   });
 
-  const renderer = new THREE.WebGLRenderer({ canvas, context });
+  const renderer = new THREE.WebGLRenderer({ alpha, canvas, context });
   renderer.gammaOutput = true;
   renderer.gammaFactor = 2.2;
   renderer.physicallyCorrectLights = true;
-  renderer.setPixelRatio(window.devicePixelRatio);
+  if (useDevicePixelRatio) {
+    renderer.setPixelRatio(window.devicePixelRatio);
+  }
   return renderer;
 }
 
@@ -96,7 +98,7 @@ export default class AvatarPreview extends Component {
     this.snapshotCanvas.height = 1280;
     this.snapshotCamera = new THREE.PerspectiveCamera(55, 720 / 1280, 0.1, 1000);
     this.snapshotCamera.matrixAutoUpdate = true;
-    this.snapshotRenderer = createRenderer(this.snapshotCanvas, true);
+    this.snapshotRenderer = createRenderer(this.snapshotCanvas, true, false);
     this.snapshotRenderer.setClearAlpha(0);
 
     this.previewRenderer = createRenderer(this.canvas);
@@ -105,6 +107,7 @@ export default class AvatarPreview extends Component {
       const dt = clock.getDelta();
       this.mixer && this.mixer.update(dt);
       this.previewRenderer.render(this.scene, this.camera);
+      this.snapshotRenderer.render(this.scene, this.snapshotCamera);
     });
     window.addEventListener("resize", this.resize);
     this.resize();
@@ -147,7 +150,7 @@ export default class AvatarPreview extends Component {
   componentWillUnmount = () => {
     this.scene && this.scene.traverse(disposeNode);
     this.previewRenderer && this.previewRenderer.dispose();
-    Object.values(this.imageBitmaps).forEach(img => img.close());
+    Object.values(this.imageBitmaps).forEach(img => disposeImageBitmap(img));
     window.removeEventListener("resize", this.resize);
   };
 
@@ -223,7 +226,7 @@ export default class AvatarPreview extends Component {
 
   applyMapToPreview = (name, image) => {
     if (this.imageBitmaps[name]) {
-      this.imageBitmaps[name].close();
+      disposeImageBitmap(this.imageBitmaps[name]);
     }
     this.imageBitmaps[name] = image;
     TEXTURE_PROPS[name].forEach(prop => {
@@ -235,7 +238,7 @@ export default class AvatarPreview extends Component {
 
   revertMap = name => {
     if (this.imageBitmaps[name]) {
-      this.imageBitmaps[name].close();
+      disposeImageBitmap(this.imageBitmaps[name]);
     }
     delete this.imageBitmaps[name];
     this.originalMaps[name].forEach((bm, i) => {
