@@ -2,7 +2,6 @@ import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 
-const playerHeight = 1.6;
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
 const isDebug = qsTruthy("debug");
@@ -50,7 +49,6 @@ export default class SceneEntryManager {
   enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
     const playerCamera = document.querySelector("#player-camera");
     playerCamera.removeAttribute("scene-preview-camera");
-    playerCamera.object3D.position.set(0, playerHeight, 0);
 
     if (isDebug) {
       NAF.connection.adapter.session.options.verbose = true;
