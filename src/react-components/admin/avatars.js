@@ -86,7 +86,7 @@ export const AvatarList = props => (
       <OwnedFileImage source="emissive_map_owned_file_id" aspect="square" />
       <OwnedFileImage source="normal_map_owned_file_id" aspect="square" />
       <OwnedFileImage source="orm_map_owned_file_id" aspect="square" />
-
+      <TextField source="attributions" />
       <BooleanField source="allow_remixing" />
       <BooleanField source="allow_promotion" />
       <TextField source="reviewed_at" />
