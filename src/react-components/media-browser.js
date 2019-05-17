@@ -212,16 +212,12 @@ class MediaBrowser extends Component {
   };
 
   showCustomMediaDialog = source => {
-    this.pushExitMediaBrowserHistory();
-    pushHistoryState(
-      this.props.history,
-      "modal",
-      source === "scene_listings" || source === "scenes"
-        ? "change_scene"
-        : source === "avatar_listings" || source === "avatar"
-          ? "avatar_url"
-          : "create"
-    );
+    const isSceneApiType = source === "scene_listings" || source === "scenes";
+    // Note: The apiSource for avatars *is* actually singular. We should probably fix this on the backend.
+    const isAvatarApiType = source === "avatar_listings" || source === "avatar";
+    this.pushExitMediaBrowserHistory(!isAvatarApiType);
+    const dialog = isSceneApiType ? "change_scene" : isAvatarApiType ? "avatar_url" : "create";
+    pushHistoryState(this.props.history, "modal", dialog);
   };
 
   close = () => {
@@ -249,6 +245,7 @@ class MediaBrowser extends Component {
     const apiSource = (hasMeta && this.state.result.meta.source) || null;
     const isVariableWidth = this.state.result && ["bing_images", "tenor"].includes(apiSource);
     const isSceneApiType = apiSource === "scene_listings" || apiSource === "scenes";
+    // Note: The apiSource for avatars *is* actually singular. We should probably fix this on the backend.
     const isAvatarApiType = apiSource === "avatar_listings" || apiSource === "avatar";
     const showCustomOption = !isSceneApiType || this.props.hubChannel.canOrWillIfCreator("update_hub");
     const [createTileWidth, createTileHeight] = this.getTileDimensions(false, urlSource === "avatars");
