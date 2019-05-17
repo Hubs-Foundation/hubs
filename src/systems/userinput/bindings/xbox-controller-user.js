@@ -3,8 +3,6 @@ import { sets } from "../sets";
 import { xforms } from "./xforms";
 import { addSetsToBindings } from "./utils";
 
-const xboxUnscaledCursorScalePenTip = "foobarbazbotbooch";
-
 const button = paths.device.xbox.button;
 const axis = paths.device.xbox.axis;
 const rightTriggerFalling = "/vars/xbox/rightTriggerFalling";
@@ -80,21 +78,6 @@ export const xboxControllerUserBindings = addSetsToBindings({
       src: { value: button("x").pressed },
       dest: { value: paths.actions.cursor.penPrevColor },
       xform: xforms.rising
-    },
-    {
-      src: {
-        bool: button("leftTrigger").pressed,
-        value: axis("rightJoystickVertical")
-      },
-      dest: { value: xboxUnscaledCursorScalePenTip },
-      xform: xforms.copyIfTrue
-    },
-    {
-      dest: {
-        value: paths.actions.cursorScalePenTip
-      },
-      src: { value: xboxUnscaledCursorScalePenTip },
-      xform: xforms.scale(0.01)
     }
   ],
   [sets.global]: [
@@ -163,6 +146,7 @@ export const xboxControllerUserBindings = addSetsToBindings({
       xform: xforms.rising
     },
     {
+      src: {},
       dest: { value: "var/vec2/zero" },
       xform: xforms.vec2Zero
     },
