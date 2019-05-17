@@ -68,13 +68,15 @@ const rowStyle = record => ({
 
 export const AvatarList = props => (
   <List {...props} filters={<AvatarFilter />} bulkActionButtons={false}>
-    <Datagrid rowStyle={rowStyle} expand={<Preview />}>
+    <Datagrid rowStyle={rowStyle}>
       <OwnedFileImage
         source="thumbnail_owned_file_id"
         aspect="tall"
         defaultImage="https://asset-bundles-prod.reticulum.io/bots/avatar_unavailable.png"
       />
+      <Preview />
       <TextField source="name" />
+      <TextField source="account_id" />
       <AvatarLink source="avatar_sid" />
       <ConditionalReferenceField reference="avatars" source="parent_avatar_id">
         <TextField source="name" />
