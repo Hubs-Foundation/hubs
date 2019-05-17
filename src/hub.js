@@ -866,7 +866,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     if (permsToken) {
-      params.perms_token = hubChannel.oauthFlowPermsToken;
+      params.perms_token = permsToken;
     }
 
     const { token } = store.state.credentials;
