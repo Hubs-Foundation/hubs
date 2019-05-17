@@ -47,11 +47,8 @@ export const AvatarEdit = props => (
 
 const styles = {
   preview: {
-    flex: 1,
-    borderRadius: 20,
-    overflow: "hidden",
-    width: 200,
-    height: 200 * (16 / 9)
+    height: 200,
+    width: 200 * (9 / 16)
   }
 };
 
