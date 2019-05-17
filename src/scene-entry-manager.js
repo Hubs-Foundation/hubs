@@ -151,12 +151,12 @@ export default class SceneEntryManager {
   };
 
   _setPlayerInfoFromProfile = async () => {
-    const { avatarId } = this.store.state.profile;
+    let avatarId = this.store.state.profile.avatarId;
     let avatarSrc = await getAvatarSrc(avatarId);
 
     if (!avatarSrc) {
       this.store.resetToRandomLegacyAvatar();
-      const { avatarId } = this.store.state.profile;
+      avatarId = this.store.state.profile.avatarId;
       avatarSrc = await getAvatarSrc(avatarId);
     }
 
