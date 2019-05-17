@@ -124,7 +124,7 @@ export default class Store extends EventTarget {
     const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
     if (oauthFlowCredentials) {
       this.update({ credentials: oauthFlowCredentials });
-      this.clearAvatar();
+      this.resetToRandomLegacyAvatar();
       Cookies.remove(OAUTH_FLOW_CREDENTIALS_KEY);
     }
   }
@@ -141,7 +141,7 @@ export default class Store extends EventTarget {
     }
   };
 
-  clearAvatar = () => {
+  resetToRandomLegacyAvatar = () => {
     this.update({
       profile: { ...(this.state.profile || {}), ...generateDefaultProfile() }
     });

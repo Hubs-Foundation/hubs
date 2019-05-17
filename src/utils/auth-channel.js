@@ -24,7 +24,7 @@ export default class AuthChannel {
       await hubChannel.signOut();
     }
     this.store.update({ credentials: { token: null, email: null } });
-    this.store.clearAvatar();
+    this.store.resetToRandomLegacyAvatar();
     this._signedIn = false;
   };
 
