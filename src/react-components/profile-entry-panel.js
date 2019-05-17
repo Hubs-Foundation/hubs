@@ -12,6 +12,7 @@ import { WithHoverSound } from "./wrap-with-audio";
 import { AVATAR_TYPES, getAvatarGltfUrl, getAvatarType } from "../utils/avatar-utils";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { replaceHistoryState } from "../utils/history";
+import { proxiedUrlFor } from "../utils/media-utils";
 import StateLink from "./state-link";
 
 import AvatarPreview from "./avatar-preview";
@@ -51,7 +52,7 @@ class ProfileEntryPanel extends Component {
     const avatarType = getAvatarType(avatarId);
     const newState = { displayName, avatarId, avatarType };
     if (avatarType === AVATAR_TYPES.URL) {
-      newState.avatarGltfUrl = avatarId;
+      newState.avatarGltfUrl = proxiedUrlFor(avatarId);
     }
     return newState;
   };
