@@ -161,6 +161,7 @@ export default class AvatarPreview extends Component {
         this.avatar = null;
       }
       if (this.props.avatarGltfUrl) {
+        this.setState({ loading: true });
         await this.loadPreviewAvatar(this.props.avatarGltfUrl).then(this.setAvatar);
       }
     }
