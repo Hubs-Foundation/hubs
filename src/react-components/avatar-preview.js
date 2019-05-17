@@ -192,7 +192,8 @@ export default class AvatarPreview extends Component {
     this.previewMesh =
       gltf.scene.getObjectByName("AvatarMesh") ||
       gltf.scene.getObjectByName("Avatar") ||
-      gltf.scene.getObjectByName("Bot_Skinned");
+      gltf.scene.getObjectByName("Bot_Skinned") ||
+      gltf.scene;
 
     const idleAnimation = gltf.animations && gltf.animations.find(({ name }) => name === "idle_eyes");
     if (idleAnimation) {
@@ -203,23 +204,27 @@ export default class AvatarPreview extends Component {
       this.idleAnimationAction = action;
     }
 
-    const material = this.previewMesh.material;
-    // We delete onUpdate here to opt out of the auto texture cleanup after GPU upload.
-    const getImage = p => delete material[p].onUpdate && material[p].image;
-    this.originalMaps = {
-      base_map: TEXTURE_PROPS["base_map"].map(getImage),
-      emissive_map: TEXTURE_PROPS["emissive_map"].map(getImage),
-      normal_map: TEXTURE_PROPS["normal_map"].map(getImage),
-      orm_map: TEXTURE_PROPS["orm_map"].map(getImage)
-    };
+    const { material } = this.previewMesh;
+    if (material) {
+      // We delete onUpdate here to opt out of the auto texture cleanup after GPU upload.
+      const getImage = p => delete material[p].onUpdate && material[p].image;
+      this.originalMaps = {
+        base_map: TEXTURE_PROPS["base_map"].map(getImage),
+        emissive_map: TEXTURE_PROPS["emissive_map"].map(getImage),
+        normal_map: TEXTURE_PROPS["normal_map"].map(getImage),
+        orm_map: TEXTURE_PROPS["orm_map"].map(getImage)
+      };
 
-    await Promise.all([
-      this.applyMaps({}, this.props), // Apply initial maps
-      createDefaultEnvironmentMap().then(t => {
-        this.previewMesh.material.envMap = t;
-        this.previewMesh.material.needsUpdate = true;
-      })
-    ]);
+      await Promise.all([
+        this.applyMaps({}, this.props), // Apply initial maps
+        createDefaultEnvironmentMap().then(t => {
+          this.previewMesh.material.envMap = t;
+          this.previewMesh.material.needsUpdate = true;
+        })
+      ]);
+    } else {
+      this.originalMaps = {};
+    }
 
     return gltf.scene;
   };
