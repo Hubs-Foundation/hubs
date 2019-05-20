@@ -322,6 +322,56 @@ export function getPromotionTokenForFile(fileId) {
   return window.APP.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
 }
 
+function exceedsDensityThreshold(count, subtree) {
+  const bounds = subtree.boundingData;
+  const trisThreshold = 1000;
+  const volumeThreshold = 0.01;
+  const dx = bounds[3] - bounds[0];
+  const dy = bounds[4] - bounds[1];
+  const dz = bounds[5] - bounds[2];
+  const volume = dx * dy * dz;
+
+  if (volume < volumeThreshold) {
+    return false;
+  }
+
+  const trisPerMeterSquared = count / volume;
+  const exceedsThreshold = trisPerMeterSquared > trisThreshold;
+  if (exceedsThreshold) {
+    var box = new THREE.Box3(
+      new THREE.Vector3(bounds[0], bounds[1], bounds[2]),
+      new THREE.Vector3(bounds[3], bounds[4], bounds[5])
+    );
+    console.log("threshold exceeded!", trisPerMeterSquared, subtree, volume, count);
+  }
+  return exceedsThreshold;
+}
+
+function isHighDensity(subtree) {
+  if (subtree.count) {
+    const result = exceedsDensityThreshold(subtree.count, subtree);
+    return result === true ? true : subtree.count;
+  } else {
+    const leftResult = isHighDensity(subtree.left);
+    if (leftResult === true) return true;
+    const rightResult = isHighDensity(subtree.right);
+    if (rightResult === true) return true;
+
+    const count = leftResult + rightResult;
+    const result = exceedsDensityThreshold(count, subtree);
+    return result === true ? true : count;
+  }
+}
+
+function isGeometryHighDensity(geo) {
+  const bvh = geo.boundsTree;
+  const roots = bvh._roots;
+  for (var i = 0; i < roots.length; ++i) {
+    return isHighDensity(roots[i]) === true;
+  }
+  return false;
+}
+
 export const traverseMeshesAndAddShapes = (function() {
   const vertexLimit = 200000;
   const shapePrefix = "ammo-shape__";
@@ -333,41 +383,70 @@ export const traverseMeshesAndAddShapes = (function() {
       entity.removeAttribute(id);
     }
 
-    let vertexCount = 0;
+    let isHighDensity = false;
     meshRoot.traverse(o => {
       if (
         o.isMesh &&
         (!THREE.Sky || o.__proto__ != THREE.Sky.prototype) &&
         o.name !== "Floor_Plan" &&
-        o.name !== "Ground_Plane"
+        o.name !== "Ground_Plane" &&
+        o.geometry.boundsTree
       ) {
-        vertexCount += o.geometry.attributes.position.count;
+        window.scene = el.sceneEl.object3D;
+        if (isGeometryHighDensity(o.geometry)) {
+          isHighDensity = true;
+          return;
+        }
       }
     });
 
     console.group("traverseMeshesAndAddShapes");
 
-    console.log(`scene has ${vertexCount} vertices from meshes`);
+    if (isHighDensity) {
+      console.log("mesh contains high triangle density region");
+    }
 
     const floorPlan = meshRoot.children.find(obj => {
-      return obj.name === "Floor_Plan";
+      return obj.name.startsWith("Floor_Plan");
     });
-    if ((vertexCount > vertexLimit || vertexCount === 0) && floorPlan) {
-      console.log(`vertex limit of ${vertexLimit} exceeded, using floor plan with mesh shape`);
+
+    if (
+      isHighDensity &&
+      floorPlan &&
+      floorPlan.el.object3DMap.object3d.userData &&
+      floorPlan.el.object3DMap.object3d.userData.gltfExtensions &&
+      floorPlan.el.object3DMap.object3d.userData.gltfExtensions.MOZ_hubs_components &&
+      floorPlan.el.object3DMap.object3d.userData.gltfExtensions.MOZ_hubs_components.heightfield
+    ) {
+      const heightfield = floorPlan.el.object3DMap.object3d.userData.gltfExtensions.MOZ_hubs_components.heightfield;
+      console.log(heightfield.offset);
+      floorPlan.el.setAttribute(shapePrefix + "heightfield", {
+        type: SHAPE.HEIGHTFIELD,
+        margin: 0.1,
+        fit: FIT.MANUAL,
+        heightfieldDistance: heightfield.distance,
+        offset: heightfield.offset,
+        heightfieldData: heightfield.data
+      });
+      shapes.push({ id: shapePrefix + "heightfield", entity: floorPlan.el });
+      console.log("mesh density exceeded, using heightfield");
+    } else if (isHighDensity && floorPlan) {
+      console.log(`mesh density exceeded, using floor plan only`);
       floorPlan.el.setAttribute(shapePrefix + floorPlan.name, {
         type: SHAPE.MESH,
         margin: 0.01,
-        fit: FIT.ALL
+        fit: FIT.ALL,
+        includeInvisible: true
       });
       shapes.push({ id: shapePrefix + floorPlan.name, entity: floorPlan.el });
-    } else if (vertexCount < vertexLimit && vertexCount > 0) {
+    } else if (!isHighDensity) {
       el.setAttribute(shapePrefix + "environment", {
         type: SHAPE.MESH,
         margin: 0.01,
         fit: FIT.ALL
       });
       shapes.push({ id: shapePrefix + "environment", entity: el });
-      console.log("adding compound mesh shape");
+      console.log("adding mesh shape");
     } else {
       el.setAttribute(shapePrefix + "defaultFloor", {
         type: SHAPE.BOX,
