@@ -107,7 +107,6 @@ export default class AvatarPreview extends Component {
       const dt = clock.getDelta();
       this.mixer && this.mixer.update(dt);
       this.previewRenderer.render(this.scene, this.camera);
-      this.snapshotRenderer.render(this.scene, this.snapshotCamera);
     });
     window.addEventListener("resize", this.resize);
     this.resize();
@@ -148,8 +147,24 @@ export default class AvatarPreview extends Component {
   })();
 
   componentWillUnmount = () => {
+    // Gotta be particularly careful about disposing things here since we will likely create many avatar
+    // previews during a session and Chrome will eventually discard the oldest webgl context if we leak
+    // contexts by holding on to them directly or indirectly.
+
     this.scene && this.scene.traverse(disposeNode);
-    this.previewRenderer && this.previewRenderer.dispose();
+    if (this.previewRenderer) {
+      this.previewRenderer.dispose();
+      this.previewRenderer.context = null;
+    }
+    if (this.snapshotRenderer) {
+      this.snapshotRenderer.dispose();
+      this.snapshotRenderer.context = null;
+    }
+    if (this.controls) {
+      this.controls.dispose();
+      this.controls.domElement = null;
+    }
+
     Object.values(this.imageBitmaps).forEach(img => disposeImageBitmap(img));
     window.removeEventListener("resize", this.resize);
   };
