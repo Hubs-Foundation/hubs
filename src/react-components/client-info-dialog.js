@@ -2,9 +2,9 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/client-info-dialog.scss";
-import profileAvatarPlaceholder from "../assets/images/profile-avatar-placeholder.jpg";
 import { FormattedMessage } from "react-intl";
 import { sluglessPath } from "../utils/history";
+import { getAvatarThumbnailUrl } from "../utils/avatar-utils";
 
 export function getClientInfoClientId(location) {
   const { search } = location;
@@ -23,6 +23,10 @@ export default class ClientInfoDialog extends Component {
     presences: PropTypes.object,
     performConditionalSignIn: PropTypes.func,
     onClose: PropTypes.func
+  };
+
+  state = {
+    avatarThumbnailUrl: null
   };
 
   kick() {
@@ -61,26 +65,44 @@ export default class ClientInfoDialog extends Component {
     onClose();
   }
 
-  render() {
+  getPresenceProfile() {
     if (!this.props.presences) return null;
 
     const presence = Object.entries(this.props.presences).find(([k]) => k === this.props.clientId);
     if (!presence) return null;
 
-    const { hubChannel, clientId, onClose } = this.props;
     const metas = presence[1].metas;
-    const meta = metas[metas.length - 1];
-    const displayName = meta.profile.displayName;
-    const title = <div className={styles.title}>{displayName}</div>;
+    return metas[metas.length - 1].profile;
+  }
+
+  componentDidMount() {
+    const { avatarId } = this.getPresenceProfile();
+    if (avatarId) {
+      getAvatarThumbnailUrl(avatarId).then(avatarThumbnailUrl => this.setState({ avatarThumbnailUrl }));
+    }
+  }
+
+  render() {
+    const profile = this.getPresenceProfile();
+    if (!profile) return null;
+
+    const { displayName, communityIdentifier } = profile;
+    const { hubChannel, clientId, onClose } = this.props;
+    const title = (
+      <div className={styles.title}>
+        {displayName}
+        <div className={styles.communityIdentifier}>{communityIdentifier}</div>
+      </div>
+    );
     const mayKick = hubChannel.canOrWillIfCreator("kick_users");
     const mayMute = hubChannel.canOrWillIfCreator("mute_users");
     const isHidden = hubChannel.isHidden(clientId);
 
     return (
-      <DialogContainer title={title} wide={true} {...this.props}>
+      <DialogContainer className={styles.clientInfoDialog} title={title} wide={true} {...this.props}>
         <div className={styles.roomInfo}>
           <div className={styles.clientProfileImage}>
-            <img src={profileAvatarPlaceholder} />
+            <img src={this.state.avatarThumbnailUrl} />
           </div>
           <div className={styles.clientActionButtons}>
             {!isHidden && (

@@ -1,9 +1,21 @@
 @import 'shared';
 
+:local(.client-info-dialog) {
+  .dialog__box__contents__title {
+    margin-bottom: 10px;
+  }
+}
+
 :local(.title) {
   text-align: center;
   font-weight: bold;
   margin: 0 12px;
+}
+
+:local(.community-identifier) {
+  font-size: 12pt;
+  font-weight: normal;
+  margin-top: 3px;
 }
 
 :local(.client-info) {
@@ -18,11 +30,12 @@
 }
 
 :local(.client-profile-image) {
+  min-width: 200px;
+
   img {
     border-radius: 12px;
     width: auto;
     height: 240px;
-    filter: brightness(1.1) contrast(1.1);
   }
 
   margin: 0px 80px;

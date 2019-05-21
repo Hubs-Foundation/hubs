@@ -17,6 +17,13 @@ import {
   BooleanField,
   Filter
 } from "react-admin";
+import { withStyles } from "@material-ui/core/styles";
+
+// Quite ugly but simplest way to have AvatarPreview work is to import aframe.
+// We can technically untangle the dependencies for this, but doesn't seem worth it for admin.
+import "aframe";
+import AvatarPreview from "../avatar-preview";
+import { getReticulumFetchUrl } from "../../utils/phoenix-utils";
 
 const AvatarFilter = props => (
   <Filter {...props}>
@@ -38,6 +45,20 @@ export const AvatarEdit = props => (
   </Edit>
 );
 
+const styles = {
+  preview: {
+    height: 200,
+    width: 200 * (9 / 16)
+  }
+};
+
+const Preview = withStyles(styles)(({ record, classes }) => (
+  <AvatarPreview
+    className={classes.preview}
+    avatarGltfUrl={getReticulumFetchUrl(`/api/v1/avatars/${record.avatar_sid}/avatar.gltf?v=${record.updated_at}`)}
+  />
+));
+
 const rowStyle = record => ({
   opacity: record.state === "removed" ? 0.3 : 1
 });
@@ -50,7 +71,9 @@ export const AvatarList = props => (
         aspect="tall"
         defaultImage="https://asset-bundles-prod.reticulum.io/bots/avatar_unavailable.png"
       />
+      <Preview />
       <TextField source="name" />
+      <TextField source="account_id" />
       <AvatarLink source="avatar_sid" />
       <ConditionalReferenceField reference="avatars" source="parent_avatar_id">
         <TextField source="name" />
@@ -62,7 +85,7 @@ export const AvatarList = props => (
       <OwnedFileImage source="emissive_map_owned_file_id" aspect="square" />
       <OwnedFileImage source="normal_map_owned_file_id" aspect="square" />
       <OwnedFileImage source="orm_map_owned_file_id" aspect="square" />
-
+      <TextField source="attributions" />
       <BooleanField source="allow_remixing" />
       <BooleanField source="allow_promotion" />
       <TextField source="reviewed_at" />

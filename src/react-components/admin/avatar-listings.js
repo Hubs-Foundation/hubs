@@ -7,6 +7,7 @@ import {
   Edit,
   SimpleForm,
   TextInput,
+  NumberInput,
   EditButton,
   SelectInput,
   Datagrid,
@@ -28,6 +29,8 @@ export const AvatarListingEdit = props => (
     <SimpleForm>
       <TextInput source="name" />
       <TextInput source="description" />
+      <TextInput source="attribution" />
+      <NumberInput source="order" />
       <SelectInput source="state" choices={[{ id: "active", name: "active" }, { id: "delisted", name: "delisted" }]} />
     </SimpleForm>
   </Edit>
@@ -46,6 +49,7 @@ export const AvatarListingList = props => (
         defaultImage="https://asset-bundles-prod.reticulum.io/bots/avatar_unavailable.png"
       />
       <TextField source="name" />
+      <TextField source="order" />
       <AvatarLink source="avatar_listing_sid" />
       <ConditionalReferenceField reference="avatar_listings" source="parent_avatar_listing_id">
         <TextField source="name" />
@@ -54,6 +58,7 @@ export const AvatarListingList = props => (
       <OwnedFileImage source="emissive_map_owned_file_id" aspect="square" />
       <OwnedFileImage source="normal_map_owned_file_id" aspect="square" />
       <OwnedFileImage source="orm_map_owned_file_id" aspect="square" />
+      <TextField source="attributions" />
       <BooleanField source="allow_remixing" />
       <TextField source="reviewed_at" />
       <DateField source="inserted_at" />

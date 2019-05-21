@@ -141,8 +141,7 @@ export default class SceneEntryManager {
   };
 
   _setupPlayerRig = () => {
-    this._updatePlayerInfoFromProfile();
-    this.store.addEventListener("statechanged", this._updatePlayerInfoFromProfile);
+    this._setPlayerInfoFromProfile();
 
     const avatarScale = parseInt(qs.get("avatar_scale"), 10);
 
@@ -151,10 +150,12 @@ export default class SceneEntryManager {
     }
   };
 
-  _updatePlayerInfoFromProfile = async () => {
-    const { avatarId } = this.store.state.profile;
+  _setPlayerInfoFromProfile = async () => {
+    const avatarId = this.store.state.profile.avatarId;
     const avatarSrc = await getAvatarSrc(avatarId);
+
     this.playerRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
+    this.store.addEventListener("statechanged", this._setPlayerInfoFromProfile);
   };
 
   _setupKicking = () => {

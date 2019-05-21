@@ -843,7 +843,11 @@ class UIRoot extends Component {
     } else {
       const channels = [];
       for (const p of Object.values(this.props.presences)) {
-        Array.prototype.push.apply(channels, p.metas.map(m => m.context.discord).filter(ch => !!ch));
+        for (const m of p.metas) {
+          if (m.profile && m.profile.discordBridges) {
+            Array.prototype.push.apply(channels, m.profile.discordBridges.map(b => b.channel.name));
+          }
+        }
       }
       return channels;
     }

@@ -15,13 +15,17 @@ export function getAvatarType(avatarId) {
   return AVATAR_TYPES.SKINNABLE;
 }
 
-async function fetchAvatarGltfUrl(avatarId) {
+async function fetchAvatar(avatarId) {
   const resp = await fetch(getReticulumFetchUrl(`/api/v1/avatars/${avatarId}`));
   if (resp.status === 404) {
     return null;
   } else {
-    return resp.json().then(({ avatars }) => avatars[0].gltf_url);
+    return resp.json().then(({ avatars }) => avatars[0]);
   }
+}
+
+async function fetchAvatarGltfUrl(avatarId) {
+  return fetchAvatar(avatarId).then(avatar => avatar && avatar.gltf_url);
 }
 
 export function getAvatarSrc(avatarId) {
@@ -45,5 +49,16 @@ export function getAvatarGltfUrl(avatarId) {
       return fetchAvatarGltfUrl(avatarId);
     case AVATAR_TYPES.URL:
       return proxiedUrlFor(avatarId);
+  }
+}
+
+export async function getAvatarThumbnailUrl(avatarId) {
+  switch (getAvatarType(avatarId)) {
+    case AVATAR_TYPES.LEGACY:
+      return avatars.find(avatar => avatar.id === avatarId).thumbnail;
+    case AVATAR_TYPES.SKINNABLE:
+      return fetchAvatar(avatarId).then(avatar => avatar.files.thumbnail);
+    default:
+      return "https://asset-bundles-prod.reticulum.io/bots/avatar_unavailable.png";
   }
 }

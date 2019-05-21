@@ -295,7 +295,7 @@ module.exports = (env, argv) => ({
     new HTMLWebpackPlugin({
       filename: "admin.html",
       template: path.join(__dirname, "src", "admin.html"),
-      chunks: ["vendor", "admindeps", "admin"]
+      chunks: ["vendor", "engine", "admindeps", "admin"]
     }),
     new CopyWebpackPlugin([
       {
