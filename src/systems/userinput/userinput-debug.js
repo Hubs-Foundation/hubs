@@ -34,6 +34,7 @@ AFRAME.registerSystem("userinput-debug", {
         this.userinputFrameStatus.id = "userinput-frame-status";
         this.userinputFrameStatus.style = `
           position: absolute;
+          z-index: 2;
           left: 0; bottom: 0;
           background: white;
           white-space: pre;
