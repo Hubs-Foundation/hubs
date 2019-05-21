@@ -76,10 +76,10 @@ export default class AvatarPreview extends Component {
     this.controls = new THREE.OrbitControls(this.camera, this.canvas);
     this.controls.enablePan = false;
 
-    const light = new THREE.DirectionalLight(0xfdf5c2, 3);
+    const light = new THREE.DirectionalLight(0xf7f6ef, 1);
     light.position.set(0, 10, 10);
     this.scene.add(light);
-    this.scene.add(new THREE.HemisphereLight(0xb1e3ff, 0xb1e3ff, 3));
+    this.scene.add(new THREE.HemisphereLight(0xb1e3ff, 0xb1e3ff, 2.5));
 
     this.camera.position.set(-0.2, 0.5, 0.5);
     this.camera.matrixAutoUpdate = true;
