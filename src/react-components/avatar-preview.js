@@ -76,10 +76,10 @@ export default class AvatarPreview extends Component {
     this.controls = new THREE.OrbitControls(this.camera, this.canvas);
     this.controls.enablePan = false;
 
-    const light = new THREE.DirectionalLight(0xfdf5c2, 3);
+    const light = new THREE.DirectionalLight(0xf7f6ef, 1);
     light.position.set(0, 10, 10);
     this.scene.add(light);
-    this.scene.add(new THREE.HemisphereLight(0xb1e3ff, 0xb1e3ff, 3));
+    this.scene.add(new THREE.HemisphereLight(0xb1e3ff, 0xb1e3ff, 2.5));
 
     this.camera.position.set(-0.2, 0.5, 0.5);
     this.camera.matrixAutoUpdate = true;
@@ -107,7 +107,6 @@ export default class AvatarPreview extends Component {
       const dt = clock.getDelta();
       this.mixer && this.mixer.update(dt);
       this.previewRenderer.render(this.scene, this.camera);
-      this.snapshotRenderer.render(this.scene, this.snapshotCamera);
     });
     window.addEventListener("resize", this.resize);
     this.resize();
@@ -148,8 +147,24 @@ export default class AvatarPreview extends Component {
   })();
 
   componentWillUnmount = () => {
+    // Gotta be particularly careful about disposing things here since we will likely create many avatar
+    // previews during a session and Chrome will eventually discard the oldest webgl context if we leak
+    // contexts by holding on to them directly or indirectly.
+
     this.scene && this.scene.traverse(disposeNode);
-    this.previewRenderer && this.previewRenderer.dispose();
+    if (this.previewRenderer) {
+      this.previewRenderer.dispose();
+      this.previewRenderer.context = null;
+    }
+    if (this.snapshotRenderer) {
+      this.snapshotRenderer.dispose();
+      this.snapshotRenderer.context = null;
+    }
+    if (this.controls) {
+      this.controls.dispose();
+      this.controls.domElement = null;
+    }
+
     Object.values(this.imageBitmaps).forEach(img => disposeImageBitmap(img));
     window.removeEventListener("resize", this.resize);
   };
