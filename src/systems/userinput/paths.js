@@ -147,6 +147,7 @@ paths.device.gamepad = gamepadIndex => ({
 
 const xbox = "/device/xbox/";
 paths.device.xbox = {
+  v: name => `/vars/xbox/${name}`,
   button: buttonName => ({
     pressed: `${xbox}button/${buttonName}/pressed`,
     touched: `${xbox}button/${buttonName}/touched`,
