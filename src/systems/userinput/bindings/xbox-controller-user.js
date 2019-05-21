@@ -153,6 +153,31 @@ export const xboxControllerUserBindings = addSetsToBindings({
       dest: { value: paths.actions.spawnPen },
       xform: xforms.rising,
       priority: 100
+    },
+    {
+      src: { value: button("dpadUp").pressed },
+      dest: { value: paths.actions.ensureFrozen },
+      xform: xforms.rising
+    },
+    {
+      src: { value: button("dpadUp").pressed },
+      dest: { value: paths.actions.thaw },
+      xform: xforms.falling
+    },
+    {
+      src: { value: button("start").pressed },
+      dest: { value: paths.actions.toggleFreeze },
+      xform: xforms.rising
+    },
+    {
+      src: { value: button("a").pressed },
+      dest: { value: paths.actions.startGazeTeleport },
+      xform: xforms.rising
+    },
+    {
+      src: { value: button("a").pressed },
+      dest: { value: paths.actions.stopGazeTeleport },
+      xform: xforms.falling
     }
   ],
   [sets.cursorHoldingNothing]: [...characterAccelerationBindings()],
@@ -176,6 +201,13 @@ export const xboxControllerUserBindings = addSetsToBindings({
       },
       dest: { value: paths.actions.cursor.modDelta },
       xform: xforms.copyIfTrue
+    }
+  ],
+  [sets.cursorHoveringOnUI]: [
+    {
+      src: { value: button("rightTrigger").pressed },
+      dest: { value: paths.actions.cursor.grab },
+      xform: xforms.rising
     }
   ],
   [sets.cursorHoveringOnInteractable]: [
