@@ -48,6 +48,7 @@
     "aframe-slice9-component": "^1.0.0",
     "ammo.js": "github:mozillareality/ammo.js#hubs/master",
     "classnames": "^2.2.5",
+    "cannon": "github:donmccurdy/cannon.js#v0.6.2-dev1",
     "copy-to-clipboard": "^3.0.8",
     "deepmerge": "^2.1.1",
     "detect-browser": "^3.0.1",
