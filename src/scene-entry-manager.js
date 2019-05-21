@@ -2,7 +2,6 @@ import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 
-const playerHeight = 1.6;
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
 const isDebug = qsTruthy("debug");
@@ -12,10 +11,11 @@ import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import {
   isIn2DInterstitial,
   handleExitTo2DInterstitial,
-  handleReEntryToVRFrom2DInterstitial
+  handleReEntryToVRFrom2DInterstitial,
+  forceExitFrom2DInterstitial
 } from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
-import { getAvatarSrc, getAvatarType } from "./assets/avatars/avatars";
+import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { pushHistoryState } from "./utils/history";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 
@@ -49,7 +49,6 @@ export default class SceneEntryManager {
   enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
     const playerCamera = document.querySelector("#player-camera");
     playerCamera.removeAttribute("scene-preview-camera");
-    playerCamera.object3D.position.set(0, playerHeight, 0);
 
     if (isDebug) {
       NAF.connection.adapter.session.options.verbose = true;
@@ -142,8 +141,7 @@ export default class SceneEntryManager {
   };
 
   _setupPlayerRig = () => {
-    this._updatePlayerInfoFromProfile();
-    this.store.addEventListener("statechanged", this._updatePlayerInfoFromProfile);
+    this._setPlayerInfoFromProfile();
 
     const avatarScale = parseInt(qs.get("avatar_scale"), 10);
 
@@ -152,10 +150,18 @@ export default class SceneEntryManager {
     }
   };
 
-  _updatePlayerInfoFromProfile = async () => {
-    const { avatarId } = this.store.state.profile;
-    const avatarSrc = await getAvatarSrc(avatarId);
+  _setPlayerInfoFromProfile = async () => {
+    let avatarId = this.store.state.profile.avatarId;
+    let avatarSrc = await getAvatarSrc(avatarId);
+
+    if (!avatarSrc) {
+      this.store.resetToRandomLegacyAvatar();
+      avatarId = this.store.state.profile.avatarId;
+      avatarSrc = await getAvatarSrc(avatarId);
+    }
+
     this.playerRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
+    this.store.addEventListener("statechanged", this._setPlayerInfoFromProfile);
   };
 
   _setupKicking = () => {
@@ -213,7 +219,7 @@ export default class SceneEntryManager {
     } catch (e) {
       if (e.reason === "invalid_token") {
         await this.authChannel.signOut(this.hubChannel);
-        this._signInAndPinElement(el);
+        this._signInAndPinOrUnpinElement(el);
       } else {
         console.warn("Pin failed for unknown reason", e);
       }
@@ -297,12 +303,12 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("action_spawn", () => {
-      handleExitTo2DInterstitial(false);
+      handleExitTo2DInterstitial(false, () => window.APP.mediaSearchStore.pushExitMediaBrowserHistory());
       window.APP.mediaSearchStore.sourceNavigateToDefaultSource();
     });
 
     this.scene.addEventListener("action_invite", () => {
-      handleExitTo2DInterstitial(false);
+      handleExitTo2DInterstitial(false, () => this.history.goBack());
       pushHistoryState(this.history, "overlay", "invite");
     });
 
@@ -321,6 +327,8 @@ export default class SceneEntryManager {
         "mute-user"
       );
     });
+
+    this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
 
     document.addEventListener("paste", e => {
       if (e.target.matches("input, textarea") && document.activeElement === e.target) return;
@@ -434,7 +442,8 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_selected_media_result_entry", e => {
       // TODO spawn in space when no rights
       const entry = e.detail;
-      if (entry.type === "scene_listing" && this.hubChannel.can("update_hub")) return;
+      if (["avatar", "avatar_listing"].includes(entry.type)) return;
+      if ((entry.type === "scene_listing" || entry.type === "scene") && this.hubChannel.can("update_hub")) return;
 
       // If user has HMD lifted up or gone through interstitial, delay spawning for now. eventually show a modal
       const spawnDelay = isIn2DInterstitial() ? 3000 : 0;

@@ -181,6 +181,11 @@ $semi-bold: 600;
   background: $action-color;
 }
 
+%spoke-action-button {
+  @extend %action-button;
+  background-color: $spoke-action-color;
+}
+
 %top-title {
   font-size: 1.5em;
   font-weight: bold;

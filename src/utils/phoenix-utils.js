@@ -100,6 +100,30 @@ export function getLandingPageForPhoto(photoUrl) {
   return getReticulumFetchUrl(parsedUrl.pathname.replace(".png", ".html") + parsedUrl.search, true);
 }
 
+export function fetchReticulumAuthenticated(url, method = "GET", payload) {
+  const { token } = window.APP.store.state.credentials;
+  const retUrl = getReticulumFetchUrl(url);
+  const params = {
+    headers: {
+      "content-type": "application/json",
+      authorization: `bearer ${token}`
+    },
+    method
+  };
+  if (payload) {
+    params.body = JSON.stringify(payload);
+  }
+  return fetch(retUrl, params).then(async r => {
+    const result = await r.text();
+    try {
+      return JSON.parse(result);
+    } catch (e) {
+      // Some reticulum responses, particularly DELETE requests, don't return json.
+      return result;
+    }
+  });
+}
+
 export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace) {
   const createUrl = getReticulumFetchUrl("/api/v1/hubs");
   const payload = { hub: { name: name || generateHubName() } };

@@ -295,7 +295,7 @@ module.exports = (env, argv) => ({
     new HTMLWebpackPlugin({
       filename: "admin.html",
       template: path.join(__dirname, "src", "admin.html"),
-      chunks: ["vendor", "admindeps", "admin"]
+      chunks: ["vendor", "engine", "admindeps", "admin"]
     }),
     new CopyWebpackPlugin([
       {
@@ -324,6 +324,7 @@ module.exports = (env, argv) => ({
     new webpack.DefinePlugin({
       "process.env": JSON.stringify({
         NODE_ENV: argv.mode,
+        DEFAULT_SCENE_SID: process.env.DEFAULT_SCENE_SID,
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
         FARSPARK_SERVER: process.env.FARSPARK_SERVER,
         CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,

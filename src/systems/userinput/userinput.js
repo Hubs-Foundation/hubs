@@ -126,12 +126,13 @@ function canMask(masker, masked) {
 }
 
 function computeMasks(bindings) {
-  const masks = [];
+  const masks = new Array(bindings.length);
   for (let row = 0; row < bindings.length; row++) {
+    const masksRow = (masks[row] = []);
+    const bindingsRow = bindings[row];
     for (let col = 0; col < bindings.length; col++) {
-      masks[row] = masks[row] || [];
-      if (canMask(bindings[col], bindings[row])) {
-        masks[row].push(col);
+      if (canMask(bindings[col], bindingsRow)) {
+        masksRow.push(col);
       }
     }
   }
@@ -148,17 +149,18 @@ function isActive(binding, sets) {
 }
 
 function computeExecutionStrategy(sortedBindings, masks, activeSets) {
-  const actives = [];
+  const actives = new Array(sortedBindings.length);
   for (let row = 0; row < sortedBindings.length; row++) {
     actives[row] = isActive(sortedBindings[row], activeSets);
   }
 
-  const masked = [];
+  const masked = new Array(sortedBindings.length);
   for (let row = 0; row < sortedBindings.length; row++) {
+    const maskedRow = (masked[row] = []);
+    const masksRow = masks[row];
     for (let col = 0; col < sortedBindings.length; col++) {
-      masked[row] = masked[row] || [];
-      if (masks[row].indexOf(col) !== -1 && isActive(sortedBindings[col], activeSets)) {
-        masked[row].push(col);
+      if (actives[col] && masksRow.indexOf(col) !== -1) {
+        maskedRow.push(col);
       }
     }
   }
@@ -295,7 +297,7 @@ AFRAME.registerSystem("userinput", {
         }
       }
       // HACK Firefox Nightly bug causes corrupt gamepad names for OpenVR, so do startsWith
-      if (e.gamepad.id.startsWith("OpenVR Gamepad")) {
+      if (e.gamepad.id.startsWith("OpenVR Gamepad") || e.gamepad.id === "HTC Vive Focus Plus Controller") {
         gamepadDevice = new ViveControllerDevice(e.gamepad);
       } else if (e.gamepad.id.startsWith("Oculus Touch")) {
         gamepadDevice = new OculusTouchControllerDevice(e.gamepad);

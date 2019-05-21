@@ -47,6 +47,10 @@ AFRAME.registerComponent("pinnable", {
         to: { x: currentScale.x, y: currentScale.y, z: currentScale.z },
         easing: "easeOutElastic"
       });
+
+      if (this.el.components["ammo-body"]) {
+        this.el.setAttribute("ammo-body", { type: "static" });
+      }
     } else {
       this.el.emit("unpinned", { el: this.el, changed: pinStateChanged });
     }

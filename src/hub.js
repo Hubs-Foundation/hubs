@@ -54,6 +54,7 @@ import "./components/text-button";
 import "./components/block-button";
 import "./components/mute-button";
 import "./components/kick-button";
+import "./components/close-vr-notice-button";
 import "./components/leave-room-button";
 import "./components/visible-if-permitted";
 import "./components/visibility-while-frozen";
@@ -66,6 +67,7 @@ import "./components/pitch-yaw-rotator";
 import "./components/position-at-box-shape-border";
 import "./components/pinnable";
 import "./components/pin-networked-object-button";
+import "./components/drop-object-button";
 import "./components/remove-networked-object-button";
 import "./components/camera-focus-button";
 import "./components/mirror-camera-button";
@@ -94,9 +96,9 @@ import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
 import React from "react";
-import jwtDecode from "jwt-decode";
 import { Router, Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
+import { pushHistoryState } from "./utils/history";
 import UIRoot from "./react-components/ui-root";
 import AuthChannel from "./utils/auth-channel";
 import HubChannel from "./utils/hub-channel";
@@ -238,6 +240,7 @@ if (document.location.pathname.includes("hub.html")) {
 }
 
 const history = createBrowserHistory({ basename: routerBaseName });
+window.APP.history = history;
 
 function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
@@ -345,17 +348,18 @@ async function updateEnvironmentForHub(hub) {
     environmentEl.addEventListener(
       "model-loaded",
       () => {
-        if (sceneEl.is("entered")) {
-          // We've already entered, so move to new spawn point once new environment is loaded
-          environmentEl.addEventListener(
-            "model-loaded",
-            () => {
-              traverseMeshesAndAddShapes(environmentEl);
+        environmentEl.addEventListener(
+          "model-loaded",
+          () => {
+            traverseMeshesAndAddShapes(environmentEl);
+
+            // We've already entered, so move to new spawn point once new environment is loaded
+            if (sceneEl.is("entered")) {
               document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
-            },
-            { once: true }
-          );
-        }
+            }
+          },
+          { once: true }
+        );
 
         environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
       },
@@ -407,7 +411,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
   scene.addEventListener("action_selected_media_result_entry", e => {
     const entry = e.detail;
-    if (entry.type !== "scene_listing") return;
+    if (entry.type !== "scene_listing" && entry.type !== "scene") return;
     if (!hubChannel.can("update_hub")) return;
 
     hubChannel.updateScene(entry.url);
@@ -584,7 +588,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const signInContinueTextId = scene.is("vr-mode") ? "entry.return-to-vr" : "dialog.close";
 
-    handleExitTo2DInterstitial(true);
+    handleExitTo2DInterstitial(true, () => remountUI({ showSignInDialog: false }));
 
     remountUI({
       showSignInDialog: true,
@@ -609,6 +613,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
   };
+
+  window.addEventListener("action_create_avatar", () => {
+    performConditionalSignIn(
+      () => hubChannel.signedIn,
+      () => pushHistoryState(history, "overlay", "avatar-editor"),
+      "create-avatar"
+    );
+  });
 
   remountUI({ performConditionalSignIn });
   entryManager.performConditionalSignIn = performConditionalSignIn;
@@ -854,12 +866,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     if (permsToken) {
-      params.perms_token = hubChannel.oauthFlowPermsToken;
+      params.perms_token = permsToken;
     }
 
     const { token } = store.state.credentials;
     if (token) {
-      console.log(`Logged into account ${jwtDecode(token).sub}`);
+      console.log(`Logged into account ${store.credentialsAccountId}`);
       params.auth_token = token;
     }
 

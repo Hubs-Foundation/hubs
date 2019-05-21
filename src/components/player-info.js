@@ -1,5 +1,5 @@
 import { injectCustomShaderChunks } from "../utils/media-utils";
-import { AVATAR_TYPES } from "../assets/avatars/avatars";
+import { AVATAR_TYPES } from "../utils/avatar-utils";
 /**
  * Sets player info state, including avatar choice and display name.
  * @namespace avatar
@@ -12,6 +12,7 @@ AFRAME.registerComponent("player-info", {
   },
   init() {
     this.displayName = null;
+    this.communityIdentifier = null;
     this.applyProperties = this.applyProperties.bind(this);
     this.updateDisplayName = this.updateDisplayName.bind(this);
     this.applyDisplayName = this.applyDisplayName.bind(this);
@@ -52,12 +53,17 @@ AFRAME.registerComponent("player-info", {
   updateDisplayNameFromPresenceMeta(presenceMeta) {
     const isModerator = presenceMeta.roles && presenceMeta.roles.moderator;
     this.displayName = presenceMeta.profile.displayName + (isModerator ? " *" : "");
+    this.communityIdentifier = presenceMeta.profile.communityIdentifier;
     this.applyDisplayName();
   },
   applyDisplayName() {
     const nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && nametagEl) {
       nametagEl.setAttribute("text", { value: this.displayName });
+    }
+    const communityIdentifierEl = this.el.querySelector(".communityIdentifier");
+    if (this.communityIdentifier && communityIdentifierEl) {
+      communityIdentifierEl.setAttribute("text", { value: this.communityIdentifier });
     }
   },
   applyProperties() {
