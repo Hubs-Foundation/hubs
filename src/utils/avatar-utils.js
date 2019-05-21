@@ -25,7 +25,7 @@ async function fetchAvatar(avatarId) {
 }
 
 async function fetchAvatarGltfUrl(avatarId) {
-  return fetchAvatar(avatarId).then(avatar => avatar.gltf_url);
+  return fetchAvatar(avatarId).then(avatar => avatar && avatar.gltf_url);
 }
 
 export function getAvatarSrc(avatarId) {

@@ -151,14 +151,8 @@ export default class SceneEntryManager {
   };
 
   _setPlayerInfoFromProfile = async () => {
-    let avatarId = this.store.state.profile.avatarId;
-    let avatarSrc = await getAvatarSrc(avatarId);
-
-    if (!avatarSrc) {
-      this.store.resetToRandomLegacyAvatar();
-      avatarId = this.store.state.profile.avatarId;
-      avatarSrc = await getAvatarSrc(avatarId);
-    }
+    const avatarId = this.store.state.profile.avatarId;
+    const avatarSrc = await getAvatarSrc(avatarId);
 
     this.playerRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
     this.store.addEventListener("statechanged", this._setPlayerInfoFromProfile);
