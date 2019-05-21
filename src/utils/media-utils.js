@@ -337,13 +337,16 @@ function exceedsDensityThreshold(count, subtree) {
 
   const trisPerMeterSquared = count / volume;
   const exceedsThreshold = trisPerMeterSquared > trisThreshold;
-  if (exceedsThreshold) {
-    var box = new THREE.Box3(
-      new THREE.Vector3(bounds[0], bounds[1], bounds[2]),
-      new THREE.Vector3(bounds[3], bounds[4], bounds[5])
-    );
-    console.log("threshold exceeded!", trisPerMeterSquared, subtree, volume, count);
-  }
+
+  // debug rendering for high density regions
+  // if (exceedsThreshold) {
+  //   var box = new THREE.Box3(
+  //     new THREE.Vector3(bounds[0], bounds[1], bounds[2]),
+  //     new THREE.Vector3(bounds[3], bounds[4], bounds[5])
+  //   );
+  //   console.log("threshold exceeded!", trisPerMeterSquared, subtree, volume, count);
+  //   var helper = new THREE.Box3Helper(box, 0xffff00);
+  // }
   return exceedsThreshold;
 }
 
@@ -388,11 +391,10 @@ export const traverseMeshesAndAddShapes = (function() {
       if (
         o.isMesh &&
         (!THREE.Sky || o.__proto__ != THREE.Sky.prototype) &&
-        o.name !== "Floor_Plan" &&
-        o.name !== "Ground_Plane" &&
+        !o.name.startsWith("Floor_Plan") &&
+        !o.name.startsWith("Ground_Plane") &&
         o.geometry.boundsTree
       ) {
-        window.scene = el.sceneEl.object3D;
         if (isGeometryHighDensity(o.geometry)) {
           isHighDensity = true;
           return;
