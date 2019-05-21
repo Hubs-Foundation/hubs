@@ -636,10 +636,9 @@
             <a-entity
                 id="player-hud"
                 hud-controller="head: #player-camera;"
-                vr-mode-toggle-class="class: ui"
-                vr-mode-toggle-visibility
-                vr-mode-toggle-playing__hud-controller
+                class="ui"
                 is-remote-hover-target
+                billboard
             >
                 <a-entity visibility-while-frozen="requireHoverOnNonMobile: false;" rotation="30 0 0">
                     <a-entity class="leave-btn" position="0 0 0" scale="0.7 0.7 0.7" leave-room-button is-remote-hover-target tags="singleActionButton: true;">
@@ -649,7 +648,7 @@
                     </a-entity>
                 </a-entity>
                 <a-entity in-world-hud visibility-while-frozen="visible: false; requireHoverOnNonMobile: false;" rotation="30 0 0" >
-                    <a-entity id="hud-presence-count" text="value:; width:1.1; align:center;" position="-0.29 -0.005 0.01" matrix-auto-update="target: text;"></a-entity>
+                    <a-entity id="hud-presence-count" text="value:; width:1.1; align:center;" position="-0.29 0.0 0.02" matrix-auto-update="target: text;"></a-entity>
                     <a-entity class="invite-btn" position="0 0.18 0" scale="0.7 0.7 0.7" is-remote-hover-target tags="singleActionButton: true;">
                         <a-entity mixin="rounded-text-action-button" slice9="width: 0.7" scale="0.8 0.8 1.0">
                             <a-entity text=" value:invite; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>

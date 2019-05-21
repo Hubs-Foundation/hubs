@@ -7,10 +7,8 @@ uniform mat4 projectionMatrix;
 varying vec2 v_uv;
 
 void main() {
-
   gl_Position = projectionMatrix*modelViewMatrix*vec4(position, 1.0);
-
-  v_uv = vec2(uv.x, 1.0-uv.y);
+  v_uv = uv;
 }
 
 //uvs : ​​
