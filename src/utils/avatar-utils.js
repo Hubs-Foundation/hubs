@@ -1,4 +1,4 @@
-import { getReticulumFetchUrl } from "./phoenix-utils";
+import { getReticulumFetchUrl, fetchReticulumAuthenticated } from "./phoenix-utils";
 import { proxiedUrlFor } from "./media-utils";
 import { avatars } from "../assets/avatars/avatars";
 
@@ -15,12 +15,25 @@ export function getAvatarType(avatarId) {
   return AVATAR_TYPES.SKINNABLE;
 }
 
-async function fetchAvatar(avatarId) {
-  const resp = await fetch(getReticulumFetchUrl(`/api/v1/avatars/${avatarId}`));
-  if (resp.status === 404) {
-    return null;
-  } else {
-    return resp.json().then(({ avatars }) => avatars[0]);
+async function fetchSkinnableAvatar(avatarId) {
+  const resp = await fetchReticulumAuthenticated(`/api/v1/avatars/${avatarId}`);
+  return resp && resp.avatars && resp.avatars[0];
+}
+
+export async function fetchAvatar(avatarId) {
+  switch (getAvatarType(avatarId)) {
+    case AVATAR_TYPES.LEGACY:
+      return {
+        avatar_id: avatarId,
+        gltf_url: avatars.find(avatar => avatar.id === avatarId).model
+      };
+    case AVATAR_TYPES.SKINNABLE:
+      return fetchSkinnableAvatar(avatarId);
+    case AVATAR_TYPES.URL:
+      return {
+        avatar_id: avatarId,
+        gltf_url: proxiedUrlFor(avatarId)
+      };
   }
 }
 

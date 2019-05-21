@@ -407,7 +407,8 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   remountUI({
     onSendMessage: messageDispatch.dispatch,
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
-    onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry)
+    onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
+    onAvatarSaved: entry => scene.emit("action_avatar_saved", entry)
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
