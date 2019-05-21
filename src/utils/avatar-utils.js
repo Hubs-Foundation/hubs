@@ -1,4 +1,4 @@
-import { getReticulumFetchUrl, fetchReticulumAuthenticated } from "./phoenix-utils";
+import { fetchReticulumAuthenticated } from "./phoenix-utils";
 import { proxiedUrlFor } from "./media-utils";
 import { avatars } from "../assets/avatars/avatars";
 
