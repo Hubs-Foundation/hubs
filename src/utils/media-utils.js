@@ -322,7 +322,7 @@ export function getPromotionTokenForFile(fileId) {
   return window.APP.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
 }
 
-function exceedsDensityThreshold(count, subtree, params) {
+function exceedsDensityThreshold(count, subtree) {
   const bounds = subtree.boundingData;
   const triangleThreshold = 1000;
   const minimumVolume = 0.1;
@@ -369,7 +369,6 @@ function isGeometryHighDensity(geo) {
 }
 
 export const traverseMeshesAndAddShapes = (function() {
-  const vertexLimit = 200000;
   const shapePrefix = "ammo-shape__";
   const shapes = [];
   return function(el) {
