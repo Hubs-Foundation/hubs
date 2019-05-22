@@ -46,7 +46,7 @@ AFRAME.registerComponent("is-remote-hover-target", {
 function isUI(el) {
   return (
     el &&
-    (el.id === "player-hud" ||
+    (el.id === "player-hud-btns" ||
       (el.components.tags && (el.components.tags.data.singleActionButton || el.components.tags.data.holdableButton)))
   );
 }

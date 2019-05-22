@@ -104,7 +104,7 @@ export function resolveActionSets() {
   );
   userinput.toggleSet(
     sets.cursorHoveringOnUI,
-    (rightRemote.hovered && rightRemote.hovered.id === "player-hud") ||
+    (rightRemote.hovered && rightRemote.hovered.id === "player-hud-btns") ||
       (!rightHand.held &&
         !rightHand.hovered &&
         !rightRemote.held &&

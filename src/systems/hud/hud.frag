@@ -11,8 +11,8 @@ bool contains_point( vec4 frame, vec2 uv ) {
 }
 
 vec4 spriteColor( vec4 stencil, vec4 sprite, vec2 uv ) {
-  float x = (v_uv.x - stencil.x) / (stencil.z);
-  float y = ((v_uv.y) - stencil.y) / (stencil.w);
+  float x = (uv.x - stencil.x) / (stencil.z);
+  float y = (uv.y - stencil.y) / (stencil.w);
 
   float u = sprite.x + x * sprite.z;
   float v = sprite.y + y * sprite.w;
