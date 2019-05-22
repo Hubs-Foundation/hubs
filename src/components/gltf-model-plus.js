@@ -228,10 +228,6 @@ function attachTemplate(root, name, templateRoot) {
   }
 }
 
-function runMigration(version, json) {
-  //do migration
-}
-
 export async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   let gltfUrl = src;
   let fileMap;
@@ -246,14 +242,6 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress)
   const gltfLoader = new THREE.GLTFLoader(loadingManager);
 
   const parser = await new Promise((resolve, reject) => gltfLoader.createParser(gltfUrl, resolve, onProgress, reject));
-
-  if (
-    parser.json.extensions &&
-    parser.json.extensions.MOZ_hubs_components &&
-    parser.json.extensions.MOZ_hubs_components.hasOwnProperty("version")
-  ) {
-    runMigration(parser.json.extensions.MOZ_hubs_components.version, parser.json);
-  }
 
   const materials = parser.json.materials;
   if (materials) {

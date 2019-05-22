@@ -322,32 +322,25 @@ export function getPromotionTokenForFile(fileId) {
   return window.APP.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
 }
 
-function exceedsDensityThreshold(count, subtree) {
+function exceedsDensityThreshold(count, subtree, params) {
   const bounds = subtree.boundingData;
-  const trisThreshold = 1000;
-  const volumeThreshold = 0.01;
+  const triangleThreshold = 1000;
+  const minimumVolume = 0.1;
+  const minimumTriangles = 100;
   const dx = bounds[3] - bounds[0];
   const dy = bounds[4] - bounds[1];
   const dz = bounds[5] - bounds[2];
   const volume = dx * dy * dz;
 
-  if (volume < volumeThreshold) {
+  if (volume < minimumVolume) {
     return false;
   }
 
-  const trisPerMeterSquared = count / volume;
-  const exceedsThreshold = trisPerMeterSquared > trisThreshold;
+  if (count < minimumTriangles) {
+    return false;
+  }
 
-  // debug rendering for high density regions
-  // if (exceedsThreshold) {
-  //   var box = new THREE.Box3(
-  //     new THREE.Vector3(bounds[0], bounds[1], bounds[2]),
-  //     new THREE.Vector3(bounds[3], bounds[4], bounds[5])
-  //   );
-  //   console.log("threshold exceeded!", trisPerMeterSquared, subtree, volume, count);
-  //   var helper = new THREE.Box3Helper(box, 0xffff00);
-  // }
-  return exceedsThreshold;
+  return count / volume > triangleThreshold;
 }
 
 function isHighDensity(subtree) {
@@ -369,7 +362,7 @@ function isHighDensity(subtree) {
 function isGeometryHighDensity(geo) {
   const bvh = geo.boundsTree;
   const roots = bvh._roots;
-  for (var i = 0; i < roots.length; ++i) {
+  for (let i = 0; i < roots.length; ++i) {
     return isHighDensity(roots[i]) === true;
   }
   return false;
@@ -386,79 +379,117 @@ export const traverseMeshesAndAddShapes = (function() {
       entity.removeAttribute(id);
     }
 
-    let isHighDensity = false;
-    meshRoot.traverse(o => {
-      if (
-        o.isMesh &&
-        (!THREE.Sky || o.__proto__ != THREE.Sky.prototype) &&
-        !o.name.startsWith("Floor_Plan") &&
-        !o.name.startsWith("Ground_Plane") &&
-        o.geometry.boundsTree
-      ) {
-        if (isGeometryHighDensity(o.geometry)) {
-          isHighDensity = true;
-          return;
-        }
-      }
-    });
-
     console.group("traverseMeshesAndAddShapes");
-
-    if (isHighDensity) {
-      console.log("mesh contains high triangle density region");
-    }
 
     const floorPlan = meshRoot.children.find(obj => {
       return obj.name.startsWith("Floor_Plan");
     });
 
-    if (
-      isHighDensity &&
-      floorPlan &&
-      floorPlan.el.object3DMap.object3d.userData &&
-      floorPlan.el.object3DMap.object3d.userData.gltfExtensions &&
-      floorPlan.el.object3DMap.object3d.userData.gltfExtensions.MOZ_hubs_components &&
-      floorPlan.el.object3DMap.object3d.userData.gltfExtensions.MOZ_hubs_components.heightfield
-    ) {
-      const heightfield = floorPlan.el.object3DMap.object3d.userData.gltfExtensions.MOZ_hubs_components.heightfield;
-      console.log(heightfield.offset);
-      floorPlan.el.setAttribute(shapePrefix + "heightfield", {
-        type: SHAPE.HEIGHTFIELD,
-        margin: 0.1,
-        fit: FIT.MANUAL,
-        heightfieldDistance: heightfield.distance,
-        offset: heightfield.offset,
-        heightfieldData: heightfield.data
+    let collisionAdded = false;
+    if (floorPlan) {
+      const trimesh = floorPlan.children.find(obj => {
+        return obj.name === "trimesh";
       });
-      shapes.push({ id: shapePrefix + "heightfield", entity: floorPlan.el });
-      console.log("mesh density exceeded, using heightfield");
-    } else if (isHighDensity && floorPlan) {
-      console.log(`mesh density exceeded, using floor plan only`);
-      floorPlan.el.setAttribute(shapePrefix + floorPlan.name, {
-        type: SHAPE.MESH,
-        margin: 0.01,
-        fit: FIT.ALL,
-        includeInvisible: true
+
+      if (trimesh) {
+        trimesh.el.setAttribute(shapePrefix + "environment", {
+          type: SHAPE.MESH,
+          margin: 0.01,
+          fit: FIT.ALL,
+          includeInvisible: true
+        });
+        shapes.push({ id: shapePrefix + "environment", entity: trimesh.el });
+        console.log("adding mesh shape");
+        collisionAdded = true;
+      } else {
+        const heightfieldObject = floorPlan.children.find(obj => {
+          return obj.name === "heightfield";
+        });
+        if (
+          heightfieldObject &&
+          heightfieldObject.el.object3DMap.object3d.userData &&
+          heightfieldObject.el.object3DMap.object3d.userData.gltfExtensions &&
+          heightfieldObject.el.object3DMap.object3d.userData.gltfExtensions.MOZ_hubs_components &&
+          heightfieldObject.el.object3DMap.object3d.userData.gltfExtensions.MOZ_hubs_components.heightfield
+        ) {
+          const heightfield =
+            heightfieldObject.el.object3DMap.object3d.userData.gltfExtensions.MOZ_hubs_components.heightfield;
+          heightfieldObject.el.setAttribute(shapePrefix + "heightfield", {
+            type: SHAPE.HEIGHTFIELD,
+            margin: 0.1,
+            fit: FIT.MANUAL,
+            heightfieldDistance: heightfield.distance,
+            offset: heightfield.offset,
+            heightfieldData: heightfield.data
+          });
+          shapes.push({ id: shapePrefix + "heightfield", entity: heightfieldObject.el });
+          console.log("adding heightfield shape");
+          collisionAdded = true;
+        }
+      }
+    }
+
+    if (!collisionAdded) {
+      console.log("collision not found in scene");
+
+      let isHighDensity = false;
+      meshRoot.traverse(o => {
+        if (
+          o.isMesh &&
+          (!THREE.Sky || o.__proto__ != THREE.Sky.prototype) &&
+          !o.name.startsWith("Floor_Plan") &&
+          !o.name.startsWith("Ground_Plane") &&
+          o.geometry.boundsTree
+        ) {
+          if (isGeometryHighDensity(o.geometry)) {
+            isHighDensity = true;
+            return;
+          }
+        }
       });
-      shapes.push({ id: shapePrefix + floorPlan.name, entity: floorPlan.el });
-    } else if (!isHighDensity) {
-      el.setAttribute(shapePrefix + "environment", {
-        type: SHAPE.MESH,
-        margin: 0.01,
-        fit: FIT.ALL
-      });
-      shapes.push({ id: shapePrefix + "environment", entity: el });
-      console.log("adding mesh shape");
-    } else {
-      el.setAttribute(shapePrefix + "defaultFloor", {
-        type: SHAPE.BOX,
-        margin: 0.01,
-        halfExtents: { x: 4000, y: 0.5, z: 4000 },
-        offset: { x: 0, y: -0.5, z: 0 },
-        fit: FIT.MANUAL
-      });
-      shapes.push({ id: shapePrefix + "defaultFloor", entity: el });
-      console.log("adding default floor collision");
+
+      let navMesh = null;
+
+      if (isHighDensity) {
+        console.log("mesh contains high triangle density region");
+        if (floorPlan) {
+          navMesh = floorPlan.children.find(obj => {
+            return obj.name === "navMesh";
+          });
+          if (!navMesh && floorPlan.el.object3DMap.mesh) {
+            navMesh = floorPlan;
+          }
+        }
+      }
+
+      if (navMesh) {
+        console.log(`mesh density exceeded, using floor plan only`);
+        navMesh.el.setAttribute(shapePrefix + floorPlan.name, {
+          type: SHAPE.MESH,
+          margin: 0.01,
+          fit: FIT.ALL,
+          includeInvisible: true
+        });
+        shapes.push({ id: shapePrefix + floorPlan.name, entity: navMesh.el });
+      } else if (!isHighDensity) {
+        el.setAttribute(shapePrefix + "environment", {
+          type: SHAPE.MESH,
+          margin: 0.01,
+          fit: FIT.ALL
+        });
+        shapes.push({ id: shapePrefix + "environment", entity: el });
+        console.log("adding mesh shape for all visible meshes");
+      } else {
+        el.setAttribute(shapePrefix + "defaultFloor", {
+          type: SHAPE.BOX,
+          margin: 0.01,
+          halfExtents: { x: 4000, y: 0.5, z: 4000 },
+          offset: { x: 0, y: -0.5, z: 0 },
+          fit: FIT.MANUAL
+        });
+        shapes.push({ id: shapePrefix + "defaultFloor", entity: el });
+        console.log("adding default floor collision");
+      }
     }
     console.groupEnd();
   };
