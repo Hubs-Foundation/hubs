@@ -54,17 +54,6 @@ export function getAvatarSrc(avatarId) {
   }
 }
 
-export function getAvatarGltfUrl(avatarId) {
-  switch (getAvatarType(avatarId)) {
-    case AVATAR_TYPES.LEGACY:
-      return avatars.find(avatar => avatar.id === avatarId).model;
-    case AVATAR_TYPES.SKINNABLE:
-      return fetchAvatarGltfUrl(avatarId);
-    case AVATAR_TYPES.URL:
-      return proxiedUrlFor(avatarId);
-  }
-}
-
 export async function getAvatarThumbnailUrl(avatarId) {
   switch (getAvatarType(avatarId)) {
     case AVATAR_TYPES.LEGACY:
