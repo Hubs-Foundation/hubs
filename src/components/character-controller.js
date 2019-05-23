@@ -73,8 +73,8 @@ AFRAME.registerComponent("character-controller", {
     this.accelerationInput.set(axes[0], 0, axes[1]);
   },
 
-  setAngularVelocity: function(value) {
-    this.angularVelocity = value;
+  setAngularVelocity: function(event) {
+    this.angularVelocity = event.detail.value;
   },
 
   snapRotateLeft: function() {
@@ -132,6 +132,12 @@ AFRAME.registerComponent("character-controller", {
       const root = this.el.object3D;
       const pivot = this.data.pivot.object3D;
       const distance = this.data.groundAcc * deltaSeconds;
+
+      const userinput = AFRAME.scenes[0].systems.userinput;
+      const userinputAngularVelocity = userinput.get(paths.actions.angularVelocity);
+      if (userinputAngularVelocity !== null && userinputAngularVelocity !== undefined) {
+        this.angularVelocity = userinputAngularVelocity;
+      }
       const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
 
       pivot.updateMatrices();
@@ -140,16 +146,11 @@ AFRAME.registerComponent("character-controller", {
       startScale.copy(root.scale);
       startPos.copy(root.position);
 
-      const userinput = AFRAME.scenes[0].systems.userinput;
       if (userinput.get(paths.actions.snapRotateLeft)) {
         this.snapRotateLeft();
       }
       if (userinput.get(paths.actions.snapRotateRight)) {
         this.snapRotateRight();
-      }
-      const userinputAngularVelocity = userinput.get(paths.actions.angularVelocity);
-      if (userinputAngularVelocity !== null && userinputAngularVelocity !== undefined) {
-        this.setAngularVelocity(userinputAngularVelocity);
       }
       const acc = userinput.get(paths.actions.characterAcceleration);
       if (acc) {
