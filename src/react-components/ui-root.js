@@ -165,6 +165,7 @@ class UIRoot extends Component {
     isCursorHoldingPen: PropTypes.bool,
     hasActiveCamera: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
+    onAvatarSaved: PropTypes.func,
     activeTips: PropTypes.object,
     location: PropTypes.object,
     history: PropTypes.object,
@@ -1480,6 +1481,7 @@ class UIRoot extends Component {
                       // my-avatars, now that we've saved an avatar.
                       this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars");
                     }
+                    this.props.onAvatarSaved();
                   }}
                   onClose={() => this.props.history.goBack()}
                   store={this.props.store}
