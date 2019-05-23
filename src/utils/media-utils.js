@@ -385,50 +385,16 @@ export const traverseMeshesAndAddShapes = (function() {
     });
 
     let collisionAdded = false;
-    if (floorPlan) {
-      const trimesh = floorPlan.children.find(obj => {
-        return obj.name === "trimesh";
-      });
 
-      if (trimesh) {
-        trimesh.el.setAttribute(shapePrefix + "environment", {
-          type: SHAPE.MESH,
-          margin: 0.01,
-          fit: FIT.ALL,
-          includeInvisible: true
-        });
-        shapes.push({ id: shapePrefix + "environment", entity: trimesh.el });
-        console.log("adding mesh shape");
-        collisionAdded = true;
-      } else {
-        const heightfieldObject = floorPlan.children.find(obj => {
-          return obj.name === "heightfield";
-        });
-        if (
-          heightfieldObject &&
-          heightfieldObject.el.object3DMap.object3d.userData &&
-          heightfieldObject.el.object3DMap.object3d.userData.gltfExtensions &&
-          heightfieldObject.el.object3DMap.object3d.userData.gltfExtensions.MOZ_hubs_components &&
-          heightfieldObject.el.object3DMap.object3d.userData.gltfExtensions.MOZ_hubs_components.heightfield
-        ) {
-          const heightfield =
-            heightfieldObject.el.object3DMap.object3d.userData.gltfExtensions.MOZ_hubs_components.heightfield;
-          heightfieldObject.el.setAttribute(shapePrefix + "heightfield", {
-            type: SHAPE.HEIGHTFIELD,
-            margin: 0.1,
-            fit: FIT.MANUAL,
-            heightfieldDistance: heightfield.distance,
-            offset: heightfield.offset,
-            heightfieldData: heightfield.data
-          });
-          shapes.push({ id: shapePrefix + "heightfield", entity: heightfieldObject.el });
-          console.log("adding heightfield shape");
-          collisionAdded = true;
-        }
-      }
+    if (floorPlan) {
+      collisionAdded = !!floorPlan.children.find(obj => {
+        return obj.el.hasAttribute(shapePrefix + "heightfield") || obj.el.hasAttribute(shapePrefix + "trimesh");
+      });
     }
 
-    if (!collisionAdded) {
+    if (collisionAdded) {
+      console.log("heightfield or trimesh found on scene");
+    } else {
       console.log("collision not found in scene");
 
       let isHighDensity = false;
