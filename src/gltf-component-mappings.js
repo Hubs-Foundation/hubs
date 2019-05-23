@@ -324,13 +324,11 @@ AFRAME.GLTFModelPlus.registerComponent("heightfield", "heightfield", (el, compon
   });
 });
 
-AFRAME.GLTFModelPlus.registerComponent("trimesh", "trimesh", (el, componentName, componentData) => {
-  if (entityComponents && "trimesh" in entityComponents) {
-    el.setAttribute("ammo-shape__trimesh", {
-      type: SHAPE.MESH,
-      margin: 0.01,
-      fit: FIT.ALL,
-      includeInvisible: true
-    });
-  }
+AFRAME.GLTFModelPlus.registerComponent("trimesh", "trimesh", el => {
+  el.setAttribute("ammo-shape__trimesh", {
+    type: SHAPE.MESH,
+    margin: 0.01,
+    fit: FIT.ALL,
+    includeInvisible: true
+  });
 });
