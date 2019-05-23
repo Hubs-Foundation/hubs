@@ -10,8 +10,9 @@ AFRAME.registerComponent("cursor-controller", {
   schema: {
     cursor: { type: "selector" },
     camera: { type: "selector" },
-    far: { default: 4 },
+    far: { default: 25 },
     near: { default: 0.01 },
+    defaultDistance: { default: 4 },
     minDistance: { default: 0.18 }
   },
 
@@ -81,7 +82,7 @@ AFRAME.registerComponent("cursor-controller", {
         );
         intersection = rawIntersections[0];
         interaction.updateCursorIntersection(intersection);
-        this.distance = intersection ? intersection.distance : this.data.far;
+        this.distance = intersection ? intersection.distance : this.data.defaultDistance;
       }
 
       const { cursor, minDistance, far, camera } = this.data;
