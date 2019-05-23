@@ -92,7 +92,6 @@ HudSystem.prototype.tick = (function() {
     const frozen = scene.is("frozen");
     this.hudEl.object3D.visible = !frozen;
     this.hud.visible = !frozen;
-    this.hudEl.object3D.lookAt(scene.camera.getWorldPosition(new THREE.Vector3()));
 
     const userinput = scene.systems.userinput;
     const interaction = scene.systems.interaction;
@@ -135,6 +134,7 @@ HudSystem.prototype.tick = (function() {
       userinput.get(interaction.options.rightRemote.grabPath) &&
       GRAB_EFFECT[hoverZone]
     ) {
+      scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_HOVER_OR_GRAB);
       GRAB_EFFECT[hoverZone](scene);
     }
   };
