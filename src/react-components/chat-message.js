@@ -135,7 +135,8 @@ function renderChatMessage(body, from, allowEmojiRender, lowResolution) {
       img.onload = async () => {
         context.drawImage(img, 0, 0);
         const blob = await new Promise(resolve => messageCanvas.toBlob(resolve));
-        el.parentNode.removeChild(el);
+        ReactDOM.unmountComponentAtNode(el);
+        el.remove();
         resolve(blob);
       };
 
