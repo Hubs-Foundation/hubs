@@ -5,7 +5,6 @@ import classNames from "classnames";
 import copy from "copy-to-clipboard";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
-import MovingAverage from "moving-average";
 import screenfull from "screenfull";
 
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
@@ -58,7 +57,8 @@ import OAuthDialog from "./oauth-dialog.js";
 import LobbyChatBox from "./lobby-chat-box.js";
 import InWorldChatBox from "./in-world-chat-box.js";
 import AvatarEditor from "./avatar-editor";
-
+import MicLevelWidget from "./mic-level-widget.js";
+import OutputLevelWidget from "./output-level-widget.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import SettingsMenu from "./settings-menu.js";
@@ -110,21 +110,6 @@ const isMobilePhoneOrVR = isMobile || isMobileVR;
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
-import webmTone from "../assets/sfx/tone.webm";
-import mp3Tone from "../assets/sfx/tone.mp3";
-import oggTone from "../assets/sfx/tone.ogg";
-import wavTone from "../assets/sfx/tone.wav";
-const toneClip = document.createElement("audio");
-if (toneClip.canPlayType("audio/webm")) {
-  toneClip.src = webmTone;
-} else if (toneClip.canPlayType("audio/mpeg")) {
-  toneClip.src = mp3Tone;
-} else if (toneClip.canPlayType("audio/ogg")) {
-  toneClip.src = oggTone;
-} else {
-  toneClip.src = wavTone;
-}
-
 class UIRoot extends Component {
   willCompileAndUploadMaterials = false;
 
@@ -167,6 +152,7 @@ class UIRoot extends Component {
     isCursorHoldingPen: PropTypes.bool,
     hasActiveCamera: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
+    onAvatarSaved: PropTypes.func,
     activeTips: PropTypes.object,
     location: PropTypes.object,
     history: PropTypes.object,
@@ -199,13 +185,7 @@ class UIRoot extends Component {
     mediaStream: null,
     audioTrack: null,
     numAudioTracks: 0,
-
-    toneInterval: null,
-    tonePlaying: false,
-
-    micLevel: 0,
     micDevices: [],
-    micUpdateInterval: null,
 
     profileNamePending: "Hello",
 
@@ -270,7 +250,6 @@ class UIRoot extends Component {
 
   componentDidMount() {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
-    this.micLevelMovingAverage = MovingAverage(100);
     this.props.scene.addEventListener(
       "didConnectToNetworkedScene",
       () => {
@@ -435,23 +414,6 @@ class UIRoot extends Component {
     }
   };
 
-  playTestTone = () => {
-    toneClip.currentTime = 0;
-    toneClip.play();
-    clearTimeout(this.testToneTimeout);
-    this.setState({ tonePlaying: true });
-    const toneLength = 1393;
-    this.testToneTimeout = setTimeout(() => {
-      this.setState({ tonePlaying: false });
-    }, toneLength);
-  };
-
-  stopTestTone = () => {
-    toneClip.pause();
-    toneClip.currentTime = 0;
-    this.setState({ tonePlaying: false });
-  };
-
   onConcurrentLoad = () => {
     if (this.props.disableAutoExitOnConcurrentLoad) return;
 
@@ -605,39 +567,7 @@ class UIRoot extends Component {
     // we should definitely have an audioTrack at this point unless they denied mic access
     if (this.state.audioTrack) {
       mediaStream.addTrack(this.state.audioTrack);
-
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      this.micLevelAudioContext = new AudioContext();
-      const micSource = this.micLevelAudioContext.createMediaStreamSource(mediaStream);
-      const analyser = this.micLevelAudioContext.createAnalyser();
-      analyser.fftSize = 32;
-      const levels = new Uint8Array(analyser.frequencyBinCount);
-
-      micSource.connect(analyser);
-
-      clearInterval(this.micUpdateInterval);
-      this.micUpdateInterval = setInterval(() => {
-        analyser.getByteTimeDomainData(levels);
-        let v = 0;
-        for (let x = 0; x < levels.length; x++) {
-          v = Math.max(levels[x] - 128, v);
-        }
-        const level = v / 128.0;
-        // Multiplier to increase visual indicator.
-        const multiplier = 6;
-        // We use a moving average to smooth out the visual animation or else it would twitch too fast for
-        // the css renderer to keep up.
-        this.micLevelMovingAverage.push(Date.now(), level * multiplier);
-        const average = this.micLevelMovingAverage.movingAverage();
-        this.setState(state => {
-          if (Math.abs(average - state.micLevel) > 0.0001) {
-            return { micLevel: average };
-          }
-        });
-      }, 50);
-
       const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForMediaStream(mediaStream));
-
       if (micDeviceId) {
         this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
       }
@@ -742,14 +672,6 @@ class UIRoot extends Component {
       }
     }
 
-    this.stopTestTone();
-    clearTimeout(this.testToneTimeout);
-
-    if (this.micLevelAudioContext) {
-      this.micLevelAudioContext.close();
-    }
-    clearInterval(this.micUpdateInterval);
-
     this.setState({ entered: true, showInviteDialog: false });
     clearHistoryState(this.props.history);
   };
@@ -851,7 +773,10 @@ class UIRoot extends Component {
   };
 
   onStoreChanged = () => {
-    this.setState({ discordTipDismissed: this.props.store.state.confirmedDiscordRooms.includes(this.props.hubId) });
+    const discordRoomConfirmed = this.props.store.state.confirmedDiscordRooms.includes(this.props.hubId);
+    if (discordRoomConfirmed !== this.state.discordTipDismissed) {
+      this.setState({ discordTipDismissed: discordRoomConfirmed });
+    }
   };
 
   confirmDiscordBridge = () => {
@@ -864,7 +789,11 @@ class UIRoot extends Component {
     } else {
       const channels = [];
       for (const p of Object.values(this.props.presences)) {
-        Array.prototype.push.apply(channels, p.metas.map(m => m.context.discord).filter(ch => !!ch));
+        for (const m of p.metas) {
+          if (m.profile && m.profile.discordBridges) {
+            Array.prototype.push.apply(channels, m.profile.discordBridges.map(b => b.channel.name));
+          }
+        }
       }
       return channels;
     }
@@ -1200,11 +1129,6 @@ class UIRoot extends Component {
   };
 
   renderAudioSetupPanel = () => {
-    const maxLevelHeight = 111;
-    const micClip = {
-      clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)`
-    };
-    const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
     const subtitleId = isMobilePhoneOrVR ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     return (
       <div className="audio-setup-panel">
@@ -1223,63 +1147,12 @@ class UIRoot extends Component {
             {(isMobilePhoneOrVR || this.state.enterInVR) && <FormattedMessage id={subtitleId} />}
           </div>
           <div className="audio-setup-panel__levels">
-            <div className="audio-setup-panel__levels__icon">
-              <img
-                src="../assets/images/level_background.png"
-                srcSet="../assets/images/level_background@2x.png 2x"
-                className="audio-setup-panel__levels__icon-part"
-              />
-              {!this.state.muteOnEntry && (
-                <img
-                  src="../assets/images/level_fill.png"
-                  srcSet="../assets/images/level_fill@2x.png 2x"
-                  className="audio-setup-panel__levels__icon-part"
-                  style={micClip}
-                />
-              )}
-              {this.state.audioTrack && !this.state.muteOnEntry ? (
-                <img
-                  src="../assets/images/mic_level.png"
-                  srcSet="../assets/images/mic_level@2x.png 2x"
-                  className="audio-setup-panel__levels__icon-part"
-                />
-              ) : (
-                <img
-                  src="../assets/images/mic_denied.png"
-                  srcSet="../assets/images/mic_denied@2x.png 2x"
-                  className="audio-setup-panel__levels__icon-part"
-                />
-              )}
-              {this.state.audioTrack &&
-                !this.state.muteOnEntry && (
-                  <div className="audio-setup-panel__levels__test_label">
-                    <FormattedMessage id="audio.talk_to_test" />
-                  </div>
-                )}
-            </div>
-            <WithHoverSound>
-              <div className="audio-setup-panel__levels__icon_clickable" onClick={this.playTestTone}>
-                <img
-                  src="../assets/images/level_action_background.png"
-                  srcSet="../assets/images/level_action_background@2x.png 2x"
-                  className="audio-setup-panel__levels__icon-part"
-                />
-                <img
-                  src="../assets/images/level_action_fill.png"
-                  srcSet="../assets/images/level_action_fill@2x.png 2x"
-                  className="audio-setup-panel__levels__icon-part"
-                  style={speakerClip}
-                />
-                <img
-                  src="../assets/images/speaker_level.png"
-                  srcSet="../assets/images/speaker_level@2x.png 2x"
-                  className="audio-setup-panel__levels__icon-part"
-                />
-                <div className="audio-setup-panel__levels__test_label">
-                  <FormattedMessage id="audio.click_to_test" />
-                </div>
-              </div>
-            </WithHoverSound>
+            <MicLevelWidget
+              hasAudioTrack={!!this.state.audioTrack}
+              muteOnEntry={this.state.muteOnEntry}
+              mediaStream={this.state.mediaStream}
+            />
+            <OutputLevelWidget />
           </div>
           {this.state.audioTrack && this.state.micDevices.length > 1 ? (
             <div className="audio-setup-panel__device-chooser">
@@ -1497,6 +1370,7 @@ class UIRoot extends Component {
                       // my-avatars, now that we've saved an avatar.
                       this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars");
                     }
+                    this.props.onAvatarSaved();
                   }}
                   onClose={() => this.props.history.goBack()}
                   store={this.props.store}

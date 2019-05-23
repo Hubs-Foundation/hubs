@@ -1,4 +1,4 @@
-import { getReticulumFetchUrl } from "./phoenix-utils";
+import { fetchReticulumAuthenticated } from "./phoenix-utils";
 import { proxiedUrlFor } from "./media-utils";
 import { avatars } from "../assets/avatars/avatars";
 
@@ -15,13 +15,30 @@ export function getAvatarType(avatarId) {
   return AVATAR_TYPES.SKINNABLE;
 }
 
-async function fetchAvatarGltfUrl(avatarId) {
-  const resp = await fetch(getReticulumFetchUrl(`/api/v1/avatars/${avatarId}`));
-  if (resp.status === 404) {
-    return null;
-  } else {
-    return resp.json().then(({ avatars }) => avatars[0].gltf_url);
+async function fetchSkinnableAvatar(avatarId) {
+  const resp = await fetchReticulumAuthenticated(`/api/v1/avatars/${avatarId}`);
+  return resp && resp.avatars && resp.avatars[0];
+}
+
+export async function fetchAvatar(avatarId) {
+  switch (getAvatarType(avatarId)) {
+    case AVATAR_TYPES.LEGACY:
+      return {
+        avatar_id: avatarId,
+        gltf_url: avatars.find(avatar => avatar.id === avatarId).model
+      };
+    case AVATAR_TYPES.SKINNABLE:
+      return fetchSkinnableAvatar(avatarId);
+    case AVATAR_TYPES.URL:
+      return {
+        avatar_id: avatarId,
+        gltf_url: proxiedUrlFor(avatarId)
+      };
   }
+}
+
+async function fetchAvatarGltfUrl(avatarId) {
+  return fetchAvatar(avatarId).then(avatar => avatar && avatar.gltf_url);
 }
 
 export function getAvatarSrc(avatarId) {
@@ -37,13 +54,13 @@ export function getAvatarSrc(avatarId) {
   }
 }
 
-export function getAvatarGltfUrl(avatarId) {
+export async function getAvatarThumbnailUrl(avatarId) {
   switch (getAvatarType(avatarId)) {
     case AVATAR_TYPES.LEGACY:
-      return avatars.find(avatar => avatar.id === avatarId).model;
+      return avatars.find(avatar => avatar.id === avatarId).thumbnail;
     case AVATAR_TYPES.SKINNABLE:
-      return fetchAvatarGltfUrl(avatarId);
-    case AVATAR_TYPES.URL:
-      return proxiedUrlFor(avatarId);
+      return fetchAvatar(avatarId).then(avatar => avatar.files.thumbnail);
+    default:
+      return "https://asset-bundles-prod.reticulum.io/bots/avatar_unavailable.png";
   }
 }

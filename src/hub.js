@@ -107,6 +107,7 @@ import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { traverseMeshesAndAddShapes, proxiedUrlFor } from "./utils/media-utils";
 import { handleExitTo2DInterstitial, handleReEntryToVRFrom2DInterstitial } from "./utils/vr-interstitial";
+import { getAvatarSrc } from "./utils/avatar-utils.js";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
@@ -406,7 +407,8 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   remountUI({
     onSendMessage: messageDispatch.dispatch,
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
-    onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry)
+    onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
+    onAvatarSaved: entry => scene.emit("action_avatar_saved", entry)
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
@@ -577,6 +579,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     onSceneLoaded();
   } else {
     scene.addEventListener("loaded", onSceneLoaded, { once: true });
+  }
+
+  // If the stored avatar doesn't have a valid src, reset to a legacy avatar.
+  const avatarSrc = await getAvatarSrc(store.state.profile.avatarId);
+  if (!avatarSrc) {
+    store.resetToRandomLegacyAvatar();
   }
 
   const authChannel = new AuthChannel(store);
@@ -866,7 +874,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     if (permsToken) {
-      params.perms_token = hubChannel.oauthFlowPermsToken;
+      params.perms_token = permsToken;
     }
 
     const { token } = store.state.credentials;

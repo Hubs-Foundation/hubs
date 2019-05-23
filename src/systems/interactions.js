@@ -1,6 +1,7 @@
 /* global AFRAME Ammo NAF */
 import { paths } from "./userinput/paths";
 import { SOUND_HOVER_OR_GRAB } from "./sound-effects-system";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 function findHandCollisionTargetForHand(body) {
   const driver = AFRAME.scenes[0].systems.physics.driver;
@@ -61,19 +62,19 @@ AFRAME.registerSystem("interaction", {
   init: function() {
     this.options = {
       leftHand: {
-        entity: document.querySelector("#player-left-controller"),
+        entity: null,
         grabPath: paths.actions.leftHand.grab,
         dropPath: paths.actions.leftHand.drop,
         hoverFn: findHandCollisionTargetForHand
       },
       rightHand: {
-        entity: document.querySelector("#player-right-controller"),
+        entity: null,
         grabPath: paths.actions.rightHand.grab,
         dropPath: paths.actions.rightHand.drop,
         hoverFn: findHandCollisionTargetForHand
       },
       rightRemote: {
-        entity: document.querySelector("#cursor"),
+        entity: null,
         grabPath: paths.actions.cursor.grab,
         dropPath: paths.actions.cursor.drop,
         hoverFn: this.getRightRemoteHoverTarget
@@ -114,7 +115,12 @@ AFRAME.registerSystem("interaction", {
       }
     };
 
-    this.cursorController = document.querySelector("#cursor-controller");
+    waitForDOMContentLoaded().then(() => {
+      this.cursorController = document.querySelector("#cursor-controller");
+      this.options.leftHand.entity = document.querySelector("#player-left-controller");
+      this.options.rightHand.entity = document.querySelector("#player-right-controller");
+      this.options.rightRemote.entity = document.querySelector("#cursor");
+    });
   },
 
   getRightRemoteHoverTarget() {

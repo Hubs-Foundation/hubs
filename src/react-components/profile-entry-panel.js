@@ -9,7 +9,7 @@ import { SCHEMA } from "../storage/store";
 import styles from "../assets/stylesheets/profile.scss";
 import hubLogo from "../assets/images/hub-preview-white.png";
 import { WithHoverSound } from "./wrap-with-audio";
-import { AVATAR_TYPES, getAvatarGltfUrl, getAvatarType } from "../utils/avatar-utils";
+import { fetchAvatar } from "../utils/avatar-utils";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { replaceHistoryState } from "../utils/history";
 import StateLink from "./state-link";
@@ -30,9 +30,8 @@ class ProfileEntryPanel extends Component {
 
   state = {
     avatarId: null,
-    avatarType: null,
     displayName: null,
-    avatarGltfUrl: null
+    avatar: null
   };
 
   constructor(props) {
@@ -40,7 +39,6 @@ class ProfileEntryPanel extends Component {
     this.state = this.getStateFromProfile();
     if (props.avatarId) {
       this.state.avatarId = props.avatarId;
-      this.state.avatarType = getAvatarType(this.state.avatarId);
     }
     this.props.store.addEventListener("statechanged", this.storeUpdated);
     this.scene = document.querySelector("a-scene");
@@ -48,12 +46,7 @@ class ProfileEntryPanel extends Component {
 
   getStateFromProfile = () => {
     const { displayName, avatarId } = this.props.store.state.profile;
-    const avatarType = getAvatarType(avatarId);
-    const newState = { displayName, avatarId, avatarType };
-    if (avatarType === AVATAR_TYPES.URL) {
-      newState.avatarGltfUrl = avatarId;
-    }
-    return newState;
+    return { displayName, avatarId };
   };
 
   storeUpdated = () => this.setState(this.getStateFromProfile());
@@ -83,19 +76,14 @@ class ProfileEntryPanel extends Component {
   };
 
   setAvatarFromMediaResult = ({ detail: entry }) => {
-    this.setState({
-      avatarId: entry.id,
-      avatarType: getAvatarType(entry.id),
-      avatarGltfUrl: entry.gltfs.avatar
-    });
+    this.setState({ avatarId: entry.id });
     // Replace history state with the current avatar id since this component gets destroyed when we open the
     // avatar editor and we want the back button to work. We read the history state back via the avatarId prop.
     // We read the current state key from history since it could be "overlay" or "entry_step".
     replaceHistoryState(this.props.history, this.props.history.location.state.key, "profile", { avatarId: entry.id });
   };
 
-  async componentDidMount() {
-    this.setState({ avatarGltfUrl: await getAvatarGltfUrl(this.state.avatarId) });
+  componentDidMount() {
     if (this.nameInput) {
       // stop propagation so that avatar doesn't move when wasd'ing during text input.
       this.nameInput.addEventListener("keydown", this.stopPropagation);
@@ -103,6 +91,16 @@ class ProfileEntryPanel extends Component {
       this.nameInput.addEventListener("keyup", this.stopPropagation);
     }
     this.scene.addEventListener("action_selected_media_result_entry", this.setAvatarFromMediaResult);
+    // This handles editing avatars in the entry_step, since this component remains mounted with the same avatarId
+    this.scene.addEventListener("action_avatar_saved", this.refetchAvatar);
+
+    this.refetchAvatar();
+  }
+
+  componentDidUpdate(_prevProps, prevState) {
+    if (prevState.avatarId !== this.state.avatarId) {
+      this.refetchAvatar();
+    }
   }
 
   componentWillUnmount() {
@@ -113,7 +111,14 @@ class ProfileEntryPanel extends Component {
       this.nameInput.removeEventListener("keyup", this.stopPropagation);
     }
     this.scene.removeEventListener("action_selected_media_result_entry", this.setAvatarFromMediaResult);
+    this.scene.removeEventListener("action_avatar_saved", this.refetchAvatar);
   }
+
+  refetchAvatar = async () => {
+    const avatar = await fetchAvatar(this.state.avatarId);
+    if (this.state.avatarId !== avatar.avatar_id) return; // This is an old result, ignore it
+    this.setState({ avatar });
+  };
 
   render() {
     const { formatMessage } = this.props.intl;
@@ -150,21 +155,25 @@ class ProfileEntryPanel extends Component {
               <FormattedMessage id="profile.choose_avatar" />
             </a>
 
-            <div className={styles.preview}>
-              <AvatarPreview avatarGltfUrl={this.state.avatarGltfUrl} />
+            {this.state.avatar ? (
+              <div className={styles.preview}>
+                <AvatarPreview avatarGltfUrl={this.state.avatar.gltf_url} />
 
-              {this.state.avatarType === AVATAR_TYPES.SKINNABLE && (
-                <StateLink
-                  stateKey="overlay"
-                  stateValue="avatar-editor"
-                  stateDetail={{ avatarId: this.state.avatarId, hideDelete: true, returnToProfile: true }}
-                  history={this.props.history}
-                  className={styles.editAvatar}
-                >
-                  <FontAwesomeIcon icon={faPencilAlt} />
-                </StateLink>
-              )}
-            </div>
+                {this.state.avatar.account_id === this.props.store.credentialsAccountId && (
+                  <StateLink
+                    stateKey="overlay"
+                    stateValue="avatar-editor"
+                    stateDetail={{ avatarId: this.state.avatarId, hideDelete: true, returnToProfile: true }}
+                    history={this.props.history}
+                    className={styles.editAvatar}
+                  >
+                    <FontAwesomeIcon icon={faPencilAlt} />
+                  </StateLink>
+                )}
+              </div>
+            ) : (
+              <div className={styles.preview} />
+            )}
 
             <WithHoverSound>
               <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
