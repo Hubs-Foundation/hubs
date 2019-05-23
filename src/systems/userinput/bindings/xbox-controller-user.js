@@ -5,7 +5,6 @@ import { addSetsToBindings } from "./utils";
 
 const button = paths.device.xbox.button;
 const axis = paths.device.xbox.axis;
-const scaledRightJoystickHorizontal = paths.device.xbox.v("scaledRightJoystickHorizontal");
 const scaledRightJoystickVertical = paths.device.xbox.v("scaledRightJoystickVertical");
 const scaledLeftJoystickCursorDelta = paths.device.xbox.v("scaledLeftJoystickCursorDelta");
 const deadzonedRightJoystickHorizontal = paths.device.xbox.v("deadzonedRightJoystickHorizontal");
@@ -13,6 +12,7 @@ const deadzonedRightJoystickVertical = paths.device.xbox.v("deadzonedRightJoysti
 const deadzonedLeftJoystickHorizontal = paths.device.xbox.v("deadzonedLeftJoystickHorizontal");
 const deadzonedLeftJoystickVertical = paths.device.xbox.v("deadzonedLeftJoystickVertical");
 const vec2Zero = paths.device.xbox.v("vec2Zero");
+const zero = paths.device.xbox.v("zero");
 
 function characterAccelerationBindings(disableForwardOnTrigger) {
   const scaledLeftJoystickHorizontal = paths.device.xbox.v("scaledLeftJoystickHorizontal");
@@ -92,8 +92,8 @@ export const xboxControllerUserBindings = addSetsToBindings({
     },
     {
       src: { value: deadzonedRightJoystickHorizontal },
-      dest: { value: scaledRightJoystickHorizontal },
-      xform: xforms.scale(-1.5) // horizontal look speed modifier
+      dest: { value: paths.actions.angularVelocity },
+      xform: xforms.scale(0.9) // horizontal look speed modifier
     },
     {
       src: { value: axis("rightJoystickVertical") },
@@ -106,8 +106,13 @@ export const xboxControllerUserBindings = addSetsToBindings({
       xform: xforms.scale(-1.25) // vertical look speed modifier
     },
     {
+      src: {},
+      dest: { value: zero },
+      xform: xforms.always(0)
+    },
+    {
       src: {
-        x: scaledRightJoystickHorizontal,
+        x: zero,
         y: scaledRightJoystickVertical
       },
       dest: { value: paths.actions.cameraDelta },

@@ -73,8 +73,8 @@ AFRAME.registerComponent("character-controller", {
     this.accelerationInput.set(axes[0], 0, axes[1]);
   },
 
-  setAngularVelocity: function(event) {
-    this.angularVelocity = event.detail.value;
+  setAngularVelocity: function(value) {
+    this.angularVelocity = value;
   },
 
   snapRotateLeft: function() {
@@ -146,6 +146,10 @@ AFRAME.registerComponent("character-controller", {
       }
       if (userinput.get(paths.actions.snapRotateRight)) {
         this.snapRotateRight();
+      }
+      const userinputAngularVelocity = userinput.get(paths.actions.angularVelocity);
+      if (userinputAngularVelocity !== null && userinputAngularVelocity !== undefined) {
+        this.setAngularVelocity(userinputAngularVelocity);
       }
       const acc = userinput.get(paths.actions.characterAcceleration);
       if (acc) {
