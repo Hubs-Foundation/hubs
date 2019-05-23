@@ -1,4 +1,4 @@
-import { HUD_BACKGROUND, BUTTON_MIC, BUTTON_CREATE, BUTTON_PEN, BUTTON_CAMERA } from "./enum";
+import { NONE, BUTTON_MIC, BUTTON_CREATE, BUTTON_PEN, BUTTON_CAMERA } from "./enum";
 export function writeXYWH(f32array, i, data) {
   f32array[4 * i + 0] = data.x;
   f32array[4 * i + 1] = data.y;
@@ -72,6 +72,6 @@ export const determineHoverZone = (function() {
       return BUTTON_CAMERA;
     }
 
-    return HUD_BACKGROUND;
+    return NONE;
   };
 })();

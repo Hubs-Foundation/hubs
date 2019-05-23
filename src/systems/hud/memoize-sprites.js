@@ -11,7 +11,7 @@ function readNorm(name, spritesheet) {
 
 export const memoizeSprites = function(spritesheet) {
   const memo = new Map();
-  return function sprite(name) {
+  return function getSprite(name) {
     const memoizedSprite = memo.get(name);
     if (memoizedSprite) {
       return memoizedSprite;
