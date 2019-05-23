@@ -380,19 +380,7 @@ export const traverseMeshesAndAddShapes = (function() {
 
     console.group("traverseMeshesAndAddShapes");
 
-    const floorPlan = meshRoot.children.find(obj => {
-      return obj.name.startsWith("Floor_Plan");
-    });
-
-    let collisionAdded = false;
-
-    if (floorPlan) {
-      collisionAdded = !!floorPlan.children.find(obj => {
-        return obj.el.hasAttribute(shapePrefix + "heightfield") || obj.el.hasAttribute(shapePrefix + "trimesh");
-      });
-    }
-
-    if (collisionAdded) {
+    if (document.querySelector(["[ammo-shape__trimesh]", "[ammo-shape__heightfield]"])) {
       console.log("heightfield or trimesh found on scene");
     } else {
       console.log("collision not found in scene");
@@ -417,25 +405,18 @@ export const traverseMeshesAndAddShapes = (function() {
 
       if (isHighDensity) {
         console.log("mesh contains high triangle density region");
-        if (floorPlan) {
-          navMesh = floorPlan.children.find(obj => {
-            return obj.name === "navMesh";
-          });
-          if (!navMesh && floorPlan.el.object3DMap.mesh) {
-            navMesh = floorPlan;
-          }
-        }
+        navMesh = document.querySelector("[nav-mesh]");
       }
 
       if (navMesh) {
         console.log(`mesh density exceeded, using floor plan only`);
-        navMesh.el.setAttribute(shapePrefix + floorPlan.name, {
+        navMesh.setAttribute(shapePrefix + "floorPlan", {
           type: SHAPE.MESH,
           margin: 0.01,
           fit: FIT.ALL,
           includeInvisible: true
         });
-        shapes.push({ id: shapePrefix + floorPlan.name, entity: navMesh.el });
+        shapes.push({ id: shapePrefix + "floorPlan", entity: navMesh });
       } else if (!isHighDensity) {
         el.setAttribute(shapePrefix + "environment", {
           type: SHAPE.MESH,
