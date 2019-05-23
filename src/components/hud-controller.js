@@ -76,9 +76,6 @@ AFRAME.registerComponent("hud-controller", {
     }
 
     hud.visible = !hudOutOfView || forceHudVisible;
-    if (hud.el.object3DMap.mesh) {
-      hud.el.object3DMap.mesh.visible = !hudOutOfView || forceHudVisible && !this.el.sceneEl.is("frozen");
-    }
     hud.position.y = (this.isYLocked ? this.lockedHeadPositionY : head.position.y) + offset + (1 - t) * offset;
     hud.rotation.x = (1 - t) * THREE.Math.DEG2RAD * 90;
     hud.matrixNeedsUpdate = true;

@@ -6,15 +6,7 @@ import spritesheetPng from "../assets/images/hud/spritesheet.png";
 import vert from "./hud/hud.vert";
 import frag from "./hud/hud.frag";
 import { writeXYWH, stencils, determineHoverZone } from "./hud/stencils";
-import {
-  HUD_ALPHA,
-  HUD_BACKGROUND,
-  BUTTON_MIC,
-  BUTTON_CREATE,
-  BUTTON_PEN,
-  BUTTON_CAMERA,
-  BUTTON_INVITE
-} from "./hud/enum";
+import { HUD_BACKGROUND, BUTTON_MIC, BUTTON_CREATE, BUTTON_PEN, BUTTON_CAMERA } from "./hud/enum";
 import { SOUND_HOVER_OR_GRAB, SOUND_SPAWN_PEN } from "./sound-effects-system";
 
 const sprite = memoizeSprites(spritesheetJson);
