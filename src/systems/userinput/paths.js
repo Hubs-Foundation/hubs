@@ -157,7 +157,8 @@ paths.device.xbox = {
   }),
   axis: axisName => {
     return `${xbox}axis/${axisName}`;
-  }
+  },
+  axesSum: `${xbox}axis/sum`
 };
 
 paths.device.oculusgo = {

@@ -230,6 +230,9 @@ AFRAME.registerSystem("userinput", {
       this.activeDevices.add(new GyroDevice());
     }
 
+    this.isMobile = isMobile;
+    this.isMobileVR = isMobileVR;
+
     this.registeredMappings = new Set([keyboardDebuggingBindings]);
     this.registeredMappingsChanged = true;
 
@@ -347,6 +350,22 @@ AFRAME.registerSystem("userinput", {
     updateBindingsForVRMode();
   },
 
+  maybeToggleXboxMapping() {
+    if (this.isMobile || this.isMobileVR) return;
+
+    const mouseMovement = this.get(paths.device.mouse.movementXY);
+    const xboxAxesSum = this.get(paths.device.xbox.axesSum);
+    const hasXboxMapping = this.registeredMappings.has(xboxControllerUserBindings);
+
+    if ((mouseMovement[0] || mouseMovement[1]) > 2 && hasXboxMapping) {
+      this.registeredMappings.delete(xboxControllerUserBindings);
+      this.registeredMappingsChanged = true;
+    } else if (Math.abs(xboxAxesSum) > 0.5 && !hasXboxMapping) {
+      this.registeredMappings.add(xboxControllerUserBindings);
+      this.registeredMappingsChanged = true;
+    }
+  },
+
   tick2() {
     this.frame.generation += 1;
     const registeredMappingsChanged = this.registeredMappingsChanged;
@@ -435,5 +454,7 @@ AFRAME.registerSystem("userinput", {
     }
 
     this.prevSortedBindings = this.sortedBindings;
+
+    this.maybeToggleXboxMapping();
   }
 });

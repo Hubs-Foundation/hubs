@@ -39,8 +39,13 @@ export class XboxControllerDevice {
         frame.setValueType(path.touched, !!button.touched);
         frame.setValueType(path.value, button.value);
       });
+      frame.setValueType(paths.device.xbox.axesSum, 0);
       this.axisMap.forEach(axis => {
         frame.setValueType(paths.device.xbox.axis(axis.name), this.gamepad.axes[axis.axisId]);
+        frame.setValueType(
+          paths.device.xbox.axesSum,
+          frame.get(paths.device.xbox.axesSum) + this.gamepad.axes[axis.axisId]
+        );
       });
 
       if (this.gamepad.hapticActuators && this.gamepad.hapticActuators[0]) {
