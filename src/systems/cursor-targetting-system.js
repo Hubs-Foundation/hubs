@@ -1,15 +1,21 @@
+import { waitForDOMContentLoaded } from "../utils/async-utils";
+
 export class CursorTargettingSystem {
   constructor() {
     this.targets = [];
     this.setDirty = this.setDirty.bind(this);
     this.dirty = true;
+
     // TODO: Use the MutationRecords passed into the callback function to determine added/removed nodes!
     this.observer = new MutationObserver(this.setDirty);
-    const scene = document.querySelector("a-scene");
-    this.observer.observe(scene, { childList: true, attributes: true, subtree: true });
-    scene.addEventListener("object3dset", this.setDirty);
-    scene.addEventListener("object3dremove", this.setDirty);
-    this.rightRemote = document.querySelector("#cursor-controller");
+
+    waitForDOMContentLoaded().then(() => {
+      const scene = document.querySelector("a-scene");
+      this.rightRemote = document.querySelector("#cursor-controller");
+      this.observer.observe(scene, { childList: true, attributes: true, subtree: true });
+      scene.addEventListener("object3dset", this.setDirty);
+      scene.addEventListener("object3dremove", this.setDirty);
+    });
   }
 
   setDirty() {
