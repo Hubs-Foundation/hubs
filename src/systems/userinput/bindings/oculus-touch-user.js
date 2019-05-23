@@ -3,6 +3,9 @@ import { sets } from "../sets";
 import { xforms } from "./xforms";
 import { addSetsToBindings } from "./utils";
 
+import qsTruthy from "../../../utils/qs_truthy";
+const fixedOriginModeEnabled = qsTruthy("fixedOriginMode");
+
 const name = "/touch/var/";
 
 const leftButton = paths.device.leftOculusTouch.button;
@@ -129,7 +132,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       xform: xforms.copy
     },
     {
-      src: [leftButton("x").touched, leftButton("y").touched, leftButton("thumbStick").touched],
+      src: [leftButton("x").touched, leftButton("y").touched, leftButton("thumbstick").touched],
       dest: {
         value: paths.actions.leftHand.thumb
       },
@@ -184,7 +187,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       xform: xforms.copy
     },
     {
-      src: [rightButton("a").touched, rightButton("b").touched, rightButton("thumbStick").touched],
+      src: [rightButton("a").touched, rightButton("b").touched, rightButton("thumbstick").touched],
       dest: {
         value: paths.actions.rightHand.thumb
       },
@@ -1008,3 +1011,12 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ]
 });
+
+if (fixedOriginModeEnabled) {
+  oculusTouchUserBindings[sets.global].push({
+    src: { value: rightButton("thumbstick").pressed },
+    dest: { value: paths.actions.setOrigin },
+    xform: xforms.rising,
+    sets: [sets.global]
+  });
+}

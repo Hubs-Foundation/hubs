@@ -3,6 +3,9 @@ const CYLINDER_TEXTURE =
 
 import { SOUND_TELEPORT_START, SOUND_TELEPORT_END } from "../systems/sound-effects-system";
 
+import qsTruthy from "../utils/qs_truthy";
+const fixedOriginModeEnabled = qsTruthy("fixedOriginMode");
+
 function easeIn(t) {
   return t * t;
 }
@@ -167,6 +170,14 @@ AFRAME.registerComponent("teleporter", {
   queryCollisionEntities: function() {
     this.collisionEntities = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.collisionEntities));
     this.meshes = getMeshes(this.collisionEntities);
+  },
+
+  play() {
+    if (fixedOriginModeEnabled) {
+      setTimeout(() => {
+        this.pause();
+      }, 0);
+    }
   },
 
   remove() {

@@ -5,14 +5,14 @@ import { copySittingToStandingTransform } from "./copy-sitting-to-standing-trans
 const ONES = new THREE.Vector3(1, 1, 1);
 
 export const leftOculusTouchButtonMap = [
-  { name: "thumbStick", buttonId: 0 },
+  { name: "thumbstick", buttonId: 0 },
   { name: "trigger", buttonId: 1 },
   { name: "grip", buttonId: 2 },
   { name: "x", buttonId: 3 },
   { name: "y", buttonId: 4 }
 ];
 export const rightOculusTouchButtonMap = [
-  { name: "thumbStick", buttonId: 0 },
+  { name: "thumbstick", buttonId: 0 },
   { name: "trigger", buttonId: 1 },
   { name: "grip", buttonId: 2 },
   { name: "a", buttonId: 3 },

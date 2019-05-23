@@ -90,6 +90,7 @@ paths.haptics = {};
 paths.haptics.actuators = {};
 paths.haptics.actuators.left = "/haptics/actuators/left";
 paths.haptics.actuators.right = "/haptics/actuators/right";
+paths.actions.setOrigin = "/actions/setOrigin";
 
 paths.device = {};
 paths.device.mouse = {};

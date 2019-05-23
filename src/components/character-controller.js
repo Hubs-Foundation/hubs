@@ -8,6 +8,8 @@ const PI_2 = Math.PI / 2;
 
 const NAV_ZONE = "character";
 
+import qsTruthy from "../utils/qs_truthy";
+const fixedOriginModeEnabled = qsTruthy("fixedOriginMode");
 /**
  * Avatar movement controller that listens to move, rotate and teleportation events and moves the avatar accordingly.
  * The controller accounts for playspace offset and orientation and depends on the nav mesh system for translation.
@@ -112,6 +114,23 @@ AFRAME.registerComponent("character-controller", {
     };
   })(),
 
+  setRootFromLeftController: (function() {
+    const rigWorldPos = new THREE.Vector3();
+    const handWorldPos = new THREE.Vector3();
+    const delta = new THREE.Vector3();
+    return function setRootFromLeftController() {
+      const hand = document.getElementById("player-left-controller").object3D;
+      const o = this.el.object3D;
+      o.getWorldPosition(rigWorldPos);
+      hand.getWorldPosition(handWorldPos);
+      delta.set(0, 0, 0).sub(handWorldPos);
+      const y = o.position.y;
+      o.position.sub(handWorldPos);
+      o.position.y = y;
+      o.matrixNeedsUpdate = true;
+    };
+  })(),
+
   tick: (function() {
     const move = new THREE.Matrix4();
     const trans = new THREE.Matrix4();
@@ -128,6 +147,17 @@ AFRAME.registerComponent("character-controller", {
 
     return function(t, dt) {
       if (!this.el.sceneEl.is("entered")) return;
+
+      const userinput = AFRAME.scenes[0].systems.userinput;
+
+      if (fixedOriginModeEnabled) {
+        if (userinput.get(paths.actions.setOrigin)) {
+          console.log("setRootFromLeftController");
+          this.setRootFromLeftController();
+        }
+        return;
+      }
+
       const deltaSeconds = dt / 1000;
       const root = this.el.object3D;
       const pivot = this.data.pivot.object3D;
@@ -140,7 +170,6 @@ AFRAME.registerComponent("character-controller", {
       startScale.copy(root.scale);
       startPos.copy(root.position);
 
-      const userinput = AFRAME.scenes[0].systems.userinput;
       if (userinput.get(paths.actions.snapRotateLeft)) {
         this.snapRotateLeft();
       }
