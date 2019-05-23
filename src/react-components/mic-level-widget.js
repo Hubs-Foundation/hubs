@@ -9,7 +9,7 @@ export default class MicLevelWidget extends Component {
   static propTypes = {
     mediaStream: PropTypes.object,
     hasAudioTrack: PropTypes.bool,
-    muteOnEntry: PropTypes.bool,
+    muteOnEntry: PropTypes.bool
   };
 
   state = {

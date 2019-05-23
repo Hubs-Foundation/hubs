@@ -1126,7 +1126,11 @@ class UIRoot extends Component {
             {(isMobilePhoneOrVR || this.state.enterInVR) && <FormattedMessage id={subtitleId} />}
           </div>
           <div className="audio-setup-panel__levels">
-            <MicLevelWidget hasAudioTrack={!!this.state.audioTrack} muteOnEntry={this.state.muteOnEntry} mediaStream={this.state.mediaStream} />
+            <MicLevelWidget
+              hasAudioTrack={!!this.state.audioTrack}
+              muteOnEntry={this.state.muteOnEntry}
+              mediaStream={this.state.mediaStream}
+            />
             <OutputLevelWidget />
           </div>
           {this.state.audioTrack && this.state.micDevices.length > 1 ? (
