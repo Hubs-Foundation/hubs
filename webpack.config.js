@@ -90,8 +90,7 @@ module.exports = (env, argv) => ({
     spoke: path.join(__dirname, "src", "spoke.js"),
     discord: path.join(__dirname, "src", "discord.js"),
     admin: path.join(__dirname, "src", "admin.js"),
-    "whats-new": path.join(__dirname, "src", "whats-new.js"),
-    "avatar-selector": path.join(__dirname, "src", "avatar-selector.js")
+    "whats-new": path.join(__dirname, "src", "whats-new.js")
   },
   output: {
     filename: "assets/js/[name]-[chunkhash].js",
@@ -284,12 +283,6 @@ module.exports = (env, argv) => ({
       filename: "whats-new.html",
       template: path.join(__dirname, "src", "whats-new.html"),
       chunks: ["vendor", "whats-new"],
-      inject: "head"
-    }),
-    new HTMLWebpackPlugin({
-      filename: "avatar-selector.html",
-      template: path.join(__dirname, "src", "avatar-selector.html"),
-      chunks: ["vendor", "engine", "avatar-selector"],
       inject: "head"
     }),
     new HTMLWebpackPlugin({
