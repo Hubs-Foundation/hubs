@@ -7,7 +7,6 @@ paths.actions.snapRotateLeft = "/actions/snapRotateLeft";
 paths.actions.snapRotateRight = "/actions/snapRotateRight";
 paths.actions.angularVelocity = "/actions/angularVelocity";
 paths.actions.logDebugFrame = "/actions/logDebugFrame";
-
 paths.actions.logInteractionState = "/actions/logInteractionState";
 paths.actions.cameraDelta = "/actions/cameraDelta";
 paths.actions.characterAcceleration = "/actions/characterAcceleration";
