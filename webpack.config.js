@@ -82,6 +82,11 @@ function matchRegex({ include, exclude }) {
 }
 
 module.exports = (env, argv) => ({
+  node: {
+    // need to specify this manually because some random lodash code will try to access
+    // Buffer on the global object if it exists, so webpack will polyfill on its behalf
+    Buffer: false
+  },
   entry: {
     index: path.join(__dirname, "src", "index.js"),
     hub: path.join(__dirname, "src", "hub.js"),
