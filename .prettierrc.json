@@ -1,4 +1,14 @@
 {
   "printWidth": 120,
-  "parser": "babylon"
+  "parser": "babylon",
+  "useTabs": false,
+  "tabWidth": 2,
+  "overrides": [
+    {
+      "files": "*.html",
+      "options": {
+        "tabWidth": 4
+      }
+    }
+  ]
 }
