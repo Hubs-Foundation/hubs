@@ -86,6 +86,11 @@ export const xboxControllerUserBindings = addSetsToBindings({
   ],
   [sets.global]: [
     {
+      src: {},
+      dest: { value: paths.actions.cursor.hideLine },
+      xform: xforms.always(true)
+    },
+    {
       src: { value: axis("rightJoystickHorizontal") },
       dest: { value: deadzonedRightJoystickHorizontal },
       xform: xforms.deadzone(0.1)
@@ -93,7 +98,7 @@ export const xboxControllerUserBindings = addSetsToBindings({
     {
       src: { value: deadzonedRightJoystickHorizontal },
       dest: { value: paths.actions.angularVelocity },
-      xform: xforms.scale(0.9) // horizontal look speed modifier
+      xform: xforms.scale(0.6) // horizontal look speed modifier
     },
     {
       src: { value: axis("rightJoystickVertical") },
@@ -162,7 +167,7 @@ export const xboxControllerUserBindings = addSetsToBindings({
     {
       src: { value: button("dpadUp").pressed },
       dest: { value: paths.actions.ensureFrozen },
-      xform: xforms.rising
+      xform: xforms.copy
     },
     {
       src: { value: button("dpadUp").pressed },

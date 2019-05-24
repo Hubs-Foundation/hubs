@@ -58,10 +58,10 @@ AFRAME.registerComponent("cursor-controller", {
     return function(t) {
       const userinput = AFRAME.scenes[0].systems.userinput;
       const cursorPose = userinput.get(paths.actions.cursor.pose);
-      const rightHandPose = userinput.get(paths.actions.rightHand.pose);
+      const hideLine = userinput.get(paths.actions.cursor.hideLine);
 
       this.data.cursor.object3D.visible = this.enabled && !!cursorPose;
-      this.line.material.visible = !!(this.enabled && rightHandPose);
+      this.line.material.visible = !!(this.enabled && !hideLine);
 
       if (!this.enabled || !cursorPose) {
         return;

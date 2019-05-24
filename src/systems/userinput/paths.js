@@ -36,6 +36,7 @@ paths.actions.transformModifier = "/actions/transformModifier";
 paths.actions.rayObjectRotation = "/actions/rayObjectRotation";
 paths.actions.cursor = {};
 paths.actions.cursor.pose = "/actions/cursorPose";
+paths.actions.cursor.hideLine = "/actions/cursorHideLine";
 paths.actions.cursor.grab = "/actions/cursorGrab";
 paths.actions.cursor.drop = "/actions/cursorDrop";
 paths.actions.cursor.modDelta = "/actions/cursorModDelta";
@@ -232,6 +233,7 @@ paths.device.rightOculusTouch = {
   axis: axisName => {
     return `${rightOculusTouch}axis/${axisName}`;
   },
+  axesSum: `${rightOculusTouch}axis/sum`,
   pose: `${rightOculusTouch}pose`,
   matrix: `${rightOculusTouch}matrix`
 };
@@ -246,6 +248,7 @@ paths.device.leftOculusTouch = {
   axis: axisName => {
     return `${leftOculusTouch}axis/${axisName}`;
   },
+  axesSum: `${leftOculusTouch}axis/sum`,
   pose: `${leftOculusTouch}pose`,
   matrix: `${leftOculusTouch}matrix`
 };
@@ -260,6 +263,7 @@ paths.device.vive.left = {
   axis: axisName => {
     return `/device/vive/left/axis/${axisName}`;
   },
+  axesSum: "/device/vive/left/axis/sum",
   pose: `/device/vive/left/pose`,
   matrix: `/device/vive/left/matrix`
 };
@@ -272,6 +276,7 @@ paths.device.vive.right = {
   axis: axisName => {
     return `/device/vive/right/axis/${axisName}`;
   },
+  axesSum: "/device/vive/right/axis/sum",
   pose: `/device/vive/right/pose`,
   matrix: `/device/vive/right/matrix`
 };
