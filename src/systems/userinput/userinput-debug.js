@@ -1,6 +1,8 @@
 import { paths } from "./paths";
 import qsTruthy from "../../utils/qs_truthy";
 
+const PATHS_TO_SHOW = ["/actions/", "/device/"];
+
 AFRAME.registerSystem("userinput-debug", {
   active: true,
 
@@ -20,7 +22,7 @@ AFRAME.registerSystem("userinput-debug", {
       const { frame } = userinput;
       for (const key in frame.values) {
         if (!frame.get(key)) continue;
-        if (!["/actions/"].some(x => key.startsWith(x))) continue;
+        if (!PATHS_TO_SHOW.some(x => key.startsWith(x))) continue;
         let val = JSON.stringify(frame.get(key), replacer);
         if (val) val = val.replace(/{"(\w{3,})":/g, '{\n  "$1":').replace(/,"(\w{3,})":/g, ',\n  "$1":');
         pathsOutput.push(`${key} -> ${val}`);
@@ -34,6 +36,7 @@ AFRAME.registerSystem("userinput-debug", {
         this.userinputFrameStatus.id = "userinput-frame-status";
         this.userinputFrameStatus.style = `
           position: absolute;
+          z-index: 2;
           left: 0; bottom: 0;
           background: white;
           white-space: pre;

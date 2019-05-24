@@ -55,8 +55,10 @@ export class ViveControllerDevice {
       frame.setValueType(path.touched, !!button.touched);
       frame.setValueType(path.value, button.value);
     });
+    frame.setValueType(this.path.axesSum, 0);
     this.axisMap.forEach(axis => {
       frame.setValueType(this.path.axis(axis.name), this.gamepad.axes[axis.axisId]);
+      frame.setValueType(this.path.axesSum, frame.get(this.path.axesSum) + Math.abs(this.gamepad.axes[axis.axisId]));
     });
 
     if (!this.selector) {

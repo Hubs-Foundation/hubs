@@ -14,6 +14,8 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
     this.yaw = 0;
     this.onRotateX = this.onRotateX.bind(this);
     this.el.sceneEl.addEventListener("rotateX", this.onRotateX);
+    this.el.sceneEl.addEventListener("enter-vr", () => this.pause());
+    this.el.sceneEl.addEventListener("exit-vr", () => this.play());
     this.pendingXRotation = 0;
   },
 

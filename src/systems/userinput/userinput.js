@@ -230,6 +230,9 @@ AFRAME.registerSystem("userinput", {
       this.activeDevices.add(new GyroDevice());
     }
 
+    this.isMobile = isMobile;
+    this.isMobileVR = isMobileVR;
+
     this.registeredMappings = new Set([keyboardDebuggingBindings]);
     this.registeredMappingsChanged = true;
 
@@ -309,7 +312,7 @@ AFRAME.registerSystem("userinput", {
         gamepadDevice = new GearVRControllerDevice(e.gamepad);
       } else if (e.gamepad.id === "Daydream Controller") {
         gamepadDevice = new DaydreamControllerDevice(e.gamepad);
-      } else if (e.gamepad.id.includes("Xbox")) {
+      } else if (e.gamepad.id.toLowerCase().includes("xinput")) {
         gamepadDevice = new XboxControllerDevice(e.gamepad);
       } else {
         gamepadDevice = new GamepadDevice(e.gamepad);
@@ -345,6 +348,28 @@ AFRAME.registerSystem("userinput", {
     this.el.sceneEl.addEventListener("exit-vr", updateBindingsForVRMode);
 
     updateBindingsForVRMode();
+  },
+
+  maybeToggleXboxMapping() {
+    if (this.isMobile || this.isMobileVR) return;
+
+    const vrAxesSum =
+      (this.get(paths.device.vive.left.axesSum) || 0) +
+      (this.get(paths.device.vive.right.axesSum) || 0) +
+      (this.get(paths.device.leftOculusTouch.axesSum) || 0) +
+      (this.get(paths.device.rightOculusTouch.axesSum) || 0);
+    const mouseMovement = this.get(paths.device.mouse.movementXY);
+    const nonXboxActivity = (mouseMovement[0] || mouseMovement[1]) > 2 || vrAxesSum > 0.5;
+
+    const hasXboxMapping = this.registeredMappings.has(xboxControllerUserBindings);
+
+    if (nonXboxActivity && hasXboxMapping) {
+      this.registeredMappings.delete(xboxControllerUserBindings);
+      this.registeredMappingsChanged = true;
+    } else if (this.get(paths.device.xbox.axesSum) > 0.5 && !hasXboxMapping) {
+      this.registeredMappings.add(xboxControllerUserBindings);
+      this.registeredMappingsChanged = true;
+    }
   },
 
   tick2() {
@@ -435,5 +460,7 @@ AFRAME.registerSystem("userinput", {
     }
 
     this.prevSortedBindings = this.sortedBindings;
+
+    this.maybeToggleXboxMapping();
   }
 });

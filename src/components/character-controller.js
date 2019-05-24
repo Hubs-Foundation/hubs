@@ -132,6 +132,12 @@ AFRAME.registerComponent("character-controller", {
       const root = this.el.object3D;
       const pivot = this.data.pivot.object3D;
       const distance = this.data.groundAcc * deltaSeconds;
+
+      const userinput = AFRAME.scenes[0].systems.userinput;
+      const userinputAngularVelocity = userinput.get(paths.actions.angularVelocity);
+      if (userinputAngularVelocity !== null && userinputAngularVelocity !== undefined) {
+        this.angularVelocity = userinputAngularVelocity;
+      }
       const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
 
       pivot.updateMatrices();
@@ -140,7 +146,6 @@ AFRAME.registerComponent("character-controller", {
       startScale.copy(root.scale);
       startPos.copy(root.position);
 
-      const userinput = AFRAME.scenes[0].systems.userinput;
       if (userinput.get(paths.actions.snapRotateLeft)) {
         this.snapRotateLeft();
       }
