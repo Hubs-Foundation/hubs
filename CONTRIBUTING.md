@@ -2,7 +2,7 @@
 
 This page outlines opportunities for people who want to contribute to the Hubs project. We welcome external contributions that align with the project's mission around enabling collaboration and communication through shared 3D spaces. You can find information about how to contribute to Hubs and the supporting projects that make up the platform here. 
 
-Contributers are expected to abide by the project's [Code of Conduct](CODE_OF_CONDUCT.md) and to be respectful of the project and people working on it. 
+Contributors are expected to abide by the project's [Code of Conduct](CODE_OF_CONDUCT.md) and to be respectful of the project and people working on it. 
 
 The following GitHub projects are part of the Hubs platform and governed by these contributing guidelines: 
 
