@@ -29,7 +29,7 @@ Steps to contributing code to the Hubs project:
 2. Find an issue or improvement that you want to fix - give us a heads up that you're working on it by dropping in a comment on the issue.
 3. Fix the bug! Test out your changes on your local setup and let us know if you have questions or want another opinion about the fix. 
 4. Submit your PR for a code review and someone from the team will take a look and give feedback. Make sure you follow up! We'll close the PR if it seems like you've abandoned it by not responding to any questions or comments we leave in the review. 
-5. Celebrate! 🎉You're helping Mozilla's mission to make the web an open and accessible place for social experiences! 
+5. Celebrate! 🎉 You're helping Mozilla's mission to make the web an open and accessible place for social experiences! 
 
 
 ### 🐛Filing Issues and Feature Requests
