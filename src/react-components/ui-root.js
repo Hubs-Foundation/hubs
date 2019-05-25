@@ -26,13 +26,7 @@ import { getClientInfoClientId } from "./client-info-dialog";
 import { lang, messages } from "../utils/i18n";
 import Loader from "./loader";
 import AutoExitWarning from "./auto-exit-warning";
-import {
-  TwoDEntryButton,
-  DeviceEntryButton,
-  GenericEntryButton,
-  DaydreamEntryButton,
-  SafariEntryButton
-} from "./entry-buttons.js";
+import { TwoDEntryButton, DeviceEntryButton, GenericEntryButton, DaydreamEntryButton } from "./entry-buttons.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowser from "./media-browser";
 
@@ -144,6 +138,7 @@ class UIRoot extends Component {
     signInCompleteMessageId: PropTypes.string,
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
+    showSafariDialog: PropTypes.bool,
     showSafariMicDialog: PropTypes.bool,
     showOAuthDialog: PropTypes.bool,
     oauthInfo: PropTypes.array,
@@ -205,6 +200,9 @@ class UIRoot extends Component {
     super(props);
     if (props.showSafariMicDialog) {
       this.state.dialog = <SafariMicDialog closable={false} />;
+    }
+    if (props.showSafariDialog) {
+      this.state.dialog = <SafariDialog closable={false} />;
     }
 
     props.mediaSearchStore.setHistory(props.history);
@@ -1027,11 +1025,6 @@ class UIRoot extends Component {
               <DaydreamEntryButton secondary={true} onClick={this.enterDaydream} subtitle={null} />
             )}
             <DeviceEntryButton secondary={true} onClick={() => this.attemptLink()} isInHMD={isMobileVR} />
-            {this.props.availableVREntryTypes.safari === VR_DEVICE_AVAILABILITY.maybe && (
-              <StateLink stateKey="modal" stateValue="safari" history={this.props.history}>
-                <SafariEntryButton onClick={this.showSafariDialog} />
-              </StateLink>
-            )}
             {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
               <TwoDEntryButton onClick={this.enter2D} />
             )}
@@ -1231,7 +1224,8 @@ class UIRoot extends Component {
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
 
     const isLoading =
-      (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) && !this.props.showSafariMicDialog;
+      (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) &&
+      !(this.props.showSafariMicDialog || this.props.showSafariDialog);
 
     const rootStyles = {
       [styles.ui]: true,
@@ -1409,12 +1403,6 @@ class UIRoot extends Component {
               stateValue="help"
               history={this.props.history}
               render={() => this.renderDialog(HelpDialog)}
-            />
-            <StateRoute
-              stateKey="modal"
-              stateValue="safari"
-              history={this.props.history}
-              render={() => this.renderDialog(SafariDialog)}
             />
             <StateRoute
               stateKey="modal"

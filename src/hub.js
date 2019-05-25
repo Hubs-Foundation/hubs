@@ -533,6 +533,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const detectedOS = detectOS(navigator.userAgent);
   const browser = detect();
   if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
+    // If we appear to be in Safari but we don't have the mediaDevices API, then we are likely in a WebView preview
+    // used in apps like Twitter and Discord. So we show the dialog that tells users to open the room 
+    // in the real Safari.
+    if (!navigator.mediaDevices) {
+      remountUI({ showSafariDialog: true });
+      return;
+    }
+
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (e) {
