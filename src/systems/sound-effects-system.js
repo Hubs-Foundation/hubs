@@ -37,6 +37,13 @@ export const SOUND_PIN = soundEnum++;
 export const SOUND_MEDIA_LOADING = soundEnum++;
 export const SOUND_MEDIA_LOADED = soundEnum++;
 
+// Safari doesn't support the promise form of decodeAudioData, so we polyfill it.
+function decodeAudioData(audioContext, arrayBuffer) {
+  return new Promise((resolve, reject) => {
+    audioContext.decodeAudioData(arrayBuffer, resolve, reject);
+  });
+}
+
 export class SoundEffectsSystem {
   constructor() {
     this.pendingEffects = [];
@@ -69,7 +76,7 @@ export class SoundEffectsSystem {
       if (!audioBufferPromise) {
         audioBufferPromise = fetch(url)
           .then(r => r.arrayBuffer())
-          .then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer));
+          .then(arrayBuffer => decodeAudioData(this.audioContext, arrayBuffer));
         loading.set(url, audioBufferPromise);
       }
       return audioBufferPromise;
