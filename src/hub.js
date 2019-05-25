@@ -529,17 +529,19 @@ async function runBotMode(scene, entryManager) {
 document.addEventListener("DOMContentLoaded", async () => {
   warmSerializeElement();
 
-  // HACK: On Safari for iOS & MacOS, if mic permission is not granted, subscriber webrtc negotiation fails.
+  // If we are on iOS but we don't have the mediaDevices API, then we are likely in a Firefox or Chrome WebView,
+  // or a WebView preview used in apps like Twitter and Discord. So we show the dialog that tells users to open
+  // the room in the real Safari.
   const detectedOS = detectOS(navigator.userAgent);
+  if (detectedOS === "iOS" && !navigator.mediaDevices) {
+    remountUI({ showSafariDialog: true });
+    return;
+  }
+
+  // HACK: On Safari for iOS & MacOS, if mic permission is not granted, subscriber webrtc negotiation fails.
+  // So we need to insist on microphone grants to continue.
   const browser = detect();
   if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
-    // If we appear to be in Safari but we don't have the mediaDevices API, then we are likely in a WebView preview
-    // used in apps like Twitter and Discord. So we show the dialog that tells users to open the room in the real Safari.
-    if (!navigator.mediaDevices) {
-      remountUI({ showSafariDialog: true });
-      return;
-    }
-
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (e) {
