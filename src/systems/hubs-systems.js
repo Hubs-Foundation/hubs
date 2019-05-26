@@ -7,6 +7,7 @@ import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
 import { HudButtonRow } from "./hud-system";
+import { SpriteSystem } from "./sprites";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -21,6 +22,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
     this.soundEffectsSystem = new SoundEffectsSystem();
     this.hudButtonRow = new HudButtonRow();
+    this.spriteSystem = new SpriteSystem(this.el);
   },
 
   tick(t) {

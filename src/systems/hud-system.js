@@ -28,7 +28,9 @@ export class HudButtonRow {
         vertexShader: vert,
         fragmentShader: frag,
         side: THREE.DoubleSide,
-        transparent: true
+        transparent: true,
+        lights: false,
+        map: null,
       });
       const mesh = new THREE.Mesh(geometry, material).translateX(-OFFSET.x).rotateX((3 * Math.PI) / 16);
       mesh.matrixNeedsUpdate = true;
