@@ -16,19 +16,10 @@ export async function createDefaultEnvironmentMap() {
 }
 
 AFRAME.registerComponent("environment-map", {
-  schema: {
-    loadDefault: { type: "boolean", default: true }
-  },
-
   init() {
     this.environmentMap = null;
 
     this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
-
-    if (this.data.loadDefault) {
-      // Used in the avatar selector scene because there is no skybox.
-      createDefaultEnvironmentMap().then(this.updateEnvironmentMap);
-    }
   },
 
   updateEnvironmentMap(environmentMap) {

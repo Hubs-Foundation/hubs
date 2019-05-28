@@ -69,7 +69,6 @@
     "profile.save": "Accept",
     "profile.display_name.validation_warning": "Alphanumerics and hyphens. At least 3 characters, no more than 32",
     "profile.header": "Name & Avatar",
-    "profile.avatar-selector.loading": "Loading Avatars...",
     "profile.terms_of_use": "Terms of Use",
     "profile.privacy_notice": "Privacy Notice",
 

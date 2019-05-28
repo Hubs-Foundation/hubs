@@ -187,17 +187,6 @@ class HomeRoot extends Component {
     };
   };
 
-  launchTour = () => {
-    createAndRedirectToNewHub(
-      "Hubs Tour",
-      // TODO BP placeholder tour scene
-      // "chjVRLh", // dev
-      "d2SF68V", // prod
-      null,
-      false
-    );
-  };
-
   render() {
     const mainContentClassNames = classNames({
       [styles.mainContent]: true,
