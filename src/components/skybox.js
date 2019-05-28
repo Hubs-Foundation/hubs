@@ -243,7 +243,8 @@ AFRAME.registerComponent("skybox", {
     this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
     // HACK: Render environment map on next frame to avoid bug where the render target texture is black.
     // This is likely due to the custom elements attached callback being synchronous on Chrome but not Firefox.
-    requestAnimationFrame(() => this.updateEnvironmentMap);
+    // Added timeout due to additional case where texture is black in Firefox.
+    requestAnimationFrame(() => setTimeout(this.updateEnvironmentMap));
   },
 
   update(oldData) {
