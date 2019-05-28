@@ -41,118 +41,53 @@ const bufferDatas = {
     1.0, 0, 0, 0,
     0, -1, 0, 0,
     0, 0, 1, 0,
-    -0.5, 0, 0, 1,
-    1.0, 0, 0, 0,
-    0, -1, 0, 0,
-    0, 0, 1, 0,
-    -0.5, 0, 0, 1,
-    1.0, 0, 0, 0,
-    0, -1, 0, 0,
-    0, 0, 1, 0,
-    -0.5, 0, 0, 1,
-    1.0, 0, 0, 0,
-    0, -1, 0, 0,
-    0, 0, 1, 0,
-    -0.5, 0, 0, 1,
+    -0.5, 4, 0, 1,
 
-    1.0,
-    0,
-    0,
-    0,
-    0,
-    -1,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0.5,
-    0,
-    0,
-    1,
-    1.0,
-    0,
-    0,
-    0,
-    0,
-    -1,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0.5,
-    0,
-    0,
-    1,
-    1.0,
-    0,
-    0,
-    0,
-    0,
-    -1,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0.5,
-    0,
-    0,
-    1,
-    1.0,
-    0,
-    0,
-    0,
-    0,
-    -1,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0.5,
-    0,
-    0,
-    1
+    1.0, 0, 0, 0,
+    0, -1, 0, 0,
+    0, 0, 1, 0,
+    -0.5, 4, 0, 1,
+
+    1.0, 0, 0, 0,
+    0, -1, 0, 0,
+    0, 0, 1, 0,
+    -0.5, 4, 0, 1,
+
+    1.0, 0, 0, 0,
+    0, -1, 0, 0,
+    0, 0, 1, 0,
+    -0.5, 4, 0, 1,
+
+    1.0, 0, 0, 0,
+    0, -1, 0, 0,
+    0, 0, 1, 0,
+    0.5, 3, 1, 1,
+
+    1.0, 0, 0, 0,
+    0, -1, 0, 0,
+    0, 0, 1, 0,
+    0.5, 3, 1, 1,
+
+    1.0, 0, 0, 0,
+    0, -1, 0, 0,
+    0, 0, 1, 0,
+    0.5, 3, 1, 1,
+
+    1.0, 0, 0, 0,
+    0, -1, 0, 0,
+    0, 0, 1, 0,
+    0.5, 3, 1, 1
   ]),
   mvs: new Float32Array([
-    1,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0,
-    -0.4,
-    0,
-    1,
-    0.3,
-    0,
-    0,
-    0,
-    0,
-    0.3,
-    0,
-    0,
-    0,
-    0,
-    0.3,
-    0,
-    0,
-    1.0,
-    0,
-    1
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 5, 3, 1,
+
+    0.5, 0, 0, 0,
+    0, 0.5, 0, 0,
+    0, 0, 0.5, 0,
+    0, 5.0, 0, 1
   ]),
   uvs: new Float32Array([
     sprite1.x,
@@ -215,13 +150,18 @@ const bufferDatas = {
   indices: new Uint16Array([0, 2, 1, 1, 2, 3, 4, 6, 5, 5, 6, 7])
 };
 
+function updateAttribute(mesh, name){
+  mesh.geometry.attributes[name].setY(1, 0);
+  mesh.geometry.attributes[name].data.needsUpdate = true;
+}
+
 export class SpriteSystem {
   constructor(scene) {
     Promise.all([createImageTexture(spritesheetPng), waitForDOMContentLoaded()]).then(([spritesheetTexture]) => {
       const geometry = new THREE.BufferGeometry();
       geometry.addAttribute("a_vertices", new THREE.BufferAttribute(bufferDatas.vertices, 3, false));
       geometry.addAttribute("a_uvs", new THREE.BufferAttribute(bufferDatas.uvs, 2, false));
-      const mvCols = new THREE.InterleavedBuffer(bufferDatas.mvCols, 16);
+      const mvCols = new THREE.InterleavedBuffer(new Float32Array(16*4*2), 16);
       geometry.addAttribute("mvCol0", new THREE.InterleavedBufferAttribute(mvCols, 4, 0, false));
       geometry.addAttribute("mvCol1", new THREE.InterleavedBufferAttribute(mvCols, 4, 4, false));
       geometry.addAttribute("mvCol2", new THREE.InterleavedBufferAttribute(mvCols, 4, 8, false));
@@ -229,7 +169,8 @@ export class SpriteSystem {
       geometry.setIndex([0, 2, 1, 1, 2, 3, 4, 6, 5, 5, 6, 7]);
       const material = new THREE.RawShaderMaterial({
         uniforms: {
-          u_spritesheet: { value: spritesheetTexture }
+          u_spritesheet: { value: spritesheetTexture },
+          //u_projection: { value: new Float32Array(new THREE.Matrix4().identity().elements) }
         },
         vertexShader: vert,
         fragmentShader: frag,
@@ -240,6 +181,11 @@ export class SpriteSystem {
       const el = document.createElement("a-entity");
       scene.appendChild(el);
       el.setObject3D("mesh", this.mesh);
+      this.mesh.frustumCulled = false;
     });
+  }
+  tick(scene) {
+    if (!this.mesh) return;
+//    this.mesh.material.uniforms.u_projection.value = new Float32Array(scene.camera.projectionMatrix.elements);
   }
 }

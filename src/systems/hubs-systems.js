@@ -40,6 +40,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
     this.soundEffectsSystem.tick();
     this.hudButtonRow.tick(this.el);
+    this.spriteSystem.tick(this.el);
   },
 
   remove() {
