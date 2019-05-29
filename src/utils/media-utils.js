@@ -380,7 +380,14 @@ export const traverseMeshesAndAddShapes = (function() {
 
     console.group("traverseMeshesAndAddShapes");
 
-    if (document.querySelector(["[ammo-shape__trimesh]", "[ammo-shape__heightfield]", "[ammo-shape__voxel0]"])) {
+    if (
+      document.querySelector([
+        "[ammo-shape__trimesh]",
+        "[ammo-shape__heightfield]",
+        "[ammo-shape__voxel0]",
+        "[ammo-shape__voxels]"
+      ])
+    ) {
       console.log("heightfield or trimesh found on scene");
     } else {
       console.log("collision not found in scene");

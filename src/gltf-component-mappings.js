@@ -351,21 +351,28 @@ AFRAME.GLTFModelPlus.registerComponent("voxels", "voxels", (el, componentName, c
   const halfExtents = new THREE.Vector3();
 
   const data = componentData.data;
-  var j = 0;
+  // var j = 0;
   console.log("adding", data.length / 6, "voxels");
-  for (let i = 0; i < data.length; i += 6) {
-    box.min.set(data[i], data[i + 1], data[i + 2]);
-    box.max.set(data[i + 3], data[i + 4], data[i + 5]);
-    box.getSize(size);
-    halfExtents.set(size.x / 2, size.y / 2, size.z / 2);
-    box.getCenter(center);
-    el.setAttribute("ammo-shape__voxel" + j, {
-      type: SHAPE.BOX,
-      margin: 0.01,
-      fit: FIT.MANUAL,
-      halfExtents: halfExtents.clone(),
-      offset: center.clone()
-    });
-    j++;
-  }
+  // for (let i = 0; i < data.length; i += 6) {
+  //   box.min.set(data[i], data[i + 1], data[i + 2]);
+  //   box.max.set(data[i + 3], data[i + 4], data[i + 5]);
+  //   box.getSize(size);
+  //   halfExtents.set(size.x / 2, size.y / 2, size.z / 2);
+  //   box.getCenter(center);
+  //   el.setAttribute("ammo-shape__voxel" + j, {
+  //     type: SHAPE.BOX,
+  //     margin: 0.01,
+  //     fit: FIT.MANUAL,
+  //     halfExtents: halfExtents.clone(),
+  //     offset: center.clone()
+  //   });
+  //   j++;
+  // }
+
+  el.setAttribute("ammo-shape__voxels", {
+    type: "voxel",
+    margin: 0.01,
+    fit: FIT.MANUAL,
+    voxelData: data
+  });
 });
