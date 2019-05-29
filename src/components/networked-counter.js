@@ -39,7 +39,7 @@ AFRAME.registerComponent("networked-counter", {
       let oldestEl = null,
         minTs = Number.MAX_VALUE;
       this.timestamps.forEach((ts, el) => {
-        if (ts < minTs && !interaction.isHeld(el)) {
+        if (ts < minTs && !interaction.isHeld(el) && NAF.utils.isMine(el)) {
           oldestEl = el;
           minTs = ts;
         }

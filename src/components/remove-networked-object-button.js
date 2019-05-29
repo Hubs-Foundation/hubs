@@ -14,6 +14,7 @@ AFRAME.registerComponent("remove-networked-object-button", {
       this.el.parentNode.setAttribute("visible", false);
 
       this.targetEl.addEventListener("animationcomplete", () => {
+        NAF.utils.takeOwnership(this.targetEl);
         this.targetEl.parentNode.removeChild(this.targetEl);
       });
     };
