@@ -26,7 +26,7 @@ import { getClientInfoClientId } from "./client-info-dialog";
 import { lang, messages } from "../utils/i18n";
 import Loader from "./loader";
 import AutoExitWarning from "./auto-exit-warning";
-import { TwoDEntryButton, DeviceEntryButton, GenericEntryButton, DaydreamEntryButton } from "./entry-buttons.js";
+import { TwoDEntryButton, GenericEntryButton, DaydreamEntryButton } from "./entry-buttons.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowser from "./media-browser";
 
@@ -61,7 +61,6 @@ import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
 import { handleTipClose } from "../systems/tips.js";
 
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
-import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
@@ -923,8 +922,22 @@ class UIRoot extends Component {
           />
         </div>
 
-        <div className={entryStyles.buttonContainer}>
-          <WithHoverSound>
+        {!this.state.waitingOnAudio ? (
+          <div className={entryStyles.buttonContainer}>
+            {!isMobileVR && (
+              <a
+                onClick={e => {
+                  e.preventDefault();
+                  this.attemptLink();
+                }}
+                className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
+              >
+                <FormattedMessage id="entry.device-medium" />
+                <div className={entryStyles.buttonSubtitle}>
+                  <FormattedMessage id={isMobile ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"} />
+                </div>
+              </a>
+            )}
             {promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType ? (
               <StateLink
                 stateKey="entry_step"
@@ -935,15 +948,26 @@ class UIRoot extends Component {
                 <FormattedMessage id="entry.enter-room" />
               </StateLink>
             ) : (
-              <button
-                onClick={() => this.handleForceEntry()}
+              <a
+                onClick={e => {
+                  e.preventDefault();
+                  this.handleForceEntry();
+                }}
                 className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
               >
                 <FormattedMessage id="entry.enter-room" />
-              </button>
+              </a>
             )}
-          </WithHoverSound>
-        </div>
+          </div>
+        ) : (
+          <div>
+            <div className="loader-wrap loader-mid">
+              <div className="loader">
+                <div className="loader-center" />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -975,7 +999,6 @@ class UIRoot extends Component {
             {this.props.availableVREntryTypes.daydream === VR_DEVICE_AVAILABILITY.yes && (
               <DaydreamEntryButton secondary={true} onClick={this.enterDaydream} subtitle={null} />
             )}
-            <DeviceEntryButton secondary={true} onClick={() => this.attemptLink()} isInHMD={isMobileVR} />
             {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
               <TwoDEntryButton onClick={this.enter2D} />
             )}

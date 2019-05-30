@@ -116,6 +116,10 @@ $semi-bold: 600;
   @media (max-width: 768px) {
     width: 327px;
   }
+
+  @media (max-width: 375px) {
+    width: 300px;
+  }
 }
 
 %link-button {
@@ -156,6 +160,11 @@ $semi-bold: 600;
   justify-content: center;
   min-width: 150px;
   height: 48px;
+}
+
+%entry-action-button {
+  border-radius: 30px;
+  height: 60px;
 }
 
 %action-button-secondary {

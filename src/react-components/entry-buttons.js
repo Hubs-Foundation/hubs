@@ -96,20 +96,3 @@ export const DaydreamEntryButton = props => {
 
   return <EntryButton {...entryButtonProps} />;
 };
-
-export const DeviceEntryButton = props => {
-  const entryButtonProps = {
-    ...props,
-    iconSrc: DeviceEntryImg,
-    prefixMessageId: isMobile ? "entry.device-prefix-mobile" : "entry.device-prefix-desktop",
-    mediumMessageId: "entry.device-medium"
-  };
-
-  entryButtonProps.subtitle = entryButtonProps.isInHMD
-    ? "entry.device-subtitle-vr"
-    : isMobile
-      ? "entry.device-subtitle-mobile"
-      : "entry.device-subtitle-desktop";
-
-  return <EntryButton {...entryButtonProps} />;
-};
