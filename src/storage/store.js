@@ -111,6 +111,14 @@ export default class Store extends EventTarget {
     if (localStorage.getItem(LOCAL_STORE_KEY) === null) {
       localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify({}));
     }
+
+    // When storage is updated in another window
+    window.addEventListener("storage", e => {
+      if (e.key !== LOCAL_STORE_KEY) return;
+      delete this[STORE_STATE_CACHE_KEY];
+      this.dispatchEvent(new CustomEvent("statechanged"));
+    });
+
     this.update({
       activity: {},
       settings: {},
