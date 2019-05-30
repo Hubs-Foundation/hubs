@@ -45,10 +45,7 @@ class DiscordLanding extends Component {
                   <FormattedMessage id="discord.secondary_tagline" />
                 </div>
                 <div className={styles.actionButtons}>
-                  <a
-                    href={inviteUrl}
-                    className={styles.downloadButton}
-                  >
+                  <a href={inviteUrl} className={styles.downloadButton}>
                     <div>
                       <FormattedMessage id="discord.contact_us" />
                     </div>
