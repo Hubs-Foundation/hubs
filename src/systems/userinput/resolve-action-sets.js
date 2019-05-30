@@ -104,14 +104,13 @@ export function resolveActionSets() {
   );
   userinput.toggleSet(
     sets.cursorHoveringOnUI,
-    (rightRemote.hovered && rightRemote.hovered.id === "hud-button-row") ||
-      (!rightHand.held &&
-        !rightHand.hovered &&
-        !rightRemote.held &&
-        rightRemote.hovered &&
-        (rightRemote.hovered.components.tags &&
-          (rightRemote.hovered.components.tags.data.singleActionButton ||
-            rightRemote.hovered.components.tags.data.holdableButton)))
+    !rightHand.held &&
+      !rightHand.hovered &&
+      !rightRemote.held &&
+      rightRemote.hovered &&
+      (rightRemote.hovered.components.tags &&
+        (rightRemote.hovered.components.tags.data.singleActionButton ||
+          rightRemote.hovered.components.tags.data.holdableButton))
   );
   userinput.toggleSet(
     sets.cursorHoveringOnVideo,
