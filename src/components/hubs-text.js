@@ -150,6 +150,12 @@ AFRAME.registerComponent("text", {
     if (oldData.font !== data.font) {
       this.updateFont().catch(err => console.error(err));
     }
+
+    // Not a new font, but we need to accomodate other changes with the existing font.
+    if (this.currentFont != null) {
+      this.updateGeometry(this.geometry, this.currentFont);
+      this.updateLayout(this.currentFont);
+    }
   },
 
   /**
@@ -191,6 +197,7 @@ AFRAME.registerComponent("text", {
       if (font.pages.length !== 1) {
         throw new Error("Currently only single-page bitmap fonts are supported.");
       }
+      this.currentFont = font;
       this.updateGeometry(geometry, font);
       this.shaderObject.update({ map: texture });
       this.updateLayout(font);
