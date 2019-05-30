@@ -1,10 +1,5 @@
 /* global AFRAME THREE */
 
-// Sprite rendering
-// We have a lot of 2D images that are each rendered separately in hubs.
-// Our goal is to render them all at once.
-
-// TODO: Write explainer for spritesheet generation
 import spritesheet from "../assets/images/hud/spritesheet.json";
 import { createImageTexture } from "../components/media-views.js";
 import spritesheetPng from "../assets/images/hud/spritesheet.png";
@@ -26,7 +21,7 @@ AFRAME.registerComponent("sprite", {
       this.el.sceneEl.systems["hubs-systems"].spriteSystem.add(this);
     }
   },
-  remove(){
+  remove() {
     this.el.sceneEl.systems["hubs-systems"].spriteSystem.remove(this);
   }
 });
@@ -42,10 +37,111 @@ function normalizedFrame(name, spritesheet) {
   };
 }
 
+const raycastOnSprite = (function() {
+  var intersectPoint = new THREE.Vector3();
+  var worldScale = new THREE.Vector3();
+  var mvPosition = new THREE.Vector3();
+
+  var alignedPosition = new THREE.Vector2();
+  var rotatedPosition = new THREE.Vector2();
+  var viewWorldMatrix = new THREE.Matrix4();
+
+  var vA = new THREE.Vector3();
+  var vB = new THREE.Vector3();
+  var vC = new THREE.Vector3();
+
+  var uvA = new THREE.Vector2();
+  var uvB = new THREE.Vector2();
+  var uvC = new THREE.Vector2();
+
+  function transformVertex(vertexPosition, mvPosition, center, scale, sin, cos) {
+    // compute position in camera space
+    alignedPosition
+      .subVectors(vertexPosition, center)
+      .addScalar(0.5)
+      .multiply(scale);
+
+    // to check if rotation is not zero
+    if (sin !== undefined) {
+      rotatedPosition.x = cos * alignedPosition.x - sin * alignedPosition.y;
+      rotatedPosition.y = sin * alignedPosition.x + cos * alignedPosition.y;
+    } else {
+      rotatedPosition.copy(alignedPosition);
+    }
+
+    vertexPosition.copy(mvPosition);
+    vertexPosition.x += rotatedPosition.x;
+    vertexPosition.y += rotatedPosition.y;
+
+    // transform to world space
+    vertexPosition.applyMatrix4(viewWorldMatrix);
+  }
+
+  return function raycast(raycaster, intersects) {
+    worldScale.setFromMatrixScale(this.matrixWorld);
+		this.modelViewMatrix.multiplyMatrices( AFRAME.scenes[0].camera.matrixWorldInverse, this.matrixWorld );
+    viewWorldMatrix.getInverse(this.modelViewMatrix).premultiply(this.matrixWorld);
+    mvPosition.setFromMatrixPosition(this.modelViewMatrix);
+
+    //    var rotation = this.material.rotation;
+    //    var sin, cos;
+    //    if (rotation !== 0) {
+    //      cos = Math.cos(rotation);
+    //      sin = Math.sin(rotation);
+    //    }
+
+    var center = CENTER;
+
+    transformVertex(vA.set(-0.5, 0.5, 0), mvPosition, center, worldScale); //, sin, cos);
+    transformVertex(vB.set(0.5, 0.5, 0), mvPosition, center, worldScale); //, sin, cos);
+    transformVertex(vC.set(-0.5, -0.5, 0), mvPosition, center, worldScale); //, sin, cos);
+
+    uvA.set(0, 0);
+    uvB.set(1, 0);
+    uvC.set(1, 1);
+
+    // check first triangle
+    var intersect = raycaster.ray.intersectTriangle(vA, vC, vB, false, intersectPoint);
+
+    if (intersect === null) {
+      // check second triangle
+      transformVertex(vA.set(0.5, -0.5, 0), mvPosition, center, worldScale); //, sin, cos);
+      uvA.set(0, 1);
+
+      intersect = raycaster.ray.intersectTriangle(vB, vC, vA, false, intersectPoint);
+      if (intersect === null) {
+        return;
+      }
+    }
+
+    var distance = raycaster.ray.origin.distanceTo(intersectPoint);
+
+    if (distance < raycaster.near || distance > raycaster.far) return;
+
+    intersects.push({
+      distance: distance,
+      point: intersectPoint.clone(),
+      uv: THREE.Triangle.getUV(intersectPoint, vA, vB, vC, uvA, uvB, uvC, new THREE.Vector2()),
+      face: null,
+      object: this
+    });
+  };
+})();
+
+function SpriteMesh(object3D, material) {}
+
+const CENTER = new THREE.Vector2(0.5, 0.5);
+
 export class SpriteSystem {
+  raycast(raycaster, intersects) {
+    for (let i = 0; i < this.spriteComponents.length; i++) {
+      raycastOnSprite.call(this.spriteComponents[i].el.object3D, raycaster, intersects);
+    }
+    return intersects;
+  }
   constructor(scene) {
     this.spriteComponents = [];
-    this.maxSprites = 3;
+    this.maxSprites = 100;
     Promise.all([createImageTexture(spritesheetPng), waitForDOMContentLoaded()]).then(([spritesheetTexture]) => {
       const geometry = new THREE.BufferGeometry();
       geometry.addAttribute(
@@ -71,7 +167,6 @@ export class SpriteSystem {
       const material = new THREE.RawShaderMaterial({
         uniforms: {
           u_spritesheet: { value: spritesheetTexture }
-          //u_projection: { value: new Float32Array(new THREE.Matrix4().identity().elements) }
         },
         vertexShader: vert,
         fragmentShader: frag,
@@ -80,16 +175,19 @@ export class SpriteSystem {
       });
       this.mesh = new THREE.Mesh(geometry, material);
       const el = document.createElement("a-entity");
+      el.classList.add("ui");
       scene.appendChild(el);
       el.setObject3D("mesh", this.mesh);
       this.mesh.frustumCulled = false;
+      this.mesh.renderOrder = window.APP.RENDER_ORDER.HUD_ICONS;
+      this.mesh.raycast = this.raycast.bind(this);
     });
   }
 
   tick(scene) {
-    if (!this.mesh) return;
+    if (!this.mesh) return; // "await" async initialization (and pay for it forever after that)
+
     for (let i = 0; i < this.spriteComponents.length; i++) {
-      this.spriteComponents[i].el.object3D.updateMatrices();
       this.set(
         this.spriteComponents[i].data.name,
         i,
@@ -109,29 +207,34 @@ export class SpriteSystem {
     }
     const frame = normalizedFrame(spritename, spritesheet);
     if (visible) {
-      this.mesh.geometry.attributes["a_uvs"].setXY(i * 4 + 0, frame.x, frame.y);
-      this.mesh.geometry.attributes["a_uvs"].setXY(i * 4 + 1, frame.x + frame.w, frame.y);
-      this.mesh.geometry.attributes["a_uvs"].setXY(i * 4 + 2, frame.x, frame.y + frame.h);
-      this.mesh.geometry.attributes["a_uvs"].setXY(i * 4 + 3, frame.x + frame.w, frame.y + frame.h);
-      this.mesh.geometry.attributes["a_uvs"].needsUpdate = true;
-      this.mesh.geometry.attributes["a_vertices"].setXYZ(i * 4 + 0, -0.5, 0.5, 0);
-      this.mesh.geometry.attributes["a_vertices"].setXYZ(i * 4 + 1, 0.5, 0.5, 0);
-      this.mesh.geometry.attributes["a_vertices"].setXYZ(i * 4 + 2, -0.5, -0.5, 0);
-      this.mesh.geometry.attributes["a_vertices"].setXYZ(i * 4 + 3, 0.5, -0.5, 0);
-      this.mesh.geometry.attributes["a_vertices"].needsUpdate = true;
-      this.mesh.geometry.attributes["mvCol0"].data.array.set(mat4.elements, i * 4 * 16 + 0);
-      this.mesh.geometry.attributes["mvCol0"].data.array.set(mat4.elements, i * 4 * 16 + 1 * 16);
-      this.mesh.geometry.attributes["mvCol0"].data.array.set(mat4.elements, i * 4 * 16 + 2 * 16);
-      this.mesh.geometry.attributes["mvCol0"].data.array.set(mat4.elements, i * 4 * 16 + 3 * 16);
-      this.mesh.geometry.attributes["mvCol0"].data.needsUpdate = true;
+      const aUvs = this.mesh.geometry.attributes["a_uvs"];
+      aUvs.setXY(i * 4 + 0, frame.x, frame.y);
+      aUvs.setXY(i * 4 + 1, frame.x + frame.w, frame.y);
+      aUvs.setXY(i * 4 + 2, frame.x, frame.y + frame.h);
+      aUvs.setXY(i * 4 + 3, frame.x + frame.w, frame.y + frame.h);
+      aUvs.needsUpdate = true;
+
+      const aVertices = this.mesh.geometry.attributes["a_vertices"];
+      aVertices.setXYZ(i * 4 + 0, -0.5, 0.5, 0);
+      aVertices.setXYZ(i * 4 + 1, 0.5, 0.5, 0);
+      aVertices.setXYZ(i * 4 + 2, -0.5, -0.5, 0);
+      aVertices.setXYZ(i * 4 + 3, 0.5, -0.5, 0);
+      aVertices.needsUpdate = true;
+
+      const mvCols = this.mesh.geometry.attributes["mvCol0"].data; // interleaved
+      mvCols.array.set(mat4.elements, i * 4 * 16 + 0);
+      mvCols.array.set(mat4.elements, i * 4 * 16 + 1 * 16);
+      mvCols.array.set(mat4.elements, i * 4 * 16 + 2 * 16);
+      mvCols.array.set(mat4.elements, i * 4 * 16 + 3 * 16);
+      mvCols.needsUpdate = true;
     } else {
-      this.mesh.geometry.attributes["a_vertices"].setXYZ(i * 4 + 0, 0, 0, 0);
-      this.mesh.geometry.attributes["a_vertices"].setXYZ(i * 4 + 1, 0, 0, 0);
-      this.mesh.geometry.attributes["a_vertices"].setXYZ(i * 4 + 2, 0, 0, 0);
-      this.mesh.geometry.attributes["a_vertices"].setXYZ(i * 4 + 3, 0, 0, 0);
-      this.mesh.geometry.attributes["a_vertices"].needsUpdate = true;
+      const aVertices = this.mesh.geometry.attributes["a_vertices"];
+      aVertices.setXYZ(i * 4 + 0, 0, 0, 0);
+      aVertices.setXYZ(i * 4 + 1, 0, 0, 0);
+      aVertices.setXYZ(i * 4 + 2, 0, 0, 0);
+      aVertices.setXYZ(i * 4 + 3, 0, 0, 0);
+      aVertices.needsUpdate = true;
     }
-    // .data is the interleaved buffer. so we don't set mvCol1/2/3 separately
   }
 
   add(sprite) {

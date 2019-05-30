@@ -263,37 +263,49 @@
                             </a-entity>
                             <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
                                 <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
-                                <a-image
-                                    icon-button="image: #camera-action; hoverImage: #camera;"
-                                    scale="0.165 0.165 0.165"
-                                    position="-0.125 0.005 0.02"
-                                ></a-image>
+                                <a-entity sprite="name: spawn.png"
+                                          scale="0.165 0.165 0.165"
+                                          position="-0.125 0.005 0.02"
+                                ></a-entity>
+                                <!-- <a-image
+                                     icon-button="image: #camera-action; hoverImage: #camera;"
+                                     scale="0.165 0.165 0.165"
+                                     position="-0.125 0.005 0.02"
+                                     ></a-image> -->
                             </a-entity>
                             <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: true" position="0.25 0.375 0.01">
                                 <a-entity text=" value:track; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
-                                <a-image
-                                    icon-button="image: #camera-action; hoverImage: #camera-action;"
-                                    scale="0.165 0.165 0.165"
-                                    position="-0.125 0.005 0.01"
-                                ></a-image>
+                                <a-entity sprite="name: spawn-hover.png"
+                                          scale="0.165 0.165 0.165"
+                                          position="-0.125 0.005 0.01"
+                                ></a-entity>
+                                <!-- <a-image
+                                     icon-button="image: #camera-action; hoverImage: #camera-action;"
+                                     scale="0.165 0.165 0.165"
+                                     position="-0.125 0.005 0.01"
+                                     ></a-image> -->
                             </a-entity>
                             <a-entity is-remote-hover-target tags="singleActionButton: true;" class="hide-when-pinned" remove-networked-object-button position="0 -0.375 0.01">
-                                <a-entity sprite="name: spawn.png"
+                                <a-entity sprite="name: mute_off-hover.png"
                                           scale="0.165 0.165 0.165"
                                           position="0 0 0.001"
                                 ></a-entity>
-                                <a-image
-                                    icon-button="image: #remove-action; hoverImage: #remove-action;"
-                                    scale="0.165 0.165 0.165"
-                                    position="0 0 0.001"
-                                ></a-image>
+                                <!-- <a-image
+                                     icon-button="image: #remove-action; hoverImage: #remove-action;"
+                                     scale="0.165 0.165 0.165"
+                                     position="0 0 0.001"
+                                     ></a-image> -->
                             </a-entity>
                             <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" class="hide-when-pinned" drop-object-button position="0 -0.625 0.01">
-                                <a-image
-                                    icon-button="image: #drop-action; hoverImage: #drop-action;"
-                                    scale="0.165 0.165 0.165"
-                                    position="0 0 0.001"
-                                ></a-image>
+                                <a-entity sprite="name: mute_off.png"
+                                          scale="0.165 0.165 0.165"
+                                          position="0 0 0.001"
+                                ></a-entity>
+                                <!-- <a-image
+                                     icon-button="image: #drop-action; hoverImage: #drop-action;"
+                                     scale="0.165 0.165 0.165"
+                                     position="0 0 0.001"
+                                     ></a-image> -->
                             </a-entity>
                             <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" open-media-button position="0.43 -0.375 0.01">
                                 <a-entity text="value:open link; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
@@ -302,25 +314,37 @@
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
                             <a-entity mixin="rounded-action-button" tags="isHoldable: true; holdableButton: true;" is-remote-hover-target transform-button transform-button-selector position="-0.3 -0.125 0.01">
-                                <a-image
-                                    icon-button="image: #rotate-action; hoverImage: #rotate-action;"
-                                    scale="0.165 0.165 0.165"
-                                    position="0 0 0.001"
-                                ></a-image>
+                                <a-entity sprite="name: pen_on-hover.png"
+                                          scale="0.165 0.165 0.165"
+                                          position="0 0 0.001"
+                                ></a-entity>
+                                <!-- <a-image
+                                     icon-button="image: #rotate-action; hoverImage: #rotate-action;"
+                                     scale="0.165 0.165 0.165"
+                                     position="0 0 0.001"
+                                     ></a-image> -->
                             </a-entity>
                             <a-entity mixin="rounded-action-button" tags="singleActionButton: true;" is-remote-hover-target transform-button="mode: align;" position="0 -0.125 0.01">
-                                <a-image
-                                    icon-button="image: #recenter-action; hoverImage: #recenter-action;"
-                                    scale="0.165 0.165 0.165"
-                                    position="0 0 0.001"
-                                ></a-image>
+                                <a-entity sprite="name: spawn_message_dark-hover.png"
+                                          scale="0.165 0.165 0.165"
+                                          position="0 0 0.001"
+                                ></a-entity>
+                                <!-- <a-image
+                                     icon-button="image: #recenter-action; hoverImage: #recenter-action;"
+                                     scale="0.165 0.165 0.165"
+                                     position="0 0 0.001"
+                                     ></a-image> -->
                             </a-entity>
                             <a-entity mixin="rounded-action-button" tags="isHoldable: true; holdableButton: true;" is-remote-hover-target transform-button="mode: scale;" position="0.3 -0.125 0.01">
-                                <a-image
-                                    icon-button="image: #scale-action; hoverImage: #scale-action;"
-                                    scale="0.165 0.165 0.165"
-                                    position="0 0 0.001"
-                                ></a-image>
+                                <a-entity sprite="name: pen_off-hover.png"
+                                          scale="0.165 0.165 0.165"
+                                          position="0 0 0.001"
+                                ></a-entity>
+                                <!-- <a-image
+                                     icon-button="image: #scale-action; hoverImage: #scale-action;"
+                                     scale="0.165 0.165 0.165"
+                                     position="0 0 0.001"
+                                     ></a-image> -->
                             </a-entity>
                         </a-entity>
                     </a-entity>
@@ -558,15 +582,6 @@
                     textColor: #ff3464;
                     backgroundHoverColor: #aaa;
                     backgroundColor: #fff;"
-                slice9="
-                    width: 0.2;
-                    height: 0.2;
-                    left: 64;
-                    top: 64;
-                    right: 66;
-                    bottom: 66;
-                    opacity: 1.0;
-                    src: #button"
             ></a-mixin>
 
             <a-mixin id="rounded-text-action-button"
