@@ -880,7 +880,6 @@ class UIRoot extends Component {
   };
 
   renderEntryStartPanel = () => {
-    const hasPush = navigator.serviceWorker && "PushManager" in window;
     const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
     const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
 
@@ -948,20 +947,6 @@ class UIRoot extends Component {
             onSendMessage={this.sendMessage}
           />
         </div>
-
-        {hasPush && (
-          <div className={entryStyles.subscribe}>
-            <input
-              id="subscribe"
-              type="checkbox"
-              onChange={this.onSubscribeChanged}
-              checked={this.state.isSubscribed === undefined ? this.props.initialIsSubscribed : this.state.isSubscribed}
-            />
-            <label htmlFor="subscribe">
-              <FormattedMessage id="entry.notify_me" />
-            </label>
-          </div>
-        )}
 
         <div className={entryStyles.buttonContainer}>
           <WithHoverSound>
@@ -1223,6 +1208,7 @@ class UIRoot extends Component {
       "ui-root": true,
       "in-modal-or-overlay": this.isInModalOrOverlay()
     };
+    const hasPush = navigator.serviceWorker && "PushManager" in window;
 
     if (this.props.showOAuthDialog)
       return (
@@ -1578,6 +1564,11 @@ class UIRoot extends Component {
                     <InviteDialog
                       allowShare={!isMobileVR}
                       entryCode={this.props.hubEntryCode}
+                      hasPush={hasPush}
+                      isSubscribed={
+                        this.state.isSubscribed === undefined ? this.props.initialIsSubscribed : this.state.isSubscribed
+                      }
+                      onSubscribeChanged={() => this.onSubscribeChanged()}
                       hubId={this.props.hubId}
                       onClose={() => this.setState({ showInviteDialog: false })}
                     />

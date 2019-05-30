@@ -217,3 +217,24 @@
   background-color: transparent;
   color: white;
 }
+
+:local(.subscribe) {
+  margin: 20px 0 6px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+
+  input {
+    @extend %checkbox;
+  }
+
+  input:checked {
+    @extend %checkbox-checked;
+  }
+
+  label {
+    cursor: pointer;
+    margin-right: 8px;
+  }
+}
