@@ -132,6 +132,11 @@ class TopHUD extends Component {
             </i>
           </button>
           <FormattedMessage id={`tips.${isMobile ? "mobile" : "desktop"}.watching`} />
+          {!isMobile && (
+            <button className={styles.tipCancelText} onClick={() => this.props.onWatchEnded()}>
+              <FormattedMessage id="tips.watching.back" />
+            </button>
+          )}
         </div>
       );
     } else if (this.props.activeTip) {

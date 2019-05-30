@@ -127,12 +127,9 @@
       outline-style: none;
       cursor: pointer;
       border: 0;
-      text-decoration: none;
-      background: transparent;
-    }
-
-    :local(.rename-button):hover {
       text-decoration: underline;
+      text-decoration-color: $grey-text;
+      background: transparent;
     }
   }
 
