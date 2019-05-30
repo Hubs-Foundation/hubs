@@ -162,6 +162,9 @@ window.Ammo = Ammo.bind(undefined, {
   }
 });
 require("aframe-physics-system");
+
+import "./systems/post-physics";
+
 import "./components/owned-object-limiter";
 import "./components/set-unowned-body-kinematic";
 import "./components/scalable-when-grabbed";

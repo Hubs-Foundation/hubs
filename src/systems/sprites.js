@@ -16,13 +16,13 @@ function isVisible(o) {
 AFRAME.registerComponent("sprite", {
   schema: { name: { type: "string" } },
   tick() {
-    if (!this.didRegisterWithSystem) {
+    if (!this.didRegisterWithSystem && this.el.sceneEl.systems["post-physics"]) {
       this.didRegisterWithSystem = true;
-      this.el.sceneEl.systems["hubs-systems"].spriteSystem.add(this);
+      this.el.sceneEl.systems["post-physics"].spriteSystem.add(this);
     }
   },
   remove() {
-    this.el.sceneEl.systems["hubs-systems"].spriteSystem.remove(this);
+    this.el.sceneEl.systems["post-physics"].spriteSystem.remove(this);
   }
 });
 
@@ -198,7 +198,7 @@ export class SpriteSystem {
     if (!this.mesh) return; // "await" async initialization (and pay for it forever after that)
 
     for (let i = 0; i < this.spriteComponents.length; i++) {
-      this.spriteComponents[i].el.object3D.matrixWorldNeedsUpdate = true;
+      this.spriteComponents[i].el.object3D.matrixNeedsUpdate = true;
       this.spriteComponents[i].el.object3D.updateMatrices();
       this.set(
         this.spriteComponents[i].data.name,

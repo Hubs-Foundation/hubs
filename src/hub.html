@@ -39,6 +39,7 @@
 <body>
     <a-scene
         loading-screen="enabled: false"
+        post-physics
         physics="debug: false; driver: ammo; debugDrawMode: 1; iterations: 4;"
         hubs-systems
         class="grab-cursor"
@@ -168,7 +169,7 @@
                                             <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
                                             <a-entity
                                                 sprite
-                                                sprite-button="image: camera-action.png; hoverImage: camera.png;"
+                                                sprite-button="image: camera-action.png; hoverImage: camera-action.png;"
                                                 scale="0.165 0.165 0.165"
                                                 position="-0.125 0.005 0.02"
                                             ></a-entity>
@@ -177,7 +178,7 @@
                                             <a-entity text=" value:track; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
                                             <a-entity
                                                 sprite
-                                                sprite-button="image: camera-action.png; hoverImage: camera.png;"
+                                                sprite-button="image: camera-action.png; hoverImage: camera-action.png;"
                                                 scale="0.165 0.165 0.165"
                                                 position="-0.125 0.005 0.01"
                                             ></a-entity>
@@ -267,7 +268,7 @@
                                 <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
                                 <a-entity
                                     sprite
-                                    sprite-button="image: camera-action.png; hoverImage: camera.png;"
+                                    sprite-button="image: camera-action.png; hoverImage: camera-action.png;"
                                     scale="0.165 0.165 0.165"
                                     position="-0.125 0.005 0.02"
                                 ></a-entity>
@@ -276,7 +277,7 @@
                                 <a-entity text=" value:track; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
                                 <a-entity
                                     sprite
-                                    sprite-button="image: camera-action.png; hoverImage: camera.png;"
+                                    sprite-button="image: camera-action.png; hoverImage: camera-action.png;"
                                     scale="0.165 0.165 0.165"
                                     position="-0.125 0.005 0.01"
                                 ></a-entity>
@@ -425,7 +426,7 @@
                     <a-entity class="snap-button" mixin="rounded-action-button" is-remote-hover-target tags="isHoverMenuChild: true; singleActionButton: true;" position="0 -0.145 0.0" scale="0.75 0.75 0.75">
                         <a-entity
                             sprite
-                            sprite-button="image: snap-camera.png; hoverImage: snap-camera.png;"
+                            sprite-button="image: snap_camera.png; hoverImage: snap_camera.png;"
                             scale="0.225 0.225 0.225"
                             position="0 0.005 0.01"
                         ></a-entity>
@@ -463,7 +464,7 @@
                         is-remote-hover-target
                         tags="singleActionButton: true; isHoverMenuChild: true;"
                         sprite
-                        sprite-button="image: video-snap.png; hoverImage: video-snap-hover.png; activeImage: video-snap.png; activeHoverImage: video-snap-hover.png"
+                        sprite-button="image: snap.png; hoverImage: snap-hover.png; activeImage: snap.png; activeHoverImage: snap-hover.png"
                         scale="0.075 0.075 0.075"
                         position="0 0.225 0"
                         class="video-snap-button"
@@ -474,7 +475,7 @@
                         is-remote-hover-target
                         tags="singleActionButton: true; isHoverMenuChild: true;"
                         sprite
-                        sprite-button="image: video-volume-down.png; hoverImage: video-volume-down-hover.png;"
+                        sprite-button="image: volume_down.png; hoverImage: volume_down-hover.png;"
                         scale="0.075 0.075 0.075"
                         position="-0.275 0.14 0"
                         class="ui video-volume-down-button"
@@ -483,7 +484,7 @@
                         is-remote-hover-target
                         tags="singleActionButton: true; isHoverMenuChild: true;"
                         sprite
-                        sprite-button="image: video-volume-up.png; hoverImage: video-volume-up-hover.png;"
+                        sprite-button="image: volume_up.png; hoverImage: volume_up-hover.png;"
                         scale="0.075 0.075 0.075"
                         position="0.275 0.14 0"
                         class="ui video-volume-up-button"
@@ -493,7 +494,7 @@
                             is-remote-hover-target
                             tags="singleActionButton: true; isHoverMenuChild: true;"
                             sprite
-                            sprite-button="image: video-seek-back.png; hoverImage: video-seek-back-hover.png;"
+                            sprite-button="image: seek_back.png; hoverImage: seek_back-hover.png;"
                             scale="0.1 0.1 0.1"
                             position="-0.3 -0.125 0"
                             class="ui video-seek-back-button"
@@ -503,7 +504,7 @@
                             is-remote-hover-target
                             tags="singleActionButton: true; isHoverMenuChild: true;"
                             sprite
-                            sprite-button="image: video-pause.png; hoverImage: video-pause-hover.png; activeImage: video-play.png; activeHoverImage: video-play-hover.png"
+                            sprite-button="image: pause.png; hoverImage: pause-hover.png; activeImage: play.png; activeHoverImage: play-hover.png"
                             scale="0.15 0.15 0.15"
                             position="0 -0.125 0"
                             class="ui video-playpause-button"
@@ -513,7 +514,7 @@
                             is-remote-hover-target
                             tags="singleActionButton: true; isHoverMenuChild: true;"
                             sprite
-                            sprite-button="image: video-seek-forward.png; hoverImage: video-seek-forward-hover.png;"
+                            sprite-button="image: seek_fwd.png; hoverImage: seek_hdw-hover.png;"
                             scale="0.1 0.1 0.1"
                             position="0.3 -0.125 0"
                             class="ui video-seek-forward-button"
@@ -647,7 +648,7 @@
         >
             <a-entity
                 sprite
-                sprite-button="image: rotation.png"
+                sprite-button="image: rotate-cursor.png"
                 scale="0.1 0.1 0.1"
                 position="0.0 0 0"
                 class="hud"
