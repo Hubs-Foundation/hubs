@@ -32,7 +32,7 @@ AFRAME.registerSystem("ui-hotkeys", {
     }
 
     if (this.userinput.get(paths.actions.mediaExit)) {
-      if (window.APP.history.location.state.value !== "avatar-editor") {
+      if (window.APP.history.location.state && window.APP.history.location.state.value !== "avatar-editor") {
         this.mediaSearchStore.pushExitMediaBrowserHistory();
       }
     }
