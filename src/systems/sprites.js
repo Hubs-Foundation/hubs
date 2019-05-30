@@ -28,7 +28,7 @@ AFRAME.registerComponent("sprite", {
 
 function normalizedFrame(name, spritesheet, missingSprites) {
   if (!spritesheet.frames[name]) {
-    if (missingSprites.indexOf(name) === -1){
+    if (missingSprites.indexOf(name) === -1) {
       missingSprites.push(name);
     }
     return { x: 0, y: 0, w: 0, h: 0 };
@@ -44,21 +44,23 @@ function normalizedFrame(name, spritesheet, missingSprites) {
 }
 
 const raycastOnSprite = (function() {
-  var intersectPoint = new THREE.Vector3();
-  var worldScale = new THREE.Vector3();
-  var mvPosition = new THREE.Vector3();
+  const intersectPoint = new THREE.Vector3();
+  const worldScale = new THREE.Vector3();
+  const mvPosition = new THREE.Vector3();
 
-  var alignedPosition = new THREE.Vector2();
-  var rotatedPosition = new THREE.Vector2();
-  var viewWorldMatrix = new THREE.Matrix4();
+  const alignedPosition = new THREE.Vector2();
+  const rotatedPosition = new THREE.Vector2();
+  const viewWorldMatrix = new THREE.Matrix4();
 
-  var vA = new THREE.Vector3();
-  var vB = new THREE.Vector3();
-  var vC = new THREE.Vector3();
+  const vA = new THREE.Vector3();
+  const vB = new THREE.Vector3();
+  const vC = new THREE.Vector3();
 
-  var uvA = new THREE.Vector2();
-  var uvB = new THREE.Vector2();
-  var uvC = new THREE.Vector2();
+  const uvA = new THREE.Vector2();
+  const uvB = new THREE.Vector2();
+  const uvC = new THREE.Vector2();
+
+  const CENTER = new THREE.Vector2(0.5, 0.5);
 
   function transformVertex(vertexPosition, mvPosition, center, scale, sin, cos) {
     // compute position in camera space
@@ -96,22 +98,20 @@ const raycastOnSprite = (function() {
     //      sin = Math.sin(rotation);
     //    }
 
-    var center = CENTER;
-
-    transformVertex(vA.set(-0.5, 0.5, 0), mvPosition, center, worldScale); //, sin, cos);
-    transformVertex(vB.set(0.5, 0.5, 0), mvPosition, center, worldScale); //, sin, cos);
-    transformVertex(vC.set(-0.5, -0.5, 0), mvPosition, center, worldScale); //, sin, cos);
+    transformVertex(vA.set(-0.5, 0.5, 0), mvPosition, CENTER, worldScale); //, sin, cos);
+    transformVertex(vB.set(0.5, 0.5, 0), mvPosition, CENTER, worldScale); //, sin, cos);
+    transformVertex(vC.set(-0.5, -0.5, 0), mvPosition, CENTER, worldScale); //, sin, cos);
 
     uvA.set(0, 0);
     uvB.set(1, 0);
     uvC.set(1, 1);
 
     // check first triangle
-    var intersect = raycaster.ray.intersectTriangle(vA, vC, vB, false, intersectPoint);
+    let intersect = raycaster.ray.intersectTriangle(vA, vC, vB, false, intersectPoint);
 
     if (intersect === null) {
       // check second triangle
-      transformVertex(vA.set(0.5, -0.5, 0), mvPosition, center, worldScale); //, sin, cos);
+      transformVertex(vA.set(0.5, -0.5, 0), mvPosition, CENTER, worldScale); //, sin, cos);
       uvA.set(0, 1);
 
       intersect = raycaster.ray.intersectTriangle(vB, vC, vA, false, intersectPoint);
@@ -120,7 +120,7 @@ const raycastOnSprite = (function() {
       }
     }
 
-    var distance = raycaster.ray.origin.distanceTo(intersectPoint);
+    const distance = raycaster.ray.origin.distanceTo(intersectPoint);
 
     if (distance < raycaster.near || distance > raycaster.far) return;
 
@@ -133,10 +133,6 @@ const raycastOnSprite = (function() {
     });
   };
 })();
-
-function SpriteMesh(object3D, material) {}
-
-const CENTER = new THREE.Vector2(0.5, 0.5);
 
 export class SpriteSystem {
   raycast(raycaster, intersects) {
@@ -194,7 +190,7 @@ export class SpriteSystem {
     });
   }
 
-  tick(scene) {
+  tick() {
     if (!this.mesh) return; // "await" async initialization (and pay for it forever after that)
 
     for (let i = 0; i < this.spriteComponents.length; i++) {

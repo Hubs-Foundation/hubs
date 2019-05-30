@@ -48,7 +48,7 @@ AFRAME.registerComponent("sprite-button", {
 
     const image = active ? (hovering ? "activeHoverImage" : "activeImage") : hovering ? "hoverImage" : "image";
     if (this.el.components.sprite) {
-      if (this.data[image]){
+      if (this.data[image]) {
         this.el.components.sprite.data.name = this.data[image];
       } else {
         console.warn(`No ${image} image on me.`, this);
