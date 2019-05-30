@@ -63,7 +63,7 @@ class AvatarUI extends React.Component {
     const { avatar } = this.state;
     if (!avatar) {
       return (
-        <div className={styles.profileEntry}>
+        <div className={styles.avatarLanding}>
           <div className={classNames([styles.box, styles.darkened])}>Loading</div>
         </div>
       );
@@ -73,7 +73,7 @@ class AvatarUI extends React.Component {
     const isSelected = avatar.avatar_id === selectedAvatarId;
 
     return (
-      <form onSubmit={this.setAvatar} className={styles.profileEntry}>
+      <form onSubmit={this.setAvatar} className={styles.avatarLanding}>
         <div className={classNames([styles.box, styles.darkened])}>
           <label className={styles.title}>
             <span>{avatar.name}</span>
