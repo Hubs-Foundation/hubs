@@ -7,7 +7,6 @@ import DesktopScreenEntryImg from "../assets/images/desktop_screen_entry.svg";
 import GenericVREntryImg from "../assets/images/generic_vr_entry.svg";
 import GearVREntryImg from "../assets/images/gearvr_entry.svg";
 import DaydreamEntryImg from "../assets/images/daydream_entry.svg";
-import DeviceEntryImg from "../assets/images/device_entry.svg";
 import styles from "../assets/stylesheets/entry.scss";
 import { WithHoverSound } from "./wrap-with-audio";
 import cx from "classnames";
