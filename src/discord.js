@@ -13,8 +13,7 @@ import en from "react-intl/locale-data/en";
 import { lang, messages } from "./utils/i18n";
 
 addLocaleData([...en]);
-const contactEmail = "hubs@mozilla.com";
-const contactSubject = "Hubs Discord Bot Invite";
+const inviteUrl = "https://forms.gle/GGPgarSuY5WaTNCT8";
 
 class DiscordLanding extends Component {
   componentDidMount() {}
@@ -46,10 +45,7 @@ class DiscordLanding extends Component {
                   <FormattedMessage id="discord.secondary_tagline" />
                 </div>
                 <div className={styles.actionButtons}>
-                  <a
-                    href={`mailto:${contactEmail}?subject=${encodeURIComponent(contactSubject)}`}
-                    className={styles.downloadButton}
-                  >
+                  <a href={inviteUrl} className={styles.downloadButton}>
                     <div>
                       <FormattedMessage id="discord.contact_us" />
                     </div>
