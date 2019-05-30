@@ -62,7 +62,7 @@ body.vr-mode {
   height: 80px;
   pointer-events: none;
 
-  a {
+  a, button {
     @extend %action-button-secondary;
     min-width: 120px;
     margin-right: 12px;

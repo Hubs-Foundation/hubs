@@ -1193,7 +1193,7 @@ class UIRoot extends Component {
   };
 
   render() {
-    if (this.props.hide) return <div />;
+    if (this.props.hide || this.state.hide) return <div />;
 
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
 
@@ -1715,11 +1715,19 @@ class UIRoot extends Component {
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
                 />
-                <div className={styles.nagCornerButton}>
-                  <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
-                    <FormattedMessage id="feedback.prompt" />
-                  </a>
-                </div>
+                {!watching ? (
+                  <div className={styles.nagCornerButton}>
+                    <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
+                      <FormattedMessage id="feedback.prompt" />
+                    </a>
+                  </div>
+                ) : (
+                  <div className={styles.nagCornerButton}>
+                    <button onClick={() => this.setState({ hide: true })}>
+                      <FormattedMessage id="hide-ui.prompt" />
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
