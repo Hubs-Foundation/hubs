@@ -158,7 +158,7 @@ class UIRoot extends Component {
     muteOnEntry: false,
     entered: false,
     dialog: null,
-    showInviteDialog: false,
+    showShareDialog: false,
     showPresenceList: false,
     showSettingsMenu: false,
     discordTipDismissed: false,
@@ -648,7 +648,7 @@ class UIRoot extends Component {
       }
     }
 
-    this.setState({ entered: true, showInviteDialog: false });
+    this.setState({ entered: true, showShareDialog: false });
     clearHistoryState(this.props.history);
   };
 
@@ -662,12 +662,14 @@ class UIRoot extends Component {
     });
   };
 
-  showInviteDialog = () => {
-    this.setState({ showInviteDialog: true });
+  showShareDialog = () => {
+    this.props.store.update({ activity: { hasOpenedShare: true } });
+    this.setState({ showShareDialog: true });
   };
 
-  toggleInviteDialog = async () => {
-    this.setState({ showInviteDialog: !this.state.showInviteDialog });
+  toggleShareDialog = async () => {
+    this.props.store.update({ activity: { hasOpenedShare: true } });
+    this.setState({ showShareDialog: !this.state.showShareDialog });
   };
 
   createObject = media => {
@@ -1278,6 +1280,14 @@ class UIRoot extends Component {
     const discordBridges = this.discordBridges();
     const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
     const showDiscordTip = discordBridges.length > 0 && !this.state.discordTipDismissed;
+    const showInviteTip =
+      !showVREntryButton &&
+      !hasTopTip &&
+      !entered &&
+      !watching &&
+      !hasTopTip &&
+      !isMobileVR &&
+      !this.props.store.state.activity.hasOpenedShare;
 
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
@@ -1520,7 +1530,7 @@ class UIRoot extends Component {
                   className={classNames({
                     [inviteStyles.inviteContainer]: true,
                     [inviteStyles.inviteContainerBelowHud]: entered,
-                    [inviteStyles.inviteContainerInverted]: this.state.showInviteDialog
+                    [inviteStyles.inviteContainerInverted]: this.state.showShareDialog
                   })}
                 >
                   {!showVREntryButton &&
@@ -1531,12 +1541,18 @@ class UIRoot extends Component {
                             [inviteStyles.inviteButton]: true,
                             [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered
                           })}
-                          onClick={() => this.toggleInviteDialog()}
+                          onClick={() => this.toggleShareDialog()}
                         >
-                          <FormattedMessage id="entry.invite-others-nag" />
+                          <FormattedMessage id="entry.invite-button" />
                         </button>
                       </WithHoverSound>
                     )}
+                  {showInviteTip && (
+                    <div className={styles.inviteTip}>
+                      <div className={styles.inviteTipAttachPoint} />
+                      <FormattedMessage id={`entry.${isMobile ? "mobile" : "desktop"}.invite-tip`} />
+                    </div>
+                  )}
                   {!showVREntryButton &&
                     this.occupantCount() > 1 &&
                     !hasTopTip &&
@@ -1560,7 +1576,7 @@ class UIRoot extends Component {
                       </button>
                     </WithHoverSound>
                   )}
-                  {this.state.showInviteDialog && (
+                  {this.state.showShareDialog && (
                     <InviteDialog
                       allowShare={!isMobileVR}
                       entryCode={this.props.hubEntryCode}
@@ -1570,7 +1586,7 @@ class UIRoot extends Component {
                       }
                       onSubscribeChanged={() => this.onSubscribeChanged()}
                       hubId={this.props.hubId}
-                      onClose={() => this.setState({ showInviteDialog: false })}
+                      onClose={() => this.setState({ showShareDialog: false })}
                     />
                   )}
                 </div>

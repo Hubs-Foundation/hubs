@@ -47,7 +47,8 @@ export const SCHEMA = {
         hasRotated: { type: "boolean" },
         hasRecentered: { type: "boolean" },
         hasScaled: { type: "boolean" },
-        hasHoveredInWorldHud: { type: "boolean" }
+        hasHoveredInWorldHud: { type: "boolean" },
+        hasOpenedShare: { type: "boolean" }
       }
     },
 
