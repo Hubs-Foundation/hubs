@@ -104,12 +104,12 @@ export function fetchReticulumAuthenticated(url, method = "GET", payload) {
   const { token } = window.APP.store.state.credentials;
   const retUrl = getReticulumFetchUrl(url);
   const params = {
-    headers: {
-      "content-type": "application/json",
-      authorization: `bearer ${token}`
-    },
+    headers: { "content-type": "application/json" },
     method
   };
+  if (token) {
+    params.headers.authorization = `bearer ${token}`;
+  }
   if (payload) {
     params.body = JSON.stringify(payload);
   }

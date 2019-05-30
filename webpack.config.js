@@ -91,6 +91,7 @@ module.exports = (env, argv) => ({
     index: path.join(__dirname, "src", "index.js"),
     hub: path.join(__dirname, "src", "hub.js"),
     scene: path.join(__dirname, "src", "scene.js"),
+    avatar: path.join(__dirname, "src", "avatar.js"),
     link: path.join(__dirname, "src", "link.js"),
     spoke: path.join(__dirname, "src", "spoke.js"),
     discord: path.join(__dirname, "src", "discord.js"),
@@ -259,6 +260,20 @@ module.exports = (env, argv) => ({
       filename: "scene.html",
       template: path.join(__dirname, "src", "scene.html"),
       chunks: ["vendor", "engine", "scene"],
+      inject: "head",
+      meta: [
+        {
+          "http-equiv": "origin-trial",
+          "data-feature": "WebVR (For Chrome M62+)",
+          "data-expires": process.env.ORIGIN_TRIAL_EXPIRES,
+          content: process.env.ORIGIN_TRIAL_TOKEN
+        }
+      ]
+    }),
+    new HTMLWebpackPlugin({
+      filename: "avatar.html",
+      template: path.join(__dirname, "src", "avatar.html"),
+      chunks: ["vendor", "engine", "avatar"],
       inject: "head",
       meta: [
         {

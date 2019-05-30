@@ -301,6 +301,8 @@
     "client-info.hide-button": "Hide",
     "client-info.unhide-button": "Un-hide ",
     "client-info.mute-button": "Mute",
-    "client-info.cancel": "Cancel"
+    "client-info.cancel": "Cancel",
+    "avatar-landing.select": "Select",
+    "avatar-landing.selected": "This is your current avatar"
   }
 }
