@@ -9,13 +9,17 @@ import React from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 
+import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
+import en from "react-intl/locale-data/en";
+import { lang, messages } from "./utils/i18n";
+addLocaleData([...en]);
+
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 disableiOSZoom();
 
 import { App } from "./App";
 
 import AvatarPreview from "./react-components/avatar-preview";
-import { WithHoverSound } from "./react-components/wrap-with-audio";
 
 import { fetchAvatar } from "./utils/avatar-utils";
 
@@ -28,7 +32,8 @@ window.APP = new App();
 class AvatarUI extends React.Component {
   static propTypes = {
     avatarId: PropTypes.string,
-    store: PropTypes.object
+    store: PropTypes.object,
+    intl: PropTypes.object
   };
 
   constructor(props) {
@@ -82,13 +87,15 @@ class AvatarUI extends React.Component {
             {avatar.attributions && avatar.attributions.creator && <span>{`by ${avatar.attributions.creator}`}</span>}
           </div>
           <div className={styles.preview}>{avatar && <AvatarPreview avatarGltfUrl={avatar.gltf_url} />}</div>
-          <WithHoverSound>
-            {isSelected ? (
-              <span className={styles.selectedMessage}>This is your current avatar.</span>
-            ) : (
-              <input disabled={isSelected} className={styles.formSubmit} type="submit" value="Select" />
-            )}
-          </WithHoverSound>
+          {isSelected ? (
+            <span className={styles.selectedMessage}>
+              <FormattedMessage id="avatar-landing.selected" />
+            </span>
+          ) : (
+            <button disabled={isSelected} className={styles.formSubmit} type="submit">
+              <FormattedMessage id="avatar-landing.select" />
+            </button>
+          )}
         </div>
         <img className={styles.logo} src={hubLogo} />
       </form>
@@ -99,5 +106,10 @@ class AvatarUI extends React.Component {
 document.addEventListener("DOMContentLoaded", () => {
   const avatarId = qs.get("avatar_id") || document.location.pathname.substring(1).split("/")[1];
   console.log(`Avatar ID: ${avatarId}`);
-  ReactDOM.render(<AvatarUI avatarId={avatarId} store={window.APP.store} />, document.getElementById("ui-root"));
+  ReactDOM.render(
+    <IntlProvider locale={lang} messages={messages}>
+      <AvatarUI avatarId={avatarId} store={window.APP.store} />
+    </IntlProvider>,
+    document.getElementById("ui-root")
+  );
 });

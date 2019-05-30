@@ -1,28 +1,32 @@
 @import 'shared';
 
+body {
+  margin: 0;
+}
+
 :local(.avatar-landing) {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+ 
   justify-content: center;
   align-items: center;
   display: flex;
   pointer-events: auto;
+  flex-direction: column;
 
   @extend %default-font;
   @extend %unselectable;
 
   :local(.logo) {
     width: 150px;
-    position: absolute;
-    right: 32px;
-    bottom: 32px;
-    display: none;
+    margin-bottom: 22px;
 
     @media (min-width: 500px) {
-      display: block;
+      position: absolute;
+      right: 15px;
+      bottom: 15px;
+      margin-bottom: 0;
     }
   }
 
@@ -31,29 +35,13 @@
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    flex: 1 1 100%;
     width: 60vw;
     min-width: 300px;
     max-width: 700px;
     min-height: 200px;
     max-height: 1000px;
-    height: 90%;
-
-    :local(.links) {
-      display: flex;
-      justify-content: center;
-      width: 100%;
-      margin: 16px;
-
-      a {
-        margin: 0px 12px;
-        color: $dark-grey-text;
-      }
-    }
-
-    :local(.darkened) {
-      background-color: $darkest-transparent;
-    }
+    height: 100%;
+    padding: 40px;
   }
 
   :local(.title) {
