@@ -165,15 +165,6 @@
     }
   }
 
-  :local(.choose-scene) {
-    font-size: 1.1em;
-    font-weight: bold;
-    color: $action-color;
-    i {
-      margin-right: 8px;
-    }
-  }
-
   :local(.profile-icon) {
     cursor: pointer;
     width: 16px;
@@ -236,7 +227,6 @@
     color: $action-color;
     text-decoration: underline;
   }
-
 }
 
 :local(.back) {

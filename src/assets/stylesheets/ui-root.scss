@@ -145,6 +145,12 @@ body.vr-mode {
   pointer-events: auto;
 }
 
+:local(.choose-scene-button) {
+  @extend %action-button-secondary;
+  pointer-events: auto;
+  margin-top: 16px;
+}
+
 :local(.invite-tip) {
   @extend %tip-bubble;
   width: auto;

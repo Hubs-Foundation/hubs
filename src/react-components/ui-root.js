@@ -916,33 +916,6 @@ class UIRoot extends Component {
         </div>
 
         <div className={entryStyles.center}>
-          {this.props.hubChannel.canOrWillIfCreator("update_hub") ? (
-            <WithHoverSound>
-              <div
-                className={classNames([entryStyles.lobbyLabel, entryStyles.chooseScene])}
-                onClick={() => {
-                  this.props.performConditionalSignIn(
-                    () => this.props.hubChannel.can("update_hub"),
-                    () => {
-                      showFullScreenIfAvailable();
-                      this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
-                    },
-                    "change-scene"
-                  );
-                }}
-              >
-                <i>
-                  <FontAwesomeIcon icon={faImage} />
-                </i>
-                <FormattedMessage id="entry.change-scene" />
-              </div>
-            </WithHoverSound>
-          ) : (
-            <div className={entryStyles.lobbyLabel}>
-              <FormattedMessage id="entry.in-lobby-notice" />
-            </div>
-          )}
-
           <LobbyChatBox
             occupantCount={this.occupantCount()}
             discordBridges={this.discordBridges()}
@@ -1288,6 +1261,14 @@ class UIRoot extends Component {
       !hasTopTip &&
       !this.props.store.state.activity.hasOpenedShare;
 
+    const showChooseSceneButton =
+      !showVREntryButton &&
+      !entered &&
+      !watching &&
+      !showInviteTip &&
+      !this.state.showShareDialog &&
+      this.props.hubChannel.canOrWillIfCreator("update_hub");
+
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
       : null;
@@ -1542,10 +1523,28 @@ class UIRoot extends Component {
                           })}
                           onClick={() => this.toggleShareDialog()}
                         >
-                          <FormattedMessage id="entry.invite-button" />
+                          <FormattedMessage id="entry.share-button" />
                         </button>
                       </WithHoverSound>
                     )}
+                  {showChooseSceneButton && (
+                    <button
+                      className={classNames([styles.chooseSceneButton])}
+                      onClick={() => {
+                        this.props.performConditionalSignIn(
+                          () => this.props.hubChannel.can("update_hub"),
+                          () => {
+                            showFullScreenIfAvailable();
+                            this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                          },
+                          "change-scene"
+                        );
+                      }}
+                    >
+                      <FormattedMessage id="entry.change-scene" />
+                    </button>
+                  )}
+
                   {showInviteTip && (
                     <div className={styles.inviteTip}>
                       <div className={styles.inviteTipAttachPoint} />
