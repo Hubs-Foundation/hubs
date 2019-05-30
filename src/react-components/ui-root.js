@@ -1503,6 +1503,7 @@ class UIRoot extends Component {
                 discordBridges={discordBridges}
                 onSendMessage={this.sendMessage}
                 onObjectCreated={this.createObject}
+                enableSpawning={entered}
                 history={this.props.history}
               />
             )}

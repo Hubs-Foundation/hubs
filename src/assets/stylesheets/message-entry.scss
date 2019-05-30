@@ -106,6 +106,10 @@
     margin-left: 4px;
   }
 
+  :local(.message-entry-input-no-spawn) {
+    padding: 8px 1.25em;
+  }
+
   :local(.message-entry-spawn) {
     @extend %action-button;
     background-color: transparent;
