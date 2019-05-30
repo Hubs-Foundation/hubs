@@ -887,7 +887,22 @@ class UIRoot extends Component {
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>
-          <span>{this.props.hubName}</span>
+          {this.props.hubChannel.canOrWillIfCreator("update_hub") ? (
+            <button
+              className={entryStyles.renameButton}
+              onClick={() =>
+                this.props.performConditionalSignIn(
+                  () => this.props.hubChannel.can("update_hub"),
+                  () => this.pushHistoryState("modal", "rename_room"),
+                  "rename-room"
+                )
+              }
+            >
+              {this.props.hubName}
+            </button>
+          ) : (
+            <span>{this.props.hubName}</span>
+          )}
           <button onClick={() => this.setState({ watching: true })} className={entryStyles.collapseButton}>
             <i>
               <FontAwesomeIcon icon={faTimes} />

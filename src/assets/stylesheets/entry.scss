@@ -116,6 +116,24 @@
     margin-bottom: 4px;
     margin-right: 48px;
     margin-left: 48px;
+
+    :local(.rename-button) {
+      @extend %glass-text;
+      font-weight: bold;
+      font-size: 1.0em;
+      appearance: none;
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      outline-style: none;
+      cursor: pointer;
+      border: 0;
+      text-decoration: none;
+      background: transparent;
+    }
+
+    :local(.rename-button):hover {
+      text-decoration: underline;
+    }
   }
 
   :local(.lobby) {
