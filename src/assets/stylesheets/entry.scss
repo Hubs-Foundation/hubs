@@ -8,24 +8,7 @@
   position: relative;
 }
 
-:local(.edit-button) {
-  @extend %fa-icon-button;
-  color: $dark-grey;
-  display: inline;
-  position: absolute;
-  top: 0px;
-  right: 24px;
-
-  i {
-    font-size: 1.0em;
-  }
-}
-
-:local(.edit-button):hover {
-  color: $action-color;
-}
-
-:local(.info-button) {
+:local(.collapse-button) {
   @extend %fa-icon-button;
   color: $dark-grey;
   display: inline;
@@ -38,7 +21,7 @@
   }
 }
 
-:local(.info-button):hover {
+:local(.collapse-button):hover {
   color: $action-color;
 }
 
