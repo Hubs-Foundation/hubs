@@ -26,7 +26,13 @@ AFRAME.registerComponent("sprite", {
   }
 });
 
-function normalizedFrame(name, spritesheet) {
+function normalizedFrame(name, spritesheet, missingSprites) {
+  if (!spritesheet.frames[name]) {
+    if (missingSprites.indexOf(name) === -1){
+      missingSprites.push(name);
+    }
+    return { x: 0, y: 0, w: 0, h: 0 };
+  }
   const size = spritesheet.meta.size;
   const frame = spritesheet.frames[name].frame;
   return {
@@ -79,7 +85,7 @@ const raycastOnSprite = (function() {
 
   return function raycast(raycaster, intersects) {
     worldScale.setFromMatrixScale(this.matrixWorld);
-		this.modelViewMatrix.multiplyMatrices( AFRAME.scenes[0].camera.matrixWorldInverse, this.matrixWorld );
+    this.modelViewMatrix.multiplyMatrices(AFRAME.scenes[0].camera.matrixWorldInverse, this.matrixWorld);
     viewWorldMatrix.getInverse(this.modelViewMatrix).premultiply(this.matrixWorld);
     mvPosition.setFromMatrixPosition(this.modelViewMatrix);
 
@@ -135,11 +141,15 @@ const CENTER = new THREE.Vector2(0.5, 0.5);
 export class SpriteSystem {
   raycast(raycaster, intersects) {
     for (let i = 0; i < this.spriteComponents.length; i++) {
-      raycastOnSprite.call(this.spriteComponents[i].el.object3D, raycaster, intersects);
+      const o = this.spriteComponents[i].el.object3D;
+      if (isVisible(o)) {
+        raycastOnSprite.call(o, raycaster, intersects);
+      }
     }
     return intersects;
   }
   constructor(scene) {
+    this.missingSprites = [];
     this.spriteComponents = [];
     this.maxSprites = 100;
     Promise.all([createImageTexture(spritesheetPng), waitForDOMContentLoaded()]).then(([spritesheetTexture]) => {
@@ -188,6 +198,8 @@ export class SpriteSystem {
     if (!this.mesh) return; // "await" async initialization (and pay for it forever after that)
 
     for (let i = 0; i < this.spriteComponents.length; i++) {
+      this.spriteComponents[i].el.object3D.matrixWorldNeedsUpdate = true;
+      this.spriteComponents[i].el.object3D.updateMatrices();
       this.set(
         this.spriteComponents[i].data.name,
         i,
@@ -205,7 +217,7 @@ export class SpriteSystem {
       console.warn("too many sprites");
       return;
     }
-    const frame = normalizedFrame(spritename, spritesheet);
+    const frame = normalizedFrame(spritename, spritesheet, this.missingSprites);
     if (visible) {
       const aUvs = this.mesh.geometry.attributes["a_uvs"];
       aUvs.setXY(i * 4 + 0, frame.x, frame.y);

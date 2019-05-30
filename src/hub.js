@@ -50,6 +50,7 @@ import "./components/hand-poses";
 import "./components/hud-controller";
 import "./components/freeze-controller";
 import "./components/icon-button";
+import "./components/sprite-button";
 import "./components/text-button";
 import "./components/block-button";
 import "./components/mute-button";
