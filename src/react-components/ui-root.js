@@ -1286,7 +1286,6 @@ class UIRoot extends Component {
       !entered &&
       !watching &&
       !hasTopTip &&
-      !isMobileVR &&
       !this.props.store.state.activity.hasOpenedShare;
 
     const displayNameOverride = this.props.hubIsBound
