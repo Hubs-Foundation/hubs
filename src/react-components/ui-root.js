@@ -896,7 +896,7 @@ class UIRoot extends Component {
         </div>
 
         <div className={entryStyles.roomSubtitle}>
-          <FormattedMessage id="entry.room" />
+          <FormattedMessage id="entry.lobby" />
         </div>
 
         <div className={entryStyles.center}>
