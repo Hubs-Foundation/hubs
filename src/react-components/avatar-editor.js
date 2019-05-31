@@ -11,7 +11,6 @@ import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
 
 const AVATARS_API = "/api/v1/avatars";
-const BOT_PARENT_AVATAR = "basebot";
 
 export default class AvatarEditor extends Component {
   static propTypes = {
@@ -26,7 +25,7 @@ export default class AvatarEditor extends Component {
   };
 
   state = {
-    avatar: { name: "My Avatar", parent_avatar_listing_id: BOT_PARENT_AVATAR, files: {} },
+    avatar: { name: "My Avatar", parent_avatar_listing_id: "basebot", files: {} },
     previewGltfUrl: null
   };
 
@@ -45,7 +44,7 @@ export default class AvatarEditor extends Component {
       Object.assign(this.inputFiles, avatar.files);
       this.setState({ avatar, previewGltfUrl: avatar.base_gltf_url });
     } else {
-      const { base_gltf_url } = await this.fetchAvatar(BOT_PARENT_AVATAR);
+      const { base_gltf_url } = await this.fetchAvatar("basebot");
       this.setState({ previewGltfUrl: base_gltf_url });
     }
   };
