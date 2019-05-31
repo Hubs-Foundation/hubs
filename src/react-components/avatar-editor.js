@@ -11,8 +11,7 @@ import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
 
 const AVATARS_API = "/api/v1/avatars";
-const BOT_PARENT_AVATAR =
-  location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
+const BOT_PARENT_AVATAR = "basebot";
 
 export default class AvatarEditor extends Component {
   static propTypes = {
