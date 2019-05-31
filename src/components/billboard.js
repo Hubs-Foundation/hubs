@@ -6,10 +6,15 @@ AFRAME.registerComponent("billboard", {
     this.target = new THREE.Vector3();
     this._updateBillboard = this._updateBillboard.bind(this);
     this._updateIsInView = this._updateIsInView.bind(this);
-    this.el.sceneEl.systems["frame-scheduler"].schedule(this._updateIsInView, "billboards");
+
+    if (isMobileVR) {
+      this.el.sceneEl.systems["frame-scheduler"].schedule(this._updateIsInView, "billboards");
+    }
   },
   remove() {
-    this.el.sceneEl.systems["frame-scheduler"].unschedule(this._updateIsInView, "billboards");
+    if (isMobileVR) {
+      this.el.sceneEl.systems["frame-scheduler"].unschedule(this._updateIsInView, "billboards");
+    }
   },
 
   tick() {
