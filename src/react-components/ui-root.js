@@ -1284,7 +1284,8 @@ class UIRoot extends Component {
       !entered &&
       !watching &&
       !hasTopTip &&
-      !this.props.store.state.activity.hasOpenedShare;
+      !this.props.store.state.activity.hasOpenedShare &&
+      this.occupantCount() >= 1;
 
     const showChooseSceneButton =
       !showVREntryButton &&
