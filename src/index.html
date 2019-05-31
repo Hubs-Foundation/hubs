@@ -4,9 +4,35 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" type="image/png" href="/favicon.ico"/>
+    <link rel="icon" sizes="16x16 24x24 32x32 48x48 64x64" href="/favicon.ico">
     <title>Get together | Hubs by Mozilla</title>
+    <!-- iOS (for "Add to Homescreen") -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <!-- Microsoft Edge (Windows) -->
+    <meta name="application-name" content="Hubs">
+    <!-- Web-App Manifest (https://w3c.github.io/manifest/) -->
+    <link rel="manifest" href="/manifest.webmanifest">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700" rel="stylesheet">
+
+    <!-- Description for search engines -->
+    <meta name="description" content="Share a virtual room with friends. Watch videos, play with 3D objects, or just hang out.">
+    <!-- Schema.org for Google -->
+    <meta itemprop="name" content="Hubs by Mozilla">
+    <meta itemprop="description" content="Share a virtual room with friends. Watch videos, play with 3D objects, or just hang out.">
+    <!-- OpenGraph for Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Hubs by Mozilla">
+    <meta property="og:description" content="Share a virtual room with friends. Watch videos, play with 3D objects, or just hang out.">
+    <meta property="og:image" content="/assets/hub-preview.png">
+    <meta property="og:url" content="/">
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:description" content="Share a virtual room with friends. Watch videos, play with 3D objects, or just hang out.">
+    <!-- Microsoft Edge -->
+    <meta name="application-name" content="Hubs by Mozilla">
+    <meta name="msapplication-tooltip" content="Share a virtual room with friends.">
+    <meta name="msapplication-starturl" content="/">
+
     <!-- Google Analytics -->
     <!-- NOTE GA tracking is disabled by default. You'll need to set the GA_TRACKING_ID build variable to enable it. -->
     <script>

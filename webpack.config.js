@@ -328,6 +328,12 @@ module.exports = (env, argv) => ({
         to: "hub.service.js"
       }
     ]),
+    new CopyWebpackPlugin([
+      {
+        from: "src/manifest.webmanifest",
+        to: "manifest.webmanifest"
+      }
+    ]),
     // Extract required css and add a content hash.
     new ExtractTextPlugin({
       filename: "assets/stylesheets/[name]-[md5:contenthash:hex:20].css",
