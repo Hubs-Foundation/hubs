@@ -330,7 +330,7 @@ module.exports = (env, argv) => ({
     ]),
     new CopyWebpackPlugin([
       {
-        from: "src/manifest.webmanifest",
+        from: "src/assets/manifest.webmanifest",
         to: "manifest.webmanifest"
       }
     ]),
