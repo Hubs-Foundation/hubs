@@ -1,0 +1,25 @@
+{
+  "lang": "en",
+  "dir": "ltr",
+  "name": "Hubs",
+  "description": "Share a virtual room with friends. Watch videos, play with 3D objects, or just hang out.",
+  "short_name": "Hubs",
+  "icons": [
+    {
+      "src": "https://assets-prod.reticulum.io/assets/images/pwaicon-hubs.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    }
+  ],
+  "scope": "/",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "theme_color": "#000",
+  "background_color": "#000",
+  "serviceworker": {
+    "src": "hub.service.js",
+    "scope": "/",
+    "update_via_cache": "none"
+  }
+}
