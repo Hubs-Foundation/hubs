@@ -1,7 +1,10 @@
 import { forEachMaterial } from "../utils/material-utils";
+import qsTruthy from "../utils/qs_truthy";
 
 const invaderPos = new AFRAME.THREE.Vector3();
 const bubblePos = new AFRAME.THREE.Vector3();
+const isMobileVR = AFRAME.utils.device.isMobileVR();
+const isDebug = qsTruthy("debug");
 
 /**
  * Iterates through bubbles and invaders on every tick and sets invader state accordingly.
@@ -18,10 +21,21 @@ AFRAME.registerSystem("personal-space-bubble", {
   init() {
     this.invaders = [];
     this.bubbles = [];
+    this._performUpdate = this._performUpdate.bind(this);
 
     this.el.addEventListener("action_space_bubble", () => {
       this.el.setAttribute("personal-space-bubble", { enabled: !this.data.enabled });
     });
+
+    if (isMobileVR) {
+      this.el.sceneEl.systems["frame-scheduler"].schedule(this._performUpdate, "personal-space-bubbles");
+    }
+  },
+
+  remove() {
+    if (isMobileVR) {
+      this.el.sceneEl.systems["frame-scheduler"].unschedule(this._performUpdate, "personal-space-bubbles");
+    }
   },
 
   registerBubble(bubble) {
@@ -73,7 +87,13 @@ AFRAME.registerSystem("personal-space-bubble", {
     }
   },
 
-  tick: (function() {
+  tick() {
+    if (!isMobileVR) {
+      this._performUpdate();
+    }
+  },
+
+  _performUpdate: (function() {
     const tempInvasionFlags = [];
 
     return function() {
@@ -229,6 +249,8 @@ AFRAME.registerComponent("personal-space-bubble", {
   },
 
   updateDebug() {
+    if (!isDebug) return;
+
     if (this.system.data.debug || this.data.debug) {
       !this.el.object3DMap[DEBUG_OBJ] && this.el.setObject3D(DEBUG_OBJ, createSphereGizmo(this.data.radius));
     } else if (this.el.object3DMap[DEBUG_OBJ]) {
