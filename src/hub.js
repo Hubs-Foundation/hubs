@@ -12,7 +12,6 @@ patchWebGLRenderingContext();
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
-import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
@@ -93,6 +92,7 @@ import "./components/replay";
 import "./components/visibility-by-path";
 import "./components/tags";
 import "./components/hubs-text";
+import "./components/billboard";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";

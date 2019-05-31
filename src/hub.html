@@ -131,17 +131,15 @@
                         <template data-name="Neck">
                             <a-entity>
                                 <a-entity
-                                    class="nametag"
                                     billboard
-                                    matrix-auto-update
+                                    class="nametag"
                                     text="side: double; align: center; color: #ddd"
                                     position="0 1 0"
                                     scale="6 6 6"
                                 ></a-entity>
                                 <a-entity
-                                    class="communityIdentifier"
                                     billboard
-                                    matrix-auto-update
+                                    class="communityIdentifier"
                                     text="side: double; align: center; color: #ddd"
                                     visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"
                                     position="0 0.8 0"
@@ -153,7 +151,7 @@
                         <template data-name="Spine">
                             <a-entity is-remote-hover-target personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
                                 <a-entity class="ui interactable-ui">
-                                    <a-entity matrix-auto-update billboard class="freeze-menu" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;" avatar-volume-controls>
+                                    <a-entity billboard class="freeze-menu" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;" avatar-volume-controls>
                                         <a-entity class="avatar-volume-label" text="value: 0%; anchor: center; align: center; color: #ff3464; letterSpacing: 4; width:1.5;" text-raycast-hack position="0.0 0.675 0.35" scale="1.25 1.25 1.25"></a-entity>
                                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.45 0.675 0.35" class="ui avatar-volume-down-button">
                                             <a-entity text="value: -; anchor: center; align: center; color: #ccc; letterSpacing: 4; width: 2.5;" text-raycast-hack position="0 0 0.01" scale="0.85 0.85 0.85"></a-entity>

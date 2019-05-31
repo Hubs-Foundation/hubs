@@ -42,7 +42,6 @@
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
     "aframe": "github:mozillareality/aframe#remove-text",
-    "aframe-billboard-component": "^2.0.0",
     "aframe-physics-system": "github:infinitelee/aframe-physics-system#feature/heightfields",
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "^1.0.0",
