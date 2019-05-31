@@ -806,7 +806,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       AFRAME.utils.device.getVRDisplay = () => vrDisplay;
     }
   } else {
-    remountUI({ availableVREntryTypes });
+    const hasVREntryDevice =
+      availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no ||
+      availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no ||
+      availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no;
+
+    remountUI({ availableVREntryTypes, forcedVREntryType: !hasVREntryDevice ? "2d" : null });
   }
 
   const environmentScene = document.querySelector("#environment-scene");

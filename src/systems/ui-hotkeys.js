@@ -32,9 +32,11 @@ AFRAME.registerSystem("ui-hotkeys", {
     }
 
     if (this.userinput.get(paths.actions.mediaExit)) {
-      if (window.APP.history.location.state.value !== "avatar-editor") {
+      if (window.APP.history.location.state && window.APP.history.location.state.value !== "avatar-editor") {
         this.mediaSearchStore.pushExitMediaBrowserHistory();
       }
+
+      this.el.emit("action_exit_watch");
     }
 
     for (let i = 0; i < MEDIA_SEARCH_PATHS.length; i++) {

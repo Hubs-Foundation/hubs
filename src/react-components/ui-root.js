@@ -26,7 +26,7 @@ import { getClientInfoClientId } from "./client-info-dialog";
 import { lang, messages } from "../utils/i18n";
 import Loader from "./loader";
 import AutoExitWarning from "./auto-exit-warning";
-import { TwoDEntryButton, DeviceEntryButton, GenericEntryButton, DaydreamEntryButton } from "./entry-buttons.js";
+import { TwoDEntryButton, GenericEntryButton, DaydreamEntryButton } from "./entry-buttons.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowser from "./media-browser";
 
@@ -61,12 +61,9 @@ import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
 import { handleTipClose } from "../systems/tips.js";
 
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
-import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
-import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import qsTruthy from "../utils/qs_truthy";
@@ -160,7 +157,7 @@ class UIRoot extends Component {
     muteOnEntry: false,
     entered: false,
     dialog: null,
-    showInviteDialog: false,
+    showShareDialog: false,
     showPresenceList: false,
     showSettingsMenu: false,
     discordTipDismissed: false,
@@ -171,6 +168,7 @@ class UIRoot extends Component {
     didConnectToNetworkedScene: false,
     noMoreLoadingUpdates: false,
     hideLoader: false,
+    watching: false,
 
     waitingOnAudio: false,
     shareScreen: false,
@@ -257,6 +255,8 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.addEventListener("exit", this.exitEventHandler);
+    this.props.scene.addEventListener("action_exit_watch", () => this.setState({ watching: false, hide: false }));
+
     const scene = this.props.scene;
 
     this.props.store.addEventListener("statechanged", this.onStoreChanged);
@@ -649,7 +649,7 @@ class UIRoot extends Component {
       }
     }
 
-    this.setState({ entered: true, showInviteDialog: false });
+    this.setState({ entered: true, showShareDialog: false });
     clearHistoryState(this.props.history);
   };
 
@@ -663,12 +663,14 @@ class UIRoot extends Component {
     });
   };
 
-  showInviteDialog = () => {
-    this.setState({ showInviteDialog: true });
+  showShareDialog = () => {
+    this.props.store.update({ activity: { hasOpenedShare: true } });
+    this.setState({ showShareDialog: true });
   };
 
-  toggleInviteDialog = async () => {
-    this.setState({ showInviteDialog: !this.state.showInviteDialog });
+  toggleShareDialog = async () => {
+    this.props.store.update({ activity: { hasOpenedShare: true } });
+    this.setState({ showShareDialog: !this.state.showShareDialog });
   };
 
   createObject = media => {
@@ -881,16 +883,15 @@ class UIRoot extends Component {
   };
 
   renderEntryStartPanel = () => {
-    const hasPush = navigator.serviceWorker && "PushManager" in window;
     const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
     const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
 
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>
-          <span>{this.props.hubName}</span>
-          {this.props.hubChannel.canOrWillIfCreator("update_hub") && (
+          {this.props.hubChannel.canOrWillIfCreator("update_hub") ? (
             <button
+              className={entryStyles.renameButton}
               onClick={() =>
                 this.props.performConditionalSignIn(
                   () => this.props.hubChannel.can("update_hub"),
@@ -898,59 +899,24 @@ class UIRoot extends Component {
                   "rename-room"
                 )
               }
-              className={entryStyles.editButton}
             >
-              <i>
-                <FontAwesomeIcon icon={faPencilAlt} />
-              </i>
+              {this.props.hubName}
             </button>
+          ) : (
+            <span>{this.props.hubName}</span>
           )}
-          {this.props.hubScene && (
-            <StateLink
-              stateKey="modal"
-              stateValue="room_info"
-              history={this.props.history}
-              className={entryStyles.infoButton}
-            >
-              <i>
-                <FontAwesomeIcon icon={faInfoCircle} />
-              </i>
-            </StateLink>
-          )}
+          <button onClick={() => this.setState({ watching: true })} className={entryStyles.collapseButton}>
+            <i>
+              <FontAwesomeIcon icon={faTimes} />
+            </i>
+          </button>
         </div>
 
         <div className={entryStyles.roomSubtitle}>
-          <FormattedMessage id="entry.room" />
+          <FormattedMessage id="entry.lobby" />
         </div>
 
         <div className={entryStyles.center}>
-          {this.props.hubChannel.canOrWillIfCreator("update_hub") ? (
-            <WithHoverSound>
-              <div
-                className={classNames([entryStyles.lobbyLabel, entryStyles.chooseScene])}
-                onClick={() => {
-                  this.props.performConditionalSignIn(
-                    () => this.props.hubChannel.can("update_hub"),
-                    () => {
-                      showFullScreenIfAvailable();
-                      this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
-                    },
-                    "change-scene"
-                  );
-                }}
-              >
-                <i>
-                  <FontAwesomeIcon icon={faImage} />
-                </i>
-                <FormattedMessage id="entry.change-scene" />
-              </div>
-            </WithHoverSound>
-          ) : (
-            <div className={entryStyles.lobbyLabel}>
-              <FormattedMessage id="entry.in-lobby-notice" />
-            </div>
-          )}
-
           <LobbyChatBox
             occupantCount={this.occupantCount()}
             discordBridges={this.discordBridges()}
@@ -958,22 +924,22 @@ class UIRoot extends Component {
           />
         </div>
 
-        {hasPush && (
-          <div className={entryStyles.subscribe}>
-            <input
-              id="subscribe"
-              type="checkbox"
-              onChange={this.onSubscribeChanged}
-              checked={this.state.isSubscribed === undefined ? this.props.initialIsSubscribed : this.state.isSubscribed}
-            />
-            <label htmlFor="subscribe">
-              <FormattedMessage id="entry.notify_me" />
-            </label>
-          </div>
-        )}
-
-        <div className={entryStyles.buttonContainer}>
-          <WithHoverSound>
+        {!this.state.waitingOnAudio ? (
+          <div className={entryStyles.buttonContainer}>
+            {!isMobileVR && (
+              <a
+                onClick={e => {
+                  e.preventDefault();
+                  this.attemptLink();
+                }}
+                className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
+              >
+                <FormattedMessage id="entry.device-medium" />
+                <div className={entryStyles.buttonSubtitle}>
+                  <FormattedMessage id={isMobile ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"} />
+                </div>
+              </a>
+            )}
             {promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType ? (
               <StateLink
                 stateKey="entry_step"
@@ -984,15 +950,26 @@ class UIRoot extends Component {
                 <FormattedMessage id="entry.enter-room" />
               </StateLink>
             ) : (
-              <button
-                onClick={() => this.handleForceEntry()}
+              <a
+                onClick={e => {
+                  e.preventDefault();
+                  this.handleForceEntry();
+                }}
                 className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
               >
                 <FormattedMessage id="entry.enter-room" />
-              </button>
+              </a>
             )}
-          </WithHoverSound>
-        </div>
+          </div>
+        ) : (
+          <div>
+            <div className="loader-wrap loader-mid">
+              <div className="loader">
+                <div className="loader-center" />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -1024,7 +1001,6 @@ class UIRoot extends Component {
             {this.props.availableVREntryTypes.daydream === VR_DEVICE_AVAILABILITY.yes && (
               <DaydreamEntryButton secondary={true} onClick={this.enterDaydream} subtitle={null} />
             )}
-            <DeviceEntryButton secondary={true} onClick={() => this.attemptLink()} isInHMD={isMobileVR} />
             {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
               <TwoDEntryButton onClick={this.enter2D} />
             )}
@@ -1219,7 +1195,7 @@ class UIRoot extends Component {
   };
 
   render() {
-    if (this.props.hide) return <div />;
+    if (this.props.hide || this.state.hide) return <div />;
 
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
 
@@ -1232,6 +1208,7 @@ class UIRoot extends Component {
       "ui-root": true,
       "in-modal-or-overlay": this.isInModalOrOverlay()
     };
+    const hasPush = navigator.serviceWorker && "PushManager" in window;
 
     if (this.props.showOAuthDialog)
       return (
@@ -1249,6 +1226,8 @@ class UIRoot extends Component {
     if (this.props.isBotMode) return this.renderBotMode();
 
     const entered = this.state.entered;
+    const watching = this.state.watching;
+    const enteredOrWatching = entered || watching;
 
     const entryDialog =
       this.props.availableVREntryTypes &&
@@ -1299,6 +1278,21 @@ class UIRoot extends Component {
     const discordBridges = this.discordBridges();
     const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
     const showDiscordTip = discordBridges.length > 0 && !this.state.discordTipDismissed;
+    const showInviteTip =
+      !showVREntryButton &&
+      !hasTopTip &&
+      !entered &&
+      !watching &&
+      !hasTopTip &&
+      !this.props.store.state.activity.hasOpenedShare;
+
+    const showChooseSceneButton =
+      !showVREntryButton &&
+      !entered &&
+      !watching &&
+      !showInviteTip &&
+      !this.state.showShareDialog &&
+      this.props.hubChannel.canOrWillIfCreator("update_hub");
 
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
@@ -1460,14 +1454,14 @@ class UIRoot extends Component {
               />
             )}
 
-            {(!this.state.entered || this.isWaitingForAutoExit()) && (
+            {(!enteredOrWatching || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
                 <PresenceLog entries={presenceLogEntries} hubId={this.props.hubId} history={this.props.history} />
                 <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
               </div>
             )}
 
-            {entered && (
+            {enteredOrWatching && (
               <PresenceLog
                 inRoom={true}
                 entries={presenceLogEntries}
@@ -1507,7 +1501,7 @@ class UIRoot extends Component {
                   )}
                 </div>
               )}
-            {entered &&
+            {enteredOrWatching &&
               showDiscordTip && (
                 <div className={styles.bottomTip}>
                   <button className={styles.tipCancel} onClick={() => this.confirmDiscordBridge()}>
@@ -1520,11 +1514,12 @@ class UIRoot extends Component {
                   </div>
                 </div>
               )}
-            {entered && (
+            {enteredOrWatching && (
               <InWorldChatBox
                 discordBridges={discordBridges}
                 onSendMessage={this.sendMessage}
                 onObjectCreated={this.createObject}
+                enableSpawning={entered}
                 history={this.props.history}
               />
             )}
@@ -1534,61 +1529,91 @@ class UIRoot extends Component {
               </button>
             )}
 
-            {!this.state.frozen && (
-              <div
-                className={classNames({
-                  [inviteStyles.inviteContainer]: true,
-                  [inviteStyles.inviteContainerBelowHud]: entered,
-                  [inviteStyles.inviteContainerInverted]: this.state.showInviteDialog
-                })}
-              >
-                {!showVREntryButton &&
-                  !hasTopTip && (
-                    <WithHoverSound>
-                      <button
-                        className={classNames({
-                          [inviteStyles.inviteButton]: true,
-                          [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered
-                        })}
-                        onClick={() => this.toggleInviteDialog()}
-                      >
-                        <FormattedMessage id="entry.invite-others-nag" />
-                      </button>
-                    </WithHoverSound>
-                  )}
-                {!showVREntryButton &&
-                  this.occupantCount() > 1 &&
-                  !hasTopTip &&
-                  entered && (
-                    <WithHoverSound>
-                      <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
-                        <span>
-                          {this.state.miniInviteActivated
-                            ? navigator.share
-                              ? "sharing..."
-                              : "copied!"
-                            : "hub.link/" + this.props.hubId}
-                        </span>
-                      </button>
-                    </WithHoverSound>
-                  )}
-                {showVREntryButton && (
-                  <WithHoverSound>
-                    <button className={inviteStyles.enterButton} onClick={() => this.props.scene.enterVR()}>
-                      <FormattedMessage id="entry.enter-in-vr" />
+            {!this.state.frozen &&
+              !watching && (
+                <div
+                  className={classNames({
+                    [inviteStyles.inviteContainer]: true,
+                    [inviteStyles.inviteContainerBelowHud]: entered,
+                    [inviteStyles.inviteContainerInverted]: this.state.showShareDialog
+                  })}
+                >
+                  {!showVREntryButton &&
+                    !hasTopTip && (
+                      <WithHoverSound>
+                        <button
+                          className={classNames({
+                            [inviteStyles.inviteButton]: true,
+                            [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered
+                          })}
+                          onClick={() => this.toggleShareDialog()}
+                        >
+                          <FormattedMessage id="entry.share-button" />
+                        </button>
+                      </WithHoverSound>
+                    )}
+                  {showChooseSceneButton && (
+                    <button
+                      className={classNames([styles.chooseSceneButton])}
+                      onClick={() => {
+                        this.props.performConditionalSignIn(
+                          () => this.props.hubChannel.can("update_hub"),
+                          () => {
+                            showFullScreenIfAvailable();
+                            this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                          },
+                          "change-scene"
+                        );
+                      }}
+                    >
+                      <FormattedMessage id="entry.change-scene" />
                     </button>
-                  </WithHoverSound>
-                )}
-                {this.state.showInviteDialog && (
-                  <InviteDialog
-                    allowShare={!isMobileVR}
-                    entryCode={this.props.hubEntryCode}
-                    hubId={this.props.hubId}
-                    onClose={() => this.setState({ showInviteDialog: false })}
-                  />
-                )}
-              </div>
-            )}
+                  )}
+
+                  {showInviteTip && (
+                    <div className={styles.inviteTip}>
+                      <div className={styles.inviteTipAttachPoint} />
+                      <FormattedMessage id={`entry.${isMobile ? "mobile" : "desktop"}.invite-tip`} />
+                    </div>
+                  )}
+                  {!showVREntryButton &&
+                    this.occupantCount() > 1 &&
+                    !hasTopTip &&
+                    entered && (
+                      <WithHoverSound>
+                        <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
+                          <span>
+                            {this.state.miniInviteActivated
+                              ? navigator.share
+                                ? "sharing..."
+                                : "copied!"
+                              : "hub.link/" + this.props.hubId}
+                          </span>
+                        </button>
+                      </WithHoverSound>
+                    )}
+                  {showVREntryButton && (
+                    <WithHoverSound>
+                      <button className={inviteStyles.enterButton} onClick={() => this.props.scene.enterVR()}>
+                        <FormattedMessage id="entry.enter-in-vr" />
+                      </button>
+                    </WithHoverSound>
+                  )}
+                  {this.state.showShareDialog && (
+                    <InviteDialog
+                      allowShare={!isMobileVR}
+                      entryCode={this.props.hubEntryCode}
+                      hasPush={hasPush}
+                      isSubscribed={
+                        this.state.isSubscribed === undefined ? this.props.initialIsSubscribed : this.state.isSubscribed
+                      }
+                      onSubscribeChanged={() => this.onSubscribeChanged()}
+                      hubId={this.props.hubId}
+                      onClose={() => this.setState({ showShareDialog: false })}
+                    />
+                  )}
+                </div>
+              )}
 
             <StateRoute
               stateKey="overlay"
@@ -1669,13 +1694,15 @@ class UIRoot extends Component {
               />
             )}
 
-            {entered && (
+            {enteredOrWatching && (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
                   history={this.props.history}
                   mediaSearchStore={this.props.mediaSearchStore}
                   muted={this.state.muted}
                   frozen={this.state.frozen}
+                  watching={this.state.watching}
+                  onWatchEnded={() => this.setState({ watching: false })}
                   spacebubble={this.state.spacebubble}
                   videoShareMediaSource={this.state.videoShareMediaSource}
                   activeTip={this.props.activeTips && this.props.activeTips.top}
@@ -1690,11 +1717,19 @@ class UIRoot extends Component {
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
                 />
-                <div className={styles.nagCornerButton}>
-                  <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
-                    <FormattedMessage id="feedback.prompt" />
-                  </a>
-                </div>
+                {!watching ? (
+                  <div className={styles.nagCornerButton}>
+                    <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
+                      <FormattedMessage id="feedback.prompt" />
+                    </a>
+                  </div>
+                ) : (
+                  <div className={styles.nagCornerButton}>
+                    <button onClick={() => this.setState({ hide: true })}>
+                      <FormattedMessage id="hide-ui.prompt" />
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

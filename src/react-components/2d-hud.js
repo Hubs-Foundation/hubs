@@ -6,6 +6,8 @@ const { detect } = require("detect-browser");
 import styles from "../assets/stylesheets/2d-hud.scss";
 import uiStyles from "../assets/stylesheets/ui-root.scss";
 import { FormattedMessage } from "react-intl";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
 const browser = detect();
 
@@ -15,6 +17,8 @@ class TopHUD extends Component {
     isCursorHoldingPen: PropTypes.bool,
     hasActiveCamera: PropTypes.bool,
     frozen: PropTypes.bool,
+    watching: PropTypes.bool,
+    onWatchEnded: PropTypes.func,
     videoShareMediaSource: PropTypes.string,
     activeTip: PropTypes.string,
     history: PropTypes.object,
@@ -115,18 +119,41 @@ class TopHUD extends Component {
 
   render() {
     const videoSharingButtons = this.buildVideoSharingButtons();
+    const isMobile = AFRAME.utils.device.isMobile();
 
-    const tip = this.props.activeTip && (
-      <div className={cx(styles.topTip)}>
-        <div className={cx([styles.attachPoint, styles[`attach_${this.props.activeTip.split(".")[1]}`]])} />
-        <FormattedMessage id={`tips.${this.props.activeTip}`} />
-      </div>
-    );
+    let tip;
+
+    if (this.props.watching) {
+      tip = (
+        <div className={cx([styles.topTip, styles.topTipNoHud])}>
+          <button className={styles.tipCancel} onClick={() => this.props.onWatchEnded()}>
+            <i>
+              <FontAwesomeIcon icon={faTimes} />
+            </i>
+          </button>
+          <FormattedMessage id={`tips.${isMobile ? "mobile" : "desktop"}.watching`} />
+          {!isMobile && (
+            <button className={styles.tipCancelText} onClick={() => this.props.onWatchEnded()}>
+              <FormattedMessage id="tips.watching.back" />
+            </button>
+          )}
+        </div>
+      );
+    } else if (this.props.activeTip) {
+      tip = this.props.activeTip && (
+        <div className={cx(styles.topTip)}>
+          {!this.props.frozen && (
+            <div className={cx([styles.attachPoint, styles[`attach_${this.props.activeTip.split(".")[1]}`]])} />
+          )}
+          <FormattedMessage id={`tips.${this.props.activeTip}`} />
+        </div>
+      );
+    }
 
     // Hide buttons when frozen.
     return (
       <div className={cx(styles.container, styles.top, styles.unselectable, uiStyles.uiInteractive)}>
-        {this.props.frozen ? (
+        {this.props.frozen || this.props.watching ? (
           <div className={cx(uiStyles.uiInteractive, styles.panel)}>{tip}</div>
         ) : (
           <div className={cx(uiStyles.uiInteractive, styles.panel)}>
