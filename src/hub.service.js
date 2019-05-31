@@ -6,7 +6,7 @@ self.addEventListener("activate", function(e) {
   return e.waitUntil(self.clients.claim());
 });
 
-self.addEventListener("fetch", function(e) {});
+self.addEventListener("fetch", function() {});
 
 self.addEventListener("push", function(e) {
   const payload = JSON.parse(e.data.text());
