@@ -4,9 +4,10 @@ import qsTruthy from "../utils/qs_truthy";
 const invaderPos = new AFRAME.THREE.Vector3();
 const bubblePos = new AFRAME.THREE.Vector3();
 const isDebug = qsTruthy("debug");
+const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 /**
- * Iterates through bubbles and invaders on every tick and sets invader state accordingly.
+ * Updates
  * testing multiline things
  * @namespace avatar/personal-space-bubble
  * @system personal-space-bubble
@@ -21,6 +22,7 @@ AFRAME.registerSystem("personal-space-bubble", {
     this.invaders = [];
     this.bubbles = [];
     this._performUpdate = this._performUpdate.bind(this);
+    this.tickCount = 0;
 
     this.el.addEventListener("action_space_bubble", () => {
       this.el.setAttribute("personal-space-bubble", { enabled: !this.data.enabled });
@@ -78,10 +80,30 @@ AFRAME.registerSystem("personal-space-bubble", {
 
   tick() {
     this._performUpdate();
+    this.tickCount++;
   },
 
   _performUpdate: (function() {
     const tempInvasionFlags = [];
+
+    const setInvaderFlag = (i, bubble) => {
+      // Hide the invader if inside the bubble
+      const invader = this.invaders[i];
+      invaderPos.setFromMatrixPosition(invader.el.object3D.matrixWorld);
+
+      const distanceSquared = bubblePos.distanceToSquared(invaderPos);
+      const radiusSum = bubble.data.radius + invader.data.radius;
+
+      if (distanceSquared < radiusSum * radiusSum) {
+        tempInvasionFlags[i] = true;
+      }
+    };
+
+    const flushInvadingFlagsForIndex = i => {
+      if (this.invaders[i].invading !== tempInvasionFlags[i]) {
+        this.invaders[i].setInvading(tempInvasionFlags[i]);
+      }
+    };
 
     return function() {
       if (!this.data.enabled) return;
@@ -102,24 +124,22 @@ AFRAME.registerSystem("personal-space-bubble", {
         bubble.el.object3D.updateMatrices();
         bubblePos.setFromMatrixPosition(bubble.el.object3D.matrixWorld);
 
-        // Hide the invader if inside the bubble
-        for (let j = 0; j < this.invaders.length; j++) {
-          const invader = this.invaders[j];
-
-          invaderPos.setFromMatrixPosition(invader.el.object3D.matrixWorld);
-
-          const distanceSquared = bubblePos.distanceToSquared(invaderPos);
-          const radiusSum = bubble.data.radius + invader.data.radius;
-          if (distanceSquared < radiusSum * radiusSum) {
-            tempInvasionFlags[j] = true;
+        if (!isMobileVR) {
+          for (let j = 0; j < this.invaders.length; j++) {
+            setInvaderFlag(j, bubble);
           }
+        } else {
+          // Optimization: update one invader per frame on mobile VR
+          setInvaderFlag(this.invaders.length % this.tickCount, bubble);
         }
       }
 
-      for (let i = 0; i < this.invaders.length; i++) {
-        if (this.invaders[i].invading !== tempInvasionFlags[i]) {
-          this.invaders[i].setInvading(tempInvasionFlags[i]);
+      if (!isMobileVR) {
+        for (let i = 0; i < this.invaders.length; i++) {
+          flushInvadingFlagsForIndex(i);
         }
+      } else {
+        flushInvadingFlagsForIndex(this.invaders.length % this.tickCount);
       }
     };
   })()
