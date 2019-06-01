@@ -7,7 +7,7 @@ const isDebug = qsTruthy("debug");
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 /**
- * Updates
+ * Updates invaders every tick, doing one per frame on mobile VR.
  * testing multiline things
  * @namespace avatar/personal-space-bubble
  * @system personal-space-bubble
