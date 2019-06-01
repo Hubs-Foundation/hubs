@@ -4,7 +4,7 @@ import qsTruthy from "../utils/qs_truthy";
 const invaderPos = new AFRAME.THREE.Vector3();
 const bubblePos = new AFRAME.THREE.Vector3();
 const isDebug = qsTruthy("debug");
-const isMobileVR = AFRAME.utils.device.isMobileVR();
+const isMobileVR = true; //AFRAME.utils.device.isMobileVR();
 
 /**
  * Updates
@@ -21,8 +21,9 @@ AFRAME.registerSystem("personal-space-bubble", {
   init() {
     this.invaders = [];
     this.bubbles = [];
-    this._performUpdate = this._performUpdate.bind(this);
     this.tickCount = 0;
+
+    this._updateInvaders = this._updateInvaders.bind(this);
 
     this.el.addEventListener("action_space_bubble", () => {
       this.el.setAttribute("personal-space-bubble", { enabled: !this.data.enabled });
@@ -79,16 +80,16 @@ AFRAME.registerSystem("personal-space-bubble", {
   },
 
   tick() {
-    this._performUpdate();
+    this._updateInvaders();
     this.tickCount++;
   },
 
-  _performUpdate: (function() {
+  _updateInvaders: (function() {
     const tempInvasionFlags = [];
 
-    const setInvaderFlag = (i, bubble) => {
+    const setInvaderFlag = (i, invaders, bubble) => {
       // Hide the invader if inside the bubble
-      const invader = this.invaders[i];
+      const invader = invaders[i];
       invaderPos.setFromMatrixPosition(invader.el.object3D.matrixWorld);
 
       const distanceSquared = bubblePos.distanceToSquared(invaderPos);
@@ -99,14 +100,15 @@ AFRAME.registerSystem("personal-space-bubble", {
       }
     };
 
-    const flushInvadingFlagsForIndex = i => {
-      if (this.invaders[i].invading !== tempInvasionFlags[i]) {
-        this.invaders[i].setInvading(tempInvasionFlags[i]);
+    const flushInvadingFlagsForIndex = (i, invaders) => {
+      if (invaders[i].invading !== tempInvasionFlags[i]) {
+        invaders[i].setInvading(tempInvasionFlags[i]);
       }
     };
 
     return function() {
       if (!this.data.enabled) return;
+      if (this.invaders.length === 0) return;
 
       tempInvasionFlags.length = 0;
 
@@ -126,20 +128,20 @@ AFRAME.registerSystem("personal-space-bubble", {
 
         if (!isMobileVR) {
           for (let j = 0; j < this.invaders.length; j++) {
-            setInvaderFlag(j, bubble);
+            setInvaderFlag(j, this.invaders, bubble);
           }
         } else {
           // Optimization: update one invader per frame on mobile VR
-          setInvaderFlag(this.invaders.length % this.tickCount, bubble);
+          setInvaderFlag(this.tickCount % this.invaders.length, this.invaders, bubble);
         }
       }
 
       if (!isMobileVR) {
         for (let i = 0; i < this.invaders.length; i++) {
-          flushInvadingFlagsForIndex(i);
+          flushInvadingFlagsForIndex(i, this.invaders);
         }
       } else {
-        flushInvadingFlagsForIndex(this.invaders.length % this.tickCount);
+        flushInvadingFlagsForIndex(this.tickCount % this.invaders.length, this.invaders);
       }
     };
   })()
