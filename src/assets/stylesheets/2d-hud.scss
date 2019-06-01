@@ -51,6 +51,10 @@
       width: 189px;
     }
 
+    @media(max-width: 420px) {
+      width: 189px;
+    }
+
     :local(.attach-point) {
       width: 0;
       height: 0;
@@ -100,6 +104,35 @@
     :local(.attach_freeze_mode) {
       display: none;
     }
+  }
+
+  :local(.top-tip-no-hud) {
+    top: -30px;
+    width: auto;
+    white-space: nowrap;
+    height: 20px;
+
+    span {
+      padding-right: 12px;
+    }
+  }
+
+  :local(.tip-cancel-text) {
+    @extend %link-button;
+    color: white;
+  }
+
+  :local(.tip-cancel) {
+    color: $light-blue;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    cursor: pointer;
+    border: none;
+    outline-style: none;
+    width: 32px;
+    margin-right: 2px;
   }
 
   :local(.video-share-extra-options) {

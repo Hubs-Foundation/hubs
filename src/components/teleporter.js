@@ -182,6 +182,7 @@ AFRAME.registerComponent("teleporter", {
   },
 
   tick(t, dt) {
+    if (!this.el.sceneEl.is("entered")) return;
     const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
     const userinput = AFRAME.scenes[0].systems.userinput;
     const { start, confirm, speed } = this.data;

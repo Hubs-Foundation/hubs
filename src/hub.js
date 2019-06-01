@@ -93,6 +93,7 @@ import "./components/track-pose";
 import "./components/replay";
 import "./components/visibility-by-path";
 import "./components/tags";
+import "./components/hubs-text";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
@@ -811,7 +812,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       AFRAME.utils.device.getVRDisplay = () => vrDisplay;
     }
   } else {
-    remountUI({ availableVREntryTypes });
+    const hasVREntryDevice =
+      availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no ||
+      availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no ||
+      availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no;
+
+    remountUI({ availableVREntryTypes, forcedVREntryType: !hasVREntryDevice ? "2d" : null });
   }
 
   const environmentScene = document.querySelector("#environment-scene");

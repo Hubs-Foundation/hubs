@@ -36,6 +36,7 @@ npm run build
 mkdir dist/pages
 mv dist/*.html dist/pages
 mv dist/hub.service.js dist/pages
+mv dist/manifest.webmanifest dist/pages
 
 # we need to upload wasm blobs with wasm content type explicitly because, unlike all our
 # other assets, AWS's built-in MIME type dictionary doesn't know about that one
