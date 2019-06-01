@@ -81,6 +81,13 @@ function matchRegex({ include, exclude }) {
   };
 }
 
+const babelConfig = JSON.parse(
+  fs
+    .readFileSync(path.resolve(__dirname, ".babelrc"))
+    .toString()
+    .replace(/\/\/.+/g, "")
+);
+
 module.exports = (env, argv) => ({
   entry: {
     index: path.join(__dirname, "src", "index.js"),
@@ -144,6 +151,16 @@ module.exports = (env, argv) => ({
           publicPath: "/",
           inline: true
         }
+      },
+      {
+        // We reference the sources of some libraries directly, and they use async/await,
+        // so we have to run it through babel in order to support the Samsung browser on Oculus Go.
+        test: [
+          path.resolve(__dirname, "node_modules/aframe-physics-system"),
+          path.resolve(__dirname, "node_modules/naf-janus-adapter")
+        ],
+        loader: "babel-loader",
+        options: babelConfig
       },
       {
         test: /\.js$/,
