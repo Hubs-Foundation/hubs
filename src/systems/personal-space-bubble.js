@@ -4,7 +4,7 @@ import qsTruthy from "../utils/qs_truthy";
 const invaderPos = new AFRAME.THREE.Vector3();
 const bubblePos = new AFRAME.THREE.Vector3();
 const isDebug = qsTruthy("debug");
-const isMobileVR = true; //AFRAME.utils.device.isMobileVR();
+const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 /**
  * Updates
