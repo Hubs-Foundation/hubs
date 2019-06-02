@@ -6,6 +6,16 @@
   "short_name": "Hubs",
   "icons": [
     {
+      "src": "https://assets-prod.reticulum.io/assets/images/pwaicon-120-hubs.png",
+      "sizes": "120x120",
+      "type": "image/png"
+    },
+    {
+      "src": "https://assets-prod.reticulum.io/assets/images/pwaicon-180-hubs.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
       "src": "https://assets-prod.reticulum.io/assets/images/pwaicon-192-hubs.png",
       "sizes": "192x192",
       "type": "image/png"
