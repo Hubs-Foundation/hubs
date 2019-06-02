@@ -28,7 +28,7 @@
   ],
   "scope": "/",
   "start_url": "/",
-  "display": "fullscreen",
+  "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#000",
   "background_color": "#000",
