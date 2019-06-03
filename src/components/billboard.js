@@ -31,6 +31,7 @@ AFRAME.registerComponent("billboard", {
 
     const expandBox = o => {
       if (o.geometry) {
+        o.updateMatrices();
         o.geometry.computeBoundingBox();
         boxTemp.copy(o.geometry.boundingBox).applyMatrix4(o.matrixWorld);
         box.expandByPoint(boxTemp.min);
