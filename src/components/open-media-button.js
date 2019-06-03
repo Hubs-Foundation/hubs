@@ -25,8 +25,7 @@ AFRAME.registerComponent("open-media-button", {
 
     this.onClick = () => {
       if (isHubsAvatarUrl(this.src)) {
-        const parts = this.src.split("/");
-        const avatarId = parts[parts.length - 1];
+        const avatarId = new URL(this.src).pathname.split("/").pop();
         window.APP.store.update({ profile: { avatarId } });
       } else if (isHubsSceneUrl(this.src)) {
         this.el.sceneEl.emit("scene_media_selected", this.src);
