@@ -115,6 +115,7 @@ import Subscriptions from "./subscriptions";
 import { createInWorldLogMessage } from "./react-components/chat-message";
 
 import "./systems/nav";
+import "./systems/frame-scheduler";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/permissions";
@@ -123,7 +124,6 @@ import "./systems/camera-tools";
 import "./systems/userinput/userinput";
 import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
-import "./systems/frame-scheduler";
 import "./systems/ui-hotkeys";
 import "./systems/tips";
 import "./systems/interactions";
