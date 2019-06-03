@@ -34,6 +34,7 @@ AFRAME.registerComponent("hand-pose", {
     }
     this.from = this.to = this.mixer.clipAction(POSES.open + suffix);
     this.from.play();
+    this.networkField = `${this.id}_hand_pose`;
 
     const getNetworkedAvatar = el => {
       if (!el) {
@@ -55,13 +56,13 @@ AFRAME.registerComponent("hand-pose", {
     if (
       !this.networkedAvatar ||
       !this.networkedAvatar.data ||
-      this.networkedAvatar.data[`${this.id}_hand_pose`] === this.pose
+      this.networkedAvatar.data[this.networkField] === this.pose
     ) {
       return;
     }
 
-    this.animatePose(NETWORK_POSES[this.pose], NETWORK_POSES[this.networkedAvatar.data[`${this.id}_hand_pose`]]);
-    this.pose = this.networkedAvatar.data[`${this.id}_hand_pose`];
+    this.animatePose(NETWORK_POSES[this.pose], NETWORK_POSES[this.networkedAvatar.data[this.networkField]]);
+    this.pose = this.networkedAvatar.data[this.networkField];
   },
 
   animatePose(prev, curr) {
