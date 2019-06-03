@@ -26,11 +26,32 @@ AFRAME.registerComponent("billboard", {
   _updateIsInView: (function() {
     const frustum = new THREE.Frustum();
     const frustumMatrix = new THREE.Matrix4();
-    const cameraWorld = new THREE.Vector3();
-    const isInViewOfCamera = (screenCamera, pos) => {
+    const box = new THREE.Box3();
+
+    const isInViewOfCamera = (obj, screenCamera) => {
       frustumMatrix.multiplyMatrices(screenCamera.projectionMatrix, screenCamera.matrixWorldInverse);
       frustum.setFromMatrix(frustumMatrix);
-      return frustum.containsPoint(pos);
+
+      // NOTE: not using box.setFromObject here because text nodes do not have Z values in their geometry buffer,
+      // and that routine ultimately assumes they do.
+      //
+      // For simplicity, this routine assumes this object has at most one geometry and that it either exists on
+      // this object or its first level children.
+      let o = obj;
+
+      if (!o.geometry) {
+        for (let i = 0, l = obj.children.length; i < l; i++) {
+          o = obj.children[i];
+
+          if (o.geometry) break;
+        }
+      }
+
+      if (!o.geometry) return false;
+
+      o.geometry.computeBoundingBox();
+      box.copy(o.geometry.boundingBox).applyMatrix4(o.matrixWorld);
+      return frustum.intersectsBox(box);
     };
 
     return function() {
@@ -44,9 +65,8 @@ AFRAME.registerComponent("billboard", {
       }
 
       if (!this.playerCamera) return;
-      this.el.object3D.getWorldPosition(cameraWorld);
 
-      this.isInView = isInViewOfCamera(this.playerCamera, cameraWorld);
+      this.isInView = isInViewOfCamera(this.el.object3D, this.playerCamera);
     };
   })(),
 
