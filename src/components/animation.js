@@ -8,7 +8,7 @@
 // Bugfix added 3/1/19 - If an animation component is removed before its delay setting, then
 // it erroneously restarts.
 
-var anime = require("animejs");
+var anime = require("animejs").default;
 var components = AFRAME.components; // hubs
 var registerComponent = AFRAME.registerComponent; // hubs
 //var THREE = require('../lib/three'); // hubs
