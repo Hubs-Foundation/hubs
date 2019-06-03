@@ -5,7 +5,8 @@ import {
   resolveUrl,
   injectCustomShaderChunks,
   isHubsRoomUrl,
-  isHubsSceneUrl
+  isHubsSceneUrl,
+  isHubsAvatarUrl
 } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
 import "three/examples/js/loaders/GLTFLoader";
@@ -97,7 +98,6 @@ AFRAME.registerComponent("media-loader", {
     this.el.removeAttribute("media-pager");
     this.el.removeAttribute("media-video");
     this.el.setAttribute("media-image", { src: "error" });
-    this.clearLoadingTimeout();
   },
 
   showLoader() {
@@ -380,7 +380,12 @@ AFRAME.registerComponent("media-loader", {
           () => {
             const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
 
-            if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
+            if (isHubsAvatarUrl(src)) {
+              this.el.setAttribute("hover-menu__hubs-item", {
+                template: "#avatar-link-hover-menu",
+                dirs: ["forward", "back"]
+              });
+            } else if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#hubs-destination-hover-menu",
                 dirs: ["forward", "back"]
