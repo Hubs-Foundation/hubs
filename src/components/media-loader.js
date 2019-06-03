@@ -98,6 +98,7 @@ AFRAME.registerComponent("media-loader", {
     this.el.removeAttribute("media-pager");
     this.el.removeAttribute("media-video");
     this.el.setAttribute("media-image", { src: "error" });
+    this.clearLoadingTimeout();
   },
 
   showLoader() {
