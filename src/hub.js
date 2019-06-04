@@ -12,7 +12,6 @@ patchWebGLRenderingContext();
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
-import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
@@ -92,6 +91,8 @@ import "./components/track-pose";
 import "./components/replay";
 import "./components/visibility-by-path";
 import "./components/tags";
+import "./components/hubs-text";
+import "./components/billboard";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
@@ -114,6 +115,7 @@ import Subscriptions from "./subscriptions";
 import { createInWorldLogMessage } from "./react-components/chat-message";
 
 import "./systems/nav";
+import "./systems/frame-scheduler";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/permissions";
@@ -122,7 +124,6 @@ import "./systems/camera-tools";
 import "./systems/userinput/userinput";
 import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
-import "./systems/frame-scheduler";
 import "./systems/ui-hotkeys";
 import "./systems/tips";
 import "./systems/interactions";
@@ -532,8 +533,17 @@ async function runBotMode(scene, entryManager) {
 document.addEventListener("DOMContentLoaded", async () => {
   warmSerializeElement();
 
-  // HACK: On Safari for iOS & MacOS, if mic permission is not granted, subscriber webrtc negotiation fails.
+  // If we are on iOS but we don't have the mediaDevices API, then we are likely in a Firefox or Chrome WebView,
+  // or a WebView preview used in apps like Twitter and Discord. So we show the dialog that tells users to open
+  // the room in the real Safari.
   const detectedOS = detectOS(navigator.userAgent);
+  if (detectedOS === "iOS" && !navigator.mediaDevices) {
+    remountUI({ showSafariDialog: true });
+    return;
+  }
+
+  // HACK: On Safari for iOS & MacOS, if mic permission is not granted, subscriber webrtc negotiation fails.
+  // So we need to insist on microphone grants to continue.
   const browser = detect();
   if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
     try {
@@ -799,7 +809,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       AFRAME.utils.device.getVRDisplay = () => vrDisplay;
     }
   } else {
-    remountUI({ availableVREntryTypes });
+    const hasVREntryDevice =
+      availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no ||
+      availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no ||
+      availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no;
+
+    remountUI({ availableVREntryTypes, forcedVREntryType: !hasVREntryDevice ? "2d" : null });
   }
 
   const environmentScene = document.querySelector("#environment-scene");

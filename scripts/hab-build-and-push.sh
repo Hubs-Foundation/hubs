@@ -9,7 +9,7 @@ export CORS_PROXY_SERVER=$6
 export NON_CORS_PROXY_DOMAINS=$7
 export TARGET_S3_URL=$8
 export SENTRY_DSN=$9
-export GA_TRACKING_ID=$10
+export GA_TRACKING_ID=${10}
 export BUILD_NUMBER=${11}
 export GIT_COMMIT=${12}
 export BUILD_VERSION="${BUILD_NUMBER} (${GIT_COMMIT})"
@@ -36,6 +36,7 @@ npm run build
 mkdir dist/pages
 mv dist/*.html dist/pages
 mv dist/hub.service.js dist/pages
+mv dist/manifest.webmanifest dist/pages
 
 # we need to upload wasm blobs with wasm content type explicitly because, unlike all our
 # other assets, AWS's built-in MIME type dictionary doesn't know about that one

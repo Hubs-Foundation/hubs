@@ -20,9 +20,9 @@ AFRAME.registerComponent("scene-preview-camera", {
     this.startRotation = new THREE.Quaternion();
     this.startRotation.setFromEuler(this.el.object3D.rotation);
 
-    this.targetPoint = new THREE.Vector3(1, 0.5, -0.5);
-    this.targetPoint.applyMatrix4(this.el.object3D.matrix);
-    this.targetPoint.add(new THREE.Vector3(0, 0, -2));
+    this.targetPoint = this.el.object3D.position.clone();
+    this.targetPoint.y = Math.max(this.targetPoint.y - 1.5, 1);
+    this.targetPoint.add(new THREE.Vector3(2, 0, -2));
 
     const targetRotDelta = new THREE.Euler(-0.15, 0.0, 0.15);
     this.targetRotation = new THREE.Quaternion();

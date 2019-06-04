@@ -249,6 +249,8 @@ AFRAME.registerSystem("tips", {
   },
 
   tick: function() {
+    if (isMobileVR) return; // Optimization for now, don't bother with this on mobile VR until we have real tips
+
     if (!this._userinput) {
       this._userinput = this.el.systems.userinput;
 

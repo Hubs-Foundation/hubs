@@ -7,7 +7,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <link rel="shortcut icon" type="image/png" href="/favicon.ico">
+    <link rel="icon" sizes="16x16 24x24 32x32 48x48 64x64" href="/favicon.ico">
+    <!-- Web-App Manifest (https://w3c.github.io/manifest/) -->
+    <link rel="manifest" href="/manifest.webmanifest">
+    <!-- iOS (for "Add to Homescreen") -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <!-- Microsoft Edge (Windows) -->
+    <meta name="application-name" content="Hubs">
     <title>Room | Hubs by Mozilla</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700" rel="stylesheet">
     <script>
@@ -52,7 +58,7 @@
         personal-space-bubble="debug: false;"
         stats-plus="false"
         rotate-selected-object
-        environment-map="loadDefault: false"
+        environment-map
     >
         <a-assets>
             <img id="rotation-symbol" crossorigin="anonymous" src="./assets/rotation.png">
@@ -126,17 +132,15 @@
                         <template data-name="Neck">
                             <a-entity>
                                 <a-entity
-                                    class="nametag"
                                     billboard
-                                    matrix-auto-update
+                                    class="nametag"
                                     text="side: double; align: center; color: #ddd"
                                     position="0 1 0"
                                     scale="6 6 6"
                                 ></a-entity>
                                 <a-entity
-                                    class="communityIdentifier"
                                     billboard
-                                    matrix-auto-update
+                                    class="communityIdentifier"
                                     text="side: double; align: center; color: #ddd"
                                     visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"
                                     position="0 0.8 0"
@@ -148,7 +152,7 @@
                         <template data-name="Spine">
                             <a-entity is-remote-hover-target personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
                                 <a-entity class="ui interactable-ui">
-                                    <a-entity matrix-auto-update billboard class="freeze-menu" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;" avatar-volume-controls>
+                                    <a-entity billboard class="freeze-menu" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;" avatar-volume-controls>
                                         <a-entity class="avatar-volume-label" text="value: 0%; anchor: center; align: center; color: #ff3464; letterSpacing: 4; width:1.5;" text-raycast-hack position="0.0 0.675 0.35" scale="1.25 1.25 1.25"></a-entity>
                                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.45 0.675 0.35" class="ui avatar-volume-down-button">
                                             <a-entity text="value: -; anchor: center; align: center; color: #ccc; letterSpacing: 4; width: 2.5;" text-raycast-hack position="0 0 0.01" scale="0.85 0.85 0.85"></a-entity>
@@ -528,6 +532,14 @@
                 <a-entity class="ui interactable-ui hover-container" visible="false">
                     <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.01">
                         <a-entity text="value:value; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="avatar-link-hover-menu">
+                <a-entity class="ui interactable-ui hover-container" visible="false">
+                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.01">
+                        <a-entity text="width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>

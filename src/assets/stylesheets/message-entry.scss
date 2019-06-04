@@ -2,7 +2,7 @@
 
 :local(.message-entry) {
   position: relative;
-  margin: 32px 24px 24px 24px;
+  margin: 10px 24px 24px 24px;
   height: 48px;
   display: flex;
   justify-content: center;
@@ -104,6 +104,10 @@
     color: white;
     padding: 8px 0px;
     margin-left: 4px;
+  }
+
+  :local(.message-entry-input-no-spawn) {
+    padding: 8px 1.25em;
   }
 
   :local(.message-entry-spawn) {

@@ -11,6 +11,7 @@ sets.cursorHoldingPen = "cursorHoldingPen";
 sets.cursorHoldingCamera = "cursorHoldingCamera";
 sets.cursorHoldingInteractable = "cursorHoldingInteractable";
 sets.cursorHoldingUI = "cursorHoldingUI";
+sets.cursorHoldingNothing = "cursorHoldingNothing";
 sets.rightHandTeleporting = "rightHandTeleporting";
 sets.rightHandHoveringOnPen = "rightHandHoveringOnPen";
 sets.rightHandHoveringOnCamera = "rightHandHoveringOnCamera";

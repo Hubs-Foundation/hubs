@@ -417,6 +417,7 @@ export default class SceneEntryManager {
       isHandlingVideoShare = true;
 
       if (currentVideoShareEntity && currentVideoShareEntity.parentNode) {
+        NAF.utils.takeOwnership(currentVideoShareEntity);
         currentVideoShareEntity.parentNode.removeChild(currentVideoShareEntity);
       }
 

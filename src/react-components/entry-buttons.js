@@ -7,7 +7,6 @@ import DesktopScreenEntryImg from "../assets/images/desktop_screen_entry.svg";
 import GenericVREntryImg from "../assets/images/generic_vr_entry.svg";
 import GearVREntryImg from "../assets/images/gearvr_entry.svg";
 import DaydreamEntryImg from "../assets/images/daydream_entry.svg";
-import DeviceEntryImg from "../assets/images/device_entry.svg";
 import styles from "../assets/stylesheets/entry.scss";
 import { WithHoverSound } from "./wrap-with-audio";
 import cx from "classnames";
@@ -93,34 +92,6 @@ export const DaydreamEntryButton = props => {
     prefixMessageId: "entry.daydream-prefix",
     mediumMessageId: "entry.daydream-medium"
   };
-
-  return <EntryButton {...entryButtonProps} />;
-};
-
-export const SafariEntryButton = props => {
-  const entryButtonProps = {
-    ...props,
-    iconSrc: MobileScreenEntryImg,
-    prefixMessageId: "entry.screen-prefix",
-    mediumMessageId: "entry.mobile-safari"
-  };
-
-  return <EntryButton {...entryButtonProps} />;
-};
-
-export const DeviceEntryButton = props => {
-  const entryButtonProps = {
-    ...props,
-    iconSrc: DeviceEntryImg,
-    prefixMessageId: isMobile ? "entry.device-prefix-mobile" : "entry.device-prefix-desktop",
-    mediumMessageId: "entry.device-medium"
-  };
-
-  entryButtonProps.subtitle = entryButtonProps.isInHMD
-    ? "entry.device-subtitle-vr"
-    : isMobile
-      ? "entry.device-subtitle-mobile"
-      : "entry.device-subtitle-desktop";
 
   return <EntryButton {...entryButtonProps} />;
 };

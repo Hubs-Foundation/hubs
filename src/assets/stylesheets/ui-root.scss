@@ -62,7 +62,7 @@ body.vr-mode {
   height: 80px;
   pointer-events: none;
 
-  a {
+  a, button {
     @extend %action-button-secondary;
     min-width: 120px;
     margin-right: 12px;
@@ -143,6 +143,34 @@ body.vr-mode {
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%);
   pointer-events: auto;
+}
+
+:local(.choose-scene-button) {
+  @extend %action-button-secondary;
+  pointer-events: auto;
+  margin-top: 16px;
+}
+
+:local(.invite-tip) {
+  @extend %tip-bubble;
+  width: auto;
+  top: 60px;
+
+  display: none;
+
+  @media (min-height: 325px) {
+    display: flex;
+  }
+
+  :local(.invite-tip-attach-point) {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid $bright-blue;
+    position: absolute;
+    top: -5px;
+  }
 }
 
 :local(.bottom-tip) {

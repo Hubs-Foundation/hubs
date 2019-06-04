@@ -121,6 +121,7 @@ export function resolveActionSets() {
       rightRemote.hovered.components["media-video"]
   );
 
+  userinput.toggleSet(sets.cursorHoldingNothing, !rightHand.held && !rightRemote.held);
   userinput.toggleSet(
     sets.cursorHoldingPen,
 

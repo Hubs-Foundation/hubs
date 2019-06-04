@@ -18,6 +18,11 @@ const togglePen = "/vars/touchscreen/togglePen";
 export const touchscreenUserBindings = addSetsToBindings({
   [sets.global]: [
     {
+      src: {},
+      dest: { value: paths.actions.cursor.hideLine },
+      xform: xforms.always(true)
+    },
+    {
       src: { value: paths.device.touchscreen.pinch.delta },
       dest: { value: forward },
       xform: xforms.scale(0.25)

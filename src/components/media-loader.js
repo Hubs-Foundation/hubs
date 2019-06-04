@@ -5,14 +5,15 @@ import {
   resolveUrl,
   injectCustomShaderChunks,
   isHubsRoomUrl,
-  isHubsSceneUrl
+  isHubsSceneUrl,
+  isHubsAvatarUrl
 } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
 
-const anime = require("animejs");
+import anime from "animejs";
 
 const SHAPE = require("aframe-physics-system/src/constants").SHAPE;
 
@@ -193,7 +194,12 @@ AFRAME.registerComponent("media-loader", {
     };
 
     if (this.data.animate) {
-      this.addMeshScaleAnimation(this.el.getObject3D("mesh"), { x: 0.001, y: 0.001, z: 0.001 }, finish);
+      const mesh = this.el.getObject3D("mesh");
+      const scale = { x: 0.001, y: 0.001, z: 0.001 };
+      scale.x = mesh.scale.x < scale.x ? mesh.scale.x * 0.001 : scale.x;
+      scale.y = mesh.scale.y < scale.y ? mesh.scale.x * 0.001 : scale.y;
+      scale.z = mesh.scale.z < scale.z ? mesh.scale.x * 0.001 : scale.z;
+      this.addMeshScaleAnimation(mesh, scale, finish);
     } else {
       finish();
     }
@@ -215,9 +221,9 @@ AFRAME.registerComponent("media-loader", {
         return function(anim) {
           const value = anim.animatables[0].target;
 
-          value.x = Math.max(0.0001, value.x);
-          value.y = Math.max(0.0001, value.y);
-          value.z = Math.max(0.0001, value.z);
+          value.x = Math.max(Number.MIN_VALUE, value.x);
+          value.y = Math.max(Number.MIN_VALUE, value.y);
+          value.z = Math.max(Number.MIN_VALUE, value.z);
 
           // For animation timeline.
           if (value.x === lastValue.x && value.y === lastValue.y && value.z === lastValue.z) {
@@ -375,7 +381,12 @@ AFRAME.registerComponent("media-loader", {
           () => {
             const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
 
-            if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
+            if (isHubsAvatarUrl(src)) {
+              this.el.setAttribute("hover-menu__hubs-item", {
+                template: "#avatar-link-hover-menu",
+                dirs: ["forward", "back"]
+              });
+            } else if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#hubs-destination-hover-menu",
                 dirs: ["forward", "back"]

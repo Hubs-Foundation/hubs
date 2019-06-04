@@ -228,6 +228,28 @@ function attachTemplate(root, name, templateRoot) {
   }
 }
 
+function runMigration(version, json) {
+  if (version < 2) {
+    //old heightfields will be on the same node as the nav-mesh, delete those
+    const oldHeightfieldNode = json.nodes.find(node => {
+      let components = null;
+      if (node.extensions && node.extensions.MOZ_hubs_components) {
+        components = node.extensions.MOZ_hubs_components;
+      } else if (node.extensions && node.extensions.HUBS_components) {
+        components = node.extensions.HUBS_components;
+      }
+      return components && components.heightfield && components["nav-mesh"];
+    });
+    if (oldHeightfieldNode) {
+      if (oldHeightfieldNode.extensions.MOZ_hubs_components) {
+        delete oldHeightfieldNode.extensions.MOZ_hubs_components.heightfield;
+      } else if (oldHeightfieldNode.extensions.HUBS_components) {
+        delete oldHeightfieldNode.extensions.HUBS_components.heightfield;
+      }
+    }
+  }
+}
+
 export async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   let gltfUrl = src;
   let fileMap;
@@ -242,6 +264,16 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress)
   const gltfLoader = new THREE.GLTFLoader(loadingManager);
 
   const parser = await new Promise((resolve, reject) => gltfLoader.createParser(gltfUrl, resolve, onProgress, reject));
+
+  let version = 0;
+  if (
+    parser.json.extensions &&
+    parser.json.extensions.MOZ_hubs_components &&
+    parser.json.extensions.MOZ_hubs_components.hasOwnProperty("version")
+  ) {
+    version = parser.json.extensions.MOZ_hubs_components.version;
+  }
+  runMigration(version, parser.json);
 
   const materials = parser.json.materials;
   if (materials) {

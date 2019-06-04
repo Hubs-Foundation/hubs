@@ -82,16 +82,21 @@ function matchRegex({ include, exclude }) {
 }
 
 module.exports = (env, argv) => ({
+  node: {
+    // need to specify this manually because some random lodash code will try to access
+    // Buffer on the global object if it exists, so webpack will polyfill on its behalf
+    Buffer: false
+  },
   entry: {
     index: path.join(__dirname, "src", "index.js"),
     hub: path.join(__dirname, "src", "hub.js"),
     scene: path.join(__dirname, "src", "scene.js"),
+    avatar: path.join(__dirname, "src", "avatar.js"),
     link: path.join(__dirname, "src", "link.js"),
     spoke: path.join(__dirname, "src", "spoke.js"),
     discord: path.join(__dirname, "src", "discord.js"),
     admin: path.join(__dirname, "src", "admin.js"),
-    "whats-new": path.join(__dirname, "src", "whats-new.js"),
-    "avatar-selector": path.join(__dirname, "src", "avatar-selector.js")
+    "whats-new": path.join(__dirname, "src", "whats-new.js")
   },
   output: {
     filename: "assets/js/[name]-[chunkhash].js",
@@ -266,6 +271,20 @@ module.exports = (env, argv) => ({
       ]
     }),
     new HTMLWebpackPlugin({
+      filename: "avatar.html",
+      template: path.join(__dirname, "src", "avatar.html"),
+      chunks: ["vendor", "engine", "avatar"],
+      inject: "head",
+      meta: [
+        {
+          "http-equiv": "origin-trial",
+          "data-feature": "WebVR (For Chrome M62+)",
+          "data-expires": process.env.ORIGIN_TRIAL_EXPIRES,
+          content: process.env.ORIGIN_TRIAL_TOKEN
+        }
+      ]
+    }),
+    new HTMLWebpackPlugin({
       filename: "link.html",
       template: path.join(__dirname, "src", "link.html"),
       chunks: ["vendor", "engine", "link"]
@@ -284,12 +303,6 @@ module.exports = (env, argv) => ({
       filename: "whats-new.html",
       template: path.join(__dirname, "src", "whats-new.html"),
       chunks: ["vendor", "whats-new"],
-      inject: "head"
-    }),
-    new HTMLWebpackPlugin({
-      filename: "avatar-selector.html",
-      template: path.join(__dirname, "src", "avatar-selector.html"),
-      chunks: ["vendor", "engine", "avatar-selector"],
       inject: "head"
     }),
     new HTMLWebpackPlugin({
@@ -313,6 +326,12 @@ module.exports = (env, argv) => ({
       {
         from: "src/hub.service.js",
         to: "hub.service.js"
+      }
+    ]),
+    new CopyWebpackPlugin([
+      {
+        from: "src/assets/manifest.webmanifest",
+        to: "manifest.webmanifest"
       }
     ]),
     // Extract required css and add a content hash.

@@ -200,6 +200,8 @@ body {
   }
   :local(.cta-buttons) {
     display: flex;
+    flex-direction: column;
+    align-items: center;
     :local(.primary-button) {
       @extend %big-action-button;
     }
@@ -207,6 +209,18 @@ body {
       font-size: 14pt;
       width: 19em;
       margin-right: 1em;
+    }
+    :local(.secondary-button) {
+      @extend %action-button-secondary;
+      display: flex;
+      flex-direction: row;
+      width: 250px;
+      margin-top: 18px;
+      padding-right: 20px;
+
+      i {
+        margin-right: 16px;
+      }
     }
   }
   :local(.rightPanel) {

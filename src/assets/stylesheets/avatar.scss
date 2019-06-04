@@ -1,0 +1,84 @@
+@import 'shared';
+
+body {
+  margin: 0;
+}
+
+:local(.avatar-landing) {
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+ 
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  pointer-events: auto;
+  flex-direction: column;
+
+  @extend %default-font;
+  @extend %unselectable;
+
+  :local(.logo) {
+    width: 150px;
+    margin-bottom: 22px;
+
+    @media (min-width: 500px) {
+      position: absolute;
+      right: 15px;
+      bottom: 15px;
+      margin-bottom: 0;
+    }
+  }
+
+  :local(.box) {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 60vw;
+    min-width: 300px;
+    max-width: 700px;
+    min-height: 200px;
+    max-height: 1000px;
+    height: 100%;
+    padding: 40px;
+  }
+
+  :local(.title) {
+    @extend %top-title;
+    width: 100%;
+    color: black;
+    text-align: center;
+  }
+
+  :local(.selected-message) {
+    color: $grey-text;
+    margin-top: 16px;
+    height: 48px;
+  }
+
+  :local(.attributions) {
+    @extend %top-subtitle;
+    margin-bottom: 1em;
+  }
+
+  :local(.form-submit) {
+    @extend %bottom-action-button;
+    margin: 0;
+    min-height: max-content;
+    margin-top: 16px;
+    &:disabled {
+      background-color: $action-color-light;
+      cursor: default;
+    }
+  }
+
+  :local(.preview) {
+    flex: 1;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    position: relative;
+    max-width: 300px;
+  }
+}

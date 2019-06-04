@@ -14,15 +14,13 @@ registerTelemetry("/home", "Hubs Home Page");
 const { pathname } = document.location;
 const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathname.substring(1).split("/")[1]);
 
-(async () => {
-  if (qs.get("new") !== null) {
-    createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, null, true);
-    return;
-  }
+const store = new Store();
+const authChannel = new AuthChannel(store);
+let installEvent = null;
+let mountedUI = false;
 
-  const store = new Store();
-  const authChannel = new AuthChannel(store);
-  authChannel.setSocket(await connectToReticulum());
+const remountUI = function() {
+  mountedUI = true;
 
   const root = (
     <HomeRoot
@@ -36,7 +34,28 @@ const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathna
       authOrigin={qs.get("auth_origin")}
       listSignup={qs.has("list_signup")}
       report={qs.has("report")}
+      installEvent={installEvent}
     />
   );
   ReactDOM.render(root, document.getElementById("home-root"));
+};
+
+// PWA install prompt
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  installEvent = e;
+
+  if (mountedUI) {
+    remountUI();
+  }
+});
+
+(async () => {
+  if (qs.get("new") !== null) {
+    createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, null, true);
+    return;
+  }
+
+  authChannel.setSocket(await connectToReticulum());
+  remountUI();
 })();

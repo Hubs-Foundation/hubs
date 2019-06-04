@@ -1,4 +1,4 @@
-import { isHubsSceneUrl, isHubsRoomUrl } from "../utils/media-utils";
+import { isHubsSceneUrl, isHubsRoomUrl, isHubsAvatarUrl } from "../utils/media-utils";
 import { guessContentType } from "../utils/media-utils";
 
 AFRAME.registerComponent("open-media-button", {
@@ -12,7 +12,9 @@ AFRAME.registerComponent("open-media-button", {
 
       if (visible) {
         let label = "open link";
-        if (isHubsSceneUrl(src)) {
+        if (isHubsAvatarUrl(src)) {
+          label = "use avatar";
+        } else if (isHubsSceneUrl(src)) {
           label = "use scene";
         } else if (isHubsRoomUrl(src)) {
           label = "visit room";
@@ -22,7 +24,10 @@ AFRAME.registerComponent("open-media-button", {
     };
 
     this.onClick = () => {
-      if (isHubsSceneUrl(this.src)) {
+      if (isHubsAvatarUrl(this.src)) {
+        const avatarId = new URL(this.src).pathname.split("/").pop();
+        window.APP.store.update({ profile: { avatarId } });
+      } else if (isHubsSceneUrl(this.src)) {
         this.el.sceneEl.emit("scene_media_selected", this.src);
       } else if (isHubsRoomUrl(this.src)) {
         location.href = this.src;

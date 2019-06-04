@@ -62,8 +62,11 @@ AFRAME.registerComponent("player-info", {
       nametagEl.setAttribute("text", { value: this.displayName });
     }
     const communityIdentifierEl = this.el.querySelector(".communityIdentifier");
-    if (this.communityIdentifier && communityIdentifierEl) {
-      communityIdentifierEl.setAttribute("text", { value: this.communityIdentifier });
+    if (communityIdentifierEl) {
+      if (this.communityIdentifier) {
+        communityIdentifierEl.setAttribute("text", { value: this.communityIdentifier });
+      }
+      communityIdentifierEl.object3D.visible = !!this.communityIdentifier;
     }
   },
   applyProperties() {
