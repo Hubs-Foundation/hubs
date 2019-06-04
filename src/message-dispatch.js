@@ -37,7 +37,6 @@ export default class MessageDispatch {
     const curScale = playerRig.object3D.scale;
     let err;
     let physicsSystem;
-    let statsPlus;
 
     switch (command) {
       case "fly":
