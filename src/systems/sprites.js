@@ -226,7 +226,7 @@ export class SpriteSystem {
     });
   }
 
-  tick(t, dt) {
+  tick(t) {
     if (!this.mesh) return; // "await" async initialization (and pay for it forever after that)
 
     for (let i = 0; i < this.spriteComponents.length; i++) {
@@ -321,9 +321,6 @@ export class SpriteSystem {
         s = -0.5;
         t = 0.5;
       }
-      if (AFRAME.scenes[0].systems.userinput.get(paths.actions.logInteractionState)) {
-        console.log(s,t);
-      }
       aSweepParams.setXY(4 * i + 0, s, t);
       aSweepParams.setXY(4 * i + 1, s, t);
       aSweepParams.setXY(4 * i + 2, s, t);
@@ -367,17 +364,4 @@ export class SpriteSystem {
   remove(sprite) {
     this.spriteComponents.splice(this.spriteComponents.indexOf(sprite), 1);
   }
-}
-
-function setUniforms(
-  uniforms,
-  el,
-  time,
-  sweepParams,
-  boundingSphere,
-  interactorOneTransform,
-  interactorTwoTransform,
-  enableSweepingEffect
-) {
-  if (!uniforms || !this.uniforms.length) return;
 }
