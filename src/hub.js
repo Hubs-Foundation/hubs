@@ -335,6 +335,9 @@ async function updateEnvironmentForHub(hub) {
     environmentEl.addEventListener(
       "model-loaded",
       () => {
+        // Show the canvas once the model has loaded
+        document.querySelector(".a-canvas").classList.remove("a-hidden");
+
         //TODO: check if the environment was made with spoke to determine if a shape should be added
         traverseMeshesAndAddShapes(environmentEl);
       },
@@ -542,6 +545,9 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const canvas = document.querySelector(".a-canvas");
+  canvas.classList.add("a-hidden");
+
   warmSerializeElement();
 
   // If we are on iOS but we don't have the mediaDevices API, then we are likely in a Firefox or Chrome WebView,
@@ -1111,7 +1117,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         initialIsSubscribed: subscriptions.isSubscribed()
       });
 
-      await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, true, data);
+      await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, false, data);
     })
     .receive("error", res => {
       if (res.reason === "closed") {
