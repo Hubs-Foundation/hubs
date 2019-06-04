@@ -218,6 +218,7 @@
     "commands.leave": "Disconnect from the room.",
     "commands.duck": "The duck tested well. Quack.",
     "commands.debug": "Toggle physics debug rendering.",
+    "commands.vrstats": "Toggle stats in VR.",
     "settings.change-avatar": "Set Name & Avatar",
     "settings.change-scene": "Choose a Scene",
     "settings.rename-room": "Set Room Name...",
