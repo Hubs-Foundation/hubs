@@ -55,6 +55,7 @@ import OutputLevelWidget from "./output-level-widget.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import SettingsMenu from "./settings-menu.js";
+import EmbedTreatment from "./embed-treatment.js";
 import TwoDHUD from "./2d-hud";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
@@ -1312,6 +1313,14 @@ class UIRoot extends Component {
         <IntlProvider locale={lang} messages={messages}>
           <div className={classNames(rootStyles)}>
             {this.state.dialog}
+
+            {embed && (
+              <EmbedTreatment
+                hubName={this.props.hubName}
+                hubScene={this.props.hubScene}
+                onEmbedLoadClicked={this.props.onEmbedLoadClicked}
+              />
+            )}
 
             <StateRoute
               stateKey="overlay"

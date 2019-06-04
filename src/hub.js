@@ -497,7 +497,6 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
     const loadEnvironmentAndConnect = () => {
       updateEnvironmentForHub(hub);
-      updateUIForHub(hub);
 
       scene.components["networked-scene"]
         .connect()
@@ -512,6 +511,8 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
           return;
         });
     };
+
+    updateUIForHub(hub);
 
     if (!embed) {
       loadEnvironmentAndConnect();
@@ -1117,7 +1118,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         initialIsSubscribed: subscriptions.isSubscribed()
       });
 
-      await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, false, data);
+      await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, true, data);
     })
     .receive("error", res => {
       if (res.reason === "closed") {

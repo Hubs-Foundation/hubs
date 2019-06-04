@@ -310,6 +310,7 @@
     "client-info.mute-button": "Mute",
     "client-info.cancel": "Cancel",
     "avatar-landing.select": "Select",
-    "avatar-landing.selected": "This is your current avatar"
+    "avatar-landing.selected": "This is your current avatar",
+    "embed.load-button": "Load Scene"
   }
 }
