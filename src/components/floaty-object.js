@@ -102,7 +102,7 @@ AFRAME.registerComponent("floaty-object", {
         });
 
         this._makeStaticWhenAtRest = true;
-        this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.NON_COLLIDING_INTERACTABLE });
+        this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.HANDS });
       } else {
         this.el.setAttribute("ammo-body", {
           gravity: { x: 0, y: this.data.releaseGravity, z: 0 },

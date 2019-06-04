@@ -7,7 +7,6 @@ module.exports = {
     AVATAR: 4,
     HANDS: 8,
     DEFAULT_INTERACTABLE: 1 | 2 | 4 | 8,
-    NON_COLLIDING_INTERACTABLE: 1 | 8,
     UNOWNED_INTERACTABLE: 1 | 8,
     DEFAULT_SPAWNER: 1 | 8
   }
