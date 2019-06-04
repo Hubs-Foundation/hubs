@@ -98,20 +98,20 @@ AFRAME.registerComponent("floaty-object", {
           angularDamping: this.data.reduceAngularFloat ? 0.98 : 0.5,
           linearDamping: 0.95,
           linearSleepingThreshold: 0.1,
-          angularSleepingThreshold: 0.1
+          angularSleepingThreshold: 0.1,
+          collisionFilterMask: COLLISION_LAYERS.HANDS
         });
 
         this._makeStaticWhenAtRest = true;
-        this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.HANDS });
       } else {
         this.el.setAttribute("ammo-body", {
           gravity: { x: 0, y: this.data.releaseGravity, z: 0 },
           angularDamping: 0.01,
           linearDamping: 0.01,
           linearSleepingThreshold: 1.6,
-          angularSleepingThreshold: 2.5
+          angularSleepingThreshold: 2.5,
+          collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
         });
-        this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE });
       }
     } else {
       this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE });
