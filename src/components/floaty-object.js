@@ -102,6 +102,7 @@ AFRAME.registerComponent("floaty-object", {
         });
 
         this._makeStaticWhenAtRest = true;
+        this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.NON_COLLIDING_INTERACTABLE });
       } else {
         this.el.setAttribute("ammo-body", {
           gravity: { x: 0, y: this.data.releaseGravity, z: 0 },
@@ -110,19 +111,20 @@ AFRAME.registerComponent("floaty-object", {
           linearSleepingThreshold: 1.6,
           angularSleepingThreshold: 2.5
         });
+        this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE });
       }
+    } else {
+      this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE });
     }
 
     if (this.data.autoLockOnRelease) {
       this.setLocked(true);
     }
-
-    this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE });
   },
 
   onGrab() {
     this.el.setAttribute("ammo-body", {
-      collisionFilterMask: this.locked ? COLLISION_LAYERS.HANDS : COLLISION_LAYERS.DEFAULT_INTERACTABLE
+      collisionFilterMask: COLLISION_LAYERS.HANDS
     });
     this.setLocked(false);
   },
