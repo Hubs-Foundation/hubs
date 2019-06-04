@@ -16,6 +16,7 @@ AFRAME.registerComponent("player-info", {
     this.applyProperties = this.applyProperties.bind(this);
     this.updateDisplayName = this.updateDisplayName.bind(this);
     this.applyDisplayName = this.applyDisplayName.bind(this);
+    this.handleModelError = this.handleModelError.bind(this);
 
     this.isLocalPlayerInfo = this.el.id === "player-rig";
     this.playerSessionId = null;
@@ -33,10 +34,12 @@ AFRAME.registerComponent("player-info", {
   play() {
     this.el.addEventListener("model-loaded", this.applyProperties);
     this.el.sceneEl.addEventListener("presence_updated", this.updateDisplayName);
+    this.el.querySelector(".model").addEventListener("model-error", this.handleModelError);
   },
   pause() {
     this.el.removeEventListener("model-loaded", this.applyProperties);
     this.el.sceneEl.removeEventListener("presence_updated", this.updateDisplayName);
+    this.el.querySelector(".model").removeEventListener("model-error", this.handleModelError);
   },
   update() {
     this.applyProperties();
@@ -82,5 +85,8 @@ AFRAME.registerComponent("player-info", {
     this.el.querySelectorAll("[hover-visuals]").forEach(el => {
       el.components["hover-visuals"].uniforms = uniforms;
     });
+  },
+  handleModelError() {
+    window.APP.store.resetToRandomLegacyAvatar();
   }
 });
