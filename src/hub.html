@@ -55,7 +55,6 @@
         action-to-event__mute="path: /actions/muteMic; event: action_mute;"
         freeze-controller="toggleEvent: action_freeze"
         personal-space-bubble="debug: false;"
-        stats-plus="false"
         rotate-selected-object
         environment-map
     >
@@ -728,6 +727,7 @@
                     position = "0.15 0 0"
                     teleporter="start: /actions/startTeleport; confirm: /actions/stopTeleport; collisionEntities: [nav-mesh];"
                 ></a-entity>
+                <a-entity id="stats" stats-plus="false" position="0 0 -1"></a-entity>
             </a-entity>
 
             <a-entity
@@ -832,7 +832,6 @@
                 <a-entity text="value:View your desktop to continue; width:1; align:center;" position="0 0 0.01"></a-entity>
             </a-entity>
         </a-entity>
-
     </a-scene>
 
     <div id="ui-root"></div>

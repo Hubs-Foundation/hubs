@@ -37,6 +37,7 @@ export default class MessageDispatch {
     const curScale = playerRig.object3D.scale;
     let err;
     let physicsSystem;
+    let statsPlus;
 
     switch (command) {
       case "fly":
@@ -82,6 +83,9 @@ export default class MessageDispatch {
       case "debug":
         physicsSystem = document.querySelector("a-scene").systems.physics;
         physicsSystem.setDebug(!physicsSystem.debug);
+        break;
+      case "vrstats":
+        document.getElementById("stats").components["stats-plus"].toggleVRStats();
         break;
       case "scene":
         if (args[0]) {
