@@ -7,8 +7,8 @@ const i = window.setInterval(() => {
       init() {
         this.spriteSystem = new SpriteSystem(this.el);
       },
-      tick() {
-        this.spriteSystem.tick(this.el);
+      tick(t, dt) {
+        this.spriteSystem.tick(t, dt);
       }
     });
     window.clearInterval(i);
