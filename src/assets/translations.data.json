@@ -71,18 +71,15 @@
     "profile.header": "Name & Avatar",
     "profile.terms_of_use": "Terms of Use",
     "profile.privacy_notice": "Privacy Notice",
-
     "profile.choose_avatar": "Choose an Avatar",
     "profile.tabs.legacy": "Default",
     "profile.tabs.skinnable": "Custom Skin",
     "profile.tabs.url": "Custom Model",
     "profile.info": "Resources for creating custom avatar models can be found",
     "profile.info-link": "here",
-
     "avatar-editor.info": "Resources for creating custom avatar skins can be found",
     "avatar-editor.info-link": "here",
     "avatar-preview.loading-failed": "Loading failed\nPlease choose another avatar",
-
     "media-browser.search-placeholder.scenes": "Search Scenes...",
     "media-browser.search-placeholder.avatars": "Search Avatars...",
     "media-browser.search-placeholder.videos": "Search the web...",
@@ -119,7 +116,6 @@
     "media-browser.nav_title.twitch": "Twitch",
     "media-browser.create-avatar": "Create Avatar",
     "media-browser.create-scene": "Create Scene with Spoke",
-
     "audio.title": "Audio Setup",
     "audio.talk_to_test": "talk",
     "audio.click_to_test": "click",
@@ -302,7 +298,7 @@
     "hide-ui.prompt": "Hide All",
     "discord.primary_tagline": "Share a virtual room with your community.\nWatch videos, play with 3D objects, or just hang out.",
     "discord.secondary_tagline": "No downloads or sign up. Full VR support too.",
-    "discord.contact_us": "Request Beta Invite",
+    "discord.contact_us": "Invite Bot to Server",
     "discord.community_link": "Hubs Discord",
     "discord.splash_tag": "Designed for serious businessing.",
     "client-info.kick-button": "Kick",
