@@ -24,7 +24,7 @@ AFRAME.registerComponent("camera-focus-button", {
   },
 
   tick() {
-    const isVisible = this.el.getAttribute("visible");
+    const isVisible = this.el.object3D.visible;
     const shouldBeVisible = !!(this.cameraSystem && this.cameraSystem.getMyCamera());
 
     if (isVisible !== shouldBeVisible) {
