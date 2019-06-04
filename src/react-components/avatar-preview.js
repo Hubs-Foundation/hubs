@@ -2,8 +2,6 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
 import classNames from "classnames";
-import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons/faExclamationTriangle";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "three/examples/js/controls/OrbitControls";
 
 import { createDefaultEnvironmentMap } from "../components/environment-map";
@@ -301,7 +299,11 @@ class AvatarPreview extends Component {
         {this.state.error &&
           !this.state.loading && (
             <div className="error">
-              <FontAwesomeIcon className="error-icon" icon={faExclamationTriangle} />
+              <img
+                src="../assets/images/warning_icon.png"
+                srcSet="../assets/images/warning_icon@2x.png 2x"
+                className="error-icon"
+              />
               <FormattedMessage id="avatar-preview.loading-failed" />
             </div>
           )}

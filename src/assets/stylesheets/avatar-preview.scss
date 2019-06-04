@@ -11,7 +11,7 @@
     top: calc(50% - 4.5em);
   }
   .error {
-    color: $error-color;
+    color: $grey-text;
     text-align: center;
     padding: 1.5em;
     position: absolute;
@@ -23,6 +23,9 @@
     width: 100%;
   }
   .error-icon {
-    margin: 0 0.2em;
+    width: 16px;
+    height: 16px;
+    transform: translateY(2px);
+    margin: 0 0.3em;
   }
 }
