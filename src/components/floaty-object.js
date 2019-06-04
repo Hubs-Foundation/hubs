@@ -42,7 +42,7 @@ AFRAME.registerComponent("floaty-object", {
       this.onRelease();
     }
 
-    if (this._makeStaticWhenAtRest) {
+    if (!isHeld && this._makeStaticWhenAtRest) {
       const isMine = this.el.components.networked && NAF.utils.isMine(this.el);
       const linearThreshold = this.ammoBody.data.linearSleepingThreshold;
       const angularThreshold = this.ammoBody.data.angularSleepingThreshold;
