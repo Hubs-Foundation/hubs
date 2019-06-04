@@ -229,10 +229,6 @@ export class SpriteSystem {
   tick(t) {
     if (!this.mesh) return;
 
-    if (this.spriteComponents.length > this.maxSprites) {
-      console.warn(`${this.spriteComponents.length - this.maxSprites} too many sprites`);
-    }
-
     const l = Math.min(this.spriteComponents.length, this.maxSprites);
     for (let i = 0; i < l; i++) {
       this.spriteComponents[i].el.object3D.updateMatrices();
@@ -314,6 +310,9 @@ export class SpriteSystem {
 
   add(sprite) {
     this.spriteComponents.push(sprite);
+    if (this.spriteComponents.length > this.maxSprites) {
+      console.warn(`${this.spriteComponents.length - this.maxSprites} too many sprites`);
+    }
   }
 
   remove(sprite) {
