@@ -1,5 +1,6 @@
 /* global AFRAME THREE */
 
+import { paths } from "./userinput/paths";
 import spritesheet from "../assets/images/hud/spritesheet.json";
 import { createImageTexture } from "../components/media-views.js";
 import spritesheetPng from "../assets/images/hud/spritesheet.png";
@@ -179,6 +180,10 @@ export class SpriteSystem {
         "a_hubs_EnableSweepingEffect",
         new THREE.BufferAttribute(new Float32Array(this.maxSprites * 4), 1, false)
       );
+      geometry.addAttribute(
+        "a_hubs_SweepParams",
+        new THREE.BufferAttribute(new Float32Array(this.maxSprites * 4 * 2), 2, false)
+      );
       geometry.addAttribute("a_uvs", new THREE.BufferAttribute(new Float32Array(this.maxSprites * 2 * 4), 2, false));
       const mvCols = new THREE.InterleavedBuffer(new Float32Array(this.maxSprites * 16 * 4), 16);
       geometry.addAttribute("mvCol0", new THREE.InterleavedBufferAttribute(mvCols, 4, 0, false));
@@ -199,7 +204,6 @@ export class SpriteSystem {
         uniforms: {
           u_spritesheet: { value: spritesheetTexture },
           hubs_IsFrozen: { value: false },
-          hubs_SweepParams: { value: [0, 0] },
           hubs_InteractorOnePos: { value: [0, 0, 0] },
           hubs_InteractorTwoPos: { value: [0, 0, 0] },
           hubs_HighlightInteractorOne: { value: false },
@@ -233,31 +237,35 @@ export class SpriteSystem {
         i,
         this.spriteComponents[i].el.object3D.matrixWorld,
         isVisible(this.spriteComponents[i].el.object3D),
-        window.enableAll || enableSweepingEffect(this.spriteComponents[i])
+        enableSweepingEffect(this.spriteComponents[i]),
+        this.spriteComponents[i]
       );
     }
     const aUvs = this.mesh.geometry.attributes["a_uvs"];
     const aVertices = this.mesh.geometry.attributes["a_vertices"];
     const mvCols = this.mesh.geometry.attributes["mvCol0"].data;
     const aEnableSweepingEffect = this.mesh.geometry.attributes["a_hubs_EnableSweepingEffect"];
+    const aSweepParams = this.mesh.geometry.attributes["a_hubs_SweepParams"];
 
     aUvs.array.fill(0, 8 * this.spriteComponents.length);
     aVertices.array.fill(0, 12 * this.spriteComponents.length);
     mvCols.array.fill(0, 16 * 4 * this.spriteComponents.length);
-    aEnableSweepingEffect.array.fill(0, 4*this.spriteComponents.length);
+    aEnableSweepingEffect.array.fill(0, 4 * this.spriteComponents.length);
+    aSweepParams.array.fill(0, 2 * 4 * this.spriteComponents.length);
 
     aUvs.needsUpdate = true;
     aVertices.needsUpdate = true;
     mvCols.needsUpdate = true;
     aEnableSweepingEffect.needsUpdate = true;
+    aSweepParams.needsUpdate = true;
 
     this.mesh.material.uniforms.hubs_IsFrozen.value = true;
-    this.mesh.material.uniforms.hubs_SweepParams.value = [-0.5, 0.5];
+    //    this.mesh.material.uniforms.hubs_SweepParams.value = [-0.5, 0.5];
     this.mesh.material.uniforms.hubs_InteractorOnePos.value = [0, 0, 0];
     this.mesh.material.uniforms.hubs_InteractorTwoPos.value = [0, 0, 0];
     this.mesh.material.uniforms.hubs_HighlightInteractorOne.value = false;
     this.mesh.material.uniforms.hubs_HighlightInteractorTwo.value = false;
-    this.mesh.material.uniforms.hubs_Time.value = t % 10000;
+    this.mesh.material.uniforms.hubs_Time.value = t;
     this.mesh.material.uniformsNeedUpdate = true;
 
     /*
@@ -266,54 +274,26 @@ export class SpriteSystem {
     const hideDueToPinning = !isSpawner && isPinned && !isFrozen;
 
     const isFrozen = AFRAME.scenes[0].is("frozen");
-    let interactorOne, interactorTwo;
-    const interaction = AFRAME.scenes[0].systems.interaction;
-    if (interaction.state.leftHand.hovered === el || interaction.state.leftHand.held === this.el) {
-      interactorOne = interaction.options.leftHand.entity.object3D;
-    }
-    if (interaction.state.rightRemote.hovered === el || interaction.state.rightRemote.held === this.el) {
-      interactorTwo = interaction.options.rightRemote.entity.object3D;
-    }
-    if (interaction.state.rightHand.hovered === el || interaction.state.rightHand.held === this.el) {
-      interactorTwo = interaction.options.rightHand.entity.object3D;
-    }
 
-    if (interactorOne) {
-      interactorOne.matrixWorld.toArray(interactorOneTransform);
-    }
-    if (interactorTwo) {
-      interactorTwo.matrixWorld.toArray(interactorTwoTransform);
-    }
-
-    if (interactorOne || interactorTwo || isFrozen) {
+    if (isFrozen) {
+      const sweepParams = sweepParams[this.spriteComponents[i]];
       const worldY = el.object3D.matrixWorld.elements[13];
       const scaledRadius = el.object3D.scale.y * this.boundingSphere.radius;
       sweepParams[0] = worldY - scaledRadius;
       sweepParams[1] = worldY + scaledRadius;
     }
 
-    const uniform = this.mesh.material.uniforms;
       uniform.hubs_EnableSweepingEffect.value = enableSweepingEffect && !hideDueToPinning;
       uniform.hubs_IsFrozen.value = isFrozen;
       uniform.hubs_SweepParams.value = sweepParams;
 
-      uniform.hubs_HighlightInteractorOne.value = !!interactorOne && !hideDueToPinning;
-      uniform.hubs_InteractorOnePos.value[0] = interactorOneTransform[12];
-      uniform.hubs_InteractorOnePos.value[1] = interactorOneTransform[13];
-      uniform.hubs_InteractorOnePos.value[2] = interactorOneTransform[14];
-
-      uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo && !hideDueToPinning;
-      uniform.hubs_InteractorTwoPos.value[0] = interactorTwoTransform[12];
-      uniform.hubs_InteractorTwoPos.value[1] = interactorTwoTransform[13];
-      uniform.hubs_InteractorTwoPos.value[2] = interactorTwoTransform[14];
-
-      if (interactorOne || interactorTwo || isFrozen) {
+      if (isFrozen) {
         uniform.hubs_Time.value = t;
       }
       */
   }
 
-  set(spritename, i, mat4, visible, enableHoverEffect) {
+  set(spritename, i, mat4, visible, enableHoverEffect, spriteComp) {
     if (i >= this.maxSprites) {
       console.warn("too many sprites");
       return;
@@ -322,11 +302,33 @@ export class SpriteSystem {
     if (visible) {
       const aEnableSweepingEffect = this.mesh.geometry.attributes["a_hubs_EnableSweepingEffect"];
       const enableSweepingEffectValue = enableHoverEffect ? 1 : 0;
-      aEnableSweepingEffect.array[i*4 + 0] = enableSweepingEffectValue;
-      aEnableSweepingEffect.array[i*4 + 1] = enableSweepingEffectValue;
-      aEnableSweepingEffect.array[i*4 + 2] = enableSweepingEffectValue;
-      aEnableSweepingEffect.array[i*4 + 3] = enableSweepingEffectValue;
+      aEnableSweepingEffect.array[i * 4 + 0] = enableSweepingEffectValue;
+      aEnableSweepingEffect.array[i * 4 + 1] = enableSweepingEffectValue;
+      aEnableSweepingEffect.array[i * 4 + 2] = enableSweepingEffectValue;
+      aEnableSweepingEffect.array[i * 4 + 3] = enableSweepingEffectValue;
       aEnableSweepingEffect.needsUpdate = true;
+
+      const hoverableVisuals = getHoverableVisuals(spriteComp.el);
+      const aSweepParams = this.mesh.geometry.attributes["a_hubs_SweepParams"];
+      let s;
+      let t;
+      if (hoverableVisuals) {
+        const worldY = hoverableVisuals.el.object3D.matrixWorld.elements[13];
+        const scaledRadius = hoverableVisuals.el.object3D.scale.y * hoverableVisuals.boundingSphere.radius;
+        s = worldY - scaledRadius;
+        t = worldY + scaledRadius;
+      } else {
+        s = -0.5;
+        t = 0.5;
+      }
+      if (AFRAME.scenes[0].systems.userinput.get(paths.actions.logInteractionState)) {
+        console.log(s,t);
+      }
+      aSweepParams.setXY(4 * i + 0, s, t);
+      aSweepParams.setXY(4 * i + 1, s, t);
+      aSweepParams.setXY(4 * i + 2, s, t);
+      aSweepParams.setXY(4 * i + 3, s, t);
+      aSweepParams.needsUpdate = true;
 
       const aUvs = this.mesh.geometry.attributes["a_uvs"];
       aUvs.setXY(i * 4 + 0, frame.x, frame.y);

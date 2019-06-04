@@ -10,11 +10,11 @@ uniform mat4 projectionMatrix;
 uniform mat4 modelViewMatrix;
 
 in float a_hubs_EnableSweepingEffect;
+in vec2 a_hubs_SweepParams;
 flat out float v_hubs_EnableSweepingEffect;
+flat out vec2 v_hubs_SweepParams;
 out vec3 hubs_WorldPosition;
 uniform bool hubs_IsFrozen;
-uniform bool hubs_HighlightInteractorOne;
-uniform bool hubs_HighlightInteractorTwo;
 
 out vec2 v_uvs;
 
@@ -23,11 +23,11 @@ void main() {
   gl_Position = projectionMatrix * modelViewMatrix * mv * vec4(a_vertices, 1.0);
   v_uvs = a_uvs;
   v_hubs_EnableSweepingEffect = a_hubs_EnableSweepingEffect;
+  v_hubs_SweepParams = a_hubs_SweepParams;
 
-  if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo || hubs_IsFrozen) {
+  if (hubs_IsFrozen) {
     vec4 wt = vec4(a_vertices, 1.0);
 
-    // Used in the fragment shader below.
-    hubs_WorldPosition = wt.xyz;
+    hubs_WorldPosition = (mv * wt).xyz;
   }
 }
