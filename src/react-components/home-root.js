@@ -267,26 +267,24 @@ class HomeRoot extends Component {
                   >
                     <FormattedMessage id="home.create_a_room" />
                   </button>
-                  {this.props.installEvent &&
-                    !this.state.installed && (
-                      <button
-                        className={classNames(styles.secondaryButton)}
-                        onClick={() => {
-                          this.props.installEvent.prompt();
+                  <button
+                    className={classNames(styles.secondaryButton)}
+                    style={this.props.installEvent || this.state.installed ? {} : { visibility: "hidden" }}
+                    onClick={() => {
+                      this.props.installEvent.prompt();
 
-                          this.props.installEvent.userChoice.then(choiceResult => {
-                            if (choiceResult.outcome === "accepted") {
-                              this.setState({ installed: true });
-                            }
-                          });
-                        }}
-                      >
-                        <i>
-                          <FontAwesomeIcon icon={faPlus} />
-                        </i>
-                        <FormattedMessage id={`home.${isMobile ? "mobile" : "desktop"}.add_pwa`} />
-                      </button>
-                    )}
+                      this.props.installEvent.userChoice.then(choiceResult => {
+                        if (choiceResult.outcome === "accepted") {
+                          this.setState({ installed: true });
+                        }
+                      });
+                    }}
+                  >
+                    <i>
+                      <FontAwesomeIcon icon={faPlus} />
+                    </i>
+                    <FormattedMessage id={`home.${isMobile ? "mobile" : "desktop"}.add_pwa`} />
+                  </button>
                 </div>
               </div>
               <div className={classNames(styles.heroPanel, styles.rightPanel)}>
