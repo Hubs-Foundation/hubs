@@ -372,7 +372,7 @@ async function updateEnvironmentForHub(hub) {
   }
 }
 
-async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
+async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, embed, data) {
   const scene = document.querySelector("a-scene");
   const isRejoin = NAF.connection.isConnected();
 
@@ -392,18 +392,6 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   const hub = data.hubs[0];
 
   console.log(`Janus host: ${hub.host}`);
-
-  const objectsScene = document.querySelector("#objects-scene");
-  const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
-  const objectsEl = document.createElement("a-entity");
-  objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
-
-  if (!isBotMode) {
-    objectsScene.appendChild(objectsEl);
-  }
-
-  updateEnvironmentForHub(hub);
-  updateUIForHub(hub);
 
   remountUI({
     onSendMessage: messageDispatch.dispatch,
@@ -434,6 +422,15 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
       }
     });
   });
+
+  const objectsScene = document.querySelector("#objects-scene");
+  const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
+  const objectsEl = document.createElement("a-entity");
+  objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
+
+  if (!isBotMode) {
+    objectsScene.appendChild(objectsEl);
+  }
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   const connectToScene = async () => {
@@ -495,18 +492,35 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
       adapter.unreliableTransport = sendViaPhoenix(false);
     });
 
-    scene.components["networked-scene"]
-      .connect()
-      .then(() => scene.emit("didConnectToNetworkedScene"))
-      .catch(connectError => {
-        // hacky until we get return codes
-        const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
-        console.error(connectError);
-        remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
-        entryManager.exitScene();
+    const loadEnvironmentAndConnect = () => {
+      updateEnvironmentForHub(hub);
+      updateUIForHub(hub);
 
-        return;
+      scene.components["networked-scene"]
+        .connect()
+        .then(() => scene.emit("didConnectToNetworkedScene"))
+        .catch(connectError => {
+          // hacky until we get return codes
+          const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+          console.error(connectError);
+          remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
+          entryManager.exitScene();
+
+          return;
+        });
+    };
+
+    if (!embed) {
+      loadEnvironmentAndConnect();
+    } else {
+      remountUI({
+        embed: true,
+        onEmbedLoadClicked: () => {
+          remountUI({ embed: false });
+          loadEnvironmentAndConnect();
+        }
       });
+    }
   };
 
   if (!isBotMode) {
@@ -1097,7 +1111,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         initialIsSubscribed: subscriptions.isSubscribed()
       });
 
-      await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
+      await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, true, data);
     })
     .receive("error", res => {
       if (res.reason === "closed") {

@@ -149,7 +149,9 @@ class UIRoot extends Component {
     showInterstitialPrompt: PropTypes.bool,
     onInterstitialPromptClicked: PropTypes.func,
     performConditionalSignIn: PropTypes.func,
-    hide: PropTypes.bool
+    hide: PropTypes.bool,
+    embed: PropTypes.bool,
+    onEmbedLoadClicked: PropTypes.func
   };
 
   state = {
@@ -1198,10 +1200,12 @@ class UIRoot extends Component {
     if (this.props.hide || this.state.hide) return <div />;
 
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
+    const embed = this.props.embed;
 
     const isLoading =
-      (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) &&
-      !(this.props.showSafariMicDialog || this.props.showSafariDialog);
+      !embed &&
+      ((!this.state.hideLoader || !this.state.didConnectToNetworkedScene) &&
+        !(this.props.showSafariMicDialog || this.props.showSafariDialog));
 
     const rootStyles = {
       [styles.ui]: true,
@@ -1228,9 +1232,11 @@ class UIRoot extends Component {
     const entered = this.state.entered;
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
+    const enteredOrWatchingOrEmbed = entered || watching || embed;
 
     const entryDialog =
       this.props.availableVREntryTypes &&
+      !embed &&
       (this.isWaitingForAutoExit() ? (
         <AutoExitWarning
           secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
@@ -1282,6 +1288,7 @@ class UIRoot extends Component {
       !showVREntryButton &&
       !hasTopTip &&
       !entered &&
+      !embed &&
       !watching &&
       !hasTopTip &&
       !this.props.store.state.activity.hasOpenedShare &&
@@ -1290,6 +1297,7 @@ class UIRoot extends Component {
     const showChooseSceneButton =
       !showVREntryButton &&
       !entered &&
+      !embed &&
       !watching &&
       !showInviteTip &&
       !this.state.showShareDialog &&
@@ -1462,7 +1470,7 @@ class UIRoot extends Component {
               </div>
             )}
 
-            {enteredOrWatching && (
+            {enteredOrWatchingOrEmbed && (
               <PresenceLog
                 inRoom={true}
                 entries={presenceLogEntries}
@@ -1502,7 +1510,7 @@ class UIRoot extends Component {
                   )}
                 </div>
               )}
-            {enteredOrWatching &&
+            {enteredOrWatchingOrEmbed &&
               showDiscordTip && (
                 <div className={styles.bottomTip}>
                   <button className={styles.tipCancel} onClick={() => this.confirmDiscordBridge()}>
@@ -1515,7 +1523,7 @@ class UIRoot extends Component {
                   </div>
                 </div>
               )}
-            {enteredOrWatching && (
+            {enteredOrWatchingOrEmbed && (
               <InWorldChatBox
                 discordBridges={discordBridges}
                 onSendMessage={this.sendMessage}
@@ -1531,7 +1539,8 @@ class UIRoot extends Component {
             )}
 
             {!this.state.frozen &&
-              !watching && (
+              !watching &&
+              !embed && (
                 <div
                   className={classNames({
                     [inviteStyles.inviteContainer]: true,
@@ -1650,15 +1659,17 @@ class UIRoot extends Component {
               )}
             />
 
-            <div
-              onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
-              className={classNames({
-                [styles.settingsInfo]: true,
-                [styles.settingsInfoSelected]: this.state.showSettingsMenu
-              })}
-            >
-              <FontAwesomeIcon icon={faBars} />
-            </div>
+            {!embed && (
+              <div
+                onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
+                className={classNames({
+                  [styles.settingsInfo]: true,
+                  [styles.settingsInfoSelected]: this.state.showSettingsMenu
+                })}
+              >
+                <FontAwesomeIcon icon={faBars} />
+              </div>
+            )}
 
             <div
               onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
