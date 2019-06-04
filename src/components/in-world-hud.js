@@ -14,9 +14,9 @@ AFRAME.registerComponent("in-world-hud", {
     this.background = this.el.querySelector(".bg");
 
     this.updateButtonStates = () => {
-      this.mic.setAttribute("sprite-button", "active", this.el.sceneEl.is("muted"));
-      this.pen.setAttribute("sprite-button", "active", this.el.sceneEl.is("pen"));
-      this.cameraBtn.setAttribute("sprite-button", "active", this.el.sceneEl.is("camera"));
+      this.mic.setAttribute("icon-button", "active", this.el.sceneEl.is("muted"));
+      this.pen.setAttribute("icon-button", "active", this.el.sceneEl.is("pen"));
+      this.cameraBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("camera"));
     };
     this.updateButtonStates();
 

@@ -48,7 +48,17 @@ AFRAME.registerComponent("icon-button", {
 
     const image = active ? (hovering ? "activeHoverImage" : "activeImage") : hovering ? "hoverImage" : "image";
 
-    this.el.setAttribute("src", this.data[image]);
+    if (this.el.components.sprite) {
+      if (this.data[image]) {
+        this.el.components.sprite.data.name = this.data[image];
+      } else {
+        console.warn(`No ${image} image on me.`, this);
+      }
+    } else {
+      // We could still use icon-button with a-image if we want, but we are not doing that anywhere.
+      console.warn("No sprite.");
+      //this.el.setAttribute("src", this.data[image]);
+    }
 
     if (this.data.tooltip && hovering) {
       this.data.tooltip.setAttribute("visible", this.hovering);

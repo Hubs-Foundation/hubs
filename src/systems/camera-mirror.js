@@ -90,7 +90,8 @@ AFRAME.registerSystem("camera-mirror", {
       if (playerHud) {
         playerHudWasVisible = playerHud.visible;
         playerHud.visible = false;
-        playerHud.el.object3DMap.mesh.visible = false;
+        // playerHud.el.object3DMap.mesh.visible = false;
+        // TODO: playerHud sprites should be invisible to camera
       }
       renderer.vr.enabled = false;
       const tmpOnAfterRender = this.el.object3D.onAfterRender;

@@ -513,7 +513,7 @@ AFRAME.registerComponent("media-video", {
     }
 
     if (this.hoverMenu) {
-      this.playPauseButton.setAttribute("sprite-button", "active", pause);
+      this.playPauseButton.setAttribute("icon-button", "active", pause);
     }
 
     if (pause) {
