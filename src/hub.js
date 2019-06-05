@@ -143,6 +143,7 @@ window.APP.RENDER_ORDER = {
 const store = window.APP.store;
 const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
+const NOISY_OCCUPANT_COUNT = 12; // Above this # of occupants, we stop posting join/leaves/renames
 
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
@@ -1066,42 +1067,49 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (!hubChannel.presence.__hadInitialSync) return;
 
             const meta = info.metas[info.metas.length - 1];
+            const occupantCount = Object.entries(hubChannel.presence.state).length;
 
-            if (current) {
-              // Change to existing presence
-              const isSelf = sessionId === socket.params().session_id;
-              const currentMeta = current.metas[0];
+            if (occupantCount <= NOISY_OCCUPANT_COUNT) {
+              if (current) {
+                // Change to existing presence
+                const isSelf = sessionId === socket.params().session_id;
+                const currentMeta = current.metas[0];
 
-              if (
-                !isSelf &&
-                currentMeta.presence !== meta.presence &&
-                meta.presence === "room" &&
-                meta.profile.displayName
-              ) {
-                addToPresenceLog({
-                  type: "entered",
-                  presence: meta.presence,
-                  name: meta.profile.displayName
-                });
-              }
+                if (
+                  !isSelf &&
+                  currentMeta.presence !== meta.presence &&
+                  meta.presence === "room" &&
+                  meta.profile.displayName
+                ) {
+                  addToPresenceLog({
+                    type: "entered",
+                    presence: meta.presence,
+                    name: meta.profile.displayName
+                  });
+                }
 
-              if (currentMeta.profile && meta.profile && currentMeta.profile.displayName !== meta.profile.displayName) {
-                addToPresenceLog({
-                  type: "display_name_changed",
-                  oldName: currentMeta.profile.displayName,
-                  newName: meta.profile.displayName
-                });
-              }
-            } else if (info.metas.length === 1) {
-              // New presence
-              const meta = info.metas[0];
+                if (
+                  currentMeta.profile &&
+                  meta.profile &&
+                  currentMeta.profile.displayName !== meta.profile.displayName
+                ) {
+                  addToPresenceLog({
+                    type: "display_name_changed",
+                    oldName: currentMeta.profile.displayName,
+                    newName: meta.profile.displayName
+                  });
+                }
+              } else if (info.metas.length === 1) {
+                // New presence
+                const meta = info.metas[0];
 
-              if (meta.presence && meta.profile.displayName) {
-                addToPresenceLog({
-                  type: "join",
-                  presence: meta.presence,
-                  name: meta.profile.displayName
-                });
+                if (meta.presence && meta.profile.displayName) {
+                  addToPresenceLog({
+                    type: "join",
+                    presence: meta.presence,
+                    name: meta.profile.displayName
+                  });
+                }
               }
             }
 
@@ -1113,6 +1121,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (!hubChannel.presence.__hadInitialSync) return;
 
             if (current && current.metas.length > 0) return;
+            const occupantCount = Object.entries(hubChannel.presence.state).length;
+            if (occupantCount > NOISY_OCCUPANT_COUNT) return;
 
             const meta = info.metas[0];
 
