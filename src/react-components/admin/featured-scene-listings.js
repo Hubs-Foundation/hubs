@@ -1,6 +1,6 @@
 import React from "react";
 import { SceneLink, OwnedFileImage } from "./fields";
-import UnfeatureSceneListingButton from "./unfeature-scene-listing-button";
+import { FeatureSceneListingButton } from "./feature-listing-buttons";
 
 import {
   List,
@@ -17,9 +17,7 @@ import {
 export const FeaturedSceneListingList = props => (
   <List {...props} sort={{ field: "order", order: "ASC" }}>
     <Datagrid>
-      <ReferenceField source="screenshot_owned_file_id" reference="owned_files" linkType={false}>
-        <OwnedFileImage source="owned_file_uuid" />
-      </ReferenceField>
+      <OwnedFileImage source="screenshot_owned_file_id" />
       <TextField source="order" />
       <SceneLink source="scene_listing_sid" />
       <ReferenceField label="Listing" source="id" reference="scene_listings">
@@ -28,7 +26,7 @@ export const FeaturedSceneListingList = props => (
       <TextField source="description" />
       <TextField source="attributions" />
       <EditButton />
-      <UnfeatureSceneListingButton />
+      <FeatureSceneListingButton />
     </Datagrid>
   </List>
 );

@@ -22,12 +22,6 @@ AFRAME.registerComponent("block-button", {
   },
 
   block(clientId) {
-    NAF.connection.adapter.block(clientId);
-  },
-
-  // Currently unused
-  unblock(clientId) {
-    NAF.connection.adapter.unblock(clientId);
-    NAF.connection.entities.completeSync(clientId);
+    window.APP.hubChannel.hide(clientId);
   }
 });

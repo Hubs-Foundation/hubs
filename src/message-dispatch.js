@@ -88,6 +88,9 @@ export default class MessageDispatch {
         physicsSystem = document.querySelector("a-scene").systems.physics;
         physicsSystem.setDebug(!physicsSystem.debug);
         break;
+      case "vrstats":
+        document.getElementById("stats").components["stats-plus"].toggleVRStats();
+        break;
       case "scene":
         if (args[0]) {
           err = this.hubChannel.updateScene(args[0]);

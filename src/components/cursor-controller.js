@@ -10,8 +10,9 @@ AFRAME.registerComponent("cursor-controller", {
   schema: {
     cursor: { type: "selector" },
     camera: { type: "selector" },
-    far: { default: 4 },
+    far: { default: 25 },
     near: { default: 0.01 },
+    defaultDistance: { default: 4 },
     minDistance: { default: 0.18 }
   },
 
@@ -58,10 +59,10 @@ AFRAME.registerComponent("cursor-controller", {
     return function(t) {
       const userinput = AFRAME.scenes[0].systems.userinput;
       const cursorPose = userinput.get(paths.actions.cursor.pose);
-      const rightHandPose = userinput.get(paths.actions.rightHand.pose);
+      const hideLine = userinput.get(paths.actions.cursor.hideLine);
 
       this.data.cursor.object3D.visible = this.enabled && !!cursorPose;
-      this.line.material.visible = !!(this.enabled && rightHandPose);
+      this.line.material.visible = !!(this.enabled && !hideLine);
 
       if (!this.enabled || !cursorPose) {
         return;
@@ -81,13 +82,13 @@ AFRAME.registerComponent("cursor-controller", {
         );
         intersection = rawIntersections[0];
         interaction.updateCursorIntersection(intersection);
-        this.distance = intersection ? intersection.distance : this.data.far;
+        this.distance = intersection ? intersection.distance : this.data.defaultDistance;
       }
 
       const { cursor, minDistance, far, camera } = this.data;
 
       const cursorModDelta = userinput.get(paths.actions.cursor.modDelta) || 0;
-      if (isGrabbing && !userinput.activeSets.has(sets.cursorHoldingUI)) {
+      if (isGrabbing && !userinput.activeSets.includes(sets.cursorHoldingUI)) {
         this.distance = THREE.Math.clamp(this.distance - cursorModDelta, minDistance, far);
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);

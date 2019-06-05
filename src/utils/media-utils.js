@@ -2,8 +2,6 @@ import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
-import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
-THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
 if (process.env.CORS_PROXY_SERVER) {
@@ -247,7 +245,7 @@ export function injectCustomShaderChunks(obj) {
   const fragRegex = /\bgl_FragColor\b/;
   const validMaterials = ["MeshStandardMaterial", "MeshBasicMaterial", "MobileStandardMaterial"];
 
-  const shaderUniforms = new Map();
+  const shaderUniforms = [];
 
   obj.traverse(object => {
     if (!object.material) return;
@@ -310,7 +308,7 @@ export function injectCustomShaderChunks(obj) {
         flines.unshift("uniform float hubs_Time;");
         shader.fragmentShader = flines.join("\n");
 
-        shaderUniforms.set(newMaterial.uuid, shader.uniforms);
+        shaderUniforms.push(shader.uniforms);
       };
       newMaterial.needsUpdate = true;
       return newMaterial;
@@ -324,27 +322,53 @@ export function getPromotionTokenForFile(fileId) {
   return window.APP.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
 }
 
-export function generateMeshBVH(object3D) {
-  object3D.traverse(obj => {
-    // note that we might already have a bounds tree if this was a clone of an object with one
-    const hasBufferGeometry = obj.isMesh && obj.geometry.isBufferGeometry;
-    const hasBoundsTree = hasBufferGeometry && obj.geometry.boundsTree;
-    if (hasBufferGeometry && !hasBoundsTree && obj.geometry.attributes.position) {
-      const geo = obj.geometry;
-      const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
-      // only bother using memory and time making a BVH if there are a reasonable number of tris,
-      // and if there are too many it's too painful and large to tolerate doing it (at least until
-      // we put this in a web worker)
-      if (triCount > 1000 && triCount < 1000000) {
-        // note that bounds tree construction creates an index as a side effect if one doesn't already exist
-        geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 30 });
-      }
-    }
-  });
+function exceedsDensityThreshold(count, subtree) {
+  const bounds = subtree.boundingData;
+  const triangleThreshold = 1000;
+  const minimumVolume = 0.1;
+  const minimumTriangles = 100;
+  const dx = bounds[3] - bounds[0];
+  const dy = bounds[4] - bounds[1];
+  const dz = bounds[5] - bounds[2];
+  const volume = dx * dy * dz;
+
+  if (volume < minimumVolume) {
+    return false;
+  }
+
+  if (count < minimumTriangles) {
+    return false;
+  }
+
+  return count / volume > triangleThreshold;
+}
+
+function isHighDensity(subtree) {
+  if (subtree.count) {
+    const result = exceedsDensityThreshold(subtree.count, subtree);
+    return result === true ? true : subtree.count;
+  } else {
+    const leftResult = isHighDensity(subtree.left);
+    if (leftResult === true) return true;
+    const rightResult = isHighDensity(subtree.right);
+    if (rightResult === true) return true;
+
+    const count = leftResult + rightResult;
+    const result = exceedsDensityThreshold(count, subtree);
+    return result === true ? true : count;
+  }
+}
+
+function isGeometryHighDensity(geo) {
+  const bvh = geo.boundsTree;
+  const roots = bvh._roots;
+  for (let i = 0; i < roots.length; ++i) {
+    return isHighDensity(roots[i]) === true;
+  }
+  return false;
 }
 
 export const traverseMeshesAndAddShapes = (function() {
-  const vertexLimit = 200000;
   const shapePrefix = "ammo-shape__";
   const shapes = [];
   return function(el) {
@@ -354,51 +378,64 @@ export const traverseMeshesAndAddShapes = (function() {
       entity.removeAttribute(id);
     }
 
-    let vertexCount = 0;
-    meshRoot.traverse(o => {
-      if (
-        o.isMesh &&
-        (!THREE.Sky || o.__proto__ != THREE.Sky.prototype) &&
-        o.name !== "Floor_Plan" &&
-        o.name !== "Ground_Plane"
-      ) {
-        vertexCount += o.geometry.attributes.position.count;
-      }
-    });
-
     console.group("traverseMeshesAndAddShapes");
 
-    console.log(`scene has ${vertexCount} vertices`);
-
-    const floorPlan = meshRoot.children.find(obj => {
-      return obj.name === "Floor_Plan";
-    });
-    if (vertexCount > vertexLimit && floorPlan) {
-      console.log(`vertex limit of ${vertexLimit} exceeded, using floor plan with mesh shape`);
-      floorPlan.el.setAttribute(shapePrefix + floorPlan.name, {
-        type: SHAPE.MESH,
-        margin: 0.01,
-        fit: FIT.ALL
-      });
-      shapes.push({ id: shapePrefix + floorPlan.name, entity: floorPlan.el });
-    } else if (vertexCount < vertexLimit) {
-      el.setAttribute(shapePrefix + "environment", {
-        type: SHAPE.MESH,
-        margin: 0.01,
-        fit: FIT.COMPOUND
-      });
-      shapes.push({ id: shapePrefix + "environment", entity: el });
-      console.log("adding compound mesh shape");
+    if (document.querySelector(["[ammo-shape__trimesh]", "[ammo-shape__heightfield]"])) {
+      console.log("heightfield or trimesh found on scene");
     } else {
-      el.setAttribute(shapePrefix + "defaultFloor", {
-        type: SHAPE.BOX,
-        margin: 0.01,
-        halfExtents: { x: 4000, y: 0.5, z: 4000 },
-        offset: { x: 0, y: -0.5, z: 0 },
-        fit: FIT.MANUAL
+      console.log("collision not found in scene");
+
+      let isHighDensity = false;
+      meshRoot.traverse(o => {
+        if (
+          o.isMesh &&
+          (!THREE.Sky || o.__proto__ != THREE.Sky.prototype) &&
+          !o.name.startsWith("Floor_Plan") &&
+          !o.name.startsWith("Ground_Plane") &&
+          o.geometry.boundsTree
+        ) {
+          if (isGeometryHighDensity(o.geometry)) {
+            isHighDensity = true;
+            return;
+          }
+        }
       });
-      shapes.push({ id: shapePrefix + "defaultFloor", entity: el });
-      console.log("adding default floor collision");
+
+      let navMesh = null;
+
+      if (isHighDensity) {
+        console.log("mesh contains high triangle density region");
+        navMesh = document.querySelector("[nav-mesh]");
+      }
+
+      if (navMesh) {
+        console.log(`mesh density exceeded, using floor plan only`);
+        navMesh.setAttribute(shapePrefix + "floorPlan", {
+          type: SHAPE.MESH,
+          margin: 0.01,
+          fit: FIT.ALL,
+          includeInvisible: true
+        });
+        shapes.push({ id: shapePrefix + "floorPlan", entity: navMesh });
+      } else if (!isHighDensity) {
+        el.setAttribute(shapePrefix + "environment", {
+          type: SHAPE.MESH,
+          margin: 0.01,
+          fit: FIT.ALL
+        });
+        shapes.push({ id: shapePrefix + "environment", entity: el });
+        console.log("adding mesh shape for all visible meshes");
+      } else {
+        el.setAttribute(shapePrefix + "defaultFloor", {
+          type: SHAPE.BOX,
+          margin: 0.01,
+          halfExtents: { x: 4000, y: 0.5, z: 4000 },
+          offset: { x: 0, y: -0.5, z: 0 },
+          fit: FIT.MANUAL
+        });
+        shapes.push({ id: shapePrefix + "defaultFloor", entity: el });
+        console.log("adding default floor collision");
+      }
     }
     console.groupEnd();
   };
@@ -460,7 +497,9 @@ export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false
 }
 
 const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/scenes\/(\w+)\/?\S*/;
+const hubsAvatarRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/avatars\/(\w+)\/?\S*/;
 const hubsRoomRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/(\w+)\/?\S*/;
 export const isHubsSceneUrl = hubsSceneRegex.test.bind(hubsSceneRegex);
 export const isHubsRoomUrl = url => !isHubsSceneUrl(url) && hubsRoomRegex.test(url);
 export const isHubsDestinationUrl = url => isHubsSceneUrl(url) || isHubsRoomUrl(url);
+export const isHubsAvatarUrl = hubsAvatarRegex.test.bind(hubsAvatarRegex);

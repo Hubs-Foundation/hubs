@@ -8,24 +8,7 @@
   position: relative;
 }
 
-:local(.edit-button) {
-  @extend %fa-icon-button;
-  color: $dark-grey;
-  display: inline;
-  position: absolute;
-  top: 0px;
-  right: 24px;
-
-  i {
-    font-size: 1.0em;
-  }
-}
-
-:local(.edit-button):hover {
-  color: $action-color;
-}
-
-:local(.info-button) {
+:local(.collapse-button) {
   @extend %fa-icon-button;
   color: $dark-grey;
   display: inline;
@@ -38,7 +21,7 @@
   }
 }
 
-:local(.info-button):hover {
+:local(.collapse-button):hover {
   color: $action-color;
 }
 
@@ -54,7 +37,7 @@
   @extend %default-font;
   border: 0;
   border-radius: 12px;
-  margin: 6px;
+  margin-top: 12px;
   padding: 12px 18px;
   height: auto;
 
@@ -131,8 +114,23 @@
     @extend %top-title;
     @extend %glass-text;
     margin-bottom: 4px;
-    margin-right: 16px;
-    margin-left: 16px;
+    margin-right: 48px;
+    margin-left: 48px;
+
+    :local(.rename-button) {
+      @extend %glass-text;
+      font-weight: bold;
+      font-size: 1.0em;
+      appearance: none;
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      outline-style: none;
+      cursor: pointer;
+      border: 0;
+      text-decoration: underline;
+      text-decoration-color: $dark-grey;
+      background: transparent;
+    }
   }
 
   :local(.lobby) {
@@ -148,16 +146,15 @@
     width: 100%;
   }
 
-  :local(.choose-scene) {
+  :local(.lobby-label) {
     margin-top: 4px;
     margin-bottom: 32px;
     @extend %default-font;
-    font-size: 1.1em;
-    color: $action-color;
+    font-size: 0.8em;
     text-decoration: none;
     cursor: pointer;
-    font-weight: bold;
     display: flex;
+    color: $dark-grey;
     align-items: center;
     justify-content: center;
     i {
@@ -182,10 +179,22 @@
 
     :local(.action-button) {
       @extend %action-button;
+      @extend %entry-action-button;
+    }
+
+    :local(.secondary-action-button) {
+      @extend %action-button-secondary;
+      @extend %entry-action-button;
+      margin-bottom: 12px;
     }
 
     :local(.wide-button) {
       @extend %wide-button;
+    }
+
+    :local(.button-subtitle) {
+      font-size: 0.8em;
+      font-weight: normal;
     }
   }
 
@@ -226,26 +235,6 @@
     cursor: pointer;
     color: $action-color;
     text-decoration: underline;
-  }
-
-  :local(.subscribe) {
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: $darker-grey;
-
-    input {
-      @extend %checkbox;
-    }
-
-    input:checked {
-      @extend %checkbox-checked;
-    }
-
-    label {
-      margin-right: 8px;
-    }
   }
 }
 

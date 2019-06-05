@@ -26,7 +26,9 @@ AFRAME.registerComponent("destroy-at-extreme-distances", {
       getLastWorldPosition(this.el.object3D, pos);
 
       if (pos.x < xMin || pos.x > xMax || pos.y < yMin || pos.y > yMax || pos.z < zMin || pos.z > zMax) {
-        this.el.parentNode.removeChild(this.el);
+        if (!this.el.components.networked || NAF.utils.isMine(this.el)) {
+          this.el.parentNode.removeChild(this.el);
+        }
       }
     };
   })()

@@ -9,6 +9,7 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { spawnChatMessage } from "./chat-message";
+import { pushHistoryState } from "../utils/history";
 
 const isMobile = AFRAME.utils.device.isMobile();
 
@@ -16,7 +17,9 @@ class InWorldChatBox extends Component {
   static propTypes = {
     discordBridges: PropTypes.array,
     onSendMessage: PropTypes.func,
-    onObjectCreated: PropTypes.func
+    onObjectCreated: PropTypes.func,
+    history: PropTypes.object,
+    enableSpawning: PropTypes.bool
   };
 
   state = {
@@ -60,22 +63,29 @@ class InWorldChatBox extends Component {
               }
             }}
           />
-          <label
-            htmlFor="message-entry-media-input"
-            title={"Upload"}
-            className={classNames([
-              styles.messageEntryButton,
-              styles.messageEntryButtonInRoom,
-              styles.messageEntryUpload
-            ])}
-          >
-            <i>
-              <FontAwesomeIcon icon={isMobile ? faCamera : faPlus} />
-            </i>
-          </label>
+          {this.props.enableSpawning && (
+            <label
+              htmlFor="message-entry-media-input"
+              title={"Upload"}
+              className={classNames([
+                styles.messageEntryButton,
+                styles.messageEntryButtonInRoom,
+                styles.messageEntryUpload
+              ])}
+            >
+              <i>
+                <FontAwesomeIcon icon={isMobile ? faCamera : faPlus} />
+              </i>
+            </label>
+          )}
           <textarea
             style={{ height: pendingMessageTextareaHeight }}
-            className={classNames([styles.messageEntryInput, styles.messageEntryInputInRoom, "chat-focus-target"])}
+            className={classNames([
+              styles.messageEntryInput,
+              styles.messageEntryInputInRoom,
+              "chat-focus-target",
+              !this.props.enableSpawning && styles.messageEntryInputNoSpawn
+            ])}
             value={this.state.pendingMessage}
             rows={textRows}
             onFocus={e => {
@@ -101,17 +111,19 @@ class InWorldChatBox extends Component {
             }}
             placeholder={this.props.discordBridges.length ? `Send to room and ${discordSnippet}...` : "Send to room..."}
           />
-          <button
-            className={classNames([styles.messageEntrySpawn])}
-            onClick={() => {
-              if (this.state.pendingMessage.length > 0) {
-                spawnChatMessage(this.state.pendingMessage);
-                this.setState({ pendingMessage: "" });
-              } else {
-                this.pushHistoryState("modal", "create");
-              }
-            }}
-          />
+          {this.props.enableSpawning && (
+            <button
+              className={classNames([styles.messageEntrySpawn])}
+              onClick={() => {
+                if (this.state.pendingMessage.length > 0) {
+                  spawnChatMessage(this.state.pendingMessage);
+                  this.setState({ pendingMessage: "" });
+                } else {
+                  pushHistoryState(this.props.history, "modal", "create");
+                }
+              }}
+            />
+          )}
           <button
             type="submit"
             className={classNames([

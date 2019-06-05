@@ -1,5 +1,5 @@
 import { injectCustomShaderChunks } from "../utils/media-utils";
-import { AVATAR_TYPES } from "../assets/avatars/avatars";
+import { AVATAR_TYPES } from "../utils/avatar-utils";
 /**
  * Sets player info state, including avatar choice and display name.
  * @namespace avatar
@@ -7,29 +7,70 @@ import { AVATAR_TYPES } from "../assets/avatars/avatars";
  */
 AFRAME.registerComponent("player-info", {
   schema: {
-    displayName: { type: "string" },
     avatarSrc: { type: "string" },
     avatarType: { type: "string", default: AVATAR_TYPES.LEGACY }
   },
   init() {
+    this.displayName = null;
+    this.communityIdentifier = null;
     this.applyProperties = this.applyProperties.bind(this);
+    this.updateDisplayName = this.updateDisplayName.bind(this);
+    this.applyDisplayName = this.applyDisplayName.bind(this);
+
+    this.isLocalPlayerInfo = this.el.id === "player-rig";
+    this.playerSessionId = null;
+
+    if (!this.isLocalPlayerInfo) {
+      NAF.utils.getNetworkedEntity(this.el).then(networkedEntity => {
+        this.playerSessionId = NAF.utils.getCreator(networkedEntity);
+        const playerPresence = window.APP.hubChannel.presence.state[this.playerSessionId];
+        if (playerPresence) {
+          this.updateDisplayNameFromPresenceMeta(playerPresence.metas[0]);
+        }
+      });
+    }
   },
   play() {
     this.el.addEventListener("model-loaded", this.applyProperties);
+    this.el.sceneEl.addEventListener("presence_updated", this.updateDisplayName);
   },
   pause() {
     this.el.removeEventListener("model-loaded", this.applyProperties);
+    this.el.sceneEl.removeEventListener("presence_updated", this.updateDisplayName);
   },
   update() {
     this.applyProperties();
   },
-  applyProperties() {
-    const nametagEl = this.el.querySelector(".nametag");
-    if (this.data.displayName && nametagEl) {
-      nametagEl.setAttribute("text", {
-        value: this.data.displayName
-      });
+  updateDisplayName(e) {
+    if (!this.playerSessionId && this.isLocalPlayerInfo) {
+      this.playerSessionId = NAF.clientId;
     }
+    if (!this.playerSessionId) return;
+    if (this.playerSessionId !== e.detail.sessionId) return;
+
+    this.updateDisplayNameFromPresenceMeta(e.detail);
+  },
+  updateDisplayNameFromPresenceMeta(presenceMeta) {
+    const isModerator = presenceMeta.roles && presenceMeta.roles.moderator;
+    this.displayName = presenceMeta.profile.displayName + (isModerator ? " *" : "");
+    this.communityIdentifier = presenceMeta.profile.communityIdentifier;
+    this.applyDisplayName();
+  },
+  applyDisplayName() {
+    const nametagEl = this.el.querySelector(".nametag");
+    if (this.displayName && nametagEl) {
+      nametagEl.setAttribute("text", { value: this.displayName });
+    }
+    const communityIdentifierEl = this.el.querySelector(".communityIdentifier");
+    if (communityIdentifierEl) {
+      if (this.communityIdentifier) {
+        communityIdentifierEl.setAttribute("text", { value: this.communityIdentifier });
+      }
+      communityIdentifierEl.object3D.visible = !!this.communityIdentifier;
+    }
+  },
+  applyProperties() {
+    this.applyDisplayName();
 
     const modelEl = this.el.querySelector(".model");
     if (this.data.avatarSrc && modelEl) {

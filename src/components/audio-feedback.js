@@ -1,3 +1,10 @@
+// This computation is expensive, so we run on at most one avatar per frame, including quiet avatars.
+// However if we detect an avatar is seen speaking (its volume is above DISABLE_AT_VOLUME_THRESHOLD)
+// then we continue analysis for at least DISABLE_GRACE_PERIOD_MS and disable doing it every frame if
+// the avatar is quiet during that entire duration (eg they are muted)
+const DISABLE_AT_VOLUME_THRESHOLD = 0.00001;
+const DISABLE_GRACE_PERIOD_MS = 10000;
+
 /**
  * Emits audioFrequencyChange events based on a networked audio source
  * @namespace avatar
@@ -9,6 +16,9 @@ AFRAME.registerComponent("networked-audio-analyser", {
     this.prevVolume = 0;
     this.smoothing = 0.3;
     this.threshold = 0.01;
+    this._updateAnalysis = this._updateAnalysis.bind(this);
+    this._runScheduledWork = this._runScheduledWork.bind(this);
+    this.el.sceneEl.systems["frame-scheduler"].schedule(this._updateAnalysis, "audio-analyser");
     this.el.addEventListener("sound-source-set", event => {
       const ctx = THREE.AudioContext.getContext();
       this.analyser = ctx.createAnalyser();
@@ -18,7 +28,27 @@ AFRAME.registerComponent("networked-audio-analyser", {
     });
   },
 
-  tick: function() {
+  remove: function() {
+    this.el.sceneEl.systems["frame-scheduler"].unschedule(this._runScheduledWork, "audio-analyser");
+  },
+
+  tick: function(t) {
+    if (!this.avatarIsQuiet) {
+      this._updateAnalysis(t);
+    }
+  },
+
+  _runScheduledWork: function() {
+    if (this.avatarIsQuiet) {
+      this._updateAnalysis();
+    }
+  },
+
+  // Updates the analysis/volume. If t is passed, that implies this is called via tick
+  // and so as a performance optimization will check to see if it's been at least DISABLE_GRACE_PERIOD_MS
+  // since the last volume was seen above DISABLE_AT_VOLUME_THRESHOLD, and if so, will disable
+  // tick updates until the volume exceeds the level again.
+  _updateAnalysis: function(t) {
     if (!this.analyser) return;
 
     // take care with compatibility, e.g. safari doesn't support getFloatTimeDomainData
@@ -35,6 +65,18 @@ AFRAME.registerComponent("networked-audio-analyser", {
     }
     this.volume = this.smoothing * currVolume + (1 - this.smoothing) * this.prevVolume;
     this.prevVolume = this.volume;
+
+    if (this.volume < DISABLE_AT_VOLUME_THRESHOLD) {
+      if (t && this.lastSeenVolume && this.lastSeenVolume < t - DISABLE_GRACE_PERIOD_MS) {
+        this.avatarIsQuiet = true;
+      }
+    } else {
+      if (t) {
+        this.lastSeenVolume = t;
+      }
+
+      this.avatarIsQuiet = false;
+    }
   }
 });
 

@@ -2,7 +2,7 @@ import { EventTarget } from "event-target-shim";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 
-export const SOURCES = ["videos", "sketchfab", "poly", "scenes", "gifs", "images", "twitch"];
+export const SOURCES = ["sketchfab", "poly", "videos", "scenes", "gifs", "images", "twitch"];
 
 const URL_SOURCE_TO_TO_API_SOURCE = {
   scenes: "scene_listings",
@@ -35,14 +35,14 @@ export default class MediaSearchStore extends EventTarget {
   setHistory(history) {
     this.history = history;
 
-    this.update(this.history.location);
+    this._update(this.history.location);
 
     this.history.listen(location => {
-      this.update(location);
+      this._update(location);
     });
   }
 
-  update = async location => {
+  _update = async location => {
     this.result = null;
     this.dispatchEvent(new CustomEvent("statechanged"));
 
@@ -66,19 +66,61 @@ export default class MediaSearchStore extends EventTarget {
     }
 
     searchParams.get("locale", navigator.languages[0]);
-    searchParams.set("source", URL_SOURCE_TO_TO_API_SOURCE[urlSource]);
+
+    let source;
+    if (urlSource === "avatars" || urlSource === "scenes") {
+      // Avatars + scenes are special since we request them from a different source based on the facet.
+      const singular = urlSource === "avatars" ? "avatar" : "scene";
+      const filter = new URLSearchParams(location.search);
+      source = filter.get("filter").startsWith("my-") ? `${singular}s` : `${singular}_listings`;
+    } else {
+      source = URL_SOURCE_TO_TO_API_SOURCE[urlSource];
+    }
+    searchParams.set("source", source);
+
+    if (source === "avatars" || source === "scenes") {
+      searchParams.set("user", window.APP.store.credentialsAccountId);
+    }
 
     const url = getReticulumFetchUrl(`/api/v1/media/search?${searchParams.toString()}`);
     if (this.lastSavedUrl === url) return;
 
-    const res = await fetch(url);
-    const result = await res.json();
+    const result = await this._fetchMedia(url, source);
+
     if (this.requestIndex != currentRequestIndex) return;
 
     this.result = result;
-    this.nextCursor = this.result.meta.next_cursor;
+    this.nextCursor = this.result.meta && this.result.meta.next_cursor;
     this.lastFetchedUrl = url;
     this.dispatchEvent(new CustomEvent("statechanged"));
+  };
+
+  _fetchMedia = async url => {
+    const headers = { "Content-Type": "application/json" };
+    const credentialsToken = window.APP.store.state.credentials.token;
+    if (credentialsToken) headers.authorization = `bearer ${credentialsToken}`;
+
+    const res = await fetch(url, { method: "GET", headers });
+    const body = await res.text();
+
+    let result;
+    try {
+      result = JSON.parse(body);
+    } catch (e) {
+      result = body;
+    }
+
+    return result;
+  };
+
+  _legacyAvatarToSearchEntry = legacyAvatar => {
+    return {
+      id: legacyAvatar.id,
+      type: "avatar_listing",
+      url: legacyAvatar.url,
+      images: { preview: { url: legacyAvatar.thumbnail, width: 720, height: 1280 } },
+      gltfs: { avatar: legacyAvatar.model }
+    };
   };
 
   pageNavigate = delta => {
@@ -117,14 +159,17 @@ export default class MediaSearchStore extends EventTarget {
     pushHistoryPath(this.history, location.pathname, searchParams.toString());
   };
 
-  getSearchClearedSearchParams = (location, keepSource) => {
+  getSearchClearedSearchParams = (location, keepSource, keepNav) => {
     const searchParams = new URLSearchParams(location.search);
 
     // Strip browsing query params
     searchParams.delete("q");
     searchParams.delete("filter");
     searchParams.delete("cursor");
-    searchParams.delete("media_nav");
+
+    if (!keepNav) {
+      searchParams.delete("media_nav");
+    }
 
     if (!keepSource) {
       searchParams.delete("media_source");
@@ -164,7 +209,7 @@ export default class MediaSearchStore extends EventTarget {
     this._sourceNavigate(source, true, false);
   };
 
-  _sourceNavigate = (source, hideNav, useLastStashedParams) => {
+  _sourceNavigate = async (source, hideNav, useLastStashedParams) => {
     const currentQuery = new URLSearchParams(this.history.location.search).get("q");
     const searchParams = this.getSearchClearedSearchParams(this.history.location);
 
@@ -183,7 +228,10 @@ export default class MediaSearchStore extends EventTarget {
           }
         }
       } else {
-        if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
+        if (source === "avatars") {
+          const hasAccountWithAvatars = await this._hasAccountWithAvatars();
+          searchParams.set("filter", hasAccountWithAvatars ? "my-avatars" : "featured");
+        } else if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
           searchParams.set("filter", MEDIA_SOURCE_DEFAULT_FILTERS[source]);
         }
       }
@@ -204,6 +252,19 @@ export default class MediaSearchStore extends EventTarget {
     }
   };
 
+  _hasAccountWithAvatars = async () => {
+    const { credentialsAccountId } = window.APP.store;
+    if (!credentialsAccountId) return false;
+
+    const searchParams = new URLSearchParams();
+    const source = "avatars";
+    searchParams.set("source", source);
+    searchParams.set("user", credentialsAccountId);
+    const url = getReticulumFetchUrl(`/api/v1/media/search?${searchParams.toString()}`);
+    const result = await this._fetchMedia(url, source);
+    return !!(result && result.entries) && result.entries.length > 0;
+  };
+
   getUrlMediaSource = location => {
     const { search } = location;
     const urlParams = new URLSearchParams(search);
@@ -213,10 +274,10 @@ export default class MediaSearchStore extends EventTarget {
     return urlParams.get("media_source") || pathname.substring(7);
   };
 
-  pushExitMediaBrowserHistory = history => {
+  pushExitMediaBrowserHistory = (history, stashLastSearchParams = true) => {
     if (!history) history = this.history;
 
-    this._stashLastSearchParams(history.location);
+    if (stashLastSearchParams) this._stashLastSearchParams(history.location);
 
     const { pathname } = history.location;
     const hasMediaPath = sluglessPath(history.location).startsWith("/media");

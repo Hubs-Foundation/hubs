@@ -22,7 +22,10 @@ export default class InviteDialog extends Component {
     hubId: PropTypes.string,
     allowShare: PropTypes.bool,
     isModal: PropTypes.bool,
-    onClose: PropTypes.func
+    onClose: PropTypes.func,
+    hasPush: PropTypes.bool,
+    isSubscribed: PropTypes.bool,
+    onSubscribeChanged: PropTypes.func
   };
 
   state = {
@@ -106,6 +109,20 @@ export default class InviteDialog extends Component {
               </WithHoverSound>
             )}
         </div>
+        {this.props.hasPush && (
+          <div className={styles.subscribe}>
+            <input
+              id="subscribe"
+              type="checkbox"
+              onChange={() => this.props.onSubscribeChanged()}
+              checked={this.props.isSubscribed}
+            />
+            <label htmlFor="subscribe">
+              <FormattedMessage id="entry.notify_me" />
+            </label>
+          </div>
+        )}
+
         {this.props.isModal && (
           <button className={styles.enterVrButton} onClick={() => this.props.onClose()}>
             <FormattedMessage id="entry.return-to-vr" />

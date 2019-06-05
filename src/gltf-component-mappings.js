@@ -18,6 +18,9 @@ AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner", (el, co
   //TODO: Do not automatically add these components
   el.setAttribute("is-remote-hover-target", "");
   el.setAttribute("tags", { isHandCollisionTarget: true });
+  el.setAttribute("hoverable-visuals", {
+    cursorController: "#cursor-controller"
+  });
   el.setAttribute(componentName, componentData);
 });
 AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
@@ -226,6 +229,9 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
     resolve: true,
     template: "#interactable-media"
   });
+  el.setAttribute("hoverable-visuals", {
+    cursorController: "#cursor-controller"
+  });
   el.setAttribute("ammo-body", {
     mass: 0,
     type: TYPE.STATIC,
@@ -306,3 +312,23 @@ AFRAME.GLTFModelPlus.registerComponent(
     });
   }
 );
+
+AFRAME.GLTFModelPlus.registerComponent("heightfield", "heightfield", (el, componentName, componentData) => {
+  el.setAttribute("ammo-shape__heightfield", {
+    type: SHAPE.HEIGHTFIELD,
+    margin: 0.01,
+    fit: FIT.MANUAL,
+    heightfieldDistance: componentData.distance,
+    offset: componentData.offset,
+    heightfieldData: componentData.data
+  });
+});
+
+AFRAME.GLTFModelPlus.registerComponent("trimesh", "trimesh", el => {
+  el.setAttribute("ammo-shape__trimesh", {
+    type: SHAPE.MESH,
+    margin: 0.01,
+    fit: FIT.ALL,
+    includeInvisible: true
+  });
+});

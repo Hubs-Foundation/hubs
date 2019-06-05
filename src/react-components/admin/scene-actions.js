@@ -60,27 +60,3 @@ export const sceneReviewed = id => ({
     refresh: true
   }
 });
-
-export const SCENE_LISTING_FEATURE = "SCENE_LISTING_FEATURE";
-export const sceneListingFeature = (id, listing) => ({
-  type: SCENE_LISTING_FEATURE,
-  payload: {
-    id,
-    data: {
-      tags: { tags: [...(listing.tags.tags || []), "featured"] }
-    }
-  },
-  meta: { fetch: UPDATE, resource: "scene_listings", refresh: true }
-});
-
-export const SCENE_LISTING_UNFEATURE = "SCENE_LISTING_UNFEATURE";
-export const sceneListingUnfeature = (id, listing) => ({
-  type: SCENE_LISTING_UNFEATURE,
-  payload: {
-    id,
-    data: {
-      tags: { tags: [...(listing.tags.tags || []).filter(x => x !== "featured")] }
-    }
-  },
-  meta: { fetch: UPDATE, resource: "scene_listings", refresh: true }
-});

@@ -1,0 +1,83 @@
+@import 'shared';
+
+:local(.client-info-dialog) {
+  .dialog__box__contents__title {
+    margin-bottom: 10px;
+  }
+}
+
+:local(.title) {
+  text-align: center;
+  font-weight: bold;
+  margin: 0 12px;
+}
+
+:local(.community-identifier) {
+  font-size: 12pt;
+  font-weight: normal;
+  margin-top: 3px;
+}
+
+:local(.client-info) {
+  display: flex;
+  text-align: left;
+  margin: 0 12px;
+
+  @media(max-width: 690px) {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+:local(.client-profile-image) {
+  min-width: 200px;
+
+  img {
+    border-radius: 12px;
+    width: auto;
+    height: 240px;
+  }
+
+  margin: 0px 80px;
+
+  @media(max-width: 690px) {
+    margin: auto;
+  }
+}
+
+:local(.client-details) {
+  display: flex;
+  flex-direction: column;
+  margin: 4px 0 0 26px;
+  font-weight: normal;
+  width: 320px;
+
+  @media(max-width: 690px) {
+    width: 200px;
+    margin: 4px 4px;
+  }
+}
+
+:local(.client-main) {
+  margin: 12px 8px 8px 0;
+  position: relative;
+  font-size: 1.8em;
+  font-weight: bold;
+}
+
+:local(.client-action-buttons) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  button {
+    @extend %action-button-secondary-modal;
+    margin-top: 12px;
+    width: 150px;
+  }
+
+  :local(.cancel) {
+    @extend %action-button;
+  }
+}

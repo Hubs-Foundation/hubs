@@ -6,7 +6,7 @@ import cubeMapNegY from "../assets/images/cubemap/negy.jpg";
 import cubeMapPosZ from "../assets/images/cubemap/posz.jpg";
 import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
 
-async function createDefaultEnvironmentMap() {
+export async function createDefaultEnvironmentMap() {
   const urls = [cubeMapPosX, cubeMapNegX, cubeMapPosY, cubeMapNegY, cubeMapPosZ, cubeMapNegZ];
   const texture = await new Promise((resolve, reject) =>
     new THREE.CubeTextureLoader().load(urls, resolve, undefined, reject)
@@ -16,19 +16,10 @@ async function createDefaultEnvironmentMap() {
 }
 
 AFRAME.registerComponent("environment-map", {
-  schema: {
-    loadDefault: { type: "boolean", default: true }
-  },
-
   init() {
     this.environmentMap = null;
 
     this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
-
-    if (this.data.loadDefault) {
-      // Used in the avatar selector scene because there is no skybox.
-      createDefaultEnvironmentMap().then(this.updateEnvironmentMap);
-    }
   },
 
   updateEnvironmentMap(environmentMap) {

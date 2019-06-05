@@ -6,6 +6,7 @@ import StateLink from "./state-link.js";
 import { resetTips } from "../systems/tips";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
+import { faDoorClosed } from "@fortawesome/free-solid-svg-icons/faDoorClosed";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
@@ -19,15 +20,18 @@ export default class SettingsMenu extends Component {
     hideSettings: PropTypes.func,
     mediaSearchStore: PropTypes.object,
     hubScene: PropTypes.object,
-    hubChannel: PropTypes.object
+    hubChannel: PropTypes.object,
+    performConditionalSignIn: PropTypes.func,
+    pushHistoryState: PropTypes.func
   };
 
   render() {
     const rowClasses = classNames([styles.row, styles.settingsRow]);
     const rowHeader = classNames([styles.row, styles.settingsRow, styles.rowHeader]);
-    const showRoomSettings = !!this.props.hubChannel.permissions.update_hub;
+    const showRoomSettings = !!this.props.hubChannel.canOrWillIfCreator("update_hub");
+    const showCloseRoom = !!this.props.hubChannel.canOrWillIfCreator("close_hub");
     const showRoomInfo = !!this.props.hubScene;
-    const showRoomSection = showRoomSettings || showRoomInfo;
+    const showRoomSection = showRoomSettings || showRoomInfo || showCloseRoom;
 
     // Draw self first
     return (
@@ -69,9 +73,15 @@ export default class SettingsMenu extends Component {
                   <div
                     className={styles.listItemLink}
                     onClick={() => {
-                      showFullScreenIfAvailable();
-                      this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
-                      this.props.hideSettings();
+                      this.props.performConditionalSignIn(
+                        () => this.props.hubChannel.can("update_hub"),
+                        () => {
+                          showFullScreenIfAvailable();
+                          this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                          this.props.hideSettings();
+                        },
+                        "change-scene"
+                      );
                     }}
                   >
                     <FormattedMessage id="settings.change-scene" />
@@ -87,14 +97,51 @@ export default class SettingsMenu extends Component {
                   </i>
                 </div>
                 <div className={styles.listItem}>
-                  <StateLink
-                    stateKey="modal"
-                    stateValue="rename_room"
-                    history={this.props.history}
-                    onClick={this.props.hideSettings}
+                  <a
+                    href="#"
+                    onClick={e => {
+                      e.preventDefault();
+
+                      this.props.performConditionalSignIn(
+                        () => this.props.hubChannel.can("update_hub"),
+                        () => {
+                          this.props.pushHistoryState("modal", "rename_room");
+                          this.props.hideSettings();
+                        },
+                        "rename-room"
+                      );
+                    }}
                   >
                     <FormattedMessage id="settings.rename-room" />
-                  </StateLink>
+                  </a>
+                </div>
+              </div>
+            )}
+            {showCloseRoom && (
+              <div className={rowClasses}>
+                <div className={styles.icon}>
+                  <i>
+                    <FontAwesomeIcon icon={faDoorClosed} />
+                  </i>
+                </div>
+                <div className={styles.listItem}>
+                  <a
+                    href="#"
+                    onClick={e => {
+                      e.preventDefault();
+
+                      this.props.performConditionalSignIn(
+                        () => this.props.hubChannel.can("update_hub"),
+                        () => {
+                          this.props.pushHistoryState("modal", "close_room");
+                          this.props.hideSettings();
+                        },
+                        "close-room"
+                      );
+                    }}
+                  >
+                    <FormattedMessage id="settings.close-room" />
+                  </a>
                 </div>
               </div>
             )}
@@ -108,7 +155,7 @@ export default class SettingsMenu extends Component {
                 <div className={styles.listItem}>
                   <StateLink
                     stateKey="modal"
-                    stateValue="info"
+                    stateValue="room_info"
                     history={this.props.history}
                     onClick={this.props.hideSettings}
                   >

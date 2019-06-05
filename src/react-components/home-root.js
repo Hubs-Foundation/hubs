@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import en from "react-intl/locale-data/en";
 
 import { lang, messages } from "../utils/i18n";
@@ -14,11 +15,11 @@ import classNames from "classnames";
 import { ENVIRONMENT_URLS } from "../assets/environments/environments";
 import { createAndRedirectToNewHub, connectToReticulum } from "../utils/phoenix-utils";
 import maskEmail from "../utils/mask-email";
-import qsTruthy from "../utils/qs_truthy";
+import checkIsMobile from "../utils/is-mobile";
+import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 
 import styles from "../assets/stylesheets/index.scss";
 
-import HubCreatePanel from "./hub-create-panel.js";
 import AuthDialog from "./auth-dialog.js";
 import JoinUsDialog from "./join-us-dialog.js";
 import ReportDialog from "./report-dialog.js";
@@ -28,6 +29,8 @@ import DialogContainer from "./dialog-container.js";
 import { WithHoverSound } from "./wrap-with-audio";
 
 addLocaleData([...en]);
+
+const isMobile = checkIsMobile();
 
 class HomeRoot extends Component {
   static propTypes = {
@@ -41,7 +44,8 @@ class HomeRoot extends Component {
     authOrigin: PropTypes.string,
     listSignup: PropTypes.bool,
     report: PropTypes.bool,
-    initialEnvironment: PropTypes.string
+    initialEnvironment: PropTypes.string,
+    installEvent: PropTypes.object
   };
 
   state = {
@@ -78,7 +82,7 @@ class HomeRoot extends Component {
   }
 
   async verifyAuth() {
-    const socket = connectToReticulum();
+    const socket = await connectToReticulum();
     const channel = socket.channel(this.props.authTopic);
     await new Promise((resolve, reject) =>
       channel
@@ -189,52 +193,18 @@ class HomeRoot extends Component {
     };
   };
 
-  launchTour = () => {
-    createAndRedirectToNewHub(
-      "Hubs Tour",
-      // TODO BP placeholder tour scene
-      // "chjVRLh", // dev
-      "d2SF68V", // prod
-      null,
-      false
-    );
-  };
-
-  showCreateDialog = () => {
-    this.showDialog(
-      props => (
-        <DialogContainer title="Choose a Scene" {...props}>
-          <HubCreatePanel {...props} />
-        </DialogContainer>
-      ),
-      {
-        initialEnvironment: this.props.initialEnvironment,
-        environments: this.state.environments
-      }
-    );
-  };
-
   render() {
     const mainContentClassNames = classNames({
       [styles.mainContent]: true,
       [styles.noninteractive]: !!this.state.dialog
     });
 
-    const useOculusBrowserFTUE = /Oculus/.test(navigator.userAgent) && qsTruthy("enable_ftue");
     const showFTUEVideo = false;
 
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.home}>
           <div className={mainContentClassNames}>
-            {!useOculusBrowserFTUE && (
-              <div className={styles.videoContainer}>
-                <video playsInline muted loop autoPlay className={styles.backgroundVideo} id="background-video">
-                  <source src={homeVideoWebM} type="video/webm" />
-                  <source src={homeVideoMp4} type="video/mp4" />
-                </video>
-              </div>
-            )}
             <div className={styles.headerContent}>
               <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
                 <div className={styles.links}>
@@ -277,98 +247,79 @@ class HomeRoot extends Component {
                 )}
               </div>
             </div>
-            <div
-              className={classNames({ [styles.heroContent]: true, [styles.oculusBrowserHero]: useOculusBrowserFTUE })}
-            >
-              <div className={styles.attribution}>
-                Medieval Fantasy Book by{" "}
-                <a
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  href="https://sketchfab.com/models/06d5a80a04fc4c5ab552759e9a97d91a?utm_campaign=06d5a80a04fc4c5ab552759e9a97d91a&utm_medium=embed&utm_source=oembed"
-                >
-                  Pixel
-                </a>
-              </div>
+            <div className={styles.heroContent}>
               <div className={styles.heroPanel}>
                 <div className={styles.container}>
                   <div className={styles.logo}>
                     <img src={hubLogo} />
                   </div>
-                  <div className={styles.title}>
-                    <FormattedMessage id="home.hero_title" />
+                  <div className={styles.blurb}>
+                    <FormattedMessage id="home.hero_blurb" />
                   </div>
-                  {useOculusBrowserFTUE && (
-                    <div className={styles.blurb}>
-                      <FormattedMessage id="home.hero_blurb" />
-                    </div>
-                  )}
-                  {!useOculusBrowserFTUE &&
-                    this.state.environments.length === 0 && (
-                      <div className="loader-wrap">
-                        <div className="loader">
-                          <div className="loader-center" />
-                        </div>
-                      </div>
-                    )}
                 </div>
-                {useOculusBrowserFTUE ? (
-                  <div className={styles.ctaButtons}>
-                    <button
-                      className={classNames(styles.primaryButton, styles.ctaButton)}
-                      onClick={this.showCreateDialog}
-                    >
-                      <FormattedMessage id="home.create_a_room" />
-                    </button>
-                    <button className={classNames(styles.secondaryButton, styles.ctaButton)} onClick={this.launchTour}>
-                      <FormattedMessage id="home.take_a_tour" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className={styles.create}>
-                    <HubCreatePanel
-                      initialEnvironment={this.props.initialEnvironment}
-                      environments={this.state.environments}
-                    />
-                  </div>
-                )}
+                <div className={styles.ctaButtons}>
+                  <button
+                    className={classNames(styles.primaryButton, styles.ctaButton)}
+                    onClick={e => {
+                      e.preventDefault();
+                      createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, null, false);
+                    }}
+                  >
+                    <FormattedMessage id="home.create_a_room" />
+                  </button>
+                  <button
+                    className={classNames(styles.secondaryButton)}
+                    style={this.props.installEvent || this.state.installed ? {} : { visibility: "hidden" }}
+                    onClick={() => {
+                      this.props.installEvent.prompt();
+
+                      this.props.installEvent.userChoice.then(choiceResult => {
+                        if (choiceResult.outcome === "accepted") {
+                          this.setState({ installed: true });
+                        }
+                      });
+                    }}
+                  >
+                    <i>
+                      <FontAwesomeIcon icon={faPlus} />
+                    </i>
+                    <FormattedMessage id={`home.${isMobile ? "mobile" : "desktop"}.add_pwa`} />
+                  </button>
+                </div>
               </div>
               <div className={classNames(styles.heroPanel, styles.rightPanel)}>
-                {useOculusBrowserFTUE &&
-                  showFTUEVideo && (
-                    <div className={styles.heroVideo}>
-                      <video playsInline muted loop autoPlay>
-                        <source src={homeVideoWebM} type="video/webm" />
-                        <source src={homeVideoMp4} type="video/mp4" />
-                      </video>
-                    </div>
-                  )}
-                {(useOculusBrowserFTUE || this.state.environments.length > 1) && (
-                  <div>
-                    <WithHoverSound>
-                      <div className={styles.secondaryLink}>
-                        <a href="/link">
-                          <FormattedMessage id="home.have_code" />
-                        </a>
-                      </div>
-                    </WithHoverSound>
-
-                    <WithHoverSound>
-                      <div className={styles.secondaryLink}>
-                        <div>
-                          <FormattedMessage id="home.add_to_discord_1" />
-                        </div>
-                        <img src={discordLogoSmall} />
-                        <a href="/discord">
-                          <FormattedMessage id="home.add_to_discord_2" />
-                        </a>
-                        <div>
-                          <FormattedMessage id="home.add_to_discord_3" />
-                        </div>
-                      </div>
-                    </WithHoverSound>
+                {showFTUEVideo && (
+                  <div className={styles.heroVideo}>
+                    <video playsInline muted loop autoPlay>
+                      <source src={homeVideoWebM} type="video/webm" />
+                      <source src={homeVideoMp4} type="video/mp4" />
+                    </video>
                   </div>
                 )}
+                <div>
+                  <WithHoverSound>
+                    <div className={styles.secondaryLink}>
+                      <a href="/link">
+                        <FormattedMessage id="home.have_code" />
+                      </a>
+                    </div>
+                  </WithHoverSound>
+
+                  <WithHoverSound>
+                    <div className={styles.secondaryLink}>
+                      <div>
+                        <FormattedMessage id="home.add_to_discord_1" />
+                      </div>
+                      <img src={discordLogoSmall} />
+                      <a href="/discord">
+                        <FormattedMessage id="home.add_to_discord_2" />
+                      </a>
+                      <div>
+                        <FormattedMessage id="home.add_to_discord_3" />
+                      </div>
+                    </div>
+                  </WithHoverSound>
+                </div>
               </div>
             </div>
             <div className={styles.footerContent}>

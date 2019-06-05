@@ -6,9 +6,11 @@ import HLS from "hls.js/dist/hls.light.js";
 import { proxiedUrlFor, spawnMediaAround } from "../utils/media-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
+import { promisifyWorker } from "../utils/promisify-worker.js";
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
+const parseGIF = promisifyWorker(new GIFWorker());
 
 export const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
@@ -57,36 +59,27 @@ class GIFTexture extends THREE.Texture {
 
 async function createGIFTexture(url) {
   return new Promise((resolve, reject) => {
-    // TODO: pool workers
-    const worker = new GIFWorker();
-    worker.onmessage = e => {
-      const [success, frames, delays, disposals] = e.data;
-      if (!success) {
-        reject(`error loading gif: ${e.data[1]}`);
-        return;
-      }
-
-      let loadCnt = 0;
-      for (let i = 0; i < frames.length; i++) {
-        const img = new Image();
-        img.onload = e => {
-          loadCnt++;
-          frames[i] = e.target;
-          if (loadCnt === frames.length) {
-            const texture = new GIFTexture(frames, delays, disposals);
-            texture.image.src = url;
-            texture.encoding = THREE.sRGBEncoding;
-            texture.minFilter = THREE.LinearFilter;
-            resolve(texture);
-          }
-        };
-        img.src = frames[i];
-      }
-    };
     fetch(url, { mode: "cors" })
       .then(r => r.arrayBuffer())
-      .then(rawImageData => {
-        worker.postMessage(rawImageData, [rawImageData]);
+      .then(rawImageData => parseGIF(rawImageData, [rawImageData]))
+      .then(result => {
+        const { frames, delayTimes, disposals } = result;
+        let loadCnt = 0;
+        for (let i = 0; i < frames.length; i++) {
+          const img = new Image();
+          img.onload = e => {
+            loadCnt++;
+            frames[i] = e.target;
+            if (loadCnt === frames.length) {
+              const texture = new GIFTexture(frames, delayTimes, disposals);
+              texture.image.src = url;
+              texture.encoding = THREE.sRGBEncoding;
+              texture.minFilter = THREE.LinearFilter;
+              resolve(texture);
+            }
+          };
+          img.src = frames[i];
+        }
       })
       .catch(reject);
   });
@@ -331,6 +324,7 @@ AFRAME.registerComponent("media-video", {
   init() {
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
     this.tryUpdateVideoPlaybackState = this.tryUpdateVideoPlaybackState.bind(this);
+    this.updateSrc = this.updateSrc.bind(this);
 
     this.seekForward = this.seekForward.bind(this);
     this.seekBack = this.seekBack.bind(this);
@@ -533,11 +527,15 @@ AFRAME.registerComponent("media-video", {
   },
 
   async update(oldData) {
-    const { src } = this.data;
-
+    const src = this.data.src;
     this.updatePlaybackState();
 
     if (!src || src === oldData.src) return;
+    return this.updateSrc(oldData);
+  },
+
+  async updateSrc(oldData) {
+    const { src } = this.data;
 
     this.cleanUp();
     if (this.mesh && this.mesh.material) {
@@ -641,7 +639,7 @@ AFRAME.registerComponent("media-video", {
       this.videoMutedAt = performance.now();
     }
 
-    this.el.emit("video-loaded");
+    this.el.emit("video-loaded", { projection: projection });
   },
 
   updateHoverMenuBasedOnLiveState() {
@@ -813,6 +811,6 @@ AFRAME.registerComponent("media-image", {
       scaleToAspectRatio(this.el, ratio);
     }
 
-    this.el.emit("image-loaded", { src: this.data.src });
+    this.el.emit("image-loaded", { src: this.data.src, projection: projection });
   }
 });

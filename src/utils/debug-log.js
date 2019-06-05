@@ -5,18 +5,19 @@ const showLog = qsTruthy("debug_log");
 if (showLog) {
   const template = document.createElement("template");
   template.innerHTML = `
-	<style>
-	  #debug-log {
-		position: absolute;
-		top: 13em;
-		background: white;
-		opacity: 0.7;
+    <style>
+      #debug-log {
+        position: absolute;
+        top: 13em;
+        background: white;
+        opacity: 0.7;
+        z-index: 1000;
       }
       #debug-log, #debug-log-input {
-		font-family: monospace;
-		font-size: 11px;
-		width: 100%;
-	  }
+        font-family: monospace;
+        font-size: 11px;
+        width: 100%;
+      }
 
       #debug-log-controls {
         display: flex;
@@ -48,8 +49,8 @@ if (showLog) {
       }
       #debug-log-log .entry.error { background-color: pink; }
       #debug-log-log .entry.warn { background-color: orange; }
-	</style>
-	<div id="debug-log">
+    </style>
+    <div id="debug-log">
         <div id="debug-log-controls">
           <form id="debug-log-eval">
             <input id="debug-log-input" placeholder="&gt;&gt;" autocorrect="off" autocapitalize="none" />
@@ -57,8 +58,8 @@ if (showLog) {
           </form>
           <button id="debug-log-minimize">_</button>
         </div>
-		<div id="debug-log-log"></div>
-	</div>
+        <div id="debug-log-log"></div>
+    </div>
   `;
 
   document.addEventListener("DOMContentLoaded", () => {

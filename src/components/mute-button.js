@@ -17,6 +17,6 @@ AFRAME.registerComponent("mute-button", {
   },
 
   async mute(clientId) {
-    window.APP.hubChannel.mute(clientId);
+    this.el.sceneEl.emit("action_mute_client", { clientId });
   }
 });

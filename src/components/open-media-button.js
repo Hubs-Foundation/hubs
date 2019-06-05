@@ -1,4 +1,4 @@
-import { isHubsSceneUrl, isHubsRoomUrl } from "../utils/media-utils";
+import { isHubsSceneUrl, isHubsRoomUrl, isHubsAvatarUrl } from "../utils/media-utils";
 import { guessContentType } from "../utils/media-utils";
 
 AFRAME.registerComponent("open-media-button", {
@@ -6,25 +6,28 @@ AFRAME.registerComponent("open-media-button", {
     this.label = this.el.querySelector("[text]");
 
     this.updateSrc = () => {
-      this.src = this.targetEl.components["media-loader"].data.src;
+      const src = (this.src = this.targetEl.components["media-loader"].data.src);
+      const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
+      this.el.object3D.visible = !!visible;
 
-      if (guessContentType(this.src) === "video/vnd.hubs-webrtc") {
-        this.el.object3D.visible = false;
+      if (visible) {
+        let label = "open link";
+        if (isHubsAvatarUrl(src)) {
+          label = "use avatar";
+        } else if (isHubsSceneUrl(src)) {
+          label = "use scene";
+        } else if (isHubsRoomUrl(src)) {
+          label = "visit room";
+        }
+        this.label.setAttribute("text", "value", label);
       }
-
-      let label = "open link";
-
-      if (isHubsSceneUrl(this.src)) {
-        label = "use scene";
-      } else if (isHubsRoomUrl(this.src)) {
-        label = "visit room";
-      }
-
-      this.label.setAttribute("text", "value", label);
     };
 
     this.onClick = () => {
-      if (isHubsSceneUrl(this.src)) {
+      if (isHubsAvatarUrl(this.src)) {
+        const avatarId = new URL(this.src).pathname.split("/").pop();
+        window.APP.store.update({ profile: { avatarId } });
+      } else if (isHubsSceneUrl(this.src)) {
         this.el.sceneEl.emit("scene_media_selected", this.src);
       } else if (isHubsRoomUrl(this.src)) {
         location.href = this.src;

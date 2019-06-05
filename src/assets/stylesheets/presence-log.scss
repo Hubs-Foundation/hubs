@@ -61,6 +61,11 @@
       font-weight: bold;
     }
 
+    :local(.message-source-link) {
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
     a {
       color: $action-color;
     }
@@ -83,7 +88,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      align-self: flex-start;
       cursor: pointer;
       margin-right: 6px;
       border-radius: 12px;
@@ -210,6 +214,11 @@
     font-size: 0.7em;
     white-space: nowrap;
     color: $light-text;
+  }
+
+  :local(.message-source-link) {
+    cursor: pointer;
+    text-decoration: underline;
   }
 }
 

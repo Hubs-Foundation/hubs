@@ -56,8 +56,9 @@ export class OculusTouchControllerDevice {
   }
 
   write(frame) {
+    if (!this.gamepad) return;
     this.gamepad = navigator.getGamepads()[this.gamepad.index];
-    if (!this.gamepad.connected) return;
+    if (!this.gamepad || !this.gamepad.connected) return;
 
     this.buttonMap.forEach(b => {
       const path = this.path.button(b.name);
@@ -66,8 +67,10 @@ export class OculusTouchControllerDevice {
       frame.setValueType(path.touched, !!button.touched);
       frame.setValueType(path.value, button.value);
     });
+    frame.setValueType(this.path.axesSum, 0);
     this.axisMap.forEach(axis => {
       frame.setValueType(this.path.axis(axis.name), this.gamepad.axes[axis.axisId]);
+      frame.setValueType(this.path.axesSum, frame.get(this.path.axesSum) + Math.abs(this.gamepad.axes[axis.axisId]));
     });
 
     this.rayObject = this.rayObject || document.querySelector(this.selector).object3D;

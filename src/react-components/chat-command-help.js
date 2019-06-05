@@ -18,6 +18,7 @@ export default class ChatCommandHelp extends Component {
       "shrink",
       "duck",
       "debug",
+      "vrstats",
       "scene <scene url>",
       "rename <new name>",
       "capture [stop]"

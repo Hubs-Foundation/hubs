@@ -6,14 +6,14 @@ import {
   injectCustomShaderChunks,
   isHubsRoomUrl,
   isHubsSceneUrl,
-  generateMeshBVH
+  isHubsAvatarUrl
 } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
 
-const anime = require("animejs");
+import anime from "animejs";
 
 const SHAPE = require("aframe-physics-system/src/constants").SHAPE;
 
@@ -54,6 +54,10 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
+
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.networkedEl = networkedEl;
+    });
   },
 
   updateScale: (function() {
@@ -125,7 +129,7 @@ AFRAME.registerComponent("media-loader", {
       this.loadingClip.play();
       this.loadingScaleClip.play();
     }
-    if (this.el.sceneEl.is("entered")) {
+    if (this.el.sceneEl.is("entered") && (!this.networkedEl || NAF.utils.isMine(this.networkedEl))) {
       this.loadingSoundNode = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundLooped(
         SOUND_MEDIA_LOADING
       );
@@ -164,7 +168,7 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
-  onMediaLoaded(isModel = false) {
+  onMediaLoaded(physicsShape = null) {
     const el = this.el;
     this.clearLoadingTimeout();
 
@@ -172,16 +176,10 @@ AFRAME.registerComponent("media-loader", {
       this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_MEDIA_LOADED);
     }
 
-    if (!el.components["animation-mixer"]) {
-      generateMeshBVH(el.object3D);
-    }
-
     const finish = () => {
-      if (isModel) {
-        el.setAttribute("ammo-shape", { type: SHAPE.HULL });
-      } else {
+      if (physicsShape) {
         el.setAttribute("ammo-shape", {
-          type: SHAPE.BOX,
+          type: physicsShape,
           minHalfExtent: 0.04
         });
       }
@@ -196,7 +194,12 @@ AFRAME.registerComponent("media-loader", {
     };
 
     if (this.data.animate) {
-      this.addMeshScaleAnimation(this.el.getObject3D("mesh"), { x: 0.001, y: 0.001, z: 0.001 }, finish);
+      const mesh = this.el.getObject3D("mesh");
+      const scale = { x: 0.001, y: 0.001, z: 0.001 };
+      scale.x = mesh.scale.x < scale.x ? mesh.scale.x * 0.001 : scale.x;
+      scale.y = mesh.scale.y < scale.y ? mesh.scale.x * 0.001 : scale.y;
+      scale.z = mesh.scale.z < scale.z ? mesh.scale.x * 0.001 : scale.z;
+      this.addMeshScaleAnimation(mesh, scale, finish);
     } else {
       finish();
     }
@@ -218,9 +221,9 @@ AFRAME.registerComponent("media-loader", {
         return function(anim) {
           const value = anim.animatables[0].target;
 
-          value.x = Math.max(0.0001, value.x);
-          value.y = Math.max(0.0001, value.y);
-          value.z = Math.max(0.0001, value.z);
+          value.x = Math.max(Number.MIN_VALUE, value.x);
+          value.y = Math.max(Number.MIN_VALUE, value.y);
+          value.z = Math.max(Number.MIN_VALUE, value.z);
 
           // For animation timeline.
           if (value.x === lastValue.x && value.y === lastValue.y && value.z === lastValue.z) {
@@ -257,6 +260,7 @@ AFRAME.registerComponent("media-loader", {
       let canonicalUrl = src;
       let accessibleUrl = src;
       let contentType = this.data.contentType;
+      let thumbnail;
 
       if (this.data.resolve) {
         const result = await resolveUrl(src);
@@ -266,6 +270,7 @@ AFRAME.registerComponent("media-loader", {
           canonicalUrl = location.protocol + canonicalUrl;
         }
         contentType = (result.meta && result.meta.expected_content_type) || contentType;
+        thumbnail = result.meta && result.meta.thumbnail && proxiedUrlFor(result.meta.thumbnail);
       }
 
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
@@ -291,7 +296,14 @@ AFRAME.registerComponent("media-loader", {
         const startTime = hashTime || qsTime || 0;
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-image");
-        this.el.addEventListener("video-loaded", () => this.onMediaLoaded(), { once: true });
+        this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
+        this.el.addEventListener(
+          "video-loaded",
+          e => {
+            this.onMediaLoaded(e.detail.projection === "flat" ? SHAPE.BOX : null);
+          },
+          { once: true }
+        );
         this.el.setAttribute(
           "media-video",
           Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, time: startTime, contentType })
@@ -305,19 +317,12 @@ AFRAME.registerComponent("media-loader", {
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(
           "image-loaded",
-          () => {
-            const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
-
-            if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
-              this.el.setAttribute("hover-menu__hubs-item", {
-                template: "#hubs-destination-hover-menu",
-                dirs: ["forward", "back"]
-              });
-            }
-            this.onMediaLoaded();
+          e => {
+            this.onMediaLoaded(e.detail.projection === "flat" ? SHAPE.BOX : null);
           },
           { once: true }
         );
+        this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
         this.el.setAttribute(
           "media-image",
           Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, contentType })
@@ -333,8 +338,9 @@ AFRAME.registerComponent("media-loader", {
         // 1. we pass the canonical URL to the pager so it can easily make subresource URLs
         // 2. we don't remove the media-image component -- media-pager uses that internally
         this.el.setAttribute("media-pager", Object.assign({}, this.data.mediaOptions, { src: canonicalUrl }));
+        this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
         this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
-        this.el.addEventListener("preview-loaded", () => this.onMediaLoaded(), { once: true });
+        this.el.addEventListener("preview-loaded", () => this.onMediaLoaded(SHAPE.BOX), { once: true });
 
         if (this.el.components["position-at-box-shape-border__freeze"]) {
           this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
@@ -351,7 +357,7 @@ AFRAME.registerComponent("media-loader", {
           "model-loaded",
           () => {
             this.updateScale(this.data.resize);
-            this.onMediaLoaded(true);
+            this.onMediaLoaded(SHAPE.HULL);
             addAnimationComponents(this.el);
           },
           { once: true }
@@ -366,6 +372,40 @@ AFRAME.registerComponent("media-loader", {
             modelToWorldScale: this.data.resize ? 0.0001 : 1.0
           })
         );
+      } else if (contentType.startsWith("text/html")) {
+        this.el.removeAttribute("gltf-model-plus");
+        this.el.removeAttribute("media-video");
+        this.el.removeAttribute("media-pager");
+        this.el.addEventListener(
+          "image-loaded",
+          () => {
+            const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
+
+            if (isHubsAvatarUrl(src)) {
+              this.el.setAttribute("hover-menu__hubs-item", {
+                template: "#avatar-link-hover-menu",
+                dirs: ["forward", "back"]
+              });
+            } else if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
+              this.el.setAttribute("hover-menu__hubs-item", {
+                template: "#hubs-destination-hover-menu",
+                dirs: ["forward", "back"]
+              });
+            } else {
+              this.el.setAttribute("hover-menu__link", { template: "#link-hover-menu", dirs: ["forward", "back"] });
+            }
+            this.onMediaLoaded(SHAPE.BOX);
+          },
+          { once: true }
+        );
+        this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
+        this.el.setAttribute(
+          "media-image",
+          Object.assign({}, this.data.mediaOptions, { src: thumbnail, contentType: "image/png" })
+        );
+        if (this.el.components["position-at-box-shape-border__freeze"]) {
+          this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
+        }
       } else {
         throw new Error(`Unsupported content type: ${contentType}`);
       }

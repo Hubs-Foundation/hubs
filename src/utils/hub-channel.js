@@ -1,6 +1,7 @@
 import jwtDecode from "jwt-decode";
 import { EventTarget } from "event-target-shim";
 import { Presence } from "phoenix";
+import { migrateChannelToSocket } from "./phoenix-utils";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
@@ -13,20 +14,60 @@ function isSameDay(da, db) {
   return isSameMonth(da, db) && da.getDate() == db.getDate();
 }
 
+// Permissions that will be assumed if the user becomes the creator.
+const HUB_CREATOR_PERMISSIONS = ["update_hub", "close_hub", "mute_users", "kick_users"];
+
 export default class HubChannel extends EventTarget {
-  constructor(store) {
+  constructor(store, hubId) {
     super();
     this.store = store;
+    this.hubId = hubId;
     this._signedIn = !!this.store.state.credentials.token;
     this._permissions = {};
+    this._blockedSessionIds = new Set();
   }
 
   get signedIn() {
     return this._signedIn;
   }
 
-  get permissions() {
-    return this._permissions;
+  // Returns true if this current session has the given permission.
+  can(permission) {
+    return this._permissions && this._permissions[permission];
+  }
+
+  // Returns true if the current session has the given permission, *or* will get the permission
+  // if they sign in and become the creator.
+  canOrWillIfCreator(permission) {
+    if (this._getCreatorAssignmentToken() && HUB_CREATOR_PERMISSIONS.includes(permission)) return true;
+    return this.can(permission);
+  }
+
+  // Migrates this hub channel to a new phoenix channel and presence
+  async migrateToSocket(socket, params) {
+    let presenceBindings;
+
+    // Unbind presence, and then set up bindings after reconnect
+    if (this.presence) {
+      presenceBindings = {
+        onJoin: this.presence.caller.onJoin,
+        onLeave: this.presence.caller.onLeave,
+        onSync: this.presence.caller.onSync
+      };
+
+      this.presence.onJoin(function() {});
+      this.presence.onLeave(function() {});
+      this.presence.onSync(function() {});
+    }
+
+    this.channel = await migrateChannelToSocket(this.channel, socket, params);
+    this.presence = new Presence(this.channel);
+
+    if (presenceBindings) {
+      this.presence.onJoin(presenceBindings.onJoin);
+      this.presence.onLeave(presenceBindings.onLeave);
+      this.presence.onSync(presenceBindings.onSync);
+    }
   }
 
   setPhoenixChannel = channel => {
@@ -37,6 +78,7 @@ export default class HubChannel extends EventTarget {
   setPermissionsFromToken = token => {
     // Note: token is not verified.
     this._permissions = jwtDecode(token);
+    this.dispatchEvent(new CustomEvent("permissions_updated"));
 
     // Refresh the token 1 minute before it expires.
     const nextRefresh = new Date(this._permissions.exp * 1000 - 60 * 1000) - new Date();
@@ -129,6 +171,11 @@ export default class HubChannel extends EventTarget {
     this.channel.push("update_hub", { name });
   };
 
+  closeHub = () => {
+    if (!this._permissions.close_hub) return "unauthorized";
+    this.channel.push("close_hub", {});
+  };
+
   subscribe = subscription => {
     this.channel.push("subscribe", { subscription });
   };
@@ -142,10 +189,20 @@ export default class HubChannel extends EventTarget {
     this.channel.push("message", { body, type });
   };
 
+  _getCreatorAssignmentToken = () => {
+    const creatorAssignmentTokenEntry =
+      this.store.state.creatorAssignmentTokens &&
+      this.store.state.creatorAssignmentTokens.find(t => t.hubId === this.hubId);
+
+    return creatorAssignmentTokenEntry && creatorAssignmentTokenEntry.creatorAssignmentToken;
+  };
+
   signIn = token => {
     return new Promise((resolve, reject) => {
+      const creator_assignment_token = this._getCreatorAssignmentToken();
+
       this.channel
-        .push("sign_in", { token })
+        .push("sign_in", { token, creator_assignment_token })
         .receive("ok", ({ perms_token }) => {
           this.setPermissionsFromToken(perms_token);
           this._signedIn = true;
@@ -171,6 +228,7 @@ export default class HubChannel extends EventTarget {
         .receive("ok", () => {
           this._permissions = {};
           this._signedIn = false;
+          this.dispatchEvent(new CustomEvent("permissions_updated"));
           resolve();
         })
         .receive("error", reject);
@@ -227,7 +285,23 @@ export default class HubChannel extends EventTarget {
     this.channel.push("mute", { session_id: sessionId });
   };
 
-  kick = sessionId => {
+  hide = sessionId => {
+    NAF.connection.adapter.block(sessionId);
+    this._blockedSessionIds.add(sessionId);
+  };
+
+  unhide = sessionId => {
+    if (!this._blockedSessionIds.has(sessionId)) return;
+    NAF.connection.adapter.unblock(sessionId);
+    NAF.connection.entities.completeSync(sessionId);
+    this._blockedSessionIds.delete(sessionId);
+  };
+
+  isHidden = sessionId => this._blockedSessionIds.has(sessionId);
+
+  kick = async sessionId => {
+    const permsToken = await this.fetchPermissions();
+    NAF.connection.adapter.kick(sessionId, permsToken);
     this.channel.push("kick", { session_id: sessionId });
   };
 
