@@ -41,7 +41,7 @@ export default class MessageDispatch {
     const curScale = playerRig.object3D.scale;
     let err;
     let physicsSystem;
-    const { captureSystem } = this.scene.systems["hubs-systems"];
+    const captureSystem = this.scene.systems["capture-system"];
 
     switch (command) {
       case "fly":
@@ -110,12 +110,20 @@ export default class MessageDispatch {
         }
         break;
       case "capture":
-        if (args[0] === "stop" || captureSystem.started) {
+        if (!captureSystem.available()) {
+          this.log("Capture unavailable.");
+          break;
+        }
+        if (args[0] === "stop") {
           captureSystem.stop();
           this.log("Capture stopped.");
         } else {
-          captureSystem.start();
-          this.log("Capture started.");
+          if (captureSystem.started()) {
+            this.log("Capture already running.");
+          } else {
+            captureSystem.start();
+            this.log("Capture started.");
+          }
         }
         break;
     }

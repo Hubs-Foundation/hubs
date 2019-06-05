@@ -1,64 +1,73 @@
-export class CaptureSystem {
-  constructor(scene) {
-    this.scene = scene;
+AFRAME.registerSystem("capture-system", {
+  init() {
+    this._gotAudioTrack = false;
+    this._recorderTimeout = null;
+    this._initRecorder();
+  },
 
-    this.gotAudioTrack = false;
-    this.stream = new MediaStream();
+  _initRecorder() {
+    if (!this.available()) return;
+    this._stream = new MediaStream();
 
-    this.scene.addEventListener("loaded", () => {
-      const video = this.scene.canvas.captureStream().getVideoTracks()[0];
-      this.stream.addTrack(video);
+    const video = this.el.canvas.captureStream().getVideoTracks()[0];
+    this._stream.addTrack(video);
 
-      this.recorder = new MediaRecorder(this.stream);
+    this._recorder = new MediaRecorder(this._stream, { mimeType: "video/webm; codecs=vp8" });
 
-      this.chunks = [];
+    const chunks = [];
 
-      this.recorder.ondataavailable = e => {
-        this.chunks.push(e.data);
-      };
-      this.recorder.onstop = () => {
-        if (this.chunks.length === 0) return;
-        const mimeType = this.chunks[0].type;
-        const blob = new Blob(this.chunks, { type: mimeType });
-        this.chunks.length = 0;
-        this.scene.emit("add_media", new File([blob], "capture", { type: mimeType }));
-      };
-    });
-  }
-  get started() {
-    return this.recorder.state !== "inactive";
-  }
+    this._recorder.ondataavailable = e => {
+      chunks.push(e.data);
+    };
+    this._recorder.onstop = () => {
+      if (chunks.length === 0) return;
+      const mimeType = chunks[0].type;
+      const blob = new Blob(chunks, { type: mimeType });
+      chunks.length = 0;
+      this.el.emit("add_media", new File([blob], "capture", { type: mimeType }));
+    };
+  },
+
+  available() {
+    return window.MediaRecorder && MediaRecorder.isTypeSupported("video/webm; codecs=vp8");
+  },
+
+  started() {
+    return this._recorder && this._recorder.state !== "inactive";
+  },
 
   // The scene doesn't get an audioListener until something in the scene is playing audio.
   // So we have to get the audio track lazily.
-  tryAddingAudioTrack() {
-    if (this.gotAudioTrack || !this.scene.audioListener) return;
+  _tryAddingAudioTrack() {
+    if (this._gotAudioTrack || !this.el.audioListener) return;
 
-    const listener = this.scene.audioListener;
+    const listener = this.el.audioListener;
     const destination = listener.context.createMediaStreamDestination();
     listener.getInput().connect(destination);
     const audio = destination.stream.getAudioTracks()[0];
 
-    this.stream.addTrack(audio);
-    this.gotAudioTrack = true;
-  }
+    this._stream.addTrack(audio);
+    this._gotAudioTrack = true;
+  },
 
   start() {
-    this.tryAddingAudioTrack();
+    this._tryAddingAudioTrack();
 
-    if (!this.started) {
-      this.recorder.start();
+    if (!this.started()) {
+      this._recorder.start();
     }
 
-    setTimeout(() => {
-      if (this.started) {
-        this.recorder.stop();
+    this._recorderTimeout = setTimeout(() => {
+      if (this.started()) {
+        this._recorder.stop();
       }
     }, 15000);
-  }
+  },
+
   stop() {
-    if (this.started) {
-      this.recorder.stop();
+    if (this.started()) {
+      clearTimeout(this._recorderTimeout);
+      this._recorder.stop();
     }
   }
-}
+});
