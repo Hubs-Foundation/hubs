@@ -1,14 +1,17 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import hubLogo from "../assets/images/hub-preview-white.png";
-import styles from "../assets/stylesheets/embed-treatment.scss";
+import styles from "../assets/stylesheets/preload-overlay.scss";
 import { FormattedMessage } from "react-intl";
 
-export default class EmbedTreatment extends Component {
+const isMobile = AFRAME.utils.device.isMobile();
+
+export default class PreloadOverlay extends Component {
   static propTypes = {
     hubName: PropTypes.string,
     hubScene: PropTypes.object,
-    onEmbedLoadClicked: PropTypes.func
+    baseUrl: PropTypes.string,
+    onPreloadClicked: PropTypes.func
   };
 
   render() {
@@ -22,9 +25,15 @@ export default class EmbedTreatment extends Component {
         </a>
         <div className={styles.mainPanel}>
           <div className={styles.hubName}>{this.props.hubName}</div>
-          <button className={styles.loadButton} onClick={this.props.onEmbedLoadClicked}>
-            <FormattedMessage id="embed.load-button" />
-          </button>
+          {!isMobile ? (
+            <button className={styles.loadButton} onClick={this.props.onPreloadClicked}>
+              <FormattedMessage id="embed.load-button" />
+            </button>
+          ) : (
+            <a href={this.props.baseUrl} target="_blank" className={styles.loadButton} rel="noreferrer noopener">
+              <FormattedMessage id="embed.load-button" />
+            </a>
+          )}
         </div>
       </div>
     );

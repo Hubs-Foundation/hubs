@@ -147,6 +147,8 @@ const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
+const isEmbed = window.self !== window.top;
+const embedToken = qs.get("embed_token");
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
@@ -375,7 +377,7 @@ async function updateEnvironmentForHub(hub) {
   }
 }
 
-async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, embed, data) {
+async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
   const isRejoin = NAF.connection.isConnected();
 
@@ -390,6 +392,12 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     // Send complete sync on phoenix re-join.
     NAF.connection.entities.completeSync(null, true);
     return;
+  }
+
+  // Turn off NAF for embeds as an optimization, so the user's browser isn't getting slammed
+  // with NAF traffic on load.
+  if (isEmbed) {
+    hubChannel.allowNAFTraffic(false);
   }
 
   const hub = data.hubs[0];
@@ -514,16 +522,23 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
     updateUIForHub(hub);
 
-    if (!embed) {
+    if (!isEmbed) {
       loadEnvironmentAndConnect();
     } else {
-      remountUI({
-        embed: true,
-        onEmbedLoadClicked: () => {
-          remountUI({ embed: false });
-          loadEnvironmentAndConnect();
-        }
-      });
+      if (embedToken) {
+        remountUI({
+          showPreload: true,
+          embed: true,
+          onPreloadClicked: () => {
+            hubChannel.allowNAFTraffic(true);
+            remountUI({ showPreload: false });
+            loadEnvironmentAndConnect();
+          }
+        });
+      } else {
+        remountUI({ roomUnavailableReason: "denied" });
+        entryManager.exitScene();
+      }
     }
   };
 
@@ -1118,7 +1133,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         initialIsSubscribed: subscriptions.isSubscribed()
       });
 
-      await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, true, data);
+      await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
     })
     .receive("error", res => {
       if (res.reason === "closed") {

@@ -62,6 +62,7 @@
     "entry.enable-screen-sharing": "Share my desktop",
     "entry.return-to-vr": "Return to VR",
     "entry.enter-in-vr": "Enter in VR",
+    "entry.open-in-window": "Open in Tab",
     "entry.lobby": "Lobby",
     "entry.back": "Back",
     "entry.notify_me": "Notify me when others arrive",

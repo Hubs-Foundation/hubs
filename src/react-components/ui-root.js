@@ -55,7 +55,7 @@ import OutputLevelWidget from "./output-level-widget.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import SettingsMenu from "./settings-menu.js";
-import EmbedTreatment from "./embed-treatment.js";
+import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
@@ -151,8 +151,9 @@ class UIRoot extends Component {
     onInterstitialPromptClicked: PropTypes.func,
     performConditionalSignIn: PropTypes.func,
     hide: PropTypes.bool,
-    embed: PropTypes.bool,
-    onEmbedLoadClicked: PropTypes.func
+    showPreload: PropTypes.bool,
+    onPreloadClicked: PropTypes.func,
+    embed: PropTypes.bool
   };
 
   state = {
@@ -1201,10 +1202,10 @@ class UIRoot extends Component {
     if (this.props.hide || this.state.hide) return <div />;
 
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
-    const embed = this.props.embed;
+    const preload = this.props.showPreload;
 
     const isLoading =
-      !embed &&
+      !preload &&
       ((!this.state.hideLoader || !this.state.didConnectToNetworkedScene) &&
         !(this.props.showSafariMicDialog || this.props.showSafariDialog));
 
@@ -1230,14 +1231,16 @@ class UIRoot extends Component {
     if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();
     if (this.props.isBotMode) return this.renderBotMode();
 
+    const embed = this.props.embed;
     const entered = this.state.entered;
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
-    const enteredOrWatchingOrEmbed = entered || watching || embed;
+    const enteredOrWatchingOrPreload = entered || watching || preload;
+    const baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
 
     const entryDialog =
       this.props.availableVREntryTypes &&
-      !embed &&
+      !preload &&
       (this.isWaitingForAutoExit() ? (
         <AutoExitWarning
           secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
@@ -1289,8 +1292,9 @@ class UIRoot extends Component {
       !showVREntryButton &&
       !hasTopTip &&
       !entered &&
-      !embed &&
+      !preload &&
       !watching &&
+      !embed &&
       !hasTopTip &&
       !this.props.store.state.activity.hasOpenedShare &&
       this.occupantCount() <= 1;
@@ -1299,7 +1303,9 @@ class UIRoot extends Component {
       !showVREntryButton &&
       !entered &&
       !embed &&
+      !preload &&
       !watching &&
+      !embed &&
       !showInviteTip &&
       !this.state.showShareDialog &&
       this.props.hubChannel.canOrWillIfCreator("update_hub");
@@ -1314,11 +1320,12 @@ class UIRoot extends Component {
           <div className={classNames(rootStyles)}>
             {this.state.dialog}
 
-            {embed && (
-              <EmbedTreatment
+            {preload && (
+              <PreloadOverlay
                 hubName={this.props.hubName}
                 hubScene={this.props.hubScene}
-                onEmbedLoadClicked={this.props.onEmbedLoadClicked}
+                baseUrl={baseUrl}
+                onPreloadClicked={this.props.onPreloadClicked}
               />
             )}
 
@@ -1479,7 +1486,7 @@ class UIRoot extends Component {
               </div>
             )}
 
-            {enteredOrWatchingOrEmbed && (
+            {enteredOrWatchingOrPreload && (
               <PresenceLog
                 inRoom={true}
                 entries={presenceLogEntries}
@@ -1519,7 +1526,7 @@ class UIRoot extends Component {
                   )}
                 </div>
               )}
-            {enteredOrWatchingOrEmbed &&
+            {enteredOrWatchingOrPreload &&
               showDiscordTip && (
                 <div className={styles.bottomTip}>
                   <button className={styles.tipCancel} onClick={() => this.confirmDiscordBridge()}>
@@ -1532,7 +1539,7 @@ class UIRoot extends Component {
                   </div>
                 </div>
               )}
-            {enteredOrWatchingOrEmbed && (
+            {enteredOrWatchingOrPreload && (
               <InWorldChatBox
                 discordBridges={discordBridges}
                 onSendMessage={this.sendMessage}
@@ -1549,7 +1556,7 @@ class UIRoot extends Component {
 
             {!this.state.frozen &&
               !watching &&
-              !embed && (
+              !preload && (
                 <div
                   className={classNames({
                     [inviteStyles.inviteContainer]: true,
@@ -1557,7 +1564,8 @@ class UIRoot extends Component {
                     [inviteStyles.inviteContainerInverted]: this.state.showShareDialog
                   })}
                 >
-                  {!showVREntryButton &&
+                  {!embed &&
+                    !showVREntryButton &&
                     !hasTopTip && (
                       <WithHoverSound>
                         <button
@@ -1596,6 +1604,7 @@ class UIRoot extends Component {
                     </div>
                   )}
                   {!showVREntryButton &&
+                    !embed &&
                     this.occupantCount() > 1 &&
                     !hasTopTip &&
                     entered && (
@@ -1617,6 +1626,11 @@ class UIRoot extends Component {
                         <FormattedMessage id="entry.enter-in-vr" />
                       </button>
                     </WithHoverSound>
+                  )}
+                  {embed && (
+                    <a href={baseUrl} className={inviteStyles.enterButton} target="_blank" rel="noopener noreferrer">
+                      <FormattedMessage id="entry.open-in-window" />
+                    </a>
                   )}
                   {this.state.showShareDialog && (
                     <InviteDialog
@@ -1668,7 +1682,7 @@ class UIRoot extends Component {
               )}
             />
 
-            {!embed && (
+            {!preload && (
               <div
                 onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
                 className={classNames({
