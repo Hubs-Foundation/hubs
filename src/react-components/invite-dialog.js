@@ -117,8 +117,25 @@ export default class InviteDialog extends Component {
               <FormattedMessage id={`invite.embed`} />
             </div>
             <div className={styles.embedText}>
-              <input type="text" readOnly onFocus={e => e.target.select()} value={embedText} />
+              <input
+                type="text"
+                readOnly
+                onFocus={e => {
+                  e.target.select();
+                  this.setState({ showEmbedTip: true });
+                }}
+                onBlur={() => this.setState({ showEmbedTip: false })}
+                value={embedText}
+              />
             </div>
+            {this.state.showEmbedTip && (
+              <div className={styles.embedTipWrap}>
+                <div className={styles.embedTip}>
+                  <div className={styles.embedTipAttachPoint} />
+                  <FormattedMessage id="invite.embed-tip" />
+                </div>
+              </div>
+            )}
           </div>
         )}
         {this.props.hasPush && (

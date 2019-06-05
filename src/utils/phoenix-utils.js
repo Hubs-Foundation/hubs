@@ -165,11 +165,14 @@ export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace
   const creatorAssignmentToken = hub.creator_assignment_token;
   if (creatorAssignmentToken) {
     store.update({ creatorAssignmentTokens: [{ hubId: hub.hub_id, creatorAssignmentToken: creatorAssignmentToken }] });
-  }
 
-  const embedToken = hub.embed_token;
-  if (embedToken) {
-    store.update({ embedTokens: [{ hubId: hub.hub_id, embedToken: embedToken }] });
+    // Don't need to store the embed token if there's no creator assignment token, since that means
+    // we are the owner and will get the embed token on page load.
+    const embedToken = hub.embed_token;
+
+    if (embedToken) {
+      store.update({ embedTokens: [{ hubId: hub.hub_id, embedToken: embedToken }] });
+    }
   }
 
   if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {

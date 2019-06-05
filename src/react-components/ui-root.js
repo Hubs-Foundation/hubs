@@ -1637,7 +1637,9 @@ class UIRoot extends Component {
                       allowShare={!isMobileVR}
                       entryCode={this.props.hubEntryCode}
                       embedUrl={
-                        this.props.embedToken && !isMobilePhoneOrVR ? `${baseUrl}?embed_token=${this.props.embedToken}` : null
+                        this.props.embedToken && !isMobilePhoneOrVR
+                          ? `${baseUrl}?embed_token=${this.props.embedToken}`
+                          : null
                       }
                       hasPush={hasPush}
                       isSubscribed={
