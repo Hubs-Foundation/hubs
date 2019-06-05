@@ -543,7 +543,6 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
       loadEnvironmentAndConnect();
     } else {
       remountUI({
-        showPreload: true,
         onPreloadClicked: () => {
           hubChannel.allowNAFTraffic(true);
           remountUI({ showPreload: false });
@@ -687,7 +686,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   });
 
-  remountUI({ performConditionalSignIn, embed: isEmbed });
+  remountUI({ performConditionalSignIn, embed: isEmbed, showPreload: isEmbed });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();
 

@@ -18,22 +18,23 @@ export default class PreloadOverlay extends Component {
     return (
       <div className={styles.treatment}>
         <div className={styles.screenshot}>
-          <img className={styles.screenshot} src={this.props.hubScene.screenshot_url} />
+          {this.props.hubScene && <img className={styles.screenshot} src={this.props.hubScene.screenshot_url} />}
         </div>
         <a href="/" target="_blank" rel="noopener noreferrer" className={styles.logo}>
           <img src={hubLogo} />
         </a>
         <div className={styles.mainPanel}>
           <div className={styles.hubName}>{this.props.hubName}</div>
-          {!isMobile ? (
-            <button className={styles.loadButton} onClick={this.props.onPreloadClicked}>
-              <FormattedMessage id="embed.load-button" />
-            </button>
-          ) : (
-            <a href={this.props.baseUrl} target="_blank" className={styles.loadButton} rel="noreferrer noopener">
-              <FormattedMessage id="embed.load-button" />
-            </a>
-          )}
+          {this.props.onPreloadClicked &&
+            (!isMobile ? (
+              <button className={styles.loadButton} onClick={this.props.onPreloadClicked}>
+                <FormattedMessage id="embed.load-button" />
+              </button>
+            ) : (
+              <a href={this.props.baseUrl} target="_blank" className={styles.loadButton} rel="noreferrer noopener">
+                <FormattedMessage id="embed.load-button" />
+              </a>
+            ))}
         </div>
       </div>
     );

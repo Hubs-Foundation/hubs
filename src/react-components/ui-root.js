@@ -1306,7 +1306,8 @@ class UIRoot extends Component {
     const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
     const hasEmbedPresence = this.hasEmbedPresence();
     const hasDiscordBridges = discordBridges.length > 0;
-    const showBroadcastTip = (hasDiscordBridges || hasEmbedPresence) && !this.state.broadcastTipDismissed;
+    const showBroadcastTip =
+      (hasDiscordBridges || (hasEmbedPresence && !this.props.embed)) && !this.state.broadcastTipDismissed;
     const showInviteTip =
       !showVREntryButton &&
       !hasTopTip &&
