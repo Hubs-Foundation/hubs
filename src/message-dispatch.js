@@ -115,8 +115,12 @@ export default class MessageDispatch {
           break;
         }
         if (args[0] === "stop") {
-          captureSystem.stop();
-          this.log("Capture stopped.");
+          if (captureSystem.started()) {
+            captureSystem.stop();
+            this.log("Capture stopped.");
+          } else {
+            this.log("Capture already stopped.");
+          }
         } else {
           if (captureSystem.started()) {
             this.log("Capture already running.");
