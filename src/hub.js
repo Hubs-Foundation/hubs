@@ -408,13 +408,13 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
   const hub = data.hubs[0];
 
-  let hubEmbedToken = hub.embed_token;
+  let embedToken = hub.embed_token;
 
-  if (!hubEmbedToken) {
+  if (!embedToken) {
     const embedTokenEntry = store.state.embedTokens && store.state.embedTokens.find(t => t.hubId === hub.hub_id);
 
     if (embedTokenEntry) {
-      hubEmbedToken = embedTokenEntry.embedToken;
+      embedToken = embedTokenEntry.embedToken;
     }
   }
 
@@ -425,7 +425,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
     onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
-    embedToken: embedsEnabled ? hubEmbedToken : null
+    embedToken: embedsEnabled ? embedToken : null
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
