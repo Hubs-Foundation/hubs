@@ -543,7 +543,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
       loadEnvironmentAndConnect();
     } else {
       remountUI({
-        onPreloadClicked: () => {
+        onPreloadLoadClicked: () => {
           hubChannel.allowNAFTraffic(true);
           remountUI({ showPreload: false });
           loadEnvironmentAndConnect();

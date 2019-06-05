@@ -11,7 +11,7 @@ export default class PreloadOverlay extends Component {
     hubName: PropTypes.string,
     hubScene: PropTypes.object,
     baseUrl: PropTypes.string,
-    onPreloadClicked: PropTypes.func
+    onLoadClicked: PropTypes.func
   };
 
   render() {
@@ -25,9 +25,9 @@ export default class PreloadOverlay extends Component {
         </a>
         <div className={styles.mainPanel}>
           <div className={styles.hubName}>{this.props.hubName}</div>
-          {this.props.onPreloadClicked &&
+          {this.props.onLoadClicked &&
             (!isMobile ? (
-              <button className={styles.loadButton} onClick={this.props.onPreloadClicked}>
+              <button className={styles.loadButton} onClick={this.props.onLoadClicked}>
                 <FormattedMessage id="embed.load-button" />
               </button>
             ) : (

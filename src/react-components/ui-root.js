@@ -152,7 +152,7 @@ class UIRoot extends Component {
     performConditionalSignIn: PropTypes.func,
     hide: PropTypes.bool,
     showPreload: PropTypes.bool,
-    onPreloadClicked: PropTypes.func,
+    onPreloadLoadClicked: PropTypes.func,
     embed: PropTypes.bool,
     embedToken: PropTypes.string
   };
@@ -1344,7 +1344,7 @@ class UIRoot extends Component {
                 hubName={this.props.hubName}
                 hubScene={this.props.hubScene}
                 baseUrl={baseUrl}
-                onPreloadClicked={this.props.onPreloadClicked}
+                onLoadClicked={this.props.onPreloadLoadClicked}
               />
             )}
 
