@@ -201,6 +201,31 @@
   }
 }
 
+:local(.embed) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 12px;
+}
+
+:local(.embed-text) {
+  input {
+    @extend %default-font;
+    font-weight: bold;
+    text-decoration: none;
+    color: black;
+    text-align: center;
+    background-color: white;
+    border: 1px solid #e2e2e2;
+    border-radius: 12px;
+    margin: 12px;
+    font-size: 1.2em;
+    padding: 8px;
+    display: block;
+    width: 295px;
+  }
+}
 :local(.close) {
   position: absolute;
   cursor: pointer;
@@ -220,7 +245,7 @@
 }
 
 :local(.subscribe) {
-  margin: 20px 0 6px 0;
+  margin: 10px 0 6px 0;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -25,7 +25,8 @@ export default class InviteDialog extends Component {
     onClose: PropTypes.func,
     hasPush: PropTypes.bool,
     isSubscribed: PropTypes.bool,
-    onSubscribeChanged: PropTypes.func
+    onSubscribeChanged: PropTypes.func,
+    embedUrl: PropTypes.string
   };
 
   state = {
@@ -48,11 +49,12 @@ export default class InviteDialog extends Component {
   };
 
   render() {
-    const { entryCode } = this.props;
+    const { entryCode, embedUrl } = this.props;
 
     const entryCodeString = pad(entryCode, 6);
     const shortLinkText = `hub.link/${this.props.hubId}`;
     const shortLink = "https://" + shortLinkText;
+    const embedText = `<iframe src="${embedUrl}" style="width: 1024px; height: 768px;" allow="microphone; camera; vr; speaker;"></iframe>`;
 
     return (
       <div className={classNames({ [styles.dialog]: true, [styles.modal]: this.props.isModal })}>
@@ -109,6 +111,16 @@ export default class InviteDialog extends Component {
               </WithHoverSound>
             )}
         </div>
+        {embedUrl && (
+          <div className={styles.embed}>
+            <div>
+              <FormattedMessage id={`invite.embed`} />
+            </div>
+            <div className={styles.embedText}>
+              <input type="text" readOnly onFocus={e => e.target.select()} value={embedText} />
+            </div>
+          </div>
+        )}
         {this.props.hasPush && (
           <div className={styles.subscribe}>
             <input

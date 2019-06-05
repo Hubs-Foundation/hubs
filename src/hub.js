@@ -149,6 +149,7 @@ const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isEmbed = window.self !== window.top;
 const embedToken = qs.get("embed_token");
+const embedsEnabled = qs.get("embeds");
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
@@ -402,13 +403,24 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
   const hub = data.hubs[0];
 
+  let hubEmbedToken = hub.embed_token;
+
+  if (!hubEmbedToken) {
+    const embedTokenEntry = store.state.embedTokens && store.state.embedTokens.find(t => t.hubId === hub.hub_id);
+
+    if (embedTokenEntry) {
+      hubEmbedToken = embedTokenEntry.embedToken;
+    }
+  }
+
   console.log(`Janus host: ${hub.host}`);
 
   remountUI({
     onSendMessage: messageDispatch.dispatch,
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
-    onAvatarSaved: entry => scene.emit("action_avatar_saved", entry)
+    onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
+    embedToken: embedsEnabled ? hubEmbedToken : null
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {

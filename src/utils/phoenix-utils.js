@@ -167,6 +167,11 @@ export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace
     store.update({ creatorAssignmentTokens: [{ hubId: hub.hub_id, creatorAssignmentToken: creatorAssignmentToken }] });
   }
 
+  const embedToken = hub.embed_token;
+  if (embedToken) {
+    store.update({ embedTokens: [{ hubId: hub.hub_id, embedToken: embedToken }] });
+  }
+
   if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
     url = `/hub.html?hub_id=${hub.hub_id}`;
   }

@@ -153,7 +153,8 @@ class UIRoot extends Component {
     hide: PropTypes.bool,
     showPreload: PropTypes.bool,
     onPreloadClicked: PropTypes.func,
-    embed: PropTypes.bool
+    embed: PropTypes.bool,
+    embedToken: PropTypes.string
   };
 
   state = {
@@ -1635,6 +1636,9 @@ class UIRoot extends Component {
                     <InviteDialog
                       allowShare={!isMobileVR}
                       entryCode={this.props.hubEntryCode}
+                      embedUrl={
+                        this.props.embedToken && !isMobilePhoneOrVR ? `${baseUrl}?embed_token=${this.props.embedToken}` : null
+                      }
                       hasPush={hasPush}
                       isSubscribed={
                         this.state.isSubscribed === undefined ? this.props.initialIsSubscribed : this.state.isSubscribed
