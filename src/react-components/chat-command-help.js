@@ -20,7 +20,8 @@ export default class ChatCommandHelp extends Component {
       "debug",
       "vrstats",
       "scene <scene url>",
-      "rename <new name>"
+      "rename <new name>",
+      "capture [stop]"
     ];
 
     return (

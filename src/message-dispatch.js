@@ -14,6 +14,10 @@ export default class MessageDispatch {
     this.mediaSearchStore = mediaSearchStore;
   }
 
+  log = body => {
+    this.addToPresenceLog({ type: "log", body });
+  };
+
   dispatch = message => {
     if (message.startsWith("/")) {
       const commandParts = message.substring(1).split(" ");
@@ -37,6 +41,7 @@ export default class MessageDispatch {
     const curScale = playerRig.object3D.scale;
     let err;
     let physicsSystem;
+    const captureSystem = this.scene.systems["capture-system"];
 
     switch (command) {
       case "fly":
@@ -102,6 +107,27 @@ export default class MessageDispatch {
         err = this.hubChannel.rename(args.join(" "));
         if (err === "unauthorized") {
           this.addToPresenceLog({ type: "log", body: "You do not have permission to rename this room." });
+        }
+        break;
+      case "capture":
+        if (!captureSystem.available()) {
+          this.log("Capture unavailable.");
+          break;
+        }
+        if (args[0] === "stop") {
+          if (captureSystem.started()) {
+            captureSystem.stop();
+            this.log("Capture stopped.");
+          } else {
+            this.log("Capture already stopped.");
+          }
+        } else {
+          if (captureSystem.started()) {
+            this.log("Capture already running.");
+          } else {
+            captureSystem.start();
+            this.log("Capture started.");
+          }
         }
         break;
     }
