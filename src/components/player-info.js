@@ -66,7 +66,6 @@ AFRAME.registerComponent("player-info", {
       if (this.communityIdentifier) {
         communityIdentifierEl.setAttribute("text", { value: this.communityIdentifier });
       }
-      communityIdentifierEl.object3D.visible = !!this.communityIdentifier;
     }
   },
   applyProperties() {
