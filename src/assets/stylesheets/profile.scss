@@ -107,9 +107,21 @@
   }
 
   :local(.choose-avatar) {
-    margin-bottom: 0.5em;
-    text-decoration: underline;
-    font-weight: bold;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    a {
+      align-self: flex-end;
+      margin-bottom: 16px;
+      @extend %action-button-secondary;
+    }
   }
 
   :local(.edit-avatar) {
