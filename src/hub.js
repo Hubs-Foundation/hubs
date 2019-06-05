@@ -148,7 +148,11 @@ const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isEmbed = window.self !== window.top;
-const embedToken = qs.get("embed_token");
+if (isEmbed && !qs.get("embed_token")) {
+  // Should be covered by X-Frame-Options, but just in case.
+  throw new Error("no embed token");
+}
+
 const embedsEnabled = qs.get("embeds");
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
@@ -537,20 +541,15 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     if (!isEmbed) {
       loadEnvironmentAndConnect();
     } else {
-      if (embedToken) {
-        remountUI({
-          showPreload: true,
-          embed: true,
-          onPreloadClicked: () => {
-            hubChannel.allowNAFTraffic(true);
-            remountUI({ showPreload: false });
-            loadEnvironmentAndConnect();
-          }
-        });
-      } else {
-        remountUI({ roomUnavailableReason: "denied" });
-        entryManager.exitScene();
-      }
+      remountUI({
+        showPreload: true,
+        embed: true,
+        onPreloadClicked: () => {
+          hubChannel.allowNAFTraffic(true);
+          remountUI({ showPreload: false });
+          loadEnvironmentAndConnect();
+        }
+      });
     }
   };
 
@@ -933,16 +932,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       context: {
         mobile: isMobile || isMobileVR,
         hmd: availableVREntryTypes.isInHMD,
-        embed: !!embedToken
+        embed: isEmbed
       }
     };
 
     if (permsToken) {
       params.perms_token = permsToken;
-    }
-
-    if (embedToken) {
-      params.embed_token = embedToken;
     }
 
     const { token } = store.state.credentials;
