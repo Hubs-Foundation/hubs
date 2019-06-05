@@ -61,7 +61,6 @@ const raycastOnSprite = (function() {
   const mvPosition = new THREE.Vector3();
 
   const alignedPosition = new THREE.Vector2();
-  const rotatedPosition = new THREE.Vector2();
   const viewWorldMatrix = new THREE.Matrix4();
 
   const vA = new THREE.Vector3();
@@ -74,24 +73,16 @@ const raycastOnSprite = (function() {
 
   const CENTER = new THREE.Vector2(0.5, 0.5);
 
-  function transformVertex(vertexPosition, mvPosition, center, scale, sin, cos) {
+  function transformVertex(vertexPosition, mvPosition, center, scale) {
     // compute position in camera space
     alignedPosition
       .subVectors(vertexPosition, center)
       .addScalar(0.5)
       .multiply(scale);
 
-    // to check if rotation is not zero
-    if (sin !== undefined) {
-      rotatedPosition.x = cos * alignedPosition.x - sin * alignedPosition.y;
-      rotatedPosition.y = sin * alignedPosition.x + cos * alignedPosition.y;
-    } else {
-      rotatedPosition.copy(alignedPosition);
-    }
-
     vertexPosition.copy(mvPosition);
-    vertexPosition.x += rotatedPosition.x;
-    vertexPosition.y += rotatedPosition.y;
+    vertexPosition.x += alignedPosition.x;
+    vertexPosition.y += alignedPosition.y;
 
     // transform to world space
     vertexPosition.applyMatrix4(viewWorldMatrix);
