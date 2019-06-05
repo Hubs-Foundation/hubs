@@ -240,11 +240,11 @@ export class SpriteSystem {
     const mvCols = this.mesh.geometry.attributes["mvCol0"].data;
     const aEnableSweepingEffect = this.mesh.geometry.attributes["a_hubs_EnableSweepingEffect"];
     const aSweepParams = this.mesh.geometry.attributes["a_hubs_SweepParams"];
-    aUvs.array.fill(0, 8 * this.spriteComponents.length);
-    aVertices.array.fill(0, 12 * this.spriteComponents.length);
-    mvCols.array.fill(0, 16 * 4 * this.spriteComponents.length);
-    aEnableSweepingEffect.array.fill(0, 4 * this.spriteComponents.length);
-    aSweepParams.array.fill(0, 2 * 4 * this.spriteComponents.length);
+    aUvs.array.fill(0, 2 * 4 * l);
+    aVertices.array.fill(0, 3 * 4 * l);
+    mvCols.array.fill(0, 16 * 4 * l);
+    aEnableSweepingEffect.array.fill(0, 4 * l);
+    aSweepParams.array.fill(0, 2 * 4 * l);
     aUvs.needsUpdate = true;
     aVertices.needsUpdate = true;
     mvCols.needsUpdate = true;
