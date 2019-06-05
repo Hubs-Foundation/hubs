@@ -2,11 +2,11 @@ AFRAME.registerSystem("capture-system", {
   init() {
     this._gotAudioTrack = false;
     this._recorderTimeout = null;
-    this._initRecorder();
   },
 
   _initRecorder() {
     if (!this.available()) return;
+
     this._stream = new MediaStream();
 
     const video = this.el.canvas.captureStream().getVideoTracks()[0];
@@ -36,8 +36,6 @@ AFRAME.registerSystem("capture-system", {
     return this._recorder && this._recorder.state !== "inactive";
   },
 
-  // The scene doesn't get an audioListener until something in the scene is playing audio.
-  // So we have to get the audio track lazily.
   _tryAddingAudioTrack() {
     if (this._gotAudioTrack || !this.el.audioListener) return;
 
@@ -51,17 +49,22 @@ AFRAME.registerSystem("capture-system", {
   },
 
   start() {
+    if (!this._recorder) {
+      this._initRecorder();
+    }
+
+    // The scene doesn't get an audioListener until something in the scene is playing audio.
+    // So we have to get the audio track lazily.
     this._tryAddingAudioTrack();
 
     if (!this.started()) {
       this._recorder.start();
+      this._recorderTimeout = setTimeout(() => {
+        if (this.started()) {
+          this._recorder.stop();
+        }
+      }, 15000);
     }
-
-    this._recorderTimeout = setTimeout(() => {
-      if (this.started()) {
-        this._recorder.stop();
-      }
-    }, 15000);
   },
 
   stop() {
