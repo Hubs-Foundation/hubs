@@ -220,9 +220,9 @@
     background-color: white;
     border: 1px solid #e2e2e2;
     border-radius: 12px;
-    margin: 12px;
+    margin: 12px 0 0 0;
     font-size: 1.2em;
-    padding: 8px;
+    padding: 8px 14px;
     display: block;
     width: 295px;
   }
@@ -246,7 +246,7 @@
 }
 
 :local(.subscribe) {
-  margin: 10px 0 6px 0;
+  margin: 18px 0 6px 0;
   display: flex;
   align-items: center;
   justify-content: center;
