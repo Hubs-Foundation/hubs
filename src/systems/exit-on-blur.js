@@ -12,7 +12,7 @@ AFRAME.registerSystem("exit-on-blur", {
     this.isOculusBrowser = navigator.userAgent.match(/Oculus/);
     this.enteredVR = false;
 
-    //window.addEventListener("blur", this.onBlur);
+    window.addEventListener("blur", this.onBlur);
     window.addEventListener("focus", this.onFocus);
     this.el.addEventListener("enter-vr", this.onEnterVR);
 

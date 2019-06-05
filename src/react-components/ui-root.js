@@ -1305,7 +1305,6 @@ class UIRoot extends Component {
       !embed &&
       !preload &&
       !watching &&
-      !embed &&
       !showInviteTip &&
       !this.state.showShareDialog &&
       this.props.hubChannel.canOrWillIfCreator("update_hub");
