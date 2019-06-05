@@ -1,3 +1,5 @@
+import qsTruthy from "../utils/qs_truthy";
+
 AFRAME.registerSystem("capture-system", {
   init() {
     this._gotAudioTrack = false;
@@ -29,7 +31,7 @@ AFRAME.registerSystem("capture-system", {
   },
 
   available() {
-    return window.MediaRecorder && MediaRecorder.isTypeSupported("video/webm; codecs=vp8");
+    return qsTruthy("video_capture") && window.MediaRecorder && MediaRecorder.isTypeSupported("video/webm; codecs=vp8");
   },
 
   started() {
