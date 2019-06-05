@@ -928,6 +928,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       params.perms_token = permsToken;
     }
 
+    if (embedToken) {
+      params.embed_token = embedToken;
+    }
+
     const { token } = store.state.credentials;
     if (token) {
       console.log(`Logged into account ${store.credentialsAccountId}`);
