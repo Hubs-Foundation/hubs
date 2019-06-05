@@ -165,7 +165,7 @@ class UIRoot extends Component {
     showShareDialog: false,
     showPresenceList: false,
     showSettingsMenu: false,
-    discordTipDismissed: false,
+    broadcastTipDismissed: false,
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
@@ -757,14 +757,14 @@ class UIRoot extends Component {
   };
 
   onStoreChanged = () => {
-    const discordRoomConfirmed = this.props.store.state.confirmedDiscordRooms.includes(this.props.hubId);
-    if (discordRoomConfirmed !== this.state.discordTipDismissed) {
-      this.setState({ discordTipDismissed: discordRoomConfirmed });
+    const broadcastedRoomConfirmed = this.props.store.state.confirmedBroadcastedRooms.includes(this.props.hubId);
+    if (broadcastedRoomConfirmed !== this.state.broadcastTipDismissed) {
+      this.setState({ broadcastTipDismissed: broadcastedRoomConfirmed });
     }
   };
 
-  confirmDiscordBridge = () => {
-    this.props.store.update({ confirmedDiscordRooms: [this.props.hubId] });
+  confirmBroadcastedRoom = () => {
+    this.props.store.update({ confirmedBroadcastedRooms: [this.props.hubId] });
   };
 
   discordBridges = () => {
@@ -781,6 +781,22 @@ class UIRoot extends Component {
       }
       return channels;
     }
+  };
+
+  hasEmbedPresence = () => {
+    if (!this.props.presences) {
+      return false;
+    } else {
+      for (const p of Object.values(this.props.presences)) {
+        for (const m of p.metas) {
+          if (m.context && m.context.embed) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
   };
 
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
@@ -1288,7 +1304,9 @@ class UIRoot extends Component {
 
     const discordBridges = this.discordBridges();
     const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
-    const showDiscordTip = discordBridges.length > 0 && !this.state.discordTipDismissed;
+    const hasEmbedPresence = this.hasEmbedPresence();
+    const hasDiscordBridges = discordBridges.length > 0;
+    const showBroadcastTip = (hasDiscordBridges || hasEmbedPresence) && !this.state.broadcastTipDismissed;
     const showInviteTip =
       !showVREntryButton &&
       !hasTopTip &&
@@ -1498,7 +1516,7 @@ class UIRoot extends Component {
               this.props.activeTips &&
               this.props.activeTips.bottom &&
               (!presenceLogEntries || presenceLogEntries.length === 0) &&
-              !showDiscordTip && (
+              !showBroadcastTip && (
                 <div className={styles.bottomTip}>
                   <button
                     className={styles.tipCancel}
@@ -1527,15 +1545,19 @@ class UIRoot extends Component {
                 </div>
               )}
             {enteredOrWatchingOrPreload &&
-              showDiscordTip && (
+              showBroadcastTip && (
                 <div className={styles.bottomTip}>
-                  <button className={styles.tipCancel} onClick={() => this.confirmDiscordBridge()}>
+                  <button className={styles.tipCancel} onClick={() => this.confirmBroadcastedRoom()}>
                     <i>
                       <FontAwesomeIcon icon={faTimes} />
                     </i>
                   </button>
                   <div className={styles.tip}>
-                    {`Chat in this room is being bridged to ${discordSnippet} on Discord.`}
+                    {hasDiscordBridges ? (
+                      <span>`Chat in this room is being bridged to ${discordSnippet} on Discord.`</span>
+                    ) : (
+                      <FormattedMessage id="embed.presence-warning" />
+                    )}
                   </div>
                 </div>
               )}

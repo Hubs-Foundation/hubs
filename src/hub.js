@@ -932,7 +932,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       perms_token: null,
       context: {
         mobile: isMobile || isMobileVR,
-        hmd: availableVREntryTypes.isInHMD
+        hmd: availableVREntryTypes.isInHMD,
+        embed: !!embedToken
       }
     };
 
