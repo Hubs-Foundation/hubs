@@ -53,11 +53,6 @@ function isUI(el) {
 AFRAME.registerSystem("interaction", {
   updateCursorIntersection: function(intersection) {
     this.rightRemoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
-    if (this.rightRemoteHoverTarget) {
-      intersection.object.parent.worldToLocal(this.intersectionPoint.copy(intersection.point));
-    } else {
-      this.intersectionPoint.set(0, 0, 0);
-    }
   },
 
   isHeld(el) {
@@ -65,7 +60,6 @@ AFRAME.registerSystem("interaction", {
   },
 
   init: function() {
-    this.intersectionPoint = new THREE.Vector3();
     this.options = {
       leftHand: {
         entity: null,
