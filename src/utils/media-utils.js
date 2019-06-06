@@ -503,3 +503,22 @@ export const isHubsSceneUrl = hubsSceneRegex.test.bind(hubsSceneRegex);
 export const isHubsRoomUrl = url => !isHubsSceneUrl(url) && hubsRoomRegex.test(url);
 export const isHubsDestinationUrl = url => isHubsSceneUrl(url) || isHubsRoomUrl(url);
 export const isHubsAvatarUrl = hubsAvatarRegex.test.bind(hubsAvatarRegex);
+
+const textureLoader = new THREE.TextureLoader();
+textureLoader.setCrossOrigin("anonymous");
+export function createImageTexture(url) {
+  return new Promise((resolve, reject) => {
+    textureLoader.load(
+      url,
+      texture => {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.minFilter = THREE.LinearFilter;
+        resolve(texture);
+      },
+      null,
+      function(xhr) {
+        reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
+      }
+    );
+  });
+}

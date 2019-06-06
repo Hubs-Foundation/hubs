@@ -1,7 +1,7 @@
 /* global AFRAME THREE */
 
 import spritesheet from "../assets/images/hud/spritesheet.json";
-import { createImageTexture } from "../components/media-views.js";
+import { createImageTexture } from "../utils/media-utils";
 import spritesheetPng from "../assets/images/hud/spritesheet.png";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import vert from "./sprites/sprite.vert";
