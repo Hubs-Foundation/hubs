@@ -250,7 +250,7 @@ function runMigration(version, json) {
   }
 }
 
-export async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
+export async function loadGLTF(src, contentType, preferredTechnique, onProgress, jsonPreprocessor) {
   let gltfUrl = src;
   let fileMap;
 
@@ -264,6 +264,10 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress)
   const gltfLoader = new THREE.GLTFLoader(loadingManager);
 
   const parser = await new Promise((resolve, reject) => gltfLoader.createParser(gltfUrl, resolve, onProgress, reject));
+
+  if (jsonPreprocessor) {
+    parser.json = jsonPreprocessor(parser.json);
+  }
 
   let version = 0;
   if (
@@ -346,6 +350,10 @@ AFRAME.registerComponent("gltf-model-plus", {
   init() {
     this.preferredTechnique =
       window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness";
+
+    // This can be set externally if a consumer wants to do some node preprocssing.
+    this.jsonPreprocessor = null;
+
     this.loadTemplates();
   },
 
@@ -364,12 +372,12 @@ AFRAME.registerComponent("gltf-model-plus", {
   async loadModel(src, contentType, technique, useCache) {
     if (useCache) {
       if (!GLTFCache[src]) {
-        GLTFCache[src] = await loadGLTF(src, contentType, technique);
+        GLTFCache[src] = await loadGLTF(src, contentType, technique, null, this.jsonPreprocessor);
       }
 
       return cloneGltf(GLTFCache[src]);
     } else {
-      return await loadGLTF(src, contentType, technique);
+      return await loadGLTF(src, contentType, technique, null, this.jsonPreprocessor);
     }
   },
 
