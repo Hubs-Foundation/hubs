@@ -11,7 +11,6 @@ AFRAME.registerComponent("visibility-while-frozen", {
   schema: {
     withinDistance: { type: "number" },
     visible: { type: "boolean", default: true },
-    hud: { type: "boolean", default: false },
     requireHoverOnNonMobile: { type: "boolean", default: true }
   },
 

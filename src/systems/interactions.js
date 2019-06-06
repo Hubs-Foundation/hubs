@@ -52,7 +52,6 @@ function isUI(el) {
 
 AFRAME.registerSystem("interaction", {
   updateCursorIntersection: function(intersection) {
-    this.intersection = intersection;
     this.rightRemoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
     if (this.rightRemoteHoverTarget) {
       intersection.object.parent.worldToLocal(this.intersectionPoint.copy(intersection.point));
