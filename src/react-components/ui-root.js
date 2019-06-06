@@ -242,6 +242,12 @@ class UIRoot extends Component {
 
   componentDidMount() {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
+    document
+      .querySelector(".a-canvas")
+      .addEventListener("mouseup", () =>
+        this.setState({ showPresenceList: false, showSettingsMenu: false, showShareDialog: false })
+      );
+
     this.props.scene.addEventListener(
       "didConnectToNetworkedScene",
       () => {
