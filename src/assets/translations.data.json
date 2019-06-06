@@ -22,6 +22,8 @@
     "sign-in.kick-user-complete": "You are now signed in.",
     "sign-in.create-avatar": "You'll need to sign in to create avatars.",
     "sign-in.create-avatar-complete": "You are now signed in.",
+    "sign-in.favorite-room": "You'll need to sign in to add this room to your favorites.",
+    "sign-in.favorite-room-complete": "You are now signed in.",
     "sign-in.as": "Signed in as",
     "sign-in.in": "Sign In",
     "sign-in.out": "Sign Out",

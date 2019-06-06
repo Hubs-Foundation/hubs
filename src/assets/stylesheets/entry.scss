@@ -21,6 +21,23 @@
   }
 }
 
+:local(.favorite-button) {
+  @extend %fa-icon-button;
+  color: $dark-grey;
+  display: inline;
+  position: absolute;
+  top: 0px;
+  right: 24px;
+
+  i {
+    font-size: 1.2em;
+  }
+}
+
+:local(.favorited) {
+  color: $duck-yellow;
+}
+
 :local(.collapse-button):hover {
   color: $action-color;
 }

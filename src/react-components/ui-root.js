@@ -63,6 +63,7 @@ import { handleTipClose } from "../systems/tips.js";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -130,6 +131,7 @@ class UIRoot extends Component {
     sessionId: PropTypes.string,
     subscriptions: PropTypes.object,
     initialIsSubscribed: PropTypes.bool,
+    initialIsFavorited: PropTypes.bool,
     showSignInDialog: PropTypes.bool,
     signInMessageId: PropTypes.string,
     signInCompleteMessageId: PropTypes.string,
@@ -339,6 +341,23 @@ class UIRoot extends Component {
   updateSubscribedState = () => {
     const isSubscribed = this.props.subscriptions && this.props.subscriptions.isSubscribed();
     this.setState({ isSubscribed });
+  };
+
+  toggleFavorited = () => {
+    this.props.performConditionalSignIn(
+      () => this.props.hubChannel.signedIn,
+      () => {
+        const isFavorited = this.isFavorited();
+
+        this.props.hubChannel[isFavorited ? "unfavorite" : "favorite"]();
+        this.setState({ isFavorited: !isFavorited });
+      },
+      "favorite-room"
+    );
+  };
+
+  isFavorited = () => {
+    return this.state.isFavorited !== undefined ? this.state.isFavorited : this.props.initialIsFavorited;
   };
 
   onLoadingFinished = () => {
@@ -908,6 +927,15 @@ class UIRoot extends Component {
           <button onClick={() => this.setState({ watching: true })} className={entryStyles.collapseButton}>
             <i>
               <FontAwesomeIcon icon={faTimes} />
+            </i>
+          </button>
+
+          <button
+            onClick={() => this.toggleFavorited()}
+            className={classNames({ [entryStyles.favoriteButton]: true, [entryStyles.favorited]: this.isFavorited() })}
+          >
+            <i>
+              <FontAwesomeIcon icon={faStar} />
             </i>
           </button>
         </div>

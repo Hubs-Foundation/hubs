@@ -1095,6 +1095,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       remountUI({
         hubIsBound: data.hub_requires_oauth,
+        initialIsFavorited: data.subscriptions.favorites,
         initialIsSubscribed: subscriptions.isSubscribed()
       });
 
