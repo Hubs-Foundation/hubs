@@ -44,7 +44,7 @@ export class MouseDevice {
   process(event) {
     if (event.type === "wheel") {
       this.wheel += (event.deltaX + event.deltaY) / modeMod[event.deltaMode];
-      return;
+      return true;
     }
 
     const left = event.button === 0;
@@ -54,14 +54,23 @@ export class MouseDevice {
     this.movementXY[0] += event.movementX;
     this.movementXY[1] += event.movementY;
     if (event.type === "mousedown" && left) {
+      this.mouseDownLeftThisFrame = true;
       this.buttonLeft = true;
     } else if (event.type === "mousedown" && right) {
+      this.mouseDownRightThisFrame = true;
       this.buttonRight = true;
     } else if (event.type === "mouseup" && left) {
+      if (this.mouseDownLeftThisFrame) {
+        return false;
+      }
       this.buttonLeft = false;
     } else if (event.type === "mouseup" && right) {
+      if (this.mouseDownRightThisFrame) {
+        return false;
+      }
       this.buttonRight = false;
     }
+    return true;
   }
 
   write(frame) {
@@ -69,12 +78,22 @@ export class MouseDevice {
     this.movementXY[1] = 0; // deltas
     this.wheel = 0; // delta
 
+    this.didStopProcessingEarly = false;
+    this.mouseDownLeftThisFrame = false;
+    this.mouseDownRightThisFrame = false;
+
     for (let i = 0; i < this.events.length; i++) {
       const event = this.events[i];
-      this.process(event);
+      if (!this.process(event)) {
+        this.didStopProcessingEarly = true;
+        this.events.splice(0, i);
+        break;
+      }
     }
 
-    this.events.length = 0;
+    if (!this.didStopProcessingEarly) {
+      this.events.length = 0;
+    }
 
     frame.setVector2(paths.device.mouse.coords, this.coords[0], this.coords[1]);
     frame.setVector2(paths.device.mouse.movementXY, this.movementXY[0], this.movementXY[1]);
