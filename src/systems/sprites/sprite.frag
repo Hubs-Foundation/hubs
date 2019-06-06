@@ -1,15 +1,12 @@
-#version 300 es
-
 precision mediump float;
 
 uniform sampler2D u_spritesheet;
 
-in vec2 v_uvs;
-out vec4 outColor;
+varying vec2 v_uvs;
 
-flat in float v_hubs_EnableSweepingEffect;
-flat in vec2 v_hubs_SweepParams;
-in vec3 hubs_WorldPosition;
+varying float v_hubs_EnableSweepingEffect;
+varying vec2 v_hubs_SweepParams;
+varying vec3 hubs_WorldPosition;
 uniform bool hubs_HighlightInteractorOne;
 uniform vec3 hubs_InteractorOnePos;
 uniform bool hubs_HighlightInteractorTwo;
@@ -27,7 +24,7 @@ vec4 linearToOutputTexel( vec4 value ) {
 }
 
 void main() {
-    vec4 texColor = texture(u_spritesheet, v_uvs);
+    vec4 texColor = texture2D(u_spritesheet, v_uvs);
 
     float ratio = 0.0;
     if (v_hubs_EnableSweepingEffect > 0.9 ) {
@@ -41,5 +38,5 @@ void main() {
     ratio = min(1.0, ratio);
 
     vec4 highlightColor = linearToOutputTexel(vec4(0.184, 0.499, 0.933, 1.0));
-    outColor = vec4((texColor.rgb * (1.0 - ratio)) + (highlightColor.rgb * ratio), texColor.a);
+    gl_FragColor = vec4((texColor.rgb * (1.0 - ratio)) + (highlightColor.rgb * ratio), texColor.a);
 }

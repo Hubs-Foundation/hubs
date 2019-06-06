@@ -1,20 +1,18 @@
-#version 300 es
-
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 
-in vec4 mvCol0;
-in vec4 mvCol1;
-in vec4 mvCol2;
-in vec4 mvCol3;
-in vec3 a_vertices;
-in vec2 a_uvs;
-out vec2 v_uvs;
-in float a_hubs_EnableSweepingEffect;
-flat out float v_hubs_EnableSweepingEffect;
-in vec2 a_hubs_SweepParams;
-flat out vec2 v_hubs_SweepParams;
-out vec3 hubs_WorldPosition;
+attribute vec4 mvCol0;
+attribute vec4 mvCol1;
+attribute vec4 mvCol2;
+attribute vec4 mvCol3;
+attribute vec3 a_vertices;
+attribute vec2 a_uvs;
+varying vec2 v_uvs;
+attribute float a_hubs_EnableSweepingEffect;
+varying float v_hubs_EnableSweepingEffect;
+attribute vec2 a_hubs_SweepParams;
+varying vec2 v_hubs_SweepParams;
+varying vec3 hubs_WorldPosition;
 
 void main() {
   mat4 mv = mat4(mvCol0, mvCol1, mvCol2, mvCol3);
