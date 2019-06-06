@@ -79,6 +79,7 @@
     "profile.info-link": "here",
     "avatar-editor.info": "Resources for creating custom avatar skins can be found",
     "avatar-editor.info-link": "here",
+    "avatar-preview.loading-failed": "Loading failed\nPlease choose another avatar",
     "media-browser.search-placeholder.scenes": "Search Scenes...",
     "media-browser.search-placeholder.avatars": "Search Avatars...",
     "media-browser.search-placeholder.videos": "Search the web...",
