@@ -59,6 +59,27 @@ AFRAME.registerSystem("interaction", {
     return this.state.leftHand.held === el || this.state.rightHand.held === el || this.state.rightRemote.held === el;
   },
 
+  release(el) {
+    if (this.state.leftHand.held === el) {
+      this.state.leftHand.held = null;
+    }
+    if (this.state.leftHand.hovered === el) {
+      this.state.leftHand.hovered = null;
+    }
+    if (this.state.leftHand.held === el) {
+      this.state.leftHand.held = null;
+    }
+    if (this.state.rightHand.hovered === el) {
+      this.state.rightHand.hovered = null;
+    }
+    if (this.state.rightRemote.held === el) {
+      this.state.rightRemote.held = null;
+    }
+    if (this.state.rightRemote.hovered === el) {
+      this.state.rightRemote.hovered = null;
+    }
+  },
+
   init: function() {
     this.options = {
       leftHand: {
