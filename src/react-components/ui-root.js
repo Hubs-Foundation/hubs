@@ -932,7 +932,11 @@ class UIRoot extends Component {
 
           <button
             onClick={() => this.toggleFavorited()}
-            className={classNames({ [entryStyles.favoriteButton]: true, [entryStyles.favorited]: this.isFavorited() })}
+            className={classNames({
+              [entryStyles.entryFavoriteButton]: true,
+              [entryStyles.favoriteButton]: true,
+              [entryStyles.favorited]: this.isFavorited()
+            })}
           >
             <i>
               <FontAwesomeIcon icon={faStar} />
@@ -1759,6 +1763,17 @@ class UIRoot extends Component {
                     </button>
                   </div>
                 )}
+                <button
+                  onClick={() => this.toggleFavorited()}
+                  className={classNames({
+                    [entryStyles.favorited]: this.isFavorited(),
+                    [styles.inRoomFavoriteButton]: true
+                  })}
+                >
+                  <i>
+                    <FontAwesomeIcon icon={faStar} />
+                  </i>
+                </button>
               </div>
             )}
           </div>
