@@ -17,12 +17,13 @@ AFRAME.registerComponent("sprite", {
   schema: { name: { type: "string" } },
   tick() {
     if (!this.didRegisterWithSystem && this.el.sceneEl.systems["post-physics"]) {
-      this.el.sceneEl.systems["post-physics"].spriteSystem.add(this);
-      this.didRegisterWithSystem = true;
+      this.didRegisterWithSystem = this.el.sceneEl.systems["post-physics"].spriteSystem.add(this);
     }
   },
   remove() {
-    this.el.sceneEl.systems["post-physics"].spriteSystem.remove(this);
+    if (this.didRegisterWithSystem) {
+      this.el.sceneEl.systems["post-physics"].spriteSystem.remove(this);
+    }
   }
 });
 
@@ -183,8 +184,10 @@ function createGeometry(maxSprites) {
 
 export class SpriteSystem {
   raycast(raycaster, intersects) {
-    for (let i = 0; i < this.spriteComponents.length; i++) {
-      const o = this.spriteComponents[i].el.object3D;
+    for (let i = 0; i < this.slots.length; i++) {
+      if (!this.slots[i]) continue;
+
+      const o = this.indexWithSprite.get(i).el.object3D;
       if (isVisible(o)) {
         raycastOnSprite.call(o, raycaster, intersects);
       }
@@ -193,8 +196,15 @@ export class SpriteSystem {
   }
   constructor(scene) {
     this.missingSprites = [];
-    this.spriteComponents = [];
     this.maxSprites = 512;
+    this.slots = new Array(this.maxSprites);
+    this.spriteWithIndex = new Map();
+    this.indexWithSprite = new Map();
+    this.stack = new Array(this.maxSprites);
+    for (let i = 0; i < this.maxSprites; i++) {
+      this.stack[i] = this.maxSprites - 1 - i;
+    }
+
     Promise.all([createImageTexture(spritesheetPng), waitForDOMContentLoaded()]).then(([spritesheetTexture]) => {
       const material = new THREE.RawShaderMaterial({
         uniforms: {
@@ -220,35 +230,20 @@ export class SpriteSystem {
   tick(t) {
     if (!this.mesh) return;
 
-    const l = Math.min(this.spriteComponents.length, this.maxSprites);
-    for (let i = 0; i < l; i++) {
-      this.spriteComponents[i].el.object3D.updateMatrices();
-      this.set(this.spriteComponents[i], i);
-    }
+    for (let i = 0; i < this.slots.length; i++) {
+      if (!this.slots[i]) continue;
 
-    const aUvs = this.mesh.geometry.attributes["a_uvs"];
-    const aVertices = this.mesh.geometry.attributes["a_vertices"];
-    const mvCols = this.mesh.geometry.attributes["mvCol0"].data;
-    const aEnableSweepingEffect = this.mesh.geometry.attributes["a_hubs_EnableSweepingEffect"];
-    const aSweepParams = this.mesh.geometry.attributes["a_hubs_SweepParams"];
-    aUvs.array.fill(0, 2 * 4 * l);
-    aVertices.array.fill(0, 3 * 4 * l);
-    mvCols.array.fill(0, 16 * 4 * l);
-    aEnableSweepingEffect.array.fill(0, 4 * l);
-    aSweepParams.array.fill(0, 2 * 4 * l);
-    aUvs.needsUpdate = true;
-    aVertices.needsUpdate = true;
-    mvCols.needsUpdate = true;
-    aEnableSweepingEffect.needsUpdate = true;
-    aSweepParams.needsUpdate = true;
+      const component = this.indexWithSprite.get(i);
+      this.set(component, i);
+    }
 
     this.mesh.material.uniforms.hubs_Time.value = t;
     this.mesh.material.uniformsNeedUpdate = true;
   }
 
   set(spriteComp, i) {
-    const frame = normalizedFrame(spriteComp.data.name, spritesheet, this.missingSprites);
     if (isVisible(spriteComp.el.object3D)) {
+      spriteComp.el.object3D.updateMatrices();
       const aEnableSweepingEffect = this.mesh.geometry.attributes["a_hubs_EnableSweepingEffect"];
       const enableSweepingEffectValue = enableSweepingEffect(spriteComp) ? 1 : 0;
       aEnableSweepingEffect.array[i * 4 + 0] = enableSweepingEffectValue;
@@ -268,20 +263,6 @@ export class SpriteSystem {
         aSweepParams.needsUpdate = true;
       }
 
-      const aUvs = this.mesh.geometry.attributes["a_uvs"];
-      aUvs.setXY(i * 4 + 0, frame.x, frame.y);
-      aUvs.setXY(i * 4 + 1, frame.x + frame.w, frame.y);
-      aUvs.setXY(i * 4 + 2, frame.x, frame.y + frame.h);
-      aUvs.setXY(i * 4 + 3, frame.x + frame.w, frame.y + frame.h);
-      aUvs.needsUpdate = true;
-
-      const aVertices = this.mesh.geometry.attributes["a_vertices"];
-      aVertices.setXYZ(i * 4 + 0, -0.5, 0.5, 0);
-      aVertices.setXYZ(i * 4 + 1, 0.5, 0.5, 0);
-      aVertices.setXYZ(i * 4 + 2, -0.5, -0.5, 0);
-      aVertices.setXYZ(i * 4 + 3, 0.5, -0.5, 0);
-      aVertices.needsUpdate = true;
-
       const mvCols = this.mesh.geometry.attributes["mvCol0"].data; // interleaved
       const mat4 = spriteComp.el.object3D.matrixWorld;
       mvCols.array.set(mat4.elements, i * 4 * 16 + 0);
@@ -289,7 +270,16 @@ export class SpriteSystem {
       mvCols.array.set(mat4.elements, i * 4 * 16 + 2 * 16);
       mvCols.array.set(mat4.elements, i * 4 * 16 + 3 * 16);
       mvCols.needsUpdate = true;
+
+      // TODO: modify the matrix scale instead
+      const aVertices = this.mesh.geometry.attributes["a_vertices"];
+      aVertices.setXYZ(i * 4 + 0, -0.5, 0.5, 0);
+      aVertices.setXYZ(i * 4 + 1, 0.5, 0.5, 0);
+      aVertices.setXYZ(i * 4 + 2, -0.5, -0.5, 0);
+      aVertices.setXYZ(i * 4 + 3, 0.5, -0.5, 0);
+      aVertices.needsUpdate = true;
     } else {
+      // TODO: modify the matrix scale instead
       const aVertices = this.mesh.geometry.attributes["a_vertices"];
       aVertices.setXYZ(i * 4 + 0, 0, 0, 0);
       aVertices.setXYZ(i * 4 + 1, 0, 0, 0);
@@ -300,13 +290,48 @@ export class SpriteSystem {
   }
 
   add(sprite) {
-    this.spriteComponents.push(sprite);
-    if (this.spriteComponents.length > this.maxSprites) {
-      console.warn(`${this.spriteComponents.length - this.maxSprites} too many sprites`);
+    if (!this.mesh) {
+      return false;
     }
+    const i = this.stack.pop();
+    if (i === undefined) {
+      console.error("Too many sprites");
+      return false;
+    }
+    this.slots[i] = true;
+    this.spriteWithIndex.set(sprite, i);
+    this.indexWithSprite.set(i, sprite);
+
+    const frame = normalizedFrame(sprite.data.name, spritesheet, this.missingSprites);
+    const aUvs = this.mesh.geometry.attributes["a_uvs"];
+    aUvs.setXY(i * 4 + 0, frame.x, frame.y);
+    aUvs.setXY(i * 4 + 1, frame.x + frame.w, frame.y);
+    aUvs.setXY(i * 4 + 2, frame.x, frame.y + frame.h);
+    aUvs.setXY(i * 4 + 3, frame.x + frame.w, frame.y + frame.h);
+    aUvs.needsUpdate = true;
+
+    const aVertices = this.mesh.geometry.attributes["a_vertices"];
+    aVertices.setXYZ(i * 4 + 0, -0.5, 0.5, 0);
+    aVertices.setXYZ(i * 4 + 1, 0.5, 0.5, 0);
+    aVertices.setXYZ(i * 4 + 2, -0.5, -0.5, 0);
+    aVertices.setXYZ(i * 4 + 3, 0.5, -0.5, 0);
+    aVertices.needsUpdate = true;
+    return true;
   }
 
   remove(sprite) {
-    this.spriteComponents.splice(this.spriteComponents.indexOf(sprite), 1);
+    const i = this.spriteWithIndex.get(sprite);
+    this.spriteWithIndex.delete(sprite);
+    this.indexWithSprite.delete(i);
+    this.slots[i] = false;
+    this.stack.push(i);
+
+    //TODO: modify the matrix scale instead.
+    const aVertices = this.mesh.geometry.attributes["a_vertices"];
+    aVertices.setXYZ(i * 4 + 0, 0, 0, 0);
+    aVertices.setXYZ(i * 4 + 1, 0, 0, 0);
+    aVertices.setXYZ(i * 4 + 2, 0, 0, 0);
+    aVertices.setXYZ(i * 4 + 3, 0, 0, 0);
+    aVertices.needsUpdate = true;
   }
 }
