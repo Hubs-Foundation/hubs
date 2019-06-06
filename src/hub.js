@@ -421,10 +421,6 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     hubChannel.updateScene(entry.url);
   });
 
-  scene.addEventListener("scene_media_selected", e => {
-    hubChannel.updateScene(e.detail);
-  });
-
   // Handle request for user gesture
   scene.addEventListener("2d-interstitial-gesture-required", () => {
     remountUI({
@@ -638,6 +634,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       () => hubChannel.signedIn,
       () => pushHistoryState(history, "overlay", "avatar-editor"),
       "create-avatar"
+    );
+  });
+
+  scene.addEventListener("scene_media_selected", e => {
+    const sceneInfo = e.detail;
+
+    performConditionalSignIn(
+      () => hubChannel.can("update_hub"),
+      () => hubChannel.updateScene(sceneInfo),
+      "change-scene"
     );
   });
 
