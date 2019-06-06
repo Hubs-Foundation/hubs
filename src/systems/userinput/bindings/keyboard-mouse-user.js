@@ -150,6 +150,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.compose_vec2
     },
     {
+      src: { value: paths.actions.cameraDelta },
+      dest: { value: paths.actions.lobbyCameraDelta },
+      xform: xforms.copy
+    },
+    {
       src: {
         value: paths.device.keyboard.key("m")
       },
