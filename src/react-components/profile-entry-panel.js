@@ -148,6 +148,13 @@ class ProfileEntryPanel extends Component {
               />
             )}
 
+            <a
+              className={styles.chooseAvatar}
+              onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars")}
+            >
+              <FormattedMessage id="profile.choose_avatar" />
+            </a>
+
             {this.state.avatar ? (
               <div className={styles.preview}>
                 <AvatarPreview avatarGltfUrl={this.state.avatar.gltf_url} />
@@ -163,21 +170,9 @@ class ProfileEntryPanel extends Component {
                     <FontAwesomeIcon icon={faPencilAlt} />
                   </StateLink>
                 )}
-
-                <div className={styles.chooseAvatar}>
-                  <a onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars")}>
-                    <FormattedMessage id="profile.choose_avatar" />
-                  </a>
-                </div>
               </div>
             ) : (
-              <div className={styles.preview}>
-                <div className={styles.chooseAvatar}>
-                  <a onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars")}>
-                    <FormattedMessage id="profile.choose_avatar" />
-                  </a>
-                </div>
-              </div>
+              <div className={styles.preview} />
             )}
 
             <WithHoverSound>
