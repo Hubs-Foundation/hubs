@@ -314,6 +314,6 @@
     "avatar-landing.select": "Select",
     "avatar-landing.selected": "This is your current avatar",
     "embed.load-button": "Load Room",
-    "embed.presence-warning": "This room is embedded, so may be visible to visitors on a non-Mozilla site."
+    "embed.presence-warning": "This room is embedded, so may be visible to visitors on other websites."
   }
 }
