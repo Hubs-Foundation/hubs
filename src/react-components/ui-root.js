@@ -1312,9 +1312,9 @@ class UIRoot extends Component {
       !showVREntryButton &&
       !hasTopTip &&
       !entered &&
+      !embed &&
       !preload &&
       !watching &&
-      !embed &&
       !hasTopTip &&
       !this.props.store.state.activity.hasOpenedShare &&
       this.occupantCount() <= 1;
@@ -1626,8 +1626,8 @@ class UIRoot extends Component {
                       <FormattedMessage id={`entry.${isMobile ? "mobile" : "desktop"}.invite-tip`} />
                     </div>
                   )}
-                  {!showVREntryButton &&
-                    !embed &&
+                  {!embed &&
+                    !showVREntryButton &&
                     this.occupantCount() > 1 &&
                     !hasTopTip &&
                     entered && (
