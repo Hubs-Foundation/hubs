@@ -265,6 +265,10 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
 
   const parser = await new Promise((resolve, reject) => gltfLoader.createParser(gltfUrl, resolve, onProgress, reject));
 
+  if (jsonPreprocessor) {
+    parser.json = jsonPreprocessor(parser.json);
+  }
+
   let version = 0;
   if (
     parser.json.extensions &&
@@ -303,10 +307,6 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
 
       node.extras.gltfIndex = i;
     }
-  }
-
-  if (jsonPreprocessor) {
-    parser.json = jsonPreprocessor(parser.json);
   }
 
   const gltf = await new Promise(parser.parse.bind(parser));

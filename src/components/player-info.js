@@ -7,18 +7,21 @@ function ensureAvatarNodes(json) {
     // If the avatar model doesn't have a Head node. The user has probably chosen a custom GLB.
     // So, we need to construct a suitable hierarchy for avatar functionality to work.
     // We re-parent the original root node to the Head node and set the scene root to a new AvatarRoot.
+
+    // Note: We assume that the first node in the primary scene is the one we care about.
+    const originalRoot = json.scenes[json.scene].nodes[0];
     nodes.push({ name: "LeftEye", extensions: { MOZ_hubs_components: {} } });
     nodes.push({ name: "RightEye", extensions: { MOZ_hubs_components: {} } });
     nodes.push({
       name: "Head",
-      children: [0, nodes.length - 1, nodes.length - 2],
+      children: [originalRoot, nodes.length - 1, nodes.length - 2],
       extensions: { MOZ_hubs_components: { "scale-audio-feedback": "" } }
     });
     nodes.push({ name: "Neck", children: [nodes.length - 1] });
     nodes.push({ name: "Spine", children: [nodes.length - 1] });
     nodes.push({ name: "Hips", children: [nodes.length - 1] });
     nodes.push({ name: "AvatarRoot", children: [nodes.length - 1] });
-    json.scenes[0].nodes[0] = nodes.length - 1;
+    json.scenes[json.scene].nodes[0] = nodes.length - 1;
   }
   return json;
 }
