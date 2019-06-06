@@ -28,14 +28,12 @@ vec4 linearToOutputTexel( vec4 value ) {
 
 void main() {
     vec4 texColor = texture(u_spritesheet, v_uvs);
-    outColor = texColor;
 
     float ratio = 0.0;
-    if (v_hubs_EnableSweepingEffect - 0.9 > 0.0 ) {
+    if (v_hubs_EnableSweepingEffect > 0.9 ) {
         float size = v_hubs_SweepParams.t - v_hubs_SweepParams.s * 1.0;
         float line = mod(hubs_Time / 500.0 * size, size * 3.0) + v_hubs_SweepParams.s - size / 3.0;
         if (hubs_WorldPosition.y < line) {
-            // Highlight with a sweeping gradient.
             ratio = max(0.0, 1.0 - (line - hubs_WorldPosition.y) / (size * 1.5));
         }
 
@@ -43,7 +41,5 @@ void main() {
     ratio = min(1.0, ratio);
 
     vec4 highlightColor = linearToOutputTexel(vec4(0.184, 0.499, 0.933, 1.0));
-    outColor = vec4(0.0,0.0,0.0,0.0);
-    outColor.rgb = (texColor.rgb * (1.0 - ratio)) + (highlightColor.rgb * ratio);
-    outColor.a = texColor.a;
+    outColor = vec4((texColor.rgb * (1.0 - ratio)) + (highlightColor.rgb * ratio), texColor.a);
 }
