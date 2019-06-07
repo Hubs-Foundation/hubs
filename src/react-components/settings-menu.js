@@ -12,6 +12,7 @@ import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { showFullScreenIfAvailable } from "../utils/fullscreen";
+import LeaveRoomDialog from "./leave-room-dialog.js";
 
 import styles from "../assets/stylesheets/settings-menu.scss";
 
@@ -23,6 +24,7 @@ export default class SettingsMenu extends Component {
     hubScene: PropTypes.object,
     hubChannel: PropTypes.object,
     performConditionalSignIn: PropTypes.func,
+    showNonHistoriedDialog: PropTypes.func,
     pushHistoryState: PropTypes.func
   };
 
@@ -190,7 +192,17 @@ export default class SettingsMenu extends Component {
                 </i>
               </div>
               <div className={styles.listItem}>
-                <a href="/" onClick={this.props.hideSettings}>
+                <a
+                  href="#"
+                  onClick={e => {
+                    e.preventDefault();
+                    this.props.showNonHistoriedDialog(LeaveRoomDialog, {
+                      destinationUrl: "/",
+                      messageType: "create-room"
+                    });
+                    this.props.hideSettings();
+                  }}
+                >
                   <FormattedMessage id="settings.create-room" />
                 </a>
               </div>

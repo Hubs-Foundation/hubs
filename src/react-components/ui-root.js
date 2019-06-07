@@ -45,6 +45,7 @@ import CloseRoomDialog from "./close-room-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebAssemblyUnsupportedDialog from "./webassembly-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
+import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
@@ -1391,7 +1392,16 @@ class UIRoot extends Component {
                 history={this.props.history}
                 mediaSearchStore={this.props.mediaSearchStore}
                 hubChannel={this.props.hubChannel}
-                onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
+                onMediaSearchResultEntrySelected={entry => {
+                  if (entry.type === "hub") {
+                    this.showNonHistoriedDialog(LeaveRoomDialog, {
+                      destinationUrl: entry.url,
+                      messageType: "join-room"
+                    });
+                  } else {
+                    this.props.onMediaSearchResultEntrySelected(entry);
+                  }
+                }}
                 performConditionalSignIn={this.props.performConditionalSignIn}
               />
             )}
@@ -1729,6 +1739,7 @@ class UIRoot extends Component {
                 hubChannel={this.props.hubChannel}
                 hubScene={this.props.hubScene}
                 performConditionalSignIn={this.props.performConditionalSignIn}
+                showNonHistoriedDialog={this.showNonHistoriedDialog}
                 pushHistoryState={this.pushHistoryState}
               />
             )}
