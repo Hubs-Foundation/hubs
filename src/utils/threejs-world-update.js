@@ -163,7 +163,7 @@ THREE.Object3D.prototype.updateMatrices = function(forceLocalUpdate, forceWorldU
 //
 // includeInvisible - If true, does not ignore non-visible objects.
 THREE.Object3D.prototype.updateMatrixWorld = function(forceWorldUpdate, includeInvisible) {
-  if (!this.visible && !includeInvisible) return;
+  if (!this.visible && !(includeInvisible || this.batched)) return;
 
   // Do not recurse upwards, since this is recursing downwards
   this.updateMatrices(false, forceWorldUpdate, true);
@@ -172,7 +172,7 @@ THREE.Object3D.prototype.updateMatrixWorld = function(forceWorldUpdate, includeI
   const forceChildrenWorldUpdate = this.childrenNeedMatrixWorldUpdate || forceWorldUpdate;
 
   for (let i = 0, l = children.length; i < l; i++) {
-    children[i].updateMatrixWorld(forceChildrenWorldUpdate, includeInvisible);
+    children[i].updateMatrixWorld(forceChildrenWorldUpdate, includeInvisible || this.batched);
   }
 
   if (this.childrenNeedMatrixWorldUpdate) this.childrenNeedMatrixWorldUpdate = false;

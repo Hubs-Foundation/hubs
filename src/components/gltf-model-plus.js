@@ -405,6 +405,8 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.model = gltf.scene || gltf.scenes[0];
       this.model.animations = gltf.animations;
 
+      this.el.sceneEl.systems["hubs-systems"].renderManagerSystem.addObject(this.model);
+
       if (gltf.animations.length > 0) {
         this.el.setAttribute("animation-mixer", {});
         this.el.components["animation-mixer"].initMixer(gltf.animations);
