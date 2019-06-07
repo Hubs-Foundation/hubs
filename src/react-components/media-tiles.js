@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
+import moment from "moment";
 import { FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
@@ -28,7 +29,6 @@ class MediaTiles extends Component {
   };
 
   render() {
-    throw new Error("my scenes broken")
     const { urlSource, result } = this.props;
     const entries = (result && result.entries) || [];
     const [createTileWidth, createTileHeight] = this.getTileDimensions(false, urlSource === "avatars");
@@ -120,6 +120,7 @@ class MediaTiles extends Component {
     const creator = entry.attributions && entry.attributions.creator;
     const isImage = entry.type.endsWith("_image");
     const isAvatar = ["avatar", "avatar_listing"].includes(entry.type);
+    const isHub = ["hub"].includes(entry.type);
     const imageAspect = entry.images.preview.width / entry.images.preview.height;
 
     const [imageWidth, imageHeight] = this.getTileDimensions(isImage, isAvatar, imageAspect);
@@ -165,29 +166,38 @@ class MediaTiles extends Component {
             >
               {entry.name || "\u00A0"}
             </a>
-            {!isAvatar && (
-              <div className={styles.attribution}>
-                <div className={styles.creator}>
-                  {creator && creator.name === undefined && <span>{creator}</span>}
-                  {creator && creator.name && !creator.url && <span>{creator.name}</span>}
-                  {creator &&
-                    creator.name &&
-                    creator.url && (
-                      <a href={creator.url} target="_blank" rel="noopener noreferrer">
-                        {creator.name}
-                      </a>
-                    )}
-                </div>
-                {publisherName && (
-                  <div className={styles.publisher}>
-                    <i>
-                      <FontAwesomeIcon icon={faExternalLinkAlt} />
-                    </i>
-                    &nbsp;<a href={entry.url} target="_blank" rel="noopener noreferrer">
-                      {publisherName}
-                    </a>
+            {!isAvatar &&
+              !isHub && (
+                <div className={styles.attribution}>
+                  <div className={styles.creator}>
+                    {creator && creator.name === undefined && <span>{creator}</span>}
+                    {creator && creator.name && !creator.url && <span>{creator.name}</span>}
+                    {creator &&
+                      creator.name &&
+                      creator.url && (
+                        <a href={creator.url} target="_blank" rel="noopener noreferrer">
+                          {creator.name}
+                        </a>
+                      )}
                   </div>
-                )}
+                  {publisherName && (
+                    <div className={styles.publisher}>
+                      <i>
+                        <FontAwesomeIcon icon={faExternalLinkAlt} />
+                      </i>
+                      &nbsp;<a href={entry.url} target="_blank" rel="noopener noreferrer">
+                        {publisherName}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )}
+            {isHub && (
+              <div className={styles.attribution}>
+                <div className={styles.lastJoined}>
+                  <FormattedMessage id="media-browser.hub.joined-prefix" />
+                  {moment(entry.last_activated_at).fromNow()}
+                </div>
               </div>
             )}
           </div>

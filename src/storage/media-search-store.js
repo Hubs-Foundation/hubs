@@ -2,7 +2,9 @@ import { EventTarget } from "event-target-shim";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 
-export const SOURCES = ["poly", "sketchfab", "videos", "scenes", "gifs", "images", "twitch"];
+export const SOURCES = ["poly", "sketchfab", "videos", "scenes", "gifs", "images", "twitch", "favorites"];
+
+const EMPTY_RESULT = { entries: [] };
 
 const URL_SOURCE_TO_TO_API_SOURCE = {
   scenes: "scene_listings",
@@ -12,13 +14,15 @@ const URL_SOURCE_TO_TO_API_SOURCE = {
   gifs: "tenor",
   sketchfab: "sketchfab",
   poly: "poly",
-  twitch: "twitch"
+  twitch: "twitch",
+  favorites: "favorites"
 };
 
 export const MEDIA_SOURCE_DEFAULT_FILTERS = {
   gifs: "trending",
   sketchfab: "featured",
-  scenes: "featured"
+  scenes: "featured",
+  favorites: "my-favorites"
 };
 
 const SEARCH_CONTEXT_PARAMS = ["q", "filter", "cursor"];
@@ -59,6 +63,8 @@ export default class MediaSearchStore extends EventTarget {
     this.requestIndex++;
     const currentRequestIndex = this.requestIndex;
     const searchParams = new URLSearchParams();
+    const locationSearchParams = new URLSearchParams(location.search);
+    const isMy = locationSearchParams.get("filter") && locationSearchParams.get("filter").startsWith("my-");
 
     for (const param of SEARCH_CONTEXT_PARAMS) {
       if (!urlParams.get(param)) continue;
@@ -71,21 +77,28 @@ export default class MediaSearchStore extends EventTarget {
     if (urlSource === "avatars" || urlSource === "scenes") {
       // Avatars + scenes are special since we request them from a different source based on the facet.
       const singular = urlSource === "avatars" ? "avatar" : "scene";
-      const filter = new URLSearchParams(location.search);
-      source = filter.get("filter").startsWith("my-") ? `${singular}s` : `${singular}_listings`;
+      source = isMy ? `${singular}s` : `${singular}_listings`;
     } else {
       source = URL_SOURCE_TO_TO_API_SOURCE[urlSource];
     }
     searchParams.set("source", source);
 
-    if (source === "avatars" || source === "scenes") {
-      searchParams.set("user", window.APP.store.credentialsAccountId);
+    let fetch = true;
+
+    if (source === "avatars" || source === "scenes" || source === "favorites") {
+      if (isMy) {
+        if (window.APP.store.credentialsAccountId) {
+          searchParams.set("user", window.APP.store.credentialsAccountId);
+        } else {
+          fetch = false; // Don't fetch my-* if not signed in
+        }
+      }
     }
 
     const url = getReticulumFetchUrl(`/api/v1/media/search?${searchParams.toString()}`);
     if (this.lastSavedUrl === url) return;
 
-    const result = await this._fetchMedia(url, source);
+    const result = fetch ? await this._fetchMedia(url, source) : EMPTY_RESULT;
 
     if (this.requestIndex != currentRequestIndex) return;
 

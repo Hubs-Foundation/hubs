@@ -6,6 +6,7 @@ import StateLink from "./state-link.js";
 import { resetTips } from "../systems/tips";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
+import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faDoorClosed } from "@fortawesome/free-solid-svg-icons/faDoorClosed";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
@@ -55,6 +56,24 @@ export default class SettingsMenu extends Component {
                 >
                   <FormattedMessage id="settings.change-avatar" />
                 </StateLink>
+              </div>
+            </div>
+            <div className={rowClasses}>
+              <div className={styles.icon}>
+                <i>
+                  <FontAwesomeIcon icon={faStar} />
+                </i>
+              </div>
+              <div className={styles.listItem}>
+                <div
+                  className={styles.listItemLink}
+                  onClick={() => {
+                    showFullScreenIfAvailable();
+                    this.props.mediaSearchStore.sourceNavigateWithNoNav("favorites");
+                  }}
+                >
+                  <FormattedMessage id="settings.favorites" />
+                </div>
               </div>
             </div>
             {showRoomSection && (

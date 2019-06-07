@@ -86,9 +86,9 @@ const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
 
-const LOBBY_MODAL_ROUTER_PATHS = ["/media/scenes"];
+const LOBBY_MODAL_ROUTER_PATHS = ["/media/scenes", "/media/avatars", "/media/favorites"];
 const LOBBY_MODAL_QUERY_VARS = ["media_source"];
-const LOBBY_MODAL_QUERY_VALUES = ["scenes"];
+const LOBBY_MODAL_QUERY_VALUES = ["scenes", "avatars", "favorites"];
 
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
@@ -1306,7 +1306,8 @@ class UIRoot extends Component {
     const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
 
     // Allow scene picker pre-entry, otherwise wait until entry
-    const showMediaBrowser = mediaSource && (["scenes", "avatars"].includes(mediaSource) || this.state.entered);
+    const showMediaBrowser =
+      mediaSource && (["scenes", "avatars", "favorites"].includes(mediaSource) || this.state.entered);
     const hasTopTip = this.props.activeTips && this.props.activeTips.top;
 
     const clientInfoClientId = getClientInfoClientId(this.props.history.location);

@@ -4,6 +4,7 @@ import { injectIntl, FormattedMessage } from "react-intl";
 import classNames from "classnames";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
+import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploadAlt";
 import { faLink } from "@fortawesome/free-solid-svg-icons/faLink";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
@@ -65,6 +66,7 @@ const DEFAULT_FACETS = {
     { text: "Featured", params: { filter: "featured" } },
     { text: "My Avatars", params: { filter: "my-avatars" } }
   ],
+  favorites: [],
   scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }]
 };
 
@@ -228,9 +230,11 @@ class MediaBrowser extends Component {
     const searchParams = new URLSearchParams(this.props.history.location.search);
     const urlSource = this.getUrlSource(searchParams);
     const isSceneApiType = urlSource === "scenes";
-    const showCustomOption = !isSceneApiType || this.props.hubChannel.canOrWillIfCreator("update_hub");
+    const isFavorites = urlSource === "favorites";
+    const showCustomOption =
+      !isFavorites && (!isSceneApiType || this.props.hubChannel.canOrWillIfCreator("update_hub"));
     const entries = (this.state.result && this.state.result.entries) || [];
-    const hideSearch = urlSource === "avatars";
+    const hideSearch = urlSource === "avatars" || urlSource === "favorites";
 
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
     if (this.state.selectNextResult) return <div />;
@@ -259,6 +263,14 @@ class MediaBrowser extends Component {
               </a>
             </div>
             <div className={styles.headerCenter}>
+              {urlSource === "favorites" && (
+                <div className={styles.favoritesHeader}>
+                  <i>
+                    <FontAwesomeIcon icon={faStar} />
+                  </i>
+                  <FormattedMessage id="media-browser.favorites-header" />
+                </div>
+              )}
               {!hideSearch && (
                 <div className={styles.search}>
                   <i>
@@ -293,16 +305,19 @@ class MediaBrowser extends Component {
                 </div>
               )}
               <div className={styles.engineAttribution}>
-                {urlSource !== "scenes" && (
-                  <div className={styles.engineAttributionContents}>
-                    <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
-                    {PRIVACY_POLICY_LINKS[urlSource] && (
-                      <a href={PRIVACY_POLICY_LINKS[urlSource]} target="_blank" rel="noreferrer noopener">
-                        <FormattedMessage id="media-browser.privacy_policy" />
-                      </a>
-                    )}
-                  </div>
-                )}
+                {!hideSearch &&
+                  urlSource !== "scenes" &&
+                  urlSource !== "avatars" &&
+                  urlSource !== "favorites" && (
+                    <div className={styles.engineAttributionContents}>
+                      <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
+                      {PRIVACY_POLICY_LINKS[urlSource] && (
+                        <a href={PRIVACY_POLICY_LINKS[urlSource]} target="_blank" rel="noreferrer noopener">
+                          <FormattedMessage id="media-browser.privacy_policy" />
+                        </a>
+                      )}
+                    </div>
+                  )}
                 {urlSource === "scenes" && (
                   <div className={styles.engineAttributionContents}>
                     <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
@@ -369,7 +384,7 @@ class MediaBrowser extends Component {
             result={this.state.result}
             history={this.props.history}
             urlSource={urlSource}
-            handleEntryClicked={this.props.handleEntryClicked}
+            handleEntryClicked={this.handleEntryClicked}
           />
         </div>
       </div>

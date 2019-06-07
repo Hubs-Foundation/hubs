@@ -52,6 +52,16 @@
       }
     }
 
+    :local(.favorites-header) {
+      font-size: 1.5em;
+      font-weight: bold;
+
+      i {
+        color: $duck-yellow;
+        margin-right: 8px;
+      }
+    }
+
     :local(.search) {
       display: flex;
       width: 450px;
@@ -340,6 +350,10 @@
                 color: $grey-text;
               }
             }
+          }
+
+          :local(.last-joined) {
+            font-weight: normal;
           }
         }
 
