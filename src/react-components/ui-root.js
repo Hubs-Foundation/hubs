@@ -62,6 +62,7 @@ import TwoDHUD from "./2d-hud";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
 import { handleTipClose } from "../systems/tips.js";
+import { takeOrReleaseLobbyCam } from "../systems/lobby-camera-system";
 
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
@@ -735,6 +736,10 @@ class UIRoot extends Component {
     this.setState({
       dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
     });
+  };
+
+  toggleStreaming = () => {
+    takeOrReleaseLobbyCam();
   };
 
   renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
@@ -1804,6 +1809,7 @@ class UIRoot extends Component {
                 history={this.props.history}
                 mediaSearchStore={this.props.mediaSearchStore}
                 hideSettings={() => this.setState({ showSettingsMenu: false })}
+                toggleStreaming={this.toggleStreaming}
                 hubChannel={this.props.hubChannel}
                 hubScene={this.props.hubScene}
                 performConditionalSignIn={this.props.performConditionalSignIn}

@@ -11,6 +11,7 @@ import { faDoorClosed } from "@fortawesome/free-solid-svg-icons/faDoorClosed";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
 import { showFullScreenIfAvailable } from "../utils/fullscreen";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 
@@ -20,6 +21,7 @@ export default class SettingsMenu extends Component {
   static propTypes = {
     history: PropTypes.object,
     hideSettings: PropTypes.func,
+    toggleStreaming: PropTypes.func,
     mediaSearchStore: PropTypes.object,
     hubScene: PropTypes.object,
     hubChannel: PropTypes.object,
@@ -211,6 +213,23 @@ export default class SettingsMenu extends Component {
                 >
                   <FormattedMessage id="settings.create-room" />
                 </a>
+              </div>
+            </div>
+            <div className={rowClasses}>
+              <div className={styles.icon}>
+                <i>
+                  <FontAwesomeIcon icon={faVideo} />
+                </i>
+              </div>
+              <div className={styles.listItem}>
+                <div
+                  className={styles.listItemLink}
+                  onClick={() => {
+                    this.props.toggleStreaming();
+                  }}
+                >
+                  <FormattedMessage id="settings.toggle-lobbycam-control" />
+                </div>
               </div>
             </div>
             <div className={classNames([styles.bottomLinksMain])}>
