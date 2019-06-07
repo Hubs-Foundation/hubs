@@ -91,6 +91,11 @@ export const touchscreenUserBindings = addSetsToBindings({
       xform: xforms.add_vec2
     },
     {
+      src: { value: touchCamDelta },
+      dest: { value: paths.actions.lobbyCameraDelta },
+      xform: xforms.copy
+    },
+    {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
       dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising

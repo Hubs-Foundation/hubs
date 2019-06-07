@@ -63,6 +63,7 @@ This will allow the CSP checks to pass that are served up by Reticulum so you ca
 - `disable_telemetry` - If `true` disables Sentry telemetry.
 - `log_filter` - A `debug` style filter for setting the logging level.
 - `debug` - If `true` performs verbose logging of Janus and NAF traffic.
+- `vrstats` - If `true` shows stats in VR.
 - `debug_log` - If `true`, enables an on-screen debug log and console. Useful for debugging on mobile devices.
 - `userinput_debug` - If `true`, enables an on-screen userinput debug status panel. Press "L" on your keyboard to show the panel.
 - `disableTunnel` - Tunnel vision is on by default. Disable the tunnel vision by this parameter.

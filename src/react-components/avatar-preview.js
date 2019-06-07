@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import "three/examples/js/controls/OrbitControls";
+import { injectIntl, FormattedMessage } from "react-intl";
 import classNames from "classnames";
+import "three/examples/js/controls/OrbitControls";
 
 import { createDefaultEnvironmentMap } from "../components/environment-map";
 import { loadGLTF } from "../components/gltf-model-plus";
@@ -57,14 +58,14 @@ function fitBoxInFrustum(camera, box, center, margin = DEFAULT_MARGIN) {
   camera.lookAt(center);
 }
 
-export default class AvatarPreview extends Component {
+class AvatarPreview extends Component {
   static propTypes = {
     avatarGltfUrl: PropTypes.string,
     className: PropTypes.string
   };
   constructor(props) {
     super(props);
-    this.state = { loading: true };
+    this.state = { loading: true, error: null };
     this.avatar = null;
     this.imageBitmaps = {};
   }
@@ -125,7 +126,7 @@ export default class AvatarPreview extends Component {
     this.avatar = avatar;
     this.scene.add(avatar);
     this.resetCamera();
-    this.setState({ loading: false });
+    this.setState({ error: null, loading: false });
   };
 
   resetCamera = (() => {
@@ -176,7 +177,7 @@ export default class AvatarPreview extends Component {
         this.avatar = null;
       }
       if (this.props.avatarGltfUrl) {
-        this.setState({ loading: true });
+        this.setState({ error: null, loading: true });
         await this.loadPreviewAvatar(this.props.avatarGltfUrl).then(this.setAvatar);
       }
     }
@@ -201,9 +202,15 @@ export default class AvatarPreview extends Component {
   }
 
   loadPreviewAvatar = async avatarGltfUrl => {
-    const gltf = await loadGLTF(avatarGltfUrl, "model/gltf");
+    let gltf;
+    try {
+      gltf = await loadGLTF(avatarGltfUrl, "model/gltf");
+    } catch (e) {
+      this.setState({ loading: false, error: true });
+      return;
+    }
 
-    // On the bckend we look for a material called Bot_PBS, here we are looking for a mesh called Avatar.
+    // On the backend we look for a material called Bot_PBS, here we are looking for a mesh called Avatar.
     // When we "officially" support uploading custom GLTFs we need to decide what we are going to key things on
     this.previewMesh =
       gltf.scene.getObjectByName("AvatarMesh") ||
@@ -283,13 +290,27 @@ export default class AvatarPreview extends Component {
   render() {
     return (
       <div className={classNames(styles.preview, this.props.className)}>
-        {this.state.loading && (
-          <div className="loader">
-            <div className="loader-center" />
-          </div>
-        )}
+        {this.state.loading &&
+          !this.state.error && (
+            <div className="loader">
+              <div className="loader-center" />
+            </div>
+          )}
+        {this.state.error &&
+          !this.state.loading && (
+            <div className="error">
+              <img
+                src="../assets/images/warning_icon.png"
+                srcSet="../assets/images/warning_icon@2x.png 2x"
+                className="error-icon"
+              />
+              <FormattedMessage id="avatar-preview.loading-failed" />
+            </div>
+          )}
         <canvas ref={c => (this.canvas = c)} />
       </div>
     );
   }
 }
+
+export default injectIntl(AvatarPreview, { withRef: true });

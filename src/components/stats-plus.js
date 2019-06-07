@@ -1,4 +1,6 @@
 import "./stats-plus.css";
+import qsTruthy from "../utils/qs_truthy";
+
 // Adapted from https://github.com/aframevr/aframe/blob/master/src/components/scene/stats.js
 
 function createStats(scene) {
@@ -10,7 +12,7 @@ function createStats(scene) {
     values: {
       fps: { caption: "fps", below: 30 }
     },
-    groups: [{ caption: "Framerate", values: ["fps", "raf"] }],
+    groups: [{ caption: "Framerate", values: ["fps", "raf", "physics"] }],
     plugins: plugins
   });
 }
@@ -64,6 +66,57 @@ AFRAME.registerComponent("stats-plus", {
 
     scene.addEventListener("enter-vr", this.onEnterVr);
     scene.addEventListener("exit-vr", this.onExitVr);
+
+    this.vrStatsEnabled = qsTruthy("vrstats");
+    if (this.vrStatsEnabled) {
+      this.initVRStats();
+    }
+    this.lastUpdate = 0;
+  },
+  initVRStats() {
+    this.vrPanel = document.createElement("a-entity");
+    this.vrPanel.setAttribute("text", { width: 0.5, whiteSpace: "pre", value: "_", baseline: "bottom" });
+    this.vrPanel.addEventListener(
+      "loaded",
+      () =>
+        this.vrPanel.object3D.traverse(x => {
+          if (x.material) x.material.depthTest = false;
+        }),
+      { once: true }
+    );
+    this.el.append(this.vrPanel);
+    const background = document.createElement("a-plane");
+    background.setAttribute("color", "#333333");
+    background.setAttribute("material", "shader", "flat");
+    background.setAttribute("material", "depthTest", false);
+    background.setAttribute("width", 0.1);
+    background.setAttribute("height", 0.12);
+    background.setAttribute("position", "-0.2 0.055 0");
+    this.el.append(background);
+  },
+  toggleVRStats() {
+    if (this.vrStatsEnabled) {
+      this.el.object3D.visible = false;
+      this.vrStatsEnabled = false;
+    } else {
+      if (!this.vrPanel) {
+        this.initVRStats();
+      }
+      this.el.object3D.visible = true;
+      this.vrStatsEnabled = true;
+    }
+  },
+  play() {
+    this.el.sceneEl.systems.physics.addComponent(this);
+  },
+  pause() {
+    this.el.sceneEl.systems.physics.removeComponent(this);
+  },
+  beforeStep() {
+    this.stats("physics").start();
+  },
+  afterStep() {
+    this.stats("physics").end();
   },
   update(oldData) {
     if (oldData !== this.data) {
@@ -76,10 +129,10 @@ AFRAME.registerComponent("stats-plus", {
       }
     }
   },
-  tick() {
-    if (this.data) {
+  tick(time) {
+    const stats = this.stats;
+    if (this.data || this.vrStatsEnabled) {
       // Update rStats
-      const stats = this.stats;
       stats("rAF").tick();
       stats("FPS").frame();
       stats().update();
@@ -98,6 +151,26 @@ AFRAME.registerComponent("stats-plus", {
         this.lastFpsUpdate = now;
         this.frameCount = 0;
       }
+    }
+    if (this.vrStatsEnabled && time - this.lastUpdate > 100) {
+      this.vrPanel.setAttribute(
+        "text",
+        "value",
+        [
+          `f ${stats("fps")
+            .value()
+            .toFixed(0)}`,
+          `r ${stats("raf")
+            .value()
+            .toFixed(0)}`,
+          `p ${stats("physics")
+            .value()
+            .toFixed(0)}`,
+          `c ${this.el.sceneEl.renderer.info.render.calls}`,
+          `t ${(this.el.sceneEl.renderer.info.render.triangles / 1000).toFixed(0)}k`
+        ].join("\n")
+      );
+      this.lastUpdate = time;
     }
   },
   onEnterVr() {

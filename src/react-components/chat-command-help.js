@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/chat-command-help.scss";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
+import qsTruthy from "../utils/qs_truthy";
 
 export default class ChatCommandHelp extends Component {
   static propTypes = {
@@ -11,7 +12,21 @@ export default class ChatCommandHelp extends Component {
   };
 
   render() {
-    const commands = ["leave", "fly", "grow", "shrink", "duck", "debug", "scene <scene url>", "rename <new name>"];
+    const commands = [
+      "leave",
+      "fly",
+      "grow",
+      "shrink",
+      "duck",
+      "debug",
+      "vrstats",
+      "scene <scene url>",
+      "rename <new name>"
+    ];
+
+    if (qsTruthy("video_capture")) {
+      commands.push("capture [stop]");
+    }
 
     return (
       <div className={classNames({ [styles.commandHelp]: true, [styles.commandHelpOnTop]: this.props.onTop })}>
