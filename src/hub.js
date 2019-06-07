@@ -1,3 +1,4 @@
+import "@babel/polyfill";
 import "./utils/debug-log";
 
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
@@ -530,6 +531,11 @@ async function runBotMode(scene, entryManager) {
 
 document.addEventListener("DOMContentLoaded", async () => {
   warmSerializeElement();
+
+  if (!window.WebAssembly) {
+    remountUI({ showWebAssemblyDialog: true });
+    return;
+  }
 
   // If we are on iOS but we don't have the mediaDevices API, then we are likely in a Firefox or Chrome WebView,
   // or a WebView preview used in apps like Twitter and Discord. So we show the dialog that tells users to open

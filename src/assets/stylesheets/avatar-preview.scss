@@ -1,9 +1,31 @@
+@import 'shared';
+
 :local(.preview) {
   position: relative;
   overflow: hidden;
+  background: #eaeaea;
+
   .loader {
     position: absolute;
     left: calc(50% - 4.3em);
     top: calc(50% - 4.5em);
+  }
+  .error {
+    color: $grey-text;
+    text-align: center;
+    padding: 1.5em;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    white-space: pre-wrap;
+    box-sizing: border-box;
+    width: 100%;
+  }
+  .error-icon {
+    width: 16px;
+    height: 16px;
+    transform: translateY(2px);
+    margin: 0 0.3em;
   }
 }

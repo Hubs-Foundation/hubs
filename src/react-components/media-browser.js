@@ -212,9 +212,8 @@ class MediaBrowser extends Component {
   };
 
   showCustomMediaDialog = source => {
-    const isSceneApiType = source === "scene_listings" || source === "scenes";
-    // Note: The apiSource for avatars *is* actually singular. We should probably fix this on the backend.
-    const isAvatarApiType = source === "avatar_listings" || source === "avatar";
+    const isSceneApiType = source === "scenes";
+    const isAvatarApiType = source === "avatars";
     this.pushExitMediaBrowserHistory(!isAvatarApiType);
     const dialog = isSceneApiType ? "change_scene" : isAvatarApiType ? "avatar_url" : "create";
     pushHistoryState(this.props.history, "modal", dialog);
@@ -244,9 +243,7 @@ class MediaBrowser extends Component {
     const urlSource = this.getUrlSource(searchParams);
     const apiSource = (hasMeta && this.state.result.meta.source) || null;
     const isVariableWidth = this.state.result && ["bing_images", "tenor"].includes(apiSource);
-    const isSceneApiType = apiSource === "scene_listings" || apiSource === "scenes";
-    // Note: The apiSource for avatars *is* actually singular. We should probably fix this on the backend.
-    const isAvatarApiType = apiSource === "avatar_listings" || apiSource === "avatar";
+    const isSceneApiType = urlSource === "scenes";
     const showCustomOption = !isSceneApiType || this.props.hubChannel.canOrWillIfCreator("update_hub");
     const [createTileWidth, createTileHeight] = this.getTileDimensions(false, urlSource === "avatars");
     const entries = (this.state.result && this.state.result.entries) || [];
@@ -254,13 +251,14 @@ class MediaBrowser extends Component {
 
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
     if (this.state.selectNextResult) return <div />;
-    const handleCustomClicked = apiSource => {
+    const handleCustomClicked = urlSource => {
+      const isAvatarApiType = urlSource === "avatars";
       if (isAvatarApiType) {
-        this.showCustomMediaDialog(apiSource);
+        this.showCustomMediaDialog(urlSource);
       } else {
         this.props.performConditionalSignIn(
           () => !isSceneApiType || this.props.hubChannel.can("update_hub"),
-          () => this.showCustomMediaDialog(apiSource),
+          () => this.showCustomMediaDialog(urlSource),
           "change-scene"
         );
       }
@@ -338,14 +336,14 @@ class MediaBrowser extends Component {
             </div>
             <div className={styles.headerRight}>
               {showCustomOption && (
-                <a onClick={() => handleCustomClicked(apiSource)} className={styles.createButton}>
+                <a onClick={() => handleCustomClicked(urlSource)} className={styles.createButton}>
                   <i>
                     <FontAwesomeIcon icon={["scenes", "avatars"].includes(urlSource) ? faLink : faCloudUploadAlt} />
                   </i>
                 </a>
               )}
               {showCustomOption && (
-                <a onClick={() => handleCustomClicked(apiSource)} className={styles.createLink}>
+                <a onClick={() => handleCustomClicked(urlSource)} className={styles.createLink}>
                   <FormattedMessage
                     id={`media-browser.add_custom_${
                       this.state.result && isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object"
