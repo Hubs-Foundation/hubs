@@ -1,3 +1,4 @@
+import "@babel/polyfill";
 import "./utils/debug-log";
 
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
@@ -128,6 +129,7 @@ import "./systems/ui-hotkeys";
 import "./systems/tips";
 import "./systems/interactions";
 import "./systems/hubs-systems";
+import "./systems/capture-system";
 import { SOUND_CHAT_MESSAGE } from "./systems/sound-effects-system";
 
 import "./gltf-component-mappings";
@@ -575,6 +577,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   canvas.classList.add("a-hidden");
 
   warmSerializeElement();
+
+  if (!window.WebAssembly) {
+    remountUI({ showWebAssemblyDialog: true });
+    return;
+  }
 
   // If we are on iOS but we don't have the mediaDevices API, then we are likely in a Firefox or Chrome WebView,
   // or a WebView preview used in apps like Twitter and Discord. So we show the dialog that tells users to open

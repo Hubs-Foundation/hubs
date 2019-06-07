@@ -43,6 +43,7 @@ import SignInDialog from "./sign-in-dialog.js";
 import RenameRoomDialog from "./rename-room-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
+import WebAssemblyUnsupportedDialog from "./webassembly-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
@@ -138,6 +139,7 @@ class UIRoot extends Component {
     onContinueAfterSignIn: PropTypes.func,
     showSafariDialog: PropTypes.bool,
     showSafariMicDialog: PropTypes.bool,
+    showWebAssemblyDialog: PropTypes.bool,
     showOAuthDialog: PropTypes.bool,
     oauthInfo: PropTypes.array,
     isCursorHoldingPen: PropTypes.bool,
@@ -206,6 +208,9 @@ class UIRoot extends Component {
     }
     if (props.showSafariDialog) {
       this.state.dialog = <SafariDialog closable={false} />;
+    }
+    if (props.showWebAssemblyDialog) {
+      this.state.dialog = <WebAssemblyUnsupportedDialog closable={false} />;
     }
 
     props.mediaSearchStore.setHistory(props.history);
@@ -1223,8 +1228,8 @@ class UIRoot extends Component {
 
     const isLoading =
       !preload &&
-      ((!this.state.hideLoader || !this.state.didConnectToNetworkedScene) &&
-        !(this.props.showSafariMicDialog || this.props.showSafariDialog));
+      (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) &&
+      !(this.props.showSafariMicDialog || this.props.showSafariDialog || this.props.showWebAssemblyDialog);
 
     const rootStyles = {
       [styles.ui]: true,

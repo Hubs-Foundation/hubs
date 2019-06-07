@@ -1,3 +1,5 @@
+const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
+
 AFRAME.registerComponent("drop-object-button", {
   init() {
     this.onClick = () => {
@@ -10,7 +12,8 @@ AFRAME.registerComponent("drop-object-button", {
         angularDamping: 0.01,
         linearDamping: 0.01,
         linearSleepingThreshold: 1.6,
-        angularSleepingThreshold: 2.5
+        angularSleepingThreshold: 2.5,
+        collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
       });
       this.targetEl.components["ammo-body"].body.activate();
 
