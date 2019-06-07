@@ -333,7 +333,6 @@ export class SpriteSystem {
     this.stack.push(i);
 
     const mvCols = this.mesh.geometry.attributes["mvCol0"].data; // interleaved
-    const mat4 = sprite.el.object3D.matrixWorld;
     mvCols.array.set(ZEROS, i * 4 * 16 + 0);
     mvCols.array.set(ZEROS, i * 4 * 16 + 1 * 16);
     mvCols.array.set(ZEROS, i * 4 * 16 + 2 * 16);
