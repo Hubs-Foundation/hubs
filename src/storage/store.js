@@ -60,7 +60,13 @@ export const SCHEMA = {
       }
     },
 
+    // Legacy
     confirmedDiscordRooms: {
+      type: "array",
+      items: { type: "string" }
+    },
+
+    confirmedBroadcastedRooms: {
       type: "array",
       items: { type: "string" }
     },
@@ -87,6 +93,18 @@ export const SCHEMA = {
           creatorAssignmentToken: { type: "string" }
         }
       }
+    },
+
+    embedTokens: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          hubId: { type: "string" },
+          embedToken: { type: "string" }
+        }
+      }
     }
   },
 
@@ -97,9 +115,11 @@ export const SCHEMA = {
     credentials: { $ref: "#/definitions/credentials" },
     activity: { $ref: "#/definitions/activity" },
     settings: { $ref: "#/definitions/settings" },
-    confirmedDiscordRooms: { $ref: "#/definitions/confirmedDiscordRooms" },
+    confirmedDiscordRooms: { $ref: "#/definitions/confirmedDiscordRooms" }, // Legacy
+    confirmedBroadcastedRooms: { $ref: "#/definitions/confirmedBroadcastedRooms" },
     uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" },
-    creatorAssignmentTokens: { $ref: "#/definitions/creatorAssignmentTokens" }
+    creatorAssignmentTokens: { $ref: "#/definitions/creatorAssignmentTokens" },
+    embedTokens: { $ref: "#/definitions/embedTokens" }
   },
 
   additionalProperties: false
@@ -126,8 +146,10 @@ export default class Store extends EventTarget {
       credentials: {},
       profile: {},
       confirmedDiscordRooms: [],
+      confirmedBroadcastedRooms: [],
       uploadPromotionTokens: [],
-      creatorAssignmentTokens: []
+      creatorAssignmentTokens: [],
+      embedTokens: []
     });
 
     const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
@@ -172,10 +194,10 @@ export default class Store extends EventTarget {
     }
   }
 
-  resetConfirmedDiscordRooms() {
+  resetConfirmedBroadcastedRooms() {
     // merge causing us some annoyance here :(
     const overwriteMerge = (destinationArray, sourceArray) => sourceArray;
-    this.update({ confirmedDiscordRooms: [] }, { arrayMerge: overwriteMerge });
+    this.update({ confirmedBroadcastedRooms: [] }, { arrayMerge: overwriteMerge });
   }
 
   resetTipActivityFlags() {

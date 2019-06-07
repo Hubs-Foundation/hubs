@@ -124,6 +124,11 @@ export const xboxControllerUserBindings = addSetsToBindings({
       xform: xforms.compose_vec2
     },
     {
+      src: { value: paths.actions.cameraDelta },
+      dest: { value: paths.actions.lobbyCameraDelta },
+      xform: xforms.copy
+    },
+    {
       src: { value: axis("leftJoystickHorizontal") },
       dest: { value: deadzonedLeftJoystickHorizontal },
       xform: xforms.deadzone(0.1)
