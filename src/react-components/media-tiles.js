@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
-import moment from "moment";
+import dayjs from "dayjs-ext";
+import relativeTime from "dayjs-ext/plugin/relativeTime";
 import { FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
@@ -13,6 +14,8 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import styles from "../assets/stylesheets/media-browser.scss";
 import { scaledThumbnailUrlFor } from "../utils/media-utils";
 import StateLink from "./state-link";
+
+dayjs.extend(relativeTime);
 
 const PUBLISHER_FOR_ENTRY_TYPE = {
   sketchfab_model: "Sketchfab",
@@ -196,7 +199,8 @@ class MediaTiles extends Component {
               <div className={styles.attribution}>
                 <div className={styles.lastJoined}>
                   <FormattedMessage id="media-browser.hub.joined-prefix" />
-                  {moment(entry.last_activated_at).fromNow()}
+                  {dayjs().fromNow(dayjs(entry.last_activated_at))}
+                  <FormattedMessage id="media-browser.hub.joined-suffix" />
                 </div>
               </div>
             )}
