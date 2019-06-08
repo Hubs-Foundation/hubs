@@ -501,9 +501,9 @@
 :local(.media-browser-inline) {
   position: relative;
   background-color: rgba(255, 255, 255, 0.6);
-  overflow-x: auto;
-  overflow-y: auto;
+  width: 100%;
   padding: 12px;
   padding-top: 20px;
   margin-bottom: 52px;
+  overflow: hidden;
 }
