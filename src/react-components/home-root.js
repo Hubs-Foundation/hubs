@@ -145,7 +145,7 @@ class HomeRoot extends Component {
 
   signOut = () => {
     this.props.authChannel.signOut();
-    this.setState({ signedIn: false, favoriteHubsResult: null });
+    this.setState({ signedIn: false });
   };
 
   loadEnvironmentFromScene = async () => {
@@ -203,81 +203,6 @@ class HomeRoot extends Component {
     });
 
     const showFTUEVideo = false;
-    const createButton = (
-      <button
-        className={classNames(styles.primaryButton, styles.ctaButton)}
-        onClick={e => {
-          e.preventDefault();
-          createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, null, false);
-        }}
-      >
-        <FormattedMessage id="home.create_a_room" />
-      </button>
-    );
-    const pwaButton = (
-      <button
-        className={classNames(styles.secondaryButton)}
-        style={this.props.installEvent || this.state.installed ? {} : { visibility: "hidden" }}
-        onClick={() => {
-          this.props.installEvent.prompt();
-
-          this.props.installEvent.userChoice.then(choiceResult => {
-            if (choiceResult.outcome === "accepted") {
-              this.setState({ installed: true });
-            }
-          });
-        }}
-      >
-        <i>
-          <FontAwesomeIcon icon={faPlus} />
-        </i>
-        <FormattedMessage id={`home.${isMobile ? "mobile" : "desktop"}.add_pwa`} />
-      </button>
-    );
-
-    const nonFavoriteHero = (
-      <div className={styles.heroPanel}>
-        <div className={styles.container}>
-          <div className={styles.logo}>
-            <img src={hubLogo} />
-          </div>
-          <div className={styles.blurb}>
-            <FormattedMessage id="home.hero_blurb" />
-          </div>
-        </div>
-        <div className={styles.ctaButtons}>
-          {createButton}
-          {pwaButton}
-        </div>
-      </div>
-    );
-
-    const favoriteHero = (
-      <div>
-        <div className={styles.heroPanel}>
-          <div className={styles.container}>
-            <div className={classNames([styles.logo, styles.logoMargin])}>
-              <img src={hubLogo} />
-            </div>
-          </div>
-          <div className={styles.ctaButtons}>
-            {createButton}
-            {pwaButton}
-          </div>
-        </div>
-        <div className={styles.heroPanel}>
-          <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
-            <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-              <MediaTiles
-                result={this.props.favoriteHubsResult}
-                urlSource="favorites"
-                handleEntryClicked={entry => (document.location = entry.url)}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
 
     return (
       <IntlProvider locale={lang} messages={messages}>
@@ -318,7 +243,10 @@ class HomeRoot extends Component {
               </div>
             </div>
             <div className={styles.heroContent}>
-              {!this.props.hideHero && (this.props.favoriteHubsResult ? favoriteHero : nonFavoriteHero)}
+              {!this.props.hideHero &&
+                (this.props.favoriteHubsResult && this.state.signedIn
+                  ? this.renderFavoriteHero()
+                  : this.renderNonFavoriteHero())}
               {!this.props.hideHero && (
                 <div className={classNames(styles.heroPanel, styles.rightPanel)}>
                   {showFTUEVideo && (
@@ -404,6 +332,91 @@ class HomeRoot extends Component {
           {this.state.dialog}
         </div>
       </IntlProvider>
+    );
+  }
+
+  renderPwaButton() {
+    return (
+      <button
+        className={classNames(styles.secondaryButton)}
+        style={this.props.installEvent || this.state.installed ? {} : { visibility: "hidden" }}
+        onClick={() => {
+          this.props.installEvent.prompt();
+
+          this.props.installEvent.userChoice.then(choiceResult => {
+            if (choiceResult.outcome === "accepted") {
+              this.setState({ installed: true });
+            }
+          });
+        }}
+      >
+        <i>
+          <FontAwesomeIcon icon={faPlus} />
+        </i>
+        <FormattedMessage id={`home.${isMobile ? "mobile" : "desktop"}.add_pwa`} />
+      </button>
+    );
+  }
+
+  renderCreateButton() {
+    return (
+      <button
+        className={classNames(styles.primaryButton, styles.ctaButton)}
+        onClick={e => {
+          e.preventDefault();
+          createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, null, false);
+        }}
+      >
+        <FormattedMessage id="home.create_a_room" />
+      </button>
+    );
+  }
+
+  renderFavoriteHero() {
+    return (
+      <div>
+        <div className={styles.heroPanel}>
+          <div className={styles.container}>
+            <div className={classNames([styles.logo, styles.logoMargin])}>
+              <img src={hubLogo} />
+            </div>
+          </div>
+          <div className={styles.ctaButtons}>
+            {this.renderCreateButton()}
+            {this.renderPwaButton()}
+          </div>
+        </div>
+        <div className={styles.heroPanel}>
+          <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
+            <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
+              <MediaTiles
+                result={this.props.favoriteHubsResult}
+                urlSource="favorites"
+                handleEntryClicked={entry => (document.location = entry.url)}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  renderNonFavoriteHero() {
+    return (
+      <div className={styles.heroPanel}>
+        <div className={styles.container}>
+          <div className={styles.logo}>
+            <img src={hubLogo} />
+          </div>
+          <div className={styles.blurb}>
+            <FormattedMessage id="home.hero_blurb" />
+          </div>
+        </div>
+        <div className={styles.ctaButtons}>
+          {this.renderCreateButton()}
+          {this.renderPwaButton()}
+        </div>
+      </div>
     );
   }
 }
