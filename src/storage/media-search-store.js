@@ -2,7 +2,7 @@ import { EventTarget } from "event-target-shim";
 import { getReticulumFetchUrl, fetchReticulum } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 
-export const SOURCES = ["poly", "sketchfab", "videos", "scenes", "gifs", "images", "twitch", "favorites"];
+export const SOURCES = ["poly", "sketchfab", "videos", "scenes", "gifs", "images", "twitch"];
 
 const EMPTY_RESULT = { entries: [] };
 

@@ -12,7 +12,7 @@ export default class LeaveRoomDialog extends Component {
 
   render() {
     return (
-      <DialogContainer title="" {...this.props}>
+      <DialogContainer title="Leave Room" {...this.props}>
         <div className={styles.leaveRoom}>
           <div>
             <FormattedMessage id={`leave-room-dialog.${this.props.messageType}.message`} />
