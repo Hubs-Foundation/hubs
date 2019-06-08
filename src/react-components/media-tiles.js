@@ -200,7 +200,6 @@ class MediaTiles extends Component {
                 <div className={styles.lastJoined}>
                   <FormattedMessage id="media-browser.hub.joined-prefix" />
                   {dayjs(entry.last_activated_at).fromNow()}
-                  <FormattedMessage id="media-browser.hub.joined-suffix" />
                 </div>
               </div>
             )}

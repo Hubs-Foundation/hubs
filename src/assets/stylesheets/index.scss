@@ -177,6 +177,9 @@ body {
         height: auto;
       }
     }
+    :local(.logo-margin) {
+      margin: 24px 0;
+    }
     :local(.blurb) {
       white-space: pre-wrap;
       font-size: 18pt;
@@ -216,6 +219,7 @@ body {
       flex-direction: row;
       width: 250px;
       margin-top: 18px;
+      margin-bottom: 18px;
       padding-right: 20px;
 
       i {

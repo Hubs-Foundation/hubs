@@ -145,7 +145,7 @@ class HomeRoot extends Component {
 
   signOut = () => {
     this.props.authChannel.signOut();
-    this.setState({ signedIn: false });
+    this.setState({ signedIn: false, favoriteHubsResult: null });
   };
 
   loadEnvironmentFromScene = async () => {
@@ -252,6 +252,33 @@ class HomeRoot extends Component {
       </div>
     );
 
+    const favoriteHero = (
+      <div>
+        <div className={styles.heroPanel}>
+          <div className={styles.container}>
+            <div className={classNames([styles.logo, styles.logoMargin])}>
+              <img src={hubLogo} />
+            </div>
+          </div>
+          <div className={styles.ctaButtons}>
+            {createButton}
+            {pwaButton}
+          </div>
+        </div>
+        <div className={styles.heroPanel}>
+          <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
+            <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
+              <MediaTiles
+                result={this.props.favoriteHubsResult}
+                urlSource="favorites"
+                handleEntryClicked={entry => (document.location = entry.url)}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.home}>
@@ -291,37 +318,7 @@ class HomeRoot extends Component {
               </div>
             </div>
             <div className={styles.heroContent}>
-              {!this.props.hideHero &&
-                (this.props.favoriteHubsResult ? (
-                  <div>
-                    <div className={styles.heroPanel}>
-                      <div className={styles.container}>
-                        <div className={styles.logo}>
-                          <img src={hubLogo} />
-                        </div>
-                      </div>
-                      <div className={styles.ctaButtons}>
-                        {createButton}
-                        {pwaButton}
-                      </div>
-                    </div>
-                    <div className={styles.heroPanel}>
-                      <div
-                        className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}
-                      >
-                        <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-                          <MediaTiles
-                            result={this.props.favoriteHubsResult}
-                            urlSource="favorites"
-                            handleEntryClicked={entry => (document.location = entry.url)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  nonFavoriteHero
-                ))}
+              {!this.props.hideHero && (this.props.favoriteHubsResult ? favoriteHero : nonFavoriteHero)}
               {!this.props.hideHero && (
                 <div className={classNames(styles.heroPanel, styles.rightPanel)}>
                   {showFTUEVideo && (
