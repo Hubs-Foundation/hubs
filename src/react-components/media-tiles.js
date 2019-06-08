@@ -136,9 +136,8 @@ class MediaTiles extends Component {
       <div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`${entry.id}_${idx}`}>
         <a
           href={entry.url}
-          target="_blank"
           rel="noreferrer noopener"
-          onClick={e => this.props.handleEntryClicked(e, entry)}
+          onClick={e => this.props.handleEntryClicked && this.props.handleEntryClicked(e, entry)}
           className={styles.tileLink}
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
         >
@@ -162,10 +161,9 @@ class MediaTiles extends Component {
           <div className={styles.info}>
             <a
               href={entry.url}
-              target="_blank"
               rel="noreferrer noopener"
               className={styles.name}
-              onClick={e => this.props.handleEntryClicked(e, entry)}
+              onClick={e => this.props.handleEntryClicked && this.props.handleEntryClicked(e, entry)}
             >
               {entry.name || "\u00A0"}
             </a>

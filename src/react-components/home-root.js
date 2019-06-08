@@ -244,7 +244,9 @@ class HomeRoot extends Component {
             </div>
             <div className={styles.heroContent}>
               {!this.props.hideHero &&
-                (this.props.favoriteHubsResult && this.state.signedIn
+                (this.props.favoriteHubsResult &&
+                this.props.favoriteHubsResult.entries.length > 0 &&
+                this.state.signedIn
                   ? this.renderFavoriteHero()
                   : this.renderNonFavoriteHero())}
               {!this.props.hideHero && (
@@ -389,11 +391,7 @@ class HomeRoot extends Component {
         <div className={styles.heroPanel}>
           <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
             <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-              <MediaTiles
-                result={this.props.favoriteHubsResult}
-                urlSource="favorites"
-                handleEntryClicked={entry => (document.location = entry.url)}
-              />
+              <MediaTiles result={this.props.favoriteHubsResult} urlSource="favorites" />
             </div>
           </div>
         </div>
