@@ -15,6 +15,24 @@ export function getReticulumFetchUrl(path, absolute = false) {
   }
 }
 
+export async function fetchReticulum(path, absolute = false) {
+  const headers = { "Content-Type": "application/json" };
+  const credentialsToken = window.APP.store.state.credentials.token;
+  if (credentialsToken) headers.authorization = `bearer ${credentialsToken}`;
+
+  const res = await fetch(getReticulumFetchUrl(path, absolute), { method: "GET", headers });
+  const body = await res.text();
+
+  let result;
+  try {
+    result = JSON.parse(body);
+  } catch (e) {
+    result = body; // TODO better error handling
+  }
+
+  return result;
+}
+
 let reticulumMeta = null;
 let invalidatedReticulumMetaThisSession = false;
 

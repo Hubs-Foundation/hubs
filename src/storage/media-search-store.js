@@ -1,5 +1,5 @@
 import { EventTarget } from "event-target-shim";
-import { getReticulumFetchUrl } from "../utils/phoenix-utils";
+import { getReticulumFetchUrl, fetchReticulum } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 
 export const SOURCES = ["poly", "sketchfab", "videos", "scenes", "gifs", "images", "twitch", "favorites"];
@@ -95,10 +95,11 @@ export default class MediaSearchStore extends EventTarget {
       }
     }
 
-    const url = getReticulumFetchUrl(`/api/v1/media/search?${searchParams.toString()}`);
+    const path = `/api/v1/media/search?${searchParams.toString()}`;
+    const url = getReticulumFetchUrl(path);
     if (this.lastSavedUrl === url) return;
 
-    const result = fetch ? await this._fetchMedia(url, source) : EMPTY_RESULT;
+    const result = fetch ? await fetchReticulum(path, source) : EMPTY_RESULT;
 
     if (this.requestIndex != currentRequestIndex) return;
 
@@ -106,24 +107,6 @@ export default class MediaSearchStore extends EventTarget {
     this.nextCursor = this.result.meta && this.result.meta.next_cursor;
     this.lastFetchedUrl = url;
     this.dispatchEvent(new CustomEvent("statechanged"));
-  };
-
-  _fetchMedia = async url => {
-    const headers = { "Content-Type": "application/json" };
-    const credentialsToken = window.APP.store.state.credentials.token;
-    if (credentialsToken) headers.authorization = `bearer ${credentialsToken}`;
-
-    const res = await fetch(url, { method: "GET", headers });
-    const body = await res.text();
-
-    let result;
-    try {
-      result = JSON.parse(body);
-    } catch (e) {
-      result = body;
-    }
-
-    return result;
   };
 
   _legacyAvatarToSearchEntry = legacyAvatar => {

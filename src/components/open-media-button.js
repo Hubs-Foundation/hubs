@@ -1,5 +1,5 @@
-import { isHubsSceneUrl, isHubsRoomUrl, isHubsAvatarUrl } from "../utils/media-utils";
-import { guessContentType } from "../utils/media-utils";
+import { isHubsSceneUrl, isHubsRoomUrl, isHubsAvatarUrl } from "../utils/media-url-utils";
+import { guessContentType } from "../utils/media-url-utils";
 
 AFRAME.registerComponent("open-media-button", {
   init() {

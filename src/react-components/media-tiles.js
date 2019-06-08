@@ -12,7 +12,7 @@ import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 
 import styles from "../assets/stylesheets/media-browser.scss";
-import { scaledThumbnailUrlFor } from "../utils/media-utils";
+import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import StateLink from "./state-link";
 
 dayjs.extend(relativeTime);
@@ -35,7 +35,7 @@ class MediaTiles extends Component {
     const { urlSource, result } = this.props;
     const entries = (result && result.entries) || [];
     const [createTileWidth, createTileHeight] = this.getTileDimensions(false, urlSource === "avatars");
-    const searchParams = new URLSearchParams(this.props.history.location.search);
+    const searchParams = new URLSearchParams((this.props.history ? this.props.history.location : location).search);
     const hasMeta = !!(result && result.meta);
     const apiSource = (hasMeta && result.meta.source) || null;
     const isVariableWidth = result && ["bing_images", "tenor"].includes(apiSource);
@@ -199,7 +199,7 @@ class MediaTiles extends Component {
               <div className={styles.attribution}>
                 <div className={styles.lastJoined}>
                   <FormattedMessage id="media-browser.hub.joined-prefix" />
-                  {dayjs().fromNow(dayjs(entry.last_activated_at))}
+                  {dayjs(entry.last_activated_at).fromNow()}
                   <FormattedMessage id="media-browser.hub.joined-suffix" />
                 </div>
               </div>

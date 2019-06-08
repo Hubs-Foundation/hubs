@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/room-info-dialog.scss";
-import { scaledThumbnailUrlFor } from "../utils/media-utils";
+import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
 
 export default class RoomInfoDialog extends Component {
   static propTypes = {
