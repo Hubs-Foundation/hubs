@@ -70,8 +70,14 @@ export default class SettingsMenu extends Component {
                 <div
                   className={styles.listItemLink}
                   onClick={() => {
-                    showFullScreenIfAvailable();
-                    this.props.mediaSearchStore.sourceNavigateWithNoNav("favorites");
+                    this.props.performConditionalSignIn(
+                      () => this.props.hubChannel.signedIn,
+                      () => {
+                        showFullScreenIfAvailable();
+                        this.props.mediaSearchStore.sourceNavigateWithNoNav("favorites");
+                      },
+                      "favorite-rooms"
+                    );
                   }}
                 >
                   <FormattedMessage id="settings.favorites" />
