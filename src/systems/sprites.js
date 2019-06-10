@@ -65,77 +65,33 @@ const normalizedFrame = (function() {
 })();
 
 const raycastOnSprite = (function() {
-  const intersectPoint = new THREE.Vector3();
-  const worldScale = new THREE.Vector3();
-  const mvPosition = new THREE.Vector3();
-
-  const alignedPosition = new THREE.Vector2();
-  const viewWorldMatrix = new THREE.Matrix4();
-
   const vA = new THREE.Vector3();
   const vB = new THREE.Vector3();
   const vC = new THREE.Vector3();
-
-  const uvA = new THREE.Vector2();
-  const uvB = new THREE.Vector2();
-  const uvC = new THREE.Vector2();
-
-  const CENTER = new THREE.Vector2(0.5, 0.5);
-
-  function transformVertex(vertexPosition, mvPosition, center, scale) {
-    // compute position in camera space
-    alignedPosition
-      .subVectors(vertexPosition, center)
-      .addScalar(0.5)
-      .multiply(scale);
-
-    vertexPosition.copy(mvPosition);
-    vertexPosition.x += alignedPosition.x;
-    vertexPosition.y += alignedPosition.y;
-
-    // transform to world space
-    vertexPosition.applyMatrix4(viewWorldMatrix);
-  }
+  const vD = new THREE.Vector3();
+  const point = new THREE.Vector3();
+  const intersectionInfo = { distance: 0, point, object: null };
 
   return function raycast(raycaster, intersects) {
-    worldScale.setFromMatrixScale(this.matrixWorld);
-    this.modelViewMatrix.multiplyMatrices(AFRAME.scenes[0].camera.matrixWorldInverse, this.matrixWorld);
-    viewWorldMatrix.getInverse(this.modelViewMatrix).premultiply(this.matrixWorld);
-    mvPosition.setFromMatrixPosition(this.modelViewMatrix);
-
-    transformVertex(vA.set(-0.5, 0.5, 0), mvPosition, CENTER, worldScale);
-    transformVertex(vB.set(0.5, 0.5, 0), mvPosition, CENTER, worldScale);
-    transformVertex(vC.set(-0.5, -0.5, 0), mvPosition, CENTER, worldScale);
-
-    uvA.set(0, 0);
-    uvB.set(1, 0);
-    uvC.set(1, 1);
-
-    // check first triangle
-    let intersect = raycaster.ray.intersectTriangle(vA, vC, vB, false, intersectPoint);
-
+    vA.set(-0.5, 0.5, 0).applyMatrix4(this.matrixWorld);
+    vB.set(0.5, 0.5, 0).applyMatrix4(this.matrixWorld);
+    vC.set(-0.5, -0.5, 0).applyMatrix4(this.matrixWorld);
+    let intersect = raycaster.ray.intersectTriangle(vA, vC, vB, false, point);
     if (intersect === null) {
-      // check second triangle
-      transformVertex(vA.set(0.5, -0.5, 0), mvPosition, CENTER, worldScale);
-      uvA.set(0, 1);
-
-      intersect = raycaster.ray.intersectTriangle(vB, vC, vA, false, intersectPoint);
+      vD.set(0.5, -0.5, 0).applyMatrix4(this.matrixWorld);
+      intersect = raycaster.ray.intersectTriangle(vB, vC, vD, false, point);
       if (intersect === null) {
         return;
       }
     }
 
-    const distance = raycaster.ray.origin.distanceTo(intersectPoint);
-
+    const distance = raycaster.ray.origin.distanceTo(point);
     if (distance < raycaster.near || distance > raycaster.far) return;
 
-    intersects.push({
-      distance: distance,
-      point: intersectPoint.clone(),
-      uv: THREE.Triangle.getUV(intersectPoint, vA, vB, vC, uvA, uvB, uvC, new THREE.Vector2()),
-      face: null,
-      object: this
-    });
+    intersectionInfo.distance = distance;
+    intersectionInfo.point = point;
+    intersectionInfo.object = this;
+    intersects.push(intersectionInfo);
   };
 })();
 
