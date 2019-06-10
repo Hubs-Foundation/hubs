@@ -8,6 +8,35 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import vert from "./sprites/sprite.vert";
 import frag from "./sprites/sprite.frag";
 
+const multiviewVertPrefix = [
+  // GLSL 3.0 conversion
+  "#version 300 es",
+  "#define attribute in",
+  "#define varying out",
+  "#define texture2D texture",
+  "#extension GL_OVR_multiview : require",
+  "layout(num_views = 2) in;",
+  "uniform mat4 modelViewMatrix;",
+  "uniform mat4 modelViewMatrix2;",
+  "#define modelViewMatrix (gl_ViewID_OVR==0u?modelViewMatrix:modelViewMatrix2)",
+  "uniform mat4 projectionMatrix;",
+  "uniform mat4 projectionMatrix2;",
+  "#define projectionMatrix (gl_ViewID_OVR==0u?projectionMatrix:projectionMatrix2)",
+  ""
+].join("\n");
+const nonmultiviewVertPrefix = ["uniform mat4 modelViewMatrix;", "uniform mat4 projectionMatrix;", ""].join("\n");
+
+const multiviewFragPrefix = [
+  "#version 300 es",
+  "#define varying in",
+  "out highp vec4 pc_fragColor;",
+  "#define gl_FragColor pc_fragColor",
+  "#define texture2D texture",
+  ""
+].join("\n");
+
+const nonmultiviewFragPrefix = "";
+
 function isVisible(o) {
   if (!o.visible) return false;
   if (!o.parent) return true;
@@ -171,14 +200,22 @@ export class SpriteSystem {
       this.stack[i] = this.maxSprites - 1 - i;
     }
 
+    const vertexShader = String.prototype.concat(
+      scene.renderer.vr.multiview ? multiviewVertPrefix : nonmultiviewVertPrefix,
+      vert
+    );
+    const fragmentShader = String.prototype.concat(
+      scene.renderer.vr.multiview ? multiviewFragPrefix : nonmultiviewFragPrefix,
+      frag
+    );
     Promise.all([createImageTexture(spritesheetPng), waitForDOMContentLoaded()]).then(([spritesheetTexture]) => {
       const material = new THREE.RawShaderMaterial({
         uniforms: {
           u_spritesheet: { value: spritesheetTexture },
           hubs_Time: { value: 0 }
         },
-        vertexShader: vert,
-        fragmentShader: frag,
+        vertexShader,
+        fragmentShader,
         side: THREE.DoubleSide,
         transparent: true
       });
