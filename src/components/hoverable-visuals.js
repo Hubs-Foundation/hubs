@@ -8,7 +8,6 @@ const interactorTwoTransform = [];
  */
 AFRAME.registerComponent("hoverable-visuals", {
   schema: {
-    cursorController: { type: "selector" },
     enableSweepingEffect: { type: "boolean", default: true }
   },
   init() {

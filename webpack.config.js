@@ -216,7 +216,7 @@ module.exports = (env, argv) => ({
         }
       },
       {
-        test: /\.(glsl)$/,
+        test: /\.(glsl|frag|vert)$/,
         use: { loader: "raw-loader" }
       }
     ]

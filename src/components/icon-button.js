@@ -48,7 +48,15 @@ AFRAME.registerComponent("icon-button", {
 
     const image = active ? (hovering ? "activeHoverImage" : "activeImage") : hovering ? "hoverImage" : "image";
 
-    this.el.setAttribute("src", this.data[image]);
+    if (this.el.components.sprite) {
+      if (this.data[image]) {
+        this.el.setAttribute("sprite", "name", this.data[image]);
+      } else {
+        console.warn(`No ${image} image on me.`, this);
+      }
+    } else {
+      console.error("No sprite.");
+    }
 
     if (this.data.tooltip && hovering) {
       this.data.tooltip.setAttribute("visible", this.hovering);
