@@ -110,7 +110,7 @@ export const resetTips = () => {
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({}));
   localStorageCache = null;
   window.APP.store.resetTipActivityFlags();
-  window.APP.store.resetConfirmedDiscordRooms();
+  window.APP.store.resetConfirmedBroadcastedRooms();
   finishedScopes = {};
 };
 
@@ -249,6 +249,8 @@ AFRAME.registerSystem("tips", {
   },
 
   tick: function() {
+    if (isMobileVR) return; // Optimization for now, don't bother with this on mobile VR until we have real tips
+
     if (!this._userinput) {
       this._userinput = this.el.systems.userinput;
 

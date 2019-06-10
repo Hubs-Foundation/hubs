@@ -30,7 +30,7 @@ function findHandCollisionTargetForHand(body) {
 }
 
 const remoteHoverTargets = new Map();
-function findRemoteHoverTarget(object3D) {
+export function findRemoteHoverTarget(object3D) {
   if (!object3D) return null;
   const target = remoteHoverTargets.get(object3D);
   return target || findRemoteHoverTarget(object3D.parent);

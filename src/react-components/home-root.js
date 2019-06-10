@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import en from "react-intl/locale-data/en";
 
 import { lang, messages } from "../utils/i18n";
@@ -14,6 +15,8 @@ import classNames from "classnames";
 import { ENVIRONMENT_URLS } from "../assets/environments/environments";
 import { createAndRedirectToNewHub, connectToReticulum } from "../utils/phoenix-utils";
 import maskEmail from "../utils/mask-email";
+import checkIsMobile from "../utils/is-mobile";
+import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 
 import styles from "../assets/stylesheets/index.scss";
 
@@ -27,6 +30,8 @@ import { WithHoverSound } from "./wrap-with-audio";
 
 addLocaleData([...en]);
 
+const isMobile = checkIsMobile();
+
 class HomeRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
@@ -39,7 +44,8 @@ class HomeRoot extends Component {
     authOrigin: PropTypes.string,
     listSignup: PropTypes.bool,
     report: PropTypes.bool,
-    initialEnvironment: PropTypes.string
+    initialEnvironment: PropTypes.string,
+    installEvent: PropTypes.object
   };
 
   state = {
@@ -260,6 +266,24 @@ class HomeRoot extends Component {
                     }}
                   >
                     <FormattedMessage id="home.create_a_room" />
+                  </button>
+                  <button
+                    className={classNames(styles.secondaryButton)}
+                    style={this.props.installEvent || this.state.installed ? {} : { visibility: "hidden" }}
+                    onClick={() => {
+                      this.props.installEvent.prompt();
+
+                      this.props.installEvent.userChoice.then(choiceResult => {
+                        if (choiceResult.outcome === "accepted") {
+                          this.setState({ installed: true });
+                        }
+                      });
+                    }}
+                  >
+                    <i>
+                      <FontAwesomeIcon icon={faPlus} />
+                    </i>
+                    <FormattedMessage id={`home.${isMobile ? "mobile" : "desktop"}.add_pwa`} />
                   </button>
                 </div>
               </div>

@@ -9,6 +9,7 @@ paths.actions.angularVelocity = "/actions/angularVelocity";
 paths.actions.logDebugFrame = "/actions/logDebugFrame";
 paths.actions.logInteractionState = "/actions/logInteractionState";
 paths.actions.cameraDelta = "/actions/cameraDelta";
+paths.actions.lobbyCameraDelta = "/actions/lobbyCameraDelta";
 paths.actions.characterAcceleration = "/actions/characterAcceleration";
 paths.actions.boost = "/actions/boost";
 paths.actions.startGazeTeleport = "/actions/startTeleport";

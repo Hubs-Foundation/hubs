@@ -37,8 +37,9 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
   },
 
   tick() {
-    const userinput = AFRAME.scenes[0].systems.userinput;
-    const cameraDelta = userinput.get(paths.actions.cameraDelta);
+    const scene = AFRAME.scenes[0];
+    const userinput = scene.systems.userinput;
+    const cameraDelta = userinput.get(scene.is("entered") ? paths.actions.cameraDelta : paths.actions.lobbyCameraDelta);
     let lookX = this.pendingXRotation;
     let lookY = 0;
     if (cameraDelta) {
