@@ -1,6 +1,3 @@
-uniform mat4 modelViewMatrix;
-uniform mat4 projectionMatrix;
-
 attribute vec4 mvCol0;
 attribute vec4 mvCol1;
 attribute vec4 mvCol2;
