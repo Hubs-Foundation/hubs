@@ -9,7 +9,6 @@ import {
   isHubsAvatarUrl
 } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
-import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
 
