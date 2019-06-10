@@ -12,5 +12,7 @@ The steps to generate a spritesheet are :
 1. Move all the sprites you want to include in the spritesheet into `src/assets/images/sprites/`. 
 1. Type `npm run spritesheet`. This will generate `sprite-system-spritesheet.json` and `sprite-system-spritesheet.png` in the directory `src/assets/images/spritesheets/`.
 
-Note: The name of the sprite that is used in the generated `json` file is the same as the name of original image file in `src/assets/images/sprites/`. Hence we refer to the image within a spritesheet by its associated filename. This may lead to some confusion, but should be clear when inspecting the `json` file.
+The name of the sprite that is used in the generated `json` file is the same as the name of original image file in `src/assets/images/sprites/`. Hence we refer to the image within a spritesheet by its associated filename. This may lead to some confusion, but should be clear when inspecting the `json` file.
+
+Note for hubs devs: Most of the source images in `src/assets/images/sprites` were exported from Figma. If you want to alter these images, it is probably best to do so in Figma, then re-export at the desired size.
 
