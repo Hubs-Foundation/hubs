@@ -1,8 +1,9 @@
 /* global AFRAME THREE */
 
-import spritesheet from "../assets/images/hud/spritesheet.json";
+// See doc/spritesheet-generation.md for information about this spritesheet
+import spritesheet from "../assets/images/spritesheets/sprite-system-spritesheet.json";
 import { createImageTexture } from "../utils/media-utils";
-import spritesheetPng from "../assets/images/hud/spritesheet.png";
+import spritesheetPng from "../assets/images/spritesheets/sprite-system-spritesheet.png";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import vert from "./sprites/sprite.vert";
 import frag from "./sprites/sprite.frag";

@@ -1,6 +1,6 @@
 {
 	"meta": {
-		"image": "spritesheet.png",
+		"image": "sprite-system-spritesheet.png",
 		"size": {"w":1024,"h":1024},
 		"scale": "1"
 	},
