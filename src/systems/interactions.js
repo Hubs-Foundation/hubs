@@ -176,7 +176,13 @@ AFRAME.registerSystem("interaction", {
       !this.state.rightHand.held &&
       !this.rightHandTeleporter.isTeleporting &&
       !this.gazeTeleporter.isTeleporting;
-    this.cursorController.components["cursor-controller"].enabled = enableRightRemote;
+    const enableCursor =
+      !this.state.rightRemote.held ||
+      !this.state.rightRemote.held.components ||
+      !this.state.rightRemote.held.components.tags ||
+      !this.state.rightRemote.held.components.tags.data.isPen ||
+      this.state.rightRemote.held.children[0].components.pen.cursorVisible;
+    this.cursorController.components["cursor-controller"].enabled = enableRightRemote && enableCursor;
     if (!enableRightRemote) {
       this.state.rightRemote.hovered = null;
     }
