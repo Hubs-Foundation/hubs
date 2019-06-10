@@ -242,13 +242,15 @@ export class SpriteSystem {
   }
 
   updateUVs(sprite) {
+    const flipY = this.mesh.material.uniforms.u_spritesheet.value.flipY;
     const i = this.spriteWithIndex.get(sprite);
     const frame = normalizedFrame(sprite.data.name, spritesheet, this.missingSprites);
     const aUvs = this.mesh.geometry.attributes["a_uvs"];
-    aUvs.setXY(i * 4 + 0, frame.x, frame.y);
-    aUvs.setXY(i * 4 + 1, frame.x + frame.w, frame.y);
-    aUvs.setXY(i * 4 + 2, frame.x, frame.y + frame.h);
-    aUvs.setXY(i * 4 + 3, frame.x + frame.w, frame.y + frame.h);
+
+    aUvs.setXY(i * 4 + 0, frame.x, flipY ? 1 - frame.y : frame.y);
+    aUvs.setXY(i * 4 + 1, frame.x + frame.w, flipY ? 1 - frame.y : frame.y);
+    aUvs.setXY(i * 4 + 2, frame.x, flipY ? 1 - frame.y - frame.h : frame.y + frame.h);
+    aUvs.setXY(i * 4 + 3, frame.x + frame.w, flipY ? 1 - frame.y - frame.h : frame.y + frame.h);
     aUvs.needsUpdate = true;
   }
 
@@ -265,13 +267,7 @@ export class SpriteSystem {
     this.spriteWithIndex.set(sprite, i);
     this.indexWithSprite.set(i, sprite);
 
-    const frame = normalizedFrame(sprite.data.name, spritesheet, this.missingSprites);
-    const aUvs = this.mesh.geometry.attributes["a_uvs"];
-    aUvs.setXY(i * 4 + 0, frame.x, frame.y);
-    aUvs.setXY(i * 4 + 1, frame.x + frame.w, frame.y);
-    aUvs.setXY(i * 4 + 2, frame.x, frame.y + frame.h);
-    aUvs.setXY(i * 4 + 3, frame.x + frame.w, frame.y + frame.h);
-    aUvs.needsUpdate = true;
+    this.updateUVs(sprite);
 
     const aVertices = this.mesh.geometry.attributes["a_vertices"];
     aVertices.setXYZ(i * 4 + 0, -0.5, 0.5, 0);
