@@ -8,9 +8,20 @@ export class RenderManagerSystem {
   addObject(rootObject) {
     rootObject.updateMatrixWorld(true);
     rootObject.traverse(object => {
-      if (object.isMesh && !object.material.transparent) {
+      if (object.isMesh && !object.isSkinnedMesh && !object.material.transparent && object.name !== "NavMesh") {
+        console.log("Adding mesh to batch", object);
         this.batchManager.addMesh(object);
         object.batched = true;
+      }
+    });
+  }
+
+  removeObject(rootObject) {
+    rootObject.traverse(object => {
+      if (object.isMesh && !object.isSkinnedMesh && !object.material.transparent && object.name !== "NavMesh") {
+        console.log("Removing mesh from batch", object);
+        this.batchManager.removeMesh(object);
+        object.batched = false;
       }
     });
   }

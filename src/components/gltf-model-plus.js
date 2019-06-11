@@ -353,6 +353,10 @@ AFRAME.registerComponent("gltf-model-plus", {
     this.applySrc(this.data.src, this.data.contentType);
   },
 
+  remove() {
+    this.model && this.el.sceneEl.systems["hubs-systems"].renderManagerSystem.removeObject(this.model);
+  },
+
   loadTemplates() {
     this.templates = {};
     this.el.querySelectorAll(":scope > template").forEach(templateEl => {

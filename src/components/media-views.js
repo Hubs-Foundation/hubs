@@ -734,6 +734,7 @@ AFRAME.registerComponent("media-image", {
   },
 
   remove() {
+    this.el.sceneEl.systems["hubs-systems"].renderManagerSystem.removeObject(this.mesh);
     textureCache.release(this.data.src);
   },
 
@@ -810,6 +811,8 @@ AFRAME.registerComponent("media-image", {
     if (projection === "flat") {
       scaleToAspectRatio(this.el, ratio);
     }
+
+    this.el.sceneEl.systems["hubs-systems"].renderManagerSystem.addObject(this.mesh);
 
     this.el.emit("image-loaded", { src: this.data.src, projection: projection });
   }
