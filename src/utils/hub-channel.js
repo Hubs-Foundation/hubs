@@ -180,6 +180,11 @@ export default class HubChannel extends EventTarget {
     this.channel.push("subscribe", { subscription });
   };
 
+  // If true, will tell the server to not send us any NAF traffic
+  allowNAFTraffic = allow => {
+    this.channel.push(allow ? "unblock_naf" : "block_naf", {});
+  };
+
   unsubscribe = subscription => {
     return new Promise(resolve => this.channel.push("unsubscribe", { subscription }).receive("ok", resolve));
   };

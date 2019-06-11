@@ -3,8 +3,8 @@ import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js/dist/hls.light.js";
+import { spawnMediaAround, createImageTexture } from "../utils/media-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
-import { spawnMediaAround } from "../utils/media-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { promisifyWorker } from "../utils/promisify-worker.js";
@@ -202,25 +202,6 @@ function scaleToAspectRatio(el, ratio) {
   const height = Math.min(1.0, ratio);
   el.object3DMap.mesh.scale.set(width, height, 1);
   el.object3DMap.mesh.matrixNeedsUpdate = true;
-}
-
-const textureLoader = new THREE.TextureLoader();
-textureLoader.setCrossOrigin("anonymous");
-function createImageTexture(url) {
-  return new Promise((resolve, reject) => {
-    textureLoader.load(
-      url,
-      texture => {
-        texture.encoding = THREE.sRGBEncoding;
-        texture.minFilter = THREE.LinearFilter;
-        resolve(texture);
-      },
-      null,
-      function(xhr) {
-        reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
-      }
-    );
-  });
 }
 
 function disposeTexture(texture) {

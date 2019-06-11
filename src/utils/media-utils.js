@@ -275,3 +275,22 @@ export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false
 
   return { entity, orientation };
 }
+
+const textureLoader = new THREE.TextureLoader();
+textureLoader.setCrossOrigin("anonymous");
+export function createImageTexture(url) {
+  return new Promise((resolve, reject) => {
+    textureLoader.load(
+      url,
+      texture => {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.minFilter = THREE.LinearFilter;
+        resolve(texture);
+      },
+      null,
+      function(xhr) {
+        reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
+      }
+    );
+  });
+}

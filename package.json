@@ -23,7 +23,8 @@
     "lint": "npm run lint:js && npm run lint:html",
     "test": "npm run lint && npm run test:unit && npm run build",
     "test:unit": "ava",
-    "stats": "rimraf ./dist && webpack --mode=production --json"
+    "stats": "rimraf ./dist && webpack --mode=production --json",
+    "spritesheet": "spritesheet-js -f json -p src/assets/images/spritesheets/ --padding 8 --divisibleByTwo -n sprite-system-spritesheet --powerOfTwo src/assets/images/sprites/*"
   },
   "ava": {
     "files": [
@@ -120,6 +121,7 @@
     "sass-loader": "^6.0.7",
     "selfsigned": "^1.10.2",
     "shelljs": "^0.8.1",
+    "spritesheet-js": "^1.2.6",
     "style-loader": "^0.20.2",
     "stylelint": "^9.10.1",
     "stylelint-config-recommended-scss": "^3.2.0",

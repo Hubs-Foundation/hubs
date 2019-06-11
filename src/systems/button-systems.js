@@ -41,28 +41,43 @@ export class HoldableButtonSystem {
   }
 }
 
+const hasButtonComponent = (function() {
+  const BUTTON_COMPONENT_NAMES = ["icon-button", "text-button", "pin-networked-object-button"];
+  return function hasButtonComponent(components) {
+    for (let i = 0; i < BUTTON_COMPONENT_NAMES.length; i++) {
+      if (components[BUTTON_COMPONENT_NAMES[i]]) {
+        return true;
+      }
+    }
+    return false;
+  };
+})();
+
 function getHoverableButton(hovered) {
   if (!hovered) return null;
-  if (
-    hovered.components["icon-button"] ||
-    hovered.components["text-button"] ||
-    hovered.components["pin-networked-object-button"]
-  )
-    return hovered;
-  // TODO: fix this so that we aren't looping thru children here. I just did this to accomodate the new rounded buttons
+  if (hasButtonComponent(hovered.components)) return hovered;
   if (hovered.children) {
+    // TODO: not sure if looping thru children here is desireable, but we did this to accomodate the rounded-button mixins
     for (let i = 0; i < hovered.children.length; i++) {
-      if (
-        hovered.children[i].components["icon-button"] ||
-        hovered.children[i].components["text-button"] ||
-        hovered.components["pin-networked-object-button"]
-      ) {
+      if (hasButtonComponent(hovered.children[i].components)) {
         return hovered.children[i];
       }
     }
   }
   return null;
 }
+
+function dispatch(el, event) {
+  el.object3D.dispatchEvent(event);
+  if (el.children) {
+    for (let i = 0; i < el.children.length; i++) {
+      if (hasButtonComponent(el.children[i].components)) {
+        el.children[i].object3D.dispatchEvent(event);
+      }
+    }
+  }
+}
+
 const HOVERED = { type: "hovered" };
 const UNHOVERED = { type: "unhovered" };
 export class HoverButtonSystem {
@@ -71,11 +86,11 @@ export class HoverButtonSystem {
     const button = getHoverableButton(interaction.state.rightRemote.hovered);
 
     if (this.prevButton && this.prevButton !== button) {
-      this.prevButton.object3D.dispatchEvent(UNHOVERED);
+      dispatch(this.prevButton, UNHOVERED);
     }
 
     if (button && this.prevButton !== button) {
-      button.object3D.dispatchEvent(HOVERED);
+      dispatch(button, HOVERED);
     }
 
     this.prevButton = button;
