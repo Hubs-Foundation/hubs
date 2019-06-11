@@ -28,7 +28,8 @@ class MediaTiles extends Component {
     result: PropTypes.object,
     history: PropTypes.object,
     urlSource: PropTypes.string,
-    handleEntryClicked: PropTypes.func
+    handleEntryClicked: PropTypes.func,
+    handlePager: PropTypes.func
   };
 
   render() {
@@ -78,18 +79,19 @@ class MediaTiles extends Component {
         </div>
 
         {result &&
-          (hasNext || hasPrevious) && (
+          (hasNext || hasPrevious) &&
+          this.props.handlePager && (
             <div className={styles.pager}>
               <a
                 className={classNames({ [styles.previousPage]: true, [styles.pagerButtonDisabled]: !hasPrevious })}
-                onClick={() => this.handlePager(-1)}
+                onClick={() => this.props.handlePager(-1)}
               >
                 <FontAwesomeIcon icon={faAngleLeft} />
               </a>
               <div className={styles.pageNumber}>{result.meta.page}</div>
               <a
                 className={classNames({ [styles.nextPage]: true, [styles.pagerButtonDisabled]: !hasNext })}
-                onClick={() => this.handlePager(1)}
+                onClick={() => this.props.handlePager(1)}
               >
                 <FontAwesomeIcon icon={faAngleRight} />
               </a>

@@ -131,6 +131,7 @@
     "media-browser.create-avatar": "Create Avatar",
     "media-browser.create-scene": "Create Scene with Spoke",
     "media-browser.hub.joined-prefix": "Joined ",
+    "media-browser.hub.joined-prefix": "Visited ",
     "audio.title": "Audio Setup",
     "audio.talk_to_test": "talk",
     "audio.click_to_test": "click",
