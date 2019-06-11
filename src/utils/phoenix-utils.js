@@ -21,6 +21,12 @@ export async function fetchReticulum(path, absolute = false) {
   if (credentialsToken) headers.authorization = `bearer ${credentialsToken}`;
 
   const res = await fetch(getReticulumFetchUrl(path, absolute), { method: "GET", headers });
+
+  if (res.status !== 200) {
+    console.warn("Reticulum fetch failed " + path);
+    return null;
+  }
+
   const body = await res.text();
 
   let result;

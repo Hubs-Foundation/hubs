@@ -99,7 +99,7 @@ export default class MediaSearchStore extends EventTarget {
     const url = getReticulumFetchUrl(path);
     if (this.lastSavedUrl === url) return;
 
-    const result = fetch ? await fetchReticulum(path, source) : EMPTY_RESULT;
+    const result = fetch ? await fetchReticulum(path) : EMPTY_RESULT;
 
     if (this.requestIndex != currentRequestIndex) return;
 
@@ -256,8 +256,7 @@ export default class MediaSearchStore extends EventTarget {
     const source = "avatars";
     searchParams.set("source", source);
     searchParams.set("user", credentialsAccountId);
-    const url = getReticulumFetchUrl(`/api/v1/media/search?${searchParams.toString()}`);
-    const result = await this._fetchMedia(url, source);
+    const result = await fetchReticulum(`/api/v1/media/search?${searchParams.toString()}`);
     return !!(result && result.entries) && result.entries.length > 0;
   };
 

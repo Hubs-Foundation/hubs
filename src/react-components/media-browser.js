@@ -380,12 +380,19 @@ class MediaBrowser extends Component {
                 ))}
               </div>
             )}
-          <MediaTiles
-            result={this.state.result}
-            history={this.props.history}
-            urlSource={urlSource}
-            handleEntryClicked={this.handleEntryClicked}
-          />
+
+          {this.result && this.result.entries.length > 0 ? (
+            <MediaTiles
+              result={this.state.result}
+              history={this.props.history}
+              urlSource={urlSource}
+              handleEntryClicked={this.handleEntryClicked}
+            />
+          ) : (
+            <div className={styles.emptyString}>
+              <FormattedMessage id={`media-browser.empty.${urlSource}`} />
+            </div>
+          )}
         </div>
       </div>
     );

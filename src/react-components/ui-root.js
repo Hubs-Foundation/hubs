@@ -944,7 +944,7 @@ class UIRoot extends Component {
               [entryStyles.favorited]: this.isFavorited()
             })}
           >
-            <i>
+            <i title="Favorite">
               <FontAwesomeIcon icon={faStar} />
             </i>
           </button>
@@ -1787,7 +1787,7 @@ class UIRoot extends Component {
                     [styles.inRoomFavoriteButton]: true
                   })}
                 >
-                  <i>
+                  <i title="Favorite">
                     <FontAwesomeIcon icon={faStar} />
                   </i>
                 </button>

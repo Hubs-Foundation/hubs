@@ -496,6 +496,11 @@
       height: 35px;
     }
   }
+
+  :local(.empty-string) {
+    font-size: 1.2em;
+    color: $light-text;
+  }
 }
 
 :local(.media-browser-inline) {
