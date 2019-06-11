@@ -391,6 +391,7 @@ class MediaBrowser extends Component {
               history={this.props.history}
               urlSource={urlSource}
               handleEntryClicked={this.handleEntryClicked}
+              handlePager={this.handlePager}
             />
           ) : (
             <div className={styles.emptyString}>
