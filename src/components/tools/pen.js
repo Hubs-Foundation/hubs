@@ -171,7 +171,6 @@ AFRAME.registerComponent("pen", {
     const lineStartPosition = new THREE.Vector3();
     const lineEndPosition = new THREE.Vector3();
     const worldQuaternion = new THREE.Quaternion();
-    const direction = new THREE.Vector3();
     return function(t, dt) {
       const userinput = AFRAME.scenes[0].systems.userinput;
       const interaction = AFRAME.scenes[0].systems.interaction;
