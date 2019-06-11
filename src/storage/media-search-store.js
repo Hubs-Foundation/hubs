@@ -4,7 +4,7 @@ import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 
 export const SOURCES = ["poly", "sketchfab", "videos", "scenes", "gifs", "images", "twitch"];
 
-const EMPTY_RESULT = { entries: [] };
+const EMPTY_RESULT = { entries: [], meta: {} };
 
 const URL_SOURCE_TO_TO_API_SOURCE = {
   scenes: "scene_listings",
@@ -99,13 +99,16 @@ export default class MediaSearchStore extends EventTarget {
     const url = getReticulumFetchUrl(path);
     if (this.lastSavedUrl === url) return;
 
+    this.isFetching = true;
+    this.dispatchEvent(new CustomEvent("statechanged"));
     const result = fetch ? await fetchReticulum(path) : EMPTY_RESULT;
 
     if (this.requestIndex != currentRequestIndex) return;
 
     this.result = result;
-    this.nextCursor = this.result.meta && this.result.meta.next_cursor;
+    this.nextCursor = this.result && this.result.meta && this.result.meta.next_cursor;
     this.lastFetchedUrl = url;
+    this.isFetching = false;
     this.dispatchEvent(new CustomEvent("statechanged"));
   };
 
@@ -176,8 +179,17 @@ export default class MediaSearchStore extends EventTarget {
 
   _stashLastSearchParams = location => {
     const searchParams = new URLSearchParams(location.search);
+
     this._stashedParams = {};
-    this._stashedSource = this.getUrlMediaSource(location);
+    this._stashedSource = null;
+
+    const source = this.getUrlMediaSource(location);
+
+    // HACK for now do not stash favorite search, since that ends up being a source
+    // we do not reveal in the media browser UX. Revisit the rules here when we have a
+    // proper favorites browser. Then, we should have two separate stashes.
+    if (source === "favorites") return;
+    this._stashedSource = source;
 
     for (const param of SEARCH_CONTEXT_PARAMS) {
       const value = searchParams.get(param);

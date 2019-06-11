@@ -213,7 +213,7 @@ class MediaBrowser extends Component {
   close = () => {
     showFullScreenIfWasFullScreen();
     const urlSource = this.getUrlSource(new URLSearchParams(this.props.history.location.search));
-    this.pushExitMediaBrowserHistory(urlSource !== "avatars");
+    this.pushExitMediaBrowserHistory(urlSource !== "avatars" && urlSource !== "favorites");
     if (this.state.clearStashedQueryOnClose) {
       this.props.mediaSearchStore.clearStashedQuery();
     }
@@ -235,6 +235,7 @@ class MediaBrowser extends Component {
       !isFavorites && (!isSceneApiType || this.props.hubChannel.canOrWillIfCreator("update_hub"));
     const entries = (this.state.result && this.state.result.entries) || [];
     const hideSearch = urlSource === "avatars" || urlSource === "favorites";
+    const showEmptyStringOnNoResult = urlSource !== "avatars" && urlSource !== "scenes";
 
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
     if (this.state.selectNextResult) return <div />;
@@ -381,7 +382,10 @@ class MediaBrowser extends Component {
               </div>
             )}
 
-          {this.result && this.result.entries.length > 0 ? (
+          {this.props.mediaSearchStore.isFetching ||
+          this._sendQueryTimeout ||
+          (this.state.result && this.state.result.entries.length > 0) ||
+          !showEmptyStringOnNoResult ? (
             <MediaTiles
               result={this.state.result}
               history={this.props.history}

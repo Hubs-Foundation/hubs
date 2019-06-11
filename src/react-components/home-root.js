@@ -375,28 +375,26 @@ class HomeRoot extends Component {
   }
 
   renderFavoriteHero() {
-    return (
-      <div>
-        <div className={styles.heroPanel}>
-          <div className={styles.container}>
-            <div className={classNames([styles.logo, styles.logoMargin])}>
-              <img src={hubLogo} />
-            </div>
-          </div>
-          <div className={styles.ctaButtons}>
-            {this.renderCreateButton()}
-            {this.renderPwaButton()}
+    return [
+      <div className={styles.heroPanel} key={1}>
+        <div className={styles.container}>
+          <div className={classNames([styles.logo, styles.logoMargin])}>
+            <img src={hubLogo} />
           </div>
         </div>
-        <div className={styles.heroPanel}>
-          <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
-            <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-              <MediaTiles result={this.props.favoriteHubsResult} urlSource="favorites" />
-            </div>
+        <div className={styles.ctaButtons}>
+          {this.renderCreateButton()}
+          {this.renderPwaButton()}
+        </div>
+      </div>,
+      <div className={styles.heroPanel} key={2}>
+        <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
+          <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
+            <MediaTiles result={this.props.favoriteHubsResult} urlSource="favorites" />
           </div>
         </div>
       </div>
-    );
+    ];
   }
 
   renderNonFavoriteHero() {
