@@ -120,6 +120,10 @@ AFRAME.registerComponent("pen", {
         visible: true
       })
     );
+
+    //prevents the line from being a raycast target for the cursor
+    this.line.raycast = function() {};
+
     this.el.parentEl.setObject3D("penline", this.line);
 
     this.drawMode = DRAW_MODE.DEFAULT_2D;
@@ -224,17 +228,17 @@ AFRAME.registerComponent("pen", {
 
       rawIntersections.length = 0;
 
-      getLastWorldPosition(this.el.parentEl.object3D, this.raycaster.ray.origin);
-
       let cursorPose;
       let intersection;
       if (this.drawMode === DRAW_MODE.PROJECTION) {
         if (this.grabberId === "cursor") {
           cursorPose = userinput.get(pathsMap.cursor.pose);
           if (cursorPose) {
+            this.raycaster.ray.origin.copy(cursorPose.position);
             this.raycaster.ray.direction.copy(cursorPose.direction);
           }
         } else if (this.grabberId !== null) {
+          getLastWorldPosition(this.el.parentEl.object3D, this.raycaster.ray.origin);
           getLastWorldQuaternion(this.el.parentEl.object3D, worldQuaternion);
           this.raycaster.ray.direction.set(0, -1, 0);
           this.raycaster.ray.direction.applyQuaternion(worldQuaternion);
