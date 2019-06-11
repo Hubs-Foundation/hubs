@@ -120,7 +120,7 @@ AFRAME.registerComponent("pen", {
         visible: true
       })
     );
-    this.el.sceneEl.setObject3D("penline", this.line); //TODO: don't put this under the scene?
+    this.el.parentEl.setObject3D("penline", this.line);
 
     this.drawMode = DRAW_MODE.DEFAULT_2D;
 
@@ -161,6 +161,7 @@ AFRAME.registerComponent("pen", {
   tick: (() => {
     const rawIntersections = [];
     const lineStartPosition = new THREE.Vector3();
+    const lineEndPosition = new THREE.Vector3();
     const worldQuaternion = new THREE.Quaternion();
     const direction = new THREE.Vector3();
     return function(t, dt) {
@@ -223,7 +224,7 @@ AFRAME.registerComponent("pen", {
 
       rawIntersections.length = 0;
 
-      getLastWorldPosition(this.data.camera.object3D, this.raycaster.ray.origin);
+      getLastWorldPosition(this.el.parentEl.object3D, this.raycaster.ray.origin);
 
       let cursorPose;
       let intersection;
@@ -246,17 +247,20 @@ AFRAME.registerComponent("pen", {
           if (intersection) {
             if (cursorPose) {
               lineStartPosition.copy(cursorPose.position);
+              this.el.parentEl.object3D.worldToLocal(lineStartPosition);
             } else {
-              getLastWorldPosition(this.el.parentEl.object3D, lineStartPosition);
+              lineStartPosition.set(0, 0, 0);
             }
+            lineEndPosition.copy(intersection.point);
+            this.el.parentEl.object3D.worldToLocal(lineEndPosition);
 
             const positionArray = this.line.geometry.attributes.position.array;
             positionArray[0] = lineStartPosition.x;
             positionArray[1] = lineStartPosition.y;
             positionArray[2] = lineStartPosition.z;
-            positionArray[3] = intersection.point.x;
-            positionArray[4] = intersection.point.y;
-            positionArray[5] = intersection.point.z;
+            positionArray[3] = lineEndPosition.x;
+            positionArray[4] = lineEndPosition.y;
+            positionArray[5] = lineEndPosition.z;
 
             this.line.geometry.attributes.position.needsUpdate = true;
             this.line.geometry.computeBoundingSphere();
@@ -412,6 +416,6 @@ AFRAME.registerComponent("pen", {
     this.observer.disconnect();
     AFRAME.scenes[0].removeEventListener("object3dset", this.setDirty);
     AFRAME.scenes[0].removeEventListener("object3dremove", this.setDirty);
-    this.el.sceneEl.removeObject3D("penline");
+    this.el.parentEl.removeObject3D("penline");
   }
 });
