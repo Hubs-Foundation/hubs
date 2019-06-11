@@ -310,9 +310,9 @@ export default class HubChannel extends EventTarget {
     this.channel.push("kick", { session_id: sessionId });
   };
 
-  requestSupport = () => {
-    this.channel.push("events:request_support", {});
-  };
+  requestSupport = () => this.channel.push("events:request_support", {});
+  favorite = () => this.channel.push("favorite", {});
+  unfavorite = () => this.channel.push("unfavorite", {});
 
   disconnect = () => {
     if (this.channel) {

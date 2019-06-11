@@ -52,6 +52,16 @@
       }
     }
 
+    :local(.favorites-header) {
+      font-size: 1.5em;
+      font-weight: bold;
+
+      i {
+        color: $duck-yellow;
+        margin-right: 12px;
+      }
+    }
+
     :local(.search) {
       display: flex;
       width: 450px;
@@ -341,6 +351,10 @@
               }
             }
           }
+
+          :local(.last-joined) {
+            font-weight: normal;
+          }
         }
 
         :local(.tile-link) {
@@ -482,4 +496,20 @@
       height: 35px;
     }
   }
+
+  :local(.empty-string) {
+    font-size: 1.2em;
+    color: $grey-text;
+    margin-top: 24px;
+  }
+}
+
+:local(.media-browser-inline) {
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.6);
+  width: 100%;
+  padding: 12px;
+  padding-top: 20px;
+  margin-bottom: 52px;
+  overflow: hidden;
 }

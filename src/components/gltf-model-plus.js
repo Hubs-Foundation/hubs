@@ -2,7 +2,7 @@ import nextTick from "../utils/next-tick";
 import { mapMaterials } from "../utils/material-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import MobileStandardMaterial from "../materials/MobileStandardMaterial";
-import { getCustomGLTFParserURLResolver } from "../utils/media-utils";
+import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 THREE.Mesh.prototype.raycast = acceleratedRaycast;

@@ -17,6 +17,7 @@ import { createAndRedirectToNewHub, connectToReticulum } from "../utils/phoenix-
 import maskEmail from "../utils/mask-email";
 import checkIsMobile from "../utils/is-mobile";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import mediaBrowserStyles from "../assets/stylesheets/media-browser.scss";
 
 import styles from "../assets/stylesheets/index.scss";
 
@@ -26,7 +27,7 @@ import ReportDialog from "./report-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
 import UpdatesDialog from "./updates-dialog.js";
 import DialogContainer from "./dialog-container.js";
-import { WithHoverSound } from "./wrap-with-audio";
+import MediaTiles from "./media-tiles";
 
 addLocaleData([...en]);
 
@@ -45,7 +46,9 @@ class HomeRoot extends Component {
     listSignup: PropTypes.bool,
     report: PropTypes.bool,
     initialEnvironment: PropTypes.string,
-    installEvent: PropTypes.object
+    installEvent: PropTypes.object,
+    hideHero: PropTypes.bool,
+    favoriteHubsResult: PropTypes.object
   };
 
   state = {
@@ -208,26 +211,18 @@ class HomeRoot extends Component {
             <div className={styles.headerContent}>
               <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
                 <div className={styles.links}>
-                  <WithHoverSound>
-                    <a href="/whats-new">
-                      <FormattedMessage id="home.whats_new_link" />
-                    </a>
-                  </WithHoverSound>
-                  <WithHoverSound>
-                    <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
-                      <FormattedMessage id="home.source_link" />
-                    </a>
-                  </WithHoverSound>
-                  <WithHoverSound>
-                    <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
-                      <FormattedMessage id="home.community_link" />
-                    </a>
-                  </WithHoverSound>
-                  <WithHoverSound>
-                    <a href="/spoke" rel="noreferrer noopener">
-                      Spoke
-                    </a>
-                  </WithHoverSound>
+                  <a href="/whats-new">
+                    <FormattedMessage id="home.whats_new_link" />
+                  </a>
+                  <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
+                    <FormattedMessage id="home.source_link" />
+                  </a>
+                  <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
+                    <FormattedMessage id="home.community_link" />
+                  </a>
+                  <a href="/spoke" rel="noreferrer noopener">
+                    Spoke
+                  </a>
                 </div>
               </div>
               <div className={styles.signIn}>
@@ -248,64 +243,29 @@ class HomeRoot extends Component {
               </div>
             </div>
             <div className={styles.heroContent}>
-              <div className={styles.heroPanel}>
-                <div className={styles.container}>
-                  <div className={styles.logo}>
-                    <img src={hubLogo} />
-                  </div>
-                  <div className={styles.blurb}>
-                    <FormattedMessage id="home.hero_blurb" />
-                  </div>
-                </div>
-                <div className={styles.ctaButtons}>
-                  <button
-                    className={classNames(styles.primaryButton, styles.ctaButton)}
-                    onClick={e => {
-                      e.preventDefault();
-                      createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, null, false);
-                    }}
-                  >
-                    <FormattedMessage id="home.create_a_room" />
-                  </button>
-                  <button
-                    className={classNames(styles.secondaryButton)}
-                    style={this.props.installEvent || this.state.installed ? {} : { visibility: "hidden" }}
-                    onClick={() => {
-                      this.props.installEvent.prompt();
-
-                      this.props.installEvent.userChoice.then(choiceResult => {
-                        if (choiceResult.outcome === "accepted") {
-                          this.setState({ installed: true });
-                        }
-                      });
-                    }}
-                  >
-                    <i>
-                      <FontAwesomeIcon icon={faPlus} />
-                    </i>
-                    <FormattedMessage id={`home.${isMobile ? "mobile" : "desktop"}.add_pwa`} />
-                  </button>
-                </div>
-              </div>
-              <div className={classNames(styles.heroPanel, styles.rightPanel)}>
-                {showFTUEVideo && (
-                  <div className={styles.heroVideo}>
-                    <video playsInline muted loop autoPlay>
-                      <source src={homeVideoWebM} type="video/webm" />
-                      <source src={homeVideoMp4} type="video/mp4" />
-                    </video>
-                  </div>
-                )}
-                <div>
-                  <WithHoverSound>
+              {!this.props.hideHero &&
+                (this.props.favoriteHubsResult &&
+                this.props.favoriteHubsResult.entries.length > 0 &&
+                this.state.signedIn
+                  ? this.renderFavoriteHero()
+                  : this.renderNonFavoriteHero())}
+              {!this.props.hideHero && (
+                <div className={classNames(styles.heroPanel, styles.rightPanel)}>
+                  {showFTUEVideo && (
+                    <div className={styles.heroVideo}>
+                      <video playsInline muted loop autoPlay>
+                        <source src={homeVideoWebM} type="video/webm" />
+                        <source src={homeVideoMp4} type="video/mp4" />
+                      </video>
+                    </div>
+                  )}
+                  <div>
                     <div className={styles.secondaryLink}>
                       <a href="/link">
                         <FormattedMessage id="home.have_code" />
                       </a>
                     </div>
-                  </WithHoverSound>
 
-                  <WithHoverSound>
                     <div className={styles.secondaryLink}>
                       <div>
                         <FormattedMessage id="home.add_to_discord_1" />
@@ -318,63 +278,53 @@ class HomeRoot extends Component {
                         <FormattedMessage id="home.add_to_discord_3" />
                       </div>
                     </div>
-                  </WithHoverSound>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
             <div className={styles.footerContent}>
               <div className={styles.links}>
                 <div className={styles.top}>
-                  <WithHoverSound>
-                    <a
-                      className={styles.link}
-                      rel="noopener noreferrer"
-                      href="#"
-                      onClick={this.onLinkClicked(this.showJoinUsDialog)}
-                    >
-                      <FormattedMessage id="home.join_us" />
-                    </a>
-                  </WithHoverSound>
-                  <WithHoverSound>
-                    <a
-                      className={styles.link}
-                      rel="noopener noreferrer"
-                      href="#"
-                      onClick={this.onLinkClicked(this.showUpdatesDialog)}
-                    >
-                      <FormattedMessage id="home.get_updates" />
-                    </a>
-                  </WithHoverSound>
-                  <WithHoverSound>
-                    <a
-                      className={styles.link}
-                      rel="noopener noreferrer"
-                      href="#"
-                      onClick={this.onLinkClicked(this.showReportDialog)}
-                    >
-                      <FormattedMessage id="home.report_issue" />
-                    </a>
-                  </WithHoverSound>
-                  <WithHoverSound>
-                    <a
-                      className={styles.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
-                    >
-                      <FormattedMessage id="home.terms_of_use" />
-                    </a>
-                  </WithHoverSound>
-                  <WithHoverSound>
-                    <a
-                      className={styles.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
-                    >
-                      <FormattedMessage id="home.privacy_notice" />
-                    </a>
-                  </WithHoverSound>
+                  <a
+                    className={styles.link}
+                    rel="noopener noreferrer"
+                    href="#"
+                    onClick={this.onLinkClicked(this.showJoinUsDialog)}
+                  >
+                    <FormattedMessage id="home.join_us" />
+                  </a>
+                  <a
+                    className={styles.link}
+                    rel="noopener noreferrer"
+                    href="#"
+                    onClick={this.onLinkClicked(this.showUpdatesDialog)}
+                  >
+                    <FormattedMessage id="home.get_updates" />
+                  </a>
+                  <a
+                    className={styles.link}
+                    rel="noopener noreferrer"
+                    href="#"
+                    onClick={this.onLinkClicked(this.showReportDialog)}
+                  >
+                    <FormattedMessage id="home.report_issue" />
+                  </a>
+                  <a
+                    className={styles.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+                  >
+                    <FormattedMessage id="home.terms_of_use" />
+                  </a>
+                  <a
+                    className={styles.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+                  >
+                    <FormattedMessage id="home.privacy_notice" />
+                  </a>
 
                   <img className={styles.mozLogo} src={mozLogo} />
                 </div>
@@ -384,6 +334,85 @@ class HomeRoot extends Component {
           {this.state.dialog}
         </div>
       </IntlProvider>
+    );
+  }
+
+  renderPwaButton() {
+    return (
+      <button
+        className={classNames(styles.secondaryButton)}
+        style={this.props.installEvent || this.state.installed ? {} : { visibility: "hidden" }}
+        onClick={() => {
+          this.props.installEvent.prompt();
+
+          this.props.installEvent.userChoice.then(choiceResult => {
+            if (choiceResult.outcome === "accepted") {
+              this.setState({ installed: true });
+            }
+          });
+        }}
+      >
+        <i>
+          <FontAwesomeIcon icon={faPlus} />
+        </i>
+        <FormattedMessage id={`home.${isMobile ? "mobile" : "desktop"}.add_pwa`} />
+      </button>
+    );
+  }
+
+  renderCreateButton() {
+    return (
+      <button
+        className={classNames(styles.primaryButton, styles.ctaButton)}
+        onClick={e => {
+          e.preventDefault();
+          createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, null, false);
+        }}
+      >
+        <FormattedMessage id="home.create_a_room" />
+      </button>
+    );
+  }
+
+  renderFavoriteHero() {
+    return [
+      <div className={styles.heroPanel} key={1}>
+        <div className={styles.container}>
+          <div className={classNames([styles.logo, styles.logoMargin])}>
+            <img src={hubLogo} />
+          </div>
+        </div>
+        <div className={styles.ctaButtons}>
+          {this.renderCreateButton()}
+          {this.renderPwaButton()}
+        </div>
+      </div>,
+      <div className={styles.heroPanel} key={2}>
+        <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
+          <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
+            <MediaTiles result={this.props.favoriteHubsResult} urlSource="favorites" />
+          </div>
+        </div>
+      </div>
+    ];
+  }
+
+  renderNonFavoriteHero() {
+    return (
+      <div className={styles.heroPanel}>
+        <div className={styles.container}>
+          <div className={styles.logo}>
+            <img src={hubLogo} />
+          </div>
+          <div className={styles.blurb}>
+            <FormattedMessage id="home.hero_blurb" />
+          </div>
+        </div>
+        <div className={styles.ctaButtons}>
+          {this.renderCreateButton()}
+          {this.renderPwaButton()}
+        </div>
+      </div>
     );
   }
 }

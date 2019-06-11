@@ -45,6 +45,7 @@ import CloseRoomDialog from "./close-room-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebAssemblyUnsupportedDialog from "./webassembly-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
+import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
@@ -65,6 +66,7 @@ import { handleTipClose } from "../systems/tips.js";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -86,9 +88,9 @@ const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
 
-const LOBBY_MODAL_ROUTER_PATHS = ["/media/scenes"];
+const LOBBY_MODAL_ROUTER_PATHS = ["/media/scenes", "/media/avatars", "/media/favorites"];
 const LOBBY_MODAL_QUERY_VARS = ["media_source"];
-const LOBBY_MODAL_QUERY_VALUES = ["scenes"];
+const LOBBY_MODAL_QUERY_VALUES = ["scenes", "avatars", "favorites"];
 
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
@@ -132,6 +134,7 @@ class UIRoot extends Component {
     sessionId: PropTypes.string,
     subscriptions: PropTypes.object,
     initialIsSubscribed: PropTypes.bool,
+    initialIsFavorited: PropTypes.bool,
     showSignInDialog: PropTypes.bool,
     signInMessageId: PropTypes.string,
     signInCompleteMessageId: PropTypes.string,
@@ -349,6 +352,23 @@ class UIRoot extends Component {
   updateSubscribedState = () => {
     const isSubscribed = this.props.subscriptions && this.props.subscriptions.isSubscribed();
     this.setState({ isSubscribed });
+  };
+
+  toggleFavorited = () => {
+    this.props.performConditionalSignIn(
+      () => this.props.hubChannel.signedIn,
+      () => {
+        const isFavorited = this.isFavorited();
+
+        this.props.hubChannel[isFavorited ? "unfavorite" : "favorite"]();
+        this.setState({ isFavorited: !isFavorited });
+      },
+      "favorite-room"
+    );
+  };
+
+  isFavorited = () => {
+    return this.state.isFavorited !== undefined ? this.state.isFavorited : this.props.initialIsFavorited;
   };
 
   onLoadingFinished = () => {
@@ -936,6 +956,19 @@ class UIRoot extends Component {
               <FontAwesomeIcon icon={faTimes} />
             </i>
           </button>
+
+          <button
+            onClick={() => this.toggleFavorited()}
+            className={classNames({
+              [entryStyles.entryFavoriteButton]: true,
+              [entryStyles.favoriteButton]: true,
+              [entryStyles.favorited]: this.isFavorited()
+            })}
+          >
+            <i title="Favorite">
+              <FontAwesomeIcon icon={faStar} />
+            </i>
+          </button>
         </div>
 
         <div className={entryStyles.roomSubtitle}>
@@ -1301,7 +1334,8 @@ class UIRoot extends Component {
     const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
 
     // Allow scene picker pre-entry, otherwise wait until entry
-    const showMediaBrowser = mediaSource && (["scenes", "avatars"].includes(mediaSource) || this.state.entered);
+    const showMediaBrowser =
+      mediaSource && (["scenes", "avatars", "favorites"].includes(mediaSource) || this.state.entered);
     const hasTopTip = this.props.activeTips && this.props.activeTips.top;
 
     const clientInfoClientId = getClientInfoClientId(this.props.history.location);
@@ -1401,7 +1435,16 @@ class UIRoot extends Component {
                 history={this.props.history}
                 mediaSearchStore={this.props.mediaSearchStore}
                 hubChannel={this.props.hubChannel}
-                onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
+                onMediaSearchResultEntrySelected={entry => {
+                  if (entry.type === "hub") {
+                    this.showNonHistoriedDialog(LeaveRoomDialog, {
+                      destinationUrl: entry.url,
+                      messageType: "join-room"
+                    });
+                  } else {
+                    this.props.onMediaSearchResultEntrySelected(entry);
+                  }
+                }}
                 performConditionalSignIn={this.props.performConditionalSignIn}
               />
             )}
@@ -1758,6 +1801,7 @@ class UIRoot extends Component {
                 hubChannel={this.props.hubChannel}
                 hubScene={this.props.hubScene}
                 performConditionalSignIn={this.props.performConditionalSignIn}
+                showNonHistoriedDialog={this.showNonHistoriedDialog}
                 pushHistoryState={this.pushHistoryState}
               />
             )}
@@ -1798,6 +1842,17 @@ class UIRoot extends Component {
                     </button>
                   </div>
                 )}
+                <button
+                  onClick={() => this.toggleFavorited()}
+                  className={classNames({
+                    [entryStyles.favorited]: this.isFavorited(),
+                    [styles.inRoomFavoriteButton]: true
+                  })}
+                >
+                  <i title="Favorite">
+                    <FontAwesomeIcon icon={faStar} />
+                  </i>
+                </button>
               </div>
             )}
           </div>

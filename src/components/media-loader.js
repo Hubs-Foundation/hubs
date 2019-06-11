@@ -1,13 +1,12 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
+import { resolveUrl, injectCustomShaderChunks } from "../utils/media-utils";
 import {
   guessContentType,
   proxiedUrlFor,
-  resolveUrl,
-  injectCustomShaderChunks,
   isHubsRoomUrl,
   isHubsSceneUrl,
   isHubsAvatarUrl
-} from "../utils/media-utils";
+} from "../utils/media-url-utils";
 import { addAnimationComponents } from "../utils/animation";
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
