@@ -41,6 +41,8 @@ const DRAW_MODE = {
   PROJECTION: 1
 };
 
+const MAX_DISTANCE_BETWEEN_SURFACES = 1;
+
 /**
  * Pen tool
  * A tool that allows drawing on networked-drawing components.
@@ -107,6 +109,8 @@ AFRAME.registerComponent("pen", {
     this.raycaster.firstHitOnly = true; // flag specific to three-mesh-bvh
 
     this.originalPosition = this.el.object3D.position.clone();
+
+    this.lastIntersectionDistance = 0;
 
     const lineGeometry = new THREE.BufferGeometry();
     lineGeometry.addAttribute("position", new THREE.BufferAttribute(new Float32Array(2 * 3), 3));
@@ -301,11 +305,16 @@ AFRAME.registerComponent("pen", {
       );
 
       //Prevent drawings from "jumping" large distances
-      if (this.currentDrawing && this.hadIntersection !== !!intersection) {
+      if (
+        this.currentDrawing &&
+        (this.lastIntersectedObject !== (intersection ? intersection.object : null) &&
+          Math.abs(intersection.distance - this.lastIntersectionDistance) > MAX_DISTANCE_BETWEEN_SURFACES)
+      ) {
         this.worldPosition.copy(this.lastPosition);
         this._endDraw();
       }
-      this.hadIntersection = !!intersection;
+      this.lastIntersectionDistance = intersection ? intersection.distance : 0;
+      this.lastIntersectedObject = intersection ? intersection.object : null;
 
       if (!almostEquals(0.005, this.worldPosition, this.lastPosition)) {
         this.direction.subVectors(this.worldPosition, this.lastPosition).normalize();
