@@ -731,7 +731,6 @@ AFRAME.registerComponent("media-image", {
   async update(oldData) {
     let texture;
     let ratio = 1;
-    this._hasRetainedTexture = false;
 
     try {
       const { src, contentType } = this.data;
@@ -744,6 +743,7 @@ AFRAME.registerComponent("media-image", {
         this.mesh.material.needsUpdate = true;
         if (this.mesh.map !== errorTexture) {
           textureCache.release(oldData.src);
+          this._hasRetainedTexture = false;
         }
       }
 
@@ -768,6 +768,7 @@ AFRAME.registerComponent("media-image", {
         // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
         if (this.data.src !== src) {
           textureCache.release(src);
+          this._hasRetainedTexture = false;
           return;
         }
       }
