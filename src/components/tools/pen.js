@@ -299,7 +299,8 @@ AFRAME.registerComponent("pen", {
       if (
         this.currentDrawing &&
         (this.lastIntersectedObject !== (intersection ? intersection.object : null) &&
-          Math.abs(intersection.distance - this.lastIntersectionDistance) > MAX_DISTANCE_BETWEEN_SURFACES)
+          (intersection &&
+            Math.abs(intersection.distance - this.lastIntersectionDistance) > MAX_DISTANCE_BETWEEN_SURFACES))
       ) {
         this.worldPosition.copy(this.lastPosition);
         this._endDraw();
