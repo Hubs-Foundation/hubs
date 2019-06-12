@@ -171,18 +171,20 @@ AFRAME.registerSystem("interaction", {
       this.tickInteractor(this.options.rightRemote, this.state.rightRemote);
     }
 
-    const enableRightRemote =
-      !this.state.rightHand.hovered &&
-      !this.state.rightHand.held &&
-      !this.rightHandTeleporter.isTeleporting &&
-      !this.gazeTeleporter.isTeleporting;
-    const enableCursor =
-      !this.state.rightRemote.held ||
-      !this.state.rightRemote.held.components ||
-      !this.state.rightRemote.held.components.tags ||
-      !this.state.rightRemote.held.components.tags.data.isPen ||
-      this.state.rightRemote.held.children[0].components.pen.cursorVisible;
-    this.cursorController.components["cursor-controller"].enabled = enableRightRemote && enableCursor;
+    const rightHandInteracting = this.state.rightHand.hovered || this.state.rightHand.held;
+    const rightHandTeleporting = this.rightHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting;
+    const rightRemotePenIntersectingInVR =
+      this.el.sceneEl.is("vr-mode") &&
+      this.state.rightRemote.held &&
+      this.state.rightRemote.held.components &&
+      this.state.rightRemote.held.components.tags &&
+      this.state.rightRemote.held.components.tags.data.isPen &&
+      this.state.rightRemote.held.children[0].components.pen.intersection;
+
+    const enableRightRemote = !rightHandInteracting && !rightHandTeleporting && !rightRemotePenIntersectingInVR;
+
+    this.cursorController.components["cursor-controller"].enabled = enableRightRemote;
+
     if (!enableRightRemote) {
       this.state.rightRemote.hovered = null;
     }

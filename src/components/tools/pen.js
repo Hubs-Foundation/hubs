@@ -32,7 +32,6 @@ const pathsMap = {
     startDrawing: paths.actions.cursor.startDrawing,
     stopDrawing: paths.actions.cursor.stopDrawing,
     undoDrawing: paths.actions.cursor.undoDrawing,
-    // no way to switchDrawModes with mouse cursor yet
     penNextColor: paths.actions.cursor.penNextColor,
     penPrevColor: paths.actions.cursor.penPrevColor,
     scalePenTip: paths.actions.cursor.scalePenTip
@@ -112,7 +111,7 @@ AFRAME.registerComponent("pen", {
     this.raycaster.firstHitOnly = true; // flag specific to three-mesh-bvh
 
     this.originalPosition = this.el.object3D.position.clone();
-
+    this.intersection = null;
     this.lastIntersectionDistance = 0;
 
     const lineGeometry = new THREE.BufferGeometry();
@@ -223,8 +222,8 @@ AFRAME.registerComponent("pen", {
 
       rawIntersections.length = 0;
 
+      this.intersection = null;
       let cursorPose;
-      let intersection;
       if (this.drawMode === DRAW_MODE.PROJECTION) {
         if (this.grabberId === "cursor") {
           cursorPose = userinput.get(pathsMap.cursor.pose);
@@ -241,16 +240,16 @@ AFRAME.registerComponent("pen", {
 
         if (this.grabberId !== null) {
           this.raycaster.intersectObjects(this.targets, true, rawIntersections);
-          intersection = rawIntersections[0];
+          this.intersection = rawIntersections[0];
 
-          if (intersection) {
+          if (this.intersection) {
             if (cursorPose) {
               lineStartPosition.copy(cursorPose.position);
               this.el.parentEl.object3D.worldToLocal(lineStartPosition);
             } else {
               lineStartPosition.set(0, 0, 0);
             }
-            lineEndPosition.copy(intersection.point);
+            lineEndPosition.copy(this.intersection.point);
             this.el.parentEl.object3D.worldToLocal(lineEndPosition);
 
             const positionArray = this.line.geometry.attributes.position.array;
@@ -262,16 +261,15 @@ AFRAME.registerComponent("pen", {
             positionArray[5] = lineEndPosition.z;
 
             this.line.geometry.attributes.position.needsUpdate = true;
-            this.line.geometry.computeBoundingSphere();
           }
 
-          if (intersection) {
-            this.el.object3D.position.copy(intersection.point);
+          if (this.intersection) {
+            this.el.object3D.position.copy(this.intersection.point);
 
             this.el.parentEl.object3D.worldToLocal(this.el.object3D.position);
 
             this.el.object3D.matrixNeedsUpdate = true;
-            this.worldPosition.copy(intersection.point);
+            this.worldPosition.copy(this.intersection.point);
           } else {
             this.el.object3D.position.copy(this.originalPosition);
             this.el.object3D.matrixNeedsUpdate = true;
@@ -284,29 +282,23 @@ AFRAME.registerComponent("pen", {
         getLastWorldPosition(this.el.object3D, this.worldPosition);
       }
 
-      this._setPenVisible(this.grabberId !== "cursor" || !intersection);
+      this._setPenVisible(this.grabberId !== "cursor" || !this.intersection);
       this._setLineVisible(
-        this.el.sceneEl.is("vr-mode") &&
-          this.grabberId !== null &&
-          this.drawMode === DRAW_MODE.PROJECTION &&
-          intersection
-      );
-      this._setCursorVisible(
-        this.grabberId !== "cursor" || this.grabberId === null || !this.el.sceneEl.is("vr-mode") || !intersection
+        this.el.sceneEl.is("vr-mode") && this.drawMode === DRAW_MODE.PROJECTION && this.intersection
       );
 
       //Prevent drawings from "jumping" large distances
       if (
         this.currentDrawing &&
-        (this.lastIntersectedObject !== (intersection ? intersection.object : null) &&
-          (intersection &&
-            Math.abs(intersection.distance - this.lastIntersectionDistance) > MAX_DISTANCE_BETWEEN_SURFACES))
+        (this.lastIntersectedObject !== (this.intersection ? this.intersection.object : null) &&
+          (!this.intersection ||
+            Math.abs(this.intersection.distance - this.lastIntersectionDistance) > MAX_DISTANCE_BETWEEN_SURFACES))
       ) {
         this.worldPosition.copy(this.lastPosition);
         this._endDraw();
       }
-      this.lastIntersectionDistance = intersection ? intersection.distance : 0;
-      this.lastIntersectedObject = intersection ? intersection.object : null;
+      this.lastIntersectionDistance = this.intersection ? this.intersection.distance : 0;
+      this.lastIntersectedObject = this.intersection ? this.intersection.object : null;
 
       if (!almostEquals(0.005, this.worldPosition, this.lastPosition)) {
         this.direction.subVectors(this.worldPosition, this.lastPosition).normalize();
@@ -349,10 +341,6 @@ AFRAME.registerComponent("pen", {
     if (this.line.material.visible !== visible) {
       this.line.material.visible = visible;
     }
-  },
-
-  _setCursorVisible(visible) {
-    this.cursorVisible = visible;
   },
 
   //helper function to get normal of direction of drawing cross direction to camera
