@@ -778,13 +778,13 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: { value: leftButton("y").pressed },
-      dest: { value: paths.actions.leftHand.undoDrawing },
+      dest: { value: paths.actions.leftHand.switchDrawMode },
       xform: xforms.rising,
       priority: 1
     },
     {
       src: { value: rightButton("b").pressed },
-      dest: { value: paths.actions.rightHand.undoDrawing },
+      dest: { value: paths.actions.leftHand.undoDrawing },
       xform: xforms.rising,
       priority: 1
     }
@@ -969,13 +969,13 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: { value: rightButton("b").pressed },
-      dest: { value: paths.actions.rightHand.undoDrawing },
+      dest: { value: paths.actions.rightHand.switchDrawMode },
       xform: xforms.rising,
       priority: 1
     },
     {
       src: { value: leftButton("y").pressed },
-      dest: { value: paths.actions.leftHand.undoDrawing },
+      dest: { value: paths.actions.rightHand.undoDrawing },
       xform: xforms.rising,
       priority: 1
     }
