@@ -7,6 +7,7 @@ import en from "react-intl/locale-data/en";
 import screenfull from "screenfull";
 
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
+import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
@@ -766,7 +767,7 @@ class UIRoot extends Component {
       this.setState({ miniInviteActivated: false });
     }, 5000);
 
-    if (navigator.share) {
+    if (canShare()) {
       navigator.share({ title: document.title, url: link });
     } else {
       copy(link);
