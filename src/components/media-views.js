@@ -743,7 +743,6 @@ AFRAME.registerComponent("media-image", {
         this.mesh.material.needsUpdate = true;
         if (this.mesh.map !== errorTexture) {
           textureCache.release(oldData.src);
-          this._hasRetainedTexture = false;
         }
       }
 
