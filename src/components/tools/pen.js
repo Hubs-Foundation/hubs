@@ -13,6 +13,7 @@ const pathsMap = {
     startDrawing: paths.actions.rightHand.startDrawing,
     stopDrawing: paths.actions.rightHand.stopDrawing,
     undoDrawing: paths.actions.rightHand.undoDrawing,
+    switchDrawMode: paths.actions.rightHand.switchDrawMode,
     penNextColor: paths.actions.rightHand.penNextColor,
     penPrevColor: paths.actions.rightHand.penPrevColor,
     scalePenTip: paths.actions.rightHand.scalePenTip
@@ -21,6 +22,7 @@ const pathsMap = {
     startDrawing: paths.actions.leftHand.startDrawing,
     stopDrawing: paths.actions.leftHand.stopDrawing,
     undoDrawing: paths.actions.leftHand.undoDrawing,
+    switchDrawMode: paths.actions.leftHand.switchDrawMode,
     penNextColor: paths.actions.leftHand.penNextColor,
     penPrevColor: paths.actions.leftHand.penPrevColor,
     scalePenTip: paths.actions.leftHand.scalePenTip
@@ -30,6 +32,7 @@ const pathsMap = {
     startDrawing: paths.actions.cursor.startDrawing,
     stopDrawing: paths.actions.cursor.stopDrawing,
     undoDrawing: paths.actions.cursor.undoDrawing,
+    // no way to switchDrawModes with mouse cursor yet
     penNextColor: paths.actions.cursor.penNextColor,
     penPrevColor: paths.actions.cursor.penPrevColor,
     scalePenTip: paths.actions.cursor.scalePenTip
@@ -209,23 +212,12 @@ AFRAME.registerComponent("pen", {
           this._changeColor(-1);
           sfx.playSoundOneShot(SOUND_PEN_CHANGE_COLOR);
         }
-
-        if (this.grabberId !== "cursor") {
-          if (userinput.get(paths.undoDrawing)) {
-            this.drawMode = this.drawMode === DRAW_MODE.DEFAULT_2D ? DRAW_MODE.PROJECTION : DRAW_MODE.DEFAULT_2D;
-          }
-          const otherGrabberId =
-            this.grabberId === "player-right-controller" ? "player-left-controller" : "player-right-controller";
-          const otherPaths = pathsMap[otherGrabberId];
-          if (userinput.get(otherPaths.undoDrawing)) {
-            this._undoDraw();
-            sfx.playSoundOneShot(SOUND_PEN_UNDO_DRAW);
-          }
-        } else {
-          if (userinput.get(paths.undoDrawing)) {
-            this._undoDraw();
-            sfx.playSoundOneShot(SOUND_PEN_UNDO_DRAW);
-          }
+        if (userinput.get(paths.undoDrawing)) {
+          this._undoDraw();
+          sfx.playSoundOneShot(SOUND_PEN_UNDO_DRAW);
+        }
+        if (paths.switchDrawMode && userinput.get(paths.switchDrawMode)) {
+          this.drawMode = this.drawMode === DRAW_MODE.DEFAULT_2D ? DRAW_MODE.PROJECTION : DRAW_MODE.DEFAULT_2D;
         }
       }
 
@@ -307,7 +299,8 @@ AFRAME.registerComponent("pen", {
       if (
         this.currentDrawing &&
         (this.lastIntersectedObject !== (intersection ? intersection.object : null) &&
-          Math.abs(intersection.distance - this.lastIntersectionDistance) > MAX_DISTANCE_BETWEEN_SURFACES)
+          (intersection &&
+            Math.abs(intersection.distance - this.lastIntersectionDistance) > MAX_DISTANCE_BETWEEN_SURFACES))
       ) {
         this.worldPosition.copy(this.lastPosition);
         this._endDraw();
