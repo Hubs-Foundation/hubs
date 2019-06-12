@@ -249,6 +249,12 @@ class TextureCache {
 
   release(src) {
     const cacheItem = this.cache.get(src);
+
+    if (!cacheItem) {
+      console.error(`Releasing uncached texture src ${src}`);
+      return;
+    }
+
     cacheItem.count--;
     // console.log("release", src, cacheItem.count);
     if (cacheItem.count <= 0) {
@@ -716,12 +722,17 @@ AFRAME.registerComponent("media-image", {
   },
 
   remove() {
-    textureCache.release(this.data.src);
+    if (this._hasRetainedTexture) {
+      textureCache.release(this.data.src);
+      this._hasRetainedTexture = false;
+    }
   },
 
   async update(oldData) {
     let texture;
     let ratio = 1;
+    this._hasRetainedTexture = false;
+
     try {
       const { src, contentType } = this.data;
       if (!src) return;
@@ -760,6 +771,8 @@ AFRAME.registerComponent("media-image", {
           return;
         }
       }
+
+      this._hasRetainedTexture = true;
     } catch (e) {
       console.error("Error loading image", this.data.src, e);
       texture = errorTexture;
