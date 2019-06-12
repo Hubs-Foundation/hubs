@@ -776,6 +776,7 @@ AFRAME.registerComponent("media-image", {
     } catch (e) {
       console.error("Error loading image", this.data.src, e);
       texture = errorTexture;
+      this._hasRetainedTexture = false;
     }
 
     const projection = this.data.projection;
