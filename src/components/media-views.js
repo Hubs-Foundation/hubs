@@ -767,7 +767,6 @@ AFRAME.registerComponent("media-image", {
         // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
         if (this.data.src !== src) {
           textureCache.release(src);
-          this._hasRetainedTexture = false;
           return;
         }
       }
