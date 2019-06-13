@@ -1,6 +1,7 @@
 import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
+import { share } from "./utils/share";
 
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
@@ -298,6 +299,11 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_spawn", () => {
       handleExitTo2DInterstitial(false, () => window.APP.mediaSearchStore.pushExitMediaBrowserHistory());
       window.APP.mediaSearchStore.sourceNavigateToDefaultSource();
+    });
+
+    this.scene.addEventListener("action_media_share", e => {
+      const { url } = e.detail;
+      share({ url, title: `Taken in #hubs, join me!` });
     });
 
     this.scene.addEventListener("action_invite", () => {
