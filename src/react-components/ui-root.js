@@ -244,10 +244,10 @@ class UIRoot extends Component {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     document
       .querySelector(".a-canvas")
-      .addEventListener("mouseup", () =>
+      .addEventListener("mouseup", () => {
         if (this.state.showPresenceList || this.state.showSettingsMenu || this.state.showShareDialog) {
           this.setState({ showPresenceList: false, showSettingsMenu: false, showShareDialog: false })
-        }
+        }}
       );
 
     this.props.scene.addEventListener(
