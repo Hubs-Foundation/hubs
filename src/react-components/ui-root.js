@@ -245,7 +245,9 @@ class UIRoot extends Component {
     document
       .querySelector(".a-canvas")
       .addEventListener("mouseup", () =>
-        this.setState({ showPresenceList: false, showSettingsMenu: false, showShareDialog: false })
+        if (this.state.showPresenceList || this.state.showSettingsMenu || this.state.showShareDialog) {
+          this.setState({ showPresenceList: false, showSettingsMenu: false, showShareDialog: false })
+        }
       );
 
     this.props.scene.addEventListener(
