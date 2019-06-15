@@ -31,6 +31,7 @@
     "sign-in.out": "Sign Out",
     "rename-room.message": "Enter the new name for the room.",
     "rename-room.rename": "Rename Room",
+    "room-settings.spawn_camera": "spawn camera",
     "close-room.message": "Closing this room will remove yourself and others from the room, shutting it down permanently.\n\nAre you sure? This action cannot be undone.",
     "close-room.confirm": "Yes, Close Room",
     "close-room.cancel": "Cancel",

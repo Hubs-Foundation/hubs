@@ -126,6 +126,7 @@ class UIRoot extends Component {
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
     hubName: PropTypes.string,
+    hubPerms: PropTypes.object,
     hubScene: PropTypes.object,
     hubIsBound: PropTypes.bool,
     isSupportAvailable: PropTypes.bool,
@@ -1475,7 +1476,10 @@ class UIRoot extends Component {
               stateValue="rename_room"
               history={this.props.history}
               render={() =>
-                this.renderDialog(RenameRoomDialog, { onRename: name => this.props.hubChannel.rename(name) })
+                this.renderDialog(RenameRoomDialog, {
+                  initialSettings: { name: this.props.hubName, perms: this.props.hubPerms },
+                  onRename: settings => this.props.hubChannel.updateHub(settings)
+                })
               }
             />
             <StateRoute

@@ -299,6 +299,7 @@ async function updateUIForHub(hub) {
   remountUI({
     hubId: hub.hub_id,
     hubName: hub.name,
+    hubPerms: hub.perms,
     hubScene: hub.scene,
     hubEntryCode: hub.entry_code
   });

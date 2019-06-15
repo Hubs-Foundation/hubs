@@ -8,13 +8,15 @@ import DialogContainer from "./dialog-container";
 
 export default class RenameRoomDialog extends Component {
   static propTypes = {
+    initialSettings: PropTypes.object,
     onRename: PropTypes.func,
     onClose: PropTypes.func
   };
 
-  state = {
-    name: ""
-  };
+  constructor(props) {
+    super(props);
+    this.state = props.initialSettings;
+  }
 
   onSubmit = e => {
     e.preventDefault();
@@ -43,6 +45,12 @@ export default class RenameRoomDialog extends Component {
             onChange={e => this.setState({ name: e.target.value })}
             className={styles.nameField}
           />
+          {Object.keys(this.state.perms).map(perm => (
+            <label key={perm}>
+              <input type="checkbox" />
+              <FormattedMessage id={`room-settings.${perm}`} />
+            </label>
+          ))}
           <button type="submit" className={styles.nextButton}>
             <FormattedMessage id="rename-room.rename" />
           </button>
