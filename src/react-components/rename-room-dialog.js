@@ -21,7 +21,7 @@ export default class RenameRoomDialog extends Component {
   onSubmit = e => {
     e.preventDefault();
     e.stopPropagation();
-    this.props.onRename(this.state.name);
+    this.props.onRename(this.state);
     this.props.onClose();
   };
 
@@ -47,7 +47,10 @@ export default class RenameRoomDialog extends Component {
           />
           {Object.keys(this.state.perms).map(perm => (
             <label key={perm}>
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                onChange={e => this.setState({ perms: { ...this.state.perms, [perm]: e.target.checked } })}
+              />
               <FormattedMessage id={`room-settings.${perm}`} />
             </label>
           ))}
