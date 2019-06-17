@@ -706,6 +706,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   });
 
+  scene.addEventListener("action_media_share", e => {
+    performConditionalSignIn(
+      () => hubChannel.signedIn,
+      async () => {
+        if (hubChannel.can("tweet")) {
+          pushHistoryState(history, "modal", "tweet", e.detail);
+        } else {
+          const url = await hubChannel.getOAuthURL();
+          remountUI({ showOAuthDialog: true, oauthInfo: [{ type: "twitter", url: url }] });
+        }
+      },
+      "tweet"
+    );
+  });
+
   remountUI({ performConditionalSignIn, embed: isEmbed, showPreload: isEmbed });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();

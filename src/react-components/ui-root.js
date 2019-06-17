@@ -50,6 +50,7 @@ import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
+import TweetDialog from "./tweet-dialog.js";
 import LobbyChatBox from "./lobby-chat-box.js";
 import InWorldChatBox from "./in-world-chat-box.js";
 import AvatarEditor from "./avatar-editor";
@@ -1534,6 +1535,12 @@ class UIRoot extends Component {
               render={() =>
                 this.renderDialog(RoomInfoDialog, { scene: this.props.hubScene, hubName: this.props.hubName })
               }
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="tweet"
+              history={this.props.history}
+              render={() => this.renderDialog(TweetDialog, {})}
             />
 
             {showClientInfo && (

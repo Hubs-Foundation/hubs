@@ -64,6 +64,7 @@ export function clearHistoryState(history) {
 // and then push a duplicate entry onto the history stack in order to wipe out forward
 // history.
 export function popToBeginningOfHubHistory(history, navigateToPriorPage) {
+  return;
   if (!history.location.state || history.location.state.__historyLength === undefined) return;
 
   const len = history.location.state.__historyLength;

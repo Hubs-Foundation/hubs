@@ -251,6 +251,17 @@ export default class HubChannel extends EventTarget {
     });
   };
 
+  getOAuthURL = () => {
+    return new Promise((resolve, reject) => {
+      this.channel
+        .push("oauth", { type: "twitter" })
+        .receive("ok", res => {
+          resolve(res.oauth_url);
+        })
+        .receive("error", reject);
+    });
+  };
+
   pin = (id, gltfNode, fileId, fileAccessToken, promotionToken) => {
     const payload = { id, gltf_node: gltfNode };
     if (fileId && promotionToken) {
