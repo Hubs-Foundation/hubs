@@ -49,6 +49,7 @@ export default class RenameRoomDialog extends Component {
             <label key={perm}>
               <input
                 type="checkbox"
+                checked={this.state.perms[perm]}
                 onChange={e => this.setState({ perms: { ...this.state.perms, [perm]: e.target.checked } })}
               />
               <FormattedMessage id={`room-settings.${perm}`} />
