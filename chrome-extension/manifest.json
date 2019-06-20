@@ -1,0 +1,28 @@
+{
+    "name" : "Lipsync-DEVHMI-Audio",
+    "author": "Gaurav Srivastava",
+    "version" : "3.4",
+    "manifest_version" : 2,
+    "minimum_chrome_version": "34",
+    "description" : "This WebRTC screen capturing extension can be used within any WebRTC library/application! Use getScreenId.js!",
+    "homepage_url": "https://localhost:9001/*",
+    "background": {
+        "scripts": ["background-script.js"],
+        "persistent": false
+    },
+    "content_scripts": [ {
+       "js": [ "content-script.js" ],
+       "all_frames": true,
+       "run_at": "document_end",
+       "matches": ["https://localhost:9001/*"]
+    }],
+    "icons" : {
+        "48" : "icon.png"
+    },
+    "permissions": [
+        "desktopCapture"
+    ],
+    "web_accessible_resources": [
+        "icon.png"
+    ]
+}
