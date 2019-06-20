@@ -1,11 +1,11 @@
 {
-    "name" : "Lipsync-DEVHMI-Audio",
+    "name" : "Hub-Screensharing-Chrome",
     "author": "Gaurav Srivastava",
     "version" : "3.4",
     "manifest_version" : 2,
     "minimum_chrome_version": "34",
     "description" : "This WebRTC screen capturing extension can be used within any WebRTC library/application! Use getScreenId.js!",
-    "homepage_url": "https://localhost:9001/*",
+    "homepage_url": "https://hubs.mozilla.com/*",
     "background": {
         "scripts": ["background-script.js"],
         "persistent": false
@@ -14,7 +14,7 @@
        "js": [ "content-script.js" ],
        "all_frames": true,
        "run_at": "document_end",
-       "matches": ["https://localhost:9001/*"]
+       "matches": ["https://hubs.mozilla.com/*"]
     }],
     "icons" : {
         "48" : "icon.png"
