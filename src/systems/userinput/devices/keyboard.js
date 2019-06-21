@@ -16,7 +16,7 @@ export class KeyboardDevice {
           (e.type === "keydown" &&
             e.key === "/" &&
             !["TEXTAREA", "INPUT"].includes(document.activeElement && document.activeElement.nodeName) &&
-            !(document.activeElement && document.activeElement.contentEditable)) ||
+            !(document.activeElement && document.activeElement.contentEditable === "true")) ||
           (e.ctrlKey &&
             (e.key === "1" ||
               e.key === "2" ||

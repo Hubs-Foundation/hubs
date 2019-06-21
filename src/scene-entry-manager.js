@@ -325,7 +325,7 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
 
     document.addEventListener("paste", e => {
-      if ((e.target.matches("input, textarea") || e.target.contentEditable) && document.activeElement === e.target)
+      if ((e.target.matches("input, textarea") || e.target.contentEditable === "true") && document.activeElement === e.target)
         return;
 
       const url = e.clipboardData.getData("text");

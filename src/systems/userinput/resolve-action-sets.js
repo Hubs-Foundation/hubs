@@ -152,6 +152,6 @@ export function resolveActionSets() {
     sets.inputFocused,
     document.activeElement.nodeName === "INPUT" ||
       document.activeElement.nodeName === "TEXTAREA" ||
-      document.activeElement.contentEditable
+      document.activeElement.contentEditable === "true"
   );
 }

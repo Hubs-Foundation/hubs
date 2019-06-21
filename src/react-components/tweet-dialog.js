@@ -11,7 +11,6 @@ import createLinkifyPlugin from "draft-js-linkify-plugin";
 import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import "draft-js-emoji-plugin/lib/plugin.css";
 import "draft-js-hashtag-plugin/lib/plugin.css";
-import "draft-js-mention-plugin/lib/plugin.css";
 import "draft-js-linkify-plugin/lib/plugin.css";
 
 const emojiPlugin = createEmojiPlugin();
