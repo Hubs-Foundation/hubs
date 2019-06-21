@@ -337,6 +337,8 @@
     "leave-room-dialog.create-room.confirm": "Leave Room",
     "embed.load-button": "Load Room",
     "embed.presence-warning": "This room is embedded, so may be visible to visitors on other websites.",
-    "tweet-dialog.tweet": "Tweet"
+    "tweet-dialog.tweet": "Tweet",
+    "tweet-dialog.posted": "Your tweet has been posted.",
+    "tweet-dialog.close": "close"
   }
 }

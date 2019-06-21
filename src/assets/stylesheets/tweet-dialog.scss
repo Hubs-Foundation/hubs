@@ -103,3 +103,15 @@
     margin-top: 36px;
   }
 }
+
+:local(.posted) {
+  margin: 24px 36px 0px 36px;
+
+  @media (max-width: 475px) {
+    margin: 24px 8px 0px 8px;
+  }
+
+  :local(.message) {
+    margin-top: 20px;
+  }
+}

@@ -4,7 +4,7 @@ import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/tweet-dialog.scss";
 import Editor, { createEditorStateWithText } from "draft-js-plugins-editor";
 import { FormattedMessage } from "react-intl";
-import { fetchReticulum } from "../utils/phoenix-utils";
+import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
 import createEmojiPlugin from "draft-js-emoji-plugin";
 import createHashtagPlugin from "draft-js-hashtag-plugin";
 import createLinkifyPlugin from "draft-js-linkify-plugin";
@@ -19,7 +19,8 @@ const linkifyPlugin = createLinkifyPlugin();
 
 export default class TweetDialog extends Component {
   static propTypes = {
-    history: PropTypes.object
+    history: PropTypes.object,
+    onClose: PropTypes.func
   };
 
   constructor(props) {
@@ -31,25 +32,36 @@ export default class TweetDialog extends Component {
     };
   }
 
-  onSearchChange = async ({ value }) => {
-    this.lastSearch = value;
-    const res = await fetchReticulum(`/api/v1/twitter/users?q=${encodeURIComponent(value)}`);
-    if (this.lastSearch !== value) return;
+  async sendTweet() {
+    // For now assume url is a owned file media url
+    const media_owned_file_url = this.props.history.location.state.detail.url;
+    const body = this.state.editorState.getCurrentContent().getPlainText();
 
-    const suggestions = [];
-
-    for (let i = 0; i < res.length; i++) {
-      suggestions.push({
-        name: "@" + res[i].screen_name,
-        avatar: scaledThumbnailUrlFor(res[i].profile_image_url, 128, 128)
-      });
-    }
-
-    this.setState({ suggestions });
-  };
+    const payload = { media_owned_file_url, body };
+    this.setState({ posting: true });
+    await fetchReticulumAuthenticated("/api/v1/twitter/tweets", "POST", payload);
+    this.setState({ posting: false, posted: true });
+  }
 
   render() {
     const { EmojiSuggestions, EmojiSelect } = emojiPlugin;
+    if (this.state.posted) {
+      return (
+        <DialogContainer wide={true} allowOverflow={true} closeable={false} title="" {...this.props}>
+          <div className={styles.posted}>
+            <div className={styles.message}>
+              <FormattedMessage id="tweet-dialog.posted" />
+            </div>
+
+            <div className={styles.buttons}>
+              <button className={styles.tweetButton} onClick={() => this.props.onClose()}>
+                <FormattedMessage id="tweet-dialog.close" />
+              </button>
+            </div>
+          </div>
+        </DialogContainer>
+      );
+    }
 
     return (
       <DialogContainer wide={true} allowOverflow={true} title="" {...this.props}>
@@ -77,11 +89,19 @@ export default class TweetDialog extends Component {
             </div>
           </div>
 
-          <div className={styles.buttons}>
-            <button className={styles.tweetButton}>
-              <FormattedMessage id="tweet-dialog.tweet" />
-            </button>
-          </div>
+          {!this.state.posting ? (
+            <div className={styles.buttons}>
+              <button className={styles.tweetButton} onClick={() => this.sendTweet()}>
+                <FormattedMessage id="tweet-dialog.tweet" />
+              </button>
+            </div>
+          ) : (
+            <div className="loader-wrap loader-mid">
+              <div className="loader">
+                <div className="loader-center" />
+              </div>
+            </div>
+          )}
         </div>
       </DialogContainer>
     );
