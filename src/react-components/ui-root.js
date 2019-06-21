@@ -249,7 +249,9 @@ class UIRoot extends Component {
             this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
           }
 
-          this.setState({ hideLoader: true });
+          if (!this.state.hideLoader) {
+            this.setState({ hideLoader: true });
+          }
         }, 0);
       });
     }

@@ -76,6 +76,10 @@
         border: none;
       }
     }
+
+    &__contents-overflow {
+      overflow-y: visible;
+    }
   }
 
   &__wide {

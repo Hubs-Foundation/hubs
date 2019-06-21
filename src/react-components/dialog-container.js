@@ -12,7 +12,8 @@ export default class DialogContainer extends Component {
     onClose: PropTypes.func,
     closable: PropTypes.bool,
     wide: PropTypes.bool,
-    className: PropTypes.string
+    className: PropTypes.string,
+    allowOverflow: PropTypes.bool
   };
 
   static defaultProps = {
@@ -50,7 +51,12 @@ export default class DialogContainer extends Component {
       <div className={classNames("dialog-overlay", this.props.className)}>
         <div className="dialog" onClick={this.onContainerClicked}>
           <div className={`dialog__box ${this.props.wide ? "dialog__wide" : ""} `}>
-            <div className="dialog__box__contents">
+            <div
+              className={classNames(
+                "dialog__box__contents",
+                this.props.allowOverflow ? "dialog__box__contents-overflow" : null
+              )}
+            >
               {this.props.closable &&
                 this.props.onClose && (
                   <WithHoverSound>
