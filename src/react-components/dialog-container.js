@@ -67,7 +67,7 @@ export default class DialogContainer extends Component {
                     </button>
                   </WithHoverSound>
                 )}
-              <div className="dialog__box__contents__title">{this.props.title}</div>
+              {this.props.title && <div className="dialog__box__contents__title">{this.props.title}</div>}
               <div className="dialog__box__contents__body">{this.props.children}</div>
               <div className="dialog__box__contents__button-container" />
             </div>

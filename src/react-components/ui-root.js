@@ -1542,7 +1542,7 @@ class UIRoot extends Component {
               stateKey="modal"
               stateValue="tweet"
               history={this.props.history}
-              render={() => this.renderDialog(TweetDialog, {})}
+              render={() => this.renderDialog(TweetDialog, { history: this.props.history })}
             />
 
             {showClientInfo && (

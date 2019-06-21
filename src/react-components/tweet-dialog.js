@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/tweet-dialog.scss";
-import Editor from "draft-js-plugins-editor";
+import Editor, { createEditorStateWithText } from "draft-js-plugins-editor";
 import { EditorState } from "draft-js";
 import { fetchReticulum } from "../utils/phoenix-utils";
 import createEmojiPlugin from "draft-js-emoji-plugin";
@@ -23,11 +23,11 @@ export default class TweetDialog extends Component {
     history: PropTypes.object
   };
 
-  constructor() {
+  constructor(props) {
     super();
 
     this.state = {
-      editorState: EditorState.createEmpty(),
+      editorState: createEditorStateWithText(props.history.location.state.detail.text || ""),
       suggestions: []
     };
   }
@@ -53,15 +53,17 @@ export default class TweetDialog extends Component {
     const { EmojiSuggestions, EmojiSelect } = emojiPlugin;
 
     return (
-      <DialogContainer wide={true} allowOverflow={true} title="" {...this.props}>
+      <DialogContainer wide={true} allowOverflow={true} closable={false} title="" {...this.props}>
         <div className={styles.tweet}>
           <div className={styles.editor} onClick={() => this.editorRef.focus()}>
-            <Editor
-              ref={r => (this.editorRef = r)}
-              editorState={this.state.editorState}
-              onChange={editorState => this.setState({ editorState })}
-              plugins={[emojiPlugin, hashtagPlugin, linkifyPlugin]}
-            />
+            <div className={styles.editorInner}>
+              <Editor
+                ref={r => (this.editorRef = r)}
+                editorState={this.state.editorState}
+                onChange={editorState => this.setState({ editorState })}
+                plugins={[emojiPlugin, hashtagPlugin, linkifyPlugin]}
+              />
+            </div>
 
             <div className={styles.emojiButton}>
               <EmojiSelect />
@@ -69,6 +71,10 @@ export default class TweetDialog extends Component {
 
             <div className={styles.emojiSuggestions}>
               <EmojiSuggestions />
+            </div>
+
+            <div className={styles.media}>
+              <img src={scaledThumbnailUrlFor(this.props.history.location.state.detail.url, 450, 255)} />
             </div>
           </div>
         </div>
