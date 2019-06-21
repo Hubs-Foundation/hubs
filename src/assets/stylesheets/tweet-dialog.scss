@@ -1,11 +1,20 @@
 @import 'shared.scss';
 
 :local(.tweet) {
-  width: 500px;
+  width: 600px;
+
+  @media (max-width: 700px) {
+    width: 400px;
+  }
+
+  @media (max-width: 475px) {
+    width: 300px;
+  }
 }
 
 :local(.editor) {
   border: 2px solid #a4d9f9;
+  margin: 24px 36px 0px 36px;
   padding: 18px;
   padding-bottom: 20px;
   text-align: left;
@@ -17,6 +26,10 @@
   cursor: text;
   display: flex;
   flex-direction: column;
+
+  @media (max-width: 475px) {
+    margin: 24px 8px 0px 8px;
+  }
 
   :local(.editor-inner) {
     padding-right: 36px;
@@ -65,5 +78,28 @@
     border-radius: 8px;
     width: 450px;
     height: 255px;
+
+
+    @media (max-width: 700px) {
+      width: 275px;
+      height: 155px;
+    }
+
+    @media (max-width: 475px) {
+      width: 175px;
+      height: 100px;
+    }
+  }
+}
+
+:local(.buttons) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  :local(.tweet-button) {
+    @extend %twitter-action-button;
+    margin-top: 36px;
   }
 }

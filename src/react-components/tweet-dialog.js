@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/tweet-dialog.scss";
 import Editor, { createEditorStateWithText } from "draft-js-plugins-editor";
-import { EditorState } from "draft-js";
+import { FormattedMessage } from "react-intl";
 import { fetchReticulum } from "../utils/phoenix-utils";
 import createEmojiPlugin from "draft-js-emoji-plugin";
 import createHashtagPlugin from "draft-js-hashtag-plugin";
@@ -53,7 +53,7 @@ export default class TweetDialog extends Component {
     const { EmojiSuggestions, EmojiSelect } = emojiPlugin;
 
     return (
-      <DialogContainer wide={true} allowOverflow={true} closable={false} title="" {...this.props}>
+      <DialogContainer wide={true} allowOverflow={true} title="" {...this.props}>
         <div className={styles.tweet}>
           <div className={styles.editor} onClick={() => this.editorRef.focus()}>
             <div className={styles.editorInner}>
@@ -76,6 +76,12 @@ export default class TweetDialog extends Component {
             <div className={styles.media}>
               <img src={scaledThumbnailUrlFor(this.props.history.location.state.detail.url, 450, 255)} />
             </div>
+          </div>
+
+          <div className={styles.buttons}>
+            <button className={styles.tweetButton}>
+              <FormattedMessage id="tweet-dialog.tweet" />
+            </button>
           </div>
         </div>
       </DialogContainer>
