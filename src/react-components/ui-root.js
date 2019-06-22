@@ -146,6 +146,7 @@ class UIRoot extends Component {
     showSafariMicDialog: PropTypes.bool,
     showWebAssemblyDialog: PropTypes.bool,
     showOAuthDialog: PropTypes.bool,
+    onCloseOAuthDialog: PropTypes.func,
     oauthInfo: PropTypes.array,
     isCursorHoldingPen: PropTypes.bool,
     hasActiveCamera: PropTypes.bool,
@@ -1277,9 +1278,11 @@ class UIRoot extends Component {
 
     if (this.props.showOAuthDialog)
       return (
-        <div className={classNames(rootStyles)}>
-          <OAuthDialog closable={false} oauthInfo={this.props.oauthInfo} />
-        </div>
+        <IntlProvider locale={lang} messages={messages}>
+          <div className={classNames(rootStyles)}>
+            <OAuthDialog onClose={this.props.onCloseOAuthDialog} oauthInfo={this.props.oauthInfo} />
+          </div>
+        </IntlProvider>
       );
     if (isExited) return this.renderExitedPane();
     if (isLoading) {

@@ -339,6 +339,9 @@
     "embed.presence-warning": "This room is embedded, so may be visible to visitors on other websites.",
     "tweet-dialog.tweet": "Tweet",
     "tweet-dialog.posted": "Your tweet has been posted.",
-    "tweet-dialog.close": "close"
+    "tweet-dialog.close": "close",
+    "oauth-dialog.sign-in.twitter": "Connect to Twitter",
+    "oauth-dialog.sign-in.discord": "Sign in to Discord",
+    "oauth-dialog.message.twitter": "Connect to Twitter to send tweets from Hubs."
   }
 }

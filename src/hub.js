@@ -714,7 +714,13 @@ document.addEventListener("DOMContentLoaded", async () => {
           pushHistoryState(history, "modal", "tweet", e.detail);
         } else {
           const url = await hubChannel.getOAuthURL();
-          remountUI({ showOAuthDialog: true, oauthInfo: [{ type: "twitter", url: url }] });
+          remountUI({
+            showOAuthDialog: true,
+            oauthInfo: [{ type: "twitter", url: url }],
+            onCloseOAuthDialog: () => {
+              remountUI({ showOAuthDialog: false, oauthInfo: null });
+            }
+          });
         }
       },
       "tweet"

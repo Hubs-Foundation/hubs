@@ -554,8 +554,8 @@
 
             <template id="photo-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
-                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" share-media-button position="0 -0.125 0.01">
-                        <a-entity text="value:share; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    <a-entity mixin="rounded-twitter-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" share-media-button position="0 -0.125 0.01">
+                        <a-entity text="value:tweet; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
@@ -640,6 +640,24 @@
                     bottom: 66;
                     opacity: 1.0;
                     src: #action-button"
+            ></a-mixin>
+
+            <a-mixin id="rounded-twitter-text-action-button"
+                text-button="
+                    textHoverColor: #fff;
+                    textColor: #fff;
+                    backgroundColor: #1da1f2;
+                    backgroundHoverColor: #2db1ff;
+                    "
+                slice9="
+                    width: 0.45;
+                    height: 0.2;
+                    left: 64;
+                    top: 64;
+                    right: 66;
+                    bottom: 66;
+                    opacity: 1.0;
+                    src: #button"
             ></a-mixin>
         </a-assets>
 
