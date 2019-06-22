@@ -33,11 +33,11 @@ export default class TweetDialog extends Component {
   }
 
   async sendTweet() {
-    // For now assume url is a owned file media url
-    const media_owned_file_url = this.props.history.location.state.detail.url;
+    // For now assume url is a stored file media url
+    const media_stored_file_url = this.props.history.location.state.detail.url;
     const body = this.state.editorState.getCurrentContent().getPlainText();
 
-    const payload = { media_owned_file_url, body };
+    const payload = { media_stored_file_url, body };
     this.setState({ posting: true });
     await fetchReticulumAuthenticated("/api/v1/twitter/tweets", "POST", payload);
     this.setState({ posting: false, posted: true });
@@ -47,7 +47,7 @@ export default class TweetDialog extends Component {
     const { EmojiSuggestions, EmojiSelect } = emojiPlugin;
     if (this.state.posted) {
       return (
-        <DialogContainer wide={true} allowOverflow={true} closeable={false} title="" {...this.props}>
+        <DialogContainer wide={true} allowOverflow={true} closable={false} title="" {...this.props}>
           <div className={styles.posted}>
             <div className={styles.message}>
               <FormattedMessage id="tweet-dialog.posted" />
