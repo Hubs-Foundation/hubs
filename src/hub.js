@@ -707,19 +707,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   scene.addEventListener("action_media_share", e => {
+    let isInModal = false;
+    let isInOAuth = false;
+
+    const exitOAuth = () => {
+      isInOAuth = false;
+      remountUI({ showOAuthDialog: false, oauthInfo: null });
+    };
+
+    handleExitTo2DInterstitial(true, () => {
+      if (isInModal) history.goBack();
+      if (isInOAuth) exitOAuth();
+    });
+
     performConditionalSignIn(
       () => hubChannel.signedIn,
       async () => {
         if (hubChannel.can("tweet")) {
+          isInModal = true;
           pushHistoryState(history, "modal", "tweet", e.detail);
         } else {
           const url = await hubChannel.getOAuthURL();
+          isInOAuth = true;
           remountUI({
             showOAuthDialog: true,
             oauthInfo: [{ type: "twitter", url: url }],
-            onCloseOAuthDialog: () => {
-              remountUI({ showOAuthDialog: false, oauthInfo: null });
-            }
+            onCloseOAuthDialog: () => exitOAuth()
           });
         }
       },

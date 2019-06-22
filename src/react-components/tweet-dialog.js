@@ -8,14 +8,18 @@ import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
 import createEmojiPlugin from "draft-js-emoji-plugin";
 import createHashtagPlugin from "draft-js-hashtag-plugin";
 import createLinkifyPlugin from "draft-js-linkify-plugin";
+import createCounterPlugin from "draft-js-counter-plugin";
+import classNames from "classnames";
 import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import "draft-js-emoji-plugin/lib/plugin.css";
 import "draft-js-hashtag-plugin/lib/plugin.css";
 import "draft-js-linkify-plugin/lib/plugin.css";
+import "draft-js-counter-plugin/lib/plugin.css";
 
 const emojiPlugin = createEmojiPlugin();
 const hashtagPlugin = createHashtagPlugin();
 const linkifyPlugin = createLinkifyPlugin();
+const counterPlugin = createCounterPlugin();
 
 export default class TweetDialog extends Component {
   static propTypes = {
@@ -45,6 +49,7 @@ export default class TweetDialog extends Component {
 
   render() {
     const { EmojiSuggestions, EmojiSelect } = emojiPlugin;
+    const { CharCounter } = counterPlugin;
     if (this.state.posted) {
       return (
         <DialogContainer wide={true} allowOverflow={true} closable={false} title="" {...this.props}>
@@ -72,7 +77,7 @@ export default class TweetDialog extends Component {
                 ref={r => (this.editorRef = r)}
                 editorState={this.state.editorState}
                 onChange={editorState => this.setState({ editorState })}
-                plugins={[emojiPlugin, hashtagPlugin, linkifyPlugin]}
+                plugins={[emojiPlugin, hashtagPlugin, linkifyPlugin, counterPlugin]}
               />
             </div>
 
@@ -84,6 +89,10 @@ export default class TweetDialog extends Component {
               <EmojiSuggestions />
             </div>
 
+            <div className={styles.counter}>
+              <CharCounter editorState={this.state.editorState} limit={280} /> / 280
+            </div>
+
             <div className={styles.media}>
               <img src={scaledThumbnailUrlFor(this.props.history.location.state.detail.url, 450, 255)} />
             </div>
@@ -91,12 +100,16 @@ export default class TweetDialog extends Component {
 
           {!this.state.posting ? (
             <div className={styles.buttons}>
-              <button className={styles.tweetButton} onClick={() => this.sendTweet()}>
+              <button
+                className={styles.tweetButton}
+                onClick={() => this.sendTweet()}
+                disabled={this.state.editorState.getCurrentContent().getPlainText().length > 280}
+              >
                 <FormattedMessage id="tweet-dialog.tweet" />
               </button>
             </div>
           ) : (
-            <div className="loader-wrap loader-mid">
+            <div className={classNames(["loader-wrap", "loader-mid", styles.tweetLoader])}>
               <div className="loader">
                 <div className="loader-center" />
               </div>

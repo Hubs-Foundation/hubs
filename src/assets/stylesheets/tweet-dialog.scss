@@ -64,6 +64,12 @@
   cursor: pointer;
 }
 
+:local(.counter) {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
 :local(.highlight) {
   color: red;
   direction: ltr;
@@ -102,6 +108,10 @@
     @extend %twitter-action-button;
     margin-top: 36px;
   }
+
+  :local(.tweet-button):disabled {
+    background-color: $light-grey;
+  }
 }
 
 :local(.posted) {
@@ -110,8 +120,8 @@
   @media (max-width: 475px) {
     margin: 24px 8px 0px 8px;
   }
+}
 
-  :local(.message) {
-    margin-top: 20px;
-  }
+:local(.tweet-loader) {
+  height: 40px;
 }

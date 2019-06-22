@@ -5,7 +5,7 @@ AFRAME.registerComponent("share-media-button", {
     });
 
     this.onClick = () => {
-      const text = `Taken in #hubs, join me: hub.link/${window.APP.hubChannel.hubId}`;
+      const text = `Taken in Mozilla #hubs, join me: hub.link/${window.APP.hubChannel.hubId}`;
       this.el.sceneEl.emit("action_media_share", { url: this.targetEl.components["media-loader"].data.src, text });
     };
   },
