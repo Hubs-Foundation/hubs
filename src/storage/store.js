@@ -107,12 +107,15 @@ export const SCHEMA = {
       }
     },
 
-    onLoadAction: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        action: { type: ["null", "string"] },
-        args: { type: "object" }
+    onLoadActions: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          action: { type: ["null", "string"] },
+          args: { type: "object" }
+        }
       }
     }
   },
@@ -129,7 +132,7 @@ export const SCHEMA = {
     uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" },
     creatorAssignmentTokens: { $ref: "#/definitions/creatorAssignmentTokens" },
     embedTokens: { $ref: "#/definitions/embedTokens" },
-    onLoadAction: { $ref: "#/definitions/onLoadAction" }
+    onLoadActions: { $ref: "#/definitions/onLoadActions" }
   },
 
   additionalProperties: false
@@ -160,7 +163,7 @@ export default class Store extends EventTarget {
       uploadPromotionTokens: [],
       creatorAssignmentTokens: [],
       embedTokens: [],
-      onLoadAction: {}
+      onLoadActions: []
     });
 
     const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
@@ -206,9 +209,7 @@ export default class Store extends EventTarget {
   }
 
   resetConfirmedBroadcastedRooms() {
-    // merge causing us some annoyance here :(
-    const overwriteMerge = (destinationArray, sourceArray) => sourceArray;
-    this.update({ confirmedBroadcastedRooms: [] }, { arrayMerge: overwriteMerge });
+    this.clearStoredArray("confirmedBroadcastedRooms");
   }
 
   resetTipActivityFlags() {
@@ -217,17 +218,27 @@ export default class Store extends EventTarget {
 
   // Sets a one-time action to perform the next time the page loads
   enqueueOnLoadAction(action, args) {
-    this.update({ onLoadAction: { action, args } });
+    this.update({ onLoadActions: { action, args } });
   }
 
-  executeOnLoadAction(sceneEl) {
-    if (!this.state.onLoadAction.action) return;
+  executeOnLoadActions(sceneEl) {
+    for (let i = 0; i < this.state.onLoadActions; i++) {
+      const { action, args } = this.state.onLoadActions[i];
 
-    if (this.state.onLoadAction.action === "emit_scene_event") {
-      sceneEl.emit(this.state.onLoadAction.args.event, this.state.onLoadAction.args.detail);
+      if (action === "emit_scene_event") {
+        sceneEl.emit(args.event, args.detail);
+      }
     }
 
-    this.update({ onLoadAction: { action: null, args: {} } });
+    this.clearStoredArray("onLoadActions");
+  }
+
+  clearStoredArray(key) {
+    const overwriteMerge = (destinationArray, sourceArray) => sourceArray;
+    const update = {};
+    update[key] = [];
+
+    this.update(update, { arrayMerge: overwriteMerge });
   }
 
   update(newState, mergeOpts) {

@@ -62,7 +62,7 @@ import SettingsMenu from "./settings-menu.js";
 import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
-import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
+import { enterVRAndExit2DInterstitial, isIn2DInterstitial } from "../utils/vr-interstitial";
 import { handleTipClose } from "../systems/tips.js";
 
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
@@ -726,12 +726,16 @@ class UIRoot extends Component {
   };
 
   closeDialog = () => {
-    showFullScreenIfWasFullScreen();
-
     if (this.state.dialog) {
       this.setState({ dialog: null });
     } else {
       this.props.history.goBack();
+    }
+
+    if (isIn2DInterstitial()) {
+      enterVRAndExit2DInterstitial();
+    } else {
+      showFullScreenIfWasFullScreen();
     }
   };
 
@@ -1711,7 +1715,7 @@ class UIRoot extends Component {
                     )}
                   {showVREntryButton && (
                     <WithHoverSound>
-                      <button className={inviteStyles.enterButton} onClick={() => this.props.scene.enterVR()}>
+                      <button className={inviteStyles.enterButton} onClick={() => enterVRAndExit2DInterstitial()}>
                         <FormattedMessage id="entry.enter-in-vr" />
                       </button>
                     </WithHoverSound>
@@ -1754,7 +1758,7 @@ class UIRoot extends Component {
                   isModal={true}
                   onClose={() => {
                     this.props.history.goBack();
-                    handleReEntryToVRFrom2DInterstitial();
+                    enterVRAndExit2DInterstitial();
                   }}
                 />
               )}

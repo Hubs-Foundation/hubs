@@ -110,7 +110,7 @@ import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { proxiedUrlFor } from "./utils/media-url-utils";
 import { traverseMeshesAndAddShapes } from "./utils/physics-utils";
-import { handleExitTo2DInterstitial, handleReEntryToVRFrom2DInterstitial } from "./utils/vr-interstitial";
+import { handleExitTo2DInterstitial, enterVRAndExit2DInterstitial } from "./utils/vr-interstitial";
 import { getAvatarSrc } from "./utils/avatar-utils.js";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
@@ -431,7 +431,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
   remountUI({
     onSendMessage: messageDispatch.dispatch,
-    onLoaded: () => store.executeOnLoadAction(scene),
+    onLoaded: () => store.executeOnLoadActions(scene),
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
     onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
@@ -684,7 +684,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         if (actionError && onFailure) onFailure(actionError);
-        handleReEntryToVRFrom2DInterstitial();
+        enterVRAndExit2DInterstitial();
       }
     });
   };

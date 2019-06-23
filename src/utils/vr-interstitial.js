@@ -44,8 +44,7 @@ export function handleExitTo2DInterstitial(isLower, exitAction) {
   }
 }
 
-export function handleReEntryToVRFrom2DInterstitial() {
-  if (!_isIn2DInterstitial) return;
+export function enterVRAndExit2DInterstitial() {
   _isIn2DInterstitial = false;
 
   document.querySelector(".vr-notice").object3D.visible = false;
@@ -74,5 +73,5 @@ export function forceExitFrom2DInterstitial() {
     _exitAction = null;
   }
 
-  handleReEntryToVRFrom2DInterstitial();
+  enterVRAndExit2DInterstitial();
 }
