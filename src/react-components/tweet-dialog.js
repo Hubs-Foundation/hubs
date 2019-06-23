@@ -89,9 +89,11 @@ export default class TweetDialog extends Component {
               <EmojiSuggestions />
             </div>
 
-            <div className={styles.counter}>
-              <CharCounter editorState={this.state.editorState} limit={280} /> / 280
-            </div>
+            {this.state.editorState.getCurrentContent().getPlainText().length > 200 && (
+              <div className={styles.counter}>
+                <CharCounter editorState={this.state.editorState} limit={280} /> / 280
+              </div>
+            )}
 
             <div className={styles.media}>
               <img src={scaledThumbnailUrlFor(this.props.history.location.state.detail.url, 450, 255)} />
