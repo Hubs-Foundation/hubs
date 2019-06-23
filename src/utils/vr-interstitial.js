@@ -12,18 +12,13 @@ const afterUserGesturePrompt = f => {
   scene.emit("2d-interstitial-gesture-required");
 };
 
-export function handleExitTo2DInterstitial(isLower, exitAction, onReady) {
+export function handleExitTo2DInterstitial(isLower, exitAction) {
   const scene = document.querySelector("a-scene");
   if (!scene.is("vr-mode")) {
     if (isMobileVR && willRequireUserGesture()) {
       afterUserGesturePrompt(() => {
         showFullScreenIfAvailable();
-        if (onReady) onReady();
       });
-    } else {
-      if (onReady) {
-        onReady();
-      }
     }
 
     return;
@@ -37,7 +32,6 @@ export function handleExitTo2DInterstitial(isLower, exitAction, onReady) {
     scene.exitVR().then(() => {
       afterUserGesturePrompt(() => {
         showFullScreenIfAvailable();
-        if (onReady) onReady();
       });
     });
   } else {
@@ -47,10 +41,6 @@ export function handleExitTo2DInterstitial(isLower, exitAction, onReady) {
     vrNotice.setAttribute("follow-in-fov", {
       angle: isLower ? 39 : -15
     });
-
-    if (onReady) {
-      onReady();
-    }
   }
 }
 

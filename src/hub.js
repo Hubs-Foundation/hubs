@@ -716,33 +716,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       remountUI({ showOAuthDialog: false, oauthInfo: null });
     };
 
-    handleExitTo2DInterstitial(
-      true,
-      () => {
-        if (isInModal) history.goBack();
-        if (isInOAuth) exitOAuth();
+    handleExitTo2DInterstitial(true, () => {
+      if (isInModal) history.goBack();
+      if (isInOAuth) exitOAuth();
+    });
+
+    performConditionalSignIn(
+      () => hubChannel.signedIn,
+      async () => {
+        if (hubChannel.can("tweet")) {
+          isInModal = true;
+          pushHistoryState(history, "modal", "tweet", e.detail);
+        } else {
+          const url = await hubChannel.getOAuthURL();
+          isInOAuth = true;
+          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: e.detail });
+          remountUI({
+            showOAuthDialog: true,
+            oauthInfo: [{ type: "twitter", url: url }],
+            onCloseOAuthDialog: () => exitOAuth()
+          });
+        }
       },
-      () => {
-        performConditionalSignIn(
-          () => hubChannel.signedIn,
-          async () => {
-            if (hubChannel.can("tweet")) {
-              isInModal = true;
-              pushHistoryState(history, "modal", "tweet", e.detail);
-            } else {
-              const url = await hubChannel.getOAuthURL();
-              isInOAuth = true;
-              store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: e.detail });
-              remountUI({
-                showOAuthDialog: true,
-                oauthInfo: [{ type: "twitter", url: url }],
-                onCloseOAuthDialog: () => exitOAuth()
-              });
-            }
-          },
-          "tweet"
-        );
-      }
+      "tweet"
     );
   });
 

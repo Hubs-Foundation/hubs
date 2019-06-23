@@ -1281,7 +1281,7 @@ class UIRoot extends Component {
     };
     const hasPush = navigator.serviceWorker && "PushManager" in window;
 
-    if (this.props.showOAuthDialog)
+    if (this.props.showOAuthDialog && !this.props.showInterstitialPrompt)
       return (
         <IntlProvider locale={lang} messages={messages}>
           <div className={classNames(rootStyles)}>
