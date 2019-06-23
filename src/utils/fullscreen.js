@@ -11,6 +11,10 @@ function shouldShowFullScreen() {
   );
 }
 
+export function willRequireUserGesture() {
+  return !screenfull.isFullscreen && shouldShowFullScreen();
+}
+
 export function showFullScreenIfAvailable() {
   if (shouldShowFullScreen()) {
     screenfull.request();
