@@ -162,7 +162,8 @@ class UIRoot extends Component {
     showPreload: PropTypes.bool,
     onPreloadLoadClicked: PropTypes.func,
     embed: PropTypes.bool,
-    embedToken: PropTypes.string
+    embedToken: PropTypes.string,
+    onLoaded: PropTypes.func
   };
 
   state = {
@@ -378,6 +379,10 @@ class UIRoot extends Component {
 
   onLoadingFinished = () => {
     this.setState({ noMoreLoadingUpdates: true });
+
+    if (this.props.onLoaded) {
+      this.props.onLoaded();
+    }
   };
 
   onSceneLoaded = () => {

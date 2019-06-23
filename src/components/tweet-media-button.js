@@ -1,4 +1,4 @@
-AFRAME.registerComponent("share-media-button", {
+AFRAME.registerComponent("tweet-media-button", {
   init() {
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.targetEl = networkedEl;
@@ -6,7 +6,7 @@ AFRAME.registerComponent("share-media-button", {
 
     this.onClick = () => {
       const text = `Taken in Mozilla #hubs, join me: hub.link/${window.APP.hubChannel.hubId}`;
-      this.el.sceneEl.emit("action_media_share", { url: this.targetEl.components["media-loader"].data.src, text });
+      this.el.sceneEl.emit("action_media_tweet", { url: this.targetEl.components["media-loader"].data.src, text });
     };
   },
 

@@ -105,6 +105,15 @@ export const SCHEMA = {
           embedToken: { type: "string" }
         }
       }
+    },
+
+    onLoadAction: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        action: { type: ["null", "string"] },
+        args: { type: "object" }
+      }
     }
   },
 
@@ -119,7 +128,8 @@ export const SCHEMA = {
     confirmedBroadcastedRooms: { $ref: "#/definitions/confirmedBroadcastedRooms" },
     uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" },
     creatorAssignmentTokens: { $ref: "#/definitions/creatorAssignmentTokens" },
-    embedTokens: { $ref: "#/definitions/embedTokens" }
+    embedTokens: { $ref: "#/definitions/embedTokens" },
+    onLoadAction: { $ref: "#/definitions/onLoadAction" }
   },
 
   additionalProperties: false
@@ -149,7 +159,8 @@ export default class Store extends EventTarget {
       confirmedBroadcastedRooms: [],
       uploadPromotionTokens: [],
       creatorAssignmentTokens: [],
-      embedTokens: []
+      embedTokens: [],
+      onLoadAction: {}
     });
 
     const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
@@ -202,6 +213,21 @@ export default class Store extends EventTarget {
 
   resetTipActivityFlags() {
     this.update({ activity: { hasRotated: false, hasPinned: false, hasRecentered: false, hasScaled: false } });
+  }
+
+  // Sets a one-time action to perform the next time the page loads
+  enqueueOnLoadAction(action, args) {
+    this.update({ onLoadAction: { action, args } });
+  }
+
+  executeOnLoadAction(sceneEl) {
+    if (!this.state.onLoadAction.action) return;
+
+    if (this.state.onLoadAction.action === "emit_scene_event") {
+      sceneEl.emit(this.state.onLoadAction.args.event, this.state.onLoadAction.args.detail);
+    }
+
+    this.update({ onLoadAction: { action: null, args: {} } });
   }
 
   update(newState, mergeOpts) {

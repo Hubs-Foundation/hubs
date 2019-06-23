@@ -83,7 +83,7 @@ import "./components/follow-in-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
-import "./components/share-media-button";
+import "./components/tweet-media-button";
 import "./components/transform-object-button";
 import "./components/hover-menu";
 import "./components/disable-frustum-culling";
@@ -431,6 +431,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
   remountUI({
     onSendMessage: messageDispatch.dispatch,
+    onLoaded: () => store.executeOnLoadAction(scene),
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
     onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
@@ -706,7 +707,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   });
 
-  scene.addEventListener("action_media_share", e => {
+  scene.addEventListener("action_media_tweet", e => {
     let isInModal = false;
     let isInOAuth = false;
 
@@ -729,6 +730,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         } else {
           const url = await hubChannel.getOAuthURL();
           isInOAuth = true;
+          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: e.detail });
           remountUI({
             showOAuthDialog: true,
             oauthInfo: [{ type: "twitter", url: url }],
