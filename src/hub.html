@@ -352,16 +352,11 @@
                     position-at-box-shape-border="target:.pen-menu"
 
                 >
-                    <a-sphere
+                    <a-entity
                         id="pen"
-                        scale="1.5, 1.5, 1.5"
                         position="0 -0.18 0"
-                        radius="0.02"
-                        color="#FF0033"
                         pen="camera: #player-camera; drawingManager: #drawing-manager"
-                        segments-width="16"
-                        segments-height="12"
-                    ></a-sphere>
+                    ></a-entity>
                     <a-entity class="ui delete-button pen-menu" visibility-while-frozen="withinDistance: 10;" >
                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" remove-networked-object-button position="0 0 0.01">
                             <a-entity
