@@ -44,7 +44,11 @@ export function handleExitTo2DInterstitial(isLower, exitAction) {
   }
 }
 
-export function exit2DInterstitialAndEnterVR() {
+export function exit2DInterstitialAndEnterVR(force) {
+  if (!force && !_isIn2DInterstitial) {
+    return;
+  }
+
   _isIn2DInterstitial = false;
 
   document.querySelector(".vr-notice").object3D.visible = false;

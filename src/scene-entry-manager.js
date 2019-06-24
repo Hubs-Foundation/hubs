@@ -63,7 +63,7 @@ export default class SceneEntryManager {
       // force gamepads to become live.
       navigator.getVRDisplays();
 
-      exit2DInterstitialAndEnterVR();
+      exit2DInterstitialAndEnterVR(true);
     }
 
     if (isMobile || qsTruthy("mobile")) {
