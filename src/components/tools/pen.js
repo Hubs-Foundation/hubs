@@ -143,7 +143,7 @@ AFRAME.registerComponent("pen", {
     if (window.APP && window.APP.quality === "low") {
       material = MobileStandardMaterial.fromStandardMaterial(material);
     }
-    this.penTip = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), material);
+    this.penTip = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 16, 12), material);
     this.penTip.scale.setScalar(this.data.radius / this.el.parentEl.object3D.scale.x);
     this.penTip.matrixNeedsUpdate = true;
 
@@ -151,7 +151,6 @@ AFRAME.registerComponent("pen", {
 
     const environmentMapComponent = this.el.sceneEl.components["environment-map"];
     if (environmentMapComponent) {
-      environmentMapComponent.applyEnvironmentMap(this.el.object3D);
       environmentMapComponent.applyEnvironmentMap(this.el.parentEl.object3D);
     }
 
