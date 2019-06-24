@@ -7,6 +7,7 @@ import {
   SOUND_PEN_CHANGE_COLOR
 } from "../../systems/sound-effects-system";
 import { waitForDOMContentLoaded } from "../../utils/async-utils";
+import MobileStandardMaterial from "../../materials/MobileStandardMaterial";
 
 const pathsMap = {
   "player-right-controller": {
@@ -138,6 +139,21 @@ AFRAME.registerComponent("pen", {
     this.setDirty = this.setDirty.bind(this);
     this.dirty = true;
 
+    let material = new THREE.MeshStandardMaterial();
+    if (window.APP && window.APP.quality === "low") {
+      material = MobileStandardMaterial.fromStandardMaterial(material);
+    }
+    this.penTip = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 16, 12), material);
+    this.penTip.scale.setScalar(this.data.radius / this.el.parentEl.object3D.scale.x);
+    this.penTip.matrixNeedsUpdate = true;
+
+    this.el.setObject3D("mesh", this.penTip);
+
+    const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+    if (environmentMapComponent) {
+      environmentMapComponent.applyEnvironmentMap(this.el.parentEl.object3D);
+    }
+
     // TODO: Use the MutationRecords passed into the callback function to determine added/removed nodes!
     this.observer = new MutationObserver(this.setDirty);
 
@@ -157,7 +173,7 @@ AFRAME.registerComponent("pen", {
 
   update(prevData) {
     if (prevData.color != this.data.color) {
-      this.el.setAttribute("color", this.data.color);
+      this.penTip.material.color.set(this.data.color);
       this.line.material.color.set(this.data.color);
     }
     if (prevData.radius != this.data.radius) {
@@ -381,13 +397,14 @@ AFRAME.registerComponent("pen", {
   _changeColor(mod) {
     this.colorIndex = (this.colorIndex + mod + this.data.availableColors.length) % this.data.availableColors.length;
     this.data.color = this.data.availableColors[this.colorIndex];
-    this.el.setAttribute("color", this.data.color);
+    this.penTip.material.color.set(this.data.color);
     this.line.material.color.set(this.data.color);
   },
 
   _changeRadius(mod) {
     this.data.radius = Math.max(this.data.minRadius, Math.min(this.data.radius + mod, this.data.maxRadius));
-    this.el.setAttribute("radius", this.data.radius);
+    this.penTip.scale.setScalar(this.data.radius / this.el.parentEl.object3D.scale.x);
+    this.penTip.matrixNeedsUpdate = true;
   },
 
   setDirty() {
