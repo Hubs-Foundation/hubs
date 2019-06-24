@@ -218,11 +218,11 @@ export default class Store extends EventTarget {
 
   // Sets a one-time action to perform the next time the page loads
   enqueueOnLoadAction(action, args) {
-    this.update({ onLoadActions: { action, args } });
+    this.update({ onLoadActions: [{ action, args }] });
   }
 
   executeOnLoadActions(sceneEl) {
-    for (let i = 0; i < this.state.onLoadActions; i++) {
+    for (let i = 0; i < this.state.onLoadActions.length; i++) {
       const { action, args } = this.state.onLoadActions[i];
 
       if (action === "emit_scene_event") {
