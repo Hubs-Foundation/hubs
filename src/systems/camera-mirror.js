@@ -90,7 +90,6 @@ AFRAME.registerSystem("camera-mirror", {
       if (playerHud) {
         playerHudWasVisible = playerHud.visible;
         playerHud.visible = false;
-        playerHud.el.object3DMap.mesh.visible = false;
         if (this.el.sceneEl.systems["post-physics"]) {
           this.el.sceneEl.systems["post-physics"].spriteSystem.mesh.visible = false;
         }
