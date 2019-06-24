@@ -47,26 +47,27 @@ export default class TweetDialog extends Component {
     this.setState({ posting: false, posted: true });
   }
 
-  render() {
+  renderPostedDialog() {
+    return (
+      <DialogContainer wide={true} allowOverflow={true} closable={false} title="" {...this.props}>
+        <div className={styles.posted}>
+          <div className={styles.message}>
+            <FormattedMessage id="tweet-dialog.posted" />
+          </div>
+
+          <div className={styles.buttons}>
+            <button className={styles.tweetButton} onClick={() => this.props.onClose()}>
+              <FormattedMessage id="tweet-dialog.close" />
+            </button>
+          </div>
+        </div>
+      </DialogContainer>
+    );
+  }
+
+  renderTweetDialog() {
     const { EmojiSuggestions, EmojiSelect } = emojiPlugin;
     const { CharCounter } = counterPlugin;
-    if (this.state.posted) {
-      return (
-        <DialogContainer wide={true} allowOverflow={true} closable={false} title="" {...this.props}>
-          <div className={styles.posted}>
-            <div className={styles.message}>
-              <FormattedMessage id="tweet-dialog.posted" />
-            </div>
-
-            <div className={styles.buttons}>
-              <button className={styles.tweetButton} onClick={() => this.props.onClose()}>
-                <FormattedMessage id="tweet-dialog.close" />
-              </button>
-            </div>
-          </div>
-        </DialogContainer>
-      );
-    }
 
     return (
       <DialogContainer wide={true} allowOverflow={true} title="" {...this.props}>
@@ -120,5 +121,13 @@ export default class TweetDialog extends Component {
         </div>
       </DialogContainer>
     );
+  }
+
+  render() {
+    if (this.state.posted) {
+      return this.renderPostedDialog();
+    } else {
+      return this.renderTweetDialog();
+    }
   }
 }
