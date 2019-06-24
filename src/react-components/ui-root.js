@@ -740,6 +740,7 @@ class UIRoot extends Component {
 
   toggleStreaming = () => {
     takeOrReleaseLobbyCam();
+    this.setState({ showSettingsMenu: false })
   };
 
   renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
