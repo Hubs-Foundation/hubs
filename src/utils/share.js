@@ -1,4 +1,4 @@
-const isMobileVR = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
+const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 export function canShare() {
   // TODO, fix up when OB/FxR support sharing
