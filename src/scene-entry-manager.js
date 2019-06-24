@@ -11,7 +11,7 @@ import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import {
   isIn2DInterstitial,
   handleExitTo2DInterstitial,
-  enterVRAndExit2DInterstitial,
+  exit2DInterstitialAndEnterVR,
   forceExitFrom2DInterstitial
 } from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
@@ -63,7 +63,7 @@ export default class SceneEntryManager {
       // force gamepads to become live.
       navigator.getVRDisplays();
 
-      enterVRAndExit2DInterstitial();
+      exit2DInterstitialAndEnterVR();
     }
 
     if (isMobile || qsTruthy("mobile")) {
@@ -455,11 +455,11 @@ export default class SceneEntryManager {
         spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
       }, spawnDelay);
 
-      enterVRAndExit2DInterstitial();
+      exit2DInterstitialAndEnterVR();
     });
 
     this.mediaSearchStore.addEventListener("media-exit", () => {
-      enterVRAndExit2DInterstitial();
+      exit2DInterstitialAndEnterVR();
     });
   };
 

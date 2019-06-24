@@ -44,18 +44,22 @@ export function handleExitTo2DInterstitial(isLower, exitAction) {
   }
 }
 
-export function enterVRAndExit2DInterstitial() {
+export function exit2DInterstitialAndEnterVR() {
   _isIn2DInterstitial = false;
 
   document.querySelector(".vr-notice").object3D.visible = false;
 
-  if (isMobileVR) {
-    const scene = document.querySelector("a-scene");
+  const scene = document.querySelector("a-scene");
 
+  if (isMobileVR) {
     if (screenfull.isFullscreen) {
       screenfull.exit();
       afterUserGesturePrompt(() => scene.enterVR());
     } else {
+      scene.enterVR();
+    }
+  } else {
+    if (!scene.is("vr-mode")) {
       scene.enterVR();
     }
   }
@@ -73,5 +77,5 @@ export function forceExitFrom2DInterstitial() {
     _exitAction = null;
   }
 
-  enterVRAndExit2DInterstitial();
+  exit2DInterstitialAndEnterVR();
 }
