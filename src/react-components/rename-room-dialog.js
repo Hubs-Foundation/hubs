@@ -45,7 +45,7 @@ export default class RenameRoomDialog extends Component {
             onChange={e => this.setState({ name: e.target.value })}
             className={styles.nameField}
           />
-          {Object.keys(this.state.perms).map(perm => (
+          {["spawn_and_move_media", "spawn_camera", "spawn_drawing", "pin_objects"].map(perm => (
             <label key={perm}>
               <input
                 type="checkbox"
