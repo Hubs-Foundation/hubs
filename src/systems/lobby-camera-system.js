@@ -3,13 +3,17 @@ import cameraModelSrc from "../assets/camera_tool.glb";
 AFRAME.registerComponent("lobby-camera-transform-component", {
   init() {
     this.el.sceneEl.systems["post-physics"].lobbyCameraSystem.lobbyCameraTransform = this.el;
-    this.el.addEventListener("model-loaded", ()=>{
-      this.el.object3DMap.mesh.scale.set(2.0, 2.0, 2.0);
-      this.el.object3DMap.mesh.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI);
-      this.el.object3DMap.mesh.matrixNeedsUpdate =true;
-      this.el.object3DMap.mesh.updateMatrices();
-    }, {once: true})
-    this.el.setAttribute("gltf-model-plus", {src: cameraModelSrc});
+    this.el.addEventListener(
+      "model-loaded",
+      () => {
+        this.el.object3DMap.mesh.scale.set(2.0, 2.0, 2.0);
+        this.el.object3DMap.mesh.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI);
+        this.el.object3DMap.mesh.matrixNeedsUpdate = true;
+        this.el.object3DMap.mesh.updateMatrices();
+      },
+      { once: true }
+    );
+    this.el.setAttribute("gltf-model-plus", { src: cameraModelSrc });
   }
 });
 
@@ -38,9 +42,25 @@ const setMatrixWorld = (function() {
   };
 })();
 
+export function avatarForSessionId(sessionId) {
+  const avatars = document.querySelectorAll("[networked-avatar]");
+  for (let i = 0; i < avatars.length; i++) {
+    const avatar = avatars[i];
+    if (avatar.components.networked.data.owner === sessionId) {
+      return avatar;
+    }
+  }
+  return null; // Have not spawned an avatar yet, or invalid session id.
+}
+
 export class LobbyCameraSystem {
   constructor() {
     this.inLobby = true;
+  }
+  follow(target, useThirdPerson) {
+    this.lobbyCameraTransform =
+      this.lobbyCameraTransform === target && useThirdPerson === this.useThirdPerson ? null : target;
+    this.useThirdPerson = useThirdPerson;
   }
   tick() {
     if (!this.lobbyCameraTransform || !this.lobbyCameraTransform.parentNode) {
@@ -62,10 +82,16 @@ export class LobbyCameraSystem {
       if (this.lobbyCameraTransform.object3DMap.mesh) {
         this.lobbyCameraTransform.object3DMap.mesh.visible = true;
       }
-      // Third person:
-      // this.playerCamera.object3D.translateZ(1.5);
-      // this.playerCamera.object3D.translateY(0.2);
-      // this.playerCamera.object3D.matrixNeedsUpdate = true;
+
+      if (this.useThirdPerson) {
+        this.playerCamera.object3D.translateZ(1.5);
+        this.playerCamera.object3D.translateY(0.2);
+        this.playerCamera.object3D.matrixNeedsUpdate = true;
+      }
+    } else {
+      if (this.lobbyCameraTransform.object3DMap.mesh) {
+        this.lobbyCameraTransform.object3DMap.mesh.visible = true;
+      }
     }
   }
 }
