@@ -90,6 +90,9 @@ AFRAME.registerSystem("camera-mirror", {
       if (playerHud) {
         playerHudWasVisible = playerHud.visible;
         playerHud.visible = false;
+        if (this.el.sceneEl.systems["post-physics"]) {
+          this.el.sceneEl.systems["post-physics"].spriteSystem.mesh.visible = false;
+        }
       }
       renderer.vr.enabled = false;
       const tmpOnAfterRender = this.el.object3D.onAfterRender;
@@ -104,6 +107,9 @@ AFRAME.registerSystem("camera-mirror", {
       }
       if (playerHud) {
         playerHud.visible = playerHudWasVisible;
+        if (this.el.sceneEl.systems["post-physics"]) {
+          this.el.sceneEl.systems["post-physics"].spriteSystem.mesh.visible = true;
+        }
       }
     };
   }

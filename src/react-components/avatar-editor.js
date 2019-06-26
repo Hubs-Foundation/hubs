@@ -103,7 +103,9 @@ export default class AvatarEditor extends Component {
       });
     }
 
-    this.inputFiles.thumbnail = new File([await this.preview.snapshot()], "thumbnail.png", { type: "image/png" });
+    this.inputFiles.thumbnail = new File([await this.preview.getWrappedInstance().snapshot()], "thumbnail.png", {
+      type: "image/png"
+    });
 
     const filesToUpload = ["gltf", "bin", "base_map", "emissive_map", "normal_map", "orm_map", "thumbnail"].filter(
       k => this.inputFiles[k] === null || this.inputFiles[k] instanceof File

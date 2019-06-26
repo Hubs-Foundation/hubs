@@ -31,7 +31,7 @@ const rightDpadCenter = `${name}rightDpad/center`;
 const rightJoy = `${name}right/joy`;
 const rightJoyY1 = `${name}right/joyY1`;
 const rightJoyY2 = `${name}right/joyY2`;
-const rightJoyYDeadzoned = `${name}left/joy/y/deadzoned`;
+const rightJoyYDeadzoned = `${name}right/joy/y/deadzoned`;
 const leftDpadNorth = `${name}leftDpad/north`;
 const leftDpadSouth = `${name}leftDpad/south`;
 const leftDpadEast = `${name}leftDpad/east`;
@@ -778,6 +778,12 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: { value: leftButton("y").pressed },
+      dest: { value: paths.actions.leftHand.switchDrawMode },
+      xform: xforms.rising,
+      priority: 1
+    },
+    {
+      src: { value: rightButton("b").pressed },
       dest: { value: paths.actions.leftHand.undoDrawing },
       xform: xforms.rising,
       priority: 1
@@ -963,6 +969,12 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: { value: rightButton("b").pressed },
+      dest: { value: paths.actions.rightHand.switchDrawMode },
+      xform: xforms.rising,
+      priority: 1
+    },
+    {
+      src: { value: leftButton("y").pressed },
       dest: { value: paths.actions.rightHand.undoDrawing },
       xform: xforms.rising,
       priority: 1

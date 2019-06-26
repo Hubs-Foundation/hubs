@@ -245,8 +245,8 @@ AFRAME.registerComponent("ik-controller", {
       this.ikRoot.el.components["player-info"].data.avatarType === AVATAR_TYPES.LEGACY
         ? LEGACY_HAND_ROTATIONS
         : HAND_ROTATIONS;
-    this.updateHand(handRotations.left, leftHand, leftController.object3D, true, this.isInView);
-    this.updateHand(handRotations.right, rightHand, rightController.object3D, false, this.isInView);
+    if (leftHand) this.updateHand(handRotations.left, leftHand, leftController.object3D, true, this.isInView);
+    if (rightHand) this.updateHand(handRotations.right, rightHand, rightController.object3D, false, this.isInView);
     this.forceIkUpdate = false;
   },
 

@@ -51,6 +51,35 @@ body.vr-mode {
   @extend %unselectable;
 }
 
+:local(.in-room-favorite-button) {
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  left: 16px;
+  margin: 22px 0;
+  padding: 0;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 24px;
+  font-size: 1.3em;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+  border: 0;
+  width: 43px;
+  height: 43px;
+  color: $dark-grey;
+
+  @media (max-width: 1080px) {
+    display: none;
+  }
+}
+
 :local(.nag-corner-button) {
   position: absolute;
   z-index: 1;

@@ -23,7 +23,8 @@
     "lint": "npm run lint:js && npm run lint:html",
     "test": "npm run lint && npm run test:unit && npm run build",
     "test:unit": "ava",
-    "stats": "rimraf ./dist && webpack --mode=production --json"
+    "stats": "rimraf ./dist && webpack --mode=production --json",
+    "spritesheet": "spritesheet-js -f json -p src/assets/images/spritesheets/ --padding 8 --divisibleByTwo -n sprite-system-spritesheet --powerOfTwo src/assets/images/sprites/*"
   },
   "ava": {
     "files": [
@@ -41,7 +42,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
-    "aframe": "github:mozillareality/aframe#remove-text",
+    "aframe": "github:mozillareality/aframe#hubs/master",
     "aframe-physics-system": "github:infinitelee/aframe-physics-system#feature/heightfields",
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "^1.0.0",
@@ -49,6 +50,7 @@
     "animejs": "github:mozillareality/anime#hubs/master",
     "classnames": "^2.2.5",
     "copy-to-clipboard": "^3.0.8",
+    "dayjs-ext": "^2.2.0",
     "deepmerge": "^2.1.1",
     "detect-browser": "^3.0.1",
     "event-target-shim": "^3.0.1",
@@ -87,6 +89,7 @@
     "@babel/core": "^7.3.3",
     "@babel/plugin-proposal-class-properties": "^7.3.3",
     "@babel/plugin-proposal-object-rest-spread": "^7.3.2",
+    "@babel/polyfill": "^7.4.4",
     "@babel/preset-env": "^7.3.1",
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.0.0",
@@ -105,6 +108,7 @@
     "eslint-plugin-react": "^7.10.0",
     "esm": "^3.2.5",
     "extract-text-webpack-plugin": "4.0.0-alpha.0",
+    "fast-plural-rules": "0.0.3",
     "file-loader": "^1.1.10",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.1.0",
@@ -117,6 +121,7 @@
     "sass-loader": "^6.0.7",
     "selfsigned": "^1.10.2",
     "shelljs": "^0.8.1",
+    "spritesheet-js": "^1.2.6",
     "style-loader": "^0.20.2",
     "stylelint": "^9.10.1",
     "stylelint-config-recommended-scss": "^3.2.0",

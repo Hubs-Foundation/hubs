@@ -1,6 +1,7 @@
 import { paths } from "../paths";
 import { Pose } from "../pose";
 import { touchIsAssigned, jobIsAssigned, assign, unassign, findByJob, findByTouch } from "./touchscreen/assignments";
+import { findRemoteHoverTarget } from "../../interactions";
 
 const MOVE_CURSOR_JOB = "MOVE CURSOR";
 const MOVE_CAMERA_JOB = "MOVE CAMERA";
@@ -52,7 +53,17 @@ function shouldMoveCursor(touch, raycaster) {
     rawIntersections
   );
   const intersection = rawIntersections.find(x => x.object.el);
-  return intersection && intersection.object.el.matches(".interactable, .interactable *");
+  const remoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
+  return (
+    intersection &&
+    intersection.object.el.matches(".interactable, .interactable *") &&
+    !(
+      remoteHoverTarget &&
+      remoteHoverTarget.components.pinnable &&
+      remoteHoverTarget.components.pinnable.data.pinned &&
+      !AFRAME.scenes[0].is("frozen")
+    )
+  );
 }
 
 export class AppAwareTouchscreenDevice {

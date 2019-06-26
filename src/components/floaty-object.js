@@ -42,7 +42,7 @@ AFRAME.registerComponent("floaty-object", {
       this.onRelease();
     }
 
-    if (this._makeStaticWhenAtRest) {
+    if (!isHeld && this._makeStaticWhenAtRest) {
       const isMine = this.el.components.networked && NAF.utils.isMine(this.el);
       const linearThreshold = this.ammoBody.data.linearSleepingThreshold;
       const angularThreshold = this.ammoBody.data.angularSleepingThreshold;
@@ -98,7 +98,8 @@ AFRAME.registerComponent("floaty-object", {
           angularDamping: this.data.reduceAngularFloat ? 0.98 : 0.5,
           linearDamping: 0.95,
           linearSleepingThreshold: 0.1,
-          angularSleepingThreshold: 0.1
+          angularSleepingThreshold: 0.1,
+          collisionFilterMask: COLLISION_LAYERS.HANDS
         });
 
         this._makeStaticWhenAtRest = true;
@@ -108,21 +109,22 @@ AFRAME.registerComponent("floaty-object", {
           angularDamping: 0.01,
           linearDamping: 0.01,
           linearSleepingThreshold: 1.6,
-          angularSleepingThreshold: 2.5
+          angularSleepingThreshold: 2.5,
+          collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
         });
       }
+    } else {
+      this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE });
     }
 
     if (this.data.autoLockOnRelease) {
       this.setLocked(true);
     }
-
-    this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE });
   },
 
   onGrab() {
     this.el.setAttribute("ammo-body", {
-      collisionFilterMask: this.locked ? COLLISION_LAYERS.HANDS : COLLISION_LAYERS.DEFAULT_INTERACTABLE
+      collisionFilterMask: COLLISION_LAYERS.HANDS
     });
     this.setLocked(false);
   },

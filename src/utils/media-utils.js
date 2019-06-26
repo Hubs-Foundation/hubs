@@ -3,78 +3,7 @@ import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
 
-const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
-if (process.env.CORS_PROXY_SERVER) {
-  nonCorsProxyDomains.push(process.env.CORS_PROXY_SERVER);
-}
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
-
-const commonKnownContentTypes = {
-  gltf: "model/gltf",
-  glb: "model/gltf-binary",
-  png: "image/png",
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  pdf: "application/pdf",
-  mp4: "video/mp4",
-  mp3: "audio/mpeg"
-};
-
-const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
-  SHAPE = PHYSICS_CONSTANTS.SHAPE,
-  FIT = PHYSICS_CONSTANTS.FIT;
-
-// thanks to https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
-function b64EncodeUnicode(str) {
-  // first we use encodeURIComponent to get percent-encoded UTF-8, then we convert the percent-encodings
-  // into raw bytes which can be fed into btoa.
-  const CHAR_RE = /%([0-9A-F]{2})/g;
-  return btoa(encodeURIComponent(str).replace(CHAR_RE, (_, p1) => String.fromCharCode("0x" + p1)));
-}
-
-const farsparkEncodeUrl = url => {
-  // farspark doesn't know how to read '=' base64 padding characters
-  // translate base64 + to - and / to _ for URL safety
-  return b64EncodeUnicode(url)
-    .replace(/=+$/g, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
-};
-
-export const scaledThumbnailUrlFor = (url, width, height) => {
-  if (
-    process.env.RETICULUM_SERVER &&
-    process.env.RETICULUM_SERVER.includes("hubs.local") &&
-    url.includes("hubs.local")
-  ) {
-    return url;
-  }
-
-  return `https://${process.env.FARSPARK_SERVER}/thumbnail/${farsparkEncodeUrl(url)}?w=${width}&h=${height}`;
-};
-
-export const proxiedUrlFor = (url, index = null) => {
-  if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
-
-  const hasIndex = index !== null;
-
-  if (!hasIndex) {
-    // Skip known domains that do not require CORS proxying.
-    try {
-      const parsedUrl = new URL(url);
-      if (nonCorsProxyDomains.find(domain => parsedUrl.hostname.endsWith(domain))) return url;
-    } catch (e) {
-      // Ignore
-    }
-  }
-
-  if (hasIndex || !process.env.CORS_PROXY_SERVER) {
-    const method = hasIndex ? "extract" : "raw";
-    return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${farsparkEncodeUrl(url)}`;
-  } else {
-    return `https://${process.env.CORS_PROXY_SERVER}/${url}`;
-  }
-};
 
 const resolveUrlCache = new Map();
 export const resolveUrl = async (url, index) => {
@@ -87,36 +16,6 @@ export const resolveUrl = async (url, index) => {
   }).then(r => r.json());
   resolveUrlCache.set(cacheKey, resolved);
   return resolved;
-};
-
-export const getCustomGLTFParserURLResolver = gltfUrl => url => {
-  if (typeof url !== "string" || url === "") return "";
-  if (/^(https?:)?\/\//i.test(url)) return url;
-  if (/^data:.*,.*$/i.test(url)) return url;
-  if (/^blob:.*$/i.test(url)) return url;
-
-  if (process.env.CORS_PROXY_SERVER) {
-    // For absolute paths with a CORS proxied gltf URL, re-write the url properly to be proxied
-    const corsProxyPrefix = `https://${process.env.CORS_PROXY_SERVER}/`;
-
-    if (gltfUrl.startsWith(corsProxyPrefix)) {
-      const originalUrl = decodeURIComponent(gltfUrl.substring(corsProxyPrefix.length));
-      const originalUrlParts = originalUrl.split("/");
-
-      // Drop the .gltf filename
-      const path = new URL(url).pathname;
-      const assetUrl = originalUrlParts.slice(0, originalUrlParts.length - 1).join("/") + "/" + path;
-      return corsProxyPrefix + assetUrl;
-    }
-  }
-
-  return url;
-};
-
-export const guessContentType = url => {
-  if (url.startsWith("hubs://") && url.endsWith("/video")) return "video/vnd.hubs-webrtc";
-  const extension = new URL(url).pathname.split(".").pop();
-  return commonKnownContentTypes[extension];
 };
 
 export const upload = file => {
@@ -322,125 +221,6 @@ export function getPromotionTokenForFile(fileId) {
   return window.APP.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
 }
 
-function exceedsDensityThreshold(count, subtree) {
-  const bounds = subtree.boundingData;
-  const triangleThreshold = 1000;
-  const minimumVolume = 0.1;
-  const minimumTriangles = 100;
-  const dx = bounds[3] - bounds[0];
-  const dy = bounds[4] - bounds[1];
-  const dz = bounds[5] - bounds[2];
-  const volume = dx * dy * dz;
-
-  if (volume < minimumVolume) {
-    return false;
-  }
-
-  if (count < minimumTriangles) {
-    return false;
-  }
-
-  return count / volume > triangleThreshold;
-}
-
-function isHighDensity(subtree) {
-  if (subtree.count) {
-    const result = exceedsDensityThreshold(subtree.count, subtree);
-    return result === true ? true : subtree.count;
-  } else {
-    const leftResult = isHighDensity(subtree.left);
-    if (leftResult === true) return true;
-    const rightResult = isHighDensity(subtree.right);
-    if (rightResult === true) return true;
-
-    const count = leftResult + rightResult;
-    const result = exceedsDensityThreshold(count, subtree);
-    return result === true ? true : count;
-  }
-}
-
-function isGeometryHighDensity(geo) {
-  const bvh = geo.boundsTree;
-  const roots = bvh._roots;
-  for (let i = 0; i < roots.length; ++i) {
-    return isHighDensity(roots[i]) === true;
-  }
-  return false;
-}
-
-export const traverseMeshesAndAddShapes = (function() {
-  const shapePrefix = "ammo-shape__";
-  const shapes = [];
-  return function(el) {
-    const meshRoot = el.object3DMap.mesh;
-    while (shapes.length > 0) {
-      const { id, entity } = shapes.pop();
-      entity.removeAttribute(id);
-    }
-
-    console.group("traverseMeshesAndAddShapes");
-
-    if (document.querySelector(["[ammo-shape__trimesh]", "[ammo-shape__heightfield]"])) {
-      console.log("heightfield or trimesh found on scene");
-    } else {
-      console.log("collision not found in scene");
-
-      let isHighDensity = false;
-      meshRoot.traverse(o => {
-        if (
-          o.isMesh &&
-          (!THREE.Sky || o.__proto__ != THREE.Sky.prototype) &&
-          !o.name.startsWith("Floor_Plan") &&
-          !o.name.startsWith("Ground_Plane") &&
-          o.geometry.boundsTree
-        ) {
-          if (isGeometryHighDensity(o.geometry)) {
-            isHighDensity = true;
-            return;
-          }
-        }
-      });
-
-      let navMesh = null;
-
-      if (isHighDensity) {
-        console.log("mesh contains high triangle density region");
-        navMesh = document.querySelector("[nav-mesh]");
-      }
-
-      if (navMesh) {
-        console.log(`mesh density exceeded, using floor plan only`);
-        navMesh.setAttribute(shapePrefix + "floorPlan", {
-          type: SHAPE.MESH,
-          margin: 0.01,
-          fit: FIT.ALL,
-          includeInvisible: true
-        });
-        shapes.push({ id: shapePrefix + "floorPlan", entity: navMesh });
-      } else if (!isHighDensity) {
-        el.setAttribute(shapePrefix + "environment", {
-          type: SHAPE.MESH,
-          margin: 0.01,
-          fit: FIT.ALL
-        });
-        shapes.push({ id: shapePrefix + "environment", entity: el });
-        console.log("adding mesh shape for all visible meshes");
-      } else {
-        el.setAttribute(shapePrefix + "defaultFloor", {
-          type: SHAPE.BOX,
-          margin: 0.01,
-          halfExtents: { x: 4000, y: 0.5, z: 4000 },
-          offset: { x: 0, y: -0.5, z: 0 },
-          fit: FIT.MANUAL
-        });
-        shapes.push({ id: shapePrefix + "defaultFloor", entity: el });
-        console.log("adding default floor collision");
-      }
-    }
-    console.groupEnd();
-  };
-})();
-
 const mediaPos = new THREE.Vector3();
 
 export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false) {
@@ -496,10 +276,21 @@ export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false
   return { entity, orientation };
 }
 
-const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/scenes\/(\w+)\/?\S*/;
-const hubsAvatarRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/avatars\/(\w+)\/?\S*/;
-const hubsRoomRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/(\w+)\/?\S*/;
-export const isHubsSceneUrl = hubsSceneRegex.test.bind(hubsSceneRegex);
-export const isHubsRoomUrl = url => !isHubsSceneUrl(url) && hubsRoomRegex.test(url);
-export const isHubsDestinationUrl = url => isHubsSceneUrl(url) || isHubsRoomUrl(url);
-export const isHubsAvatarUrl = hubsAvatarRegex.test.bind(hubsAvatarRegex);
+const textureLoader = new THREE.TextureLoader();
+textureLoader.setCrossOrigin("anonymous");
+export function createImageTexture(url) {
+  return new Promise((resolve, reject) => {
+    textureLoader.load(
+      url,
+      texture => {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.minFilter = THREE.LinearFilter;
+        resolve(texture);
+      },
+      null,
+      function(xhr) {
+        reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
+      }
+    );
+  });
+}

@@ -85,6 +85,11 @@ AFRAME.registerComponent("camera-tool", {
       const width = 0.28;
       const geometry = new THREE.PlaneBufferGeometry(width, width / this.camera.aspect);
 
+      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+      if (environmentMapComponent) {
+        environmentMapComponent.applyEnvironmentMap(this.el.object3D);
+      }
+
       if (enableCameraViewport) {
         const screen = new THREE.Mesh(geometry, material);
         screen.rotation.set(0, Math.PI, 0);
@@ -225,6 +230,9 @@ AFRAME.registerComponent("camera-tool", {
         if (this.playerHud) {
           playerHudWasVisible = this.playerHud.visible;
           this.playerHud.visible = false;
+          if (this.el.sceneEl.systems["post-physics"]) {
+            this.el.sceneEl.systems["post-physics"].spriteSystem.mesh.visible = false;
+          }
         }
 
         const tmpVRFlag = renderer.vr.enabled;
@@ -245,6 +253,9 @@ AFRAME.registerComponent("camera-tool", {
         }
         if (this.playerHud) {
           this.playerHud.visible = playerHudWasVisible;
+          if (this.el.sceneEl.systems["post-physics"]) {
+            this.el.sceneEl.systems["post-physics"].spriteSystem.mesh.visible = true;
+          }
         }
         this.lastUpdate = now;
         this.updateRenderTargetNextTick = false;
