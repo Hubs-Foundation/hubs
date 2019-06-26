@@ -39,7 +39,7 @@ export default class SettingsMenu extends Component {
     const showCloseRoom = !!this.props.hubChannel.canOrWillIfCreator("close_hub");
     const showRoomInfo = !!this.props.hubScene;
     const showRoomSection = showRoomSettings || showRoomInfo || showCloseRoom;
-    const showStreamerMode = !!this.props.hubChannel.canOrWillIfCreator("kick_users");
+    const showStreamerMode = this.props.scene.is("entered") && !!this.props.hubChannel.canOrWillIfCreator("kick_users");
 
     // Draw self first
     return (
@@ -218,14 +218,14 @@ export default class SettingsMenu extends Component {
                 </a>
               </div>
             </div>
-            {this.props.scene.is("entered") && showStreamerMode ? (
+            {showStreamerMode ? (
               <div className={rowHeader}>
                 <FormattedMessage id="settings.row-tools" />
               </div>
             ) : (
               <div />
             )}
-            {this.props.scene.is("entered") && showStreamerMode ? (
+            {showStreamerMode ? (
               <div className={rowClasses}>
                 <div className={styles.icon}>
                   <i>
