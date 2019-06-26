@@ -193,7 +193,7 @@ AFRAME.registerComponent("camera-tool", {
       this.snapCountdown--;
 
       if (this.snapCountdown === 0) {
-        this.el.setAttribute("camera-tool", { label: " ", isSnapping: false });
+        this.el.setAttribute("camera-tool", { label: "", isSnapping: false });
         this.takeSnapshotNextTick = true;
         clearInterval(interval);
       } else {
