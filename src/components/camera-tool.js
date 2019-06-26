@@ -72,7 +72,7 @@ AFRAME.registerComponent("camera-tool", {
       map: this.renderTarget.texture
     });
 
-    // Bit of a hack here to only update the renderTarget when the screens are in view 
+    // Bit of a hack here to only update the renderTarget when the screens are in view
     material.map.isVideoTexture = true;
     material.map.update = () => {
       if (this.showCameraViewport) {
