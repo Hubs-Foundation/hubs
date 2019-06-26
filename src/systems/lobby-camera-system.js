@@ -67,10 +67,10 @@ export class LobbyCameraSystem {
     target.object3D.matrixNeedsUpdate = true;
     target.object3D.updateMatrices();
 
-    if (avatar) {
-      // TODO: Show spectating message.
-      this.spectatingMessage = `You are now spectating ${avatar.components["player-info"].displayName}`;
-    }
+    //if (avatar) {
+    // TODO: Show spectating message.
+    // const spectatingMessage = `You are spectating ${avatar.components["player-info"].displayName}.`;
+    //}
 
     setMatrixWorld(this.playerCamera, target.object3D.matrixWorld);
     this.playerCamera.translateZ(-0.1);
