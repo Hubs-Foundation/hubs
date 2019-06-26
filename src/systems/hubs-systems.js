@@ -6,6 +6,7 @@ import { HoverMenuSystem } from "./hover-menu-system";
 import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
+import { LobbyCameraSystem } from "./lobby-camera-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -19,6 +20,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.superSpawnerSystem = new SuperSpawnerSystem();
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
     this.soundEffectsSystem = new SoundEffectsSystem();
+    this.lobbyCameraSystem = new LobbyCameraSystem();
   },
 
   tick(t) {
@@ -35,6 +37,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverMenuSystem.tick();
     this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
     this.soundEffectsSystem.tick();
+    this.lobbyCameraSystem.tick();
   },
 
   remove() {
