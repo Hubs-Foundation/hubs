@@ -1,6 +1,5 @@
 import { spawnChatMessage } from "./react-components/chat-message";
 import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "./systems/sound-effects-system";
-import { takeOrReleaseLobbyCam } from "./systems/lobby-camera-system";
 
 const DUCK_URL = "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf";
 
@@ -45,9 +44,6 @@ export default class MessageDispatch {
     const captureSystem = this.scene.systems["capture-system"];
 
     switch (command) {
-      case "lobbycam":
-        takeOrReleaseLobbyCam();
-        break;
       case "fly":
         if (playerRig.getAttribute("character-controller").fly !== true) {
           playerRig.setAttribute("character-controller", "fly", true);

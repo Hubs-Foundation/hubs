@@ -228,7 +228,7 @@ export default class SettingsMenu extends Component {
                     this.props.toggleStreaming();
                   }}
                 >
-                  <FormattedMessage id="settings.toggle-lobbycam-control" />
+                  <FormattedMessage id="settings.streamer-mode" />
                 </div>
               </div>
             </div>

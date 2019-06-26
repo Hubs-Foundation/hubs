@@ -21,7 +21,7 @@ AFRAME.registerComponent("lobby-camera-transform-component", {
   }
 });
 
-export function takeOrReleaseLobbyCam() {
+export function takeOrCreateLobbyCamera() {
   const state = document.getElementById(NETWORKED_LOBBY_CAMERA_STATE);
   if (!state) {
     const e = document.createElement("a-entity");
@@ -31,6 +31,16 @@ export function takeOrReleaseLobbyCam() {
   } else {
     NAF.utils.takeOwnership(state);
   }
+}
+
+export function lobbyCameraIsMine() {
+  const state = document.getElementById(NETWORKED_LOBBY_CAMERA_STATE);
+  return state && NAF.utils.isMine(state);
+}
+
+export function releaseLobbyCamera() {
+  const state = document.getElementById(NETWORKED_LOBBY_CAMERA_STATE);
+  state.parentNode.removeChild(state);
 }
 
 function avatarForSessionId(sessionId) {

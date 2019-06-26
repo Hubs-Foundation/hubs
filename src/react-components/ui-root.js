@@ -62,7 +62,7 @@ import TwoDHUD from "./2d-hud";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
 import { handleTipClose } from "../systems/tips.js";
-import { takeOrReleaseLobbyCam } from "../systems/lobby-camera-system";
+import { takeOrCreateLobbyCamera, lobbyCameraIsMine, releaseLobbyCamera } from "../systems/lobby-camera-system";
 
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
@@ -275,7 +275,12 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.addEventListener("exit", this.exitEventHandler);
-    this.props.scene.addEventListener("action_exit_watch", () => this.setState({ watching: false, hide: false }));
+    this.props.scene.addEventListener("action_exit_watch", () => {
+      this.setState({ watching: false, hide: false });
+      if (lobbyCameraIsMine()) {
+        releaseLobbyCamera();
+      }
+    });
 
     const scene = this.props.scene;
 
@@ -739,8 +744,8 @@ class UIRoot extends Component {
   };
 
   toggleStreaming = () => {
-    takeOrReleaseLobbyCam();
-    this.setState({ showSettingsMenu: false })
+    takeOrCreateLobbyCamera();
+    this.setState({ showSettingsMenu: false, hide: true });
   };
 
   renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
