@@ -21,6 +21,10 @@ const pathsMap = {
 };
 
 const snapCanvas = document.createElement("canvas");
+const videoCanvas = document.createElement("canvas");
+
+let isDrawingVideoFrame = false;
+
 async function pixelsToPNG(pixels, width, height) {
   snapCanvas.width = width;
   snapCanvas.height = height;
@@ -67,6 +71,14 @@ AFRAME.registerComponent("camera-tool", {
     this.camera.position.set(0, 0, 0.05);
     this.camera.matrixNeedsUpdate = true;
     this.el.setObject3D("camera", this.camera);
+
+    videoCanvas.width = this.renderTarget.width;
+    videoCanvas.height = this.renderTarget.height;
+
+    this.videoContext = videoCanvas.getContext("2d");
+    this.videoImageData = this.videoContext.createImageData(this.renderTarget.width, this.renderTarget.height);
+    this.videoPixels = new Uint8Array(this.renderTarget.width * this.renderTarget.height * 4);
+    this.videoImageData.data.set(this.videoPixels);
 
     const material = new THREE.MeshBasicMaterial({
       map: this.renderTarget.texture
@@ -180,7 +192,6 @@ AFRAME.registerComponent("camera-tool", {
     this.el.setAttribute("camera-tool", "isSnapping", true);
     this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_COUNTDOWN);
 
-    this.isSnapping = true;
     this.snapCountdown = 3;
     this.el.setAttribute("camera-tool", "label", `${this.snapCountdown}`);
 
@@ -194,7 +205,49 @@ AFRAME.registerComponent("camera-tool", {
 
       if (this.snapCountdown === 0) {
         this.el.setAttribute("camera-tool", { label: "", isSnapping: false });
-        this.takeSnapshotNextTick = true;
+
+        if (/* use still camera */ false) {
+          this.takeSnapshotNextTick = true;
+        } else {
+          const stream = new MediaStream();
+          const track = videoCanvas.captureStream().getVideoTracks()[0];
+          stream.addTrack(track);
+          this.videoRecorder = new MediaRecorder(stream, { mimeType: "video/webm; codecs=vp8" });
+          const chunks = [];
+
+          this.videoRecorder.ondataavailable = e => chunks.push(e.data);
+          this.videoRecorder.onstop = () => {
+            if (chunks.length === 0) return;
+            const mimeType = chunks[0].type;
+            console.log(mimeType);
+            console.log(chunks.length);
+            const blob = new Blob(chunks, { type: mimeType });
+            chunks.length = 0;
+            const { orientation } = spawnMediaAround(
+              this.el,
+              new File([blob], "capture", { type: mimeType }),
+              this.localSnapCount,
+              true
+            );
+
+            orientation.then(() => {
+              this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
+            });
+          };
+
+          this.updateRenderTargetNextTick = true;
+
+          this.el.setAttribute("camera-tool", "label", "r");
+
+          this.videoRecorder.start();
+
+          setTimeout(() => {
+            this.videoRecorder.stop();
+            this.videoRecorder = null;
+            this.el.setAttribute("camera-tool", "label", "");
+          }, 5000);
+        }
+
         clearInterval(interval);
       } else {
         this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_COUNTDOWN);
@@ -335,6 +388,21 @@ AFRAME.registerComponent("camera-tool", {
           }
         }
         this.lastUpdate = now;
+
+        if (!isDrawingVideoFrame && this.videoRecorder) {
+          isDrawingVideoFrame = true;
+
+          createImageBitmap(this.videoImageData).then(bitmap => {
+            this.videoContext.scale(1, -1);
+            this.videoContext.drawImage(bitmap, 0, -this.renderTarget.height);
+            isDrawingVideoFrame = false;
+
+            if (this.videoRecorder) {
+              this.updateRenderTargetNextTick = true;
+            }
+          });
+        }
+
         this.updateRenderTargetNextTick = false;
         this.viewportInViewThisFrame = false;
       }
@@ -346,6 +414,7 @@ AFRAME.registerComponent("camera-tool", {
           this.snapPixels = new Uint8Array(width * height * 4);
         }
         renderer.readRenderTargetPixels(this.renderTarget, 0, 0, width, height, this.snapPixels);
+
         pixelsToPNG(this.snapPixels, width, height).then(file => {
           const { orientation } = spawnMediaAround(this.el, file, this.localSnapCount, true);
 
