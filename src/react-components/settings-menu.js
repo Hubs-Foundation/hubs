@@ -215,23 +215,27 @@ export default class SettingsMenu extends Component {
                 </a>
               </div>
             </div>
-            <div className={rowClasses}>
-              <div className={styles.icon}>
-                <i>
-                  <FontAwesomeIcon icon={faVideo} />
-                </i>
-              </div>
-              <div className={styles.listItem}>
-                <div
-                  className={styles.listItemLink}
-                  onClick={() => {
-                    this.props.toggleStreaming();
-                  }}
-                >
-                  <FormattedMessage id="settings.streamer-mode" />
+            {showRoomSettings ? (
+              <div className={rowClasses}>
+                <div className={styles.icon}>
+                  <i>
+                    <FontAwesomeIcon icon={faVideo} />
+                  </i>
+                </div>
+                <div className={styles.listItem}>
+                  <div
+                    className={styles.listItemLink}
+                    onClick={() => {
+                      this.props.toggleStreaming();
+                    }}
+                  >
+                    <FormattedMessage id="settings.streamer-mode" />
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div />
+            )}
             <div className={classNames([styles.bottomLinksMain])}>
               <a href="/whats-new" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.whats-new" />

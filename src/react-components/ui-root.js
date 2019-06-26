@@ -746,6 +746,11 @@ class UIRoot extends Component {
   toggleStreaming = () => {
     takeOrCreateLobbyCamera();
     this.setState({ showSettingsMenu: false, hide: true });
+
+    const playerRig = document.querySelector("#player-rig");
+    if (playerRig.getAttribute("character-controller").fly !== true) {
+      playerRig.setAttribute("character-controller", "fly", true);
+    }
   };
 
   renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
