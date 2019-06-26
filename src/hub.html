@@ -388,6 +388,22 @@
                     position-at-box-shape-border__freeze="target: .camera-menu"
                     set-yxz-order
                 >
+                    <a-entity
+                        class="label"
+                        text="value: text; align: center; color: #efefef"
+                        position="0 0 0.1"
+                        scale="3.5 3.5 3.5"
+                    ></a-entity>
+                    <a-entity class="ui interactable-ui camera-snap-menu" mixin="button-container">
+                        <a-entity class="snap-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 -0.15 0.075" scale="0.75 0.75 0.75">
+                            <a-entity
+                                sprite
+                                icon-button="image: snap_camera.png; hoverImage: snap_camera.png;"
+                                scale="0.225 0.225 0.225"
+                                position="0 0.005 0.01"
+                            ></a-entity>
+                        </a-entity>
+                    </a-entity>
                     <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 10;">
                         <a-entity mixin="rounded-text-action-button" is-remote-hover-target tags="singleActionButton: true;" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01">
                             <a-entity text=" value:mirror; width:2.5; align:center;" class="mirror-button-label" text-raycast-hack position="0 0 0.02"></a-entity>
@@ -416,19 +432,6 @@
                                 position="0 0 0.001"
                             ></a-entity>
                         </a-entity>
-                    </a-entity>
-                </a-entity>
-            </template>
-
-            <template id="camera-hover-menu">
-                <a-entity class="ui interactable-ui hover-container camera-snap-menu" mixin="button-container" visible="false">
-                    <a-entity class="snap-button" mixin="rounded-action-button" is-remote-hover-target tags="isHoverMenuChild: true; singleActionButton: true;" position="0 -0.145 0.0" scale="0.75 0.75 0.75">
-                        <a-entity
-                            sprite
-                            icon-button="image: snap_camera.png; hoverImage: snap_camera.png;"
-                            scale="0.225 0.225 0.225"
-                            position="0 0.005 0.01"
-                        ></a-entity>
                     </a-entity>
                 </a-entity>
             </template>

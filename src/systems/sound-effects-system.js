@@ -36,6 +36,7 @@ export const SOUND_FREEZE = soundEnum++;
 export const SOUND_PIN = soundEnum++;
 export const SOUND_MEDIA_LOADING = soundEnum++;
 export const SOUND_MEDIA_LOADED = soundEnum++;
+export const SOUND_CAMERA_TOOL_COUNTDOWN = soundEnum++;
 
 // Safari doesn't support the promise form of decodeAudioData, so we polyfill it.
 function decodeAudioData(audioContext, arrayBuffer) {
@@ -55,6 +56,7 @@ export class SoundEffectsSystem {
       [SOUND_PEN_UNDO_DRAW, URL_TICK],
       [SOUND_PEN_CHANGE_COLOR, URL_TICK],
       [SOUND_TOGGLE_MIC, URL_TICK],
+      [SOUND_CAMERA_TOOL_COUNTDOWN, URL_TICK],
       [SOUND_TELEPORT_START, URL_TELEPORT_LOOP],
       [SOUND_TELEPORT_END, URL_QUICK_TURN],
       [SOUND_SNAP_ROTATE, URL_TAP_MELLOW],
