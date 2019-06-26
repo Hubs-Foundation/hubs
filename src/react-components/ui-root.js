@@ -276,7 +276,6 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("exit", this.exitEventHandler);
     this.props.scene.addEventListener("action_exit_watch", () => {
       this.setState({ watching: false, hide: false });
-      document.querySelector("#player-rig").setAttribute("player-info", "isStreaming", false);
     });
 
     const scene = this.props.scene;
@@ -747,6 +746,14 @@ class UIRoot extends Component {
       playerRig.setAttribute("character-controller", "fly", true);
     }
     playerRig.setAttribute("player-info", "isStreaming", true);
+  };
+
+  disableStreamerMode = () => {
+    const playerRig = document.querySelector("#player-rig");
+    if (playerRig.components["character-controller"].data.fly) {
+      playerRig.setAttribute("character-controller", "fly", false);
+    }
+    playerRig.setAttribute("player-info", "isStreaming", false);
   };
 
   renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
@@ -1817,6 +1824,7 @@ class UIRoot extends Component {
                 mediaSearchStore={this.props.mediaSearchStore}
                 hideSettings={() => this.setState({ showSettingsMenu: false })}
                 enableStreamerMode={this.enableStreamerMode}
+                disableStreamerMode={this.disableStreamerMode}
                 hubChannel={this.props.hubChannel}
                 hubScene={this.props.hubScene}
                 scene={this.props.scene}
