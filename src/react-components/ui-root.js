@@ -1842,7 +1842,6 @@ class UIRoot extends Component {
                 hideSettings={() => this.setState({ showSettingsMenu: false })}
                 isStreaming={this.state.isStreaming}
                 enableStreamerMode={this.enableStreamerMode}
-                disableStreamerMode={this.disableStreamerMode}
                 hubChannel={this.props.hubChannel}
                 hubScene={this.props.hubScene}
                 scene={this.props.scene}

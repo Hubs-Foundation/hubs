@@ -23,7 +23,6 @@ export default class SettingsMenu extends Component {
     hideSettings: PropTypes.func,
     isStreaming: PropTypes.bool,
     enableStreamerMode: PropTypes.func,
-    disableStreamerMode: PropTypes.func,
     mediaSearchStore: PropTypes.object,
     scene: PropTypes.object,
     hubScene: PropTypes.object,
@@ -40,6 +39,7 @@ export default class SettingsMenu extends Component {
     const showCloseRoom = !!this.props.hubChannel.canOrWillIfCreator("close_hub");
     const showRoomInfo = !!this.props.hubScene;
     const showRoomSection = showRoomSettings || showRoomInfo || showCloseRoom;
+    const showStreamerMode = !!this.props.hubChannel.canOrWillIfCreator("kick_users");
 
     // Draw self first
     return (
@@ -218,14 +218,14 @@ export default class SettingsMenu extends Component {
                 </a>
               </div>
             </div>
-            {this.props.scene.is("entered") && showRoomSettings ? (
+            {this.props.scene.is("entered") && showStreamerMode ? (
               <div className={rowHeader}>
                 <FormattedMessage id="settings.row-tools" />
               </div>
             ) : (
               <div />
             )}
-            {this.props.scene.is("entered") && showRoomSettings ? (
+            {this.props.scene.is("entered") && showStreamerMode ? (
               <div className={rowClasses}>
                 <div className={styles.icon}>
                   <i>
@@ -233,25 +233,14 @@ export default class SettingsMenu extends Component {
                   </i>
                 </div>
                 <div className={styles.listItem}>
-                  {this.props.isStreaming ? (
-                    <div
-                      className={styles.listItemLink}
-                      onClick={() => {
-                        this.props.disableStreamerMode();
-                      }}
-                    >
-                      <FormattedMessage id="settings.disable-streamer-mode" />
-                    </div>
-                  ) : (
-                    <div
-                      className={styles.listItemLink}
-                      onClick={() => {
-                        this.props.enableStreamerMode();
-                      }}
-                    >
-                      <FormattedMessage id="settings.enable-streamer-mode" />
-                    </div>
-                  )}
+                  <div
+                    className={styles.listItemLink}
+                    onClick={() => {
+                      this.props.enableStreamerMode();
+                    }}
+                  >
+                    <FormattedMessage id="settings.enable-streamer-mode" />
+                  </div>
                 </div>
               </div>
             ) : (
