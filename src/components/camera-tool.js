@@ -39,7 +39,7 @@ const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 AFRAME.registerComponent("camera-tool", {
   schema: {
-    previewFPS: { default: 6 },
+    heldOrSnappingViewportFPS: { default: 6 },
     imageWidth: { default: 1024 },
     imageHeight: { default: 1024 / (16 / 9) },
     isSnapping: { default: false },
@@ -240,7 +240,10 @@ AFRAME.registerComponent("camera-tool", {
     }
 
     // Always draw held or snapping camera viewports with a decent framerate
-    if ((isHolding || this.data.isSnapping) && performance.now() - this.lastUpdate >= 1000 / this.data.previewFPS) {
+    if (
+      (isHolding || this.data.isSnapping) &&
+      performance.now() - this.lastUpdate >= 1000 / this.data.heldOrSnappingViewportFPS
+    ) {
       this.updateRenderTargetNextTick = true;
     }
 
