@@ -34,7 +34,8 @@ function ensureAvatarNodes(json) {
 AFRAME.registerComponent("player-info", {
   schema: {
     avatarSrc: { type: "string" },
-    avatarType: { type: "string", default: AVATAR_TYPES.LEGACY }
+    avatarType: { type: "string", default: AVATAR_TYPES.LEGACY },
+    isStreaming: { type: "boolean", default: false }
   },
   init() {
     this.displayName = null;

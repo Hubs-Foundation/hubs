@@ -21,8 +21,9 @@ export default class SettingsMenu extends Component {
   static propTypes = {
     history: PropTypes.object,
     hideSettings: PropTypes.func,
-    toggleStreaming: PropTypes.func,
+    enableStreamerMode: PropTypes.func,
     mediaSearchStore: PropTypes.object,
+    scene: PropTypes.object,
     hubScene: PropTypes.object,
     hubChannel: PropTypes.object,
     performConditionalSignIn: PropTypes.func,
@@ -215,7 +216,7 @@ export default class SettingsMenu extends Component {
                 </a>
               </div>
             </div>
-            {showRoomSettings ? (
+            {this.props.scene.is("entered") && showRoomSettings ? (
               <div className={rowClasses}>
                 <div className={styles.icon}>
                   <i>
@@ -226,7 +227,7 @@ export default class SettingsMenu extends Component {
                   <div
                     className={styles.listItemLink}
                     onClick={() => {
-                      this.props.toggleStreaming();
+                      this.props.enableStreamerMode();
                     }}
                   >
                     <FormattedMessage id="settings.streamer-mode" />

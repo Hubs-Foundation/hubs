@@ -62,7 +62,6 @@ import TwoDHUD from "./2d-hud";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
 import { handleTipClose } from "../systems/tips.js";
-import { takeOrCreateLobbyCamera, lobbyCameraIsMine, releaseLobbyCamera } from "../systems/lobby-camera-system";
 
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
@@ -277,9 +276,7 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("exit", this.exitEventHandler);
     this.props.scene.addEventListener("action_exit_watch", () => {
       this.setState({ watching: false, hide: false });
-      if (lobbyCameraIsMine()) {
-        releaseLobbyCamera();
-      }
+      document.querySelector("#player-rig").setAttribute("player-info", "isStreaming", false);
     });
 
     const scene = this.props.scene;
@@ -743,14 +740,13 @@ class UIRoot extends Component {
     });
   };
 
-  toggleStreaming = () => {
-    takeOrCreateLobbyCamera();
+  enableStreamerMode = () => {
     this.setState({ showSettingsMenu: false, hide: true });
-
     const playerRig = document.querySelector("#player-rig");
-    if (playerRig.getAttribute("character-controller").fly !== true) {
+    if (!playerRig.components["character-controller"].data.fly) {
       playerRig.setAttribute("character-controller", "fly", true);
     }
+    playerRig.setAttribute("player-info", "isStreaming", true);
   };
 
   renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
@@ -1820,9 +1816,10 @@ class UIRoot extends Component {
                 history={this.props.history}
                 mediaSearchStore={this.props.mediaSearchStore}
                 hideSettings={() => this.setState({ showSettingsMenu: false })}
-                toggleStreaming={this.toggleStreaming}
+                enableStreamerMode={this.enableStreamerMode}
                 hubChannel={this.props.hubChannel}
                 hubScene={this.props.hubScene}
+                scene={this.props.scene}
                 performConditionalSignIn={this.props.performConditionalSignIn}
                 showNonHistoriedDialog={this.showNonHistoriedDialog}
                 pushHistoryState={this.pushHistoryState}

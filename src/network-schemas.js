@@ -180,11 +180,6 @@ function registerNetworkSchemas() {
       }
     ]
   });
-
-  NAF.schemas.add({
-    template: "#lobby-camera",
-    components: ["position", "rotation"]
-  });
 }
 
 export default registerNetworkSchemas;
