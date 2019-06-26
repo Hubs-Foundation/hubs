@@ -7,18 +7,18 @@ export class RenderManagerSystem {
 
   addObject(rootObject) {
     rootObject.updateMatrixWorld(true);
+    let batchedCount = 0;
     rootObject.traverse(object => {
       if (object.isMesh && !object.isSkinnedMesh && !object.material.transparent && object.name !== "NavMesh") {
-        console.log("Adding mesh to batch", object);
-        this.batchManager.addMesh(object);
+        if (this.batchManager.addMesh(object)) batchedCount++;
       }
     });
+    return batchedCount;
   }
 
   removeObject(rootObject) {
     rootObject.traverse(object => {
       if (object.isMesh && !object.isSkinnedMesh && !object.material.transparent && object.name !== "NavMesh") {
-        console.log("Removing mesh from batch", object);
         this.batchManager.removeMesh(object);
       }
     });

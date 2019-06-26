@@ -354,7 +354,7 @@ AFRAME.registerComponent("gltf-model-plus", {
   },
 
   remove() {
-    this.model && this.el.sceneEl.systems["hubs-systems"].renderManagerSystem.removeObject(this.model);
+    this.model && this.el.sceneEl.systems["hubs-systems"].renderManagerSystem.removeObject(this.el.object3DMap.mesh);
   },
 
   loadTemplates() {
