@@ -179,6 +179,8 @@ class UIRoot extends Component {
     noMoreLoadingUpdates: false,
     hideLoader: false,
     watching: false,
+    isStreaming: false,
+    showStreamingTip: false,
 
     waitingOnAudio: false,
     shareScreen: false,
@@ -274,9 +276,7 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.addEventListener("exit", this.exitEventHandler);
-    this.props.scene.addEventListener("action_exit_watch", () => {
-      this.setState({ watching: false, hide: false });
-    });
+    this.props.scene.addEventListener("action_exit_watch", () => this.setState({ watching: false, hide: false }));
 
     const scene = this.props.scene;
 
@@ -740,12 +740,12 @@ class UIRoot extends Component {
   };
 
   enableStreamerMode = () => {
-    this.setState({ showSettingsMenu: false, hide: true });
     const playerRig = document.querySelector("#player-rig");
     if (!playerRig.components["character-controller"].data.fly) {
       playerRig.setAttribute("character-controller", "fly", true);
     }
     playerRig.setAttribute("player-info", "isStreaming", true);
+    this.setState({ isStreaming: true, showStreamingTip: true, showSettingsMenu: false });
   };
 
   disableStreamerMode = () => {
@@ -754,6 +754,7 @@ class UIRoot extends Component {
       playerRig.setAttribute("character-controller", "fly", false);
     }
     playerRig.setAttribute("player-info", "isStreaming", false);
+    this.setState({ isStreaming: false });
   };
 
   renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
@@ -1662,7 +1663,8 @@ class UIRoot extends Component {
                 >
                   {!embed &&
                     !showVREntryButton &&
-                    !hasTopTip && (
+                    !hasTopTip &&
+                    !this.state.isStreaming && (
                       <WithHoverSound>
                         <button
                           className={classNames({
@@ -1703,7 +1705,8 @@ class UIRoot extends Component {
                     !showVREntryButton &&
                     this.occupantCount() > 1 &&
                     !hasTopTip &&
-                    entered && (
+                    entered &&
+                    !this.state.isStreaming && (
                       <WithHoverSound>
                         <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
                           <span>
@@ -1783,16 +1786,30 @@ class UIRoot extends Component {
               )}
             />
 
-            {!preload && (
-              <div
-                onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
+            {this.state.isStreaming ? (
+              <button
+                onClick={this.disableStreamerMode}
                 className={classNames({
                   [styles.settingsInfo]: true,
                   [styles.settingsInfoSelected]: this.state.showSettingsMenu
                 })}
               >
-                <FontAwesomeIcon icon={faBars} />
-              </div>
+                <i title="Exit Streamer mode">
+                  <FontAwesomeIcon icon={faTimes} />
+                </i>
+              </button>
+            ) : (
+              !preload && (
+                <div
+                  onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
+                  className={classNames({
+                    [styles.settingsInfo]: true,
+                    [styles.settingsInfoSelected]: this.state.showSettingsMenu
+                  })}
+                >
+                  <FontAwesomeIcon icon={faBars} />
+                </div>
+              )
             )}
 
             <div
@@ -1823,6 +1840,7 @@ class UIRoot extends Component {
                 history={this.props.history}
                 mediaSearchStore={this.props.mediaSearchStore}
                 hideSettings={() => this.setState({ showSettingsMenu: false })}
+                isStreaming={this.state.isStreaming}
                 enableStreamerMode={this.enableStreamerMode}
                 disableStreamerMode={this.disableStreamerMode}
                 hubChannel={this.props.hubChannel}
@@ -1856,31 +1874,43 @@ class UIRoot extends Component {
                   onShareVideo={this.shareVideo}
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
+                  isStreaming={this.state.isStreaming}
+                  showStreamingTip={this.state.showStreamingTip}
+                  hideStreamingTip={() => {
+                    this.setState({ showStreamingTip: false });
+                  }}
                 />
-                {!watching ? (
-                  <div className={styles.nagCornerButton}>
-                    <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
-                      <FormattedMessage id="feedback.prompt" />
-                    </a>
-                  </div>
+                {!this.state.isStreaming ? (
+                  !watching ? (
+                    <div className={styles.nagCornerButton}>
+                      <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
+                        <FormattedMessage id="feedback.prompt" />
+                      </a>
+                    </div>
+                  ) : (
+                    <div className={styles.nagCornerButton}>
+                      <button onClick={() => this.setState({ hide: true })}>
+                        <FormattedMessage id="hide-ui.prompt" />
+                      </button>
+                    </div>
+                  )
                 ) : (
-                  <div className={styles.nagCornerButton}>
-                    <button onClick={() => this.setState({ hide: true })}>
-                      <FormattedMessage id="hide-ui.prompt" />
-                    </button>
-                  </div>
+                  <div />
                 )}
-                <button
-                  onClick={() => this.toggleFavorited()}
-                  className={classNames({
-                    [entryStyles.favorited]: this.isFavorited(),
-                    [styles.inRoomFavoriteButton]: true
-                  })}
-                >
-                  <i title="Favorite">
-                    <FontAwesomeIcon icon={faStar} />
-                  </i>
-                </button>
+
+                {!this.state.isStreaming && (
+                  <button
+                    onClick={() => this.toggleFavorited()}
+                    className={classNames({
+                      [entryStyles.favorited]: this.isFavorited(),
+                      [styles.inRoomFavoriteButton]: true
+                    })}
+                  >
+                    <i title="Favorite">
+                      <FontAwesomeIcon icon={faStar} />
+                    </i>
+                  </button>
+                )}
               </div>
             )}
           </div>

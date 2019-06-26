@@ -29,7 +29,10 @@ class TopHUD extends Component {
     onShareVideo: PropTypes.func,
     onEndShareVideo: PropTypes.func,
     onShareVideoNotCapable: PropTypes.func,
-    mediaSearchStore: PropTypes.object
+    mediaSearchStore: PropTypes.object,
+    isStreaming: PropTypes.bool,
+    showStreamingTip: PropTypes.bool,
+    hideStreamingTip: PropTypes.func
   };
 
   state = {
@@ -146,6 +149,17 @@ class TopHUD extends Component {
             <div className={cx([styles.attachPoint, styles[`attach_${this.props.activeTip.split(".")[1]}`]])} />
           )}
           <FormattedMessage id={`tips.${this.props.activeTip}`} />
+        </div>
+      );
+    } else if (this.props.isStreaming && this.props.showStreamingTip) {
+      tip = (
+        <div className={cx([styles.topTip])}>
+          <button className={styles.tipCancel} onClick={this.props.hideStreamingTip}>
+            <i>
+              <FontAwesomeIcon icon={faTimes} />
+            </i>
+          </button>
+          <FormattedMessage id={`tips.streaming`} />
         </div>
       );
     }

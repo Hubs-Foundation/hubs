@@ -21,6 +21,7 @@ export default class SettingsMenu extends Component {
   static propTypes = {
     history: PropTypes.object,
     hideSettings: PropTypes.func,
+    isStreaming: PropTypes.bool,
     enableStreamerMode: PropTypes.func,
     disableStreamerMode: PropTypes.func,
     mediaSearchStore: PropTypes.object,
@@ -218,6 +219,13 @@ export default class SettingsMenu extends Component {
               </div>
             </div>
             {this.props.scene.is("entered") && showRoomSettings ? (
+              <div className={rowHeader}>
+                <FormattedMessage id="settings.row-tools" />
+              </div>
+            ) : (
+              <div />
+            )}
+            {this.props.scene.is("entered") && showRoomSettings ? (
               <div className={rowClasses}>
                 <div className={styles.icon}>
                   <i>
@@ -225,7 +233,7 @@ export default class SettingsMenu extends Component {
                   </i>
                 </div>
                 <div className={styles.listItem}>
-                  {document.querySelector("#player-rig").components["player-info"].data.isStreaming ? (
+                  {this.props.isStreaming ? (
                     <div
                       className={styles.listItemLink}
                       onClick={() => {
