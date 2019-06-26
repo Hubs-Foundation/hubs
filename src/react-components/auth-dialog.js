@@ -13,12 +13,16 @@ class AuthDialog extends Component {
   render() {
     const { authOrigin, verifying } = this.props;
     const { formatMessage } = this.props.intl;
-    const title = verifying ? formatMessage({ id: "auth.verifying" }) : formatMessage({ id: "auth.verified-title" });
+    const title = verifying ? "" : formatMessage({ id: "auth.verified-title" });
 
     return (
-      <DialogContainer title={title} {...this.props}>
+      <DialogContainer title={title} closable={!verifying} {...this.props}>
         {verifying ? (
-          <FormattedMessage id="auth.verifying" />
+          <div className="loader-wrap loader-mid">
+            <div className="loader">
+              <div className="loader-center" />
+            </div>
+          </div>
         ) : authOrigin === "spoke" ? (
           <FormattedMessage className="preformatted" id="auth.spoke-verified" />
         ) : (
