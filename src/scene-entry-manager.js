@@ -47,7 +47,6 @@ export default class SceneEntryManager {
   };
 
   enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
-    this.scene.systems["post-physics"].lobbyCameraSystem.inLobby = false;
     const playerCamera = document.querySelector("#player-camera");
     playerCamera.removeAttribute("scene-preview-camera");
 

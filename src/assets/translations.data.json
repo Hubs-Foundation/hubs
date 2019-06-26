@@ -231,7 +231,6 @@
     "commands.fly": "Toggle fly mode.",
     "commands.grow": "Increase your avatar's size.",
     "commands.shrink": "Decrease your avatar's size.",
-    "commands.lobbycam": "Toggle control of the lobby camera.",
     "commands.scene": "Change the scene.",
     "commands.rename": "Rename the room.",
     "commands.help": "Show help.",
