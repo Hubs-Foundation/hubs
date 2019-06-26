@@ -1,37 +1,4 @@
-/* global AFRAME, NAF, THREE */
-import cameraModelSrc from "../assets/camera_tool.glb";
-AFRAME.registerComponent("lobby-camera-transform-component", {
-  init() {
-    this.el.sceneEl.systems["post-physics"].lobbyCameraSystem.lobbyCameraTransform = this.el;
-    this.el.addEventListener(
-      "model-loaded",
-      () => {
-        this.el.object3DMap.mesh.scale.set(2.0, 2.0, 2.0);
-        this.el.object3DMap.mesh.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI);
-        this.el.object3DMap.mesh.matrixNeedsUpdate = true;
-        this.el.object3DMap.mesh.updateMatrices();
-      },
-      { once: true }
-    );
-    this.el.setAttribute("gltf-model-plus", { src: cameraModelSrc });
-  }
-});
-
-export function takeOrReleaseLobbyCam() {
-  const scene = AFRAME.scenes[0];
-  const sys = scene.systems["post-physics"].lobbyCameraSystem;
-  if (!sys.lobbyCameraTransform) {
-    sys.lobbyCameraTransform = document.createElement("a-entity");
-    sys.lobbyCameraTransform.id = "lobby-camera-transform-entity";
-    sys.lobbyCameraTransform.setAttribute("networked", "template: #lobby-camera");
-    scene.appendChild(sys.lobbyCameraTransform);
-  } else if (!NAF.utils.isMine(sys.lobbyCameraTransform)) {
-    NAF.utils.takeOwnership(sys.lobbyCameraTransform);
-  } else {
-    sys.lobbyCameraTransform.parentNode.removeChild(sys.lobbyCameraTransform);
-    sys.lobbyCameraTransform = null;
-  }
-}
+const NETWORKED_LOBBY_CAMERA_STATE = "networked-lobby-camera-state";
 
 const setMatrixWorld = (function() {
   const inv = new THREE.Matrix4();
@@ -42,7 +9,31 @@ const setMatrixWorld = (function() {
   };
 })();
 
-export function avatarForSessionId(sessionId) {
+AFRAME.registerComponent("lobby-camera-transform-component", {
+  init() {
+    this.el.id = NETWORKED_LOBBY_CAMERA_STATE;
+  },
+  tick() {
+    if (NAF.utils.isMine(this.el)) {
+      this.playerCamera = this.playerCamera || document.querySelector("#player-camera").object3D;
+      setMatrixWorld(this.el.object3D, this.playerCamera.matrixWorld);
+    }
+  }
+});
+
+export function takeOrReleaseLobbyCam() {
+  const state = document.getElementById(NETWORKED_LOBBY_CAMERA_STATE);
+  if (!state) {
+    const e = document.createElement("a-entity");
+    e.setAttribute("networked", "template: #lobby-camera");
+    e.id = NETWORKED_LOBBY_CAMERA_STATE;
+    AFRAME.scenes[0].appendChild(e);
+  } else {
+    NAF.utils.takeOwnership(state);
+  }
+}
+
+function avatarForSessionId(sessionId) {
   const avatars = document.querySelectorAll("[networked-avatar]");
   for (let i = 0; i < avatars.length; i++) {
     const avatar = avatars[i];
@@ -54,44 +45,25 @@ export function avatarForSessionId(sessionId) {
 }
 
 export class LobbyCameraSystem {
-  constructor() {
-    this.inLobby = true;
-  }
-  follow(target, useThirdPerson) {
-    this.lobbyCameraTransform =
-      this.lobbyCameraTransform === target && useThirdPerson === this.useThirdPerson ? null : target;
-    this.useThirdPerson = useThirdPerson;
-  }
   tick() {
-    if (!this.lobbyCameraTransform || !this.lobbyCameraTransform.parentNode) {
+    const state = document.getElementById(NETWORKED_LOBBY_CAMERA_STATE);
+    if (AFRAME.scenes[0].is("entered") || !state || !state.parentNode || NAF.utils.isMine(state)) {
       return;
     }
-    this.playerCamera = this.playerCamera || document.querySelector("#player-camera");
-    if (NAF.utils.isMine(this.lobbyCameraTransform)) {
-      setMatrixWorld(this.lobbyCameraTransform.object3D, this.playerCamera.object3D.matrixWorld);
-      if (this.lobbyCameraTransform.object3DMap.mesh) {
-        this.lobbyCameraTransform.object3DMap.mesh.visible = false;
-      }
-    } else if (this.inLobby) {
-      this.lobbyCameraTransform.object3D.matrixNeedsUpdate = true;
-      this.lobbyCameraTransform.object3D.updateMatrices();
-      setMatrixWorld(this.playerCamera.object3D, this.lobbyCameraTransform.object3D.matrixWorld);
-      // translate the camera such that we don't see the avatar's eyes
-      this.playerCamera.object3D.translateZ(-0.1);
-      this.playerCamera.object3D.matrixNeedsUpdate = true;
-      if (this.lobbyCameraTransform.object3DMap.mesh) {
-        this.lobbyCameraTransform.object3DMap.mesh.visible = true;
-      }
 
-      if (this.useThirdPerson) {
-        this.playerCamera.object3D.translateZ(1.5);
-        this.playerCamera.object3D.translateY(0.2);
-        this.playerCamera.object3D.matrixNeedsUpdate = true;
-      }
-    } else {
-      if (this.lobbyCameraTransform.object3DMap.mesh) {
-        this.lobbyCameraTransform.object3DMap.mesh.visible = true;
-      }
+    this.playerCamera = this.playerCamera || document.querySelector("#player-camera").object3D;
+    const avatar = avatarForSessionId(state.components.networked.data.owner);
+    const target = avatar ? avatar.querySelector(".camera") : state;
+    target.object3D.matrixNeedsUpdate = true;
+    target.object3D.updateMatrices();
+
+    if (avatar) {
+      // TODO: Show spectating message.
+      this.spectatingMessage = `You are now spectating ${avatar.components["player-info"].displayName}`;
     }
+
+    setMatrixWorld(this.playerCamera, target.object3D.matrixWorld);
+    this.playerCamera.translateZ(-0.1);
+    this.playerCamera.matrixNeedsUpdate = true;
   }
 }

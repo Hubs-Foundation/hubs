@@ -13,10 +13,7 @@ import StateLink from "./state-link.js";
 import { WithHoverSound } from "./wrap-with-audio";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
-import { faMapPin } from "@fortawesome/free-solid-svg-icons/faMapPin";
-import { faMask } from "@fortawesome/free-solid-svg-icons/faMask";
 import { pushHistoryPath, withSlug } from "../utils/history";
-import { avatarForSessionId } from "../systems/lobby-camera-system";
 
 function getPresenceImage(ctx) {
   if (ctx && ctx.mobile) {
@@ -72,34 +69,6 @@ export default class PresenceList extends Component {
     return (
       <WithHoverSound key={sessionId}>
         <div className={styles.row}>
-          {!AFRAME.scenes[0].is("entered") && avatarForSessionId(sessionId) ? (
-            <div>
-              <i
-                className={styles.icon}
-                onClick={() => {
-                  AFRAME.scenes[0].systems["post-physics"].lobbyCameraSystem.follow(
-                    avatarForSessionId(sessionId).querySelector(".camera"),
-                    true
-                  );
-                }}
-              >
-                <FontAwesomeIcon icon={faMapPin} />
-              </i>
-              <i
-                className={styles.icon}
-                onClick={() => {
-                  AFRAME.scenes[0].systems["post-physics"].lobbyCameraSystem.follow(
-                    avatarForSessionId(sessionId).querySelector(".camera"),
-                    false
-                  );
-                }}
-              >
-                <FontAwesomeIcon icon={faMask} />
-              </i>
-            </div>
-          ) : (
-            <div />
-          )}
           <div className={styles.icon}>
             <img src={image} />
           </div>
