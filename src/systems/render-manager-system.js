@@ -11,7 +11,6 @@ export class RenderManagerSystem {
       if (object.isMesh && !object.isSkinnedMesh && !object.material.transparent && object.name !== "NavMesh") {
         console.log("Adding mesh to batch", object);
         this.batchManager.addMesh(object);
-        object.batched = true;
       }
     });
   }
@@ -21,7 +20,6 @@ export class RenderManagerSystem {
       if (object.isMesh && !object.isSkinnedMesh && !object.material.transparent && object.name !== "NavMesh") {
         console.log("Removing mesh from batch", object);
         this.batchManager.removeMesh(object);
-        object.batched = false;
       }
     });
   }
