@@ -739,22 +739,15 @@ class UIRoot extends Component {
     });
   };
 
-  enableStreamerMode = () => {
+  toggleStreamerMode = enable => {
     const playerRig = document.querySelector("#player-rig");
-    if (!playerRig.components["character-controller"].data.fly) {
-      playerRig.setAttribute("character-controller", "fly", true);
+    playerRig.setAttribute("character-controller", "fly", enable);
+    playerRig.setAttribute("player-info", "isStreaming", enable);
+    if (enable) {
+      this.setState({ isStreaming: true, showStreamingTip: true, showSettingsMenu: false });
+    } else {
+      this.setState({ isStreaming: false });
     }
-    playerRig.setAttribute("player-info", "isStreaming", true);
-    this.setState({ isStreaming: true, showStreamingTip: true, showSettingsMenu: false });
-  };
-
-  disableStreamerMode = () => {
-    const playerRig = document.querySelector("#player-rig");
-    if (playerRig.components["character-controller"].data.fly) {
-      playerRig.setAttribute("character-controller", "fly", false);
-    }
-    playerRig.setAttribute("player-info", "isStreaming", false);
-    this.setState({ isStreaming: false });
   };
 
   renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
@@ -1788,7 +1781,9 @@ class UIRoot extends Component {
 
             {this.state.isStreaming ? (
               <button
-                onClick={this.disableStreamerMode}
+                onClick={() => {
+                  this.toggleStreamerMode(false);
+                }}
                 className={classNames({
                   [styles.settingsInfo]: true,
                   [styles.settingsInfoSelected]: this.state.showSettingsMenu
@@ -1841,7 +1836,7 @@ class UIRoot extends Component {
                 mediaSearchStore={this.props.mediaSearchStore}
                 hideSettings={() => this.setState({ showSettingsMenu: false })}
                 isStreaming={this.state.isStreaming}
-                enableStreamerMode={this.enableStreamerMode}
+                toggleStreamerMode={this.toggleStreamerMode}
                 hubChannel={this.props.hubChannel}
                 hubScene={this.props.hubScene}
                 scene={this.props.scene}

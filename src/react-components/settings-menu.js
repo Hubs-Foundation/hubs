@@ -22,7 +22,7 @@ export default class SettingsMenu extends Component {
     history: PropTypes.object,
     hideSettings: PropTypes.func,
     isStreaming: PropTypes.bool,
-    enableStreamerMode: PropTypes.func,
+    toggleStreamerMode: PropTypes.func,
     mediaSearchStore: PropTypes.object,
     scene: PropTypes.object,
     hubScene: PropTypes.object,
@@ -236,7 +236,7 @@ export default class SettingsMenu extends Component {
                   <div
                     className={styles.listItemLink}
                     onClick={() => {
-                      this.props.enableStreamerMode();
+                      this.props.toggleStreamerMode(true);
                     }}
                   >
                     <FormattedMessage id="settings.enable-streamer-mode" />
