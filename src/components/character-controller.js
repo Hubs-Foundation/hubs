@@ -4,7 +4,6 @@ const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
 const MAX_WARNINGS = 10;
-const PI_2 = Math.PI / 2;
 
 const NAV_ZONE = "character";
 
