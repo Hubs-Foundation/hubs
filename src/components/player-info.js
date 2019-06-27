@@ -57,6 +57,11 @@ AFRAME.registerComponent("player-info", {
         }
       });
     }
+    window.APP.playerInfos = window.APP.playerInfos || [];
+    window.APP.playerInfos.push(this.el);
+  },
+  remove(){
+    window.APP.playerInfos.splice(window.APP.playerInfos.indexOf(this.el), 1);
   },
   play() {
     this.el.addEventListener("model-loaded", this.applyProperties);

@@ -1,7 +1,8 @@
 import { setMatrixWorld } from "../utils/three-utils";
 
 function getStreamerCamera() {
-  const playerInfos = document.querySelectorAll("[player-info]");
+  window.APP.playerInfos = window.APP.playerInfos || [];
+  const playerInfos = window.APP.playerInfos;
   for (let i = 0; i < playerInfos.length; i++) {
     const playerInfo = playerInfos[i].components["player-info"];
     if (playerInfo.data.isStreaming) {
