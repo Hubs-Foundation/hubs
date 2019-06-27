@@ -3,6 +3,10 @@ import { createImageBitmap } from "../utils/image-bitmap-utils";
 import { ObjectTypes } from "../object-types";
 import { paths } from "../systems/userinput/paths";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT, SOUND_CAMERA_TOOL_COUNTDOWN } from "../systems/sound-effects-system";
+import * as ebml from "ts-ebml";
+import { Buffer } from "buffer";
+
+window.Buffer = Buffer;
 
 import cameraModelSrc from "../assets/camera_tool.glb";
 
@@ -23,8 +27,6 @@ const pathsMap = {
 const snapCanvas = document.createElement("canvas");
 const videoCanvas = document.createElement("canvas");
 
-let isDrawingVideoFrame = false;
-
 async function pixelsToPNG(pixels, width, height) {
   snapCanvas.width = width;
   snapCanvas.height = height;
@@ -44,8 +46,9 @@ const isMobileVR = AFRAME.utils.device.isMobileVR();
 AFRAME.registerComponent("camera-tool", {
   schema: {
     heldOrSnappingViewportFPS: { default: 6 },
-    imageWidth: { default: 1024 },
-    imageHeight: { default: 1024 / (16 / 9) },
+    videoRecordingFPS: { default: 25 },
+    imageWidth: { default: 320 },
+    imageHeight: { default: 180 },
     isSnapping: { default: false },
     label: { default: "" }
   },
@@ -210,20 +213,52 @@ AFRAME.registerComponent("camera-tool", {
           this.takeSnapshotNextTick = true;
         } else {
           const stream = new MediaStream();
-          const track = videoCanvas.captureStream().getVideoTracks()[0];
+          const track = videoCanvas.captureStream(this.data.videoRecordingFPS).getVideoTracks()[0];
+          /*const listener = this.el.sceneEl.audioListener;
+          const destination = listener.context.createMediaStreamDestination();
+          listener.getInput().connect(destination);
+          const audio = destination.stream.getAudioTracks()[0];
+          stream.addTrack(audio);*/
+
           stream.addTrack(track);
           this.videoRecorder = new MediaRecorder(stream, { mimeType: "video/webm; codecs=vp8" });
           const chunks = [];
 
           this.videoRecorder.ondataavailable = e => chunks.push(e.data);
-          this.videoRecorder.onstop = () => {
+          this.videoRecorder.onstop = async () => {
+            console.log(chunks.length);
             if (chunks.length === 0) return;
             const mimeType = chunks[0].type;
-            console.log(mimeType);
-            console.log(chunks.length);
-            const blob = new Blob(chunks, { type: mimeType });
+            let blob;
+
+            if (true) {
+              // HACK, on chrome, webms are unseekable and so can't be played by some browsers like
+              // Oculus Browser so use https://github.com/legokichi/ts-ebml
+              const decoder = new ebml.Decoder();
+              const reader = new ebml.Reader();
+              reader.logging = false;
+              reader.drop_default_duration = false;
+              const buf = new Buffer(await new Response(chunks[0]).arrayBuffer());
+              const elms = decoder.decode(buf);
+              elms.forEach(elm => {
+                reader.read(elm);
+              });
+              reader.stop();
+              const refinedMetadataBuf = ebml.tools.makeMetadataSeekable(
+                reader.metadatas,
+                reader.duration,
+                reader.cues
+              );
+              const body = buf.slice(reader.metadataSize);
+              const refined = new Buffer(ebml.tools.concat([new Buffer(refinedMetadataBuf), body]).buffer);
+              blob = new Blob([refined], { type: mimeType });
+            } else {
+              blob = new Blob(chunks, { type: mimeType });
+            }
+
             chunks.length = 0;
-            const { orientation } = spawnMediaAround(
+            this.el.sceneEl.emit("add_media", new File([blob], "capture", { type: mimeType }));
+            /*const { orientation } = spawnMediaAround(
               this.el,
               new File([blob], "capture", { type: mimeType }),
               this.localSnapCount,
@@ -232,7 +267,7 @@ AFRAME.registerComponent("camera-tool", {
 
             orientation.then(() => {
               this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
-            });
+            });*/
           };
 
           this.updateRenderTargetNextTick = true;
@@ -286,16 +321,17 @@ AFRAME.registerComponent("camera-tool", {
       this.localSnapCount = 0;
     }
 
-    this.showCameraViewport = isHolding || !isMobileVR || this.data.isSnapping;
+    this.showCameraViewport = isHolding || !isMobileVR || this.data.isSnapping || this.videoRecorder;
 
     if (this.screen && this.selfieScreen) {
       this.screen.visible = this.selfieScreen.visible = this.showCameraViewport;
     }
 
-    // Always draw held or snapping camera viewports with a decent framerate
+    // Always draw held, snapping, or recording camera viewports with a decent framerate
     if (
-      (isHolding || this.data.isSnapping) &&
-      performance.now() - this.lastUpdate >= 1000 / this.data.heldOrSnappingViewportFPS
+      (isHolding || this.data.isSnapping || this.videoRecorder) &&
+      performance.now() - this.lastUpdate >=
+        1000 / (this.videoRecorder ? this.data.videoRecordingFPS : this.data.heldOrSnappingViewportFPS)
     ) {
       this.updateRenderTargetNextTick = true;
     }
@@ -389,18 +425,16 @@ AFRAME.registerComponent("camera-tool", {
         }
         this.lastUpdate = now;
 
-        if (!isDrawingVideoFrame && this.videoRecorder) {
-          isDrawingVideoFrame = true;
+        if (this.videoRecorder) {
+          const width = this.renderTarget.width;
+          const height = this.renderTarget.height;
+          const videoImageData = this.videoContext.createImageData(width, height);
+          const videoPixels = new Uint8Array(width * height * 4);
+          renderer.readRenderTargetPixels(this.renderTarget, 0, 0, width, height, videoPixels);
+          videoImageData.data.set(videoPixels);
 
-          createImageBitmap(this.videoImageData).then(bitmap => {
-            this.videoContext.scale(1, -1);
-            this.videoContext.drawImage(bitmap, 0, -this.renderTarget.height);
-            isDrawingVideoFrame = false;
-
-            if (this.videoRecorder) {
-              this.updateRenderTargetNextTick = true;
-            }
-          });
+          this.videoContext.scale(1, -1);
+          this.videoContext.putImageData(videoImageData, 0, 0);
         }
 
         this.updateRenderTargetNextTick = false;
