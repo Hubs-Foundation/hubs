@@ -1224,6 +1224,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     updateUIForHub(hub);
 
+    hubChannel.fetchPermissions();
+
     if (stale_fields.includes("scene")) {
       updateEnvironmentForHub(hub);
 

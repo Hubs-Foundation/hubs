@@ -201,6 +201,10 @@
   z-index: 1;
 }
 
+:local(.iconButton.disabled) {
+  filter: contrast(0.1);
+}
+
 :local(.iconButton.video-share) {
   position: relative;
 }
