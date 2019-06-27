@@ -1,11 +1,4 @@
-const setMatrixWorld = (function() {
-  const inv = new THREE.Matrix4();
-  return function setMatrixWorld(object3D, m) {
-    object3D.matrixWorld.copy(m);
-    object3D.matrix = inv.getInverse(object3D.parent.matrixWorld).multiply(object3D.matrixWorld);
-    object3D.matrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
-  };
-})();
+import { setMatrixWorld } from "../utils/three-utils";
 
 function getStreamerCamera() {
   const playerInfos = document.querySelectorAll("[player-info]");
