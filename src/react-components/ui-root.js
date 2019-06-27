@@ -1876,22 +1876,18 @@ class UIRoot extends Component {
                     this.setState({ showStreamingTip: false });
                   }}
                 />
-                {!streaming ? (
-                  !watching ? (
-                    <div className={styles.nagCornerButton}>
-                      <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
-                        <FormattedMessage id="feedback.prompt" />
-                      </a>
-                    </div>
-                  ) : (
-                    <div className={styles.nagCornerButton}>
-                      <button onClick={() => this.setState({ hide: true })}>
-                        <FormattedMessage id="hide-ui.prompt" />
-                      </button>
-                    </div>
-                  )
+                {!watching && !streaming ? (
+                  <div className={styles.nagCornerButton}>
+                    <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
+                      <FormattedMessage id="feedback.prompt" />
+                    </a>
+                  </div>
                 ) : (
-                  <div />
+                  <div className={styles.nagCornerButton}>
+                    <button onClick={() => this.setState({ hide: true })}>
+                      <FormattedMessage id="hide-ui.prompt" />
+                    </button>
+                  </div>
                 )}
 
                 {!streaming && (

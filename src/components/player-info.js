@@ -60,7 +60,7 @@ AFRAME.registerComponent("player-info", {
     window.APP.playerInfos = window.APP.playerInfos || [];
     window.APP.playerInfos.push(this.el);
   },
-  remove(){
+  remove() {
     window.APP.playerInfos.splice(window.APP.playerInfos.indexOf(this.el), 1);
   },
   play() {
