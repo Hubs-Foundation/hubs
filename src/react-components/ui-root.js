@@ -1391,6 +1391,8 @@ class UIRoot extends Component {
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
       : null;
 
+    const streaming = this.state.isStreaming;
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
@@ -1657,7 +1659,7 @@ class UIRoot extends Component {
                   {!embed &&
                     !showVREntryButton &&
                     !hasTopTip &&
-                    !this.state.isStreaming && (
+                    !streaming && (
                       <WithHoverSound>
                         <button
                           className={classNames({
@@ -1699,7 +1701,7 @@ class UIRoot extends Component {
                     this.occupantCount() > 1 &&
                     !hasTopTip &&
                     entered &&
-                    !this.state.isStreaming && (
+                    !streaming && (
                       <WithHoverSound>
                         <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
                           <span>
@@ -1779,7 +1781,7 @@ class UIRoot extends Component {
               )}
             />
 
-            {this.state.isStreaming ? (
+            {streaming ? (
               <button
                 onClick={() => {
                   this.toggleStreamerMode(false);
@@ -1835,7 +1837,7 @@ class UIRoot extends Component {
                 history={this.props.history}
                 mediaSearchStore={this.props.mediaSearchStore}
                 hideSettings={() => this.setState({ showSettingsMenu: false })}
-                isStreaming={this.state.isStreaming}
+                isStreaming={streaming}
                 toggleStreamerMode={this.toggleStreamerMode}
                 hubChannel={this.props.hubChannel}
                 hubScene={this.props.hubScene}
@@ -1868,13 +1870,13 @@ class UIRoot extends Component {
                   onShareVideo={this.shareVideo}
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
-                  isStreaming={this.state.isStreaming}
+                  isStreaming={streaming}
                   showStreamingTip={this.state.showStreamingTip}
                   hideStreamingTip={() => {
                     this.setState({ showStreamingTip: false });
                   }}
                 />
-                {!this.state.isStreaming ? (
+                {!streaming ? (
                   !watching ? (
                     <div className={styles.nagCornerButton}>
                       <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
@@ -1892,7 +1894,7 @@ class UIRoot extends Component {
                   <div />
                 )}
 
-                {!this.state.isStreaming && (
+                {!streaming && (
                   <button
                     onClick={() => this.toggleFavorited()}
                     className={classNames({
