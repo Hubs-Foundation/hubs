@@ -256,6 +256,12 @@ class UIRoot extends Component {
 
   componentDidMount() {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
+    document.querySelector(".a-canvas").addEventListener("mouseup", () => {
+      if (this.state.showPresenceList || this.state.showSettingsMenu || this.state.showShareDialog) {
+        this.setState({ showPresenceList: false, showSettingsMenu: false, showShareDialog: false });
+      }
+    });
+
     this.props.scene.addEventListener(
       "didConnectToNetworkedScene",
       () => {
@@ -1607,7 +1613,7 @@ class UIRoot extends Component {
                   </button>
                   <div className={styles.tip}>
                     {hasDiscordBridges ? (
-                      <span>`Chat in this room is being bridged to ${discordSnippet} on Discord.`</span>
+                      <span>{`Chat in this room is being bridged to ${discordSnippet} on Discord.`}</span>
                     ) : (
                       <FormattedMessage id="embed.presence-warning" />
                     )}

@@ -7,6 +7,7 @@
  */
 
 import SharedBufferGeometryManager from "../../utils/sharedbuffergeometrymanager";
+import MobileStandardMaterial from "../../materials/MobileStandardMaterial";
 
 const MSG_CONFIRM_CONNECT = 0;
 const MSG_BUFFER_DATA = 1;
@@ -53,7 +54,11 @@ AFRAME.registerComponent("networked-drawing", {
     this.radius = this.data.defaultRadius;
     this.segments = this.data.segments;
 
-    const material = new THREE.MeshStandardMaterial(options);
+    let material = new THREE.MeshStandardMaterial(options);
+    if (window.APP && window.APP.quality === "low") {
+      material = MobileStandardMaterial.fromStandardMaterial(material);
+    }
+
     this.sharedBufferGeometryManager = new SharedBufferGeometryManager();
     // NOTE: 20 is approximate for how many floats per point are added.
     // maxLines + 1 because a line can be currently drawing while at maxLines.
@@ -81,6 +86,11 @@ AFRAME.registerComponent("networked-drawing", {
     const sceneEl = document.querySelector("a-scene");
     this.scene = sceneEl.object3D;
     this.scene.add(this.drawing);
+
+    const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+    if (environmentMapComponent) {
+      environmentMapComponent.applyEnvironmentMap(this.drawing);
+    }
 
     this.prevIdx = Object.assign({}, this.sharedBuffer.idx);
     this.idx = Object.assign({}, this.sharedBuffer.idx);
