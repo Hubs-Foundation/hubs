@@ -59,6 +59,7 @@ import PresenceList from "./presence-list.js";
 import SettingsMenu from "./settings-menu.js";
 import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
+import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
 import { handleTipClose } from "../systems/tips.js";
@@ -69,6 +70,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { getStreamer } from "../components/scene-preview-camera";
 
 import qsTruthy from "../utils/qs_truthy";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
@@ -1847,6 +1849,11 @@ class UIRoot extends Component {
                 pushHistoryState={this.pushHistoryState}
               />
             )}
+
+            {!entered &&
+              !streaming &&
+              !isMobile &&
+              getStreamer() && <SpectatingLabel name={getStreamer().el.components["player-info"].displayName} />}
 
             {enteredOrWatching && (
               <div className={styles.topHud}>

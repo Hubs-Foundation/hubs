@@ -310,6 +310,7 @@
     "tips.watching.back": "Enter Room",
     "tips.mobile.watching": "You're in the lobby.",
     "tips.watching-exit": "Back",
+    "spectating": "Currently spectating: ",
     "loader.entering_lobby": "Entering lobby...",
     "loader.loading": "Loading ",
     "loader.object": "object",
