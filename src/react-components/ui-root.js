@@ -1609,7 +1609,7 @@ class UIRoot extends Component {
                   </button>
                   <div className={styles.tip}>
                     {hasDiscordBridges ? (
-                      <span>`Chat in this room is being bridged to ${discordSnippet} on Discord.`</span>
+                      <span>{`Chat in this room is being bridged to ${discordSnippet} on Discord.`}</span>
                     ) : (
                       <FormattedMessage id="embed.presence-warning" />
                     )}
