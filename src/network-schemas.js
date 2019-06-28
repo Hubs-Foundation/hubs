@@ -161,6 +161,10 @@ function registerNetworkSchemas() {
       },
       {
         component: "camera-tool",
+        property: "isRecording"
+      },
+      {
+        component: "camera-tool",
         property: "label"
       }
     ]

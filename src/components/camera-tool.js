@@ -142,6 +142,8 @@ AFRAME.registerComponent("camera-tool", {
       this.el.setObject3D("selfieScreen", this.selfieScreen);
 
       this.label = this.el.querySelector(".label");
+      this.labelActionBackground = this.el.querySelector(".label-action-background");
+      this.labelBackground = this.el.querySelector(".label-background");
       this.durationLabel = this.el.querySelector(".duration");
 
       this.snapIcon = this.el.querySelector(".snap-icon");
@@ -281,12 +283,16 @@ AFRAME.registerComponent("camera-tool", {
               const reader = new ebml.Reader();
               reader.logging = false;
               reader.drop_default_duration = false;
-              const buf = new Buffer(await new Response(chunks[0]).arrayBuffer());
-              decoder.decode(buf).forEach(e => reader.read(e));
+
+              for (let i = 0; i < chunks.length; i++) {
+                const buf = new Buffer(await new Response(chunks[i]).arrayBuffer());
+                decoder.decode(buf).forEach(e => reader.read(e));
+              }
+
               reader.stop();
 
               const seekableMeta = ebml.tools.makeMetadataSeekable(reader.metadatas, reader.duration, reader.cues);
-              const body = buf.slice(reader.metadataSize);
+              const body = new Buffer(await new Response(chunks[0]).arrayBuffer()).slice(reader.metadataSize);
               const refined = new Buffer(ebml.tools.concat([new Buffer(seekableMeta), body]).buffer);
               blob = new Blob([refined], { type: mimeType });
             } else {
@@ -351,12 +357,17 @@ AFRAME.registerComponent("camera-tool", {
     const hasDuration = this.data.captureDuration !== 0 && this.data.captureDuration !== Infinity;
     const isPhoto = this.data.captureDuration === 0;
 
-    if (label) {
-      this.label.setAttribute("text", "value", label);
-    }
-
     const isRecordingUnbound = !hasDuration && this.data.isRecording && this.videoRecorder;
     this.label.object3D.visible = !!label && !isRecordingUnbound;
+    const showActionLabelBackground = this.label.object3D.visible && this.data.isRecording && !isRecordingUnbound;
+
+    if (label) {
+      this.label.setAttribute("text", { value: label, color: showActionLabelBackground ? "#fafafa" : "#ff3464" });
+    }
+
+    this.labelActionBackground.object3D.visible = showActionLabelBackground;
+    this.labelBackground.object3D.visible = this.label.object3D.visible && !showActionLabelBackground;
+
     this.stopButton.object3D.visible = isRecordingUnbound;
 
     if (hasDuration) {
