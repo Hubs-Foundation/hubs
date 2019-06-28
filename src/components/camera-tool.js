@@ -33,7 +33,7 @@ const CAPTURE_WIDTH = isMobileVR ? 320 : 1280; // NOTE: Oculus Quest can't recor
 const CAPTURE_HEIGHT = isMobileVR ? 180 : 720;
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
-const CAPTURE_DURATIONS = [0, 3, 7, 15, 30, 60, 90];
+const CAPTURE_DURATIONS = allowVideo ? [0, Infinity, 3, 7, 15, 30, 60] : [0];
 const DEFAULT_CAPTURE_DURATION = allowVideo ? 3 : 0;
 const COUNTDOWN_DURATION = 3;
 
@@ -67,6 +67,7 @@ AFRAME.registerComponent("camera-tool", {
     captureDuration: { default: DEFAULT_CAPTURE_DURATION },
     captureAudio: { default: false },
     isSnapping: { default: false },
+    isRecording: { default: false },
     label: { default: "" }
   },
 
@@ -149,13 +150,16 @@ AFRAME.registerComponent("camera-tool", {
       this.label.object3D.visible = false;
       this.durationLabel.object3D.visible = false;
 
-      this.updateUI();
-
       this.snapButton = this.el.querySelector(".snap-button");
+      this.nextDurationButton = this.el.querySelector(".next-duration");
+      this.prevDurationButton = this.el.querySelector(".prev-duration");
       this.snapButton.object3D.addEventListener("interact", () => this.beginSnapping());
+      this.nextDurationButton.object3D.addEventListener("interact", () => this.changeDuration(1));
+      this.prevDurationButton.object3D.addEventListener("interact", () => this.changeDuration(-1));
+      this.stopButton = this.el.querySelector(".stop-button");
+      this.stopButton.object3D.addEventListener("interact", () => this.stopRecording());
 
-      this.el.querySelector(".next-duration").object3D.addEventListener("interact", () => this.changeDuration(1));
-      this.el.querySelector(".prev-duration").object3D.addEventListener("interact", () => this.changeDuration(-1));
+      this.updateUI();
 
       this.updateRenderTargetNextTick = true;
 
@@ -241,9 +245,8 @@ AFRAME.registerComponent("camera-tool", {
       this.snapCountdown--;
 
       if (this.snapCountdown === 0) {
-        this.el.setAttribute("camera-tool", { label: "", isSnapping: false });
-
         if (this.data.captureDuration === 0) {
+          this.el.setAttribute("camera-tool", { label: "", isSnapping: false });
           this.takeSnapshotNextTick = true;
         } else {
           const stream = new MediaStream();
@@ -310,22 +313,23 @@ AFRAME.registerComponent("camera-tool", {
           this.updateRenderTargetNextTick = true;
 
           this.videoRecorder.start();
-          this.videoCountdown = this.data.captureDuration;
-          this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
+          this.el.setAttribute("camera-tool", "isRecording", true);
 
-          this.videoCountdownInterval = setInterval(() => {
-            this.videoCountdown--;
+          if (this.data.captureDuration !== Infinity) {
+            this.videoCountdown = this.data.captureDuration;
+            this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
 
-            if (this.videoCountdown === 0) {
-              this.videoRecorder.stop();
-              this.videoRecorder = null;
-              this.el.setAttribute("camera-tool", "label", "");
-              clearInterval(this.videoCountdownInterval);
-              this.videoCountdownInterval = null;
-            } else {
-              this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
-            }
-          }, 1000);
+            this.videoCountdownInterval = setInterval(() => {
+              this.videoCountdown--;
+
+              if (this.videoCountdown === 0) {
+                this.stopRecording(true);
+                this.videoCountdownInterval = null;
+              } else {
+                this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
+              }
+            }, 1000);
+          }
         }
 
         clearInterval(interval);
@@ -344,21 +348,35 @@ AFRAME.registerComponent("camera-tool", {
     if (!this.label) return;
 
     const label = this.data.label;
+    const hasDuration = this.data.captureDuration !== 0 && this.data.captureDuration !== Infinity;
+    const isPhoto = this.data.captureDuration === 0;
 
     if (label) {
       this.label.setAttribute("text", "value", label);
     }
 
-    this.label.object3D.visible = !!label;
-
-    const hasDuration = this.data.captureDuration !== 0;
+    const isRecordingUnbound = !hasDuration && this.data.isRecording && this.videoRecorder;
+    this.label.object3D.visible = !!label && !isRecordingUnbound;
+    this.stopButton.object3D.visible = isRecordingUnbound;
 
     if (hasDuration) {
       this.durationLabel.setAttribute("text", "value", `${this.data.captureDuration}`);
     }
 
-    this.durationLabel.object3D.visible = this.videoIcon.object3D.visible = hasDuration;
-    this.snapIcon.object3D.visible = !hasDuration;
+    this.durationLabel.object3D.visible = hasDuration && !this.data.isSnapping;
+    this.videoIcon.object3D.visible = !isPhoto;
+    this.snapIcon.object3D.visible = isPhoto;
+    this.snapButton.object3D.visible = !this.data.isSnapping;
+    this.prevDurationButton.object3D.visible = this.nextDurationButton.object3D.visible =
+      !this.data.isSnapping && allowVideo;
+  },
+
+  stopRecording() {
+    this.videoRecorder.stop();
+    this.videoRecorder = null;
+    clearInterval(this.videoCountdownInterval);
+    this.el.setAttribute("camera-tool", "label", "");
+    this.el.setAttribute("camera-tool", { isRecording: false, isSnapping: false });
   },
 
   tick() {

@@ -421,6 +421,15 @@
                         </a-entity>
                         <a-entity class="next-duration" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0.135 -0.15 0.075" scale="0.5 0.5 0.5">
                         </a-entity>
+                        <a-entity class="stop-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0 0.125" scale="0.75 0.75 0.75">
+                            <a-entity
+                                sprite
+                                                                                                                                                         class="stop-icon"
+                                icon-button="image: stop_camera.png; hoverImage: stop_camera.png;"
+                                scale="0.225 0.225 0.225"
+                                position="0 0.005 0.01"
+                            ></a-entity>
+                        </a-entity>
                     </a-entity>
                     <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 10;">
                         <a-entity mixin="rounded-text-action-button" is-remote-hover-target tags="singleActionButton: true;" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01">
