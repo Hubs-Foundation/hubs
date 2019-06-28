@@ -2,15 +2,14 @@ import { spawnMediaAround } from "../utils/media-utils";
 import { createImageBitmap } from "../utils/image-bitmap-utils";
 import { ObjectTypes } from "../object-types";
 import { paths } from "../systems/userinput/paths";
+import { detect } from "detect-browser";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT, SOUND_CAMERA_TOOL_COUNTDOWN } from "../systems/sound-effects-system";
 import * as ebml from "ts-ebml";
-import { Buffer } from "buffer";
-
-window.Buffer = Buffer;
 
 import cameraModelSrc from "../assets/camera_tool.glb";
 
 const cameraModelPromise = new Promise(resolve => new THREE.GLTFLoader().load(cameraModelSrc, resolve));
+const browser = detect();
 
 const pathsMap = {
   "player-right-controller": {
@@ -26,22 +25,27 @@ const pathsMap = {
 
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
-const heldOrSnappingViewportFPS = 6;
-const videoRecordingFPS = 25;
-const captureWidth = isMobileVR ? 320 : 1280; // NOTE: Oculus Quest can't record bigger videos atm
-const captureHeight = isMobileVR ? 180 : 720;
-const renderWidth = 1280;
-const renderHeight = 720;
+const VIEWPORT_FPS = 6;
+const VIDEO_FPS = 25;
+const VIDEO_MIME_TYPE = "video/webm; codecs=vp8";
+const allowVideo = MediaRecorder.isTypeSupported(VIDEO_MIME_TYPE);
+const CAPTURE_WIDTH = isMobileVR ? 320 : 1280; // NOTE: Oculus Quest can't record bigger videos atm
+const CAPTURE_HEIGHT = isMobileVR ? 180 : 720;
+const RENDER_WIDTH = 1280;
+const RENDER_HEIGHT = 720;
+const CAPTURE_DURATIONS = [0, 3, 7, 15, 30, 60, 90];
+const DEFAULT_CAPTURE_DURATION = allowVideo ? 3 : 0;
+const COUNTDOWN_DURATION = 3;
 
 const snapCanvas = document.createElement("canvas");
-
 const videoCanvas = document.createElement("canvas");
-videoCanvas.width = captureWidth;
-videoCanvas.height = captureHeight;
+
+videoCanvas.width = CAPTURE_WIDTH;
+videoCanvas.height = CAPTURE_HEIGHT;
 
 const videoContext = videoCanvas.getContext("2d");
-const videoImageData = videoContext.createImageData(captureWidth, captureHeight);
-const videoPixels = new Uint8Array(captureWidth * captureHeight * 4);
+const videoImageData = videoContext.createImageData(CAPTURE_WIDTH, CAPTURE_HEIGHT);
+const videoPixels = new Uint8Array(CAPTURE_WIDTH * CAPTURE_HEIGHT * 4);
 videoImageData.data.set(videoPixels);
 
 async function pixelsToPNG(pixels, width, height) {
@@ -60,18 +64,19 @@ async function pixelsToPNG(pixels, width, height) {
 
 AFRAME.registerComponent("camera-tool", {
   schema: {
+    captureDuration: { default: DEFAULT_CAPTURE_DURATION },
+    captureAudio: { default: false },
     isSnapping: { default: false },
     label: { default: "" }
   },
 
   init() {
     this.lastUpdate = performance.now();
-    this.localSnapCount = 0; // Counter that is used to arrange photos
+    this.localSnapCount = 0; // Counter that is used to arrange photos/videos
 
-    // On mobile, we show the camera viewport when holding the camera or during a snapshot.
     this.showCameraViewport = !isMobileVR;
 
-    this.renderTarget = new THREE.WebGLRenderTarget(renderWidth, renderHeight, {
+    this.renderTarget = new THREE.WebGLRenderTarget(RENDER_WIDTH, RENDER_HEIGHT, {
       format: THREE.RGBAFormat,
       minFilter: THREE.LinearFilter,
       magFilter: THREE.NearestFilter,
@@ -82,7 +87,7 @@ AFRAME.registerComponent("camera-tool", {
 
     // Create a separate render target for video becuase we need to flip and (sometimes) downscale it before
     // encoding it to video.
-    this.videoRenderTarget = new THREE.WebGLRenderTarget(captureWidth, captureHeight, {
+    this.videoRenderTarget = new THREE.WebGLRenderTarget(CAPTURE_WIDTH, CAPTURE_HEIGHT, {
       format: THREE.RGBAFormat,
       minFilter: THREE.LinearFilter,
       magFilter: THREE.NearestFilter,
@@ -91,7 +96,7 @@ AFRAME.registerComponent("camera-tool", {
       stencil: false
     });
 
-    this.camera = new THREE.PerspectiveCamera(50, renderWidth / renderHeight, 0.1, 30000);
+    this.camera = new THREE.PerspectiveCamera(50, RENDER_WIDTH / RENDER_HEIGHT, 0.1, 30000);
     this.camera.rotation.set(0, Math.PI, 0);
     this.camera.position.set(0, 0, 0.05);
     this.camera.matrixNeedsUpdate = true;
@@ -209,7 +214,7 @@ AFRAME.registerComponent("camera-tool", {
     this.el.setAttribute("camera-tool", "isSnapping", true);
     this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_COUNTDOWN);
 
-    this.snapCountdown = 3;
+    this.snapCountdown = COUNTDOWN_DURATION;
     this.el.setAttribute("camera-tool", "label", `${this.snapCountdown}`);
 
     const interval = setInterval(() => {
@@ -223,29 +228,35 @@ AFRAME.registerComponent("camera-tool", {
       if (this.snapCountdown === 0) {
         this.el.setAttribute("camera-tool", { label: "", isSnapping: false });
 
-        if (/* use still camera */ false) {
+        if (this.data.captureDuration === 0) {
           this.takeSnapshotNextTick = true;
         } else {
           const stream = new MediaStream();
-          const track = videoCanvas.captureStream(videoRecordingFPS).getVideoTracks()[0];
-          /*const listener = this.el.sceneEl.audioListener;
-          const destination = listener.context.createMediaStreamDestination();
-          listener.getInput().connect(destination);
-          const audio = destination.stream.getAudioTracks()[0];
-          stream.addTrack(audio);*/
+          const track = videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
+
+          if (this.data.captureAudio) {
+            const listener = this.el.sceneEl.audioListener;
+
+            if (listener) {
+              // NOTE audio is not captured from camera vantage point for now.
+              const destination = listener.context.createMediaStreamDestination();
+              listener.getInput().connect(destination);
+              const audio = destination.stream.getAudioTracks()[0];
+              stream.addTrack(audio);
+            }
+          }
 
           stream.addTrack(track);
-          this.videoRecorder = new MediaRecorder(stream, { mimeType: "video/webm; codecs=vp8" });
+          this.videoRecorder = new MediaRecorder(stream, { mimeType: VIDEO_MIME_TYPE });
           const chunks = [];
 
           this.videoRecorder.ondataavailable = e => chunks.push(e.data);
           this.videoRecorder.onstop = async () => {
-            console.log(chunks.length);
             if (chunks.length === 0) return;
             const mimeType = chunks[0].type;
             let blob;
 
-            if (true) {
+            if (browser.name === "chrome") {
               // HACK, on chrome, webms are unseekable and so can't be played by some browsers like
               // Oculus Browser so use https://github.com/legokichi/ts-ebml
               const decoder = new ebml.Decoder();
@@ -253,48 +264,53 @@ AFRAME.registerComponent("camera-tool", {
               reader.logging = false;
               reader.drop_default_duration = false;
               const buf = new Buffer(await new Response(chunks[0]).arrayBuffer());
-              const elms = decoder.decode(buf);
-              elms.forEach(elm => {
-                reader.read(elm);
-              });
+              decoder.decode(buf).forEach(e => reader.read(e));
               reader.stop();
-              const refinedMetadataBuf = ebml.tools.makeMetadataSeekable(
-                reader.metadatas,
-                reader.duration,
-                reader.cues
-              );
+
+              const seekableMeta = ebml.tools.makeMetadataSeekable(reader.metadatas, reader.duration, reader.cues);
               const body = buf.slice(reader.metadataSize);
-              const refined = new Buffer(ebml.tools.concat([new Buffer(refinedMetadataBuf), body]).buffer);
+              const refined = new Buffer(ebml.tools.concat([new Buffer(seekableMeta), body]).buffer);
               blob = new Blob([refined], { type: mimeType });
             } else {
               blob = new Blob(chunks, { type: mimeType });
             }
 
             chunks.length = 0;
-            this.el.sceneEl.emit("add_media", new File([blob], "capture", { type: mimeType }));
-            /*const { orientation } = spawnMediaAround(
+            //this.el.sceneEl.emit("add_media", new File([blob], "capture", { type: mimeType }));
+            const { orientation } = spawnMediaAround(
               this.el,
               new File([blob], "capture", { type: mimeType }),
               this.localSnapCount,
+              "video",
               true
             );
 
+            this.localSnapCount++;
+
             orientation.then(() => {
               this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
-            });*/
+            });
           };
 
           this.updateRenderTargetNextTick = true;
 
-          this.el.setAttribute("camera-tool", "label", "r");
-
           this.videoRecorder.start();
+          this.videoCountdown = this.data.captureDuration;
+          this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
 
-          setTimeout(() => {
-            this.videoRecorder.stop();
-            this.videoRecorder = null;
-            this.el.setAttribute("camera-tool", "label", "");
-          }, 5000);
+          this.videoCountdownInterval = setInterval(() => {
+            this.videoCountdown--;
+
+            if (this.videoCountdown === 0) {
+              this.videoRecorder.stop();
+              this.videoRecorder = null;
+              this.el.setAttribute("camera-tool", "label", "");
+              clearInterval(this.videoCountdownInterval);
+              this.videoCountdownInterval = null;
+            } else {
+              this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
+            }
+          }, 1000);
         }
 
         clearInterval(interval);
@@ -344,7 +360,7 @@ AFRAME.registerComponent("camera-tool", {
     // Always draw held, snapping, or recording camera viewports with a decent framerate
     if (
       (isHolding || this.data.isSnapping || this.videoRecorder) &&
-      performance.now() - this.lastUpdate >= 1000 / (this.videoRecorder ? videoRecordingFPS : heldOrSnappingViewportFPS)
+      performance.now() - this.lastUpdate >= 1000 / (this.videoRecorder ? VIDEO_FPS : VIEWPORT_FPS)
     ) {
       this.updateRenderTargetNextTick = true;
     }
@@ -455,15 +471,15 @@ AFRAME.registerComponent("camera-tool", {
             this.renderTarget,
             0,
             0,
-            renderWidth,
-            renderHeight,
+            RENDER_WIDTH,
+            RENDER_HEIGHT,
             this.videoRenderTarget,
             0,
-            captureHeight,
-            captureWidth,
+            CAPTURE_HEIGHT,
+            CAPTURE_WIDTH,
             0
           );
-          renderer.readRenderTargetPixels(this.videoRenderTarget, 0, 0, captureWidth, captureHeight, videoPixels);
+          renderer.readRenderTargetPixels(this.videoRenderTarget, 0, 0, CAPTURE_WIDTH, CAPTURE_HEIGHT, videoPixels);
           videoImageData.data.set(videoPixels);
           videoContext.putImageData(videoImageData, 0, 0);
         }
@@ -474,12 +490,12 @@ AFRAME.registerComponent("camera-tool", {
 
       if (this.takeSnapshotNextTick) {
         if (!this.snapPixels) {
-          this.snapPixels = new Uint8Array(renderWidth * renderHeight * 4);
+          this.snapPixels = new Uint8Array(RENDER_WIDTH * RENDER_HEIGHT * 4);
         }
-        renderer.readRenderTargetPixels(this.renderTarget, 0, 0, renderWidth, renderHeight, this.snapPixels);
+        renderer.readRenderTargetPixels(this.renderTarget, 0, 0, RENDER_WIDTH, RENDER_HEIGHT, this.snapPixels);
 
-        pixelsToPNG(this.snapPixels, renderWidth, renderHeight).then(file => {
-          const { orientation } = spawnMediaAround(this.el, file, this.localSnapCount, true);
+        pixelsToPNG(this.snapPixels, RENDER_WIDTH, RENDER_HEIGHT).then(file => {
+          const { orientation } = spawnMediaAround(this.el, file, this.localSnapCount, "photo", true);
 
           orientation.then(() => {
             this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });

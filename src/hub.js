@@ -133,6 +133,8 @@ import "./systems/interactions";
 import "./systems/hubs-systems";
 import "./systems/capture-system";
 import { SOUND_CHAT_MESSAGE } from "./systems/sound-effects-system";
+import { Buffer } from "buffer";
+window.Buffer = window.Buffer || Buffer;
 
 import "./gltf-component-mappings";
 

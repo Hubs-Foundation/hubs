@@ -223,7 +223,7 @@ export function getPromotionTokenForFile(fileId) {
 
 const mediaPos = new THREE.Vector3();
 
-export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false) {
+export function spawnMediaAround(el, media, snapCount, type /* 'photo' or 'video' */, mirrorOrientation = false) {
   const { entity, orientation } = addMedia(media, "#interactable-media", undefined, false);
 
   const pos = el.object3D.position;
@@ -248,27 +248,31 @@ export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false
   el.object3D.localToWorld(mediaPos);
   entity.object3D.visible = false;
 
-  entity.addEventListener(
-    "image-loaded",
-    () => {
-      entity.object3D.visible = true;
-      entity.setAttribute("animation__photo_pos", {
-        property: "position",
-        dur: 800,
-        from: { x: pos.x, y: pos.y, z: pos.z },
-        to: { x: mediaPos.x, y: mediaPos.y, z: mediaPos.z },
-        easing: "easeOutElastic"
-      });
-    },
-    { once: true }
-  );
+  const handler = () => {
+    entity.object3D.visible = true;
+    entity.setAttribute("animation__photo_pos", {
+      property: "position",
+      dur: 800,
+      from: { x: pos.x, y: pos.y, z: pos.z },
+      to: { x: mediaPos.x, y: mediaPos.y, z: mediaPos.z },
+      easing: "easeOutElastic"
+    });
+  };
+
+  if (type === "photo") {
+    entity.addEventListener("image-loaded", handler, { once: true });
+  } else if (type === "video") {
+    entity.addEventListener("video-loaded", handler, { once: true });
+  } else {
+    console.error("invalid type " + type);
+  }
 
   entity.object3D.matrixNeedsUpdate = true;
 
   entity.addEventListener(
     "media_resolved",
     () => {
-      el.emit("photo_taken", entity.components["media-loader"].data.src);
+      el.emit(`${type}_taken`, entity.components["media-loader"].data.src);
     },
     { once: true }
   );

@@ -425,7 +425,7 @@ AFRAME.registerComponent("media-video", {
     const file = new File([blob], "snap.png", TYPE_IMG_PNG);
 
     this.localSnapCount++;
-    const { entity } = spawnMediaAround(this.el, file, this.localSnapCount);
+    const { entity } = spawnMediaAround(this.el, file, this.localSnapCount, "photo");
     entity.addEventListener("image-loaded", this.onSnapImageLoaded, ONCE_TRUE);
   },
 
