@@ -390,18 +390,36 @@
                 >
                     <a-entity
                         class="label"
-                        text="value: text; align: center; color: #efefef"
+                        text="value: text; align: center; color: #fafafa"
                         position="0 0 0.1"
                         scale="3.5 3.5 3.5"
+                    ></a-entity>
+                    <a-entity
+                        class="duration"
+                        text="value: 5s; align: center; color: #fafafa"
+                        position="0 -0.15 0.09"
+                        scale="1.7 1.7 1.7"
                     ></a-entity>
                     <a-entity class="ui interactable-ui camera-snap-menu" mixin="button-container">
                         <a-entity class="snap-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 -0.15 0.075" scale="0.75 0.75 0.75">
                             <a-entity
                                 sprite
+                                                                                                                                                         class="snap-icon"
                                 icon-button="image: snap_camera.png; hoverImage: snap_camera.png;"
                                 scale="0.225 0.225 0.225"
                                 position="0 0.005 0.01"
                             ></a-entity>
+                            <a-entity
+                                sprite
+                                                                                                                                                         class="video-icon"
+                                icon-button="image: video_camera.png; hoverImage: video_camera.png;"
+                                scale="0.225 0.225 0.225"
+                                position="0 0.005 0.01"
+                            ></a-entity>
+                        </a-entity>
+                        <a-entity class="prev-duration" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.135 -0.15 0.075" scale="0.5 0.5 0.5">
+                        </a-entity>
+                        <a-entity class="next-duration" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0.135 -0.15 0.075" scale="0.5 0.5 0.5">
                         </a-entity>
                     </a-entity>
                     <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 10;">

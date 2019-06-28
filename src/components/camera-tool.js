@@ -141,12 +141,21 @@ AFRAME.registerComponent("camera-tool", {
       this.el.setObject3D("selfieScreen", this.selfieScreen);
 
       this.label = this.el.querySelector(".label");
+      this.durationLabel = this.el.querySelector(".duration");
+
+      this.snapIcon = this.el.querySelector(".snap-icon");
+      this.videoIcon = this.el.querySelector(".video-icon");
+
       this.label.object3D.visible = false;
+      this.durationLabel.object3D.visible = false;
+
+      this.updateUI();
 
       this.snapButton = this.el.querySelector(".snap-button");
-      this.snapButton.object3D.addEventListener("interact", () => {
-        this.beginSnapping();
-      });
+      this.snapButton.object3D.addEventListener("interact", () => this.beginSnapping());
+
+      this.el.querySelector(".next-duration").object3D.addEventListener("interact", () => this.changeDuration(1));
+      this.el.querySelector(".prev-duration").object3D.addEventListener("interact", () => this.changeDuration(-1));
 
       this.updateRenderTargetNextTick = true;
 
@@ -163,6 +172,12 @@ AFRAME.registerComponent("camera-tool", {
 
   updateViewport() {
     this.updateRenderTargetNextTick = true;
+  },
+
+  changeDuration(delta) {
+    const idx = CAPTURE_DURATIONS.findIndex(d => this.data.captureDuration == d);
+    const newIdx = idx === 0 && delta === -1 ? CAPTURE_DURATIONS.length - 1 : (idx + delta) % CAPTURE_DURATIONS.length;
+    this.el.setAttribute("camera-tool", "captureDuration", CAPTURE_DURATIONS[newIdx]);
   },
 
   focus(el, track) {
@@ -321,16 +336,29 @@ AFRAME.registerComponent("camera-tool", {
     }, 1000);
   },
 
-  async update() {
+  update() {
+    this.updateUI();
+  },
+
+  updateUI() {
+    if (!this.label) return;
+
     const label = this.data.label;
 
-    if (this.label) {
-      if (label) {
-        this.label.setAttribute("text", "value", label);
-      }
-
-      this.label.object3D.visible = !!label;
+    if (label) {
+      this.label.setAttribute("text", "value", label);
     }
+
+    this.label.object3D.visible = !!label;
+
+    const hasDuration = this.data.captureDuration !== 0;
+
+    if (hasDuration) {
+      this.durationLabel.setAttribute("text", "value", `${this.data.captureDuration}`);
+    }
+
+    this.durationLabel.object3D.visible = this.videoIcon.object3D.visible = hasDuration;
+    this.snapIcon.object3D.visible = !hasDuration;
   },
 
   tick() {
