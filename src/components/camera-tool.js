@@ -27,8 +27,11 @@ const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 const VIEWPORT_FPS = 6;
 const VIDEO_FPS = 25;
-const VIDEO_MIME_TYPE = "video/webm; codecs=vp8";
-const allowVideo = MediaRecorder.isTypeSupported(VIDEO_MIME_TYPE);
+// Prefer h264 if available due to faster decoding speec on most platforms
+const videoCodec = ["h264", "vp9", "vp8"].find(codec => MediaRecorder.isTypeSupported(`video/webm; codecs=${codec}`));
+const videoMimeType = videoCodec ? `video/webm; codecs=${videoCodec}` : null;
+const allowVideo = !!videoMimeType;
+
 const CAPTURE_WIDTH = isMobileVR ? 320 : 1280; // NOTE: Oculus Quest can't record bigger videos atm
 const CAPTURE_HEIGHT = isMobileVR ? 180 : 720;
 const RENDER_WIDTH = 1280;
@@ -267,7 +270,7 @@ AFRAME.registerComponent("camera-tool", {
           }
 
           stream.addTrack(track);
-          this.videoRecorder = new MediaRecorder(stream, { mimeType: VIDEO_MIME_TYPE });
+          this.videoRecorder = new MediaRecorder(stream, { mimeType: videoMimeType });
           const chunks = [];
 
           this.videoRecorder.ondataavailable = e => chunks.push(e.data);
