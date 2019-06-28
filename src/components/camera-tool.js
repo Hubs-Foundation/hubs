@@ -24,8 +24,25 @@ const pathsMap = {
   }
 };
 
+const isMobileVR = AFRAME.utils.device.isMobileVR();
+
+const heldOrSnappingViewportFPS = 6;
+const videoRecordingFPS = 25;
+const captureWidth = isMobileVR ? 320 : 1280; // NOTE: Oculus Quest can't record bigger videos atm
+const captureHeight = isMobileVR ? 180 : 720;
+const renderWidth = 1280;
+const renderHeight = 720;
+
 const snapCanvas = document.createElement("canvas");
+
 const videoCanvas = document.createElement("canvas");
+videoCanvas.width = captureWidth;
+videoCanvas.height = captureHeight;
+
+const videoContext = videoCanvas.getContext("2d");
+const videoImageData = videoContext.createImageData(captureWidth, captureHeight);
+const videoPixels = new Uint8Array(captureWidth * captureHeight * 4);
+videoImageData.data.set(videoPixels);
 
 async function pixelsToPNG(pixels, width, height) {
   snapCanvas.width = width;
@@ -41,14 +58,8 @@ async function pixelsToPNG(pixels, width, height) {
   return new File([blob], "snap.png", { type: "image/png" });
 }
 
-const isMobileVR = AFRAME.utils.device.isMobileVR();
-
 AFRAME.registerComponent("camera-tool", {
   schema: {
-    heldOrSnappingViewportFPS: { default: 6 },
-    videoRecordingFPS: { default: 25 },
-    imageWidth: { default: 320 },
-    imageHeight: { default: 180 },
     isSnapping: { default: false },
     label: { default: "" }
   },
@@ -60,7 +71,7 @@ AFRAME.registerComponent("camera-tool", {
     // On mobile, we show the camera viewport when holding the camera or during a snapshot.
     this.showCameraViewport = !isMobileVR;
 
-    this.renderTarget = new THREE.WebGLRenderTarget(this.data.imageWidth, this.data.imageHeight, {
+    this.renderTarget = new THREE.WebGLRenderTarget(renderWidth, renderHeight, {
       format: THREE.RGBAFormat,
       minFilter: THREE.LinearFilter,
       magFilter: THREE.NearestFilter,
@@ -69,19 +80,22 @@ AFRAME.registerComponent("camera-tool", {
       stencil: false
     });
 
-    this.camera = new THREE.PerspectiveCamera(50, this.renderTarget.width / this.renderTarget.height, 0.1, 30000);
+    // Create a separate render target for video becuase we need to flip and (sometimes) downscale it before
+    // encoding it to video.
+    this.videoRenderTarget = new THREE.WebGLRenderTarget(captureWidth, captureHeight, {
+      format: THREE.RGBAFormat,
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.NearestFilter,
+      encoding: THREE.sRGBEncoding,
+      depth: false,
+      stencil: false
+    });
+
+    this.camera = new THREE.PerspectiveCamera(50, renderWidth / renderHeight, 0.1, 30000);
     this.camera.rotation.set(0, Math.PI, 0);
     this.camera.position.set(0, 0, 0.05);
     this.camera.matrixNeedsUpdate = true;
     this.el.setObject3D("camera", this.camera);
-
-    videoCanvas.width = this.renderTarget.width;
-    videoCanvas.height = this.renderTarget.height;
-
-    this.videoContext = videoCanvas.getContext("2d");
-    this.videoImageData = this.videoContext.createImageData(this.renderTarget.width, this.renderTarget.height);
-    this.videoPixels = new Uint8Array(this.renderTarget.width * this.renderTarget.height * 4);
-    this.videoImageData.data.set(this.videoPixels);
 
     const material = new THREE.MeshBasicMaterial({
       map: this.renderTarget.texture
@@ -213,7 +227,7 @@ AFRAME.registerComponent("camera-tool", {
           this.takeSnapshotNextTick = true;
         } else {
           const stream = new MediaStream();
-          const track = videoCanvas.captureStream(this.data.videoRecordingFPS).getVideoTracks()[0];
+          const track = videoCanvas.captureStream(videoRecordingFPS).getVideoTracks()[0];
           /*const listener = this.el.sceneEl.audioListener;
           const destination = listener.context.createMediaStreamDestination();
           listener.getInput().connect(destination);
@@ -330,8 +344,7 @@ AFRAME.registerComponent("camera-tool", {
     // Always draw held, snapping, or recording camera viewports with a decent framerate
     if (
       (isHolding || this.data.isSnapping || this.videoRecorder) &&
-      performance.now() - this.lastUpdate >=
-        1000 / (this.videoRecorder ? this.data.videoRecordingFPS : this.data.heldOrSnappingViewportFPS)
+      performance.now() - this.lastUpdate >= 1000 / (this.videoRecorder ? videoRecordingFPS : heldOrSnappingViewportFPS)
     ) {
       this.updateRenderTargetNextTick = true;
     }
@@ -358,6 +371,7 @@ AFRAME.registerComponent("camera-tool", {
 
   tock: (function() {
     const tempHeadScale = new THREE.Vector3();
+    let hasSetupVideoRenderTarget = false;
 
     return function tock() {
       const sceneEl = this.el.sceneEl;
@@ -383,7 +397,10 @@ AFRAME.registerComponent("camera-tool", {
         this.playerHud = hudEl && hudEl.object3D;
       }
 
-      if (this.takeSnapshotNextTick || (this.updateRenderTargetNextTick && this.viewportInViewThisFrame)) {
+      if (
+        this.takeSnapshotNextTick ||
+        (this.updateRenderTargetNextTick && (this.viewportInViewThisFrame || this.videoRecorder))
+      ) {
         if (this.playerHead) {
           tempHeadScale.copy(this.playerHead.scale);
           this.playerHead.scale.set(1, 1, 1);
@@ -406,6 +423,12 @@ AFRAME.registerComponent("camera-tool", {
         delete sceneEl.object3D.onAfterRender;
         renderer.vr.enabled = false;
 
+        // HACK this sets up the framebuffer for the video render target
+        if (!hasSetupVideoRenderTarget) {
+          renderer.setRenderTarget(this.videoRenderTarget);
+          hasSetupVideoRenderTarget = true;
+        }
+
         renderer.setRenderTarget(this.renderTarget);
         renderer.render(sceneEl.object3D, this.camera);
         renderer.setRenderTarget(null);
@@ -426,15 +449,23 @@ AFRAME.registerComponent("camera-tool", {
         this.lastUpdate = now;
 
         if (this.videoRecorder) {
-          const width = this.renderTarget.width;
-          const height = this.renderTarget.height;
-          const videoImageData = this.videoContext.createImageData(width, height);
-          const videoPixels = new Uint8Array(width * height * 4);
-          renderer.readRenderTargetPixels(this.renderTarget, 0, 0, width, height, videoPixels);
+          // This blit operation will (if necessary) scale/resample the view finder render target and, importantly,
+          // flip the texture on Y
+          renderer.blitFramebuffer(
+            this.renderTarget,
+            0,
+            0,
+            renderWidth,
+            renderHeight,
+            this.videoRenderTarget,
+            0,
+            captureHeight,
+            captureWidth,
+            0
+          );
+          renderer.readRenderTargetPixels(this.videoRenderTarget, 0, 0, captureWidth, captureHeight, videoPixels);
           videoImageData.data.set(videoPixels);
-
-          this.videoContext.scale(1, -1);
-          this.videoContext.putImageData(videoImageData, 0, 0);
+          videoContext.putImageData(videoImageData, 0, 0);
         }
 
         this.updateRenderTargetNextTick = false;
@@ -442,14 +473,12 @@ AFRAME.registerComponent("camera-tool", {
       }
 
       if (this.takeSnapshotNextTick) {
-        const width = this.renderTarget.width;
-        const height = this.renderTarget.height;
         if (!this.snapPixels) {
-          this.snapPixels = new Uint8Array(width * height * 4);
+          this.snapPixels = new Uint8Array(renderWidth * renderHeight * 4);
         }
-        renderer.readRenderTargetPixels(this.renderTarget, 0, 0, width, height, this.snapPixels);
+        renderer.readRenderTargetPixels(this.renderTarget, 0, 0, renderWidth, renderHeight, this.snapPixels);
 
-        pixelsToPNG(this.snapPixels, width, height).then(file => {
+        pixelsToPNG(this.snapPixels, renderWidth, renderHeight).then(file => {
           const { orientation } = spawnMediaAround(this.el, file, this.localSnapCount, true);
 
           orientation.then(() => {

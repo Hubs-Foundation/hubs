@@ -20,6 +20,7 @@ import "./utils/audio-context-fix";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
+import addBlitFrameBufferFunction from "./utils/three-blit-framebuffer";
 import { detectOS, detect } from "detect-browser";
 import {
   getReticulumFetchUrl,
@@ -636,6 +637,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const physicsSystem = scene.systems.physics;
     physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
     patchThreeAllocations();
+    addBlitFrameBufferFunction();
   };
 
   if (scene.hasLoaded) {
