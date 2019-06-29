@@ -321,6 +321,7 @@ AFRAME.registerComponent("camera-tool", {
 
   async beginRecording(duration) {
     if (!this.videoContext) {
+      this.videoCanvas = document.createElement("canvas");
       this.videoCanvas.width = CAPTURE_WIDTH;
       this.videoCanvas.height = CAPTURE_HEIGHT;
       this.videoContext = this.videoCanvas.getContext("2d");
