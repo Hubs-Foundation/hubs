@@ -403,7 +403,7 @@
                         class="duration"
                         text="value: 5s; align: center; color: #fafafa"
                         position="0 -0.15 0.09"
-                        scale="1.7 1.7 1.7"
+                        scale="1.9 1.9 1.9"
                     ></a-entity>
                     <a-entity class="ui interactable-ui camera-snap-menu" mixin="button-container">
                         <a-entity class="snap-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 -0.15 0.075" scale="0.75 0.75 0.75">
@@ -411,37 +411,45 @@
                                 sprite
                                                                                                                                                          class="snap-icon"
                                 icon-button="image: snap_camera.png; hoverImage: snap_camera.png;"
-                                scale="0.225 0.225 0.225"
-                                position="0 0.005 0.01"
+                                scale="0.2 0.2 0.2"
+                                position="0 0.002 0.01"
                             ></a-entity>
                             <a-entity
                                 sprite
-                                                                                                                                                         class="video-icon"
-                                icon-button="image: video_camera.png; hoverImage: video_camera.png;"
-                                scale="0.225 0.225 0.225"
-                                position="0 0.005 0.01"
+                                                                                                                                                         class="record-icon"
+                                icon-button="image: record-action.png; hoverImage: record-action.png;"
+                                scale="0.175 0.175 0.175"
+                                position="0 0 0.01"
                             ></a-entity>
-                        </a-entity>
-                        <a-entity class="cancel-button" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0 -0.15 0.075" scale="0.75 0.75 0.75">
                             <a-entity
                                 sprite
-                                                                                                                                                         class="snap-icon"
-                                icon-button="image: snap_camera.png; hoverImage: snap_camera.png;"
-                                scale="0.225 0.225 0.225"
-                                position="0 0.005 0.01"
+                                                                                                                                                         class="record-alpha-icon"
+                                icon-button="image: record-action-alpha.png; hoverImage: record-action-alpha.png;"
+                                scale="0.175 0.175 0.175"
+                                position="0 0 0.01"
                             ></a-entity>
                         </a-entity>
-                        <a-entity class="prev-duration" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.135 -0.15 0.075" scale="0.5 0.5 0.5">
+                        <a-entity class="cancel-button" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0 -0.15 0.075" scale="0.65 0.65 0.65">
+                            <a-entity
+                                sprite
+                                icon-button="image: close-action.png; hoverImage: close-action.png;"
+                                scale="0.075 0.075 0.075"
+                                position="0 0 0.01"
+                            ></a-entity>
                         </a-entity>
-                        <a-entity class="next-duration" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0.135 -0.15 0.075" scale="0.5 0.5 0.5">
+                        <a-entity class="prev-duration" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.135 -0.15 0.075" scale="0.5 0.5 0.5">
+                            <a-entity text=" value:<; width:2; align:center; color:#ff3464" text-raycast-hack position="0 0 0.01"></a-entity>
+                        </a-entity>
+                        <a-entity class="next-duration" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0.135 -0.15 0.075" scale="0.5 0.5 0.5">
+                            <a-entity text=" value:>; width:2; align:center; color:#ff3464" text-raycast-hack position="0 0 0.01"></a-entity>
                         </a-entity>
                         <a-entity class="stop-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0.15 0.08" scale="0.75 0.75 0.75">
                             <a-entity
                                 sprite
                                                                                                                                                          class="stop-icon"
-                                icon-button="image: stop_camera.png; hoverImage: stop_camera.png;"
-                                scale="0.225 0.225 0.225"
-                                position="0 0.005 0.01"
+                                icon-button="image: stop-action.png; hoverImage: stop-action.png;"
+                                scale="0.125 0.125 0.125"
+                                position="0 0 0.01"
                             ></a-entity>
                         </a-entity>
                     </a-entity>

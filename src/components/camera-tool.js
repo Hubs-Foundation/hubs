@@ -175,7 +175,8 @@ AFRAME.registerComponent("camera-tool", {
       this.durationLabel = this.el.querySelector(".duration");
 
       this.snapIcon = this.el.querySelector(".snap-icon");
-      this.videoIcon = this.el.querySelector(".video-icon");
+      this.recordIcon = this.el.querySelector(".record-icon");
+      this.recordAlphaIcon = this.el.querySelector(".record-alpha-icon");
 
       this.label.object3D.visible = false;
       this.durationLabel.object3D.visible = false;
@@ -314,7 +315,8 @@ AFRAME.registerComponent("camera-tool", {
     }
 
     this.durationLabel.object3D.visible = hasDuration && !this.data.isSnapping && !isFrozen;
-    this.videoIcon.object3D.visible = !isPhoto && !isFrozen;
+    this.recordIcon.object3D.visible = !hasDuration && !isPhoto && !isFrozen;
+    this.recordAlphaIcon.object3D.visible = hasDuration && !isPhoto && !isFrozen;
     this.snapIcon.object3D.visible = isPhoto && !isFrozen;
     this.snapButton.object3D.visible = !this.data.isSnapping && !isFrozen;
     this.cancelButton.object3D.visible = this.data.isSnapping && !isFrozen;
