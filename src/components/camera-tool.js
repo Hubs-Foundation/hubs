@@ -25,16 +25,17 @@ const pathsMap = {
 };
 
 const isMobileVR = AFRAME.utils.device.isMobileVR();
+const isOculusBrowser = navigator.userAgent.match(/Oculus/);
 
 const VIEWPORT_FPS = 6;
 const VIDEO_FPS = 25;
 // Prefer h264 if available due to faster decoding speec on most platforms
 const videoCodec = ["h264", "vp9", "vp8"].find(codec => MediaRecorder.isTypeSupported(`video/webm; codecs=${codec}`));
 const videoMimeType = videoCodec ? `video/webm; codecs=${videoCodec}` : null;
-const allowVideo = !!videoMimeType;
+const allowVideo = !!videoMimeType && !isOculusBrowser; // Disable Oculus Browser until h264/vp8 fixed
 
-const CAPTURE_WIDTH = isMobileVR ? 320 : 1280; // NOTE: Oculus Quest can't record bigger videos atm
-const CAPTURE_HEIGHT = isMobileVR ? 180 : 720;
+const CAPTURE_WIDTH = isOculusBrowser ? 320 : 1280; // NOTE: Oculus Browser can't record bigger videos atm
+const CAPTURE_HEIGHT = isOculusBrowser ? 180 : 720;
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
 const CAPTURE_DURATIONS = allowVideo ? [0, Infinity, 3, 7, 15, 30, 60] : [0];
