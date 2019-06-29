@@ -387,7 +387,7 @@ AFRAME.registerComponent("camera-tool", {
       // a few times and then pause it.
       if (recordingDuration <= MAX_DURATION_TO_LIMIT_LOOPS * 1000) {
         setTimeout(
-          () => entity.components["media-video"].tryUpdateVideoPlaybackState(true),
+          () => entity.components["media-video"] && entity.components["media-video"].tryUpdateVideoPlaybackState(true),
           recordingDuration * VIDEO_LOOPS + 100
         );
       }
@@ -428,7 +428,10 @@ AFRAME.registerComponent("camera-tool", {
 
       this.videoRecorder.stop();
       this.videoRecorder = null;
-      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
+
+      if (!cancel) {
+        this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
+      }
     }
     clearInterval(this.videoCountdownInterval);
 
