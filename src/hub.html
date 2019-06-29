@@ -454,7 +454,13 @@
                         </a-entity>
                     </a-entity>
                     <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 10;">
-                        <a-entity mixin="rounded-text-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0.125 0.01" sprite icon-button="image: mute_off.png; hoverImage: mute_off-hover.png; activeImage: mute_on.png; activeHoverImage: mute_on-hover.png" scale="0.1 0.1 0.1" class="capture-audio"></a-entity>
+                        <a-entity mixin="rounded-action-button" class="capture-audio" is-remote-hover-target tags="singleActionButton: true;" position="0 0.125 0.01">
+                            <a-entity sprite class="capture-audio-icon"
+                                icon-button="image: unmute-action.png; hoverImage: unmute-action.png; activeImage: mute-action.png; activeHoverImage: mute-action.png"
+                                scale="0.165 0.165 0.165"
+                                position="0 0 0.001"
+                            ></a-entity>
+                        </a-entity>
                         <a-entity mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" transform-button="mode: align;" position="-0.15 -0.125 0.01">
                             <a-entity
                                 sprite

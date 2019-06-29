@@ -192,6 +192,7 @@ AFRAME.registerComponent("camera-tool", {
       this.stopButton = this.el.querySelector(".stop-button");
       this.stopButton.object3D.addEventListener("interact", () => this.stopRecording());
       this.captureAudioButton = this.el.querySelector(".capture-audio");
+      this.captureAudioIcon = this.el.querySelector(".capture-audio-icon");
       this.captureAudioButton.object3D.addEventListener("interact", () =>
         this.el.setAttribute("camera-tool", "captureAudio", !this.data.captureAudio)
       );
@@ -323,7 +324,7 @@ AFRAME.registerComponent("camera-tool", {
     this.prevDurationButton.object3D.visible = this.nextDurationButton.object3D.visible =
       !this.data.isSnapping && allowVideo && !isFrozen;
 
-    this.captureAudioButton.setAttribute("icon-button", "active", this.data.captureAudio);
+    this.captureAudioIcon.setAttribute("icon-button", "active", this.data.captureAudio);
   },
 
   async beginRecording(duration) {
