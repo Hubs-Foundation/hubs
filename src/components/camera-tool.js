@@ -162,9 +162,11 @@ AFRAME.registerComponent("camera-tool", {
       this.durationLabel.object3D.visible = false;
 
       this.snapButton = this.el.querySelector(".snap-button");
+      this.cancelButton = this.el.querySelector(".cancel-button");
       this.nextDurationButton = this.el.querySelector(".next-duration");
       this.prevDurationButton = this.el.querySelector(".prev-duration");
       this.snapButton.object3D.addEventListener("interact", () => this.beginSnapping());
+      this.cancelButton.object3D.addEventListener("interact", () => this.cancelSnapping());
       this.nextDurationButton.object3D.addEventListener("interact", () => this.changeDuration(1));
       this.prevDurationButton.object3D.addEventListener("interact", () => this.changeDuration(-1));
       this.stopButton = this.el.querySelector(".stop-button");
@@ -244,9 +246,10 @@ AFRAME.registerComponent("camera-tool", {
     this.snapCountdown = COUNTDOWN_DURATION;
     this.el.setAttribute("camera-tool", "label", `${this.snapCountdown}`);
 
-    const interval = setInterval(async () => {
+    this.countdownInterval = setInterval(async () => {
       if (!NAF.utils.isMine(this.el) && !NAF.utils.takeOwnership(this.el)) {
-        clearInterval(interval);
+        clearInterval(this.countdownInterval);
+        this.countdownInterval = null;
         return;
       }
 
@@ -288,6 +291,7 @@ AFRAME.registerComponent("camera-tool", {
           const recordingStartTime = performance.now();
 
           this.videoRecorder.ondataavailable = e => chunks.push(e.data);
+          this.videoRecorder._free = () => (chunks.length = 0); // Used for cancelling
           this.videoRecorder.onstop = async () => {
             if (chunks.length === 0) return;
             const mimeType = chunks[0].type;
@@ -357,7 +361,7 @@ AFRAME.registerComponent("camera-tool", {
               this.videoCountdown--;
 
               if (this.videoCountdown === 0) {
-                this.stopRecording(true);
+                this.stopRecording();
                 this.videoCountdownInterval = null;
               } else {
                 this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
@@ -366,12 +370,19 @@ AFRAME.registerComponent("camera-tool", {
           }
         }
 
-        clearInterval(interval);
+        clearInterval(this.countdownInterval);
+        this.countdownInterval = null;
       } else {
         this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_COUNTDOWN);
         this.el.setAttribute("camera-tool", "label", `${this.snapCountdown}`);
       }
     }, 1000);
+  },
+
+  cancelSnapping() {
+    clearInterval(this.countdownInterval);
+    this.stopRecording(true);
+    this.updateUI();
   },
 
   update() {
@@ -407,16 +418,26 @@ AFRAME.registerComponent("camera-tool", {
     this.videoIcon.object3D.visible = !isPhoto && !isFrozen;
     this.snapIcon.object3D.visible = isPhoto && !isFrozen;
     this.snapButton.object3D.visible = !this.data.isSnapping && !isFrozen;
+    this.cancelButton.object3D.visible = this.data.isSnapping && !isFrozen;
     this.prevDurationButton.object3D.visible = this.nextDurationButton.object3D.visible =
       !this.data.isSnapping && allowVideo && !isFrozen;
 
     this.captureAudioButton.setAttribute("icon-button", "active", this.data.captureAudio);
   },
 
-  stopRecording() {
-    this.videoRecorder.stop();
-    this.videoRecorder = null;
+  stopRecording(cancel) {
+    if (this.videoRecorder) {
+      if (cancel) {
+        this.videoRecorder.onstop = () => {};
+        this.videoRecorder._free();
+      }
+
+      this.videoRecorder.stop();
+      this.videoRecorder = null;
+    }
     clearInterval(this.videoCountdownInterval);
+
+    this.videoCountdownInterval = null;
     this.el.setAttribute("camera-tool", "label", "");
     this.el.setAttribute("camera-tool", { isRecording: false, isSnapping: false });
     this.el.sceneEl.setAttribute("local-audio-analyser", { analyze: false });
