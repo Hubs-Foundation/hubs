@@ -40,6 +40,8 @@ const RENDER_HEIGHT = 720;
 const CAPTURE_DURATIONS = allowVideo ? [0, Infinity, 3, 7, 15, 30, 60] : [0];
 const DEFAULT_CAPTURE_DURATION = allowVideo ? 3 : 0;
 const COUNTDOWN_DURATION = 3;
+const VIDEO_LOOPS = 3; // Number of times to loop the videos we spawn before stopping them (for perf)
+const MAX_DURATION_TO_LIMIT_LOOPS = 31; // Max duration for which we limit loops (eg GIFs vs long form videos)
 
 const snapCanvas = document.createElement("canvas");
 const videoCanvas = document.createElement("canvas");
@@ -283,12 +285,15 @@ AFRAME.registerComponent("camera-tool", {
           stream.addTrack(track);
           this.videoRecorder = new MediaRecorder(stream, { mimeType: videoMimeType });
           const chunks = [];
+          const recordingStartTime = performance.now();
 
           this.videoRecorder.ondataavailable = e => chunks.push(e.data);
           this.videoRecorder.onstop = async () => {
             if (chunks.length === 0) return;
             const mimeType = chunks[0].type;
             let blob;
+
+            const recordingDuration = performance.now() - recordingStartTime;
 
             if (browser.name === "chrome") {
               // HACK, on chrome, webms are unseekable and so can't be played by some browsers like
@@ -314,14 +319,23 @@ AFRAME.registerComponent("camera-tool", {
             }
 
             chunks.length = 0;
-            //this.el.sceneEl.emit("add_media", new File([blob], "capture", { type: mimeType }));
-            const { orientation } = spawnMediaAround(
+
+            const { entity, orientation } = spawnMediaAround(
               this.el,
               new File([blob], "capture", { type: mimeType }),
               this.localSnapCount,
               "video",
               true
             );
+
+            // To limit the # of concurrent videos playing, if it was a short clip, let it loop
+            // a few times and then pause it.
+            if (recordingDuration <= MAX_DURATION_TO_LIMIT_LOOPS * 1000) {
+              setTimeout(
+                () => entity.components["media-video"].tryUpdateVideoPlaybackState(true),
+                recordingDuration * VIDEO_LOOPS + 100
+              );
+            }
 
             this.localSnapCount++;
 
