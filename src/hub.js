@@ -19,8 +19,9 @@ import "aframe-slice9-component";
 import "./utils/audio-context-fix";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
+import "./utils/threejs-video-texture-pause";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
-import addBlitFrameBufferFunction from "./utils/three-blit-framebuffer";
+import addBlitFrameBufferFunction from "./utils/threejs-blit-framebuffer";
 import { detectOS, detect } from "detect-browser";
 import {
   getReticulumFetchUrl,
