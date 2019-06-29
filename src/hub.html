@@ -49,6 +49,7 @@
         physics="debug: false; driver: ammo; debugDrawMode: 1; iterations: 4;"
         hubs-systems
         capture-system
+        local-audio-analyser="analyze: false"
         class="grab-cursor"
         renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: true;"
         shadow="type: pcfsoft"
@@ -425,7 +426,7 @@
                         </a-entity>
                         <a-entity class="next-duration" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0.135 -0.15 0.075" scale="0.5 0.5 0.5">
                         </a-entity>
-                        <a-entity class="stop-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0 0.125" scale="1 1 1">
+                        <a-entity class="stop-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0 0.125" scale="0.75 0.75 0.75">
                             <a-entity
                                 sprite
                                                                                                                                                          class="stop-icon"
@@ -436,9 +437,7 @@
                         </a-entity>
                     </a-entity>
                     <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 10;">
-                        <a-entity mixin="rounded-text-action-button" is-remote-hover-target tags="singleActionButton: true;" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01">
-                            <a-entity text=" value:mirror; width:2.5; align:center;" class="mirror-button-label" text-raycast-hack position="0 0 0.02"></a-entity>
-                        </a-entity>
+                        <a-entity mixin="rounded-text-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0.125 0.01" sprite icon-button="image: mute_off.png; hoverImage: mute_off-hover.png; activeImage: mute_on.png; activeHoverImage: mute_on-hover.png" scale="0.1 0.1 0.1" class="capture-audio"></a-entity>
                         <a-entity mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" transform-button="mode: align;" position="-0.15 -0.125 0.01">
                             <a-entity
                                 sprite

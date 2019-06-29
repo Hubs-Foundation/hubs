@@ -280,7 +280,6 @@
     "tips.mobile.invite": "Use the Share button to share this room.",
     "tips.desktop.video_share_mode": "You're streaming. Select again to stop sharing video.",
     "tips.desktop.pen_mode": "Press ESC or right click to drop pen. Ctrl-Z to undo.",
-    "tips.desktop.mirror_mode": "Press ESC to end camera mirroring.",
     "tips.desktop.mute_mode": "You are muted. Click or press M to un-mute.",
     "tips.desktop.look": "Welcome to Hubs! 👋 Click and drag to look around.",
     "tips.desktop.locomotion": "Great! Now, use the W A S D keys to move. Hold shift to boost.",

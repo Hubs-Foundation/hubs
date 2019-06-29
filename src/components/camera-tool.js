@@ -4,6 +4,7 @@ import { ObjectTypes } from "../object-types";
 import { paths } from "../systems/userinput/paths";
 import { detect } from "detect-browser";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT, SOUND_CAMERA_TOOL_COUNTDOWN } from "../systems/sound-effects-system";
+import { getAudioFeedbackScale } from "./audio-feedback";
 import * as ebml from "ts-ebml";
 
 import cameraModelSrc from "../assets/camera_tool.glb";
@@ -118,6 +119,9 @@ AFRAME.registerComponent("camera-tool", {
       }
     };
 
+    this.el.sceneEl.addEventListener("stateadded", () => this.updateUI());
+    this.el.sceneEl.addEventListener("stateremoved", () => this.updateUI());
+
     cameraModelPromise.then(model => {
       const mesh = model.scene.clone();
       mesh.scale.set(2, 2, 2);
@@ -163,6 +167,10 @@ AFRAME.registerComponent("camera-tool", {
       this.prevDurationButton.object3D.addEventListener("interact", () => this.changeDuration(-1));
       this.stopButton = this.el.querySelector(".stop-button");
       this.stopButton.object3D.addEventListener("interact", () => this.stopRecording());
+      this.captureAudioButton = this.el.querySelector(".capture-audio");
+      this.captureAudioButton.object3D.addEventListener("interact", () =>
+        this.el.setAttribute("camera-tool", "captureAudio", !this.data.captureAudio)
+      );
 
       this.updateUI();
 
@@ -175,7 +183,6 @@ AFRAME.registerComponent("camera-tool", {
 
   remove() {
     this.cameraSystem.deregister(this.el);
-    this.el.sceneEl.systems["camera-mirror"].unmirrorCameraAtEl(this.el);
     this.el.sceneEl.emit("camera_removed");
   },
 
@@ -208,14 +215,6 @@ AFRAME.registerComponent("camera-tool", {
     };
   })(),
 
-  mirror() {
-    this.el.sceneEl.systems["camera-mirror"].mirrorCameraAtEl(this.el);
-  },
-
-  unmirror() {
-    this.el.sceneEl.systems["camera-mirror"].unmirrorCameraAtEl(this.el);
-  },
-
   onAvatarUpdated() {
     delete this.playerHead;
   },
@@ -231,6 +230,8 @@ AFRAME.registerComponent("camera-tool", {
     if (isHandHeld) {
       // Don't do a photo timer if it's being used while holding the camera, for instant snapping.
       this.takeSnapshotNextTick = true;
+
+      // TODO video
       return;
     }
 
@@ -241,7 +242,7 @@ AFRAME.registerComponent("camera-tool", {
     this.snapCountdown = COUNTDOWN_DURATION;
     this.el.setAttribute("camera-tool", "label", `${this.snapCountdown}`);
 
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       if (!NAF.utils.isMine(this.el) && !NAF.utils.takeOwnership(this.el)) {
         clearInterval(interval);
         return;
@@ -254,19 +255,29 @@ AFRAME.registerComponent("camera-tool", {
           this.el.setAttribute("camera-tool", { label: "", isSnapping: false });
           this.takeSnapshotNextTick = true;
         } else {
+          // Begin sampling local audio so we can perform head scaling
+          this.el.sceneEl.setAttribute("local-audio-analyser", { analyze: true });
+
           const stream = new MediaStream();
           const track = videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
 
           if (this.data.captureAudio) {
-            const listener = this.el.sceneEl.audioListener;
+            const context = THREE.AudioContext.getContext();
+            const destination = context.createMediaStreamDestination();
 
+            const listener = this.el.sceneEl.audioListener;
             if (listener) {
               // NOTE audio is not captured from camera vantage point for now.
-              const destination = listener.context.createMediaStreamDestination();
               listener.getInput().connect(destination);
-              const audio = destination.stream.getAudioTracks()[0];
-              stream.addTrack(audio);
             }
+
+            const selfAudio = await NAF.connection.adapter.getMediaStream(NAF.clientId, "audio");
+            if (selfAudio) {
+              context.createMediaStreamSource(selfAudio).connect(destination);
+            }
+
+            const audio = destination.stream.getAudioTracks()[0];
+            stream.addTrack(audio);
           }
 
           stream.addTrack(track);
@@ -357,6 +368,7 @@ AFRAME.registerComponent("camera-tool", {
     if (!this.label) return;
 
     const label = this.data.label;
+    const isFrozen = this.el.sceneEl.is("frozen");
     const hasDuration = this.data.captureDuration !== 0 && this.data.captureDuration !== Infinity;
     const isPhoto = this.data.captureDuration === 0;
 
@@ -377,12 +389,14 @@ AFRAME.registerComponent("camera-tool", {
       this.durationLabel.setAttribute("text", "value", `${this.data.captureDuration}`);
     }
 
-    this.durationLabel.object3D.visible = hasDuration && !this.data.isSnapping;
-    this.videoIcon.object3D.visible = !isPhoto;
-    this.snapIcon.object3D.visible = isPhoto;
-    this.snapButton.object3D.visible = !this.data.isSnapping;
+    this.durationLabel.object3D.visible = hasDuration && !this.data.isSnapping && !isFrozen;
+    this.videoIcon.object3D.visible = !isPhoto && !isFrozen;
+    this.snapIcon.object3D.visible = isPhoto && !isFrozen;
+    this.snapButton.object3D.visible = !this.data.isSnapping && !isFrozen;
     this.prevDurationButton.object3D.visible = this.nextDurationButton.object3D.visible =
-      !this.data.isSnapping && allowVideo;
+      !this.data.isSnapping && allowVideo && !isFrozen;
+
+    this.captureAudioButton.setAttribute("icon-button", "active", this.data.captureAudio);
   },
 
   stopRecording() {
@@ -391,6 +405,7 @@ AFRAME.registerComponent("camera-tool", {
     clearInterval(this.videoCountdownInterval);
     this.el.setAttribute("camera-tool", "label", "");
     this.el.setAttribute("camera-tool", { isRecording: false, isSnapping: false });
+    this.el.sceneEl.setAttribute("local-audio-analyser", { analyze: false });
   },
 
   tick() {
@@ -414,7 +429,7 @@ AFRAME.registerComponent("camera-tool", {
     this.showCameraViewport = isHolding || !isMobileVR || this.data.isSnapping || this.videoRecorder;
 
     if (this.screen && this.selfieScreen) {
-      this.screen.visible = this.selfieScreen.visible = this.showCameraViewport;
+      this.screen.visible = this.selfieScreen.visible = !!this.showCameraViewport;
     }
 
     // Always draw held, snapping, or recording camera viewports with a decent framerate
@@ -479,7 +494,19 @@ AFRAME.registerComponent("camera-tool", {
       ) {
         if (this.playerHead) {
           tempHeadScale.copy(this.playerHead.scale);
-          this.playerHead.scale.set(1, 1, 1);
+
+          // We want to scale our own head now that we're taking a video/photo.
+          //
+          // NOTE this assumes the player has a head with scale-audio-feedback, will need to revisit this for
+          // custom avatars.
+          let scale = 1;
+          const analyser = this.el.sceneEl.systems["local-audio-analyser"];
+
+          if (analyser && analyser.data.analyze) {
+            scale = getAudioFeedbackScale(this.el.object3D, this.playerHead, 1, 2, analyser.volume);
+          }
+
+          this.playerHead.scale.set(scale, scale, scale);
           this.playerHead.updateMatrices(true, true);
           this.playerHead.updateMatrixWorld(true, true);
         }
