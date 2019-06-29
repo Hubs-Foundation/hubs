@@ -69,6 +69,24 @@ async function pixelsToPNG(pixels, width, height) {
   return new File([blob], "snap.png", { type: "image/png" });
 }
 
+async function convertWebMChunksToSeekable(chunks) {
+  const decoder = new ebml.Decoder();
+  const reader = new ebml.Reader();
+  reader.logging = false;
+  reader.drop_default_duration = false;
+
+  for (let i = 0; i < chunks.length; i++) {
+    const buf = new Buffer(await new Response(chunks[i]).arrayBuffer());
+    decoder.decode(buf).forEach(e => reader.read(e));
+  }
+
+  reader.stop();
+
+  const seekableMeta = ebml.tools.makeMetadataSeekable(reader.metadatas, reader.duration, reader.cues);
+  const body = new Buffer(await new Response(chunks[0]).arrayBuffer()).slice(reader.metadataSize);
+  return new Buffer(ebml.tools.concat([new Buffer(seekableMeta), body]).buffer);
+}
+
 AFRAME.registerComponent("camera-tool", {
   schema: {
     captureDuration: { default: DEFAULT_CAPTURE_DURATION },
@@ -166,7 +184,7 @@ AFRAME.registerComponent("camera-tool", {
       this.cancelButton = this.el.querySelector(".cancel-button");
       this.nextDurationButton = this.el.querySelector(".next-duration");
       this.prevDurationButton = this.el.querySelector(".prev-duration");
-      this.snapButton.object3D.addEventListener("interact", () => this.beginSnapping());
+      this.snapButton.object3D.addEventListener("interact", () => this.snapClicked());
       this.cancelButton.object3D.addEventListener("interact", () => this.cancelSnapping());
       this.nextDurationButton.object3D.addEventListener("interact", () => this.changeDuration(1));
       this.prevDurationButton.object3D.addEventListener("interact", () => this.changeDuration(-1));
@@ -224,23 +242,10 @@ AFRAME.registerComponent("camera-tool", {
     delete this.playerHead;
   },
 
-  beginSnapping() {
+  snapClicked() {
     if (this.data.isSnapping) return;
-
-    const interaction = AFRAME.scenes[0].systems.interaction;
-    const heldLeftHand = interaction.state.leftHand.held === this.el;
-    const heldRightHand = interaction.state.rightHand.held === this.el;
-    const isHandHeld = heldLeftHand || heldRightHand;
-
-    if (isHandHeld) {
-      // Don't do a photo timer if it's being used while holding the camera, for instant snapping.
-      this.takeSnapshotNextTick = true;
-
-      // TODO video
-      return;
-    }
-
     if (!NAF.utils.isMine(this.el) && !NAF.utils.takeOwnership(this.el)) return;
+
     this.el.setAttribute("camera-tool", "isSnapping", true);
     this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_COUNTDOWN);
 
@@ -257,122 +262,15 @@ AFRAME.registerComponent("camera-tool", {
       this.snapCountdown--;
 
       if (this.snapCountdown === 0) {
+        clearInterval(this.countdownInterval);
+        this.countdownInterval = null;
+
         if (this.data.captureDuration === 0) {
           this.el.setAttribute("camera-tool", { label: "", isSnapping: false });
           this.takeSnapshotNextTick = true;
         } else {
-          // Begin sampling local audio so we can perform head scaling
-          this.el.sceneEl.setAttribute("local-audio-analyser", { analyze: true });
-
-          const stream = new MediaStream();
-          const track = videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
-
-          if (this.data.captureAudio) {
-            const context = THREE.AudioContext.getContext();
-            const destination = context.createMediaStreamDestination();
-
-            const listener = this.el.sceneEl.audioListener;
-            if (listener) {
-              // NOTE audio is not captured from camera vantage point for now.
-              listener.getInput().connect(destination);
-            }
-
-            const selfAudio = await NAF.connection.adapter.getMediaStream(NAF.clientId, "audio");
-            if (selfAudio) {
-              context.createMediaStreamSource(selfAudio).connect(destination);
-            }
-
-            const audio = destination.stream.getAudioTracks()[0];
-            stream.addTrack(audio);
-          }
-
-          stream.addTrack(track);
-          this.videoRecorder = new MediaRecorder(stream, { mimeType: videoMimeType });
-          const chunks = [];
-          const recordingStartTime = performance.now();
-
-          this.videoRecorder.ondataavailable = e => chunks.push(e.data);
-          this.videoRecorder._free = () => (chunks.length = 0); // Used for cancelling
-          this.videoRecorder.onstop = async () => {
-            if (chunks.length === 0) return;
-            const mimeType = chunks[0].type;
-            let blob;
-
-            const recordingDuration = performance.now() - recordingStartTime;
-
-            if (browser.name === "chrome") {
-              // HACK, on chrome, webms are unseekable and so can't be played by some browsers like
-              // Oculus Browser so use https://github.com/legokichi/ts-ebml
-              const decoder = new ebml.Decoder();
-              const reader = new ebml.Reader();
-              reader.logging = false;
-              reader.drop_default_duration = false;
-
-              for (let i = 0; i < chunks.length; i++) {
-                const buf = new Buffer(await new Response(chunks[i]).arrayBuffer());
-                decoder.decode(buf).forEach(e => reader.read(e));
-              }
-
-              reader.stop();
-
-              const seekableMeta = ebml.tools.makeMetadataSeekable(reader.metadatas, reader.duration, reader.cues);
-              const body = new Buffer(await new Response(chunks[0]).arrayBuffer()).slice(reader.metadataSize);
-              const refined = new Buffer(ebml.tools.concat([new Buffer(seekableMeta), body]).buffer);
-              blob = new Blob([refined], { type: mimeType });
-            } else {
-              blob = new Blob(chunks, { type: mimeType });
-            }
-
-            chunks.length = 0;
-
-            const { entity, orientation } = spawnMediaAround(
-              this.el,
-              new File([blob], "capture", { type: mimeType }),
-              this.localSnapCount,
-              "video",
-              true
-            );
-
-            // To limit the # of concurrent videos playing, if it was a short clip, let it loop
-            // a few times and then pause it.
-            if (recordingDuration <= MAX_DURATION_TO_LIMIT_LOOPS * 1000) {
-              setTimeout(
-                () => entity.components["media-video"].tryUpdateVideoPlaybackState(true),
-                recordingDuration * VIDEO_LOOPS + 100
-              );
-            }
-
-            this.localSnapCount++;
-
-            orientation.then(() => {
-              this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
-            });
-          };
-
-          this.updateRenderTargetNextTick = true;
-
-          this.videoRecorder.start();
-          this.el.setAttribute("camera-tool", "isRecording", true);
-
-          if (this.data.captureDuration !== Infinity) {
-            this.videoCountdown = this.data.captureDuration;
-            this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
-
-            this.videoCountdownInterval = setInterval(() => {
-              this.videoCountdown--;
-
-              if (this.videoCountdown === 0) {
-                this.stopRecording();
-                this.videoCountdownInterval = null;
-              } else {
-                this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
-              }
-            }, 1000);
-          }
+          this.beginRecording(this.data.captureDuration);
         }
-
-        clearInterval(this.countdownInterval);
-        this.countdownInterval = null;
       } else {
         this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_COUNTDOWN);
         this.el.setAttribute("camera-tool", "label", `${this.snapCountdown}`);
@@ -426,6 +324,101 @@ AFRAME.registerComponent("camera-tool", {
     this.captureAudioButton.setAttribute("icon-button", "active", this.data.captureAudio);
   },
 
+  async beginRecording(duration) {
+    // Begin sampling local audio so we can perform head scaling
+    this.el.sceneEl.setAttribute("local-audio-analyser", { analyze: true });
+
+    const stream = new MediaStream();
+    const track = videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
+
+    if (this.data.captureAudio) {
+      const context = THREE.AudioContext.getContext();
+      const destination = context.createMediaStreamDestination();
+
+      const listener = this.el.sceneEl.audioListener;
+      if (listener) {
+        // NOTE audio is not captured from camera vantage point for now.
+        listener.getInput().connect(destination);
+      }
+
+      const selfAudio = await NAF.connection.adapter.getMediaStream(NAF.clientId, "audio");
+      if (selfAudio) {
+        context.createMediaStreamSource(selfAudio).connect(destination);
+      }
+
+      const audio = destination.stream.getAudioTracks()[0];
+      stream.addTrack(audio);
+    }
+
+    stream.addTrack(track);
+    this.videoRecorder = new MediaRecorder(stream, { mimeType: videoMimeType });
+    const chunks = [];
+    const recordingStartTime = performance.now();
+
+    this.videoRecorder.ondataavailable = e => chunks.push(e.data);
+    this.videoRecorder._free = () => (chunks.length = 0); // Used for cancelling
+    this.videoRecorder.onstop = async () => {
+      if (chunks.length === 0) return;
+      const mimeType = chunks[0].type;
+      let blob;
+
+      const recordingDuration = performance.now() - recordingStartTime;
+
+      if (browser.name === "chrome") {
+        // HACK, on chrome, webms are unseekable and so can't be played by some browsers like
+        // Oculus Browser so use https://github.com/legokichi/ts-ebml
+        const seekable = await convertWebMChunksToSeekable(chunks);
+        blob = new Blob([seekable], { type: mimeType });
+      } else {
+        blob = new Blob(chunks, { type: mimeType });
+      }
+
+      chunks.length = 0;
+
+      const { entity, orientation } = spawnMediaAround(
+        this.el,
+        new File([blob], "capture", { type: mimeType }),
+        this.localSnapCount,
+        "video",
+        true
+      );
+
+      // To limit the # of concurrent videos playing, if it was a short clip, let it loop
+      // a few times and then pause it.
+      if (recordingDuration <= MAX_DURATION_TO_LIMIT_LOOPS * 1000) {
+        setTimeout(
+          () => entity.components["media-video"].tryUpdateVideoPlaybackState(true),
+          recordingDuration * VIDEO_LOOPS + 100
+        );
+      }
+
+      this.localSnapCount++;
+
+      orientation.then(() => this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA }));
+    };
+
+    this.updateRenderTargetNextTick = true;
+
+    this.videoRecorder.start();
+    this.el.setAttribute("camera-tool", "isRecording", true);
+
+    if (duration !== Infinity) {
+      this.videoCountdown = this.data.captureDuration;
+      this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
+
+      this.videoCountdownInterval = setInterval(() => {
+        this.videoCountdown--;
+
+        if (this.videoCountdown === 0) {
+          this.stopRecording();
+          this.videoCountdownInterval = null;
+        } else {
+          this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
+        }
+      }, 1000);
+    }
+  },
+
   stopRecording(cancel) {
     if (this.videoRecorder) {
       if (cancel) {
@@ -435,6 +428,7 @@ AFRAME.registerComponent("camera-tool", {
 
       this.videoRecorder.stop();
       this.videoRecorder = null;
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
     }
     clearInterval(this.videoCountdownInterval);
 
@@ -476,23 +470,28 @@ AFRAME.registerComponent("camera-tool", {
       this.updateRenderTargetNextTick = true;
     }
 
-    let grabberId;
-    if (heldRightHand) {
-      grabberId = "player-right-controller";
-    } else if (heldLeftHand) {
-      grabberId = "player-left-controller";
-    } else if (heldRightRemote) {
-      grabberId = "cursor";
-    }
-    if (grabberId) {
-      const grabberPaths = pathsMap[grabberId];
-      if (userinput.get(grabberPaths.takeSnapshot)) {
-        this.beginSnapping();
-      }
-    }
+    const isHoldingTrigger = this.isHoldingSnapshotTrigger();
 
-    if (userinput.get(paths.actions.takeSnapshot)) {
-      this.beginSnapping();
+    // If the user lets go of the trigger before 500ms, take a picture, otherwise record until they let go.
+    if (isHoldingTrigger && !this.data.isSnapping && !this.snapTriggerTimeout) {
+      this.snapTriggerTimeout = setTimeout(() => {
+        if (this.isHoldingSnapshotTrigger()) {
+          this.el.setAttribute("camera-tool", "isSnapping", true);
+          this.beginRecording(Infinity);
+
+          const releaseInterval = setInterval(() => {
+            if (this.isHoldingSnapshotTrigger()) return;
+            this.stopRecording();
+            clearInterval(releaseInterval);
+          }, 500);
+        }
+
+        this.snapTriggerTimeout = null;
+      }, 500);
+    } else if (!isHoldingTrigger && !this.data.isSnapping && this.snapTriggerTimeout) {
+      clearTimeout(this.snapTriggerTimeout);
+      this.snapTriggerTimeout = null;
+      this.takeSnapshotNextTick = true;
     }
   },
 
@@ -629,5 +628,31 @@ AFRAME.registerComponent("camera-tool", {
         this.localSnapCount++;
       }
     };
-  })()
+  })(),
+
+  isHoldingSnapshotTrigger: function() {
+    const interaction = AFRAME.scenes[0].systems.interaction;
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    const heldLeftHand = interaction.state.leftHand.held === this.el;
+    const heldRightHand = interaction.state.rightHand.held === this.el;
+    const heldRightRemote = interaction.state.rightRemote.held === this.el;
+
+    let grabberId;
+    if (heldRightHand) {
+      grabberId = "player-right-controller";
+    } else if (heldLeftHand) {
+      grabberId = "player-left-controller";
+    } else if (heldRightRemote) {
+      grabberId = "cursor";
+    }
+
+    if (grabberId) {
+      const grabberPaths = pathsMap[grabberId];
+      if (userinput.get(grabberPaths.takeSnapshot)) {
+        return true;
+      }
+    }
+
+    return !!userinput.get(paths.actions.takeSnapshot);
+  }
 });
