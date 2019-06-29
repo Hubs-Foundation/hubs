@@ -45,15 +45,6 @@ const VIDEO_LOOPS = 3; // Number of times to loop the videos we spawn before sto
 const MAX_DURATION_TO_LIMIT_LOOPS = 31; // Max duration for which we limit loops (eg GIFs vs long form videos)
 
 const snapCanvas = document.createElement("canvas");
-const videoCanvas = document.createElement("canvas");
-
-videoCanvas.width = CAPTURE_WIDTH;
-videoCanvas.height = CAPTURE_HEIGHT;
-
-const videoContext = videoCanvas.getContext("2d");
-const videoImageData = videoContext.createImageData(CAPTURE_WIDTH, CAPTURE_HEIGHT);
-const videoPixels = new Uint8Array(CAPTURE_WIDTH * CAPTURE_HEIGHT * 4);
-videoImageData.data.set(videoPixels);
 
 async function pixelsToPNG(pixels, width, height) {
   snapCanvas.width = width;
@@ -209,6 +200,7 @@ AFRAME.registerComponent("camera-tool", {
   remove() {
     this.cameraSystem.deregister(this.el);
     this.el.sceneEl.emit("camera_removed");
+    this.stopRecording();
   },
 
   updateViewport() {
@@ -328,11 +320,20 @@ AFRAME.registerComponent("camera-tool", {
   },
 
   async beginRecording(duration) {
+    if (!this.videoContext) {
+      this.videoCanvas.width = CAPTURE_WIDTH;
+      this.videoCanvas.height = CAPTURE_HEIGHT;
+      this.videoContext = this.videoCanvas.getContext("2d");
+      this.videoImageData = this.videoContext.createImageData(CAPTURE_WIDTH, CAPTURE_HEIGHT);
+      this.videoPixels = new Uint8Array(CAPTURE_WIDTH * CAPTURE_HEIGHT * 4);
+      this.videoImageData.data.set(this.videoPixels);
+    }
+
     // Begin sampling local audio so we can perform head scaling
     this.el.sceneEl.setAttribute("local-audio-analyser", { analyze: true });
 
     const stream = new MediaStream();
-    const track = videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
+    const track = this.videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
 
     if (this.data.captureAudio) {
       const context = THREE.AudioContext.getContext();
@@ -607,9 +608,16 @@ AFRAME.registerComponent("camera-tool", {
             CAPTURE_WIDTH,
             0
           );
-          renderer.readRenderTargetPixels(this.videoRenderTarget, 0, 0, CAPTURE_WIDTH, CAPTURE_HEIGHT, videoPixels);
-          videoImageData.data.set(videoPixels);
-          videoContext.putImageData(videoImageData, 0, 0);
+          renderer.readRenderTargetPixels(
+            this.videoRenderTarget,
+            0,
+            0,
+            CAPTURE_WIDTH,
+            CAPTURE_HEIGHT,
+            this.videoPixels
+          );
+          this.videoImageData.data.set(this.videoPixels);
+          this.videoContext.putImageData(this.videoImageData, 0, 0);
         }
 
         this.updateRenderTargetNextTick = false;
