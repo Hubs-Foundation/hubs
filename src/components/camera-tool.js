@@ -370,8 +370,7 @@ AFRAME.registerComponent("camera-tool", {
       const recordingDuration = performance.now() - recordingStartTime;
 
       if (browser.name === "chrome") {
-        // HACK, on chrome, webms are unseekable and so can't be played by some browsers like
-        // Oculus Browser so use https://github.com/legokichi/ts-ebml
+        // HACK, on chrome, webms are unseekable
         const seekable = await convertWebMChunksToSeekable(chunks);
         blob = new Blob([seekable], { type: mimeType });
       } else {
