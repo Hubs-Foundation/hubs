@@ -102,17 +102,6 @@ AFRAME.registerComponent("camera-tool", {
       stencil: false
     });
 
-    // Create a separate render target for video becuase we need to flip and (sometimes) downscale it before
-    // encoding it to video.
-    this.videoRenderTarget = new THREE.WebGLRenderTarget(CAPTURE_WIDTH, CAPTURE_HEIGHT, {
-      format: THREE.RGBAFormat,
-      minFilter: THREE.LinearFilter,
-      magFilter: THREE.NearestFilter,
-      encoding: THREE.sRGBEncoding,
-      depth: false,
-      stencil: false
-    });
-
     this.camera = new THREE.PerspectiveCamera(50, RENDER_WIDTH / RENDER_HEIGHT, 0.1, 30000);
     this.camera.rotation.set(0, Math.PI, 0);
     this.camera.position.set(0, 0, 0.05);
@@ -564,10 +553,19 @@ AFRAME.registerComponent("camera-tool", {
         delete sceneEl.object3D.onAfterRender;
         renderer.vr.enabled = false;
 
-        // HACK this sets up the framebuffer for the video render target
-        if (!this.hasSetupVideoRenderTarget) {
+        if (allowVideo && this.videoRecorder && !this.videoRenderTarget) {
+          // Create a separate render target for video becuase we need to flip and (sometimes) downscale it before
+          // encoding it to video.
+          this.videoRenderTarget = new THREE.WebGLRenderTarget(CAPTURE_WIDTH, CAPTURE_HEIGHT, {
+            format: THREE.RGBAFormat,
+            minFilter: THREE.LinearFilter,
+            magFilter: THREE.NearestFilter,
+            encoding: THREE.sRGBEncoding,
+            depth: false,
+            stencil: false
+          });
+
           renderer.setRenderTarget(this.videoRenderTarget);
-          this.hasSetupVideoRenderTarget = true;
         }
 
         renderer.setRenderTarget(this.renderTarget);
