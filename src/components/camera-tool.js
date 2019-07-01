@@ -505,7 +505,6 @@ AFRAME.registerComponent("camera-tool", {
 
   tock: (function() {
     const tempHeadScale = new THREE.Vector3();
-    let hasSetupVideoRenderTarget = false;
 
     return function tock() {
       const sceneEl = this.el.sceneEl;
@@ -570,9 +569,9 @@ AFRAME.registerComponent("camera-tool", {
         renderer.vr.enabled = false;
 
         // HACK this sets up the framebuffer for the video render target
-        if (!hasSetupVideoRenderTarget) {
+        if (!this.hasSetupVideoRenderTarget) {
           renderer.setRenderTarget(this.videoRenderTarget);
-          hasSetupVideoRenderTarget = true;
+          this.hasSetupVideoRenderTarget = true;
         }
 
         renderer.setRenderTarget(this.renderTarget);
