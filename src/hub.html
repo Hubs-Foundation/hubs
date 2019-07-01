@@ -438,10 +438,20 @@
                             ></a-entity>
                         </a-entity>
                         <a-entity class="prev-duration" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.135 -0.15 0.075" scale="0.5 0.5 0.5">
-                            <a-entity text=" value:<; width:2; align:center; color:#ff3464" text-raycast-hack position="0 0 0.01"></a-entity>
+                            <a-entity
+                                sprite
+                                icon-button="image: prev.png; hoverImage: prev.png;"
+                                scale="0.075 0.075 0.075"
+                                position="0 0 0.01"
+                            ></a-entity>
                         </a-entity>
                         <a-entity class="next-duration" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0.135 -0.15 0.075" scale="0.5 0.5 0.5">
-                            <a-entity text=" value:>; width:2; align:center; color:#ff3464" text-raycast-hack position="0 0 0.01"></a-entity>
+                            <a-entity
+                                sprite
+                                icon-button="image: next.png; hoverImage: next.png;"
+                                scale="0.075 0.075 0.075"
+                                position="0 0 0.01"
+                            ></a-entity>
                         </a-entity>
                         <a-entity class="stop-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0.15 0.08" scale="0.75 0.75 0.75">
                             <a-entity
@@ -499,13 +509,23 @@
                 <a-entity class="ui paging-toolbar" visibility-while-frozen="withinDistance: 10; requireHoverOnNonMobile: false;">
                     <a-entity class="prev-button" position="-0.3 0 0">
                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.2">
-                            <a-entity text=" value:<; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                            <a-entity
+                                sprite
+                                icon-button="image: prev.png; hoverImage: prev.png;"
+                                scale="0.075 0.075 0.075"
+                                position="0 0 0.01"
+                            ></a-entity>
                         </a-entity>
                     </a-entity>
                     <a-entity class="page-label" text="value:.; width:2; align:center;" text-raycast-hack></a-entity>
                     <a-entity class="next-button" position="0.3 0 0">
                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.2">
-                            <a-entity text=" value:>; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                            <a-entity
+                                sprite
+                                icon-button="image: next.png; hoverImage: next.png;"
+                                scale="0.075 0.075 0.075"
+                                position="0 0 0.01"
+                            ></a-entity>
                         </a-entity>
                     </a-entity>
                 </a-entity>
