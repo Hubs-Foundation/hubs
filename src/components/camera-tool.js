@@ -405,7 +405,7 @@ AFRAME.registerComponent("camera-tool", {
     this.updateRenderTargetNextTick = true;
 
     this.videoRecorder.start();
-    this.el.setAttribute("camera-tool", "isRecording", true);
+    this.el.setAttribute("camera-tool", { isRecording: true, label: " " });
 
     if (duration !== Infinity) {
       this.videoCountdown = this.data.captureDuration;
