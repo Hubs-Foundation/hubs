@@ -34,8 +34,8 @@ const videoCodec = ["h264", "vp9", "vp8"].find(codec => MediaRecorder.isTypeSupp
 const videoMimeType = videoCodec ? `video/webm; codecs=${videoCodec}` : null;
 const allowVideo = !!videoMimeType && !isOculusBrowser; // Disable Oculus Browser until h264/vp8 fixed
 
-const CAPTURE_WIDTH = isOculusBrowser ? 320 : 1280; // NOTE: Oculus Browser can't record bigger videos atm
-const CAPTURE_HEIGHT = isOculusBrowser ? 180 : 720;
+const CAPTURE_WIDTH = isOculusBrowser ? 320 : 640; // NOTE: Oculus Browser can't record bigger videos atm
+const CAPTURE_HEIGHT = isOculusBrowser ? 180 : 360;
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
 const CAPTURE_DURATIONS = allowVideo ? [0, Infinity, 3, 7, 15, 30, 60] : [0];
