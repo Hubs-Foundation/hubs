@@ -1,3 +1,4 @@
+// Monkey patches three.js to stop doing texture uploads for paused videos
 THREE.VideoTexture.prototype.update = function() {
   const video = this.image;
   const paused = video.paused;
