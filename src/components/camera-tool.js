@@ -565,6 +565,7 @@ AFRAME.registerComponent("camera-tool", {
             stencil: false
           });
 
+          // Used to set up framebuffer in three.js as a side effect
           renderer.setRenderTarget(this.videoRenderTarget);
         }
 
