@@ -30,7 +30,9 @@ const isOculusBrowser = navigator.userAgent.match(/Oculus/);
 const VIEWPORT_FPS = 6;
 const VIDEO_FPS = 25;
 // Prefer h264 if available due to faster decoding speec on most platforms
-const videoCodec = ["h264", "vp9", "vp8"].find(codec => MediaRecorder.isTypeSupported(`video/webm; codecs=${codec}`));
+const videoCodec = ["h264", "vp9", "vp8"].find(
+  codec => window.MediaRecorder && MediaRecorder.isTypeSupported(`video/webm; codecs=${codec}`)
+);
 const videoMimeType = videoCodec ? `video/webm; codecs=${videoCodec}` : null;
 const allowVideo = !!videoMimeType && !isOculusBrowser; // Disable Oculus Browser until h264/vp8 fixed
 
