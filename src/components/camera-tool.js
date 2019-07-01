@@ -537,14 +537,11 @@ AFRAME.registerComponent("camera-tool", {
         if (this.playerHead) {
           tempHeadScale.copy(this.playerHead.scale);
 
-          // We want to scale our own head now that we're taking a video/photo.
-          //
-          // NOTE this assumes the player has a head with scale-audio-feedback, will need to revisit this for
-          // custom avatars.
+          // We want to scale our own head in between frames now that we're taking a video/photo.
           let scale = 1;
           const analyser = this.el.sceneEl.systems["local-audio-analyser"];
 
-          if (analyser && analyser.data.analyze) {
+          if (analyser && analyser.data.analyze && this.playerHead.el.components["scale-audio-feedback"]) {
             scale = getAudioFeedbackScale(this.el.object3D, this.playerHead, 1, 2, analyser.volume);
           }
 
