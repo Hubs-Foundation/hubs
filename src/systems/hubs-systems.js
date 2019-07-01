@@ -8,71 +8,68 @@ import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
 import { RenderManagerSystem } from "./render-manager-system";
 
-export const vertexShader = `#version 300 es
-precision highp float;
-precision highp int;
-
-uniform mat4 projectionMatrix;
-uniform mat4 modelViewMatrix;
-
-in vec3 position;
-
-void main() {
-  gl_Position = (projectionMatrix * modelViewMatrix * vec4(position, 1.0)) - vec4(0,0,0.00002, 0);
-}
-`;
-
-export const fragmentShader = `#version 300 es
-precision highp float;
-precision highp int;
-
-out vec4 outColor;
-
-void main() {
-  outColor = vec4(0.5,0.5,1, 0.5);
-}
-`;
+import vertexShader from "./highlight/highlight.vert";
+import fragmentShader from "./highlight/highlight.frag";
 
 class HoverVisualsSystem {
   constructor(scene) {
-    // const geometry = new THREE.BufferGeometry();
-    const geometry = new THREE.BoxBufferGeometry();
-    const material = new THREE.RawShaderMaterial({ vertexShader, fragmentShader });
-    // const material = new THREE.MeshStandardMaterial();
-    material.transparent = true;
-    material.depthFunc = THREE.LessEqualDepth;
-    material.depthWrite = false;
-    // material.depthTest = false;
-    // material.color.set(0, 0, 0);
-    console.log(material);
+    const geometry = new THREE.BufferGeometry();
 
     this.meshes = [];
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 3; i++) {
+      const material = new THREE.RawShaderMaterial({
+        vertexShader,
+        fragmentShader,
+        transparent: true,
+        depthWrite: false,
+        uniforms: {
+          hubs_Time: { value: 0 },
+          hubs_SweepParams: { value: [0, 0] }
+        }
+      });
       const mesh = new THREE.Mesh(geometry, material);
-      // this.mesh.matrixWorld = new THREE.Matrix4();
       mesh.matrixIsModified = true;
-      // this.mesh.visible = false;
+      mesh.visible = false;
       scene.add(mesh);
       this.meshes.push(mesh);
     }
-    this.curMesh = 0;
   }
 
-  tick() {
-    const interaction = AFRAME.scenes[0].systems.interaction;
-    const hovered = interaction.state.rightRemote.hovered;
-    this.curMesh = 0;
-    if (hovered && hovered.object3D && hovered.components["hoverable-visuals"]) {
-      hovered.object3D.traverse(o => {
+  updateMesh(mesh, interactor, time) {
+    let meshToHighlight;
+    const { hovered, held } = interactor;
+    if (
+      (hovered && hovered.object3D && hovered.components["hoverable-visuals"]) ||
+      (held && held.object3D && held.components["hoverable-visuals"])
+    ) {
+      (hovered || held).object3D.traverseVisible(o => {
         if (!o.isMesh) return;
-        const mesh = this.meshes[this.curMesh++ % this.meshes.length];
-        const hoveredMesh = o; //= hovered.object3DMap.mesh.children[1].children[1].children[0];
-        // hoveredMesh.visible = false;
-        // console.log(this.mesh, hovered, hoveredMesh, hovered.object3D);
-        mesh.geometry = hoveredMesh.geometry;
-        mesh.matrixWorld.copy(hoveredMesh.matrixWorld);
+        meshToHighlight = o;
       });
     }
+
+    if (meshToHighlight) {
+      mesh.visible = true;
+      mesh.geometry = meshToHighlight.geometry;
+      mesh.matrixWorld.copy(meshToHighlight.matrixWorld);
+
+      const worldY = mesh.matrixWorld.elements[13];
+      if (!meshToHighlight.geometry.boundingSphere) meshToHighlight.geometry.computeBoundingSphere();
+      const scaledRadius = hovered.object3D.scale.y * meshToHighlight.geometry.boundingSphere.radius;
+      mesh.material.uniforms.hubs_SweepParams.value[0] = worldY - scaledRadius;
+      mesh.material.uniforms.hubs_SweepParams.value[1] = worldY + scaledRadius;
+    } else {
+      mesh.visible = false;
+    }
+
+    mesh.material.uniforms.hubs_Time.value = time;
+  }
+
+  tick(time) {
+    const interaction = AFRAME.scenes[0].systems.interaction;
+    this.updateMesh(this.meshes[0], interaction.state.rightRemote, time);
+    this.updateMesh(this.meshes[1], interaction.state.rightHand, time);
+    this.updateMesh(this.meshes[2], interaction.state.leftHand, time);
   }
 }
 
