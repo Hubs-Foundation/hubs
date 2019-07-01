@@ -151,17 +151,6 @@ class TopHUD extends Component {
           <FormattedMessage id={`tips.${this.props.activeTip}`} />
         </div>
       );
-    } else if (this.props.isStreaming && this.props.showStreamingTip) {
-      tip = (
-        <div className={cx([styles.topTip])}>
-          <button className={styles.tipCancel} onClick={this.props.hideStreamingTip}>
-            <i>
-              <FontAwesomeIcon icon={faTimes} />
-            </i>
-          </button>
-          <FormattedMessage id={`tips.streaming`} />
-        </div>
-      );
     }
 
     // Hide buttons when frozen.

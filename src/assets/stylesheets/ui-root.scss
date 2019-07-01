@@ -1,5 +1,37 @@
 @import 'shared';
 
+:local(.streaming-tip-container) {
+  display: flex;
+  :local(.streaming-tip) {
+    margin-left: 70px;
+    margin-top: 20px;
+    background-color: $bright-blue;
+    padding: 12px 24px;
+    border-radius: 28px;
+    display: flex;
+    pointer-events: auto;
+    max-width: 30%;
+    text-align: center;
+
+    :local(.streaming-tip-close){
+      width: 32px;
+      margin-right: 2px;
+      margin-left: -16px;
+      border: none;
+      cursor: pointer;
+      background: transparent;
+      color: $light-blue;
+    }
+    :local(.streaming-tip-message){
+      color: white;
+      user-select: text;
+      display: flex;
+      flex-flow: column;
+    }
+  }
+}
+
+
 :local(.ui) {
   @extend %default-font;
   @extend %unselectable;
@@ -157,6 +189,7 @@ body.vr-mode {
   padding: 10px 12px;
   pointer-events: auto;
   cursor: pointer;
+  border: none;
 }
 
 :local(.settings-info-selected) {

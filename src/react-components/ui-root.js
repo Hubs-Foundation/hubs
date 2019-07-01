@@ -1394,13 +1394,37 @@ class UIRoot extends Component {
       : null;
 
     const streaming = this.state.isStreaming;
+    const streamingTip =
+      streaming && this.state.showStreamingTip ? (
+        <div className={classNames([styles.streamingTipContainer])}>
+          <div className={classNames([styles.streamingTip])}>
+            <button
+              title="Dismiss this tip"
+              className={styles.streamingTipClose}
+              onClick={() => {
+                this.setState({ showStreamingTip: false });
+              }}
+            >
+              <i>
+                <FontAwesomeIcon icon={faTimes} />
+              </i>
+            </button>
+
+            <div className={styles.streamingTipMessage}>
+              <FormattedMessage id={`tips.streaming`} />
+              <FormattedMessage id={`tips.streaming2`} />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div />
+      );
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
           <div className={classNames(rootStyles)}>
             {this.state.dialog}
-
             {preload && (
               <PreloadOverlay
                 hubName={this.props.hubName}
@@ -1782,21 +1806,24 @@ class UIRoot extends Component {
                 />
               )}
             />
-
             {streaming ? (
-              <button
-                onClick={() => {
-                  this.toggleStreamerMode(false);
-                }}
-                className={classNames({
-                  [styles.settingsInfo]: true,
-                  [styles.settingsInfoSelected]: this.state.showSettingsMenu
-                })}
-              >
-                <i title="Exit Streamer mode">
-                  <FontAwesomeIcon icon={faTimes} />
-                </i>
-              </button>
+              <div>
+                <button
+                  title="Exit Streamer Mode"
+                  onClick={() => {
+                    this.toggleStreamerMode(false);
+                  }}
+                  className={classNames({
+                    [styles.settingsInfo]: true,
+                    [styles.settingsInfoSelected]: this.state.showSettingsMenu
+                  })}
+                >
+                  <i>
+                    <FontAwesomeIcon icon={faTimes} />
+                  </i>
+                </button>
+                {streamingTip}
+              </div>
             ) : (
               !preload && (
                 <div
