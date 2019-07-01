@@ -1405,9 +1405,7 @@ class UIRoot extends Component {
                 this.setState({ showStreamingTip: false });
               }}
             >
-              <i>
-                <FontAwesomeIcon icon={faTimes} />
-              </i>
+              <FontAwesomeIcon icon={faTimes} />
             </button>
 
             <div className={styles.streamingTipMessage}>

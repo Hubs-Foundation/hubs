@@ -2,8 +2,9 @@ import { setMatrixWorld } from "../utils/three-utils";
 
 export function getStreamer() {
   if (!window.APP) return null;
-  window.APP.playerInfos = window.APP.playerInfos || [];
-  const playerInfos = window.APP.playerInfos;
+  window.APP.componentArrays = window.APP.componentArrays || {};
+  window.APP.componentArrays.playerInfos = window.APP.componentArrays.playerInfos || [];
+  const playerInfos = window.APP.componentArrays.playerInfos;
   for (let i = 0; i < playerInfos.length; i++) {
     const playerInfo = playerInfos[i].components["player-info"];
     if (playerInfo.data.isStreaming) {

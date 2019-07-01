@@ -57,11 +57,12 @@ AFRAME.registerComponent("player-info", {
         }
       });
     }
-    window.APP.playerInfos = window.APP.playerInfos || [];
-    window.APP.playerInfos.push(this.el);
+    window.APP.componentArrays = window.APP.componentArrays || {};
+    window.APP.componentArrays.playerInfos = window.APP.componentArrays.playerInfos || [];
+    window.APP.componentArrays.playerInfos.push(this.el);
   },
   remove() {
-    window.APP.playerInfos.splice(window.APP.playerInfos.indexOf(this.el), 1);
+    window.APP.componentArrays.playerInfos.splice(window.APP.componentArrays.playerInfos.indexOf(this.el), 1);
   },
   play() {
     this.el.addEventListener("model-loaded", this.applyProperties);
