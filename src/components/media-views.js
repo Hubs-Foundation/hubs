@@ -58,6 +58,18 @@ class GIFTexture extends THREE.Texture {
   }
 }
 
+class UpdatingCanvasTexture extends THREE.Texture {
+  constructor(canvas) {
+    super(canvas);
+    this.isVideoTexture = true;
+    this.canvas = canvas;
+  }
+
+  update() {
+    this.needsUpdate = true;
+  }
+}
+
 async function createGIFTexture(url) {
   return new Promise((resolve, reject) => {
     fetch(url, { mode: "cors" })
@@ -94,8 +106,14 @@ const isIOS = AFRAME.utils.device.isIOS();
  * @param {string} src - Url to a video file.
  * @returns {Element} Video element.
  */
-async function createVideoEl() {
-  const videoEl = document.createElement("video");
+async function createVideoEl(audioDestination) {
+  //const videoEl = document.createElement("video");
+  const videoEl = new OGVPlayer({
+    enableWebM: true,
+    webGL: true,
+    audioContext: document.querySelector("a-scene").audioListener.context,
+    audioDestination
+  });
   videoEl.setAttribute("playsinline", "");
   videoEl.setAttribute("webkit-playsinline", "");
   // iOS Safari requires the autoplay attribute, or it won't play the video at all.
@@ -109,11 +127,12 @@ async function createVideoEl() {
   return videoEl;
 }
 
-function createVideoTexture(url, contentType) {
+function createVideoTexture(url, contentType, audioDestination) {
   return new Promise(async (resolve, reject) => {
-    const videoEl = await createVideoEl();
+    const videoEl = await createVideoEl(audioDestination);
 
-    const texture = new THREE.VideoTexture(videoEl);
+    const canvas = videoEl.querySelector("canvas");
+    const texture = new UpdatingCanvasTexture(canvas);
     texture.minFilter = THREE.LinearFilter;
     texture.encoding = THREE.sRGBEncoding;
 
@@ -164,12 +183,14 @@ function createVideoTexture(url, contentType) {
       } else if (videoEl.canPlayType(contentType)) {
         videoEl.src = url;
         videoEl.onerror = reject;
+        videoEl.load();
       } else {
         reject("HLS unsupported");
       }
     } else {
       videoEl.src = url;
       videoEl.onerror = reject;
+      videoEl.load();
     }
 
     let hasResolved = false;
@@ -183,17 +204,17 @@ function createVideoTexture(url, contentType) {
     videoEl.addEventListener("canplay", resolveOnce, { once: true });
 
     // HACK: Sometimes iOS fails to fire the canplay event, so we poll for the video dimensions to appear instead.
-    if (isIOS) {
-      const poll = () => {
-        if ((texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width)) {
-          resolveOnce();
-        } else {
-          setTimeout(poll, 500);
-        }
-      };
+    //if (isIOS) {
+    const poll = () => {
+      if ((texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width)) {
+        resolveOnce();
+      } else {
+        setTimeout(poll, 500);
+      }
+    };
 
-      poll();
-    }
+    poll();
+    //}
   });
 }
 
@@ -508,9 +529,9 @@ AFRAME.registerComponent("media-video", {
       this.video.pause();
     } else {
       // Need to deal with the fact play() may fail if user has not interacted with browser yet.
-      this.video.play().catch(() => {
+      this.video.play(); /*.catch(() => {
         this._playbackStateChangeTimeout = setTimeout(() => this.tryUpdateVideoPlaybackState(pause, currentTime), 1000);
-      });
+      });*/
     }
   },
 
@@ -533,17 +554,9 @@ AFRAME.registerComponent("media-video", {
 
     let texture;
     try {
-      texture = await createVideoTexture(src, this.data.contentType);
-
-      // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
-      if (this.data.src !== src) {
-        disposeTexture(texture);
-        return;
-      }
-
       if (!src.startsWith("hubs://")) {
         // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
-        texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
+        //this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
 
         if (this.data.audioType === "pannernode") {
           this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
@@ -558,11 +571,24 @@ AFRAME.registerComponent("media-video", {
           this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
         }
 
-        this.audio.setNodeSource(texture.audioSource);
         this.el.setObject3D("sound", this.audio);
       }
 
-      this.video = texture.image;
+      texture = await createVideoTexture(src, this.data.contentType, this.audio.panner || this.audio.gain);
+      console.log("created");
+
+      if (!src.startsWith("hubs://")) {
+        //texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
+        //this.audio.setNodeSource(texture.audioSource);
+      }
+
+      // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
+      if (this.data.src !== src) {
+        disposeTexture(texture);
+        return;
+      }
+
+      this.video = texture.canvas;
       this.video.loop = this.data.loop;
       this.video.addEventListener("pause", this.onPauseStateChange);
       this.video.addEventListener("play", this.onPauseStateChange);
@@ -618,7 +644,7 @@ AFRAME.registerComponent("media-video", {
     this.mesh.material.needsUpdate = true;
 
     if (projection === "flat") {
-      scaleToAspectRatio(this.el, texture.image.videoHeight / texture.image.videoWidth);
+      //scaleToAspectRatio(this.el, this.video.videoHeight / this.video.videoWidth);
     }
 
     this.updatePlaybackState(true);
