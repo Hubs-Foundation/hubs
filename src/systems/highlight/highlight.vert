@@ -5,7 +5,6 @@ precision highp int;
 uniform mat4 projectionMatrix;
 uniform mat4 modelViewMatrix;
 uniform mat4 modelMatrix;
-uniform float hubs_Time;
 
 in vec3 position;
 out vec3 hubs_WorldPosition;

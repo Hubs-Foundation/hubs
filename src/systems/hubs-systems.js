@@ -7,69 +7,55 @@ import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
 import { RenderManagerSystem } from "./render-manager-system";
+// import HoverVisualsSystem from "./highlight/hover-visuas-system";
 
-import vertexShader from "./highlight/highlight.vert";
-import fragmentShader from "./highlight/highlight.frag";
+export default class HoverVisualsSystem {
+  constructor() {
+    this.prevHighlights = {
+      rightRemote: {
+        entity: null,
+        meshes: []
+      },
+      rightHand: {
+        entity: null,
+        meshes: []
+      },
+      leftHand: {
+        entity: null,
+        meshes: []
+      }
+    };
+  }
 
-class HoverVisualsSystem {
-  constructor(scene) {
-    const geometry = new THREE.BufferGeometry();
+  updateMesh(hand) {
+    const interactionSystem = AFRAME.scenes[0].systems.interaction;
+    const interaction = interactionSystem.state[hand];
 
-    this.meshes = [];
-    for (let i = 0; i < 3; i++) {
-      const material = new THREE.RawShaderMaterial({
-        vertexShader,
-        fragmentShader,
-        transparent: true,
-        depthWrite: false,
-        uniforms: {
-          hubs_Time: { value: 0 },
-          hubs_SweepParams: { value: [0, 0] }
-        }
+    const entity = interaction.hovered || interaction.held;
+    if (entity != this.prevHighlights[hand].entity) {
+      this.prevHighlights[hand].meshes.forEach(o => {
+        o.layers.disable(0);
       });
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.matrixIsModified = true;
-      mesh.visible = false;
-      scene.add(mesh);
-      this.meshes.push(mesh);
+      this.prevHighlights[hand].meshes.length = 0;
+      this.prevHighlights[hand].entity = entity;
+
+      if (entity && entity.object3D && entity.components["hoverable-visuals"]) {
+        entity.object3D.traverseVisible(o => {
+          if (!o.isMesh || !o.batched) return;
+          o.layers.enable(0);
+          o.material.polygonOffset = true;
+          o.material.polygonOffsetFactor = -2;
+          o.material.polygonOffsetUnits = -3;
+          this.prevHighlights[hand].meshes.push(o);
+        });
+      }
     }
   }
 
-  updateMesh(mesh, interactor, time) {
-    let meshToHighlight;
-    const { hovered, held } = interactor;
-    if (
-      (hovered && hovered.object3D && hovered.components["hoverable-visuals"]) ||
-      (held && held.object3D && held.components["hoverable-visuals"])
-    ) {
-      (hovered || held).object3D.traverseVisible(o => {
-        if (!o.isMesh) return;
-        meshToHighlight = o;
-      });
-    }
-
-    if (meshToHighlight) {
-      mesh.visible = true;
-      mesh.geometry = meshToHighlight.geometry;
-      mesh.matrixWorld.copy(meshToHighlight.matrixWorld);
-
-      const worldY = mesh.matrixWorld.elements[13];
-      if (!meshToHighlight.geometry.boundingSphere) meshToHighlight.geometry.computeBoundingSphere();
-      const scaledRadius = hovered.object3D.scale.y * meshToHighlight.geometry.boundingSphere.radius;
-      mesh.material.uniforms.hubs_SweepParams.value[0] = worldY - scaledRadius;
-      mesh.material.uniforms.hubs_SweepParams.value[1] = worldY + scaledRadius;
-    } else {
-      mesh.visible = false;
-    }
-
-    mesh.material.uniforms.hubs_Time.value = time;
-  }
-
-  tick(time) {
-    const interaction = AFRAME.scenes[0].systems.interaction;
-    this.updateMesh(this.meshes[0], interaction.state.rightRemote, time);
-    this.updateMesh(this.meshes[1], interaction.state.rightHand, time);
-    this.updateMesh(this.meshes[2], interaction.state.leftHand, time);
+  tick() {
+    this.updateMesh("rightRemote");
+    this.updateMesh("rightHand");
+    this.updateMesh("leftHand");
   }
 }
 

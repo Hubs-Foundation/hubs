@@ -4,6 +4,10 @@ precision highp int;
 
 uniform float hubs_Time;
 uniform vec2 hubs_SweepParams;
+uniform bool hubs_HighlightInteractorOne;
+uniform vec3 hubs_InteractorOnePos;
+uniform bool hubs_HighlightInteractorTwo;
+uniform vec3 hubs_InteractorTwoPos;
 
 in vec3 hubs_WorldPosition;
 out vec4 outColor;
@@ -19,7 +23,20 @@ void main() {
         ratio = max(0.0, 1.0 - (line - hubs_WorldPosition.y) / (size * 1.5));
     }
 
-    // ratio = 1.0;
+    // Highlight with a gradient falling off with distance.
+    float pulse = 9.0 + 3.0 * (sin(hubs_Time / 1000.0) + 1.0);
+
+    if (hubs_HighlightInteractorOne) {
+        float dist1 = distance(hubs_WorldPosition, hubs_InteractorOnePos);
+        ratio += -min(1.0, pow(dist1 * pulse, 3.0)) + 1.0;
+    }
+
+    if (hubs_HighlightInteractorTwo) {
+        float dist2 = distance(hubs_WorldPosition, hubs_InteractorTwoPos);
+        ratio += -min(1.0, pow(dist2 * pulse, 3.0)) + 1.0;
+    }
+
+    ratio = min(1.0, ratio);
 
     vec4 highlightColor = vec4(0.184, 0.499, 0.933, 1);
 
