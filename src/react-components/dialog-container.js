@@ -13,7 +13,8 @@ export default class DialogContainer extends Component {
     closable: PropTypes.bool,
     wide: PropTypes.bool,
     className: PropTypes.string,
-    allowOverflow: PropTypes.bool
+    allowOverflow: PropTypes.bool,
+    additionalClass: PropTypes.string
   };
 
   static defaultProps = {
@@ -54,7 +55,8 @@ export default class DialogContainer extends Component {
             <div
               className={classNames(
                 "dialog__box__contents",
-                this.props.allowOverflow ? "dialog__box__contents-overflow" : null
+                this.props.allowOverflow ? "dialog__box__contents-overflow" : null,
+                this.props.additionalClass
               )}
             >
               {this.props.closable &&

@@ -113,7 +113,7 @@ export const SCHEMA = {
         type: "object",
         additionalProperties: false,
         properties: {
-          action: { type: ["null", "string"] },
+          action: { type: "string" },
           args: { type: "object" }
         }
       }
@@ -230,6 +230,10 @@ export default class Store extends EventTarget {
       }
     }
 
+    this.clearOnLoadActions();
+  }
+
+  clearOnLoadActions() {
     this.clearStoredArray("onLoadActions");
   }
 

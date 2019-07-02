@@ -251,7 +251,7 @@ export default class HubChannel extends EventTarget {
     });
   };
 
-  getOAuthURL = () => {
+  getTwitterOAuthURL = () => {
     return new Promise((resolve, reject) => {
       this.channel
         .push("oauth", { type: "twitter" })

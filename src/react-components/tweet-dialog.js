@@ -36,6 +36,11 @@ export default class TweetDialog extends Component {
     };
   }
 
+  componentDidMount() {
+    // Calling this immediately seems to break editor initialization
+    setTimeout(() => this.editorRef.focus());
+  }
+
   async sendTweet() {
     // For now assume url is a stored file media url
     const media_stored_file_url = this.props.history.location.state.detail.url;
@@ -70,7 +75,13 @@ export default class TweetDialog extends Component {
     const { CharCounter } = counterPlugin;
 
     return (
-      <DialogContainer wide={true} allowOverflow={true} title="" {...this.props}>
+      <DialogContainer
+        wide={true}
+        allowOverflow={true}
+        title=""
+        additionalClass={styles.dialogBackground}
+        {...this.props}
+      >
         <div className={styles.tweet}>
           <div className={styles.editor} onClick={() => this.editorRef.focus()}>
             <div className={styles.editorInner}>

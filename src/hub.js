@@ -713,6 +713,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const exitOAuth = () => {
       isInOAuth = false;
+      store.clearOnLoadActions();
       remountUI({ showOAuthDialog: false, oauthInfo: null });
     };
 
@@ -728,7 +729,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           isInModal = true;
           pushHistoryState(history, "modal", "tweet", e.detail);
         } else {
-          const url = await hubChannel.getOAuthURL();
+          const url = await hubChannel.getTwitterOAuthURL();
           isInOAuth = true;
           store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: e.detail });
           remountUI({

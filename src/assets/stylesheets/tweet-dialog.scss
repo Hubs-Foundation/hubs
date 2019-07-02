@@ -13,6 +13,7 @@
 }
 
 :local(.editor) {
+  background-color: white;
   border: 2px solid #a4d9f9;
   margin: 24px 36px 0px 36px;
   padding: 18px;
@@ -124,4 +125,7 @@
 
 :local(.tweet-loader) {
   height: 40px;
+}
+:local(.dialog-background) {
+  background-color: #e6ecf0;
 }
