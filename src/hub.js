@@ -712,6 +712,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.APP.scene = scene;
   window.APP.hubChannel = hubChannel;
+  window.dispatchEvent(new CustomEvent("hub_channel_ready"));
 
   const handleEarlyVRMode = () => {
     // If VR headset is activated, refreshing page will fire vrdisplayactivate
