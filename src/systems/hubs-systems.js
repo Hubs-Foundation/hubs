@@ -9,7 +9,7 @@ import { SoundEffectsSystem } from "./sound-effects-system";
 import { RenderManagerSystem } from "./render-manager-system";
 // import HoverVisualsSystem from "./highlight/hover-visuas-system";
 
-export default class HoverVisualsSystem {
+class HoverVisualsSystem {
   constructor() {
     this.prevHighlights = {
       rightRemote: {
@@ -72,7 +72,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
     this.soundEffectsSystem = new SoundEffectsSystem();
     this.renderManagerSystem = new RenderManagerSystem(this.el.sceneEl.object3D, this.el.sceneEl.renderer);
-    this.hoverVisualsSystem = new HoverVisualsSystem(this.el.sceneEl.object3D);
+    // this.hoverVisualsSystem = new HoverVisualsSystem(this.el.sceneEl.object3D);
   },
 
   tick(t) {
@@ -90,7 +90,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
     this.soundEffectsSystem.tick();
     this.renderManagerSystem.tick(t);
-    this.hoverVisualsSystem.tick(t);
+    // this.hoverVisualsSystem.tick(t);
   },
 
   remove() {
