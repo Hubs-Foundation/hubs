@@ -7,58 +7,6 @@ import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
 import { RenderManagerSystem } from "./render-manager-system";
-// import HoverVisualsSystem from "./highlight/hover-visuas-system";
-
-class HoverVisualsSystem {
-  constructor() {
-    this.prevHighlights = {
-      rightRemote: {
-        entity: null,
-        meshes: []
-      },
-      rightHand: {
-        entity: null,
-        meshes: []
-      },
-      leftHand: {
-        entity: null,
-        meshes: []
-      }
-    };
-  }
-
-  updateMesh(hand) {
-    const interactionSystem = AFRAME.scenes[0].systems.interaction;
-    const interaction = interactionSystem.state[hand];
-
-    const entity = interaction.hovered || interaction.held;
-    if (entity != this.prevHighlights[hand].entity) {
-      this.prevHighlights[hand].meshes.forEach(o => {
-        o.layers.disable(0);
-      });
-      this.prevHighlights[hand].meshes.length = 0;
-      this.prevHighlights[hand].entity = entity;
-
-      if (entity && entity.object3D && entity.components["hoverable-visuals"]) {
-        entity.object3D.traverseVisible(o => {
-          if (!o.isMesh || !o.batched) return;
-          o.layers.enable(0);
-          o.material.polygonOffset = true;
-          o.material.polygonOffsetFactor = -2;
-          o.material.polygonOffsetUnits = -3;
-          this.prevHighlights[hand].meshes.push(o);
-        });
-      }
-    }
-  }
-
-  tick() {
-    this.updateMesh("rightRemote");
-    this.updateMesh("rightHand");
-    this.updateMesh("leftHand");
-  }
-}
-
 AFRAME.registerSystem("hubs-systems", {
   init() {
     this.cursorTargettingSystem = new CursorTargettingSystem();
@@ -90,7 +38,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
     this.soundEffectsSystem.tick();
     this.renderManagerSystem.tick(t);
-    // this.hoverVisualsSystem.tick(t);
   },
 
   remove() {
