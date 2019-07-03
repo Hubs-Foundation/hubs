@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import styles from "../assets/stylesheets/scene-ui.scss";
+import styles from "../assets/stylesheets/spectating-label.scss";
 import { FormattedMessage } from "react-intl";
 
 export class SpectatingLabel extends Component {
@@ -10,11 +10,9 @@ export class SpectatingLabel extends Component {
 
   render() {
     return (
-      <div className={styles.info}>
-        <div className={styles.name}>
-          <FormattedMessage id="spectating" />
-          {this.props.name}
-        </div>
+      <div className={styles.label}>
+        <FormattedMessage id="lobby.watching" />
+        <b>{this.props.name}</b>
       </div>
     );
   }

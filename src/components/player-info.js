@@ -1,5 +1,7 @@
 import { injectCustomShaderChunks } from "../utils/media-utils";
 import { AVATAR_TYPES } from "../utils/avatar-utils";
+import { registerComponentInstance } from "../utils/component-utils";
+import { deregisterComponentInstance } from "../utils/component-utils";
 
 function ensureAvatarNodes(json) {
   const { nodes } = json;
@@ -34,8 +36,7 @@ function ensureAvatarNodes(json) {
 AFRAME.registerComponent("player-info", {
   schema: {
     avatarSrc: { type: "string" },
-    avatarType: { type: "string", default: AVATAR_TYPES.LEGACY },
-    isStreaming: { type: "boolean", default: false }
+    avatarType: { type: "string", default: AVATAR_TYPES.LEGACY }
   },
   init() {
     this.displayName = null;
@@ -57,12 +58,10 @@ AFRAME.registerComponent("player-info", {
         }
       });
     }
-    window.APP.componentArrays = window.APP.componentArrays || {};
-    window.APP.componentArrays.playerInfos = window.APP.componentArrays.playerInfos || [];
-    window.APP.componentArrays.playerInfos.push(this.el);
+    registerComponentInstance(this, "player-info");
   },
   remove() {
-    window.APP.componentArrays.playerInfos.splice(window.APP.componentArrays.playerInfos.indexOf(this.el), 1);
+    deregisterComponentInstance(this, "player-info");
   },
   play() {
     this.el.addEventListener("model-loaded", this.applyProperties);

@@ -1,21 +1,8 @@
 import { setMatrixWorld } from "../utils/three-utils";
-
-export function getStreamer() {
-  if (!window.APP) return null;
-  window.APP.componentArrays = window.APP.componentArrays || {};
-  window.APP.componentArrays.playerInfos = window.APP.componentArrays.playerInfos || [];
-  const playerInfos = window.APP.componentArrays.playerInfos;
-  for (let i = 0; i < playerInfos.length; i++) {
-    const playerInfo = playerInfos[i].components["player-info"];
-    if (playerInfo.data.isStreaming) {
-      return playerInfo;
-    }
-  }
-  return null;
-}
+import { getCurrentStreamer } from "../utils/component-utils";
 
 function getStreamerCamera() {
-  const streamer = getStreamer();
+  const streamer = getCurrentStreamer();
   if (streamer) {
     return streamer.el.querySelector(".camera").object3D;
   }

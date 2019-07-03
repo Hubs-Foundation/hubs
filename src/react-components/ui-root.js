@@ -22,6 +22,7 @@ import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
 import { getPresenceProfileForSession } from "../utils/phoenix-utils";
 import { getClientInfoClientId } from "./client-info-dialog";
+import { getCurrentStreamer } from "../utils/component-utils";
 
 import { lang, messages } from "../utils/i18n";
 import Loader from "./loader";
@@ -70,7 +71,6 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { getStreamer } from "../components/scene-preview-camera";
 
 import qsTruthy from "../utils/qs_truthy";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
@@ -744,10 +744,12 @@ class UIRoot extends Component {
   toggleStreamerMode = enable => {
     const playerRig = document.querySelector("#player-rig");
     playerRig.setAttribute("character-controller", "fly", enable);
-    playerRig.setAttribute("player-info", "isStreaming", enable);
+
     if (enable) {
+      this.props.hubChannel.beginStreaming();
       this.setState({ isStreaming: true, showStreamingTip: true, showSettingsMenu: false });
     } else {
+      this.props.hubChannel.endStreaming();
       this.setState({ isStreaming: false });
     }
   };
@@ -1394,29 +1396,26 @@ class UIRoot extends Component {
       : null;
 
     const streaming = this.state.isStreaming;
-    const streamingTip =
-      streaming && this.state.showStreamingTip ? (
-        <div className={classNames([styles.streamingTipContainer])}>
-          <div className={classNames([styles.streamingTip])}>
-            <button
-              title="Dismiss this tip"
-              className={styles.streamingTipClose}
-              onClick={() => {
-                this.setState({ showStreamingTip: false });
-              }}
-            >
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
+    const streamingTip = streaming &&
+      this.state.showStreamingTip && (
+        <div className={classNames([styles.streamingTip])}>
+          <div className={classNames([styles.streamingTipAttachPoint])} />
+          <button
+            title="Dismiss"
+            className={styles.streamingTipClose}
+            onClick={() => this.setState({ showStreamingTip: false })}
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
 
-            <div className={styles.streamingTipMessage}>
-              <FormattedMessage id={`tips.streaming`} />
-              <FormattedMessage id={`tips.streaming2`} />
-            </div>
+          <div className={styles.streamingTipMessage}>
+            <FormattedMessage id="tips.streaming" />
           </div>
         </div>
-      ) : (
-        <div />
       );
+
+    const streamer = getCurrentStreamer();
+    const streamerName = streamer && streamer.displayName;
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1804,37 +1803,30 @@ class UIRoot extends Component {
                 />
               )}
             />
-            {streaming ? (
-              <div>
-                <button
-                  title="Exit Streamer Mode"
-                  onClick={() => {
-                    this.toggleStreamerMode(false);
-                  }}
-                  className={classNames({
-                    [styles.settingsInfo]: true,
-                    [styles.settingsInfoSelected]: this.state.showSettingsMenu
-                  })}
-                >
-                  <i>
-                    <FontAwesomeIcon icon={faTimes} />
-                  </i>
-                </button>
-                {streamingTip}
-              </div>
-            ) : (
+            {streaming && (
+              <button
+                title="Exit Camera Mode"
+                onClick={() => this.toggleStreamerMode(false)}
+                className={classNames([styles.cornerButton, styles.cameraModeExitButton])}
+              >
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            )}
+
+            {streamingTip}
+
+            {!streaming &&
               !preload && (
                 <div
                   onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
                   className={classNames({
-                    [styles.settingsInfo]: true,
-                    [styles.settingsInfoSelected]: this.state.showSettingsMenu
+                    [styles.cornerButton]: true,
+                    [styles.cornerButtonSelected]: this.state.showSettingsMenu
                   })}
                 >
                   <FontAwesomeIcon icon={faBars} />
                 </div>
-              )
-            )}
+              )}
 
             <div
               onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
@@ -1875,10 +1867,7 @@ class UIRoot extends Component {
               />
             )}
 
-            {!entered &&
-              !streaming &&
-              !isMobile &&
-              getStreamer() && <SpectatingLabel name={getStreamer().el.components["player-info"].displayName} />}
+            {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
 
             {enteredOrWatching && (
               <div className={styles.topHud}>

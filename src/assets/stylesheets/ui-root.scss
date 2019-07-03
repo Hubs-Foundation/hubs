@@ -1,34 +1,46 @@
 @import 'shared';
 
-:local(.streaming-tip-container) {
+:local(.streaming-tip) {
+  position: absolute;
+  left: 6px;
+  top: 72px;
+  background-color: $bright-blue;
+  padding: 12px 24px;
+  border-radius: 28px;
   display: flex;
-  :local(.streaming-tip) {
-    margin-left: 70px;
-    margin-top: 20px;
-    background-color: $bright-blue;
-    padding: 12px 24px;
-    border-radius: 28px;
-    display: flex;
-    pointer-events: auto;
-    max-width: 30%;
-    text-align: center;
+  pointer-events: auto;
+  max-width: 30%;
+  text-align: center;
 
-    :local(.streaming-tip-close){
-      width: 32px;
-      margin-right: 2px;
-      margin-left: -16px;
-      border: none;
-      cursor: pointer;
-      background: transparent;
-      color: $light-blue;
-    }
-    :local(.streaming-tip-message){
-      color: white;
-      user-select: text;
-      display: flex;
-      flex-flow: column;
-      font-size: 0.8em;
-    }
+  @media (max-width: 960px) {
+    display:none;
+  }
+
+  :local(.streaming-tip-attach-point) {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid $bright-blue;
+    position: absolute;
+    top: -5px;
+  }
+
+  :local(.streaming-tip-close){
+    width: 32px;
+    margin-right: 2px;
+    margin-left: -16px;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    color: $light-blue;
+  }
+  :local(.streaming-tip-message){
+    color: white;
+    user-select: text;
+    display: flex;
+    flex-flow: column;
+    font-size: 0.8em;
   }
 }
 
@@ -172,7 +184,7 @@ body.vr-mode {
   color: $action-color;
 }
 
-:local(.settings-info) {
+:local(.corner-button) {
   @extend %unselectable;
   text-align: right;
   position: absolute;
@@ -193,7 +205,11 @@ body.vr-mode {
   border: none;
 }
 
-:local(.settings-info-selected) {
+:local(.camera-mode-exit-button) {
+  padding: 8px 12px;
+}
+
+:local(.corner-button-selected) {
   color: $action-color;
 }
 
