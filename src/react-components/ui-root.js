@@ -1440,6 +1440,7 @@ class UIRoot extends Component {
                   {...props}
                   displayNameOverride={displayNameOverride}
                   finished={() => this.pushHistoryState()}
+                  onClose={() => this.pushHistoryState()}
                   store={this.props.store}
                   mediaSearchStore={this.props.mediaSearchStore}
                   avatarId={props.location.state.detail && props.location.state.detail.avatarId}
@@ -1508,6 +1509,7 @@ class UIRoot extends Component {
                       this.pushHistoryState("entry_step", "device");
                     }
                   }}
+                  onClose={() => this.pushHistoryState()}
                   store={this.props.store}
                   mediaSearchStore={this.props.mediaSearchStore}
                   avatarId={props.location.state.detail && props.location.state.detail.avatarId}
