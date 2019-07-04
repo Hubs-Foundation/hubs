@@ -41,7 +41,7 @@ const wordWrap = body => {
   return outWords.join(" ");
 };
 
-const messageBodyDom = (body, from, fromSessionId, history, includeFrom) => {
+const messageBodyDom = (body, from, fromSessionId, includeFrom, history) => {
   // Support wrapping text in ` to get monospace, and multiline.
   const multiLine = body.split("\n").length > 1;
   const wrapStyle = multiLine ? styles.messageWrapMulti : styles.messageWrap;
@@ -230,7 +230,7 @@ export default function ChatMessage(props) {
           onClick={() => spawnChatMessage(props.body)}
         />
       )}
-      {messageBodyDom(props.body, props.name, props.sessionId, props.history, props.includeFrom)}
+      {messageBodyDom(props.body, props.name, props.sessionId, props.includeFrom, props.history)}
     </div>
   );
 }
