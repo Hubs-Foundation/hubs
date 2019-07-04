@@ -1,11 +1,44 @@
 import { BatchManager, BatchRawUniformGroup } from "three-render-manager";
 
+import unlitBatchVert from "./render-manager/unlit-batch.vert";
+import unlitBatchFrag from "./render-manager/unlit-batch.frag";
+
 const tempVec3 = new Array(3);
 const tempVec4 = new Array(4);
 
+export const INSTANCE_DATA_BYTE_LENGTH = 112;
+
 class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
   constructor(maxInstances, meshToEl) {
-    super(maxInstances, "InstanceData");
+    const hubsDataSize =
+      maxInstances * 4 * 4 + // sweepParams
+      4 *
+        (3 + // interactorOnePos
+        1 + // isFrozen
+        3 + // interactorTwoPos
+          1); // time
+
+    const data = new ArrayBuffer(maxInstances * INSTANCE_DATA_BYTE_LENGTH + hubsDataSize);
+    super(maxInstances, "InstanceData", data);
+
+    let offset = this.offset;
+    this.hubs_sweepParams = new Float32Array(this.data, offset, 4 * maxInstances);
+    offset += this.hubs_sweepParams.byteLength;
+
+    this.hubs_interactorOnePos = new Float32Array(this.data, offset, 3);
+    offset += this.hubs_interactorOnePos.byteLength;
+
+    this.hubs_isFrozen = new Uint32Array(this.data, offset, 1);
+    offset += this.hubs_isFrozen.byteLength;
+
+    this.hubs_interactorTwoPos = new Float32Array(this.data, offset, 3);
+    offset += this.hubs_interactorTwoPos.byteLength;
+
+    this.hubs_time = new Float32Array(this.data, offset, 1);
+    offset += this.hubs_time.byteLength;
+
+    this.offset = offset;
+
     this.meshToEl = meshToEl;
   }
 
@@ -68,7 +101,13 @@ export class RenderManagerSystem {
     this.ubo = new HubsBatchRawUniformGroup(maxInstances, this.meshToEl);
     this.batchManager = new BatchManager(scene, renderer, {
       maxInstances: maxInstances,
-      ubo: this.ubo
+      ubo: this.ubo,
+      shaders: {
+        unlit: {
+          vertexShader: unlitBatchVert,
+          fragmentShader: unlitBatchFrag
+        }
+      }
     });
   }
 
