@@ -74,7 +74,7 @@ export default class PresenceLog extends Component {
             body={e.body}
             maySpawn={e.maySpawn}
             sessionId={e.sessionId}
-            includeFrom={this.props.inRoom && !isBot}
+            includeFromLink={this.props.inRoom && !isBot}
             history={this.props.history}
           />
         );
