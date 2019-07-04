@@ -7,6 +7,7 @@ import { proxiedUrlFor, spawnMediaAround } from "../utils/media-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { promisifyWorker } from "../utils/promisify-worker.js";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
@@ -203,23 +204,22 @@ function scaleToAspectRatio(el, ratio) {
   el.object3DMap.mesh.matrixNeedsUpdate = true;
 }
 
-const textureLoader = new THREE.TextureLoader();
+const textureLoader = new HubsTextureLoader();
 textureLoader.setCrossOrigin("anonymous");
-function createImageTexture(url) {
-  return new Promise((resolve, reject) => {
-    textureLoader.load(
-      url,
-      texture => {
-        texture.encoding = THREE.sRGBEncoding;
-        texture.minFilter = THREE.LinearFilter;
-        resolve(texture);
-      },
-      null,
-      function(xhr) {
-        reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
-      }
-    );
-  });
+async function createImageTexture(url, contentType) {
+  const texture = new THREE.Texture();
+
+  await textureLoader.loadTextureAsync(texture, url, contentType);
+
+  // try {
+  // } catch (e) {
+  //   throw new Error(`'${url}' could not be fetched (Error code: ${e.status}; Response: ${e.statusText})`);
+  // }
+
+  texture.encoding = THREE.sRGBEncoding;
+  texture.minFilter = THREE.LinearFilter;
+
+  return texture;
 }
 
 function disposeTexture(texture) {
@@ -764,7 +764,7 @@ AFRAME.registerComponent("media-image", {
         } else if (contentType.includes("image/gif")) {
           texture = await createGIFTexture(src);
         } else if (contentType.startsWith("image/")) {
-          texture = await createImageTexture(src);
+          texture = await createImageTexture(src, contentType);
         } else {
           throw new Error(`Unknown image content type: ${contentType}`);
         }
