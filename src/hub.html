@@ -247,9 +247,20 @@
                     hoverable-visuals
                 >
                     <a-entity class="ui interactable-ui">
-                        <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 10;">
-                            <a-entity mixin="rounded-text-action-button" is-remote-hover-target tags="singleActionButton:true" pin-networked-object-button="tipSelector:.pin-button-tip; labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;" position="0 0.125 0.01">
-                                <a-entity class="pin-button-label" visible="false" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                        <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 10; withPermission: spawn_and_move_media">
+                            <a-entity 
+                                mixin="rounded-text-action-button"
+                                is-remote-hover-target
+                                tags="singleActionButton:true"
+                                pin-networked-object-button="tipSelector:.pin-button-tip; labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;"
+                                position="0 0.125 0.01">
+                                <a-entity 
+                                    class="pin-button-label" 
+                                    visible="false" 
+                                    text=" value:pin; width:1.75; align:center;"
+                                    text-raycast-hack 
+                                    position="0 0 0.01">
+                                </a-entity>
                             </a-entity>
                             <a-entity
                                 class="pin-button-tip"

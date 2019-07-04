@@ -25,6 +25,20 @@ export default class RenameRoomDialog extends Component {
     this.props.onClose();
   };
 
+  renderCheckbox(perm, disabled, onChange) {
+    return (
+      <label key={perm}>
+        <input
+          type="checkbox"
+          checked={this.state.perms[perm]}
+          disabled={disabled}
+          onChange={onChange || (e => this.setState({ perms: { ...this.state.perms, [perm]: e.target.checked } }))}
+        />
+        <FormattedMessage id={`room-settings.${perm}`} />
+      </label>
+    );
+  }
+
   render() {
     return (
       <DialogContainer title="Set Room Name" {...this.props}>
@@ -45,16 +59,23 @@ export default class RenameRoomDialog extends Component {
             onChange={e => this.setState({ name: e.target.value })}
             className={styles.nameField}
           />
-          {["spawn_and_move_media", "spawn_camera", "spawn_drawing", "pin_objects"].map(perm => (
-            <label key={perm}>
-              <input
-                type="checkbox"
-                checked={this.state.perms[perm]}
-                onChange={e => this.setState({ perms: { ...this.state.perms, [perm]: e.target.checked } })}
-              />
-              <FormattedMessage id={`room-settings.${perm}`} />
-            </label>
-          ))}
+          <div>
+            {this.renderCheckbox("spawn_and_move_media", false, e => {
+              const newPerms = {
+                spawn_and_move_media: e.target.checked
+              };
+              if (!e.target.checked) {
+                newPerms.spawn_camera = false;
+                newPerms.pin_objects = false;
+              }
+              this.setState({ perms: { ...this.state.perms, ...newPerms } });
+            })}
+            <div>
+              {this.renderCheckbox("spawn_camera", !this.state.perms.spawn_and_move_media)}
+              {this.renderCheckbox("pin_objects", !this.state.perms.spawn_and_move_media)}
+            </div>
+            {this.renderCheckbox("spawn_drawing")}
+          </div>
           <button type="submit" className={styles.nextButton}>
             <FormattedMessage id="rename-room.rename" />
           </button>
