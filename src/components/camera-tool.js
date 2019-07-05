@@ -114,6 +114,7 @@ AFRAME.registerComponent("camera-tool", {
     this.el.components["hover-menu__camera"].getHoverMenu().then(() => {
       this.snapButton = this.el.querySelector(".snap-button");
       this.snapButton.object3D.addEventListener("interact", () => {
+        if (!window.APP.hubChannel.can("spawn_camera")) return;
         this.takeSnapshotNextTick = true;
       });
     });
@@ -181,11 +182,13 @@ AFRAME.registerComponent("camera-tool", {
     if (grabberId) {
       const grabberPaths = pathsMap[grabberId];
       if (userinput.get(grabberPaths.takeSnapshot)) {
+        if (!window.APP.hubChannel.can("spawn_camera")) return;
         this.takeSnapshotNextTick = true;
       }
     }
 
     if (userinput.get(paths.actions.takeSnapshot)) {
+      if (!window.APP.hubChannel.can("spawn_camera")) return;
       this.takeSnapshotNextTick = true;
     }
   },

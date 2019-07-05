@@ -457,6 +457,7 @@ export default class SceneEntryManager {
 
   _setupCamera = () => {
     this.scene.addEventListener("action_toggle_camera", () => {
+      if (!this.hubChannel.can("spawn_camera")) return;
       const myCamera = this.scene.systems["camera-tools"].getMyCamera();
 
       if (myCamera) {
