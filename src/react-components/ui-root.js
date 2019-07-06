@@ -66,7 +66,6 @@ import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
 import { handleTipClose } from "../systems/tips.js";
 
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
-import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
@@ -1837,20 +1836,21 @@ class UIRoot extends Component {
               />
             )}
 
-            {!streaming && !preload && (
-              <SettingsMenu
-                history={this.props.history}
-                mediaSearchStore={this.props.mediaSearchStore}
-                isStreaming={streaming}
-                toggleStreamerMode={this.toggleStreamerMode}
-                hubChannel={this.props.hubChannel}
-                hubScene={this.props.hubScene}
-                scene={this.props.scene}
-                performConditionalSignIn={this.props.performConditionalSignIn}
-                showNonHistoriedDialog={this.showNonHistoriedDialog}
-                pushHistoryState={this.pushHistoryState}
-              />
-            )}
+            {!streaming &&
+              !preload && (
+                <SettingsMenu
+                  history={this.props.history}
+                  mediaSearchStore={this.props.mediaSearchStore}
+                  isStreaming={streaming}
+                  toggleStreamerMode={this.toggleStreamerMode}
+                  hubChannel={this.props.hubChannel}
+                  hubScene={this.props.hubScene}
+                  scene={this.props.scene}
+                  performConditionalSignIn={this.props.performConditionalSignIn}
+                  showNonHistoriedDialog={this.showNonHistoriedDialog}
+                  pushHistoryState={this.pushHistoryState}
+                />
+              )}
 
             {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
 
