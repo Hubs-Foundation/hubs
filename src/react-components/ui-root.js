@@ -67,7 +67,6 @@ import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../uti
 import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
 import { handleTipClose } from "../systems/tips.js";
 
-import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
@@ -173,7 +172,6 @@ class UIRoot extends Component {
     entered: false,
     dialog: null,
     showShareDialog: false,
-    showPresenceList: false,
     broadcastTipDismissed: false,
     linkCode: null,
     linkCodeCancel: null,
@@ -259,8 +257,8 @@ class UIRoot extends Component {
   componentDidMount() {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
-      if (this.state.showPresenceList || this.state.showShareDialog) {
-        this.setState({ showPresenceList: false, showShareDialog: false });
+      if (this.state.showShareDialog) {
+        this.setState({ showShareDialog: false });
       }
     });
 
@@ -1808,28 +1806,15 @@ class UIRoot extends Component {
 
             {streamingTip}
 
-            <div
-              onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
-              className={classNames({
-                [styles.presenceInfo]: true,
-                [styles.presenceInfoSelected]: this.state.showPresenceList
-              })}
-            >
-              <FontAwesomeIcon icon={faUsers} />
-              <span className={styles.occupantCount}>{this.occupantCount()}</span>
-            </div>
-
-            {this.state.showPresenceList && (
-              <PresenceList
-                history={this.props.history}
-                presences={this.props.presences}
-                sessionId={this.props.sessionId}
-                signedIn={this.state.signedIn}
-                email={this.props.store.state.credentials.email}
-                onSignIn={this.showSignInDialog}
-                onSignOut={this.signOut}
-              />
-            )}
+            <PresenceList
+              history={this.props.history}
+              presences={this.props.presences}
+              sessionId={this.props.sessionId}
+              signedIn={this.state.signedIn}
+              email={this.props.store.state.credentials.email}
+              onSignIn={this.showSignInDialog}
+              onSignOut={this.signOut}
+            />
 
             {!streaming &&
               !preload && (
