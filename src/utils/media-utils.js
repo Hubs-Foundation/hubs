@@ -170,7 +170,7 @@ export function injectCustomShaderChunks(obj) {
       renderManager.meshToEl.set(object, obj.el);
 
       const newMaterial = material.clone();
-      // This will never run if the object is never rendered unbatched
+      // This will not run if the object is never rendered unbatched, since its unbatched shader will never be compiled
       newMaterial.onBeforeCompile = shader => {
         if (!vertexRegex.test(shader.vertexShader)) return;
 
