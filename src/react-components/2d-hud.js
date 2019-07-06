@@ -29,7 +29,10 @@ class TopHUD extends Component {
     onShareVideo: PropTypes.func,
     onEndShareVideo: PropTypes.func,
     onShareVideoNotCapable: PropTypes.func,
-    mediaSearchStore: PropTypes.object
+    mediaSearchStore: PropTypes.object,
+    isStreaming: PropTypes.bool,
+    showStreamingTip: PropTypes.bool,
+    hideStreamingTip: PropTypes.func
   };
 
   state = {
