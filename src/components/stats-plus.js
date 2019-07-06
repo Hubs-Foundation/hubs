@@ -141,7 +141,6 @@ AFRAME.registerComponent("stats-plus", {
       // Update rStats
       stats("rAF").tick();
       stats("FPS").frame();
-      stats("rAF").tick();
 
       const batchManager = this.el.sceneEl.systems["hubs-systems"].renderManagerSystem.batchManager;
       stats("batchdraws").set(batchManager.batches.length);
