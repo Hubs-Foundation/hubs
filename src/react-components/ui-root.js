@@ -200,7 +200,6 @@ class UIRoot extends Component {
 
     muted: false,
     frozen: false,
-    spacebubble: true,
 
     exited: false,
 
@@ -391,7 +390,7 @@ class UIRoot extends Component {
 
   // TODO: we need to come up with a cleaner way to handle the shared state between aframe and react than emmitting events and setting state on the scene
   onAframeStateChanged = e => {
-    if (!(e.detail === "muted" || e.detail === "frozen" || e.detail === "spacebubble")) return;
+    if (!(e.detail === "muted" || e.detail === "frozen")) return;
     this.setState({
       [e.detail]: this.props.scene.is(e.detail)
     });
@@ -411,10 +410,6 @@ class UIRoot extends Component {
 
   toggleFreeze = () => {
     this.props.scene.emit("action_freeze");
-  };
-
-  toggleSpaceBubble = () => {
-    this.props.scene.emit("action_space_bubble");
   };
 
   shareVideo = mediaSource => {
@@ -1878,14 +1873,12 @@ class UIRoot extends Component {
                   frozen={this.state.frozen}
                   watching={this.state.watching}
                   onWatchEnded={() => this.setState({ watching: false })}
-                  spacebubble={this.state.spacebubble}
                   videoShareMediaSource={this.state.videoShareMediaSource}
                   activeTip={this.props.activeTips && this.props.activeTips.top}
                   isCursorHoldingPen={this.props.isCursorHoldingPen}
                   hasActiveCamera={this.props.hasActiveCamera}
                   onToggleMute={this.toggleMute}
                   onToggleFreeze={this.toggleFreeze}
-                  onToggleSpaceBubble={this.toggleSpaceBubble}
                   onSpawnPen={this.spawnPen}
                   onSpawnCamera={() => this.props.scene.emit("action_toggle_camera")}
                   onShareVideo={this.shareVideo}
