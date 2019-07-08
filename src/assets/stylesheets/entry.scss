@@ -6,35 +6,45 @@
   align-items: center;
   height: 100%;
   position: relative;
+}
 
-  :local(.collapse) {
-    @extend %fa-icon-button;
-    color: black;
-    position: absolute;
-    top: 0px;
-    right: 12px;
-    width: 32px;
-    height: 32px;
-  }
+:local(.collapse-button) {
+  @extend %fa-icon-button;
+  color: $dark-grey;
+  display: inline;
+  position: absolute;
+  top: 0px;
+  left: 24px;
 
-  :local(.expand) {
-    @extend %fa-icon-button;
-    color: white;
-    position: absolute;
-    top: -64px;
-    right: 12px;
-    width: 38px;
-    height: 38px;
-    padding-left: 1px;
-    padding-bottom: 1px;
-    background-color: $action-color;
-    border-radius: 19px;
+  i {
+    font-size: 1.2em;
   }
+}
+
+:local(.favorite-button) {
+  @extend %fa-icon-button;
+  position: absolute;
+  top: 0px;
+  right: 24px;
+  color: $dark-grey;
+  display: inline;
+
+  i {
+    font-size: 1.2em;
+  }
+}
+
+:local(.favorited) {
+  color: $duck-yellow;
+}
+
+:local(.collapse-button):hover {
+  color: $action-color;
 }
 
 :local(.entry-button) {
   @extend %action-button;
-  width: 272px;
+  width: 290px;
   display: flex;
   text-align: left;
   flex-direction: row;
@@ -44,7 +54,7 @@
   @extend %default-font;
   border: 0;
   border-radius: 12px;
-  margin: 6px;
+  margin-top: 12px;
   padding: 12px 18px;
   height: auto;
 
@@ -75,6 +85,18 @@
   }
 }
 
+:local(.entry-button-secondary) {
+  @extend %action-button-secondary;
+
+  :local(.label) {
+    color: $action-color;
+  }
+
+  :local(.subtitle) {
+    color: $action-color;
+  }
+}
+
 :local(.entry-panel) {
   overflow-y: auto;
   display: flex;
@@ -85,6 +107,17 @@
   min-height: 150px;
   height: 100%;
   width: 100%;
+
+  a {
+    text-decoration: none;
+  }
+
+  :local(.room-subtitle) {
+    font-size: 0.8em;
+    text-transform: uppercase;
+    color: $dark-grey;
+    margin-bottom: 8px;
+  }
 
   :local(.title) {
     @extend %top-title;
@@ -98,8 +131,23 @@
     @extend %top-title;
     @extend %glass-text;
     margin-bottom: 4px;
-    margin-right: 8px;
-    margin-left: 8px;
+    margin-right: 48px;
+    margin-left: 48px;
+
+    :local(.rename-button) {
+      @extend %glass-text;
+      font-weight: bold;
+      font-size: 1.0em;
+      appearance: none;
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      outline-style: none;
+      cursor: pointer;
+      border: 0;
+      text-decoration: underline;
+      text-decoration-color: $dark-grey;
+      background: transparent;
+    }
   }
 
   :local(.lobby) {
@@ -115,17 +163,20 @@
     width: 100%;
   }
 
-  :local(.profile-name) {
+  :local(.lobby-label) {
     margin-top: 4px;
     margin-bottom: 32px;
     @extend %default-font;
-    font-size: 1.1em;
-    color: $action-color;
+    font-size: 0.8em;
+    text-decoration: none;
     cursor: pointer;
-    font-weight: bold;
     display: flex;
+    color: $dark-grey;
     align-items: center;
     justify-content: center;
+    i {
+      margin-right: 8px;
+    }
   }
 
   :local(.profile-icon) {
@@ -145,11 +196,27 @@
 
     :local(.action-button) {
       @extend %action-button;
+      @extend %entry-action-button;
+    }
+
+    :local(.secondary-action-button) {
+      @extend %action-button-secondary;
+      @extend %entry-action-button;
+      margin-bottom: 12px;
     }
 
     :local(.wide-button) {
       @extend %wide-button;
     }
+
+    :local(.button-subtitle) {
+      font-size: 0.8em;
+      font-weight: normal;
+    }
+  }
+
+  :local(.audio-loader) {
+    min-height: 228px;
   }
 
   :local(.webvr-link-container) {
@@ -180,28 +247,35 @@
   :local(.secondary) {
     width: 100%;
     text-align: center;
-    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 0.8em;
     cursor: pointer;
-    color: $dark-grey-text;
+    color: $action-color;
+    text-decoration: underline;
+  }
+}
+
+:local(.back) {
+  @extend %fa-icon-button;
+
+  display: flex;
+  font-size: 1.0em;
+  font-weight: bold;
+
+  @media (max-width: 768px) {
+    align-self: flex-start;
+    padding-left: 1.5em;
+    padding-bottom: 0.5em;
+    margin: 0;
   }
 
-  :local(.subscribe) {
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: $darker-grey;
+  @media (min-width: 768px) {
+    position: absolute;
+    top: 12px;
+    left: 26px;
+  }
 
-    input {
-      @extend %checkbox;
-    }
-
-    input:checked {
-      @extend %checkbox-checked;
-    }
-
-    label {
-      margin-right: 8px;
-    }
+  i {
+    margin-right: 18px;
   }
 }

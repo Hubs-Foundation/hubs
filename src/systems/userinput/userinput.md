@@ -1,12 +1,7 @@
-
-<a id="org6030eab"></a>
-
 # The userinput system
 
 The userinput system is a module that manages mappings from device state changes to app state changes. 
 
-
-<a id="org2da9acd"></a>
 
 ## Overview
 
@@ -16,15 +11,11 @@ The userinput system happens to be an `aframe` `system`; its `tick` is called on
 
 2.  A `binding` is `active` if it is `available` and it belongs to an `action set` that is `active` this frame. The application is responsible for activating and deactivating `action sets` when appropriate. For example, when the user's avatar grabs a pen in its right hand, an action set called "rightHandHoldingPen" is activated. Though it depends on the way bindings have been configured, this will likely activate bindings responsible for writing to the following "actions": "rightHandStartDrawing", "rightHandStopDrawing", "rightHandPenNextColor", "rightHandPenPrevColor", "rightHandScalePenTip", "rightHandDrop".
 
-3.  A `binding` is `prioritized` if, among all of the currently `available` and `active` bindings, it is defined with the highest "priority" value for the given "root". Within the oculus and vive bindings, for example, the binding that says "stop drawing from the pen in the right hand when the trigger is released" in the "rightHandHoldingPen" action set is defined with a higher priority than (and with the same root as) the binding that says "drop a grabbable from the avatar's right hand when the trigger is released" in the "rightHandHoldingInteractable" action set. Thus, you do not drop the pen in your right hand when the trigger is released, and we define a third binding for how to perform this action when the thing in your right hand happens to be a pen.
+3.  A `binding` is `prioritized` if, among all of the currently `available` and `active` bindings, it is defined with the highest "priority" value. Within the oculus and vive bindings, for example, the binding that says "stop drawing from the pen in the right hand when the trigger is released" in the "rightHandHoldingPen" action set is defined with a higher priority than the binding that says "drop a grabbable from the avatar's right hand when the trigger is released" in the "rightHandHoldingInteractable" action set. Thus, you do not drop the pen in your right hand when the trigger is released, and we define a third binding for how to perform this action when the thing in your right hand happens to be a pen.
 
-
-<a id="org4721ce9"></a>
 
 ## Terms and Conventions
 
-
-<a id="orgd62cc68"></a>
 
 ### path
 
@@ -48,8 +39,6 @@ A path is used as a key when writing or querying the state a user input frame. P
     const lJoyScaled = "/vars/oculustouch/left/joy/scaled";
 
 
-<a id="orgb8066a6"></a>
-
 ### action
 
 A path used by app code when reading a user input frame.
@@ -67,22 +56,16 @@ The value in the frame can be of any type, but we have tried to keep it to simpl
     this.move( this.velocity );
 
 
-<a id="org15eafde"></a>
-
 ### frame
 
 A key-value store created each time the userinput system ticks. The userinput system writes a new frame by processing input from devices and transforming them by the set of `available`, `active`, and `prioritized` bindings.
 
-
-<a id="orgea2f123"></a>
 
 ### device
 
 A device is almost always mapped one-to-one with a device as we think about it in the real world. In the case of mouse, touchscreen, and keyboard input, the browser emits events that are captured into a queue to be processed in order once each frame. An exception to handling device input through the userinput system is the case of interacting with browser API's that require a user-gesture, like the pointer lock API. In this case, the browser prevents us from engaging pointer lock except in a short-running event listener to a user-gesture.
 Most devices can write their input state to the frame without depending on any other app state. An exception are the "app aware" touchscreen and mouse devices, which decide whether a raycast sent out from the in-game camera through the projected touch/click point lands on an interactable object or not, and what should be done in the case that it does.
 
-
-<a id="org47c9c20"></a>
 
 ### binding
 
@@ -94,14 +77,11 @@ A binding is an association of the form:
       dest: { xform_key_1 : path,
               xform_key_2 : path },
       xform: some_function, // f(frame, src, dest, prevState) -> newState
-      root: key_to_resolve_binding_conflicts,
       priority: numerical_priority_of_this_binding // higher priority overrides lower priority bindings
     },
 
 Bindings are organized into sets, and written with active specific device combinations in mind.
 
-
-<a id="org876e7b0"></a>
 
 ### xforms
 
@@ -109,16 +89,11 @@ Each binding specifies a `xform` (transformation) function that reads values in 
 These ought to be treated as user-customizable, although we are likely the only ones to do this customization for some time.
 
 
-<a id="orgbe4669b"></a>
-
 ### set
 
 Sets are app state that correspond to sets of capabilities we expect to activate and deactivate all at once on behalf of the user.
 
 
-<a id="orgdd3c0c5"></a>
+### priority
 
-### priority and root
-
-When bindings can be written such that multiple actions could be triggered by the device input, we express our desire to apply one over another via the `binding` s `root` s and `priority` s. When active bindings share the same root, the userinput system only applies active bindings with highest priority values. This mechanism allows us to craft context-sensitive interaction mechanics on devices with limited input, like the oculus go remote.
-
+When bindings can be written such that multiple actions could be triggered by the device input, we express our desire to apply one over another via the `binding`s and `priority`s. The userinput system only applies active bindings with highest priority values. This mechanism allows us to craft context-sensitive interaction mechanics on devices with limited input, like the oculus go remote.

@@ -1,18 +1,16 @@
 import nextTick from "../utils/next-tick";
+import { mapMaterials } from "../utils/material-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import MobileStandardMaterial from "../materials/MobileStandardMaterial";
-import cubeMapPosX from "../assets/images/cubemap/posx.jpg";
-import cubeMapNegX from "../assets/images/cubemap/negx.jpg";
-import cubeMapPosY from "../assets/images/cubemap/posy.jpg";
-import cubeMapNegY from "../assets/images/cubemap/negy.jpg";
-import cubeMapPosZ from "../assets/images/cubemap/posz.jpg";
-import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
-import { getCustomGLTFParserURLResolver } from "../utils/media-utils";
+import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
+import { promisifyWorker } from "../utils/promisify-worker.js";
+import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
+THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const GLTFCache = {};
-let CachedEnvMapTexture = null;
+const extractZipFile = promisifyWorker(new SketchfabZipWorker());
 
-function inflateComponent(el, componentName, componentData) {
+function defaultInflator(el, componentName, componentData) {
   if (!AFRAME.components[componentName]) {
     throw new Error(`Inflator failed. "${componentName}" component does not exist.`);
   }
@@ -29,7 +27,7 @@ AFRAME.GLTFModelPlus = {
   // eslint-disable-next-line no-unused-vars
   components: {},
   registerComponent(componentKey, componentName, inflator) {
-    inflator = inflator || inflateComponent;
+    inflator = inflator || defaultInflator;
     AFRAME.GLTFModelPlus.components[componentKey] = { inflator, componentName };
   }
 };
@@ -42,6 +40,25 @@ function parallelTraverse(a, b, callback) {
   }
 }
 
+function generateMeshBVH(object3D) {
+  object3D.traverse(obj => {
+    // note that we might already have a bounds tree if this was a clone of an object with one
+    const hasBufferGeometry = obj.isMesh && obj.geometry.isBufferGeometry;
+    const hasBoundsTree = hasBufferGeometry && obj.geometry.boundsTree;
+    if (hasBufferGeometry && !hasBoundsTree && obj.geometry.attributes.position) {
+      const geo = obj.geometry;
+      const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
+      // only bother using memory and time making a BVH if there are a reasonable number of tris,
+      // and if there are too many it's too painful and large to tolerate doing it (at least until
+      // we put this in a web worker)
+      if (triCount > 1000 && triCount < 1000000) {
+        // note that bounds tree construction creates an index as a side effect if one doesn't already exist
+        geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 30 });
+      }
+    }
+  });
+}
+
 // Modified version of Don McCurdy's AnimationUtils.clone
 // https://github.com/mrdoob/three.js/pull/14494
 function cloneSkinnedMesh(source) {
@@ -51,6 +68,9 @@ function cloneSkinnedMesh(source) {
 
   parallelTraverse(source, clone, function(sourceNode, clonedNode) {
     cloneLookup.set(sourceNode, clonedNode);
+    if (sourceNode.isMesh && sourceNode.geometry.boundsTree) {
+      clonedNode.geometry.boundsTree = sourceNode.geometry.boundsTree;
+    }
   });
 
   source.traverse(function(sourceMesh) {
@@ -82,30 +102,45 @@ function cloneGltf(gltf) {
   };
 }
 
+function getHubsComponents(node) {
+  const hubsComponents =
+    node.userData.gltfExtensions &&
+    (node.userData.gltfExtensions.MOZ_hubs_components || node.userData.gltfExtensions.HUBS_components);
+
+  // We can remove support for legacy components when our environment, avatar and interactable models are
+  // updated to match Spoke output.
+  const legacyComponents = node.userData.components;
+
+  return hubsComponents || legacyComponents;
+}
+
 /// Walks the tree of three.js objects starting at the given node, using the GLTF data
 /// and template data to construct A-Frame entities and components when necessary.
 /// (It's unnecessary to construct entities for subtrees that have no component data
 /// or templates associated with any of their nodes.)
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
-const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
+const inflateEntities = function(indexToEntityMap, node, templates, isRoot, modelToWorldScale = 1) {
+  // TODO: Remove this once we update the legacy avatars to the new node names
+  if (node.name === "Chest") {
+    node.name = "Spine";
+  } else if (node.name === "Root Scene") {
+    node.name = "AvatarRoot";
+  } else if (node.name === "Bot_Skinned") {
+    node.name = "AvatarMesh";
+  }
+
   // inflate subtrees first so that we can determine whether or not this node needs to be inflated
   const childEntities = [];
   const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
   for (const child of children) {
-    const el = inflateEntities(child, templates);
+    const el = inflateEntities(indexToEntityMap, child, templates);
     if (el) {
       childEntities.push(el);
     }
   }
 
-  const hubsComponents = node.userData.gltfExtensions && node.userData.gltfExtensions.HUBS_components;
-
-  // We can remove support for legacy components when our environment, avatar and interactable models are
-  // updated to match Spoke output.
-  const legacyComponents = node.userData.components;
-
-  const entityComponents = hubsComponents || legacyComponents;
+  const entityComponents = getHubsComponents(node);
 
   const nodeHasBehavior = !!entityComponents || node.name in templates;
   if (!nodeHasBehavior && !childEntities.length && !isRoot) {
@@ -126,26 +161,14 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
 
   // Copy over the object's transform to the THREE.Group and reset the actual transform of the Object3D
   // all updates to the object should be done through the THREE.Group wrapper
-  el.setAttribute("position", {
-    x: node.position.x,
-    y: node.position.y,
-    z: node.position.z
-  });
-  el.setAttribute("rotation", {
-    x: node.rotation.x * THREE.Math.RAD2DEG,
-    y: node.rotation.y * THREE.Math.RAD2DEG,
-    z: node.rotation.z * THREE.Math.RAD2DEG
-  });
-  el.setAttribute("scale", {
-    x: node.scale.x * (modelToWorldScale !== undefined ? modelToWorldScale : 1),
-    y: node.scale.y * (modelToWorldScale !== undefined ? modelToWorldScale : 1),
-    z: node.scale.z * (modelToWorldScale !== undefined ? modelToWorldScale : 1)
-  });
+  el.object3D.position.copy(node.position);
+  el.object3D.rotation.copy(node.rotation);
+  el.object3D.scale.copy(node.scale).multiplyScalar(modelToWorldScale);
+  el.object3D.matrixNeedsUpdate = true;
 
   node.matrixAutoUpdate = false;
   node.matrix.identity();
   node.matrix.decompose(node.position, node.rotation, node.scale);
-  el.object3D.matrixNeedsUpdate = true;
 
   el.setObject3D(node.type.toLowerCase(), node);
   if (entityComponents && "nav-mesh" in entityComponents) {
@@ -165,17 +188,29 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
     node.parent.animations = node.animations;
   }
 
-  if (entityComponents) {
-    for (const prop in entityComponents) {
-      if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
-        const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-        inflator(el, componentName, entityComponents[prop]);
-      }
-    }
+  const gltfIndex = node.userData.gltfIndex;
+  if (gltfIndex !== undefined) {
+    indexToEntityMap[gltfIndex] = el;
   }
 
   return el;
 };
+
+function inflateComponents(inflatedEntity, indexToEntityMap) {
+  inflatedEntity.object3D.traverse(object3D => {
+    const entityComponents = getHubsComponents(object3D);
+    const el = object3D.el;
+
+    if (entityComponents && el) {
+      for (const prop in entityComponents) {
+        if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
+          const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
+          inflator(el, componentName, entityComponents[prop], entityComponents, indexToEntityMap);
+        }
+      }
+    }
+  });
+}
 
 function attachTemplate(root, name, templateRoot) {
   const targetEls = root.querySelectorAll("." + name);
@@ -193,38 +228,56 @@ function attachTemplate(root, name, templateRoot) {
   }
 }
 
-function getFilesFromSketchfabZip(src) {
-  return new Promise((resolve, reject) => {
-    const worker = new SketchfabZipWorker();
-    worker.onmessage = e => {
-      const [success, fileMapOrError] = e.data;
-      (success ? resolve : reject)(fileMapOrError);
-    };
-    worker.postMessage(src);
-  });
+function runMigration(version, json) {
+  if (version < 2) {
+    //old heightfields will be on the same node as the nav-mesh, delete those
+    const oldHeightfieldNode = json.nodes.find(node => {
+      let components = null;
+      if (node.extensions && node.extensions.MOZ_hubs_components) {
+        components = node.extensions.MOZ_hubs_components;
+      } else if (node.extensions && node.extensions.HUBS_components) {
+        components = node.extensions.HUBS_components;
+      }
+      return components && components.heightfield && components["nav-mesh"];
+    });
+    if (oldHeightfieldNode) {
+      if (oldHeightfieldNode.extensions.MOZ_hubs_components) {
+        delete oldHeightfieldNode.extensions.MOZ_hubs_components.heightfield;
+      } else if (oldHeightfieldNode.extensions.HUBS_components) {
+        delete oldHeightfieldNode.extensions.HUBS_components.heightfield;
+      }
+    }
+  }
 }
 
-async function loadEnvMap() {
-  const urls = [cubeMapPosX, cubeMapNegX, cubeMapPosY, cubeMapNegY, cubeMapPosZ, cubeMapNegZ];
-  const texture = await new THREE.CubeTextureLoader().load(urls);
-  texture.format = THREE.RGBFormat;
-  return texture;
-}
-
-async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
+export async function loadGLTF(src, contentType, preferredTechnique, onProgress, jsonPreprocessor) {
   let gltfUrl = src;
   let fileMap;
 
   if (contentType.includes("model/gltf+zip") || contentType.includes("application/x-zip-compressed")) {
-    fileMap = await getFilesFromSketchfabZip(gltfUrl);
+    fileMap = await extractZipFile(gltfUrl);
     gltfUrl = fileMap["scene.gtlf"];
   }
 
-  const gltfLoader = new THREE.GLTFLoader();
-  gltfLoader.customURLResolver = getCustomGLTFParserURLResolver(gltfUrl);
-  gltfLoader.setLazy(true);
+  const loadingManager = new THREE.LoadingManager();
+  loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
+  const gltfLoader = new THREE.GLTFLoader(loadingManager);
 
-  const { parser } = await new Promise((resolve, reject) => gltfLoader.load(gltfUrl, resolve, onProgress, reject));
+  const parser = await new Promise((resolve, reject) => gltfLoader.createParser(gltfUrl, resolve, onProgress, reject));
+
+  if (jsonPreprocessor) {
+    parser.json = jsonPreprocessor(parser.json);
+  }
+
+  let version = 0;
+  if (
+    parser.json.extensions &&
+    parser.json.extensions.MOZ_hubs_components &&
+    parser.json.extensions.MOZ_hubs_components.hasOwnProperty("version")
+  ) {
+    version = parser.json.extensions.MOZ_hubs_components.version;
+  }
+  runMigration(version, parser.json);
 
   const materials = parser.json.materials;
   if (materials) {
@@ -242,35 +295,33 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     }
   }
 
-  if (!CachedEnvMapTexture) {
-    CachedEnvMapTexture = loadEnvMap();
+  const nodes = parser.json.nodes;
+
+  if (nodes) {
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+
+      if (!node.extras) {
+        node.extras = {};
+      }
+
+      node.extras.gltfIndex = i;
+    }
   }
 
-  const gltf = await new Promise((resolve, reject) =>
-    parser.parse(
-      (scene, scenes, cameras, animations, json) => {
-        resolve({ scene, scenes, cameras, animations, json });
-      },
-      e => {
-        reject(e);
-      }
-    )
-  );
-
-  const envMap = await CachedEnvMapTexture;
+  const gltf = await new Promise(parser.parse.bind(parser));
 
   gltf.scene.traverse(object => {
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
 
-    if (object.material && object.material.type === "MeshStandardMaterial") {
-      if (preferredTechnique === "KHR_materials_unlit") {
-        object.material = MobileStandardMaterial.fromStandardMaterial(object.material);
-      } else {
-        object.material.envMap = envMap;
-        object.material.needsUpdate = true;
+    object.material = mapMaterials(object, material => {
+      if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
+        return MobileStandardMaterial.fromStandardMaterial(material);
       }
-    }
+
+      return material;
+    });
   });
 
   if (fileMap) {
@@ -299,6 +350,10 @@ AFRAME.registerComponent("gltf-model-plus", {
   init() {
     this.preferredTechnique =
       window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness";
+
+    // This can be set externally if a consumer wants to do some node preprocssing.
+    this.jsonPreprocessor = null;
+
     this.loadTemplates();
   },
 
@@ -317,12 +372,12 @@ AFRAME.registerComponent("gltf-model-plus", {
   async loadModel(src, contentType, technique, useCache) {
     if (useCache) {
       if (!GLTFCache[src]) {
-        GLTFCache[src] = await loadGLTF(src, contentType, technique);
+        GLTFCache[src] = await loadGLTF(src, contentType, technique, null, this.jsonPreprocessor);
       }
 
       return cloneGltf(GLTFCache[src]);
     } else {
-      return await loadGLTF(src, contentType, technique);
+      return await loadGLTF(src, contentType, technique, null, this.jsonPreprocessor);
     }
   },
 
@@ -340,11 +395,12 @@ AFRAME.registerComponent("gltf-model-plus", {
       if (!src) {
         if (this.inflatedEl) {
           console.warn("gltf-model-plus set to an empty source, unloading inflated model.");
-          this.removeInflatedEl();
+          this.disposeLastInflatedEl();
         }
         return;
       }
 
+      this.el.emit("model-loading");
       const gltf = await this.loadModel(src, contentType, this.preferredTechnique, this.data.useCache);
 
       // If we started loading something else already
@@ -352,7 +408,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       if (src != this.lastSrc) return;
 
       // If we had inflated something already before, clean that up
-      this.removeInflatedEl();
+      this.disposeLastInflatedEl();
 
       this.model = gltf.scene || gltf.scenes[0];
       this.model.animations = gltf.animations;
@@ -360,12 +416,22 @@ AFRAME.registerComponent("gltf-model-plus", {
       if (gltf.animations.length > 0) {
         this.el.setAttribute("animation-mixer", {});
         this.el.components["animation-mixer"].initMixer(gltf.animations);
+      } else {
+        generateMeshBVH(this.model);
       }
+
+      const indexToEntityMap = {};
 
       let object3DToSet = this.model;
       if (
         this.data.inflate &&
-        (this.inflatedEl = inflateEntities(this.model, this.templates, true, this.data.modelToWorldScale))
+        (this.inflatedEl = inflateEntities(
+          indexToEntityMap,
+          this.model,
+          this.templates,
+          true,
+          this.data.modelToWorldScale
+        ))
       ) {
         this.el.appendChild(this.inflatedEl);
 
@@ -374,6 +440,9 @@ AFRAME.registerComponent("gltf-model-plus", {
         // Wait one tick for the appended custom elements to be connected before attaching templates
         await nextTick();
         if (src != this.lastSrc) return; // TODO: there must be a nicer pattern for this
+
+        inflateComponents(this.inflatedEl, indexToEntityMap);
+
         for (const name in this.templates) {
           attachTemplate(this.el, name, this.templates[name]);
         }
@@ -393,6 +462,12 @@ AFRAME.registerComponent("gltf-model-plus", {
         if (el) rewires.push(() => (o.el = el));
       });
 
+      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+
+      if (environmentMapComponent) {
+        environmentMapComponent.applyEnvironmentMap(object3DToSet);
+      }
+
       this.el.setObject3D("mesh", object3DToSet);
 
       rewires.forEach(f => f());
@@ -405,10 +480,27 @@ AFRAME.registerComponent("gltf-model-plus", {
     }
   },
 
-  removeInflatedEl() {
+  disposeLastInflatedEl() {
     if (this.inflatedEl) {
       this.inflatedEl.parentNode.removeChild(this.inflatedEl);
+
+      this.inflatedEl.object3D.traverse(x => {
+        if (x.material && x.material.dispose) {
+          x.material.dispose();
+        }
+
+        if (x.geometry) {
+          if (x.geometry.dispose) {
+            x.geometry.dispose();
+          }
+
+          x.geometry.boundsTree = null;
+        }
+      });
+
       delete this.inflatedEl;
+
+      this.el.removeAttribute("animation-mixer");
     }
   }
 });

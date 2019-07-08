@@ -5,24 +5,26 @@
   left: 0;
   position: fixed;
   color: black;
-  z-index: 10;
+  z-index: 20;
 }
 
 .dialog {
-  display: grid;
-  grid-template-columns: 1fr 20px minmax(200px, 525px) 20px 1fr;
-  grid-template-rows: 1fr 20px minmax(200px, max-content) 20px 1fr;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   height: 100%;
   background-color: rgba(0,0,0,.85);
 
   &__box {
-    grid-column: 3;
-    grid-row: 3;
+    max-width: 30em;
+    max-height: 100%;
+    display: flex;
     position: relative;
     pointer-events: auto;
 
     &__contents {
+      overflow-y: auto;
       padding: 30px;
       box-shadow: 0px 0px 30px 1px #202020;
       border-radius: 12px;
@@ -44,7 +46,6 @@
         display: flex;
         flex-direction: column;
         height: 100%;
-        overflow-y: auto;
         margin: 10px 0;
         white-space: pre-wrap;
 
@@ -62,13 +63,12 @@
         }
       }
 
-
       &__close {
         position: absolute;
-        right: 12px;
-        top: 6px;
+        left: 18px;
+        top: 18px;
         color: black;
-        font-size: 1.8em;
+        font-size: 1.6em;
         font-weight: bold;
 
         background: none;
@@ -76,6 +76,10 @@
         border: none;
       }
     }
+  }
+
+  &__wide {
+    max-width: 640px;
   }
 }
 

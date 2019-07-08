@@ -169,3 +169,11 @@
   top: -12px;
   color: white;
 }
+
+:local(.unavailable) {
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}

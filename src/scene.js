@@ -28,18 +28,14 @@ import { App } from "./App";
 window.APP = new App();
 
 const qs = new URLSearchParams(location.search);
-const isMobile = AFRAME.utils.device.isMobile();
+const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
 
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
 import "aframe-physics-system";
-import "aframe-physics-extras";
 import "./components/event-repeater";
-import "./components/controls-shape-offset";
 
 import registerTelemetry from "./telemetry";
-
-registerTelemetry();
 
 disableiOSZoom();
 
@@ -61,6 +57,9 @@ const onReady = async () => {
 
   const sceneId = qs.get("scene_id") || document.location.pathname.substring(1).split("/")[1];
   console.log(`Scene ID: ${sceneId}`);
+
+  // Disable shadows on low quality
+  scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" });
 
   let uiProps = { sceneId: sceneId };
 
@@ -91,6 +90,18 @@ const onReady = async () => {
 
   const res = await fetch(getReticulumFetchUrl(`/api/v1/scenes/${sceneId}`)).then(r => r.json());
   const sceneInfo = res.scenes[0];
+
+  // Delisted/Removed
+  if (!sceneInfo) {
+    remountUI({ unavailable: true });
+    return;
+  }
+
+  if (sceneInfo.allow_promotion) {
+    registerTelemetry(`/scene/${sceneId}`, `Hubs Scene: ${sceneInfo.title}`);
+  } else {
+    registerTelemetry("/scene", "Hubs Non-Promotable Scene Page");
+  }
 
   const modelUrl = sceneInfo.model_url;
   console.log(`Scene Model URL: ${modelUrl}`);

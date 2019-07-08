@@ -6,6 +6,7 @@ import classNames from "classnames";
 import Linkify from "react-linkify";
 import { toArray as toEmojis } from "react-emoji-render";
 import serializeElement from "../utils/serialize-element";
+import { navigateToClientInfo } from "./presence-list";
 
 const messageCanvas = document.createElement("canvas");
 const emojiRegex = /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|[\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|[\ud83c[\ude32-\ude3a]|[\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])/;
@@ -40,7 +41,7 @@ const wordWrap = body => {
   return outWords.join(" ");
 };
 
-const messageBodyDom = (body, from) => {
+const messageBodyDom = (body, from, fromSessionId, history) => {
   // Support wrapping text in ` to get monospace, and multiline.
   const multiLine = body.split("\n").length > 1;
   const wrapStyle = multiLine ? styles.messageWrapMulti : styles.messageWrap;
@@ -50,6 +51,8 @@ const messageBodyDom = (body, from) => {
     [styles.messageBodyMulti]: multiLine,
     [styles.messageBodyMono]: mono
   };
+  const includeClientLink = fromSessionId && history && NAF.clientId !== fromSessionId;
+  const onFromClick = includeClientLink ? () => navigateToClientInfo(history, fromSessionId) : () => {};
 
   if (!multiLine) {
     body = wordWrap(body);
@@ -59,7 +62,14 @@ const messageBodyDom = (body, from) => {
 
   return (
     <div className={wrapStyle}>
-      {from && <div className={styles.messageSource}>{from}:</div>}
+      {from && (
+        <div
+          onClick={onFromClick}
+          className={classNames({ [styles.messageSource]: true, [styles.messageSourceLink]: includeClientLink })}
+        >
+          {from}:
+        </div>
+      )}
       <div className={classNames(messageBodyClasses)}>
         <Linkify properties={{ target: "_blank", rel: "noopener referrer" }}>{toEmojis(cleanedBody)}</Linkify>
       </div>
@@ -125,7 +135,8 @@ function renderChatMessage(body, from, allowEmojiRender, lowResolution) {
       img.onload = async () => {
         context.drawImage(img, 0, 0);
         const blob = await new Promise(resolve => messageCanvas.toBlob(resolve));
-        el.parentNode.removeChild(el);
+        ReactDOM.unmountComponentAtNode(el);
+        el.remove();
         resolve(blob);
       };
 
@@ -137,7 +148,7 @@ function renderChatMessage(body, from, allowEmojiRender, lowResolution) {
 export async function createInWorldLogMessage({ name, type, body }) {
   if (type !== "chat") return;
 
-  const lowResolution = AFRAME.utils.device.isMobile();
+  const lowResolution = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
   const blob = await renderChatMessage(body, name, false, lowResolution);
   const entity = document.createElement("a-entity");
   const meshEntity = document.createElement("a-entity");
@@ -145,7 +156,7 @@ export async function createInWorldLogMessage({ name, type, body }) {
   document.querySelector("a-scene").appendChild(entity);
 
   entity.appendChild(meshEntity);
-  entity.setAttribute("follow-in-lower-fov", {
+  entity.setAttribute("follow-in-fov", {
     target: "#player-camera",
     offset: { x: 0, y: 0.0, z: -0.8 }
   });
@@ -189,7 +200,7 @@ export async function createInWorldLogMessage({ name, type, body }) {
     material.generateMipmaps = false;
     material.needsUpdate = true;
 
-    const geometry = new THREE.PlaneGeometry();
+    const geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
     const mesh = new THREE.Mesh(geometry, material);
     meshEntity.setObject3D("mesh", mesh);
     meshEntity.meshMaterial = material;
@@ -219,7 +230,7 @@ export default function ChatMessage(props) {
           onClick={() => spawnChatMessage(props.body)}
         />
       )}
-      {messageBodyDom(props.body, props.name)}
+      {messageBodyDom(props.body, props.name, props.sessionId, props.history)}
     </div>
   );
 }
@@ -228,5 +239,7 @@ ChatMessage.propTypes = {
   name: PropTypes.string,
   maySpawn: PropTypes.bool,
   body: PropTypes.string,
+  sessionId: PropTypes.string,
+  history: PropTypes.object,
   className: PropTypes.string
 };

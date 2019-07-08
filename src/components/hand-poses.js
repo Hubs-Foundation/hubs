@@ -25,18 +25,25 @@ AFRAME.registerComponent("hand-pose", {
     this.pose = 0;
     this.animatePose = this.animatePose.bind(this);
     const mixerEl = findAncestorWithComponent(this.el, "animation-mixer");
-    if (!mixerEl) {
-      console.warn("Avatar does not have an animation mixer, disabling hand animations");
+    const suffix = this.id == "left" ? "_L" : "_R";
+    this.mixer = mixerEl && mixerEl.components["animation-mixer"].mixer;
+    if (!this.mixer || !this.mixer.clipAction(POSES.open + suffix)) {
+      console.warn("Avatar does not an 'allOpen' animation, disabling hand animations");
       this.el.removeAttribute("hand-pose");
       return;
     }
-    this.mixer = mixerEl.components["animation-mixer"].mixer;
-    const suffix = this.id == "left" ? "_L" : "_R";
     this.from = this.to = this.mixer.clipAction(POSES.open + suffix);
     this.from.play();
+    this.networkField = `${this.id}_hand_pose`;
 
     const getNetworkedAvatar = el => {
-      const networkedAvatar = el.components["networked-avatar"];
+      if (!el) {
+        window.setTimeout(() => {
+          getNetworkedAvatar(this.el);
+        }, 1000);
+        return;
+      }
+      const networkedAvatar = el.components && el.components["networked-avatar"];
       if (networkedAvatar) {
         return networkedAvatar;
       }
@@ -49,13 +56,13 @@ AFRAME.registerComponent("hand-pose", {
     if (
       !this.networkedAvatar ||
       !this.networkedAvatar.data ||
-      this.networkedAvatar.data[`${this.id}_hand_pose`] === this.pose
+      this.networkedAvatar.data[this.networkField] === this.pose
     ) {
       return;
     }
 
-    this.animatePose(NETWORK_POSES[this.pose], NETWORK_POSES[this.networkedAvatar.data[`${this.id}_hand_pose`]]);
-    this.pose = this.networkedAvatar.data[`${this.id}_hand_pose`];
+    this.animatePose(NETWORK_POSES[this.pose], NETWORK_POSES[this.networkedAvatar.data[this.networkField]]);
+    this.pose = this.networkedAvatar.data[this.networkField];
   },
 
   animatePose(prev, curr) {

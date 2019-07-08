@@ -30,23 +30,18 @@
 
 :local(.panel) {
   display: flex;
+  position: relative;
   justify-content: space-around;
   align-items: center;
   padding: 5px;
   background-color: $hud-panel-background;
   border-radius: 30px;
 
-  :local(.video-share-notify) {
-    position: absolute;
-    left: -12px;
-    top: 52px;
-    display: flex;
-    flex-direction: column;
-    border-radius: 28px;
-    border: 0;
-    pointer-events: auto;
-    z-index: 2;
-    width: 223px;
+  :local(.top-tip) {
+    @extend %tip-bubble;
+    top: 60px;
+
+    width: 350px;
 
     @media(max-width: 465px) {
       width: 207px;
@@ -56,11 +51,9 @@
       width: 189px;
     }
 
-    font-size: 0.8em;
-    color: white;
-    padding: 12px 24px;
-    background-color: $bright-blue;
-    text-align: center;
+    @media(max-width: 420px) {
+      width: 189px;
+    }
 
     :local(.attach-point) {
       width: 0;
@@ -70,8 +63,76 @@
       border-bottom: 5px solid $bright-blue;
       position: absolute;
       top: -5px;
-      left: 29px;
     }
+
+    :local(.attach_video_share_mode) {
+      left: 90px;
+
+      @media(max-width: 465px) {
+        left: 27px;
+      }
+
+      @media(max-width: 420px) {
+        left: 26px;
+      }
+    }
+
+    :local(.attach_pen_mode) {
+      right: 143px;
+
+      @media(max-width: 465px) {
+        right: 76px;
+      }
+
+      @media(max-width: 420px) {
+        right: 71px;
+      }
+    }
+
+    :local(.attach_mute_mode) {
+      left: 143px;
+
+      @media(max-width: 465px) {
+        left: 76px;
+      }
+
+      @media(max-width: 420px) {
+        left: 71px;
+      }
+    }
+
+    :local(.attach_freeze_mode) {
+      display: none;
+    }
+  }
+
+  :local(.top-tip-no-hud) {
+    top: -30px;
+    width: auto;
+    white-space: nowrap;
+    height: 20px;
+
+    span {
+      padding-right: 12px;
+    }
+  }
+
+  :local(.tip-cancel-text) {
+    @extend %link-button;
+    color: white;
+  }
+
+  :local(.tip-cancel) {
+    color: $light-blue;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    cursor: pointer;
+    border: none;
+    outline-style: none;
+    width: 32px;
+    margin-right: 2px;
   }
 
   :local(.video-share-extra-options) {
@@ -105,6 +166,10 @@
 }
 
 :local(.iconButton) {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
   width: 40px;
   height: 40px;
   background-size: 100%;
@@ -114,6 +179,7 @@
   align-items: center;
   cursor: pointer;
   margin: 0px 6px;
+  border: 0;
 
   @media(max-width: 465px) {
     margin: 0px 4px;
@@ -139,64 +205,112 @@
   position: relative;
 }
 
+// This roundabout pattern is the only way I can get hovers to not happen on touch devices
 :local(.iconButton.mute) {
   background-image: url(../hud/mute_off.png);
 }
 :local(.iconButton.mute:hover) {
-  background-image: url(../hud/mute_off-hover.png);
+  @media (pointer: fine) {
+    background-image: url(../hud/mute_off-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/mute_off.png);
+  }
 }
+
 :local(.iconButton.mute.active) {
   background-image: url(../hud/mute_on.png);
 }
 :local(.iconButton.mute.active:hover) {
-  background-image: url(../hud/mute_on-hover.png);
+  @media (pointer: fine) {
+    background-image: url(../hud/mute_on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/mute_on.png);
+  }  
 }
 
-:local(.iconButton.bubble) {
-  background-image: url(../hud/bubble_off.png);
+:local(.iconButton.pen) {
+  background-image: url(../hud/pen_off.png);
 }
-:local(.iconButton.bubble:hover) {
-  background-image: url(../hud/bubble_off-hover.png);
-}
-:local(.iconButton.bubble.active) {
-  background-image: url(../hud/bubble_on.png);
-}
-:local(.iconButton.bubble.active:hover) {
-  background-image: url(../hud/bubble_on-hover.png);
+:local(.iconButton.pen:hover) {
+  @media (pointer: fine) {
+    background-image: url(../hud/pen_off-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/pen_off.png);
+  }
 }
 
-:local(.iconButton.spawn_pen) {
-  background-image: url(../hud/spawn_pen.png);
+:local(.iconButton.pen.active) {
+  background-image: url(../hud/pen_on.png);
 }
-:local(.iconButton.spawn_pen:hover) {
-  background-image: url(../hud/spawn_pen-hover.png);
+:local(.iconButton.pen.active:hover) {
+  @media (pointer: fine) {
+    background-image: url(../hud/pen_on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/pen_on.png);
+  }  
 }
 
-:local(.iconButton.spawn_camera) {
-  background-image: url(../hud/spawn_camera.png);
+:local(.iconButton.camera) {
+  background-image: url(../hud/camera_off.png);
 }
-:local(.iconButton.spawn_camera:hover) {
-  background-image: url(../hud/spawn_camera-hover.png);
+:local(.iconButton.camera:hover) {
+  @media (pointer: fine) {
+    background-image: url(../hud/camera_off-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/camera_off.png);
+  }
+}
+
+:local(.iconButton.camera.active) {
+  background-image: url(../hud/camera_on.png);
+}
+:local(.iconButton.camera.active:hover) {
+  @media (pointer: fine) {
+    background-image: url(../hud/camera_on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/camera_on.png);
+  }  
 }
 
 :local(.iconButton.freeze) {
   background-image: url(../hud/freeze_off.png);
 }
 :local(.iconButton.freeze:hover) {
-  background-image: url(../hud/freeze_off-hover.png);
+  @media (pointer: fine) {
+    background-image: url(../hud/freeze_off-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/freeze_off.png);
+  }
 }
 :local(.iconButton.freeze.active) {
   background-image: url(../hud/freeze_on.png);
 }
 :local(.iconButton.freeze.active:hover) {
-  background-image: url(../hud/freeze_on-hover.png);
+  @media (pointer: fine) {
+    background-image: url(../hud/freeze_on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/freeze_on.png);
+  }
 }
 
-:local(.iconButton.create-object) {
-  background-image: url(../hud/create_object.png);
-}
-:local(.iconButton.create-object:hover) {
-  background-image: url(../hud/create_object-hover.png);
+:local(.iconButton.spawn) {
+  background-image: url(../hud/spawn.png);
 }
 
 :local(.iconButton.mobile-media-picker) {
@@ -206,44 +320,76 @@
 :local(.iconButton.share_camera) {
   background-image: url(../hud/share_camera_off.png);
 }
+:local(.iconButton.share_camera:hover) {
+  @media (pointer: fine) {
+    background-image: url(../hud/share_camera_off-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/share_camera_off.png);
+  }
+}
+
 :local(.iconButton.share_camera.active) {
   background-image: url(../hud/share_camera_on.png);
 }
 :local(.iconButton.share_camera.active:hover) {
-  background-image: url(../hud/share_camera_on-hover.png);
+  @media (pointer: fine) {
+    background-image: url(../hud/share_camera_on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/share_camera_on.png);
+  }
 }
 
 :local(.iconButton.share_screen) {
   background-image: url(../hud/share_screen_off.png);
 }
+:local(.iconButton.share_screen:hover) {
+  @media (pointer: fine) {
+    background-image: url(../hud/share_screen_off-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/share_screen_off.png);
+  }
+}
+
 :local(.iconButton.share_screen.active) {
   background-image: url(../hud/share_screen_on.png);
 }
 :local(.iconButton.share_screen.active:hover) {
-  background-image: url(../hud/share_screen_on-hover.png);
+  @media (pointer: fine) {
+    background-image: url(../hud/share_screen_on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/share_screen_on-hover.png);
+  }
 }
 
 :local(.iconButton.share_window) {
   background-image: url(../hud/share_window_off.png);
 }
+:local(.iconButton.share_window:hover) {
+  @media (pointer: fine) {
+    background-image: url(../hud/share_window_off-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/share_window_off.png);
+  }
+}
 :local(.iconButton.share_window.active) {
   background-image: url(../hud/share_window_on.png);
 }
 :local(.iconButton.share_window.active:hover) {
-  background-image: url(../hud/share_window_on-hover.png);
-}
+  @media (pointer: fine) {
+    background-image: url(../hud/share_window_on-hover.png);
+  }
 
-// On mobile, since hover is fired on tap, this can make user think they are streaming,
-// so don't show hover states for now on the share buttons :P
-//
-// @media(hover) query doesn't seem to do the trick.
-/*:local(.iconButton.share_window:hover) {
-  background-image: url(../hud/share_window_off-hover.png);
+  @media (pointer: coarse) {
+    background-image: url(../hud/share_window_on.png);
+  }
 }
-:local(.iconButton.share_screen:hover) {
-  background-image: url(../hud/share_screen_off-hover.png);
-}
-:local(.iconButton.share_camera:hover) {
-  background-image: url(../hud/share_camera_off-hover.png);
-}
- */

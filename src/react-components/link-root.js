@@ -7,7 +7,7 @@ import { lang, messages } from "../utils/i18n";
 import classNames from "classnames";
 import styles from "../assets/stylesheets/link.scss";
 import { disableiOSZoom } from "../utils/disable-ios-zoom";
-import HeadsetIcon from "../assets/images/generic_vr_entry.svg";
+import HeadsetIcon from "../assets/images/generic_vr_headset.svg";
 import { WithHoverSound } from "./wrap-with-audio";
 
 const MAX_DIGITS = 6;
@@ -21,8 +21,7 @@ class LinkRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
     store: PropTypes.object,
-    linkChannel: PropTypes.object,
-    showHeadsetLinkOption: PropTypes.bool
+    linkChannel: PropTypes.object
   };
 
   state = {
@@ -31,8 +30,31 @@ class LinkRoot extends Component {
     failedAtLeastOnce: false
   };
 
+  buttonRefs = {};
+
   componentDidMount = () => {
     document.addEventListener("keydown", this.handleKeyDown);
+    this.attachTouchEvents();
+  };
+
+  attachTouchEvents = () => {
+    // https://github.com/facebook/react/issues/9809#issuecomment-413978405
+    if (hasTouchEvents) {
+      for (const [name, ref] of Object.entries(this.buttonRefs)) {
+        if (!ref) continue;
+        if (name === "remove") {
+          ref.ontouchstart = () => this.removeChar();
+        } else if (name === "toggle") {
+          ref.ontouchstart = () => this.toggleMode();
+        } else {
+          ref.ontouchstart = () => this.addToEntry(name);
+        }
+      }
+    }
+  };
+
+  componentDidUpdate = () => {
+    this.attachTouchEvents();
   };
 
   componentWillUnmount = () => {
@@ -68,11 +90,11 @@ class LinkRoot extends Component {
     if (this.state.entered.length >= this.maxAllowedChars()) return;
     const newChars = `${this.state.entered}${ch}`;
 
-    if (newChars.length === this.maxAllowedChars()) {
-      this.attemptLookup(newChars);
-    }
-
-    this.setState({ entered: newChars });
+    this.setState({ entered: newChars }, () => {
+      if (this.state.entered.length === this.maxAllowedChars()) {
+        this.attemptLookup(this.state.entered);
+      }
+    });
   };
 
   removeChar = () => {
@@ -175,26 +197,25 @@ class LinkRoot extends Component {
                       this.setState({ isAlphaMode: true });
                     }
 
-                    this.setState({ entered: ev.target.value.toUpperCase() });
+                    this.setState({ entered: ev.target.value.toUpperCase() }, () => {
+                      if (this.state.entered.length === this.maxAllowedChars()) {
+                        this.attemptLookup(this.state.entered);
+                      }
+                    });
                   }}
                 />
               </div>
 
               <div className={styles.enteredFooter}>
-                {!this.state.isAlphaMode &&
-                  this.props.showHeadsetLinkOption && (
-                    <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
-                  )}
-                {!this.state.isAlphaMode &&
-                  this.props.showHeadsetLinkOption && (
-                    <span>
-                      <WithHoverSound>
-                        <a href="#" onClick={() => this.toggleMode()}>
-                          <FormattedMessage id="link.linking_a_headset" />
-                        </a>
-                      </WithHoverSound>
-                    </span>
-                  )}
+                {!this.state.isAlphaMode && (
+                  <span>
+                    <WithHoverSound>
+                      <a href="#" onClick={() => this.toggleMode()}>
+                        <FormattedMessage id="link.linking_a_headset" />
+                      </a>
+                    </WithHoverSound>
+                  </span>
+                )}
               </div>
             </div>
 
@@ -211,33 +232,29 @@ class LinkRoot extends Component {
                     onClick={() => {
                       if (!hasTouchEvents) this.addToEntry(d);
                     }}
-                    onTouchStart={() => this.addToEntry(d)}
+                    ref={r => (this.buttonRefs[d.toString()] = r)}
                   >
                     {d}
                   </button>
                 </WithHoverSound>
               ))}
-              {this.props.showHeadsetLinkOption ? (
-                <WithHoverSound>
-                  <button
-                    className={classNames(styles.keypadButton, styles.keypadToggleMode)}
-                    onTouchStart={() => this.toggleMode()}
-                    onClick={() => {
-                      if (!hasTouchEvents) this.toggleMode();
-                    }}
-                  >
-                    {this.state.isAlphaMode ? "123" : "ABC"}
-                  </button>
-                </WithHoverSound>
-              ) : (
-                <div />
-              )}
+              <WithHoverSound>
+                <button
+                  className={classNames(styles.keypadButton, styles.keypadToggleMode)}
+                  ref={r => (this.buttonRefs["toggle"] = r)}
+                  onClick={() => {
+                    if (!hasTouchEvents) this.toggleMode();
+                  }}
+                >
+                  {this.state.isAlphaMode ? "123" : "ABC"}
+                </button>
+              </WithHoverSound>
               {!this.state.isAlphaMode && (
                 <WithHoverSound>
                   <button
                     disabled={this.state.entered.length === this.maxAllowedChars()}
                     className={classNames(styles.keypadButton, styles.keypadZeroButton)}
-                    onTouchStart={() => this.addToEntry(0)}
+                    ref={r => (this.buttonRefs["0"] = r)}
                     onClick={() => {
                       if (!hasTouchEvents) this.addToEntry(0);
                     }}
@@ -250,7 +267,7 @@ class LinkRoot extends Component {
                 <button
                   disabled={this.state.entered.length === 0 || this.state.entered.length === this.maxAllowedChars()}
                   className={classNames(styles.keypadButton, styles.keypadBackspace)}
-                  onTouchStart={() => this.removeChar()}
+                  ref={r => (this.buttonRefs["remove"] = r)}
                   onClick={() => {
                     if (!hasTouchEvents) this.removeChar();
                   }}
@@ -261,24 +278,23 @@ class LinkRoot extends Component {
             </div>
 
             <div className={styles.footer}>
-              {!this.state.isAlphaMode &&
-                this.props.showHeadsetLinkOption && (
-                  <div
-                    className={styles.linkHeadsetFooterLink}
-                    style={{ visibility: this.state.isAlphaMode ? "hidden" : "visible" }}
-                  >
+              {!this.state.isAlphaMode && (
+                <div
+                  className={styles.linkHeadsetFooterLink}
+                  style={{ visibility: this.state.isAlphaMode ? "hidden" : "visible" }}
+                >
+                  <WithHoverSound>
+                    <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
+                  </WithHoverSound>
+                  <span>
                     <WithHoverSound>
-                      <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
+                      <a href="#" onClick={() => this.toggleMode()}>
+                        <FormattedMessage id="link.linking_a_headset" />
+                      </a>
                     </WithHoverSound>
-                    <span>
-                      <WithHoverSound>
-                        <a href="#" onClick={() => this.toggleMode()}>
-                          <FormattedMessage id="link.linking_a_headset" />
-                        </a>
-                      </WithHoverSound>
-                    </span>
-                  </div>
-                )}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

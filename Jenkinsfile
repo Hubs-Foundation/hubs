@@ -34,14 +34,17 @@ pipeline {
           def baseAssetsPath = env.BASE_ASSETS_PATH
           def assetBundleServer = env.ASSET_BUNDLE_SERVER
           def targetS3Url = env.TARGET_S3_URL
+          def sentryDsn = env.SENTRY_DSN
+          def gaTrackingId = env.GA_TRACKING_ID
           def smokeURL = env.SMOKE_URL
-          def janusServer = env.JANUS_SERVER
           def reticulumServer = env.RETICULUM_SERVER
           def farsparkServer = env.FARSPARK_SERVER
           def corsProxyServer = env.CORS_PROXY_SERVER
+          def nonCorsProxyDomains = env.NON_CORS_PROXY_DOMAINS
+          def defaultSceneSid = env.DEFAULT_SCENE_SID
           def slackURL = env.SLACK_URL
 
-          def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh \\\"${baseAssetsPath}\\\" \\\"${assetBundleServer}\\\" \\\"${janusServer}\\\" \\\"${reticulumServer}\\\" \\\"${farsparkServer}\\\" \\\"${corsProxyServer}\\\" \\\"${targetS3Url}\\\" \\\"${env.BUILD_NUMBER}\\\" \\\"${env.GIT_COMMIT}\\\""
+          def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh \\\"${defaultSceneSid}\\\" \\\"${baseAssetsPath}\\\" \\\"${assetBundleServer}\\\" \\\"${reticulumServer}\\\" \\\"${farsparkServer}\\\" \\\"${corsProxyServer}\\\" \\\"${nonCorsProxyDomains}\\\" \\\"${targetS3Url}\\\" \\\"${sentryDsn}\\\" \\\"${gaTrackingId}\\\" \\\"${env.BUILD_NUMBER}\\\" \\\"${env.GIT_COMMIT}\\\""
           sh "/usr/bin/script --return -c ${shellString(habCommand)} /dev/null"
 
           def gitMessage = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'[%an] %s'").trim()

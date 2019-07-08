@@ -8,6 +8,7 @@ AFRAME.registerComponent("drawing-manager", {
   init() {
     this._onComponentInitialized = this._onComponentInitialized.bind(this);
 
+    this.el.object3D.visible = false;
     this.drawingToPen = new Map();
   },
 

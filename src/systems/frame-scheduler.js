@@ -27,8 +27,6 @@ AFRAME.registerSystem("frame-scheduler", {
         entries.splice(idx, 1);
       }
     }
-
-    console.log(this.registry);
   },
 
   tick: function() {

@@ -40,7 +40,7 @@ npm run build
 
 and then upload the files in the `dist` folder to your hosting provider.
 
-If you are running your own servers, you can modify the environment variables `JANUS_SERVER` and
+If you are running your own servers, you can modify the environment variable
 `RETICULUM_SERVER` when building to point Hubs to your own infrastructure.
 
 See `.env.defaults` for the full set of environment variables that can modify
@@ -63,7 +63,9 @@ This will allow the CSP checks to pass that are served up by Reticulum so you ca
 - `disable_telemetry` - If `true` disables Sentry telemetry.
 - `log_filter` - A `debug` style filter for setting the logging level.
 - `debug` - If `true` performs verbose logging of Janus and NAF traffic.
+- `vrstats` - If `true` shows stats in VR.
 - `debug_log` - If `true`, enables an on-screen debug log and console. Useful for debugging on mobile devices.
+- `userinput_debug` - If `true`, enables an on-screen userinput debug status panel. Press "L" on your keyboard to show the panel.
 - `disableTunnel` - Tunnel vision is on by default. Disable the tunnel vision by this parameter.
 
 ## Additional Resources
@@ -73,5 +75,3 @@ This will allow the CSP checks to pass that are served up by Reticulum so you ca
 * [Janus Gateway](https://github.com/meetecho/janus-gateway) - A WebRTC proxy used for centralizing network traffic in this client.
 * [Janus SFU Plugin](https://github.com/mozilla/janus-plugin-sfu) - Plugins for Janus which enables it to act as a SFU.
 * [Hubs-Ops](https://github.com/mozilla/hubs-ops) - Infrastructure as code + management tools for running necessary backend services on AWS.
-
-[![Waffle.io - Columns and their card count](https://badge.waffle.io/mozilla/socialmr.svg?columns=all)](http://waffle.io/mozilla/socialmr)

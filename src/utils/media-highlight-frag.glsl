@@ -1,13 +1,13 @@
-if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo) {
+if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo || hubs_IsFrozen) {
   float ratio = 0.0;
 
   if (hubs_EnableSweepingEffect) {
     float size = hubs_SweepParams.t - hubs_SweepParams.s;
-    float line = mod(hubs_Time / 3000.0 * size, size * 2.0) + hubs_SweepParams.s - size / 2.0;
+    float line = mod(hubs_Time / 500.0 * size, size * 3.0) + hubs_SweepParams.s - size / 3.0;
 
     if (hubs_WorldPosition.y < line) {
       // Highlight with a sweeping gradient.
-      ratio = max(0.0, 1.0 - (line - hubs_WorldPosition.y) / size * 3.0);
+      ratio = max(0.0, 1.0 - (line - hubs_WorldPosition.y) / (size * 1.5));
     }
   }
 

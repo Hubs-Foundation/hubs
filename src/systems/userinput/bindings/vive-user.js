@@ -21,8 +21,8 @@ const lDpadWest = v("left/dpad/west");
 const lDpadCenter = v("left/dpad/center");
 const lTriggerFallingStopDrawing = v("left/trigger/falling/stopDrawing");
 const lGripFallingStopDrawing = v("left/grip/falling/stopDrawing");
-const lTriggerRisingGrab = v("right/trigger/rising/grab");
-const lGripRisingGrab = v("right/grab/rising/grab");
+const lTriggerRisingGrab = v("left/trigger/rising/grab");
+const lGripRisingGrab = v("left/grab/rising/grab");
 const lTouchpadRising2 = v("left/touchpad/rising2");
 const lTouchpadRising1 = v("left/touchpad/rising1");
 const lCharacterAcceleration = v("left/characterAcceleration");
@@ -87,6 +87,24 @@ const leftGripFallingWhileHoldingPen = v("leftGripFallingWhileHoldingPen");
 
 export const viveUserBindings = addSetsToBindings({
   [sets.global]: [
+    {
+      src: {
+        value: paths.device.vive.left.matrix
+      },
+      dest: {
+        value: paths.actions.leftHand.matrix
+      },
+      xform: xforms.copy
+    },
+    {
+      src: {
+        value: paths.device.vive.right.matrix
+      },
+      dest: {
+        value: paths.actions.rightHand.matrix
+      },
+      xform: xforms.copy
+    },
     {
       src: [ensureFrozenViaDpad, ensureFrozenViaKeyboard],
       dest: { value: paths.actions.ensureFrozen },
@@ -316,6 +334,11 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.any
     },
     {
+      src: { value: paths.device.keyboard.key("Tab") },
+      dest: { value: paths.actions.toggleFreeze },
+      xform: xforms.rising
+    },
+    {
       src: { value: paths.device.keyboard.key(" ") },
       dest: { value: ensureFrozenViaKeyboard },
       xform: xforms.copy
@@ -324,6 +347,21 @@ export const viveUserBindings = addSetsToBindings({
       src: { value: paths.device.keyboard.key(" ") },
       dest: { value: thawViaKeyboard },
       xform: xforms.falling
+    },
+    {
+      src: { value: paths.device.keyboard.key("p") },
+      dest: { value: paths.actions.spawnPen },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("c") },
+      dest: { value: paths.actions.toggleCamera },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("x") },
+      dest: { value: paths.actions.takeSnapshot },
+      xform: xforms.rising
     },
     {
       src: { value: rButton("touchpad").pressed, bool: rDpadCenterStrip },
@@ -421,10 +459,145 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: {
+        value: paths.device.keyboard.key("/")
+      },
+      dest: {
+        value: paths.actions.focusChatCommand
+      },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("Escape") },
+      dest: { value: paths.actions.mediaExit },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("1")
+      },
+      dest: { value: "/var/shift+1" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+1" },
+      dest: { value: paths.actions.mediaSearch1 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("2")
+      },
+      dest: { value: "/var/shift+2" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+2" },
+      dest: { value: paths.actions.mediaSearch2 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("3")
+      },
+      dest: { value: "/var/shift+3" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+3" },
+      dest: { value: paths.actions.mediaSearch3 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("4")
+      },
+      dest: { value: "/var/shift+4" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+4" },
+      dest: { value: paths.actions.mediaSearch4 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("5")
+      },
+      dest: { value: "/var/shift+5" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+5" },
+      dest: { value: paths.actions.mediaSearch5 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("6")
+      },
+      dest: { value: "/var/shift+6" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+6" },
+      dest: { value: paths.actions.mediaSearch6 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("7")
+      },
+      dest: { value: "/var/shift+7" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+7" },
+      dest: { value: paths.actions.mediaSearch7 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("8")
+      },
+      dest: { value: "/var/shift+8" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+8" },
+      dest: { value: paths.actions.mediaSearch8 },
+      xform: xforms.rising
+    },
+    {
+      src: {
         value: paths.device.keyboard.key("l")
       },
       dest: {
         value: paths.actions.logDebugFrame
+      },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        value: paths.device.keyboard.key("k")
+      },
+      dest: {
+        value: paths.actions.logInteractionState
       },
       xform: xforms.rising
     },
@@ -564,6 +737,17 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
+  [sets.cursorHoveringOnVideo]: [
+    {
+      src: {
+        value: rAxis("joyY"),
+        touching: rButton("touchpad").touched
+      },
+      dest: { value: paths.actions.cursor.mediaVolumeMod },
+      xform: xforms.touch_axis_scroll(0.1)
+    }
+  ],
+
   [sets.leftHandHoveringOnInteractable]: [
     {
       src: { value: leftGripPressed2 },
@@ -594,6 +778,18 @@ export const viveUserBindings = addSetsToBindings({
 
   [sets.leftHandHoveringOnPen]: [],
   [sets.leftHandHoldingPen]: [
+    {
+      src: { value: leftGripPressed2 },
+      dest: { value: paths.actions.leftHand.drop },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: { value: leftGripPressed2 },
+      dest: { value: paths.actions.leftHand.drop },
+      xform: xforms.noop,
+      priority: 2
+    },
     {
       src: { value: leftTouchpadPressed2 },
       dest: { value: leftTouchpadFallingStopTeleport },
@@ -686,7 +882,7 @@ export const viveUserBindings = addSetsToBindings({
         touching: lButton("touchpad").touched
       },
       dest: { value: paths.actions.leftHand.scalePenTip },
-      xform: xforms.touch_axis_scroll(0.1)
+      xform: xforms.touch_axis_scroll(0.05)
     },
     {
       src: { value: lButton("top").pressed },
@@ -715,6 +911,17 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
+  [sets.cursorHoldingUI]: [
+    {
+      src: { value: rightTriggerPressed2 },
+      dest: {
+        value: cursorDrop2
+      },
+      xform: xforms.falling,
+      priority: 4
+    }
+  ],
+
   [sets.cursorHoldingInteractable]: [
     {
       src: {
@@ -731,15 +938,7 @@ export const viveUserBindings = addSetsToBindings({
       priority: 1
     },
     {
-      src: { value: rightTriggerPressed2 },
-      dest: {
-        value: cursorDrop2
-      },
-      xform: xforms.falling,
-      priority: 2
-    },
-    {
-      src: [cursorDrop1],
+      src: [cursorDrop1, cursorDrop2],
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.any
     },
@@ -754,6 +953,24 @@ export const viveUserBindings = addSetsToBindings({
   [sets.cursorHoveringOnPen]: [],
 
   [sets.cursorHoldingPen]: [
+    {
+      src: [cursorDrop1],
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.noop,
+      priority: 1
+    },
+    {
+      src: [cursorDrop2],
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.noop,
+      priority: 1
+    },
+    {
+      src: { value: rightGripPressed2 },
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.rising,
+      priority: 1
+    },
     {
       src: {
         bool: rTouchpadRising,
@@ -850,7 +1067,8 @@ export const viveUserBindings = addSetsToBindings({
     {
       src: [rHandDrop1],
       dest: { value: paths.actions.rightHand.drop },
-      xform: xforms.any
+      xform: xforms.any,
+      priority: 2
     },
     {
       src: {},
@@ -861,6 +1079,18 @@ export const viveUserBindings = addSetsToBindings({
   ],
   [sets.rightHandHoveringOnPen]: [],
   [sets.rightHandHoldingPen]: [
+    {
+      src: [rHandDrop1],
+      dest: { value: paths.actions.rightHand.drop },
+      xform: xforms.noop,
+      priority: 1
+    },
+    {
+      src: { value: rightGripPressed2 },
+      dest: { value: paths.actions.rightHand.drop },
+      xform: xforms.rising,
+      priority: 1
+    },
     {
       src: {
         bool: rTouchpadRising,
@@ -909,7 +1139,7 @@ export const viveUserBindings = addSetsToBindings({
         touching: rButton("touchpad").touched
       },
       dest: { value: paths.actions.rightHand.scalePenTip },
-      xform: xforms.touch_axis_scroll(0.1)
+      xform: xforms.touch_axis_scroll(0.05)
     },
     {
       src: { value: rButton("top").pressed },

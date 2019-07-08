@@ -4,6 +4,7 @@ import { FormattedMessage } from "react-intl";
 
 import styles from "../assets/stylesheets/sign-in-dialog.scss";
 import DialogContainer from "./dialog-container";
+import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 
 export default class SignInDialog extends Component {
   static propTypes = {
@@ -52,6 +53,8 @@ export default class SignInDialog extends Component {
             required
             placeholder="Your email address"
             value={this.state.email}
+            onFocus={e => handleTextFieldFocus(e.target)}
+            onBlur={() => handleTextFieldBlur()}
             onChange={e => this.setState({ email: e.target.value })}
             className={styles.emailField}
           />

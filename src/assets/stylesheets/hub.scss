@@ -8,7 +8,11 @@
 @import 'audio';
 @import 'info-dialog';
 
-body.vr-mode {
+body {
+  background-color: #d7e5ec;
+}
+
+body.vr-mode-stretch {
   a-scene {
     .a-canvas {
       width: 200% !important;

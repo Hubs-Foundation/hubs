@@ -12,6 +12,8 @@ const rightButton = paths.device.rightOculusTouch.button;
 const rightAxis = paths.device.rightOculusTouch.axis;
 const rightPose = paths.device.rightOculusTouch.pose;
 
+const leftJoyXDeadzoned = `${name}left/joy/x/deadzoned`;
+const leftJoyYDeadzoned = `${name}left/joy/y/deadzoned`;
 const scaledLeftJoyX = `${name}left/scaledJoyX`;
 const scaledLeftJoyY = `${name}left/scaledJoyY`;
 const cursorDrop2 = `${name}right/cursorDrop2`;
@@ -29,13 +31,13 @@ const rightDpadCenter = `${name}rightDpad/center`;
 const rightJoy = `${name}right/joy`;
 const rightJoyY1 = `${name}right/joyY1`;
 const rightJoyY2 = `${name}right/joyY2`;
+const rightJoyYDeadzoned = `${name}right/joy/y/deadzoned`;
 const leftDpadNorth = `${name}leftDpad/north`;
 const leftDpadSouth = `${name}leftDpad/south`;
 const leftDpadEast = `${name}leftDpad/east`;
 const leftDpadWest = `${name}leftDpad/west`;
 const leftDpadCenter = `${name}leftDpad/center`;
 const leftJoy = `${name}left/joy`;
-const leftJoyY = `${name}left/joyY`;
 const oculusTouchCharacterAcceleration = `${name}characterAcceleration`;
 const keyboardCharacterAcceleration = "/var/keyboard/characterAcceleration";
 const characterAcceleration = "/var/oculus-touch/nonNormalizedCharacterAcceleration";
@@ -71,6 +73,24 @@ const rightTriggerPressed2 = v("rightTriggerPressed2");
 
 export const oculusTouchUserBindings = addSetsToBindings({
   [sets.global]: [
+    {
+      src: {
+        value: paths.device.leftOculusTouch.matrix
+      },
+      dest: {
+        value: paths.actions.leftHand.matrix
+      },
+      xform: xforms.copy
+    },
+    {
+      src: {
+        value: paths.device.rightOculusTouch.matrix
+      },
+      dest: {
+        value: paths.actions.rightHand.matrix
+      },
+      xform: xforms.copy
+    },
     {
       src: [ensureFrozenViaButtons, ensureFrozenViaKeyboard],
       dest: { value: paths.actions.ensureFrozen },
@@ -272,6 +292,11 @@ export const oculusTouchUserBindings = addSetsToBindings({
       xform: xforms.any
     },
     {
+      src: { value: paths.device.keyboard.key("Tab") },
+      dest: { value: paths.actions.toggleFreeze },
+      xform: xforms.rising
+    },
+    {
       src: { value: paths.device.keyboard.key(" ") },
       dest: { value: ensureFrozenViaKeyboard },
       xform: xforms.copy
@@ -318,19 +343,39 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: {
+        value: leftAxis("joyY")
+      },
+      dest: {
+        value: leftJoyYDeadzoned
+      },
+      xform: xforms.deadzone(0.1)
+    },
+    {
+      src: {
+        value: leftJoyYDeadzoned
+      },
+      dest: {
+        value: scaledLeftJoyY
+      },
+      xform: xforms.scale(-1.5) // horizontal character speed modifier
+    },
+    {
+      src: {
         value: leftAxis("joyX")
+      },
+      dest: {
+        value: leftJoyXDeadzoned
+      },
+      xform: xforms.deadzone(0.1)
+    },
+    {
+      src: {
+        value: leftJoyXDeadzoned
       },
       dest: {
         value: scaledLeftJoyX
       },
       xform: xforms.scale(1.5) // horizontal character speed modifier
-    },
-    {
-      src: {
-        value: leftAxis("joyY")
-      },
-      dest: { value: scaledLeftJoyY },
-      xform: xforms.scale(-1.5) // vertical character speed modifier
     },
     {
       src: {
@@ -384,7 +429,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
         override: "/device/overrides/foo"
       },
       dest: { value: paths.actions.characterAcceleration },
-      xform: xforms.normalize_vec2
+      xform: xforms.copy
     },
     {
       src: { value: paths.device.keyboard.key("shift") },
@@ -425,10 +470,160 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: {
+        value: paths.device.keyboard.key("/")
+      },
+      dest: {
+        value: paths.actions.focusChatCommand
+      },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("Escape") },
+      dest: { value: paths.actions.mediaExit },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("p") },
+      dest: { value: paths.actions.spawnPen },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("c") },
+      dest: { value: paths.actions.toggleCamera },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("x") },
+      dest: { value: paths.actions.takeSnapshot },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("1")
+      },
+      dest: { value: "/var/shift+1" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+1" },
+      dest: { value: paths.actions.mediaSearch1 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("2")
+      },
+      dest: { value: "/var/shift+2" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+2" },
+      dest: { value: paths.actions.mediaSearch2 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("3")
+      },
+      dest: { value: "/var/shift+3" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+3" },
+      dest: { value: paths.actions.mediaSearch3 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("4")
+      },
+      dest: { value: "/var/shift+4" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+4" },
+      dest: { value: paths.actions.mediaSearch4 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("5")
+      },
+      dest: { value: "/var/shift+5" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+5" },
+      dest: { value: paths.actions.mediaSearch5 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("6")
+      },
+      dest: { value: "/var/shift+6" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+6" },
+      dest: { value: paths.actions.mediaSearch6 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("7")
+      },
+      dest: { value: "/var/shift+7" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+7" },
+      dest: { value: paths.actions.mediaSearch7 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("8")
+      },
+      dest: { value: "/var/shift+8" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+8" },
+      dest: { value: paths.actions.mediaSearch8 },
+      xform: xforms.rising
+    },
+    {
+      src: {
         value: paths.device.keyboard.key("l")
       },
       dest: {
         value: paths.actions.logDebugFrame
+      },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        value: paths.device.keyboard.key("k")
+      },
+      dest: {
+        value: paths.actions.logInteractionState
       },
       xform: xforms.rising
     },
@@ -485,6 +680,14 @@ export const oculusTouchUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising,
       priority: 2
+    }
+  ],
+
+  [sets.cursorHoveringOnVideo]: [
+    {
+      src: { value: rightAxis("joyY") },
+      dest: { value: paths.actions.cursor.mediaVolumeMod },
+      xform: xforms.scale(-0.01)
     }
   ],
 
@@ -568,20 +771,19 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: {
-        value: leftAxis("joyY")
-      },
-      dest: { value: leftJoyY },
-      xform: xforms.copy
-    },
-    {
-      src: { value: leftJoyY },
+      src: { value: leftJoyYDeadzoned },
       dest: { value: paths.actions.leftHand.scalePenTip },
-      xform: xforms.scale(-0.005),
+      xform: xforms.scaleExp(-0.005, 5),
       priority: 1
     },
     {
       src: { value: leftButton("y").pressed },
+      dest: { value: paths.actions.leftHand.switchDrawMode },
+      xform: xforms.rising,
+      priority: 1
+    },
+    {
+      src: { value: leftButton("x").pressed },
       dest: { value: paths.actions.leftHand.undoDrawing },
       xform: xforms.rising,
       priority: 1
@@ -609,6 +811,15 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
+  [sets.cursorHoldingUI]: [
+    {
+      src: { value: rightTriggerPressed2 },
+      dest: { value: cursorDrop2 },
+      xform: xforms.falling,
+      priority: 5
+    }
+  ],
+
   [sets.cursorHoldingInteractable]: [
     {
       src: { value: rightAxis("joyY") },
@@ -622,15 +833,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 3
     },
     {
-      src: { value: rightTriggerPressed2 },
-      dest: {
-        value: cursorDrop2
-      },
-      xform: xforms.falling,
-      priority: 2
-    },
-    {
-      src: [cursorDrop1],
+      src: [cursorDrop1, cursorDrop2],
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.any,
       priority: 2
@@ -744,9 +947,18 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: { value: rightJoyY2 },
+      src: {
+        value: rightAxis("joyY")
+      },
+      dest: {
+        value: rightJoyYDeadzoned
+      },
+      xform: xforms.deadzone(0.1)
+    },
+    {
+      src: { value: rightJoyYDeadzoned },
       dest: { value: paths.actions.rightHand.scalePenTip },
-      xform: xforms.scale(-0.005),
+      xform: xforms.scaleExp(-0.005, 5),
       priority: 2
     },
     {
@@ -757,6 +969,12 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: { value: rightButton("b").pressed },
+      dest: { value: paths.actions.rightHand.switchDrawMode },
+      xform: xforms.rising,
+      priority: 1
+    },
+    {
+      src: { value: rightButton("a").pressed },
       dest: { value: paths.actions.rightHand.undoDrawing },
       xform: xforms.rising,
       priority: 1

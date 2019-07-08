@@ -21,28 +21,39 @@ AFRAME.registerComponent("avatar-replay", {
     rightController: { type: "selector" },
     recordingUrl: { type: "string" }
   },
+
   init: function() {
+    console.log("avatar replay init");
     this.modelLoaded = new Promise(resolve => this.el.addEventListener("model-loaded", resolve));
   },
 
   update: function() {
+    console.log("avatar replay updated: " + this.data.recordingUrl);
     const { camera, leftController, rightController, recordingUrl } = this.data;
     if (!recordingUrl) {
       return;
     }
 
+    console.log("Fetching recording.");
     const fetchRecording = fetch(recordingUrl).then(resp => resp.json());
     camera.setAttribute("motion-capture-replayer", { loop: true });
     this._setupController(leftController);
     this._setupController(rightController);
+    console.log("Waiting for recording to load.");
 
     this.dataLoaded = Promise.all([fetchRecording, this.modelLoaded]).then(([recording]) => {
+      console.log(
+        `Recording ready [${recording.camera.poses.length} cam/${recording.left &&
+          recording.left.poses.length} left/${recording.right &&
+          recording.right.poses.length} right] replaying traffic.`
+      );
       const cameraReplayer = camera.components["motion-capture-replayer"];
       cameraReplayer.startReplaying(recording.camera);
       const leftControllerReplayer = leftController.components["motion-capture-replayer"];
       leftControllerReplayer.startReplaying(recording.left);
       const rightControllerReplayer = rightController.components["motion-capture-replayer"];
       rightControllerReplayer.startReplaying(recording.right);
+      console.log("Replay begun.");
     });
   },
 

@@ -1,10 +1,11 @@
-import { paths } from "../systems/userinput/paths";
+/* global require AFRAME THREE setTimeout clearTimeout */
 import { addMedia } from "../utils/media-utils";
 import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
-import { getLastWorldPosition, getLastWorldQuaternion } from "../utils/three-utils";
+import { paths } from "../systems/userinput/paths";
 
-let nextGrabId = 0;
+const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
+
 /**
  * Spawns networked objects when grabbed or when a specified event is fired.
  * @namespace network
@@ -21,6 +22,11 @@ AFRAME.registerComponent("super-spawner", {
      * Whether to use the Reticulum media resolution API to interpret the src URL (e.g. find a video URL for Youtube videos.)
      */
     resolve: { default: false },
+
+    /**
+     * Whether to resize the media on load.
+     */
+    resize: { default: false },
 
     /**
      * The template to use for this object
@@ -46,12 +52,6 @@ AFRAME.registerComponent("super-spawner", {
     spawnScale: { type: "vec3" },
 
     /**
-     * The events to emit for programmatically grabbing and releasing objects
-     */
-    grabEvents: { default: ["cursor-grab", "primary_hand_grab"] },
-    releaseEvents: { default: ["cursor-release", "primary_hand_release"] },
-
-    /**
      * The spawner will become invisible and ungrabbable for this ammount of time after being grabbed. This can prevent rapidly spawning objects.
      */
     spawnCooldown: { default: 1 },
@@ -67,44 +67,32 @@ AFRAME.registerComponent("super-spawner", {
     spawnEvent: { type: "string" },
 
     /**
-     * The superHand to use if an object is spawned via spawnEvent
+     * If true, will spawn the object at the cursor and animate it into the hand.
      */
-    superHand: { type: "selector" },
-
-    /**
-     * The cursor superHand to use if an object is spawned via spawnEvent
-     */
-    cursorSuperHand: { type: "selector" }
+    animateFromCursor: { type: "boolean" }
   },
 
   init() {
-    this.heldEntities = new Map();
     this.cooldownTimeout = null;
-    this.onGrabStart = this.onGrabStart.bind(this);
-    this.onGrabEnd = this.onGrabEnd.bind(this);
+    this.handPosition = new THREE.Vector3();
 
     this.onSpawnEvent = this.onSpawnEvent.bind(this);
 
     this.sceneEl = document.querySelector("a-scene");
 
-    this.el.setAttribute("hoverable-visuals", { cursorController: "#cursor-controller", enableSweepingEffect: false });
+    this.tempSpawnHandPosition = new THREE.Vector3();
   },
 
   play() {
-    this.el.addEventListener("grab-start", this.onGrabStart);
-    this.el.addEventListener("grab-end", this.onGrabEnd);
     if (this.data.spawnEvent) {
-      this.sceneEl.addEventListener(this.data.spawnEvent, this.onSpawnEvent);
+      this.el.sceneEl.addEventListener(this.data.spawnEvent, this.onSpawnEvent);
     }
   },
 
   pause() {
-    this.el.removeEventListener("grab-start", this.onGrabStart);
-    this.el.removeEventListener("grab-end", this.onGrabEnd);
     if (this.data.spawnEvent) {
-      this.sceneEl.removeEventListener(this.data.spawnEvent, this.onSpawnEvent);
+      this.el.sceneEl.removeEventListener(this.data.spawnEvent, this.onSpawnEvent);
     }
-
     if (this.cooldownTimeout) {
       clearTimeout(this.cooldownTimeout);
       this.cooldownTimeout = null;
@@ -113,97 +101,76 @@ AFRAME.registerComponent("super-spawner", {
     }
   },
 
-  remove() {
-    this.heldEntities.clear();
-  },
-
   async onSpawnEvent() {
-    const userinput = AFRAME.scenes[0].systems.userinput;
-    const leftPose = userinput.get(paths.actions.leftHand.pose);
-    const rightPose = userinput.get(paths.actions.rightHand.pose);
-    const controllerCount = leftPose && rightPose ? 2 : leftPose || rightPose ? 1 : 0;
-    const using6DOF = controllerCount > 1 && this.el.sceneEl.is("vr-mode");
-    const hand = using6DOF ? this.data.superHand : this.data.cursorSuperHand;
-
-    if (this.cooldownTimeout || !hand) {
+    if (this.cooldownTimeout || !this.el.sceneEl.is("entered")) {
       return;
     }
 
-    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve).entity;
+    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve, false)
+      .entity;
 
-    getLastWorldPosition(hand.object3D, entity.object3D.position);
-    getLastWorldQuaternion(hand.object3D, entity.object3D.quaternion);
+    const cursor = document.querySelector("#cursor");
+    cursor.object3D.getWorldPosition(entity.object3D.position);
+    cursor.object3D.getWorldQuaternion(entity.object3D.quaternion);
+    entity.object3D.matrixNeedsUpdate = true;
 
     if (this.data.useCustomSpawnScale) {
       entity.object3D.scale.copy(this.data.spawnScale);
     }
 
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    const interaction = AFRAME.scenes[0].systems.interaction;
+    const willAnimateFromCursor = this.data.animateFromCursor && userinput.get(paths.actions.rightHand.matrix);
+    if (!willAnimateFromCursor) {
+      interaction.state.rightRemote.held = entity;
+      interaction.state.rightRemote.spawning = true;
+    }
     this.activateCooldown();
-
     await waitForEvent("body-loaded", entity);
 
-    getLastWorldPosition(hand.object3D, entity.object3D.position);
+    cursor.object3D.getWorldPosition(entity.object3D.position);
+    cursor.object3D.getWorldQuaternion(entity.object3D.quaternion);
     entity.object3D.matrixNeedsUpdate = true;
 
-    if (!using6DOF) {
-      for (let i = 0; i < this.data.grabEvents.length; i++) {
-        hand.emit(this.data.grabEvents[i], { targetEntity: entity });
-      }
+    if (willAnimateFromCursor) {
+      document.querySelector("#player-right-controller").object3D.getWorldPosition(this.handPosition);
+      entity.setAttribute("animation__spawn-at-cursor", {
+        property: "position",
+        delay: 500,
+        dur: 1500,
+        from: { x: entity.object3D.position.x, y: entity.object3D.position.y, z: entity.object3D.position.z },
+        to: { x: this.handPosition.x, y: this.handPosition.y, z: this.handPosition.z },
+        easing: "easeInOutBack"
+      });
+    } else {
+      interaction.state.rightRemote.spawning = false;
     }
-  },
-
-  async onGrabStart(e) {
-    if (this.cooldownTimeout) {
-      return;
-    }
-
-    // This tells super-hands we are handling this grab. The user is now "grabbing" the spawner
-    e.preventDefault();
-
-    const hand = e.detail.hand;
-    const thisGrabId = nextGrabId++;
-    this.heldEntities.set(hand, thisGrabId);
-
-    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve).entity;
-
-    entity.object3D.position.copy(
-      this.data.useCustomSpawnPosition ? this.data.spawnPosition : this.el.object3D.position
-    );
-    entity.object3D.rotation.copy(
-      this.data.useCustomSpawnRotation ? this.data.spawnRotation : this.el.object3D.rotation
-    );
-    entity.object3D.scale.copy(this.data.useCustomSpawnScale ? this.data.spawnScale : this.el.object3D.scale);
-    entity.object3D.matrixNeedsUpdate = true;
-
-    await waitForEvent("body-loaded", entity);
-
-    // If we are still holding the spawner with the hand that grabbed to create this entity, release the spawner and grab the entity
-    if (this.heldEntities.get(hand) === thisGrabId) {
-      if (this.data.centerSpawnedObject) {
-        entity.body.position.copy(hand.object3D.position);
-      }
-      for (let i = 0; i < this.data.grabEvents.length; i++) {
-        hand.emit(this.data.releaseEvents[i]);
-        hand.emit(this.data.grabEvents[i], { targetEntity: entity });
-      }
-    }
-
-    this.activateCooldown();
-  },
-
-  onGrabEnd(e) {
-    this.heldEntities.delete(e.detail.hand);
-    // This tells super-hands we are handling this release
-    e.preventDefault();
+    entity.components["ammo-body"].syncToPhysics();
   },
 
   activateCooldown() {
     if (this.data.spawnCooldown > 0) {
+      const [sx, sy, sz] = [this.el.object3D.scale.x, this.el.object3D.scale.y, this.el.object3D.scale.z];
+
       this.el.setAttribute("visible", false);
+      this.el.object3D.scale.set(0.001, 0.001, 0.001);
+      this.el.object3D.matrixNeedsUpdate = true;
       this.el.classList.remove("interactable");
+      this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.NONE });
       this.cooldownTimeout = setTimeout(() => {
         this.el.setAttribute("visible", true);
         this.el.classList.add("interactable");
+        this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_SPAWNER });
+        this.el.removeAttribute("animation__spawner-cooldown");
+        this.el.setAttribute("animation__spawner-cooldown", {
+          property: "scale",
+          delay: 50,
+          dur: 350,
+          from: { x: 0.001, y: 0.001, z: 0.001 },
+          to: { x: sx, y: sy, z: sz },
+          easing: "easeOutElastic"
+        });
+
         this.cooldownTimeout = null;
       }, this.data.spawnCooldown * 1000);
     }

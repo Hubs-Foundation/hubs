@@ -22,7 +22,7 @@
     -ms-user-select: text;
 
     background-color: $white-transparent;
-    margin: 8px 64px 8px 16px;
+    margin: 0px 64px 8px 8px;
     font-size: 0.8em;
     padding: 8px 16px;
     border-radius: 20px;
@@ -61,6 +61,11 @@
       font-weight: bold;
     }
 
+    :local(.message-source-link) {
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
     a {
       color: $action-color;
     }
@@ -83,7 +88,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      align-self: flex-start;
       cursor: pointer;
       margin-right: 6px;
       border-radius: 12px;
@@ -95,12 +99,12 @@
     }
 
     :local(.spawn-message) {
-      background-image: url(../spawn_message.png);
+      background-image: url(../images/spawn_message.png);
     }
 
     // TODO replace these icons with share button
     :local(.share) {
-      background-image: url(../share_message.png);
+      background-image: url(../images/share_message.png);
     }
 
     &:local(.media) {
@@ -137,14 +141,21 @@
 
 :local(.presence-log-in-room) {
   position: absolute;
-  bottom: 165px;
+  bottom: 64px;
   z-index: 1;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  width: 95%;
+  max-width: 700px;
 
   :local(.presence-log-entry) {
     background-color: $hud-panel-background;
     color: $light-text;
     min-height: 18px;
 
+    // If this is selectable, tap holding on mobile anywhere on the screen will result
+    // in a selection.
     user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
@@ -203,6 +214,11 @@
     font-size: 0.7em;
     white-space: nowrap;
     color: $light-text;
+  }
+
+  :local(.message-source-link) {
+    cursor: pointer;
+    text-decoration: underline;
   }
 }
 

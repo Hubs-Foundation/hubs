@@ -6,8 +6,7 @@ import en from "react-intl/locale-data/en";
 import styles from "../assets/stylesheets/scene-ui.scss";
 import hubLogo from "../assets/images/hub-preview-white.png";
 import spokeLogo from "../assets/images/spoke_logo_black.png";
-import { getReticulumFetchUrl } from "../utils/phoenix-utils";
-import { generateHubName } from "../utils/name-generation";
+import { createAndRedirectToNewHub } from "../utils/phoenix-utils";
 import { WithHoverSound } from "./wrap-with-audio";
 import CreateRoomDialog from "./create-room-dialog.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -25,7 +24,8 @@ class SceneUI extends Component {
     sceneName: PropTypes.string,
     sceneDescription: PropTypes.string,
     sceneAttributions: PropTypes.object,
-    sceneScreenshotURL: PropTypes.string
+    sceneScreenshotURL: PropTypes.string,
+    unavailable: PropTypes.bool
   };
 
   state = {
@@ -52,26 +52,25 @@ class SceneUI extends Component {
     this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
   }
 
-  createRoom = async () => {
-    const payload = { hub: { name: this.state.customRoomName || generateHubName(), scene_id: this.props.sceneId } };
-    const createUrl = getReticulumFetchUrl("/api/v1/hubs");
-
-    const res = await fetch(createUrl, {
-      body: JSON.stringify(payload),
-      headers: { "content-type": "application/json" },
-      method: "POST"
-    });
-
-    const hub = await res.json();
-
-    if (!process.env.RETICULUM_SERVER || document.location.host === process.env.RETICULUM_SERVER) {
-      document.location = hub.url;
-    } else {
-      document.location = `/hub.html?hub_id=${hub.hub_id}`;
-    }
+  createRoom = () => {
+    createAndRedirectToNewHub(this.state.customRoomName, this.props.sceneId);
   };
 
   render() {
+    if (this.props.unavailable) {
+      return (
+        <IntlProvider locale={lang} messages={messages}>
+          <div className={styles.ui}>
+            <div className={styles.unavailable}>
+              <div>
+                <FormattedMessage id="scene.unavailable" />
+              </div>
+            </div>
+          </div>
+        </IntlProvider>
+      );
+    }
+
     const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
     const tweetText = `${this.props.sceneName} in #hubs`;
     const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(sceneUrl)}&text=${encodeURIComponent(
@@ -82,12 +81,11 @@ class SceneUI extends Component {
 
     const toAttributionSpan = a => {
       if (a.url) {
-        const source =
-          a.url.indexOf("sketchfab.com") >= 0
-            ? "on Sketchfab"
-            : a.url.indexOf("poly.google.com") >= 0
-              ? "on Google Poly"
-              : "";
+        const source = a.url.includes("sketchfab.com")
+          ? "on Sketchfab"
+          : a.url.includes("poly.google.com")
+            ? "on Google Poly"
+            : "";
 
         return (
           <span key={a.url}>

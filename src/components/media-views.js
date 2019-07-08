@@ -1,5 +1,27 @@
+/* global performance THREE AFRAME NAF MediaStream process setTimeout */
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
+import { paths } from "../systems/userinput/paths";
+import HLS from "hls.js/dist/hls.light.js";
+import { spawnMediaAround, createImageTexture } from "../utils/media-utils";
+import { proxiedUrlFor } from "../utils/media-url-utils";
+import { buildAbsoluteURL } from "url-toolkit";
+import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
+import { promisifyWorker } from "../utils/promisify-worker.js";
+
+const ONCE_TRUE = { once: true };
+const TYPE_IMG_PNG = { type: "image/png" };
+const parseGIF = promisifyWorker(new GIFWorker());
+
+export const VOLUME_LABELS = [];
+for (let i = 0; i <= 20; i++) {
+  let s = "|";
+  for (let j = 0; j <= 20; j++) {
+    s += i >= j ? "|" : " ";
+  }
+  s += "|";
+  VOLUME_LABELS[i] = s;
+}
 
 class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
@@ -38,36 +60,27 @@ class GIFTexture extends THREE.Texture {
 
 async function createGIFTexture(url) {
   return new Promise((resolve, reject) => {
-    // TODO: pool workers
-    const worker = new GIFWorker();
-    worker.onmessage = e => {
-      const [success, frames, delays, disposals] = e.data;
-      if (!success) {
-        reject(`error loading gif: ${e.data[1]}`);
-        return;
-      }
-
-      let loadCnt = 0;
-      for (let i = 0; i < frames.length; i++) {
-        const img = new Image();
-        img.onload = e => {
-          loadCnt++;
-          frames[i] = e.target;
-          if (loadCnt === frames.length) {
-            const texture = new GIFTexture(frames, delays, disposals);
-            texture.image.src = url;
-            texture.encoding = THREE.sRGBEncoding;
-            texture.minFilter = THREE.LinearFilter;
-            resolve(texture);
-          }
-        };
-        img.src = frames[i];
-      }
-    };
     fetch(url, { mode: "cors" })
       .then(r => r.arrayBuffer())
-      .then(rawImageData => {
-        worker.postMessage(rawImageData, [rawImageData]);
+      .then(rawImageData => parseGIF(rawImageData, [rawImageData]))
+      .then(result => {
+        const { frames, delayTimes, disposals } = result;
+        let loadCnt = 0;
+        for (let i = 0; i < frames.length; i++) {
+          const img = new Image();
+          img.onload = e => {
+            loadCnt++;
+            frames[i] = e.target;
+            if (loadCnt === frames.length) {
+              const texture = new GIFTexture(frames, delayTimes, disposals);
+              texture.image.src = url;
+              texture.encoding = THREE.sRGBEncoding;
+              texture.minFilter = THREE.LinearFilter;
+              resolve(texture);
+            }
+          };
+          img.src = frames[i];
+        }
       })
       .catch(reject);
   });
@@ -81,7 +94,7 @@ const isIOS = AFRAME.utils.device.isIOS();
  * @param {string} src - Url to a video file.
  * @returns {Element} Video element.
  */
-async function createVideoEl(src) {
+async function createVideoEl() {
   const videoEl = document.createElement("video");
   videoEl.setAttribute("playsinline", "");
   videoEl.setAttribute("webkit-playsinline", "");
@@ -91,90 +104,104 @@ async function createVideoEl(src) {
   // allow the user to unmute it with an interaction in the unmute-video-button component.
   videoEl.muted = isIOS;
   videoEl.preload = "auto";
-  videoEl.loop = true;
   videoEl.crossOrigin = "anonymous";
-
-  if (!src.startsWith("hubs://")) {
-    videoEl.src = src;
-  } else {
-    const streamClientId = src.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
-    const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
-    videoEl.srcObject = new MediaStream(stream.getVideoTracks());
-  }
 
   return videoEl;
 }
 
-function createVideoTexture(url) {
+function createVideoTexture(url, contentType) {
   return new Promise(async (resolve, reject) => {
-    const videoEl = await createVideoEl(url);
+    const videoEl = await createVideoEl();
 
     const texture = new THREE.VideoTexture(videoEl);
     texture.minFilter = THREE.LinearFilter;
     texture.encoding = THREE.sRGBEncoding;
 
-    videoEl.addEventListener("loadedmetadata", () => resolve(texture), { once: true });
-    videoEl.onerror = reject;
+    if (url.startsWith("hubs://")) {
+      const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
+      const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
+      videoEl.srcObject = new MediaStream(stream.getVideoTracks());
+      // If hls.js is supported we always use it as it gives us better events
+    } else if (AFRAME.utils.material.isHLS(url, contentType)) {
+      if (HLS.isSupported()) {
+        const corsProxyPrefix = `https://${process.env.CORS_PROXY_SERVER}/`;
+        const baseUrl = url.startsWith(corsProxyPrefix) ? url.substring(corsProxyPrefix.length) : url;
+        const hls = new HLS({
+          xhrSetup: (xhr, u) => {
+            if (u.startsWith(corsProxyPrefix)) {
+              u = u.substring(corsProxyPrefix.length);
+            }
 
-    // If iOS and video is HLS, do some hacks.
-    if (
-      isIOS &&
-      AFRAME.utils.material.isHLS(
-        videoEl.src || videoEl.getAttribute("src"),
-        videoEl.type || videoEl.getAttribute("type")
-      )
-    ) {
-      // Actually BGRA. Tell shader to correct later.
-      texture.format = THREE.RGBAFormat;
-      texture.needsCorrectionBGRA = true;
-      // Apparently needed for HLS. Tell shader to correct later.
-      texture.flipY = false;
-      texture.needsCorrectionFlipY = true;
+            // HACK HLS.js resolves relative urls internally, but our CORS proxying screws it up. Resolve relative to the original unproxied url.
+            // TODO extend HLS.js to allow overriding of its internal resolving instead
+            if (!u.startsWith("http")) {
+              u = buildAbsoluteURL(baseUrl, u.startsWith("/") ? u : `/${u}`);
+            }
+
+            xhr.open("GET", proxiedUrlFor(u));
+          }
+        });
+        texture.hls = hls;
+        hls.loadSource(url);
+        hls.attachMedia(videoEl);
+        hls.on(HLS.Events.ERROR, function(event, data) {
+          if (data.fatal) {
+            switch (data.type) {
+              case HLS.ErrorTypes.NETWORK_ERROR:
+                // try to recover network error
+                hls.startLoad();
+                break;
+              case HLS.ErrorTypes.MEDIA_ERROR:
+                hls.recoverMediaError();
+                break;
+              default:
+                reject(event);
+                return;
+            }
+          }
+        });
+        // If not, see if native support will work
+      } else if (videoEl.canPlayType(contentType)) {
+        videoEl.src = url;
+        videoEl.onerror = reject;
+      } else {
+        reject("HLS unsupported");
+      }
+    } else {
+      videoEl.src = url;
+      videoEl.onerror = reject;
+    }
+
+    let hasResolved = false;
+
+    const resolveOnce = () => {
+      if (hasResolved) return;
+      hasResolved = true;
+      resolve(texture);
+    };
+
+    videoEl.addEventListener("canplay", resolveOnce, { once: true });
+
+    // HACK: Sometimes iOS fails to fire the canplay event, so we poll for the video dimensions to appear instead.
+    if (isIOS) {
+      const poll = () => {
+        if ((texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width)) {
+          resolveOnce();
+        } else {
+          setTimeout(poll, 500);
+        }
+      };
+
+      poll();
     }
   });
 }
 
-function createPlaneMesh(texture) {
-  const material = new THREE.MeshBasicMaterial();
-  material.side = THREE.DoubleSide;
-  material.transparent = true;
-  material.map = texture;
-  material.needsUpdate = true;
-
-  const geometry = new THREE.PlaneGeometry();
-  return new THREE.Mesh(geometry, material);
-}
-
-function fitToTexture(el, texture) {
-  const ratio =
-    (texture.image.videoHeight || texture.image.height || 1.0) /
-    (texture.image.videoWidth || texture.image.width || 1.0);
+function scaleToAspectRatio(el, ratio) {
   const width = Math.min(1.0, 1.0 / ratio);
   const height = Math.min(1.0, ratio);
   el.object3DMap.mesh.scale.set(width, height, 1);
-  el.setAttribute("shape", {
-    shape: "box",
-    halfExtents: { x: width / 2, y: height / 2, z: 0.05 }
-  });
-}
-
-const textureLoader = new THREE.TextureLoader();
-textureLoader.setCrossOrigin("anonymous");
-function createImageTexture(url) {
-  return new Promise((resolve, reject) => {
-    textureLoader.load(
-      url,
-      texture => {
-        texture.encoding = THREE.sRGBEncoding;
-        texture.minFilter = THREE.LinearFilter;
-        resolve(texture);
-      },
-      null,
-      function(xhr) {
-        reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
-      }
-    );
-  });
+  el.object3DMap.mesh.matrixNeedsUpdate = true;
 }
 
 function disposeTexture(texture) {
@@ -184,6 +211,11 @@ function disposeTexture(texture) {
     video.src = "";
     video.load();
   }
+
+  if (texture.hls) {
+    texture.hls.destroy();
+  }
+
   texture.dispose();
 }
 
@@ -191,11 +223,13 @@ class TextureCache {
   cache = new Map();
 
   set(src, texture) {
+    const image = texture.image;
     this.cache.set(src, {
       texture,
+      ratio: (image.videoHeight || image.height) / (image.videoWidth || image.width),
       count: 0
     });
-    this.retain(src);
+    return this.retain(src);
   }
 
   has(src) {
@@ -203,18 +237,24 @@ class TextureCache {
   }
 
   get(src) {
-    return this.cache.get(src).texture;
+    return this.cache.get(src);
   }
 
   retain(src) {
     const cacheItem = this.cache.get(src);
     cacheItem.count++;
     // console.log("retain", src, cacheItem.count);
-    return cacheItem.texture;
+    return cacheItem;
   }
 
   release(src) {
     const cacheItem = this.cache.get(src);
+
+    if (!cacheItem) {
+      console.error(`Releasing uncached texture src ${src}`);
+      return;
+    }
+
     cacheItem.count--;
     // console.log("release", src, cacheItem.count);
     if (cacheItem.count <= 0) {
@@ -235,11 +275,36 @@ errorImage.onload = () => {
   errorTexture.needsUpdate = true;
 };
 
+function timeFmt(t) {
+  let s = Math.floor(t),
+    h = Math.floor(s / 3600);
+  s -= h * 3600;
+  let m = Math.floor(s / 60);
+  s -= m * 60;
+  if (h < 10) h = `0${h}`;
+  if (m < 10) m = `0${m}`;
+  if (s < 10) s = `0${s}`;
+  return h === "00" ? `${m}:${s}` : `${h}:${m}:${s}`;
+}
+
 AFRAME.registerComponent("media-video", {
   schema: {
     src: { type: "string" },
-    time: { type: "number" },
+    contentType: { type: "string" },
+    volume: { type: "number", default: 0.5 },
+    loop: { type: "boolean", default: true },
+    audioType: { type: "string", default: "pannernode" },
+    hidePlaybackControls: { type: "boolean", default: false },
+    distanceModel: { type: "string", default: "inverse" },
+    rolloffFactor: { type: "number", default: 1 },
+    refDistance: { type: "number", default: 1 },
+    maxDistance: { type: "number", default: 10000 },
+    coneInnerAngle: { type: "number", default: 360 },
+    coneOuterAngle: { type: "number", default: 0 },
+    coneOuterGain: { type: "number", default: 0 },
     videoPaused: { type: "boolean" },
+    projection: { type: "string", default: "flat" },
+    time: { type: "number" },
     tickRate: { default: 1000 }, // ms interval to send time interval updates
     syncTolerance: { default: 2 }
   },
@@ -247,19 +312,60 @@ AFRAME.registerComponent("media-video", {
   init() {
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
     this.tryUpdateVideoPlaybackState = this.tryUpdateVideoPlaybackState.bind(this);
+    this.updateSrc = this.updateSrc.bind(this);
 
-    this._grabStart = this._grabStart.bind(this);
-    this._grabEnd = this._grabEnd.bind(this);
+    this.seekForward = this.seekForward.bind(this);
+    this.seekBack = this.seekBack.bind(this);
+    this.volumeUp = this.volumeUp.bind(this);
+    this.volumeDown = this.volumeDown.bind(this);
+    this.snap = this.snap.bind(this);
+    this.changeVolumeBy = this.changeVolumeBy.bind(this);
+    this.togglePlaying = this.togglePlaying.bind(this);
 
     this.lastUpdate = 0;
+    this.videoMutedAt = 0;
+    this.localSnapCount = 0;
+    this.isSnapping = false;
+    this.onSnapImageLoaded = () => (this.isSnapping = false);
+
+    this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", dirs: ["forward", "back"] });
+    this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
+      // If we got removed while waiting, do nothing.
+      if (!this.el.parentNode) return;
+
+      this.hoverMenu = menu;
+
+      this.playbackControls = this.el.querySelector(".video-playback");
+      this.playPauseButton = this.el.querySelector(".video-playpause-button");
+      this.volumeUpButton = this.el.querySelector(".video-volume-up-button");
+      this.volumeDownButton = this.el.querySelector(".video-volume-down-button");
+      this.seekForwardButton = this.el.querySelector(".video-seek-forward-button");
+      this.seekBackButton = this.el.querySelector(".video-seek-back-button");
+      this.snapButton = this.el.querySelector(".video-snap-button");
+      this.timeLabel = this.el.querySelector(".video-time-label");
+      this.volumeLabel = this.el.querySelector(".video-volume-label");
+
+      this.playPauseButton.object3D.addEventListener("interact", this.togglePlaying);
+      this.seekForwardButton.object3D.addEventListener("interact", this.seekForward);
+      this.seekBackButton.object3D.addEventListener("interact", this.seekBack);
+      this.volumeUpButton.object3D.addEventListener("interact", this.volumeUp);
+      this.volumeDownButton.object3D.addEventListener("interact", this.volumeDown);
+      this.snapButton.object3D.addEventListener("interact", this.snap);
+
+      this.updateVolumeLabel();
+      this.updateHoverMenuBasedOnLiveState();
+      this.updatePlaybackState();
+    });
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
       this.updatePlaybackState();
 
       // For scene-owned videos, take ownership after a random delay if nobody
-      // else has so there is a timekeeper.
-      if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
+      // else has so there is a timekeeper. Do not due this on iOS because iOS has an
+      // annoying "auto-pause" feature that forces one non-autoplaying video to play
+      // at once, which will pause the videos for everyone in the room if owned.
+      if (!isIOS && NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
         setTimeout(() => {
           if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
             NAF.utils.takeOwnership(this.networkedEl);
@@ -279,52 +385,78 @@ AFRAME.registerComponent("media-video", {
     });
   },
 
-  // aframe component play, unrelated to video
-  play() {
-    this.el.addEventListener("grab-start", this._grabStart);
-    this.el.addEventListener("grab-end", this._grabEnd);
-  },
-
-  // aframe component pause, unrelated to video
-  pause() {
-    this.el.removeEventListener("grab-start", this._grabStart);
-    this.el.removeEventListener("grab-end", this._grabEnd);
-  },
-
-  _grabStart() {
-    if (!this.el.components.grabbable || this.el.components.grabbable.data.maxGrabbers === 0) return;
-
-    if (this.video && this.video.muted && !this.video.paused) {
-      this.video.muted = false;
-    }
-
-    this.grabStartPosition = this.el.object3D.position.clone();
-  },
-
-  _grabEnd() {
-    if (this.grabStartPosition && this.grabStartPosition.distanceToSquared(this.el.object3D.position) < 0.01 * 0.01) {
-      this.togglePlayingIfOwner();
-      this.grabStartPosition = null;
+  seekForward() {
+    if ((!this.videoIsLive && NAF.utils.isMine(this.networkedEl)) || NAF.utils.takeOwnership(this.networkedEl)) {
+      this.video.currentTime += 30;
+      this.el.setAttribute("media-video", "time", this.video.currentTime);
     }
   },
 
-  togglePlayingIfOwner() {
-    if (this.networkedEl && NAF.utils.isMine(this.networkedEl) && this.video) {
+  seekBack() {
+    if ((!this.videoIsLive && NAF.utils.isMine(this.networkedEl)) || NAF.utils.takeOwnership(this.networkedEl)) {
+      this.video.currentTime -= 10;
+      this.el.setAttribute("media-video", "time", this.video.currentTime);
+    }
+  },
+
+  changeVolumeBy(v) {
+    this.el.setAttribute("media-video", "volume", THREE.Math.clamp(this.data.volume + v, 0, 1));
+    this.updateVolumeLabel();
+  },
+
+  volumeUp() {
+    this.changeVolumeBy(0.1);
+  },
+
+  volumeDown() {
+    this.changeVolumeBy(-0.1);
+  },
+
+  async snap() {
+    if (this.isSnapping) return;
+    this.isSnapping = true;
+    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = this.video.videoWidth;
+    canvas.height = this.video.videoHeight;
+    canvas.getContext("2d").drawImage(this.video, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise(resolve => canvas.toBlob(resolve));
+    const file = new File([blob], "snap.png", TYPE_IMG_PNG);
+
+    this.localSnapCount++;
+    const { entity } = spawnMediaAround(this.el, file, this.localSnapCount);
+    entity.addEventListener("image-loaded", this.onSnapImageLoaded, ONCE_TRUE);
+  },
+
+  togglePlaying() {
+    // See onPauseStateChanged for note about iOS
+    if (isIOS && this.video.paused && NAF.utils.isMine(this.networkedEl)) {
+      this.video.play();
+      return;
+    }
+
+    if (this.networkedEl && (NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
       this.tryUpdateVideoPlaybackState(!this.data.videoPaused);
     }
   },
 
-  remove() {
-    if (this.mesh && this.mesh.material) {
-      disposeTexture(this.mesh.material.map);
-    }
-    if (this.video) {
-      this.video.removeEventListener("pause", this.onPauseStateChange);
-      this.video.removeEventListener("play", this.onPauseStateChange);
-    }
-  },
-
   onPauseStateChange() {
+    // iOS Safari will auto-pause other videos if one is manually started (not autoplayed.) So, to keep things
+    // easy to reason about, we *never* broadcast pauses from iOS.
+    //
+    // if an iOS safari user pauses and plays a video they'll pause all the other videos,
+    // which isn't great, but this check will at least ensure they don't pause those videos
+    // for all other users in the room! Of course, if they go and hit play on those videos auto-paused,
+    // they will become the timekeeper, and will seek everyone to where the video was auto-paused.
+    //
+    // This specific case will diverge the network schema and the video player state, so that
+    // this.data.videoPaused is false (so others will keep playing it) but our local player will
+    // have stopped. So we deal with this special case as well when we press the play button.
+    if (isIOS && this.video.paused && NAF.utils.isMine(this.networkedEl)) {
+      return;
+    }
+
     this.el.setAttribute("media-video", "videoPaused", this.video.paused);
 
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
@@ -332,10 +464,76 @@ AFRAME.registerComponent("media-video", {
     }
   },
 
-  async updateTexture(src) {
+  updatePlaybackState(force) {
+    if (this.hoverMenu) {
+      this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
+      this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
+
+      this.playPauseButton.object3D.visible = !!this.video;
+      this.snapButton.object3D.visible = !!this.video;
+      this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
+      this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
+    }
+
+    // Only update playback position for videos you don't own
+    if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
+      if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
+        this.tryUpdateVideoPlaybackState(this.data.videoPaused, this.data.time);
+      } else {
+        this.tryUpdateVideoPlaybackState(this.data.videoPaused);
+      }
+    }
+
+    // Volume is local, always update it
+    if (this.audio) {
+      this.audio.gain.gain.value = this.data.volume;
+    }
+  },
+
+  tryUpdateVideoPlaybackState(pause, currentTime) {
+    if (this._playbackStateChangeTimeout) {
+      clearTimeout(this._playbackStateChangeTimeout);
+      delete this._playbackStateChangeTimeout;
+    }
+
+    if (!this.videoIsLive && currentTime !== undefined) {
+      this.video.currentTime = currentTime;
+    }
+
+    if (this.hoverMenu) {
+      this.playPauseButton.setAttribute("icon-button", "active", pause);
+    }
+
+    if (pause) {
+      this.video.pause();
+    } else {
+      // Need to deal with the fact play() may fail if user has not interacted with browser yet.
+      this.video.play().catch(() => {
+        this._playbackStateChangeTimeout = setTimeout(() => this.tryUpdateVideoPlaybackState(pause, currentTime), 1000);
+      });
+    }
+  },
+
+  async update(oldData) {
+    const src = this.data.src;
+    this.updatePlaybackState();
+
+    if (!src || src === oldData.src) return;
+    return this.updateSrc(oldData);
+  },
+
+  async updateSrc(oldData) {
+    const { src } = this.data;
+
+    this.cleanUp();
+    if (this.mesh && this.mesh.material) {
+      this.mesh.material.map = null;
+      this.mesh.material.needsUpdate = true;
+    }
+
     let texture;
     try {
-      texture = await createVideoTexture(src);
+      texture = await createVideoTexture(src, this.data.contentType);
 
       // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
       if (this.data.src !== src) {
@@ -347,14 +545,41 @@ AFRAME.registerComponent("media-video", {
         // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
         texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
 
-        const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-        sound.setNodeSource(texture.audioSource);
-        this.el.setObject3D("sound", sound);
+        if (this.data.audioType === "pannernode") {
+          this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+          this.audio.setDistanceModel(this.data.distanceModel);
+          this.audio.setRolloffFactor(this.data.rolloffFactor);
+          this.audio.setRefDistance(this.data.refDistance);
+          this.audio.setMaxDistance(this.data.maxDistance);
+          this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
+          this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
+          this.audio.panner.coneOuterGain = this.data.coneOuterGain;
+        } else {
+          this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
+        }
+
+        this.audio.setNodeSource(texture.audioSource);
+        this.el.setObject3D("sound", this.audio);
       }
 
       this.video = texture.image;
+      this.video.loop = this.data.loop;
       this.video.addEventListener("pause", this.onPauseStateChange);
       this.video.addEventListener("play", this.onPauseStateChange);
+
+      if (texture.hls) {
+        const updateLiveState = () => {
+          this.videoIsLive = texture.hls.levels[texture.hls.currentLevel].details.live;
+          this.updateHoverMenuBasedOnLiveState();
+        };
+        texture.hls.on(HLS.Events.LEVEL_SWITCHED, updateLiveState);
+        if (texture.hls.currentLevel >= 0) {
+          updateLiveState();
+        }
+      } else {
+        this.videoIsLive = this.video.duration === Infinity;
+        this.updateHoverMenuBasedOnLiveState();
+      }
 
       if (isIOS) {
         const template = document.getElementById("video-unmute");
@@ -369,85 +594,122 @@ AFRAME.registerComponent("media-video", {
       texture = errorTexture;
     }
 
-    if (!this.mesh) {
-      this.mesh = createPlaneMesh(texture);
+    const projection = this.data.projection;
+
+    if (!this.mesh || projection !== oldData.projection) {
+      const material = new THREE.MeshBasicMaterial();
+
+      let geometry;
+
+      if (projection === "360-equirectangular") {
+        geometry = new THREE.SphereBufferGeometry(1, 64, 32);
+        // invert the geometry on the x-axis so that all of the faces point inward
+        geometry.scale(-1, 1, 1);
+      } else {
+        geometry = new THREE.PlaneBufferGeometry();
+        material.side = THREE.DoubleSide;
+      }
+
+      this.mesh = new THREE.Mesh(geometry, material);
       this.el.setObject3D("mesh", this.mesh);
-    } else {
-      const { material } = this.mesh;
-      material.map = texture;
-      material.needsUpdate = true;
-      this.mesh.needsUpdate = true;
     }
 
-    fitToTexture(this.el, texture);
+    this.mesh.material.map = texture;
+    this.mesh.material.needsUpdate = true;
+
+    if (projection === "flat") {
+      scaleToAspectRatio(this.el, texture.image.videoHeight / texture.image.videoWidth);
+    }
 
     this.updatePlaybackState(true);
 
-    this.el.emit("video-loaded");
-  },
-
-  updatePlaybackState(force) {
-    if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
-      if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
-        this.tryUpdateVideoPlaybackState(this.data.videoPaused, this.data.time);
-      } else {
-        this.tryUpdateVideoPlaybackState(this.data.videoPaused);
-      }
-    }
-  },
-
-  tryUpdateVideoPlaybackState(pause, currentTime) {
-    if (this._playbackStateChangeTimeout) {
-      clearTimeout(this._playbackStateChangeTimeout);
+    if (this.video.muted) {
+      this.videoMutedAt = performance.now();
     }
 
-    if (pause) {
-      this.video.pause();
+    this.el.emit("video-loaded", { projection: projection });
+  },
 
-      if (currentTime) {
-        this.video.currentTime = currentTime;
-      }
-    } else {
-      // Need to deal with the fact play() may fail if user has not interacted with browser yet.
-      this.video
-        .play()
-        .then(() => {
-          if (currentTime) {
-            this.video.currentTime = currentTime;
-          }
-        })
-        .catch(() => {
-          this._playbackStateChangeTimeout = setTimeout(
-            () => this.tryUpdateVideoPlaybackState(pause, currentTime),
-            1000
-          );
-        });
+  updateHoverMenuBasedOnLiveState() {
+    if (!this.hoverMenu) return;
+
+    this.seekForwardButton.object3D.visible = !this.videoIsLive;
+    this.seekBackButton.object3D.visible = !this.videoIsLive;
+
+    if (this.videoIsLive) {
+      this.timeLabel.setAttribute("text", "value", "LIVE");
     }
   },
 
-  update(oldData) {
-    const { src } = this.data;
-
-    this.updatePlaybackState();
-
-    if (!src || src === oldData.src) return;
-
-    this.remove();
-    if (this.mesh && this.mesh.material) {
-      this.mesh.material.map = null;
-      this.mesh.material.needsUpdate = true;
-    }
-
-    this.updateTexture(src);
+  updateVolumeLabel() {
+    this.volumeLabel.setAttribute(
+      "text",
+      "value",
+      this.data.volume === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(this.data.volume / 0.05)]
+    );
   },
 
   tick() {
-    if (this.data.videoPaused || !this.video || !this.networkedEl || !NAF.utils.isMine(this.networkedEl)) return;
+    if (!this.video) return;
 
-    const now = performance.now();
-    if (now - this.lastUpdate > this.data.tickRate) {
-      this.el.setAttribute("media-video", "time", this.video.currentTime);
-      this.lastUpdate = now;
+    const userinput = this.el.sceneEl.systems.userinput;
+    const interaction = this.el.sceneEl.systems.interaction;
+    const volumeMod = userinput.get(paths.actions.cursor.mediaVolumeMod);
+    if (interaction.state.rightRemote.hovered === this.el && volumeMod) {
+      this.changeVolumeBy(volumeMod);
+    }
+
+    const isHeld = interaction.isHeld(this.el);
+
+    if (this.wasHeld && !isHeld) {
+      this.localSnapCount = 0;
+    }
+
+    this.wasHeld = isHeld;
+
+    if (this.hoverMenu && this.hoverMenu.object3D.visible && !this.videoIsLive) {
+      this.timeLabel.setAttribute(
+        "text",
+        "value",
+        `${timeFmt(this.video.currentTime)} / ${timeFmt(this.video.duration)}`
+      );
+    }
+
+    // If a non-live video is currently playing and we own it, send out time updates
+    if (!this.data.videoPaused && !this.videoIsLive && this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
+      const now = performance.now();
+      if (now - this.lastUpdate > this.data.tickRate) {
+        this.el.setAttribute("media-video", "time", this.video.currentTime);
+        this.lastUpdate = now;
+      }
+    }
+  },
+
+  cleanUp() {
+    if (this.mesh && this.mesh.material) {
+      disposeTexture(this.mesh.material.map);
+    }
+  },
+
+  remove() {
+    this.cleanUp();
+
+    if (this.audio) {
+      this.el.removeObject3D("sound");
+      this.audio.disconnect();
+      delete this.audio;
+    }
+
+    if (this.video) {
+      this.video.removeEventListener("pause", this.onPauseStateChange);
+      this.video.removeEventListener("play", this.onPauseStateChange);
+    }
+    if (this.hoverMenu) {
+      this.playPauseButton.object3D.removeEventListener("interact", this.togglePlaying);
+      this.volumeUpButton.object3D.removeEventListener("interact", this.volumeUp);
+      this.volumeDownButton.object3D.removeEventListener("interact", this.volumeDown);
+      this.seekForwardButton.object3D.removeEventListener("interact", this.seekForward);
+      this.seekBackButton.object3D.removeEventListener("interact", this.seekBack);
     }
   }
 });
@@ -455,20 +717,28 @@ AFRAME.registerComponent("media-video", {
 AFRAME.registerComponent("media-image", {
   schema: {
     src: { type: "string" },
+    projection: { type: "string", default: "flat" },
     contentType: { type: "string" }
   },
 
   remove() {
-    textureCache.release(this.data.src);
+    if (this._hasRetainedTexture) {
+      textureCache.release(this.data.src);
+      this._hasRetainedTexture = false;
+    }
   },
 
   async update(oldData) {
     let texture;
+    let ratio = 1;
+
     try {
       const { src, contentType } = this.data;
       if (!src) return;
 
-      if (this.mesh && this.mesh.map) {
+      this.el.emit("image-loading");
+
+      if (this.mesh && this.mesh.map && src !== oldData.src) {
         this.mesh.material.map = null;
         this.mesh.material.needsUpdate = true;
         if (this.mesh.map !== errorTexture) {
@@ -477,7 +747,9 @@ AFRAME.registerComponent("media-image", {
       }
 
       if (textureCache.has(src)) {
-        texture = textureCache.retain(src);
+        const cacheItem = textureCache.retain(src);
+        texture = cacheItem.texture;
+        ratio = cacheItem.ratio;
       } else {
         if (src === "error") {
           texture = errorTexture;
@@ -489,7 +761,8 @@ AFRAME.registerComponent("media-image", {
           throw new Error(`Unknown image content type: ${contentType}`);
         }
 
-        textureCache.set(src, texture);
+        const cacheItem = textureCache.set(src, texture);
+        ratio = cacheItem.ratio;
 
         // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
         if (this.data.src !== src) {
@@ -497,23 +770,42 @@ AFRAME.registerComponent("media-image", {
           return;
         }
       }
+
+      this._hasRetainedTexture = true;
     } catch (e) {
       console.error("Error loading image", this.data.src, e);
       texture = errorTexture;
+      this._hasRetainedTexture = false;
     }
 
-    if (!this.mesh) {
-      this.mesh = createPlaneMesh(texture);
+    const projection = this.data.projection;
+
+    if (!this.mesh || projection !== oldData.projection) {
+      const material = new THREE.MeshBasicMaterial();
+
+      let geometry;
+
+      if (projection === "360-equirectangular") {
+        geometry = new THREE.SphereBufferGeometry(1, 64, 32);
+        // invert the geometry on the x-axis so that all of the faces point inward
+        geometry.scale(-1, 1, 1);
+      } else {
+        geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
+        material.side = THREE.DoubleSide;
+      }
+
+      this.mesh = new THREE.Mesh(geometry, material);
       this.el.setObject3D("mesh", this.mesh);
-    } else {
-      const { material } = this.mesh;
-      material.map = texture;
-      material.needsUpdate = true;
-      this.mesh.needsUpdate = true;
     }
 
-    fitToTexture(this.el, texture);
+    this.mesh.material.map = texture;
+    this.mesh.material.transparent = texture.format === THREE.RGBAFormat;
+    this.mesh.material.needsUpdate = true;
 
-    this.el.emit("image-loaded", { src: this.data.src });
+    if (projection === "flat") {
+      scaleToAspectRatio(this.el, ratio);
+    }
+
+    this.el.emit("image-loaded", { src: this.data.src, projection: projection });
   }
 });

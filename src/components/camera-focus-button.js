@@ -1,13 +1,18 @@
 AFRAME.registerComponent("camera-focus-button", {
   schema: {
-    track: { default: false }
+    track: { default: false },
+    selector: { default: null }
   },
 
   init() {
     this.cameraSystem = this.el.sceneEl.systems["camera-tools"];
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.targetEl = networkedEl;
+      if (this.data.selector) {
+        this.targetEl = networkedEl.querySelector(this.data.selector);
+      } else {
+        this.targetEl = networkedEl;
+      }
     });
 
     this.onClick = () => {
@@ -19,7 +24,7 @@ AFRAME.registerComponent("camera-focus-button", {
   },
 
   tick() {
-    const isVisible = this.el.getAttribute("visible");
+    const isVisible = this.el.object3D.visible;
     const shouldBeVisible = !!(this.cameraSystem && this.cameraSystem.getMyCamera());
 
     if (isVisible !== shouldBeVisible) {
@@ -28,10 +33,10 @@ AFRAME.registerComponent("camera-focus-button", {
   },
 
   play() {
-    this.el.addEventListener("grab-start", this.onClick);
+    this.el.object3D.addEventListener("interact", this.onClick);
   },
 
   pause() {
-    this.el.removeEventListener("grab-start", this.onClick);
+    this.el.object3D.removeEventListener("interact", this.onClick);
   }
 });

@@ -23,7 +23,6 @@ html, body, #ui-root, .container {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 65px;
   flex-shrink: 0;
 }
 .logo {
@@ -41,7 +40,7 @@ html, body, #ui-root, .container {
 
 .content {
   padding: 1em;
-  width: 40em;
+  width: 45em;
   display: flex;
   flex-direction: column;
 }
@@ -54,16 +53,22 @@ h1 {
   text-align: center;
 }
 
-.note:nth-child(2) .date {
-  margin-top: 1em;
+.note-header { 
+  display: flex; 
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 }
 .date, .date-blank, .title {
-  display: inline-block;
   margin: 0;
 }
+.title a:link, .title a:active .title a:hover, .title a:visited {
+  color: black;
+}
 .title {
+  flex: 1;
   @media (max-width: 768px) {
-    display: block;
+    align-self: flex-start;
   }
 }
 
@@ -72,7 +77,7 @@ h1 {
   width: 120px;
 }
 .date {
-  margin-top: 2em;
+  margin-top: 0.2em;
 }
 
 .body {

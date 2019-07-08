@@ -1,5 +1,5 @@
 /**
- * A button with an image, tooltip, hover states and haptics.
+ * A button with an image, tooltip, hover states.
  * @namespace ui
  * @component icon-button
  */
@@ -10,44 +10,32 @@ AFRAME.registerComponent("icon-button", {
     activeImage: { type: "string" },
     activeHoverImage: { type: "string" },
     active: { type: "boolean" },
-    haptic: { type: "selector" },
     tooltip: { type: "selector" },
     tooltipText: { type: "string" },
     activeTooltipText: { type: "string" }
   },
 
   init() {
+    this.el.object3D.matrixNeedsUpdate = true;
     this.onHover = () => {
       this.hovering = true;
       this.updateButtonState();
-      this.emitHapticPulse();
     };
     this.onHoverOut = () => {
       this.hovering = false;
       this.updateButtonState();
     };
-    this.onClick = () => {
-      this.emitHapticPulse();
-    };
-  },
-
-  emitHapticPulse() {
-    if (this.data.haptic) {
-      this.data.haptic.emit("haptic_pulse", { intensity: "low" });
-    }
   },
 
   play() {
     this.updateButtonState();
-    this.el.addEventListener("hover-start", this.onHover);
-    this.el.addEventListener("hover-end", this.onHoverOut);
-    this.el.addEventListener("grab-start", this.onClick);
+    this.el.object3D.addEventListener("hovered", this.onHover);
+    this.el.object3D.addEventListener("unhovered", this.onHoverOut);
   },
 
   pause() {
-    this.el.removeEventListener("hover-start", this.onHover);
-    this.el.removeEventListener("hover-end", this.onHoverOut);
-    this.el.removeEventListener("grab-start", this.onClick);
+    this.el.object3D.removeEventListener("hovered", this.onHover);
+    this.el.object3D.removeEventListener("unhovered", this.onHoverOut);
   },
 
   update() {
@@ -60,9 +48,17 @@ AFRAME.registerComponent("icon-button", {
 
     const image = active ? (hovering ? "activeHoverImage" : "activeImage") : hovering ? "hoverImage" : "image";
 
-    this.el.setAttribute("src", this.data[image]);
+    if (this.el.components.sprite) {
+      if (this.data[image]) {
+        this.el.setAttribute("sprite", "name", this.data[image]);
+      } else {
+        console.warn(`No ${image} image on me.`, this);
+      }
+    } else {
+      console.error("No sprite.");
+    }
 
-    if (this.data.tooltip) {
+    if (this.data.tooltip && hovering) {
       this.data.tooltip.setAttribute("visible", this.hovering);
       this.data.tooltip
         .querySelector("[text]")

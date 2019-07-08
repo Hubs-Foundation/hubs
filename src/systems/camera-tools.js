@@ -7,18 +7,22 @@ AFRAME.registerSystem("camera-tools", {
   register(el) {
     this.cameraEls.push(el);
     el.addEventListener("ownership-changed", this._onOwnershipChange);
-    this.myCamera = null;
+    delete this.myCamera;
   },
 
   deregister(el) {
     this.cameraEls = this.cameraEls.filter(c => c !== el);
     el.removeEventListener("ownership-changed", this._onOwnershipChange);
-    this.myCamera = null;
+    delete this.myCamera;
+  },
+
+  avatarUpdated() {
+    this.cameraEls.forEach(el => delete el.components["camera-tool"].onAvatarUpdated());
   },
 
   getMyCamera() {
-    if (this.myCamera) return this.myCamera;
-    this.myCamera = this.cameraEls.find(NAF.utils.isMine);
+    if (this.myCamera !== undefined) return this.myCamera;
+    this.myCamera = this.cameraEls.find(NAF.utils.isMine) || null;
     return this.myCamera;
   },
 

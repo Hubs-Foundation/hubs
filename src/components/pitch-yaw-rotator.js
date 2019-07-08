@@ -5,8 +5,8 @@ const radToDeg = THREE.Math.radToDeg;
 
 AFRAME.registerComponent("pitch-yaw-rotator", {
   schema: {
-    minPitch: { default: -65 },
-    maxPitch: { default: 65 }
+    minPitch: { default: -90 },
+    maxPitch: { default: 90 }
   },
 
   init() {
@@ -14,6 +14,8 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
     this.yaw = 0;
     this.onRotateX = this.onRotateX.bind(this);
     this.el.sceneEl.addEventListener("rotateX", this.onRotateX);
+    this.el.sceneEl.addEventListener("enter-vr", () => this.pause());
+    this.el.sceneEl.addEventListener("exit-vr", () => this.play());
     this.pendingXRotation = 0;
   },
 
@@ -35,8 +37,9 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
   },
 
   tick() {
-    const userinput = AFRAME.scenes[0].systems.userinput;
-    const cameraDelta = userinput.get(paths.actions.cameraDelta);
+    const scene = AFRAME.scenes[0];
+    const userinput = scene.systems.userinput;
+    const cameraDelta = userinput.get(scene.is("entered") ? paths.actions.cameraDelta : paths.actions.lobbyCameraDelta);
     let lookX = this.pendingXRotation;
     let lookY = 0;
     if (cameraDelta) {

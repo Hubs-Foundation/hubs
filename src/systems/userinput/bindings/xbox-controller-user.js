@@ -3,60 +3,63 @@ import { sets } from "../sets";
 import { xforms } from "./xforms";
 import { addSetsToBindings } from "./utils";
 
-const xboxUnscaledCursorScalePenTip = "foobarbazbotbooch";
-
 const button = paths.device.xbox.button;
 const axis = paths.device.xbox.axis;
-const rightTriggerFalling = "/vars/xbox/rightTriggerFalling";
+const scaledRightJoystickVertical = paths.device.xbox.v("scaledRightJoystickVertical");
+const scaledLeftJoystickCursorDelta = paths.device.xbox.v("scaledLeftJoystickCursorDelta");
+const deadzonedRightJoystickHorizontal = paths.device.xbox.v("deadzonedRightJoystickHorizontal");
+const deadzonedRightJoystickVertical = paths.device.xbox.v("deadzonedRightJoystickVertical");
+const deadzonedLeftJoystickHorizontal = paths.device.xbox.v("deadzonedLeftJoystickHorizontal");
+const deadzonedLeftJoystickVertical = paths.device.xbox.v("deadzonedLeftJoystickVertical");
+const vec2Zero = paths.device.xbox.v("vec2Zero");
+const zero = paths.device.xbox.v("zero");
+
+function characterAccelerationBindings(disableForwardOnTrigger) {
+  const scaledLeftJoystickHorizontal = paths.device.xbox.v("scaledLeftJoystickHorizontal");
+  const scaledLeftJoystickVertical = paths.device.xbox.v("scaledLeftJoystickVertical");
+  const scaledLeftJoystickForwardAcceleration = paths.device.xbox.v("scaledLeftJoystickForwardAcceleration");
+  return [
+    {
+      src: { value: deadzonedLeftJoystickHorizontal },
+      dest: { value: scaledLeftJoystickHorizontal },
+      xform: xforms.scale(1.5) // horizontal move speed modifier
+    },
+    {
+      src: { value: deadzonedLeftJoystickVertical },
+      dest: { value: scaledLeftJoystickVertical },
+      xform: xforms.scale(-1.25) // vertical move speed modifier
+    },
+    {
+      src: {
+        bool: button("leftTrigger").pressed,
+        value: scaledLeftJoystickVertical
+      },
+      dest: { value: scaledLeftJoystickForwardAcceleration },
+      xform: disableForwardOnTrigger ? xforms.copyIfFalse : xforms.copy
+    },
+    {
+      src: {
+        x: scaledLeftJoystickHorizontal,
+        y: scaledLeftJoystickForwardAcceleration
+      },
+      dest: { value: paths.actions.characterAcceleration },
+      xform: xforms.compose_vec2
+    }
+  ];
+}
 
 export const xboxControllerUserBindings = addSetsToBindings({
-  [sets.cursorHoldingInteractable]: [
-    {
-      src: { value: button("rightTrigger").pressed },
-      dest: { value: paths.actions.cursor.drop },
-      xform: xforms.falling,
-      root: rightTriggerFalling,
-      priority: 100
-    },
-    {
-      src: {
-        bool: button("leftTrigger").pressed,
-        value: axis("leftJoystickVertical")
-      },
-      dest: { value: "/vars/xbox/cursorModDelta" },
-      xform: xforms.copyIfTrue
-    },
-    {
-      src: {
-        value: "/vars/xbox/cursorModDelta"
-      },
-      dest: { value: paths.actions.cursor.modDelta },
-      xform: xforms.copy
-    },
-    {
-      src: {
-        bool: button("leftTrigger").pressed,
-        value: axis("leftJoystickVertical")
-      },
-      dest: { value: "/var/xbox/leftJoystickVertical" },
-      xform: xforms.copyIfFalse,
-      root: "xbox/leftJoystick",
-      priority: 200
-    }
-  ],
   [sets.cursorHoldingPen]: [
     {
       src: { value: button("rightTrigger").pressed },
       dest: { value: paths.actions.cursor.startDrawing },
       xform: xforms.rising,
-      root: "xboxRightTriggerRising",
       priority: 200
     },
     {
       src: { value: button("rightTrigger").pressed },
       dest: { value: paths.actions.cursor.stopDrawing },
       xform: xforms.falling,
-      root: rightTriggerFalling,
       priority: 200
     },
     {
@@ -68,7 +71,6 @@ export const xboxControllerUserBindings = addSetsToBindings({
       src: { value: button("y").pressed },
       dest: { value: paths.actions.cursor.undoDrawing },
       xform: xforms.rising,
-      root: "xbox/y",
       priority: 200
     },
     {
@@ -80,72 +82,61 @@ export const xboxControllerUserBindings = addSetsToBindings({
       src: { value: button("x").pressed },
       dest: { value: paths.actions.cursor.penPrevColor },
       xform: xforms.rising
-    },
-    {
-      src: {
-        bool: button("leftTrigger").pressed,
-        value: axis("rightJoystickVertical")
-      },
-      dest: { value: xboxUnscaledCursorScalePenTip },
-      xform: xforms.copyIfTrue
-    },
-    {
-      dest: {
-        value: paths.actions.cursorScalePenTip
-      },
-      src: { value: xboxUnscaledCursorScalePenTip },
-      xform: xforms.scale(0.01)
     }
   ],
   [sets.global]: [
     {
-      src: {
-        value: axis("rightJoystickHorizontal")
-      },
-      dest: { value: "/var/xbox/scaledRightJoystickHorizontal" },
-      xform: xforms.scale(-1.5) // horizontal look speed modifier
+      src: {},
+      dest: { value: paths.actions.cursor.hideLine },
+      xform: xforms.always(true)
     },
     {
-      src: {
-        value: axis("rightJoystickVertical")
-      },
-      dest: { value: "/var/xbox/scaledRightJoystickVertical" },
+      src: { value: axis("rightJoystickHorizontal") },
+      dest: { value: deadzonedRightJoystickHorizontal },
+      xform: xforms.deadzone(0.1)
+    },
+    {
+      src: { value: deadzonedRightJoystickHorizontal },
+      dest: { value: paths.actions.angularVelocity },
+      xform: xforms.scale(0.6) // horizontal look speed modifier
+    },
+    {
+      src: { value: axis("rightJoystickVertical") },
+      dest: { value: deadzonedRightJoystickVertical },
+      xform: xforms.deadzone(0.1)
+    },
+    {
+      src: { value: deadzonedRightJoystickVertical },
+      dest: { value: scaledRightJoystickVertical },
       xform: xforms.scale(-1.25) // vertical look speed modifier
     },
     {
+      src: {},
+      dest: { value: zero },
+      xform: xforms.always(0)
+    },
+    {
       src: {
-        x: "/var/xbox/scaledRightJoystickHorizontal",
-        y: "/var/xbox/scaledRightJoystickVertical"
+        x: zero,
+        y: scaledRightJoystickVertical
       },
       dest: { value: paths.actions.cameraDelta },
       xform: xforms.compose_vec2
     },
     {
-      src: {
-        value: axis("leftJoystickHorizontal")
-      },
-      dest: { value: "/var/xbox/scaledLeftJoystickHorizontal" },
-      xform: xforms.scale(1.5) // horizontal move speed modifier
+      src: { value: paths.actions.cameraDelta },
+      dest: { value: paths.actions.lobbyCameraDelta },
+      xform: xforms.copy
+    },
+    {
+      src: { value: axis("leftJoystickHorizontal") },
+      dest: { value: deadzonedLeftJoystickHorizontal },
+      xform: xforms.deadzone(0.1)
     },
     {
       src: { value: axis("leftJoystickVertical") },
-      dest: { value: "/var/xbox/leftJoystickVertical" },
-      xform: xforms.copy,
-      root: "xbox/leftJoystick",
-      priority: 100
-    },
-    {
-      src: { value: "/var/xbox/leftJoystickVertical" },
-      dest: { value: "/var/xbox/scaledLeftJoystickVertical" },
-      xform: xforms.scale(-1.25) // vertical move speed modifier
-    },
-    {
-      src: {
-        x: "/var/xbox/scaledLeftJoystickHorizontal",
-        y: "/var/xbox/scaledLeftJoystickVertical"
-      },
-      dest: { value: paths.actions.characterAcceleration },
-      xform: xforms.compose_vec2
+      dest: { value: deadzonedLeftJoystickVertical },
+      xform: xforms.deadzone(0.1)
     },
     {
       src: { value: button("leftTrigger").pressed },
@@ -163,11 +154,12 @@ export const xboxControllerUserBindings = addSetsToBindings({
       xform: xforms.rising
     },
     {
-      dest: { value: "var/vec2/zero" },
+      src: {},
+      dest: { value: vec2Zero },
       xform: xforms.vec2Zero
     },
     {
-      src: { value: "var/vec2/zero" },
+      src: { value: vec2Zero },
       dest: { value: paths.actions.cursor.pose },
       xform: xforms.poseFromCameraProjection()
     },
@@ -175,16 +167,70 @@ export const xboxControllerUserBindings = addSetsToBindings({
       src: { value: button("y").pressed },
       dest: { value: paths.actions.spawnPen },
       xform: xforms.rising,
-      root: "xbox/y",
       priority: 100
+    },
+    {
+      src: { value: button("dpadUp").pressed },
+      dest: { value: paths.actions.ensureFrozen },
+      xform: xforms.copy
+    },
+    {
+      src: { value: button("dpadUp").pressed },
+      dest: { value: paths.actions.thaw },
+      xform: xforms.falling
+    },
+    {
+      src: { value: button("start").pressed },
+      dest: { value: paths.actions.toggleFreeze },
+      xform: xforms.rising
+    },
+    {
+      src: { value: button("a").pressed },
+      dest: { value: paths.actions.startGazeTeleport },
+      xform: xforms.rising
+    },
+    {
+      src: { value: button("a").pressed },
+      dest: { value: paths.actions.stopGazeTeleport },
+      xform: xforms.falling
+    }
+  ],
+  [sets.cursorHoldingNothing]: [...characterAccelerationBindings()],
+  [sets.cursorHoldingInteractable]: [
+    ...characterAccelerationBindings(true),
+    {
+      src: { value: button("rightTrigger").pressed },
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.falling,
+      priority: 100
+    },
+    {
+      src: { value: deadzonedLeftJoystickVertical },
+      dest: { value: scaledLeftJoystickCursorDelta },
+      xform: xforms.scale(0.25)
+    },
+    {
+      src: {
+        bool: button("leftTrigger").pressed,
+        value: scaledLeftJoystickCursorDelta
+      },
+      dest: { value: paths.actions.cursor.modDelta },
+      xform: xforms.copyIfTrue
+    }
+  ],
+  [sets.cursorHoveringOnUI]: [
+    {
+      src: { value: button("rightTrigger").pressed },
+      dest: { value: paths.actions.cursor.grab },
+      xform: xforms.rising
     }
   ],
   [sets.cursorHoveringOnInteractable]: [
+    ...characterAccelerationBindings(),
     {
       src: { value: button("rightTrigger").pressed },
       dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising,
-      root: "xboxRightTriggerRising",
       priority: 100
     }
   ]

@@ -1,0 +1,89 @@
+@import 'shared';
+
+:local(.title) {
+  text-align: center;
+  font-weight: bold;
+  margin: 0 12px;
+}
+
+:local(.room-info) {
+  display: flex;
+  text-align: left;
+  margin: 0 12px;
+
+  @media(max-width: 690px) {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+:local(.scene-screenshot) {
+  img {
+    border-radius: 12px;
+    width: 210px;
+    height: 240px;
+    filter: brightness(1.1) contrast(1.1);
+  }
+}
+
+:local(.scene-details) {
+  display: flex;
+  flex-direction: column;
+  margin: 4px 0 0 26px;
+  font-weight: normal;
+  width: 320px;
+
+  @media(max-width: 690px) {
+    width: 200px;
+    margin: 4px 4px;
+  }
+}
+
+:local(.scene-main) {
+  margin: 0 8px 8px 0;
+  position: relative;
+}
+
+:local(.scene-name) {
+  font-size: 20px;
+  font-weight: $semi-bold;
+  color: black;
+}
+
+:local(.scene-creator) {
+  font-size: 16px;
+  color: $grey-text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:local(.scene-attributions) {
+  display: flex;
+  flex-direction: column;
+  max-height: 90px;
+  overflow-y: scroll;
+}
+
+:local(.attribution) {
+  margin: 8px 0;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 12px;
+}
+
+:local(.attribution-name) {
+  font-weight: $semi-bold;
+
+  a {
+    color: $action-color;
+    text-decoration: none;
+  }
+}
+
+:local(.attribution-author) {
+  color: $grey-text;
+  font-weight: normal;
+}

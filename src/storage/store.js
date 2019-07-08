@@ -1,8 +1,11 @@
 import { Validator } from "jsonschema";
 import merge from "deepmerge";
+import Cookies from "js-cookie";
+import jwtDecode from "jwt-decode";
 
 const LOCAL_STORE_KEY = "___hubs_store";
 const STORE_STATE_CACHE_KEY = Symbol();
+const OAUTH_FLOW_CREDENTIALS_KEY = "ret-oauth-flow-account-credentials";
 const validator = new Validator();
 import { EventTarget } from "event-target-shim";
 import { generateDefaultProfile, generateRandomName } from "../utils/identity.js";
@@ -18,7 +21,8 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         displayName: { type: "string", pattern: "^[A-Za-z0-9-]{3,32}$" },
-        avatarId: { type: "string" }
+        avatarId: { type: "string" },
+        personalAvatarId: { type: "string" }
       }
     },
 
@@ -37,7 +41,14 @@ export const SCHEMA = {
       properties: {
         hasFoundFreeze: { type: "boolean" },
         hasChangedName: { type: "boolean" },
-        lastEnteredAt: { type: "string" }
+        hasAcceptedProfile: { type: "boolean" },
+        lastEnteredAt: { type: "string" },
+        hasPinned: { type: "boolean" },
+        hasRotated: { type: "boolean" },
+        hasRecentered: { type: "boolean" },
+        hasScaled: { type: "boolean" },
+        hasHoveredInWorldHud: { type: "boolean" },
+        hasOpenedShare: { type: "boolean" }
       }
     },
 
@@ -47,6 +58,17 @@ export const SCHEMA = {
       properties: {
         lastUsedMicDeviceId: { type: "string" }
       }
+    },
+
+    // Legacy
+    confirmedDiscordRooms: {
+      type: "array",
+      items: { type: "string" }
+    },
+
+    confirmedBroadcastedRooms: {
+      type: "array",
+      items: { type: "string" }
     },
 
     uploadPromotionTokens: {
@@ -59,6 +81,30 @@ export const SCHEMA = {
           promotionToken: { type: "string" }
         }
       }
+    },
+
+    creatorAssignmentTokens: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          hubId: { type: "string" },
+          creatorAssignmentToken: { type: "string" }
+        }
+      }
+    },
+
+    embedTokens: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          hubId: { type: "string" },
+          embedToken: { type: "string" }
+        }
+      }
     }
   },
 
@@ -69,7 +115,11 @@ export const SCHEMA = {
     credentials: { $ref: "#/definitions/credentials" },
     activity: { $ref: "#/definitions/activity" },
     settings: { $ref: "#/definitions/settings" },
-    uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" }
+    confirmedDiscordRooms: { $ref: "#/definitions/confirmedDiscordRooms" }, // Legacy
+    confirmedBroadcastedRooms: { $ref: "#/definitions/confirmedBroadcastedRooms" },
+    uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" },
+    creatorAssignmentTokens: { $ref: "#/definitions/creatorAssignmentTokens" },
+    embedTokens: { $ref: "#/definitions/embedTokens" }
   },
 
   additionalProperties: false
@@ -82,13 +132,32 @@ export default class Store extends EventTarget {
     if (localStorage.getItem(LOCAL_STORE_KEY) === null) {
       localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify({}));
     }
+
+    // When storage is updated in another window
+    window.addEventListener("storage", e => {
+      if (e.key !== LOCAL_STORE_KEY) return;
+      delete this[STORE_STATE_CACHE_KEY];
+      this.dispatchEvent(new CustomEvent("statechanged"));
+    });
+
     this.update({
       activity: {},
       settings: {},
       credentials: {},
       profile: {},
-      uploadPromotionTokens: []
+      confirmedDiscordRooms: [],
+      confirmedBroadcastedRooms: [],
+      uploadPromotionTokens: [],
+      creatorAssignmentTokens: [],
+      embedTokens: []
     });
+
+    const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
+    if (oauthFlowCredentials) {
+      this.update({ credentials: oauthFlowCredentials });
+      this.resetToRandomLegacyAvatar();
+      Cookies.remove(OAUTH_FLOW_CREDENTIALS_KEY);
+    }
   }
 
   // Initializes store with any default bits
@@ -103,6 +172,12 @@ export default class Store extends EventTarget {
     }
   };
 
+  resetToRandomLegacyAvatar = () => {
+    this.update({
+      profile: { ...(this.state.profile || {}), ...generateDefaultProfile() }
+    });
+  };
+
   get state() {
     if (!this.hasOwnProperty(STORE_STATE_CACHE_KEY)) {
       this[STORE_STATE_CACHE_KEY] = JSON.parse(localStorage.getItem(LOCAL_STORE_KEY));
@@ -111,8 +186,26 @@ export default class Store extends EventTarget {
     return this[STORE_STATE_CACHE_KEY];
   }
 
-  update(newState) {
-    const finalState = merge(this.state, newState);
+  get credentialsAccountId() {
+    if (this.state.credentials.token) {
+      return jwtDecode(this.state.credentials.token).sub;
+    } else {
+      return null;
+    }
+  }
+
+  resetConfirmedBroadcastedRooms() {
+    // merge causing us some annoyance here :(
+    const overwriteMerge = (destinationArray, sourceArray) => sourceArray;
+    this.update({ confirmedBroadcastedRooms: [] }, { arrayMerge: overwriteMerge });
+  }
+
+  resetTipActivityFlags() {
+    this.update({ activity: { hasRotated: false, hasPinned: false, hasRecentered: false, hasScaled: false } });
+  }
+
+  update(newState, mergeOpts) {
+    const finalState = merge(this.state, newState, mergeOpts);
     const { valid } = validator.validate(finalState, SCHEMA);
 
     if (!valid) {

@@ -7,6 +7,18 @@ const modeMod = {
   [WheelEvent.DOM_DELTA_PAGE]: 2
 };
 
+const isInModal = (() => {
+  let uiRoot = null;
+
+  return function() {
+    if (!uiRoot) {
+      uiRoot = document.querySelector(".ui-root");
+    }
+
+    return uiRoot && uiRoot.classList.contains("in-modal-or-overlay");
+  };
+})();
+
 export class MouseDevice {
   constructor() {
     this.events = [];
@@ -20,15 +32,19 @@ export class MouseDevice {
     const canvas = document.querySelector("canvas");
     ["mousedown", "wheel"].map(x => canvas.addEventListener(x, queueEvent));
     ["mousemove", "mouseup"].map(x => window.addEventListener(x, queueEvent));
+
     document.addEventListener("wheel", e => {
-      e.preventDefault();
+      // Do not capture wheel events if they are being sent to an modal/overlay
+      if (!isInModal()) {
+        e.preventDefault();
+      }
     });
   }
 
   process(event) {
     if (event.type === "wheel") {
       this.wheel += (event.deltaX + event.deltaY) / modeMod[event.deltaMode];
-      return;
+      return true;
     }
 
     const left = event.button === 0;
@@ -38,35 +54,57 @@ export class MouseDevice {
     this.movementXY[0] += event.movementX;
     this.movementXY[1] += event.movementY;
     if (event.type === "mousedown" && left) {
+      this.mouseDownLeftThisFrame = true;
       this.buttonLeft = true;
     } else if (event.type === "mousedown" && right) {
+      this.mouseDownRightThisFrame = true;
       this.buttonRight = true;
     } else if (event.type === "mouseup" && left) {
+      if (this.mouseDownLeftThisFrame) {
+        return false;
+      }
       this.buttonLeft = false;
     } else if (event.type === "mouseup" && right) {
+      if (this.mouseDownRightThisFrame) {
+        return false;
+      }
       this.buttonRight = false;
     }
+    return true;
   }
 
   write(frame) {
-    this.movementXY = [0, 0]; // deltas
+    this.movementXY[0] = 0; // deltas
+    this.movementXY[1] = 0; // deltas
     this.wheel = 0; // delta
-    this.events.forEach(event => {
-      this.process(event, frame);
-    });
 
-    while (this.events.length) {
-      this.events.pop();
+    this.didStopProcessingEarly = false;
+    this.mouseDownLeftThisFrame = false;
+    this.mouseDownRightThisFrame = false;
+
+    for (let i = 0; i < this.events.length; i++) {
+      const event = this.events[i];
+      if (!this.process(event)) {
+        this.didStopProcessingEarly = true;
+        this.events.splice(0, i);
+        break;
+      }
     }
 
-    frame[paths.device.mouse.coords] = this.coords;
-    frame[paths.device.mouse.movementXY] = this.movementXY;
-    frame[paths.device.mouse.buttonLeft] = this.buttonLeft;
-    frame[paths.device.mouse.buttonRight] = this.buttonRight;
-    frame[paths.device.mouse.wheel] = this.wheel;
+    if (!this.didStopProcessingEarly) {
+      this.events.length = 0;
+    }
+
+    frame.setVector2(paths.device.mouse.coords, this.coords[0], this.coords[1]);
+    frame.setVector2(paths.device.mouse.movementXY, this.movementXY[0], this.movementXY[1]);
+    frame.setValueType(paths.device.mouse.buttonLeft, this.buttonLeft);
+    frame.setValueType(paths.device.mouse.buttonRight, this.buttonRight);
+    frame.setValueType(paths.device.mouse.wheel, this.wheel);
   }
 }
 
 window.oncontextmenu = e => {
-  e.preventDefault();
+  if (!isInModal()) {
+    e.preventDefault();
+  }
 };

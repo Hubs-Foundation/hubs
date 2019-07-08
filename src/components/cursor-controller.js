@@ -1,24 +1,19 @@
 import { paths } from "../systems/userinput/paths";
+import { sets } from "../systems/userinput/sets";
 import { getLastWorldPosition } from "../utils/three-utils";
 
-/**
- * Manages targeting and physical cursor location. Has the following responsibilities:
- *
- * - Tracking which entities in the scene can be targeted by the cursor (`objects`).
- * - Performing a raycast per-frame or on-demand to identify which entity is being currently targeted.
- * - Updating the visual presentation and position of the `cursor` entity and `line` component per frame.
- * - Sending an event when an entity is targeted or un-targeted.
- */
+const HIGHLIGHT = new THREE.Color(23 / 255, 64 / 255, 118 / 255);
+const NO_HIGHLIGHT = new THREE.Color(190 / 255, 190 / 255, 190 / 255);
+const TRANSFORM_COLOR_1 = new THREE.Color(150 / 255, 80 / 255, 150 / 255);
+const TRANSFORM_COLOR_2 = new THREE.Color(23 / 255, 64 / 255, 118 / 255);
 AFRAME.registerComponent("cursor-controller", {
   schema: {
     cursor: { type: "selector" },
     camera: { type: "selector" },
-    far: { default: 3 },
-    near: { default: 0.06 },
-    cursorColorHovered: { default: "#2F80ED" },
-    cursorColorUnhovered: { default: "#FFFFFF" },
-    rayObject: { type: "selector" },
-    objects: { default: "" }
+    far: { default: 25 },
+    near: { default: 0.01 },
+    defaultDistance: { default: 4 },
+    minDistance: { default: 0.18 }
   },
 
   init: function() {
@@ -32,110 +27,69 @@ AFRAME.registerComponent("cursor-controller", {
       { once: true }
     );
 
-    // raycaster state
-    this.setDirty = this.setDirty.bind(this);
-    this.targets = [];
     this.raycaster = new THREE.Raycaster();
-    this.dirty = true;
+    this.raycaster.firstHitOnly = true; // flag specific to three-mesh-bvh
     this.distance = this.data.far;
-    const lineMaterial = new THREE.LineBasicMaterial({
-      color: "white",
-      opacity: 0.2,
-      transparent: true,
-      visible: false
-    });
+    this.color = new THREE.Color(0, 0, 0);
 
     const lineGeometry = new THREE.BufferGeometry();
     lineGeometry.addAttribute("position", new THREE.BufferAttribute(new Float32Array(2 * 3), 3));
 
-    this.line = new THREE.Line(lineGeometry, lineMaterial);
+    this.line = new THREE.Line(
+      lineGeometry,
+      new THREE.LineBasicMaterial({
+        color: "white",
+        opacity: 0.2,
+        transparent: true,
+        visible: false
+      })
+    );
     this.el.setObject3D("line", this.line);
   },
 
   update: function() {
     this.raycaster.far = this.data.far;
     this.raycaster.near = this.data.near;
-    this.setDirty();
   },
 
-  play: function() {
-    this.observer = new MutationObserver(this.setDirty);
-    this.observer.observe(this.el.sceneEl, { childList: true, attributes: true, subtree: true });
-    this.el.sceneEl.addEventListener("object3dset", this.setDirty);
-    this.el.sceneEl.addEventListener("object3dremove", this.setDirty);
-  },
-
-  pause: function() {
-    this.observer.disconnect();
-    this.el.sceneEl.removeEventListener("object3dset", this.setDirty);
-    this.el.sceneEl.removeEventListener("object3dremove", this.setDirty);
-  },
-
-  setDirty: function() {
-    this.dirty = true;
-  },
-
-  populateEntities: function(selector, target) {
-    target.length = 0;
-    const els = this.data.objects ? this.el.sceneEl.querySelectorAll(this.data.objects) : this.el.sceneEl.children;
-    for (let i = 0; i < els.length; i++) {
-      if (els[i].object3D) {
-        target.push(els[i].object3D);
-      }
-    }
-  },
-
-  emitIntersectionEvents: function(prevIntersection, currIntersection) {
-    // if we are now intersecting something, and previously we were intersecting nothing or something else
-    if (currIntersection && (!prevIntersection || currIntersection.object.el !== prevIntersection.object.el)) {
-      this.data.cursor.emit("raycaster-intersection", { el: currIntersection.object.el });
-    }
-    // if we were intersecting something, but now we are intersecting nothing or something else
-    if (prevIntersection && (!currIntersection || currIntersection.object.el !== prevIntersection.object.el)) {
-      this.data.cursor.emit("raycaster-intersection-cleared", { el: prevIntersection.object.el });
-    }
-  },
-
-  tick: (() => {
+  tick2: (() => {
     const rawIntersections = [];
     const cameraPos = new THREE.Vector3();
 
-    return function() {
-      if (this.dirty) {
-        // app aware devices cares about this.targets so we must update it even if cursor is not enabled
-        this.populateEntities(this.data.objects, this.targets);
-        this.dirty = false;
-      }
-
+    return function(t) {
       const userinput = AFRAME.scenes[0].systems.userinput;
       const cursorPose = userinput.get(paths.actions.cursor.pose);
-      const rightHandPose = userinput.get(paths.actions.rightHand.pose);
+      const hideLine = userinput.get(paths.actions.cursor.hideLine);
 
       this.data.cursor.object3D.visible = this.enabled && !!cursorPose;
-      this.line.material.visible = !!(this.enabled && rightHandPose);
+      this.line.material.visible = !!(this.enabled && !hideLine);
 
       if (!this.enabled || !cursorPose) {
         return;
       }
 
+      const interaction = AFRAME.scenes[0].systems.interaction;
       let intersection;
-      const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
+      const isGrabbing = !!interaction.state.rightRemote.held;
       if (!isGrabbing) {
         rawIntersections.length = 0;
         this.raycaster.ray.origin = cursorPose.position;
         this.raycaster.ray.direction = cursorPose.direction;
-        this.raycaster.intersectObjects(this.targets, true, rawIntersections);
-        intersection = rawIntersections.find(x => x.object.el);
-        this.emitIntersectionEvents(this.prevIntersection, intersection);
-        this.prevIntersection = intersection;
-        this.distance = intersection ? intersection.distance : this.data.far;
+        this.raycaster.intersectObjects(
+          AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem.targets,
+          true,
+          rawIntersections
+        );
+        intersection = rawIntersections[0];
+        interaction.updateCursorIntersection(intersection);
+        this.distance = intersection ? intersection.distance : this.data.defaultDistance;
       }
 
-      const { cursor, near, far, camera, cursorColorHovered, cursorColorUnhovered } = this.data;
+      const { cursor, minDistance, far, camera } = this.data;
 
-      const cursorModDelta = userinput.get(paths.actions.cursor.modDelta);
-      if (isGrabbing && cursorModDelta) {
-        this.distance = THREE.Math.clamp(this.distance - cursorModDelta, near, far);
+      const cursorModDelta = userinput.get(paths.actions.cursor.modDelta) || 0;
+      if (isGrabbing && !userinput.activeSets.includes(sets.cursorHoldingUI)) {
+        this.distance = THREE.Math.clamp(this.distance - cursorModDelta, minDistance, far);
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);
       // The cursor will always be oriented towards the player about its Y axis, so objects held by the cursor will rotate towards the player.
@@ -145,14 +99,20 @@ AFRAME.registerComponent("cursor-controller", {
       cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
       cursor.object3D.matrixNeedsUpdate = true;
 
-      const cursorColor = intersection || isGrabbing ? cursorColorHovered : cursorColorUnhovered;
+      if (AFRAME.scenes[0].systems["transform-selected-object"].transforming) {
+        this.color.copy(TRANSFORM_COLOR_1).lerpHSL(TRANSFORM_COLOR_2, 0.5 + 0.5 * Math.sin(t / 1000.0));
+      } else if (intersection || isGrabbing) {
+        this.color.copy(HIGHLIGHT);
+      } else {
+        this.color.copy(NO_HIGHLIGHT);
+      }
 
-      if (this.data.cursor.components.material.data.color !== cursorColor) {
-        this.data.cursor.setAttribute("material", "color", cursorColor);
+      if (!this.data.cursor.object3DMap.mesh.material.color.equals(this.color)) {
+        this.data.cursor.object3DMap.mesh.material.color.copy(this.color);
+        this.data.cursor.object3DMap.mesh.material.needsUpdate = true;
       }
 
       if (this.line.material.visible) {
-        // Reach into line component for better performance
         const posePosition = cursorPose.position;
         const cursorPosition = cursor.object3D.position;
         const positionArray = this.line.geometry.attributes.position.array;
@@ -168,10 +128,5 @@ AFRAME.registerComponent("cursor-controller", {
         this.line.geometry.computeBoundingSphere();
       }
     };
-  })(),
-
-  remove: function() {
-    this.emitIntersectionEvents(this.prevIntersection, null);
-    delete this.prevIntersection;
-  }
+  })()
 });

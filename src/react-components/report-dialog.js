@@ -14,23 +14,17 @@ export default class ReportDialog extends Component {
               <a href="https://github.com/mozilla/hubs/issues" target="_blank" rel="noopener noreferrer">
                 GitHub Issue
               </a>
-            </WithHoverSound>
+            </WithHoverSound>{" "}
             or e-mail us for support at{" "}
             <WithHoverSound>
               <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>
             </WithHoverSound>
           </p>
           <p>
-            You can also find us in{" "}
+            You can also find us on{" "}
             <WithHoverSound>
-              <a href="https://webvr.slack.com/messages/social" target="_blank" rel="noopener noreferrer">
-                #social
-              </a>
-            </WithHoverSound>
-            on the{" "}
-            <WithHoverSound>
-              <a href="https://webvr-slack.herokuapp.com/" target="_blank" rel="noopener noreferrer">
-                WebVR Slack
+              <a href="https://discord.gg/wHmY4nd" target="_blank" rel="noopener noreferrer">
+                Discord
               </a>
             </WithHoverSound>
           </p>

@@ -11,7 +11,7 @@ export default class HelpDialog extends Component {
           <p style={{ textAlign: "center" }}>
             Join the Hubs community on{" "}
             <WithHoverSound>
-              <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/XzrGUY8">
+              <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/wHmY4nd">
                 Discord
               </a>
             </WithHoverSound>
@@ -30,6 +30,17 @@ export default class HelpDialog extends Component {
           </p>
           <p>
             The <b>Pause Toggle</b> pauses all other avatars and lets you block others or pin or remove objects.
+          </p>
+          <p>
+            See detailed{" "}
+            <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/wiki/Hubs-Features">
+              feature
+            </a>{" "}
+            and{" "}
+            <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/wiki/Hubs-Controls">
+              controls
+            </a>{" "}
+            documentation.
           </p>
           <p className="dialog__box__contents__links">
             <WithHoverSound>

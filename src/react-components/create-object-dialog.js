@@ -7,6 +7,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import styles from "../assets/stylesheets/create-object-dialog.scss";
 import cx from "classnames";
 import DialogContainer from "./dialog-container.js";
+import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { WithHoverSound } from "./wrap-with-audio";
 
 const attributionHostnames = {
@@ -15,9 +16,9 @@ const attributionHostnames = {
 };
 
 const DEFAULT_OBJECT_URL = "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf";
-const isMobile = AFRAME.utils.device.isMobile();
-const instructions = "Paste a URL to an image, video, model, or upload a file.";
-const desktopTips = "Tip: You can paste media directly into Hubs with Ctrl+V";
+const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
+const instructions = "Paste a URL to an image, video, model, scene, or upload.";
+const desktopTips = "Tip: You can paste URLs directly into Hubs with Ctrl+V";
 const references = (
   <span>
     For models, try{" "}
@@ -127,6 +128,8 @@ export default class CreateObjectDialog extends Component {
       <input
         className={cx(styles.leftSideOfInput)}
         placeholder="Image/Video/glTF URL"
+        onFocus={e => handleTextFieldFocus(e.target)}
+        onBlur={() => handleTextFieldBlur()}
         onChange={this.onUrlChange}
         type="url"
         value={this.state.url}

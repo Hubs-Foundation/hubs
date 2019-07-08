@@ -1,44 +1,12 @@
-// Detects if another instance of ConcurrentLoadDetector is start()'ed by in the same local storage
-// context with the same instance key. Once a duplicate run is detected this will not fire any additional
-// events.
-
-const LOCAL_STORE_KEY = "___concurrent_load_detector";
-import { EventTarget } from "event-target-shim";
-
-export default class ConcurrentLoadDetector extends EventTarget {
-  constructor(instanceKey) {
-    super();
-
-    this.interval = null;
-    this.startedAt = null;
-    this.instanceKey = instanceKey || "global";
-  }
-
-  start = () => {
-    this.startedAt = new Date();
-    localStorage.setItem(this.localStorageKey(), JSON.stringify({ started_at: this.startedAt }));
-
-    // Check for concurrent load every second
-    this.interval = setInterval(this._step, 1000);
+// Stores a key in localStorage and registeres a listener for the same key being set (by another tab).
+// When detected, fire a "concurrentload" event.
+export default function detectConcurrentLoad(instanceKey = "global") {
+  const key = `___concurrent_load_detector_${instanceKey}`;
+  localStorage.setItem(key, JSON.stringify({ started_at: new Date() }));
+  const onStorageEvent = e => {
+    if (e.key !== key) return;
+    window.dispatchEvent(new CustomEvent("concurrentload"));
+    window.removeEventListener("storage", onStorageEvent);
   };
-
-  stop = () => {
-    if (this.interval) {
-      clearInterval(this.interval);
-    }
-  };
-
-  localStorageKey = () => {
-    return `${LOCAL_STORE_KEY}_${this.instanceKey}`;
-  };
-
-  _step = () => {
-    const currentState = JSON.parse(localStorage.getItem(this.localStorageKey()));
-    const maxStartedAt = new Date(currentState.started_at);
-
-    if (maxStartedAt.getTime() !== this.startedAt.getTime()) {
-      this.dispatchEvent(new CustomEvent("concurrentload"));
-      this.stop();
-    }
-  };
+  window.addEventListener("storage", onStorageEvent);
 }

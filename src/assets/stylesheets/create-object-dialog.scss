@@ -24,6 +24,7 @@
   @extend %unselectable;
   display: flex;
   flex-direction: row;
+  justify-content: center;
   align-items: center;
 }
 
@@ -73,6 +74,7 @@
   align-self: center;
   overflow: hidden;
   text-overflow: ellipsis;
+  width: 100%;
 }
 
 :local(.hide-file-input) {

@@ -14,6 +14,7 @@ AFRAME.registerComponent("remove-networked-object-button", {
       this.el.parentNode.setAttribute("visible", false);
 
       this.targetEl.addEventListener("animationcomplete", () => {
+        NAF.utils.takeOwnership(this.targetEl);
         this.targetEl.parentNode.removeChild(this.targetEl);
       });
     };
@@ -24,10 +25,10 @@ AFRAME.registerComponent("remove-networked-object-button", {
   },
 
   play() {
-    this.el.addEventListener("grab-start", this.onClick);
+    this.el.object3D.addEventListener("interact", this.onClick);
   },
 
   pause() {
-    this.el.removeEventListener("grab-start", this.onClick);
+    this.el.object3D.removeEventListener("interact", this.onClick);
   }
 });

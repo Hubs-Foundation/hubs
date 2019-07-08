@@ -1,4 +1,5 @@
 import { paths } from "../systems/userinput/paths";
+import { SOUND_FREEZE, SOUND_THAW } from "../systems/sound-effects-system";
 
 /**
  * Toggles freezing of network traffic on the given event.
@@ -23,11 +24,16 @@ AFRAME.registerComponent("freeze-controller", {
   },
 
   tick: function() {
-    const userinput = AFRAME.scenes[0].systems.userinput;
-    const ensureFrozen = userinput.frame[paths.actions.ensureFrozen];
-    const thaw = userinput.frame[paths.actions.thaw];
+    const scene = this.el.sceneEl;
+    if (!scene.is("entered")) return;
 
-    const toggleFreezeDueToInput = (this.el.is("frozen") && thaw) || (!this.el.is("frozen") && ensureFrozen);
+    const userinput = scene.systems.userinput;
+    const ensureFrozen = userinput.get(paths.actions.ensureFrozen);
+    const thaw = userinput.get(paths.actions.thaw);
+    const toggleFreeze = userinput.get(paths.actions.toggleFreeze);
+
+    const toggleFreezeDueToInput =
+      (this.el.is("frozen") && thaw) || (!this.el.is("frozen") && ensureFrozen) || toggleFreeze;
 
     if (toggleFreezeDueToInput) {
       this.onToggle();
@@ -36,12 +42,13 @@ AFRAME.registerComponent("freeze-controller", {
 
   onToggle: function() {
     window.APP.store.update({ activity: { hasFoundFreeze: true } });
+    if (!NAF.connection.adapter) return;
     NAF.connection.adapter.toggleFreeze();
     if (NAF.connection.adapter.frozen) {
-      this.el.emit("play_freeze_sound");
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_FREEZE);
       this.el.addState("frozen");
     } else {
-      this.el.emit("play_thaw_sound");
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_THAW);
       this.el.removeState("frozen");
     }
   }

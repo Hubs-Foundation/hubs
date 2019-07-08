@@ -51,6 +51,11 @@ const dropOnCenterOrSouth = [
 export const daydreamUserBindings = addSetsToBindings({
   [sets.global]: [
     {
+      src: { value: paths.device.daydream.matrix },
+      dest: { value: paths.actions.rightHand.matrix },
+      xform: xforms.copy
+    },
+    {
       src: {
         x: paths.device.daydream.axis("touchpadX"),
         y: paths.device.daydream.axis("touchpadY")
@@ -134,6 +139,17 @@ export const daydreamUserBindings = addSetsToBindings({
 
   [sets.cursorHoveringOnInteractable]: grabBinding,
   [sets.cursorHoveringOnUI]: grabBinding,
+
+  [sets.cursorHoveringOnVideo]: [
+    {
+      src: {
+        value: paths.device.daydream.axis("touchpadY"),
+        touching: paths.device.daydream.button("touchpad").touched
+      },
+      dest: { value: paths.actions.cursor.mediaVolumeMod },
+      xform: xforms.touch_axis_scroll(-0.1)
+    }
+  ],
 
   [sets.cursorHoldingInteractable]: [
     {

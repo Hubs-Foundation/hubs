@@ -13,13 +13,24 @@ const touchCamDeltaYScaled = "vars/touchscreen/touchCameraDelta/y/scaled";
 const gyroCamDelta = "vars/gyro/gyroCameraDelta";
 const gyroCamDeltaXScaled = "vars/gyro/gyroCameraDelta/x/scaled";
 const gyroCamDeltaYScaled = "vars/gyro/gyroCameraDelta/y/scaled";
+const togglePen = "/vars/touchscreen/togglePen";
 
 export const touchscreenUserBindings = addSetsToBindings({
   [sets.global]: [
     {
+      src: {},
+      dest: { value: paths.actions.cursor.hideLine },
+      xform: xforms.always(true)
+    },
+    {
       src: { value: paths.device.touchscreen.pinch.delta },
       dest: { value: forward },
       xform: xforms.scale(0.25)
+    },
+    {
+      src: { value: paths.device.touchscreen.tap2 },
+      dest: { value: paths.actions.toggleFreeze },
+      xform: xforms.copy
     },
     {
       src: {},
@@ -80,14 +91,25 @@ export const touchscreenUserBindings = addSetsToBindings({
       xform: xforms.add_vec2
     },
     {
-      src: { value: paths.device.touchscreen.isTouchingGrabbable },
-      dest: { value: paths.actions.cursor.grab },
+      src: { value: touchCamDelta },
+      dest: { value: paths.actions.lobbyCameraDelta },
       xform: xforms.copy
     },
     {
-      src: { value: paths.device.hud.penButton },
-      dest: { value: paths.actions.spawnPen },
+      src: { value: paths.device.touchscreen.isTouchingGrabbable },
+      dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.hud.penButton },
+      dest: { value: togglePen },
+      xform: xforms.rising
+    },
+    {
+      src: { value: togglePen },
+      dest: { value: paths.actions.spawnPen },
+      xform: xforms.rising,
+      priority: 2
     }
   ],
   [sets.cursorHoldingInteractable]: [
@@ -114,10 +136,16 @@ export const touchscreenUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: { value: paths.device.hud.penButton },
+      src: { value: togglePen },
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.rising,
-      priority: 1
+      priority: 3
+    },
+    {
+      src: { value: togglePen },
+      dest: { value: paths.actions.pen.remove },
+      xform: xforms.rising,
+      priority: 3
     }
   ]
 });

@@ -6,12 +6,14 @@ import { FormattedMessage } from "react-intl";
 
 import ChatMessage from "./chat-message";
 import PhotoMessage from "./photo-message";
+import ImageMessage from "./image-message";
 
 export default class PresenceLog extends Component {
   static propTypes = {
     entries: PropTypes.array,
     inRoom: PropTypes.bool,
-    hubId: PropTypes.string
+    hubId: PropTypes.string,
+    history: PropTypes.object
   };
 
   constructor(props) {
@@ -21,7 +23,7 @@ export default class PresenceLog extends Component {
   domForEntry = e => {
     const entryClasses = {
       [styles.presenceLogEntry]: true,
-      [styles.presenceLogEntryWithButton]: e.type === "chat" && e.maySpawn,
+      [styles.presenceLogEntryWithButton]: (e.type === "chat" || e.type === "image") && e.maySpawn,
       [styles.presenceLogChat]: e.type === "chat",
       [styles.expired]: !!e.expired
     };
@@ -46,6 +48,18 @@ export default class PresenceLog extends Component {
             <b>{e.oldName}</b>&nbsp;<FormattedMessage id="presence.name_change" />&nbsp;<b>{e.newName}</b>.
           </div>
         );
+      case "scene_changed":
+        return (
+          <div key={e.key} className={classNames(entryClasses)}>
+            <b>{e.name}</b>&nbsp;<FormattedMessage id="presence.scene_change" />&nbsp;<b>{e.sceneName}</b>.
+          </div>
+        );
+      case "hub_name_changed":
+        return (
+          <div key={e.key} className={classNames(entryClasses)}>
+            <b>{e.name}</b>&nbsp;<FormattedMessage id="presence.hub_name_change" />&nbsp;<b>{e.hubName}</b>.
+          </div>
+        );
       case "chat":
         return (
           <ChatMessage
@@ -54,9 +68,21 @@ export default class PresenceLog extends Component {
             className={classNames(entryClasses)}
             body={e.body}
             maySpawn={e.maySpawn}
+            sessionId={e.sessionId}
+            history={this.props.history}
           />
         );
-      case "spawn":
+      case "image":
+        return (
+          <ImageMessage
+            key={e.key}
+            name={e.name}
+            className={classNames(entryClasses, styles.media)}
+            body={e.body}
+            maySpawn={e.maySpawn}
+          />
+        );
+      case "photo":
         return (
           <PhotoMessage
             key={e.key}

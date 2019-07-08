@@ -1,3 +1,5 @@
+import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "../systems/sound-effects-system";
+
 AFRAME.registerComponent("quack", {
   schema: {
     quackPercentage: { default: 1 },
@@ -9,19 +11,19 @@ AFRAME.registerComponent("quack", {
   },
 
   play: function() {
-    this.el.addEventListener("grab-start", this._handleGrabStart);
+    this.el.object3D.addEventListener("interact", this._handleGrabStart);
   },
 
   pause: function() {
-    this.el.removeEventListener("grab-start", this._handleGrabStart);
+    this.el.object3D.removeEventListener("interact", this._handleGrabStart);
   },
 
   _handleGrabStart: function() {
     const rand = Math.random();
     if (rand < this.data.specialQuackPercentage) {
-      this.el.emit("specialquack");
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);
     } else if (rand < this.data.quackPercentage) {
-      this.el.emit("quack");
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_QUACK);
     }
   }
 });

@@ -1,13 +1,18 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import classNames from "classnames";
 import { WithHoverSound } from "./wrap-with-audio";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default class DialogContainer extends Component {
   static propTypes = {
     title: PropTypes.node,
     children: PropTypes.node.isRequired,
     onClose: PropTypes.func,
-    closable: PropTypes.bool
+    closable: PropTypes.bool,
+    wide: PropTypes.bool,
+    className: PropTypes.string
   };
 
   static defaultProps = {
@@ -42,15 +47,17 @@ export default class DialogContainer extends Component {
 
   render() {
     return (
-      <div className="dialog-overlay">
+      <div className={classNames("dialog-overlay", this.props.className)}>
         <div className="dialog" onClick={this.onContainerClicked}>
-          <div className="dialog__box">
+          <div className={`dialog__box ${this.props.wide ? "dialog__wide" : ""} `}>
             <div className="dialog__box__contents">
               {this.props.closable &&
                 this.props.onClose && (
                   <WithHoverSound>
-                    <button className="dialog__box__contents__close" onClick={this.props.onClose}>
-                      <span>×</span>
+                    <button className="dialog__box__contents__close" onClick={() => this.props.onClose()}>
+                      <i>
+                        <FontAwesomeIcon icon={faTimes} />
+                      </i>
                     </button>
                   </WithHoverSound>
                 )}

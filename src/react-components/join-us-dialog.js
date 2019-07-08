@@ -8,7 +8,7 @@ export default class JoinUsDialog extends Component {
         <span>
           <p>
             Join us in the{" "}
-            <a href="https://discord.gg/XzrGUY8" target="_blank" rel="noopener noreferrer">
+            <a href="https://discord.gg/wHmY4nd" target="_blank" rel="noopener noreferrer">
               Hubs community
             </a>{" "}
             on Discord.

@@ -1,6 +1,7 @@
 import { sets } from "../sets";
 import { paths } from "../paths";
 import { Pose } from "../pose";
+import { findRemoteHoverTarget } from "../../interactions";
 
 const calculateCursorPose = function(camera, coords, origin, direction, cursorPose) {
   origin.setFromMatrixPosition(camera.matrixWorld);
@@ -38,19 +39,30 @@ export class AppAwareMouseDevice {
       this.camera = document.querySelector("#player-camera").components.camera.camera;
     }
 
-    const buttonLeft = frame[paths.device.mouse.buttonLeft];
-    const buttonRight = frame[paths.device.mouse.buttonRight];
+    const buttonLeft = frame.get(paths.device.mouse.buttonLeft);
+    const buttonRight = frame.get(paths.device.mouse.buttonRight);
     if (buttonLeft && !this.prevButtonLeft) {
       const rawIntersections = [];
-      this.cursorController.raycaster.intersectObjects(this.cursorController.targets, true, rawIntersections);
+      this.cursorController.raycaster.intersectObjects(
+        AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem.targets,
+        true,
+        rawIntersections
+      );
       const intersection = rawIntersections.find(x => x.object.el);
+      const remoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
       const userinput = AFRAME.scenes[0].systems.userinput;
       this.clickedOnAnything =
         (intersection &&
-          intersection.object.el.matches(".pen, .pen *, .video, .video *, .interactable, .interactable *")) ||
-        userinput.activeSets.has(sets.cursorHoldingPen) ||
-        userinput.activeSets.has(sets.cursorHoldingInteractable) ||
-        userinput.activeSets.has(sets.cursorHoldingCamera);
+          intersection.object.el.matches(".pen, .pen *, .video, .video *, .interactable, .interactable *") &&
+          !(
+            remoteHoverTarget &&
+            remoteHoverTarget.components.pinnable &&
+            remoteHoverTarget.components.pinnable.data.pinned &&
+            !AFRAME.scenes[0].is("frozen")
+          )) ||
+        userinput.activeSets.includes(sets.cursorHoldingPen) ||
+        userinput.activeSets.includes(sets.cursorHoldingInteractable) ||
+        userinput.activeSets.includes(sets.cursorHoldingCamera);
     }
     this.prevButtonLeft = buttonLeft;
 
@@ -59,16 +71,16 @@ export class AppAwareMouseDevice {
     }
 
     if ((!this.clickedOnAnything && buttonLeft) || buttonRight) {
-      frame[paths.device.smartMouse.cameraDelta] = frame[paths.device.mouse.movementXY];
+      const movementXY = frame.get(paths.device.mouse.movementXY);
+      if (movementXY) {
+        frame.setVector2(paths.device.smartMouse.cameraDelta, movementXY[0], movementXY[1]);
+      }
     }
 
-    const coords = frame[paths.device.mouse.coords];
-    frame[paths.device.smartMouse.cursorPose] = calculateCursorPose(
-      this.camera,
-      coords,
-      this.origin,
-      this.direction,
-      this.cursorPose
+    const coords = frame.get(paths.device.mouse.coords);
+    frame.setPose(
+      paths.device.smartMouse.cursorPose,
+      calculateCursorPose(this.camera, coords, this.origin, this.direction, this.cursorPose)
     );
   }
 }

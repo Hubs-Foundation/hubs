@@ -6,6 +6,7 @@ import { findAncestorWithComponent } from "../utils/scene-graph";
  */
 AFRAME.registerComponent("loop-animation", {
   schema: {
+    paused: { type: "boolean", default: false },
     clip: { type: "string" }
   },
 
@@ -21,8 +22,14 @@ AFRAME.registerComponent("loop-animation", {
   },
 
   update(oldData) {
-    if (oldData.clip !== this.data.clip && this.mixerEl) {
-      this.updateClip();
+    if ((oldData.clip !== this.data.clip || oldData.paused !== this.data.paused) && this.mixerEl) {
+      if (oldData.clip !== this.data.clip) {
+        this.updateClip();
+      }
+
+      if (this.currentAction) {
+        this.currentAction.paused = this.data.paused;
+      }
     }
   },
 
