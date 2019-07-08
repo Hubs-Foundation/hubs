@@ -185,8 +185,6 @@ class UIRoot extends Component {
     showStreamingTip: false,
 
     waitingOnAudio: false,
-    shareScreen: false,
-    requestedScreen: false,
     mediaStream: null,
     audioTrack: null,
     micDevices: [],
@@ -487,24 +485,10 @@ class UIRoot extends Component {
     });
   };
 
-  hasGrantedMicPermissions = async () => {
-    if (this.state.requestedScreen) {
-      // There is no way to tell if you've granted mic permissions in a previous session if we've
-      // already prompted for screen sharing permissions, so we have to assume that we've never granted permissions.
-      // Fortunately, if you *have* granted permissions permanently, there won't be a second browser prompt, but we
-      // can't determine that before hand.
-      // See https://bugzilla.mozilla.org/show_bug.cgi?id=1449783 for a potential solution in the future.
-      return false;
-    } else {
-      // If we haven't requested the screen in this session, check if we've granted permissions in a previous session.
-      return (await grantedMicLabels()).length > 0;
-    }
-  };
-
   performDirectEntryFlow = async enterInVR => {
     this.setState({ enterInVR, waitingOnAudio: true });
 
-    const hasGrantedMic = await this.hasGrantedMicPermissions();
+    const hasGrantedMic = (await grantedMicLabels()).length > 0;
 
     if (hasGrantedMic) {
       await this.setMediaStreamToDefault();
@@ -1091,20 +1075,6 @@ class UIRoot extends Component {
           </div>
         )}
       </div>
-    );
-  };
-
-  renderScreensharing = () => {
-    return (
-      <label className={entryStyles.screenSharing}>
-        <input
-          className={entryStyles.checkbox}
-          type="checkbox"
-          value={this.state.shareScreen}
-          onChange={this.setStateAndRequestScreen}
-        />
-        <FormattedMessage id="entry.enable-screen-sharing" />
-      </label>
     );
   };
 
