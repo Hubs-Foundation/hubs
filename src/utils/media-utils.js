@@ -2,6 +2,7 @@ import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
 
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
@@ -289,21 +290,19 @@ export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false
   return { entity, orientation };
 }
 
-const textureLoader = new THREE.TextureLoader();
-textureLoader.setCrossOrigin("anonymous");
-export function createImageTexture(url) {
-  return new Promise((resolve, reject) => {
-    textureLoader.load(
-      url,
-      texture => {
-        texture.encoding = THREE.sRGBEncoding;
-        texture.minFilter = THREE.LinearFilter;
-        resolve(texture);
-      },
-      null,
-      function(xhr) {
-        reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
-      }
-    );
-  });
+export const textureLoader = new HubsTextureLoader().setCrossOrigin("anonymous");
+
+export async function createImageTexture(url, contentType) {
+  const texture = new THREE.Texture();
+
+  try {
+    await textureLoader.loadTextureAsync(texture, url, contentType);
+  } catch (e) {
+    throw new Error(`'${url}' could not be fetched (Error code: ${e.status}; Response: ${e.statusText})`);
+  }
+
+  texture.encoding = THREE.sRGBEncoding;
+  texture.minFilter = THREE.LinearFilter;
+
+  return texture;
 }
