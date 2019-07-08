@@ -6,12 +6,13 @@
 
 :local(.subtitle) {
   margin: 1em;
+  margin-top: 0;
   font-size: 12pt;
 }
 
 :local(.name-field) {
   @extend %input-field;
-  margin-bottom: 1em;
+  margin-bottom: 1.5em;
   margin-top: 0;
 }
 
