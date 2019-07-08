@@ -113,8 +113,16 @@ export const getCustomGLTFParserURLResolver = gltfUrl => url => {
   return url;
 };
 
+const dataUrlRegex = /data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/;
+
 export const guessContentType = url => {
   if (url.startsWith("hubs://") && url.endsWith("/video")) return "video/vnd.hubs-webrtc";
+  if (url.startsWith("data:")) {
+    const matches = dataUrlRegex.match(url);
+    if (matches.length > 0) {
+      matches[1];
+    }
+  }
   const extension = new URL(url).pathname.split(".").pop();
   return commonKnownContentTypes[extension];
 };

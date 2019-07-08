@@ -1,26 +1,19 @@
-/**
- * @author mrdoob / http://mrdoob.com/
- */
+//
+// Based on THREE.TextureLoader
+// https://github.com/mrdoob/three.js/blob/master/src/loaders/TextureLoader.js
+// Licensed under the MIT license.
+// https://github.com/mrdoob/three.js/blob/master/LICENSE
+//
+
+import { guessContentType } from "../utils/media-utils";
 
 function loadAsync(loader, url, onProgress) {
   return new Promise((resolve, reject) => loader.load(url, resolve, onProgress, reject));
 }
 
-function isJPEG(url) {
-  return url.search(/\.jpe?g($|\?)/i) > 0 || url.search(/^data:image\/jpeg/) === 0;
-}
-
-function isPNG(url) {
-  return url.search(/\.png($|\?)/i) > 0 || url.search(/^data:image\/png/) === 0;
-}
-
 function getChunkType(arrayBuffer, byteOffset) {
   const arr = new Uint8Array(arrayBuffer, byteOffset, 4);
-  let str = "";
-  for (let i = 0; i < 4; i++) {
-    str += String.fromCharCode(arr[i]);
-  }
-  return str;
+  return String.fromCharCode.apply(null, arr);
 }
 
 export default class HubsTextureLoader {
@@ -44,7 +37,9 @@ export default class HubsTextureLoader {
     let url = src;
     let transparent = true;
 
-    if (isPNG(src) || contentType === "image/png") {
+    const finalContentType = contentType || guessContentType(src);
+
+    if (finalContentType === "image/png") {
       const fileLoader = new THREE.FileLoader(this.manager);
       fileLoader.setResponseType("blob");
 
@@ -83,7 +78,7 @@ export default class HubsTextureLoader {
       }
 
       url = URL.createObjectURL(blob);
-    } else if (isJPEG(src) || contentType === "image/jpeg") {
+    } else if (finalContentType === "image/jpeg") {
       // JPEGs can't have an alpha channel, so memory can be saved by storing them as RGB.
       transparent = false;
     }
