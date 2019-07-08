@@ -302,7 +302,6 @@ export async function createImageTexture(url, contentType) {
   }
 
   texture.encoding = THREE.sRGBEncoding;
-  texture.minFilter = THREE.LinearFilter;
 
   return texture;
 }
