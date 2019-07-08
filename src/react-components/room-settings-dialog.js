@@ -1,12 +1,13 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 import { FormattedMessage } from "react-intl";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 
-import styles from "../assets/stylesheets/rename-room-dialog.scss";
+import styles from "../assets/stylesheets/room-settings-dialog.scss";
 import DialogContainer from "./dialog-container";
 
-export default class RenameRoomDialog extends Component {
+export default class RoomSettingsDialog extends Component {
   static propTypes = {
     initialSettings: PropTypes.object,
     onRename: PropTypes.func,
@@ -27,7 +28,7 @@ export default class RenameRoomDialog extends Component {
 
   renderCheckbox(perm, disabled, onChange) {
     return (
-      <label key={perm}>
+      <label className={cx(styles.permission, { [styles.permissionDisabled]: disabled })} key={perm}>
         <input
           type="checkbox"
           checked={this.state.perms[perm]}
@@ -41,10 +42,10 @@ export default class RenameRoomDialog extends Component {
 
   render() {
     return (
-      <DialogContainer title="Set Room Name" {...this.props}>
-        <form onSubmit={this.onSubmit} className={styles.renameRoomForm}>
-          <span>
-            <FormattedMessage id="rename-room.message" />
+      <DialogContainer title="Room Settings" {...this.props}>
+        <form onSubmit={this.onSubmit} className={styles.roomSettingsForm}>
+          <span className={styles.subtitle}>
+            <FormattedMessage id="room-settings.name-subtitle" />
           </span>
           <input
             name="name"
@@ -59,7 +60,10 @@ export default class RenameRoomDialog extends Component {
             onChange={e => this.setState({ name: e.target.value })}
             className={styles.nameField}
           />
-          <div>
+          <span className={styles.subtitle}>
+            <FormattedMessage id="room-settings.permissions-subtitle" />
+          </span>
+          <div className={styles.permissions}>
             {this.renderCheckbox("spawn_and_move_media", false, e => {
               const newPerms = {
                 spawn_and_move_media: e.target.checked
@@ -70,14 +74,14 @@ export default class RenameRoomDialog extends Component {
               }
               this.setState({ perms: { ...this.state.perms, ...newPerms } });
             })}
-            <div>
+            <div className={styles.permissionsGroup}>
               {this.renderCheckbox("spawn_camera", !this.state.perms.spawn_and_move_media)}
               {this.renderCheckbox("pin_objects", !this.state.perms.spawn_and_move_media)}
             </div>
             {this.renderCheckbox("spawn_drawing")}
           </div>
           <button type="submit" className={styles.nextButton}>
-            <FormattedMessage id="rename-room.rename" />
+            <FormattedMessage id="room-settings.apply" />
           </button>
         </form>
       </DialogContainer>

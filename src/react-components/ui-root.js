@@ -40,7 +40,7 @@ import LinkDialog from "./link-dialog.js";
 import SafariDialog from "./safari-dialog.js";
 import SafariMicDialog from "./safari-mic-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
-import RenameRoomDialog from "./rename-room-dialog.js";
+import RoomSettingsDialog from "./room-settings-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebAssemblyUnsupportedDialog from "./webassembly-unsupported-dialog.js";
@@ -948,8 +948,8 @@ class UIRoot extends Component {
               onClick={() =>
                 this.props.performConditionalSignIn(
                   () => this.props.hubChannel.can("update_hub"),
-                  () => this.pushHistoryState("modal", "rename_room"),
-                  "rename-room"
+                  () => this.pushHistoryState("modal", "room_settings"),
+                  "room-settings"
                 )
               }
             >
@@ -1479,10 +1479,10 @@ class UIRoot extends Component {
             />
             <StateRoute
               stateKey="modal"
-              stateValue="rename_room"
+              stateValue="room_settings"
               history={this.props.history}
               render={() =>
-                this.renderDialog(RenameRoomDialog, {
+                this.renderDialog(RoomSettingsDialog, {
                   initialSettings: { name: this.props.hubName, perms: this.props.hubPerms },
                   onRename: settings => this.props.hubChannel.updateHub(settings)
                 })

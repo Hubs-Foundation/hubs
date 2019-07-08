@@ -132,14 +132,14 @@ export default class SettingsMenu extends Component {
                       this.props.performConditionalSignIn(
                         () => this.props.hubChannel.can("update_hub"),
                         () => {
-                          this.props.pushHistoryState("modal", "rename_room");
+                          this.props.pushHistoryState("modal", "room_settings");
                           this.props.hideSettings();
                         },
-                        "rename-room"
+                        "room-settings"
                       );
                     }}
                   >
-                    <FormattedMessage id="settings.rename-room" />
+                    <FormattedMessage id="settings.room-settings" />
                   </a>
                 </div>
               </div>
