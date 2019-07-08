@@ -59,7 +59,8 @@ export class AppAwareMouseDevice {
             remoteHoverTarget.components.pinnable &&
             remoteHoverTarget.components.pinnable.data.pinned &&
             !AFRAME.scenes[0].is("frozen")
-          )) ||
+          ) &&
+          window.APP.hubChannel.can("spawn_and_move_media")) ||
         userinput.activeSets.includes(sets.cursorHoldingPen) ||
         userinput.activeSets.includes(sets.cursorHoldingInteractable) ||
         userinput.activeSets.includes(sets.cursorHoldingCamera);

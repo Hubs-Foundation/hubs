@@ -34,8 +34,9 @@ AFRAME.registerComponent("hover-visuals", {
     const isFrozen = this.el.sceneEl.is("frozen");
     const isPinned = el.components.pinnable && el.components.pinnable.data.pinned;
     const isSpawner = !!el.components["super-spawner"];
+    const canMove = window.APP.hubChannel.can("spawn_and_move_media");
 
-    return !isSpawner && isPinned && !isFrozen;
+    return (!isSpawner && isPinned && !isFrozen) || !canMove;
   },
 
   handleLeftVisuals: function() {

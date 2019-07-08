@@ -62,7 +62,8 @@ function shouldMoveCursor(touch, raycaster) {
       remoteHoverTarget.components.pinnable &&
       remoteHoverTarget.components.pinnable.data.pinned &&
       !AFRAME.scenes[0].is("frozen")
-    )
+    ) &&
+    window.APP.hubChannel.can("spawn_and_move_media")
   );
 }
 

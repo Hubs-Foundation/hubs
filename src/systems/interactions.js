@@ -142,7 +142,10 @@ AFRAME.registerSystem("interaction", {
         state.hovered.components.tags &&
         state.hovered.components.tags.data.isHoldable &&
         userinput.get(options.grabPath) &&
-        (this.el.is("frozen") || !state.hovered.components.pinnable || !state.hovered.components.pinnable.data.pinned)
+        (this.el.is("frozen") ||
+          !state.hovered.components.pinnable ||
+          !state.hovered.components.pinnable.data.pinned) &&
+        window.APP.hubChannel.can("spawn_and_move_media")
       ) {
         state.held = state.hovered;
       }
