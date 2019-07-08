@@ -290,8 +290,8 @@ export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false
   return { entity, orientation };
 }
 
-const textureLoader = new HubsTextureLoader();
-textureLoader.setCrossOrigin("anonymous");
+export const textureLoader = new HubsTextureLoader().setCrossOrigin("anonymous");
+
 export async function createImageTexture(url, contentType) {
   const texture = new THREE.Texture();
 
