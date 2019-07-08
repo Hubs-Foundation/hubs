@@ -98,7 +98,7 @@ export default class MessageDispatch {
           if (err === "unauthorized") {
             this.addToPresenceLog({ type: "log", body: "You do not have permission to change the scene." });
           }
-        } else {
+        } else if (this.hubChannel.canOrWillIfCreator("update_hub")) {
           this.mediaSearchStore.sourceNavigateWithNoNav("scenes");
         }
 
