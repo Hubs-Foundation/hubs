@@ -189,7 +189,6 @@ class UIRoot extends Component {
     requestedScreen: false,
     mediaStream: null,
     audioTrack: null,
-    numAudioTracks: 0,
     micDevices: [],
 
     autoExitTimerStartedAt: null,
@@ -562,14 +561,11 @@ class UIRoot extends Component {
 
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      this.setState({
-        audioTrack: mediaStream.getAudioTracks()[0],
-        numAudioTracks: mediaStream.getAudioTracks().length
-      });
+      this.setState({ audioTrack: mediaStream.getAudioTracks()[0] });
       return true;
     } catch (e) {
       // Error fetching audio track, most likely a permission denial.
-      this.setState({ audioTrack: null, numAudioTracks: 0 });
+      this.setState({ audioTrack: null });
       return false;
     }
   };
