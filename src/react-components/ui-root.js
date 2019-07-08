@@ -192,8 +192,6 @@ class UIRoot extends Component {
     numAudioTracks: 0,
     micDevices: [],
 
-    profileNamePending: "Hello",
-
     autoExitTimerStartedAt: null,
     autoExitTimerInterval: null,
     secondsRemainingBeforeAutoExit: Infinity,
