@@ -216,7 +216,7 @@ module.exports = (env, argv) => ({
         }
       },
       {
-        test: /\.(glsl)$/,
+        test: /\.(glsl|frag|vert)$/,
         use: { loader: "raw-loader" }
       }
     ]
@@ -362,6 +362,7 @@ module.exports = (env, argv) => ({
         NODE_ENV: argv.mode,
         DEFAULT_SCENE_SID: process.env.DEFAULT_SCENE_SID,
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
+        RETICULUM_SOCKET_SERVER: process.env.RETICULUM_SOCKET_SERVER,
         FARSPARK_SERVER: process.env.FARSPARK_SERVER,
         CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,
         NON_CORS_PROXY_DOMAINS: process.env.NON_CORS_PROXY_DOMAINS,

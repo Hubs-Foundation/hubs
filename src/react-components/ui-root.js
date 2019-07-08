@@ -22,6 +22,7 @@ import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
 import { getPresenceProfileForSession } from "../utils/phoenix-utils";
 import { getClientInfoClientId } from "./client-info-dialog";
+import { getCurrentStreamer } from "../utils/component-utils";
 
 import { lang, messages } from "../utils/i18n";
 import Loader from "./loader";
@@ -45,6 +46,7 @@ import CloseRoomDialog from "./close-room-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebAssemblyUnsupportedDialog from "./webassembly-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
+import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
@@ -56,7 +58,9 @@ import OutputLevelWidget from "./output-level-widget.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import SettingsMenu from "./settings-menu.js";
+import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
+import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
 import { handleTipClose } from "../systems/tips.js";
@@ -64,6 +68,7 @@ import { handleTipClose } from "../systems/tips.js";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -85,9 +90,9 @@ const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
 
-const LOBBY_MODAL_ROUTER_PATHS = ["/media/scenes"];
+const LOBBY_MODAL_ROUTER_PATHS = ["/media/scenes", "/media/avatars", "/media/favorites"];
 const LOBBY_MODAL_QUERY_VARS = ["media_source"];
-const LOBBY_MODAL_QUERY_VALUES = ["scenes"];
+const LOBBY_MODAL_QUERY_VALUES = ["scenes", "avatars", "favorites"];
 
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
@@ -131,6 +136,7 @@ class UIRoot extends Component {
     sessionId: PropTypes.string,
     subscriptions: PropTypes.object,
     initialIsSubscribed: PropTypes.bool,
+    initialIsFavorited: PropTypes.bool,
     showSignInDialog: PropTypes.bool,
     signInMessageId: PropTypes.string,
     signInCompleteMessageId: PropTypes.string,
@@ -151,7 +157,11 @@ class UIRoot extends Component {
     showInterstitialPrompt: PropTypes.bool,
     onInterstitialPromptClicked: PropTypes.func,
     performConditionalSignIn: PropTypes.func,
-    hide: PropTypes.bool
+    hide: PropTypes.bool,
+    showPreload: PropTypes.bool,
+    onPreloadLoadClicked: PropTypes.func,
+    embed: PropTypes.bool,
+    embedToken: PropTypes.string
   };
 
   state = {
@@ -162,7 +172,7 @@ class UIRoot extends Component {
     showShareDialog: false,
     showPresenceList: false,
     showSettingsMenu: false,
-    discordTipDismissed: false,
+    broadcastTipDismissed: false,
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
@@ -171,6 +181,8 @@ class UIRoot extends Component {
     noMoreLoadingUpdates: false,
     hideLoader: false,
     watching: false,
+    isStreaming: false,
+    showStreamingTip: false,
 
     waitingOnAudio: false,
     shareScreen: false,
@@ -247,6 +259,12 @@ class UIRoot extends Component {
 
   componentDidMount() {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
+    document.querySelector(".a-canvas").addEventListener("mouseup", () => {
+      if (this.state.showPresenceList || this.state.showSettingsMenu || this.state.showShareDialog) {
+        this.setState({ showPresenceList: false, showSettingsMenu: false, showShareDialog: false });
+      }
+    });
+
     this.props.scene.addEventListener(
       "didConnectToNetworkedScene",
       () => {
@@ -344,6 +362,23 @@ class UIRoot extends Component {
   updateSubscribedState = () => {
     const isSubscribed = this.props.subscriptions && this.props.subscriptions.isSubscribed();
     this.setState({ isSubscribed });
+  };
+
+  toggleFavorited = () => {
+    this.props.performConditionalSignIn(
+      () => this.props.hubChannel.signedIn,
+      () => {
+        const isFavorited = this.isFavorited();
+
+        this.props.hubChannel[isFavorited ? "unfavorite" : "favorite"]();
+        this.setState({ isFavorited: !isFavorited });
+      },
+      "favorite-room"
+    );
+  };
+
+  isFavorited = () => {
+    return this.state.isFavorited !== undefined ? this.state.isFavorited : this.props.initialIsFavorited;
   };
 
   onLoadingFinished = () => {
@@ -706,6 +741,19 @@ class UIRoot extends Component {
     });
   };
 
+  toggleStreamerMode = enable => {
+    const playerRig = document.querySelector("#player-rig");
+    playerRig.setAttribute("character-controller", "fly", enable);
+
+    if (enable) {
+      this.props.hubChannel.beginStreaming();
+      this.setState({ isStreaming: true, showStreamingTip: true, showSettingsMenu: false });
+    } else {
+      this.props.hubChannel.endStreaming();
+      this.setState({ isStreaming: false });
+    }
+  };
+
   renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
 
   showSignInDialog = () => {
@@ -757,14 +805,14 @@ class UIRoot extends Component {
   };
 
   onStoreChanged = () => {
-    const discordRoomConfirmed = this.props.store.state.confirmedDiscordRooms.includes(this.props.hubId);
-    if (discordRoomConfirmed !== this.state.discordTipDismissed) {
-      this.setState({ discordTipDismissed: discordRoomConfirmed });
+    const broadcastedRoomConfirmed = this.props.store.state.confirmedBroadcastedRooms.includes(this.props.hubId);
+    if (broadcastedRoomConfirmed !== this.state.broadcastTipDismissed) {
+      this.setState({ broadcastTipDismissed: broadcastedRoomConfirmed });
     }
   };
 
-  confirmDiscordBridge = () => {
-    this.props.store.update({ confirmedDiscordRooms: [this.props.hubId] });
+  confirmBroadcastedRoom = () => {
+    this.props.store.update({ confirmedBroadcastedRooms: [this.props.hubId] });
   };
 
   discordBridges = () => {
@@ -781,6 +829,22 @@ class UIRoot extends Component {
       }
       return channels;
     }
+  };
+
+  hasEmbedPresence = () => {
+    if (!this.props.presences) {
+      return false;
+    } else {
+      for (const p of Object.values(this.props.presences)) {
+        for (const m of p.metas) {
+          if (m.context && m.context.embed) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
   };
 
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
@@ -913,6 +977,19 @@ class UIRoot extends Component {
           <button onClick={() => this.setState({ watching: true })} className={entryStyles.collapseButton}>
             <i>
               <FontAwesomeIcon icon={faTimes} />
+            </i>
+          </button>
+
+          <button
+            onClick={() => this.toggleFavorited()}
+            className={classNames({
+              [entryStyles.entryFavoriteButton]: true,
+              [entryStyles.favoriteButton]: true,
+              [entryStyles.favorited]: this.isFavorited()
+            })}
+          >
+            <i title="Favorite">
+              <FontAwesomeIcon icon={faStar} />
             </i>
           </button>
         </div>
@@ -1203,8 +1280,10 @@ class UIRoot extends Component {
     if (this.props.hide || this.state.hide) return <div />;
 
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
+    const preload = this.props.showPreload;
 
     const isLoading =
+      !preload &&
       (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) &&
       !(this.props.showSafariMicDialog || this.props.showSafariDialog || this.props.showWebAssemblyDialog);
 
@@ -1230,12 +1309,16 @@ class UIRoot extends Component {
     if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();
     if (this.props.isBotMode) return this.renderBotMode();
 
+    const embed = this.props.embed;
     const entered = this.state.entered;
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
+    const enteredOrWatchingOrPreload = entered || watching || preload;
+    const baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
 
     const entryDialog =
       this.props.availableVREntryTypes &&
+      !preload &&
       (this.isWaitingForAutoExit() ? (
         <AutoExitWarning
           secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
@@ -1274,7 +1357,8 @@ class UIRoot extends Component {
     const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
 
     // Allow scene picker pre-entry, otherwise wait until entry
-    const showMediaBrowser = mediaSource && (["scenes", "avatars"].includes(mediaSource) || this.state.entered);
+    const showMediaBrowser =
+      mediaSource && (["scenes", "avatars", "favorites"].includes(mediaSource) || this.state.entered);
     const hasTopTip = this.props.activeTips && this.props.activeTips.top;
 
     const clientInfoClientId = getClientInfoClientId(this.props.history.location);
@@ -1282,11 +1366,16 @@ class UIRoot extends Component {
 
     const discordBridges = this.discordBridges();
     const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
-    const showDiscordTip = discordBridges.length > 0 && !this.state.discordTipDismissed;
+    const hasEmbedPresence = this.hasEmbedPresence();
+    const hasDiscordBridges = discordBridges.length > 0;
+    const showBroadcastTip =
+      (hasDiscordBridges || (hasEmbedPresence && !this.props.embed)) && !this.state.broadcastTipDismissed;
     const showInviteTip =
       !showVREntryButton &&
       !hasTopTip &&
       !entered &&
+      !embed &&
+      !preload &&
       !watching &&
       !hasTopTip &&
       !this.props.store.state.activity.hasOpenedShare &&
@@ -1295,6 +1384,8 @@ class UIRoot extends Component {
     const showChooseSceneButton =
       !showVREntryButton &&
       !entered &&
+      !embed &&
+      !preload &&
       !watching &&
       !showInviteTip &&
       !this.state.showShareDialog &&
@@ -1304,11 +1395,41 @@ class UIRoot extends Component {
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
       : null;
 
+    const streaming = this.state.isStreaming;
+    const streamingTip = streaming &&
+      this.state.showStreamingTip && (
+        <div className={classNames([styles.streamingTip])}>
+          <div className={classNames([styles.streamingTipAttachPoint])} />
+          <button
+            title="Dismiss"
+            className={styles.streamingTipClose}
+            onClick={() => this.setState({ showStreamingTip: false })}
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+
+          <div className={styles.streamingTipMessage}>
+            <FormattedMessage id="tips.streaming" />
+          </div>
+        </div>
+      );
+
+    const streamer = getCurrentStreamer();
+    const streamerName = streamer && streamer.displayName;
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
           <div className={classNames(rootStyles)}>
             {this.state.dialog}
+            {preload && (
+              <PreloadOverlay
+                hubName={this.props.hubName}
+                hubScene={this.props.hubScene}
+                baseUrl={baseUrl}
+                onLoadClicked={this.props.onPreloadLoadClicked}
+              />
+            )}
 
             <StateRoute
               stateKey="overlay"
@@ -1358,7 +1479,16 @@ class UIRoot extends Component {
                 history={this.props.history}
                 mediaSearchStore={this.props.mediaSearchStore}
                 hubChannel={this.props.hubChannel}
-                onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
+                onMediaSearchResultEntrySelected={entry => {
+                  if (entry.type === "hub") {
+                    this.showNonHistoriedDialog(LeaveRoomDialog, {
+                      destinationUrl: entry.url,
+                      messageType: "join-room"
+                    });
+                  } else {
+                    this.props.onMediaSearchResultEntrySelected(entry);
+                  }
+                }}
                 performConditionalSignIn={this.props.performConditionalSignIn}
               />
             )}
@@ -1467,7 +1597,7 @@ class UIRoot extends Component {
               </div>
             )}
 
-            {enteredOrWatching && (
+            {enteredOrWatchingOrPreload && (
               <PresenceLog
                 inRoom={true}
                 entries={presenceLogEntries}
@@ -1479,7 +1609,7 @@ class UIRoot extends Component {
               this.props.activeTips &&
               this.props.activeTips.bottom &&
               (!presenceLogEntries || presenceLogEntries.length === 0) &&
-              !showDiscordTip && (
+              !showBroadcastTip && (
                 <div className={styles.bottomTip}>
                   <button
                     className={styles.tipCancel}
@@ -1507,20 +1637,24 @@ class UIRoot extends Component {
                   )}
                 </div>
               )}
-            {enteredOrWatching &&
-              showDiscordTip && (
+            {enteredOrWatchingOrPreload &&
+              showBroadcastTip && (
                 <div className={styles.bottomTip}>
-                  <button className={styles.tipCancel} onClick={() => this.confirmDiscordBridge()}>
+                  <button className={styles.tipCancel} onClick={() => this.confirmBroadcastedRoom()}>
                     <i>
                       <FontAwesomeIcon icon={faTimes} />
                     </i>
                   </button>
                   <div className={styles.tip}>
-                    {`Chat in this room is being bridged to ${discordSnippet} on Discord.`}
+                    {hasDiscordBridges ? (
+                      <span>{`Chat in this room is being bridged to ${discordSnippet} on Discord.`}</span>
+                    ) : (
+                      <FormattedMessage id="embed.presence-warning" />
+                    )}
                   </div>
                 </div>
               )}
-            {enteredOrWatching && (
+            {enteredOrWatchingOrPreload && (
               <InWorldChatBox
                 discordBridges={discordBridges}
                 onSendMessage={this.sendMessage}
@@ -1536,7 +1670,8 @@ class UIRoot extends Component {
             )}
 
             {!this.state.frozen &&
-              !watching && (
+              !watching &&
+              !preload && (
                 <div
                   className={classNames({
                     [inviteStyles.inviteContainer]: true,
@@ -1544,8 +1679,10 @@ class UIRoot extends Component {
                     [inviteStyles.inviteContainerInverted]: this.state.showShareDialog
                   })}
                 >
-                  {!showVREntryButton &&
-                    !hasTopTip && (
+                  {!embed &&
+                    !showVREntryButton &&
+                    !hasTopTip &&
+                    !streaming && (
                       <WithHoverSound>
                         <button
                           className={classNames({
@@ -1582,10 +1719,12 @@ class UIRoot extends Component {
                       <FormattedMessage id={`entry.${isMobile ? "mobile" : "desktop"}.invite-tip`} />
                     </div>
                   )}
-                  {!showVREntryButton &&
+                  {!embed &&
+                    !showVREntryButton &&
                     this.occupantCount() > 1 &&
                     !hasTopTip &&
-                    entered && (
+                    entered &&
+                    !streaming && (
                       <WithHoverSound>
                         <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
                           <span>
@@ -1605,10 +1744,20 @@ class UIRoot extends Component {
                       </button>
                     </WithHoverSound>
                   )}
+                  {embed && (
+                    <a href={baseUrl} className={inviteStyles.enterButton} target="_blank" rel="noopener noreferrer">
+                      <FormattedMessage id="entry.open-in-window" />
+                    </a>
+                  )}
                   {this.state.showShareDialog && (
                     <InviteDialog
                       allowShare={!isMobileVR}
                       entryCode={this.props.hubEntryCode}
+                      embedUrl={
+                        this.props.embedToken && !isMobilePhoneOrVR
+                          ? `${baseUrl}?embed_token=${this.props.embedToken}`
+                          : null
+                      }
                       hasPush={hasPush}
                       isSubscribed={
                         this.state.isSubscribed === undefined ? this.props.initialIsSubscribed : this.state.isSubscribed
@@ -1654,16 +1803,30 @@ class UIRoot extends Component {
                 />
               )}
             />
+            {streaming && (
+              <button
+                title="Exit Camera Mode"
+                onClick={() => this.toggleStreamerMode(false)}
+                className={classNames([styles.cornerButton, styles.cameraModeExitButton])}
+              >
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            )}
 
-            <div
-              onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
-              className={classNames({
-                [styles.settingsInfo]: true,
-                [styles.settingsInfoSelected]: this.state.showSettingsMenu
-              })}
-            >
-              <FontAwesomeIcon icon={faBars} />
-            </div>
+            {streamingTip}
+
+            {!streaming &&
+              !preload && (
+                <div
+                  onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
+                  className={classNames({
+                    [styles.cornerButton]: true,
+                    [styles.cornerButtonSelected]: this.state.showSettingsMenu
+                  })}
+                >
+                  <FontAwesomeIcon icon={faBars} />
+                </div>
+              )}
 
             <div
               onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
@@ -1693,12 +1856,18 @@ class UIRoot extends Component {
                 history={this.props.history}
                 mediaSearchStore={this.props.mediaSearchStore}
                 hideSettings={() => this.setState({ showSettingsMenu: false })}
+                isStreaming={streaming}
+                toggleStreamerMode={this.toggleStreamerMode}
                 hubChannel={this.props.hubChannel}
                 hubScene={this.props.hubScene}
+                scene={this.props.scene}
                 performConditionalSignIn={this.props.performConditionalSignIn}
+                showNonHistoriedDialog={this.showNonHistoriedDialog}
                 pushHistoryState={this.pushHistoryState}
               />
             )}
+
+            {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
 
             {enteredOrWatching && (
               <div className={styles.topHud}>
@@ -1722,8 +1891,13 @@ class UIRoot extends Component {
                   onShareVideo={this.shareVideo}
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
+                  isStreaming={streaming}
+                  showStreamingTip={this.state.showStreamingTip}
+                  hideStreamingTip={() => {
+                    this.setState({ showStreamingTip: false });
+                  }}
                 />
-                {!watching ? (
+                {!watching && !streaming ? (
                   <div className={styles.nagCornerButton}>
                     <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
                       <FormattedMessage id="feedback.prompt" />
@@ -1735,6 +1909,20 @@ class UIRoot extends Component {
                       <FormattedMessage id="hide-ui.prompt" />
                     </button>
                   </div>
+                )}
+
+                {!streaming && (
+                  <button
+                    onClick={() => this.toggleFavorited()}
+                    className={classNames({
+                      [entryStyles.favorited]: this.isFavorited(),
+                      [styles.inRoomFavoriteButton]: true
+                    })}
+                  >
+                    <i title="Favorite">
+                      <FontAwesomeIcon icon={faStar} />
+                    </i>
+                  </button>
                 )}
               </div>
             )}

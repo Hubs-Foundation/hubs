@@ -1,6 +1,6 @@
 import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
-import { isHubsDestinationUrl } from "./utils/media-utils";
+import { isHubsDestinationUrl } from "./utils/media-url-utils";
 const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
   TYPE = PHYSICS_CONSTANTS.TYPE,
   SHAPE = PHYSICS_CONSTANTS.SHAPE,

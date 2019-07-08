@@ -6,11 +6,14 @@ import StateLink from "./state-link.js";
 import { resetTips } from "../systems/tips";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
+import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faDoorClosed } from "@fortawesome/free-solid-svg-icons/faDoorClosed";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
 import { showFullScreenIfAvailable } from "../utils/fullscreen";
+import LeaveRoomDialog from "./leave-room-dialog.js";
 
 import styles from "../assets/stylesheets/settings-menu.scss";
 
@@ -18,10 +21,14 @@ export default class SettingsMenu extends Component {
   static propTypes = {
     history: PropTypes.object,
     hideSettings: PropTypes.func,
+    isStreaming: PropTypes.bool,
+    toggleStreamerMode: PropTypes.func,
     mediaSearchStore: PropTypes.object,
+    scene: PropTypes.object,
     hubScene: PropTypes.object,
     hubChannel: PropTypes.object,
     performConditionalSignIn: PropTypes.func,
+    showNonHistoriedDialog: PropTypes.func,
     pushHistoryState: PropTypes.func
   };
 
@@ -32,6 +39,7 @@ export default class SettingsMenu extends Component {
     const showCloseRoom = !!this.props.hubChannel.canOrWillIfCreator("close_hub");
     const showRoomInfo = !!this.props.hubScene;
     const showRoomSection = showRoomSettings || showRoomInfo || showCloseRoom;
+    const showStreamerMode = this.props.scene.is("entered") && !!this.props.hubChannel.canOrWillIfCreator("kick_users");
 
     // Draw self first
     return (
@@ -55,6 +63,30 @@ export default class SettingsMenu extends Component {
                 >
                   <FormattedMessage id="settings.change-avatar" />
                 </StateLink>
+              </div>
+            </div>
+            <div className={rowClasses}>
+              <div className={styles.icon}>
+                <i>
+                  <FontAwesomeIcon icon={faStar} />
+                </i>
+              </div>
+              <div className={styles.listItem}>
+                <div
+                  className={styles.listItemLink}
+                  onClick={() => {
+                    this.props.performConditionalSignIn(
+                      () => this.props.hubChannel.signedIn,
+                      () => {
+                        showFullScreenIfAvailable();
+                        this.props.mediaSearchStore.sourceNavigateWithNoNav("favorites");
+                      },
+                      "favorite-rooms"
+                    );
+                  }}
+                >
+                  <FormattedMessage id="settings.favorites" />
+                </div>
               </div>
             </div>
             {showRoomSection && (
@@ -171,11 +203,49 @@ export default class SettingsMenu extends Component {
                 </i>
               </div>
               <div className={styles.listItem}>
-                <a href="/" onClick={this.props.hideSettings}>
+                <a
+                  href="#"
+                  onClick={e => {
+                    e.preventDefault();
+                    this.props.showNonHistoriedDialog(LeaveRoomDialog, {
+                      destinationUrl: "/",
+                      messageType: "create-room"
+                    });
+                    this.props.hideSettings();
+                  }}
+                >
                   <FormattedMessage id="settings.create-room" />
                 </a>
               </div>
             </div>
+            {showStreamerMode ? (
+              <div className={rowHeader}>
+                <FormattedMessage id="settings.row-tools" />
+              </div>
+            ) : (
+              <div />
+            )}
+            {showStreamerMode ? (
+              <div className={rowClasses}>
+                <div className={styles.icon}>
+                  <i>
+                    <FontAwesomeIcon icon={faVideo} />
+                  </i>
+                </div>
+                <div className={styles.listItem}>
+                  <div
+                    className={styles.listItemLink}
+                    onClick={() => {
+                      this.props.toggleStreamerMode(true);
+                    }}
+                  >
+                    <FormattedMessage id="settings.enable-streamer-mode" />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div />
+            )}
             <div className={classNames([styles.bottomLinksMain])}>
               <a href="/whats-new" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.whats-new" />

@@ -110,7 +110,7 @@ export const resetTips = () => {
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({}));
   localStorageCache = null;
   window.APP.store.resetTipActivityFlags();
-  window.APP.store.resetConfirmedDiscordRooms();
+  window.APP.store.resetConfirmedBroadcastedRooms();
   finishedScopes = {};
 };
 

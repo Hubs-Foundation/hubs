@@ -1,8 +1,10 @@
 import { EventTarget } from "event-target-shim";
-import { getReticulumFetchUrl } from "../utils/phoenix-utils";
+import { getReticulumFetchUrl, fetchReticulum } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 
 export const SOURCES = ["poly", "sketchfab", "videos", "scenes", "gifs", "images", "twitch"];
+
+const EMPTY_RESULT = { entries: [], meta: {} };
 
 const URL_SOURCE_TO_TO_API_SOURCE = {
   scenes: "scene_listings",
@@ -12,13 +14,15 @@ const URL_SOURCE_TO_TO_API_SOURCE = {
   gifs: "tenor",
   sketchfab: "sketchfab",
   poly: "poly",
-  twitch: "twitch"
+  twitch: "twitch",
+  favorites: "favorites"
 };
 
 export const MEDIA_SOURCE_DEFAULT_FILTERS = {
   gifs: "trending",
   sketchfab: "featured",
-  scenes: "featured"
+  scenes: "featured",
+  favorites: "my-favorites"
 };
 
 const SEARCH_CONTEXT_PARAMS = ["q", "filter", "cursor"];
@@ -59,6 +63,8 @@ export default class MediaSearchStore extends EventTarget {
     this.requestIndex++;
     const currentRequestIndex = this.requestIndex;
     const searchParams = new URLSearchParams();
+    const locationSearchParams = new URLSearchParams(location.search);
+    const isMy = locationSearchParams.get("filter") && locationSearchParams.get("filter").startsWith("my-");
 
     for (const param of SEARCH_CONTEXT_PARAMS) {
       if (!urlParams.get(param)) continue;
@@ -71,46 +77,39 @@ export default class MediaSearchStore extends EventTarget {
     if (urlSource === "avatars" || urlSource === "scenes") {
       // Avatars + scenes are special since we request them from a different source based on the facet.
       const singular = urlSource === "avatars" ? "avatar" : "scene";
-      const filter = new URLSearchParams(location.search);
-      source = filter.get("filter").startsWith("my-") ? `${singular}s` : `${singular}_listings`;
+      source = isMy ? `${singular}s` : `${singular}_listings`;
     } else {
       source = URL_SOURCE_TO_TO_API_SOURCE[urlSource];
     }
     searchParams.set("source", source);
 
-    if (source === "avatars" || source === "scenes") {
-      searchParams.set("user", window.APP.store.credentialsAccountId);
+    let fetch = true;
+
+    if (source === "avatars" || source === "scenes" || source === "favorites") {
+      if (isMy) {
+        if (window.APP.store.credentialsAccountId) {
+          searchParams.set("user", window.APP.store.credentialsAccountId);
+        } else {
+          fetch = false; // Don't fetch my-* if not signed in
+        }
+      }
     }
 
-    const url = getReticulumFetchUrl(`/api/v1/media/search?${searchParams.toString()}`);
+    const path = `/api/v1/media/search?${searchParams.toString()}`;
+    const url = getReticulumFetchUrl(path);
     if (this.lastSavedUrl === url) return;
 
-    const result = await this._fetchMedia(url, source);
+    this.isFetching = true;
+    this.dispatchEvent(new CustomEvent("statechanged"));
+    const result = fetch ? await fetchReticulum(path) : EMPTY_RESULT;
 
     if (this.requestIndex != currentRequestIndex) return;
 
     this.result = result;
-    this.nextCursor = this.result.meta && this.result.meta.next_cursor;
+    this.nextCursor = this.result && this.result.meta && this.result.meta.next_cursor;
     this.lastFetchedUrl = url;
+    this.isFetching = false;
     this.dispatchEvent(new CustomEvent("statechanged"));
-  };
-
-  _fetchMedia = async url => {
-    const headers = { "Content-Type": "application/json" };
-    const credentialsToken = window.APP.store.state.credentials.token;
-    if (credentialsToken) headers.authorization = `bearer ${credentialsToken}`;
-
-    const res = await fetch(url, { method: "GET", headers });
-    const body = await res.text();
-
-    let result;
-    try {
-      result = JSON.parse(body);
-    } catch (e) {
-      result = body;
-    }
-
-    return result;
   };
 
   _legacyAvatarToSearchEntry = legacyAvatar => {
@@ -180,8 +179,17 @@ export default class MediaSearchStore extends EventTarget {
 
   _stashLastSearchParams = location => {
     const searchParams = new URLSearchParams(location.search);
+
     this._stashedParams = {};
-    this._stashedSource = this.getUrlMediaSource(location);
+    this._stashedSource = null;
+
+    const source = this.getUrlMediaSource(location);
+
+    // HACK for now do not stash favorite search, since that ends up being a source
+    // we do not reveal in the media browser UX. Revisit the rules here when we have a
+    // proper favorites browser. Then, we should have two separate stashes.
+    if (source === "favorites") return;
+    this._stashedSource = source;
 
     for (const param of SEARCH_CONTEXT_PARAMS) {
       const value = searchParams.get(param);
@@ -260,8 +268,7 @@ export default class MediaSearchStore extends EventTarget {
     const source = "avatars";
     searchParams.set("source", source);
     searchParams.set("user", credentialsAccountId);
-    const url = getReticulumFetchUrl(`/api/v1/media/search?${searchParams.toString()}`);
-    const result = await this._fetchMedia(url, source);
+    const result = await fetchReticulum(`/api/v1/media/search?${searchParams.toString()}`);
     return !!(result && result.entries) && result.entries.length > 0;
   };
 

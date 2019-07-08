@@ -1,13 +1,12 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
+import { resolveUrl, injectCustomShaderChunks } from "../utils/media-utils";
 import {
   guessContentType,
   proxiedUrlFor,
-  resolveUrl,
-  injectCustomShaderChunks,
   isHubsRoomUrl,
   isHubsSceneUrl,
   isHubsAvatarUrl
-} from "../utils/media-utils";
+} from "../utils/media-url-utils";
 import { addAnimationComponents } from "../utils/animation";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
@@ -205,6 +204,29 @@ AFRAME.registerComponent("media-loader", {
   },
 
   addMeshScaleAnimation(mesh, initialScale, onComplete) {
+    const step = (function() {
+      const lastValue = {};
+      return function(anim) {
+        const value = anim.animatables[0].target;
+
+        value.x = Math.max(Number.MIN_VALUE, value.x);
+        value.y = Math.max(Number.MIN_VALUE, value.y);
+        value.z = Math.max(Number.MIN_VALUE, value.z);
+
+        // For animation timeline.
+        if (value.x === lastValue.x && value.y === lastValue.y && value.z === lastValue.z) {
+          return;
+        }
+
+        lastValue.x = value.x;
+        lastValue.y = value.y;
+        lastValue.z = value.z;
+
+        mesh.scale.set(value.x, value.y, value.z);
+        mesh.matrixNeedsUpdate = true;
+      };
+    })();
+
     const config = {
       duration: 400,
       easing: "easeOutElastic",
@@ -215,29 +237,11 @@ AFRAME.registerComponent("media-loader", {
       y: mesh.scale.y,
       z: mesh.scale.z,
       targets: [initialScale],
-      update: (function() {
-        const lastValue = {};
-        return function(anim) {
-          const value = anim.animatables[0].target;
-
-          value.x = Math.max(Number.MIN_VALUE, value.x);
-          value.y = Math.max(Number.MIN_VALUE, value.y);
-          value.z = Math.max(Number.MIN_VALUE, value.z);
-
-          // For animation timeline.
-          if (value.x === lastValue.x && value.y === lastValue.y && value.z === lastValue.z) {
-            return;
-          }
-
-          lastValue.x = value.x;
-          lastValue.y = value.y;
-          lastValue.z = value.z;
-
-          mesh.scale.set(value.x, value.y, value.z);
-          mesh.matrixNeedsUpdate = true;
-        };
-      })(),
-      complete: onComplete
+      update: anim => step(anim),
+      complete: anim => {
+        step(anim);
+        onComplete();
+      }
     };
 
     mesh.scale.copy(initialScale);

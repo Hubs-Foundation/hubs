@@ -3,11 +3,11 @@ import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js/dist/hls.light.js";
-import { proxiedUrlFor, spawnMediaAround } from "../utils/media-utils";
+import { spawnMediaAround, createImageTexture } from "../utils/media-utils";
+import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { promisifyWorker } from "../utils/promisify-worker.js";
-import HubsTextureLoader from "../loaders/HubsTextureLoader";
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
@@ -204,24 +204,6 @@ function scaleToAspectRatio(el, ratio) {
   el.object3DMap.mesh.matrixNeedsUpdate = true;
 }
 
-const textureLoader = new HubsTextureLoader();
-textureLoader.setCrossOrigin("anonymous");
-async function createImageTexture(url, contentType) {
-  const texture = new THREE.Texture();
-
-  await textureLoader.loadTextureAsync(texture, url, contentType);
-
-  // try {
-  // } catch (e) {
-  //   throw new Error(`'${url}' could not be fetched (Error code: ${e.status}; Response: ${e.statusText})`);
-  // }
-
-  texture.encoding = THREE.sRGBEncoding;
-  texture.minFilter = THREE.LinearFilter;
-
-  return texture;
-}
-
 function disposeTexture(texture) {
   if (texture.image instanceof HTMLVideoElement) {
     const video = texture.image;
@@ -267,6 +249,12 @@ class TextureCache {
 
   release(src) {
     const cacheItem = this.cache.get(src);
+
+    if (!cacheItem) {
+      console.error(`Releasing uncached texture src ${src}`);
+      return;
+    }
+
     cacheItem.count--;
     // console.log("release", src, cacheItem.count);
     if (cacheItem.count <= 0) {
@@ -734,12 +722,16 @@ AFRAME.registerComponent("media-image", {
   },
 
   remove() {
-    textureCache.release(this.data.src);
+    if (this._hasRetainedTexture) {
+      textureCache.release(this.data.src);
+      this._hasRetainedTexture = false;
+    }
   },
 
   async update(oldData) {
     let texture;
     let ratio = 1;
+
     try {
       const { src, contentType } = this.data;
       if (!src) return;
@@ -778,9 +770,12 @@ AFRAME.registerComponent("media-image", {
           return;
         }
       }
+
+      this._hasRetainedTexture = true;
     } catch (e) {
       console.error("Error loading image", this.data.src, e);
       texture = errorTexture;
+      this._hasRetainedTexture = false;
     }
 
     const projection = this.data.projection;

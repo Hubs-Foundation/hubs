@@ -1,5 +1,7 @@
 import { injectCustomShaderChunks } from "../utils/media-utils";
 import { AVATAR_TYPES } from "../utils/avatar-utils";
+import { registerComponentInstance } from "../utils/component-utils";
+import { deregisterComponentInstance } from "../utils/component-utils";
 
 function ensureAvatarNodes(json) {
   const { nodes } = json;
@@ -39,6 +41,8 @@ AFRAME.registerComponent("player-info", {
   init() {
     this.displayName = null;
     this.communityIdentifier = null;
+    this.isModerator = false;
+    this.isRecording = false;
     this.applyProperties = this.applyProperties.bind(this);
     this.updateDisplayName = this.updateDisplayName.bind(this);
     this.applyDisplayName = this.applyDisplayName.bind(this);
@@ -56,6 +60,10 @@ AFRAME.registerComponent("player-info", {
         }
       });
     }
+    registerComponentInstance(this, "player-info");
+  },
+  remove() {
+    deregisterComponentInstance(this, "player-info");
   },
   play() {
     this.el.addEventListener("model-loaded", this.applyProperties);
@@ -84,9 +92,10 @@ AFRAME.registerComponent("player-info", {
     this.updateDisplayNameFromPresenceMeta(e.detail);
   },
   updateDisplayNameFromPresenceMeta(presenceMeta) {
-    const isModerator = presenceMeta.roles && presenceMeta.roles.moderator;
-    this.displayName = presenceMeta.profile.displayName + (isModerator ? " *" : "");
+    this.displayName = presenceMeta.profile.displayName;
     this.communityIdentifier = presenceMeta.profile.communityIdentifier;
+    this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
+    this.isModerator = !!(presenceMeta.roles && presenceMeta.roles.moderator);
     this.applyDisplayName();
   },
   applyDisplayName() {
@@ -99,6 +108,15 @@ AFRAME.registerComponent("player-info", {
       if (this.communityIdentifier) {
         communityIdentifierEl.setAttribute("text", { value: this.communityIdentifier });
       }
+    }
+    const recordingBadgeEl = this.el.querySelector(".recordingBadge");
+    if (recordingBadgeEl) {
+      recordingBadgeEl.object3D.visible = this.isRecording;
+    }
+
+    const modBadgeEl = this.el.querySelector(".modBadge");
+    if (modBadgeEl) {
+      modBadgeEl.object3D.visible = !this.isRecording && this.isModerator;
     }
   },
   applyProperties() {

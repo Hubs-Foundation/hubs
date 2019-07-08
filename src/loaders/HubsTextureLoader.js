@@ -5,7 +5,7 @@
 // https://github.com/mrdoob/three.js/blob/master/LICENSE
 //
 
-import { guessContentType } from "../utils/media-utils";
+import { guessContentType } from "../utils/media-url-utils";
 
 function loadAsync(loader, url, onProgress) {
   return new Promise((resolve, reject) => loader.load(url, resolve, onProgress, reject));

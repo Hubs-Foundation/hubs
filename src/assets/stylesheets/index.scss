@@ -133,8 +133,8 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  flex: 450px;
   position: relative;
+  flex: 1;
   background-image: url('../images/home-hero-background.jpg');
   background-size: cover;
   padding: 1.5em;
@@ -151,6 +151,7 @@ body {
     justify-content: center;
     align-items: center;
     padding: 0;
+    margin-top: 36px;
 
     @media (max-width: 768px) {
       width: 80%;
@@ -176,6 +177,9 @@ body {
         width: 100%;
         height: auto;
       }
+    }
+    :local(.logo-margin) {
+      margin: 24px 0;
     }
     :local(.blurb) {
       white-space: pre-wrap;
@@ -209,6 +213,10 @@ body {
       font-size: 14pt;
       width: 19em;
       margin-right: 1em;
+
+      @media (max-width: 380px) {
+        width: 18em;
+      }
     }
     :local(.secondary-button) {
       @extend %action-button-secondary;
@@ -216,6 +224,7 @@ body {
       flex-direction: row;
       width: 250px;
       margin-top: 18px;
+      margin-bottom: 18px;
       padding-right: 20px;
 
       i {

@@ -15,6 +15,30 @@ export function getReticulumFetchUrl(path, absolute = false) {
   }
 }
 
+export async function fetchReticulum(path, absolute = false) {
+  const headers = { "Content-Type": "application/json" };
+  const credentialsToken = window.APP.store.state.credentials.token;
+  if (credentialsToken) headers.authorization = `bearer ${credentialsToken}`;
+
+  const res = await fetch(getReticulumFetchUrl(path, absolute), { method: "GET", headers });
+
+  if (res.status !== 200) {
+    console.warn("Reticulum fetch failed " + path);
+    return null;
+  }
+
+  const body = await res.text();
+
+  let result;
+  try {
+    result = JSON.parse(body);
+  } catch (e) {
+    result = body; // TODO better error handling
+  }
+
+  return result;
+}
+
 let reticulumMeta = null;
 let invalidatedReticulumMetaThisSession = false;
 
@@ -58,8 +82,10 @@ export async function connectToReticulum(debug = false, params = null) {
     let socketPort = qs.get("phx_port");
 
     const reticulumMeta = await getReticulumMeta();
-    socketHost = socketHost || reticulumMeta.phx_host;
-    socketPort = socketPort || (process.env.RETICULUM_SERVER.includes("hubs.local") ? "4000" : "443"); // TODO phx_port
+    socketHost = socketHost || process.env.RETICULUM_SOCKET_SERVER || reticulumMeta.phx_host;
+    socketPort =
+      socketPort ||
+      (process.env.RETICULUM_SERVER ? new URL(`${socketProtocol}//${process.env.RETICULUM_SERVER}`).port : "443");
     return `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}`;
   };
 
@@ -165,6 +191,14 @@ export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace
   const creatorAssignmentToken = hub.creator_assignment_token;
   if (creatorAssignmentToken) {
     store.update({ creatorAssignmentTokens: [{ hubId: hub.hub_id, creatorAssignmentToken: creatorAssignmentToken }] });
+
+    // Don't need to store the embed token if there's no creator assignment token, since that means
+    // we are the owner and will get the embed token on page load.
+    const embedToken = hub.embed_token;
+
+    if (embedToken) {
+      store.update({ embedTokens: [{ hubId: hub.hub_id, embedToken: embedToken }] });
+    }
   }
 
   if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {

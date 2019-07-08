@@ -100,7 +100,8 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
-import { traverseMeshesAndAddShapes, proxiedUrlFor } from "./utils/media-utils";
+import { proxiedUrlFor } from "./utils/media-url-utils";
+import { traverseMeshesAndAddShapes } from "./utils/physics-utils";
 import { handleExitTo2DInterstitial, handleReEntryToVRFrom2DInterstitial } from "./utils/vr-interstitial";
 import { getAvatarSrc } from "./utils/avatar-utils.js";
 import MessageDispatch from "./message-dispatch";
@@ -138,10 +139,18 @@ window.APP.RENDER_ORDER = {
 const store = window.APP.store;
 const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
+const NOISY_OCCUPANT_COUNT = 12; // Above this # of occupants, we stop posting join/leaves/renames
 
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
+const isEmbed = window.self !== window.top;
+if (isEmbed && !qs.get("embed_token")) {
+  // Should be covered by X-Frame-Options, but just in case.
+  throw new Error("no embed token");
+}
+
+const embedsEnabled = qs.get("embeds");
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
@@ -157,6 +166,9 @@ window.Ammo = Ammo.bind(undefined, {
   }
 });
 require("aframe-physics-system");
+
+import "./systems/post-physics";
+
 import "./components/owned-object-limiter";
 import "./components/set-unowned-body-kinematic";
 import "./components/scalable-when-grabbed";
@@ -330,6 +342,9 @@ async function updateEnvironmentForHub(hub) {
     environmentEl.addEventListener(
       "model-loaded",
       () => {
+        // Show the canvas once the model has loaded
+        document.querySelector(".a-canvas").classList.remove("a-hidden");
+
         //TODO: check if the environment was made with spoke to determine if a shape should be added
         traverseMeshesAndAddShapes(environmentEl);
       },
@@ -384,27 +399,32 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     return;
   }
 
-  const hub = data.hubs[0];
-
-  console.log(`Janus host: ${hub.host}`);
-
-  const objectsScene = document.querySelector("#objects-scene");
-  const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
-  const objectsEl = document.createElement("a-entity");
-  objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
-
-  if (!isBotMode) {
-    objectsScene.appendChild(objectsEl);
+  // Turn off NAF for embeds as an optimization, so the user's browser isn't getting slammed
+  // with NAF traffic on load.
+  if (isEmbed) {
+    hubChannel.allowNAFTraffic(false);
   }
 
-  updateEnvironmentForHub(hub);
-  updateUIForHub(hub);
+  const hub = data.hubs[0];
+
+  let embedToken = hub.embed_token;
+
+  if (!embedToken) {
+    const embedTokenEntry = store.state.embedTokens && store.state.embedTokens.find(t => t.hubId === hub.hub_id);
+
+    if (embedTokenEntry) {
+      embedToken = embedTokenEntry.embedToken;
+    }
+  }
+
+  console.log(`Janus host: ${hub.host}`);
 
   remountUI({
     onSendMessage: messageDispatch.dispatch,
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
-    onAvatarSaved: entry => scene.emit("action_avatar_saved", entry)
+    onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
+    embedToken: embedsEnabled ? embedToken : null
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
@@ -413,10 +433,6 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     if (!hubChannel.can("update_hub")) return;
 
     hubChannel.updateScene(entry.url);
-  });
-
-  scene.addEventListener("scene_media_selected", e => {
-    hubChannel.updateScene(e.detail);
   });
 
   // Handle request for user gesture
@@ -429,6 +445,15 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
       }
     });
   });
+
+  const objectsScene = document.querySelector("#objects-scene");
+  const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
+  const objectsEl = document.createElement("a-entity");
+  objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
+
+  if (!isBotMode) {
+    objectsScene.appendChild(objectsEl);
+  }
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   const connectToScene = async () => {
@@ -490,18 +515,36 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
       adapter.unreliableTransport = sendViaPhoenix(false);
     });
 
-    scene.components["networked-scene"]
-      .connect()
-      .then(() => scene.emit("didConnectToNetworkedScene"))
-      .catch(connectError => {
-        // hacky until we get return codes
-        const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
-        console.error(connectError);
-        remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
-        entryManager.exitScene();
+    const loadEnvironmentAndConnect = () => {
+      updateEnvironmentForHub(hub);
 
-        return;
+      scene.components["networked-scene"]
+        .connect()
+        .then(() => scene.emit("didConnectToNetworkedScene"))
+        .catch(connectError => {
+          // hacky until we get return codes
+          const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+          console.error(connectError);
+          remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
+          entryManager.exitScene();
+
+          return;
+        });
+    };
+
+    updateUIForHub(hub);
+
+    if (!isEmbed) {
+      loadEnvironmentAndConnect();
+    } else {
+      remountUI({
+        onPreloadLoadClicked: () => {
+          hubChannel.allowNAFTraffic(true);
+          remountUI({ showPreload: false });
+          loadEnvironmentAndConnect();
+        }
       });
+    }
   };
 
   if (!isBotMode) {
@@ -523,6 +566,9 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const canvas = document.querySelector(".a-canvas");
+  canvas.classList.add("a-hidden");
+
   warmSerializeElement();
 
   if (!window.WebAssembly) {
@@ -639,7 +685,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   });
 
-  remountUI({ performConditionalSignIn });
+  scene.addEventListener("scene_media_selected", e => {
+    const sceneInfo = e.detail;
+
+    performConditionalSignIn(
+      () => hubChannel.can("update_hub"),
+      () => hubChannel.updateScene(sceneInfo),
+      "change-scene"
+    );
+  });
+
+  remountUI({ performConditionalSignIn, embed: isEmbed, showPreload: isEmbed });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();
 
@@ -883,7 +939,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       perms_token: null,
       context: {
         mobile: isMobile || isMobileVR,
-        hmd: availableVREntryTypes.isInHMD
+        hmd: availableVREntryTypes.isInHMD,
+        embed: isEmbed
       }
     };
 
@@ -1017,46 +1074,59 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (!hubChannel.presence.__hadInitialSync) return;
 
             const meta = info.metas[info.metas.length - 1];
+            const occupantCount = Object.entries(hubChannel.presence.state).length;
 
-            if (current) {
-              // Change to existing presence
-              const isSelf = sessionId === socket.params().session_id;
-              const currentMeta = current.metas[0];
+            if (occupantCount <= NOISY_OCCUPANT_COUNT) {
+              if (current) {
+                // Change to existing presence
+                const isSelf = sessionId === socket.params().session_id;
+                const currentMeta = current.metas[0];
 
-              if (
-                !isSelf &&
-                currentMeta.presence !== meta.presence &&
-                meta.presence === "room" &&
-                meta.profile.displayName
-              ) {
-                addToPresenceLog({
-                  type: "entered",
-                  presence: meta.presence,
-                  name: meta.profile.displayName
-                });
-              }
+                if (
+                  !isSelf &&
+                  currentMeta.presence !== meta.presence &&
+                  meta.presence === "room" &&
+                  meta.profile.displayName
+                ) {
+                  addToPresenceLog({
+                    type: "entered",
+                    presence: meta.presence,
+                    name: meta.profile.displayName
+                  });
+                }
 
-              if (currentMeta.profile && meta.profile && currentMeta.profile.displayName !== meta.profile.displayName) {
-                addToPresenceLog({
-                  type: "display_name_changed",
-                  oldName: currentMeta.profile.displayName,
-                  newName: meta.profile.displayName
-                });
-              }
-            } else if (info.metas.length === 1) {
-              // New presence
-              const meta = info.metas[0];
+                if (
+                  currentMeta.profile &&
+                  meta.profile &&
+                  currentMeta.profile.displayName !== meta.profile.displayName
+                ) {
+                  addToPresenceLog({
+                    type: "display_name_changed",
+                    oldName: currentMeta.profile.displayName,
+                    newName: meta.profile.displayName
+                  });
+                }
+              } else if (info.metas.length === 1) {
+                // New presence
+                const meta = info.metas[0];
 
-              if (meta.presence && meta.profile.displayName) {
-                addToPresenceLog({
-                  type: "join",
-                  presence: meta.presence,
-                  name: meta.profile.displayName
-                });
+                if (meta.presence && meta.profile.displayName) {
+                  addToPresenceLog({
+                    type: "join",
+                    presence: meta.presence,
+                    name: meta.profile.displayName
+                  });
+                }
               }
             }
 
-            scene.emit("presence_updated", { sessionId, profile: meta.profile, roles: meta.roles });
+            scene.emit("presence_updated", {
+              sessionId,
+              profile: meta.profile,
+              roles: meta.roles,
+              streaming: meta.streaming,
+              recording: meta.recording
+            });
           });
 
           presence.onLeave((sessionId, current, info) => {
@@ -1064,6 +1134,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (!hubChannel.presence.__hadInitialSync) return;
 
             if (current && current.metas.length > 0) return;
+            const occupantCount = Object.entries(hubChannel.presence.state).length;
+            if (occupantCount > NOISY_OCCUPANT_COUNT) return;
 
             const meta = info.metas[0];
 
@@ -1093,6 +1165,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       remountUI({
         hubIsBound: data.hub_requires_oauth,
+        initialIsFavorited: data.subscriptions.favorites,
         initialIsSubscribed: subscriptions.isSubscribed()
       });
 

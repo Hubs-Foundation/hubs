@@ -1,6 +1,6 @@
 import { addMedia } from "../utils/media-utils";
 import { ObjectContentOrigins } from "../object-types";
-import { guessContentType } from "../utils/media-utils";
+import { guessContentType } from "../utils/media-url-utils";
 
 AFRAME.registerComponent("clone-media-button", {
   init() {
