@@ -156,7 +156,7 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add({
-    template: "#pen-interactable",
+    template: "#interactable-pen",
     components: [
       {
         component: "position",

@@ -364,7 +364,7 @@
                 </a-entity>
             </template>
 
-            <template id="pen-interactable">
+            <template id="interactable-pen">
                 <a-entity
                     class="pen interactable"
                     ammo-body="type: dynamic; mass: 0.001; collisionFilterGroup: 1; collisionFilterMask: 15;"
@@ -890,7 +890,7 @@
         <a-entity
             action-to-event="path: /actions/spawnPen; event: spawn_pen; withPermission: spawn_drawing"
             super-spawner="
-                template: #pen-interactable;
+                template: #interactable-pen;
                 src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;
                 spawnEvent: spawn_pen;
                 animateFromCursor: true;
