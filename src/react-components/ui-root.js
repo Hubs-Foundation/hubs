@@ -46,6 +46,7 @@ import CloseRoomDialog from "./close-room-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebAssemblyUnsupportedDialog from "./webassembly-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
+import FeedbackDialog from "./feedback-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
@@ -145,6 +146,7 @@ class UIRoot extends Component {
     showSafariDialog: PropTypes.bool,
     showSafariMicDialog: PropTypes.bool,
     showWebAssemblyDialog: PropTypes.bool,
+    showFeedbackDialog: PropTypes.bool,
     showOAuthDialog: PropTypes.bool,
     oauthInfo: PropTypes.array,
     isCursorHoldingPen: PropTypes.bool,
@@ -1578,6 +1580,12 @@ class UIRoot extends Component {
                 this.renderDialog(RoomInfoDialog, { scene: this.props.hubScene, hubName: this.props.hubName })
               }
             />
+            <StateRoute
+              stateKey="modal"
+              stateValue="feedback"
+              history={this.props.history}
+              render={() => this.renderDialog(FeedbackDialog)}
+            />
 
             {showClientInfo && (
               <ClientInfoDialog
@@ -1899,9 +1907,9 @@ class UIRoot extends Component {
                 />
                 {!watching && !streaming ? (
                   <div className={styles.nagCornerButton}>
-                    <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
+                    <button onClick={() => this.pushHistoryState("modal", "feedback")}>
                       <FormattedMessage id="feedback.prompt" />
-                    </a>
+                    </button>
                   </div>
                 ) : (
                   <div className={styles.nagCornerButton}>
