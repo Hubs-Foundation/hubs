@@ -292,7 +292,7 @@ async function updateUIForHub(hub) {
   remountUI({
     hubId: hub.hub_id,
     hubName: hub.name,
-    hubPerms: hub.perms,
+    hubMemberPermissions: hub.member_permissions,
     hubScene: hub.scene,
     hubEntryCode: hub.entry_code
   });
@@ -1233,7 +1233,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
-    if (stale_fields.includes("perms")) {
+    if (stale_fields.includes("member_permissions")) {
       hubChannel.fetchPermissions();
     }
 

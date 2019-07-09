@@ -26,16 +26,22 @@ export default class RoomSettingsDialog extends Component {
     this.props.onClose();
   };
 
-  renderCheckbox(perm, disabled, onChange) {
+  renderCheckbox(member_permission, disabled, onChange) {
     return (
-      <label className={cx(styles.permission, { [styles.permissionDisabled]: disabled })} key={perm}>
+      <label className={cx(styles.permission, { [styles.permissionDisabled]: disabled })} key={member_permission}>
         <input
           type="checkbox"
-          checked={this.state.perms[perm]}
+          checked={this.state.member_permissions[member_permission]}
           disabled={disabled}
-          onChange={onChange || (e => this.setState({ perms: { ...this.state.perms, [perm]: e.target.checked } }))}
+          onChange={
+            onChange ||
+            (e =>
+              this.setState({
+                member_permissions: { ...this.state.member_permissions, [member_permission]: e.target.checked }
+              }))
+          }
         />
-        <FormattedMessage id={`room-settings.${perm}`} />
+        <FormattedMessage id={`room-settings.${member_permission}`} />
       </label>
     );
   }
@@ -65,18 +71,18 @@ export default class RoomSettingsDialog extends Component {
           </span>
           <div className={styles.permissions}>
             {this.renderCheckbox("spawn_and_move_media", false, e => {
-              const newPerms = {
+              const newMemberPermissions = {
                 spawn_and_move_media: e.target.checked
               };
               if (!e.target.checked) {
-                newPerms.spawn_camera = false;
-                newPerms.pin_objects = false;
+                newMemberPermissions.spawn_camera = false;
+                newMemberPermissions.pin_objects = false;
               }
-              this.setState({ perms: { ...this.state.perms, ...newPerms } });
+              this.setState({ member_permissions: { ...this.state.member_permissions, ...newMemberPermissions } });
             })}
             <div className={styles.permissionsGroup}>
-              {this.renderCheckbox("spawn_camera", !this.state.perms.spawn_and_move_media)}
-              {this.renderCheckbox("pin_objects", !this.state.perms.spawn_and_move_media)}
+              {this.renderCheckbox("spawn_camera", !this.state.member_permissions.spawn_and_move_media)}
+              {this.renderCheckbox("pin_objects", !this.state.member_permissions.spawn_and_move_media)}
             </div>
             {this.renderCheckbox("spawn_drawing")}
           </div>
