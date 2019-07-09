@@ -1322,6 +1322,11 @@ class UIRoot extends Component {
     const enteredOrWatching = entered || watching;
     const enteredOrWatchingOrPreload = entered || watching || preload;
     const baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
+    const inEntryFlow = !!(
+      this.props.history &&
+      this.props.history.location.state &&
+      this.props.history.location.state.entry_step
+    );
 
     const entryDialog =
       this.props.availableVREntryTypes &&
@@ -1384,6 +1389,8 @@ class UIRoot extends Component {
       !embed &&
       !preload &&
       !watching &&
+      !hasTopTip &&
+      !inEntryFlow &&
       !this.props.store.state.activity.hasOpenedShare &&
       this.occupantCount() <= 1;
 
