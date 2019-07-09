@@ -21,7 +21,7 @@ import { withStyles } from "@material-ui/core/styles";
 
 // Quite ugly but simplest way to have AvatarPreview work is to import aframe.
 // We can technically untangle the dependencies for this, but doesn't seem worth it for admin.
-import "aframe";
+import "../../aframe-entry";
 import AvatarPreview from "../avatar-preview";
 import { getReticulumFetchUrl } from "../../utils/phoenix-utils";
 
