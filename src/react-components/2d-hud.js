@@ -14,6 +14,7 @@ const browser = detect();
 class TopHUD extends Component {
   static propTypes = {
     muted: PropTypes.bool,
+    volumeLevel: PropTypes.number,
     isCursorHoldingPen: PropTypes.bool,
     hasActiveCamera: PropTypes.bool,
     frozen: PropTypes.bool,
@@ -153,6 +154,16 @@ class TopHUD extends Component {
       );
     }
 
+    const micLevelStyle =
+      this.props.volumeLevel < 0.2
+        ? 0
+        : this.props.volumeLevel < 0.3
+          ? 1
+          : this.props.volumeLevel < 0.6
+            ? 2
+            : this.props.volumeLevel < 1.3
+              ? 3
+              : 4;
     // Hide buttons when frozen.
     return (
       <div className={cx(styles.container, styles.top, styles.unselectable, uiStyles.uiInteractive)}>
@@ -163,10 +174,20 @@ class TopHUD extends Component {
             {tip}
             {videoSharingButtons}
             <div
-              className={cx(styles.iconButton, styles.mute, { [styles.active]: this.props.muted })}
+              className={cx(
+                styles.iconButton,
+                styles.mute,
+                { [styles.active]: this.props.muted },
+                { [styles.volumeLevel1]: micLevelStyle === 1 },
+                { [styles.volumeLevel2]: micLevelStyle === 2 },
+                { [styles.volumeLevel3]: micLevelStyle === 3 },
+                { [styles.volumeLevel4]: micLevelStyle === 4 }
+              )}
               title={this.props.muted ? "Unmute Mic" : "Mute Mic"}
               onClick={this.props.onToggleMute}
-            />
+            >
+              <div className={cx(styles.iconButton)} />
+            </div>
             <button
               className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn)}
               onClick={() => this.props.mediaSearchStore.sourceNavigateToDefaultSource()}

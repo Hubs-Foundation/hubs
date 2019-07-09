@@ -191,6 +191,7 @@ class UIRoot extends Component {
     audioTrack: null,
     numAudioTracks: 0,
     micDevices: [],
+    volumeLevel: 1,
 
     profileNamePending: "Hello",
 
@@ -227,6 +228,7 @@ class UIRoot extends Component {
   }
 
   componentDidUpdate(prevProps) {
+    window.setState = this.setState.bind(this);
     const { hubChannel, showSignInDialog } = this.props;
     if (hubChannel) {
       const { signedIn } = hubChannel;
@@ -1416,6 +1418,7 @@ class UIRoot extends Component {
 
     const streamer = getCurrentStreamer();
     const streamerName = streamer && streamer.displayName;
+    console.log(this.state.volumeLevel);
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1874,6 +1877,7 @@ class UIRoot extends Component {
                 <TwoDHUD.TopHUD
                   history={this.props.history}
                   mediaSearchStore={this.props.mediaSearchStore}
+                  volumeLevel={this.state.volumeLevel}
                   muted={this.state.muted}
                   frozen={this.state.frozen}
                   watching={this.state.watching}
