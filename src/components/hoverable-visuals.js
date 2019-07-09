@@ -25,7 +25,7 @@ AFRAME.registerComponent("hoverable-visuals", {
     this.boundingBox = null;
 
     // Used when the object is batched
-    const renderManager = AFRAME.scenes[0].systems["hubs-systems"].renderManagerSystem;
+    const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
     this.el.object3D.traverse(object => {
       if (!object.material) return;
       forEachMaterial(object, material => {
@@ -37,7 +37,7 @@ AFRAME.registerComponent("hoverable-visuals", {
         )
           return;
 
-        renderManager.meshToEl.delete(object);
+        batchManagerSystem.meshToEl.delete(object);
       });
     });
   },

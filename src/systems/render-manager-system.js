@@ -1,4 +1,4 @@
-import { BatchManager } from "three-render-manager";
+import { BatchManager } from "three-batch-manager";
 
 import HubsBatchRawUniformGroup from "./render-manager/hubs-batch-raw-uniform-group";
 import unlitBatchVert from "./render-manager/unlit-batch.vert";
@@ -6,7 +6,7 @@ import unlitBatchFrag from "./render-manager/unlit-batch.frag";
 
 const MAX_INSTANCES = 256;
 
-export class RenderManagerSystem {
+export class BatchManagerSystem {
   constructor(scene, renderer) {
     this.meshToEl = new WeakMap();
 

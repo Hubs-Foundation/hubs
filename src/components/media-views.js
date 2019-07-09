@@ -724,7 +724,7 @@ AFRAME.registerComponent("media-image", {
 
   remove() {
     if (this.data.batch && this.mesh) {
-      this.el.sceneEl.systems["hubs-systems"].renderManagerSystem.removeObject(this.mesh);
+      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
     }
     if (this._hasRetainedTexture) {
       textureCache.release(this.data.src);
@@ -811,7 +811,7 @@ AFRAME.registerComponent("media-image", {
     }
 
     if (this.data.batch) {
-      this.el.sceneEl.systems["hubs-systems"].renderManagerSystem.addObject(this.mesh);
+      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.mesh);
     }
 
     this.el.emit("image-loaded", { src: this.data.src, projection: projection });

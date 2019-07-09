@@ -1,4 +1,4 @@
-import { BatchRawUniformGroup } from "three-render-manager";
+import { BatchRawUniformGroup } from "three-batch-manager";
 
 const tempVec3 = new Array(3);
 const tempVec4 = new Array(4);

@@ -142,7 +142,7 @@ AFRAME.registerComponent("stats-plus", {
       stats("rAF").tick();
       stats("FPS").frame();
 
-      const batchManager = this.el.sceneEl.systems["hubs-systems"].renderManagerSystem.batchManager;
+      const batchManager = this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.batchManager;
       stats("batchdraws").set(batchManager.batches.length);
       stats("batchinstances").set(batchManager.instanceCount);
       stats("batchatlassize").set(batchManager.atlas.arrayDepth);
