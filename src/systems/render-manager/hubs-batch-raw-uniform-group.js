@@ -42,7 +42,9 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
   }
 
   update(time) {
+    const interaction = AFRAME.scenes[0].systems.interaction;
     let interactorOne, interactorTwo;
+
     for (let instanceId = 0; instanceId < this.meshes.length; instanceId++) {
       const mesh = this.meshes[instanceId];
       if (!mesh) continue;
@@ -65,21 +67,24 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
         const isFrozen = el.sceneEl.is("frozen");
         const hideDueToPinning = !isSpawner && isPinned && !isFrozen;
 
-        const interaction = AFRAME.scenes[0].systems.interaction;
+        let highlightInteractorOne, highlightInteractorTwo;
         if (interaction.state.leftHand.hovered === el || interaction.state.leftHand.held === el) {
           interactorOne = interaction.options.leftHand.entity.object3D;
+          highlightInteractorOne = true;
         }
 
         if (interaction.state.rightRemote.hovered === el || interaction.state.rightRemote.held === el) {
           interactorTwo = interaction.options.rightRemote.entity.object3D;
+          highlightInteractorTwo = true;
         } else if (interaction.state.rightHand.hovered === el || interaction.state.rightHand.held === el) {
           interactorTwo = interaction.options.rightHand.entity.object3D;
+          highlightInteractorTwo = true;
         }
 
         tempVec4[0] = worldY - scaledRadius;
         tempVec4[1] = worldY + scaledRadius;
-        tempVec4[2] = !!interactorOne && !hideDueToPinning;
-        tempVec4[3] = !!interactorTwo && !hideDueToPinning;
+        tempVec4[2] = !!highlightInteractorOne && !hideDueToPinning;
+        tempVec4[3] = !!highlightInteractorTwo && !hideDueToPinning;
         this.hubs_sweepParams.set(tempVec4, instanceId * 4);
       }
     }
