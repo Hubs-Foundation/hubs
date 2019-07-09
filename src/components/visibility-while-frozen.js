@@ -74,8 +74,9 @@ AFRAME.registerComponent("visibility-while-frozen", {
 
     const isTransforming = AFRAME.scenes[0].systems["transform-selected-object"].transforming;
 
+    const allowed = !this.data.withPermission || window.APP.hubChannel.canOrWillIfCreator(this.data.withPermission);
     let shouldBeVisible =
-      (!this.data.withPermission || window.APP.hubChannel.canOrWillIfCreator(this.data.withPermission)) &&
+      allowed &&
       ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) &&
       isWithinDistance &&
       !isTransforming;
