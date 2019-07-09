@@ -23,7 +23,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.soundEffectsSystem = new SoundEffectsSystem();
     this.lobbyCameraSystem = new LobbyCameraSystem();
     this.renderManagerSystem = new RenderManagerSystem(this.el.sceneEl.object3D, this.el.sceneEl.renderer);
-    // this.hoverVisualsSystem = new HoverVisualsSystem(this.el.sceneEl.object3D);
   },
 
   tick(t) {

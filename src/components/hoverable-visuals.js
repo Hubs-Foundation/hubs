@@ -37,7 +37,6 @@ AFRAME.registerComponent("hoverable-visuals", {
         )
           return;
 
-        console.log("removing", object);
         renderManager.meshToEl.delete(object);
       });
     });
