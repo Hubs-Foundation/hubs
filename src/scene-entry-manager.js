@@ -359,7 +359,16 @@ export default class SceneEntryManager {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
-      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      let newStream;
+
+      try {
+        newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (e) {
+        isHandlingVideoShare = false;
+        this.scene.emit("share_video_failed");
+        return;
+      }
+
       const videoTracks = newStream ? newStream.getVideoTracks() : [];
 
       if (videoTracks.length > 0) {

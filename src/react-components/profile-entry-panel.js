@@ -13,6 +13,7 @@ import { fetchAvatar } from "../utils/avatar-utils";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { replaceHistoryState } from "../utils/history";
 import StateLink from "./state-link";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
 import AvatarPreview from "./avatar-preview";
 
@@ -25,7 +26,8 @@ class ProfileEntryPanel extends Component {
     finished: PropTypes.func,
     intl: PropTypes.object,
     history: PropTypes.object,
-    avatarId: PropTypes.string
+    avatarId: PropTypes.string,
+    onClose: PropTypes.func
   };
 
   state = {
@@ -125,6 +127,13 @@ class ProfileEntryPanel extends Component {
 
     return (
       <div className={styles.profileEntry}>
+        <div className={styles.close}>
+          <a onClick={() => this.props.onClose()}>
+            <i>
+              <FontAwesomeIcon icon={faTimes} />
+            </i>
+          </a>
+        </div>
         <form onSubmit={this.saveStateAndFinish} className={styles.form}>
           <div className={classNames([styles.box, styles.darkened])}>
             <label htmlFor="#profile-entry-display-name" className={styles.title}>

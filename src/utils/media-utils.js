@@ -2,6 +2,7 @@ import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
 
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
@@ -9,11 +10,24 @@ const resolveUrlCache = new Map();
 export const resolveUrl = async (url, index) => {
   const cacheKey = `${url}|${index}`;
   if (resolveUrlCache.has(cacheKey)) return resolveUrlCache.get(cacheKey);
-  const resolved = await fetch(mediaAPIEndpoint, {
+
+  const response = await fetch(mediaAPIEndpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ media: { url, index } })
-  }).then(r => r.json());
+  });
+
+  if (!response.ok) {
+    const message = `Error resolving url "${url}":`;
+    try {
+      const body = await response.text();
+      throw new Error(message + " " + body);
+    } catch (e) {
+      throw new Error(message + " " + response.statusText);
+    }
+  }
+
+  const resolved = await response.json();
   resolveUrlCache.set(cacheKey, resolved);
   return resolved;
 };
@@ -276,21 +290,18 @@ export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false
   return { entity, orientation };
 }
 
-const textureLoader = new THREE.TextureLoader();
-textureLoader.setCrossOrigin("anonymous");
-export function createImageTexture(url) {
-  return new Promise((resolve, reject) => {
-    textureLoader.load(
-      url,
-      texture => {
-        texture.encoding = THREE.sRGBEncoding;
-        texture.minFilter = THREE.LinearFilter;
-        resolve(texture);
-      },
-      null,
-      function(xhr) {
-        reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
-      }
-    );
-  });
+export const textureLoader = new HubsTextureLoader().setCrossOrigin("anonymous");
+
+export async function createImageTexture(url, contentType) {
+  const texture = new THREE.Texture();
+
+  try {
+    await textureLoader.loadTextureAsync(texture, url, contentType);
+  } catch (e) {
+    throw new Error(`'${url}' could not be fetched (Error code: ${e.status}; Response: ${e.statusText})`);
+  }
+
+  texture.encoding = THREE.sRGBEncoding;
+
+  return texture;
 }
