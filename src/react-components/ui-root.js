@@ -1389,6 +1389,7 @@ class UIRoot extends Component {
       !watching &&
       !showInviteTip &&
       !this.state.showShareDialog &&
+      this.props.hubChannel &&
       this.props.hubChannel.canOrWillIfCreator("update_hub");
 
     const displayNameOverride = this.props.hubIsBound

@@ -11,7 +11,7 @@ export function deregisterComponentInstance(component, name) {
 }
 
 export function getCurrentStreamer() {
-  if (!window.APP || !window.APP.componentRegistry) return null;
+  if (!window.APP || !window.APP.componentRegistry || !window.APP.hubChannel) return null;
   const playerInfos = window.APP.componentRegistry["player-info"] || [];
   const presences = window.APP.hubChannel.presence.state;
 
