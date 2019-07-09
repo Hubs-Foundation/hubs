@@ -17,8 +17,11 @@ function registerNetworkSchemas() {
     };
   };
 
+  // Note: networked template ids are semantically important. We use the template suffix as a filter
+  // for allowing and authorizing messages in reticulum. See https://github.com/mozilla/reticulum/pull/195
+
   NAF.schemas.add({
-    template: "#remote-avatar-template",
+    template: "#remote-avatar",
     components: [
       {
         component: "position",
