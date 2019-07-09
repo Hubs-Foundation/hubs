@@ -1,7 +1,4 @@
 AFRAME.registerSystem("permissions", {
-  init() {
-    this.permissionsReadyHandlers = [];
-  },
   onPermissionsUpdated(handler) {
     if (window.APP.hubChannel) {
       window.APP.hubChannel.addEventListener("permissions_updated", handler);
