@@ -10,7 +10,7 @@ import DialogContainer from "./dialog-container";
 export default class RoomSettingsDialog extends Component {
   static propTypes = {
     initialSettings: PropTypes.object,
-    onRename: PropTypes.func,
+    onChange: PropTypes.func,
     onClose: PropTypes.func
   };
 
@@ -22,7 +22,7 @@ export default class RoomSettingsDialog extends Component {
   onSubmit = e => {
     e.preventDefault();
     e.stopPropagation();
-    this.props.onRename(this.state);
+    this.props.onChange(this.state);
     this.props.onClose();
   };
 

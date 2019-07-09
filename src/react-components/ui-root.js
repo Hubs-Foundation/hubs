@@ -1484,7 +1484,7 @@ class UIRoot extends Component {
               render={() =>
                 this.renderDialog(RoomSettingsDialog, {
                   initialSettings: { name: this.props.hubName, perms: this.props.hubPerms },
-                  onRename: settings => this.props.hubChannel.updateHub(settings)
+                  onChange: settings => this.props.hubChannel.updateHub(settings)
                 })
               }
             />

@@ -1225,8 +1225,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     updateUIForHub(hub);
 
-    hubChannel.fetchPermissions();
-
     if (stale_fields.includes("scene")) {
       updateEnvironmentForHub(hub);
 
@@ -1235,6 +1233,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         name: userInfo.metas[0].profile.displayName,
         sceneName: hub.scene ? hub.scene.name : "a custom URL"
       });
+    }
+
+    if (stale_fields.includes("perms")) {
+      hubChannel.fetchPermissions();
     }
 
     if (stale_fields.includes("name")) {
