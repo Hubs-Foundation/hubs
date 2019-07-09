@@ -43,6 +43,7 @@ import SafariMicDialog from "./safari-mic-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
 import RenameRoomDialog from "./rename-room-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
+import Tip from "./tip.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebAssemblyUnsupportedDialog from "./webassembly-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
@@ -64,7 +65,6 @@ import TwoDHUD from "./2d-hud";
 import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
-import { handleTipClose } from "../systems/tips.js";
 
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
@@ -1372,6 +1372,7 @@ class UIRoot extends Component {
     const hasDiscordBridges = discordBridges.length > 0;
     const showBroadcastTip =
       (hasDiscordBridges || (hasEmbedPresence && !this.props.embed)) && !this.state.broadcastTipDismissed;
+
     const showInviteTip =
       !showVREntryButton &&
       !hasTopTip &&
@@ -1432,7 +1433,6 @@ class UIRoot extends Component {
                 onLoadClicked={this.props.onPreloadLoadClicked}
               />
             )}
-
             <StateRoute
               stateKey="overlay"
               stateValue="profile"
@@ -1586,7 +1586,6 @@ class UIRoot extends Component {
               history={this.props.history}
               render={() => this.renderDialog(FeedbackDialog)}
             />
-
             {showClientInfo && (
               <ClientInfoDialog
                 clientId={clientInfoClientId}
@@ -1597,14 +1596,12 @@ class UIRoot extends Component {
                 performConditionalSignIn={this.props.performConditionalSignIn}
               />
             )}
-
             {(!enteredOrWatching || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
                 <PresenceLog entries={presenceLogEntries} hubId={this.props.hubId} history={this.props.history} />
                 <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
               </div>
             )}
-
             {enteredOrWatchingOrPreload && (
               <PresenceLog
                 inRoom={true}
@@ -1618,49 +1615,15 @@ class UIRoot extends Component {
               this.props.activeTips.bottom &&
               (!presenceLogEntries || presenceLogEntries.length === 0) &&
               !showBroadcastTip && (
-                <div className={styles.bottomTip}>
-                  <button
-                    className={styles.tipCancel}
-                    onClick={() => handleTipClose(this.props.activeTips.bottom, "bottom")}
-                  >
-                    <i>
-                      <FontAwesomeIcon icon={faTimes} />
-                    </i>
-                  </button>
-                  {[".spawn_menu", "_button"].find(x => this.props.activeTips.bottom.endsWith(x)) ? (
-                    <div className={styles.splitTip}>
-                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}-pre`} />
-                      <div
-                        className={classNames({
-                          [styles.splitTipIcon]: true,
-                          [styles[this.props.activeTips.bottom.split(".")[1] + "-icon"]]: true
-                        })}
-                      />
-                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}-post`} />
-                    </div>
-                  ) : (
-                    <div className={styles.tip}>
-                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}`} />
-                    </div>
-                  )}
-                </div>
+                <Tip tip={this.props.activeTips.bottom} tipRegion="bottom" pushHistoryState={this.pushHistoryState} />
               )}
             {enteredOrWatchingOrPreload &&
               showBroadcastTip && (
-                <div className={styles.bottomTip}>
-                  <button className={styles.tipCancel} onClick={() => this.confirmBroadcastedRoom()}>
-                    <i>
-                      <FontAwesomeIcon icon={faTimes} />
-                    </i>
-                  </button>
-                  <div className={styles.tip}>
-                    {hasDiscordBridges ? (
-                      <span>{`Chat in this room is being bridged to ${discordSnippet} on Discord.`}</span>
-                    ) : (
-                      <FormattedMessage id="embed.presence-warning" />
-                    )}
-                  </div>
-                </div>
+                <Tip
+                  tip={hasDiscordBridges ? "discord" : "embed"}
+                  broadcastTarget={discordSnippet}
+                  onClose={() => this.confirmBroadcastedRoom()}
+                />
               )}
             {enteredOrWatchingOrPreload && (
               <InWorldChatBox
@@ -1676,7 +1639,6 @@ class UIRoot extends Component {
                 <FormattedMessage id="entry.leave-room" />
               </button>
             )}
-
             {!this.state.frozen &&
               !watching &&
               !preload && (
@@ -1777,7 +1739,6 @@ class UIRoot extends Component {
                   )}
                 </div>
               )}
-
             <StateRoute
               stateKey="overlay"
               stateValue="invite"
@@ -1795,7 +1756,6 @@ class UIRoot extends Component {
                 />
               )}
             />
-
             <StateRoute
               stateKey="overlay"
               stateValue="link"
@@ -1820,9 +1780,7 @@ class UIRoot extends Component {
                 <FontAwesomeIcon icon={faTimes} />
               </button>
             )}
-
             {streamingTip}
-
             {!streaming &&
               !preload && (
                 <div
@@ -1835,7 +1793,6 @@ class UIRoot extends Component {
                   <FontAwesomeIcon icon={faBars} />
                 </div>
               )}
-
             <div
               onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
               className={classNames({
@@ -1846,7 +1803,6 @@ class UIRoot extends Component {
               <FontAwesomeIcon icon={faUsers} />
               <span className={styles.occupantCount}>{this.occupantCount()}</span>
             </div>
-
             {this.state.showPresenceList && (
               <PresenceList
                 history={this.props.history}
@@ -1858,7 +1814,6 @@ class UIRoot extends Component {
                 onSignOut={this.signOut}
               />
             )}
-
             {this.state.showSettingsMenu && (
               <SettingsMenu
                 history={this.props.history}
@@ -1874,9 +1829,7 @@ class UIRoot extends Component {
                 pushHistoryState={this.pushHistoryState}
               />
             )}
-
             {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
-
             {enteredOrWatching && (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
