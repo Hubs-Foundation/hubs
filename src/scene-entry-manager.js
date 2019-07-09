@@ -275,19 +275,11 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("pinned", e => {
       if (this._disableSignInOnPinAction) return;
-
-      // Don't go into pin/unpin flow if the pin state didn't actually change and this was just initialization
-      if (!e.detail.changed) return;
-
       this._signInAndPinOrUnpinElement(e.detail.el, true);
     });
 
     this.scene.addEventListener("unpinned", e => {
       if (this._disableSignInOnPinAction) return;
-
-      // Don't go into pin/unpin flow if the pin state didn't actually change and this was just initialization
-      if (!e.detail.changed) return;
-
       this._signInAndPinOrUnpinElement(e.detail.el, false);
     });
 
