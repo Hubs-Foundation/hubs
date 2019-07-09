@@ -1593,7 +1593,12 @@ class UIRoot extends Component {
 
             {(!enteredOrWatching || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
-                <PresenceLog entries={presenceLogEntries} hubId={this.props.hubId} history={this.props.history} />
+                <PresenceLog
+                  entries={presenceLogEntries}
+                  presences={this.props.presences}
+                  hubId={this.props.hubId}
+                  history={this.props.history}
+                />
                 <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
               </div>
             )}
@@ -1601,6 +1606,7 @@ class UIRoot extends Component {
             {enteredOrWatchingOrPreload && (
               <PresenceLog
                 inRoom={true}
+                presences={this.props.presences}
                 entries={presenceLogEntries}
                 hubId={this.props.hubId}
                 history={this.props.history}

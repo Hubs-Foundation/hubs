@@ -7,13 +7,15 @@ import { FormattedMessage } from "react-intl";
 import ChatMessage from "./chat-message";
 import PhotoMessage from "./photo-message";
 import ImageMessage from "./image-message";
+import { getPresenceContextForSession } from "../utils/phoenix-utils";
 
 export default class PresenceLog extends Component {
   static propTypes = {
     entries: PropTypes.array,
     inRoom: PropTypes.bool,
     hubId: PropTypes.string,
-    history: PropTypes.object
+    history: PropTypes.object,
+    presences: PropTypes.object
   };
 
   constructor(props) {
@@ -27,6 +29,9 @@ export default class PresenceLog extends Component {
       [styles.presenceLogChat]: e.type === "chat",
       [styles.expired]: !!e.expired
     };
+
+    const presenceContext = e.sessionId ? getPresenceContextForSession(this.props.presences, e.sessionId) : {};
+    const isBot = !!presenceContext.discord;
 
     switch (e.type) {
       case "join":
@@ -69,6 +74,7 @@ export default class PresenceLog extends Component {
             body={e.body}
             maySpawn={e.maySpawn}
             sessionId={e.sessionId}
+            includeFromLink={this.props.inRoom && !isBot}
             history={this.props.history}
           />
         );
