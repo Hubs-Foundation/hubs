@@ -40,7 +40,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
     this.soundEffectsSystem.tick();
     this.lobbyCameraSystem.tick();
-    this.batchManagerSystem.tick(t);
+    // batchManager is ticked in "post-physics" system
   },
 
   remove() {
