@@ -98,8 +98,7 @@ AFRAME.registerComponent("pin-networked-object-button", {
   _updateUI() {
     const { fileIsOwned, fileId } = this.targetEl.components["media-loader"].data;
     const canPin =
-      window.APP.hubChannel.canOrWillIfCreator("pin_objects") &&
-      !!(fileIsOwned || (fileId && getPromotionTokenForFile(fileId)));
+      window.APP.hubChannel.can("pin_objects") && !!(fileIsOwned || (fileId && getPromotionTokenForFile(fileId)));
     this.el.setAttribute("visible", canPin);
     this.labelEl.setAttribute("visible", canPin);
 
