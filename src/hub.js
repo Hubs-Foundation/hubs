@@ -258,12 +258,14 @@ if (document.location.pathname.includes("hub.html")) {
 const history = createBrowserHistory({ basename: routerBaseName });
 window.APP.history = history;
 
+const qsVREntryType = qs.get("vr_entry_type");
+
 function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
-  const forcedVREntryType = qs.get("vr_entry_type");
   const isCursorHoldingPen = scene && scene.systems.userinput.activeSets.includes(userinputSets.cursorHoldingPen);
   const hasActiveCamera = scene && !!scene.systems["camera-tools"].getMyCamera();
+  const forcedVREntryType = qsVREntryType;
 
   ReactDOM.render(
     <Router history={history}>
@@ -874,7 +876,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no ||
       availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no;
 
-    remountUI({ availableVREntryTypes, forcedVREntryType: !hasVREntryDevice ? "2d" : null });
+    remountUI({ availableVREntryTypes, forcedVREntryType: qsVREntryType || (!hasVREntryDevice ? "2d" : null) });
   }
 
   const environmentScene = document.querySelector("#environment-scene");
@@ -1128,7 +1130,13 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
             }
 
-            scene.emit("presence_updated", { sessionId, profile: meta.profile, roles: meta.roles });
+            scene.emit("presence_updated", {
+              sessionId,
+              profile: meta.profile,
+              roles: meta.roles,
+              streaming: meta.streaming,
+              recording: meta.recording
+            });
           });
 
           presence.onLeave((sessionId, current, info) => {

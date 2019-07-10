@@ -58,6 +58,7 @@ export default class HoverVisualsSystem {
     this.updateMesh("leftHand");
   }
 }
+import { LobbyCameraSystem } from "./lobby-camera-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -73,6 +74,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.soundEffectsSystem = new SoundEffectsSystem();
     this.renderManagerSystem = new RenderManagerSystem(this.el.sceneEl.object3D, this.el.sceneEl.renderer);
     this.hoverVisualsSystem = new HoverVisualsSystem(this.el.sceneEl.object3D);
+    this.lobbyCameraSystem = new LobbyCameraSystem();
   },
 
   tick(t) {
@@ -91,6 +93,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.soundEffectsSystem.tick();
     this.renderManagerSystem.tick(t);
     this.hoverVisualsSystem.tick(t);
+    this.lobbyCameraSystem.tick();
   },
 
   remove() {

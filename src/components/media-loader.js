@@ -405,7 +405,10 @@ AFRAME.registerComponent("media-loader", {
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
         this.el.setAttribute(
           "media-image",
-          Object.assign({}, this.data.mediaOptions, { src: thumbnail, contentType: "image/png" })
+          Object.assign({}, this.data.mediaOptions, {
+            src: thumbnail,
+            contentType: guessContentType(thumbnail) || "image/png"
+          })
         );
         if (this.el.components["position-at-box-shape-border__freeze"]) {
           this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
@@ -471,7 +474,7 @@ AFRAME.registerComponent("media-pager", {
     if (!this.data.src) return;
 
     const pageSrc = proxiedUrlFor(this.data.src, this.data.index);
-    this.el.setAttribute("media-image", { src: pageSrc, contentType: "image/png" });
+    this.el.setAttribute("media-image", { src: pageSrc, contentType: guessContentType(pageSrc) || "image/png" });
 
     await this._ensureUI();
 

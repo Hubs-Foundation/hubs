@@ -35,6 +35,7 @@ const remountUI = function() {
       authVerify={qs.has("auth_topic")}
       authTopic={qs.get("auth_topic")}
       authToken={qs.get("auth_token")}
+      authPayload={qs.get("auth_payload")}
       authOrigin={qs.get("auth_origin")}
       listSignup={qs.has("list_signup")}
       hideHero={hideHero}

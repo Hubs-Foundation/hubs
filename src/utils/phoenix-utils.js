@@ -212,10 +212,18 @@ export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace
   }
 }
 
-export function getPresenceProfileForSession(presences, sessionId) {
+export function getPresenceEntryForSession(presences, sessionId) {
   const entry = Object.entries(presences || {}).find(([k]) => k === sessionId) || [];
   const presence = entry[1];
-  return (presence && presence.metas && presence.metas[0].profile) || {};
+  return (presence && presence.metas && presence.metas[0]) || {};
+}
+
+export function getPresenceContextForSession(presences, sessionId) {
+  return (getPresenceEntryForSession(presences, sessionId) || {}).context || {};
+}
+
+export function getPresenceProfileForSession(presences, sessionId) {
+  return (getPresenceEntryForSession(presences, sessionId) || {}).profile || {};
 }
 
 // Takes the given channel, and creates a new channel with the same bindings

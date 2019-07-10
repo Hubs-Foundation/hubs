@@ -1,4 +1,4 @@
-import { BatchManager } from "three-render-manager";
+import { BatchManager } from "@mozillareality/three-batch-manager";
 
 export class RenderManagerSystem {
   constructor(scene, renderer) {
