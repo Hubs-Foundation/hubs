@@ -236,3 +236,15 @@ export function migrateChannelToSocket(oldChannel, socket, params) {
     });
   });
 }
+
+export function discordBridgesForPresences(presences) {
+  const channels = [];
+  for (const p of Object.values(presences)) {
+    for (const m of p.metas) {
+      if (m.profile && m.profile.discordBridges) {
+        Array.prototype.push.apply(channels, m.profile.discordBridges.map(b => b.channel.name));
+      }
+    }
+  }
+  return channels;
+}

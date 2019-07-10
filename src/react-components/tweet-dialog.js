@@ -11,6 +11,7 @@ import createLinkifyPlugin from "draft-js-linkify-plugin";
 import createCounterPlugin from "draft-js-counter-plugin";
 import classNames from "classnames";
 import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
+import { Modifier, EditorState } from "draft-js";
 import "draft-js-emoji-plugin/lib/plugin.css";
 import "draft-js-hashtag-plugin/lib/plugin.css";
 import "draft-js-linkify-plugin/lib/plugin.css";
@@ -20,6 +21,39 @@ const emojiPlugin = createEmojiPlugin();
 const hashtagPlugin = createHashtagPlugin();
 const linkifyPlugin = createLinkifyPlugin();
 const counterPlugin = createCounterPlugin();
+
+// Taken from draft-js-emoji
+const addEmoji = (emoji, editorState) => {
+  const contentState = editorState.getCurrentContent();
+  const contentStateWithEntity = contentState.createEntity("emoji", "IMMUTABLE", { emojiUnicode: emoji });
+  const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+  const currentSelectionState = editorState.getSelection();
+
+  let emojiAddedContent;
+  let emojiEndPos = 0;
+  let blockSize = 0;
+
+  // in case text is selected it is removed and then the emoji is added
+  const afterRemovalContentState = Modifier.removeRange(contentState, currentSelectionState, "backward");
+
+  // deciding on the position to insert emoji
+  const targetSelection = afterRemovalContentState.getSelectionAfter();
+
+  emojiAddedContent = Modifier.insertText(afterRemovalContentState, targetSelection, emoji, null, entityKey);
+
+  emojiEndPos = targetSelection.getAnchorOffset();
+  const blockKey = targetSelection.getAnchorKey();
+  blockSize = contentState.getBlockForKey(blockKey).getLength();
+
+  // If the emoji is inserted at the end, a space is appended right after for
+  // a smooth writing experience.
+  if (emojiEndPos === blockSize) {
+    emojiAddedContent = Modifier.insertText(emojiAddedContent, emojiAddedContent.getSelectionAfter(), " ");
+  }
+
+  const newEditorState = EditorState.push(editorState, emojiAddedContent, "insert-emoji");
+  return EditorState.forceSelection(newEditorState, emojiAddedContent.getSelectionAfter());
+};
 
 export default class TweetDialog extends Component {
   static propTypes = {
@@ -38,7 +72,12 @@ export default class TweetDialog extends Component {
 
   componentDidMount() {
     // Calling this immediately seems to break editor initialization
-    setTimeout(() => this.editorRef.focus());
+    setTimeout(() => {
+      this.editorRef.focus();
+
+      // Other attempts at doing this resulted in no visible cursor or weird editor behavior:
+      this.setState({ editorState: addEmoji("🐤", this.state.editorState) });
+    });
   }
 
   async sendTweet() {

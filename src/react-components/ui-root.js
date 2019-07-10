@@ -21,7 +21,7 @@ import {
 } from "../utils/history";
 import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
-import { getPresenceProfileForSession } from "../utils/phoenix-utils";
+import { getPresenceProfileForSession, discordBridgesForPresences } from "../utils/phoenix-utils";
 import { getClientInfoClientId } from "./client-info-dialog";
 import { getCurrentStreamer } from "../utils/component-utils";
 
@@ -840,15 +840,7 @@ class UIRoot extends Component {
     if (!this.props.presences) {
       return [];
     } else {
-      const channels = [];
-      for (const p of Object.values(this.props.presences)) {
-        for (const m of p.metas) {
-          if (m.profile && m.profile.discordBridges) {
-            Array.prototype.push.apply(channels, m.profile.discordBridges.map(b => b.channel.name));
-          }
-        }
-      }
-      return channels;
+      return discordBridgesForPresences(this.props.presences);
     }
   };
 

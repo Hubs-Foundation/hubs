@@ -5,7 +5,12 @@ AFRAME.registerComponent("tweet-media-button", {
     });
 
     this.onClick = () => {
-      const text = `Taken in hubs.mozilla.com, join me now at hub.link/${window.APP.hubChannel.hubId}`;
+      const hasDiscordBridges = window.APP.hubChannel && window.APP.hubChannel.discordBridges().length > 0;
+
+      const text = !hasDiscordBridges
+        ? `Taken in hubs.mozilla.com - join me now at hub.link/${window.APP.hubChannel.hubId}! `
+        : `Taken in hubs.mozilla.com `;
+
       this.el.sceneEl.emit("action_media_tweet", { url: this.targetEl.components["media-loader"].data.src, text });
     };
   },
