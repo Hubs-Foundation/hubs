@@ -756,7 +756,7 @@ AFRAME.registerComponent("media-image", {
         } else if (contentType.includes("image/gif")) {
           texture = await createGIFTexture(src);
         } else if (contentType.startsWith("image/")) {
-          texture = await createImageTexture(src, contentType);
+          texture = await createImageTexture(src);
         } else {
           throw new Error(`Unknown image content type: ${contentType}`);
         }
