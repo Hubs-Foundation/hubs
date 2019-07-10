@@ -1,4 +1,4 @@
-import { BatchRawUniformGroup } from "three-batch-manager";
+import { BatchRawUniformGroup } from "@mozillareality/three-batch-manager";
 
 const tempVec3 = new Array(3);
 const tempVec4 = new Array(4);
