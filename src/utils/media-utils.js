@@ -302,7 +302,7 @@ export async function createImageTexture(url, contentType) {
   }
 
   texture.encoding = THREE.sRGBEncoding;
-  texture.anisotropy = 16;
+  texture.anisotropy = 4;
 
   return texture;
 }
