@@ -25,7 +25,7 @@ const LOCAL_STORAGE_KEY = "__hubs_finished_tips";
 
 const TIPS = {
   desktop: {
-    top: ["mirror_mode", "pen_mode", "video_share_mode", "mute_mode"],
+    top: ["pen_mode", "video_share_mode", "mute_mode"],
     bottom: [
       "look",
       "locomotion",
@@ -228,9 +228,6 @@ const VALIDATORS = {
   },
   video_share_mode: function(userinput, scene) {
     return scene.is("sharing_video") ? VALID : INVALID;
-  },
-  mirror_mode: function(userinput, scene) {
-    return scene.is("mirroring") ? VALID : INVALID;
   },
   mute_mode: function(userinput, scene) {
     return scene.is("muted") ? VALID : INVALID;

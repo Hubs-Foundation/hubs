@@ -495,7 +495,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.keyboard.key("x") },
       dest: { value: paths.actions.takeSnapshot },
-      xform: xforms.rising
+      xform: xforms.copy
     },
     {
       src: {
@@ -989,7 +989,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     {
       src: { value: rightTriggerPressed2 },
       dest: { value: paths.actions.rightHand.takeSnapshot },
-      xform: xforms.rising,
+      xform: xforms.copy,
       priority: 4
     }
   ],
@@ -997,7 +997,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     {
       src: { value: leftTriggerPressed2 },
       dest: { value: paths.actions.leftHand.takeSnapshot },
-      xform: xforms.rising,
+      xform: xforms.copy,
       priority: 4
     }
   ],
@@ -1005,7 +1005,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     {
       src: { value: rightTriggerPressed2 },
       dest: { value: paths.actions.cursor.takeSnapshot },
-      xform: xforms.rising,
+      xform: xforms.copy,
       priority: 4
     }
   ],

@@ -16,6 +16,7 @@ require("./utils/webgl").patchWebGLRenderingContext();
 require("./utils/audio-context-fix");
 require("./utils/threejs-positional-audio-updatematrixworld");
 require("./utils/threejs-world-update");
+require("./utils/threejs-video-texture-pause");
 
 THREE.TextureLoader = require("./loaders/HubsTextureLoader");
 

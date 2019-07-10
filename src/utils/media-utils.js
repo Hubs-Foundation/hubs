@@ -271,27 +271,36 @@ export function spawnMediaAround(el, media, contentSubtype, snapCount, mirrorOri
   el.object3D.localToWorld(mediaPos);
   entity.object3D.visible = false;
 
-  entity.addEventListener(
-    "image-loaded",
-    () => {
-      entity.object3D.visible = true;
-      entity.setAttribute("animation__photo_pos", {
-        property: "position",
-        dur: 800,
-        from: { x: pos.x, y: pos.y, z: pos.z },
-        to: { x: mediaPos.x, y: mediaPos.y, z: mediaPos.z },
-        easing: "easeOutElastic"
-      });
-    },
-    { once: true }
-  );
+  const handler = () => {
+    entity.object3D.visible = true;
+    entity.setAttribute("animation__photo_pos", {
+      property: "position",
+      dur: 800,
+      from: { x: pos.x, y: pos.y, z: pos.z },
+      to: { x: mediaPos.x, y: mediaPos.y, z: mediaPos.z },
+      easing: "easeOutElastic"
+    });
+  };
+
+  let eventType = null;
+
+  if (contentSubtype.startsWith("photo")) {
+    entity.addEventListener("image-loaded", handler, { once: true });
+    eventType = "photo";
+  } else if (contentSubtype.startsWith("video")) {
+    entity.addEventListener("video-loaded", handler, { once: true });
+    eventType = "video";
+  } else {
+    console.error("invalid type " + contentSubtype);
+    return;
+  }
 
   entity.object3D.matrixNeedsUpdate = true;
 
   entity.addEventListener(
     "media_resolved",
     () => {
-      el.emit("photo_taken", entity.components["media-loader"].data.src);
+      el.emit(`${eventType}_taken`, entity.components["media-loader"].data.src);
     },
     { once: true }
   );
