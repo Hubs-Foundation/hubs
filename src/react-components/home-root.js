@@ -18,6 +18,7 @@ import maskEmail from "../utils/mask-email";
 import checkIsMobile from "../utils/is-mobile";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import mediaBrowserStyles from "../assets/stylesheets/media-browser.scss";
+import AuthChannel from "../utils/auth-channel";
 
 import styles from "../assets/stylesheets/index.scss";
 
@@ -42,6 +43,7 @@ class HomeRoot extends Component {
     authVerify: PropTypes.bool,
     authTopic: PropTypes.string,
     authToken: PropTypes.string,
+    authPayload: PropTypes.string,
     authOrigin: PropTypes.string,
     listSignup: PropTypes.bool,
     report: PropTypes.bool,
@@ -85,15 +87,10 @@ class HomeRoot extends Component {
   }
 
   async verifyAuth() {
-    const socket = await connectToReticulum();
-    const channel = socket.channel(this.props.authTopic);
-    await new Promise((resolve, reject) =>
-      channel
-        .join()
-        .receive("ok", resolve)
-        .receive("error", reject)
-    );
-    channel.push("auth_verified", { token: this.props.authToken });
+    const authChannel = new AuthChannel(this.props.store);
+    authChannel.setSocket(await connectToReticulum());
+    await authChannel.verifyAuthentication(this.props.authTopic, this.props.authToken, this.props.authPayload);
+    this.setState({ signedIn: true, email: this.props.store.state.credentials.email });
   }
 
   showDialog = (DialogClass, props = {}) => {
@@ -103,7 +100,7 @@ class HomeRoot extends Component {
   };
 
   showAuthDialog = verifying => {
-    this.showDialog(AuthDialog, { closable: false, verifying, authOrigin: this.props.authOrigin });
+    this.showDialog(AuthDialog, { verifying, authOrigin: this.props.authOrigin });
   };
 
   loadHomeVideo = () => {

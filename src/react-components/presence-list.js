@@ -7,6 +7,7 @@ import styles from "../assets/stylesheets/presence-list.scss";
 import PhoneImage from "../assets/images/presence_phone.png";
 import DesktopImage from "../assets/images/presence_desktop.png";
 import DiscordImage from "../assets/images/presence_discord.png";
+import CameraImage from "../assets/images/presence_camera.png";
 import HMDImage from "../assets/images/presence_vr.png";
 import maskEmail from "../utils/mask-email";
 import StateLink from "./state-link.js";
@@ -57,7 +58,8 @@ export default class PresenceList extends Component {
     const meta = data.metas[data.metas.length - 1];
     const context = meta.context;
     const profile = meta.profile;
-    const image = getPresenceImage(context);
+    const recording = meta.streaming || meta.recording;
+    const image = recording ? CameraImage : getPresenceImage(context);
     const isBot = context && context.discord;
     const isModerator = meta.roles && meta.roles.moderator;
     const badge = isModerator && (
