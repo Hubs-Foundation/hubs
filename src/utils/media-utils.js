@@ -300,11 +300,11 @@ export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false
 
 export const textureLoader = new HubsTextureLoader().setCrossOrigin("anonymous");
 
-export async function createImageTexture(url, contentType) {
+export async function createImageTexture(url) {
   const texture = new THREE.Texture();
 
   try {
-    await textureLoader.loadTextureAsync(texture, url, contentType);
+    await textureLoader.loadTextureAsync(texture, url);
   } catch (e) {
     throw new Error(`'${url}' could not be fetched (Error code: ${e.status}; Response: ${e.statusText})`);
   }
