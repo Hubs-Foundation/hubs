@@ -32,7 +32,7 @@ export default class MicLevelWidget extends Component {
   }
 
   componentWillUnmount() {
-    this.stopAnalyzer();
+//    this.stopAnalyzer();
   }
 
   stopAnalyzer() {
@@ -65,11 +65,12 @@ export default class MicLevelWidget extends Component {
       // the css renderer to keep up.
       micLevelMovingAverage.push(Date.now(), level * multiplier);
       const average = micLevelMovingAverage.movingAverage();
-      this.setState(state => {
-        if (Math.abs(average - state.micLevel) > 0.0001) {
-          return { micLevel: average };
-        }
-      });
+      //this.setState(state => {
+      //  if (Math.abs(average - state.micLevel) > 0.0001) {
+      //    return { micLevel: average };
+      //  }
+      //});
+      window.setState({volumeLevel: average});
     }, 50);
   }
 

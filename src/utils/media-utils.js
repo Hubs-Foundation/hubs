@@ -9,11 +9,24 @@ const resolveUrlCache = new Map();
 export const resolveUrl = async (url, index) => {
   const cacheKey = `${url}|${index}`;
   if (resolveUrlCache.has(cacheKey)) return resolveUrlCache.get(cacheKey);
-  const resolved = await fetch(mediaAPIEndpoint, {
+
+  const response = await fetch(mediaAPIEndpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ media: { url, index } })
-  }).then(r => r.json());
+  });
+
+  if (!response.ok) {
+    const message = `Error resolving url "${url}":`;
+    try {
+      const body = await response.text();
+      throw new Error(message + " " + body);
+    } catch (e) {
+      throw new Error(message + " " + response.statusText);
+    }
+  }
+
+  const resolved = await response.json();
   resolveUrlCache.set(cacheKey, resolved);
   return resolved;
 };

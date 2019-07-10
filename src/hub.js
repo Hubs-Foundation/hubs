@@ -1131,7 +1131,13 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
             }
 
-            scene.emit("presence_updated", { sessionId, profile: meta.profile, roles: meta.roles });
+            scene.emit("presence_updated", {
+              sessionId,
+              profile: meta.profile,
+              roles: meta.roles,
+              streaming: meta.streaming,
+              recording: meta.recording
+            });
           });
 
           presence.onLeave((sessionId, current, info) => {
