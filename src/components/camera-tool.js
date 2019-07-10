@@ -322,7 +322,8 @@ AFRAME.registerComponent("camera-tool", {
     }
 
     // Begin sampling local audio so we can perform head scaling
-    this.el.sceneEl.setAttribute("local-audio-analyser", { analyze: true });
+    const localAudioAnalyser = this.el.sceneEl.systems["local-audio-analyser"];
+    localAudioAnalyser.subscribe(this);
 
     const stream = new MediaStream();
     const track = this.videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
@@ -433,7 +434,6 @@ AFRAME.registerComponent("camera-tool", {
     this.videoCountdownInterval = null;
     this.el.setAttribute("camera-tool", "label", "");
     this.el.setAttribute("camera-tool", { isRecording: false, isSnapping: false });
-    this.el.sceneEl.setAttribute("local-audio-analyser", { analyze: false });
   },
 
   tick() {
@@ -531,7 +531,7 @@ AFRAME.registerComponent("camera-tool", {
           let scale = 1;
           const analyser = this.el.sceneEl.systems["local-audio-analyser"];
 
-          if (analyser && analyser.data.analyze && this.playerHead.el.components["scale-audio-feedback"]) {
+          if (analyser && this.playerHead.el.components["scale-audio-feedback"]) {
             scale = getAudioFeedbackScale(this.el.object3D, this.playerHead, 1, 2, analyser.volume);
           }
 

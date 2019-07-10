@@ -38,7 +38,7 @@ AFRAME.registerComponent("hud-controller", {
     const yawDif = deltaAngle(head.rotation.y, hud.rotation.y) * THREE.Math.RAD2DEG;
 
     // HUD is always visible until first hover, to increase discoverability.
-    const forceHudVisible = !this.store.state.activity.hasHoveredInWorldHud;
+    const forceHudVisible = true || !this.store.state.activity.hasHoveredInWorldHud;
 
     // animate the hud into place over animRange degrees as the user aproaches the lookCutoff angle
     let t = 1 - THREE.Math.clamp(lookCutoff - pitch, 0, animRange) / animRange;

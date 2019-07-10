@@ -6,17 +6,14 @@ const DISABLE_AT_VOLUME_THRESHOLD = 0.00001;
 const DISABLE_GRACE_PERIOD_MS = 10000;
 const MIN_VOLUME_THRESHOLD = 0.01;
 
-const getVolume = (levels, smoothing, prevVolume) => {
+const getVolume = levels => {
   let sum = 0;
   for (let i = 0; i < levels.length; i++) {
     const amplitude = (levels[i] - 128) / 128;
     sum += amplitude * amplitude;
   }
-  let currVolume = Math.sqrt(sum / levels.length);
-  if (currVolume < MIN_VOLUME_THRESHOLD) {
-    currVolume = 0;
-  }
-  return smoothing * currVolume + (1 - smoothing) * prevVolume;
+  const currVolume = Math.sqrt(sum / levels.length);
+  return currVolume < MIN_VOLUME_THRESHOLD ? 0 : currVolume;
 };
 
 const tempScaleFromPosition = new THREE.Vector3();
@@ -38,6 +35,7 @@ AFRAME.registerComponent("networked-audio-analyser", {
   async init() {
     this.volume = 0;
     this.prevVolume = 0;
+    this.immediateVolume = 0;
     this.smoothing = 0.3;
     this._updateAnalysis = this._updateAnalysis.bind(this);
     this._runScheduledWork = this._runScheduledWork.bind(this);
@@ -76,7 +74,8 @@ AFRAME.registerComponent("networked-audio-analyser", {
 
     // take care with compatibility, e.g. safari doesn't support getFloatTimeDomainData
     this.analyser.getByteTimeDomainData(this.levels);
-    this.volume = getVolume(this.levels, this.smoothing, this.prevVolume);
+    this.immediateVolume = getVolume(this.levels);
+    this.volume = this.smoothing * this.immediateVolume + (1 - this.smoothing) * this.prevVolume;
     this.prevVolume = this.volume;
 
     if (this.volume < DISABLE_AT_VOLUME_THRESHOLD) {
@@ -97,18 +96,31 @@ AFRAME.registerComponent("networked-audio-analyser", {
  * Performs local audio analysis, currently used to scale head when using video recording from camera.
  */
 AFRAME.registerSystem("local-audio-analyser", {
-  schema: {
-    analyze: { default: false }
-  },
-
   async init() {
     this.volume = 0;
     this.prevVolume = 0;
     this.smoothing = 0.3;
+    this.immediateVolume = 0;
+    this.subscribers = [];
   },
 
-  async update() {
-    if (!this.data.analyze) {
+  subscribe(ii) {
+    if (this.subscribers.indexOf(ii) === -1) {
+      this.subscribers.push(ii);
+    }
+  },
+
+  unsubscribe(ii) {
+    const index = this.subscribers.indexOf(ii);
+    if (index !== -1) {
+      this.subscribers.splice(index, 1);
+    }
+  },
+
+  tick: async function() {
+    if (!NAF.connection.adapter) return;
+
+    if (!this.subscribers.length) {
       this.stream = this.analyser = null;
     } else if (!this.stream) {
       this.stream = await NAF.connection.adapter.getMediaStream(NAF.clientId, "audio");
@@ -121,14 +133,13 @@ AFRAME.registerSystem("local-audio-analyser", {
       this.levels = new Uint8Array(this.analyser.frequencyBinCount);
       source.connect(this.analyser);
     }
-  },
 
-  tick: function() {
-    if (!this.analyser || !this.data.analyze || !this.stream) return;
+    if (!this.analyser || !this.stream) return;
 
     // take care with compatibility, e.g. safari doesn't support getFloatTimeDomainData
     this.analyser.getByteTimeDomainData(this.levels);
-    this.volume = getVolume(this.levels, this.smoothing, this.prevVolume);
+    this.immediateVolume = getVolume(this.levels);
+    this.volume = this.smoothing * this.immediateVolume + (1 - this.smoothing) * this.prevVolume;
     this.prevVolume = this.volume;
   }
 });
@@ -165,5 +176,63 @@ AFRAME.registerComponent("scale-audio-feedback", {
 
     object3D.scale.setScalar(scale);
     object3D.matrixNeedsUpdate = true;
+  }
+});
+
+const micLevels = [
+  "mic-level-1.png",
+  "mic-level-1.png",
+  "mic-level-2.png",
+  "mic-level-3.png",
+  "mic-level-4.png",
+  "mic-level-5.png",
+  "mic-level-7.png",
+  "mic-level-7.png"
+];
+AFRAME.registerComponent("mic-button", {
+  init() {
+    this.loudest = 0;
+    this.prevImage = "";
+    this.decayingVolume = 0;
+    this.smoothing = 0.8;
+  },
+  tick() {
+    const audioAnalyser = this.el.sceneEl.systems["local-audio-analyser"];
+    if (!audioAnalyser) return;
+
+    if (this.el.object3D.visible) {
+      audioAnalyser.subscribe(this);
+    } else {
+      audioAnalyser.unsubscribe(this);
+    }
+    let volume;
+    if (audioAnalyser.immediateVolume > this.decayingVolume) {
+      this.decayingVolume = audioAnalyser.immediateVolume;
+      volume = audioAnalyser.immediateVolume;
+      if (this.loudest < volume) {
+        console.log(volume);
+      }
+      this.loudest = Math.max(this.loudest, volume);
+    } else {
+      volume = this.decayingVolume * this.smoothing < 0.001 ? 0 : this.decayingVolume * this.smoothing;
+      this.decayingVolume = volume;
+    }
+    const level =
+      volume < this.loudest * 0.1
+        ? 1
+        : volume < this.loudest * 0.2
+          ? 2
+          : volume < this.loudest * 0.45
+            ? 3
+            : volume < this.loudest * 0.6
+              ? 4
+              : volume < this.loudest * 0.8
+                ? 5
+                : 7;
+    const newimage = micLevels[level];
+    if (newimage !== this.prevImage) {
+      this.prevImage = newimage;
+      this.el.setAttribute("icon-button", { image: this.prevImage });
+    }
   }
 });
