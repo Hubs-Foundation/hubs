@@ -99,8 +99,7 @@ export const guessContentType = url => {
       matches[1];
     }
   }
-  const path = url.startsWith("/") ? url : new URL(url).pathname;
-  const extension = path.split(".").pop();
+  const extension = new URL(url, window.location).pathname.split(".").pop();
   return commonKnownContentTypes[extension];
 };
 const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/scenes\/(\w+)\/?\S*/;
