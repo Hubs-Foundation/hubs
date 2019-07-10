@@ -1,36 +1,59 @@
 import { BatchManager } from "@mozillareality/three-batch-manager";
 
-export class RenderManagerSystem {
+import HubsBatchRawUniformGroup from "./render-manager/hubs-batch-raw-uniform-group";
+import unlitBatchVert from "./render-manager/unlit-batch.vert";
+import unlitBatchFrag from "./render-manager/unlit-batch.frag";
+
+const MAX_INSTANCES = 256;
+
+export class BatchManagerSystem {
   constructor(scene, renderer) {
-    this.batchManager = new BatchManager(scene, renderer);
+    this.meshToEl = new WeakMap();
+
+    this.batchingEnabled = window.WebGL2RenderingContext && renderer.context instanceof WebGL2RenderingContext;
+
+    if (!this.batchingEnabled) {
+      console.warn("Batching requires WebGL 2. Disabling batching.");
+    }
+
+    this.ubo = new HubsBatchRawUniformGroup(MAX_INSTANCES, this.meshToEl);
+    this.batchManager = new BatchManager(scene, renderer, {
+      maxInstances: MAX_INSTANCES,
+      ubo: this.ubo,
+      shaders: {
+        unlit: {
+          vertexShader: unlitBatchVert,
+          fragmentShader: unlitBatchFrag
+        }
+      }
+    });
   }
 
   addObject(rootObject) {
-    rootObject.updateMatrixWorld(true);
+    if (!this.batchingEnabled) return 0;
+
     let batchedCount = 0;
     rootObject.traverse(object => {
       if (object.isMesh && !object.isSkinnedMesh && !object.material.transparent && object.name !== "NavMesh") {
-        if (this.batchManager.addMesh(object)) {
-          object.batched = true;
-          batchedCount++;
-        }
+        if (this.batchManager.addMesh(object)) batchedCount++;
       }
     });
     return batchedCount;
   }
 
   removeObject(rootObject) {
+    if (!this.batchingEnabled) return;
+
     rootObject.traverse(object => {
       if (object.isMesh && !object.isSkinnedMesh && !object.material.transparent && object.name !== "NavMesh") {
         this.batchManager.removeMesh(object);
-        object.batched = false;
       }
     });
   }
 
-  tick(dt) {
-    this.batchManager.update(dt);
-  }
+  tick(time) {
+    if (!this.batchingEnabled) return;
 
-  remove() {}
+    this.batchManager.update(time);
+  }
 }

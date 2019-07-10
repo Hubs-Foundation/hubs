@@ -3,6 +3,7 @@ import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
+import { validMaterials } from "../components/hoverable-visuals";
 
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
@@ -156,9 +157,9 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
 export function injectCustomShaderChunks(obj) {
   const vertexRegex = /\bskinning_vertex\b/;
   const fragRegex = /\bgl_FragColor\b/;
-  const validMaterials = ["MeshStandardMaterial", "MeshBasicMaterial", "MobileStandardMaterial"];
 
   const shaderUniforms = [];
+  const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
 
   obj.traverse(object => {
     if (!object.material) return;
@@ -172,11 +173,18 @@ export function injectCustomShaderChunks(obj) {
       // material, so maps cannot be updated at runtime. This breaks UI elements who have
       // hover/toggle state, so for now just skip these while we figure out a more correct
       // solution.
-      if (object.el.classList.contains("ui")) return material;
-      if (object.el.classList.contains("hud")) return material;
-      if (object.el.getAttribute("text-button")) return material;
+      if (
+        object.el.classList.contains("ui") ||
+        object.el.classList.contains("hud") ||
+        object.el.getAttribute("text-button")
+      )
+        return material;
+
+      // Used when the object is batched
+      batchManagerSystem.meshToEl.set(object, obj.el);
 
       const newMaterial = material.clone();
+      // This will not run if the object is never rendered unbatched, since its unbatched shader will never be compiled
       newMaterial.onBeforeCompile = shader => {
         if (!vertexRegex.test(shader.vertexShader)) return;
 

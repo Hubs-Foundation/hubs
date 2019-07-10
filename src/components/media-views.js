@@ -718,11 +718,14 @@ AFRAME.registerComponent("media-image", {
   schema: {
     src: { type: "string" },
     projection: { type: "string", default: "flat" },
-    contentType: { type: "string" }
+    contentType: { type: "string" },
+    batch: { default: true }
   },
 
   remove() {
-    this.el.sceneEl.systems["hubs-systems"].renderManagerSystem.removeObject(this.mesh);
+    if (this.data.batch && this.mesh) {
+      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
+    }
     if (this._hasRetainedTexture) {
       textureCache.release(this.data.src);
       this._hasRetainedTexture = false;
@@ -807,7 +810,9 @@ AFRAME.registerComponent("media-image", {
       scaleToAspectRatio(this.el, ratio);
     }
 
-    this.el.sceneEl.systems["hubs-systems"].renderManagerSystem.addObject(this.mesh);
+    if (this.data.batch) {
+      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.mesh);
+    }
 
     this.el.emit("image-loaded", { src: this.data.src, projection: projection });
   }

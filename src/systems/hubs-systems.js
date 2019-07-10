@@ -6,7 +6,6 @@ import { HoverMenuSystem } from "./hover-menu-system";
 import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
-import { RenderManagerSystem } from "./render-manager-system";
 // import HoverVisualsSystem from "./highlight/hover-visuas-system";
 
 export default class HoverVisualsSystem {
@@ -58,6 +57,7 @@ export default class HoverVisualsSystem {
     this.updateMesh("leftHand");
   }
 }
+import { BatchManagerSystem } from "./render-manager-system";
 import { LobbyCameraSystem } from "./lobby-camera-system";
 
 AFRAME.registerSystem("hubs-systems", {
@@ -72,9 +72,9 @@ AFRAME.registerSystem("hubs-systems", {
     this.superSpawnerSystem = new SuperSpawnerSystem();
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
     this.soundEffectsSystem = new SoundEffectsSystem();
-    this.renderManagerSystem = new RenderManagerSystem(this.el.sceneEl.object3D, this.el.sceneEl.renderer);
     this.hoverVisualsSystem = new HoverVisualsSystem(this.el.sceneEl.object3D);
     this.lobbyCameraSystem = new LobbyCameraSystem();
+    this.batchManagerSystem = new BatchManagerSystem(this.el.sceneEl.object3D, this.el.sceneEl.renderer);
   },
 
   tick(t) {
@@ -91,9 +91,9 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverMenuSystem.tick();
     this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
     this.soundEffectsSystem.tick();
-    this.renderManagerSystem.tick(t);
     this.hoverVisualsSystem.tick(t);
     this.lobbyCameraSystem.tick();
+    // batchManager is ticked in "post-physics" system
   },
 
   remove() {
