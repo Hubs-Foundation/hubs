@@ -276,19 +276,11 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("pinned", e => {
       if (this._disableSignInOnPinAction) return;
-
-      // Don't go into pin/unpin flow if the pin state didn't actually change and this was just initialization
-      if (!e.detail.changed) return;
-
       this._signInAndPinOrUnpinElement(e.detail.el, true);
     });
 
     this.scene.addEventListener("unpinned", e => {
       if (this._disableSignInOnPinAction) return;
-
-      // Don't go into pin/unpin flow if the pin state didn't actually change and this was just initialization
-      if (!e.detail.changed) return;
-
       this._signInAndPinOrUnpinElement(e.detail.el, false);
     });
 
@@ -368,7 +360,16 @@ export default class SceneEntryManager {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
-      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      let newStream;
+
+      try {
+        newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (e) {
+        isHandlingVideoShare = false;
+        this.scene.emit("share_video_failed");
+        return;
+      }
+
       const videoTracks = newStream ? newStream.getVideoTracks() : [];
 
       if (videoTracks.length > 0) {

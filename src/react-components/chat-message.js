@@ -41,7 +41,7 @@ const wordWrap = body => {
   return outWords.join(" ");
 };
 
-const messageBodyDom = (body, from, fromSessionId, history) => {
+const messageBodyDom = (body, from, fromSessionId, includeFromLink, history) => {
   // Support wrapping text in ` to get monospace, and multiline.
   const multiLine = body.split("\n").length > 1;
   const wrapStyle = multiLine ? styles.messageWrapMulti : styles.messageWrap;
@@ -51,7 +51,7 @@ const messageBodyDom = (body, from, fromSessionId, history) => {
     [styles.messageBodyMulti]: multiLine,
     [styles.messageBodyMono]: mono
   };
-  const includeClientLink = fromSessionId && history && NAF.clientId !== fromSessionId;
+  const includeClientLink = includeFromLink && fromSessionId && history && NAF.clientId !== fromSessionId;
   const onFromClick = includeClientLink ? () => navigateToClientInfo(history, fromSessionId) : () => {};
 
   if (!multiLine) {
@@ -230,7 +230,7 @@ export default function ChatMessage(props) {
           onClick={() => spawnChatMessage(props.body)}
         />
       )}
-      {messageBodyDom(props.body, props.name, props.sessionId, props.history)}
+      {messageBodyDom(props.body, props.name, props.sessionId, props.includeFromLink, props.history)}
     </div>
   );
 }
@@ -241,5 +241,6 @@ ChatMessage.propTypes = {
   body: PropTypes.string,
   sessionId: PropTypes.string,
   history: PropTypes.object,
-  className: PropTypes.string
+  className: PropTypes.string,
+  includeFromLink: PropTypes.bool
 };

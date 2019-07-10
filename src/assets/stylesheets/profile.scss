@@ -129,4 +129,12 @@
     color: black;
     font-size: 16pt;
   }
+
+  :local(.close) {
+    top: 32px;
+    left: 24px;
+    height: 35px;
+    position: absolute;
+    font-size: 1.6em;
+  }
 }

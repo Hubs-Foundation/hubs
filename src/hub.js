@@ -5,21 +5,14 @@ console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
 
-import "aframe";
+import "./aframe-entry";
 import "./utils/logging";
-import { patchWebGLRenderingContext } from "./utils/webgl";
-patchWebGLRenderingContext();
 
-import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
-import "./utils/audio-context-fix";
-import "./utils/threejs-positional-audio-updatematrixworld";
-import "./utils/threejs-world-update";
-import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
 import {
   getReticulumFetchUrl,
@@ -639,7 +632,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems.physics;
     physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
-    patchThreeAllocations();
   };
 
   if (scene.hasLoaded) {
@@ -1168,7 +1160,13 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
             }
 
-            scene.emit("presence_updated", { sessionId, profile: meta.profile, roles: meta.roles });
+            scene.emit("presence_updated", {
+              sessionId,
+              profile: meta.profile,
+              roles: meta.roles,
+              streaming: meta.streaming,
+              recording: meta.recording
+            });
           });
 
           presence.onLeave((sessionId, current, info) => {

@@ -50,7 +50,7 @@
         hubs-systems
         capture-system
         class="grab-cursor"
-        renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: true;"
+        renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: false;"
         shadow="type: pcfsoft"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
@@ -145,6 +145,22 @@
                                     visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"
                                     position="0 0.8 0"
                                     scale="3 3 3"
+                                ></a-entity>
+                                <a-entity
+                                    billboard
+                                    class="recordingBadge"
+                                    sprite
+                                    icon-button="image: recording-badge.png; hoverImage: recording-badge.png;"
+                                    scale="0.10 0.10 0.10"
+                                    position="0 1.2 -0.02"
+                                ></a-entity>
+                                <a-entity
+                                    billboard
+                                    class="modBadge"
+                                    sprite
+                                    icon-button="image: mod-badge.png; hoverImage: mod-badge.png;"
+                                    scale="0.10 0.10 0.10"
+                                    position="0 1.2 -0.02"
                                 ></a-entity>
                             </a-entity>
                         </template>
@@ -352,16 +368,11 @@
                     position-at-box-shape-border="target:.pen-menu"
 
                 >
-                    <a-sphere
+                    <a-entity
                         id="pen"
-                        scale="1.5, 1.5, 1.5"
                         position="0 -0.18 0"
-                        radius="0.02"
-                        color="#FF0033"
                         pen="camera: #player-camera; drawingManager: #drawing-manager"
-                        segments-width="16"
-                        segments-height="12"
-                    ></a-sphere>
+                    ></a-entity>
                     <a-entity class="ui delete-button pen-menu" visibility-while-frozen="withinDistance: 10;" >
                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" remove-networked-object-button position="0 0 0.01">
                             <a-entity
