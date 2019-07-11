@@ -116,6 +116,7 @@ module.exports = (env, argv) => ({
     public: `${host}:8080`,
     useLocalIp: true,
     allowedHosts: [host],
+    contentBase: "./public",
     headers: {
       "Access-Control-Allow-Origin": "*"
     },

@@ -446,7 +446,7 @@ AFRAME.registerComponent("media-video", {
     const file = new File([blob], "snap.png", TYPE_IMG_PNG);
 
     this.localSnapCount++;
-    const { entity } = spawnMediaAround(this.el, file, this.localSnapCount);
+    const { entity } = spawnMediaAround(this.el, file, this.localSnapCount, "photo");
     entity.addEventListener("image-loaded", this.onSnapImageLoaded, ONCE_TRUE);
   },
 
@@ -826,7 +826,6 @@ AFRAME.registerComponent("media-image", {
 
     this.mesh.material.map = texture;
     this.mesh.material.transparent = texture.format === THREE.RGBAFormat;
-    this.mesh.material.needsUpdate = true;
 
     if (projection === "flat") {
       scaleToAspectRatio(this.el, ratio);
