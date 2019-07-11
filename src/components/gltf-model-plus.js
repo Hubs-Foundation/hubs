@@ -32,7 +32,6 @@ class GLTFCache {
   retain(src) {
     const cacheItem = this.cache.get(src);
     cacheItem.count++;
-    console.log("retain", src, cacheItem.count);
     return cacheItem;
   }
 
@@ -45,9 +44,7 @@ class GLTFCache {
     }
 
     cacheItem.count--;
-    console.log("release", src, cacheItem.count);
     if (cacheItem.count <= 0) {
-      console.log("dispose", src);
       cacheItem.gltf.scene.traverse(disposeNode);
       this.cache.delete(src);
     }
@@ -436,7 +433,6 @@ AFRAME.registerComponent("gltf-model-plus", {
         return cloneGltf(gltfCache.get(src).gltf);
       } else {
         if (inflightGltfs.has(src)) {
-          console.log(src, "was inflight");
           const gltf = await inflightGltfs.get(src);
           gltfCache.retain(src);
           return cloneGltf(gltf);
