@@ -46,8 +46,9 @@ function isVisible(o) {
 AFRAME.registerComponent("sprite", {
   schema: { name: { type: "string" } },
   tick() {
-    if (!this.didRegisterWithSystem && this.el.sceneEl.systems["post-physics"]) {
+    if (!(this.didRegisterWithSystem || this.didFailToRegister) && this.el.sceneEl.systems["post-physics"]) {
       this.didRegisterWithSystem = this.el.sceneEl.systems["post-physics"].spriteSystem.add(this);
+      this.didFailToRegister = !this.didRegisterWithSystem;
     }
   },
 
