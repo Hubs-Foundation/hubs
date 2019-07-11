@@ -14,6 +14,7 @@ export class BatchManagerSystem {
 
     if (!this.batchingEnabled) {
       console.warn("Batching requires WebGL 2. Disabling batching.");
+      return;
     }
 
     this.ubo = new HubsBatchRawUniformGroup(MAX_INSTANCES, this.meshToEl);
