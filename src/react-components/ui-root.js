@@ -148,7 +148,6 @@ class UIRoot extends Component {
     showSafariDialog: PropTypes.bool,
     showSafariMicDialog: PropTypes.bool,
     showWebAssemblyDialog: PropTypes.bool,
-    showFeedbackDialog: PropTypes.bool,
     showOAuthDialog: PropTypes.bool,
     onCloseOAuthDialog: PropTypes.func,
     oauthInfo: PropTypes.array,
@@ -1608,7 +1607,12 @@ class UIRoot extends Component {
               stateKey="modal"
               stateValue="feedback"
               history={this.props.history}
-              render={() => this.renderDialog(FeedbackDialog)}
+              render={() =>
+                this.renderDialog(FeedbackDialog, {
+                  history: this.props.history,
+                  onClose: () => this.pushHistoryState("modal", null)
+                })
+              }
             />
             <StateRoute
               stateKey="modal"
