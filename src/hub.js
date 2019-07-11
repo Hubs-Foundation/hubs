@@ -1096,7 +1096,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
       if (isInitialJoin) {
-        store.addEventListener("statechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
+        store.addEventListener("profilechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
         hubChannel.presence.onSync(() => {
           const presence = hubChannel.presence;
 
