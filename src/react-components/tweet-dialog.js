@@ -148,7 +148,7 @@ export default class TweetDialog extends Component {
             )}
 
             <div className={styles.media}>
-              {contentSubtype.startsWith("video") ? (
+              {contentSubtype && contentSubtype.startsWith("video") ? (
                 <video src={url} width={450} height={255} controls />
               ) : (
                 <img src={scaledThumbnailUrlFor(url, 450, 255)} />
