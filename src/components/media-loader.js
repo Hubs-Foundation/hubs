@@ -377,7 +377,7 @@ AFRAME.registerComponent("media-loader", {
             src: accessibleUrl,
             contentType: contentType,
             inflate: true,
-            batch: forceBatching || window.APP.quality === "low",
+            batch: forceBatching,
             modelToWorldScale: this.data.resize ? 0.0001 : 1.0
           })
         );
