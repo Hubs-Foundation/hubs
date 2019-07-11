@@ -6,9 +6,56 @@ import { textureLoader } from "../utils/media-utils";
 import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
+import { disposeNode } from "../utils/three-utils";
+
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
-const GLTFCache = {};
+class GLTFCache {
+  cache = new Map();
+
+  set(src, gltf) {
+    this.cache.set(src, {
+      gltf,
+      count: 0
+    });
+    return this.retain(src);
+  }
+
+  has(src) {
+    return this.cache.has(src);
+  }
+
+  get(src) {
+    return this.cache.get(src);
+  }
+
+  retain(src) {
+    const cacheItem = this.cache.get(src);
+    cacheItem.count++;
+    console.log("retain", src, cacheItem.count);
+    return cacheItem;
+  }
+
+  release(src) {
+    const cacheItem = this.cache.get(src);
+
+    if (!cacheItem) {
+      console.error(`Releasing uncached gltf ${src}`);
+      return;
+    }
+
+    cacheItem.count--;
+    console.log("release", src, cacheItem.count);
+    if (cacheItem.count <= 0) {
+      console.log("dispose", src);
+      cacheItem.gltf.scene.traverse(disposeNode);
+      this.cache.delete(src);
+    }
+  }
+}
+const gltfCache = new GLTFCache();
+const inflightGltfs = new Map();
+
 const extractZipFile = promisifyWorker(new SketchfabZipWorker());
 
 function defaultInflator(el, componentName, componentData) {
@@ -369,6 +416,9 @@ AFRAME.registerComponent("gltf-model-plus", {
     if (this.data.batch && this.model) {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.el.object3DMap.mesh);
     }
+    if (this.data.src) {
+      gltfCache.release(this.data.src);
+    }
   },
 
   loadTemplates() {
@@ -381,13 +431,26 @@ AFRAME.registerComponent("gltf-model-plus", {
 
   async loadModel(src, contentType, technique, useCache) {
     if (useCache) {
-      if (!GLTFCache[src]) {
-        GLTFCache[src] = await loadGLTF(src, contentType, technique, null, this.jsonPreprocessor);
+      if (gltfCache.has(src)) {
+        gltfCache.retain(src);
+        return cloneGltf(gltfCache.get(src).gltf);
+      } else {
+        if (inflightGltfs.has(src)) {
+          console.log(src, "was inflight");
+          const gltf = await inflightGltfs.get(src);
+          gltfCache.retain(src);
+          return cloneGltf(gltf);
+        } else {
+          const promise = loadGLTF(src, contentType, technique, null, this.jsonPreprocessor);
+          inflightGltfs.set(src, promise);
+          const gltf = await promise;
+          inflightGltfs.delete(src);
+          gltfCache.set(src, gltf);
+          return cloneGltf(gltf);
+        }
       }
-
-      return cloneGltf(GLTFCache[src]);
     } else {
-      return await loadGLTF(src, contentType, technique, null, this.jsonPreprocessor);
+      return loadGLTF(src, contentType, technique, null, this.jsonPreprocessor);
     }
   },
 
@@ -400,6 +463,11 @@ AFRAME.registerComponent("gltf-model-plus", {
       }
 
       if (src === this.lastSrc) return;
+
+      if (this.lastSrc) {
+        gltfCache.release(this.lastSrc);
+      }
+
       this.lastSrc = src;
 
       if (!src) {
@@ -488,7 +556,7 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
-      delete GLTFCache[src];
+      gltfCache.release(src);
       console.error("Failed to load glTF model", e, this);
       this.el.emit("model-error", { format: "gltf", src });
     }
