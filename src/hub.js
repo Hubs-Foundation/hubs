@@ -83,6 +83,7 @@ import "./components/follow-in-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
+import "./components/tweet-media-button";
 import "./components/transform-object-button";
 import "./components/hover-menu";
 import "./components/disable-frustum-culling";
@@ -109,7 +110,7 @@ import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { proxiedUrlFor } from "./utils/media-url-utils";
 import { traverseMeshesAndAddShapes } from "./utils/physics-utils";
-import { handleExitTo2DInterstitial, handleReEntryToVRFrom2DInterstitial } from "./utils/vr-interstitial";
+import { handleExitTo2DInterstitial, exit2DInterstitialAndEnterVR } from "./utils/vr-interstitial";
 import { getAvatarSrc } from "./utils/avatar-utils.js";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
@@ -430,6 +431,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
   remountUI({
     onSendMessage: messageDispatch.dispatch,
+    onLoaded: () => store.executeOnLoadActions(scene),
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
     onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
@@ -682,7 +684,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         if (actionError && onFailure) onFailure(actionError);
-        handleReEntryToVRFrom2DInterstitial();
+        exit2DInterstitialAndEnterVR();
       }
     });
   };
@@ -702,6 +704,42 @@ document.addEventListener("DOMContentLoaded", async () => {
       () => hubChannel.can("update_hub"),
       () => hubChannel.updateScene(sceneInfo),
       "change-scene"
+    );
+  });
+
+  scene.addEventListener("action_media_tweet", e => {
+    let isInModal = false;
+    let isInOAuth = false;
+
+    const exitOAuth = () => {
+      isInOAuth = false;
+      store.clearOnLoadActions();
+      remountUI({ showOAuthDialog: false, oauthInfo: null });
+    };
+
+    handleExitTo2DInterstitial(true, () => {
+      if (isInModal) history.goBack();
+      if (isInOAuth) exitOAuth();
+    });
+
+    performConditionalSignIn(
+      () => hubChannel.signedIn,
+      async () => {
+        if (hubChannel.can("tweet")) {
+          isInModal = true;
+          pushHistoryState(history, "modal", "tweet", e.detail);
+        } else {
+          const url = await hubChannel.getTwitterOAuthURL();
+          isInOAuth = true;
+          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: e.detail });
+          remountUI({
+            showOAuthDialog: true,
+            oauthInfo: [{ type: "twitter", url: url }],
+            onCloseOAuthDialog: () => exitOAuth()
+          });
+        }
+      },
+      "tweet"
     );
   });
 

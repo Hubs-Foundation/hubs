@@ -1,5 +1,5 @@
 import { EventTarget } from "event-target-shim";
-import { getReticulumFetchUrl, fetchReticulum } from "../utils/phoenix-utils";
+import { getReticulumFetchUrl, fetchReticulumAuthenticated } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 
 export const SOURCES = ["poly", "sketchfab", "videos", "scenes", "gifs", "images", "twitch"];
@@ -101,7 +101,7 @@ export default class MediaSearchStore extends EventTarget {
 
     this.isFetching = true;
     this.dispatchEvent(new CustomEvent("statechanged"));
-    const result = fetch ? await fetchReticulum(path) : EMPTY_RESULT;
+    const result = fetch ? await fetchReticulumAuthenticated(path) : EMPTY_RESULT;
 
     if (this.requestIndex != currentRequestIndex) return;
 
@@ -268,7 +268,7 @@ export default class MediaSearchStore extends EventTarget {
     const source = "avatars";
     searchParams.set("source", source);
     searchParams.set("user", credentialsAccountId);
-    const result = await fetchReticulum(`/api/v1/media/search?${searchParams.toString()}`);
+    const result = await fetchReticulumAuthenticated(`/api/v1/media/search?${searchParams.toString()}`);
     return !!(result && result.entries) && result.entries.length > 0;
   };
 

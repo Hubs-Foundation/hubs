@@ -25,6 +25,8 @@
     "sign-in.favorite-rooms": "You'll need to sign in to add favorite rooms.",
     "sign-in.favorite-room-complete": "You are now signed in.",
     "sign-in.favorite-rooms-complete": "You are now signed in.",
+    "sign-in.tweet": "You'll need to sign in to send tweets.",
+    "sign-in.tweet-complete": "You are now signed in.",
     "sign-in.as": "Signed in as",
     "sign-in.in": "Sign In",
     "sign-in.out": "Sign Out",
@@ -340,6 +342,12 @@
     "leave-room-dialog.create-room.message": "Creating a new room will leave this one. Are you sure?",
     "leave-room-dialog.create-room.confirm": "Leave Room",
     "embed.load-button": "Load Room",
-    "embed.presence-warning": "This room is embedded, so may be visible to visitors on other websites."
+    "embed.presence-warning": "This room is embedded, so may be visible to visitors on other websites.",
+    "tweet-dialog.tweet": "Tweet",
+    "tweet-dialog.posted": "Your tweet has been posted.",
+    "tweet-dialog.close": "close",
+    "oauth-dialog.sign-in.twitter": "Connect to Twitter",
+    "oauth-dialog.sign-in.discord": "Sign in to Discord",
+    "oauth-dialog.message.twitter": "Connect to Twitter to send tweets from Hubs."
   }
 }

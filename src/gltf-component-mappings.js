@@ -128,7 +128,8 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
     resize: true,
     resolve: true,
     fileIsOwned: true,
-    animate: false
+    animate: false,
+    contentSubtype: componentData.contentSubtype
   });
 
   if (componentData.pageIndex) {

@@ -7,6 +7,7 @@ import en from "react-intl/locale-data/en";
 import screenfull from "screenfull";
 
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
+import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
@@ -20,7 +21,7 @@ import {
 } from "../utils/history";
 import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
-import { getPresenceProfileForSession } from "../utils/phoenix-utils";
+import { getPresenceProfileForSession, discordBridgesForPresences } from "../utils/phoenix-utils";
 import { getClientInfoClientId } from "./client-info-dialog";
 import { getCurrentStreamer } from "../utils/component-utils";
 
@@ -50,6 +51,7 @@ import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
+import TweetDialog from "./tweet-dialog.js";
 import LobbyChatBox from "./lobby-chat-box.js";
 import InWorldChatBox from "./in-world-chat-box.js";
 import AvatarEditor from "./avatar-editor";
@@ -62,7 +64,7 @@ import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
 import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
-import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
+import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
 import { handleTipClose } from "../systems/tips.js";
 
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
@@ -146,6 +148,7 @@ class UIRoot extends Component {
     showSafariMicDialog: PropTypes.bool,
     showWebAssemblyDialog: PropTypes.bool,
     showOAuthDialog: PropTypes.bool,
+    onCloseOAuthDialog: PropTypes.func,
     oauthInfo: PropTypes.array,
     isCursorHoldingPen: PropTypes.bool,
     hasActiveCamera: PropTypes.bool,
@@ -161,7 +164,8 @@ class UIRoot extends Component {
     showPreload: PropTypes.bool,
     onPreloadLoadClicked: PropTypes.func,
     embed: PropTypes.bool,
-    embedToken: PropTypes.string
+    embedToken: PropTypes.string,
+    onLoaded: PropTypes.func
   };
 
   state = {
@@ -252,7 +256,9 @@ class UIRoot extends Component {
             this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
           }
 
-          this.setState({ hideLoader: true });
+          if (!this.state.hideLoader) {
+            this.setState({ hideLoader: true });
+          }
         }, 0);
       });
     }
@@ -386,6 +392,10 @@ class UIRoot extends Component {
 
   onLoadingFinished = () => {
     this.setState({ noMoreLoadingUpdates: true });
+
+    if (this.props.onLoaded) {
+      this.props.onLoaded();
+    }
   };
 
   onSceneLoaded = () => {
@@ -733,12 +743,16 @@ class UIRoot extends Component {
   };
 
   closeDialog = () => {
-    showFullScreenIfWasFullScreen();
-
     if (this.state.dialog) {
       this.setState({ dialog: null });
     } else {
       this.props.history.goBack();
+    }
+
+    if (isIn2DInterstitial()) {
+      exit2DInterstitialAndEnterVR();
+    } else {
+      showFullScreenIfWasFullScreen();
     }
   };
 
@@ -796,7 +810,7 @@ class UIRoot extends Component {
       this.setState({ miniInviteActivated: false });
     }, 5000);
 
-    if (navigator.share) {
+    if (canShare()) {
       navigator.share({ title: document.title, url: link });
     } else {
       copy(link);
@@ -826,15 +840,7 @@ class UIRoot extends Component {
     if (!this.props.presences) {
       return [];
     } else {
-      const channels = [];
-      for (const p of Object.values(this.props.presences)) {
-        for (const m of p.metas) {
-          if (m.profile && m.profile.discordBridges) {
-            Array.prototype.push.apply(channels, m.profile.discordBridges.map(b => b.channel.name));
-          }
-        }
-      }
-      return channels;
+      return discordBridgesForPresences(this.props.presences);
     }
   };
 
@@ -1301,11 +1307,13 @@ class UIRoot extends Component {
     };
     const hasPush = navigator.serviceWorker && "PushManager" in window;
 
-    if (this.props.showOAuthDialog)
+    if (this.props.showOAuthDialog && !this.props.showInterstitialPrompt)
       return (
-        <div className={classNames(rootStyles)}>
-          <OAuthDialog closable={false} oauthInfo={this.props.oauthInfo} />
-        </div>
+        <IntlProvider locale={lang} messages={messages}>
+          <div className={classNames(rootStyles)}>
+            <OAuthDialog onClose={this.props.onCloseOAuthDialog} oauthInfo={this.props.oauthInfo} />
+          </div>
+        </IntlProvider>
       );
     if (isExited) return this.renderExitedPane();
     if (isLoading) {
@@ -1594,6 +1602,12 @@ class UIRoot extends Component {
                 this.renderDialog(RoomInfoDialog, { scene: this.props.hubScene, hubName: this.props.hubName })
               }
             />
+            <StateRoute
+              stateKey="modal"
+              stateValue="tweet"
+              history={this.props.history}
+              render={() => this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog })}
+            />
 
             {showClientInfo && (
               <ClientInfoDialog
@@ -1761,7 +1775,7 @@ class UIRoot extends Component {
                     )}
                   {showVREntryButton && (
                     <WithHoverSound>
-                      <button className={inviteStyles.enterButton} onClick={() => this.props.scene.enterVR()}>
+                      <button className={inviteStyles.enterButton} onClick={() => exit2DInterstitialAndEnterVR()}>
                         <FormattedMessage id="entry.enter-in-vr" />
                       </button>
                     </WithHoverSound>
@@ -1804,7 +1818,7 @@ class UIRoot extends Component {
                   isModal={true}
                   onClose={() => {
                     this.props.history.goBack();
-                    handleReEntryToVRFrom2DInterstitial();
+                    exit2DInterstitialAndEnterVR();
                   }}
                 />
               )}

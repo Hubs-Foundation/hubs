@@ -82,7 +82,15 @@ function getOrientation(file, callback) {
 }
 
 let interactableId = 0;
-export const addMedia = (src, template, contentOrigin, resolve = false, resize = false, animate = true) => {
+export const addMedia = (
+  src,
+  template,
+  contentOrigin,
+  contentSubtype = null,
+  resolve = false,
+  resize = false,
+  animate = true
+) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
@@ -94,6 +102,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
     resolve,
     animate,
     src: typeof src === "string" ? src : "",
+    contentSubtype,
     fileIsOwned: !needsToBeUploaded
   });
 
@@ -237,8 +246,8 @@ export function getPromotionTokenForFile(fileId) {
 
 const mediaPos = new THREE.Vector3();
 
-export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false) {
-  const { entity, orientation } = addMedia(media, "#interactable-media", undefined, false);
+export function spawnMediaAround(el, media, contentSubtype, snapCount, mirrorOrientation = false) {
+  const { entity, orientation } = addMedia(media, "#interactable-media", undefined, contentSubtype, false);
 
   const pos = el.object3D.position;
 

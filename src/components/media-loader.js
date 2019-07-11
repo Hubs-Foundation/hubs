@@ -40,6 +40,7 @@ AFRAME.registerComponent("media-loader", {
     resize: { default: false },
     resolve: { default: false },
     contentType: { default: null },
+    contentSubtype: { default: null },
     animate: { default: true },
     mediaOptions: {
       default: {},
@@ -253,7 +254,7 @@ AFRAME.registerComponent("media-loader", {
 
   async update(oldData) {
     try {
-      const { src } = this.data;
+      const { src, contentSubtype } = this.data;
 
       if (src !== oldData.src && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
@@ -323,6 +324,13 @@ AFRAME.registerComponent("media-loader", {
           "image-loaded",
           e => {
             this.onMediaLoaded(e.detail.projection === "flat" ? SHAPE.BOX : null);
+
+            if (contentSubtype === "camera-photo") {
+              this.el.setAttribute("hover-menu__photo", {
+                template: "#photo-hover-menu",
+                dirs: ["forward", "back"]
+              });
+            }
           },
           { once: true }
         );

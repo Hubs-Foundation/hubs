@@ -74,20 +74,7 @@ AFRAME.registerComponent("pin-networked-object-button", {
   },
 
   _discordBridges() {
-    const presences = window.APP.hubChannel.presence.state;
-    if (!presences) {
-      return [];
-    } else {
-      const channels = [];
-      for (const p of Object.values(presences)) {
-        for (const m of p.metas) {
-          if (m.profile && m.profile.discordBridges) {
-            Array.prototype.push.apply(channels, m.profile.discordBridges.map(b => b.channel.name));
-          }
-        }
-      }
-      return channels;
-    }
+    return window.APP.hubChannel.discordBridges();
   },
 
   _updateUIOnStateChange(e) {
