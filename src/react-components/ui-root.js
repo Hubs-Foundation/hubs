@@ -68,7 +68,6 @@ import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-in
 import { handleTipClose } from "../systems/tips.js";
 
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
-import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
@@ -175,7 +174,6 @@ class UIRoot extends Component {
     dialog: null,
     showShareDialog: false,
     showPresenceList: false,
-    showSettingsMenu: false,
     broadcastTipDismissed: false,
     linkCode: null,
     linkCodeCancel: null,
@@ -261,8 +259,8 @@ class UIRoot extends Component {
   componentDidMount() {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
-      if (this.state.showPresenceList || this.state.showSettingsMenu || this.state.showShareDialog) {
-        this.setState({ showPresenceList: false, showSettingsMenu: false, showShareDialog: false });
+      if (this.state.showPresenceList || this.state.showShareDialog) {
+        this.setState({ showPresenceList: false, showShareDialog: false });
       }
     });
 
@@ -741,7 +739,7 @@ class UIRoot extends Component {
 
     if (enable) {
       this.props.hubChannel.beginStreaming();
-      this.setState({ isStreaming: true, showStreamingTip: true, showSettingsMenu: false });
+      this.setState({ isStreaming: true, showStreamingTip: true });
     } else {
       this.props.hubChannel.endStreaming();
       this.setState({ isStreaming: false });
@@ -1810,19 +1808,6 @@ class UIRoot extends Component {
 
             {streamingTip}
 
-            {!streaming &&
-              !preload && (
-                <div
-                  onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
-                  className={classNames({
-                    [styles.cornerButton]: true,
-                    [styles.cornerButtonSelected]: this.state.showSettingsMenu
-                  })}
-                >
-                  <FontAwesomeIcon icon={faBars} />
-                </div>
-              )}
-
             <div
               onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
               className={classNames({
@@ -1846,21 +1831,21 @@ class UIRoot extends Component {
               />
             )}
 
-            {this.state.showSettingsMenu && (
-              <SettingsMenu
-                history={this.props.history}
-                mediaSearchStore={this.props.mediaSearchStore}
-                hideSettings={() => this.setState({ showSettingsMenu: false })}
-                isStreaming={streaming}
-                toggleStreamerMode={this.toggleStreamerMode}
-                hubChannel={this.props.hubChannel}
-                hubScene={this.props.hubScene}
-                scene={this.props.scene}
-                performConditionalSignIn={this.props.performConditionalSignIn}
-                showNonHistoriedDialog={this.showNonHistoriedDialog}
-                pushHistoryState={this.pushHistoryState}
-              />
-            )}
+            {!streaming &&
+              !preload && (
+                <SettingsMenu
+                  history={this.props.history}
+                  mediaSearchStore={this.props.mediaSearchStore}
+                  isStreaming={streaming}
+                  toggleStreamerMode={this.toggleStreamerMode}
+                  hubChannel={this.props.hubChannel}
+                  hubScene={this.props.hubScene}
+                  scene={this.props.scene}
+                  performConditionalSignIn={this.props.performConditionalSignIn}
+                  showNonHistoriedDialog={this.showNonHistoriedDialog}
+                  pushHistoryState={this.pushHistoryState}
+                />
+              )}
 
             {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
 
