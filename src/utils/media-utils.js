@@ -2,6 +2,7 @@ import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
 
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
@@ -81,7 +82,15 @@ function getOrientation(file, callback) {
 }
 
 let interactableId = 0;
-export const addMedia = (src, template, contentOrigin, resolve = false, resize = false, animate = true) => {
+export const addMedia = (
+  src,
+  template,
+  contentOrigin,
+  contentSubtype = null,
+  resolve = false,
+  resize = false,
+  animate = true
+) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
@@ -93,6 +102,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
     resolve,
     animate,
     src: typeof src === "string" ? src : "",
+    contentSubtype,
     fileIsOwned: !needsToBeUploaded
   });
 
@@ -236,8 +246,8 @@ export function getPromotionTokenForFile(fileId) {
 
 const mediaPos = new THREE.Vector3();
 
-export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false) {
-  const { entity, orientation } = addMedia(media, "#interactable-media", undefined, false);
+export function spawnMediaAround(el, media, contentSubtype, snapCount, mirrorOrientation = false) {
+  const { entity, orientation } = addMedia(media, "#interactable-media", undefined, contentSubtype, false);
 
   const pos = el.object3D.position;
 
@@ -289,21 +299,19 @@ export function spawnMediaAround(el, media, snapCount, mirrorOrientation = false
   return { entity, orientation };
 }
 
-const textureLoader = new THREE.TextureLoader();
-textureLoader.setCrossOrigin("anonymous");
-export function createImageTexture(url) {
-  return new Promise((resolve, reject) => {
-    textureLoader.load(
-      url,
-      texture => {
-        texture.encoding = THREE.sRGBEncoding;
-        texture.minFilter = THREE.LinearFilter;
-        resolve(texture);
-      },
-      null,
-      function(xhr) {
-        reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
-      }
-    );
-  });
+export const textureLoader = new HubsTextureLoader().setCrossOrigin("anonymous");
+
+export async function createImageTexture(url) {
+  const texture = new THREE.Texture();
+
+  try {
+    await textureLoader.loadTextureAsync(texture, url);
+  } catch (e) {
+    throw new Error(`'${url}' could not be fetched (Error code: ${e.status}; Response: ${e.statusText})`);
+  }
+
+  texture.encoding = THREE.sRGBEncoding;
+  texture.anisotropy = 4;
+
+  return texture;
 }

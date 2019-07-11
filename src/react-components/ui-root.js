@@ -7,6 +7,7 @@ import en from "react-intl/locale-data/en";
 import screenfull from "screenfull";
 
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
+import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
@@ -20,7 +21,7 @@ import {
 } from "../utils/history";
 import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
-import { getPresenceProfileForSession } from "../utils/phoenix-utils";
+import { getPresenceProfileForSession, discordBridgesForPresences } from "../utils/phoenix-utils";
 import { getClientInfoClientId } from "./client-info-dialog";
 import { getCurrentStreamer } from "../utils/component-utils";
 
@@ -52,6 +53,7 @@ import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
+import TweetDialog from "./tweet-dialog.js";
 import LobbyChatBox from "./lobby-chat-box.js";
 import InWorldChatBox from "./in-world-chat-box.js";
 import AvatarEditor from "./avatar-editor";
@@ -64,7 +66,7 @@ import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
 import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
-import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
+import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
 
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
@@ -148,6 +150,7 @@ class UIRoot extends Component {
     showWebAssemblyDialog: PropTypes.bool,
     showFeedbackDialog: PropTypes.bool,
     showOAuthDialog: PropTypes.bool,
+    onCloseOAuthDialog: PropTypes.func,
     oauthInfo: PropTypes.array,
     isCursorHoldingPen: PropTypes.bool,
     hasActiveCamera: PropTypes.bool,
@@ -163,7 +166,8 @@ class UIRoot extends Component {
     showPreload: PropTypes.bool,
     onPreloadLoadClicked: PropTypes.func,
     embed: PropTypes.bool,
-    embedToken: PropTypes.string
+    embedToken: PropTypes.string,
+    onLoaded: PropTypes.func
   };
 
   state = {
@@ -207,7 +211,8 @@ class UIRoot extends Component {
     exited: false,
 
     signedIn: false,
-    videoShareMediaSource: null
+    videoShareMediaSource: null,
+    showVideoShareFailed: false
   };
 
   constructor(props) {
@@ -253,7 +258,9 @@ class UIRoot extends Component {
             this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
           }
 
-          this.setState({ hideLoader: true });
+          if (!this.state.hideLoader) {
+            this.setState({ hideLoader: true });
+          }
         }, 0);
       });
     }
@@ -279,6 +286,7 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
     this.props.scene.addEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
+    this.props.scene.addEventListener("share_video_failed", this.onShareVideoFailed);
     this.props.scene.addEventListener("exit", this.exitEventHandler);
     this.props.scene.addEventListener("action_exit_watch", () => this.setState({ watching: false, hide: false }));
 
@@ -328,6 +336,7 @@ class UIRoot extends Component {
     this.props.scene.removeEventListener("exit", this.exitEventHandler);
     this.props.scene.removeEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.removeEventListener("share_video_disabled", this.onShareVideoDisabled);
+    this.props.scene.removeEventListener("share_video_failed", this.onShareVideoFailed);
   }
 
   showContextualSignInDialog = () => {
@@ -385,6 +394,10 @@ class UIRoot extends Component {
 
   onLoadingFinished = () => {
     this.setState({ noMoreLoadingUpdates: true });
+
+    if (this.props.onLoaded) {
+      this.props.onLoaded();
+    }
   };
 
   onSceneLoaded = () => {
@@ -405,6 +418,10 @@ class UIRoot extends Component {
 
   onShareVideoDisabled = () => {
     this.setState({ videoShareMediaSource: null });
+  };
+
+  onShareVideoFailed = () => {
+    this.setState({ showVideoShareFailed: true });
   };
 
   toggleMute = () => {
@@ -728,12 +745,16 @@ class UIRoot extends Component {
   };
 
   closeDialog = () => {
-    showFullScreenIfWasFullScreen();
-
     if (this.state.dialog) {
       this.setState({ dialog: null });
     } else {
       this.props.history.goBack();
+    }
+
+    if (isIn2DInterstitial()) {
+      exit2DInterstitialAndEnterVR();
+    } else {
+      showFullScreenIfWasFullScreen();
     }
   };
 
@@ -791,7 +812,7 @@ class UIRoot extends Component {
       this.setState({ miniInviteActivated: false });
     }, 5000);
 
-    if (navigator.share) {
+    if (canShare()) {
       navigator.share({ title: document.title, url: link });
     } else {
       copy(link);
@@ -821,15 +842,7 @@ class UIRoot extends Component {
     if (!this.props.presences) {
       return [];
     } else {
-      const channels = [];
-      for (const p of Object.values(this.props.presences)) {
-        for (const m of p.metas) {
-          if (m.profile && m.profile.discordBridges) {
-            Array.prototype.push.apply(channels, m.profile.discordBridges.map(b => b.channel.name));
-          }
-        }
-      }
-      return channels;
+      return discordBridgesForPresences(this.props.presences);
     }
   };
 
@@ -1296,11 +1309,13 @@ class UIRoot extends Component {
     };
     const hasPush = navigator.serviceWorker && "PushManager" in window;
 
-    if (this.props.showOAuthDialog)
+    if (this.props.showOAuthDialog && !this.props.showInterstitialPrompt)
       return (
-        <div className={classNames(rootStyles)}>
-          <OAuthDialog closable={false} oauthInfo={this.props.oauthInfo} />
-        </div>
+        <IntlProvider locale={lang} messages={messages}>
+          <div className={classNames(rootStyles)}>
+            <OAuthDialog onClose={this.props.onCloseOAuthDialog} oauthInfo={this.props.oauthInfo} />
+          </div>
+        </IntlProvider>
       );
     if (isExited) return this.renderExitedPane();
     if (isLoading) {
@@ -1317,6 +1332,11 @@ class UIRoot extends Component {
     const enteredOrWatching = entered || watching;
     const enteredOrWatchingOrPreload = entered || watching || preload;
     const baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
+    const inEntryFlow = !!(
+      this.props.history &&
+      this.props.history.location.state &&
+      this.props.history.location.state.entry_step
+    );
 
     const entryDialog =
       this.props.availableVREntryTypes &&
@@ -1361,7 +1381,7 @@ class UIRoot extends Component {
     // Allow scene picker pre-entry, otherwise wait until entry
     const showMediaBrowser =
       mediaSource && (["scenes", "avatars", "favorites"].includes(mediaSource) || this.state.entered);
-    const hasTopTip = this.props.activeTips && this.props.activeTips.top;
+    const hasTopTip = (this.props.activeTips && this.props.activeTips.top) || this.state.showVideoShareFailed;
 
     const clientInfoClientId = getClientInfoClientId(this.props.history.location);
     const showClientInfo = !!clientInfoClientId;
@@ -1381,6 +1401,7 @@ class UIRoot extends Component {
       !preload &&
       !watching &&
       !hasTopTip &&
+      !inEntryFlow &&
       !this.props.store.state.activity.hasOpenedShare &&
       this.occupantCount() <= 1;
 
@@ -1392,6 +1413,7 @@ class UIRoot extends Component {
       !watching &&
       !showInviteTip &&
       !this.state.showShareDialog &&
+      this.props.hubChannel &&
       this.props.hubChannel.canOrWillIfCreator("update_hub");
 
     const displayNameOverride = this.props.hubIsBound
@@ -1442,6 +1464,7 @@ class UIRoot extends Component {
                   {...props}
                   displayNameOverride={displayNameOverride}
                   finished={() => this.pushHistoryState()}
+                  onClose={() => this.pushHistoryState()}
                   store={this.props.store}
                   mediaSearchStore={this.props.mediaSearchStore}
                   avatarId={props.location.state.detail && props.location.state.detail.avatarId}
@@ -1510,6 +1533,7 @@ class UIRoot extends Component {
                       this.pushHistoryState("entry_step", "device");
                     }
                   }}
+                  onClose={() => this.pushHistoryState()}
                   store={this.props.store}
                   mediaSearchStore={this.props.mediaSearchStore}
                   avatarId={props.location.state.detail && props.location.state.detail.avatarId}
@@ -1586,6 +1610,12 @@ class UIRoot extends Component {
               history={this.props.history}
               render={() => this.renderDialog(FeedbackDialog)}
             />
+            <StateRoute
+              stateKey="modal"
+              stateValue="tweet"
+              history={this.props.history}
+              render={() => this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog })}
+            />
             {showClientInfo && (
               <ClientInfoDialog
                 clientId={clientInfoClientId}
@@ -1598,13 +1628,19 @@ class UIRoot extends Component {
             )}
             {(!enteredOrWatching || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
-                <PresenceLog entries={presenceLogEntries} hubId={this.props.hubId} history={this.props.history} />
+                <PresenceLog
+                  entries={presenceLogEntries}
+                  presences={this.props.presences}
+                  hubId={this.props.hubId}
+                  history={this.props.history}
+                />
                 <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
               </div>
             )}
             {enteredOrWatchingOrPreload && (
               <PresenceLog
                 inRoom={true}
+                presences={this.props.presences}
                 entries={presenceLogEntries}
                 hubId={this.props.hubId}
                 history={this.props.history}
@@ -1709,7 +1745,7 @@ class UIRoot extends Component {
                     )}
                   {showVREntryButton && (
                     <WithHoverSound>
-                      <button className={inviteStyles.enterButton} onClick={() => this.props.scene.enterVR()}>
+                      <button className={inviteStyles.enterButton} onClick={() => exit2DInterstitialAndEnterVR()}>
                         <FormattedMessage id="entry.enter-in-vr" />
                       </button>
                     </WithHoverSound>
@@ -1751,7 +1787,7 @@ class UIRoot extends Component {
                   isModal={true}
                   onClose={() => {
                     this.props.history.goBack();
-                    handleReEntryToVRFrom2DInterstitial();
+                    exit2DInterstitialAndEnterVR();
                   }}
                 />
               )}
@@ -1841,6 +1877,8 @@ class UIRoot extends Component {
                   onWatchEnded={() => this.setState({ watching: false })}
                   spacebubble={this.state.spacebubble}
                   videoShareMediaSource={this.state.videoShareMediaSource}
+                  showVideoShareFailed={this.state.showVideoShareFailed}
+                  hideVideoShareFailedTip={() => this.setState({ showVideoShareFailed: false })}
                   activeTip={this.props.activeTips && this.props.activeTips.top}
                   isCursorHoldingPen={this.props.isCursorHoldingPen}
                   hasActiveCamera={this.props.hasActiveCamera}

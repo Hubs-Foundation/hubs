@@ -5,7 +5,7 @@ import "./assets/stylesheets/index.scss";
 import registerTelemetry from "./telemetry";
 import HomeRoot from "./react-components/home-root";
 import AuthChannel from "./utils/auth-channel";
-import { createAndRedirectToNewHub, connectToReticulum, fetchReticulum } from "./utils/phoenix-utils";
+import { createAndRedirectToNewHub, connectToReticulum, fetchReticulumAuthenticated } from "./utils/phoenix-utils";
 import Store from "./storage/store";
 
 const qs = new URLSearchParams(location.search);
@@ -35,6 +35,7 @@ const remountUI = function() {
       authVerify={qs.has("auth_topic")}
       authTopic={qs.get("auth_topic")}
       authToken={qs.get("auth_token")}
+      authPayload={qs.get("auth_payload")}
       authOrigin={qs.get("auth_origin")}
       listSignup={qs.has("list_signup")}
       hideHero={hideHero}
@@ -68,7 +69,7 @@ window.addEventListener("beforeinstallprompt", e => {
   if (authChannel.signedIn) {
     // Fetch favorite rooms
     const path = `/api/v1/media/search?source=favorites&type=hubs&user=${store.credentialsAccountId}`;
-    favoriteHubsResult = await fetchReticulum(path);
+    favoriteHubsResult = await fetchReticulumAuthenticated(path);
   }
 
   hideHero = false;

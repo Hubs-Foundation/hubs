@@ -106,8 +106,14 @@ AFRAME.registerComponent("super-spawner", {
       return;
     }
 
-    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve, false)
-      .entity;
+    const entity = addMedia(
+      this.data.src,
+      this.data.template,
+      ObjectContentOrigins.SPAWNER,
+      null,
+      this.data.resolve,
+      false
+    ).entity;
 
     const cursor = document.querySelector("#cursor");
     cursor.object3D.getWorldPosition(entity.object3D.position);

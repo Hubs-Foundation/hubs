@@ -20,6 +20,8 @@ class TopHUD extends Component {
     watching: PropTypes.bool,
     onWatchEnded: PropTypes.func,
     videoShareMediaSource: PropTypes.string,
+    showVideoShareFailed: PropTypes.bool,
+    hideVideoShareFailedTip: PropTypes.func,
     activeTip: PropTypes.string,
     history: PropTypes.object,
     onToggleMute: PropTypes.func,
@@ -123,6 +125,19 @@ class TopHUD extends Component {
   render() {
     const videoSharingButtons = this.buildVideoSharingButtons();
     const isMobile = AFRAME.utils.device.isMobile();
+    const tipDivForType = (type, cancelFunc) => (
+      <div className={cx(styles.topTip)}>
+        {cancelFunc && (
+          <button className={styles.tipCancel} onClick={cancelFunc}>
+            <i>
+              <FontAwesomeIcon icon={faTimes} />
+            </i>
+          </button>
+        )}
+        {!this.props.frozen && <div className={cx([styles.attachPoint, styles[`attach_${type.split(".")[1]}`]])} />}
+        <FormattedMessage id={`tips.${type}`} />
+      </div>
+    );
 
     let tip;
 
@@ -142,15 +157,10 @@ class TopHUD extends Component {
           )}
         </div>
       );
+    } else if (this.props.showVideoShareFailed) {
+      tip = tipDivForType(`${isMobile ? "mobile" : "desktop"}.video_share_failed`, this.props.hideVideoShareFailedTip);
     } else if (this.props.activeTip) {
-      tip = this.props.activeTip && (
-        <div className={cx(styles.topTip)}>
-          {!this.props.frozen && (
-            <div className={cx([styles.attachPoint, styles[`attach_${this.props.activeTip.split(".")[1]}`]])} />
-          )}
-          <FormattedMessage id={`tips.${this.props.activeTip}`} />
-        </div>
-      );
+      tip = tipDivForType(this.props.activeTip);
     }
 
     // Hide buttons when frozen.

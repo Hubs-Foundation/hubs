@@ -15,30 +15,6 @@ export function getReticulumFetchUrl(path, absolute = false) {
   }
 }
 
-export async function fetchReticulum(path, absolute = false) {
-  const headers = { "Content-Type": "application/json" };
-  const credentialsToken = window.APP.store.state.credentials.token;
-  if (credentialsToken) headers.authorization = `bearer ${credentialsToken}`;
-
-  const res = await fetch(getReticulumFetchUrl(path, absolute), { method: "GET", headers });
-
-  if (res.status !== 200) {
-    console.warn("Reticulum fetch failed " + path);
-    return null;
-  }
-
-  const body = await res.text();
-
-  let result;
-  try {
-    result = JSON.parse(body);
-  } catch (e) {
-    result = body; // TODO better error handling
-  }
-
-  return result;
-}
-
 let reticulumMeta = null;
 let invalidatedReticulumMetaThisSession = false;
 
@@ -212,10 +188,18 @@ export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace
   }
 }
 
-export function getPresenceProfileForSession(presences, sessionId) {
+export function getPresenceEntryForSession(presences, sessionId) {
   const entry = Object.entries(presences || {}).find(([k]) => k === sessionId) || [];
   const presence = entry[1];
-  return (presence && presence.metas && presence.metas[0].profile) || {};
+  return (presence && presence.metas && presence.metas[0]) || {};
+}
+
+export function getPresenceContextForSession(presences, sessionId) {
+  return (getPresenceEntryForSession(presences, sessionId) || {}).context || {};
+}
+
+export function getPresenceProfileForSession(presences, sessionId) {
+  return (getPresenceEntryForSession(presences, sessionId) || {}).profile || {};
 }
 
 // Takes the given channel, and creates a new channel with the same bindings
@@ -251,4 +235,16 @@ export function migrateChannelToSocket(oldChannel, socket, params) {
       resolve(channel);
     });
   });
+}
+
+export function discordBridgesForPresences(presences) {
+  const channels = [];
+  for (const p of Object.values(presences)) {
+    for (const m of p.metas) {
+      if (m.profile && m.profile.discordBridges) {
+        Array.prototype.push.apply(channels, m.profile.discordBridges.map(b => b.channel.name));
+      }
+    }
+  }
+  return channels;
 }

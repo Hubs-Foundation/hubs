@@ -269,7 +269,7 @@ AFRAME.registerComponent("camera-tool", {
         }
         renderer.readRenderTargetPixels(this.renderTarget, 0, 0, width, height, this.snapPixels);
         pixelsToPNG(this.snapPixels, width, height).then(file => {
-          const { orientation } = spawnMediaAround(this.el, file, this.localSnapCount, true);
+          const { orientation } = spawnMediaAround(this.el, file, "camera-photo", this.localSnapCount, true);
 
           orientation.then(() => {
             this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });

@@ -1,7 +1,7 @@
 import jwtDecode from "jwt-decode";
 import { EventTarget } from "event-target-shim";
 import { Presence } from "phoenix";
-import { migrateChannelToSocket } from "./phoenix-utils";
+import { migrateChannelToSocket, discordBridgesForPresences } from "./phoenix-utils";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
@@ -257,6 +257,22 @@ export default class HubChannel extends EventTarget {
         })
         .receive("error", reject);
     });
+  };
+
+  getTwitterOAuthURL = () => {
+    return new Promise((resolve, reject) => {
+      this.channel
+        .push("oauth", { type: "twitter" })
+        .receive("ok", res => {
+          resolve(res.oauth_url);
+        })
+        .receive("error", reject);
+    });
+  };
+
+  discordBridges = () => {
+    if (!this.presence || !this.presence.state) return [];
+    return discordBridgesForPresences(this.presence.state);
   };
 
   pin = (id, gltfNode, fileId, fileAccessToken, promotionToken) => {

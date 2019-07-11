@@ -25,6 +25,8 @@
     "sign-in.favorite-rooms": "You'll need to sign in to add favorite rooms.",
     "sign-in.favorite-room-complete": "You are now signed in.",
     "sign-in.favorite-rooms-complete": "You are now signed in.",
+    "sign-in.tweet": "You'll need to sign in to send tweets.",
+    "sign-in.tweet-complete": "You are now signed in.",
     "sign-in.as": "Signed in as",
     "sign-in.in": "Sign In",
     "sign-in.out": "Sign Out",
@@ -279,6 +281,7 @@
     "tips.mobile.object_recenter_button-post": " to have the object face you.",
     "tips.mobile.object_pin": "Pin an object to save it to the room.",
     "tips.mobile.object_pin": "Pin an object to save it to the room.",
+    "tips.mobile.video_share_failed": "No permission granted.",
     "tips.mobile.invite": "Use the Share button to share this room.",
     "tips.mobile.feedback": "🦆 Quack! Want to help Hubs?",
     "tips.mobile.feedback-link": "Tell the Duck.",
@@ -306,6 +309,7 @@
     "tips.desktop.pen_color": "Use Shift-Q and Shift-E to change the pen color.",
     "tips.desktop.pen_size": "Hold Shift and scroll to change the pen size.",
     "tips.desktop.invite": "Nobody else is here. Use the Share button at the top to share this room.",
+    "tips.desktop.video_share_failed": "You need to grant permissions to stream video.",
     "tips.streaming": "Now broadcasting to the lobby. Click to exit.",
     "tips.desktop.watching": "You're in the lobby. Others cannot see or hear you.",
     "tips.desktop.feedback": "🦆 Quack! Want to help us make Hubs better?",
@@ -342,6 +346,12 @@
     "leave-room-dialog.create-room.message": "Creating a new room will leave this one. Are you sure?",
     "leave-room-dialog.create-room.confirm": "Leave Room",
     "embed.load-button": "Load Room",
-    "embed.presence-warning": "This room is embedded, so may be visible to visitors on other websites."
+    "embed.presence-warning": "This room is embedded, so may be visible to visitors on other websites.",
+    "tweet-dialog.tweet": "Tweet",
+    "tweet-dialog.posted": "Your tweet has been posted.",
+    "tweet-dialog.close": "close",
+    "oauth-dialog.sign-in.twitter": "Connect to Twitter",
+    "oauth-dialog.sign-in.discord": "Sign in to Discord",
+    "oauth-dialog.message.twitter": "Connect to Twitter to send tweets from Hubs."
   }
 }

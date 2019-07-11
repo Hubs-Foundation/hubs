@@ -1,3 +1,5 @@
+import "three/examples/js/pmrem/PMREMGenerator";
+import "three/examples/js/pmrem/PMREMCubeUVPacker";
 import qsTruthy from "../utils/qs_truthy";
 const isBotMode = qsTruthy("bot");
 

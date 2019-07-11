@@ -18,6 +18,8 @@ $action-color-light: #FF74A4;
 $action-color-transparent: rgba(255, 52, 100, 0.9);
 $hud-panel-background: rgba(79, 79, 79, 0.45);
 $spoke-action-color: $bright-blue;
+$twitter-action-color: #1da1f2;
+$discord-action-color: #7289da;
 $semi-bold: 600;
 $duck-yellow: #FFC000;
 
@@ -194,6 +196,16 @@ $duck-yellow: #FFC000;
 %spoke-action-button {
   @extend %action-button;
   background-color: $spoke-action-color;
+}
+
+%discord-action-button {
+  @extend %action-button;
+  background-color: $discord-action-color;
+}
+
+%twitter-action-button {
+  @extend %action-button;
+  background-color: $twitter-action-color;
 }
 
 %top-title {
