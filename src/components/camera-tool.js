@@ -110,7 +110,11 @@ AFRAME.registerComponent("camera-tool", {
       this.cameraSystem.register(this.el);
     });
 
-    this.el.setAttribute("hover-menu__camera", { template: "#camera-hover-menu", dirs: ["forward", "back"] });
+    this.el.setAttribute("hover-menu__camera", {
+      template: "#camera-hover-menu",
+      dirs: ["forward", "back"],
+      withPermission: "spawn_camera"
+    });
     this.el.components["hover-menu__camera"].getHoverMenu().then(() => {
       this.snapButton = this.el.querySelector(".snap-button");
       this.snapButton.object3D.addEventListener("interact", () => {

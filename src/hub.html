@@ -384,7 +384,7 @@
                         position="0 -0.18 0"
                         pen="camera: #player-camera; drawingManager: #drawing-manager"
                     ></a-entity>
-                    <a-entity class="ui delete-button pen-menu" visibility-while-frozen="withinDistance: 10;" >
+                    <a-entity class="ui delete-button pen-menu" visibility-while-frozen="withinDistance: 10; withPermission: spawn_drawing" >
                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" remove-networked-object-button position="0 0 0.01">
                             <a-entity
                                 sprite
@@ -415,7 +415,7 @@
                     position-at-box-shape-border__freeze="target: .camera-menu"
                     set-yxz-order
                 >
-                    <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 10;">
+                    <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 10; withPermission: spawn_camera">
                         <a-entity mixin="rounded-text-action-button" is-remote-hover-target tags="singleActionButton: true;" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01">
                             <a-entity text=" value:mirror; width:2.5; align:center;" class="mirror-button-label" text-raycast-hack position="0 0 0.02"></a-entity>
                         </a-entity>
