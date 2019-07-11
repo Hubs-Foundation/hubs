@@ -354,6 +354,8 @@ AFRAME.registerComponent("camera-tool", {
     this.videoRecorder.ondataavailable = e => chunks.push(e.data);
     this.videoRecorder._free = () => (chunks.length = 0); // Used for cancelling
     this.videoRecorder.onstop = async () => {
+      this.el.sceneEl.emit("action_camera_recording_ended");
+
       if (chunks.length === 0) return;
       const mimeType = chunks[0].type;
       let blob;
@@ -396,6 +398,7 @@ AFRAME.registerComponent("camera-tool", {
 
     this.videoRecorder.start();
     this.el.setAttribute("camera-tool", { isRecording: true, label: " " });
+    this.el.sceneEl.emit("action_camera_recording_started");
 
     if (duration !== Infinity) {
       this.videoCountdown = this.data.captureDuration;
