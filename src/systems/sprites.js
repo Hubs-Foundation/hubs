@@ -46,8 +46,10 @@ function isVisible(o) {
 AFRAME.registerComponent("sprite", {
   schema: { name: { type: "string" } },
   tick() {
-    if (!this.didRegisterWithSystem && this.el.sceneEl.systems["post-physics"]) {
+    // TODO when we run out of sprites we currently just stop rendering them. We need to do something better.
+    if (!(this.didRegisterWithSystem || this.didFailToRegister) && this.el.sceneEl.systems["post-physics"]) {
       this.didRegisterWithSystem = this.el.sceneEl.systems["post-physics"].spriteSystem.add(this);
+      this.didFailToRegister = !this.didRegisterWithSystem;
     }
   },
 
