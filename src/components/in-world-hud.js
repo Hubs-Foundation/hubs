@@ -1,6 +1,6 @@
 import { SOUND_SPAWN_PEN } from "../systems/sound-effects-system";
 /**
- * HUD panel for muting, freezing, and space bubble controls.
+ * HUD panel for muting, freezing, and other controls that don't necessarily have hardware buttons.
  * @namespace ui
  * @component in-world-hud
  */
