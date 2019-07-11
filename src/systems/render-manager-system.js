@@ -34,7 +34,7 @@ export class BatchManagerSystem {
 
     let batchedCount = 0;
     rootObject.traverse(object => {
-      if (object.isMesh && !object.isSkinnedMesh && !object.material.transparent && object.name !== "NavMesh") {
+      if (object.isMesh) {
         if (this.batchManager.addMesh(object)) batchedCount++;
       }
     });
@@ -45,7 +45,7 @@ export class BatchManagerSystem {
     if (!this.batchingEnabled) return;
 
     rootObject.traverse(object => {
-      if (object.isMesh && !object.isSkinnedMesh && !object.material.transparent && object.name !== "NavMesh") {
+      if (object.isMesh) {
         this.batchManager.removeMesh(object);
       }
     });
