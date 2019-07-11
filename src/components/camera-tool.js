@@ -372,9 +372,9 @@ AFRAME.registerComponent("camera-tool", {
 
       const { entity, orientation } = spawnMediaAround(
         this.el,
-        new File([blob], "capture", { type: mimeType }),
+        new File([blob], "capture", { type: mimeType.split(";")[0] }), // Drop codec
+        "video-camera",
         this.localSnapCount,
-        "video",
         true
       );
 
@@ -628,7 +628,7 @@ AFRAME.registerComponent("camera-tool", {
         renderer.readRenderTargetPixels(this.renderTarget, 0, 0, RENDER_WIDTH, RENDER_HEIGHT, this.snapPixels);
 
         pixelsToPNG(this.snapPixels, RENDER_WIDTH, RENDER_HEIGHT).then(file => {
-          const { orientation } = spawnMediaAround(this.el, file, "camera-photo", this.localSnapCount, true);
+          const { orientation } = spawnMediaAround(this.el, file, "photo-camera", this.localSnapCount, true);
 
           orientation.then(() => {
             this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });

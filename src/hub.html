@@ -552,10 +552,14 @@
                         tags="singleActionButton: true; isHoverMenuChild: true;"
                         sprite
                         icon-button="image: snap.png; hoverImage: snap-hover.png; activeImage: snap.png; activeHoverImage: snap-hover.png"
+                        visibility-on-content-subtype="contentSubtype: video-camera; visible: false;" 
                         scale="0.075 0.075 0.075"
                         position="0 0.225 0"
                         class="video-snap-button"
                     ></a-entity>
+                    <a-entity mixin="rounded-twitter-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" tweet-media-button visibility-on-content-subtype="contentSubtype: video-camera; visible: true;" position="0 0.285 0.01">
+                        <a-entity text="value:tweet; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    </a-entity>
                     <a-entity class="video-time-label" text="value: 0; anchor: center; align: center; color: #aaa;" text-raycast-hack position="0 -0.24 0" scale="0.75 0.75 0.75"></a-entity>
                     <a-entity class="video-volume-label" text="value: 0%; anchor: center; align: center; color: #ccc; letterSpacing: 4;" text-raycast-hack position="0.0 0.14 0.015" scale="1.25 1.25 1.25"></a-entity>
                     <a-entity
@@ -637,7 +641,7 @@
 
             <template id="photo-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
-                    <a-entity mixin="rounded-twitter-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" tweet-media-button position="0 -0.125 0.01">
+                    <a-entity mixin="rounded-twitter-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" tweet-media-button position="0 0.285 0.01">
                         <a-entity text="value:tweet; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
