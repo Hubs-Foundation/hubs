@@ -163,6 +163,8 @@ AFRAME.registerComponent("camera-tool", {
       this.label.object3D.visible = false;
       this.durationLabel.object3D.visible = false;
 
+      this.snapMenu = this.el.querySelector(".camera-snap-menu");
+      this.playerCamera = document.querySelector("#player-camera").getObject3D("camera");
       this.snapButton = this.el.querySelector(".snap-button");
       this.cancelButton = this.el.querySelector(".cancel-button");
       this.nextDurationButton = this.el.querySelector(".next-duration");
@@ -453,6 +455,8 @@ AFRAME.registerComponent("camera-tool", {
 
     const isHolding = heldLeftHand || heldRightHand || heldRightRemote;
 
+    this.updateSnapMenuOrientation();
+
     if (heldThisFrame) {
       this.localSnapCount = 0;
     }
@@ -668,5 +672,31 @@ AFRAME.registerComponent("camera-tool", {
     }
 
     return !!userinput.get(paths.actions.takeSnapshot);
-  }
+  },
+
+  updateSnapMenuOrientation: (function() {
+    const playerWorld = new THREE.Vector3();
+    const cameraWorld = new THREE.Vector3();
+    const playerToCamera = new THREE.Vector3();
+    const cameraForwardPoint = new THREE.Vector3();
+    const cameraForwardWorld = new THREE.Vector3();
+    return function() {
+      this.el.object3D.getWorldPosition(cameraWorld);
+      this.playerCamera.getWorldPosition(playerWorld);
+      playerToCamera.subVectors(playerWorld, cameraWorld);
+      cameraForwardPoint.set(0, 0, 1);
+      this.el.object3D.localToWorld(cameraForwardPoint);
+      cameraForwardWorld.subVectors(cameraForwardPoint, cameraWorld);
+      cameraForwardWorld.normalize();
+      playerToCamera.normalize();
+
+      const flipped = cameraForwardWorld.dot(playerToCamera) < 0;
+
+      if (this.snapMenuFlipped !== flipped) {
+        this.snapMenuFlipped = flipped;
+        this.snapMenu.object3D.rotation.set(0, flipped ? Math.PI : 0, 0);
+        this.snapMenu.object3D.matrixNeedsUpdate = true;
+      }
+    };
+  })()
 });
