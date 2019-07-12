@@ -196,6 +196,7 @@ import qsTruthy from "./utils/qs_truthy";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
+NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
 
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
