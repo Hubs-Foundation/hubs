@@ -24,10 +24,11 @@ AFRAME.registerComponent("hoverable-visuals", {
   tick(time) {
     if (!this.uniforms || !this.uniforms.length) return;
 
+    const isFrozen = this.el.sceneEl.is("frozen");
     const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
     const isSpawner = !!this.el.components["super-spawner"];
-    const isFrozen = this.el.sceneEl.is("frozen");
-    const canMove = window.APP.hubChannel.can("spawn_and_move_media");
+    const canMove =
+      window.APP.hubChannel.can("spawn_and_move_media") && (!isPinned || window.APP.hubChannel.can("pin_objects"));
     const hideEffect = (!isSpawner && isPinned && !isFrozen) || !canMove;
 
     let interactorOne, interactorTwo;

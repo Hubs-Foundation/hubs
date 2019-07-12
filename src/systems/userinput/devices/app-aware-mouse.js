@@ -51,16 +51,16 @@ export class AppAwareMouseDevice {
       const intersection = rawIntersections.find(x => x.object.el);
       const remoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
       const userinput = AFRAME.scenes[0].systems.userinput;
+      const isInteractable =
+        intersection &&
+        intersection.object.el.matches(".pen, .pen *, .video, .video *, .interactable, .interactable *");
+      const isPinned =
+        remoteHoverTarget && remoteHoverTarget.components.pinnable && remoteHoverTarget.components.pinnable.data.pinned;
+      const isFrozen = AFRAME.scenes[0].is("frozen");
+      const canMove =
+        window.APP.hubChannel.can("spawn_and_move_media") && (!isPinned || window.APP.hubChannel.can("pin_objects"));
       this.clickedOnAnything =
-        (intersection &&
-          intersection.object.el.matches(".pen, .pen *, .video, .video *, .interactable, .interactable *") &&
-          !(
-            remoteHoverTarget &&
-            remoteHoverTarget.components.pinnable &&
-            remoteHoverTarget.components.pinnable.data.pinned &&
-            !AFRAME.scenes[0].is("frozen")
-          ) &&
-          window.APP.hubChannel.can("spawn_and_move_media")) ||
+        (isInteractable && (isFrozen || !isPinned) && canMove) ||
         userinput.activeSets.includes(sets.cursorHoldingPen) ||
         userinput.activeSets.includes(sets.cursorHoldingInteractable) ||
         userinput.activeSets.includes(sets.cursorHoldingCamera);

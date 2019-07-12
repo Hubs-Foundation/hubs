@@ -7,10 +7,7 @@ AFRAME.registerComponent("pin-networked-object-button", {
     tipSelector: { type: "string" },
 
     // Selector for label to change when pinned/unpinned, must be sibling of this components element
-    labelSelector: { type: "string" },
-
-    // Selector for items to hide iff pinned
-    hideWhenPinnedSelector: { type: "string" }
+    labelSelector: { type: "string" }
   },
 
   init() {
@@ -110,9 +107,5 @@ AFRAME.registerComponent("pin-networked-object-button", {
     this.labelEl.setAttribute("text", "value", isPinned ? "un-pin" : "pin");
     this.el.setAttribute("text-button", "backgroundColor", isPinned ? "#fff" : "#ff3550");
     this.el.setAttribute("text-button", "backgroundHoverColor", isPinned ? "#bbb" : "#fc3545");
-
-    this.el.parentNode.querySelectorAll(this.data.hideWhenPinnedSelector).forEach(hideEl => {
-      hideEl.setAttribute("visible", !isPinned);
-    });
   }
 });

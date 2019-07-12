@@ -137,16 +137,14 @@ AFRAME.registerSystem("interaction", {
       }
     } else {
       state.hovered = options.hoverFn.call(this, options.entity.body);
-      if (
-        state.hovered &&
-        state.hovered.components.tags &&
-        state.hovered.components.tags.data.isHoldable &&
-        userinput.get(options.grabPath) &&
-        (this.el.is("frozen") ||
-          !state.hovered.components.pinnable ||
-          !state.hovered.components.pinnable.data.pinned) &&
-        window.APP.hubChannel.can("spawn_and_move_media")
-      ) {
+      const isHoldable =
+        state.hovered && state.hovered.components.tags && state.hovered.components.tags.data.isHoldable;
+      const isFrozen = this.el.is("frozen");
+      const isPinned =
+        state.hovered && state.hovered.components.pinnable && state.hovered.components.pinnable.data.pinned;
+      const canMove =
+        window.APP.hubChannel.can("spawn_and_move_media") && (!isPinned || window.APP.hubChannel.can("pin_objects"));
+      if (isHoldable && userinput.get(options.grabPath) && (isFrozen || !isPinned) && canMove) {
         state.held = state.hovered;
       }
     }
