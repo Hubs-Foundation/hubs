@@ -1,6 +1,6 @@
 # Privacy Notice for Hubs and Spoke
 
-Version 3.2.2, June 11, 2019
+Version 3.2.3, July 11, 2019
 
 ## At Mozilla (that’s us), we believe that privacy is fundamental to a healthy internet.
 
@@ -15,10 +15,14 @@ In this Privacy Notice, we explain what data may be accessible to Mozilla or oth
 
 - **Avatar data**: We receive and send to others in the Room the name and likeness of your Avatar, its position in the Room, and your interactions with objects in the Room. 
   - **Custom Avatars**: You may create a custom avatar. If you create an account, Mozilla will store your custom avatar, associated with your account.
-  - **Stock Avatars**: If you choose one of the regular avatar, you may login to store information about your avatar with Mozilla. You can optionally store information about your Avatar in your browser’s local storage if you do not log in to your account.  
+  - **Stock Avatars**: If you choose one of the regular avatars, you may login to store information about your avatar with Mozilla. You can optionally store information about your Avatar in your browser’s local storage if you do not log in to your account.  
 - **Room data**: Rooms are publicly accessible to anyone with the URL. Mozilla receives data about the virtual objects and Avatars in a Room and shares that data with others in the Room.     
 - **Voice data**: If your microphone is on, Mozilla receives and sends audio to other users in the Room. Mozilla does not record or store the audio.  *Be aware that once you agree to let Hubs use your microphone, it will stay on as long as you remain in a Hubs room, unless you turn it off.*
-- **Third-Party Communications Services**: Hubs allows you to connect Slack and Discord to a Hubs room. When someone has connected Slack or Discord to a Hubs room, Hubs will share information in a Hubs room with the third-party service connected to it, and vice versa. This includes chat messages, 2D and 3D objects you create, and entering or leaving a room. Mozilla will not store this information permanently, but will share the information between Hubs and the third-party communications service. If you log in to Hubs with Discord, Mozilla receives your Discord username and authentication. You can see Discord’s [Privacy Policy](https://discordapp.com/privacy) or Slack’s [Privacy Policy](https://slack.com/privacy-policy) for more information.
+- **In-Room Photos and Video**: You can use the camera tool to take photos and video unless the room owner has disabled this feature. The camera tool displays a red icon during filming. Your avatar will also indicate to others with a red icon that you are filming and capturing audio from enabled microphones in the room.
+  - Data retention: If you take a photo or video, the file is stored locally on your device and uploaded to Mozilla’s servers so that it can be shared within the room. Pinned files are stored permanently in your room unless you remove it. Unpinned files are deleted from Mozilla’s servers after 72 hours. 
+- **Third-Party Communications Services**: Hubs allows you to connect some third-party services to a Hubs room.
+  - **Twitter**: Logging into your Twitter account from Hubs allows you to tweet and share 2D images. Any content you tweet will be shared with Twitter and published publicly on the Twitter platform. You can see Twitter’s [Privacy Policy](https://twitter.com/en/privacy) for more information.
+  - **Discord**: Hubs allows you to connect Discord to a Hubs room. When someone has connected Discord to a Hubs room, we store access tokens and the server and channel IDs that have been connected. We will synchronize chat messages, room changes, 2D and 3D objects you create, and whether a user joins or leaves with the connected Discord channel, but do not log any of these synchronized messages. For diagnostics, we log aggregated counts such as the number of messages and users who have joined relevant channels. You can see [Discord’s Privacy Policy](https://discordapp.com/privacy) for more information.
 
 - You can learn more by looking at the [code itself](https://github.com/mozilla/hubs) for Hubs. [Janus SFU](https://github.com/mozilla/janus-plugin-sfu), [Reticulum](https://github.com/mozilla/reticulum), [Hubs](https://github.com/mozilla/hubs), [Hubs-Ops](https://github.com/mozilla/hubs-ops), [Discord Bot](https://github.com/MozillaReality/hubs-discord-bot)
 

@@ -150,6 +150,8 @@ export function resolveActionSets() {
 
   userinput.toggleSet(
     sets.inputFocused,
-    document.activeElement.nodeName === "INPUT" || document.activeElement.nodeName === "TEXTAREA"
+    document.activeElement.nodeName === "INPUT" ||
+      document.activeElement.nodeName === "TEXTAREA" ||
+      document.activeElement.contentEditable === "true"
   );
 }

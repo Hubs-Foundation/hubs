@@ -65,7 +65,7 @@
       top: -5px;
     }
 
-    :local(.attach_video_share_mode) {
+    :local(.attach_video_share_mode), :local(.attach_video_share_failed) {
       left: 90px;
 
       @media(max-width: 465px) {
