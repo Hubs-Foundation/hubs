@@ -238,10 +238,9 @@ export default class HubChannel extends EventTarget {
     return new Promise((resolve, reject) => {
       this.channel
         .push("sign_out")
-        .receive("ok", () => {
-          this._permissions = {};
+        .receive("ok", async () => {
           this._signedIn = false;
-          this.dispatchEvent(new CustomEvent("permissions_updated"));
+          await this.fetchPermissions();
           resolve();
         })
         .receive("error", reject);
