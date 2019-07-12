@@ -470,7 +470,7 @@ AFRAME.registerComponent("media-video", {
       this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
 
       this.playPauseButton.object3D.visible = !!this.video;
-      this.snapButton.object3D.visible = !!this.video;
+      this.snapButton.object3D.visible = !!this.video && window.APP.hubChannel.can("spawn_and_move_media");
       this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
       this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
     }
