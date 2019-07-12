@@ -105,6 +105,18 @@ export const SCHEMA = {
           embedToken: { type: "string" }
         }
       }
+    },
+
+    onLoadActions: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          action: { type: "string" },
+          args: { type: "object" }
+        }
+      }
     }
   },
 
@@ -119,7 +131,8 @@ export const SCHEMA = {
     confirmedBroadcastedRooms: { $ref: "#/definitions/confirmedBroadcastedRooms" },
     uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" },
     creatorAssignmentTokens: { $ref: "#/definitions/creatorAssignmentTokens" },
-    embedTokens: { $ref: "#/definitions/embedTokens" }
+    embedTokens: { $ref: "#/definitions/embedTokens" },
+    onLoadActions: { $ref: "#/definitions/onLoadActions" }
   },
 
   additionalProperties: false
@@ -149,7 +162,8 @@ export default class Store extends EventTarget {
       confirmedBroadcastedRooms: [],
       uploadPromotionTokens: [],
       creatorAssignmentTokens: [],
-      embedTokens: []
+      embedTokens: [],
+      onLoadActions: []
     });
 
     const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
@@ -195,13 +209,40 @@ export default class Store extends EventTarget {
   }
 
   resetConfirmedBroadcastedRooms() {
-    // merge causing us some annoyance here :(
-    const overwriteMerge = (destinationArray, sourceArray) => sourceArray;
-    this.update({ confirmedBroadcastedRooms: [] }, { arrayMerge: overwriteMerge });
+    this.clearStoredArray("confirmedBroadcastedRooms");
   }
 
   resetTipActivityFlags() {
     this.update({ activity: { hasRotated: false, hasPinned: false, hasRecentered: false, hasScaled: false } });
+  }
+
+  // Sets a one-time action to perform the next time the page loads
+  enqueueOnLoadAction(action, args) {
+    this.update({ onLoadActions: [{ action, args }] });
+  }
+
+  executeOnLoadActions(sceneEl) {
+    for (let i = 0; i < this.state.onLoadActions.length; i++) {
+      const { action, args } = this.state.onLoadActions[i];
+
+      if (action === "emit_scene_event") {
+        sceneEl.emit(args.event, args.detail);
+      }
+    }
+
+    this.clearOnLoadActions();
+  }
+
+  clearOnLoadActions() {
+    this.clearStoredArray("onLoadActions");
+  }
+
+  clearStoredArray(key) {
+    const overwriteMerge = (destinationArray, sourceArray) => sourceArray;
+    const update = {};
+    update[key] = [];
+
+    this.update(update, { arrayMerge: overwriteMerge });
   }
 
   update(newState, mergeOpts) {
@@ -217,6 +258,9 @@ export default class Store extends EventTarget {
     localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(finalState));
     delete this[STORE_STATE_CACHE_KEY];
 
+    if (newState.profile !== undefined) {
+      this.dispatchEvent(new CustomEvent("profilechanged"));
+    }
     this.dispatchEvent(new CustomEvent("statechanged"));
 
     return finalState;

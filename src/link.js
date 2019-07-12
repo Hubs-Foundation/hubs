@@ -1,5 +1,5 @@
 import "./assets/stylesheets/link.scss";
-import "./aframe-entry";
+import "aframe";
 import React from "react";
 import ReactDOM from "react-dom";
 import registerTelemetry from "./telemetry";

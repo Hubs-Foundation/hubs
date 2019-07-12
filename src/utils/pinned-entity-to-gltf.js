@@ -23,13 +23,14 @@ export default function pinnedEntityToGltf(el) {
 
   if (components["media-loader"]) {
     const mediaSrc = components["media-loader"].data.src;
+    const mediaContentSubtype = components["media-loader"].data.contentSubtype;
 
     if (mediaSrc.startsWith("hubs://") && mediaSrc.endsWith("/video")) {
       // Do not persist hubs client video urls
       return null;
     }
 
-    gltfComponents.media = { src: mediaSrc, id: networkId };
+    gltfComponents.media = { src: mediaSrc, contentSubtype: mediaContentSubtype, id: networkId };
 
     if (components["media-pager"]) {
       gltfComponents.media.pageIndex = components["media-pager"].data.index;

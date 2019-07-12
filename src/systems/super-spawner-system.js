@@ -24,6 +24,7 @@ export class SuperSpawnerSystem {
       data.src,
       data.template,
       ObjectContentOrigins.SPAWNER,
+      null,
       data.resolve,
       data.resize,
       false

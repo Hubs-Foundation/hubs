@@ -11,7 +11,7 @@ import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import {
   isIn2DInterstitial,
   handleExitTo2DInterstitial,
-  handleReEntryToVRFrom2DInterstitial,
+  exit2DInterstitialAndEnterVR,
   forceExitFrom2DInterstitial
 } from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
@@ -63,7 +63,7 @@ export default class SceneEntryManager {
       // force gamepads to become live.
       navigator.getVRDisplays();
 
-      this.scene.enterVR();
+      exit2DInterstitialAndEnterVR(true);
     }
 
     if (isMobile || qsTruthy("mobile")) {
@@ -254,6 +254,7 @@ export default class SceneEntryManager {
         src,
         "#interactable-media",
         contentOrigin,
+        null,
         !(src instanceof MediaStream),
         true
       );
@@ -276,19 +277,11 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("pinned", e => {
       if (this._disableSignInOnPinAction) return;
-
-      // Don't go into pin/unpin flow if the pin state didn't actually change and this was just initialization
-      if (!e.detail.changed) return;
-
       this._signInAndPinOrUnpinElement(e.detail.el, true);
     });
 
     this.scene.addEventListener("unpinned", e => {
       if (this._disableSignInOnPinAction) return;
-
-      // Don't go into pin/unpin flow if the pin state didn't actually change and this was just initialization
-      if (!e.detail.changed) return;
-
       this._signInAndPinOrUnpinElement(e.detail.el, false);
     });
 
@@ -325,7 +318,15 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
 
     document.addEventListener("paste", e => {
-      if (e.target.matches("input, textarea") && document.activeElement === e.target) return;
+      if (
+        (e.target.matches("input, textarea") || e.target.contentEditable === "true") &&
+        document.activeElement === e.target
+      )
+        return;
+
+      // Never paste into scene if dialog is open
+      const uiRoot = document.querySelector(".ui-root");
+      if (uiRoot && uiRoot.classList.contains("in-modal-or-overlay")) return;
 
       const url = e.clipboardData.getData("text");
       const files = e.clipboardData.files && e.clipboardData.files;
@@ -360,7 +361,16 @@ export default class SceneEntryManager {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
-      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      let newStream;
+
+      try {
+        newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (e) {
+        isHandlingVideoShare = false;
+        this.scene.emit("share_video_failed");
+        return;
+      }
+
       const videoTracks = newStream ? newStream.getVideoTracks() : [];
 
       if (videoTracks.length > 0) {
@@ -447,11 +457,11 @@ export default class SceneEntryManager {
         spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
       }, spawnDelay);
 
-      handleReEntryToVRFrom2DInterstitial();
+      exit2DInterstitialAndEnterVR();
     });
 
     this.mediaSearchStore.addEventListener("media-exit", () => {
-      handleReEntryToVRFrom2DInterstitial();
+      exit2DInterstitialAndEnterVR();
     });
   };
 

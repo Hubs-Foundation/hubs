@@ -22,12 +22,7 @@ AFRAME.registerSystem("personal-space-bubble", {
     this.invaders = [];
     this.bubbles = [];
     this.tickCount = 0;
-
     this._updateInvaders = this._updateInvaders.bind(this);
-
-    this.el.addEventListener("action_space_bubble", () => {
-      this.el.setAttribute("personal-space-bubble", { enabled: !this.data.enabled });
-    });
   },
 
   registerBubble(bubble) {

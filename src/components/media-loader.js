@@ -8,6 +8,9 @@ import {
   isHubsAvatarUrl
 } from "../utils/media-url-utils";
 import { addAnimationComponents } from "../utils/animation";
+import qsTruthy from "../utils/qs_truthy";
+
+import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
 
@@ -31,6 +34,8 @@ const fetchMaxContentIndex = url => {
 
 const boundingBox = new THREE.Box3();
 
+const forceBatching = qsTruthy("forceBatching");
+
 AFRAME.registerComponent("media-loader", {
   schema: {
     fileId: { type: "string" },
@@ -39,6 +44,7 @@ AFRAME.registerComponent("media-loader", {
     resize: { default: false },
     resolve: { default: false },
     contentType: { default: null },
+    contentSubtype: { default: null },
     animate: { default: true },
     mediaOptions: {
       default: {},
@@ -252,7 +258,7 @@ AFRAME.registerComponent("media-loader", {
 
   async update(oldData) {
     try {
-      const { src } = this.data;
+      const { src, contentSubtype } = this.data;
 
       if (src !== oldData.src && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
@@ -322,6 +328,13 @@ AFRAME.registerComponent("media-loader", {
           "image-loaded",
           e => {
             this.onMediaLoaded(e.detail.projection === "flat" ? SHAPE.BOX : null);
+
+            if (contentSubtype === "camera-photo") {
+              this.el.setAttribute("hover-menu__photo", {
+                template: "#photo-hover-menu",
+                dirs: ["forward", "back"]
+              });
+            }
           },
           { once: true }
         );
@@ -372,6 +385,7 @@ AFRAME.registerComponent("media-loader", {
             src: accessibleUrl,
             contentType: contentType,
             inflate: true,
+            batch: forceBatching,
             modelToWorldScale: this.data.resize ? 0.0001 : 1.0
           })
         );
@@ -404,7 +418,10 @@ AFRAME.registerComponent("media-loader", {
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
         this.el.setAttribute(
           "media-image",
-          Object.assign({}, this.data.mediaOptions, { src: thumbnail, contentType: "image/png" })
+          Object.assign({}, this.data.mediaOptions, {
+            src: thumbnail,
+            contentType: guessContentType(thumbnail) || "image/png"
+          })
         );
         if (this.el.components["position-at-box-shape-border__freeze"]) {
           this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
@@ -470,7 +487,7 @@ AFRAME.registerComponent("media-pager", {
     if (!this.data.src) return;
 
     const pageSrc = proxiedUrlFor(this.data.src, this.data.index);
-    this.el.setAttribute("media-image", { src: pageSrc, contentType: "image/png" });
+    this.el.setAttribute("media-image", { src: pageSrc, contentType: guessContentType(pageSrc) || "image/png" });
 
     await this._ensureUI();
 
