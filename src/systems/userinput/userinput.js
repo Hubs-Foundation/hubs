@@ -312,10 +312,9 @@ AFRAME.registerSystem("userinput", {
         gamepadDevice = new GearVRControllerDevice(e.gamepad);
       } else if (e.gamepad.id === "Daydream Controller") {
         gamepadDevice = new DaydreamControllerDevice(e.gamepad);
-      } else if (e.gamepad.id.toLowerCase().includes("xinput")) {
-        gamepadDevice = new XboxControllerDevice(e.gamepad);
       } else {
-        gamepadDevice = new GamepadDevice(e.gamepad);
+        // Our XboxController device and bindings should be generic enough for most gamepads.
+        gamepadDevice = new XboxControllerDevice(e.gamepad);
       }
 
       this.activeDevices.add(gamepadDevice);
