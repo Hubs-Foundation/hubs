@@ -8,8 +8,6 @@ import {
   isHubsAvatarUrl
 } from "../utils/media-url-utils";
 import { addAnimationComponents } from "../utils/animation";
-import qsTruthy from "../utils/qs_truthy";
-
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
@@ -33,8 +31,6 @@ const fetchMaxContentIndex = url => {
 };
 
 const boundingBox = new THREE.Box3();
-
-const forceBatching = qsTruthy("forceBatching");
 
 AFRAME.registerComponent("media-loader", {
   schema: {
@@ -385,7 +381,6 @@ AFRAME.registerComponent("media-loader", {
             src: accessibleUrl,
             contentType: contentType,
             inflate: true,
-            batch: forceBatching,
             modelToWorldScale: this.data.resize ? 0.0001 : 1.0
           })
         );
