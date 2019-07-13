@@ -2,6 +2,7 @@ import { sets } from "../sets";
 import { paths } from "../paths";
 import { Pose } from "../pose";
 import { findRemoteHoverTarget } from "../../interactions";
+import { canMove } from "../../../utils/permissions-utils";
 
 const calculateCursorPose = function(camera, coords, origin, direction, cursorPose) {
   origin.setFromMatrixPosition(camera.matrixWorld);
@@ -57,10 +58,8 @@ export class AppAwareMouseDevice {
       const isPinned =
         remoteHoverTarget && remoteHoverTarget.components.pinnable && remoteHoverTarget.components.pinnable.data.pinned;
       const isFrozen = AFRAME.scenes[0].is("frozen");
-      const canMove =
-        window.APP.hubChannel.can("spawn_and_move_media") && (!isPinned || window.APP.hubChannel.can("pin_objects"));
       this.clickedOnAnything =
-        (isInteractable && (isFrozen || !isPinned) && canMove) ||
+        (isInteractable && (isFrozen || !isPinned) && canMove(remoteHoverTarget, isPinned)) ||
         userinput.activeSets.includes(sets.cursorHoldingPen) ||
         userinput.activeSets.includes(sets.cursorHoldingInteractable) ||
         userinput.activeSets.includes(sets.cursorHoldingCamera);

@@ -2,6 +2,7 @@ import { paths } from "../paths";
 import { Pose } from "../pose";
 import { touchIsAssigned, jobIsAssigned, assign, unassign, findByJob, findByTouch } from "./touchscreen/assignments";
 import { findRemoteHoverTarget } from "../../interactions";
+import { canMove } from "../../../utils/permissions-utils";
 
 const MOVE_CURSOR_JOB = "MOVE CURSOR";
 const MOVE_CAMERA_JOB = "MOVE CAMERA";
@@ -58,9 +59,7 @@ function shouldMoveCursor(touch, raycaster) {
   const isPinned =
     remoteHoverTarget && remoteHoverTarget.components.pinnable && remoteHoverTarget.components.pinnable.data.pinned;
   const isFrozen = AFRAME.scenes[0].is("frozen");
-  const canMove =
-    window.APP.hubChannel.can("spawn_and_move_media") && (!isPinned || window.APP.hubChannel.can("pin_objects"));
-  return isInteractable && (isFrozen || !isPinned) && canMove;
+  return isInteractable && (isFrozen || !isPinned) && canMove(remoteHoverTarget, isPinned);
 }
 
 export class AppAwareTouchscreenDevice {
