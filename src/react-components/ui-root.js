@@ -227,7 +227,6 @@ class UIRoot extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    window.setState = this.setState.bind(this);
     const { hubChannel, showSignInDialog } = this.props;
     if (hubChannel) {
       const { signedIn } = hubChannel;
