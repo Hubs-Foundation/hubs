@@ -379,7 +379,7 @@ AFRAME.registerComponent("camera-tool", {
         new File([blob], "capture", { type: mimeType }),
         this.localSnapCount,
         "video",
-        true
+        !!this.playerIsBehindCamera
       );
 
       // To limit the # of concurrent videos playing, if it was a short clip, let it loop
@@ -635,7 +635,13 @@ AFRAME.registerComponent("camera-tool", {
         renderer.readRenderTargetPixels(this.renderTarget, 0, 0, RENDER_WIDTH, RENDER_HEIGHT, this.snapPixels);
 
         pixelsToPNG(this.snapPixels, RENDER_WIDTH, RENDER_HEIGHT).then(file => {
-          const { orientation } = spawnMediaAround(this.el, file, this.localSnapCount, "photo", true);
+          const { orientation } = spawnMediaAround(
+            this.el,
+            file,
+            this.localSnapCount,
+            "photo",
+            !!this.playerIsBehindCamera
+          );
 
           orientation.then(() => {
             this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
@@ -690,11 +696,11 @@ AFRAME.registerComponent("camera-tool", {
       cameraForwardWorld.normalize();
       playerToCamera.normalize();
 
-      const flipped = cameraForwardWorld.dot(playerToCamera) < 0;
+      const playerIsBehindCamera = cameraForwardWorld.dot(playerToCamera) < 0;
 
-      if (this.snapMenuFlipped !== flipped) {
-        this.snapMenuFlipped = flipped;
-        this.snapMenu.object3D.rotation.set(0, flipped ? Math.PI : 0, 0);
+      if (this.playerIsBehindCamera !== playerIsBehindCamera) {
+        this.playerIsBehindCamera = playerIsBehindCamera;
+        this.snapMenu.object3D.rotation.set(0, this.playerIsBehindCamera ? Math.PI : 0, 0);
         this.snapMenu.object3D.matrixNeedsUpdate = true;
       }
     };
