@@ -19,10 +19,12 @@ AFRAME.registerComponent("icon-button", {
     this.el.object3D.matrixNeedsUpdate = true;
     this.onHover = () => {
       this.hovering = true;
+      this.data.tooltip.setAttribute("visible", true);
       this.updateButtonState();
     };
     this.onHoverOut = () => {
       this.hovering = false;
+      this.data.tooltip.setAttribute("visible", false);
       this.updateButtonState();
     };
   },
@@ -59,7 +61,6 @@ AFRAME.registerComponent("icon-button", {
     }
 
     if (this.data.tooltip && hovering) {
-      this.data.tooltip.setAttribute("visible", this.hovering);
       this.data.tooltip
         .querySelector("[text]")
         .setAttribute("text", "value", this.data.active ? this.data.activeTooltipText : this.data.tooltipText);

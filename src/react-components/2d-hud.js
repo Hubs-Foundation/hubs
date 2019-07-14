@@ -8,13 +8,27 @@ import uiStyles from "../assets/stylesheets/ui-root.scss";
 import { FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { micLevelForVolume } from "../components/audio-feedback";
 
+const ICONS = {
+  MIC: [styles.mic0, styles.mic1, styles.mic2, styles.mic3, styles.mic4, styles.mic5, styles.mic6, styles.mic7],
+  MIC_OFF: [
+    styles.micOff0,
+    styles.micOff1,
+    styles.micOff2,
+    styles.micOff3,
+    styles.micOff4,
+    styles.micOff5,
+    styles.micOff6,
+    styles.micOff7
+  ]
+};
 const browser = detect();
 
 class TopHUD extends Component {
   static propTypes = {
+    scene: PropTypes.object,
     muted: PropTypes.bool,
-    volumeLevel: PropTypes.number,
     isCursorHoldingPen: PropTypes.bool,
     hasActiveCamera: PropTypes.bool,
     frozen: PropTypes.bool,
@@ -38,7 +52,27 @@ class TopHUD extends Component {
 
   state = {
     showVideoShareOptions: false,
-    lastActiveMediaSource: null
+    lastActiveMediaSource: null,
+    micLevel: 0
+  };
+  componentDidMount = () => {
+    let max = 0;
+    if (this.micUpdateInterval) {
+      clearInterval(this.micUpdateInterval);
+    }
+    this.micUpdateInterval = setInterval(() => {
+      const volume = this.props.scene.systems["local-audio-analyser"].volume;
+      max = Math.max(volume, max);
+      const micLevel = micLevelForVolume(volume, max);
+      if (micLevel !== this.state.micLevel) {
+        this.setState({ micLevel });
+      }
+    }, 50);
+  };
+  componentWillUnmount = () => {
+    if (this.micUpdateInterval) {
+      clearInterval(this.micUpdateInterval);
+    }
   };
 
   handleVideoShareClicked = source => {
@@ -154,16 +188,8 @@ class TopHUD extends Component {
       );
     }
 
-    const micLevelStyle =
-      this.props.volumeLevel < 0.2
-        ? 0
-        : this.props.volumeLevel < 0.3
-          ? 1
-          : this.props.volumeLevel < 0.6
-            ? 2
-            : this.props.volumeLevel < 1.3
-              ? 3
-              : 4;
+    const micLevel = this.state.micLevel;
+    const micIconClass = this.props.muted ? ICONS.MIC_OFF[micLevel] : ICONS.MIC[micLevel];
     // Hide buttons when frozen.
     return (
       <div className={cx(styles.container, styles.top, styles.unselectable, uiStyles.uiInteractive)}>
@@ -174,15 +200,7 @@ class TopHUD extends Component {
             {tip}
             {videoSharingButtons}
             <div
-              className={cx(
-                styles.iconButton,
-                styles.mute,
-                { [styles.active]: this.props.muted },
-                { [styles.volumeLevel1]: micLevelStyle === 1 },
-                { [styles.volumeLevel2]: micLevelStyle === 2 },
-                { [styles.volumeLevel3]: micLevelStyle === 3 },
-                { [styles.volumeLevel4]: micLevelStyle === 4 }
-              )}
+              className={cx(styles.iconButton, micIconClass)}
               title={this.props.muted ? "Unmute Mic" : "Mute Mic"}
               onClick={this.props.onToggleMute}
             >

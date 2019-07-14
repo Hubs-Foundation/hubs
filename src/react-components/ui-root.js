@@ -191,7 +191,6 @@ class UIRoot extends Component {
     audioTrack: null,
     numAudioTracks: 0,
     micDevices: [],
-    volumeLevel: 1,
 
     profileNamePending: "Hello",
 
@@ -593,6 +592,7 @@ class UIRoot extends Component {
     }
 
     this.setState({ mediaStream });
+    this.props.scene.emit("local-media-stream-created", {mediaStream});
   };
 
   onMicGrantButton = async () => {
@@ -1180,9 +1180,9 @@ class UIRoot extends Component {
           </div>
           <div className="audio-setup-panel__levels">
             <MicLevelWidget
+              scene={this.props.scene}
               hasAudioTrack={!!this.state.audioTrack}
               muteOnEntry={this.state.muteOnEntry}
-              mediaStream={this.state.mediaStream}
             />
             <OutputLevelWidget />
           </div>
@@ -1418,7 +1418,6 @@ class UIRoot extends Component {
 
     const streamer = getCurrentStreamer();
     const streamerName = streamer && streamer.displayName;
-    console.log(this.state.volumeLevel);
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1875,9 +1874,9 @@ class UIRoot extends Component {
             {enteredOrWatching && (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
+                  scene={this.props.scene}
                   history={this.props.history}
                   mediaSearchStore={this.props.mediaSearchStore}
-                  volumeLevel={this.state.volumeLevel}
                   muted={this.state.muted}
                   frozen={this.state.frozen}
                   watching={this.state.watching}

@@ -322,9 +322,6 @@ AFRAME.registerComponent("camera-tool", {
     }
 
     // Begin sampling local audio so we can perform head scaling
-    const localAudioAnalyser = this.el.sceneEl.systems["local-audio-analyser"];
-    localAudioAnalyser.subscribe(this);
-
     const stream = new MediaStream();
     const track = this.videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
 
