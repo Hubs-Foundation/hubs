@@ -12,7 +12,7 @@ AFRAME.registerComponent("tweet-media-button", {
         : `Taken in hubs.mozilla.com `;
 
       const { src, contentSubtype } = this.targetEl.components["media-loader"].data;
-      this.el.sceneEl.emit("action_media_tweet", { url: src, contentSubtype, text });
+      this.el.sceneEl.emit("action_media_tweet", { url: src, contentSubtype, text, el: this.targetEl });
     };
   },
 

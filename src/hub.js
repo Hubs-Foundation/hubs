@@ -732,9 +732,21 @@ document.addEventListener("DOMContentLoaded", async () => {
           isInModal = true;
           pushHistoryState(history, "modal", "tweet", e.detail);
         } else {
+          if (e.detail.el) {
+            // Pin the object if we have to go through OAuth, since the page will refresh and
+            // the object will otherwise be removed
+            e.detail.el.setAttribute("pinnable", "pinned", true);
+          }
+
           const url = await hubChannel.getTwitterOAuthURL();
+
+          // Strip el from stored payload because it won't serialize into the store.
+          const loadActionDetail = {};
+          Object.assign(loadActionDetail, e.detail);
+          delete loadActionDetail.el;
+
           isInOAuth = true;
-          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: e.detail });
+          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: loadActionDetail });
           remountUI({
             showOAuthDialog: true,
             oauthInfo: [{ type: "twitter", url: url }],
