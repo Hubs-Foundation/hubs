@@ -10,17 +10,18 @@ import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faDoorClosed } from "@fortawesome/free-solid-svg-icons/faDoorClosed";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
+import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
 import { showFullScreenIfAvailable } from "../utils/fullscreen";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 
 import styles from "../assets/stylesheets/settings-menu.scss";
+import rootStyles from "../assets/stylesheets/ui-root.scss";
 
 export default class SettingsMenu extends Component {
   static propTypes = {
     history: PropTypes.object,
-    hideSettings: PropTypes.func,
     isStreaming: PropTypes.bool,
     toggleStreamerMode: PropTypes.func,
     mediaSearchStore: PropTypes.object,
@@ -32,7 +33,19 @@ export default class SettingsMenu extends Component {
     pushHistoryState: PropTypes.func
   };
 
-  render() {
+  state = {
+    expanded: false
+  };
+
+  componentDidMount() {
+    document.querySelector(".a-canvas").addEventListener("mouseup", () => {
+      if (this.state.expanded) {
+        this.setState({ expanded: false });
+      }
+    });
+  }
+
+  renderExpandedMenu() {
     const rowClasses = classNames([styles.row, styles.settingsRow]);
     const rowHeader = classNames([styles.row, styles.settingsRow, styles.rowHeader]);
     const showRoomSettings = !!this.props.hubChannel.canOrWillIfCreator("update_hub");
@@ -59,7 +72,7 @@ export default class SettingsMenu extends Component {
                   stateKey="overlay"
                   stateValue="profile"
                   history={this.props.history}
-                  onClick={this.props.hideSettings}
+                  onClick={() => this.setState({ expanded: false })}
                 >
                   <FormattedMessage id="settings.change-avatar" />
                 </StateLink>
@@ -110,7 +123,7 @@ export default class SettingsMenu extends Component {
                         () => {
                           showFullScreenIfAvailable();
                           this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
-                          this.props.hideSettings();
+                          this.setState({ expanded: false });
                         },
                         "change-scene"
                       );
@@ -138,7 +151,7 @@ export default class SettingsMenu extends Component {
                         () => this.props.hubChannel.can("update_hub"),
                         () => {
                           this.props.pushHistoryState("modal", "rename_room");
-                          this.props.hideSettings();
+                          this.setState({ expanded: false });
                         },
                         "rename-room"
                       );
@@ -166,7 +179,7 @@ export default class SettingsMenu extends Component {
                         () => this.props.hubChannel.can("update_hub"),
                         () => {
                           this.props.pushHistoryState("modal", "close_room");
-                          this.props.hideSettings();
+                          this.setState({ expanded: false });
                         },
                         "close-room"
                       );
@@ -189,7 +202,7 @@ export default class SettingsMenu extends Component {
                     stateKey="modal"
                     stateValue="room_info"
                     history={this.props.history}
-                    onClick={this.props.hideSettings}
+                    onClick={() => this.setState({ expanded: false })}
                   >
                     <FormattedMessage id="settings.room-info" />
                   </StateLink>
@@ -211,7 +224,7 @@ export default class SettingsMenu extends Component {
                       destinationUrl: "/",
                       messageType: "create-room"
                     });
-                    this.props.hideSettings();
+                    this.setState({ expanded: false });
                   }}
                 >
                   <FormattedMessage id="settings.create-room" />
@@ -237,6 +250,7 @@ export default class SettingsMenu extends Component {
                     className={styles.listItemLink}
                     onClick={() => {
                       this.props.toggleStreamerMode(true);
+                      this.setState({ expanded: false });
                     }}
                   >
                     <FormattedMessage id="settings.enable-streamer-mode" />
@@ -254,7 +268,7 @@ export default class SettingsMenu extends Component {
                 onClick={e => {
                   e.preventDefault();
                   resetTips();
-                  this.props.hideSettings();
+                  this.setState({ expanded: false });
                 }}
               >
                 <FormattedMessage id="settings.tips" />
@@ -295,6 +309,22 @@ export default class SettingsMenu extends Component {
             </div>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        <FontAwesomeIcon
+          icon={faBars}
+          onClick={() => this.setState({ expanded: !this.state.expanded })}
+          className={classNames({
+            [rootStyles.cornerButton]: true,
+            [rootStyles.cornerButtonSelected]: this.state.expanded
+          })}
+        />
+        {this.state.expanded && this.renderExpandedMenu()}
       </div>
     );
   }

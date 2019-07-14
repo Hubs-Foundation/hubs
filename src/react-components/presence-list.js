@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import classNames from "classnames";
 
+import rootStyles from "../assets/stylesheets/ui-root.scss";
 import styles from "../assets/stylesheets/presence-list.scss";
 import PhoneImage from "../assets/images/presence_phone.png";
 import DesktopImage from "../assets/images/presence_desktop.png";
@@ -13,6 +14,7 @@ import maskEmail from "../utils/mask-email";
 import StateLink from "./state-link.js";
 import { WithHoverSound } from "./wrap-with-audio";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { pushHistoryPath, withSlug } from "../utils/history";
 
@@ -48,6 +50,10 @@ export default class PresenceList extends Component {
     email: PropTypes.string,
     onSignIn: PropTypes.func,
     onSignOut: PropTypes.func
+  };
+
+  state = {
+    expanded: false
   };
 
   navigateToClientInfo = clientId => {
@@ -108,8 +114,15 @@ export default class PresenceList extends Component {
     );
   };
 
-  render() {
-    // Draw self first
+  componentDidMount() {
+    document.querySelector(".a-canvas").addEventListener("mouseup", () => {
+      if (this.state.expanded) {
+        this.setState({ expanded: false });
+      }
+    });
+  }
+
+  renderExpandedList() {
     return (
       <div className={styles.presenceList}>
         <div className={styles.attachPoint} />
@@ -139,6 +152,25 @@ export default class PresenceList extends Component {
             )}
           </div>
         </div>
+      </div>
+    );
+  }
+
+  render() {
+    const occupantCount = this.props.presences ? Object.entries(this.props.presences).length : 0;
+    return (
+      <div>
+        <div
+          onClick={() => this.setState({ expanded: !this.state.expanded })}
+          className={classNames({
+            [rootStyles.presenceInfo]: true,
+            [rootStyles.presenceInfoSelected]: this.state.expanded
+          })}
+        >
+          <FontAwesomeIcon icon={faUsers} />
+          <span className={rootStyles.occupantCount}>{occupantCount}</span>
+        </div>
+        {this.state.expanded && this.renderExpandedList()}
       </div>
     );
   }

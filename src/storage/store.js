@@ -258,6 +258,9 @@ export default class Store extends EventTarget {
     localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(finalState));
     delete this[STORE_STATE_CACHE_KEY];
 
+    if (newState.profile !== undefined) {
+      this.dispatchEvent(new CustomEvent("profilechanged"));
+    }
     this.dispatchEvent(new CustomEvent("statechanged"));
 
     return finalState;

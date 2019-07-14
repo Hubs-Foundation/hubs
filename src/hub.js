@@ -5,15 +5,22 @@ console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
 
-import "./aframe-entry";
+import "aframe";
 import "./utils/logging";
+import { patchWebGLRenderingContext } from "./utils/webgl";
+patchWebGLRenderingContext();
 
+import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
 import addBlitFrameBufferFunction from "./utils/threejs-blit-framebuffer";
+import "./utils/audio-context-fix";
+import "./utils/threejs-positional-audio-updatematrixworld";
+import "./utils/threejs-world-update";
+import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
 import {
   getReticulumFetchUrl,
@@ -635,6 +642,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const physicsSystem = scene.systems.physics;
     physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
     addBlitFrameBufferFunction();
+    patchThreeAllocations();
   };
 
   if (scene.hasLoaded) {
@@ -948,11 +956,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const socket = await connectToReticulum(isDebug);
 
   socket.onClose(e => {
-    // The socket should close normally if the server has explicitly killed it.
+    // We don't currently have an easy way to distinguish between being kicked (server closes socket)
+    // and a variety of other network issues that seem to produce the 1000 closure code, but the
+    // latter are probably more common. Either way, we just tell the user they got disconnected.
     const NORMAL_CLOSURE = 1000;
     if (e.code === NORMAL_CLOSURE) {
       entryManager.exitScene();
-      remountUI({ roomUnavailableReason: "kicked" });
+      remountUI({ roomUnavailableReason: "disconnected" });
     }
   });
 
@@ -1092,7 +1102,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
       if (isInitialJoin) {
-        store.addEventListener("statechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
+        store.addEventListener("profilechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
         hubChannel.presence.onSync(() => {
           const presence = hubChannel.presence;
 

@@ -1,3 +1,5 @@
+const THREE = AFRAME.THREE;
+
 function checkFloatTextureSupport() {
   const renderer = new THREE.WebGLRenderer();
 
