@@ -860,6 +860,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({ roomUnavailableReason: "closed" });
   });
 
+  scene.addEventListener("action_camera_recording_started", () => hubChannel.beginRecording());
+  scene.addEventListener("action_camera_recording_ended", () => hubChannel.endRecording());
+
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
   if (platformUnsupportedReason) {
