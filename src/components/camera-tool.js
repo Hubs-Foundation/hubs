@@ -378,14 +378,22 @@ AFRAME.registerComponent("camera-tool", {
         true
       );
 
-      // To limit the # of concurrent videos playing, if it was a short clip, let it loop
-      // a few times and then pause it.
-      if (recordingDuration <= MAX_DURATION_TO_LIMIT_LOOPS * 1000) {
-        setTimeout(
-          () => entity.components["media-video"] && entity.components["media-video"].tryUpdateVideoPlaybackState(true),
-          recordingDuration * VIDEO_LOOPS + 100
-        );
-      }
+      entity.addEventListener(
+        "video-loaded",
+        () => {
+          // If we were recording audio, then pause the video immediately after starting.
+          //
+          // Or, to limit the # of concurrent videos playing, if it was a short clip, let it loop
+          // a few times and then pause it.
+          if (this.data.captureAudio || recordingDuration <= MAX_DURATION_TO_LIMIT_LOOPS * 1000) {
+            setTimeout(() => {
+              if (!NAF.utils.isMine(entity) && !NAF.utils.takeOwnership(entity)) return;
+              entity.components["media-video"].tryUpdateVideoPlaybackState(true);
+            }, this.data.captureAudio ? 0 : recordingDuration * VIDEO_LOOPS + 100);
+          }
+        },
+        { once: true }
+      );
 
       this.localSnapCount++;
 
