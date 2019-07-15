@@ -60,8 +60,7 @@ AFRAME.registerComponent("mute-mic", {
       NAF.connection.adapter.enableMicrophone(true);
       this.el.removeState("muted");
     } else {
-      console.log("NEED TO MUTE MIC WITHOUT DISABLING THE STREAM");
-      //      NAF.connection.adapter.enableMicrophone(false);
+      NAF.connection.adapter.enableMicrophone(false);
       this.el.addState("muted");
     }
   },
@@ -69,8 +68,7 @@ AFRAME.registerComponent("mute-mic", {
   onMute: function() {
     if (!NAF.connection.adapter) return;
     if (!this.el.is("muted")) {
-      console.log("NEED TO MUTE MIC WITHOUT DISABLING THE STREAM");
-      //      NAF.connection.adapter.enableMicrophone(false);
+      NAF.connection.adapter.enableMicrophone(false);
       this.el.addState("muted");
     }
   },
