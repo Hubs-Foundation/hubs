@@ -263,19 +263,21 @@ AFRAME.registerComponent("mic-button", {
 });
 
 export function micLevelForVolume(volume, max) {
-  return volume < max * 0.1
+  return max === 0
     ? 0
-    : volume < max * 0.2
-      ? 1
-      : volume < max * 0.3
-        ? 2
-        : volume < max * 0.4
-          ? 3
-          : volume < max * 0.5
-            ? 4
-            : volume < max * 0.6
-              ? 5
-              : volume < max * 0.7
-                ? 6
-                : 7;
+    : volume < max * 0.1
+      ? 0
+      : volume < max * 0.2
+        ? 1
+        : volume < max * 0.3
+          ? 2
+          : volume < max * 0.4
+            ? 3
+            : volume < max * 0.5
+              ? 4
+              : volume < max * 0.6
+                ? 5
+                : volume < max * 0.7
+                  ? 6
+                  : 7;
 }

@@ -374,7 +374,7 @@
 }
 :local(.mic-0:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-hover-0.png);
+    background-image: url(../images/sprites/mic-0_hover.png);
   }
 
   @media (pointer: coarse) {
@@ -386,7 +386,7 @@
 }
 :local(.mic-off-0:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-off-hover-0.png);
+    background-image: url(../images/sprites/mic-off-0_hover.png);
   }
 
   @media (pointer: coarse) {
@@ -399,7 +399,7 @@
 }
 :local(.mic-1:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-hover-1.png);
+    background-image: url(../images/sprites/mic-1_hover.png);
   }
 
   @media (pointer: coarse) {
@@ -411,7 +411,7 @@
 }
 :local(.mic-off-1:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-off-hover-1.png);
+    background-image: url(../images/sprites/mic-off-1_hover.png);
   }
 
   @media (pointer: coarse) {
@@ -424,7 +424,7 @@
 }
 :local(.mic-2:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-hover-2.png);
+    background-image: url(../images/sprites/mic-2_hover.png);
   }
 
   @media (pointer: coarse) {
@@ -436,7 +436,7 @@
 }
 :local(.mic-off-2:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-off-hover-2.png);
+    background-image: url(../images/sprites/mic-off-2_hover.png);
   }
 
   @media (pointer: coarse) {
@@ -449,7 +449,7 @@
 }
 :local(.mic-3:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-hover-3.png);
+    background-image: url(../images/sprites/mic-3_hover.png);
   }
 
   @media (pointer: coarse) {
@@ -461,7 +461,7 @@
 }
 :local(.mic-off-3:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-off-hover-3.png);
+    background-image: url(../images/sprites/mic-off-3_hover.png);
   }
 
   @media (pointer: coarse) {
@@ -474,7 +474,7 @@
 }
 :local(.mic-4:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-hover-4.png);
+    background-image: url(../images/sprites/mic-4_hover.png);
   }
 
   @media (pointer: coarse) {
@@ -486,7 +486,7 @@
 }
 :local(.mic-off-4:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-off-hover-4.png);
+    background-image: url(../images/sprites/mic-off-4_hover.png);
   }
 
   @media (pointer: coarse) {
@@ -499,7 +499,7 @@
 }
 :local(.mic-5:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-hover-5.png);
+    background-image: url(../images/sprites/mic-5_hover.png);
   }
 
   @media (pointer: coarse) {
@@ -511,7 +511,7 @@
 }
 :local(.mic-off-5:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-off-hover-5.png);
+    background-image: url(../images/sprites/mic-off-5_hover.png);
   }
 
   @media (pointer: coarse) {
@@ -524,7 +524,7 @@
 }
 :local(.mic-6:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-hover-6.png);
+    background-image: url(../images/sprites/mic-6_hover.png);
   }
 
   @media (pointer: coarse) {
@@ -536,7 +536,7 @@
 }
 :local(.mic-off-6:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-off-hover-6.png);
+    background-image: url(../images/sprites/mic-off-6_hover.png);
   }
 
   @media (pointer: coarse) {
@@ -549,7 +549,7 @@
 }
 :local(.mic-7:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-hover-7.png);
+    background-image: url(../images/sprites/mic-7_hover.png);
   }
 
   @media (pointer: coarse) {
@@ -561,10 +561,16 @@
 }
 :local(.mic-off-7:hover) {
   @media (pointer: fine) {
-    background-image: url(../images/sprites/mic-off-hover-7.png);
+    background-image: url(../images/sprites/mic-off-7_hover.png);
   }
 
   @media (pointer: coarse) {
     background-image: url(../images/sprites/mic-off-7.png);
   }
+}
+
+:local(.sprite){
+  transform: scale(0.56);
+  transform-origin: center;
+  flex-shrink: 0;
 }

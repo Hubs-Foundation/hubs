@@ -5,11 +5,34 @@ import cx from "classnames";
 const { detect } = require("detect-browser");
 import styles from "../assets/stylesheets/2d-hud.scss";
 import uiStyles from "../assets/stylesheets/ui-root.scss";
+import spritesheet from "../assets/images/spritesheets/sprite-system-spritesheet.css";
 import { FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { micLevelForVolume } from "../components/audio-feedback";
 
+const SPRITESHEET_ICONS = {
+  MIC: [
+    spritesheet.mic0,
+    spritesheet.mic1,
+    spritesheet.mic2,
+    spritesheet.mic3,
+    spritesheet.mic4,
+    spritesheet.mic5,
+    spritesheet.mic6,
+    spritesheet.mic7
+  ],
+  MIC_OFF: [
+    spritesheet.micOff0,
+    spritesheet.micOff1,
+    spritesheet.micOff2,
+    spritesheet.micOff3,
+    spritesheet.micOff4,
+    spritesheet.micOff5,
+    spritesheet.micOff6,
+    spritesheet.micOff7
+  ]
+};
 const ICONS = {
   MIC: [styles.mic0, styles.mic1, styles.mic2, styles.mic3, styles.mic4, styles.mic5, styles.mic6, styles.mic7],
   MIC_OFF: [
@@ -189,7 +212,8 @@ class TopHUD extends Component {
     }
 
     const micLevel = this.state.micLevel;
-    const micIconClass = this.props.muted ? ICONS.MIC_OFF[micLevel] : ICONS.MIC[micLevel];
+    const icons = window.useSpritesheetIcons ? SPRITESHEET_ICONS : ICONS;
+    const micIconClass = this.props.muted ? icons.MIC_OFF[micLevel] : icons.MIC[micLevel];
     // Hide buttons when frozen.
     return (
       <div className={cx(styles.container, styles.top, styles.unselectable, uiStyles.uiInteractive)}>
@@ -200,11 +224,16 @@ class TopHUD extends Component {
             {tip}
             {videoSharingButtons}
             <div
-              className={cx(styles.iconButton, micIconClass)}
+              className={cx(styles.iconButton, { [micIconClass]: !window.useSpritesheetIcons })}
               title={this.props.muted ? "Unmute Mic" : "Mute Mic"}
               onClick={this.props.onToggleMute}
             >
-              <div className={cx(styles.iconButton)} />
+              <div
+                className={cx(
+                  { [micIconClass]: window.useSpritesheetIcons },
+                  { [styles.sprite]: window.useSpritesheetIcons }
+                )}
+              />
             </div>
             <button
               className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn)}
