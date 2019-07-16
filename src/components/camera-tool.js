@@ -25,7 +25,6 @@ const pathsMap = {
 };
 
 const isMobileVR = AFRAME.utils.device.isMobileVR();
-const isOculusBrowser = navigator.userAgent.match(/Oculus/);
 
 const VIEWPORT_FPS = 6;
 const VIDEO_FPS = 25;
@@ -34,10 +33,10 @@ const videoCodec = ["h264", "vp9", "vp8"].find(
   codec => window.MediaRecorder && MediaRecorder.isTypeSupported(`video/webm; codecs=${codec}`)
 );
 const videoMimeType = videoCodec ? `video/webm; codecs=${videoCodec}` : null;
-const allowVideo = !!videoMimeType && !isOculusBrowser; // Disable Oculus Browser until h264/vp8 fixed
+const allowVideo = !!videoMimeType;
 
-const CAPTURE_WIDTH = isOculusBrowser ? 320 : 640; // NOTE: Oculus Browser can't record bigger videos atm
-const CAPTURE_HEIGHT = isOculusBrowser ? 180 : 360;
+const CAPTURE_WIDTH = 640; // NOTE: Oculus Browser can't record bigger videos atm
+const CAPTURE_HEIGHT = 360;
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
 const CAPTURE_DURATIONS = allowVideo ? [0, Infinity, 3, 7, 15, 30, 60] : [0];
@@ -163,6 +162,8 @@ AFRAME.registerComponent("camera-tool", {
       this.label.object3D.visible = false;
       this.durationLabel.object3D.visible = false;
 
+      this.snapMenu = this.el.querySelector(".camera-snap-menu");
+      this.playerCamera = document.querySelector("#player-camera").getObject3D("camera");
       this.snapButton = this.el.querySelector(".snap-button");
       this.cancelButton = this.el.querySelector(".cancel-button");
       this.nextDurationButton = this.el.querySelector(".next-duration");
@@ -352,6 +353,8 @@ AFRAME.registerComponent("camera-tool", {
     this.videoRecorder.ondataavailable = e => chunks.push(e.data);
     this.videoRecorder._free = () => (chunks.length = 0); // Used for cancelling
     this.videoRecorder.onstop = async () => {
+      this.el.sceneEl.emit("action_camera_recording_ended");
+
       if (chunks.length === 0) return;
       const mimeType = chunks[0].type;
       let blob;
@@ -373,7 +376,7 @@ AFRAME.registerComponent("camera-tool", {
         new File([blob], "capture", { type: mimeType }),
         this.localSnapCount,
         "video",
-        true
+        !!this.playerIsBehindCamera
       );
 
       // To limit the # of concurrent videos playing, if it was a short clip, let it loop
@@ -394,6 +397,7 @@ AFRAME.registerComponent("camera-tool", {
 
     this.videoRecorder.start();
     this.el.setAttribute("camera-tool", { isRecording: true, label: " " });
+    this.el.sceneEl.emit("action_camera_recording_started");
 
     if (duration !== Infinity) {
       this.videoCountdown = this.data.captureDuration;
@@ -446,6 +450,8 @@ AFRAME.registerComponent("camera-tool", {
       (heldRightRemote && userinput.get(interaction.options.rightRemote.grabPath));
 
     const isHolding = heldLeftHand || heldRightHand || heldRightRemote;
+
+    this.updateSnapMenuOrientation();
 
     if (heldThisFrame) {
       this.localSnapCount = 0;
@@ -625,7 +631,13 @@ AFRAME.registerComponent("camera-tool", {
         renderer.readRenderTargetPixels(this.renderTarget, 0, 0, RENDER_WIDTH, RENDER_HEIGHT, this.snapPixels);
 
         pixelsToPNG(this.snapPixels, RENDER_WIDTH, RENDER_HEIGHT).then(file => {
-          const { orientation } = spawnMediaAround(this.el, file, this.localSnapCount, "photo", true);
+          const { orientation } = spawnMediaAround(
+            this.el,
+            file,
+            this.localSnapCount,
+            "photo",
+            !!this.playerIsBehindCamera
+          );
 
           orientation.then(() => {
             this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
@@ -662,5 +674,31 @@ AFRAME.registerComponent("camera-tool", {
     }
 
     return !!userinput.get(paths.actions.takeSnapshot);
-  }
+  },
+
+  updateSnapMenuOrientation: (function() {
+    const playerWorld = new THREE.Vector3();
+    const cameraWorld = new THREE.Vector3();
+    const playerToCamera = new THREE.Vector3();
+    const cameraForwardPoint = new THREE.Vector3();
+    const cameraForwardWorld = new THREE.Vector3();
+    return function() {
+      this.el.object3D.getWorldPosition(cameraWorld);
+      this.playerCamera.getWorldPosition(playerWorld);
+      playerToCamera.subVectors(playerWorld, cameraWorld);
+      cameraForwardPoint.set(0, 0, 1);
+      this.el.object3D.localToWorld(cameraForwardPoint);
+      cameraForwardWorld.subVectors(cameraForwardPoint, cameraWorld);
+      cameraForwardWorld.normalize();
+      playerToCamera.normalize();
+
+      const playerIsBehindCamera = cameraForwardWorld.dot(playerToCamera) < 0;
+
+      if (this.playerIsBehindCamera !== playerIsBehindCamera) {
+        this.playerIsBehindCamera = playerIsBehindCamera;
+        this.snapMenu.object3D.rotation.set(0, this.playerIsBehindCamera ? Math.PI : 0, 0);
+        this.snapMenu.object3D.matrixNeedsUpdate = true;
+      }
+    };
+  })()
 });

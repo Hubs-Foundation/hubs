@@ -5,22 +5,14 @@ console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
 
-import "aframe";
+import "./aframe-entry";
 import "./utils/logging";
-import { patchWebGLRenderingContext } from "./utils/webgl";
-patchWebGLRenderingContext();
 
-import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
-import "./utils/audio-context-fix";
-import "./utils/threejs-positional-audio-updatematrixworld";
-import "./utils/threejs-world-update";
-import "./utils/threejs-video-texture-pause";
-import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import addBlitFrameBufferFunction from "./utils/threejs-blit-framebuffer";
 import { detectOS, detect } from "detect-browser";
 import {
@@ -260,12 +252,14 @@ if (document.location.pathname.includes("hub.html")) {
 const history = createBrowserHistory({ basename: routerBaseName });
 window.APP.history = history;
 
+const qsVREntryType = qs.get("vr_entry_type");
+
 function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
-  const forcedVREntryType = qs.get("vr_entry_type");
   const isCursorHoldingPen = scene && scene.systems.userinput.activeSets.includes(userinputSets.cursorHoldingPen);
   const hasActiveCamera = scene && !!scene.systems["camera-tools"].getMyCamera();
+  const forcedVREntryType = qsVREntryType;
 
   ReactDOM.render(
     <Router history={history}>
@@ -637,7 +631,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems.physics;
     physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
-    patchThreeAllocations();
     addBlitFrameBufferFunction();
   };
 
@@ -828,6 +821,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({ roomUnavailableReason: "closed" });
   });
 
+  scene.addEventListener("action_camera_recording_started", () => hubChannel.beginRecording());
+  scene.addEventListener("action_camera_recording_ended", () => hubChannel.endRecording());
+
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
   if (platformUnsupportedReason) {
@@ -877,7 +873,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no ||
       availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no;
 
-    remountUI({ availableVREntryTypes, forcedVREntryType: !hasVREntryDevice ? "2d" : null });
+    remountUI({ availableVREntryTypes, forcedVREntryType: qsVREntryType || (!hasVREntryDevice ? "2d" : null) });
   }
 
   const environmentScene = document.querySelector("#environment-scene");

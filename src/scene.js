@@ -2,13 +2,8 @@ console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/scene.scss";
 
-import "aframe";
+import "./aframe-entry";
 import "./utils/logging";
-import "./utils/threejs-world-update";
-import { patchWebGLRenderingContext } from "./utils/webgl";
-patchWebGLRenderingContext();
-
-import "three/examples/js/loaders/GLTFLoader";
 
 import "./components/scene-components";
 import "./components/debug";

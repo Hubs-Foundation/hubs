@@ -205,7 +205,8 @@ class UIRoot extends Component {
     exited: false,
 
     signedIn: false,
-    videoShareMediaSource: null
+    videoShareMediaSource: null,
+    showVideoShareFailed: false
   };
 
   constructor(props) {
@@ -277,6 +278,7 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
     this.props.scene.addEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
+    this.props.scene.addEventListener("share_video_failed", this.onShareVideoFailed);
     this.props.scene.addEventListener("exit", this.exitEventHandler);
     this.props.scene.addEventListener("action_exit_watch", () => this.setState({ watching: false, hide: false }));
 
@@ -326,6 +328,7 @@ class UIRoot extends Component {
     this.props.scene.removeEventListener("exit", this.exitEventHandler);
     this.props.scene.removeEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.removeEventListener("share_video_disabled", this.onShareVideoDisabled);
+    this.props.scene.removeEventListener("share_video_failed", this.onShareVideoFailed);
   }
 
   showContextualSignInDialog = () => {
@@ -403,6 +406,10 @@ class UIRoot extends Component {
 
   onShareVideoDisabled = () => {
     this.setState({ videoShareMediaSource: null });
+  };
+
+  onShareVideoFailed = () => {
+    this.setState({ showVideoShareFailed: true });
   };
 
   toggleMute = () => {
@@ -1318,6 +1325,11 @@ class UIRoot extends Component {
     const enteredOrWatching = entered || watching;
     const enteredOrWatchingOrPreload = entered || watching || preload;
     const baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
+    const inEntryFlow = !!(
+      this.props.history &&
+      this.props.history.location.state &&
+      this.props.history.location.state.entry_step
+    );
 
     const entryDialog =
       this.props.availableVREntryTypes &&
@@ -1362,7 +1374,7 @@ class UIRoot extends Component {
     // Allow scene picker pre-entry, otherwise wait until entry
     const showMediaBrowser =
       mediaSource && (["scenes", "avatars", "favorites"].includes(mediaSource) || this.state.entered);
-    const hasTopTip = this.props.activeTips && this.props.activeTips.top;
+    const hasTopTip = (this.props.activeTips && this.props.activeTips.top) || this.state.showVideoShareFailed;
 
     const clientInfoClientId = getClientInfoClientId(this.props.history.location);
     const showClientInfo = !!clientInfoClientId;
@@ -1381,6 +1393,7 @@ class UIRoot extends Component {
       !preload &&
       !watching &&
       !hasTopTip &&
+      !inEntryFlow &&
       !this.props.store.state.activity.hasOpenedShare &&
       this.occupantCount() <= 1;
 
@@ -1392,6 +1405,7 @@ class UIRoot extends Component {
       !watching &&
       !showInviteTip &&
       !this.state.showShareDialog &&
+      this.props.hubChannel &&
       this.props.hubChannel.canOrWillIfCreator("update_hub");
 
     const displayNameOverride = this.props.hubIsBound
@@ -1443,6 +1457,7 @@ class UIRoot extends Component {
                   {...props}
                   displayNameOverride={displayNameOverride}
                   finished={() => this.pushHistoryState()}
+                  onClose={() => this.pushHistoryState()}
                   store={this.props.store}
                   mediaSearchStore={this.props.mediaSearchStore}
                   avatarId={props.location.state.detail && props.location.state.detail.avatarId}
@@ -1511,6 +1526,7 @@ class UIRoot extends Component {
                       this.pushHistoryState("entry_step", "device");
                     }
                   }}
+                  onClose={() => this.pushHistoryState()}
                   store={this.props.store}
                   mediaSearchStore={this.props.mediaSearchStore}
                   avatarId={props.location.state.detail && props.location.state.detail.avatarId}
@@ -1595,7 +1611,12 @@ class UIRoot extends Component {
 
             {(!enteredOrWatching || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
-                <PresenceLog entries={presenceLogEntries} hubId={this.props.hubId} history={this.props.history} />
+                <PresenceLog
+                  entries={presenceLogEntries}
+                  presences={this.props.presences}
+                  hubId={this.props.hubId}
+                  history={this.props.history}
+                />
                 <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
               </div>
             )}
@@ -1603,6 +1624,7 @@ class UIRoot extends Component {
             {enteredOrWatchingOrPreload && (
               <PresenceLog
                 inRoom={true}
+                presences={this.props.presences}
                 entries={presenceLogEntries}
                 hubId={this.props.hubId}
                 history={this.props.history}
@@ -1884,6 +1906,8 @@ class UIRoot extends Component {
                   onWatchEnded={() => this.setState({ watching: false })}
                   spacebubble={this.state.spacebubble}
                   videoShareMediaSource={this.state.videoShareMediaSource}
+                  showVideoShareFailed={this.state.showVideoShareFailed}
+                  hideVideoShareFailedTip={() => this.setState({ showVideoShareFailed: false })}
                   activeTip={this.props.activeTips && this.props.activeTips.top}
                   isCursorHoldingPen={this.props.isCursorHoldingPen}
                   hasActiveCamera={this.props.hasActiveCamera}
