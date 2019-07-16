@@ -5,7 +5,7 @@ import cx from "classnames";
 const { detect } = require("detect-browser");
 import styles from "../assets/stylesheets/2d-hud.scss";
 import uiStyles from "../assets/stylesheets/ui-root.scss";
-import spritesheet from "../assets/images/spritesheets/sprite-system-spritesheet.css";
+import spritesheet from "../assets/images/spritesheets/css-sprites-spritesheet.css";
 import { FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";

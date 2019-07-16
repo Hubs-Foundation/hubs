@@ -1,0 +1,721 @@
+:local(.create_object-hover) {
+    width: 132px;
+    height: 132px;
+    background: url("css-sprites-spritesheet.png") -8px -8px;
+	background-size: 1024px 1024px;
+}
+
+:local(.create_object) {
+    width: 132px;
+    height: 132px;
+    background: url("css-sprites-spritesheet.png") -156px -8px;
+	background-size: 1024px 1024px;
+}
+
+:local(.freeze_off-hover) {
+    width: 132px;
+    height: 132px;
+    background: url("css-sprites-spritesheet.png") -8px -156px;
+	background-size: 1024px 1024px;
+}
+
+:local(.freeze_off) {
+    width: 132px;
+    height: 132px;
+    background: url("css-sprites-spritesheet.png") -156px -156px;
+	background-size: 1024px 1024px;
+}
+
+:local(.freeze_on-hover) {
+    width: 132px;
+    height: 132px;
+    background: url("css-sprites-spritesheet.png") -304px -8px;
+	background-size: 1024px 1024px;
+}
+
+:local(.freeze_on) {
+    width: 132px;
+    height: 132px;
+    background: url("css-sprites-spritesheet.png") -304px -156px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mod-badge) {
+    width: 128px;
+    height: 128px;
+    background: url("css-sprites-spritesheet.png") -8px -304px;
+	background-size: 1024px 1024px;
+}
+
+:local(.recording-badge) {
+    width: 128px;
+    height: 128px;
+    background: url("css-sprites-spritesheet.png") -152px -304px;
+	background-size: 1024px 1024px;
+}
+
+:local(.spawn-hover) {
+    width: 128px;
+    height: 128px;
+    background: url("css-sprites-spritesheet.png") -296px -304px;
+	background-size: 1024px 1024px;
+}
+
+:local(.spawn) {
+    width: 128px;
+    height: 128px;
+    background: url("css-sprites-spritesheet.png") -452px -8px;
+	background-size: 1024px 1024px;
+}
+
+:local(.Background) {
+    width: 128px;
+    height: 48px;
+    background: url("css-sprites-spritesheet.png") -452px -152px;
+	background-size: 1024px 1024px;
+}
+
+:local(.Oval Copy) {
+    width: 124px;
+    height: 124px;
+    background: url("css-sprites-spritesheet.png") -452px -216px;
+	background-size: 1024px 1024px;
+}
+
+:local(.camera_off-hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -452px -356px;
+	background-size: 1024px 1024px;
+}
+
+:local(.camera_off) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -8px -448px;
+	background-size: 1024px 1024px;
+}
+
+:local(.camera_on-hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -92px -448px;
+	background-size: 1024px 1024px;
+}
+
+:local(.camera_on) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -176px -448px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-0) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -344px -448px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-1) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -512px -448px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-2) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -596px -92px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-3) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -596px -260px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-4) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -596px -428px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-5) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -92px -532px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-6) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -260px -532px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-7) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -428px -532px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mute_off-hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -512px -532px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mute_off) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -596px -532px;
+	background-size: 1024px 1024px;
+}
+
+:local(.pen_off-hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -680px -8px;
+	background-size: 1024px 1024px;
+}
+
+:local(.pen_off) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -680px -92px;
+	background-size: 1024px 1024px;
+}
+
+:local(.pen_on-hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -680px -176px;
+	background-size: 1024px 1024px;
+}
+
+:local(.pen_on) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -680px -260px;
+	background-size: 1024px 1024px;
+}
+
+:local(.share_camera_off-hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -680px -344px;
+	background-size: 1024px 1024px;
+}
+
+:local(.share_camera_off) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -680px -428px;
+	background-size: 1024px 1024px;
+}
+
+:local(.share_camera_on-hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -680px -512px;
+	background-size: 1024px 1024px;
+}
+
+:local(.share_camera_on) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -8px -616px;
+	background-size: 1024px 1024px;
+}
+
+:local(.share_screen_off) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -92px -616px;
+	background-size: 1024px 1024px;
+}
+
+:local(.share_screen_on-hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -176px -616px;
+	background-size: 1024px 1024px;
+}
+
+:local(.share_screen_on) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -260px -616px;
+	background-size: 1024px 1024px;
+}
+
+:local(.share_window_off-hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -344px -616px;
+	background-size: 1024px 1024px;
+}
+
+:local(.share_window_off) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -428px -616px;
+	background-size: 1024px 1024px;
+}
+
+:local(.share_window_on-hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -512px -616px;
+	background-size: 1024px 1024px;
+}
+
+:local(.share_window_on) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -596px -616px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-0) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -764px -8px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-1) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -764px -172px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-2) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -764px -336px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-3) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -764px -500px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-4) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -8px -700px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-5) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -168px -700px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-6) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -328px -700px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-7) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -488px -700px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mute_on-hover) {
+    width: 66px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -568px -700px;
+	background-size: 1024px 1024px;
+}
+
+:local(.camera-action) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -650px -700px;
+	background-size: 1024px 1024px;
+}
+
+:local(.close-action) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -730px -700px;
+	background-size: 1024px 1024px;
+}
+
+:local(.close-white) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -844px -8px;
+	background-size: 1024px 1024px;
+}
+
+:local(.drop-action) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -844px -88px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mute_on) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -844px -168px;
+	background-size: 1024px 1024px;
+}
+
+:local(.next) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -844px -248px;
+	background-size: 1024px 1024px;
+}
+
+:local(.pause-hover) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -844px -328px;
+	background-size: 1024px 1024px;
+}
+
+:local(.pause) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -844px -408px;
+	background-size: 1024px 1024px;
+}
+
+:local(.pin-action) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -844px -488px;
+	background-size: 1024px 1024px;
+}
+
+:local(.play-hover) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -844px -568px;
+	background-size: 1024px 1024px;
+}
+
+:local(.play) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -844px -648px;
+	background-size: 1024px 1024px;
+}
+
+:local(.prev) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -8px -782px;
+	background-size: 1024px 1024px;
+}
+
+:local(.recenter-action) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -88px -782px;
+	background-size: 1024px 1024px;
+}
+
+:local(.record-action-alpha) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -168px -782px;
+	background-size: 1024px 1024px;
+}
+
+:local(.record-action) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -248px -782px;
+	background-size: 1024px 1024px;
+}
+
+:local(.remote-action) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -328px -782px;
+	background-size: 1024px 1024px;
+}
+
+:local(.remove-action) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -408px -782px;
+	background-size: 1024px 1024px;
+}
+
+:local(.rotate-action) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -488px -782px;
+	background-size: 1024px 1024px;
+}
+
+:local(.rotate-cursor) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -568px -782px;
+	background-size: 1024px 1024px;
+}
+
+:local(.scale-action) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -648px -782px;
+	background-size: 1024px 1024px;
+}
+
+:local(.snap_camera) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -728px -782px;
+	background-size: 1024px 1024px;
+}
+
+:local(.spawn_message_dark-hover) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -808px -782px;
+	background-size: 1024px 1024px;
+}
+
+:local(.spawn_message_dark) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -924px -8px;
+	background-size: 1024px 1024px;
+}
+
+:local(.spawn_message) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -924px -88px;
+	background-size: 1024px 1024px;
+}
+
+:local(.stop-action) {
+    width: 64px;
+    height: 64px;
+    background: url("css-sprites-spritesheet.png") -924px -168px;
+	background-size: 1024px 1024px;
+}
+
+:local(.unmute-action) {
+    width: 48px;
+    height: 48px;
+    background: url("css-sprites-spritesheet.png") -924px -248px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mute-action) {
+    width: 26px;
+    height: 46px;
+    background: url("css-sprites-spritesheet.png") -924px -312px;
+	background-size: 1024px 1024px;
+}
+
+:local(.seek_back-hover) {
+    width: 32px;
+    height: 32px;
+    background: url("css-sprites-spritesheet.png") -924px -374px;
+	background-size: 1024px 1024px;
+}
+
+:local(.seek_back) {
+    width: 32px;
+    height: 32px;
+    background: url("css-sprites-spritesheet.png") -924px -422px;
+	background-size: 1024px 1024px;
+}
+
+:local(.seek_fwd-hover) {
+    width: 32px;
+    height: 32px;
+    background: url("css-sprites-spritesheet.png") -924px -470px;
+	background-size: 1024px 1024px;
+}
+
+:local(.seek_fwd) {
+    width: 32px;
+    height: 32px;
+    background: url("css-sprites-spritesheet.png") -924px -518px;
+	background-size: 1024px 1024px;
+}
+
+:local(.snap-hover) {
+    width: 32px;
+    height: 32px;
+    background: url("css-sprites-spritesheet.png") -924px -566px;
+	background-size: 1024px 1024px;
+}
+
+:local(.snap) {
+    width: 32px;
+    height: 32px;
+    background: url("css-sprites-spritesheet.png") -924px -614px;
+	background-size: 1024px 1024px;
+}
+
+:local(.volume_down-hover) {
+    width: 32px;
+    height: 32px;
+    background: url("css-sprites-spritesheet.png") -924px -662px;
+	background-size: 1024px 1024px;
+}
+
+:local(.volume_down) {
+    width: 32px;
+    height: 32px;
+    background: url("css-sprites-spritesheet.png") -924px -710px;
+	background-size: 1024px 1024px;
+}
+
+:local(.volume_up-hover) {
+    width: 32px;
+    height: 32px;
+    background: url("css-sprites-spritesheet.png") -924px -758px;
+	background-size: 1024px 1024px;
+}
+
+:local(.volume_up) {
+    width: 32px;
+    height: 32px;
+    background: url("css-sprites-spritesheet.png") -924px -806px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-0:hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -260px -448px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-1:hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -428px -448px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-2:hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -596px -8px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-3:hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -596px -176px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-4:hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -596px -344px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-5:hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -8px -532px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-6:hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -176px -532px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-7:hover) {
+    width: 68px;
+    height: 68px;
+    background: url("css-sprites-spritesheet.png") -344px -532px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-0:hover) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -680px -616px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-1:hover) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -764px -90px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-2:hover) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -764px -254px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-3:hover) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -764px -418px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-4:hover) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -764px -582px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-5:hover) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -88px -700px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-6:hover) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -248px -700px;
+	background-size: 1024px 1024px;
+}
+
+:local(.mic-off-7:hover) {
+    width: 64px;
+    height: 66px;
+    background: url("css-sprites-spritesheet.png") -408px -700px;
+	background-size: 1024px 1024px;
+}
+

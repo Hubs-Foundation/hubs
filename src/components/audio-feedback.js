@@ -166,14 +166,14 @@ AFRAME.registerComponent("scale-audio-feedback", {
 const SPRITE_NAMES = {
   MIC: ["mic-0.png", "mic-1.png", "mic-2.png", "mic-3.png", "mic-4.png", "mic-5.png", "mic-6.png", "mic-7.png"],
   MIC_HOVER: [
-    "mic-hover-0.png",
-    "mic-hover-1.png",
-    "mic-hover-2.png",
-    "mic-hover-3.png",
-    "mic-hover-4.png",
-    "mic-hover-5.png",
-    "mic-hover-6.png",
-    "mic-hover-7.png"
+    "mic-0_hover.png",
+    "mic-1_hover.png",
+    "mic-2_hover.png",
+    "mic-3_hover.png",
+    "mic-4_hover.png",
+    "mic-5_hover.png",
+    "mic-6_hover.png",
+    "mic-7_hover.png"
   ],
   MIC_OFF: [
     "mic-off-0.png",
@@ -186,14 +186,14 @@ const SPRITE_NAMES = {
     "mic-off-7.png"
   ],
   MIC_OFF_HOVER: [
-    "mic-off-hover-0.png",
-    "mic-off-hover-1.png",
-    "mic-off-hover-2.png",
-    "mic-off-hover-3.png",
-    "mic-off-hover-4.png",
-    "mic-off-hover-5.png",
-    "mic-off-hover-6.png",
-    "mic-off-hover-7.png"
+    "mic-off-0_hover.png",
+    "mic-off-1_hover.png",
+    "mic-off-2_hover.png",
+    "mic-off-3_hover.png",
+    "mic-off-4_hover.png",
+    "mic-off-5_hover.png",
+    "mic-off-6_hover.png",
+    "mic-off-7_hover.png"
   ]
 };
 
