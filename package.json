@@ -42,7 +42,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
-    "@mozillareality/three-batch-manager": "^0.1.2",
+    "@mozillareality/three-batch-manager": "^0.1.3",
     "aframe": "github:mozillareality/aframe#hubs/master",
     "aframe-physics-system": "github:infinitelee/aframe-physics-system#feature/heightfields",
     "aframe-rounded": "^1.0.3",

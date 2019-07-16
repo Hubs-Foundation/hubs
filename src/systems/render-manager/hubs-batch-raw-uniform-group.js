@@ -7,17 +7,20 @@ export const INSTANCE_DATA_BYTE_LENGTH = 112;
 const DEFAULT_COLOR = new THREE.Color(1, 1, 1);
 const HIDE_MATRIX = new THREE.Matrix4().makeScale(0, 0, 0);
 
+export function sizeofInstances(instanceCount) {
+  const hubsDataSize =
+    instanceCount * 4 * 4 + // sweepParams
+    4 *
+      (3 + // interactorOnePos
+      1 + // isFrozen
+      3 + // interactorTwoPos
+        1); // time
+  return instanceCount * INSTANCE_DATA_BYTE_LENGTH + hubsDataSize;
+}
+
 export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
   constructor(maxInstances, meshToEl) {
-    const hubsDataSize =
-      maxInstances * 4 * 4 + // sweepParams
-      4 *
-        (3 + // interactorOnePos
-        1 + // isFrozen
-        3 + // interactorTwoPos
-          1); // time
-
-    const data = new ArrayBuffer(maxInstances * INSTANCE_DATA_BYTE_LENGTH + hubsDataSize);
+    const data = new ArrayBuffer(sizeofInstances(maxInstances));
     super(maxInstances, "InstanceData", data);
 
     let offset = this.offset;

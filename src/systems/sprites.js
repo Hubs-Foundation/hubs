@@ -48,8 +48,9 @@ AFRAME.registerComponent("sprite", {
   tick() {
     // TODO when we run out of sprites we currently just stop rendering them. We need to do something better.
     if (!(this.didRegisterWithSystem || this.didFailToRegister) && this.el.sceneEl.systems["post-physics"]) {
-      this.didRegisterWithSystem = this.el.sceneEl.systems["post-physics"].spriteSystem.add(this);
-      this.didFailToRegister = !this.didRegisterWithSystem;
+      const registered = this.el.sceneEl.systems["post-physics"].spriteSystem.add(this);
+      this.didRegisterWithSystem = registered > 0;
+      this.didFailToRegister = registered < 0;
     }
   },
 
@@ -295,12 +296,12 @@ export class SpriteSystem {
 
   add(sprite) {
     if (!this.mesh) {
-      return false;
+      return 0;
     }
     const i = this.stack.pop();
     if (i === undefined) {
       console.error("Too many sprites");
-      return false;
+      return -1;
     }
     this.slots[i] = true;
     this.spriteWithIndex.set(sprite, i);
@@ -314,7 +315,7 @@ export class SpriteSystem {
     aVertices.setXYZ(i * 4 + 2, -0.5, -0.5, 0);
     aVertices.setXYZ(i * 4 + 3, 0.5, -0.5, 0);
     aVertices.needsUpdate = true;
-    return true;
+    return 1;
   }
 
   remove(sprite) {
