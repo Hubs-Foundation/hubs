@@ -142,10 +142,13 @@ AFRAME.registerComponent("stats-plus", {
       stats("rAF").tick();
       stats("FPS").frame();
 
-      const batchManager = this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.batchManager;
-      stats("batchdraws").set(batchManager.batches.length);
-      stats("batchinstances").set(batchManager.instanceCount);
-      stats("batchatlassize").set(batchManager.atlas.arrayDepth);
+      const batchManagerSystem = this.el.sceneEl.systems["hubs-systems"].batchManagerSystem;
+      if (batchManagerSystem.batchingEnabled) {
+        const batchManager = batchManagerSystem.batchManager;
+        stats("batchdraws").set(batchManager.batches.length);
+        stats("batchinstances").set(batchManager.instanceCount);
+        stats("batchatlassize").set(batchManager.atlas.arrayDepth);
+      }
 
       stats().update();
     } else if (!this.inVR) {

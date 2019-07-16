@@ -1,10 +1,12 @@
 import { BatchManager } from "@mozillareality/three-batch-manager";
 
 import HubsBatchRawUniformGroup from "./render-manager/hubs-batch-raw-uniform-group";
+import { sizeofInstances } from "./render-manager/hubs-batch-raw-uniform-group";
 import unlitBatchVert from "./render-manager/unlit-batch.vert";
 import unlitBatchFrag from "./render-manager/unlit-batch.frag";
 
-const MAX_INSTANCES = 256;
+const MAX_INSTANCES = 500;
+const UBO_BYTE_LENGTH = sizeofInstances(MAX_INSTANCES);
 
 export class BatchManagerSystem {
   constructor(scene, renderer) {
@@ -14,6 +16,13 @@ export class BatchManagerSystem {
 
     if (!this.batchingEnabled) {
       console.warn("Batching requires WebGL 2. Disabling batching.");
+      return;
+    }
+
+    const gl = renderer.context;
+    if (UBO_BYTE_LENGTH > gl.getParameter(gl.MAX_UNIFORM_BLOCK_SIZE)) {
+      console.warn("Inusfficent MAX_UNIFORM_BLOCK_SIZE, Disabling batching");
+      this.batchingEnabled = false;
       return;
     }
 
