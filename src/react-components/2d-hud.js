@@ -227,8 +227,7 @@ class TopHUD extends Component {
               className={cx(styles.iconButton, micIconClass)}
               title={this.props.muted ? "Unmute Mic" : "Mute Mic"}
               onClick={this.props.onToggleMute}
-            >
-            </div>
+            />
             <button
               className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn)}
               onClick={() => this.props.mediaSearchStore.sourceNavigateToDefaultSource()}

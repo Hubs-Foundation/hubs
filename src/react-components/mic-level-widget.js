@@ -3,8 +3,6 @@ import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import MovingAverage from "moving-average";
 
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-
 export default class MicLevelWidget extends Component {
   static propTypes = {
     hasAudioTrack: PropTypes.bool,

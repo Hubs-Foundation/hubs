@@ -590,7 +590,7 @@ class UIRoot extends Component {
       }
       const mediaStreamForMicAnalysis = new MediaStream();
       mediaStreamForMicAnalysis.addTrack(this.state.audioTrack.clone());
-      this.props.scene.emit("local-media-stream-created", {mediaStream: mediaStreamForMicAnalysis});
+      this.props.scene.emit("local-media-stream-created", { mediaStream: mediaStreamForMicAnalysis });
     }
 
     this.setState({ mediaStream });
