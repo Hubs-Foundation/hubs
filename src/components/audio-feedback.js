@@ -227,7 +227,7 @@ AFRAME.registerComponent("mic-button", {
 
   init() {
     this.loudest = 0;
-    this.prevSpriteName = SPRITE_NAMES["MIC"][0];
+    this.prevSpriteName = "";
     this.decayingVolume = 0;
     this.el.object3D.matrixNeedsUpdate = true;
     this.hovering = false;
