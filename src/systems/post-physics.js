@@ -5,9 +5,11 @@ const i = window.setInterval(() => {
     AFRAME.registerSystem("post-physics", {
       init() {
         this.spriteSystem = new SpriteSystem(this.el);
+        this.hubsSystems = this.el.sceneEl.systems["hubs-systems"];
       },
       tick(t, dt) {
         this.spriteSystem.tick(t, dt);
+        this.hubsSystems.batchManagerSystem.tick(t);
       }
     });
     window.clearInterval(i);
