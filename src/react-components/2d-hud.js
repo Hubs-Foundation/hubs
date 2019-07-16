@@ -5,7 +5,7 @@ import cx from "classnames";
 const { detect } = require("detect-browser");
 import styles from "../assets/stylesheets/2d-hud.scss";
 import uiStyles from "../assets/stylesheets/ui-root.scss";
-import spritesheet from "../assets/images/spritesheets/css-sprites-spritesheet.css";
+import spritesheet from "../assets/images/spritesheets/css-spritesheet.css";
 import { FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
@@ -224,16 +224,10 @@ class TopHUD extends Component {
             {tip}
             {videoSharingButtons}
             <div
-              className={cx(styles.iconButton, { [micIconClass]: !window.useSpritesheetIcons })}
+              className={cx(styles.iconButton, micIconClass)}
               title={this.props.muted ? "Unmute Mic" : "Mute Mic"}
               onClick={this.props.onToggleMute}
             >
-              <div
-                className={cx(
-                  { [micIconClass]: window.useSpritesheetIcons },
-                  { [styles.sprite]: window.useSpritesheetIcons }
-                )}
-              />
             </div>
             <button
               className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn)}
@@ -257,3 +251,4 @@ class TopHUD extends Component {
 }
 
 export default { TopHUD };
+window.useSpritesheetIcons = true;

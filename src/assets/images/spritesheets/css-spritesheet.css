@@ -1,0 +1,224 @@
+:local(.mic-0) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -52px -4px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-1) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -52px -52px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-2) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -100px -52px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-3) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -52px -100px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-4) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -148px -4px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-5) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -148px -100px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-6) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -52px -148px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-7) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -148px -148px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-0) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -196px -52px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-1) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -196px -148px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-2) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -52px -196px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-3) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -148px -196px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-4) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -244px -4px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-5) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -244px -100px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-6) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -244px -196px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-7) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -52px -244px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-0:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -4px -4px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-1:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -4px -52px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-2:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -100px -4px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-3:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -4px -100px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-4:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -100px -100px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-5:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -148px -52px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-6:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -4px -148px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-7:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -100px -148px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-0:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -196px -4px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-1:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -196px -100px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-2:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -4px -196px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-3:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -100px -196px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-4:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -196px -196px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-5:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -244px -52px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-6:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -244px -148px;
+	background-size: 288px 288px;
+}
+
+:local(.mic-off-7:hover) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -4px -244px;
+	background-size: 288px 288px;
+}
+
