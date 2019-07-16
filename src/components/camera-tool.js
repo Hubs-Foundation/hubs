@@ -322,7 +322,6 @@ AFRAME.registerComponent("camera-tool", {
       this.videoImageData.data.set(this.videoPixels);
     }
 
-    // Begin sampling local audio so we can perform head scaling
     const stream = new MediaStream();
     const track = this.videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
 
@@ -532,6 +531,9 @@ AFRAME.registerComponent("camera-tool", {
 
           // We want to scale our own head in between frames now that we're taking a video/photo.
           let scale = 1;
+          // TODO: The local-audio-analyser has the non-networked media stream, which is active
+          // even while the user is muted. This should be looking at a different analyser that
+          // has the networked media stream instead.
           const analyser = this.el.sceneEl.systems["local-audio-analyser"];
 
           if (analyser && this.playerHead.el.components["scale-audio-feedback"]) {
