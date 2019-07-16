@@ -21,7 +21,7 @@ export class BatchManagerSystem {
 
     const gl = renderer.context;
     if (UBO_BYTE_LENGTH > gl.getParameter(gl.MAX_UNIFORM_BLOCK_SIZE)) {
-      console.warn("Inusfficent MAX_UNIFORM_BLOCK_SIZE, Disabling batching");
+      console.warn("Insufficient MAX_UNIFORM_BLOCK_SIZE, Disabling batching");
       this.batchingEnabled = false;
       return;
     }
