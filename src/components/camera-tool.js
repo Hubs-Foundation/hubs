@@ -329,22 +329,25 @@ AFRAME.registerComponent("camera-tool", {
     const track = this.videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
 
     if (this.data.captureAudio) {
-      const context = THREE.AudioContext.getContext();
-      const destination = context.createMediaStreamDestination();
-
-      const listener = this.el.sceneEl.audioListener;
-      if (listener) {
-        // NOTE audio is not captured from camera vantage point for now.
-        listener.getInput().connect(destination);
-      }
-
       const selfAudio = await NAF.connection.adapter.getMediaStream(NAF.clientId, "audio");
-      if (selfAudio && selfAudio.getAudioTracks().length > 0) {
-        context.createMediaStreamSource(selfAudio).connect(destination);
-      }
 
-      const audio = destination.stream.getAudioTracks()[0];
-      stream.addTrack(audio);
+      // NOTE: if we don't have a self audio track, we can end up generating an empty video (browser bug?)
+      // if no audio comes through on the listener source. (Eg the room is otherwise silent.)
+      // So for now, if we don't have a track, just disable audio capture.
+      if (selfAudio && selfAudio.getAudioTracks().length > 0) {
+        const context = THREE.AudioContext.getContext();
+        const destination = context.createMediaStreamDestination();
+
+        const listener = this.el.sceneEl.audioListener;
+        if (listener) {
+          // NOTE audio is not captured from camera vantage point for now.
+          listener.getInput().connect(destination);
+        }
+        context.createMediaStreamSource(selfAudio).connect(destination);
+
+        const audio = destination.stream.getAudioTracks()[0];
+        stream.addTrack(audio);
+      }
     }
 
     stream.addTrack(track);
