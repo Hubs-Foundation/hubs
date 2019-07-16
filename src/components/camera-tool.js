@@ -339,7 +339,7 @@ AFRAME.registerComponent("camera-tool", {
       }
 
       const selfAudio = await NAF.connection.adapter.getMediaStream(NAF.clientId, "audio");
-      if (selfAudio) {
+      if (selfAudio && selfAudio.getAudioTracks().length > 0) {
         context.createMediaStreamSource(selfAudio).connect(destination);
       }
 

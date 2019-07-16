@@ -112,7 +112,7 @@ AFRAME.registerSystem("local-audio-analyser", {
       this.stream = this.analyser = null;
     } else if (!this.stream) {
       this.stream = await NAF.connection.adapter.getMediaStream(NAF.clientId, "audio");
-      if (!this.stream) return;
+      if (!this.stream || this.stream.getAudioTracks().length === 0) return;
 
       const ctx = THREE.AudioContext.getContext();
       const source = ctx.createMediaStreamSource(this.stream);
