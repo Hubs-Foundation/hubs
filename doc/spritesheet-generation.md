@@ -1,7 +1,5 @@
 ## intro
-In Hubs, we use texture atlassing to improve rendering efficiency. This document explains how to generate and use the spritesheet that is read by the SpriteSystem. 
-
-Information about what spritesheets are and how to use them is outside the scope of this document, as there are many good resources about this on the web. 
+We use texture atlassing to improve rendering and loading efficiency. This document explains how to generate the spritesheets used by the SpriteSystem and the page's css.
 
 ## generating spritesheets
 
