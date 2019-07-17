@@ -19,12 +19,16 @@ AFRAME.registerComponent("icon-button", {
     this.el.object3D.matrixNeedsUpdate = true;
     this.onHover = () => {
       this.hovering = true;
-      this.data.tooltip.setAttribute("visible", true);
+      if (this.data.tooltip) {
+        this.data.tooltip.setAttribute("visible", true);
+      }
       this.updateButtonState();
     };
     this.onHoverOut = () => {
       this.hovering = false;
-      this.data.tooltip.setAttribute("visible", false);
+      if (this.data.tooltip) {
+        this.data.tooltip.setAttribute("visible", false);
+      }
       this.updateButtonState();
     };
   },

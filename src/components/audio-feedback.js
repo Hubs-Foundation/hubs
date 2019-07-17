@@ -113,7 +113,7 @@ AFRAME.registerSystem("local-audio-analyser", {
       const mediaStream = e.detail.mediaStream;
       if (this.stream) {
         console.warn("media stream changed", this.stream, mediaStream);
-        // cleanup?
+        // TODO: cleanup?
       }
       this.stream = mediaStream;
       const { analyser, levels } = connectAnalyser(mediaStream);
@@ -200,19 +200,19 @@ const SPRITE_NAMES = {
 export function micLevelForVolume(volume, max) {
   return max === 0
     ? 0
-    : volume < max * 0.1
+    : volume < max * 0.02
       ? 0
-      : volume < max * 0.2
+      : volume < max * 0.04
         ? 1
-        : volume < max * 0.3
+        : volume < max * 0.08
           ? 2
-          : volume < max * 0.4
+          : volume < max * 0.16
             ? 3
-            : volume < max * 0.5
+            : volume < max * 0.24
               ? 4
-              : volume < max * 0.6
+              : volume < max * 0.42
                 ? 5
-                : volume < max * 0.7
+                : volume < max * 0.6
                   ? 6
                   : 7;
 }
@@ -251,6 +251,12 @@ AFRAME.registerComponent("mic-button", {
     this.el.object3D.removeEventListener("unhovered", this.onHoverOut);
   },
 
+  update() {
+    if (this.data.tooltip) {
+      this.textEl = this.data.tooltip.querySelector("[text]");
+    }
+  },
+
   tick() {
     const audioAnalyser = this.el.sceneEl.systems["local-audio-analyser"];
     let volume;
@@ -263,11 +269,12 @@ AFRAME.registerComponent("mic-button", {
       volume = this.decayingVolume * s > 0.001 ? this.decayingVolume * s : 0;
       this.decayingVolume = volume;
     }
-    const level = micLevelForVolume(volume, this.loudest);
+
     const active = this.data.active;
     const hovering = this.hovering;
     const spriteNames =
       SPRITE_NAMES[!active ? (hovering ? "MIC_HOVER" : "MIC") : hovering ? "MIC_OFF_HOVER" : "MIC_OFF"];
+    const level = micLevelForVolume(volume, this.loudest);
     const spriteName = spriteNames[level];
     if (spriteName !== this.prevSpriteName) {
       this.prevSpriteName = spriteName;
@@ -275,9 +282,8 @@ AFRAME.registerComponent("mic-button", {
     }
 
     if (this.data.tooltip && hovering) {
-      this.data.tooltip
-        .querySelector("[text]")
-        .setAttribute("text", "value", active ? this.data.activeTooltipText : this.data.tooltipText);
+      this.textEl = this.textEl || this.data.tooltip.querySelector("[text]");
+      this.textEl.setAttribute("text", "value", active ? this.data.activeTooltipText : this.data.tooltipText);
     }
   }
 });
