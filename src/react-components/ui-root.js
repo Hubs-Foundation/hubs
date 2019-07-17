@@ -559,12 +559,18 @@ class UIRoot extends Component {
       if (/Oculus/.test(navigator.userAgent)) {
         // HACK Oculus Browser 6 seems to randomly end the microphone audio stream. This re-creates it.
         // Note the ended event will only fire if some external event ends the stream, not if we call stop().
-        audioTrack.addEventListener("ended", async () => {
+        const recreateAudioStream = async () => {
           console.warn(
             "Oculus Browser 6 bug hit: Audio stream track ended without calling stop. Recreating audio stream."
           );
-          NAF.connection.adapter.setLocalMediaStream(await navigator.mediaDevices.getUserMedia(constraints));
-        });
+
+          const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+          const audioTrack = mediaStream.getAudioTracks()[0];
+          NAF.connection.adapter.setLocalMediaStream(mediaStream);
+          audioTrack.addEventListener("ended", recreateAudioStream);
+        };
+
+        audioTrack.addEventListener("ended", recreateAudioStream);
       }
 
       return true;
