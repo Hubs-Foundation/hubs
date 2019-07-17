@@ -567,10 +567,10 @@ class UIRoot extends Component {
           const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
           const audioTrack = mediaStream.getAudioTracks()[0];
           NAF.connection.adapter.setLocalMediaStream(mediaStream);
-          audioTrack.addEventListener("ended", recreateAudioStream);
+          audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
         };
 
-        audioTrack.addEventListener("ended", recreateAudioStream);
+        audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
       }
 
       return true;
