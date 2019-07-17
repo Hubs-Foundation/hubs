@@ -4,6 +4,7 @@ import HubsBatchRawUniformGroup from "./render-manager/hubs-batch-raw-uniform-gr
 import { sizeofInstances } from "./render-manager/hubs-batch-raw-uniform-group";
 import unlitBatchVert from "./render-manager/unlit-batch.vert";
 import unlitBatchFrag from "./render-manager/unlit-batch.frag";
+import qsTruthy from "../utils/qs_truthy";
 
 const MAX_INSTANCES = 500;
 const UBO_BYTE_LENGTH = sizeofInstances(MAX_INSTANCES);
@@ -11,20 +12,24 @@ const UBO_BYTE_LENGTH = sizeofInstances(MAX_INSTANCES);
 export class BatchManagerSystem {
   constructor(scene, renderer) {
     this.meshToEl = new WeakMap();
+    const gl = renderer.context;
 
-    this.batchingEnabled = window.WebGL2RenderingContext && renderer.context instanceof WebGL2RenderingContext;
+    if (!qsTruthy("enableBatching")) {
+      console.warn("Batching is not on by default and must be turned on with enableBatching. Disabling batching.");
+      return;
+    }
 
-    if (!this.batchingEnabled) {
+    if (!(window.WebGL2RenderingContext && gl instanceof WebGL2RenderingContext)) {
       console.warn("Batching requires WebGL 2. Disabling batching.");
       return;
     }
 
-    const gl = renderer.context;
     if (UBO_BYTE_LENGTH > gl.getParameter(gl.MAX_UNIFORM_BLOCK_SIZE)) {
       console.warn("Insufficient MAX_UNIFORM_BLOCK_SIZE, Disabling batching");
-      this.batchingEnabled = false;
       return;
     }
+
+    this.batchingEnabled = true;
 
     this.ubo = new HubsBatchRawUniformGroup(MAX_INSTANCES, this.meshToEl);
     this.batchManager = new BatchManager(scene, renderer, {
