@@ -7,30 +7,31 @@ import { validMaterials } from "../components/hoverable-visuals";
 
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
+// Map<String, Promise<Object>
 const resolveUrlCache = new Map();
 export const resolveUrl = async (url, index) => {
   const cacheKey = `${url}|${index}`;
   if (resolveUrlCache.has(cacheKey)) return resolveUrlCache.get(cacheKey);
 
-  const response = await fetch(mediaAPIEndpoint, {
+  const resultPromise = fetch(mediaAPIEndpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ media: { url, index } })
+  }).then(async response => {
+    if (!response.ok) {
+      const message = `Error resolving url "${url}":`;
+      try {
+        const body = await response.text();
+        throw new Error(message + " " + body);
+      } catch (e) {
+        throw new Error(message + " " + response.statusText);
+      }
+    }
+    return response.json();
   });
 
-  if (!response.ok) {
-    const message = `Error resolving url "${url}":`;
-    try {
-      const body = await response.text();
-      throw new Error(message + " " + body);
-    } catch (e) {
-      throw new Error(message + " " + response.statusText);
-    }
-  }
-
-  const resolved = await response.json();
-  resolveUrlCache.set(cacheKey, resolved);
-  return resolved;
+  resolveUrlCache.set(cacheKey, resultPromise);
+  return resultPromise;
 };
 
 export const upload = file => {
