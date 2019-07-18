@@ -202,17 +202,17 @@ export function micLevelForVolume(volume, max) {
     ? 0
     : volume < max * 0.02
       ? 0
-      : volume < max * 0.04
+      : volume < max * 0.03
         ? 1
-        : volume < max * 0.08
+        : volume < max * 0.06
           ? 2
-          : volume < max * 0.16
+          : volume < max * 0.08
             ? 3
-            : volume < max * 0.24
+            : volume < max * 0.16
               ? 4
-              : volume < max * 0.42
+              : volume < max * 0.32
                 ? 5
-                : volume < max * 0.6
+                : volume < max * 0.5
                   ? 6
                   : 7;
 }
