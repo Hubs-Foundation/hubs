@@ -284,9 +284,14 @@ export default class SettingsMenu extends Component {
               <a href="https://discord.gg/wHmY4nd" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.community" />
               </a>
-              <a target="_blank" href="https://forms.gle/1g4H5Ayd1mGWqWpV7" rel="noopener noreferrer">
+              <button
+                onClick={e => {
+                  e.preventDefault();
+                  this.props.pushHistoryState("modal", "feedback");
+                }}
+              >
                 <FormattedMessage id="settings.send-feedback" />
-              </a>
+              </button>
               <a className={styles.bottomLink} href="/?report" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.report" />
               </a>

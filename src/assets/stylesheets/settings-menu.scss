@@ -50,7 +50,7 @@
   justify-items: center;
   width: 90%;
 
-  a {
+  button, a {
     color: black;
     margin: 2px 12px;
     display: flex;
@@ -65,14 +65,9 @@
     @extend %default-font;
     @extend %link-button;
     font-weight: bold;
-    color: black;
     text-decoration-color: $dark-grey;
     padding: 0;
-    margin: 2px 12px;
-    display: flex;
     justify-content: flex-start;
-    align-items: center;
-    white-space: nowrap;
     text-align: center;
   }
 }
@@ -84,7 +79,7 @@
   padding-top: 12px;
   font-weight: normal;
 
-  a {
+  a, button {
     color: $dark-grey;
     margin: 2px 12px;
     display: flex;
@@ -92,5 +87,15 @@
     align-items: center;
     white-space: nowrap;
     text-decoration: none;
+  }
+
+  button {
+    @extend %default-font;
+    @extend %link-button;
+    font-weight: normal;
+    text-decoration-color: $dark-grey;
+    padding: 0;
+    justify-content: flex-start;
+    text-align: center;
   }
 }
