@@ -802,8 +802,9 @@ AFRAME.registerComponent("media-image", {
       this.el.setObject3D("mesh", this.mesh);
     }
 
+    // We only support transparency on gifs. Other images will support cutout as part of batching, but not alpha transparency for now
+    this.mesh.material.transparent = this.data.contentType.includes("image/gif");
     this.mesh.material.map = texture;
-    this.mesh.material.transparent = texture.format === THREE.RGBAFormat;
     this.mesh.material.needsUpdate = true;
 
     if (projection === "flat") {
