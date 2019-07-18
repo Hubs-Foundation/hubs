@@ -730,7 +730,7 @@ AFRAME.registerComponent("media-image", {
     }
     if (this._hasRetainedTexture) {
       textureCache.release(this.data.src);
-      this._hasRetainedTexture = false;
+      this.currentSrcIsRetained = false;
     }
   },
 
@@ -749,6 +749,7 @@ AFRAME.registerComponent("media-image", {
         this.mesh.material.needsUpdate = true;
         if (this.mesh.map !== errorTexture) {
           textureCache.release(oldData.src);
+          this.currentSrcIsRetained = false;
         }
       }
 
@@ -776,8 +777,8 @@ AFRAME.registerComponent("media-image", {
           cacheItem = textureCache.set(src, texture);
         }
 
-        // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
-        if (this.data.src !== src) {
+        // No way to cancel promises, so if src has changed or this entity was removed while we were creating the texture just throw it away.
+        if (this.data.src !== src || !this.el.parentNode) {
           textureCache.release(src);
           return;
         }
@@ -786,11 +787,11 @@ AFRAME.registerComponent("media-image", {
       texture = cacheItem.texture;
       ratio = cacheItem.ratio;
 
-      this._hasRetainedTexture = true;
+      this.currentSrcIsRetained = true;
     } catch (e) {
       console.error("Error loading image", this.data.src, e);
       texture = errorTexture;
-      this._hasRetainedTexture = false;
+      this.currentSrcIsRetained = false;
     }
 
     const projection = this.data.projection;
