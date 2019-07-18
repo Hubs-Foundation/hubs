@@ -950,11 +950,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const socket = await connectToReticulum(isDebug);
 
   socket.onClose(e => {
-    // The socket should close normally if the server has explicitly killed it.
+    // We don't currently have an easy way to distinguish between being kicked (server closes socket)
+    // and a variety of other network issues that seem to produce the 1000 closure code, but the
+    // latter are probably more common. Either way, we just tell the user they got disconnected.
     const NORMAL_CLOSURE = 1000;
     if (e.code === NORMAL_CLOSURE) {
       entryManager.exitScene();
-      remountUI({ roomUnavailableReason: "kicked" });
+      remountUI({ roomUnavailableReason: "disconnected" });
     }
   });
 
@@ -1094,7 +1096,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
       if (isInitialJoin) {
-        store.addEventListener("statechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
+        store.addEventListener("profilechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
         hubChannel.presence.onSync(() => {
           const presence = hubChannel.presence;
 

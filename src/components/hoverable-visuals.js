@@ -1,6 +1,9 @@
+import { forEachMaterial } from "../utils/material-utils";
+
 const interactorOneTransform = [];
 const interactorTwoTransform = [];
 
+export const validMaterials = ["MeshStandardMaterial", "MeshBasicMaterial", "MobileStandardMaterial"];
 /**
  * Applies effects to a hoverable based on hover state.
  * @namespace interactables
@@ -20,6 +23,23 @@ AFRAME.registerComponent("hoverable-visuals", {
   remove() {
     this.uniforms = null;
     this.boundingBox = null;
+
+    // Used when the object is batched
+    const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
+    this.el.object3D.traverse(object => {
+      if (!object.material) return;
+      forEachMaterial(object, material => {
+        if (
+          !validMaterials.includes(material.type) ||
+          object.el.classList.contains("ui") ||
+          object.el.classList.contains("hud") ||
+          object.el.getAttribute("text-button")
+        )
+          return;
+
+        batchManagerSystem.meshToEl.delete(object);
+      });
+    });
   },
   tick(time) {
     if (!this.uniforms || !this.uniforms.length) return;

@@ -68,8 +68,6 @@ import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
 
-import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
-import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
@@ -175,8 +173,6 @@ class UIRoot extends Component {
     entered: false,
     dialog: null,
     showShareDialog: false,
-    showPresenceList: false,
-    showSettingsMenu: false,
     broadcastTipDismissed: false,
     linkCode: null,
     linkCodeCancel: null,
@@ -190,14 +186,9 @@ class UIRoot extends Component {
     showStreamingTip: false,
 
     waitingOnAudio: false,
-    shareScreen: false,
-    requestedScreen: false,
     mediaStream: null,
     audioTrack: null,
-    numAudioTracks: 0,
     micDevices: [],
-
-    profileNamePending: "Hello",
 
     autoExitTimerStartedAt: null,
     autoExitTimerInterval: null,
@@ -205,7 +196,6 @@ class UIRoot extends Component {
 
     muted: false,
     frozen: false,
-    spacebubble: true,
 
     exited: false,
 
@@ -268,8 +258,8 @@ class UIRoot extends Component {
   componentDidMount() {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
-      if (this.state.showPresenceList || this.state.showSettingsMenu || this.state.showShareDialog) {
-        this.setState({ showPresenceList: false, showSettingsMenu: false, showShareDialog: false });
+      if (this.state.showShareDialog) {
+        this.setState({ showShareDialog: false });
       }
     });
 
@@ -405,7 +395,7 @@ class UIRoot extends Component {
 
   // TODO: we need to come up with a cleaner way to handle the shared state between aframe and react than emmitting events and setting state on the scene
   onAframeStateChanged = e => {
-    if (!(e.detail === "muted" || e.detail === "frozen" || e.detail === "spacebubble")) return;
+    if (!(e.detail === "muted" || e.detail === "frozen")) return;
     this.setState({
       [e.detail]: this.props.scene.is(e.detail)
     });
@@ -429,10 +419,6 @@ class UIRoot extends Component {
 
   toggleFreeze = () => {
     this.props.scene.emit("action_freeze");
-  };
-
-  toggleSpaceBubble = () => {
-    this.props.scene.emit("action_space_bubble");
   };
 
   shareVideo = mediaSource => {
@@ -508,24 +494,10 @@ class UIRoot extends Component {
     });
   };
 
-  hasGrantedMicPermissions = async () => {
-    if (this.state.requestedScreen) {
-      // There is no way to tell if you've granted mic permissions in a previous session if we've
-      // already prompted for screen sharing permissions, so we have to assume that we've never granted permissions.
-      // Fortunately, if you *have* granted permissions permanently, there won't be a second browser prompt, but we
-      // can't determine that before hand.
-      // See https://bugzilla.mozilla.org/show_bug.cgi?id=1449783 for a potential solution in the future.
-      return false;
-    } else {
-      // If we haven't requested the screen in this session, check if we've granted permissions in a previous session.
-      return (await grantedMicLabels()).length > 0;
-    }
-  };
-
   performDirectEntryFlow = async enterInVR => {
     this.setState({ enterInVR, waitingOnAudio: true });
 
-    const hasGrantedMic = await this.hasGrantedMicPermissions();
+    const hasGrantedMic = (await grantedMicLabels()).length > 0;
 
     if (hasGrantedMic) {
       await this.setMediaStreamToDefault();
@@ -582,14 +554,30 @@ class UIRoot extends Component {
 
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      this.setState({
-        audioTrack: mediaStream.getAudioTracks()[0],
-        numAudioTracks: mediaStream.getAudioTracks().length
-      });
+      const audioTrack = mediaStream.getAudioTracks()[0];
+      this.setState({ audioTrack });
+
+      if (/Oculus/.test(navigator.userAgent)) {
+        // HACK Oculus Browser 6 seems to randomly end the microphone audio stream. This re-creates it.
+        // Note the ended event will only fire if some external event ends the stream, not if we call stop().
+        const recreateAudioStream = async () => {
+          console.warn(
+            "Oculus Browser 6 bug hit: Audio stream track ended without calling stop. Recreating audio stream."
+          );
+
+          const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+          const audioTrack = mediaStream.getAudioTracks()[0];
+          NAF.connection.adapter.setLocalMediaStream(mediaStream);
+          audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
+        };
+
+        audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
+      }
+
       return true;
     } catch (e) {
       // Error fetching audio track, most likely a permission denial.
-      this.setState({ audioTrack: null, numAudioTracks: 0 });
+      this.setState({ audioTrack: null });
       return false;
     }
   };
@@ -769,7 +757,7 @@ class UIRoot extends Component {
 
     if (enable) {
       this.props.hubChannel.beginStreaming();
-      this.setState({ isStreaming: true, showStreamingTip: true, showSettingsMenu: false });
+      this.setState({ isStreaming: true, showStreamingTip: true });
     } else {
       this.props.hubChannel.endStreaming();
       this.setState({ isStreaming: false });
@@ -932,7 +920,7 @@ class UIRoot extends Component {
         <div>
           <FormattedMessage id={exitSubtitleId} />
           <p />
-          {!["left", "kicked"].includes(this.props.roomUnavailableReason) && (
+          {!["left", "disconnected"].includes(this.props.roomUnavailableReason) && (
             <div>
               You can also{" "}
               <WithHoverSound>
@@ -1111,20 +1099,6 @@ class UIRoot extends Component {
           </div>
         )}
       </div>
-    );
-  };
-
-  renderScreensharing = () => {
-    return (
-      <label className={entryStyles.screenSharing}>
-        <input
-          className={entryStyles.checkbox}
-          type="checkbox"
-          value={this.state.shareScreen}
-          onChange={this.setStateAndRequestScreen}
-        />
-        <FormattedMessage id="entry.enable-screen-sharing" />
-      </label>
     );
   };
 
@@ -1749,7 +1723,7 @@ class UIRoot extends Component {
                     )}
                   {showVREntryButton && (
                     <WithHoverSound>
-                      <button className={inviteStyles.enterButton} onClick={() => exit2DInterstitialAndEnterVR()}>
+                      <button className={inviteStyles.enterButton} onClick={() => exit2DInterstitialAndEnterVR(true)}>
                         <FormattedMessage id="entry.enter-in-vr" />
                       </button>
                     </WithHoverSound>
@@ -1821,54 +1795,32 @@ class UIRoot extends Component {
               </button>
             )}
             {streamingTip}
+
+            <PresenceList
+              history={this.props.history}
+              presences={this.props.presences}
+              sessionId={this.props.sessionId}
+              signedIn={this.state.signedIn}
+              email={this.props.store.state.credentials.email}
+              onSignIn={this.showSignInDialog}
+              onSignOut={this.signOut}
+            />
+
             {!streaming &&
               !preload && (
-                <div
-                  onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
-                  className={classNames({
-                    [styles.cornerButton]: true,
-                    [styles.cornerButtonSelected]: this.state.showSettingsMenu
-                  })}
-                >
-                  <FontAwesomeIcon icon={faBars} />
-                </div>
+                <SettingsMenu
+                  history={this.props.history}
+                  mediaSearchStore={this.props.mediaSearchStore}
+                  isStreaming={streaming}
+                  toggleStreamerMode={this.toggleStreamerMode}
+                  hubChannel={this.props.hubChannel}
+                  hubScene={this.props.hubScene}
+                  scene={this.props.scene}
+                  performConditionalSignIn={this.props.performConditionalSignIn}
+                  showNonHistoriedDialog={this.showNonHistoriedDialog}
+                  pushHistoryState={this.pushHistoryState}
+                />
               )}
-            <div
-              onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
-              className={classNames({
-                [styles.presenceInfo]: true,
-                [styles.presenceInfoSelected]: this.state.showPresenceList
-              })}
-            >
-              <FontAwesomeIcon icon={faUsers} />
-              <span className={styles.occupantCount}>{this.occupantCount()}</span>
-            </div>
-            {this.state.showPresenceList && (
-              <PresenceList
-                history={this.props.history}
-                presences={this.props.presences}
-                sessionId={this.props.sessionId}
-                signedIn={this.state.signedIn}
-                email={this.props.store.state.credentials.email}
-                onSignIn={this.showSignInDialog}
-                onSignOut={this.signOut}
-              />
-            )}
-            {this.state.showSettingsMenu && (
-              <SettingsMenu
-                history={this.props.history}
-                mediaSearchStore={this.props.mediaSearchStore}
-                hideSettings={() => this.setState({ showSettingsMenu: false })}
-                isStreaming={streaming}
-                toggleStreamerMode={this.toggleStreamerMode}
-                hubChannel={this.props.hubChannel}
-                hubScene={this.props.hubScene}
-                scene={this.props.scene}
-                performConditionalSignIn={this.props.performConditionalSignIn}
-                showNonHistoriedDialog={this.showNonHistoriedDialog}
-                pushHistoryState={this.pushHistoryState}
-              />
-            )}
             {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
             {enteredOrWatching && (
               <div className={styles.topHud}>
@@ -1879,7 +1831,6 @@ class UIRoot extends Component {
                   frozen={this.state.frozen}
                   watching={this.state.watching}
                   onWatchEnded={() => this.setState({ watching: false })}
-                  spacebubble={this.state.spacebubble}
                   videoShareMediaSource={this.state.videoShareMediaSource}
                   showVideoShareFailed={this.state.showVideoShareFailed}
                   hideVideoShareFailedTip={() => this.setState({ showVideoShareFailed: false })}
@@ -1888,7 +1839,6 @@ class UIRoot extends Component {
                   hasActiveCamera={this.props.hasActiveCamera}
                   onToggleMute={this.toggleMute}
                   onToggleFreeze={this.toggleFreeze}
-                  onToggleSpaceBubble={this.toggleSpaceBubble}
                   onSpawnPen={this.spawnPen}
                   onSpawnCamera={() => this.props.scene.emit("action_toggle_camera")}
                   onShareVideo={this.shareVideo}
