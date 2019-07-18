@@ -33,19 +33,6 @@ const SPRITESHEET_ICONS = {
     spritesheet.micOff7
   ]
 };
-const ICONS = {
-  MIC: [styles.mic0, styles.mic1, styles.mic2, styles.mic3, styles.mic4, styles.mic5, styles.mic6, styles.mic7],
-  MIC_OFF: [
-    styles.micOff0,
-    styles.micOff1,
-    styles.micOff2,
-    styles.micOff3,
-    styles.micOff4,
-    styles.micOff5,
-    styles.micOff6,
-    styles.micOff7
-  ]
-};
 const browser = detect();
 
 class TopHUD extends Component {
@@ -222,8 +209,7 @@ class TopHUD extends Component {
     }
 
     const micLevel = this.state.micLevel;
-    const icons = window.useSpritesheetIcons ? SPRITESHEET_ICONS : ICONS;
-    const micIconClass = this.props.muted ? icons.MIC_OFF[micLevel] : icons.MIC[micLevel];
+    const micIconClass = this.props.muted ? SPRITESHEET_ICONS.MIC_OFF[micLevel] : SPRITESHEET_ICONS.MIC[micLevel];
     // Hide buttons when frozen.
     return (
       <div className={cx(styles.container, styles.top, styles.unselectable, uiStyles.uiInteractive)}>
@@ -260,4 +246,3 @@ class TopHUD extends Component {
 }
 
 export default { TopHUD };
-window.useSpritesheetIcons = true;
