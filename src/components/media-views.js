@@ -275,6 +275,7 @@ errorTexture.magFilter = THREE.NearestFilter;
 errorImage.onload = () => {
   errorTexture.needsUpdate = true;
 };
+const errorCacheItem = { texture: errorTexture, ratio: 1 };
 
 function timeFmt(t) {
   let s = Math.floor(t),
@@ -756,7 +757,7 @@ AFRAME.registerComponent("media-image", {
         cacheItem = textureCache.retain(src);
       } else {
         if (src === "error") {
-          texture = errorTexture;
+          cacheItem = errorCacheItem;
         } else if (inflightTextures.has(src)) {
           await inflightTextures.get(src);
           cacheItem = textureCache.retain(src);
@@ -813,7 +814,7 @@ AFRAME.registerComponent("media-image", {
     }
 
     // We only support transparency on gifs. Other images will support cutout as part of batching, but not alpha transparency for now
-    this.mesh.material.transparent = this.data.contentType.includes("image/gif");
+    this.mesh.material.transparent = texture == errorTexture || this.data.contentType.includes("image/gif");
     this.mesh.material.map = texture;
     this.mesh.material.needsUpdate = true;
 
@@ -821,7 +822,7 @@ AFRAME.registerComponent("media-image", {
       scaleToAspectRatio(this.el, ratio);
     }
 
-    if (this.data.batch) {
+    if (texture !== errorTexture && this.data.batch) {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.mesh);
     }
 
