@@ -985,52 +985,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     Cookies.remove(OAUTH_FLOW_PERMS_TOKEN_KEY);
   }
 
-  const getAuthorizedNafSchemas = schemas => {
-    /* Produces a structure like:
-     * {
-     *   "#interactable-media": [
-     *    {
-     *      component: "media-video",
-     *      properties: [ "time", "videoPaused" ],
-     *      indices: [ 4, 5 ]
-     *    },
-     *    ...
-     *   ],
-     *   ...
-     * }
-     */
-    const authorizedSchemas = {};
-
-    for (const key in schemas) {
-      if (!schemas.hasOwnProperty(key) || !schemas[key].authorizedComponents) continue;
-      authorizedSchemas[key] = [];
-      for (const authorizedComponent of schemas[key].authorizedComponents) {
-        authorizedComponent.indices = schemas[key].components
-          .map((schemaComponent, i) => {
-            if (
-              schemaComponent === authorizedComponent.component ||
-              schemaComponent.component === authorizedComponent.component
-            ) {
-              return i;
-            } else {
-              return null;
-            }
-          })
-          .filter(i => i !== null);
-        authorizedSchemas[key].push(authorizedComponent);
-      }
-    }
-
-    return authorizedSchemas;
-  };
-
   const createHubChannelParams = permsToken => {
     const params = {
       profile: store.state.profile,
       push_subscription_endpoint: pushSubscriptionEndpoint,
       auth_token: null,
       perms_token: null,
-      authorized_naf_schemas: getAuthorizedNafSchemas(NAF.schemas.schemaDict),
       context: {
         mobile: isMobile || isMobileVR,
         hmd: availableVREntryTypes.isInHMD,
