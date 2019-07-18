@@ -266,6 +266,7 @@ class TextureCache {
 }
 
 const textureCache = new TextureCache();
+const inflightTextures = new Map();
 
 const errorImage = new Image();
 errorImage.src = errorImageSrc;
@@ -750,23 +751,29 @@ AFRAME.registerComponent("media-image", {
         }
       }
 
+      let cacheItem;
       if (textureCache.has(src)) {
-        const cacheItem = textureCache.retain(src);
-        texture = cacheItem.texture;
-        ratio = cacheItem.ratio;
+        cacheItem = textureCache.retain(src);
       } else {
         if (src === "error") {
           texture = errorTexture;
-        } else if (contentType.includes("image/gif")) {
-          texture = await createGIFTexture(src);
-        } else if (contentType.startsWith("image/")) {
-          texture = await createImageTexture(src);
+        } else if (inflightTextures.has(src)) {
+          await inflightTextures.get(src);
+          cacheItem = textureCache.retain(src);
         } else {
-          throw new Error(`Unknown image content type: ${contentType}`);
+          let promise;
+          if (contentType.includes("image/gif")) {
+            promise = createGIFTexture(src);
+          } else if (contentType.startsWith("image/")) {
+            promise = createImageTexture(src);
+          } else {
+            throw new Error(`Unknown image content type: ${contentType}`);
+          }
+          inflightTextures.set(src, promise);
+          texture = await promise;
+          inflightTextures.delete(src);
+          cacheItem = textureCache.set(src, texture);
         }
-
-        const cacheItem = textureCache.set(src, texture);
-        ratio = cacheItem.ratio;
 
         // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
         if (this.data.src !== src) {
@@ -774,6 +781,9 @@ AFRAME.registerComponent("media-image", {
           return;
         }
       }
+
+      texture = cacheItem.texture;
+      ratio = cacheItem.ratio;
 
       this._hasRetainedTexture = true;
     } catch (e) {
