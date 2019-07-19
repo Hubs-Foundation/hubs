@@ -34,13 +34,13 @@ export const resolveUrl = async (url, index) => {
   return resultPromise;
 };
 
-export const upload = (file, convertTo) => {
+export const upload = (file, desiredContentType) => {
   const formData = new FormData();
   formData.append("media", file);
   formData.append("promotion_mode", "with_token");
 
-  if (convertTo) {
-    formData.append("convert_to", convertTo);
+  if (desiredContentType) {
+    formData.append("desired_content_type", desiredContentType);
   }
 
   return fetch(mediaAPIEndpoint, {
@@ -143,9 +143,9 @@ export const addMedia = (
   });
   if (needsToBeUploaded) {
     // Video camera videos are converted to mp4 for compatibility
-    const convertTo = contentSubtype === "video-camera" ? "video/mp4" : null;
+    const desiredContentType = contentSubtype === "video-camera" ? "video/mp4" : null;
 
-    upload(src, convertTo)
+    upload(src, desiredContentType)
       .then(response => {
         const srcUrl = new URL(response.raw);
         srcUrl.searchParams.set("token", response.meta.access_token);
