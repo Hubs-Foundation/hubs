@@ -16,7 +16,6 @@ import "naf-janus-adapter";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
-import addBlitFrameBufferFunction from "./utils/threejs-blit-framebuffer";
 import "./utils/audio-context-fix";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
@@ -134,8 +133,6 @@ import "./systems/interactions";
 import "./systems/hubs-systems";
 import "./systems/capture-system";
 import { SOUND_CHAT_MESSAGE } from "./systems/sound-effects-system";
-import { Buffer } from "buffer";
-window.Buffer = window.Buffer || Buffer;
 
 import "./gltf-component-mappings";
 
@@ -642,7 +639,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems.physics;
     physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
-    addBlitFrameBufferFunction();
     patchThreeAllocations();
   };
 

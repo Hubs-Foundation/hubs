@@ -1,16 +1,13 @@
-import { spawnMediaAround } from "../utils/media-utils";
+import { addAndArrangeMedia } from "../utils/media-utils";
 import { createImageBitmap } from "../utils/image-bitmap-utils";
 import { ObjectTypes } from "../object-types";
 import { paths } from "../systems/userinput/paths";
-import { detect } from "detect-browser";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT, SOUND_CAMERA_TOOL_COUNTDOWN } from "../systems/sound-effects-system";
 import { getAudioFeedbackScale } from "./audio-feedback";
-import * as ebml from "ts-ebml";
 
 import cameraModelSrc from "../assets/camera_tool.glb";
 
 const cameraModelPromise = new Promise(resolve => new THREE.GLTFLoader().load(cameraModelSrc, resolve));
-const browser = detect();
 
 const pathsMap = {
   "player-right-controller": {
@@ -26,14 +23,15 @@ const pathsMap = {
 
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
-const VIEWPORT_FPS = 6;
+const VIEWFINDER_FPS = 6;
 const VIDEO_FPS = 25;
 // Prefer h264 if available due to faster decoding speec on most platforms
 const videoCodec = ["h264", "vp9", "vp8"].find(
   codec => window.MediaRecorder && MediaRecorder.isTypeSupported(`video/webm; codecs=${codec}`)
 );
 const videoMimeType = videoCodec ? `video/webm; codecs=${videoCodec}` : null;
-const allowVideo = !!videoMimeType;
+const hasWebGL2 = !!document.createElement("canvas").getContext("webgl2");
+const allowVideo = !!videoMimeType && hasWebGL2;
 
 const CAPTURE_WIDTH = 640;
 const CAPTURE_HEIGHT = 360;
@@ -61,22 +59,22 @@ async function pixelsToPNG(pixels, width, height) {
   return new File([blob], "snap.png", { type: "image/png" });
 }
 
-async function convertWebMChunksToSeekable(chunks) {
-  const decoder = new ebml.Decoder();
-  const reader = new ebml.Reader();
-  reader.logging = false;
-  reader.drop_default_duration = false;
+function blitFramebuffer(renderer, src, srcX0, srcY0, srcX1, srcY1, dest, dstX0, dstY0, dstX1, dstY1) {
+  const gl = renderer.context;
 
-  for (let i = 0; i < chunks.length; i++) {
-    const buf = new Buffer(await new Response(chunks[i]).arrayBuffer());
-    decoder.decode(buf).forEach(e => reader.read(e));
+  // Copies from one framebuffer to another. Note that at the end of this function, you need to restore
+  // the original framebuffer via setRenderTarget
+  const srcFramebuffer = renderer.properties.get(src).__webglFramebuffer;
+  const destFramebuffer = renderer.properties.get(dest).__webglFramebuffer;
+
+  if (srcFramebuffer && destFramebuffer) {
+    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, srcFramebuffer);
+    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, destFramebuffer);
+
+    if (gl.checkFramebufferStatus(gl.READ_FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE) {
+      gl.blitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, gl.COLOR_BUFFER_BIT, gl.LINEAR);
+    }
   }
-
-  reader.stop();
-
-  const seekableMeta = ebml.tools.makeMetadataSeekable(reader.metadatas, reader.duration, reader.cues);
-  const body = new Buffer(await new Response(chunks[0]).arrayBuffer()).slice(reader.metadataSize);
-  return new Buffer(ebml.tools.concat([new Buffer(seekableMeta), body]).buffer);
 }
 
 AFRAME.registerComponent("camera-tool", {
@@ -92,7 +90,7 @@ AFRAME.registerComponent("camera-tool", {
     this.lastUpdate = performance.now();
     this.localSnapCount = 0; // Counter that is used to arrange photos/videos
 
-    this.showCameraViewport = !isMobileVR;
+    this.showCameraViewfinder = !isMobileVR;
 
     this.renderTarget = new THREE.WebGLRenderTarget(RENDER_WIDTH, RENDER_HEIGHT, {
       format: THREE.RGBAFormat,
@@ -116,8 +114,8 @@ AFRAME.registerComponent("camera-tool", {
     // Bit of a hack here to only update the renderTarget when the screens are in view
     material.map.isVideoTexture = true;
     material.map.update = () => {
-      if (this.showCameraViewport) {
-        this.viewportInViewThisFrame = true;
+      if (this.showCameraViewfinder) {
+        this.viewfinderInViewThisFrame = true;
       }
     };
 
@@ -195,7 +193,7 @@ AFRAME.registerComponent("camera-tool", {
     this.stopRecording();
   },
 
-  updateViewport() {
+  updateViewfinder() {
     this.updateRenderTargetNextTick = true;
   },
 
@@ -356,27 +354,41 @@ AFRAME.registerComponent("camera-tool", {
     const recordingStartTime = performance.now();
 
     this.videoRecorder.ondataavailable = e => chunks.push(e.data);
+
+    this.updateRenderTargetNextTick = true;
+
+    this.videoRecorder.start();
+    this.el.setAttribute("camera-tool", { isRecording: true, label: " " });
+    this.el.sceneEl.emit("action_camera_recording_started");
+
+    if (duration !== Infinity) {
+      this.videoCountdown = this.data.captureDuration;
+      this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
+
+      this.videoCountdownInterval = setInterval(() => {
+        this.videoCountdown--;
+
+        if (this.videoCountdown === 0) {
+          this.stopRecording();
+          this.videoCountdownInterval = null;
+        } else {
+          this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
+        }
+      }, 1000);
+    }
+
     this.videoRecorder._free = () => (chunks.length = 0); // Used for cancelling
     this.videoRecorder.onstop = async () => {
       this.el.sceneEl.emit("action_camera_recording_ended");
 
       if (chunks.length === 0) return;
       const mimeType = chunks[0].type;
-      let blob;
-
       const recordingDuration = performance.now() - recordingStartTime;
-
-      if (browser.name === "chrome") {
-        // HACK, on chrome, webms are unseekable
-        const seekable = await convertWebMChunksToSeekable(chunks);
-        blob = new Blob([seekable], { type: mimeType });
-      } else {
-        blob = new Blob(chunks, { type: mimeType });
-      }
+      const blob = new Blob(chunks, { type: mimeType });
 
       chunks.length = 0;
 
-      const { entity, orientation } = spawnMediaAround(
+      const { entity, orientation } = addAndArrangeMedia(
         this.el,
         new File([blob], "capture", { type: mimeType.split(";")[0] }), // Drop codec
         "video-camera",
@@ -405,28 +417,6 @@ AFRAME.registerComponent("camera-tool", {
 
       orientation.then(() => this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA }));
     };
-
-    this.updateRenderTargetNextTick = true;
-
-    this.videoRecorder.start();
-    this.el.setAttribute("camera-tool", { isRecording: true, label: " " });
-    this.el.sceneEl.emit("action_camera_recording_started");
-
-    if (duration !== Infinity) {
-      this.videoCountdown = this.data.captureDuration;
-      this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
-
-      this.videoCountdownInterval = setInterval(() => {
-        this.videoCountdown--;
-
-        if (this.videoCountdown === 0) {
-          this.stopRecording();
-          this.videoCountdownInterval = null;
-        } else {
-          this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
-        }
-      }, 1000);
-    }
   },
 
   stopRecording(cancel) {
@@ -471,16 +461,16 @@ AFRAME.registerComponent("camera-tool", {
       this.localSnapCount = 0;
     }
 
-    this.showCameraViewport = isHolding || !isMobileVR || this.data.isSnapping || this.videoRecorder;
+    this.showCameraViewfinder = isHolding || !isMobileVR || this.data.isSnapping || this.videoRecorder;
 
     if (this.screen && this.selfieScreen) {
-      this.screen.visible = this.selfieScreen.visible = !!this.showCameraViewport;
+      this.screen.visible = this.selfieScreen.visible = !!this.showCameraViewfinder;
     }
 
-    // Always draw held, snapping, or recording camera viewports with a decent framerate
+    // Always draw held, snapping, or recording camera viewfinders with a decent framerate
     if (
       (isHolding || this.data.isSnapping || this.videoRecorder) &&
-      performance.now() - this.lastUpdate >= 1000 / (this.videoRecorder ? VIDEO_FPS : VIEWPORT_FPS)
+      performance.now() - this.lastUpdate >= 1000 / (this.videoRecorder ? VIDEO_FPS : VIEWFINDER_FPS)
     ) {
       this.updateRenderTargetNextTick = true;
     }
@@ -490,7 +480,7 @@ AFRAME.registerComponent("camera-tool", {
 
     if (isPermittedToUse) {
       // If the user lets go of the trigger before 500ms, take a picture, otherwise record until they let go.
-      if (isHoldingTrigger && !this.data.isSnapping && !this.snapTriggerTimeout) {
+      if (isHoldingTrigger && !this.data.isSnapping) {
         this.snapTriggerTimeout = setTimeout(() => {
           if (this.isHoldingSnapshotTrigger()) {
             this.el.setAttribute("camera-tool", "isSnapping", true);
@@ -542,7 +532,7 @@ AFRAME.registerComponent("camera-tool", {
 
       if (
         this.takeSnapshotNextTick ||
-        (this.updateRenderTargetNextTick && (this.viewportInViewThisFrame || this.videoRecorder))
+        (this.updateRenderTargetNextTick && (this.viewfinderInViewThisFrame || this.videoRecorder))
       ) {
         if (this.playerHead) {
           tempHeadScale.copy(this.playerHead.scale);
@@ -613,7 +603,8 @@ AFRAME.registerComponent("camera-tool", {
         if (this.videoRecorder) {
           // This blit operation will (if necessary) scale/resample the view finder render target and, importantly,
           // flip the texture on Y
-          renderer.blitFramebuffer(
+          blitFramebuffer(
+            renderer,
             this.renderTarget,
             0,
             0,
@@ -638,7 +629,7 @@ AFRAME.registerComponent("camera-tool", {
         }
 
         this.updateRenderTargetNextTick = false;
-        this.viewportInViewThisFrame = false;
+        this.viewfinderInViewThisFrame = false;
       }
 
       if (this.takeSnapshotNextTick) {
@@ -648,7 +639,7 @@ AFRAME.registerComponent("camera-tool", {
         renderer.readRenderTargetPixels(this.renderTarget, 0, 0, RENDER_WIDTH, RENDER_HEIGHT, this.snapPixels);
 
         pixelsToPNG(this.snapPixels, RENDER_WIDTH, RENDER_HEIGHT).then(file => {
-          const { orientation } = spawnMediaAround(
+          const { orientation } = addAndArrangeMedia(
             this.el,
             file,
             "photo-camera",

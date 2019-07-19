@@ -263,7 +263,7 @@ export function getPromotionTokenForFile(fileId) {
 
 const mediaPos = new THREE.Vector3();
 
-export function spawnMediaAround(el, media, contentSubtype, snapCount, mirrorOrientation = false) {
+export function addAndArrangeMedia(el, media, contentSubtype, snapCount, mirrorOrientation = false) {
   const { entity, orientation } = addMedia(media, "#interactable-media", undefined, contentSubtype, false);
 
   const pos = el.object3D.position;

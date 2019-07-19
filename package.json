@@ -49,7 +49,6 @@
     "aframe-slice9-component": "^1.0.0",
     "ammo.js": "github:mozillareality/ammo.js#hubs/master",
     "animejs": "github:mozillareality/anime#hubs/master",
-    "buffer": "^5.2.1",
     "classnames": "^2.2.5",
     "copy-to-clipboard": "^3.0.8",
     "dayjs-ext": "^2.2.0",
@@ -65,7 +64,6 @@
     "form-urlencoded": "^2.0.4",
     "history": "^4.7.2",
     "hls.js": "^0.12.2",
-    "int64-buffer": "^0.99.1007",
     "js-cookie": "^2.2.0",
     "jsonschema": "^1.2.2",
     "jwt-decode": "^2.2.0",
@@ -90,7 +88,6 @@
     "three-bmfont-text": "^2.3.0",
     "three-mesh-bvh": "^0.1.2",
     "three-pathfinding": "github:MozillaReality/three-pathfinding#hubs/master2",
-    "ts-ebml": "^2.0.2",
     "uuid": "^3.2.1",
     "webrtc-adapter": "^6.0.2",
     "zip-loader": "^1.1.0"
