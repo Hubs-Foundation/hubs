@@ -115,7 +115,7 @@ export default class ClientInfoDialog extends Component {
   }
 
   render() {
-    const { profile, roles } = this.getPresenceEntry();
+    const { profile, roles, signed_in } = this.getPresenceEntry();
 
     const { displayName, communityIdentifier } = profile;
     const { hubChannel, clientId, onClose } = this.props;
@@ -129,6 +129,7 @@ export default class ClientInfoDialog extends Component {
     const mayMute = hubChannel.canOrWillIfCreator("mute_users");
     const targetIsOwner = !!roles.owner;
     const targetIsCreator = !!roles.creator;
+    const targetIsSignedIn = !!roles.signed_in;
     const mayAddOwner = hubChannel.canOrWillIfCreator("update_roles") && !targetIsOwner && !targetIsCreator;
     const mayRemoveOwner = hubChannel.canOrWillIfCreator("update_roles") && targetIsOwner && !targetIsCreator;
     const isHidden = hubChannel.isHidden(clientId);
@@ -141,7 +142,11 @@ export default class ClientInfoDialog extends Component {
           </div>
           <div className={styles.clientActionButtons}>
             {mayAddOwner && (
-              <button onClick={() => this.addOwner()}>
+              <button
+                onClick={() => this.addOwner()}
+                disabled={!targetIsSignedIn}
+                title={targetIsSignedIn ? "Promote" : `${profile.displayName} is signed out.`}
+              >
                 <img className={styles.buttonIcon} src="../assets/images/add-owner.png" />
                 <FormattedMessage id="client-info.add-owner" />
               </button>

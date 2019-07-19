@@ -88,6 +88,14 @@
     flex-direction: row;
   }
 
+  button:disabled {
+    color: $dark-grey;
+
+    :local(.button-icon) {
+      filter: saturate(0);
+    }
+  }
+
   :local(.cancel) {
     @extend %action-button;
   }
