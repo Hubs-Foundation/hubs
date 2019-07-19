@@ -817,7 +817,6 @@ AFRAME.registerComponent("media-image", {
     // We only support transparency on gifs. Other images will support cutout as part of batching, but not alpha transparency for now
     this.mesh.material.transparent =
       !this.data.batch || texture == errorTexture || this.data.contentType.includes("image/gif");
-    console.log(this.data.batch, this.mesh.material.transparent);
     this.mesh.material.map = texture;
     this.mesh.material.needsUpdate = true;
 
