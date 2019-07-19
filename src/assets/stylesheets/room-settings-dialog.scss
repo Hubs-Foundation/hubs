@@ -1,0 +1,54 @@
+@import 'shared';
+
+:local(.room-settings-form) {
+  @extend %centered-flex-column;
+}
+
+:local(.subtitle) {
+  margin: 1em;
+  margin-top: 0;
+  font-size: 12pt;
+}
+
+:local(.name-field) {
+  @extend %input-field;
+  margin-bottom: 1.5em;
+  margin-top: 0;
+}
+
+:local(.next-button), :local(.continue-button) {
+  @extend %action-button;
+  margin-top: 1em;
+}
+
+:local(.permissions) {
+  margin-bottom: 1em;
+  text-align: left;
+}
+
+:local(.permissions-group) {
+  padding-left: 1em;
+}
+
+:local(.permission) {
+  display: flex;
+  align-items: center;
+}
+
+:local(.permission-disabled) {
+  color: $dark-grey;
+}
+
+:local(.permission-disabled input) {
+  cursor: auto;
+}
+
+:local(.permission input) {
+  @extend %checkbox;
+  vertical-align: middle;
+  margin: 0.5em;
+}
+
+:local(.permission input:checked) {
+  @extend %checkbox-checked;
+}

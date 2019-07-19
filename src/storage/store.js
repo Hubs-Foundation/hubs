@@ -48,7 +48,8 @@ export const SCHEMA = {
         hasRecentered: { type: "boolean" },
         hasScaled: { type: "boolean" },
         hasHoveredInWorldHud: { type: "boolean" },
-        hasOpenedShare: { type: "boolean" }
+        hasOpenedShare: { type: "boolean" },
+        entryCount: { type: "number" }
       }
     },
 
@@ -213,7 +214,14 @@ export default class Store extends EventTarget {
   }
 
   resetTipActivityFlags() {
-    this.update({ activity: { hasRotated: false, hasPinned: false, hasRecentered: false, hasScaled: false } });
+    this.update({
+      activity: { hasRotated: false, hasPinned: false, hasRecentered: false, hasScaled: false, entryCount: 0 }
+    });
+  }
+
+  bumpEntryCount() {
+    const currentEntryCount = this.state.activity.entryCount || 0;
+    this.update({ activity: { entryCount: currentEntryCount + 1 } });
   }
 
   // Sets a one-time action to perform the next time the page loads

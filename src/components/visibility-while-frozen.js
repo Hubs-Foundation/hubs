@@ -11,7 +11,8 @@ AFRAME.registerComponent("visibility-while-frozen", {
   schema: {
     withinDistance: { type: "number" },
     visible: { type: "boolean", default: true },
-    requireHoverOnNonMobile: { type: "boolean", default: true }
+    requireHoverOnNonMobile: { type: "boolean", default: true },
+    withPermission: { type: "string" }
   },
 
   init() {
@@ -73,8 +74,13 @@ AFRAME.registerComponent("visibility-while-frozen", {
 
     const isTransforming = AFRAME.scenes[0].systems["transform-selected-object"].transforming;
 
+    const allowed = !this.data.withPermission || window.APP.hubChannel.canOrWillIfCreator(this.data.withPermission);
+
     let shouldBeVisible =
-      ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) && isWithinDistance && !isTransforming;
+      allowed &&
+      ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) &&
+      isWithinDistance &&
+      !isTransforming;
 
     if (this.data.requireHoverOnNonMobile && !isMobile) {
       shouldBeVisible =

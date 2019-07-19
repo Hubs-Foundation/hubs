@@ -159,6 +159,7 @@ AFRAME.registerComponent("camera-tool", {
       this.recordIcon = this.el.querySelector(".record-icon");
       this.recordAlphaIcon = this.el.querySelector(".record-alpha-icon");
 
+<<<<<<< HEAD
       this.label.object3D.visible = false;
       this.durationLabel.object3D.visible = false;
 
@@ -476,6 +477,7 @@ AFRAME.registerComponent("camera-tool", {
     if (this.screen && this.selfieScreen) {
       this.screen.visible = this.selfieScreen.visible = !!this.showCameraViewport;
     }
+<<<<<<< HEAD
 
     // Always draw held, snapping, or recording camera viewports with a decent framerate
     if (

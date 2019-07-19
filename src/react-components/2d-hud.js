@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
 const browser = detect();
+const noop = () => {};
 
 class TopHUD extends Component {
   static propTypes = {
@@ -39,7 +40,33 @@ class TopHUD extends Component {
 
   state = {
     showVideoShareOptions: false,
-    lastActiveMediaSource: null
+    lastActiveMediaSource: null,
+    cameraDisabled: false,
+    penDisabled: false,
+    mediaDisabled: false
+  };
+
+  constructor(props) {
+    super(props);
+    this.state.cameraDisabled = !window.APP.hubChannel.can("spawn_camera");
+    this.state.penDisabled = !window.APP.hubChannel.can("spawn_drawing");
+    this.state.mediaDisabled = !window.APP.hubChannel.can("spawn_and_move_media");
+  }
+
+  componentDidMount() {
+    window.APP.hubChannel.addEventListener("permissions_updated", this.onPermissionsUpdated);
+  }
+
+  componentWillUnMount() {
+    window.APP.hubChannel.removeEventListener("permissions_updated", this.onPermissionsUpdated);
+  }
+
+  onPermissionsUpdated = () => {
+    this.setState({
+      cameraDisabled: !window.APP.hubChannel.can("spawn_camera"),
+      penDisabled: !window.APP.hubChannel.can("spawn_drawing"),
+      mediaDisabled: !window.APP.hubChannel.can("spawn_and_move_media")
+    });
   };
 
   handleVideoShareClicked = source => {
@@ -89,19 +116,28 @@ class TopHUD extends Component {
       }, 250);
     };
 
+    const maybeHandlePrimaryShare = () => {
+      if (!this.state.showVideoShareOptions) {
+        this.handleVideoShareClicked(primaryVideoShareType);
+      }
+    };
+
+    const capitalize = str => str[0].toUpperCase() + str.slice(1);
+
     return (
       <div
         className={cx(styles.iconButton, styles[`share_${primaryVideoShareType}`], {
           [styles.active]: this.props.videoShareMediaSource === primaryVideoShareType,
+          [styles.disabled]: this.state.mediaDisabled,
           [styles.videoShare]: true
         })}
-        title={this.props.videoShareMediaSource !== null ? "Stop sharing" : `Share ${primaryVideoShareType}`}
-        onClick={() => {
-          if (!this.state.showVideoShareOptions) {
-            this.handleVideoShareClicked(primaryVideoShareType);
-          }
-        }}
-        onMouseOver={showExtrasOnHover}
+        title={
+          this.props.videoShareMediaSource !== null
+            ? "Stop sharing"
+            : `Share ${capitalize(primaryVideoShareType)}${this.state.mediaDisabled ? " Disabled" : ""}`
+        }
+        onClick={this.state.mediaDisabled ? noop : maybeHandlePrimaryShare}
+        onMouseOver={this.state.mediaDisabled ? noop : showExtrasOnHover}
       >
         {videoShareExtraOptionTypes.length > 0 && (
           <div className={cx(styles.videoShareExtraOptions)} onMouseOut={hideExtrasOnOut}>
@@ -109,11 +145,16 @@ class TopHUD extends Component {
               <div
                 key={type}
                 className={cx(styles.iconButton, styles[`share_${type}`], {
-                  [styles.active]: this.props.videoShareMediaSource === type
+                  [styles.active]: this.props.videoShareMediaSource === type,
+                  [styles.disabled]: this.state.mediaDisabled
                 })}
-                title={this.props.videoShareMediaSource === type ? "Stop sharing" : `Share ${type}`}
-                onClick={() => this.handleVideoShareClicked(type)}
-                onMouseOver={showExtrasOnHover}
+                title={
+                  this.props.videoShareMediaSource === type
+                    ? "Stop sharing"
+                    : `Share ${capitalize(type)}${this.state.mediaDisabled ? " Disabled" : ""}`
+                }
+                onClick={this.state.mediaDisabled ? noop : () => this.handleVideoShareClicked(type)}
+                onMouseOver={this.state.mediaDisabled ? noop : showExtrasOnHover}
               />
             ))}
           </div>
@@ -178,18 +219,28 @@ class TopHUD extends Component {
               onClick={this.props.onToggleMute}
             />
             <button
-              className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn)}
-              onClick={() => this.props.mediaSearchStore.sourceNavigateToDefaultSource()}
+              className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn, {
+                [styles.disabled]: this.state.mediaDisabled
+              })}
+              onClick={
+                this.state.mediaDisabled ? noop : () => this.props.mediaSearchStore.sourceNavigateToDefaultSource()
+              }
             />
             <div
-              className={cx(styles.iconButton, styles.pen, { [styles.active]: this.props.isCursorHoldingPen })}
-              title={"Pen"}
-              onClick={this.props.onSpawnPen}
+              className={cx(styles.iconButton, styles.pen, {
+                [styles.active]: this.props.isCursorHoldingPen,
+                [styles.disabled]: this.state.penDisabled
+              })}
+              title={`Pen${this.state.penDisabled ? " Disabled" : ""}`}
+              onClick={this.state.penDisabled ? noop : this.props.onSpawnPen}
             />
             <div
-              className={cx(styles.iconButton, styles.camera, { [styles.active]: this.props.hasActiveCamera })}
-              title={"Camera"}
-              onClick={this.props.onSpawnCamera}
+              className={cx(styles.iconButton, styles.camera, {
+                [styles.active]: this.props.hasActiveCamera,
+                [styles.disabled]: this.state.cameraDisabled
+              })}
+              title={`Camera${this.state.cameraDisabled ? " Disabled" : ""}`}
+              onClick={this.state.cameraDisabled ? noop : this.props.onSpawnCamera}
             />
           </div>
         )}
