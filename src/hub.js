@@ -159,8 +159,6 @@ if (isEmbed && !qs.get("embed_token")) {
   throw new Error("no embed token");
 }
 
-const embedsEnabled = qs.get("embeds");
-
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
 
@@ -438,7 +436,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
     onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
-    embedToken: embedsEnabled ? embedToken : null
+    embedToken: embedToken
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
