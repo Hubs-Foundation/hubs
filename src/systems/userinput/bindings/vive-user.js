@@ -885,8 +885,14 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.touch_axis_scroll(0.05)
     },
     {
-      src: { value: lButton("top").pressed },
+      src: { value: rButton("top").pressed },
       dest: { value: paths.actions.leftHand.undoDrawing },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: { value: lButton("top").pressed },
+      dest: { value: paths.actions.leftHand.switchDrawMode },
       xform: xforms.rising,
       priority: 2
     }
@@ -1142,8 +1148,14 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.touch_axis_scroll(0.05)
     },
     {
-      src: { value: rButton("top").pressed },
+      src: { value: lButton("top").pressed },
       dest: { value: paths.actions.rightHand.undoDrawing },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: { value: rButton("top").pressed },
+      dest: { value: paths.actions.rightHand.switchDrawMode },
       xform: xforms.rising,
       priority: 2
     }
