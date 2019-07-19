@@ -115,7 +115,7 @@ export default class ClientInfoDialog extends Component {
   }
 
   render() {
-    const { profile, roles, signed_in } = this.getPresenceEntry();
+    const { profile, roles } = this.getPresenceEntry();
 
     const { displayName, communityIdentifier } = profile;
     const { hubChannel, clientId, onClose } = this.props;
