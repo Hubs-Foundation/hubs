@@ -59,7 +59,7 @@ function shouldMoveCursor(touch, raycaster) {
   const isPinned =
     remoteHoverTarget && remoteHoverTarget.components.pinnable && remoteHoverTarget.components.pinnable.data.pinned;
   const isFrozen = AFRAME.scenes[0].is("frozen");
-  return isInteractable && (isFrozen || !isPinned) && canMove(remoteHoverTarget, isPinned);
+  return isInteractable && (isFrozen || !isPinned) && canMove(remoteHoverTarget);
 }
 
 export class AppAwareTouchscreenDevice {
