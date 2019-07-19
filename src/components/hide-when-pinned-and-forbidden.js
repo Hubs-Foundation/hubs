@@ -38,10 +38,10 @@ AFRAME.registerComponent("hide-when-pinned-and-forbidden", {
     const isPinned = this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned;
 
     if (this.data.whenPinned) {
-      this.el.setAttribute("visible", !isPinned);
+      this.el.object3D.visible = !isPinned;
     } else {
       const pinnedAndForbidden = isPinned && !window.APP.hubChannel.canOrWillIfCreator("pin_objects");
-      this.el.setAttribute("visible", !pinnedAndForbidden);
+      this.el.object3D.visible = !pinnedAndForbidden;
     }
   }
 });
