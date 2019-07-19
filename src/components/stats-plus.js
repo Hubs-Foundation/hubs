@@ -10,9 +10,15 @@ function createStats(scene) {
   return new window.rStats({
     css: [], // Our stylesheet is injected from AFrame.
     values: {
-      fps: { caption: "fps", below: 30 }
+      fps: { caption: "fps", below: 30 },
+      batchdraws: { caption: "Draws" },
+      batchinstances: { caption: "Instances" },
+      batchatlassize: { caption: "Atlas Size" }
     },
-    groups: [{ caption: "Framerate", values: ["fps", "raf", "physics"] }],
+    groups: [
+      { caption: "Framerate", values: ["fps", "raf", "physics"] },
+      { caption: "Batching", values: ["batchdraws", "batchinstances", "batchatlassize"] }
+    ],
     plugins: plugins
   });
 }
@@ -135,6 +141,15 @@ AFRAME.registerComponent("stats-plus", {
       // Update rStats
       stats("rAF").tick();
       stats("FPS").frame();
+
+      const batchManagerSystem = this.el.sceneEl.systems["hubs-systems"].batchManagerSystem;
+      if (batchManagerSystem.batchingEnabled) {
+        const batchManager = batchManagerSystem.batchManager;
+        stats("batchdraws").set(batchManager.batches.length);
+        stats("batchinstances").set(batchManager.instanceCount);
+        stats("batchatlassize").set(batchManager.atlas.arrayDepth);
+      }
+
       stats().update();
     } else if (!this.inVR) {
       // Update the fps counter

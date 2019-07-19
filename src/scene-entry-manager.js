@@ -108,6 +108,9 @@ export default class SceneEntryManager {
       });
     })();
 
+    // Bump stored entry count after 30s
+    setTimeout(() => this.store.bumpEntryCount(), 30000);
+
     this.scene.addState("entered");
 
     if (muteOnEntry) {
