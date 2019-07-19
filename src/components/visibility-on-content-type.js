@@ -22,7 +22,8 @@ AFRAME.registerComponent("visibility-on-content-type", {
     const currentContentType =
       contentType || (mediaVideo && mediaVideo.data.contentType) || (mediaImage && mediaImage.data.contentType);
     const matchesType =
-      !this.data.contentType || currentContentType.toLowerCase().split(";")[0] === this.data.contentType;
+      !this.data.contentType ||
+      (currentContentType && currentContentType.toLowerCase().split(";")[0] === this.data.contentType);
     const matchesSubtype =
       !this.data.contentSubtype ||
       (mediaLoader.data.contentSubtype && mediaLoader.data.contentSubtype === this.data.contentSubtype);
