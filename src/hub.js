@@ -1354,6 +1354,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  hubPhxChannel.on("permissions_updated", async () => {
+    await hubChannel.fetchPermissions();
+
+    // Ugly, force a refresh since permissions are not part of props
+    remountUI({});
+  });
+
   hubPhxChannel.on("mute", ({ session_id }) => {
     if (session_id === NAF.clientId && !scene.is("muted")) {
       scene.emit("action_mute");

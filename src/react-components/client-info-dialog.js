@@ -59,32 +59,55 @@ export default class ClientInfoDialog extends Component {
     onClose();
   }
 
+  addOwner() {
+    const { clientId, performConditionalSignIn, hubChannel, onClose } = this.props;
+
+    performConditionalSignIn(
+      () => hubChannel.can("update_roles"),
+      async () => await hubChannel.addOwner(clientId),
+      "add-owner"
+    );
+
+    onClose();
+  }
+
+  removeOwner() {
+    const { clientId, performConditionalSignIn, hubChannel, onClose } = this.props;
+
+    performConditionalSignIn(
+      () => hubChannel.can("update_roles"),
+      async () => await hubChannel.removeOwner(clientId),
+      "remove-owner"
+    );
+
+    onClose();
+  }
+
   unhide() {
     const { clientId, hubChannel, onClose } = this.props;
     hubChannel.unhide(clientId);
     onClose();
   }
 
-  getPresenceProfile() {
+  getPresenceEntry() {
     if (!this.props.presences) return null;
 
     const presence = Object.entries(this.props.presences).find(([k]) => k === this.props.clientId);
-    if (!presence) return null;
+    if (!presence) return { profile: {}, roles: {} };
 
     const metas = presence[1].metas;
-    return metas[metas.length - 1].profile;
+    return metas[metas.length - 1];
   }
 
   componentDidMount() {
-    const { avatarId } = this.getPresenceProfile();
-    if (avatarId) {
-      getAvatarThumbnailUrl(avatarId).then(avatarThumbnailUrl => this.setState({ avatarThumbnailUrl }));
+    const { profile } = this.getPresenceEntry();
+    if (profile.avatarId) {
+      getAvatarThumbnailUrl(profile.avatarId).then(avatarThumbnailUrl => this.setState({ avatarThumbnailUrl }));
     }
   }
 
   render() {
-    const profile = this.getPresenceProfile();
-    if (!profile) return null;
+    const { profile, roles } = this.getPresenceEntry();
 
     const { displayName, communityIdentifier } = profile;
     const { hubChannel, clientId, onClose } = this.props;
@@ -96,6 +119,10 @@ export default class ClientInfoDialog extends Component {
     );
     const mayKick = hubChannel.canOrWillIfCreator("kick_users");
     const mayMute = hubChannel.canOrWillIfCreator("mute_users");
+    const targetIsOwner = !!roles.owner;
+    const targetIsCreator = !!roles.creator;
+    const mayAddOwner = hubChannel.canOrWillIfCreator("update_roles") && !targetIsOwner && !targetIsCreator;
+    const mayRemoveOwner = hubChannel.canOrWillIfCreator("update_roles") && targetIsOwner && !targetIsCreator;
     const isHidden = hubChannel.isHidden(clientId);
 
     return (
@@ -105,6 +132,18 @@ export default class ClientInfoDialog extends Component {
             <img src={this.state.avatarThumbnailUrl} />
           </div>
           <div className={styles.clientActionButtons}>
+            {mayAddOwner && (
+              <button onClick={() => this.addOwner()}>
+                <img className={styles.buttonIcon} src="../assets/images/add-owner.png" />
+                <FormattedMessage id="client-info.add-owner" />
+              </button>
+            )}
+            {mayRemoveOwner && (
+              <button onClick={() => this.removeOwner()}>
+                <img className={styles.buttonIcon} src="../assets/images/remove-owner.png" />
+                <FormattedMessage id="client-info.remove-owner" />
+              </button>
+            )}
             {!isHidden && (
               <button onClick={() => this.hide()}>
                 <FormattedMessage id="client-info.hide-button" />
