@@ -252,6 +252,7 @@ export default class SceneEntryManager {
   _setupMedia = mediaStream => {
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
+      if (!this.hubChannel.can("spawn_and_move_media")) return;
       const { entity, orientation } = addMedia(
         src,
         "#interactable-media",
@@ -469,6 +470,7 @@ export default class SceneEntryManager {
 
   _setupCamera = () => {
     this.scene.addEventListener("action_toggle_camera", () => {
+      if (!this.hubChannel.can("spawn_camera")) return;
       const myCamera = this.scene.systems["camera-tools"].getMyCamera();
 
       if (myCamera) {
@@ -495,7 +497,7 @@ export default class SceneEntryManager {
   };
 
   _spawnAvatar = () => {
-    this.playerRig.setAttribute("networked", "template: #remote-avatar-template; attachTemplateToLocal: false;");
+    this.playerRig.setAttribute("networked", "template: #remote-avatar; attachTemplateToLocal: false;");
     this.playerRig.setAttribute("networked-avatar", "");
     this.playerRig.emit("entered");
   };

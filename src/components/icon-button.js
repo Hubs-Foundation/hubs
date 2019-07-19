@@ -10,6 +10,7 @@ AFRAME.registerComponent("icon-button", {
     activeImage: { type: "string" },
     activeHoverImage: { type: "string" },
     active: { type: "boolean" },
+    disabled: { type: "boolean" },
     tooltip: { type: "selector" },
     tooltipText: { type: "string" },
     activeTooltipText: { type: "string" }
@@ -45,8 +46,16 @@ AFRAME.registerComponent("icon-button", {
   updateButtonState() {
     const hovering = this.hovering;
     const active = this.data.active;
+    const disabled = this.data.disabled;
 
-    const image = active ? (hovering ? "activeHoverImage" : "activeImage") : hovering ? "hoverImage" : "image";
+    let image;
+    if (disabled) {
+      image = "disabledImage";
+    } else if (active) {
+      image = hovering ? "activeHoverImage" : "activeImage";
+    } else {
+      image = hovering ? "hoverImage" : "image";
+    }
 
     if (this.el.components.sprite) {
       if (this.data[image]) {
@@ -59,10 +68,10 @@ AFRAME.registerComponent("icon-button", {
     }
 
     if (this.data.tooltip && hovering) {
-      this.data.tooltip.setAttribute("visible", this.hovering);
-      this.data.tooltip
-        .querySelector("[text]")
-        .setAttribute("text", "value", this.data.active ? this.data.activeTooltipText : this.data.tooltipText);
+      const tooltipText =
+        (this.data.active ? this.data.activeTooltipText : this.data.tooltipText) + (disabled ? " Disabled" : "");
+      this.data.tooltip.object3D.visible = this.hovering;
+      this.data.tooltip.querySelector("[text]").setAttribute("text", "value", tooltipText);
     }
   }
 });

@@ -57,6 +57,7 @@ import "./components/kick-button";
 import "./components/close-vr-notice-button";
 import "./components/leave-room-button";
 import "./components/visible-if-permitted";
+import "./components/hide-when-pinned-and-forbidden";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
@@ -203,6 +204,7 @@ import qsTruthy from "./utils/qs_truthy";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
+NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
 
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
@@ -302,6 +304,7 @@ async function updateUIForHub(hub) {
   remountUI({
     hubId: hub.hub_id,
     hubName: hub.name,
+    hubMemberPermissions: hub.member_permissions,
     hubScene: hub.scene,
     hubEntryCode: hub.entry_code
   });
@@ -751,6 +754,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.APP.scene = scene;
   window.APP.hubChannel = hubChannel;
+  window.dispatchEvent(new CustomEvent("hub_channel_ready"));
 
   const handleEarlyVRMode = () => {
     // If VR headset is activated, refreshing page will fire vrdisplayactivate
@@ -1279,6 +1283,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         name: userInfo.metas[0].profile.displayName,
         sceneName: hub.scene ? hub.scene.name : "a custom URL"
       });
+    }
+
+    if (stale_fields.includes("member_permissions")) {
+      hubChannel.fetchPermissions();
     }
 
     if (stale_fields.includes("name")) {

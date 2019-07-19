@@ -3,7 +3,8 @@ AFRAME.registerComponent("hover-menu", {
   schema: {
     template: { type: "selector" },
     dirs: { type: "array" },
-    dim: { default: true }
+    dim: { default: true },
+    withPermission: { type: "string" }
   },
 
   async init() {
@@ -38,7 +39,8 @@ AFRAME.registerComponent("hover-menu", {
 
   applyHoverState() {
     if (!this.menu) return;
-    this.menu.object3D.visible = !this.el.sceneEl.is("frozen") && this.hovering;
+    const allowed = !this.data.withPermission || window.APP.hubChannel.canOrWillIfCreator(this.data.withPermission);
+    this.menu.object3D.visible = allowed && !this.el.sceneEl.is("frozen") && this.hovering;
     if (this.data.dim && this.el.object3DMap.mesh && this.el.object3DMap.mesh.material) {
       this.el.object3DMap.mesh.material.color.setScalar(this.menu.object3D.visible ? 0.5 : 1);
     }

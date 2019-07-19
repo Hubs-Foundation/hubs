@@ -111,6 +111,7 @@ module.exports = (env, argv) => ({
   },
   devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
   devServer: {
+    inline: false,
     https: createHTTPSConfig(),
     host: process.env.HOST_IP || "0.0.0.0",
     public: `${host}:8080`,

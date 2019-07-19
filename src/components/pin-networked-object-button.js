@@ -7,10 +7,7 @@ AFRAME.registerComponent("pin-networked-object-button", {
     tipSelector: { type: "string" },
 
     // Selector for label to change when pinned/unpinned, must be sibling of this components element
-    labelSelector: { type: "string" },
-
-    // Selector for items to hide iff pinned
-    hideWhenPinnedSelector: { type: "string" }
+    labelSelector: { type: "string" }
   },
 
   init() {
@@ -84,21 +81,18 @@ AFRAME.registerComponent("pin-networked-object-button", {
 
   _updateUI() {
     const { fileIsOwned, fileId } = this.targetEl.components["media-loader"].data;
-    const canPin = !!(fileIsOwned || (fileId && getPromotionTokenForFile(fileId)));
-    this.el.setAttribute("visible", canPin);
-    this.labelEl.setAttribute("visible", canPin);
+    const canPin =
+      window.APP.hubChannel.can("pin_objects") && !!(fileIsOwned || (fileId && getPromotionTokenForFile(fileId)));
+    this.el.object3D.visible = canPin;
+    this.labelEl.object3D.visible = canPin;
 
     const isPinned = this.targetEl.getAttribute("pinnable") && this.targetEl.getAttribute("pinnable").pinned;
     const discordBridges = this._discordBridges();
-    this.tipEl.setAttribute("visible", !!(canPin && !isPinned && this.hovering && discordBridges.length > 0));
+    this.tipEl.object3D.visible = !!(canPin && !isPinned && this.hovering && discordBridges.length > 0);
 
     if (!canPin) return;
     this.labelEl.setAttribute("text", "value", isPinned ? "un-pin" : "pin");
     this.el.setAttribute("text-button", "backgroundColor", isPinned ? "#fff" : "#ff3550");
     this.el.setAttribute("text-button", "backgroundHoverColor", isPinned ? "#bbb" : "#fc3545");
-
-    this.el.parentNode.querySelectorAll(this.data.hideWhenPinnedSelector).forEach(hideEl => {
-      hideEl.setAttribute("visible", !isPinned);
-    });
   }
 });
