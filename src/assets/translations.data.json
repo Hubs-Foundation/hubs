@@ -220,7 +220,7 @@
     "invite.or_visit": "or share permalink",
     "invite.or_visit_modal": "or by visiting permalink",
     "invite.embed": "or embed on a page",
-    "invite.embed-tip": "Please be mindful of where you embed a Hubs room.\nAnyone who can access the page can enter and create/remove objects.",
+    "invite.embed-tip": "Please be mindful of where you embed a Hubs room.\nGo to Room Settings to lock down permissions for this room.",
     "spoke.primary_tagline": "make your space",
     "spoke.secondary_tagline": "Create 3D social scenes for ",
     "spoke.thank_you": "Thank you for downloading Spoke!",
