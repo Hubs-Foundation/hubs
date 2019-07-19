@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
+import PromoteClientDialog from "./promote-client-dialog.js";
 import styles from "../assets/stylesheets/client-info-dialog.scss";
 import { FormattedMessage } from "react-intl";
 import { sluglessPath } from "../utils/history";
@@ -22,7 +23,8 @@ export default class ClientInfoDialog extends Component {
     hubChannel: PropTypes.object,
     presences: PropTypes.object,
     performConditionalSignIn: PropTypes.func,
-    onClose: PropTypes.func
+    onClose: PropTypes.func,
+    showNonHistoriedDialog: PropTypes.func
   };
 
   state = {
@@ -61,14 +63,20 @@ export default class ClientInfoDialog extends Component {
 
   addOwner() {
     const { clientId, performConditionalSignIn, hubChannel, onClose } = this.props;
+    const { profile } = this.getPresenceEntry();
 
     performConditionalSignIn(
       () => hubChannel.can("update_roles"),
-      async () => await hubChannel.addOwner(clientId),
+      async () => {
+        onClose();
+
+        this.props.showNonHistoriedDialog(PromoteClientDialog, {
+          displayName: profile.displayName,
+          onConfirm: () => hubChannel.addOwner(clientId)
+        });
+      },
       "add-owner"
     );
-
-    onClose();
   }
 
   removeOwner() {
