@@ -159,7 +159,6 @@ AFRAME.registerComponent("camera-tool", {
       this.recordIcon = this.el.querySelector(".record-icon");
       this.recordAlphaIcon = this.el.querySelector(".record-alpha-icon");
 
-<<<<<<< HEAD
       this.label.object3D.visible = false;
       this.durationLabel.object3D.visible = false;
 
@@ -477,7 +476,6 @@ AFRAME.registerComponent("camera-tool", {
     if (this.screen && this.selfieScreen) {
       this.screen.visible = this.selfieScreen.visible = !!this.showCameraViewport;
     }
-<<<<<<< HEAD
 
     // Always draw held, snapping, or recording camera viewports with a decent framerate
     if (
@@ -488,27 +486,30 @@ AFRAME.registerComponent("camera-tool", {
     }
 
     const isHoldingTrigger = this.isHoldingSnapshotTrigger();
+    const isPermittedToUse = window.APP.hubChannel.can("spawn_camera");
 
-    // If the user lets go of the trigger before 500ms, take a picture, otherwise record until they let go.
-    if (isHoldingTrigger && !this.data.isSnapping && !this.snapTriggerTimeout) {
-      this.snapTriggerTimeout = setTimeout(() => {
-        if (this.isHoldingSnapshotTrigger()) {
-          this.el.setAttribute("camera-tool", "isSnapping", true);
-          this.beginRecording(Infinity);
+    if (isPermittedToUse) {
+      // If the user lets go of the trigger before 500ms, take a picture, otherwise record until they let go.
+      if (isHoldingTrigger && !this.data.isSnapping && !this.snapTriggerTimeout) {
+        this.snapTriggerTimeout = setTimeout(() => {
+          if (this.isHoldingSnapshotTrigger()) {
+            this.el.setAttribute("camera-tool", "isSnapping", true);
+            this.beginRecording(Infinity);
 
-          const releaseInterval = setInterval(() => {
-            if (this.isHoldingSnapshotTrigger()) return;
-            this.stopRecording();
-            clearInterval(releaseInterval);
-          }, 500);
-        }
+            const releaseInterval = setInterval(() => {
+              if (this.isHoldingSnapshotTrigger()) return;
+              this.stopRecording();
+              clearInterval(releaseInterval);
+            }, 500);
+          }
 
+          this.snapTriggerTimeout = null;
+        }, 500);
+      } else if (!isHoldingTrigger && !this.data.isSnapping && this.snapTriggerTimeout) {
+        clearTimeout(this.snapTriggerTimeout);
         this.snapTriggerTimeout = null;
-      }, 500);
-    } else if (!isHoldingTrigger && !this.data.isSnapping && this.snapTriggerTimeout) {
-      clearTimeout(this.snapTriggerTimeout);
-      this.snapTriggerTimeout = null;
-      this.takeSnapshotNextTick = true;
+        this.takeSnapshotNextTick = true;
+      }
     }
   },
 
