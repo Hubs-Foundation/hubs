@@ -34,10 +34,15 @@ export const resolveUrl = async (url, index) => {
   return resultPromise;
 };
 
-export const upload = file => {
+export const upload = (file, desiredContentType) => {
   const formData = new FormData();
   formData.append("media", file);
   formData.append("promotion_mode", "with_token");
+
+  if (desiredContentType) {
+    formData.append("desired_content_type", desiredContentType);
+  }
+
   return fetch(mediaAPIEndpoint, {
     method: "POST",
     body: formData
@@ -137,7 +142,10 @@ export const addMedia = (
     }
   });
   if (needsToBeUploaded) {
-    upload(src)
+    // Video camera videos are converted to mp4 for compatibility
+    const desiredContentType = contentSubtype === "video-camera" ? "video/mp4" : null;
+
+    upload(src, desiredContentType)
       .then(response => {
         const srcUrl = new URL(response.raw);
         srcUrl.searchParams.set("token", response.meta.access_token);
@@ -255,7 +263,7 @@ export function getPromotionTokenForFile(fileId) {
 
 const mediaPos = new THREE.Vector3();
 
-export function spawnMediaAround(el, media, contentSubtype, snapCount, mirrorOrientation = false) {
+export function addAndArrangeMedia(el, media, contentSubtype, snapCount, mirrorOrientation = false) {
   const { entity, orientation } = addMedia(media, "#interactable-media", undefined, contentSubtype, false);
 
   const pos = el.object3D.position;
@@ -280,27 +288,36 @@ export function spawnMediaAround(el, media, contentSubtype, snapCount, mirrorOri
   el.object3D.localToWorld(mediaPos);
   entity.object3D.visible = false;
 
-  entity.addEventListener(
-    "image-loaded",
-    () => {
-      entity.object3D.visible = true;
-      entity.setAttribute("animation__photo_pos", {
-        property: "position",
-        dur: 800,
-        from: { x: pos.x, y: pos.y, z: pos.z },
-        to: { x: mediaPos.x, y: mediaPos.y, z: mediaPos.z },
-        easing: "easeOutElastic"
-      });
-    },
-    { once: true }
-  );
+  const handler = () => {
+    entity.object3D.visible = true;
+    entity.setAttribute("animation__photo_pos", {
+      property: "position",
+      dur: 800,
+      from: { x: pos.x, y: pos.y, z: pos.z },
+      to: { x: mediaPos.x, y: mediaPos.y, z: mediaPos.z },
+      easing: "easeOutElastic"
+    });
+  };
+
+  let eventType = null;
+
+  if (contentSubtype.startsWith("photo")) {
+    entity.addEventListener("image-loaded", handler, { once: true });
+    eventType = "photo";
+  } else if (contentSubtype.startsWith("video")) {
+    entity.addEventListener("video-loaded", handler, { once: true });
+    eventType = "video";
+  } else {
+    console.error("invalid type " + contentSubtype);
+    return;
+  }
 
   entity.object3D.matrixNeedsUpdate = true;
 
   entity.addEventListener(
     "media_resolved",
     () => {
-      el.emit("photo_taken", entity.components["media-loader"].data.src);
+      el.emit(`${eventType}_taken`, entity.components["media-loader"].data.src);
     },
     { once: true }
   );

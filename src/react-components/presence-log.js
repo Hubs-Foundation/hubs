@@ -6,6 +6,7 @@ import { FormattedMessage } from "react-intl";
 
 import ChatMessage from "./chat-message";
 import PhotoMessage from "./photo-message";
+import VideoMessage from "./video-message";
 import ImageMessage from "./image-message";
 import { getPresenceContextForSession } from "../utils/phoenix-utils";
 
@@ -91,6 +92,17 @@ export default class PresenceLog extends Component {
       case "photo":
         return (
           <PhotoMessage
+            key={e.key}
+            name={e.name}
+            className={classNames(entryClasses, styles.media)}
+            body={e.body}
+            maySpawn={e.maySpawn}
+            hubId={this.props.hubId}
+          />
+        );
+      case "video":
+        return (
+          <VideoMessage
             key={e.key}
             name={e.name}
             className={classNames(entryClasses, styles.media)}

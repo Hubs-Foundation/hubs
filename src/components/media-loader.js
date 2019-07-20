@@ -330,7 +330,7 @@ AFRAME.registerComponent("media-loader", {
           e => {
             this.onMediaLoaded(e.detail.projection === "flat" ? SHAPE.BOX : null);
 
-            if (contentSubtype === "camera-photo") {
+            if (contentSubtype === "photo-camera") {
               this.el.setAttribute("hover-menu__photo", {
                 template: "#photo-hover-menu",
                 dirs: ["forward", "back"]

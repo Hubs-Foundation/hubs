@@ -361,7 +361,7 @@ export const viveUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.keyboard.key("x") },
       dest: { value: paths.actions.takeSnapshot },
-      xform: xforms.rising
+      xform: xforms.copy
     },
     {
       src: { value: rButton("touchpad").pressed, bool: rDpadCenterStrip },
@@ -1169,7 +1169,7 @@ export const viveUserBindings = addSetsToBindings({
     {
       src: { value: rightTriggerPressed2 },
       dest: { value: paths.actions.rightHand.takeSnapshot },
-      xform: xforms.rising,
+      xform: xforms.copy,
       priority: 3
     },
     {
@@ -1183,14 +1183,14 @@ export const viveUserBindings = addSetsToBindings({
     {
       src: { value: lButton("trigger").pressed },
       dest: { value: paths.actions.leftHand.takeSnapshot },
-      xform: xforms.rising
+      xform: xforms.copy
     }
   ],
   [sets.cursorHoldingCamera]: [
     {
       src: { value: rightTriggerPressed2 },
       dest: { value: paths.actions.cursor.takeSnapshot },
-      xform: xforms.rising,
+      xform: xforms.copy,
       priority: 3
     },
     {

@@ -4,6 +4,30 @@
 // the avatar is quiet during that entire duration (eg they are muted)
 const DISABLE_AT_VOLUME_THRESHOLD = 0.00001;
 const DISABLE_GRACE_PERIOD_MS = 10000;
+const MIN_VOLUME_THRESHOLD = 0.01;
+
+const getVolume = (levels, smoothing, prevVolume) => {
+  let sum = 0;
+  for (let i = 0; i < levels.length; i++) {
+    const amplitude = (levels[i] - 128) / 128;
+    sum += amplitude * amplitude;
+  }
+  let currVolume = Math.sqrt(sum / levels.length);
+  if (currVolume < MIN_VOLUME_THRESHOLD) {
+    currVolume = 0;
+  }
+  return smoothing * currVolume + (1 - smoothing) * prevVolume;
+};
+
+const tempScaleFromPosition = new THREE.Vector3();
+const tempScaleToPosition = new THREE.Vector3();
+
+export function getAudioFeedbackScale(fromObject, toObject, minScale, maxScale, volume) {
+  tempScaleToPosition.setFromMatrixPosition(toObject.matrixWorld);
+  tempScaleFromPosition.setFromMatrixPosition(fromObject.matrixWorld);
+  const distance = tempScaleFromPosition.distanceTo(tempScaleToPosition) / 10;
+  return Math.min(maxScale, minScale + (maxScale - minScale) * volume * 8 * distance);
+}
 
 /**
  * Emits audioFrequencyChange events based on a networked audio source
@@ -15,7 +39,6 @@ AFRAME.registerComponent("networked-audio-analyser", {
     this.volume = 0;
     this.prevVolume = 0;
     this.smoothing = 0.3;
-    this.threshold = 0.01;
     this._updateAnalysis = this._updateAnalysis.bind(this);
     this._runScheduledWork = this._runScheduledWork.bind(this);
     this.el.sceneEl.systems["frame-scheduler"].schedule(this._updateAnalysis, "audio-analyser");
@@ -53,17 +76,7 @@ AFRAME.registerComponent("networked-audio-analyser", {
 
     // take care with compatibility, e.g. safari doesn't support getFloatTimeDomainData
     this.analyser.getByteTimeDomainData(this.levels);
-
-    let sum = 0;
-    for (let i = 0; i < this.levels.length; i++) {
-      const amplitude = (this.levels[i] - 128) / 128;
-      sum += amplitude * amplitude;
-    }
-    let currVolume = Math.sqrt(sum / this.levels.length);
-    if (currVolume < this.threshold) {
-      currVolume = 0;
-    }
-    this.volume = this.smoothing * currVolume + (1 - this.smoothing) * this.prevVolume;
+    this.volume = getVolume(this.levels, this.smoothing, this.prevVolume);
     this.prevVolume = this.volume;
 
     if (this.volume < DISABLE_AT_VOLUME_THRESHOLD) {
@@ -81,6 +94,46 @@ AFRAME.registerComponent("networked-audio-analyser", {
 });
 
 /**
+ * Performs local audio analysis, currently used to scale head when using video recording from camera.
+ */
+AFRAME.registerSystem("local-audio-analyser", {
+  schema: {
+    analyze: { default: false }
+  },
+
+  async init() {
+    this.volume = 0;
+    this.prevVolume = 0;
+    this.smoothing = 0.3;
+  },
+
+  async update() {
+    if (!this.data.analyze) {
+      this.stream = this.analyser = null;
+    } else if (!this.stream) {
+      this.stream = await NAF.connection.adapter.getMediaStream(NAF.clientId, "audio");
+      if (!this.stream || this.stream.getAudioTracks().length === 0) return;
+
+      const ctx = THREE.AudioContext.getContext();
+      const source = ctx.createMediaStreamSource(this.stream);
+      this.analyser = ctx.createAnalyser();
+      this.analyser.fftSize = 32;
+      this.levels = new Uint8Array(this.analyser.frequencyBinCount);
+      source.connect(this.analyser);
+    }
+  },
+
+  tick: function() {
+    if (!this.analyser || !this.data.analyze || !this.stream) return;
+
+    // take care with compatibility, e.g. safari doesn't support getFloatTimeDomainData
+    this.analyser.getByteTimeDomainData(this.levels);
+    this.volume = getVolume(this.levels, this.smoothing, this.prevVolume);
+    this.prevVolume = this.volume;
+  }
+});
+
+/**
  * Sets an entity's scale base on audioFrequencyChange events.
  * @namespace avatar
  * @component scale-audio-feedback
@@ -93,8 +146,6 @@ AFRAME.registerComponent("scale-audio-feedback", {
 
   init() {
     this._playerCamera = document.getElementById("player-camera").object3D;
-    this._playerCameraWorldPosition = new THREE.Vector3();
-    this._worldPosition = new THREE.Vector3();
   },
 
   tick() {
@@ -110,11 +161,7 @@ AFRAME.registerComponent("scale-audio-feedback", {
 
     const { object3D } = this.el;
 
-    this._playerCameraWorldPosition.setFromMatrixPosition(this._playerCamera.matrixWorld);
-    this._worldPosition.setFromMatrixPosition(object3D.matrixWorld);
-    const distance = this._worldPosition.distanceTo(this._playerCameraWorldPosition) / 10;
-
-    const scale = Math.min(maxScale, minScale + (maxScale - minScale) * audioAnalyser.volume * 8 * distance);
+    const scale = getAudioFeedbackScale(this.el.object3D, this._playerCamera, minScale, maxScale, audioAnalyser.volume);
 
     object3D.scale.setScalar(scale);
     object3D.matrixNeedsUpdate = true;

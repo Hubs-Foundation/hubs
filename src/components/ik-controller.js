@@ -108,7 +108,6 @@ AFRAME.registerComponent("ik-controller", {
     this.isInView = true;
     this.hasConvergedHips = false;
     this.lastCameraTransform = new THREE.Matrix4();
-    this.cameraMirrorSystem = this.el.sceneEl.systems["camera-mirror"];
     this.playerCamera = document.querySelector("#player-camera").getObject3D("camera");
 
     this.el.sceneEl.systems["frame-scheduler"].schedule(this._runScheduledWork, "ik");
@@ -292,15 +291,10 @@ AFRAME.registerComponent("ik-controller", {
     };
 
     return function() {
-      // Take into account the mirror camera if it is enabled.
-      const mirrorCamera = this.cameraMirrorSystem.mirrorCamera;
-
       const camera = this.ikRoot.camera.object3D;
       camera.getWorldPosition(cameraWorld);
 
-      this.isInView =
-        isInViewOfCamera(this.playerCamera, cameraWorld) ||
-        (mirrorCamera && isInViewOfCamera(mirrorCamera, cameraWorld));
+      this.isInView = isInViewOfCamera(this.playerCamera, cameraWorld);
     };
   })()
 });

@@ -11,7 +11,8 @@ AFRAME.registerComponent("tweet-media-button", {
         ? `Taken in hubs.mozilla.com - join me now at hub.link/${window.APP.hubChannel.hubId}! `
         : `Taken in hubs.mozilla.com `;
 
-      this.el.sceneEl.emit("action_media_tweet", { url: this.targetEl.components["media-loader"].data.src, text });
+      const { src, contentSubtype } = this.targetEl.components["media-loader"].data;
+      this.el.sceneEl.emit("action_media_tweet", { url: src, contentSubtype, text, el: this.targetEl });
     };
   },
 

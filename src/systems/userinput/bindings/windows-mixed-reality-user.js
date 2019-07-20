@@ -329,7 +329,7 @@ function holdingCameraBindings(hand, forCursor) {
     {
       src: { value: paths.device.wmr[hand].trigger.pressed },
       dest: { value: actions.takeSnapshot },
-      xform: xforms.rising
+      xform: xforms.copy
     }
   ];
 }

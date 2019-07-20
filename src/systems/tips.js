@@ -26,7 +26,7 @@ const NUM_ENTRIES_FOR_FEEDBACK_TIP = 3;
 
 const TIPS = {
   desktop: {
-    top: ["mirror_mode", "pen_mode", "video_share_mode", "mute_mode"],
+    top: ["pen_mode", "video_share_mode", "mute_mode"],
     bottom: [
       "look",
       "locomotion",
@@ -237,9 +237,6 @@ const VALIDATORS = {
   },
   video_share_mode: function(userinput, scene) {
     return scene.is("sharing_video") ? VALID : INVALID;
-  },
-  mirror_mode: function(userinput, scene) {
-    return scene.is("mirroring") ? VALID : INVALID;
   },
   mute_mode: function(userinput, scene) {
     return scene.is("muted") ? VALID : INVALID;

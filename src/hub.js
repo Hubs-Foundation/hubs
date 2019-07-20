@@ -57,6 +57,7 @@ import "./components/kick-button";
 import "./components/close-vr-notice-button";
 import "./components/leave-room-button";
 import "./components/visible-if-permitted";
+import "./components/visibility-on-content-type";
 import "./components/hide-when-pinned-and-forbidden";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
@@ -71,7 +72,6 @@ import "./components/pin-networked-object-button";
 import "./components/drop-object-button";
 import "./components/remove-networked-object-button";
 import "./components/camera-focus-button";
-import "./components/mirror-camera-button";
 import "./components/unmute-video-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/visible-to-owner";
@@ -126,7 +126,6 @@ import "./systems/permissions";
 import "./systems/exit-on-blur";
 import "./systems/camera-tools";
 import "./systems/userinput/userinput";
-import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
 import "./systems/ui-hotkeys";
 import "./systems/tips";
@@ -730,9 +729,21 @@ document.addEventListener("DOMContentLoaded", async () => {
           isInModal = true;
           pushHistoryState(history, "modal", "tweet", e.detail);
         } else {
+          if (e.detail.el) {
+            // Pin the object if we have to go through OAuth, since the page will refresh and
+            // the object will otherwise be removed
+            e.detail.el.setAttribute("pinnable", "pinned", true);
+          }
+
           const url = await hubChannel.getTwitterOAuthURL();
+
+          // Strip el from stored payload because it won't serialize into the store.
+          const loadActionDetail = {};
+          Object.assign(loadActionDetail, e.detail);
+          delete loadActionDetail.el;
+
           isInOAuth = true;
-          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: e.detail });
+          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: loadActionDetail });
           remountUI({
             showOAuthDialog: true,
             oauthInfo: [{ type: "twitter", url: url }],
@@ -866,6 +877,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     entryManager.exitScene("closed");
     remountUI({ roomUnavailableReason: "closed" });
   });
+
+  scene.addEventListener("action_camera_recording_started", () => hubChannel.beginRecording());
+  scene.addEventListener("action_camera_recording_ended", () => hubChannel.endRecording());
 
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
