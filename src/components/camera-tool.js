@@ -480,7 +480,7 @@ AFRAME.registerComponent("camera-tool", {
 
     if (isPermittedToUse) {
       // If the user lets go of the trigger before 500ms, take a picture, otherwise record until they let go.
-      if (isHoldingTrigger && !this.data.isSnapping) {
+      if (isHoldingTrigger && !this.data.isSnapping && !this.snapTriggerTimeout) {
         this.snapTriggerTimeout = setTimeout(() => {
           if (this.isHoldingSnapshotTrigger()) {
             this.el.setAttribute("camera-tool", "isSnapping", true);
