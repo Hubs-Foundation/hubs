@@ -725,9 +725,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     performConditionalSignIn(
       () => hubChannel.signedIn,
       async () => {
+        // Strip el from stored payload because it won't serialize into the store.
+        const serializableDetail = {};
+        Object.assign(serializableDetail, e.detail);
+        delete serializableDetail.el;
+
         if (hubChannel.can("tweet")) {
           isInModal = true;
-          pushHistoryState(history, "modal", "tweet", e.detail);
+          pushHistoryState(history, "modal", "tweet", serializableDetail);
         } else {
           if (e.detail.el) {
             // Pin the object if we have to go through OAuth, since the page will refresh and
@@ -737,13 +742,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           const url = await hubChannel.getTwitterOAuthURL();
 
-          // Strip el from stored payload because it won't serialize into the store.
-          const loadActionDetail = {};
-          Object.assign(loadActionDetail, e.detail);
-          delete loadActionDetail.el;
-
           isInOAuth = true;
-          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: loadActionDetail });
+          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: serializableDetail });
           remountUI({
             showOAuthDialog: true,
             oauthInfo: [{ type: "twitter", url: url }],
