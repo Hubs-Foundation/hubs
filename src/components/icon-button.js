@@ -9,6 +9,7 @@ AFRAME.registerComponent("icon-button", {
     hoverImage: { type: "string" },
     activeImage: { type: "string" },
     activeHoverImage: { type: "string" },
+    disabledImage: { type: "string" },
     active: { type: "boolean" },
     disabled: { type: "boolean" },
     tooltip: { type: "selector" },
