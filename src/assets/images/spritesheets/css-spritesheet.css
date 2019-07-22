@@ -48,7 +48,7 @@
   @media (pointer: fine) {
     width: 40px;
     height: 40px;
-    background: url("css-spritesheet.png") -86.25px -43.75px;
+    background: url("css-spritesheet.png") -86.25px -1.25px;
     background-size: 255px 255px;
   }
   @media (pointer: coarse) {
@@ -88,7 +88,7 @@
   @media (pointer: fine) {
     width: 40px;
     height: 40px;
-    background: url("css-spritesheet.png") -86.25px -1.25px;
+    background: url("css-spritesheet.png") -86.25px -86.25px;
     background-size: 255px 255px;
   }
   @media (pointer: coarse) {
@@ -108,7 +108,7 @@
   @media (pointer: fine) {
     width: 40px;
     height: 40px;
-    background: url("css-spritesheet.png") -128.75px -86.25px;
+    background: url("css-spritesheet.png") -128.75px -43.75px;
     background-size: 255px 255px;
   }
   @media (pointer: coarse) {
@@ -168,7 +168,7 @@
   @media (pointer: fine) {
     width: 40px;
     height: 40px;
-    background: url("css-spritesheet.png") -171.25px -43.75px;
+    background: url("css-spritesheet.png") -171.25px -1.25px;
     background-size: 255px 255px;
   }
   @media (pointer: coarse) {
@@ -188,7 +188,7 @@
   @media (pointer: fine) {
     width: 40px;
     height: 40px;
-    background: url("css-spritesheet.png") -171.25px -128.75px;
+    background: url("css-spritesheet.png") -171.25px -86.25px;
     background-size: 255px 255px;
   }
   @media (pointer: coarse) {
@@ -248,7 +248,7 @@
   @media (pointer: fine) {
     width: 40px;
     height: 40px;
-    background: url("css-spritesheet.png") -171.25px -1.25px;
+    background: url("css-spritesheet.png") -171.25px -171.25px;
     background-size: 255px 255px;
   }
   @media (pointer: coarse) {
@@ -268,7 +268,7 @@
   @media (pointer: fine) {
     width: 40px;
     height: 40px;
-    background: url("css-spritesheet.png") -213.75px -86.25px;
+    background: url("css-spritesheet.png") -213.75px -43.75px;
     background-size: 255px 255px;
   }
   @media (pointer: coarse) {
@@ -288,7 +288,7 @@
   @media (pointer: fine) {
     width: 40px;
     height: 40px;
-    background: url("css-spritesheet.png") -213.75px -171.25px;
+    background: url("css-spritesheet.png") -213.75px -128.75px;
     background-size: 255px 255px;
   }
   @media (pointer: coarse) {
