@@ -6,7 +6,12 @@ export class SuperSpawnerSystem {
   maybeSpawn(state, entity, grabPath) {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const superSpawner = state.hovered && state.hovered.components["super-spawner"];
-    if (superSpawner && !superSpawner.cooldownTimeout && userinput.get(grabPath)) {
+    if (
+      superSpawner &&
+      !superSpawner.cooldownTimeout &&
+      userinput.get(grabPath) &&
+      window.APP.hubChannel.can("spawn_and_move_media")
+    ) {
       this.performSpawn(state, entity, grabPath, userinput, superSpawner);
     }
   }
@@ -19,6 +24,7 @@ export class SuperSpawnerSystem {
       data.src,
       data.template,
       ObjectContentOrigins.SPAWNER,
+      null,
       data.resolve,
       data.resize,
       false

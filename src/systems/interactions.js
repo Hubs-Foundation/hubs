@@ -2,6 +2,7 @@
 import { paths } from "./userinput/paths";
 import { SOUND_HOVER_OR_GRAB } from "./sound-effects-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
+import { canMove } from "../utils/permissions-utils";
 
 function findHandCollisionTargetForHand(body) {
   const driver = AFRAME.scenes[0].systems.physics.driver;
@@ -137,14 +138,14 @@ AFRAME.registerSystem("interaction", {
       }
     } else {
       state.hovered = options.hoverFn.call(this, options.entity.body);
-      if (
-        state.hovered &&
-        state.hovered.components.tags &&
-        state.hovered.components.tags.data.isHoldable &&
-        userinput.get(options.grabPath) &&
-        (this.el.is("frozen") || !state.hovered.components.pinnable || !state.hovered.components.pinnable.data.pinned)
-      ) {
-        state.held = state.hovered;
+      if (state.hovered) {
+        const entity = state.hovered;
+        const isHoldable = entity.components.tags && entity.components.tags.data.isHoldable;
+        const isFrozen = this.el.is("frozen");
+        const isPinned = entity.components.pinnable && entity.components.pinnable.data.pinned;
+        if (isHoldable && userinput.get(options.grabPath) && (isFrozen || !isPinned) && canMove(entity)) {
+          state.held = entity;
+        }
       }
     }
   },

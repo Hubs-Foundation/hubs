@@ -38,12 +38,12 @@ AFRAME.registerSystem("camera-tools", {
   tick() {
     this.ticks++;
 
-    // We update at most one camera viewport per frame.
+    // We update at most one camera viewfinder per frame.
     if (this.ticks % CAMERA_UPDATE_FRAME_DELAY === 0) {
       if (this.cameraEls.length == 0) return;
 
       this.cameraUpdateCount++;
-      this.cameraEls[this.cameraUpdateCount % this.cameraEls.length].components["camera-tool"].updateViewport();
+      this.cameraEls[this.cameraUpdateCount % this.cameraEls.length].components["camera-tool"].updateViewfinder();
     }
   }
 });

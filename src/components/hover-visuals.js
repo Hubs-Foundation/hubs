@@ -1,3 +1,5 @@
+import { showHoverEffect } from "../utils/permissions-utils";
+
 /**
  * Applies effects to a hoverer based on hover state.
  * @namespace interactables
@@ -11,7 +13,6 @@ AFRAME.registerComponent("hover-visuals", {
     // uniforms are set from the component responsible for loading the mesh.
     this.handleLeftVisuals = this.handleLeftVisuals.bind(this);
     this.handleRightVisuals = this.handleRightVisuals.bind(this);
-    this.hideVisualEffectOnElement = this.hideVisualEffectOnElement.bind(this);
     this.hadLeftVisualLastFrame = false;
     this.hadRightVisualLastFrame = false;
     this.uniforms = null;
@@ -30,18 +31,10 @@ AFRAME.registerComponent("hover-visuals", {
     }
   },
 
-  hideVisualEffectOnElement(el) {
-    const isFrozen = this.el.sceneEl.is("frozen");
-    const isPinned = el.components.pinnable && el.components.pinnable.data.pinned;
-    const isSpawner = !!el.components["super-spawner"];
-
-    return !isSpawner && isPinned && !isFrozen;
-  },
-
   handleLeftVisuals: function() {
     const interaction = AFRAME.scenes[0].systems.interaction;
     const interactingElement = interaction.state.leftHand.held || interaction.state.leftHand.hovered;
-    const hideVisual = !interactingElement || this.hideVisualEffectOnElement(interactingElement);
+    const hideVisual = !interactingElement || !showHoverEffect(interactingElement);
 
     // Last frame, we didn't have a visual so no need to update uniforms.
     if (hideVisual && !this.hadLeftVisualLastFrame) return;
@@ -62,7 +55,7 @@ AFRAME.registerComponent("hover-visuals", {
     const interaction = AFRAME.scenes[0].systems.interaction;
 
     const interactingElement = interaction.state.rightHand.held || interaction.state.rightHand.hovered;
-    const hideVisual = !interactingElement || this.hideVisualEffectOnElement(interactingElement);
+    const hideVisual = !interactingElement || !showHoverEffect(interactingElement);
 
     // Last frame, we didn't have a visual so no need to update uniforms.
     if (hideVisual && !this.hadRightVisualLastFrame) return;

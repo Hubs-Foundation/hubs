@@ -1,16 +1,13 @@
-import { spawnMediaAround } from "../utils/media-utils";
+import { addAndArrangeMedia } from "../utils/media-utils";
 import { createImageBitmap } from "../utils/image-bitmap-utils";
 import { ObjectTypes } from "../object-types";
 import { paths } from "../systems/userinput/paths";
-import { detect } from "detect-browser";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT, SOUND_CAMERA_TOOL_COUNTDOWN } from "../systems/sound-effects-system";
 import { getAudioFeedbackScale } from "./audio-feedback";
-import * as ebml from "ts-ebml";
 
 import cameraModelSrc from "../assets/camera_tool.glb";
 
 const cameraModelPromise = new Promise(resolve => new THREE.GLTFLoader().load(cameraModelSrc, resolve));
-const browser = detect();
 
 const pathsMap = {
   "player-right-controller": {
@@ -26,20 +23,21 @@ const pathsMap = {
 
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
-const VIEWPORT_FPS = 6;
+const VIEWFINDER_FPS = 6;
 const VIDEO_FPS = 25;
 // Prefer h264 if available due to faster decoding speec on most platforms
 const videoCodec = ["h264", "vp9", "vp8"].find(
   codec => window.MediaRecorder && MediaRecorder.isTypeSupported(`video/webm; codecs=${codec}`)
 );
 const videoMimeType = videoCodec ? `video/webm; codecs=${videoCodec}` : null;
-const allowVideo = !!videoMimeType;
+const hasWebGL2 = !!document.createElement("canvas").getContext("webgl2");
+const allowVideo = !!videoMimeType && hasWebGL2;
 
-const CAPTURE_WIDTH = 640; // NOTE: Oculus Browser can't record bigger videos atm
+const CAPTURE_WIDTH = 640;
 const CAPTURE_HEIGHT = 360;
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
-const CAPTURE_DURATIONS = allowVideo ? [0, Infinity, 3, 7, 15, 30, 60] : [0];
+const CAPTURE_DURATIONS = allowVideo ? [0, 3, 7, 15, 30, 60, Infinity] : [0];
 const DEFAULT_CAPTURE_DURATION = allowVideo ? 3 : 0;
 const COUNTDOWN_DURATION = 3;
 const VIDEO_LOOPS = 3; // Number of times to loop the videos we spawn before stopping them (for perf)
@@ -61,22 +59,22 @@ async function pixelsToPNG(pixels, width, height) {
   return new File([blob], "snap.png", { type: "image/png" });
 }
 
-async function convertWebMChunksToSeekable(chunks) {
-  const decoder = new ebml.Decoder();
-  const reader = new ebml.Reader();
-  reader.logging = false;
-  reader.drop_default_duration = false;
+function blitFramebuffer(renderer, src, srcX0, srcY0, srcX1, srcY1, dest, dstX0, dstY0, dstX1, dstY1) {
+  const gl = renderer.context;
 
-  for (let i = 0; i < chunks.length; i++) {
-    const buf = new Buffer(await new Response(chunks[i]).arrayBuffer());
-    decoder.decode(buf).forEach(e => reader.read(e));
+  // Copies from one framebuffer to another. Note that at the end of this function, you need to restore
+  // the original framebuffer via setRenderTarget
+  const srcFramebuffer = renderer.properties.get(src).__webglFramebuffer;
+  const destFramebuffer = renderer.properties.get(dest).__webglFramebuffer;
+
+  if (srcFramebuffer && destFramebuffer) {
+    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, srcFramebuffer);
+    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, destFramebuffer);
+
+    if (gl.checkFramebufferStatus(gl.READ_FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE) {
+      gl.blitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, gl.COLOR_BUFFER_BIT, gl.LINEAR);
+    }
   }
-
-  reader.stop();
-
-  const seekableMeta = ebml.tools.makeMetadataSeekable(reader.metadatas, reader.duration, reader.cues);
-  const body = new Buffer(await new Response(chunks[0]).arrayBuffer()).slice(reader.metadataSize);
-  return new Buffer(ebml.tools.concat([new Buffer(seekableMeta), body]).buffer);
 }
 
 AFRAME.registerComponent("camera-tool", {
@@ -92,7 +90,7 @@ AFRAME.registerComponent("camera-tool", {
     this.lastUpdate = performance.now();
     this.localSnapCount = 0; // Counter that is used to arrange photos/videos
 
-    this.showCameraViewport = !isMobileVR;
+    this.showCameraViewfinder = !isMobileVR;
 
     this.renderTarget = new THREE.WebGLRenderTarget(RENDER_WIDTH, RENDER_HEIGHT, {
       format: THREE.RGBAFormat,
@@ -116,8 +114,8 @@ AFRAME.registerComponent("camera-tool", {
     // Bit of a hack here to only update the renderTarget when the screens are in view
     material.map.isVideoTexture = true;
     material.map.update = () => {
-      if (this.showCameraViewport) {
-        this.viewportInViewThisFrame = true;
+      if (this.showCameraViewfinder) {
+        this.viewfinderInViewThisFrame = true;
       }
     };
 
@@ -195,7 +193,7 @@ AFRAME.registerComponent("camera-tool", {
     this.stopRecording();
   },
 
-  updateViewport() {
+  updateViewfinder() {
     this.updateRenderTargetNextTick = true;
   },
 
@@ -326,22 +324,25 @@ AFRAME.registerComponent("camera-tool", {
     const track = this.videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
 
     if (this.data.captureAudio) {
-      const context = THREE.AudioContext.getContext();
-      const destination = context.createMediaStreamDestination();
-
-      const listener = this.el.sceneEl.audioListener;
-      if (listener) {
-        // NOTE audio is not captured from camera vantage point for now.
-        listener.getInput().connect(destination);
-      }
-
       const selfAudio = await NAF.connection.adapter.getMediaStream(NAF.clientId, "audio");
-      if (selfAudio) {
-        context.createMediaStreamSource(selfAudio).connect(destination);
-      }
 
-      const audio = destination.stream.getAudioTracks()[0];
-      stream.addTrack(audio);
+      // NOTE: if we don't have a self audio track, we can end up generating an empty video (browser bug?)
+      // if no audio comes through on the listener source. (Eg the room is otherwise silent.)
+      // So for now, if we don't have a track, just disable audio capture.
+      if (selfAudio && selfAudio.getAudioTracks().length > 0) {
+        const context = THREE.AudioContext.getContext();
+        const destination = context.createMediaStreamDestination();
+
+        const listener = this.el.sceneEl.audioListener;
+        if (listener) {
+          // NOTE audio is not captured from camera vantage point for now.
+          listener.getInput().connect(destination);
+        }
+        context.createMediaStreamSource(selfAudio).connect(destination);
+
+        const audio = destination.stream.getAudioTracks()[0];
+        stream.addTrack(audio);
+      }
     }
 
     stream.addTrack(track);
@@ -350,47 +351,6 @@ AFRAME.registerComponent("camera-tool", {
     const recordingStartTime = performance.now();
 
     this.videoRecorder.ondataavailable = e => chunks.push(e.data);
-    this.videoRecorder._free = () => (chunks.length = 0); // Used for cancelling
-    this.videoRecorder.onstop = async () => {
-      this.el.sceneEl.emit("action_camera_recording_ended");
-
-      if (chunks.length === 0) return;
-      const mimeType = chunks[0].type;
-      let blob;
-
-      const recordingDuration = performance.now() - recordingStartTime;
-
-      if (browser.name === "chrome") {
-        // HACK, on chrome, webms are unseekable
-        const seekable = await convertWebMChunksToSeekable(chunks);
-        blob = new Blob([seekable], { type: mimeType });
-      } else {
-        blob = new Blob(chunks, { type: mimeType });
-      }
-
-      chunks.length = 0;
-
-      const { entity, orientation } = spawnMediaAround(
-        this.el,
-        new File([blob], "capture", { type: mimeType }),
-        this.localSnapCount,
-        "video",
-        !!this.playerIsBehindCamera
-      );
-
-      // To limit the # of concurrent videos playing, if it was a short clip, let it loop
-      // a few times and then pause it.
-      if (recordingDuration <= MAX_DURATION_TO_LIMIT_LOOPS * 1000) {
-        setTimeout(
-          () => entity.components["media-video"] && entity.components["media-video"].tryUpdateVideoPlaybackState(true),
-          recordingDuration * VIDEO_LOOPS + 100
-        );
-      }
-
-      this.localSnapCount++;
-
-      orientation.then(() => this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA }));
-    };
 
     this.updateRenderTargetNextTick = true;
 
@@ -413,6 +373,47 @@ AFRAME.registerComponent("camera-tool", {
         }
       }, 1000);
     }
+
+    this.videoRecorder._free = () => (chunks.length = 0); // Used for cancelling
+    this.videoRecorder.onstop = async () => {
+      this.el.sceneEl.emit("action_camera_recording_ended");
+
+      if (chunks.length === 0) return;
+      const mimeType = chunks[0].type;
+      const recordingDuration = performance.now() - recordingStartTime;
+      const blob = new Blob(chunks, { type: mimeType });
+
+      chunks.length = 0;
+
+      const { entity, orientation } = addAndArrangeMedia(
+        this.el,
+        new File([blob], "capture", { type: mimeType.split(";")[0] }), // Drop codec
+        "video-camera",
+        this.localSnapCount,
+        !!this.playerIsBehindCamera
+      );
+
+      entity.addEventListener(
+        "video-loaded",
+        () => {
+          // If we were recording audio, then pause the video immediately after starting.
+          //
+          // Or, to limit the # of concurrent videos playing, if it was a short clip, let it loop
+          // a few times and then pause it.
+          if (this.data.captureAudio || recordingDuration <= MAX_DURATION_TO_LIMIT_LOOPS * 1000) {
+            setTimeout(() => {
+              if (!NAF.utils.isMine(entity) && !NAF.utils.takeOwnership(entity)) return;
+              entity.components["media-video"].tryUpdateVideoPlaybackState(true);
+            }, this.data.captureAudio ? 0 : recordingDuration * VIDEO_LOOPS + 100);
+          }
+        },
+        { once: true }
+      );
+
+      this.localSnapCount++;
+
+      orientation.then(() => this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA }));
+    };
   },
 
   stopRecording(cancel) {
@@ -456,42 +457,45 @@ AFRAME.registerComponent("camera-tool", {
       this.localSnapCount = 0;
     }
 
-    this.showCameraViewport = isHolding || !isMobileVR || this.data.isSnapping || this.videoRecorder;
+    this.showCameraViewfinder = isHolding || !isMobileVR || this.data.isSnapping || this.videoRecorder;
 
     if (this.screen && this.selfieScreen) {
-      this.screen.visible = this.selfieScreen.visible = !!this.showCameraViewport;
+      this.screen.visible = this.selfieScreen.visible = !!this.showCameraViewfinder;
     }
 
-    // Always draw held, snapping, or recording camera viewports with a decent framerate
+    // Always draw held, snapping, or recording camera viewfinders with a decent framerate
     if (
       (isHolding || this.data.isSnapping || this.videoRecorder) &&
-      performance.now() - this.lastUpdate >= 1000 / (this.videoRecorder ? VIDEO_FPS : VIEWPORT_FPS)
+      performance.now() - this.lastUpdate >= 1000 / (this.videoRecorder ? VIDEO_FPS : VIEWFINDER_FPS)
     ) {
       this.updateRenderTargetNextTick = true;
     }
 
     const isHoldingTrigger = this.isHoldingSnapshotTrigger();
+    const isPermittedToUse = window.APP.hubChannel.can("spawn_camera");
 
-    // If the user lets go of the trigger before 500ms, take a picture, otherwise record until they let go.
-    if (isHoldingTrigger && !this.data.isSnapping && !this.snapTriggerTimeout) {
-      this.snapTriggerTimeout = setTimeout(() => {
-        if (this.isHoldingSnapshotTrigger()) {
-          this.el.setAttribute("camera-tool", "isSnapping", true);
-          this.beginRecording(Infinity);
+    if (isPermittedToUse) {
+      // If the user lets go of the trigger before 500ms, take a picture, otherwise record until they let go.
+      if (isHoldingTrigger && !this.data.isSnapping && !this.snapTriggerTimeout) {
+        this.snapTriggerTimeout = setTimeout(() => {
+          if (this.isHoldingSnapshotTrigger()) {
+            this.el.setAttribute("camera-tool", "isSnapping", true);
+            this.beginRecording(Infinity);
 
-          const releaseInterval = setInterval(() => {
-            if (this.isHoldingSnapshotTrigger()) return;
-            this.stopRecording();
-            clearInterval(releaseInterval);
-          }, 500);
-        }
+            const releaseInterval = setInterval(() => {
+              if (this.isHoldingSnapshotTrigger()) return;
+              this.stopRecording();
+              clearInterval(releaseInterval);
+            }, 500);
+          }
 
+          this.snapTriggerTimeout = null;
+        }, 500);
+      } else if (!isHoldingTrigger && !this.data.isSnapping && this.snapTriggerTimeout) {
+        clearTimeout(this.snapTriggerTimeout);
         this.snapTriggerTimeout = null;
-      }, 500);
-    } else if (!isHoldingTrigger && !this.data.isSnapping && this.snapTriggerTimeout) {
-      clearTimeout(this.snapTriggerTimeout);
-      this.snapTriggerTimeout = null;
-      this.takeSnapshotNextTick = true;
+        this.takeSnapshotNextTick = true;
+      }
     }
   },
 
@@ -524,7 +528,7 @@ AFRAME.registerComponent("camera-tool", {
 
       if (
         this.takeSnapshotNextTick ||
-        (this.updateRenderTargetNextTick && (this.viewportInViewThisFrame || this.videoRecorder))
+        (this.updateRenderTargetNextTick && (this.viewfinderInViewThisFrame || this.videoRecorder))
       ) {
         if (this.playerHead) {
           tempHeadScale.copy(this.playerHead.scale);
@@ -598,7 +602,8 @@ AFRAME.registerComponent("camera-tool", {
         if (this.videoRecorder) {
           // This blit operation will (if necessary) scale/resample the view finder render target and, importantly,
           // flip the texture on Y
-          renderer.blitFramebuffer(
+          blitFramebuffer(
+            renderer,
             this.renderTarget,
             0,
             0,
@@ -623,7 +628,7 @@ AFRAME.registerComponent("camera-tool", {
         }
 
         this.updateRenderTargetNextTick = false;
-        this.viewportInViewThisFrame = false;
+        this.viewfinderInViewThisFrame = false;
       }
 
       if (this.takeSnapshotNextTick) {
@@ -633,11 +638,11 @@ AFRAME.registerComponent("camera-tool", {
         renderer.readRenderTargetPixels(this.renderTarget, 0, 0, RENDER_WIDTH, RENDER_HEIGHT, this.snapPixels);
 
         pixelsToPNG(this.snapPixels, RENDER_WIDTH, RENDER_HEIGHT).then(file => {
-          const { orientation } = spawnMediaAround(
+          const { orientation } = addAndArrangeMedia(
             this.el,
             file,
+            "photo-camera",
             this.localSnapCount,
-            "photo",
             !!this.playerIsBehindCamera
           );
 

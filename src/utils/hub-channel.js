@@ -1,7 +1,7 @@
 import jwtDecode from "jwt-decode";
 import { EventTarget } from "event-target-shim";
 import { Presence } from "phoenix";
-import { migrateChannelToSocket } from "./phoenix-utils";
+import { migrateChannelToSocket, discordBridgesForPresences } from "./phoenix-utils";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
@@ -16,6 +16,8 @@ function isSameDay(da, db) {
 
 // Permissions that will be assumed if the user becomes the creator.
 const HUB_CREATOR_PERMISSIONS = ["update_hub", "close_hub", "mute_users", "kick_users"];
+const VALID_PERMISSIONS =
+  HUB_CREATOR_PERMISSIONS + ["tweet", "spawn_camera", "spawn_drawing", "spawn_and_move_media", "pin_objects"];
 
 export default class HubChannel extends EventTarget {
   constructor(store, hubId) {
@@ -33,6 +35,7 @@ export default class HubChannel extends EventTarget {
 
   // Returns true if this current session has the given permission.
   can(permission) {
+    if (!VALID_PERMISSIONS.includes(permission)) throw new Error(`Invalid permission name: ${permission}`);
     return this._permissions && this._permissions[permission];
   }
 
@@ -182,9 +185,9 @@ export default class HubChannel extends EventTarget {
     this.channel.push("update_scene", { url });
   };
 
-  rename = name => {
+  updateHub = settings => {
     if (!this._permissions.update_hub) return "unauthorized";
-    this.channel.push("update_hub", { name });
+    this.channel.push("update_hub", settings);
   };
 
   closeHub = () => {
@@ -246,10 +249,9 @@ export default class HubChannel extends EventTarget {
     return new Promise((resolve, reject) => {
       this.channel
         .push("sign_out")
-        .receive("ok", () => {
-          this._permissions = {};
+        .receive("ok", async () => {
           this._signedIn = false;
-          this.dispatchEvent(new CustomEvent("permissions_updated"));
+          await this.fetchPermissions();
           resolve();
         })
         .receive("error", reject);
@@ -265,6 +267,22 @@ export default class HubChannel extends EventTarget {
         })
         .receive("error", reject);
     });
+  };
+
+  getTwitterOAuthURL = () => {
+    return new Promise((resolve, reject) => {
+      this.channel
+        .push("oauth", { type: "twitter" })
+        .receive("ok", res => {
+          resolve(res.oauth_url);
+        })
+        .receive("error", reject);
+    });
+  };
+
+  discordBridges = () => {
+    if (!this.presence || !this.presence.state) return [];
+    return discordBridgesForPresences(this.presence.state);
   };
 
   pin = (id, gltfNode, fileId, fileAccessToken, promotionToken) => {

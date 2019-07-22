@@ -5,15 +5,21 @@ console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
 
-import "./aframe-entry";
+import "aframe";
 import "./utils/logging";
+import { patchWebGLRenderingContext } from "./utils/webgl";
+patchWebGLRenderingContext();
 
+import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
-import addBlitFrameBufferFunction from "./utils/threejs-blit-framebuffer";
+import "./utils/audio-context-fix";
+import "./utils/threejs-positional-audio-updatematrixworld";
+import "./utils/threejs-world-update";
+import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
 import {
   getReticulumFetchUrl,
@@ -51,6 +57,8 @@ import "./components/kick-button";
 import "./components/close-vr-notice-button";
 import "./components/leave-room-button";
 import "./components/visible-if-permitted";
+import "./components/visibility-on-content-type";
+import "./components/hide-when-pinned-and-forbidden";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
@@ -76,6 +84,7 @@ import "./components/follow-in-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
+import "./components/tweet-media-button";
 import "./components/transform-object-button";
 import "./components/hover-menu";
 import "./components/disable-frustum-culling";
@@ -102,7 +111,7 @@ import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { proxiedUrlFor } from "./utils/media-url-utils";
 import { traverseMeshesAndAddShapes } from "./utils/physics-utils";
-import { handleExitTo2DInterstitial, handleReEntryToVRFrom2DInterstitial } from "./utils/vr-interstitial";
+import { handleExitTo2DInterstitial, exit2DInterstitialAndEnterVR } from "./utils/vr-interstitial";
 import { getAvatarSrc } from "./utils/avatar-utils.js";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
@@ -124,8 +133,6 @@ import "./systems/interactions";
 import "./systems/hubs-systems";
 import "./systems/capture-system";
 import { SOUND_CHAT_MESSAGE } from "./systems/sound-effects-system";
-import { Buffer } from "buffer";
-window.Buffer = window.Buffer || Buffer;
 
 import "./gltf-component-mappings";
 
@@ -150,8 +157,6 @@ if (isEmbed && !qs.get("embed_token")) {
   // Should be covered by X-Frame-Options, but just in case.
   throw new Error("no embed token");
 }
-
-const embedsEnabled = qs.get("embeds");
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
@@ -196,6 +201,7 @@ import qsTruthy from "./utils/qs_truthy";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
+NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
 
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
@@ -295,6 +301,7 @@ async function updateUIForHub(hub) {
   remountUI({
     hubId: hub.hub_id,
     hubName: hub.name,
+    hubMemberPermissions: hub.member_permissions,
     hubScene: hub.scene,
     hubEntryCode: hub.entry_code
   });
@@ -424,10 +431,11 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
   remountUI({
     onSendMessage: messageDispatch.dispatch,
+    onLoaded: () => store.executeOnLoadActions(scene),
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
     onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
-    embedToken: embedsEnabled ? embedToken : null
+    embedToken: embedToken
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
@@ -631,7 +639,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems.physics;
     physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
-    addBlitFrameBufferFunction();
+    patchThreeAllocations();
   };
 
   if (scene.hasLoaded) {
@@ -676,7 +684,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         if (actionError && onFailure) onFailure(actionError);
-        handleReEntryToVRFrom2DInterstitial();
+        exit2DInterstitialAndEnterVR();
       }
     });
   };
@@ -699,6 +707,54 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   });
 
+  scene.addEventListener("action_media_tweet", e => {
+    let isInModal = false;
+    let isInOAuth = false;
+
+    const exitOAuth = () => {
+      isInOAuth = false;
+      store.clearOnLoadActions();
+      remountUI({ showOAuthDialog: false, oauthInfo: null });
+    };
+
+    handleExitTo2DInterstitial(true, () => {
+      if (isInModal) history.goBack();
+      if (isInOAuth) exitOAuth();
+    });
+
+    performConditionalSignIn(
+      () => hubChannel.signedIn,
+      async () => {
+        // Strip el from stored payload because it won't serialize into the store.
+        const serializableDetail = {};
+        Object.assign(serializableDetail, e.detail);
+        delete serializableDetail.el;
+
+        if (hubChannel.can("tweet")) {
+          isInModal = true;
+          pushHistoryState(history, "modal", "tweet", serializableDetail);
+        } else {
+          if (e.detail.el) {
+            // Pin the object if we have to go through OAuth, since the page will refresh and
+            // the object will otherwise be removed
+            e.detail.el.setAttribute("pinnable", "pinned", true);
+          }
+
+          const url = await hubChannel.getTwitterOAuthURL();
+
+          isInOAuth = true;
+          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: serializableDetail });
+          remountUI({
+            showOAuthDialog: true,
+            oauthInfo: [{ type: "twitter", url: url }],
+            onCloseOAuthDialog: () => exitOAuth()
+          });
+        }
+      },
+      "tweet"
+    );
+  });
+
   remountUI({ performConditionalSignIn, embed: isEmbed, showPreload: isEmbed });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();
@@ -707,6 +763,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.APP.scene = scene;
   window.APP.hubChannel = hubChannel;
+  window.dispatchEvent(new CustomEvent("hub_channel_ready"));
 
   const handleEarlyVRMode = () => {
     // If VR headset is activated, refreshing page will fire vrdisplayactivate
@@ -909,11 +966,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const socket = await connectToReticulum(isDebug);
 
   socket.onClose(e => {
-    // The socket should close normally if the server has explicitly killed it.
+    // We don't currently have an easy way to distinguish between being kicked (server closes socket)
+    // and a variety of other network issues that seem to produce the 1000 closure code, but the
+    // latter are probably more common. Either way, we just tell the user they got disconnected.
     const NORMAL_CLOSURE = 1000;
     if (e.code === NORMAL_CLOSURE) {
       entryManager.exitScene();
-      remountUI({ roomUnavailableReason: "kicked" });
+      remountUI({ roomUnavailableReason: "disconnected" });
     }
   });
 
@@ -1053,7 +1112,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
       if (isInitialJoin) {
-        store.addEventListener("statechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
+        store.addEventListener("profilechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
         hubChannel.presence.onSync(() => {
           const presence = hubChannel.presence;
 
@@ -1236,6 +1295,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         name: userInfo.metas[0].profile.displayName,
         sceneName: hub.scene ? hub.scene.name : "a custom URL"
       });
+    }
+
+    if (stale_fields.includes("member_permissions")) {
+      hubChannel.fetchPermissions();
     }
 
     if (stale_fields.includes("name")) {
