@@ -83,12 +83,12 @@ AFRAME.registerComponent("pin-networked-object-button", {
     const { fileIsOwned, fileId } = this.targetEl.components["media-loader"].data;
     const canPin =
       window.APP.hubChannel.can("pin_objects") && !!(fileIsOwned || (fileId && getPromotionTokenForFile(fileId)));
-    this.el.setAttribute("visible", canPin);
-    this.labelEl.setAttribute("visible", canPin);
+    this.el.object3D.visible = canPin;
+    this.labelEl.object3D.visible = canPin;
 
     const isPinned = this.targetEl.getAttribute("pinnable") && this.targetEl.getAttribute("pinnable").pinned;
     const discordBridges = this._discordBridges();
-    this.tipEl.setAttribute("visible", !!(canPin && !isPinned && this.hovering && discordBridges.length > 0));
+    this.tipEl.object3D.visible = !!(canPin && !isPinned && this.hovering && discordBridges.length > 0);
 
     if (!canPin) return;
     this.labelEl.setAttribute("text", "value", isPinned ? "un-pin" : "pin");

@@ -8,6 +8,8 @@ import {
   isHubsAvatarUrl
 } from "../utils/media-url-utils";
 import { addAnimationComponents } from "../utils/animation";
+import qsTruthy from "../utils/qs_truthy";
+
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
@@ -31,6 +33,9 @@ const fetchMaxContentIndex = url => {
 };
 
 const boundingBox = new THREE.Box3();
+
+const forceBatching = qsTruthy("forceBatching");
+const enableBatching = qsTruthy("enableBatching");
 
 AFRAME.registerComponent("media-loader", {
   schema: {
@@ -325,7 +330,7 @@ AFRAME.registerComponent("media-loader", {
           e => {
             this.onMediaLoaded(e.detail.projection === "flat" ? SHAPE.BOX : null);
 
-            if (contentSubtype === "camera-photo") {
+            if (contentSubtype === "photo-camera") {
               this.el.setAttribute("hover-menu__photo", {
                 template: "#photo-hover-menu",
                 dirs: ["forward", "back"]
@@ -337,7 +342,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
         this.el.setAttribute(
           "media-image",
-          Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, contentType })
+          Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, contentType, batch: enableBatching })
         );
 
         if (this.el.components["position-at-box-shape-border__freeze"]) {
@@ -381,6 +386,7 @@ AFRAME.registerComponent("media-loader", {
             src: accessibleUrl,
             contentType: contentType,
             inflate: true,
+            batch: forceBatching,
             modelToWorldScale: this.data.resize ? 0.0001 : 1.0
           })
         );
@@ -415,7 +421,8 @@ AFRAME.registerComponent("media-loader", {
           "media-image",
           Object.assign({}, this.data.mediaOptions, {
             src: thumbnail,
-            contentType: guessContentType(thumbnail) || "image/png"
+            contentType: guessContentType(thumbnail) || "image/png",
+            batch: enableBatching
           })
         );
         if (this.el.components["position-at-box-shape-border__freeze"]) {

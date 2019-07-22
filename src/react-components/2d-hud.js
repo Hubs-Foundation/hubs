@@ -122,6 +122,8 @@ class TopHUD extends Component {
       }
     };
 
+    const capitalize = str => str[0].toUpperCase() + str.slice(1);
+
     return (
       <div
         className={cx(styles.iconButton, styles[`share_${primaryVideoShareType}`], {
@@ -132,7 +134,7 @@ class TopHUD extends Component {
         title={
           this.props.videoShareMediaSource !== null
             ? "Stop sharing"
-            : `Share ${primaryVideoShareType}${this.state.mediaDisabled ? " (disabled)" : ""}`
+            : `Share ${capitalize(primaryVideoShareType)}${this.state.mediaDisabled ? " Disabled" : ""}`
         }
         onClick={this.state.mediaDisabled ? noop : maybeHandlePrimaryShare}
         onMouseOver={this.state.mediaDisabled ? noop : showExtrasOnHover}
@@ -149,7 +151,7 @@ class TopHUD extends Component {
                 title={
                   this.props.videoShareMediaSource === type
                     ? "Stop sharing"
-                    : `Share ${type}${this.state.mediaDisabled ? " (disabled)" : ""}`
+                    : `Share ${capitalize(type)}${this.state.mediaDisabled ? " Disabled" : ""}`
                 }
                 onClick={this.state.mediaDisabled ? noop : () => this.handleVideoShareClicked(type)}
                 onMouseOver={this.state.mediaDisabled ? noop : showExtrasOnHover}
@@ -229,7 +231,7 @@ class TopHUD extends Component {
                 [styles.active]: this.props.isCursorHoldingPen,
                 [styles.disabled]: this.state.penDisabled
               })}
-              title={`Pen${this.state.penDisabled ? " (disabled)" : ""}`}
+              title={`Pen${this.state.penDisabled ? " Disabled" : ""}`}
               onClick={this.state.penDisabled ? noop : this.props.onSpawnPen}
             />
             <div
@@ -237,7 +239,7 @@ class TopHUD extends Component {
                 [styles.active]: this.props.hasActiveCamera,
                 [styles.disabled]: this.state.cameraDisabled
               })}
-              title={`Camera${this.state.cameraDisabled ? " (disabled)" : ""}`}
+              title={`Camera${this.state.cameraDisabled ? " Disabled" : ""}`}
               onClick={this.state.cameraDisabled ? noop : this.props.onSpawnCamera}
             />
           </div>

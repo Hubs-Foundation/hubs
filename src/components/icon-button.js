@@ -69,8 +69,8 @@ AFRAME.registerComponent("icon-button", {
 
     if (this.data.tooltip && hovering) {
       const tooltipText =
-        (this.data.active ? this.data.activeTooltipText : this.data.tooltipText) + (disabled ? " (disabled)" : "");
-      this.data.tooltip.setAttribute("visible", this.hovering);
+        (this.data.active ? this.data.activeTooltipText : this.data.tooltipText) + (disabled ? " Disabled" : "");
+      this.data.tooltip.object3D.visible = this.hovering;
       this.data.tooltip.querySelector("[text]").setAttribute("text", "value", tooltipText);
     }
   }

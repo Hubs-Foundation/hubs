@@ -57,6 +57,7 @@ import "./components/kick-button";
 import "./components/close-vr-notice-button";
 import "./components/leave-room-button";
 import "./components/visible-if-permitted";
+import "./components/visibility-on-content-type";
 import "./components/hide-when-pinned-and-forbidden";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
@@ -71,7 +72,6 @@ import "./components/pin-networked-object-button";
 import "./components/drop-object-button";
 import "./components/remove-networked-object-button";
 import "./components/camera-focus-button";
-import "./components/mirror-camera-button";
 import "./components/unmute-video-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/visible-to-owner";
@@ -126,7 +126,6 @@ import "./systems/permissions";
 import "./systems/exit-on-blur";
 import "./systems/camera-tools";
 import "./systems/userinput/userinput";
-import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
 import "./systems/ui-hotkeys";
 import "./systems/tips";
@@ -158,8 +157,6 @@ if (isEmbed && !qs.get("embed_token")) {
   // Should be covered by X-Frame-Options, but just in case.
   throw new Error("no embed token");
 }
-
-const embedsEnabled = qs.get("embeds");
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
@@ -438,7 +435,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
     onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
-    embedToken: embedsEnabled ? embedToken : null
+    embedToken: embedToken
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
@@ -728,13 +725,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     performConditionalSignIn(
       () => hubChannel.signedIn,
       async () => {
+        // Strip el from stored payload because it won't serialize into the store.
+        const serializableDetail = {};
+        Object.assign(serializableDetail, e.detail);
+        delete serializableDetail.el;
+
         if (hubChannel.can("tweet")) {
           isInModal = true;
-          pushHistoryState(history, "modal", "tweet", e.detail);
+          pushHistoryState(history, "modal", "tweet", serializableDetail);
         } else {
+          if (e.detail.el) {
+            // Pin the object if we have to go through OAuth, since the page will refresh and
+            // the object will otherwise be removed
+            e.detail.el.setAttribute("pinnable", "pinned", true);
+          }
+
           const url = await hubChannel.getTwitterOAuthURL();
+
           isInOAuth = true;
-          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: e.detail });
+          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: serializableDetail });
           remountUI({
             showOAuthDialog: true,
             oauthInfo: [{ type: "twitter", url: url }],
@@ -869,6 +878,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({ roomUnavailableReason: "closed" });
   });
 
+  scene.addEventListener("action_camera_recording_started", () => hubChannel.beginRecording());
+  scene.addEventListener("action_camera_recording_ended", () => hubChannel.endRecording());
+
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
   if (platformUnsupportedReason) {
@@ -985,52 +997,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     Cookies.remove(OAUTH_FLOW_PERMS_TOKEN_KEY);
   }
 
-  const getAuthorizedNafSchemas = schemas => {
-    /* Produces a structure like:
-     * {
-     *   "#interactable-media": [
-     *    {
-     *      component: "media-video",
-     *      properties: [ "time", "videoPaused" ],
-     *      indices: [ 4, 5 ]
-     *    },
-     *    ...
-     *   ],
-     *   ...
-     * }
-     */
-    const authorizedSchemas = {};
-
-    for (const key in schemas) {
-      if (!schemas.hasOwnProperty(key) || !schemas[key].authorizedComponents) continue;
-      authorizedSchemas[key] = [];
-      for (const authorizedComponent of schemas[key].authorizedComponents) {
-        authorizedComponent.indices = schemas[key].components
-          .map((schemaComponent, i) => {
-            if (
-              schemaComponent === authorizedComponent.component ||
-              schemaComponent.component === authorizedComponent.component
-            ) {
-              return i;
-            } else {
-              return null;
-            }
-          })
-          .filter(i => i !== null);
-        authorizedSchemas[key].push(authorizedComponent);
-      }
-    }
-
-    return authorizedSchemas;
-  };
-
   const createHubChannelParams = permsToken => {
     const params = {
       profile: store.state.profile,
       push_subscription_endpoint: pushSubscriptionEndpoint,
       auth_token: null,
       perms_token: null,
-      authorized_naf_schemas: getAuthorizedNafSchemas(NAF.schemas.schemaDict),
       context: {
         mobile: isMobile || isMobileVR,
         hmd: availableVREntryTypes.isInHMD,

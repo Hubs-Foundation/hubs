@@ -1,7 +1,12 @@
 // Used for tracking and managing camera tools in the scene
+
+const CAMERA_UPDATE_FRAME_DELAY = 10; // Update one camera every N'th frame
+
 AFRAME.registerSystem("camera-tools", {
   init() {
     this.cameraEls = [];
+    this.cameraUpdateCount = 0;
+    this.ticks = 0;
   },
 
   register(el) {
@@ -28,5 +33,17 @@ AFRAME.registerSystem("camera-tools", {
 
   _onOwnershipChange() {
     this.myCamera = null;
+  },
+
+  tick() {
+    this.ticks++;
+
+    // We update at most one camera viewfinder per frame.
+    if (this.ticks % CAMERA_UPDATE_FRAME_DELAY === 0) {
+      if (this.cameraEls.length == 0) return;
+
+      this.cameraUpdateCount++;
+      this.cameraEls[this.cameraUpdateCount % this.cameraEls.length].components["camera-tool"].updateViewfinder();
+    }
   }
 });

@@ -20,9 +20,6 @@ function registerNetworkSchemas() {
   // Note: networked template ids are semantically important. We use the template suffix as a filter
   // for allowing and authorizing messages in reticulum. See https://github.com/mozilla/reticulum/pull/195
 
-  // authorizedComponents is a custom addition to NAF schemas that allows us to mark specific components and properties
-  // as authorized for any user to network through reticulum, regardless of permissions.
-
   NAF.schemas.add({
     template: "#remote-avatar",
     components: [
@@ -105,16 +102,6 @@ function registerNetworkSchemas() {
         property: "index"
       },
       "pinnable"
-    ],
-    authorizedComponents: [
-      {
-        component: "media-video",
-        properties: ["time", "videoPaused"]
-      },
-      {
-        component: "media-pager",
-        properties: ["index"]
-      }
     ]
   });
 
@@ -126,12 +113,6 @@ function registerNetworkSchemas() {
       {
         component: "media-video",
         property: "time"
-      }
-    ],
-    authorizedComponents: [
-      {
-        component: "media-video",
-        properties: ["time"]
       }
     ]
   });
@@ -152,16 +133,6 @@ function registerNetworkSchemas() {
       {
         component: "media-pager",
         property: "index"
-      }
-    ],
-    authorizedComponents: [
-      {
-        component: "media-video",
-        properties: ["time", "videoPaused"]
-      },
-      {
-        component: "media-pager",
-        properties: ["index"]
       }
     ]
   });
@@ -184,7 +155,22 @@ function registerNetworkSchemas() {
 
   NAF.schemas.add({
     template: "#interactable-camera",
-    components: ["position", "rotation"]
+    components: [
+      "position",
+      "rotation",
+      {
+        component: "camera-tool",
+        property: "isSnapping"
+      },
+      {
+        component: "camera-tool",
+        property: "isRecording"
+      },
+      {
+        component: "camera-tool",
+        property: "label"
+      }
+    ]
   });
 
   NAF.schemas.add({

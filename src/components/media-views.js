@@ -3,7 +3,7 @@ import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js/dist/hls.light.js";
-import { spawnMediaAround, createImageTexture } from "../utils/media-utils";
+import { addAndArrangeMedia, createImageTexture } from "../utils/media-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
@@ -266,6 +266,7 @@ class TextureCache {
 }
 
 const textureCache = new TextureCache();
+const inflightTextures = new Map();
 
 const errorImage = new Image();
 errorImage.src = errorImageSrc;
@@ -274,6 +275,7 @@ errorTexture.magFilter = THREE.NearestFilter;
 errorImage.onload = () => {
   errorTexture.needsUpdate = true;
 };
+const errorCacheItem = { texture: errorTexture, ratio: 1 };
 
 function timeFmt(t) {
   let s = Math.floor(t),
@@ -425,7 +427,7 @@ AFRAME.registerComponent("media-video", {
     const file = new File([blob], "snap.png", TYPE_IMG_PNG);
 
     this.localSnapCount++;
-    const { entity } = spawnMediaAround(this.el, file, "video-snapshot", this.localSnapCount);
+    const { entity } = addAndArrangeMedia(this.el, file, "photo-snapshot", this.localSnapCount);
     entity.addEventListener("image-loaded", this.onSnapImageLoaded, ONCE_TRUE);
   },
 
@@ -719,13 +721,17 @@ AFRAME.registerComponent("media-image", {
   schema: {
     src: { type: "string" },
     projection: { type: "string", default: "flat" },
-    contentType: { type: "string" }
+    contentType: { type: "string" },
+    batch: { default: false }
   },
 
   remove() {
+    if (this.data.batch && this.mesh) {
+      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
+    }
     if (this._hasRetainedTexture) {
       textureCache.release(this.data.src);
-      this._hasRetainedTexture = false;
+      this.currentSrcIsRetained = false;
     }
   },
 
@@ -744,39 +750,49 @@ AFRAME.registerComponent("media-image", {
         this.mesh.material.needsUpdate = true;
         if (this.mesh.map !== errorTexture) {
           textureCache.release(oldData.src);
+          this.currentSrcIsRetained = false;
         }
       }
 
+      let cacheItem;
       if (textureCache.has(src)) {
-        const cacheItem = textureCache.retain(src);
-        texture = cacheItem.texture;
-        ratio = cacheItem.ratio;
+        cacheItem = textureCache.retain(src);
       } else {
         if (src === "error") {
-          texture = errorTexture;
-        } else if (contentType.includes("image/gif")) {
-          texture = await createGIFTexture(src);
-        } else if (contentType.startsWith("image/")) {
-          texture = await createImageTexture(src);
+          cacheItem = errorCacheItem;
+        } else if (inflightTextures.has(src)) {
+          await inflightTextures.get(src);
+          cacheItem = textureCache.retain(src);
         } else {
-          throw new Error(`Unknown image content type: ${contentType}`);
+          let promise;
+          if (contentType.includes("image/gif")) {
+            promise = createGIFTexture(src);
+          } else if (contentType.startsWith("image/")) {
+            promise = createImageTexture(src);
+          } else {
+            throw new Error(`Unknown image content type: ${contentType}`);
+          }
+          inflightTextures.set(src, promise);
+          texture = await promise;
+          inflightTextures.delete(src);
+          cacheItem = textureCache.set(src, texture);
         }
 
-        const cacheItem = textureCache.set(src, texture);
-        ratio = cacheItem.ratio;
-
-        // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
-        if (this.data.src !== src) {
+        // No way to cancel promises, so if src has changed or this entity was removed while we were creating the texture just throw it away.
+        if (this.data.src !== src || !this.el.parentNode) {
           textureCache.release(src);
           return;
         }
       }
 
-      this._hasRetainedTexture = true;
+      texture = cacheItem.texture;
+      ratio = cacheItem.ratio;
+
+      this.currentSrcIsRetained = true;
     } catch (e) {
       console.error("Error loading image", this.data.src, e);
       texture = errorTexture;
-      this._hasRetainedTexture = false;
+      this.currentSrcIsRetained = false;
     }
 
     const projection = this.data.projection;
@@ -799,12 +815,18 @@ AFRAME.registerComponent("media-image", {
       this.el.setObject3D("mesh", this.mesh);
     }
 
+    // We only support transparency on gifs. Other images will support cutout as part of batching, but not alpha transparency for now
+    this.mesh.material.transparent =
+      !this.data.batch || texture == errorTexture || this.data.contentType.includes("image/gif");
     this.mesh.material.map = texture;
-    this.mesh.material.transparent = texture.format === THREE.RGBAFormat;
     this.mesh.material.needsUpdate = true;
 
     if (projection === "flat") {
       scaleToAspectRatio(this.el, ratio);
+    }
+
+    if (texture !== errorTexture && this.data.batch) {
+      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.mesh);
     }
 
     this.el.emit("image-loaded", { src: this.data.src, projection: projection });
