@@ -19,20 +19,3 @@ The steps to generate a spritesheet are :
 The name of the sprite that is used in the generated `json` file is the same as its source filename; When a sprite component has the name `foo.png`, the sprite system looks for that name in the `json` file. It does not use the `foo.png` source file.
 
 The source images are exported from Figma. If you want to alter these images, it is probably best to do so in Figma, then re-export at the desired size. It is a good idea to stack all of the icons you want to export on top of one another in figma, because otherwise Figma produces surprisingly different results for similar icons when exporting at low resolution.
-
-TODO: We want the spritesheet generation template to use `pointer` `@media` queries to prevent `:hover` on mobile, because it gets stuck.
-
-```
-:local(.mic-off-7) {
-  background-image: url(../images/css-sprites/mic-off-7.png)
-}
-:local(.mic-off-7:hover) {
-  @media (pointer: fine) {
-    background-image: url(../images/css-sprites/mic-off-7_hover.png);
-  }
-
-  @media (pointer: coarse) {
-    background-image: url(../images/css-sprites/mic-off-7.png);
-  }
-}
-```
