@@ -33,8 +33,8 @@ const videoMimeType = videoCodec ? `video/webm; codecs=${videoCodec}` : null;
 const hasWebGL2 = !!document.createElement("canvas").getContext("webgl2");
 const allowVideo = !!videoMimeType && hasWebGL2;
 
-const CAPTURE_WIDTH = 640;
-const CAPTURE_HEIGHT = 360;
+const CAPTURE_WIDTH = isMobileVR ? 640 : 1280;
+const CAPTURE_HEIGHT = isMobileVR ? 360 : 720;
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
 const CAPTURE_DURATIONS = allowVideo ? [0, 3, 7, 15, 30, 60, Infinity] : [0];
