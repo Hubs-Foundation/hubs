@@ -1608,6 +1608,7 @@ class UIRoot extends Component {
                 history={this.props.history}
                 presences={this.props.presences}
                 hubChannel={this.props.hubChannel}
+                showNonHistoriedDialog={this.showNonHistoriedDialog}
                 performConditionalSignIn={this.props.performConditionalSignIn}
               />
             )}
