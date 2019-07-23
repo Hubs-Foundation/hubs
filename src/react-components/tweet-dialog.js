@@ -112,6 +112,7 @@ export default class TweetDialog extends Component {
   renderTweetDialog() {
     const { EmojiSuggestions, EmojiSelect } = emojiPlugin;
     const { CharCounter } = counterPlugin;
+    const { url, contentSubtype } = this.props.history.location.state.detail;
 
     return (
       <DialogContainer
@@ -147,7 +148,11 @@ export default class TweetDialog extends Component {
             )}
 
             <div className={styles.media}>
-              <img src={scaledThumbnailUrlFor(this.props.history.location.state.detail.url, 450, 255)} />
+              {contentSubtype && contentSubtype.startsWith("video") ? (
+                <video src={url} width={450} height={255} controls />
+              ) : (
+                <img src={scaledThumbnailUrlFor(url, 450, 255)} />
+              )}
             </div>
           </div>
 

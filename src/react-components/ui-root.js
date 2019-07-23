@@ -42,11 +42,13 @@ import LinkDialog from "./link-dialog.js";
 import SafariDialog from "./safari-dialog.js";
 import SafariMicDialog from "./safari-mic-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
-import RenameRoomDialog from "./rename-room-dialog.js";
+import RoomSettingsDialog from "./room-settings-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
+import Tip from "./tip.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebAssemblyUnsupportedDialog from "./webassembly-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
+import FeedbackDialog from "./feedback-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
@@ -65,7 +67,6 @@ import TwoDHUD from "./2d-hud";
 import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
-import { handleTipClose } from "../systems/tips.js";
 
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
@@ -128,6 +129,7 @@ class UIRoot extends Component {
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
     hubName: PropTypes.string,
+    hubMemberPermissions: PropTypes.object,
     hubScene: PropTypes.object,
     hubIsBound: PropTypes.bool,
     isSupportAvailable: PropTypes.bool,
@@ -593,6 +595,9 @@ class UIRoot extends Component {
       if (micDeviceId) {
         this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
       }
+      const mediaStreamForMicAnalysis = new MediaStream();
+      mediaStreamForMicAnalysis.addTrack(this.state.audioTrack.clone());
+      this.props.scene.emit("local-media-stream-created", { mediaStream: mediaStreamForMicAnalysis });
     }
 
     this.setState({ mediaStream });
@@ -965,8 +970,8 @@ class UIRoot extends Component {
               onClick={() =>
                 this.props.performConditionalSignIn(
                   () => this.props.hubChannel.can("update_hub"),
-                  () => this.pushHistoryState("modal", "rename_room"),
-                  "rename-room"
+                  () => this.pushHistoryState("modal", "room_settings"),
+                  "room-settings"
                 )
               }
             >
@@ -1165,9 +1170,9 @@ class UIRoot extends Component {
           </div>
           <div className="audio-setup-panel__levels">
             <MicLevelWidget
+              scene={this.props.scene}
               hasAudioTrack={!!this.state.audioTrack}
               muteOnEntry={this.state.muteOnEntry}
-              mediaStream={this.state.mediaStream}
             />
             <OutputLevelWidget />
           </div>
@@ -1364,6 +1369,7 @@ class UIRoot extends Component {
     const hasDiscordBridges = discordBridges.length > 0;
     const showBroadcastTip =
       (hasDiscordBridges || (hasEmbedPresence && !this.props.embed)) && !this.state.broadcastTipDismissed;
+
     const showInviteTip =
       !showVREntryButton &&
       !hasTopTip &&
@@ -1426,7 +1432,6 @@ class UIRoot extends Component {
                 onLoadClicked={this.props.onPreloadLoadClicked}
               />
             )}
-
             <StateRoute
               stateKey="overlay"
               stateValue="profile"
@@ -1514,10 +1519,13 @@ class UIRoot extends Component {
             />
             <StateRoute
               stateKey="modal"
-              stateValue="rename_room"
+              stateValue="room_settings"
               history={this.props.history}
               render={() =>
-                this.renderDialog(RenameRoomDialog, { onRename: name => this.props.hubChannel.rename(name) })
+                this.renderDialog(RoomSettingsDialog, {
+                  initialSettings: { name: this.props.hubName, member_permissions: this.props.hubMemberPermissions },
+                  onChange: settings => this.props.hubChannel.updateHub(settings)
+                })
               }
             />
             <StateRoute
@@ -1578,11 +1586,21 @@ class UIRoot extends Component {
             />
             <StateRoute
               stateKey="modal"
+              stateValue="feedback"
+              history={this.props.history}
+              render={() =>
+                this.renderDialog(FeedbackDialog, {
+                  history: this.props.history,
+                  onClose: () => this.pushHistoryState("modal", null)
+                })
+              }
+            />
+            <StateRoute
+              stateKey="modal"
               stateValue="tweet"
               history={this.props.history}
               render={() => this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog })}
             />
-
             {showClientInfo && (
               <ClientInfoDialog
                 clientId={clientInfoClientId}
@@ -1590,10 +1608,10 @@ class UIRoot extends Component {
                 history={this.props.history}
                 presences={this.props.presences}
                 hubChannel={this.props.hubChannel}
+                showNonHistoriedDialog={this.showNonHistoriedDialog}
                 performConditionalSignIn={this.props.performConditionalSignIn}
               />
             )}
-
             {(!enteredOrWatching || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
                 <PresenceLog
@@ -1605,7 +1623,6 @@ class UIRoot extends Component {
                 <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
               </div>
             )}
-
             {enteredOrWatchingOrPreload && (
               <PresenceLog
                 inRoom={true}
@@ -1620,49 +1637,15 @@ class UIRoot extends Component {
               this.props.activeTips.bottom &&
               (!presenceLogEntries || presenceLogEntries.length === 0) &&
               !showBroadcastTip && (
-                <div className={styles.bottomTip}>
-                  <button
-                    className={styles.tipCancel}
-                    onClick={() => handleTipClose(this.props.activeTips.bottom, "bottom")}
-                  >
-                    <i>
-                      <FontAwesomeIcon icon={faTimes} />
-                    </i>
-                  </button>
-                  {[".spawn_menu", "_button"].find(x => this.props.activeTips.bottom.endsWith(x)) ? (
-                    <div className={styles.splitTip}>
-                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}-pre`} />
-                      <div
-                        className={classNames({
-                          [styles.splitTipIcon]: true,
-                          [styles[this.props.activeTips.bottom.split(".")[1] + "-icon"]]: true
-                        })}
-                      />
-                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}-post`} />
-                    </div>
-                  ) : (
-                    <div className={styles.tip}>
-                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}`} />
-                    </div>
-                  )}
-                </div>
+                <Tip tip={this.props.activeTips.bottom} tipRegion="bottom" pushHistoryState={this.pushHistoryState} />
               )}
             {enteredOrWatchingOrPreload &&
               showBroadcastTip && (
-                <div className={styles.bottomTip}>
-                  <button className={styles.tipCancel} onClick={() => this.confirmBroadcastedRoom()}>
-                    <i>
-                      <FontAwesomeIcon icon={faTimes} />
-                    </i>
-                  </button>
-                  <div className={styles.tip}>
-                    {hasDiscordBridges ? (
-                      <span>{`Chat in this room is being bridged to ${discordSnippet} on Discord.`}</span>
-                    ) : (
-                      <FormattedMessage id="embed.presence-warning" />
-                    )}
-                  </div>
-                </div>
+                <Tip
+                  tip={hasDiscordBridges ? "discord" : "embed"}
+                  broadcastTarget={discordSnippet}
+                  onClose={() => this.confirmBroadcastedRoom()}
+                />
               )}
             {enteredOrWatchingOrPreload && (
               <InWorldChatBox
@@ -1678,7 +1661,6 @@ class UIRoot extends Component {
                 <FormattedMessage id="entry.leave-room" />
               </button>
             )}
-
             {!this.state.frozen &&
               !watching &&
               !preload && (
@@ -1779,7 +1761,6 @@ class UIRoot extends Component {
                   )}
                 </div>
               )}
-
             <StateRoute
               stateKey="overlay"
               stateValue="invite"
@@ -1797,7 +1778,6 @@ class UIRoot extends Component {
                 />
               )}
             />
-
             <StateRoute
               stateKey="overlay"
               stateValue="link"
@@ -1822,7 +1802,6 @@ class UIRoot extends Component {
                 <FontAwesomeIcon icon={faTimes} />
               </button>
             )}
-
             {streamingTip}
 
             <PresenceList
@@ -1850,12 +1829,11 @@ class UIRoot extends Component {
                   pushHistoryState={this.pushHistoryState}
                 />
               )}
-
             {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
-
             {enteredOrWatching && (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
+                  scene={this.props.scene}
                   history={this.props.history}
                   mediaSearchStore={this.props.mediaSearchStore}
                   muted={this.state.muted}
@@ -1883,9 +1861,9 @@ class UIRoot extends Component {
                 />
                 {!watching && !streaming ? (
                   <div className={styles.nagCornerButton}>
-                    <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
+                    <button onClick={() => this.pushHistoryState("modal", "feedback")}>
                       <FormattedMessage id="feedback.prompt" />
-                    </a>
+                    </button>
                   </div>
                 ) : (
                   <div className={styles.nagCornerButton}>

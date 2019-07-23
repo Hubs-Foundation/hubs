@@ -57,6 +57,8 @@ import "./components/kick-button";
 import "./components/close-vr-notice-button";
 import "./components/leave-room-button";
 import "./components/visible-if-permitted";
+import "./components/visibility-on-content-type";
+import "./components/hide-when-pinned-and-forbidden";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
@@ -70,7 +72,6 @@ import "./components/pin-networked-object-button";
 import "./components/drop-object-button";
 import "./components/remove-networked-object-button";
 import "./components/camera-focus-button";
-import "./components/mirror-camera-button";
 import "./components/unmute-video-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/visible-to-owner";
@@ -95,6 +96,7 @@ import "./components/visibility-by-path";
 import "./components/tags";
 import "./components/hubs-text";
 import "./components/billboard";
+import "./components/periodic-full-syncs";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
@@ -125,7 +127,6 @@ import "./systems/permissions";
 import "./systems/exit-on-blur";
 import "./systems/camera-tools";
 import "./systems/userinput/userinput";
-import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
 import "./systems/ui-hotkeys";
 import "./systems/tips";
@@ -157,8 +158,6 @@ if (isEmbed && !qs.get("embed_token")) {
   // Should be covered by X-Frame-Options, but just in case.
   throw new Error("no embed token");
 }
-
-const embedsEnabled = qs.get("embeds");
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
@@ -203,6 +202,7 @@ import qsTruthy from "./utils/qs_truthy";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
+NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
 
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
@@ -302,6 +302,7 @@ async function updateUIForHub(hub) {
   remountUI({
     hubId: hub.hub_id,
     hubName: hub.name,
+    hubMemberPermissions: hub.member_permissions,
     hubScene: hub.scene,
     hubEntryCode: hub.entry_code
   });
@@ -435,7 +436,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
     onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
-    embedToken: embedsEnabled ? embedToken : null
+    embedToken: embedToken
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
@@ -725,13 +726,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     performConditionalSignIn(
       () => hubChannel.signedIn,
       async () => {
+        // Strip el from stored payload because it won't serialize into the store.
+        const serializableDetail = {};
+        Object.assign(serializableDetail, e.detail);
+        delete serializableDetail.el;
+
         if (hubChannel.can("tweet")) {
           isInModal = true;
-          pushHistoryState(history, "modal", "tweet", e.detail);
+          pushHistoryState(history, "modal", "tweet", serializableDetail);
         } else {
+          if (e.detail.el) {
+            // Pin the object if we have to go through OAuth, since the page will refresh and
+            // the object will otherwise be removed
+            e.detail.el.setAttribute("pinnable", "pinned", true);
+          }
+
           const url = await hubChannel.getTwitterOAuthURL();
+
           isInOAuth = true;
-          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: e.detail });
+          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: serializableDetail });
           remountUI({
             showOAuthDialog: true,
             oauthInfo: [{ type: "twitter", url: url }],
@@ -751,6 +764,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.APP.scene = scene;
   window.APP.hubChannel = hubChannel;
+  window.dispatchEvent(new CustomEvent("hub_channel_ready"));
 
   const handleEarlyVRMode = () => {
     // If VR headset is activated, refreshing page will fire vrdisplayactivate
@@ -812,10 +826,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     // HACK: Oculus browser pauses videos when exiting VR mode, so we need to resume them after a timeout.
     if (/OculusBrowser/i.test(window.navigator.userAgent)) {
       document.querySelectorAll("[media-video]").forEach(m => {
-        const video = m.components["media-video"].video;
+        const videoComponent = m.components["media-video"];
 
-        if (!video.paused) {
-          setTimeout(() => video.play(), 1000);
+        if (videoComponent) {
+          videoComponent._ignorePauseStateChanges = true;
+
+          setTimeout(() => {
+            const video = videoComponent.video;
+
+            if (video && video.paused && !videoComponent.data.videoPaused) {
+              video.play();
+            }
+
+            videoComponent._ignorePauseStateChanges = false;
+          }, 1000);
         }
       });
     }
@@ -864,6 +888,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     entryManager.exitScene("closed");
     remountUI({ roomUnavailableReason: "closed" });
   });
+
+  scene.addEventListener("action_camera_recording_started", () => hubChannel.beginRecording());
+  scene.addEventListener("action_camera_recording_ended", () => hubChannel.endRecording());
 
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
@@ -1281,6 +1308,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
+    if (stale_fields.includes("member_permissions")) {
+      hubChannel.fetchPermissions();
+    }
+
     if (stale_fields.includes("name")) {
       const titleParts = document.title.split(" | "); // Assumes title has | trailing site name
       titleParts[0] = hub.name;
@@ -1305,6 +1336,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       scene.emit("hub_closed");
     }
   });
+
+  hubPhxChannel.on("permissions_updated", () => hubChannel.fetchPermissions());
 
   hubPhxChannel.on("mute", ({ session_id }) => {
     if (session_id === NAF.clientId && !scene.is("muted")) {

@@ -5,6 +5,7 @@ HOST=$1
 
 if [ -e $HOST ]; then
   HOST="hubs.local"
+  export RETICULUM_SOCKET_SERVER="hubs.local"
 else
   export RETICULUM_SOCKET_SERVER="$1"
 fi

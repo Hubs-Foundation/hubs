@@ -62,6 +62,9 @@ void main() {
 
   int mapIdx = int(vMapSettings.x);
   outColor = texture(map, vec3(uv, mapIdx)) * vColor;
+  if(outColor.a == 0.0) {
+      discard;
+  }
 
   bool hubs_HighlightInteractorOne = instanceData.hubs_SweepParams[vInstance].z > 0.0;
   bool hubs_HighlightInteractorTwo = instanceData.hubs_SweepParams[vInstance].w > 0.0;

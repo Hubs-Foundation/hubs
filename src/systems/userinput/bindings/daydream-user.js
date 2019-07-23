@@ -253,7 +253,7 @@ export const daydreamUserBindings = addSetsToBindings({
         bool: touchpadRising
       },
       dest: { value: paths.actions.cursor.takeSnapshot },
-      xform: xforms.copyIfTrue,
+      xform: xforms.copy,
       priority: 100
     },
     ...dropOnCenterOrSouth

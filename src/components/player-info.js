@@ -41,7 +41,7 @@ AFRAME.registerComponent("player-info", {
   init() {
     this.displayName = null;
     this.communityIdentifier = null;
-    this.isModerator = false;
+    this.isOwner = false;
     this.isRecording = false;
     this.applyProperties = this.applyProperties.bind(this);
     this.updateDisplayName = this.updateDisplayName.bind(this);
@@ -95,7 +95,7 @@ AFRAME.registerComponent("player-info", {
     this.displayName = presenceMeta.profile.displayName;
     this.communityIdentifier = presenceMeta.profile.communityIdentifier;
     this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
-    this.isModerator = !!(presenceMeta.roles && presenceMeta.roles.moderator);
+    this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
     this.applyDisplayName();
   },
   applyDisplayName() {
@@ -116,7 +116,7 @@ AFRAME.registerComponent("player-info", {
 
     const modBadgeEl = this.el.querySelector(".modBadge");
     if (modBadgeEl) {
-      modBadgeEl.object3D.visible = !this.isRecording && this.isModerator;
+      modBadgeEl.object3D.visible = !this.isRecording && this.isOwner;
     }
   },
   applyProperties() {
