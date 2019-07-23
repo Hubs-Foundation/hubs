@@ -11,10 +11,18 @@ AFRAME.registerComponent("periodic-full-syncs", {
   init: function() {
     this.syncInterval = setInterval(() => {
       if (this.el.components && this.el.components.networked) {
-        // Sends an undirected first sync message.
-        this.el.components.networked.syncAll(null, true);
+        this.sendSyncOnNextTick = true;
       }
     }, SYNC_DURATION_MS);
+  },
+
+  tick() {
+    if (this.sendSyncOnNextTick) {
+      this.sendSyncOnNextTick = false;
+
+      // Sends an undirected first sync message.
+      this.el.components.networked.syncAll(null, true);
+    }
   },
 
   remove() {
