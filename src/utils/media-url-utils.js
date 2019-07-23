@@ -32,14 +32,22 @@ const farsparkEncodeUrl = url => {
 };
 
 export const scaledThumbnailUrlFor = (url, width, height) => {
-  const urlHostname = new URL(url).hostname;
+  const farsparkUrl = `https://${process.env.FARSPARK_SERVER}/thumbnail/${farsparkEncodeUrl(
+    url
+  )}?w=${width}&h=${height}`;
 
-  if (process.env.RETICULUM_SERVER) {
-    const retHostname = new URL(`https://${process.env.RETICULUM_SERVER}`).hostname;
-    if (retHostname === urlHostname) return url;
+  try {
+    const urlHostname = new URL(url).hostname;
+
+    if (process.env.RETICULUM_SERVER) {
+      const retHostname = new URL(`https://${process.env.RETICULUM_SERVER}`).hostname;
+      if (retHostname === urlHostname) return url;
+    }
+  } catch (e) {
+    return farsparkUrl;
   }
 
-  return `https://${process.env.FARSPARK_SERVER}/thumbnail/${farsparkEncodeUrl(url)}?w=${width}&h=${height}`;
+  return farsparkUrl;
 };
 
 export const proxiedUrlFor = (url, index = null) => {

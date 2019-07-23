@@ -822,12 +822,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     remountUI({ hide: false });
 
-    // HACK: Oculus browser pauses videos when exiting VR mode, so we need to resume them after a timeout.
-    if (/OculusBrowser/i.test(window.navigator.userAgent)) {
+    // HACK: Oculus browser 5 pauses videos when exiting VR mode, so we need to resume them after a timeout.
+    if (/OculusBrowser\/5/i.test(window.navigator.userAgent)) {
       document.querySelectorAll("[media-video]").forEach(m => {
         const video = m.components["media-video"].video;
 
-        if (!video.paused) {
+        if (video && !video.paused) {
           setTimeout(() => video.play(), 1000);
         }
       });
