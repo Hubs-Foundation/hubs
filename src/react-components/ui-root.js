@@ -595,6 +595,9 @@ class UIRoot extends Component {
       if (micDeviceId) {
         this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
       }
+      const mediaStreamForMicAnalysis = new MediaStream();
+      mediaStreamForMicAnalysis.addTrack(this.state.audioTrack.clone());
+      this.props.scene.emit("local-media-stream-created", { mediaStream: mediaStreamForMicAnalysis });
     }
 
     this.setState({ mediaStream });
@@ -1167,9 +1170,9 @@ class UIRoot extends Component {
           </div>
           <div className="audio-setup-panel__levels">
             <MicLevelWidget
+              scene={this.props.scene}
               hasAudioTrack={!!this.state.audioTrack}
               muteOnEntry={this.state.muteOnEntry}
-              mediaStream={this.state.mediaStream}
             />
             <OutputLevelWidget />
           </div>
@@ -1830,6 +1833,7 @@ class UIRoot extends Component {
             {enteredOrWatching && (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
+                  scene={this.props.scene}
                   history={this.props.history}
                   mediaSearchStore={this.props.mediaSearchStore}
                   muted={this.state.muted}

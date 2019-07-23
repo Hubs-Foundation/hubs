@@ -49,7 +49,7 @@
         physics="debug: false; driver: ammo; debugDrawMode: 1; iterations: 4;"
         hubs-systems
         capture-system
-        local-audio-analyser="analyze: false"
+        local-audio-analyser
         class="grab-cursor"
         renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: false;"
         shadow="type: pcfsoft"
@@ -594,7 +594,7 @@
                         tags="singleActionButton: true; isHoverMenuChild: true;"
                         sprite
                         icon-button="image: snap.png; hoverImage: snap-hover.png; activeImage: snap.png; activeHoverImage: snap-hover.png"
-                        visibility-on-content-type="contentType: video/mp4; contentSubtype: video-camera; visible: false;" 
+                        visibility-on-content-type="contentType: video/mp4; contentSubtype: video-camera; visible: false;"
                         scale="0.075 0.075 0.075"
                         position="0 0.225 0"
                         class="video-snap-button"
@@ -862,14 +862,7 @@
                         is-remote-hover-target
                         tags="singleActionButton: true"
                         sprite
-                        icon-button="
-                            tooltip: #hud-tooltip;
-                            tooltipText: Mute Mic;
-                            activeTooltipText: Unmute Mic;
-                            image: mute_off.png;
-                            hoverImage: mute_off-hover.png;
-                            activeImage: mute_on.png;
-                            activeHoverImage: mute_on-hover.png;"
+                        mic-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic;"
                         scale="0.1 0.1 0.1"
                         position="-0.17 0 0.001"
                         class="hud mic"

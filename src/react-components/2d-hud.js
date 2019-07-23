@@ -5,15 +5,40 @@ import cx from "classnames";
 const { detect } = require("detect-browser");
 import styles from "../assets/stylesheets/2d-hud.scss";
 import uiStyles from "../assets/stylesheets/ui-root.scss";
+import spritesheet from "../assets/images/spritesheets/css-spritesheet.css";
 import { FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { micLevelForVolume } from "../components/audio-feedback";
 
+const SPRITESHEET_ICONS = {
+  MIC: [
+    spritesheet.mic0,
+    spritesheet.mic1,
+    spritesheet.mic2,
+    spritesheet.mic3,
+    spritesheet.mic4,
+    spritesheet.mic5,
+    spritesheet.mic6,
+    spritesheet.mic7
+  ],
+  MIC_OFF: [
+    spritesheet.micOff0,
+    spritesheet.micOff1,
+    spritesheet.micOff2,
+    spritesheet.micOff3,
+    spritesheet.micOff4,
+    spritesheet.micOff5,
+    spritesheet.micOff6,
+    spritesheet.micOff7
+  ]
+};
 const browser = detect();
 const noop = () => {};
 
 class TopHUD extends Component {
   static propTypes = {
+    scene: PropTypes.object,
     muted: PropTypes.bool,
     isCursorHoldingPen: PropTypes.bool,
     hasActiveCamera: PropTypes.bool,
@@ -41,6 +66,7 @@ class TopHUD extends Component {
   state = {
     showVideoShareOptions: false,
     lastActiveMediaSource: null,
+    micLevel: 0,
     cameraDisabled: false,
     penDisabled: false,
     mediaDisabled: false
@@ -53,20 +79,35 @@ class TopHUD extends Component {
     this.state.mediaDisabled = !window.APP.hubChannel.can("spawn_and_move_media");
   }
 
-  componentDidMount() {
-    window.APP.hubChannel.addEventListener("permissions_updated", this.onPermissionsUpdated);
-  }
-
-  componentWillUnMount() {
-    window.APP.hubChannel.removeEventListener("permissions_updated", this.onPermissionsUpdated);
-  }
-
   onPermissionsUpdated = () => {
     this.setState({
       cameraDisabled: !window.APP.hubChannel.can("spawn_camera"),
       penDisabled: !window.APP.hubChannel.can("spawn_drawing"),
       mediaDisabled: !window.APP.hubChannel.can("spawn_and_move_media")
     });
+  };
+
+  componentDidMount = () => {
+    let max = 0;
+    if (this.micUpdateInterval) {
+      clearInterval(this.micUpdateInterval);
+    }
+    this.micUpdateInterval = setInterval(() => {
+      const volume = this.props.scene.systems["local-audio-analyser"].volume;
+      max = Math.max(volume, max);
+      const micLevel = micLevelForVolume(volume, max);
+      if (micLevel !== this.state.micLevel) {
+        this.setState({ micLevel });
+      }
+    }, 50);
+    window.APP.hubChannel.addEventListener("permissions_updated", this.onPermissionsUpdated);
+  };
+
+  componentWillUnmount = () => {
+    if (this.micUpdateInterval) {
+      clearInterval(this.micUpdateInterval);
+    }
+    window.APP.hubChannel.removeEventListener("permissions_updated", this.onPermissionsUpdated);
   };
 
   handleVideoShareClicked = source => {
@@ -204,6 +245,8 @@ class TopHUD extends Component {
       tip = tipDivForType(this.props.activeTip);
     }
 
+    const micLevel = this.state.micLevel;
+    const micIconClass = this.props.muted ? SPRITESHEET_ICONS.MIC_OFF[micLevel] : SPRITESHEET_ICONS.MIC[micLevel];
     // Hide buttons when frozen.
     return (
       <div className={cx(styles.container, styles.top, styles.unselectable, uiStyles.uiInteractive)}>
@@ -214,7 +257,7 @@ class TopHUD extends Component {
             {tip}
             {videoSharingButtons}
             <div
-              className={cx(styles.iconButton, styles.mute, { [styles.active]: this.props.muted })}
+              className={cx(styles.iconButton, micIconClass)}
               title={this.props.muted ? "Unmute Mic" : "Mute Mic"}
               onClick={this.props.onToggleMute}
             />
