@@ -67,8 +67,8 @@ export default class PresenceList extends Component {
     const recording = meta.streaming || meta.recording;
     const image = recording ? CameraImage : getPresenceImage(context);
     const isBot = context && context.discord;
-    const isModerator = meta.roles && meta.roles.moderator;
-    const badge = isModerator && (
+    const isOwner = meta.roles && meta.roles.owner;
+    const badge = isOwner && (
       <span className={styles.moderatorBadge} title="Moderator">
         &#x2605;
       </span>

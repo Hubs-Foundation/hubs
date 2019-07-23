@@ -1326,6 +1326,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  hubPhxChannel.on("permissions_updated", () => hubChannel.fetchPermissions());
+
   hubPhxChannel.on("mute", ({ session_id }) => {
     if (session_id === NAF.clientId && !scene.is("muted")) {
       scene.emit("action_mute");
