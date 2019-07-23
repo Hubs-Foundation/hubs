@@ -11,8 +11,6 @@ AFRAME.registerComponent("particle-emitter", {
     middleOpacity: { type: "number" },
     endOpacity: { type: "number" },
     colorCurve: { type: "string" },
-    emitterHeight: { type: "number" },
-    emitterWidth: { type: "number" },
     sizeCurve: { type: "string" },
     startSize: { type: "number" },
     endSize: { type: "number" },
@@ -79,16 +77,6 @@ AFRAME.registerComponent("particle-emitter", {
 
     if (prevData.colorCurve !== data.colorCurve) {
       particleEmitter.colorCurve = data.colorCurve;
-    }
-
-    if (prevData.emitterHeight !== data.emitterHeight) {
-      particleEmitter.emitterHeight = data.emitterHeight;
-      this.updateParticles = true;
-    }
-
-    if (prevData.emitterWidth !== data.emitterWidth) {
-      particleEmitter.emitterWidth = data.emitterWidth;
-      this.updateParticles = true;
     }
 
     if (prevData.sizeCurve !== data.sizeCurve) {
