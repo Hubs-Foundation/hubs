@@ -8,17 +8,11 @@ const SYNC_DURATION_MS = 5000;
 // This component, when added, will re-send a isFirstSync message for the networked object is it attached to
 // every SYNC_DURATION_MS milliseconds.
 AFRAME.registerComponent("periodic-full-syncs", {
-  init: function() {
-    this.syncInterval = setInterval(() => {
-      if (this.el.components && this.el.components.networked) {
-        this.sendSyncOnNextTick = true;
-      }
-    }, SYNC_DURATION_MS);
-  },
-
   tick() {
-    if (this.sendSyncOnNextTick) {
-      this.sendSyncOnNextTick = false;
+    const now = performance.now();
+
+    if (!this.lastSync || this.lastSync - now >= SYNC_DURATION_MS) {
+      this.lastSync = SYNC_DURATION_MS;
 
       // Sends an undirected first sync message.
       this.el.components.networked.syncAll(null, true);
