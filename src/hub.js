@@ -827,20 +827,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (/OculusBrowser/i.test(window.navigator.userAgent)) {
       document.querySelectorAll("[media-video]").forEach(m => {
         const videoComponent = m.components["media-video"];
-        const video = videoComponent.video;
-        const wasPausedByBrowser = videoComponent && video && video.paused && !videoComponent.data.videoPaused;
 
-        if (wasPausedByBrowser) {
-          // Disable event handlers which may update videoPaused if we own the video.
+        if (videoComponent) {
           videoComponent._ignorePauseStateChanges = true;
 
           setTimeout(() => {
-            videoComponent._ignorePauseStateChanges = false;
+            const video = videoComponent.video;
 
-            // Just in case someone else updated the network state in the interim
-            if (!videoComponent.data.videoPaused) {
+            if (video && video.paused && !videoComponent.data.videoPaused) {
               video.play();
             }
+
+            videoComponent._ignorePauseStateChanges = false;
           }, 1000);
         }
       });
