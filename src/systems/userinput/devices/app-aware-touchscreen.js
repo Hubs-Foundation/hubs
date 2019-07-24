@@ -28,7 +28,7 @@ const getPlayerCamera = (() => {
 
   return function() {
     if (!playerCamera) {
-      playerCamera = document.querySelector("#player-camera").components.camera.camera;
+      playerCamera = document.getElementById("experimental-camera").components.camera.camera;
     }
 
     return playerCamera;

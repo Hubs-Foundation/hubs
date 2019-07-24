@@ -925,13 +925,11 @@
             <a-entity
                 id="player-camera"
                 class="camera"
-                camera
                 personal-space-bubble="radius: 0.4;"
                 rotation
                 pitch-yaw-rotator
                 set-yxz-order
                 matrix-auto-update
-                set-active-camera
             >
                 <a-entity
                     id="gaze-teleport"
@@ -986,7 +984,7 @@
                 </template>
 
                 <template data-name="Head">
-                    <a-entity id="player-head" visible="false" bone-visibility></a-entity>
+                    <a-entity id="player-head" bone-visibility></a-entity>
                 </template>
 
                 <template data-name="LeftHand">
@@ -1043,6 +1041,16 @@
                 </a-entity>
                 <a-entity text="value:View your desktop to continue; width:1; align:center;" position="0 0 0.01"></a-entity>
             </a-entity>
+        </a-entity>
+        <a-entity id="experimental-rig"
+               set-yxz-order
+               matrix-auto-update>
+            <a-entity
+               id="experimental-camera"
+               camera
+               set-active-camera
+               set-yxz-order
+               matrix-auto-update></a-entity>
         </a-entity>
     </a-scene>
 

@@ -217,6 +217,7 @@ AFRAME.registerSystem("transform-selected-object", {
 
     this.target.getWorldPosition(plane.position);
     this.el.camera.getWorldQuaternion(plane.quaternion);
+    this.el.camera.getWorldPosition(v);
     plane.matrixNeedsUpdate = true;
     const cameraToPlaneDistance = v.sub(plane.position).length();
 

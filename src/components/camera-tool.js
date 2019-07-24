@@ -161,7 +161,7 @@ AFRAME.registerComponent("camera-tool", {
       this.durationLabel.object3D.visible = false;
 
       this.snapMenu = this.el.querySelector(".camera-snap-menu");
-      this.playerCamera = document.querySelector("#player-camera").getObject3D("camera");
+      this.playerCamera = document.getElementById("experimental-camera").getObject3D("camera");
       this.snapButton = this.el.querySelector(".snap-button");
       this.cancelButton = this.el.querySelector(".cancel-button");
       this.nextDurationButton = this.el.querySelector(".next-duration");

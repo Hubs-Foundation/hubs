@@ -9,6 +9,7 @@ import { SoundEffectsSystem } from "./sound-effects-system";
 
 import { BatchManagerSystem } from "./render-manager-system";
 import { LobbyCameraSystem } from "./lobby-camera-system";
+import { CameraSystem } from "./camera-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -24,6 +25,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.soundEffectsSystem = new SoundEffectsSystem();
     this.lobbyCameraSystem = new LobbyCameraSystem();
     this.batchManagerSystem = new BatchManagerSystem(this.el.sceneEl.object3D, this.el.sceneEl.renderer);
+    this.cameraSystem = new CameraSystem();
   },
 
   tick(t) {
@@ -41,6 +43,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
     this.soundEffectsSystem.tick();
     this.lobbyCameraSystem.tick();
+    this.cameraSystem.tick();
     // batchManager is ticked in "post-physics" system
   },
 
