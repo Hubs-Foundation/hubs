@@ -333,3 +333,5 @@ AFRAME.GLTFModelPlus.registerComponent("trimesh", "trimesh", el => {
     includeInvisible: true
   });
 });
+
+AFRAME.GLTFModelPlus.registerComponent("particle-emitter", "particle-emitter");
