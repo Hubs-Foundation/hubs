@@ -59,6 +59,7 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
+    this.animating = false;
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
@@ -182,6 +183,8 @@ AFRAME.registerComponent("media-loader", {
     }
 
     const finish = () => {
+      this.animating = false;
+
       if (physicsShape) {
         el.setAttribute("ammo-shape", {
           type: physicsShape,
@@ -199,13 +202,18 @@ AFRAME.registerComponent("media-loader", {
     };
 
     if (this.data.animate) {
-      const mesh = this.el.getObject3D("mesh");
-      const scale = { x: 0.001, y: 0.001, z: 0.001 };
-      scale.x = mesh.scale.x < scale.x ? mesh.scale.x * 0.001 : scale.x;
-      scale.y = mesh.scale.y < scale.y ? mesh.scale.x * 0.001 : scale.y;
-      scale.z = mesh.scale.z < scale.z ? mesh.scale.x * 0.001 : scale.z;
-      this.addMeshScaleAnimation(mesh, scale, finish);
+      if (!this.animating) {
+        this.animating = true;
+        this.updateScale(this.data.resize);
+        const mesh = this.el.getObject3D("mesh");
+        const scale = { x: 0.001, y: 0.001, z: 0.001 };
+        scale.x = mesh.scale.x < scale.x ? mesh.scale.x * 0.001 : scale.x;
+        scale.y = mesh.scale.y < scale.y ? mesh.scale.x * 0.001 : scale.y;
+        scale.z = mesh.scale.z < scale.z ? mesh.scale.x * 0.001 : scale.z;
+        this.addMeshScaleAnimation(mesh, scale, finish);
+      }
     } else {
+      this.updateScale(this.data.resize);
       finish();
     }
   },
@@ -373,7 +381,6 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "model-loaded",
           () => {
-            this.updateScale(this.data.resize);
             this.onMediaLoaded(SHAPE.HULL);
             addAnimationComponents(this.el);
           },
