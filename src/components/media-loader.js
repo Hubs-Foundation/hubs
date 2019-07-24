@@ -174,7 +174,7 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
-  onMediaLoaded(physicsShape = null) {
+  onMediaLoaded(physicsShape = null, shouldUpdateScale) {
     const el = this.el;
     this.clearLoadingTimeout();
 
@@ -204,7 +204,7 @@ AFRAME.registerComponent("media-loader", {
     if (this.data.animate) {
       if (!this.animating) {
         this.animating = true;
-        this.updateScale(this.data.resize);
+        if (shouldUpdateScale) this.updateScale(this.data.resize);
         const mesh = this.el.getObject3D("mesh");
         const scale = { x: 0.001, y: 0.001, z: 0.001 };
         scale.x = mesh.scale.x < scale.x ? mesh.scale.x * 0.001 : scale.x;
@@ -213,7 +213,7 @@ AFRAME.registerComponent("media-loader", {
         this.addMeshScaleAnimation(mesh, scale, finish);
       }
     } else {
-      this.updateScale(this.data.resize);
+      if (shouldUpdateScale) this.updateScale(this.data.resize);
       finish();
     }
   },
@@ -381,7 +381,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "model-loaded",
           () => {
-            this.onMediaLoaded(SHAPE.HULL);
+            this.onMediaLoaded(SHAPE.HULL, true);
             addAnimationComponents(this.el);
           },
           { once: true }
