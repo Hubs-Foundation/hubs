@@ -42,7 +42,7 @@ export class HoldableButtonSystem {
 }
 
 const hasButtonComponent = (function() {
-  const BUTTON_COMPONENT_NAMES = ["icon-button", "text-button", "pin-networked-object-button"];
+  const BUTTON_COMPONENT_NAMES = ["icon-button", "text-button", "pin-networked-object-button", "mic-button"];
   return function hasButtonComponent(components) {
     for (let i = 0; i < BUTTON_COMPONENT_NAMES.length; i++) {
       if (components[BUTTON_COMPONENT_NAMES[i]]) {

@@ -460,6 +460,9 @@ AFRAME.registerComponent("media-video", {
       return;
     }
 
+    // Used in the HACK in hub.js for dealing with auto-pause in Oculus Browser
+    if (this._ignorePauseStateChanges) return;
+
     this.el.setAttribute("media-video", "videoPaused", this.video.paused);
 
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {

@@ -73,7 +73,7 @@ AFRAME.registerComponent("vr-mode-toggle-class", {
   multiple: true,
   schema: {
     invert: { type: "boolean", default: false },
-    class: { type: "string", default: false }
+    class: { type: "string", default: "" }
   },
 
   init() {
