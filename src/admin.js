@@ -58,13 +58,18 @@ class AdminUI extends Component {
   }
 }
 
+import { IntlProvider } from "react-intl";
+import { lang, messages } from "./utils/i18n";
+
 const mountUI = async retPhxChannel => {
   const dataProvider = postgrestClient("//" + process.env.POSTGREST_SERVER);
   const authProvider = postgrestAuthenticatior.createAuthProvider(retPhxChannel);
   await postgrestAuthenticatior.refreshToken();
 
   ReactDOM.render(
-    <AdminUI dataProvider={dataProvider} authProvider={authProvider} />,
+    <IntlProvider locale={lang} messages={messages}>
+      <AdminUI dataProvider={dataProvider} authProvider={authProvider} />
+    </IntlProvider>,
     document.getElementById("ui-root")
   );
 };
