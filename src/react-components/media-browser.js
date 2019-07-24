@@ -234,7 +234,7 @@ class MediaBrowser extends Component {
     const showCustomOption =
       !isFavorites && (!isSceneApiType || this.props.hubChannel.canOrWillIfCreator("update_hub"));
     const entries = (this.state.result && this.state.result.entries) || [];
-    const hideSearch = urlSource === "avatars" || urlSource === "favorites";
+    const hideSearch = urlSource === "favorites";
     const showEmptyStringOnNoResult = urlSource !== "avatars" && urlSource !== "scenes";
 
     // Don't render anything if we just did a feeling lucky query and are waiting on result.

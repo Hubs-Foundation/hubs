@@ -12,6 +12,11 @@ import styles from "../assets/stylesheets/avatar-editor.scss";
 
 const AVATARS_API = "/api/v1/avatars";
 
+const fetchAvatar = async avatarId => {
+  const { avatars } = await fetchReticulumAuthenticated(`${AVATARS_API}/${avatarId}`);
+  return avatars[0];
+};
+
 export default class AvatarEditor extends Component {
   static propTypes = {
     avatarId: PropTypes.string,
@@ -39,18 +44,14 @@ export default class AvatarEditor extends Component {
 
   componentDidMount = async () => {
     if (this.props.avatarId) {
-      const avatar = await this.fetchAvatar(this.props.avatarId);
+      const avatar = await fetchAvatar(this.props.avatarId);
       avatar.creatorAttribution = (avatar.attributions && avatar.attributions.creator) || "";
       Object.assign(this.inputFiles, avatar.files);
       this.setState({ avatar, previewGltfUrl: avatar.base_gltf_url });
     } else {
-      const { base_gltf_url } = await this.fetchAvatar("basebot");
-      this.setState({ previewGltfUrl: base_gltf_url });
+      const { base_gltf_url } = await fetchAvatar("basebot");
+      this.setState({ avatar: { ...this.state.avatar, base_gltf_url }, previewGltfUrl: base_gltf_url });
     }
-  };
-
-  fetchAvatar = avatarId => {
-    return fetchReticulumAuthenticated(`${AVATARS_API}/${avatarId}`).then(({ avatars }) => avatars[0]);
   };
 
   createOrUpdateAvatar = avatar => {
@@ -138,7 +139,7 @@ export default class AvatarEditor extends Component {
   };
 
   fileField = (name, label, accept, disabled = false, title) => (
-    <div className="file-input-row" key={name} title={title}>
+    <div className={classNames("file-input-row", { disabled })} key={name} title={title}>
       <label htmlFor={`avatar-file_${name}`}>
         <div className="img-box" />
         <span>{label}</span>
@@ -149,14 +150,40 @@ export default class AvatarEditor extends Component {
         accept={accept}
         disabled={disabled}
         onChange={e => {
-          this.inputFiles[name] = e.target.files[0];
+          const file = e.target.files[0];
           e.target.value = null;
+          this.inputFiles[name] = file;
+          URL.revokeObjectURL(this.state.previewGltfUrl);
+          const previewGltfUrl = URL.createObjectURL(this.inputFiles.glb);
+          this.setState({
+            previewGltfUrl,
+            avatar: {
+              ...this.state.avatar,
+              files: {
+                ...this.state.avatar.files,
+                [name]: URL.createObjectURL(file)
+              }
+            }
+          });
         }}
       />
       {this.state.avatar.files[name] && (
         <a
           onClick={() => {
             this.inputFiles[name] = null;
+            URL.revokeObjectURL(this.state.avatar.files[name]);
+            this.setState(
+              {
+                avatar: {
+                  ...this.state.avatar,
+                  files: {
+                    ...this.state.avatar.files,
+                    [name]: null
+                  }
+                }
+              },
+              () => this.updatePreviewGltf()
+            );
           }}
         >
           <i>
@@ -233,6 +260,47 @@ export default class AvatarEditor extends Component {
     </div>
   );
 
+  updatePreviewGltf = previewGltfUrl => {
+    if (!previewGltfUrl) {
+      const glbFile = this.inputFiles.glb;
+      const gltfUrl = this.state.avatar.files.gltf;
+      if (glbFile) {
+        previewGltfUrl = URL.createObjectURL(this.inputFiles.glb);
+      } else if (gltfUrl) {
+        previewGltfUrl = gltfUrl;
+      } else {
+        previewGltfUrl = this.state.avatar.base_gltf_url;
+      }
+    }
+    URL.revokeObjectURL(this.state.previewGltfUrl);
+    this.setState({ previewGltfUrl });
+  };
+
+  selectField = (name, placeholder, disabled, required) => (
+    <div>
+      <select
+        value={this.state.avatar[name] || ""}
+        onChange={async e => {
+          const sid = e.target.value;
+          if (sid) {
+            const avatar = await fetchAvatar(sid);
+            this.updatePreviewGltf(avatar.base_gltf_url);
+          } else {
+            this.updatePreviewGltf();
+          }
+          this.setState({ avatar: { ...this.state.avatar, [name]: sid } });
+        }}
+        placeholder={placeholder}
+        className="select"
+      >
+        <option value="basebot">Bot A</option>
+        <option value="basebot2">Bot B</option>
+        <option value="mine">Minecraft skin</option>
+        <option value="">Custom GLB...</option>
+      </select>
+    </div>
+  );
+
   textarea = (name, placeholder, disabled) => (
     <div>
       <textarea
@@ -277,19 +345,20 @@ export default class AvatarEditor extends Component {
               <div className="form-body">
                 {debug && this.textField("avatar_id", "Avatar ID", true)}
                 {debug && this.textField("parent_avatar_id", "Parent Avatar ID")}
-                {debug && this.textField("parent_avatar_listing_id", "Parent Avatar Listing ID")}
                 {this.textField("name", "Name", false, true)}
                 {debug && this.textarea("description", "Description")}
-                {debug && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
-
+                {this.selectField("parent_avatar_listing_id", "Parent Avatar Listing ID")}
+                {this.fileField(
+                  "glb",
+                  "Avatar GLB",
+                  "model/gltf+binary,.glb",
+                  this.state.avatar.parent_avatar_listing_id
+                )}
                 {this.mapField("base_map", "Base Map", "image/*")}
                 {this.mapField("emissive_map", "Emissive Map", "image/*")}
                 {this.mapField("normal_map", "Normal Map", "image/*")}
-
                 {this.mapField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
-
                 <hr />
-
                 {this.checkbox(
                   "allow_promotion",
                   <span>
@@ -323,7 +392,6 @@ export default class AvatarEditor extends Component {
                   </span>
                 )}
                 {this.textField("creatorAttribution", "Attribution (optional)", false, false)}
-
                 {/* {this.mapField("ao_map", "AO Map", "images/\*", true)} */}
                 {/* {this.mapField("metallic_map", "Metallic Map", "image/\*", true)} */}
                 {/* {this.mapField("roughness_map", "Roughness Map", "image/\*", true)} */}

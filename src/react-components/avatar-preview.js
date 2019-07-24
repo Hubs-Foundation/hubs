@@ -218,6 +218,14 @@ class AvatarPreview extends Component {
       gltf.scene.getObjectByName("Bot_Skinned") ||
       gltf.scene;
 
+    if (!this.previewMesh.isMesh) {
+      this.previewMesh.traverse(o => {
+        if (!this.previewMesh.isMesh && o.isMesh) {
+          this.previewMesh = o;
+        }
+      });
+    }
+
     const idleAnimation = gltf.animations && gltf.animations.find(({ name }) => name === "idle_eyes");
     if (idleAnimation) {
       this.mixer = new THREE.AnimationMixer(gltf.scene);
@@ -230,7 +238,7 @@ class AvatarPreview extends Component {
     const { material } = this.previewMesh;
     if (material) {
       // We delete onUpdate here to opt out of the auto texture cleanup after GPU upload.
-      const getImage = p => delete material[p].onUpdate && material[p].image;
+      const getImage = p => material[p] && delete material[p].onUpdate && material[p].image;
       this.originalMaps = {
         base_map: TEXTURE_PROPS["base_map"].map(getImage),
         emissive_map: TEXTURE_PROPS["emissive_map"].map(getImage),

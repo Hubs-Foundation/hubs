@@ -50,6 +50,9 @@
     .file-input-row {
       display: flex;
       align-items: center;
+      &.disabled{
+        opacity: 0.5;
+      }
       label {
         display: flex;
         align-items: center;
@@ -86,6 +89,13 @@
       @extend %input-field;
       font-size: 16px;
     }
+
+    .select {
+      @extend %input-field;
+      font-size: 16px;
+      height: 36px;
+    }
+
 
     .checkbox-container {
       display: flex;
