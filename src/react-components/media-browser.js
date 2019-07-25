@@ -404,6 +404,7 @@ class MediaBrowser extends Component {
               urlSource={urlSource}
               handleEntryClicked={this.handleEntryClicked}
               handlePager={this.handlePager}
+              mediaBrowser={this}
             />
           ) : (
             <div className={styles.emptyString}>

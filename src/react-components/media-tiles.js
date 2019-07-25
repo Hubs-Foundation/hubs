@@ -9,12 +9,15 @@ import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 
 import styles from "../assets/stylesheets/media-browser.scss";
 import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import StateLink from "./state-link";
+import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
 
+const AVATARS_API = "/api/v1/avatars";
 dayjs.extend(relativeTime);
 
 const PUBLISHER_FOR_ENTRY_TYPE = {
@@ -29,7 +32,22 @@ class MediaTiles extends Component {
     history: PropTypes.object,
     urlSource: PropTypes.string,
     handleEntryClicked: PropTypes.func,
-    handlePager: PropTypes.func
+    handlePager: PropTypes.func,
+    mediaBrowser: PropTypes.object
+  };
+
+  handleCopyAvatar = async (e, entry) => {
+    e.preventDefault();
+    console.log(entry);
+    const avatar = {
+      parent_avatar_listing_id: entry.id,
+      name: entry.name,
+      files: {}
+    };
+
+    const { avatars } = await fetchReticulumAuthenticated(AVATARS_API, "POST", { avatar });
+    console.log(avatars);
+    this.props.mediaBrowser.handleFacetClicked({ params: { filter: "my-avatars" } });
   };
 
   render() {
@@ -171,6 +189,16 @@ class MediaTiles extends Component {
             history={this.props.history}
           >
             <FontAwesomeIcon icon={faPencilAlt} />
+          </StateLink>
+        )}
+        {entry.type === "avatar_listing" && (
+          <StateLink
+            className={styles.editAvatar}
+            onClick={e => this.handleCopyAvatar(e, entry)}
+            history={this.props.history}
+            title="Copy to my avatars"
+          >
+            <FontAwesomeIcon icon={faClone} />
           </StateLink>
         )}
         {!entry.type.endsWith("_image") && (

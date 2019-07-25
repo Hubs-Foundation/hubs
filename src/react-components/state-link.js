@@ -18,6 +18,7 @@ class StateLink extends React.Component {
     stateValue: PropTypes.string,
     stateDetail: PropTypes.object,
     target: PropTypes.string,
+    title: PropTypes.string,
     onClick: PropTypes.func,
     children: PropTypes.node,
     className: PropTypes.string
@@ -39,11 +40,12 @@ class StateLink extends React.Component {
   }
 
   render() {
-    const { innerRef, target, className, children } = this.props;
+    const { innerRef, target, className, title, children } = this.props;
     return (
       <a
         target={target}
         className={className}
+        title={title}
         onClick={event => this.handleClick(event, this.props.history)}
         href="#"
         ref={innerRef}
