@@ -32,6 +32,7 @@ const PRIVACY_POLICY_LINKS = {
 
 const DEFAULT_FACETS = {
   sketchfab: [
+    { text: "Featured", params: { filter: "featured" } },
     { text: "Animals", params: { filter: "animals-pets" } },
     { text: "Architecture", params: { filter: "architecture" } },
     { text: "Art", params: { filter: "art-abstract" } },
@@ -52,6 +53,7 @@ const DEFAULT_FACETS = {
     { text: "Weapons", params: { filter: "weapons-military" } }
   ],
   poly: [
+    { text: "Featured", params: { filter: "" } },
     { text: "Animals", params: { filter: "animals" } },
     { text: "Architecture", params: { filter: "architecture" } },
     { text: "Art", params: { filter: "art" } },
@@ -64,7 +66,8 @@ const DEFAULT_FACETS = {
   ],
   avatars: [
     { text: "Featured", params: { filter: "featured" } },
-    { text: "My Avatars", params: { filter: "my-avatars" } }
+    { text: "My Avatars", params: { filter: "my-avatars" } },
+    { text: "All Avatars", params: { filter: "" } }
   ],
   favorites: [],
   scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }]
@@ -252,6 +255,8 @@ class MediaBrowser extends Component {
       }
     };
 
+    const activeFilter = searchParams.get("filter") || (!searchParams.get("q") && "");
+
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
         <div className={classNames([styles.box, styles.darkened])}>
@@ -378,7 +383,11 @@ class MediaBrowser extends Component {
             this.state.facets.length > 0 && (
               <div className={styles.facets}>
                 {this.state.facets.map((s, i) => (
-                  <a onClick={() => this.handleFacetClicked(s)} key={i} className={styles.facet}>
+                  <a
+                    onClick={() => this.handleFacetClicked(s)}
+                    key={i}
+                    className={classNames(styles.facet, { selected: s.params.filter === activeFilter })}
+                  >
                     {s.text}
                   </a>
                 ))}
