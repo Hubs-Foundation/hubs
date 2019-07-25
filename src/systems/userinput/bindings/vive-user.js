@@ -363,8 +363,7 @@ export const viveUserBindings = addSetsToBindings({
       dest: {
         value: rSnapRight2
       },
-      xform: xforms.rising,
-      priority: 1
+      xform: xforms.rising
     },
     {
       src: { value: paths.device.keyboard.key("e") },
