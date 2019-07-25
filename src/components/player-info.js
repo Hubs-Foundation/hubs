@@ -1,5 +1,9 @@
 import { injectCustomShaderChunks } from "../utils/media-utils";
 import { AVATAR_TYPES } from "../utils/avatar-utils";
+import { registerComponentInstance } from "../utils/component-utils";
+import { deregisterComponentInstance } from "../utils/component-utils";
+
+import faSmileBeam from "../assets/images/sprites/camera_off.png";
 
 function ensureAvatarNodes(json) {
   const { nodes } = json;
@@ -37,8 +41,11 @@ AFRAME.registerComponent("player-info", {
     avatarType: { type: "string", default: AVATAR_TYPES.LEGACY }
   },
   init() {
+    this.changeEmoji = this.changeEmoji.bind(this);
     this.displayName = null;
     this.communityIdentifier = null;
+    this.isOwner = false;
+    this.isRecording = false;
     this.applyProperties = this.applyProperties.bind(this);
     this.updateDisplayName = this.updateDisplayName.bind(this);
     this.applyDisplayName = this.applyDisplayName.bind(this);
@@ -56,8 +63,13 @@ AFRAME.registerComponent("player-info", {
         }
       });
     }
+    registerComponentInstance(this, "player-info");
+  },
+  remove() {
+    deregisterComponentInstance(this, "player-info");
   },
   play() {
+    this.el.sceneEl.addEventListener("action_emoji_change", this.changeEmoji);
     this.el.addEventListener("model-loaded", this.applyProperties);
     this.el.sceneEl.addEventListener("presence_updated", this.updateDisplayName);
     if (this.isLocalPlayerInfo) {
@@ -65,11 +77,22 @@ AFRAME.registerComponent("player-info", {
     }
   },
   pause() {
+    this.el.sceneEl.removeEventListener("action_emoji_change", this.changeEmoji);
     this.el.removeEventListener("model-loaded", this.applyProperties);
     this.el.sceneEl.removeEventListener("presence_updated", this.updateDisplayName);
     if (this.isLocalPlayerInfo) {
       this.el.querySelector(".model").removeEventListener("model-error", this.handleModelError);
     }
+  },
+  changeEmoji() {
+    //console.log("change emoji called");
+
+    this.el.sceneEl
+      .querySelector("#player-rig")
+      .querySelector(".image")
+      .setAttribute("media-loader", { src: new URL(faSmileBeam, window.location.href).href });
+
+    console.log("change emoji called");
   },
   update() {
     this.applyProperties();
@@ -84,9 +107,10 @@ AFRAME.registerComponent("player-info", {
     this.updateDisplayNameFromPresenceMeta(e.detail);
   },
   updateDisplayNameFromPresenceMeta(presenceMeta) {
-    const isModerator = presenceMeta.roles && presenceMeta.roles.moderator;
-    this.displayName = presenceMeta.profile.displayName + (isModerator ? " *" : "");
+    this.displayName = presenceMeta.profile.displayName;
     this.communityIdentifier = presenceMeta.profile.communityIdentifier;
+    this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
+    this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
     this.applyDisplayName();
   },
   applyDisplayName() {
@@ -99,6 +123,15 @@ AFRAME.registerComponent("player-info", {
       if (this.communityIdentifier) {
         communityIdentifierEl.setAttribute("text", { value: this.communityIdentifier });
       }
+    }
+    const recordingBadgeEl = this.el.querySelector(".recordingBadge");
+    if (recordingBadgeEl) {
+      recordingBadgeEl.object3D.visible = this.isRecording;
+    }
+
+    const modBadgeEl = this.el.querySelector(".modBadge");
+    if (modBadgeEl) {
+      modBadgeEl.object3D.visible = !this.isRecording && this.isOwner;
     }
   },
   applyProperties() {

@@ -162,9 +162,9 @@ class LinkRoot extends Component {
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.link}>
           <div className={styles.linkContents}>
-            <div className={styles.logo}>
+            <a className={styles.logo} href="/">
               <img src="../assets/images/hub-preview-light-no-shadow.png" />
-            </div>
+            </a>
             {this.state.entered.length === this.maxAllowedChars() && (
               <div className={classNames("loading-panel", styles.codeLoadingPanel)}>
                 <div className="loader-wrap">

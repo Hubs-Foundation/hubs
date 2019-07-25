@@ -7,6 +7,7 @@ import en from "react-intl/locale-data/en";
 import screenfull from "screenfull";
 
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
+import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
@@ -20,8 +21,9 @@ import {
 } from "../utils/history";
 import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
-import { getPresenceProfileForSession } from "../utils/phoenix-utils";
+import { getPresenceProfileForSession, discordBridgesForPresences } from "../utils/phoenix-utils";
 import { getClientInfoClientId } from "./client-info-dialog";
+import { getCurrentStreamer } from "../utils/component-utils";
 
 import { lang, messages } from "../utils/i18n";
 import Loader from "./loader";
@@ -40,17 +42,23 @@ import LinkDialog from "./link-dialog.js";
 import SafariDialog from "./safari-dialog.js";
 import SafariMicDialog from "./safari-mic-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
-import RenameRoomDialog from "./rename-room-dialog.js";
+import RoomSettingsDialog from "./room-settings-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
+import Tip from "./tip.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebAssemblyUnsupportedDialog from "./webassembly-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
+import FeedbackDialog from "./feedback-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
+import TweetDialog from "./tweet-dialog.js";
 import LobbyChatBox from "./lobby-chat-box.js";
 import InWorldChatBox from "./in-world-chat-box.js";
+//import AvatarEmojiChatBox from "./avatar-emoji-chat-box.js";
+
+
 import AvatarEditor from "./avatar-editor";
 import MicLevelWidget from "./mic-level-widget.js";
 import OutputLevelWidget from "./output-level-widget.js";
@@ -59,15 +67,15 @@ import PresenceList from "./presence-list.js";
 import SettingsMenu from "./settings-menu.js";
 import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
+import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
-import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
-import { handleTipClose } from "../systems/tips.js";
+import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
 
-import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
-import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
+import { faSmileBeam } from "@fortawesome/free-solid-svg-icons/faSmileBeam";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import qsTruthy from "../utils/qs_truthy";
@@ -126,6 +134,7 @@ class UIRoot extends Component {
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
     hubName: PropTypes.string,
+    hubMemberPermissions: PropTypes.object,
     hubScene: PropTypes.object,
     hubIsBound: PropTypes.bool,
     isSupportAvailable: PropTypes.bool,
@@ -144,6 +153,7 @@ class UIRoot extends Component {
     showSafariMicDialog: PropTypes.bool,
     showWebAssemblyDialog: PropTypes.bool,
     showOAuthDialog: PropTypes.bool,
+    onCloseOAuthDialog: PropTypes.func,
     oauthInfo: PropTypes.array,
     isCursorHoldingPen: PropTypes.bool,
     hasActiveCamera: PropTypes.bool,
@@ -159,7 +169,8 @@ class UIRoot extends Component {
     showPreload: PropTypes.bool,
     onPreloadLoadClicked: PropTypes.func,
     embed: PropTypes.bool,
-    embedToken: PropTypes.string
+    embedToken: PropTypes.string,
+    onLoaded: PropTypes.func
   };
 
   state = {
@@ -168,8 +179,6 @@ class UIRoot extends Component {
     entered: false,
     dialog: null,
     showShareDialog: false,
-    showPresenceList: false,
-    showSettingsMenu: false,
     broadcastTipDismissed: false,
     linkCode: null,
     linkCodeCancel: null,
@@ -179,14 +188,16 @@ class UIRoot extends Component {
     noMoreLoadingUpdates: false,
     hideLoader: false,
     watching: false,
+    isStreaming: false,
+    showStreamingTip: false,
 
     waitingOnAudio: false,
-    shareScreen: false,
-    requestedScreen: false,
     mediaStream: null,
     audioTrack: null,
-    numAudioTracks: 0,
     micDevices: [],
+
+    ////////
+    changeAvatarChestImg: false,
 
     profileNamePending: "Hello",
 
@@ -196,12 +207,12 @@ class UIRoot extends Component {
 
     muted: false,
     frozen: false,
-    spacebubble: true,
 
     exited: false,
 
     signedIn: false,
-    videoShareMediaSource: null
+    videoShareMediaSource: null,
+    showVideoShareFailed: false
   };
 
   constructor(props) {
@@ -247,7 +258,9 @@ class UIRoot extends Component {
             this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
           }
 
-          this.setState({ hideLoader: true });
+          if (!this.state.hideLoader) {
+            this.setState({ hideLoader: true });
+          }
         }, 0);
       });
     }
@@ -256,8 +269,8 @@ class UIRoot extends Component {
   componentDidMount() {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
-      if (this.state.showPresenceList || this.state.showSettingsMenu || this.state.showShareDialog) {
-        this.setState({ showPresenceList: false, showSettingsMenu: false, showShareDialog: false });
+      if (this.state.showShareDialog) {
+        this.setState({ showShareDialog: false });
       }
     });
 
@@ -273,6 +286,7 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
     this.props.scene.addEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
+    this.props.scene.addEventListener("share_video_failed", this.onShareVideoFailed);
     this.props.scene.addEventListener("exit", this.exitEventHandler);
     this.props.scene.addEventListener("action_exit_watch", () => this.setState({ watching: false, hide: false }));
 
@@ -322,6 +336,7 @@ class UIRoot extends Component {
     this.props.scene.removeEventListener("exit", this.exitEventHandler);
     this.props.scene.removeEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.removeEventListener("share_video_disabled", this.onShareVideoDisabled);
+    this.props.scene.removeEventListener("share_video_failed", this.onShareVideoFailed);
   }
 
   showContextualSignInDialog = () => {
@@ -379,6 +394,10 @@ class UIRoot extends Component {
 
   onLoadingFinished = () => {
     this.setState({ noMoreLoadingUpdates: true });
+
+    if (this.props.onLoaded) {
+      this.props.onLoaded();
+    }
   };
 
   onSceneLoaded = () => {
@@ -387,7 +406,7 @@ class UIRoot extends Component {
 
   // TODO: we need to come up with a cleaner way to handle the shared state between aframe and react than emmitting events and setting state on the scene
   onAframeStateChanged = e => {
-    if (!(e.detail === "muted" || e.detail === "frozen" || e.detail === "spacebubble")) return;
+    if (!(e.detail === "muted" || e.detail === "frozen")) return;
     this.setState({
       [e.detail]: this.props.scene.is(e.detail)
     });
@@ -401,16 +420,16 @@ class UIRoot extends Component {
     this.setState({ videoShareMediaSource: null });
   };
 
+  onShareVideoFailed = () => {
+    this.setState({ showVideoShareFailed: true });
+  };
+
   toggleMute = () => {
     this.props.scene.emit("action_mute");
   };
 
   toggleFreeze = () => {
     this.props.scene.emit("action_freeze");
-  };
-
-  toggleSpaceBubble = () => {
-    this.props.scene.emit("action_space_bubble");
   };
 
   shareVideo = mediaSource => {
@@ -472,6 +491,15 @@ class UIRoot extends Component {
     this.props.exitScene(reason);
     this.setState({ exited: true });
   };
+///////////////////////////////////////////////
+
+  
+  emojiChange = () =>{
+    
+   this.props.scene.emit("action_emoji_change");
+    console.log("emojiChange called on ui-root.js ");
+
+  };
 
   isWaitingForAutoExit = () => {
     return this.state.secondsRemainingBeforeAutoExit <= AUTO_EXIT_TIMER_SECONDS;
@@ -486,24 +514,10 @@ class UIRoot extends Component {
     });
   };
 
-  hasGrantedMicPermissions = async () => {
-    if (this.state.requestedScreen) {
-      // There is no way to tell if you've granted mic permissions in a previous session if we've
-      // already prompted for screen sharing permissions, so we have to assume that we've never granted permissions.
-      // Fortunately, if you *have* granted permissions permanently, there won't be a second browser prompt, but we
-      // can't determine that before hand.
-      // See https://bugzilla.mozilla.org/show_bug.cgi?id=1449783 for a potential solution in the future.
-      return false;
-    } else {
-      // If we haven't requested the screen in this session, check if we've granted permissions in a previous session.
-      return (await grantedMicLabels()).length > 0;
-    }
-  };
-
   performDirectEntryFlow = async enterInVR => {
     this.setState({ enterInVR, waitingOnAudio: true });
 
-    const hasGrantedMic = await this.hasGrantedMicPermissions();
+    const hasGrantedMic = (await grantedMicLabels()).length > 0;
 
     if (hasGrantedMic) {
       await this.setMediaStreamToDefault();
@@ -560,14 +574,30 @@ class UIRoot extends Component {
 
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      this.setState({
-        audioTrack: mediaStream.getAudioTracks()[0],
-        numAudioTracks: mediaStream.getAudioTracks().length
-      });
+      const audioTrack = mediaStream.getAudioTracks()[0];
+      this.setState({ audioTrack });
+
+      if (/Oculus/.test(navigator.userAgent)) {
+        // HACK Oculus Browser 6 seems to randomly end the microphone audio stream. This re-creates it.
+        // Note the ended event will only fire if some external event ends the stream, not if we call stop().
+        const recreateAudioStream = async () => {
+          console.warn(
+            "Oculus Browser 6 bug hit: Audio stream track ended without calling stop. Recreating audio stream."
+          );
+
+          const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+          const audioTrack = mediaStream.getAudioTracks()[0];
+          NAF.connection.adapter.setLocalMediaStream(mediaStream);
+          audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
+        };
+
+        audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
+      }
+
       return true;
     } catch (e) {
       // Error fetching audio track, most likely a permission denial.
-      this.setState({ audioTrack: null, numAudioTracks: 0 });
+      this.setState({ audioTrack: null });
       return false;
     }
   };
@@ -584,6 +614,9 @@ class UIRoot extends Component {
       if (micDeviceId) {
         this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
       }
+      const mediaStreamForMicAnalysis = new MediaStream();
+      mediaStreamForMicAnalysis.addTrack(this.state.audioTrack.clone());
+      this.props.scene.emit("local-media-stream-created", { mediaStream: mediaStreamForMicAnalysis });
     }
 
     this.setState({ mediaStream });
@@ -722,12 +755,16 @@ class UIRoot extends Component {
   };
 
   closeDialog = () => {
-    showFullScreenIfWasFullScreen();
-
     if (this.state.dialog) {
       this.setState({ dialog: null });
     } else {
       this.props.history.goBack();
+    }
+
+    if (isIn2DInterstitial()) {
+      exit2DInterstitialAndEnterVR();
+    } else {
+      showFullScreenIfWasFullScreen();
     }
   };
 
@@ -735,6 +772,19 @@ class UIRoot extends Component {
     this.setState({
       dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
     });
+  };
+
+  toggleStreamerMode = enable => {
+    const playerRig = document.querySelector("#player-rig");
+    playerRig.setAttribute("character-controller", "fly", enable);
+
+    if (enable) {
+      this.props.hubChannel.beginStreaming();
+      this.setState({ isStreaming: true, showStreamingTip: true });
+    } else {
+      this.props.hubChannel.endStreaming();
+      this.setState({ isStreaming: false });
+    }
   };
 
   renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
@@ -772,7 +822,7 @@ class UIRoot extends Component {
       this.setState({ miniInviteActivated: false });
     }, 5000);
 
-    if (navigator.share) {
+    if (canShare()) {
       navigator.share({ title: document.title, url: link });
     } else {
       copy(link);
@@ -802,15 +852,7 @@ class UIRoot extends Component {
     if (!this.props.presences) {
       return [];
     } else {
-      const channels = [];
-      for (const p of Object.values(this.props.presences)) {
-        for (const m of p.metas) {
-          if (m.profile && m.profile.discordBridges) {
-            Array.prototype.push.apply(channels, m.profile.discordBridges.map(b => b.channel.name));
-          }
-        }
-      }
-      return channels;
+      return discordBridgesForPresences(this.props.presences);
     }
   };
 
@@ -901,7 +943,7 @@ class UIRoot extends Component {
         <div>
           <FormattedMessage id={exitSubtitleId} />
           <p />
-          {!["left", "kicked"].includes(this.props.roomUnavailableReason) && (
+          {!["left", "disconnected"].includes(this.props.roomUnavailableReason) && (
             <div>
               You can also{" "}
               <WithHoverSound>
@@ -947,8 +989,8 @@ class UIRoot extends Component {
               onClick={() =>
                 this.props.performConditionalSignIn(
                   () => this.props.hubChannel.can("update_hub"),
-                  () => this.pushHistoryState("modal", "rename_room"),
-                  "rename-room"
+                  () => this.pushHistoryState("modal", "room_settings"),
+                  "room-settings"
                 )
               }
             >
@@ -1083,20 +1125,6 @@ class UIRoot extends Component {
     );
   };
 
-  renderScreensharing = () => {
-    return (
-      <label className={entryStyles.screenSharing}>
-        <input
-          className={entryStyles.checkbox}
-          type="checkbox"
-          value={this.state.shareScreen}
-          onChange={this.setStateAndRequestScreen}
-        />
-        <FormattedMessage id="entry.enable-screen-sharing" />
-      </label>
-    );
-  };
-
   renderMicPanel = granted => {
     return (
       <div className="mic-grant-panel">
@@ -1161,9 +1189,9 @@ class UIRoot extends Component {
           </div>
           <div className="audio-setup-panel__levels">
             <MicLevelWidget
+              scene={this.props.scene}
               hasAudioTrack={!!this.state.audioTrack}
               muteOnEntry={this.state.muteOnEntry}
-              mediaStream={this.state.mediaStream}
             />
             <OutputLevelWidget />
           </div>
@@ -1277,11 +1305,13 @@ class UIRoot extends Component {
     };
     const hasPush = navigator.serviceWorker && "PushManager" in window;
 
-    if (this.props.showOAuthDialog)
+    if (this.props.showOAuthDialog && !this.props.showInterstitialPrompt)
       return (
-        <div className={classNames(rootStyles)}>
-          <OAuthDialog closable={false} oauthInfo={this.props.oauthInfo} />
-        </div>
+        <IntlProvider locale={lang} messages={messages}>
+          <div className={classNames(rootStyles)}>
+            <OAuthDialog onClose={this.props.onCloseOAuthDialog} oauthInfo={this.props.oauthInfo} />
+          </div>
+        </IntlProvider>
       );
     if (isExited) return this.renderExitedPane();
     if (isLoading) {
@@ -1298,6 +1328,11 @@ class UIRoot extends Component {
     const enteredOrWatching = entered || watching;
     const enteredOrWatchingOrPreload = entered || watching || preload;
     const baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
+    const inEntryFlow = !!(
+      this.props.history &&
+      this.props.history.location.state &&
+      this.props.history.location.state.entry_step
+    );
 
     const entryDialog =
       this.props.availableVREntryTypes &&
@@ -1342,7 +1377,7 @@ class UIRoot extends Component {
     // Allow scene picker pre-entry, otherwise wait until entry
     const showMediaBrowser =
       mediaSource && (["scenes", "avatars", "favorites"].includes(mediaSource) || this.state.entered);
-    const hasTopTip = this.props.activeTips && this.props.activeTips.top;
+    const hasTopTip = (this.props.activeTips && this.props.activeTips.top) || this.state.showVideoShareFailed;
 
     const clientInfoClientId = getClientInfoClientId(this.props.history.location);
     const showClientInfo = !!clientInfoClientId;
@@ -1353,6 +1388,7 @@ class UIRoot extends Component {
     const hasDiscordBridges = discordBridges.length > 0;
     const showBroadcastTip =
       (hasDiscordBridges || (hasEmbedPresence && !this.props.embed)) && !this.state.broadcastTipDismissed;
+
     const showInviteTip =
       !showVREntryButton &&
       !hasTopTip &&
@@ -1361,6 +1397,7 @@ class UIRoot extends Component {
       !preload &&
       !watching &&
       !hasTopTip &&
+      !inEntryFlow &&
       !this.props.store.state.activity.hasOpenedShare &&
       this.occupantCount() <= 1;
 
@@ -1372,18 +1409,40 @@ class UIRoot extends Component {
       !watching &&
       !showInviteTip &&
       !this.state.showShareDialog &&
+      this.props.hubChannel &&
       this.props.hubChannel.canOrWillIfCreator("update_hub");
 
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
       : null;
 
+    const streaming = this.state.isStreaming;
+    const streamingTip = streaming &&
+      this.state.showStreamingTip && (
+        <div className={classNames([styles.streamingTip])}>
+          <div className={classNames([styles.streamingTipAttachPoint])} />
+          <button
+            title="Dismiss"
+            className={styles.streamingTipClose}
+            onClick={() => this.setState({ showStreamingTip: false })}
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+
+          <div className={styles.streamingTipMessage}>
+            <FormattedMessage id="tips.streaming" />
+          </div>
+        </div>
+      );
+
+    const streamer = getCurrentStreamer();
+    const streamerName = streamer && streamer.displayName;
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
           <div className={classNames(rootStyles)}>
             {this.state.dialog}
-
             {preload && (
               <PreloadOverlay
                 hubName={this.props.hubName}
@@ -1392,7 +1451,6 @@ class UIRoot extends Component {
                 onLoadClicked={this.props.onPreloadLoadClicked}
               />
             )}
-
             <StateRoute
               stateKey="overlay"
               stateValue="profile"
@@ -1402,6 +1460,7 @@ class UIRoot extends Component {
                   {...props}
                   displayNameOverride={displayNameOverride}
                   finished={() => this.pushHistoryState()}
+                  onClose={() => this.pushHistoryState()}
                   store={this.props.store}
                   mediaSearchStore={this.props.mediaSearchStore}
                   avatarId={props.location.state.detail && props.location.state.detail.avatarId}
@@ -1470,6 +1529,7 @@ class UIRoot extends Component {
                       this.pushHistoryState("entry_step", "device");
                     }
                   }}
+                  onClose={() => this.pushHistoryState()}
                   store={this.props.store}
                   mediaSearchStore={this.props.mediaSearchStore}
                   avatarId={props.location.state.detail && props.location.state.detail.avatarId}
@@ -1478,10 +1538,13 @@ class UIRoot extends Component {
             />
             <StateRoute
               stateKey="modal"
-              stateValue="rename_room"
+              stateValue="room_settings"
               history={this.props.history}
               render={() =>
-                this.renderDialog(RenameRoomDialog, { onRename: name => this.props.hubChannel.rename(name) })
+                this.renderDialog(RoomSettingsDialog, {
+                  initialSettings: { name: this.props.hubName, member_permissions: this.props.hubMemberPermissions },
+                  onChange: settings => this.props.hubChannel.updateHub(settings)
+                })
               }
             />
             <StateRoute
@@ -1540,7 +1603,23 @@ class UIRoot extends Component {
                 this.renderDialog(RoomInfoDialog, { scene: this.props.hubScene, hubName: this.props.hubName })
               }
             />
-
+            <StateRoute
+              stateKey="modal"
+              stateValue="feedback"
+              history={this.props.history}
+              render={() =>
+                this.renderDialog(FeedbackDialog, {
+                  history: this.props.history,
+                  onClose: () => this.pushHistoryState("modal", null)
+                })
+              }
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="tweet"
+              history={this.props.history}
+              render={() => this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog })}
+            />
             {showClientInfo && (
               <ClientInfoDialog
                 clientId={clientInfoClientId}
@@ -1548,20 +1627,25 @@ class UIRoot extends Component {
                 history={this.props.history}
                 presences={this.props.presences}
                 hubChannel={this.props.hubChannel}
+                showNonHistoriedDialog={this.showNonHistoriedDialog}
                 performConditionalSignIn={this.props.performConditionalSignIn}
               />
             )}
-
             {(!enteredOrWatching || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
-                <PresenceLog entries={presenceLogEntries} hubId={this.props.hubId} history={this.props.history} />
+                <PresenceLog
+                  entries={presenceLogEntries}
+                  presences={this.props.presences}
+                  hubId={this.props.hubId}
+                  history={this.props.history}
+                />
                 <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
               </div>
             )}
-
             {enteredOrWatchingOrPreload && (
               <PresenceLog
                 inRoom={true}
+                presences={this.props.presences}
                 entries={presenceLogEntries}
                 hubId={this.props.hubId}
                 history={this.props.history}
@@ -1572,51 +1656,17 @@ class UIRoot extends Component {
               this.props.activeTips.bottom &&
               (!presenceLogEntries || presenceLogEntries.length === 0) &&
               !showBroadcastTip && (
-                <div className={styles.bottomTip}>
-                  <button
-                    className={styles.tipCancel}
-                    onClick={() => handleTipClose(this.props.activeTips.bottom, "bottom")}
-                  >
-                    <i>
-                      <FontAwesomeIcon icon={faTimes} />
-                    </i>
-                  </button>
-                  {[".spawn_menu", "_button"].find(x => this.props.activeTips.bottom.endsWith(x)) ? (
-                    <div className={styles.splitTip}>
-                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}-pre`} />
-                      <div
-                        className={classNames({
-                          [styles.splitTipIcon]: true,
-                          [styles[this.props.activeTips.bottom.split(".")[1] + "-icon"]]: true
-                        })}
-                      />
-                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}-post`} />
-                    </div>
-                  ) : (
-                    <div className={styles.tip}>
-                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}`} />
-                    </div>
-                  )}
-                </div>
+                <Tip tip={this.props.activeTips.bottom} tipRegion="bottom" pushHistoryState={this.pushHistoryState} />
               )}
             {enteredOrWatchingOrPreload &&
               showBroadcastTip && (
-                <div className={styles.bottomTip}>
-                  <button className={styles.tipCancel} onClick={() => this.confirmBroadcastedRoom()}>
-                    <i>
-                      <FontAwesomeIcon icon={faTimes} />
-                    </i>
-                  </button>
-                  <div className={styles.tip}>
-                    {hasDiscordBridges ? (
-                      <span>{`Chat in this room is being bridged to ${discordSnippet} on Discord.`}</span>
-                    ) : (
-                      <FormattedMessage id="embed.presence-warning" />
-                    )}
-                  </div>
-                </div>
+                <Tip
+                  tip={hasDiscordBridges ? "discord" : "embed"}
+                  broadcastTarget={discordSnippet}
+                  onClose={() => this.confirmBroadcastedRoom()}
+                />
               )}
-            {enteredOrWatchingOrPreload && (
+            {enteredOrWatchingOrPreload && !this.state.frozen && (
               <InWorldChatBox
                 discordBridges={discordBridges}
                 onSendMessage={this.sendMessage}
@@ -1630,7 +1680,13 @@ class UIRoot extends Component {
                 <FormattedMessage id="entry.leave-room" />
               </button>
             )}
-
+            {this.state.frozen && (
+              <button className={classNames(styles.myTestButton)} onClick={() => this.emojiChange()}>
+              <i>
+                <FontAwesomeIcon icon={faSmileBeam} />
+              </i>
+              </button>
+            )}
             {!this.state.frozen &&
               !watching &&
               !preload && (
@@ -1643,7 +1699,8 @@ class UIRoot extends Component {
                 >
                   {!embed &&
                     !showVREntryButton &&
-                    !hasTopTip && (
+                    !hasTopTip &&
+                    !streaming && (
                       <WithHoverSound>
                         <button
                           className={classNames({
@@ -1684,7 +1741,8 @@ class UIRoot extends Component {
                     !showVREntryButton &&
                     this.occupantCount() > 1 &&
                     !hasTopTip &&
-                    entered && (
+                    entered &&
+                    !streaming && (
                       <WithHoverSound>
                         <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
                           <span>
@@ -1699,7 +1757,7 @@ class UIRoot extends Component {
                     )}
                   {showVREntryButton && (
                     <WithHoverSound>
-                      <button className={inviteStyles.enterButton} onClick={() => this.props.scene.enterVR()}>
+                      <button className={inviteStyles.enterButton} onClick={() => exit2DInterstitialAndEnterVR(true)}>
                         <FormattedMessage id="entry.enter-in-vr" />
                       </button>
                     </WithHoverSound>
@@ -1729,7 +1787,6 @@ class UIRoot extends Component {
                   )}
                 </div>
               )}
-
             <StateRoute
               stateKey="overlay"
               stateValue="invite"
@@ -1742,12 +1799,11 @@ class UIRoot extends Component {
                   isModal={true}
                   onClose={() => {
                     this.props.history.goBack();
-                    handleReEntryToVRFrom2DInterstitial();
+                    exit2DInterstitialAndEnterVR();
                   }}
                 />
               )}
             />
-
             <StateRoute
               stateKey="overlay"
               stateValue="link"
@@ -1763,83 +1819,78 @@ class UIRoot extends Component {
                 />
               )}
             />
-
-            {!preload && (
-              <div
-                onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
-                className={classNames({
-                  [styles.settingsInfo]: true,
-                  [styles.settingsInfoSelected]: this.state.showSettingsMenu
-                })}
+            {streaming && (
+              <button
+                title="Exit Camera Mode"
+                onClick={() => this.toggleStreamerMode(false)}
+                className={classNames([styles.cornerButton, styles.cameraModeExitButton])}
               >
-                <FontAwesomeIcon icon={faBars} />
-              </div>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
             )}
+            {streamingTip}
 
-            <div
-              onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
-              className={classNames({
-                [styles.presenceInfo]: true,
-                [styles.presenceInfoSelected]: this.state.showPresenceList
-              })}
-            >
-              <FontAwesomeIcon icon={faUsers} />
-              <span className={styles.occupantCount}>{this.occupantCount()}</span>
-            </div>
+            <PresenceList
+              history={this.props.history}
+              presences={this.props.presences}
+              sessionId={this.props.sessionId}
+              signedIn={this.state.signedIn}
+              email={this.props.store.state.credentials.email}
+              onSignIn={this.showSignInDialog}
+              onSignOut={this.signOut}
+            />
 
-            {this.state.showPresenceList && (
-              <PresenceList
-                history={this.props.history}
-                presences={this.props.presences}
-                sessionId={this.props.sessionId}
-                signedIn={this.state.signedIn}
-                email={this.props.store.state.credentials.email}
-                onSignIn={this.showSignInDialog}
-                onSignOut={this.signOut}
-              />
-            )}
-
-            {this.state.showSettingsMenu && (
-              <SettingsMenu
-                history={this.props.history}
-                mediaSearchStore={this.props.mediaSearchStore}
-                hideSettings={() => this.setState({ showSettingsMenu: false })}
-                hubChannel={this.props.hubChannel}
-                hubScene={this.props.hubScene}
-                performConditionalSignIn={this.props.performConditionalSignIn}
-                showNonHistoriedDialog={this.showNonHistoriedDialog}
-                pushHistoryState={this.pushHistoryState}
-              />
-            )}
-
+            {!streaming &&
+              !preload && (
+                <SettingsMenu
+                  history={this.props.history}
+                  mediaSearchStore={this.props.mediaSearchStore}
+                  isStreaming={streaming}
+                  toggleStreamerMode={this.toggleStreamerMode}
+                  hubChannel={this.props.hubChannel}
+                  hubScene={this.props.hubScene}
+                  scene={this.props.scene}
+                  performConditionalSignIn={this.props.performConditionalSignIn}
+                  showNonHistoriedDialog={this.showNonHistoriedDialog}
+                  pushHistoryState={this.pushHistoryState}
+                />
+              )}
+            {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
             {enteredOrWatching && (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
+                  scene={this.props.scene}
                   history={this.props.history}
                   mediaSearchStore={this.props.mediaSearchStore}
                   muted={this.state.muted}
                   frozen={this.state.frozen}
                   watching={this.state.watching}
                   onWatchEnded={() => this.setState({ watching: false })}
-                  spacebubble={this.state.spacebubble}
                   videoShareMediaSource={this.state.videoShareMediaSource}
+                  showVideoShareFailed={this.state.showVideoShareFailed}
+                  hideVideoShareFailedTip={() => this.setState({ showVideoShareFailed: false })}
                   activeTip={this.props.activeTips && this.props.activeTips.top}
                   isCursorHoldingPen={this.props.isCursorHoldingPen}
                   hasActiveCamera={this.props.hasActiveCamera}
                   onToggleMute={this.toggleMute}
                   onToggleFreeze={this.toggleFreeze}
-                  onToggleSpaceBubble={this.toggleSpaceBubble}
                   onSpawnPen={this.spawnPen}
+                  onEmojiChange={this.emojiChange}
                   onSpawnCamera={() => this.props.scene.emit("action_toggle_camera")}
                   onShareVideo={this.shareVideo}
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
+                  isStreaming={streaming}
+                  showStreamingTip={this.state.showStreamingTip}
+                  hideStreamingTip={() => {
+                    this.setState({ showStreamingTip: false });
+                  }}
                 />
-                {!watching ? (
+                {!watching && !streaming ? (
                   <div className={styles.nagCornerButton}>
-                    <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
+                    <button onClick={() => this.pushHistoryState("modal", "feedback")}>
                       <FormattedMessage id="feedback.prompt" />
-                    </a>
+                    </button>
                   </div>
                 ) : (
                   <div className={styles.nagCornerButton}>
@@ -1848,17 +1899,20 @@ class UIRoot extends Component {
                     </button>
                   </div>
                 )}
-                <button
-                  onClick={() => this.toggleFavorited()}
-                  className={classNames({
-                    [entryStyles.favorited]: this.isFavorited(),
-                    [styles.inRoomFavoriteButton]: true
-                  })}
-                >
-                  <i title="Favorite">
-                    <FontAwesomeIcon icon={faStar} />
-                  </i>
-                </button>
+
+                {!streaming && (
+                  <button
+                    onClick={() => this.toggleFavorited()}
+                    className={classNames({
+                      [entryStyles.favorited]: this.isFavorited(),
+                      [styles.inRoomFavoriteButton]: true
+                    })}
+                  >
+                    <i title="Favorite">
+                      <FontAwesomeIcon icon={faStar} />
+                    </i>
+                  </button>
+                )}
               </div>
             )}
           </div>

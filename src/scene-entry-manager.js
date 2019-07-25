@@ -11,7 +11,7 @@ import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import {
   isIn2DInterstitial,
   handleExitTo2DInterstitial,
-  handleReEntryToVRFrom2DInterstitial,
+  exit2DInterstitialAndEnterVR,
   forceExitFrom2DInterstitial
 } from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
@@ -63,7 +63,7 @@ export default class SceneEntryManager {
       // force gamepads to become live.
       navigator.getVRDisplays();
 
-      this.scene.enterVR();
+      exit2DInterstitialAndEnterVR(true);
     }
 
     if (isMobile || qsTruthy("mobile")) {
@@ -107,6 +107,9 @@ export default class SceneEntryManager {
         this.store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
       });
     })();
+
+    // Bump stored entry count after 30s
+    setTimeout(() => this.store.bumpEntryCount(), 30000);
 
     this.scene.addState("entered");
 
@@ -249,10 +252,12 @@ export default class SceneEntryManager {
   _setupMedia = mediaStream => {
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
+      if (!this.hubChannel.can("spawn_and_move_media")) return;
       const { entity, orientation } = addMedia(
         src,
         "#interactable-media",
         contentOrigin,
+        null,
         !(src instanceof MediaStream),
         true
       );
@@ -275,19 +280,11 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("pinned", e => {
       if (this._disableSignInOnPinAction) return;
-
-      // Don't go into pin/unpin flow if the pin state didn't actually change and this was just initialization
-      if (!e.detail.changed) return;
-
       this._signInAndPinOrUnpinElement(e.detail.el, true);
     });
 
     this.scene.addEventListener("unpinned", e => {
       if (this._disableSignInOnPinAction) return;
-
-      // Don't go into pin/unpin flow if the pin state didn't actually change and this was just initialization
-      if (!e.detail.changed) return;
-
       this._signInAndPinOrUnpinElement(e.detail.el, false);
     });
 
@@ -324,7 +321,15 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
 
     document.addEventListener("paste", e => {
-      if (e.target.matches("input, textarea") && document.activeElement === e.target) return;
+      if (
+        (e.target.matches("input, textarea") || e.target.contentEditable === "true") &&
+        document.activeElement === e.target
+      )
+        return;
+
+      // Never paste into scene if dialog is open
+      const uiRoot = document.querySelector(".ui-root");
+      if (uiRoot && uiRoot.classList.contains("in-modal-or-overlay")) return;
 
       const url = e.clipboardData.getData("text");
       const files = e.clipboardData.files && e.clipboardData.files;
@@ -359,7 +364,16 @@ export default class SceneEntryManager {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
-      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      let newStream;
+
+      try {
+        newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (e) {
+        isHandlingVideoShare = false;
+        this.scene.emit("share_video_failed");
+        return;
+      }
+
       const videoTracks = newStream ? newStream.getVideoTracks() : [];
 
       if (videoTracks.length > 0) {
@@ -446,16 +460,17 @@ export default class SceneEntryManager {
         spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
       }, spawnDelay);
 
-      handleReEntryToVRFrom2DInterstitial();
+      exit2DInterstitialAndEnterVR();
     });
 
     this.mediaSearchStore.addEventListener("media-exit", () => {
-      handleReEntryToVRFrom2DInterstitial();
+      exit2DInterstitialAndEnterVR();
     });
   };
 
   _setupCamera = () => {
     this.scene.addEventListener("action_toggle_camera", () => {
+      if (!this.hubChannel.can("spawn_camera")) return;
       const myCamera = this.scene.systems["camera-tools"].getMyCamera();
 
       if (myCamera) {
@@ -476,13 +491,12 @@ export default class SceneEntryManager {
       setTimeout(() => this.scene.emit("camera_toggled"));
     });
 
-    this.scene.addEventListener("photo_taken", e => {
-      this.hubChannel.sendMessage({ src: e.detail }, "photo");
-    });
+    this.scene.addEventListener("photo_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "photo"));
+    this.scene.addEventListener("video_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "video"));
   };
 
   _spawnAvatar = () => {
-    this.playerRig.setAttribute("networked", "template: #remote-avatar-template; attachTemplateToLocal: false;");
+    this.playerRig.setAttribute("networked", "template: #remote-avatar; attachTemplateToLocal: false;");
     this.playerRig.setAttribute("networked-avatar", "");
     this.playerRig.emit("entered");
   };

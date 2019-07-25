@@ -32,14 +32,22 @@ const farsparkEncodeUrl = url => {
 };
 
 export const scaledThumbnailUrlFor = (url, width, height) => {
-  const urlHostname = new URL(url).hostname;
+  const farsparkUrl = `https://${process.env.FARSPARK_SERVER}/thumbnail/${farsparkEncodeUrl(
+    url
+  )}?w=${width}&h=${height}`;
 
-  if (process.env.RETICULUM_SERVER) {
-    const retHostname = new URL(`https://${process.env.RETICULUM_SERVER}`).hostname;
-    if (retHostname === urlHostname) return url;
+  try {
+    const urlHostname = new URL(url).hostname;
+
+    if (process.env.RETICULUM_SERVER) {
+      const retHostname = new URL(`https://${process.env.RETICULUM_SERVER}`).hostname;
+      if (retHostname === urlHostname) return url;
+    }
+  } catch (e) {
+    return farsparkUrl;
   }
 
-  return `https://${process.env.FARSPARK_SERVER}/thumbnail/${farsparkEncodeUrl(url)}?w=${width}&h=${height}`;
+  return farsparkUrl;
 };
 
 export const proxiedUrlFor = (url, index = null) => {
@@ -89,9 +97,17 @@ export const getCustomGLTFParserURLResolver = gltfUrl => url => {
   return url;
 };
 
+const dataUrlRegex = /data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/;
+
 export const guessContentType = url => {
   if (url.startsWith("hubs://") && url.endsWith("/video")) return "video/vnd.hubs-webrtc";
-  const extension = new URL(url).pathname.split(".").pop();
+  if (url.startsWith("data:")) {
+    const matches = dataUrlRegex.match(url);
+    if (matches.length > 0) {
+      matches[1];
+    }
+  }
+  const extension = new URL(url, window.location).pathname.split(".").pop();
   return commonKnownContentTypes[extension];
 };
 const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/scenes\/(\w+)\/?\S*/;

@@ -72,9 +72,28 @@
   align-items: center;
 
   button {
+    position: relative;
+
+    :local(.button-icon) {
+      position: absolute;
+      left: 10px;
+      width: 32px;
+      height: 32px;
+    }
+
     @extend %action-button-secondary-modal;
     margin-top: 12px;
-    width: 150px;
+    width: 200px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  button:disabled {
+    color: $dark-grey;
+
+    :local(.button-icon) {
+      filter: saturate(0);
+    }
   }
 
   :local(.cancel) {

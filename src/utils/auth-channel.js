@@ -28,45 +28,18 @@ export default class AuthChannel {
     this._signedIn = false;
   };
 
-  verifyAuthentication(authTopic, authToken) {
+  verifyAuthentication(authTopic, authToken, authPayload) {
     const channel = this.socket.channel(authTopic);
     return new Promise((resolve, reject) =>
       channel
         .join()
         .receive("ok", () => {
-          let receivedEmail;
-          let receivedToken;
-
-          // On the verifier side, also update local storage so we log in on both sides.
-          //
-          // In the case where it's the same browser, it should be updated with the same values in
-          // both tabs, so nbd.
-          const storeCredentials = async () => {
-            if (!receivedEmail || !receivedToken) return;
-            await this.handleAuthCredentials(receivedEmail, receivedToken);
+          channel.on("auth_credentials", async ({ credentials: token, payload: payload }) => {
+            await this.handleAuthCredentials(payload.email, token);
             resolve();
-          };
-
-          // We need to receive both the credentials token and the email (these come over via separate messages,
-          // since the email needs to be send from the origin process)
-          //
-          // If the user closed the other tab, which would cause the email to not show up, or the token failed,
-          // give up after a timeout.
-          setTimeout(() => {
-            if (!receivedEmail || !receivedToken) resolve();
-          }, 5000);
-
-          channel.on("auth_credentials", async ({ credentials: token }) => {
-            receivedToken = token;
-            storeCredentials();
           });
 
-          channel.on("auth_email", async ({ email: email }) => {
-            receivedEmail = email;
-            storeCredentials();
-          });
-
-          channel.push("auth_verified", { token: authToken });
+          channel.push("auth_verified", { token: authToken, payload: authPayload });
         })
         .receive("error", reject)
     );

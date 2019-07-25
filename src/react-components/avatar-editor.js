@@ -272,7 +272,7 @@ export default class AvatarEditor extends Component {
           </a>
         )}
         {this.props.signedIn ? (
-          <div className="center">
+          <form onSubmit={this.uploadAvatar} className="center">
             <div className="split">
               <div className="form-body">
                 {debug && this.textField("avatar_id", "Avatar ID", true)}
@@ -346,7 +346,6 @@ export default class AvatarEditor extends Component {
             <div>
               <input
                 disabled={this.state.uploading}
-                onClick={this.uploadAvatar}
                 className="form-submit"
                 type="submit"
                 value={this.state.uploading ? "Uploading..." : "Save"}
@@ -364,7 +363,7 @@ export default class AvatarEditor extends Component {
                 )}
               </div>
             )}
-          </div>
+          </form>
         ) : (
           <a onClick={this.props.onSignIn}>
             <FormattedMessage id="sign-in.in" />

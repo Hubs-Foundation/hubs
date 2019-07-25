@@ -20,14 +20,6 @@ body.vr-mode-stretch {
   }
 }
 
-body.mirrored-camera {
-  a-scene {
-    .a-canvas {
-      width: 100% !important;
-    }
-  }
-}
-
 .a-enter-vr, .a-orientation-modal {
   display: none;
 }

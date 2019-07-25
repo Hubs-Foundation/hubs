@@ -1,5 +1,50 @@
 @import 'shared';
 
+:local(.streaming-tip) {
+  position: absolute;
+  left: 8px;
+  top: 72px;
+  background-color: $bright-blue;
+  padding: 12px 24px;
+  border-radius: 28px;
+  display: flex;
+  pointer-events: auto;
+  max-width: 30%;
+  text-align: center;
+
+  @media (max-width: 960px) {
+    display:none;
+  }
+
+  :local(.streaming-tip-attach-point) {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid $bright-blue;
+    position: absolute;
+    top: -5px;
+  }
+
+  :local(.streaming-tip-close){
+    width: 32px;
+    margin-right: 2px;
+    margin-left: -16px;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    color: $light-blue;
+  }
+  :local(.streaming-tip-message){
+    color: white;
+    user-select: text;
+    display: flex;
+    flex-flow: column;
+    font-size: 0.8em;
+  }
+}
+
+
 :local(.ui) {
   @extend %default-font;
   @extend %unselectable;
@@ -91,9 +136,8 @@ body.vr-mode {
   height: 80px;
   pointer-events: none;
 
-  a, button {
+  button {
     @extend %action-button-secondary;
-    min-width: 120px;
     margin-right: 12px;
     margin-left: 12px;
     white-space: nowrap;
@@ -139,7 +183,7 @@ body.vr-mode {
   color: $action-color;
 }
 
-:local(.settings-info) {
+:local(.corner-button) {
   @extend %unselectable;
   text-align: right;
   position: absolute;
@@ -157,9 +201,14 @@ body.vr-mode {
   padding: 10px 12px;
   pointer-events: auto;
   cursor: pointer;
+  border: none;
 }
 
-:local(.settings-info-selected) {
+:local(.camera-mode-exit-button) {
+  padding: 10px 14px;
+}
+
+:local(.corner-button-selected) {
   color: $action-color;
 }
 
@@ -173,7 +222,30 @@ body.vr-mode {
   transform: translateX(-50%);
   pointer-events: auto;
 }
-
+////////////
+:local(.my-test-button) {
+  
+  position: absolute;
+ // margin-bottom: 1px;
+  display: flex;
+  left: 50%;
+  bottom: 24px;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  background-color: transparent;
+  border: transparent;
+  pointer-events: auto;
+  min-width: 150px;
+ // display: flex;
+  //transition: opacity 0.15s linear;
+}
+:local(.my-test-button):hover {
+  color: $action-color;
+}
+:local(.my-test-button):disabled{
+  color: $dark-grey;
+}
+/////////////////////////////////
 :local(.choose-scene-button) {
   @extend %action-button-secondary;
   pointer-events: auto;
@@ -187,7 +259,7 @@ body.vr-mode {
 
   display: none;
 
-  @media (min-height: 325px) {
+  @media (min-height: 450px) {
     display: flex;
   }
 
@@ -199,83 +271,6 @@ body.vr-mode {
     border-bottom: 5px solid $bright-blue;
     position: absolute;
     top: -5px;
-  }
-}
-
-:local(.bottom-tip) {
-  @extend %tip-bubble;
-  bottom: 80px;
-  width: auto;
-  padding: 4px 24px 4px 12px;
-
-  @media(max-width: 768px) {
-    left: 50%;
-    width: 80%;
-    -webkit-transform: auto;
-    transform: auto;
-  }
-
-  :local(.tip-cancel) {
-    color: $light-blue;
-    appearance: none;
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    background: transparent;
-    cursor: pointer;
-    border: none;
-    outline-style: none;
-    width: 32px;
-    height: 32px;
-    margin-right: 2px;
-  }
-
-  :local(.tip) {
-    flex: 10;
-  }
-
-  :local(.split-tip) {
-    flex: 10;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-
-    :local(.split-tip-icon) {
-      appearance: none;
-      -moz-appearance: none;
-      -webkit-appearance: none;
-      outline-style: none;
-      width: 28px;
-      height: 28px;
-      background-size: 30px;
-      background-position: center;
-      background-repeat: no-repeat;
-      border: 2px solid white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      align-self: flex-start;
-      cursor: pointer;
-      margin: 0 6px;
-      border-radius: 18px;
-      background-color: $action-color;
-    }
-
-    :local(.spawn_menu-icon) {
-      background-image: url(../images/spawn_message.png);
-    }
-
-    :local(.object_rotate_button-icon) {
-      background-image: url(../images/rotate.png);
-    }
-
-    :local(.object_scale_button-icon) {
-      background-image: url(../images/scale.png);
-    }
-
-    :local(.object_recenter_button-icon) {
-      background-image: url(../images/recenter.png);
-    }
   }
 }
 

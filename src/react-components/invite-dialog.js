@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import copy from "copy-to-clipboard";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
-import { share } from "../utils/share";
+import { share, canShare } from "../utils/share";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -95,7 +95,7 @@ export default class InviteDialog extends Component {
             </button>
           </WithHoverSound>
           {this.props.allowShare &&
-            navigator.share && (
+            canShare() && (
               <WithHoverSound>
                 <button className={styles.linkButton} onClick={this.shareClicked.bind(this, shortLink)}>
                   <span>{this.state.shareButtonActive ? "sharing..." : "share"}</span>
@@ -103,7 +103,7 @@ export default class InviteDialog extends Component {
               </WithHoverSound>
             )}
           {this.props.allowShare &&
-            !navigator.share && (
+            !canShare() && (
               <WithHoverSound>
                 <button className={styles.linkButton} onClick={this.shareClicked.bind(this, shortLink)}>
                   <FormattedMessage id="invite.tweet" />

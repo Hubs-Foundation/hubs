@@ -16,7 +16,16 @@
 }
 :local(.oauth-button) {
   @extend %action-button;
-  margin-top: 0.5em;
+  margin-top: 24px;
   color: white !important;
   flex-direction: row;
+}
+:local(.oauth-twitter-button) {
+  @extend %twitter-action-button;
+}
+:local(.oauth-discord-button) {
+  @extend %discord-action-button;
+}
+:local(.twitter-message) {
+  margin: 24px 36px 0 36px;
 }

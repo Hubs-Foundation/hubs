@@ -57,6 +57,8 @@ import "./components/kick-button";
 import "./components/close-vr-notice-button";
 import "./components/leave-room-button";
 import "./components/visible-if-permitted";
+import "./components/visibility-on-content-type";
+import "./components/hide-when-pinned-and-forbidden";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
@@ -70,7 +72,6 @@ import "./components/pin-networked-object-button";
 import "./components/drop-object-button";
 import "./components/remove-networked-object-button";
 import "./components/camera-focus-button";
-import "./components/mirror-camera-button";
 import "./components/unmute-video-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/visible-to-owner";
@@ -83,6 +84,7 @@ import "./components/follow-in-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
+import "./components/tweet-media-button";
 import "./components/transform-object-button";
 import "./components/hover-menu";
 import "./components/disable-frustum-culling";
@@ -94,6 +96,7 @@ import "./components/visibility-by-path";
 import "./components/tags";
 import "./components/hubs-text";
 import "./components/billboard";
+import "./components/periodic-full-syncs";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
@@ -109,7 +112,7 @@ import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { proxiedUrlFor } from "./utils/media-url-utils";
 import { traverseMeshesAndAddShapes } from "./utils/physics-utils";
-import { handleExitTo2DInterstitial, handleReEntryToVRFrom2DInterstitial } from "./utils/vr-interstitial";
+import { handleExitTo2DInterstitial, exit2DInterstitialAndEnterVR } from "./utils/vr-interstitial";
 import { getAvatarSrc } from "./utils/avatar-utils.js";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
@@ -124,7 +127,6 @@ import "./systems/permissions";
 import "./systems/exit-on-blur";
 import "./systems/camera-tools";
 import "./systems/userinput/userinput";
-import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
 import "./systems/ui-hotkeys";
 import "./systems/tips";
@@ -156,8 +158,6 @@ if (isEmbed && !qs.get("embed_token")) {
   // Should be covered by X-Frame-Options, but just in case.
   throw new Error("no embed token");
 }
-
-const embedsEnabled = qs.get("embeds");
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
@@ -202,6 +202,7 @@ import qsTruthy from "./utils/qs_truthy";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
+NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
 
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
@@ -258,12 +259,14 @@ if (document.location.pathname.includes("hub.html")) {
 const history = createBrowserHistory({ basename: routerBaseName });
 window.APP.history = history;
 
+const qsVREntryType = qs.get("vr_entry_type");
+
 function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
-  const forcedVREntryType = qs.get("vr_entry_type");
   const isCursorHoldingPen = scene && scene.systems.userinput.activeSets.includes(userinputSets.cursorHoldingPen);
   const hasActiveCamera = scene && !!scene.systems["camera-tools"].getMyCamera();
+  const forcedVREntryType = qsVREntryType;
 
   ReactDOM.render(
     <Router history={history}>
@@ -299,6 +302,7 @@ async function updateUIForHub(hub) {
   remountUI({
     hubId: hub.hub_id,
     hubName: hub.name,
+    hubMemberPermissions: hub.member_permissions,
     hubScene: hub.scene,
     hubEntryCode: hub.entry_code
   });
@@ -428,10 +432,11 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
   remountUI({
     onSendMessage: messageDispatch.dispatch,
+    onLoaded: () => store.executeOnLoadActions(scene),
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
     onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
-    embedToken: embedsEnabled ? embedToken : null
+    embedToken: embedToken
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
@@ -680,7 +685,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         if (actionError && onFailure) onFailure(actionError);
-        handleReEntryToVRFrom2DInterstitial();
+        exit2DInterstitialAndEnterVR();
       }
     });
   };
@@ -703,6 +708,54 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   });
 
+  scene.addEventListener("action_media_tweet", e => {
+    let isInModal = false;
+    let isInOAuth = false;
+
+    const exitOAuth = () => {
+      isInOAuth = false;
+      store.clearOnLoadActions();
+      remountUI({ showOAuthDialog: false, oauthInfo: null });
+    };
+
+    handleExitTo2DInterstitial(true, () => {
+      if (isInModal) history.goBack();
+      if (isInOAuth) exitOAuth();
+    });
+
+    performConditionalSignIn(
+      () => hubChannel.signedIn,
+      async () => {
+        // Strip el from stored payload because it won't serialize into the store.
+        const serializableDetail = {};
+        Object.assign(serializableDetail, e.detail);
+        delete serializableDetail.el;
+
+        if (hubChannel.can("tweet")) {
+          isInModal = true;
+          pushHistoryState(history, "modal", "tweet", serializableDetail);
+        } else {
+          if (e.detail.el) {
+            // Pin the object if we have to go through OAuth, since the page will refresh and
+            // the object will otherwise be removed
+            e.detail.el.setAttribute("pinnable", "pinned", true);
+          }
+
+          const url = await hubChannel.getTwitterOAuthURL();
+
+          isInOAuth = true;
+          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: serializableDetail });
+          remountUI({
+            showOAuthDialog: true,
+            oauthInfo: [{ type: "twitter", url: url }],
+            onCloseOAuthDialog: () => exitOAuth()
+          });
+        }
+      },
+      "tweet"
+    );
+  });
+
   remountUI({ performConditionalSignIn, embed: isEmbed, showPreload: isEmbed });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();
@@ -711,6 +764,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.APP.scene = scene;
   window.APP.hubChannel = hubChannel;
+  window.dispatchEvent(new CustomEvent("hub_channel_ready"));
 
   const handleEarlyVRMode = () => {
     // If VR headset is activated, refreshing page will fire vrdisplayactivate
@@ -772,10 +826,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     // HACK: Oculus browser pauses videos when exiting VR mode, so we need to resume them after a timeout.
     if (/OculusBrowser/i.test(window.navigator.userAgent)) {
       document.querySelectorAll("[media-video]").forEach(m => {
-        const video = m.components["media-video"].video;
+        const videoComponent = m.components["media-video"];
 
-        if (!video.paused) {
-          setTimeout(() => video.play(), 1000);
+        if (videoComponent) {
+          videoComponent._ignorePauseStateChanges = true;
+
+          setTimeout(() => {
+            const video = videoComponent.video;
+
+            if (video && video.paused && !videoComponent.data.videoPaused) {
+              video.play();
+            }
+
+            videoComponent._ignorePauseStateChanges = false;
+          }, 1000);
         }
       });
     }
@@ -824,6 +888,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     entryManager.exitScene("closed");
     remountUI({ roomUnavailableReason: "closed" });
   });
+
+  scene.addEventListener("action_camera_recording_started", () => hubChannel.beginRecording());
+  scene.addEventListener("action_camera_recording_ended", () => hubChannel.endRecording());
 
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
@@ -874,7 +941,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no ||
       availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no;
 
-    remountUI({ availableVREntryTypes, forcedVREntryType: !hasVREntryDevice ? "2d" : null });
+    remountUI({ availableVREntryTypes, forcedVREntryType: qsVREntryType || (!hasVREntryDevice ? "2d" : null) });
   }
 
   const environmentScene = document.querySelector("#environment-scene");
@@ -910,11 +977,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const socket = await connectToReticulum(isDebug);
 
   socket.onClose(e => {
-    // The socket should close normally if the server has explicitly killed it.
+    // We don't currently have an easy way to distinguish between being kicked (server closes socket)
+    // and a variety of other network issues that seem to produce the 1000 closure code, but the
+    // latter are probably more common. Either way, we just tell the user they got disconnected.
     const NORMAL_CLOSURE = 1000;
     if (e.code === NORMAL_CLOSURE) {
       entryManager.exitScene();
-      remountUI({ roomUnavailableReason: "kicked" });
+      remountUI({ roomUnavailableReason: "disconnected" });
     }
   });
 
@@ -1054,7 +1123,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
       if (isInitialJoin) {
-        store.addEventListener("statechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
+        store.addEventListener("profilechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
         hubChannel.presence.onSync(() => {
           const presence = hubChannel.presence;
 
@@ -1128,7 +1197,13 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
             }
 
-            scene.emit("presence_updated", { sessionId, profile: meta.profile, roles: meta.roles });
+            scene.emit("presence_updated", {
+              sessionId,
+              profile: meta.profile,
+              roles: meta.roles,
+              streaming: meta.streaming,
+              recording: meta.recording
+            });
           });
 
           presence.onLeave((sessionId, current, info) => {
@@ -1233,6 +1308,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
+    if (stale_fields.includes("member_permissions")) {
+      hubChannel.fetchPermissions();
+    }
+
     if (stale_fields.includes("name")) {
       const titleParts = document.title.split(" | "); // Assumes title has | trailing site name
       titleParts[0] = hub.name;
@@ -1257,6 +1336,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       scene.emit("hub_closed");
     }
   });
+
+  hubPhxChannel.on("permissions_updated", () => hubChannel.fetchPermissions());
 
   hubPhxChannel.on("mute", ({ session_id }) => {
     if (session_id === NAF.clientId && !scene.is("muted")) {

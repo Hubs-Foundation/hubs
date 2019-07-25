@@ -2,6 +2,7 @@ import { sets } from "../sets";
 import { paths } from "../paths";
 import { Pose } from "../pose";
 import { findRemoteHoverTarget } from "../../interactions";
+import { canMove } from "../../../utils/permissions-utils";
 
 const calculateCursorPose = function(camera, coords, origin, direction, cursorPose) {
   origin.setFromMatrixPosition(camera.matrixWorld);
@@ -51,15 +52,14 @@ export class AppAwareMouseDevice {
       const intersection = rawIntersections.find(x => x.object.el);
       const remoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
       const userinput = AFRAME.scenes[0].systems.userinput;
+      const isInteractable =
+        intersection &&
+        intersection.object.el.matches(".pen, .pen *, .video, .video *, .interactable, .interactable *");
+      const isPinned =
+        remoteHoverTarget && remoteHoverTarget.components.pinnable && remoteHoverTarget.components.pinnable.data.pinned;
+      const isFrozen = AFRAME.scenes[0].is("frozen");
       this.clickedOnAnything =
-        (intersection &&
-          intersection.object.el.matches(".pen, .pen *, .video, .video *, .interactable, .interactable *") &&
-          !(
-            remoteHoverTarget &&
-            remoteHoverTarget.components.pinnable &&
-            remoteHoverTarget.components.pinnable.data.pinned &&
-            !AFRAME.scenes[0].is("frozen")
-          )) ||
+        (isInteractable && (isFrozen || !isPinned) && canMove(remoteHoverTarget)) ||
         userinput.activeSets.includes(sets.cursorHoldingPen) ||
         userinput.activeSets.includes(sets.cursorHoldingInteractable) ||
         userinput.activeSets.includes(sets.cursorHoldingCamera);
