@@ -10,7 +10,6 @@ const v = name => {
 const lButton = paths.device.vive.left.button;
 const lAxis = paths.device.vive.left.axis;
 const lPose = paths.device.vive.left.pose;
-const lJoy = v("left/joy");
 const lJoyScaled = v("left/joy/scaled");
 const lJoyXScaled = v("left/joyX/scaled");
 const lJoyYScaled = v("left/joyY/scaled");
