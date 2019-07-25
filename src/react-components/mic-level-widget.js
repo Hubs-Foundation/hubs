@@ -3,80 +3,55 @@ import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import MovingAverage from "moving-average";
 
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-
 export default class MicLevelWidget extends Component {
   static propTypes = {
-    mediaStream: PropTypes.object,
     hasAudioTrack: PropTypes.bool,
-    muteOnEntry: PropTypes.bool
+    muteOnEntry: PropTypes.bool,
+    scene: PropTypes.object
   };
 
   state = {
-    micLevel: 0
+    volume: 0
   };
 
   componentDidMount() {
-    if (this.props.mediaStream != null && this.props.hasAudioTrack) {
-      this.startAnalyzer(this.props.mediaStream);
-    }
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.props.mediaStream !== prevProps.mediaStream || this.props.hasAudioTrack !== prevProps.hasAudioTrack) {
-      this.stopAnalyzer();
-      if (this.props.mediaStream != null && this.props.hasAudioTrack) {
-        this.startAnalyzer(this.props.mediaStream);
-      }
-    }
+    this.startAnalyser();
   }
 
   componentWillUnmount() {
-    this.stopAnalyzer();
+    this.stopAnalyser();
   }
 
-  stopAnalyzer() {
+  stopAnalyser() {
     if (this.micUpdateInterval != null) {
       clearInterval(this.micUpdateInterval);
     }
-    if (this.micLevelAudioContext != null) {
-      this.micLevelAudioContext.close();
-    }
   }
 
-  startAnalyzer(mediaStream) {
-    this.micLevelAudioContext = new AudioContext();
-    const micSource = this.micLevelAudioContext.createMediaStreamSource(mediaStream);
-    const analyser = this.micLevelAudioContext.createAnalyser();
-    analyser.fftSize = 32;
-    const levels = new Uint8Array(analyser.frequencyBinCount);
-    micSource.connect(analyser);
+  startAnalyser() {
+    if (this.micUpdateInterval) {
+      clearInterval(this.micUpdateInterval);
+    }
     const micLevelMovingAverage = MovingAverage(100);
+    let max = 0;
     this.micUpdateInterval = setInterval(() => {
-      analyser.getByteTimeDomainData(levels);
-      let v = 0;
-      for (let x = 0; x < levels.length; x++) {
-        v = Math.max(levels[x] - 128, v);
-      }
-      const level = v / 128.0;
-      // Multiplier to increase visual indicator.
-      const multiplier = 6;
+      const analyser = this.props.scene.systems["local-audio-analyser"];
+      max = Math.max(analyser.volume, max);
       // We use a moving average to smooth out the visual animation or else it would twitch too fast for
       // the css renderer to keep up.
-      micLevelMovingAverage.push(Date.now(), level * multiplier);
+      micLevelMovingAverage.push(Date.now(), analyser.volume);
       const average = micLevelMovingAverage.movingAverage();
-      this.setState(state => {
-        if (Math.abs(average - state.micLevel) > 0.0001) {
-          return { micLevel: average };
-        }
-      });
+      const volume = max === 0 ? 0 : average / max;
+      if (Math.abs(this.state.volume - volume) > 0.05) {
+        this.setState({ volume });
+      }
     }, 50);
   }
 
   render() {
     const maxLevelHeight = 111;
     const micClip = {
-      clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)`
+      clip: `rect(${maxLevelHeight - Math.floor(this.state.volume * maxLevelHeight)}px, 111px, 111px, 0px)`
     };
 
     return (

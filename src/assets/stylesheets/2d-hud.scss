@@ -209,32 +209,6 @@
   position: relative;
 }
 
-// This roundabout pattern is the only way I can get hovers to not happen on touch devices
-:local(.iconButton.mute) {
-  background-image: url(../hud/mute_off.png);
-}
-:local(.iconButton.mute:hover) {
-  @media (pointer: fine) {
-    background-image: url(../hud/mute_off-hover.png);
-  }
-
-  @media (pointer: coarse) {
-    background-image: url(../hud/mute_off.png);
-  }
-}
-
-:local(.iconButton.mute.active) {
-  background-image: url(../hud/mute_on.png);
-}
-:local(.iconButton.mute.active:hover) {
-  @media (pointer: fine) {
-    background-image: url(../hud/mute_on-hover.png);
-  }
-
-  @media (pointer: coarse) {
-    background-image: url(../hud/mute_on.png);
-  }  
-}
 
 :local(.iconButton.pen) {
   background-image: url(../hud/pen_off.png);

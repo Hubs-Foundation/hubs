@@ -34,8 +34,8 @@ const fetchMaxContentIndex = url => {
 
 const boundingBox = new THREE.Box3();
 
-const forceBatching = qsTruthy("forceBatching");
-const enableBatching = qsTruthy("enableBatching");
+const batchMeshes = qsTruthy("batchMeshes");
+const disableBatching = qsTruthy("disableBatching");
 
 AFRAME.registerComponent("media-loader", {
   schema: {
@@ -59,6 +59,7 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
+    this.animating = false;
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
@@ -173,7 +174,7 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
-  onMediaLoaded(physicsShape = null) {
+  onMediaLoaded(physicsShape = null, shouldUpdateScale) {
     const el = this.el;
     this.clearLoadingTimeout();
 
@@ -182,6 +183,8 @@ AFRAME.registerComponent("media-loader", {
     }
 
     const finish = () => {
+      this.animating = false;
+
       if (physicsShape) {
         el.setAttribute("ammo-shape", {
           type: physicsShape,
@@ -199,13 +202,18 @@ AFRAME.registerComponent("media-loader", {
     };
 
     if (this.data.animate) {
-      const mesh = this.el.getObject3D("mesh");
-      const scale = { x: 0.001, y: 0.001, z: 0.001 };
-      scale.x = mesh.scale.x < scale.x ? mesh.scale.x * 0.001 : scale.x;
-      scale.y = mesh.scale.y < scale.y ? mesh.scale.x * 0.001 : scale.y;
-      scale.z = mesh.scale.z < scale.z ? mesh.scale.x * 0.001 : scale.z;
-      this.addMeshScaleAnimation(mesh, scale, finish);
+      if (!this.animating) {
+        this.animating = true;
+        if (shouldUpdateScale) this.updateScale(this.data.resize);
+        const mesh = this.el.getObject3D("mesh");
+        const scale = { x: 0.001, y: 0.001, z: 0.001 };
+        scale.x = mesh.scale.x < scale.x ? mesh.scale.x * 0.001 : scale.x;
+        scale.y = mesh.scale.y < scale.y ? mesh.scale.x * 0.001 : scale.y;
+        scale.z = mesh.scale.z < scale.z ? mesh.scale.x * 0.001 : scale.z;
+        this.addMeshScaleAnimation(mesh, scale, finish);
+      }
     } else {
+      if (shouldUpdateScale) this.updateScale(this.data.resize);
       finish();
     }
   },
@@ -342,7 +350,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
         this.el.setAttribute(
           "media-image",
-          Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, contentType, batch: enableBatching })
+          Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, contentType, batch: !disableBatching })
         );
 
         if (this.el.components["position-at-box-shape-border__freeze"]) {
@@ -373,8 +381,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "model-loaded",
           () => {
-            this.updateScale(this.data.resize);
-            this.onMediaLoaded(SHAPE.HULL);
+            this.onMediaLoaded(SHAPE.HULL, true);
             addAnimationComponents(this.el);
           },
           { once: true }
@@ -386,7 +393,7 @@ AFRAME.registerComponent("media-loader", {
             src: accessibleUrl,
             contentType: contentType,
             inflate: true,
-            batch: forceBatching,
+            batch: !disableBatching && batchMeshes,
             modelToWorldScale: this.data.resize ? 0.0001 : 1.0
           })
         );
@@ -422,7 +429,7 @@ AFRAME.registerComponent("media-loader", {
           Object.assign({}, this.data.mediaOptions, {
             src: thumbnail,
             contentType: guessContentType(thumbnail) || "image/png",
-            batch: enableBatching
+            batch: !disableBatching
           })
         );
         if (this.el.components["position-at-box-shape-border__freeze"]) {

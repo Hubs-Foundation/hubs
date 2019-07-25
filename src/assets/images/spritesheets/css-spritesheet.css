@@ -1,0 +1,320 @@
+:local(.mic-0) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -43.75px -1.25px;
+    background-size: 255px 255px;
+}
+:local(.mic-0:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -1.25px -1.25px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -43.75px -1.25px;
+    background-size: 255px 255px;
+  }
+}
+:local(.mic-1) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -43.75px -43.75px;
+    background-size: 255px 255px;
+}
+:local(.mic-1:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -1.25px -43.75px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -43.75px -43.75px;
+    background-size: 255px 255px;
+  }
+}
+:local(.mic-2) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -86.25px -43.75px;
+    background-size: 255px 255px;
+}
+:local(.mic-2:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -86.25px -1.25px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -86.25px -43.75px;
+    background-size: 255px 255px;
+  }
+}
+:local(.mic-3) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -43.75px -86.25px;
+    background-size: 255px 255px;
+}
+:local(.mic-3:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -1.25px -86.25px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -43.75px -86.25px;
+    background-size: 255px 255px;
+  }
+}
+:local(.mic-4) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -128.75px -1.25px;
+    background-size: 255px 255px;
+}
+:local(.mic-4:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -86.25px -86.25px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -128.75px -1.25px;
+    background-size: 255px 255px;
+  }
+}
+:local(.mic-5) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -128.75px -86.25px;
+    background-size: 255px 255px;
+}
+:local(.mic-5:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -128.75px -43.75px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -128.75px -86.25px;
+    background-size: 255px 255px;
+  }
+}
+:local(.mic-6) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -43.75px -128.75px;
+    background-size: 255px 255px;
+}
+:local(.mic-6:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -1.25px -128.75px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -43.75px -128.75px;
+    background-size: 255px 255px;
+  }
+}
+:local(.mic-7) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -128.75px -128.75px;
+    background-size: 255px 255px;
+}
+:local(.mic-7:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -86.25px -128.75px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -128.75px -128.75px;
+    background-size: 255px 255px;
+  }
+}
+:local(.mic-off-0) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -171.25px -43.75px;
+    background-size: 255px 255px;
+}
+:local(.mic-off-0:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -171.25px -1.25px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -171.25px -43.75px;
+    background-size: 255px 255px;
+  }
+}
+:local(.mic-off-1) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -171.25px -128.75px;
+    background-size: 255px 255px;
+}
+:local(.mic-off-1:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -171.25px -86.25px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -171.25px -128.75px;
+    background-size: 255px 255px;
+  }
+}
+:local(.mic-off-2) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -43.75px -171.25px;
+    background-size: 255px 255px;
+}
+:local(.mic-off-2:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -1.25px -171.25px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -43.75px -171.25px;
+    background-size: 255px 255px;
+  }
+}
+:local(.mic-off-3) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -128.75px -171.25px;
+    background-size: 255px 255px;
+}
+:local(.mic-off-3:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -86.25px -171.25px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -128.75px -171.25px;
+    background-size: 255px 255px;
+  }
+}
+:local(.mic-off-4) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -213.75px -1.25px;
+    background-size: 255px 255px;
+}
+:local(.mic-off-4:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -171.25px -171.25px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -213.75px -1.25px;
+    background-size: 255px 255px;
+  }
+}
+:local(.mic-off-5) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -213.75px -86.25px;
+    background-size: 255px 255px;
+}
+:local(.mic-off-5:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -213.75px -43.75px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -213.75px -86.25px;
+    background-size: 255px 255px;
+  }
+}
+:local(.mic-off-6) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -213.75px -171.25px;
+    background-size: 255px 255px;
+}
+:local(.mic-off-6:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -213.75px -128.75px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -213.75px -171.25px;
+    background-size: 255px 255px;
+  }
+}
+:local(.mic-off-7) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -43.75px -213.75px;
+    background-size: 255px 255px;
+}
+:local(.mic-off-7:hover){
+  @media (pointer: fine) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -1.25px -213.75px;
+    background-size: 255px 255px;
+  }
+  @media (pointer: coarse) {
+    width: 40px;
+    height: 40px;
+    background: url("css-spritesheet.png") -43.75px -213.75px;
+    background-size: 255px 255px;
+  }
+}

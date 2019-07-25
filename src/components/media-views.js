@@ -361,6 +361,7 @@ AFRAME.registerComponent("media-video", {
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
+      this.networkedEl.components.networked.applyPersistentFirstSync();
       this.updatePlaybackState();
 
       // For scene-owned videos, take ownership after a random delay if nobody
@@ -459,6 +460,9 @@ AFRAME.registerComponent("media-video", {
       return;
     }
 
+    // Used in the HACK in hub.js for dealing with auto-pause in Oculus Browser
+    if (this._ignorePauseStateChanges) return;
+
     this.el.setAttribute("media-video", "videoPaused", this.video.paused);
 
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
@@ -512,6 +516,7 @@ AFRAME.registerComponent("media-video", {
     } else {
       // Need to deal with the fact play() may fail if user has not interacted with browser yet.
       this.video.play().catch(() => {
+        if (pause !== this.data.videoPaused) return;
         this._playbackStateChangeTimeout = setTimeout(() => this.tryUpdateVideoPlaybackState(pause, currentTime), 1000);
       });
     }

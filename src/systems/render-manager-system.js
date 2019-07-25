@@ -14,8 +14,8 @@ export class BatchManagerSystem {
     this.meshToEl = new WeakMap();
     const gl = renderer.context;
 
-    if (!qsTruthy("enableBatching")) {
-      console.warn("Batching is not on by default and must be turned on with enableBatching. Disabling batching.");
+    if (qsTruthy("disableBatching")) {
+      console.warn("Batching disabled by user via disableBatching. Disabling batching.");
       return;
     }
 

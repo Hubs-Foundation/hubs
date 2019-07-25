@@ -33,8 +33,8 @@ const videoMimeType = videoCodec ? `video/webm; codecs=${videoCodec}` : null;
 const hasWebGL2 = !!document.createElement("canvas").getContext("webgl2");
 const allowVideo = !!videoMimeType && hasWebGL2;
 
-const CAPTURE_WIDTH = 640;
-const CAPTURE_HEIGHT = 360;
+const CAPTURE_WIDTH = isMobileVR ? 640 : 1280;
+const CAPTURE_HEIGHT = isMobileVR ? 360 : 720;
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
 const CAPTURE_DURATIONS = allowVideo ? [0, 3, 7, 15, 30, 60, Infinity] : [0];
@@ -320,9 +320,6 @@ AFRAME.registerComponent("camera-tool", {
       this.videoImageData.data.set(this.videoPixels);
     }
 
-    // Begin sampling local audio so we can perform head scaling
-    this.el.sceneEl.setAttribute("local-audio-analyser", { analyze: true });
-
     const stream = new MediaStream();
     const track = this.videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
 
@@ -438,7 +435,6 @@ AFRAME.registerComponent("camera-tool", {
     this.videoCountdownInterval = null;
     this.el.setAttribute("camera-tool", "label", "");
     this.el.setAttribute("camera-tool", { isRecording: false, isSnapping: false });
-    this.el.sceneEl.setAttribute("local-audio-analyser", { analyze: false });
   },
 
   tick() {
@@ -539,9 +535,12 @@ AFRAME.registerComponent("camera-tool", {
 
           // We want to scale our own head in between frames now that we're taking a video/photo.
           let scale = 1;
+          // TODO: The local-audio-analyser has the non-networked media stream, which is active
+          // even while the user is muted. This should be looking at a different analyser that
+          // has the networked media stream instead.
           const analyser = this.el.sceneEl.systems["local-audio-analyser"];
 
-          if (analyser && analyser.data.analyze && this.playerHead.el.components["scale-audio-feedback"]) {
+          if (analyser && this.playerHead.el.components["scale-audio-feedback"]) {
             scale = getAudioFeedbackScale(this.el.object3D, this.playerHead, 1, 2, analyser.volume);
           }
 
