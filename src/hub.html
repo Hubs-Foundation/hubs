@@ -254,7 +254,7 @@
                     owned-object-limiter="counter: #media-counter"
                     set-unowned-body-kinematic
                     is-remote-hover-target
-                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; inspectable: true;"
                     destroy-at-extreme-distances
                     scalable-when-grabbed
                     floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
@@ -365,10 +365,9 @@
                             </a-entity>
                             <a-entity
                                 mixin="rounded-action-button"
-                                tags="singleActionButton: true;"
+                                tags="isHoldable: true; holdableButton: true;"
                                 is-remote-hover-target
-                                transform-button="mode: align;"
-                                hide-when-pinned-and-forbidden
+                                inspect-button
                                 position="0 -0.125 0.01">
                                 <a-entity
                                     sprite
@@ -1049,7 +1048,9 @@
                id="experimental-camera"
                camera
                set-active-camera
+               rotation
                set-yxz-order
+               pitch-yaw-rotator
                matrix-auto-update></a-entity>
         </a-entity>
     </a-scene>

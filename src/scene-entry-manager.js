@@ -47,8 +47,7 @@ export default class SceneEntryManager {
   };
 
   enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
-    const playerCamera = document.querySelector("#player-camera");
-    playerCamera.removeAttribute("scene-preview-camera");
+    document.getElementById("experimental-camera").removeAttribute("scene-preview-camera");
 
     if (isDebug) {
       NAF.connection.adapter.session.options.verbose = true;

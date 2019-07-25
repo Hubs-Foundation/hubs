@@ -17,6 +17,7 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
     this.el.sceneEl.addEventListener("enter-vr", () => this.pause());
     this.el.sceneEl.addEventListener("exit-vr", () => this.play());
     this.pendingXRotation = 0;
+    this.on = true;
   },
 
   onRotateX(e) {
@@ -37,6 +38,10 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
   },
 
   tick() {
+    if (!this.on) {
+      this.pendingXRotation = 0;
+      return;
+    }
     const scene = AFRAME.scenes[0];
     const userinput = scene.systems.userinput;
     const cameraDelta = userinput.get(scene.is("entered") ? paths.actions.cameraDelta : paths.actions.lobbyCameraDelta);
