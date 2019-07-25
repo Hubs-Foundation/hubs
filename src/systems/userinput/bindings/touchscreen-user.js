@@ -55,12 +55,12 @@ export const touchscreenUserBindings = addSetsToBindings({
     {
       src: { value: touchCamDeltaX },
       dest: { value: touchCamDeltaXScaled },
-      xform: xforms.scale(0.18)
+      xform: xforms.scale(Math.PI)
     },
     {
       src: { value: touchCamDeltaY },
       dest: { value: touchCamDeltaYScaled },
-      xform: xforms.scale(0.35)
+      xform: xforms.scale(Math.PI / 2)
     },
     {
       src: { x: touchCamDeltaXScaled, y: touchCamDeltaYScaled },

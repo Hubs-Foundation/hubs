@@ -1,5 +1,68 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
-import { setMatrixWorld, positionRigSuchThatCameraIsInFrontOfObject } from "../utils/three-utils";
+import { setMatrixWorld } from "../utils/three-utils";
+
+const positionRigSuchThatCameraIsInFrontOfObject = (function() {
+  const r = new THREE.Vector3();
+  const rq = new THREE.Quaternion();
+  const c = new THREE.Vector3();
+  const cq = new THREE.Quaternion();
+  const o = new THREE.Vector3();
+  const o2 = new THREE.Vector3();
+  const oq = new THREE.Quaternion();
+  const coq = new THREE.Quaternion();
+  const q = new THREE.Quaternion();
+
+  const cp = new THREE.Vector3();
+  const op = new THREE.Vector3();
+  const v = new THREE.Vector3();
+  const p = new THREE.Vector3();
+  const UP = new THREE.Vector3(0, 1, 0);
+
+  const oScale = new THREE.Vector3();
+  return function positionRigSuchThatCameraIsInFrontOfObject(rig, camera, object) {
+    // assume
+    //  - camera is rig's child
+    //  - scales are 1
+    //  - object is not flat on the floor
+    rig.getWorldQuaternion(rq);
+    camera.getWorldQuaternion(cq);
+    object.getWorldQuaternion(oq);
+
+    r.set(0, 0, 1)
+      .applyQuaternion(rq) //     .projectOnPlane(UP) // not needed here since rig is assumed flat
+      .normalize();
+
+    c.set(0, 0, -1)
+      .applyQuaternion(cq)
+      .projectOnPlane(UP)
+      .normalize();
+
+    o.set(0, 0, -1).applyQuaternion(oq);
+    o2.copy(o)
+      .projectOnPlane(UP)
+      .normalize();
+
+    coq.setFromUnitVectors(c, o2);
+    q.copy(rq).premultiply(coq);
+
+    cp.copy(camera.position);
+    object.getWorldPosition(op);
+
+    object.getWorldScale(oScale);
+    //const isMobileNonVR = AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isMobileVR();
+    // TODO: Position yourself slightly farther away when on mobile. Better yet, make use of
+    // the screen size / frustrum info
+    v.copy(cp).multiplyScalar(-1);
+    p.copy(op)
+      .sub(o.multiplyScalar(oScale.length() * 0.4))
+      //      .sub(new THREE.Vector3(0, o.y / 2, 0))
+      .add(v);
+
+    rig.quaternion.copy(q);
+    rig.position.copy(p);
+    rig.matrixNeedsUpdate = true;
+  };
+})();
 
 let numCameraModes = 0;
 const CAMERA_MODE_FIRST_PERSON = numCameraModes++;
@@ -47,11 +110,11 @@ export class CameraSystem {
     positionRigSuchThatCameraIsInFrontOfObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
   }
   uninspect() {
+    this.inspected = null;
     if (this.mode !== CAMERA_MODE_INSPECT) {
       return;
     }
     this.mode = this.preInspectMode || CAMERA_MODE_FIRST_PERSON;
-    this.inspected = null;
   }
   tick() {
     this.playerHead = this.playerHead || document.getElementById("player-head");
@@ -85,8 +148,6 @@ export class CameraSystem {
       setMatrixWorld(this.rigEl.object3D, m2);
       this.playerCamera.object3D.quaternion.copy(this.cameraEl.object3D.quaternion);
     }
-    if (this.mode === CAMERA_MODE_INSPECT) {
-    }
   }
 }
 
@@ -105,11 +166,20 @@ AFRAME.registerComponent("inspect-button", {
     if (!this.inspectable) {
       console.error("You put an inspect button but I could not find what you want to inspect");
     }
+    this.el.object3D.addEventListener("interact", () => {
+      if (!this.el.sceneEl.is("vr-mode")) {
+        this.el.sceneEl.systems["post-physics"].cameraSystem.inspect(this.inspectable.object3D);
+      }
+    });
     this.el.object3D.addEventListener("holdable-button-down", () => {
-      this.el.sceneEl.systems["hubs-systems"].cameraSystem.inspect(this.inspectable.object3D);
+      if (this.el.sceneEl.is("vr-mode")) {
+        this.el.sceneEl.systems["post-physics"].cameraSystem.inspect(this.inspectable.object3D);
+      }
     });
     this.el.object3D.addEventListener("holdable-button-up", () => {
-//      this.el.sceneEl.systems["hubs-systems"].cameraSystem.uninspect();
+      if (this.el.sceneEl.is("vr-mode")) {
+        this.el.sceneEl.systems["post-physics"].cameraSystem.uninspect();
+      }
     });
   }
 });

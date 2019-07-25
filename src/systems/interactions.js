@@ -182,7 +182,16 @@ AFRAME.registerSystem("interaction", {
       this.state.rightRemote.held.components.tags.data.isPen &&
       this.state.rightRemote.held.children[0].components.pen.intersection;
 
-    const enableRightRemote = !rightHandInteracting && !rightHandTeleporting && !rightRemotePenIntersectingInVR;
+    const enableRightRemote =
+      !rightHandInteracting &&
+      !rightHandTeleporting &&
+      !rightRemotePenIntersectingInVR &&
+      !(
+        this.state.rightRemote.held &&
+        this.state.rightRemote.held.components &&
+        this.state.rightRemote.held.components["inspect-button"] &&
+        this.el.sceneEl.is("vr-mode")
+      );
 
     this.cursorController.components["cursor-controller"].enabled = enableRightRemote;
 

@@ -106,6 +106,7 @@ paths.device.mouse.wheel = "/device/mouse/wheel";
 paths.device.smartMouse = {};
 paths.device.smartMouse.cursorPose = "/device/smartMouse/cursorPose";
 paths.device.smartMouse.cameraDelta = "/device/smartMouse/cameraDelta";
+paths.device.smartMouse.shouldMoveCamera = "/device/smartMouse/shouldMoveCamera";
 paths.device.touchscreen = {};
 paths.device.touchscreen.cursorPose = "/device/touchscreen/cursorPose";
 paths.device.touchscreen.touchCameraDelta = "/device/touchscreen/touchCameraDelta";

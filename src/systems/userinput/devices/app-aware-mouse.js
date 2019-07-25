@@ -75,6 +75,7 @@ export class AppAwareMouseDevice {
       if (movementXY) {
         frame.setVector2(paths.device.smartMouse.cameraDelta, movementXY[0], movementXY[1]);
       }
+      frame.setValueType(paths.device.smartMouse.shouldMoveCamera, true);
     }
 
     const coords = frame.get(paths.device.mouse.coords);

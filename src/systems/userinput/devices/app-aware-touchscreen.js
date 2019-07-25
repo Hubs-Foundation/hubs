@@ -337,7 +337,7 @@ export class AppAwareTouchscreenDevice {
 
     if (hasCameraJob) {
       const delta = findByJob(MOVE_CAMERA_JOB, this.assignments).delta;
-      frame.setVector2(path.touchCameraDelta, delta[0], delta[1]);
+      frame.setVector2(path.touchCameraDelta, delta[0] / window.innerWidth, delta[1] / window.innerHeight);
     }
 
     frame.setValueType(path.pinch.delta, this.pinch.delta);
