@@ -20,7 +20,7 @@ import { keyboardMouseUserBindings } from "./bindings/keyboard-mouse-user";
 import { touchscreenUserBindings } from "./bindings/touchscreen-user";
 import { keyboardDebuggingBindings } from "./bindings/keyboard-debugging";
 import { oculusTouchUserBindings } from "./bindings/oculus-touch-user";
-import { viveUserBindings } from "./bindings/vive-user";
+import { viveUserBindings, viveWandUserBindings } from "./bindings/vive-user";
 import { wmrUserBindings } from "./bindings/windows-mixed-reality-user";
 import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
 import { daydreamUserBindings } from "./bindings/daydream-user";
@@ -260,6 +260,9 @@ AFRAME.registerSystem("userinput", {
           const activeDevice = this.activeDevices.items[i];
           const mapping = vrGamepadMappings.get(activeDevice.constructor);
           mapping && this.registeredMappings.add(mapping);
+          if (activeDevice instanceof ViveControllerDevice && activeDevice.isViveWand) {
+            this.registeredMappings.add(viveWandUserBindings);
+          }
         }
 
         // Handle cardboard by looking of VR device caps
