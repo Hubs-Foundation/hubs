@@ -2,7 +2,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { setMatrixWorld } from "../utils/three-utils";
 import { paths } from "./userinput/paths";
 
-const positionRigSuchThatCameraIsInFrontOfObject = (function() {
+const positionRigSuchThatCameraIsLookingStraightAtObject = (function() {
   const r = new THREE.Vector3();
   const rq = new THREE.Quaternion();
   const c = new THREE.Vector3();
@@ -20,7 +20,7 @@ const positionRigSuchThatCameraIsInFrontOfObject = (function() {
   const UP = new THREE.Vector3(0, 1, 0);
 
   const oScale = new THREE.Vector3();
-  return function positionRigSuchThatCameraIsInFrontOfObject(rig, camera, object) {
+  return function positionRigSuchThatCameraIsLookingStraightAtObject(rig, camera, object) {
     // assume
     //  - camera is rig's child
     //  - scales are 1
@@ -81,15 +81,6 @@ export class CameraSystem {
       this.rigEl = document.getElementById("experimental-rig");
       this.rigEl.object3D.matrixWorldNeedsUpdate = true;
       this.rigEl.object3D.matrixIsModified = true;
-
-      document.addEventListener("keydown", e => {
-        if (e.key === "o") {
-          this.nextMode();
-        }
-        if (e.key === "O") {
-          this.uninspect();
-        }
-      });
     });
   }
   nextMode() {
@@ -109,7 +100,7 @@ export class CameraSystem {
     }
     this.mode = CAMERA_MODE_INSPECT;
     this.inspected = o;
-    positionRigSuchThatCameraIsInFrontOfObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
+    positionRigSuchThatCameraIsLookingStraightAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
   }
   uninspect() {
     this.inspected = null;
@@ -124,6 +115,11 @@ export class CameraSystem {
     if (!this.playerCamera) return;
     this.playerCamera.components["pitch-yaw-rotator"].on = true;
     this.cameraEl.components["pitch-yaw-rotator"].on = true;
+
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    if (userinput.get(paths.actions.nextCameraMode)) {
+      this.nextMode();
+    }
 
     const visible = this.mode !== CAMERA_MODE_FIRST_PERSON;
     if (visible !== this.playerHead.object3D.visible) {
@@ -152,7 +148,6 @@ export class CameraSystem {
     }
 
     if (!!this.inspected) {
-      const userinput = AFRAME.scenes[0].systems.userinput;
       const stopInspecting = userinput.get(paths.actions.stopInspecting);
       if (stopInspecting) {
         this.uninspect();

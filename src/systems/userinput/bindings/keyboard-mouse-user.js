@@ -348,6 +348,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       },
       xform: xforms.falling,
       priority: 100
+    },
+    {
+      src: { value: paths.device.keyboard.key("o") },
+      dest: { value: paths.actions.nextCameraMode },
+      xform: xforms.rising
     }
 
     // Helpful bindings for debugging hands in 2D
@@ -591,11 +596,17 @@ export const keyboardMouseUserBindings = addSetsToBindings({
   ],
   [sets.inspecting]: [
     {
+      src: { value: paths.device.keyboard.key("space") },
+      dest: { value: k("space-rising") },
+      xform: xforms.rising
+    },
+    {
       src: [
         paths.device.keyboard.key("w"),
         paths.device.keyboard.key("a"),
         paths.device.keyboard.key("s"),
-        paths.device.keyboard.key("d")
+        paths.device.keyboard.key("d"),
+        k("space-rising")
       ],
       dest: { value: paths.actions.stopInspecting },
       xform: xforms.any

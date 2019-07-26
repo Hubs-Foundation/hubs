@@ -92,6 +92,7 @@ paths.actions.leftHand.middleRingPinky = "/actions/leftHand/middleRingPinkyDown"
 paths.actions.camera = {};
 paths.actions.camera.exitMirror = "/actions/cameraExitMirror";
 paths.actions.stopInspecting = "/actions/stopInspecting";
+paths.actions.nextCameraMode = "/actions/nextCameraMode";
 paths.haptics = {};
 paths.haptics.actuators = {};
 paths.haptics.actuators.left = "/haptics/actuators/left";
