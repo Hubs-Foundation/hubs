@@ -50,13 +50,13 @@ AFRAME.registerComponent("hoverable-visuals", {
 
     let interactorOne, interactorTwo;
     const interaction = AFRAME.scenes[0].systems.interaction;
-    if (interaction.state.leftHand.hovered === this.el || interaction.state.leftHand.held === this.el) {
+    if (interaction.state.leftHand.hovered === this.el && !interaction.state.leftHand.held) {
       interactorOne = interaction.options.leftHand.entity.object3D;
     }
-    if (interaction.state.rightRemote.hovered === this.el || interaction.state.rightRemote.held === this.el) {
+    if (interaction.state.rightRemote.hovered === this.el && !interaction.state.rightRemote.held) {
       interactorTwo = interaction.options.rightRemote.entity.object3D;
     }
-    if (interaction.state.rightHand.hovered === this.el || interaction.state.rightHand.held === this.el) {
+    if (interaction.state.rightHand.hovered === this.el && !interaction.state.rightHand.held) {
       interactorTwo = interaction.options.rightHand.entity.object3D;
     }
 
