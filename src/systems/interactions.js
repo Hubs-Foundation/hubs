@@ -34,7 +34,7 @@ const notRemoteHoverTargets = new Map();
 const remoteHoverTargets = new Map();
 export function findRemoteHoverTarget(object3D) {
   if (!object3D) return null;
-  if (!!notRemoteHoverTargets.get(object3D)) return null;
+  if (notRemoteHoverTargets.get(object3D)) return null;
   const target = remoteHoverTargets.get(object3D);
   return target || findRemoteHoverTarget(object3D.parent);
 }
