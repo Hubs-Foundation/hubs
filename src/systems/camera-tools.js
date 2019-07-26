@@ -7,6 +7,16 @@ AFRAME.registerSystem("camera-tools", {
     this.cameraEls = [];
     this.cameraUpdateCount = 0;
     this.ticks = 0;
+
+    const playerModelEl = document.querySelector("#player-rig .model");
+    playerModelEl.addEventListener("model-loading", () => (this.playerHead = null));
+    playerModelEl.addEventListener("model-loaded", this.updatePlayerHead.bind(this));
+    this.updatePlayerHead();
+  },
+
+  updatePlayerHead() {
+    const headEl = document.getElementById("player-head");
+    this.playerHead = headEl && headEl.object3D;
   },
 
   register(el) {
@@ -19,10 +29,6 @@ AFRAME.registerSystem("camera-tools", {
     this.cameraEls = this.cameraEls.filter(c => c !== el);
     el.removeEventListener("ownership-changed", this._onOwnershipChange);
     delete this.myCamera;
-  },
-
-  avatarUpdated() {
-    this.cameraEls.forEach(el => delete el.components["camera-tool"].onAvatarUpdated());
   },
 
   getMyCamera() {
