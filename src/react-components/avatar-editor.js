@@ -182,7 +182,7 @@ export default class AvatarEditor extends Component {
                   }
                 }
               },
-              () => this.updatePreviewGltf()
+              () => this.setState({ previewGltfUrl: this.getFallbackPreviewUrl() })
             );
           }}
         >
@@ -260,35 +260,33 @@ export default class AvatarEditor extends Component {
     </div>
   );
 
-  updatePreviewGltf = previewGltfUrl => {
-    if (!previewGltfUrl) {
-      const glbFile = this.inputFiles.glb;
-      const gltfUrl = this.state.avatar.files.gltf;
-      if (glbFile) {
-        previewGltfUrl = URL.createObjectURL(this.inputFiles.glb);
-      } else if (gltfUrl) {
-        previewGltfUrl = gltfUrl;
-      } else {
-        previewGltfUrl = this.state.avatar.base_gltf_url;
-      }
+  getFallbackPreviewUrl = () => {
+    const glbFile = this.inputFiles.glb;
+    const gltfUrl = this.state.avatar.files.gltf;
+    if (glbFile) {
+      return URL.createObjectURL(this.inputFiles.glb);
+    } else if (gltfUrl) {
+      return gltfUrl;
+    } else {
+      return this.state.avatar.base_gltf_url;
     }
-    URL.revokeObjectURL(this.state.previewGltfUrl);
-    this.setState({ previewGltfUrl });
   };
 
-  selectField = (name, placeholder, disabled, required) => (
+  selectListingField = (name, placeholder) => (
     <div>
       <select
         value={this.state.avatar[name] || ""}
         onChange={async e => {
           const sid = e.target.value;
+          let previewGltfUrl;
           if (sid) {
             const avatar = await fetchAvatar(sid);
-            this.updatePreviewGltf(avatar.base_gltf_url);
+            previewGltfUrl = avatar.base_gltf_url;
           } else {
-            this.updatePreviewGltf();
+            previewGltfUrl = this.getFallbackPreviewUrl();
           }
-          this.setState({ avatar: { ...this.state.avatar, [name]: sid } });
+          URL.revokeObjectURL(this.state.previewGltfUrl);
+          this.setState({ avatar: { ...this.state.avatar, [name]: sid }, previewGltfUrl });
         }}
         placeholder={placeholder}
         className="select"
@@ -330,6 +328,8 @@ export default class AvatarEditor extends Component {
 
   render() {
     const { debug } = this.props;
+    const { avatar } = this.state;
+
     return (
       <div className={classNames(styles.avatarEditor, this.props.className)}>
         {this.props.onClose && (
@@ -345,20 +345,18 @@ export default class AvatarEditor extends Component {
               <div className="form-body">
                 {debug && this.textField("avatar_id", "Avatar ID", true)}
                 {debug && this.textField("parent_avatar_id", "Parent Avatar ID")}
+                {debug && this.textField("parent_avatar_listing_id", "Parent Avatar Listing ID")}
                 {this.textField("name", "Name", false, true)}
                 {debug && this.textarea("description", "Description")}
-                {this.selectField("parent_avatar_listing_id", "Parent Avatar Listing ID")}
-                {this.fileField(
-                  "glb",
-                  "Avatar GLB",
-                  "model/gltf+binary,.glb",
-                  this.state.avatar.parent_avatar_listing_id
-                )}
+                {!this.props.avatarId && this.selectListingField("parent_avatar_listing_id")}
+                {!avatar.parent_avatar_listing_id && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
                 {this.mapField("base_map", "Base Map", "image/*")}
-                {this.mapField("emissive_map", "Emissive Map", "image/*")}
-                {this.mapField("normal_map", "Normal Map", "image/*")}
-                {this.mapField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
-                <hr />
+                <details>
+                  <summary>Advanced</summary>
+                  {this.mapField("emissive_map", "Emissive Map", "image/*")}
+                  {this.mapField("normal_map", "Normal Map", "image/*")}
+                  {this.mapField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
+                </details>
                 {this.checkbox(
                   "allow_promotion",
                   <span>
