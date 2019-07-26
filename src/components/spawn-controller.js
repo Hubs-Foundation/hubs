@@ -47,7 +47,8 @@ AFRAME.registerComponent("spawn-controller", {
 
     // Reset pitch-yaw-rotator after any scene-preview-camera rotation.
     if (camera.components["pitch-yaw-rotator"]) {
-      camera.components["pitch-yaw-rotator"].set(camera.object3D.rotation.x, camera.object3D.rotation.y);
+      // TODO
+      // camera.components["pitch-yaw-rotator"].set(camera.object3D.rotation.x, camera.object3D.rotation.y);
     }
   }
 });

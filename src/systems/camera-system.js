@@ -1,5 +1,6 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { setMatrixWorld } from "../utils/three-utils";
+import { paths } from "./userinput/paths";
 
 const positionRigSuchThatCameraIsInFrontOfObject = (function() {
   const r = new THREE.Vector3();
@@ -100,6 +101,7 @@ export class CameraSystem {
     } else if (this.mode === CAMERA_MODE_INSPECT) {
       this.mode = CAMERA_MODE_FIRST_PERSON; // skip inspect for now
     }
+    this.inspected = null;
   }
   inspect(o) {
     if (this.mode !== CAMERA_MODE_INSPECT) {
@@ -148,6 +150,14 @@ export class CameraSystem {
       setMatrixWorld(this.rigEl.object3D, m2);
       this.playerCamera.object3D.quaternion.copy(this.cameraEl.object3D.quaternion);
     }
+
+    if (!!this.inspected) {
+      const userinput = AFRAME.scenes[0].systems.userinput;
+      const stopInspecting = userinput.get(paths.actions.stopInspecting);
+      if (stopInspecting) {
+        this.uninspect();
+      }
+    }
   }
 }
 
@@ -168,17 +178,18 @@ AFRAME.registerComponent("inspect-button", {
     }
     this.el.object3D.addEventListener("interact", () => {
       if (!this.el.sceneEl.is("vr-mode")) {
-        this.el.sceneEl.systems["post-physics"].cameraSystem.inspect(this.inspectable.object3D);
+        this.el.sceneEl.systems["hubs-systems"].cameraSystem.inspect(this.inspectable.object3D);
       }
     });
+
     this.el.object3D.addEventListener("holdable-button-down", () => {
       if (this.el.sceneEl.is("vr-mode")) {
-        this.el.sceneEl.systems["post-physics"].cameraSystem.inspect(this.inspectable.object3D);
+        this.el.sceneEl.systems["hubs-systems"].cameraSystem.inspect(this.inspectable.object3D);
       }
     });
     this.el.object3D.addEventListener("holdable-button-up", () => {
       if (this.el.sceneEl.is("vr-mode")) {
-        this.el.sceneEl.systems["post-physics"].cameraSystem.uninspect();
+        this.el.sceneEl.systems["hubs-systems"].cameraSystem.uninspect();
       }
     });
   }

@@ -91,6 +91,7 @@ paths.actions.leftHand.index = "/actions/leftHand/indexDown";
 paths.actions.leftHand.middleRingPinky = "/actions/leftHand/middleRingPinkyDown";
 paths.actions.camera = {};
 paths.actions.camera.exitMirror = "/actions/cameraExitMirror";
+paths.actions.stopInspecting = "/actions/stopInspecting";
 paths.haptics = {};
 paths.haptics.actuators = {};
 paths.haptics.actuators.left = "/haptics/actuators/left";
@@ -136,7 +137,7 @@ paths.device.keyboard = {
     if (path) {
       return path;
     }
-    path = `/device/keyboard/${k.toLowerCase()}`;
+    path = `/device/keyboard/${k === " " ? "space" : k.toLowerCase()}`;
     this.map.set(k, path);
     return path;
   }

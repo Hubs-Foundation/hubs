@@ -154,4 +154,8 @@ export function resolveActionSets() {
       document.activeElement.nodeName === "TEXTAREA" ||
       document.activeElement.contentEditable === "true"
   );
+
+  if (AFRAME.scenes[0] && AFRAME.scenes[0].systems["hubs-systems"]) {
+    userinput.toggleSet(sets.inspecting, !!AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspected);
+  }
 }

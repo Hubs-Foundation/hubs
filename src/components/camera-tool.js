@@ -554,8 +554,8 @@ AFRAME.registerComponent("camera-tool", {
         if (this.playerHud) {
           playerHudWasVisible = this.playerHud.visible;
           this.playerHud.visible = false;
-          if (this.el.sceneEl.systems["post-physics"]) {
-            this.el.sceneEl.systems["post-physics"].spriteSystem.mesh.visible = false;
+          if (this.el.sceneEl.systems["hubs-systems"]) {
+            this.el.sceneEl.systems["hubs-systems"].spriteSystem.mesh.visible = false;
           }
         }
 

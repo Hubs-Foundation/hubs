@@ -147,7 +147,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: "/var/mouseCoordsY" },
       dest: { value: "/var/mouseCoordsYScaled" },
-      xform: xforms.scale(2*Math.PI/3)
+      xform: xforms.scale((2 * Math.PI) / 3)
     },
     {
       src: { x: "/var/mouseCoordsXScaled", y: "/var/mouseCoordsYScaled" },
@@ -587,6 +587,18 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising
+    }
+  ],
+  [sets.inspecting]: [
+    {
+      src: [
+        paths.device.keyboard.key("w"),
+        paths.device.keyboard.key("a"),
+        paths.device.keyboard.key("s"),
+        paths.device.keyboard.key("d")
+      ],
+      dest: { value: paths.actions.stopInspecting },
+      xform: xforms.any
     }
   ]
 });
