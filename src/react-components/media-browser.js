@@ -128,6 +128,7 @@ class MediaBrowser extends Component {
     const newState = { result, query: this.state.query || searchParams.get("q") || "" };
     const urlSource = this.getUrlSource(searchParams);
     newState.showNav = !!(searchParams.get("media_nav") !== "false");
+    newState.selectAction = searchParams.get("selectAction") || "spawn";
 
     if (result && result.suggestions && result.suggestions.length > 0) {
       newState.facets = result.suggestions.map(s => {
@@ -179,7 +180,7 @@ class MediaBrowser extends Component {
 
   selectEntry = entry => {
     if (!this.props.onMediaSearchResultEntrySelected) return;
-    this.props.onMediaSearchResultEntrySelected(entry);
+    this.props.onMediaSearchResultEntrySelected(entry, this.state.selectAction);
     this.close();
   };
 
@@ -188,7 +189,7 @@ class MediaBrowser extends Component {
   };
 
   handleFacetClicked = facet => {
-    const searchParams = this.getSearchClearedSearchParams(true, true);
+    const searchParams = this.getSearchClearedSearchParams(true, true, true);
 
     for (const [k, v] of Object.entries(facet.params)) {
       searchParams.set(k, v);
@@ -197,8 +198,13 @@ class MediaBrowser extends Component {
     pushHistoryPath(this.props.history, this.props.history.location.pathname, searchParams.toString());
   };
 
-  getSearchClearedSearchParams = (keepSource, keepNav) => {
-    return this.props.mediaSearchStore.getSearchClearedSearchParams(this.props.history.location, keepSource, keepNav);
+  getSearchClearedSearchParams = (keepSource, keepNav, keepSelectAction) => {
+    return this.props.mediaSearchStore.getSearchClearedSearchParams(
+      this.props.history.location,
+      keepSource,
+      keepNav,
+      keepSelectAction
+    );
   };
 
   pushExitMediaBrowserHistory = (stashLastSearchParams = true) => {

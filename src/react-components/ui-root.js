@@ -1500,7 +1500,7 @@ class UIRoot extends Component {
                       this.props.history.goBack();
                       // We are returning to the media browser. Trigger an update so that the filter switches to
                       // my-avatars, now that we've saved an avatar.
-                      this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars");
+                      this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
                     }
                     this.props.onAvatarSaved();
                   }}
@@ -1517,14 +1517,14 @@ class UIRoot extends Component {
                 history={this.props.history}
                 mediaSearchStore={this.props.mediaSearchStore}
                 hubChannel={this.props.hubChannel}
-                onMediaSearchResultEntrySelected={entry => {
+                onMediaSearchResultEntrySelected={(entry, selectAction) => {
                   if (entry.type === "hub") {
                     this.showNonHistoriedDialog(LeaveRoomDialog, {
                       destinationUrl: entry.url,
                       messageType: "join-room"
                     });
                   } else {
-                    this.props.onMediaSearchResultEntrySelected(entry);
+                    this.props.onMediaSearchResultEntrySelected(entry, selectAction);
                   }
                 }}
                 performConditionalSignIn={this.props.performConditionalSignIn}
@@ -1744,7 +1744,7 @@ class UIRoot extends Component {
                           () => this.props.hubChannel.can("update_hub"),
                           () => {
                             showFullScreenIfAvailable();
-                            this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                            this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
                           },
                           "change-scene"
                         );
