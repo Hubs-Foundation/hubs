@@ -593,8 +593,8 @@ AFRAME.registerComponent("camera-tool", {
         }
         if (this.playerHud) {
           this.playerHud.visible = playerHudWasVisible;
-          if (this.el.sceneEl.systems["post-physics"]) {
-            this.el.sceneEl.systems["post-physics"].spriteSystem.mesh.visible = true;
+          if (this.el.sceneEl.systems["hubs-systems"]) {
+            this.el.sceneEl.systems["hubs-systems"].spriteSystem.mesh.visible = true;
           }
         }
         this.lastUpdate = now;

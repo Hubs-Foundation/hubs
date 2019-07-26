@@ -147,5 +147,14 @@ export const touchscreenUserBindings = addSetsToBindings({
       xform: xforms.rising,
       priority: 3
     }
+  ],
+
+  [sets.inspecting]: [
+    {
+      src: { value: paths.device.touchscreen.tap2 },
+      dest: { value: paths.actions.stopInspecting },
+      xform: xforms.rising,
+      priority: 1
+    }
   ]
 });
