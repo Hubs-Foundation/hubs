@@ -81,8 +81,8 @@ AFRAME.registerComponent("cursor-controller", {
           rawIntersections
         );
         intersection = rawIntersections[0];
-        interaction.updateCursorIntersection(intersection);
-        this.distance = intersection ? intersection.distance : this.data.defaultDistance;
+        this.intersectionIsValid = !!interaction.updateCursorIntersection(intersection);
+        this.distance = this.intersectionIsValid ? intersection.distance : this.data.defaultDistance;
       }
 
       const { cursor, minDistance, far, camera } = this.data;
@@ -101,7 +101,7 @@ AFRAME.registerComponent("cursor-controller", {
 
       if (AFRAME.scenes[0].systems["transform-selected-object"].transforming) {
         this.color.copy(TRANSFORM_COLOR_1).lerpHSL(TRANSFORM_COLOR_2, 0.5 + 0.5 * Math.sin(t / 1000.0));
-      } else if (intersection || isGrabbing) {
+      } else if (this.intersectionIsValid || isGrabbing) {
         this.color.copy(HIGHLIGHT);
       } else {
         this.color.copy(NO_HIGHLIGHT);
