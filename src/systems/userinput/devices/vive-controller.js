@@ -24,6 +24,9 @@ export class ViveControllerDevice {
         { name: "grip", buttonId: 2 }
       ];
     } else {
+      if (gamepad.axes.length === 2) {
+        this.isViveWand = true;
+      }
       this.buttonMap = [
         { name: "touchpad", buttonId: 0 },
         { name: "trigger", buttonId: 1 },
@@ -31,7 +34,12 @@ export class ViveControllerDevice {
         { name: "top", buttonId: 3 }
       ];
     }
-    this.axisMap = [{ name: "joyX", axisId: 0 }, { name: "joyY", axisId: 1 }];
+    this.axisMap = [
+      { name: "touchX", axisId: 0 },
+      { name: "touchY", axisId: 1 },
+      { name: "joyX", axisId: 2 },
+      { name: "joyY", axisId: 3 }
+    ];
 
     this.pose = new Pose();
     this.rayObjectRotation = new THREE.Quaternion();
@@ -45,7 +53,12 @@ export class ViveControllerDevice {
   }
 
   write(frame) {
-    this.gamepad = navigator.getGamepads()[this.gamepad.index];
+    const gamepads = navigator.getGamepads();
+    if (gamepads.length < this.gamepad.index + 1) {
+      //workaround for: https://bugzilla.mozilla.org/show_bug.cgi?id=1568076
+      return;
+    }
+    this.gamepad = gamepads[this.gamepad.index];
     if (!this.gamepad.connected) return;
 
     this.buttonMap.forEach(b => {
