@@ -19,6 +19,7 @@ import anime from "animejs";
 const SHAPE = require("aframe-physics-system/src/constants").SHAPE;
 
 const gltfLoader = new THREE.GLTFLoader();
+let loadingObjectEnvMap;
 let loadingObject;
 gltfLoader.load(loadingObjectSrc, gltf => {
   loadingObject = gltf;
@@ -113,12 +114,22 @@ AFRAME.registerComponent("media-loader", {
       return;
     }
     const useFancyLoader = !!loadingObject;
+
     const mesh = useFancyLoader
       ? loadingObject.scene.clone()
       : new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
     this.el.setObject3D("mesh", mesh);
+
     this.updateScale(true);
+
     if (useFancyLoader) {
+      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+      const currentEnivronmentMap = environmentMapComponent.environmentMap;
+      if (loadingObjectEnvMap !== currentEnivronmentMap) {
+        environmentMapComponent.applyEnvironmentMap(mesh);
+        loadingObjectEnvMap = currentEnivronmentMap;
+      }
+
       this.loaderMixer = new THREE.AnimationMixer(mesh);
 
       this.loadingClip = this.loaderMixer.clipAction(loadingObject.animations[0]);
@@ -135,11 +146,13 @@ AFRAME.registerComponent("media-loader", {
       this.loadingClip.play();
       this.loadingScaleClip.play();
     }
+
     if (this.el.sceneEl.is("entered") && (!this.networkedEl || NAF.utils.isMine(this.networkedEl))) {
       this.loadingSoundNode = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundLooped(
         SOUND_MEDIA_LOADING
       );
     }
+
     delete this.showLoaderTimeout;
   },
 
