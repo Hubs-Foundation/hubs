@@ -1,8 +1,11 @@
 import { ParticleEmitter } from "@mozillareality/three-particle-emitter";
 import { textureLoader } from "../utils/media-utils";
+import { resolveUrl } from "../utils/media-utils";
+import { proxiedUrlFor } from "../utils/media-url-utils";
 
 AFRAME.registerComponent("particle-emitter", {
   schema: {
+    resolve: { type: "boolean", default: true },
     src: { type: "string" },
     startColor: { type: "color" },
     middleColor: { type: "color" },
@@ -32,22 +35,42 @@ AFRAME.registerComponent("particle-emitter", {
     this.updateParticles = false;
   },
 
+  async setTexture(src, resolve) {
+    let accessibleUrl = src;
+
+    if (resolve) {
+      const result = await resolveUrl(src);
+      let canonicalUrl = result.origin;
+
+      // handle protocol relative urls
+      if (canonicalUrl.startsWith("//")) {
+        canonicalUrl = location.protocol + canonicalUrl;
+      }
+
+      // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
+      accessibleUrl = proxiedUrlFor(canonicalUrl, null);
+    }
+
+    const texture = new THREE.Texture();
+
+    await textureLoader.loadTextureAsync(texture, accessibleUrl);
+
+    // Guard against src changing while request was in flight
+    if (this.data.src !== src) {
+      return;
+    }
+
+    this.particleEmitter.material.uniforms.map.value = texture;
+    this.particleEmitter.visible = true;
+    this.updateParticles = true;
+  },
+
   update(prevData) {
     const data = this.data;
     const particleEmitter = this.particleEmitter;
 
     if (prevData.src !== data.src) {
-      this.textureLoaded = false;
-      textureLoader.load(
-        data.src,
-        texture => {
-          this.particleEmitter.material.uniforms.map.value = texture;
-          this.particleEmitter.visible = true;
-          this.updateParticles = true;
-        },
-        undefined,
-        console.error
-      );
+      this.setTexture(data.src, data.resolve).catch(console.error);
     }
 
     if (
