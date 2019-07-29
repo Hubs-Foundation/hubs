@@ -55,6 +55,11 @@ AFRAME.registerComponent("particle-emitter", {
 
     await textureLoader.loadTextureAsync(texture, accessibleUrl);
 
+    // Guard against src changing while request was in flight
+    if (this.data.src !== src) {
+      return;
+    }
+
     this.particleEmitter.material.uniforms.map.value = texture;
     this.particleEmitter.visible = true;
     this.updateParticles = true;
