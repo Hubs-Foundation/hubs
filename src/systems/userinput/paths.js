@@ -125,6 +125,7 @@ paths.device.touchscreen.tap2 = "/device/touchscreen/tap2";
 paths.device.touchscreen.tap3 = "/device/touchscreen/tap3";
 paths.device.touchscreen.tap4 = "/device/touchscreen/tap4";
 paths.device.touchscreen.tap5 = "/device/touchscreen/tap5";
+paths.device.touchscreen.anything = "/device/touchscreen/anything";
 paths.device.gyro = {};
 paths.device.gyro.averageDeltaX = "/device/gyro/averageDeltaX";
 paths.device.gyro.averageDeltaY = "/device/gyro/averageDeltaY";

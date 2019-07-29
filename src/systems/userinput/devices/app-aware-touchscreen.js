@@ -350,5 +350,8 @@ export class AppAwareTouchscreenDevice {
     }
 
     this.tapIndexToWriteNextFrame = 0;
+
+    frame.setValueType(path.anything, this.assignments.length !== 0);
+
   }
 }
