@@ -30,6 +30,7 @@ import {
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
+import { authorizeOrSanitizeMessage } from "./utils/permissions-utils";
 import Cookies from "js-cookie";
 
 import "./components/scene-components";
@@ -1284,7 +1285,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hubPhxChannel.on("naf", data => {
     if (!NAF.connection.adapter) return;
-    NAF.connection.adapter.onData(data, PHOENIX_RELIABLE_NAF);
+
+    const { from_session_id } = data;
+    const senderPermissions = from_session_id
+      ? window.APP.hubChannel.presence.state[from_session_id].metas[0].permissions
+      : null;
+
+    data = authorizeOrSanitizeMessage(data, senderPermissions);
+
+    if (data !== null) {
+      NAF.connection.adapter.onData(data, PHOENIX_RELIABLE_NAF);
+    }
   });
 
   hubPhxChannel.on("message", ({ session_id, type, body, from }) => {

@@ -19,3 +19,26 @@ export function canMove(entity) {
     (!isPen || window.APP.hubChannel.can("spawn_drawing"))
   );
 }
+
+export function authorizeOrSanitizeMessage(message, senderPermissions) {
+  const { dataType } = message;
+
+  let alreadyAuthorizedByServer = false;
+  switch (dataType) {
+    case "u":
+      alreadyAuthorizedByServer = message.data.isFirstSync;
+      break;
+    case "r":
+      alreadyAuthorizedByServer = true;
+      break;
+  }
+
+  if (alreadyAuthorizedByServer) {
+    return message;
+  }
+
+  return null;
+}
+
+function authorizeOrSanitizeMessageData(data, senderPermissions) {
+}
