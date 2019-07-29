@@ -110,9 +110,9 @@ export const guessContentType = url => {
   const extension = new URL(url, window.location).pathname.split(".").pop();
   return commonKnownContentTypes[extension];
 };
-const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/scenes\/(\w+)\/?\S*/;
-const hubsAvatarRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/avatars\/(\w+)\/?\S*/;
-const hubsRoomRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/(\w+)\/?\S*/;
+const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/scenes\/(\w+)\/?\S*/;
+const hubsAvatarRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/avatars\/(\w+)\/?\S*/;
+const hubsRoomRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/(\w+)\/?\S*/;
 export const isHubsSceneUrl = hubsSceneRegex.test.bind(hubsSceneRegex);
 export const isHubsRoomUrl = url => !isHubsSceneUrl(url) && hubsRoomRegex.test(url);
 export const isHubsDestinationUrl = url => isHubsSceneUrl(url) || isHubsRoomUrl(url);
