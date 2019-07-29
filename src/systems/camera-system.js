@@ -2,65 +2,23 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { setMatrixWorld } from "../utils/three-utils";
 import { paths } from "./userinput/paths";
 
-const positionRigSuchThatCameraIsLookingStraightAtObject = (function() {
-  const r = new THREE.Vector3();
-  const rq = new THREE.Quaternion();
-  const c = new THREE.Vector3();
-  const cq = new THREE.Quaternion();
-  const o = new THREE.Vector3();
-  const o2 = new THREE.Vector3();
-  const oq = new THREE.Quaternion();
-  const coq = new THREE.Quaternion();
-  const q = new THREE.Quaternion();
+const moveRigSoCameraLooksAtObject = (function() {
+  const cqInv = new THREE.Quaternion();
+  const owq = new THREE.Quaternion();
+  const v1 = new THREE.Vector3();
+  const v2 = new THREE.Vector3();
+  const owp = new THREE.Vector3();
 
-  const cp = new THREE.Vector3();
-  const op = new THREE.Vector3();
-  const v = new THREE.Vector3();
-  const p = new THREE.Vector3();
-  const UP = new THREE.Vector3(0, 1, 0);
+  return function moveRigSoCameraLooksAtObject(rig, camera, object) {
+    object.getWorldQuaternion(owq);
+    object.getWorldPosition(owp);
+    cqInv.copy(camera.quaternion).inverse();
+    rig.quaternion.copy(owq).multiply(cqInv);
 
-  const oScale = new THREE.Vector3();
-  return function positionRigSuchThatCameraIsLookingStraightAtObject(rig, camera, object) {
-    // assume
-    //  - camera is rig's child
-    //  - scales are 1
-    //  - object is not flat on the floor
-    rig.getWorldQuaternion(rq);
-    camera.getWorldQuaternion(cq);
-    object.getWorldQuaternion(oq);
+    v1.set(0, 0, 1).applyQuaternion(owq);
+    v2.copy(camera.position).applyQuaternion(rig.quaternion);
+    rig.position.subVectors(v1, v2).add(owp);
 
-    r.set(0, 0, 1)
-      .applyQuaternion(rq) //     .projectOnPlane(UP) // not needed here since rig is assumed flat
-      .normalize();
-
-    c.set(0, 0, -1)
-      .applyQuaternion(cq)
-      .projectOnPlane(UP)
-      .normalize();
-
-    o.set(0, 0, -1).applyQuaternion(oq);
-    o2.copy(o)
-      .projectOnPlane(UP)
-      .normalize();
-
-    coq.setFromUnitVectors(c, o2);
-    q.copy(rq).premultiply(coq);
-
-    cp.copy(camera.position);
-    object.getWorldPosition(op);
-
-    object.getWorldScale(oScale);
-    //const isMobileNonVR = AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isMobileVR();
-    // TODO: Position yourself slightly farther away when on mobile. Better yet, make use of
-    // the screen size / frustrum info
-    v.copy(cp).multiplyScalar(-1);
-    p.copy(op)
-      .sub(o.multiplyScalar(oScale.length() * 0.4))
-      //      .sub(new THREE.Vector3(0, o.y / 2, 0))
-      .add(v);
-
-    rig.quaternion.copy(q);
-    rig.position.copy(p);
     rig.matrixNeedsUpdate = true;
   };
 })();
@@ -100,7 +58,7 @@ export class CameraSystem {
     }
     this.mode = CAMERA_MODE_INSPECT;
     this.inspected = o;
-    positionRigSuchThatCameraIsLookingStraightAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
+    moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
   }
   uninspect() {
     this.inspected = null;
