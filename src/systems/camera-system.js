@@ -97,7 +97,7 @@ export class CameraSystem {
     }
 
     if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
-      var offset = new THREE.Vector3(0, 1, 3);
+      const offset = new THREE.Vector3(0, 1, 3);
       if (this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
         offset.multiplyScalar(3);
       }
@@ -108,7 +108,7 @@ export class CameraSystem {
       this.playerCamera.object3D.quaternion.copy(this.cameraEl.object3D.quaternion);
     }
 
-    if (!!this.inspected) {
+    if (this.inspected) {
       const stopInspecting = userinput.get(paths.actions.stopInspecting);
       if (stopInspecting) {
         this.uninspect();
