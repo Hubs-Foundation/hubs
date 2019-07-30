@@ -168,9 +168,10 @@ AFRAME.registerComponent("ik-controller", {
     }
 
     const root = this.ikRoot.el.object3D;
+    root.updateMatrices();
     const { camera, leftController, rightController } = this.ikRoot;
 
-    camera.object3D.updateMatrix();
+    camera.object3D.updateMatrices();
 
     const hasNewCameraTransform = !this.lastCameraTransform.equals(camera.object3D.matrix);
 

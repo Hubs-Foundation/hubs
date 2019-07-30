@@ -84,15 +84,18 @@ export class CameraSystem {
       this.playerHead.object3D.visible = visible;
     }
 
-    if (this.mode === CAMERA_MODE_FIRST_PERSON) {
-      setMatrixWorld(this.cameraEl.object3D, this.playerCamera.object3D.matrixWorld);
-    }
-
+    this.playerRig.object3D.updateMatrices();
+    this.rigEl.object3D.updateMatrices();
     if (this.mode === CAMERA_MODE_FIRST_PERSON) {
       this.cameraEl.components["pitch-yaw-rotator"].on = false;
       const m2 = new THREE.Matrix4().copy(this.playerRig.object3D.matrixWorld);
       setMatrixWorld(this.rigEl.object3D, m2);
     }
+
+    if (this.mode === CAMERA_MODE_FIRST_PERSON) {
+      setMatrixWorld(this.cameraEl.object3D, this.playerCamera.object3D.matrixWorld);
+    }
+
     if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
       var offset = new THREE.Vector3(0, 1, 3);
       if (this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
