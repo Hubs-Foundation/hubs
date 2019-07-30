@@ -73,6 +73,7 @@
     "naf-janus-adapter": "^2.0.2",
     "networked-aframe": "github:mozillareality/networked-aframe#master",
     "nipplejs": "github:mozillareality/nipplejs#mr-social-client/master",
+    "pdfjs-dist": "^2.1.266",
     "phoenix": "github:gfodor/phoenix-js#master",
     "raven-js": "^3.20.1",
     "react": "^16.1.1",

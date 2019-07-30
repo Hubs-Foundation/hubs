@@ -32,7 +32,10 @@ export default function pinnedEntityToGltf(el) {
 
     gltfComponents.media = { src: mediaSrc, contentSubtype: mediaContentSubtype, id: networkId };
 
-    if (components["media-pager"]) {
+    if (components["media-pdf"]) {
+      gltfComponents.media.pageIndex = components["media-pdf"].data.index;
+    } else if (components["media-pager"]) {
+      // Legacy
       gltfComponents.media.pageIndex = components["media-pager"].data.index;
     }
 

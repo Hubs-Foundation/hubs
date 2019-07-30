@@ -48,7 +48,7 @@ AFRAME.registerComponent("particle-emitter", {
       }
 
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
-      accessibleUrl = proxiedUrlFor(canonicalUrl, null);
+      accessibleUrl = proxiedUrlFor(canonicalUrl);
     }
 
     const texture = new THREE.Texture();
