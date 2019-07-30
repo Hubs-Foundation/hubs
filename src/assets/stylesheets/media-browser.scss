@@ -83,7 +83,7 @@
       justify-content: center;
       align-items: center;
 
-      i {
+      :local(.search-clear), :local(.search-icon) {
         color: $darkest-grey;
         margin: 0 18px;
         font-size: 1.2em;
