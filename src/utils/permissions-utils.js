@@ -20,25 +20,39 @@ export function canMove(entity) {
   );
 }
 
-export function authorizeOrSanitizeMessage(message, senderPermissions) {
-  const { dataType } = message;
-
-  let alreadyAuthorizedByServer = false;
-  switch (dataType) {
-    case "u":
-      alreadyAuthorizedByServer = message.data.isFirstSync;
-      break;
-    case "r":
-      alreadyAuthorizedByServer = true;
-      break;
-  }
-
-  if (alreadyAuthorizedByServer) {
-    return message;
-  }
-
-  return null;
+function sanitizeMessageData(data) {
 }
 
 function authorizeOrSanitizeMessageData(data, senderPermissions) {
+  const template = data.networkId;
+  if (template.endsWith("-avatar")) {
+    return;
+  } else if (template.endsWith("-media")) {
+    return;
+  }
+  sanitizeMessageData(data);
+}
+
+export function authorizeOrSanitizeMessage(message) {
+  const { dataType, from_session_id } = message;
+
+  if (dataType === "u" && message.data.isFirstSync && !message.data.persistent) {
+    // The server has already authorized first sync messages that result in an instantiation.
+    return message;
+  }
+
+  // TODO BP - Maybe find a way to avoid doing all this member access.
+  const senderPermissions = from_session_id
+    ? window.APP.hubChannel.presence.state[from_session_id].metas[0].permissions
+    : null;
+
+  if (dataType === "um") {
+    for (const data of message.data.d) {
+      authorizeOrSanitizeMessageData(data, senderPermissions);
+    }
+  } else {
+    authorizeOrSanitizeMessageData(message.data, senderPermissions);
+  }
+
+  return message;
 }

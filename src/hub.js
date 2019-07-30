@@ -1286,16 +1286,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel.on("naf", data => {
     if (!NAF.connection.adapter) return;
 
-    const { from_session_id } = data;
-    const senderPermissions = from_session_id
-      ? window.APP.hubChannel.presence.state[from_session_id].metas[0].permissions
-      : null;
-
-    data = authorizeOrSanitizeMessage(data, senderPermissions);
-
-    if (data !== null) {
-      NAF.connection.adapter.onData(data, PHOENIX_RELIABLE_NAF);
-    }
+    NAF.connection.adapter.onData(authorizeOrSanitizeMessage(data), PHOENIX_RELIABLE_NAF);
   });
 
   hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
