@@ -20,22 +20,22 @@ export function canMove(entity) {
   );
 }
 
-function indexForAuthorizedComponent(authorizedComponent, schema) {
-  const fullComponent = typeof authorizedComponent === "string";
-  const componentName = fullComponent ? authorizedComponent : authorizedComponent.component;
+function indexForNonAuthorizedComponent(nonAuthorizedComponent, schema) {
+  const fullComponent = typeof nonAuthorizedComponent === "string";
+  const componentName = fullComponent ? nonAuthorizedComponent : nonAuthorizedComponent.component;
 
   if (fullComponent) {
     return schema.components.findIndex(schemaComponent => schemaComponent === componentName);
   } else {
     return schema.components.findIndex(
       schemaComponent =>
-        schemaComponent.component === componentName && schemaComponent.property === authorizedComponent.property
+        schemaComponent.component === componentName && schemaComponent.property === nonAuthorizedComponent.property
     );
   }
 }
 
-let authorizedSchemas = null;
-function initializeAuthorizedSchemas() {
+let nonAuthorizedSchemas = null;
+function initializeNonAuthorizedSchemas() {
   /*
   Takes the NAF schemas defined in network-schemas.js and produces a data structure of template name to authorized
   component indices:
@@ -43,25 +43,25 @@ function initializeAuthorizedSchemas() {
     "#interactable-media": ["4", "5", "6"]
   }
   */
-  authorizedSchemas = {};
+  nonAuthorizedSchemas = {};
   const { schemaDict } = NAF.schemas;
   for (const template in schemaDict) {
     if (!schemaDict.hasOwnProperty(template)) continue;
     const schema = schemaDict[template];
-    authorizedSchemas[template] = (schema.authorizedComponents || [])
-      .map(authorizedComponent => indexForAuthorizedComponent(authorizedComponent, schema))
+    nonAuthorizedSchemas[template] = (schema.nonAuthorizedComponents || [])
+      .map(nonAuthorizedComponent => indexForNonAuthorizedComponent(nonAuthorizedComponent, schema))
       .map(index => index.toString());
   }
 }
 
 function sanitizeMessageData(template, data) {
-  if (authorizedSchemas === null) {
-    initializeAuthorizedSchemas();
+  if (nonAuthorizedSchemas === null) {
+    initializeNonAuthorizedSchemas();
   }
-  const authorizedIndices = authorizedSchemas[template];
+  const nonAuthorizedIndices = nonAuthorizedSchemas[template];
   for (const index in data.components) {
     if (!data.components.hasOwnProperty(index)) continue;
-    if (!authorizedIndices.includes(index)) {
+    if (!nonAuthorizedIndices.includes(index)) {
       data.components[index] = null;
     }
   }
@@ -141,7 +141,7 @@ export function authorizeOrSanitizeMessage(message) {
       return emptyObject;
     }
   } else {
-    // Pass through for other data types. Namely, "drawing-<networkId>" messages
+    // Fall through for other data types. Namely, "drawing-<networkId>" messages at the moment.
     return message;
   }
 }
