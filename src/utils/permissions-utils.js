@@ -20,47 +20,48 @@ export function canMove(entity) {
   );
 }
 
+function indexForAuthorizedComponent(authorizedComponent, schema) {
+  const fullComponent = typeof authorizedComponent === "string";
+  const componentName = fullComponent ? authorizedComponent : authorizedComponent.component;
+
+  if (fullComponent) {
+    return schema.components.findIndex(schemaComponent => schemaComponent === componentName);
+  } else {
+    return schema.components.findIndex(
+      schemaComponent =>
+        schemaComponent.component === componentName && schemaComponent.property === authorizedComponent.property
+    );
+  }
+}
+
 let authorizedSchemas = null;
 function initializeAuthorizedSchemas() {
   /*
-  Takes the NAF schemas defined in network-schemas.js and produces a data structure like:
+  Takes the NAF schemas defined in network-schemas.js and produces a data structure of template name to authorized
+  component indices:
   {
-    "#interactable-media": { indices: ["4", "5", "6"] }
+    "#interactable-media": ["4", "5", "6"]
   }
   */
-  authorizedSchemas = Object.fromEntries(
-    Object.entries(NAF.schemas.schemaDict).map(([template, schema]) => {
-      const authorizedSchema = {};
-
-      authorizedSchema.indices = (schema.authorizedComponents || [])
-        .map(authorizedComponent => {
-          const fullComponent = typeof authorizedComponent === "string";
-          const componentName = fullComponent ? authorizedComponent : authorizedComponent.component;
-
-          if (fullComponent) {
-            return schema.components.findIndex(schemaComponent => schemaComponent === componentName);
-          } else {
-            return schema.components.findIndex(
-              schemaComponent =>
-                schemaComponent.component === componentName && schemaComponent.property === authorizedComponent.property
-            );
-          }
-        })
-        .map(index => index.toString());
-
-      return [template, authorizedSchema];
-    })
-  );
+  authorizedSchemas = {};
+  const { schemaDict } = NAF.schemas;
+  for (const template in schemaDict) {
+    if (!schemaDict.hasOwnProperty(template)) continue;
+    const schema = schemaDict[template];
+    authorizedSchemas[template] = (schema.authorizedComponents || [])
+      .map(authorizedComponent => indexForAuthorizedComponent(authorizedComponent, schema))
+      .map(index => index.toString());
+  }
 }
 
 function sanitizeMessageData(template, data) {
   if (authorizedSchemas === null) {
     initializeAuthorizedSchemas();
   }
-  const authorizedSchema = authorizedSchemas[template];
+  const authorizedIndices = authorizedSchemas[template];
   for (const index in data.components) {
     if (!data.components.hasOwnProperty(index)) continue;
-    if (!authorizedSchema.indices.includes(index)) {
+    if (!authorizedIndices.includes(index)) {
       data.components[index] = null;
     }
   }
