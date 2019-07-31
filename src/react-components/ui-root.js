@@ -404,9 +404,6 @@ class UIRoot extends Component {
   performConditionalSignIn = async (predicate, action, messageId, onFailure) => {
     if (predicate()) return action();
 
-    const signInMessageId = `sign-in.${messageId}`;
-    const signInCompleteMessageId = `sign-in.${messageId}-complete`;
-    const signInContinueTextId = this.props.scene.is("vr-mode") ? "entry.return-to-vr" : "dialog.close";
     const onContinueAfterSignIn = async () => {
       this.closeDialog();
       let actionError = null;
@@ -424,31 +421,8 @@ class UIRoot extends Component {
       exit2DInterstitialAndEnterVR();
     };
 
-    const presentSignInDialog = () => {
-      this.showNonHistoriedDialog(SignInDialog, {
-        message: messages[signInMessageId],
-        onSignIn: async email => {
-          const { authComplete } = await this.props.authChannel.startAuthentication(email, this.props.hubChannel);
-
-          this.showNonHistoriedDialog(SignInDialog, { authStarted: true, onClose: onContinueAfterSignIn });
-
-          await authComplete;
-
-          this.setState({ signedIn: true });
-          this.showNonHistoriedDialog(SignInDialog, {
-            authComplete: true,
-            message: messages[signInCompleteMessageId],
-            continueText: messages[signInContinueTextId],
-            onClose: onContinueAfterSignIn,
-            onContinue: onContinueAfterSignIn
-          });
-        },
-        onClose: onContinueAfterSignIn
-      });
-    };
-
-    handleExitTo2DInterstitial(true, presentSignInDialog);
-    presentSignInDialog();
+    handleExitTo2DInterstitial(true, () => this.showSignInDialog(messageId, onContinueAfterSignIn));
+    this.showSignInDialog(messageId, onContinueAfterSignIn);
   };
 
   _signInAndPinOrUnpinElement = (el, pin) => {
@@ -920,19 +894,25 @@ class UIRoot extends Component {
 
   renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
 
-  showSignInDialog = () => {
+  showSignInDialog = (messageId = "prompt", continuation = this.closeDialog) => {
     this.showNonHistoriedDialog(SignInDialog, {
-      message: messages["sign-in.prompt"],
+      message: messages[`sign-in.${messageId}`],
       onSignIn: async email => {
         const { authComplete } = await this.props.authChannel.startAuthentication(email, this.props.hubChannel);
-
-        this.showNonHistoriedDialog(SignInDialog, { authStarted: true });
-
+        this.showNonHistoriedDialog(SignInDialog, { authStarted: true, onClose: continuation });
         await authComplete;
 
+        const continueTextId = this.props.scene.is("vr-mode") ? "entry.return-to-vr" : "dialog.close";
         this.setState({ signedIn: true });
-        this.closeDialog();
-      }
+        this.showNonHistoriedDialog(SignInDialog, {
+          authComplete: true,
+          message: messages[`sign-in.${messageId}-complete`],
+          continueText: messages[continueTextId],
+          onClose: continuation,
+          onContinue: continuation
+        });
+      },
+      onClose: continuation
     });
   };
 
@@ -1606,7 +1586,7 @@ class UIRoot extends Component {
                 <AvatarEditor
                   className={styles.avatarEditor}
                   signedIn={this.state.signedIn}
-                  onSignIn={this.showSignInDialog}
+                  onSignIn={() => this.showSignInDialog()}
                   onSave={() => {
                     if (props.location.state.detail && props.location.state.detail.returnToProfile) {
                       this.props.history.goBack();
@@ -1960,7 +1940,7 @@ class UIRoot extends Component {
               sessionId={this.props.sessionId}
               signedIn={this.state.signedIn}
               email={this.props.store.state.credentials.email}
-              onSignIn={this.showSignInDialog}
+              onSignIn={() => this.showSignInDialog()}
               onSignOut={this.signOut}
             />
 
