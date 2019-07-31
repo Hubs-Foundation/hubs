@@ -23,10 +23,10 @@ const moveRigSoCameraLooksAtObject = (function() {
     const halfXExtents = Math.max(Math.abs(box.max.x - center.x), Math.abs(center.x - box.min.x));
     const halfVertFOV = THREE.Math.degToRad(camera.el.sceneEl.camera.fov / 2);
     const halfHorFOV =
-      Math.atan(Math.tan(halfVertFOV) * camera.el.sceneEl.camera.aspect) * object.el.sceneEl.is("vr-mode") ? 0.5 : 1;
+      Math.atan(Math.tan(halfVertFOV) * camera.el.sceneEl.camera.aspect) * (object.el.sceneEl.is("vr-mode") ? 0.5 : 1);
     const margin = 1.05;
-    const l = (halfYExtents * margin) / Math.tan(halfVertFOV);
-    const l2 = (halfXExtents * margin) / Math.tan(halfHorFOV);
+    const l = Math.abs((halfYExtents * margin) / Math.tan(halfVertFOV));
+    const l2 = Math.abs((halfXExtents * margin) / Math.tan(halfHorFOV));
     v1.set(0, 0, 1)
       .multiplyScalar(Math.abs(box.max.z - center.z) + Math.max(l, l2))
       .applyQuaternion(owq);
@@ -38,10 +38,10 @@ const moveRigSoCameraLooksAtObject = (function() {
 })();
 
 let numCameraModes = 0;
-const CAMERA_MODE_FIRST_PERSON = numCameraModes++;
-const CAMERA_MODE_THIRD_PERSON_NEAR = numCameraModes++;
-const CAMERA_MODE_THIRD_PERSON_FAR = numCameraModes++;
-const CAMERA_MODE_INSPECT = numCameraModes++;
+export const CAMERA_MODE_FIRST_PERSON = numCameraModes++;
+export const CAMERA_MODE_THIRD_PERSON_NEAR = numCameraModes++;
+export const CAMERA_MODE_THIRD_PERSON_FAR = numCameraModes++;
+export const CAMERA_MODE_INSPECT = numCameraModes++;
 
 export class CameraSystem {
   constructor() {
@@ -106,8 +106,13 @@ export class CameraSystem {
       setMatrixWorld(this.rigEl.object3D, m2);
     }
 
+    this.playerCamera.object3D.matrixWorldNeedsUpdate = true;
     if (this.mode === CAMERA_MODE_FIRST_PERSON) {
-      setMatrixWorld(this.cameraEl.object3D, this.playerCamera.object3D.matrixWorld);
+      if (!AFRAME.scenes[0].is("vr-mode")) {
+        setMatrixWorld(this.cameraEl.object3D, this.playerCamera.object3D.matrixWorld);
+      } else {
+        setMatrixWorld(this.playerCamera.object3D, this.cameraEl.object3D.matrixWorld);
+      }
     }
 
     if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {

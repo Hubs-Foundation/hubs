@@ -18,8 +18,10 @@ AFRAME.registerComponent("visibility-while-frozen", {
   init() {
     this.updateVisibility = this.updateVisibility.bind(this);
     this.camWorldPos = new THREE.Vector3();
+    this.cam2WorldPos = new THREE.Vector3();
     this.objWorldPos = new THREE.Vector3();
-    this.cam = this.el.sceneEl.camera.el.object3D;
+    this.cam = document.getElementById("player-camera").object3D;
+    this.cam2 = this.el.sceneEl.camera;
 
     let hoverableSearch = this.el;
 
@@ -65,11 +67,13 @@ AFRAME.registerComponent("visibility-while-frozen", {
       }
 
       getLastWorldPosition(this.cam, this.camWorldPos);
+      getLastWorldPosition(this.cam2, this.cam2WorldPos);
       this.objWorldPos.copy(this.el.object3D.position);
       this.el.object3D.localToWorld(this.objWorldPos);
 
       isWithinDistance =
-        this.camWorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance;
+        this.camWorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance ||
+        this.cam2WorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance;
     }
 
     const isTransforming = AFRAME.scenes[0].systems["transform-selected-object"].transforming;
