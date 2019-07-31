@@ -739,7 +739,7 @@ AFRAME.registerComponent("media-image", {
     if (this.data.batch && this.mesh) {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
     }
-    if (this._hasRetainedTexture) {
+    if (this.currentSrcIsRetained) {
       textureCache.release(this.data.src);
       this.currentSrcIsRetained = false;
     }
@@ -863,10 +863,15 @@ AFRAME.registerComponent("media-pdf", {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
     }
 
-    if (this._hasRetainedTexture) {
-      textureCache.release(this.data.src);
+    if (this.currentPageTextureIsRetained) {
+      const cacheKey = this.currentTextureCacheKey();
+      textureCache.release(cacheKey);
       this.currentPageTextureIsRetained = false;
     }
+  },
+
+  currentTextureCacheKey() {
+    return `${this.data.src}_${this.canvas.width}_${this.canvas.height}`;
   },
 
   async update(oldData) {
@@ -921,7 +926,7 @@ AFRAME.registerComponent("media-pdf", {
         this.mesh.material.needsUpdate = true;
       }
 
-      const cacheKey = `${src}_${this.canvas.width}_${this.canvas.height}`;
+      const cacheKey = this.currentTextureCacheKey();
       let cacheItem;
       if (textureCache.has(cacheKey)) {
         if (this.currentPageTextureIsRetained) {
