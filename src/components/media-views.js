@@ -10,8 +10,9 @@ import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import pdfjs from "pdfjs-dist";
 
-// TODO figure out how to pack this?
-pdfjs.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@2.1.266/build/pdf.worker.min.js";
+// Using external CDN to reduce build size
+pdfjs.GlobalWorkerOptions.workerSrc =
+  "https://assets-prod.reticulum.io/assets/js/pdfjs-dist@2.1.266/build/pdf.worker.js";
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
