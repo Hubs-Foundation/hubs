@@ -68,7 +68,7 @@ import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
 import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
-import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
+import { handleExitTo2DInterstitial, exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
 
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
@@ -149,9 +149,6 @@ class UIRoot extends Component {
     showSafariDialog: PropTypes.bool,
     showSafariMicDialog: PropTypes.bool,
     showWebAssemblyDialog: PropTypes.bool,
-    showOAuthDialog: PropTypes.bool,
-    onCloseOAuthDialog: PropTypes.func,
-    oauthInfo: PropTypes.array,
     isCursorHoldingPen: PropTypes.bool,
     hasActiveCamera: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
@@ -176,6 +173,9 @@ class UIRoot extends Component {
     entered: false,
     dialog: null,
     showShareDialog: false,
+    showOAuthDialog: false,
+    oauthInfo: null,
+    onCloseOAuthDialog: null,
     broadcastTipDismissed: false,
     linkCode: null,
     linkCodeCancel: null,
@@ -303,6 +303,71 @@ class UIRoot extends Component {
         () => this.props.hubChannel.can("mute_users"),
         () => this.props.hubChannel.mute(clientId),
         "mute-user"
+      );
+    });
+    this.props.scene.addEventListener("scene_media_selected", e => {
+      const sceneInfo = e.detail;
+      this.props.performConditionalSignIn(
+        () => this.props.hubChannel.can("update_hub"),
+        () => this.props.hubChannel.updateScene(sceneInfo),
+        "change-scene"
+      );
+    });
+
+    this.props.scene.addEventListener("action_media_tweet", e => {
+      let isInModal = false;
+      let isInOAuth = false;
+
+      const exitOAuth = () => {
+        isInOAuth = false;
+        this.props.store.clearOnLoadActions();
+        this.setState({ showOAuthDialog: false, oauthInfo: null });
+      };
+
+      handleExitTo2DInterstitial(true, () => {
+        if (isInModal) this.props.history.goBack();
+        if (isInOAuth) exitOAuth();
+      });
+
+      this.props.performConditionalSignIn(
+        () => this.props.hubChannel.signedIn,
+        async () => {
+          // Strip el from stored payload because it won't serialize into the store.
+          const serializableDetail = {};
+          Object.assign(serializableDetail, e.detail);
+          delete serializableDetail.el;
+
+          if (this.props.hubChannel.can("tweet")) {
+            isInModal = true;
+            pushHistoryState(this.props.history, "modal", "tweet", serializableDetail);
+          } else {
+            if (e.detail.el) {
+              // Pin the object if we have to go through OAuth, since the page will refresh and
+              // the object will otherwise be removed
+              e.detail.el.setAttribute("pinnable", "pinned", true);
+            }
+
+            const url = await this.props.hubChannel.getTwitterOAuthURL();
+
+            isInOAuth = true;
+            this.props.store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: serializableDetail });
+            this.setState({
+              showOAuthDialog: true,
+              oauthInfo: [{ type: "twitter", url: url }],
+              onCloseOAuthDialog: () => exitOAuth()
+            });
+          }
+        },
+        "tweet"
+      );
+    });
+
+    // todo: this shouldn't be an event.
+    window.addEventListener("action_create_avatar", () => {
+      this.props.performConditionalSignIn(
+        () => this.props.hubChannel.signedIn,
+        () => pushHistoryState(this.props.history, "overlay", "avatar-editor"),
+        "create-avatar"
       );
     });
 
@@ -1371,11 +1436,11 @@ class UIRoot extends Component {
     };
     const hasPush = navigator.serviceWorker && "PushManager" in window;
 
-    if (this.props.showOAuthDialog && !this.props.showInterstitialPrompt)
+    if (this.state.showOAuthDialog && !this.props.showInterstitialPrompt)
       return (
         <IntlProvider locale={lang} messages={messages}>
           <div className={classNames(rootStyles)}>
-            <OAuthDialog onClose={this.props.onCloseOAuthDialog} oauthInfo={this.props.oauthInfo} />
+            <OAuthDialog onClose={this.state.onCloseOAuthDialog} oauthInfo={this.state.oauthInfo} />
           </div>
         </IntlProvider>
       );
