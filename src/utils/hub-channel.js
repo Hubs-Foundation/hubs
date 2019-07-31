@@ -35,7 +35,6 @@ export default class HubChannel extends EventTarget {
 
   // Returns true if this current session has the given permission.
   can(permission) {
-    return true;
     if (!VALID_PERMISSIONS.includes(permission)) throw new Error(`Invalid permission name: ${permission}`);
     return this._permissions && this._permissions[permission];
   }
@@ -43,7 +42,6 @@ export default class HubChannel extends EventTarget {
   // Returns true if the current session has the given permission, *or* will get the permission
   // if they sign in and become the creator.
   canOrWillIfCreator(permission) {
-    return true;
     if (this._getCreatorAssignmentToken() && HUB_CREATOR_PERMISSIONS.includes(permission)) return true;
     return this.can(permission);
   }
