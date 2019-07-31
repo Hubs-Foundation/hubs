@@ -19,6 +19,7 @@ import anime from "animejs";
 
 const SHAPE = require("aframe-physics-system/src/constants").SHAPE;
 
+let loadingObjectEnvMap;
 let loadingObject;
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -62,6 +63,7 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
+    this.animating = false;
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
@@ -115,12 +117,22 @@ AFRAME.registerComponent("media-loader", {
       return;
     }
     const useFancyLoader = !!loadingObject;
+
     const mesh = useFancyLoader
       ? cloneObject3D(loadingObject.scene)
       : new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
     this.el.setObject3D("mesh", mesh);
+
     this.updateScale(true);
+
     if (useFancyLoader) {
+      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+      const currentEnivronmentMap = environmentMapComponent.environmentMap;
+      if (loadingObjectEnvMap !== currentEnivronmentMap) {
+        environmentMapComponent.applyEnvironmentMap(mesh);
+        loadingObjectEnvMap = currentEnivronmentMap;
+      }
+
       this.loaderMixer = new THREE.AnimationMixer(mesh);
 
       this.loadingClip = this.loaderMixer.clipAction(mesh.animations[0]);
@@ -137,11 +149,13 @@ AFRAME.registerComponent("media-loader", {
       this.loadingClip.play();
       this.loadingScaleClip.play();
     }
+
     if (this.el.sceneEl.is("entered") && (!this.networkedEl || NAF.utils.isMine(this.networkedEl))) {
       this.loadingSoundNode = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundLooped(
         SOUND_MEDIA_LOADING
       );
     }
+
     delete this.showLoaderTimeout;
   },
 
@@ -176,7 +190,7 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
-  onMediaLoaded(physicsShape = null) {
+  onMediaLoaded(physicsShape = null, shouldUpdateScale) {
     const el = this.el;
     this.clearLoadingTimeout();
 
@@ -185,6 +199,8 @@ AFRAME.registerComponent("media-loader", {
     }
 
     const finish = () => {
+      this.animating = false;
+
       if (physicsShape) {
         el.setAttribute("ammo-shape", {
           type: physicsShape,
@@ -202,13 +218,18 @@ AFRAME.registerComponent("media-loader", {
     };
 
     if (this.data.animate) {
-      const mesh = this.el.getObject3D("mesh");
-      const scale = { x: 0.001, y: 0.001, z: 0.001 };
-      scale.x = mesh.scale.x < scale.x ? mesh.scale.x * 0.001 : scale.x;
-      scale.y = mesh.scale.y < scale.y ? mesh.scale.x * 0.001 : scale.y;
-      scale.z = mesh.scale.z < scale.z ? mesh.scale.x * 0.001 : scale.z;
-      this.addMeshScaleAnimation(mesh, scale, finish);
+      if (!this.animating) {
+        this.animating = true;
+        if (shouldUpdateScale) this.updateScale(this.data.resize);
+        const mesh = this.el.getObject3D("mesh");
+        const scale = { x: 0.001, y: 0.001, z: 0.001 };
+        scale.x = mesh.scale.x < scale.x ? mesh.scale.x * 0.001 : scale.x;
+        scale.y = mesh.scale.y < scale.y ? mesh.scale.x * 0.001 : scale.y;
+        scale.z = mesh.scale.z < scale.z ? mesh.scale.x * 0.001 : scale.z;
+        this.addMeshScaleAnimation(mesh, scale, finish);
+      }
     } else {
+      if (shouldUpdateScale) this.updateScale(this.data.resize);
       finish();
     }
   },
@@ -376,8 +397,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "model-loaded",
           () => {
-            this.updateScale(this.data.resize);
-            this.onMediaLoaded(SHAPE.HULL);
+            this.onMediaLoaded(SHAPE.HULL, true);
             addAnimationComponents(this.el);
           },
           { once: true }

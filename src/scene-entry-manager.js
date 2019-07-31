@@ -346,8 +346,20 @@ export default class SceneEntryManager {
 
     document.addEventListener("drop", e => {
       e.preventDefault();
-      const url = e.dataTransfer.getData("url");
+
+      let url = e.dataTransfer.getData("url");
+
+      if (!url) {
+        // Sometimes dataTransfer text contains a valid URL, so try for that.
+        try {
+          url = new URL(e.dataTransfer.getData("text")).href;
+        } catch (e) {
+          // Nope, not this time.
+        }
+      }
+
       const files = e.dataTransfer.files;
+
       if (url) {
         spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
       } else {
