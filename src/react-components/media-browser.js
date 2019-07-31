@@ -159,6 +159,15 @@ class MediaBrowser extends Component {
     this.setState({ query });
   };
 
+  handleCreateAvatarClicked = evt => {
+    evt.preventDefault();
+    this.props.performConditionalSignIn(
+      () => this.props.hubChannel.signedIn,
+      () => pushHistoryState(this.props.history, "overlay", "avatar-editor"),
+      "create-avatar"
+    );
+  };
+
   handleEntryClicked = (evt, entry) => {
     evt.preventDefault();
 
@@ -393,6 +402,7 @@ class MediaBrowser extends Component {
               result={this.state.result}
               history={this.props.history}
               urlSource={urlSource}
+              handleCreateAvatarClicked={this.handleCreateAvatarClicked}
               handleEntryClicked={this.handleEntryClicked}
               handlePager={this.handlePager}
             />

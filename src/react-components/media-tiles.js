@@ -28,6 +28,7 @@ class MediaTiles extends Component {
     result: PropTypes.object,
     history: PropTypes.object,
     urlSource: PropTypes.string,
+    handleCreateAvatarClicked: PropTypes.func,
     handleEntryClicked: PropTypes.func,
     handlePager: PropTypes.func
   };
@@ -59,13 +60,7 @@ class MediaTiles extends Component {
                   </div>
                 </a>
               ) : (
-                <a
-                  onClick={e => {
-                    e.preventDefault();
-                    window.dispatchEvent(new CustomEvent("action_create_avatar"));
-                  }}
-                  className={styles.tileLink}
-                >
+                <a onClick={this.props.handleCreateAvatarClicked} className={styles.tileLink}>
                   <div className={styles.tileContent}>
                     <FontAwesomeIcon icon={faPlus} />
                     <FormattedMessage id="media-browser.create-avatar" />

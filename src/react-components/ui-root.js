@@ -352,15 +352,6 @@ class UIRoot extends Component {
       );
     });
 
-    // todo: this shouldn't be an event.
-    window.addEventListener("action_create_avatar", () => {
-      this.performConditionalSignIn(
-        () => this.props.hubChannel.signedIn,
-        () => pushHistoryState(this.props.history, "overlay", "avatar-editor"),
-        "create-avatar"
-      );
-    });
-
     const scene = this.props.scene;
 
     this.props.store.addEventListener("statechanged", this.onStoreChanged);
