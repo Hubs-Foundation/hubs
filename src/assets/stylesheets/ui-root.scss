@@ -222,8 +222,45 @@ body.vr-mode {
   transform: translateX(-50%);
   pointer-events: auto;
 }
-////////////
-:local(.my-test-button) {
+////
+:local(.image-icon){
+  width: 30px;
+  height: 30px;
+}
+//happy     
+:local(.emoji-button-happiness) {
+  
+  position: absolute;
+  max-width: 15%;
+  display: flex;
+  left: 35%;
+  bottom: 24px;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  background-color: transparent;
+  border: transparent;
+  pointer-events: auto;
+
+}
+//sad
+:local(.emoji-button-sadness) {
+  
+  position: absolute;
+ // margin-bottom: 1px;
+  display: flex;
+  left: 45%;
+  bottom: 24px;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  background-color: transparent;
+  border: transparent;
+  pointer-events: auto;
+  min-width: 150px;
+ // display: flex;
+  //transition: opacity 0.15s linear;
+}
+//disgust
+:local(.emoji-button-disgust) {
   
   position: absolute;
  // margin-bottom: 1px;
@@ -239,11 +276,75 @@ body.vr-mode {
  // display: flex;
   //transition: opacity 0.15s linear;
 }
-:local(.my-test-button):hover {
-  color: $action-color;
+//eww
+:local(.emoji-button-eww) {
+  
+  position: absolute;
+  display: flex;
+  left: 55%;
+  bottom: 24px;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  background-color: transparent;
+  border: transparent;
+  pointer-events: auto;
+  min-width: 150px;
 }
-:local(.my-test-button):disabled{
-  color: $dark-grey;
+//hearts
+:local(.emoji-button-hearts) {
+  
+  position: absolute;
+  display: flex;
+  left: 60%;
+  bottom: 24px;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  background-color: transparent;
+  border: transparent;
+  pointer-events: auto;
+  min-width: 150px;
+}
+//smile
+:local(.emoji-button-smile) {
+  
+  position: absolute;
+  display: flex;
+  left: 65%;
+  bottom: 24px;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  background-color: transparent;
+  border: transparent;
+  pointer-events: auto;
+  min-width: 150px;
+}
+//angry
+:local(.emoji-button-angry) {
+  
+  position: absolute;
+  display: flex;
+  left: 70%;
+  bottom: 24px;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  background-color: transparent;
+  border: transparent;
+  pointer-events: auto;
+  min-width: 150px;
+}
+//surprise
+:local(.emoji-button-surprise) {
+  
+  position: absolute;
+  display: flex;
+  left: 75%;
+  bottom: 24px;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  background-color: transparent;
+  border: transparent;
+  pointer-events: auto;
+  min-width: 150px;
 }
 /////////////////////////////////
 :local(.choose-scene-button) {

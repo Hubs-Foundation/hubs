@@ -3,7 +3,14 @@ import { AVATAR_TYPES } from "../utils/avatar-utils";
 import { registerComponentInstance } from "../utils/component-utils";
 import { deregisterComponentInstance } from "../utils/component-utils";
 
-import faSmileBeam from "../assets/images/sprites/camera_off.png";
+import happyEmoji from "../assets/images/sprites/chest-emojis/screen effect/happy.png";
+import sadEmoji from "../assets/images/sprites/chest-emojis/screen effect/sad.png";
+import angryEmoji from "../assets/images/sprites/chest-emojis/screen effect/angry.png";
+import ewwEmoji from "../assets/images/sprites/chest-emojis/screen effect/eww_black.png";
+import disgustEmoji from "../assets/images/sprites/chest-emojis/screen effect/disgust.png";
+import heartsEmoji from "../assets/images/sprites/chest-emojis/screen effect/hearts.png";
+import smileEmoji from "../assets/images/sprites/chest-emojis/screen effect/smile.png";
+import surpriseEmoji from "../assets/images/sprites/chest-emojis/screen effect/surprise.png";
 
 function ensureAvatarNodes(json) {
   const { nodes } = json;
@@ -41,7 +48,8 @@ AFRAME.registerComponent("player-info", {
     avatarType: { type: "string", default: AVATAR_TYPES.LEGACY }
   },
   init() {
-    this.changeEmoji = this.changeEmoji.bind(this);
+    this.changeHappyEmoji = this.changeHappyEmoji.bind(this);
+    this.changeSadEmoji = this.changeSadEmoji.bind(this);
     this.displayName = null;
     this.communityIdentifier = null;
     this.isOwner = false;
@@ -69,7 +77,9 @@ AFRAME.registerComponent("player-info", {
     deregisterComponentInstance(this, "player-info");
   },
   play() {
-    this.el.sceneEl.addEventListener("action_emoji_change", this.changeEmoji);
+    ["happy", "sad", "eww", "disgust", "angry", "smile", "hearts", "surprise"].map(x =>
+      this.el.sceneEl.addEventListener(x, this.emojiAction(x))
+    );
     this.el.addEventListener("model-loaded", this.applyProperties);
     this.el.sceneEl.addEventListener("presence_updated", this.updateDisplayName);
     if (this.isLocalPlayerInfo) {
@@ -77,20 +87,113 @@ AFRAME.registerComponent("player-info", {
     }
   },
   pause() {
-    this.el.sceneEl.removeEventListener("action_emoji_change", this.changeEmoji);
+    ["happy", "sad", "eww", "disgust", "angry", "smile", "hearts", "surprise"].map(x =>
+      this.el.sceneEl.removeEventListener(x, this.emojiAction(x))
+    );
     this.el.removeEventListener("model-loaded", this.applyProperties);
     this.el.sceneEl.removeEventListener("presence_updated", this.updateDisplayName);
     if (this.isLocalPlayerInfo) {
       this.el.querySelector(".model").removeEventListener("model-error", this.handleModelError);
     }
   },
-  changeEmoji() {
+
+  emojiAction(type) {
+    switch (type) {
+      case "happy":
+        return this.changeHappyEmoji;
+      case "sad":
+        return this.changeSadEmoji;
+      case "eww":
+        return this.changeEwwEmoji;
+      case "disgust":
+        return this.changeDisgustEmoji;
+      case "angry":
+        return this.changeAngryEmoji;
+      case "smile":
+        return this.changeSmileEmoji;
+      case "hearts":
+        return this.changeHeartsEmoji;
+      case "surprise":
+        return this.changeSurpriseEmoji;
+    }
+  },
+  changeHappyEmoji() {
+    console.log("change emoji called");
+
+    this.el.sceneEl
+      .querySelector("#player-rig")
+      .querySelector(".image")
+      .setAttribute("media-loader", { src: new URL(happyEmoji, window.location.href).href });
+
+    console.log("change emoji called");
+  },
+  changeSadEmoji() {
     //console.log("change emoji called");
 
     this.el.sceneEl
       .querySelector("#player-rig")
       .querySelector(".image")
-      .setAttribute("media-loader", { src: new URL(faSmileBeam, window.location.href).href });
+      .setAttribute("media-loader", { src: new URL(sadEmoji, window.location.href).href });
+
+    console.log("change emoji called");
+  },
+  changeAngryEmoji() {
+    console.log("change emoji called");
+
+    this.el.sceneEl
+      .querySelector("#player-rig")
+      .querySelector(".image")
+      .setAttribute("media-loader", { src: new URL(angryEmoji, window.location.href).href });
+
+    console.log("change emoji called");
+  },
+  changeEwwEmoji() {
+    console.log("change emoji called");
+
+    this.el.sceneEl
+      .querySelector("#player-rig")
+      .querySelector(".image")
+      .setAttribute("media-loader", { src: new URL(ewwEmoji, window.location.href).href });
+
+    console.log("change emoji called");
+  },
+  changeDisgustEmoji() {
+    console.log("change emoji called");
+
+    this.el.sceneEl
+      .querySelector("#player-rig")
+      .querySelector(".image")
+      .setAttribute("media-loader", { src: new URL(disgustEmoji, window.location.href).href });
+
+    console.log("change emoji called");
+  },
+  changeHeartsEmoji() {
+    console.log("change emoji called");
+
+    this.el.sceneEl
+      .querySelector("#player-rig")
+      .querySelector(".image")
+      .setAttribute("media-loader", { src: new URL(heartsEmoji, window.location.href).href });
+
+    console.log("change emoji called");
+  },
+  changeSmileEmoji() {
+    console.log("change emoji called");
+
+    this.el.sceneEl
+      .querySelector("#player-rig")
+      .querySelector(".image")
+      .setAttribute("media-loader", { src: new URL(smileEmoji, window.location.href).href });
+
+    console.log("change emoji called");
+  },
+  changeSurpriseEmoji() {
+    console.log("change emoji called");
+
+    this.el.sceneEl
+      .querySelector("#player-rig")
+      .querySelector(".image")
+      .setAttribute("media-loader", { src: new URL(surpriseEmoji, window.location.href).href });
 
     console.log("change emoji called");
   },

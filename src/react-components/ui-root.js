@@ -58,7 +58,6 @@ import LobbyChatBox from "./lobby-chat-box.js";
 import InWorldChatBox from "./in-world-chat-box.js";
 //import AvatarEmojiChatBox from "./avatar-emoji-chat-box.js";
 
-
 import AvatarEditor from "./avatar-editor";
 import MicLevelWidget from "./mic-level-widget.js";
 import OutputLevelWidget from "./output-level-widget.js";
@@ -75,6 +74,27 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { faSmileBeam } from "@fortawesome/free-solid-svg-icons/faSmileBeam";
+
+import happyEmojiIconOn from "../assets/images/sprites/chest-emojis/emoji-icons/happy-on.png";
+import happyEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/happy-on-hover.png";
+import happyEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/happy-off.png";
+import angryEmojiIconOn from "../assets/images/sprites/chest-emojis/emoji-icons/angry-on.png";
+import angryEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/angry-on-hover.png";
+import angryEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/angry-off.png";
+import ewwEmojiIconOn from "../assets/images/sprites/chest-emojis/emoji-icons/eww-on.png";
+import ewwEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/eww-on-hover.png";
+import ewwEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/eww-off.png";
+import disgustEmojiIconOn from "../assets/images/sprites/chest-emojis/emoji-icons/disgust-on.png";
+import disgustEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/disgust-on-hover.png";
+import disgustEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/disgust-off.png";
+import heartsEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/hearts-off.png";
+import heartsEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/hearts-on-hover.png";
+import sadEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/sad-off.png";
+import sadEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/sad-on-hover.png";
+import smileEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/smile-off.png";
+import smileEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/smile-on-hover.png";
+import surpriseEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/surprise-off.png";
+import surpriseEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/surprise-on-hover.png";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -195,11 +215,6 @@ class UIRoot extends Component {
     mediaStream: null,
     audioTrack: null,
     micDevices: [],
-
-    ////////
-    changeAvatarChestImg: false,
-
-    profileNamePending: "Hello",
 
     autoExitTimerStartedAt: null,
     autoExitTimerInterval: null,
@@ -491,14 +506,11 @@ class UIRoot extends Component {
     this.props.exitScene(reason);
     this.setState({ exited: true });
   };
-///////////////////////////////////////////////
+  ///////////////////////////////////////////////
 
-  
-  emojiChange = () =>{
-    
-   this.props.scene.emit("action_emoji_change");
-    console.log("emojiChange called on ui-root.js ");
-
+  emojiChange = reason => {
+    this.props.scene.emit(reason);
+    console.log("emojiChange called on ui-root.js " + reason);
   };
 
   isWaitingForAutoExit = () => {
@@ -1666,26 +1678,111 @@ class UIRoot extends Component {
                   onClose={() => this.confirmBroadcastedRoom()}
                 />
               )}
-            {enteredOrWatchingOrPreload && !this.state.frozen && (
-              <InWorldChatBox
-                discordBridges={discordBridges}
-                onSendMessage={this.sendMessage}
-                onObjectCreated={this.createObject}
-                enableSpawning={entered}
-                history={this.props.history}
-              />
-            )}
+            {enteredOrWatchingOrPreload &&
+              !this.state.frozen && (
+                <InWorldChatBox
+                  discordBridges={discordBridges}
+                  onSendMessage={this.sendMessage}
+                  onObjectCreated={this.createObject}
+                  enableSpawning={entered}
+                  history={this.props.history}
+                />
+              )}
             {this.state.frozen && (
               <button className={styles.leaveButton} onClick={() => this.exit("left")}>
                 <FormattedMessage id="entry.leave-room" />
               </button>
             )}
             {this.state.frozen && (
-              <button className={classNames(styles.myTestButton)} onClick={() => this.emojiChange()}>
-              <i>
-                <FontAwesomeIcon icon={faSmileBeam} />
-              </i>
-              </button>
+              <div>
+                <button className={classNames(styles.emojiButtonHappiness)} onClick={() => this.emojiChange("happy")}>
+                  <i>
+                    <img
+                      className={classNames(styles.imageIcon)}
+                      src={happyEmojiIconOff}
+                      onMouseOver={e => (e.currentTarget.src = happyEmojiIconHover)}
+                      onMouseOut={e => (e.currentTarget.src = happyEmojiIconOff)}
+                    />
+                  </i>
+                </button>
+
+                <button className={classNames(styles.emojiButtonSadness)} onClick={() => this.emojiChange("sad")}>
+                  <i>
+                    <img
+                      className={classNames(styles.imageIcon)}
+                      src={sadEmojiIconOff}
+                      onMouseOver={e => (e.currentTarget.src = sadEmojiIconHover)}
+                      onMouseOut={e => (e.currentTarget.src = sadEmojiIconOff)}
+                    />
+                  </i>
+                </button>
+
+                <button className={classNames(styles.emojiButtonDisgust)} onClick={() => this.emojiChange("disgust")}>
+                  <i>
+                    <img
+                      className={classNames(styles.imageIcon)}
+                      src={disgustEmojiIconOff}
+                      onMouseOver={e => (e.currentTarget.src = disgustEmojiIconHover)}
+                      onMouseOut={e => (e.currentTarget.src = disgustEmojiIconOff)}
+                    />
+                  </i>
+                </button>
+
+                <button className={classNames(styles.emojiButtonEww)} onClick={() => this.emojiChange("eww")}>
+                  <i>
+                    <img
+                      className={classNames(styles.imageIcon)}
+                      src={ewwEmojiIconOff}
+                      onMouseOver={e => (e.currentTarget.src = ewwEmojiIconHover)}
+                      onMouseOut={e => (e.currentTarget.src = ewwEmojiIconOff)}
+                    />
+                  </i>
+                </button>
+
+                <button className={classNames(styles.emojiButtonHearts)} onClick={() => this.emojiChange("hearts")}>
+                  <i>
+                    <img
+                      className={classNames(styles.imageIcon)}
+                      src={heartsEmojiIconOff}
+                      onMouseOver={e => (e.currentTarget.src = heartsEmojiIconHover)}
+                      onMouseOut={e => (e.currentTarget.src = heartsEmojiIconOff)}
+                    />
+                  </i>
+                </button>
+
+                <button className={classNames(styles.emojiButtonSmile)} onClick={() => this.emojiChange("smile")}>
+                  <i>
+                    <img
+                      className={classNames(styles.imageIcon)}
+                      src={smileEmojiIconOff}
+                      onMouseOver={e => (e.currentTarget.src = smileEmojiIconHover)}
+                      onMouseOut={e => (e.currentTarget.src = smileEmojiIconOff)}
+                    />
+                  </i>
+                </button>
+
+                <button className={classNames(styles.emojiButtonAngry)} onClick={() => this.emojiChange("angry")}>
+                  <i>
+                    <img
+                      className={classNames(styles.imageIcon)}
+                      src={angryEmojiIconOff}
+                      onMouseOver={e => (e.currentTarget.src = angryEmojiIconHover)}
+                      onMouseOut={e => (e.currentTarget.src = angryEmojiIconOff)}
+                    />
+                  </i>
+                </button>
+
+                <button className={classNames(styles.emojiButtonSurprise)} onClick={() => this.emojiChange("surprise")}>
+                  <i>
+                    <img
+                      className={classNames(styles.imageIcon)}
+                      src={surpriseEmojiIconOff}
+                      onMouseOver={e => (e.currentTarget.src = surpriseEmojiIconHover)}
+                      onMouseOut={e => (e.currentTarget.src = surpriseEmojiIconOff)}
+                    />
+                  </i>
+                </button>
+              </div>
             )}
             {!this.state.frozen &&
               !watching &&
