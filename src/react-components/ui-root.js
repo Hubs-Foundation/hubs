@@ -219,7 +219,7 @@ class UIRoot extends Component {
     this.exitEventHandler = () => this.exit();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate() {
     const { hubChannel } = this.props;
     if (hubChannel) {
       const { signedIn } = hubChannel;
@@ -337,7 +337,10 @@ class UIRoot extends Component {
             const url = await this.props.hubChannel.getTwitterOAuthURL();
 
             isInOAuth = true;
-            this.props.store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: serializableDetail });
+            this.props.store.enqueueOnLoadAction("emit_scene_event", {
+              event: "action_media_tweet",
+              detail: serializableDetail
+            });
             this.setState({
               showOAuthDialog: true,
               oauthInfo: [{ type: "twitter", url: url }],

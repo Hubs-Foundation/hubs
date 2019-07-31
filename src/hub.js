@@ -102,7 +102,6 @@ import ReactDOM from "react-dom";
 import React from "react";
 import { Router, Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
-import { pushHistoryState } from "./utils/history";
 import UIRoot from "./react-components/ui-root";
 import AuthChannel from "./utils/auth-channel";
 import HubChannel from "./utils/hub-channel";
