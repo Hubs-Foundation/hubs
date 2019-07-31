@@ -24,6 +24,8 @@ import StateRoute from "./state-route.js";
 import { getPresenceProfileForSession, discordBridgesForPresences } from "../utils/phoenix-utils";
 import { getClientInfoClientId } from "./client-info-dialog";
 import { getCurrentStreamer } from "../utils/component-utils";
+import { getPromotionTokenForFile } from "../utils/media-utils";
+import pinnedEntityToGltf from "../utils/pinned-entity-to-gltf";
 
 import { lang, messages } from "../utils/i18n";
 import Loader from "./loader";
@@ -280,6 +282,30 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("exit", this.exitEventHandler);
     this.props.scene.addEventListener("action_exit_watch", () => this.setState({ watching: false, hide: false }));
 
+    this.props.scene.addEventListener("pinned", e => {
+      if (this._disableSignInOnPinAction) return;
+      this._signInAndPinOrUnpinElement(e.detail.el, true);
+    });
+    this.props.scene.addEventListener("unpinned", e => {
+      if (this._disableSignInOnPinAction) return;
+      this._signInAndPinOrUnpinElement(e.detail.el, false);
+    });
+
+    this.props.scene.addEventListener("action_kick_client", ({ detail: { clientId } }) => {
+      this.props.performConditionalSignIn(
+        () => this.props.hubChannel.can("kick_users"),
+        async () => await this.props.hubChannel.kick(clientId),
+        "kick-user"
+      );
+    });
+    this.props.scene.addEventListener("action_mute_client", ({ detail: { clientId } }) => {
+      this.props.performConditionalSignIn(
+        () => this.props.hubChannel.can("mute_users"),
+        () => this.props.hubChannel.mute(clientId),
+        "mute-user"
+      );
+    });
+
     const scene = this.props.scene;
 
     this.props.store.addEventListener("statechanged", this.onStoreChanged);
@@ -328,6 +354,65 @@ class UIRoot extends Component {
     this.props.scene.removeEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.removeEventListener("share_video_failed", this.onShareVideoFailed);
   }
+
+  _signInAndPinOrUnpinElement = (el, pin) => {
+    const action = pin ? () => this._pinElement(el) : async () => await this._unpinElement(el);
+
+    this.props.performConditionalSignIn(() => this.state.signedIn, action, pin ? "pin" : "unpin", () => {
+      // UI pins/un-pins the entity optimistically, so we undo that here.
+      // Note we have to disable the sign in flow here otherwise this will recurse.
+      this._disableSignInOnPinAction = true;
+      el.setAttribute("pinnable", "pinned", !pin);
+      this._disableSignInOnPinAction = false;
+    });
+  };
+
+  _pinElement = async el => {
+    const { networkId } = el.components.networked.data;
+
+    const { fileId, src } = el.components["media-loader"].data;
+
+    let fileAccessToken, promotionToken;
+    if (fileId) {
+      fileAccessToken = new URL(src).searchParams.get("token");
+      const storedPromotionToken = getPromotionTokenForFile(fileId);
+      if (storedPromotionToken) {
+        promotionToken = storedPromotionToken.promotionToken;
+      }
+    }
+
+    const gltfNode = pinnedEntityToGltf(el);
+    if (!gltfNode) return;
+    el.setAttribute("networked", { persistent: true });
+    el.setAttribute("media-loader", { fileIsOwned: true });
+
+    try {
+      await this.props.hubChannel.pin(networkId, gltfNode, fileId, fileAccessToken, promotionToken);
+      this.props.store.update({ activity: { hasPinned: true } });
+    } catch (e) {
+      if (e.reason === "invalid_token") {
+        await this.props.authChannel.signOut(this.props.hubChannel);
+        this._signInAndPinOrUnpinElement(el);
+      } else {
+        console.warn("Pin failed for unknown reason", e);
+      }
+    }
+  };
+
+  _unpinElement = el => {
+    const components = el.components;
+    const networked = components.networked;
+
+    if (!networked || !networked.data || !NAF.utils.isMine(el)) return;
+
+    const networkId = components.networked.data.networkId;
+    el.setAttribute("networked", { persistent: false });
+
+    const mediaLoader = components["media-loader"];
+    const fileId = mediaLoader.data && mediaLoader.data.fileId;
+
+    this.props.hubChannel.unpin(networkId, fileId);
+  };
 
   showContextualSignInDialog = () => {
     const {

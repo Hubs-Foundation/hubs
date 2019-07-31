@@ -1,13 +1,12 @@
 import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
-import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
 const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 
-import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
+import { addMedia } from "./utils/media-utils";
 import {
   isIn2DInterstitial,
   handleExitTo2DInterstitial,
@@ -22,9 +21,8 @@ import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 const isIOS = AFRAME.utils.device.isIOS();
 
 export default class SceneEntryManager {
-  constructor(hubChannel, authChannel, availableVREntryTypes, history) {
+  constructor(hubChannel, availableVREntryTypes, history) {
     this.hubChannel = hubChannel;
-    this.authChannel = authChannel;
     this.availableVREntryTypes = availableVREntryTypes;
     this.store = window.APP.store;
     this.mediaSearchStore = window.APP.mediaSearchStore;
@@ -32,7 +30,6 @@ export default class SceneEntryManager {
     this.cursorController = document.querySelector("#cursor-controller");
     this.playerRig = document.querySelector("#player-rig");
     this._entered = false;
-    this.performConditionalSignIn = () => {};
     this.history = history;
   }
 
@@ -190,65 +187,6 @@ export default class SceneEntryManager {
     });
   };
 
-  _pinElement = async el => {
-    const { networkId } = el.components.networked.data;
-
-    const { fileId, src } = el.components["media-loader"].data;
-
-    let fileAccessToken, promotionToken;
-    if (fileId) {
-      fileAccessToken = new URL(src).searchParams.get("token");
-      const storedPromotionToken = getPromotionTokenForFile(fileId);
-      if (storedPromotionToken) {
-        promotionToken = storedPromotionToken.promotionToken;
-      }
-    }
-
-    const gltfNode = pinnedEntityToGltf(el);
-    if (!gltfNode) return;
-    el.setAttribute("networked", { persistent: true });
-    el.setAttribute("media-loader", { fileIsOwned: true });
-
-    try {
-      await this.hubChannel.pin(networkId, gltfNode, fileId, fileAccessToken, promotionToken);
-      this.store.update({ activity: { hasPinned: true } });
-    } catch (e) {
-      if (e.reason === "invalid_token") {
-        await this.authChannel.signOut(this.hubChannel);
-        this._signInAndPinOrUnpinElement(el);
-      } else {
-        console.warn("Pin failed for unknown reason", e);
-      }
-    }
-  };
-
-  _signInAndPinOrUnpinElement = (el, pin) => {
-    const action = pin ? () => this._pinElement(el) : async () => await this._unpinElement(el);
-
-    this.performConditionalSignIn(() => this.hubChannel.signedIn, action, pin ? "pin" : "unpin", () => {
-      // UI pins/un-pins the entity optimistically, so we undo that here.
-      // Note we have to disable the sign in flow here otherwise this will recurse.
-      this._disableSignInOnPinAction = true;
-      el.setAttribute("pinnable", "pinned", !pin);
-      this._disableSignInOnPinAction = false;
-    });
-  };
-
-  _unpinElement = el => {
-    const components = el.components;
-    const networked = components.networked;
-
-    if (!networked || !networked.data || !NAF.utils.isMine(el)) return;
-
-    const networkId = components.networked.data.networkId;
-    el.setAttribute("networked", { persistent: false });
-
-    const mediaLoader = components["media-loader"];
-    const fileId = mediaLoader.data && mediaLoader.data.fileId;
-
-    this.hubChannel.unpin(networkId, fileId);
-  };
-
   _setupMedia = mediaStream => {
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
@@ -278,16 +216,6 @@ export default class SceneEntryManager {
       spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
     });
 
-    this.scene.addEventListener("pinned", e => {
-      if (this._disableSignInOnPinAction) return;
-      this._signInAndPinOrUnpinElement(e.detail.el, true);
-    });
-
-    this.scene.addEventListener("unpinned", e => {
-      if (this._disableSignInOnPinAction) return;
-      this._signInAndPinOrUnpinElement(e.detail.el, false);
-    });
-
     this.scene.addEventListener("object_spawned", e => {
       this.hubChannel.sendObjectSpawnedEvent(e.detail.objectType);
     });
@@ -300,22 +228,6 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_invite", () => {
       handleExitTo2DInterstitial(false, () => this.history.goBack());
       pushHistoryState(this.history, "overlay", "invite");
-    });
-
-    this.scene.addEventListener("action_kick_client", ({ detail: { clientId } }) => {
-      this.performConditionalSignIn(
-        () => this.hubChannel.can("kick_users"),
-        async () => await window.APP.hubChannel.kick(clientId),
-        "kick-user"
-      );
-    });
-
-    this.scene.addEventListener("action_mute_client", ({ detail: { clientId } }) => {
-      this.performConditionalSignIn(
-        () => this.hubChannel.can("mute_users"),
-        () => window.APP.hubChannel.mute(clientId),
-        "mute-user"
-      );
     });
 
     this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());

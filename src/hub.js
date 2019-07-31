@@ -657,7 +657,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store, hubId);
   const availableVREntryTypes = await getAvailableVREntryTypes();
-  const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes, history);
+  const entryManager = new SceneEntryManager(hubChannel, availableVREntryTypes, history);
   const performConditionalSignIn = async (predicate, action, messageId, onFailure) => {
     if (predicate()) return action();
 
