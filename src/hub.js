@@ -96,6 +96,7 @@ import "./components/visibility-by-path";
 import "./components/tags";
 import "./components/hubs-text";
 import "./components/billboard";
+import "./components/periodic-full-syncs";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
