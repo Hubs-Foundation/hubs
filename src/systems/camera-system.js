@@ -17,14 +17,14 @@ const moveRigSoCameraLooksAtObject = (function() {
     cqInv.copy(camera.quaternion).inverse();
     rig.quaternion.copy(owq).multiply(cqInv);
 
-    const fov = camera.el.sceneEl.camera.fov;
     const box = getBox(object.el, object.el.getObject3D("mesh"), true);
     box.getCenter(center);
     const halfYExtents = Math.max(Math.abs(box.max.y - center.y), Math.abs(center.y - box.min.y));
     const halfXExtents = Math.max(Math.abs(box.max.x - center.x), Math.abs(center.x - box.min.x));
+    const halfVertFOV = THREE.Math.degToRad(camera.el.sceneEl.camera.fov / 2);
+    const halfHorFOV =
+      Math.atan(Math.tan(halfVertFOV) * camera.el.sceneEl.camera.aspect) * object.el.sceneEl.is("vr-mode") ? 0.5 : 1;
     const margin = 1.05;
-    const halfVertFOV = THREE.Math.degToRad(fov / 2);
-    const halfHorFOV = Math.atan(Math.tan(halfVertFOV) * camera.el.sceneEl.camera.aspect);
     const l = (halfYExtents * margin) / Math.tan(halfVertFOV);
     const l2 = (halfXExtents * margin) / Math.tan(halfHorFOV);
     v1.set(0, 0, 1)
