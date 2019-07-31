@@ -98,7 +98,7 @@ function registerNetworkSchemas() {
         property: "videoPaused"
       },
       {
-        component: "media-pager",
+        component: "media-pdf",
         property: "index"
       },
       "pinnable"
@@ -131,7 +131,7 @@ function registerNetworkSchemas() {
         property: "videoPaused"
       },
       {
-        component: "media-pager",
+        component: "media-pdf",
         property: "index"
       }
     ]

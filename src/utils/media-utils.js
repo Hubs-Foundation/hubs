@@ -4,6 +4,7 @@ import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { validMaterials } from "../components/hoverable-visuals";
+import { proxiedUrlFor } from "../utils/media-url-utils";
 
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
@@ -121,7 +122,7 @@ export const addMedia = (
     scene.emit("media-loading", { src: src });
   }, 100);
 
-  ["model-loaded", "video-loaded", "image-loaded"].forEach(eventName => {
+  ["model-loaded", "video-loaded", "image-loaded", "pdf-loaded"].forEach(eventName => {
     entity.addEventListener(
       eventName,
       async () => {
@@ -147,7 +148,7 @@ export const addMedia = (
 
     upload(src, desiredContentType)
       .then(response => {
-        const srcUrl = new URL(response.raw);
+        const srcUrl = new URL(proxiedUrlFor(response.origin));
         srcUrl.searchParams.set("token", response.meta.access_token);
         entity.setAttribute("media-loader", { resolve: false, src: srcUrl.href, fileId: response.file_id });
         window.APP.store.update({
