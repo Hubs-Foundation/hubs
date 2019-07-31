@@ -37,7 +37,7 @@ function indexForNonAuthorizedComponent(nonAuthorizedComponent, schema) {
 let nonAuthorizedSchemas = null;
 function initializeNonAuthorizedSchemas() {
   /*
-  Takes the NAF schemas defined in network-schemas.js and produces a data structure of template name to authorized
+  Takes the NAF schemas defined in network-schemas.js and produces a data structure of template name to non-authorized
   component indices:
   {
     "#interactable-media": ["4", "5", "6"]
