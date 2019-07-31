@@ -19,7 +19,7 @@ AFRAME.registerComponent("visibility-on-content-type", {
     const mediaLoader = this.networkedEl.components["media-loader"];
     const mediaImage = this.networkedEl.components["media-image"];
     const mediaVideo = this.networkedEl.components["media-video"];
-    const mediaPdf = this.networkedEl.components["media-video"];
+    const mediaPdf = this.networkedEl.components["media-pdf"];
     const currentContentType =
       contentType ||
       (mediaVideo && mediaVideo.data.contentType) ||

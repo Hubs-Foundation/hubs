@@ -892,8 +892,8 @@ AFRAME.registerComponent("media-pdf", {
         this.el.setAttribute("media-pager", { maxIndex: this.pdf.numPages - 1 });
       }
 
-      const loadingIndex = this.data.index;
-      const page = await this.pdf.getPage(this.data.index + 1);
+      const loadingIndex = index;
+      const page = await this.pdf.getPage(index + 1);
       if (loadingIndex !== this.data.index) return;
 
       const viewport = page.getViewport({ scale: 3 });
@@ -917,7 +917,7 @@ AFRAME.registerComponent("media-pdf", {
       }
 
       const renderingSrc = this.data.src;
-      const renderingIndex = this.data.index;
+      const renderingIndex = index;
 
       if (this.renderTask) {
         // If a previous update is rendering, wait for it to finish.
@@ -936,11 +936,6 @@ AFRAME.registerComponent("media-pdf", {
       this.renderTask = null;
 
       if (this.data.src !== renderingSrc || this.data.index !== renderingIndex) return;
-
-      if (this.mesh && this.mesh.map && (src !== oldData.src || index !== oldData.index)) {
-        this.mesh.material.map = null;
-        this.mesh.material.needsUpdate = true;
-      }
 
       const cacheKey = this.currentTextureCacheKey();
       let cacheItem;
