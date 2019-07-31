@@ -1,6 +1,7 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { setMatrixWorld } from "../utils/three-utils";
 import { paths } from "./userinput/paths";
+import { getBox } from "../utils/auto-box-collider";
 
 const moveRigSoCameraLooksAtObject = (function() {
   const cqInv = new THREE.Quaternion();
@@ -8,6 +9,7 @@ const moveRigSoCameraLooksAtObject = (function() {
   const v1 = new THREE.Vector3();
   const v2 = new THREE.Vector3();
   const owp = new THREE.Vector3();
+  const center = new THREE.Vector3();
 
   return function moveRigSoCameraLooksAtObject(rig, camera, object) {
     object.getWorldQuaternion(owq);
@@ -15,7 +17,19 @@ const moveRigSoCameraLooksAtObject = (function() {
     cqInv.copy(camera.quaternion).inverse();
     rig.quaternion.copy(owq).multiply(cqInv);
 
-    v1.set(0, 0, 1).applyQuaternion(owq);
+    const fov = camera.el.sceneEl.camera.fov;
+    const box = getBox(object.el, object.el.getObject3D("mesh"), true);
+    box.getCenter(center);
+    const halfYExtents = Math.max(Math.abs(box.max.y - center.y), Math.abs(center.y - box.min.y));
+    const halfXExtents = Math.max(Math.abs(box.max.x - center.x), Math.abs(center.x - box.min.x));
+    const margin = 1.05;
+    const halfVertFOV = THREE.Math.degToRad(fov / 2);
+    const halfHorFOV = Math.atan(Math.tan(halfVertFOV) * camera.el.sceneEl.camera.aspect);
+    const l = (halfYExtents * margin) / Math.tan(halfVertFOV);
+    const l2 = (halfXExtents * margin) / Math.tan(halfHorFOV);
+    v1.set(0, 0, 1)
+      .multiplyScalar(Math.abs(box.max.z - center.z) + Math.max(l, l2))
+      .applyQuaternion(owq);
     v2.copy(camera.position).applyQuaternion(rig.quaternion);
     rig.position.subVectors(v1, v2).add(owp);
 
