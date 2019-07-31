@@ -274,7 +274,7 @@ class MediaBrowser extends Component {
               )}
               {!hideSearch && (
                 <div className={styles.search}>
-                  <i>
+                  <i className={styles.searchIcon}>
                     <FontAwesomeIcon icon={faSearch} />
                   </i>
                   <input
@@ -303,6 +303,9 @@ class MediaBrowser extends Component {
                     value={this.state.query}
                     onChange={e => this.handleQueryUpdated(e.target.value)}
                   />
+                  <i className={styles.searchClear} onClick={() => this.handleQueryUpdated("", true)}>
+                    <FontAwesomeIcon icon={faTimes} />
+                  </i>
                 </div>
               )}
               <div className={styles.engineAttribution}>

@@ -126,7 +126,6 @@ AFRAME.registerComponent("player-info", {
     if (this.data.avatarSrc && modelEl) {
       modelEl.components["gltf-model-plus"].jsonPreprocessor = ensureAvatarNodes;
       modelEl.setAttribute("gltf-model-plus", "src", this.data.avatarSrc);
-      this.el.sceneEl.systems["camera-tools"].avatarUpdated();
     }
 
     const uniforms = injectCustomShaderChunks(this.el.object3D);

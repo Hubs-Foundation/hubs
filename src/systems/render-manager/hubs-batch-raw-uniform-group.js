@@ -71,15 +71,15 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
         const hideDueToPinning = !isSpawner && isPinned && !isFrozen;
 
         let highlightInteractorOne, highlightInteractorTwo;
-        if (interaction.state.leftHand.hovered === el || interaction.state.leftHand.held === el) {
+        if (interaction.state.leftHand.hovered === el && !interaction.state.leftHand.held) {
           interactorOne = interaction.options.leftHand.entity.object3D;
           highlightInteractorOne = true;
         }
 
-        if (interaction.state.rightRemote.hovered === el || interaction.state.rightRemote.held === el) {
+        if (interaction.state.rightRemote.hovered === el && !interaction.state.rightRemote.held) {
           interactorTwo = interaction.options.rightRemote.entity.object3D;
           highlightInteractorTwo = true;
-        } else if (interaction.state.rightHand.hovered === el || interaction.state.rightHand.held === el) {
+        } else if (interaction.state.rightHand.hovered === el && !interaction.state.rightHand.held) {
           interactorTwo = interaction.options.rightHand.entity.object3D;
           highlightInteractorTwo = true;
         }

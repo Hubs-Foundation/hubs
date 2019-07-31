@@ -50,24 +50,19 @@ export const scaledThumbnailUrlFor = (url, width, height) => {
   return farsparkUrl;
 };
 
-export const proxiedUrlFor = (url, index = null) => {
+export const proxiedUrlFor = url => {
   if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
 
-  const hasIndex = index !== null;
-
-  if (!hasIndex) {
-    // Skip known domains that do not require CORS proxying.
-    try {
-      const parsedUrl = new URL(url);
-      if (nonCorsProxyDomains.find(domain => parsedUrl.hostname.endsWith(domain))) return url;
-    } catch (e) {
-      // Ignore
-    }
+  // Skip known domains that do not require CORS proxying.
+  try {
+    const parsedUrl = new URL(url);
+    if (nonCorsProxyDomains.find(domain => parsedUrl.hostname.endsWith(domain))) return url;
+  } catch (e) {
+    // Ignore
   }
 
-  if (hasIndex || !process.env.CORS_PROXY_SERVER) {
-    const method = hasIndex ? "extract" : "raw";
-    return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${farsparkEncodeUrl(url)}`;
+  if (!process.env.CORS_PROXY_SERVER) {
+    return `https://${process.env.FARSPARK_SERVER}/0/raw/0/0/0/0/${farsparkEncodeUrl(url)}`;
   } else {
     return `https://${process.env.CORS_PROXY_SERVER}/${url}`;
   }
@@ -110,9 +105,9 @@ export const guessContentType = url => {
   const extension = new URL(url, window.location).pathname.split(".").pop();
   return commonKnownContentTypes[extension];
 };
-const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/scenes\/(\w+)\/?\S*/;
-const hubsAvatarRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/avatars\/(\w+)\/?\S*/;
-const hubsRoomRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/(\w+)\/?\S*/;
+const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/scenes\/(\w+)\/?\S*/;
+const hubsAvatarRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/avatars\/(\w+)\/?\S*/;
+const hubsRoomRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/(\w+)\/?\S*/;
 export const isHubsSceneUrl = hubsSceneRegex.test.bind(hubsSceneRegex);
 export const isHubsRoomUrl = url => !isHubsSceneUrl(url) && hubsRoomRegex.test(url);
 export const isHubsDestinationUrl = url => isHubsSceneUrl(url) || isHubsRoomUrl(url);

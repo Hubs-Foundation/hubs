@@ -326,6 +326,7 @@ export default class HubChannel extends EventTarget {
 
   hide = sessionId => {
     NAF.connection.adapter.block(sessionId);
+    this.channel.push("block", { session_id: sessionId });
     this._blockedSessionIds.add(sessionId);
   };
 
@@ -333,6 +334,7 @@ export default class HubChannel extends EventTarget {
     if (!this._blockedSessionIds.has(sessionId)) return;
     NAF.connection.adapter.unblock(sessionId);
     NAF.connection.entities.completeSync(sessionId);
+    this.channel.push("unblock", { session_id: sessionId });
     this._blockedSessionIds.delete(sessionId);
   };
 

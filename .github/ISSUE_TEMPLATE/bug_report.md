@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-**Describe the bug**
+**Description**
 A clear and concise description of what the bug is.
 
 **To Reproduce**
@@ -23,8 +23,8 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
--  Device: [e.g. Desktop, phone, VR headset]
+**Hardware** <!-- Please complete the following information -->
+ - Device: [e.g. Desktop, phone, VR headset]
  - OS: [e.g. Windows, iOS, Linux]
  - Browser [e.g. Firefox]
 
