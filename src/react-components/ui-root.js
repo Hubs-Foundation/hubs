@@ -280,8 +280,6 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("exit", this.exitEventHandler);
     this.props.scene.addEventListener("action_exit_watch", () => this.setState({ watching: false, hide: false }));
 
-    const scene = this.props.scene;
-
     this.props.store.addEventListener("statechanged", this.onStoreChanged);
 
     const unsubscribe = this.props.history.listen((location, action) => {
@@ -304,17 +302,6 @@ class UIRoot extends Component {
     if (this.props.history.location.state && !sluglessPath(this.props.history.location).startsWith("/media")) {
       popToBeginningOfHubHistory(this.props.history);
     }
-
-    this.setState({
-      audioContext: {
-        playSound: sound => {
-          scene.emit(sound);
-        },
-        onMouseLeave: () => {
-          //          scene.emit("play_sound-hud_mouse_leave");
-        }
-      }
-    });
 
     if (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now")) {
       setTimeout(() => this.handleForceEntry(), 2000);
@@ -1420,7 +1407,7 @@ class UIRoot extends Component {
     const streamerName = streamer && streamer.displayName;
 
     return (
-      <ReactAudioContext.Provider value={this.state.audioContext}>
+      <ReactAudioContext.Provider value={{}}>
         <IntlProvider locale={lang} messages={messages}>
           <div className={classNames(rootStyles)}>
             {this.state.dialog}
