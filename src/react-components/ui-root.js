@@ -197,11 +197,6 @@ class UIRoot extends Component {
     exited: false,
 
     signedIn: false,
-    showSignInDialog: false,
-    signInMessageId: null,
-    signInCompleteMessageId: null,
-    signInContinueTextId: null,
-    onContinueAfterSignIn: null,
     videoShareMediaSource: null,
     showVideoShareFailed: false
   };
@@ -230,14 +225,6 @@ class UIRoot extends Component {
       const { signedIn } = hubChannel;
       if (signedIn !== this.state.signedIn) {
         this.setState({ signedIn });
-      }
-    }
-    const { showSignInDialog } = prevState;
-    if (prevState.showSignInDialog !== this.state.showSignInDialog) {
-      if (this.state.showSignInDialog) {
-        this.showContextualSignInDialog();
-      } else {
-        this.closeDialog();
       }
     }
     if (!this.willCompileAndUploadMaterials && this.state.noMoreLoadingUpdates) {
@@ -423,32 +410,51 @@ class UIRoot extends Component {
   performConditionalSignIn = async (predicate, action, messageId, onFailure) => {
     if (predicate()) return action();
 
+    const signInMessageId = `sign-in.${messageId}`;
+    const signInCompleteMessageId = `sign-in.${messageId}-complete`;
     const signInContinueTextId = this.props.scene.is("vr-mode") ? "entry.return-to-vr" : "dialog.close";
-
-    handleExitTo2DInterstitial(true, () => this.setState({ showSignInDialog: false }));
-
-    this.setState({
-      showSignInDialog: true,
-      signInMessageId: `sign-in.${messageId}`,
-      signInCompleteMessageId: `sign-in.${messageId}-complete`,
-      signInContinueTextId,
-      onContinueAfterSignIn: async () => {
-        this.setState({ showSignInDialog: false });
-        let actionError = null;
-        if (predicate()) {
-          try {
-            await action();
-          } catch (e) {
-            actionError = e;
-          }
-        } else {
-          actionError = new Error("Predicate failed post sign-in");
+    const onContinueAfterSignIn = async () => {
+      this.closeDialog();
+      let actionError = null;
+      if (predicate()) {
+        try {
+          await action();
+        } catch (e) {
+          actionError = e;
         }
-
-        if (actionError && onFailure) onFailure(actionError);
-        exit2DInterstitialAndEnterVR();
+      } else {
+        actionError = new Error("Predicate failed post sign-in");
       }
-    });
+
+      if (actionError && onFailure) onFailure(actionError);
+      exit2DInterstitialAndEnterVR();
+    };
+
+    const presentSignInDialog = () => {
+      this.showNonHistoriedDialog(SignInDialog, {
+        message: messages[signInMessageId],
+        onSignIn: async email => {
+          const { authComplete } = await this.props.authChannel.startAuthentication(email, this.props.hubChannel);
+
+          this.showNonHistoriedDialog(SignInDialog, { authStarted: true, onClose: onContinueAfterSignIn });
+
+          await authComplete;
+
+          this.setState({ signedIn: true });
+          this.showNonHistoriedDialog(SignInDialog, {
+            authComplete: true,
+            message: messages[signInCompleteMessageId],
+            continueText: messages[signInContinueTextId],
+            onClose: onContinueAfterSignIn,
+            onContinue: onContinueAfterSignIn
+          });
+        },
+        onClose: onContinueAfterSignIn
+      });
+    };
+
+    handleExitTo2DInterstitial(true, presentSignInDialog);
+    presentSignInDialog();
   };
 
   _signInAndPinOrUnpinElement = (el, pin) => {
@@ -508,36 +514,6 @@ class UIRoot extends Component {
     const fileId = mediaLoader.data && mediaLoader.data.fileId;
 
     this.props.hubChannel.unpin(networkId, fileId);
-  };
-
-  showContextualSignInDialog = () => {
-    const {
-      signInMessageId,
-      signInCompleteMessageId,
-      signInContinueTextId,
-      onContinueAfterSignIn
-    } = this.state;
-
-    this.showNonHistoriedDialog(SignInDialog, {
-      message: messages[signInMessageId],
-      onSignIn: async email => {
-        const { authComplete } = await this.props.authChannel.startAuthentication(email, this.props.hubChannel);
-
-        this.showNonHistoriedDialog(SignInDialog, { authStarted: true, onClose: onContinueAfterSignIn });
-
-        await authComplete;
-
-        this.setState({ signedIn: true });
-        this.showNonHistoriedDialog(SignInDialog, {
-          authComplete: true,
-          message: messages[signInCompleteMessageId],
-          continueText: messages[signInContinueTextId],
-          onClose: onContinueAfterSignIn,
-          onContinue: onContinueAfterSignIn
-        });
-      },
-      onClose: onContinueAfterSignIn
-    });
   };
 
   updateSubscribedState = () => {
