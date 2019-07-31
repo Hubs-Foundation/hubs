@@ -20,6 +20,9 @@ function registerNetworkSchemas() {
   // Note: networked template ids are semantically important. We use the template suffix as a filter
   // for allowing and authorizing messages in reticulum. See https://github.com/mozilla/reticulum/pull/195
 
+  // NAF schemas have been extended with a custom authorizedComponents property that is used to authorize certain
+  // components and properties regardless of hub or user permissions. See permissions-utils.js.
+
   NAF.schemas.add({
     template: "#remote-avatar",
     components: [
@@ -102,6 +105,20 @@ function registerNetworkSchemas() {
         property: "index"
       },
       "pinnable"
+    ],
+    authorizedComponents: [
+      {
+        component: "media-video",
+        property: "time"
+      },
+      {
+        component: "media-video",
+        property: "videoPaused"
+      },
+      {
+        component: "media-pager",
+        property: "index"
+      }
     ]
   });
 
@@ -114,6 +131,12 @@ function registerNetworkSchemas() {
         component: "media-video",
         property: "time"
       }
+    ],
+    authorizedComponents: [
+      {
+        component: "media-video",
+        property: "time"
+      }
     ]
   });
 
@@ -122,6 +145,20 @@ function registerNetworkSchemas() {
     components: [
       // TODO: Optimize checking mediaOptions with requiresNetworkUpdate.
       "media-loader",
+      {
+        component: "media-video",
+        property: "time"
+      },
+      {
+        component: "media-video",
+        property: "videoPaused"
+      },
+      {
+        component: "media-pager",
+        property: "index"
+      }
+    ],
+    authorizedComponents: [
       {
         component: "media-video",
         property: "time"
