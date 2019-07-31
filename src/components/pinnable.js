@@ -18,13 +18,17 @@ AFRAME.registerComponent("pinnable", {
   },
 
   _fireEventsAndAnimate(oldData, force) {
-    // We need to guard against _fireEventsAndAnimate being called during entity initialization,
-    // when the networked component isn't initialized yet.
-    if (this.el.components.networked && this.el.components.networked.data && !NAF.utils.isMine(this.el)) return;
+    // during object initialization, we may not have a networked component, and we
+    // also have no desire to fire pinned events or animate anything
+    if (!this.el.components.networked) {
+      return;
+    }
+    // if someone else pinned it, we don't want to take action
+    if (this.el.components.networked.data && !NAF.utils.isMine(this.el)) {
+      return;
+    }
 
-    // Avoid firing events during initialization by checking if the pin state has changed before doing so.
     const pinStateChanged = !!oldData.pinned !== this.data.pinned;
-
     if (this.data.pinned) {
       if (pinStateChanged || force) {
         this.el.emit("pinned", { el: this.el });
