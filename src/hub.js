@@ -111,7 +111,6 @@ import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { proxiedUrlFor } from "./utils/media-url-utils";
 import { traverseMeshesAndAddShapes } from "./utils/physics-utils";
-import { handleExitTo2DInterstitial, exit2DInterstitialAndEnterVR } from "./utils/vr-interstitial";
 import { getAvatarSrc } from "./utils/avatar-utils.js";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
@@ -658,39 +657,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const hubChannel = new HubChannel(store, hubId);
   const availableVREntryTypes = await getAvailableVREntryTypes();
   const entryManager = new SceneEntryManager(hubChannel, availableVREntryTypes, history);
-  const performConditionalSignIn = async (predicate, action, messageId, onFailure) => {
-    if (predicate()) return action();
-
-    const signInContinueTextId = scene.is("vr-mode") ? "entry.return-to-vr" : "dialog.close";
-
-    handleExitTo2DInterstitial(true, () => remountUI({ showSignInDialog: false }));
-
-    remountUI({
-      showSignInDialog: true,
-      signInMessageId: `sign-in.${messageId}`,
-      signInCompleteMessageId: `sign-in.${messageId}-complete`,
-      signInContinueTextId,
-      onContinueAfterSignIn: async () => {
-        remountUI({ showSignInDialog: false });
-        let actionError = null;
-        if (predicate()) {
-          try {
-            await action();
-          } catch (e) {
-            actionError = e;
-          }
-        } else {
-          actionError = new Error("Predicate failed post sign-in");
-        }
-
-        if (actionError && onFailure) onFailure(actionError);
-        exit2DInterstitialAndEnterVR();
-      }
-    });
-  };
-
-  remountUI({ performConditionalSignIn, embed: isEmbed, showPreload: isEmbed });
-  entryManager.performConditionalSignIn = performConditionalSignIn;
+  remountUI({ embed: isEmbed, showPreload: isEmbed });
   entryManager.init();
 
   const linkChannel = new LinkChannel(store);

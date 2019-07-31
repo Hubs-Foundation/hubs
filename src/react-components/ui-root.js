@@ -141,11 +141,6 @@ class UIRoot extends Component {
     subscriptions: PropTypes.object,
     initialIsSubscribed: PropTypes.bool,
     initialIsFavorited: PropTypes.bool,
-    showSignInDialog: PropTypes.bool,
-    signInMessageId: PropTypes.string,
-    signInCompleteMessageId: PropTypes.string,
-    signInContinueTextId: PropTypes.string,
-    onContinueAfterSignIn: PropTypes.func,
     showSafariDialog: PropTypes.bool,
     showSafariMicDialog: PropTypes.bool,
     showWebAssemblyDialog: PropTypes.bool,
@@ -158,7 +153,6 @@ class UIRoot extends Component {
     history: PropTypes.object,
     showInterstitialPrompt: PropTypes.bool,
     onInterstitialPromptClicked: PropTypes.func,
-    performConditionalSignIn: PropTypes.func,
     hide: PropTypes.bool,
     showPreload: PropTypes.bool,
     onPreloadLoadClicked: PropTypes.func,
@@ -203,6 +197,11 @@ class UIRoot extends Component {
     exited: false,
 
     signedIn: false,
+    showSignInDialog: false,
+    signInMessageId: null,
+    signInCompleteMessageId: null,
+    signInContinueTextId: null,
+    onContinueAfterSignIn: null,
     videoShareMediaSource: null,
     showVideoShareFailed: false
   };
@@ -225,16 +224,17 @@ class UIRoot extends Component {
     this.exitEventHandler = () => this.exit();
   }
 
-  componentDidUpdate(prevProps) {
-    const { hubChannel, showSignInDialog } = this.props;
+  componentDidUpdate(prevProps, prevState) {
+    const { hubChannel } = this.props;
     if (hubChannel) {
       const { signedIn } = hubChannel;
       if (signedIn !== this.state.signedIn) {
         this.setState({ signedIn });
       }
     }
-    if (prevProps.showSignInDialog !== showSignInDialog) {
-      if (showSignInDialog) {
+    const { showSignInDialog } = prevState;
+    if (prevState.showSignInDialog !== this.state.showSignInDialog) {
+      if (this.state.showSignInDialog) {
         this.showContextualSignInDialog();
       } else {
         this.closeDialog();
@@ -292,14 +292,14 @@ class UIRoot extends Component {
     });
 
     this.props.scene.addEventListener("action_kick_client", ({ detail: { clientId } }) => {
-      this.props.performConditionalSignIn(
+      this.performConditionalSignIn(
         () => this.props.hubChannel.can("kick_users"),
         async () => await this.props.hubChannel.kick(clientId),
         "kick-user"
       );
     });
     this.props.scene.addEventListener("action_mute_client", ({ detail: { clientId } }) => {
-      this.props.performConditionalSignIn(
+      this.performConditionalSignIn(
         () => this.props.hubChannel.can("mute_users"),
         () => this.props.hubChannel.mute(clientId),
         "mute-user"
@@ -307,7 +307,7 @@ class UIRoot extends Component {
     });
     this.props.scene.addEventListener("scene_media_selected", e => {
       const sceneInfo = e.detail;
-      this.props.performConditionalSignIn(
+      this.performConditionalSignIn(
         () => this.props.hubChannel.can("update_hub"),
         () => this.props.hubChannel.updateScene(sceneInfo),
         "change-scene"
@@ -329,7 +329,7 @@ class UIRoot extends Component {
         if (isInOAuth) exitOAuth();
       });
 
-      this.props.performConditionalSignIn(
+      this.performConditionalSignIn(
         () => this.props.hubChannel.signedIn,
         async () => {
           // Strip el from stored payload because it won't serialize into the store.
@@ -364,7 +364,7 @@ class UIRoot extends Component {
 
     // todo: this shouldn't be an event.
     window.addEventListener("action_create_avatar", () => {
-      this.props.performConditionalSignIn(
+      this.performConditionalSignIn(
         () => this.props.hubChannel.signedIn,
         () => pushHistoryState(this.props.history, "overlay", "avatar-editor"),
         "create-avatar"
@@ -420,10 +420,41 @@ class UIRoot extends Component {
     this.props.scene.removeEventListener("share_video_failed", this.onShareVideoFailed);
   }
 
+  performConditionalSignIn = async (predicate, action, messageId, onFailure) => {
+    if (predicate()) return action();
+
+    const signInContinueTextId = this.props.scene.is("vr-mode") ? "entry.return-to-vr" : "dialog.close";
+
+    handleExitTo2DInterstitial(true, () => this.setState({ showSignInDialog: false }));
+
+    this.setState({
+      showSignInDialog: true,
+      signInMessageId: `sign-in.${messageId}`,
+      signInCompleteMessageId: `sign-in.${messageId}-complete`,
+      signInContinueTextId,
+      onContinueAfterSignIn: async () => {
+        this.setState({ showSignInDialog: false });
+        let actionError = null;
+        if (predicate()) {
+          try {
+            await action();
+          } catch (e) {
+            actionError = e;
+          }
+        } else {
+          actionError = new Error("Predicate failed post sign-in");
+        }
+
+        if (actionError && onFailure) onFailure(actionError);
+        exit2DInterstitialAndEnterVR();
+      }
+    });
+  };
+
   _signInAndPinOrUnpinElement = (el, pin) => {
     const action = pin ? () => this._pinElement(el) : async () => await this._unpinElement(el);
 
-    this.props.performConditionalSignIn(() => this.state.signedIn, action, pin ? "pin" : "unpin", () => {
+    this.performConditionalSignIn(() => this.state.signedIn, action, pin ? "pin" : "unpin", () => {
       // UI pins/un-pins the entity optimistically, so we undo that here.
       // Note we have to disable the sign in flow here otherwise this will recurse.
       this._disableSignInOnPinAction = true;
@@ -482,16 +513,15 @@ class UIRoot extends Component {
   showContextualSignInDialog = () => {
     const {
       signInMessageId,
-      authChannel,
       signInCompleteMessageId,
       signInContinueTextId,
       onContinueAfterSignIn
-    } = this.props;
+    } = this.state;
 
     this.showNonHistoriedDialog(SignInDialog, {
       message: messages[signInMessageId],
       onSignIn: async email => {
-        const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
+        const { authComplete } = await this.props.authChannel.startAuthentication(email, this.props.hubChannel);
 
         this.showNonHistoriedDialog(SignInDialog, { authStarted: true, onClose: onContinueAfterSignIn });
 
@@ -516,7 +546,7 @@ class UIRoot extends Component {
   };
 
   toggleFavorited = () => {
-    this.props.performConditionalSignIn(
+    this.performConditionalSignIn(
       () => this.props.hubChannel.signedIn,
       () => {
         const isFavorited = this.isFavorited();
@@ -1118,7 +1148,7 @@ class UIRoot extends Component {
             <button
               className={entryStyles.renameButton}
               onClick={() =>
-                this.props.performConditionalSignIn(
+                this.performConditionalSignIn(
                   () => this.props.hubChannel.can("update_hub"),
                   () => this.pushHistoryState("modal", "room_settings"),
                   "room-settings"
@@ -1641,7 +1671,7 @@ class UIRoot extends Component {
                     this.props.onMediaSearchResultEntrySelected(entry);
                   }
                 }}
-                performConditionalSignIn={this.props.performConditionalSignIn}
+                performConditionalSignIn={this.performConditionalSignIn}
               />
             )}
             <StateRoute
@@ -1759,7 +1789,7 @@ class UIRoot extends Component {
                 presences={this.props.presences}
                 hubChannel={this.props.hubChannel}
                 showNonHistoriedDialog={this.showNonHistoriedDialog}
-                performConditionalSignIn={this.props.performConditionalSignIn}
+                performConditionalSignIn={this.performConditionalSignIn}
               />
             )}
             {(!enteredOrWatching || this.isWaitingForAutoExit()) && (
@@ -1841,7 +1871,7 @@ class UIRoot extends Component {
                     <button
                       className={classNames([styles.chooseSceneButton])}
                       onClick={() => {
-                        this.props.performConditionalSignIn(
+                        this.performConditionalSignIn(
                           () => this.props.hubChannel.can("update_hub"),
                           () => {
                             showFullScreenIfAvailable();
@@ -1974,7 +2004,7 @@ class UIRoot extends Component {
                   hubChannel={this.props.hubChannel}
                   hubScene={this.props.hubScene}
                   scene={this.props.scene}
-                  performConditionalSignIn={this.props.performConditionalSignIn}
+                  performConditionalSignIn={this.performConditionalSignIn}
                   showNonHistoriedDialog={this.showNonHistoriedDialog}
                   pushHistoryState={this.pushHistoryState}
                 />
