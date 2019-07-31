@@ -871,7 +871,8 @@ AFRAME.registerComponent("media-pdf", {
   },
 
   currentTextureCacheKey() {
-    return `${this.data.src}_${this.canvas.width}_${this.canvas.height}`;
+    // We ensure a unique texture for each PDF entity, because they are drawn over during pagination.
+    return `${this.el.object3D.uuid}_${this.canvas.width}_${this.canvas.height}`;
   },
 
   async update(oldData) {
@@ -901,7 +902,7 @@ AFRAME.registerComponent("media-pdf", {
 
       if (!this.canvas || this.canvas.width !== pw || this.canvas.height !== ph) {
         if (this.canvas) {
-          const oldCacheKey = `${oldData.src}_${this.canvas.width}_${this.canvas.height}`;
+          const oldCacheKey = `${this.el.object3D.uuid}_${this.canvas.width}_${this.canvas.height}`;
 
           if (this.mesh.map !== errorTexture && textureCache.has(oldCacheKey)) {
             textureCache.release(oldCacheKey);
@@ -917,7 +918,22 @@ AFRAME.registerComponent("media-pdf", {
 
       const renderingSrc = this.data.src;
       const renderingIndex = this.data.index;
-      await page.render({ canvasContext: this.canvasContext, viewport });
+
+      if (this.renderTask) {
+        // If a previous update is rendering, wait for it to finish.
+        await new Promise(resolve => {
+          const interval = setInterval(() => {
+            if (!this.renderTask) {
+              clearInterval(interval);
+              resolve();
+            }
+          }, 100);
+        });
+      }
+
+      this.renderTask = page.render({ canvasContext: this.canvasContext, viewport });
+      await this.renderTask.promise;
+      this.renderTask = null;
 
       if (this.data.src !== renderingSrc || this.data.index !== renderingIndex) return;
 
