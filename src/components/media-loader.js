@@ -377,7 +377,7 @@ AFRAME.registerComponent("media-loader", {
           Object.assign({}, this.data.mediaOptions, {
             src: accessibleUrl,
             contentType,
-            batch: disableBatching
+            batch: false // Batching disabled until atlas is updated properly
           })
         );
         this.el.setAttribute("media-pager", {});

@@ -856,17 +856,18 @@ AFRAME.registerComponent("media-pdf", {
     batch: { default: false }
   },
 
-  init() {},
+  init() {
+    this.canvas = document.createElement("canvas");
+    this.canvasContext = this.canvas.getContext("2d");
+    this.texture = new THREE.CanvasTexture(this.canvas);
+
+    this.texture.encoding = THREE.sRGBEncoding;
+    this.texture.minFilter = THREE.LinearFilter;
+  },
 
   remove() {
     if (this.data.batch && this.mesh) {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
-    }
-
-    if (this.currentPageTextureIsRetained) {
-      const cacheKey = this.currentTextureCacheKey();
-      textureCache.release(cacheKey);
-      this.currentPageTextureIsRetained = false;
     }
   },
 
@@ -883,87 +884,46 @@ AFRAME.registerComponent("media-pdf", {
       const { src, index } = this.data;
       if (!src) return;
 
+      if (this.renderTask) {
+        await this.renderTask.promise;
+        if (src !== this.data.src || index !== this.data.index) return;
+      }
+
       this.el.emit("pdf-loading");
 
-      if (!oldData.src || src !== oldData.src) {
+      if (src !== oldData.src) {
         const loadingSrc = this.data.src;
-        this.pdf = await pdfjs.getDocument(src);
+        const pdf = await pdfjs.getDocument(src);
         if (loadingSrc !== this.data.src) return;
+
+        this.pdf = pdf;
         this.el.setAttribute("media-pager", { maxIndex: this.pdf.numPages - 1 });
       }
 
-      const loadingIndex = index;
       const page = await this.pdf.getPage(index + 1);
-      if (loadingIndex !== this.data.index) return;
+      if (src !== this.data.src || index !== this.data.index) return;
 
       const viewport = page.getViewport({ scale: 3 });
       const pw = viewport.width;
       const ph = viewport.height;
+      texture = this.texture;
+      ratio = ph / pw;
 
-      if (!this.canvas || this.canvas.width !== pw || this.canvas.height !== ph) {
-        if (this.canvas) {
-          const oldCacheKey = `${this.el.object3D.uuid}_${this.canvas.width}_${this.canvas.height}`;
-
-          if (this.mesh.map !== errorTexture && textureCache.has(oldCacheKey)) {
-            textureCache.release(oldCacheKey);
-            this.currentPageTextureIsRetained = false;
-          }
-        }
-
-        this.canvas = document.createElement("canvas");
-        this.canvasContext = this.canvas.getContext("2d");
-        this.canvas.width = pw;
-        this.canvas.height = ph;
-      }
-
-      const renderingSrc = this.data.src;
-      const renderingIndex = index;
-
-      if (this.renderTask) {
-        // If a previous update is rendering, wait for it to finish.
-        await new Promise(resolve => {
-          const interval = setInterval(() => {
-            if (!this.renderTask) {
-              clearInterval(interval);
-              resolve();
-            }
-          }, 100);
-        });
-      }
+      this.canvas.width = pw;
+      this.canvas.height = ph;
 
       this.renderTask = page.render({ canvasContext: this.canvasContext, viewport });
+
       await this.renderTask.promise;
+
       this.renderTask = null;
 
-      if (this.data.src !== renderingSrc || this.data.index !== renderingIndex) return;
-
-      const cacheKey = this.currentTextureCacheKey();
-      let cacheItem;
-      if (textureCache.has(cacheKey)) {
-        if (this.currentPageTextureIsRetained) {
-          cacheItem = textureCache.get(cacheKey);
-        } else {
-          cacheItem = textureCache.retain(cacheKey);
-        }
-      } else {
-        if (src === "error") {
-          cacheItem = errorCacheItem;
-        } else {
-          const texture = new THREE.CanvasTexture(this.canvas);
-          texture.encoding = THREE.sRGBEncoding;
-          texture.minFilter = THREE.LinearFilter;
-          cacheItem = textureCache.set(cacheKey, texture);
-        }
-      }
-
-      texture = cacheItem.texture;
-      ratio = cacheItem.ratio;
+      if (src !== this.data.src || index !== this.data.index) return;
 
       this.currentPageTextureIsRetained = true;
     } catch (e) {
-      console.error("Error loading image", this.data.src, e);
+      console.error("Error loading PDF", this.data.src, e);
       texture = errorTexture;
-      this.currentPageTextureIsRetained = false;
     }
 
     if (!this.mesh) {

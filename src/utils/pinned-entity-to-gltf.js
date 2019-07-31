@@ -34,9 +34,6 @@ export default function pinnedEntityToGltf(el) {
 
     if (components["media-pdf"]) {
       gltfComponents.media.pageIndex = components["media-pdf"].data.index;
-    } else if (components["media-pager"]) {
-      // Legacy
-      gltfComponents.media.pageIndex = components["media-pager"].data.index;
     }
 
     if (components["media-video"] && components["media-video"].data.videoPaused) {
