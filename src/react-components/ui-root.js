@@ -270,12 +270,12 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("action_exit_watch", () => this.setState({ watching: false, hide: false }));
 
     this.props.scene.addEventListener("pinned", e => {
-      if (this._disableSignInOnPinAction) return;
-      this._signInAndPinOrUnpinElement(e.detail.el, true);
+      if (this.disableSignInOnPinAction) return;
+      this.signInAndPinOrUnpinElement(e.detail.el, true);
     });
     this.props.scene.addEventListener("unpinned", e => {
-      if (this._disableSignInOnPinAction) return;
-      this._signInAndPinOrUnpinElement(e.detail.el, false);
+      if (this.disableSignInOnPinAction) return;
+      this.signInAndPinOrUnpinElement(e.detail.el, false);
     });
 
     this.props.scene.addEventListener("action_kick_client", ({ detail: { clientId } }) => {
@@ -425,19 +425,19 @@ class UIRoot extends Component {
     this.showSignInDialog(messageId, onContinueAfterSignIn);
   };
 
-  _signInAndPinOrUnpinElement = (el, pin) => {
-    const action = pin ? () => this._pinElement(el) : async () => await this._unpinElement(el);
+  signInAndPinOrUnpinElement = (el, pin) => {
+    const action = pin ? () => this.pinElement(el) : async () => await this.unpinElement(el);
 
     this.performConditionalSignIn(() => this.state.signedIn, action, pin ? "pin" : "unpin", () => {
       // UI pins/un-pins the entity optimistically, so we undo that here.
       // Note we have to disable the sign in flow here otherwise this will recurse.
-      this._disableSignInOnPinAction = true;
+      this.disableSignInOnPinAction = true;
       el.setAttribute("pinnable", "pinned", !pin);
-      this._disableSignInOnPinAction = false;
+      this.disableSignInOnPinAction = false;
     });
   };
 
-  _pinElement = async el => {
+  pinElement = async el => {
     const { networkId } = el.components.networked.data;
 
     const { fileId, src } = el.components["media-loader"].data;
@@ -462,14 +462,14 @@ class UIRoot extends Component {
     } catch (e) {
       if (e.reason === "invalid_token") {
         await this.props.authChannel.signOut(this.props.hubChannel);
-        this._signInAndPinOrUnpinElement(el);
+        this.signInAndPinOrUnpinElement(el);
       } else {
         console.warn("Pin failed for unknown reason", e);
       }
     }
   };
 
-  _unpinElement = el => {
+  unpinElement = el => {
     const components = el.components;
     const networked = components.networked;
 
@@ -874,9 +874,7 @@ class UIRoot extends Component {
   };
 
   showNonHistoriedDialog = (DialogClass, props = {}) => {
-    this.setState({
-      dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
-    });
+    this.setState({ dialog: this.renderDialog(DialogClass, props) });
   };
 
   toggleStreamerMode = enable => {
@@ -908,8 +906,7 @@ class UIRoot extends Component {
           authComplete: true,
           message: messages[`sign-in.${messageId}-complete`],
           continueText: messages[continueTextId],
-          onClose: continuation,
-          onContinue: continuation
+          onClose: continuation
         });
       },
       onClose: continuation

@@ -10,8 +10,8 @@ export default class SignInDialog extends Component {
   static propTypes = {
     authStarted: PropTypes.bool,
     authComplete: PropTypes.bool,
+    onClose: PropTypes.func,
     onSignIn: PropTypes.func,
-    onContinue: PropTypes.func,
     message: PropTypes.string,
     continueText: PropTypes.string
   };
@@ -38,7 +38,7 @@ export default class SignInDialog extends Component {
       contents = (
         <div className={styles.signInComplete}>
           <p>{this.props.message}</p>
-          <button onClick={this.props.onContinue} className={styles.continueButton}>
+          <button onClick={this.props.onClose} className={styles.continueButton}>
             {this.props.continueText}
           </button>
         </div>
@@ -76,7 +76,7 @@ export default class SignInDialog extends Component {
     }
 
     return (
-      <DialogContainer title="Sign In" {...this.props}>
+      <DialogContainer title="Sign In" onClose={this.props.onClose}>
         {contents}
       </DialogContainer>
     );
