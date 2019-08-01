@@ -228,7 +228,7 @@ body.vr-mode {
   position: absolute;
   width:400px;
   left: 50%;
-  margin-left: -160px;
+  margin-left: -200px;
   bottom: 24px;          
   display: flex;
   justify-content: space-around;
@@ -487,32 +487,32 @@ body.vr-mode {
   }  
 }
 
-:local(.iconEmoji.clean) {
-  //lfet: 61%;
-  background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-off.png);
-}
-:local(.iconEmoji.clean:hover) {
-  @media (pointer: fine) {
-    background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on-hover.png);
-  }
+// :local(.iconEmoji.clean) {
+//   //lfet: 61%;
+//   background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-off.png);
+// }
+// :local(.iconEmoji.clean:hover) {
+//   @media (pointer: fine) {
+//     background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on-hover.png);
+//   }
 
-  @media (pointer: coarse) {
-    background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-off.png);
-  }
-}
+//   @media (pointer: coarse) {
+//     background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-off.png);
+//   }
+// }
 
-:local(.iconEmoji.clean.active) {
-  background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on.png);
-}
-:local(.iconEmoji.clean.active:hover) {
-  @media (pointer: fine) {
-    background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on-hover.png);
-  }
+// :local(.iconEmoji.clean.active) {
+//   background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on.png);
+// }
+// :local(.iconEmoji.clean.active:hover) {
+//   @media (pointer: fine) {
+//     background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on-hover.png);
+//   }
 
-  @media (pointer: coarse) {
-    background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on.png);
-  }  
-}
+//   @media (pointer: coarse) {
+//     background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on.png);
+//   }  
+// }
 
 :local(.choose-scene-button) {
   @extend %action-button-secondary;

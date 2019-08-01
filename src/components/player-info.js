@@ -6,7 +6,7 @@ import { deregisterComponentInstance } from "../utils/component-utils";
 import happyEmoji from "../assets/images/sprites/chest-emojis/screen effect/happy.png";
 import sadEmoji from "../assets/images/sprites/chest-emojis/screen effect/sad.png";
 import angryEmoji from "../assets/images/sprites/chest-emojis/screen effect/angry.png";
-import ewwEmoji from "../assets/images/sprites/chest-emojis/screen effect/eww_black.png";
+import ewwEmoji from "../assets/images/sprites/chest-emojis/screen effect/eww.png";
 import disgustEmoji from "../assets/images/sprites/chest-emojis/screen effect/disgust.png";
 import heartsEmoji from "../assets/images/sprites/chest-emojis/screen effect/hearts.png";
 import smileEmoji from "../assets/images/sprites/chest-emojis/screen effect/smile.png";
