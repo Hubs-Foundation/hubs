@@ -2,21 +2,11 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { setMatrixWorld } from "../utils/three-utils";
 import { paths } from "./userinput/paths";
 import { getBox } from "../utils/auto-box-collider";
+import qsTruthy from "../utils/qs_truthy";
 
-const moveRigSoCameraLooksAtObject = (function() {
-  const cqInv = new THREE.Quaternion();
-  const owq = new THREE.Quaternion();
-  const v1 = new THREE.Vector3();
-  const v2 = new THREE.Vector3();
-  const owp = new THREE.Vector3();
+const calculateViewingDistance = (function() {
   const center = new THREE.Vector3();
-
-  return function moveRigSoCameraLooksAtObject(rig, camera, object) {
-    object.getWorldQuaternion(owq);
-    object.getWorldPosition(owp);
-    cqInv.copy(camera.quaternion).inverse();
-    rig.quaternion.copy(owq).multiply(cqInv);
-
+  return function calculateViewingDistance(camera, object) {
     const box = getBox(object.el, object.el.getObject3D("mesh"), true);
     box.getCenter(center);
     const halfYExtents = Math.max(Math.abs(box.max.y - center.y), Math.abs(center.y - box.min.y));
@@ -29,8 +19,25 @@ const moveRigSoCameraLooksAtObject = (function() {
     const l2 = Math.abs((halfXExtents * margin) / Math.tan(halfHorFOV));
     const l3 = Math.abs(box.max.z - center.z) + Math.max(l1, l2);
     const l = object.el.sceneEl.is("vr-mode") ? Math.max(0.25, l3) : l3;
+    return l;
+  };
+})();
+
+const moveRigSoCameraLooksAtObject = (function() {
+  const cqInv = new THREE.Quaternion();
+  const owq = new THREE.Quaternion();
+  const v1 = new THREE.Vector3();
+  const v2 = new THREE.Vector3();
+  const owp = new THREE.Vector3();
+
+  return function moveRigSoCameraLooksAtObject(rig, camera, object) {
+    object.getWorldQuaternion(owq);
+    object.getWorldPosition(owp);
+    cqInv.copy(camera.quaternion).inverse();
+    rig.quaternion.copy(owq).multiply(cqInv);
+
     v1.set(0, 0, 1)
-      .multiplyScalar(l)
+      .multiplyScalar(calculateViewingDistance(camera, object))
       .applyQuaternion(owq);
     v2.copy(camera.position).applyQuaternion(rig.quaternion);
     rig.position.subVectors(v1, v2).add(owp);
@@ -45,6 +52,9 @@ export const CAMERA_MODE_THIRD_PERSON_NEAR = numCameraModes++;
 export const CAMERA_MODE_THIRD_PERSON_FAR = numCameraModes++;
 export const CAMERA_MODE_INSPECT = numCameraModes++;
 
+const m2 = new THREE.Matrix4();
+const m3 = new THREE.Matrix4();
+const offset = new THREE.Vector3();
 export class CameraSystem {
   constructor() {
     this.mode = CAMERA_MODE_FIRST_PERSON;
@@ -58,6 +68,13 @@ export class CameraSystem {
     });
   }
   nextMode() {
+    if (!qsTruthy("thirdPerson")) return;
+
+    if (this.mode === CAMERA_MODE_INSPECT) {
+      this.uninspect();
+      return;
+    }
+
     this.mode = (this.mode + 1) % numCameraModes;
     if (this.mode === CAMERA_MODE_FIRST_PERSON) {
       AFRAME.scenes[0].renderer.vr.setPoseTarget(this.playerCamera.object3D);
@@ -66,7 +83,6 @@ export class CameraSystem {
     } else if (this.mode === CAMERA_MODE_INSPECT) {
       this.mode = CAMERA_MODE_FIRST_PERSON; // skip inspect for now
     }
-    this.inspected = null;
   }
   inspect(o) {
     if (this.mode !== CAMERA_MODE_INSPECT) {
@@ -104,7 +120,7 @@ export class CameraSystem {
     this.rigEl.object3D.updateMatrices();
     if (this.mode === CAMERA_MODE_FIRST_PERSON) {
       this.cameraEl.components["pitch-yaw-rotator"].on = false;
-      const m2 = new THREE.Matrix4().copy(this.playerRig.object3D.matrixWorld);
+      m2.copy(this.playerRig.object3D.matrixWorld);
       setMatrixWorld(this.rigEl.object3D, m2);
     }
 
@@ -118,12 +134,12 @@ export class CameraSystem {
     }
 
     if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
-      const offset = new THREE.Vector3(0, 1, 3);
+      offset.set(0, 1, 3);
       if (this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
         offset.multiplyScalar(3);
       }
-      const m3 = new THREE.Matrix4().makeTranslation(offset.x, offset.y, offset.z);
-      const m2 = new THREE.Matrix4().copy(this.playerRig.object3D.matrixWorld);
+      m3.makeTranslation(offset.x, offset.y, offset.z);
+      m2.copy(this.playerRig.object3D.matrixWorld);
       m2.multiply(m3);
       setMatrixWorld(this.rigEl.object3D, m2);
       this.playerCamera.object3D.quaternion.copy(this.cameraEl.object3D.quaternion);
