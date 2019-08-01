@@ -250,7 +250,7 @@ body.vr-mode {
   background-color: transparent;
 }
 :local(.iconEmoji.angry) {
-  //left: 35%;
+ 
   background-image: url(../images/sprites/chest-emojis/emoji-icons/angry-off.png);
 }
 :local(.iconEmoji.angry:hover) {
@@ -288,7 +288,7 @@ body.vr-mode {
 }
 
 :local(.iconEmoji.happy) {
-  //left: 38%;
+
   background-image: url(../images/sprites/chest-emojis/emoji-icons/happy-off.png);
 }
 :local(.iconEmoji.happy:hover) {
@@ -341,7 +341,7 @@ body.vr-mode {
   }  
 }
 :local(.iconEmoji.smile) {
-  //left: 44%;
+ 
   background-image: url(../images/sprites/chest-emojis/emoji-icons/smile-off.png);
 }
 :local(.iconEmoji.smile:hover) {
@@ -368,7 +368,7 @@ body.vr-mode {
 }
 
 :local(.iconEmoji.eww) {
-  //lfet: 47%;
+ 
   background-image: url(../images/sprites/chest-emojis/emoji-icons/eww-off.png);
 }
 :local(.iconEmoji.eww:hover) {
@@ -395,7 +395,7 @@ body.vr-mode {
 }
 
 :local(.iconEmoji.disgust) {
-  //lfet: 50%;
+  
   background-image: url(../images/sprites/chest-emojis/emoji-icons/disgust-off.png);
 }
 :local(.iconEmoji.disgust:hover) {
@@ -422,7 +422,7 @@ body.vr-mode {
 }
 
 :local(.iconEmoji.hearts) {
-  //lfet: 53%;
+
   background-image: url(../images/sprites/chest-emojis/emoji-icons/hearts-off.png);
 }
 :local(.iconEmoji.hearts:hover) {
@@ -449,7 +449,7 @@ body.vr-mode {
 }
 
 :local(.iconEmoji.surprise) {
-  //lfet: 56%;
+ 
   background-image: url(../images/sprites/chest-emojis/emoji-icons/surprise-off.png);
 }
 :local(.iconEmoji.surprise:hover) {
@@ -475,32 +475,6 @@ body.vr-mode {
   }  
 }
 
-// :local(.iconEmoji.clean) {
-//   //lfet: 61%;
-//   background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-off.png);
-// }
-// :local(.iconEmoji.clean:hover) {
-//   @media (pointer: fine) {
-//     background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on-hover.png);
-//   }
-
-//   @media (pointer: coarse) {
-//     background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-off.png);
-//   }
-// }
-
-// :local(.iconEmoji.clean.active) {
-//   background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on.png);
-// }
-// :local(.iconEmoji.clean.active:hover) {
-//   @media (pointer: fine) {
-//     background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on-hover.png);
-//   }
-
-//   @media (pointer: coarse) {
-//     background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on.png);
-//   }  
-// }
 
 :local(.choose-scene-button) {
   @extend %action-button-secondary;
