@@ -8,6 +8,11 @@ import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { promisifyWorker } from "../utils/promisify-worker.js";
+import pdfjs from "pdfjs-dist";
+
+// Using external CDN to reduce build size
+pdfjs.GlobalWorkerOptions.workerSrc =
+  "https://assets-prod.reticulum.io/assets/js/pdfjs-dist@2.1.266/build/pdf.worker.js";
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
@@ -734,7 +739,7 @@ AFRAME.registerComponent("media-image", {
     if (this.data.batch && this.mesh) {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
     }
-    if (this._hasRetainedTexture) {
+    if (this.currentSrcIsRetained) {
       textureCache.release(this.data.src);
       this.currentSrcIsRetained = false;
     }
@@ -761,7 +766,11 @@ AFRAME.registerComponent("media-image", {
 
       let cacheItem;
       if (textureCache.has(src)) {
-        cacheItem = textureCache.retain(src);
+        if (this.currentSrcIsRetained) {
+          cacheItem = textureCache.get(src);
+        } else {
+          cacheItem = textureCache.retain(src);
+        }
       } else {
         if (src === "error") {
           cacheItem = errorCacheItem;
@@ -835,5 +844,112 @@ AFRAME.registerComponent("media-image", {
     }
 
     this.el.emit("image-loaded", { src: this.data.src, projection: projection });
+  }
+});
+
+AFRAME.registerComponent("media-pdf", {
+  schema: {
+    src: { type: "string" },
+    projection: { type: "string", default: "flat" },
+    contentType: { type: "string" },
+    index: { default: 0 },
+    batch: { default: false }
+  },
+
+  init() {
+    this.canvas = document.createElement("canvas");
+    this.canvasContext = this.canvas.getContext("2d");
+    this.texture = new THREE.CanvasTexture(this.canvas);
+
+    this.texture.encoding = THREE.sRGBEncoding;
+    this.texture.minFilter = THREE.LinearFilter;
+  },
+
+  remove() {
+    if (this.data.batch && this.mesh) {
+      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
+    }
+  },
+
+  currentTextureCacheKey() {
+    // We ensure a unique texture for each PDF entity, because they are drawn over during pagination.
+    return `${this.el.object3D.uuid}_${this.canvas.width}_${this.canvas.height}`;
+  },
+
+  async update(oldData) {
+    let texture;
+    let ratio = 1;
+
+    try {
+      const { src, index } = this.data;
+      if (!src) return;
+
+      if (this.renderTask) {
+        await this.renderTask.promise;
+        if (src !== this.data.src || index !== this.data.index) return;
+      }
+
+      this.el.emit("pdf-loading");
+
+      if (src !== oldData.src) {
+        const loadingSrc = this.data.src;
+        const pdf = await pdfjs.getDocument(src);
+        if (loadingSrc !== this.data.src) return;
+
+        this.pdf = pdf;
+        this.el.setAttribute("media-pager", { maxIndex: this.pdf.numPages - 1 });
+      }
+
+      const page = await this.pdf.getPage(index + 1);
+      if (src !== this.data.src || index !== this.data.index) return;
+
+      const viewport = page.getViewport({ scale: 3 });
+      const pw = viewport.width;
+      const ph = viewport.height;
+      texture = this.texture;
+      ratio = ph / pw;
+
+      this.canvas.width = pw;
+      this.canvas.height = ph;
+
+      this.renderTask = page.render({ canvasContext: this.canvasContext, viewport });
+
+      await this.renderTask.promise;
+
+      this.renderTask = null;
+
+      if (src !== this.data.src || index !== this.data.index) return;
+
+      this.currentPageTextureIsRetained = true;
+    } catch (e) {
+      console.error("Error loading PDF", this.data.src, e);
+      texture = errorTexture;
+    }
+
+    if (!this.mesh) {
+      const material = new THREE.MeshBasicMaterial();
+      const geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
+      material.side = THREE.DoubleSide;
+
+      this.mesh = new THREE.Mesh(geometry, material);
+      this.el.setObject3D("mesh", this.mesh);
+    }
+
+    this.mesh.material.transparent = texture == errorTexture;
+    this.mesh.material.map = texture;
+    this.mesh.material.map.needsUpdate = true;
+    this.mesh.material.needsUpdate = true;
+
+    scaleToAspectRatio(this.el, ratio);
+
+    if (texture !== errorTexture && this.data.batch) {
+      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.mesh);
+    }
+
+    if (this.el.components["media-pager"] && this.el.components["media-pager"].data.index !== this.data.index) {
+      this.el.setAttribute("media-pager", { index: this.data.index });
+    }
+
+    this.el.emit("pdf-loaded", { src: this.data.src });
   }
 });

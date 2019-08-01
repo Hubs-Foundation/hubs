@@ -398,6 +398,7 @@
             <template id="interactable-pen">
                 <a-entity
                     class="pen interactable"
+                    media-loader="src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;"
                     ammo-body="type: dynamic; mass: 0.001; collisionFilterGroup: 1; collisionFilterMask: 15;"
                     owned-object-limiter="counter: #pen-counter"
                     set-unowned-body-kinematic
@@ -829,6 +830,7 @@
             character-controller="pivot: #player-camera"
             ik-root
             player-info
+            periodic-full-syncs
         >
             <a-entity
                 id="player-hud"
@@ -1014,7 +1016,6 @@
             action-to-event="path: /actions/spawnPen; event: spawn_pen; withPermission: spawn_drawing"
             super-spawner="
                 template: #interactable-pen;
-                src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;
                 spawnEvent: spawn_pen;
                 animateFromCursor: true;
                 useCustomSpawnScale: true;
