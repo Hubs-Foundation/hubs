@@ -25,10 +25,12 @@ const moveRigSoCameraLooksAtObject = (function() {
     const halfHorFOV =
       Math.atan(Math.tan(halfVertFOV) * camera.el.sceneEl.camera.aspect) * (object.el.sceneEl.is("vr-mode") ? 0.5 : 1);
     const margin = 1.05;
-    const l = Math.abs((halfYExtents * margin) / Math.tan(halfVertFOV));
+    const l1 = Math.abs((halfYExtents * margin) / Math.tan(halfVertFOV));
     const l2 = Math.abs((halfXExtents * margin) / Math.tan(halfHorFOV));
+    const l3 = Math.abs(box.max.z - center.z) + Math.max(l, l2);
+    const l = object.el.sceneEl.is("vr-mode") ? Math.max(0.25, l3) : l3;
     v1.set(0, 0, 1)
-      .multiplyScalar(Math.abs(box.max.z - center.z) + Math.max(l, l2))
+      .multiplyScalar(l)
       .applyQuaternion(owq);
     v2.copy(camera.position).applyQuaternion(rig.quaternion);
     rig.position.subVectors(v1, v2).add(owp);
