@@ -27,7 +27,7 @@ const moveRigSoCameraLooksAtObject = (function() {
     const margin = 1.05;
     const l1 = Math.abs((halfYExtents * margin) / Math.tan(halfVertFOV));
     const l2 = Math.abs((halfXExtents * margin) / Math.tan(halfHorFOV));
-    const l3 = Math.abs(box.max.z - center.z) + Math.max(l, l2);
+    const l3 = Math.abs(box.max.z - center.z) + Math.max(l1, l2);
     const l = object.el.sceneEl.is("vr-mode") ? Math.max(0.25, l3) : l3;
     v1.set(0, 0, 1)
       .multiplyScalar(l)
@@ -151,8 +151,10 @@ AFRAME.registerComponent("inspect-button", {
   init() {
     this.inspectable = getInspectable(this.el);
     if (!this.inspectable) {
-      console.error("You put an inspect button but I could not find what you want to inspect");
+      console.error("You put an inspect button but I could not find what you want to inspect.", this.el);
+      return;
     }
+
     this.el.object3D.addEventListener("interact", () => {
       if (!this.el.sceneEl.is("vr-mode")) {
         this.el.sceneEl.systems["hubs-systems"].cameraSystem.inspect(this.inspectable.object3D);
