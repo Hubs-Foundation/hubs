@@ -8,18 +8,14 @@
 @import 'audio';
 @import 'info-dialog';
 
+body {
+  background-color: #d7e5ec;
+}
+
 body.vr-mode-stretch {
   a-scene {
     .a-canvas {
       width: 200% !important;
-    }
-  }
-}
-
-body.mirrored-camera {
-  a-scene {
-    .a-canvas {
-      width: 100% !important;
     }
   }
 }

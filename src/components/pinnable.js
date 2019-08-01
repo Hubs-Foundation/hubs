@@ -4,28 +4,31 @@ AFRAME.registerComponent("pinnable", {
   },
 
   init() {
-    this._fireEvents = this._fireEvents.bind(this);
+    this._fireEventsAndAnimate = this._fireEventsAndAnimate.bind(this);
 
     // Fire pinned events when page changes so we can persist the page.
-    this.el.addEventListener("pager-page-changed", this._fireEvents);
+    this.el.addEventListener("pager-page-changed", this._fireEventsAndAnimate);
 
     // Fire pinned events when video state changes so we can persist the page.
-    this.el.addEventListener("owned-video-state-changed", this._fireEvents);
+    this.el.addEventListener("owned-video-state-changed", this._fireEventsAndAnimate);
   },
 
   update(oldData) {
-    this._fireEvents(oldData);
+    this._fireEventsAndAnimate(oldData);
   },
 
-  _fireEvents(oldData) {
-    // We need to guard against _fireEvents being called during entity initialization,
+  _fireEventsAndAnimate(oldData, force) {
+    // We need to guard against _fireEventsAndAnimate being called during entity initialization,
     // when the networked component isn't initialized yet.
     if (this.el.components.networked && this.el.components.networked.data && !NAF.utils.isMine(this.el)) return;
 
+    // Avoid firing events during initialization by checking if the pin state has changed before doing so.
     const pinStateChanged = !!oldData.pinned !== this.data.pinned;
 
     if (this.data.pinned) {
-      this.el.emit("pinned", { el: this.el, changed: pinStateChanged });
+      if (pinStateChanged || force) {
+        this.el.emit("pinned", { el: this.el });
+      }
 
       this.el.removeAttribute("animation__pin-start");
       this.el.removeAttribute("animation__pin-end");
@@ -52,16 +55,24 @@ AFRAME.registerComponent("pinnable", {
         this.el.setAttribute("ammo-body", { type: "static" });
       }
     } else {
-      this.el.emit("unpinned", { el: this.el, changed: pinStateChanged });
+      if (pinStateChanged || force) {
+        this.el.emit("unpinned", { el: this.el });
+      }
     }
   },
 
+  isHeld(el) {
+    const { leftHand, rightHand, rightRemote } = el.sceneEl.systems.interaction.state;
+    return leftHand.held === el || rightHand.held === el || rightRemote.held === el;
+  },
+
   tick() {
-    const { leftHand, rightHand, rightRemote } = this.el.sceneEl.systems.interaction.state;
-    const held = leftHand.held === this.el || rightHand.held === this.el || rightRemote.held === this.el;
+    const held = this.isHeld(this.el);
+
     if (!held && this.wasHeld) {
-      this._fireEvents(this.data);
+      this._fireEventsAndAnimate(this.data, true);
     }
+
     this.wasHeld = held;
   }
 });

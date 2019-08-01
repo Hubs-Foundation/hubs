@@ -109,8 +109,7 @@
   :local(.choose-avatar) {
     position: absolute;
     width: 100%;
-    height: 100%;
-    top: 0;
+    bottom: 16px;
     left: 0;
     display: flex;
     flex-direction: row;
@@ -119,7 +118,6 @@
 
     a {
       align-self: flex-end;
-      margin-bottom: 16px;
       @extend %action-button-secondary;
     }
   }
@@ -130,5 +128,13 @@
     right: 20px;
     color: black;
     font-size: 16pt;
+  }
+
+  :local(.close) {
+    top: 32px;
+    left: 24px;
+    height: 35px;
+    position: absolute;
+    font-size: 1.6em;
   }
 }

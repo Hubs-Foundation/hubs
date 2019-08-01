@@ -3,10 +3,16 @@ import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js/dist/hls.light.js";
-import { proxiedUrlFor, spawnMediaAround } from "../utils/media-utils";
+import { addAndArrangeMedia, createImageTexture } from "../utils/media-utils";
+import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { promisifyWorker } from "../utils/promisify-worker.js";
+import pdfjs from "pdfjs-dist";
+
+// Using external CDN to reduce build size
+pdfjs.GlobalWorkerOptions.workerSrc =
+  "https://assets-prod.reticulum.io/assets/js/pdfjs-dist@2.1.266/build/pdf.worker.js";
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
@@ -203,25 +209,6 @@ function scaleToAspectRatio(el, ratio) {
   el.object3DMap.mesh.matrixNeedsUpdate = true;
 }
 
-const textureLoader = new THREE.TextureLoader();
-textureLoader.setCrossOrigin("anonymous");
-function createImageTexture(url) {
-  return new Promise((resolve, reject) => {
-    textureLoader.load(
-      url,
-      texture => {
-        texture.encoding = THREE.sRGBEncoding;
-        texture.minFilter = THREE.LinearFilter;
-        resolve(texture);
-      },
-      null,
-      function(xhr) {
-        reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
-      }
-    );
-  });
-}
-
 function disposeTexture(texture) {
   if (texture.image instanceof HTMLVideoElement) {
     const video = texture.image;
@@ -267,6 +254,12 @@ class TextureCache {
 
   release(src) {
     const cacheItem = this.cache.get(src);
+
+    if (!cacheItem) {
+      console.error(`Releasing uncached texture src ${src}`);
+      return;
+    }
+
     cacheItem.count--;
     // console.log("release", src, cacheItem.count);
     if (cacheItem.count <= 0) {
@@ -278,6 +271,7 @@ class TextureCache {
 }
 
 const textureCache = new TextureCache();
+const inflightTextures = new Map();
 
 const errorImage = new Image();
 errorImage.src = errorImageSrc;
@@ -286,6 +280,7 @@ errorTexture.magFilter = THREE.NearestFilter;
 errorImage.onload = () => {
   errorTexture.needsUpdate = true;
 };
+const errorCacheItem = { texture: errorTexture, ratio: 1 };
 
 function timeFmt(t) {
   let s = Math.floor(t),
@@ -371,6 +366,7 @@ AFRAME.registerComponent("media-video", {
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
+      this.networkedEl.components.networked.applyPersistentFirstSync();
       this.updatePlaybackState();
 
       // For scene-owned videos, take ownership after a random delay if nobody
@@ -437,7 +433,7 @@ AFRAME.registerComponent("media-video", {
     const file = new File([blob], "snap.png", TYPE_IMG_PNG);
 
     this.localSnapCount++;
-    const { entity } = spawnMediaAround(this.el, file, this.localSnapCount);
+    const { entity } = addAndArrangeMedia(this.el, file, "photo-snapshot", this.localSnapCount);
     entity.addEventListener("image-loaded", this.onSnapImageLoaded, ONCE_TRUE);
   },
 
@@ -469,6 +465,9 @@ AFRAME.registerComponent("media-video", {
       return;
     }
 
+    // Used in the HACK in hub.js for dealing with auto-pause in Oculus Browser
+    if (this._ignorePauseStateChanges) return;
+
     this.el.setAttribute("media-video", "videoPaused", this.video.paused);
 
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
@@ -481,8 +480,9 @@ AFRAME.registerComponent("media-video", {
       this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
       this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
 
-      this.playPauseButton.object3D.visible = !!this.video;
-      this.snapButton.object3D.visible = !!this.video;
+      const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
+      this.playPauseButton.object3D.visible = !!this.video && (!isPinned || window.APP.hubChannel.can("pin_objects"));
+      this.snapButton.object3D.visible = !!this.video && window.APP.hubChannel.can("spawn_and_move_media");
       this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
       this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
     }
@@ -521,6 +521,7 @@ AFRAME.registerComponent("media-video", {
     } else {
       // Need to deal with the fact play() may fail if user has not interacted with browser yet.
       this.video.play().catch(() => {
+        if (pause !== this.data.videoPaused) return;
         this._playbackStateChangeTimeout = setTimeout(() => this.tryUpdateVideoPlaybackState(pause, currentTime), 1000);
       });
     }
@@ -730,16 +731,24 @@ AFRAME.registerComponent("media-image", {
   schema: {
     src: { type: "string" },
     projection: { type: "string", default: "flat" },
-    contentType: { type: "string" }
+    contentType: { type: "string" },
+    batch: { default: false }
   },
 
   remove() {
-    textureCache.release(this.data.src);
+    if (this.data.batch && this.mesh) {
+      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
+    }
+    if (this.currentSrcIsRetained) {
+      textureCache.release(this.data.src);
+      this.currentSrcIsRetained = false;
+    }
   },
 
   async update(oldData) {
     let texture;
     let ratio = 1;
+
     try {
       const { src, contentType } = this.data;
       if (!src) return;
@@ -751,36 +760,53 @@ AFRAME.registerComponent("media-image", {
         this.mesh.material.needsUpdate = true;
         if (this.mesh.map !== errorTexture) {
           textureCache.release(oldData.src);
+          this.currentSrcIsRetained = false;
         }
       }
 
+      let cacheItem;
       if (textureCache.has(src)) {
-        const cacheItem = textureCache.retain(src);
-        texture = cacheItem.texture;
-        ratio = cacheItem.ratio;
+        if (this.currentSrcIsRetained) {
+          cacheItem = textureCache.get(src);
+        } else {
+          cacheItem = textureCache.retain(src);
+        }
       } else {
         if (src === "error") {
-          texture = errorTexture;
-        } else if (contentType.includes("image/gif")) {
-          texture = await createGIFTexture(src);
-        } else if (contentType.startsWith("image/")) {
-          texture = await createImageTexture(src);
+          cacheItem = errorCacheItem;
+        } else if (inflightTextures.has(src)) {
+          await inflightTextures.get(src);
+          cacheItem = textureCache.retain(src);
         } else {
-          throw new Error(`Unknown image content type: ${contentType}`);
+          let promise;
+          if (contentType.includes("image/gif")) {
+            promise = createGIFTexture(src);
+          } else if (contentType.startsWith("image/")) {
+            promise = createImageTexture(src);
+          } else {
+            throw new Error(`Unknown image content type: ${contentType}`);
+          }
+          inflightTextures.set(src, promise);
+          texture = await promise;
+          inflightTextures.delete(src);
+          cacheItem = textureCache.set(src, texture);
         }
 
-        const cacheItem = textureCache.set(src, texture);
-        ratio = cacheItem.ratio;
-
-        // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
-        if (this.data.src !== src) {
+        // No way to cancel promises, so if src has changed or this entity was removed while we were creating the texture just throw it away.
+        if (this.data.src !== src || !this.el.parentNode) {
           textureCache.release(src);
           return;
         }
       }
+
+      texture = cacheItem.texture;
+      ratio = cacheItem.ratio;
+
+      this.currentSrcIsRetained = true;
     } catch (e) {
       console.error("Error loading image", this.data.src, e);
       texture = errorTexture;
+      this.currentSrcIsRetained = false;
     }
 
     const projection = this.data.projection;
@@ -803,14 +829,127 @@ AFRAME.registerComponent("media-image", {
       this.el.setObject3D("mesh", this.mesh);
     }
 
+    // We only support transparency on gifs. Other images will support cutout as part of batching, but not alpha transparency for now
+    this.mesh.material.transparent =
+      !this.data.batch || texture == errorTexture || this.data.contentType.includes("image/gif");
     this.mesh.material.map = texture;
-    this.mesh.material.transparent = texture.format === THREE.RGBAFormat;
     this.mesh.material.needsUpdate = true;
 
     if (projection === "flat") {
       scaleToAspectRatio(this.el, ratio);
     }
 
+    if (texture !== errorTexture && this.data.batch) {
+      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.mesh);
+    }
+
     this.el.emit("image-loaded", { src: this.data.src, projection: projection });
+  }
+});
+
+AFRAME.registerComponent("media-pdf", {
+  schema: {
+    src: { type: "string" },
+    projection: { type: "string", default: "flat" },
+    contentType: { type: "string" },
+    index: { default: 0 },
+    batch: { default: false }
+  },
+
+  init() {
+    this.canvas = document.createElement("canvas");
+    this.canvasContext = this.canvas.getContext("2d");
+    this.texture = new THREE.CanvasTexture(this.canvas);
+
+    this.texture.encoding = THREE.sRGBEncoding;
+    this.texture.minFilter = THREE.LinearFilter;
+  },
+
+  remove() {
+    if (this.data.batch && this.mesh) {
+      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
+    }
+  },
+
+  currentTextureCacheKey() {
+    // We ensure a unique texture for each PDF entity, because they are drawn over during pagination.
+    return `${this.el.object3D.uuid}_${this.canvas.width}_${this.canvas.height}`;
+  },
+
+  async update(oldData) {
+    let texture;
+    let ratio = 1;
+
+    try {
+      const { src, index } = this.data;
+      if (!src) return;
+
+      if (this.renderTask) {
+        await this.renderTask.promise;
+        if (src !== this.data.src || index !== this.data.index) return;
+      }
+
+      this.el.emit("pdf-loading");
+
+      if (src !== oldData.src) {
+        const loadingSrc = this.data.src;
+        const pdf = await pdfjs.getDocument(src);
+        if (loadingSrc !== this.data.src) return;
+
+        this.pdf = pdf;
+        this.el.setAttribute("media-pager", { maxIndex: this.pdf.numPages - 1 });
+      }
+
+      const page = await this.pdf.getPage(index + 1);
+      if (src !== this.data.src || index !== this.data.index) return;
+
+      const viewport = page.getViewport({ scale: 3 });
+      const pw = viewport.width;
+      const ph = viewport.height;
+      texture = this.texture;
+      ratio = ph / pw;
+
+      this.canvas.width = pw;
+      this.canvas.height = ph;
+
+      this.renderTask = page.render({ canvasContext: this.canvasContext, viewport });
+
+      await this.renderTask.promise;
+
+      this.renderTask = null;
+
+      if (src !== this.data.src || index !== this.data.index) return;
+
+      this.currentPageTextureIsRetained = true;
+    } catch (e) {
+      console.error("Error loading PDF", this.data.src, e);
+      texture = errorTexture;
+    }
+
+    if (!this.mesh) {
+      const material = new THREE.MeshBasicMaterial();
+      const geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
+      material.side = THREE.DoubleSide;
+
+      this.mesh = new THREE.Mesh(geometry, material);
+      this.el.setObject3D("mesh", this.mesh);
+    }
+
+    this.mesh.material.transparent = texture == errorTexture;
+    this.mesh.material.map = texture;
+    this.mesh.material.map.needsUpdate = true;
+    this.mesh.material.needsUpdate = true;
+
+    scaleToAspectRatio(this.el, ratio);
+
+    if (texture !== errorTexture && this.data.batch) {
+      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.mesh);
+    }
+
+    if (this.el.components["media-pager"] && this.el.components["media-pager"].data.index !== this.data.index) {
+      this.el.setAttribute("media-pager", { index: this.data.index });
+    }
+
+    this.el.emit("pdf-loaded", { src: this.data.src });
   }
 });

@@ -15,8 +15,8 @@
   cursor: pointer;
   position: absolute;
   bottom: 0px;
-  left: 2px;
-  padding: 8px 12px;
+  right: 2px;
+  padding: 4px 8px;
   color: #aaa;
   font-size: 10px;
   -moz-user-select: none;

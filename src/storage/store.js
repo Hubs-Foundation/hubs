@@ -48,7 +48,8 @@ export const SCHEMA = {
         hasRecentered: { type: "boolean" },
         hasScaled: { type: "boolean" },
         hasHoveredInWorldHud: { type: "boolean" },
-        hasOpenedShare: { type: "boolean" }
+        hasOpenedShare: { type: "boolean" },
+        entryCount: { type: "number" }
       }
     },
 
@@ -60,7 +61,13 @@ export const SCHEMA = {
       }
     },
 
+    // Legacy
     confirmedDiscordRooms: {
+      type: "array",
+      items: { type: "string" }
+    },
+
+    confirmedBroadcastedRooms: {
       type: "array",
       items: { type: "string" }
     },
@@ -87,6 +94,30 @@ export const SCHEMA = {
           creatorAssignmentToken: { type: "string" }
         }
       }
+    },
+
+    embedTokens: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          hubId: { type: "string" },
+          embedToken: { type: "string" }
+        }
+      }
+    },
+
+    onLoadActions: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          action: { type: "string" },
+          args: { type: "object" }
+        }
+      }
     }
   },
 
@@ -97,9 +128,12 @@ export const SCHEMA = {
     credentials: { $ref: "#/definitions/credentials" },
     activity: { $ref: "#/definitions/activity" },
     settings: { $ref: "#/definitions/settings" },
-    confirmedDiscordRooms: { $ref: "#/definitions/confirmedDiscordRooms" },
+    confirmedDiscordRooms: { $ref: "#/definitions/confirmedDiscordRooms" }, // Legacy
+    confirmedBroadcastedRooms: { $ref: "#/definitions/confirmedBroadcastedRooms" },
     uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" },
-    creatorAssignmentTokens: { $ref: "#/definitions/creatorAssignmentTokens" }
+    creatorAssignmentTokens: { $ref: "#/definitions/creatorAssignmentTokens" },
+    embedTokens: { $ref: "#/definitions/embedTokens" },
+    onLoadActions: { $ref: "#/definitions/onLoadActions" }
   },
 
   additionalProperties: false
@@ -126,8 +160,11 @@ export default class Store extends EventTarget {
       credentials: {},
       profile: {},
       confirmedDiscordRooms: [],
+      confirmedBroadcastedRooms: [],
       uploadPromotionTokens: [],
-      creatorAssignmentTokens: []
+      creatorAssignmentTokens: [],
+      embedTokens: [],
+      onLoadActions: []
     });
 
     const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
@@ -172,14 +209,48 @@ export default class Store extends EventTarget {
     }
   }
 
-  resetConfirmedDiscordRooms() {
-    // merge causing us some annoyance here :(
-    const overwriteMerge = (destinationArray, sourceArray) => sourceArray;
-    this.update({ confirmedDiscordRooms: [] }, { arrayMerge: overwriteMerge });
+  resetConfirmedBroadcastedRooms() {
+    this.clearStoredArray("confirmedBroadcastedRooms");
   }
 
   resetTipActivityFlags() {
-    this.update({ activity: { hasRotated: false, hasPinned: false, hasRecentered: false, hasScaled: false } });
+    this.update({
+      activity: { hasRotated: false, hasPinned: false, hasRecentered: false, hasScaled: false, entryCount: 0 }
+    });
+  }
+
+  bumpEntryCount() {
+    const currentEntryCount = this.state.activity.entryCount || 0;
+    this.update({ activity: { entryCount: currentEntryCount + 1 } });
+  }
+
+  // Sets a one-time action to perform the next time the page loads
+  enqueueOnLoadAction(action, args) {
+    this.update({ onLoadActions: [{ action, args }] });
+  }
+
+  executeOnLoadActions(sceneEl) {
+    for (let i = 0; i < this.state.onLoadActions.length; i++) {
+      const { action, args } = this.state.onLoadActions[i];
+
+      if (action === "emit_scene_event") {
+        sceneEl.emit(args.event, args.detail);
+      }
+    }
+
+    this.clearOnLoadActions();
+  }
+
+  clearOnLoadActions() {
+    this.clearStoredArray("onLoadActions");
+  }
+
+  clearStoredArray(key) {
+    const overwriteMerge = (destinationArray, sourceArray) => sourceArray;
+    const update = {};
+    update[key] = [];
+
+    this.update(update, { arrayMerge: overwriteMerge });
   }
 
   update(newState, mergeOpts) {
@@ -195,6 +266,9 @@ export default class Store extends EventTarget {
     localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(finalState));
     delete this[STORE_STATE_CACHE_KEY];
 
+    if (newState.profile !== undefined) {
+      this.dispatchEvent(new CustomEvent("profilechanged"));
+    }
     this.dispatchEvent(new CustomEvent("statechanged"));
 
     return finalState;

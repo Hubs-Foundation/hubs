@@ -108,7 +108,6 @@ AFRAME.registerComponent("ik-controller", {
     this.isInView = true;
     this.hasConvergedHips = false;
     this.lastCameraTransform = new THREE.Matrix4();
-    this.cameraMirrorSystem = this.el.sceneEl.systems["camera-mirror"];
     this.playerCamera = document.querySelector("#player-camera").getObject3D("camera");
 
     this.el.sceneEl.systems["frame-scheduler"].schedule(this._runScheduledWork, "ik");
@@ -245,8 +244,8 @@ AFRAME.registerComponent("ik-controller", {
       this.ikRoot.el.components["player-info"].data.avatarType === AVATAR_TYPES.LEGACY
         ? LEGACY_HAND_ROTATIONS
         : HAND_ROTATIONS;
-    this.updateHand(handRotations.left, leftHand, leftController.object3D, true, this.isInView);
-    this.updateHand(handRotations.right, rightHand, rightController.object3D, false, this.isInView);
+    if (leftHand) this.updateHand(handRotations.left, leftHand, leftController.object3D, true, this.isInView);
+    if (rightHand) this.updateHand(handRotations.right, rightHand, rightController.object3D, false, this.isInView);
     this.forceIkUpdate = false;
   },
 
@@ -292,15 +291,10 @@ AFRAME.registerComponent("ik-controller", {
     };
 
     return function() {
-      // Take into account the mirror camera if it is enabled.
-      const mirrorCamera = this.cameraMirrorSystem.mirrorCamera;
-
       const camera = this.ikRoot.camera.object3D;
       camera.getWorldPosition(cameraWorld);
 
-      this.isInView =
-        isInViewOfCamera(this.playerCamera, cameraWorld) ||
-        (mirrorCamera && isInViewOfCamera(mirrorCamera, cameraWorld));
+      this.isInView = isInViewOfCamera(this.playerCamera, cameraWorld);
     };
   })()
 });

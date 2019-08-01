@@ -1,4 +1,4 @@
-import { showFullScreenIfAvailable } from "./fullscreen";
+import { willRequireUserGesture, showFullScreenIfAvailable } from "./fullscreen";
 import screenfull from "screenfull";
 
 let _isIn2DInterstitial = false;
@@ -14,7 +14,15 @@ const afterUserGesturePrompt = f => {
 
 export function handleExitTo2DInterstitial(isLower, exitAction) {
   const scene = document.querySelector("a-scene");
-  if (!scene.is("vr-mode")) return;
+  if (!scene.is("vr-mode")) {
+    if (isMobileVR && willRequireUserGesture()) {
+      afterUserGesturePrompt(() => {
+        showFullScreenIfAvailable();
+      });
+    }
+
+    return;
+  }
 
   _isIn2DInterstitial = true;
   _exitAction = exitAction;
@@ -22,7 +30,9 @@ export function handleExitTo2DInterstitial(isLower, exitAction) {
   if (isMobileVR) {
     // Immersive browser, exit VR.
     scene.exitVR().then(() => {
-      afterUserGesturePrompt(() => showFullScreenIfAvailable());
+      afterUserGesturePrompt(() => {
+        showFullScreenIfAvailable();
+      });
     });
   } else {
     // Non-immersive browser, show notice
@@ -34,19 +44,26 @@ export function handleExitTo2DInterstitial(isLower, exitAction) {
   }
 }
 
-export function handleReEntryToVRFrom2DInterstitial() {
-  if (!_isIn2DInterstitial) return;
+export function exit2DInterstitialAndEnterVR(force) {
+  if (!force && !_isIn2DInterstitial) {
+    return;
+  }
+
   _isIn2DInterstitial = false;
 
   document.querySelector(".vr-notice").object3D.visible = false;
 
-  if (isMobileVR) {
-    const scene = document.querySelector("a-scene");
+  const scene = document.querySelector("a-scene");
 
+  if (isMobileVR) {
     if (screenfull.isFullscreen) {
       screenfull.exit();
       afterUserGesturePrompt(() => scene.enterVR());
     } else {
+      scene.enterVR();
+    }
+  } else {
+    if (!scene.is("vr-mode")) {
       scene.enterVR();
     }
   }
@@ -64,5 +81,5 @@ export function forceExitFrom2DInterstitial() {
     _exitAction = null;
   }
 
-  handleReEntryToVRFrom2DInterstitial();
+  exit2DInterstitialAndEnterVR();
 }

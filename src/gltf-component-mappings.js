@@ -1,6 +1,6 @@
 import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
-import { isHubsDestinationUrl } from "./utils/media-utils";
+import { isHubsDestinationUrl } from "./utils/media-url-utils";
 const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
   TYPE = PHYSICS_CONSTANTS.TYPE,
   SHAPE = PHYSICS_CONSTANTS.SHAPE,
@@ -128,10 +128,12 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
     resize: true,
     resolve: true,
     fileIsOwned: true,
-    animate: false
+    animate: false,
+    contentSubtype: componentData.contentSubtype
   });
 
   if (componentData.pageIndex) {
+    el.setAttribute("media-pdf", { index: componentData.pageIndex });
     el.setAttribute("media-pager", { index: componentData.pageIndex });
   }
 
@@ -332,3 +334,5 @@ AFRAME.GLTFModelPlus.registerComponent("trimesh", "trimesh", el => {
     includeInvisible: true
   });
 });
+
+AFRAME.GLTFModelPlus.registerComponent("particle-emitter", "particle-emitter");

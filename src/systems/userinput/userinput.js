@@ -20,7 +20,7 @@ import { keyboardMouseUserBindings } from "./bindings/keyboard-mouse-user";
 import { touchscreenUserBindings } from "./bindings/touchscreen-user";
 import { keyboardDebuggingBindings } from "./bindings/keyboard-debugging";
 import { oculusTouchUserBindings } from "./bindings/oculus-touch-user";
-import { viveUserBindings } from "./bindings/vive-user";
+import { viveUserBindings, viveWandUserBindings } from "./bindings/vive-user";
 import { wmrUserBindings } from "./bindings/windows-mixed-reality-user";
 import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
 import { daydreamUserBindings } from "./bindings/daydream-user";
@@ -260,6 +260,9 @@ AFRAME.registerSystem("userinput", {
           const activeDevice = this.activeDevices.items[i];
           const mapping = vrGamepadMappings.get(activeDevice.constructor);
           mapping && this.registeredMappings.add(mapping);
+          if (activeDevice instanceof ViveControllerDevice && activeDevice.isViveWand) {
+            this.registeredMappings.add(viveWandUserBindings);
+          }
         }
 
         // Handle cardboard by looking of VR device caps
@@ -312,9 +315,11 @@ AFRAME.registerSystem("userinput", {
         gamepadDevice = new GearVRControllerDevice(e.gamepad);
       } else if (e.gamepad.id === "Daydream Controller") {
         gamepadDevice = new DaydreamControllerDevice(e.gamepad);
-      } else if (e.gamepad.id.toLowerCase().includes("xinput")) {
+      } else if (e.gamepad.mapping === "standard") {
+        // Our XboxController device and bindings should be generic enough for most gamepads.
         gamepadDevice = new XboxControllerDevice(e.gamepad);
       } else {
+        // This device doesn't actually have any bindings, but we need to fallback to something.
         gamepadDevice = new GamepadDevice(e.gamepad);
       }
 

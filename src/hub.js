@@ -1,3 +1,4 @@
+import "@babel/polyfill";
 import "./utils/debug-log";
 
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
@@ -29,6 +30,7 @@ import {
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
+import { authorizeOrSanitizeMessage } from "./utils/permissions-utils";
 import Cookies from "js-cookie";
 
 import "./components/scene-components";
@@ -56,6 +58,8 @@ import "./components/kick-button";
 import "./components/close-vr-notice-button";
 import "./components/leave-room-button";
 import "./components/visible-if-permitted";
+import "./components/visibility-on-content-type";
+import "./components/hide-when-pinned-and-forbidden";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
@@ -69,7 +73,6 @@ import "./components/pin-networked-object-button";
 import "./components/drop-object-button";
 import "./components/remove-networked-object-button";
 import "./components/camera-focus-button";
-import "./components/mirror-camera-button";
 import "./components/unmute-video-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/visible-to-owner";
@@ -82,6 +85,7 @@ import "./components/follow-in-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
+import "./components/tweet-media-button";
 import "./components/transform-object-button";
 import "./components/hover-menu";
 import "./components/disable-frustum-culling";
@@ -93,6 +97,7 @@ import "./components/visibility-by-path";
 import "./components/tags";
 import "./components/hubs-text";
 import "./components/billboard";
+import "./components/periodic-full-syncs";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
@@ -106,8 +111,9 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
-import { traverseMeshesAndAddShapes, proxiedUrlFor } from "./utils/media-utils";
-import { handleExitTo2DInterstitial, handleReEntryToVRFrom2DInterstitial } from "./utils/vr-interstitial";
+import { proxiedUrlFor } from "./utils/media-url-utils";
+import { traverseMeshesAndAddShapes } from "./utils/physics-utils";
+import { handleExitTo2DInterstitial, exit2DInterstitialAndEnterVR } from "./utils/vr-interstitial";
 import { getAvatarSrc } from "./utils/avatar-utils.js";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
@@ -122,7 +128,6 @@ import "./systems/permissions";
 import "./systems/exit-on-blur";
 import "./systems/camera-tools";
 import "./systems/userinput/userinput";
-import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
 import "./systems/ui-hotkeys";
 import "./systems/tips";
@@ -144,10 +149,16 @@ window.APP.RENDER_ORDER = {
 const store = window.APP.store;
 const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
+const NOISY_OCCUPANT_COUNT = 12; // Above this # of occupants, we stop posting join/leaves/renames
 
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
+const isEmbed = window.self !== window.top;
+if (isEmbed && !qs.get("embed_token")) {
+  // Should be covered by X-Frame-Options, but just in case.
+  throw new Error("no embed token");
+}
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
@@ -163,6 +174,9 @@ window.Ammo = Ammo.bind(undefined, {
   }
 });
 require("aframe-physics-system");
+
+import "./systems/post-physics";
+
 import "./components/owned-object-limiter";
 import "./components/set-unowned-body-kinematic";
 import "./components/scalable-when-grabbed";
@@ -189,6 +203,7 @@ import qsTruthy from "./utils/qs_truthy";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
+NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
 
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
@@ -245,12 +260,14 @@ if (document.location.pathname.includes("hub.html")) {
 const history = createBrowserHistory({ basename: routerBaseName });
 window.APP.history = history;
 
+const qsVREntryType = qs.get("vr_entry_type");
+
 function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
-  const forcedVREntryType = qs.get("vr_entry_type");
   const isCursorHoldingPen = scene && scene.systems.userinput.activeSets.includes(userinputSets.cursorHoldingPen);
   const hasActiveCamera = scene && !!scene.systems["camera-tools"].getMyCamera();
+  const forcedVREntryType = qsVREntryType;
 
   ReactDOM.render(
     <Router history={history}>
@@ -286,6 +303,7 @@ async function updateUIForHub(hub) {
   remountUI({
     hubId: hub.hub_id,
     hubName: hub.name,
+    hubMemberPermissions: hub.member_permissions,
     hubScene: hub.scene,
     hubEntryCode: hub.entry_code
   });
@@ -336,6 +354,9 @@ async function updateEnvironmentForHub(hub) {
     environmentEl.addEventListener(
       "model-loaded",
       () => {
+        // Show the canvas once the model has loaded
+        document.querySelector(".a-canvas").classList.remove("a-hidden");
+
         //TODO: check if the environment was made with spoke to determine if a shape should be added
         traverseMeshesAndAddShapes(environmentEl);
       },
@@ -373,7 +394,7 @@ async function updateEnvironmentForHub(hub) {
   }
 }
 
-async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
+function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
   const isRejoin = NAF.connection.isConnected();
 
@@ -390,27 +411,33 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     return;
   }
 
+  // Turn off NAF for embeds as an optimization, so the user's browser isn't getting slammed
+  // with NAF traffic on load.
+  if (isEmbed) {
+    hubChannel.allowNAFTraffic(false);
+  }
+
   const hub = data.hubs[0];
+
+  let embedToken = hub.embed_token;
+
+  if (!embedToken) {
+    const embedTokenEntry = store.state.embedTokens && store.state.embedTokens.find(t => t.hubId === hub.hub_id);
+
+    if (embedTokenEntry) {
+      embedToken = embedTokenEntry.embedToken;
+    }
+  }
 
   console.log(`Janus host: ${hub.host}`);
 
-  const objectsScene = document.querySelector("#objects-scene");
-  const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
-  const objectsEl = document.createElement("a-entity");
-  objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
-
-  if (!isBotMode) {
-    objectsScene.appendChild(objectsEl);
-  }
-
-  updateEnvironmentForHub(hub);
-  updateUIForHub(hub);
-
   remountUI({
     onSendMessage: messageDispatch.dispatch,
+    onLoaded: () => store.executeOnLoadActions(scene),
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
-    onAvatarSaved: entry => scene.emit("action_avatar_saved", entry)
+    onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
+    embedToken: embedToken
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
@@ -419,10 +446,6 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     if (!hubChannel.can("update_hub")) return;
 
     hubChannel.updateScene(entry.url);
-  });
-
-  scene.addEventListener("scene_media_selected", e => {
-    hubChannel.updateScene(e.detail);
   });
 
   // Handle request for user gesture
@@ -435,6 +458,15 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
       }
     });
   });
+
+  const objectsScene = document.querySelector("#objects-scene");
+  const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
+  const objectsEl = document.createElement("a-entity");
+  objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
+
+  if (!isBotMode) {
+    objectsScene.appendChild(objectsEl);
+  }
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   const connectToScene = async () => {
@@ -496,18 +528,36 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
       adapter.unreliableTransport = sendViaPhoenix(false);
     });
 
-    scene.components["networked-scene"]
-      .connect()
-      .then(() => scene.emit("didConnectToNetworkedScene"))
-      .catch(connectError => {
-        // hacky until we get return codes
-        const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
-        console.error(connectError);
-        remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
-        entryManager.exitScene();
+    const loadEnvironmentAndConnect = () => {
+      updateEnvironmentForHub(hub);
 
-        return;
+      scene.components["networked-scene"]
+        .connect()
+        .then(() => scene.emit("didConnectToNetworkedScene"))
+        .catch(connectError => {
+          // hacky until we get return codes
+          const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+          console.error(connectError);
+          remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
+          entryManager.exitScene();
+
+          return;
+        });
+    };
+
+    updateUIForHub(hub);
+
+    if (!isEmbed) {
+      loadEnvironmentAndConnect();
+    } else {
+      remountUI({
+        onPreloadLoadClicked: () => {
+          hubChannel.allowNAFTraffic(true);
+          remountUI({ showPreload: false });
+          loadEnvironmentAndConnect();
+        }
       });
+    }
   };
 
   if (!isBotMode) {
@@ -529,7 +579,15 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const canvas = document.querySelector(".a-canvas");
+  canvas.classList.add("a-hidden");
+
   warmSerializeElement();
+
+  if (!window.WebAssembly) {
+    remountUI({ showWebAssemblyDialog: true });
+    return;
+  }
 
   // If we are on iOS but we don't have the mediaDevices API, then we are likely in a Firefox or Chrome WebView,
   // or a WebView preview used in apps like Twitter and Discord. So we show the dialog that tells users to open
@@ -628,7 +686,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         if (actionError && onFailure) onFailure(actionError);
-        handleReEntryToVRFrom2DInterstitial();
+        exit2DInterstitialAndEnterVR();
       }
     });
   };
@@ -641,7 +699,65 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   });
 
-  remountUI({ performConditionalSignIn });
+  scene.addEventListener("scene_media_selected", e => {
+    const sceneInfo = e.detail;
+
+    performConditionalSignIn(
+      () => hubChannel.can("update_hub"),
+      () => hubChannel.updateScene(sceneInfo),
+      "change-scene"
+    );
+  });
+
+  scene.addEventListener("action_media_tweet", e => {
+    let isInModal = false;
+    let isInOAuth = false;
+
+    const exitOAuth = () => {
+      isInOAuth = false;
+      store.clearOnLoadActions();
+      remountUI({ showOAuthDialog: false, oauthInfo: null });
+    };
+
+    handleExitTo2DInterstitial(true, () => {
+      if (isInModal) history.goBack();
+      if (isInOAuth) exitOAuth();
+    });
+
+    performConditionalSignIn(
+      () => hubChannel.signedIn,
+      async () => {
+        // Strip el from stored payload because it won't serialize into the store.
+        const serializableDetail = {};
+        Object.assign(serializableDetail, e.detail);
+        delete serializableDetail.el;
+
+        if (hubChannel.can("tweet")) {
+          isInModal = true;
+          pushHistoryState(history, "modal", "tweet", serializableDetail);
+        } else {
+          if (e.detail.el) {
+            // Pin the object if we have to go through OAuth, since the page will refresh and
+            // the object will otherwise be removed
+            e.detail.el.setAttribute("pinnable", "pinned", true);
+          }
+
+          const url = await hubChannel.getTwitterOAuthURL();
+
+          isInOAuth = true;
+          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: serializableDetail });
+          remountUI({
+            showOAuthDialog: true,
+            oauthInfo: [{ type: "twitter", url: url }],
+            onCloseOAuthDialog: () => exitOAuth()
+          });
+        }
+      },
+      "tweet"
+    );
+  });
+
+  remountUI({ performConditionalSignIn, embed: isEmbed, showPreload: isEmbed });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();
 
@@ -649,6 +765,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.APP.scene = scene;
   window.APP.hubChannel = hubChannel;
+  window.dispatchEvent(new CustomEvent("hub_channel_ready"));
 
   const handleEarlyVRMode = () => {
     // If VR headset is activated, refreshing page will fire vrdisplayactivate
@@ -710,10 +827,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     // HACK: Oculus browser pauses videos when exiting VR mode, so we need to resume them after a timeout.
     if (/OculusBrowser/i.test(window.navigator.userAgent)) {
       document.querySelectorAll("[media-video]").forEach(m => {
-        const video = m.components["media-video"].video;
+        const videoComponent = m.components["media-video"];
 
-        if (!video.paused) {
-          setTimeout(() => video.play(), 1000);
+        if (videoComponent) {
+          videoComponent._ignorePauseStateChanges = true;
+
+          setTimeout(() => {
+            const video = videoComponent.video;
+
+            if (video && video.paused && !videoComponent.data.videoPaused) {
+              video.play();
+            }
+
+            videoComponent._ignorePauseStateChanges = false;
+          }, 1000);
         }
       });
     }
@@ -762,6 +889,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     entryManager.exitScene("closed");
     remountUI({ roomUnavailableReason: "closed" });
   });
+
+  scene.addEventListener("action_camera_recording_started", () => hubChannel.beginRecording());
+  scene.addEventListener("action_camera_recording_ended", () => hubChannel.endRecording());
 
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
@@ -812,7 +942,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no ||
       availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no;
 
-    remountUI({ availableVREntryTypes, forcedVREntryType: !hasVREntryDevice ? "2d" : null });
+    remountUI({ availableVREntryTypes, forcedVREntryType: qsVREntryType || (!hasVREntryDevice ? "2d" : null) });
   }
 
   const environmentScene = document.querySelector("#environment-scene");
@@ -848,11 +978,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const socket = await connectToReticulum(isDebug);
 
   socket.onClose(e => {
-    // The socket should close normally if the server has explicitly killed it.
+    // We don't currently have an easy way to distinguish between being kicked (server closes socket)
+    // and a variety of other network issues that seem to produce the 1000 closure code, but the
+    // latter are probably more common. Either way, we just tell the user they got disconnected.
     const NORMAL_CLOSURE = 1000;
     if (e.code === NORMAL_CLOSURE) {
       entryManager.exitScene();
-      remountUI({ roomUnavailableReason: "kicked" });
+      remountUI({ roomUnavailableReason: "disconnected" });
     }
   });
 
@@ -885,7 +1017,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       perms_token: null,
       context: {
         mobile: isMobile || isMobileVR,
-        hmd: availableVREntryTypes.isInHMD
+        hmd: availableVREntryTypes.isInHMD,
+        embed: isEmbed
       }
     };
 
@@ -980,6 +1113,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let isInitialJoin = true;
 
+  // We need to be able to wait for initial presence syncs across reconnects and socket migrations,
+  // so we create this object in the outer scope and assign it a new promise on channel join.
+  const presenceSync = {
+    promise: null,
+    resolve: null
+  };
+
   hubChannel.setPhoenixChannel(hubPhxChannel);
 
   hubPhxChannel
@@ -990,8 +1130,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
+      presenceSync.promise = new Promise(resolve => {
+        presenceSync.resolve = resolve;
+      });
+
       if (isInitialJoin) {
-        store.addEventListener("statechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
+        store.addEventListener("profilechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
+
         hubChannel.presence.onSync(() => {
           const presence = hubChannel.presence;
 
@@ -1011,7 +1156,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           // HACK - Set a flag on the presence object indicating if the initial sync has completed,
           // which is used to determine if we should fire join/leave messages into the presence log.
+          // This flag is required since we reuse these onJoin and onLeave handler functions on
+          // socket migrations.
           presence.__hadInitialSync = true;
+
+          presenceSync.resolve();
 
           presence.onJoin((sessionId, current, info) => {
             // Ignore presence join/leaves if this Presence has not yet had its initial sync (o/w the user
@@ -1019,46 +1168,60 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (!hubChannel.presence.__hadInitialSync) return;
 
             const meta = info.metas[info.metas.length - 1];
+            const occupantCount = Object.entries(hubChannel.presence.state).length;
 
-            if (current) {
-              // Change to existing presence
-              const isSelf = sessionId === socket.params().session_id;
-              const currentMeta = current.metas[0];
+            if (occupantCount <= NOISY_OCCUPANT_COUNT) {
+              if (current) {
+                // Change to existing presence
+                const isSelf = sessionId === socket.params().session_id;
+                const currentMeta = current.metas[0];
 
-              if (
-                !isSelf &&
-                currentMeta.presence !== meta.presence &&
-                meta.presence === "room" &&
-                meta.profile.displayName
-              ) {
-                addToPresenceLog({
-                  type: "entered",
-                  presence: meta.presence,
-                  name: meta.profile.displayName
-                });
-              }
+                if (
+                  !isSelf &&
+                  currentMeta.presence !== meta.presence &&
+                  meta.presence === "room" &&
+                  meta.profile.displayName
+                ) {
+                  addToPresenceLog({
+                    type: "entered",
+                    presence: meta.presence,
+                    name: meta.profile.displayName
+                  });
+                }
 
-              if (currentMeta.profile && meta.profile && currentMeta.profile.displayName !== meta.profile.displayName) {
-                addToPresenceLog({
-                  type: "display_name_changed",
-                  oldName: currentMeta.profile.displayName,
-                  newName: meta.profile.displayName
-                });
-              }
-            } else if (info.metas.length === 1) {
-              // New presence
-              const meta = info.metas[0];
+                if (
+                  currentMeta.profile &&
+                  meta.profile &&
+                  currentMeta.profile.displayName !== meta.profile.displayName
+                ) {
+                  addToPresenceLog({
+                    type: "display_name_changed",
+                    oldName: currentMeta.profile.displayName,
+                    newName: meta.profile.displayName
+                  });
+                }
+              } else if (info.metas.length === 1) {
+                // New presence
+                const meta = info.metas[0];
 
-              if (meta.presence && meta.profile.displayName) {
-                addToPresenceLog({
-                  type: "join",
-                  presence: meta.presence,
-                  name: meta.profile.displayName
-                });
+                if (meta.presence && meta.profile.displayName) {
+                  addToPresenceLog({
+                    type: "join",
+                    presence: meta.presence,
+                    name: meta.profile.displayName
+                  });
+                }
               }
             }
 
-            scene.emit("presence_updated", { sessionId, profile: meta.profile, roles: meta.roles });
+            scene.emit("presence_updated", {
+              sessionId,
+              profile: meta.profile,
+              roles: meta.roles,
+              permissions: meta.permissions,
+              streaming: meta.streaming,
+              recording: meta.recording
+            });
           });
 
           presence.onLeave((sessionId, current, info) => {
@@ -1066,6 +1229,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (!hubChannel.presence.__hadInitialSync) return;
 
             if (current && current.metas.length > 0) return;
+            const occupantCount = Object.entries(hubChannel.presence.state).length;
+            if (occupantCount > NOISY_OCCUPANT_COUNT) return;
 
             const meta = info.metas[0];
 
@@ -1095,10 +1260,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       remountUI({
         hubIsBound: data.hub_requires_oauth,
+        initialIsFavorited: data.subscriptions.favorites,
         initialIsSubscribed: subscriptions.isSubscribed()
       });
 
-      await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
+      await presenceSync.promise;
+
+      handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
     })
     .receive("error", res => {
       if (res.reason === "closed") {
@@ -1117,7 +1285,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hubPhxChannel.on("naf", data => {
     if (!NAF.connection.adapter) return;
-    NAF.connection.adapter.onData(data, PHOENIX_RELIABLE_NAF);
+
+    NAF.connection.adapter.onData(authorizeOrSanitizeMessage(data), PHOENIX_RELIABLE_NAF);
   });
 
   hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
@@ -1160,6 +1329,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
+    if (stale_fields.includes("member_permissions")) {
+      hubChannel.fetchPermissions();
+    }
+
     if (stale_fields.includes("name")) {
       const titleParts = document.title.split(" | "); // Assumes title has | trailing site name
       titleParts[0] = hub.name;
@@ -1184,6 +1357,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       scene.emit("hub_closed");
     }
   });
+
+  hubPhxChannel.on("permissions_updated", () => hubChannel.fetchPermissions());
 
   hubPhxChannel.on("mute", ({ session_id }) => {
     if (session_id === NAF.clientId && !scene.is("muted")) {

@@ -1,5 +1,5 @@
 import { fetchReticulumAuthenticated } from "./phoenix-utils";
-import { proxiedUrlFor } from "./media-utils";
+import { proxiedUrlFor } from "./media-url-utils";
 import { avatars } from "../assets/avatars/avatars";
 
 export const AVATAR_TYPES = {

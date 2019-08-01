@@ -106,8 +106,14 @@ AFRAME.registerComponent("super-spawner", {
       return;
     }
 
-    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve, false)
-      .entity;
+    const entity = addMedia(
+      this.data.src,
+      this.data.template,
+      ObjectContentOrigins.SPAWNER,
+      null,
+      this.data.resolve,
+      false
+    ).entity;
 
     const cursor = document.querySelector("#cursor");
     cursor.object3D.getWorldPosition(entity.object3D.position);
@@ -120,8 +126,7 @@ AFRAME.registerComponent("super-spawner", {
 
     const userinput = AFRAME.scenes[0].systems.userinput;
     const interaction = AFRAME.scenes[0].systems.interaction;
-    const willAnimateFromCursor =
-      this.data.animateFromCursor && userinput.get(paths.actions.rightHand.matrix) && !AFRAME.utils.device.isMobileVR();
+    const willAnimateFromCursor = this.data.animateFromCursor && userinput.get(paths.actions.rightHand.matrix);
     if (!willAnimateFromCursor) {
       interaction.state.rightRemote.held = entity;
       interaction.state.rightRemote.spawning = true;

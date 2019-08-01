@@ -6,32 +6,53 @@ import StateLink from "./state-link.js";
 import { resetTips } from "../systems/tips";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
+import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faDoorClosed } from "@fortawesome/free-solid-svg-icons/faDoorClosed";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
+import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
 import { showFullScreenIfAvailable } from "../utils/fullscreen";
+import LeaveRoomDialog from "./leave-room-dialog.js";
 
 import styles from "../assets/stylesheets/settings-menu.scss";
+import rootStyles from "../assets/stylesheets/ui-root.scss";
 
 export default class SettingsMenu extends Component {
   static propTypes = {
     history: PropTypes.object,
-    hideSettings: PropTypes.func,
+    isStreaming: PropTypes.bool,
+    toggleStreamerMode: PropTypes.func,
     mediaSearchStore: PropTypes.object,
+    scene: PropTypes.object,
     hubScene: PropTypes.object,
     hubChannel: PropTypes.object,
     performConditionalSignIn: PropTypes.func,
+    showNonHistoriedDialog: PropTypes.func,
     pushHistoryState: PropTypes.func
   };
 
-  render() {
+  state = {
+    expanded: false
+  };
+
+  componentDidMount() {
+    document.querySelector(".a-canvas").addEventListener("mouseup", () => {
+      if (this.state.expanded) {
+        this.setState({ expanded: false });
+      }
+    });
+  }
+
+  renderExpandedMenu() {
     const rowClasses = classNames([styles.row, styles.settingsRow]);
     const rowHeader = classNames([styles.row, styles.settingsRow, styles.rowHeader]);
     const showRoomSettings = !!this.props.hubChannel.canOrWillIfCreator("update_hub");
     const showCloseRoom = !!this.props.hubChannel.canOrWillIfCreator("close_hub");
     const showRoomInfo = !!this.props.hubScene;
     const showRoomSection = showRoomSettings || showRoomInfo || showCloseRoom;
+    const showStreamerMode = this.props.scene.is("entered") && !!this.props.hubChannel.canOrWillIfCreator("kick_users");
 
     // Draw self first
     return (
@@ -51,10 +72,34 @@ export default class SettingsMenu extends Component {
                   stateKey="overlay"
                   stateValue="profile"
                   history={this.props.history}
-                  onClick={this.props.hideSettings}
+                  onClick={() => this.setState({ expanded: false })}
                 >
                   <FormattedMessage id="settings.change-avatar" />
                 </StateLink>
+              </div>
+            </div>
+            <div className={rowClasses}>
+              <div className={styles.icon}>
+                <i>
+                  <FontAwesomeIcon icon={faStar} />
+                </i>
+              </div>
+              <div className={styles.listItem}>
+                <div
+                  className={styles.listItemLink}
+                  onClick={() => {
+                    this.props.performConditionalSignIn(
+                      () => this.props.hubChannel.signedIn,
+                      () => {
+                        showFullScreenIfAvailable();
+                        this.props.mediaSearchStore.sourceNavigateWithNoNav("favorites");
+                      },
+                      "favorite-rooms"
+                    );
+                  }}
+                >
+                  <FormattedMessage id="settings.favorites" />
+                </div>
               </div>
             </div>
             {showRoomSection && (
@@ -78,7 +123,7 @@ export default class SettingsMenu extends Component {
                         () => {
                           showFullScreenIfAvailable();
                           this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
-                          this.props.hideSettings();
+                          this.setState({ expanded: false });
                         },
                         "change-scene"
                       );
@@ -105,14 +150,14 @@ export default class SettingsMenu extends Component {
                       this.props.performConditionalSignIn(
                         () => this.props.hubChannel.can("update_hub"),
                         () => {
-                          this.props.pushHistoryState("modal", "rename_room");
-                          this.props.hideSettings();
+                          this.props.pushHistoryState("modal", "room_settings");
+                          this.setState({ expanded: false });
                         },
-                        "rename-room"
+                        "room-settings"
                       );
                     }}
                   >
-                    <FormattedMessage id="settings.rename-room" />
+                    <FormattedMessage id="settings.room-settings" />
                   </a>
                 </div>
               </div>
@@ -134,7 +179,7 @@ export default class SettingsMenu extends Component {
                         () => this.props.hubChannel.can("update_hub"),
                         () => {
                           this.props.pushHistoryState("modal", "close_room");
-                          this.props.hideSettings();
+                          this.setState({ expanded: false });
                         },
                         "close-room"
                       );
@@ -157,7 +202,7 @@ export default class SettingsMenu extends Component {
                     stateKey="modal"
                     stateValue="room_info"
                     history={this.props.history}
-                    onClick={this.props.hideSettings}
+                    onClick={() => this.setState({ expanded: false })}
                   >
                     <FormattedMessage id="settings.room-info" />
                   </StateLink>
@@ -171,11 +216,50 @@ export default class SettingsMenu extends Component {
                 </i>
               </div>
               <div className={styles.listItem}>
-                <a href="/" onClick={this.props.hideSettings}>
+                <a
+                  href="#"
+                  onClick={e => {
+                    e.preventDefault();
+                    this.props.showNonHistoriedDialog(LeaveRoomDialog, {
+                      destinationUrl: "/",
+                      messageType: "create-room"
+                    });
+                    this.setState({ expanded: false });
+                  }}
+                >
                   <FormattedMessage id="settings.create-room" />
                 </a>
               </div>
             </div>
+            {showStreamerMode ? (
+              <div className={rowHeader}>
+                <FormattedMessage id="settings.row-tools" />
+              </div>
+            ) : (
+              <div />
+            )}
+            {showStreamerMode ? (
+              <div className={rowClasses}>
+                <div className={styles.icon}>
+                  <i>
+                    <FontAwesomeIcon icon={faVideo} />
+                  </i>
+                </div>
+                <div className={styles.listItem}>
+                  <div
+                    className={styles.listItemLink}
+                    onClick={() => {
+                      this.props.toggleStreamerMode(true);
+                      this.setState({ expanded: false });
+                    }}
+                  >
+                    <FormattedMessage id="settings.enable-streamer-mode" />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div />
+            )}
             <div className={classNames([styles.bottomLinksMain])}>
               <a href="/whats-new" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.whats-new" />
@@ -184,7 +268,7 @@ export default class SettingsMenu extends Component {
                 onClick={e => {
                   e.preventDefault();
                   resetTips();
-                  this.props.hideSettings();
+                  this.setState({ expanded: false });
                 }}
               >
                 <FormattedMessage id="settings.tips" />
@@ -200,9 +284,14 @@ export default class SettingsMenu extends Component {
               <a href="https://discord.gg/wHmY4nd" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.community" />
               </a>
-              <a target="_blank" href="https://forms.gle/1g4H5Ayd1mGWqWpV7" rel="noopener noreferrer">
+              <button
+                onClick={e => {
+                  e.preventDefault();
+                  this.props.pushHistoryState("modal", "feedback");
+                }}
+              >
                 <FormattedMessage id="settings.send-feedback" />
-              </a>
+              </button>
               <a className={styles.bottomLink} href="/?report" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.report" />
               </a>
@@ -225,6 +314,22 @@ export default class SettingsMenu extends Component {
             </div>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        <FontAwesomeIcon
+          icon={faBars}
+          onClick={() => this.setState({ expanded: !this.state.expanded })}
+          className={classNames({
+            [rootStyles.cornerButton]: true,
+            [rootStyles.cornerButtonSelected]: this.state.expanded
+          })}
+        />
+        {this.state.expanded && this.renderExpandedMenu()}
       </div>
     );
   }

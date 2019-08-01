@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
-import { proxiedUrlFor } from "../utils/media-utils";
+import { proxiedUrlFor } from "../utils/media-url-utils";
 
 function spawnImage(url) {
   document.querySelector("a-scene").emit("add_media", url);

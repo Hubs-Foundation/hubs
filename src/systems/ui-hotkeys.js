@@ -40,7 +40,7 @@ AFRAME.registerSystem("ui-hotkeys", {
     }
 
     for (let i = 0; i < MEDIA_SEARCH_PATHS.length; i++) {
-      if (this.userinput.get(MEDIA_SEARCH_PATHS[i])) {
+      if (this.userinput.get(MEDIA_SEARCH_PATHS[i]) && window.APP.hubChannel.can("spawn_and_move_media")) {
         this.mediaSearchStore.sourceNavigate(SOURCES[i]);
       }
     }

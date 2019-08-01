@@ -1,6 +1,6 @@
 import { SOUND_SPAWN_PEN } from "../systems/sound-effects-system";
 /**
- * HUD panel for muting, freezing, and space bubble controls.
+ * HUD panel for muting, freezing, and other controls that don't necessarily have hardware buttons.
  * @namespace ui
  * @component in-world-hud
  */
@@ -12,17 +12,16 @@ AFRAME.registerComponent("in-world-hud", {
     this.cameraBtn = this.el.querySelector(".camera-btn");
     this.inviteBtn = this.el.querySelector(".invite-btn");
     this.background = this.el.querySelector(".bg");
-    const renderOrder = window.APP.RENDER_ORDER;
-    this.mic.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
-    this.spawn.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
-    this.pen.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
-    this.cameraBtn.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
-    this.background.object3DMap.mesh.renderOrder = renderOrder.HUD_BACKGROUND;
 
     this.updateButtonStates = () => {
-      this.mic.setAttribute("icon-button", "active", this.el.sceneEl.is("muted"));
+      this.mic.setAttribute("mic-button", "active", this.el.sceneEl.is("muted"));
       this.pen.setAttribute("icon-button", "active", this.el.sceneEl.is("pen"));
       this.cameraBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("camera"));
+      if (window.APP.hubChannel) {
+        this.spawn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_and_move_media"));
+        this.pen.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_drawing"));
+        this.cameraBtn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_camera"));
+      }
     };
     this.updateButtonStates();
 
@@ -37,15 +36,18 @@ AFRAME.registerComponent("in-world-hud", {
     };
 
     this.onSpawnClick = () => {
+      if (!window.APP.hubChannel.can("spawn_and_move_media")) return;
       this.el.emit("action_spawn");
     };
 
     this.onPenClick = () => {
+      if (!window.APP.hubChannel.can("spawn_drawing")) return;
       this.el.emit("spawn_pen");
       this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPAWN_PEN);
     };
 
     this.onCameraClick = () => {
+      if (!window.APP.hubChannel.can("spawn_camera")) return;
       this.el.emit("action_toggle_camera");
     };
 
@@ -57,6 +59,7 @@ AFRAME.registerComponent("in-world-hud", {
   play() {
     this.el.sceneEl.addEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.addEventListener("stateremoved", this.onStateChange);
+    this.el.sceneEl.systems.permissions.onPermissionsUpdated(this.updateButtonStates);
 
     this.mic.object3D.addEventListener("interact", this.onMicClick);
     this.spawn.object3D.addEventListener("interact", this.onSpawnClick);
@@ -68,6 +71,7 @@ AFRAME.registerComponent("in-world-hud", {
   pause() {
     this.el.sceneEl.removeEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateChange);
+    window.APP.hubChannel.removeEventListener("permissions_updated", this.updateButtonStates);
 
     this.mic.object3D.removeEventListener("interact", this.onMicClick);
     this.spawn.object3D.removeEventListener("interact", this.onSpawnClick);

@@ -103,7 +103,9 @@ export default class AvatarEditor extends Component {
       });
     }
 
-    this.inputFiles.thumbnail = new File([await this.preview.snapshot()], "thumbnail.png", { type: "image/png" });
+    this.inputFiles.thumbnail = new File([await this.preview.getWrappedInstance().snapshot()], "thumbnail.png", {
+      type: "image/png"
+    });
 
     const filesToUpload = ["gltf", "bin", "base_map", "emissive_map", "normal_map", "orm_map", "thumbnail"].filter(
       k => this.inputFiles[k] === null || this.inputFiles[k] instanceof File
@@ -270,7 +272,7 @@ export default class AvatarEditor extends Component {
           </a>
         )}
         {this.props.signedIn ? (
-          <div className="center">
+          <form onSubmit={this.uploadAvatar} className="center">
             <div className="split">
               <div className="form-body">
                 {debug && this.textField("avatar_id", "Avatar ID", true)}
@@ -335,6 +337,11 @@ export default class AvatarEditor extends Component {
             </div>
             <div className="info">
               <p>
+                <a target="_blank" rel="noopener noreferrer" href="https://tryquilt.io/">
+                  <FormattedMessage id="avatar-editor.quilt-link" />
+                </a>
+              </p>
+              <p>
                 <FormattedMessage id="avatar-editor.info" />
                 <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
                   <FormattedMessage id="avatar-editor.info-link" />
@@ -344,7 +351,6 @@ export default class AvatarEditor extends Component {
             <div>
               <input
                 disabled={this.state.uploading}
-                onClick={this.uploadAvatar}
                 className="form-submit"
                 type="submit"
                 value={this.state.uploading ? "Uploading..." : "Save"}
@@ -362,7 +368,7 @@ export default class AvatarEditor extends Component {
                 )}
               </div>
             )}
-          </div>
+          </form>
         ) : (
           <a onClick={this.props.onSignIn}>
             <FormattedMessage id="sign-in.in" />

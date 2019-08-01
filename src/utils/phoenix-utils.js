@@ -58,8 +58,10 @@ export async function connectToReticulum(debug = false, params = null) {
     let socketPort = qs.get("phx_port");
 
     const reticulumMeta = await getReticulumMeta();
-    socketHost = socketHost || reticulumMeta.phx_host;
-    socketPort = socketPort || (process.env.RETICULUM_SERVER.includes("hubs.local") ? "4000" : "443"); // TODO phx_port
+    socketHost = socketHost || process.env.RETICULUM_SOCKET_SERVER || reticulumMeta.phx_host;
+    socketPort =
+      socketPort ||
+      (process.env.RETICULUM_SERVER ? new URL(`${socketProtocol}//${process.env.RETICULUM_SERVER}`).port : "443");
     return `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}`;
   };
 
@@ -165,6 +167,14 @@ export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace
   const creatorAssignmentToken = hub.creator_assignment_token;
   if (creatorAssignmentToken) {
     store.update({ creatorAssignmentTokens: [{ hubId: hub.hub_id, creatorAssignmentToken: creatorAssignmentToken }] });
+
+    // Don't need to store the embed token if there's no creator assignment token, since that means
+    // we are the owner and will get the embed token on page load.
+    const embedToken = hub.embed_token;
+
+    if (embedToken) {
+      store.update({ embedTokens: [{ hubId: hub.hub_id, embedToken: embedToken }] });
+    }
   }
 
   if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
@@ -178,10 +188,18 @@ export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace
   }
 }
 
-export function getPresenceProfileForSession(presences, sessionId) {
+export function getPresenceEntryForSession(presences, sessionId) {
   const entry = Object.entries(presences || {}).find(([k]) => k === sessionId) || [];
   const presence = entry[1];
-  return (presence && presence.metas && presence.metas[0].profile) || {};
+  return (presence && presence.metas && presence.metas[0]) || {};
+}
+
+export function getPresenceContextForSession(presences, sessionId) {
+  return (getPresenceEntryForSession(presences, sessionId) || {}).context || {};
+}
+
+export function getPresenceProfileForSession(presences, sessionId) {
+  return (getPresenceEntryForSession(presences, sessionId) || {}).profile || {};
 }
 
 // Takes the given channel, and creates a new channel with the same bindings
@@ -217,4 +235,16 @@ export function migrateChannelToSocket(oldChannel, socket, params) {
       resolve(channel);
     });
   });
+}
+
+export function discordBridgesForPresences(presences) {
+  const channels = [];
+  for (const p of Object.values(presences)) {
+    for (const m of p.metas) {
+      if (m.profile && m.profile.discordBridges) {
+        Array.prototype.push.apply(channels, m.profile.discordBridges.map(b => b.channel.name));
+      }
+    }
+  }
+  return channels;
 }

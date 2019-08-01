@@ -1,6 +1,10 @@
+import { forEachMaterial } from "../utils/material-utils";
+import { showHoverEffect } from "../utils/permissions-utils";
+
 const interactorOneTransform = [];
 const interactorTwoTransform = [];
 
+export const validMaterials = ["MeshStandardMaterial", "MeshBasicMaterial", "MobileStandardMaterial"];
 /**
  * Applies effects to a hoverable based on hover state.
  * @namespace interactables
@@ -8,7 +12,6 @@ const interactorTwoTransform = [];
  */
 AFRAME.registerComponent("hoverable-visuals", {
   schema: {
-    cursorController: { type: "selector" },
     enableSweepingEffect: { type: "boolean", default: true }
   },
   init() {
@@ -21,24 +24,39 @@ AFRAME.registerComponent("hoverable-visuals", {
   remove() {
     this.uniforms = null;
     this.boundingBox = null;
+
+    // Used when the object is batched
+    const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
+    this.el.object3D.traverse(object => {
+      if (!object.material) return;
+      forEachMaterial(object, material => {
+        if (
+          !validMaterials.includes(material.type) ||
+          object.el.classList.contains("ui") ||
+          object.el.classList.contains("hud") ||
+          object.el.getAttribute("text-button")
+        )
+          return;
+
+        batchManagerSystem.meshToEl.delete(object);
+      });
+    });
   },
   tick(time) {
     if (!this.uniforms || !this.uniforms.length) return;
 
-    const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
-    const isSpawner = !!this.el.components["super-spawner"];
     const isFrozen = this.el.sceneEl.is("frozen");
-    const hideDueToPinning = !isSpawner && isPinned && !isFrozen;
+    const showEffect = showHoverEffect(this.el);
 
     let interactorOne, interactorTwo;
     const interaction = AFRAME.scenes[0].systems.interaction;
-    if (interaction.state.leftHand.hovered === this.el || interaction.state.leftHand.held === this.el) {
+    if (interaction.state.leftHand.hovered === this.el && !interaction.state.leftHand.held) {
       interactorOne = interaction.options.leftHand.entity.object3D;
     }
-    if (interaction.state.rightRemote.hovered === this.el || interaction.state.rightRemote.held === this.el) {
+    if (interaction.state.rightRemote.hovered === this.el && !interaction.state.rightRemote.held) {
       interactorTwo = interaction.options.rightRemote.entity.object3D;
     }
-    if (interaction.state.rightHand.hovered === this.el || interaction.state.rightHand.held === this.el) {
+    if (interaction.state.rightHand.hovered === this.el && !interaction.state.rightHand.held) {
       interactorTwo = interaction.options.rightHand.entity.object3D;
     }
 
@@ -58,16 +76,16 @@ AFRAME.registerComponent("hoverable-visuals", {
 
     for (let i = 0, l = this.uniforms.length; i < l; i++) {
       const uniform = this.uniforms[i];
-      uniform.hubs_EnableSweepingEffect.value = this.data.enableSweepingEffect && !hideDueToPinning;
+      uniform.hubs_EnableSweepingEffect.value = this.data.enableSweepingEffect && showEffect;
       uniform.hubs_IsFrozen.value = isFrozen;
       uniform.hubs_SweepParams.value = this.sweepParams;
 
-      uniform.hubs_HighlightInteractorOne.value = !!interactorOne && !hideDueToPinning;
+      uniform.hubs_HighlightInteractorOne.value = !!interactorOne && showEffect;
       uniform.hubs_InteractorOnePos.value[0] = interactorOneTransform[12];
       uniform.hubs_InteractorOnePos.value[1] = interactorOneTransform[13];
       uniform.hubs_InteractorOnePos.value[2] = interactorOneTransform[14];
 
-      uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo && !hideDueToPinning;
+      uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo && showEffect;
       uniform.hubs_InteractorTwoPos.value[0] = interactorTwoTransform[12];
       uniform.hubs_InteractorTwoPos.value[1] = interactorTwoTransform[13];
       uniform.hubs_InteractorTwoPos.value[2] = interactorTwoTransform[14];
