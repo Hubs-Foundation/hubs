@@ -1,5 +1,6 @@
 @import 'shared';
 
+
 :local(.streaming-tip) {
   position: absolute;
   left: 8px;
@@ -223,130 +224,296 @@ body.vr-mode {
   pointer-events: auto;
 }
 ////
-:local(.image-icon){
-  width: 30px;
-  height: 30px;
-}
-//happy     
-:local(.emoji-button-happiness) {
-  
+:local(.panel) { 
   position: absolute;
-  max-width: 15%;
+  width:400px;
+  left: 50%;
+  margin-left: -160px;
+  bottom: 24px;          
   display: flex;
-  left: 35%;
-  bottom: 24px;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  background-color: transparent;
-  border: transparent;
-  pointer-events: auto;
+  justify-content: space-around;
+  align-items: center;
+  padding: 5px;
+  background-color: $hud-panel-background;
+  border-radius: 300px;
 
 }
-//sad
-:local(.emoji-button-sadness) {
+:local(.iconEmoji) {
   
-  position: absolute;
- // margin-bottom: 1px;
-  display: flex;
-  left: 45%;
-  bottom: 24px;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
+  margin-bottom: 4px;
+  appearance: none;  
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+  width: 30px;
+  height: 30px;
+  background-size: 30px;
+  background-position: center;
+  background-repeat: no-repeat;
   background-color: transparent;
-  border: transparent;
-  pointer-events: auto;
-  min-width: 150px;
- // display: flex;
-  //transition: opacity 0.15s linear;
+
+
+  @media(max-width: 465px) {
+     margin-bottom: 4px;
+  }
+
+   @media(max-width: 420px) {
+     margin-bottom:  2px;
+   }
 }
-//disgust
-:local(.emoji-button-disgust) {
-  
-  position: absolute;
- // margin-bottom: 1px;
-  display: flex;
-  left: 50%;
-  bottom: 24px;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  background-color: transparent;
-  border: transparent;
-  pointer-events: auto;
-  min-width: 150px;
- // display: flex;
-  //transition: opacity 0.15s linear;
+:local(.iconEmoji.angry) {
+  //left: 35%;
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/angry-off.png);
 }
-//eww
-:local(.emoji-button-eww) {
-  
-  position: absolute;
-  display: flex;
-  left: 55%;
-  bottom: 24px;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  background-color: transparent;
-  border: transparent;
-  pointer-events: auto;
-  min-width: 150px;
+:local(.iconEmoji.angry:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/angry-on-hover.png);
+  }
+ 
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/angry-off.png);
+  }
 }
-//hearts
-:local(.emoji-button-hearts) {
-  
-  position: absolute;
-  display: flex;
-  left: 60%;
-  bottom: 24px;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  background-color: transparent;
-  border: transparent;
-  pointer-events: auto;
-  min-width: 150px;
+:local(.iconEmoji.angry.disactive) {
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/angry-off.png);
 }
-//smile
-:local(.emoji-button-smile) {
-  
-  position: absolute;
-  display: flex;
-  left: 65%;
-  bottom: 24px;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  background-color: transparent;
-  border: transparent;
-  pointer-events: auto;
-  min-width: 150px;
+:local(.iconEmoji.angry.disactive:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/angry-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/angry-on.png);
+  }  
 }
-//angry
-:local(.emoji-button-angry) {
-  
-  position: absolute;
-  display: flex;
-  left: 70%;
-  bottom: 24px;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  background-color: transparent;
-  border: transparent;
-  pointer-events: auto;
-  min-width: 150px;
+:local(.iconEmoji.angry.active) {
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/angry-on.png);
 }
-//surprise
-:local(.emoji-button-surprise) {
-  
-  position: absolute;
-  display: flex;
-  left: 75%;
-  bottom: 24px;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  background-color: transparent;
-  border: transparent;
-  pointer-events: auto;
-  min-width: 150px;
+:local(.iconEmoji.angry.active:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/angry-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/angry-on.png);
+  }  
 }
-/////////////////////////////////
+
+:local(.iconEmoji.happy) {
+  //left: 38%;
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/happy-off.png);
+}
+:local(.iconEmoji.happy:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/happy-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/happy-off.png);
+  }
+}
+
+:local(.iconEmoji.happy.active) {
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/happy-on.png);
+}
+:local(.iconEmoji.happy.active:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/happy-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/happy-on.png);
+  }  
+}
+
+:local(.iconEmoji.sad) {
+  left: 41%;
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/sad-off.png);
+}
+:local(.iconEmoji.sad:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/sad-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/sad-off.png);
+  }
+}
+
+:local(.iconEmoji.sad.active) {
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/sad-on.png);
+}
+:local(.iconEmoji.sad.active:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/sad-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/sad-on.png);
+  }  
+}
+:local(.iconEmoji.smile) {
+  //left: 44%;
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/smile-off.png);
+}
+:local(.iconEmoji.smile:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/smile-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/smile-off.png);
+  }
+}
+
+:local(.iconEmoji.smile.active) {
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/smile-on.png);
+}
+:local(.iconEmoji.smile.active:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/smile-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/smile-on.png);
+  }  
+}
+
+:local(.iconEmoji.eww) {
+  //lfet: 47%;
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/eww-off.png);
+}
+:local(.iconEmoji.eww:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/eww-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/eww-off.png);
+  }
+}
+
+:local(.iconEmoji.eww.active) {
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/eww-on.png);
+}
+:local(.iconEmoji.eww.active:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/eww-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/eww-on.png);
+  }  
+}
+
+:local(.iconEmoji.disgust) {
+  //lfet: 50%;
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/disgust-off.png);
+}
+:local(.iconEmoji.disgust:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/disgust-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/disgust-off.png);
+  }
+}
+
+:local(.iconEmoji.disgust.active) {
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/disgust-on.png);
+}
+:local(.iconEmoji.disgust.active:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/disgust-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/disgust-on.png);
+  }  
+}
+
+:local(.iconEmoji.hearts) {
+  //lfet: 53%;
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/hearts-off.png);
+}
+:local(.iconEmoji.hearts:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/hearts-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/hearts-off.png);
+  }
+}
+
+:local(.iconEmoji.hearts.active) {
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/hearts-on.png);
+}
+:local(.iconEmoji.hearts.active:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/hearts-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/hearts-on.png);
+  }  
+}
+
+:local(.iconEmoji.surprise) {
+  //lfet: 56%;
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/surprise-off.png);
+}
+:local(.iconEmoji.surprise:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/surprise-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/surprise-off.png);
+  }
+}
+
+:local(.iconEmoji.surprise.active) {
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/surprise-on.png);
+}
+:local(.iconEmoji.surprise.active:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/surprise-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/happy-on.png);
+  }  
+}
+
+:local(.iconEmoji.clean) {
+  //lfet: 61%;
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-off.png);
+}
+:local(.iconEmoji.clean:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-off.png);
+  }
+}
+
+:local(.iconEmoji.clean.active) {
+  background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on.png);
+}
+:local(.iconEmoji.clean.active:hover) {
+  @media (pointer: fine) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../images/sprites/chest-emojis/emoji-icons/clean-on.png);
+  }  
+}
+
 :local(.choose-scene-button) {
   @extend %action-button-secondary;
   pointer-events: auto;

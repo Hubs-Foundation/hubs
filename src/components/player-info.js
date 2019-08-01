@@ -11,7 +11,7 @@ import disgustEmoji from "../assets/images/sprites/chest-emojis/screen effect/di
 import heartsEmoji from "../assets/images/sprites/chest-emojis/screen effect/hearts.png";
 import smileEmoji from "../assets/images/sprites/chest-emojis/screen effect/smile.png";
 import surpriseEmoji from "../assets/images/sprites/chest-emojis/screen effect/surprise.png";
-
+import emptyEmoji from "../assets/images/sprites/chest-emojis/screen effect/empty.png";
 function ensureAvatarNodes(json) {
   const { nodes } = json;
   if (!nodes.some(node => node.name === "Head")) {
@@ -50,6 +50,13 @@ AFRAME.registerComponent("player-info", {
   init() {
     this.changeHappyEmoji = this.changeHappyEmoji.bind(this);
     this.changeSadEmoji = this.changeSadEmoji.bind(this);
+    this.changeAngryEmoji = this.changeAngryEmoji.bind(this);
+    this.changeSmileEmoji = this.changeSmileEmoji.bind(this);
+    this.changeSurpriseEmoji = this.changeSurpriseEmoji.bind(this);
+    this.changeEwwEmoji = this.changeEwwEmoji.bind(this);
+    this.changeHeartsEmoji = this.changeHeartsEmoji.bind(this);
+    this.cleanEmoji = this.cleanEmoji.bind(this);
+    this.changeDisgustEmoji = this.changeDisgustEmoji.bind(this);
     this.displayName = null;
     this.communityIdentifier = null;
     this.isOwner = false;
@@ -77,7 +84,7 @@ AFRAME.registerComponent("player-info", {
     deregisterComponentInstance(this, "player-info");
   },
   play() {
-    ["happy", "sad", "eww", "disgust", "angry", "smile", "hearts", "surprise"].map(x =>
+    ["happy", "sad", "eww", "disgust", "angry", "smile", "hearts", "surprise", "clean"].map(x =>
       this.el.sceneEl.addEventListener(x, this.emojiAction(x))
     );
     this.el.addEventListener("model-loaded", this.applyProperties);
@@ -87,7 +94,7 @@ AFRAME.registerComponent("player-info", {
     }
   },
   pause() {
-    ["happy", "sad", "eww", "disgust", "angry", "smile", "hearts", "surprise"].map(x =>
+    ["happy", "sad", "eww", "disgust", "angry", "smile", "hearts", "surprise", "clean"].map(x =>
       this.el.sceneEl.removeEventListener(x, this.emojiAction(x))
     );
     this.el.removeEventListener("model-loaded", this.applyProperties);
@@ -115,8 +122,11 @@ AFRAME.registerComponent("player-info", {
         return this.changeHeartsEmoji;
       case "surprise":
         return this.changeSurpriseEmoji;
+      case "clean":
+        return this.cleanEmoji;
     }
   },
+
   changeHappyEmoji() {
     console.log("change emoji called");
 
@@ -138,14 +148,10 @@ AFRAME.registerComponent("player-info", {
     console.log("change emoji called");
   },
   changeAngryEmoji() {
-    console.log("change emoji called");
-
     this.el.sceneEl
       .querySelector("#player-rig")
       .querySelector(".image")
       .setAttribute("media-loader", { src: new URL(angryEmoji, window.location.href).href });
-
-    console.log("change emoji called");
   },
   changeEwwEmoji() {
     console.log("change emoji called");
@@ -196,6 +202,14 @@ AFRAME.registerComponent("player-info", {
       .setAttribute("media-loader", { src: new URL(surpriseEmoji, window.location.href).href });
 
     console.log("change emoji called");
+  },
+  cleanEmoji() {
+    this.el.sceneEl
+      .querySelector("#player-rig")
+      .querySelector(".image")
+      .setAttribute("media-loader", { src: new URL(emptyEmoji, window.location.href).href });
+
+    console.log("emptied chest screen");
   },
   update() {
     this.applyProperties();

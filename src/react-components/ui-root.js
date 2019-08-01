@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
@@ -73,29 +74,6 @@ import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-in
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
-import { faSmileBeam } from "@fortawesome/free-solid-svg-icons/faSmileBeam";
-
-import happyEmojiIconOn from "../assets/images/sprites/chest-emojis/emoji-icons/happy-on.png";
-import happyEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/happy-on-hover.png";
-import happyEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/happy-off.png";
-import angryEmojiIconOn from "../assets/images/sprites/chest-emojis/emoji-icons/angry-on.png";
-import angryEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/angry-on-hover.png";
-import angryEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/angry-off.png";
-import ewwEmojiIconOn from "../assets/images/sprites/chest-emojis/emoji-icons/eww-on.png";
-import ewwEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/eww-on-hover.png";
-import ewwEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/eww-off.png";
-import disgustEmojiIconOn from "../assets/images/sprites/chest-emojis/emoji-icons/disgust-on.png";
-import disgustEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/disgust-on-hover.png";
-import disgustEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/disgust-off.png";
-import heartsEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/hearts-off.png";
-import heartsEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/hearts-on-hover.png";
-import sadEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/sad-off.png";
-import sadEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/sad-on-hover.png";
-import smileEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/smile-off.png";
-import smileEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/smile-on-hover.png";
-import surpriseEmojiIconOff from "../assets/images/sprites/chest-emojis/emoji-icons/surprise-off.png";
-import surpriseEmojiIconHover from "../assets/images/sprites/chest-emojis/emoji-icons/surprise-on-hover.png";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import qsTruthy from "../utils/qs_truthy";
@@ -130,11 +108,15 @@ const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isMobilePhoneOrVR = isMobile || isMobileVR;
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
+const noop = () => {};
 
 class UIRoot extends Component {
   willCompileAndUploadMaterials = false;
 
   static propTypes = {
+    hasActiveAngry: PropTypes.bool,
+    hasActiveHappy: PropTypes.bool,
+
     enterScene: PropTypes.func,
     exitScene: PropTypes.func,
     onSendMessage: PropTypes.func,
@@ -194,6 +176,16 @@ class UIRoot extends Component {
   };
 
   state = {
+    hasAngryActive: false,
+    hasHappyActive: false,
+    hasSadActive: false,
+    hasSurpriseActive: false,
+    hasDisgustActive: false,
+    hasEwwActive: false,
+    hasSmileActive: false,
+    hasHeartsActive: false,
+    hasCleanActive: false,
+
     enterInVR: false,
     muteOnEntry: false,
     entered: false,
@@ -232,6 +224,7 @@ class UIRoot extends Component {
 
   constructor(props) {
     super(props);
+
     if (props.showSafariMicDialog) {
       this.state.dialog = <SafariMicDialog closable={false} />;
     }
@@ -509,7 +502,128 @@ class UIRoot extends Component {
   ///////////////////////////////////////////////
 
   emojiChange = reason => {
+    console.log(reason);
     this.props.scene.emit(reason);
+    switch (reason) {
+      case "happy":
+        this.setState({
+          hasHappyActive: !this.state.hasHappyActive,
+          hasAngryActive: false,
+          hasSadActive: false,
+          hasSmileActive: false,
+          hasEwwActive: false,
+          hasCleanActive: false,
+          hasDisgustActive: false,
+          hasHeartsActive: false,
+          hasSurpriseActive: false
+        });
+        break;
+      case "sad":
+        this.setState({
+          hasHappyActive: false,
+          hasAngryActive: false,
+          hasSadActive: !this.state.hasSadActive,
+          hasSmileActive: false,
+          hasEwwActive: false,
+          hasCleanActive: false,
+          hasDisgustActive: false,
+          hasHeartsActive: false,
+          hasSurpriseActive: false
+        });
+        break;
+      case "eww":
+        this.setState({
+          hasHappyActive: false,
+          hasAngryActive: false,
+          hasSadActive: false,
+          hasSmileActive: false,
+          hasEwwActive: !this.state.hasEwwActive,
+          hasCleanActive: false,
+          hasDisgustActive: false,
+          hasHeartsActive: false,
+          hasSurpriseActive: false
+        });
+        break;
+      case "disgust":
+        this.setState({
+          hasHappyActive: false,
+          hasAngryActive: false,
+          hasSadActive: false,
+          hasSmileActive: false,
+          hasEwwActive: false,
+          hasCleanActive: false,
+          hasDisgustActive: !this.state.hasDisgustActive,
+          hasHeartsActive: false,
+          hasSurpriseActive: false
+        });
+        break;
+      case "angry":
+        this.setState({
+          hasHappyActive: false,
+          hasAngryActive: !this.state.hasHappyActive,
+          hasSadActive: false,
+          hasSmileActive: false,
+          hasEwwActive: false,
+          hasCleanActive: false,
+          hasDisgustActive: false,
+          hasHeartsActive: false,
+          hasSurpriseActive: false
+        });
+        break;
+      case "smile":
+        this.setState({
+          hasHappyActive: false,
+          hasAngryActive: false,
+          hasSadActive: false,
+          hasSmileActive: !this.state.hasSmileActive,
+          hasEwwActive: false,
+          hasCleanActive: false,
+          hasDisgustActive: false,
+          hasHeartsActive: false,
+          hasSurpriseActive: false
+        });
+        break;
+      case "hearts":
+        this.setState({
+          hasHappyActive: false,
+          hasAngryActive: false,
+          hasSadActive: false,
+          hasSmileActive: false,
+          hasEwwActive: false,
+          hasCleanActive: false,
+          hasDisgustActive: false,
+          hasHeartsActive: !this.state.hasHeartsActive,
+          hasSurpriseActive: false
+        });
+        break;
+      case "surprise":
+        this.setState({
+          hasHappyActive: false,
+          hasAngryActive: false,
+          hasSadActive: false,
+          hasSmileActive: false,
+          hasEwwActive: false,
+          hasCleanActive: false,
+          hasDisgustActive: false,
+          hasHeartsActive: false,
+          hasSurpriseActive: !this.state.hasSurpriseActive
+        });
+        break;
+      case "clean":
+        this.setState({
+          hasHappyActive: false,
+          hasAngryActive: false,
+          hasSadActive: false,
+          hasSmileActive: false,
+          hasEwwActive: false,
+          hasCleanActive: !this.state.hasCleanActive,
+          hasDisgustActive: false,
+          hasHeartsActive: false,
+          hasSurpriseActive: false
+        });
+        break;
+    }
+
     console.log("emojiChange called on ui-root.js " + reason);
   };
 
@@ -1449,6 +1563,7 @@ class UIRoot extends Component {
 
     const streamer = getCurrentStreamer();
     const streamerName = streamer && streamer.displayName;
+    console.log(this.state.hasAngryActive);
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1694,94 +1809,70 @@ class UIRoot extends Component {
               </button>
             )}
             {this.state.frozen && (
-              <div>
-                <button className={classNames(styles.emojiButtonHappiness)} onClick={() => this.emojiChange("happy")}>
-                  <i>
-                    <img
-                      className={classNames(styles.imageIcon)}
-                      src={happyEmojiIconOff}
-                      onMouseOver={e => (e.currentTarget.src = happyEmojiIconHover)}
-                      onMouseOut={e => (e.currentTarget.src = happyEmojiIconOff)}
-                    />
-                  </i>
-                </button>
+              <div className={cx(styles.uiInteractive, styles.panel)}>
+                <div
+                  className={cx(styles.iconEmoji, styles.angry, {
+                    [styles.active]: this.state.hasAngryActive,
+                    [styles.disactive]:!this.state.hasAngryActive
+                  })}
+                  onClick={() => this.emojiChange("angry")}
+                />
 
-                <button className={classNames(styles.emojiButtonSadness)} onClick={() => this.emojiChange("sad")}>
-                  <i>
-                    <img
-                      className={classNames(styles.imageIcon)}
-                      src={sadEmojiIconOff}
-                      onMouseOver={e => (e.currentTarget.src = sadEmojiIconHover)}
-                      onMouseOut={e => (e.currentTarget.src = sadEmojiIconOff)}
-                    />
-                  </i>
-                </button>
+                <div
+                  className={cx(styles.iconEmoji, styles.happy, {
+                    [styles.active]: this.state.hasHappyActive
+                  })}
+                  onClick={this.state.hasHappyActive ? noop : () => this.emojiChange("happy")}
+                />
 
-                <button className={classNames(styles.emojiButtonDisgust)} onClick={() => this.emojiChange("disgust")}>
-                  <i>
-                    <img
-                      className={classNames(styles.imageIcon)}
-                      src={disgustEmojiIconOff}
-                      onMouseOver={e => (e.currentTarget.src = disgustEmojiIconHover)}
-                      onMouseOut={e => (e.currentTarget.src = disgustEmojiIconOff)}
-                    />
-                  </i>
-                </button>
+                <div
+                  className={cx(styles.iconEmoji, styles.sad, {
+                    [styles.active]: this.state.hasSadActive
+                  })}
+                  onClick={this.state.hasSadActive ? noop : () => this.emojiChange("sad")}
+                />
 
-                <button className={classNames(styles.emojiButtonEww)} onClick={() => this.emojiChange("eww")}>
-                  <i>
-                    <img
-                      className={classNames(styles.imageIcon)}
-                      src={ewwEmojiIconOff}
-                      onMouseOver={e => (e.currentTarget.src = ewwEmojiIconHover)}
-                      onMouseOut={e => (e.currentTarget.src = ewwEmojiIconOff)}
-                    />
-                  </i>
-                </button>
+                <div
+                  className={cx(styles.iconEmoji, styles.surprise, {
+                    [styles.active]: this.state.hasSurpriseActive
+                  })}
+                  onClick={this.state.hasSurpriseActive ? noop : () => this.emojiChange("surprise")}
+                />
 
-                <button className={classNames(styles.emojiButtonHearts)} onClick={() => this.emojiChange("hearts")}>
-                  <i>
-                    <img
-                      className={classNames(styles.imageIcon)}
-                      src={heartsEmojiIconOff}
-                      onMouseOver={e => (e.currentTarget.src = heartsEmojiIconHover)}
-                      onMouseOut={e => (e.currentTarget.src = heartsEmojiIconOff)}
-                    />
-                  </i>
-                </button>
+                <div
+                  className={cx(styles.iconEmoji, styles.eww, {
+                    [styles.active]: this.state.hasEwwActive
+                  })}
+                  onClick={this.state.hasEwwActive ? noop : () => this.emojiChange("eww")}
+                />
 
-                <button className={classNames(styles.emojiButtonSmile)} onClick={() => this.emojiChange("smile")}>
-                  <i>
-                    <img
-                      className={classNames(styles.imageIcon)}
-                      src={smileEmojiIconOff}
-                      onMouseOver={e => (e.currentTarget.src = smileEmojiIconHover)}
-                      onMouseOut={e => (e.currentTarget.src = smileEmojiIconOff)}
-                    />
-                  </i>
-                </button>
+                <div
+                  className={cx(styles.iconEmoji, styles.smile, {
+                    [styles.active]: this.state.hasSmileActive
+                  })}
+                  onClick={this.state.hasSmileActive ? noop : () => this.emojiChange("smile")}
+                />
 
-                <button className={classNames(styles.emojiButtonAngry)} onClick={() => this.emojiChange("angry")}>
-                  <i>
-                    <img
-                      className={classNames(styles.imageIcon)}
-                      src={angryEmojiIconOff}
-                      onMouseOver={e => (e.currentTarget.src = angryEmojiIconHover)}
-                      onMouseOut={e => (e.currentTarget.src = angryEmojiIconOff)}
-                    />
-                  </i>
-                </button>
+                <div
+                  className={cx(styles.iconEmoji, styles.disgust, {
+                    [styles.active]: this.state.hasDisgustActive
+                  })}
+                  onClick={this.state.hasDisgustActive ? noop : () => this.emojiChange("disgust")}
+                />
 
-                <button className={classNames(styles.emojiButtonSurprise)} onClick={() => this.emojiChange("surprise")}>
-                  <i>
-                    <img
-                      className={classNames(styles.imageIcon)}
-                      src={surpriseEmojiIconOff}
-                      onMouseOver={e => (e.currentTarget.src = surpriseEmojiIconHover)}
-                      onMouseOut={e => (e.currentTarget.src = surpriseEmojiIconOff)}
-                    />
-                  </i>
-                </button>
+                <div
+                  className={cx(styles.iconEmoji, styles.hearts, {
+                    [styles.active]: this.state.hasHeartsActive
+                  })}
+                  onClick={this.state.hasHeartsActive ? noop : () => this.emojiChange("hearts")}
+                />
+
+                <div
+                  className={cx(styles.iconEmoji, styles.clean, {
+                    [styles.active]: this.state.hasCleanActive
+                  })}
+                  onClick={this.state.hasCleanActive ? noop : () => this.emojiChange("clean")}
+                />
               </div>
             )}
             {!this.state.frozen &&
