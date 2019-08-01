@@ -242,7 +242,6 @@ function setupLobbyCamera() {
   camera.object3D.matrixNeedsUpdate = true;
 
   camera.setAttribute("scene-preview-camera", "positionOnly: true; duration: 60");
-  //  camera.components["pitch-yaw-rotator"].set(camera.object3D.rotation.x, camera.object3D.rotation.y);
 }
 
 let uiProps = {};

@@ -44,12 +44,6 @@ AFRAME.registerComponent("spawn-controller", {
     // Camera faces -Z direction. Flip rotation on Y axis to face the correct direction.
     this.el.object3D.rotation.y += Math.PI;
     this.el.object3D.matrixNeedsUpdate = true;
-
-    // Reset pitch-yaw-rotator after any scene-preview-camera rotation.
-    if (camera.components["pitch-yaw-rotator"]) {
-      // TODO
-      // camera.components["pitch-yaw-rotator"].set(camera.object3D.rotation.x, camera.object3D.rotation.y);
-    }
   }
 });
 
