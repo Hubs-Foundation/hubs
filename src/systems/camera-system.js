@@ -170,17 +170,8 @@ AFRAME.registerComponent("inspect-button", {
       console.error("You put an inspect button but I could not find what you want to inspect.", this.el);
       return;
     }
-
-    this.el.object3D.addEventListener("interact", () => {
-      if (!this.el.sceneEl.is("vr-mode")) {
-        this.el.sceneEl.systems["hubs-systems"].cameraSystem.inspect(this.inspectable.object3D);
-      }
-    });
-
     this.el.object3D.addEventListener("holdable-button-down", () => {
-      if (this.el.sceneEl.is("vr-mode")) {
-        this.el.sceneEl.systems["hubs-systems"].cameraSystem.inspect(this.inspectable.object3D);
-      }
+      this.el.sceneEl.systems["hubs-systems"].cameraSystem.inspect(this.inspectable.object3D);
     });
     this.el.object3D.addEventListener("holdable-button-up", () => {
       if (this.el.sceneEl.is("vr-mode")) {
