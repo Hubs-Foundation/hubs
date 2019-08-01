@@ -222,10 +222,6 @@ AFRAME.registerComponent("camera-tool", {
     };
   })(),
 
-  onAvatarUpdated() {
-    delete this.playerHead;
-  },
-
   snapClicked() {
     if (this.data.isSnapping) return;
     if (!NAF.utils.isMine(this.el) && !NAF.utils.takeOwnership(this.el)) return;
@@ -506,6 +502,7 @@ AFRAME.registerComponent("camera-tool", {
       const sceneEl = this.el.sceneEl;
       const renderer = this.renderer || sceneEl.renderer;
       const now = performance.now();
+      const playerHead = this.cameraSystem.playerHead;
 
       // Perform lookAt in tock so it will re-orient after grabs, etc.
       if (this.trackTarget) {
@@ -514,11 +511,6 @@ AFRAME.registerComponent("camera-tool", {
         } else {
           this.trackTarget = null; // Target removed
         }
-      }
-
-      if (!this.playerHead) {
-        const headEl = document.getElementById("player-head");
-        this.playerHead = headEl && headEl.object3D;
       }
 
       if (!this.playerHud) {
@@ -530,8 +522,8 @@ AFRAME.registerComponent("camera-tool", {
         this.takeSnapshotNextTick ||
         (this.updateRenderTargetNextTick && (this.viewfinderInViewThisFrame || this.videoRecorder))
       ) {
-        if (this.playerHead) {
-          tempHeadScale.copy(this.playerHead.scale);
+        if (playerHead) {
+          tempHeadScale.copy(playerHead.scale);
 
           // We want to scale our own head in between frames now that we're taking a video/photo.
           let scale = 1;
@@ -540,13 +532,13 @@ AFRAME.registerComponent("camera-tool", {
           // has the networked media stream instead.
           const analyser = this.el.sceneEl.systems["local-audio-analyser"];
 
-          if (analyser && this.playerHead.el.components["scale-audio-feedback"]) {
-            scale = getAudioFeedbackScale(this.el.object3D, this.playerHead, 1, 2, analyser.volume);
+          if (analyser && playerHead.el.components["scale-audio-feedback"]) {
+            scale = getAudioFeedbackScale(this.el.object3D, playerHead, 1, 2, analyser.volume);
           }
 
-          this.playerHead.scale.set(scale, scale, scale);
-          this.playerHead.updateMatrices(true, true);
-          this.playerHead.updateMatrixWorld(true, true);
+          playerHead.scale.set(scale, scale, scale);
+          playerHead.updateMatrices(true, true);
+          playerHead.updateMatrixWorld(true, true);
         }
 
         let playerHudWasVisible = false;
@@ -586,10 +578,10 @@ AFRAME.registerComponent("camera-tool", {
 
         renderer.vr.enabled = tmpVRFlag;
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
-        if (this.playerHead) {
-          this.playerHead.scale.copy(tempHeadScale);
-          this.playerHead.updateMatrices(true, true);
-          this.playerHead.updateMatrixWorld(true, true);
+        if (playerHead) {
+          playerHead.scale.copy(tempHeadScale);
+          playerHead.updateMatrices(true, true);
+          playerHead.updateMatrixWorld(true, true);
         }
         if (this.playerHud) {
           this.playerHud.visible = playerHudWasVisible;

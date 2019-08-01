@@ -30,6 +30,7 @@ import {
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
+import { authorizeOrSanitizeMessage } from "./utils/permissions-utils";
 import Cookies from "js-cookie";
 
 import "./components/scene-components";
@@ -393,7 +394,7 @@ async function updateEnvironmentForHub(hub) {
   }
 }
 
-async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
+function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
   const isRejoin = NAF.connection.isConnected();
 
@@ -1112,6 +1113,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let isInitialJoin = true;
 
+  // We need to be able to wait for initial presence syncs across reconnects and socket migrations,
+  // so we create this object in the outer scope and assign it a new promise on channel join.
+  const presenceSync = {
+    promise: null,
+    resolve: null
+  };
+
   hubChannel.setPhoenixChannel(hubPhxChannel);
 
   hubPhxChannel
@@ -1122,8 +1130,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
+      presenceSync.promise = new Promise(resolve => {
+        presenceSync.resolve = resolve;
+      });
+
       if (isInitialJoin) {
         store.addEventListener("profilechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
+
         hubChannel.presence.onSync(() => {
           const presence = hubChannel.presence;
 
@@ -1143,7 +1156,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           // HACK - Set a flag on the presence object indicating if the initial sync has completed,
           // which is used to determine if we should fire join/leave messages into the presence log.
+          // This flag is required since we reuse these onJoin and onLeave handler functions on
+          // socket migrations.
           presence.__hadInitialSync = true;
+
+          presenceSync.resolve();
 
           presence.onJoin((sessionId, current, info) => {
             // Ignore presence join/leaves if this Presence has not yet had its initial sync (o/w the user
@@ -1201,6 +1218,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               sessionId,
               profile: meta.profile,
               roles: meta.roles,
+              permissions: meta.permissions,
               streaming: meta.streaming,
               recording: meta.recording
             });
@@ -1246,7 +1264,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         initialIsSubscribed: subscriptions.isSubscribed()
       });
 
-      await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
+      await presenceSync.promise;
+
+      handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
     })
     .receive("error", res => {
       if (res.reason === "closed") {
@@ -1265,7 +1285,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hubPhxChannel.on("naf", data => {
     if (!NAF.connection.adapter) return;
-    NAF.connection.adapter.onData(data, PHOENIX_RELIABLE_NAF);
+
+    NAF.connection.adapter.onData(authorizeOrSanitizeMessage(data), PHOENIX_RELIABLE_NAF);
   });
 
   hubPhxChannel.on("message", ({ session_id, type, body, from }) => {

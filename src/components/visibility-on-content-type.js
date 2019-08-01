@@ -19,8 +19,12 @@ AFRAME.registerComponent("visibility-on-content-type", {
     const mediaLoader = this.networkedEl.components["media-loader"];
     const mediaImage = this.networkedEl.components["media-image"];
     const mediaVideo = this.networkedEl.components["media-video"];
+    const mediaPdf = this.networkedEl.components["media-pdf"];
     const currentContentType =
-      contentType || (mediaVideo && mediaVideo.data.contentType) || (mediaImage && mediaImage.data.contentType);
+      contentType ||
+      (mediaVideo && mediaVideo.data.contentType) ||
+      (mediaImage && mediaImage.data.contentType) ||
+      (mediaPdf && mediaPdf.data.contentType);
     const matchesType =
       !this.data.contentType ||
       (currentContentType && currentContentType.toLowerCase().split(";")[0] === this.data.contentType);

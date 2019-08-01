@@ -9,7 +9,7 @@ const selfsigned = require("selfsigned");
 const webpack = require("webpack");
 const cors = require("cors");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
@@ -111,7 +111,6 @@ module.exports = (env, argv) => ({
   },
   devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
   devServer: {
-    inline: false,
     https: createHTTPSConfig(),
     host: process.env.HOST_IP || "0.0.0.0",
     public: `${host}:8080`,
@@ -178,20 +177,20 @@ module.exports = (env, argv) => ({
       },
       {
         test: /\.(scss|css)$/,
-        loader: ExtractTextPlugin.extract({
-          fallback: "style-loader",
-          use: [
-            {
-              loader: "css-loader",
-              options: {
-                name: "[path][name]-[hash].[ext]",
-                localIdentName: "[name]__[local]__[hash:base64:5]",
-                camelCase: true
-              }
-            },
-            "sass-loader"
-          ]
-        })
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader
+          },
+          {
+            loader: "css-loader",
+            options: {
+              name: "[path][name]-[hash].[ext]",
+              localIdentName: "[name]__[local]__[hash:base64:5]",
+              camelCase: true
+            }
+          },
+          "sass-loader"
+        ]
       },
       {
         test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm)$/,
@@ -353,7 +352,7 @@ module.exports = (env, argv) => ({
       }
     ]),
     // Extract required css and add a content hash.
-    new ExtractTextPlugin({
+    new MiniCssExtractPlugin({
       filename: "assets/stylesheets/[name]-[md5:contenthash:hex:20].css",
       disable: argv.mode !== "production"
     }),

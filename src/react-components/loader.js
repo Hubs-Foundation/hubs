@@ -20,8 +20,10 @@ class Loader extends Component {
   componentDidMount() {
     this.props.scene.addEventListener("model-loading", this.onObjectLoading);
     this.props.scene.addEventListener("image-loading", this.onObjectLoading);
+    this.props.scene.addEventListener("pdf-loading", this.onObjectLoading);
     this.props.scene.addEventListener("model-loaded", this.onObjectLoaded);
     this.props.scene.addEventListener("image-loaded", this.onObjectLoaded);
+    this.props.scene.addEventListener("pdf-loaded", this.onObjectLoaded);
     this.props.scene.addEventListener("model-error", this.onObjectLoaded);
     this.props.scene.addEventListener(
       "environment-scene-loaded",
@@ -36,8 +38,10 @@ class Loader extends Component {
   componentWillUnmount() {
     this.props.scene.removeEventListener("model-loading", this.onObjectLoading);
     this.props.scene.removeEventListener("image-loading", this.onObjectLoading);
+    this.props.scene.removeEventListener("pdf-loading", this.onObjectLoading);
     this.props.scene.removeEventListener("model-loaded", this.onObjectLoaded);
     this.props.scene.removeEventListener("image-loaded", this.onObjectLoaded);
+    this.props.scene.removeEventListener("pdf-loaded", this.onObjectLoaded);
     this.props.scene.removeEventListener("model-error", this.onObjectLoaded);
   }
 
