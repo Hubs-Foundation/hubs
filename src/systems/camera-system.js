@@ -62,7 +62,7 @@ export class CameraSystem {
   constructor() {
     this.mode = CAMERA_MODE_FIRST_PERSON;
     waitForDOMContentLoaded().then(() => {
-      this.playerCamera = document.getElementById("player-camera");
+      this.playerCamera = document.getElementById("avatar-pov-node");
       this.playerRig = document.getElementById("player-rig");
       this.cameraEl = document.getElementById("experimental-camera");
       this.rigEl = document.getElementById("experimental-rig");
@@ -126,8 +126,10 @@ export class CameraSystem {
         this.cameraEl.components["pitch-yaw-rotator"].on = false;
         setMatrixWorld(this.rigEl.object3D, this.playerRig.object3D.matrixWorld);
         if (AFRAME.scenes[0].is("vr-mode")) {
+          this.cameraEl.object3D.updateMatrices();
           setMatrixWorld(this.playerCamera.object3D, this.cameraEl.object3D.matrixWorld);
         } else {
+          this.playerCamera.object3D.updateMatrices();
           setMatrixWorld(this.cameraEl.object3D, this.playerCamera.object3D.matrixWorld);
         }
       }

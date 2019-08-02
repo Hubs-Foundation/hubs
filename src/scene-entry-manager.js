@@ -262,7 +262,7 @@ export default class SceneEntryManager {
       );
       orientation.then(or => {
         entity.setAttribute("offset-relative-to", {
-          target: "#player-camera",
+          target: "#avatar-pov-node",
           offset,
           orientation: or
         });
@@ -491,7 +491,7 @@ export default class SceneEntryManager {
         const entity = document.createElement("a-entity");
         entity.setAttribute("networked", { template: "#interactable-camera" });
         entity.setAttribute("offset-relative-to", {
-          target: "#player-camera",
+          target: "#avatar-pov-node",
           offset: { x: 0, y: 0, z: -1.5 }
         });
         this.scene.appendChild(entity);
@@ -538,7 +538,7 @@ export default class SceneEntryManager {
       audioInput.onchange = getAudio;
     }
 
-    const camera = document.querySelector("#player-camera");
+    const camera = document.querySelector("#avatar-pov-node");
     const leftController = document.querySelector("#player-left-controller");
     const rightController = document.querySelector("#player-right-controller");
     const getRecording = () => {

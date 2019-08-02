@@ -20,7 +20,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
     this.camWorldPos = new THREE.Vector3();
     this.cam2WorldPos = new THREE.Vector3();
     this.objWorldPos = new THREE.Vector3();
-    this.cam = document.getElementById("player-camera").object3D;
+    this.cam = document.getElementById("avatar-pov-node").object3D;
     this.cam2 = this.el.sceneEl.camera;
 
     let hoverableSearch = this.el;

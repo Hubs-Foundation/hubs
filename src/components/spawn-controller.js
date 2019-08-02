@@ -8,7 +8,7 @@ import { getLastWorldPosition } from "../utils/three-utils";
 AFRAME.registerComponent("spawn-controller", {
   schema: {
     target: { type: "selector" },
-    camera: { type: "selector", default: "#player-camera" },
+    camera: { type: "selector", default: "#avatar-pov-node" },
     playerHeight: { default: 1.6 },
     loadedEvent: { type: "string" }
   },

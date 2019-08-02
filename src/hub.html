@@ -414,7 +414,7 @@
                     <a-entity
                         id="pen"
                         position="0 -0.18 0"
-                        pen="camera: #player-camera; drawingManager: #drawing-manager"
+                        pen="camera: #avatar-pov-node; drawingManager: #drawing-manager"
                     ></a-entity>
                     <a-entity class="ui delete-button pen-menu" visibility-while-frozen="withinDistance: 10; withPermission: spawn_drawing" >
                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" remove-networked-object-button position="0 0 0.01">
@@ -801,7 +801,7 @@
 
         <a-entity
             id="cursor-controller"
-            cursor-controller="cursor: #cursor; camera: #player-camera;"
+            cursor-controller="cursor: #cursor; camera: #avatar-pov-node;"
         ></a-entity>
 
         <a-sphere
@@ -827,7 +827,7 @@
         <a-entity
             id="player-rig"
             spawn-controller="loadedEvent: entered; target: #player-rig"
-            character-controller="pivot: #player-camera"
+            character-controller="pivot: #avatar-pov-node"
             ik-root
             player-info
             periodic-full-syncs
@@ -923,7 +923,7 @@
             </a-entity>
 
             <a-entity
-                id="player-camera"
+                id="avatar-pov-node"
                 class="camera"
                 personal-space-bubble="radius: 0.4;"
                 rotation
@@ -1023,7 +1023,7 @@
                 "
         ></a-entity>
 
-        <a-entity matrix-auto-update class="ui interactable-ui vr-notice" mixin="button-container" follow-in-fov="target: #player-camera; offset: 0 0 -0.8; angle: 39;" visible="false">
+        <a-entity matrix-auto-update class="ui interactable-ui vr-notice" mixin="button-container" follow-in-fov="target: #avatar-pov-node; offset: 0 0 -0.8; angle: 39;" visible="false">
             <a-entity slice9="width: 0.8; height: 0.25; left: 64; top: 64; right: 66; bottom: 66; opacity: 1.0; src: #button"
                 text-button="
                     textHoverColor: #fff;
