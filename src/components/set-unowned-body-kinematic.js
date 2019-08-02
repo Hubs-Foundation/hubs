@@ -21,7 +21,7 @@ AFRAME.registerComponent("set-unowned-body-kinematic", {
     this.el.removeEventListener("ownership-lost", this.setBodyKinematic);
   },
   setBodyKinematic() {
-    this.el.setAttribute("ammo-body", {
+    this.el.setAttribute("body-helper", {
       type: "kinematic",
       collisionFilterMask: COLLISION_LAYERS.UNOWNED_INTERACTABLE
     });

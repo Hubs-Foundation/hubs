@@ -25,17 +25,17 @@ AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner", (el, co
 });
 AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
 AFRAME.GLTFModelPlus.registerComponent("media-loader", "media-loader");
-AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", el => {
+AFRAME.GLTFModelPlus.registerComponent("body", "body-helper", el => {
   //This is only required for migration of old environments with super-spawners
   //will no longer be needed when spawners are added via Spoke instead.
-  el.setAttribute("ammo-body", {
+  el.setAttribute("body-helper", {
     mass: 0,
     type: TYPE.STATIC,
     collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
     collisionFilterMask: COLLISION_LAYERS.DEFAULT_SPAWNER
   });
 });
-AFRAME.GLTFModelPlus.registerComponent("ammo-shape", "ammo-shape");
+AFRAME.GLTFModelPlus.registerComponent("ammo-shape", "shape-helper");
 AFRAME.GLTFModelPlus.registerComponent("hide-when-quality", "hide-when-quality");
 AFRAME.GLTFModelPlus.registerComponent("light", "light", (el, componentName, componentData) => {
   if (componentData.distance === 0) {
@@ -77,7 +77,7 @@ AFRAME.GLTFModelPlus.registerComponent(
       const { scale, rotation } = componentData;
       euler.set(rotation.x, rotation.y, rotation.z);
       const orientation = new THREE.Quaternion().setFromEuler(euler);
-      el.setAttribute(componentName, {
+      el.setAttribute("shape-helper", {
         type: SHAPE.BOX,
         fit: FIT.MANUAL,
         offset: componentData.position,
@@ -233,7 +233,7 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
   el.setAttribute("hoverable-visuals", {
     cursorController: "#cursor-controller"
   });
-  el.setAttribute("ammo-body", {
+  el.setAttribute("body-helper", {
     mass: 0,
     type: TYPE.STATIC,
     collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
@@ -315,7 +315,7 @@ AFRAME.GLTFModelPlus.registerComponent(
 );
 
 AFRAME.GLTFModelPlus.registerComponent("heightfield", "heightfield", (el, componentName, componentData) => {
-  el.setAttribute("ammo-shape__heightfield", {
+  el.setAttribute("shape-helper__heightfield", {
     type: SHAPE.HEIGHTFIELD,
     margin: 0.01,
     fit: FIT.MANUAL,
@@ -326,7 +326,7 @@ AFRAME.GLTFModelPlus.registerComponent("heightfield", "heightfield", (el, compon
 });
 
 AFRAME.GLTFModelPlus.registerComponent("trimesh", "trimesh", el => {
-  el.setAttribute("ammo-shape__trimesh", {
+  el.setAttribute("shape-helper__trimesh", {
     type: SHAPE.MESH,
     margin: 0.01,
     fit: FIT.ALL,

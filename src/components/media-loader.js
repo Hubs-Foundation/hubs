@@ -82,8 +82,8 @@ AFRAME.registerComponent("media-loader", {
   })(),
 
   removeShape(id) {
-    if (this.el.getAttribute("ammo-shape__" + id)) {
-      this.el.removeAttribute("ammo-shape__" + id);
+    if (this.el.getAttribute("shape-helper__" + id)) {
+      this.el.removeAttribute("shape-helper__" + id);
     }
   },
 
@@ -140,7 +140,7 @@ AFRAME.registerComponent("media-loader", {
       );
       setTimeout(() => {
         if (!this.loaderMixer) return; // Animation/loader was stopped early
-        this.el.setAttribute("ammo-shape__loader", { type: SHAPE.BOX });
+        this.el.setAttribute("shape-helper__loader", { type: SHAPE.BOX });
       }, 200);
 
       this.loadingClip.play();
@@ -199,7 +199,7 @@ AFRAME.registerComponent("media-loader", {
       this.animating = false;
 
       if (physicsShape) {
-        el.setAttribute("ammo-shape", {
+        el.setAttribute("shape-helper", {
           type: physicsShape,
           minHalfExtent: 0.04
         });
@@ -538,7 +538,7 @@ AFRAME.registerComponent("media-pager", {
   },
 
   repositionToolbar() {
-    const ammoShape = this.el.getAttribute("ammo-shape");
+    const ammoShape = this.el.getAttribute("shape-helper");
     if (!ammoShape) return;
 
     this.toolbar.object3D.position.y = -0.7;

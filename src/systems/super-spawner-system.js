@@ -44,22 +44,16 @@ export class SuperSpawnerSystem {
     // WARNING: previously used waitForEvent which is semantically different than
     // entity.addEventListener("body-loaded", ...) and adding a callback fn via
     // addEventListener will not work unless the callback function wraps its code in setTimeout(()=>{...}, 0)
-    spawnedEntity.addEventListener(
-      "body-loaded",
-      () => {
-        setTimeout(() => {
-          state.spawning = false;
-          spawnedEntity.object3D.position.copy(
-            data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
-          );
-          if (data.centerSpawnedObject) {
-            spawnedEntity.body.position.copy(entity.object3D.position);
-          }
-          spawnedEntity.object3D.matrixNeedsUpdate = true;
-        });
-      },
-      { once: true }
-    );
+    setTimeout(() => {
+      state.spawning = false;
+      spawnedEntity.object3D.position.copy(
+        data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
+      );
+      if (data.centerSpawnedObject) {
+        spawnedEntity.body.position.copy(entity.object3D.position);
+      }
+      spawnedEntity.object3D.matrixNeedsUpdate = true;
+    });
   }
 
   tick() {

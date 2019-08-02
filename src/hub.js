@@ -161,20 +161,6 @@ if (isEmbed && !qs.get("embed_token")) {
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
 
-const Ammo = require("ammo.js/builds/ammo.wasm.js");
-const AmmoWasm = require("ammo.js/builds/ammo.wasm.wasm");
-window.Ammo = Ammo.bind(undefined, {
-  locateFile(path) {
-    if (path.endsWith(".wasm")) {
-      return AmmoWasm;
-    }
-    return path;
-  }
-});
-require("aframe-physics-system");
-
-import "./systems/post-physics";
-
 import "./components/owned-object-limiter";
 import "./components/set-unowned-body-kinematic";
 import "./components/scalable-when-grabbed";
@@ -189,6 +175,9 @@ import "./components/nav-mesh-helper";
 import "./components/tools/pen";
 import "./components/tools/networked-drawing";
 import "./components/tools/drawing-manager";
+
+import "./components/body-helper";
+import "./components/shape-helper";
 
 import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
@@ -633,12 +622,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const scene = document.querySelector("a-scene");
   scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
 
-  // Physics needs to be ready before spawning anything.
-  while (!scene.systems.physics.initialized) await nextTick();
-
   const onSceneLoaded = () => {
-    const physicsSystem = scene.systems.physics;
-    physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
+    const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
+    physicsSystem.setDebug(isDebug || physicsSystem.debug);
     patchThreeAllocations();
   };
 

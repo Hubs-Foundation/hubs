@@ -45,7 +45,7 @@ AFRAME.registerComponent("transform-button", {
         return;
       }
       if (this.targetEl.body) {
-        this.targetEl.setAttribute("ammo-body", AMMO_BODY_ATTRIBUTES);
+        this.targetEl.setAttribute("body-helper", AMMO_BODY_ATTRIBUTES);
       }
       this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];
       this.transformSystem.startTransform(
