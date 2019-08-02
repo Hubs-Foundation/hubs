@@ -21,7 +21,7 @@ const computeObjectAABB = (function() {
 })();
 
 const rotation = new THREE.Euler();
-export function getBox(entity, boxRoot, dontLocalize) {
+export function getBox(entity, boxRoot, worldSpace) {
   const box = new THREE.Box3();
 
   rotation.copy(entity.object3D.rotation);
@@ -34,7 +34,7 @@ export function getBox(entity, boxRoot, dontLocalize) {
   computeObjectAABB(boxRoot, box);
 
   if (!box.isEmpty()) {
-    if (!dontLocalize) {
+    if (!worldSpace) {
       entity.object3D.worldToLocal(box.min);
       entity.object3D.worldToLocal(box.max);
     }

@@ -3,6 +3,7 @@ import { setMatrixWorld } from "../utils/three-utils";
 import { paths } from "./userinput/paths";
 import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
+const enableThirdPersonMode = qsTruthy("thirdPerson");
 
 const calculateViewingDistance = (function() {
   const center = new THREE.Vector3();
@@ -46,15 +47,17 @@ const moveRigSoCameraLooksAtObject = (function() {
   };
 })();
 
-let numCameraModes = 0;
-export const CAMERA_MODE_FIRST_PERSON = numCameraModes++;
-export const CAMERA_MODE_THIRD_PERSON_NEAR = numCameraModes++;
-export const CAMERA_MODE_THIRD_PERSON_FAR = numCameraModes++;
-export const CAMERA_MODE_INSPECT = numCameraModes++;
+export const CAMERA_MODE_FIRST_PERSON = 0;
+export const CAMERA_MODE_THIRD_PERSON_NEAR = 1;
+export const CAMERA_MODE_THIRD_PERSON_FAR = 2;
+export const CAMERA_MODE_INSPECT = 3;
 
-const m2 = new THREE.Matrix4();
-const m3 = new THREE.Matrix4();
-const offset = new THREE.Vector3();
+const NEXT_MODES = {
+  CAMERA_MODE_FIRST_PERSON: CAMERA_MODE_THIRD_PERSON_NEAR,
+  CAMERA_MODE_THIRD_PERSON_NEAR: CAMERA_MODE_THIRD_PERSON_FAR,
+  CAMERA_MODE_THIRD_PERSON_FAR: CAMERA_MODE_FIRST_PERSON
+};
+
 export class CameraSystem {
   constructor() {
     this.mode = CAMERA_MODE_FIRST_PERSON;
@@ -63,27 +66,24 @@ export class CameraSystem {
       this.playerRig = document.getElementById("player-rig");
       this.cameraEl = document.getElementById("experimental-camera");
       this.rigEl = document.getElementById("experimental-rig");
-      this.rigEl.object3D.matrixWorldNeedsUpdate = true;
-      this.rigEl.object3D.matrixIsModified = true;
     });
   }
   nextMode() {
-    if (!qsTruthy("thirdPerson")) return;
-
     if (this.mode === CAMERA_MODE_INSPECT) {
       this.uninspect();
       return;
     }
 
-    this.mode = (this.mode + 1) % numCameraModes;
+    if (!enableThirdPersonMode) return;
+
+    this.mode = NEXT_MODES[this.mode];
     if (this.mode === CAMERA_MODE_FIRST_PERSON) {
       AFRAME.scenes[0].renderer.vr.setPoseTarget(this.playerCamera.object3D);
     } else if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
       AFRAME.scenes[0].renderer.vr.setPoseTarget(this.cameraEl.object3D);
-    } else if (this.mode === CAMERA_MODE_INSPECT) {
-      this.mode = CAMERA_MODE_FIRST_PERSON; // skip inspect for now
     }
   }
+
   inspect(o) {
     if (this.mode !== CAMERA_MODE_INSPECT) {
       this.preInspectMode = this.mode;
@@ -98,85 +98,58 @@ export class CameraSystem {
       return;
     }
     this.mode = this.preInspectMode || CAMERA_MODE_FIRST_PERSON;
+    this.preInspectMode = null;
   }
-  tick() {
-    this.playerHead = this.playerHead || document.getElementById("player-head");
-    if (!this.playerHead) return;
-    if (!this.playerCamera) return;
-    this.playerCamera.components["pitch-yaw-rotator"].on = true;
-    this.cameraEl.components["pitch-yaw-rotator"].on = true;
+  tick = (function() {
+    const m2 = new THREE.Matrix4();
+    const m3 = new THREE.Matrix4();
+    const offset = new THREE.Vector3();
+    return function tick() {
+      this.playerHead = this.playerHead || document.getElementById("player-head");
+      if (!this.playerHead) return;
 
-    const userinput = AFRAME.scenes[0].systems.userinput;
-    if (userinput.get(paths.actions.nextCameraMode)) {
-      this.nextMode();
-    }
+      this.playerCamera.components["pitch-yaw-rotator"].on = true;
+      this.cameraEl.components["pitch-yaw-rotator"].on = true;
 
-    const visible = this.mode !== CAMERA_MODE_FIRST_PERSON;
-    if (visible !== this.playerHead.object3D.visible) {
-      this.playerHead.object3D.visible = visible;
-    }
-
-    this.playerRig.object3D.updateMatrices();
-    this.rigEl.object3D.updateMatrices();
-    if (this.mode === CAMERA_MODE_FIRST_PERSON) {
-      this.cameraEl.components["pitch-yaw-rotator"].on = false;
-      m2.copy(this.playerRig.object3D.matrixWorld);
-      setMatrixWorld(this.rigEl.object3D, m2);
-    }
-
-    this.playerCamera.object3D.matrixWorldNeedsUpdate = true;
-    if (this.mode === CAMERA_MODE_FIRST_PERSON) {
-      if (!AFRAME.scenes[0].is("vr-mode")) {
-        setMatrixWorld(this.cameraEl.object3D, this.playerCamera.object3D.matrixWorld);
-      } else {
-        setMatrixWorld(this.playerCamera.object3D, this.cameraEl.object3D.matrixWorld);
+      const userinput = AFRAME.scenes[0].systems.userinput;
+      if (userinput.get(paths.actions.nextCameraMode)) {
+        this.nextMode();
       }
-    }
 
-    if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
-      offset.set(0, 1, 3);
-      if (this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
-        offset.multiplyScalar(3);
+      const headShouldBeVisible = this.mode !== CAMERA_MODE_FIRST_PERSON;
+      if (headShouldBeVisible !== this.playerHead.object3D.visible) {
+        this.playerHead.object3D.visible = headShouldBeVisible;
       }
-      m3.makeTranslation(offset.x, offset.y, offset.z);
-      m2.copy(this.playerRig.object3D.matrixWorld);
-      m2.multiply(m3);
-      setMatrixWorld(this.rigEl.object3D, m2);
-      this.playerCamera.object3D.quaternion.copy(this.cameraEl.object3D.quaternion);
-    }
 
-    if (this.inspected) {
-      const stopInspecting = userinput.get(paths.actions.stopInspecting);
-      if (stopInspecting) {
-        this.uninspect();
+      this.playerRig.object3D.updateMatrices();
+      if (this.mode === CAMERA_MODE_FIRST_PERSON) {
+        this.cameraEl.components["pitch-yaw-rotator"].on = false;
+        setMatrixWorld(this.rigEl.object3D, this.playerRig.object3D.matrixWorld);
+        if (AFRAME.scenes[0].is("vr-mode")) {
+          setMatrixWorld(this.playerCamera.object3D, this.cameraEl.object3D.matrixWorld);
+        } else {
+          setMatrixWorld(this.cameraEl.object3D, this.playerCamera.object3D.matrixWorld);
+        }
       }
-    }
-  }
+
+      if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
+        offset.set(0, 1, 3);
+        if (this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
+          offset.multiplyScalar(3);
+        }
+        m3.makeTranslation(offset.x, offset.y, offset.z);
+        m2.copy(this.playerRig.object3D.matrixWorld);
+        m2.multiply(m3);
+        setMatrixWorld(this.rigEl.object3D, m2);
+        this.playerCamera.object3D.quaternion.copy(this.cameraEl.object3D.quaternion);
+      }
+
+      if (this.inspected) {
+        const stopInspecting = userinput.get(paths.actions.stopInspecting);
+        if (stopInspecting) {
+          this.uninspect();
+        }
+      }
+    };
+  })();
 }
-
-function getInspectable(child) {
-  let el = child;
-  while (el) {
-    if (el.components && el.components.tags && el.components.tags.data.inspectable) return el;
-    el = el.parentNode;
-  }
-  return null;
-}
-
-AFRAME.registerComponent("inspect-button", {
-  init() {
-    this.inspectable = getInspectable(this.el);
-    if (!this.inspectable) {
-      console.error("You put an inspect button but I could not find what you want to inspect.", this.el);
-      return;
-    }
-    this.el.object3D.addEventListener("holdable-button-down", () => {
-      this.el.sceneEl.systems["hubs-systems"].cameraSystem.inspect(this.inspectable.object3D);
-    });
-    this.el.object3D.addEventListener("holdable-button-up", () => {
-      if (this.el.sceneEl.is("vr-mode")) {
-        this.el.sceneEl.systems["hubs-systems"].cameraSystem.uninspect();
-      }
-    });
-  }
-});
