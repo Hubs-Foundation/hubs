@@ -30,15 +30,12 @@ export default class AvatarEditor extends Component {
   };
 
   state = {
-    avatar: { name: "My Avatar", parent_avatar_listing_id: "basebot", files: {} },
+    baseAvatars: [],
     previewGltfUrl: null
   };
 
   constructor(props) {
     super(props);
-    // Blank avatar, used to create base avatar
-    // this.state = { avatar: { name: "Base bot avatar", files: {} } };
-
     this.inputFiles = {};
   }
 
@@ -49,8 +46,27 @@ export default class AvatarEditor extends Component {
       Object.assign(this.inputFiles, avatar.files);
       this.setState({ avatar, previewGltfUrl: avatar.base_gltf_url });
     } else {
-      const { base_gltf_url } = await fetchAvatar("basebot");
-      this.setState({ avatar: { ...this.state.avatar, base_gltf_url }, previewGltfUrl: base_gltf_url });
+      const { entries } = await fetchReticulumAuthenticated(`/api/v1/media/search?filter=base&source=avatar_listings`);
+      const baseAvatars = entries.map(e => ({ id: e.id, name: e.name, gltfs: e.gltfs }));
+      if (baseAvatars.length) {
+        this.setState({
+          baseAvatars,
+          avatar: {
+            name: "My Avatar",
+            files: {},
+            base_gltf_url: baseAvatars[0].gltfs.base,
+            parent_avatar_listing_id: baseAvatars[0].id
+          },
+          previewGltfUrl: baseAvatars[0].gltfs.avatar
+        });
+      } else {
+        this.setState({
+          avatar: {
+            name: "My Avatar",
+            files: {}
+          }
+        });
+      }
     }
   };
 
@@ -182,7 +198,7 @@ export default class AvatarEditor extends Component {
                   }
                 }
               },
-              () => this.setState({ previewGltfUrl: this.getFallbackPreviewUrl() })
+              () => this.setState({ previewGltfUrl: this.getPreviewUrl() })
             );
           }}
         >
@@ -260,7 +276,12 @@ export default class AvatarEditor extends Component {
     </div>
   );
 
-  getFallbackPreviewUrl = () => {
+  getPreviewUrl = parentSid => {
+    if (parentSid) {
+      const avatar = this.state.baseAvatars.find(a => a.id === parentSid);
+      if (avatar) return avatar.gltfs.avatar;
+    }
+
     const glbFile = this.inputFiles.glb;
     const gltfUrl = this.state.avatar.files.gltf;
     if (glbFile) {
@@ -272,28 +293,22 @@ export default class AvatarEditor extends Component {
     }
   };
 
-  selectListingField = (name, placeholder) => (
+  selectListingField = (propName, placeholder) => (
     <div>
       <select
-        value={this.state.avatar[name] || ""}
+        value={this.state.avatar[propName] || ""}
         onChange={async e => {
           const sid = e.target.value;
-          let previewGltfUrl;
-          if (sid) {
-            const avatar = await fetchAvatar(sid);
-            previewGltfUrl = avatar.base_gltf_url;
-          } else {
-            previewGltfUrl = this.getFallbackPreviewUrl();
-          }
-          URL.revokeObjectURL(this.state.previewGltfUrl);
-          this.setState({ avatar: { ...this.state.avatar, [name]: sid }, previewGltfUrl });
+          this.setState({ avatar: { ...this.state.avatar, [propName]: sid }, previewGltfUrl: this.getPreviewUrl(sid) });
         }}
         placeholder={placeholder}
         className="select"
       >
-        <option value="basebot">Bot A</option>
-        <option value="basebot2">Bot B</option>
-        <option value="mine">Minecraft skin</option>
+        {this.state.baseAvatars.map(a => (
+          <option key={a.id} value={a.id}>
+            {a.name}
+          </option>
+        ))}
         <option value="">Custom GLB...</option>
       </select>
     </div>
@@ -339,7 +354,11 @@ export default class AvatarEditor extends Component {
             </i>
           </a>
         )}
-        {this.props.signedIn ? (
+        {!this.state.avatar ? (
+          <div className="loader">
+            <div className="loader-center" />
+          </div>
+        ) : this.props.signedIn ? (
           <form onSubmit={this.uploadAvatar} className="center">
             <div className="split">
               <div className="form-body">
@@ -348,7 +367,7 @@ export default class AvatarEditor extends Component {
                 {debug && this.textField("parent_avatar_listing_id", "Parent Avatar Listing ID")}
                 {this.textField("name", "Name", false, true)}
                 {debug && this.textarea("description", "Description")}
-                {!this.props.avatarId && this.selectListingField("parent_avatar_listing_id")}
+                {!!this.state.baseAvatars.length && this.selectListingField("parent_avatar_listing_id")}
                 {!avatar.parent_avatar_listing_id && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
                 {this.mapField("base_map", "Base Map", "image/*")}
                 <details>
