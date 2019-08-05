@@ -201,6 +201,10 @@ import detectConcurrentLoad from "./utils/concurrent-load-detector.js";
 
 import qsTruthy from "./utils/qs_truthy";
 
+// Tridify
+import { getTridifyModel } from "./tridify/TridifyLoader";
+import * as TridifyDefault from "./tridify/TridifyDefault.glb";
+
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
 NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
@@ -318,7 +322,10 @@ async function updateEnvironmentForHub(hub) {
 
   if (hub.scene) {
     isLegacyBundle = false;
-    sceneUrl = hub.scene.model_url;
+    // Tridify code:
+    sceneUrl = TridifyDefault;
+    // Original code:
+    /* sceneUrl = hub.scene.model_url; */
   } else if (hub.scene === null) {
     // delisted/removed scene
     sceneUrl = loadingEnvironmentURL;
@@ -328,6 +335,7 @@ async function updateEnvironmentForHub(hub) {
     const bundleAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle");
     sceneUrl = (glbAsset || bundleAsset).src;
     const hasExtension = /\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl);
+    console.log(hasExtension);
     isLegacyBundle = !(glbAsset || hasExtension);
   }
 
@@ -350,6 +358,9 @@ async function updateEnvironmentForHub(hub) {
     environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
 
     environmentScene.appendChild(environmentEl);
+
+    // Tridify code:
+    getTridifyModel(environmentScene);
 
     environmentEl.addEventListener(
       "model-loaded",
