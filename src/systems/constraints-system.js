@@ -26,7 +26,13 @@ export class ConstraintsSystem {
     if (!this.physicsSystem.world) return;
 
     if (prevState.held === state.held) {
-      if (!state.spawning && prevState.spawning && state.held && state.held.components.tags.data[constraintTag]) {
+      if (
+        !state.spawning &&
+        prevState.spawning &&
+        state.held &&
+        state.held.components.tags &&
+        state.held.components.tags.data[constraintTag]
+      ) {
         state.held.setAttribute("body-helper", {
           type: "dynamic",
           activationState: ACTIVATION_STATE.DISABLE_DEACTIVATION
@@ -43,7 +49,7 @@ export class ConstraintsSystem {
       }
       return;
     }
-    if (prevState.held && prevState.held.components.tags.data[constraintTag]) {
+    if (prevState.held && prevState.held.components.tags && prevState.held.components.tags.data[constraintTag]) {
       const heldEntityId = prevState.held.id;
       if (this.constraintPairs[heldEntityId] && this.constraintPairs[heldEntityId].indexOf(entityId) !== -1) {
         this.constraintPairs[heldEntityId].splice(this.constraintPairs[heldEntityId].indexOf(entityId), 1);
