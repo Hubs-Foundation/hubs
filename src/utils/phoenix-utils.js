@@ -3,6 +3,9 @@ import { generateHubName } from "../utils/name-generation";
 
 import Store from "../storage/store";
 
+// Tridify
+import { getModelHash } from "../tridify/modelparams";
+
 const resolverLink = document.createElement("a");
 export function getReticulumFetchUrl(path, absolute = false) {
   if (process.env.RETICULUM_SERVER) {
@@ -177,9 +180,22 @@ export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace
     }
   }
 
+  // Tridify code
+  if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
+    const model = getModelHash();
+    if (model) {
+      url = `/hub.html?hub_id=${hub.hub_id}&model=${model}`;
+    } else {
+      url = `/hub.html?hub_id=${hub.hub_id}`;
+    }
+  }
+
+  // Original code
+  /*
   if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
     url = `/hub.html?hub_id=${hub.hub_id}`;
   }
+  */
 
   if (replace) {
     document.location.replace(url);
