@@ -62,10 +62,10 @@ export class CameraSystem {
   constructor() {
     this.mode = CAMERA_MODE_FIRST_PERSON;
     waitForDOMContentLoaded().then(() => {
-      this.playerCamera = document.getElementById("avatar-pov-node");
+      this.avatarPOV = document.getElementById("avatar-pov-node");
       this.avatarRig = document.getElementById("avatar-rig");
       this.cameraEl = document.getElementById("viewing-camera");
-      this.rigEl = document.getElementById("experimental-rig");
+      this.rigEl = document.getElementById("viewing-rig");
     });
   }
   nextMode() {
@@ -78,7 +78,7 @@ export class CameraSystem {
 
     this.mode = NEXT_MODES[this.mode];
     if (this.mode === CAMERA_MODE_FIRST_PERSON) {
-      AFRAME.scenes[0].renderer.vr.setPoseTarget(this.playerCamera.object3D);
+      AFRAME.scenes[0].renderer.vr.setPoseTarget(this.avatarPOV.object3D);
     } else if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
       AFRAME.scenes[0].renderer.vr.setPoseTarget(this.cameraEl.object3D);
     }
@@ -107,7 +107,7 @@ export class CameraSystem {
       this.playerHead = this.playerHead || document.getElementById("player-head");
       if (!this.playerHead) return;
 
-      this.playerCamera.components["pitch-yaw-rotator"].on = true;
+      this.avatarPOV.components["pitch-yaw-rotator"].on = true;
       this.cameraEl.components["pitch-yaw-rotator"].on = true;
 
       this.userinput = this.userinput || AFRAME.scenes[0].systems.userinput;
@@ -133,10 +133,10 @@ export class CameraSystem {
         setMatrixWorld(this.rigEl.object3D, this.avatarRig.object3D.matrixWorld);
         if (AFRAME.scenes[0].is("vr-mode")) {
           this.cameraEl.object3D.updateMatrices();
-          setMatrixWorld(this.playerCamera.object3D, this.cameraEl.object3D.matrixWorld);
+          setMatrixWorld(this.avatarPOV.object3D, this.cameraEl.object3D.matrixWorld);
         } else {
-          this.playerCamera.object3D.updateMatrices();
-          setMatrixWorld(this.cameraEl.object3D, this.playerCamera.object3D.matrixWorld);
+          this.avatarPOV.object3D.updateMatrices();
+          setMatrixWorld(this.cameraEl.object3D, this.avatarPOV.object3D.matrixWorld);
         }
       }
       if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
@@ -148,8 +148,8 @@ export class CameraSystem {
         m2.copy(this.avatarRig.object3D.matrixWorld);
         m2.multiply(m3);
         setMatrixWorld(this.rigEl.object3D, m2);
-        this.playerCamera.object3D.quaternion.copy(this.cameraEl.object3D.quaternion);
-        this.playerCamera.object3D.matrixNeedsUpdate = true;
+        this.avatarPOV.object3D.quaternion.copy(this.cameraEl.object3D.quaternion);
+        this.avatarPOV.object3D.matrixNeedsUpdate = true;
       }
     };
   })();
