@@ -39,6 +39,10 @@ function registerNetworkSchemas() {
       "player-info",
       "networked-avatar",
       {
+        selector: ".image",
+        component: "media-loader"
+      },
+      {
         selector: ".camera",
         component: "position",
         requiresNetworkUpdate: vectorRequiresUpdate(0.001)
