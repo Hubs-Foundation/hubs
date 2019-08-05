@@ -1,5 +1,5 @@
 import * as threeToAmmo from "three-to-ammo";
-import { SHAPE, FIT } from "three-ammo/src/constants";
+import { SHAPE, FIT } from "three-ammo/constants";
 
 AFRAME.registerComponent("shape-helper", {
   schema: {

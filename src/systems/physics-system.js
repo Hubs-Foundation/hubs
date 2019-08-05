@@ -1,5 +1,5 @@
 import { World } from "three-ammo";
-import { TYPE } from "three-ammo/src/constants";
+import { TYPE } from "three-ammo/constants";
 
 export class PhysicsSystem {
   constructor(scene) {

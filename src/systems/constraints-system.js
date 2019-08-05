@@ -1,6 +1,6 @@
 /* global NAF AFRAME */
 import { Constraint } from "three-ammo";
-import { ACTIVATION_STATE } from "three-ammo/src/constants.js";
+import { ACTIVATION_STATE } from "three-ammo/constants.js";
 
 export class ConstraintsSystem {
   constructor(physicsSystem) {

@@ -1,5 +1,5 @@
 import { Body } from "three-ammo";
-import { ACTIVATION_STATE, TYPE } from "three-ammo/src/constants";
+import { ACTIVATION_STATE, TYPE } from "three-ammo/constants";
 
 const ACTIVATION_STATES = [
   ACTIVATION_STATE.ACTIVE_TAG,
