@@ -23,6 +23,13 @@ const v2 = new THREE.Vector3();
 const q = new THREE.Quaternion();
 const q2 = new THREE.Quaternion();
 
+const eps = 0.001;
+function qAlmostEquals(a, b) {
+  return (
+    Math.abs(a.x - b.x) < eps && Math.abs(a.y - b.y) < eps && Math.abs(a.z - b.z) < eps && Math.abs(a.w - b.w) < eps
+  );
+}
+
 AFRAME.registerComponent("transform-button", {
   schema: {
     mode: {
@@ -78,6 +85,7 @@ AFRAME.registerSystem("transform-selected-object", {
     this.transforming = false;
     this.axis = new THREE.Vector3();
     this.store = window.APP.store;
+    this.startQ = new THREE.Quaternion();
 
     this.dxStore = 0;
     this.dxApplied = 0;
@@ -114,9 +122,24 @@ AFRAME.registerSystem("transform-selected-object", {
     this.el.object3D.add(this.planarInfo.plane);
   },
 
-  stopTransform() {
-    this.transforming = false;
-  },
+  stopTransform: (function() {
+    const q = new THREE.Quaternion();
+    const PI_AROUND_Y = new THREE.Quaternion(0, 1, 0, 0);
+    const pInv = new THREE.Quaternion();
+    return function stopTransform() {
+      this.transforming = false;
+      if (this.mode === TRANSFORM_MODE.CURSOR) {
+        this.target.getWorldQuaternion(q);
+        if (qAlmostEquals(q, this.startQ)) {
+          q.multiply(PI_AROUND_Y);
+          this.target.parent.getWorldQuaternion(pInv);
+          pInv.inverse();
+          this.target.quaternion.copy(pInv).multiply(q);
+          this.target.matrixNeedsUpdate = true;
+        }
+      }
+    };
+  })(),
 
   startPlaneCasting() {
     const { plane, intersections, previousPointOnPlane } = this.planarInfo;
@@ -172,6 +195,10 @@ AFRAME.registerSystem("transform-selected-object", {
       this.store.update({ activity: { hasScaled: true } });
     } else {
       this.store.update({ activity: { hasRotated: true } });
+    }
+
+    if (this.mode === TRANSFORM_MODE.CURSOR) {
+      this.target.getWorldQuaternion(this.startQ);
     }
 
     if (this.mode === TRANSFORM_MODE.PUPPET) {

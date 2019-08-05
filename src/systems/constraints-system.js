@@ -6,18 +6,15 @@ export class ConstraintsSystem {
   constructor(physicsSystem) {
     this.prevLeftHand = {
       held: null,
-      hovered: null,
-      spawning: null
+      spawning: false
     };
     this.prevRightHand = {
       held: null,
-      hovered: null,
-      spawning: null
+      spawning: false
     };
     this.prevRightRemote = {
       held: null,
-      hovered: null,
-      spawning: null
+      spawning: false
     };
 
     this.physicsSystem = physicsSystem;
@@ -107,5 +104,21 @@ export class ConstraintsSystem {
     Object.assign(this.prevLeftHand, interaction.state.leftHand);
     Object.assign(this.prevRightHand, interaction.state.rightHand);
     Object.assign(this.prevRightRemote, interaction.state.rightRemote);
+  }
+
+  // for held objects deleted during the component tick
+  release(el) {
+    if (this.prevLeftHand.held === el) {
+      this.prevLeftHand.held = null;
+      this.prevLeftHand.spawning = false;
+    }
+    if (this.prevLeftHand.held === el) {
+      this.prevLeftHand.held = null;
+      this.prevLeftHand.spawning = false;
+    }
+    if (this.prevRightRemote.held === el) {
+      this.prevRightRemote.held = null;
+      this.prevRightRemote.spawning = false;
+    }
   }
 }

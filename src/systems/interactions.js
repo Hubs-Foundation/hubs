@@ -19,9 +19,11 @@ function findHandCollisionTargetForHand(body) {
   return null;
 }
 
+const notRemoteHoverTargets = new Map();
 const remoteHoverTargets = new Map();
 export function findRemoteHoverTarget(object3D) {
   if (!object3D) return null;
+  if (notRemoteHoverTargets.get(object3D)) return null;
   const target = remoteHoverTargets.get(object3D);
   return target || findRemoteHoverTarget(object3D.parent);
 }
@@ -31,6 +33,14 @@ AFRAME.registerComponent("is-remote-hover-target", {
   },
   remove: function() {
     remoteHoverTargets.delete(this.el.object3D);
+  }
+});
+AFRAME.registerComponent("is-not-remote-hover-target", {
+  init: function() {
+    notRemoteHoverTargets.set(this.el.object3D, this.el);
+  },
+  remove: function() {
+    notRemoteHoverTargets.delete(this.el.object3D);
   }
 });
 
@@ -43,10 +53,32 @@ function isUI(el) {
 AFRAME.registerSystem("interaction", {
   updateCursorIntersection: function(intersection) {
     this.rightRemoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
+    return this.rightRemoteHoverTarget;
   },
 
   isHeld(el) {
     return this.state.leftHand.held === el || this.state.rightHand.held === el || this.state.rightRemote.held === el;
+  },
+
+  release(el) {
+    if (this.state.leftHand.held === el) {
+      this.state.leftHand.held = null;
+    }
+    if (this.state.leftHand.hovered === el) {
+      this.state.leftHand.hovered = null;
+    }
+    if (this.state.leftHand.held === el) {
+      this.state.leftHand.held = null;
+    }
+    if (this.state.rightHand.hovered === el) {
+      this.state.rightHand.hovered = null;
+    }
+    if (this.state.rightRemote.held === el) {
+      this.state.rightRemote.held = null;
+    }
+    if (this.state.rightRemote.hovered === el) {
+      this.state.rightRemote.hovered = null;
+    }
   },
 
   init: function() {

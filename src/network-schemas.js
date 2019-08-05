@@ -18,7 +18,11 @@ function registerNetworkSchemas() {
   };
 
   // Note: networked template ids are semantically important. We use the template suffix as a filter
-  // for allowing and authorizing messages in reticulum. See https://github.com/mozilla/reticulum/pull/195
+  // for allowing and authorizing messages in reticulum.
+  // See `spawn_permitted?` in https://github.com/mozilla/reticulum/blob/master/lib/ret_web/channels/hub_channel.ex
+
+  // NAF schemas have been extended with a custom nonAuthorizedComponents property that is used to skip authorization
+  // on certain components and properties regardless of hub or user permissions. See permissions-utils.js.
 
   NAF.schemas.add({
     template: "#remote-avatar",
@@ -98,10 +102,24 @@ function registerNetworkSchemas() {
         property: "videoPaused"
       },
       {
-        component: "media-pager",
+        component: "media-pdf",
         property: "index"
       },
       "pinnable"
+    ],
+    nonAuthorizedComponents: [
+      {
+        component: "media-video",
+        property: "time"
+      },
+      {
+        component: "media-video",
+        property: "videoPaused"
+      },
+      {
+        component: "media-pager",
+        property: "index"
+      }
     ]
   });
 
@@ -114,6 +132,12 @@ function registerNetworkSchemas() {
         component: "media-video",
         property: "time"
       }
+    ],
+    nonAuthorizedComponents: [
+      {
+        component: "media-video",
+        property: "time"
+      }
     ]
   });
 
@@ -122,6 +146,20 @@ function registerNetworkSchemas() {
     components: [
       // TODO: Optimize checking mediaOptions with requiresNetworkUpdate.
       "media-loader",
+      {
+        component: "media-video",
+        property: "time"
+      },
+      {
+        component: "media-video",
+        property: "videoPaused"
+      },
+      {
+        component: "media-pdf",
+        property: "index"
+      }
+    ],
+    nonAuthorizedComponents: [
       {
         component: "media-video",
         property: "time"
@@ -185,7 +223,6 @@ function registerNetworkSchemas() {
         requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       "scale",
-      "media-loader",
       {
         selector: "#pen",
         component: "pen",
