@@ -228,7 +228,7 @@ function getPlatformUnsupportedReason() {
 }
 
 function setupLobbyCamera() {
-  const camera = document.getElementById("experimental-camera");
+  const camera = document.getElementById("viewing-camera");
   const previewCamera = document.getElementById("environment-scene").object3D.getObjectByName("scene-preview-camera");
 
   if (previewCamera) {

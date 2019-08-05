@@ -64,7 +64,7 @@ export class CameraSystem {
     waitForDOMContentLoaded().then(() => {
       this.playerCamera = document.getElementById("avatar-pov-node");
       this.avatarRig = document.getElementById("avatar-rig");
-      this.cameraEl = document.getElementById("experimental-camera");
+      this.cameraEl = document.getElementById("viewing-camera");
       this.rigEl = document.getElementById("experimental-rig");
     });
   }

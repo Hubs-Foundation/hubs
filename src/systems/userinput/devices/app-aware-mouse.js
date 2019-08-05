@@ -37,7 +37,7 @@ export class AppAwareMouseDevice {
     }
 
     if (!this.camera) {
-      this.camera = document.getElementById("experimental-camera").components.camera.camera;
+      this.camera = document.getElementById("viewing-camera").components.camera.camera;
     }
 
     const buttonLeft = frame.get(paths.device.mouse.buttonLeft);

@@ -88,7 +88,7 @@ export const xforms = {
     const pose = new Pose();
     return function poseFromCameraProjection(frame, src, dest) {
       if (!camera) {
-        camera = document.getElementById("experimental-camera").components.camera.camera;
+        camera = document.getElementById("viewing-camera").components.camera.camera;
       }
       const value = frame.get(src.value);
       frame.setPose(dest.value, pose.fromCameraProjection(camera, value[0], value[1]));

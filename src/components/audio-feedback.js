@@ -139,7 +139,7 @@ AFRAME.registerComponent("scale-audio-feedback", {
   },
 
   init() {
-    this.camera = document.getElementById("experimental-camera").object3D;
+    this.camera = document.getElementById("viewing-camera").object3D;
   },
 
   tick() {

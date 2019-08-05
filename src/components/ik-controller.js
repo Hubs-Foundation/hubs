@@ -108,7 +108,7 @@ AFRAME.registerComponent("ik-controller", {
     this.isInView = true;
     this.hasConvergedHips = false;
     this.lastCameraTransform = new THREE.Matrix4();
-    this.playerCamera = document.getElementById("experimental-camera").getObject3D("camera");
+    this.playerCamera = document.getElementById("viewing-camera").getObject3D("camera");
 
     this.el.sceneEl.systems["frame-scheduler"].schedule(this._runScheduledWork, "ik");
   },
