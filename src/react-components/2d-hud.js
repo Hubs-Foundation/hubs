@@ -51,8 +51,6 @@ class TopHUD extends Component {
     activeTip: PropTypes.string,
     history: PropTypes.object,
     onToggleMute: PropTypes.func,
-
-    onEmojiChange: PropTypes.func,
     onToggleFreeze: PropTypes.func,
     onSpawnPen: PropTypes.func,
     onSpawnCamera: PropTypes.func,
@@ -284,7 +282,7 @@ class TopHUD extends Component {
                 [styles.active]: this.props.hasActiveCamera,
                 [styles.disabled]: this.state.cameraDisabled
               })}
-              //title={`Camera${this.state.cameraDisabled ? " Disabled" : ""}`}
+              title={`Camera${this.state.cameraDisabled ? " Disabled" : ""}`}
               onClick={this.state.cameraDisabled ? noop : this.props.onSpawnCamera}
             />
           </div>

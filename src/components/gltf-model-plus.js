@@ -460,10 +460,7 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       if (src === this.lastSrc) return;
 
-      if (this.lastSrc) {
-        gltfCache.release(this.lastSrc);
-      }
-
+      const lastSrc = this.lastSrc;
       this.lastSrc = src;
 
       if (!src) {
@@ -546,6 +543,9 @@ AFRAME.registerComponent("gltf-model-plus", {
         environmentMapComponent.applyEnvironmentMap(object3DToSet);
       }
 
+      if (lastSrc) {
+        gltfCache.release(lastSrc);
+      }
       this.el.setObject3D("mesh", object3DToSet);
 
       rewires.forEach(f => f());

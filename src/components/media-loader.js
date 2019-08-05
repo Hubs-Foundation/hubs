@@ -19,6 +19,7 @@ import anime from "animejs";
 const SHAPE = require("aframe-physics-system/src/constants").SHAPE;
 
 const gltfLoader = new THREE.GLTFLoader();
+let loadingObjectEnvMap;
 let loadingObject;
 gltfLoader.load(loadingObjectSrc, gltf => {
   loadingObject = gltf;
@@ -28,14 +29,10 @@ const fetchContentType = url => {
   return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
 };
 
-const fetchMaxContentIndex = url => {
-  return fetch(url).then(r => parseInt(r.headers.get("x-max-content-index")));
-};
-
 const boundingBox = new THREE.Box3();
 
-const forceBatching = qsTruthy("forceBatching");
-const enableBatching = qsTruthy("enableBatching");
+const batchMeshes = qsTruthy("batchMeshes");
+const disableBatching = qsTruthy("disableBatching");
 
 AFRAME.registerComponent("media-loader", {
   schema: {
@@ -59,6 +56,7 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
+    this.animating = false;
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
@@ -102,6 +100,7 @@ AFRAME.registerComponent("media-loader", {
     this.el.removeAttribute("gltf-model-plus");
     this.el.removeAttribute("media-pager");
     this.el.removeAttribute("media-video");
+    this.el.removeAttribute("media-pdf");
     this.el.setAttribute("media-image", { src: "error" });
     this.clearLoadingTimeout();
   },
@@ -112,12 +111,22 @@ AFRAME.registerComponent("media-loader", {
       return;
     }
     const useFancyLoader = !!loadingObject;
+
     const mesh = useFancyLoader
       ? loadingObject.scene.clone()
       : new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
     this.el.setObject3D("mesh", mesh);
+
     this.updateScale(true);
+
     if (useFancyLoader) {
+      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+      const currentEnivronmentMap = environmentMapComponent.environmentMap;
+      if (loadingObjectEnvMap !== currentEnivronmentMap) {
+        environmentMapComponent.applyEnvironmentMap(mesh);
+        loadingObjectEnvMap = currentEnivronmentMap;
+      }
+
       this.loaderMixer = new THREE.AnimationMixer(mesh);
 
       this.loadingClip = this.loaderMixer.clipAction(loadingObject.animations[0]);
@@ -134,11 +143,13 @@ AFRAME.registerComponent("media-loader", {
       this.loadingClip.play();
       this.loadingScaleClip.play();
     }
+
     if (this.el.sceneEl.is("entered") && (!this.networkedEl || NAF.utils.isMine(this.networkedEl))) {
       this.loadingSoundNode = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundLooped(
         SOUND_MEDIA_LOADING
       );
     }
+
     delete this.showLoaderTimeout;
   },
 
@@ -173,7 +184,7 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
-  onMediaLoaded(physicsShape = null) {
+  onMediaLoaded(physicsShape = null, shouldUpdateScale) {
     const el = this.el;
     this.clearLoadingTimeout();
 
@@ -182,6 +193,8 @@ AFRAME.registerComponent("media-loader", {
     }
 
     const finish = () => {
+      this.animating = false;
+
       if (physicsShape) {
         el.setAttribute("ammo-shape", {
           type: physicsShape,
@@ -199,13 +212,18 @@ AFRAME.registerComponent("media-loader", {
     };
 
     if (this.data.animate) {
-      const mesh = this.el.getObject3D("mesh");
-      const scale = { x: 0.001, y: 0.001, z: 0.001 };
-      scale.x = mesh.scale.x < scale.x ? mesh.scale.x * 0.001 : scale.x;
-      scale.y = mesh.scale.y < scale.y ? mesh.scale.x * 0.001 : scale.y;
-      scale.z = mesh.scale.z < scale.z ? mesh.scale.x * 0.001 : scale.z;
-      this.addMeshScaleAnimation(mesh, scale, finish);
+      if (!this.animating) {
+        this.animating = true;
+        if (shouldUpdateScale) this.updateScale(this.data.resize);
+        const mesh = this.el.getObject3D("mesh");
+        const scale = { x: 0.001, y: 0.001, z: 0.001 };
+        scale.x = mesh.scale.x < scale.x ? mesh.scale.x * 0.001 : scale.x;
+        scale.y = mesh.scale.y < scale.y ? mesh.scale.x * 0.001 : scale.y;
+        scale.z = mesh.scale.z < scale.z ? mesh.scale.x * 0.001 : scale.z;
+        this.addMeshScaleAnimation(mesh, scale, finish);
+      }
     } else {
+      if (shouldUpdateScale) this.updateScale(this.data.resize);
       finish();
     }
   },
@@ -284,7 +302,7 @@ AFRAME.registerComponent("media-loader", {
       }
 
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
-      accessibleUrl = proxiedUrlFor(canonicalUrl, null);
+      accessibleUrl = proxiedUrlFor(canonicalUrl);
 
       // if the component creator didn't know the content type, we didn't get it from reticulum, and
       // we don't think we can infer it from the extension, we need to make a HEAD request to find it out
@@ -306,6 +324,7 @@ AFRAME.registerComponent("media-loader", {
         const startTime = hashTime || qsTime || 0;
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-image");
+        this.el.removeAttribute("media-pdf");
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
         this.el.addEventListener(
           "video-loaded",
@@ -324,6 +343,7 @@ AFRAME.registerComponent("media-loader", {
       } else if (contentType.startsWith("image/")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
+        this.el.removeAttribute("media-pdf");
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(
           "image-loaded",
@@ -342,7 +362,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
         this.el.setAttribute(
           "media-image",
-          Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, contentType, batch: enableBatching })
+          Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, contentType, batch: !disableBatching })
         );
 
         if (this.el.components["position-at-box-shape-border__freeze"]) {
@@ -351,13 +371,25 @@ AFRAME.registerComponent("media-loader", {
       } else if (contentType.startsWith("application/pdf")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
-        // two small differences:
-        // 1. we pass the canonical URL to the pager so it can easily make subresource URLs
-        // 2. we don't remove the media-image component -- media-pager uses that internally
-        this.el.setAttribute("media-pager", Object.assign({}, this.data.mediaOptions, { src: canonicalUrl }));
+        this.el.removeAttribute("media-image");
+        this.el.setAttribute(
+          "media-pdf",
+          Object.assign({}, this.data.mediaOptions, {
+            src: accessibleUrl,
+            contentType,
+            batch: false // Batching disabled until atlas is updated properly
+          })
+        );
+        this.el.setAttribute("media-pager", {});
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
-        this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
-        this.el.addEventListener("preview-loaded", () => this.onMediaLoaded(SHAPE.BOX), { once: true });
+        this.el.addEventListener(
+          "pdf-loaded",
+          () => {
+            this.clearLoadingTimeout();
+            this.onMediaLoaded(SHAPE.BOX);
+          },
+          { once: true }
+        );
 
         if (this.el.components["position-at-box-shape-border__freeze"]) {
           this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
@@ -369,12 +401,12 @@ AFRAME.registerComponent("media-loader", {
       ) {
         this.el.removeAttribute("media-image");
         this.el.removeAttribute("media-video");
+        this.el.removeAttribute("media-pdf");
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(
           "model-loaded",
           () => {
-            this.updateScale(this.data.resize);
-            this.onMediaLoaded(SHAPE.HULL);
+            this.onMediaLoaded(SHAPE.HULL, true);
             addAnimationComponents(this.el);
           },
           { once: true }
@@ -386,13 +418,14 @@ AFRAME.registerComponent("media-loader", {
             src: accessibleUrl,
             contentType: contentType,
             inflate: true,
-            batch: forceBatching,
+            batch: !disableBatching && batchMeshes,
             modelToWorldScale: this.data.resize ? 0.0001 : 1.0
           })
         );
       } else if (contentType.startsWith("text/html")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
+        this.el.removeAttribute("media-pdf");
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(
           "image-loaded",
@@ -422,7 +455,7 @@ AFRAME.registerComponent("media-loader", {
           Object.assign({}, this.data.mediaOptions, {
             src: thumbnail,
             contentType: guessContentType(thumbnail) || "image/png",
-            batch: enableBatching
+            batch: !disableBatching
           })
         );
         if (this.el.components["position-at-box-shape-border__freeze"]) {
@@ -440,13 +473,12 @@ AFRAME.registerComponent("media-loader", {
 
 AFRAME.registerComponent("media-pager", {
   schema: {
-    src: { type: "string" },
-    index: { default: 0 }
+    index: { default: 0 },
+    maxIndex: { default: 0 }
   },
 
   init() {
     this.toolbar = null;
-    this.imageSrc = null;
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
 
@@ -454,20 +486,20 @@ AFRAME.registerComponent("media-pager", {
       this.networkedEl = networkedEl;
     });
 
-    this.el.addEventListener("image-loaded", async e => {
-      this.imageSrc = e.detail.src;
+    this.el.addEventListener("pdf-loaded", async () => {
       await this._ensureUI();
       this.update();
     });
   },
 
   async _ensureUI() {
-    if (this.hasSetupUI || !this.imageSrc) return;
+    if (this.hasSetupUI) return;
+    if (!this.data.maxIndex) return;
+
     this.hasSetupUI = true;
 
     // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
     // request for the same page to read out the max-content-index header
-    this.maxIndex = await fetchMaxContentIndex(this.imageSrc);
     const template = document.getElementById("paging-toolbar");
     this.el.querySelector(".interactable-ui").appendChild(document.importNode(template.content, true));
     this.toolbar = this.el.querySelector(".paging-toolbar");
@@ -481,20 +513,15 @@ AFRAME.registerComponent("media-pager", {
       this.prevButton.object3D.addEventListener("interact", this.onPrev);
 
       this.update();
-      this.el.emit("preview-loaded");
+      this.el.emit("pager-loaded");
     }, 0);
   },
 
   async update() {
-    if (!this.data.src) return;
-
-    const pageSrc = proxiedUrlFor(this.data.src, this.data.index);
-    this.el.setAttribute("media-image", { src: pageSrc, contentType: guessContentType(pageSrc) || "image/png" });
-
     await this._ensureUI();
 
     if (this.pageLabel) {
-      this.pageLabel.setAttribute("text", "value", `${this.data.index + 1}/${this.maxIndex + 1}`);
+      this.pageLabel.setAttribute("text", "value", `${this.data.index + 1}/${this.data.maxIndex + 1}`);
       this.repositionToolbar();
     }
   },
@@ -507,19 +534,24 @@ AFRAME.registerComponent("media-pager", {
 
   onNext() {
     if (!NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
-    this.el.setAttribute("media-pager", "index", Math.min(this.data.index + 1, this.maxIndex));
+    const newIndex = Math.min(this.data.index + 1, this.data.maxIndex);
+    this.el.setAttribute("media-pdf", "index", newIndex);
+    this.el.setAttribute("media-pager", "index", newIndex);
     this.el.emit("pager-page-changed");
   },
 
   onPrev() {
     if (!NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
-    this.el.setAttribute("media-pager", "index", Math.max(this.data.index - 1, 0));
+    const newIndex = Math.max(this.data.index - 1, 0);
+    this.el.setAttribute("media-pdf", "index", newIndex);
+    this.el.setAttribute("media-pager", "index", newIndex);
     this.el.emit("pager-page-changed");
   },
 
   repositionToolbar() {
     const ammoShape = this.el.getAttribute("ammo-shape");
     if (!ammoShape) return;
+    if (!this.toolbar) return;
 
     this.toolbar.object3D.position.y = -0.7;
     this.toolbar.object3D.matrixNeedsUpdate = true;

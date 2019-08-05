@@ -133,6 +133,7 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
   });
 
   if (componentData.pageIndex) {
+    el.setAttribute("media-pdf", { index: componentData.pageIndex });
     el.setAttribute("media-pager", { index: componentData.pageIndex });
   }
 
@@ -333,3 +334,5 @@ AFRAME.GLTFModelPlus.registerComponent("trimesh", "trimesh", el => {
     includeInvisible: true
   });
 });
+
+AFRAME.GLTFModelPlus.registerComponent("particle-emitter", "particle-emitter");
