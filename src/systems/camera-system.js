@@ -63,7 +63,7 @@ export class CameraSystem {
     this.mode = CAMERA_MODE_FIRST_PERSON;
     waitForDOMContentLoaded().then(() => {
       this.playerCamera = document.getElementById("avatar-pov-node");
-      this.playerRig = document.getElementById("player-rig");
+      this.avatarRig = document.getElementById("avatar-rig");
       this.cameraEl = document.getElementById("experimental-camera");
       this.rigEl = document.getElementById("experimental-rig");
     });
@@ -127,10 +127,10 @@ export class CameraSystem {
         this.playerHead.object3D.visible = headShouldBeVisible;
       }
 
-      this.playerRig.object3D.updateMatrices();
+      this.avatarRig.object3D.updateMatrices();
       if (this.mode === CAMERA_MODE_FIRST_PERSON) {
         this.cameraEl.components["pitch-yaw-rotator"].on = false;
-        setMatrixWorld(this.rigEl.object3D, this.playerRig.object3D.matrixWorld);
+        setMatrixWorld(this.rigEl.object3D, this.avatarRig.object3D.matrixWorld);
         if (AFRAME.scenes[0].is("vr-mode")) {
           this.cameraEl.object3D.updateMatrices();
           setMatrixWorld(this.playerCamera.object3D, this.cameraEl.object3D.matrixWorld);
@@ -145,7 +145,7 @@ export class CameraSystem {
           offset.multiplyScalar(3);
         }
         m3.makeTranslation(offset.x, offset.y, offset.z);
-        m2.copy(this.playerRig.object3D.matrixWorld);
+        m2.copy(this.avatarRig.object3D.matrixWorld);
         m2.multiply(m3);
         setMatrixWorld(this.rigEl.object3D, m2);
         this.playerCamera.object3D.quaternion.copy(this.cameraEl.object3D.quaternion);

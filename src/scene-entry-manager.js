@@ -30,7 +30,7 @@ export default class SceneEntryManager {
     this.mediaSearchStore = window.APP.mediaSearchStore;
     this.scene = document.querySelector("a-scene");
     this.cursorController = document.querySelector("#cursor-controller");
-    this.playerRig = document.querySelector("#player-rig");
+    this.avatarRig = document.querySelector("#avatar-rig");
     this._entered = false;
     this.performConditionalSignIn = () => {};
     this.history = history;
@@ -66,7 +66,7 @@ export default class SceneEntryManager {
     }
 
     if (isMobile || qsTruthy("mobile")) {
-      this.playerRig.setAttribute("virtual-gamepad-controls", {});
+      this.avatarRig.setAttribute("virtual-gamepad-controls", {});
     }
 
     this._setupPlayerRig();
@@ -148,7 +148,7 @@ export default class SceneEntryManager {
 
     const avatarScale = parseInt(qs.get("avatar_scale"), 10);
     if (avatarScale) {
-      this.playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
+      this.avatarRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
     }
   };
 
@@ -156,7 +156,7 @@ export default class SceneEntryManager {
     const avatarId = this.store.state.profile.avatarId;
     const avatarSrc = await getAvatarSrc(avatarId);
 
-    this.playerRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
+    this.avatarRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
   };
 
   _setupKicking = () => {
@@ -507,9 +507,9 @@ export default class SceneEntryManager {
   };
 
   _spawnAvatar = () => {
-    this.playerRig.setAttribute("networked", "template: #remote-avatar; attachTemplateToLocal: false;");
-    this.playerRig.setAttribute("networked-avatar", "");
-    this.playerRig.emit("entered");
+    this.avatarRig.setAttribute("networked", "template: #remote-avatar; attachTemplateToLocal: false;");
+    this.avatarRig.setAttribute("networked-avatar", "");
+    this.avatarRig.emit("entered");
   };
 
   _runBot = async mediaStream => {

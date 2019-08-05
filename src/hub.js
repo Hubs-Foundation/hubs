@@ -379,7 +379,7 @@ async function updateEnvironmentForHub(hub) {
 
             // We've already entered, so move to new spawn point once new environment is loaded
             if (sceneEl.is("entered")) {
-              document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
+              document.querySelector("#avatar-rig").components["spawn-controller"].moveToSpawnPoint();
             }
           },
           { once: true }

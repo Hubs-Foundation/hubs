@@ -606,6 +606,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
         paths.device.keyboard.key("a"),
         paths.device.keyboard.key("s"),
         paths.device.keyboard.key("d"),
+        paths.device.keyboard.key("q"),
+        paths.device.keyboard.key("e"),
         k("space-rising")
       ],
       dest: { value: paths.actions.stopInspecting },

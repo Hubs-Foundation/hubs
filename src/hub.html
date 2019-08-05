@@ -823,10 +823,10 @@
             ></a-entity>
         </a-sphere>
 
-        <!-- Player Rig -->
+        <!-- Avatar Rig -->
         <a-entity
-            id="player-rig"
-            spawn-controller="loadedEvent: entered; target: #player-rig"
+            id="avatar-rig"
+            spawn-controller="loadedEvent: entered; target: #avatar-rig"
             character-controller="pivot: #avatar-pov-node"
             ik-root
             player-info
@@ -972,8 +972,8 @@
                         disable-frustum-culling
                         hand-pose__left
                         hand-pose__right
-                        hand-pose-controller__left="networkedAvatar:#player-rig;eventSrc:#player-left-controller"
-                        hand-pose-controller__right="networkedAvatar:#player-rig;eventSrc:#player-right-controller"
+                        hand-pose-controller__left="networkedAvatar:#avatar-rig;eventSrc:#player-left-controller"
+                        hand-pose-controller__right="networkedAvatar:#avatar-rig;eventSrc:#player-right-controller"
                     ></a-entity>
                 </template>
 
@@ -984,7 +984,7 @@
                 </template>
 
                 <template data-name="Head">
-                    <a-entity id="player-head" visible="false" bone-visibility></a-entity>
+                    <a-entity id="avatar-head" visible="false" bone-visibility></a-entity>
                 </template>
 
                 <template data-name="LeftHand">

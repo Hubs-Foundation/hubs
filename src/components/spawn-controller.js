@@ -1,7 +1,7 @@
 import { getLastWorldPosition } from "../utils/three-utils";
 
 /**
- * Used on a player-rig to move the player to a random spawn point on entry.
+ * Used on a avatar-rig to move the avatar to a random spawn point on entry.
  * @namespace avatar
  * @component spawn-controller
  */
@@ -32,7 +32,7 @@ AFRAME.registerComponent("spawn-controller", {
     this.el.object3D.rotation.copy(spawnPoint.object3D.rotation);
 
     if (this.el.sceneEl.is("vr-mode")) {
-      // Rotate the player rig such that the vr-camera faces forward.
+      // Rotate the avatar rig such that the vr-camera faces forward.
       this.el.object3D.rotation.y -= this.data.camera.object3D.rotation.y;
     } else {
       // Reset the camera transform in 2D mode.

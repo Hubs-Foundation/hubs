@@ -10,7 +10,7 @@ AFRAME.registerSystem("camera-tools", {
     this.ticks = 0;
 
     waitForDOMContentLoaded().then(() => {
-      const playerModelEl = document.querySelector("#player-rig .model");
+      const playerModelEl = document.querySelector("#avatar-rig .model");
       playerModelEl.addEventListener("model-loading", () => (this.playerHead = null));
       playerModelEl.addEventListener("model-loaded", this.updatePlayerHead.bind(this));
       this.updatePlayerHead();
