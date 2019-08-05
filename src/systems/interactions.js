@@ -6,7 +6,6 @@ import { canMove } from "../utils/permissions-utils";
 
 function findHandCollisionTargetForHand(body) {
   const world = this.el.sceneEl.systems["hubs-systems"].physicsSystem.world;
-  const numManifolds = world.dispatcher.getNumManifolds();
   const handPtr = Ammo.getPointer(body.physicsBody);
 
   if (world.collisions.has(handPtr) && world.collisions.get(handPtr).length > 0) {

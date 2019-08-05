@@ -1,6 +1,5 @@
-import { World, Body, Constraint } from "three-ammo";
-import { TYPE, CONSTRAINT, ACTIVATION_STATE } from "three-ammo/src/constants";
-import { createBoxShape, createSphereShape } from "three-to-ammo";
+import { World } from "three-ammo";
+import { TYPE } from "three-ammo/src/constants";
 
 export class PhysicsSystem {
   constructor(scene) {
@@ -21,9 +20,7 @@ export class PhysicsSystem {
     this.scene = scene;
     this.stepDuration = 0;
 
-    AmmoModule().then(Ammo => {
-      console.log("Ammo ready!");
-
+    AmmoModule().then(() => {
       this.world = new World({
         debugDrawMode: THREE.AmmoDebugConstants.DrawWireframe,
         gravity: { x: 0, y: -9.8, z: 0 }

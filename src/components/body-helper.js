@@ -1,7 +1,5 @@
-/* global Ammo,THREE */
-import AmmoDebugDrawer from "ammo-debug-drawer";
 import { Body } from "three-ammo";
-import { ACTIVATION_STATE, COLLISION_FLAG, SHAPE, TYPE, FIT } from "three-ammo/src/constants";
+import { ACTIVATION_STATE, TYPE } from "three-ammo/src/constants";
 
 const ACTIVATION_STATES = [
   ACTIVATION_STATE.ACTIVE_TAG,
