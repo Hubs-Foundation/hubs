@@ -34,7 +34,9 @@ AFRAME.registerComponent("video-pause-state", {
   },
 
   remove() {
-    this.video.removeEventListener("pause", this.onPauseStateChange);
+    if (this.video) {
+      this.video.removeEventListener("pause", this.onPauseStateChange);
+    }
     this.el.removeEventListener("video-loaded", this.onVideoLoaded);
   }
 });
