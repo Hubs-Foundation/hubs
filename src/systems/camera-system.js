@@ -92,11 +92,10 @@ export class CameraSystem {
     this.inspected = o;
     moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
   }
+
   uninspect() {
     this.inspected = null;
-    if (this.mode !== CAMERA_MODE_INSPECT) {
-      return;
-    }
+    if (this.mode !== CAMERA_MODE_INSPECT) return;
     this.mode = this.preInspectMode || CAMERA_MODE_FIRST_PERSON;
     this.preInspectMode = null;
   }
@@ -111,15 +110,15 @@ export class CameraSystem {
       this.playerCamera.components["pitch-yaw-rotator"].on = true;
       this.cameraEl.components["pitch-yaw-rotator"].on = true;
 
-      const userinput = AFRAME.scenes[0].systems.userinput;
+      this.userinput = this.userinput || AFRAME.scenes[0].systems.userinput;
       if (this.inspected) {
-        const stopInspecting = userinput.get(paths.actions.stopInspecting);
+        const stopInspecting = this.userinput.get(paths.actions.stopInspecting);
         if (stopInspecting) {
           this.uninspect();
         }
       }
 
-      if (userinput.get(paths.actions.nextCameraMode)) {
+      if (this.userinput.get(paths.actions.nextCameraMode)) {
         this.nextMode();
       }
 
@@ -152,7 +151,6 @@ export class CameraSystem {
         this.playerCamera.object3D.quaternion.copy(this.cameraEl.object3D.quaternion);
         this.playerCamera.object3D.matrixNeedsUpdate = true;
       }
-
     };
   })();
 }

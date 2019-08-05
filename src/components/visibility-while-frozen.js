@@ -2,6 +2,10 @@ import { getLastWorldPosition } from "../utils/three-utils";
 
 const isMobile = AFRAME.utils.device.isMobile();
 
+function almostEqual(a, b) {
+  return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) + Math.abs(a.z - b.z) < 0.1;
+}
+
 /**
  * Toggles the visibility of this entity when the scene is frozen.
  * @namespace ui
@@ -68,12 +72,14 @@ AFRAME.registerComponent("visibility-while-frozen", {
 
       getLastWorldPosition(this.cam, this.camWorldPos);
       getLastWorldPosition(this.cam2, this.cam2WorldPos);
+      const checkBoth = !almostEqual(this.camWorldPos, this.cam2WorldPos);
       this.objWorldPos.copy(this.el.object3D.position);
       this.el.object3D.localToWorld(this.objWorldPos);
 
       isWithinDistance =
         this.camWorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance ||
-        this.cam2WorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance;
+        (checkBoth &&
+          this.cam2WorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance);
     }
 
     const isTransforming = AFRAME.scenes[0].systems["transform-selected-object"].transforming;

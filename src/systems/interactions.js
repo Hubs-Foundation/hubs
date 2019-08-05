@@ -181,7 +181,7 @@ AFRAME.registerSystem("interaction", {
       this.state.rightRemote.held.components.tags &&
       this.state.rightRemote.held.components.tags.data.isPen &&
       this.state.rightRemote.held.children[0].components.pen.intersection;
-    const inspectingInVR = this.el.systems["hubs-systems"].cameraSystem.inspected;// && this.el.sceneEl.is("vr-mode");
+    const inspectingInVR = this.el.systems["hubs-systems"].cameraSystem.inspected; // && this.el.sceneEl.is("vr-mode");
 
     const enableRightRemote =
       !rightHandInteracting && !rightHandTeleporting && !rightRemotePenIntersectingInVR && !inspectingInVR;
