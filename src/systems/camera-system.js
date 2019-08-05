@@ -53,9 +53,9 @@ export const CAMERA_MODE_THIRD_PERSON_FAR = 2;
 export const CAMERA_MODE_INSPECT = 3;
 
 const NEXT_MODES = {
-  CAMERA_MODE_FIRST_PERSON: CAMERA_MODE_THIRD_PERSON_NEAR,
-  CAMERA_MODE_THIRD_PERSON_NEAR: CAMERA_MODE_THIRD_PERSON_FAR,
-  CAMERA_MODE_THIRD_PERSON_FAR: CAMERA_MODE_FIRST_PERSON
+  [CAMERA_MODE_FIRST_PERSON]: CAMERA_MODE_THIRD_PERSON_NEAR,
+  [CAMERA_MODE_THIRD_PERSON_NEAR]: CAMERA_MODE_THIRD_PERSON_FAR,
+  [CAMERA_MODE_THIRD_PERSON_FAR]: CAMERA_MODE_FIRST_PERSON
 };
 
 export class CameraSystem {
@@ -112,6 +112,13 @@ export class CameraSystem {
       this.cameraEl.components["pitch-yaw-rotator"].on = true;
 
       const userinput = AFRAME.scenes[0].systems.userinput;
+      if (this.inspected) {
+        const stopInspecting = userinput.get(paths.actions.stopInspecting);
+        if (stopInspecting) {
+          this.uninspect();
+        }
+      }
+
       if (userinput.get(paths.actions.nextCameraMode)) {
         this.nextMode();
       }
@@ -133,7 +140,6 @@ export class CameraSystem {
           setMatrixWorld(this.cameraEl.object3D, this.playerCamera.object3D.matrixWorld);
         }
       }
-
       if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
         offset.set(0, 1, 3);
         if (this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
@@ -144,14 +150,9 @@ export class CameraSystem {
         m2.multiply(m3);
         setMatrixWorld(this.rigEl.object3D, m2);
         this.playerCamera.object3D.quaternion.copy(this.cameraEl.object3D.quaternion);
+        this.playerCamera.object3D.matrixNeedsUpdate = true;
       }
 
-      if (this.inspected) {
-        const stopInspecting = userinput.get(paths.actions.stopInspecting);
-        if (stopInspecting) {
-          this.uninspect();
-        }
-      }
     };
   })();
 }
