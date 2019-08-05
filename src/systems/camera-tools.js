@@ -18,7 +18,7 @@ AFRAME.registerSystem("camera-tools", {
   },
 
   updatePlayerHead() {
-    const headEl = document.getElementById("player-head");
+    const headEl = document.getElementById("avatar-head");
     this.playerHead = headEl && headEl.object3D;
   },
 

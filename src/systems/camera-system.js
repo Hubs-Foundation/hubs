@@ -104,7 +104,7 @@ export class CameraSystem {
     const m3 = new THREE.Matrix4();
     const offset = new THREE.Vector3();
     return function tick() {
-      this.playerHead = this.playerHead || document.getElementById("player-head");
+      this.playerHead = this.playerHead || document.getElementById("avatar-head");
       if (!this.playerHead) return;
 
       this.avatarPOV.components["pitch-yaw-rotator"].on = true;
