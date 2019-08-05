@@ -1,3 +1,26 @@
+# Tridify Multi-user-viewer
+
+A multi-user-web-viewer for displaying building models converted in Tridifys cloud converting service https://www.tridify.com/.
+Tridifys converting service allows you to convert BIM and architectural CAD models into gltf-files that can be turned in to 3D environments.
+
+Rough objects for Multiuser Viewer:
+- User gets model-spesific URL for multi-user-viewer from Tridifys conversion service
+- Viewer displays model according to URL
+- User can share (session ID / URL) so that other users can 
+
+## Using URL parameters
+
+Go to https://localhost:8080/?model={model-hash}
+Then press "Create room"
+Model will be loaded
+
+default hash: iyN_Ip9hznKe0DVpD8uACqq-SuVaI0pzc33UkpbwzRE
+example url: https://localhost:8080/?model=iyN_Ip9hznKe0DVpD8uACqq-SuVaI0pzc33UkpbwzRE
+
+Repo forked from https://github.com/mozilla/hubs.git.
+
+## README.md from mozilla.hubs:
+
 [![Build Status](https://travis-ci.org/mozilla/hubs.svg?branch=master)](https://travis-ci.org/mozilla/hubs)
 
 The client-side code for https://hubs.mozilla.com/, a multi-user experience in WebVR. Built with
