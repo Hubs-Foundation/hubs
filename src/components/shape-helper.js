@@ -36,6 +36,10 @@ AFRAME.registerComponent("shape-helper", {
 
   init: function() {
     this.system = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
+    this.system.registerShapeHelper(this);
+  },
+
+  init2: function() {
     this.mesh = null;
 
     let bodyEl = this.el;
@@ -65,8 +69,12 @@ AFRAME.registerComponent("shape-helper", {
   },
 
   remove: function() {
-    for (let i = 0; i < this.shapes.length; i++) {
-      this.bodyHelper.body.removeShape(this.shapes[i]);
+    if (this.shapes) {
+      for (let i = 0; i < this.shapes.length; i++) {
+        if (this.bodyHelper.body) {
+          this.bodyHelper.body.removeShape(this.shapes[i]);
+        }
+      }
     }
   }
 });

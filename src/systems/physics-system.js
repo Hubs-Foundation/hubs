@@ -15,8 +15,11 @@ export class PhysicsSystem {
     });
 
     this.bodies = [];
+    this.bodyHelpers = [];
+    this.shapeHelpers = [];
 
-    this.debug = false;
+    this.debugRequested = false;
+    this.debugEnabled = false;
     this.scene = scene;
     this.stepDuration = 0;
 
@@ -29,16 +32,27 @@ export class PhysicsSystem {
   }
 
   setDebug(debug) {
-    this.debug = debug;
-    if (this.debug) {
-      this.world.getDebugDrawer(this.scene).enable();
-    } else {
-      this.world.getDebugDrawer(this.scene).disable();
-    }
+    this.debugRequested = debug;
   }
 
   tick(dt) {
     if (this.world) {
+      if (this.debugRequested !== this.debugEnabled) {
+        this.debugEnabled = this.debugRequested;
+        if (this.debugEnabled) {
+          this.world.getDebugDrawer(this.scene).enable();
+        } else {
+          this.world.getDebugDrawer(this.scene).disable();
+        }
+      }
+
+      while (this.bodyHelpers.length > 0) {
+        this.bodyHelpers.shift().init2();
+      }
+      while (this.shapeHelpers.length > 0) {
+        this.shapeHelpers.shift().init2();
+      }
+
       for (let i = 0; i < this.bodies.length; i++) {
         this.bodies[i].updateShapes();
         if (this.bodies[i].type !== TYPE.DYNAMIC) {
@@ -64,6 +78,22 @@ export class PhysicsSystem {
     const idx = this.bodies.indexOf(body);
     if (idx !== -1) {
       this.bodies.splice(idx, 1);
+    }
+  }
+
+  registerBodyHelper(bodyHelper) {
+    if (this.world) {
+      bodyHelper.init2();
+    } else {
+      this.bodyHelpers.push(bodyHelper);
+    }
+  }
+
+  registerShapeHelper(shapeHelper) {
+    if (this.world) {
+      shapeHelper.init2();
+    } else {
+      this.shapeHelpers.push(shapeHelper);
     }
   }
 }

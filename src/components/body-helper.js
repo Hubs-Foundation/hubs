@@ -33,15 +33,16 @@ AFRAME.registerComponent("body-helper", {
 
   init: function() {
     this.system = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
-    if (!this.system.world) {
-      debugger;
-    }
+    this.system.registerBodyHelper(this);
+  },
+
+  init2: function() {
     this.body = new Body(this.data, this.el.object3D, this.system.world);
     this.system.addBody(this.body);
   },
 
   update: function(prevData) {
-    if (prevData !== null) {
+    if (prevData !== null && this.body) {
       this.body.update(this.data);
     }
   },
