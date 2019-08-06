@@ -1,10 +1,7 @@
 import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { isHubsDestinationUrl } from "./utils/media-url-utils";
-const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
-  TYPE = PHYSICS_CONSTANTS.TYPE,
-  SHAPE = PHYSICS_CONSTANTS.SHAPE,
-  FIT = PHYSICS_CONSTANTS.FIT;
+import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");

@@ -33,11 +33,10 @@ AFRAME.registerSystem("hubs-systems", {
   tick(t, dt) {
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
+    systems.interaction.tick2(this.soundEffectsSystem);
     this.superSpawnerSystem.tick();
     this.cursorTargettingSystem.tick(t);
     this.constraintsSystem.tick();
-    this.physicsSystem.tick(dt);
-    systems.interaction.tick2(this.soundEffectsSystem);
     this.twoPointStretchingSystem.tick();
     this.singleActionButtonSystem.tick();
     this.holdableButtonSystem.tick();
@@ -46,6 +45,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
     this.soundEffectsSystem.tick();
     this.lobbyCameraSystem.tick();
+    this.physicsSystem.tick(dt);
     this.spriteSystem.tick(t, dt);
     this.batchManagerSystem.tick(t);
   },

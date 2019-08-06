@@ -1,6 +1,4 @@
-const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
-  SHAPE = PHYSICS_CONSTANTS.SHAPE,
-  FIT = PHYSICS_CONSTANTS.FIT;
+import { SHAPE, FIT } from "three-ammo/constants";
 
 function exceedsDensityThreshold(count, subtree) {
   const bounds = subtree.boundingData;

@@ -16,7 +16,7 @@ import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effect
 
 import anime from "animejs";
 
-const SHAPE = require("aframe-physics-system/src/constants").SHAPE;
+import { SHAPE } from "three-ammo/constants";
 
 const gltfLoader = new THREE.GLTFLoader();
 let loadingObjectEnvMap;

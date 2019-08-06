@@ -32,7 +32,6 @@ const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileV
 
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
-import "aframe-physics-system";
 import "./components/event-repeater";
 
 import registerTelemetry from "./telemetry";
