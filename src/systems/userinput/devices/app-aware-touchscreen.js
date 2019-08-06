@@ -53,8 +53,7 @@ function shouldMoveCursor(touch, raycaster) {
     rawIntersections
   );
   const intersection = rawIntersections.find(x => x.object.el);
-  const remoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
-  return remoteHoverTarget;
+  return intersection && findRemoteHoverTarget(intersection.object);
 }
 
 export class AppAwareTouchscreenDevice {
@@ -318,7 +317,6 @@ export class AppAwareTouchscreenDevice {
 
     if (hasCursorJob) {
       const assignment = findByJob(MOVE_CURSOR_JOB, this.assignments);
-      console.log(assignment.framesUntilGrab);
       frame.setValueType(path.isTouchingGrabbable, assignment.framesUntilGrab <= 0);
       assignment.framesUntilGrab--;
 
