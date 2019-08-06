@@ -37,9 +37,17 @@ function createLights(objectsScene) {
   objectsScene.appendChild(element);
 }
 
-export function getTridifyModel(objectsScene) {
+export async function getTridifyModel(objectsScene) {
   setTridifyParams();
   createModel(objectsScene);
   createLights(objectsScene);
+  const ifc = await parseIfc();
+  console.log(ifc.ifc);
   console.log("Tridify Model Loaded");
 }
+
+const parseIfc = () => {
+  return fetch(myUrl() + "/ifc").then(function(response) {
+    return response.json();
+  });
+};
