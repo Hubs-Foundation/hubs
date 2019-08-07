@@ -10,7 +10,7 @@ export function setTridifyParams() {
 const defaultUrl = "iyN_Ip9hznKe0DVpD8uACqq-SuVaI0pzc33UkpbwzRE";
 const baseUrl = "https://ws.tridify.com/api/shared/conversion";
 const myUrl = () => `${baseUrl}/${urlParams || defaultUrl}`;
-
+export const ifcData = [];
 const parseGltfUrls = () => {
   return fetch(myUrl())
     .then(function(response) {
@@ -37,9 +37,32 @@ function createLights(objectsScene) {
   objectsScene.appendChild(element);
 }
 
-export function getTridifyModel(objectsScene) {
+export async function getTridifyModel(objectsScene) {
   setTridifyParams();
-  createModel(objectsScene);
+  await parseIfc().then(getAllSlabsFromIfc);
   createLights(objectsScene);
+  createModel(objectsScene);
   console.log("Tridify Model Loaded");
+}
+
+const parseIfc = () => {
+  return fetch(myUrl() + "/ifc")
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(myJson) {
+      return myJson.ifc.decomposition;
+    })
+    .then(function(deco) {
+      return deco.IfcProject.IfcSite.IfcBuilding.IfcBuildingStorey;
+    });
+};
+function getAllSlabsFromIfc(ifcStoreys) {
+  ifcStoreys.forEach(storey => {
+    if (storey.IfcSlab) {
+      storey.IfcSlab.forEach(element => {
+        ifcData.push(element["@id"]);
+      });
+    }
+  });
 }
