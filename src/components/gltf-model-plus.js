@@ -323,6 +323,20 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
     parser.json.extensions.MOZ_hubs_components.hasOwnProperty("version")
   ) {
     version = parser.json.extensions.MOZ_hubs_components.version;
+  } else {
+    if (!gltfUrl.includes("reticulum")) {
+      for (let i = 0; i < parser.json.nodes.length; i++) {
+        if (parser.json.nodes[i].hasOwnProperty("mesh")) {
+          parser.json.nodes[i].extras = {
+            gltfExtensions: {
+              MOZ_hubs_components: {
+                shadow: { cast: true, receive: true }
+              }
+            }
+          };
+        }
+      }
+    }
   }
   runMigration(version, parser.json);
 
