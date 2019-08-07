@@ -67,14 +67,14 @@ AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
 AFRAME.GLTFModelPlus.registerComponent(
   "box-collider",
-  "ammo-shape",
+  "shape-helper",
   (() => {
     const euler = new THREE.Euler();
     return (el, componentName, componentData) => {
       const { scale, rotation } = componentData;
       euler.set(rotation.x, rotation.y, rotation.z);
       const orientation = new THREE.Quaternion().setFromEuler(euler);
-      el.setAttribute("shape-helper", {
+      el.setAttribute(componentName, {
         type: SHAPE.BOX,
         fit: FIT.MANUAL,
         offset: componentData.position,
