@@ -7,7 +7,7 @@ import { findAncestorWithComponent } from "../utils/scene-graph";
 AFRAME.registerComponent("loop-animation", {
   schema: {
     paused: { type: "boolean", default: false },
-    /* DEPRECATED: Use animation instead since animation names are not unique */
+    /* DEPRECATED: Use activeClipIndex instead since animation names are not unique */
     clip: { type: "string", default: "" },
     activeClipIndex: { type: "int", default: 0 }
   },
