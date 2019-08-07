@@ -36,6 +36,15 @@ const pathsMap = {
     penNextColor: paths.actions.cursor.penNextColor,
     penPrevColor: paths.actions.cursor.penPrevColor,
     scalePenTip: paths.actions.cursor.scalePenTip
+  },
+  cursor2: {
+    pose: paths.actions.cursor.left.pose,
+    startDrawing: paths.actions.cursor.left.startDrawing,
+    stopDrawing: paths.actions.cursor.left.stopDrawing,
+    undoDrawing: paths.actions.cursor.left.undoDrawing,
+    penNextColor: paths.actions.cursor.left.penNextColor,
+    penPrevColor: paths.actions.cursor.left.penPrevColor,
+    scalePenTip: paths.actions.cursor.left.scalePenTip
   }
 };
 
@@ -159,7 +168,8 @@ AFRAME.registerComponent("pen", {
 
     waitForDOMContentLoaded().then(() => {
       const scene = document.querySelector("a-scene");
-      this.rightRemote = document.querySelector("#cursor-controller");
+      this.rightRemote = document.getElementById("cursor-controller");
+      this.leftRemote = document.getElementById("cursor-controller2");
       this.observer.observe(scene, { childList: true, attributes: true, subtree: true });
       scene.addEventListener("object3dset", this.setDirty);
       scene.addEventListener("object3dremove", this.setDirty);
@@ -199,6 +209,9 @@ AFRAME.registerComponent("pen", {
         this.grabberId = "player-left-controller";
       } else if (interaction.state.rightRemote.held === this.el.parentNode) {
         this.grabberId = "cursor";
+        this.drawMode = DRAW_MODE.PROJECTION;
+      } else if (interaction.state.leftRemote.held === this.el.parentNode) {
+        this.grabberId = "cursor2";
         this.drawMode = DRAW_MODE.PROJECTION;
       } else {
         this.grabberId = null;
@@ -243,6 +256,12 @@ AFRAME.registerComponent("pen", {
       if (this.drawMode === DRAW_MODE.PROJECTION) {
         if (this.grabberId === "cursor") {
           cursorPose = userinput.get(pathsMap.cursor.pose);
+          if (cursorPose) {
+            this.raycaster.ray.origin.copy(cursorPose.position);
+            this.raycaster.ray.direction.copy(cursorPose.direction);
+          }
+        } else if (this.grabberId === "cursor2") {
+          cursorPose = userinput.get(pathsMap.cursor.left.pose);
           if (cursorPose) {
             this.raycaster.ray.origin.copy(cursorPose.position);
             this.raycaster.ray.direction.copy(cursorPose.direction);
@@ -298,7 +317,7 @@ AFRAME.registerComponent("pen", {
         getLastWorldPosition(this.el.object3D, this.worldPosition);
       }
 
-      this._setPenVisible(this.grabberId !== "cursor" || !this.intersection);
+      this._setPenVisible((this.grabberId !== "cursor" && this.grabberId !== "cursor2") || !this.intersection);
       this._setLineVisible(
         this.el.sceneEl.is("vr-mode") && this.drawMode === DRAW_MODE.PROJECTION && this.intersection
       );

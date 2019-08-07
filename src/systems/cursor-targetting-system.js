@@ -11,7 +11,8 @@ export class CursorTargettingSystem {
 
     waitForDOMContentLoaded().then(() => {
       const scene = document.querySelector("a-scene");
-      this.rightRemote = document.querySelector("#cursor-controller");
+      this.rightRemote = document.getElementById("cursor-controller");
+      this.leftRemote = document.getElementById("cursor-controller2");
       this.observer.observe(scene, { childList: true, attributes: true, subtree: true });
       scene.addEventListener("object3dset", this.setDirty);
       scene.addEventListener("object3dremove", this.setDirty);
@@ -29,6 +30,7 @@ export class CursorTargettingSystem {
     }
 
     this.rightRemote.components["cursor-controller"].tick2(t);
+    this.leftRemote.components["cursor-controller"].tick2(t, true);
   }
 
   populateEntities(targets) {

@@ -69,7 +69,12 @@ export class HapticFeedbackSystem {
         held: null,
         hovered: null,
         isTeleporting: false
-      }
+      },
+      leftRemote: {
+        held: null,
+        hovered: null,
+        isTeleporting: false
+      },
     };
   }
 
@@ -82,7 +87,7 @@ export class HapticFeedbackSystem {
     }
 
     const interaction = AFRAME.scenes[0].systems.interaction;
-    const { leftHand, rightHand, rightRemote } = interaction.state;
+    const { leftHand, rightHand, rightRemote, leftRemote } = interaction.state;
     this.leftTeleporter =
       this.leftTeleporter || document.querySelector("#player-left-controller").components.teleporter;
     this.rightTeleporter =
@@ -91,10 +96,12 @@ export class HapticFeedbackSystem {
     const leftHandStrength = determineStrength(this.state.leftHand, leftHand, this.leftTeleporter.isTeleporting);
     const rightHandStrength = determineStrength(this.state.rightHand, rightHand, this.rightTeleporter.isTeleporting);
     const rightRemoteStrength = determineStrength(this.state.rightRemote, rightRemote, false);
+    const leftRemoteStrength = determineStrength(this.state.leftRemote, leftRemote, false);
     const buttonPressedStrength = didClickButton ? STRENGTH.BUTTON_PRESSED : 0;
     const stretchingStrength = determineStretchStrength(twoPointStretchingSystem);
 
-    const leftStrength = Math.max(leftHandStrength, stretchingStrength);
+    // TODO: haptic feedback for button pressed by left remote
+    const leftStrength = Math.max(leftHandStrength, leftRemoteStrength, stretchingStrength);
     const rightStrength = Math.max(rightHandStrength, rightRemoteStrength, stretchingStrength, buttonPressedStrength);
 
     if (leftStrength && leftActuator) {

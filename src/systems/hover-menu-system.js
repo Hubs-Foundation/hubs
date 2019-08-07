@@ -40,5 +40,20 @@ export class HoverMenuSystem {
     }
 
     this.prevHoverMenu = hoverMenu;
+
+    //TODO: Menu be visible if either remote is hovering.
+    const hoverMenu2 = findHoverMenu(interaction.state.leftRemote.hovered);
+
+    if (this.prevHoverMenu2 && this.prevHoverMenu2 !== hoverMenu2) {
+      this.prevHoverMenu2.hovering = false;
+      this.prevHoverMenu2.applyHoverState();
+    }
+
+    if (hoverMenu2 && this.prevHoverMenu2 !== hoverMenu2) {
+      hoverMenu2.hovering = true;
+      hoverMenu2.applyHoverState();
+    }
+
+    this.prevHoverMenu2 = hoverMenu2;
   }
 }

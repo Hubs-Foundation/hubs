@@ -79,5 +79,10 @@ export class SuperSpawnerSystem {
       interaction.options.rightRemote.entity,
       interaction.options.rightRemote.grabPath
     );
+    this.maybeSpawn(
+      interaction.state.leftRemote,
+      interaction.options.leftRemote.entity,
+      interaction.options.leftRemote.grabPath
+    );
   }
 }

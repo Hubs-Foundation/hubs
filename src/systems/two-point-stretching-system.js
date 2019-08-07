@@ -17,6 +17,7 @@ export class TwoPointStretchingSystem {
   }
 
   tick() {
+    //TODO: leftRemote
     const interaction = AFRAME.scenes[0].systems.interaction;
     const { leftHand, rightHand, rightRemote } = interaction.state;
 

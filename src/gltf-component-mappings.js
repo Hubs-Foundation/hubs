@@ -18,9 +18,7 @@ AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner", (el, co
   //TODO: Do not automatically add these components
   el.setAttribute("is-remote-hover-target", "");
   el.setAttribute("tags", { isHandCollisionTarget: true });
-  el.setAttribute("hoverable-visuals", {
-    cursorController: "#cursor-controller"
-  });
+  el.setAttribute("hoverable-visuals", "");
   el.setAttribute(componentName, componentData);
 });
 AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
@@ -231,9 +229,7 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
     resolve: true,
     template: "#interactable-media"
   });
-  el.setAttribute("hoverable-visuals", {
-    cursorController: "#cursor-controller"
-  });
+  el.setAttribute("hoverable-visuals", "");
   el.setAttribute("ammo-body", {
     mass: 0,
     type: TYPE.STATIC,

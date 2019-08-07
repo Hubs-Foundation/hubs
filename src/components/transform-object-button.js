@@ -43,7 +43,8 @@ AFRAME.registerComponent("transform-button", {
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.targetEl = networkedEl;
     });
-    const rightHand = document.querySelector("#player-right-controller");
+    const rightHand = document.getElementById("player-right-controller");
+    const leftHand = document.getElementById("player-left-controller");
     this.onGrabStart = e => {
       if (!this.targetEl) {
         return;
@@ -57,7 +58,11 @@ AFRAME.registerComponent("transform-button", {
       this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];
       this.transformSystem.startTransform(
         this.targetEl.object3D,
-        e.object3D.el.id === "cursor" ? rightHand.object3D : e.object3D,
+        e.object3D.el.id === "cursor"
+          ? rightHand.object3D
+          : e.object3D.el.id === "cursor2"
+            ? leftHand.object3D
+            : e.object3D,
         this.data
       );
     };
@@ -152,11 +157,22 @@ AFRAME.registerSystem("transform-selected-object", {
 
     intersections.length = 0;
     this.raycaster =
-      this.raycaster || document.querySelector("#cursor-controller").components["cursor-controller"].raycaster;
-    const far = this.raycaster.far;
-    this.raycaster.far = 1000;
-    plane.raycast(this.raycaster, intersections);
-    this.raycaster.far = far;
+      this.raycaster || document.getElementById("cursor-controller").components["cursor-controller"].raycaster;
+    this.raycaster2 =
+      this.raycaster2 || document.getElementById("cursor-controller2").components["cursor-controller"].raycaster;
+    const left = this.hand.id === "player-left-controller";
+    const far = left ? this.raycaster2.far : this.raycaster.far;
+    if (left) {
+      this.raycaster2.far = 1000;
+    } else {
+      this.raycaster.far = 1000;
+    }
+    plane.raycast(left ? this.raycaster2 : this.raycaster, intersections);
+    if (left) {
+      this.raycaster2.far = far;
+    } else {
+      this.raycaster.far = far;
+    }
     this.transforming = !!intersections[0];
     if (!this.transforming) {
       return;
@@ -248,6 +264,7 @@ AFRAME.registerSystem("transform-selected-object", {
     const cameraToPlaneDistance = v.sub(plane.position).length();
 
     intersections.length = 0;
+    // TODO: Right hand / left hand support
     const far = this.raycaster.far;
     this.raycaster.far = 1000;
     plane.raycast(this.raycaster, intersections);
@@ -335,7 +352,10 @@ AFRAME.registerSystem("transform-selected-object", {
 
 AFRAME.registerComponent("transform-button-selector", {
   tick() {
-    const hand = AFRAME.scenes[0].systems.userinput.get(paths.actions.rightHand.pose);
+    // TODO: awkward lefthand/righthand checks. what is correct here?
+    const hand =
+      AFRAME.scenes[0].systems.userinput.get(paths.actions.rightHand.pose) ||
+      AFRAME.scenes[0].systems.userinput.get(paths.actions.leftHand.pose);
     if (!hand) {
       if (this.el.components["transform-button"].data.mode !== TRANSFORM_MODE.CURSOR) {
         this.el.setAttribute("transform-button", "mode", TRANSFORM_MODE.CURSOR);
