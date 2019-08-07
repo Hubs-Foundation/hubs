@@ -238,7 +238,7 @@ AFRAME.registerSystem("interaction", {
       this.leftHandTeleporter || document.querySelector("#player-left-controller").components["teleporter"];
     this.gazeTeleporter = this.gazeTeleporter || document.querySelector("#gaze-teleport").components["teleporter"];
 
-    if (this.options.leftHand.entity.object3D.visible) {
+    if (this.options.leftHand.entity.object3D.visible && !this.state.leftRemote.held) {
       this.tickInteractor(this.options.leftHand, this.state.leftHand);
     }
     if (this.options.rightHand.entity.object3D.visible && !this.state.rightRemote.held) {
