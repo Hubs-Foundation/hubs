@@ -60,6 +60,7 @@ AFRAME.registerComponent("shape-helper", {
         return;
       }
       this.mesh = this.el.object3DMap.mesh;
+      this.mesh.updateMatrices();
     }
 
     this.shapes = threeToAmmo.createCollisionShapes(this.mesh, this.data);
