@@ -28,7 +28,7 @@ Steps to contributing code to the Hubs project:
 1. Clone the repo you want to contribute to and get things running locally
 2. Find an issue or improvement that you want to fix - give us a heads up that you're working on it by dropping in a comment on the issue.
 3. Fix the bug! Test out your changes on your local setup and let us know if you have questions or want another opinion about the fix. 
-4. Submit your PR for a code review and someone from the team will take a look and give feedback. Make sure you follow up! We'll close the PR if it seems like you've abandoned it by not responding to any questions or comments we leave in the review. 
+4. Submit your PR for a code review and someone from the team will take a look and give feedback. Make sure you follow up! We'll close the PR if it seems like you've abandoned it by not responding to any questions or comments we leave in the review. If your PR adds a new feature, consider requesting the 'What's New' tag. With the 'What's New' tag, any text in the main body of the PR up to (and including) an image will be added to the [hubs website](https://hubs.mozilla.com/whats-new). Gifs are especially appreciated! [This pull request](https://github.com/mozilla/hubs/pull/1536) shows an example of how the 'What's New' tag can be used.
 5. Celebrate! 🎉 You're helping Mozilla's mission to make the web an open and accessible place for social experiences! 
 
 
