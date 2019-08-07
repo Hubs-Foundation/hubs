@@ -12,6 +12,8 @@ const rightButton = paths.device.rightOculusTouch.button;
 const rightAxis = paths.device.rightOculusTouch.axis;
 const rightPose = paths.device.rightOculusTouch.pose;
 
+const wakeLeft = `${name}left/wake`;
+const wakeRight = `${name}right/wake`;
 const leftJoyXDeadzoned = `${name}left/joy/x/deadzoned`;
 const leftJoyYDeadzoned = `${name}left/joy/y/deadzoned`;
 const scaledLeftJoyX = `${name}left/scaledJoyX`;
@@ -670,6 +672,36 @@ export const oculusTouchUserBindings = addSetsToBindings({
       dest: { value: paths.actions.leftHand.stopTeleport },
       xform: xforms.falling,
       priority: 1
+    },
+    {
+      src: [
+        leftButton("y").pressed,
+        leftButton("x").pressed,
+        leftButton("trigger").pressed,
+        leftButton("grip").pressed
+      ],
+      dest: { value: wakeLeft },
+      xform: xforms.any
+    },
+    {
+      src: { value: wakeLeft },
+      dest: { value: paths.actions.cursor.left.wake },
+      xform: xforms.rising
+    },
+    {
+      src: [
+        rightButton("b").pressed,
+        rightButton("a").pressed,
+        rightButton("trigger").pressed,
+        rightButton("grip").pressed
+      ],
+      dest: { value: wakeRight },
+      xform: xforms.any
+    },
+    {
+      src: { value: wakeRight },
+      dest: { value: paths.actions.cursor.wake },
+      xform: xforms.rising
     }
   ],
 
@@ -971,7 +1003,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 3
     },
     {
-      src: { value: leftButton("b").pressed },
+      src: { value: leftButton("y").pressed },
       dest: { value: paths.actions.cursor.left.undoDrawing },
       xform: xforms.rising,
       priority: 1

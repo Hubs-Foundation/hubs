@@ -28,7 +28,6 @@ export class CursorTargettingSystem {
       this.populateEntities(this.targets);
       this.dirty = false;
     }
-
     this.rightRemote.components["cursor-controller"].tick2(t);
     this.leftRemote.components["cursor-controller"].tick2(t, true);
   }

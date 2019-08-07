@@ -86,6 +86,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
       shouldBeVisible =
         shouldBeVisible &&
         ((this.hoverable && AFRAME.scenes[0].systems.interaction.state.rightRemote.hovered === this.hoverable) ||
+          AFRAME.scenes[0].systems.interaction.state.leftRemote.hovered === this.hoverable ||
           isVisible);
     }
 

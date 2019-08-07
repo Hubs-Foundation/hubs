@@ -1,4 +1,5 @@
 import { CursorTargettingSystem } from "./cursor-targetting-system";
+import { CursorTogglingSystem } from "./cursor-toggling-system";
 import { ConstraintsSystem } from "./constraints-system";
 import { TwoPointStretchingSystem } from "./two-point-stretching-system";
 import { SingleActionButtonSystem, HoldableButtonSystem, HoverButtonSystem } from "./button-systems";
@@ -12,6 +13,7 @@ import { LobbyCameraSystem } from "./lobby-camera-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
+    this.cursorTogglingSystem = new CursorTogglingSystem();
     this.cursorTargettingSystem = new CursorTargettingSystem();
     this.constraintsSystem = new ConstraintsSystem();
     this.twoPointStretchingSystem = new TwoPointStretchingSystem();
@@ -31,6 +33,7 @@ AFRAME.registerSystem("hubs-systems", {
     systems.userinput.tick2();
     systems.interaction.tick2(this.soundEffectsSystem);
     this.superSpawnerSystem.tick();
+    this.cursorTogglingSystem.tick();
     this.cursorTargettingSystem.tick(t);
     this.constraintsSystem.tick();
     this.twoPointStretchingSystem.tick();
@@ -38,7 +41,11 @@ AFRAME.registerSystem("hubs-systems", {
     this.holdableButtonSystem.tick();
     this.hoverButtonSystem.tick();
     this.hoverMenuSystem.tick();
-    this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
+    this.hapticFeedbackSystem.tick(
+      this.twoPointStretchingSystem,
+      this.singleActionButtonSystem.didInteractLeftThisFrame,
+      this.singleActionButtonSystem.didInteractRightThisFrame
+    );
     this.soundEffectsSystem.tick();
     this.lobbyCameraSystem.tick();
     // batchManager is ticked in "post-physics" system

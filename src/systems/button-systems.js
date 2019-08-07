@@ -18,7 +18,7 @@ export class SingleActionButtonSystem {
     }
     const hovered2 = interaction.state.leftRemote.hovered;
     if (
-      hovered &&
+      hovered2 &&
       userinput.get(interaction.options.leftRemote.grabPath) &&
       hovered2.components.tags &&
       hovered2.components.tags.data.singleActionButton

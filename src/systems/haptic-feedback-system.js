@@ -74,11 +74,11 @@ export class HapticFeedbackSystem {
         held: null,
         hovered: null,
         isTeleporting: false
-      },
+      }
     };
   }
 
-  tick(twoPointStretchingSystem, didClickButton) {
+  tick(twoPointStretchingSystem, interactLeft, interactRight) {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const leftActuator = userinput.get(paths.haptics.actuators.left);
     const rightActuator = userinput.get(paths.haptics.actuators.right);
@@ -97,12 +97,13 @@ export class HapticFeedbackSystem {
     const rightHandStrength = determineStrength(this.state.rightHand, rightHand, this.rightTeleporter.isTeleporting);
     const rightRemoteStrength = determineStrength(this.state.rightRemote, rightRemote, false);
     const leftRemoteStrength = determineStrength(this.state.leftRemote, leftRemote, false);
-    const buttonPressedStrength = didClickButton ? STRENGTH.BUTTON_PRESSED : 0;
+    const buttonLeftStrength = interactLeft ? STRENGTH.BUTTON_PRESSED : 0;
+    const buttonRightStrength = interactRight ? STRENGTH.BUTTON_PRESSED : 0;
     const stretchingStrength = determineStretchStrength(twoPointStretchingSystem);
 
     // TODO: haptic feedback for button pressed by left remote
-    const leftStrength = Math.max(leftHandStrength, leftRemoteStrength, stretchingStrength);
-    const rightStrength = Math.max(rightHandStrength, rightRemoteStrength, stretchingStrength, buttonPressedStrength);
+    const leftStrength = Math.max(leftHandStrength, leftRemoteStrength, stretchingStrength, buttonLeftStrength);
+    const rightStrength = Math.max(rightHandStrength, rightRemoteStrength, stretchingStrength, buttonRightStrength);
 
     if (leftStrength && leftActuator) {
       leftActuator.pulse(leftStrength, 15);
@@ -115,5 +116,6 @@ export class HapticFeedbackSystem {
     copyState(this.state.rightHand, rightHand, this.rightTeleporter.isTeleporting);
     copyState(this.state.leftHand, leftHand, this.leftTeleporter.isTeleporting);
     copyState(this.state.rightRemote, rightRemote, false);
+    copyState(this.state.leftRemote, leftRemote, false);
   }
 }

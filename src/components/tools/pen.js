@@ -254,14 +254,8 @@ AFRAME.registerComponent("pen", {
       this.intersection = null;
       let cursorPose;
       if (this.drawMode === DRAW_MODE.PROJECTION) {
-        if (this.grabberId === "cursor") {
-          cursorPose = userinput.get(pathsMap.cursor.pose);
-          if (cursorPose) {
-            this.raycaster.ray.origin.copy(cursorPose.position);
-            this.raycaster.ray.direction.copy(cursorPose.direction);
-          }
-        } else if (this.grabberId === "cursor2") {
-          cursorPose = userinput.get(pathsMap.cursor.left.pose);
+        if (this.grabberId === "cursor" || this.grabberId === "cursor2") {
+          cursorPose = userinput.get(pathsMap[this.grabberId].pose);
           if (cursorPose) {
             this.raycaster.ray.origin.copy(cursorPose.position);
             this.raycaster.ray.direction.copy(cursorPose.direction);
