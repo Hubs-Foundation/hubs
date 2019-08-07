@@ -83,7 +83,8 @@ AFRAME.registerComponent("floaty-object", {
     if (this.data.modifyGravityOnRelease) {
       if (
         this.data.gravitySpeedLimit === 0 ||
-        this.bodyHelper.body.getVelocity().length2() < this.data.gravitySpeedLimit * this.data.gravitySpeedLimit
+        (this.bodyHelper.body &&
+          this.bodyHelper.body.getVelocity().length2() < this.data.gravitySpeedLimit * this.data.gravitySpeedLimit)
       ) {
         this.el.setAttribute("body-helper", {
           gravity: { x: 0, y: 0, z: 0 },

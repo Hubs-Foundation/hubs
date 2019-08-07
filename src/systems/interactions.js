@@ -156,8 +156,13 @@ AFRAME.registerSystem("interaction", {
       if (userinput.get(options.dropPath) || lostOwnership) {
         state.held = null;
       }
-    } else if (options.entity.components["body-helper"] && options.entity.components["body-helper"].body) {
-      state.hovered = options.hoverFn.call(this, options.entity.components["body-helper"].body);
+    } else {
+      state.hovered = options.hoverFn.call(
+        this,
+        options.entity.components["body-helper"] && options.entity.components["body-helper"].body
+          ? options.entity.components["body-helper"].body
+          : null
+      );
       if (state.hovered) {
         const entity = state.hovered;
         const isHoldable = entity.components.tags && entity.components.tags.data.isHoldable;
