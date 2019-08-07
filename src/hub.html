@@ -168,7 +168,7 @@
 
                         <template data-name="Spine">
                             <a-entity is-remote-hover-target personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
-                                <a-entity class = "image" scale="0.18 0.18 0.18" position="0 -0.025 0.13"> 
+                                <a-entity class = "chest-image" scale="0.18 0.18 0.18" position="0 -0.025 0.13"> 
                                     
                                 </a-entity>
                                 <a-entity class="ui interactable-ui">
@@ -950,8 +950,7 @@
                     ></a-entity>
                 </a-entity>
             </a-entity>
-            <a-entity class = "image" scale="0.18 0.18 0.18" position="0 -0.025 0.13">
-            </a-entity>
+            
             <a-entity
                 id="player-camera"
                 class="camera"
@@ -1014,7 +1013,12 @@
                         <a-entity class="nametag" visible="false" text ></a-entity>
                     </a-entity>
                 </template>
-
+                <template data-name="Spine">
+                        <a-entity>
+                    <a-entity class = "chest-image" scale="0.18 0.18 0.18" position="0 -0.025 0.13">
+                    </a-entity>
+                </a-entity>
+                </template>
                 <template data-name="Head">
                     <a-entity id="player-head" visible="false" bone-visibility></a-entity>
                 </template>

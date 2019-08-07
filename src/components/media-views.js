@@ -756,7 +756,7 @@ AFRAME.registerComponent("media-image", {
   chestImage() {
     this.el.sceneEl
       .querySelector("#player-rig")
-      .querySelector(".image")
+      .querySelector(".chest-image")
       .setAttribute("media-loader", { src: this.data.src });
   },
 

@@ -38,10 +38,7 @@ function registerNetworkSchemas() {
       "scale",
       "player-info",
       "networked-avatar",
-      {
-        selector: ".image",
-        component: "media-loader"
-      },
+
       {
         selector: ".camera",
         component: "position",

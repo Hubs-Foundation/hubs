@@ -277,6 +277,7 @@ AFRAME.registerComponent("media-loader", {
 
   async update(oldData) {
     try {
+      console.log(this.data.src);
       const { src, contentSubtype } = this.data;
 
       if (src !== oldData.src && !this.showLoaderTimeout) {

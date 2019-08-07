@@ -10,6 +10,7 @@ import screenfull from "screenfull";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
+import emojiStyle from "../assets/stylesheets/ui-emoji.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
@@ -174,6 +175,7 @@ class UIRoot extends Component {
   };
 
   state = {
+    emojiState: "empty",
     hasAngryActive: false,
     hasHappyActive: false,
     hasSadActive: false,
@@ -498,130 +500,26 @@ class UIRoot extends Component {
     this.setState({ exited: true });
   };
 
-  emojiChange = reason => {
-    const cleanCheck =
-      !this.state.hasAngryActive &&
-      !this.state.hasHappyActive &&
-      !this.state.hasSadActive &&
-      !this.state.hasEwwActive &&
-      !this.state.hasDisgustActive &&
-      !this.state.hasSmileActive &&
-      !this.state.hasHeartsActive &&
-      !this.state.hasSurpriseActive;
-    if (!cleanCheck) {
-      this.props.scene.emit("clean");
-    } else {
-      this.props.scene.emit(reason);
-    }
-    console.log(reason + " " + cleanCheck);
-    switch (reason) {
-      case "happy":
-        this.setState({
-          hasHappyActive: !this.state.hasHappyActive,
-          hasAngryActive: false,
-          hasSadActive: false,
-          hasSmileActive: false,
-          hasEwwActive: false,
-          hasCleanActive: false,
-          hasDisgustActive: false,
-          hasHeartsActive: false,
-          hasSurpriseActive: false
-        });
-        break;
-      case "sad":
-        this.setState({
-          hasHappyActive: false,
-          hasAngryActive: false,
-          hasSadActive: !this.state.hasSadActive,
-          hasSmileActive: false,
-          hasEwwActive: false,
-          hasCleanActive: false,
-          hasDisgustActive: false,
-          hasHeartsActive: false,
-          hasSurpriseActive: false
-        });
-        break;
-      case "eww":
-        this.setState({
-          hasHappyActive: false,
-          hasAngryActive: false,
-          hasSadActive: false,
-          hasSmileActive: false,
-          hasEwwActive: !this.state.hasEwwActive,
-          hasCleanActive: false,
-          hasDisgustActive: false,
-          hasHeartsActive: false,
-          hasSurpriseActive: false
-        });
-        break;
-      case "disgust":
-        this.setState({
-          hasHappyActive: false,
-          hasAngryActive: false,
-          hasSadActive: false,
-          hasSmileActive: false,
-          hasEwwActive: false,
-          hasCleanActive: false,
-          hasDisgustActive: !this.state.hasDisgustActive,
-          hasHeartsActive: false,
-          hasSurpriseActive: false
-        });
-        break;
-      case "angry":
-        this.setState({
-          hasHappyActive: false,
-          hasAngryActive: !this.state.hasAngryActive,
-          hasSadActive: false,
-          hasSmileActive: false,
-          hasEwwActive: false,
-          hasCleanActive: false,
-          hasDisgustActive: false,
-          hasHeartsActive: false,
-          hasSurpriseActive: false
-        });
-        break;
-      case "smile":
-        this.setState({
-          hasHappyActive: false,
-          hasAngryActive: false,
-          hasSadActive: false,
-          hasSmileActive: !this.state.hasSmileActive,
-          hasEwwActive: false,
-          hasCleanActive: false,
-          hasDisgustActive: false,
-          hasHeartsActive: false,
-          hasSurpriseActive: false
-        });
-        break;
-      case "hearts":
-        this.setState({
-          hasHappyActive: false,
-          hasAngryActive: false,
-          hasSadActive: false,
-          hasSmileActive: false,
-          hasEwwActive: false,
-          hasCleanActive: false,
-          hasDisgustActive: false,
-          hasHeartsActive: !this.state.hasHeartsActive,
-          hasSurpriseActive: false
-        });
-        break;
-      case "surprise":
-        this.setState({
-          hasHappyActive: false,
-          hasAngryActive: false,
-          hasSadActive: false,
-          hasSmileActive: false,
-          hasEwwActive: false,
-          hasCleanActive: false,
-          hasDisgustActive: false,
-          hasHeartsActive: false,
-          hasSurpriseActive: !this.state.hasSurpriseActive
-        });
-        break;
-    }
+  emojiEvent = {
+    emojiType: "empty"
+  };
 
-    console.log("emojiChange called on ui-root.js " + reason);
+  emojiChange = reason => {
+    console.log(" start emojistate: " + this.state.emojiState + ", reason: " + reason);
+    if (this.state.emojiState === reason) {
+      this.setState({
+        emojiState: "empty"
+      });
+      this.emojiEvent.emojiType = "empty";
+    } else {
+      this.setState({ emojiState: reason });
+      this.emojiEvent.emojiType = reason;
+    }
+    console.log(" end emojistate: " + this.state.emojiState);
+
+    this.props.scene.querySelector("#player-rig").setAttribute("player-info", this.emojiEvent);
+
+    console.log("emoji type: " + this.emojiEvent.emojiType);
   };
 
   isWaitingForAutoExit = () => {
@@ -1805,60 +1703,59 @@ class UIRoot extends Component {
               </button>
             )}
             {this.state.frozen && (
-              <div className={cx(styles.uiInteractive, styles.panel)}>
+              <div className={cx(styles.uiInteractive, emojiStyle.panel)}>
                 <div
-                  className={cx(styles.iconEmoji, styles.angry, {
-                    [styles.active]: this.state.hasAngryActive,
-                    [styles.disactive]: !this.state.hasAngryActive
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.angry, {
+                    [emojiStyle.active]: this.state.emojiState === "angry"
                   })}
                   onClick={() => this.emojiChange("angry")}
                 />
 
                 <div
-                  className={cx(styles.iconEmoji, styles.happy, {
-                    [styles.active]: this.state.hasHappyActive
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.happy, {
+                    [emojiStyle.active]: this.state.emojiState === "happy"
                   })}
                   onClick={() => this.emojiChange("happy")}
                 />
 
                 <div
-                  className={cx(styles.iconEmoji, styles.sad, {
-                    [styles.active]: this.state.hasSadActive
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.sad, {
+                    [emojiStyle.active]: this.state.emojiState === "sad"
                   })}
                   onClick={() => this.emojiChange("sad")}
                 />
 
                 <div
-                  className={cx(styles.iconEmoji, styles.surprise, {
-                    [styles.active]: this.state.hasSurpriseActive
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.surprise, {
+                    [emojiStyle.active]: this.state.emojiState === "surprise"
                   })}
                   onClick={() => this.emojiChange("surprise")}
                 />
 
                 <div
-                  className={cx(styles.iconEmoji, styles.eww, {
-                    [styles.active]: this.state.hasEwwActive
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.eww, {
+                    [emojiStyle.active]: this.state.emojiState === "eww"
                   })}
                   onClick={() => this.emojiChange("eww")}
                 />
 
                 <div
-                  className={cx(styles.iconEmoji, styles.smile, {
-                    [styles.active]: this.state.hasSmileActive
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.smile, {
+                    [emojiStyle.active]: this.state.emojiState === "smile"
                   })}
                   onClick={() => this.emojiChange("smile")}
                 />
 
                 <div
-                  className={cx(styles.iconEmoji, styles.disgust, {
-                    [styles.active]: this.state.hasDisgustActive
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.disgust, {
+                    [emojiStyle.active]: this.state.emojiState === "disgust"
                   })}
                   onClick={() => this.emojiChange("disgust")}
                 />
 
                 <div
-                  className={cx(styles.iconEmoji, styles.hearts, {
-                    [styles.active]: this.state.hasHeartsActive
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.hearts, {
+                    [emojiStyle.active]: this.state.emojiState === "hearts"
                   })}
                   onClick={() => this.emojiChange("hearts")}
                 />
