@@ -361,6 +361,7 @@ module.exports = (env, argv) => ({
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
         RETICULUM_SOCKET_SERVER: process.env.RETICULUM_SOCKET_SERVER,
         FARSPARK_SERVER: process.env.FARSPARK_SERVER,
+        THUMBNAIL_SERVER: process.env.THUMBNAIL_SERVER,
         CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,
         NON_CORS_PROXY_DOMAINS: process.env.NON_CORS_PROXY_DOMAINS,
         ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER,

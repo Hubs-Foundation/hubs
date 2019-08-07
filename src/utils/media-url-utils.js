@@ -32,7 +32,7 @@ const farsparkEncodeUrl = url => {
 };
 
 export const scaledThumbnailUrlFor = (url, width, height) => {
-  const farsparkUrl = `https://${process.env.FARSPARK_SERVER}/thumbnail/${farsparkEncodeUrl(
+  const farsparkUrl = `https://${process.env.THUMBNAIL_SERVER}/thumbnail/${farsparkEncodeUrl(
     url
   )}?w=${width}&h=${height}`;
 
