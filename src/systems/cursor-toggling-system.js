@@ -3,8 +3,8 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 export class CursorTogglingSystem {
   constructor() {
-    this.rightToggledOff = true;
-    this.leftToggledOff = true;
+    this.rightToggledOff = false;
+    this.leftToggledOff = false;
 
     waitForDOMContentLoaded().then(() => {
       this.rightRemote = document.getElementById("cursor-controller");
