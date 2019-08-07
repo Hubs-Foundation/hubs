@@ -360,8 +360,7 @@ AFRAME.registerComponent("media-video", {
       this.volumeUpButton.object3D.addEventListener("interact", this.volumeUp);
       this.volumeDownButton.object3D.addEventListener("interact", this.volumeDown);
       this.snapButton.object3D.addEventListener("interact", this.snap);
-      this.chestImageButton.object3D.addEventListener("interact", this.chestImage);
-
+      // this.chestImageButton.object3D.addEventListener("interact", this.chestImage);
 
       this.updateVolumeLabel();
       this.updateHoverMenuBasedOnLiveState();
@@ -441,8 +440,11 @@ AFRAME.registerComponent("media-video", {
     entity.addEventListener("image-loaded", this.onSnapImageLoaded, ONCE_TRUE);
   },
 
-  chestImage(){
-    this.el.sceneEl.querySelector("#player-rig").querySelector(".image").setAttribute("material", {src:this.data.src, color:"white"});
+  chestImage() {
+    this.el.sceneEl
+      .querySelector("#player-rig")
+      .querySelector(".image")
+      .setAttribute("material", { src: this.data.src, color: "white" });
   },
 
   togglePlaying() {
@@ -742,23 +744,23 @@ AFRAME.registerComponent("media-image", {
     contentType: { type: "string" },
     batch: { default: false }
   },
-  init(){
-    this.chestImage = this.chestImage.bind(this);
+  // init(){
+  //   this.chestImage = this.chestImage.bind(this);
 
-    this.el.setAttribute("hover-menu__image", { template: "#image-hover-menu", dirs: ["forward", "back"] });
-    this.el.components["hover-menu__image"].getHoverMenu().then( menu => {
-      if (!this.el.parentNode) return;
+  //   this.el.setAttribute("hover-menu__image", { template: "#image-hover-menu", dirs: ["forward", "back"] });
+  //   this.el.components["hover-menu__image"].getHoverMenu().then( menu => {
+  //     if (!this.el.parentNode) return;
 
-      this.chestImageButton = this.el.querySelector(".video-chest-image-button");
-      this.chestImageButton.object3D.addEventListener("interact", this.chestImage);
-    });
-  },
-  chestImage() {
-    this.el.sceneEl
-      .querySelector("#player-rig")
-      .querySelector(".chest-image")
-      .setAttribute("media-loader", { src: this.data.src });
-  },
+  //     this.chestImageButton = this.el.querySelector(".video-chest-image-button");
+  //     this.chestImageButton.object3D.addEventListener("interact", this.chestImage);
+  //   });
+  // },
+  // chestImage() {
+  //   this.el.sceneEl
+  //     .querySelector("#player-rig")
+  //     .querySelector(".chest-image")
+  //     .setAttribute("media-loader", { src: this.data.src });
+  // },
 
   remove() {
     if (this.data.batch && this.mesh) {

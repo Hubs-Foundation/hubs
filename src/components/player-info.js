@@ -106,7 +106,6 @@ AFRAME.registerComponent("player-info", {
     if (!avatarImage) return;
     const emojiType = this.data.emojiType;
     const emojiImage = emojiTypeToImage[emojiType];
-    //console.log("change emoji called: " + emojiImage + ", emojiType: " + emojiType);
     if (emojiType === "empty") {
       avatarImage.removeAttribute("media-image");
       avatarImage.removeAttribute("media-loader");

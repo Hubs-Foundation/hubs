@@ -1,6 +1,6 @@
 @import 'shared';
 
-:local(.panel) {
+:local(.emojiPanel) {
   position: absolute;
   width:400px;
   left: 50%;
@@ -14,10 +14,6 @@
   border-radius: 300px;
 }
 :local(.iconEmoji) {
-  appearance: none;
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  outline-style: none;
   width: 30px;
   height: 30px;
   background-size: 30px;

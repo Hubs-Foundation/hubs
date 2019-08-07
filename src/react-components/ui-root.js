@@ -113,9 +113,6 @@ class UIRoot extends Component {
   willCompileAndUploadMaterials = false;
 
   static propTypes = {
-    hasActiveAngry: PropTypes.bool,
-    hasActiveHappy: PropTypes.bool,
-
     enterScene: PropTypes.func,
     exitScene: PropTypes.func,
     onSendMessage: PropTypes.func,
@@ -505,7 +502,7 @@ class UIRoot extends Component {
   };
 
   emojiChange = reason => {
-    console.log(" start emojistate: " + this.state.emojiState + ", reason: " + reason);
+   
     if (this.state.emojiState === reason) {
       this.setState({
         emojiState: "empty"
@@ -515,11 +512,11 @@ class UIRoot extends Component {
       this.setState({ emojiState: reason });
       this.emojiEvent.emojiType = reason;
     }
-    console.log(" end emojistate: " + this.state.emojiState);
+  
 
     this.props.scene.querySelector("#player-rig").setAttribute("player-info", this.emojiEvent);
 
-    console.log("emoji type: " + this.emojiEvent.emojiType);
+  
   };
 
   isWaitingForAutoExit = () => {
@@ -1703,7 +1700,7 @@ class UIRoot extends Component {
               </button>
             )}
             {this.state.frozen && (
-              <div className={cx(styles.uiInteractive, emojiStyle.panel)}>
+              <div className={cx(styles.uiInteractive, emojiStyle.emojiPanel)}>
                 <div
                   className={cx(emojiStyle.iconEmoji, emojiStyle.angry, {
                     [emojiStyle.active]: this.state.emojiState === "angry"
@@ -1949,7 +1946,6 @@ class UIRoot extends Component {
                   onToggleMute={this.toggleMute}
                   onToggleFreeze={this.toggleFreeze}
                   onSpawnPen={this.spawnPen}
-                  onEmojiChange={this.emojiChange}
                   onSpawnCamera={() => this.props.scene.emit("action_toggle_camera")}
                   onShareVideo={this.shareVideo}
                   onEndShareVideo={this.endShareVideo}

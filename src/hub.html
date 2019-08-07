@@ -593,26 +593,6 @@
 
             <template id="video-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
-                    <a-entity
-                        is-remote-hover-target
-                        tags="singleActionButton: true; isHoverMenuChild: true;"
-                        sprite
-                        icon-button="image: snap.png; hoverImage: snap-hover.png; activeImage: snap.png; activeHoverImage: snap-hover.png"
-                        visibility-on-content-type="contentType: video/mp4; contentSubtype: video-camera; visible: false;"
-                        scale="0.075 0.075 0.075"
-                        position="0 0.125 0"
-                        class="video-snap-button"
-                    ></a-entity>
-
-                    <a-entity
-                    is-remote-hover-target
-                    tags="singleActionButton: true; isHoverMenuChild: true;"
-                    sprite
-                    icon-button="image: snap.png; hoverImage: snap-hover.png; activeImage: snap.png; activeHoverImage: snap-hover.png"
-                    scale="0.075 0.075 0.075"
-                    position="0 0.125 0"
-                    class="video-chest-image-button"
-                ></a-entity>
 
                     <a-entity mixin="rounded-twitter-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" tweet-media-button visibility-on-content-type="contentType: video/mp4; contentSubtype: video-camera; visible: true;" position="0 0.285 0.01">
                         <a-entity text="value:tweet; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
@@ -671,20 +651,7 @@
                     </a-entity>
                 </a-entity>
             </template>
-<!-- hover button on image -->
-            <template id= "image-hover-menu">
-                    <a-entity class="ui interactable-ui hover-container" visible="false">
-                            <a-entity
-                            is-remote-hover-target
-                            tags="singleActionButton: true; isHoverMenuChild: true;"
-                            sprite
-                            icon-button="image: snap.png; hoverImage: snap-hover.png; activeImage: snap.png; activeHoverImage: snap-hover.png"
-                            scale="0.075 0.075 0.075"
-                            position="0 0.1 0"
-                            class="video-chest-image-button"
-                        ></a-entity>
-                    </a-entity>
-            </template>
+
 
             <template id="hubs-destination-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
