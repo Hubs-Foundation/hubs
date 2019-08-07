@@ -151,7 +151,9 @@ AFRAME.registerComponent("super-spawner", {
     } else {
       interaction.state.rightRemote.spawning = false;
     }
-    entity.components["body-helper"].body.syncToPhysics(true);
+    if (entity.components["body-helper"].body) {
+      entity.components["body-helper"].body.syncToPhysics(true);
+    }
   },
 
   activateCooldown() {

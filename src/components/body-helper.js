@@ -48,7 +48,9 @@ AFRAME.registerComponent("body-helper", {
   },
 
   remove: function() {
-    this.system.removeBody(this.body);
-    this.body.destroy();
+    if (this.body) {
+      this.system.removeBody(this.body);
+      this.body.destroy();
+    }
   }
 });

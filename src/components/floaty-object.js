@@ -47,6 +47,7 @@ AFRAME.registerComponent("floaty-object", {
       const linearThreshold = this.bodyHelper.data.linearSleepingThreshold;
       const angularThreshold = this.bodyHelper.data.angularSleepingThreshold;
       const isAtRest =
+        this.bodyHelper.body &&
         this.bodyHelper.body.physicsBody.getLinearVelocity().length2() < linearThreshold * linearThreshold &&
         this.bodyHelper.body.physicsBody.getAngularVelocity().length2() < angularThreshold * angularThreshold;
 
