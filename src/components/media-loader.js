@@ -14,6 +14,7 @@ import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
 import { loadModel } from "./gltf-model-plus";
 import { cloneObject3D } from "../utils/three-utils";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import anime from "animejs";
 
@@ -22,7 +23,7 @@ const SHAPE = require("aframe-physics-system/src/constants").SHAPE;
 let loadingObjectEnvMap;
 let loadingObject;
 
-window.addEventListener("DOMContentLoaded", () => {
+waitForDOMContentLoaded().then(() => {
   loadModel(loadingObjectSrc).then(gltf => {
     loadingObject = gltf;
   });
