@@ -140,24 +140,37 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.copy
     },
     {
-      src: { value: paths.device.smartMouse.cameraDelta },
-      dest: { x: "/var/smartMouseCamDeltaX", y: "/var/smartMouseCamDeltaY" },
+      src: { value: paths.device.mouse.coords },
+      dest: { value: "/var/mouseCoordsDelta" },
+      xform: xforms.diff_vec2
+    },
+    {
+      src: { value: "/var/mouseCoordsDelta" },
+      dest: { x: "/var/mouseCoordsX", y: "/var/mouseCoordsY" },
       xform: xforms.split_vec2
     },
     {
-      src: { value: "/var/smartMouseCamDeltaX" },
-      dest: { value: "/var/smartMouseCamDeltaXScaled" },
-      xform: xforms.scale(-0.2)
+      src: { value: "/var/mouseCoordsX" },
+      dest: { value: "/var/mouseCoordsXScaled" },
+      xform: xforms.scale(-Math.PI)
     },
     {
-      src: { value: "/var/smartMouseCamDeltaY" },
-      dest: { value: "/var/smartMouseCamDeltaYScaled" },
-      xform: xforms.scale(-0.1)
+      src: { value: "/var/mouseCoordsY" },
+      dest: { value: "/var/mouseCoordsYScaled" },
+      xform: xforms.scale((2 * Math.PI) / 3)
     },
     {
-      src: { x: "/var/smartMouseCamDeltaXScaled", y: "/var/smartMouseCamDeltaYScaled" },
-      dest: { value: paths.actions.cameraDelta },
+      src: { x: "/var/mouseCoordsXScaled", y: "/var/mouseCoordsYScaled" },
+      dest: { value: "/var/actions/cameraDelta" },
       xform: xforms.compose_vec2
+    },
+    {
+      src: {
+        value: "/var/actions/cameraDelta",
+        bool: paths.device.smartMouse.shouldMoveCamera
+      },
+      dest: { value: paths.actions.cameraDelta },
+      xform: xforms.copyVec2IfTrue
     },
     {
       src: { value: paths.actions.cameraDelta },
@@ -345,6 +358,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       },
       xform: xforms.falling,
       priority: 100
+    },
+    {
+      src: { value: paths.device.keyboard.key("o") },
+      dest: { value: paths.actions.nextCameraMode },
+      xform: xforms.rising
     }
 
     // Helpful bindings for debugging hands in 2D
@@ -584,6 +602,26 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.rising
+    }
+  ],
+  [sets.inspecting]: [
+    {
+      src: { value: paths.device.keyboard.key("space") },
+      dest: { value: k("space-rising") },
+      xform: xforms.rising
+    },
+    {
+      src: [
+        paths.device.keyboard.key("w"),
+        paths.device.keyboard.key("a"),
+        paths.device.keyboard.key("s"),
+        paths.device.keyboard.key("d"),
+        paths.device.keyboard.key("q"),
+        paths.device.keyboard.key("e"),
+        k("space-rising")
+      ],
+      dest: { value: paths.actions.stopInspecting },
+      xform: xforms.any
     }
   ]
 });

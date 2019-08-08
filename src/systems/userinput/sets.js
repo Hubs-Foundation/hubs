@@ -39,3 +39,4 @@ sets.leftHandHoldingPen = "leftHandHoldingPen";
 sets.leftHandHoldingCamera = "leftHandHoldingCamera";
 sets.leftHandHoldingInteractable = "leftHandHoldingInteractable";
 sets.leftHandHoveringOnNothing = "leftHandHoveringOnNothing";
+sets.inspecting = "inspecting";

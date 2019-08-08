@@ -31,7 +31,7 @@ export default class SceneEntryManager {
     this.scene = document.querySelector("a-scene");
     this.rightCursorController = document.getElementById("right-cursor-controller");
     this.leftCursorController = document.getElementById("left-cursor-controller");
-    this.playerRig = document.querySelector("#player-rig");
+    this.avatarRig = document.getElementById("avatar-rig");
     this._entered = false;
     this.performConditionalSignIn = () => {};
     this.history = history;
@@ -49,8 +49,7 @@ export default class SceneEntryManager {
   };
 
   enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
-    const playerCamera = document.querySelector("#player-camera");
-    playerCamera.removeAttribute("scene-preview-camera");
+    document.getElementById("viewing-camera").removeAttribute("scene-preview-camera");
 
     if (isDebug) {
       NAF.connection.adapter.session.options.verbose = true;
@@ -69,7 +68,7 @@ export default class SceneEntryManager {
     }
 
     if (isMobile || qsTruthy("mobile")) {
-      this.playerRig.setAttribute("virtual-gamepad-controls", {});
+      this.avatarRig.setAttribute("virtual-gamepad-controls", {});
     }
 
     this._setupPlayerRig();
@@ -152,7 +151,7 @@ export default class SceneEntryManager {
 
     const avatarScale = parseInt(qs.get("avatar_scale"), 10);
     if (avatarScale) {
-      this.playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
+      this.avatarRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
     }
   };
 
@@ -160,7 +159,7 @@ export default class SceneEntryManager {
     const avatarId = this.store.state.profile.avatarId;
     const avatarSrc = await getAvatarSrc(avatarId);
 
-    this.playerRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
+    this.avatarRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
   };
 
   _setupKicking = () => {
@@ -266,7 +265,7 @@ export default class SceneEntryManager {
       );
       orientation.then(or => {
         entity.setAttribute("offset-relative-to", {
-          target: "#player-camera",
+          target: "#avatar-pov-node",
           offset,
           orientation: or
         });
@@ -495,7 +494,7 @@ export default class SceneEntryManager {
         const entity = document.createElement("a-entity");
         entity.setAttribute("networked", { template: "#interactable-camera" });
         entity.setAttribute("offset-relative-to", {
-          target: "#player-camera",
+          target: "#avatar-pov-node",
           offset: { x: 0, y: 0, z: -1.5 }
         });
         this.scene.appendChild(entity);
@@ -511,9 +510,9 @@ export default class SceneEntryManager {
   };
 
   _spawnAvatar = () => {
-    this.playerRig.setAttribute("networked", "template: #remote-avatar; attachTemplateToLocal: false;");
-    this.playerRig.setAttribute("networked-avatar", "");
-    this.playerRig.emit("entered");
+    this.avatarRig.setAttribute("networked", "template: #remote-avatar; attachTemplateToLocal: false;");
+    this.avatarRig.setAttribute("networked-avatar", "");
+    this.avatarRig.emit("entered");
   };
 
   _runBot = async mediaStream => {
@@ -542,7 +541,7 @@ export default class SceneEntryManager {
       audioInput.onchange = getAudio;
     }
 
-    const camera = document.querySelector("#player-camera");
+    const camera = document.querySelector("#avatar-pov-node");
     const leftController = document.querySelector("#player-left-controller");
     const rightController = document.querySelector("#player-right-controller");
     const getRecording = () => {

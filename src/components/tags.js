@@ -11,7 +11,8 @@ AFRAME.registerComponent("tags", {
     singleActionButton: { default: false },
     holdableButton: { default: false },
     isPen: { default: false },
-    isHoverMenuChild: { default: false }
+    isHoverMenuChild: { default: false },
+    inspectable: { default: false }
   },
   update() {
     if (this.didUpdateOnce) {

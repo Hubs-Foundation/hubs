@@ -41,6 +41,10 @@ AFRAME.registerComponent("hoverable-visuals", {
         batchManagerSystem.meshToEl.delete(object);
       });
     });
+
+    const isMobile = AFRAME.utils.device.isMobile();
+    const isMobileVR = AFRAME.utils.device.isMobileVR();
+    this.isTouchscreen = isMobile && !isMobileVR;
   },
   tick(time) {
     if (!this.uniforms || !this.uniforms.length) return;
@@ -92,12 +96,12 @@ AFRAME.registerComponent("hoverable-visuals", {
       uniform.hubs_IsFrozen.value = isFrozen;
       uniform.hubs_SweepParams.value = this.sweepParams;
 
-      uniform.hubs_HighlightInteractorOne.value = !!interactorOne && showEffect;
+      uniform.hubs_HighlightInteractorOne.value = !!interactorOne && showEffect && !this.isTouchscreen;
       uniform.hubs_InteractorOnePos.value[0] = interactorOneTransform[12];
       uniform.hubs_InteractorOnePos.value[1] = interactorOneTransform[13];
       uniform.hubs_InteractorOnePos.value[2] = interactorOneTransform[14];
 
-      uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo && showEffect;
+      uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo && showEffect && !this.isTouchscreen;
       uniform.hubs_InteractorTwoPos.value[0] = interactorTwoTransform[12];
       uniform.hubs_InteractorTwoPos.value[1] = interactorTwoTransform[13];
       uniform.hubs_InteractorTwoPos.value[2] = interactorTwoTransform[14];

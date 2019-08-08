@@ -1,14 +1,14 @@
 import { getLastWorldPosition } from "../utils/three-utils";
 
 /**
- * Used on a player-rig to move the player to a random spawn point on entry.
+ * Used on a avatar-rig to move the avatar to a random spawn point on entry.
  * @namespace avatar
  * @component spawn-controller
  */
 AFRAME.registerComponent("spawn-controller", {
   schema: {
     target: { type: "selector" },
-    camera: { type: "selector", default: "#player-camera" },
+    camera: { type: "selector", default: "#avatar-pov-node" },
     playerHeight: { default: 1.6 },
     loadedEvent: { type: "string" }
   },
@@ -32,7 +32,7 @@ AFRAME.registerComponent("spawn-controller", {
     this.el.object3D.rotation.copy(spawnPoint.object3D.rotation);
 
     if (this.el.sceneEl.is("vr-mode")) {
-      // Rotate the player rig such that the vr-camera faces forward.
+      // Rotate the avatar rig such that the vr-camera faces forward.
       this.el.object3D.rotation.y -= this.data.camera.object3D.rotation.y;
     } else {
       // Reset the camera transform in 2D mode.
@@ -44,11 +44,6 @@ AFRAME.registerComponent("spawn-controller", {
     // Camera faces -Z direction. Flip rotation on Y axis to face the correct direction.
     this.el.object3D.rotation.y += Math.PI;
     this.el.object3D.matrixNeedsUpdate = true;
-
-    // Reset pitch-yaw-rotator after any scene-preview-camera rotation.
-    if (camera.components["pitch-yaw-rotator"]) {
-      camera.components["pitch-yaw-rotator"].set(camera.object3D.rotation.x, camera.object3D.rotation.y);
-    }
   }
 });
 

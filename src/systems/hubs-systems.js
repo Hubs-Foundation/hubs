@@ -10,6 +10,8 @@ import { SoundEffectsSystem } from "./sound-effects-system";
 import { BatchManagerSystem } from "./render-manager-system";
 import { LobbyCameraSystem } from "./lobby-camera-system";
 import { InteractionSfxSystem } from "./interaction-sfx-system";
+import { SpriteSystem } from "./sprites";
+import { CameraSystem } from "./camera-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -27,6 +29,8 @@ AFRAME.registerSystem("hubs-systems", {
     this.soundEffectsSystem = new SoundEffectsSystem();
     this.lobbyCameraSystem = new LobbyCameraSystem();
     this.batchManagerSystem = new BatchManagerSystem(this.el.sceneEl.object3D, this.el.sceneEl.renderer);
+    this.spriteSystem = new SpriteSystem(this.el);
+    this.cameraSystem = new CameraSystem();
   },
 
   tick(t) {
@@ -50,10 +54,25 @@ AFRAME.registerSystem("hubs-systems", {
     );
     this.soundEffectsSystem.tick();
     this.lobbyCameraSystem.tick();
-    // batchManager is ticked in "post-physics" system
   },
 
   remove() {
     this.cursorTargettingSystem.remove();
   }
 });
+
+const i = window.setInterval(() => {
+  if (AFRAME.scenes[0] && AFRAME.scenes[0].systems && AFRAME.scenes[0].systems.physics) {
+    AFRAME.registerSystem("post-physics", {
+      init() {
+        this.hubsSystems = this.el.sceneEl.systems["hubs-systems"];
+      },
+      tick(t, dt) {
+        this.hubsSystems.spriteSystem.tick(t, dt);
+        this.hubsSystems.batchManagerSystem.tick(t);
+        this.hubsSystems.cameraSystem.tick();
+      }
+    });
+    window.clearInterval(i);
+  }
+}, 1000);

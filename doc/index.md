@@ -244,7 +244,7 @@ Sets player info state, including avatar choice and display name.
 <a name="components/avatar/spawn-controller"></a>
 #### spawn-controller
 
-Used on a player-rig to move the player to a random spawn point on entry.
+Used on a avatar-rig to move the avatar to a random spawn point on entry.
 
 `src/components/spawn-controller.js`
           
