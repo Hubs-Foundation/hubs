@@ -60,9 +60,14 @@ const parseIfc = () => {
 function getAllSlabsFromIfc(ifcStoreys) {
   ifcStoreys.forEach(storey => {
     if (storey.IfcSlab) {
-      storey.IfcSlab.forEach(element => {
-        ifcData.push(element["@id"]);
-      });
+      // Ifc slab can be an array of objects or just one object
+      if (storey.IfcSlab[0]) {
+        storey.IfcSlab.forEach(element => {
+          ifcData.push(element["@id"]);
+        });
+      } else {
+        ifcData.push(storey.IfcSlab["@id"]);
+      }
     }
   });
 }
