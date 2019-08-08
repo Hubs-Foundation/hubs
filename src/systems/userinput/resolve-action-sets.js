@@ -108,10 +108,7 @@ export function resolveActionSets() {
   );
   userinput.toggleSet(
     sets.rightCursorHoveringOnUI,
-    !rightHand.held &&
-      !rightHand.hovered &&
-      !rightRemote.held &&
-      isUI(rightRemote.hovered)
+    !rightHand.held && !rightHand.hovered && !rightRemote.held && isUI(rightRemote.hovered)
   );
   userinput.toggleSet(
     sets.rightCursorHoveringOnVideo,
@@ -179,10 +176,7 @@ export function resolveActionSets() {
   );
   userinput.toggleSet(
     sets.leftCursorHoveringOnUI,
-    !leftHand.held &&
-      !leftHand.hovered &&
-      !leftRemote.held &&
-      isUI(leftRemote.hovered)
+    !leftHand.held && !leftHand.hovered && !leftRemote.held && isUI(leftRemote.hovered)
   );
   userinput.toggleSet(
     sets.leftCursorHoveringOnVideo,

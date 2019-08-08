@@ -1026,7 +1026,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       dest: { value: paths.actions.rightHand.drop },
       xform: xforms.any,
       priority: 2
-    },
+    }
   ],
   [sets.rightHandHoveringOnPen]: [],
   [sets.rightHandHoldingPen]: [
