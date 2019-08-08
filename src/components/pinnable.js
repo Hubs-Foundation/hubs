@@ -51,7 +51,7 @@ AFRAME.registerComponent("pinnable", {
         easing: "easeOutElastic"
       });
 
-      if (this.el.components["ammo-body"]) {
+      if (this.el.components["ammo-body"] && !this.el.sceneEl.systems.interaction.isHeld(this.el)) {
         this.el.setAttribute("ammo-body", { type: "static" });
       }
     } else {

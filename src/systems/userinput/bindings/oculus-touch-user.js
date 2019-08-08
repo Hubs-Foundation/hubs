@@ -58,7 +58,6 @@ const keyboardSnapLeft = `${name}/keyboard/snap-left`;
 const lowerButtons = `${name}buttons/lower`;
 
 const ensureFrozenViaButtons = `${name}buttons/ensureFrozen`;
-const ensureFrozenViaButtons2 = `${name}buttons/ensureFrozen2`;
 const ensureFrozenViaKeyboard = `${name}keyboard/ensureFrozen`;
 
 const thawViaButtons = `${name}buttons/thaw`;
@@ -97,7 +96,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       xform: xforms.copy
     },
     {
-      src: [ensureFrozenViaButtons, ensureFrozenViaButtons2, ensureFrozenViaKeyboard],
+      src: [ensureFrozenViaButtons, ensureFrozenViaKeyboard],
       dest: { value: paths.actions.ensureFrozen },
       xform: xforms.any
     },
@@ -791,12 +790,6 @@ export const oculusTouchUserBindings = addSetsToBindings({
       src: { value: leftGripPressed2 },
       dest: { value: paths.actions.leftHand.drop },
       xform: xforms.falling
-    },
-    {
-      src: {},
-      dest: { value: ensureFrozenViaButtons },
-      priority: 1,
-      xform: xforms.always(false)
     }
   ],
 
@@ -932,12 +925,6 @@ export const oculusTouchUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.any,
       priority: 2
-    },
-    {
-      src: {},
-      dest: { value: ensureFrozenViaButtons },
-      priority: 1,
-      xform: xforms.always(false)
     }
   ],
 
@@ -958,12 +945,6 @@ export const oculusTouchUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.left.drop },
       xform: xforms.any,
       priority: 2
-    },
-    {
-      src: {},
-      dest: { value: ensureFrozenViaButtons2 },
-      priority: 1,
-      xform: xforms.always(false)
     }
   ],
 
@@ -1046,12 +1027,6 @@ export const oculusTouchUserBindings = addSetsToBindings({
       xform: xforms.any,
       priority: 2
     },
-    {
-      src: {},
-      dest: { value: ensureFrozenViaButtons },
-      priority: 1,
-      xform: xforms.always(false)
-    }
   ],
   [sets.rightHandHoveringOnPen]: [],
   [sets.rightHandHoldingPen]: [
