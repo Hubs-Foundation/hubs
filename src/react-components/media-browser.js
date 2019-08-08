@@ -387,7 +387,7 @@ class MediaBrowser extends Component {
 
           {this.props.mediaSearchStore.isFetching ||
           this._sendQueryTimeout ||
-          (this.state.result && this.state.result.entries.length > 0) ||
+          entries.length > 0 ||
           !showEmptyStringOnNoResult ? (
             <MediaTiles
               result={this.state.result}

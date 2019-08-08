@@ -6,7 +6,7 @@ import { textureLoader } from "../utils/media-utils";
 import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
-import { disposeNode } from "../utils/three-utils";
+import { disposeNode, cloneObject3D } from "../utils/three-utils";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -77,14 +77,6 @@ AFRAME.GLTFModelPlus = {
   }
 };
 
-function parallelTraverse(a, b, callback) {
-  callback(a, b);
-
-  for (let i = 0; i < a.children.length; i++) {
-    parallelTraverse(a.children[i], b.children[i], callback);
-  }
-}
-
 function generateMeshBVH(object3D) {
   object3D.traverse(obj => {
     // note that we might already have a bounds tree if this was a clone of an object with one
@@ -104,46 +96,10 @@ function generateMeshBVH(object3D) {
   });
 }
 
-// Modified version of Don McCurdy's AnimationUtils.clone
-// https://github.com/mrdoob/three.js/pull/14494
-function cloneSkinnedMesh(source) {
-  const cloneLookup = new Map();
-
-  const clone = source.clone();
-
-  parallelTraverse(source, clone, function(sourceNode, clonedNode) {
-    cloneLookup.set(sourceNode, clonedNode);
-    if (sourceNode.isMesh && sourceNode.geometry.boundsTree) {
-      clonedNode.geometry.boundsTree = sourceNode.geometry.boundsTree;
-    }
-  });
-
-  source.traverse(function(sourceMesh) {
-    if (!sourceMesh.isSkinnedMesh) return;
-
-    const sourceBones = sourceMesh.skeleton.bones;
-    const clonedMesh = cloneLookup.get(sourceMesh);
-
-    clonedMesh.skeleton = sourceMesh.skeleton.clone();
-
-    clonedMesh.skeleton.bones = sourceBones.map(function(sourceBone) {
-      if (!cloneLookup.has(sourceBone)) {
-        throw new Error("Required bones are not descendants of the given object.");
-      }
-
-      return cloneLookup.get(sourceBone);
-    });
-
-    clonedMesh.bind(clonedMesh.skeleton, sourceMesh.bindMatrix);
-  });
-
-  return clone;
-}
-
 function cloneGltf(gltf) {
   return {
-    animations: gltf.animations,
-    scene: cloneSkinnedMesh(gltf.scene)
+    animations: gltf.scene.animations,
+    scene: cloneObject3D(gltf.scene)
   };
 }
 
@@ -221,10 +177,16 @@ const inflateEntities = function(indexToEntityMap, node, templates, isRoot, mode
   }
 
   // Set the name of the `THREE.Group` to match the name of the node,
+  // so that templates can be attached to the correct AFrame entity.
+  el.object3D.name = node.name;
+
+  // Set the uuid of the `THREE.Group` to match the uuid of the node,
   // so that `THREE.PropertyBinding` will find (and later animate)
   // the group. See `PropertyBinding.findNode`:
   // https://github.com/mrdoob/three.js/blob/dev/src/animation/PropertyBinding.js#L211
-  el.object3D.name = node.name;
+  el.object3D.uuid = node.uuid;
+  node.uuid = THREE.Math.generateUUID();
+
   if (node.animations) {
     // Pass animations up to the group object so that when we can pass the group as
     // the optional root in `THREE.AnimationMixer.clipAction` and use the hierarchy
@@ -299,7 +261,7 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
   let gltfUrl = src;
   let fileMap;
 
-  if (contentType.includes("model/gltf+zip") || contentType.includes("application/x-zip-compressed")) {
+  if (contentType && (contentType.includes("model/gltf+zip") || contentType.includes("application/x-zip-compressed"))) {
     fileMap = await extractZipFile(gltfUrl);
     gltfUrl = fileMap["scene.gtlf"];
   }
@@ -376,7 +338,36 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
     Object.keys(fileMap).forEach(URL.revokeObjectURL);
   }
 
+  gltf.scene.animations = gltf.animations;
+
   return gltf;
+}
+
+export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
+  const preferredTechnique =
+    window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness";
+
+  if (useCache) {
+    if (gltfCache.has(src)) {
+      gltfCache.retain(src);
+      return cloneGltf(gltfCache.get(src).gltf);
+    } else {
+      if (inflightGltfs.has(src)) {
+        const gltf = await inflightGltfs.get(src);
+        gltfCache.retain(src);
+        return cloneGltf(gltf);
+      } else {
+        const promise = loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor);
+        inflightGltfs.set(src, promise);
+        const gltf = await promise;
+        inflightGltfs.delete(src);
+        gltfCache.set(src, gltf);
+        return cloneGltf(gltf);
+      }
+    }
+  } else {
+    return loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor);
+  }
 }
 
 /**
@@ -396,9 +387,6 @@ AFRAME.registerComponent("gltf-model-plus", {
   },
 
   init() {
-    this.preferredTechnique =
-      window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness";
-
     // This can be set externally if a consumer wants to do some node preprocssing.
     this.jsonPreprocessor = null;
 
@@ -426,30 +414,6 @@ AFRAME.registerComponent("gltf-model-plus", {
     });
   },
 
-  async loadModel(src, contentType, technique, useCache) {
-    if (useCache) {
-      if (gltfCache.has(src)) {
-        gltfCache.retain(src);
-        return cloneGltf(gltfCache.get(src).gltf);
-      } else {
-        if (inflightGltfs.has(src)) {
-          const gltf = await inflightGltfs.get(src);
-          gltfCache.retain(src);
-          return cloneGltf(gltf);
-        } else {
-          const promise = loadGLTF(src, contentType, technique, null, this.jsonPreprocessor);
-          inflightGltfs.set(src, promise);
-          const gltf = await promise;
-          inflightGltfs.delete(src);
-          gltfCache.set(src, gltf);
-          return cloneGltf(gltf);
-        }
-      }
-    } else {
-      return loadGLTF(src, contentType, technique, null, this.jsonPreprocessor);
-    }
-  },
-
   async applySrc(src, contentType) {
     try {
       // If the src attribute is a selector, get the url from the asset item.
@@ -472,7 +436,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       }
 
       this.el.emit("model-loading");
-      const gltf = await this.loadModel(src, contentType, this.preferredTechnique, this.data.useCache);
+      const gltf = await loadModel(src, contentType, this.data.useCache, this.jsonPreprocessor);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
@@ -482,7 +446,6 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.disposeLastInflatedEl();
 
       this.model = gltf.scene || gltf.scenes[0];
-      this.model.animations = gltf.animations;
 
       if (this.data.batch) {
         this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.model);
@@ -490,7 +453,7 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       if (gltf.animations.length > 0) {
         this.el.setAttribute("animation-mixer", {});
-        this.el.components["animation-mixer"].initMixer(gltf.animations);
+        this.el.components["animation-mixer"].initMixer(this.model.animations);
       } else {
         generateMeshBVH(this.model);
       }
