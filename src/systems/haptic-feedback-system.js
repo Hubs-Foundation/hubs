@@ -101,7 +101,6 @@ export class HapticFeedbackSystem {
     const buttonRightStrength = interactRight ? STRENGTH.BUTTON_PRESSED : 0;
     const stretchingStrength = determineStretchStrength(twoPointStretchingSystem);
 
-    // TODO: haptic feedback for button pressed by left remote
     const leftStrength = Math.max(leftHandStrength, leftRemoteStrength, stretchingStrength, buttonLeftStrength);
     const rightStrength = Math.max(rightHandStrength, rightRemoteStrength, stretchingStrength, buttonRightStrength);
 

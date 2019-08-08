@@ -1,4 +1,5 @@
 import { sets } from "./sets";
+import { isUI } from "./../interactions";
 
 let leftTeleporter, rightTeleporter;
 
@@ -110,10 +111,7 @@ export function resolveActionSets() {
     !rightHand.held &&
       !rightHand.hovered &&
       !rightRemote.held &&
-      rightRemote.hovered &&
-      (rightRemote.hovered.components.tags &&
-        (rightRemote.hovered.components.tags.data.singleActionButton ||
-          rightRemote.hovered.components.tags.data.holdableButton))
+      isUI(rightRemote.hovered)
   );
   userinput.toggleSet(
     sets.rightCursorHoveringOnVideo,
@@ -184,10 +182,7 @@ export function resolveActionSets() {
     !leftHand.held &&
       !leftHand.hovered &&
       !leftRemote.held &&
-      leftRemote.hovered &&
-      (leftRemote.hovered.components.tags &&
-        (leftRemote.hovered.components.tags.data.singleActionButton ||
-          leftRemote.hovered.components.tags.data.holdableButton))
+      isUI(leftRemote.hovered)
   );
   userinput.toggleSet(
     sets.leftCursorHoveringOnVideo,

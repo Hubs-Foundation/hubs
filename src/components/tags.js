@@ -1,3 +1,7 @@
+export function isTagged(el, tag) {
+  return el && el.components && el.components.tags && el.components.tags.data[tag];
+}
+
 AFRAME.registerComponent("tags", {
   schema: {
     isHandCollisionTarget: { default: false },

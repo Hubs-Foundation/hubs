@@ -7,13 +7,15 @@ import { HoverMenuSystem } from "./hover-menu-system";
 import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
-
 import { BatchManagerSystem } from "./render-manager-system";
 import { LobbyCameraSystem } from "./lobby-camera-system";
+import { InteractionSfxSystem } from "./interaction-sfx-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
     this.cursorTogglingSystem = new CursorTogglingSystem();
+    this.interactionSfxSystem = new InteractionSfxSystem();
+    this.superSpawnerSystem = new SuperSpawnerSystem();
     this.cursorTargettingSystem = new CursorTargettingSystem();
     this.constraintsSystem = new ConstraintsSystem();
     this.twoPointStretchingSystem = new TwoPointStretchingSystem();
@@ -21,7 +23,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.holdableButtonSystem = new HoldableButtonSystem();
     this.hoverButtonSystem = new HoverButtonSystem();
     this.hoverMenuSystem = new HoverMenuSystem();
-    this.superSpawnerSystem = new SuperSpawnerSystem();
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
     this.soundEffectsSystem = new SoundEffectsSystem();
     this.lobbyCameraSystem = new LobbyCameraSystem();
@@ -31,9 +32,10 @@ AFRAME.registerSystem("hubs-systems", {
   tick(t) {
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
-    systems.interaction.tick2(this.soundEffectsSystem);
+    systems.interaction.tick2();
+    this.cursorTogglingSystem.tick(systems.interaction, systems.userinput, this.el);
+    this.interactionSfxSystem.tick(systems.interaction, systems.userinput, this.soundEffectsSystem);
     this.superSpawnerSystem.tick();
-    this.cursorTogglingSystem.tick();
     this.cursorTargettingSystem.tick(t);
     this.constraintsSystem.tick();
     this.twoPointStretchingSystem.tick();

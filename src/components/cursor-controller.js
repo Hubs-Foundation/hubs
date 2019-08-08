@@ -17,7 +17,6 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   init: function() {
-    this.toggledOff = false;
     this.enabled = true;
 
     this.data.cursor.addEventListener(
@@ -62,13 +61,10 @@ AFRAME.registerComponent("cursor-controller", {
       const cursorPose = userinput.get(left ? paths.actions.cursor.left.pose : paths.actions.cursor.right.pose);
       const hideLine = userinput.get(left ? paths.actions.cursor.left.hideLine : paths.actions.cursor.right.hideLine);
 
-      this.data.cursor.object3D.visible = this.enabled && !!cursorPose && !this.toggledOff;
-      this.line.material.visible = !!(this.enabled && !hideLine && !this.toggledOff);
+      this.data.cursor.object3D.visible = this.enabled && !!cursorPose;
+      this.line.material.visible = !!(this.enabled && !hideLine);
 
-      if (userinput.get(left ? paths.actions.cursor.left.toggle : paths.actions.cursor.right.toggle)) {
-        this.toggledOff = !this.toggledOff;
-      }
-      if (!this.enabled || !cursorPose || this.toggledOff) {
+      if (!this.enabled || !cursorPose) {
         return;
       }
 

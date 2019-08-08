@@ -1,8 +1,8 @@
 /* global AFRAME Ammo NAF */
 import { paths } from "./userinput/paths";
-import { SOUND_HOVER_OR_GRAB } from "./sound-effects-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { canMove } from "../utils/permissions-utils";
+import { isTagged } from "../components/tags";
 
 function findHandCollisionTargetForHand(body) {
   const driver = AFRAME.scenes[0].systems.physics.driver;
@@ -20,7 +20,7 @@ function findHandCollisionTargetForHand(body) {
       const manifoldPoint = persistentManifold.getContactPoint(j);
       if (manifoldPoint.getDistance() <= 10e-6) {
         const object3D = driver.els.get(handPtr === body0ptr ? body1ptr : body0ptr).object3D;
-        if (object3D.el && object3D.el.components.tags && object3D.el.components.tags.data.isHandCollisionTarget) {
+        if (isTagged(object3D.el, "isHandCollisionTarget")) {
           return object3D.el;
         }
         return null;
@@ -55,10 +55,8 @@ AFRAME.registerComponent("is-not-remote-hover-target", {
   }
 });
 
-function isUI(el) {
-  return (
-    el && el.components.tags && (el.components.tags.data.singleActionButton || el.components.tags.data.holdableButton)
-  );
+export function isUI(el) {
+  return isTagged(el, "singleActionButton") || isTagged(el, "holdableButton");
 }
 
 AFRAME.registerSystem("interaction", {
@@ -106,6 +104,14 @@ AFRAME.registerSystem("interaction", {
     if (this.state.leftRemote.hovered === el) {
       this.state.leftRemote.hovered = null;
     }
+  },
+
+  getRightRemoteHoverTarget() {
+    return this.rightRemoteHoverTarget;
+  },
+
+  getLeftRemoteHoverTarget() {
+    return this.leftRemoteHoverTarget;
   },
 
   init: function() {
@@ -179,23 +185,12 @@ AFRAME.registerSystem("interaction", {
         spawning: null
       }
     };
-
     waitForDOMContentLoaded().then(() => {
-      this.rightCursorController = document.getElementById("right-cursor-controller");
-      this.leftCursorController = document.getElementById("left-cursor-controller");
       this.options.leftHand.entity = document.getElementById("player-left-controller");
       this.options.rightHand.entity = document.getElementById("player-right-controller");
       this.options.rightRemote.entity = document.getElementById("right-cursor");
       this.options.leftRemote.entity = document.getElementById("left-cursor");
     });
-  },
-
-  getRightRemoteHoverTarget() {
-    return this.rightRemoteHoverTarget;
-  },
-
-  getLeftRemoteHoverTarget() {
-    return this.leftRemoteHoverTarget;
   },
 
   tickInteractor(options, state) {
@@ -210,20 +205,22 @@ AFRAME.registerSystem("interaction", {
       state.hovered = options.hoverFn.call(this, options.entity.body);
       if (state.hovered) {
         const entity = state.hovered;
-        const isHoldable = entity.components.tags && entity.components.tags.data.isHoldable;
         const isFrozen = this.el.is("frozen");
         const isPinned = entity.components.pinnable && entity.components.pinnable.data.pinned;
-        if (isHoldable && userinput.get(options.grabPath) && (isFrozen || !isPinned) && canMove(entity)) {
+        if (
+          isTagged(entity, "isHoldable") &&
+          userinput.get(options.grabPath) &&
+          (isFrozen || !isPinned) &&
+          canMove(entity)
+        ) {
           state.held = entity;
         }
       }
     }
   },
 
-  tick2(sfx) {
+  tick2() {
     if (!this.el.is("entered")) {
-      this.rightCursorController.components["cursor-controller"].enabled = false;
-      this.leftCursorController.components["cursor-controller"].enabled = false;
       return;
     }
 
@@ -231,12 +228,6 @@ AFRAME.registerSystem("interaction", {
     Object.assign(this.previousState.rightRemote, this.state.rightRemote);
     Object.assign(this.previousState.leftHand, this.state.leftHand);
     Object.assign(this.previousState.leftRemote, this.state.leftRemote);
-
-    this.rightHandTeleporter =
-      this.rightHandTeleporter || document.querySelector("#player-right-controller").components["teleporter"];
-    this.leftHandTeleporter =
-      this.leftHandTeleporter || document.querySelector("#player-left-controller").components["teleporter"];
-    this.gazeTeleporter = this.gazeTeleporter || document.querySelector("#gaze-teleport").components["teleporter"];
 
     if (this.options.leftHand.entity.object3D.visible && !this.state.leftRemote.held) {
       this.tickInteractor(this.options.leftHand, this.state.leftHand);
@@ -249,75 +240,6 @@ AFRAME.registerSystem("interaction", {
     }
     if (!this.state.leftHand.held && !this.state.leftHand.hovered) {
       this.tickInteractor(this.options.leftRemote, this.state.leftRemote);
-    }
-
-    const rightHandInteracting = this.state.rightHand.hovered || this.state.rightHand.held;
-    const rightHandTeleporting = this.rightHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting;
-    const rightRemotePenIntersectingInVR =
-      this.el.sceneEl.is("vr-mode") &&
-      this.state.rightRemote.held &&
-      this.state.rightRemote.held.components &&
-      this.state.rightRemote.held.components.tags &&
-      this.state.rightRemote.held.components.tags.data.isPen &&
-      this.state.rightRemote.held.children[0].components.pen.intersection;
-
-    const enableRightRemote = !rightHandInteracting && !rightHandTeleporting && !rightRemotePenIntersectingInVR;
-
-    this.rightCursorController.components["cursor-controller"].enabled = enableRightRemote;
-
-    if (!enableRightRemote) {
-      this.state.rightRemote.hovered = null;
-    }
-
-    const leftHandInteracting = this.state.leftHand.hovered || this.state.leftHand.held;
-    const leftHandTeleporting = this.leftHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting;
-    const leftRemotePenIntersectingInVR =
-      this.el.sceneEl.is("vr-mode") &&
-      this.state.leftRemote.held &&
-      this.state.leftRemote.held.components &&
-      this.state.leftRemote.held.components.tags &&
-      this.state.leftRemote.held.components.tags.data.isPen &&
-      this.state.leftRemote.held.children[0].components.pen.intersection;
-
-    const enableLeftRemote = !leftHandInteracting && !leftHandTeleporting && !leftRemotePenIntersectingInVR;
-
-    this.leftCursorController.components["cursor-controller"].enabled = enableLeftRemote;
-
-    if (!enableLeftRemote) {
-      this.state.leftRemote.hovered = null;
-    }
-
-    if (
-      this.state.leftHand.held !== this.previousState.leftHand.held ||
-      this.state.rightHand.held !== this.previousState.rightHand.held ||
-      this.state.rightRemote.held !== this.previousState.rightRemote.held ||
-      (isUI(this.state.rightRemote.hovered) &&
-        this.state.rightRemote.hovered !== this.previousState.rightRemote.hovered) ||
-      this.state.leftRemote.held !== this.previousState.leftRemote.held ||
-      (isUI(this.state.leftRemote.hovered) && this.state.leftRemote.hovered !== this.previousState.leftRemote.hovered)
-    ) {
-      sfx.playSoundOneShot(SOUND_HOVER_OR_GRAB);
-    }
-
-    if (this.el.systems.userinput.get(paths.actions.logInteractionState)) {
-      console.log(
-        "Interaction System State\nleftHand held",
-        this.state.leftHand.held,
-        "\nleftHand hovered",
-        this.state.leftHand.hovered,
-        "\nrightHand held",
-        this.state.rightHand.held,
-        "\nrightHand hovered",
-        this.state.rightHand.hovered,
-        "\nrightRemote held",
-        this.state.rightRemote.held,
-        "\nrightRemote hovered",
-        this.state.rightRemote.hovered,
-        "\nleftRemote held",
-        this.state.leftRemote.held,
-        "\nleftRemote hovered",
-        this.state.leftRemote.hovered
-      );
     }
   }
 });
