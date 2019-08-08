@@ -42,6 +42,9 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
     this.offset = offset;
 
     this.meshToEl = meshToEl;
+    const isMobile = AFRAME.utils.device.isMobile();
+    const isMobileVR = AFRAME.utils.device.isMobileVR();
+    this.isTouchscreen = isMobile && !isMobileVR;
   }
 
   update(time) {
@@ -86,8 +89,8 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
 
         tempVec4[0] = worldY - scaledRadius;
         tempVec4[1] = worldY + scaledRadius;
-        tempVec4[2] = !!highlightInteractorOne && !hideDueToPinning;
-        tempVec4[3] = !!highlightInteractorTwo && !hideDueToPinning;
+        tempVec4[2] = !!highlightInteractorOne && !hideDueToPinning && !this.isTouchscreen;
+        tempVec4[3] = !!highlightInteractorTwo && !hideDueToPinning && !this.isTouchscreen;
         this.hubs_sweepParams.set(tempVec4, instanceId * 4);
       }
     }

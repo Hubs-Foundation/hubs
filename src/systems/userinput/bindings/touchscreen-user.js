@@ -19,11 +19,6 @@ export const touchscreenUserBindings = addSetsToBindings({
   [sets.global]: [
     {
       src: {},
-      dest: { value: paths.actions.disableInteractorHighlightEffect },
-      xform: xforms.always(true)
-    },
-    {
-      src: {},
       dest: { value: paths.actions.cursor.hideLine },
       xform: xforms.always(true)
     },
