@@ -156,10 +156,11 @@ AFRAME.registerSystem("transform-selected-object", {
     plane.updateMatrixWorld(true);
 
     intersections.length = 0;
+    // TODO: sort out left/right more clearly than this
     this.raycaster =
-      this.raycaster || document.getElementById("cursor-controller").components["cursor-controller"].raycaster;
+      this.raycaster || document.getElementById("right-cursor-controller").components["cursor-controller"].raycaster;
     this.raycaster2 =
-      this.raycaster2 || document.getElementById("cursor-controller2").components["cursor-controller"].raycaster;
+      this.raycaster2 || document.getElementById("left-cursor-controller").components["cursor-controller"].raycaster;
     const left = this.hand.id === "player-left-controller";
     const far = left ? this.raycaster2.far : this.raycaster.far;
     if (left) {

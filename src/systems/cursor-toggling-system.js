@@ -7,8 +7,8 @@ export class CursorTogglingSystem {
     this.leftToggledOff = false;
 
     waitForDOMContentLoaded().then(() => {
-      this.rightRemote = document.getElementById("cursor-controller");
-      this.leftRemote = document.getElementById("cursor-controller2");
+      this.rightRemote = document.getElementById("right-cursor-controller");
+      this.leftRemote = document.getElementById("left-cursor-controller");
     });
   }
   tick(t) {

@@ -181,8 +181,8 @@ AFRAME.registerSystem("interaction", {
     };
 
     waitForDOMContentLoaded().then(() => {
-      this.cursorController = document.getElementById("cursor-controller");
-      this.cursorController2 = document.getElementById("cursor-controller2");
+      this.rightCursorController = document.getElementById("right-cursor-controller");
+      this.leftCursorController = document.getElementById("left-cursor-controller");
       this.options.leftHand.entity = document.getElementById("player-left-controller");
       this.options.rightHand.entity = document.getElementById("player-right-controller");
       this.options.rightRemote.entity = document.getElementById("cursor");
@@ -222,8 +222,8 @@ AFRAME.registerSystem("interaction", {
 
   tick2(sfx) {
     if (!this.el.is("entered")) {
-      this.cursorController.components["cursor-controller"].enabled = false;
-      this.cursorController2.components["cursor-controller"].enabled = false;
+      this.rightCursorController.components["cursor-controller"].enabled = false;
+      this.leftCursorController.components["cursor-controller"].enabled = false;
       return;
     }
 
@@ -263,7 +263,7 @@ AFRAME.registerSystem("interaction", {
 
     const enableRightRemote = !rightHandInteracting && !rightHandTeleporting && !rightRemotePenIntersectingInVR;
 
-    this.cursorController.components["cursor-controller"].enabled = enableRightRemote;
+    this.rightCursorController.components["cursor-controller"].enabled = enableRightRemote;
 
     if (!enableRightRemote) {
       this.state.rightRemote.hovered = null;
@@ -281,7 +281,7 @@ AFRAME.registerSystem("interaction", {
 
     const enableLeftRemote = !leftHandInteracting && !leftHandTeleporting && !leftRemotePenIntersectingInVR;
 
-    this.cursorController2.components["cursor-controller"].enabled = enableLeftRemote;
+    this.leftCursorController.components["cursor-controller"].enabled = enableLeftRemote;
 
     if (!enableLeftRemote) {
       this.state.leftRemote.hovered = null;

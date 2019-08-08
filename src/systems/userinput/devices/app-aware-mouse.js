@@ -33,7 +33,7 @@ export class AppAwareMouseDevice {
     this.prevDirection.copy(this.prevDirection);
 
     if (!this.cursorController) {
-      this.cursorController = document.querySelector("[cursor-controller]").components["cursor-controller"];
+      this.cursorController = document.getElementById("right-cursor-controller").components["cursor-controller"];
     }
 
     if (!this.camera) {
