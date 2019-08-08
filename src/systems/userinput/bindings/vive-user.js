@@ -747,7 +747,7 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: { value: rPose },
-      dest: { value: paths.actions.cursor.pose },
+      dest: { value: paths.actions.cursor.right.pose },
       xform: xforms.copy
     },
     {
@@ -815,7 +815,7 @@ export const viveUserBindings = addSetsToBindings({
   [sets.cursorHoveringOnUI]: [
     {
       src: { value: rightTriggerPressed2 },
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.rising,
       priority: 1
     }
@@ -827,14 +827,14 @@ export const viveUserBindings = addSetsToBindings({
         value: rAxis("touchY"),
         touching: rButton("touchpad").touched
       },
-      dest: { value: paths.actions.cursor.mediaVolumeMod },
+      dest: { value: paths.actions.cursor.right.mediaVolumeMod },
       xform: xforms.touch_axis_scroll(0.1)
     },
     {
       src: {
         value: rAxis("joyY")
       },
-      dest: { value: paths.actions.cursor.mediaVolumeMod },
+      dest: { value: paths.actions.cursor.right.mediaVolumeMod },
       xform: xforms.scale(0.02)
     }
   ],
@@ -991,7 +991,7 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: [rGripRisingGrab],
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.any
     }
   ],
@@ -1013,14 +1013,14 @@ export const viveUserBindings = addSetsToBindings({
         value: rAxis("touchY"),
         touching: rButton("touchpad").touched
       },
-      dest: { value: paths.actions.cursor.modDelta },
+      dest: { value: paths.actions.cursor.right.modDelta },
       xform: xforms.touch_axis_scroll(-1)
     },
     {
       src: {
         value: rAxis("joyY")
       },
-      dest: { value: paths.actions.cursor.modDelta },
+      dest: { value: paths.actions.cursor.right.modDelta },
       xform: xforms.scale(-0.02)
     },
     {
@@ -1031,7 +1031,7 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: [cursorDrop1, cursorDrop2],
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.any
     },
     {
@@ -1047,19 +1047,19 @@ export const viveUserBindings = addSetsToBindings({
   [sets.cursorHoldingPen]: [
     {
       src: [cursorDrop1],
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.noop,
       priority: 1
     },
     {
       src: [cursorDrop2],
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.noop,
       priority: 1
     },
     {
       src: { value: rightGripPressed2 },
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.rising,
       priority: 1
     },
@@ -1074,13 +1074,13 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: { value: rightTriggerPressed2 },
-      dest: { value: paths.actions.cursor.startDrawing },
+      dest: { value: paths.actions.cursor.right.startDrawing },
       xform: xforms.rising,
       priority: 3
     },
     {
       src: { value: rightTriggerPressed2 },
-      dest: { value: paths.actions.cursor.stopDrawing },
+      dest: { value: paths.actions.cursor.right.stopDrawing },
       xform: xforms.falling,
       priority: 3
     },
@@ -1089,7 +1089,7 @@ export const viveUserBindings = addSetsToBindings({
         value: rAxis("touchX"),
         touching: rButton("touchpad").touched
       },
-      dest: { value: paths.actions.cursor.scalePenTip },
+      dest: { value: paths.actions.cursor.right.scalePenTip },
       xform: xforms.touch_axis_scroll(0.1)
     },
     {
@@ -1098,7 +1098,7 @@ export const viveUserBindings = addSetsToBindings({
         value: rDpadNorth1
       },
       dest: {
-        value: paths.actions.cursor.penNextColor
+        value: paths.actions.cursor.right.penNextColor
       },
       xform: xforms.copyIfTrue,
       priority: 2
@@ -1109,14 +1109,14 @@ export const viveUserBindings = addSetsToBindings({
         value: rDpadSouth1
       },
       dest: {
-        value: paths.actions.cursor.penPrevColor
+        value: paths.actions.cursor.right.penPrevColor
       },
       xform: xforms.copyIfTrue,
       priority: 2
     },
     {
       src: { value: rButton("top").pressed },
-      dest: { value: paths.actions.cursor.undoDrawing },
+      dest: { value: paths.actions.cursor.right.undoDrawing },
       xform: xforms.rising,
       priority: 2
     }
@@ -1249,7 +1249,7 @@ export const viveUserBindings = addSetsToBindings({
   [sets.cursorHoldingCamera]: [
     {
       src: { value: rightTriggerPressed2 },
-      dest: { value: paths.actions.cursor.takeSnapshot },
+      dest: { value: paths.actions.cursor.right.takeSnapshot },
       xform: xforms.copy,
       priority: 3
     },

@@ -59,13 +59,13 @@ AFRAME.registerComponent("cursor-controller", {
 
     return function(t, left) {
       const userinput = AFRAME.scenes[0].systems.userinput;
-      const cursorPose = userinput.get(left ? paths.actions.cursor.left.pose : paths.actions.cursor.pose);
-      const hideLine = userinput.get(left ? paths.actions.cursor.left.hideLine : paths.actions.cursor.hideLine);
+      const cursorPose = userinput.get(left ? paths.actions.cursor.left.pose : paths.actions.cursor.right.pose);
+      const hideLine = userinput.get(left ? paths.actions.cursor.left.hideLine : paths.actions.cursor.right.hideLine);
 
       this.data.cursor.object3D.visible = this.enabled && !!cursorPose && !this.toggledOff;
       this.line.material.visible = !!(this.enabled && !hideLine && !this.toggledOff);
 
-      if (userinput.get(left ? paths.actions.cursor.left.toggle : paths.actions.cursor.toggle)) {
+      if (userinput.get(left ? paths.actions.cursor.left.toggle : paths.actions.cursor.right.toggle)) {
         this.toggledOff = !this.toggledOff;
       }
       if (!this.enabled || !cursorPose || this.toggledOff) {
@@ -92,8 +92,8 @@ AFRAME.registerComponent("cursor-controller", {
       const { cursor, minDistance, far, camera } = this.data;
 
       const cursorModDelta =
-        userinput.get(left ? paths.actions.cursor.left.modDelta : paths.actions.cursor.modDelta) || 0;
-      if (isGrabbing && !userinput.activeSets.includes(left ? sets.cursorHoldingUI2 : sets.cursorHoldingUI)) {
+        userinput.get(left ? paths.actions.cursor.left.modDelta : paths.actions.cursor.right.modDelta) || 0;
+      if (isGrabbing && !userinput.activeSets.includes(left ? sets.cursor2HoldingUI : sets.cursorHoldingUI)) {
         this.distance = THREE.Math.clamp(this.distance - cursorModDelta, minDistance, far);
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);

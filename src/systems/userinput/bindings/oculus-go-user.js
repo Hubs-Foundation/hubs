@@ -28,7 +28,7 @@ export default function generate3DOFTriggerBindings(device) {
     src: {
       value: triggerRising
     },
-    dest: { value: paths.actions.cursor.grab },
+    dest: { value: paths.actions.cursor.right.grab },
     xform: xforms.copy,
     priority: 200
   };
@@ -36,7 +36,7 @@ export default function generate3DOFTriggerBindings(device) {
     src: {
       value: triggerFalling
     },
-    dest: { value: paths.actions.cursor.drop },
+    dest: { value: paths.actions.cursor.right.drop },
     xform: xforms.copy,
     priority: 200
   };
@@ -169,7 +169,7 @@ export default function generate3DOFTriggerBindings(device) {
       },
       {
         src: { value: device.pose },
-        dest: { value: paths.actions.cursor.pose },
+        dest: { value: paths.actions.cursor.right.pose },
         xform: xforms.copy
       },
       {
@@ -203,7 +203,7 @@ export default function generate3DOFTriggerBindings(device) {
           value: touchpadY,
           touching: touchpadButton.touched
         },
-        dest: { value: paths.actions.cursor.mediaVolumeMod },
+        dest: { value: paths.actions.cursor.right.mediaVolumeMod },
         xform: xforms.touch_axis_scroll(-0.1)
       }
     ],
@@ -213,7 +213,7 @@ export default function generate3DOFTriggerBindings(device) {
         src: {
           value: triggerFalling
         },
-        dest: { value: paths.actions.cursor.drop },
+        dest: { value: paths.actions.cursor.right.drop },
         xform: xforms.copy,
         priority: 200
       },
@@ -222,7 +222,7 @@ export default function generate3DOFTriggerBindings(device) {
           value: touchpadY,
           touching: touchpadButton.touched
         },
-        dest: { value: paths.actions.cursor.modDelta },
+        dest: { value: paths.actions.cursor.right.modDelta },
         xform: xforms.touch_axis_scroll()
       },
       {
@@ -248,7 +248,7 @@ export default function generate3DOFTriggerBindings(device) {
         src: {
           value: triggerRising
         },
-        dest: { value: paths.actions.cursor.startDrawing },
+        dest: { value: paths.actions.cursor.right.startDrawing },
         xform: xforms.copy,
         priority: 300
       },
@@ -256,7 +256,7 @@ export default function generate3DOFTriggerBindings(device) {
         src: {
           value: triggerFalling
         },
-        dest: { value: paths.actions.cursor.stopDrawing },
+        dest: { value: paths.actions.cursor.right.stopDrawing },
         xform: xforms.copy,
         priority: 300
       },
@@ -265,7 +265,7 @@ export default function generate3DOFTriggerBindings(device) {
           value: touchpadXForPen,
           touching: touchpadButton.touched
         },
-        dest: { value: paths.actions.cursor.scalePenTip },
+        dest: { value: paths.actions.cursor.right.scalePenTip },
         xform: xforms.touch_axis_scroll(0.1, 0.1),
         priority: 200
       },
@@ -274,7 +274,7 @@ export default function generate3DOFTriggerBindings(device) {
           value: touchpadYForPen,
           touching: touchpadButton.touched
         },
-        dest: { value: paths.actions.cursor.modDelta },
+        dest: { value: paths.actions.cursor.right.modDelta },
         xform: xforms.touch_axis_scroll(1, 0.1),
         priority: 200
       },
@@ -289,7 +289,7 @@ export default function generate3DOFTriggerBindings(device) {
       },
       {
         src: { value: togglePen },
-        dest: { value: paths.actions.cursor.drop },
+        dest: { value: paths.actions.cursor.right.drop },
         xform: xforms.rising,
         priority: 200
       },
@@ -305,7 +305,7 @@ export default function generate3DOFTriggerBindings(device) {
           bool: touchpadRising
         },
         dest: {
-          value: paths.actions.cursor.penPrevColor
+          value: paths.actions.cursor.right.penPrevColor
         },
         xform: xforms.copyIfTrue,
         priority: 200
@@ -316,7 +316,7 @@ export default function generate3DOFTriggerBindings(device) {
           bool: touchpadRising
         },
         dest: {
-          value: paths.actions.cursor.penNextColor
+          value: paths.actions.cursor.right.penNextColor
         },
         xform: xforms.copyIfTrue,
         priority: 200
@@ -327,7 +327,7 @@ export default function generate3DOFTriggerBindings(device) {
           bool: touchpadRising
         },
         dest: {
-          value: paths.actions.cursor.undoDrawing
+          value: paths.actions.cursor.right.undoDrawing
         },
         xform: xforms.copyIfTrue,
         priority: 200
@@ -339,7 +339,7 @@ export default function generate3DOFTriggerBindings(device) {
         src: {
           value: triggerRising
         },
-        dest: { value: paths.actions.cursor.takeSnapshot },
+        dest: { value: paths.actions.cursor.right.takeSnapshot },
         xform: xforms.copy,
         priority: 300
       }

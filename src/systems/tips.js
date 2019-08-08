@@ -205,7 +205,7 @@ const VALIDATORS = {
     if (userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
     if (userinput.activeSets.includes(sets.cursorHoldingCamera)) return INVALID;
     if (!userinput.activeSets.includes(sets.cursorHoldingInteractable)) return INVALID;
-    if (userinput.get(paths.actions.cursor.modDelta)) return FINISH;
+    if (userinput.get(paths.actions.cursor.right.modDelta)) return FINISH;
     return VALID;
   },
   object_scale: function(userinput, scene) {
@@ -213,19 +213,22 @@ const VALIDATORS = {
     if (userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
     if (userinput.activeSets.includes(sets.cursorHoldingCamera)) return INVALID;
     if (!userinput.activeSets.includes(sets.cursorHoldingInteractable)) return INVALID;
-    if (userinput.get(paths.actions.cursor.scaleGrabbedGrabbable)) return FINISH;
+    if (userinput.get(paths.actions.cursor.right.scaleGrabbedGrabbable)) return FINISH;
     return VALID;
   },
   pen_color: function(userinput) {
     if (!userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
-    if (userinput.get(paths.actions.cursor.penNextColor) || userinput.get(paths.actions.cursor.penPrevColor)) {
+    if (
+      userinput.get(paths.actions.cursor.right.penNextColor) ||
+      userinput.get(paths.actions.cursor.right.penPrevColor)
+    ) {
       return FINISH;
     }
     return VALID;
   },
   pen_size: function(userinput) {
     if (!userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
-    if (userinput.get(paths.actions.cursor.scalePenTip)) return FINISH;
+    if (userinput.get(paths.actions.cursor.right.scalePenTip)) return FINISH;
     return VALID;
   },
   pen_mode: function(userinput) {

@@ -29,13 +29,13 @@ const pathsMap = {
     scalePenTip: paths.actions.leftHand.scalePenTip
   },
   cursor: {
-    pose: paths.actions.cursor.pose,
-    startDrawing: paths.actions.cursor.startDrawing,
-    stopDrawing: paths.actions.cursor.stopDrawing,
-    undoDrawing: paths.actions.cursor.undoDrawing,
-    penNextColor: paths.actions.cursor.penNextColor,
-    penPrevColor: paths.actions.cursor.penPrevColor,
-    scalePenTip: paths.actions.cursor.scalePenTip
+    pose: paths.actions.cursor.right.pose,
+    startDrawing: paths.actions.cursor.right.startDrawing,
+    stopDrawing: paths.actions.cursor.right.stopDrawing,
+    undoDrawing: paths.actions.cursor.right.undoDrawing,
+    penNextColor: paths.actions.cursor.right.penNextColor,
+    penPrevColor: paths.actions.cursor.right.penPrevColor,
+    scalePenTip: paths.actions.cursor.right.scalePenTip
   },
   cursor2: {
     pose: paths.actions.cursor.left.pose,

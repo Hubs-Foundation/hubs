@@ -17,7 +17,7 @@ const pathsMap = {
     takeSnapshot: paths.actions.leftHand.takeSnapshot
   },
   cursor: {
-    takeSnapshot: paths.actions.cursor.takeSnapshot
+    takeSnapshot: paths.actions.cursor.right.takeSnapshot
   },
   cursor2: {
     takeSnapshot: paths.actions.cursor.left.takeSnapshot

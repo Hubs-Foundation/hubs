@@ -71,7 +71,7 @@ function penBindings(hand, forCursor) {
   const padCenterStripTouched = paths.device.wmr.v(hand + "/pad/centerStrip/touched");
   const { padWest, padEast, padCenter, padCenterStrip } = dpadVariables(hand);
 
-  const actions = paths.actions[forCursor ? "cursor" : hand + "Hand"];
+  const actions = forCursor ? paths.actions.cursor[hand] : paths.actions[hand + "Hand"];
 
   return [
     neverFrozenBinding,
@@ -293,7 +293,7 @@ function cursorModDeltaBindings() {
     },
     {
       src: { value: rPadNorthOrSouthPressedY },
-      dest: { value: paths.actions.cursor.modDelta },
+      dest: { value: paths.actions.cursor.right.modDelta },
       xform: xforms.scale(0.1)
     }
   ];
@@ -316,14 +316,14 @@ function cursorMediaVolumeModBindings() {
     },
     {
       src: { value: padY, touching: padCenterStripTouched },
-      dest: { value: paths.actions.cursor.mediaVolumeMod },
+      dest: { value: paths.actions.cursor[hand].mediaVolumeMod },
       xform: xforms.touch_axis_scroll(-0.1)
     }
   ];
 }
 
 function holdingCameraBindings(hand, forCursor) {
-  const actions = paths.actions[forCursor ? "cursor" : hand + "Hand"];
+  const actions = forCursor ? paths.actions.cursor[hand] : paths.actions[hand + "Hand"];
   return [
     neverFrozenBinding,
     {
@@ -417,7 +417,7 @@ export const wmrUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.wmr.right.pose },
-      dest: { value: paths.actions.cursor.pose },
+      dest: { value: paths.actions.cursor.right.pose },
       xform: xforms.copy
     },
     {
@@ -591,7 +591,7 @@ export const wmrUserBindings = addSetsToBindings({
   [sets.cursorHoveringOnUI]: [
     {
       src: { value: rTriggerPressed },
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.rising
     }
   ],
@@ -618,7 +618,7 @@ export const wmrUserBindings = addSetsToBindings({
     },
     {
       src: [rGripRising, rTriggerRising],
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.any
     }
   ],
@@ -653,7 +653,7 @@ export const wmrUserBindings = addSetsToBindings({
     },
     {
       src: [rGripFalling, rTriggerFalling],
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.any
     }
   ],

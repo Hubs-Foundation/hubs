@@ -124,8 +124,8 @@ AFRAME.registerSystem("interaction", {
       },
       rightRemote: {
         entity: null,
-        grabPath: paths.actions.cursor.grab,
-        dropPath: paths.actions.cursor.drop,
+        grabPath: paths.actions.cursor.right.grab,
+        dropPath: paths.actions.cursor.right.drop,
         hoverFn: this.getRightRemoteHoverTarget
       },
       leftRemote: {

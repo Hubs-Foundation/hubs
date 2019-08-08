@@ -648,7 +648,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: { value: rightPose },
-      dest: { value: paths.actions.cursor.pose },
+      dest: { value: paths.actions.cursor.right.pose },
       xform: xforms.copy
     },
     {
@@ -700,7 +700,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: { value: wakeRight },
-      dest: { value: paths.actions.cursor.wake },
+      dest: { value: paths.actions.cursor.right.wake },
       xform: xforms.rising
     }
   ],
@@ -717,7 +717,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
   [sets.cursorHoveringOnUI]: [
     {
       src: { value: rightTriggerPressed2 },
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.rising,
       priority: 2
     }
@@ -735,7 +735,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
   [sets.cursorHoveringOnVideo]: [
     {
       src: { value: rightAxis("joyY") },
-      dest: { value: paths.actions.cursor.mediaVolumeMod },
+      dest: { value: paths.actions.cursor.right.mediaVolumeMod },
       xform: xforms.scale(-0.01)
     }
   ],
@@ -871,7 +871,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: [rightGripRisingGrab],
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.any,
       priority: 2
     }
@@ -918,7 +918,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
   [sets.cursorHoldingInteractable]: [
     {
       src: { value: rightAxis("joyY") },
-      dest: { value: paths.actions.cursor.modDelta },
+      dest: { value: paths.actions.cursor.right.modDelta },
       xform: xforms.scale(0.1)
     },
     {
@@ -929,7 +929,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: [cursorDrop1, cursorDrop2],
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.any,
       priority: 2
     },
@@ -972,19 +972,19 @@ export const oculusTouchUserBindings = addSetsToBindings({
   [sets.cursorHoldingPen]: [
     {
       src: { value: rightTriggerPressed2 },
-      dest: { value: paths.actions.cursor.startDrawing },
+      dest: { value: paths.actions.cursor.right.startDrawing },
       xform: xforms.rising,
       priority: 3
     },
     {
       src: { value: rightTriggerPressed2 },
-      dest: { value: paths.actions.cursor.stopDrawing },
+      dest: { value: paths.actions.cursor.right.stopDrawing },
       xform: xforms.falling,
       priority: 3
     },
     {
       src: { value: rightButton("b").pressed },
-      dest: { value: paths.actions.cursor.undoDrawing },
+      dest: { value: paths.actions.cursor.right.undoDrawing },
       xform: xforms.rising,
       priority: 1
     }
@@ -1145,7 +1145,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
   [sets.cursorHoldingCamera]: [
     {
       src: { value: rightTriggerPressed2 },
-      dest: { value: paths.actions.cursor.takeSnapshot },
+      dest: { value: paths.actions.cursor.right.takeSnapshot },
       xform: xforms.copy,
       priority: 4
     }

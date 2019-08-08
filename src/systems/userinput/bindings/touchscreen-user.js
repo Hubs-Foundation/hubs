@@ -19,7 +19,7 @@ export const touchscreenUserBindings = addSetsToBindings({
   [sets.global]: [
     {
       src: {},
-      dest: { value: paths.actions.cursor.hideLine },
+      dest: { value: paths.actions.cursor.right.hideLine },
       xform: xforms.always(true)
     },
     {
@@ -44,7 +44,7 @@ export const touchscreenUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.touchscreen.cursorPose },
-      dest: { value: paths.actions.cursor.pose },
+      dest: { value: paths.actions.cursor.right.pose },
       xform: xforms.copy
     },
     {
@@ -97,7 +97,7 @@ export const touchscreenUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.rising
     },
     {
@@ -115,7 +115,7 @@ export const touchscreenUserBindings = addSetsToBindings({
   [sets.cursorHoldingInteractable]: [
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.falling,
       priority: 1
     }
@@ -125,19 +125,19 @@ export const touchscreenUserBindings = addSetsToBindings({
   [sets.cursorHoldingPen]: [
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
-      dest: { value: paths.actions.cursor.startDrawing },
+      dest: { value: paths.actions.cursor.right.startDrawing },
       xform: xforms.risingWithFrameDelay(5),
       priority: 2
     },
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
-      dest: { value: paths.actions.cursor.stopDrawing },
+      dest: { value: paths.actions.cursor.right.stopDrawing },
       xform: xforms.falling,
       priority: 2
     },
     {
       src: { value: togglePen },
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.rising,
       priority: 3
     },

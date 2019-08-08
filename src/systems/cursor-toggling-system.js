@@ -15,18 +15,18 @@ export class CursorTogglingSystem {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const interaction = AFRAME.scenes[0].systems.interaction;
 
-    if (userinput.get(paths.actions.cursor.wake)) {
+    if (userinput.get(paths.actions.cursor.right.wake)) {
+      this.rightToggledOff = false;
       if (!interaction.state.leftRemote.held) {
         this.leftToggledOff = true;
       }
-      this.rightToggledOff = false;
     }
 
     if (userinput.get(paths.actions.cursor.left.wake)) {
+      this.leftToggledOff = false;
       if (!interaction.state.rightRemote.held) {
         this.rightToggledOff = true;
       }
-      this.leftToggledOff = false;
     }
 
     this.rightRemote.components["cursor-controller"].toggledOff = this.rightToggledOff;
