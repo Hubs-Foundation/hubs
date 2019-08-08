@@ -220,7 +220,7 @@ class AvatarPreview extends Component {
 
     const idleAnimation = gltf.animations && gltf.animations.find(({ name }) => name === "idle_eyes");
     if (idleAnimation) {
-      this.mixer = new THREE.AnimationMixer(this.previewMesh);
+      this.mixer = new THREE.AnimationMixer(gltf.scene);
       const action = this.mixer.clipAction(idleAnimation);
       action.enabled = true;
       action.setLoop(THREE.LoopRepeat, Infinity).play();

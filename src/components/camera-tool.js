@@ -4,10 +4,12 @@ import { ObjectTypes } from "../object-types";
 import { paths } from "../systems/userinput/paths";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT, SOUND_CAMERA_TOOL_COUNTDOWN } from "../systems/sound-effects-system";
 import { getAudioFeedbackScale } from "./audio-feedback";
-
+import { cloneObject3D } from "../utils/three-utils";
+import { loadModel } from "./gltf-model-plus";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 import cameraModelSrc from "../assets/camera_tool.glb";
 
-const cameraModelPromise = new Promise(resolve => new THREE.GLTFLoader().load(cameraModelSrc, resolve));
+const cameraModelPromise = waitForDOMContentLoaded().then(() => loadModel(cameraModelSrc));
 
 const pathsMap = {
   "player-right-controller": {
@@ -123,7 +125,7 @@ AFRAME.registerComponent("camera-tool", {
     this.el.sceneEl.addEventListener("stateremoved", () => this.updateUI());
 
     cameraModelPromise.then(model => {
-      const mesh = model.scene.clone();
+      const mesh = cloneObject3D(model.scene);
       mesh.scale.set(2, 2, 2);
       mesh.matrixNeedsUpdate = true;
       this.el.setObject3D("mesh", mesh);
