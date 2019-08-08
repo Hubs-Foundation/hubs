@@ -10,19 +10,23 @@ import {
 import { addAnimationComponents } from "../utils/animation";
 import qsTruthy from "../utils/qs_truthy";
 
-import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
+import { loadModel } from "./gltf-model-plus";
+import { cloneObject3D } from "../utils/three-utils";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import anime from "animejs";
 
 const SHAPE = require("aframe-physics-system/src/constants").SHAPE;
 
-const gltfLoader = new THREE.GLTFLoader();
 let loadingObjectEnvMap;
 let loadingObject;
-gltfLoader.load(loadingObjectSrc, gltf => {
-  loadingObject = gltf;
+
+waitForDOMContentLoaded().then(() => {
+  loadModel(loadingObjectSrc).then(gltf => {
+    loadingObject = gltf;
+  });
 });
 
 const fetchContentType = url => {
@@ -114,7 +118,7 @@ AFRAME.registerComponent("media-loader", {
     const useFancyLoader = !!loadingObject;
 
     const mesh = useFancyLoader
-      ? loadingObject.scene.clone()
+      ? cloneObject3D(loadingObject.scene)
       : new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
     this.el.setObject3D("mesh", mesh);
 
@@ -130,7 +134,7 @@ AFRAME.registerComponent("media-loader", {
 
       this.loaderMixer = new THREE.AnimationMixer(mesh);
 
-      this.loadingClip = this.loaderMixer.clipAction(loadingObject.animations[0]);
+      this.loadingClip = this.loaderMixer.clipAction(mesh.animations[0]);
       this.loadingScaleClip = this.loaderMixer.clipAction(
         new THREE.AnimationClip(null, 1000, [
           new THREE.VectorKeyframeTrack(".scale", [0, 0.2], [0, 0, 0, mesh.scale.x, mesh.scale.y, mesh.scale.z])

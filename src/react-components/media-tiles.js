@@ -12,7 +12,7 @@ import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 
 import styles from "../assets/stylesheets/media-browser.scss";
-import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
+import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import StateLink from "./state-link";
 
 dayjs.extend(relativeTime);
@@ -130,6 +130,23 @@ class MediaTiles extends Component {
 
     const [imageWidth, imageHeight] = this.getTileDimensions(isImage, isAvatar, imageAspect);
 
+    // Inline mp4s directly since far/nearspark cannot resize them.
+    const thumbnailElement =
+      entry.images.preview.type === "mp4" ? (
+        <video
+          className={classNames(styles.tileContent, styles.avatarTile)}
+          style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
+          autoPlay
+          src={proxiedUrlFor(imageSrc)}
+        />
+      ) : (
+        <img
+          className={classNames(styles.tileContent, styles.avatarTile)}
+          style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
+          src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)}
+        />
+      );
+
     const publisherName =
       (entry.attributions && entry.attributions.publisher && entry.attributions.publisher.name) ||
       PUBLISHER_FOR_ENTRY_TYPE[entry.type];
@@ -143,10 +160,7 @@ class MediaTiles extends Component {
           className={styles.tileLink}
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
         >
-          <img
-            className={classNames(styles.tileContent, styles.avatarTile)}
-            src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)}
-          />
+          {thumbnailElement}
         </a>
         {entry.type === "avatar" && (
           <StateLink

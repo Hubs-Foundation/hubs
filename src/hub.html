@@ -62,49 +62,9 @@
         environment-map
     >
         <a-assets>
-            <img id="rotation-symbol" crossorigin="anonymous" src="./assets/rotation.png">
-            <img id="button" crossorigin="anonymous" src="./assets/hud/button.9.png">
-            <img id="action-button" crossorigin="anonymous" src="./assets/hud/action_button.9.png">
-            <img id="tooltip" crossorigin="anonymous" src="./assets/hud/tooltip.9.png">
-            <img id="mute-off" crossorigin="anonymous" src="./assets/hud/mute_off.png">
-            <img id="mute-off-hover" crossorigin="anonymous" src="./assets/hud/mute_off-hover.png">
-            <img id="mute-on" crossorigin="anonymous" src="./assets/hud/mute_on.png">
-            <img id="mute-on-hover" crossorigin="anonymous" src="./assets/hud/mute_on-hover.png">
-            <img id="spawn" crossorigin="anonymous" src="./assets/hud/spawn.png">
-            <img id="spawn-hover" crossorigin="anonymous" src="./assets/hud/spawn-hover.png">
-            <img id="pen-off" crossorigin="anonymous" src="./assets/hud/pen_off.png">
-            <img id="pen-off-hover" crossorigin="anonymous" src="./assets/hud/pen_off-hover.png">
-            <img id="pen-on" crossorigin="anonymous" src="./assets/hud/pen_on.png">
-            <img id="pen-on-hover" crossorigin="anonymous" src="./assets/hud/pen_on-hover.png">
-            <img id="camera-off" crossorigin="anonymous" src="./assets/hud/camera_off.png">
-            <img id="camera-off-hover" crossorigin="anonymous" src="./assets/hud/camera_off-hover.png">
-            <img id="camera-on" crossorigin="anonymous" src="./assets/hud/camera_on.png">
-            <img id="camera-on-hover" crossorigin="anonymous" src="./assets/hud/camera_on-hover.png">
-            <img id="snap-camera" crossorigin="anonymous" src="./assets/images/snap_camera.png">
-            <img id="camera" crossorigin="anonymous" src="./assets/images/camera.png">
-            <img id="close-white" crossorigin="anonymous" src="./assets/images/close-white.png">
             <img id="presence-count" crossorigin="anonymous" src="./assets/hud/presence-count.png">
-            <img id="camera-action" crossorigin="anonymous" src="./assets/camera-action.png">
-            <img id="scale-action" crossorigin="anonymous" src="./assets/scale-action.png">
-            <img id="rotate-action" crossorigin="anonymous" src="./assets/rotate-action.png">
-            <img id="remove-action" crossorigin="anonymous" src="./assets/remove-action.png">
-            <img id="drop-action" crossorigin="anonymous" src="./assets/drop-action.png">
-            <img id="recenter-action" crossorigin="anonymous" src="./assets/recenter-action.png">
-
-            <img id="video-volume-down" crossorigin="anonymous" src="./assets/video-overlay/volume_down.png">
-            <img id="video-volume-down-hover" crossorigin="anonymous" src="./assets/video-overlay/volume_down-hover.png">
-            <img id="video-volume-up" crossorigin="anonymous" src="./assets/video-overlay/volume_up.png">
-            <img id="video-volume-up-hover" crossorigin="anonymous" src="./assets/video-overlay/volume_up-hover.png">
-            <img id="video-seek-back" crossorigin="anonymous" src="./assets/video-overlay/seek_back.png">
-            <img id="video-seek-back-hover" crossorigin="anonymous" src="./assets/video-overlay/seek_back-hover.png">
-            <img id="video-seek-forward" crossorigin="anonymous" src="./assets/video-overlay/seek_fwd.png">
-            <img id="video-seek-forward-hover" crossorigin="anonymous" src="./assets/video-overlay/seek_fwd-hover.png">
-            <img id="video-play" crossorigin="anonymous" src="./assets/video-overlay/play.png">
-            <img id="video-play-hover" crossorigin="anonymous" src="./assets/video-overlay/play-hover.png">
-            <img id="video-pause" crossorigin="anonymous" src="./assets/video-overlay/pause.png">
-            <img id="video-pause-hover" crossorigin="anonymous" src="./assets/video-overlay/pause-hover.png">
-            <img id="video-snap" crossorigin="anonymous" src="./assets/video-overlay/snap.png">
-            <img id="video-snap-hover" crossorigin="anonymous" src="./assets/video-overlay/snap-hover.png">
+            <img id="action-button" crossorigin="anonymous" src="./assets/hud/action_button.9.png">
+            <img id="button" crossorigin="anonymous" src="./assets/hud/button.9.png">
 
             <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
             <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
@@ -149,17 +109,17 @@
                                 ></a-entity>
                                 <a-entity
                                     billboard
+                                    is-not-remote-hover-target
                                     class="recordingBadge"
-                                    sprite
-                                    icon-button="image: recording-badge.png; hoverImage: recording-badge.png;"
+                                    sprite="name: recording-badge.png"
                                     scale="0.10 0.10 0.10"
                                     position="0 1.2 -0.02"
                                 ></a-entity>
                                 <a-entity
                                     billboard
+                                    is-not-remote-hover-target
                                     class="modBadge"
-                                    sprite
-                                    icon-button="image: mod-badge.png; hoverImage: mod-badge.png;"
+                                    sprite="name: mod-badge.png"
                                     scale="0.10 0.10 0.10"
                                     position="0 1.2 -0.02"
                                 ></a-entity>
@@ -172,10 +132,10 @@
                                 <a-entity class="ui interactable-ui">
                                     <a-entity billboard class="freeze-menu" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;" avatar-volume-controls>
                                         <a-entity class="avatar-volume-label" text="value: 0%; anchor: center; align: center; color: #ff3464; letterSpacing: 4; width:1.5;" text-raycast-hack position="0.0 0.675 0.35" scale="1.25 1.25 1.25"></a-entity>
-                                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.45 0.675 0.35" class="ui avatar-volume-down-button">
+                                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.45 0.675 0.35" class="avatar-volume-down-button">
                                             <a-entity text="value: -; anchor: center; align: center; color: #ccc; letterSpacing: 4; width: 2.5;" text-raycast-hack position="0 0 0.01" scale="0.85 0.85 0.85"></a-entity>
                                         </a-entity>
-                                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0.45 0.675 0.35" class="ui avatar-volume-up-button">
+                                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0.45 0.675 0.35" class="avatar-volume-up-button">
                                             <a-entity text="value: +; anchor: center; align: center; color: #ccc; letterSpacing: 4; width: 2.5;" text-raycast-hack position="0 0 0.01" scale="0.85 0.85 0.85"></a-entity>
                                         </a-entity>
                                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" block-button position="0 0 .35">

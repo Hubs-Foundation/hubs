@@ -28,7 +28,7 @@ Steps to contributing code to the Hubs project:
 1. Clone the repo you want to contribute to and get things running locally
 2. Find an issue or improvement that you want to fix - give us a heads up that you're working on it by dropping in a comment on the issue.
 3. Fix the bug! Test out your changes on your local setup and let us know if you have questions or want another opinion about the fix. 
-4. Submit your PR for a code review and someone from the team will take a look and give feedback. Make sure you follow up! We'll close the PR if it seems like you've abandoned it by not responding to any questions or comments we leave in the review. 
+4. Submit your PR for a code review and someone from the team will take a look and give feedback. Make sure you follow up! We'll close the PR if it seems like you've abandoned it by not responding to any questions or comments we leave in the review. If your PR adds a new feature, consider requesting the 'What's New' tag. With the 'What's New' tag, any text in the main body of the PR up to (and including) an image will be added to the [hubs website](https://hubs.mozilla.com/whats-new). Gifs are especially appreciated! [This pull request](https://github.com/mozilla/hubs/pull/1536) shows an example of how the 'What's New' tag can be used.
 5. Celebrate! 🎉 You're helping Mozilla's mission to make the web an open and accessible place for social experiences! 
 
 
@@ -41,7 +41,14 @@ Reporting bugs, feature requests, and questions that you have about the platform
 
 * Screenshots when appropriate are much appreciated 📷
 
-We will do our best to respond to and tag inbound issues as they are submitted in a timely manner. 
+We will do our best to respond to and tag inbound issues as they are submitted in a timely manner. Bugs will be prioritized according to the following table: 
+
+| Priority  | Criteria | Example |
+| ------------- | ------------- | -------------
+| P0 | Needs immediate attention. Affects many users and their ability to use core product functionality of connecting to rooms with other users. | No one can enter any Hubs rooms with any VR headset |
+| P1 | Address as quickly as possible. Affects many users and their ability to use a common product feature. Workaround is difficult or unavailable. | Teleporting doesn't work for users on Quest with the Oculus browser. |
+| P2 | Address when able. Affects some users regularly but mildly, or is a hard-to-repro failure seen rarely that is fixed with an easy workaround. | Lobby camera in Camera mode does not show emojis shared from iOS. <br><br> One user reports getting disconnected after ten minutes in a particular room, but no one else experiences it and they are able to refresh to re-enter.
+| P3 | Address when able after P2 bugs are fixed. Affects a small set of users inconsistently in a non-breaking way with an easy workaround. | Every so often, a standalone VR headset will show up as a mobile phone in the user list. Refreshing fixes it. |
 
 ### 🎨 3D Art
 If you are a 3D artist and want to support what we're doing with Hubs, consider creating and releasing content under a Creative Commons license or creating scenes using the [Spoke web editor](https://hubs.mozilla.com/spoke) and releasing them as remixable environments. Content with low polygon counts that are optimized to run well on the web are much appreciated! In particular, we'd love to see scenes that capture a wide range of experiences. 

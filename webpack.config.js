@@ -353,7 +353,7 @@ module.exports = (env, argv) => ({
     ]),
     // Extract required css and add a content hash.
     new MiniCssExtractPlugin({
-      filename: "assets/stylesheets/[name]-[md5:contenthash:hex:20].css",
+      filename: "assets/stylesheets/[name]-[contenthash].css",
       disable: argv.mode !== "production"
     }),
     // Define process.env variables in the browser context.
@@ -364,6 +364,7 @@ module.exports = (env, argv) => ({
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
         RETICULUM_SOCKET_SERVER: process.env.RETICULUM_SOCKET_SERVER,
         FARSPARK_SERVER: process.env.FARSPARK_SERVER,
+        THUMBNAIL_SERVER: process.env.THUMBNAIL_SERVER,
         CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,
         NON_CORS_PROXY_DOMAINS: process.env.NON_CORS_PROXY_DOMAINS,
         ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER,

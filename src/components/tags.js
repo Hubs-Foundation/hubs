@@ -14,5 +14,13 @@ AFRAME.registerComponent("tags", {
       console.warn("Do not edit tags with .setAttribute");
     }
     this.didUpdateOnce = true;
+  },
+
+  remove() {
+    const interaction = this.el.sceneEl.systems.interaction;
+    if (interaction.isHeld(this.el)) {
+      interaction.release(this.el);
+      this.el.sceneEl.systems["hubs-systems"].constraintsSystem.release(this.el);
+    }
   }
 });
