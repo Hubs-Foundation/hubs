@@ -1,6 +1,11 @@
 import { World } from "three-ammo";
 import { TYPE } from "three-ammo/constants";
 
+const WORLD_CONFIG = {
+  debugDrawMode: THREE.AmmoDebugConstants.DrawWireframe,
+  gravity: { x: 0, y: -9.8, z: 0 }
+};
+
 export class PhysicsSystem {
   constructor(scene) {
     const Ammo = require("ammo.js/builds/ammo.wasm.js");
@@ -24,10 +29,7 @@ export class PhysicsSystem {
     this.stepDuration = 0;
 
     AmmoModule().then(() => {
-      this.world = new World({
-        debugDrawMode: THREE.AmmoDebugConstants.DrawWireframe,
-        gravity: { x: 0, y: -9.8, z: 0 }
-      });
+      this.world = new World(WORLD_CONFIG);
     });
   }
 

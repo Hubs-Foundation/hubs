@@ -2,6 +2,8 @@
 import { Constraint } from "three-ammo";
 import { ACTIVATION_STATE } from "three-ammo/constants.js";
 
+const CONSTRAINT_CONFIG = {};
+
 export class ConstraintsSystem {
   constructor(physicsSystem) {
     this.prevLeftHand = {
@@ -74,7 +76,7 @@ export class ConstraintsSystem {
         const body = state.held.components["body-helper"].body;
         const targetEl = document.querySelector(`#${entityId}`);
         const targetBody = targetEl.components["body-helper"].body;
-        this.constraints[entityId] = new Constraint({}, body, targetBody, this.physicsSystem.world);
+        this.constraints[entityId] = new Constraint(CONSTRAINT_CONFIG, body, targetBody, this.physicsSystem.world);
         if (!this.constraintPairs[heldEntityId]) {
           this.constraintPairs[heldEntityId] = [];
         }
