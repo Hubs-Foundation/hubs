@@ -131,7 +131,15 @@ class LinkRoot extends Component {
   };
 
   attemptEntry = async code => {
+    // Tridify
+
+    // TODO: Make link connect to correct model, currently connects only to correct session
+
+    const url = "https://dev.reticulum.io/link/" + code;
+    // Orginal
+    /*
     const url = "/link/" + code;
+     */
     const res = await fetch(url);
 
     if (res.status >= 400) {
