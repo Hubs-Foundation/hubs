@@ -14,6 +14,7 @@
   border-radius: 300px;
   z-index: 2;
 }
+
 :local(.iconEmoji) {
   width: 30px;
   height: 30px;
@@ -22,6 +23,7 @@
   background-repeat: no-repeat;
   background-color: transparent;
 }
+
 :local(.iconEmoji.angry) {
   background-image: url(../images/chest-emojis/emoji-icons/angry-off.png);
 }
@@ -29,23 +31,11 @@
   @media (pointer: fine) {
     background-image: url(../images/chest-emojis/emoji-icons/angry-on-hover.png);
   }
-
   @media (pointer: coarse) {
     background-image: url(../images/chest-emojis/emoji-icons/angry-off.png);
   }
 }
-:local(.iconEmoji.angry.disactive) {
-  background-image: url(../images/chest-emojis/emoji-icons/angry-off.png);
-}
-:local(.iconEmoji.angry.disactive:hover) {
-  @media (pointer: fine) {
-    background-image: url(../images/chest-emojis/emoji-icons/angry-on-hover.png);
-  }
 
-  @media (pointer: coarse) {
-    background-image: url(../images/chest-emojis/emoji-icons/angry-on.png);
-  }
-}
 :local(.iconEmoji.angry.active) {
   background-image: url(../images/chest-emojis/emoji-icons/angry-on.png);
 }
@@ -53,21 +43,18 @@
   @media (pointer: fine) {
     background-image: url(../images/chest-emojis/emoji-icons/angry-on-hover.png);
   }
-
   @media (pointer: coarse) {
     background-image: url(../images/chest-emojis/emoji-icons/angry-on.png);
   }
 }
 
 :local(.iconEmoji.happy) {
-
   background-image: url(../images/chest-emojis/emoji-icons/happy-off.png);
 }
 :local(.iconEmoji.happy:hover) {
   @media (pointer: fine) {
     background-image: url(../images/chest-emojis/emoji-icons/happy-on-hover.png);
   }
-
   @media (pointer: coarse) {
     background-image: url(../images/chest-emojis/emoji-icons/happy-off.png);
   }
@@ -80,21 +67,18 @@
   @media (pointer: fine) {
     background-image: url(../images/chest-emojis/emoji-icons/happy-on-hover.png);
   }
-
   @media (pointer: coarse) {
     background-image: url(../images/chest-emojis/emoji-icons/happy-on.png);
   }
 }
 
 :local(.iconEmoji.sad) {
-  left: 41%;
   background-image: url(../images/chest-emojis/emoji-icons/sad-off.png);
 }
 :local(.iconEmoji.sad:hover) {
   @media (pointer: fine) {
     background-image: url(../images/chest-emojis/emoji-icons/sad-on-hover.png);
   }
-
   @media (pointer: coarse) {
     background-image: url(../images/chest-emojis/emoji-icons/sad-off.png);
   }
@@ -107,7 +91,6 @@
   @media (pointer: fine) {
     background-image: url(../images/chest-emojis/emoji-icons/sad-on-hover.png);
   }
-
   @media (pointer: coarse) {
     background-image: url(../images/chest-emojis/emoji-icons/sad-on.png);
   }
@@ -119,7 +102,6 @@
   @media (pointer: fine) {
     background-image: url(../images/chest-emojis/emoji-icons/smile-on-hover.png);
   }
-
   @media (pointer: coarse) {
     background-image: url(../images/chest-emojis/emoji-icons/smile-off.png);
   }
@@ -132,7 +114,6 @@
   @media (pointer: fine) {
     background-image: url(../images/chest-emojis/emoji-icons/smile-on-hover.png);
   }
-
   @media (pointer: coarse) {
     background-image: url(../images/chest-emojis/emoji-icons/smile-on.png);
   }
@@ -145,7 +126,6 @@
   @media (pointer: fine) {
     background-image: url(../images/chest-emojis/emoji-icons/eww-on-hover.png);
   }
-
   @media (pointer: coarse) {
     background-image: url(../images/chest-emojis/emoji-icons/eww-off.png);
   }
@@ -158,7 +138,6 @@
   @media (pointer: fine) {
     background-image: url(../images/chest-emojis/emoji-icons/eww-on-hover.png);
   }
-
   @media (pointer: coarse) {
     background-image: url(../images/chest-emojis/emoji-icons/eww-on.png);
   }
@@ -171,7 +150,6 @@
   @media (pointer: fine) {
     background-image: url(../images/chest-emojis/emoji-icons/disgust-on-hover.png);
   }
-
   @media (pointer: coarse) {
     background-image: url(../images/chest-emojis/emoji-icons/disgust-off.png);
   }
@@ -184,21 +162,18 @@
   @media (pointer: fine) {
     background-image: url(../images/chest-emojis/emoji-icons/disgust-on-hover.png);
   }
-
   @media (pointer: coarse) {
     background-image: url(../images/chest-emojis/emoji-icons/disgust-on.png);
   }
 }
 
 :local(.iconEmoji.hearts) {
-
   background-image: url(../images/chest-emojis/emoji-icons/hearts-off.png);
 }
 :local(.iconEmoji.hearts:hover) {
   @media (pointer: fine) {
     background-image: url(../images/chest-emojis/emoji-icons/hearts-on-hover.png);
   }
-
   @media (pointer: coarse) {
     background-image: url(../images/chest-emojis/emoji-icons/hearts-off.png);
   }
@@ -211,7 +186,6 @@
   @media (pointer: fine) {
     background-image: url(../images/chest-emojis/emoji-icons/hearts-on-hover.png);
   }
-
   @media (pointer: coarse) {
     background-image: url(../images/chest-emojis/emoji-icons/hearts-on.png);
   }
@@ -224,7 +198,6 @@
   @media (pointer: fine) {
     background-image: url(../images/chest-emojis/emoji-icons/surprise-on-hover.png);
   }
-
   @media (pointer: coarse) {
     background-image: url(../images/chest-emojis/emoji-icons/surprise-off.png);
   }
