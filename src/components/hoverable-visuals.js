@@ -1,5 +1,6 @@
 import { forEachMaterial } from "../utils/material-utils";
 import { showHoverEffect } from "../utils/permissions-utils";
+import { paths } from "../systems/userinput/paths";
 
 const interactorOneTransform = [];
 const interactorTwoTransform = [];
@@ -44,9 +45,11 @@ AFRAME.registerComponent("hoverable-visuals", {
   },
   tick(time) {
     if (!this.uniforms || !this.uniforms.length) return;
+    const userinput = this.el.sceneEl.systems.userinput;
 
     const isFrozen = this.el.sceneEl.is("frozen");
     const showEffect = showHoverEffect(this.el);
+    const disableInteractorHighlight = userinput.get(paths.actions.disableInteractorHighlightEffect);
 
     let interactorOne, interactorTwo;
     const interaction = AFRAME.scenes[0].systems.interaction;
@@ -80,12 +83,12 @@ AFRAME.registerComponent("hoverable-visuals", {
       uniform.hubs_IsFrozen.value = isFrozen;
       uniform.hubs_SweepParams.value = this.sweepParams;
 
-      uniform.hubs_HighlightInteractorOne.value = !!interactorOne && showEffect;
+      uniform.hubs_HighlightInteractorOne.value = !!interactorOne && showEffect && !disableInteractorHighlight;
       uniform.hubs_InteractorOnePos.value[0] = interactorOneTransform[12];
       uniform.hubs_InteractorOnePos.value[1] = interactorOneTransform[13];
       uniform.hubs_InteractorOnePos.value[2] = interactorOneTransform[14];
 
-      uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo && showEffect;
+      uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo && showEffect && !disableInteractorHighlight;
       uniform.hubs_InteractorTwoPos.value[0] = interactorTwoTransform[12];
       uniform.hubs_InteractorTwoPos.value[1] = interactorTwoTransform[13];
       uniform.hubs_InteractorTwoPos.value[2] = interactorTwoTransform[14];
