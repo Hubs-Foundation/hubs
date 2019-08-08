@@ -11,7 +11,7 @@ export class CursorTogglingSystem {
       this.leftRemote = document.getElementById("left-cursor-controller");
     });
   }
-  tick(t) {
+  tick() {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const interaction = AFRAME.scenes[0].systems.interaction;
 

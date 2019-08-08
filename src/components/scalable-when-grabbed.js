@@ -7,10 +7,10 @@ AFRAME.registerComponent("scalable-when-grabbed", {
     let deltaScale;
     if (interaction.state.rightRemote.held === this.el) {
       deltaScale = userinput.get(paths.actions.cursor.right.scaleGrabbedGrabbable);
-    };
+    }
     if (interaction.state.leftRemote.held === this.el) {
       deltaScale = userinput.get(paths.actions.cursor.left.scaleGrabbedGrabbable);
-    };
+    }
     if (!deltaScale) return;
 
     this.el.object3D.scale.addScalar(deltaScale).clampScalar(0.1, 100);
