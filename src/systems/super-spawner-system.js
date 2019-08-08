@@ -29,31 +29,33 @@ export class SuperSpawnerSystem {
       data.resize,
       false
     ).entity;
+
     spawnedEntity.object3D.position.copy(
       data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
     );
     spawnedEntity.object3D.rotation.copy(
       data.useCustomSpawnRotation ? data.spawnRotation : superSpawner.el.object3D.rotation
     );
-    spawnedEntity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);
     spawnedEntity.object3D.matrixNeedsUpdate = true;
     state.held = spawnedEntity;
 
+    const targetScale = superSpawner.el.object3D.scale.clone();
+
     superSpawner.activateCooldown();
     state.spawning = true;
-    // WARNING: previously used waitForEvent which is semantically different than
-    // entity.addEventListener("body-loaded", ...) and adding a callback fn via
-    // addEventListener will not work unless the callback function wraps its code in setTimeout(()=>{...}, 0)
-    setTimeout(() => {
-      state.spawning = false;
-      spawnedEntity.object3D.position.copy(
-        data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
-      );
-      if (data.centerSpawnedObject) {
-        spawnedEntity.body.position.copy(entity.object3D.position);
-      }
-      spawnedEntity.object3D.matrixNeedsUpdate = true;
-    });
+
+    spawnedEntity.addEventListener(
+      "model-loaded",
+      () => {
+        if (spawnedEntity.object3DMap.mesh) {
+          spawnedEntity.object3DMap.mesh.scale.copy(data.useCustomSpawnScale ? data.spawnScale : targetScale);
+          spawnedEntity.object3DMap.mesh.matrixNeedsUpdate = true;
+        }
+
+        state.spawning = false;
+      },
+      { once: true }
+    );
   }
 
   tick() {
