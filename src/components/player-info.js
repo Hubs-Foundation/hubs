@@ -3,15 +3,15 @@ import { AVATAR_TYPES } from "../utils/avatar-utils";
 import { registerComponentInstance } from "../utils/component-utils";
 import { deregisterComponentInstance } from "../utils/component-utils";
 
-import happyEmoji from "../assets/images/sprites/chest-emojis/screen effect/happy.png";
-import sadEmoji from "../assets/images/sprites/chest-emojis/screen effect/sad.png";
-import angryEmoji from "../assets/images/sprites/chest-emojis/screen effect/angry.png";
-import ewwEmoji from "../assets/images/sprites/chest-emojis/screen effect/eww.png";
-import disgustEmoji from "../assets/images/sprites/chest-emojis/screen effect/disgust.png";
-import heartsEmoji from "../assets/images/sprites/chest-emojis/screen effect/hearts.png";
-import smileEmoji from "../assets/images/sprites/chest-emojis/screen effect/smile.png";
-import surpriseEmoji from "../assets/images/sprites/chest-emojis/screen effect/surprise.png";
-import emptyEmoji from "../assets/images/sprites/chest-emojis/screen effect/empty.png";
+import happyEmoji from "../assets/images/chest-emojis/screen effect/happy.png";
+import sadEmoji from "../assets/images/chest-emojis/screen effect/sad.png";
+import angryEmoji from "../assets/images/chest-emojis/screen effect/angry.png";
+import ewwEmoji from "../assets/images/chest-emojis/screen effect/eww.png";
+import disgustEmoji from "../assets/images/chest-emojis/screen effect/disgust.png";
+import heartsEmoji from "../assets/images/chest-emojis/screen effect/hearts.png";
+import smileEmoji from "../assets/images/chest-emojis/screen effect/smile.png";
+import surpriseEmoji from "../assets/images/chest-emojis/screen effect/surprise.png";
+
 function ensureAvatarNodes(json) {
   const { nodes } = json;
   if (!nodes.some(node => node.name === "Head")) {
@@ -109,8 +109,12 @@ AFRAME.registerComponent("player-info", {
     if (emojiType === "empty") {
       avatarImage.removeAttribute("media-image");
       avatarImage.removeAttribute("media-loader");
+      avatarImage.removeObject3D("mesh");
     } else if (emojiType !== null) {
-      avatarImage.setAttribute("media-loader", { src: new URL(emojiImage, window.location.href).href });
+      avatarImage.setAttribute("media-loader", {
+        playSoundEffect: this.isLocalPlayerInfo,
+        src: new URL(emojiImage, window.location.href).href
+      });
     }
   },
 

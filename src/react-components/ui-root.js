@@ -173,15 +173,6 @@ class UIRoot extends Component {
 
   state = {
     emojiState: "empty",
-    hasAngryActive: false,
-    hasHappyActive: false,
-    hasSadActive: false,
-    hasSurpriseActive: false,
-    hasDisgustActive: false,
-    hasEwwActive: false,
-    hasSmileActive: false,
-    hasHeartsActive: false,
-    hasCleanActive: false,
 
     enterInVR: false,
     muteOnEntry: false,
@@ -502,7 +493,6 @@ class UIRoot extends Component {
   };
 
   emojiChange = reason => {
-   
     if (this.state.emojiState === reason) {
       this.setState({
         emojiState: "empty"
@@ -512,11 +502,8 @@ class UIRoot extends Component {
       this.setState({ emojiState: reason });
       this.emojiEvent.emojiType = reason;
     }
-  
 
     this.props.scene.querySelector("#player-rig").setAttribute("player-info", this.emojiEvent);
-
-  
   };
 
   isWaitingForAutoExit = () => {
@@ -1702,10 +1689,10 @@ class UIRoot extends Component {
             {this.state.frozen && (
               <div className={cx(styles.uiInteractive, emojiStyle.emojiPanel)}>
                 <div
-                  className={cx(emojiStyle.iconEmoji, emojiStyle.angry, {
-                    [emojiStyle.active]: this.state.emojiState === "angry"
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.smile, {
+                    [emojiStyle.active]: this.state.emojiState === "smile"
                   })}
-                  onClick={() => this.emojiChange("angry")}
+                  onClick={() => this.emojiChange("smile")}
                 />
 
                 <div
@@ -1713,6 +1700,25 @@ class UIRoot extends Component {
                     [emojiStyle.active]: this.state.emojiState === "happy"
                   })}
                   onClick={() => this.emojiChange("happy")}
+                />
+                <div
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.surprise, {
+                    [emojiStyle.active]: this.state.emojiState === "surprise"
+                  })}
+                  onClick={() => this.emojiChange("surprise")}
+                />
+
+                <div
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.disgust, {
+                    [emojiStyle.active]: this.state.emojiState === "disgust"
+                  })}
+                  onClick={() => this.emojiChange("disgust")}
+                />
+                <div
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.angry, {
+                    [emojiStyle.active]: this.state.emojiState === "angry"
+                  })}
+                  onClick={() => this.emojiChange("angry")}
                 />
 
                 <div
@@ -1723,31 +1729,10 @@ class UIRoot extends Component {
                 />
 
                 <div
-                  className={cx(emojiStyle.iconEmoji, emojiStyle.surprise, {
-                    [emojiStyle.active]: this.state.emojiState === "surprise"
-                  })}
-                  onClick={() => this.emojiChange("surprise")}
-                />
-
-                <div
                   className={cx(emojiStyle.iconEmoji, emojiStyle.eww, {
                     [emojiStyle.active]: this.state.emojiState === "eww"
                   })}
                   onClick={() => this.emojiChange("eww")}
-                />
-
-                <div
-                  className={cx(emojiStyle.iconEmoji, emojiStyle.smile, {
-                    [emojiStyle.active]: this.state.emojiState === "smile"
-                  })}
-                  onClick={() => this.emojiChange("smile")}
-                />
-
-                <div
-                  className={cx(emojiStyle.iconEmoji, emojiStyle.disgust, {
-                    [emojiStyle.active]: this.state.emojiState === "disgust"
-                  })}
-                  onClick={() => this.emojiChange("disgust")}
                 />
 
                 <div
