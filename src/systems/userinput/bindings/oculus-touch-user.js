@@ -714,7 +714,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnUI]: [
+  [sets.rightCursorHoveringOnUI]: [
     {
       src: { value: rightTriggerPressed2 },
       dest: { value: paths.actions.cursor.right.grab },
@@ -732,7 +732,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnVideo]: [
+  [sets.rightCursorHoveringOnVideo]: [
     {
       src: { value: rightAxis("joyY") },
       dest: { value: paths.actions.cursor.right.mediaVolumeMod },
@@ -748,7 +748,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnNothing]: [
+  [sets.rightCursorHoveringOnNothing]: [
     {
       src: { value: rightTriggerPressed2 },
       dest: { value: paths.actions.rightHand.startTeleport },
@@ -856,7 +856,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnInteractable]: [
+  [sets.rightCursorHoveringOnInteractable]: [
     {
       src: { value: rightGripPressed2 },
       dest: { value: rightGripRisingGrab },
@@ -898,7 +898,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoldingUI]: [
+  [sets.rightCursorHoldingUI]: [
     {
       src: { value: rightTriggerPressed2 },
       dest: { value: cursorDrop2 },
@@ -915,7 +915,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoldingInteractable]: [
+  [sets.rightCursorHoldingInteractable]: [
     {
       src: { value: rightAxis("joyY") },
       dest: { value: paths.actions.cursor.right.modDelta },
@@ -967,9 +967,9 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnPen]: [],
+  [sets.rightCursorHoveringOnPen]: [],
 
-  [sets.cursorHoldingPen]: [
+  [sets.rightCursorHoldingPen]: [
     {
       src: { value: rightTriggerPressed2 },
       dest: { value: paths.actions.cursor.right.startDrawing },
@@ -1122,7 +1122,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnCamera]: [],
+  [sets.rightCursorHoveringOnCamera]: [],
   [sets.rightHandHoveringOnCamera]: [],
   [sets.leftHandHoveringOnCamera]: [],
 
@@ -1142,7 +1142,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 4
     }
   ],
-  [sets.cursorHoldingCamera]: [
+  [sets.rightCursorHoldingCamera]: [
     {
       src: { value: rightTriggerPressed2 },
       dest: { value: paths.actions.cursor.right.takeSnapshot },
@@ -1150,7 +1150,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 4
     }
   ],
-  [sets.cursorHoldingCamera]: [
+  [sets.rightCursorHoldingCamera]: [
     {
       src: { value: leftTriggerPressed2 },
       dest: { value: paths.actions.cursor.left.takeSnapshot },

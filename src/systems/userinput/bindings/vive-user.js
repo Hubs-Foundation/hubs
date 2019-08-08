@@ -810,9 +810,9 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnNothing]: [],
+  [sets.rightCursorHoveringOnNothing]: [],
 
-  [sets.cursorHoveringOnUI]: [
+  [sets.rightCursorHoveringOnUI]: [
     {
       src: { value: rightTriggerPressed2 },
       dest: { value: paths.actions.cursor.right.grab },
@@ -821,7 +821,7 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnVideo]: [
+  [sets.rightCursorHoveringOnVideo]: [
     {
       src: {
         value: rAxis("touchY"),
@@ -977,7 +977,7 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnInteractable]: [
+  [sets.rightCursorHoveringOnInteractable]: [
     {
       src: { value: rightGripPressed2 },
       dest: { value: rGripRisingGrab },
@@ -996,7 +996,7 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoldingUI]: [
+  [sets.rightCursorHoldingUI]: [
     {
       src: { value: rightTriggerPressed2 },
       dest: {
@@ -1007,7 +1007,7 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoldingInteractable]: [
+  [sets.rightCursorHoldingInteractable]: [
     {
       src: {
         value: rAxis("touchY"),
@@ -1042,9 +1042,9 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnPen]: [],
+  [sets.rightCursorHoveringOnPen]: [],
 
-  [sets.cursorHoldingPen]: [
+  [sets.rightCursorHoldingPen]: [
     {
       src: [cursorDrop1],
       dest: { value: paths.actions.cursor.right.drop },
@@ -1221,7 +1221,7 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnCamera]: [],
+  [sets.rightCursorHoveringOnCamera]: [],
   [sets.rightHandHoveringOnCamera]: [],
   [sets.leftHandHoveringOnCamera]: [],
 
@@ -1246,7 +1246,7 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.copy
     }
   ],
-  [sets.cursorHoldingCamera]: [
+  [sets.rightCursorHoldingCamera]: [
     {
       src: { value: rightTriggerPressed2 },
       dest: { value: paths.actions.cursor.right.takeSnapshot },

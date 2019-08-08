@@ -137,10 +137,10 @@ export const daydreamUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnInteractable]: grabBinding,
-  [sets.cursorHoveringOnUI]: grabBinding,
+  [sets.rightCursorHoveringOnInteractable]: grabBinding,
+  [sets.rightCursorHoveringOnUI]: grabBinding,
 
-  [sets.cursorHoveringOnVideo]: [
+  [sets.rightCursorHoveringOnVideo]: [
     {
       src: {
         value: paths.device.daydream.axis("touchpadY"),
@@ -151,7 +151,7 @@ export const daydreamUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoldingInteractable]: [
+  [sets.rightCursorHoldingInteractable]: [
     {
       src: { value: touchpadFalling },
       dest: { value: paths.actions.cursor.right.drop },
@@ -180,7 +180,7 @@ export const daydreamUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoldingPen]: [
+  [sets.rightCursorHoldingPen]: [
     {
       src: { value: dpadNorth, bool: touchpadRising },
       dest: { value: paths.actions.cursor.right.startDrawing },
@@ -238,7 +238,7 @@ export const daydreamUserBindings = addSetsToBindings({
     ...dropOnCenterOrSouth
   ],
 
-  [sets.cursorHoldingCamera]: [
+  [sets.rightCursorHoldingCamera]: [
     // Don't drop on touchpad release
     {
       src: {

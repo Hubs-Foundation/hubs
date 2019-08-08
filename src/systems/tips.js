@@ -125,55 +125,55 @@ export const resetTips = () => {
 
 const VALIDATORS = {
   look: function(userinput) {
-    if (userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingPen)) return INVALID;
     const cameraDelta = userinput.get(
       isMobile ? paths.device.touchscreen.touchCameraDelta : paths.device.smartMouse.cameraDelta
     );
     return cameraDelta ? FINISH : VALID;
   },
   locomotion: function(userinput) {
-    if (userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingPen)) return INVALID;
     const accel = userinput.get(paths.actions.characterAcceleration);
 
     // User moved
     return accel && (accel[0] !== 0 || accel[1] !== 0) ? FINISH : VALID;
   },
   turning: function(userinput) {
-    if (userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingPen)) return INVALID;
     if (userinput.get(paths.actions.snapRotateLeft) || userinput.get(paths.actions.snapRotateRight)) return FINISH;
     return VALID;
   },
   spawn_menu: function(userinput, scene, mediaCounter) {
-    if (userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingPen)) return INVALID;
     if (mediaCounter.count() === 0) return VALID;
     return FINISH;
   },
   freeze_gesture: function(userinput, scene, mediaCounter) {
     if (mediaCounter.count() === 0) return INVALID;
-    if (userinput.activeSets.includes(sets.cursorHoldingInteractable)) return INVALID;
-    if (userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
-    if (scene.is("frozen") && userinput.activeSets.includes(sets.cursorHoveringOnInteractable)) return FINISH;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingInteractable)) return INVALID;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingPen)) return INVALID;
+    if (scene.is("frozen") && userinput.activeSets.includes(sets.rightCursorHoveringOnInteractable)) return FINISH;
     return scene.is("frozen") ? INVALID : VALID;
   },
   menu_hover: function(userinput, scene, mediaCounter) {
     if (mediaCounter.count() === 0) return INVALID;
     if (!scene.is("frozen")) return INVALID;
-    if (userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
-    if (scene.is("frozen") && userinput.activeSets.includes(sets.cursorHoveringOnInteractable)) return FINISH;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingPen)) return INVALID;
+    if (scene.is("frozen") && userinput.activeSets.includes(sets.rightCursorHoveringOnInteractable)) return FINISH;
     return VALID;
   },
   invite: function(userinput, scene) {
-    if (userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
-    if (userinput.activeSets.includes(sets.cursorHoldingCamera)) return INVALID;
-    if (userinput.activeSets.includes(sets.cursorHoldingInteractable)) return INVALID;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingPen)) return INVALID;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingCamera)) return INVALID;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingInteractable)) return INVALID;
     return scene.is("copresent") ? FINISH : VALID;
   },
   object_grab: function(userinput, scene, mediaCounter) {
     if (scene.is("frozen")) return INVALID;
     if (mediaCounter.count() === 0) return INVALID;
-    if (userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
-    if (userinput.activeSets.includes(sets.cursorHoldingCamera)) return INVALID;
-    if (userinput.activeSets.includes(sets.cursorHoldingInteractable)) return FINISH;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingPen)) return INVALID;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingCamera)) return INVALID;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingInteractable)) return FINISH;
     return VALID;
   },
   object_rotate_button: function(userinput, scene, mediaCounter, store) {
@@ -202,22 +202,22 @@ const VALIDATORS = {
   },
   object_zoom: function(userinput, scene) {
     if (scene.is("frozen")) return INVALID;
-    if (userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
-    if (userinput.activeSets.includes(sets.cursorHoldingCamera)) return INVALID;
-    if (!userinput.activeSets.includes(sets.cursorHoldingInteractable)) return INVALID;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingPen)) return INVALID;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingCamera)) return INVALID;
+    if (!userinput.activeSets.includes(sets.rightCursorHoldingInteractable)) return INVALID;
     if (userinput.get(paths.actions.cursor.right.modDelta)) return FINISH;
     return VALID;
   },
   object_scale: function(userinput, scene) {
     if (scene.is("frozen")) return INVALID;
-    if (userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
-    if (userinput.activeSets.includes(sets.cursorHoldingCamera)) return INVALID;
-    if (!userinput.activeSets.includes(sets.cursorHoldingInteractable)) return INVALID;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingPen)) return INVALID;
+    if (userinput.activeSets.includes(sets.rightCursorHoldingCamera)) return INVALID;
+    if (!userinput.activeSets.includes(sets.rightCursorHoldingInteractable)) return INVALID;
     if (userinput.get(paths.actions.cursor.right.scaleGrabbedGrabbable)) return FINISH;
     return VALID;
   },
   pen_color: function(userinput) {
-    if (!userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
+    if (!userinput.activeSets.includes(sets.rightCursorHoldingPen)) return INVALID;
     if (
       userinput.get(paths.actions.cursor.right.penNextColor) ||
       userinput.get(paths.actions.cursor.right.penPrevColor)
@@ -227,12 +227,12 @@ const VALIDATORS = {
     return VALID;
   },
   pen_size: function(userinput) {
-    if (!userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
+    if (!userinput.activeSets.includes(sets.rightCursorHoldingPen)) return INVALID;
     if (userinput.get(paths.actions.cursor.right.scalePenTip)) return FINISH;
     return VALID;
   },
   pen_mode: function(userinput) {
-    if (!userinput.activeSets.includes(sets.cursorHoldingPen)) return INVALID;
+    if (!userinput.activeSets.includes(sets.rightCursorHoldingPen)) return INVALID;
     return VALID;
   },
   freeze_mode: function(userinput, scene) {

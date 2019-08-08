@@ -93,7 +93,7 @@ AFRAME.registerComponent("cursor-controller", {
 
       const cursorModDelta =
         userinput.get(left ? paths.actions.cursor.left.modDelta : paths.actions.cursor.right.modDelta) || 0;
-      if (isGrabbing && !userinput.activeSets.includes(left ? sets.leftCursorHoldingUI : sets.cursorHoldingUI)) {
+      if (isGrabbing && !userinput.activeSets.includes(left ? sets.leftCursorHoldingUI : sets.rightCursorHoldingUI)) {
         this.distance = THREE.Math.clamp(this.distance - cursorModDelta, minDistance, far);
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);

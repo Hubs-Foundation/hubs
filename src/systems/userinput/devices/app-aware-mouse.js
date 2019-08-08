@@ -60,9 +60,9 @@ export class AppAwareMouseDevice {
       const isFrozen = AFRAME.scenes[0].is("frozen");
       this.clickedOnAnything =
         (isInteractable && (isFrozen || !isPinned) && canMove(remoteHoverTarget)) ||
-        userinput.activeSets.includes(sets.cursorHoldingPen) ||
-        userinput.activeSets.includes(sets.cursorHoldingInteractable) ||
-        userinput.activeSets.includes(sets.cursorHoldingCamera);
+        userinput.activeSets.includes(sets.rightCursorHoldingPen) ||
+        userinput.activeSets.includes(sets.rightCursorHoldingInteractable) ||
+        userinput.activeSets.includes(sets.rightCursorHoldingCamera);
     }
     this.prevButtonLeft = buttonLeft;
 

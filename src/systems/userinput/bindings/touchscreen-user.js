@@ -112,7 +112,7 @@ export const touchscreenUserBindings = addSetsToBindings({
       priority: 2
     }
   ],
-  [sets.cursorHoldingInteractable]: [
+  [sets.rightCursorHoldingInteractable]: [
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
       dest: { value: paths.actions.cursor.right.drop },
@@ -121,8 +121,8 @@ export const touchscreenUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnPen]: [],
-  [sets.cursorHoldingPen]: [
+  [sets.rightCursorHoveringOnPen]: [],
+  [sets.rightCursorHoldingPen]: [
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
       dest: { value: paths.actions.cursor.right.startDrawing },

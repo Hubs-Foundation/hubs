@@ -49,7 +49,7 @@ function characterAccelerationBindings(disableForwardOnTrigger) {
 }
 
 export const xboxControllerUserBindings = addSetsToBindings({
-  [sets.cursorHoldingPen]: [
+  [sets.rightCursorHoldingPen]: [
     {
       src: { value: button("rightTrigger").pressed },
       dest: { value: paths.actions.cursor.right.startDrawing },
@@ -195,8 +195,8 @@ export const xboxControllerUserBindings = addSetsToBindings({
       xform: xforms.falling
     }
   ],
-  [sets.cursorHoldingNothing]: [...characterAccelerationBindings()],
-  [sets.cursorHoldingInteractable]: [
+  [sets.rightCursorHoldingNothing]: [...characterAccelerationBindings()],
+  [sets.rightCursorHoldingInteractable]: [
     ...characterAccelerationBindings(true),
     {
       src: { value: button("rightTrigger").pressed },
@@ -218,14 +218,14 @@ export const xboxControllerUserBindings = addSetsToBindings({
       xform: xforms.copyIfTrue
     }
   ],
-  [sets.cursorHoveringOnUI]: [
+  [sets.rightCursorHoveringOnUI]: [
     {
       src: { value: button("rightTrigger").pressed },
       dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.rising
     }
   ],
-  [sets.cursorHoveringOnInteractable]: [
+  [sets.rightCursorHoveringOnInteractable]: [
     ...characterAccelerationBindings(),
     {
       src: { value: button("rightTrigger").pressed },

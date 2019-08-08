@@ -362,7 +362,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     // }
   ],
 
-  [sets.cursorHoldingPen]: [
+  [sets.rightCursorHoldingPen]: [
     {
       src: {
         bool: paths.device.keyboard.key("shift"),
@@ -481,7 +481,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoldingCamera]: [
+  [sets.rightCursorHoldingCamera]: [
     {
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.actions.cursor.right.drop },
@@ -490,7 +490,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoldingInteractable]: [
+  [sets.rightCursorHoldingInteractable]: [
     {
       src: {
         bool: paths.device.keyboard.key("shift"),
@@ -532,7 +532,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       priority: 2
     }
   ],
-  [sets.cursorHoldingUI]: [
+  [sets.rightCursorHoldingUI]: [
     {
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.actions.cursor.right.drop },
@@ -545,7 +545,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.copy
     }
   ],
-  [sets.cursorHoveringOnInteractable]: [
+  [sets.rightCursorHoveringOnInteractable]: [
     {
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.actions.cursor.right.grab },
@@ -553,7 +553,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       priority: 1
     }
   ],
-  [sets.cursorHoveringOnVideo]: [
+  [sets.rightCursorHoveringOnVideo]: [
     {
       src: { value: paths.device.mouse.wheel },
       dest: { value: paths.actions.cursor.right.mediaVolumeMod },
@@ -569,7 +569,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnUI]: [
+  [sets.rightCursorHoveringOnUI]: [
     {
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.actions.cursor.right.grab },

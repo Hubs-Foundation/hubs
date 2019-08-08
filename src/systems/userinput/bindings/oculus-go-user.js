@@ -194,10 +194,10 @@ export default function generate3DOFTriggerBindings(device) {
       }
     ],
 
-    [sets.cursorHoveringOnInteractable]: [grabBinding],
-    [sets.cursorHoveringOnUI]: [grabBinding],
-    [sets.cursorHoldingUI]: [dropBinding],
-    [sets.cursorHoveringOnVideo]: [
+    [sets.rightCursorHoveringOnInteractable]: [grabBinding],
+    [sets.rightCursorHoveringOnUI]: [grabBinding],
+    [sets.rightCursorHoldingUI]: [dropBinding],
+    [sets.rightCursorHoveringOnVideo]: [
       {
         src: {
           value: touchpadY,
@@ -208,7 +208,7 @@ export default function generate3DOFTriggerBindings(device) {
       }
     ],
 
-    [sets.cursorHoldingInteractable]: [
+    [sets.rightCursorHoldingInteractable]: [
       {
         src: {
           value: triggerFalling
@@ -243,7 +243,7 @@ export default function generate3DOFTriggerBindings(device) {
       }
     ],
 
-    [sets.cursorHoldingPen]: [
+    [sets.rightCursorHoldingPen]: [
       {
         src: {
           value: triggerRising
@@ -334,7 +334,7 @@ export default function generate3DOFTriggerBindings(device) {
       }
     ],
 
-    [sets.cursorHoldingCamera]: [
+    [sets.rightCursorHoldingCamera]: [
       {
         src: {
           value: triggerRising

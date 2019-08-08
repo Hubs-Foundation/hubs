@@ -577,7 +577,7 @@ export const wmrUserBindings = addSetsToBindings({
   ],
 
   [sets.leftHandHoveringOnNothing]: [],
-  [sets.cursorHoveringOnNothing]: [],
+  [sets.rightCursorHoveringOnNothing]: [],
   [sets.rightHandHoveringOnNothing]: [],
 
   [sets.rightHandTeleporting]: [
@@ -588,7 +588,7 @@ export const wmrUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnUI]: [
+  [sets.rightCursorHoveringOnUI]: [
     {
       src: { value: rTriggerPressed },
       dest: { value: paths.actions.cursor.right.grab },
@@ -596,7 +596,7 @@ export const wmrUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnVideo]: [...cursorMediaVolumeModBindings()],
+  [sets.rightCursorHoveringOnVideo]: [...cursorMediaVolumeModBindings()],
 
   [sets.leftHandHoveringOnInteractable]: [
     {
@@ -605,7 +605,7 @@ export const wmrUserBindings = addSetsToBindings({
       xform: xforms.rising
     }
   ],
-  [sets.cursorHoveringOnInteractable]: [
+  [sets.rightCursorHoveringOnInteractable]: [
     {
       src: { value: rGripPressed },
       dest: { value: rGripRising },
@@ -638,7 +638,7 @@ export const wmrUserBindings = addSetsToBindings({
       xform: xforms.falling
     }
   ],
-  [sets.cursorHoldingInteractable]: [
+  [sets.rightCursorHoldingInteractable]: [
     neverFrozenBinding,
     ...cursorModDeltaBindings(),
     {
@@ -667,19 +667,19 @@ export const wmrUserBindings = addSetsToBindings({
   ],
 
   [sets.leftHandHoveringOnPen]: [],
-  [sets.cursorHoveringOnPen]: [],
+  [sets.rightCursorHoveringOnPen]: [],
   [sets.rightHandHoveringOnPen]: [],
 
   [sets.leftHandHoldingPen]: penBindings("left"),
-  [sets.cursorHoldingPen]: penBindings("right", true),
+  [sets.rightCursorHoldingPen]: penBindings("right", true),
   [sets.rightHandHoldingPen]: penBindings("right"),
 
   [sets.leftHandHoveringOnCamera]: [],
-  [sets.cursorHoveringOnCamera]: [],
+  [sets.rightCursorHoveringOnCamera]: [],
   [sets.rightHandHoveringOnCamera]: [],
 
   [sets.leftHandHoldingCamera]: holdingCameraBindings("left"),
-  [sets.cursorHoldingCamera]: holdingCameraBindings("right", true),
+  [sets.rightCursorHoldingCamera]: holdingCameraBindings("right", true),
   [sets.rightHandHoldingCamera]: holdingCameraBindings("right"),
 
   [sets.inputFocused]: [
