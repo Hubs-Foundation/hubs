@@ -115,7 +115,7 @@ AFRAME.registerComponent("super-spawner", {
       false
     ).entity;
 
-    const cursor = document.querySelector("#cursor");
+    const cursor = document.getElementById("right-cursor");
     cursor.object3D.getWorldPosition(entity.object3D.position);
     cursor.object3D.getWorldQuaternion(entity.object3D.quaternion);
     entity.object3D.matrixNeedsUpdate = true;

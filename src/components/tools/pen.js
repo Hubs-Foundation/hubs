@@ -28,7 +28,7 @@ const pathsMap = {
     penPrevColor: paths.actions.leftHand.penPrevColor,
     scalePenTip: paths.actions.leftHand.scalePenTip
   },
-  cursor: {
+  "right-cursor": {
     pose: paths.actions.cursor.right.pose,
     startDrawing: paths.actions.cursor.right.startDrawing,
     stopDrawing: paths.actions.cursor.right.stopDrawing,
@@ -208,7 +208,7 @@ AFRAME.registerComponent("pen", {
       } else if (interaction.state.leftHand.held === this.el.parentNode) {
         this.grabberId = "player-left-controller";
       } else if (interaction.state.rightRemote.held === this.el.parentNode) {
-        this.grabberId = "cursor";
+        this.grabberId = "right-cursor";
         this.drawMode = DRAW_MODE.PROJECTION;
       } else if (interaction.state.leftRemote.held === this.el.parentNode) {
         this.grabberId = "left-cursor";
@@ -254,7 +254,7 @@ AFRAME.registerComponent("pen", {
       this.intersection = null;
       let cursorPose;
       if (this.drawMode === DRAW_MODE.PROJECTION) {
-        if (this.grabberId === "cursor" || this.grabberId === "left-cursor") {
+        if (this.grabberId === "right-cursor" || this.grabberId === "left-cursor") {
           cursorPose = userinput.get(pathsMap[this.grabberId].pose);
           if (cursorPose) {
             this.raycaster.ray.origin.copy(cursorPose.position);
@@ -311,7 +311,9 @@ AFRAME.registerComponent("pen", {
         getLastWorldPosition(this.el.object3D, this.worldPosition);
       }
 
-      this._setPenVisible((this.grabberId !== "cursor" && this.grabberId !== "left-cursor") || !this.intersection);
+      this._setPenVisible(
+        (this.grabberId !== "right-cursor" && this.grabberId !== "left-cursor") || !this.intersection
+      );
       this._setLineVisible(
         this.el.sceneEl.is("vr-mode") && this.drawMode === DRAW_MODE.PROJECTION && this.intersection
       );

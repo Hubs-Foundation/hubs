@@ -58,7 +58,7 @@ AFRAME.registerComponent("transform-button", {
       this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];
       this.transformSystem.startTransform(
         this.targetEl.object3D,
-        e.object3D.el.id === "cursor"
+        e.object3D.el.id === "right-cursor"
           ? rightHand.object3D
           : e.object3D.el.id === "left-cursor"
             ? leftHand.object3D
