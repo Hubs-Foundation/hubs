@@ -2,17 +2,26 @@
 
 :local(.emojiPanel) {
   position: absolute;
-  width:400px;
+  width: 400px;
   left: 50%;
   margin-left: -200px;
+  box-sizing: border-box;
   bottom: 24px;
+
   display: flex;
   justify-content: space-around;
   align-items: center;
+
   padding: 5px;
   background-color: $hud-panel-background;
   border-radius: 300px;
+
   z-index: 2;
+
+  @media (max-width: 400px) {
+    width: 320px;
+    margin-left: -160px;
+  }
 }
 
 :local(.iconEmoji) {
