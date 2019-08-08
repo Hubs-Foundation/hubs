@@ -19,7 +19,7 @@ const pathsMap = {
   cursor: {
     takeSnapshot: paths.actions.cursor.right.takeSnapshot
   },
-  cursor2: {
+  "left-cursor": {
     takeSnapshot: paths.actions.cursor.left.takeSnapshot
   }
 };
@@ -668,7 +668,7 @@ AFRAME.registerComponent("camera-tool", {
     } else if (heldRightRemote) {
       grabberId = "cursor";
     } else if (heldLeftRemote) {
-      grabberId = "cursor2";
+      grabberId = "left-cursor";
     }
 
     if (grabberId) {

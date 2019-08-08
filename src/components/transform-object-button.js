@@ -60,7 +60,7 @@ AFRAME.registerComponent("transform-button", {
         this.targetEl.object3D,
         e.object3D.el.id === "cursor"
           ? rightHand.object3D
-          : e.object3D.el.id === "cursor2"
+          : e.object3D.el.id === "left-cursor"
             ? leftHand.object3D
             : e.object3D,
         this.data

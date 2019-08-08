@@ -186,7 +186,7 @@ AFRAME.registerSystem("interaction", {
       this.options.leftHand.entity = document.getElementById("player-left-controller");
       this.options.rightHand.entity = document.getElementById("player-right-controller");
       this.options.rightRemote.entity = document.getElementById("cursor");
-      this.options.leftRemote.entity = document.getElementById("cursor2");
+      this.options.leftRemote.entity = document.getElementById("left-cursor");
     });
   },
 

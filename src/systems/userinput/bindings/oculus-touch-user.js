@@ -20,8 +20,8 @@ const scaledLeftJoyX = `${name}left/scaledJoyX`;
 const scaledLeftJoyY = `${name}left/scaledJoyY`;
 const cursorDrop2 = `${name}right/cursorDrop2`;
 const cursorDrop1 = `${name}right/cursorDrop1`;
-const cursor2Drop2 = `${name}left/cursor2Drop2`;
-const cursor2Drop1 = `${name}left/cursor2Drop1`;
+const leftCursorDrop2 = `${name}left/cursorDrop2`;
+const leftCursorDrop1 = `${name}left/cursorDrop1`;
 const rightHandDrop2 = `${name}right/rightHandDrop2`;
 const rightGripRisingGrab = `${name}right/grip/RisingGrab`;
 const rightTriggerRisingGrab = `${name}right/trigger/RisingGrab`;
@@ -723,7 +723,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursor2HoveringOnUI]: [
+  [sets.leftCursorHoveringOnUI]: [
     {
       src: { value: leftTriggerPressed2 },
       dest: { value: paths.actions.cursor.left.grab },
@@ -740,7 +740,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursor2HoveringOnVideo]: [
+  [sets.leftCursorHoveringOnVideo]: [
     {
       src: { value: leftAxis("joyY") },
       dest: { value: paths.actions.cursor.left.mediaVolumeMod },
@@ -757,7 +757,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursor2HoveringOnNothing]: [
+  [sets.leftCursorHoveringOnNothing]: [
     {
       src: { value: leftTriggerPressed2 },
       dest: { value: paths.actions.leftHand.startTeleport },
@@ -877,7 +877,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursor2HoveringOnInteractable]: [
+  [sets.leftCursorHoveringOnInteractable]: [
     {
       src: { value: leftGripPressed2 },
       dest: { value: leftGripRisingGrab },
@@ -906,10 +906,10 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 5
     }
   ],
-  [sets.cursor2HoldingUI]: [
+  [sets.leftCursorHoldingUI]: [
     {
       src: { value: leftTriggerPressed2 },
-      dest: { value: cursor2Drop2 },
+      dest: { value: leftCursorDrop2 },
       xform: xforms.falling,
       priority: 5
     }
@@ -941,7 +941,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursor2HoldingInteractable]: [
+  [sets.leftCursorHoldingInteractable]: [
     {
       src: { value: leftAxis("joyY") },
       dest: { value: paths.actions.cursor.left.modDelta },
@@ -949,12 +949,12 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: { value: leftGripPressed2 },
-      dest: { value: cursor2Drop1 },
+      dest: { value: leftCursorDrop1 },
       xform: xforms.falling,
       priority: 3
     },
     {
-      src: [cursor2Drop1, cursor2Drop2],
+      src: [leftCursorDrop1, leftCursorDrop2],
       dest: { value: paths.actions.cursor.left.drop },
       xform: xforms.any,
       priority: 2
@@ -989,7 +989,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 1
     }
   ],
-  [sets.cursor2HoldingPen]: [
+  [sets.leftCursorHoldingPen]: [
     {
       src: { value: leftTriggerPressed2 },
       dest: { value: paths.actions.cursor.left.startDrawing },

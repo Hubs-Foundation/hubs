@@ -149,11 +149,11 @@ export function resolveActionSets() {
   userinput.toggleSet(sets.cursorHoldingInteractable, rightRemote.held);
 
   userinput.toggleSet(
-    sets.cursor2HoveringOnNothing,
+    sets.leftCursorHoveringOnNothing,
     !leftHand.held && !leftHand.hovered && !leftRemote.held && !leftRemote.hovered
   );
   userinput.toggleSet(
-    sets.cursor2HoveringOnPen,
+    sets.leftCursorHoveringOnPen,
     !leftHand.held &&
       !leftHand.hovered &&
       !leftRemote.held &&
@@ -162,7 +162,7 @@ export function resolveActionSets() {
       leftRemote.hovered.components.tags.data.isPen
   );
   userinput.toggleSet(
-    sets.cursor2HoveringOnCamera,
+    sets.leftCursorHoveringOnCamera,
 
     !leftHand.held &&
       !leftHand.hovered &&
@@ -171,7 +171,7 @@ export function resolveActionSets() {
       leftRemote.hovered.components["camera-tool"]
   );
   userinput.toggleSet(
-    sets.cursor2HoveringOnInteractable,
+    sets.leftCursorHoveringOnInteractable,
     !leftHand.held &&
       !leftHand.hovered &&
       !leftRemote.held &&
@@ -180,7 +180,7 @@ export function resolveActionSets() {
         leftRemote.hovered.components["super-spawner"])
   );
   userinput.toggleSet(
-    sets.cursor2HoveringOnUI,
+    sets.leftCursorHoveringOnUI,
     !leftHand.held &&
       !leftHand.hovered &&
       !leftRemote.held &&
@@ -190,7 +190,7 @@ export function resolveActionSets() {
           leftRemote.hovered.components.tags.data.holdableButton))
   );
   userinput.toggleSet(
-    sets.cursor2HoveringOnVideo,
+    sets.leftCursorHoveringOnVideo,
     !leftHand.held &&
       !leftHand.hovered &&
       !leftRemote.held &&
@@ -198,9 +198,9 @@ export function resolveActionSets() {
       leftRemote.hovered.components["media-video"]
   );
 
-  userinput.toggleSet(sets.cursor2HoldingNothing, !leftHand.held && !leftRemote.held);
+  userinput.toggleSet(sets.leftCursorHoldingNothing, !leftHand.held && !leftRemote.held);
   userinput.toggleSet(
-    sets.cursor2HoldingPen,
+    sets.leftCursorHoldingPen,
 
     !leftHand.held &&
       !leftHand.hovered &&
@@ -209,18 +209,18 @@ export function resolveActionSets() {
       leftRemote.held.components.tags.data.isPen
   );
   userinput.toggleSet(
-    sets.cursor2HoldingCamera,
+    sets.leftCursorHoldingCamera,
     !leftHand.held && !leftHand.hovered && leftRemote.held && leftRemote.held.components["camera-tool"]
   );
   userinput.toggleSet(
-    sets.cursor2HoldingUI,
+    sets.leftCursorHoldingUI,
     !leftHand.held &&
       !leftHand.hovered &&
       leftRemote.held &&
       leftRemote.held.components.tags &&
       leftRemote.held.components.tags.data.holdableButton
   );
-  userinput.toggleSet(sets.cursor2HoldingInteractable, leftRemote.held);
+  userinput.toggleSet(sets.leftCursorHoldingInteractable, leftRemote.held);
 
   userinput.toggleSet(sets.leftHandTeleporting, leftTeleporter.isTeleporting);
   userinput.toggleSet(sets.rightHandTeleporting, rightTeleporter.isTeleporting);

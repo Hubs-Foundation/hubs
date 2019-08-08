@@ -37,7 +37,7 @@ const pathsMap = {
     penPrevColor: paths.actions.cursor.right.penPrevColor,
     scalePenTip: paths.actions.cursor.right.scalePenTip
   },
-  cursor2: {
+  "left-cursor": {
     pose: paths.actions.cursor.left.pose,
     startDrawing: paths.actions.cursor.left.startDrawing,
     stopDrawing: paths.actions.cursor.left.stopDrawing,
@@ -211,7 +211,7 @@ AFRAME.registerComponent("pen", {
         this.grabberId = "cursor";
         this.drawMode = DRAW_MODE.PROJECTION;
       } else if (interaction.state.leftRemote.held === this.el.parentNode) {
-        this.grabberId = "cursor2";
+        this.grabberId = "left-cursor";
         this.drawMode = DRAW_MODE.PROJECTION;
       } else {
         this.grabberId = null;
@@ -254,7 +254,7 @@ AFRAME.registerComponent("pen", {
       this.intersection = null;
       let cursorPose;
       if (this.drawMode === DRAW_MODE.PROJECTION) {
-        if (this.grabberId === "cursor" || this.grabberId === "cursor2") {
+        if (this.grabberId === "cursor" || this.grabberId === "left-cursor") {
           cursorPose = userinput.get(pathsMap[this.grabberId].pose);
           if (cursorPose) {
             this.raycaster.ray.origin.copy(cursorPose.position);
@@ -311,7 +311,7 @@ AFRAME.registerComponent("pen", {
         getLastWorldPosition(this.el.object3D, this.worldPosition);
       }
 
-      this._setPenVisible((this.grabberId !== "cursor" && this.grabberId !== "cursor2") || !this.intersection);
+      this._setPenVisible((this.grabberId !== "cursor" && this.grabberId !== "left-cursor") || !this.intersection);
       this._setLineVisible(
         this.el.sceneEl.is("vr-mode") && this.drawMode === DRAW_MODE.PROJECTION && this.intersection
       );
