@@ -11,7 +11,7 @@ export function resolveActionSets() {
     rightTeleporter ||
     (document.getElementById("player-right-controller") &&
       document.getElementById("player-right-controller").components.teleporter);
-  if (!leftTeleporter && !rightTeleporter) return;
+  if (!leftTeleporter || !rightTeleporter) return;
   const userinput = AFRAME.scenes[0].systems.userinput;
   const { leftHand, rightHand, rightRemote } = AFRAME.scenes[0].systems.interaction.state;
 
