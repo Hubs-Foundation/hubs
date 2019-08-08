@@ -502,7 +502,6 @@ class UIRoot extends Component {
       this.setState({ emojiState: reason });
       this.emojiEvent.emojiType = reason;
     }
-
     this.props.scene.querySelector("#player-rig").setAttribute("player-info", this.emojiEvent);
   };
 

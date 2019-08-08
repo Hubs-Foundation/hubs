@@ -38,7 +38,6 @@ function registerNetworkSchemas() {
       "scale",
       "player-info",
       "networked-avatar",
-
       {
         selector: ".camera",
         component: "position",
