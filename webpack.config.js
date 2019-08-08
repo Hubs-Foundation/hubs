@@ -353,7 +353,7 @@ module.exports = (env, argv) => ({
     ]),
     // Extract required css and add a content hash.
     new MiniCssExtractPlugin({
-      filename: "assets/stylesheets/[name]-[md5:contenthash:hex:20].css",
+      filename: "assets/stylesheets/[name]-[contenthash].css",
       disable: argv.mode !== "production"
     }),
     // Define process.env variables in the browser context.
