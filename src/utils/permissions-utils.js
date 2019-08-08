@@ -108,9 +108,15 @@ export function authorizeOrSanitizeMessage(message) {
     return message;
   }
 
-  const senderPermissions = from_session_id
-    ? window.APP.hubChannel.presence.state[from_session_id].metas[0].permissions
-    : null;
+  const presenceState = window.APP.hubChannel.presence.state[from_session_id];
+
+  if (!presenceState) {
+    // We've received a manipulation message from a user that we don't have presence state for yet.
+    // Since we can't make a judgement about their permissions, we'll have to ignore the message.
+    return emptyObject;
+  }
+
+  const senderPermissions = presenceState.metas[0].permissions;
 
   if (dataType === "um") {
     for (const index in message.data.d) {
