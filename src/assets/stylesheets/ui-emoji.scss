@@ -12,6 +12,7 @@
   padding: 5px;
   background-color: $hud-panel-background;
   border-radius: 300px;
+  z-index: 2;
 }
 :local(.iconEmoji) {
   width: 30px;
