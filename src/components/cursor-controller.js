@@ -17,7 +17,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   init: function() {
-    this.enabled = true;
+    this.enabled = false;
 
     this.data.cursor.addEventListener(
       "loaded",

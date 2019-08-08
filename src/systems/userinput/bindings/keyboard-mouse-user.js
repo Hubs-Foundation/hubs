@@ -26,6 +26,16 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.always(true)
     },
     {
+      src: {},
+      dest: { value: paths.actions.cursor.right.wake },
+      xform: xforms.always(true)
+    },
+    {
+      src: {},
+      dest: { value: paths.actions.cursor.left.wake },
+      xform: xforms.always(false)
+    },
+    {
       src: {
         w: paths.device.keyboard.key("arrowup"),
         a: paths.device.keyboard.key("arrowleft"),

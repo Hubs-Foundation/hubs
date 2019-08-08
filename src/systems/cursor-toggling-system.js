@@ -10,8 +10,8 @@ function shouldEnableRemote(scene, hand, remote, teleporting, woke) {
 
 export class CursorTogglingSystem {
   constructor() {
-    this.wakeLeft = true;
-    this.wakeRight = true;
+    this.wakeLeft = false;
+    this.wakeRight = false;
 
     waitForDOMContentLoaded().then(() => {
       this.domContentLoadedButComponentsMayNotHave = true;
