@@ -139,7 +139,7 @@ AFRAME.registerComponent("scale-audio-feedback", {
   },
 
   init() {
-    this._playerCamera = document.getElementById("player-camera").object3D;
+    this.camera = document.getElementById("viewing-camera").object3D;
   },
 
   tick() {
@@ -155,7 +155,7 @@ AFRAME.registerComponent("scale-audio-feedback", {
 
     const { object3D } = this.el;
 
-    const scale = getAudioFeedbackScale(this.el.object3D, this._playerCamera, minScale, maxScale, audioAnalyser.volume);
+    const scale = getAudioFeedbackScale(this.el.object3D, this.camera, minScale, maxScale, audioAnalyser.volume);
 
     object3D.scale.setScalar(scale);
     object3D.matrixNeedsUpdate = true;

@@ -52,6 +52,12 @@ export const xforms = {
   copyIfTrue: function(frame, src, dest) {
     frame.setValueType(dest.value, frame.get(src.bool) ? frame.get(src.value) : undefined);
   },
+  copyVec2IfTrue: function(frame, src, dest) {
+    if (frame.get(src.bool)) {
+      const v2 = frame.get(src.value);
+      frame.setVector2(dest.value, v2[0], v2[1]);
+    }
+  },
   zeroIfDefined: function(frame, src, dest) {
     frame.setValueType(dest.value, frame.get(src.bool) !== undefined ? 0 : frame.get(src.value));
   },
@@ -82,7 +88,7 @@ export const xforms = {
     const pose = new Pose();
     return function poseFromCameraProjection(frame, src, dest) {
       if (!camera) {
-        camera = document.querySelector("#player-camera").components.camera.camera;
+        camera = document.getElementById("viewing-camera").components.camera.camera;
       }
       const value = frame.get(src.value);
       frame.setPose(dest.value, pose.fromCameraProjection(camera, value[0], value[1]));
@@ -183,5 +189,14 @@ export const xforms = {
 
       return state;
     };
+  },
+  diff_vec2: function diff_vec2(frame, src, dest, state = [0, 0]) {
+    const v2 = frame.get(src.value);
+    if (v2) {
+      frame.setVector2(dest.value, v2[0] - state[0], v2[1] - state[1]);
+      state[0] = v2[0];
+      state[1] = v2[1];
+    }
+    return state;
   }
 };

@@ -778,8 +778,8 @@ class UIRoot extends Component {
   };
 
   toggleStreamerMode = enable => {
-    const playerRig = document.querySelector("#player-rig");
-    playerRig.setAttribute("character-controller", "fly", enable);
+    const avatarRig = document.querySelector("#avatar-rig");
+    avatarRig.setAttribute("character-controller", "fly", enable);
 
     if (enable) {
       this.props.hubChannel.beginStreaming();

@@ -157,7 +157,7 @@ export async function createInWorldLogMessage({ name, type, body }) {
 
   entity.appendChild(meshEntity);
   entity.setAttribute("follow-in-fov", {
-    target: "#player-camera",
+    target: "#avatar-pov-node",
     offset: { x: 0, y: 0.0, z: -0.8 }
   });
 

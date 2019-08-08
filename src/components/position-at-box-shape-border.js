@@ -1,5 +1,6 @@
 import { getBox } from "../utils/auto-box-collider.js";
 import { getLastWorldPosition } from "../utils/three-utils";
+import { CAMERA_MODE_FIRST_PERSON } from "../systems/camera-system";
 
 const PI = Math.PI;
 const HALF_PI = PI / 2;
@@ -179,7 +180,10 @@ AFRAME.registerComponent("position-at-box-shape-border", {
 
       const distance = Math.sqrt(targetSquareDistance);
       const scale = Math.max(this.halfExtents.x, this.halfExtents.z) * distance;
-      const targetScale = Math.min(2.0, Math.max(0.5, scale * tempParentWorldScale.x));
+      const targetScale = Math.min(
+        this.el.sceneEl.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_FIRST_PERSON ? 2.0 : 4.0,
+        Math.max(0.5, scale * tempParentWorldScale.x)
+      );
       const finalScale = this.data.scale ? targetScale / tempParentWorldScale.x : 1;
 
       if (animate) {
