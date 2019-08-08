@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
@@ -9,6 +10,7 @@ import screenfull from "screenfull";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
+import emojiStyle from "../assets/stylesheets/ui-emoji.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
@@ -169,6 +171,8 @@ class UIRoot extends Component {
   };
 
   state = {
+    emojiState: "empty",
+
     enterInVR: false,
     muteOnEntry: false,
     entered: false,
@@ -207,6 +211,7 @@ class UIRoot extends Component {
 
   constructor(props) {
     super(props);
+
     if (props.showSafariMicDialog) {
       this.state.dialog = <SafariMicDialog closable={false} />;
     }
@@ -480,6 +485,23 @@ class UIRoot extends Component {
   exit = reason => {
     this.props.exitScene(reason);
     this.setState({ exited: true });
+  };
+
+  emojiEvent = {
+    emojiType: "empty"
+  };
+
+  emojiChange = reason => {
+    if (this.state.emojiState === reason) {
+      this.setState({
+        emojiState: "empty"
+      });
+      this.emojiEvent.emojiType = "empty";
+    } else {
+      this.setState({ emojiState: reason });
+      this.emojiEvent.emojiType = reason;
+    }
+    this.props.scene.querySelector("#player-rig").setAttribute("player-info", this.emojiEvent);
   };
 
   isWaitingForAutoExit = () => {
@@ -1647,19 +1669,77 @@ class UIRoot extends Component {
                   onClose={() => this.confirmBroadcastedRoom()}
                 />
               )}
-            {enteredOrWatchingOrPreload && (
-              <InWorldChatBox
-                discordBridges={discordBridges}
-                onSendMessage={this.sendMessage}
-                onObjectCreated={this.createObject}
-                enableSpawning={entered}
-                history={this.props.history}
-              />
-            )}
+            {enteredOrWatchingOrPreload &&
+              !this.state.frozen && (
+                <InWorldChatBox
+                  discordBridges={discordBridges}
+                  onSendMessage={this.sendMessage}
+                  onObjectCreated={this.createObject}
+                  enableSpawning={entered}
+                  history={this.props.history}
+                />
+              )}
             {this.state.frozen && (
               <button className={styles.leaveButton} onClick={() => this.exit("left")}>
                 <FormattedMessage id="entry.leave-room" />
               </button>
+            )}
+            {this.state.frozen && (
+              <div className={cx(styles.uiInteractive, emojiStyle.emojiPanel)}>
+                <div
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.smile, {
+                    [emojiStyle.active]: this.state.emojiState === "smile"
+                  })}
+                  onClick={() => this.emojiChange("smile")}
+                />
+
+                <div
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.happy, {
+                    [emojiStyle.active]: this.state.emojiState === "happy"
+                  })}
+                  onClick={() => this.emojiChange("happy")}
+                />
+                <div
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.surprise, {
+                    [emojiStyle.active]: this.state.emojiState === "surprise"
+                  })}
+                  onClick={() => this.emojiChange("surprise")}
+                />
+
+                <div
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.disgust, {
+                    [emojiStyle.active]: this.state.emojiState === "disgust"
+                  })}
+                  onClick={() => this.emojiChange("disgust")}
+                />
+                <div
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.angry, {
+                    [emojiStyle.active]: this.state.emojiState === "angry"
+                  })}
+                  onClick={() => this.emojiChange("angry")}
+                />
+
+                <div
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.sad, {
+                    [emojiStyle.active]: this.state.emojiState === "sad"
+                  })}
+                  onClick={() => this.emojiChange("sad")}
+                />
+
+                <div
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.eww, {
+                    [emojiStyle.active]: this.state.emojiState === "eww"
+                  })}
+                  onClick={() => this.emojiChange("eww")}
+                />
+
+                <div
+                  className={cx(emojiStyle.iconEmoji, emojiStyle.hearts, {
+                    [emojiStyle.active]: this.state.emojiState === "hearts"
+                  })}
+                  onClick={() => this.emojiChange("hearts")}
+                />
+              </div>
             )}
             {!this.state.frozen &&
               !watching &&

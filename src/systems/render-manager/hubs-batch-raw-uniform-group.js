@@ -58,40 +58,45 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
       mesh.updateMatrices();
 
       // TODO need to account for nested visibility deeper than 1 level
-      this.setInstanceTransform(instanceId, mesh.visible && mesh.parent.visible ? mesh.matrixWorld : HIDE_MATRIX);
+      this.setInstanceTransform(
+        instanceId,
+        mesh.visible && (mesh.parent && mesh.parent.visible) ? mesh.matrixWorld : HIDE_MATRIX
+      );
       this.setInstanceColor(instanceId, mesh.material.color || DEFAULT_COLOR, mesh.material.opacity || 1);
 
       const el = this.meshToEl.get(mesh);
       if (el) {
         const obj = el.object3D;
         const hoverableVisuals = el.components["hoverable-visuals"];
-        const worldY = obj.matrixWorld.elements[13];
-        const scaledRadius = obj.scale.y * hoverableVisuals.boundingSphere.radius;
+        if (hoverableVisuals) {
+          const worldY = obj.matrixWorld.elements[13];
+          const scaledRadius = obj.scale.y * hoverableVisuals.boundingSphere.radius;
 
-        const isPinned = el.components.pinnable && el.components.pinnable.data.pinned;
-        const isSpawner = !!el.components["super-spawner"];
-        const isFrozen = el.sceneEl.is("frozen");
-        const hideDueToPinning = !isSpawner && isPinned && !isFrozen;
+          const isPinned = el.components.pinnable && el.components.pinnable.data.pinned;
+          const isSpawner = !!el.components["super-spawner"];
+          const isFrozen = el.sceneEl.is("frozen");
+          const hideDueToPinning = !isSpawner && isPinned && !isFrozen;
 
-        let highlightInteractorOne, highlightInteractorTwo;
-        if (interaction.state.leftHand.hovered === el && !interaction.state.leftHand.held) {
-          interactorOne = interaction.options.leftHand.entity.object3D;
-          highlightInteractorOne = true;
+          let highlightInteractorOne, highlightInteractorTwo;
+          if (interaction.state.leftHand.hovered === el && !interaction.state.leftHand.held) {
+            interactorOne = interaction.options.leftHand.entity.object3D;
+            highlightInteractorOne = true;
+          }
+
+          if (interaction.state.rightRemote.hovered === el && !interaction.state.rightRemote.held) {
+            interactorTwo = interaction.options.rightRemote.entity.object3D;
+            highlightInteractorTwo = true;
+          } else if (interaction.state.rightHand.hovered === el && !interaction.state.rightHand.held) {
+            interactorTwo = interaction.options.rightHand.entity.object3D;
+            highlightInteractorTwo = true;
+          }
+
+          tempVec4[0] = worldY - scaledRadius;
+          tempVec4[1] = worldY + scaledRadius;
+          tempVec4[2] = !!highlightInteractorOne && !hideDueToPinning && !this.isTouchscreen;
+          tempVec4[3] = !!highlightInteractorTwo && !hideDueToPinning && !this.isTouchscreen;
+          this.hubs_sweepParams.set(tempVec4, instanceId * 4);
         }
-
-        if (interaction.state.rightRemote.hovered === el && !interaction.state.rightRemote.held) {
-          interactorTwo = interaction.options.rightRemote.entity.object3D;
-          highlightInteractorTwo = true;
-        } else if (interaction.state.rightHand.hovered === el && !interaction.state.rightHand.held) {
-          interactorTwo = interaction.options.rightHand.entity.object3D;
-          highlightInteractorTwo = true;
-        }
-
-        tempVec4[0] = worldY - scaledRadius;
-        tempVec4[1] = worldY + scaledRadius;
-        tempVec4[2] = !!highlightInteractorOne && !hideDueToPinning && !this.isTouchscreen;
-        tempVec4[3] = !!highlightInteractorTwo && !hideDueToPinning && !this.isTouchscreen;
-        this.hubs_sweepParams.set(tempVec4, instanceId * 4);
       }
     }
 

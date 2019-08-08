@@ -128,6 +128,7 @@
 
                         <template data-name="Spine">
                             <a-entity is-remote-hover-target personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
+                                <a-entity class="chest-image" scale="0.18 0.18 0.18" position="0 -0.025 0.13"></a-entity>
                                 <a-entity class="ui interactable-ui">
                                     <a-entity billboard class="freeze-menu" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;" avatar-volume-controls>
                                         <a-entity class="avatar-volume-label" text="value: 0%; anchor: center; align: center; color: #ff3464; letterSpacing: 4; width:1.5;" text-raycast-hack position="0.0 0.675 0.35" scale="1.25 1.25 1.25"></a-entity>
@@ -302,7 +303,7 @@
                                     position="0 0 0.001"
                                 ></a-entity>
                             </a-entity>
-                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" open-media-button position="0.43 -0.375 0.01">
+                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" open-media-button="onlyOpenLink: true" position="0.43 -0.375 0.01">
                                 <a-entity text="value:open link; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
                             <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" clone-media-button position="-0.43 -0.375 0.01">
@@ -617,6 +618,7 @@
                     </a-entity>
                 </a-entity>
             </template>
+
 
             <template id="hubs-destination-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
@@ -945,7 +947,11 @@
                         <a-entity class="nametag" visible="false" text ></a-entity>
                     </a-entity>
                 </template>
-
+                <template data-name="Spine">
+                    <a-entity>
+                        <a-entity class="chest-image" scale="0.18 0.18 0.18" position="0 -0.025 0.13"></a-entity>
+                    </a-entity>
+                </template>
                 <template data-name="Head">
                     <a-entity id="player-head" visible="false" bone-visibility></a-entity>
                 </template>
