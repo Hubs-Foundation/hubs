@@ -65,9 +65,9 @@ export default class SceneEntryManager {
       exit2DInterstitialAndEnterVR(true);
     }
 
-    if (isMobile || qsTruthy("mobile")) {
-      this.avatarRig.setAttribute("virtual-gamepad-controls", {});
-    }
+//    if (isMobile || qsTruthy("mobile")) {
+//      this.avatarRig.setAttribute("virtual-gamepad-controls", {});
+//    }
 
     this._setupPlayerRig();
     this._setupBlocking();
