@@ -89,6 +89,7 @@ AFRAME.registerComponent("camera-tool", {
   },
 
   init() {
+    this.el.object3D.visible = false; // Make invisible until model ready
     this.lastUpdate = performance.now();
     this.localSnapCount = 0; // Counter that is used to arrange photos/videos
 
@@ -129,6 +130,17 @@ AFRAME.registerComponent("camera-tool", {
       mesh.scale.set(2, 2, 2);
       mesh.matrixNeedsUpdate = true;
       this.el.setObject3D("mesh", mesh);
+
+      this.el.object3D.visible = true;
+      this.el.object3D.scale.set(0.75, 0.75, 0.75);
+
+      this.el.setAttribute("animation__scale", {
+        property: "scale",
+        dur: 200,
+        from: { x: 0.75, y: 0.75, z: 0.75 },
+        to: { x: 1, y: 1, z: 1 },
+        easing: "easeOutQuad"
+      });
 
       const width = 0.28;
       const geometry = new THREE.PlaneBufferGeometry(width, width / this.camera.aspect);
