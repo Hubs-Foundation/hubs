@@ -9,7 +9,7 @@ AFRAME.registerComponent("emoji-hud", {
     const totalWidth = totalSize * emojis.length;
     const offset = totalSize / 2;
 
-    const playerRig = this.el.sceneEl.querySelector("#player-rig");
+    const playerRig = this.el.sceneEl.querySelector("#avatar-rig");
     playerRig.addEventListener("emoji_changed", ({ detail }) => {
       this.currentEmoji = detail.emojiType;
       this.updateEmojiStates();

@@ -325,7 +325,7 @@ class UIRoot extends Component {
       setTimeout(() => this.handleForceEntry(), 2000);
     }
 
-    this.playerRig = scene.querySelector("#player-rig");
+    this.playerRig = scene.querySelector("#avatar-rig");
     this.playerRig.addEventListener("emoji_changed", ({ detail }) => this.setState({ emojiState: detail.emojiType }));
   }
 

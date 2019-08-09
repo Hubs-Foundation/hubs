@@ -626,9 +626,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const scene = document.querySelector("a-scene");
   scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
 
-  // Physics needs to be ready before spawning anything.
-  while (!scene.systems.physics.initialized) await nextTick();
-
   // HACK - Trigger initial batch preparation with an invisible object
   scene
     .querySelector("#batch-prep")

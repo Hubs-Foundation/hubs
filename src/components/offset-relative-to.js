@@ -19,7 +19,7 @@ AFRAME.registerComponent("offset-relative-to", {
     selfDestruct: {
       default: false
     },
-    yawOnly: {
+    lookAt: {
       default: false
     }
   },
@@ -47,7 +47,7 @@ AFRAME.registerComponent("offset-relative-to", {
         obj.parent.worldToLocal(offsetVector);
       }
       obj.position.copy(offsetVector);
-      if (this.data.yawOnly) {
+      if (this.data.lookAt) {
         target.getWorldPosition(targetWorldPos);
         obj.updateMatrices(true);
         obj.lookAt(targetWorldPos);

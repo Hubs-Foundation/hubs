@@ -416,7 +416,7 @@
                     </a-entity>
                     <a-entity class="label-background" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0.15 0.08" scale="0.75 0.75 0.75">
                     </a-entity>
-                    <a-entity class="ui interactable-ui camera-snap-menu" mixin="button-container" visible-if-permitted="spawn_camera">
+                    <a-entity class="ui interactable-ui camera-snap-menu" visible-if-permitted="spawn_camera">
                         <a-entity
                             class="duration"
                             text="value: 5s; align: center; color: #fafafa"
@@ -751,10 +751,10 @@
 
             <a-mixin id="emoji-button"
                 is-remote-hover-target
+                visibility-while-frozen="requireHoverOnNonMobile: false"
                 sprite
                 position="0.0 0 0.005"
                 tags="singleActionButton: true;"
-                class="ui hud"
                 material="alphaTest: 0.1;"
             ></a-mixin>
         </a-assets>
@@ -912,11 +912,12 @@
             </a-entity>
 
             <a-entity
-                offset-relative-to="target: #player-camera; offset: 0 -0.5 -1.5; on: stateadded; yawOnly: true"
-                vr-mode-toggle-class="class: ui"
+                offset-relative-to="target: #viewing-camera; offset: 0 -0.5 -1.5; on: stateadded; lookAt: true"
                 vr-mode-toggle-visibility
+                vr-mode-toggle-class="class: ui"
                 emoji-hud>
-                <a-entity 
+                <a-entity
+                    is-remote-hover-target
                     visibility-while-frozen="requireHoverOnNonMobile: false"
                     slice9="
                         color: #000000;
@@ -928,15 +929,15 @@
                         bottom: 66;
                         opacity: 0.2;
                         src: #button;">
-                    <a-entity mixin="emoji-button" data-emoji="smile"></a-entity>
-                    <a-entity mixin="emoji-button" data-emoji="happy"></a-entity>
-                    <a-entity mixin="emoji-button" data-emoji="surprise"></a-entity>
-                    <a-entity mixin="emoji-button" data-emoji="disgust"></a-entity>
-                    <a-entity mixin="emoji-button" data-emoji="angry"></a-entity>
-                    <a-entity mixin="emoji-button" data-emoji="sad"></a-entity>
-                    <a-entity mixin="emoji-button" data-emoji="eww"></a-entity>
-                    <a-entity mixin="emoji-button" data-emoji="hearts"></a-entity>
                 </a-entity>
+                <a-entity mixin="emoji-button" data-emoji="smile"></a-entity>
+                <a-entity mixin="emoji-button" data-emoji="happy"></a-entity>
+                <a-entity mixin="emoji-button" data-emoji="surprise"></a-entity>
+                <a-entity mixin="emoji-button" data-emoji="disgust"></a-entity>
+                <a-entity mixin="emoji-button" data-emoji="angry"></a-entity>
+                <a-entity mixin="emoji-button" data-emoji="sad"></a-entity>
+                <a-entity mixin="emoji-button" data-emoji="eww"></a-entity>
+                <a-entity mixin="emoji-button" data-emoji="hearts"></a-entity>
             </a-entity>
 
             <a-entity
@@ -1027,7 +1028,7 @@
                 "
         ></a-entity>
 
-        <a-entity matrix-auto-update class="ui interactable-ui vr-notice" mixin="button-container" follow-in-fov="target: #avatar-pov-node; offset: 0 0 -0.8; angle: 39;" visible="false">
+        <a-entity matrix-auto-update class="ui interactable-ui vr-notice" follow-in-fov="target: #avatar-pov-node; offset: 0 0 -0.8; angle: 39;" visible="false">
             <a-entity slice9="width: 0.8; height: 0.25; left: 64; top: 64; right: 66; bottom: 66; opacity: 1.0; src: #button"
                 text-button="
                     textHoverColor: #fff;
