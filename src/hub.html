@@ -751,7 +751,19 @@
                     opacity: 1.0;
                     src: #button"
             ></a-mixin>
+
+            <a-mixin id="emoji-button"
+                is-remote-hover-target
+                sprite
+                position="0.0 0 0.005"
+                tags="singleActionButton: true;"
+                class="ui hud"
+                material="alphaTest: 0.1;"
+            ></a-mixin>
         </a-assets>
+
+        <!-- HACK - We use this object to trigger initial batch preparation -->
+        <a-entity id="batch-prep" visible="false"></a-entity>
 
         <!-- Interactables -->
         <a-entity id="media-counter" networked-counter="max: 20;"></a-entity>
@@ -902,6 +914,34 @@
                     teleporter="start: /actions/startTeleport; confirm: /actions/stopTeleport; collisionEntities: [nav-mesh];"
                 ></a-entity>
                 <a-entity id="stats" stats-plus="false" position="0 0 -1"></a-entity>
+            </a-entity>
+
+            <a-entity
+                offset-relative-to="target: #player-camera; offset: 0 -0.5 -1.5; on: stateadded; yawOnly: true"
+                vr-mode-toggle-class="class: ui"
+                vr-mode-toggle-visibility
+                emoji-hud>
+                <a-entity 
+                    visibility-while-frozen="requireHoverOnNonMobile: false"
+                    slice9="
+                        color: #000000;
+                        width: 1.5;
+                        height: 0.2;
+                        left: 64;
+                        top: 64;
+                        right: 66;
+                        bottom: 66;
+                        opacity: 0.2;
+                        src: #button;">
+                    <a-entity mixin="emoji-button" data-emoji="smile"></a-entity>
+                    <a-entity mixin="emoji-button" data-emoji="happy"></a-entity>
+                    <a-entity mixin="emoji-button" data-emoji="surprise"></a-entity>
+                    <a-entity mixin="emoji-button" data-emoji="disgust"></a-entity>
+                    <a-entity mixin="emoji-button" data-emoji="angry"></a-entity>
+                    <a-entity mixin="emoji-button" data-emoji="sad"></a-entity>
+                    <a-entity mixin="emoji-button" data-emoji="eww"></a-entity>
+                    <a-entity mixin="emoji-button" data-emoji="hearts"></a-entity>
+                </a-entity>
             </a-entity>
 
             <a-entity
