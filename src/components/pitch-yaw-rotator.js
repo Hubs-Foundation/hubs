@@ -16,7 +16,7 @@ const rotatePitchAndYaw = (function() {
     o.getWorldQuaternion(owq);
     oq.copy(o.quaternion);
     v.set(0, 0, 1).applyQuaternion(oq);
-    const initialForwardDotUp = v.dot(UP);
+    const initialForwardDotUp = Math.abs(v.dot(UP));
     right.set(1, 0, 0).applyQuaternion(owq);
     pq.setFromAxisAngle(right, p);
     yq.setFromAxisAngle(UP, y);
@@ -25,11 +25,10 @@ const rotatePitchAndYaw = (function() {
       .premultiply(yq)
       .premultiply(opq.inverse());
     v.set(0, 0, 1).applyQuaternion(q);
-    const newForwardDotUp = v.dot(UP);
-    if (
-      (newForwardDotUp > 0.9 && newForwardDotUp > initialForwardDotUp) ||
-      (newForwardDotUp < -0.9 && newForwardDotUp < initialForwardDotUp)
-    ) {
+    const newForwardDotUp = Math.abs(v.dot(UP));
+    // Check if we are looking straight straight up or down
+    if (newForwardDotUp > 0.9 && newForwardDotUp > initialForwardDotUp) {
+      // TODO: Would be nice to apply _part_ of the rotation up to but not exceeding the bounds
       return;
     } else {
       o.quaternion.copy(q);
