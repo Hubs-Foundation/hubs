@@ -1,10 +1,7 @@
 import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { isHubsDestinationUrl } from "./utils/media-url-utils";
-const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
-  TYPE = PHYSICS_CONSTANTS.TYPE,
-  SHAPE = PHYSICS_CONSTANTS.SHAPE,
-  FIT = PHYSICS_CONSTANTS.FIT;
+import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
@@ -25,17 +22,17 @@ AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner", (el, co
 });
 AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
 AFRAME.GLTFModelPlus.registerComponent("media-loader", "media-loader");
-AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", el => {
+AFRAME.GLTFModelPlus.registerComponent("body", "body-helper", el => {
   //This is only required for migration of old environments with super-spawners
   //will no longer be needed when spawners are added via Spoke instead.
-  el.setAttribute("ammo-body", {
+  el.setAttribute("body-helper", {
     mass: 0,
     type: TYPE.STATIC,
     collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
     collisionFilterMask: COLLISION_LAYERS.DEFAULT_SPAWNER
   });
 });
-AFRAME.GLTFModelPlus.registerComponent("ammo-shape", "ammo-shape");
+AFRAME.GLTFModelPlus.registerComponent("ammo-shape", "shape-helper");
 AFRAME.GLTFModelPlus.registerComponent("hide-when-quality", "hide-when-quality");
 AFRAME.GLTFModelPlus.registerComponent("light", "light", (el, componentName, componentData) => {
   if (componentData.distance === 0) {
@@ -70,7 +67,7 @@ AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
 AFRAME.GLTFModelPlus.registerComponent(
   "box-collider",
-  "ammo-shape",
+  "shape-helper",
   (() => {
     const euler = new THREE.Euler();
     return (el, componentName, componentData) => {
@@ -234,7 +231,7 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
   el.setAttribute("hoverable-visuals", {
     cursorController: "#cursor-controller"
   });
-  el.setAttribute("ammo-body", {
+  el.setAttribute("body-helper", {
     mass: 0,
     type: TYPE.STATIC,
     collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
@@ -316,7 +313,7 @@ AFRAME.GLTFModelPlus.registerComponent(
 );
 
 AFRAME.GLTFModelPlus.registerComponent("heightfield", "heightfield", (el, componentName, componentData) => {
-  el.setAttribute("ammo-shape__heightfield", {
+  el.setAttribute("shape-helper__heightfield", {
     type: SHAPE.HEIGHTFIELD,
     margin: 0.01,
     fit: FIT.MANUAL,
@@ -327,7 +324,7 @@ AFRAME.GLTFModelPlus.registerComponent("heightfield", "heightfield", (el, compon
 });
 
 AFRAME.GLTFModelPlus.registerComponent("trimesh", "trimesh", el => {
-  el.setAttribute("ammo-shape__trimesh", {
+  el.setAttribute("shape-helper__trimesh", {
     type: SHAPE.MESH,
     margin: 0.01,
     fit: FIT.ALL,

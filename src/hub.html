@@ -45,7 +45,6 @@
 <body>
     <a-scene
         loading-screen="enabled: false"
-        post-physics
         physics="debug: false; driver: ammo; debugDrawMode: 1; iterations: 4;"
         hubs-systems
         capture-system
@@ -176,8 +175,8 @@
                                 networked-audio-analyser
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
-                                ammo-body="type: kinematic; collisionFilterGroup: 4; collisionFilterMask: 1;"
-                                ammo-shape="type: cylinder; fit: manual; halfExtents: 0.11 0.10 0.11; offset: 0 0.06 0.04;"
+                                body-helper="type: kinematic; collisionFilterGroup: 4; collisionFilterMask: 1;"
+                                shape-helper="type: cylinder; fit: manual; halfExtents: 0.11 0.10 0.11; offset: 0 0.06 0.04;"
                             ></a-entity>
                         </template>
 
@@ -194,7 +193,7 @@
 
             <template id="static-media">
                 <a-entity
-                    ammo-body="type: static; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 11;"
+                    body-helper="type: static; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 11;"
                 >
                 </a-entity>
             </template>
@@ -202,7 +201,7 @@
             <template id="static-controlled-media">
                 <a-entity
                     class="interactable"
-                    ammo-body="type: static; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 11;"
+                    body-helper="type: static; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 11;"
                     is-remote-hover-target
                 >
                 </a-entity>
@@ -211,7 +210,7 @@
             <template id="interactable-media">
                 <a-entity
                     class="interactable"
-                    ammo-body="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 15;"
+                    body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 15;"
                     owned-object-limiter="counter: #media-counter"
                     set-unowned-body-kinematic
                     is-remote-hover-target
@@ -359,8 +358,8 @@
             <template id="interactable-pen">
                 <a-entity
                     class="pen interactable"
+                    body-helper="type: dynamic; mass: 0.001; collisionFilterGroup: 1; collisionFilterMask: 15; gravity: 0 0 0;"
                     media-loader="src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;"
-                    ammo-body="type: dynamic; mass: 0.001; collisionFilterGroup: 1; collisionFilterMask: 15;"
                     owned-object-limiter="counter: #pen-counter"
                     set-unowned-body-kinematic
                     is-remote-hover-target
@@ -393,14 +392,13 @@
             <template id="interactable-camera">
                 <a-entity
                     class="interactable"
-                    ammo-body="type: dynamic; mass: 0.001; collisionFilterGroup: 1; collisionFilterMask: 8;"
+                    body-helper="type: dynamic; mass: 0.001; collisionFilterGroup: 1; collisionFilterMask: 8;"
                     camera-tool
                     is-remote-hover-target
                     tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
                     matrix-auto-update
-                    scale="0.5 0.5 0.5"
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
-                    ammo-shape="type: box; fit: manual; halfExtents: 0.11 0.07 0.05; offset: 0 0.02 0;"
+                    shape-helper="type: box; fit: manual; halfExtents: 0.22 0.14 0.1; offset: 0 0.02 0;"
                     floaty-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     owned-object-limiter="counter: #camera-counter"
                     set-unowned-body-kinematic
@@ -772,8 +770,8 @@
             radius="0.02"
             segments-width="9"
             segments-height="9"
-            ammo-body="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
-            ammo-shape="type: sphere; sphereRadius: 0.02; fit: manual;"
+            body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
+            shape-helper="type: sphere; sphereRadius: 0.02; fit: manual;"
         >
             <a-entity
                 sprite
@@ -909,8 +907,8 @@
                 hand-controls2="left"
                 teleporter="start: /actions/leftHand/startTeleport; confirm: /actions/leftHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
-                ammo-body="type: kinematic; emitCollisionEvents: false; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
-                ammo-shape="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                body-helper="type: kinematic; emitCollisionEvents: false; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
+                shape-helper="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
             >
             </a-entity>
 
@@ -922,8 +920,8 @@
                 hand-controls2="right"
                 teleporter="start: /actions/rightHand/startTeleport; confirm: /actions/rightHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
-                ammo-body="type: kinematic; emitCollisionEvents: false; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
-                ammo-shape="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                body-helper="type: kinematic; emitCollisionEvents: false; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
+                shape-helper="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
             >
             </a-entity>
 
@@ -967,7 +965,7 @@
         <!-- Environment -->
         <a-entity
             id="environment-root"
-            ammo-body="type: static; mass: 0; collisionFilterGroup: 2; collisionFilterMask: 1;"
+            body-helper="type: static; mass: 0; collisionFilterGroup: 2; collisionFilterMask: 1;"
             nav-mesh-helper
         >
             <a-entity id="environment-scene"></a-entity>
