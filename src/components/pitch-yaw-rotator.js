@@ -6,21 +6,34 @@ const rotatePitchAndYaw = (function() {
   const oq = new THREE.Quaternion();
   const pq = new THREE.Quaternion();
   const yq = new THREE.Quaternion();
+  const q = new THREE.Quaternion();
   const right = new THREE.Vector3();
+  const v = new THREE.Vector3();
   const UP = new THREE.Vector3(0, 1, 0);
+
   return function rotatePitchAndYaw(o, p, y) {
     o.parent.getWorldQuaternion(opq);
     o.getWorldQuaternion(owq);
     oq.copy(o.quaternion);
+    v.set(0, 0, 1).applyQuaternion(oq);
+    const initialForwardDotUp = Math.abs(v.dot(UP));
     right.set(1, 0, 0).applyQuaternion(owq);
     pq.setFromAxisAngle(right, p);
     yq.setFromAxisAngle(UP, y);
-    o.quaternion
-      .copy(owq)
+    q.copy(owq)
       .premultiply(pq)
       .premultiply(yq)
       .premultiply(opq.inverse());
-    o.matrixNeedsUpdate = true;
+    v.set(0, 0, 1).applyQuaternion(q);
+    const newForwardDotUp = Math.abs(v.dot(UP));
+    // Check if we are looking straight straight up or down
+    if (newForwardDotUp > 0.9 && newForwardDotUp > initialForwardDotUp) {
+      // TODO: Would be nice to apply _part_ of the rotation up to but not exceeding the bounds
+      return;
+    } else {
+      o.quaternion.copy(q);
+      o.matrixNeedsUpdate = true;
+    }
   };
 })();
 
