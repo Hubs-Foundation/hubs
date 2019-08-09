@@ -5,28 +5,16 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { canMove } from "../utils/permissions-utils";
 
 function findHandCollisionTargetForHand(body) {
-  const driver = AFRAME.scenes[0].systems.physics.driver;
-  const numManifolds = driver.dispatcher.getNumManifolds();
-  const handPtr = Ammo.getPointer(body);
-  for (let i = 0; i < numManifolds; i++) {
-    const persistentManifold = driver.dispatcher.getManifoldByIndexInternal(i);
-    const body0ptr = Ammo.getPointer(persistentManifold.getBody0());
-    const body1ptr = Ammo.getPointer(persistentManifold.getBody1());
-    if (handPtr !== body0ptr && handPtr !== body1ptr) {
-      continue;
-    }
-    const numContacts = persistentManifold.getNumContacts();
-    for (let j = 0; j < numContacts; j++) {
-      const manifoldPoint = persistentManifold.getContactPoint(j);
-      if (manifoldPoint.getDistance() <= 10e-6) {
-        const object3D = driver.els.get(handPtr === body0ptr ? body1ptr : body0ptr).object3D;
-        if (object3D.el && object3D.el.components.tags && object3D.el.components.tags.data.isHandCollisionTarget) {
-          return object3D.el;
-        }
-        return null;
-      }
+  const world = this.el.sceneEl.systems["hubs-systems"].physicsSystem.world;
+  const handPtr = Ammo.getPointer(body.physicsBody);
+
+  if (world.collisions.has(handPtr) && world.collisions.get(handPtr).length > 0) {
+    const object3D = world.object3Ds.get(world.collisions.get(handPtr)[0]);
+    if (object3D.el && object3D.el.components.tags && object3D.el.components.tags.data.isHandCollisionTarget) {
+      return object3D.el;
     }
   }
+
   return null;
 }
 
@@ -169,7 +157,12 @@ AFRAME.registerSystem("interaction", {
         state.held = null;
       }
     } else {
-      state.hovered = options.hoverFn.call(this, options.entity.body);
+      state.hovered = options.hoverFn.call(
+        this,
+        options.entity.components["body-helper"] && options.entity.components["body-helper"].body
+          ? options.entity.components["body-helper"].body
+          : null
+      );
       if (state.hovered) {
         const entity = state.hovered;
         const isHoldable = entity.components.tags && entity.components.tags.data.isHoldable;
@@ -207,14 +200,16 @@ AFRAME.registerSystem("interaction", {
     const rightHandInteracting = this.state.rightHand.hovered || this.state.rightHand.held;
     const rightHandTeleporting = this.rightHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting;
     const rightRemotePenIntersectingInVR =
-      this.el.sceneEl.is("vr-mode") &&
+      this.el.is("vr-mode") &&
       this.state.rightRemote.held &&
       this.state.rightRemote.held.components &&
       this.state.rightRemote.held.components.tags &&
       this.state.rightRemote.held.components.tags.data.isPen &&
       this.state.rightRemote.held.children[0].components.pen.intersection;
+    const inspectingInVR = this.el.systems["hubs-systems"].cameraSystem.inspected; // && this.el.sceneEl.is("vr-mode");
 
-    const enableRightRemote = !rightHandInteracting && !rightHandTeleporting && !rightRemotePenIntersectingInVR;
+    const enableRightRemote =
+      !rightHandInteracting && !rightHandTeleporting && !rightRemotePenIntersectingInVR && !inspectingInVR;
 
     this.cursorController.components["cursor-controller"].enabled = enableRightRemote;
 

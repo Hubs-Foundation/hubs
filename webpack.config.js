@@ -161,10 +161,7 @@ module.exports = (env, argv) => ({
       {
         // We reference the sources of some libraries directly, and they use async/await,
         // so we have to run it through babel in order to support the Samsung browser on Oculus Go.
-        test: [
-          path.resolve(__dirname, "node_modules/aframe-physics-system"),
-          path.resolve(__dirname, "node_modules/naf-janus-adapter")
-        ],
+        test: [path.resolve(__dirname, "node_modules/naf-janus-adapter")],
         loader: "babel-loader",
         options: babelConfig
       },

@@ -16,9 +16,10 @@ AFRAME.registerComponent("freeze-controller", {
     if (!scene.is("entered")) return;
 
     const userinput = scene.systems.userinput;
-    const ensureFrozen = userinput.get(paths.actions.ensureFrozen);
-    const thaw = userinput.get(paths.actions.thaw);
-    const toggleFreeze = userinput.get(paths.actions.toggleFreeze);
+    const inspecting = !!scene.systems["hubs-systems"].cameraSystem.inspected;
+    const ensureFrozen = userinput.get(paths.actions.ensureFrozen) && !inspecting;
+    const thaw = userinput.get(paths.actions.thaw) || inspecting;
+    const toggleFreeze = userinput.get(paths.actions.toggleFreeze) && !inspecting;
 
     const toggleFreezeDueToInput =
       (this.el.is("frozen") && thaw) || (!this.el.is("frozen") && ensureFrozen) || toggleFreeze;

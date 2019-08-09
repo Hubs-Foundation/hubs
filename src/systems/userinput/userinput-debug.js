@@ -1,7 +1,7 @@
 import { paths } from "./paths";
 import qsTruthy from "../../utils/qs_truthy";
 
-const PATHS_TO_SHOW = ["/actions/", "/device/"];
+const PATHS_TO_SHOW = ["/actions/", "/device/", "/var/"];
 
 AFRAME.registerSystem("userinput-debug", {
   active: true,

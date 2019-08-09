@@ -67,7 +67,7 @@ AFRAME.registerComponent("player-info", {
     this.applyDisplayName = this.applyDisplayName.bind(this);
     this.handleModelError = this.handleModelError.bind(this);
 
-    this.isLocalPlayerInfo = this.el.id === "player-rig";
+    this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
 
     if (!this.isLocalPlayerInfo) {

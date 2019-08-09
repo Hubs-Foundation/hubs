@@ -24,7 +24,7 @@ AFRAME.registerComponent("clone-media-button", {
       entity.object3D.matrixNeedsUpdate = true;
 
       entity.setAttribute("offset-relative-to", {
-        target: "#player-camera",
+        target: "#avatar-pov-node",
         offset: { x: 0, y: 0, z: -1.5 }
       });
     };

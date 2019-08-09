@@ -47,7 +47,7 @@ export class DaydreamControllerDevice {
       this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
       frame.setPose(POSE, this.pose);
 
-      this.headObject3D = this.headObject3D || document.querySelector("#player-camera").object3D;
+      this.headObject3D = this.headObject3D || document.querySelector("#avatar-pov-node").object3D;
 
       if (this.gamepad.pose.orientation) {
         frame.setMatrix4(
