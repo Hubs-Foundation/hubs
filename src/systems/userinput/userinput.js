@@ -11,7 +11,7 @@ import { OculusTouchControllerDevice } from "./devices/oculus-touch-controller";
 import { DaydreamControllerDevice } from "./devices/daydream-controller";
 import { ViveControllerDevice } from "./devices/vive-controller";
 import { WindowsMixedRealityControllerDevice } from "./devices/windows-mixed-reality-controller";
-import { GyroDevice } from "./devices/gyro";
+//import { GyroDevice } from "./devices/gyro";
 
 import { AppAwareMouseDevice } from "./devices/app-aware-mouse";
 import { AppAwareTouchscreenDevice } from "./devices/app-aware-touchscreen";
@@ -241,7 +241,7 @@ AFRAME.registerSystem("userinput", {
     } else if (!isMobileVR) {
       this.activeDevices.add(new AppAwareTouchscreenDevice());
       this.activeDevices.add(new KeyboardDevice());
-      this.activeDevices.add(new GyroDevice());
+      //      this.activeDevices.add(new GyroDevice());
     }
 
     this.isMobile = isMobile;
