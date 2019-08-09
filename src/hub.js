@@ -98,6 +98,7 @@ import "./components/tags";
 import "./components/hubs-text";
 import "./components/billboard";
 import "./components/periodic-full-syncs";
+import "./components/inspect-button";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
@@ -216,8 +217,8 @@ function getPlatformUnsupportedReason() {
 }
 
 function setupLobbyCamera() {
-  const camera = document.querySelector("#player-camera");
-  const previewCamera = document.querySelector("#environment-scene").object3D.getObjectByName("scene-preview-camera");
+  const camera = document.getElementById("viewing-camera");
+  const previewCamera = document.getElementById("environment-scene").object3D.getObjectByName("scene-preview-camera");
 
   if (previewCamera) {
     camera.object3D.position.copy(previewCamera.position);
@@ -231,7 +232,6 @@ function setupLobbyCamera() {
   camera.object3D.matrixNeedsUpdate = true;
 
   camera.setAttribute("scene-preview-camera", "positionOnly: true; duration: 60");
-  camera.components["pitch-yaw-rotator"].set(camera.object3D.rotation.x, camera.object3D.rotation.y);
 }
 
 let uiProps = {};
@@ -368,7 +368,7 @@ async function updateEnvironmentForHub(hub) {
 
             // We've already entered, so move to new spawn point once new environment is loaded
             if (sceneEl.is("entered")) {
-              document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
+              document.querySelector("#avatar-rig").components["spawn-controller"].moveToSpawnPoint();
             }
           },
           { once: true }

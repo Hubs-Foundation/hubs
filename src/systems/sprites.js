@@ -47,8 +47,8 @@ AFRAME.registerComponent("sprite", {
   schema: { name: { type: "string" } },
   tick() {
     // TODO when we run out of sprites we currently just stop rendering them. We need to do something better.
-    if (!(this.didRegisterWithSystem || this.didFailToRegister) && this.el.sceneEl.systems["post-physics"]) {
-      const registered = this.el.sceneEl.systems["post-physics"].spriteSystem.add(this);
+    if (!(this.didRegisterWithSystem || this.didFailToRegister) && this.el.sceneEl.systems["hubs-systems"]) {
+      const registered = this.el.sceneEl.systems["hubs-systems"].spriteSystem.add(this);
       this.didRegisterWithSystem = registered > 0;
       this.didFailToRegister = registered < 0;
     }
@@ -56,13 +56,13 @@ AFRAME.registerComponent("sprite", {
 
   update() {
     if (this.didRegisterWithSystem) {
-      this.el.sceneEl.systems["post-physics"].spriteSystem.updateUVs(this);
+      this.el.sceneEl.systems["hubs-systems"].spriteSystem.updateUVs(this);
     }
   },
 
   remove() {
     if (this.didRegisterWithSystem) {
-      this.el.sceneEl.systems["post-physics"].spriteSystem.remove(this);
+      this.el.sceneEl.systems["hubs-systems"].spriteSystem.remove(this);
     }
   }
 });

@@ -8,9 +8,10 @@ import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
 
-import { SpriteSystem } from "./sprites";
 import { BatchManagerSystem } from "./render-manager-system";
 import { LobbyCameraSystem } from "./lobby-camera-system";
+import { SpriteSystem } from "./sprites";
+import { CameraSystem } from "./camera-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -28,6 +29,8 @@ AFRAME.registerSystem("hubs-systems", {
     this.lobbyCameraSystem = new LobbyCameraSystem();
     this.spriteSystem = new SpriteSystem(this.el);
     this.batchManagerSystem = new BatchManagerSystem(this.el.sceneEl.object3D, this.el.sceneEl.renderer);
+    this.spriteSystem = new SpriteSystem(this.el);
+    this.cameraSystem = new CameraSystem();
   },
 
   tick(t, dt) {
@@ -48,6 +51,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.physicsSystem.tick(dt);
     this.spriteSystem.tick(t, dt);
     this.batchManagerSystem.tick(t);
+    this.cameraSystem.tick();
   },
 
   remove() {

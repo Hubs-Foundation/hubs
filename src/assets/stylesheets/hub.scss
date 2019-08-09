@@ -35,3 +35,11 @@ body.vr-mode-stretch {
 .webxr-realities, .webxr-sessions {
   @extend %unselectable
 }
+
+// HACK: Deals with a performance regression in Chrome 75 where, once
+// enough elements are on the page, the Chrome "reader" functionality continually
+// scanning the page on mouse drag kills performance.
+
+a-entity {
+  display: none;
+}

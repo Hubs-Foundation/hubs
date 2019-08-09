@@ -200,14 +200,16 @@ AFRAME.registerSystem("interaction", {
     const rightHandInteracting = this.state.rightHand.hovered || this.state.rightHand.held;
     const rightHandTeleporting = this.rightHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting;
     const rightRemotePenIntersectingInVR =
-      this.el.sceneEl.is("vr-mode") &&
+      this.el.is("vr-mode") &&
       this.state.rightRemote.held &&
       this.state.rightRemote.held.components &&
       this.state.rightRemote.held.components.tags &&
       this.state.rightRemote.held.components.tags.data.isPen &&
       this.state.rightRemote.held.children[0].components.pen.intersection;
+    const inspectingInVR = this.el.systems["hubs-systems"].cameraSystem.inspected; // && this.el.sceneEl.is("vr-mode");
 
-    const enableRightRemote = !rightHandInteracting && !rightHandTeleporting && !rightRemotePenIntersectingInVR;
+    const enableRightRemote =
+      !rightHandInteracting && !rightHandTeleporting && !rightRemotePenIntersectingInVR && !inspectingInVR;
 
     this.cursorController.components["cursor-controller"].enabled = enableRightRemote;
 

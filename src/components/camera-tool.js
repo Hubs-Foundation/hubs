@@ -163,7 +163,7 @@ AFRAME.registerComponent("camera-tool", {
       this.durationLabel.object3D.visible = false;
 
       this.snapMenu = this.el.querySelector(".camera-snap-menu");
-      this.playerCamera = document.querySelector("#player-camera").getObject3D("camera");
+      this.playerCamera = document.getElementById("viewing-camera").getObject3D("camera");
       this.snapButton = this.el.querySelector(".snap-button");
       this.cancelButton = this.el.querySelector(".cancel-button");
       this.nextDurationButton = this.el.querySelector(".next-duration");
@@ -548,8 +548,8 @@ AFRAME.registerComponent("camera-tool", {
         if (this.playerHud) {
           playerHudWasVisible = this.playerHud.visible;
           this.playerHud.visible = false;
-          if (this.el.sceneEl.systems["post-physics"]) {
-            this.el.sceneEl.systems["post-physics"].spriteSystem.mesh.visible = false;
+          if (this.el.sceneEl.systems["hubs-systems"]) {
+            this.el.sceneEl.systems["hubs-systems"].spriteSystem.mesh.visible = false;
           }
         }
 
@@ -587,8 +587,8 @@ AFRAME.registerComponent("camera-tool", {
         }
         if (this.playerHud) {
           this.playerHud.visible = playerHudWasVisible;
-          if (this.el.sceneEl.systems["post-physics"]) {
-            this.el.sceneEl.systems["post-physics"].spriteSystem.mesh.visible = true;
+          if (this.el.sceneEl.systems["hubs-systems"]) {
+            this.el.sceneEl.systems["hubs-systems"].spriteSystem.mesh.visible = true;
           }
         }
         this.lastUpdate = now;

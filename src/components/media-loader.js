@@ -40,6 +40,7 @@ const disableBatching = qsTruthy("disableBatching");
 
 AFRAME.registerComponent("media-loader", {
   schema: {
+    playSoundEffect: { default: true },
     fileId: { type: "string" },
     fileIsOwned: { type: "boolean" },
     src: { type: "string" },
@@ -148,7 +149,11 @@ AFRAME.registerComponent("media-loader", {
       this.loadingScaleClip.play();
     }
 
-    if (this.el.sceneEl.is("entered") && (!this.networkedEl || NAF.utils.isMine(this.networkedEl))) {
+    if (
+      this.el.sceneEl.is("entered") &&
+      (!this.networkedEl || NAF.utils.isMine(this.networkedEl)) &&
+      this.data.playSoundEffect
+    ) {
       this.loadingSoundNode = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundLooped(
         SOUND_MEDIA_LOADING
       );
@@ -192,7 +197,7 @@ AFRAME.registerComponent("media-loader", {
     const el = this.el;
     this.clearLoadingTimeout();
 
-    if (this.el.sceneEl.is("entered")) {
+    if (this.el.sceneEl.is("entered") && this.data.playSoundEffect) {
       this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_MEDIA_LOADED);
     }
 

@@ -299,7 +299,7 @@ AFRAME.GLTFModelPlus.registerComponent(
 
     // Filter out scope and colliders properties.
     el.setAttribute("trigger-volume", {
-      colliders: "#player-camera",
+      colliders: "#avatar-pov-node",
       size,
       target: targetEntity,
       enterComponent: enterComponentMapping.mappedComponent,
