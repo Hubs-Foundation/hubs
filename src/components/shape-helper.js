@@ -75,7 +75,10 @@ AFRAME.registerComponent("shape-helper", {
         if (this.bodyHelper.body) {
           this.bodyHelper.body.removeShape(this.shapes[i]);
         }
+        this.shapes[i].destroy();
+        Ammo.destroy(this.shapes[i].localTransform);
       }
     }
+    this.shapes = null;
   }
 });
