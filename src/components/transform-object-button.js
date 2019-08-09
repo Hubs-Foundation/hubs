@@ -52,7 +52,7 @@ AFRAME.registerComponent("transform-button", {
         return;
       }
       if (this.targetEl.body) {
-        this.targetEl.setAttribute("ammo-body", AMMO_BODY_ATTRIBUTES);
+        this.targetEl.setAttribute("body-helper", AMMO_BODY_ATTRIBUTES);
       }
       this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];
       this.transformSystem.startTransform(
@@ -244,6 +244,7 @@ AFRAME.registerSystem("transform-selected-object", {
 
     this.target.getWorldPosition(plane.position);
     this.el.camera.getWorldQuaternion(plane.quaternion);
+    this.el.camera.getWorldPosition(v);
     plane.matrixNeedsUpdate = true;
     const cameraToPlaneDistance = v.sub(plane.position).length();
 

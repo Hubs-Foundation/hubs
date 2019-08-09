@@ -108,7 +108,7 @@ AFRAME.registerComponent("ik-controller", {
     this.isInView = true;
     this.hasConvergedHips = false;
     this.lastCameraTransform = new THREE.Matrix4();
-    this.playerCamera = document.querySelector("#player-camera").getObject3D("camera");
+    this.playerCamera = document.getElementById("viewing-camera").getObject3D("camera");
 
     this.el.sceneEl.systems["frame-scheduler"].schedule(this._runScheduledWork, "ik");
   },
@@ -168,6 +168,7 @@ AFRAME.registerComponent("ik-controller", {
     }
 
     const root = this.ikRoot.el.object3D;
+    root.updateMatrices();
     const { camera, leftController, rightController } = this.ikRoot;
 
     camera.object3D.updateMatrix();

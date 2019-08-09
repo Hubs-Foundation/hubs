@@ -3,8 +3,15 @@ import { sets } from "./sets";
 let leftTeleporter, rightTeleporter;
 
 export function resolveActionSets() {
-  leftTeleporter = leftTeleporter || document.querySelector("#player-left-controller").components.teleporter;
-  rightTeleporter = rightTeleporter || document.querySelector("#player-right-controller").components.teleporter;
+  leftTeleporter =
+    leftTeleporter ||
+    (document.getElementById("player-left-controller") &&
+      document.getElementById("player-left-controller").components.teleporter);
+  rightTeleporter =
+    rightTeleporter ||
+    (document.getElementById("player-right-controller") &&
+      document.getElementById("player-right-controller").components.teleporter);
+  if (!leftTeleporter || !rightTeleporter) return;
   const userinput = AFRAME.scenes[0].systems.userinput;
   const { leftHand, rightHand, rightRemote } = AFRAME.scenes[0].systems.interaction.state;
 
@@ -154,4 +161,8 @@ export function resolveActionSets() {
       document.activeElement.nodeName === "TEXTAREA" ||
       document.activeElement.contentEditable === "true"
   );
+
+  if (AFRAME.scenes[0] && AFRAME.scenes[0].systems["hubs-systems"]) {
+    userinput.toggleSet(sets.inspecting, !!AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspected);
+  }
 }

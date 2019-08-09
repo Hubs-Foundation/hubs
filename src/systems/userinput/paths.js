@@ -91,6 +91,8 @@ paths.actions.leftHand.index = "/actions/leftHand/indexDown";
 paths.actions.leftHand.middleRingPinky = "/actions/leftHand/middleRingPinkyDown";
 paths.actions.camera = {};
 paths.actions.camera.exitMirror = "/actions/cameraExitMirror";
+paths.actions.stopInspecting = "/actions/stopInspecting";
+paths.actions.nextCameraMode = "/actions/nextCameraMode";
 paths.haptics = {};
 paths.haptics.actuators = {};
 paths.haptics.actuators.left = "/haptics/actuators/left";
@@ -106,6 +108,7 @@ paths.device.mouse.wheel = "/device/mouse/wheel";
 paths.device.smartMouse = {};
 paths.device.smartMouse.cursorPose = "/device/smartMouse/cursorPose";
 paths.device.smartMouse.cameraDelta = "/device/smartMouse/cameraDelta";
+paths.device.smartMouse.shouldMoveCamera = "/device/smartMouse/shouldMoveCamera";
 paths.device.touchscreen = {};
 paths.device.touchscreen.cursorPose = "/device/touchscreen/cursorPose";
 paths.device.touchscreen.touchCameraDelta = "/device/touchscreen/touchCameraDelta";
@@ -122,6 +125,7 @@ paths.device.touchscreen.tap2 = "/device/touchscreen/tap2";
 paths.device.touchscreen.tap3 = "/device/touchscreen/tap3";
 paths.device.touchscreen.tap4 = "/device/touchscreen/tap4";
 paths.device.touchscreen.tap5 = "/device/touchscreen/tap5";
+paths.device.touchscreen.anything = "/device/touchscreen/anything";
 paths.device.gyro = {};
 paths.device.gyro.averageDeltaX = "/device/gyro/averageDeltaX";
 paths.device.gyro.averageDeltaY = "/device/gyro/averageDeltaY";
@@ -135,7 +139,7 @@ paths.device.keyboard = {
     if (path) {
       return path;
     }
-    path = `/device/keyboard/${k.toLowerCase()}`;
+    path = `/device/keyboard/${k === " " ? "space" : k.toLowerCase()}`;
     this.map.set(k, path);
     return path;
   }

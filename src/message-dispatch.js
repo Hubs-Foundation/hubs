@@ -36,28 +36,28 @@ export default class MessageDispatch {
       return;
     }
 
-    const playerRig = document.querySelector("#player-rig");
+    const avatarRig = document.querySelector("#avatar-rig");
     const scales = [0.0625, 0.125, 0.25, 0.5, 1.0, 1.5, 3, 5, 7.5, 12.5];
-    const curScale = playerRig.object3D.scale;
+    const curScale = avatarRig.object3D.scale;
     let err;
     let physicsSystem;
     const captureSystem = this.scene.systems["capture-system"];
 
     switch (command) {
       case "fly":
-        if (playerRig.getAttribute("character-controller").fly !== true) {
-          playerRig.setAttribute("character-controller", "fly", true);
+        if (avatarRig.getAttribute("character-controller").fly !== true) {
+          avatarRig.setAttribute("character-controller", "fly", true);
           this.addToPresenceLog({ type: "log", body: "Fly mode enabled." });
         } else {
-          playerRig.setAttribute("character-controller", "fly", false);
+          avatarRig.setAttribute("character-controller", "fly", false);
           this.addToPresenceLog({ type: "log", body: "Fly mode disabled." });
         }
         break;
       case "grow":
         for (let i = 0; i < scales.length; i++) {
           if (scales[i] > curScale.x) {
-            playerRig.object3D.scale.set(scales[i], scales[i], scales[i]);
-            playerRig.object3D.matrixNeedsUpdate = true;
+            avatarRig.object3D.scale.set(scales[i], scales[i], scales[i]);
+            avatarRig.object3D.matrixNeedsUpdate = true;
             break;
           }
         }
@@ -66,7 +66,7 @@ export default class MessageDispatch {
       case "shrink":
         for (let i = scales.length - 1; i >= 0; i--) {
           if (curScale.x > scales[i]) {
-            playerRig.object3D.scale.set(scales[i], scales[i], scales[i]);
+            avatarRig.object3D.scale.set(scales[i], scales[i], scales[i]);
             break;
           }
         }
@@ -85,7 +85,7 @@ export default class MessageDispatch {
         }
         break;
       case "debug":
-        physicsSystem = document.querySelector("a-scene").systems.physics;
+        physicsSystem = document.querySelector("a-scene").systems["hubs-systems"].physicsSystem;
         physicsSystem.setDebug(!physicsSystem.debug);
         break;
       case "vrstats":

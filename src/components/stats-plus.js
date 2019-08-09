@@ -112,18 +112,6 @@ AFRAME.registerComponent("stats-plus", {
       this.vrStatsEnabled = true;
     }
   },
-  play() {
-    this.el.sceneEl.systems.physics.addComponent(this);
-  },
-  pause() {
-    this.el.sceneEl.systems.physics.removeComponent(this);
-  },
-  beforeStep() {
-    this.stats("physics").start();
-  },
-  afterStep() {
-    this.stats("physics").end();
-  },
   update(oldData) {
     if (oldData !== this.data) {
       if (this.data) {
@@ -141,6 +129,7 @@ AFRAME.registerComponent("stats-plus", {
       // Update rStats
       stats("rAF").tick();
       stats("FPS").frame();
+      stats("physics").set(this.el.sceneEl.systems["hubs-systems"].physicsSystem.stepDuration);
 
       const batchManagerSystem = this.el.sceneEl.systems["hubs-systems"].batchManagerSystem;
       if (batchManagerSystem.batchingEnabled) {

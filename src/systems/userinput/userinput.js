@@ -11,7 +11,7 @@ import { OculusTouchControllerDevice } from "./devices/oculus-touch-controller";
 import { DaydreamControllerDevice } from "./devices/daydream-controller";
 import { ViveControllerDevice } from "./devices/vive-controller";
 import { WindowsMixedRealityControllerDevice } from "./devices/windows-mixed-reality-controller";
-import { GyroDevice } from "./devices/gyro";
+//import { GyroDevice } from "./devices/gyro";
 
 import { AppAwareMouseDevice } from "./devices/app-aware-mouse";
 import { AppAwareTouchscreenDevice } from "./devices/app-aware-touchscreen";
@@ -105,6 +105,20 @@ function dependencySort(mappings) {
   return sorted;
 }
 
+function notEmpty(s) {
+  return s !== "";
+}
+
+function isSubpath(subpath, path) {
+  const a = subpath.split("/").filter(notEmpty);
+  const b = path.split("/").filter(notEmpty);
+  if (a.length > b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
 function canMask(masker, masked) {
   if (masker.priority === undefined) {
     masker.priority = 0;
@@ -117,7 +131,7 @@ function canMask(masker, masked) {
     const maskerPath = masker.src[maskerKey];
     for (const maskedKey in masked.src) {
       const maskedPath = masked.src[maskedKey];
-      if (maskedPath.indexOf(maskerPath) !== -1) {
+      if (maskedPath.indexOf(maskerPath) !== -1 && isSubpath(maskerPath, maskedPath)) {
         return true;
       }
     }
@@ -227,7 +241,7 @@ AFRAME.registerSystem("userinput", {
     } else if (!isMobileVR) {
       this.activeDevices.add(new AppAwareTouchscreenDevice());
       this.activeDevices.add(new KeyboardDevice());
-      this.activeDevices.add(new GyroDevice());
+      //      this.activeDevices.add(new GyroDevice());
     }
 
     this.isMobile = isMobile;

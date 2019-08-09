@@ -224,7 +224,7 @@ AFRAME.registerComponent("teleporter", {
       }
 
       this.characterController =
-        this.characterController || document.querySelector("#player-rig").components["character-controller"];
+        this.characterController || document.getElementById("avatar-rig").components["character-controller"];
       this.characterController.teleportTo(this.hitPoint);
 
       sfx.playSoundOneShot(SOUND_TELEPORT_END);

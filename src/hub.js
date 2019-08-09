@@ -98,6 +98,7 @@ import "./components/tags";
 import "./components/hubs-text";
 import "./components/billboard";
 import "./components/periodic-full-syncs";
+import "./components/inspect-button";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
@@ -163,20 +164,6 @@ if (isEmbed && !qs.get("embed_token")) {
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
 
-const Ammo = require("ammo.js/builds/ammo.wasm.js");
-const AmmoWasm = require("ammo.js/builds/ammo.wasm.wasm");
-window.Ammo = Ammo.bind(undefined, {
-  locateFile(path) {
-    if (path.endsWith(".wasm")) {
-      return AmmoWasm;
-    }
-    return path;
-  }
-});
-require("aframe-physics-system");
-
-import "./systems/post-physics";
-
 import "./components/owned-object-limiter";
 import "./components/set-unowned-body-kinematic";
 import "./components/scalable-when-grabbed";
@@ -191,6 +178,9 @@ import "./components/nav-mesh-helper";
 import "./components/tools/pen";
 import "./components/tools/networked-drawing";
 import "./components/tools/drawing-manager";
+
+import "./components/body-helper";
+import "./components/shape-helper";
 
 import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
@@ -227,8 +217,8 @@ function getPlatformUnsupportedReason() {
 }
 
 function setupLobbyCamera() {
-  const camera = document.querySelector("#player-camera");
-  const previewCamera = document.querySelector("#environment-scene").object3D.getObjectByName("scene-preview-camera");
+  const camera = document.getElementById("viewing-camera");
+  const previewCamera = document.getElementById("environment-scene").object3D.getObjectByName("scene-preview-camera");
 
   if (previewCamera) {
     camera.object3D.position.copy(previewCamera.position);
@@ -242,7 +232,6 @@ function setupLobbyCamera() {
   camera.object3D.matrixNeedsUpdate = true;
 
   camera.setAttribute("scene-preview-camera", "positionOnly: true; duration: 60");
-  camera.components["pitch-yaw-rotator"].set(camera.object3D.rotation.x, camera.object3D.rotation.y);
 }
 
 let uiProps = {};
@@ -379,7 +368,7 @@ async function updateEnvironmentForHub(hub) {
 
             // We've already entered, so move to new spawn point once new environment is loaded
             if (sceneEl.is("entered")) {
-              document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
+              document.querySelector("#avatar-rig").components["spawn-controller"].moveToSpawnPoint();
             }
           },
           { once: true }
@@ -635,12 +624,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const scene = document.querySelector("a-scene");
   scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
 
-  // Physics needs to be ready before spawning anything.
-  while (!scene.systems.physics.initialized) await nextTick();
-
   const onSceneLoaded = () => {
-    const physicsSystem = scene.systems.physics;
-    physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
+    const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
+    physicsSystem.setDebug(isDebug || physicsSystem.debug);
     patchThreeAllocations();
   };
 

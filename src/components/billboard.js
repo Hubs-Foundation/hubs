@@ -57,7 +57,7 @@ AFRAME.registerComponent("billboard", {
       }
 
       if (!this.playerCamera) {
-        this.playerCamera = document.querySelector("#player-camera").getObject3D("camera");
+        this.playerCamera = document.getElementById("viewing-camera").getObject3D("camera");
       }
 
       if (!this.playerCamera) return;
