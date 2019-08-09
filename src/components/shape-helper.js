@@ -1,3 +1,4 @@
+/* global Ammo */
 import * as threeToAmmo from "three-to-ammo";
 import { SHAPE, FIT } from "three-ammo/constants";
 
