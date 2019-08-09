@@ -28,7 +28,7 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
   init() {
     this.pendingXRotation = 0;
     this.el.sceneEl.addEventListener("rotateX", e => {
-      this.pendingXRotation += e.detail.value;
+      this.pendingXRotation += e.detail.value * 0.03;
     });
     this.on = true;
   },
