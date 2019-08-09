@@ -1,4 +1,5 @@
 import { getModelHash } from "./modelparams";
+import { Scene } from "three";
 
 let urlParams;
 
@@ -40,8 +41,9 @@ function createLights(objectsScene) {
 export async function getTridifyModel(objectsScene) {
   setTridifyParams();
   await parseIfc().then(getAllSlabsFromIfc);
-  createLights(objectsScene);
-  createModel(objectsScene);
+  await createLights(objectsScene);
+  await createModel(objectsScene);
+  window.APP.scene.emit("tridify-scene-loaded");
   console.log("Tridify Model Loaded");
 }
 
