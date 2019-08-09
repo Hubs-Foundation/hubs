@@ -105,7 +105,7 @@ export class CameraSystem {
     const offset = new THREE.Vector3();
     return function tick() {
       this.playerHead = this.playerHead || document.getElementById("avatar-head");
-      if (!this.playerHead) return;
+      if (!AFRAME.scenes[0].is("entered")) return;
 
       this.avatarPOV.components["pitch-yaw-rotator"].on = true;
       this.cameraEl.components["pitch-yaw-rotator"].on = true;
@@ -123,8 +123,11 @@ export class CameraSystem {
       }
 
       const headShouldBeVisible = this.mode !== CAMERA_MODE_FIRST_PERSON;
-      if (headShouldBeVisible !== this.playerHead.object3D.visible) {
+      if (this.playerHead && headShouldBeVisible !== this.playerHead.object3D.visible) {
         this.playerHead.object3D.visible = headShouldBeVisible;
+
+        // Skip a frame so we don't see our own avatar, etc.
+        return;
       }
 
       this.avatarRig.object3D.updateMatrices();
