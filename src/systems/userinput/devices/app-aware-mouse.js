@@ -52,14 +52,12 @@ export class AppAwareMouseDevice {
       const intersection = rawIntersections.find(x => x.object.el);
       const remoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
       const userinput = AFRAME.scenes[0].systems.userinput;
-      const isInteractable =
-        intersection &&
-        intersection.object.el.matches(".pen, .pen *, .video, .video *, .interactable, .interactable *");
+      const isInteractable = intersection && intersection.object.el.matches(".interactable, .interactable *");
       const isPinned =
         remoteHoverTarget && remoteHoverTarget.components.pinnable && remoteHoverTarget.components.pinnable.data.pinned;
       const isFrozen = AFRAME.scenes[0].is("frozen");
       this.clickedOnAnything =
-        (isInteractable && (isFrozen || !isPinned) && canMove(remoteHoverTarget)) ||
+        (isInteractable && (isFrozen || !isPinned) && (remoteHoverTarget && canMove(remoteHoverTarget))) ||
         userinput.activeSets.includes(sets.cursorHoldingPen) ||
         userinput.activeSets.includes(sets.cursorHoldingInteractable) ||
         userinput.activeSets.includes(sets.cursorHoldingCamera);
