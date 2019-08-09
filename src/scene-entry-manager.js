@@ -3,7 +3,7 @@ import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 
 const isBotMode = qsTruthy("bot");
-//const isMobile = AFRAME.utils.device.isMobile();
+const isMobile = AFRAME.utils.device.isMobile();
 const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 
@@ -65,9 +65,9 @@ export default class SceneEntryManager {
       exit2DInterstitialAndEnterVR(true);
     }
 
-    //    if (isMobile || qsTruthy("mobile")) {
-    //      this.avatarRig.setAttribute("virtual-gamepad-controls", {});
-    //    }
+       if (isMobile || qsTruthy("mobile")) {
+         this.avatarRig.setAttribute("virtual-gamepad-controls", {});
+       }
 
     this._setupPlayerRig();
     this._setupBlocking();
