@@ -241,7 +241,7 @@ AFRAME.registerSystem("userinput", {
     } else if (!isMobileVR) {
       this.activeDevices.add(new AppAwareTouchscreenDevice());
       this.activeDevices.add(new KeyboardDevice());
-//      this.activeDevices.add(new GyroDevice());
+      //      this.activeDevices.add(new GyroDevice());
     }
 
     this.isMobile = isMobile;
