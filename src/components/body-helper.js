@@ -51,6 +51,7 @@ AFRAME.registerComponent("body-helper", {
     if (this.body) {
       this.system.removeBody(this.body);
       this.body.destroy();
+      this.body = null;
     }
   }
 });
