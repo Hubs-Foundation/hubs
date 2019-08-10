@@ -6,14 +6,16 @@ import { canMove } from "../utils/permissions-utils";
 
 function findHandCollisionTargetForHand(body) {
   const world = this.el.sceneEl.systems["hubs-systems"].physicsSystem.world;
-  const handPtr = Ammo.getPointer(body.physicsBody);
 
-  const handCollisions = world.collisions.get(handPtr);
-  if (handCollisions !== null) {
-    for (let i = 0; i < handCollisions.length; i++) {
-      const object3D = world.object3Ds.get(handCollisions[i]);
-      if (object3D.el && object3D.el.components.tags && object3D.el.components.tags.data.isHandCollisionTarget) {
-        return object3D.el;
+  if (world) {
+    const handPtr = Ammo.getPointer(body.physicsBody);
+    const handCollisions = world.collisions.get(handPtr);
+    if (handCollisions) {
+      for (let i = 0; i < handCollisions.length; i++) {
+        const object3D = world.object3Ds.get(handCollisions[i]);
+        if (object3D.el && object3D.el.components.tags && object3D.el.components.tags.data.isHandCollisionTarget) {
+          return object3D.el;
+        }
       }
     }
   }
