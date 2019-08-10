@@ -43,8 +43,8 @@ export default class HubsTextureLoader {
 
     texture.onUpdate = function() {
       // Delete texture data once it has been uploaded to the GPU
-      texture.image.close && texture.image.close();
-      delete texture.image;
+      //texture.image.close && texture.image.close();
+      //delete texture.image;
     };
 
     return texture;

@@ -5,6 +5,8 @@ import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 
+const CAMERA_LAYER_INSPECT = 4;
+
 const calculateViewingDistance = (function() {
   const center = new THREE.Vector3();
   return function calculateViewingDistance(camera, object) {
@@ -130,6 +132,12 @@ export class CameraSystem {
       this.cameraEl = document.getElementById("viewing-camera");
       this.rigEl = document.getElementById("viewing-rig");
     });
+    this.disableInspectLayer = function(o) {
+      o.layers.disable(CAMERA_LAYER_INSPECT);
+    };
+    this.enableInspectLayer = function(o) {
+      o.layers.enable(CAMERA_LAYER_INSPECT);
+    };
   }
   nextMode() {
     if (this.mode === CAMERA_MODE_INSPECT) {
@@ -153,14 +161,28 @@ export class CameraSystem {
     }
     this.mode = CAMERA_MODE_INSPECT;
     this.inspected = o;
-    if (AFRAME.scenes[0].is("vr-mode")) {
-      moveRigSoCameraIsInFrontOfObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
-    } else {
-      moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
-    }
+    moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
+    //if (AFRAME.scenes[0].is("vr-mode")) {
+    //  moveRigSoCameraIsInFrontOfObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
+    //} else {
+    //  moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
+    //}
+    this.inspected.traverse(this.enableInspectLayer);
+    const vrMode = AFRAME.scenes[0].is("vr-mode");
+    const scene = AFRAME.scenes[0];
+    const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
+    this.layerMask = camera.layers.mask;
+    camera.layers.set(CAMERA_LAYER_INSPECT);
   }
 
   uninspect() {
+    if (this.inspected) {
+      this.inspected.traverse(this.disableInspectLayer);
+    }
+    const vrMode = AFRAME.scenes[0].is("vr-mode");
+    const scene = AFRAME.scenes[0];
+    const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
+    camera.layers.mask = this.layerMask;
     this.inspected = null;
     if (this.mode !== CAMERA_MODE_INSPECT) return;
     this.mode = this.preInspectMode || CAMERA_MODE_FIRST_PERSON;
