@@ -1,6 +1,4 @@
-const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
-  SHAPE = PHYSICS_CONSTANTS.SHAPE,
-  FIT = PHYSICS_CONSTANTS.FIT;
+import { SHAPE, FIT } from "three-ammo/constants";
 
 function exceedsDensityThreshold(count, subtree) {
   const bounds = subtree.boundingData;
@@ -49,7 +47,7 @@ function isGeometryHighDensity(geo) {
 }
 
 export const traverseMeshesAndAddShapes = (function() {
-  const shapePrefix = "ammo-shape__";
+  const shapePrefix = "shape-helper__";
   const shapes = [];
   return function(el) {
     const meshRoot = el.object3DMap.mesh;
@@ -60,7 +58,7 @@ export const traverseMeshesAndAddShapes = (function() {
 
     console.group("traverseMeshesAndAddShapes");
 
-    if (document.querySelector(["[ammo-shape__trimesh]", "[ammo-shape__heightfield]"])) {
+    if (document.querySelector(["[shape-helper__trimesh]", "[shape-helper__heightfield]"])) {
       console.log("heightfield or trimesh found on scene");
     } else {
       console.log("collision not found in scene");

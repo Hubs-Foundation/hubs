@@ -3,14 +3,14 @@ import { AVATAR_TYPES } from "../utils/avatar-utils";
 import { registerComponentInstance } from "../utils/component-utils";
 import { deregisterComponentInstance } from "../utils/component-utils";
 
-import happyEmoji from "../assets/images/chest-emojis/screen effect/happy.png";
-import sadEmoji from "../assets/images/chest-emojis/screen effect/sad.png";
-import angryEmoji from "../assets/images/chest-emojis/screen effect/angry.png";
-import ewwEmoji from "../assets/images/chest-emojis/screen effect/eww.png";
-import disgustEmoji from "../assets/images/chest-emojis/screen effect/disgust.png";
-import heartsEmoji from "../assets/images/chest-emojis/screen effect/hearts.png";
-import smileEmoji from "../assets/images/chest-emojis/screen effect/smile.png";
-import surpriseEmoji from "../assets/images/chest-emojis/screen effect/surprise.png";
+import happyEmoji from "../assets/images/chest-emojis/screen-effect/happy.png";
+import sadEmoji from "../assets/images/chest-emojis/screen-effect/sad.png";
+import angryEmoji from "../assets/images/chest-emojis/screen-effect/angry.png";
+import ewwEmoji from "../assets/images/chest-emojis/screen-effect/eww.png";
+import disgustEmoji from "../assets/images/chest-emojis/screen-effect/disgust.png";
+import heartsEmoji from "../assets/images/chest-emojis/screen-effect/hearts.png";
+import smileEmoji from "../assets/images/chest-emojis/screen-effect/smile.png";
+import surpriseEmoji from "../assets/images/chest-emojis/screen-effect/surprise.png";
 
 function ensureAvatarNodes(json) {
   const { nodes } = json;
@@ -115,6 +115,9 @@ AFRAME.registerComponent("player-info", {
         playSoundEffect: this.isLocalPlayerInfo,
         src: new URL(emojiImage, window.location.href).href
       });
+    }
+    if (this.isLocalPlayerInfo) {
+      this.el.emit("emoji_changed", { emojiType }, false);
     }
   },
 

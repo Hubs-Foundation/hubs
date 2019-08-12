@@ -82,7 +82,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
           this.cam2WorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance);
     }
 
-    const isTransforming = AFRAME.scenes[0].systems["transform-selected-object"].transforming;
+    const isTransforming = this.el.sceneEl.systems["transform-selected-object"].transforming;
 
     const allowed = !this.data.withPermission || window.APP.hubChannel.canOrWillIfCreator(this.data.withPermission);
 
@@ -95,8 +95,9 @@ AFRAME.registerComponent("visibility-while-frozen", {
     if (this.data.requireHoverOnNonMobile && !isMobile) {
       shouldBeVisible =
         shouldBeVisible &&
-        ((this.hoverable && AFRAME.scenes[0].systems.interaction.state.rightRemote.hovered === this.hoverable) ||
-          AFRAME.scenes[0].systems.interaction.state.leftRemote.hovered === this.hoverable ||
+        ((this.hoverable &&
+          (this.el.sceneEl.systems.interaction.state.rightRemote.hovered === this.hoverable ||
+            this.el.sceneEl.systems.interaction.state.leftRemote.hovered === this.hoverable)) ||
           isVisible);
     }
 

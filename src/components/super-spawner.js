@@ -132,7 +132,7 @@ AFRAME.registerComponent("super-spawner", {
       interaction.state.rightRemote.spawning = true;
     }
     this.activateCooldown();
-    await waitForEvent("body-loaded", entity);
+    await waitForEvent("model-loaded", entity);
 
     cursor.object3D.getWorldPosition(entity.object3D.position);
     cursor.object3D.getWorldQuaternion(entity.object3D.quaternion);
@@ -151,7 +151,9 @@ AFRAME.registerComponent("super-spawner", {
     } else {
       interaction.state.rightRemote.spawning = false;
     }
-    entity.components["ammo-body"].syncToPhysics();
+    if (entity.components["body-helper"].body) {
+      entity.components["body-helper"].body.syncToPhysics(true);
+    }
   },
 
   activateCooldown() {
@@ -162,11 +164,11 @@ AFRAME.registerComponent("super-spawner", {
       this.el.object3D.scale.set(0.001, 0.001, 0.001);
       this.el.object3D.matrixNeedsUpdate = true;
       this.el.classList.remove("interactable");
-      this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.NONE });
+      this.el.setAttribute("body-helper", { collisionFilterMask: COLLISION_LAYERS.NONE });
       this.cooldownTimeout = setTimeout(() => {
         this.el.setAttribute("visible", true);
         this.el.classList.add("interactable");
-        this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_SPAWNER });
+        this.el.setAttribute("body-helper", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_SPAWNER });
         this.el.removeAttribute("animation__spawner-cooldown");
         this.el.setAttribute("animation__spawner-cooldown", {
           property: "scale",

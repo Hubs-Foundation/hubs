@@ -4,6 +4,7 @@ import "./utils/debug-log";
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
+import happyEmoji from "./assets/images/chest-emojis/screen-effect/happy.png";
 
 import "aframe";
 import "./utils/logging";
@@ -38,6 +39,7 @@ import "./components/mute-mic";
 import "./components/bone-mute-state-indicator";
 import "./components/bone-visibility";
 import "./components/in-world-hud";
+import "./components/emoji-hud";
 import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
 import "./components/hand-controls2";
@@ -164,20 +166,6 @@ if (isEmbed && !qs.get("embed_token")) {
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
 
-const Ammo = require("ammo.js/builds/ammo.wasm.js");
-const AmmoWasm = require("ammo.js/builds/ammo.wasm.wasm");
-window.Ammo = Ammo.bind(undefined, {
-  locateFile(path) {
-    if (path.endsWith(".wasm")) {
-      return AmmoWasm;
-    }
-    return path;
-  }
-});
-require("aframe-physics-system");
-
-import "./systems/post-physics";
-
 import "./components/owned-object-limiter";
 import "./components/set-unowned-body-kinematic";
 import "./components/scalable-when-grabbed";
@@ -192,6 +180,9 @@ import "./components/nav-mesh-helper";
 import "./components/tools/pen";
 import "./components/tools/networked-drawing";
 import "./components/tools/drawing-manager";
+
+import "./components/body-helper";
+import "./components/shape-helper";
 
 import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
@@ -638,12 +629,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const scene = document.querySelector("a-scene");
   scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
 
-  // Physics needs to be ready before spawning anything.
-  while (!scene.systems.physics.initialized) await nextTick();
+  // HACK - Trigger initial batch preparation with an invisible object
+  scene
+    .querySelector("#batch-prep")
+    .setAttribute("media-image", { batch: true, src: happyEmoji, contentType: "image/png" });
 
   const onSceneLoaded = () => {
-    const physicsSystem = scene.systems.physics;
-    physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
+    const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
+    physicsSystem.setDebug(isDebug || physicsSystem.debug);
     patchThreeAllocations();
   };
 
