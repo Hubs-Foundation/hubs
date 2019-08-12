@@ -49,20 +49,24 @@ export class CursorTogglingSystem {
     }
 
     const inspectingInVR = interaction.el.systems["hubs-systems"].cameraSystem.inspected; // && this.el.sceneEl.is("vr-mode");
-    const shouldEnableLeftRemote = !inspectingInVR && shouldEnableRemote(
-      scene,
-      leftHand,
-      leftRemote,
-      this.leftHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting,
-      this.wakeLeft
-    );
-    const shouldEnableRightRemote = !inspectingInVR && shouldEnableRemote(
-      scene,
-      rightHand,
-      rightRemote,
-      this.rightHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting,
-      this.wakeRight
-    );
+    const shouldEnableLeftRemote =
+      !inspectingInVR &&
+      shouldEnableRemote(
+        scene,
+        leftHand,
+        leftRemote,
+        this.leftHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting,
+        this.wakeLeft
+      );
+    const shouldEnableRightRemote =
+      !inspectingInVR &&
+      shouldEnableRemote(
+        scene,
+        rightHand,
+        rightRemote,
+        this.rightHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting,
+        this.wakeRight
+      );
 
     if (!shouldEnableLeftRemote) {
       leftRemote.hovered = null;
