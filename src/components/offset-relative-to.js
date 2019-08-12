@@ -18,6 +18,9 @@ AFRAME.registerComponent("offset-relative-to", {
     },
     selfDestruct: {
       default: false
+    },
+    lookAt: {
+      default: false
     }
   },
   init() {
@@ -34,6 +37,7 @@ AFRAME.registerComponent("offset-relative-to", {
     const z = new THREE.Vector3(0, 0, -1);
     const QUARTER_CIRCLE = Math.PI / 2;
     const offsetVector = new THREE.Vector3();
+    const targetWorldPos = new THREE.Vector3();
     return function() {
       const obj = this.el.object3D;
       const target = this.data.target.object3D;
@@ -43,7 +47,13 @@ AFRAME.registerComponent("offset-relative-to", {
         obj.parent.worldToLocal(offsetVector);
       }
       obj.position.copy(offsetVector);
-      target.getWorldQuaternion(obj.quaternion);
+      if (this.data.lookAt) {
+        target.getWorldPosition(targetWorldPos);
+        obj.updateMatrices(true);
+        obj.lookAt(targetWorldPos);
+      } else {
+        target.getWorldQuaternion(obj.quaternion);
+      }
 
       // See doc/image_orientations.gif
       switch (this.data.orientation) {
