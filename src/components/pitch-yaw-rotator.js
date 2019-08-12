@@ -15,6 +15,8 @@ const rotatePitchAndYaw = (function() {
     o.parent.getWorldQuaternion(opq);
     o.getWorldQuaternion(owq);
     oq.copy(o.quaternion);
+    v.set(0, 1, 0).applyQuaternion(oq);
+    const initialUpDot = v.dot(UP);
     v.set(0, 0, 1).applyQuaternion(oq);
     const initialForwardDotUp = Math.abs(v.dot(UP));
     right.set(1, 0, 0).applyQuaternion(owq);
@@ -24,11 +26,13 @@ const rotatePitchAndYaw = (function() {
       .premultiply(pq)
       .premultiply(yq)
       .premultiply(opq.inverse());
+    v.set(0, 1, 0).applyQuaternion(q);
+    const newUpDot = v.dot(UP);
     v.set(0, 0, 1).applyQuaternion(q);
     const newForwardDotUp = Math.abs(v.dot(UP));
-    // Check if we are looking straight straight up or down
-    if (newForwardDotUp > 0.9 && newForwardDotUp > initialForwardDotUp) {
-      // TODO: Would be nice to apply _part_ of the rotation up to but not exceeding the bounds
+    // Ensure our pitch is in an accepted range and our head would not be flipped upside down
+    if ((newForwardDotUp > 0.9 && newForwardDotUp > initialForwardDotUp) || (newUpDot < 0 && newUpDot < initialUpDot)) {
+      // TODO: Apply a partial rotation that does not exceed the bounds for nicer UX
       return;
     } else {
       o.quaternion.copy(q);
