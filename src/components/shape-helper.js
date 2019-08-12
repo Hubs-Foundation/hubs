@@ -51,7 +51,7 @@ AFRAME.registerComponent("shape-helper", {
         this.bodyHelper = bodyEl.components["body-helper"];
       }
     }
-    if (!this.bodyHelper) {
+    if (!this.bodyHelper || !this.bodyHelper.body) {
       console.warn("body not found");
       return;
     }
