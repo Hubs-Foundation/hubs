@@ -4,6 +4,7 @@ import "./utils/debug-log";
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
+import happyEmoji from "./assets/images/chest-emojis/screen-effect/happy.png";
 
 import "aframe";
 import "./utils/logging";
@@ -38,6 +39,7 @@ import "./components/mute-mic";
 import "./components/bone-mute-state-indicator";
 import "./components/bone-visibility";
 import "./components/in-world-hud";
+import "./components/emoji-hud";
 import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
 import "./components/hand-controls2";
@@ -623,6 +625,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const scene = document.querySelector("a-scene");
   scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
+
+  // HACK - Trigger initial batch preparation with an invisible object
+  scene
+    .querySelector("#batch-prep")
+    .setAttribute("media-image", { batch: true, src: happyEmoji, contentType: "image/png" });
 
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;

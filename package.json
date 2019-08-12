@@ -24,7 +24,9 @@
     "test": "npm run lint && npm run test:unit && npm run build",
     "test:unit": "ava",
     "stats": "rimraf ./dist && webpack --mode=production --json",
-    "spritesheet": "spritesheet-js -f custom-scale-css-modules -p src/assets/images/spritesheets/ --customCanvasWidth 840 --customCanvasWidth 840 -n css-spritesheet src/assets/images/css-sprites/* --hubsFlag anything --customHeight 40 --customWidth 40 && spritesheet-js -f json -p src/assets/images/spritesheets/ --padding 8 --divisibleByTwo -n sprite-system-spritesheet --powerOfTwo src/assets/images/sprites/*"
+    "spritesheet": "npm run spritesheet:css && npm run spritesheet:system",
+    "spritesheet:css": "spritesheet-js -f custom-scale-css-modules -p src/assets/images/spritesheets/ --customCanvasWidth 840 --customCanvasWidth 840 -n css-spritesheet src/assets/images/css-sprites/* --hubsFlag anything --customHeight 40 --customWidth 40",
+    "spritesheet:system": "spritesheet-js -f json -p src/assets/images/spritesheets/ --padding 8 --divisibleByTwo -n sprite-system-spritesheet --powerOfTwo src/assets/images/sprites/*"
   },
   "ava": {
     "files": [
@@ -70,7 +72,7 @@
     "jwt-decode": "^2.2.0",
     "markdown-it": "^8.4.2",
     "moving-average": "^1.0.0",
-    "naf-janus-adapter": "^2.0.2",
+    "naf-janus-adapter": "^3.0.0",
     "networked-aframe": "github:mozillareality/networked-aframe#master",
     "nipplejs": "github:mozillareality/nipplejs#mr-social-client/master",
     "node-ensure": "0.0.0",

@@ -30,15 +30,6 @@ export class PhysicsSystem {
 
     AmmoModule().then(() => {
       this.world = new World(WORLD_CONFIG);
-
-      for (const bodyHelper of this.bodyHelpers) {
-        if (bodyHelper.isPlaying) bodyHelper.init2();
-      }
-      for (const shapeHelper of this.shapeHelpers) {
-        if (shapeHelper.isPlaying) shapeHelper.init2();
-      }
-      this.shapeHelpers.length = 0;
-      this.bodyHelpers.length = 0;
     });
   }
 
@@ -55,6 +46,13 @@ export class PhysicsSystem {
         } else {
           this.world.getDebugDrawer(this.scene).disable();
         }
+      }
+
+      while (this.bodyHelpers.length > 0) {
+        this.bodyHelpers.shift().init2();
+      }
+      while (this.shapeHelpers.length > 0) {
+        this.shapeHelpers.shift().init2();
       }
 
       for (let i = 0; i < this.bodies.length; i++) {
