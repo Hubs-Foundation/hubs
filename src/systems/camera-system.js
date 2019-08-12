@@ -4,6 +4,7 @@ import { paths } from "./userinput/paths";
 import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
 const enableThirdPersonMode = qsTruthy("thirdPerson");
+const noRoll = qsTruthy("noRoll");
 
 const CAMERA_LAYER_INSPECT = 4;
 
@@ -49,68 +50,68 @@ const moveRigSoCameraLooksAtObject = (function() {
   };
 })();
 
-// const moveRigSoCameraIsInFrontOfObject = (function() {
-//   const r = new THREE.Vector3();
-//   const rq = new THREE.Quaternion();
-//   const c = new THREE.Vector3();
-//   const cq = new THREE.Quaternion();
-//   const o = new THREE.Vector3();
-//   const o2 = new THREE.Vector3();
-//   const oq = new THREE.Quaternion();
-//   const coq = new THREE.Quaternion();
-//   const q = new THREE.Quaternion();
+const moveRigSoCameraIsInFrontOfObject = (function() {
+  const r = new THREE.Vector3();
+  const rq = new THREE.Quaternion();
+  const c = new THREE.Vector3();
+  const cq = new THREE.Quaternion();
+  const o = new THREE.Vector3();
+  const o2 = new THREE.Vector3();
+  const oq = new THREE.Quaternion();
+  const coq = new THREE.Quaternion();
+  const q = new THREE.Quaternion();
 
-//   const cp = new THREE.Vector3();
-//   const op = new THREE.Vector3();
-//   const v = new THREE.Vector3();
-//   const p = new THREE.Vector3();
-//   const UP = new THREE.Vector3(0, 1, 0);
+  const cp = new THREE.Vector3();
+  const op = new THREE.Vector3();
+  const v = new THREE.Vector3();
+  const p = new THREE.Vector3();
+  const UP = new THREE.Vector3(0, 1, 0);
 
-//   const oScale = new THREE.Vector3();
-//   return function moveRigSoCameraIsInFrontOfObject(rig, camera, object) {
-//     // assume
-//     //  - camera is rig's child
-//     //  - scales are 1
-//     //  - object is not flat on the floor
-//     rig.getWorldQuaternion(rq);
-//     camera.getWorldQuaternion(cq);
-//     object.getWorldQuaternion(oq);
+  const oScale = new THREE.Vector3();
+  return function moveRigSoCameraIsInFrontOfObject(rig, camera, object) {
+    // assume
+    //  - camera is rig's child
+    //  - scales are 1
+    //  - object is not flat on the floor
+    rig.getWorldQuaternion(rq);
+    camera.getWorldQuaternion(cq);
+    object.getWorldQuaternion(oq);
 
-//     r.set(0, 0, 1)
-//       .applyQuaternion(rq) //     .projectOnPlane(UP) // not needed here since rig is assumed flat
-//       .normalize();
+    r.set(0, 0, 1)
+      .applyQuaternion(rq) //     .projectOnPlane(UP) // not needed here since rig is assumed flat
+      .normalize();
 
-//     c.set(0, 0, -1)
-//       .applyQuaternion(cq)
-//       .projectOnPlane(UP)
-//       .normalize();
+    c.set(0, 0, -1)
+      .applyQuaternion(cq)
+      .projectOnPlane(UP)
+      .normalize();
 
-//     o.set(0, 0, -1).applyQuaternion(oq);
-//     o2.copy(o)
-//       .projectOnPlane(UP)
-//       .normalize();
+    o.set(0, 0, -1).applyQuaternion(oq);
+    o2.copy(o)
+      .projectOnPlane(UP)
+      .normalize();
 
-//     coq.setFromUnitVectors(c, o2);
-//     q.copy(rq).premultiply(coq);
+    coq.setFromUnitVectors(c, o2);
+    q.copy(rq).premultiply(coq);
 
-//     cp.copy(camera.position);
-//     object.getWorldPosition(op);
+    cp.copy(camera.position);
+    object.getWorldPosition(op);
 
-//     object.getWorldScale(oScale);
-//     //const isMobileNonVR = AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isMobileVR();
-//     // TODO: Position yourself slightly farther away when on mobile. Better yet, make use of
-//     // the screen size / frustrum info
-//     v.copy(cp).multiplyScalar(-1);
-//     p.copy(op)
-//       .sub(o.multiplyScalar(oScale.length() * 0.4))
-//       //      .sub(new THREE.Vector3(0, o.y / 2, 0))
-//       .add(v);
+    object.getWorldScale(oScale);
+    //const isMobileNonVR = AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isMobileVR();
+    // TODO: Position yourself slightly farther away when on mobile. Better yet, make use of
+    // the screen size / frustrum info
+    v.copy(cp).multiplyScalar(-1);
+    p.copy(op)
+      .sub(o.multiplyScalar(oScale.length() * 0.4))
+      //      .sub(new THREE.Vector3(0, o.y / 2, 0))
+      .add(v);
 
-//     rig.quaternion.copy(q);
-//     rig.position.copy(p);
-//     rig.matrixNeedsUpdate = true;
-//   };
-// })();
+    rig.quaternion.copy(q);
+    rig.position.copy(p);
+    rig.matrixNeedsUpdate = true;
+  };
+})();
 
 export const CAMERA_MODE_FIRST_PERSON = 0;
 export const CAMERA_MODE_THIRD_PERSON_NEAR = 1;
@@ -132,12 +133,14 @@ export class CameraSystem {
       this.cameraEl = document.getElementById("viewing-camera");
       this.rigEl = document.getElementById("viewing-rig");
     });
-    this.disableInspectLayer = function(o) {
-      o.layers.disable(CAMERA_LAYER_INSPECT);
-    };
-    this.enableInspectLayer = function(o) {
-      o.layers.enable(CAMERA_LAYER_INSPECT);
-    };
+    if (!noRoll) {
+      this.disableInspectLayer = function(o) {
+        o.layers.disable(CAMERA_LAYER_INSPECT);
+      };
+      this.enableInspectLayer = function(o) {
+        o.layers.enable(CAMERA_LAYER_INSPECT);
+      };
+    }
   }
   nextMode() {
     if (this.mode === CAMERA_MODE_INSPECT) {
@@ -161,28 +164,33 @@ export class CameraSystem {
     }
     this.mode = CAMERA_MODE_INSPECT;
     this.inspected = o;
-    moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
-    //if (AFRAME.scenes[0].is("vr-mode")) {
-    //  moveRigSoCameraIsInFrontOfObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
-    //} else {
-    //  moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
-    //}
-    this.inspected.traverse(this.enableInspectLayer);
-    const vrMode = AFRAME.scenes[0].is("vr-mode");
-    const scene = AFRAME.scenes[0];
-    const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
-    this.layerMask = camera.layers.mask;
-    camera.layers.set(CAMERA_LAYER_INSPECT);
+    if (noRoll) {
+      if (AFRAME.scenes[0].is("vr-mode")) {
+        moveRigSoCameraIsInFrontOfObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
+      } else {
+        moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
+      }
+    } else {
+      moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
+      this.inspected.traverse(this.enableInspectLayer);
+      const vrMode = AFRAME.scenes[0].is("vr-mode");
+      const scene = AFRAME.scenes[0];
+      const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
+      this.layerMask = camera.layers.mask;
+      camera.layers.set(CAMERA_LAYER_INSPECT);
+    }
   }
 
   uninspect() {
-    if (this.inspected) {
-      this.inspected.traverse(this.disableInspectLayer);
+    if (!noRoll) {
+      if (this.inspected) {
+        this.inspected.traverse(this.disableInspectLayer);
+      }
+      const vrMode = AFRAME.scenes[0].is("vr-mode");
+      const scene = AFRAME.scenes[0];
+      const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
+      camera.layers.mask = this.layerMask;
     }
-    const vrMode = AFRAME.scenes[0].is("vr-mode");
-    const scene = AFRAME.scenes[0];
-    const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
-    camera.layers.mask = this.layerMask;
     this.inspected = null;
     if (this.mode !== CAMERA_MODE_INSPECT) return;
     this.mode = this.preInspectMode || CAMERA_MODE_FIRST_PERSON;
