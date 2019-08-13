@@ -32,10 +32,10 @@ export class PhysicsSystem {
       this.world = new World(WORLD_CONFIG);
 
       for (const bodyHelper of this.bodyHelpers) {
-        if (bodyHelper.isPlaying) bodyHelper.init2();
+        if (bodyHelper.alive) bodyHelper.init2();
       }
       for (const shapeHelper of this.shapeHelpers) {
-        if (shapeHelper.isPlaying) shapeHelper.init2();
+        if (shapeHelper.alive) shapeHelper.init2();
       }
       this.shapeHelpers.length = 0;
       this.bodyHelpers.length = 0;

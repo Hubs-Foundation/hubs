@@ -33,6 +33,7 @@ AFRAME.registerComponent("body-helper", {
 
   init: function() {
     this.system = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
+    this.alive = true;
     this.system.registerBodyHelper(this);
   },
 
@@ -53,5 +54,6 @@ AFRAME.registerComponent("body-helper", {
       this.body.destroy();
       this.body = null;
     }
+    this.alive = false;
   }
 });

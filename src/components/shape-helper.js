@@ -37,6 +37,7 @@ AFRAME.registerComponent("shape-helper", {
 
   init: function() {
     this.system = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
+    this.alive = true;
     this.system.registerShapeHelper(this);
   },
 
@@ -81,5 +82,6 @@ AFRAME.registerComponent("shape-helper", {
       }
     }
     this.shapes = null;
+    this.alive = false;
   }
 });
