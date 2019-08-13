@@ -8,6 +8,7 @@ import { cloneObject3D } from "../utils/three-utils";
 import { loadModel } from "./gltf-model-plus";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import cameraModelSrc from "../assets/camera_tool.glb";
+import anime from "animejs";
 
 const cameraModelPromise = waitForDOMContentLoaded().then(() => loadModel(cameraModelSrc));
 
@@ -132,16 +133,49 @@ AFRAME.registerComponent("camera-tool", {
       this.el.setObject3D("mesh", mesh);
 
       this.el.object3D.visible = true;
-      this.el.object3D.scale.set(0.75, 0.75, 0.75);
+      this.el.object3D.scale.set(0.5, 0.5, 0.5);
       this.el.object3D.matrixNeedsUpdate = true;
 
-      this.el.setAttribute("animation__scale", {
-        property: "scale",
-        dur: 200,
-        from: { x: 0.75, y: 0.75, z: 0.75 },
-        to: { x: 1, y: 1, z: 1 },
-        easing: "easeOutQuad"
-      });
+      const obj = this.el.object3D;
+
+      const step = (function() {
+        const lastValue = {};
+        return function(anim) {
+          const value = anim.animatables[0].target;
+
+          value.x = Math.max(Number.MIN_VALUE, value.x);
+          value.y = Math.max(Number.MIN_VALUE, value.y);
+          value.z = Math.max(Number.MIN_VALUE, value.z);
+
+          // For animation timeline.
+          if (value.x === lastValue.x && value.y === lastValue.y && value.z === lastValue.z) {
+            return;
+          }
+
+          lastValue.x = value.x;
+          lastValue.y = value.y;
+          lastValue.z = value.z;
+
+          obj.scale.set(value.x, value.y, value.z);
+          obj.matrixNeedsUpdate = true;
+        };
+      })();
+
+      const config = {
+        duration: 200,
+        easing: "easeOutQuad",
+        elasticity: 400,
+        loop: 0,
+        round: false,
+        x: 1,
+        y: 1,
+        z: 1,
+        targets: [{ x: 0.5, y: 0.5, z: 0.5 }],
+        update: anim => step(anim),
+        complete: anim => step(anim)
+      };
+
+      anime(config);
 
       const width = 0.28;
       const geometry = new THREE.PlaneBufferGeometry(width, width / this.camera.aspect);
