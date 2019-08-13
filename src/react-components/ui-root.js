@@ -193,6 +193,7 @@ class UIRoot extends Component {
     waitingOnAudio: false,
     mediaStream: null,
     audioTrack: null,
+    audioTrackClone: null,
     micDevices: [],
 
     autoExitTimerStartedAt: null,
@@ -561,6 +562,9 @@ class UIRoot extends Component {
     if (this.state.audioTrack) {
       this.state.audioTrack.stop();
     }
+    if (this.state.audioTrackClone) {
+      this.state.audioTrackClone.stop();
+    }
 
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -605,7 +609,9 @@ class UIRoot extends Component {
         this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
       }
       const mediaStreamForMicAnalysis = new MediaStream();
-      mediaStreamForMicAnalysis.addTrack(this.state.audioTrack.clone());
+      const audioTrackClone = this.state.audioTrack.clone();
+      this.setState({ audioTrackClone });
+      mediaStreamForMicAnalysis.addTrack(audioTrackClone);
       this.props.scene.emit("local-media-stream-created", { mediaStream: mediaStreamForMicAnalysis });
     }
 
