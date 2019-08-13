@@ -21,14 +21,34 @@ const parseGltfUrls = () => {
     });
 };
 
-function createModel(objectsScene) {
+function checkIfModelLoaded(scene, count, goal) {
+  if (count === goal) {
+    window.APP.scene.emit("tridify-scene-loaded");
+    console.log("Tridify Model Loaded");
+  }
+}
+
+async function createModel(scene) {
+  let readyCount = 0;
   parseGltfUrls().then(model => {
     model.forEach(url => {
       const element = document.createElement("a-entity");
       element.setAttribute("gltf-model-plus", { src: url, useCache: false, inflate: true });
-      objectsScene.appendChild(element);
+      element.addEventListener("model-loaded", () => {
+        console.log(`Loaded GLTF model from ${url}`);
+        readyCount++;
+        checkIfModelLoaded(scene, readyCount, model.length);
+      });
+      element.addEventListener("model-error", () => {
+        console.log(`GLTF-model from : ${url} was unable to load`);
+        readyCount++;
+        checkIfModelLoaded(scene, readyCount, model.length);
+      });
+
+      scene.appendChild(element);
     });
   });
+  return;
 }
 
 function createLights(objectsScene) {
@@ -42,7 +62,6 @@ export async function getTridifyModel(objectsScene) {
   await parseIfc().then(getAllSlabsFromIfc);
   createLights(objectsScene);
   createModel(objectsScene);
-  console.log("Tridify Model Loaded");
 }
 
 const parseIfc = () => {

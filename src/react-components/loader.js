@@ -26,7 +26,8 @@ class Loader extends Component {
     this.props.scene.addEventListener("pdf-loaded", this.onObjectLoaded);
     this.props.scene.addEventListener("model-error", this.onObjectLoaded);
     this.props.scene.addEventListener(
-      "environment-scene-loaded",
+      /*"environment-scene-loaded",*/
+      "tridify-scene-loaded",
       () => {
         this.environmentSceneLoaded = true;
         this.tryFinishLoading();
