@@ -1,3 +1,4 @@
+/* global Ammo */
 import * as threeToAmmo from "three-to-ammo";
 import { SHAPE, FIT } from "three-ammo/constants";
 
@@ -36,6 +37,7 @@ AFRAME.registerComponent("shape-helper", {
 
   init: function() {
     this.system = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
+    this.alive = true;
     this.system.registerShapeHelper(this);
   },
 
@@ -50,7 +52,7 @@ AFRAME.registerComponent("shape-helper", {
         this.bodyHelper = bodyEl.components["body-helper"];
       }
     }
-    if (!this.bodyHelper) {
+    if (!this.bodyHelper || !this.bodyHelper.body) {
       console.warn("body not found");
       return;
     }
@@ -75,7 +77,11 @@ AFRAME.registerComponent("shape-helper", {
         if (this.bodyHelper.body) {
           this.bodyHelper.body.removeShape(this.shapes[i]);
         }
+        this.shapes[i].destroy();
+        Ammo.destroy(this.shapes[i].localTransform);
       }
     }
+    this.shapes = null;
+    this.alive = false;
   }
 });
