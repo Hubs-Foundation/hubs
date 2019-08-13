@@ -133,6 +133,7 @@ AFRAME.registerComponent("camera-tool", {
 
       this.el.object3D.visible = true;
       this.el.object3D.scale.set(0.75, 0.75, 0.75);
+      this.el.object3D.matrixNeedsUpdate = true;
 
       this.el.setAttribute("animation__scale", {
         property: "scale",
