@@ -183,6 +183,7 @@ class ProfileEntryPanel extends Component {
               </div>
             ) : (
               <div className={styles.preview}>
+                <AvatarPreview />
                 <div className={styles.chooseAvatar}>
                   <a onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use")}>
                     <FormattedMessage id="profile.choose_avatar" />
