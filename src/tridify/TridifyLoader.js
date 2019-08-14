@@ -1,4 +1,5 @@
 import { getModelHash } from "./modelparams";
+import { centerModel } from "./center";
 
 let urlParams;
 
@@ -23,6 +24,7 @@ const parseGltfUrls = () => {
 
 function checkIfModelLoaded(scene, count, goal) {
   if (count === goal) {
+    centerModel(scene);
     window.APP.scene.emit("tridify-scene-loaded");
     console.log("Tridify Model Loaded");
   }
