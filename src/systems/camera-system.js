@@ -4,7 +4,6 @@ import { paths } from "./userinput/paths";
 import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
 const enableThirdPersonMode = qsTruthy("thirdPerson");
-const noRoll = qsTruthy("noRoll");
 
 const CAMERA_LAYER_INSPECT = 4;
 
@@ -135,7 +134,6 @@ export class CameraSystem {
     this.batchManagerSystem = batchManagerSystem;
 
     this.mode = CAMERA_MODE_FIRST_PERSON;
-    this.preInspectTransform = new THREE.Matrix4();
     waitForDOMContentLoaded().then(() => {
       this.avatarPOV = document.getElementById("avatar-pov-node");
       this.avatarRig = document.getElementById("avatar-rig");
@@ -143,26 +141,22 @@ export class CameraSystem {
       this.rigEl = document.getElementById("viewing-rig");
       const sphere = document.getElementById("inspect-sphere");
       function setupSphere(sphere) {
-        sphere.object3D.traverse(o => {
-          o.layers.set(CAMERA_LAYER_INSPECT);
-        });
+        sphere.object3D.traverse(o => o.layers.set(CAMERA_LAYER_INSPECT));
+        sphere.object3DMap.mesh.material.side = 2;
         sphere.object3DMap.mesh.material.color.setHex(0x020202);
         sphere.object3D.scale.multiplyScalar(100);
-        sphere.object3DMap.mesh.material.side = 2;
         sphere.object3D.matrixNeedsUpdate = true;
       }
       setTimeout(() => {
         setupSphere(sphere);
       }, 2000);
     });
-    if (!noRoll) {
-      this.disableInspectLayer = function(o) {
-        o.layers.disable(CAMERA_LAYER_INSPECT);
-      };
-      this.enableInspectLayer = function(o) {
-        o.layers.enable(CAMERA_LAYER_INSPECT);
-      };
-    }
+    this.disableInspectLayer = function(o) {
+      o.layers.disable(CAMERA_LAYER_INSPECT);
+    };
+    this.enableInspectLayer = function(o) {
+      o.layers.enable(CAMERA_LAYER_INSPECT);
+    };
   }
   nextMode() {
     if (this.mode === CAMERA_MODE_INSPECT) {
@@ -183,62 +177,57 @@ export class CameraSystem {
   inspect(o) {
     if (this.mode !== CAMERA_MODE_INSPECT) {
       this.preInspectMode = this.mode;
-      o.updateMatrices();
-      this.preInspectTransform.copy(o.matrixWorld);
     }
     this.mode = CAMERA_MODE_INSPECT;
     this.inspected = o;
-    if (noRoll) {
-      moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
-    } else {
-      moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
 
-      const batchForInspected = getBatch(this.inspected, this.batchManagerSystem);
-      if (batchForInspected) {
-        batchForInspected.traverse(this.enableInspectLayer);
-      } else {
-        this.inspected.traverse(this.enableInspectLayer);
-      }
-      const vrMode = AFRAME.scenes[0].is("vr-mode");
-      const scene = AFRAME.scenes[0];
-      const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
-      this.layerMask = camera.layers.mask;
-      camera.layers.set(CAMERA_LAYER_INSPECT);
-      if (vrMode) {
-        this.layerMask0 = camera.cameras[0].layers.mask;
-        this.layerMask1 = camera.cameras[1].layers.mask;
-        camera.cameras[0].layers.set(CAMERA_LAYER_INSPECT);
-        camera.cameras[1].layers.set(CAMERA_LAYER_INSPECT);
-      }
+    const batchForInspected = getBatch(this.inspected, this.batchManagerSystem);
+    if (batchForInspected) {
+      batchForInspected.traverse(this.enableInspectLayer);
+    } else {
+      this.inspected.traverse(this.enableInspectLayer);
     }
+    const scene = AFRAME.scenes[0];
+    const vrMode = scene.is("vr-mode");
+    const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
+    this.preInspectLayerMask = camera.layers.mask;
+    camera.layers.set(CAMERA_LAYER_INSPECT);
+    if (vrMode) {
+      this.preInspectLayerMask0 = camera.cameras[0].layers.mask;
+      this.preInspectLayerMask1 = camera.cameras[1].layers.mask;
+      camera.cameras[0].layers.set(CAMERA_LAYER_INSPECT);
+      camera.cameras[1].layers.set(CAMERA_LAYER_INSPECT);
+    }
+
+    moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
   }
 
   uninspect() {
-    if (!noRoll) {
-      if (this.inspected) {
-        const batchForInspected = getBatch(this.inspected, this.batchManagerSystem);
-        if (batchForInspected) {
-          console.log("has batch for the mesh, uninspecting");
-          batchForInspected.traverse(this.disableInspectLayer);
-        } else {
-          this.inspected.traverse(this.disableInspectLayer);
-        }
+    if (this.inspected) {
+      const batchForInspected = getBatch(this.inspected, this.batchManagerSystem);
+      if (batchForInspected) {
+        console.log("has batch for the mesh, uninspecting");
+        batchForInspected.traverse(this.disableInspectLayer);
+      } else {
+        this.inspected.traverse(this.disableInspectLayer);
       }
-      const vrMode = AFRAME.scenes[0].is("vr-mode");
-      const scene = AFRAME.scenes[0];
-      const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
-      if (vrMode) {
-        camera.cameras[0].layers.mask = this.layerMask0;
-        camera.cameras[1].layers.mask = this.layerMask1;
-      }
-      camera.layers.mask = this.layerMask;
     }
-    setMatrixWorld(this.inspected, this.preInspectTransform);
-    this.inspected = null;
+    const vrMode = AFRAME.scenes[0].is("vr-mode");
+    const scene = AFRAME.scenes[0];
+    const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
+    if (vrMode) {
+      camera.cameras[0].layers.mask = this.preInspectLayerMask0;
+      camera.cameras[1].layers.mask = this.preInspectLayerMask1;
+    }
+    camera.layers.mask = this.preInspectLayerMask;
+    if (this.inspected) {
+      this.inspected = null;
+    }
     if (this.mode !== CAMERA_MODE_INSPECT) return;
     this.mode = this.preInspectMode || CAMERA_MODE_FIRST_PERSON;
     this.preInspectMode = null;
   }
+
   tick = (function() {
     const m2 = new THREE.Matrix4();
     const m3 = new THREE.Matrix4();
