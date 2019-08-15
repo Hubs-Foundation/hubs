@@ -364,8 +364,6 @@ module.exports = (env, argv) => ({
         THUMBNAIL_SERVER: process.env.THUMBNAIL_SERVER,
         CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,
         NON_CORS_PROXY_DOMAINS: process.env.NON_CORS_PROXY_DOMAINS,
-        ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER,
-        EXTRA_ENVIRONMENTS: process.env.EXTRA_ENVIRONMENTS,
         BUILD_VERSION: process.env.BUILD_VERSION,
         SENTRY_DSN: process.env.SENTRY_DSN,
         GA_TRACKING_ID: process.env.GA_TRACKING_ID,
