@@ -150,14 +150,9 @@ export class CameraSystem {
         sphere.object3DMap.mesh.material.side = 2;
         sphere.object3D.matrixNeedsUpdate = true;
       }
-      if (!sphere.object3DMap.mesh) {
-        // look, don't ask me. Let's use a regular object, not an a-sphere. this was just expedient.
-        setTimeout(() => {
-          setupSphere(sphere);
-        }, 1000);
-      } else {
+      setTimeout(() => {
         setupSphere(sphere);
-      }
+      }, 2000);
     });
     if (!noRoll) {
       this.disableInspectLayer = function(o) {
