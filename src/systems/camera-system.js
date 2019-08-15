@@ -135,6 +135,7 @@ export class CameraSystem {
     this.batchManagerSystem = batchManagerSystem;
 
     this.mode = CAMERA_MODE_FIRST_PERSON;
+    this.preInspectTransform = new THREE.Matrix4();
     waitForDOMContentLoaded().then(() => {
       this.avatarPOV = document.getElementById("avatar-pov-node");
       this.avatarRig = document.getElementById("avatar-rig");
@@ -182,6 +183,8 @@ export class CameraSystem {
   inspect(o) {
     if (this.mode !== CAMERA_MODE_INSPECT) {
       this.preInspectMode = this.mode;
+      o.updateMatrices();
+      this.preInspectTransform.copy(o.matrixWorld);
     }
     this.mode = CAMERA_MODE_INSPECT;
     this.inspected = o;
@@ -230,6 +233,7 @@ export class CameraSystem {
       }
       camera.layers.mask = this.layerMask;
     }
+    setMatrixWorld(this.inspected, this.preInspectTransform);
     this.inspected = null;
     if (this.mode !== CAMERA_MODE_INSPECT) return;
     this.mode = this.preInspectMode || CAMERA_MODE_FIRST_PERSON;
