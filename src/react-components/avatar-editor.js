@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
 import { upload } from "../utils/media-utils";
+import { ensureAvatarMaterial } from "../utils/avatar-utils";
 import classNames from "classnames";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -90,8 +91,8 @@ export default class AvatarEditor extends Component {
       );
       URL.revokeObjectURL(gltfUrl);
 
-      const { content, body } = parser.extensions.KHR_binary_glTF;
-
+      const { body } = parser.extensions.KHR_binary_glTF;
+      const content = JSON.stringify(ensureAvatarMaterial(parser.json));
       // Inject hubs components on upload. Used to create base avatar
       // const gltf = parser.json;
       // Object.assign(gltf.scenes[0], {

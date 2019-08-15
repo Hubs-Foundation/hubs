@@ -6,7 +6,8 @@ import "three/examples/js/controls/OrbitControls";
 
 import { createDefaultEnvironmentMap } from "../components/environment-map";
 import { loadGLTF } from "../components/gltf-model-plus";
-import { disposeNode } from "../utils/three-utils";
+import { disposeNode, findNode } from "../utils/three-utils";
+import { ensureAvatarMaterial, MAT_NAME } from "../utils/avatar-utils";
 import { createImageBitmap, disposeImageBitmap } from "../utils/image-bitmap-utils";
 import styles from "../assets/stylesheets/avatar-preview.scss";
 
@@ -204,26 +205,18 @@ class AvatarPreview extends Component {
   loadPreviewAvatar = async avatarGltfUrl => {
     let gltf;
     try {
-      gltf = await loadGLTF(avatarGltfUrl, "model/gltf");
+      const technique = window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness";
+      gltf = await loadGLTF(avatarGltfUrl, "model/gltf", technique, null, ensureAvatarMaterial);
     } catch (e) {
       this.setState({ loading: false, error: true });
       return;
     }
 
-    // On the backend we look for a material called Bot_PBS, here we are looking for a mesh called Avatar.
-    // When we "officially" support uploading custom GLTFs we need to decide what we are going to key things on
-    this.previewMesh =
-      gltf.scene.getObjectByName("AvatarMesh") ||
-      gltf.scene.getObjectByName("Avatar") ||
-      gltf.scene.getObjectByName("Bot_Skinned") ||
-      gltf.scene;
+    this.previewMesh = findNode(gltf.scene, n => n.isMesh && n.material && n.material.name === MAT_NAME);
 
-    if (!this.previewMesh.isMesh) {
-      this.previewMesh.traverse(o => {
-        if (!this.previewMesh.isMesh && o.isMesh) {
-          this.previewMesh = o;
-        }
-      });
+    if (!this.previewMesh) {
+      this.setState({ loading: false, error: true });
+      return;
     }
 
     const idleAnimation = gltf.animations && gltf.animations.find(({ name }) => name === "idle_eyes");
