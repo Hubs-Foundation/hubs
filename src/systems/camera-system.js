@@ -8,6 +8,16 @@ const noRoll = qsTruthy("noRoll");
 
 const CAMERA_LAYER_INSPECT = 4;
 
+function getBatch(inspected, batchManagerSystem) {
+  return (
+    batchManagerSystem.batchManager &&
+    (batchManagerSystem.batchManager.batchForMesh.get(inspected) ||
+      (inspected.el &&
+        inspected.el.object3DMap.mesh &&
+        batchManagerSystem.batchManager.batchForMesh.get(inspected.el.object3DMap.mesh)))
+  );
+}
+
 const calculateViewingDistance = (function() {
   const center = new THREE.Vector3();
   return function calculateViewingDistance(camera, object) {
@@ -50,68 +60,64 @@ const moveRigSoCameraLooksAtObject = (function() {
   };
 })();
 
-const moveRigSoCameraIsInFrontOfObject = (function() {
-  const r = new THREE.Vector3();
-  const rq = new THREE.Quaternion();
-  const c = new THREE.Vector3();
-  const cq = new THREE.Quaternion();
-  const o = new THREE.Vector3();
-  const o2 = new THREE.Vector3();
-  const oq = new THREE.Quaternion();
-  const coq = new THREE.Quaternion();
-  const q = new THREE.Quaternion();
-
-  const cp = new THREE.Vector3();
-  const op = new THREE.Vector3();
-  const v = new THREE.Vector3();
-  const p = new THREE.Vector3();
-  const UP = new THREE.Vector3(0, 1, 0);
-
-  const oScale = new THREE.Vector3();
-  return function moveRigSoCameraIsInFrontOfObject(rig, camera, object) {
-    // assume
-    //  - camera is rig's child
-    //  - scales are 1
-    //  - object is not flat on the floor
-    rig.getWorldQuaternion(rq);
-    camera.getWorldQuaternion(cq);
-    object.getWorldQuaternion(oq);
-
-    r.set(0, 0, 1)
-      .applyQuaternion(rq) //     .projectOnPlane(UP) // not needed here since rig is assumed flat
-      .normalize();
-
-    c.set(0, 0, -1)
-      .applyQuaternion(cq)
-      .projectOnPlane(UP)
-      .normalize();
-
-    o.set(0, 0, -1).applyQuaternion(oq);
-    o2.copy(o)
-      .projectOnPlane(UP)
-      .normalize();
-
-    coq.setFromUnitVectors(c, o2);
-    q.copy(rq).premultiply(coq);
-
-    cp.copy(camera.position);
-    object.getWorldPosition(op);
-
-    object.getWorldScale(oScale);
-    //const isMobileNonVR = AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isMobileVR();
-    // TODO: Position yourself slightly farther away when on mobile. Better yet, make use of
-    // the screen size / frustrum info
-    v.copy(cp).multiplyScalar(-1);
-    p.copy(op)
-      .sub(o.multiplyScalar(oScale.length() * 0.4))
-      //      .sub(new THREE.Vector3(0, o.y / 2, 0))
-      .add(v);
-
-    rig.quaternion.copy(q);
-    rig.position.copy(p);
-    rig.matrixNeedsUpdate = true;
-  };
-})();
+//const moveRigSoCameraIsInFrontOfObject = (function() {
+//  const r = new THREE.Vector3();
+//  const rq = new THREE.Quaternion();
+//  const c = new THREE.Vector3();
+//  const cq = new THREE.Quaternion();
+//  const o = new THREE.Vector3();
+//  const oq = new THREE.Quaternion();
+//  const coq = new THREE.Quaternion();
+//  const q = new THREE.Quaternion();
+//
+//  const cp = new THREE.Vector3();
+//  const op = new THREE.Vector3();
+//  const v = new THREE.Vector3();
+//  const p = new THREE.Vector3();
+//  const UP = new THREE.Vector3(0, 1, 0);
+//
+//  return function moveRigSoCameraIsInFrontOfObject(rig, camera, object) {
+//    // assume
+//    //  - camera is rig's child
+//    //  - scales are 1
+//    //  - object is not flat on the floor
+//    rig.getWorldQuaternion(rq);
+//    camera.getWorldQuaternion(cq);
+//    object.getWorldQuaternion(oq);
+//
+//    r.set(0, 0, 1)
+//      .applyQuaternion(rq) //     .projectOnPlane(UP) // not needed here since rig is assumed flat
+//      .normalize();
+//
+//    c.set(0, 0, -1)
+//      .applyQuaternion(cq)
+//      .projectOnPlane(UP)
+//      .normalize();
+//
+//    o.set(0, 0, -1)
+//      .applyQuaternion(oq)
+//      .projectOnPlane(UP)
+//      .normalize();
+//
+//    coq.setFromUnitVectors(c, o);
+//    q.copy(rq).premultiply(coq);
+//
+//    cp.copy(camera.position);
+//    object.getWorldPosition(op);
+//
+//    //const isMobileNonVR = AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isMobileVR();
+//    // TODO: Position yourself slightly farther away when on mobile. Better yet, make use of
+//    // the screen size / frustrum info
+//    v.copy(cp).multiplyScalar(-1);
+//    p.copy(op)
+//      .sub(o.multiplyScalar(calculateViewingDistance(camera, object)))
+//      .add(v);
+//
+//    rig.quaternion.copy(q);
+//    rig.position.copy(p);
+//    rig.matrixNeedsUpdate = true;
+//  };
+//})();
 
 export const CAMERA_MODE_FIRST_PERSON = 0;
 export const CAMERA_MODE_THIRD_PERSON_NEAR = 1;
@@ -125,13 +131,33 @@ const NEXT_MODES = {
 };
 
 export class CameraSystem {
-  constructor() {
+  constructor(batchManagerSystem) {
+    this.batchManagerSystem = batchManagerSystem;
+
     this.mode = CAMERA_MODE_FIRST_PERSON;
     waitForDOMContentLoaded().then(() => {
       this.avatarPOV = document.getElementById("avatar-pov-node");
       this.avatarRig = document.getElementById("avatar-rig");
       this.cameraEl = document.getElementById("viewing-camera");
       this.rigEl = document.getElementById("viewing-rig");
+      const sphere = document.getElementById("inspect-sphere");
+      function setupSphere(sphere) {
+        sphere.object3D.traverse(o => {
+          o.layers.set(CAMERA_LAYER_INSPECT);
+        });
+        sphere.object3DMap.mesh.material.color.setHex(0x020202);
+        sphere.object3D.scale.multiplyScalar(100);
+        sphere.object3DMap.mesh.material.side = 2;
+        sphere.object3D.matrixNeedsUpdate = true;
+      }
+      if (!sphere.object3DMap.mesh) {
+        // look, don't ask me. Let's use a regular object, not an a-sphere. this was just expedient.
+        setTimeout(() => {
+          setupSphere(sphere);
+        }, 1000);
+      } else {
+        setupSphere(sphere);
+      }
     });
     if (!noRoll) {
       this.disableInspectLayer = function(o) {
@@ -165,30 +191,48 @@ export class CameraSystem {
     this.mode = CAMERA_MODE_INSPECT;
     this.inspected = o;
     if (noRoll) {
-      if (AFRAME.scenes[0].is("vr-mode")) {
-        moveRigSoCameraIsInFrontOfObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
-      } else {
-        moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
-      }
+      moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
     } else {
       moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
-      this.inspected.traverse(this.enableInspectLayer);
+
+      const batchForInspected = getBatch(this.inspected, this.batchManagerSystem);
+      if (batchForInspected) {
+        batchForInspected.traverse(this.enableInspectLayer);
+      } else {
+        this.inspected.traverse(this.enableInspectLayer);
+      }
       const vrMode = AFRAME.scenes[0].is("vr-mode");
       const scene = AFRAME.scenes[0];
       const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
       this.layerMask = camera.layers.mask;
       camera.layers.set(CAMERA_LAYER_INSPECT);
+      if (vrMode) {
+        this.layerMask0 = camera.cameras[0].layers.mask;
+        this.layerMask1 = camera.cameras[1].layers.mask;
+        camera.cameras[0].layers.set(CAMERA_LAYER_INSPECT);
+        camera.cameras[1].layers.set(CAMERA_LAYER_INSPECT);
+      }
     }
   }
 
   uninspect() {
     if (!noRoll) {
       if (this.inspected) {
-        this.inspected.traverse(this.disableInspectLayer);
+        const batchForInspected = getBatch(this.inspected, this.batchManagerSystem);
+        if (batchForInspected) {
+          console.log("has batch for the mesh, uninspecting");
+          batchForInspected.traverse(this.disableInspectLayer);
+        } else {
+          this.inspected.traverse(this.disableInspectLayer);
+        }
       }
       const vrMode = AFRAME.scenes[0].is("vr-mode");
       const scene = AFRAME.scenes[0];
       const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
+      if (vrMode) {
+        camera.cameras[0].layers.mask = this.layerMask0;
+        camera.cameras[1].layers.mask = this.layerMask1;
+      }
       camera.layers.mask = this.layerMask;
     }
     this.inspected = null;
