@@ -328,8 +328,8 @@ export default class AvatarEditor extends Component {
     </div>
   );
 
-  checkbox = (name, children, disabled) => (
-    <div className="checkbox-container">
+  checkbox = (name, title, children, disabled) => (
+    <div className="checkbox-container" title={title}>
       <input
         id={`avatar-${name}`}
         type="checkbox"
@@ -379,6 +379,7 @@ export default class AvatarEditor extends Component {
                 </details>
                 {this.checkbox(
                   "allow_promotion",
+                  "Allow Mozilla to promote your avatar, and show it in search results.",
                   <span>
                     Allow{" "}
                     <a
@@ -392,6 +393,7 @@ export default class AvatarEditor extends Component {
                 )}
                 {this.checkbox(
                   "allow_remixing",
+                  "Allow others to edit and re-publish your avatar as long as they give you credit.",
                   <span>
                     Allow{" "}
                     <a
