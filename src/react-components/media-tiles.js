@@ -191,16 +191,17 @@ class MediaTiles extends Component {
             <FontAwesomeIcon icon={faPencilAlt} />
           </StateLink>
         )}
-        {entry.type === "avatar_listing" && (
-          <StateLink
-            className={styles.editAvatar}
-            onClick={e => this.handleCopyAvatar(e, entry)}
-            history={this.props.history}
-            title="Copy to my avatars"
-          >
-            <FontAwesomeIcon icon={faClone} />
-          </StateLink>
-        )}
+        {entry.type === "avatar_listing" &&
+          entry.allow_remixing && (
+            <StateLink
+              className={styles.editAvatar}
+              onClick={e => this.handleCopyAvatar(e, entry)}
+              history={this.props.history}
+              title="Copy to my avatars"
+            >
+              <FontAwesomeIcon icon={faClone} />
+            </StateLink>
+          )}
         {!entry.type.endsWith("_image") && (
           <div className={styles.info}>
             <a
