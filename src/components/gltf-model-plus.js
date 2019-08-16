@@ -401,8 +401,9 @@ AFRAME.registerComponent("gltf-model-plus", {
     if (this.data.batch && this.model) {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.el.object3DMap.mesh);
     }
-    if (this.data.src) {
-      gltfCache.release(this.data.src);
+    const src = this.resolveAsset(this.data.src);
+    if (src) {
+      gltfCache.release(src);
     }
   },
 
@@ -414,13 +415,18 @@ AFRAME.registerComponent("gltf-model-plus", {
     });
   },
 
+  resolveAsset(src) {
+    // If the src attribute is a selector, get the url from the asset item.
+    if (src && src.charAt(0) === "#") {
+      const assetEl = document.getElementById(src.substring(1));
+      return assetEl.getAttribute("src");
+    }
+    return src;
+  },
+
   async applySrc(src, contentType) {
     try {
-      // If the src attribute is a selector, get the url from the asset item.
-      if (src && src.charAt(0) === "#") {
-        const assetEl = document.getElementById(src.substring(1));
-        src = assetEl.getAttribute("src");
-      }
+      src = this.resolveAsset(src);
 
       if (src === this.lastSrc) return;
 

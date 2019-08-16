@@ -10,7 +10,7 @@ import {
 import { addAnimationComponents } from "../utils/animation";
 import qsTruthy from "../utils/qs_truthy";
 
-import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
+import loadingObjectSrc from "../assets/models/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
 import { loadModel } from "./gltf-model-plus";
 import { cloneObject3D } from "../utils/three-utils";
@@ -298,8 +298,9 @@ AFRAME.registerComponent("media-loader", {
       let accessibleUrl = src;
       let contentType = this.data.contentType;
       let thumbnail;
+      const parsedUrl = new URL(src);
 
-      if (this.data.resolve && !src.startsWith("data:")) {
+      if (this.data.resolve && !src.startsWith("data:") && parsedUrl.hostname !== location.hostname) {
         const result = await resolveUrl(src);
         canonicalUrl = result.origin;
         // handle protocol relative urls
@@ -327,7 +328,6 @@ AFRAME.registerComponent("media-loader", {
         contentType.startsWith("audio/") ||
         AFRAME.utils.material.isHLS(canonicalUrl, contentType)
       ) {
-        const parsedUrl = new URL(src);
         const qsTime = parseInt(parsedUrl.searchParams.get("t"));
         const hashTime = parseInt(new URLSearchParams(parsedUrl.hash.substring(1)).get("t"));
         const startTime = hashTime || qsTime || 0;
