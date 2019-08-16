@@ -6,19 +6,20 @@ let _exitAction = null;
 
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
-const afterUserGesturePrompt = f => {
-  const scene = document.querySelector("a-scene");
-  scene.addEventListener("2d-interstitial-gesture-complete", f, { once: true });
-  scene.emit("2d-interstitial-gesture-required");
+const getUserGesture = () => {
+  return new Promise(resolve => {
+    const scene = document.querySelector("a-scene");
+    scene.addEventListener("2d-interstitial-gesture-complete", resolve, { once: true });
+    scene.emit("2d-interstitial-gesture-required");
+  });
 };
 
-export function handleExitTo2DInterstitial(isLower, exitAction) {
+export async function handleExitTo2DInterstitial(isLower, exitAction) {
   const scene = document.querySelector("a-scene");
   if (!scene.is("vr-mode")) {
     if (isMobileVR && willRequireUserGesture()) {
-      afterUserGesturePrompt(() => {
-        showFullScreenIfAvailable();
-      });
+      await getUserGesture();
+      await showFullScreenIfAvailable();
     }
 
     return;
@@ -28,12 +29,9 @@ export function handleExitTo2DInterstitial(isLower, exitAction) {
   _exitAction = exitAction;
 
   if (isMobileVR) {
-    // Immersive browser, exit VR.
-    scene.exitVR().then(() => {
-      afterUserGesturePrompt(() => {
-        showFullScreenIfAvailable();
-      });
-    });
+    await scene.exitVR();
+    await getUserGesture();
+    await showFullScreenIfAvailable();
   } else {
     // Non-immersive browser, show notice
     const vrNotice = document.querySelector(".vr-notice");
@@ -44,7 +42,7 @@ export function handleExitTo2DInterstitial(isLower, exitAction) {
   }
 }
 
-export function exit2DInterstitialAndEnterVR(force) {
+export async function exit2DInterstitialAndEnterVR(force) {
   if (!force && !_isIn2DInterstitial) {
     return;
   }
@@ -57,14 +55,15 @@ export function exit2DInterstitialAndEnterVR(force) {
 
   if (isMobileVR) {
     if (screenfull.isFullscreen) {
-      screenfull.exit();
-      afterUserGesturePrompt(() => scene.enterVR());
+      await screenfull.exit();
+      await getUserGesture();
+      await scene.enterVR();
     } else {
-      scene.enterVR();
+      await scene.enterVR();
     }
   } else {
     if (!scene.is("vr-mode")) {
-      scene.enterVR();
+      await scene.enterVR();
     }
   }
 }
@@ -73,7 +72,7 @@ export function isIn2DInterstitial() {
   return _isIn2DInterstitial;
 }
 
-export function forceExitFrom2DInterstitial() {
+export async function forceExitFrom2DInterstitial() {
   if (!_isIn2DInterstitial) return;
 
   if (_exitAction) {
@@ -81,5 +80,5 @@ export function forceExitFrom2DInterstitial() {
     _exitAction = null;
   }
 
-  exit2DInterstitialAndEnterVR();
+  await exit2DInterstitialAndEnterVR();
 }
