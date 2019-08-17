@@ -4,6 +4,7 @@ import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
+const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 
@@ -62,7 +63,7 @@ export default class SceneEntryManager {
       // force gamepads to become live.
       navigator.getVRDisplays();
 
-      exit2DInterstitialAndEnterVR(true);
+      await exit2DInterstitialAndEnterVR(true);
     }
 
     if (isMobile || qsTruthy("mobile")) {
@@ -458,20 +459,23 @@ export default class SceneEntryManager {
       isHandlingVideoShare = false;
     });
 
-    this.scene.addEventListener("action_selected_media_result_entry", e => {
+    this.scene.addEventListener("action_selected_media_result_entry", async e => {
       // TODO spawn in space when no rights
       const entry = e.detail;
       if (["avatar", "avatar_listing"].includes(entry.type)) return;
       if ((entry.type === "scene_listing" || entry.type === "scene") && this.hubChannel.can("update_hub")) return;
 
+      const delaySpawn = isIn2DInterstitial() && !isMobileVR;
+      await exit2DInterstitialAndEnterVR();
+
       // If user has HMD lifted up or gone through interstitial, delay spawning for now. eventually show a modal
-      const spawnDelay = isIn2DInterstitial() ? 3000 : 0;
-
-      setTimeout(() => {
+      if (delaySpawn) {
+        setTimeout(() => {
+          spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
+        }, 3000);
+      } else {
         spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
-      }, spawnDelay);
-
-      exit2DInterstitialAndEnterVR();
+      }
     });
 
     this.mediaSearchStore.addEventListener("media-exit", () => {
