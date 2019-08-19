@@ -5,8 +5,6 @@ import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 
-const CAMERA_LAYER_INSPECT = 4;
-
 function getBatch(inspected, batchManagerSystem) {
   return (
     batchManagerSystem.batchManager &&
@@ -129,35 +127,51 @@ const NEXT_MODES = {
   [CAMERA_MODE_THIRD_PERSON_FAR]: CAMERA_MODE_FIRST_PERSON
 };
 
+const CAMERA_LAYER_INSPECT = 4;
+const enableInspectLayer = function(o) {
+  o.layers.enable(CAMERA_LAYER_INSPECT);
+};
+const disableInspectLayer = function(o) {
+  o.layers.disable(CAMERA_LAYER_INSPECT);
+};
+
+function setupSphere(sphere) {
+  sphere.object3D.traverse(o => o.layers.set(CAMERA_LAYER_INSPECT));
+  sphere.object3DMap.mesh.material.side = 2;
+  sphere.object3DMap.mesh.material.color.setHex(0x020202);
+  sphere.object3D.scale.multiplyScalar(100);
+  sphere.object3D.matrixNeedsUpdate = true;
+}
+
+function getAudio(o) {
+  let audio;
+  o.traverse(c => {
+    if (!audio && c.type === "Audio") {
+      audio = c;
+    }
+  });
+  return audio;
+}
+
 export class CameraSystem {
   constructor(batchManagerSystem) {
     this.batchManagerSystem = batchManagerSystem;
-
     this.mode = CAMERA_MODE_FIRST_PERSON;
+    this.snapshot = { audioTransform: new THREE.Matrix4() };
     waitForDOMContentLoaded().then(() => {
       this.avatarPOV = document.getElementById("avatar-pov-node");
       this.avatarRig = document.getElementById("avatar-rig");
       this.cameraEl = document.getElementById("viewing-camera");
       this.rigEl = document.getElementById("viewing-rig");
+
       const sphere = document.getElementById("inspect-sphere");
-      function setupSphere(sphere) {
-        sphere.object3D.traverse(o => o.layers.set(CAMERA_LAYER_INSPECT));
-        sphere.object3DMap.mesh.material.side = 2;
-        sphere.object3DMap.mesh.material.color.setHex(0x020202);
-        sphere.object3D.scale.multiplyScalar(100);
-        sphere.object3D.matrixNeedsUpdate = true;
-      }
+      // TODO: Make this synchronous, or at least not a race condition.
       setTimeout(() => {
         setupSphere(sphere);
       }, 2000);
     });
-    this.disableInspectLayer = function(o) {
-      o.layers.disable(CAMERA_LAYER_INSPECT);
-    };
-    this.enableInspectLayer = function(o) {
-      o.layers.enable(CAMERA_LAYER_INSPECT);
-    };
   }
+
   nextMode() {
     if (this.mode === CAMERA_MODE_INSPECT) {
       this.uninspect();
@@ -176,56 +190,58 @@ export class CameraSystem {
 
   inspect(o) {
     if (this.mode !== CAMERA_MODE_INSPECT) {
-      this.preInspectMode = this.mode;
+      this.snapshot.mode = this.mode;
     }
     this.mode = CAMERA_MODE_INSPECT;
     this.inspected = o;
 
-    const batchForInspected = getBatch(this.inspected, this.batchManagerSystem);
-    if (batchForInspected) {
-      batchForInspected.traverse(this.enableInspectLayer);
-    } else {
-      this.inspected.traverse(this.enableInspectLayer);
-    }
+    (getBatch(o, this.batchManagerSystem) || o).traverse(enableInspectLayer);
+
     const scene = AFRAME.scenes[0];
     const vrMode = scene.is("vr-mode");
     const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
-    this.preInspectLayerMask = camera.layers.mask;
+    this.snapshot.mask = camera.layers.mask;
     camera.layers.set(CAMERA_LAYER_INSPECT);
     if (vrMode) {
-      this.preInspectLayerMask0 = camera.cameras[0].layers.mask;
-      this.preInspectLayerMask1 = camera.cameras[1].layers.mask;
+      this.snapshot.mask0 = camera.cameras[0].layers.mask;
+      this.snapshot.mask1 = camera.cameras[1].layers.mask;
       camera.cameras[0].layers.set(CAMERA_LAYER_INSPECT);
       camera.cameras[1].layers.set(CAMERA_LAYER_INSPECT);
     }
 
     moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
+
+    this.snapshot.audio = getAudio(o);
+    if (this.snapshot.audio) {
+      this.snapshot.audio.updateMatrices();
+      this.snapshot.audioTransform.copy(this.snapshot.audio.matrixWorld);
+      this.cameraEl.object3D.updateMatrices();
+      setMatrixWorld(this.snapshot.audio, this.cameraEl.object3D.matrixWorld);
+    }
   }
 
   uninspect() {
     if (this.inspected) {
-      const batchForInspected = getBatch(this.inspected, this.batchManagerSystem);
-      if (batchForInspected) {
-        console.log("has batch for the mesh, uninspecting");
-        batchForInspected.traverse(this.disableInspectLayer);
-      } else {
-        this.inspected.traverse(this.disableInspectLayer);
-      }
+      (getBatch(this.inspected, this.batchManagerSystem) || this.inspected).traverse(disableInspectLayer);
     }
     const vrMode = AFRAME.scenes[0].is("vr-mode");
     const scene = AFRAME.scenes[0];
     const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
+    camera.layers.mask = this.snapshot.mask;
     if (vrMode) {
-      camera.cameras[0].layers.mask = this.preInspectLayerMask0;
-      camera.cameras[1].layers.mask = this.preInspectLayerMask1;
+      camera.cameras[0].layers.mask = this.snapshot.mask0;
+      camera.cameras[1].layers.mask = this.snapshot.mask1;
     }
-    camera.layers.mask = this.preInspectLayerMask;
     if (this.inspected) {
       this.inspected = null;
     }
     if (this.mode !== CAMERA_MODE_INSPECT) return;
-    this.mode = this.preInspectMode || CAMERA_MODE_FIRST_PERSON;
-    this.preInspectMode = null;
+    this.mode = this.snapshot.mode || CAMERA_MODE_FIRST_PERSON;
+    this.snapshot.mode = null;
+
+    if (this.snapshot.audio) {
+      setMatrixWorld(this.snapshot.audio, this.snapshot.audioTransform);
+    }
   }
 
   tick = (function() {
@@ -242,6 +258,10 @@ export class CameraSystem {
       this.userinput = this.userinput || AFRAME.scenes[0].systems.userinput;
       if (this.inspected) {
         const stopInspecting = this.userinput.get(paths.actions.stopInspecting);
+        if (this.snapshot.audio) {
+          //setMatrixWorld(this.snapshot.audio, this.snapshot.audioTransform);
+          //this.snapshot.audio = null;
+        }
         if (stopInspecting) {
           this.uninspect();
         }
