@@ -581,13 +581,20 @@ class UIRoot extends Component {
 
           const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
           const audioTrack = mediaStream.getAudioTracks()[0];
+          const audioTrackClone = audioTrack.clone();
+          this.setState({ audioTrackClone });
+
           NAF.connection.adapter.setLocalMediaStream(mediaStream);
 
           if (this.props.scene.is("muted")) {
             NAF.connection.adapter.enableMicrophone(false);
           }
 
-          this.props.scene.emit("local-media-stream-created", { mediaStream });
+          this.setState({ mediaStream, audioTrack, audioTrackClone });
+
+          const mediaStreamForMicAnalysis = new MediaStream();
+          mediaStreamForMicAnalysis.addTrack(audioTrackClone);
+          this.props.scene.emit("local-media-stream-created", { mediaStream: mediaStreamForMicAnalysis });
           audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
         };
 
