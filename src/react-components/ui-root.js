@@ -582,6 +582,11 @@ class UIRoot extends Component {
           const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
           const audioTrack = mediaStream.getAudioTracks()[0];
           NAF.connection.adapter.setLocalMediaStream(mediaStream);
+
+          if (this.props.scene.is("muted")) {
+            NAF.connection.adapter.enableMicrophone(false);
+          }
+
           audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
         };
 
