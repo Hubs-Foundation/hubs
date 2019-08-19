@@ -587,6 +587,7 @@ class UIRoot extends Component {
             NAF.connection.adapter.enableMicrophone(false);
           }
 
+          this.props.scene.emit("local-media-stream-created", { mediaStream });
           audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
         };
 
