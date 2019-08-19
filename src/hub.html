@@ -77,7 +77,7 @@
             <a-asset-item id="botwoody" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotWoody_Avatar-0140485a23.gltf"></a-asset-item>
 
             <template id="remote-avatar">
-                <a-entity networked-avatar ik-root player-info matrix-auto-update>
+                <a-entity networked-avatar ik-root player-info matrix-auto-update visible="false">
                     <a-entity class="camera" matrix-auto-update></a-entity>
 
                     <a-entity class="left-controller" matrix-auto-update></a-entity>
@@ -802,6 +802,7 @@
             ik-root
             player-info
             periodic-full-syncs
+            visible="false"
         >
             <a-entity
                 id="player-hud"
