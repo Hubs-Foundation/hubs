@@ -1,5 +1,6 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { setMatrixWorld } from "../utils/three-utils";
+import { isTagged } from "../components/tags";
 import { paths } from "./userinput/paths";
 import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
@@ -16,10 +17,7 @@ function getBatch(inspected, batchManagerSystem) {
 }
 
 const calculateViewingDistance = (function() {
-  const center = new THREE.Vector3();
-  return function calculateViewingDistance(camera, object) {
-    const box = getBox(object.el, object.el.getObject3D("mesh"), true);
-    box.getCenter(center);
+  return function calculateViewingDistance(camera, object, box, center) {
     const halfYExtents = Math.max(Math.abs(box.max.y - center.y), Math.abs(center.y - box.min.y));
     const halfXExtents = Math.max(Math.abs(box.max.x - center.x), Math.abs(center.x - box.min.x));
     const halfVertFOV = THREE.Math.degToRad(camera.el.sceneEl.camera.fov / 2);
@@ -39,19 +37,28 @@ const moveRigSoCameraLooksAtObject = (function() {
   const owq = new THREE.Quaternion();
   const v1 = new THREE.Vector3();
   const v2 = new THREE.Vector3();
-  const owp = new THREE.Vector3();
+  const center = new THREE.Vector3();
+  const flipXZ = new THREE.Quaternion(0, 1, 0, 0);
 
-  return function moveRigSoCameraLooksAtObject(rig, camera, object) {
+  return function moveRigSoCameraLooksAtObject(rig, camera, object, backwards) {
     object.getWorldQuaternion(owq);
-    object.getWorldPosition(owp);
     cqInv.copy(camera.quaternion).inverse();
     rig.quaternion.copy(owq).multiply(cqInv);
+    if (backwards) {
+      rig.quaternion.multiply(flipXZ);
+    }
 
-    v1.set(0, 0, 1)
-      .multiplyScalar(calculateViewingDistance(camera, object))
+    if (!object.el.getObject3D("mesh")) {
+      window.foo = object;
+      console.log(object);
+    }
+    const box = getBox(object.el, object.el.getObject3D("mesh") || object, true);
+    box.getCenter(center);
+    v1.set(0, 0, backwards ? -1 : 1)
+      .multiplyScalar(calculateViewingDistance(camera, object, box, center))
       .applyQuaternion(owq);
     v2.copy(camera.position).applyQuaternion(rig.quaternion);
-    rig.position.subVectors(v1, v2).add(owp);
+    rig.position.subVectors(v1, v2).add(center);
 
     rig.matrixNeedsUpdate = true;
   };
@@ -209,7 +216,12 @@ export class CameraSystem {
       camera.cameras[1].layers.set(CAMERA_LAYER_INSPECT);
     }
 
-    moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
+    moveRigSoCameraLooksAtObject(
+      this.rigEl.object3D,
+      this.cameraEl.object3D,
+      this.inspected,
+      isTagged(this.inspected.el, "inspectBackwards")
+    );
 
     this.snapshot.audio = getAudio(o);
     if (this.snapshot.audio) {

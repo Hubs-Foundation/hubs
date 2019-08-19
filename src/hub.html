@@ -84,7 +84,7 @@
 
                     <a-entity class="right-controller" matrix-auto-update></a-entity>
 
-                    <a-entity class="model" gltf-model-plus="inflate: true">
+                    <a-entity class="model" gltf-model-plus="inflate: true" tags="inspectable:true; inspectBackwards:true;">
                         <template data-name="AvatarRoot">
                             <a-entity ik-controller hand-pose__left hand-pose__right space-invader-mesh="meshName: AvatarMesh"></a-entity>
                         </template>
@@ -136,6 +136,19 @@
                                         </a-entity>
                                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0.45 0.675 0.35" class="avatar-volume-up-button">
                                             <a-entity text="value: +; anchor: center; align: center; color: #ccc; letterSpacing: 4; width: 2.5;" text-raycast-hack position="0 0 0.01" scale="0.85 0.85 0.85"></a-entity>
+                                        </a-entity>
+                                        <a-entity
+                                            mixin="rounded-action-button"
+                                            tags="isHoldable: true; holdableButton: true;"
+                                            is-remote-hover-target
+                                            inspect-button
+                                            position="0 0.25 0.35">
+                                            <a-entity
+                                                sprite
+                                                icon-button="image: recenter-action.png; hoverImage: recenter-action.png"
+                                                scale="0.165 0.165 0.165"
+                                                position="0 0 0.001"
+                                            ></a-entity>
                                         </a-entity>
                                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" block-button position="0 0 .35">
                                             <a-entity text="value:Hide; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
