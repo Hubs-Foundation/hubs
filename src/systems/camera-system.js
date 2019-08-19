@@ -248,14 +248,14 @@ export class CameraSystem {
     const m2 = new THREE.Matrix4();
     const m3 = new THREE.Matrix4();
     const offset = new THREE.Vector3();
-    return function tick() {
+    return function tick(scene) {
+      if (!scene.is("entered")) return;
       this.playerHead = this.playerHead || document.getElementById("avatar-head");
-      if (!AFRAME.scenes[0].is("entered")) return;
 
       this.avatarPOV.components["pitch-yaw-rotator"].on = true;
       this.cameraEl.components["pitch-yaw-rotator"].on = true;
 
-      this.userinput = this.userinput || AFRAME.scenes[0].systems.userinput;
+      this.userinput = this.userinput || scene.systems.userinput;
       if (this.inspected) {
         const stopInspecting = this.userinput.get(paths.actions.stopInspecting);
         if (this.snapshot.audio) {
@@ -283,7 +283,7 @@ export class CameraSystem {
       if (this.mode === CAMERA_MODE_FIRST_PERSON) {
         this.cameraEl.components["pitch-yaw-rotator"].on = false;
         setMatrixWorld(this.rigEl.object3D, this.avatarRig.object3D.matrixWorld);
-        if (AFRAME.scenes[0].is("vr-mode")) {
+        if (scene.is("vr-mode")) {
           this.cameraEl.object3D.updateMatrices();
           setMatrixWorld(this.avatarPOV.object3D, this.cameraEl.object3D.matrixWorld);
         } else {
@@ -302,6 +302,20 @@ export class CameraSystem {
         setMatrixWorld(this.rigEl.object3D, m2);
         this.avatarPOV.object3D.quaternion.copy(this.cameraEl.object3D.quaternion);
         this.avatarPOV.object3D.matrixNeedsUpdate = true;
+      }
+
+      if (scene.audioListener && this.avatarPOV) {
+        if (
+          (this.mode === CAMERA_MODE_FIRST_PERSON || this.mode === CAMERA_MODE_INSPECT) &&
+          scene.audioListener.parent !== this.avatarPOV.object3D
+        ) {
+          this.avatarPOV.object3D.add(scene.audioListener);
+        } else if (
+          (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) &&
+          scene.audioListener.parent !== this.cameraEl.object3D
+        ) {
+          this.cameraEl.object3D.add(scene.audioListener);
+        }
       }
     };
   })();
