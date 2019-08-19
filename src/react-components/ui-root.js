@@ -582,7 +582,6 @@ class UIRoot extends Component {
           const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
           const audioTrack = mediaStream.getAudioTracks()[0];
           const audioTrackClone = audioTrack.clone();
-          this.setState({ audioTrackClone });
 
           NAF.connection.adapter.setLocalMediaStream(mediaStream);
 
