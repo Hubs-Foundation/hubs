@@ -709,12 +709,17 @@ class UIRoot extends Component {
     );
   };
 
-  onAudioReadyButton = () => {
+  onAudioReadyButton = async () => {
     if (!this.state.enterInVR) {
-      showFullScreenIfAvailable();
+      await showFullScreenIfAvailable();
     }
 
-    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.muteOnEntry);
+    // Push the new history state before going into VR, otherwise menu button will take us back
+    clearHistoryState(this.props.history);
+
+    await this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.muteOnEntry);
+
+    this.setState({ entered: true, showShareDialog: false });
 
     const mediaStream = this.state.mediaStream;
 
@@ -727,9 +732,6 @@ class UIRoot extends Component {
         console.log("Screen sharing enabled.");
       }
     }
-
-    this.setState({ entered: true, showShareDialog: false });
-    clearHistoryState(this.props.history);
   };
 
   attemptLink = async () => {
