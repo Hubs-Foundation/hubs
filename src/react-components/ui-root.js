@@ -586,7 +586,9 @@ class UIRoot extends Component {
           NAF.connection.adapter.setLocalMediaStream(mediaStream);
 
           if (this.props.scene.is("muted")) {
+            console.warn("re-muting microphone");
             NAF.connection.adapter.enableMicrophone(false);
+            audioTrack.enabled = false;
           }
 
           this.setState({ mediaStream, audioTrack, audioTrackClone });
