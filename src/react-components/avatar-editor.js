@@ -452,7 +452,16 @@ export default class AvatarEditor extends Component {
                     <a onClick={() => this.setState({ confirmDelete: false })}>no</a>
                   </span>
                 ) : (
-                  <a onClick={() => this.setState({ confirmDelete: true })}>delete avatar</a>
+                  <a
+                    onClick={() => this.setState({ confirmDelete: true })}
+                    title={
+                      avatar.has_listings
+                        ? "Other users already using this avatar will still be able to use it, but it will be removed from 'My Avatars' and search results."
+                        : ""
+                    }
+                  >
+                    {avatar.has_listings ? "delist" : "delete"} avatar
+                  </a>
                 )}
               </div>
             )}
