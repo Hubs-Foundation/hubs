@@ -1,6 +1,5 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { setMatrixWorld } from "../utils/three-utils";
-import { isTagged } from "../components/tags";
 import { paths } from "./userinput/paths";
 import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
@@ -38,23 +37,15 @@ const moveRigSoCameraLooksAtObject = (function() {
   const v1 = new THREE.Vector3();
   const v2 = new THREE.Vector3();
   const center = new THREE.Vector3();
-  const flipXZ = new THREE.Quaternion(0, 1, 0, 0);
 
-  return function moveRigSoCameraLooksAtObject(rig, camera, object, backwards) {
+  return function moveRigSoCameraLooksAtObject(rig, camera, object) {
     object.getWorldQuaternion(owq);
     cqInv.copy(camera.quaternion).inverse();
     rig.quaternion.copy(owq).multiply(cqInv);
-    if (backwards) {
-      rig.quaternion.multiply(flipXZ);
-    }
 
-    if (!object.el.getObject3D("mesh")) {
-      window.foo = object;
-      console.log(object);
-    }
     const box = getBox(object.el, object.el.getObject3D("mesh") || object, true);
     box.getCenter(center);
-    v1.set(0, 0, backwards ? -1 : 1)
+    v1.set(0, 0, 1)
       .multiplyScalar(calculateViewingDistance(camera, object, box, center))
       .applyQuaternion(owq);
     v2.copy(camera.position).applyQuaternion(rig.quaternion);
@@ -63,65 +54,6 @@ const moveRigSoCameraLooksAtObject = (function() {
     rig.matrixNeedsUpdate = true;
   };
 })();
-
-//const moveRigSoCameraIsInFrontOfObject = (function() {
-//  const r = new THREE.Vector3();
-//  const rq = new THREE.Quaternion();
-//  const c = new THREE.Vector3();
-//  const cq = new THREE.Quaternion();
-//  const o = new THREE.Vector3();
-//  const oq = new THREE.Quaternion();
-//  const coq = new THREE.Quaternion();
-//  const q = new THREE.Quaternion();
-//
-//  const cp = new THREE.Vector3();
-//  const op = new THREE.Vector3();
-//  const v = new THREE.Vector3();
-//  const p = new THREE.Vector3();
-//  const UP = new THREE.Vector3(0, 1, 0);
-//
-//  return function moveRigSoCameraIsInFrontOfObject(rig, camera, object) {
-//    // assume
-//    //  - camera is rig's child
-//    //  - scales are 1
-//    //  - object is not flat on the floor
-//    rig.getWorldQuaternion(rq);
-//    camera.getWorldQuaternion(cq);
-//    object.getWorldQuaternion(oq);
-//
-//    r.set(0, 0, 1)
-//      .applyQuaternion(rq) //     .projectOnPlane(UP) // not needed here since rig is assumed flat
-//      .normalize();
-//
-//    c.set(0, 0, -1)
-//      .applyQuaternion(cq)
-//      .projectOnPlane(UP)
-//      .normalize();
-//
-//    o.set(0, 0, -1)
-//      .applyQuaternion(oq)
-//      .projectOnPlane(UP)
-//      .normalize();
-//
-//    coq.setFromUnitVectors(c, o);
-//    q.copy(rq).premultiply(coq);
-//
-//    cp.copy(camera.position);
-//    object.getWorldPosition(op);
-//
-//    //const isMobileNonVR = AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isMobileVR();
-//    // TODO: Position yourself slightly farther away when on mobile. Better yet, make use of
-//    // the screen size / frustrum info
-//    v.copy(cp).multiplyScalar(-1);
-//    p.copy(op)
-//      .sub(o.multiplyScalar(calculateViewingDistance(camera, object)))
-//      .add(v);
-//
-//    rig.quaternion.copy(q);
-//    rig.position.copy(p);
-//    rig.matrixNeedsUpdate = true;
-//  };
-//})();
 
 export const CAMERA_MODE_FIRST_PERSON = 0;
 export const CAMERA_MODE_THIRD_PERSON_NEAR = 1;
@@ -172,9 +104,12 @@ export class CameraSystem {
       this.rigEl = document.getElementById("viewing-rig");
 
       const sphere = document.getElementById("inspect-sphere");
-      // TODO: Make this synchronous, or at least not a race condition.
-      setTimeout(() => {
-        setupSphere(sphere);
+      // TODO: Make this synchronous, don't use a-sphere
+      const i = setInterval(() => {
+        if (sphere.object3DMap && sphere.object3DMap.mesh) {
+          clearInterval(i);
+          setupSphere(sphere);
+        }
       }, 2000);
     });
   }
@@ -216,12 +151,7 @@ export class CameraSystem {
       camera.cameras[1].layers.set(CAMERA_LAYER_INSPECT);
     }
 
-    moveRigSoCameraLooksAtObject(
-      this.rigEl.object3D,
-      this.cameraEl.object3D,
-      this.inspected,
-      isTagged(this.inspected.el, "inspectBackwards")
-    );
+    moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
 
     this.snapshot.audio = getAudio(o);
     if (this.snapshot.audio) {
