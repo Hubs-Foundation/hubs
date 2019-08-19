@@ -213,10 +213,11 @@ export class CameraSystem {
 
     this.snapshot.audio = getAudio(o);
     if (this.snapshot.audio) {
+      this.snapshot.audio.applyMatrix(new THREE.Matrix4().identity()); // hack around our matrix optimizations
       this.snapshot.audio.updateMatrices();
       this.snapshot.audioTransform.copy(this.snapshot.audio.matrixWorld);
-      this.cameraEl.object3D.updateMatrices();
-      setMatrixWorld(this.snapshot.audio, this.cameraEl.object3D.matrixWorld);
+      scene.audioListener.updateMatrices();
+      setMatrixWorld(this.snapshot.audio, scene.audioListener.matrixWorld);
     }
   }
 
@@ -259,8 +260,8 @@ export class CameraSystem {
       if (this.inspected) {
         const stopInspecting = this.userinput.get(paths.actions.stopInspecting);
         if (this.snapshot.audio) {
-          //setMatrixWorld(this.snapshot.audio, this.snapshot.audioTransform);
-          //this.snapshot.audio = null;
+          scene.audioListener.updateMatrices();
+          setMatrixWorld(this.snapshot.audio, scene.audioListener.matrixWorld);
         }
         if (stopInspecting) {
           this.uninspect();
