@@ -724,7 +724,7 @@ class UIRoot extends Component {
     this.setState({ linkCode: code, linkCodeCancel: cancel });
     onFinished.then(() => {
       this.setState({ log: false, linkCode: null, linkCodeCancel: null });
-      this.props.history.goBack();
+      this.exit();
     });
   };
 
