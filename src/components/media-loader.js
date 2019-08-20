@@ -74,6 +74,12 @@ AFRAME.registerComponent("media-loader", {
       center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
       mesh.position.sub(center);
       mesh.matrixNeedsUpdate = true;
+
+      // Tridify code
+      // Hacky way to disable item rescaling
+      mesh.scale.x = 1;
+      mesh.scale.y = 1;
+      mesh.scale.z = 1;
     };
   })(),
 
