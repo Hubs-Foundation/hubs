@@ -248,6 +248,7 @@ AFRAME.registerSystem("transform-selected-object", {
     this.target.matrixNeedsUpdate = true;
   },
 
+  // TODO: stabilize scaling in VR. currently feels broken
   cursorAxisOrScaleTick() {
     const {
       plane,
@@ -258,7 +259,6 @@ AFRAME.registerSystem("transform-selected-object", {
       deltaOnPlane,
       finalProjectedVec
     } = this.planarInfo;
-
     this.target.getWorldPosition(plane.position);
     this.el.camera.getWorldQuaternion(plane.quaternion);
     this.el.camera.getWorldPosition(v);
@@ -381,9 +381,14 @@ AFRAME.registerComponent("transform-button-selector", {
 const FORWARD = new THREE.Vector3(0, 0, 1);
 const TWO_PI = 2 * Math.PI;
 AFRAME.registerComponent("visible-if-transforming", {
+  schema: {
+    hand: { type: "string" }
+  },
   init() {},
   tick(t) {
-    const shouldBeVisible = AFRAME.scenes[0].systems["transform-selected-object"].transforming;
+    const shouldBeVisible =
+      AFRAME.scenes[0].systems["transform-selected-object"].transforming &&
+      AFRAME.scenes[0].systems["transform-selected-object"].hand.el.id.indexOf(this.data.hand) !== -1;
     const visibleNeedsUpdate = this.el.getAttribute("visible") !== shouldBeVisible;
     if (visibleNeedsUpdate) {
       this.el.setAttribute("visible", AFRAME.scenes[0].systems["transform-selected-object"].transforming);

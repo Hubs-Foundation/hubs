@@ -104,8 +104,8 @@ AFRAME.registerComponent("cursor-controller", {
       const transformObjectSystem = AFRAME.scenes[0].systems["transform-selected-object"];
       if (
         transformObjectSystem.transforming &&
-        ((left && transformObjectSystem.hand.id === "player-left-controller") ||
-          (!left && transformObjectSystem.hand.id === "player-right-controller"))
+        ((left && transformObjectSystem.hand.el.id === "player-left-controller") ||
+          (!left && transformObjectSystem.hand.el.id === "player-right-controller"))
       ) {
         this.color.copy(TRANSFORM_COLOR_1).lerpHSL(TRANSFORM_COLOR_2, 0.5 + 0.5 * Math.sin(t / 1000.0));
       } else if (this.intersectionIsValid || isGrabbing) {
