@@ -1,6 +1,7 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import { resolveUrl, injectCustomShaderChunks } from "../utils/media-utils";
 import {
+  isNonCorsProxyDomain,
   guessContentType,
   proxiedUrlFor,
   isHubsRoomUrl,
@@ -303,10 +304,10 @@ AFRAME.registerComponent("media-loader", {
 
       const parsedUrl = new URL(src);
 
-      // We want to resolve some hubs urls, like room and scene links,
-      // but we want to skip resolution and proxying for local assets
+      // We want to resolve and proxy some hubs urls, like rooms and scene links,
+      // but want to avoid proxying assets in order for this to work in dev environments
       const isLocalModelAsset =
-        parsedUrl.hostname === location.hostname && (guessContentType(src) || "").startsWith("model/gltf");
+        isNonCorsProxyDomain(parsedUrl.hostname) && (guessContentType(src) || "").startsWith("model/gltf");
 
       if (this.data.resolve && !src.startsWith("data:") && !isLocalModelAsset) {
         const result = await resolveUrl(src);
