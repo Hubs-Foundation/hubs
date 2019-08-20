@@ -156,7 +156,7 @@ const NOISY_OCCUPANT_COUNT = 12; // Above this # of occupants, we stop posting j
 
 // Maximum number of people in the room/entering before users are forced to observer mode.
 // Eventually this should be moved to a room setting.
-const MAX_OCCUPIED_ROOM_ENTRY_SLOTS = 1;
+const MAX_OCCUPIED_ROOM_ENTRY_SLOTS = 24;
 
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
