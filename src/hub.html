@@ -224,7 +224,7 @@
                     hoverable-visuals
                 >
                     <a-entity class="ui interactable-ui">
-                        <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 10; withPermission: spawn_and_move_media">
+                        <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media">
                             <a-entity
                                 mixin="rounded-text-action-button"
                                 is-remote-hover-target
@@ -376,7 +376,7 @@
                         position="0 -0.18 0"
                         pen="camera: #avatar-pov-node; drawingManager: #drawing-manager"
                     ></a-entity>
-                    <a-entity class="ui delete-button pen-menu" visibility-while-frozen="withinDistance: 10; withPermission: spawn_drawing" >
+                    <a-entity class="ui delete-button pen-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_drawing" >
                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" remove-networked-object-button position="0 0 0.01">
                             <a-entity
                                 sprite
@@ -477,7 +477,7 @@
                             ></a-entity>
                         </a-entity>
                     </a-entity>
-                    <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 10; withPermission: spawn_camera">
+                    <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_camera">
                         <a-entity mixin="rounded-action-button" class="capture-audio" is-remote-hover-target tags="singleActionButton: true;" position="0 0.125 0.01">
                             <a-entity sprite class="capture-audio-icon"
                                 icon-button="image: unmute-action.png; hoverImage: unmute-action.png; activeImage: mute-action.png; activeHoverImage: mute-action.png"
@@ -520,7 +520,7 @@
             </template>
 
             <template id="paging-toolbar">
-                <a-entity class="ui paging-toolbar" visibility-while-frozen="withinDistance: 10; requireHoverOnNonMobile: false;">
+                <a-entity class="ui paging-toolbar" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;">
                     <a-entity class="prev-button" position="-0.3 0 0">
                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.2">
                             <a-entity
@@ -654,7 +654,7 @@
                 <a-entity
                     class="ui interactable-ui hover-container unmute-ui"
                     position="0 0 0.1"
-                    visibility-while-frozen="visible: false; withinDistance: 10; requireHoverOnNonMobile: false;"
+                    visibility-while-frozen="visible: false; withinDistance: 100; requireHoverOnNonMobile: false;"
                 >
                     <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.4" unmute-video-button position="0 -0.5 0.01">
                         <a-entity text="value:unmute; width:2; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>

@@ -10,7 +10,7 @@ AFRAME.registerComponent("cursor-controller", {
   schema: {
     cursor: { type: "selector" },
     camera: { type: "selector" },
-    far: { default: 25 },
+    far: { default: 100 },
     near: { default: 0.01 },
     defaultDistance: { default: 4 },
     minDistance: { default: 0.18 }
