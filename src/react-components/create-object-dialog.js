@@ -10,7 +10,7 @@ import styles from "../assets/stylesheets/create-object-dialog.scss";
 import ducky from "../assets/models/DuckyMesh.glb";
 import DialogContainer from "./dialog-container.js";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
-import { getAbsoluteHref } from "../utils/url-utils";
+import { getAbsoluteHref } from "../utils/media-url-utils";
 import { WithHoverSound } from "./wrap-with-audio";
 
 const attributionHostnames = {

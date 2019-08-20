@@ -1,4 +1,4 @@
-import { getAbsoluteHref } from "./utils/url-utils";
+import { getAbsoluteHref } from "./utils/media-url-utils";
 import { spawnChatMessage } from "./react-components/chat-message";
 import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "./systems/sound-effects-system";
 import ducky from "./assets/models/DuckyMesh.glb";
