@@ -5,6 +5,7 @@ console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
 import happyEmoji from "./assets/images/chest-emojis/screen-effect/happy.png";
+import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 
 import "aframe";
 import "./utils/logging";
@@ -200,9 +201,6 @@ NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
 const isDebug = qsTruthy("debug");
-const loadingEnvironmentURL = proxiedUrlFor(
-  "https://uploads-prod.reticulum.io/files/61d77151-7a74-40a6-b427-0c5a350c4502.glb"
-);
 
 if (!isBotMode && !isTelemetryDisabled) {
   registerTelemetry("/hub", "Room Landing Page");
@@ -312,7 +310,7 @@ async function updateEnvironmentForHub(hub) {
     sceneUrl = hub.scene.model_url;
   } else if (hub.scene === null) {
     // delisted/removed scene
-    sceneUrl = loadingEnvironmentURL;
+    sceneUrl = loadingEnvironment;
   } else {
     const defaultSpaceTopic = hub.topics[0];
     const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
@@ -381,7 +379,7 @@ async function updateEnvironmentForHub(hub) {
       { once: true }
     );
 
-    environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironmentURL });
+    environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironment });
   }
 }
 
