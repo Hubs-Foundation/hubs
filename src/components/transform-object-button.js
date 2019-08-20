@@ -161,7 +161,7 @@ AFRAME.registerSystem("transform-selected-object", {
       this.raycaster || document.getElementById("right-cursor-controller").components["cursor-controller"].raycaster;
     this.raycaster2 =
       this.raycaster2 || document.getElementById("left-cursor-controller").components["cursor-controller"].raycaster;
-    const left = this.hand.id === "player-left-controller";
+    const left = this.hand.el.id === "player-left-controller";
     const far = left ? this.raycaster2.far : this.raycaster.far;
     if (left) {
       this.raycaster2.far = 1000;
@@ -266,11 +266,19 @@ AFRAME.registerSystem("transform-selected-object", {
     const cameraToPlaneDistance = v.sub(plane.position).length();
 
     intersections.length = 0;
-    // TODO: Right hand / left hand support
-    const far = this.raycaster.far;
-    this.raycaster.far = 1000;
-    plane.raycast(this.raycaster, intersections);
-    this.raycaster.far = far;
+    const left = this.hand.el.id === "player-left-controller";
+    const far = left ? this.raycaster2.far : this.raycaster.far;
+    if (left) {
+      this.raycaster2.far = 1000;
+    } else {
+      this.raycaster.far = 1000;
+    }
+    plane.raycast(left ? this.raycaster2 : this.raycaster, intersections);
+    if (left) {
+      this.raycaster2.far = far;
+    } else {
+      this.raycaster.far = far;
+    }
     const intersection = intersections[0]; // point
     if (!intersection) return;
 
