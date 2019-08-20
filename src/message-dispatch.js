@@ -86,7 +86,7 @@ export default class MessageDispatch {
         break;
       case "debug":
         physicsSystem = document.querySelector("a-scene").systems["hubs-systems"].physicsSystem;
-        physicsSystem.setDebug(!physicsSystem.debug);
+        physicsSystem.setDebug(!physicsSystem.debugEnabled);
         break;
       case "vrstats":
         document.getElementById("stats").components["stats-plus"].toggleVRStats();

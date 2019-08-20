@@ -4,6 +4,7 @@ import "./utils/debug-log";
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
+import happyEmoji from "./assets/images/chest-emojis/screen-effect/happy.png";
 
 import "aframe";
 import "./utils/logging";
@@ -38,6 +39,7 @@ import "./components/mute-mic";
 import "./components/bone-mute-state-indicator";
 import "./components/bone-visibility";
 import "./components/in-world-hud";
+import "./components/emoji-hud";
 import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
 import "./components/hand-controls2";
@@ -442,8 +444,8 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     remountUI({
       showInterstitialPrompt: true,
       onInterstitialPromptClicked: () => {
-        scene.emit("2d-interstitial-gesture-complete");
         remountUI({ showInterstitialPrompt: false, onInterstitialPromptClicked: null });
+        scene.emit("2d-interstitial-gesture-complete");
       }
     });
   });
@@ -624,6 +626,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const scene = document.querySelector("a-scene");
   scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
 
+  // HACK - Trigger initial batch preparation with an invisible object
+  scene
+    .querySelector("#batch-prep")
+    .setAttribute("media-image", { batch: true, src: happyEmoji, contentType: "image/png" });
+
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
     physicsSystem.setDebug(isDebug || physicsSystem.debug);
@@ -651,7 +658,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const signInContinueTextId = scene.is("vr-mode") ? "entry.return-to-vr" : "dialog.close";
 
-    handleExitTo2DInterstitial(true, () => remountUI({ showSignInDialog: false }));
+    await handleExitTo2DInterstitial(true, () => remountUI({ showSignInDialog: false }));
 
     remountUI({
       showSignInDialog: true,
@@ -695,7 +702,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   });
 
-  scene.addEventListener("action_media_tweet", e => {
+  scene.addEventListener("action_media_tweet", async e => {
     let isInModal = false;
     let isInOAuth = false;
 
@@ -705,7 +712,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       remountUI({ showOAuthDialog: false, oauthInfo: null });
     };
 
-    handleExitTo2DInterstitial(true, () => {
+    await handleExitTo2DInterstitial(true, () => {
       if (isInModal) history.goBack();
       if (isInOAuth) exitOAuth();
     });

@@ -10,7 +10,7 @@ import screenfull from "screenfull";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
-import emojiStyle from "../assets/stylesheets/ui-emoji.scss";
+import emojiStyles from "../assets/stylesheets/ui-emoji.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
@@ -193,6 +193,7 @@ class UIRoot extends Component {
     waitingOnAudio: false,
     mediaStream: null,
     audioTrack: null,
+    audioTrackClone: null,
     micDevices: [],
 
     autoExitTimerStartedAt: null,
@@ -324,6 +325,9 @@ class UIRoot extends Component {
     if (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now")) {
       setTimeout(() => this.handleForceEntry(), 2000);
     }
+
+    this.playerRig = scene.querySelector("#avatar-rig");
+    this.playerRig.addEventListener("emoji_changed", ({ detail }) => this.setState({ emojiState: detail.emojiType }));
   }
 
   componentWillUnmount() {
@@ -423,10 +427,6 @@ class UIRoot extends Component {
     this.props.scene.emit("action_mute");
   };
 
-  toggleFreeze = () => {
-    this.props.scene.emit("action_freeze");
-  };
-
   shareVideo = mediaSource => {
     this.props.scene.emit(`action_share_${mediaSource}`);
   };
@@ -487,21 +487,9 @@ class UIRoot extends Component {
     this.setState({ exited: true });
   };
 
-  emojiEvent = {
-    emojiType: "empty"
-  };
-
-  emojiChange = reason => {
-    if (this.state.emojiState === reason) {
-      this.setState({
-        emojiState: "empty"
-      });
-      this.emojiEvent.emojiType = "empty";
-    } else {
-      this.setState({ emojiState: reason });
-      this.emojiEvent.emojiType = reason;
-    }
-    this.props.scene.querySelector("#avatar-rig").setAttribute("player-info", this.emojiEvent);
+  changeEmoji = type => {
+    const newEmoji = this.state.emojiState === type ? "empty" : type;
+    this.playerRig.setAttribute("player-info", { emojiType: newEmoji });
   };
 
   isWaitingForAutoExit = () => {
@@ -574,6 +562,9 @@ class UIRoot extends Component {
     if (this.state.audioTrack) {
       this.state.audioTrack.stop();
     }
+    if (this.state.audioTrackClone) {
+      this.state.audioTrackClone.stop();
+    }
 
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -590,7 +581,21 @@ class UIRoot extends Component {
 
           const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
           const audioTrack = mediaStream.getAudioTracks()[0];
+          const audioTrackClone = audioTrack.clone();
+
           NAF.connection.adapter.setLocalMediaStream(mediaStream);
+
+          if (this.props.scene.is("muted")) {
+            console.warn("re-muting microphone");
+            NAF.connection.adapter.enableMicrophone(false);
+            audioTrack.enabled = false;
+          }
+
+          this.setState({ mediaStream, audioTrack, audioTrackClone });
+
+          const mediaStreamForMicAnalysis = new MediaStream();
+          mediaStreamForMicAnalysis.addTrack(audioTrackClone);
+          this.props.scene.emit("local-media-stream-created", { mediaStream: mediaStreamForMicAnalysis });
           audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
         };
 
@@ -618,7 +623,9 @@ class UIRoot extends Component {
         this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
       }
       const mediaStreamForMicAnalysis = new MediaStream();
-      mediaStreamForMicAnalysis.addTrack(this.state.audioTrack.clone());
+      const audioTrackClone = this.state.audioTrack.clone();
+      this.setState({ audioTrackClone });
+      mediaStreamForMicAnalysis.addTrack(audioTrackClone);
       this.props.scene.emit("local-media-stream-created", { mediaStream: mediaStreamForMicAnalysis });
     }
 
@@ -702,12 +709,17 @@ class UIRoot extends Component {
     );
   };
 
-  onAudioReadyButton = () => {
+  onAudioReadyButton = async () => {
     if (!this.state.enterInVR) {
-      showFullScreenIfAvailable();
+      await showFullScreenIfAvailable();
     }
 
-    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.muteOnEntry);
+    // Push the new history state before going into VR, otherwise menu button will take us back
+    clearHistoryState(this.props.history);
+
+    await this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.muteOnEntry);
+
+    this.setState({ entered: true, showShareDialog: false });
 
     const mediaStream = this.state.mediaStream;
 
@@ -720,9 +732,6 @@ class UIRoot extends Component {
         console.log("Screen sharing enabled.");
       }
     }
-
-    this.setState({ entered: true, showShareDialog: false });
-    clearHistoryState(this.props.history);
   };
 
   attemptLink = async () => {
@@ -1441,6 +1450,13 @@ class UIRoot extends Component {
     const streamer = getCurrentStreamer();
     const streamerName = streamer && streamer.displayName;
 
+    const EmojiButton = ({ type, state, onClick }) => (
+      <div
+        className={cx(emojiStyles.iconEmoji, emojiStyles[type], { [emojiStyles.active]: state === type })}
+        onClick={() => onClick(type)}
+      />
+    );
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
@@ -1685,60 +1701,15 @@ class UIRoot extends Component {
               </button>
             )}
             {this.state.frozen && (
-              <div className={cx(styles.uiInteractive, emojiStyle.emojiPanel)}>
-                <div
-                  className={cx(emojiStyle.iconEmoji, emojiStyle.smile, {
-                    [emojiStyle.active]: this.state.emojiState === "smile"
-                  })}
-                  onClick={() => this.emojiChange("smile")}
-                />
-
-                <div
-                  className={cx(emojiStyle.iconEmoji, emojiStyle.happy, {
-                    [emojiStyle.active]: this.state.emojiState === "happy"
-                  })}
-                  onClick={() => this.emojiChange("happy")}
-                />
-                <div
-                  className={cx(emojiStyle.iconEmoji, emojiStyle.surprise, {
-                    [emojiStyle.active]: this.state.emojiState === "surprise"
-                  })}
-                  onClick={() => this.emojiChange("surprise")}
-                />
-
-                <div
-                  className={cx(emojiStyle.iconEmoji, emojiStyle.disgust, {
-                    [emojiStyle.active]: this.state.emojiState === "disgust"
-                  })}
-                  onClick={() => this.emojiChange("disgust")}
-                />
-                <div
-                  className={cx(emojiStyle.iconEmoji, emojiStyle.angry, {
-                    [emojiStyle.active]: this.state.emojiState === "angry"
-                  })}
-                  onClick={() => this.emojiChange("angry")}
-                />
-
-                <div
-                  className={cx(emojiStyle.iconEmoji, emojiStyle.sad, {
-                    [emojiStyle.active]: this.state.emojiState === "sad"
-                  })}
-                  onClick={() => this.emojiChange("sad")}
-                />
-
-                <div
-                  className={cx(emojiStyle.iconEmoji, emojiStyle.eww, {
-                    [emojiStyle.active]: this.state.emojiState === "eww"
-                  })}
-                  onClick={() => this.emojiChange("eww")}
-                />
-
-                <div
-                  className={cx(emojiStyle.iconEmoji, emojiStyle.hearts, {
-                    [emojiStyle.active]: this.state.emojiState === "hearts"
-                  })}
-                  onClick={() => this.emojiChange("hearts")}
-                />
+              <div className={cx(styles.uiInteractive, emojiStyles.emojiPanel)}>
+                <EmojiButton type="smile" state={this.state.emojiState} onClick={this.changeEmoji} />
+                <EmojiButton type="happy" state={this.state.emojiState} onClick={this.changeEmoji} />
+                <EmojiButton type="surprise" state={this.state.emojiState} onClick={this.changeEmoji} />
+                <EmojiButton type="disgust" state={this.state.emojiState} onClick={this.changeEmoji} />
+                <EmojiButton type="angry" state={this.state.emojiState} onClick={this.changeEmoji} />
+                <EmojiButton type="sad" state={this.state.emojiState} onClick={this.changeEmoji} />
+                <EmojiButton type="eww" state={this.state.emojiState} onClick={this.changeEmoji} />
+                <EmojiButton type="hearts" state={this.state.emojiState} onClick={this.changeEmoji} />
               </div>
             )}
             {!this.state.frozen &&
@@ -1927,7 +1898,6 @@ class UIRoot extends Component {
                   isCursorHoldingPen={this.props.isCursorHoldingPen}
                   hasActiveCamera={this.props.hasActiveCamera}
                   onToggleMute={this.toggleMute}
-                  onToggleFreeze={this.toggleFreeze}
                   onSpawnPen={this.spawnPen}
                   onSpawnCamera={() => this.props.scene.emit("action_toggle_camera")}
                   onShareVideo={this.shareVideo}
