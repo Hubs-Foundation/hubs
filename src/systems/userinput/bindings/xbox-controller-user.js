@@ -108,7 +108,7 @@ export const xboxControllerUserBindings = addSetsToBindings({
     {
       src: { value: deadzonedRightJoystickVertical },
       dest: { value: scaledRightJoystickVertical },
-      xform: xforms.scale(-1.25) // vertical look speed modifier
+      xform: xforms.scale(-0.125) // vertical look speed modifier
     },
     {
       src: {},

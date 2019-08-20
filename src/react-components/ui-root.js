@@ -193,6 +193,7 @@ class UIRoot extends Component {
     waitingOnAudio: false,
     mediaStream: null,
     audioTrack: null,
+    audioTrackClone: null,
     micDevices: [],
 
     autoExitTimerStartedAt: null,
@@ -561,6 +562,9 @@ class UIRoot extends Component {
     if (this.state.audioTrack) {
       this.state.audioTrack.stop();
     }
+    if (this.state.audioTrackClone) {
+      this.state.audioTrackClone.stop();
+    }
 
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -577,7 +581,21 @@ class UIRoot extends Component {
 
           const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
           const audioTrack = mediaStream.getAudioTracks()[0];
+          const audioTrackClone = audioTrack.clone();
+
           NAF.connection.adapter.setLocalMediaStream(mediaStream);
+
+          if (this.props.scene.is("muted")) {
+            console.warn("re-muting microphone");
+            NAF.connection.adapter.enableMicrophone(false);
+            audioTrack.enabled = false;
+          }
+
+          this.setState({ mediaStream, audioTrack, audioTrackClone });
+
+          const mediaStreamForMicAnalysis = new MediaStream();
+          mediaStreamForMicAnalysis.addTrack(audioTrackClone);
+          this.props.scene.emit("local-media-stream-created", { mediaStream: mediaStreamForMicAnalysis });
           audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
         };
 
@@ -605,7 +623,9 @@ class UIRoot extends Component {
         this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
       }
       const mediaStreamForMicAnalysis = new MediaStream();
-      mediaStreamForMicAnalysis.addTrack(this.state.audioTrack.clone());
+      const audioTrackClone = this.state.audioTrack.clone();
+      this.setState({ audioTrackClone });
+      mediaStreamForMicAnalysis.addTrack(audioTrackClone);
       this.props.scene.emit("local-media-stream-created", { mediaStream: mediaStreamForMicAnalysis });
     }
 
@@ -689,12 +709,17 @@ class UIRoot extends Component {
     );
   };
 
-  onAudioReadyButton = () => {
+  onAudioReadyButton = async () => {
     if (!this.state.enterInVR) {
-      showFullScreenIfAvailable();
+      await showFullScreenIfAvailable();
     }
 
-    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.muteOnEntry);
+    // Push the new history state before going into VR, otherwise menu button will take us back
+    clearHistoryState(this.props.history);
+
+    await this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.muteOnEntry);
+
+    this.setState({ entered: true, showShareDialog: false });
 
     const mediaStream = this.state.mediaStream;
 
@@ -707,9 +732,6 @@ class UIRoot extends Component {
         console.log("Screen sharing enabled.");
       }
     }
-
-    this.setState({ entered: true, showShareDialog: false });
-    clearHistoryState(this.props.history);
   };
 
   attemptLink = async () => {

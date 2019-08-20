@@ -447,8 +447,8 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     remountUI({
       showInterstitialPrompt: true,
       onInterstitialPromptClicked: () => {
-        scene.emit("2d-interstitial-gesture-complete");
         remountUI({ showInterstitialPrompt: false, onInterstitialPromptClicked: null });
+        scene.emit("2d-interstitial-gesture-complete");
       }
     });
   });
@@ -661,7 +661,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const signInContinueTextId = scene.is("vr-mode") ? "entry.return-to-vr" : "dialog.close";
 
-    handleExitTo2DInterstitial(true, () => remountUI({ showSignInDialog: false }));
+    await handleExitTo2DInterstitial(true, () => remountUI({ showSignInDialog: false }));
 
     remountUI({
       showSignInDialog: true,
@@ -705,7 +705,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   });
 
-  scene.addEventListener("action_media_tweet", e => {
+  scene.addEventListener("action_media_tweet", async e => {
     let isInModal = false;
     let isInOAuth = false;
 
@@ -715,7 +715,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       remountUI({ showOAuthDialog: false, oauthInfo: null });
     };
 
-    handleExitTo2DInterstitial(true, () => {
+    await handleExitTo2DInterstitial(true, () => {
       if (isInModal) history.goBack();
       if (isInOAuth) exitOAuth();
     });

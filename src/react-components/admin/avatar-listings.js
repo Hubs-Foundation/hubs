@@ -14,7 +14,9 @@ import {
   TextField,
   DateField,
   BooleanField,
-  Filter
+  Filter,
+  ArrayInput,
+  SimpleFormIterator
 } from "react-admin";
 
 const AvatarListingFilter = props => (
@@ -30,6 +32,11 @@ export const AvatarListingEdit = props => (
       <TextInput source="name" />
       <TextInput source="description" />
       <TextInput source="attribution" />
+      <ArrayInput source="tags.tags" defaultValue={[]}>
+        <SimpleFormIterator>
+          <TextInput />
+        </SimpleFormIterator>
+      </ArrayInput>
       <NumberInput source="order" />
       <SelectInput source="state" choices={[{ id: "active", name: "active" }, { id: "delisted", name: "delisted" }]} />
     </SimpleForm>

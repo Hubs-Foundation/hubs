@@ -299,7 +299,7 @@ AFRAME.registerComponent("media-loader", {
       let contentType = this.data.contentType;
       let thumbnail;
 
-      if (this.data.resolve) {
+      if (this.data.resolve && !src.startsWith("data:")) {
         const result = await resolveUrl(src);
         canonicalUrl = result.origin;
         // handle protocol relative urls

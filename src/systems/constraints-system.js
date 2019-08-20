@@ -47,11 +47,13 @@ export class ConstraintsSystem {
         const body = state.held.components["body-helper"].body;
         const targetEl = document.querySelector(`#${entityId}`);
         const targetBody = targetEl.components["body-helper"].body;
-        this.constraints[entityId] = new Constraint({}, body, targetBody, this.physicsSystem.world);
-        if (!this.constraintPairs[heldEntityId]) {
-          this.constraintPairs[heldEntityId] = [];
+        if (targetBody && targetBody.physicsBody) {
+          this.constraints[entityId] = new Constraint({}, body, targetBody, this.physicsSystem.world);
+          if (!this.constraintPairs[heldEntityId]) {
+            this.constraintPairs[heldEntityId] = [];
+          }
+          this.constraintPairs[heldEntityId].push(entityId);
         }
-        this.constraintPairs[heldEntityId].push(entityId);
       }
       return;
     }
@@ -80,11 +82,13 @@ export class ConstraintsSystem {
         const body = state.held.components["body-helper"].body;
         const targetEl = document.querySelector(`#${entityId}`);
         const targetBody = targetEl.components["body-helper"].body;
-        this.constraints[entityId] = new Constraint(CONSTRAINT_CONFIG, body, targetBody, this.physicsSystem.world);
-        if (!this.constraintPairs[heldEntityId]) {
-          this.constraintPairs[heldEntityId] = [];
+        if (targetBody && targetBody.physicsBody) {
+          this.constraints[entityId] = new Constraint(CONSTRAINT_CONFIG, body, targetBody, this.physicsSystem.world);
+          if (!this.constraintPairs[heldEntityId]) {
+            this.constraintPairs[heldEntityId] = [];
+          }
+          this.constraintPairs[heldEntityId].push(entityId);
         }
-        this.constraintPairs[heldEntityId].push(entityId);
       } else {
         console.log("Failed to obtain ownership while trying to create constraint on networked object.");
       }

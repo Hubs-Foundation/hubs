@@ -6,12 +6,17 @@ import { isTagged } from "../components/tags";
 
 function findHandCollisionTargetForHand(body) {
   const world = this.el.sceneEl.systems["hubs-systems"].physicsSystem.world;
-  const handPtr = Ammo.getPointer(body.physicsBody);
 
-  if (world.collisions.has(handPtr) && world.collisions.get(handPtr).length > 0) {
-    const object3D = world.object3Ds.get(world.collisions.get(handPtr)[0]);
-    if (isTagged(object3D.el, "isHandCollisionTarget")) {
-      return object3D.el;
+  if (world) {
+    const handPtr = Ammo.getPointer(body.physicsBody);
+    const handCollisions = world.collisions.get(handPtr);
+    if (handCollisions) {
+      for (let i = 0; i < handCollisions.length; i++) {
+        const object3D = world.object3Ds.get(handCollisions[i]);
+        if (isTagged(object3D.el, "isHandCollisionTarget")) {
+          return object3D.el;
+        }
+      }
     }
   }
 
