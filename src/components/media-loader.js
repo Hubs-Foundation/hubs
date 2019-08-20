@@ -300,9 +300,15 @@ AFRAME.registerComponent("media-loader", {
       let accessibleUrl = src;
       let contentType = this.data.contentType;
       let thumbnail;
+
       const parsedUrl = new URL(src);
 
-      if (this.data.resolve && !src.startsWith("data:") && parsedUrl.hostname !== location.hostname) {
+      // We want to resolve some hubs urls, like room and scene links,
+      // but we want to skip resolution and proxying for local assets
+      const isLocalModelAsset =
+        parsedUrl.hostname === location.hostname && (guessContentType(src) || "").startsWith("model/gltf");
+
+      if (this.data.resolve && !src.startsWith("data:") && !isLocalModelAsset) {
         const result = await resolveUrl(src);
         canonicalUrl = result.origin;
         // handle protocol relative urls
