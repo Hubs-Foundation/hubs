@@ -40,7 +40,7 @@ AFRAME.registerComponent("pen-laser", {
       material = MobileStandardMaterial.fromStandardMaterial(material);
     }
 
-    const lineCurve = new THREE.LineCurve3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 1));
+    const lineCurve = new THREE.LineCurve3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 2));
     const geometry = new THREE.TubeBufferGeometry(lineCurve, 2, 0.003, 8, true);
     this.laser = new THREE.Mesh(geometry, material);
 
@@ -108,7 +108,7 @@ AFRAME.registerComponent("pen-laser", {
     if (origin && target) {
       this.laser.position.copy(origin);
       this.laser.lookAt(target);
-      this.laser.scale.set(1, 1, origin.distanceTo(target) * 2); //multiply by 2 because parent scale is 0.5
+      this.laser.scale.set(1, 1, origin.distanceTo(target));
       this.laser.matrixNeedsUpdate = true;
       this.laserTip.position.copy(target);
       this.laserTip.matrixNeedsUpdate = true;
@@ -117,6 +117,7 @@ AFRAME.registerComponent("pen-laser", {
 
     if (this.laser.material.visible !== laserVisible) {
       this.laser.material.visible = laserVisible;
+      this.laserTip.material.visible = laserVisible;
     }
   },
 
