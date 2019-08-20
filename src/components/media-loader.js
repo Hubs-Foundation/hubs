@@ -126,10 +126,12 @@ AFRAME.registerComponent("media-loader", {
 
     if (useFancyLoader) {
       const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-      const currentEnivronmentMap = environmentMapComponent.environmentMap;
-      if (loadingObjectEnvMap !== currentEnivronmentMap) {
-        environmentMapComponent.applyEnvironmentMap(mesh);
-        loadingObjectEnvMap = currentEnivronmentMap;
+      if (environmentMapComponent) {
+        const currentEnivronmentMap = environmentMapComponent.environmentMap;
+        if (loadingObjectEnvMap !== currentEnivronmentMap) {
+          environmentMapComponent.applyEnvironmentMap(mesh);
+          loadingObjectEnvMap = currentEnivronmentMap;
+        }
       }
 
       this.loaderMixer = new THREE.AnimationMixer(mesh);
