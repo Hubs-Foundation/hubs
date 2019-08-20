@@ -245,11 +245,6 @@ function registerNetworkSchemas() {
       },
       {
         selector: "#pen",
-        component: "position",
-        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
-      },
-      {
-        selector: "#pen",
         component: "pen-laser",
         property: "remoteLaserVisible"
       },

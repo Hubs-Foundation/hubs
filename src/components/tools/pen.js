@@ -175,6 +175,10 @@ AFRAME.registerComponent("pen", {
       const isMine =
         this.el.parentEl.components.networked.initialized && this.el.parentEl.components.networked.isMine();
 
+      if (this.penTip.material.visible !== isMine) {
+        this.penTip.material.visible = isMine;
+      }
+
       this._handleInput();
 
       this._drawLine(isMine);
