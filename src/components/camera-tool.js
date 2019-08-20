@@ -325,7 +325,6 @@ AFRAME.registerComponent("camera-tool", {
     const label = this.data.label;
     const isFrozen = this.el.sceneEl.is("frozen");
     const hasDuration = this.data.captureDuration !== Infinity;
-    const isPhoto = this.data.captureDuration === 0;
 
     const isRecordingUnbound = !hasDuration && this.data.isRecording && this.videoRecorder;
     this.label.object3D.visible = !!label && !isRecordingUnbound;
@@ -345,8 +344,8 @@ AFRAME.registerComponent("camera-tool", {
     }
 
     this.durationLabel.object3D.visible = hasDuration && !this.data.isSnapping && !isFrozen && allowVideo;
-    this.recordIcon.object3D.visible = !hasDuration && !isPhoto && !isFrozen && allowVideo;
-    this.recordAlphaIcon.object3D.visible = hasDuration && !isPhoto && !isFrozen && allowVideo;
+    this.recordIcon.object3D.visible = !hasDuration && !isFrozen && allowVideo;
+    this.recordAlphaIcon.object3D.visible = hasDuration && !isFrozen && allowVideo;
     this.snapButton.object3D.visible = !this.data.isSnapping && !isFrozen;
     this.recordButton.object3D.visible = !this.data.isSnapping && !isFrozen && allowVideo;
     this.cancelButton.object3D.visible = this.data.isSnapping && !isFrozen;
