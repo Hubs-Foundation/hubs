@@ -43,3 +43,11 @@ body.vr-mode-stretch {
 a-entity {
   display: none;
 }
+
+.svg-icon {
+  overflow: visible;
+  display: inline-block;
+  font-size: inherit;
+  vertical-align: -0.125em;
+  height: 1em;
+}

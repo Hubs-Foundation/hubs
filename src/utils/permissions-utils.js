@@ -119,6 +119,7 @@ export function authorizeOrSanitizeMessage(message) {
   const senderPermissions = presenceState.metas[0].permissions;
 
   if (dataType === "um") {
+    let sanitizedAny = false;
     for (const index in message.data.d) {
       if (!message.data.d.hasOwnProperty(index)) continue;
       const authorizedOrSanitized = authorizeOrSanitizeMessageData(
@@ -127,9 +128,15 @@ export function authorizeOrSanitizeMessage(message) {
         senderPermissions
       );
       if (!authorizedOrSanitized) {
-        message.data.d[index] = emptyObject;
+        message.data.d[index] = null;
+        sanitizedAny = true;
       }
     }
+
+    if (sanitizedAny) {
+      message.data.d = message.data.d.filter(x => x != null);
+    }
+
     return message;
   } else if (dataType === "u") {
     const authorizedOrSanitized = authorizeOrSanitizeMessageData(message.data, from_session_id, senderPermissions);

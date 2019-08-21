@@ -1,6 +1,7 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import { resolveUrl, injectCustomShaderChunks } from "../utils/media-utils";
 import {
+  isNonCorsProxyDomain,
   guessContentType,
   proxiedUrlFor,
   isHubsRoomUrl,
@@ -10,7 +11,7 @@ import {
 import { addAnimationComponents } from "../utils/animation";
 import qsTruthy from "../utils/qs_truthy";
 
-import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
+import loadingObjectSrc from "../assets/models/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
 import { loadModel } from "./gltf-model-plus";
 import { cloneObject3D } from "../utils/three-utils";
@@ -126,10 +127,12 @@ AFRAME.registerComponent("media-loader", {
 
     if (useFancyLoader) {
       const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-      const currentEnivronmentMap = environmentMapComponent.environmentMap;
-      if (loadingObjectEnvMap !== currentEnivronmentMap) {
-        environmentMapComponent.applyEnvironmentMap(mesh);
-        loadingObjectEnvMap = currentEnivronmentMap;
+      if (environmentMapComponent) {
+        const currentEnivronmentMap = environmentMapComponent.environmentMap;
+        if (loadingObjectEnvMap !== currentEnivronmentMap) {
+          environmentMapComponent.applyEnvironmentMap(mesh);
+          loadingObjectEnvMap = currentEnivronmentMap;
+        }
       }
 
       this.loaderMixer = new THREE.AnimationMixer(mesh);
@@ -299,7 +302,14 @@ AFRAME.registerComponent("media-loader", {
       let contentType = this.data.contentType;
       let thumbnail;
 
-      if (this.data.resolve) {
+      const parsedUrl = new URL(src);
+
+      // We want to resolve and proxy some hubs urls, like rooms and scene links,
+      // but want to avoid proxying assets in order for this to work in dev environments
+      const isLocalModelAsset =
+        isNonCorsProxyDomain(parsedUrl.hostname) && (guessContentType(src) || "").startsWith("model/gltf");
+
+      if (this.data.resolve && !src.startsWith("data:") && !isLocalModelAsset) {
         const result = await resolveUrl(src);
         canonicalUrl = result.origin;
         // handle protocol relative urls
@@ -327,7 +337,6 @@ AFRAME.registerComponent("media-loader", {
         contentType.startsWith("audio/") ||
         AFRAME.utils.material.isHLS(canonicalUrl, contentType)
       ) {
-        const parsedUrl = new URL(src);
         const qsTime = parseInt(parsedUrl.searchParams.get("t"));
         const hashTime = parseInt(new URLSearchParams(parsedUrl.hash.substring(1)).get("t"));
         const startTime = hashTime || qsTime || 0;

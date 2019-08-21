@@ -141,6 +141,7 @@
     "stylelint": "^9.10.1",
     "stylelint-config-recommended-scss": "^3.2.0",
     "stylelint-scss": "^3.5.3",
+    "svg-inline-loader": "^0.8.0",
     "url-loader": "^1.0.1",
     "webpack": "^4.32.2",
     "webpack-bundle-analyzer": "^3.3.2",

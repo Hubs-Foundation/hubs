@@ -136,6 +136,7 @@ class MediaTiles extends Component {
         <video
           className={classNames(styles.tileContent, styles.avatarTile)}
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
+          muted
           autoPlay
           src={proxiedUrlFor(imageSrc)}
         />

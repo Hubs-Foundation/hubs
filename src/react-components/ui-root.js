@@ -21,7 +21,6 @@ import {
   navigateToPriorPage,
   sluglessPath
 } from "../utils/history";
-import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
 import { getPresenceProfileForSession, discordBridgesForPresences } from "../utils/phoenix-utils";
 import { getClientInfoClientId } from "./client-info-dialog";
@@ -127,6 +126,7 @@ class UIRoot extends Component {
     hubEntryCode: PropTypes.number,
     availableVREntryTypes: PropTypes.object,
     environmentSceneLoaded: PropTypes.bool,
+    entryDisallowed: PropTypes.bool,
     roomUnavailableReason: PropTypes.string,
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
@@ -581,7 +581,21 @@ class UIRoot extends Component {
 
           const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
           const audioTrack = mediaStream.getAudioTracks()[0];
+          const audioTrackClone = audioTrack.clone();
+
           NAF.connection.adapter.setLocalMediaStream(mediaStream);
+
+          if (this.props.scene.is("muted")) {
+            console.warn("re-muting microphone");
+            NAF.connection.adapter.enableMicrophone(false);
+            audioTrack.enabled = false;
+          }
+
+          this.setState({ mediaStream, audioTrack, audioTrackClone });
+
+          const mediaStreamForMicAnalysis = new MediaStream();
+          mediaStreamForMicAnalysis.addTrack(audioTrackClone);
+          this.props.scene.emit("local-media-stream-created", { mediaStream: mediaStreamForMicAnalysis });
           audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
         };
 
@@ -695,12 +709,17 @@ class UIRoot extends Component {
     );
   };
 
-  onAudioReadyButton = () => {
+  onAudioReadyButton = async () => {
     if (!this.state.enterInVR) {
-      showFullScreenIfAvailable();
+      await showFullScreenIfAvailable();
     }
 
-    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.muteOnEntry);
+    // Push the new history state before going into VR, otherwise menu button will take us back
+    clearHistoryState(this.props.history);
+
+    await this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.muteOnEntry);
+
+    this.setState({ entered: true, showShareDialog: false });
 
     const mediaStream = this.state.mediaStream;
 
@@ -713,9 +732,6 @@ class UIRoot extends Component {
         console.log("Screen sharing enabled.");
       }
     }
-
-    this.setState({ entered: true, showShareDialog: false });
-    clearHistoryState(this.props.history);
   };
 
   attemptLink = async () => {
@@ -724,7 +740,7 @@ class UIRoot extends Component {
     this.setState({ linkCode: code, linkCodeCancel: cancel });
     onFinished.then(() => {
       this.setState({ log: false, linkCode: null, linkCodeCancel: null });
-      this.props.history.goBack();
+      this.exit();
     });
   };
 
@@ -1027,44 +1043,62 @@ class UIRoot extends Component {
           />
         </div>
 
-        {!this.state.waitingOnAudio ? (
-          <div className={entryStyles.buttonContainer}>
-            {!isMobileVR && (
+        {!this.state.waitingOnAudio &&
+          !this.props.entryDisallowed && (
+            <div className={entryStyles.buttonContainer}>
+              {!isMobileVR && (
+                <a
+                  onClick={e => {
+                    e.preventDefault();
+                    this.attemptLink();
+                  }}
+                  className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
+                >
+                  <FormattedMessage id="entry.device-medium" />
+                  <div className={entryStyles.buttonSubtitle}>
+                    <FormattedMessage
+                      id={isMobile ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"}
+                    />
+                  </div>
+                </a>
+              )}
               <a
                 onClick={e => {
                   e.preventDefault();
-                  this.attemptLink();
+
+                  if (promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType) {
+                    this.props.hubChannel.sendEnteringEvent();
+
+                    const stateValue = promptForNameAndAvatarBeforeEntry ? "profile" : "device";
+                    this.pushHistoryState("entry_step", stateValue);
+                  } else {
+                    this.handleForceEntry();
+                  }
+                }}
+                className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
+              >
+                <FormattedMessage id="entry.enter-room" />
+              </a>
+            </div>
+          )}
+        {this.props.entryDisallowed &&
+          !this.state.waitingOnAudio && (
+            <div className={entryStyles.buttonContainer}>
+              <a
+                onClick={e => {
+                  e.preventDefault();
+                  this.setState({ watching: true });
                 }}
                 className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
               >
-                <FormattedMessage id="entry.device-medium" />
+                <FormattedMessage id="entry.entry-disallowed" />
                 <div className={entryStyles.buttonSubtitle}>
-                  <FormattedMessage id={isMobile ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"} />
+                  <FormattedMessage id="entry.entry-disallowed-subtitle" />
                 </div>
               </a>
-            )}
-            {promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType ? (
-              <StateLink
-                stateKey="entry_step"
-                stateValue={promptForNameAndAvatarBeforeEntry ? "profile" : "device"}
-                history={this.props.history}
-                className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
-              >
-                <FormattedMessage id="entry.enter-room" />
-              </StateLink>
-            ) : (
-              <a
-                onClick={e => {
-                  e.preventDefault();
-                  this.handleForceEntry();
-                }}
-                className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
-              >
-                <FormattedMessage id="entry.enter-room" />
-              </a>
-            )}
-          </div>
-        ) : (
+            </div>
+          )}
+        {this.state.waitingOnAudio && (
           <div>
             <div className="loader-wrap loader-mid">
               <div className="loader">
@@ -1080,7 +1114,13 @@ class UIRoot extends Component {
   renderDevicePanel = () => {
     return (
       <div className={entryStyles.entryPanel}>
-        <div onClick={() => this.props.history.goBack()} className={entryStyles.back}>
+        <div
+          onClick={() => {
+            this.props.hubChannel.sendEnteringCancelledEvent();
+            this.props.history.goBack();
+          }}
+          className={entryStyles.back}
+        >
           <i>
             <FontAwesomeIcon icon={faArrowLeft} />
           </i>
@@ -1169,7 +1209,18 @@ class UIRoot extends Component {
     const subtitleId = isMobilePhoneOrVR ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     return (
       <div className="audio-setup-panel">
-        <div onClick={() => this.props.history.goBack()} className={entryStyles.back}>
+        <div
+          onClick={() => {
+            // If we forced a VR entry type, then we skipped the device panel
+            // and hence going back from the audio setup panel will bring you back to the lobby.
+            if (this.props.forcedVREntryType) {
+              this.props.hubChannel.sendEnteringCancelledEvent();
+            }
+
+            this.props.history.goBack();
+          }}
+          className={entryStyles.back}
+        >
           <i>
             <FontAwesomeIcon icon={faArrowLeft} />
           </i>

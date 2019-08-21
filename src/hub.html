@@ -76,8 +76,10 @@
             <a-asset-item id="botrobert" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotRobert_Avatar-e9554880f3.gltf"></a-asset-item>
             <a-asset-item id="botwoody" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotWoody_Avatar-0140485a23.gltf"></a-asset-item>
 
+            <a-asset-item id="drawing-pen" response-type="arraybuffer" src="./assets/models/DrawingPen.glb"></a-asset-item>
+
             <template id="remote-avatar">
-                <a-entity networked-avatar ik-root player-info matrix-auto-update>
+                <a-entity networked-avatar ik-root player-info matrix-auto-update visible="false">
                     <a-entity class="camera" matrix-auto-update></a-entity>
 
                     <a-entity class="left-controller" matrix-auto-update></a-entity>
@@ -406,30 +408,32 @@
                     position-at-box-shape-border__freeze="target: .camera-menu"
                     set-yxz-order
                 >
-                    <a-entity
-                        class="label"
-                        text="value: text; align: center; color: #fafafa"
-                        position="0 0.15 0.081"
-                        scale="1.95 1.95 1.95"
-                    ></a-entity>
-                    <a-entity class="label-action-background" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0.15 0.08" scale="0.75 0.75 0.75">
-                    </a-entity>
-                    <a-entity class="label-background" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0.15 0.08" scale="0.75 0.75 0.75">
-                    </a-entity>
                     <a-entity class="ui interactable-ui camera-snap-menu" visible-if-permitted="spawn_camera">
+                        <a-entity
+                            class="label"
+                            text="value: text; align: center; color: #fafafa"
+                            position="0 0.15 0.081"
+                            scale="1.95 1.95 1.95"
+                        ></a-entity>
+                        <a-entity class="label-action-background" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0.15 0.08" scale="0.75 0.75 0.75">
+                        </a-entity>
+                        <a-entity class="label-background" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0.15 0.08" scale="0.75 0.75 0.75">
+                        </a-entity>
                         <a-entity
                             class="duration"
                             text="value: 5s; align: center; color: #fafafa"
                             position="0 -0.15 0.09"
                             scale="1.9 1.9 1.9"
                         ></a-entity>
-                        <a-entity class="snap-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 -0.15 0.075" scale="0.75 0.75 0.75">
+                        <a-entity class="snap-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0.15 0.08" scale="0.75 0.75 0.75">
                             <a-entity
                                 sprite class="snap-icon"
                                 icon-button="image: snap_camera.png; hoverImage: snap_camera.png;"
                                 scale="0.2 0.2 0.2"
                                 position="0 0.002 0.01"
                             ></a-entity>
+                        </a-entity>
+                        <a-entity class="record-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 -0.15 0.075" scale="0.75 0.75 0.75">
                             <a-entity
                                 sprite class="record-icon"
                                 icon-button="image: record-action.png; hoverImage: record-action.png;"
@@ -803,6 +807,7 @@
             ik-root
             player-info
             periodic-full-syncs
+            visible="false"
         >
             <a-entity
                 id="player-hud"

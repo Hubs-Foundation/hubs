@@ -40,8 +40,8 @@ const CAPTURE_WIDTH = isMobileVR ? 640 : 1280;
 const CAPTURE_HEIGHT = isMobileVR ? 360 : 720;
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
-const CAPTURE_DURATIONS = allowVideo ? [0, 3, 7, 15, 30, 60, Infinity] : [0];
-const DEFAULT_CAPTURE_DURATION = allowVideo ? 3 : 0;
+const CAPTURE_DURATIONS = [3, 7, 15, 30, 60, Infinity];
+const DEFAULT_CAPTURE_DURATION = 3;
 const COUNTDOWN_DURATION = 3;
 const VIDEO_LOOPS = 3; // Number of times to loop the videos we spawn before stopping them (for perf)
 const MAX_DURATION_TO_LIMIT_LOOPS = 31; // Max duration for which we limit loops (eg GIFs vs long form videos)
@@ -202,7 +202,6 @@ AFRAME.registerComponent("camera-tool", {
       this.labelBackground = this.el.querySelector(".label-background");
       this.durationLabel = this.el.querySelector(".duration");
 
-      this.snapIcon = this.el.querySelector(".snap-icon");
       this.recordIcon = this.el.querySelector(".record-icon");
       this.recordAlphaIcon = this.el.querySelector(".record-alpha-icon");
 
@@ -212,10 +211,13 @@ AFRAME.registerComponent("camera-tool", {
       this.snapMenu = this.el.querySelector(".camera-snap-menu");
       this.playerCamera = document.getElementById("viewing-camera").getObject3D("camera");
       this.snapButton = this.el.querySelector(".snap-button");
+      this.recordButton = this.el.querySelector(".record-button");
+
       this.cancelButton = this.el.querySelector(".cancel-button");
       this.nextDurationButton = this.el.querySelector(".next-duration");
       this.prevDurationButton = this.el.querySelector(".prev-duration");
-      this.snapButton.object3D.addEventListener("interact", () => this.snapClicked());
+      this.snapButton.object3D.addEventListener("interact", () => this.snapClicked(true));
+      this.recordButton.object3D.addEventListener("interact", () => this.snapClicked(false));
       this.cancelButton.object3D.addEventListener("interact", () => this.cancelSnapping());
       this.nextDurationButton.object3D.addEventListener("interact", () => this.changeDuration(1));
       this.prevDurationButton.object3D.addEventListener("interact", () => this.changeDuration(-1));
@@ -271,7 +273,7 @@ AFRAME.registerComponent("camera-tool", {
     };
   })(),
 
-  snapClicked() {
+  snapClicked(isPhoto) {
     if (this.data.isSnapping) return;
     if (!NAF.utils.isMine(this.el) && !NAF.utils.takeOwnership(this.el)) return;
 
@@ -294,7 +296,7 @@ AFRAME.registerComponent("camera-tool", {
         clearInterval(this.countdownInterval);
         this.countdownInterval = null;
 
-        if (this.data.captureDuration === 0) {
+        if (isPhoto) {
           this.el.setAttribute("camera-tool", { label: "", isSnapping: false });
           this.takeSnapshotNextTick = true;
         } else {
@@ -322,8 +324,7 @@ AFRAME.registerComponent("camera-tool", {
 
     const label = this.data.label;
     const isFrozen = this.el.sceneEl.is("frozen");
-    const hasDuration = this.data.captureDuration !== 0 && this.data.captureDuration !== Infinity;
-    const isPhoto = this.data.captureDuration === 0;
+    const hasDuration = this.data.captureDuration !== Infinity;
 
     const isRecordingUnbound = !hasDuration && this.data.isRecording && this.videoRecorder;
     this.label.object3D.visible = !!label && !isRecordingUnbound;
@@ -342,14 +343,14 @@ AFRAME.registerComponent("camera-tool", {
       this.durationLabel.setAttribute("text", "value", `${this.data.captureDuration}`);
     }
 
-    this.durationLabel.object3D.visible = hasDuration && !this.data.isSnapping && !isFrozen;
-    this.recordIcon.object3D.visible = !hasDuration && !isPhoto && !isFrozen;
-    this.recordAlphaIcon.object3D.visible = hasDuration && !isPhoto && !isFrozen;
-    this.snapIcon.object3D.visible = isPhoto && !isFrozen;
+    this.durationLabel.object3D.visible = hasDuration && !this.data.isSnapping && !isFrozen && allowVideo;
+    this.recordIcon.object3D.visible = !hasDuration && !isFrozen && allowVideo;
+    this.recordAlphaIcon.object3D.visible = hasDuration && !isFrozen && allowVideo;
     this.snapButton.object3D.visible = !this.data.isSnapping && !isFrozen;
+    this.recordButton.object3D.visible = !this.data.isSnapping && !isFrozen && allowVideo;
     this.cancelButton.object3D.visible = this.data.isSnapping && !isFrozen;
     this.prevDurationButton.object3D.visible = this.nextDurationButton.object3D.visible =
-      !this.data.isSnapping && allowVideo && !isFrozen;
+      !this.data.isSnapping && allowVideo && !isFrozen && allowVideo;
 
     this.captureAudioIcon.setAttribute("icon-button", "active", this.data.captureAudio);
   },
