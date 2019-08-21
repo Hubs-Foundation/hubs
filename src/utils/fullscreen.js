@@ -15,15 +15,15 @@ export function willRequireUserGesture() {
   return !screenfull.isFullscreen && shouldShowFullScreen();
 }
 
-export function showFullScreenIfAvailable() {
+export async function showFullScreenIfAvailable() {
   if (shouldShowFullScreen()) {
-    screenfull.request();
     hasEnteredFullScreenThisSession = true;
+    await screenfull.request();
   }
 }
 
-export function showFullScreenIfWasFullScreen() {
+export async function showFullScreenIfWasFullScreen() {
   if (hasEnteredFullScreenThisSession && !screenfull.isFullscreen) {
-    screenfull.request();
+    await screenfull.request();
   }
 }

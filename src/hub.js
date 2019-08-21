@@ -5,6 +5,7 @@ console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
 import happyEmoji from "./assets/images/chest-emojis/screen-effect/happy.png";
+import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 
 import "aframe";
 import "./utils/logging";
@@ -154,6 +155,10 @@ const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
 const NOISY_OCCUPANT_COUNT = 12; // Above this # of occupants, we stop posting join/leaves/renames
 
+// Maximum number of people in the room/entering before users are forced to observer mode.
+// Eventually this should be moved to a room setting.
+const MAX_OCCUPIED_ROOM_ENTRY_SLOTS = 24;
+
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
@@ -200,9 +205,6 @@ NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
 const isDebug = qsTruthy("debug");
-const loadingEnvironmentURL = proxiedUrlFor(
-  "https://uploads-prod.reticulum.io/files/61d77151-7a74-40a6-b427-0c5a350c4502.glb"
-);
 
 if (!isBotMode && !isTelemetryDisabled) {
   registerTelemetry("/hub", "Room Landing Page");
@@ -312,7 +314,7 @@ async function updateEnvironmentForHub(hub) {
     sceneUrl = hub.scene.model_url;
   } else if (hub.scene === null) {
     // delisted/removed scene
-    sceneUrl = loadingEnvironmentURL;
+    sceneUrl = loadingEnvironment;
   } else {
     const defaultSpaceTopic = hub.topics[0];
     const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
@@ -381,7 +383,7 @@ async function updateEnvironmentForHub(hub) {
       { once: true }
     );
 
-    environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironmentURL });
+    environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironment });
   }
 }
 
@@ -394,7 +396,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     // on re-join. Ideally this would be updated into the channel socket state but this
     // would require significant changes to the hub channel events and socket management.
     if (scene.is("entered")) {
-      hubChannel.sendEntryEvent();
+      hubChannel.sendEnteredEvent();
     }
 
     // Send complete sync on phoenix re-join.
@@ -444,8 +446,8 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     remountUI({
       showInterstitialPrompt: true,
       onInterstitialPromptClicked: () => {
-        scene.emit("2d-interstitial-gesture-complete");
         remountUI({ showInterstitialPrompt: false, onInterstitialPromptClicked: null });
+        scene.emit("2d-interstitial-gesture-complete");
       }
     });
   });
@@ -658,7 +660,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const signInContinueTextId = scene.is("vr-mode") ? "entry.return-to-vr" : "dialog.close";
 
-    handleExitTo2DInterstitial(true, () => remountUI({ showSignInDialog: false }));
+    await handleExitTo2DInterstitial(true, () => remountUI({ showSignInDialog: false }));
 
     remountUI({
       showSignInDialog: true,
@@ -702,7 +704,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   });
 
-  scene.addEventListener("action_media_tweet", e => {
+  scene.addEventListener("action_media_tweet", async e => {
     let isInModal = false;
     let isInOAuth = false;
 
@@ -712,7 +714,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       remountUI({ showOAuthDialog: false, oauthInfo: null });
     };
 
-    handleExitTo2DInterstitial(true, () => {
+    await handleExitTo2DInterstitial(true, () => {
       if (isInModal) history.goBack();
       if (isInOAuth) exitOAuth();
     });
@@ -1106,6 +1108,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let isInitialJoin = true;
 
+  // state used to ensure we only remountUI when entry allowed changes, since otherwise we'd re-render
+  // on every presence sync.
+  let entryDisallowed = false;
+
   // We need to be able to wait for initial presence syncs across reconnects and socket migrations,
   // so we create this object in the outer scope and assign it a new promise on channel join.
   const presenceSync = {
@@ -1141,10 +1147,27 @@ document.addEventListener("DOMContentLoaded", async () => {
           const occupantCount = Object.entries(presence.state).length;
           vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
 
+          // A room entry slot is used by people in the room, or those going through the
+          // entry flow.
+          const roomEntrySlotCount = Object.values(presence.state).reduce((acc, { metas }) => {
+            const meta = metas[metas.length - 1];
+            const usingSlot = meta.presence === "room" || (meta.context && meta.context.entering);
+            return acc + (usingSlot ? 1 : 0);
+          }, 0);
+
           if (occupantCount > 1) {
             scene.addState("copresent");
           } else {
             scene.removeState("copresent");
+          }
+
+          const entryNowDisallowed =
+            roomEntrySlotCount >= MAX_OCCUPIED_ROOM_ENTRY_SLOTS && !hubChannel.canOrWillIfCreator("update_hub");
+
+          if (entryDisallowed !== entryNowDisallowed) {
+            // Optimization to prevent re-render unless entry allowed state changes.
+            entryDisallowed = entryNowDisallowed;
+            remountUI({ entryDisallowed });
           }
 
           // HACK - Set a flag on the presence object indicating if the initial sync has completed,
