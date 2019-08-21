@@ -8,25 +8,6 @@ function almostEquals(epsilon, u, v) {
 AFRAME.registerComponent("pen-laser", {
   schema: {
     color: { type: "color", default: "#FF0033" },
-    availableColors: {
-      default: [
-        "#FF0033",
-        "#FFFF00",
-        "#0099FF",
-        "#00FF33",
-        "#9900FF",
-        "#FF6600",
-        "#8D5524",
-        "#C68642",
-        "#E0AC69",
-        "#F1C27D",
-        "#FFDBAC",
-        "#FFFFFF",
-        "#222222",
-        "#111111",
-        "#000000"
-      ]
-    },
     laserVisible: { default: false },
     remoteLaserVisible: { default: false },
     laserOrigin: { default: { x: 0, y: 0, z: 0 } },
