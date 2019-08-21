@@ -79,7 +79,7 @@
             <a-asset-item id="drawing-pen" response-type="arraybuffer" src="./assets/models/DrawingPen.glb"></a-asset-item>
 
             <template id="remote-avatar">
-                <a-entity networked-avatar ik-root player-info matrix-auto-update>
+                <a-entity networked-avatar ik-root player-info matrix-auto-update visible="false">
                     <a-entity class="camera" matrix-auto-update></a-entity>
 
                     <a-entity class="left-controller" matrix-auto-update></a-entity>
@@ -806,6 +806,7 @@
             ik-root
             player-info
             periodic-full-syncs
+            visible="false"
         >
             <a-entity
                 id="player-hud"
