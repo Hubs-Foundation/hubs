@@ -4,6 +4,7 @@ import { paths } from "./userinput/paths";
 import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
 const enableThirdPersonMode = qsTruthy("thirdPerson");
+const IDENTITY = new THREE.Matrix4().identity();
 
 function getBatch(inspected, batchManagerSystem) {
   return (
@@ -155,7 +156,7 @@ export class CameraSystem {
 
     this.snapshot.audio = getAudio(o);
     if (this.snapshot.audio) {
-      this.snapshot.audio.applyMatrix(new THREE.Matrix4().identity()); // hack around our matrix optimizations
+      this.snapshot.audio.applyMatrix(IDENTITY); // hack around our matrix optimizations
       this.snapshot.audio.updateMatrices();
       this.snapshot.audioTransform.copy(this.snapshot.audio.matrixWorld);
       scene.audioListener.updateMatrices();
@@ -167,6 +168,7 @@ export class CameraSystem {
     if (this.inspected) {
       (getBatch(this.inspected, this.batchManagerSystem) || this.inspected).traverse(disableInspectLayer);
     }
+    this.inspected = null;
     const vrMode = AFRAME.scenes[0].is("vr-mode");
     const scene = AFRAME.scenes[0];
     const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
@@ -175,16 +177,13 @@ export class CameraSystem {
       camera.cameras[0].layers.mask = this.snapshot.mask0;
       camera.cameras[1].layers.mask = this.snapshot.mask1;
     }
-    if (this.inspected) {
-      this.inspected = null;
+    if (this.snapshot.audio) {
+      setMatrixWorld(this.snapshot.audio, this.snapshot.audioTransform);
+      this.snapshot.audio = null;
     }
     if (this.mode !== CAMERA_MODE_INSPECT) return;
     this.mode = this.snapshot.mode || CAMERA_MODE_FIRST_PERSON;
     this.snapshot.mode = null;
-
-    if (this.snapshot.audio) {
-      setMatrixWorld(this.snapshot.audio, this.snapshot.audioTransform);
-    }
   }
 
   tick = (function() {
@@ -193,7 +192,6 @@ export class CameraSystem {
     const offset = new THREE.Vector3();
     return function tick(scene) {
       if (!scene.is("entered")) return;
-      this.playerHead = this.playerHead || document.getElementById("avatar-head");
 
       this.avatarPOV.components["pitch-yaw-rotator"].on = true;
       this.cameraEl.components["pitch-yaw-rotator"].on = true;
@@ -215,6 +213,7 @@ export class CameraSystem {
       }
 
       const headShouldBeVisible = this.mode !== CAMERA_MODE_FIRST_PERSON;
+      this.playerHead = this.playerHead || document.getElementById("avatar-head");
       if (this.playerHead && headShouldBeVisible !== this.playerHead.object3D.visible) {
         this.playerHead.object3D.visible = headShouldBeVisible;
 
