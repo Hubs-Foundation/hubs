@@ -98,6 +98,7 @@ export class CameraSystem {
     this.batchManagerSystem = batchManagerSystem;
     this.mode = CAMERA_MODE_FIRST_PERSON;
     this.snapshot = { audioTransform: new THREE.Matrix4() };
+    this.audioListenerTargetTransform = new THREE.Matrix4();
     waitForDOMContentLoaded().then(() => {
       this.avatarPOV = document.getElementById("avatar-pov-node");
       this.avatarRig = document.getElementById("avatar-rig");
@@ -160,7 +161,8 @@ export class CameraSystem {
       this.snapshot.audio.updateMatrices();
       this.snapshot.audioTransform.copy(this.snapshot.audio.matrixWorld);
       scene.audioListener.updateMatrices();
-      setMatrixWorld(this.snapshot.audio, scene.audioListener.matrixWorld);
+      this.audioListenerTargetTransform.makeTranslation(0,0,1).premultiply(scene.audioListener.matrixWorld)
+      setMatrixWorld(this.snapshot.audio, this.audioListenerTargetTransform);
     }
   }
 
@@ -199,10 +201,6 @@ export class CameraSystem {
       this.userinput = this.userinput || scene.systems.userinput;
       if (this.inspected) {
         const stopInspecting = this.userinput.get(paths.actions.stopInspecting);
-        if (this.snapshot.audio) {
-          scene.audioListener.updateMatrices();
-          setMatrixWorld(this.snapshot.audio, scene.audioListener.matrixWorld);
-        }
         if (stopInspecting) {
           this.uninspect();
         }
