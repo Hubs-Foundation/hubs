@@ -597,8 +597,8 @@ AFRAME.registerComponent("media-video", {
               // We just determined the video is live (there can be a delay due to autoplay issues, etc)
               // so catch it up to HEAD.
               if (!isFirefoxReality) {
-                // HACK this causes live streams to freeze in FxR due to https://github.com/MozillaReality/FirefoxReality/issues/1602
-                this.video.currentTime = this.video.duration;
+                // HACK this causes live streams to freeze in FxR due to https://github.com/MozillaReality/FirefoxReality/issues/1602, TODO remove once 1.4 ships
+                this.video.currentTime = this.video.duration - 0.01;
               }
             }
           }
@@ -667,6 +667,7 @@ AFRAME.registerComponent("media-video", {
 
     this.seekForwardButton.object3D.visible = !this.videoIsLive;
     this.seekBackButton.object3D.visible = !this.videoIsLive;
+    this.playPauseButton.object3D.visible = !this.videoIsLive;
 
     if (this.videoIsLive) {
       this.timeLabel.setAttribute("text", "value", "LIVE");
