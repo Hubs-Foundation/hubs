@@ -6,6 +6,14 @@ import qsTruthy from "../utils/qs_truthy";
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 const IDENTITY = new THREE.Matrix4().identity();
 
+function inParentHierarchyOf(o, child) {
+  while (child) {
+    if (child === o) return true;
+    child = child.parent;
+  }
+  return false;
+}
+
 function getBatch(inspected, batchManagerSystem) {
   return (
     batchManagerSystem.batchManager &&
@@ -95,6 +103,7 @@ function getAudio(o) {
 
 export class CameraSystem {
   constructor(batchManagerSystem) {
+    this.inspectedMeshesFromBatch = [];
     this.batchManagerSystem = batchManagerSystem;
     this.mode = CAMERA_MODE_FIRST_PERSON;
     this.snapshot = { audioTransform: new THREE.Matrix4() };
@@ -139,7 +148,18 @@ export class CameraSystem {
     this.mode = CAMERA_MODE_INSPECT;
     this.inspected = o;
 
-    (getBatch(o, this.batchManagerSystem) || o).traverse(enableInspectLayer);
+    this.inspectedMeshesFromBatch.length = 0;
+    const batch = getBatch(o, this.batchManagerSystem);
+    (batch || o).traverse(enableInspectLayer);
+    if (batch) {
+      for (let instanceId = 0; instanceId < batch.ubo.meshes.length; instanceId++) {
+        const mesh = batch.ubo.meshes[instanceId];
+        if (!mesh) continue;
+        if (inParentHierarchyOf(this.inspected, mesh)) {
+          this.inspectedMeshesFromBatch.push(mesh);
+        }
+      }
+    }
 
     const scene = AFRAME.scenes[0];
     const vrMode = scene.is("vr-mode");
@@ -167,6 +187,7 @@ export class CameraSystem {
   }
 
   uninspect() {
+    this.inspectedMeshesFromBatch.length = 0;
     if (this.inspected) {
       (getBatch(this.inspected, this.batchManagerSystem) || this.inspected).traverse(disableInspectLayer);
     }

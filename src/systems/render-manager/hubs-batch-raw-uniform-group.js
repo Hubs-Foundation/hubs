@@ -18,14 +18,6 @@ export function sizeofInstances(instanceCount) {
   return instanceCount * INSTANCE_DATA_BYTE_LENGTH + hubsDataSize;
 }
 
-function inParentHierarchyOf(o, child) {
-  while (child) {
-    if (child === o) return true;
-    child = child.parent;
-  }
-  return false;
-}
-
 export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
   constructor(maxInstances, meshToEl) {
     const data = new ArrayBuffer(sizeofInstances(maxInstances));
@@ -57,7 +49,9 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
 
   update(time) {
     const interaction = AFRAME.scenes[0].systems.interaction;
-    const inspected = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspected;
+    const cameraSystem = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem;
+    const inspected = cameraSystem.inspected;
+    const inspectedMeshesFromBatch = cameraSystem.inspectedMeshesFromBatch;
     let interactorOne, interactorTwo;
 
     for (let instanceId = 0; instanceId < this.meshes.length; instanceId++) {
@@ -69,7 +63,9 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
       // TODO need to account for nested visibility deeper than 1 level
       this.setInstanceTransform(
         instanceId,
-        mesh.visible && (mesh.parent && mesh.parent.visible) && (!inspected || inParentHierarchyOf(inspected, mesh))
+        mesh.visible &&
+        (mesh.parent && mesh.parent.visible) &&
+        (!inspected || inspectedMeshesFromBatch.indexOf(mesh) !== -1)
           ? mesh.matrixWorld
           : HIDE_MATRIX
       );
