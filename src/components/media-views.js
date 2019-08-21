@@ -485,7 +485,7 @@ AFRAME.registerComponent("media-video", {
 
       const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
       this.playPauseButton.object3D.visible =
-        !!this.video && !!this.videoIsLive && (!isPinned || window.APP.hubChannel.can("pin_objects"));
+        !!this.video && !this.videoIsLive && (!isPinned || window.APP.hubChannel.can("pin_objects"));
       this.snapButton.object3D.visible = !!this.video && window.APP.hubChannel.can("spawn_and_move_media");
       this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
       this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
