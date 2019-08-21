@@ -40,17 +40,20 @@ AFRAME.registerComponent("pen-laser", {
       material = MobileStandardMaterial.fromStandardMaterial(material);
     }
 
+    const tipMaterial = material.clone();
+
     const lineCurve = new THREE.LineCurve3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 2));
     const geometry = new THREE.TubeBufferGeometry(lineCurve, 2, 0.003, 8, true);
     this.laser = new THREE.Mesh(geometry, material);
 
-    this.laserTip = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 16, 12), material);
+    this.laserTip = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 16, 12), tipMaterial);
     this.laserTip.scale.setScalar(0.01);
     this.laserTip.matrixNeedsUpdate = true;
 
     const environmentMapComponent = this.el.sceneEl.components["environment-map"];
     if (environmentMapComponent) {
       environmentMapComponent.applyEnvironmentMap(this.laser);
+      environmentMapComponent.applyEnvironmentMap(this.laserTip);
     }
 
     //prevents the line from being a raycast target for the cursor
@@ -90,7 +93,7 @@ AFRAME.registerComponent("pen-laser", {
     };
   })(),
 
-  tick(_, dt) {
+  tick(t, dt) {
     const isMine = this.el.parentEl.components.networked.initialized && this.el.parentEl.components.networked.isMine();
     let laserVisible = false;
     let origin, target;
@@ -117,7 +120,11 @@ AFRAME.registerComponent("pen-laser", {
 
     if (this.laser.material.visible !== laserVisible) {
       this.laser.material.visible = laserVisible;
-      this.laserTip.material.visible = laserVisible;
+    }
+
+    const laserTipVisible = laserVisible ? !(isMine && this.data.laserVisible) : false;
+    if (this.laserTip.material.visible !== laserTipVisible) {
+      this.laserTip.material.visible = laserTipVisible;
     }
   },
 

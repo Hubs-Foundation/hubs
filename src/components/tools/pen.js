@@ -115,15 +115,11 @@ AFRAME.registerComponent("pen", {
     this.raycaster.firstHitOnly = true; // flag specific to three-mesh-bvh
 
     this.originalPosition = this.el.object3D.position.clone();
-    this.intersection = null;
     this.lastIntersectionDistance = 0;
 
     this.targets = [];
     this.setDirty = this.setDirty.bind(this);
     this.dirty = true;
-
-    this.laserVisible = false;
-    this.remoteLaserVisible = false;
 
     let material = new THREE.MeshStandardMaterial();
     if (window.APP && window.APP.quality === "low") {
@@ -179,66 +175,37 @@ AFRAME.registerComponent("pen", {
         this.penTip.material.visible = isMine;
       }
 
-      this._handleInput();
-
-      this._drawLine(isMine);
-
       if (isMine) {
-        const penVisible = this.grabberId !== "cursor" || !this.intersection;
-        this._setPenVisible(penVisible);
+        this._handleInput();
 
-        this.remoteLaserVisible = this.data.drawMode === DRAW_MODE.PROJECTION && !!this.intersection;
-        this.laserVisible = this.el.sceneEl.is("vr-mode") && !!this.intersection && this.remoteLaserVisible;
+        const cursorPose =
+          this.data.drawMode === DRAW_MODE.PROJECTION && this.grabberId === "cursor"
+            ? AFRAME.scenes[0].systems.userinput.get(pathsMap.cursor.pose)
+            : null;
+
+        const intersection = this._getIntersection(cursorPose);
+
+        this._updatePenTip(intersection);
+
+        const remoteLaserVisible = this.data.drawMode === DRAW_MODE.PROJECTION && !!intersection;
+        const laserVisible = this.el.sceneEl.is("vr-mode") && !!intersection && remoteLaserVisible;
         this.el.setAttribute("pen-laser", {
-          laserVisible: this.laserVisible,
-          remoteLaserVisible: this.remoteLaserVisible
+          laserVisible: laserVisible,
+          remoteLaserVisible: remoteLaserVisible
         });
+
+        if (remoteLaserVisible || laserVisible) {
+          this._updateLaser(cursorPose, intersection);
+        }
+
+        const penVisible = this.grabberId !== "cursor" || !intersection;
+        this._setPenVisible(penVisible);
         this.el.setAttribute("pen", { penVisible: penVisible });
+
+        this._doDraw(intersection, dt);
       } else {
         this._setPenVisible(this.data.penVisible);
       }
-
-      //Prevent drawings from "jumping" large distances
-      if (
-        this.currentDrawing &&
-        (this.lastIntersectedObject !== (this.intersection ? this.intersection.object : null) &&
-          (!this.intersection ||
-            Math.abs(this.intersection.distance - this.lastIntersectionDistance) > MAX_DISTANCE_BETWEEN_SURFACES))
-      ) {
-        this.worldPosition.copy(this.lastPosition);
-        this._endDraw();
-      }
-      this.lastIntersectionDistance = this.intersection ? this.intersection.distance : 0;
-      this.lastIntersectedObject = this.intersection ? this.intersection.object : null;
-
-      if (!almostEquals(0.005, this.worldPosition, this.lastPosition)) {
-        this.direction.subVectors(this.worldPosition, this.lastPosition).normalize();
-        this.lastPosition.copy(this.worldPosition);
-      }
-
-      if (this.currentDrawing) {
-        const time = this.timeSinceLastDraw + dt;
-        if (
-          time >= this.data.drawFrequency &&
-          this.currentDrawing.getLastPoint().distanceTo(this.worldPosition) >= this.data.minDistanceBetweenPoints
-        ) {
-          this._getNormal(this.normal, this.worldPosition, this.direction);
-          this.currentDrawing.draw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
-        }
-
-        this.timeSinceLastDraw = time % this.data.drawFrequency;
-      }
-
-      if (this.currentDrawing && !this.grabberId) {
-        this._endDraw();
-      }
-
-      if (this.dirty) {
-        this.populateEntities(this.targets);
-        this.dirty = false;
-      }
-
-      this.el.object3D.matrixNeedsUpdate = true;
     };
   })(),
 
@@ -290,82 +257,131 @@ AFRAME.registerComponent("pen", {
     }
   },
 
-  _drawLine: (() => {
+  _getIntersection: (() => {
     const rawIntersections = [];
-    const laserStartPosition = new THREE.Vector3();
-    const laserEndPosition = new THREE.Vector3();
     const worldQuaternion = new THREE.Quaternion();
-    const camerWorldPosition = new THREE.Vector3();
-    const remoteLaserOrigin = new THREE.Vector3();
-    return function(isMine) {
+    return function(cursorPose) {
       const userinput = AFRAME.scenes[0].systems.userinput;
 
       rawIntersections.length = 0;
 
-      this.intersection = null;
-      let cursorPose;
       if (this.data.drawMode === DRAW_MODE.PROJECTION) {
-        if (isMine) {
-          if (this.grabberId === "cursor") {
-            cursorPose = userinput.get(pathsMap.cursor.pose);
-            if (cursorPose) {
-              this.raycaster.ray.origin.copy(cursorPose.position);
-              this.raycaster.ray.direction.copy(cursorPose.direction);
-            }
-          } else if (this.grabberId !== null) {
-            getLastWorldPosition(this.el.parentEl.object3D, this.raycaster.ray.origin);
-            getLastWorldQuaternion(this.el.parentEl.object3D, worldQuaternion);
-            this.raycaster.ray.direction.set(0, -1, 0);
-            this.raycaster.ray.direction.applyQuaternion(worldQuaternion);
-          }
-
-          if (this.grabberId !== null) {
-            this.raycaster.intersectObjects(this.targets, true, rawIntersections);
-            this.intersection = rawIntersections[0];
-
-            if (this.intersection) {
-              if (cursorPose) {
-                laserStartPosition.copy(cursorPose.position);
-              } else {
-                laserStartPosition.set(0, 0, 0);
-              }
-              laserEndPosition.copy(this.intersection.point);
-
-              camerWorldPosition.copy(this.data.camera.object3D.position);
-              this.data.camera.object3D.getWorldPosition(camerWorldPosition);
-              remoteLaserOrigin
-                .subVectors(laserEndPosition, camerWorldPosition)
-                .normalize()
-                .multiplyScalar(0.5);
-              remoteLaserOrigin.add(camerWorldPosition);
-              this.el.setAttribute("pen-laser", {
-                laserOrigin: laserStartPosition,
-                remoteLaserOrigin: remoteLaserOrigin,
-                laserTarget: laserEndPosition
-              });
-            }
-
-            if (this.intersection) {
-              this.el.object3D.position.copy(this.intersection.point);
-
-              this.el.parentEl.object3D.worldToLocal(this.el.object3D.position);
-
-              this.el.object3D.matrixNeedsUpdate = true;
-              this.worldPosition.copy(this.intersection.point);
-            } else {
-              this.el.object3D.position.copy(this.originalPosition);
-              this.el.object3D.matrixNeedsUpdate = true;
-              getLastWorldPosition(this.el.object3D, this.worldPosition);
-            }
-          }
+        if (cursorPose) {
+          this.raycaster.ray.origin.copy(cursorPose.position);
+          this.raycaster.ray.direction.copy(cursorPose.direction);
+        } else if (this.grabberId !== null) {
+          getLastWorldPosition(this.el.parentEl.object3D, this.raycaster.ray.origin);
+          getLastWorldQuaternion(this.el.parentEl.object3D, worldQuaternion);
+          this.raycaster.ray.direction.set(0, -1, 0);
+          this.raycaster.ray.direction.applyQuaternion(worldQuaternion);
         }
+
+        if (this.grabberId !== null) {
+          this.raycaster.intersectObjects(this.targets, true, rawIntersections);
+          return rawIntersections[0];
+        }
+      }
+
+      return null;
+    };
+  })(),
+
+  _updatePenTip(intersection) {
+    if (this.data.drawMode === DRAW_MODE.PROJECTION) {
+      if (intersection) {
+        this.el.object3D.position.copy(intersection.point);
+
+        this.el.parentEl.object3D.worldToLocal(this.el.object3D.position);
+
+        this.el.object3D.matrixNeedsUpdate = true;
+        this.worldPosition.copy(intersection.point);
       } else {
         this.el.object3D.position.copy(this.originalPosition);
         this.el.object3D.matrixNeedsUpdate = true;
         getLastWorldPosition(this.el.object3D, this.worldPosition);
       }
+    } else {
+      this.el.object3D.position.copy(this.originalPosition);
+      this.el.object3D.matrixNeedsUpdate = true;
+      getLastWorldPosition(this.el.object3D, this.worldPosition);
+    }
+  },
+
+  _updateLaser: (() => {
+    const laserStartPosition = new THREE.Vector3();
+    const laserEndPosition = new THREE.Vector3();
+    const camerWorldPosition = new THREE.Vector3();
+    const remoteLaserOrigin = new THREE.Vector3();
+    return function(cursorPose, intersection) {
+      if (cursorPose) {
+        laserStartPosition.copy(cursorPose.position);
+      } else {
+        this.el.parentEl.object3D.getWorldPosition(laserStartPosition);
+      }
+
+      laserEndPosition.copy(intersection.point);
+
+      if (this.el.sceneEl.is("vr-mode")) {
+        remoteLaserOrigin.copy(laserStartPosition);
+      } else {
+        camerWorldPosition.copy(this.data.camera.object3D.position);
+        this.data.camera.object3D.getWorldPosition(camerWorldPosition);
+        remoteLaserOrigin
+          .subVectors(laserEndPosition, camerWorldPosition)
+          .normalize()
+          .multiplyScalar(0.5);
+        remoteLaserOrigin.add(camerWorldPosition);
+      }
+
+      this.el.setAttribute("pen-laser", {
+        laserOrigin: laserStartPosition,
+        remoteLaserOrigin: remoteLaserOrigin,
+        laserTarget: laserEndPosition
+      });
     };
   })(),
+
+  _doDraw(intersection, dt) {
+    //Prevent drawings from "jumping" large distances
+    if (
+      this.currentDrawing &&
+      (this.lastIntersectedObject !== (intersection ? intersection.object : null) &&
+        (!intersection ||
+          Math.abs(intersection.distance - this.lastIntersectionDistance) > MAX_DISTANCE_BETWEEN_SURFACES))
+    ) {
+      this.worldPosition.copy(this.lastPosition);
+      this._endDraw();
+    }
+    this.lastIntersectionDistance = intersection ? intersection.distance : 0;
+    this.lastIntersectedObject = intersection ? intersection.object : null;
+
+    if (!almostEquals(0.005, this.worldPosition, this.lastPosition)) {
+      this.direction.subVectors(this.worldPosition, this.lastPosition).normalize();
+      this.lastPosition.copy(this.worldPosition);
+    }
+
+    if (this.currentDrawing) {
+      const time = this.timeSinceLastDraw + dt;
+      if (
+        time >= this.data.drawFrequency &&
+        this.currentDrawing.getLastPoint().distanceTo(this.worldPosition) >= this.data.minDistanceBetweenPoints
+      ) {
+        this._getNormal(this.normal, this.worldPosition, this.direction);
+        this.currentDrawing.draw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
+      }
+
+      this.timeSinceLastDraw = time % this.data.drawFrequency;
+    }
+
+    if (this.currentDrawing && !this.grabberId) {
+      this._endDraw();
+    }
+
+    if (this.dirty) {
+      this.populateEntities(this.targets);
+      this.dirty = false;
+    }
+  },
 
   _setPenVisible(visible) {
     if (this.el.parentEl.object3DMap.mesh && this.el.parentEl.object3DMap.mesh.visible !== visible) {
