@@ -261,8 +261,6 @@ AFRAME.registerComponent("pen", {
     const rawIntersections = [];
     const worldQuaternion = new THREE.Quaternion();
     return function(cursorPose) {
-      const userinput = AFRAME.scenes[0].systems.userinput;
-
       rawIntersections.length = 0;
 
       if (this.data.drawMode === DRAW_MODE.PROJECTION) {
