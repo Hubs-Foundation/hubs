@@ -161,7 +161,7 @@ export class CameraSystem {
       this.snapshot.audio.updateMatrices();
       this.snapshot.audioTransform.copy(this.snapshot.audio.matrixWorld);
       scene.audioListener.updateMatrices();
-      this.audioListenerTargetTransform.makeTranslation(0,0,1).premultiply(scene.audioListener.matrixWorld)
+      this.audioListenerTargetTransform.makeTranslation(0, 0, 1).premultiply(scene.audioListener.matrixWorld);
       setMatrixWorld(this.snapshot.audio, this.audioListenerTargetTransform);
     }
   }
@@ -189,23 +189,18 @@ export class CameraSystem {
   }
 
   tick = (function() {
-    const m2 = new THREE.Matrix4();
-    const m3 = new THREE.Matrix4();
-    const offset = new THREE.Vector3();
+    const translation = new THREE.Matrix4();
     return function tick(scene) {
       if (!scene.is("entered")) return;
-
-      this.avatarPOV.components["pitch-yaw-rotator"].on = true;
-      this.cameraEl.components["pitch-yaw-rotator"].on = true;
+      this.avatarPOVRotator = this.avatarPOVRotator || this.avatarPOV.components["pitch-yaw-rotator"];
+      this.cameraElRotator = this.cameraElRotator || this.cameraEl.components["pitch-yaw-rotator"];
+      this.avatarPOVRotator.on = true;
+      this.cameraElRotator.on = true;
 
       this.userinput = this.userinput || scene.systems.userinput;
-      if (this.inspected) {
-        const stopInspecting = this.userinput.get(paths.actions.stopInspecting);
-        if (stopInspecting) {
-          this.uninspect();
-        }
+      if (this.inspected && this.userinput.get(paths.actions.stopInspecting)) {
+        this.uninspect();
       }
-
       if (this.userinput.get(paths.actions.nextCameraMode)) {
         this.nextMode();
       }
@@ -219,9 +214,9 @@ export class CameraSystem {
         return;
       }
 
-      this.avatarRig.object3D.updateMatrices();
       if (this.mode === CAMERA_MODE_FIRST_PERSON) {
-        this.cameraEl.components["pitch-yaw-rotator"].on = false;
+        this.cameraElRotator.on = false;
+        this.avatarRig.object3D.updateMatrices();
         setMatrixWorld(this.rigEl.object3D, this.avatarRig.object3D.matrixWorld);
         if (scene.is("vr-mode")) {
           this.cameraEl.object3D.updateMatrices();
@@ -230,16 +225,15 @@ export class CameraSystem {
           this.avatarPOV.object3D.updateMatrices();
           setMatrixWorld(this.cameraEl.object3D, this.avatarPOV.object3D.matrixWorld);
         }
-      }
-      if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
-        offset.set(0, 1, 3);
-        if (this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
-          offset.multiplyScalar(3);
+      } else if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
+        if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR) {
+          translation.makeTranslation(0, 1, 3);
+        } else {
+          translation.makeTranslation(0, 2, 8);
         }
-        m3.makeTranslation(offset.x, offset.y, offset.z);
-        m2.copy(this.avatarRig.object3D.matrixWorld);
-        m2.multiply(m3);
-        setMatrixWorld(this.rigEl.object3D, m2);
+        this.avatarRig.object3D.updateMatrices();
+        this.rigEl.object3D.matrixWorld.copy(this.avatarRig.object3D.matrixWorld).multiply(translation);
+        setMatrixWorld(this.rigEl.object3D, this.rigEl.object3D.matrixWorld);
         this.avatarPOV.object3D.quaternion.copy(this.cameraEl.object3D.quaternion);
         this.avatarPOV.object3D.matrixNeedsUpdate = true;
       }
