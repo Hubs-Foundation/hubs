@@ -40,9 +40,9 @@ AFRAME.registerComponent("in-world-hud", {
       this.el.emit("action_spawn");
     };
 
-    this.onPenClick = () => {
+    this.onPenClick = e => {
       if (!window.APP.hubChannel.can("spawn_drawing")) return;
-      this.el.emit("spawn_pen");
+      this.el.emit("spawn_pen", { object3D: e.object3D });
       this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPAWN_PEN);
     };
 
