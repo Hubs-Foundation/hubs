@@ -1,7 +1,7 @@
+import { getAbsoluteHref } from "./utils/media-url-utils";
 import { spawnChatMessage } from "./react-components/chat-message";
 import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "./systems/sound-effects-system";
-
-const DUCK_URL = "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf";
+import ducky from "./assets/models/DuckyMesh.glb";
 
 // Handles user-entered messages
 export default class MessageDispatch {
@@ -77,7 +77,7 @@ export default class MessageDispatch {
         this.remountUI({ roomUnavailableReason: "left" });
         break;
       case "duck":
-        spawnChatMessage(DUCK_URL);
+        spawnChatMessage(getAbsoluteHref(location.href, ducky));
         if (Math.random() < 0.01) {
           this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);
         } else {

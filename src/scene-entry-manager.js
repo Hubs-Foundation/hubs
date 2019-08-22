@@ -106,7 +106,7 @@ export default class SceneEntryManager {
         await nextTick();
       }
 
-      this.hubChannel.sendEntryEvent().then(() => {
+      this.hubChannel.sendEnteredEvent().then(() => {
         this.store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
       });
     })();

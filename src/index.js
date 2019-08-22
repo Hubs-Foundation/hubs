@@ -11,9 +11,6 @@ import Store from "./storage/store";
 const qs = new URLSearchParams(location.search);
 registerTelemetry("/home", "Hubs Home Page");
 
-const { pathname } = document.location;
-const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathname.substring(1).split("/")[1]);
-
 const store = new Store();
 window.APP = { store };
 
@@ -28,8 +25,6 @@ const remountUI = function() {
 
   const root = (
     <HomeRoot
-      initialEnvironment={qs.get("initial_environment")}
-      sceneId={sceneId || ""}
       store={store}
       authChannel={authChannel}
       authVerify={qs.has("auth_topic")}
@@ -59,7 +54,7 @@ window.addEventListener("beforeinstallprompt", e => {
 
 (async () => {
   if (qs.get("new") !== null) {
-    createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, null, true);
+    createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, true);
     return;
   }
 

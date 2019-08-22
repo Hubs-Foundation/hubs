@@ -50,13 +50,17 @@ export const scaledThumbnailUrlFor = (url, width, height) => {
   return farsparkUrl;
 };
 
+export const isNonCorsProxyDomain = hostname => {
+  return nonCorsProxyDomains.find(domain => hostname.endsWith(domain));
+};
+
 export const proxiedUrlFor = url => {
   if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
 
   // Skip known domains that do not require CORS proxying.
   try {
     const parsedUrl = new URL(url);
-    if (nonCorsProxyDomains.find(domain => parsedUrl.hostname.endsWith(domain))) return url;
+    if (isNonCorsProxyDomain(parsedUrl.hostname)) return url;
   } catch (e) {
     // Ignore
   }
@@ -67,6 +71,14 @@ export const proxiedUrlFor = url => {
     return `https://${process.env.CORS_PROXY_SERVER}/${url}`;
   }
 };
+
+export function getAbsoluteUrl(baseUrl, relativeUrl) {
+  return new URL(relativeUrl, baseUrl);
+}
+
+export function getAbsoluteHref(baseUrl, relativeUrl) {
+  return getAbsoluteUrl(baseUrl, relativeUrl).href;
+}
 
 export const getCustomGLTFParserURLResolver = gltfUrl => url => {
   if (typeof url !== "string" || url === "") return "";
@@ -95,6 +107,7 @@ export const getCustomGLTFParserURLResolver = gltfUrl => url => {
 const dataUrlRegex = /data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/;
 
 export const guessContentType = url => {
+  if (!url) return;
   if (url.startsWith("hubs://") && url.endsWith("/video")) return "video/vnd.hubs-webrtc";
   if (url.startsWith("data:")) {
     const matches = dataUrlRegex.exec(url);
