@@ -1278,8 +1278,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         // the audio.
         //
         // This only covers the case where a Safari user is in the room and the first
-        // other user joins. If a silent user is in the room and Safari user joins,
-        // then it may still break if that user is silent.
+        // other user joins. If a user is in the room and Safari user joins,
+        // then Safari can fail to receive audio from a single peer (it does not seem
+        // to be related to silence, but may be a factor.)
         const ctx = THREE.AudioContext.getContext();
         const oscillator = ctx.createOscillator();
         const gain = ctx.createGain();
