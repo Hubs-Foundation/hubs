@@ -54,6 +54,7 @@ AFRAME.registerComponent("pen-laser", {
     return function(prevData) {
       if (prevData.color != this.data.color) {
         this.laser.material.color.set(this.data.color);
+        this.laserTip.material.color.set(this.data.color);
       }
 
       if (prevData.remoteLaserOrigin && !almostEquals(0.001, prevData.remoteLaserOrigin, this.data.remoteLaserOrigin)) {
