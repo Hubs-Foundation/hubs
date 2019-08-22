@@ -1266,9 +1266,42 @@ document.addEventListener("DOMContentLoaded", async () => {
       hubChannel.setPermissionsFromToken(permsToken);
 
       scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
+        // HUGE HACK Safari does not like it if the first peer seen does not immediately
+        // send audio over its media stream. Otherwise, the stream doesn't work and stays
+        // silent. (Though subsequent peers work fine.)
+        //
+        // This hooks up a simple audio pipeline to push a short tone over the WebRTC
+        // media stream as its created to mitigate this Safari bug.
+        //
+        // Users will never hear this tone -- the outgoing media track is overwritten
+        // before we spawn our avatar, which is when other users will begin hearing
+        // the audio.
+        //
+        // This only covers the case where a Safari user is in the room and the first
+        // other user joins. If a user is in the room and Safari user joins,
+        // then Safari can fail to receive audio from a single peer (it does not seem
+        // to be related to silence, but may be a factor.)
+        const ctx = THREE.AudioContext.getContext();
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.01, ctx.currentTime);
+        const dest = ctx.createMediaStreamDestination();
+        oscillator.connect(gain);
+        gain.connect(dest);
+        oscillator.start();
+        const stream = dest.stream;
+        const track = stream.getAudioTracks()[0];
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
+        adapter.setLocalMediaStream(stream);
         hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
+
+        // Stop the tone after we've connected, which seems to mitigate the issue without actually
+        // having to keep this playing and using bandwidth.
+        scene.addEventListener("didConnectToNetworkedScene", () => {
+          oscillator.stop();
+          track.enabled = false;
+        });
       });
       subscriptions.setHubChannel(hubChannel);
 
