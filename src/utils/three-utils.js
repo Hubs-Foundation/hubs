@@ -51,7 +51,11 @@ export function disposeNode(node) {
   }
 }
 
+const IDENTITY = new THREE.Matrix4().identity();
 export function setMatrixWorld(object3D, m) {
+  if (!object3D.matrixIsModified) {
+    object3D.applyMatrix(IDENTITY); // hack around our matrix optimizations
+  }
   object3D.matrixWorld.copy(m);
   object3D.matrix = object3D.matrix.getInverse(object3D.parent.matrixWorld).multiply(object3D.matrixWorld);
   object3D.matrix.decompose(object3D.position, object3D.quaternion, object3D.scale);

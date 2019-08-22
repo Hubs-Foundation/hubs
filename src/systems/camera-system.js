@@ -4,7 +4,6 @@ import { paths } from "./userinput/paths";
 import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
 const enableThirdPersonMode = qsTruthy("thirdPerson");
-const IDENTITY = new THREE.Matrix4().identity();
 
 function inParentHierarchyOf(o, child) {
   while (child) {
@@ -177,7 +176,6 @@ export class CameraSystem {
 
     this.snapshot.audio = getAudio(o);
     if (this.snapshot.audio) {
-      this.snapshot.audio.applyMatrix(IDENTITY); // hack around our matrix optimizations
       this.snapshot.audio.updateMatrices();
       this.snapshot.audioTransform.copy(this.snapshot.audio.matrixWorld);
       scene.audioListener.updateMatrices();
