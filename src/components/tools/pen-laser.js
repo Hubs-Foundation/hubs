@@ -27,7 +27,7 @@ AFRAME.registerComponent("pen-laser", {
     const geometry = new THREE.TubeBufferGeometry(lineCurve, 2, 0.003, 8, true);
     this.laser = new THREE.Mesh(geometry, material);
 
-    this.laserTip = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 16, 12), tipMaterial);
+    this.laserTip = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 8, 6), tipMaterial);
     this.laserTip.scale.setScalar(0.01);
     this.laserTip.matrixNeedsUpdate = true;
 
