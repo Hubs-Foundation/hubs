@@ -14,6 +14,12 @@
     align-items: center;
   }
 
+  > .loader {
+    position: absolute;
+    left: calc(50% - 4.3em);
+    top: calc(50% - 4.5em);
+  }
+
   .info {
     text-align: center;
     width: 100%;
@@ -50,6 +56,9 @@
     .file-input-row {
       display: flex;
       align-items: center;
+      &.disabled{
+        opacity: 0.5;
+      }
       label {
         display: flex;
         align-items: center;
@@ -86,6 +95,24 @@
       @extend %input-field;
       font-size: 16px;
     }
+
+    .select-container {
+      position: relative;
+      .arrow{
+        position: absolute;
+        right: 10px;
+        bottom: 20px;
+      }
+    }
+
+    .select {
+      @extend %input-field;
+      font-size: 16px;
+      height: 36px;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
 
     .checkbox-container {
       display: flex;

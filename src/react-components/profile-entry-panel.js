@@ -77,7 +77,9 @@ class ProfileEntryPanel extends Component {
     e.stopPropagation();
   };
 
-  setAvatarFromMediaResult = ({ detail: entry }) => {
+  setAvatarFromMediaResult = ({ detail: { entry, selectAction } }) => {
+    if ((entry.type !== "avatar" && entry.type !== "avatar_listing") || selectAction !== "use") return;
+
     this.setState({ avatarId: entry.id });
     // Replace history state with the current avatar id since this component gets destroyed when we open the
     // avatar editor and we want the back button to work. We read the history state back via the avatarId prop.
@@ -174,15 +176,16 @@ class ProfileEntryPanel extends Component {
                 )}
 
                 <div className={styles.chooseAvatar}>
-                  <a onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars")}>
+                  <a onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use")}>
                     <FormattedMessage id="profile.choose_avatar" />
                   </a>
                 </div>
               </div>
             ) : (
               <div className={styles.preview}>
+                <AvatarPreview />
                 <div className={styles.chooseAvatar}>
-                  <a onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars")}>
+                  <a onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use")}>
                     <FormattedMessage id="profile.choose_avatar" />
                   </a>
                 </div>
