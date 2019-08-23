@@ -75,40 +75,45 @@ AFRAME.registerComponent("pen-laser", {
     };
   })(),
 
-  tick(t, dt) {
-    const isMine = this.el.parentEl.components.networked.initialized && this.el.parentEl.components.networked.isMine();
-    let laserVisible = false;
-    let origin, target;
+  tick: (() => {
+    const origin = new THREE.Vector3();
+    const target = new THREE.Vector3();
+    return function(t, dt) {
+      const isMine =
+        this.el.parentEl.components.networked.initialized && this.el.parentEl.components.networked.isMine();
+      let laserVisible = false;
 
-    if (isMine && this.data.laserVisible) {
-      origin = this.data.laserOrigin;
-      target = this.data.laserTarget;
-    } else if (!isMine && this.data.remoteLaserVisible) {
-      this.originBuffer.update(dt);
-      this.targetBuffer.update(dt);
-      origin = this.originBuffer.getPosition();
-      target = this.targetBuffer.getPosition();
-    }
+      if (isMine && this.data.laserVisible) {
+        origin.copy(this.data.laserOrigin);
+        target.copy(this.data.laserTarget);
+        laserVisible = true;
+      } else if (!isMine && this.data.remoteLaserVisible) {
+        this.originBuffer.update(dt);
+        this.targetBuffer.update(dt);
+        origin.copy(this.originBuffer.getPosition());
+        target.copy(this.targetBuffer.getPosition());
+        laserVisible = true;
+      }
 
-    if (origin && target) {
-      this.laser.position.copy(origin);
-      this.laser.lookAt(target);
-      this.laser.scale.set(1, 1, origin.distanceTo(target));
-      this.laser.matrixNeedsUpdate = true;
-      this.laserTip.position.copy(target);
-      this.laserTip.matrixNeedsUpdate = true;
-      laserVisible = true;
-    }
+      if (laserVisible) {
+        this.laser.position.copy(origin);
+        this.laser.lookAt(target);
+        this.laser.scale.set(1, 1, origin.distanceTo(target));
+        this.laser.matrixNeedsUpdate = true;
+        this.laserTip.position.copy(target);
+        this.laserTip.matrixNeedsUpdate = true;
+      }
 
-    if (this.laser.material.visible !== laserVisible) {
-      this.laser.material.visible = laserVisible;
-    }
+      if (this.laser.material.visible !== laserVisible) {
+        this.laser.material.visible = laserVisible;
+      }
 
-    const laserTipVisible = laserVisible ? !(isMine && this.data.laserVisible) : false;
-    if (this.laserTip.material.visible !== laserTipVisible) {
-      this.laserTip.material.visible = laserTipVisible;
-    }
-  },
+      const laserTipVisible = laserVisible ? !(isMine && this.data.laserVisible) : false;
+      if (this.laserTip.material.visible !== laserTipVisible) {
+        this.laserTip.material.visible = laserTipVisible;
+      }
+    };
+  })(),
 
   remove() {
     this.el.sceneEl.removeObject3D(`pen-laser-${this.laser.uuid}`);
