@@ -401,7 +401,7 @@ export default class SceneEntryManager {
         currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
       }
 
-      this.scene.emit("share_video_enabled", { source: constraints.video.mediaSource });
+      this.scene.emit("share_video_enabled", { source: isDisplayMedia ? "screen" : "camera" });
       this.scene.addState("sharing_video");
       isHandlingVideoShare = false;
     };
