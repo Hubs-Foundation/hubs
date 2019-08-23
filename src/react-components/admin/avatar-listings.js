@@ -70,7 +70,6 @@ export const AvatarListingList = props => (
       <TextField source="reviewed_at" />
       <DateField source="inserted_at" />
       <DateField source="updated_at" />
-      <TextField source="state" />
       <FeatureAvatarListingButton />
       <EditButton />
     </Datagrid>

@@ -67,6 +67,8 @@
     "entry.device-subtitle-desktop": "Standalone VR or Phone",
     "entry.device-subtitle-mobile": "Standalone VR or PC",
     "entry.device-subtitle-vr": "Phone or PC",
+    "entry.entry-disallowed": "Watch from Lobby",
+    "entry.entry-disallowed-subtitle": "Room is Full",
     "entry.cardboard": "Enter on Google Cardboard",
     "entry.daydream-prefix": "Enter on ",
     "entry.daydream-medium": "Daydream",

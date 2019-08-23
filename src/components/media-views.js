@@ -18,6 +18,10 @@ const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
 const parseGIF = promisifyWorker(new GIFWorker());
 
+const isIOS = AFRAME.utils.device.isIOS();
+const isMobileVR = AFRAME.utils.device.isMobileVR();
+const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
+
 export const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
   let s = "|";
@@ -90,8 +94,6 @@ async function createGIFTexture(url) {
       .catch(reject);
   });
 }
-
-const isIOS = AFRAME.utils.device.isIOS();
 
 /**
  * Create video element to be used as a texture.
@@ -333,6 +335,7 @@ AFRAME.registerComponent("media-video", {
     this.videoMutedAt = 0;
     this.localSnapCount = 0;
     this.isSnapping = false;
+    this.videoIsLive = null; // value null until we've determined if the video is live or not.
     this.onSnapImageLoaded = () => (this.isSnapping = false);
 
     this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", dirs: ["forward", "back"] });
@@ -481,7 +484,8 @@ AFRAME.registerComponent("media-video", {
       this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
 
       const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
-      this.playPauseButton.object3D.visible = !!this.video && (!isPinned || window.APP.hubChannel.can("pin_objects"));
+      this.playPauseButton.object3D.visible =
+        !!this.video && !this.videoIsLive && (!isPinned || window.APP.hubChannel.can("pin_objects"));
       this.snapButton.object3D.visible = !!this.video && window.APP.hubChannel.can("spawn_and_move_media");
       this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
       this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
@@ -508,7 +512,9 @@ AFRAME.registerComponent("media-video", {
       delete this._playbackStateChangeTimeout;
     }
 
-    if (!this.videoIsLive && currentTime !== undefined) {
+    // Update current time if we've determined this video is not a live stream, since otherwise we may
+    // update the video to currentTime = 0
+    if (this.videoIsLive === false && currentTime !== undefined) {
       this.video.currentTime = currentTime;
     }
 
@@ -582,9 +588,22 @@ AFRAME.registerComponent("media-video", {
 
       if (texture.hls) {
         const updateLiveState = () => {
-          this.videoIsLive = texture.hls.levels[texture.hls.currentLevel].details.live;
-          this.updateHoverMenuBasedOnLiveState();
+          if (texture.hls.currentLevel >= 0) {
+            const videoWasLive = !!this.videoIsLive;
+            this.videoIsLive = texture.hls.levels[texture.hls.currentLevel].details.live;
+            this.updateHoverMenuBasedOnLiveState();
+
+            if (!videoWasLive && this.videoIsLive) {
+              // We just determined the video is live (there can be a delay due to autoplay issues, etc)
+              // so catch it up to HEAD.
+              if (!isFirefoxReality) {
+                // HACK this causes live streams to freeze in FxR due to https://github.com/MozillaReality/FirefoxReality/issues/1602, TODO remove once 1.4 ships
+                this.video.currentTime = this.video.duration - 0.01;
+              }
+            }
+          }
         };
+        texture.hls.on(HLS.Events.LEVEL_LOADED, updateLiveState);
         texture.hls.on(HLS.Events.LEVEL_SWITCHED, updateLiveState);
         if (texture.hls.currentLevel >= 0) {
           updateLiveState();
@@ -648,6 +667,7 @@ AFRAME.registerComponent("media-video", {
 
     this.seekForwardButton.object3D.visible = !this.videoIsLive;
     this.seekBackButton.object3D.visible = !this.videoIsLive;
+    this.playPauseButton.object3D.visible = !this.videoIsLive;
 
     if (this.videoIsLive) {
       this.timeLabel.setAttribute("text", "value", "LIVE");
@@ -692,8 +712,13 @@ AFRAME.registerComponent("media-video", {
       );
     }
 
-    // If a non-live video is currently playing and we own it, send out time updates
-    if (!this.data.videoPaused && !this.videoIsLive && this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
+    // If a known non-live video is currently playing and we own it, send out time updates
+    if (
+      !this.data.videoPaused &&
+      this.videoIsLive === false &&
+      this.networkedEl &&
+      NAF.utils.isMine(this.networkedEl)
+    ) {
       const now = performance.now();
       if (now - this.lastUpdate > this.data.tickRate) {
         this.el.setAttribute("media-video", "time", this.video.currentTime);

@@ -370,6 +370,15 @@ export async function loadModel(src, contentType = null, useCache = false, jsonP
   }
 }
 
+function resolveAsset(src) {
+  // If the src attribute is a selector, get the url from the asset item.
+  if (src && src.charAt(0) === "#") {
+    const assetEl = document.getElementById(src.substring(1));
+    return assetEl.getAttribute("src");
+  }
+  return src;
+}
+
 /**
  * Loads a GLTF model, optionally recursively "inflates" the child nodes of a model into a-entities and sets
  * whitelisted components on them if defined in the node's extras.
@@ -394,15 +403,16 @@ AFRAME.registerComponent("gltf-model-plus", {
   },
 
   update() {
-    this.applySrc(this.data.src, this.data.contentType);
+    this.applySrc(resolveAsset(this.data.src), this.data.contentType);
   },
 
   remove() {
     if (this.data.batch && this.model) {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.el.object3DMap.mesh);
     }
-    if (this.data.src) {
-      gltfCache.release(this.data.src);
+    const src = resolveAsset(this.data.src);
+    if (src) {
+      gltfCache.release(src);
     }
   },
 
@@ -416,12 +426,6 @@ AFRAME.registerComponent("gltf-model-plus", {
 
   async applySrc(src, contentType) {
     try {
-      // If the src attribute is a selector, get the url from the asset item.
-      if (src && src.charAt(0) === "#") {
-        const assetEl = document.getElementById(src.substring(1));
-        src = assetEl.getAttribute("src");
-      }
-
       if (src === this.lastSrc) return;
 
       const lastSrc = this.lastSrc;

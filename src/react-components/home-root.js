@@ -12,7 +12,6 @@ import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import discordLogoSmall from "../assets/images/discord-logo-small.png";
 import mozLogo from "../assets/images/moz-logo-black.png";
 import classNames from "classnames";
-import { ENVIRONMENT_URLS } from "../assets/environments/environments";
 import { createAndRedirectToNewHub, connectToReticulum } from "../utils/phoenix-utils";
 import maskEmail from "../utils/mask-email";
 import checkIsMobile from "../utils/is-mobile";
@@ -37,7 +36,6 @@ const isMobile = checkIsMobile();
 class HomeRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
-    sceneId: PropTypes.string,
     store: PropTypes.object,
     authChannel: PropTypes.object,
     authVerify: PropTypes.bool,
@@ -47,14 +45,12 @@ class HomeRoot extends Component {
     authOrigin: PropTypes.string,
     listSignup: PropTypes.bool,
     report: PropTypes.bool,
-    initialEnvironment: PropTypes.string,
     installEvent: PropTypes.object,
     hideHero: PropTypes.bool,
     favoriteHubsResult: PropTypes.object
   };
 
   state = {
-    environments: [],
     dialog: null,
     signedIn: null,
     mailingListEmail: "",
@@ -72,11 +68,6 @@ class HomeRoot extends Component {
       this.showAuthDialog(true);
       this.verifyAuth().then(this.showAuthDialog);
       return;
-    }
-    if (this.props.sceneId) {
-      this.loadEnvironmentFromScene();
-    } else {
-      this.loadEnvironments();
     }
     this.loadHomeVideo();
     if (this.props.listSignup) {
@@ -143,46 +134,6 @@ class HomeRoot extends Component {
   signOut = () => {
     this.props.authChannel.signOut();
     this.setState({ signedIn: false });
-  };
-
-  loadEnvironmentFromScene = async () => {
-    let sceneUrlBase = "/api/v1/scenes";
-    if (process.env.RETICULUM_SERVER) {
-      sceneUrlBase = `https://${process.env.RETICULUM_SERVER}${sceneUrlBase}`;
-    }
-    const sceneInfoUrl = `${sceneUrlBase}/${this.props.sceneId}`;
-    const resp = await fetch(sceneInfoUrl).then(r => r.json());
-    const scene = resp.scenes[0];
-    const attribution = scene.attribution && scene.attribution.split("\n").join(", ");
-    const authors = attribution && [{ organization: { name: attribution } }];
-    // Transform the scene info into a an environment bundle structure.
-    this.setState({
-      environments: [
-        {
-          scene_id: this.props.sceneId,
-          meta: {
-            title: scene.name,
-            authors,
-            images: [{ type: "preview-thumbnail", srcset: scene.screenshot_url }]
-          }
-        }
-      ]
-    });
-  };
-
-  loadEnvironments = () => {
-    const environments = [];
-
-    const environmentLoads = ENVIRONMENT_URLS.map(src =>
-      (async () => {
-        const res = await fetch(src);
-        const data = await res.json();
-        data.bundle_url = src;
-        environments.push(data);
-      })()
-    );
-
-    Promise.all(environmentLoads).then(() => this.setState({ environments }));
   };
 
   onLinkClicked = trigger => {
@@ -364,7 +315,7 @@ class HomeRoot extends Component {
         className={classNames(styles.primaryButton, styles.ctaButton)}
         onClick={e => {
           e.preventDefault();
-          createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, null, false);
+          createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, false);
         }}
       >
         <FormattedMessage id="home.create_a_room" />

@@ -1,13 +1,16 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import giphyLogo from "../assets/images/giphy_logo.png";
+import cx from "classnames";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperclip } from "@fortawesome/free-solid-svg-icons/faPaperclip";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+
+import giphyLogo from "../assets/images/giphy_logo.png";
 import styles from "../assets/stylesheets/create-object-dialog.scss";
-import cx from "classnames";
+import ducky from "../assets/models/DuckyMesh.glb";
 import DialogContainer from "./dialog-container.js";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
+import { getAbsoluteHref } from "../utils/media-url-utils";
 import { WithHoverSound } from "./wrap-with-audio";
 
 const attributionHostnames = {
@@ -15,7 +18,6 @@ const attributionHostnames = {
   "media.giphy.com": giphyLogo
 };
 
-const DEFAULT_OBJECT_URL = "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf";
 const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
 const instructions = "Paste a URL to an image, video, model, scene, or upload.";
 const desktopTips = "Tip: You can paste URLs directly into Hubs with Ctrl+V";
@@ -102,7 +104,7 @@ export default class CreateObjectDialog extends Component {
 
   onCreateClicked = e => {
     e.preventDefault();
-    this.props.onCreate(this.state.file || this.state.url || DEFAULT_OBJECT_URL);
+    this.props.onCreate(this.state.file || this.state.url || getAbsoluteHref(location.href, ducky));
     this.props.onClose();
   };
 

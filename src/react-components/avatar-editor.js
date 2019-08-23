@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
 import { upload } from "../utils/media-utils";
+import { ensureAvatarMaterial } from "../utils/avatar-utils";
 import classNames from "classnames";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,6 +12,11 @@ import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
 
 const AVATARS_API = "/api/v1/avatars";
+
+const fetchAvatar = async avatarId => {
+  const { avatars } = await fetchReticulumAuthenticated(`${AVATARS_API}/${avatarId}`);
+  return avatars[0];
+};
 
 export default class AvatarEditor extends Component {
   static propTypes = {
@@ -25,32 +31,45 @@ export default class AvatarEditor extends Component {
   };
 
   state = {
-    avatar: { name: "My Avatar", parent_avatar_listing_id: "basebot", files: {} },
+    baseAvatarResults: [],
     previewGltfUrl: null
   };
 
   constructor(props) {
     super(props);
-    // Blank avatar, used to create base avatar
-    // this.state = { avatar: { name: "Base bot avatar", files: {} } };
-
     this.inputFiles = {};
   }
 
   componentDidMount = async () => {
     if (this.props.avatarId) {
-      const avatar = await this.fetchAvatar(this.props.avatarId);
+      const avatar = await fetchAvatar(this.props.avatarId);
       avatar.creatorAttribution = (avatar.attributions && avatar.attributions.creator) || "";
       Object.assign(this.inputFiles, avatar.files);
       this.setState({ avatar, previewGltfUrl: avatar.base_gltf_url });
     } else {
-      const { base_gltf_url } = await this.fetchAvatar("basebot");
-      this.setState({ previewGltfUrl: base_gltf_url });
+      const { entries } = await fetchReticulumAuthenticated(`/api/v1/media/search?filter=base&source=avatar_listings`);
+      const baseAvatarResults = entries.map(e => ({ id: e.id, name: e.name, gltfs: e.gltfs }));
+      if (baseAvatarResults.length) {
+        const randomAvatarResult = baseAvatarResults[Math.floor(Math.random() * baseAvatarResults.length)];
+        this.setState({
+          baseAvatarResults,
+          avatar: {
+            name: "My Avatar",
+            files: {},
+            base_gltf_url: randomAvatarResult.gltfs.base,
+            parent_avatar_listing_id: randomAvatarResult.id
+          },
+          previewGltfUrl: randomAvatarResult.gltfs.avatar
+        });
+      } else {
+        this.setState({
+          avatar: {
+            name: "My Avatar",
+            files: {}
+          }
+        });
+      }
     }
-  };
-
-  fetchAvatar = avatarId => {
-    return fetchReticulumAuthenticated(`${AVATARS_API}/${avatarId}`).then(({ avatars }) => avatars[0]);
   };
 
   createOrUpdateAvatar = avatar => {
@@ -73,8 +92,8 @@ export default class AvatarEditor extends Component {
       );
       URL.revokeObjectURL(gltfUrl);
 
-      const { content, body } = parser.extensions.KHR_binary_glTF;
-
+      const { body } = parser.extensions.KHR_binary_glTF;
+      const content = JSON.stringify(ensureAvatarMaterial(parser.json));
       // Inject hubs components on upload. Used to create base avatar
       // const gltf = parser.json;
       // Object.assign(gltf.scenes[0], {
@@ -138,7 +157,7 @@ export default class AvatarEditor extends Component {
   };
 
   fileField = (name, label, accept, disabled = false, title) => (
-    <div className="file-input-row" key={name} title={title}>
+    <div className={classNames("file-input-row", { disabled })} key={name} title={title}>
       <label htmlFor={`avatar-file_${name}`}>
         <div className="img-box" />
         <span>{label}</span>
@@ -149,14 +168,40 @@ export default class AvatarEditor extends Component {
         accept={accept}
         disabled={disabled}
         onChange={e => {
-          this.inputFiles[name] = e.target.files[0];
+          const file = e.target.files[0];
           e.target.value = null;
+          this.inputFiles[name] = file;
+          URL.revokeObjectURL(this.state.previewGltfUrl);
+          const previewGltfUrl = URL.createObjectURL(this.inputFiles.glb);
+          this.setState({
+            previewGltfUrl,
+            avatar: {
+              ...this.state.avatar,
+              files: {
+                ...this.state.avatar.files,
+                [name]: URL.createObjectURL(file)
+              }
+            }
+          });
         }}
       />
       {this.state.avatar.files[name] && (
         <a
           onClick={() => {
             this.inputFiles[name] = null;
+            URL.revokeObjectURL(this.state.avatar.files[name]);
+            this.setState(
+              {
+                avatar: {
+                  ...this.state.avatar,
+                  files: {
+                    ...this.state.avatar.files,
+                    [name]: null
+                  }
+                }
+              },
+              () => this.setState({ previewGltfUrl: this.getPreviewUrl() })
+            );
           }}
         >
           <i>
@@ -220,6 +265,7 @@ export default class AvatarEditor extends Component {
 
   textField = (name, placeholder, disabled, required) => (
     <div>
+      <label htmlFor={`#avatar-${name}`}>{placeholder}</label>
       <input
         id={`avatar-${name}`}
         type="text"
@@ -229,6 +275,44 @@ export default class AvatarEditor extends Component {
         className="text-field"
         value={this.state.avatar[name] || ""}
         onChange={e => this.setState({ avatar: { ...this.state.avatar, [name]: e.target.value } })}
+      />
+    </div>
+  );
+
+  // Return the gltf for the selected base avatar, the locally modified glb, or the avatar's base_gltf_url
+  getPreviewUrl = baseSid => {
+    if (baseSid) {
+      const avatarResult = this.state.baseAvatarResults.find(a => a.id === baseSid);
+      if (avatarResult) return avatarResult.gltfs.avatar;
+    }
+
+    return this.inputFiles.glb ? URL.createObjectURL(this.inputFiles.glb) : this.state.avatar.base_gltf_url;
+  };
+
+  selectListingField = (propName, placeholder) => (
+    <div className="select-container">
+      <label htmlFor={`#avatar-${propName}`}>{placeholder}</label>
+      <select
+        id={`avatar-${propName}`}
+        value={this.state.avatar[propName] || ""}
+        onChange={async e => {
+          const sid = e.target.value;
+          this.setState({ avatar: { ...this.state.avatar, [propName]: sid }, previewGltfUrl: this.getPreviewUrl(sid) });
+        }}
+        placeholder={placeholder}
+        className="select"
+      >
+        {this.state.baseAvatarResults.map(a => (
+          <option key={a.id} value={a.id}>
+            {a.name}
+          </option>
+        ))}
+        <option value="">Custom GLB...</option>
+      </select>
+      <img
+        className="arrow"
+        src="../assets/images/dropdown_arrow.png"
+        srcSet="../assets/images/dropdown_arrow@2x.png 2x"
       />
     </div>
   );
@@ -246,8 +330,8 @@ export default class AvatarEditor extends Component {
     </div>
   );
 
-  checkbox = (name, children, disabled) => (
-    <div className="checkbox-container">
+  checkbox = (name, title, children, disabled) => (
+    <div className="checkbox-container" title={title}>
       <input
         id={`avatar-${name}`}
         type="checkbox"
@@ -262,6 +346,8 @@ export default class AvatarEditor extends Component {
 
   render() {
     const { debug } = this.props;
+    const { avatar } = this.state;
+
     return (
       <div className={classNames(styles.avatarEditor, this.props.className)}>
         {this.props.onClose && (
@@ -271,7 +357,11 @@ export default class AvatarEditor extends Component {
             </i>
           </a>
         )}
-        {this.props.signedIn ? (
+        {!this.state.avatar ? (
+          <div className="loader">
+            <div className="loader-center" />
+          </div>
+        ) : this.props.signedIn ? (
           <form onSubmit={this.uploadAvatar} className="center">
             <div className="split">
               <div className="form-body">
@@ -280,18 +370,18 @@ export default class AvatarEditor extends Component {
                 {debug && this.textField("parent_avatar_listing_id", "Parent Avatar Listing ID")}
                 {this.textField("name", "Name", false, true)}
                 {debug && this.textarea("description", "Description")}
-                {debug && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
-
+                {!!this.state.baseAvatarResults.length && this.selectListingField("parent_avatar_listing_id", "Model")}
+                {!avatar.parent_avatar_listing_id && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
                 {this.mapField("base_map", "Base Map", "image/*")}
-                {this.mapField("emissive_map", "Emissive Map", "image/*")}
-                {this.mapField("normal_map", "Normal Map", "image/*")}
-
-                {this.mapField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
-
-                <hr />
-
+                <details>
+                  <summary>Advanced</summary>
+                  {this.mapField("emissive_map", "Emissive Map", "image/*")}
+                  {this.mapField("normal_map", "Normal Map", "image/*")}
+                  {this.mapField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
+                </details>
                 {this.checkbox(
                   "allow_promotion",
+                  "Allow Mozilla to promote your avatar, and show it in search results.",
                   <span>
                     Allow{" "}
                     <a
@@ -305,6 +395,7 @@ export default class AvatarEditor extends Component {
                 )}
                 {this.checkbox(
                   "allow_remixing",
+                  "Allow others to edit and re-publish your avatar as long as they give you credit.",
                   <span>
                     Allow{" "}
                     <a
@@ -323,7 +414,6 @@ export default class AvatarEditor extends Component {
                   </span>
                 )}
                 {this.textField("creatorAttribution", "Attribution (optional)", false, false)}
-
                 {/* {this.mapField("ao_map", "AO Map", "images/\*", true)} */}
                 {/* {this.mapField("metallic_map", "Metallic Map", "image/\*", true)} */}
                 {/* {this.mapField("roughness_map", "Roughness Map", "image/\*", true)} */}
@@ -364,7 +454,16 @@ export default class AvatarEditor extends Component {
                     <a onClick={() => this.setState({ confirmDelete: false })}>no</a>
                   </span>
                 ) : (
-                  <a onClick={() => this.setState({ confirmDelete: true })}>delete avatar</a>
+                  <a
+                    onClick={() => this.setState({ confirmDelete: true })}
+                    title={
+                      avatar.has_listings
+                        ? "Other users already using this avatar will still be able to use it, but it will be removed from 'My Avatars' and search results."
+                        : ""
+                    }
+                  >
+                    {avatar.has_listings ? "delist" : "delete"} avatar
+                  </a>
                 )}
               </div>
             )}
