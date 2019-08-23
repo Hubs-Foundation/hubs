@@ -96,10 +96,21 @@
       font-size: 16px;
     }
 
+    .select-container {
+      position: relative;
+      .arrow{
+        position: absolute;
+        right: 10px;
+        bottom: 20px;
+      }
+    }
+
     .select {
       @extend %input-field;
       font-size: 16px;
       height: 36px;
+      -webkit-appearance: none;
+      -moz-appearance: none;
     }
 
 

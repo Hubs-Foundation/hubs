@@ -265,6 +265,7 @@ export default class AvatarEditor extends Component {
 
   textField = (name, placeholder, disabled, required) => (
     <div>
+      <label htmlFor={`#avatar-${name}`}>{placeholder}</label>
       <input
         id={`avatar-${name}`}
         type="text"
@@ -289,8 +290,10 @@ export default class AvatarEditor extends Component {
   };
 
   selectListingField = (propName, placeholder) => (
-    <div>
+    <div className="select-container">
+      <label htmlFor={`#avatar-${propName}`}>{placeholder}</label>
       <select
+        id={`avatar-${propName}`}
         value={this.state.avatar[propName] || ""}
         onChange={async e => {
           const sid = e.target.value;
@@ -306,6 +309,11 @@ export default class AvatarEditor extends Component {
         ))}
         <option value="">Custom GLB...</option>
       </select>
+      <img
+        className="arrow"
+        src="../assets/images/dropdown_arrow.png"
+        srcSet="../assets/images/dropdown_arrow@2x.png 2x"
+      />
     </div>
   );
 
@@ -362,7 +370,7 @@ export default class AvatarEditor extends Component {
                 {debug && this.textField("parent_avatar_listing_id", "Parent Avatar Listing ID")}
                 {this.textField("name", "Name", false, true)}
                 {debug && this.textarea("description", "Description")}
-                {!!this.state.baseAvatarResults.length && this.selectListingField("parent_avatar_listing_id")}
+                {!!this.state.baseAvatarResults.length && this.selectListingField("parent_avatar_listing_id", "Model")}
                 {!avatar.parent_avatar_listing_id && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
                 {this.mapField("base_map", "Base Map", "image/*")}
                 <details>
