@@ -19,12 +19,12 @@ class ApproveButton extends Component {
   };
 
   render() {
-    const { record } = this.props;
+    const { record, resource } = this.props;
     if (!(record.allow_promotion || record._allow_promotion)) return false;
 
     return (
       <Button label="Approve" onClick={this.handleClick}>
-        Approve
+        {record[`${resource}_listing_id`] ? "Update" : "Approve"}
       </Button>
     );
   }
@@ -48,11 +48,11 @@ const withStaticProps = staticProps => (stateProps, dispatchProps, ownProps) => 
 export const ApproveSceneButton = connect(
   null,
   { approveNew: sceneApproveNew, approveExisting: sceneApproveExisting, reviewed: sceneReviewed },
-  withStaticProps({ resource: "scenes" })
+  withStaticProps({ resource: "scene" })
 )(ApproveButton);
 
 export const ApproveAvatarButton = connect(
   null,
   { approveNew: avatarApproveNew, approveExisting: avatarApproveExisting, reviewed: avatarReviewed },
-  withStaticProps({ resource: "avatars" })
+  withStaticProps({ resource: "avatar" })
 )(ApproveButton);
