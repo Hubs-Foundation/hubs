@@ -110,7 +110,7 @@ class TopHUD extends Component {
   };
 
   handleVideoShareClicked = source => {
-    if ((source === "screen" || source === "window") && browser.name !== "firefox") {
+    if (source === "screen" && !navigator.mediaDevices.getDisplayMedia) {
       this.props.onShareVideoNotCapable();
       return;
     }
@@ -133,7 +133,7 @@ class TopHUD extends Component {
     if (this.state.showVideoShareOptions) {
       videoShareExtraOptionTypes.push(primaryVideoShareType);
 
-      ["screen", "window", "camera"].forEach(t => {
+      ["screen", "camera"].forEach(t => {
         if (videoShareExtraOptionTypes.indexOf(t) === -1) {
           videoShareExtraOptionTypes.push(t);
         }
