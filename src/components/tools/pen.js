@@ -168,8 +168,6 @@ AFRAME.registerComponent("pen", {
 
     waitForDOMContentLoaded().then(() => {
       const scene = document.querySelector("a-scene");
-      this.rightRemote = document.getElementById("right-cursor-controller"); // TODO: unused?
-      this.leftRemote = document.getElementById("left-cursor-controller"); // TODO: unused?
       this.observer.observe(scene, { childList: true, attributes: true, subtree: true });
       scene.addEventListener("object3dset", this.setDirty);
       scene.addEventListener("object3dremove", this.setDirty);
