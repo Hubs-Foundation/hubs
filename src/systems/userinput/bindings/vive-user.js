@@ -7,6 +7,9 @@ const v = name => {
   return `/vive-user/vive-var/${name}`;
 };
 
+const wakeLeft = `${name}left/wake`;
+const wakeRight = `${name}right/wake`;
+
 const lButton = paths.device.vive.left.button;
 const lAxis = paths.device.vive.left.axis;
 const lPose = paths.device.vive.left.pose;
@@ -746,6 +749,11 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.any
     },
     {
+      src: { value: lPose },
+      dest: { value: paths.actions.cursor.left.pose },
+      xform: xforms.copy
+    },
+    {
       src: { value: rPose },
       dest: { value: paths.actions.cursor.right.pose },
       xform: xforms.copy
@@ -759,6 +767,26 @@ export const viveUserBindings = addSetsToBindings({
       src: { value: lPose },
       dest: { value: paths.actions.leftHand.pose },
       xform: xforms.copy
+    },
+    {
+      src: [lButton("top").pressed, lButton("trigger").pressed, lButton("grip").pressed, lButton("touchpad").pressed],
+      dest: { value: wakeLeft },
+      xform: xforms.any
+    },
+    {
+      src: { value: wakeLeft },
+      dest: { value: paths.actions.cursor.left.wake },
+      xform: xforms.rising
+    },
+    {
+      src: [rButton("top").pressed, rButton("trigger").pressed, rButton("grip").pressed, rButton("touchpad").pressed],
+      dest: { value: wakeRight },
+      xform: xforms.any
+    },
+    {
+      src: { value: wakeRight },
+      dest: { value: paths.actions.cursor.right.wake },
+      xform: xforms.rising
     }
   ],
   [sets.rightHandTeleporting]: [
