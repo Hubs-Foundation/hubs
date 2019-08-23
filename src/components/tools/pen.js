@@ -136,6 +136,16 @@ AFRAME.registerComponent("pen", {
       environmentMapComponent.applyEnvironmentMap(this.el.parentEl.object3D);
     }
 
+    this.penLaserAttributesUpdated = false;
+    this.penLaserAttributes = {
+      color: "#FF0033",
+      laserVisible: false,
+      remoteLaserVisible: false,
+      laserOrigin: { x: 0, y: 0, z: 0 },
+      remoteLaserOrigin: { x: 0, y: 0, z: 0 },
+      laserTarget: { x: 0, y: 0, z: 0 }
+    };
+
     // TODO: Use the MutationRecords passed into the callback function to determine added/removed nodes!
     this.observer = new MutationObserver(this.setDirty);
 
@@ -156,6 +166,7 @@ AFRAME.registerComponent("pen", {
   update(prevData) {
     if (prevData.color != this.data.color) {
       this.penTip.material.color.set(this.data.color);
+      this.penLaserAttributes.color = this.data.color;
       this.el.setAttribute("pen-laser", { color: this.data.color });
     }
     if (prevData.radius != this.data.radius) {
@@ -166,48 +177,56 @@ AFRAME.registerComponent("pen", {
     this.raycaster.near = this.data.near;
   },
 
-  tick: (() => {
-    return function(t, dt) {
-      const isMine =
-        this.el.parentEl.components.networked.initialized && this.el.parentEl.components.networked.isMine();
+  tick(t, dt) {
+    const isMine = this.el.parentEl.components.networked.initialized && this.el.parentEl.components.networked.isMine();
 
-      if (this.penTip.material.visible !== isMine) {
-        this.penTip.material.visible = isMine;
+    if (this.penTip.material.visible !== isMine) {
+      this.penTip.material.visible = isMine;
+    }
+
+    if (isMine) {
+      this._handleInput();
+
+      const cursorPose =
+        this.data.drawMode === DRAW_MODE.PROJECTION && this.grabberId === "cursor"
+          ? AFRAME.scenes[0].systems.userinput.get(pathsMap.cursor.pose)
+          : null;
+
+      const intersection = this._getIntersection(cursorPose);
+
+      this._updatePenTip(intersection);
+
+      const remoteLaserVisible = this.data.drawMode === DRAW_MODE.PROJECTION && !!intersection;
+      const laserVisible = this.el.sceneEl.is("vr-mode") && !!intersection && remoteLaserVisible;
+
+      if (this.penLaserAttributes.laserVisible !== laserVisible) {
+        this.penLaserAttributes.laserVisible = laserVisible;
+        this.penLaserAttributesUpdated = true;
       }
 
-      if (isMine) {
-        this._handleInput();
-
-        const cursorPose =
-          this.data.drawMode === DRAW_MODE.PROJECTION && this.grabberId === "cursor"
-            ? AFRAME.scenes[0].systems.userinput.get(pathsMap.cursor.pose)
-            : null;
-
-        const intersection = this._getIntersection(cursorPose);
-
-        this._updatePenTip(intersection);
-
-        const remoteLaserVisible = this.data.drawMode === DRAW_MODE.PROJECTION && !!intersection;
-        const laserVisible = this.el.sceneEl.is("vr-mode") && !!intersection && remoteLaserVisible;
-        this.el.setAttribute("pen-laser", {
-          laserVisible: laserVisible,
-          remoteLaserVisible: remoteLaserVisible
-        });
-
-        if (remoteLaserVisible || laserVisible) {
-          this._updateLaser(cursorPose, intersection);
-        }
-
-        const penVisible = this.grabberId !== "cursor" || !intersection;
-        this._setPenVisible(penVisible);
-        this.el.setAttribute("pen", { penVisible: penVisible });
-
-        this._doDraw(intersection, dt);
-      } else {
-        this._setPenVisible(this.data.penVisible);
+      if (this.penLaserAttributes.remoteLaserVisible !== remoteLaserVisible) {
+        this.penLaserAttributes.remoteLaserVisible = remoteLaserVisible;
+        this.penLaserAttributesUpdated = true;
       }
-    };
-  })(),
+
+      if (remoteLaserVisible || laserVisible) {
+        this._updateLaser(cursorPose, intersection);
+      }
+
+      const penVisible = this.grabberId !== "cursor" || !intersection;
+      this._setPenVisible(penVisible);
+      this.el.setAttribute("pen", { penVisible: penVisible });
+
+      this._doDraw(intersection, dt);
+
+      if (this.penLaserAttributesUpdated) {
+        this.penLaserAttributesUpdated = false;
+        this.el.setAttribute("pen-laser", this.penLaserAttributes, true);
+      }
+    } else {
+      this._setPenVisible(this.data.penVisible);
+    }
+  },
 
   _handleInput() {
     const userinput = AFRAME.scenes[0].systems.userinput;
@@ -322,7 +341,6 @@ AFRAME.registerComponent("pen", {
       if (this.el.sceneEl.is("vr-mode")) {
         remoteLaserOrigin.copy(laserStartPosition);
       } else {
-        camerWorldPosition.copy(this.data.camera.object3D.position);
         this.data.camera.object3D.getWorldPosition(camerWorldPosition);
         remoteLaserOrigin
           .subVectors(laserEndPosition, camerWorldPosition)
@@ -331,11 +349,26 @@ AFRAME.registerComponent("pen", {
         remoteLaserOrigin.add(camerWorldPosition);
       }
 
-      this.el.setAttribute("pen-laser", {
-        laserOrigin: laserStartPosition,
-        remoteLaserOrigin: remoteLaserOrigin,
-        laserTarget: laserEndPosition
-      });
+      if (!almostEquals(0.001, this.penLaserAttributes.laserOrigin, laserStartPosition)) {
+        this.penLaserAttributes.laserOrigin.x = laserStartPosition.x;
+        this.penLaserAttributes.laserOrigin.y = laserStartPosition.y;
+        this.penLaserAttributes.laserOrigin.z = laserStartPosition.z;
+        this.penLaserAttributesUpdated = true;
+      }
+
+      if (!almostEquals(0.001, this.penLaserAttributes.remoteLaserOrigin, remoteLaserOrigin)) {
+        this.penLaserAttributes.remoteLaserOrigin.x = remoteLaserOrigin.x;
+        this.penLaserAttributes.remoteLaserOrigin.y = remoteLaserOrigin.y;
+        this.penLaserAttributes.remoteLaserOrigin.z = remoteLaserOrigin.z;
+        this.penLaserAttributesUpdated = true;
+      }
+
+      if (!almostEquals(0.001, this.penLaserAttributes.laserTarget, laserEndPosition)) {
+        this.penLaserAttributes.laserTarget.x = laserEndPosition.x;
+        this.penLaserAttributes.laserTarget.y = laserEndPosition.y;
+        this.penLaserAttributes.laserTarget.z = laserEndPosition.z;
+        this.penLaserAttributesUpdated = true;
+      }
     };
   })(),
 
@@ -426,7 +459,8 @@ AFRAME.registerComponent("pen", {
     this.colorIndex = (this.colorIndex + mod + this.data.availableColors.length) % this.data.availableColors.length;
     this.data.color = this.data.availableColors[this.colorIndex];
     this.penTip.material.color.set(this.data.color);
-    this.el.setAttribute("pen-laser", { color: this.data.color });
+    this.penLaserAttributes.color = this.data.color;
+    this.penLaserAttributesUpdated = true;
   },
 
   _changeRadius(mod) {
