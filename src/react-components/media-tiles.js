@@ -33,21 +33,19 @@ class MediaTiles extends Component {
     urlSource: PropTypes.string,
     handleEntryClicked: PropTypes.func,
     handlePager: PropTypes.func,
-    mediaBrowser: PropTypes.object
+    onCopyAvatar: PropTypes.func
   };
 
   handleCopyAvatar = async (e, entry) => {
     e.preventDefault();
-    console.log(entry);
     const avatar = {
       parent_avatar_listing_id: entry.id,
       name: entry.name,
       files: {}
     };
 
-    const { avatars } = await fetchReticulumAuthenticated(AVATARS_API, "POST", { avatar });
-    console.log(avatars);
-    this.props.mediaBrowser.handleFacetClicked({ params: { filter: "my-avatars" } });
+    await fetchReticulumAuthenticated(AVATARS_API, "POST", { avatar });
+    this.props.onCopyAvatar();
   };
 
   render() {

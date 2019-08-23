@@ -31,7 +31,7 @@ export default class AvatarEditor extends Component {
   };
 
   state = {
-    baseAvatars: [],
+    baseAvatarResults: [],
     previewGltfUrl: null
   };
 
@@ -48,17 +48,18 @@ export default class AvatarEditor extends Component {
       this.setState({ avatar, previewGltfUrl: avatar.base_gltf_url });
     } else {
       const { entries } = await fetchReticulumAuthenticated(`/api/v1/media/search?filter=base&source=avatar_listings`);
-      const baseAvatars = entries.map(e => ({ id: e.id, name: e.name, gltfs: e.gltfs }));
-      if (baseAvatars.length) {
+      const baseAvatarResults = entries.map(e => ({ id: e.id, name: e.name, gltfs: e.gltfs }));
+      if (baseAvatarResults.length) {
+        const randomAvatarResult = baseAvatarResults[Math.floor(Math.random() * baseAvatarResults.length)];
         this.setState({
-          baseAvatars,
+          baseAvatarResults,
           avatar: {
             name: "My Avatar",
             files: {},
-            base_gltf_url: baseAvatars[0].gltfs.base,
-            parent_avatar_listing_id: baseAvatars[0].id
+            base_gltf_url: randomAvatarResult.gltfs.base,
+            parent_avatar_listing_id: randomAvatarResult.id
           },
-          previewGltfUrl: baseAvatars[0].gltfs.avatar
+          previewGltfUrl: randomAvatarResult.gltfs.avatar
         });
       } else {
         this.setState({
@@ -277,21 +278,14 @@ export default class AvatarEditor extends Component {
     </div>
   );
 
-  getPreviewUrl = parentSid => {
-    if (parentSid) {
-      const avatar = this.state.baseAvatars.find(a => a.id === parentSid);
-      if (avatar) return avatar.gltfs.avatar;
+  // Return the gltf for the selected base avatar, the locally modified glb, or the avatar's base_gltf_url
+  getPreviewUrl = baseSid => {
+    if (baseSid) {
+      const avatarResult = this.state.baseAvatarResults.find(a => a.id === baseSid);
+      if (avatarResult) return avatarResult.gltfs.avatar;
     }
 
-    const glbFile = this.inputFiles.glb;
-    const gltfUrl = this.state.avatar.files.gltf;
-    if (glbFile) {
-      return URL.createObjectURL(this.inputFiles.glb);
-    } else if (gltfUrl) {
-      return gltfUrl;
-    } else {
-      return this.state.avatar.base_gltf_url;
-    }
+    return this.inputFiles.glb ? URL.createObjectURL(this.inputFiles.glb) : this.state.avatar.base_gltf_url;
   };
 
   selectListingField = (propName, placeholder) => (
@@ -305,7 +299,7 @@ export default class AvatarEditor extends Component {
         placeholder={placeholder}
         className="select"
       >
-        {this.state.baseAvatars.map(a => (
+        {this.state.baseAvatarResults.map(a => (
           <option key={a.id} value={a.id}>
             {a.name}
           </option>
@@ -368,7 +362,7 @@ export default class AvatarEditor extends Component {
                 {debug && this.textField("parent_avatar_listing_id", "Parent Avatar Listing ID")}
                 {this.textField("name", "Name", false, true)}
                 {debug && this.textarea("description", "Description")}
-                {!!this.state.baseAvatars.length && this.selectListingField("parent_avatar_listing_id")}
+                {!!this.state.baseAvatarResults.length && this.selectListingField("parent_avatar_listing_id")}
                 {!avatar.parent_avatar_listing_id && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
                 {this.mapField("base_map", "Base Map", "image/*")}
                 <details>

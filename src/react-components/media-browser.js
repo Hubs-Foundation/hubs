@@ -67,7 +67,7 @@ const DEFAULT_FACETS = {
   avatars: [
     { text: "Featured", params: { filter: "featured" } },
     { text: "My Avatars", params: { filter: "my-avatars" } },
-    { text: "All Avatars", params: { filter: "" } }
+    { text: "Newest", params: { filter: "" } }
   ],
   favorites: [],
   scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }]
@@ -176,6 +176,10 @@ class MediaBrowser extends Component {
       this.setState({ clearStashedQueryOnClose: true });
       this.handleQueryUpdated(entry.lucky_query, true);
     }
+  };
+
+  onCopyAvatar = () => {
+    this.handleFacetClicked({ params: { filter: "my-avatars" } });
   };
 
   selectEntry = entry => {
@@ -409,8 +413,8 @@ class MediaBrowser extends Component {
               history={this.props.history}
               urlSource={urlSource}
               handleEntryClicked={this.handleEntryClicked}
+              onCopyAvatar={this.onCopyAvatar}
               handlePager={this.handlePager}
-              mediaBrowser={this}
             />
           ) : (
             <div className={styles.emptyString}>

@@ -183,5 +183,5 @@ export function findNode(root, pred) {
     if (pred(node)) return node;
     if (node.children) nodes = nodes.concat(node.children);
   }
-  return undefined;
+  return null;
 }

@@ -65,6 +65,10 @@ export async function getAvatarThumbnailUrl(avatarId) {
   }
 }
 
+// Currently the way we do material overrides is with a special named material.
+// We want to migrate eventually to having a GLTF extension that specifies what
+// materials can be overridden, but in the meantime we want to be able to support
+// arbitrary models with some sort of functionality. This provides a fallback
 export const MAT_NAME = "Bot_PBS";
 export function ensureAvatarMaterial(gltf) {
   if (gltf.materials.find(m => m.name === MAT_NAME)) return gltf;
