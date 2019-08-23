@@ -33,7 +33,7 @@ const SPRITESHEET_ICONS = {
     spritesheet.micOff7
   ]
 };
-const browser = detect();
+
 const noop = () => {};
 
 class TopHUD extends Component {
