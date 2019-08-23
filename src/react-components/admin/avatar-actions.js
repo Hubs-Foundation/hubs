@@ -18,6 +18,8 @@ export const avatarApproveNew = avatar => ({
       attributions: avatar.attributions,
       tags: { tags: [] },
 
+      account_id: avatar.account,
+
       parent_avatar_listing_id: avatar.parent_avatar_listing_id,
       gltf_owned_file_id: avatar.gltf_owned_file_id,
       bin_owned_file_id: avatar.bin_owned_file_id,
@@ -45,6 +47,8 @@ export const avatarApproveExisting = avatar => ({
       name: avatar.name,
       description: avatar.description,
       attributions: avatar.attributions,
+
+      account_id: avatar.account,
 
       parent_avatar_listing_id: avatar.parent_avatar_listing_id,
       gltf_owned_file_id: avatar.gltf_owned_file_id,

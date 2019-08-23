@@ -64,3 +64,31 @@ export async function getAvatarThumbnailUrl(avatarId) {
       return "https://asset-bundles-prod.reticulum.io/bots/avatar_unavailable.png";
   }
 }
+
+// Currently the way we do material overrides is with a special named material.
+// We want to migrate eventually to having a GLTF extension that specifies what
+// materials can be overridden, but in the meantime we want to be able to support
+// arbitrary models with some sort of functionality. This provides a fallback
+export const MAT_NAME = "Bot_PBS";
+export function ensureAvatarMaterial(gltf) {
+  if (gltf.materials.find(m => m.name === MAT_NAME)) return gltf;
+
+  function materialForMesh(mesh) {
+    if (!mesh.primitives) return;
+    const primitive = mesh.primitives.find(p => p.material !== undefined);
+    return primitive && gltf.materials[primitive.material];
+  }
+
+  let nodes = gltf.scenes[gltf.scene].nodes.slice(0);
+  while (nodes.length) {
+    const node = gltf.nodes[nodes.shift()];
+    const material = node.mesh !== undefined && materialForMesh(gltf.meshes[node.mesh]);
+    if (material) {
+      material.name = MAT_NAME;
+      break;
+    }
+    if (node.children) nodes = nodes.concat(node.children);
+  }
+
+  return gltf;
+}

@@ -427,15 +427,16 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   remountUI({
     onSendMessage: messageDispatch.dispatch,
     onLoaded: () => store.executeOnLoadActions(scene),
-    onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
+    onMediaSearchResultEntrySelected: (entry, selectAction) =>
+      scene.emit("action_selected_media_result_entry", { entry, selectAction }),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
     onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
     embedToken: embedToken
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
-    const entry = e.detail;
-    if (entry.type !== "scene_listing" && entry.type !== "scene") return;
+    const { entry, selectAction } = e.detail;
+    if ((entry.type !== "scene_listing" && entry.type !== "scene") || selectAction !== "use") return;
     if (!hubChannel.can("update_hub")) return;
 
     hubChannel.updateScene(entry.url);

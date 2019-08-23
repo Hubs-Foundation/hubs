@@ -461,9 +461,8 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("action_selected_media_result_entry", async e => {
       // TODO spawn in space when no rights
-      const entry = e.detail;
-      if (["avatar", "avatar_listing"].includes(entry.type)) return;
-      if ((entry.type === "scene_listing" || entry.type === "scene") && this.hubChannel.can("update_hub")) return;
+      const { entry, selectAction } = e.detail;
+      if (selectAction !== "spawn") return;
 
       const delaySpawn = isIn2DInterstitial() && !isMobileVR;
       await exit2DInterstitialAndEnterVR();
