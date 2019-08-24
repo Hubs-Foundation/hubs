@@ -20,11 +20,16 @@ const lTouch = v("left/touch");
 const lTouchScaled = v("left/touch/scaled");
 const lTouchXScaled = v("left/touchX/scaled");
 const lTouchYScaled = v("left/touchY/scaled");
-const lDpadNorth = v("left/dpad/north");
-const lDpadSouth = v("left/dpad/south");
-const lDpadEast = v("left/dpad/east");
-const lDpadWest = v("left/dpad/west");
-const lDpadCenter = v("left/dpad/center");
+const lDpadNorth1 = v("left/dpad/north1");
+const lDpadSouth1 = v("left/dpad/south1");
+const lDpadEast1 = v("left/dpad/east1");
+const lDpadWest1 = v("left/dpad/west1");
+const lDpadCenter1 = v("left/dpad/center1");
+const lDpadNorth2 = v("left/dpad/north2");
+const lDpadSouth2 = v("left/dpad/south2");
+const lDpadEast2 = v("left/dpad/east2");
+const lDpadWest2 = v("left/dpad/west2");
+const lDpadCenter2 = v("left/dpad/center2");
 const lTriggerFallingStopDrawing = v("left/trigger/falling/stopDrawing");
 const lGripFallingStopDrawing = v("left/grip/falling/stopDrawing");
 const lTriggerRisingGrab = v("left/trigger/rising/grab");
@@ -57,8 +62,10 @@ const rTouchpadFalling = v("right/touchpad/falling");
 const rightBoost = v("right/boost");
 const rTriggerRisingGrab = v("right/trigger/rising/grab");
 const rGripRisingGrab = v("right/grab/rising/grab");
-const cursorDrop1 = v("right/cursorDrop1");
-const cursorDrop2 = v("right/cursorDrop2");
+const rightCursorDrop1 = v("right/cursorDrop1");
+const rightCursorDrop2 = v("right/cursorDrop2");
+const leftCursorDrop1 = v("left/cursorDrop1");
+const leftCursorDrop2 = v("left/cursorDrop2");
 const rTriggerStopTeleport = v("right/trigger/stopTeleport");
 const rTouchpadStopTeleport = v("right/touchpad/stopTeleport");
 const rootForFrozenOverrideWhenHolding = "rootForFrozenOverrideWhenHolding";
@@ -253,11 +260,11 @@ export const viveUserBindings = addSetsToBindings({
         value: lTouch
       },
       dest: {
-        north: lDpadNorth,
-        south: lDpadSouth,
-        east: lDpadEast,
-        west: lDpadWest,
-        center: lDpadCenter
+        north: lDpadNorth1,
+        south: lDpadSouth1,
+        east: lDpadEast1,
+        west: lDpadWest1,
+        center: lDpadCenter1
       },
       xform: xforms.vec2dpad(0.35)
     },
@@ -840,10 +847,21 @@ export const viveUserBindings = addSetsToBindings({
 
   [sets.rightCursorHoveringOnNothing]: [],
 
+  [sets.leftCursorHoveringOnNothing]: [],
+
   [sets.rightCursorHoveringOnUI]: [
     {
       src: { value: rightTriggerPressed2 },
       dest: { value: paths.actions.cursor.right.grab },
+      xform: xforms.rising,
+      priority: 1
+    }
+  ],
+
+  [sets.leftCursorHoveringOnUI]: [
+    {
+      src: { value: leftTriggerPressed2 },
+      dest: { value: paths.actions.cursor.left.grab },
       xform: xforms.rising,
       priority: 1
     }
@@ -863,6 +881,24 @@ export const viveUserBindings = addSetsToBindings({
         value: rAxis("joyY")
       },
       dest: { value: paths.actions.cursor.right.mediaVolumeMod },
+      xform: xforms.scale(0.02)
+    }
+  ],
+
+  [sets.leftCursorHoveringOnVideo]: [
+    {
+      src: {
+        value: lAxis("touchY"),
+        touching: lButton("touchpad").touched
+      },
+      dest: { value: paths.actions.cursor.left.mediaVolumeMod },
+      xform: xforms.touch_axis_scroll(0.1)
+    },
+    {
+      src: {
+        value: lAxis("joyY")
+      },
+      dest: { value: paths.actions.cursor.left.mediaVolumeMod },
       xform: xforms.scale(0.02)
     }
   ],
@@ -916,7 +952,7 @@ export const viveUserBindings = addSetsToBindings({
     {
       src: {
         bool: lTouchpadRising1,
-        value: lDpadCenter
+        value: lDpadCenter1
       },
       dest: { value: paths.actions.leftHand.startTeleport },
       xform: xforms.copyIfTrue,
@@ -964,7 +1000,7 @@ export const viveUserBindings = addSetsToBindings({
     {
       src: {
         bool: lTouchpadRising2,
-        value: lDpadNorth
+        value: lDpadNorth1
       },
       dest: {
         value: paths.actions.leftHand.penNextColor
@@ -975,7 +1011,7 @@ export const viveUserBindings = addSetsToBindings({
     {
       src: {
         bool: lTouchpadRising2,
-        value: lDpadSouth
+        value: lDpadSouth1
       },
       dest: {
         value: paths.actions.leftHand.penPrevColor
@@ -1024,11 +1060,41 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
+  [sets.leftCursorHoveringOnInteractable]: [
+    {
+      src: { value: leftGripPressed2 },
+      dest: { value: lGripRisingGrab },
+      xform: xforms.rising
+    },
+    {
+      src: { value: leftTriggerPressed2 },
+      dest: { value: lTriggerRisingGrab },
+      xform: xforms.rising,
+      priority: 1
+    },
+    {
+      src: [lGripRisingGrab],
+      dest: { value: paths.actions.cursor.left.grab },
+      xform: xforms.any
+    }
+  ],
+
   [sets.rightCursorHoldingUI]: [
     {
       src: { value: rightTriggerPressed2 },
       dest: {
-        value: cursorDrop2
+        value: rightCursorDrop2
+      },
+      xform: xforms.falling,
+      priority: 4
+    }
+  ],
+
+  [sets.leftCursorHoldingUI]: [
+    {
+      src: { value: leftTriggerPressed2 },
+      dest: {
+        value: leftCursorDrop2
       },
       xform: xforms.falling,
       priority: 4
@@ -1053,13 +1119,48 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: { value: rightGripPressed2 },
-      dest: { value: cursorDrop1 },
+      dest: { value: rightCursorDrop1 },
       xform: xforms.falling,
       priority: 1
     },
     {
-      src: [cursorDrop1, cursorDrop2],
+      src: [rightCursorDrop1, rightCursorDrop2],
       dest: { value: paths.actions.cursor.right.drop },
+      xform: xforms.any
+    },
+    {
+      src: {},
+      dest: { value: ensureFrozenViaDpad },
+      root: rootForFrozenOverrideWhenHolding,
+      xform: xforms.always(false)
+    }
+  ],
+
+  [sets.leftCursorHoldingInteractable]: [
+    {
+      src: {
+        value: lAxis("touchY"),
+        touching: lButton("touchpad").touched
+      },
+      dest: { value: paths.actions.cursor.left.modDelta },
+      xform: xforms.touch_axis_scroll(-1)
+    },
+    {
+      src: {
+        value: lAxis("joyY")
+      },
+      dest: { value: paths.actions.cursor.left.modDelta },
+      xform: xforms.scale(-0.02)
+    },
+    {
+      src: { value: leftGripPressed2 },
+      dest: { value: leftCursorDrop1 },
+      xform: xforms.falling,
+      priority: 1
+    },
+    {
+      src: [leftCursorDrop1, leftCursorDrop2],
+      dest: { value: paths.actions.cursor.left.drop },
       xform: xforms.any
     },
     {
@@ -1072,15 +1173,17 @@ export const viveUserBindings = addSetsToBindings({
 
   [sets.rightCursorHoveringOnPen]: [],
 
+  [sets.leftCursorHoveringOnPen]: [],
+
   [sets.rightCursorHoldingPen]: [
     {
-      src: [cursorDrop1],
+      src: [rightCursorDrop1],
       dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.noop,
       priority: 1
     },
     {
-      src: [cursorDrop2],
+      src: [rightCursorDrop2],
       dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.noop,
       priority: 1
@@ -1145,6 +1248,84 @@ export const viveUserBindings = addSetsToBindings({
     {
       src: { value: rButton("top").pressed },
       dest: { value: paths.actions.cursor.right.undoDrawing },
+      xform: xforms.rising,
+      priority: 2
+    }
+  ],
+
+  [sets.leftCursorHoldingPen]: [
+    {
+      src: [leftCursorDrop1],
+      dest: { value: paths.actions.cursor.left.drop },
+      xform: xforms.noop,
+      priority: 1
+    },
+    {
+      src: [leftCursorDrop2],
+      dest: { value: paths.actions.cursor.left.drop },
+      xform: xforms.noop,
+      priority: 1
+    },
+    {
+      src: { value: leftGripPressed2 },
+      dest: { value: paths.actions.cursor.left.drop },
+      xform: xforms.rising,
+      priority: 1
+    },
+    {
+      src: {
+        bool: lTouchpadRising1,
+        value: lDpadCenter1
+      },
+      dest: { value: paths.actions.leftHand.startTeleport },
+      xform: xforms.copyIfTrue,
+      priority: 2
+    },
+    {
+      src: { value: leftTriggerPressed2 },
+      dest: { value: paths.actions.cursor.left.startDrawing },
+      xform: xforms.rising,
+      priority: 3
+    },
+    {
+      src: { value: leftTriggerPressed2 },
+      dest: { value: paths.actions.cursor.left.stopDrawing },
+      xform: xforms.falling,
+      priority: 3
+    },
+    {
+      src: {
+        value: lAxis("touchX"),
+        touching: lButton("touchpad").touched
+      },
+      dest: { value: paths.actions.cursor.left.scalePenTip },
+      xform: xforms.touch_axis_scroll(0.1)
+    },
+    {
+      src: {
+        bool: lTouchpadRising1,
+        value: lDpadNorth1
+      },
+      dest: {
+        value: paths.actions.cursor.left.penNextColor
+      },
+      xform: xforms.copyIfTrue,
+      priority: 2
+    },
+    {
+      src: {
+        bool: lTouchpadRising1,
+        value: lDpadSouth1
+      },
+      dest: {
+        value: paths.actions.cursor.left.penPrevColor
+      },
+      xform: xforms.copyIfTrue,
+      priority: 2
+    },
+    {
+      src: { value: lButton("top").pressed },
+      dest: { value: paths.actions.cursor.left.undoDrawing },
       xform: xforms.rising,
       priority: 2
     }
@@ -1250,6 +1431,7 @@ export const viveUserBindings = addSetsToBindings({
   ],
 
   [sets.rightCursorHoveringOnCamera]: [],
+  [sets.leftCursorHoveringOnCamera]: [],
   [sets.rightHandHoveringOnCamera]: [],
   [sets.leftHandHoveringOnCamera]: [],
 
@@ -1283,6 +1465,20 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: { value: rightTriggerPressed2 },
+      dest: { value: paths.noop },
+      xform: xforms.falling,
+      priority: 3
+    }
+  ],
+  [sets.leftCursorHoldingCamera]: [
+    {
+      src: { value: leftTriggerPressed2 },
+      dest: { value: paths.actions.cursor.left.takeSnapshot },
+      xform: xforms.copy,
+      priority: 3
+    },
+    {
+      src: { value: leftTriggerPressed2 },
       dest: { value: paths.noop },
       xform: xforms.falling,
       priority: 3
