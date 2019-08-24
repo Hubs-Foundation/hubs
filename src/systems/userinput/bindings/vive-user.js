@@ -1143,14 +1143,16 @@ export const viveUserBindings = addSetsToBindings({
         touching: lButton("touchpad").touched
       },
       dest: { value: paths.actions.cursor.left.modDelta },
-      xform: xforms.touch_axis_scroll(-1)
+      xform: xforms.touch_axis_scroll(-1),
+      priority: 1
     },
     {
       src: {
         value: lAxis("joyY")
       },
       dest: { value: paths.actions.cursor.left.modDelta },
-      xform: xforms.scale(-0.02)
+      xform: xforms.scale(-0.02),
+      priority: 1
     },
     {
       src: { value: leftGripPressed2 },
