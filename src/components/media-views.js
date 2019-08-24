@@ -187,7 +187,11 @@ function createVideoTexture(url, contentType) {
       resolve(texture);
     };
 
-    videoEl.addEventListener("canplay", resolveOnce, { once: true });
+    if (videoEl.readyState >= videoEl.HAVE_FUTURE_DATA) {
+      resolveOnce();
+    } else {
+      videoEl.addEventListener("canplay", resolveOnce, { once: true });
+    }
 
     // HACK: Sometimes iOS fails to fire the canplay event, so we poll for the video dimensions to appear instead.
     if (isIOS) {
