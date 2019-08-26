@@ -1266,7 +1266,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const permsToken = oauthFlowPermsToken || data.perms_token;
       hubChannel.setPermissionsFromToken(permsToken);
 
-      scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
+      scene.addEventListener("adapter-ready", async ({ detail: adapter }) => {
         // HUGE HACK Safari does not like it if the first peer seen does not immediately
         // send audio over its media stream. Otherwise, the stream doesn't work and stays
         // silent. (Though subsequent peers work fine.)
@@ -1294,7 +1294,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const track = stream.getAudioTracks()[0];
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
-        adapter.setLocalMediaStream(stream);
+        await adapter.setLocalMediaStream(stream);
         hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
 
         // Stop the tone after we've connected, which seems to mitigate the issue without actually
