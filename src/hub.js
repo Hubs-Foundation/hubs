@@ -1294,7 +1294,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         const track = stream.getAudioTracks()[0];
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
-        await adapter.setLocalMediaStream(stream);
         hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
 
         // Stop the tone after we've connected, which seems to mitigate the issue without actually
@@ -1303,6 +1302,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           oscillator.stop();
           track.enabled = false;
         });
+
+        await adapter.setLocalMediaStream(stream);
       });
       subscriptions.setHubChannel(hubChannel);
 
