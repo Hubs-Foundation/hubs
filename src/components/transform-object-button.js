@@ -158,10 +158,12 @@ AFRAME.registerSystem("transform-selected-object", {
 
     intersections.length = 0;
     this.raycasters.right =
-      this.raycasters.right || document.getElementById("right-cursor-controller").components["cursor-controller"].raycaster;
+      this.raycasters.right ||
+      document.getElementById("right-cursor-controller").components["cursor-controller"].raycaster;
     this.raycasters.left =
-      this.raycasters.left || document.getElementById("left-cursor-controller").components["cursor-controller"].raycaster;
-    const raycaster = this.hand.el.id === "player-left-controller"? this.raycasters.left : this.raycasters.right;
+      this.raycasters.left ||
+      document.getElementById("left-cursor-controller").components["cursor-controller"].raycaster;
+    const raycaster = this.hand.el.id === "player-left-controller" ? this.raycasters.left : this.raycasters.right;
     const far = raycaster.far;
     raycaster.far = 1000;
     plane.raycast(raycaster, intersections);
@@ -252,7 +254,7 @@ AFRAME.registerSystem("transform-selected-object", {
       finalProjectedVec
     } = this.planarInfo;
     this.target.getWorldPosition(plane.position);
-//    this.el.camera.getWorldQuaternion(plane.quaternion);
+    //    this.el.camera.getWorldQuaternion(plane.quaternion);
     this.el.camera.getWorldPosition(v);
     plane.matrixNeedsUpdate = true;
     const cameraToPlaneDistance = v.sub(plane.position).length();
@@ -346,11 +348,9 @@ AFRAME.registerSystem("transform-selected-object", {
 
 AFRAME.registerComponent("transform-button-selector", {
   tick() {
-    // TODO: awkward lefthand/righthand checks. what is correct here?
-    const hand =
-      AFRAME.scenes[0].systems.userinput.get(paths.actions.rightHand.pose) ||
-      AFRAME.scenes[0].systems.userinput.get(paths.actions.leftHand.pose);
-    if (!hand) {
+    this.userinput = this.userinput || this.el.sceneEl.systems.userinput;
+    const hasHand = this.userinput.get(paths.actions.rightHand.pose) || this.userinput.get(paths.actions.leftHand.pose);
+    if (!hasHand) {
       if (this.el.components["transform-button"].data.mode !== TRANSFORM_MODE.CURSOR) {
         this.el.setAttribute("transform-button", "mode", TRANSFORM_MODE.CURSOR);
       }
