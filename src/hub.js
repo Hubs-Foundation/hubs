@@ -1302,7 +1302,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         scene.addEventListener("didConnectToNetworkedScene", () => {
           oscillator.stop();
           track.enabled = false;
-        });
+        }, { once: true });
 
         await adapter.setLocalMediaStream(stream);
       });
