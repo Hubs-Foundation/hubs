@@ -41,10 +41,10 @@ const rAxis = paths.device.vive.right.axis;
 const rPose = paths.device.vive.right.pose;
 const rTouch = v("right/touch");
 const rJoy = v("right/joy");
-const rDpadNorth1 = v("right/dpad/north");
-const rDpadSouth1 = v("right/dpad/south");
-const rDpadEast1 = v("right/dpad/east");
-const rDpadWest1 = v("right/dpad/west");
+const rDpadNorth1 = v("right/dpad/north1");
+const rDpadSouth1 = v("right/dpad/south1");
+const rDpadEast1 = v("right/dpad/east1");
+const rDpadWest1 = v("right/dpad/west1");
 const rDpadCenter1 = v("right/dpad/center");
 const rDpadNorth2 = v("right/dpad/north2");
 const rDpadSouth2 = v("right/dpad/south2");
@@ -1138,8 +1138,7 @@ export const viveUserBindings = addSetsToBindings({
         touching: lButton("touchpad").touched
       },
       dest: { value: paths.actions.cursor.left.modDelta },
-      xform: xforms.touch_axis_scroll(-1),
-      priority: 1
+      xform: xforms.touch_axis_scroll(-1)
     },
     {
       src: {
@@ -1270,15 +1269,6 @@ export const viveUserBindings = addSetsToBindings({
       priority: 1
     },
     {
-      src: {
-        bool: lTouchpadRising1,
-        value: lDpadCenter1
-      },
-      dest: { value: paths.actions.leftHand.startTeleport },
-      xform: xforms.copyIfTrue,
-      priority: 2
-    },
-    {
       src: { value: leftTriggerPressed2 },
       dest: { value: paths.actions.cursor.left.startDrawing },
       xform: xforms.rising,
@@ -1297,6 +1287,16 @@ export const viveUserBindings = addSetsToBindings({
       },
       dest: { value: paths.actions.cursor.left.scalePenTip },
       xform: xforms.touch_axis_scroll(0.1)
+    },
+    {
+      src: {
+        value: leftTouchpadPressed2
+      },
+      dest: {
+        value: lTouchpadRising1
+      },
+      xform: xforms.rising,
+      priority: 1
     },
     {
       src: {
