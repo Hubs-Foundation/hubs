@@ -97,6 +97,7 @@ AFRAME.registerSystem("transform-selected-object", {
     this.dyAll = 0;
     this.dyStore = 0;
     this.dyApplied = 0;
+    this.raycasters = {};
 
     this.puppet = {
       initialControllerOrientation: new THREE.Quaternion(),
@@ -156,24 +157,15 @@ AFRAME.registerSystem("transform-selected-object", {
     plane.updateMatrixWorld(true);
 
     intersections.length = 0;
-    // TODO: sort out left/right more clearly than this
-    this.raycaster =
-      this.raycaster || document.getElementById("right-cursor-controller").components["cursor-controller"].raycaster;
-    this.raycaster2 =
-      this.raycaster2 || document.getElementById("left-cursor-controller").components["cursor-controller"].raycaster;
-    const left = this.hand.el.id === "player-left-controller";
-    const far = left ? this.raycaster2.far : this.raycaster.far;
-    if (left) {
-      this.raycaster2.far = 1000;
-    } else {
-      this.raycaster.far = 1000;
-    }
-    plane.raycast(left ? this.raycaster2 : this.raycaster, intersections);
-    if (left) {
-      this.raycaster2.far = far;
-    } else {
-      this.raycaster.far = far;
-    }
+    this.raycasters.right =
+      this.raycasters.right || document.getElementById("right-cursor-controller").components["cursor-controller"].raycaster;
+    this.raycasters.left =
+      this.raycasters.left || document.getElementById("left-cursor-controller").components["cursor-controller"].raycaster;
+    const raycaster = this.hand.el.id === "player-left-controller"? this.raycasters.left : this.raycasters.right;
+    const far = raycaster.far;
+    raycaster.far = 1000;
+    plane.raycast(raycaster, intersections);
+    raycaster.far = far;
     this.transforming = !!intersections[0];
     if (!this.transforming) {
       return;
@@ -260,26 +252,18 @@ AFRAME.registerSystem("transform-selected-object", {
       finalProjectedVec
     } = this.planarInfo;
     this.target.getWorldPosition(plane.position);
-    this.el.camera.getWorldQuaternion(plane.quaternion);
+//    this.el.camera.getWorldQuaternion(plane.quaternion);
     this.el.camera.getWorldPosition(v);
     plane.matrixNeedsUpdate = true;
     const cameraToPlaneDistance = v.sub(plane.position).length();
 
     intersections.length = 0;
-    const left = this.hand.el.id === "player-left-controller";
-    const far = left ? this.raycaster2.far : this.raycaster.far;
-    if (left) {
-      this.raycaster2.far = 1000;
-    } else {
-      this.raycaster.far = 1000;
-    }
-    plane.raycast(left ? this.raycaster2 : this.raycaster, intersections);
-    if (left) {
-      this.raycaster2.far = far;
-    } else {
-      this.raycaster.far = far;
-    }
-    const intersection = intersections[0]; // point
+    const raycaster = this.hand.el.id === "player-left-controller" ? this.raycasters.left : this.raycasters.right;
+    const far = raycaster.far;
+    raycaster.far = 1000;
+    plane.raycast(raycaster, intersections);
+    raycaster.far = far;
+    const intersection = intersections[0];
     if (!intersection) return;
 
     normal.set(0, 0, -1).applyQuaternion(plane.quaternion);
