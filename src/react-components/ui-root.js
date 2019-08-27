@@ -483,7 +483,10 @@ class UIRoot extends Component {
   };
 
   exit = reason => {
-    this.props.exitScene(reason);
+    if (this.props.exitScene) {
+      this.props.exitScene(reason);
+    }
+
     this.setState({ exited: true });
   };
 
