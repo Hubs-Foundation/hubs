@@ -371,12 +371,13 @@
                     scale="0.5 0.5 0.5"
                     action-to-remove__pen="path: /actions/pen/remove;"
                     position-at-box-shape-border="target:.pen-menu"
-
+                    set-yxz-order
                 >
                     <a-entity
                         id="pen"
                         position="0 -0.18 0"
                         pen="camera: #avatar-pov-node; drawingManager: #drawing-manager"
+                        pen-laser
                     ></a-entity>
                     <a-entity class="ui delete-button pen-menu" visibility-while-frozen="withinDistance: 10; withPermission: spawn_drawing" >
                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" remove-networked-object-button position="0 0 0.01">
@@ -954,6 +955,7 @@
                 matrix-auto-update
                 body-helper="type: kinematic; emitCollisionEvents: false; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
                 shape-helper="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                set-yxz-order
             >
             </a-entity>
 
@@ -967,6 +969,7 @@
                 matrix-auto-update
                 body-helper="type: kinematic; emitCollisionEvents: false; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
                 shape-helper="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                set-yxz-order
             >
             </a-entity>
 

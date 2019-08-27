@@ -88,7 +88,7 @@ export default class SceneEntryManager {
     }
 
     if (mediaStream) {
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
+      await NAF.connection.adapter.setLocalMediaStream(mediaStream);
     }
 
     this.scene.classList.remove("hand-cursor");
@@ -390,7 +390,7 @@ export default class SceneEntryManager {
 
       if (videoTracks.length > 0) {
         newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
-        NAF.connection.adapter.setLocalMediaStream(mediaStream);
+        await NAF.connection.adapter.setLocalMediaStream(mediaStream);
         currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
 
         // Wire up custom removal event which will stop the stream.
@@ -438,7 +438,7 @@ export default class SceneEntryManager {
       });
     });
 
-    this.scene.addEventListener("action_end_video_sharing", () => {
+    this.scene.addEventListener("action_end_video_sharing", async () => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
@@ -451,7 +451,7 @@ export default class SceneEntryManager {
         mediaStream.removeTrack(track);
       }
 
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
+      await NAF.connection.adapter.setLocalMediaStream(mediaStream);
       currentVideoShareEntity = null;
 
       this.scene.emit("share_video_disabled");
@@ -461,9 +461,8 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("action_selected_media_result_entry", async e => {
       // TODO spawn in space when no rights
-      const entry = e.detail;
-      if (["avatar", "avatar_listing"].includes(entry.type)) return;
-      if ((entry.type === "scene_listing" || entry.type === "scene") && this.hubChannel.can("update_hub")) return;
+      const { entry, selectAction } = e.detail;
+      if (selectAction !== "spawn") return;
 
       const delaySpawn = isIn2DInterstitial() && !isMobileVR;
       await exit2DInterstitialAndEnterVR();
@@ -580,7 +579,7 @@ export default class SceneEntryManager {
           ? audioEl.mozCaptureStream().getAudioTracks()[0]
           : null
     );
-    NAF.connection.adapter.setLocalMediaStream(mediaStream);
+    await NAF.connection.adapter.setLocalMediaStream(mediaStream);
     audioEl.play();
   };
 }

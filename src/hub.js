@@ -183,6 +183,7 @@ import "./components/cursor-controller";
 import "./components/nav-mesh-helper";
 
 import "./components/tools/pen";
+import "./components/tools/pen-laser";
 import "./components/tools/networked-drawing";
 import "./components/tools/drawing-manager";
 
@@ -427,15 +428,16 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   remountUI({
     onSendMessage: messageDispatch.dispatch,
     onLoaded: () => store.executeOnLoadActions(scene),
-    onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
+    onMediaSearchResultEntrySelected: (entry, selectAction) =>
+      scene.emit("action_selected_media_result_entry", { entry, selectAction }),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
     onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
     embedToken: embedToken
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
-    const entry = e.detail;
-    if (entry.type !== "scene_listing" && entry.type !== "scene") return;
+    const { entry, selectAction } = e.detail;
+    if ((entry.type !== "scene_listing" && entry.type !== "scene") || selectAction !== "use") return;
     if (!hubChannel.can("update_hub")) return;
 
     hubChannel.updateScene(entry.url);
@@ -1265,10 +1267,44 @@ document.addEventListener("DOMContentLoaded", async () => {
       const permsToken = oauthFlowPermsToken || data.perms_token;
       hubChannel.setPermissionsFromToken(permsToken);
 
-      scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
+      scene.addEventListener("adapter-ready", async ({ detail: adapter }) => {
+        // HUGE HACK Safari does not like it if the first peer seen does not immediately
+        // send audio over its media stream. Otherwise, the stream doesn't work and stays
+        // silent. (Though subsequent peers work fine.)
+        //
+        // This hooks up a simple audio pipeline to push a short tone over the WebRTC
+        // media stream as its created to mitigate this Safari bug.
+        //
+        // Users will never hear this tone -- the outgoing media track is overwritten
+        // before we spawn our avatar, which is when other users will begin hearing
+        // the audio.
+        //
+        // This only covers the case where a Safari user is in the room and the first
+        // other user joins. If a user is in the room and Safari user joins,
+        // then Safari can fail to receive audio from a single peer (it does not seem
+        // to be related to silence, but may be a factor.)
+        const ctx = THREE.AudioContext.getContext();
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.01, ctx.currentTime);
+        const dest = ctx.createMediaStreamDestination();
+        oscillator.connect(gain);
+        gain.connect(dest);
+        oscillator.start();
+        const stream = dest.stream;
+        const track = stream.getAudioTracks()[0];
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
         hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
+
+        // Stop the tone after we've connected, which seems to mitigate the issue without actually
+        // having to keep this playing and using bandwidth.
+        scene.addEventListener("didConnectToNetworkedScene", () => {
+          oscillator.stop();
+          track.enabled = false;
+        }, { once: true });
+
+        await adapter.setLocalMediaStream(stream);
       });
       subscriptions.setHubChannel(hubChannel);
 

@@ -2,7 +2,7 @@ import { EventTarget } from "event-target-shim";
 import { getReticulumFetchUrl, fetchReticulumAuthenticated } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 
-export const SOURCES = ["poly", "sketchfab", "videos", "scenes", "gifs", "images", "twitch"];
+export const SOURCES = ["poly", "sketchfab", "videos", "scenes", "avatars", "gifs", "images", "twitch"];
 
 const EMPTY_RESULT = { entries: [], meta: {} };
 
@@ -158,7 +158,7 @@ export default class MediaSearchStore extends EventTarget {
     pushHistoryPath(this.history, location.pathname, searchParams.toString());
   };
 
-  getSearchClearedSearchParams = (location, keepSource, keepNav) => {
+  getSearchClearedSearchParams = (location, keepSource, keepNav, keepSelectAction) => {
     const searchParams = new URLSearchParams(location.search);
 
     // Strip browsing query params
@@ -172,6 +172,10 @@ export default class MediaSearchStore extends EventTarget {
 
     if (!keepSource) {
       searchParams.delete("media_source");
+    }
+
+    if (!keepSelectAction) {
+      searchParams.delete("selectAction");
     }
 
     return searchParams;
@@ -213,11 +217,11 @@ export default class MediaSearchStore extends EventTarget {
     this._sourceNavigate(this._stashedSource ? this._stashedSource : SOURCES[0], false, true);
   };
 
-  sourceNavigateWithNoNav = source => {
-    this._sourceNavigate(source, true, false);
+  sourceNavigateWithNoNav = (source, selectAction) => {
+    this._sourceNavigate(source, true, false, selectAction);
   };
 
-  _sourceNavigate = async (source, hideNav, useLastStashedParams) => {
+  _sourceNavigate = async (source, hideNav, useLastStashedParams, selectAction) => {
     const currentQuery = new URLSearchParams(this.history.location.search).get("q");
     const searchParams = this.getSearchClearedSearchParams(this.history.location);
 
@@ -250,6 +254,10 @@ export default class MediaSearchStore extends EventTarget {
 
     if (hideNav) {
       searchParams.set("media_nav", "false");
+    }
+
+    if (selectAction) {
+      searchParams.set("selectAction", selectAction);
     }
 
     if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {

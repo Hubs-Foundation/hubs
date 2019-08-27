@@ -572,7 +572,9 @@ AFRAME.registerComponent("camera-tool", {
         this.takeSnapshotNextTick ||
         (this.updateRenderTargetNextTick && (this.viewfinderInViewThisFrame || this.videoRecorder))
       ) {
+        let tempHeadVisible;
         if (playerHead) {
+          tempHeadVisible = playerHead.visible;
           tempHeadScale.copy(playerHead.scale);
 
           // We want to scale our own head in between frames now that we're taking a video/photo.
@@ -586,6 +588,7 @@ AFRAME.registerComponent("camera-tool", {
             scale = getAudioFeedbackScale(this.el.object3D, playerHead, 1, 2, analyser.volume);
           }
 
+          playerHead.visible = true;
           playerHead.scale.set(scale, scale, scale);
           playerHead.updateMatrices(true, true);
           playerHead.updateMatrixWorld(true, true);
@@ -629,6 +632,7 @@ AFRAME.registerComponent("camera-tool", {
         renderer.vr.enabled = tmpVRFlag;
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
         if (playerHead) {
+          playerHead.visible = tempHeadVisible;
           playerHead.scale.copy(tempHeadScale);
           playerHead.updateMatrices(true, true);
           playerHead.updateMatrixWorld(true, true);

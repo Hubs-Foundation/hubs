@@ -78,7 +78,7 @@ function authorizeEntityManipulation(entityMetadata, sender, senderPermissions) 
   } else if (template.endsWith("-camera")) {
     return isCreator || senderPermissions.spawn_camera;
   } else if (template.endsWith("-pen")) {
-    return isCreator || senderPermissions.spawn_pen;
+    return isCreator || senderPermissions.spawn_drawing;
   } else {
     return false;
   }
