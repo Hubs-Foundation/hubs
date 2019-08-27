@@ -135,19 +135,6 @@ function createVideoTexture(url, contentType) {
 
     videoEl.addEventListener("canplay", yieldTexture, { once: true });
 
-    // HACK: Sometimes iOS fails to fire the canplay event, so we poll for the video dimensions to appear instead.
-    if (isIOS) {
-      const poll = () => {
-        if ((texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width)) {
-          yieldTexture();
-        } else {
-          setTimeout(poll, 500);
-        }
-      };
-
-      poll();
-    }
-
     // Set src on video to begin loading.
     if (url.startsWith("hubs://")) {
       const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
