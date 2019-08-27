@@ -124,7 +124,7 @@ function createVideoTexture(url, contentType) {
     texture.minFilter = THREE.LinearFilter;
     texture.encoding = THREE.sRGBEncoding;
 
-    // Wire up event handlers or polling to forward along texture once video can play.
+    // Wire up canplay event handlers to forward along texture once video can play.
     videoEl.addEventListener("canplay", () => resolve(texture), { once: true });
 
     // Set src on video to begin loading.
