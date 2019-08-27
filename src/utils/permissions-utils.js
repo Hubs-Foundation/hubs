@@ -85,18 +85,12 @@ function authorizeEntityManipulation(entityMetadata, sender, senderPermissions) 
 }
 
 function getPendingOrExistingEntityMetadata(networkId) {
-  const { adapter } = NAF.connection;
-  const entityMessage = adapter.frozenUpdates.get(networkId);
+  const pendingData = NAF.connection.adapter.getPendingDataForNetworkId(networkId);
 
-  if (adapter.frozen && entityMessage) {
-    const { dataType } = entityMessage;
-    const data =
-      dataType === "um"
-        ? entityMessage.data.d.find(entityData => entityData.networkId === networkId)
-        : entityMessage.data;
-    const { template, creator } = data;
+  if (pendingData) {
+    const { template, creator } = pendingData;
     const schema = NAF.schemas.schemaDict[template];
-    const pinnableComponent = data.components[indexForComponent("pinnable", schema)];
+    const pinnableComponent = pendingData.components[indexForComponent("pinnable", schema)];
     const isPinned = pinnableComponent && pinnableComponent.pinned;
     return { template, creator, isPinned };
   }
