@@ -124,6 +124,31 @@ function createVideoTexture(url, contentType) {
     texture.minFilter = THREE.LinearFilter;
     texture.encoding = THREE.sRGBEncoding;
 
+    // Wire up event handlers or polling to forward along texture once video can play.
+    let hasYielded = false;
+
+    const yieldTexture = () => {
+      if (hasYielded) return;
+      hasYielded = true;
+      resolve(texture);
+    };
+
+    videoEl.addEventListener("canplay", yieldTexture, { once: true });
+
+    // HACK: Sometimes iOS fails to fire the canplay event, so we poll for the video dimensions to appear instead.
+    if (isIOS) {
+      const poll = () => {
+        if ((texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width)) {
+          yieldTexture();
+        } else {
+          setTimeout(poll, 500);
+        }
+      };
+
+      poll();
+    }
+
+    // Set src on video to begin loading.
     if (url.startsWith("hubs://")) {
       const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
       const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
@@ -177,29 +202,6 @@ function createVideoTexture(url, contentType) {
     } else {
       videoEl.src = url;
       videoEl.onerror = reject;
-    }
-
-    let hasResolved = false;
-
-    const resolveOnce = () => {
-      if (hasResolved) return;
-      hasResolved = true;
-      resolve(texture);
-    };
-
-    videoEl.addEventListener("canplay", resolveOnce, { once: true });
-
-    // HACK: Sometimes iOS fails to fire the canplay event, so we poll for the video dimensions to appear instead.
-    if (isIOS) {
-      const poll = () => {
-        if ((texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width)) {
-          resolveOnce();
-        } else {
-          setTimeout(poll, 500);
-        }
-      };
-
-      poll();
     }
   });
 }
