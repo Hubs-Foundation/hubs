@@ -125,15 +125,7 @@ function createVideoTexture(url, contentType) {
     texture.encoding = THREE.sRGBEncoding;
 
     // Wire up event handlers or polling to forward along texture once video can play.
-    let hasYielded = false;
-
-    const yieldTexture = () => {
-      if (hasYielded) return;
-      hasYielded = true;
-      resolve(texture);
-    };
-
-    videoEl.addEventListener("canplay", yieldTexture, { once: true });
+    videoEl.addEventListener("canplay", () => resolve(texture), { once: true });
 
     // Set src on video to begin loading.
     if (url.startsWith("hubs://")) {
