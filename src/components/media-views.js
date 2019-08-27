@@ -180,33 +180,16 @@ function createVideoTexture(url, contentType) {
       videoEl.onerror = reject;
     }
 
-    // Wire up event handlers or polling to forward along texture once video can play.
-    let hasYielded = false;
-
-    const yieldTexture = () => {
-      if (hasYielded) return;
-      hasYielded = true;
-      resolve(texture);
+    // NOTE: Previously we were using the canplay event here, but sometimes that event simply doesn't fire (even if the readyState starts at 0)
+    const poll = () => {
+      if ((texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width)) {
+        resolve(texture);
+      } else {
+        setTimeout(poll, 500);
+      }
     };
 
-    if (videoEl.readyState >= videoEl.HAVE_CURRENT_DATA) {
-      yieldTexture();
-    } else {
-      videoEl.addEventListener("canplay", yieldTexture, { once: true });
-    }
-
-    // HACK: Sometimes iOS fails to fire the canplay event, so we poll for the video dimensions to appear instead.
-    if (isIOS) {
-      const poll = () => {
-        if ((texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width)) {
-          yieldTexture();
-        } else {
-          setTimeout(poll, 500);
-        }
-      };
-
-      poll();
-    }
+    poll();
   });
 }
 
