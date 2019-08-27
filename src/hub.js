@@ -1299,10 +1299,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Stop the tone after we've connected, which seems to mitigate the issue without actually
         // having to keep this playing and using bandwidth.
-        scene.addEventListener("didConnectToNetworkedScene", () => {
-          oscillator.stop();
-          track.enabled = false;
-        }, { once: true });
+        scene.addEventListener(
+          "didConnectToNetworkedScene",
+          () => {
+            oscillator.stop();
+            track.enabled = false;
+          },
+          { once: true }
+        );
 
         await adapter.setLocalMediaStream(stream);
       });
