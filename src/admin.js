@@ -18,6 +18,7 @@ import { AvatarListingList, AvatarListingEdit } from "./react-components/admin/a
 import { FeaturedSceneListingList, FeaturedSceneListingEdit } from "./react-components/admin/featured-scene-listings";
 import { PendingSceneList } from "./react-components/admin/pending-scenes";
 import { AccountList, AccountEdit } from "./react-components/admin/accounts";
+import { ProjectList, ProjectShow } from "./react-components/admin/projects";
 
 window.APP = new App();
 const store = window.APP.store;
@@ -51,6 +52,8 @@ class AdminUI extends Component {
         <Resource name="scenes" list={SceneList} edit={SceneEdit} />
         <Resource name="avatars" list={AvatarList} edit={AvatarEdit} />
         <Resource name="owned_files" />
+
+        <Resource name="projects" list={ProjectList} show={ProjectShow} />
 
         <Resource name="hubs_metrics" list={ListGuesser} />
       </Admin>
