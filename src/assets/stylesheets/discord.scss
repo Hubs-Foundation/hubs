@@ -155,8 +155,11 @@ body {
   z-index: -1;
   border-radius: 8px;
 
-  img {
+  video {
     width: 90%;
+    border-style: solid;
+    border-width: thick;
+    border-radius: 5px;
   }
 
   @media(max-width: $breakpoint) {
@@ -166,7 +169,7 @@ body {
   :local(.splash-tagline) {
     position: absolute;
     bottom: -40px;
-    right: 10%;
+    right: 15%;
     width: 75%;
     text-align: center;
     color: #A3A3A3;
