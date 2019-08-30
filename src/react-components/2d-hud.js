@@ -99,6 +99,7 @@ class TopHUD extends Component {
       }
     }, 50);
     window.APP.hubChannel.addEventListener("permissions_updated", this.onPermissionsUpdated);
+    this.onPermissionsUpdated();
   };
 
   componentWillUnmount = () => {
