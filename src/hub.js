@@ -214,8 +214,6 @@ if (!isBotMode && !isTelemetryDisabled) {
 disableiOSZoom();
 detectConcurrentLoad();
 
-store.init();
-
 function getPlatformUnsupportedReason() {
   if (typeof RTCDataChannelEvent === "undefined") return "no_data_channels";
   return null;
@@ -574,6 +572,8 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  await store.init();
+
   const canvas = document.querySelector(".a-canvas");
   canvas.classList.add("a-hidden");
 
@@ -650,7 +650,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // If the stored avatar doesn't have a valid src, reset to a legacy avatar.
   const avatarSrc = await getAvatarSrc(store.state.profile.avatarId);
   if (!avatarSrc) {
-    store.resetToRandomLegacyAvatar();
+    await store.resetToRandomDefaultAvatar();
   }
 
   const authChannel = new AuthChannel(store);

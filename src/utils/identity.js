@@ -1,4 +1,4 @@
-import { avatars } from "../assets/avatars/avatars.js";
+import { fetchReticulumAuthenticated } from "./phoenix-utils";
 
 const names = [
   "Baers-Pochard",
@@ -97,9 +97,10 @@ export function generateRandomName() {
   return `${selectRandom(names)}-${Math.floor(10000 + Math.random() * 10000)}`;
 }
 
-export const avatarIds = avatars.map(av => av.id);
-
-export function generateDefaultProfile() {
+export async function generateDefaultProfile() {
+  const defaultAvatarEndpoint = "/api/v1/media/search?source=avatar_listings";
+  const defaultAvatars = (await fetchReticulumAuthenticated(defaultAvatarEndpoint)).entries;
+  const avatarIds = defaultAvatars.map(avatar => avatar.id);
   return {
     avatarId: selectRandom(avatarIds)
   };
