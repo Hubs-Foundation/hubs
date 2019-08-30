@@ -54,7 +54,7 @@ const emojiTypeToImage = {
 AFRAME.registerComponent("player-info", {
   schema: {
     avatarSrc: { type: "string" },
-    avatarType: { type: "string", default: AVATAR_TYPES.LEGACY },
+    avatarType: { type: "string", default: AVATAR_TYPES.SKINNABLE },
     emojiType: { type: "string", default: null }
   },
   init() {
@@ -177,6 +177,6 @@ AFRAME.registerComponent("player-info", {
     this.applyEmoji();
   },
   handleModelError() {
-    window.APP.store.resetToRandomLegacyAvatar();
+    window.APP.store.resetToRandomDefaultAvatar();
   }
 });

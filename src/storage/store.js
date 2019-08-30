@@ -168,19 +168,25 @@ export default class Store extends EventTarget {
       onLoadActions: []
     });
 
+    this._shouldResetAvatarOnInit = false;
+
     const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
     if (oauthFlowCredentials) {
       this.update({ credentials: oauthFlowCredentials });
-      this.resetToRandomDefaultAvatar();
+      this._shouldResetAvatarOnInit = true;
       Cookies.remove(OAUTH_FLOW_CREDENTIALS_KEY);
     }
   }
 
   // Initializes store with any default bits
   init = async () => {
-    this.update({
-      profile: { ...(await generateDefaultProfile()), ...(this.state.profile || {}) }
-    });
+    if (this._shouldResetAvatarOnInit) {
+      await this.resetToRandomDefaultAvatar();
+    } else {
+      this.update({
+        profile: { ...(await generateDefaultProfile()), ...(this.state.profile || {}) }
+      });
+    }
 
     // Regenerate name to encourage users to change it.
     if (!this.state.activity.hasChangedName) {
