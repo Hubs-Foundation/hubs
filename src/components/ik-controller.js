@@ -1,7 +1,5 @@
 const { Vector3, Quaternion, Matrix4, Euler } = THREE;
 
-import { AVATAR_TYPES } from "../utils/avatar-utils";
-
 function quaternionAlmostEquals(epsilon, u, v) {
   // Note: q and -q represent same rotation
   return (
