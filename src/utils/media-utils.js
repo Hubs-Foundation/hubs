@@ -89,7 +89,6 @@ function getOrientation(file, callback) {
   reader.readAsArrayBuffer(file);
 }
 
-let interactableId = 0;
 export const addMedia = (
   src,
   template,
@@ -102,7 +101,6 @@ export const addMedia = (
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
-  entity.id = "interactable-media-" + interactableId++;
   entity.setAttribute("networked", { template: template });
   const needsToBeUploaded = src instanceof File;
   entity.setAttribute("media-loader", {
