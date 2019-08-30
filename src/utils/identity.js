@@ -98,7 +98,7 @@ export function generateRandomName() {
 }
 
 export async function generateDefaultProfile() {
-  const defaultAvatarEndpoint = "/api/v1/media/search?source=avatar_listings";
+  const defaultAvatarEndpoint = "/api/v1/media/search?filter=default&source=avatar_listings";
   const defaultAvatars = (await fetchReticulumAuthenticated(defaultAvatarEndpoint)).entries;
   const avatarIds = defaultAvatars.map(avatar => avatar.id);
   return {
