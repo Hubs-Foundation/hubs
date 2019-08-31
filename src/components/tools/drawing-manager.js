@@ -6,16 +6,8 @@
  */
 AFRAME.registerComponent("drawing-manager", {
   init() {
-    this._onComponentInitialized = this._onComponentInitialized.bind(this);
-
     this.el.object3D.visible = false;
     this.drawingToPen = new Map();
-  },
-
-  remove() {
-    if (this.drawingEl) {
-      this.drawingEl.removeEventListener("componentinitialized", this._onComponentInitialized);
-    }
   },
 
   _onComponentInitialized(e) {
@@ -30,12 +22,22 @@ AFRAME.registerComponent("drawing-manager", {
       this.drawingEl.setAttribute("networked", "template: #interactable-drawing");
       this.el.sceneEl.appendChild(this.drawingEl);
 
-      this.drawingEl.addEventListener("componentinitialized", this._onComponentInitialized);
+      this.drawingEl.addEventListener("componentinitialized", this._onComponentInitialized.bind(this), { once: true });
     }
+  },
+
+  destroyDrawing() {
+    this.drawingToPen.delete(this.drawing);
+    this.drawing = null;
+    this.drawingEl = null;
   },
 
   getDrawing(pen) {
     //TODO: future handling of multiple drawings
+    if (!this.drawingEl) {
+      this.createDrawing();
+    }
+
     if (this.drawing && (!this.drawingToPen.has(this.drawing) || this.drawingToPen.get(this.drawing) === pen)) {
       this.drawingToPen.set(this.drawing, pen);
       return this.drawing;

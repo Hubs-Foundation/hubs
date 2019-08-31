@@ -1,14 +1,14 @@
-:local(.mic-0) {
+:local(.mic-off-0) {
     width: 40px;
     height: 40px;
     background: url("css-spritesheet.png") -0px -0px;
     background-size: 262.5px 240px;
 }
-:local(.mic-0:hover){
+:local(.mic-off-0:hover){
   @media (pointer: fine) {
     width: 40px;
     height: 40px;
-    background: url("css-spritesheet.png") -40px -0px;
+    background: url("css-spritesheet.png") -160px -40px;
     background-size: 262.5px 240px;
   }
   @media (pointer: coarse) {
@@ -158,23 +158,23 @@
     background-size: 262.5px 240px;
   }
 }
-:local(.mic-off-0) {
+:local(.mic-0) {
     width: 40px;
     height: 40px;
-    background: url("css-spritesheet.png") -160px -0px;
+    background: url("css-spritesheet.png") -40px -0px;
     background-size: 262.5px 240px;
 }
-:local(.mic-off-0:hover){
+:local(.mic-0:hover){
   @media (pointer: fine) {
     width: 40px;
     height: 40px;
-    background: url("css-spritesheet.png") -160px -40px;
+    background: url("css-spritesheet.png") -160px -0px;
     background-size: 262.5px 240px;
   }
   @media (pointer: coarse) {
     width: 40px;
     height: 40px;
-    background: url("css-spritesheet.png") -160px -0px;
+    background: url("css-spritesheet.png") -40px -0px;
     background-size: 262.5px 240px;
   }
 }

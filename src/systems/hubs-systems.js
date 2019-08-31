@@ -3,6 +3,7 @@ import { PhysicsSystem } from "./physics-system";
 import { ConstraintsSystem } from "./constraints-system";
 import { TwoPointStretchingSystem } from "./two-point-stretching-system";
 import { SingleActionButtonSystem, HoldableButtonSystem, HoverButtonSystem } from "./button-systems";
+import { DrawingMenuSystem } from "./drawing-menu-system";
 import { HoverMenuSystem } from "./hover-menu-system";
 import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
@@ -23,6 +24,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.holdableButtonSystem = new HoldableButtonSystem();
     this.hoverButtonSystem = new HoverButtonSystem();
     this.hoverMenuSystem = new HoverMenuSystem();
+    this.DrawingMenuSystem = new DrawingMenuSystem(this.el.sceneEl);
     this.superSpawnerSystem = new SuperSpawnerSystem();
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
     this.soundEffectsSystem = new SoundEffectsSystem();
@@ -44,6 +46,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.singleActionButtonSystem.tick();
     this.holdableButtonSystem.tick();
     this.hoverButtonSystem.tick();
+    this.DrawingMenuSystem.tick();
     this.hoverMenuSystem.tick();
     this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
     this.soundEffectsSystem.tick();
