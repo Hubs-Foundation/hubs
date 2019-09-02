@@ -264,6 +264,7 @@ class TopHUD extends Component {
               className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn, {
                 [styles.disabled]: this.state.mediaDisabled
               })}
+              title={`Create${this.state.mediaDisabled ? " Disabled" : ""}`}
               onClick={
                 this.state.mediaDisabled ? noop : () => this.props.mediaSearchStore.sourceNavigateToDefaultSource()
               }
