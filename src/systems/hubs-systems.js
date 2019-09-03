@@ -30,7 +30,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.spriteSystem = new SpriteSystem(this.el);
     this.batchManagerSystem = new BatchManagerSystem(this.el.sceneEl.object3D, this.el.sceneEl.renderer);
     this.spriteSystem = new SpriteSystem(this.el);
-    this.cameraSystem = new CameraSystem();
+    this.cameraSystem = new CameraSystem(this.batchManagerSystem);
   },
 
   tick(t, dt) {
@@ -51,7 +51,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.physicsSystem.tick(dt);
     this.spriteSystem.tick(t, dt);
     this.batchManagerSystem.tick(t);
-    this.cameraSystem.tick();
+    this.cameraSystem.tick(this.el);
   },
 
   remove() {
