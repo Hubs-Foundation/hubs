@@ -1,4 +1,5 @@
 import { CursorTargettingSystem } from "./cursor-targetting-system";
+import { CursorTogglingSystem } from "./cursor-toggling-system";
 import { PhysicsSystem } from "./physics-system";
 import { ConstraintsSystem } from "./constraints-system";
 import { TwoPointStretchingSystem } from "./two-point-stretching-system";
@@ -10,11 +11,15 @@ import { SoundEffectsSystem } from "./sound-effects-system";
 
 import { BatchManagerSystem } from "./render-manager-system";
 import { LobbyCameraSystem } from "./lobby-camera-system";
+import { InteractionSfxSystem } from "./interaction-sfx-system";
 import { SpriteSystem } from "./sprites";
 import { CameraSystem } from "./camera-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
+    this.cursorTogglingSystem = new CursorTogglingSystem();
+    this.interactionSfxSystem = new InteractionSfxSystem();
+    this.superSpawnerSystem = new SuperSpawnerSystem();
     this.cursorTargettingSystem = new CursorTargettingSystem();
     this.physicsSystem = new PhysicsSystem(this.el.sceneEl.object3D);
     this.constraintsSystem = new ConstraintsSystem(this.physicsSystem);
@@ -23,7 +28,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.holdableButtonSystem = new HoldableButtonSystem();
     this.hoverButtonSystem = new HoverButtonSystem();
     this.hoverMenuSystem = new HoverMenuSystem();
-    this.superSpawnerSystem = new SuperSpawnerSystem();
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
     this.soundEffectsSystem = new SoundEffectsSystem();
     this.lobbyCameraSystem = new LobbyCameraSystem();
@@ -36,7 +40,9 @@ AFRAME.registerSystem("hubs-systems", {
   tick(t, dt) {
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
-    systems.interaction.tick2(this.soundEffectsSystem);
+    systems.interaction.tick2();
+    this.cursorTogglingSystem.tick(systems.interaction, systems.userinput, this.el);
+    this.interactionSfxSystem.tick(systems.interaction, systems.userinput, this.soundEffectsSystem);
     this.superSpawnerSystem.tick();
     this.cursorTargettingSystem.tick(t);
     this.constraintsSystem.tick();
@@ -45,7 +51,11 @@ AFRAME.registerSystem("hubs-systems", {
     this.holdableButtonSystem.tick();
     this.hoverButtonSystem.tick();
     this.hoverMenuSystem.tick();
-    this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
+    this.hapticFeedbackSystem.tick(
+      this.twoPointStretchingSystem,
+      this.singleActionButtonSystem.didInteractLeftThisFrame,
+      this.singleActionButtonSystem.didInteractRightThisFrame
+    );
     this.soundEffectsSystem.tick();
     this.lobbyCameraSystem.tick();
     this.physicsSystem.tick(dt);

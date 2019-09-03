@@ -259,7 +259,10 @@ const qsVREntryType = qs.get("vr_entry_type");
 function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
-  const isCursorHoldingPen = scene && scene.systems.userinput.activeSets.includes(userinputSets.cursorHoldingPen);
+  const isCursorHoldingPen =
+    scene &&
+    (scene.systems.userinput.activeSets.includes(userinputSets.rightCursorHoldingPen) ||
+      scene.systems.userinput.activeSets.includes(userinputSets.leftCursorHoldingPen));
   const hasActiveCamera = scene && !!scene.systems["camera-tools"].getMyCamera();
   const forcedVREntryType = qsVREntryType;
 

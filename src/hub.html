@@ -776,12 +776,17 @@
         <a-entity id="drawing-manager" drawing-manager></a-entity>
 
         <a-entity
-            id="cursor-controller"
-            cursor-controller="cursor: #cursor; camera: #avatar-pov-node;"
+            id="right-cursor-controller"
+            cursor-controller="cursor: #right-cursor; camera: #avatar-pov-node;"
+        ></a-entity>
+
+        <a-entity
+            id="left-cursor-controller"
+            cursor-controller="cursor: #left-cursor; camera: #avatar-pov-node;"
         ></a-entity>
 
         <a-sphere
-            id="cursor"
+            id="right-cursor"
             material="depthTest: false; opacity:0.9;"
             radius="0.02"
             segments-width="9"
@@ -795,7 +800,26 @@
                 scale="0.1 0.1 0.1"
                 position="0.0 0 0"
                 class="hud"
-                visible-if-transforming
+                visible-if-transforming="hand:right"
+            ></a-entity>
+        </a-sphere>
+
+        <a-sphere
+            id="left-cursor"
+            material="depthTest: false; opacity:0.9;"
+            radius="0.02"
+            segments-width="9"
+            segments-height="9"
+            body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
+            shape-helper="type: sphere; sphereRadius: 0.02; fit: manual;"
+        >
+            <a-entity
+                sprite
+                icon-button="image: rotate-cursor.png"
+                scale="0.1 0.1 0.1"
+                position="0.0 0 0"
+                class="hud"
+                visible-if-transforming="hand:left"
             ></a-entity>
         </a-sphere>
 
