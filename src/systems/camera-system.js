@@ -39,55 +39,30 @@ const calculateViewingDistance = (function() {
   };
 })();
 
-const decompose = (function(){
+const decompose = (function() {
   const scale = new THREE.Vector3();
   return function decompose(m, p, q) {
     m.decompose(p, q, scale); //ignore scale, like we're dealing with a motor
-  }
+  };
 })();
 
-export const childMatch = (function(){
-  const pwp = new THREE.Vector3();
-  const pwq = new THREE.Quaternion();
-  const cwp = new THREE.Vector3();
-  const cwq = new THREE.Quaternion();
+export const childMatch = (function() {
   const cp = new THREE.Vector3();
   const cq = new THREE.Quaternion();
   const cqI = new THREE.Quaternion();
   const twp = new THREE.Vector3();
   const twq = new THREE.Quaternion();
   // transform the parent such that its child matches the target
-  return function childMatch (parent, child, target) {
-    parent.updateMatrices();
-    child.updateMatrices();
+  return function childMatch(parent, child, target) {
     target.updateMatrices();
-
-    decompose(parent.matrixWorld, pwp, pwq);
-    //decompose(child.matrixWorld, cwp, cwq);
     decompose(target.matrixWorld, twp, twq);
     cp.copy(child.position);
     cq.copy(child.quaternion);
     cqI.copy(cq).inverse();
-
-    // want npwq such that ncwq = twq without changing cq. That is,
-    //   ncwq = twq   and
-    //   ncwq = cq*npwq.
-    // We solve for npwq to find
-    //   npwq = cq^-1*twq.
-    // For now we assume parent is in world space, hence we set
-    // parent.quaternion and parent.position (later) instead of
-    // e.g. constructing a Matrix4 and using setMatrixWorld.
-    parent.quaternion.copy(twq)
-          .multiply(cqI);
-    // want npwp such that ncwp = twp without changing cp. That is,
-    //   ncwp = twp,
-    //   ncwp = npwq>>>cp + npwp
-    // where >>> denotes a sandwich product (qv(~q)), where (~q) is the reversal of q.
-    // We solve for npwp to find
-    // npwp = twp - npwq>>>cp
+    parent.quaternion.copy(twq).multiply(cqI);
     parent.position.subVectors(twp, cp.applyQuaternion(parent.quaternion));
     parent.matrixNeedsUpdate = true;
-  }
+  };
 })();
 
 const moveRigSoCameraLooksAtObject = (function() {
@@ -95,9 +70,7 @@ const moveRigSoCameraLooksAtObject = (function() {
   const owp = new THREE.Vector3();
   const cwq = new THREE.Quaternion();
   const cwp = new THREE.Vector3();
-  const rwq = new THREE.Quaternion();
   const oForw = new THREE.Vector3();
-  const lookAt = new THREE.Vector3();
   const center = new THREE.Vector3();
   const target = new THREE.Object3D();
   const IDENTITY = new THREE.Matrix4().identity();
@@ -116,26 +89,16 @@ const moveRigSoCameraLooksAtObject = (function() {
     const box = getBox(object.el, object.el.getObject3D("mesh") || object, true);
     box.getCenter(center);
     const dist = calculateViewingDistance(camera, object, box, center);
-    target.position.addVectors(owp, oForw.set(0,0,1).multiplyScalar(dist).applyQuaternion(owq));
-    //if (object.el.components["media-video"] || object.el.components["media-image"] || object.el.components["media-pdf"]) {
-    //}
-//    lookAt.subVectors(target.position, owp).multiplyScalar(2).add(owp);
-//    target.lookAt(lookAt);
-    target.quaternion.copy(owq); // Easy alignment, works ok in most cases. Doesn't account for camera roll.
-
+    target.position.addVectors(
+      owp,
+      oForw
+        .set(0, 0, 1)
+        .multiplyScalar(dist)
+        .applyQuaternion(owq)
+    );
+    target.quaternion.copy(owq);
     target.matrixNeedsUpdate = true;
     childMatch(rig, camera, target);
-
-//    object.getWorldQuaternion(owq);
-//    cqInv.copy(camera.quaternion).inverse();
-//    rig.quaternion.copy(owq).multiply(cqInv);
-//    v1.set(0, 0, 1)
-//      .multiplyScalar(calculateViewingDistance(camera, object, box, center))
-//      .applyQuaternion(owq);
-//    v2.copy(camera.position).applyQuaternion(rig.quaternion);
-//    rig.position.subVectors(v1, v2).add(center);
-//
-//    rig.matrixNeedsUpdate = true;
   };
 })();
 
