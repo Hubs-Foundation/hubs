@@ -233,6 +233,8 @@
 
     :local(.facet) {
       @extend %action-button;
+      background-color: transparent;
+      color: $action-color;
       border: 0;
       border-radius: 12px;
       font-weight: normal;
@@ -242,6 +244,15 @@
       min-width: auto;
       min-height: 44px;
       white-space: nowrap;
+
+      &:hover{
+        background-color: $action-color-light;
+        color: white;
+      }
+      &.selected{
+        background-color: $action-color;
+        color: white;
+      }
 
       @media(max-width: 801px) {
         font-size: 1.0em;
@@ -387,6 +398,10 @@
           height: 30px;
           text-align: center;
           line-height: 27px;
+          &:hover {
+            background: $action-color;
+            color: white;
+          }
         }
       }
     }

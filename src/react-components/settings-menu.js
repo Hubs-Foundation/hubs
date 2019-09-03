@@ -92,7 +92,7 @@ export default class SettingsMenu extends Component {
                       () => this.props.hubChannel.signedIn,
                       () => {
                         showFullScreenIfAvailable();
-                        this.props.mediaSearchStore.sourceNavigateWithNoNav("favorites");
+                        this.props.mediaSearchStore.sourceNavigateWithNoNav("favorites", "use");
                       },
                       "favorite-rooms"
                     );
@@ -122,7 +122,7 @@ export default class SettingsMenu extends Component {
                         () => this.props.hubChannel.can("update_hub"),
                         () => {
                           showFullScreenIfAvailable();
-                          this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                          this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
                           this.setState({ expanded: false });
                         },
                         "change-scene"

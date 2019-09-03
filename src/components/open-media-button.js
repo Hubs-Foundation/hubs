@@ -9,6 +9,7 @@ AFRAME.registerComponent("open-media-button", {
     this.label = this.el.querySelector("[text]");
 
     this.updateSrc = () => {
+      if (!this.targetEl.parentNode) return; // If removed
       const src = (this.src = this.targetEl.components["media-loader"].data.src);
       const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");

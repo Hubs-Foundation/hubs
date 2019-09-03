@@ -179,3 +179,13 @@ export function cloneObject3D(source, preserveUUIDs) {
 
   return clone;
 }
+
+export function findNode(root, pred) {
+  let nodes = [root];
+  while (nodes.length) {
+    const node = nodes.shift();
+    if (pred(node)) return node;
+    if (node.children) nodes = nodes.concat(node.children);
+  }
+  return null;
+}

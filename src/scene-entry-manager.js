@@ -88,7 +88,7 @@ export default class SceneEntryManager {
     }
 
     if (mediaStream) {
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
+      await NAF.connection.adapter.setLocalMediaStream(mediaStream);
     }
 
     this.scene.classList.remove("hand-cursor");
@@ -372,14 +372,18 @@ export default class SceneEntryManager {
     let currentVideoShareEntity;
     let isHandlingVideoShare = false;
 
-    const shareVideoMediaStream = async constraints => {
+    const shareVideoMediaStream = async (constraints, isDisplayMedia) => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
       let newStream;
 
       try {
-        newStream = await navigator.mediaDevices.getUserMedia(constraints);
+        if (isDisplayMedia) {
+          newStream = await navigator.mediaDevices.getDisplayMedia(constraints);
+        } else {
+          newStream = await navigator.mediaDevices.getUserMedia(constraints);
+        }
       } catch (e) {
         isHandlingVideoShare = false;
         this.scene.emit("share_video_failed");
@@ -390,14 +394,14 @@ export default class SceneEntryManager {
 
       if (videoTracks.length > 0) {
         newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
-        NAF.connection.adapter.setLocalMediaStream(mediaStream);
+        await NAF.connection.adapter.setLocalMediaStream(mediaStream);
         currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
 
         // Wire up custom removal event which will stop the stream.
         currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
       }
 
-      this.scene.emit("share_video_enabled", { source: constraints.video.mediaSource });
+      this.scene.emit("share_video_enabled", { source: isDisplayMedia ? "screen" : "camera" });
       this.scene.addState("sharing_video");
       isHandlingVideoShare = false;
     };
@@ -412,33 +416,22 @@ export default class SceneEntryManager {
       });
     });
 
-    this.scene.addEventListener("action_share_window", () => {
-      shareVideoMediaStream({
-        video: {
-          mediaSource: "window",
-          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
-          // other than your current monitor that has a different aspect ratio.
-          width: 720 * (screen.width / screen.height),
-          height: 720,
-          frameRate: 30
-        }
-      });
-    });
-
     this.scene.addEventListener("action_share_screen", () => {
-      shareVideoMediaStream({
-        video: {
-          mediaSource: "screen",
-          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
-          // other than your current monitor that has a different aspect ratio.
-          width: 720 * (screen.width / screen.height),
-          height: 720,
-          frameRate: 30
-        }
-      });
+      shareVideoMediaStream(
+        {
+          video: {
+            // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
+            // other than your current monitor that has a different aspect ratio.
+            width: 720 * (screen.width / screen.height),
+            height: 720,
+            frameRate: 30
+          }
+        },
+        true
+      );
     });
 
-    this.scene.addEventListener("action_end_video_sharing", () => {
+    this.scene.addEventListener("action_end_video_sharing", async () => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
@@ -451,7 +444,7 @@ export default class SceneEntryManager {
         mediaStream.removeTrack(track);
       }
 
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
+      await NAF.connection.adapter.setLocalMediaStream(mediaStream);
       currentVideoShareEntity = null;
 
       this.scene.emit("share_video_disabled");
@@ -461,9 +454,8 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("action_selected_media_result_entry", async e => {
       // TODO spawn in space when no rights
-      const entry = e.detail;
-      if (["avatar", "avatar_listing"].includes(entry.type)) return;
-      if ((entry.type === "scene_listing" || entry.type === "scene") && this.hubChannel.can("update_hub")) return;
+      const { entry, selectAction } = e.detail;
+      if (selectAction !== "spawn") return;
 
       const delaySpawn = isIn2DInterstitial() && !isMobileVR;
       await exit2DInterstitialAndEnterVR();
@@ -580,7 +572,7 @@ export default class SceneEntryManager {
           ? audioEl.mozCaptureStream().getAudioTracks()[0]
           : null
     );
-    NAF.connection.adapter.setLocalMediaStream(mediaStream);
+    await NAF.connection.adapter.setLocalMediaStream(mediaStream);
     audioEl.play();
   };
 }

@@ -52,10 +52,10 @@ const styles = {
   }
 };
 
-const Preview = withStyles(styles)(({ record, classes }) => (
+const Preview = withStyles(styles)(({ record, classes, source = "avatar_sid" }) => (
   <AvatarPreview
     className={classes.preview}
-    avatarGltfUrl={getReticulumFetchUrl(`/api/v1/avatars/${record.avatar_sid}/avatar.gltf?v=${record.updated_at}`)}
+    avatarGltfUrl={getReticulumFetchUrl(`/api/v1/avatars/${record[source]}/avatar.gltf?v=${record.updated_at}`)}
   />
 ));
 
@@ -66,18 +66,30 @@ const rowStyle = record => ({
 export const AvatarList = props => (
   <List {...props} filters={<AvatarFilter />} bulkActionButtons={false}>
     <Datagrid rowStyle={rowStyle}>
+      <ConditionalReferenceField label="live thumbnail" reference="avatar_listings" source="avatar_listing_id">
+        <OwnedFileImage
+          source="thumbnail_owned_file_id"
+          aspect="tall"
+          defaultImage="https://asset-bundles-prod.reticulum.io/bots/avatar_unavailable.png"
+        />
+      </ConditionalReferenceField>
+      <ConditionalReferenceField label="live preview" reference="avatar_listings" source="avatar_listing_id">
+        <Preview source="avatar_listing_sid" />
+      </ConditionalReferenceField>
+      <ConditionalReferenceField label="live name" reference="avatar_listings" source="avatar_listing_id">
+        <TextField source="name" />
+      </ConditionalReferenceField>
+      <span> ➡ </span>
       <OwnedFileImage
+        label="thumbnail"
         source="thumbnail_owned_file_id"
         aspect="tall"
         defaultImage="https://asset-bundles-prod.reticulum.io/bots/avatar_unavailable.png"
       />
-      <Preview />
+      <Preview label="preview" />
       <TextField source="name" />
       <TextField source="account_id" />
       <AvatarLink source="avatar_sid" />
-      <ConditionalReferenceField reference="avatars" source="parent_avatar_id">
-        <TextField source="name" />
-      </ConditionalReferenceField>
       <ConditionalReferenceField reference="avatar_listings" source="parent_avatar_listing_id">
         <TextField source="name" />
       </ConditionalReferenceField>
@@ -87,11 +99,9 @@ export const AvatarList = props => (
       <OwnedFileImage source="orm_map_owned_file_id" aspect="square" />
       <TextField source="attributions" />
       <BooleanField source="allow_remixing" />
-      <BooleanField source="allow_promotion" />
       <TextField source="reviewed_at" />
       <DateField source="inserted_at" />
       <DateField source="updated_at" />
-      <TextField source="state" />
       <EditButton />
       <ApproveAvatarButton />
       <DenyAvatarButton />
