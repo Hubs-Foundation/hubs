@@ -64,7 +64,7 @@ function shouldMoveCursor(touch, raycaster) {
 
 export class AppAwareTouchscreenDevice {
   constructor() {
-    this.raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 30);
+    this.raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 100);
     this.assignments = [];
     this.pinch = { initialDistance: 0, currentDistance: 0, delta: 0 };
 
