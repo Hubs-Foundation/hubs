@@ -17,6 +17,7 @@ AFRAME.registerComponent("action-to-event", {
 
   play() {
     this.el.sceneEl.systems.permissions.onPermissionsUpdated(this.updatePermissions);
+    this.updatePermissions();
   },
 
   pause() {

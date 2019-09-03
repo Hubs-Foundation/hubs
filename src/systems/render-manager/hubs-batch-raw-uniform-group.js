@@ -49,6 +49,9 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
 
   update(time) {
     const interaction = AFRAME.scenes[0].systems.interaction;
+    const cameraSystem = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem;
+    const inspected = cameraSystem.inspected;
+    const inspectedMeshesFromBatch = cameraSystem.inspectedMeshesFromBatch;
     let interactorOne, interactorTwo;
 
     for (let instanceId = 0; instanceId < this.meshes.length; instanceId++) {
@@ -60,7 +63,11 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
       // TODO need to account for nested visibility deeper than 1 level
       this.setInstanceTransform(
         instanceId,
-        mesh.visible && (mesh.parent && mesh.parent.visible) ? mesh.matrixWorld : HIDE_MATRIX
+        mesh.visible &&
+        (mesh.parent && mesh.parent.visible) &&
+        (!inspected || inspectedMeshesFromBatch.indexOf(mesh) !== -1)
+          ? mesh.matrixWorld
+          : HIDE_MATRIX
       );
       this.setInstanceColor(instanceId, mesh.material.color || DEFAULT_COLOR, mesh.material.opacity || 1);
 

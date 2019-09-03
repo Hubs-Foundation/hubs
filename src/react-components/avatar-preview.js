@@ -208,13 +208,19 @@ class AvatarPreview extends Component {
       const technique = window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness";
       gltf = await loadGLTF(avatarGltfUrl, "model/gltf", technique, null, ensureAvatarMaterial);
     } catch (e) {
+      console.error("Failed to load avatar preview", e);
       this.setState({ loading: false, error: true });
       return;
     }
 
-    this.previewMesh = findNode(gltf.scene, n => n.isMesh && n.material && n.material.name === MAT_NAME);
+    // TODO Check for "Bot_Skinned" here is a hack for legacy avatars which only has a name one of the MOZ_alt_material nodes
+    this.previewMesh = findNode(
+      gltf.scene,
+      n => (n.isMesh && n.material && n.material.name === MAT_NAME) || n.name === "Bot_Skinned"
+    );
 
     if (!this.previewMesh) {
+      console.error("Failed to find avatar preview mesh");
       this.setState({ loading: false, error: true });
       return;
     }
