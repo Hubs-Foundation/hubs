@@ -89,6 +89,7 @@ import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
 import "./components/tweet-media-button";
+import "./components/remix-avatar-button";
 import "./components/transform-object-button";
 import "./components/hover-menu";
 import "./components/disable-frustum-culling";
