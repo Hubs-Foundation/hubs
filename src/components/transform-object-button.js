@@ -43,7 +43,8 @@ AFRAME.registerComponent("transform-button", {
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.targetEl = networkedEl;
     });
-    const rightHand = document.querySelector("#player-right-controller");
+    const rightHand = document.getElementById("player-right-controller");
+    const leftHand = document.getElementById("player-left-controller");
     this.onGrabStart = e => {
       if (!this.targetEl) {
         return;
@@ -57,7 +58,11 @@ AFRAME.registerComponent("transform-button", {
       this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];
       this.transformSystem.startTransform(
         this.targetEl.object3D,
-        e.object3D.el.id === "cursor" ? rightHand.object3D : e.object3D,
+        e.object3D.el.id === "right-cursor"
+          ? rightHand.object3D
+          : e.object3D.el.id === "left-cursor"
+            ? leftHand.object3D
+            : e.object3D,
         this.data
       );
     };
@@ -92,6 +97,7 @@ AFRAME.registerSystem("transform-selected-object", {
     this.dyAll = 0;
     this.dyStore = 0;
     this.dyApplied = 0;
+    this.raycasters = {};
 
     this.puppet = {
       initialControllerOrientation: new THREE.Quaternion(),
@@ -151,12 +157,17 @@ AFRAME.registerSystem("transform-selected-object", {
     plane.updateMatrixWorld(true);
 
     intersections.length = 0;
-    this.raycaster =
-      this.raycaster || document.querySelector("#cursor-controller").components["cursor-controller"].raycaster;
-    const far = this.raycaster.far;
-    this.raycaster.far = 1000;
-    plane.raycast(this.raycaster, intersections);
-    this.raycaster.far = far;
+    this.raycasters.right =
+      this.raycasters.right ||
+      document.getElementById("right-cursor-controller").components["cursor-controller"].raycaster;
+    this.raycasters.left =
+      this.raycasters.left ||
+      document.getElementById("left-cursor-controller").components["cursor-controller"].raycaster;
+    const raycaster = this.hand.el.id === "player-left-controller" ? this.raycasters.left : this.raycasters.right;
+    const far = raycaster.far;
+    raycaster.far = 1000;
+    plane.raycast(raycaster, intersections);
+    raycaster.far = far;
     this.transforming = !!intersections[0];
     if (!this.transforming) {
       return;
@@ -231,6 +242,7 @@ AFRAME.registerSystem("transform-selected-object", {
     this.target.matrixNeedsUpdate = true;
   },
 
+  // TODO: stabilize scaling in VR. currently feels broken
   cursorAxisOrScaleTick() {
     const {
       plane,
@@ -241,19 +253,19 @@ AFRAME.registerSystem("transform-selected-object", {
       deltaOnPlane,
       finalProjectedVec
     } = this.planarInfo;
-
     this.target.getWorldPosition(plane.position);
-    this.el.camera.getWorldQuaternion(plane.quaternion);
+    //    this.el.camera.getWorldQuaternion(plane.quaternion);
     this.el.camera.getWorldPosition(v);
     plane.matrixNeedsUpdate = true;
     const cameraToPlaneDistance = v.sub(plane.position).length();
 
     intersections.length = 0;
-    const far = this.raycaster.far;
-    this.raycaster.far = 1000;
-    plane.raycast(this.raycaster, intersections);
-    this.raycaster.far = far;
-    const intersection = intersections[0]; // point
+    const raycaster = this.hand.el.id === "player-left-controller" ? this.raycasters.left : this.raycasters.right;
+    const far = raycaster.far;
+    raycaster.far = 1000;
+    plane.raycast(raycaster, intersections);
+    raycaster.far = far;
+    const intersection = intersections[0];
     if (!intersection) return;
 
     normal.set(0, 0, -1).applyQuaternion(plane.quaternion);
@@ -336,8 +348,9 @@ AFRAME.registerSystem("transform-selected-object", {
 
 AFRAME.registerComponent("transform-button-selector", {
   tick() {
-    const hand = AFRAME.scenes[0].systems.userinput.get(paths.actions.rightHand.pose);
-    if (!hand) {
+    this.userinput = this.userinput || this.el.sceneEl.systems.userinput;
+    const hasHand = this.userinput.get(paths.actions.rightHand.pose) || this.userinput.get(paths.actions.leftHand.pose);
+    if (!hasHand) {
       if (this.el.components["transform-button"].data.mode !== TRANSFORM_MODE.CURSOR) {
         this.el.setAttribute("transform-button", "mode", TRANSFORM_MODE.CURSOR);
       }
@@ -352,9 +365,14 @@ AFRAME.registerComponent("transform-button-selector", {
 const FORWARD = new THREE.Vector3(0, 0, 1);
 const TWO_PI = 2 * Math.PI;
 AFRAME.registerComponent("visible-if-transforming", {
+  schema: {
+    hand: { type: "string" }
+  },
   init() {},
   tick(t) {
-    const shouldBeVisible = AFRAME.scenes[0].systems["transform-selected-object"].transforming;
+    const shouldBeVisible =
+      AFRAME.scenes[0].systems["transform-selected-object"].transforming &&
+      AFRAME.scenes[0].systems["transform-selected-object"].hand.el.id.indexOf(this.data.hand) !== -1;
     const visibleNeedsUpdate = this.el.getAttribute("visible") !== shouldBeVisible;
     if (visibleNeedsUpdate) {
       this.el.setAttribute("visible", AFRAME.scenes[0].systems["transform-selected-object"].transforming);

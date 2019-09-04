@@ -11,6 +11,10 @@ export const distanceBetweenStretchers = (() => {
   };
 })();
 
+function existsAndHeldInEither(object, holderA, holderB) {
+  return object && (object === holderA.held || object === holderB.held);
+}
+
 export class TwoPointStretchingSystem {
   constructor() {
     this.initialScale = new THREE.Vector3();
@@ -18,23 +22,27 @@ export class TwoPointStretchingSystem {
 
   tick() {
     const interaction = AFRAME.scenes[0].systems.interaction;
-    const { leftHand, rightHand, rightRemote } = interaction.state;
+    const { leftHand, rightHand, rightRemote, leftRemote } = interaction.state;
 
-    const stretching = leftHand.held && (leftHand.held === rightHand.held || leftHand.held === rightRemote.held);
+    const stretching =
+      existsAndHeldInEither(leftHand.held, rightHand, rightRemote) ||
+      existsAndHeldInEither(leftRemote.held, rightHand, rightRemote);
+    const stretched = leftHand.held || leftRemote.held;
     let leftStretcher, rightStretcher;
     if (stretching) {
-      leftStretcher = interaction.options.leftHand.entity.object3D;
-      rightStretcher =
-        leftHand.held === rightHand.held
-          ? interaction.options.rightHand.entity.object3D
-          : interaction.options.rightRemote.entity.object3D;
+      leftStretcher = leftHand.held
+        ? interaction.options.leftHand.entity.object3D
+        : interaction.options.leftRemote.entity.object3D;
+      rightStretcher = rightHand.held
+        ? interaction.options.rightHand.entity.object3D
+        : interaction.options.rightRemote.entity.object3D;
       if (
         leftStretcher !== this.previousLeftStretcher ||
         rightStretcher !== this.previousRightStretcher ||
-        leftHand.held !== this.stretched
+        stretched !== this.stretched
       ) {
         this.initialStretchDistance = distanceBetweenStretchers(leftStretcher, rightStretcher);
-        this.stretched = leftHand.held;
+        this.stretched = stretched;
         this.initialScale.copy(this.stretched.object3D.scale);
         if (this.stretched.components["ammo-body"]) {
           this.stretched.setAttribute("ammo-body", COLLISION_FILTER_MASK_HANDS);

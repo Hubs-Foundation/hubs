@@ -10,13 +10,14 @@ AFRAME.registerComponent("action-to-event", {
   init() {
     this.needsPermission = !!this.data.withPermission;
     this.updatePermissions = () => {
-      if (!this.needsPermission) return;
+      if (!this.needsPermission || !window.APP.hubChannel) return;
       this.hasPermission = window.APP.hubChannel.canOrWillIfCreator(this.data.withPermission);
     };
   },
 
   play() {
     this.el.sceneEl.systems.permissions.onPermissionsUpdated(this.updatePermissions);
+    this.updatePermissions();
   },
 
   pause() {

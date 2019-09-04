@@ -16,6 +16,19 @@ export class SingleActionButtonSystem {
         object3D: interaction.options.rightRemote.entity.object3D
       });
     }
+    const hovered2 = interaction.state.leftRemote.hovered;
+    if (
+      hovered2 &&
+      userinput.get(interaction.options.leftRemote.grabPath) &&
+      hovered2.components.tags &&
+      hovered2.components.tags.data.singleActionButton
+    ) {
+      this.didInteractThisFrame = true;
+      hovered2.object3D.dispatchEvent({
+        type: "interact",
+        object3D: interaction.options.leftRemote.entity.object3D
+      });
+    }
   }
 }
 
@@ -38,6 +51,23 @@ export class HoldableButtonSystem {
     }
 
     this.prevHeld = held;
+
+    const heldLeft = interaction.state.leftRemote.held;
+
+    if (this.prevHeldLeft && this.prevHeldLeft !== heldLeft) {
+      this.prevHeldLeft.object3D.dispatchEvent({
+        type: "holdable-button-up",
+        object3D: interaction.options.leftRemote.entity.object3D
+      });
+    }
+    if (heldLeft && this.prevHeldLeft !== heldLeft) {
+      heldLeft.object3D.dispatchEvent({
+        type: "holdable-button-down",
+        object3D: interaction.options.leftRemote.entity.object3D
+      });
+    }
+
+    this.prevHeldLeft = heldLeft;
   }
 }
 
@@ -90,6 +120,7 @@ export class HoverButtonSystem {
   tick() {
     const interaction = AFRAME.scenes[0].systems.interaction;
     const button = getHoverableButton(interaction.state.rightRemote.hovered);
+    const button2 = getHoverableButton(interaction.state.leftRemote.hovered);
 
     if (this.prevButton && this.prevButton !== button) {
       dispatch(this.prevButton, UNHOVERED);
@@ -100,5 +131,16 @@ export class HoverButtonSystem {
     }
 
     this.prevButton = button;
+
+    // TODO: hover should respect both remotes
+    if (this.prevButtonLeft && this.prevButtonLeft !== button2) {
+      dispatch(this.prevButtonLeft, UNHOVERED);
+    }
+
+    if (button2 && this.prevButtonLeft !== button2) {
+      dispatch(button2, HOVERED);
+    }
+
+    this.prevButtonLeft = button2;
   }
 }
