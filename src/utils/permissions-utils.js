@@ -79,7 +79,7 @@ function authorizeEntityManipulation(entity, sender, senderPermissions) {
     return (!isPinned || senderPermissions.pin_objects) && (isCreator || senderPermissions.spawn_and_move_media);
   } else if (template.endsWith("-camera")) {
     return isCreator || senderPermissions.spawn_camera;
-  } else if (template.endsWith("-pen")) {
+  } else if (template.endsWith("-pen") || template.endsWith("-drawing")) {
     return isCreator || senderPermissions.spawn_drawing;
   } else {
     return false;

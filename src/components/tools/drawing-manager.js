@@ -10,22 +10,6 @@ AFRAME.registerComponent("drawing-manager", {
     this.drawingToPen = new Map();
   },
 
-  _onComponentInitialized(e) {
-    if (e.detail.name == "networked-drawing") {
-      this.drawing = this.drawingEl.components["networked-drawing"];
-    }
-  },
-
-  createDrawing() {
-    if (!this.drawingEl) {
-      this.drawingEl = document.createElement("a-entity");
-      this.drawingEl.setAttribute("networked", "template: #interactable-drawing");
-      this.el.sceneEl.appendChild(this.drawingEl);
-
-      this.drawingEl.addEventListener("componentinitialized", this._onComponentInitialized.bind(this), { once: true });
-    }
-  },
-
   destroyDrawing() {
     this.drawingToPen.delete(this.drawing);
     this.drawing = null;
@@ -34,16 +18,33 @@ AFRAME.registerComponent("drawing-manager", {
 
   getDrawing(pen) {
     //TODO: future handling of multiple drawings
-    if (!this.drawingEl) {
-      this.createDrawing();
-    }
+    return new Promise((resolve, reject) => {
+      if (!this.drawingEl) {
+        this.drawingEl = document.createElement("a-entity");
+        this.drawingEl.setAttribute("networked", "template: #interactable-drawing");
+        this.el.sceneEl.appendChild(this.drawingEl);
 
-    if (this.drawing && (!this.drawingToPen.has(this.drawing) || this.drawingToPen.get(this.drawing) === pen)) {
-      this.drawingToPen.set(this.drawing, pen);
-      return this.drawing;
-    }
-
-    return null;
+        this.drawingEl.addEventListener(
+          "componentinitialized",
+          e => {
+            if (e.detail.name == "networked-drawing") {
+              this.drawing = this.drawingEl.components["networked-drawing"];
+              this.drawingToPen.set(this.drawing, pen);
+              resolve(this.drawing);
+            }
+          },
+          { once: true }
+        );
+      } else if (
+        this.drawing &&
+        (!this.drawingToPen.has(this.drawing) || this.drawingToPen.get(this.drawing) === pen)
+      ) {
+        this.drawingToPen.set(this.drawing, pen);
+        resolve(this.drawing);
+      } else {
+        reject();
+      }
+    });
   },
 
   returnDrawing(pen) {

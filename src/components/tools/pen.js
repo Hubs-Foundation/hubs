@@ -160,7 +160,6 @@ AFRAME.registerComponent("pen", {
 
   play() {
     this.drawingManager = document.querySelector(this.data.drawingManager).components["drawing-manager"];
-    this.drawingManager.createDrawing();
   },
 
   update(prevData) {
@@ -430,11 +429,11 @@ AFRAME.registerComponent("pen", {
   })(),
 
   _startDraw() {
-    this.currentDrawing = this.drawingManager.getDrawing(this);
-    if (this.currentDrawing) {
+    this.drawingManager.getDrawing(this).then(drawing => {
+      this.currentDrawing = drawing;
       this._getNormal(this.normal, this.worldPosition, this.direction);
       this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
-    }
+    });
   },
 
   _endDraw() {
@@ -448,11 +447,10 @@ AFRAME.registerComponent("pen", {
   },
 
   _undoDraw() {
-    const drawing = this.drawingManager.getDrawing(this);
-    if (drawing) {
+    this.drawingManager.getDrawing(this).then(drawing => {
       drawing.undoDraw();
       this.drawingManager.returnDrawing(this);
-    }
+    });
   },
 
   _changeColor(mod) {

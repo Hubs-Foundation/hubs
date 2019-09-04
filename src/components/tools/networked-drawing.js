@@ -113,6 +113,8 @@ AFRAME.registerComponent("networked-drawing", {
   remove() {
     NAF.connection.unsubscribeToDataChannel(this.drawingId, this._receiveData);
 
+    this.drawStarted = false;
+
     this.el.removeObject3D("mesh");
 
     const drawingManager = this.el.sceneEl.querySelector("#drawing-manager").components["drawing-manager"];

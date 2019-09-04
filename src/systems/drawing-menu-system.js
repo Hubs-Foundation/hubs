@@ -51,9 +51,7 @@ export class DrawingMenuSystem {
         for (let i = 0; i < this.cursorControllers.length; i++) {
           if (this.cursorControllers[i].components["cursor-controller"].intersection) {
             const intersectionPoint = this.cursorControllers[i].components["cursor-controller"].intersection.point;
-            if (hovered.components.networked.isMine()) {
-              this.showMenu(hovered, intersectionPoint);
-            }
+            this.showMenu(hovered, intersectionPoint);
           }
         }
       }
@@ -108,6 +106,7 @@ export class DrawingMenuSystem {
             if (hovered.classList.contains("undo-drawing")) {
               hovered.parentEl.parentEl.components["networked-drawing"].undoDraw();
             } else if (hovered.classList.contains("delete-drawing")) {
+              NAF.utils.takeOwnership(hovered.parentEl.parentEl);
               this.sceneEl.removeChild(hovered.parentEl.parentEl);
             }
           }
@@ -152,6 +151,14 @@ export class DrawingMenuSystem {
         menu.object3D.matrixNeedsUpdate = true;
         menu.object3D.visible = true;
         this.lastIntersection.copy(intersectionPoint);
+
+        const isMine = hovered.components.networked.isMine();
+        if (!isMine) {
+          menu.querySelector(".undo-drawing").object3D.visible = false;
+          const deleteButton = menu.querySelector(".delete-drawing");
+          deleteButton.object3D.position.y = 0.125;
+          deleteButton.object3D.matrixNeedsUpdate = true;
+        }
 
         const dist = cameraWorldPos.distanceTo(menu.object3D.position);
         const finalScale = this.getMenuScale(dist);
