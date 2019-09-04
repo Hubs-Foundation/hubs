@@ -59,10 +59,8 @@ export class CursorTogglingSystem {
         this.wakeLeft
       );
     const isMobile = AFRAME.utils.device.isMobile();
-    const isMobileVR = AFRAME.utils.device.isMobileVR();
-    const isTouchscreen = isMobile && !isMobileVR;
     const shouldEnableRightRemote =
-      isTouchscreen ||
+      isMobile ||
       (!inspectingInVR &&
         shouldEnableRemote(
           scene,
