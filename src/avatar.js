@@ -21,10 +21,13 @@ import { App } from "./App";
 
 import AvatarPreview from "./react-components/avatar-preview";
 
-import { fetchAvatar } from "./utils/avatar-utils";
+import { fetchAvatar, remixAvatar } from "./utils/avatar-utils";
 
 import styles from "./assets/stylesheets/avatar.scss";
 import hubLogo from "./assets/images/hub-preview-white.png";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
 
 const qs = new URLSearchParams(location.search);
 window.APP = new App();
@@ -38,7 +41,7 @@ class AvatarUI extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = { copyMessage: false };
   }
 
   componentDidMount() {
@@ -64,8 +67,17 @@ class AvatarUI extends React.Component {
     });
   };
 
-  render() {
+  handleCopyAvatar = async e => {
+    e.preventDefault();
     const { avatar } = this.state;
+    this.setState({ copyMessage: "copying..." });
+    await remixAvatar(avatar.avatar_id, avatar.name);
+    this.setState({ copyMessage: "Coppied!" });
+    setTimeout(() => this.setState({ copyMessage: false }), 2000);
+  };
+
+  render() {
+    const { avatar, copyMessage } = this.state;
     if (!avatar) {
       return (
         <div className={styles.avatarLanding}>
@@ -86,7 +98,19 @@ class AvatarUI extends React.Component {
           <div className={styles.attributions}>
             {avatar.attributions && avatar.attributions.creator && <span>{`by ${avatar.attributions.creator}`}</span>}
           </div>
-          <div className={styles.preview}>{avatar && <AvatarPreview avatarGltfUrl={avatar.gltf_url} />}</div>
+          <div className={styles.preview}>
+            {avatar && <AvatarPreview avatarGltfUrl={avatar.gltf_url} />}
+            {copyMessage ? (
+              <div className={styles.copyTip}>{copyMessage}</div>
+            ) : (
+              avatar &&
+              avatar.allow_remixing && (
+                <a className={styles.editAvatar} onClick={this.handleCopyAvatar} title="Copy to my avatars">
+                  <FontAwesomeIcon icon={faClone} />
+                </a>
+              )
+            )}
+          </div>
           {isSelected ? (
             <span className={styles.selectedMessage}>
               <FormattedMessage id="avatar-landing.selected" />

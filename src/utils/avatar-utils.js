@@ -2,6 +2,8 @@ import { fetchReticulumAuthenticated } from "./phoenix-utils";
 import { proxiedUrlFor } from "./media-url-utils";
 import { avatars } from "../assets/avatars/avatars";
 
+const AVATARS_API = "/api/v1/avatars";
+
 export const AVATAR_TYPES = {
   LEGACY: "legacy",
   SKINNABLE: "skinnable",
@@ -91,4 +93,14 @@ export function ensureAvatarMaterial(gltf) {
   }
 
   return gltf;
+}
+
+export async function remixAvatar(parentId, name) {
+  const avatar = {
+    parent_avatar_listing_id: parentId,
+    name: name,
+    files: {}
+  };
+
+  return fetchReticulumAuthenticated(AVATARS_API, "POST", { avatar });
 }
