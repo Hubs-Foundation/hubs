@@ -58,15 +58,19 @@ export class CursorTogglingSystem {
         this.leftHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting,
         this.wakeLeft
       );
+    const isMobile = AFRAME.utils.device.isMobile();
+    const isMobileVR = AFRAME.utils.device.isMobileVR();
+    const isTouchscreen = isMobile && !isMobileVR;
     const shouldEnableRightRemote =
-      !inspectingInVR &&
-      shouldEnableRemote(
-        scene,
-        rightHand,
-        rightRemote,
-        this.rightHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting,
-        this.wakeRight
-      );
+      isTouchscreen ||
+      (!inspectingInVR &&
+        shouldEnableRemote(
+          scene,
+          rightHand,
+          rightRemote,
+          this.rightHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting,
+          this.wakeRight
+        ));
 
     if (!shouldEnableLeftRemote) {
       leftRemote.hovered = null;
