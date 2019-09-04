@@ -52,7 +52,7 @@ AFRAME.registerComponent("floaty-object", {
         this.bodyHelper.body.physicsBody.getAngularVelocity().length2() < angularThreshold * angularThreshold;
 
       if (isAtRest && isMine) {
-        this.el.setAttribute("body-helper", { type: "static" });
+        this.el.setAttribute("body-helper", { type: "kinematic" });
       }
 
       if (isAtRest || !isMine) {
