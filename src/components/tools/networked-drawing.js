@@ -83,7 +83,7 @@ AFRAME.registerComponent("networked-drawing", {
 
     this.sharedBuffer = this.sharedBufferGeometryManager.getSharedBuffer(0);
     this.drawing = this.sharedBuffer.drawing;
-    const sceneEl = document.querySelector("a-scene");
+
     this.el.setObject3D("mesh", this.drawing);
 
     const environmentMapComponent = this.el.sceneEl.components["environment-map"];

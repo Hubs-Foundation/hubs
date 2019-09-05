@@ -44,8 +44,6 @@ export class DrawingMenuSystem {
         this.dirty = false;
       }
 
-      const interaction = AFRAME.scenes[0].systems.interaction;
-
       const hovered = this.getHovered();
       if (hovered) {
         for (let i = 0; i < this.cursorControllers.length; i++) {
