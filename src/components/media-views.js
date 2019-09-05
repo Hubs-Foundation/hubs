@@ -124,6 +124,7 @@ function createVideoTexture(url, contentType) {
     texture.minFilter = THREE.LinearFilter;
     texture.encoding = THREE.sRGBEncoding;
 
+    // Set src on video to begin loading.
     if (url.startsWith("hubs://")) {
       const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
       const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
@@ -179,28 +180,17 @@ function createVideoTexture(url, contentType) {
       videoEl.onerror = reject;
     }
 
-    let hasResolved = false;
-
-    const resolveOnce = () => {
-      if (hasResolved) return;
-      hasResolved = true;
-      resolve(texture);
+    // NOTE: We used to use the canplay event here to yield the texture, but that fails to fire on iOS Safari
+    // and also sometimes in Chrome it seems.
+    const poll = () => {
+      if ((texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width)) {
+        resolve(texture);
+      } else {
+        setTimeout(poll, 500);
+      }
     };
 
-    videoEl.addEventListener("canplay", resolveOnce, { once: true });
-
-    // HACK: Sometimes iOS fails to fire the canplay event, so we poll for the video dimensions to appear instead.
-    if (isIOS) {
-      const poll = () => {
-        if ((texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width)) {
-          resolveOnce();
-        } else {
-          setTimeout(poll, 500);
-        }
-      };
-
-      poll();
-    }
+    poll();
   });
 }
 
@@ -687,9 +677,13 @@ AFRAME.registerComponent("media-video", {
 
     const userinput = this.el.sceneEl.systems.userinput;
     const interaction = this.el.sceneEl.systems.interaction;
-    const volumeMod = userinput.get(paths.actions.cursor.mediaVolumeMod);
-    if (interaction.state.rightRemote.hovered === this.el && volumeMod) {
-      this.changeVolumeBy(volumeMod);
+    const volumeModRight = userinput.get(paths.actions.cursor.right.mediaVolumeMod);
+    if (interaction.state.rightRemote.hovered === this.el && volumeModRight) {
+      this.changeVolumeBy(volumeModRight);
+    }
+    const volumeModLeft = userinput.get(paths.actions.cursor.left.mediaVolumeMod);
+    if (interaction.state.leftRemote.hovered === this.el && volumeModLeft) {
+      this.changeVolumeBy(volumeModLeft);
     }
 
     const isHeld = interaction.isHeld(this.el);

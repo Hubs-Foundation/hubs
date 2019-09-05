@@ -483,7 +483,10 @@ class UIRoot extends Component {
   };
 
   exit = reason => {
-    this.props.exitScene(reason);
+    if (this.props.exitScene) {
+      this.props.exitScene(reason);
+    }
+
     this.setState({ exited: true });
   };
 
@@ -583,7 +586,7 @@ class UIRoot extends Component {
           const audioTrack = mediaStream.getAudioTracks()[0];
           const audioTrackClone = audioTrack.clone();
 
-          NAF.connection.adapter.setLocalMediaStream(mediaStream);
+          await NAF.connection.adapter.setLocalMediaStream(mediaStream);
 
           if (this.props.scene.is("muted")) {
             console.warn("re-muting microphone");

@@ -51,13 +51,25 @@ AFRAME.registerComponent("hoverable-visuals", {
 
     const isFrozen = this.el.sceneEl.is("frozen");
     const showEffect = showHoverEffect(this.el);
+    const toggling = this.el.sceneEl.systems["hubs-systems"].cursorTogglingSystem;
 
     let interactorOne, interactorTwo;
     const interaction = AFRAME.scenes[0].systems.interaction;
     if (interaction.state.leftHand.hovered === this.el && !interaction.state.leftHand.held) {
       interactorOne = interaction.options.leftHand.entity.object3D;
     }
-    if (interaction.state.rightRemote.hovered === this.el && !interaction.state.rightRemote.held) {
+    if (
+      interaction.state.leftRemote.hovered === this.el &&
+      !interaction.state.leftRemote.held &&
+      !toggling.leftToggledOff
+    ) {
+      interactorOne = interaction.options.leftRemote.entity.object3D;
+    }
+    if (
+      interaction.state.rightRemote.hovered === this.el &&
+      !interaction.state.rightRemote.held &&
+      !toggling.rightToggledOff
+    ) {
       interactorTwo = interaction.options.rightRemote.entity.object3D;
     }
     if (interaction.state.rightHand.hovered === this.el && !interaction.state.rightHand.held) {

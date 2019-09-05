@@ -27,7 +27,7 @@ export class DrawingMenuSystem {
     this.observer = new MutationObserver(this.setDirty);
 
     waitForDOMContentLoaded().then(() => {
-      this.cursorControllers = document.querySelectorAll("#cursor-controller");
+      this.cursorControllers = document.querySelectorAll("[cursor-controller]");
       this.camera = this.sceneEl.querySelector("#avatar-pov-node");
       this.observer.observe(this.sceneEl, { childList: true, attributes: true, subtree: true });
       this.sceneEl.addEventListener("object3dset", this.setDirty.bind(this));
@@ -36,7 +36,7 @@ export class DrawingMenuSystem {
   }
 
   tick() {
-    if (!this.cursorControllers || !this.camera) return;
+    if (!this.cursorControllers || this.cursorControllers.length === 0 || !this.camera) return;
 
     if (this.sceneEl.is("frozen")) {
       if (this.dirty) {
