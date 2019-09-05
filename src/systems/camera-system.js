@@ -180,9 +180,10 @@ export class CameraSystem {
   }
 
   inspect(o) {
-    if (this.mode !== CAMERA_MODE_INSPECT) {
-      this.snapshot.mode = this.mode;
+    if (this.mode === CAMERA_MODE_INSPECT) {
+      return;
     }
+    this.snapshot.mode = this.mode;
     this.mode = CAMERA_MODE_INSPECT;
     this.inspected = o;
 
@@ -244,6 +245,7 @@ export class CameraSystem {
     if (this.mode !== CAMERA_MODE_INSPECT) return;
     this.mode = this.snapshot.mode || CAMERA_MODE_FIRST_PERSON;
     this.snapshot.mode = null;
+    this.tick(AFRAME.scenes[0]);
   }
 
   tick = (function() {

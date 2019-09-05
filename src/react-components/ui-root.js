@@ -62,6 +62,7 @@ import MicLevelWidget from "./mic-level-widget.js";
 import OutputLevelWidget from "./output-level-widget.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
+import ObjectList from "./object-list.js";
 import SettingsMenu from "./settings-menu.js";
 import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
@@ -76,6 +77,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import qsTruthy from "../utils/qs_truthy";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
+const enableObjectList = qsTruthy("ol");
 
 addLocaleData([...en]);
 
@@ -1892,6 +1894,8 @@ class UIRoot extends Component {
               </button>
             )}
             {streamingTip}
+
+            {enableObjectList ? <ObjectList /> : <div />}
 
             <PresenceList
               history={this.props.history}

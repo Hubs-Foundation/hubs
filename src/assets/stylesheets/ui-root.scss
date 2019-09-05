@@ -150,6 +150,34 @@ body.vr-mode {
   }
 }
 
+:local(.object-list) {
+  @extend %unselectable;
+  text-align: right;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 132px;
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 1.3em;
+  background-color: white;
+  border-radius: 24px;
+  font-weight: bold;
+  padding: 8px 18px;
+  pointer-events: auto;
+  cursor: pointer;
+
+  @media(max-width: 500px) {
+    flex-direction: column;
+    padding: 8px 8px;
+  }
+
+  :local(.occupant-count) {
+    margin: 0 12px;
+  }
+}
 :local(.presence-info) {
   @extend %unselectable;
   text-align: right;

@@ -44,6 +44,15 @@
   align-items: center;
   margin: 6px 0;
 }
+:local(.row-no-margin) {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  font-weight: bold;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0px 0;
+}
 
 :local(.row-header) {
   margin-top: 18px;
