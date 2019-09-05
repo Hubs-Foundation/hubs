@@ -101,7 +101,7 @@ AFRAME.registerComponent("super-spawner", {
     }
   },
 
-  async onSpawnEvent() {
+  async onSpawnEvent(e) {
     if (this.cooldownTimeout || !this.el.sceneEl.is("entered")) {
       return;
     }
@@ -115,9 +115,14 @@ AFRAME.registerComponent("super-spawner", {
       false
     ).entity;
 
-    const cursor = document.querySelector("#cursor");
-    cursor.object3D.getWorldPosition(entity.object3D.position);
-    cursor.object3D.getWorldQuaternion(entity.object3D.quaternion);
+    const cursor =
+      (e.detail && e.detail.object3D) || this.el.sceneEl.systems.interaction.options.rightRemote.entity.object3D;
+    const left = cursor.el.id.indexOf("right") === -1;
+    const hand = left
+      ? this.el.sceneEl.systems.interaction.options.leftHand.entity.object3D
+      : this.el.sceneEl.systems.interaction.options.rightHand.entity.object3D;
+    cursor.getWorldPosition(entity.object3D.position);
+    cursor.getWorldQuaternion(entity.object3D.quaternion);
     entity.object3D.matrixNeedsUpdate = true;
 
     if (this.data.useCustomSpawnScale) {
@@ -126,20 +131,27 @@ AFRAME.registerComponent("super-spawner", {
 
     const userinput = AFRAME.scenes[0].systems.userinput;
     const interaction = AFRAME.scenes[0].systems.interaction;
-    const willAnimateFromCursor = this.data.animateFromCursor && userinput.get(paths.actions.rightHand.matrix);
+    const willAnimateFromCursor =
+      this.data.animateFromCursor &&
+      (userinput.get(paths.actions.rightHand.matrix) || userinput.get(paths.actions.leftHand.matrix));
     if (!willAnimateFromCursor) {
-      interaction.state.rightRemote.held = entity;
-      interaction.state.rightRemote.spawning = true;
+      if (left) {
+        interaction.state.leftRemote.held = entity;
+        interaction.state.leftRemote.spawning = true;
+      } else {
+        interaction.state.rightRemote.held = entity;
+        interaction.state.rightRemote.spawning = true;
+      }
     }
     this.activateCooldown();
     await waitForEvent("model-loaded", entity);
 
-    cursor.object3D.getWorldPosition(entity.object3D.position);
-    cursor.object3D.getWorldQuaternion(entity.object3D.quaternion);
+    cursor.getWorldPosition(entity.object3D.position);
+    cursor.getWorldQuaternion(entity.object3D.quaternion);
     entity.object3D.matrixNeedsUpdate = true;
 
     if (willAnimateFromCursor) {
-      document.querySelector("#player-right-controller").object3D.getWorldPosition(this.handPosition);
+      hand.getWorldPosition(this.handPosition);
       entity.setAttribute("animation__spawn-at-cursor", {
         property: "position",
         delay: 500,
@@ -149,7 +161,11 @@ AFRAME.registerComponent("super-spawner", {
         easing: "easeInOutBack"
       });
     } else {
-      interaction.state.rightRemote.spawning = false;
+      if (left) {
+        interaction.state.leftRemote.spawning = false;
+      } else {
+        interaction.state.rightRemote.spawning = false;
+      }
     }
     if (entity.components["body-helper"].body) {
       entity.components["body-helper"].body.syncToPhysics(true);

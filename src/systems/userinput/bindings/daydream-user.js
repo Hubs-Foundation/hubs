@@ -22,7 +22,7 @@ const dpadCenterDrop = v("dropCenter");
 const grabBinding = [
   {
     src: { value: dpadCenter, bool: touchpadRising },
-    dest: { value: paths.actions.cursor.grab },
+    dest: { value: paths.actions.cursor.right.grab },
     xform: xforms.copyIfTrue,
     priority: 100
   }
@@ -43,7 +43,7 @@ const dropOnCenterOrSouth = [
   },
   {
     src: [dpadCenterDrop, dpadSouthDrop],
-    dest: { value: paths.actions.cursor.drop },
+    dest: { value: paths.actions.cursor.right.drop },
     xform: xforms.any
   }
 ];
@@ -127,7 +127,7 @@ export const daydreamUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.daydream.pose },
-      dest: { value: paths.actions.cursor.pose },
+      dest: { value: paths.actions.cursor.right.pose },
       xform: xforms.copy
     },
     {
@@ -137,24 +137,24 @@ export const daydreamUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnInteractable]: grabBinding,
-  [sets.cursorHoveringOnUI]: grabBinding,
+  [sets.rightCursorHoveringOnInteractable]: grabBinding,
+  [sets.rightCursorHoveringOnUI]: grabBinding,
 
-  [sets.cursorHoveringOnVideo]: [
+  [sets.rightCursorHoveringOnVideo]: [
     {
       src: {
         value: paths.device.daydream.axis("touchpadY"),
         touching: paths.device.daydream.button("touchpad").touched
       },
-      dest: { value: paths.actions.cursor.mediaVolumeMod },
+      dest: { value: paths.actions.cursor.right.mediaVolumeMod },
       xform: xforms.touch_axis_scroll(-0.1)
     }
   ],
 
-  [sets.cursorHoldingInteractable]: [
+  [sets.rightCursorHoldingInteractable]: [
     {
       src: { value: touchpadFalling },
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.copy
     },
     {
@@ -167,7 +167,7 @@ export const daydreamUserBindings = addSetsToBindings({
     },
     {
       src: { value: cursorModDelta },
-      dest: { value: paths.actions.cursor.modDelta },
+      dest: { value: paths.actions.cursor.right.modDelta },
       xform: xforms.copy
     }
   ],
@@ -180,16 +180,16 @@ export const daydreamUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoldingPen]: [
+  [sets.rightCursorHoldingPen]: [
     {
       src: { value: dpadNorth, bool: touchpadRising },
-      dest: { value: paths.actions.cursor.startDrawing },
+      dest: { value: paths.actions.cursor.right.startDrawing },
       xform: xforms.copyIfTrue,
       priority: 100
     },
     {
       src: { value: touchpadFalling },
-      dest: { value: paths.actions.cursor.stopDrawing },
+      dest: { value: paths.actions.cursor.right.stopDrawing },
       xform: xforms.copy,
       priority: 100
     },
@@ -206,14 +206,14 @@ export const daydreamUserBindings = addSetsToBindings({
         value: brushSizeDelta,
         bool: touchpadPressed
       },
-      dest: { value: paths.actions.cursor.scalePenTip },
+      dest: { value: paths.actions.cursor.right.scalePenTip },
       xform: xforms.copyIfFalse,
       priority: 100
     },
     {
       src: { value: dpadEast, bool: touchpadRising },
       dest: {
-        value: paths.actions.cursor.penPrevColor
+        value: paths.actions.cursor.right.penPrevColor
       },
       xform: xforms.copyIfTrue,
       priority: 100
@@ -221,7 +221,7 @@ export const daydreamUserBindings = addSetsToBindings({
     {
       src: { value: dpadWest, bool: touchpadRising },
       dest: {
-        value: paths.actions.cursor.penNextColor
+        value: paths.actions.cursor.right.penNextColor
       },
       xform: xforms.copyIfTrue,
       priority: 100
@@ -231,14 +231,14 @@ export const daydreamUserBindings = addSetsToBindings({
         value: cursorModDelta,
         bool: touchpadPressed
       },
-      dest: { value: paths.actions.cursor.modDelta },
+      dest: { value: paths.actions.cursor.right.modDelta },
       xform: xforms.copyIfFalse,
       priority: 100
     },
     ...dropOnCenterOrSouth
   ],
 
-  [sets.cursorHoldingCamera]: [
+  [sets.rightCursorHoldingCamera]: [
     // Don't drop on touchpad release
     {
       src: {
@@ -252,7 +252,7 @@ export const daydreamUserBindings = addSetsToBindings({
         value: dpadNorth,
         bool: touchpadRising
       },
-      dest: { value: paths.actions.cursor.takeSnapshot },
+      dest: { value: paths.actions.cursor.right.takeSnapshot },
       xform: xforms.copy,
       priority: 100
     },

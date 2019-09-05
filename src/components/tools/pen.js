@@ -28,14 +28,23 @@ const pathsMap = {
     penPrevColor: paths.actions.leftHand.penPrevColor,
     scalePenTip: paths.actions.leftHand.scalePenTip
   },
-  cursor: {
-    pose: paths.actions.cursor.pose,
-    startDrawing: paths.actions.cursor.startDrawing,
-    stopDrawing: paths.actions.cursor.stopDrawing,
-    undoDrawing: paths.actions.cursor.undoDrawing,
-    penNextColor: paths.actions.cursor.penNextColor,
-    penPrevColor: paths.actions.cursor.penPrevColor,
-    scalePenTip: paths.actions.cursor.scalePenTip
+  "right-cursor": {
+    pose: paths.actions.cursor.right.pose,
+    startDrawing: paths.actions.cursor.right.startDrawing,
+    stopDrawing: paths.actions.cursor.right.stopDrawing,
+    undoDrawing: paths.actions.cursor.right.undoDrawing,
+    penNextColor: paths.actions.cursor.right.penNextColor,
+    penPrevColor: paths.actions.cursor.right.penPrevColor,
+    scalePenTip: paths.actions.cursor.right.scalePenTip
+  },
+  "left-cursor": {
+    pose: paths.actions.cursor.left.pose,
+    startDrawing: paths.actions.cursor.left.startDrawing,
+    stopDrawing: paths.actions.cursor.left.stopDrawing,
+    undoDrawing: paths.actions.cursor.left.undoDrawing,
+    penNextColor: paths.actions.cursor.left.penNextColor,
+    penPrevColor: paths.actions.cursor.left.penPrevColor,
+    scalePenTip: paths.actions.cursor.left.scalePenTip
   }
 };
 
@@ -151,7 +160,6 @@ AFRAME.registerComponent("pen", {
 
     waitForDOMContentLoaded().then(() => {
       const scene = document.querySelector("a-scene");
-      this.rightRemote = document.querySelector("#cursor-controller");
       this.observer.observe(scene, { childList: true, attributes: true, subtree: true });
       scene.addEventListener("object3dset", this.setDirty);
       scene.addEventListener("object3dremove", this.setDirty);
@@ -188,8 +196,9 @@ AFRAME.registerComponent("pen", {
       this._handleInput();
 
       const cursorPose =
-        this.data.drawMode === DRAW_MODE.PROJECTION && this.grabberId === "cursor"
-          ? AFRAME.scenes[0].systems.userinput.get(pathsMap.cursor.pose)
+        this.data.drawMode === DRAW_MODE.PROJECTION &&
+        (this.grabberId === "right-cursor" || this.grabberId === "left-cursor")
+          ? AFRAME.scenes[0].systems.userinput.get(pathsMap[this.grabberId].pose)
           : null;
 
       const intersection = this._getIntersection(cursorPose);
@@ -213,7 +222,7 @@ AFRAME.registerComponent("pen", {
         this._updateLaser(cursorPose, intersection);
       }
 
-      const penVisible = this.grabberId !== "cursor" || !intersection;
+      const penVisible = (this.grabberId !== "left-cursor" && this.grabberId !== "right-cursor") || !intersection;
       this._setPenVisible(penVisible);
       this.el.setAttribute("pen", { penVisible: penVisible });
 
@@ -237,7 +246,10 @@ AFRAME.registerComponent("pen", {
     } else if (interaction.state.leftHand.held === this.el.parentNode) {
       this.grabberId = "player-left-controller";
     } else if (interaction.state.rightRemote.held === this.el.parentNode) {
-      this.grabberId = "cursor";
+      this.grabberId = "right-cursor";
+      this.data.drawMode = DRAW_MODE.PROJECTION;
+    } else if (interaction.state.leftRemote.held === this.el.parentNode) {
+      this.grabberId = "left-cursor";
       this.data.drawMode = DRAW_MODE.PROJECTION;
     } else {
       this.grabberId = null;

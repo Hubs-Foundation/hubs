@@ -30,8 +30,9 @@ export default class SceneEntryManager {
     this.store = window.APP.store;
     this.mediaSearchStore = window.APP.mediaSearchStore;
     this.scene = document.querySelector("a-scene");
-    this.cursorController = document.querySelector("#cursor-controller");
-    this.avatarRig = document.querySelector("#avatar-rig");
+    this.rightCursorController = document.getElementById("right-cursor-controller");
+    this.leftCursorController = document.getElementById("left-cursor-controller");
+    this.avatarRig = document.getElementById("avatar-rig");
     this._entered = false;
     this.performConditionalSignIn = () => {};
     this.history = history;
@@ -39,7 +40,8 @@ export default class SceneEntryManager {
 
   init = () => {
     this.whenSceneLoaded(() => {
-      this.cursorController.components["cursor-controller"].enabled = false;
+      this.rightCursorController.components["cursor-controller"].enabled = false;
+      this.leftCursorController.components["cursor-controller"].enabled = false;
     });
   };
 
@@ -94,7 +96,8 @@ export default class SceneEntryManager {
     this.scene.classList.remove("hand-cursor");
     this.scene.classList.add("no-cursor");
 
-    this.cursorController.components["cursor-controller"].enabled = true;
+    this.rightCursorController.components["cursor-controller"].enabled = true;
+    this.leftCursorController.components["cursor-controller"].enabled = true;
     this._entered = true;
 
     // Delay sending entry event telemetry until VR display is presenting.

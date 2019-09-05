@@ -69,11 +69,16 @@ export class HapticFeedbackSystem {
         held: null,
         hovered: null,
         isTeleporting: false
+      },
+      leftRemote: {
+        held: null,
+        hovered: null,
+        isTeleporting: false
       }
     };
   }
 
-  tick(twoPointStretchingSystem, didClickButton) {
+  tick(twoPointStretchingSystem, interactLeft, interactRight) {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const leftActuator = userinput.get(paths.haptics.actuators.left);
     const rightActuator = userinput.get(paths.haptics.actuators.right);
@@ -82,7 +87,7 @@ export class HapticFeedbackSystem {
     }
 
     const interaction = AFRAME.scenes[0].systems.interaction;
-    const { leftHand, rightHand, rightRemote } = interaction.state;
+    const { leftHand, rightHand, rightRemote, leftRemote } = interaction.state;
     this.leftTeleporter =
       this.leftTeleporter || document.querySelector("#player-left-controller").components.teleporter;
     this.rightTeleporter =
@@ -91,11 +96,13 @@ export class HapticFeedbackSystem {
     const leftHandStrength = determineStrength(this.state.leftHand, leftHand, this.leftTeleporter.isTeleporting);
     const rightHandStrength = determineStrength(this.state.rightHand, rightHand, this.rightTeleporter.isTeleporting);
     const rightRemoteStrength = determineStrength(this.state.rightRemote, rightRemote, false);
-    const buttonPressedStrength = didClickButton ? STRENGTH.BUTTON_PRESSED : 0;
+    const leftRemoteStrength = determineStrength(this.state.leftRemote, leftRemote, false);
+    const buttonLeftStrength = interactLeft ? STRENGTH.BUTTON_PRESSED : 0;
+    const buttonRightStrength = interactRight ? STRENGTH.BUTTON_PRESSED : 0;
     const stretchingStrength = determineStretchStrength(twoPointStretchingSystem);
 
-    const leftStrength = Math.max(leftHandStrength, stretchingStrength);
-    const rightStrength = Math.max(rightHandStrength, rightRemoteStrength, stretchingStrength, buttonPressedStrength);
+    const leftStrength = Math.max(leftHandStrength, leftRemoteStrength, stretchingStrength, buttonLeftStrength);
+    const rightStrength = Math.max(rightHandStrength, rightRemoteStrength, stretchingStrength, buttonRightStrength);
 
     if (leftStrength && leftActuator) {
       leftActuator.pulse(leftStrength, 15);
@@ -108,5 +115,6 @@ export class HapticFeedbackSystem {
     copyState(this.state.rightHand, rightHand, this.rightTeleporter.isTeleporting);
     copyState(this.state.leftHand, leftHand, this.leftTeleporter.isTeleporting);
     copyState(this.state.rightRemote, rightRemote, false);
+    copyState(this.state.leftRemote, leftRemote, false);
   }
 }

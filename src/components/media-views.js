@@ -677,9 +677,13 @@ AFRAME.registerComponent("media-video", {
 
     const userinput = this.el.sceneEl.systems.userinput;
     const interaction = this.el.sceneEl.systems.interaction;
-    const volumeMod = userinput.get(paths.actions.cursor.mediaVolumeMod);
-    if (interaction.state.rightRemote.hovered === this.el && volumeMod) {
-      this.changeVolumeBy(volumeMod);
+    const volumeModRight = userinput.get(paths.actions.cursor.right.mediaVolumeMod);
+    if (interaction.state.rightRemote.hovered === this.el && volumeModRight) {
+      this.changeVolumeBy(volumeModRight);
+    }
+    const volumeModLeft = userinput.get(paths.actions.cursor.left.mediaVolumeMod);
+    if (interaction.state.leftRemote.hovered === this.el && volumeModLeft) {
+      this.changeVolumeBy(volumeModLeft);
     }
 
     const isHeld = interaction.isHeld(this.el);
