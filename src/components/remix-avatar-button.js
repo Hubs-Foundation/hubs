@@ -10,7 +10,7 @@ AFRAME.registerComponent("remix-avatar-button", {
       this.src = this.targetEl.components["media-loader"].data.src;
       try {
         this.avatar = await fetchAvatar(idForAvatarUrl(this.src));
-        this.el.object3D.visible = this.avatar && this.avatar.allow_remixing;
+        this.el.object3D.visible = this.avatar && this.avatar.allow_remixing && this.avatar.type === "avatar_listing";
       } catch (e) {
         console.error(e);
         this.el.object3D.visible = false;

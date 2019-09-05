@@ -104,6 +104,7 @@ class AvatarUI extends React.Component {
               <div className={styles.copyTip}>{copyMessage}</div>
             ) : (
               avatar &&
+              avatar.type === "avatar_listing" &&
               avatar.allow_remixing && (
                 <a className={styles.editAvatar} onClick={this.handleCopyAvatar} title="Copy to my avatars">
                   <FontAwesomeIcon icon={faClone} />
