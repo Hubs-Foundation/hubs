@@ -72,7 +72,7 @@ class AvatarUI extends React.Component {
     const { avatar } = this.state;
     this.setState({ copyMessage: "copying..." });
     await remixAvatar(avatar.avatar_id, avatar.name);
-    this.setState({ copyMessage: "Coppied!" });
+    this.setState({ copyMessage: "Copied!" });
     setTimeout(() => this.setState({ copyMessage: false }), 2000);
   };
 
