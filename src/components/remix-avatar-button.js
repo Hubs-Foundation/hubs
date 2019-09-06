@@ -26,7 +26,7 @@ AFRAME.registerComponent("remix-avatar-button", {
 
         await remixAvatar(this.avatar.avatar_id, this.avatar.name);
 
-        this.label.setAttribute("text", "value", "Coppied!");
+        this.label.setAttribute("text", "value", "Copied!");
       } catch (e) {
         this.label.setAttribute("text", "value", "Error");
       }
