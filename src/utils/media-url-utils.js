@@ -65,11 +65,7 @@ export const proxiedUrlFor = url => {
     // Ignore
   }
 
-  if (!process.env.CORS_PROXY_SERVER) {
-    return `https://${process.env.FARSPARK_SERVER}/0/raw/0/0/0/0/${farsparkEncodeUrl(url)}`;
-  } else {
-    return `https://${process.env.CORS_PROXY_SERVER}/${url}`;
-  }
+  return `https://${process.env.CORS_PROXY_SERVER}/${url}`;
 };
 
 export function getAbsoluteUrl(baseUrl, relativeUrl) {
