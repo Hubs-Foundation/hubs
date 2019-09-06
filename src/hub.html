@@ -223,7 +223,6 @@
                     set-yxz-order
                     matrix-auto-update
                     position-at-box-shape-border__freeze="target:.freeze-menu;"
-                    position-at-box-shape-border__pager="target:.paging-toolbar; yOffset: 0.7;"
                     hoverable-visuals
                 >
                     <a-entity class="ui interactable-ui">
@@ -525,7 +524,7 @@
 
             <template id="paging-toolbar">
                 <a-entity class="ui paging-toolbar" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;">
-                    <a-entity class="prev-button" position="-0.3 0 0.01">
+                    <a-entity class="prev-button" position="-0.3 0 0">
                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.2">
                             <a-entity
                                 sprite
@@ -535,8 +534,8 @@
                             ></a-entity>
                         </a-entity>
                     </a-entity>
-                    <a-entity class="page-label" text="side: double; value:.; width:2; align:center;" text-raycast-hack></a-entity>
-                    <a-entity class="next-button" position="0.3 0 0.01">
+                    <a-entity class="page-label" text="value:.; width:2; align:center;" text-raycast-hack></a-entity>
+                    <a-entity class="next-button" position="0.3 0 0">
                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.2">
                             <a-entity
                                 sprite
