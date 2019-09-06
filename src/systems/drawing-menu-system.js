@@ -29,7 +29,7 @@ export class DrawingMenuSystem {
   tick() {
     if (!this.cursorControllers || this.cursorControllers.length === 0 || !this.camera) return;
 
-    if (this.sceneEl.is("frozen")) {
+    if (this.sceneEl.is("frozen") && window.APP.hubChannel.can("spawn_drawing")) {
       const hovered = this.getHovered();
       if (hovered) {
         for (let i = 0; i < this.cursorControllers.length; i++) {
