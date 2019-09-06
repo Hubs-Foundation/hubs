@@ -81,4 +81,33 @@ body {
     position: relative;
     max-width: 300px;
   }
+
+  :local(.copy-tip) {
+    position: absolute;
+    padding: 5px 20px;
+    background: $darker-grey;
+    top: 5px;
+    right: 10px;
+    border-radius: 20px;
+    height: 20px;
+    line-height: 20px;
+    color: $light-text;
+  }
+
+  :local(.edit-avatar) {
+    position: absolute;
+    top: 6px;
+    right: 7px;
+    color: black;
+    background: #ffffffde;
+    border-radius: 30px;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 27px;
+    &:hover {
+      background: $action-color;
+      color: white;
+    }
+  }
 }
