@@ -39,6 +39,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     target: { type: "string" },
     dirs: { default: ["left", "right", "forward", "back"] },
     animate: { default: true },
+    yOffset: { default: 0 },
     scale: { default: true }
   },
 
@@ -198,6 +199,10 @@ AFRAME.registerComponent("position-at-box-shape-border", {
         });
       } else if (!this.targetEl.getAttribute("animation__show")) {
         this.target.scale.setScalar(finalScale);
+      }
+
+      if (this.data.yOffset) {
+        this.target.position.y = this.data.yOffset;
       }
 
       this.target.matrixNeedsUpdate = true;

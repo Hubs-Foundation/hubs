@@ -215,12 +215,6 @@ AFRAME.registerComponent("media-loader", {
       }
 
       this.updateHoverableVisuals();
-
-      const pager = el.components["media-pager"];
-
-      if (pager) {
-        pager.repositionToolbar();
-      }
     };
 
     if (this.data.animate) {
@@ -540,7 +534,6 @@ AFRAME.registerComponent("media-pager", {
 
     if (this.pageLabel) {
       this.pageLabel.setAttribute("text", "value", `${this.data.index + 1}/${this.data.maxIndex + 1}`);
-      this.repositionToolbar();
     }
   },
 
@@ -564,14 +557,5 @@ AFRAME.registerComponent("media-pager", {
     this.el.setAttribute("media-pdf", "index", newIndex);
     this.el.setAttribute("media-pager", "index", newIndex);
     this.el.emit("pager-page-changed");
-  },
-
-  repositionToolbar() {
-    const ammoShape = this.el.getAttribute("shape-helper");
-    if (!ammoShape) return;
-    if (!this.toolbar) return;
-
-    this.toolbar.object3D.position.y = -0.7;
-    this.toolbar.object3D.matrixNeedsUpdate = true;
   }
 });
