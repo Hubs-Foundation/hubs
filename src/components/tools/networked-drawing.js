@@ -83,9 +83,8 @@ AFRAME.registerComponent("networked-drawing", {
 
     this.sharedBuffer = this.sharedBufferGeometryManager.getSharedBuffer(0);
     this.drawing = this.sharedBuffer.drawing;
-    const sceneEl = document.querySelector("a-scene");
-    this.scene = sceneEl.object3D;
-    this.scene.add(this.drawing);
+
+    this.el.setObject3D("mesh", this.drawing);
 
     const environmentMapComponent = this.el.sceneEl.components["environment-map"];
     if (environmentMapComponent) {
@@ -111,10 +110,21 @@ AFRAME.registerComponent("networked-drawing", {
     });
   },
 
+  play() {
+    AFRAME.scenes[0].systems["hubs-systems"].drawingMenuSystem.registerDrawingMenu(this.el);
+  },
+
   remove() {
     NAF.connection.unsubscribeToDataChannel(this.drawingId, this._receiveData);
 
-    this.scene.remove(this.drawing);
+    this.drawStarted = false;
+
+    this.el.removeObject3D("mesh");
+
+    const drawingManager = this.el.sceneEl.querySelector("#drawing-manager").components["drawing-manager"];
+    drawingManager.destroyDrawing();
+
+    AFRAME.scenes[0].systems["hubs-systems"].drawingMenuSystem.unregisterDrawingMenu(this.el);
   },
 
   tick(t) {
@@ -471,6 +481,8 @@ AFRAME.registerComponent("networked-drawing", {
     this.currentPointCount = 0;
     this.lineStarted = false;
     this.drawStarted = false;
+
+    this.sharedBuffer.computeBoundingSpheres();
   },
 
   _addToNetworkBuffer: (() => {
