@@ -65,12 +65,13 @@ AFRAME.registerComponent("cursor-controller", {
       this.data.cursor.object3D.visible = this.enabled && !!cursorPose;
       this.line.material.visible = !!(this.enabled && !hideLine);
 
+      this.intersection = null;
+
       if (!this.enabled || !cursorPose) {
         return;
       }
 
       const interaction = AFRAME.scenes[0].systems.interaction;
-      this.intersection = null;
       const isGrabbing = left ? !!interaction.state.leftRemote.held : !!interaction.state.rightRemote.held;
       if (!isGrabbing) {
         rawIntersections.length = 0;

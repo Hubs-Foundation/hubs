@@ -2,9 +2,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 /**
  * Drawing Menu System
- * A tool that allows drawing on networked-drawing components.
- * @namespace drawing
- * @component pen
+ * A system for showing menus for drawings.
  */
 
 function almostEquals(epsilon, u, v) {
@@ -20,18 +18,11 @@ export class DrawingMenuSystem {
     this.lastIntersection = new THREE.Vector3();
 
     this.drawingMenus = [];
-    this.setDirty = this.setDirty.bind(this);
-    this.dirty = true;
-
-    // TODO: Use the MutationRecords passed into the callback function to determine added/removed nodes!
-    this.observer = new MutationObserver(this.setDirty);
+    this.buttonMap = {};
 
     waitForDOMContentLoaded().then(() => {
       this.cursorControllers = document.querySelectorAll("[cursor-controller]");
       this.camera = this.sceneEl.querySelector("#avatar-pov-node");
-      this.observer.observe(this.sceneEl, { childList: true, attributes: true, subtree: true });
-      this.sceneEl.addEventListener("object3dset", this.setDirty.bind(this));
-      this.sceneEl.addEventListener("object3dremove", this.setDirty.bind(this));
     });
   }
 
@@ -39,11 +30,6 @@ export class DrawingMenuSystem {
     if (!this.cursorControllers || this.cursorControllers.length === 0 || !this.camera) return;
 
     if (this.sceneEl.is("frozen")) {
-      if (this.dirty) {
-        this.populateEntities(this.targets);
-        this.dirty = false;
-      }
-
       const hovered = this.getHovered();
       if (hovered) {
         for (let i = 0; i < this.cursorControllers.length; i++) {
@@ -95,17 +81,17 @@ export class DrawingMenuSystem {
           const hovered = interaction.state[remote].hovered;
           if (
             hovered &&
-            interaction.options[remote] &&
             userinput.get(interaction.options[remote].grabPath) &&
             hovered.components.tags &&
-            hovered.components.tags.data.singleActionButton &&
-            hovered.parentEl.parentEl.components["networked-drawing"]
+            hovered.components.tags.data.singleActionButton
           ) {
-            if (hovered.classList.contains("undo-drawing")) {
-              hovered.parentEl.parentEl.components["networked-drawing"].undoDraw();
-            } else if (hovered.classList.contains("delete-drawing")) {
-              NAF.utils.takeOwnership(hovered.parentEl.parentEl);
-              this.sceneEl.removeChild(hovered.parentEl.parentEl);
+            if (hovered.classList.contains("undo-drawing") && this.buttonMap[hovered.object3D.uuid]) {
+              const networkedEntity = this.buttonMap[hovered.object3D.uuid];
+              networkedEntity.components["networked-drawing"].undoDraw();
+            } else if (hovered.classList.contains("delete-drawing") && this.buttonMap[hovered.object3D.uuid]) {
+              const networkedEntity = this.buttonMap[hovered.object3D.uuid];
+              NAF.utils.takeOwnership(networkedEntity);
+              this.sceneEl.removeChild(networkedEntity);
             }
           }
         }
@@ -190,11 +176,24 @@ export class DrawingMenuSystem {
     }
   }
 
-  setDirty() {
-    this.dirty = true;
+  registerDrawingMenu(networkedDrawingEl) {
+    const menuEl = networkedDrawingEl.querySelector(".drawing-menu");
+    this.drawingMenus.push(menuEl);
+    const undoButton = menuEl.querySelector(".undo-drawing");
+    this.buttonMap[undoButton.object3D.uuid] = networkedDrawingEl;
+    const deleteButton = menuEl.querySelector(".delete-drawing");
+    this.buttonMap[deleteButton.object3D.uuid] = networkedDrawingEl;
   }
 
-  populateEntities() {
-    this.drawingMenus = this.sceneEl.querySelectorAll(".drawing-menu");
+  unregisterDrawingMenu(networkedDrawingEl) {
+    const menuEl = networkedDrawingEl.querySelector(".drawing-menu");
+    const idx = this.drawingMenus.indexOf(menuEl);
+    if (idx !== -1) {
+      this.drawingMenus.splice(idx, 1);
+    }
+    const undoButton = menuEl.querySelector(".undo-drawing");
+    delete this.buttonMap[undoButton.object3D.uuid];
+    const deleteButton = menuEl.querySelector(".delete-drawing");
+    delete this.buttonMap[deleteButton.object3D.uuid];
   }
 }

@@ -110,6 +110,10 @@ AFRAME.registerComponent("networked-drawing", {
     });
   },
 
+  play() {
+    AFRAME.scenes[0].systems["hubs-systems"].drawingMenuSystem.registerDrawingMenu(this.el);
+  },
+
   remove() {
     NAF.connection.unsubscribeToDataChannel(this.drawingId, this._receiveData);
 
@@ -119,6 +123,8 @@ AFRAME.registerComponent("networked-drawing", {
 
     const drawingManager = this.el.sceneEl.querySelector("#drawing-manager").components["drawing-manager"];
     drawingManager.destroyDrawing();
+
+    AFRAME.scenes[0].systems["hubs-systems"].drawingMenuSystem.unregisterDrawingMenu(this.el);
   },
 
   tick(t) {
@@ -476,7 +482,6 @@ AFRAME.registerComponent("networked-drawing", {
     this.lineStarted = false;
     this.drawStarted = false;
 
-    AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem.setDirty();
     this.sharedBuffer.computeBoundingSpheres();
   },
 

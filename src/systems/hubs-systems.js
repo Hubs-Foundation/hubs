@@ -36,7 +36,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.batchManagerSystem = new BatchManagerSystem(this.el.sceneEl.object3D, this.el.sceneEl.renderer);
     this.spriteSystem = new SpriteSystem(this.el);
     this.cameraSystem = new CameraSystem(this.batchManagerSystem);
-    this.DrawingMenuSystem = new DrawingMenuSystem(this.el.sceneEl);
+    this.drawingMenuSystem = new DrawingMenuSystem(this.el.sceneEl);
   },
 
   tick(t, dt) {
@@ -52,7 +52,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.singleActionButtonSystem.tick();
     this.holdableButtonSystem.tick();
     this.hoverButtonSystem.tick();
-    this.DrawingMenuSystem.tick();
+    this.drawingMenuSystem.tick();
     this.hoverMenuSystem.tick();
     this.hapticFeedbackSystem.tick(
       this.twoPointStretchingSystem,
