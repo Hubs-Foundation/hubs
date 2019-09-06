@@ -19,8 +19,11 @@ const pathsMap = {
   "player-left-controller": {
     takeSnapshot: paths.actions.leftHand.takeSnapshot
   },
-  cursor: {
-    takeSnapshot: paths.actions.cursor.takeSnapshot
+  "right-cursor": {
+    takeSnapshot: paths.actions.cursor.right.takeSnapshot
+  },
+  "left-cursor": {
+    takeSnapshot: paths.actions.cursor.left.takeSnapshot
   }
 };
 
@@ -709,6 +712,7 @@ AFRAME.registerComponent("camera-tool", {
     const heldLeftHand = interaction.state.leftHand.held === this.el;
     const heldRightHand = interaction.state.rightHand.held === this.el;
     const heldRightRemote = interaction.state.rightRemote.held === this.el;
+    const heldLeftRemote = interaction.state.leftRemote.held === this.el;
 
     let grabberId;
     if (heldRightHand) {
@@ -716,7 +720,9 @@ AFRAME.registerComponent("camera-tool", {
     } else if (heldLeftHand) {
       grabberId = "player-left-controller";
     } else if (heldRightRemote) {
-      grabberId = "cursor";
+      grabberId = "right-cursor";
+    } else if (heldLeftRemote) {
+      grabberId = "left-cursor";
     }
 
     if (grabberId) {
