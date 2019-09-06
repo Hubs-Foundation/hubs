@@ -27,7 +27,11 @@ export default class ObjectList extends Component {
       }
     });
     this.updateFilteredEntities = this.updateFilteredEntities.bind(this);
+    const scene = document.querySelector("a-scene");
+    scene.addEventListener("object3dset", this.updateFilteredEntities);
+    scene.addEventListener("object3dremove", this.updateFilteredEntities);
   }
+
   updateFilteredEntities() {
     // Wait one frame for the entity to be removed from the scene.
     setTimeout(() => {
