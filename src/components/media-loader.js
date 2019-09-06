@@ -571,7 +571,7 @@ AFRAME.registerComponent("media-pager", {
     if (!ammoShape) return;
     if (!this.toolbar) return;
 
-    this.toolbar.object3D.position.y = -0.7;
+    this.toolbar.object3D.position.y = 0.7;
     this.toolbar.object3D.matrixNeedsUpdate = true;
   }
 });

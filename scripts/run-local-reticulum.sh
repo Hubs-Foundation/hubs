@@ -10,4 +10,4 @@ else
   export RETICULUM_SOCKET_SERVER="$1"
 fi
 
-NON_CORS_PROXY_DOMAINS="$HOST,dev.reticulum.io" BASE_ASSETS_PATH="https://$HOST:8080/" RETICULUM_SERVER="$HOST:4000" npm start
+CORS_PROXY_SERVER="hubs-proxy.local:4000" NON_CORS_PROXY_DOMAINS="$HOST,dev.reticulum.io" BASE_ASSETS_PATH="https://$HOST:8080/" RETICULUM_SERVER="$HOST:4000" npm start
