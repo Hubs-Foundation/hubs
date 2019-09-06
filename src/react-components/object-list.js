@@ -5,13 +5,15 @@ import styles from "../assets/stylesheets/presence-list.scss";
 import DiscordImage from "../assets/images/presence_discord.png";
 import HMDImage from "../assets/images/presence_vr.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
+import { faTrash } from "@fortawesome/free-solid-svg-icons/faTrash";
+import { faBoxes } from "@fortawesome/free-solid-svg-icons/faBoxes";
 
 export default class ObjectList extends Component {
   static propTypes = {};
 
   state = {
     expanded: false,
+    inspecting: false,
     filteredEntities: []
   };
 
@@ -20,42 +22,62 @@ export default class ObjectList extends Component {
       if (this.state.expanded) {
         this.setState({ expanded: false });
       }
+      if (this.state.inspecting) {
+        this.setState({ inspecting: false });
+      }
     });
+    this.updateFilteredEntities = this.updateFilteredEntities.bind(this);
   }
   updateFilteredEntities() {
-    const filteredEntities = Object.keys(NAF.entities.entities)
-      .filter(id => {
-        return NAF.entities.entities[id].components.networked.data.template === "#interactable-media";
-      })
-      .map(id => {
-        return NAF.entities.entities[id];
-      });
-    if (this.state.filteredEntities.length !== filteredEntities.length) {
-      this.setState({
-        filteredEntities
-      });
-    }
+    // Wait one frame for the entity to be removed from the scene.
+    setTimeout(() => {
+      const filteredEntities = Object.keys(NAF.entities.entities)
+        .filter(id => {
+          return NAF.entities.entities[id].components.networked.data.template === "#interactable-media";
+        })
+        .map(id => {
+          return NAF.entities.entities[id];
+        });
+      if (this.state.filteredEntities.length !== filteredEntities.length) {
+        this.setState({
+          filteredEntities
+        });
+      }
+    }, 0);
   }
   componentDidUpdate() {
     this.updateFilteredEntities();
   }
 
   domForObject(obj, i) {
-    const update = this.updateFilteredEntities.bind(this);
     return (
       <div
         key={i}
         className={styles.rowNoMargin}
-        onMouseOver={() => {
+        onMouseDown={() => {
+          this.setState({ inspecting: true });
           AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(obj.object3D);
         }}
+        onMouseOver={() => {
+          if (this.state.inspecting) {
+            AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(obj.object3D);
+          }
+        }}
         onMouseOut={() => {
-          AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
+          if (this.state.inspecting) {
+            AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
+          }
+        }}
+        onMouseUp={() => {
+          if (this.state.inspecting) {
+            this.setState({ inspecting: false });
+            AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
+          }
         }}
       >
         <div className={styles.icon}>
-          <img
-            src={DiscordImage}
+          <FontAwesomeIcon
+            icon={faTrash}
             onClick={() => {
               if (
                 !obj.object3D.el.components.networked ||
@@ -66,7 +88,11 @@ export default class ObjectList extends Component {
                   obj.object3D.el.setAttribute("pinnable", "pinned", false);
                 }
                 obj.object3D.el.parentNode.removeChild(obj.object3D.el);
-                update();
+                if (this.state.inspecting) {
+                  this.setState({ inspecting: false });
+                  AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
+                }
+                this.updateFilteredEntities();
               }
             }}
           />
@@ -74,7 +100,7 @@ export default class ObjectList extends Component {
         <div className={classNames({ [styles.listItem]: true })}>
           <div className={styles.presence}>
             <p>
-              {obj.components["media-loader"].data.src.substring(obj.components["media-loader"].data.src.length - 20)}
+              {obj.components["media-loader"].data.src.substring(obj.components["media-loader"].data.src.length - 50)}
             </p>
           </div>
         </div>
@@ -103,7 +129,7 @@ export default class ObjectList extends Component {
             [rootStyles.presenceInfoSelected]: this.state.expanded
           })}
         >
-          <FontAwesomeIcon icon={faUsers} />
+          <FontAwesomeIcon icon={faBoxes} />
           <span className={rootStyles.occupantCount}>{this.state.filteredEntities.length}</span>
         </div>
         {this.state.expanded && this.renderExpandedList()}

@@ -45,6 +45,7 @@ AFRAME.registerComponent("scene-preview-camera", {
   },
 
   tick2: function() {
+    this.el.sceneEl.systems["hubs-systems"].cameraSystem.mode = this.el.sceneEl.systems["hubs-systems"].cameraSystem.CAMERA_MODE_SCENE_PREVIEW;
     const streamerCamera = getStreamerCamera();
     if (streamerCamera) {
       setMatrixWorld(this.el.object3D, streamerCamera.matrixWorld);

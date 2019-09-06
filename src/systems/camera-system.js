@@ -106,6 +106,7 @@ export const CAMERA_MODE_FIRST_PERSON = 0;
 export const CAMERA_MODE_THIRD_PERSON_NEAR = 1;
 export const CAMERA_MODE_THIRD_PERSON_FAR = 2;
 export const CAMERA_MODE_INSPECT = 3;
+export const CAMERA_MODE_SCENE_PREVIEW = 4;
 
 const NEXT_MODES = {
   [CAMERA_MODE_FIRST_PERSON]: CAMERA_MODE_THIRD_PERSON_NEAR,
@@ -143,8 +144,8 @@ export class CameraSystem {
   constructor(batchManagerSystem) {
     this.inspectedMeshesFromBatch = [];
     this.batchManagerSystem = batchManagerSystem;
-    this.mode = CAMERA_MODE_FIRST_PERSON;
-    this.snapshot = { audioTransform: new THREE.Matrix4() };
+    this.mode = CAMERA_MODE_SCENE_PREVIEW;
+    this.snapshot = { audioTransform: new THREE.Matrix4(), matrixWorld: new THREE.Matrix4() };
     this.audioListenerTargetTransform = new THREE.Matrix4();
     waitForDOMContentLoaded().then(() => {
       this.avatarPOV = document.getElementById("avatar-pov-node");
@@ -170,6 +171,7 @@ export class CameraSystem {
     }
 
     if (!enableThirdPersonMode) return;
+    if (this.mode === CAMERA_MODE_SCENE_PREVIEW) return;
 
     this.mode = NEXT_MODES[this.mode];
     if (this.mode === CAMERA_MODE_FIRST_PERSON) {
@@ -212,6 +214,9 @@ export class CameraSystem {
       camera.cameras[1].layers.set(CAMERA_LAYER_INSPECT);
     }
 
+    this.cameraEl.object3D.updateMatrices();
+    this.snapshot.matrixWorld.copy(this.cameraEl.object3D.matrixWorld);
+
     moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
 
     this.snapshot.audio = getAudio(o);
@@ -244,6 +249,9 @@ export class CameraSystem {
     }
     if (this.mode !== CAMERA_MODE_INSPECT) return;
     this.mode = this.snapshot.mode || CAMERA_MODE_FIRST_PERSON;
+    if (this.snapshot.mode === CAMERA_MODE_SCENE_PREVIEW) {
+      setMatrixWorld(this.cameraEl.object3D, this.snapshot.matrixWorld);
+    }
     this.snapshot.mode = null;
     this.tick(AFRAME.scenes[0]);
   }
@@ -251,7 +259,11 @@ export class CameraSystem {
   tick = (function() {
     const translation = new THREE.Matrix4();
     return function tick(scene) {
-      if (!scene.is("entered")) return;
+      if (!this.enteredScene && scene.is("entered")) {
+        this.enteredScene = true;
+        this.mode = CAMERA_MODE_FIRST_PERSON;
+      }
+      if (this.mode === CAMERA_MODE_SCENE_PREVIEW) return;
       this.avatarPOVRotator = this.avatarPOVRotator || this.avatarPOV.components["pitch-yaw-rotator"];
       this.cameraElRotator = this.cameraElRotator || this.cameraEl.components["pitch-yaw-rotator"];
       this.avatarPOVRotator.on = true;
