@@ -2,8 +2,6 @@ import React, { Component } from "react";
 import classNames from "classnames";
 import rootStyles from "../assets/stylesheets/ui-root.scss";
 import styles from "../assets/stylesheets/presence-list.scss";
-import DiscordImage from "../assets/images/presence_discord.png";
-import HMDImage from "../assets/images/presence_vr.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons/faTrash";
 import { faBoxes } from "@fortawesome/free-solid-svg-icons/faBoxes";
@@ -27,9 +25,6 @@ export default class ObjectList extends Component {
       }
     });
     this.updateFilteredEntities = this.updateFilteredEntities.bind(this);
-    const scene = document.querySelector("a-scene");
-    scene.addEventListener("object3dset", this.updateFilteredEntities);
-    scene.addEventListener("object3dremove", this.updateFilteredEntities);
   }
 
   updateFilteredEntities() {
@@ -59,48 +54,25 @@ export default class ObjectList extends Component {
         key={i}
         className={styles.rowNoMargin}
         onMouseDown={() => {
-          this.setState({ inspecting: true });
-          AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(obj.object3D);
-        }}
-        onMouseOver={() => {
-          if (this.state.inspecting) {
-            AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(obj.object3D);
-          }
-        }}
-        onMouseOut={() => {
-          if (this.state.inspecting) {
+          const willBeInspecting = !this.state.inspecting;
+          this.setState({ inspecting: willBeInspecting });
+          if (!willBeInspecting) {
             AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
           }
+          this.setState({ expanded: false });
         }}
-        onMouseUp={() => {
-          if (this.state.inspecting) {
-            this.setState({ inspecting: false });
+        onMouseOver={() => {
+          AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(obj.object3D);
+        }}
+        onMouseOut={() => {
+          if (!this.state.inspecting) {
             AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
           }
         }}
       >
-        <div className={styles.icon}>
-          <FontAwesomeIcon
-            icon={faTrash}
-            onClick={() => {
-              if (
-                !obj.object3D.el.components.networked ||
-                NAF.utils.isMine(obj.object3D.el) ||
-                NAF.utils.takeOwnership(obj.object3D.el)
-              ) {
-                if (obj.object3D.el.components["pinnable"]) {
-                  obj.object3D.el.setAttribute("pinnable", "pinned", false);
-                }
-                obj.object3D.el.parentNode.removeChild(obj.object3D.el);
-                if (this.state.inspecting) {
-                  this.setState({ inspecting: false });
-                  AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
-                }
-                this.updateFilteredEntities();
-              }
-            }}
-          />
-        </div>
+        {/* <div className={styles.icon}> */}
+        {/*   <FontAwesomeIcon icon={faTrash} /> */}
+        {/* </div> */}
         <div className={classNames({ [styles.listItem]: true })}>
           <div className={styles.presence}>
             <p>
