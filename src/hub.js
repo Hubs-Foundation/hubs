@@ -89,6 +89,7 @@ import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
 import "./components/tweet-media-button";
+import "./components/remix-avatar-button";
 import "./components/transform-object-button";
 import "./components/hover-menu";
 import "./components/disable-frustum-culling";
@@ -975,6 +976,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  // Socket disconnects on refresh but we don't want to show exit scene in that scenario.
+  let isReloading = false;
+  window.addEventListener("beforeunload", () => (isReloading = true));
+
   const socket = await connectToReticulum(isDebug);
 
   socket.onClose(e => {
@@ -982,7 +987,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // and a variety of other network issues that seem to produce the 1000 closure code, but the
     // latter are probably more common. Either way, we just tell the user they got disconnected.
     const NORMAL_CLOSURE = 1000;
-    if (e.code === NORMAL_CLOSURE) {
+
+    if (e.code === NORMAL_CLOSURE && !isReloading) {
       entryManager.exitScene();
       remountUI({ roomUnavailableReason: "disconnected" });
     }

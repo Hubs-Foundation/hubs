@@ -374,7 +374,9 @@ function resolveAsset(src) {
   // If the src attribute is a selector, get the url from the asset item.
   if (src && src.charAt(0) === "#") {
     const assetEl = document.getElementById(src.substring(1));
-    return assetEl.getAttribute("src");
+    if (assetEl) {
+      return assetEl.getAttribute("src");
+    }
   }
   return src;
 }

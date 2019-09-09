@@ -18,6 +18,7 @@ AFRAME.registerComponent("hoverable-visuals", {
     // uniforms and boundingSphere are set from the component responsible for loading the mesh.
     this.uniforms = null;
     this.boundingSphere = new THREE.Sphere();
+    this.scene = AFRAME.scenes[0];
 
     this.sweepParams = [0, 0];
   },
@@ -26,7 +27,7 @@ AFRAME.registerComponent("hoverable-visuals", {
     this.boundingBox = null;
 
     // Used when the object is batched
-    const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
+    const batchManagerSystem = this.scene.systems["hubs-systems"].batchManagerSystem;
     this.el.object3D.traverse(object => {
       if (!object.material) return;
       forEachMaterial(object, material => {

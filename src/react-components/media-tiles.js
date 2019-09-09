@@ -15,9 +15,8 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import styles from "../assets/stylesheets/media-browser.scss";
 import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import StateLink from "./state-link";
-import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
+import { remixAvatar } from "../utils/avatar-utils";
 
-const AVATARS_API = "/api/v1/avatars";
 dayjs.extend(relativeTime);
 
 const PUBLISHER_FOR_ENTRY_TYPE = {
@@ -38,13 +37,7 @@ class MediaTiles extends Component {
 
   handleCopyAvatar = async (e, entry) => {
     e.preventDefault();
-    const avatar = {
-      parent_avatar_listing_id: entry.id,
-      name: entry.name,
-      files: {}
-    };
-
-    await fetchReticulumAuthenticated(AVATARS_API, "POST", { avatar });
+    await remixAvatar(entry.id, entry.name);
     this.props.onCopyAvatar();
   };
 

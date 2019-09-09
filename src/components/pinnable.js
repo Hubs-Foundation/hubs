@@ -52,7 +52,7 @@ AFRAME.registerComponent("pinnable", {
       });
 
       if (this.el.components["body-helper"] && !this.el.sceneEl.systems.interaction.isHeld(this.el)) {
-        this.el.setAttribute("body-helper", { type: "static" });
+        this.el.setAttribute("body-helper", { type: "kinematic" });
       }
     } else {
       if (pinStateChanged || force) {

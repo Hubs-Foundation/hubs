@@ -366,7 +366,6 @@ module.exports = (env, argv) => ({
         DEFAULT_SCENE_SID: process.env.DEFAULT_SCENE_SID,
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
         RETICULUM_SOCKET_SERVER: process.env.RETICULUM_SOCKET_SERVER,
-        FARSPARK_SERVER: process.env.FARSPARK_SERVER,
         THUMBNAIL_SERVER: process.env.THUMBNAIL_SERVER,
         CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,
         NON_CORS_PROXY_DOMAINS: process.env.NON_CORS_PROXY_DOMAINS,

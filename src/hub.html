@@ -518,8 +518,29 @@
 
             <template id="interactable-drawing">
                 <a-entity
+                    class="drawing"
                     networked-drawing
-                ></a-entity>
+                    is-remote-hover-target
+                >
+                    <a-entity class="ui drawing-menu" visible="false">
+                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" position="0 0.125 0.01" class="undo-drawing">
+                            <a-entity
+                                sprite
+                                icon-button="image: undo-action.png; hoverImage: undo-action.png;"
+                                scale="0.165 0.165 0.165"
+                                position="0 0 0.001"
+                            ></a-entity>
+                        </a-entity>
+                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" position="0 -0.125 0.01" class="delete-drawing">
+                            <a-entity
+                                sprite
+                                icon-button="image: remove-action.png; hoverImage: remove-action.png;"
+                                scale="0.165 0.165 0.165"
+                                position="0 0 0.001"
+                            ></a-entity>
+                        </a-entity>
+                    </a-entity>
+                </a-entity>
             </template>
 
             <template id="paging-toolbar">
@@ -632,6 +653,9 @@
             <template id="avatar-link-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
                     <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.01">
+                        <a-entity text="width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    </a-entity>
+                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" remix-avatar-button position="0 -0.35 0.01" visible="false">
                         <a-entity text="width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>

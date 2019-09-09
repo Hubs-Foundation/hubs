@@ -4,6 +4,7 @@ import { PhysicsSystem } from "./physics-system";
 import { ConstraintsSystem } from "./constraints-system";
 import { TwoPointStretchingSystem } from "./two-point-stretching-system";
 import { SingleActionButtonSystem, HoldableButtonSystem, HoverButtonSystem } from "./button-systems";
+import { DrawingMenuSystem } from "./drawing-menu-system";
 import { HoverMenuSystem } from "./hover-menu-system";
 import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
@@ -35,6 +36,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.batchManagerSystem = new BatchManagerSystem(this.el.sceneEl.object3D, this.el.sceneEl.renderer);
     this.spriteSystem = new SpriteSystem(this.el);
     this.cameraSystem = new CameraSystem(this.batchManagerSystem);
+    this.drawingMenuSystem = new DrawingMenuSystem(this.el.sceneEl);
   },
 
   tick(t, dt) {
@@ -50,6 +52,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.singleActionButtonSystem.tick();
     this.holdableButtonSystem.tick();
     this.hoverButtonSystem.tick();
+    this.drawingMenuSystem.tick();
     this.hoverMenuSystem.tick();
     this.hapticFeedbackSystem.tick(
       this.twoPointStretchingSystem,

@@ -27,6 +27,7 @@ AFRAME.registerComponent("cursor-controller", {
       { once: true }
     );
 
+    this.intersection = null;
     this.raycaster = new THREE.Raycaster();
     this.raycaster.firstHitOnly = true; // flag specific to three-mesh-bvh
     this.distance = this.data.far;
@@ -64,12 +65,13 @@ AFRAME.registerComponent("cursor-controller", {
       this.data.cursor.object3D.visible = this.enabled && !!cursorPose;
       this.line.material.visible = !!(this.enabled && !hideLine);
 
+      this.intersection = null;
+
       if (!this.enabled || !cursorPose) {
         return;
       }
 
       const interaction = AFRAME.scenes[0].systems.interaction;
-      let intersection;
       const isGrabbing = left ? !!interaction.state.leftRemote.held : !!interaction.state.rightRemote.held;
       if (!isGrabbing) {
         rawIntersections.length = 0;
@@ -80,9 +82,9 @@ AFRAME.registerComponent("cursor-controller", {
           true,
           rawIntersections
         );
-        intersection = rawIntersections[0];
-        this.intersectionIsValid = !!interaction.updateCursorIntersection(intersection, left);
-        this.distance = this.intersectionIsValid ? intersection.distance : this.data.defaultDistance;
+        this.intersection = rawIntersections[0];
+        this.intersectionIsValid = !!interaction.updateCursorIntersection(this.intersection, left);
+        this.distance = this.intersectionIsValid ? this.intersection.distance : this.data.defaultDistance;
       }
 
       const { cursor, minDistance, far, camera } = this.data;
