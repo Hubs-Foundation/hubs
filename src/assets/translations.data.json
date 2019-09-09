@@ -351,6 +351,7 @@
     "client-info.cancel": "Cancel",
     "client-info.add-owner": "Promote",
     "client-info.remove-owner": "Demote",
+    "object-info.delete-button": "Delete",
     "avatar-landing.select": "Select",
     "avatar-landing.selected": "This is your current avatar",
     "leave-room-dialog.join-room.message": "Joining a new room will leave this one. Are you sure?",

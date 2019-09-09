@@ -12,6 +12,7 @@ export default class DialogContainer extends Component {
     onClose: PropTypes.func,
     closable: PropTypes.bool,
     wide: PropTypes.bool,
+    noOverlay: PropTypes.bool,
     className: PropTypes.string,
     allowOverflow: PropTypes.bool,
     additionalClass: PropTypes.string
@@ -48,9 +49,17 @@ export default class DialogContainer extends Component {
   };
 
   render() {
+    console.log(this.props.noOverlay);
     return (
       <div className={classNames("dialog-overlay", this.props.className)}>
-        <div className="dialog" onClick={this.onContainerClicked}>
+        <div
+          className={classNames(
+            "dialog",
+            this.props.noOverlay ? "" : "dialog__dark-background",
+            this.props.noOverlay ? "dialog__align-end" : ""
+          )}
+          onClick={this.onContainerClicked}
+        >
           <div className={`dialog__box ${this.props.wide ? "dialog__wide" : ""} `}>
             <div
               className={classNames(

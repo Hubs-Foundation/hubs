@@ -53,6 +53,7 @@ import FeedbackDialog from "./feedback-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
+import ObjectInfoDialog from "./object-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
 import LobbyChatBox from "./lobby-chat-box.js";
@@ -209,7 +210,10 @@ class UIRoot extends Component {
 
     signedIn: false,
     videoShareMediaSource: null,
-    showVideoShareFailed: false
+    showVideoShareFailed: false,
+
+    objectInfo: {},
+    inspectingObjects: false
   };
 
   constructor(props) {
@@ -1433,6 +1437,7 @@ class UIRoot extends Component {
 
     const clientInfoClientId = getClientInfoClientId(this.props.history.location);
     const showClientInfo = !!clientInfoClientId;
+    const showObjectInfo = !!(this.state.objectInfo && this.state.objectInfo.uuid);
 
     const discordBridges = this.discordBridges();
     const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
@@ -1690,7 +1695,17 @@ class UIRoot extends Component {
                 performConditionalSignIn={this.props.performConditionalSignIn}
               />
             )}
-            {(!enteredOrWatching || this.isWaitingForAutoExit()) && (
+            {showObjectInfo && (
+              <ObjectInfoDialog
+                scene={this.props.scene}
+                object={this.state.objectInfo}
+                onClose={() => {
+                  this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
+                  this.setState({ inspectingObjects: false, objectInfo: null });
+                }}
+              />
+            )}
+            {((!enteredOrWatching && !this.state.inspectingObjects) || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
                 <PresenceLog
                   entries={presenceLogEntries}
@@ -1895,7 +1910,14 @@ class UIRoot extends Component {
             )}
             {streamingTip}
 
-            {enableObjectList ? <ObjectList /> : <div />}
+            {enableObjectList ? (
+              <ObjectList
+                onExpand={() => this.setState({ inspectingObjects: true })}
+                onInspectObject={o => this.setState({ objectInfo: o })}
+              />
+            ) : (
+              <div />
+            )}
 
             <PresenceList
               history={this.props.history}

@@ -1,13 +1,16 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import classNames from "classnames";
 import rootStyles from "../assets/stylesheets/ui-root.scss";
 import styles from "../assets/stylesheets/presence-list.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons/faTrash";
 import { faBoxes } from "@fortawesome/free-solid-svg-icons/faBoxes";
 
 export default class ObjectList extends Component {
-  static propTypes = {};
+  static propTypes = {
+    onInspectObject: PropTypes.func,
+    onExpand: PropTypes.func
+  };
 
   state = {
     expanded: false,
@@ -18,6 +21,7 @@ export default class ObjectList extends Component {
   componentDidMount() {
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
       if (this.state.expanded) {
+        this.props.onExpand();
         this.setState({ expanded: false });
       }
       if (this.state.inspecting) {
@@ -54,25 +58,14 @@ export default class ObjectList extends Component {
         key={i}
         className={styles.rowNoMargin}
         onMouseDown={() => {
-          const willBeInspecting = !this.state.inspecting;
-          this.setState({ inspecting: willBeInspecting });
-          if (!willBeInspecting) {
-            AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
-          }
           this.setState({ expanded: false });
+          this.props.onInspectObject(obj.object3D);
         }}
         onMouseOver={() => {
-          AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(obj.object3D);
-        }}
-        onMouseOut={() => {
-          if (!this.state.inspecting) {
-            AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
-          }
+          AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
+          AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(obj.object3D, 1.5);
         }}
       >
-        {/* <div className={styles.icon}> */}
-        {/*   <FontAwesomeIcon icon={faTrash} /> */}
-        {/* </div> */}
         <div className={classNames({ [styles.listItem]: true })}>
           <div className={styles.presence}>
             <p>
@@ -87,7 +80,6 @@ export default class ObjectList extends Component {
   renderExpandedList() {
     return (
       <div className={styles.presenceList}>
-        <div className={styles.attachPoint} />
         <div className={styles.contents}>
           <div className={styles.rows}>{this.state.filteredEntities.map(this.domForObject.bind(this))}</div>
         </div>
@@ -99,7 +91,12 @@ export default class ObjectList extends Component {
     return (
       <div>
         <div
-          onClick={() => this.setState({ expanded: !this.state.expanded })}
+          onClick={() => {
+            if (!this.state.expanded) {
+              this.props.onExpand();
+            }
+            this.setState({ expanded: !this.state.expanded });
+          }}
           className={classNames({
             [rootStyles.objectList]: true,
             [rootStyles.presenceInfoSelected]: this.state.expanded

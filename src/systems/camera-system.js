@@ -74,7 +74,7 @@ const moveRigSoCameraLooksAtObject = (function() {
   const center = new THREE.Vector3();
   const target = new THREE.Object3D();
   const IDENTITY = new THREE.Matrix4().identity();
-  return function moveRigSoCameraLooksAtObject(rig, camera, object) {
+  return function moveRigSoCameraLooksAtObject(rig, camera, object, distanceMod) {
     if (!target.parent) {
       // add dummy object to the scene, if this is the first time we call this function
       AFRAME.scenes[0].object3D.add(target);
@@ -88,7 +88,7 @@ const moveRigSoCameraLooksAtObject = (function() {
 
     const box = getBox(object.el, object.el.getObject3D("mesh") || object, true);
     box.getCenter(center);
-    const dist = calculateViewingDistance(camera, object, box, center);
+    const dist = calculateViewingDistance(camera, object, box, center) * distanceMod;
     target.position.addVectors(
       owp,
       oForw
@@ -181,7 +181,7 @@ export class CameraSystem {
     }
   }
 
-  inspect(o) {
+  inspect(o, distanceMod) {
     if (this.mode === CAMERA_MODE_INSPECT) {
       return;
     }
@@ -217,7 +217,7 @@ export class CameraSystem {
     this.cameraEl.object3D.updateMatrices();
     this.snapshot.matrixWorld.copy(this.cameraEl.object3D.matrixWorld);
 
-    moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected);
+    moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected, distanceMod || 1);
 
     this.snapshot.audio = getAudio(o);
     if (this.snapshot.audio) {
