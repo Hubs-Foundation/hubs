@@ -8,7 +8,7 @@ const STORE_STATE_CACHE_KEY = Symbol();
 const OAUTH_FLOW_CREDENTIALS_KEY = "ret-oauth-flow-account-credentials";
 const validator = new Validator();
 import { EventTarget } from "event-target-shim";
-import { generateDefaultProfile, generateRandomName } from "../utils/identity.js";
+import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identity.js";
 
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
@@ -22,6 +22,7 @@ export const SCHEMA = {
       properties: {
         displayName: { type: "string", pattern: "^[A-Za-z0-9-]{3,32}$" },
         avatarId: { type: "string" },
+        // personalAvatarId is obsolete, but we need it here for backwards compatibility.
         personalAvatarId: { type: "string" }
       }
     },
@@ -167,19 +168,24 @@ export default class Store extends EventTarget {
       onLoadActions: []
     });
 
+    this._shouldResetAvatarOnInit = false;
+
     const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
     if (oauthFlowCredentials) {
       this.update({ credentials: oauthFlowCredentials });
-      this.resetToRandomLegacyAvatar();
+      this._shouldResetAvatarOnInit = true;
       Cookies.remove(OAUTH_FLOW_CREDENTIALS_KEY);
     }
   }
 
-  // Initializes store with any default bits
-  init = () => {
-    this.update({
-      profile: { ...generateDefaultProfile(), ...(this.state.profile || {}) }
-    });
+  initProfile = async () => {
+    if (this._shouldResetAvatarOnInit) {
+      await this.resetToRandomDefaultAvatar();
+    } else {
+      this.update({
+        profile: { avatarId: await fetchRandomDefaultAvatarId(), ...(this.state.profile || {}) }
+      });
+    }
 
     // Regenerate name to encourage users to change it.
     if (!this.state.activity.hasChangedName) {
@@ -187,9 +193,9 @@ export default class Store extends EventTarget {
     }
   };
 
-  resetToRandomLegacyAvatar = () => {
+  resetToRandomDefaultAvatar = async () => {
     this.update({
-      profile: { ...(this.state.profile || {}), ...generateDefaultProfile() }
+      profile: { ...(this.state.profile || {}), avatarId: await fetchRandomDefaultAvatarId() }
     });
   };
 

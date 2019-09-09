@@ -1,7 +1,5 @@
 const { Vector3, Quaternion, Matrix4, Euler } = THREE;
 
-import { AVATAR_TYPES } from "../utils/avatar-utils";
-
 function quaternionAlmostEquals(epsilon, u, v) {
   // Note: q and -q represent same rotation
   return (
@@ -48,11 +46,6 @@ function findIKRoot(entity) {
   }
   return entity && entity.components["ik-root"];
 }
-
-const LEGACY_HAND_ROTATIONS = {
-  left: new Matrix4().makeRotationFromEuler(new Euler(-Math.PI / 2, Math.PI / 2, 0)),
-  right: new Matrix4().makeRotationFromEuler(new Euler(Math.PI / 2, Math.PI / 2, 0))
-};
 
 const HAND_ROTATIONS = {
   left: new Matrix4().makeRotationFromEuler(new Euler(-Math.PI / 2, Math.PI / 2, 0)),
@@ -247,12 +240,8 @@ AFRAME.registerComponent("ik-controller", {
 
     const { leftHand, rightHand } = this;
 
-    const handRotations =
-      this.ikRoot.el.components["player-info"].data.avatarType === AVATAR_TYPES.LEGACY
-        ? LEGACY_HAND_ROTATIONS
-        : HAND_ROTATIONS;
-    if (leftHand) this.updateHand(handRotations.left, leftHand, leftController.object3D, true, this.isInView);
-    if (rightHand) this.updateHand(handRotations.right, rightHand, rightController.object3D, false, this.isInView);
+    if (leftHand) this.updateHand(HAND_ROTATIONS.left, leftHand, leftController.object3D, true, this.isInView);
+    if (rightHand) this.updateHand(HAND_ROTATIONS.right, rightHand, rightController.object3D, false, this.isInView);
     this.forceIkUpdate = false;
 
     if (!this._hadFirstTick) {

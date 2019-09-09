@@ -215,8 +215,6 @@ if (!isBotMode && !isTelemetryDisabled) {
 disableiOSZoom();
 detectConcurrentLoad();
 
-store.init();
-
 function getPlatformUnsupportedReason() {
   if (typeof RTCDataChannelEvent === "undefined") return "no_data_channels";
   return null;
@@ -324,7 +322,7 @@ async function updateEnvironmentForHub(hub) {
     const defaultSpaceTopic = hub.topics[0];
     const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
     const bundleAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle");
-    sceneUrl = (glbAsset || bundleAsset).src;
+    sceneUrl = (glbAsset || bundleAsset).src || loadingEnvironment;
     const hasExtension = /\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl);
     isLegacyBundle = !(glbAsset || hasExtension);
   }
@@ -578,6 +576,8 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  await store.initProfile();
+
   const canvas = document.querySelector(".a-canvas");
   canvas.classList.add("a-hidden");
 
@@ -654,7 +654,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // If the stored avatar doesn't have a valid src, reset to a legacy avatar.
   const avatarSrc = await getAvatarSrc(store.state.profile.avatarId);
   if (!avatarSrc) {
-    store.resetToRandomLegacyAvatar();
+    await store.resetToRandomDefaultAvatar();
   }
 
   const authChannel = new AuthChannel(store);

@@ -112,16 +112,6 @@ export default class MediaSearchStore extends EventTarget {
     this.dispatchEvent(new CustomEvent("statechanged"));
   };
 
-  _legacyAvatarToSearchEntry = legacyAvatar => {
-    return {
-      id: legacyAvatar.id,
-      type: "avatar_listing",
-      url: legacyAvatar.url,
-      images: { preview: { url: legacyAvatar.thumbnail, width: 720, height: 1280 } },
-      gltfs: { avatar: legacyAvatar.model }
-    };
-  };
-
   pageNavigate = delta => {
     if (delta === -1) {
       this.history.goBack();
