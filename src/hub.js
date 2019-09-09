@@ -575,7 +575,7 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await store.init();
+  await store.initProfile();
 
   const canvas = document.querySelector(".a-canvas");
   canvas.classList.add("a-hidden");

@@ -11,7 +11,6 @@ import Store from "./storage/store";
 registerTelemetry("/link", "Hubs Device Link");
 
 const store = new Store();
-store.init();
 
 const linkChannel = new LinkChannel(store);
 

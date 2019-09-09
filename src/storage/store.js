@@ -178,8 +178,7 @@ export default class Store extends EventTarget {
     }
   }
 
-  // Initializes store with any default bits
-  init = async () => {
+  initProfile = async () => {
     if (this._shouldResetAvatarOnInit) {
       await this.resetToRandomDefaultAvatar();
     } else {

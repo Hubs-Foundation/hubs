@@ -25,7 +25,6 @@ const store = window.APP.store;
 
 import registerTelemetry from "./telemetry";
 registerTelemetry("/admin", "Hubs Admin");
-store.init();
 
 class AdminUI extends Component {
   static propTypes = {
