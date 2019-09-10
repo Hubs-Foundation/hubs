@@ -92,6 +92,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       mountUI(retPhxChannel);
     })
     .receive("error", res => {
+      document.location = "/?sign_in&sign_in_destination=admin";
       console.error(res);
     });
 });

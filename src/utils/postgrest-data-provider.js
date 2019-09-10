@@ -296,6 +296,7 @@ const createAuthProvider = channel => {
 
     if (type === AUTH_LOGOUT) {
       currentPermsToken = null;
+      document.location = "/?sign_in&sign_in_destination=admin";
       return Promise.resolve();
     }
 
@@ -303,7 +304,7 @@ const createAuthProvider = channel => {
       const status = params.status;
       if (status === 401 || status === 403) {
         currentPermsToken = null;
-        return Promise.reject();
+        return Promise.reject({ redirectTo: "/?sign_in&sign_in_destination=admin" });
       }
       return Promise.resolve();
     }

@@ -13,7 +13,12 @@ export default class SignInDialog extends Component {
     onSignIn: PropTypes.func,
     onContinue: PropTypes.func,
     message: PropTypes.string,
-    continueText: PropTypes.string
+    continueText: PropTypes.string,
+    closable: PropTypes.bool
+  };
+
+  static defaultProps = {
+    closable: true
   };
 
   state = {

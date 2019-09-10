@@ -12,7 +12,7 @@ import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import discordLogoSmall from "../assets/images/discord-logo-small.png";
 import mozLogo from "../assets/images/moz-logo-black.png";
 import classNames from "classnames";
-import { createAndRedirectToNewHub, connectToReticulum } from "../utils/phoenix-utils";
+import { isLocalClient, createAndRedirectToNewHub, connectToReticulum } from "../utils/phoenix-utils";
 import maskEmail from "../utils/mask-email";
 import checkIsMobile from "../utils/is-mobile";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
@@ -47,7 +47,9 @@ class HomeRoot extends Component {
     report: PropTypes.bool,
     installEvent: PropTypes.object,
     hideHero: PropTypes.bool,
-    favoriteHubsResult: PropTypes.object
+    favoriteHubsResult: PropTypes.object,
+    showSignIn: PropTypes.bool,
+    signInDestination: PropTypes.string
   };
 
   state = {
@@ -68,6 +70,9 @@ class HomeRoot extends Component {
       this.showAuthDialog(true);
       this.verifyAuth().then(this.showAuthDialog);
       return;
+    }
+    if (this.props.showSignIn) {
+      this.showSignInDialog(false);
     }
     this.loadHomeVideo();
     if (this.props.listSignup) {
@@ -118,15 +123,21 @@ class HomeRoot extends Component {
       }
     });
 
-  showSignInDialog = () => {
+  showSignInDialog = (closable = true) => {
     this.showDialog(SignInDialog, {
-      message: messages["sign-in.prompt"],
+      message:
+        messages[this.props.signInDestination ? `sign-in.dest-${this.props.signInDestination}` : "sign-in.prompt"],
+      closable: closable,
       onSignIn: async email => {
         const { authComplete } = await this.props.authChannel.startAuthentication(email);
         this.showDialog(SignInDialog, { authStarted: true });
         await authComplete;
         this.setState({ signedIn: true, email });
         this.closeDialog();
+
+        if (this.props.signInDestination === "admin") {
+          document.location = isLocalClient() ? "/admin.html" : "/admin";
+        }
       }
     });
   };

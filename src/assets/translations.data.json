@@ -4,6 +4,7 @@
     "auth.verified": "Your email has been verified!\nYou can now close this browser tab and return to Hubs.",
     "auth.spoke-verified": "You email has been verified!\nYou can now close this browser tab and return to Spoke.",
     "sign-in.prompt": "Sign in to pin objects in rooms.",
+    "sign-in.dest-admin": "Sign in to access admin tools.",
     "sign-in.auth-started": "Email sent!\n\nTo continue, go click on the link in the email using your phone, tablet, or PC.",
     "sign-in.pin": "You'll need to sign in to pin objects.",
     "sign-in.pin-complete": "You are now signed in.",
