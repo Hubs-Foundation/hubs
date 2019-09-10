@@ -190,7 +190,10 @@ class HomeRoot extends Component {
                 )}
               </div>
             </div>
-            <div className={styles.heroContent}>
+            <div
+              className={styles.heroContent}
+              style={{ backgroundImage: window.CONFIG && `url(${window.CONFIG.home_hero_background})` }}
+            >
               {!this.props.hideHero &&
                 (this.props.favoriteHubsResult &&
                 this.props.favoriteHubsResult.entries &&
