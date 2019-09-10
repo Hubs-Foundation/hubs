@@ -1,3 +1,5 @@
+import { findAncestorWithComponent } from "../utils/scene-graph";
+
 // This computation is expensive, so we run on at most one avatar per frame, including quiet avatars.
 // However if we detect an avatar is seen speaking (its volume is above DISABLE_AT_VOLUME_THRESHOLD)
 // then we continue analysis for at least DISABLE_GRACE_PERIOD_MS and disable doing it every frame if
@@ -44,7 +46,7 @@ AFRAME.registerComponent("networked-audio-analyser", {
       const ctx = THREE.AudioContext.getContext();
       this.analyser = ctx.createAnalyser();
       this.analyser.fftSize = 32;
-      this.levels = new Uint8Array(this.analyser.frequencyBinCount);
+      this.levels = new Uint8Array(this.analyser.fftSize);
       event.detail.soundSource.connect(this.analyser);
     });
   },
@@ -96,9 +98,20 @@ function connectAnalyser(mediaStream) {
   const source = ctx.createMediaStreamSource(mediaStream);
   const analyser = ctx.createAnalyser();
   analyser.fftSize = 32;
-  const levels = new Uint8Array(analyser.frequencyBinCount);
+  const levels = new Uint8Array(analyser.fftSize);
   source.connect(analyser);
   return { analyser, levels };
+}
+
+function getAnalyser(el) {
+  // Is this the local player
+  if (findAncestorWithComponent(el, "ik-root").id === "avatar-rig") {
+    return el.sceneEl.systems["local-audio-analyser"];
+  } else {
+    const analyserEl = findAncestorWithComponent(el, "networked-audio-analyser");
+    if (!analyserEl) return null;
+    return analyserEl.components["networked-audio-analyser"];
+  }
 }
 
 /**
@@ -147,18 +160,46 @@ AFRAME.registerComponent("scale-audio-feedback", {
     // bone's are "hidden" by scaling them with bone-visibility, without this we would overwrite that.
     if (!this.el.object3D.visible) return;
 
+    if (!this.analyser) this.analyser = getAnalyser(this.el);
+
     const { minScale, maxScale } = this.data;
-
-    const audioAnalyser = this.el.components["networked-audio-analyser"];
-
-    if (!audioAnalyser) return;
 
     const { object3D } = this.el;
 
-    const scale = getAudioFeedbackScale(this.el.object3D, this.camera, minScale, maxScale, audioAnalyser.volume);
+    const scale = getAudioFeedbackScale(this.el.object3D, this.camera, minScale, maxScale, this.analyser.volume);
 
     object3D.scale.setScalar(scale);
     object3D.matrixNeedsUpdate = true;
+  }
+});
+
+/**
+ * Animates a morph target based on audioFrequencyChange events.
+ * @namespace avatar
+ * @component morph-audio-feedback
+ */
+AFRAME.registerComponent("morph-audio-feedback", {
+  schema: {
+    name: { default: "" },
+    minValue: { default: 0 },
+    maxValue: { default: 1 }
+  },
+
+  init() {
+    this.mesh = this.el.object3DMap.skinnedmesh;
+    this.morphNumber = this.mesh.morphTargetDictionary[this.data.name];
+
+    console.log(this.el, this.analyser, this.mesh, this.morphNumber, this.data);
+  },
+
+  tick() {
+    if (!this.mesh) return;
+
+    if (!this.analyser) this.analyser = getAnalyser(this.el);
+
+    const { minValue, maxValue } = this.data;
+    const t = THREE.Math.mapLinear(this.analyser.volume, 0, 0.4, minValue, maxValue);
+    this.mesh.morphTargetInfluences[this.morphNumber] = t;
   }
 });
 
