@@ -150,8 +150,8 @@ export class CameraSystem {
     waitForDOMContentLoaded().then(() => {
       this.avatarPOV = document.getElementById("avatar-pov-node");
       this.avatarRig = document.getElementById("avatar-rig");
-      this.cameraEl = document.getElementById("viewing-camera");
-      this.rigEl = document.getElementById("viewing-rig");
+      this.viewingCamera = document.getElementById("viewing-camera");
+      this.viewingRig = document.getElementById("viewing-rig");
 
       const sphere = document.getElementById("inspect-sphere");
       // TODO: Make this synchronous, don't use a-sphere
@@ -173,11 +173,11 @@ export class CameraSystem {
     if (!enableThirdPersonMode) return;
     if (this.mode === CAMERA_MODE_SCENE_PREVIEW) return;
 
-    this.mode = NEXT_MODES[this.mode];
+    this.mode = NEXT_MODES[this.mode] || 0;
     if (this.mode === CAMERA_MODE_FIRST_PERSON) {
       AFRAME.scenes[0].renderer.vr.setPoseTarget(this.avatarPOV.object3D);
     } else if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
-      AFRAME.scenes[0].renderer.vr.setPoseTarget(this.cameraEl.object3D);
+      AFRAME.scenes[0].renderer.vr.setPoseTarget(this.viewingCamera.object3D);
     }
   }
 
@@ -214,10 +214,15 @@ export class CameraSystem {
       camera.cameras[1].layers.set(CAMERA_LAYER_INSPECT);
     }
 
-    this.cameraEl.object3D.updateMatrices();
-    this.snapshot.matrixWorld.copy(this.cameraEl.object3D.matrixWorld);
+    this.viewingCamera.object3D.updateMatrices();
+    this.snapshot.matrixWorld.copy(this.viewingRig.object3D.matrixWorld);
 
-    moveRigSoCameraLooksAtObject(this.rigEl.object3D, this.cameraEl.object3D, this.inspected, distanceMod || 1);
+    moveRigSoCameraLooksAtObject(
+      this.viewingRig.object3D,
+      this.viewingCamera.object3D,
+      this.inspected,
+      distanceMod || 1
+    );
 
     this.snapshot.audio = getAudio(o);
     if (this.snapshot.audio) {
@@ -230,13 +235,15 @@ export class CameraSystem {
   }
 
   uninspect() {
+    if (this.mode !== CAMERA_MODE_INSPECT) return;
     this.inspectedMeshesFromBatch.length = 0;
+    this.inspectedMeshesFromBatch = [];
     if (this.inspected) {
       (getBatch(this.inspected, this.batchManagerSystem) || this.inspected).traverse(disableInspectLayer);
     }
     this.inspected = null;
-    const vrMode = AFRAME.scenes[0].is("vr-mode");
     const scene = AFRAME.scenes[0];
+    const vrMode = scene.is("vr-mode");
     const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
     camera.layers.mask = this.snapshot.mask;
     if (vrMode) {
@@ -247,10 +254,10 @@ export class CameraSystem {
       setMatrixWorld(this.snapshot.audio, this.snapshot.audioTransform);
       this.snapshot.audio = null;
     }
-    if (this.mode !== CAMERA_MODE_INSPECT) return;
-    this.mode = this.snapshot.mode || CAMERA_MODE_FIRST_PERSON;
+
+    this.mode = this.snapshot.mode;
     if (this.snapshot.mode === CAMERA_MODE_SCENE_PREVIEW) {
-      setMatrixWorld(this.cameraEl.object3D, this.snapshot.matrixWorld);
+      setMatrixWorld(this.viewingRig.object3D, this.snapshot.matrixWorld);
     }
     this.snapshot.mode = null;
     this.tick(AFRAME.scenes[0]);
@@ -263,11 +270,10 @@ export class CameraSystem {
         this.enteredScene = true;
         this.mode = CAMERA_MODE_FIRST_PERSON;
       }
-      if (this.mode === CAMERA_MODE_SCENE_PREVIEW) return;
       this.avatarPOVRotator = this.avatarPOVRotator || this.avatarPOV.components["pitch-yaw-rotator"];
-      this.cameraElRotator = this.cameraElRotator || this.cameraEl.components["pitch-yaw-rotator"];
+      this.viewingCameraRotator = this.viewingCameraRotator || this.viewingCamera.components["pitch-yaw-rotator"];
       this.avatarPOVRotator.on = true;
-      this.cameraElRotator.on = true;
+      this.viewingCameraRotator.on = true;
 
       this.userinput = this.userinput || scene.systems.userinput;
       if (this.inspected && this.userinput.get(paths.actions.stopInspecting)) {
@@ -287,15 +293,15 @@ export class CameraSystem {
       }
 
       if (this.mode === CAMERA_MODE_FIRST_PERSON) {
-        this.cameraElRotator.on = false;
+        this.viewingCameraRotator.on = false;
         this.avatarRig.object3D.updateMatrices();
-        setMatrixWorld(this.rigEl.object3D, this.avatarRig.object3D.matrixWorld);
+        setMatrixWorld(this.viewingRig.object3D, this.avatarRig.object3D.matrixWorld);
         if (scene.is("vr-mode")) {
-          this.cameraEl.object3D.updateMatrices();
-          setMatrixWorld(this.avatarPOV.object3D, this.cameraEl.object3D.matrixWorld);
+          this.viewingCamera.object3D.updateMatrices();
+          setMatrixWorld(this.avatarPOV.object3D, this.viewingCamera.object3D.matrixWorld);
         } else {
           this.avatarPOV.object3D.updateMatrices();
-          setMatrixWorld(this.cameraEl.object3D, this.avatarPOV.object3D.matrixWorld);
+          setMatrixWorld(this.viewingCamera.object3D, this.avatarPOV.object3D.matrixWorld);
         }
       } else if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
         if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR) {
@@ -304,9 +310,9 @@ export class CameraSystem {
           translation.makeTranslation(0, 2, 8);
         }
         this.avatarRig.object3D.updateMatrices();
-        this.rigEl.object3D.matrixWorld.copy(this.avatarRig.object3D.matrixWorld).multiply(translation);
-        setMatrixWorld(this.rigEl.object3D, this.rigEl.object3D.matrixWorld);
-        this.avatarPOV.object3D.quaternion.copy(this.cameraEl.object3D.quaternion);
+        this.viewingRig.object3D.matrixWorld.copy(this.avatarRig.object3D.matrixWorld).multiply(translation);
+        setMatrixWorld(this.viewingRig.object3D, this.viewingRig.object3D.matrixWorld);
+        this.avatarPOV.object3D.quaternion.copy(this.viewingCamera.object3D.quaternion);
         this.avatarPOV.object3D.matrixNeedsUpdate = true;
       }
 
@@ -318,9 +324,9 @@ export class CameraSystem {
           this.avatarPOV.object3D.add(scene.audioListener);
         } else if (
           (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) &&
-          scene.audioListener.parent !== this.cameraEl.object3D
+          scene.audioListener.parent !== this.viewingCamera.object3D
         ) {
-          this.cameraEl.object3D.add(scene.audioListener);
+          this.viewingCamera.object3D.add(scene.audioListener);
         }
       }
     };

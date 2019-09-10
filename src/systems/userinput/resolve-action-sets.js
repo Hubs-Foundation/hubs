@@ -1,5 +1,6 @@
 import { sets } from "./sets";
 import { isUI } from "./../interactions";
+import { CAMERA_MODE_INSPECT } from "../camera-system";
 
 let leftTeleporter, rightTeleporter;
 
@@ -229,6 +230,9 @@ export function resolveActionSets() {
   );
 
   if (AFRAME.scenes[0] && AFRAME.scenes[0].systems["hubs-systems"]) {
-    userinput.toggleSet(sets.inspecting, !!AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspected);
+    userinput.toggleSet(
+      sets.inspecting,
+      !!AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT
+    );
   }
 }

@@ -13,8 +13,10 @@ export default class ObjectInfoDialog extends Component {
 
   delete() {
     this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
-    this.props.object.el.parentNode.removeChild(this.props.object.el);
-    this.props.onClose();
+    setTimeout(() => {
+      this.props.object.el.parentNode.removeChild(this.props.object.el);
+      this.props.onClose();
+    }, 1);
   }
 
   render() {
@@ -25,7 +27,7 @@ export default class ObjectInfoDialog extends Component {
         <div className={styles.roomInfo}>
           <div className={styles.clientActionButtons}>
             {true && (
-              <button onClick={() => this.delete()}>
+              <button onClick={this.delete.bind(this)}>
                 <FormattedMessage id="object-info.delete-button" />
               </button>
             )}

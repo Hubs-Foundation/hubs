@@ -77,6 +77,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import qsTruthy from "../utils/qs_truthy";
+import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const enableObjectList = qsTruthy("ol");
 
@@ -1700,7 +1701,9 @@ class UIRoot extends Component {
                 scene={this.props.scene}
                 object={this.state.objectInfo}
                 onClose={() => {
-                  this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
+                  if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
+                    this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
+                  }
                   this.setState({ inspectingObjects: false, objectInfo: null });
                 }}
               />
