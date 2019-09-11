@@ -82,7 +82,7 @@ const mountUI = async retPhxChannel => {
     // Refresh perms regularly
     setInterval(() => postgrestAuthenticatior.refreshPermsToken(), 60000);
   } else {
-    dataProvider = postgrestClient("//" + process.env.RETICULUM_SERVER + "/api/v1/postgrest");
+    dataProvider = postgrestClient("//" + process.env.RETICULUM_SERVER + "/api/postgrest");
     authProvider = postgrestAuthenticatior.createAuthProvider();
     postgrestAuthenticatior.setAuthToken(store.state.credentials.token);
   }
