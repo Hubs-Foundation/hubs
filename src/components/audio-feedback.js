@@ -6,7 +6,7 @@ import { findAncestorWithComponent } from "../utils/scene-graph";
 // the avatar is quiet during that entire duration (eg they are muted)
 const DISABLE_AT_VOLUME_THRESHOLD = 0.00001;
 const DISABLE_GRACE_PERIOD_MS = 10000;
-const MIN_VOLUME_THRESHOLD = 0.01;
+const MIN_VOLUME_THRESHOLD = 0.08;
 
 const calculateVolume = (analyser, levels) => {
   // take care with compatibility, e.g. safari doesn't support getFloatTimeDomainData
@@ -17,7 +17,7 @@ const calculateVolume = (analyser, levels) => {
     sum += amplitude * amplitude;
   }
   const currVolume = Math.sqrt(sum / levels.length);
-  return currVolume < MIN_VOLUME_THRESHOLD ? 0 : currVolume;
+  return currVolume;
 };
 
 const tempScaleFromPosition = new THREE.Vector3();
@@ -31,30 +31,16 @@ export function getAudioFeedbackScale(fromObject, toObject, minScale, maxScale, 
 }
 
 function updateVolume(component) {
-  const newVolume = calculateVolume(component.analyser, component.levels);
+  const newRawVolume = calculateVolume(component.analyser, component.levels);
 
-  component.loudest = Math.max(component.loudest, newVolume);
-  component.volume = component.loudest === 0 ? 0 : THREE.Math.mapLinear(newVolume, 0, component.loudest, 0, 1);
+  const newPerceivedVolume = Math.log(THREE.Math.mapLinear(newRawVolume, 0, 1, 1, Math.E));
 
-  const s = 0.3;
+  component.volume = newPerceivedVolume < MIN_VOLUME_THRESHOLD ? 0 : newPerceivedVolume;
+
+  const s = component.volume > component.prevVolume ? 0.35 : 0.3;
   component.volume = s * component.volume + (1 - s) * component.prevVolume;
-  component.loudest *= 0.999;
-
   component.prevVolume = component.volume;
 }
-
-// function updateVolume(component) {
-//   const newVolume = calculateVolume(component.analyser, component.levels);
-//   if (newVolume > component.decayingVolume) {
-//     component.loudest = Math.max(component.loudest, newVolume);
-//     component.volume = component.decayingVolume =
-//       component.loudest === 0 ? 0 : THREE.Math.mapLinear(newVolume, 0, component.loudest, 0, 1);
-//   } else {
-//     const s = 0.8;
-//     component.volume = component.decayingVolume * s > MIN_VOLUME_THRESHOLD ? component.decayingVolume * s : 0;
-//     component.decayingVolume = component.volume;
-//   }
-// }
 
 /**
  * Updates a `volume` property based on a networked audio source
@@ -200,6 +186,10 @@ AFRAME.registerComponent("scale-audio-feedback", {
   }
 });
 
+function easeOutQuadratic(t) {
+  return t * (2 - t);
+}
+
 /**
  * Animates a morph target based on an audio-analyser in a parent entity
  * @namespace avatar
@@ -224,7 +214,7 @@ AFRAME.registerComponent("morph-audio-feedback", {
 
     const { minValue, maxValue } = this.data;
     this.mesh.morphTargetInfluences[this.morphNumber] = THREE.Math.mapLinear(
-      this.analyser.volume,
+      easeOutQuadratic(this.analyser.volume),
       0,
       1,
       minValue,
@@ -268,7 +258,7 @@ const SPRITE_NAMES = {
 };
 
 export function micLevelForVolume(volume) {
-  return Math.ceil(THREE.Math.mapLinear(volume, 0, 1, 0, 7));
+  return THREE.Math.clamp(Math.ceil(THREE.Math.mapLinear(volume - 0.05, 0, 1, 0, 7)), 0, 7);
 }
 
 AFRAME.registerComponent("mic-button", {
