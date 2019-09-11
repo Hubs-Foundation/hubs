@@ -30,8 +30,34 @@ export function getAudioFeedbackScale(fromObject, toObject, minScale, maxScale, 
   return Math.min(maxScale, minScale + (maxScale - minScale) * volume * 8 * distance);
 }
 
+function updateVolume(component) {
+  const newVolume = calculateVolume(component.analyser, component.levels);
+
+  component.loudest = Math.max(component.loudest, newVolume);
+  component.volume = component.loudest === 0 ? 0 : THREE.Math.mapLinear(newVolume, 0, component.loudest, 0, 1);
+
+  const s = 0.3;
+  component.volume = s * component.volume + (1 - s) * component.prevVolume;
+  component.loudest *= 0.999;
+
+  component.prevVolume = component.volume;
+}
+
+// function updateVolume(component) {
+//   const newVolume = calculateVolume(component.analyser, component.levels);
+//   if (newVolume > component.decayingVolume) {
+//     component.loudest = Math.max(component.loudest, newVolume);
+//     component.volume = component.decayingVolume =
+//       component.loudest === 0 ? 0 : THREE.Math.mapLinear(newVolume, 0, component.loudest, 0, 1);
+//   } else {
+//     const s = 0.8;
+//     component.volume = component.decayingVolume * s > MIN_VOLUME_THRESHOLD ? component.decayingVolume * s : 0;
+//     component.decayingVolume = component.volume;
+//   }
+// }
+
 /**
- * Emits audioFrequencyChange events based on a networked audio source
+ * Updates a `volume` property based on a networked audio source
  * @namespace avatar
  * @component networked-audio-analyser
  */
@@ -39,6 +65,8 @@ AFRAME.registerComponent("networked-audio-analyser", {
   async init() {
     this.volume = 0;
     this.prevVolume = 0;
+    this.loudest = 0;
+
     this._updateAnalysis = this._updateAnalysis.bind(this);
     this._runScheduledWork = this._runScheduledWork.bind(this);
     this.el.sceneEl.systems["frame-scheduler"].schedule(this._updateAnalysis, "audio-analyser");
@@ -74,10 +102,7 @@ AFRAME.registerComponent("networked-audio-analyser", {
   _updateAnalysis: function(t) {
     if (!this.analyser) return;
 
-    const currentVolume = calculateVolume(this.analyser, this.levels);
-    const s = 0.3;
-    this.volume = s * currentVolume + (1 - s) * this.prevVolume;
-    this.prevVolume = this.volume;
+    updateVolume(this);
 
     if (this.volume < DISABLE_AT_VOLUME_THRESHOLD) {
       if (t && this.lastSeenVolume && this.lastSeenVolume < t - DISABLE_GRACE_PERIOD_MS) {
@@ -120,6 +145,8 @@ function getAnalyser(el) {
 AFRAME.registerSystem("local-audio-analyser", {
   init() {
     this.volume = 0;
+    this.loudest = 0;
+    this.prevVolume = 0;
 
     this.el.addEventListener("local-media-stream-created", e => {
       const mediaStream = e.detail.mediaStream;
@@ -136,19 +163,19 @@ AFRAME.registerSystem("local-audio-analyser", {
 
   tick: function() {
     if (!this.analyser) return;
-    this.volume = calculateVolume(this.analyser, this.levels);
+    updateVolume(this);
   }
 });
 
 /**
- * Sets an entity's scale base on audioFrequencyChange events.
+ * Sets an entity's scale base on the volume of an audio-analyser in a parent entity.
  * @namespace avatar
  * @component scale-audio-feedback
  */
 AFRAME.registerComponent("scale-audio-feedback", {
   schema: {
     minScale: { default: 1 },
-    maxScale: { default: 2 }
+    maxScale: { default: 1.5 }
   },
 
   init() {
@@ -174,7 +201,7 @@ AFRAME.registerComponent("scale-audio-feedback", {
 });
 
 /**
- * Animates a morph target based on audioFrequencyChange events.
+ * Animates a morph target based on an audio-analyser in a parent entity
  * @namespace avatar
  * @component morph-audio-feedback
  */
@@ -182,14 +209,12 @@ AFRAME.registerComponent("morph-audio-feedback", {
   schema: {
     name: { default: "" },
     minValue: { default: 0 },
-    maxValue: { default: 1 }
+    maxValue: { default: 2 }
   },
 
   init() {
     this.mesh = this.el.object3DMap.skinnedmesh;
     this.morphNumber = this.mesh.morphTargetDictionary[this.data.name];
-
-    console.log(this.el, this.analyser, this.mesh, this.morphNumber, this.data);
   },
 
   tick() {
@@ -198,8 +223,13 @@ AFRAME.registerComponent("morph-audio-feedback", {
     if (!this.analyser) this.analyser = getAnalyser(this.el);
 
     const { minValue, maxValue } = this.data;
-    const t = THREE.Math.mapLinear(this.analyser.volume, 0, 0.4, minValue, maxValue);
-    this.mesh.morphTargetInfluences[this.morphNumber] = t;
+    this.mesh.morphTargetInfluences[this.morphNumber] = THREE.Math.mapLinear(
+      this.analyser.volume,
+      0,
+      1,
+      minValue,
+      maxValue
+    );
   }
 });
 
@@ -237,24 +267,8 @@ const SPRITE_NAMES = {
   ]
 };
 
-export function micLevelForVolume(volume, max) {
-  return max === 0
-    ? 0
-    : volume < max * 0.02
-      ? 0
-      : volume < max * 0.03
-        ? 1
-        : volume < max * 0.06
-          ? 2
-          : volume < max * 0.08
-            ? 3
-            : volume < max * 0.16
-              ? 4
-              : volume < max * 0.32
-                ? 5
-                : volume < max * 0.5
-                  ? 6
-                  : 7;
+export function micLevelForVolume(volume) {
+  return Math.ceil(THREE.Math.mapLinear(volume, 0, 1, 0, 7));
 }
 
 AFRAME.registerComponent("mic-button", {
@@ -266,9 +280,7 @@ AFRAME.registerComponent("mic-button", {
   },
 
   init() {
-    this.loudest = 0;
     this.prevSpriteName = "";
-    this.decayingVolume = 0;
     this.el.object3D.matrixNeedsUpdate = true;
     this.hovering = false;
     this.onHover = () => {
@@ -299,22 +311,11 @@ AFRAME.registerComponent("mic-button", {
 
   tick() {
     const audioAnalyser = this.el.sceneEl.systems["local-audio-analyser"];
-    let volume;
-    if (audioAnalyser.volume > this.decayingVolume) {
-      this.decayingVolume = audioAnalyser.volume;
-      volume = audioAnalyser.volume;
-      this.loudest = Math.max(this.loudest, volume);
-    } else {
-      const s = 0.8;
-      volume = this.decayingVolume * s > 0.001 ? this.decayingVolume * s : 0;
-      this.decayingVolume = volume;
-    }
-
     const active = this.data.active;
     const hovering = this.hovering;
     const spriteNames =
       SPRITE_NAMES[!active ? (hovering ? "MIC_HOVER" : "MIC") : hovering ? "MIC_OFF_HOVER" : "MIC_OFF"];
-    const level = micLevelForVolume(volume, this.loudest);
+    const level = micLevelForVolume(audioAnalyser.volume);
     const spriteName = spriteNames[level];
     if (spriteName !== this.prevSpriteName) {
       this.prevSpriteName = spriteName;
