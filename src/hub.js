@@ -213,7 +213,7 @@ if (!isBotMode && !isTelemetryDisabled) {
 }
 
 disableiOSZoom();
-//detectConcurrentLoad();
+detectConcurrentLoad();
 
 store.init();
 
