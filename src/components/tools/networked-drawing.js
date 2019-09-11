@@ -8,6 +8,10 @@
 
 import SharedBufferGeometryManager from "../../utils/sharedbuffergeometrymanager";
 import MobileStandardMaterial from "../../materials/MobileStandardMaterial";
+import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
+import { cloneObject3D } from "../../utils/three-utils";
+import { addMedia } from "../../utils/media-utils";
+import { ObjectContentOrigins } from "../../object-types";
 
 const MSG_CONFIRM_CONNECT = 0;
 const MSG_BUFFER_DATA = 1;
@@ -167,6 +171,66 @@ AFRAME.registerComponent("networked-drawing", {
     }
 
     this._deleteExpiredLines(t);
+  },
+
+  async serializeDrawing() {
+    const exporter = new GLTFExporter();
+    const clonedMesh = cloneObject3D(this.drawing);
+
+    const chunks = await new Promise((resolve, reject) => {
+      exporter.parseChunks(
+        clonedMesh,
+        resolve,
+        e => {
+          new Error(`Error exporting scene. ${eventToMessage(e)}`);
+        },
+        {
+          mode: "glb",
+          includeCustomExtensions: true
+        }
+      );
+    });
+
+    const json = chunks.json;
+    if (!json.extensions) {
+      json.extensions = {};
+    }
+    json.extensions.MOZ_hubs_components = { version: 4 };
+    json.asset.generator = `Mozilla Hubs Serialize Drawing`;
+
+    const glb = await new Promise((resolve, reject) => {
+      exporter.createGLBBlob(chunks, resolve, e => {
+        reject(new Error(`Error creating glb blob. ${eventToMessage(e)}`));
+      });
+    });
+
+    const file = new File([glb], "drawing.glb", {
+      type: "model/gltf-binary"
+    });
+
+    const { entity, orientation } = addMedia(
+      file,
+      "#interactable-media",
+      ObjectContentOrigins.FILE,
+      null,
+      false,
+      false
+    );
+
+    const min = new THREE.Vector3(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
+    const max = new THREE.Vector3(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
+    const temp = new THREE.Vector3();
+
+    const { start, count } = this.sharedBuffer.current.drawRange;
+    const attribute = this.sharedBuffer.current.attributes.position;
+    for (let i = 0; i < count; i++) {
+      temp.set(attribute.getX(i), attribute.getY(i), attribute.getZ(i));
+      min.min(temp);
+      max.max(temp);
+    }
+
+    entity.object3D.position.addVectors(min, max).multiplyScalar(0.5);
+    entity.object3D.matrixNeedsUpdate = true;
   },
 
   _broadcastDrawing: (() => {

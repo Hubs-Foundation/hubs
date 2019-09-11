@@ -92,6 +92,13 @@ export class DrawingMenuSystem {
               const networkedEntity = this.buttonMap[hovered.object3D.uuid];
               NAF.utils.takeOwnership(networkedEntity);
               this.sceneEl.removeChild(networkedEntity);
+            } else if (hovered.classList.contains("serialize-drawing") && this.buttonMap[hovered.object3D.uuid]) {
+              const networkedEntity = this.buttonMap[hovered.object3D.uuid];
+              networkedEntity.components["networked-drawing"].serializeDrawing().then(() => {
+                const networkedEntity = this.buttonMap[hovered.object3D.uuid];
+                NAF.utils.takeOwnership(networkedEntity);
+                this.sceneEl.removeChild(networkedEntity);
+              });
             }
           }
         }
@@ -183,6 +190,8 @@ export class DrawingMenuSystem {
     this.buttonMap[undoButton.object3D.uuid] = networkedDrawingEl;
     const deleteButton = menuEl.querySelector(".delete-drawing");
     this.buttonMap[deleteButton.object3D.uuid] = networkedDrawingEl;
+    const serializeButton = menuEl.querySelector(".serialize-drawing");
+    this.buttonMap[serializeButton.object3D.uuid] = networkedDrawingEl;
   }
 
   unregisterDrawingMenu(networkedDrawingEl) {
@@ -195,5 +204,7 @@ export class DrawingMenuSystem {
     delete this.buttonMap[undoButton.object3D.uuid];
     const deleteButton = menuEl.querySelector(".delete-drawing");
     delete this.buttonMap[deleteButton.object3D.uuid];
+    const serializeButton = menuEl.querySelector(".serialize-drawing");
+    delete this.buttonMap[serializeButton.object3D.uuid];
   }
 }
