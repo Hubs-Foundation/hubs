@@ -16,7 +16,7 @@ export default class ObjectInfoDialog extends Component {
     setTimeout(() => {
       this.props.object.el.parentNode.removeChild(this.props.object.el);
       this.props.onClose();
-    }, 1);
+    }, 0);
   }
 
   render() {

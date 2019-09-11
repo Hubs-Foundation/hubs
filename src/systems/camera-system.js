@@ -185,6 +185,9 @@ export class CameraSystem {
     if (this.mode === CAMERA_MODE_INSPECT) {
       return;
     }
+    const scene = AFRAME.scenes[0];
+    scene.classList.add("hand-cursor");
+    scene.classList.remove("no-cursor");
     this.snapshot.mode = this.mode;
     this.mode = CAMERA_MODE_INSPECT;
     this.inspected = o;
@@ -202,7 +205,6 @@ export class CameraSystem {
       }
     }
 
-    const scene = AFRAME.scenes[0];
     const vrMode = scene.is("vr-mode");
     const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
     this.snapshot.mask = camera.layers.mask;
@@ -236,13 +238,17 @@ export class CameraSystem {
 
   uninspect() {
     if (this.mode !== CAMERA_MODE_INSPECT) return;
+    const scene = AFRAME.scenes[0];
+    if (scene.is("entered")) {
+      scene.classList.remove("hand-cursor");
+      scene.classList.add("no-cursor");
+    }
     this.inspectedMeshesFromBatch.length = 0;
     this.inspectedMeshesFromBatch = [];
     if (this.inspected) {
       (getBatch(this.inspected, this.batchManagerSystem) || this.inspected).traverse(disableInspectLayer);
     }
     this.inspected = null;
-    const scene = AFRAME.scenes[0];
     const vrMode = scene.is("vr-mode");
     const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
     camera.layers.mask = this.snapshot.mask;

@@ -69,7 +69,8 @@ export default class DialogContainer extends Component {
               )}
             >
               {this.props.closable &&
-                this.props.onClose && (
+                this.props.onClose &&
+                !this.props.noOverlay && (
                   <WithHoverSound>
                     <button className="dialog__box__contents__close" onClick={() => this.props.onClose()}>
                       <i>
