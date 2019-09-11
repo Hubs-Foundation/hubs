@@ -296,15 +296,23 @@ const createAuthProvider = channel => {
 
     if (type === AUTH_LOGOUT) {
       currentPermsToken = null;
-      document.location = "/?sign_in&sign_in_destination=admin";
       return Promise.resolve();
     }
 
     if (type === AUTH_ERROR) {
       const status = params.status;
       if (status === 401 || status === 403) {
+        let redirectTo = "/?sign_in&sign_in_destination=admin";
+
+        if (currentPermsToken) {
+          redirectTo = redirectTo + "&sign_in_reason=admin_no_permission";
+        }
+
         currentPermsToken = null;
-        return Promise.reject({ redirectTo: "/?sign_in&sign_in_destination=admin" });
+
+        // Rejecting with redirectTo doesn't work if perm check failed for some reason.
+        document.location = redirectTo;
+        return Promise.reject();
       }
       return Promise.resolve();
     }

@@ -38,7 +38,12 @@ class AdminUI extends Component {
 
   render() {
     return (
-      <Admin dataProvider={this.props.dataProvider} authProvider={this.props.authProvider}>
+      <Admin
+        dataProvider={this.props.dataProvider}
+        authProvider={this.props.authProvider}
+        loginPage={false}
+        logoutButton={() => <span />}
+      >
         <Resource name="pending_scenes" list={PendingSceneList} />
         <Resource name="scene_listings" list={SceneListingList} edit={SceneListingEdit} />
         <Resource name="featured_scene_listings" list={FeaturedSceneListingList} edit={FeaturedSceneListingEdit} />

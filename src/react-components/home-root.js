@@ -16,6 +16,7 @@ import { isLocalClient, createAndRedirectToNewHub, connectToReticulum } from "..
 import maskEmail from "../utils/mask-email";
 import checkIsMobile from "../utils/is-mobile";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import mediaBrowserStyles from "../assets/stylesheets/media-browser.scss";
 import AuthChannel from "../utils/auth-channel";
 
@@ -47,9 +48,11 @@ class HomeRoot extends Component {
     report: PropTypes.bool,
     installEvent: PropTypes.object,
     hideHero: PropTypes.bool,
+    showAdmin: PropTypes.bool,
     favoriteHubsResult: PropTypes.object,
     showSignIn: PropTypes.bool,
-    signInDestination: PropTypes.string
+    signInDestination: PropTypes.string,
+    signInReason: PropTypes.string
   };
 
   state = {
@@ -124,9 +127,16 @@ class HomeRoot extends Component {
     });
 
   showSignInDialog = (closable = true) => {
+    let messageId = "sign-in.prompt";
+
+    if (this.props.signInReason === "admin_no_permission") {
+      messageId = "sign-in.admin-no-permission";
+    } else if (this.props.signInDestination === "admin") {
+      messageId = "sign-in.admin";
+    }
+
     this.showDialog(SignInDialog, {
-      message:
-        messages[this.props.signInDestination ? `sign-in.dest-${this.props.signInDestination}` : "sign-in.prompt"],
+      message: messages[messageId],
       closable: closable,
       onSignIn: async email => {
         const { authComplete } = await this.props.authChannel.startAuthentication(email);
@@ -182,6 +192,15 @@ class HomeRoot extends Component {
                   <a href="/spoke" rel="noreferrer noopener">
                     Spoke
                   </a>
+                  {this.props.showAdmin && (
+                    <a href="/admin" rel="noreferrer noopener">
+                      <i>
+                        <FontAwesomeIcon icon={faCog} />
+                      </i>
+                      &nbsp;
+                      <FormattedMessage id="home.admin" />
+                    </a>
+                  )}
                 </div>
               </div>
               <div className={styles.signIn}>
