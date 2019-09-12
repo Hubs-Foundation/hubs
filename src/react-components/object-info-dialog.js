@@ -11,6 +11,10 @@ export default class ObjectInfoDialog extends Component {
     onClose: PropTypes.func
   };
 
+  componentDidMount() {
+    this.props.scene.addEventListener("uninspect", this.props.onClose);
+  }
+
   delete() {
     this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
     setTimeout(() => {

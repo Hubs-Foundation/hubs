@@ -283,6 +283,7 @@ export class CameraSystem {
 
       this.userinput = this.userinput || scene.systems.userinput;
       if (this.inspected && this.userinput.get(paths.actions.stopInspecting)) {
+        scene.emit("uninspect");
         this.uninspect();
       }
       if (this.userinput.get(paths.actions.nextCameraMode)) {

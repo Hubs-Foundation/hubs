@@ -22,8 +22,8 @@ function getDisplayString(el) {
   if (httpIndex !== -1 && split.length > httpIndex + 3) {
     host = split[httpIndex + 2];
     const hostSplit = host.split(".");
-    if (split.length > 1) {
-      lessHost = hostSplit[hostSplit.length - 2];
+    if (hostSplit.length > 1) {
+      lessHost = `${hostSplit[hostSplit.length - 2]}.${hostSplit[hostSplit.length - 1]}`;
     }
   }
 
