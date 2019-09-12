@@ -6,6 +6,30 @@ import styles from "../assets/stylesheets/presence-list.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBoxes } from "@fortawesome/free-solid-svg-icons/faBoxes";
 
+function getDisplayString(el) {
+  const url = el.components["media-loader"].data.src;
+  const split = url.split("/");
+  const resourceName = split[split.length - 1].split("?")[0];
+  let httpIndex = -1;
+  for (let i = 0; i < split.length; i++) {
+    if (split[i].indexOf("http") !== -1) {
+      httpIndex = i;
+    }
+  }
+
+  let host = "";
+  let lessHost = "";
+  if (httpIndex !== -1 && split.length > httpIndex + 3) {
+    host = split[httpIndex + 2];
+    const hostSplit = host.split(".");
+    if (split.length > 1) {
+      lessHost = hostSplit[hostSplit.length - 2];
+    }
+  }
+
+  return `${lessHost} ... ${resourceName.substr(0, 30)}`;
+}
+
 export default class ObjectList extends Component {
   static propTypes = {
     onInspectObject: PropTypes.func,
@@ -69,9 +93,7 @@ export default class ObjectList extends Component {
       >
         <div className={classNames({ [styles.listItem]: true })}>
           <div className={styles.presence}>
-            <p>
-              {obj.components["media-loader"].data.src.substring(obj.components["media-loader"].data.src.length - 50)}
-            </p>
+            <p>{getDisplayString(obj)}</p>
           </div>
         </div>
       </div>
