@@ -77,7 +77,13 @@
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-name="AvatarRoot">
-                            <a-entity ik-controller hand-pose__left hand-pose__right space-invader-mesh="meshName: AvatarMesh"></a-entity>
+                            <a-entity
+                                ik-controller
+                                hand-pose__left
+                                hand-pose__right
+                                space-invader-mesh="meshName: AvatarMesh"
+                                networked-audio-analyser
+                            ></a-entity>
                         </template>
 
                         <template data-name="Neck">
@@ -163,7 +169,6 @@
                         <template data-name="Head">
                             <a-entity
                                 networked-audio-source="rolloffFactor: 2.0;"
-                                networked-audio-analyser
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
                                 body-helper="type: kinematic; collisionFilterGroup: 4; collisionFilterMask: 1;"
