@@ -213,8 +213,9 @@ class UIRoot extends Component {
     videoShareMediaSource: null,
     showVideoShareFailed: false,
 
-    objectInfo: {},
-    inspectingObjects: false
+    objectInfo: null,
+    isObjectListExpanded: false,
+    isPresenceListExpanded: false
   };
 
   constructor(props) {
@@ -1704,11 +1705,12 @@ class UIRoot extends Component {
                   if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
                     this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
                   }
-                  this.setState({ inspectingObjects: false, objectInfo: null });
+                  this.setState({ isObjectListExpanded: false, objectInfo: null });
                 }}
               />
             )}
-            {((!enteredOrWatching && !this.state.inspectingObjects) || this.isWaitingForAutoExit()) && (
+            {((!enteredOrWatching && !this.state.isObjectListExpanded && !showObjectInfo) ||
+              this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
                 <PresenceLog
                   entries={presenceLogEntries}
@@ -1744,6 +1746,7 @@ class UIRoot extends Component {
                 />
               )}
             {enteredOrWatchingOrPreload &&
+              !this.state.objectInfo &&
               !this.state.frozen && (
                 <InWorldChatBox
                   discordBridges={discordBridges}
@@ -1915,7 +1918,21 @@ class UIRoot extends Component {
 
             {enableObjectList ? (
               <ObjectList
-                onExpand={() => this.setState({ inspectingObjects: true })}
+                onExpand={(expand, uninspect) => {
+                  if (expand) {
+                    this.setState({ isPresenceListExpanded: false, isObjectListExpanded: expand });
+                  } else {
+                    this.setState({ isObjectListExpanded: expand });
+                  }
+
+                  if (uninspect) {
+                    this.setState({ objectInfo: null });
+                    if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
+                      this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
+                    }
+                  }
+                }}
+                expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
                 onInspectObject={o => this.setState({ objectInfo: o })}
               />
             ) : (
@@ -1930,6 +1947,14 @@ class UIRoot extends Component {
               email={this.props.store.state.credentials.email}
               onSignIn={this.showSignInDialog}
               onSignOut={this.signOut}
+              expanded={!this.state.isObjectListExpanded && this.state.isPresenceListExpanded}
+              onExpand={expand => {
+                if (expand) {
+                  this.setState({ isPresenceListExpanded: expand, isObjectListExpanded: false });
+                } else {
+                  this.setState({ isPresenceListExpanded: expand });
+                }
+              }}
             />
 
             {!streaming &&

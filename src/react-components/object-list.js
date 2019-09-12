@@ -9,23 +9,19 @@ import { faBoxes } from "@fortawesome/free-solid-svg-icons/faBoxes";
 export default class ObjectList extends Component {
   static propTypes = {
     onInspectObject: PropTypes.func,
-    onExpand: PropTypes.func
+    onExpand: PropTypes.func,
+    expanded: PropTypes.bool
   };
 
   state = {
-    expanded: false,
     inspecting: false,
     filteredEntities: []
   };
 
   componentDidMount() {
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
-      if (this.state.expanded) {
-        this.props.onExpand();
-        this.setState({ expanded: false });
-      }
-      if (this.state.inspecting) {
-        this.setState({ inspecting: false });
+      if (this.props.expanded) {
+        this.props.onExpand(false, true);
       }
     });
     this.updateFilteredEntities = this.updateFilteredEntities.bind(this);
@@ -58,8 +54,13 @@ export default class ObjectList extends Component {
         key={i}
         className={styles.rowNoMargin}
         onMouseDown={() => {
-          this.setState({ expanded: false });
+          this.props.onExpand(false, false);
           this.props.onInspectObject(obj.object3D);
+        }}
+        onMouseOut={() => {
+          if (this.props.expanded) {
+            AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
+          }
         }}
         onMouseOver={() => {
           AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
@@ -92,20 +93,17 @@ export default class ObjectList extends Component {
       <div>
         <div
           onClick={() => {
-            if (!this.state.expanded) {
-              this.props.onExpand();
-            }
-            this.setState({ expanded: !this.state.expanded });
+            this.props.onExpand(!this.props.expanded, true);
           }}
           className={classNames({
             [rootStyles.objectList]: true,
-            [rootStyles.presenceInfoSelected]: this.state.expanded
+            [rootStyles.presenceInfoSelected]: this.props.expanded
           })}
         >
           <FontAwesomeIcon icon={faBoxes} />
           <span className={rootStyles.occupantCount}>{this.state.filteredEntities.length}</span>
         </div>
-        {this.state.expanded && this.renderExpandedList()}
+        {this.props.expanded && this.renderExpandedList()}
       </div>
     );
   }

@@ -49,11 +49,9 @@ export default class PresenceList extends Component {
     signedIn: PropTypes.bool,
     email: PropTypes.string,
     onSignIn: PropTypes.func,
-    onSignOut: PropTypes.func
-  };
-
-  state = {
-    expanded: false
+    onSignOut: PropTypes.func,
+    expanded: PropTypes.bool,
+    onExpand: PropTypes.func
   };
 
   navigateToClientInfo = clientId => {
@@ -116,10 +114,8 @@ export default class PresenceList extends Component {
 
   componentDidMount() {
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
-      if (this.state.expanded) {
-        this.setState({ expanded: false });
-      }
-    });
+      this.props.onExpand(false);
+    }, {once: true});
   }
 
   renderExpandedList() {
@@ -161,16 +157,16 @@ export default class PresenceList extends Component {
     return (
       <div>
         <div
-          onClick={() => this.setState({ expanded: !this.state.expanded })}
+          onClick={() => {this.props.onExpand(!this.props.expanded); console.log("onclick of div, presence list")}}
           className={classNames({
             [rootStyles.presenceInfo]: true,
-            [rootStyles.presenceInfoSelected]: this.state.expanded
+            [rootStyles.presenceInfoSelected]: this.props.expanded
           })}
         >
           <FontAwesomeIcon icon={faUsers} />
           <span className={rootStyles.occupantCount}>{occupantCount}</span>
         </div>
-        {this.state.expanded && this.renderExpandedList()}
+        {this.props.expanded && this.renderExpandedList()}
       </div>
     );
   }
