@@ -8,7 +8,8 @@ export default class ObjectInfoDialog extends Component {
   static propTypes = {
     scene: PropTypes.object,
     object: PropTypes.object,
-    onClose: PropTypes.func
+    onClose: PropTypes.func,
+    hubChannel: PropTypes.object
   };
 
   componentDidMount() {
@@ -30,11 +31,12 @@ export default class ObjectInfoDialog extends Component {
       <DialogContainer noOverlay={true} className={"foo"} wide={true} {...this.props}>
         <div className={styles.roomInfo}>
           <div className={styles.clientActionButtons}>
-            {true && (
-              <button onClick={this.delete.bind(this)}>
-                <FormattedMessage id="object-info.delete-button" />
-              </button>
-            )}
+            {this.props.hubChannel &&
+              this.props.hubChannel.can("spawn_and_move_media") && (
+                <button onClick={this.delete.bind(this)}>
+                  <FormattedMessage id="object-info.delete-button" />
+                </button>
+              )}
             <button className={styles.cancel} onClick={onClose}>
               <FormattedMessage id="client-info.cancel" />
             </button>

@@ -49,7 +49,6 @@ export default class DialogContainer extends Component {
   };
 
   render() {
-    console.log(this.props.noOverlay);
     return (
       <div className={classNames("dialog-overlay", this.props.className)}>
         <div

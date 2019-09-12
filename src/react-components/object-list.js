@@ -5,7 +5,18 @@ import rootStyles from "../assets/stylesheets/ui-root.scss";
 import styles from "../assets/stylesheets/presence-list.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBoxes } from "@fortawesome/free-solid-svg-icons/faBoxes";
+import VideoImage from "../assets/images/presence_desktop.png";
+import ImageImage from "../assets/images/presence_phone.png";
+import PDFImage from "../assets/images/giphy_logo.png";
+import GLTFImage from "../assets/images/mic_granted.png";
 
+function getDisplayImage(el) {
+  if (el.components["media-video"]) return VideoImage;
+  if (el.components["media-image"]) return ImageImage;
+  if (el.components["media-pdf"]) return PDFImage;
+  if (el.components["gltf-model-plus"]) return GLTFImage;
+  return PDFImage;
+}
 function getDisplayString(el) {
   const url = el.components["media-loader"].data.src;
   const split = url.split("/");
@@ -91,6 +102,9 @@ export default class ObjectList extends Component {
           AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(obj.object3D, 1.5);
         }}
       >
+        <div className={styles.icon}>
+          <img src={getDisplayImage(obj)} />
+        </div>
         <div className={classNames({ [styles.listItem]: true })}>
           <div className={styles.presence}>
             <p>{getDisplayString(obj)}</p>
