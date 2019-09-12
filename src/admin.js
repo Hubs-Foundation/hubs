@@ -38,7 +38,12 @@ class AdminUI extends Component {
 
   render() {
     return (
-      <Admin dataProvider={this.props.dataProvider} authProvider={this.props.authProvider}>
+      <Admin
+        dataProvider={this.props.dataProvider}
+        authProvider={this.props.authProvider}
+        loginPage={false}
+        logoutButton={() => <span />}
+      >
         <Resource name="pending_scenes" list={PendingSceneList} />
         <Resource name="scene_listings" list={SceneListingList} edit={SceneListingEdit} />
         <Resource name="featured_scene_listings" list={FeaturedSceneListingList} edit={FeaturedSceneListingEdit} />
@@ -64,9 +69,23 @@ import { IntlProvider } from "react-intl";
 import { lang, messages } from "./utils/i18n";
 
 const mountUI = async retPhxChannel => {
-  const dataProvider = postgrestClient("//" + process.env.POSTGREST_SERVER);
-  const authProvider = postgrestAuthenticatior.createAuthProvider(retPhxChannel);
-  await postgrestAuthenticatior.refreshToken();
+  let dataProvider;
+  let authProvider;
+
+  // If POSTGREST_SERVER is set, we're talking directly to PostgREST over a tunnel, and will be managing the
+  // perms token ourselves. If we're not, we talk to reticulum and presume it will handle perms token forwarding.
+  if (process.env.POSTGREST_SERVER) {
+    dataProvider = postgrestClient("//" + process.env.POSTGREST_SERVER);
+    authProvider = postgrestAuthenticatior.createAuthProvider(retPhxChannel);
+    await postgrestAuthenticatior.refreshPermsToken();
+
+    // Refresh perms regularly
+    setInterval(() => postgrestAuthenticatior.refreshPermsToken(), 60000);
+  } else {
+    dataProvider = postgrestClient("//" + process.env.RETICULUM_SERVER + "/api/postgrest");
+    authProvider = postgrestAuthenticatior.createAuthProvider();
+    postgrestAuthenticatior.setAuthToken(store.state.credentials.token);
+  }
 
   ReactDOM.render(
     <IntlProvider locale={lang} messages={messages}>
@@ -79,11 +98,6 @@ const mountUI = async retPhxChannel => {
 document.addEventListener("DOMContentLoaded", async () => {
   const socket = await connectToReticulum();
 
-  // Refresh perms regularly
-  setInterval(() => {
-    postgrestAuthenticatior.refreshToken();
-  }, 60000);
-
   // Reticulum global channel
   const retPhxChannel = socket.channel(`ret`, { hub_id: "admin", token: store.state.credentials.token });
   retPhxChannel
@@ -92,6 +106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       mountUI(retPhxChannel);
     })
     .receive("error", res => {
+      document.location = "/?sign_in&sign_in_destination=admin";
       console.error(res);
     });
 });
