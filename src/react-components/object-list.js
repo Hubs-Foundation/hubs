@@ -5,18 +5,40 @@ import rootStyles from "../assets/stylesheets/ui-root.scss";
 import styles from "../assets/stylesheets/presence-list.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBoxes } from "@fortawesome/free-solid-svg-icons/faBoxes";
-import VideoImage from "../assets/images/presence_desktop.png";
-import ImageImage from "../assets/images/presence_phone.png";
-import PDFImage from "../assets/images/giphy_logo.png";
-import GLTFImage from "../assets/images/mic_granted.png";
+import { faBox } from "@fortawesome/free-solid-svg-icons/faBox";
+import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
+import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
+import { faNewspaper } from "@fortawesome/free-solid-svg-icons/faNewspaper";
+import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 
-function getDisplayImage(el) {
-  if (el.components["media-video"]) return VideoImage;
-  if (el.components["media-image"]) return ImageImage;
-  if (el.components["media-pdf"]) return PDFImage;
-  if (el.components["gltf-model-plus"]) return GLTFImage;
-  return PDFImage;
+const SORT_ORDER_VIDEO = 0;
+const SORT_ORDER_IMAGE = 1;
+const SORT_ORDER_PDF = 2;
+const SORT_ORDER_MODEL = 3;
+const SORT_ORDER_UNIDENTIFIED = 4;
+function mediaSortOrder(el) {
+  if (el.components["media-video"]) return SORT_ORDER_VIDEO;
+  if (el.components["media-image"]) return SORT_ORDER_IMAGE;
+  if (el.components["media-pdf"]) return SORT_ORDER_PDF;
+  if (el.components["gltf-model-plus"]) return SORT_ORDER_MODEL;
+  return SORT_ORDER_UNIDENTIFIED;
 }
+
+function mediaSort(el1, el2) {
+  return mediaSortOrder(el1) - mediaSortOrder(el2);
+}
+
+const DISPLAY_IMAGE = new Map([
+  [SORT_ORDER_VIDEO, faVideo],
+  [SORT_ORDER_IMAGE, faImage],
+  [SORT_ORDER_PDF, faNewspaper],
+  [SORT_ORDER_UNIDENTIFIED, faQuestion],
+  [SORT_ORDER_MODEL, faBox]
+]);
+function getDisplayImage(el) {
+  return DISPLAY_IMAGE.get(mediaSortOrder(el));
+}
+
 function getDisplayString(el) {
   const url = el.components["media-loader"].data.src;
   const split = url.split("/");
@@ -71,7 +93,8 @@ export default class ObjectList extends Component {
         })
         .map(id => {
           return NAF.entities.entities[id];
-        });
+        })
+        .sort(mediaSort);
       if (this.state.filteredEntities.length !== filteredEntities.length) {
         this.setState({
           filteredEntities
@@ -83,14 +106,14 @@ export default class ObjectList extends Component {
     this.updateFilteredEntities();
   }
 
-  domForObject(obj, i) {
+  domForEntity(el, i) {
     return (
       <div
         key={i}
         className={styles.rowNoMargin}
         onMouseDown={() => {
           this.props.onExpand(false, false);
-          this.props.onInspectObject(obj.object3D, getDisplayString(obj));
+          this.props.onInspectObject(el.object3D, el.components["media-loader"].data.src);
         }}
         onMouseOut={() => {
           if (this.props.expanded && !AFRAME.utils.device.isMobileVR()) {
@@ -99,15 +122,15 @@ export default class ObjectList extends Component {
         }}
         onMouseOver={() => {
           AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
-          AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(obj.object3D, 1.5);
+          AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(el.object3D, 1.5);
         }}
       >
         <div className={styles.icon}>
-          <img src={getDisplayImage(obj)} />
+          <FontAwesomeIcon icon={getDisplayImage(el)} />
         </div>
         <div className={classNames({ [styles.listItem]: true })}>
           <div className={styles.presence}>
-            <p>{getDisplayString(obj)}</p>
+            <p>{getDisplayString(el)}</p>
           </div>
         </div>
       </div>
@@ -118,7 +141,7 @@ export default class ObjectList extends Component {
     return (
       <div className={styles.presenceList}>
         <div className={styles.contents}>
-          <div className={styles.rows}>{this.state.filteredEntities.map(this.domForObject.bind(this))}</div>
+          <div className={styles.rows}>{this.state.filteredEntities.map(this.domForEntity.bind(this))}</div>
         </div>
       </div>
     );
