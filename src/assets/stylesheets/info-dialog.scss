@@ -42,6 +42,11 @@
       position: relative;
       background-color: white;
 
+
+      @media (max-width: 801px) {
+        padding: 5px;
+      }
+
       &__title {
         @extend %top-title;
         margin-bottom: 20px;
@@ -56,6 +61,10 @@
         height: 100%;
         margin: 10px 0;
         white-space: pre-wrap;
+
+        @media (max-width: 801px) {
+          margin: 0;
+        }
 
         a { color: black }
         a.info-dialog--action-button { color: white; }

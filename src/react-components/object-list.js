@@ -90,7 +90,7 @@ export default class ObjectList extends Component {
         className={styles.rowNoMargin}
         onMouseDown={() => {
           this.props.onExpand(false, false);
-          this.props.onInspectObject(obj.object3D);
+          this.props.onInspectObject(obj.object3D, getDisplayString(obj));
         }}
         onMouseOut={() => {
           if (this.props.expanded && !AFRAME.utils.device.isMobileVR()) {

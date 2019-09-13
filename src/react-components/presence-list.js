@@ -113,9 +113,13 @@ export default class PresenceList extends Component {
   };
 
   componentDidMount() {
-    document.querySelector(".a-canvas").addEventListener("mouseup", () => {
-      this.props.onExpand(false);
-    }, {once: true});
+    document.querySelector(".a-canvas").addEventListener(
+      "mouseup",
+      () => {
+        this.props.onExpand(false);
+      },
+      { once: true }
+    );
   }
 
   renderExpandedList() {
@@ -157,7 +161,9 @@ export default class PresenceList extends Component {
     return (
       <div>
         <div
-          onClick={() => {this.props.onExpand(!this.props.expanded); console.log("onclick of div, presence list")}}
+          onClick={() => {
+            this.props.onExpand(!this.props.expanded);
+          }}
           className={classNames({
             [rootStyles.presenceInfo]: true,
             [rootStyles.presenceInfoSelected]: this.props.expanded

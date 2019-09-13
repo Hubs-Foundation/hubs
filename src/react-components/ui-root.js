@@ -214,6 +214,7 @@ class UIRoot extends Component {
     showVideoShareFailed: false,
 
     objectInfo: null,
+    objectDisplayString: "",
     isObjectListExpanded: false,
     isPresenceListExpanded: false
   };
@@ -1701,6 +1702,7 @@ class UIRoot extends Component {
               <ObjectInfoDialog
                 scene={this.props.scene}
                 object={this.state.objectInfo}
+                objectDisplayString={this.state.objectDisplayString}
                 hubChannel={this.props.hubChannel}
                 onClose={() => {
                   if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
@@ -1934,7 +1936,7 @@ class UIRoot extends Component {
                   }
                 }}
                 expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
-                onInspectObject={o => this.setState({ objectInfo: o })}
+                onInspectObject={(o, s) => this.setState({ objectInfo: o, objectDisplayString: s })}
               />
             ) : (
               <div />

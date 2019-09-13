@@ -8,6 +8,7 @@ export default class ObjectInfoDialog extends Component {
   static propTypes = {
     scene: PropTypes.object,
     object: PropTypes.object,
+    objectDisplayString: PropTypes.string,
     onClose: PropTypes.func,
     hubChannel: PropTypes.object
   };
@@ -28,8 +29,9 @@ export default class ObjectInfoDialog extends Component {
     const { onClose } = this.props;
 
     return (
-      <DialogContainer noOverlay={true} className={"foo"} wide={true} {...this.props}>
+      <DialogContainer noOverlay={true} wide={true} {...this.props}>
         <div className={styles.roomInfo}>
+          <p>{this.props.objectDisplayString}</p>
           <div className={styles.clientActionButtons}>
             {this.props.hubChannel &&
               this.props.hubChannel.can("spawn_and_move_media") && (
