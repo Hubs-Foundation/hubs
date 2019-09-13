@@ -172,6 +172,8 @@ body.vr-mode {
   @media(max-width: 500px) {
     flex-direction: column;
     padding: 8px 8px;
+    right: 16px;
+    top: 80px;
   }
 
   :local(.occupant-count) {
