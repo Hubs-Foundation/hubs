@@ -67,6 +67,7 @@ export default class ObjectList extends Component {
   static propTypes = {
     onInspectObject: PropTypes.func,
     onExpand: PropTypes.func,
+    scene: PropTypes.object,
     expanded: PropTypes.bool
   };
 
@@ -82,6 +83,10 @@ export default class ObjectList extends Component {
       }
     });
     this.updateFilteredEntities = this.updateFilteredEntities.bind(this);
+    // TODO: This is too many events. Use a different method?
+    this.observer = new MutationObserver(this.updateFilteredEntities);
+    this.observer.observe(this.props.scene, { childList: true, attributes: true, subtree: true });
+    this.updateFilteredEntities();
   }
 
   updateFilteredEntities() {
@@ -102,9 +107,7 @@ export default class ObjectList extends Component {
       }
     }, 0);
   }
-  componentDidUpdate() {
-    this.updateFilteredEntities();
-  }
+  componentDidUpdate() {}
 
   domForEntity(el, i) {
     return (
@@ -152,7 +155,10 @@ export default class ObjectList extends Component {
       <div>
         <div
           onClick={() => {
-            this.props.onExpand(!this.props.expanded, !AFRAME.utils.device.isMobileVR());
+            this.props.onExpand(
+              !this.props.expanded && this.state.filteredEntities.length > 0,
+              !AFRAME.utils.device.isMobileVR()
+            );
           }}
           className={classNames({
             [rootStyles.objectList]: true,

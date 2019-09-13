@@ -1921,6 +1921,7 @@ class UIRoot extends Component {
 
             {enableObjectList ? (
               <ObjectList
+                scene={this.props.scene}
                 onExpand={(expand, uninspect) => {
                   if (expand) {
                     this.setState({ isPresenceListExpanded: false, isObjectListExpanded: expand });
