@@ -329,3 +329,5 @@ AFRAME.GLTFModelPlus.registerComponent("trimesh", "trimesh", el => {
 });
 
 AFRAME.GLTFModelPlus.registerComponent("particle-emitter", "particle-emitter");
+
+AFRAME.GLTFModelPlus.registerComponent("networked-drawing-buffer", "networked-drawing-buffer");

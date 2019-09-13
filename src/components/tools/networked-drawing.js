@@ -177,6 +177,10 @@ AFRAME.registerComponent("networked-drawing", {
     const exporter = new GLTFExporter();
     const clonedMesh = cloneObject3D(this.drawing);
 
+    clonedMesh.userData.gltfExtensions = {
+      MOZ_hubs_components: { "networked-drawing-buffer": { buffer: this.networkBuffer } }
+    };
+
     const chunks = await new Promise((resolve, reject) => {
       exporter.parseChunks(
         clonedMesh,
@@ -232,6 +236,45 @@ AFRAME.registerComponent("networked-drawing", {
     entity.object3D.position.addVectors(min, max).multiplyScalar(0.5);
     entity.object3D.matrixNeedsUpdate = true;
   },
+
+  deserializeDrawing: (() => {
+    const position = new THREE.Vector3();
+    const direction = new THREE.Vector3();
+    const normal = new THREE.Vector3();
+    return function(buffer) {
+      let head = buffer[0];
+      if (head === "-") {
+        this._undoDraw();
+        buffer.shift();
+        head = buffer[0];
+      }
+
+      while (head != null && buffer.length >= 11) {
+        const pointCount = buffer[0];
+
+        position.set(buffer[1], buffer[2], buffer[3]);
+        direction.set(buffer[4], buffer[5], buffer[6]);
+        this.radius = Math.round(direction.length() * 1000) / 1000; //radius is encoded as length of direction vector
+        direction.normalize();
+        normal.set(buffer[7], buffer[8], buffer[9]);
+        this.color.setHex(Math.round(normal.length()) - 1); //color is encoded as length of normal vector
+        normal.normalize();
+
+        buffer.splice(0, 10);
+
+        if (!this.drawStarted) {
+          this.startDraw(position, direction, normal);
+        } else if (buffer[0] !== null) {
+          this.draw(position, direction, normal);
+        }
+
+        if (buffer[0] === null) {
+          this.endDraw(position, direction, normal);
+          buffer.shift();
+        }
+      }
+    };
+  })(),
 
   _broadcastDrawing: (() => {
     const copyArray = [];
@@ -693,4 +736,69 @@ AFRAME.registerComponent("networked-drawing", {
       out.copy(point).add(calculatedDirection.normalize().multiplyScalar(radius));
     };
   })()
+});
+
+AFRAME.registerComponent("networked-drawing-buffer", {
+  schema: {
+    buffer: { default: [] }
+  },
+
+  play() {
+    const button = this._getDeserializeButton(this.el.parentEl);
+    if (button) {
+      button.object3D.visible = true;
+    }
+  },
+
+  _getDeserializeButton(entity) {
+    if (entity.classList.contains("interactable")) {
+      return entity.querySelector(".deserialize-drawing");
+    } else if (entity.parentEl) {
+      return this._getDeserializeButton(entity.parentEl);
+    } else {
+      return null;
+    }
+  }
+});
+
+AFRAME.registerComponent("deserialize-drawing-button", {
+  init() {
+    this.onClick = () => {
+      if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) return;
+
+      const drawingManager = this.el.sceneEl.querySelector("#drawing-manager").components["drawing-manager"];
+      const buffer = this.targetEl.querySelector("[networked-drawing-buffer]").components["networked-drawing-buffer"]
+        .data.buffer;
+
+      //serialize any existing drawing and clear the drawing.
+      if (drawingManager.drawing) {
+        drawingManager.drawing.serializeDrawing().then(() => {
+          drawingManager.drawing.el.parentEl.removeChild(drawingManager.drawing.el);
+          drawingManager.destroyDrawing();
+
+          drawingManager.createDrawing().then(() => {
+            drawingManager.drawing.deserializeDrawing(buffer);
+            this.targetEl.parentEl.removeChild(this.targetEl);
+          });
+        });
+      } else {
+        drawingManager.createDrawing().then(() => {
+          drawingManager.drawing.deserializeDrawing(buffer);
+          this.targetEl.parentEl.removeChild(this.targetEl);
+        });
+      }
+    };
+
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.targetEl = networkedEl;
+    });
+  },
+
+  play() {
+    this.el.object3D.addEventListener("interact", this.onClick);
+  },
+
+  pause() {
+    this.el.object3D.removeEventListener("interact", this.onClick);
+  }
 });

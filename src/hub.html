@@ -217,6 +217,21 @@
                     <a-entity class="ui interactable-ui">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media">
                             <a-entity
+                                class="deserialize-drawing"
+                                visible="false"
+                                mixin="rounded-button"
+                                is-remote-hover-target
+                                tags="singleActionButton: true;"
+                                deserialize-drawing-button
+                                position="0 0.375 0.01">
+                                <a-entity
+                                    sprite
+                                    icon-button="image: deserialize-action.png; hoverImage: deserialize-action.png"
+                                    scale="0.165 0.165 0.165"
+                                    position="0 0 0.001"
+                                ></a-entity>
+                            </a-entity>
+                            <a-entity
                                 mixin="rounded-text-action-button"
                                 is-remote-hover-target
                                 tags="singleActionButton:true"
@@ -512,7 +527,7 @@
                     is-remote-hover-target
                 >
                     <a-entity class="ui drawing-menu" visible="false">
-                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" position="0 0.125 0.01" class="undo-drawing">
+                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" position="0.075 0.125 0.01" class="undo-drawing">
                             <a-entity
                                 sprite
                                 icon-button="image: undo-action.png; hoverImage: undo-action.png;"
@@ -520,7 +535,7 @@
                                 position="0 0 0.001"
                             ></a-entity>
                         </a-entity>
-                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" position="0 -0.125 0.01" class="delete-drawing">
+                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" position="0.075 -0.125 0.01" class="delete-drawing">
                             <a-entity
                                 sprite
                                 icon-button="image: remove-action.png; hoverImage: remove-action.png;"
@@ -528,7 +543,7 @@
                                 position="0 0 0.001"
                             ></a-entity>
                         </a-entity>
-                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" position="-0.2 0 0.01" class="serialize-drawing">
+                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" position="-0.125 0 0.01" class="serialize-drawing">
                             <a-entity
                                 sprite
                                 icon-button="image: serialize-action.png; hoverImage: serialize-action.png;"
