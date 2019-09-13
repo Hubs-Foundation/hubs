@@ -93,7 +93,7 @@ export default class ObjectList extends Component {
           this.props.onInspectObject(obj.object3D);
         }}
         onMouseOut={() => {
-          if (this.props.expanded) {
+          if (this.props.expanded && !AFRAME.utils.device.isMobileVR()) {
             AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
           }
         }}
@@ -129,7 +129,7 @@ export default class ObjectList extends Component {
       <div>
         <div
           onClick={() => {
-            this.props.onExpand(!this.props.expanded, true);
+            this.props.onExpand(!this.props.expanded, !AFRAME.utils.device.isMobileVR());
           }}
           className={classNames({
             [rootStyles.objectList]: true,
