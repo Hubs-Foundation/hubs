@@ -116,7 +116,7 @@ export default class ObjectList extends Component {
         className={styles.rowNoMargin}
         onMouseDown={() => {
           this.props.onExpand(false, false);
-          this.props.onInspectObject(el.object3D, el.components["media-loader"].data.src);
+          this.props.onInspectObject(el, el.components["media-loader"].data.src);
         }}
         onMouseOut={() => {
           if (this.props.expanded && !AFRAME.utils.device.isMobileVR()) {

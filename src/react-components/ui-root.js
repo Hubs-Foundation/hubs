@@ -1440,7 +1440,7 @@ class UIRoot extends Component {
 
     const clientInfoClientId = getClientInfoClientId(this.props.history.location);
     const showClientInfo = !!clientInfoClientId;
-    const showObjectInfo = !!(this.state.objectInfo && this.state.objectInfo.uuid);
+    const showObjectInfo = !!(this.state.objectInfo && this.state.objectInfo.object3D);
 
     const discordBridges = this.discordBridges();
     const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
@@ -1701,7 +1701,7 @@ class UIRoot extends Component {
             {showObjectInfo && (
               <ObjectInfoDialog
                 scene={this.props.scene}
-                object={this.state.objectInfo}
+                el={this.state.objectInfo}
                 objectDisplayString={this.state.objectDisplayString}
                 hubChannel={this.props.hubChannel}
                 onClose={() => {
@@ -1937,7 +1937,7 @@ class UIRoot extends Component {
                   }
                 }}
                 expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
-                onInspectObject={(o, s) => this.setState({ objectInfo: o, objectDisplayString: s })}
+                onInspectObject={(el, s) => this.setState({ objectInfo: el, objectDisplayString: s })}
               />
             ) : (
               <div />
