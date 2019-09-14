@@ -28,6 +28,14 @@ function mediaSort(el1, el2) {
   return mediaSortOrder(el1) - mediaSortOrder(el2);
 }
 
+const THUMBNAIL_TITLE = new Map([
+  [SORT_ORDER_VIDEO, "Video"],
+  [SORT_ORDER_IMAGE, "Image"],
+  [SORT_ORDER_PDF, "PDF"],
+  [SORT_ORDER_UNIDENTIFIED, "Unknown Media Type"],
+  [SORT_ORDER_MODEL, "Model"]
+]);
+
 const DISPLAY_IMAGE = new Map([
   [SORT_ORDER_VIDEO, faVideo],
   [SORT_ORDER_IMAGE, faImage],
@@ -110,6 +118,7 @@ export default class ObjectList extends Component {
   componentDidUpdate() {}
 
   domForEntity(el, i) {
+    const thumbnailTitle = THUMBNAIL_TITLE.get(mediaSortOrder(el));
     return (
       <div
         key={i}
@@ -128,7 +137,7 @@ export default class ObjectList extends Component {
           AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(el.object3D, 1.5);
         }}
       >
-        <div className={styles.icon}>
+        <div title={thumbnailTitle} className={styles.icon}>
           <FontAwesomeIcon icon={getDisplayImage(el)} />
         </div>
         <div className={classNames({ [styles.listItem]: true })}>
@@ -154,6 +163,7 @@ export default class ObjectList extends Component {
     return (
       <div>
         <div
+          title={"Media"}
           onClick={() => {
             this.props.onExpand(
               !this.props.expanded && this.state.filteredEntities.length > 0,
