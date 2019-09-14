@@ -3,6 +3,10 @@ import { generateHubName } from "../utils/name-generation";
 
 import Store from "../storage/store";
 
+export function isLocalClient() {
+  return process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER;
+}
+
 const resolverLink = document.createElement("a");
 export function getReticulumFetchUrl(path, absolute = false) {
   if (process.env.RETICULUM_SERVER) {
@@ -171,7 +175,7 @@ export async function createAndRedirectToNewHub(name, sceneId, replace) {
     }
   }
 
-  if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
+  if (isLocalClient()) {
     url = `/hub.html?hub_id=${hub.hub_id}`;
   }
 
