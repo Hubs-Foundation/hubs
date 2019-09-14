@@ -181,12 +181,12 @@ AFRAME.registerComponent("networked-drawing", {
       MOZ_hubs_components: { "networked-drawing-buffer": { buffer: this.networkBuffer } }
     };
 
-    const chunks = await new Promise((resolve, reject) => {
+    const chunks = await new Promise(resolve => {
       exporter.parseChunks(
         clonedMesh,
         resolve,
         e => {
-          new Error(`Error exporting scene. ${eventToMessage(e)}`);
+          new Error(`Error serializing drawing. ${e}`);
         },
         {
           mode: "glb",
@@ -204,7 +204,7 @@ AFRAME.registerComponent("networked-drawing", {
 
     const glb = await new Promise((resolve, reject) => {
       exporter.createGLBBlob(chunks, resolve, e => {
-        reject(new Error(`Error creating glb blob. ${eventToMessage(e)}`));
+        reject(new Error(`Error creating glb blob. ${e}`));
       });
     });
 
@@ -212,14 +212,7 @@ AFRAME.registerComponent("networked-drawing", {
       type: "model/gltf-binary"
     });
 
-    const { entity, orientation } = addMedia(
-      file,
-      "#interactable-media",
-      ObjectContentOrigins.FILE,
-      null,
-      false,
-      false
-    );
+    const { entity } = addMedia(file, "#interactable-media", ObjectContentOrigins.FILE, null, false, false);
 
     const min = new THREE.Vector3(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
     const max = new THREE.Vector3(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
@@ -227,7 +220,7 @@ AFRAME.registerComponent("networked-drawing", {
 
     const { start, count } = this.sharedBuffer.current.drawRange;
     const attribute = this.sharedBuffer.current.attributes.position;
-    for (let i = 0; i < count; i++) {
+    for (let i = start; i < count; i++) {
       temp.set(attribute.getX(i), attribute.getY(i), attribute.getZ(i));
       min.min(temp);
       max.max(temp);
@@ -250,8 +243,6 @@ AFRAME.registerComponent("networked-drawing", {
       }
 
       while (head != null && buffer.length >= 11) {
-        const pointCount = buffer[0];
-
         position.set(buffer[1], buffer[2], buffer[3]);
         direction.set(buffer[4], buffer[5], buffer[6]);
         this.radius = Math.round(direction.length() * 1000) / 1000; //radius is encoded as length of direction vector

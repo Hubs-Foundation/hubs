@@ -11,7 +11,7 @@ AFRAME.registerComponent("drawing-manager", {
   },
 
   createDrawing() {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       this.drawingEl = document.createElement("a-entity");
       this.drawingEl.setAttribute("networked", "template: #interactable-drawing");
       this.el.sceneEl.appendChild(this.drawingEl);
