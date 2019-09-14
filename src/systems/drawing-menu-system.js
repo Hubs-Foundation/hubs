@@ -146,6 +146,7 @@ export class DrawingMenuSystem {
         const isMine = hovered.components.networked.isMine();
         if (!isMine) {
           menu.querySelector(".undo-drawing").object3D.visible = false;
+          menu.querySelector(".serialize-drawing").object3D.visible = false;
           const deleteButton = menu.querySelector(".delete-drawing");
           deleteButton.object3D.position.y = 0.125;
           deleteButton.object3D.matrixNeedsUpdate = true;
