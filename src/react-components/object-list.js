@@ -91,29 +91,25 @@ export default class ObjectList extends Component {
       }
     });
     this.updateFilteredEntities = this.updateFilteredEntities.bind(this);
-    // TODO: This is too many events. Use a different method?
     this.observer = new MutationObserver(this.updateFilteredEntities);
     this.observer.observe(this.props.scene, { childList: true, attributes: true, subtree: true });
     this.updateFilteredEntities();
   }
 
   updateFilteredEntities() {
-    // Wait one frame for the entity to be removed from the scene.
-    setTimeout(() => {
-      const filteredEntities = Object.keys(NAF.entities.entities)
-        .filter(id => {
-          return NAF.entities.entities[id].components.networked.data.template === "#interactable-media";
-        })
-        .map(id => {
-          return NAF.entities.entities[id];
-        })
-        .sort(mediaSort);
-      if (this.state.filteredEntities.length !== filteredEntities.length) {
-        this.setState({
-          filteredEntities
-        });
-      }
-    }, 0);
+    const filteredEntities = Object.keys(NAF.entities.entities)
+      .filter(id => {
+        return NAF.entities.entities[id].components.networked.data.template === "#interactable-media";
+      })
+      .map(id => {
+        return NAF.entities.entities[id];
+      })
+      .sort(mediaSort);
+    if (this.state.filteredEntities.length !== filteredEntities.length) {
+      this.setState({
+        filteredEntities
+      });
+    }
   }
   componentDidUpdate() {}
 
