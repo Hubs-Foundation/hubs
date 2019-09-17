@@ -29,10 +29,12 @@ AFRAME.registerComponent("drawing-manager", {
     });
   },
 
-  destroyDrawing() {
-    this.drawingToPen.delete(this.drawing);
-    this.drawing = null;
-    this.drawingEl = null;
+  destroyDrawing(networkedDrawing) {
+    if (this.drawing === networkedDrawing) {
+      this.drawingToPen.delete(this.drawing);
+      this.drawing = null;
+      this.drawingEl = null;
+    }
   },
 
   getDrawing(pen) {

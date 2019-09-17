@@ -126,7 +126,7 @@ AFRAME.registerComponent("networked-drawing", {
     this.el.removeObject3D("mesh");
 
     const drawingManager = this.el.sceneEl.querySelector("#drawing-manager").components["drawing-manager"];
-    drawingManager.destroyDrawing();
+    drawingManager.destroyDrawing(this);
 
     AFRAME.scenes[0].systems["hubs-systems"].drawingMenuSystem.unregisterDrawingMenu(this.el);
   },
@@ -765,7 +765,7 @@ AFRAME.registerComponent("deserialize-drawing-button", {
       if (drawingManager.drawing) {
         drawingManager.drawing.serializeDrawing().then(() => {
           drawingManager.drawing.el.parentEl.removeChild(drawingManager.drawing.el);
-          drawingManager.destroyDrawing();
+          drawingManager.destroyDrawing(drawingManager.drawing);
 
           drawingManager.createDrawing().then(() => {
             drawingManager.drawing.deserializeDrawing(buffer);
