@@ -113,6 +113,7 @@ class InWorldChatBox extends Component {
           />
           {this.props.enableSpawning && (
             <button
+              title={"Create"}
               className={classNames([styles.messageEntrySpawn])}
               onClick={() => {
                 if (this.state.pendingMessage.length > 0) {
@@ -126,6 +127,7 @@ class InWorldChatBox extends Component {
           )}
           <button
             type="submit"
+            title={"Submit"}
             className={classNames([
               styles.messageEntryButton,
               styles.messageEntryButtonInRoom,
