@@ -257,8 +257,8 @@ export class CameraSystem {
     const vrMode = scene.is("vr-mode");
     const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
     this.snapshot.mask = camera.layers.mask;
-    camera.layers.set(CAMERA_LAYER_INSPECT);
     if (vrMode) {
+      camera.layers.set(CAMERA_LAYER_INSPECT); // Move this line out of the `if` to for "lower the lights" in 2D.
       this.snapshot.mask0 = camera.cameras[0].layers.mask;
       this.snapshot.mask1 = camera.cameras[1].layers.mask;
       camera.cameras[0].layers.set(CAMERA_LAYER_INSPECT);
