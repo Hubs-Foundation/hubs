@@ -74,5 +74,12 @@ AFRAME.registerComponent("pinnable", {
     }
 
     this.wasHeld = held;
+
+    this.transformObjectSystem = this.transformObjectSystem || AFRAME.scenes[0].systems["transform-selected-object"];
+    const transforming = this.transformObjectSystem.transforming && this.transformObjectSystem.target.el === this.el;
+    if (!transforming && this.wasTransforming) {
+      this._fireEventsAndAnimate(this.data, true);
+    }
+    this.wasTransforming = transforming;
   }
 });
