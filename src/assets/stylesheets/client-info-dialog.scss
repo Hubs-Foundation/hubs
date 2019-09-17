@@ -86,6 +86,11 @@
     width: 200px;
     display: flex;
     flex-direction: row;
+
+    @media (max-width: 801px) {
+      width: 100px;
+      margin-top: 4px;
+    }
   }
 
   button:disabled {

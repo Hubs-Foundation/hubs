@@ -150,6 +150,46 @@ body.vr-mode {
   }
 }
 
+:local(.object-list) {
+  @extend %unselectable;
+  text-align: right;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 132px;
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 1.3em;
+  background-color: white;
+  border-radius: 24px;
+  font-weight: bold;
+  padding: 8px 18px;
+  pointer-events: auto;
+  cursor: pointer;
+
+  @media(min-width: 501px) {
+    :local(.occupant-count) {
+      margin: 0px 8px;
+    }
+  }
+
+  @media(max-width: 500px) {
+    flex-direction: column;
+    padding: 8px 0px;
+    right: 16px;
+    top: 80px;
+    width: 52px;
+    :local(.occupant-count) {
+      margin: 0px 0px;
+    }
+    svg {
+      width: 26px !important;
+    }
+  }
+}
+
 :local(.presence-info) {
   @extend %unselectable;
   text-align: right;
@@ -170,13 +210,19 @@ body.vr-mode {
   cursor: pointer;
 
   @media(max-width: 500px) {
+    width: 52px;
     flex-direction: column;
-    padding: 8px 8px;
+    padding: 8px 0px;
+
+    svg {
+      width: 26px !important;
+    }
   }
 
   :local(.occupant-count) {
     margin: 0 12px;
   }
+
 }
 
 :local(.presence-info-selected) {
