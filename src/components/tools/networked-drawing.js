@@ -212,7 +212,7 @@ AFRAME.registerComponent("networked-drawing", {
       type: "model/gltf-binary"
     });
 
-    const { entity } = addMedia(file, "#interactable-media", ObjectContentOrigins.FILE, null, false, false);
+    const { entity } = addMedia(file, "#interactable-media", ObjectContentOrigins.FILE, "drawing", false, false);
 
     const min = new THREE.Vector3(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
     const max = new THREE.Vector3(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
