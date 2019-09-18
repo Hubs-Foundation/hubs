@@ -7,6 +7,7 @@ import { addSetsToBindings } from "./utils";
 
 const wasd_vec2 = "/var/mouse-and-keyboard/wasd_vec2";
 const keyboardCharacterAcceleration = "/var/mouse-and-keyboard/keyboardCharacterAcceleration";
+const dCharSpeed = "/var/mouse-and-keyboard/dCharSpeed";
 const arrows_vec2 = "/var/mouse-and-keyboard/arrows_vec2";
 const togglePenWithRMB = "/vars/mouse-and-keyboard/drop_pen_with_RMB";
 const togglePenWithEsc = "/vars/mouse-and-keyboard/drop_pen_with_esc";
@@ -67,6 +68,16 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: { value: keyboardCharacterAcceleration },
       dest: { value: paths.actions.characterAcceleration },
       xform: xforms.normalize_vec2
+    },
+    {
+      src: { value: paths.device.mouse.wheel },
+      dest: { value: dCharSpeed },
+      xform: xforms.scale(-0.3)
+    },
+    {
+      src: { value: dCharSpeed },
+      dest: { value: paths.actions.dCharSpeed },
+      xform: xforms.copy
     },
     {
       src: { value: paths.device.keyboard.key("shift") },
@@ -527,7 +538,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: {
         value: k("wheelWithShift")
       },
-      xform: xforms.copyIfTrue
+      xform: xforms.copyIfTrue,
+      priority: 1
     },
     {
       src: {
@@ -537,7 +549,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: {
         value: k("wheelWithoutShift")
       },
-      xform: xforms.copyIfFalse
+      xform: xforms.copyIfFalse,
+      priority: 1
     },
     {
       src: {
@@ -585,7 +598,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.mouse.wheel },
       dest: { value: paths.actions.cursor.right.mediaVolumeMod },
-      xform: xforms.scale(-0.3)
+      xform: xforms.scale(-0.3),
+      priority: 1
     }
   ],
   [sets.inputFocused]: [
@@ -626,7 +640,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.mouse.wheel },
       dest: { value: paths.actions.inspectZoom },
-      xform: xforms.scale(-5.0)
+      xform: xforms.scale(-5.0),
+      priority: 1
     },
     {
       src: {

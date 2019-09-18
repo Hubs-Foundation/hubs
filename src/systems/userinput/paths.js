@@ -11,6 +11,7 @@ paths.actions.logInteractionState = "/actions/logInteractionState";
 paths.actions.cameraDelta = "/actions/cameraDelta";
 paths.actions.lobbyCameraDelta = "/actions/lobbyCameraDelta";
 paths.actions.characterAcceleration = "/actions/characterAcceleration";
+paths.actions.dCharSpeed = "/actions/dCharSpeed";
 paths.actions.boost = "/actions/boost";
 paths.actions.startGazeTeleport = "/actions/startTeleport";
 paths.actions.stopGazeTeleport = "/actions/stopTeleport";
