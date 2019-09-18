@@ -86,21 +86,21 @@ export class DrawingMenuSystem {
             hovered.components.tags &&
             hovered.components.tags.data.singleActionButton
           ) {
-            if (hovered.classList.contains("undo-drawing") && this.buttonMap[hovered.object3D.uuid]) {
+            if (this.buttonMap[hovered.object3D.uuid]) {
               const networkedEntity = this.buttonMap[hovered.object3D.uuid];
-              networkedEntity.components["networked-drawing"].undoDraw();
-              this.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PEN_UNDO_DRAW);
-            } else if (hovered.classList.contains("delete-drawing") && this.buttonMap[hovered.object3D.uuid]) {
-              const networkedEntity = this.buttonMap[hovered.object3D.uuid];
-              NAF.utils.takeOwnership(networkedEntity);
-              this.sceneEl.removeChild(networkedEntity);
-            } else if (hovered.classList.contains("serialize-drawing") && this.buttonMap[hovered.object3D.uuid]) {
-              const networkedEntity = this.buttonMap[hovered.object3D.uuid];
-              networkedEntity.components["networked-drawing"].serializeDrawing().then(() => {
-                const networkedEntity = this.buttonMap[hovered.object3D.uuid];
+              if (hovered.classList.contains("undo-drawing")) {
+                networkedEntity.components["networked-drawing"].undoDraw();
+                this.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PEN_UNDO_DRAW);
+              } else if (hovered.classList.contains("delete-drawing")) {
                 NAF.utils.takeOwnership(networkedEntity);
                 this.sceneEl.removeChild(networkedEntity);
-              });
+              } else if (hovered.classList.contains("serialize-drawing")) {
+                networkedEntity.components["networked-drawing"].serializeDrawing().then(() => {
+                  const networkedEntity = this.buttonMap[hovered.object3D.uuid];
+                  NAF.utils.takeOwnership(networkedEntity);
+                  this.sceneEl.removeChild(networkedEntity);
+                });
+              }
             }
           }
         }

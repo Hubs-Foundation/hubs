@@ -41,7 +41,6 @@ AFRAME.registerComponent("drawing-manager", {
     return new Promise((resolve, reject) => {
       if (!this.drawingEl) {
         this.createDrawing().then(() => {
-          this.drawing = this.drawingEl.components["networked-drawing"];
           this.drawingToPen.set(this.drawing, pen);
           resolve(this.drawing);
         });
