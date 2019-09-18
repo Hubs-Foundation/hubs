@@ -1,8 +1,15 @@
+import { CAMERA_MODE_INSPECT } from "./camera-system";
+
 export class SingleActionButtonSystem {
   tick() {
     this.didInteractThisFrame = false;
     const interaction = AFRAME.scenes[0].systems.interaction;
     const userinput = AFRAME.scenes[0].systems.userinput;
+    if (AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
+      // TODO: Fix issue where button objects are "visible" but not on the inspect layer,
+      // which makes it so we can interact with them but cannot see them.
+      return;
+    }
     const hovered = interaction.state.rightRemote.hovered;
     if (
       hovered &&

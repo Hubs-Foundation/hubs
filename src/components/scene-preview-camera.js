@@ -1,5 +1,6 @@
 import { setMatrixWorld } from "../utils/three-utils";
 import { getCurrentStreamer } from "../utils/component-utils";
+import { CAMERA_MODE_SCENE_PREVIEW } from "../systems/camera-system";
 
 function getStreamerCamera() {
   const streamer = getCurrentStreamer();
@@ -45,6 +46,7 @@ AFRAME.registerComponent("scene-preview-camera", {
   },
 
   tick2: function() {
+    this.el.sceneEl.systems["hubs-systems"].cameraSystem.mode = CAMERA_MODE_SCENE_PREVIEW;
     const streamerCamera = getStreamerCamera();
     if (streamerCamera) {
       setMatrixWorld(this.el.object3D, streamerCamera.matrixWorld);

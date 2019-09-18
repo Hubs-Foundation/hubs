@@ -622,6 +622,31 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       ],
       dest: { value: paths.actions.stopInspecting },
       xform: xforms.any
+    },
+    {
+      src: { value: paths.device.mouse.wheel },
+      dest: { value: paths.actions.inspectZoom },
+      xform: xforms.scale(-5.0)
+    },
+    {
+      src: {
+        value: paths.device.mouse.buttonRight
+      },
+      dest: {
+        value: paths.noop
+      },
+      xform: xforms.noop,
+      priority: 101
+    },
+    {
+      src: {
+        value: paths.device.mouse.buttonRight
+      },
+      dest: {
+        value: paths.noop
+      },
+      xform: xforms.noop,
+      priority: 101
     }
   ]
 });
