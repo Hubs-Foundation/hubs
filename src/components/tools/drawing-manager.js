@@ -16,16 +16,15 @@ AFRAME.registerComponent("drawing-manager", {
       this.drawingEl.setAttribute("networked", "template: #interactable-drawing");
       this.el.sceneEl.appendChild(this.drawingEl);
 
-      this.drawingEl.addEventListener(
-        "componentinitialized",
-        e => {
-          if (e.detail.name == "networked-drawing") {
-            this.drawing = this.drawingEl.components["networked-drawing"];
-            resolve();
-          }
-        },
-        { once: true }
-      );
+      const handNetworkedDrawingInit = e => {
+        if (e.detail.name === "networked-drawing") {
+          this.drawing = this.drawingEl.components["networked-drawing"];
+          this.drawingEl.removeEventListener("componentinitialized", handNetworkedDrawingInit);
+          resolve();
+        }
+      };
+
+      this.drawingEl.addEventListener("componentinitialized", handNetworkedDrawingInit);
     });
   },
 

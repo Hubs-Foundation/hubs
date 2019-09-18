@@ -1,4 +1,5 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
+import { SOUND_PEN_UNDO_DRAW } from "./sound-effects-system";
 
 /**
  * Drawing Menu System
@@ -88,6 +89,7 @@ export class DrawingMenuSystem {
             if (hovered.classList.contains("undo-drawing") && this.buttonMap[hovered.object3D.uuid]) {
               const networkedEntity = this.buttonMap[hovered.object3D.uuid];
               networkedEntity.components["networked-drawing"].undoDraw();
+              this.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PEN_UNDO_DRAW);
             } else if (hovered.classList.contains("delete-drawing") && this.buttonMap[hovered.object3D.uuid]) {
               const networkedEntity = this.buttonMap[hovered.object3D.uuid];
               NAF.utils.takeOwnership(networkedEntity);
@@ -144,13 +146,9 @@ export class DrawingMenuSystem {
         this.lastIntersection.copy(intersectionPoint);
 
         const isMine = hovered.components.networked.isMine();
-        if (!isMine) {
-          menu.querySelector(".undo-drawing").object3D.visible = false;
-          menu.querySelector(".serialize-drawing").object3D.visible = false;
-          const deleteButton = menu.querySelector(".delete-drawing");
-          deleteButton.object3D.position.y = 0.125;
-          deleteButton.object3D.matrixNeedsUpdate = true;
-        }
+        menu.querySelector(".undo-drawing").object3D.visible = isMine;
+        menu.querySelector(".serialize-drawing").object3D.visible =
+          isMine && window.APP.hubChannel.can("spawn_and_move_media");
 
         const dist = cameraWorldPos.distanceTo(menu.object3D.position);
         const finalScale = this.getMenuScale(dist);

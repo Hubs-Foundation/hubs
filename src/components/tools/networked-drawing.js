@@ -10,8 +10,9 @@ import SharedBufferGeometryManager from "../../utils/sharedbuffergeometrymanager
 import MobileStandardMaterial from "../../materials/MobileStandardMaterial";
 import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
 import { cloneObject3D } from "../../utils/three-utils";
-import { addMedia } from "../../utils/media-utils";
+import { addMedia, addMeshScaleAnimation } from "../../utils/media-utils";
 import { ObjectContentOrigins } from "../../object-types";
+import { SOUND_PEN_START_DRAW } from "../../systems/sound-effects-system";
 
 const MSG_CONFIRM_CONNECT = 0;
 const MSG_BUFFER_DATA = 1;
@@ -738,6 +739,7 @@ AFRAME.registerComponent("networked-drawing-buffer", {
     const button = this._getDeserializeButton(this.el.parentEl);
     if (button) {
       button.object3D.visible = true;
+      button.components["deserialize-drawing-button"].networkedDrawingBuffer = this;
     }
   },
 
@@ -754,34 +756,46 @@ AFRAME.registerComponent("networked-drawing-buffer", {
 
 AFRAME.registerComponent("deserialize-drawing-button", {
   init() {
+    const drawingManager = this.el.sceneEl.querySelector("#drawing-manager").components["drawing-manager"];
+    this.networkedDrawingBuffer = null;
+
     this.onClick = () => {
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) return;
 
-      const drawingManager = this.el.sceneEl.querySelector("#drawing-manager").components["drawing-manager"];
-      const buffer = this.targetEl.querySelector("[networked-drawing-buffer]").components["networked-drawing-buffer"]
-        .data.buffer;
+      const finishDrawing = () => {
+        drawingManager.drawing.deserializeDrawing(this.networkedDrawingBuffer.data.buffer);
+        addMeshScaleAnimation(drawingManager.drawing.el.object3DMap.mesh, { x: 0.001, y: 0.001, z: 0.001 });
+
+        if (this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned) {
+          this.targetEl.setAttribute("pinnable", "pinned", false);
+        }
+        this.targetEl.parentEl.removeChild(this.targetEl);
+        this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PEN_START_DRAW);
+      };
 
       //serialize any existing drawing and clear the drawing.
       if (drawingManager.drawing) {
         drawingManager.drawing.serializeDrawing().then(() => {
           drawingManager.drawing.el.parentEl.removeChild(drawingManager.drawing.el);
-          drawingManager.destroyDrawing(drawingManager.drawing);
+          drawingManager.destroyDrawing();
 
-          drawingManager.createDrawing().then(() => {
-            drawingManager.drawing.deserializeDrawing(buffer);
-            this.targetEl.parentEl.removeChild(this.targetEl);
-          });
+          drawingManager.createDrawing().then(finishDrawing);
         });
       } else {
-        drawingManager.createDrawing().then(() => {
-          drawingManager.drawing.deserializeDrawing(buffer);
-          this.targetEl.parentEl.removeChild(this.targetEl);
-        });
+        drawingManager.createDrawing().then(finishDrawing);
       }
     };
 
+    this._updateUI = this._updateUI.bind(this);
+    this._updateUIOnStateChange = this._updateUIOnStateChange.bind(this);
+    this.el.sceneEl.addEventListener("stateadded", this._updateUIOnStateChange);
+    this.el.sceneEl.addEventListener("stateremoved", this._updateUIOnStateChange);
+
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.targetEl = networkedEl;
+      this._updateUI();
+      this.targetEl.addEventListener("pinned", this._updateUI);
+      this.targetEl.addEventListener("unpinned", this._updateUI);
     });
   },
 
@@ -791,5 +805,30 @@ AFRAME.registerComponent("deserialize-drawing-button", {
 
   pause() {
     this.el.object3D.removeEventListener("interact", this.onClick);
+  },
+
+  remove() {
+    this.el.sceneEl.removeEventListener("stateadded", this._updateUIOnStateChange);
+    this.el.sceneEl.removeEventListener("stateremoved", this._updateUIOnStateChange);
+
+    if (this.targetEl) {
+      this.targetEl.removeEventListener("pinned", this._updateUI);
+      this.targetEl.removeEventListener("unpinned", this._updateUI);
+    }
+  },
+
+  _updateUIOnStateChange(e) {
+    if (e.detail !== "frozen") return;
+    this._updateUI();
+  },
+
+  _updateUI() {
+    if (this.networkedDrawingBuffer) {
+      const isPinned = this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned;
+      const canPin = window.APP.hubChannel.can("pin_objects") && window.APP.hubChannel.signedIn;
+      this.el.object3D.visible = (!isPinned || canPin) && window.APP.hubChannel.can("spawn_drawing");
+    } else {
+      this.el.object3D.visible = false;
+    }
   }
 });
