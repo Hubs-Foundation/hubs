@@ -179,11 +179,10 @@ AFRAME.registerComponent("character-controller", {
       this.accelerationInput.set(0, 0, 0);
 
       const boost = userinput.get(paths.actions.boost) ? 2 : 1;
-      const slowmo = userinput.get(paths.actions.slowmo) ? 0.5 : 1;
       move.makeTranslation(
-        this.velocity.x * distance * boost * slowmo * this.charSpeed,
-        this.velocity.y * distance * boost * slowmo * this.charSpeed,
-        this.velocity.z * distance * boost * slowmo * this.charSpeed
+        this.velocity.x * distance * boost * this.charSpeed,
+        this.velocity.y * distance * boost * this.charSpeed,
+        this.velocity.z * distance * boost * this.charSpeed
       );
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 
