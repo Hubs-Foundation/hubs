@@ -105,7 +105,13 @@ export default class ObjectList extends Component {
   updateFilteredEntities() {
     const filteredEntities = Object.keys(NAF.entities.entities)
       .filter(id => {
-        return NAF.entities.entities[id].components.networked.data.template === "#interactable-media";
+        return (
+          NAF.entities.entities[id] &&
+          NAF.entities.entities[id].components &&
+          NAF.entities.entities[id].components.networked &&
+          NAF.entities.entities[id].components.networked.data &&
+          NAF.entities.entities[id].components.networked.data.template === "#interactable-media"
+        );
       })
       .map(id => {
         return NAF.entities.entities[id];
