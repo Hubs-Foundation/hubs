@@ -65,7 +65,16 @@ function getDisplayString(el) {
     }
   }
 
-  return `${lessHost} ... ${resourceName.substr(0, 30)}`;
+  const firstPart =
+    url.indexOf("poly.google") !== -1
+      ? "Google Poly"
+      : url.indexOf("sketchfab.com") !== -1
+        ? "Sketchfab"
+        : url.indexOf("youtube.com") !== -1
+          ? "YouTube"
+          : lessHost;
+
+  return `${firstPart} ... ${resourceName.substr(0, 4)}`;
 }
 
 export default class ObjectList extends Component {
