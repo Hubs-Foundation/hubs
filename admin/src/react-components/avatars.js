@@ -22,8 +22,8 @@ import { withStyles } from "@material-ui/core/styles";
 // Quite ugly but simplest way to have AvatarPreview work is to import aframe.
 // We can technically untangle the dependencies for this, but doesn't seem worth it for admin.
 import "aframe";
-import AvatarPreview from "../avatar-preview";
-import { getReticulumFetchUrl } from "../../utils/phoenix-utils";
+//import AvatarPreview from "./avatar-preview";
+import { getReticulumFetchUrl } from "hubs/src/utils/phoenix-utils";
 
 const AvatarFilter = props => (
   <Filter {...props}>
@@ -53,10 +53,11 @@ const styles = {
 };
 
 const Preview = withStyles(styles)(({ record, classes, source = "avatar_sid" }) => (
-  <AvatarPreview
-    className={classes.preview}
-    avatarGltfUrl={getReticulumFetchUrl(`/api/v1/avatars/${record[source]}/avatar.gltf?v=${record.updated_at}`)}
-  />
+  <p>WIP</p>
+//  <AvatarPreview
+//    className={classes.preview}
+//    avatarGltfUrl={getReticulumFetchUrl(`/api/v1/avatars/${record[source]}/avatar.gltf?v=${record.updated_at}`)}
+//  />
 ));
 
 const rowStyle = record => ({

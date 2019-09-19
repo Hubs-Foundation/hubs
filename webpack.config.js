@@ -228,12 +228,6 @@ module.exports = (env, argv) => ({
   optimization: {
     splitChunks: {
       cacheGroups: {
-        admindeps: {
-          test: /[\\/]node_modules[\\/](@material-ui|material-ui|jss-|ra-|react-admin|react-autosuggest|react-jss|react-redux|react-router-redux|react-themable|redux|redux-|theming)/,
-          priority: 150,
-          name: "admindeps",
-          chunks: "all"
-        },
         vendors: {
           test: matchRegex({
             include: /([\\/]node_modules[\\/]|[\\/]vendor[\\/])/,
@@ -324,11 +318,6 @@ module.exports = (env, argv) => ({
       template: path.join(__dirname, "src", "whats-new.html"),
       chunks: ["vendor", "whats-new"],
       inject: "head"
-    }),
-    new HTMLWebpackPlugin({
-      filename: "admin.html",
-      template: path.join(__dirname, "src", "admin.html"),
-      chunks: ["vendor", "engine", "admindeps", "admin"]
     }),
     new CopyWebpackPlugin([
       {

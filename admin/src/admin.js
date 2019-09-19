@@ -1,29 +1,25 @@
-import "./utils/debug-log";
 import "./assets/stylesheets/admin.scss";
-
-import "./utils/logging";
 
 import ReactDOM from "react-dom";
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { connectToReticulum } from "./utils/phoenix-utils";
-import { App } from "./App";
+import { connectToReticulum } from "hubs/src/utils/phoenix-utils";
 import { Admin, Resource, ListGuesser } from "react-admin";
 //import { EditGuesser, CreateGuesser } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
-import { SceneList, SceneEdit } from "./react-components/admin/scenes";
-import { SceneListingList, SceneListingEdit } from "./react-components/admin/scene-listings";
-import { AvatarList, AvatarEdit } from "./react-components/admin/avatars";
-import { AvatarListingList, AvatarListingEdit } from "./react-components/admin/avatar-listings";
-import { FeaturedSceneListingList, FeaturedSceneListingEdit } from "./react-components/admin/featured-scene-listings";
-import { PendingSceneList } from "./react-components/admin/pending-scenes";
-import { AccountList, AccountEdit } from "./react-components/admin/accounts";
-import { ProjectList, ProjectShow } from "./react-components/admin/projects";
+import { SceneList, SceneEdit } from "./react-components/scenes";
+import { SceneListingList, SceneListingEdit } from "./react-components/scene-listings";
+import { AvatarList, AvatarEdit } from "./react-components/avatars";
+import { AvatarListingList, AvatarListingEdit } from "./react-components/avatar-listings";
+import { FeaturedSceneListingList, FeaturedSceneListingEdit } from "./react-components/featured-scene-listings";
+import { PendingSceneList } from "./react-components/pending-scenes";
+import { AccountList, AccountEdit } from "./react-components/accounts";
+import { ProjectList, ProjectShow } from "./react-components/projects";
+import Store from "hubs/src/storage/store";
 
-window.APP = new App();
-const store = window.APP.store;
+const store = new Store();
 
-import registerTelemetry from "./telemetry";
+import registerTelemetry from "hubs/src/telemetry";
 registerTelemetry("/admin", "Hubs Admin");
 
 class AdminUI extends Component {
@@ -75,14 +71,14 @@ const mountUI = async retPhxChannel => {
   // If POSTGREST_SERVER is set, we're talking directly to PostgREST over a tunnel, and will be managing the
   // perms token ourselves. If we're not, we talk to reticulum and presume it will handle perms token forwarding.
   if (process.env.POSTGREST_SERVER) {
-    dataProvider = postgrestClient("//" + process.env.POSTGREST_SERVER);
+    dataProvider = postgrestClient(process.env.POSTGREST_SERVER);
     authProvider = postgrestAuthenticatior.createAuthProvider(retPhxChannel);
     await postgrestAuthenticatior.refreshPermsToken();
 
     // Refresh perms regularly
     setInterval(() => postgrestAuthenticatior.refreshPermsToken(), 60000);
   } else {
-    dataProvider = postgrestClient("//" + process.env.RETICULUM_SERVER + "/api/postgrest");
+    dataProvider = postgrestClient(process.env.RETICULUM_SERVER + "/api/postgrest");
     authProvider = postgrestAuthenticatior.createAuthProvider();
     postgrestAuthenticatior.setAuthToken(store.state.credentials.token);
   }

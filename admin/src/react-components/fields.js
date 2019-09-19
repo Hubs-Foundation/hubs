@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import LaunchIcon from "@material-ui/icons/Launch";
-import { getReticulumFetchUrl } from "./../../utils/phoenix-utils";
+import { getReticulumFetchUrl } from "hubs/src/utils/phoenix-utils";
 import { ReferenceField } from "react-admin";
 
 const styles = {
