@@ -9,6 +9,7 @@ export default class ObjectInfoDialog extends Component {
     scene: PropTypes.object,
     el: PropTypes.object,
     objectDisplayString: PropTypes.string,
+    src: PropTypes.string,
     onClose: PropTypes.func,
     hubChannel: PropTypes.object
   };
@@ -69,7 +70,9 @@ export default class ObjectInfoDialog extends Component {
     return (
       <DialogContainer noOverlay={true} wide={true} {...this.props}>
         <div className={styles.roomInfo}>
-          <p>{this.props.objectDisplayString}</p>
+          <a href={this.props.objectDisplayString} target="_blank" rel="noopener noreferrer">
+            {this.props.objectDisplayString}
+          </a>
           <div className={styles.clientActionButtons}>
             {this.props.scene.is("entered") &&
               !this.state.pinned &&

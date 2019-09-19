@@ -215,6 +215,7 @@ class UIRoot extends Component {
 
     objectInfo: null,
     objectDisplayString: "",
+    objectSrc: "",
     isObjectListExpanded: false,
     isPresenceListExpanded: false
   };
@@ -1703,6 +1704,7 @@ class UIRoot extends Component {
                 scene={this.props.scene}
                 el={this.state.objectInfo}
                 objectDisplayString={this.state.objectDisplayString}
+                src={this.state.objectSrc}
                 hubChannel={this.props.hubChannel}
                 onClose={() => {
                   if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
@@ -1937,7 +1939,7 @@ class UIRoot extends Component {
                   }
                 }}
                 expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
-                onInspectObject={(el, s) => this.setState({ objectInfo: el, objectDisplayString: s })}
+                onInspectObject={(el, s) => this.setState({ objectInfo: el, objectDisplayString: s, objectSrc: s })}
               />
             ) : (
               <div />

@@ -35,7 +35,7 @@ const calculateViewingDistance = (function() {
     const l2 = Math.abs((halfXExtents * margin) / Math.tan(halfHorFOV));
     const l3 = Math.abs(box.max.z - center.z) + Math.max(l1, l2);
     const l = object.el.sceneEl.is("vr-mode") ? Math.max(0.25, l3) : l3;
-    return l;
+    return l || 1.25;
   };
 })();
 
@@ -257,8 +257,8 @@ export class CameraSystem {
     const vrMode = scene.is("vr-mode");
     const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
     this.snapshot.mask = camera.layers.mask;
+    camera.layers.set(CAMERA_LAYER_INSPECT);
     if (vrMode) {
-      camera.layers.set(CAMERA_LAYER_INSPECT); // Move this line out of the `if` to for "lower the lights" in 2D.
       this.snapshot.mask0 = camera.cameras[0].layers.mask;
       this.snapshot.mask1 = camera.cameras[1].layers.mask;
       camera.cameras[0].layers.set(CAMERA_LAYER_INSPECT);

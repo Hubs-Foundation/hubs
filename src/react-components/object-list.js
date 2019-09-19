@@ -43,9 +43,6 @@ const DISPLAY_IMAGE = new Map([
   [SORT_ORDER_UNIDENTIFIED, faQuestion],
   [SORT_ORDER_MODEL, faBox]
 ]);
-function getDisplayImage(el) {
-  return DISPLAY_IMAGE.get(mediaSortOrder(el));
-}
 
 function getDisplayString(el) {
   const url = el.components["media-loader"].data.src;
@@ -114,7 +111,6 @@ export default class ObjectList extends Component {
   componentDidUpdate() {}
 
   domForEntity(el, i) {
-    const thumbnailTitle = THUMBNAIL_TITLE.get(mediaSortOrder(el));
     return (
       <div
         key={i}
@@ -133,8 +129,8 @@ export default class ObjectList extends Component {
           AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(el.object3D, 1.5, true);
         }}
       >
-        <div title={thumbnailTitle} className={styles.icon}>
-          <FontAwesomeIcon icon={getDisplayImage(el)} />
+        <div title={THUMBNAIL_TITLE.get(mediaSortOrder(el))} className={styles.icon}>
+          <FontAwesomeIcon icon={DISPLAY_IMAGE.get(mediaSortOrder(el))} />
         </div>
         <div className={classNames({ [styles.listItem]: true })}>
           <div className={styles.presence}>
