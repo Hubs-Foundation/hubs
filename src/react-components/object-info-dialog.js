@@ -44,6 +44,16 @@ export default class ObjectInfoDialog extends Component {
     this.updatePinnedState();
   }
 
+  toggleLights() {
+    const cameraSystem = this.props.scene.systems["hubs-systems"].cameraSystem;
+    cameraSystem.enableLights = !cameraSystem.enableLights;
+    if (cameraSystem.enableLights) {
+      cameraSystem.showEverythingAsNormal();
+    } else {
+      cameraSystem.hideEverythingButThisObject(this.props.el.object3D);
+    }
+  }
+
   delete() {
     const targetEl = this.props.el;
 
@@ -74,6 +84,9 @@ export default class ObjectInfoDialog extends Component {
             {this.props.objectDisplayString}
           </a>
           <div className={styles.clientActionButtons}>
+            <button onClick={this.toggleLights.bind(this)}>
+              <FormattedMessage id={`object-info.toggle-lights`} />
+            </button>
             {this.props.scene.is("entered") &&
               !this.state.pinned &&
               this.props.hubChannel &&

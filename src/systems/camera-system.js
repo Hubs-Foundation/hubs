@@ -184,6 +184,7 @@ function getAudio(o) {
 const FALLOFF = 0.9;
 export class CameraSystem {
   constructor(batchManagerSystem) {
+    this.enableLights = false;
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
     this.inspectZoom = 0;
@@ -241,28 +242,8 @@ export class CameraSystem {
     this.mode = CAMERA_MODE_INSPECT;
     this.inspected = o;
 
-    this.inspectedMeshesFromBatch.length = 0;
-    const batch = getBatch(o, this.batchManagerSystem);
-    (batch || o).traverse(enableInspectLayer);
-    if (batch) {
-      for (let instanceId = 0; instanceId < batch.ubo.meshes.length; instanceId++) {
-        const mesh = batch.ubo.meshes[instanceId];
-        if (!mesh) continue;
-        if (inParentHierarchyOf(this.inspected, mesh)) {
-          this.inspectedMeshesFromBatch.push(mesh);
-        }
-      }
-    }
-
-    const vrMode = scene.is("vr-mode");
-    const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
-    this.snapshot.mask = camera.layers.mask;
-    camera.layers.set(CAMERA_LAYER_INSPECT);
-    if (vrMode) {
-      this.snapshot.mask0 = camera.cameras[0].layers.mask;
-      this.snapshot.mask1 = camera.cameras[1].layers.mask;
-      camera.cameras[0].layers.set(CAMERA_LAYER_INSPECT);
-      camera.cameras[1].layers.set(CAMERA_LAYER_INSPECT);
+    if (!this.enableLights) {
+      this.hideEverythingButThisObject(o);
     }
 
     this.viewingCamera.object3D.updateMatrices();
@@ -293,19 +274,8 @@ export class CameraSystem {
       scene.classList.remove("hand-cursor");
       scene.classList.add("no-cursor");
     }
-    this.inspectedMeshesFromBatch.length = 0;
-    this.inspectedMeshesFromBatch = [];
-    if (this.inspected) {
-      (getBatch(this.inspected, this.batchManagerSystem) || this.inspected).traverse(disableInspectLayer);
-    }
+    this.showEverythingAsNormal();
     this.inspected = null;
-    const vrMode = scene.is("vr-mode");
-    const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
-    camera.layers.mask = this.snapshot.mask;
-    if (vrMode) {
-      camera.cameras[0].layers.mask = this.snapshot.mask0;
-      camera.cameras[1].layers.mask = this.snapshot.mask1;
-    }
     if (this.snapshot.audio) {
       setMatrixWorld(this.snapshot.audio, this.snapshot.audioTransform);
       this.snapshot.audio = null;
@@ -317,6 +287,49 @@ export class CameraSystem {
     }
     this.snapshot.mode = null;
     this.tick(AFRAME.scenes[0]);
+  }
+
+  hideEverythingButThisObject(o) {
+    this.inspectedMeshesFromBatch.length = 0;
+    const batch = getBatch(o, this.batchManagerSystem);
+    (batch || o).traverse(enableInspectLayer);
+    if (batch) {
+      for (let instanceId = 0; instanceId < batch.ubo.meshes.length; instanceId++) {
+        const mesh = batch.ubo.meshes[instanceId];
+        if (!mesh) continue;
+        if (inParentHierarchyOf(this.inspected, mesh)) {
+          this.inspectedMeshesFromBatch.push(mesh);
+        }
+      }
+    }
+
+    const scene = AFRAME.scenes[0];
+    const vrMode = scene.is("vr-mode");
+    const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
+    this.snapshot.mask = camera.layers.mask;
+    camera.layers.set(CAMERA_LAYER_INSPECT);
+    if (vrMode) {
+      this.snapshot.mask0 = camera.cameras[0].layers.mask;
+      this.snapshot.mask1 = camera.cameras[1].layers.mask;
+      camera.cameras[0].layers.set(CAMERA_LAYER_INSPECT);
+      camera.cameras[1].layers.set(CAMERA_LAYER_INSPECT);
+    }
+  }
+
+  showEverythingAsNormal() {
+    this.inspectedMeshesFromBatch.length = 0;
+    this.inspectedMeshesFromBatch = [];
+    if (this.inspected) {
+      (getBatch(this.inspected, this.batchManagerSystem) || this.inspected).traverse(disableInspectLayer);
+    }
+    const scene = AFRAME.scenes[0];
+    const vrMode = scene.is("vr-mode");
+    const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
+    camera.layers.mask = this.snapshot.mask;
+    if (vrMode) {
+      camera.cameras[0].layers.mask = this.snapshot.mask0;
+      camera.cameras[1].layers.mask = this.snapshot.mask1;
+    }
   }
 
   tick = (function() {
