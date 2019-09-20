@@ -15,7 +15,8 @@ export default class ObjectInfoDialog extends Component {
   };
 
   state = {
-    pinned: false
+    pinned: false,
+    enableLights: false
   };
 
   componentDidMount() {
@@ -24,6 +25,8 @@ export default class ObjectInfoDialog extends Component {
     this.unpin = this.unpin.bind(this);
     this.props.scene.addEventListener("uninspect", this.props.onClose);
     this.updatePinnedState();
+    const cameraSystem = this.props.scene.systems["hubs-systems"].cameraSystem;
+    this.setState({ enableLights: cameraSystem.enableLights });
   }
 
   updatePinnedState() {
@@ -47,6 +50,7 @@ export default class ObjectInfoDialog extends Component {
   toggleLights() {
     const cameraSystem = this.props.scene.systems["hubs-systems"].cameraSystem;
     cameraSystem.enableLights = !cameraSystem.enableLights;
+    this.setState({ enableLights: cameraSystem.enableLights });
     if (cameraSystem.enableLights) {
       cameraSystem.showEverythingAsNormal();
     } else {
@@ -85,7 +89,7 @@ export default class ObjectInfoDialog extends Component {
           </a>
           <div className={styles.clientActionButtons}>
             <button onClick={this.toggleLights.bind(this)}>
-              <FormattedMessage id={`object-info.toggle-lights`} />
+              <FormattedMessage id={`object-info.${this.state.enableLights ? "lower" : "raise"}-lights`} />
             </button>
             {this.props.scene.is("entered") &&
               !this.state.pinned &&
