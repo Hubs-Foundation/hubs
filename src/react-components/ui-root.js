@@ -79,7 +79,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import qsTruthy from "../utils/qs_truthy";
 import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
-const enableObjectList = qsTruthy("ol");
 
 addLocaleData([...en]);
 
@@ -215,6 +214,7 @@ class UIRoot extends Component {
 
     objectInfo: null,
     objectDisplayString: "",
+    objectSrc: "",
     isObjectListExpanded: false,
     isPresenceListExpanded: false
   };
@@ -1703,6 +1703,7 @@ class UIRoot extends Component {
                 scene={this.props.scene}
                 el={this.state.objectInfo}
                 objectDisplayString={this.state.objectDisplayString}
+                src={this.state.objectSrc}
                 hubChannel={this.props.hubChannel}
                 onClose={() => {
                   if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
@@ -1919,29 +1920,25 @@ class UIRoot extends Component {
             )}
             {streamingTip}
 
-            {enableObjectList ? (
-              <ObjectList
-                scene={this.props.scene}
-                onExpand={(expand, uninspect) => {
-                  if (expand) {
-                    this.setState({ isPresenceListExpanded: false, isObjectListExpanded: expand });
-                  } else {
-                    this.setState({ isObjectListExpanded: expand });
-                  }
+            <ObjectList
+              scene={this.props.scene}
+              onExpand={(expand, uninspect) => {
+                if (expand) {
+                  this.setState({ isPresenceListExpanded: false, isObjectListExpanded: expand });
+                } else {
+                  this.setState({ isObjectListExpanded: expand });
+                }
 
-                  if (uninspect) {
-                    this.setState({ objectInfo: null });
-                    if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
-                      this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
-                    }
+                if (uninspect) {
+                  this.setState({ objectInfo: null });
+                  if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
+                    this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
                   }
-                }}
-                expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
-                onInspectObject={(el, s) => this.setState({ objectInfo: el, objectDisplayString: s })}
-              />
-            ) : (
-              <div />
-            )}
+                }
+              }}
+              expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
+              onInspectObject={(el, s) => this.setState({ objectInfo: el, objectDisplayString: s, objectSrc: s })}
+            />
 
             <PresenceList
               history={this.props.history}

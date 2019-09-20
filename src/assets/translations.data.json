@@ -356,6 +356,8 @@
     "client-info.remove-owner": "Demote",
     "object-info.delete-button": "Delete",
     "object-info.pin-button": "Pin",
+    "object-info.raise-lights": "Show Background",
+    "object-info.lower-lights": "Hide Background",
     "object-info.unpin-button": "Unpin",
     "avatar-landing.select": "Select",
     "avatar-landing.selected": "This is your current avatar",

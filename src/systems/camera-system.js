@@ -31,11 +31,11 @@ const calculateViewingDistance = (function() {
     const halfHorFOV =
       Math.atan(Math.tan(halfVertFOV) * camera.el.sceneEl.camera.aspect) * (object.el.sceneEl.is("vr-mode") ? 0.5 : 1);
     const margin = 1.05;
-    const l1 = Math.abs((halfYExtents * margin) / Math.tan(halfVertFOV));
-    const l2 = Math.abs((halfXExtents * margin) / Math.tan(halfHorFOV));
-    const l3 = Math.abs(box.max.z - center.z) + Math.max(l1, l2);
-    const l = object.el.sceneEl.is("vr-mode") ? Math.max(0.25, l3) : l3;
-    return l;
+    const length1 = Math.abs((halfYExtents * margin) / Math.tan(halfVertFOV));
+    const length2 = Math.abs((halfXExtents * margin) / Math.tan(halfHorFOV));
+    const length3 = Math.abs(box.max.z - center.z) + Math.max(length1, length2);
+    const length = object.el.sceneEl.is("vr-mode") ? Math.max(0.25, length3) : length3;
+    return length || 1.25;
   };
 })();
 
@@ -184,6 +184,7 @@ function getAudio(o) {
 const FALLOFF = 0.9;
 export class CameraSystem {
   constructor(batchManagerSystem) {
+    this.enableLights = false;
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
     this.inspectZoom = 0;
@@ -241,28 +242,8 @@ export class CameraSystem {
     this.mode = CAMERA_MODE_INSPECT;
     this.inspected = o;
 
-    this.inspectedMeshesFromBatch.length = 0;
-    const batch = getBatch(o, this.batchManagerSystem);
-    (batch || o).traverse(enableInspectLayer);
-    if (batch) {
-      for (let instanceId = 0; instanceId < batch.ubo.meshes.length; instanceId++) {
-        const mesh = batch.ubo.meshes[instanceId];
-        if (!mesh) continue;
-        if (inParentHierarchyOf(this.inspected, mesh)) {
-          this.inspectedMeshesFromBatch.push(mesh);
-        }
-      }
-    }
-
-    const vrMode = scene.is("vr-mode");
-    const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
-    this.snapshot.mask = camera.layers.mask;
-    if (vrMode) {
-      camera.layers.set(CAMERA_LAYER_INSPECT); // Move this line out of the `if` to for "lower the lights" in 2D.
-      this.snapshot.mask0 = camera.cameras[0].layers.mask;
-      this.snapshot.mask1 = camera.cameras[1].layers.mask;
-      camera.cameras[0].layers.set(CAMERA_LAYER_INSPECT);
-      camera.cameras[1].layers.set(CAMERA_LAYER_INSPECT);
+    if (!this.enableLights) {
+      this.hideEverythingButThisObject(o);
     }
 
     this.viewingCamera.object3D.updateMatrices();
@@ -293,19 +274,8 @@ export class CameraSystem {
       scene.classList.remove("hand-cursor");
       scene.classList.add("no-cursor");
     }
-    this.inspectedMeshesFromBatch.length = 0;
-    this.inspectedMeshesFromBatch = [];
-    if (this.inspected) {
-      (getBatch(this.inspected, this.batchManagerSystem) || this.inspected).traverse(disableInspectLayer);
-    }
+    this.showEverythingAsNormal();
     this.inspected = null;
-    const vrMode = scene.is("vr-mode");
-    const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
-    camera.layers.mask = this.snapshot.mask;
-    if (vrMode) {
-      camera.cameras[0].layers.mask = this.snapshot.mask0;
-      camera.cameras[1].layers.mask = this.snapshot.mask1;
-    }
     if (this.snapshot.audio) {
       setMatrixWorld(this.snapshot.audio, this.snapshot.audioTransform);
       this.snapshot.audio = null;
@@ -317,6 +287,49 @@ export class CameraSystem {
     }
     this.snapshot.mode = null;
     this.tick(AFRAME.scenes[0]);
+  }
+
+  hideEverythingButThisObject(o) {
+    this.inspectedMeshesFromBatch.length = 0;
+    const batch = getBatch(o, this.batchManagerSystem);
+    (batch || o).traverse(enableInspectLayer);
+    if (batch) {
+      for (let instanceId = 0; instanceId < batch.ubo.meshes.length; instanceId++) {
+        const mesh = batch.ubo.meshes[instanceId];
+        if (!mesh) continue;
+        if (inParentHierarchyOf(this.inspected, mesh)) {
+          this.inspectedMeshesFromBatch.push(mesh);
+        }
+      }
+    }
+
+    const scene = AFRAME.scenes[0];
+    const vrMode = scene.is("vr-mode");
+    const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
+    this.snapshot.mask = camera.layers.mask;
+    camera.layers.set(CAMERA_LAYER_INSPECT);
+    if (vrMode) {
+      this.snapshot.mask0 = camera.cameras[0].layers.mask;
+      this.snapshot.mask1 = camera.cameras[1].layers.mask;
+      camera.cameras[0].layers.set(CAMERA_LAYER_INSPECT);
+      camera.cameras[1].layers.set(CAMERA_LAYER_INSPECT);
+    }
+  }
+
+  showEverythingAsNormal() {
+    this.inspectedMeshesFromBatch.length = 0;
+    this.inspectedMeshesFromBatch = [];
+    if (this.inspected) {
+      (getBatch(this.inspected, this.batchManagerSystem) || this.inspected).traverse(disableInspectLayer);
+    }
+    const scene = AFRAME.scenes[0];
+    const vrMode = scene.is("vr-mode");
+    const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
+    camera.layers.mask = this.snapshot.mask;
+    if (vrMode) {
+      camera.cameras[0].layers.mask = this.snapshot.mask0;
+      camera.cameras[1].layers.mask = this.snapshot.mask1;
+    }
   }
 
   tick = (function() {

@@ -482,7 +482,7 @@ AFRAME.registerComponent("media-video", {
     }
 
     // Only update playback position for videos you don't own
-    if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
+    if (this.video && (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl)))) {
       if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
         this.tryUpdateVideoPlaybackState(this.data.videoPaused, this.data.time);
       } else {
@@ -645,7 +645,7 @@ AFRAME.registerComponent("media-video", {
 
     this.updatePlaybackState(true);
 
-    if (this.video.muted) {
+    if (this.video && this.video.muted) {
       this.videoMutedAt = performance.now();
     }
 

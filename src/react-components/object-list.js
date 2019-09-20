@@ -43,9 +43,6 @@ const DISPLAY_IMAGE = new Map([
   [SORT_ORDER_UNIDENTIFIED, faQuestion],
   [SORT_ORDER_MODEL, faBox]
 ]);
-function getDisplayImage(el) {
-  return DISPLAY_IMAGE.get(mediaSortOrder(el));
-}
 
 function getDisplayString(el) {
   const url = el.components["media-loader"].data.src;
@@ -68,7 +65,16 @@ function getDisplayString(el) {
     }
   }
 
-  return `${lessHost} ... ${resourceName.substr(0, 30)}`;
+  const firstPart =
+    url.indexOf("poly.google") !== -1
+      ? "Google Poly"
+      : url.indexOf("sketchfab.com") !== -1
+        ? "Sketchfab"
+        : url.indexOf("youtube.com") !== -1
+          ? "YouTube"
+          : lessHost;
+
+  return `${firstPart} ... ${resourceName.substr(0, 4)}`;
 }
 
 export default class ObjectList extends Component {
@@ -99,7 +105,13 @@ export default class ObjectList extends Component {
   updateFilteredEntities() {
     const filteredEntities = Object.keys(NAF.entities.entities)
       .filter(id => {
-        return NAF.entities.entities[id].components.networked.data.template === "#interactable-media";
+        return (
+          NAF.entities.entities[id] &&
+          NAF.entities.entities[id].components &&
+          NAF.entities.entities[id].components.networked &&
+          NAF.entities.entities[id].components.networked.data &&
+          NAF.entities.entities[id].components.networked.data.template === "#interactable-media"
+        );
       })
       .map(id => {
         return NAF.entities.entities[id];
@@ -114,7 +126,6 @@ export default class ObjectList extends Component {
   componentDidUpdate() {}
 
   domForEntity(el, i) {
-    const thumbnailTitle = THUMBNAIL_TITLE.get(mediaSortOrder(el));
     return (
       <div
         key={i}
@@ -133,8 +144,8 @@ export default class ObjectList extends Component {
           AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(el.object3D, 1.5, true);
         }}
       >
-        <div title={thumbnailTitle} className={styles.icon}>
-          <FontAwesomeIcon icon={getDisplayImage(el)} />
+        <div title={THUMBNAIL_TITLE.get(mediaSortOrder(el))} className={styles.icon}>
+          <FontAwesomeIcon icon={DISPLAY_IMAGE.get(mediaSortOrder(el))} />
         </div>
         <div className={classNames({ [styles.listItem]: true })}>
           <div className={styles.presence}>
