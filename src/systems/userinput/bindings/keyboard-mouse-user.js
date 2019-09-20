@@ -7,7 +7,6 @@ import { addSetsToBindings } from "./utils";
 
 const wasd_vec2 = "/var/mouse-and-keyboard/wasd_vec2";
 const keyboardCharacterAcceleration = "/var/mouse-and-keyboard/keyboardCharacterAcceleration";
-const dCharSpeed = "/var/mouse-and-keyboard/dCharSpeed";
 const arrows_vec2 = "/var/mouse-and-keyboard/arrows_vec2";
 const togglePenWithRMB = "/vars/mouse-and-keyboard/drop_pen_with_RMB";
 const togglePenWithEsc = "/vars/mouse-and-keyboard/drop_pen_with_esc";
