@@ -71,13 +71,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.mouse.wheel },
-      dest: { value: dCharSpeed },
-      xform: xforms.scale(-0.3)
-    },
-    {
-      src: { value: dCharSpeed },
       dest: { value: paths.actions.dCharSpeed },
-      xform: xforms.copy
+      xform: xforms.scale(-0.3)
     },
     {
       src: { value: paths.device.keyboard.key("shift") },

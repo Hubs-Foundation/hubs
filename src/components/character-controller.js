@@ -140,9 +140,9 @@ AFRAME.registerComponent("character-controller", {
       if (userinputAngularVelocity !== null && userinputAngularVelocity !== undefined) {
         this.angularVelocity = userinputAngularVelocity;
       }
-      const dCharSpeed = userinput.get(paths.actions.dCharSpeed) || 0;
-      if (enableWheelSpeed && dCharSpeed) {
-        this.charSpeed = Math.min(Math.max(this.charSpeed + this.charSpeed * dCharSpeed, 0.1), 5);
+      if (enableWheelSpeed) {
+        const dCharSpeed = userinput.get(paths.actions.dCharSpeed) || 0;
+        this.charSpeed = THREE.Math.clamp(this.charSpeed + this.charSpeed * dCharSpeed, 0.1, 5);
       }
       const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
 
