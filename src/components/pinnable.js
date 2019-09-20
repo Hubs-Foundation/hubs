@@ -69,7 +69,9 @@ AFRAME.registerComponent("pinnable", {
   tick() {
     const held = this.isHeld(this.el);
 
+    let didFireThisFrame = false;
     if (!held && this.wasHeld) {
+      didFireThisFrame = true;
       this._fireEventsAndAnimate(this.data, true);
     }
 
@@ -77,7 +79,7 @@ AFRAME.registerComponent("pinnable", {
 
     this.transformObjectSystem = this.transformObjectSystem || AFRAME.scenes[0].systems["transform-selected-object"];
     const transforming = this.transformObjectSystem.transforming && this.transformObjectSystem.target.el === this.el;
-    if (!transforming && this.wasTransforming) {
+    if (!didFireThisFrame && !transforming && this.wasTransforming) {
       this._fireEventsAndAnimate(this.data, true);
     }
     this.wasTransforming = transforming;
