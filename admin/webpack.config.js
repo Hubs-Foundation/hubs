@@ -120,7 +120,10 @@ module.exports = (env, argv) => ({
       {
         test: /\.js$/,
         loader: "babel-loader",
-        options: babelConfig
+        options: babelConfig,
+        exclude: function(modulePath) {
+          return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
+        }
       },
       {
         test: /\.worker\.js$/,
