@@ -31,11 +31,11 @@ const calculateViewingDistance = (function() {
     const halfHorFOV =
       Math.atan(Math.tan(halfVertFOV) * camera.el.sceneEl.camera.aspect) * (object.el.sceneEl.is("vr-mode") ? 0.5 : 1);
     const margin = 1.05;
-    const l1 = Math.abs((halfYExtents * margin) / Math.tan(halfVertFOV));
-    const l2 = Math.abs((halfXExtents * margin) / Math.tan(halfHorFOV));
-    const l3 = Math.abs(box.max.z - center.z) + Math.max(l1, l2);
-    const l = object.el.sceneEl.is("vr-mode") ? Math.max(0.25, l3) : l3;
-    return l || 1.25;
+    const length1 = Math.abs((halfYExtents * margin) / Math.tan(halfVertFOV));
+    const length2 = Math.abs((halfXExtents * margin) / Math.tan(halfHorFOV));
+    const length3 = Math.abs(box.max.z - center.z) + Math.max(length1, length2);
+    const length = object.el.sceneEl.is("vr-mode") ? Math.max(0.25, length3) : length3;
+    return length || 1.25;
   };
 })();
 
