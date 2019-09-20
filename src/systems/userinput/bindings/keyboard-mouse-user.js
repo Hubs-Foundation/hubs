@@ -69,6 +69,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.normalize_vec2
     },
     {
+      src: { value: paths.device.mouse.wheel },
+      dest: { value: paths.actions.dCharSpeed },
+      xform: xforms.scale(-0.3)
+    },
+    {
       src: { value: paths.device.keyboard.key("shift") },
       dest: { value: paths.actions.boost },
       xform: xforms.copy
@@ -527,7 +532,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: {
         value: k("wheelWithShift")
       },
-      xform: xforms.copyIfTrue
+      xform: xforms.copyIfTrue,
+      priority: 1
     },
     {
       src: {
@@ -537,7 +543,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: {
         value: k("wheelWithoutShift")
       },
-      xform: xforms.copyIfFalse
+      xform: xforms.copyIfFalse,
+      priority: 1
     },
     {
       src: {
@@ -585,7 +592,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.mouse.wheel },
       dest: { value: paths.actions.cursor.right.mediaVolumeMod },
-      xform: xforms.scale(-0.3)
+      xform: xforms.scale(-0.3),
+      priority: 1
     }
   ],
   [sets.inputFocused]: [
@@ -626,7 +634,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.mouse.wheel },
       dest: { value: paths.actions.inspectZoom },
-      xform: xforms.scale(-5.0)
+      xform: xforms.scale(-5.0),
+      priority: 1
     },
     {
       src: {
