@@ -4,9 +4,10 @@ import ReactDOM from "react-dom";
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connectToReticulum } from "hubs/src/utils/phoenix-utils";
-import { Admin, Resource, ListGuesser } from "react-admin";
+import { Admin, Layout, Resource, ListGuesser } from "react-admin";
 //import { EditGuesser, CreateGuesser } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
+import { AdminMenu } from "./react-components/admin-menu";
 import { SceneList, SceneEdit } from "./react-components/scenes";
 import { SceneListingList, SceneListingEdit } from "./react-components/scene-listings";
 import { AvatarList, AvatarEdit } from "./react-components/avatars";
@@ -22,6 +23,8 @@ const store = new Store();
 import registerTelemetry from "hubs/src/telemetry";
 registerTelemetry("/admin", "Hubs Admin");
 
+const AdminLayout = (props) => <Layout {...props} menu={AdminMenu} />;
+
 class AdminUI extends Component {
   static propTypes = {
     dataProvider: PropTypes.func,
@@ -35,6 +38,7 @@ class AdminUI extends Component {
   render() {
     return (
       <Admin
+        appLayout={AdminLayout}
         dataProvider={this.props.dataProvider}
         authProvider={this.props.authProvider}
         loginPage={false}
