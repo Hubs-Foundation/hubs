@@ -189,9 +189,10 @@ module.exports = (env, argv) => ({
     new webpack.DefinePlugin({
       "process.env": JSON.stringify({
         NODE_ENV: argv.mode,
-        RETICULUM_SERVER: process.env.RETICULUM_SERVER,
-        RETICULUM_SOCKET_SERVER: process.env.RETICULUM_SOCKET_SERVER,
         BUILD_VERSION: process.env.BUILD_VERSION,
+        CONFIGURABLE_SERVICES: process.env.CONFIGURABLE_SERVICES,
+        ITA_SERVER: process.env.ITA_SERVER,
+        RETICULUM_SERVER: process.env.RETICULUM_SERVER,
         POSTGREST_SERVER: process.env.POSTGREST_SERVER
       })
     })

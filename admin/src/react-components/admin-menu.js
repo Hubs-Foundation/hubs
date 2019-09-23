@@ -1,106 +1,111 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
+import React, { Component } from 'react';
 import inflection from 'inflection';
-import compose from 'recompose/compose';
+import { connect } from 'react-redux';
+import { getResources } from 'react-admin';
+import { withRouter, NavLink } from 'react-router-dom';
 import { withStyles, createStyles } from '@material-ui/core/styles';
-import classnames from 'classnames';
-import { getResources, translate } from 'ra-core';
-import DefaultIcon from '@material-ui/icons/ViewList';
-import { DashboardMenuItem, MenuItemLink, Responsive } from 'ra-ui-materialui';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import ViewIcon from '@material-ui/icons/ViewList';
+import SettingsIcon from '@material-ui/icons/Settings';
+import Collapse from '@material-ui/core/Collapse';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import { getServiceDisplayName } from "../utils/ita";
 
-const styles = createStyles({
-  main: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
+const mapStateToProps = state => ({
+  resources: getResources(state),
+});
+
+const styles = theme => ({
+  root: {
+    width: "100%",
+  },
+  nested: {
+    paddingLeft: 4,
   },
 });
 
-const translatedResourceName = (resource, translate) =>
-      translate(`resources.${resource.name}.name`, {
-        smart_count: 2,
-        _:
-        resource.options && resource.options.label
-          ? translate(resource.options.label, {
-            smart_count: 2,
-            _: resource.options.label,
-          })
-          : inflection.humanize(inflection.pluralize(resource.name)),
-      });
+function getResourceDisplayName(resource) {
+  if (resource.options && resource.options.label) {
+    return resource.options.label;
+  } else {
+    return inflection.humanize(inflection.pluralize(resource.name));
+  }
+}
 
-const Menu = ({
-  classes,
-  className,
-  dense,
-  hasDashboard,
-  onMenuClick,
-  open,
-  pathname,
-  resources,
-  translate,
-  logout,
-  ...rest
-}) => (
-  <div className={classnames(classes.main, className)} {...rest}>
-    {hasDashboard && <DashboardMenuItem onClick={onMenuClick} />}
-    {resources
-     .filter(r => r.hasList)
-     .map(resource => (
-       <MenuItemLink
-         key={resource.name}
-         to={`/${resource.name}`}
-         primaryText={translatedResourceName(resource, translate)}
-         leftIcon={
-           resource.icon ? <resource.icon /> : <DefaultIcon />
-         }
-         onClick={onMenuClick}
-         dense={dense}
-       />
-     ))}
-    <Responsive xsmall={logout} medium={null} />
-  </div>
-);
+class Menu extends Component {
 
-Menu.propTypes = {
-  classes: PropTypes.object,
-  className: PropTypes.string,
-  dense: PropTypes.bool,
-  hasDashboard: PropTypes.bool,
-  logout: PropTypes.element,
-  onMenuClick: PropTypes.func,
-  open: PropTypes.bool,
-  pathname: PropTypes.string,
-  resources: PropTypes.array.isRequired,
-  translate: PropTypes.func.isRequired,
-};
+  state = {
+    expanded: null
+  }
 
-Menu.defaultProps = {
-  onMenuClick: () => null,
-};
-
-const mapStateToProps = state => ({
-  open: state.admin.ui.sidebarOpen,
-  resources: getResources(state),
-  pathname: state.router.location.pathname, // used to force redraw on navigation
-});
-
-const enhance = compose(
-  translate,
-  connect(
-    mapStateToProps,
-    {}, // Avoid connect passing dispatch in props,
-    null,
-    {
-      areStatePropsEqual: (prev, next) =>
-        prev.resources.every(
-          (value, index) => value === next.resources[index] // shallow compare resources
-        ) &&
-        prev.pathname === next.pathname &&
-        prev.open === next.open,
+  onClick(category) {
+    if (this.state.expanded === category) {
+      this.setState({ expanded: null });
+    } else {
+      this.setState({ expanded: category });
     }
-  ),
-  withStyles(styles)
-);
+  }
 
-export const AdminMenu = enhance(Menu);
+  renderService(service) {
+    const icon = <SettingsIcon />;
+    return (
+      <ListItem
+        component={NavLink}
+        activeStyle={{ "backgroundColor": "#D0D0D0" }}
+        key={service}
+        to={`/services/${service}`}>
+        <ListItemIcon>{icon}</ListItemIcon>
+        <ListItemText primary={getServiceDisplayName(service)} />
+      </ListItem>
+    );
+  }
+
+  renderResource(resource) {
+    const icon = resource.icon ? <resource.icon /> : <ViewIcon />;
+    return (
+      <ListItem
+        component={NavLink}
+        activeStyle={{ "backgroundColor": "#D0D0D0" }}
+        key={resource.name}
+        to={`/${resource.name}`}>
+        {icon && <ListItemIcon>{icon}</ListItemIcon>}
+        <ListItemText primary={getResourceDisplayName(resource)} />
+      </ListItem>
+    );
+  }
+
+  render() {
+    const { expanded } = this.state;
+    return (
+      <List className={this.props.classes.root}>
+        <ListItem component={NavLink} activeStyle={{ "backgroundColor": "#D0D0D0" }} key="system" to="/system">
+          <ListItemText primary="System" />
+        </ListItem>
+        <ListItem button onClick={() => this.onClick("content")}>
+          <ListItemText primary="Content" />
+          {expanded === "content" ? <ExpandLess /> : <ExpandMore />}
+        </ListItem>
+        <Collapse in={true} timeout="auto" unmountOnExit>
+          <List component="nav" disablePadding>
+            {this.props.resources.map(this.renderResource.bind(this))}
+          </List>
+        </Collapse>
+        <ListItem button onClick={() => this.onClick("services")}>
+          <ListItemText primary="Services" />
+          {expanded === "config" ? <ExpandLess /> : <ExpandMore />}
+        </ListItem>
+        <Collapse in={true} timeout="auto" unmountOnExit>
+          <List component="nav" disablePadding>
+            {this.props.services.map(this.renderService.bind(this))}
+          </List>
+        </Collapse>
+      </List>
+    );
+  }
+}
+
+export const AdminMenu = withRouter(connect(mapStateToProps)(withStyles(styles)(Menu)));

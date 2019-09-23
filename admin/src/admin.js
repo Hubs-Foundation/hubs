@@ -2,7 +2,9 @@ import "./assets/stylesheets/admin.scss";
 
 import ReactDOM from "react-dom";
 import React, { Component } from "react";
+import { Route } from 'react-router-dom';
 import PropTypes from "prop-types";
+import { serviceNames } from "./utils/ita";
 import { connectToReticulum } from "hubs/src/utils/phoenix-utils";
 import { Admin, Layout, Resource, ListGuesser } from "react-admin";
 //import { EditGuesser, CreateGuesser } from "react-admin";
@@ -16,6 +18,8 @@ import { FeaturedSceneListingList, FeaturedSceneListingEdit } from "./react-comp
 import { PendingSceneList } from "./react-components/pending-scenes";
 import { AccountList, AccountEdit } from "./react-components/accounts";
 import { ProjectList, ProjectShow } from "./react-components/projects";
+import { ServiceEditor } from "./react-components/service-editor";
+import { SystemEditor } from "./react-components/system-editor";
 import Store from "hubs/src/storage/store";
 
 const store = new Store();
@@ -23,9 +27,15 @@ const store = new Store();
 import registerTelemetry from "hubs/src/telemetry";
 registerTelemetry("/admin", "Hubs Admin");
 
-const AdminLayout = (props) => <Layout {...props} menu={AdminMenu} />;
+const systemRoute = <Route exact path="/system" component={SystemEditor} />;
+const serviceRoutes = serviceNames.map(s => {
+  return <Route exact path={`/services/${s}`} render={(props) => <ServiceEditor {...props} service={s} />} />;
+});
+
+const AdminLayout = (props) => <Layout {...props} menu={(props) => <AdminMenu {...props} services={serviceNames} />} />;
 
 class AdminUI extends Component {
+
   static propTypes = {
     dataProvider: PropTypes.func,
     authProvider: PropTypes.func
@@ -38,7 +48,9 @@ class AdminUI extends Component {
   render() {
     return (
       <Admin
+        dashboard={SystemEditor}
         appLayout={AdminLayout}
+        customRoutes={[systemRoute].concat(serviceRoutes)}
         dataProvider={this.props.dataProvider}
         authProvider={this.props.authProvider}
         loginPage={false}
