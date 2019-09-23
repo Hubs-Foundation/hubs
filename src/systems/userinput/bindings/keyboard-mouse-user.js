@@ -2,6 +2,7 @@ import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
 import { addSetsToBindings } from "./utils";
+import qsTruthy from "../../../utils/qs_truthy";
 
 // import { Pose } from "../pose";
 
@@ -17,6 +18,26 @@ const togglePen = "/vars/mouse-and-keyboard/togglePen";
 const k = name => {
   return `/keyboard-mouse-user/keyboard-var/${name}`;
 };
+
+const micBinding = qsTruthy("ptt")
+  ? {
+      src: {
+        value: paths.device.keyboard.key("m")
+      },
+      dest: {
+        value: paths.actions.ptt
+      },
+      xform: xforms.copy
+    }
+  : {
+      src: {
+        value: paths.device.keyboard.key("m")
+      },
+      dest: {
+        value: paths.actions.muteMic
+      },
+      xform: xforms.rising
+    };
 
 export const keyboardMouseUserBindings = addSetsToBindings({
   [sets.global]: [
@@ -182,15 +203,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.actions.lobbyCameraDelta },
       xform: xforms.copy
     },
-    {
-      src: {
-        value: paths.device.keyboard.key("m")
-      },
-      dest: {
-        value: paths.actions.muteMic
-      },
-      xform: xforms.rising
-    },
+    micBinding,
     {
       src: {
         value: paths.device.keyboard.key("t")

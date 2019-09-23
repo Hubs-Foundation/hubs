@@ -1,5 +1,7 @@
 import { sets } from "./userinput/sets";
 import { paths } from "./userinput/paths";
+import qsTruthy from "../utils/qs_truthy";
+const enablePTT = qsTruthy("ptt");
 
 // The output of this system is activeTips which shows, if any, the tips to show at the top
 // and bottom of the screen. There are named tips (eg locomotion) that each have validators.
@@ -319,7 +321,7 @@ const VALIDATORS = {
     return scene.is("sharing_video") ? VALID : INVALID;
   },
   mute_mode: function(userinput, scene) {
-    return scene.is("muted") ? VALID : INVALID;
+    return scene.is("muted") && !enablePTT ? VALID : INVALID;
   },
   feedback: function(userinput, scene, mediaCounter, store) {
     if (store && store.state.activity.entryCount >= NUM_ENTRIES_FOR_FEEDBACK_TIP) return VALID;

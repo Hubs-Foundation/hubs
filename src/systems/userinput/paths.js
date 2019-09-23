@@ -20,6 +20,7 @@ paths.actions.ensureFrozen = "/actions/ensureFrozen";
 paths.actions.toggleFreeze = "/actions/toggleFreeze";
 paths.actions.thaw = "/actions/thaw";
 paths.actions.muteMic = "/actions/muteMic";
+paths.actions.ptt = "/actions/ptt";
 paths.actions.focusChat = "/actions/focusChat";
 paths.actions.focusChatCommand = "/actions/focusChatCommand";
 paths.actions.toggleCamera = "/actions/toggleCamera";

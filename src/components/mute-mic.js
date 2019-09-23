@@ -1,4 +1,7 @@
 import { SOUND_TOGGLE_MIC } from "../systems/sound-effects-system";
+import qsTruthy from "../utils/qs_truthy";
+import { paths } from "../systems/userinput/paths";
+const enablePTT = qsTruthy("ptt");
 
 const bindAllEvents = function(elements, events, f) {
   if (!elements || !elements.length) return;
@@ -39,16 +42,20 @@ AFRAME.registerComponent("mute-mic", {
 
   play: function() {
     const { eventSrc, toggleEvents, muteEvents, unmuteEvents } = this.data;
-    bindAllEvents(eventSrc, toggleEvents, this.onToggle);
-    bindAllEvents(eventSrc, muteEvents, this.onMute);
-    bindAllEvents(eventSrc, unmuteEvents, this.onUnmute);
+    if (!enablePTT) {
+      bindAllEvents(eventSrc, toggleEvents, this.onToggle);
+      bindAllEvents(eventSrc, muteEvents, this.onMute);
+      bindAllEvents(eventSrc, unmuteEvents, this.onUnmute);
+    }
   },
 
   pause: function() {
     const { eventSrc, toggleEvents, muteEvents, unmuteEvents } = this.data;
-    unbindAllEvents(eventSrc, toggleEvents, this.onToggle);
-    unbindAllEvents(eventSrc, muteEvents, this.onMute);
-    unbindAllEvents(eventSrc, unmuteEvents, this.onUnmute);
+    if (!enablePTT) {
+      unbindAllEvents(eventSrc, toggleEvents, this.onToggle);
+      unbindAllEvents(eventSrc, muteEvents, this.onMute);
+      unbindAllEvents(eventSrc, unmuteEvents, this.onUnmute);
+    }
   },
 
   onToggle: function() {
@@ -61,6 +68,21 @@ AFRAME.registerComponent("mute-mic", {
       this.el.removeState("muted");
     } else {
       NAF.connection.adapter.enableMicrophone(false);
+      this.el.addState("muted");
+    }
+  },
+
+  tick: function() {
+    if (!enablePTT || !NAF.connection.adapter) {
+      return;
+    }
+
+    const ptt = this.el.sceneEl.systems.userinput.get(paths.actions.ptt);
+    if (ptt && this.el.is("muted")) {
+      NAF.connection.adapter.enableMicrophone(ptt);
+      this.el.removeState("muted");
+    } else if (!ptt && !this.el.is("muted")) {
+      NAF.connection.adapter.enableMicrophone(ptt);
       this.el.addState("muted");
     }
   },
