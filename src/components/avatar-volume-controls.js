@@ -1,4 +1,6 @@
 import { VOLUME_LABELS } from "./media-views";
+const MAX_VOLUME = 4;
+const STEP = MAX_VOLUME / VOLUME_LABELS.length;
 
 AFRAME.registerComponent("avatar-volume-controls", {
   schema: {
@@ -19,21 +21,21 @@ AFRAME.registerComponent("avatar-volume-controls", {
   },
 
   changeVolumeBy(v) {
-    this.el.setAttribute("avatar-volume-controls", "volume", THREE.Math.clamp(this.data.volume + v, 0, 1));
+    this.el.setAttribute("avatar-volume-controls", "volume", THREE.Math.clamp(this.data.volume + v, 0, MAX_VOLUME));
     this.updateVolumeLabel();
   },
 
   volumeUp() {
-    this.changeVolumeBy(0.1);
+    this.changeVolumeBy(STEP * (this.data.volume < 1 ? 0.5 : 1));
   },
 
   volumeDown() {
-    this.changeVolumeBy(-0.1);
+    this.changeVolumeBy(-1 * STEP * (this.data.volume < 1 ? 0.5 : 1));
   },
 
   update() {
     if (this.audio) {
-      this.audio.gain.gain.value = this.data.volume;
+      this.audio.setVolume(this.data.volume);
     }
   },
 
@@ -41,7 +43,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
     this.volumeLabel.setAttribute(
       "text",
       "value",
-      this.data.volume === 0 ? "Muted" : VOLUME_LABELS[Math.floor(this.data.volume / 0.05)]
+      this.data.volume === 0 ? "Muted" : VOLUME_LABELS[Math.floor(this.data.volume / STEP)]
     );
   },
 
