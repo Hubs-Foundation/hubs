@@ -89,6 +89,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.rising
     },
     {
+      src: { value: paths.device.keyboard.key("f") },
+      dest: { value: paths.actions.toggleFly },
+      xform: xforms.rising
+    },
+    {
       src: { value: paths.device.keyboard.key("e") },
       dest: { value: paths.actions.snapRotateRight },
       xform: xforms.rising

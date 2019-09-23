@@ -710,6 +710,11 @@ export const oculusTouchUserBindings = addSetsToBindings({
       src: { value: wakeRight },
       dest: { value: paths.actions.cursor.right.wake },
       xform: xforms.rising
+    },
+    {
+      src: { value: rightButton("b").pressed },
+      dest: { value: paths.actions.toggleFly },
+      xform: xforms.rising
     }
   ],
 
