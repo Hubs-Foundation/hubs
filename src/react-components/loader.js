@@ -18,6 +18,7 @@ class Loader extends Component {
   };
 
   componentDidMount() {
+    this.props.scene.addState("loader");
     this.props.scene.addEventListener("model-loading", this.onObjectLoading);
     this.props.scene.addEventListener("image-loading", this.onObjectLoading);
     this.props.scene.addEventListener("pdf-loading", this.onObjectLoading);
@@ -36,6 +37,7 @@ class Loader extends Component {
   }
 
   componentWillUnmount() {
+    this.props.scene.removeState("loader");
     this.props.scene.removeEventListener("model-loading", this.onObjectLoading);
     this.props.scene.removeEventListener("image-loading", this.onObjectLoading);
     this.props.scene.removeEventListener("pdf-loading", this.onObjectLoading);

@@ -368,6 +368,16 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: { value: paths.device.keyboard.key("o") },
       dest: { value: paths.actions.nextCameraMode },
       xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("u") },
+      dest: { value: paths.actions.decreaseResolution },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("i") },
+      dest: { value: paths.actions.increaseResolution },
+      xform: xforms.rising
     }
 
     // Helpful bindings for debugging hands in 2D
