@@ -44,7 +44,7 @@ AFRAME.registerSystem("hubs-systems", {
   tick(t, dt) {
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
-    this.adaptiveResolutionSystem.tick(systems.userinput, this.el, t)
+    this.adaptiveResolutionSystem.tick(systems.userinput, this.el, t);
     systems.interaction.tick2();
     this.cursorTogglingSystem.tick(systems.interaction, systems.userinput, this.el);
     this.interactionSfxSystem.tick(systems.interaction, systems.userinput, this.soundEffectsSystem);

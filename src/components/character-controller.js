@@ -26,6 +26,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   init: function() {
+    this.timeOfLastMovement = 0;
     this.charSpeed = 1;
     this.navGroup = null;
     this.navNode = null;
@@ -153,9 +154,11 @@ AFRAME.registerComponent("character-controller", {
       startPos.copy(root.position);
 
       if (userinput.get(paths.actions.snapRotateLeft)) {
+        this.timeOfLastMovement = t;
         this.snapRotateLeft();
       }
       if (userinput.get(paths.actions.snapRotateRight)) {
+        this.timeOfLastMovement = t;
         this.snapRotateRight();
       }
       const acc = userinput.get(paths.actions.characterAcceleration);
@@ -165,6 +168,9 @@ AFRAME.registerComponent("character-controller", {
           this.accelerationInput.y + 0,
           this.accelerationInput.z + acc[1]
         );
+      }
+      if (Math.abs(this.accelerationInput.x) > 0.001 || Math.abs(this.accelerationInput.z) > 0.001) {
+        this.timeOfLastMovement = t;
       }
 
       pivotPos.copy(pivot.position);
