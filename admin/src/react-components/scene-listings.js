@@ -44,8 +44,12 @@ export const SceneListingList = props => (
       <ReferenceField label="Scene" source="scene_id" reference="scenes">
         <TextField source="name" />
       </ReferenceField>
-      <BooleanField source="_allow_remixing" />
-      <BooleanField source="_allow_promotion" />
+      <ReferenceField label="Allow remixing" source="scene_id" reference="scenes" linkType={false}>
+        <BooleanField source="allow_remixing" />
+      </ReferenceField>
+      <ReferenceField label="Allow promotion" source="scene_id" reference="scenes" linkType={false}>
+        <BooleanField source="allow_promotion" />
+      </ReferenceField>
       <TextField source="reviewed_at" />
       <DateField source="inserted_at" />
       <DateField source="updated_at" />
