@@ -1,5 +1,5 @@
 import React from "react";
-import { SceneLink, OwnedFileImage } from "./fields";
+import { SceneLink, OwnedFileImage, OwnedFileSizeField } from "./fields";
 import { ApproveSceneButton } from "./approve-buttons";
 
 import {
@@ -39,6 +39,7 @@ export const SceneList = props => (
   <List {...props} filters={<SceneFilter />}>
     <Datagrid>
       <OwnedFileImage source="screenshot_owned_file_id" />
+      <OwnedFileSizeField label="Model size" source="model_owned_file_id" />
       <TextField source="name" />
       <SceneLink source="scene_sid" />
       <BooleanField source="allow_remixing" />

@@ -1,5 +1,5 @@
 import React from "react";
-import { SceneLink, OwnedFileImage } from "./fields";
+import { SceneLink, OwnedFileImage, OwnedFileSizeField } from "./fields";
 import { FeatureSceneListingButton } from "./feature-listing-buttons";
 
 import {
@@ -37,6 +37,7 @@ export const SceneListingList = props => (
   <List {...props} filters={<SceneListingFilter />}>
     <Datagrid>
       <OwnedFileImage source="screenshot_owned_file_id" />
+      <OwnedFileSizeField label="Model size" source="model_owned_file_id" />
       <TextField source="name" />
       <SceneLink source="scene_listing_sid" />
       <ReferenceField label="Scene" source="scene_id" reference="scenes">
