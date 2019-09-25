@@ -29,7 +29,7 @@ export const SceneListingEdit = props => (
     <SimpleForm>
       <TextInput source="name" />
       <TextInput source="description" />
-      <SelectInput source="state" choices={[{ id: "active", name: "active" }, { id: "delisted", name: "delisted" }]} />
+      <SelectInput label="Status" source="state" choices={[{ id: "active", name: "active" }, { id: "delisted", name: "delisted" }]} />
     </SimpleForm>
   </Edit>
 );
@@ -53,7 +53,7 @@ export const SceneListingList = props => (
       <TextField source="reviewed_at" />
       <DateField source="inserted_at" />
       <DateField source="updated_at" />
-      <TextField source="state" />
+      <TextField label="Status" source="state" />
       <FeatureSceneListingButton />
       <EditButton />
     </Datagrid>

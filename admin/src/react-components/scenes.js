@@ -29,7 +29,7 @@ export const SceneEdit = props => (
     <SimpleForm>
       <TextInput source="name" />
       <TextInput source="description" />
-      <SelectInput source="state" choices={[{ id: "active", name: "active" }, { id: "removed", name: "removed" }]} />
+      <SelectInput label="Status" source="state" choices={[{ id: "active", name: "active" }, { id: "removed", name: "removed" }]} />
       <BooleanInput source="allow_remixing" />
       <BooleanInput source="allow_promotion" />
     </SimpleForm>
@@ -45,7 +45,7 @@ export const SceneList = props => (
       <BooleanField source="allow_remixing" />
       <BooleanField source="allow_promotion" />
       <DateField source="updated_at" />
-      <TextField source="state" />
+      <TextField label="Status" source="state" />
       <EditButton />
       <ApproveSceneButton />
     </Datagrid>
