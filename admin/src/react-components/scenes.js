@@ -44,8 +44,6 @@ export const SceneList = props => (
       <SceneLink source="scene_sid" />
       <BooleanField source="allow_remixing" />
       <BooleanField source="allow_promotion" />
-      <TextField source="reviewed_at" />
-      <DateField source="inserted_at" />
       <DateField source="updated_at" />
       <TextField source="state" />
       <EditButton />
