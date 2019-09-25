@@ -402,7 +402,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
         value: paths.device.keyboard.key("q")
       },
       dest: { value: "/var/shift+q" },
-      xform: xforms.copyIfTrue
+      xform: xforms.copyIfTrue,
+      priority: 1
     },
     {
       src: { value: "/var/shift+q" },
@@ -415,7 +416,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
         value: paths.device.keyboard.key("e")
       },
       dest: { value: "/var/shift+e" },
-      xform: xforms.copyIfTrue
+      xform: xforms.copyIfTrue,
+      priority: 1
     },
     {
       src: { value: "/var/shift+e" },
@@ -428,7 +430,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
         value: paths.device.keyboard.key("q")
       },
       dest: { value: "/var/notshift+q" },
-      xform: xforms.copyIfFalse
+      xform: xforms.copyIfFalse,
+      priority: 1
     },
     {
       src: { value: "/var/notshift+q" },
@@ -442,7 +445,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
         value: paths.device.keyboard.key("e")
       },
       dest: { value: "/var/notshift+e" },
-      xform: xforms.copyIfFalse
+      xform: xforms.copyIfFalse,
+      priority: 1
     },
     {
       src: { value: "/var/notshift+e" },
@@ -532,7 +536,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: {
         value: k("wheelWithShift")
       },
-      xform: xforms.copyIfTrue
+      xform: xforms.copyIfTrue,
+      priority: 1
     },
     {
       src: {
@@ -542,7 +547,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: {
         value: k("wheelWithoutShift")
       },
-      xform: xforms.copyIfFalse
+      xform: xforms.copyIfFalse,
+      priority: 1
     },
     {
       src: {
@@ -654,6 +660,14 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       },
       xform: xforms.noop,
       priority: 101
+    }
+  ],
+  [sets.debugUserInput]: [
+    {
+      src: { value: paths.device.keyboard.key("m") },
+      dest: { value: paths.actions.debugUserInput.describeCurrentMasks },
+      xform: xforms.rising,
+      priority: 10
     }
   ]
 });

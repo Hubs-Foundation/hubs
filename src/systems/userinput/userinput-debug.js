@@ -2,6 +2,37 @@ import { paths } from "./paths";
 import qsTruthy from "../../utils/qs_truthy";
 
 const PATHS_TO_SHOW = ["/actions/", "/device/", "/var/"];
+const DELIMITER = "-----------------------------------";
+
+const replacer = (k, v) => {
+  if (typeof v === "number") {
+    return `${v >= 0 ? "+" : ""}${v.toFixed(3)}`;
+  }
+  return v;
+};
+function describeCurrentMasks(userinput) {
+  const sb = [];
+  userinput.masked.forEach((maskers, i) => {
+    let val;
+    if (!userinput.actives[i]) return;
+    if (maskers.length) {
+      val = JSON.stringify(userinput.sortedBindings[i], replacer);
+      sb.push(DELIMITER);
+      sb.push(`Binding #${i}:`);
+      if (val) val = val.replace(/{"(\w{3,})":/g, '{\n  "$1":').replace(/,"(\w{3,})":/g, ',\n  "$1":');
+      sb.push(`${val}\n`);
+    }
+    maskers.forEach(masker => {
+      val = JSON.stringify(userinput.sortedBindings[masker], replacer);
+      if (val) val = val.replace(/{"(\w{3,})":/g, '{\n  "$1":').replace(/,"(\w{3,})":/g, ',\n  "$1":');
+      sb.push(`- Masked by #${masker}:\n${val}`);
+    });
+    if (maskers.length) {
+      sb.push(`\n`);
+    }
+  });
+  return sb.join("\n");
+}
 
 AFRAME.registerSystem("userinput-debug", {
   active: true,
@@ -12,12 +43,6 @@ AFRAME.registerSystem("userinput-debug", {
     const userinput = AFRAME.scenes[0].systems.userinput;
 
     if (this.userinputFrameStatus) {
-      const replacer = (k, v) => {
-        if (typeof v === "number") {
-          return `${v >= 0 ? "+" : ""}${v.toFixed(3)}`;
-        }
-        return v;
-      };
       const pathsOutput = [];
       const { frame } = userinput;
       for (const key in frame.values) {
@@ -28,6 +53,10 @@ AFRAME.registerSystem("userinput-debug", {
         pathsOutput.push(`${key} -> ${val}`);
       }
       this.userinputFrameStatus.textContent = pathsOutput.join("\n");
+    }
+
+    if (userinput.get(paths.actions.debugUserInput.describeCurrentMasks)) {
+      console.log(describeCurrentMasks(userinput));
     }
 
     if (userinput.get(paths.actions.logDebugFrame)) {
