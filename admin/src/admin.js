@@ -57,12 +57,12 @@ class AdminUI extends Component {
         logoutButton={() => <span />}
       >
         <Resource name="pending_scenes" list={PendingSceneList} />
-        <Resource name="scene_listings" list={SceneListingList} edit={SceneListingEdit} />
-        <Resource name="featured_scene_listings" list={FeaturedSceneListingList} edit={FeaturedSceneListingEdit} />
+        <Resource name="scene_listings" list={SceneListingList} edit={SceneListingEdit} options={{ label: 'Approved scenes' }} />
+        <Resource name="featured_scene_listings" list={FeaturedSceneListingList} edit={FeaturedSceneListingEdit} options={{ label: 'Featured scenes' }} />
 
         <Resource name="pending_avatars" list={AvatarList} />
-        <Resource name="avatar_listings" list={AvatarListingList} edit={AvatarListingEdit} />
-        <Resource name="featured_avatar_listings" list={AvatarListingList} edit={AvatarListingEdit} />
+        <Resource name="avatar_listings" list={AvatarListingList} edit={AvatarListingEdit} options={{ label: 'Approved avatars' }}/>
+        <Resource name="featured_avatar_listings" list={AvatarListingList} edit={AvatarListingEdit} options={{ label: 'Featured avatars' }}/>
 
         <Resource name="accounts" list={AccountList} edit={AccountEdit} />
         <Resource name="scenes" list={SceneList} edit={SceneEdit} />
