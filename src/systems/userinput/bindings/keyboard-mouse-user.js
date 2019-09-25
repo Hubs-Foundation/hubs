@@ -76,7 +76,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.keyboard.key("shift") },
       dest: { value: paths.actions.boost },
-      xform: xforms.copy
+      xform: xforms.copy,
+      priority: 1
     },
     {
       src: { value: paths.device.keyboard.key("Escape") },
@@ -581,7 +582,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.keyboard.key("shift") },
       dest: { value: paths.actions.transformModifier },
-      xform: xforms.copy
+      xform: xforms.copy,
+      priority: 1
     }
   ],
   [sets.rightCursorHoveringOnInteractable]: [
