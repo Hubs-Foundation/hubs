@@ -11,7 +11,6 @@ export const PendingSceneList = props => (
       <OwnedFileImage source="screenshot_owned_file_id" />
       <SceneLink source="scene_sid" />
       <TextField source="name" />
-      <TextField source="description" />
       <TextField source="attributions" />
       <ConditionalReferenceField source="scene_listing_id" reference="scene_listings">
         <TextField source="name" />

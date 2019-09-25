@@ -28,7 +28,6 @@ export const SceneListingEdit = props => (
   <Edit {...props}>
     <SimpleForm>
       <TextInput source="name" />
-      <TextInput source="description" />
       <SelectInput label="Status" source="state" choices={[{ id: "active", name: "active" }, { id: "delisted", name: "delisted" }]} />
     </SimpleForm>
   </Edit>
@@ -39,7 +38,6 @@ export const SceneListingList = props => (
     <Datagrid>
       <OwnedFileImage source="screenshot_owned_file_id" />
       <TextField source="name" />
-      <TextField source="description" />
       <SceneLink source="scene_listing_sid" />
       <ReferenceField label="Scene" source="scene_id" reference="scenes">
         <TextField source="name" />

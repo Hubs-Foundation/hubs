@@ -23,7 +23,6 @@ export const FeaturedSceneListingList = props => (
       <ReferenceField label="Listing" source="id" reference="scene_listings">
         <TextField source="name" />
       </ReferenceField>
-      <TextField source="description" />
       <TextField source="attributions" />
       <EditButton />
       <FeatureSceneListingButton />

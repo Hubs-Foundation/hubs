@@ -28,7 +28,6 @@ export const SceneEdit = props => (
   <Edit {...props}>
     <SimpleForm>
       <TextInput source="name" />
-      <TextInput source="description" />
       <SelectInput label="Status" source="state" choices={[{ id: "active", name: "active" }, { id: "removed", name: "removed" }]} />
       <BooleanInput source="allow_remixing" />
       <BooleanInput source="allow_promotion" />
