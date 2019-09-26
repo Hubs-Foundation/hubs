@@ -27,6 +27,7 @@ rm /usr/bin/env
 ln -s "$(hab pkg path core/coreutils)/bin/env" /usr/bin/env
 hab pkg install -b core/coreutils core/bash core/node10 core/git core/aws-cli core/python2
 
+# main client
 npm ci --verbose --no-progress
 npm rebuild node-sass # HACK sometimes node-sass build fails
 npm rebuild node-sass # HACK sometimes node-sass build fails
@@ -36,6 +37,16 @@ mkdir dist/pages
 mv dist/*.html dist/pages
 mv dist/hub.service.js dist/pages
 mv dist/manifest.webmanifest dist/pages
+
+# admin
+cd admin
+npm ci --verbose --no-progress
+npm rebuild node-sass # HACK sometimes node-sass build fails
+npm rebuild node-sass # HACK sometimes node-sass build fails
+npm rebuild node-sass # HACK sometimes node-sass build fails
+npm run build
+mv dist/* ../dist # it will get uploaded with the rest of the stuff, below
+cd ..
 
 # we need to upload wasm blobs with wasm content type explicitly because, unlike all our
 # other assets, AWS's built-in MIME type dictionary doesn't know about that one
