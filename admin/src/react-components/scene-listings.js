@@ -49,8 +49,6 @@ export const SceneListingList = props => (
       <ReferenceField label="Allow promotion" source="scene_id" reference="scenes" linkType={false}>
         <BooleanField source="allow_promotion" />
       </ReferenceField>
-      <TextField source="reviewed_at" />
-      <DateField source="inserted_at" />
       <DateField source="updated_at" />
       <TextField label="Status" source="state" />
       <FeatureSceneListingButton />
