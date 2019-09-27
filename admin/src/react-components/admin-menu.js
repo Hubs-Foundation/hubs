@@ -8,6 +8,8 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import ComputerIcon from '@material-ui/icons/Computer';
+import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 import ViewIcon from '@material-ui/icons/ViewList';
 import SettingsIcon from '@material-ui/icons/Settings';
 import Collapse from '@material-ui/core/Collapse';
@@ -21,10 +23,16 @@ const mapStateToProps = state => ({
 
 const styles = theme => ({
   root: {
-    width: "100%",
+    width: "100%"
+  },
+  icon: {
+    marginRight: 0
+  },
+  text: {
+    paddingLeft: 10
   },
   nested: {
-    paddingLeft: 4,
+    paddingLeft: 40
   },
 });
 
@@ -38,28 +46,17 @@ function getResourceDisplayName(resource) {
 
 class Menu extends Component {
 
-  state = {
-    expanded: null
-  }
-
-  onClick(category) {
-    if (this.state.expanded === category) {
-      this.setState({ expanded: null });
-    } else {
-      this.setState({ expanded: category });
-    }
-  }
-
   renderService(service) {
     const icon = <SettingsIcon />;
     return (
       <ListItem
+        className={this.props.classes.nested}
         component={NavLink}
         activeStyle={{ "backgroundColor": "#D0D0D0" }}
         key={service}
         to={`/services/${service}`}>
-        <ListItemIcon>{icon}</ListItemIcon>
-        <ListItemText primary={getServiceDisplayName(service)} />
+        <ListItemIcon className={this.props.classes.icon}><ViewIcon /></ListItemIcon>
+        <ListItemText className={this.props.classes.text} primary={getServiceDisplayName(service)} />
       </ListItem>
     );
   }
@@ -68,35 +65,36 @@ class Menu extends Component {
     const icon = resource.icon ? <resource.icon /> : <ViewIcon />;
     return (
       <ListItem
+        className={this.props.classes.nested}
         component={NavLink}
         activeStyle={{ "backgroundColor": "#D0D0D0" }}
         key={resource.name}
         to={`/${resource.name}`}>
-        {icon && <ListItemIcon>{icon}</ListItemIcon>}
-        <ListItemText primary={getResourceDisplayName(resource)} />
+        {icon && <ListItemIcon className={this.props.classes.icon}>{icon}</ListItemIcon>}
+        <ListItemText className={this.props.classes.text} primary={getResourceDisplayName(resource)} />
       </ListItem>
     );
   }
 
   render() {
-    const { expanded } = this.state;
     return (
       <List className={this.props.classes.root}>
         <ListItem component={NavLink} activeStyle={{ "backgroundColor": "#D0D0D0" }} key="system" to="/system">
-          <ListItemText primary="System" />
+          <ListItemIcon className={this.props.classes.icon}><ComputerIcon /></ListItemIcon>
+          <ListItemText className={this.props.classes.text} primary="System" />
         </ListItem>
-        <ListItem button onClick={() => this.onClick("content")}>
-          <ListItemText primary="Content" />
-          {expanded === "content" ? <ExpandLess /> : <ExpandMore />}
+        <ListItem>
+          <ListItemIcon className={this.props.classes.icon}><LibraryBooksIcon /></ListItemIcon>
+          <ListItemText className={this.props.classes.text} primary="Content" />
         </ListItem>
         <Collapse in={true} timeout="auto" unmountOnExit>
           <List component="nav" disablePadding>
             {this.props.resources.map(this.renderResource.bind(this))}
           </List>
         </Collapse>
-        <ListItem button onClick={() => this.onClick("services")}>
-          <ListItemText primary="Services" />
-          {expanded === "config" ? <ExpandLess /> : <ExpandMore />}
+        <ListItem>
+          <ListItemIcon className={this.props.classes.icon}><SettingsIcon /></ListItemIcon>
+          <ListItemText className={this.props.classes.text} primary="Services" />
         </ListItem>
         <Collapse in={true} timeout="auto" unmountOnExit>
           <List component="nav" disablePadding>
