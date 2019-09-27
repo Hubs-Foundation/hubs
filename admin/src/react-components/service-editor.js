@@ -73,7 +73,7 @@ class ConfigurationEditor extends Component {
         key={displayPath}
         id={displayPath}
         label={displayPath}
-        value={currentValue !== undefined ? currentValue : ""}
+        value={currentValue !== undefined ? currentValue : descriptor.default}
         onChange={ev => this.onChange(path, ev)}
         type={inputType}
         fullWidth
