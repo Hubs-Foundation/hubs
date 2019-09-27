@@ -1,27 +1,25 @@
-import React, { Component } from 'react';
-import inflection from 'inflection';
-import { connect } from 'react-redux';
-import { getResources } from 'react-admin';
-import { withRouter, NavLink } from 'react-router-dom';
-import { withStyles, createStyles } from '@material-ui/core/styles';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import ComputerIcon from '@material-ui/icons/Computer';
-import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
-import ViewIcon from '@material-ui/icons/ViewList';
-import SettingsIcon from '@material-ui/icons/Settings';
-import Collapse from '@material-ui/core/Collapse';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
+import React, { Component } from "react";
+import inflection from "inflection";
+import { connect } from "react-redux";
+import { getResources } from "react-admin";
+import { withRouter, NavLink } from "react-router-dom";
+import { withStyles } from "@material-ui/core/styles";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemText from "@material-ui/core/ListItemText";
+import ComputerIcon from "@material-ui/icons/Computer";
+import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
+import ViewIcon from "@material-ui/icons/ViewList";
+import SettingsIcon from "@material-ui/icons/Settings";
+import Collapse from "@material-ui/core/Collapse";
 import { getServiceDisplayName } from "../utils/ita";
 
 const mapStateToProps = state => ({
-  resources: getResources(state),
+  resources: getResources(state)
 });
 
-const styles = theme => ({
+const styles = _theme => ({
   root: {
     width: "100%"
   },
@@ -33,7 +31,7 @@ const styles = theme => ({
   },
   nested: {
     paddingLeft: 40
-  },
+  }
 });
 
 function getResourceDisplayName(resource) {
@@ -45,17 +43,18 @@ function getResourceDisplayName(resource) {
 }
 
 class Menu extends Component {
-
   renderService(service) {
-    const icon = <SettingsIcon />;
     return (
       <ListItem
         className={this.props.classes.nested}
         component={NavLink}
-        activeStyle={{ "backgroundColor": "#D0D0D0" }}
+        activeStyle={{ backgroundColor: "#D0D0D0" }}
         key={service}
-        to={`/services/${service}`}>
-        <ListItemIcon className={this.props.classes.icon}><ViewIcon /></ListItemIcon>
+        to={`/services/${service}`}
+      >
+        <ListItemIcon className={this.props.classes.icon}>
+          <ViewIcon />
+        </ListItemIcon>
         <ListItemText className={this.props.classes.text} primary={getServiceDisplayName(service)} />
       </ListItem>
     );
@@ -67,9 +66,10 @@ class Menu extends Component {
       <ListItem
         className={this.props.classes.nested}
         component={NavLink}
-        activeStyle={{ "backgroundColor": "#D0D0D0" }}
+        activeStyle={{ backgroundColor: "#D0D0D0" }}
         key={resource.name}
-        to={`/${resource.name}`}>
+        to={`/${resource.name}`}
+      >
         {icon && <ListItemIcon className={this.props.classes.icon}>{icon}</ListItemIcon>}
         <ListItemText className={this.props.classes.text} primary={getResourceDisplayName(resource)} />
       </ListItem>
@@ -79,12 +79,16 @@ class Menu extends Component {
   render() {
     return (
       <List className={this.props.classes.root}>
-        <ListItem component={NavLink} activeStyle={{ "backgroundColor": "#D0D0D0" }} key="system" to="/system">
-          <ListItemIcon className={this.props.classes.icon}><ComputerIcon /></ListItemIcon>
+        <ListItem component={NavLink} activeStyle={{ backgroundColor: "#D0D0D0" }} key="system" to="/system">
+          <ListItemIcon className={this.props.classes.icon}>
+            <ComputerIcon />
+          </ListItemIcon>
           <ListItemText className={this.props.classes.text} primary="System" />
         </ListItem>
         <ListItem>
-          <ListItemIcon className={this.props.classes.icon}><LibraryBooksIcon /></ListItemIcon>
+          <ListItemIcon className={this.props.classes.icon}>
+            <LibraryBooksIcon />
+          </ListItemIcon>
           <ListItemText className={this.props.classes.text} primary="Content" />
         </ListItem>
         <Collapse in={true} timeout="auto" unmountOnExit>
@@ -93,7 +97,9 @@ class Menu extends Component {
           </List>
         </Collapse>
         <ListItem>
-          <ListItemIcon className={this.props.classes.icon}><SettingsIcon /></ListItemIcon>
+          <ListItemIcon className={this.props.classes.icon}>
+            <SettingsIcon />
+          </ListItemIcon>
           <ListItemText className={this.props.classes.text} primary="Services" />
         </ListItem>
         <Collapse in={true} timeout="auto" unmountOnExit>

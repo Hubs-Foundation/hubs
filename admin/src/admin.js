@@ -2,7 +2,7 @@ import "./assets/stylesheets/admin.scss";
 
 import ReactDOM from "react-dom";
 import React, { Component } from "react";
-import { Route } from 'react-router-dom';
+import { Route } from "react-router-dom";
 import PropTypes from "prop-types";
 import { serviceNames } from "./utils/ita";
 import { connectToReticulum } from "hubs/src/utils/phoenix-utils";
@@ -29,13 +29,12 @@ registerTelemetry("/admin", "Hubs Admin");
 
 const systemRoute = <Route exact path="/system" component={SystemEditor} />;
 const serviceRoutes = serviceNames.map(s => {
-  return <Route exact path={`/services/${s}`} render={(props) => <ServiceEditor {...props} service={s} />} />;
+  return <Route exact key={s} path={`/services/${s}`} render={props => <ServiceEditor {...props} service={s} />} />;
 });
 
-const AdminLayout = (props) => <Layout {...props} menu={(props) => <AdminMenu {...props} services={serviceNames} />} />;
+const AdminLayout = props => <Layout {...props} menu={props => <AdminMenu {...props} services={serviceNames} />} />;
 
 class AdminUI extends Component {
-
   static propTypes = {
     dataProvider: PropTypes.func,
     authProvider: PropTypes.func
@@ -57,12 +56,32 @@ class AdminUI extends Component {
         logoutButton={() => <span />}
       >
         <Resource name="pending_scenes" list={PendingSceneList} />
-        <Resource name="scene_listings" list={SceneListingList} edit={SceneListingEdit} options={{ label: 'Approved scenes' }} />
-        <Resource name="featured_scene_listings" list={FeaturedSceneListingList} edit={FeaturedSceneListingEdit} options={{ label: 'Featured scenes' }} />
+        <Resource
+          name="scene_listings"
+          list={SceneListingList}
+          edit={SceneListingEdit}
+          options={{ label: "Approved scenes" }}
+        />
+        <Resource
+          name="featured_scene_listings"
+          list={FeaturedSceneListingList}
+          edit={FeaturedSceneListingEdit}
+          options={{ label: "Featured scenes" }}
+        />
 
         <Resource name="pending_avatars" list={AvatarList} />
-        <Resource name="avatar_listings" list={AvatarListingList} edit={AvatarListingEdit} options={{ label: 'Approved avatars' }}/>
-        <Resource name="featured_avatar_listings" list={AvatarListingList} edit={AvatarListingEdit} options={{ label: 'Featured avatars' }}/>
+        <Resource
+          name="avatar_listings"
+          list={AvatarListingList}
+          edit={AvatarListingEdit}
+          options={{ label: "Approved avatars" }}
+        />
+        <Resource
+          name="featured_avatar_listings"
+          list={AvatarListingList}
+          edit={AvatarListingEdit}
+          options={{ label: "Featured avatars" }}
+        />
 
         <Resource name="accounts" list={AccountList} edit={AccountEdit} />
         <Resource name="scenes" list={SceneList} edit={SceneEdit} />

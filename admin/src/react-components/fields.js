@@ -132,7 +132,7 @@ export const OwnedFileSizeField = withStyles(styles)(({ label, basePath, record,
       reference="owned_files"
       linkType={false}
       record={record}
-      defaultValue={<span>"N/A"</span>}
+      defaultValue={<span>N/A</span>}
     >
       <OwnedFileSizeFieldInternal />
     </ConditionalReferenceField>

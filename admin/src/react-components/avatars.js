@@ -54,10 +54,10 @@ const styles = {
 
 const Preview = withStyles(styles)(({ record, classes, source = "avatar_sid" }) => (
   <p>WIP</p>
-//  <AvatarPreview
-//    className={classes.preview}
-//    avatarGltfUrl={getReticulumFetchUrl(`/api/v1/avatars/${record[source]}/avatar.gltf?v=${record.updated_at}`)}
-//  />
+  //  <AvatarPreview
+  //    className={classes.preview}
+  //    avatarGltfUrl={getReticulumFetchUrl(`/api/v1/avatars/${record[source]}/avatar.gltf?v=${record.updated_at}`)}
+  //  />
 ));
 
 const rowStyle = record => ({
