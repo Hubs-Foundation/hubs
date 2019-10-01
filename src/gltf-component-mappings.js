@@ -47,14 +47,8 @@ AFRAME.GLTFModelPlus.registerComponent("light", "light", (el, componentName, com
 AFRAME.GLTFModelPlus.registerComponent("ambient-light", "ambient-light");
 AFRAME.GLTFModelPlus.registerComponent("directional-light", "directional-light");
 AFRAME.GLTFModelPlus.registerComponent("hemisphere-light", "hemisphere-light");
-function decayMigration(el, componentName, componentData) {
-  if (componentData.range === 0) {
-    componentData.decay = 0;
-  }
-  el.setAttribute(componentName, componentData);
-}
-AFRAME.GLTFModelPlus.registerComponent("point-light", "point-light", decayMigration);
-AFRAME.GLTFModelPlus.registerComponent("spot-light", "spot-light", decayMigration);
+AFRAME.GLTFModelPlus.registerComponent("point-light", "point-light");
+AFRAME.GLTFModelPlus.registerComponent("spot-light", "spot-light");
 
 AFRAME.GLTFModelPlus.registerComponent("skybox", "skybox");
 AFRAME.GLTFModelPlus.registerComponent("layers", "layers");
