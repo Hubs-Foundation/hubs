@@ -235,23 +235,55 @@ function attachTemplate(root, name, templateRoot) {
   }
 }
 
+function getHubsComponentsExtension(node) {
+  if (node.extensions && node.extensions.MOZ_hubs_components) {
+    return node.extensions.MOZ_hubs_components;
+  } else if (node.extensions && node.extensions.HUBS_components) {
+    return node.extensions.HUBS_components;
+  } else if (node.extras && node.extras.gltfExtensions && node.extras.gltfExtensions.MOZ_hubs_components) {
+    return node.extras.gltfExtensions.MOZ_hubs_components;
+  }
+}
+
+// Versions are documented here: https://github.com/mozilla/hubs/wiki/MOZ_hubs_components-Changelog
+// Make sure to update the wiki and Spoke when bumping a version
 function runMigration(version, json) {
   if (version < 2) {
     //old heightfields will be on the same node as the nav-mesh, delete those
     const oldHeightfieldNode = json.nodes.find(node => {
-      let components = null;
-      if (node.extensions && node.extensions.MOZ_hubs_components) {
-        components = node.extensions.MOZ_hubs_components;
-      } else if (node.extensions && node.extensions.HUBS_components) {
-        components = node.extensions.HUBS_components;
-      }
+      const components = getHubsComponentsExtension(node);
       return components && components.heightfield && components["nav-mesh"];
     });
     if (oldHeightfieldNode) {
-      if (oldHeightfieldNode.extensions.MOZ_hubs_components) {
+      if (oldHeightfieldNode.extensions && oldHeightfieldNode.extensions.MOZ_hubs_components) {
         delete oldHeightfieldNode.extensions.MOZ_hubs_components.heightfield;
-      } else if (oldHeightfieldNode.extensions.HUBS_components) {
+      } else if (oldHeightfieldNode.extensions && oldHeightfieldNode.extensions.HUBS_components) {
         delete oldHeightfieldNode.extensions.HUBS_components.heightfield;
+      } else if (
+        oldHeightfieldNode.extras &&
+        oldHeightfieldNode.extras.gltfExtensions &&
+        oldHeightfieldNode.extras.gltfExtensions.MOZ_hubs_components
+      ) {
+        delete oldHeightfieldNode.extras.gltfExtensions.MOZ_hubs_components;
+      }
+    }
+  }
+
+  if (version < 4) {
+    // Lights prior to version 4 should treat range === 0 as if it has zero decay
+    if (json.nodes) {
+      for (const node of json.nodes) {
+        const components = getHubsComponentsExtension(node);
+
+        if (!components) {
+          continue;
+        }
+
+        const light = components["spot-light"] || components["point-light"];
+
+        if (light && light.range === 0) {
+          light.decay = 0;
+        }
       }
     }
   }
