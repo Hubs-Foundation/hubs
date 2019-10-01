@@ -176,77 +176,10 @@ AFRAME.registerComponent("networked-drawing", {
   async serializeDrawing() {
     const exporter = new GLTFExporter();
 
-    const options = {
+    const material = new THREE.MeshStandardMaterial({
       vertexColors: THREE.VertexColors
-    };
-    const geometry = new THREE.BufferGeometry();
-    let material = new THREE.MeshStandardMaterial(options);
-    if (window.APP && window.APP.quality === "low") {
-      material = MobileStandardMaterial.fromStandardMaterial(material);
-    }
-
-    const { start, count } = this.sharedBuffer.current.drawRange;
-
-    const originalGeometry = this.sharedBuffer.current;
-    const originalPositions = originalGeometry.getAttribute("position");
-    const originalColors = originalGeometry.getAttribute("color");
-    const originalNormals = originalGeometry.getAttribute("normal");
-
-    const length = (count - 2) * 9;
-    const positions = new Float32Array(length);
-    const colors = new Float32Array(length);
-    const normals = new Float32Array(length);
-
-    let index = 0;
-    let order = 0;
-    for (let i = start; i < count - 2; i++) {
-      const i2 = i + 1 + order;
-      const i3 = i + 2 - order;
-      order = (order + 1) % 2;
-
-      positions[index] = originalPositions.getX(i);
-      positions[index + 1] = originalPositions.getY(i);
-      positions[index + 2] = originalPositions.getZ(i);
-
-      positions[index + 3] = originalPositions.getX(i2);
-      positions[index + 4] = originalPositions.getY(i2);
-      positions[index + 5] = originalPositions.getZ(i2);
-
-      positions[index + 6] = originalPositions.getX(i3);
-      positions[index + 7] = originalPositions.getY(i3);
-      positions[index + 8] = originalPositions.getZ(i3);
-
-      colors[index] = originalColors.getX(i);
-      colors[index + 1] = originalColors.getY(i);
-      colors[index + 2] = originalColors.getZ(i);
-
-      colors[index + 3] = originalColors.getX(i2);
-      colors[index + 4] = originalColors.getY(i2);
-      colors[index + 5] = originalColors.getZ(i2);
-
-      colors[index + 6] = originalColors.getX(i3);
-      colors[index + 7] = originalColors.getY(i3);
-      colors[index + 8] = originalColors.getZ(i3);
-
-      normals[index] = originalNormals.getX(i);
-      normals[index + 1] = originalNormals.getY(i);
-      normals[index + 2] = originalNormals.getZ(i);
-
-      normals[index + 3] = originalNormals.getX(i2);
-      normals[index + 4] = originalNormals.getY(i2);
-      normals[index + 5] = originalNormals.getZ(i2);
-
-      normals[index + 6] = originalNormals.getX(i3);
-      normals[index + 7] = originalNormals.getY(i3);
-      normals[index + 8] = originalNormals.getZ(i3);
-
-      index += 9;
-    }
-
-    geometry.addAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geometry.addAttribute("color", new THREE.BufferAttribute(colors, 3));
-    geometry.addAttribute("normal", new THREE.BufferAttribute(normals, 3));
-
+    });
+    const geometry = this.convertToTriangles(this.sharedBuffer.current);
     const mesh = new THREE.Mesh(geometry, material);
 
     mesh.userData.gltfExtensions = {
@@ -290,7 +223,7 @@ AFRAME.registerComponent("networked-drawing", {
     const max = new THREE.Vector3(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
     const temp = new THREE.Vector3();
 
-    // const { start, count } = this.sharedBuffer.current.drawRange;
+    const { start, count } = this.sharedBuffer.current.drawRange;
     const attribute = this.sharedBuffer.current.attributes.position;
     for (let i = start; i < count; i++) {
       temp.set(attribute.getX(i), attribute.getY(i), attribute.getZ(i));
@@ -300,6 +233,65 @@ AFRAME.registerComponent("networked-drawing", {
 
     entity.object3D.position.addVectors(min, max).multiplyScalar(0.5);
     entity.object3D.matrixNeedsUpdate = true;
+  },
+
+  convertToTriangles(originalGeometry) {
+    const geometry = new THREE.BufferGeometry();
+
+    const { start, count } = originalGeometry.drawRange;
+
+    const originalPositions = originalGeometry.getAttribute("position");
+    const originalColors = originalGeometry.getAttribute("color");
+    const originalNormals = originalGeometry.getAttribute("normal");
+
+    const length = count * 3;
+    const positions = new Float32Array(length);
+    const colors = new Float32Array(length);
+    const normals = new Float32Array(length);
+    const indices = [];
+
+    let index = 0;
+    let order = 0;
+
+    const copy = i => {
+      colors[index] = originalColors.getX(i);
+      normals[index] = originalNormals.getX(i);
+      positions[index] = originalPositions.getX(i);
+      index++;
+      colors[index] = originalColors.getY(i);
+      normals[index] = originalNormals.getY(i);
+      positions[index] = originalPositions.getY(i);
+      index++;
+      colors[index] = originalColors.getZ(i);
+      normals[index] = originalNormals.getZ(i);
+      positions[index] = originalPositions.getZ(i);
+      index++;
+    };
+
+    for (let i = start; i < count - 2; i++) {
+      const i2 = i + 1 + order;
+      const i3 = i + 2 - order;
+
+      if (i === 0) {
+        copy(i);
+        copy(i2);
+        copy(i3);
+      } else if (i2 > i3) {
+        copy(i2);
+      } else {
+        copy(i3);
+      }
+
+      indices.push(i, i2, i3);
+      order = (order + 1) % 2;
+    }
+
+    geometry.addAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.addAttribute("color", new THREE.BufferAttribute(colors, 3));
+    geometry.addAttribute("normal", new THREE.BufferAttribute(normals, 3));
+    geometry.setIndex(indices);
+
+    return geometry;
   },
 
   deserializeDrawing: (() => {
