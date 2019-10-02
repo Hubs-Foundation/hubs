@@ -532,8 +532,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: {
         value: k("wheelWithShift")
       },
-      xform: xforms.copyIfTrue,
-      priority: 1
+      xform: xforms.copyIfTrue
     },
     {
       src: {
@@ -543,8 +542,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: {
         value: k("wheelWithoutShift")
       },
-      xform: xforms.copyIfFalse,
-      priority: 1
+      xform: xforms.copyIfFalse
     },
     {
       src: {
