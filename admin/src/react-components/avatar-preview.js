@@ -296,24 +296,21 @@ class AvatarPreview extends Component {
   render() {
     return (
       <div className={classNames(styles.preview, this.props.className)}>
-        {!this.props.avatarGltfUrl ||
-          (this.state.loading &&
-            !this.state.error && (
-              <div className="loader">
-                <div className="loader-center" />
-              </div>
-            ))}
-        {this.props.avatarGltfUrl &&
-          (this.state.error && !this.state.loading) && (
-            <div className="error">
-              <img
-                src="hubs/src/assets/images/warning_icon.png"
-                srcSet="hubs/src/assets/images/warning_icon@2x.png 2x"
-                className="error-icon"
-              />
-              <FormattedMessage id="avatar-preview.loading-failed" />
-            </div>
-          )}
+        {(!this.props.avatarGltfUrl || (this.state.loading && !this.state.error)) && (
+          <div className="loader">
+            <div className="loader-center" />
+          </div>
+        )}
+        {this.props.avatarGltfUrl && (this.state.error && !this.state.loading) && (
+          <div className="error">
+            <img
+              src="hubs/src/assets/images/warning_icon.png"
+              srcSet="hubs/src/assets/images/warning_icon@2x.png 2x"
+              className="error-icon"
+            />
+            <FormattedMessage id="avatar-preview.loading-failed" />
+          </div>
+        )}
         <canvas ref={c => (this.canvas = c)} />
       </div>
     );

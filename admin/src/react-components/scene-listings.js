@@ -28,7 +28,11 @@ export const SceneListingEdit = props => (
   <Edit {...props}>
     <SimpleForm>
       <TextInput source="name" />
-      <SelectInput label="Status" source="state" choices={[{ id: "active", name: "active" }, { id: "delisted", name: "delisted" }]} />
+      <SelectInput
+        label="Status"
+        source="state"
+        choices={[{ id: "active", name: "active" }, { id: "delisted", name: "delisted" }]}
+      />
     </SimpleForm>
   </Edit>
 );

@@ -16,7 +16,7 @@ import {
   putConfig
 } from "../utils/ita";
 
-const styles = _theme => ({
+const styles = () => ({
   container: {
     display: "flex",
     flexWrap: "wrap"
@@ -62,11 +62,11 @@ class ConfigurationEditor extends Component {
     this.setState({ config: config });
   }
 
-  onSubmit(_ev) {
+  onSubmit() {
     putConfig(this.props.service, this.state.config);
   }
 
-  onRevert(_ev) {
+  onRevert() {
     getConfig(this.props.service).then(config => this.setState({ config: config }));
   }
 

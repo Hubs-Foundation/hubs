@@ -19,7 +19,7 @@ const mapStateToProps = state => ({
   resources: getResources(state)
 });
 
-const styles = _theme => ({
+const styles = () => ({
   root: {
     width: "100%"
   },
