@@ -102,7 +102,6 @@ module.exports = (env, argv) => ({
     link: path.join(__dirname, "src", "link.js"),
     spoke: path.join(__dirname, "src", "spoke.js"),
     discord: path.join(__dirname, "src", "discord.js"),
-    admin: path.join(__dirname, "src", "admin.js"),
     "whats-new": path.join(__dirname, "src", "whats-new.js")
   },
   output: {
