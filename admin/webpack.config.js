@@ -61,12 +61,7 @@ function createHTTPSConfig() {
 
 const defaultHostName = "hubs.local";
 const host = process.env.HOST_IP || defaultHostName;
-const babelConfig = JSON.parse(
-  fs
-    .readFileSync(path.resolve(__dirname, ".babelrc"))
-    .toString()
-    .replace(/\/\/.+/g, "")
-);
+const babelConfig = JSON.parse(fs.readFileSync(path.resolve(__dirname, ".babelrc")).toString());
 
 module.exports = (env, argv) => ({
   node: {
