@@ -1,5 +1,5 @@
 import { VOLUME_LABELS } from "./media-views";
-const MAX_VOLUME = 4;
+const MAX_VOLUME = 2;
 const STEP = MAX_VOLUME / VOLUME_LABELS.length;
 
 AFRAME.registerComponent("avatar-volume-controls", {
@@ -26,11 +26,11 @@ AFRAME.registerComponent("avatar-volume-controls", {
   },
 
   volumeUp() {
-    this.changeVolumeBy(STEP * (this.data.volume < 1 ? 0.5 : 1));
+    this.changeVolumeBy(STEP);
   },
 
   volumeDown() {
-    this.changeVolumeBy(-1 * STEP * (this.data.volume < 1 ? 0.5 : 1));
+    this.changeVolumeBy(-1 * STEP);
   },
 
   update() {
