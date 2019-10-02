@@ -7,12 +7,10 @@ import HomeRoot from "./react-components/home-root";
 import AuthChannel from "./utils/auth-channel";
 import { createAndRedirectToNewHub, connectToReticulum, fetchReticulumAuthenticated } from "./utils/phoenix-utils";
 import Store from "./storage/store";
+import jwtDecode from "jwt-decode";
 
 const qs = new URLSearchParams(location.search);
 registerTelemetry("/home", "Hubs Home Page");
-
-const { pathname } = document.location;
-const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathname.substring(1).split("/")[1]);
 
 const store = new Store();
 window.APP = { store };
@@ -22,14 +20,13 @@ let installEvent = null;
 let favoriteHubsResult = null;
 let mountedUI = false;
 let hideHero = true;
+let showAdmin = false;
 
 const remountUI = function() {
   mountedUI = true;
 
   const root = (
     <HomeRoot
-      initialEnvironment={qs.get("initial_environment")}
-      sceneId={sceneId || ""}
       store={store}
       authChannel={authChannel}
       authVerify={qs.has("auth_topic")}
@@ -38,7 +35,11 @@ const remountUI = function() {
       authPayload={qs.get("auth_payload")}
       authOrigin={qs.get("auth_origin")}
       listSignup={qs.has("list_signup")}
+      showSignIn={qs.has("sign_in")}
+      signInDestination={qs.get("sign_in_destination")}
+      signInReason={qs.get("sign_in_reason")}
       hideHero={hideHero}
+      showAdmin={showAdmin}
       favoriteHubsResult={favoriteHubsResult}
       report={qs.has("report")}
       installEvent={installEvent}
@@ -59,17 +60,33 @@ window.addEventListener("beforeinstallprompt", e => {
 
 (async () => {
   if (qs.get("new") !== null) {
-    createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, null, true);
+    createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, true);
     return;
   }
 
-  authChannel.setSocket(await connectToReticulum());
+  const socket = await connectToReticulum();
+
+  authChannel.setSocket(socket);
   remountUI();
 
   if (authChannel.signedIn) {
     // Fetch favorite rooms
     const path = `/api/v1/media/search?source=favorites&type=hubs&user=${store.credentialsAccountId}`;
     favoriteHubsResult = await fetchReticulumAuthenticated(path);
+
+    const retPhxChannel = socket.channel(`ret`, { hub_id: "index", token: store.state.credentials.token });
+    retPhxChannel.join().receive("ok", () => {
+      retPhxChannel.push("refresh_perms_token").receive("ok", ({ perms_token }) => {
+        const perms = jwtDecode(perms_token);
+
+        if (perms.postgrest_role === "ret_admin") {
+          showAdmin = true;
+          remountUI();
+        }
+
+        retPhxChannel.leave();
+      });
+    });
   }
 
   hideHero = false;

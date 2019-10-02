@@ -10,14 +10,14 @@ AFRAME.registerComponent("cursor-controller", {
   schema: {
     cursor: { type: "selector" },
     camera: { type: "selector" },
-    far: { default: 25 },
+    far: { default: 100 },
     near: { default: 0.01 },
     defaultDistance: { default: 4 },
     minDistance: { default: 0.18 }
   },
 
   init: function() {
-    this.enabled = true;
+    this.enabled = false;
 
     this.data.cursor.addEventListener(
       "loaded",
@@ -27,6 +27,7 @@ AFRAME.registerComponent("cursor-controller", {
       { once: true }
     );
 
+    this.intersection = null;
     this.raycaster = new THREE.Raycaster();
     this.raycaster.firstHitOnly = true; // flag specific to three-mesh-bvh
     this.distance = this.data.far;
@@ -56,21 +57,22 @@ AFRAME.registerComponent("cursor-controller", {
     const rawIntersections = [];
     const cameraPos = new THREE.Vector3();
 
-    return function(t) {
+    return function(t, left) {
       const userinput = AFRAME.scenes[0].systems.userinput;
-      const cursorPose = userinput.get(paths.actions.cursor.pose);
-      const hideLine = userinput.get(paths.actions.cursor.hideLine);
+      const cursorPose = userinput.get(left ? paths.actions.cursor.left.pose : paths.actions.cursor.right.pose);
+      const hideLine = userinput.get(left ? paths.actions.cursor.left.hideLine : paths.actions.cursor.right.hideLine);
 
       this.data.cursor.object3D.visible = this.enabled && !!cursorPose;
       this.line.material.visible = !!(this.enabled && !hideLine);
+
+      this.intersection = null;
 
       if (!this.enabled || !cursorPose) {
         return;
       }
 
       const interaction = AFRAME.scenes[0].systems.interaction;
-      let intersection;
-      const isGrabbing = !!interaction.state.rightRemote.held;
+      const isGrabbing = left ? !!interaction.state.leftRemote.held : !!interaction.state.rightRemote.held;
       if (!isGrabbing) {
         rawIntersections.length = 0;
         this.raycaster.ray.origin = cursorPose.position;
@@ -80,15 +82,16 @@ AFRAME.registerComponent("cursor-controller", {
           true,
           rawIntersections
         );
-        intersection = rawIntersections[0];
-        interaction.updateCursorIntersection(intersection);
-        this.distance = intersection ? intersection.distance : this.data.defaultDistance;
+        this.intersection = rawIntersections[0];
+        this.intersectionIsValid = !!interaction.updateCursorIntersection(this.intersection, left);
+        this.distance = this.intersectionIsValid ? this.intersection.distance : this.data.defaultDistance;
       }
 
       const { cursor, minDistance, far, camera } = this.data;
 
-      const cursorModDelta = userinput.get(paths.actions.cursor.modDelta) || 0;
-      if (isGrabbing && !userinput.activeSets.includes(sets.cursorHoldingUI)) {
+      const cursorModDelta =
+        userinput.get(left ? paths.actions.cursor.left.modDelta : paths.actions.cursor.right.modDelta) || 0;
+      if (isGrabbing && !userinput.activeSets.includes(left ? sets.leftCursorHoldingUI : sets.rightCursorHoldingUI)) {
         this.distance = THREE.Math.clamp(this.distance - cursorModDelta, minDistance, far);
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);
@@ -99,9 +102,15 @@ AFRAME.registerComponent("cursor-controller", {
       cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
       cursor.object3D.matrixNeedsUpdate = true;
 
-      if (AFRAME.scenes[0].systems["transform-selected-object"].transforming) {
+      // TODO : Check if the selected object being transformed is for this cursor!
+      const transformObjectSystem = AFRAME.scenes[0].systems["transform-selected-object"];
+      if (
+        transformObjectSystem.transforming &&
+        ((left && transformObjectSystem.hand.el.id === "player-left-controller") ||
+          (!left && transformObjectSystem.hand.el.id === "player-right-controller"))
+      ) {
         this.color.copy(TRANSFORM_COLOR_1).lerpHSL(TRANSFORM_COLOR_2, 0.5 + 0.5 * Math.sin(t / 1000.0));
-      } else if (intersection || isGrabbing) {
+      } else if (this.intersectionIsValid || isGrabbing) {
         this.color.copy(HIGHLIGHT);
       } else {
         this.color.copy(NO_HIGHLIGHT);

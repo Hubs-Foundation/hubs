@@ -2,10 +2,14 @@ import { isHubsSceneUrl, isHubsRoomUrl, isHubsAvatarUrl } from "../utils/media-u
 import { guessContentType } from "../utils/media-url-utils";
 
 AFRAME.registerComponent("open-media-button", {
+  schema: {
+    onlyOpenLink: { type: "boolean" }
+  },
   init() {
     this.label = this.el.querySelector("[text]");
 
     this.updateSrc = () => {
+      if (!this.targetEl.parentNode) return; // If removed
       const src = (this.src = this.targetEl.components["media-loader"].data.src);
       const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
@@ -14,12 +18,14 @@ AFRAME.registerComponent("open-media-button", {
 
       if (visible) {
         let label = "open link";
-        if (isHubsAvatarUrl(src)) {
-          label = "use avatar";
-        } else if (isHubsSceneUrl(src) && mayChangeScene) {
-          label = "use scene";
-        } else if (isHubsRoomUrl(src)) {
-          label = "visit room";
+        if (!this.data.onlyOpenLink) {
+          if (isHubsAvatarUrl(src)) {
+            label = "use avatar";
+          } else if (isHubsSceneUrl(src) && mayChangeScene) {
+            label = "use scene";
+          } else if (isHubsRoomUrl(src)) {
+            label = "visit room";
+          }
         }
         this.label.setAttribute("text", "value", label);
       }
@@ -28,7 +34,9 @@ AFRAME.registerComponent("open-media-button", {
     this.onClick = () => {
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
 
-      if (isHubsAvatarUrl(this.src)) {
+      if (this.data.onlyOpenLink) {
+        window.open(this.src);
+      } else if (isHubsAvatarUrl(this.src)) {
         const avatarId = new URL(this.src).pathname.split("/").pop();
         window.APP.store.update({ profile: { avatarId } });
       } else if (isHubsSceneUrl(this.src) && mayChangeScene) {

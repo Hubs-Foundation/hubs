@@ -5,6 +5,7 @@ import { guessContentType } from "../utils/media-url-utils";
 AFRAME.registerComponent("clone-media-button", {
   init() {
     this.updateSrc = () => {
+      if (!this.targetEl.parentNode) return; // If removed
       const src = (this.src = this.targetEl.components["media-loader"].data.src);
       const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
       this.el.object3D.visible = !!visible;
@@ -24,7 +25,7 @@ AFRAME.registerComponent("clone-media-button", {
       entity.object3D.matrixNeedsUpdate = true;
 
       entity.setAttribute("offset-relative-to", {
-        target: "#player-camera",
+        target: "#avatar-pov-node",
         offset: { x: 0, y: 0, z: -1.5 }
       });
     };

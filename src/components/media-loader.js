@@ -1,6 +1,7 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
-import { resolveUrl, injectCustomShaderChunks } from "../utils/media-utils";
+import { resolveUrl, injectCustomShaderChunks, addMeshScaleAnimation } from "../utils/media-utils";
 import {
+  isNonCorsProxyDomain,
   guessContentType,
   proxiedUrlFor,
   isHubsRoomUrl,
@@ -10,19 +11,21 @@ import {
 import { addAnimationComponents } from "../utils/animation";
 import qsTruthy from "../utils/qs_truthy";
 
-import "three/examples/js/loaders/GLTFLoader";
-import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
+import loadingObjectSrc from "../assets/models/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
+import { loadModel } from "./gltf-model-plus";
+import { cloneObject3D } from "../utils/three-utils";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 
-import anime from "animejs";
+import { SHAPE } from "three-ammo/constants";
 
-const SHAPE = require("aframe-physics-system/src/constants").SHAPE;
-
-const gltfLoader = new THREE.GLTFLoader();
 let loadingObjectEnvMap;
 let loadingObject;
-gltfLoader.load(loadingObjectSrc, gltf => {
-  loadingObject = gltf;
+
+waitForDOMContentLoaded().then(() => {
+  loadModel(loadingObjectSrc).then(gltf => {
+    loadingObject = gltf;
+  });
 });
 
 const fetchContentType = url => {
@@ -36,6 +39,7 @@ const disableBatching = qsTruthy("disableBatching");
 
 AFRAME.registerComponent("media-loader", {
   schema: {
+    playSoundEffect: { default: true },
     fileId: { type: "string" },
     fileIsOwned: { type: "boolean" },
     src: { type: "string" },
@@ -84,8 +88,8 @@ AFRAME.registerComponent("media-loader", {
   })(),
 
   removeShape(id) {
-    if (this.el.getAttribute("ammo-shape__" + id)) {
-      this.el.removeAttribute("ammo-shape__" + id);
+    if (this.el.getAttribute("shape-helper__" + id)) {
+      this.el.removeAttribute("shape-helper__" + id);
     }
   },
 
@@ -119,7 +123,7 @@ AFRAME.registerComponent("media-loader", {
     const useFancyLoader = !!loadingObject;
 
     const mesh = useFancyLoader
-      ? loadingObject.scene.clone()
+      ? cloneObject3D(loadingObject.scene)
       : new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
     this.el.setObject3D("mesh", mesh);
 
@@ -127,15 +131,17 @@ AFRAME.registerComponent("media-loader", {
 
     if (useFancyLoader) {
       const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-      const currentEnivronmentMap = environmentMapComponent.environmentMap;
-      if (loadingObjectEnvMap !== currentEnivronmentMap) {
-        environmentMapComponent.applyEnvironmentMap(mesh);
-        loadingObjectEnvMap = currentEnivronmentMap;
+      if (environmentMapComponent) {
+        const currentEnivronmentMap = environmentMapComponent.environmentMap;
+        if (loadingObjectEnvMap !== currentEnivronmentMap) {
+          environmentMapComponent.applyEnvironmentMap(mesh);
+          loadingObjectEnvMap = currentEnivronmentMap;
+        }
       }
 
       this.loaderMixer = new THREE.AnimationMixer(mesh);
 
-      this.loadingClip = this.loaderMixer.clipAction(loadingObject.animations[0]);
+      this.loadingClip = this.loaderMixer.clipAction(mesh.animations[0]);
       this.loadingScaleClip = this.loaderMixer.clipAction(
         new THREE.AnimationClip(null, 1000, [
           new THREE.VectorKeyframeTrack(".scale", [0, 0.2], [0, 0, 0, mesh.scale.x, mesh.scale.y, mesh.scale.z])
@@ -143,14 +149,18 @@ AFRAME.registerComponent("media-loader", {
       );
       setTimeout(() => {
         if (!this.loaderMixer) return; // Animation/loader was stopped early
-        this.el.setAttribute("ammo-shape__loader", { type: SHAPE.BOX });
+        this.el.setAttribute("shape-helper__loader", { type: SHAPE.BOX });
       }, 200);
 
       this.loadingClip.play();
       this.loadingScaleClip.play();
     }
 
-    if (this.el.sceneEl.is("entered") && (!this.networkedEl || NAF.utils.isMine(this.networkedEl))) {
+    if (
+      this.el.sceneEl.is("entered") &&
+      (!this.networkedEl || NAF.utils.isMine(this.networkedEl)) &&
+      this.data.playSoundEffect
+    ) {
       this.loadingSoundNode = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundLooped(
         SOUND_MEDIA_LOADING
       );
@@ -194,7 +204,7 @@ AFRAME.registerComponent("media-loader", {
     const el = this.el;
     this.clearLoadingTimeout();
 
-    if (this.el.sceneEl.is("entered")) {
+    if (this.el.sceneEl.is("entered") && this.data.playSoundEffect) {
       this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_MEDIA_LOADED);
     }
 
@@ -202,7 +212,7 @@ AFRAME.registerComponent("media-loader", {
       this.animating = false;
 
       if (physicsShape) {
-        el.setAttribute("ammo-shape", {
+        el.setAttribute("shape-helper", {
           type: physicsShape,
           minHalfExtent: 0.04
         });
@@ -226,59 +236,12 @@ AFRAME.registerComponent("media-loader", {
         scale.x = mesh.scale.x < scale.x ? mesh.scale.x * 0.001 : scale.x;
         scale.y = mesh.scale.y < scale.y ? mesh.scale.x * 0.001 : scale.y;
         scale.z = mesh.scale.z < scale.z ? mesh.scale.x * 0.001 : scale.z;
-        this.addMeshScaleAnimation(mesh, scale, finish);
+        addMeshScaleAnimation(mesh, scale, finish);
       }
     } else {
       if (shouldUpdateScale) this.updateScale(this.data.resize);
       finish();
     }
-  },
-
-  addMeshScaleAnimation(mesh, initialScale, onComplete) {
-    const step = (function() {
-      const lastValue = {};
-      return function(anim) {
-        const value = anim.animatables[0].target;
-
-        value.x = Math.max(Number.MIN_VALUE, value.x);
-        value.y = Math.max(Number.MIN_VALUE, value.y);
-        value.z = Math.max(Number.MIN_VALUE, value.z);
-
-        // For animation timeline.
-        if (value.x === lastValue.x && value.y === lastValue.y && value.z === lastValue.z) {
-          return;
-        }
-
-        lastValue.x = value.x;
-        lastValue.y = value.y;
-        lastValue.z = value.z;
-
-        mesh.scale.set(value.x, value.y, value.z);
-        mesh.matrixNeedsUpdate = true;
-      };
-    })();
-
-    const config = {
-      duration: 400,
-      easing: "easeOutElastic",
-      elasticity: 400,
-      loop: 0,
-      round: false,
-      x: mesh.scale.x,
-      y: mesh.scale.y,
-      z: mesh.scale.z,
-      targets: [initialScale],
-      update: anim => step(anim),
-      complete: anim => {
-        step(anim);
-        onComplete();
-      }
-    };
-
-    mesh.scale.copy(initialScale);
-    mesh.matrixNeedsUpdate = true;
-
-    return anime(config);
   },
 
   async update(oldData) {
@@ -296,7 +259,14 @@ AFRAME.registerComponent("media-loader", {
       let contentType = this.data.contentType;
       let thumbnail;
 
-      if (this.data.resolve) {
+      const parsedUrl = new URL(src);
+
+      // We want to resolve and proxy some hubs urls, like rooms and scene links,
+      // but want to avoid proxying assets in order for this to work in dev environments
+      const isLocalModelAsset =
+        isNonCorsProxyDomain(parsedUrl.hostname) && (guessContentType(src) || "").startsWith("model/gltf");
+
+      if (this.data.resolve && !src.startsWith("data:") && !isLocalModelAsset) {
         const result = await resolveUrl(src);
         canonicalUrl = result.origin;
         // handle protocol relative urls
@@ -324,7 +294,6 @@ AFRAME.registerComponent("media-loader", {
         contentType.startsWith("audio/") ||
         AFRAME.utils.material.isHLS(canonicalUrl, contentType)
       ) {
-        const parsedUrl = new URL(src);
         const qsTime = parseInt(parsedUrl.searchParams.get("t"));
         const hashTime = parseInt(new URLSearchParams(parsedUrl.hash.substring(1)).get("t"));
         const startTime = hashTime || qsTime || 0;
@@ -555,11 +524,11 @@ AFRAME.registerComponent("media-pager", {
   },
 
   repositionToolbar() {
-    const ammoShape = this.el.getAttribute("ammo-shape");
+    const ammoShape = this.el.getAttribute("shape-helper");
     if (!ammoShape) return;
     if (!this.toolbar) return;
 
-    this.toolbar.object3D.position.y = -0.7;
+    this.toolbar.object3D.position.y = 0.7;
     this.toolbar.object3D.matrixNeedsUpdate = true;
   }
 });

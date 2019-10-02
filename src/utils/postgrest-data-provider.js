@@ -4,7 +4,10 @@ import { GET_LIST, GET_ONE, GET_MANY, GET_MANY_REFERENCE, CREATE, UPDATE, DELETE
 import { AUTH_LOGIN, AUTH_LOGOUT, AUTH_ERROR } from "react-admin";
 import json2ParseBigint from "./json_parse_bigint";
 
+// NOTE: The current perms token (and refresh) is used when we are talking directly to PostgREST over a tunnel.
+// The current auth token, if set, is used when we're talking to reticulum proxying PostgREST.
 let currentPermsToken = null;
+let currentAuthToken = null;
 
 // Custom fetchJson routing to ensure bigint precision
 const fetchJson = (url, options) => {
@@ -17,7 +20,7 @@ const fetchJson = (url, options) => {
     requestHeaders.set("Content-Type", "application/json");
   }
   if (options.user && options.user.authenticated && options.user.token) {
-    requestHeaders.set("Authorization", options.user.token);
+    requestHeaders.set("Authorization", `Bearer ${options.user.token}`);
   }
 
   return fetch(url, { ...options, headers: requestHeaders })
@@ -109,7 +112,7 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
     let url = "";
     const options = {};
     options.headers = new Headers();
-    options.headers.set("Authorization", `Bearer ${currentPermsToken}`);
+    options.headers.set("Authorization", `Bearer ${currentAuthToken || currentPermsToken}`);
     const stripReadOnlyColumns = json => {
       const newJson = {};
 
@@ -270,7 +273,11 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
 
 let retPhxChannel;
 
-export const refreshToken = function() {
+const setAuthToken = function(token) {
+  currentAuthToken = token;
+};
+
+export const refreshPermsToken = function() {
   return new Promise((resolve, reject) => {
     retPhxChannel
       .push("refresh_perms_token")
@@ -290,11 +297,12 @@ const createAuthProvider = channel => {
 
   return async (type, params) => {
     if (type === AUTH_LOGIN) {
-      const token = await refreshToken();
+      const token = await refreshPermsToken();
       return token;
     }
 
     if (type === AUTH_LOGOUT) {
+      currentAuthToken = null;
       currentPermsToken = null;
       return Promise.resolve();
     }
@@ -302,7 +310,17 @@ const createAuthProvider = channel => {
     if (type === AUTH_ERROR) {
       const status = params.status;
       if (status === 401 || status === 403) {
+        let redirectTo = "/?sign_in&sign_in_destination=admin";
+
+        if (currentAuthToken || currentPermsToken) {
+          redirectTo = redirectTo + "&sign_in_reason=admin_no_permission";
+        }
+
+        currentAuthToken = null;
         currentPermsToken = null;
+
+        // Rejecting with redirectTo doesn't work if perm check failed for some reason.
+        document.location = redirectTo;
         return Promise.reject();
       }
       return Promise.resolve();
@@ -314,7 +332,8 @@ const createAuthProvider = channel => {
 
 const postgrestAuthenticatior = {
   createAuthProvider,
-  refreshToken
+  refreshPermsToken,
+  setAuthToken
 };
 
 export { postgrestClient, postgrestAuthenticatior };

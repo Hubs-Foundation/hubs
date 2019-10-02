@@ -89,7 +89,7 @@ This will allow the CSP checks to pass that are served up by Reticulum so you ca
 - `vrstats` - If `true` shows stats in VR.
 - `debug_log` - If `true`, enables an on-screen debug log and console. Useful for debugging on mobile devices.
 - `userinput_debug` - If `true`, enables an on-screen userinput debug status panel. Press "L" on your keyboard to show the panel.
-- `disableTunnel` - Tunnel vision is on by default. Disable the tunnel vision by this parameter.
+- `thirdPerson` - Enables experimental third person mode.
 
 ## Additional Resources
 

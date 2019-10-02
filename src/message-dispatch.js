@@ -1,7 +1,7 @@
+import { getAbsoluteHref } from "./utils/media-url-utils";
 import { spawnChatMessage } from "./react-components/chat-message";
 import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "./systems/sound-effects-system";
-
-const DUCK_URL = "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf";
+import ducky from "./assets/models/DuckyMesh.glb";
 
 // Handles user-entered messages
 export default class MessageDispatch {
@@ -36,28 +36,28 @@ export default class MessageDispatch {
       return;
     }
 
-    const playerRig = document.querySelector("#player-rig");
+    const avatarRig = document.querySelector("#avatar-rig");
     const scales = [0.0625, 0.125, 0.25, 0.5, 1.0, 1.5, 3, 5, 7.5, 12.5];
-    const curScale = playerRig.object3D.scale;
+    const curScale = avatarRig.object3D.scale;
     let err;
     let physicsSystem;
     const captureSystem = this.scene.systems["capture-system"];
 
     switch (command) {
       case "fly":
-        if (playerRig.getAttribute("character-controller").fly !== true) {
-          playerRig.setAttribute("character-controller", "fly", true);
+        if (avatarRig.getAttribute("character-controller").fly !== true) {
+          avatarRig.setAttribute("character-controller", "fly", true);
           this.addToPresenceLog({ type: "log", body: "Fly mode enabled." });
         } else {
-          playerRig.setAttribute("character-controller", "fly", false);
+          avatarRig.setAttribute("character-controller", "fly", false);
           this.addToPresenceLog({ type: "log", body: "Fly mode disabled." });
         }
         break;
       case "grow":
         for (let i = 0; i < scales.length; i++) {
           if (scales[i] > curScale.x) {
-            playerRig.object3D.scale.set(scales[i], scales[i], scales[i]);
-            playerRig.object3D.matrixNeedsUpdate = true;
+            avatarRig.object3D.scale.set(scales[i], scales[i], scales[i]);
+            avatarRig.object3D.matrixNeedsUpdate = true;
             break;
           }
         }
@@ -66,7 +66,7 @@ export default class MessageDispatch {
       case "shrink":
         for (let i = scales.length - 1; i >= 0; i--) {
           if (curScale.x > scales[i]) {
-            playerRig.object3D.scale.set(scales[i], scales[i], scales[i]);
+            avatarRig.object3D.scale.set(scales[i], scales[i], scales[i]);
             break;
           }
         }
@@ -77,7 +77,7 @@ export default class MessageDispatch {
         this.remountUI({ roomUnavailableReason: "left" });
         break;
       case "duck":
-        spawnChatMessage(DUCK_URL);
+        spawnChatMessage(getAbsoluteHref(location.href, ducky));
         if (Math.random() < 0.01) {
           this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);
         } else {
@@ -85,8 +85,8 @@ export default class MessageDispatch {
         }
         break;
       case "debug":
-        physicsSystem = document.querySelector("a-scene").systems.physics;
-        physicsSystem.setDebug(!physicsSystem.debug);
+        physicsSystem = document.querySelector("a-scene").systems["hubs-systems"].physicsSystem;
+        physicsSystem.setDebug(!physicsSystem.debugEnabled);
         break;
       case "vrstats":
         document.getElementById("stats").components["stats-plus"].toggleVRStats();
@@ -99,7 +99,7 @@ export default class MessageDispatch {
             this.addToPresenceLog({ type: "log", body: "You do not have permission to change the scene." });
           }
         } else if (this.hubChannel.canOrWillIfCreator("update_hub")) {
-          this.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+          this.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
         }
 
         break;

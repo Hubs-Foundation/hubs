@@ -28,7 +28,7 @@ const getPlayerCamera = (() => {
 
   return function() {
     if (!playerCamera) {
-      playerCamera = document.querySelector("#player-camera").components.camera.camera;
+      playerCamera = document.getElementById("viewing-camera").components.camera.camera;
     }
 
     return playerCamera;
@@ -54,17 +54,17 @@ function shouldMoveCursor(touch, raycaster) {
     rawIntersections
   );
   const intersection = rawIntersections.find(x => x.object.el);
-  const remoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
   const isInteractable = intersection && intersection.object.el.matches(".interactable, .interactable *");
+  const remoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
   const isPinned =
     remoteHoverTarget && remoteHoverTarget.components.pinnable && remoteHoverTarget.components.pinnable.data.pinned;
   const isFrozen = AFRAME.scenes[0].is("frozen");
-  return isInteractable && (isFrozen || !isPinned) && canMove(remoteHoverTarget);
+  return isInteractable && (isFrozen || !isPinned) && (remoteHoverTarget && canMove(remoteHoverTarget));
 }
 
 export class AppAwareTouchscreenDevice {
   constructor() {
-    this.raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 4);
+    this.raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 100);
     this.assignments = [];
     this.pinch = { initialDistance: 0, currentDistance: 0, delta: 0 };
 
@@ -337,7 +337,7 @@ export class AppAwareTouchscreenDevice {
 
     if (hasCameraJob) {
       const delta = findByJob(MOVE_CAMERA_JOB, this.assignments).delta;
-      frame.setVector2(path.touchCameraDelta, delta[0], delta[1]);
+      frame.setVector2(path.touchCameraDelta, delta[0] / window.innerWidth, delta[1] / window.innerHeight);
     }
 
     frame.setValueType(path.pinch.delta, this.pinch.delta);
@@ -350,5 +350,7 @@ export class AppAwareTouchscreenDevice {
     }
 
     this.tapIndexToWriteNextFrame = 0;
+
+    frame.setValueType(path.anything, this.assignments.length !== 0);
   }
 }

@@ -2,6 +2,7 @@ import { paths } from "../paths";
 import { Pose } from "../pose";
 import { applyArmModel } from "../arm-model.js";
 import { copySittingToStandingTransform } from "./copy-sitting-to-standing-transform";
+import { waitForDOMContentLoaded } from "../../../utils/async-utils";
 
 const ONES = new THREE.Vector3(1, 1, 1);
 
@@ -22,12 +23,17 @@ export class OculusGoControllerDevice {
     // TODO ideally we should just be getting pose from the gamepad
     // TODO if controller is set to left hand, we still use right hand query here
     // because otherwise things break.
-    this.rayObject = document.querySelector("#player-right-controller").object3D;
-    this.headObject3D = document.querySelector("#player-camera").object3D;
+    waitForDOMContentLoaded().then(() => {
+      this.rayObject = document.querySelector("#player-right-controller").object3D;
+      this.headObject3D = document.querySelector("#avatar-pov-node").object3D;
+    });
+
     navigator.getGamepads();
   }
 
   write(frame) {
+    if (!this.rayObject || !this.headObject3D) return;
+
     // Have to call navigator.getGamepads() in order for the gamepad object to update.
     navigator.getGamepads();
     if (this.gamepad.connected) {

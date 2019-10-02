@@ -19,7 +19,7 @@ export const touchscreenUserBindings = addSetsToBindings({
   [sets.global]: [
     {
       src: {},
-      dest: { value: paths.actions.cursor.hideLine },
+      dest: { value: paths.actions.cursor.right.hideLine },
       xform: xforms.always(true)
     },
     {
@@ -44,7 +44,7 @@ export const touchscreenUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.touchscreen.cursorPose },
-      dest: { value: paths.actions.cursor.pose },
+      dest: { value: paths.actions.cursor.right.pose },
       xform: xforms.copy
     },
     {
@@ -55,12 +55,12 @@ export const touchscreenUserBindings = addSetsToBindings({
     {
       src: { value: touchCamDeltaX },
       dest: { value: touchCamDeltaXScaled },
-      xform: xforms.scale(0.18)
+      xform: xforms.scale(Math.PI)
     },
     {
       src: { value: touchCamDeltaY },
       dest: { value: touchCamDeltaYScaled },
-      xform: xforms.scale(0.35)
+      xform: xforms.scale(Math.PI / 2)
     },
     {
       src: { x: touchCamDeltaXScaled, y: touchCamDeltaYScaled },
@@ -97,7 +97,7 @@ export const touchscreenUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.rising
     },
     {
@@ -112,32 +112,32 @@ export const touchscreenUserBindings = addSetsToBindings({
       priority: 2
     }
   ],
-  [sets.cursorHoldingInteractable]: [
+  [sets.rightCursorHoldingInteractable]: [
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.falling,
       priority: 1
     }
   ],
 
-  [sets.cursorHoveringOnPen]: [],
-  [sets.cursorHoldingPen]: [
+  [sets.rightCursorHoveringOnPen]: [],
+  [sets.rightCursorHoldingPen]: [
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
-      dest: { value: paths.actions.cursor.startDrawing },
+      dest: { value: paths.actions.cursor.right.startDrawing },
       xform: xforms.risingWithFrameDelay(5),
       priority: 2
     },
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
-      dest: { value: paths.actions.cursor.stopDrawing },
+      dest: { value: paths.actions.cursor.right.stopDrawing },
       xform: xforms.falling,
       priority: 2
     },
     {
       src: { value: togglePen },
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.rising,
       priority: 3
     },
@@ -146,6 +146,20 @@ export const touchscreenUserBindings = addSetsToBindings({
       dest: { value: paths.actions.pen.remove },
       xform: xforms.rising,
       priority: 3
+    }
+  ],
+
+  [sets.inspecting]: [
+    {
+      src: { value: paths.device.touchscreen.anything },
+      dest: { value: paths.actions.stopInspecting },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.touchscreen.pinch.delta },
+      dest: { value: paths.actions.inspectZoom },
+      xform: xforms.scale(0.25),
+      priority: 1
     }
   ]
 });

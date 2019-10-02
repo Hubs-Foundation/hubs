@@ -22,8 +22,18 @@ export const keyboardMouseUserBindings = addSetsToBindings({
   [sets.global]: [
     {
       src: {},
-      dest: { value: paths.actions.cursor.hideLine },
+      dest: { value: paths.actions.cursor.right.hideLine },
       xform: xforms.always(true)
+    },
+    {
+      src: {},
+      dest: { value: paths.actions.cursor.right.wake },
+      xform: xforms.always(true)
+    },
+    {
+      src: {},
+      dest: { value: paths.actions.cursor.left.wake },
+      xform: xforms.always(false)
     },
     {
       src: {
@@ -57,6 +67,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: { value: keyboardCharacterAcceleration },
       dest: { value: paths.actions.characterAcceleration },
       xform: xforms.normalize_vec2
+    },
+    {
+      src: { value: paths.device.mouse.wheel },
+      dest: { value: paths.actions.dCharSpeed },
+      xform: xforms.scale(-0.3)
     },
     {
       src: { value: paths.device.keyboard.key("shift") },
@@ -126,28 +141,41 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.smartMouse.cursorPose },
-      dest: { value: paths.actions.cursor.pose },
+      dest: { value: paths.actions.cursor.right.pose },
       xform: xforms.copy
     },
     {
-      src: { value: paths.device.smartMouse.cameraDelta },
-      dest: { x: "/var/smartMouseCamDeltaX", y: "/var/smartMouseCamDeltaY" },
+      src: { value: paths.device.mouse.coords },
+      dest: { value: "/var/mouseCoordsDelta" },
+      xform: xforms.diff_vec2
+    },
+    {
+      src: { value: "/var/mouseCoordsDelta" },
+      dest: { x: "/var/mouseCoordsX", y: "/var/mouseCoordsY" },
       xform: xforms.split_vec2
     },
     {
-      src: { value: "/var/smartMouseCamDeltaX" },
-      dest: { value: "/var/smartMouseCamDeltaXScaled" },
-      xform: xforms.scale(-0.2)
+      src: { value: "/var/mouseCoordsX" },
+      dest: { value: "/var/mouseCoordsXScaled" },
+      xform: xforms.scale(-Math.PI)
     },
     {
-      src: { value: "/var/smartMouseCamDeltaY" },
-      dest: { value: "/var/smartMouseCamDeltaYScaled" },
-      xform: xforms.scale(-0.1)
+      src: { value: "/var/mouseCoordsY" },
+      dest: { value: "/var/mouseCoordsYScaled" },
+      xform: xforms.scale((2 * Math.PI) / 3)
     },
     {
-      src: { x: "/var/smartMouseCamDeltaXScaled", y: "/var/smartMouseCamDeltaYScaled" },
-      dest: { value: paths.actions.cameraDelta },
+      src: { x: "/var/mouseCoordsXScaled", y: "/var/mouseCoordsYScaled" },
+      dest: { value: "/var/actions/cameraDelta" },
       xform: xforms.compose_vec2
+    },
+    {
+      src: {
+        value: "/var/actions/cameraDelta",
+        bool: paths.device.smartMouse.shouldMoveCamera
+      },
+      dest: { value: paths.actions.cameraDelta },
+      xform: xforms.copyVec2IfTrue
     },
     {
       src: { value: paths.actions.cameraDelta },
@@ -335,6 +363,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       },
       xform: xforms.falling,
       priority: 100
+    },
+    {
+      src: { value: paths.device.keyboard.key("o") },
+      dest: { value: paths.actions.nextCameraMode },
+      xform: xforms.rising
     }
 
     // Helpful bindings for debugging hands in 2D
@@ -362,7 +395,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     // }
   ],
 
-  [sets.cursorHoldingPen]: [
+  [sets.rightCursorHoldingPen]: [
     {
       src: {
         bool: paths.device.keyboard.key("shift"),
@@ -373,7 +406,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     },
     {
       src: { value: "/var/shift+q" },
-      dest: { value: paths.actions.cursor.penPrevColor },
+      dest: { value: paths.actions.cursor.right.penPrevColor },
       xform: xforms.rising
     },
     {
@@ -386,7 +419,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     },
     {
       src: { value: "/var/shift+e" },
-      dest: { value: paths.actions.cursor.penNextColor },
+      dest: { value: paths.actions.cursor.right.penNextColor },
       xform: xforms.rising
     },
     {
@@ -419,13 +452,13 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.mouse.buttonLeft },
-      dest: { value: paths.actions.cursor.startDrawing },
+      dest: { value: paths.actions.cursor.right.startDrawing },
       xform: xforms.rising,
       priority: 3
     },
     {
       src: { value: paths.device.mouse.buttonLeft },
-      dest: { value: paths.actions.cursor.stopDrawing },
+      dest: { value: paths.actions.cursor.right.stopDrawing },
       xform: xforms.falling,
       priority: 3
     },
@@ -439,7 +472,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     },
     {
       src: { value: "/var/cursorScalePenTipWheel" },
-      dest: { value: paths.actions.cursor.scalePenTip },
+      dest: { value: paths.actions.cursor.right.scalePenTip },
       xform: xforms.scale(0.03)
     },
     {
@@ -463,13 +496,13 @@ export const keyboardMouseUserBindings = addSetsToBindings({
         bool: paths.device.keyboard.key("control"),
         value: paths.device.keyboard.key("z")
       },
-      dest: { value: paths.actions.cursor.undoDrawing },
+      dest: { value: paths.actions.cursor.right.undoDrawing },
       priority: 1001,
       xform: xforms.rising
     },
     {
       src: { value: togglePen },
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.rising,
       priority: 200
     },
@@ -481,16 +514,16 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoldingCamera]: [
+  [sets.rightCursorHoldingCamera]: [
     {
       src: { value: paths.device.mouse.buttonLeft },
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.falling,
       priority: 2
     }
   ],
 
-  [sets.cursorHoldingInteractable]: [
+  [sets.rightCursorHoldingInteractable]: [
     {
       src: {
         bool: paths.device.keyboard.key("shift"),
@@ -515,27 +548,27 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: {
         value: k("wheelWithoutShift")
       },
-      dest: { value: paths.actions.cursor.modDelta },
+      dest: { value: paths.actions.cursor.right.modDelta },
       xform: xforms.copy
     },
     {
       src: {
         value: k("wheelWithShift")
       },
-      dest: { value: paths.actions.cursor.scaleGrabbedGrabbable },
+      dest: { value: paths.actions.cursor.right.scaleGrabbedGrabbable },
       xform: xforms.copy
     },
     {
       src: { value: paths.device.mouse.buttonLeft },
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.falling,
       priority: 2
     }
   ],
-  [sets.cursorHoldingUI]: [
+  [sets.rightCursorHoldingUI]: [
     {
       src: { value: paths.device.mouse.buttonLeft },
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.falling,
       priority: 3
     },
@@ -545,19 +578,20 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.copy
     }
   ],
-  [sets.cursorHoveringOnInteractable]: [
+  [sets.rightCursorHoveringOnInteractable]: [
     {
       src: { value: paths.device.mouse.buttonLeft },
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.rising,
       priority: 1
     }
   ],
-  [sets.cursorHoveringOnVideo]: [
+  [sets.rightCursorHoveringOnVideo]: [
     {
       src: { value: paths.device.mouse.wheel },
-      dest: { value: paths.actions.cursor.mediaVolumeMod },
-      xform: xforms.scale(-0.3)
+      dest: { value: paths.actions.cursor.right.mediaVolumeMod },
+      xform: xforms.scale(-0.3),
+      priority: 1
     }
   ],
   [sets.inputFocused]: [
@@ -569,11 +603,57 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnUI]: [
+  [sets.rightCursorHoveringOnUI]: [
     {
       src: { value: paths.device.mouse.buttonLeft },
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.rising
+    }
+  ],
+  [sets.inspecting]: [
+    {
+      src: { value: paths.device.keyboard.key("space") },
+      dest: { value: k("space-rising") },
+      xform: xforms.rising
+    },
+    {
+      src: [
+        paths.device.keyboard.key("w"),
+        paths.device.keyboard.key("a"),
+        paths.device.keyboard.key("s"),
+        paths.device.keyboard.key("d"),
+        paths.device.keyboard.key("q"),
+        paths.device.keyboard.key("e"),
+        k("space-rising")
+      ],
+      dest: { value: paths.actions.stopInspecting },
+      xform: xforms.any
+    },
+    {
+      src: { value: paths.device.mouse.wheel },
+      dest: { value: paths.actions.inspectZoom },
+      xform: xforms.scale(-5.0),
+      priority: 1
+    },
+    {
+      src: {
+        value: paths.device.mouse.buttonRight
+      },
+      dest: {
+        value: paths.noop
+      },
+      xform: xforms.noop,
+      priority: 101
+    },
+    {
+      src: {
+        value: paths.device.mouse.buttonRight
+      },
+      dest: {
+        value: paths.noop
+      },
+      xform: xforms.noop,
+      priority: 101
     }
   ]
 });

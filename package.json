@@ -24,7 +24,9 @@
     "test": "npm run lint && npm run test:unit && npm run build",
     "test:unit": "ava",
     "stats": "rimraf ./dist && webpack --mode=production --json",
-    "spritesheet": "spritesheet-js -f custom-scale-css-modules -p src/assets/images/spritesheets/ --padding 4 --divisibleByTwo -n css-spritesheet src/assets/images/css-sprites/* --hubsFlag anything --customHeight 40 --customWidth 40 && spritesheet-js -f json -p src/assets/images/spritesheets/ --padding 8 --divisibleByTwo -n sprite-system-spritesheet --powerOfTwo src/assets/images/sprites/*"
+    "spritesheet": "npm run spritesheet:css && npm run spritesheet:system",
+    "spritesheet:css": "spritesheet-js -f custom-scale-css-modules -p src/assets/images/spritesheets/ --customCanvasWidth 840 --customCanvasWidth 840 -n css-spritesheet src/assets/images/css-sprites/* --hubsFlag anything --customHeight 40 --customWidth 40",
+    "spritesheet:system": "spritesheet-js -f json -p src/assets/images/spritesheets/ --padding 8 --divisibleByTwo -n sprite-system-spritesheet --powerOfTwo src/assets/images/sprites/*"
   },
   "ava": {
     "files": [
@@ -45,11 +47,12 @@
     "@mozillareality/three-batch-manager": "^0.1.4",
     "@mozillareality/three-particle-emitter": "^0.1.5",
     "aframe": "github:mozillareality/aframe#hubs/master",
-    "aframe-physics-system": "github:infinitelee/aframe-physics-system#feature/heightfields",
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "^1.0.0",
+    "ammo-debug-drawer": "github:infinitelee/ammo-debug-drawer",
     "ammo.js": "github:mozillareality/ammo.js#hubs/master",
     "animejs": "github:mozillareality/anime#hubs/master",
+    "buffered-interpolation": "^0.2.5",
     "classnames": "^2.2.5",
     "copy-to-clipboard": "^3.0.8",
     "dayjs-ext": "^2.2.0",
@@ -70,7 +73,7 @@
     "jwt-decode": "^2.2.0",
     "markdown-it": "^8.4.2",
     "moving-average": "^1.0.0",
-    "naf-janus-adapter": "^2.0.2",
+    "naf-janus-adapter": "^3.0.10",
     "networked-aframe": "github:mozillareality/networked-aframe#master",
     "nipplejs": "github:mozillareality/nipplejs#mr-social-client/master",
     "node-ensure": "0.0.0",
@@ -88,9 +91,11 @@
     "react-youtube": "^7.8.0",
     "screenfull": "^4.0.1",
     "three": "github:mozillareality/three.js#hubs/master",
+    "three-ammo": "github:infinitelee/three-ammo#master",
     "three-bmfont-text": "^2.3.0",
     "three-mesh-bvh": "^0.1.2",
     "three-pathfinding": "github:MozillaReality/three-pathfinding#hubs/master2",
+    "three-to-ammo": "github:infinitelee/three-to-ammo",
     "uuid": "^3.2.1",
     "webrtc-adapter": "^6.0.2",
     "zip-loader": "^1.1.0"
@@ -136,6 +141,7 @@
     "stylelint": "^9.10.1",
     "stylelint-config-recommended-scss": "^3.2.0",
     "stylelint-scss": "^3.5.3",
+    "svg-inline-loader": "^0.8.0",
     "url-loader": "^1.0.1",
     "webpack": "^4.32.2",
     "webpack-bundle-analyzer": "^3.3.2",

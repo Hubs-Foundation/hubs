@@ -20,16 +20,15 @@ export function canMove(entity) {
   );
 }
 
-function indexForNonAuthorizedComponent(nonAuthorizedComponent, schema) {
-  const fullComponent = typeof nonAuthorizedComponent === "string";
-  const componentName = fullComponent ? nonAuthorizedComponent : nonAuthorizedComponent.component;
+function indexForComponent(component, schema) {
+  const fullComponent = typeof component === "string";
+  const componentName = fullComponent ? component : component.component;
 
   if (fullComponent) {
     return schema.components.findIndex(schemaComponent => schemaComponent === componentName);
   } else {
     return schema.components.findIndex(
-      schemaComponent =>
-        schemaComponent.component === componentName && schemaComponent.property === nonAuthorizedComponent.property
+      schemaComponent => schemaComponent.component === componentName && schemaComponent.property === component.property
     );
   }
 }
@@ -49,7 +48,7 @@ function initializeNonAuthorizedSchemas() {
     if (!schemaDict.hasOwnProperty(template)) continue;
     const schema = schemaDict[template];
     nonAuthorizedSchemas[template] = (schema.nonAuthorizedComponents || [])
-      .map(nonAuthorizedComponent => indexForNonAuthorizedComponent(nonAuthorizedComponent, schema))
+      .map(nonAuthorizedComponent => indexForComponent(nonAuthorizedComponent, schema))
       .map(index => index.toString());
   }
 }
@@ -68,9 +67,8 @@ function sanitizeMessageData(template, data) {
   return data;
 }
 
-function authorizeEntityManipulation(entity, sender, senderPermissions) {
-  const { template, creator } = entity.components.networked.data;
-  const isPinned = entity.components.pinnable && entity.components.pinnable.data.pinned;
+function authorizeEntityManipulation(entityMetadata, sender, senderPermissions) {
+  const { template, creator, isPinned } = entityMetadata;
   const isCreator = sender === creator;
 
   if (template.endsWith("-avatar")) {
@@ -79,21 +77,40 @@ function authorizeEntityManipulation(entity, sender, senderPermissions) {
     return (!isPinned || senderPermissions.pin_objects) && (isCreator || senderPermissions.spawn_and_move_media);
   } else if (template.endsWith("-camera")) {
     return isCreator || senderPermissions.spawn_camera;
-  } else if (template.endsWith("-pen")) {
-    return isCreator || senderPermissions.spawn_pen;
+  } else if (template.endsWith("-pen") || template.endsWith("-drawing")) {
+    return isCreator || senderPermissions.spawn_drawing;
   } else {
     return false;
   }
 }
 
-function authorizeOrSanitizeMessageData(data, sender, senderPermissions) {
-  const entity = NAF.entities.getEntity(data.networkId);
-  if (!entity) return false;
+function getPendingOrExistingEntityMetadata(networkId) {
+  const pendingData = NAF.connection.adapter.getPendingDataForNetworkId(networkId);
 
-  if (authorizeEntityManipulation(entity, sender, senderPermissions)) {
+  if (pendingData) {
+    const { template, creator } = pendingData;
+    const schema = NAF.schemas.schemaDict[template];
+    const pinnableComponent = pendingData.components[indexForComponent("pinnable", schema)];
+    const isPinned = pinnableComponent && pinnableComponent.pinned;
+    return { template, creator, isPinned };
+  }
+
+  const entity = NAF.entities.getEntity(networkId);
+  if (!entity) return null;
+
+  const { template, creator } = entity.components.networked.data;
+  const isPinned = entity.components.pinnable && entity.components.pinnable.data.pinned;
+  return { template, creator, isPinned };
+}
+
+function authorizeOrSanitizeMessageData(data, sender, senderPermissions) {
+  const entityMetadata = getPendingOrExistingEntityMetadata(data.networkId);
+  if (!entityMetadata) return false;
+
+  if (authorizeEntityManipulation(entityMetadata, sender, senderPermissions)) {
     return true;
   } else {
-    const { template } = entity.components.networked.data;
+    const { template } = entityMetadata;
     sanitizeMessageData(template, data);
     return true;
   }
@@ -108,11 +125,18 @@ export function authorizeOrSanitizeMessage(message) {
     return message;
   }
 
-  const senderPermissions = from_session_id
-    ? window.APP.hubChannel.presence.state[from_session_id].metas[0].permissions
-    : null;
+  const presenceState = window.APP.hubChannel.presence.state[from_session_id];
+
+  if (!presenceState) {
+    // We've received a manipulation message from a user that we don't have presence state for yet.
+    // Since we can't make a judgement about their permissions, we'll have to ignore the message.
+    return emptyObject;
+  }
+
+  const senderPermissions = presenceState.metas[0].permissions;
 
   if (dataType === "um") {
+    let sanitizedAny = false;
     for (const index in message.data.d) {
       if (!message.data.d.hasOwnProperty(index)) continue;
       const authorizedOrSanitized = authorizeOrSanitizeMessageData(
@@ -121,9 +145,15 @@ export function authorizeOrSanitizeMessage(message) {
         senderPermissions
       );
       if (!authorizedOrSanitized) {
-        message.data.d[index] = emptyObject;
+        message.data.d[index] = null;
+        sanitizedAny = true;
       }
     }
+
+    if (sanitizedAny) {
+      message.data.d = message.data.d.filter(x => x != null);
+    }
+
     return message;
   } else if (dataType === "u") {
     const authorizedOrSanitized = authorizeOrSanitizeMessageData(message.data, from_session_id, senderPermissions);
@@ -133,9 +163,9 @@ export function authorizeOrSanitizeMessage(message) {
       return emptyObject;
     }
   } else if (dataType === "r") {
-    const entity = NAF.entities.getEntity(message.data.networkId);
-    if (!entity) return emptyObject;
-    if (authorizeEntityManipulation(entity, from_session_id, senderPermissions)) {
+    const entityMetadata = getPendingOrExistingEntityMetadata(message.data.networkId);
+    if (!entityMetadata) return emptyObject;
+    if (authorizeEntityManipulation(entityMetadata, from_session_id, senderPermissions)) {
       return message;
     } else {
       return emptyObject;

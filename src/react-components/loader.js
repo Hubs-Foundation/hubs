@@ -84,7 +84,10 @@ class Loader extends Component {
         <FormattedMessage id="loader.entering_lobby" />
       </h4>
     );
-    const progress = this.state.loadingNum === 0 ? " " : `${this.state.loadedNum} / ${this.state.loadingNum} `;
+    const progress =
+      this.state.loadingNum === 0
+        ? " "
+        : `${Math.min(this.state.loadedNum, this.state.loadingNum)} / ${this.state.loadingNum} `;
     const usual = (
       <h4 className={loaderStyles.loadingText}>
         <FormattedMessage id="loader.loading" />

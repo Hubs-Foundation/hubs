@@ -9,11 +9,13 @@ import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 
 import styles from "../assets/stylesheets/media-browser.scss";
-import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
+import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import StateLink from "./state-link";
+import { remixAvatar } from "../utils/avatar-utils";
 
 dayjs.extend(relativeTime);
 
@@ -29,7 +31,14 @@ class MediaTiles extends Component {
     history: PropTypes.object,
     urlSource: PropTypes.string,
     handleEntryClicked: PropTypes.func,
-    handlePager: PropTypes.func
+    handlePager: PropTypes.func,
+    onCopyAvatar: PropTypes.func
+  };
+
+  handleCopyAvatar = async (e, entry) => {
+    e.preventDefault();
+    await remixAvatar(entry.id, entry.name);
+    this.props.onCopyAvatar();
   };
 
   render() {
@@ -130,6 +139,24 @@ class MediaTiles extends Component {
 
     const [imageWidth, imageHeight] = this.getTileDimensions(isImage, isAvatar, imageAspect);
 
+    // Inline mp4s directly since far/nearspark cannot resize them.
+    const thumbnailElement =
+      entry.images.preview.type === "mp4" ? (
+        <video
+          className={classNames(styles.tileContent, styles.avatarTile)}
+          style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
+          muted
+          autoPlay
+          src={proxiedUrlFor(imageSrc)}
+        />
+      ) : (
+        <img
+          className={classNames(styles.tileContent, styles.avatarTile)}
+          style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
+          src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)}
+        />
+      );
+
     const publisherName =
       (entry.attributions && entry.attributions.publisher && entry.attributions.publisher.name) ||
       PUBLISHER_FOR_ENTRY_TYPE[entry.type];
@@ -143,10 +170,7 @@ class MediaTiles extends Component {
           className={styles.tileLink}
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
         >
-          <img
-            className={classNames(styles.tileContent, styles.avatarTile)}
-            src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)}
-          />
+          {thumbnailElement}
         </a>
         {entry.type === "avatar" && (
           <StateLink
@@ -159,6 +183,17 @@ class MediaTiles extends Component {
             <FontAwesomeIcon icon={faPencilAlt} />
           </StateLink>
         )}
+        {entry.type === "avatar_listing" &&
+          entry.allow_remixing && (
+            <StateLink
+              className={styles.editAvatar}
+              onClick={e => this.handleCopyAvatar(e, entry)}
+              history={this.props.history}
+              title="Copy to my avatars"
+            >
+              <FontAwesomeIcon icon={faClone} />
+            </StateLink>
+          )}
         {!entry.type.endsWith("_image") && (
           <div className={styles.info}>
             <a

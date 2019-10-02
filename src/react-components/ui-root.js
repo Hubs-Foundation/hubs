@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
@@ -9,6 +10,7 @@ import screenfull from "screenfull";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
+import emojiStyles from "../assets/stylesheets/ui-emoji.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
@@ -19,7 +21,6 @@ import {
   navigateToPriorPage,
   sluglessPath
 } from "../utils/history";
-import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
 import { getPresenceProfileForSession, discordBridgesForPresences } from "../utils/phoenix-utils";
 import { getClientInfoClientId } from "./client-info-dialog";
@@ -52,6 +53,7 @@ import FeedbackDialog from "./feedback-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
+import ObjectInfoDialog from "./object-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
 import LobbyChatBox from "./lobby-chat-box.js";
@@ -61,6 +63,7 @@ import MicLevelWidget from "./mic-level-widget.js";
 import OutputLevelWidget from "./output-level-widget.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
+import ObjectList from "./object-list.js";
 import SettingsMenu from "./settings-menu.js";
 import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
@@ -74,6 +77,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import qsTruthy from "../utils/qs_truthy";
+import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
 addLocaleData([...en]);
@@ -125,6 +129,7 @@ class UIRoot extends Component {
     hubEntryCode: PropTypes.number,
     availableVREntryTypes: PropTypes.object,
     environmentSceneLoaded: PropTypes.bool,
+    entryDisallowed: PropTypes.bool,
     roomUnavailableReason: PropTypes.string,
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
@@ -169,6 +174,8 @@ class UIRoot extends Component {
   };
 
   state = {
+    emojiState: "empty",
+
     enterInVR: false,
     muteOnEntry: false,
     entered: false,
@@ -189,6 +196,7 @@ class UIRoot extends Component {
     waitingOnAudio: false,
     mediaStream: null,
     audioTrack: null,
+    audioTrackClone: null,
     micDevices: [],
 
     autoExitTimerStartedAt: null,
@@ -202,11 +210,18 @@ class UIRoot extends Component {
 
     signedIn: false,
     videoShareMediaSource: null,
-    showVideoShareFailed: false
+    showVideoShareFailed: false,
+
+    objectInfo: null,
+    objectDisplayString: "",
+    objectSrc: "",
+    isObjectListExpanded: false,
+    isPresenceListExpanded: false
   };
 
   constructor(props) {
     super(props);
+
     if (props.showSafariMicDialog) {
       this.state.dialog = <SafariMicDialog closable={false} />;
     }
@@ -319,6 +334,9 @@ class UIRoot extends Component {
     if (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now")) {
       setTimeout(() => this.handleForceEntry(), 2000);
     }
+
+    this.playerRig = scene.querySelector("#avatar-rig");
+    this.playerRig.addEventListener("emoji_changed", ({ detail }) => this.setState({ emojiState: detail.emojiType }));
   }
 
   componentWillUnmount() {
@@ -418,10 +436,6 @@ class UIRoot extends Component {
     this.props.scene.emit("action_mute");
   };
 
-  toggleFreeze = () => {
-    this.props.scene.emit("action_freeze");
-  };
-
   shareVideo = mediaSource => {
     this.props.scene.emit(`action_share_${mediaSource}`);
   };
@@ -478,8 +492,16 @@ class UIRoot extends Component {
   };
 
   exit = reason => {
-    this.props.exitScene(reason);
+    if (this.props.exitScene) {
+      this.props.exitScene(reason);
+    }
+
     this.setState({ exited: true });
+  };
+
+  changeEmoji = type => {
+    const newEmoji = this.state.emojiState === type ? "empty" : type;
+    this.playerRig.setAttribute("player-info", { emojiType: newEmoji });
   };
 
   isWaitingForAutoExit = () => {
@@ -552,6 +574,9 @@ class UIRoot extends Component {
     if (this.state.audioTrack) {
       this.state.audioTrack.stop();
     }
+    if (this.state.audioTrackClone) {
+      this.state.audioTrackClone.stop();
+    }
 
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -568,7 +593,21 @@ class UIRoot extends Component {
 
           const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
           const audioTrack = mediaStream.getAudioTracks()[0];
-          NAF.connection.adapter.setLocalMediaStream(mediaStream);
+          const audioTrackClone = audioTrack.clone();
+
+          await NAF.connection.adapter.setLocalMediaStream(mediaStream);
+
+          if (this.props.scene.is("muted")) {
+            console.warn("re-muting microphone");
+            NAF.connection.adapter.enableMicrophone(false);
+            audioTrack.enabled = false;
+          }
+
+          this.setState({ mediaStream, audioTrack, audioTrackClone });
+
+          const mediaStreamForMicAnalysis = new MediaStream();
+          mediaStreamForMicAnalysis.addTrack(audioTrackClone);
+          this.props.scene.emit("local-media-stream-created", { mediaStream: mediaStreamForMicAnalysis });
           audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
         };
 
@@ -596,7 +635,9 @@ class UIRoot extends Component {
         this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
       }
       const mediaStreamForMicAnalysis = new MediaStream();
-      mediaStreamForMicAnalysis.addTrack(this.state.audioTrack.clone());
+      const audioTrackClone = this.state.audioTrack.clone();
+      this.setState({ audioTrackClone });
+      mediaStreamForMicAnalysis.addTrack(audioTrackClone);
       this.props.scene.emit("local-media-stream-created", { mediaStream: mediaStreamForMicAnalysis });
     }
 
@@ -680,12 +721,17 @@ class UIRoot extends Component {
     );
   };
 
-  onAudioReadyButton = () => {
+  onAudioReadyButton = async () => {
     if (!this.state.enterInVR) {
-      showFullScreenIfAvailable();
+      await showFullScreenIfAvailable();
     }
 
-    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.muteOnEntry);
+    // Push the new history state before going into VR, otherwise menu button will take us back
+    clearHistoryState(this.props.history);
+
+    await this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.muteOnEntry);
+
+    this.setState({ entered: true, showShareDialog: false });
 
     const mediaStream = this.state.mediaStream;
 
@@ -698,9 +744,6 @@ class UIRoot extends Component {
         console.log("Screen sharing enabled.");
       }
     }
-
-    this.setState({ entered: true, showShareDialog: false });
-    clearHistoryState(this.props.history);
   };
 
   attemptLink = async () => {
@@ -709,7 +752,7 @@ class UIRoot extends Component {
     this.setState({ linkCode: code, linkCodeCancel: cancel });
     onFinished.then(() => {
       this.setState({ log: false, linkCode: null, linkCodeCancel: null });
-      this.props.history.goBack();
+      this.exit();
     });
   };
 
@@ -756,8 +799,8 @@ class UIRoot extends Component {
   };
 
   toggleStreamerMode = enable => {
-    const playerRig = document.querySelector("#player-rig");
-    playerRig.setAttribute("character-controller", "fly", enable);
+    const avatarRig = document.querySelector("#avatar-rig");
+    avatarRig.setAttribute("character-controller", "fly", enable);
 
     if (enable) {
       this.props.hubChannel.beginStreaming();
@@ -1012,44 +1055,62 @@ class UIRoot extends Component {
           />
         </div>
 
-        {!this.state.waitingOnAudio ? (
-          <div className={entryStyles.buttonContainer}>
-            {!isMobileVR && (
+        {!this.state.waitingOnAudio &&
+          !this.props.entryDisallowed && (
+            <div className={entryStyles.buttonContainer}>
+              {!isMobileVR && (
+                <a
+                  onClick={e => {
+                    e.preventDefault();
+                    this.attemptLink();
+                  }}
+                  className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
+                >
+                  <FormattedMessage id="entry.device-medium" />
+                  <div className={entryStyles.buttonSubtitle}>
+                    <FormattedMessage
+                      id={isMobile ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"}
+                    />
+                  </div>
+                </a>
+              )}
               <a
                 onClick={e => {
                   e.preventDefault();
-                  this.attemptLink();
+
+                  if (promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType) {
+                    this.props.hubChannel.sendEnteringEvent();
+
+                    const stateValue = promptForNameAndAvatarBeforeEntry ? "profile" : "device";
+                    this.pushHistoryState("entry_step", stateValue);
+                  } else {
+                    this.handleForceEntry();
+                  }
+                }}
+                className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
+              >
+                <FormattedMessage id="entry.enter-room" />
+              </a>
+            </div>
+          )}
+        {this.props.entryDisallowed &&
+          !this.state.waitingOnAudio && (
+            <div className={entryStyles.buttonContainer}>
+              <a
+                onClick={e => {
+                  e.preventDefault();
+                  this.setState({ watching: true });
                 }}
                 className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
               >
-                <FormattedMessage id="entry.device-medium" />
+                <FormattedMessage id="entry.entry-disallowed" />
                 <div className={entryStyles.buttonSubtitle}>
-                  <FormattedMessage id={isMobile ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"} />
+                  <FormattedMessage id="entry.entry-disallowed-subtitle" />
                 </div>
               </a>
-            )}
-            {promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType ? (
-              <StateLink
-                stateKey="entry_step"
-                stateValue={promptForNameAndAvatarBeforeEntry ? "profile" : "device"}
-                history={this.props.history}
-                className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
-              >
-                <FormattedMessage id="entry.enter-room" />
-              </StateLink>
-            ) : (
-              <a
-                onClick={e => {
-                  e.preventDefault();
-                  this.handleForceEntry();
-                }}
-                className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
-              >
-                <FormattedMessage id="entry.enter-room" />
-              </a>
-            )}
-          </div>
-        ) : (
+            </div>
+          )}
+        {this.state.waitingOnAudio && (
           <div>
             <div className="loader-wrap loader-mid">
               <div className="loader">
@@ -1065,7 +1126,13 @@ class UIRoot extends Component {
   renderDevicePanel = () => {
     return (
       <div className={entryStyles.entryPanel}>
-        <div onClick={() => this.props.history.goBack()} className={entryStyles.back}>
+        <div
+          onClick={() => {
+            this.props.hubChannel.sendEnteringCancelledEvent();
+            this.props.history.goBack();
+          }}
+          className={entryStyles.back}
+        >
           <i>
             <FontAwesomeIcon icon={faArrowLeft} />
           </i>
@@ -1154,7 +1221,18 @@ class UIRoot extends Component {
     const subtitleId = isMobilePhoneOrVR ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     return (
       <div className="audio-setup-panel">
-        <div onClick={() => this.props.history.goBack()} className={entryStyles.back}>
+        <div
+          onClick={() => {
+            // If we forced a VR entry type, then we skipped the device panel
+            // and hence going back from the audio setup panel will bring you back to the lobby.
+            if (this.props.forcedVREntryType) {
+              this.props.hubChannel.sendEnteringCancelledEvent();
+            }
+
+            this.props.history.goBack();
+          }}
+          className={entryStyles.back}
+        >
           <i>
             <FontAwesomeIcon icon={faArrowLeft} />
           </i>
@@ -1362,6 +1440,7 @@ class UIRoot extends Component {
 
     const clientInfoClientId = getClientInfoClientId(this.props.history.location);
     const showClientInfo = !!clientInfoClientId;
+    const showObjectInfo = !!(this.state.objectInfo && this.state.objectInfo.object3D);
 
     const discordBridges = this.discordBridges();
     const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
@@ -1419,6 +1498,13 @@ class UIRoot extends Component {
     const streamer = getCurrentStreamer();
     const streamerName = streamer && streamer.displayName;
 
+    const EmojiButton = ({ type, state, onClick }) => (
+      <div
+        className={cx(emojiStyles.iconEmoji, emojiStyles[type], { [emojiStyles.active]: state === type })}
+        onClick={() => onClick(type)}
+      />
+    );
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
@@ -1464,7 +1550,7 @@ class UIRoot extends Component {
                       this.props.history.goBack();
                       // We are returning to the media browser. Trigger an update so that the filter switches to
                       // my-avatars, now that we've saved an avatar.
-                      this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars");
+                      this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
                     }
                     this.props.onAvatarSaved();
                   }}
@@ -1481,14 +1567,14 @@ class UIRoot extends Component {
                 history={this.props.history}
                 mediaSearchStore={this.props.mediaSearchStore}
                 hubChannel={this.props.hubChannel}
-                onMediaSearchResultEntrySelected={entry => {
+                onMediaSearchResultEntrySelected={(entry, selectAction) => {
                   if (entry.type === "hub") {
                     this.showNonHistoriedDialog(LeaveRoomDialog, {
                       destinationUrl: entry.url,
                       messageType: "join-room"
                     });
                   } else {
-                    this.props.onMediaSearchResultEntrySelected(entry);
+                    this.props.onMediaSearchResultEntrySelected(entry, selectAction);
                   }
                 }}
                 performConditionalSignIn={this.props.performConditionalSignIn}
@@ -1612,7 +1698,23 @@ class UIRoot extends Component {
                 performConditionalSignIn={this.props.performConditionalSignIn}
               />
             )}
-            {(!enteredOrWatching || this.isWaitingForAutoExit()) && (
+            {showObjectInfo && (
+              <ObjectInfoDialog
+                scene={this.props.scene}
+                el={this.state.objectInfo}
+                objectDisplayString={this.state.objectDisplayString}
+                src={this.state.objectSrc}
+                hubChannel={this.props.hubChannel}
+                onClose={() => {
+                  if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
+                    this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
+                  }
+                  this.setState({ isObjectListExpanded: false, objectInfo: null });
+                }}
+              />
+            )}
+            {((!enteredOrWatching && !this.state.isObjectListExpanded && !showObjectInfo) ||
+              this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
                 <PresenceLog
                   entries={presenceLogEntries}
@@ -1647,19 +1749,33 @@ class UIRoot extends Component {
                   onClose={() => this.confirmBroadcastedRoom()}
                 />
               )}
-            {enteredOrWatchingOrPreload && (
-              <InWorldChatBox
-                discordBridges={discordBridges}
-                onSendMessage={this.sendMessage}
-                onObjectCreated={this.createObject}
-                enableSpawning={entered}
-                history={this.props.history}
-              />
-            )}
+            {enteredOrWatchingOrPreload &&
+              !this.state.objectInfo &&
+              !this.state.frozen && (
+                <InWorldChatBox
+                  discordBridges={discordBridges}
+                  onSendMessage={this.sendMessage}
+                  onObjectCreated={this.createObject}
+                  enableSpawning={entered}
+                  history={this.props.history}
+                />
+              )}
             {this.state.frozen && (
               <button className={styles.leaveButton} onClick={() => this.exit("left")}>
                 <FormattedMessage id="entry.leave-room" />
               </button>
+            )}
+            {this.state.frozen && (
+              <div className={cx(styles.uiInteractive, emojiStyles.emojiPanel)}>
+                <EmojiButton type="smile" state={this.state.emojiState} onClick={this.changeEmoji} />
+                <EmojiButton type="happy" state={this.state.emojiState} onClick={this.changeEmoji} />
+                <EmojiButton type="surprise" state={this.state.emojiState} onClick={this.changeEmoji} />
+                <EmojiButton type="disgust" state={this.state.emojiState} onClick={this.changeEmoji} />
+                <EmojiButton type="angry" state={this.state.emojiState} onClick={this.changeEmoji} />
+                <EmojiButton type="sad" state={this.state.emojiState} onClick={this.changeEmoji} />
+                <EmojiButton type="eww" state={this.state.emojiState} onClick={this.changeEmoji} />
+                <EmojiButton type="hearts" state={this.state.emojiState} onClick={this.changeEmoji} />
+              </div>
             )}
             {!this.state.frozen &&
               !watching &&
@@ -1695,7 +1811,7 @@ class UIRoot extends Component {
                           () => this.props.hubChannel.can("update_hub"),
                           () => {
                             showFullScreenIfAvailable();
-                            this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                            this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
                           },
                           "change-scene"
                         );
@@ -1804,6 +1920,26 @@ class UIRoot extends Component {
             )}
             {streamingTip}
 
+            <ObjectList
+              scene={this.props.scene}
+              onExpand={(expand, uninspect) => {
+                if (expand) {
+                  this.setState({ isPresenceListExpanded: false, isObjectListExpanded: expand });
+                } else {
+                  this.setState({ isObjectListExpanded: expand });
+                }
+
+                if (uninspect) {
+                  this.setState({ objectInfo: null });
+                  if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
+                    this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
+                  }
+                }
+              }}
+              expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
+              onInspectObject={(el, s) => this.setState({ objectInfo: el, objectDisplayString: s, objectSrc: s })}
+            />
+
             <PresenceList
               history={this.props.history}
               presences={this.props.presences}
@@ -1812,6 +1948,14 @@ class UIRoot extends Component {
               email={this.props.store.state.credentials.email}
               onSignIn={this.showSignInDialog}
               onSignOut={this.signOut}
+              expanded={!this.state.isObjectListExpanded && this.state.isPresenceListExpanded}
+              onExpand={expand => {
+                if (expand) {
+                  this.setState({ isPresenceListExpanded: expand, isObjectListExpanded: false });
+                } else {
+                  this.setState({ isPresenceListExpanded: expand });
+                }
+              }}
             />
 
             {!streaming &&
@@ -1847,7 +1991,6 @@ class UIRoot extends Component {
                   isCursorHoldingPen={this.props.isCursorHoldingPen}
                   hasActiveCamera={this.props.hasActiveCamera}
                   onToggleMute={this.toggleMute}
-                  onToggleFreeze={this.toggleFreeze}
                   onSpawnPen={this.spawnPen}
                   onSpawnCamera={() => this.props.scene.emit("action_toggle_camera")}
                   onShareVideo={this.shareVideo}

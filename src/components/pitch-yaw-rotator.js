@@ -1,55 +1,67 @@
 import { paths } from "../systems/userinput/paths";
 
-const degToRad = THREE.Math.degToRad;
-const radToDeg = THREE.Math.radToDeg;
+const rotatePitchAndYaw = (function() {
+  const opq = new THREE.Quaternion();
+  const owq = new THREE.Quaternion();
+  const oq = new THREE.Quaternion();
+  const pq = new THREE.Quaternion();
+  const yq = new THREE.Quaternion();
+  const q = new THREE.Quaternion();
+  const right = new THREE.Vector3();
+  const v = new THREE.Vector3();
+  const UP = new THREE.Vector3(0, 1, 0);
+
+  return function rotatePitchAndYaw(o, p, y) {
+    o.parent.getWorldQuaternion(opq);
+    o.getWorldQuaternion(owq);
+    oq.copy(o.quaternion);
+    v.set(0, 1, 0).applyQuaternion(oq);
+    const initialUpDot = v.dot(UP);
+    v.set(0, 0, 1).applyQuaternion(oq);
+    const initialForwardDotUp = Math.abs(v.dot(UP));
+    right.set(1, 0, 0).applyQuaternion(owq);
+    pq.setFromAxisAngle(right, p);
+    yq.setFromAxisAngle(UP, y);
+    q.copy(owq)
+      .premultiply(pq)
+      .premultiply(yq)
+      .premultiply(opq.inverse());
+    v.set(0, 1, 0).applyQuaternion(q);
+    const newUpDot = v.dot(UP);
+    v.set(0, 0, 1).applyQuaternion(q);
+    const newForwardDotUp = Math.abs(v.dot(UP));
+    // Ensure our pitch is in an accepted range and our head would not be flipped upside down
+    if ((newForwardDotUp > 0.9 && newForwardDotUp > initialForwardDotUp) || (newUpDot < 0 && newUpDot < initialUpDot)) {
+      // TODO: Apply a partial rotation that does not exceed the bounds for nicer UX
+      return;
+    } else {
+      o.quaternion.copy(q);
+      o.matrixNeedsUpdate = true;
+    }
+  };
+})();
 
 AFRAME.registerComponent("pitch-yaw-rotator", {
-  schema: {
-    minPitch: { default: -90 },
-    maxPitch: { default: 90 }
-  },
-
   init() {
-    this.pitch = 0;
-    this.yaw = 0;
-    this.onRotateX = this.onRotateX.bind(this);
-    this.el.sceneEl.addEventListener("rotateX", this.onRotateX);
-    this.el.sceneEl.addEventListener("enter-vr", () => this.pause());
-    this.el.sceneEl.addEventListener("exit-vr", () => this.play());
     this.pendingXRotation = 0;
-  },
-
-  onRotateX(e) {
-    this.pendingXRotation += e.detail.value;
-  },
-
-  look(deltaPitch, deltaYaw) {
-    const { minPitch, maxPitch } = this.data;
-    this.pitch += deltaPitch;
-    this.pitch = THREE.Math.clamp(this.pitch, minPitch, maxPitch);
-    this.yaw += deltaYaw;
-  },
-
-  set(pitch, yaw) {
-    const { minPitch, maxPitch } = this.data;
-    this.pitch = THREE.Math.clamp(radToDeg(pitch), minPitch, maxPitch);
-    this.yaw = radToDeg(yaw);
+    this.el.sceneEl.addEventListener("rotateX", e => {
+      this.pendingXRotation += e.detail.value * 0.03;
+    });
+    this.on = true;
   },
 
   tick() {
-    const scene = AFRAME.scenes[0];
-    const userinput = scene.systems.userinput;
-    const cameraDelta = userinput.get(scene.is("entered") ? paths.actions.cameraDelta : paths.actions.lobbyCameraDelta);
-    let lookX = this.pendingXRotation;
-    let lookY = 0;
-    if (cameraDelta) {
-      lookY += cameraDelta[0];
-      lookX += cameraDelta[1];
-    }
-    if (lookX !== 0 || lookY !== 0) {
-      this.look(lookX, lookY);
-      this.el.object3D.rotation.set(degToRad(this.pitch), degToRad(this.yaw), 0);
-      this.el.object3D.rotation.order = "YXZ";
+    if (this.on) {
+      const scene = AFRAME.scenes[0];
+      const userinput = scene.systems.userinput;
+      const cameraDelta = userinput.get(
+        scene.is("entered") ? paths.actions.cameraDelta : paths.actions.lobbyCameraDelta
+      );
+      if (cameraDelta) {
+        rotatePitchAndYaw(this.el.object3D, this.pendingXRotation + cameraDelta[1], cameraDelta[0]);
+      } else if (this.pendingXRotation) {
+        rotatePitchAndYaw(this.el.object3D, this.pendingXRotation, 0);
+      }
     }
     this.pendingXRotation = 0;
   }

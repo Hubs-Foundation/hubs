@@ -1,10 +1,7 @@
 import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { isHubsDestinationUrl } from "./utils/media-url-utils";
-const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
-  TYPE = PHYSICS_CONSTANTS.TYPE,
-  SHAPE = PHYSICS_CONSTANTS.SHAPE,
-  FIT = PHYSICS_CONSTANTS.FIT;
+import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
@@ -18,24 +15,22 @@ AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner", (el, co
   //TODO: Do not automatically add these components
   el.setAttribute("is-remote-hover-target", "");
   el.setAttribute("tags", { isHandCollisionTarget: true });
-  el.setAttribute("hoverable-visuals", {
-    cursorController: "#cursor-controller"
-  });
+  el.setAttribute("hoverable-visuals", "");
   el.setAttribute(componentName, componentData);
 });
 AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
 AFRAME.GLTFModelPlus.registerComponent("media-loader", "media-loader");
-AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", el => {
+AFRAME.GLTFModelPlus.registerComponent("body", "body-helper", el => {
   //This is only required for migration of old environments with super-spawners
   //will no longer be needed when spawners are added via Spoke instead.
-  el.setAttribute("ammo-body", {
+  el.setAttribute("body-helper", {
     mass: 0,
     type: TYPE.STATIC,
     collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
     collisionFilterMask: COLLISION_LAYERS.DEFAULT_SPAWNER
   });
 });
-AFRAME.GLTFModelPlus.registerComponent("ammo-shape", "ammo-shape");
+AFRAME.GLTFModelPlus.registerComponent("ammo-shape", "shape-helper");
 AFRAME.GLTFModelPlus.registerComponent("hide-when-quality", "hide-when-quality");
 AFRAME.GLTFModelPlus.registerComponent("light", "light", (el, componentName, componentData) => {
   if (componentData.distance === 0) {
@@ -52,25 +47,20 @@ AFRAME.GLTFModelPlus.registerComponent("light", "light", (el, componentName, com
 AFRAME.GLTFModelPlus.registerComponent("ambient-light", "ambient-light");
 AFRAME.GLTFModelPlus.registerComponent("directional-light", "directional-light");
 AFRAME.GLTFModelPlus.registerComponent("hemisphere-light", "hemisphere-light");
-function decayMigration(el, componentName, componentData) {
-  if (componentData.range === 0) {
-    componentData.decay = 0;
-  }
-  el.setAttribute(componentName, componentData);
-}
-AFRAME.GLTFModelPlus.registerComponent("point-light", "point-light", decayMigration);
-AFRAME.GLTFModelPlus.registerComponent("spot-light", "spot-light", decayMigration);
+AFRAME.GLTFModelPlus.registerComponent("point-light", "point-light");
+AFRAME.GLTFModelPlus.registerComponent("spot-light", "spot-light");
 
 AFRAME.GLTFModelPlus.registerComponent("skybox", "skybox");
 AFRAME.GLTFModelPlus.registerComponent("layers", "layers");
 AFRAME.GLTFModelPlus.registerComponent("shadow", "shadow");
 AFRAME.GLTFModelPlus.registerComponent("water", "water");
 AFRAME.GLTFModelPlus.registerComponent("scale-audio-feedback", "scale-audio-feedback");
+AFRAME.GLTFModelPlus.registerComponent("morph-audio-feedback", "morph-audio-feedback");
 AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
 AFRAME.GLTFModelPlus.registerComponent(
   "box-collider",
-  "ammo-shape",
+  "shape-helper",
   (() => {
     const euler = new THREE.Euler();
     return (el, componentName, componentData) => {
@@ -125,7 +115,7 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 
   el.setAttribute("media-loader", {
     src: componentData.src,
-    resize: true,
+    resize: componentData.contentSubtype ? false : true,
     resolve: true,
     fileIsOwned: true,
     animate: false,
@@ -231,10 +221,8 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
     resolve: true,
     template: "#interactable-media"
   });
-  el.setAttribute("hoverable-visuals", {
-    cursorController: "#cursor-controller"
-  });
-  el.setAttribute("ammo-body", {
+  el.setAttribute("hoverable-visuals", "");
+  el.setAttribute("body-helper", {
     mass: 0,
     type: TYPE.STATIC,
     collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
@@ -302,7 +290,7 @@ AFRAME.GLTFModelPlus.registerComponent(
 
     // Filter out scope and colliders properties.
     el.setAttribute("trigger-volume", {
-      colliders: "#player-camera",
+      colliders: "#avatar-pov-node",
       size,
       target: targetEntity,
       enterComponent: enterComponentMapping.mappedComponent,
@@ -316,7 +304,7 @@ AFRAME.GLTFModelPlus.registerComponent(
 );
 
 AFRAME.GLTFModelPlus.registerComponent("heightfield", "heightfield", (el, componentName, componentData) => {
-  el.setAttribute("ammo-shape__heightfield", {
+  el.setAttribute("shape-helper__heightfield", {
     type: SHAPE.HEIGHTFIELD,
     margin: 0.01,
     fit: FIT.MANUAL,
@@ -327,7 +315,7 @@ AFRAME.GLTFModelPlus.registerComponent("heightfield", "heightfield", (el, compon
 });
 
 AFRAME.GLTFModelPlus.registerComponent("trimesh", "trimesh", el => {
-  el.setAttribute("ammo-shape__trimesh", {
+  el.setAttribute("shape-helper__trimesh", {
     type: SHAPE.MESH,
     margin: 0.01,
     fit: FIT.ALL,
@@ -336,3 +324,5 @@ AFRAME.GLTFModelPlus.registerComponent("trimesh", "trimesh", el => {
 });
 
 AFRAME.GLTFModelPlus.registerComponent("particle-emitter", "particle-emitter");
+
+AFRAME.GLTFModelPlus.registerComponent("networked-drawing-buffer", "networked-drawing-buffer");

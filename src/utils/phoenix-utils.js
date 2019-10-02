@@ -129,15 +129,9 @@ export function fetchReticulumAuthenticated(url, method = "GET", payload) {
   });
 }
 
-export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace) {
+export async function createAndRedirectToNewHub(name, sceneId, replace) {
   const createUrl = getReticulumFetchUrl("/api/v1/hubs");
-  const payload = { hub: { name: name || generateHubName() } };
-
-  if (sceneId) {
-    payload.hub.scene_id = sceneId;
-  } else {
-    payload.hub.default_environment_gltf_bundle_url = sceneUrl;
-  }
+  const payload = { hub: { name: name || generateHubName(), scene_id: sceneId } };
 
   const headers = { "content-type": "application/json" };
   const store = new Store();

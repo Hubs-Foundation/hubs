@@ -161,10 +161,7 @@ module.exports = (env, argv) => ({
       {
         // We reference the sources of some libraries directly, and they use async/await,
         // so we have to run it through babel in order to support the Samsung browser on Oculus Go.
-        test: [
-          path.resolve(__dirname, "node_modules/aframe-physics-system"),
-          path.resolve(__dirname, "node_modules/naf-janus-adapter")
-        ],
+        test: [path.resolve(__dirname, "node_modules/naf-janus-adapter")],
         loader: "babel-loader",
         options: babelConfig
       },
@@ -202,6 +199,12 @@ module.exports = (env, argv) => ({
             // Make asset paths relative to /src
             context: path.join(__dirname, "src")
           }
+        }
+      },
+      {
+        test: /\.(svgi)$/,
+        use: {
+          loader: "svg-inline-loader"
         }
       },
       {
@@ -353,7 +356,7 @@ module.exports = (env, argv) => ({
     ]),
     // Extract required css and add a content hash.
     new MiniCssExtractPlugin({
-      filename: "assets/stylesheets/[name]-[md5:contenthash:hex:20].css",
+      filename: "assets/stylesheets/[name]-[contenthash].css",
       disable: argv.mode !== "production"
     }),
     // Define process.env variables in the browser context.
@@ -363,11 +366,9 @@ module.exports = (env, argv) => ({
         DEFAULT_SCENE_SID: process.env.DEFAULT_SCENE_SID,
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
         RETICULUM_SOCKET_SERVER: process.env.RETICULUM_SOCKET_SERVER,
-        FARSPARK_SERVER: process.env.FARSPARK_SERVER,
+        THUMBNAIL_SERVER: process.env.THUMBNAIL_SERVER,
         CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,
         NON_CORS_PROXY_DOMAINS: process.env.NON_CORS_PROXY_DOMAINS,
-        ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER,
-        EXTRA_ENVIRONMENTS: process.env.EXTRA_ENVIRONMENTS,
         BUILD_VERSION: process.env.BUILD_VERSION,
         SENTRY_DSN: process.env.SENTRY_DSN,
         GA_TRACKING_ID: process.env.GA_TRACKING_ID,

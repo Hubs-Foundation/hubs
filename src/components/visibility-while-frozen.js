@@ -2,6 +2,10 @@ import { getLastWorldPosition } from "../utils/three-utils";
 
 const isMobile = AFRAME.utils.device.isMobile();
 
+function almostEqual(a, b) {
+  return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) + Math.abs(a.z - b.z) < 0.1;
+}
+
 /**
  * Toggles the visibility of this entity when the scene is frozen.
  * @namespace ui
@@ -18,8 +22,10 @@ AFRAME.registerComponent("visibility-while-frozen", {
   init() {
     this.updateVisibility = this.updateVisibility.bind(this);
     this.camWorldPos = new THREE.Vector3();
+    this.cam2WorldPos = new THREE.Vector3();
     this.objWorldPos = new THREE.Vector3();
-    this.cam = this.el.sceneEl.camera.el.object3D;
+    this.cam = document.getElementById("avatar-pov-node").object3D;
+    this.cam2 = this.el.sceneEl.camera;
 
     let hoverableSearch = this.el;
 
@@ -65,14 +71,18 @@ AFRAME.registerComponent("visibility-while-frozen", {
       }
 
       getLastWorldPosition(this.cam, this.camWorldPos);
+      getLastWorldPosition(this.cam2, this.cam2WorldPos);
+      const checkBoth = !almostEqual(this.camWorldPos, this.cam2WorldPos);
       this.objWorldPos.copy(this.el.object3D.position);
       this.el.object3D.localToWorld(this.objWorldPos);
 
       isWithinDistance =
-        this.camWorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance;
+        this.camWorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance ||
+        (checkBoth &&
+          this.cam2WorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance);
     }
 
-    const isTransforming = AFRAME.scenes[0].systems["transform-selected-object"].transforming;
+    const isTransforming = this.el.sceneEl.systems["transform-selected-object"].transforming;
 
     const allowed = !this.data.withPermission || window.APP.hubChannel.canOrWillIfCreator(this.data.withPermission);
 
@@ -85,7 +95,9 @@ AFRAME.registerComponent("visibility-while-frozen", {
     if (this.data.requireHoverOnNonMobile && !isMobile) {
       shouldBeVisible =
         shouldBeVisible &&
-        ((this.hoverable && AFRAME.scenes[0].systems.interaction.state.rightRemote.hovered === this.hoverable) ||
+        ((this.hoverable &&
+          (this.el.sceneEl.systems.interaction.state.rightRemote.hovered === this.hoverable ||
+            this.el.sceneEl.systems.interaction.state.leftRemote.hovered === this.hoverable)) ||
           isVisible);
     }
 

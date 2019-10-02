@@ -232,6 +232,33 @@ function registerNetworkSchemas() {
         selector: "#pen",
         component: "pen",
         property: "color"
+      },
+      {
+        selector: "#pen",
+        component: "pen",
+        property: "drawMode"
+      },
+      {
+        selector: "#pen",
+        component: "pen",
+        property: "penVisible"
+      },
+      {
+        selector: "#pen",
+        component: "pen-laser",
+        property: "remoteLaserVisible"
+      },
+      {
+        selector: "#pen",
+        component: "pen-laser",
+        property: "remoteLaserOrigin",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
+      {
+        selector: "#pen",
+        component: "pen-laser",
+        property: "laserTarget",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       }
     ]
   });

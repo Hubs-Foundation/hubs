@@ -18,6 +18,7 @@ AFRAME.registerComponent("hoverable-visuals", {
     // uniforms and boundingSphere are set from the component responsible for loading the mesh.
     this.uniforms = null;
     this.boundingSphere = new THREE.Sphere();
+    this.scene = AFRAME.scenes[0];
 
     this.sweepParams = [0, 0];
   },
@@ -26,7 +27,7 @@ AFRAME.registerComponent("hoverable-visuals", {
     this.boundingBox = null;
 
     // Used when the object is batched
-    const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
+    const batchManagerSystem = this.scene.systems["hubs-systems"].batchManagerSystem;
     this.el.object3D.traverse(object => {
       if (!object.material) return;
       forEachMaterial(object, material => {
@@ -41,19 +42,35 @@ AFRAME.registerComponent("hoverable-visuals", {
         batchManagerSystem.meshToEl.delete(object);
       });
     });
+
+    const isMobile = AFRAME.utils.device.isMobile();
+    const isMobileVR = AFRAME.utils.device.isMobileVR();
+    this.isTouchscreen = isMobile && !isMobileVR;
   },
   tick(time) {
     if (!this.uniforms || !this.uniforms.length) return;
 
     const isFrozen = this.el.sceneEl.is("frozen");
     const showEffect = showHoverEffect(this.el);
+    const toggling = this.el.sceneEl.systems["hubs-systems"].cursorTogglingSystem;
 
     let interactorOne, interactorTwo;
     const interaction = AFRAME.scenes[0].systems.interaction;
     if (interaction.state.leftHand.hovered === this.el && !interaction.state.leftHand.held) {
       interactorOne = interaction.options.leftHand.entity.object3D;
     }
-    if (interaction.state.rightRemote.hovered === this.el && !interaction.state.rightRemote.held) {
+    if (
+      interaction.state.leftRemote.hovered === this.el &&
+      !interaction.state.leftRemote.held &&
+      !toggling.leftToggledOff
+    ) {
+      interactorOne = interaction.options.leftRemote.entity.object3D;
+    }
+    if (
+      interaction.state.rightRemote.hovered === this.el &&
+      !interaction.state.rightRemote.held &&
+      !toggling.rightToggledOff
+    ) {
       interactorTwo = interaction.options.rightRemote.entity.object3D;
     }
     if (interaction.state.rightHand.hovered === this.el && !interaction.state.rightHand.held) {
@@ -80,12 +97,12 @@ AFRAME.registerComponent("hoverable-visuals", {
       uniform.hubs_IsFrozen.value = isFrozen;
       uniform.hubs_SweepParams.value = this.sweepParams;
 
-      uniform.hubs_HighlightInteractorOne.value = !!interactorOne && showEffect;
+      uniform.hubs_HighlightInteractorOne.value = !!interactorOne && showEffect && !this.isTouchscreen;
       uniform.hubs_InteractorOnePos.value[0] = interactorOneTransform[12];
       uniform.hubs_InteractorOnePos.value[1] = interactorOneTransform[13];
       uniform.hubs_InteractorOnePos.value[2] = interactorOneTransform[14];
 
-      uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo && showEffect;
+      uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo && showEffect && !this.isTouchscreen;
       uniform.hubs_InteractorTwoPos.value[0] = interactorTwoTransform[12];
       uniform.hubs_InteractorTwoPos.value[1] = interactorTwoTransform[13];
       uniform.hubs_InteractorTwoPos.value[2] = interactorTwoTransform[14];

@@ -49,45 +49,45 @@ function characterAccelerationBindings(disableForwardOnTrigger) {
 }
 
 export const xboxControllerUserBindings = addSetsToBindings({
-  [sets.cursorHoldingPen]: [
+  [sets.rightCursorHoldingPen]: [
     {
       src: { value: button("rightTrigger").pressed },
-      dest: { value: paths.actions.cursor.startDrawing },
+      dest: { value: paths.actions.cursor.right.startDrawing },
       xform: xforms.rising,
       priority: 200
     },
     {
       src: { value: button("rightTrigger").pressed },
-      dest: { value: paths.actions.cursor.stopDrawing },
+      dest: { value: paths.actions.cursor.right.stopDrawing },
       xform: xforms.falling,
       priority: 200
     },
     {
       src: { value: button("b").pressed },
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.rising
     },
     {
       src: { value: button("y").pressed },
-      dest: { value: paths.actions.cursor.undoDrawing },
+      dest: { value: paths.actions.cursor.right.undoDrawing },
       xform: xforms.rising,
       priority: 200
     },
     {
       src: { value: button("a").pressed },
-      dest: { value: paths.actions.cursor.penNextColor },
+      dest: { value: paths.actions.cursor.right.penNextColor },
       xform: xforms.rising
     },
     {
       src: { value: button("x").pressed },
-      dest: { value: paths.actions.cursor.penPrevColor },
+      dest: { value: paths.actions.cursor.right.penPrevColor },
       xform: xforms.rising
     }
   ],
   [sets.global]: [
     {
       src: {},
-      dest: { value: paths.actions.cursor.hideLine },
+      dest: { value: paths.actions.cursor.right.hideLine },
       xform: xforms.always(true)
     },
     {
@@ -108,7 +108,7 @@ export const xboxControllerUserBindings = addSetsToBindings({
     {
       src: { value: deadzonedRightJoystickVertical },
       dest: { value: scaledRightJoystickVertical },
-      xform: xforms.scale(-1.25) // vertical look speed modifier
+      xform: xforms.scale(-0.125) // vertical look speed modifier
     },
     {
       src: {},
@@ -160,7 +160,7 @@ export const xboxControllerUserBindings = addSetsToBindings({
     },
     {
       src: { value: vec2Zero },
-      dest: { value: paths.actions.cursor.pose },
+      dest: { value: paths.actions.cursor.right.pose },
       xform: xforms.poseFromCameraProjection()
     },
     {
@@ -195,12 +195,12 @@ export const xboxControllerUserBindings = addSetsToBindings({
       xform: xforms.falling
     }
   ],
-  [sets.cursorHoldingNothing]: [...characterAccelerationBindings()],
-  [sets.cursorHoldingInteractable]: [
+  [sets.rightCursorHoldingNothing]: [...characterAccelerationBindings()],
+  [sets.rightCursorHoldingInteractable]: [
     ...characterAccelerationBindings(true),
     {
       src: { value: button("rightTrigger").pressed },
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.falling,
       priority: 100
     },
@@ -214,22 +214,22 @@ export const xboxControllerUserBindings = addSetsToBindings({
         bool: button("leftTrigger").pressed,
         value: scaledLeftJoystickCursorDelta
       },
-      dest: { value: paths.actions.cursor.modDelta },
+      dest: { value: paths.actions.cursor.right.modDelta },
       xform: xforms.copyIfTrue
     }
   ],
-  [sets.cursorHoveringOnUI]: [
+  [sets.rightCursorHoveringOnUI]: [
     {
       src: { value: button("rightTrigger").pressed },
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.rising
     }
   ],
-  [sets.cursorHoveringOnInteractable]: [
+  [sets.rightCursorHoveringOnInteractable]: [
     ...characterAccelerationBindings(),
     {
       src: { value: button("rightTrigger").pressed },
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.rising,
       priority: 100
     }

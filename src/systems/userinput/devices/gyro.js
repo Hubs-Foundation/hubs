@@ -71,8 +71,8 @@ export class GyroDevice {
     // Don't use gyro values when device is lying flat
     if (hmdEuler.x < -Math.PI * 0.475) return;
 
-    const dX = THREE.Math.RAD2DEG * difference(hmdEuler.x, this.prevX);
-    const dY = THREE.Math.RAD2DEG * difference(hmdEuler.y, this.prevY);
+    const dX = difference(hmdEuler.x, this.prevX);
+    const dY = difference(hmdEuler.y, this.prevY);
 
     this.dXBuffer.push(Math.abs(dX) < 0.001 ? 0 : dX);
     this.dYBuffer.push(Math.abs(dY) < 0.001 ? 0 : dY);

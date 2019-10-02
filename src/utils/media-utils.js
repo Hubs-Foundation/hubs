@@ -6,6 +6,8 @@ import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { validMaterials } from "../components/hoverable-visuals";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 
+import anime from "animejs";
+
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
 // Map<String, Promise<Object>
@@ -89,7 +91,6 @@ function getOrientation(file, callback) {
   reader.readAsArrayBuffer(file);
 }
 
-let interactableId = 0;
 export const addMedia = (
   src,
   template,
@@ -102,7 +103,6 @@ export const addMedia = (
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
-  entity.id = "interactable-media-" + interactableId++;
   entity.setAttribute("networked", { template: template });
   const needsToBeUploaded = src instanceof File;
   entity.setAttribute("media-loader", {
@@ -341,4 +341,51 @@ export async function createImageTexture(url) {
   texture.anisotropy = 4;
 
   return texture;
+}
+
+export function addMeshScaleAnimation(mesh, initialScale, onComplete) {
+  const step = (function() {
+    const lastValue = {};
+    return function(anim) {
+      const value = anim.animatables[0].target;
+
+      value.x = Math.max(Number.MIN_VALUE, value.x);
+      value.y = Math.max(Number.MIN_VALUE, value.y);
+      value.z = Math.max(Number.MIN_VALUE, value.z);
+
+      // For animation timeline.
+      if (value.x === lastValue.x && value.y === lastValue.y && value.z === lastValue.z) {
+        return;
+      }
+
+      lastValue.x = value.x;
+      lastValue.y = value.y;
+      lastValue.z = value.z;
+
+      mesh.scale.set(value.x, value.y, value.z);
+      mesh.matrixNeedsUpdate = true;
+    };
+  })();
+
+  const config = {
+    duration: 400,
+    easing: "easeOutElastic",
+    elasticity: 400,
+    loop: 0,
+    round: false,
+    x: mesh.scale.x,
+    y: mesh.scale.y,
+    z: mesh.scale.z,
+    targets: [initialScale],
+    update: anim => step(anim),
+    complete: anim => {
+      step(anim);
+      if (onComplete) onComplete();
+    }
+  };
+
+  mesh.scale.copy(initialScale);
+  mesh.matrixNeedsUpdate = true;
+
+  return anime(config);
 }

@@ -4,6 +4,7 @@ import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
+const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 
@@ -29,8 +30,9 @@ export default class SceneEntryManager {
     this.store = window.APP.store;
     this.mediaSearchStore = window.APP.mediaSearchStore;
     this.scene = document.querySelector("a-scene");
-    this.cursorController = document.querySelector("#cursor-controller");
-    this.playerRig = document.querySelector("#player-rig");
+    this.rightCursorController = document.getElementById("right-cursor-controller");
+    this.leftCursorController = document.getElementById("left-cursor-controller");
+    this.avatarRig = document.getElementById("avatar-rig");
     this._entered = false;
     this.performConditionalSignIn = () => {};
     this.history = history;
@@ -38,7 +40,8 @@ export default class SceneEntryManager {
 
   init = () => {
     this.whenSceneLoaded(() => {
-      this.cursorController.components["cursor-controller"].enabled = false;
+      this.rightCursorController.components["cursor-controller"].enabled = false;
+      this.leftCursorController.components["cursor-controller"].enabled = false;
     });
   };
 
@@ -47,8 +50,7 @@ export default class SceneEntryManager {
   };
 
   enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
-    const playerCamera = document.querySelector("#player-camera");
-    playerCamera.removeAttribute("scene-preview-camera");
+    document.getElementById("viewing-camera").removeAttribute("scene-preview-camera");
 
     if (isDebug) {
       NAF.connection.adapter.session.options.verbose = true;
@@ -63,11 +65,11 @@ export default class SceneEntryManager {
       // force gamepads to become live.
       navigator.getVRDisplays();
 
-      exit2DInterstitialAndEnterVR(true);
+      await exit2DInterstitialAndEnterVR(true);
     }
 
     if (isMobile || qsTruthy("mobile")) {
-      this.playerRig.setAttribute("virtual-gamepad-controls", {});
+      this.avatarRig.setAttribute("virtual-gamepad-controls", {});
     }
 
     this._setupPlayerRig();
@@ -88,13 +90,14 @@ export default class SceneEntryManager {
     }
 
     if (mediaStream) {
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
+      await NAF.connection.adapter.setLocalMediaStream(mediaStream);
     }
 
     this.scene.classList.remove("hand-cursor");
     this.scene.classList.add("no-cursor");
 
-    this.cursorController.components["cursor-controller"].enabled = true;
+    this.rightCursorController.components["cursor-controller"].enabled = true;
+    this.leftCursorController.components["cursor-controller"].enabled = true;
     this._entered = true;
 
     // Delay sending entry event telemetry until VR display is presenting.
@@ -103,7 +106,7 @@ export default class SceneEntryManager {
         await nextTick();
       }
 
-      this.hubChannel.sendEntryEvent().then(() => {
+      this.hubChannel.sendEnteredEvent().then(() => {
         this.store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
       });
     })();
@@ -149,7 +152,7 @@ export default class SceneEntryManager {
 
     const avatarScale = parseInt(qs.get("avatar_scale"), 10);
     if (avatarScale) {
-      this.playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
+      this.avatarRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
     }
   };
 
@@ -157,7 +160,7 @@ export default class SceneEntryManager {
     const avatarId = this.store.state.profile.avatarId;
     const avatarSrc = await getAvatarSrc(avatarId);
 
-    this.playerRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
+    this.avatarRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
   };
 
   _setupKicking = () => {
@@ -223,7 +226,11 @@ export default class SceneEntryManager {
   };
 
   _signInAndPinOrUnpinElement = (el, pin) => {
-    const action = pin ? () => this._pinElement(el) : async () => await this._unpinElement(el);
+    const action = pin
+      ? () => this._pinElement(el)
+      : async () => {
+          await this._unpinElement(el);
+        };
 
     this.performConditionalSignIn(() => this.hubChannel.signedIn, action, pin ? "pin" : "unpin", () => {
       // UI pins/un-pins the entity optimistically, so we undo that here.
@@ -263,7 +270,7 @@ export default class SceneEntryManager {
       );
       orientation.then(or => {
         entity.setAttribute("offset-relative-to", {
-          target: "#player-camera",
+          target: "#avatar-pov-node",
           offset,
           orientation: or
         });
@@ -372,14 +379,18 @@ export default class SceneEntryManager {
     let currentVideoShareEntity;
     let isHandlingVideoShare = false;
 
-    const shareVideoMediaStream = async constraints => {
+    const shareVideoMediaStream = async (constraints, isDisplayMedia) => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
       let newStream;
 
       try {
-        newStream = await navigator.mediaDevices.getUserMedia(constraints);
+        if (isDisplayMedia) {
+          newStream = await navigator.mediaDevices.getDisplayMedia(constraints);
+        } else {
+          newStream = await navigator.mediaDevices.getUserMedia(constraints);
+        }
       } catch (e) {
         isHandlingVideoShare = false;
         this.scene.emit("share_video_failed");
@@ -390,14 +401,14 @@ export default class SceneEntryManager {
 
       if (videoTracks.length > 0) {
         newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
-        NAF.connection.adapter.setLocalMediaStream(mediaStream);
+        await NAF.connection.adapter.setLocalMediaStream(mediaStream);
         currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
 
         // Wire up custom removal event which will stop the stream.
         currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
       }
 
-      this.scene.emit("share_video_enabled", { source: constraints.video.mediaSource });
+      this.scene.emit("share_video_enabled", { source: isDisplayMedia ? "screen" : "camera" });
       this.scene.addState("sharing_video");
       isHandlingVideoShare = false;
     };
@@ -412,33 +423,22 @@ export default class SceneEntryManager {
       });
     });
 
-    this.scene.addEventListener("action_share_window", () => {
-      shareVideoMediaStream({
-        video: {
-          mediaSource: "window",
-          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
-          // other than your current monitor that has a different aspect ratio.
-          width: 720 * (screen.width / screen.height),
-          height: 720,
-          frameRate: 30
-        }
-      });
-    });
-
     this.scene.addEventListener("action_share_screen", () => {
-      shareVideoMediaStream({
-        video: {
-          mediaSource: "screen",
-          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
-          // other than your current monitor that has a different aspect ratio.
-          width: 720 * (screen.width / screen.height),
-          height: 720,
-          frameRate: 30
-        }
-      });
+      shareVideoMediaStream(
+        {
+          video: {
+            // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
+            // other than your current monitor that has a different aspect ratio.
+            width: 720 * (screen.width / screen.height),
+            height: 720,
+            frameRate: 30
+          }
+        },
+        true
+      );
     });
 
-    this.scene.addEventListener("action_end_video_sharing", () => {
+    this.scene.addEventListener("action_end_video_sharing", async () => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
@@ -451,7 +451,7 @@ export default class SceneEntryManager {
         mediaStream.removeTrack(track);
       }
 
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
+      await NAF.connection.adapter.setLocalMediaStream(mediaStream);
       currentVideoShareEntity = null;
 
       this.scene.emit("share_video_disabled");
@@ -459,20 +459,22 @@ export default class SceneEntryManager {
       isHandlingVideoShare = false;
     });
 
-    this.scene.addEventListener("action_selected_media_result_entry", e => {
+    this.scene.addEventListener("action_selected_media_result_entry", async e => {
       // TODO spawn in space when no rights
-      const entry = e.detail;
-      if (["avatar", "avatar_listing"].includes(entry.type)) return;
-      if ((entry.type === "scene_listing" || entry.type === "scene") && this.hubChannel.can("update_hub")) return;
+      const { entry, selectAction } = e.detail;
+      if (selectAction !== "spawn") return;
+
+      const delaySpawn = isIn2DInterstitial() && !isMobileVR;
+      await exit2DInterstitialAndEnterVR();
 
       // If user has HMD lifted up or gone through interstitial, delay spawning for now. eventually show a modal
-      const spawnDelay = isIn2DInterstitial() ? 3000 : 0;
-
-      setTimeout(() => {
+      if (delaySpawn) {
+        setTimeout(() => {
+          spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
+        }, 3000);
+      } else {
         spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
-      }, spawnDelay);
-
-      exit2DInterstitialAndEnterVR();
+      }
     });
 
     this.mediaSearchStore.addEventListener("media-exit", () => {
@@ -492,7 +494,7 @@ export default class SceneEntryManager {
         const entity = document.createElement("a-entity");
         entity.setAttribute("networked", { template: "#interactable-camera" });
         entity.setAttribute("offset-relative-to", {
-          target: "#player-camera",
+          target: "#avatar-pov-node",
           offset: { x: 0, y: 0, z: -1.5 }
         });
         this.scene.appendChild(entity);
@@ -508,9 +510,9 @@ export default class SceneEntryManager {
   };
 
   _spawnAvatar = () => {
-    this.playerRig.setAttribute("networked", "template: #remote-avatar; attachTemplateToLocal: false;");
-    this.playerRig.setAttribute("networked-avatar", "");
-    this.playerRig.emit("entered");
+    this.avatarRig.setAttribute("networked", "template: #remote-avatar; attachTemplateToLocal: false;");
+    this.avatarRig.setAttribute("networked-avatar", "");
+    this.avatarRig.emit("entered");
   };
 
   _runBot = async mediaStream => {
@@ -539,7 +541,7 @@ export default class SceneEntryManager {
       audioInput.onchange = getAudio;
     }
 
-    const camera = document.querySelector("#player-camera");
+    const camera = document.querySelector("#avatar-pov-node");
     const leftController = document.querySelector("#player-left-controller");
     const rightController = document.querySelector("#player-right-controller");
     const getRecording = () => {
@@ -577,7 +579,7 @@ export default class SceneEntryManager {
           ? audioEl.mozCaptureStream().getAudioTracks()[0]
           : null
     );
-    NAF.connection.adapter.setLocalMediaStream(mediaStream);
+    await NAF.connection.adapter.setLocalMediaStream(mediaStream);
     audioEl.play();
   };
 }

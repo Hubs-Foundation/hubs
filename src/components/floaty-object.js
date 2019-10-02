@@ -29,8 +29,8 @@ AFRAME.registerComponent("floaty-object", {
   },
 
   tick() {
-    if (!this.ammoBody) {
-      this.ammoBody = this.el.components["ammo-body"];
+    if (!this.bodyHelper) {
+      this.bodyHelper = this.el.components["body-helper"];
     }
 
     const interaction = AFRAME.scenes[0].systems.interaction;
@@ -44,14 +44,15 @@ AFRAME.registerComponent("floaty-object", {
 
     if (!isHeld && this._makeStaticWhenAtRest) {
       const isMine = this.el.components.networked && NAF.utils.isMine(this.el);
-      const linearThreshold = this.ammoBody.data.linearSleepingThreshold;
-      const angularThreshold = this.ammoBody.data.angularSleepingThreshold;
+      const linearThreshold = this.bodyHelper.data.linearSleepingThreshold;
+      const angularThreshold = this.bodyHelper.data.angularSleepingThreshold;
       const isAtRest =
-        this.ammoBody.body.getLinearVelocity().length2() < linearThreshold * linearThreshold &&
-        this.ammoBody.body.getAngularVelocity().length2() < angularThreshold * angularThreshold;
+        this.bodyHelper.body &&
+        this.bodyHelper.body.physicsBody.getLinearVelocity().length2() < linearThreshold * linearThreshold &&
+        this.bodyHelper.body.physicsBody.getAngularVelocity().length2() < angularThreshold * angularThreshold;
 
       if (isAtRest && isMine) {
-        this.el.setAttribute("ammo-body", { type: "static" });
+        this.el.setAttribute("body-helper", { type: "kinematic" });
       }
 
       if (isAtRest || !isMine) {
@@ -66,11 +67,8 @@ AFRAME.registerComponent("floaty-object", {
     // We do this in play instead of in init because otherwise NAF.utils.isMine fails
     if (this.hasBeenHereBefore) return;
     this.hasBeenHereBefore = true;
-    if (this.el.body) {
-      this._onBodyLoaded();
-    } else {
-      this._onBodyLoaded = this._onBodyLoaded.bind(this);
-      this.el.addEventListener("body-loaded", this._onBodyLoaded, { once: true });
+    if (this.data.autoLockOnLoad) {
+      this.setLocked(true);
     }
   },
 
@@ -78,22 +76,17 @@ AFRAME.registerComponent("floaty-object", {
     if (this.el.components.networked && !NAF.utils.isMine(this.el)) return;
 
     this.locked = locked;
-    this.el.setAttribute("ammo-body", { type: locked ? "kinematic" : "dynamic" });
-  },
-
-  _onBodyLoaded() {
-    if (this.data.autoLockOnLoad) {
-      this.setLocked(true);
-    }
+    this.el.setAttribute("body-helper", { type: locked ? "kinematic" : "dynamic" });
   },
 
   onRelease() {
     if (this.data.modifyGravityOnRelease) {
       if (
         this.data.gravitySpeedLimit === 0 ||
-        this.ammoBody.getVelocity().length2() < this.data.gravitySpeedLimit * this.data.gravitySpeedLimit
+        (this.bodyHelper.body &&
+          this.bodyHelper.body.getVelocity().length2() < this.data.gravitySpeedLimit * this.data.gravitySpeedLimit)
       ) {
-        this.el.setAttribute("ammo-body", {
+        this.el.setAttribute("body-helper", {
           gravity: { x: 0, y: 0, z: 0 },
           angularDamping: this.data.reduceAngularFloat ? 0.98 : 0.5,
           linearDamping: 0.95,
@@ -104,7 +97,7 @@ AFRAME.registerComponent("floaty-object", {
 
         this._makeStaticWhenAtRest = true;
       } else {
-        this.el.setAttribute("ammo-body", {
+        this.el.setAttribute("body-helper", {
           gravity: { x: 0, y: this.data.releaseGravity, z: 0 },
           angularDamping: 0.01,
           linearDamping: 0.01,
@@ -114,7 +107,7 @@ AFRAME.registerComponent("floaty-object", {
         });
       }
     } else {
-      this.el.setAttribute("ammo-body", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE });
+      this.el.setAttribute("body-helper", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE });
     }
 
     if (this.data.autoLockOnRelease) {
@@ -123,14 +116,13 @@ AFRAME.registerComponent("floaty-object", {
   },
 
   onGrab() {
-    this.el.setAttribute("ammo-body", {
+    this.el.setAttribute("body-helper", {
       collisionFilterMask: COLLISION_LAYERS.HANDS
     });
     this.setLocked(false);
   },
 
   remove() {
-    this.el.removeEventListener("body-loaded", this._onBodyLoaded);
     if (this.stuckTo) {
       const stuckTo = this.stuckTo;
       delete this.stuckTo;

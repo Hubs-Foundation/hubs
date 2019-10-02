@@ -21,7 +21,7 @@ const computeObjectAABB = (function() {
 })();
 
 const rotation = new THREE.Euler();
-export function getBox(entity, boxRoot) {
+export function getBox(entity, boxRoot, worldSpace) {
   const box = new THREE.Box3();
 
   rotation.copy(entity.object3D.rotation);
@@ -34,8 +34,10 @@ export function getBox(entity, boxRoot) {
   computeObjectAABB(boxRoot, box);
 
   if (!box.isEmpty()) {
-    entity.object3D.worldToLocal(box.min);
-    entity.object3D.worldToLocal(box.max);
+    if (!worldSpace) {
+      entity.object3D.worldToLocal(box.min);
+      entity.object3D.worldToLocal(box.max);
+    }
     entity.object3D.rotation.copy(rotation);
     entity.object3D.matrixNeedsUpdate = true;
   }

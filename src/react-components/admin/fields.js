@@ -63,6 +63,50 @@ OwnedFileImage.propTypes = {
   classes: PropTypes.object
 };
 
+function OwnedFileDownloadFieldInternal({ fileName, record, source }) {
+  return (
+    <a
+      download={fileName || true}
+      href={getReticulumFetchUrl(`/files/${record[source]}`)}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Download
+    </a>
+  );
+}
+
+OwnedFileDownloadFieldInternal.propTypes = {
+  record: PropTypes.object,
+  fileName: PropTypes.string,
+  source: PropTypes.string
+};
+
+export function OwnedFileDownloadField({ getFileName, ...props }) {
+  const fileName = getFileName && getFileName(props);
+
+  return (
+    <ConditionalReferenceField
+      reference="owned_files"
+      linkType={false}
+      defaultValue={<a href="#">Download</a>}
+      {...props}
+    >
+      <OwnedFileDownloadFieldInternal source="owned_file_uuid" fileName={fileName} />
+    </ConditionalReferenceField>
+  );
+}
+
+OwnedFileDownloadField.propTypes = {
+  getFileName: PropTypes.func,
+  record: PropTypes.object,
+  source: PropTypes.string
+};
+
+OwnedFileDownloadField.defaultProps = {
+  addLabel: true
+};
+
 export const SceneLink = withStyles(styles)(({ source, record = {}, classes }) => {
   const src = getReticulumFetchUrl(`/scenes/${record.scene_sid || record.scene_listing_sid}`);
   return (
@@ -80,7 +124,7 @@ SceneLink.propTypes = {
 };
 
 export const AvatarLink = withStyles(styles)(({ source, record = {}, classes }) => {
-  const src = getReticulumFetchUrl(`/api/v1/avatars/${record.avatar_sid || record.avatar_listing_sid}`);
+  const src = getReticulumFetchUrl(`/avatars/${record.avatar_sid || record.avatar_listing_sid}`);
   return (
     <a href={src} className={classes.avatarLink} target="_blank" rel="noopener noreferrer">
       {record[source]}

@@ -28,19 +28,28 @@ const pathsMap = {
     penPrevColor: paths.actions.leftHand.penPrevColor,
     scalePenTip: paths.actions.leftHand.scalePenTip
   },
-  cursor: {
-    pose: paths.actions.cursor.pose,
-    startDrawing: paths.actions.cursor.startDrawing,
-    stopDrawing: paths.actions.cursor.stopDrawing,
-    undoDrawing: paths.actions.cursor.undoDrawing,
-    penNextColor: paths.actions.cursor.penNextColor,
-    penPrevColor: paths.actions.cursor.penPrevColor,
-    scalePenTip: paths.actions.cursor.scalePenTip
+  "right-cursor": {
+    pose: paths.actions.cursor.right.pose,
+    startDrawing: paths.actions.cursor.right.startDrawing,
+    stopDrawing: paths.actions.cursor.right.stopDrawing,
+    undoDrawing: paths.actions.cursor.right.undoDrawing,
+    penNextColor: paths.actions.cursor.right.penNextColor,
+    penPrevColor: paths.actions.cursor.right.penPrevColor,
+    scalePenTip: paths.actions.cursor.right.scalePenTip
+  },
+  "left-cursor": {
+    pose: paths.actions.cursor.left.pose,
+    startDrawing: paths.actions.cursor.left.startDrawing,
+    stopDrawing: paths.actions.cursor.left.stopDrawing,
+    undoDrawing: paths.actions.cursor.left.undoDrawing,
+    penNextColor: paths.actions.cursor.left.penNextColor,
+    penPrevColor: paths.actions.cursor.left.penPrevColor,
+    scalePenTip: paths.actions.cursor.left.scalePenTip
   }
 };
 
 const DRAW_MODE = {
-  DEFAULT_2D: 0,
+  DEFAULT_3D: 0,
   PROJECTION: 1
 };
 
@@ -87,7 +96,10 @@ AFRAME.registerComponent("pen", {
     minRadius: { default: 0.005 },
     maxRadius: { default: 0.2 },
     far: { default: 100 },
-    near: { default: 0.01 }
+    near: { default: 0.01 },
+    drawMode: { default: DRAW_MODE.DEFAULT_3D, oneOf: [DRAW_MODE.DEFAULT_3D, DRAW_MODE.PROJECTION] },
+    penVisible: { default: true },
+    penTipPosition: { default: { x: 0, y: 0, z: 0 } }
   },
 
   init() {
@@ -112,28 +124,7 @@ AFRAME.registerComponent("pen", {
     this.raycaster.firstHitOnly = true; // flag specific to three-mesh-bvh
 
     this.originalPosition = this.el.object3D.position.clone();
-    this.intersection = null;
     this.lastIntersectionDistance = 0;
-
-    const lineGeometry = new THREE.BufferGeometry();
-    lineGeometry.addAttribute("position", new THREE.BufferAttribute(new Float32Array(2 * 3), 3));
-
-    this.line = new THREE.Line(
-      lineGeometry,
-      new THREE.LineBasicMaterial({
-        color: "red",
-        opacity: 0.2,
-        transparent: true,
-        visible: true
-      })
-    );
-
-    //prevents the line from being a raycast target for the cursor
-    this.line.raycast = function() {};
-
-    this.el.parentEl.setObject3D("penline", this.line);
-
-    this.drawMode = DRAW_MODE.DEFAULT_2D;
 
     this.targets = [];
     this.setDirty = this.setDirty.bind(this);
@@ -154,12 +145,21 @@ AFRAME.registerComponent("pen", {
       environmentMapComponent.applyEnvironmentMap(this.el.parentEl.object3D);
     }
 
+    this.penLaserAttributesUpdated = false;
+    this.penLaserAttributes = {
+      color: "#FF0033",
+      laserVisible: false,
+      remoteLaserVisible: false,
+      laserOrigin: { x: 0, y: 0, z: 0 },
+      remoteLaserOrigin: { x: 0, y: 0, z: 0 },
+      laserTarget: { x: 0, y: 0, z: 0 }
+    };
+
     // TODO: Use the MutationRecords passed into the callback function to determine added/removed nodes!
     this.observer = new MutationObserver(this.setDirty);
 
     waitForDOMContentLoaded().then(() => {
       const scene = document.querySelector("a-scene");
-      this.rightRemote = document.querySelector("#cursor-controller");
       this.observer.observe(scene, { childList: true, attributes: true, subtree: true });
       scene.addEventListener("object3dset", this.setDirty);
       scene.addEventListener("object3dremove", this.setDirty);
@@ -168,13 +168,13 @@ AFRAME.registerComponent("pen", {
 
   play() {
     this.drawingManager = document.querySelector(this.data.drawingManager).components["drawing-manager"];
-    this.drawingManager.createDrawing();
   },
 
   update(prevData) {
     if (prevData.color != this.data.color) {
       this.penTip.material.color.set(this.data.color);
-      this.line.material.color.set(this.data.color);
+      this.penLaserAttributes.color = this.data.color;
+      this.el.setAttribute("pen-laser", { color: this.data.color });
     }
     if (prevData.radius != this.data.radius) {
       this.el.setAttribute("radius", this.data.radius);
@@ -184,69 +184,119 @@ AFRAME.registerComponent("pen", {
     this.raycaster.near = this.data.near;
   },
 
-  tick: (() => {
+  tick(t, dt) {
+    const isMine = this.el.parentEl.components.networked.initialized && this.el.parentEl.components.networked.isMine();
+
+    if (this.penTip.material.visible !== isMine) {
+      this.penTip.material.visible = isMine;
+    }
+
+    if (isMine) {
+      this._handleInput();
+
+      const cursorPose =
+        this.data.drawMode === DRAW_MODE.PROJECTION &&
+        (this.grabberId === "right-cursor" || this.grabberId === "left-cursor")
+          ? AFRAME.scenes[0].systems.userinput.get(pathsMap[this.grabberId].pose)
+          : null;
+
+      const intersection = this._getIntersection(cursorPose);
+
+      this._updatePenTip(intersection);
+
+      const remoteLaserVisible = this.data.drawMode === DRAW_MODE.PROJECTION && !!intersection;
+      const laserVisible = this.el.sceneEl.is("vr-mode") && !!intersection && remoteLaserVisible;
+
+      if (this.penLaserAttributes.laserVisible !== laserVisible) {
+        this.penLaserAttributes.laserVisible = laserVisible;
+        this.penLaserAttributesUpdated = true;
+      }
+
+      if (this.penLaserAttributes.remoteLaserVisible !== remoteLaserVisible) {
+        this.penLaserAttributes.remoteLaserVisible = remoteLaserVisible;
+        this.penLaserAttributesUpdated = true;
+      }
+
+      if (remoteLaserVisible || laserVisible) {
+        this._updateLaser(cursorPose, intersection);
+      }
+
+      const penVisible = (this.grabberId !== "left-cursor" && this.grabberId !== "right-cursor") || !intersection;
+      this._setPenVisible(penVisible);
+      this.el.setAttribute("pen", { penVisible: penVisible });
+
+      this._doDraw(intersection, dt);
+
+      if (this.penLaserAttributesUpdated) {
+        this.penLaserAttributesUpdated = false;
+        this.el.setAttribute("pen-laser", this.penLaserAttributes, true);
+      }
+    } else {
+      this._setPenVisible(this.data.penVisible);
+    }
+  },
+
+  _handleInput() {
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    const interaction = AFRAME.scenes[0].systems.interaction;
+
+    if (interaction.state.rightHand.held === this.el.parentNode) {
+      this.grabberId = "player-right-controller";
+    } else if (interaction.state.leftHand.held === this.el.parentNode) {
+      this.grabberId = "player-left-controller";
+    } else if (interaction.state.rightRemote.held === this.el.parentNode) {
+      this.grabberId = "right-cursor";
+      this.data.drawMode = DRAW_MODE.PROJECTION;
+    } else if (interaction.state.leftRemote.held === this.el.parentNode) {
+      this.grabberId = "left-cursor";
+      this.data.drawMode = DRAW_MODE.PROJECTION;
+    } else {
+      this.grabberId = null;
+    }
+
+    if (this.grabberId && pathsMap[this.grabberId]) {
+      const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
+      const paths = pathsMap[this.grabberId];
+      if (userinput.get(paths.startDrawing)) {
+        this._startDraw();
+        sfx.playSoundOneShot(SOUND_PEN_START_DRAW);
+      }
+      if (userinput.get(paths.stopDrawing)) {
+        this._endDraw();
+        sfx.playSoundOneShot(SOUND_PEN_STOP_DRAW);
+      }
+      const penScaleMod = userinput.get(paths.scalePenTip);
+      if (penScaleMod) {
+        this._changeRadius(penScaleMod);
+      }
+      if (userinput.get(paths.penNextColor)) {
+        this._changeColor(1);
+        sfx.playSoundOneShot(SOUND_PEN_CHANGE_COLOR);
+      }
+      if (userinput.get(paths.penPrevColor)) {
+        this._changeColor(-1);
+        sfx.playSoundOneShot(SOUND_PEN_CHANGE_COLOR);
+      }
+      if (userinput.get(paths.undoDrawing)) {
+        this._undoDraw();
+        sfx.playSoundOneShot(SOUND_PEN_UNDO_DRAW);
+      }
+      if (paths.switchDrawMode && userinput.get(paths.switchDrawMode)) {
+        this.data.drawMode = this.data.drawMode === DRAW_MODE.DEFAULT_3D ? DRAW_MODE.PROJECTION : DRAW_MODE.DEFAULT_3D;
+      }
+    }
+  },
+
+  _getIntersection: (() => {
     const rawIntersections = [];
-    const lineStartPosition = new THREE.Vector3();
-    const lineEndPosition = new THREE.Vector3();
     const worldQuaternion = new THREE.Quaternion();
-    return function(t, dt) {
-      const userinput = AFRAME.scenes[0].systems.userinput;
-      const interaction = AFRAME.scenes[0].systems.interaction;
-
-      if (interaction.state.rightHand.held === this.el.parentNode) {
-        this.grabberId = "player-right-controller";
-      } else if (interaction.state.leftHand.held === this.el.parentNode) {
-        this.grabberId = "player-left-controller";
-      } else if (interaction.state.rightRemote.held === this.el.parentNode) {
-        this.grabberId = "cursor";
-        this.drawMode = DRAW_MODE.PROJECTION;
-      } else {
-        this.grabberId = null;
-      }
-
-      if (this.grabberId && pathsMap[this.grabberId]) {
-        const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
-        const paths = pathsMap[this.grabberId];
-        if (userinput.get(paths.startDrawing)) {
-          this._startDraw();
-          sfx.playSoundOneShot(SOUND_PEN_START_DRAW);
-        }
-        if (userinput.get(paths.stopDrawing)) {
-          this._endDraw();
-          sfx.playSoundOneShot(SOUND_PEN_STOP_DRAW);
-        }
-        const penScaleMod = userinput.get(paths.scalePenTip);
-        if (penScaleMod) {
-          this._changeRadius(penScaleMod);
-        }
-        if (userinput.get(paths.penNextColor)) {
-          this._changeColor(1);
-          sfx.playSoundOneShot(SOUND_PEN_CHANGE_COLOR);
-        }
-        if (userinput.get(paths.penPrevColor)) {
-          this._changeColor(-1);
-          sfx.playSoundOneShot(SOUND_PEN_CHANGE_COLOR);
-        }
-        if (userinput.get(paths.undoDrawing)) {
-          this._undoDraw();
-          sfx.playSoundOneShot(SOUND_PEN_UNDO_DRAW);
-        }
-        if (paths.switchDrawMode && userinput.get(paths.switchDrawMode)) {
-          this.drawMode = this.drawMode === DRAW_MODE.DEFAULT_2D ? DRAW_MODE.PROJECTION : DRAW_MODE.DEFAULT_2D;
-        }
-      }
-
+    return function(cursorPose) {
       rawIntersections.length = 0;
 
-      this.intersection = null;
-      let cursorPose;
-      if (this.drawMode === DRAW_MODE.PROJECTION) {
-        if (this.grabberId === "cursor") {
-          cursorPose = userinput.get(pathsMap.cursor.pose);
-          if (cursorPose) {
-            this.raycaster.ray.origin.copy(cursorPose.position);
-            this.raycaster.ray.direction.copy(cursorPose.direction);
-          }
+      if (this.data.drawMode === DRAW_MODE.PROJECTION) {
+        if (cursorPose) {
+          this.raycaster.ray.origin.copy(cursorPose.position);
+          this.raycaster.ray.direction.copy(cursorPose.direction);
         } else if (this.grabberId !== null) {
           getLastWorldPosition(this.el.parentEl.object3D, this.raycaster.ray.origin);
           getLastWorldQuaternion(this.el.parentEl.object3D, worldQuaternion);
@@ -256,106 +306,128 @@ AFRAME.registerComponent("pen", {
 
         if (this.grabberId !== null) {
           this.raycaster.intersectObjects(this.targets, true, rawIntersections);
-          this.intersection = rawIntersections[0];
-
-          if (this.intersection) {
-            if (cursorPose) {
-              lineStartPosition.copy(cursorPose.position);
-              this.el.parentEl.object3D.worldToLocal(lineStartPosition);
-            } else {
-              lineStartPosition.set(0, 0, 0);
-            }
-            lineEndPosition.copy(this.intersection.point);
-            this.el.parentEl.object3D.worldToLocal(lineEndPosition);
-
-            const positionArray = this.line.geometry.attributes.position.array;
-            positionArray[0] = lineStartPosition.x;
-            positionArray[1] = lineStartPosition.y;
-            positionArray[2] = lineStartPosition.z;
-            positionArray[3] = lineEndPosition.x;
-            positionArray[4] = lineEndPosition.y;
-            positionArray[5] = lineEndPosition.z;
-
-            this.line.geometry.attributes.position.needsUpdate = true;
-          }
-
-          if (this.intersection) {
-            this.el.object3D.position.copy(this.intersection.point);
-
-            this.el.parentEl.object3D.worldToLocal(this.el.object3D.position);
-
-            this.el.object3D.matrixNeedsUpdate = true;
-            this.worldPosition.copy(this.intersection.point);
-          } else {
-            this.el.object3D.position.copy(this.originalPosition);
-            this.el.object3D.matrixNeedsUpdate = true;
-            getLastWorldPosition(this.el.object3D, this.worldPosition);
-          }
+          return rawIntersections[0];
         }
+      }
+
+      return null;
+    };
+  })(),
+
+  _updatePenTip(intersection) {
+    if (this.data.drawMode === DRAW_MODE.PROJECTION) {
+      if (intersection) {
+        this.el.object3D.position.copy(intersection.point);
+
+        this.el.parentEl.object3D.worldToLocal(this.el.object3D.position);
+
+        this.el.object3D.matrixNeedsUpdate = true;
+        this.worldPosition.copy(intersection.point);
       } else {
         this.el.object3D.position.copy(this.originalPosition);
         this.el.object3D.matrixNeedsUpdate = true;
         getLastWorldPosition(this.el.object3D, this.worldPosition);
       }
-
-      this._setPenVisible(this.grabberId !== "cursor" || !this.intersection);
-      this._setLineVisible(
-        this.el.sceneEl.is("vr-mode") && this.drawMode === DRAW_MODE.PROJECTION && this.intersection
-      );
-
-      //Prevent drawings from "jumping" large distances
-      if (
-        this.currentDrawing &&
-        (this.lastIntersectedObject !== (this.intersection ? this.intersection.object : null) &&
-          (!this.intersection ||
-            Math.abs(this.intersection.distance - this.lastIntersectionDistance) > MAX_DISTANCE_BETWEEN_SURFACES))
-      ) {
-        this.worldPosition.copy(this.lastPosition);
-        this._endDraw();
-      }
-      this.lastIntersectionDistance = this.intersection ? this.intersection.distance : 0;
-      this.lastIntersectedObject = this.intersection ? this.intersection.object : null;
-
-      if (!almostEquals(0.005, this.worldPosition, this.lastPosition)) {
-        this.direction.subVectors(this.worldPosition, this.lastPosition).normalize();
-        this.lastPosition.copy(this.worldPosition);
-      }
-
-      if (this.currentDrawing) {
-        const time = this.timeSinceLastDraw + dt;
-        if (
-          time >= this.data.drawFrequency &&
-          this.currentDrawing.getLastPoint().distanceTo(this.worldPosition) >= this.data.minDistanceBetweenPoints
-        ) {
-          this._getNormal(this.normal, this.worldPosition, this.direction);
-          this.currentDrawing.draw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
-        }
-
-        this.timeSinceLastDraw = time % this.data.drawFrequency;
-      }
-
-      if (this.currentDrawing && !this.grabberId) {
-        this._endDraw();
-      }
-
-      if (this.dirty) {
-        this.populateEntities(this.targets);
-        this.dirty = false;
-      }
-
+    } else {
+      this.el.object3D.position.copy(this.originalPosition);
       this.el.object3D.matrixNeedsUpdate = true;
+      getLastWorldPosition(this.el.object3D, this.worldPosition);
+    }
+  },
+
+  _updateLaser: (() => {
+    const laserStartPosition = new THREE.Vector3();
+    const laserEndPosition = new THREE.Vector3();
+    const camerWorldPosition = new THREE.Vector3();
+    const remoteLaserOrigin = new THREE.Vector3();
+    return function(cursorPose, intersection) {
+      if (cursorPose) {
+        laserStartPosition.copy(cursorPose.position);
+      } else {
+        this.el.parentEl.object3D.getWorldPosition(laserStartPosition);
+      }
+
+      laserEndPosition.copy(intersection.point);
+
+      if (this.el.sceneEl.is("vr-mode")) {
+        remoteLaserOrigin.copy(laserStartPosition);
+      } else {
+        this.data.camera.object3D.getWorldPosition(camerWorldPosition);
+        remoteLaserOrigin
+          .subVectors(laserEndPosition, camerWorldPosition)
+          .normalize()
+          .multiplyScalar(0.5);
+        remoteLaserOrigin.add(camerWorldPosition);
+      }
+
+      if (!almostEquals(0.001, this.penLaserAttributes.laserOrigin, laserStartPosition)) {
+        this.penLaserAttributes.laserOrigin.x = laserStartPosition.x;
+        this.penLaserAttributes.laserOrigin.y = laserStartPosition.y;
+        this.penLaserAttributes.laserOrigin.z = laserStartPosition.z;
+        this.penLaserAttributesUpdated = true;
+      }
+
+      if (!almostEquals(0.001, this.penLaserAttributes.remoteLaserOrigin, remoteLaserOrigin)) {
+        this.penLaserAttributes.remoteLaserOrigin.x = remoteLaserOrigin.x;
+        this.penLaserAttributes.remoteLaserOrigin.y = remoteLaserOrigin.y;
+        this.penLaserAttributes.remoteLaserOrigin.z = remoteLaserOrigin.z;
+        this.penLaserAttributesUpdated = true;
+      }
+
+      if (!almostEquals(0.001, this.penLaserAttributes.laserTarget, laserEndPosition)) {
+        this.penLaserAttributes.laserTarget.x = laserEndPosition.x;
+        this.penLaserAttributes.laserTarget.y = laserEndPosition.y;
+        this.penLaserAttributes.laserTarget.z = laserEndPosition.z;
+        this.penLaserAttributesUpdated = true;
+      }
     };
   })(),
+
+  _doDraw(intersection, dt) {
+    //Prevent drawings from "jumping" large distances
+    if (
+      this.currentDrawing &&
+      (this.lastIntersectedObject !== (intersection ? intersection.object : null) &&
+        (!intersection ||
+          Math.abs(intersection.distance - this.lastIntersectionDistance) > MAX_DISTANCE_BETWEEN_SURFACES))
+    ) {
+      this.worldPosition.copy(this.lastPosition);
+      this._endDraw();
+    }
+    this.lastIntersectionDistance = intersection ? intersection.distance : 0;
+    this.lastIntersectedObject = intersection ? intersection.object : null;
+
+    if (!almostEquals(0.005, this.worldPosition, this.lastPosition)) {
+      this.direction.subVectors(this.worldPosition, this.lastPosition).normalize();
+      this.lastPosition.copy(this.worldPosition);
+    }
+
+    if (this.currentDrawing) {
+      const time = this.timeSinceLastDraw + dt;
+      if (
+        time >= this.data.drawFrequency &&
+        this.currentDrawing.getLastPoint().distanceTo(this.worldPosition) >= this.data.minDistanceBetweenPoints
+      ) {
+        this._getNormal(this.normal, this.worldPosition, this.direction);
+        this.currentDrawing.draw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
+      }
+
+      this.timeSinceLastDraw = time % this.data.drawFrequency;
+    }
+
+    if (this.currentDrawing && !this.grabberId) {
+      this._endDraw();
+    }
+
+    if (this.dirty) {
+      this.populateEntities(this.targets);
+      this.dirty = false;
+    }
+  },
 
   _setPenVisible(visible) {
     if (this.el.parentEl.object3DMap.mesh && this.el.parentEl.object3DMap.mesh.visible !== visible) {
       this.el.parentEl.object3DMap.mesh.visible = visible;
-    }
-  },
-
-  _setLineVisible(visible) {
-    if (this.line.material.visible !== visible) {
-      this.line.material.visible = visible;
     }
   },
 
@@ -369,11 +441,11 @@ AFRAME.registerComponent("pen", {
   })(),
 
   _startDraw() {
-    this.currentDrawing = this.drawingManager.getDrawing(this);
-    if (this.currentDrawing) {
+    this.drawingManager.getDrawing(this).then(drawing => {
+      this.currentDrawing = drawing;
       this._getNormal(this.normal, this.worldPosition, this.direction);
       this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
-    }
+    });
   },
 
   _endDraw() {
@@ -387,18 +459,18 @@ AFRAME.registerComponent("pen", {
   },
 
   _undoDraw() {
-    const drawing = this.drawingManager.getDrawing(this);
-    if (drawing) {
+    this.drawingManager.getDrawing(this).then(drawing => {
       drawing.undoDraw();
       this.drawingManager.returnDrawing(this);
-    }
+    });
   },
 
   _changeColor(mod) {
     this.colorIndex = (this.colorIndex + mod + this.data.availableColors.length) % this.data.availableColors.length;
     this.data.color = this.data.availableColors[this.colorIndex];
     this.penTip.material.color.set(this.data.color);
-    this.line.material.color.set(this.data.color);
+    this.penLaserAttributes.color = this.data.color;
+    this.penLaserAttributesUpdated = true;
   },
 
   _changeRadius(mod) {
@@ -426,6 +498,5 @@ AFRAME.registerComponent("pen", {
     this.observer.disconnect();
     AFRAME.scenes[0].removeEventListener("object3dset", this.setDirty);
     AFRAME.scenes[0].removeEventListener("object3dremove", this.setDirty);
-    this.el.parentEl.removeObject3D("penline");
   }
 });

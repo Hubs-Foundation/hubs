@@ -4,8 +4,7 @@ import classNames from "classnames";
 import styles from "../assets/stylesheets/message-entry.scss";
 import { WithHoverSound } from "./wrap-with-audio";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import sendMessageIcon from "../assets/images/send_message.svgi";
 
 class LobbyChatBox extends Component {
   static propTypes = {
@@ -71,11 +70,8 @@ class LobbyChatBox extends Component {
               className={classNames([styles.messageEntryButton, styles.messageEntrySubmit])}
               disabled={this.props.occupantCount <= 1 ? true : false}
               type="submit"
-            >
-              <i>
-                <FontAwesomeIcon icon={faPaperPlane} />
-              </i>
-            </button>
+              dangerouslySetInnerHTML={{ __html: sendMessageIcon }}
+            />
           </WithHoverSound>
         </div>
       </form>

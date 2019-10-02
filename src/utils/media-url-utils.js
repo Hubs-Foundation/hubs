@@ -32,7 +32,7 @@ const farsparkEncodeUrl = url => {
 };
 
 export const scaledThumbnailUrlFor = (url, width, height) => {
-  const farsparkUrl = `https://${process.env.FARSPARK_SERVER}/thumbnail/${farsparkEncodeUrl(
+  const farsparkUrl = `https://${process.env.THUMBNAIL_SERVER}/thumbnail/${farsparkEncodeUrl(
     url
   )}?w=${width}&h=${height}`;
 
@@ -50,23 +50,31 @@ export const scaledThumbnailUrlFor = (url, width, height) => {
   return farsparkUrl;
 };
 
+export const isNonCorsProxyDomain = hostname => {
+  return nonCorsProxyDomains.find(domain => hostname.endsWith(domain));
+};
+
 export const proxiedUrlFor = url => {
   if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
 
   // Skip known domains that do not require CORS proxying.
   try {
     const parsedUrl = new URL(url);
-    if (nonCorsProxyDomains.find(domain => parsedUrl.hostname.endsWith(domain))) return url;
+    if (isNonCorsProxyDomain(parsedUrl.hostname)) return url;
   } catch (e) {
     // Ignore
   }
 
-  if (!process.env.CORS_PROXY_SERVER) {
-    return `https://${process.env.FARSPARK_SERVER}/0/raw/0/0/0/0/${farsparkEncodeUrl(url)}`;
-  } else {
-    return `https://${process.env.CORS_PROXY_SERVER}/${url}`;
-  }
+  return `https://${process.env.CORS_PROXY_SERVER}/${url}`;
 };
+
+export function getAbsoluteUrl(baseUrl, relativeUrl) {
+  return new URL(relativeUrl, baseUrl);
+}
+
+export function getAbsoluteHref(baseUrl, relativeUrl) {
+  return getAbsoluteUrl(baseUrl, relativeUrl).href;
+}
 
 export const getCustomGLTFParserURLResolver = gltfUrl => url => {
   if (typeof url !== "string" || url === "") return "";
@@ -95,9 +103,10 @@ export const getCustomGLTFParserURLResolver = gltfUrl => url => {
 const dataUrlRegex = /data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/;
 
 export const guessContentType = url => {
+  if (!url) return;
   if (url.startsWith("hubs://") && url.endsWith("/video")) return "video/vnd.hubs-webrtc";
   if (url.startsWith("data:")) {
-    const matches = dataUrlRegex.match(url);
+    const matches = dataUrlRegex.exec(url);
     if (matches.length > 0) {
       matches[1];
     }
@@ -106,9 +115,18 @@ export const guessContentType = url => {
   return commonKnownContentTypes[extension];
 };
 const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/scenes\/(\w+)\/?\S*/;
-const hubsAvatarRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/avatars\/(\w+)\/?\S*/;
-const hubsRoomRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/(\w+)\/?\S*/;
+const hubsAvatarRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/avatars\/(?<id>\w+)\/?\S*/;
+const hubsRoomRegex = /(https?:\/\/)?(hub.link)|(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/(\w+)\/?\S*/;
+
 export const isHubsSceneUrl = hubsSceneRegex.test.bind(hubsSceneRegex);
 export const isHubsRoomUrl = url => !isHubsSceneUrl(url) && hubsRoomRegex.test(url);
 export const isHubsDestinationUrl = url => isHubsSceneUrl(url) || isHubsRoomUrl(url);
 export const isHubsAvatarUrl = hubsAvatarRegex.test.bind(hubsAvatarRegex);
+
+export const idForAvatarUrl = url => {
+  const match = url.match(hubsAvatarRegex);
+  if (match) {
+    return match.groups.id;
+  }
+  return null;
+};

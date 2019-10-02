@@ -8,6 +8,10 @@
 
 import SharedBufferGeometryManager from "../../utils/sharedbuffergeometrymanager";
 import MobileStandardMaterial from "../../materials/MobileStandardMaterial";
+import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
+import { addMedia, addMeshScaleAnimation } from "../../utils/media-utils";
+import { ObjectContentOrigins } from "../../object-types";
+import { SOUND_PEN_START_DRAW } from "../../systems/sound-effects-system";
 
 const MSG_CONFIRM_CONNECT = 0;
 const MSG_BUFFER_DATA = 1;
@@ -83,9 +87,8 @@ AFRAME.registerComponent("networked-drawing", {
 
     this.sharedBuffer = this.sharedBufferGeometryManager.getSharedBuffer(0);
     this.drawing = this.sharedBuffer.drawing;
-    const sceneEl = document.querySelector("a-scene");
-    this.scene = sceneEl.object3D;
-    this.scene.add(this.drawing);
+
+    this.el.setObject3D("mesh", this.drawing);
 
     const environmentMapComponent = this.el.sceneEl.components["environment-map"];
     if (environmentMapComponent) {
@@ -111,10 +114,21 @@ AFRAME.registerComponent("networked-drawing", {
     });
   },
 
+  play() {
+    AFRAME.scenes[0].systems["hubs-systems"].drawingMenuSystem.registerDrawingMenu(this.el);
+  },
+
   remove() {
     NAF.connection.unsubscribeToDataChannel(this.drawingId, this._receiveData);
 
-    this.scene.remove(this.drawing);
+    this.drawStarted = false;
+
+    this.el.removeObject3D("mesh");
+
+    const drawingManager = this.el.sceneEl.querySelector("#drawing-manager").components["drawing-manager"];
+    drawingManager.destroyDrawing(this);
+
+    AFRAME.scenes[0].systems["hubs-systems"].drawingMenuSystem.unregisterDrawingMenu(this.el);
   },
 
   tick(t) {
@@ -158,6 +172,164 @@ AFRAME.registerComponent("networked-drawing", {
 
     this._deleteExpiredLines(t);
   },
+
+  async serializeDrawing() {
+    const exporter = new GLTFExporter();
+
+    const material = new THREE.MeshStandardMaterial({
+      vertexColors: THREE.VertexColors
+    });
+    const geometry = this.convertToTriangles(this.sharedBuffer.current);
+    const mesh = new THREE.Mesh(geometry, material);
+
+    mesh.userData.gltfExtensions = {
+      MOZ_hubs_components: { "networked-drawing-buffer": { buffer: this.networkBuffer } }
+    };
+
+    const chunks = await new Promise(resolve => {
+      exporter.parseChunks(
+        mesh,
+        resolve,
+        e => {
+          new Error(`Error serializing drawing. ${e}`);
+        },
+        {
+          mode: "glb",
+          includeCustomExtensions: true
+        }
+      );
+    });
+
+    const json = chunks.json;
+    if (!json.extensions) {
+      json.extensions = {};
+    }
+    json.extensions.MOZ_hubs_components = { version: 4 };
+    json.asset.generator = `Mozilla Hubs Serialize Drawing`;
+
+    const glb = await new Promise((resolve, reject) => {
+      exporter.createGLBBlob(chunks, resolve, e => {
+        reject(new Error(`Error creating glb blob. ${e}`));
+      });
+    });
+
+    const file = new File([glb], "drawing.glb", {
+      type: "model/gltf-binary"
+    });
+
+    const { entity } = addMedia(file, "#interactable-media", ObjectContentOrigins.FILE, "drawing", false, false);
+
+    const min = new THREE.Vector3(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
+    const max = new THREE.Vector3(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
+    const temp = new THREE.Vector3();
+
+    const { start, count } = this.sharedBuffer.current.drawRange;
+    const attribute = this.sharedBuffer.current.attributes.position;
+    for (let i = start; i < count; i++) {
+      temp.set(attribute.getX(i), attribute.getY(i), attribute.getZ(i));
+      min.min(temp);
+      max.max(temp);
+    }
+
+    entity.object3D.position.addVectors(min, max).multiplyScalar(0.5);
+    entity.object3D.matrixNeedsUpdate = true;
+  },
+
+  convertToTriangles(originalGeometry) {
+    const geometry = new THREE.BufferGeometry();
+
+    const { start, count } = originalGeometry.drawRange;
+
+    const originalPositions = originalGeometry.getAttribute("position");
+    const originalColors = originalGeometry.getAttribute("color");
+    const originalNormals = originalGeometry.getAttribute("normal");
+
+    const length = count * 3;
+    const positions = new Float32Array(length);
+    const colors = new Float32Array(length);
+    const normals = new Float32Array(length);
+    const indices = [];
+
+    let index = 0;
+    let order = 0;
+
+    const copy = i => {
+      colors[index] = originalColors.getX(i);
+      normals[index] = originalNormals.getX(i);
+      positions[index] = originalPositions.getX(i);
+      index++;
+      colors[index] = originalColors.getY(i);
+      normals[index] = originalNormals.getY(i);
+      positions[index] = originalPositions.getY(i);
+      index++;
+      colors[index] = originalColors.getZ(i);
+      normals[index] = originalNormals.getZ(i);
+      positions[index] = originalPositions.getZ(i);
+      index++;
+    };
+
+    for (let i = start; i < count - 2; i++) {
+      const i2 = i + 1 + order;
+      const i3 = i + 2 - order;
+
+      if (i === 0) {
+        copy(i);
+        copy(i2);
+        copy(i3);
+      } else if (i2 > i3) {
+        copy(i2);
+      } else {
+        copy(i3);
+      }
+
+      indices.push(i, i2, i3);
+      order = (order + 1) % 2;
+    }
+
+    geometry.addAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.addAttribute("color", new THREE.BufferAttribute(colors, 3));
+    geometry.addAttribute("normal", new THREE.BufferAttribute(normals, 3));
+    geometry.setIndex(indices);
+
+    return geometry;
+  },
+
+  deserializeDrawing: (() => {
+    const position = new THREE.Vector3();
+    const direction = new THREE.Vector3();
+    const normal = new THREE.Vector3();
+    return function(buffer) {
+      let head = buffer[0];
+      if (head === "-") {
+        this._undoDraw();
+        buffer.shift();
+        head = buffer[0];
+      }
+
+      while (head != null && buffer.length >= 11) {
+        position.set(buffer[1], buffer[2], buffer[3]);
+        direction.set(buffer[4], buffer[5], buffer[6]);
+        this.radius = Math.round(direction.length() * 1000) / 1000; //radius is encoded as length of direction vector
+        direction.normalize();
+        normal.set(buffer[7], buffer[8], buffer[9]);
+        this.color.setHex(Math.round(normal.length()) - 1); //color is encoded as length of normal vector
+        normal.normalize();
+
+        buffer.splice(0, 10);
+
+        if (!this.drawStarted) {
+          this.startDraw(position, direction, normal);
+        } else if (buffer[0] !== null) {
+          this.draw(position, direction, normal);
+        }
+
+        if (buffer[0] === null) {
+          this.endDraw(position, direction, normal);
+          buffer.shift();
+        }
+      }
+    };
+  })(),
 
   _broadcastDrawing: (() => {
     const copyArray = [];
@@ -471,6 +643,8 @@ AFRAME.registerComponent("networked-drawing", {
     this.currentPointCount = 0;
     this.lineStarted = false;
     this.drawStarted = false;
+
+    this.sharedBuffer.computeBoundingSpheres();
   },
 
   _addToNetworkBuffer: (() => {
@@ -617,4 +791,107 @@ AFRAME.registerComponent("networked-drawing", {
       out.copy(point).add(calculatedDirection.normalize().multiplyScalar(radius));
     };
   })()
+});
+
+AFRAME.registerComponent("networked-drawing-buffer", {
+  schema: {
+    buffer: { default: [] }
+  },
+
+  play() {
+    const button = this._getDeserializeButton(this.el.parentEl);
+    if (button) {
+      button.object3D.visible = true;
+      button.components["deserialize-drawing-button"].networkedDrawingBuffer = this;
+    }
+  },
+
+  _getDeserializeButton(entity) {
+    if (entity.classList.contains("interactable")) {
+      return entity.querySelector(".deserialize-drawing");
+    } else if (entity.parentEl) {
+      return this._getDeserializeButton(entity.parentEl);
+    } else {
+      return null;
+    }
+  }
+});
+
+AFRAME.registerComponent("deserialize-drawing-button", {
+  init() {
+    const drawingManager = this.el.sceneEl.querySelector("#drawing-manager").components["drawing-manager"];
+    this.networkedDrawingBuffer = null;
+
+    this.onClick = () => {
+      if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) return;
+
+      const finishDrawing = () => {
+        drawingManager.drawing.deserializeDrawing(this.networkedDrawingBuffer.data.buffer);
+        addMeshScaleAnimation(drawingManager.drawing.el.object3DMap.mesh, { x: 0.001, y: 0.001, z: 0.001 });
+
+        if (this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned) {
+          this.targetEl.setAttribute("pinnable", "pinned", false);
+        }
+        this.targetEl.parentEl.removeChild(this.targetEl);
+        this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PEN_START_DRAW);
+      };
+
+      //serialize any existing drawing and clear the drawing.
+      if (drawingManager.drawing) {
+        drawingManager.drawing.serializeDrawing().then(() => {
+          drawingManager.drawing.el.parentEl.removeChild(drawingManager.drawing.el);
+          drawingManager.destroyDrawing();
+
+          drawingManager.createDrawing().then(finishDrawing);
+        });
+      } else {
+        drawingManager.createDrawing().then(finishDrawing);
+      }
+    };
+
+    this._updateUI = this._updateUI.bind(this);
+    this._updateUIOnStateChange = this._updateUIOnStateChange.bind(this);
+    this.el.sceneEl.addEventListener("stateadded", this._updateUIOnStateChange);
+    this.el.sceneEl.addEventListener("stateremoved", this._updateUIOnStateChange);
+
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.targetEl = networkedEl;
+      this._updateUI();
+      this.targetEl.addEventListener("pinned", this._updateUI);
+      this.targetEl.addEventListener("unpinned", this._updateUI);
+    });
+  },
+
+  play() {
+    this.el.object3D.addEventListener("interact", this.onClick);
+  },
+
+  pause() {
+    this.el.object3D.removeEventListener("interact", this.onClick);
+  },
+
+  remove() {
+    this.el.sceneEl.removeEventListener("stateadded", this._updateUIOnStateChange);
+    this.el.sceneEl.removeEventListener("stateremoved", this._updateUIOnStateChange);
+
+    if (this.targetEl) {
+      this.targetEl.removeEventListener("pinned", this._updateUI);
+      this.targetEl.removeEventListener("unpinned", this._updateUI);
+    }
+  },
+
+  _updateUIOnStateChange(e) {
+    if (e.detail !== "frozen") return;
+    this._updateUI();
+  },
+
+  _updateUI() {
+    if (this.networkedDrawingBuffer) {
+      const isPinned = this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned;
+      const canPin = window.APP.hubChannel.can("pin_objects") && window.APP.hubChannel.signedIn;
+      this.el.object3D.visible = (!isPinned || canPin) && window.APP.hubChannel.can("spawn_drawing");
+    } else {
+      this.el.object3D.visible = false;
+    }
+  }
 });

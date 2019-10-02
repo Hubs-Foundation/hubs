@@ -32,6 +32,7 @@ const PRIVACY_POLICY_LINKS = {
 
 const DEFAULT_FACETS = {
   sketchfab: [
+    { text: "Featured", params: { filter: "featured" } },
     { text: "Animals", params: { filter: "animals-pets" } },
     { text: "Architecture", params: { filter: "architecture" } },
     { text: "Art", params: { filter: "art-abstract" } },
@@ -52,6 +53,7 @@ const DEFAULT_FACETS = {
     { text: "Weapons", params: { filter: "weapons-military" } }
   ],
   poly: [
+    { text: "Featured", params: { filter: "" } },
     { text: "Animals", params: { filter: "animals" } },
     { text: "Architecture", params: { filter: "architecture" } },
     { text: "Art", params: { filter: "art" } },
@@ -64,7 +66,8 @@ const DEFAULT_FACETS = {
   ],
   avatars: [
     { text: "Featured", params: { filter: "featured" } },
-    { text: "My Avatars", params: { filter: "my-avatars" } }
+    { text: "My Avatars", params: { filter: "my-avatars" } },
+    { text: "Newest", params: { filter: "" } }
   ],
   favorites: [],
   scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }]
@@ -125,6 +128,7 @@ class MediaBrowser extends Component {
     const newState = { result, query: this.state.query || searchParams.get("q") || "" };
     const urlSource = this.getUrlSource(searchParams);
     newState.showNav = !!(searchParams.get("media_nav") !== "false");
+    newState.selectAction = searchParams.get("selectAction") || "spawn";
 
     if (result && result.suggestions && result.suggestions.length > 0) {
       newState.facets = result.suggestions.map(s => {
@@ -174,9 +178,13 @@ class MediaBrowser extends Component {
     }
   };
 
+  onCopyAvatar = () => {
+    this.handleFacetClicked({ params: { filter: "my-avatars" } });
+  };
+
   selectEntry = entry => {
     if (!this.props.onMediaSearchResultEntrySelected) return;
-    this.props.onMediaSearchResultEntrySelected(entry);
+    this.props.onMediaSearchResultEntrySelected(entry, this.state.selectAction);
     this.close();
   };
 
@@ -185,7 +193,7 @@ class MediaBrowser extends Component {
   };
 
   handleFacetClicked = facet => {
-    const searchParams = this.getSearchClearedSearchParams(true, true);
+    const searchParams = this.getSearchClearedSearchParams(true, true, true);
 
     for (const [k, v] of Object.entries(facet.params)) {
       searchParams.set(k, v);
@@ -194,8 +202,13 @@ class MediaBrowser extends Component {
     pushHistoryPath(this.props.history, this.props.history.location.pathname, searchParams.toString());
   };
 
-  getSearchClearedSearchParams = (keepSource, keepNav) => {
-    return this.props.mediaSearchStore.getSearchClearedSearchParams(this.props.history.location, keepSource, keepNav);
+  getSearchClearedSearchParams = (keepSource, keepNav, keepSelectAction) => {
+    return this.props.mediaSearchStore.getSearchClearedSearchParams(
+      this.props.history.location,
+      keepSource,
+      keepNav,
+      keepSelectAction
+    );
   };
 
   pushExitMediaBrowserHistory = (stashLastSearchParams = true) => {
@@ -234,7 +247,7 @@ class MediaBrowser extends Component {
     const showCustomOption =
       !isFavorites && (!isSceneApiType || this.props.hubChannel.canOrWillIfCreator("update_hub"));
     const entries = (this.state.result && this.state.result.entries) || [];
-    const hideSearch = urlSource === "avatars" || urlSource === "favorites";
+    const hideSearch = urlSource === "favorites";
     const showEmptyStringOnNoResult = urlSource !== "avatars" && urlSource !== "scenes";
 
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
@@ -251,6 +264,8 @@ class MediaBrowser extends Component {
         );
       }
     };
+
+    const activeFilter = searchParams.get("filter") || (!searchParams.get("q") && "");
 
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
@@ -378,7 +393,11 @@ class MediaBrowser extends Component {
             this.state.facets.length > 0 && (
               <div className={styles.facets}>
                 {this.state.facets.map((s, i) => (
-                  <a onClick={() => this.handleFacetClicked(s)} key={i} className={styles.facet}>
+                  <a
+                    onClick={() => this.handleFacetClicked(s)}
+                    key={i}
+                    className={classNames(styles.facet, { selected: s.params.filter === activeFilter })}
+                  >
                     {s.text}
                   </a>
                 ))}
@@ -387,13 +406,14 @@ class MediaBrowser extends Component {
 
           {this.props.mediaSearchStore.isFetching ||
           this._sendQueryTimeout ||
-          (this.state.result && this.state.result.entries.length > 0) ||
+          entries.length > 0 ||
           !showEmptyStringOnNoResult ? (
             <MediaTiles
               result={this.state.result}
               history={this.props.history}
               urlSource={urlSource}
               handleEntryClicked={this.handleEntryClicked}
+              onCopyAvatar={this.onCopyAvatar}
               handlePager={this.handlePager}
             />
           ) : (

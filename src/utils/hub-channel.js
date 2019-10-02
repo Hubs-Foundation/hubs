@@ -91,7 +91,15 @@ export default class HubChannel extends EventTarget {
     }, nextRefresh);
   };
 
-  sendEntryEvent = async () => {
+  sendEnteringEvent = async () => {
+    this.channel.push("events:entering", {});
+  };
+
+  sendEnteringCancelledEvent = async () => {
+    this.channel.push("events:entering_cancelled", {});
+  };
+
+  sendEnteredEvent = async () => {
     if (!this.channel) {
       console.warn("No phoenix channel initialized before room entry.");
       return;

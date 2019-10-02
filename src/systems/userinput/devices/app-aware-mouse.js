@@ -33,11 +33,11 @@ export class AppAwareMouseDevice {
     this.prevDirection.copy(this.prevDirection);
 
     if (!this.cursorController) {
-      this.cursorController = document.querySelector("[cursor-controller]").components["cursor-controller"];
+      this.cursorController = document.getElementById("right-cursor-controller").components["cursor-controller"];
     }
 
     if (!this.camera) {
-      this.camera = document.querySelector("#player-camera").components.camera.camera;
+      this.camera = document.getElementById("viewing-camera").components.camera.camera;
     }
 
     const buttonLeft = frame.get(paths.device.mouse.buttonLeft);
@@ -52,17 +52,15 @@ export class AppAwareMouseDevice {
       const intersection = rawIntersections.find(x => x.object.el);
       const remoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
       const userinput = AFRAME.scenes[0].systems.userinput;
-      const isInteractable =
-        intersection &&
-        intersection.object.el.matches(".pen, .pen *, .video, .video *, .interactable, .interactable *");
+      const isInteractable = intersection && intersection.object.el.matches(".interactable, .interactable *");
       const isPinned =
         remoteHoverTarget && remoteHoverTarget.components.pinnable && remoteHoverTarget.components.pinnable.data.pinned;
       const isFrozen = AFRAME.scenes[0].is("frozen");
       this.clickedOnAnything =
-        (isInteractable && (isFrozen || !isPinned) && canMove(remoteHoverTarget)) ||
-        userinput.activeSets.includes(sets.cursorHoldingPen) ||
-        userinput.activeSets.includes(sets.cursorHoldingInteractable) ||
-        userinput.activeSets.includes(sets.cursorHoldingCamera);
+        (isInteractable && (isFrozen || !isPinned) && (remoteHoverTarget && canMove(remoteHoverTarget))) ||
+        userinput.activeSets.includes(sets.rightCursorHoldingPen) ||
+        userinput.activeSets.includes(sets.rightCursorHoldingInteractable) ||
+        userinput.activeSets.includes(sets.rightCursorHoldingCamera);
     }
     this.prevButtonLeft = buttonLeft;
 
@@ -75,6 +73,7 @@ export class AppAwareMouseDevice {
       if (movementXY) {
         frame.setVector2(paths.device.smartMouse.cameraDelta, movementXY[0], movementXY[1]);
       }
+      frame.setValueType(paths.device.smartMouse.shouldMoveCamera, true);
     }
 
     const coords = frame.get(paths.device.mouse.coords);

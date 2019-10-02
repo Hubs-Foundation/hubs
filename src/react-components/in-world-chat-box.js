@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "../assets/stylesheets/message-entry.scss";
 import ChatCommandHelp from "./chat-command-help";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
+import sendMessageIcon from "../assets/images/send_message.svgi";
 import { faCamera } from "@fortawesome/free-solid-svg-icons/faCamera";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -113,6 +113,7 @@ class InWorldChatBox extends Component {
           />
           {this.props.enableSpawning && (
             <button
+              title={"Create"}
               className={classNames([styles.messageEntrySpawn])}
               onClick={() => {
                 if (this.state.pendingMessage.length > 0) {
@@ -126,16 +127,14 @@ class InWorldChatBox extends Component {
           )}
           <button
             type="submit"
+            title={"Submit"}
             className={classNames([
               styles.messageEntryButton,
               styles.messageEntryButtonInRoom,
               styles.messageEntrySubmit
             ])}
-          >
-            <i>
-              <FontAwesomeIcon icon={faPaperPlane} />
-            </i>
-          </button>
+            dangerouslySetInnerHTML={{ __html: sendMessageIcon }}
+          />
         </div>
       </form>
     );

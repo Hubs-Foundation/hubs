@@ -3,6 +3,15 @@ import { AVATAR_TYPES } from "../utils/avatar-utils";
 import { registerComponentInstance } from "../utils/component-utils";
 import { deregisterComponentInstance } from "../utils/component-utils";
 
+import happyEmoji from "../assets/images/chest-emojis/screen-effect/happy.png";
+import sadEmoji from "../assets/images/chest-emojis/screen-effect/sad.png";
+import angryEmoji from "../assets/images/chest-emojis/screen-effect/angry.png";
+import ewwEmoji from "../assets/images/chest-emojis/screen-effect/eww.png";
+import disgustEmoji from "../assets/images/chest-emojis/screen-effect/disgust.png";
+import heartsEmoji from "../assets/images/chest-emojis/screen-effect/hearts.png";
+import smileEmoji from "../assets/images/chest-emojis/screen-effect/smile.png";
+import surpriseEmoji from "../assets/images/chest-emojis/screen-effect/surprise.png";
+
 function ensureAvatarNodes(json) {
   const { nodes } = json;
   if (!nodes.some(node => node.name === "Head")) {
@@ -27,7 +36,16 @@ function ensureAvatarNodes(json) {
   }
   return json;
 }
-
+const emojiTypeToImage = {
+  happy: happyEmoji,
+  sad: sadEmoji,
+  angry: angryEmoji,
+  smile: smileEmoji,
+  surprise: surpriseEmoji,
+  eww: ewwEmoji,
+  hearts: heartsEmoji,
+  disgust: disgustEmoji
+};
 /**
  * Sets player info state, including avatar choice and display name.
  * @namespace avatar
@@ -36,7 +54,8 @@ function ensureAvatarNodes(json) {
 AFRAME.registerComponent("player-info", {
   schema: {
     avatarSrc: { type: "string" },
-    avatarType: { type: "string", default: AVATAR_TYPES.LEGACY }
+    avatarType: { type: "string", default: AVATAR_TYPES.SKINNABLE },
+    emojiType: { type: "string", default: null }
   },
   init() {
     this.displayName = null;
@@ -48,7 +67,7 @@ AFRAME.registerComponent("player-info", {
     this.applyDisplayName = this.applyDisplayName.bind(this);
     this.handleModelError = this.handleModelError.bind(this);
 
-    this.isLocalPlayerInfo = this.el.id === "player-rig";
+    this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
 
     if (!this.isLocalPlayerInfo) {
@@ -66,6 +85,7 @@ AFRAME.registerComponent("player-info", {
     deregisterComponentInstance(this, "player-info");
   },
   play() {
+    this.el.sceneEl.addEventListener("change_emoji", this.changeEmoji);
     this.el.addEventListener("model-loaded", this.applyProperties);
     this.el.sceneEl.addEventListener("presence_updated", this.updateDisplayName);
     if (this.isLocalPlayerInfo) {
@@ -73,12 +93,34 @@ AFRAME.registerComponent("player-info", {
     }
   },
   pause() {
+    this.el.sceneEl.removeEventListener("change_emoji", this.changeEmoji);
     this.el.removeEventListener("model-loaded", this.applyProperties);
     this.el.sceneEl.removeEventListener("presence_updated", this.updateDisplayName);
     if (this.isLocalPlayerInfo) {
       this.el.querySelector(".model").removeEventListener("model-error", this.handleModelError);
     }
   },
+
+  applyEmoji() {
+    const avatarImage = this.el.querySelector(".chest-image");
+    if (!avatarImage) return;
+    const emojiType = this.data.emojiType;
+    const emojiImage = emojiTypeToImage[emojiType];
+    if (emojiType === "empty") {
+      avatarImage.removeAttribute("media-image");
+      avatarImage.removeAttribute("media-loader");
+      avatarImage.removeObject3D("mesh");
+    } else if (emojiType !== null) {
+      avatarImage.setAttribute("media-loader", {
+        playSoundEffect: this.isLocalPlayerInfo,
+        src: new URL(emojiImage, window.location.href).href
+      });
+    }
+    if (this.isLocalPlayerInfo) {
+      this.el.emit("emoji_changed", { emojiType }, false);
+    }
+  },
+
   update() {
     this.applyProperties();
   },
@@ -132,8 +174,9 @@ AFRAME.registerComponent("player-info", {
     this.el.querySelectorAll("[hover-visuals]").forEach(el => {
       el.components["hover-visuals"].uniforms = uniforms;
     });
+    this.applyEmoji();
   },
   handleModelError() {
-    window.APP.store.resetToRandomLegacyAvatar();
+    window.APP.store.resetToRandomDefaultAvatar();
   }
 });

@@ -11,7 +11,8 @@ export class CursorTargettingSystem {
 
     waitForDOMContentLoaded().then(() => {
       const scene = document.querySelector("a-scene");
-      this.rightRemote = document.querySelector("#cursor-controller");
+      this.rightRemote = document.getElementById("right-cursor-controller");
+      this.leftRemote = document.getElementById("left-cursor-controller");
       this.observer.observe(scene, { childList: true, attributes: true, subtree: true });
       scene.addEventListener("object3dset", this.setDirty);
       scene.addEventListener("object3dremove", this.setDirty);
@@ -27,14 +28,14 @@ export class CursorTargettingSystem {
       this.populateEntities(this.targets);
       this.dirty = false;
     }
-
     this.rightRemote.components["cursor-controller"].tick2(t);
+    this.leftRemote.components["cursor-controller"].tick2(t, true);
   }
 
   populateEntities(targets) {
     targets.length = 0;
     // TODO: Do not querySelectorAll on the entire scene every time anything changes!
-    const els = AFRAME.scenes[0].querySelectorAll(".collidable, .interactable, .ui");
+    const els = AFRAME.scenes[0].querySelectorAll(".collidable, .interactable, .ui, .drawing");
     for (let i = 0; i < els.length; i++) {
       if (els[i].object3D) {
         targets.push(els[i].object3D);

@@ -2,16 +2,15 @@
 
 export DEFAULT_SCENE_SID=$1
 export BASE_ASSETS_PATH=$2
-export ASSET_BUNDLE_SERVER=$3
-export RETICULUM_SERVER=$4
-export FARSPARK_SERVER=$5
-export CORS_PROXY_SERVER=$6
-export NON_CORS_PROXY_DOMAINS=$7
-export TARGET_S3_URL=$8
-export SENTRY_DSN=$9
-export GA_TRACKING_ID=${10}
-export BUILD_NUMBER=${11}
-export GIT_COMMIT=${12}
+export RETICULUM_SERVER=$3
+export THUMBNAIL_SERVER=$4
+export CORS_PROXY_SERVER=$5
+export NON_CORS_PROXY_DOMAINS=$6
+export TARGET_S3_URL=$7
+export SENTRY_DSN=$8
+export GA_TRACKING_ID=${9}
+export BUILD_NUMBER=${10}
+export GIT_COMMIT=${11}
 export BUILD_VERSION="${BUILD_NUMBER} (${GIT_COMMIT})"
 
 # To build + push to S3 run:
