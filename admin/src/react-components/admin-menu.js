@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import classNames from "classnames";
 import inflection from "inflection";
 import { connect } from "react-redux";
 import { getResources } from "react-admin";
@@ -21,7 +22,11 @@ const mapStateToProps = state => ({
 
 const styles = () => ({
   root: {
-    width: "100%"
+    width: "100%",
+    paddingTop: 0
+  },
+  item: {
+    padding: "8px 16px"
   },
   icon: {
     marginRight: 0
@@ -46,7 +51,7 @@ class Menu extends Component {
   renderService(service) {
     return (
       <ListItem
-        className={this.props.classes.nested}
+        className={classNames(this.props.classes.item, this.props.classes.nested)}
         component={NavLink}
         activeStyle={{ backgroundColor: "#D0D0D0" }}
         key={service}
@@ -64,7 +69,7 @@ class Menu extends Component {
     const icon = resource.icon ? <resource.icon /> : <ViewIcon />;
     return (
       <ListItem
-        className={this.props.classes.nested}
+        className={classNames(this.props.classes.item, this.props.classes.nested)}
         component={NavLink}
         activeStyle={{ backgroundColor: "#D0D0D0" }}
         key={resource.name}
@@ -79,13 +84,13 @@ class Menu extends Component {
   render() {
     return (
       <List className={this.props.classes.root}>
-        <ListItem component={NavLink} activeStyle={{ backgroundColor: "#D0D0D0" }} key="system" to="/system">
+        <ListItem className={this.props.classes.item} component={NavLink} activeStyle={{ backgroundColor: "#D0D0D0" }} key="system" to="/system">
           <ListItemIcon className={this.props.classes.icon}>
             <ComputerIcon />
           </ListItemIcon>
           <ListItemText className={this.props.classes.text} primary="System" />
         </ListItem>
-        <ListItem>
+        <ListItem className={this.props.classes.item}>
           <ListItemIcon className={this.props.classes.icon}>
             <LibraryBooksIcon />
           </ListItemIcon>
@@ -96,7 +101,7 @@ class Menu extends Component {
             {this.props.resources.map(this.renderResource.bind(this))}
           </List>
         </Collapse>
-        <ListItem>
+        <ListItem className={this.props.classes.item}>
           <ListItemIcon className={this.props.classes.icon}>
             <SettingsIcon />
           </ListItemIcon>
