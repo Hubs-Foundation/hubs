@@ -14,9 +14,20 @@ cp -R {{ pkg.path }}/dist/* $TEMP_DIST_PATH
 
 # Every config available to this package will be injected into the text assets if the asset
 # had the correct sha256sum as per the plan.sh build settings
+
 {{#each cfg.general ~}}
-find $TEMP_DIST_PATH -type f -name *.html -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)/{{ strReplace this "/" "\\/" }}/g" {} \;
-find $TEMP_DIST_PATH -type f -name *.js -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)/{{ strReplace this "/" "\\/" }}/g" {} \;
+
+# HACK, need to special case base asset path in pages because of weirdness with trailing slash -- webpack
+# seems to gracefully handle the extra trailing slash when injected at build time on HTML tags.
+if [[ "{{ @key }}" == "base_assets_path" ]] ;
+then
+  find $TEMP_DIST_PATH -type f -name *.html -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)\//{{ strReplace this "/" "\\/" }}/g" {} \;
+  find $TEMP_DIST_PATH -type f -name *.js -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)\//{{ strReplace this "/" "\\/" }}/g" {} \;
+else
+  find $TEMP_DIST_PATH -type f -name *.html -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)/{{ strReplace this "/" "\\/" }}/g" {} \;
+  find $TEMP_DIST_PATH -type f -name *.js -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)/{{ strReplace this "/" "\\/" }}/g" {} \;
+fi
+
 {{/each}}
 
 # need to upload wasm blobs with wasm content type explicitly because, unlike all
