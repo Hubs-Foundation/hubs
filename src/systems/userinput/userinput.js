@@ -20,7 +20,12 @@ import { keyboardMouseUserBindings } from "./bindings/keyboard-mouse-user";
 import { touchscreenUserBindings } from "./bindings/touchscreen-user";
 import { keyboardDebuggingBindings } from "./bindings/keyboard-debugging";
 import { oculusTouchUserBindings } from "./bindings/oculus-touch-user";
-import { viveUserBindings, viveWandUserBindings } from "./bindings/vive-user";
+import {
+  viveUserBindings,
+  viveWandUserBindings,
+  indexUserBindings,
+  viveFocusPlusUserBindings
+} from "./bindings/vive-user";
 import { wmrUserBindings } from "./bindings/windows-mixed-reality-user";
 import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
 import { daydreamUserBindings } from "./bindings/daydream-user";
@@ -274,8 +279,19 @@ AFRAME.registerSystem("userinput", {
           const activeDevice = this.activeDevices.items[i];
           const mapping = vrGamepadMappings.get(activeDevice.constructor);
           mapping && this.registeredMappings.add(mapping);
-          if (activeDevice instanceof ViveControllerDevice && activeDevice.isViveWand) {
-            this.registeredMappings.add(viveWandUserBindings);
+
+          if (activeDevice instanceof ViveControllerDevice && activeDevice.gamepad) {
+            console.log(activeDevice);
+            if (activeDevice.gamepad.id === "HTC Vive Focus Plus Controller") {
+              //HTC Vive Focus Plus Controller
+              this.registeredMappings.add(viveFocusPlusUserBindings);
+            } else if (activeDevice.gamepad.axes.length === 4) {
+              //Valve Index Controller
+              this.registeredMappings.add(indexUserBindings);
+            } else {
+              //HTC Vive Controller (wands)
+              this.registeredMappings.add(viveWandUserBindings);
+            }
           }
         }
 

@@ -19,6 +19,7 @@ const lJoyYScaled = v("left/joyY/scaled");
 const lTouch = v("left/touch");
 const lTouchScaled = v("left/touch/scaled");
 const lTouchXScaled = v("left/touchX/scaled");
+const lTouchY = v("left/touchY");
 const lTouchYScaled = v("left/touchY/scaled");
 const lDpadNorth1 = v("left/dpad/north1");
 const lDpadSouth1 = v("left/dpad/south1");
@@ -464,7 +465,7 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: {
-        value: lAxis("touchY")
+        value: lTouchY
       },
       dest: { value: lTouchYScaled },
       xform: xforms.scale(1.5) // vertical character speed modifier
@@ -1492,6 +1493,55 @@ export const viveUserBindings = addSetsToBindings({
 });
 
 export const viveWandUserBindings = addSetsToBindings({
+  [sets.global]: [
+    {
+      src: {
+        value: lAxis("touchY")
+      },
+      dest: { value: lTouchY },
+      xform: xforms.copy
+    }
+  ],
+  [sets.leftHandHoldingPen]: [
+    {
+      src: { value: leftGripPressed2 },
+      dest: { value: paths.actions.leftHand.drop },
+      xform: xforms.rising,
+      priority: 2
+    }
+  ],
+  [sets.rightHandHoldingPen]: [
+    {
+      src: { value: rightGripPressed2 },
+      dest: { value: paths.actions.rightHand.drop },
+      xform: xforms.rising,
+      priority: 2
+    }
+  ]
+});
+
+export const indexUserBindings = addSetsToBindings({
+  [sets.global]: [
+    {
+      src: {
+        value: lAxis("touchY")
+      },
+      dest: { value: lTouchY },
+      xform: xforms.copy
+    }
+  ]
+});
+
+export const viveFocusPlusUserBindings = addSetsToBindings({
+  [sets.global]: [
+    {
+      src: {
+        value: lAxis("touchY")
+      },
+      dest: { value: lTouchY },
+      xform: xforms.negate
+    }
+  ],
   [sets.leftHandHoldingPen]: [
     {
       src: { value: leftGripPressed2 },

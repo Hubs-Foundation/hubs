@@ -24,9 +24,6 @@ export class ViveControllerDevice {
         { name: "grip", buttonId: 2 }
       ];
     } else {
-      if (gamepad.axes.length === 2) {
-        this.isViveWand = true;
-      }
       this.buttonMap = [
         { name: "touchpad", buttonId: 0 },
         { name: "trigger", buttonId: 1 },
