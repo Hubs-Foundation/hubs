@@ -10,8 +10,6 @@ rm -rf $TEMP_DIST_PATH
 mkdir -p $TEMP_DIST_PATH
 cp -R {{ pkg.path }}/dist/* $TEMP_DIST_PATH
 
-# A bit hacky, use a unicode char as the delimiter to remove need for escaping
-
 # Every config available to this package will be injected into the text assets if the asset
 # had the correct sha256sum as per the plan.sh build settings
 
