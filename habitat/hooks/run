@@ -22,9 +22,11 @@ cp -R {{ pkg.path }}/dist/* $TEMP_DIST_PATH
 if [[ "{{ @key }}" == "base_assets_path" ]] ;
 then
   find $TEMP_DIST_PATH -type f -name *.html -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)\//{{ strReplace this "/" "\\/" }}/g" {} \;
+  find $TEMP_DIST_PATH -type f -name *.css -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)\//{{ strReplace this "/" "\\/" }}/g" {} \;
   find $TEMP_DIST_PATH -type f -name *.js -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)\//{{ strReplace this "/" "\\/" }}/g" {} \;
 else
   find $TEMP_DIST_PATH -type f -name *.html -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)/{{ strReplace this "/" "\\/" }}/g" {} \;
+  find $TEMP_DIST_PATH -type f -name *.css -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)/{{ strReplace this "/" "\\/" }}/g" {} \;
   find $TEMP_DIST_PATH -type f -name *.js -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)/{{ strReplace this "/" "\\/" }}/g" {} \;
 fi
 
