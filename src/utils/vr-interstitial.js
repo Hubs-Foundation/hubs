@@ -14,7 +14,7 @@ const getUserGesture = () => {
   });
 };
 
-export async function handleExitTo2DInterstitial(isLower, exitAction) {
+export async function handleExitTo2DInterstitial(isLower, exitAction, nonFullscreen) {
   const scene = document.querySelector("a-scene");
   if (!scene.is("vr-mode")) {
     if (isMobileVR && willRequireUserGesture()) {
@@ -30,8 +30,11 @@ export async function handleExitTo2DInterstitial(isLower, exitAction) {
 
   if (isMobileVR) {
     await scene.exitVR();
-    await getUserGesture();
-    await showFullScreenIfAvailable();
+
+    if (!nonFullscreen) {
+      await getUserGesture();
+      await showFullScreenIfAvailable();
+    }
   } else {
     // Non-immersive browser, show notice
     const vrNotice = document.querySelector(".vr-notice");
