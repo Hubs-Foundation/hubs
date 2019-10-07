@@ -184,7 +184,7 @@ function getAudio(o) {
 const FALLOFF = 0.9;
 export class CameraSystem {
   constructor(batchManagerSystem) {
-    this.enableLights = false;
+    this.enableLights = localStorage.getItem("show-background-while-inspecting") === "true";
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
     this.inspectZoom = 0;
@@ -242,6 +242,13 @@ export class CameraSystem {
     this.mode = CAMERA_MODE_INSPECT;
     this.inspected = o;
 
+    const vrMode = scene.is("vr-mode");
+    const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
+    this.snapshot.mask = camera.layers.mask;
+    if (vrMode) {
+      this.snapshot.mask0 = camera.cameras[0].layers.mask;
+      this.snapshot.mask1 = camera.cameras[1].layers.mask;
+    }
     if (!this.enableLights) {
       this.hideEverythingButThisObject(o);
     }
@@ -306,11 +313,8 @@ export class CameraSystem {
     const scene = AFRAME.scenes[0];
     const vrMode = scene.is("vr-mode");
     const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
-    this.snapshot.mask = camera.layers.mask;
     camera.layers.set(CAMERA_LAYER_INSPECT);
     if (vrMode) {
-      this.snapshot.mask0 = camera.cameras[0].layers.mask;
-      this.snapshot.mask1 = camera.cameras[1].layers.mask;
       camera.cameras[0].layers.set(CAMERA_LAYER_INSPECT);
       camera.cameras[1].layers.set(CAMERA_LAYER_INSPECT);
     }

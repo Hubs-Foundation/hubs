@@ -50,6 +50,7 @@ export default class ObjectInfoDialog extends Component {
   toggleLights() {
     const cameraSystem = this.props.scene.systems["hubs-systems"].cameraSystem;
     cameraSystem.enableLights = !cameraSystem.enableLights;
+    localStorage.setItem("show-background-while-inspecting", cameraSystem.enableLights.toString());
     this.setState({ enableLights: cameraSystem.enableLights });
     if (cameraSystem.enableLights) {
       cameraSystem.showEverythingAsNormal();
