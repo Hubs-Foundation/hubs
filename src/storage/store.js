@@ -176,7 +176,18 @@ export default class Store extends EventTarget {
       this._shouldResetAvatarOnInit = true;
       Cookies.remove(OAUTH_FLOW_CREDENTIALS_KEY);
     }
+
+    this._signOutOnExpiredAuthToken();
   }
+
+  _signOutOnExpiredAuthToken = () => {
+    if (!this.state.credentials.token) return;
+
+    const expiry = jwtDecode(this.state.credentials.token).exp;
+    if (expiry <= Date.now()) {
+      this.update({ credentials: { token: null, email: null } });
+    }
+  };
 
   initProfile = async () => {
     if (this._shouldResetAvatarOnInit) {
