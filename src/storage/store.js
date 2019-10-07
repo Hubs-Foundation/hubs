@@ -183,7 +183,7 @@ export default class Store extends EventTarget {
   _signOutOnExpiredAuthToken = () => {
     if (!this.state.credentials.token) return;
 
-    const expiry = jwtDecode(this.state.credentials.token).exp;
+    const expiry = jwtDecode(this.state.credentials.token).exp * 1000;
     if (expiry <= Date.now()) {
       this.update({ credentials: { token: null, email: null } });
     }
