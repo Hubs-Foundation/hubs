@@ -281,7 +281,6 @@ AFRAME.registerSystem("userinput", {
           mapping && this.registeredMappings.add(mapping);
 
           if (activeDevice instanceof ViveControllerDevice && activeDevice.gamepad) {
-            console.log(activeDevice);
             if (activeDevice.gamepad.id === "HTC Vive Focus Plus Controller") {
               //HTC Vive Focus Plus Controller
               this.registeredMappings.add(viveFocusPlusUserBindings);
