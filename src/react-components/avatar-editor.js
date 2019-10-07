@@ -48,7 +48,7 @@ export default class AvatarEditor extends Component {
       this.setState({ avatar, previewGltfUrl: avatar.base_gltf_url });
     } else {
       const { entries } = await fetchReticulumAuthenticated(`/api/v1/media/search?filter=base&source=avatar_listings`);
-      const baseAvatarResults = entries.map(e => ({ id: e.id, name: e.name, gltfs: e.gltfs }));
+      const baseAvatarResults = entries.map(e => ({ id: e.id, name: e.name, gltfs: e.gltfs, images: e.images }));
       if (baseAvatarResults.length) {
         const randomAvatarResult = baseAvatarResults[Math.floor(Math.random() * baseAvatarResults.length)];
         this.setState({
@@ -317,6 +317,39 @@ export default class AvatarEditor extends Component {
     </div>
   );
 
+  selectListingGrid = (propName, placeholder) => (
+    <div className="select-container">
+      <label htmlFor={`#avatar-${propName}`}>{placeholder}</label>
+      <div className="select-grid">
+        {this.state.baseAvatarResults.map(a => (
+          <div
+            onClick={() =>
+              this.setState({
+                avatar: { ...this.state.avatar, [propName]: a.id },
+                previewGltfUrl: this.getPreviewUrl(a.id)
+              })
+            }
+            key={a.id}
+            className={classNames("item", { selected: a.id === this.state.avatar[propName] })}
+          >
+            <img src={a.images.preview.url} />
+          </div>
+        ))}
+      </div>
+      <div
+        onClick={() =>
+          this.setState({
+            avatar: { ...this.state.avatar, [propName]: "" },
+            previewGltfUrl: this.getPreviewUrl("")
+          })
+        }
+        className={classNames("item", "custom", { selected: "" === this.state.avatar[propName] })}
+      >
+        Custom GLB
+      </div>
+    </div>
+  );
+
   textarea = (name, placeholder, disabled) => (
     <div>
       <textarea
@@ -370,7 +403,7 @@ export default class AvatarEditor extends Component {
                 {debug && this.textField("parent_avatar_listing_id", "Parent Avatar Listing ID")}
                 {this.textField("name", "Name", false, true)}
                 {debug && this.textarea("description", "Description")}
-                {!!this.state.baseAvatarResults.length && this.selectListingField("parent_avatar_listing_id", "Model")}
+                {!!this.state.baseAvatarResults.length && this.selectListingGrid("parent_avatar_listing_id", "Model")}
                 {!avatar.parent_avatar_listing_id && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
                 {this.mapField("base_map", "Base Map", "image/*")}
                 <details>
