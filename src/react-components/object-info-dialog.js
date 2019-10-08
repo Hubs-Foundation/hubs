@@ -3,6 +3,9 @@ import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/client-info-dialog.scss";
 import { FormattedMessage } from "react-intl";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import entryStyles from "../assets/stylesheets/entry.scss";
 
 export default class ObjectInfoDialog extends Component {
   static propTypes = {
@@ -85,9 +88,21 @@ export default class ObjectInfoDialog extends Component {
     return (
       <DialogContainer noOverlay={true} wide={true} {...this.props}>
         <div className={styles.roomInfo}>
-          <a href={this.props.objectDisplayString} target="_blank" rel="noopener noreferrer">
-            {this.props.objectDisplayString}
-          </a>
+          <div className={styles.titleAndClose}>
+            <a className={entryStyles.collapseButton} onClick={onClose}>
+              <i>
+                <FontAwesomeIcon icon={faTimes} />
+              </i>
+            </a>
+            <a
+              className={styles.objectDisplayString}
+              href={this.props.objectDisplayString}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {this.props.objectDisplayString}
+            </a>
+          </div>
           <div className={styles.clientActionButtons}>
             <button onClick={this.toggleLights.bind(this)}>
               <FormattedMessage id={`object-info.${this.state.enableLights ? "lower" : "raise"}-lights`} />
@@ -103,13 +118,16 @@ export default class ObjectInfoDialog extends Component {
             {this.props.scene.is("entered") &&
               this.props.hubChannel &&
               this.props.hubChannel.can("pin_objects") && (
-                <button onClick={this.state.pinned ? this.unpin : this.pin}>
+                <button
+                  className={this.state.pinned ? "" : styles.primaryActionButton}
+                  onClick={this.state.pinned ? this.unpin : this.pin}
+                >
                   <FormattedMessage id={`object-info.${this.state.pinned ? "unpin-button" : "pin-button"}`} />
                 </button>
               )}
-            <button className={styles.cancel} onClick={onClose}>
+            <a className={styles.cancelText} href="#" onClick={onClose}>
               <FormattedMessage id="client-info.cancel" />
-            </button>
+            </a>
           </div>
         </div>
       </DialogContainer>
