@@ -149,12 +149,6 @@ export const CAMERA_MODE_THIRD_PERSON_FAR = 2;
 export const CAMERA_MODE_INSPECT = 3;
 export const CAMERA_MODE_SCENE_PREVIEW = 4;
 
-const ensureLightsAreSeenByCamera = function(o) {
-  if (o.isLight) {
-    o.layers.enable(CAMERA_LAYER_INSPECT);
-  }
-};
-
 const NEXT_MODES = {
   [CAMERA_MODE_FIRST_PERSON]: CAMERA_MODE_THIRD_PERSON_NEAR,
   [CAMERA_MODE_THIRD_PERSON_NEAR]: CAMERA_MODE_THIRD_PERSON_FAR,
@@ -162,6 +156,11 @@ const NEXT_MODES = {
 };
 
 const CAMERA_LAYER_INSPECT = 4;
+const ensureLightsAreSeenByCamera = function(o) {
+  if (o.isLight) {
+    o.layers.enable(CAMERA_LAYER_INSPECT);
+  }
+};
 const enableInspectLayer = function(o) {
   o.layers.enable(CAMERA_LAYER_INSPECT);
 };
