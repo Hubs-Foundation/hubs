@@ -32,7 +32,7 @@ pipeline {
       steps {
         script {
           def baseAssetsPath = env.BASE_ASSETS_PATH
-          def targetS3Url = env.TARGET_S3_URL
+          def targetS3Bucket = env.TARGET_S3_BUCKET
           def sentryDsn = env.SENTRY_DSN
           def gaTrackingId = env.GA_TRACKING_ID
           def smokeURL = env.SMOKE_URL
@@ -42,8 +42,11 @@ pipeline {
           def nonCorsProxyDomains = env.NON_CORS_PROXY_DOMAINS
           def defaultSceneSid = env.DEFAULT_SCENE_SID
           def slackURL = env.SLACK_URL
+          def habOrg = env.HAB_ORG
+          def habRing = env.HAB_RING
+          def habHost = env.HAB_HOST
 
-          def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh \\\"${defaultSceneSid}\\\" \\\"${baseAssetsPath}\\\" \\\"${reticulumServer}\\\" \\\"${thumbnailServer}\\\" \\\"${corsProxyServer}\\\" \\\"${nonCorsProxyDomains}\\\" \\\"${targetS3Url}\\\" \\\"${sentryDsn}\\\" \\\"${gaTrackingId}\\\" \\\"${env.BUILD_NUMBER}\\\" \\\"${env.GIT_COMMIT}\\\""
+          def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh \\\"${defaultSceneSid}\\\" \\\"${baseAssetsPath}\\\" \\\"${reticulumServer}\\\" \\\"${thumbnailServer}\\\" \\\"${corsProxyServer}\\\" \\\"${nonCorsProxyDomains}\\\" \\\"${targetS3Bucket}\\\" \\\"${sentryDsn}\\\" \\\"${gaTrackingId}\\\" \\\"${env.BUILD_NUMBER}\\\" \\\"${env.GIT_COMMIT}\\\" \\\"${habOrg}\\\" \\\"${habRing}\\\" \\\"${habHost}\\\""
           sh "/usr/bin/script --return -c ${shellString(habCommand)} /dev/null"
 
           def gitMessage = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'[%an] %s'").trim()
@@ -53,7 +56,7 @@ pipeline {
             "<https://github.com/mozilla/hubs/commit/$gitSha|$gitSha> " +
             "Hubs: ```${gitSha} ${gitMessage}```\n" +
             "<${smokeURL}?required_version=${env.BUILD_NUMBER}|Smoke Test> - to push:\n" +
-            "`/mr hubs deploy ${env.BUILD_NUMBER} ${targetS3Url}`"
+            "`/mr hubs deploy ${env.BUILD_NUMBER} s3://${targetS3Bucket}`"
           )
           def payload = 'payload=' + JsonOutput.toJson([
             text      : text,
