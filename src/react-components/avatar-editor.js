@@ -6,6 +6,7 @@ import { upload } from "../utils/media-utils";
 import { ensureAvatarMaterial } from "../utils/avatar-utils";
 import classNames from "classnames";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploadAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import AvatarPreview from "./avatar-preview";
@@ -215,7 +216,13 @@ export default class AvatarEditor extends Component {
   mapField = (name, label, accept, disabled = false, title) => (
     <div className="file-input-row" key={name} title={title}>
       <label htmlFor={`avatar-file_${name}`}>
-        <div className="img-box">{this.state.avatar.files[name] && <img src={this.state.avatar.files[name]} />}</div>
+        <div className="img-box">
+          {this.state.avatar.files[name] ? (
+            <img src={this.state.avatar.files[name]} />
+          ) : (
+            <FontAwesomeIcon icon={faCloudUploadAlt} />
+          )}
+        </div>
         <span>{label}</span>
       </label>
       <input
@@ -264,7 +271,7 @@ export default class AvatarEditor extends Component {
   );
 
   textField = (name, placeholder, disabled, required) => (
-    <div>
+    <div className="text-field-container">
       <label htmlFor={`#avatar-${name}`}>{placeholder}</label>
       <input
         id={`avatar-${name}`}
@@ -318,7 +325,7 @@ export default class AvatarEditor extends Component {
   );
 
   selectListingGrid = (propName, placeholder) => (
-    <div className="select-container">
+    <div className="select-grid-container">
       <label htmlFor={`#avatar-${propName}`}>{placeholder}</label>
       <div className="select-grid">
         {this.state.baseAvatarResults.map(a => (
@@ -336,17 +343,35 @@ export default class AvatarEditor extends Component {
           </div>
         ))}
       </div>
-      <div
-        onClick={() =>
+      <input
+        id="avatar-file_glb"
+        type="file"
+        accept="model/gltf+binary,.glb"
+        onChange={e => {
+          const file = e.target.files[0];
+          e.target.value = null;
+          this.inputFiles["glb"] = file;
+          URL.revokeObjectURL(this.state.avatar.files["glb"]);
           this.setState({
-            avatar: { ...this.state.avatar, [propName]: "" },
+            avatar: {
+              ...this.state.avatar,
+              [propName]: "",
+              files: {
+                ...this.state.avatar.files,
+                glb: URL.createObjectURL(file)
+              }
+            },
             previewGltfUrl: this.getPreviewUrl("")
-          })
-        }
+          });
+        }}
+      />
+      <label
+        htmlFor="avatar-file_glb"
         className={classNames("item", "custom", { selected: "" === this.state.avatar[propName] })}
       >
-        Custom GLB
-      </div>
+        <FontAwesomeIcon icon={faCloudUploadAlt} />
+        &nbsp; Custom GLB
+      </label>
     </div>
   );
 
@@ -396,15 +421,17 @@ export default class AvatarEditor extends Component {
           </div>
         ) : this.props.signedIn ? (
           <form onSubmit={this.uploadAvatar} className="center">
+            {this.textField("name", "Name", false, true)}
             <div className="split">
               <div className="form-body">
                 {debug && this.textField("avatar_id", "Avatar ID", true)}
                 {debug && this.textField("parent_avatar_id", "Parent Avatar ID")}
                 {debug && this.textField("parent_avatar_listing_id", "Parent Avatar Listing ID")}
-                {this.textField("name", "Name", false, true)}
                 {debug && this.textarea("description", "Description")}
                 {!!this.state.baseAvatarResults.length && this.selectListingGrid("parent_avatar_listing_id", "Model")}
-                {!avatar.parent_avatar_listing_id && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
+                {/* {!avatar.parent_avatar_listing_id && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")} */}
+
+                <label>Skin</label>
                 {this.mapField("base_map", "Base Map", "image/*")}
                 <details>
                   <summary>Advanced</summary>
@@ -412,6 +439,8 @@ export default class AvatarEditor extends Component {
                   {this.mapField("normal_map", "Normal Map", "image/*")}
                   {this.mapField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
                 </details>
+
+                <label>Share Settings</label>
                 {this.checkbox(
                   "allow_promotion",
                   "Allow Mozilla to promote your avatar, and show it in search results.",
