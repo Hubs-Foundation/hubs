@@ -4,8 +4,8 @@ import { generateHubName } from "../utils/name-generation";
 import Store from "../storage/store";
 
 export function hasReticulumServer() {
-  // HACK avoid constant expression elimination of RETICULUM_SERVER by comparing with "" becuase we inject configs
-  return process.env.RETICULUM_SERVER != "";
+  // NOTE avoid constant expression elimination of RETICULUM_SERVER by comparing with "" becuase we inject configs
+  return process.env.RETICULUM_SERVER.length !== 0;
 }
 
 export function isLocalClient() {
