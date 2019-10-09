@@ -78,7 +78,7 @@ const orbit = (function() {
   const target = new THREE.Object3D();
   const dhQ = new THREE.Quaternion();
   const dvQ = new THREE.Quaternion();
-  return function orbit(object, rig, camera, dh, dv, dz, dt) {
+  return function orbit(object, rig, camera, dh, dv, dz, dt, panY) {
     if (!target.parent) {
       // add dummy object to the scene, if this is the first time we call this function
       AFRAME.scenes[0].object3D.add(target);
@@ -101,7 +101,11 @@ const orbit = (function() {
 
     dvQ.setFromAxisAngle(RIGHT.set(1, 0, 0).applyQuaternion(target.quaternion), 0.1 * dv * dt);
     target.quaternion.premultiply(dvQ);
-    target.position.addVectors(owp, dPos.applyQuaternion(dhQ).applyQuaternion(dvQ));
+    target.position.addVectors(owp, dPos.applyQuaternion(dhQ).applyQuaternion(dvQ)).add(
+      UP.set(0, 1, 0)
+        .multiplyScalar(panY * newLength)
+        .applyQuaternion(target.quaternion)
+    );
     target.matrixNeedsUpdate = true;
     childMatch(rig, camera, target);
   };
@@ -418,15 +422,20 @@ export class CameraSystem {
 
         const inspectZoom = this.userinput.get(paths.actions.inspectZoom) * 0.001;
         if (inspectZoom) {
-          this.inspectZoom = (inspectZoom + this.inspectZoom) / 2;
+          this.inspectZoom = inspectZoom + (5 * this.inspectZoom) / 6;
         } else if (Math.abs(this.inspectZoom) > 0.0001) {
           this.inspectZoom = FALLOFF * this.inspectZoom;
+        }
+        const panY = this.userinput.get(paths.actions.inspectPanY) || 0;
+        if (this.userinput.get(paths.actions.resetInspectView)) {
+          moveRigSoCameraLooksAtObject(this.viewingRig.object3D, this.viewingCamera.object3D, this.inspected, 1);
         }
 
         if (
           Math.abs(this.verticalDelta) > 0.001 ||
           Math.abs(this.horizontalDelta) > 0.001 ||
-          Math.abs(this.inspectZoom) > 0.001
+          Math.abs(this.inspectZoom) > 0.001 ||
+          Math.abs(panY) > 0.0001
         ) {
           orbit(
             this.inspected,
@@ -435,7 +444,8 @@ export class CameraSystem {
             this.horizontalDelta,
             this.verticalDelta,
             this.inspectZoom,
-            dt
+            dt,
+            panY
           );
         }
       }
