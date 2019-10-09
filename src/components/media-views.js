@@ -24,11 +24,11 @@ const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 
 export const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
-  let s = "|";
+  let s = "[";
   for (let j = 0; j <= 20; j++) {
     s += i >= j ? "|" : " ";
   }
-  s += "|";
+  s += "]";
   VOLUME_LABELS[i] = s;
 }
 
