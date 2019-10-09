@@ -25,7 +25,7 @@ do_build() {
   npm rebuild node-sass # HACK sometimes node-sass build fails
 
   # We inject random tokens into the build that will be replaced at run webhook/deploy time with the actual runtime configs.
-  export DEFAULT_SCENE_SID="$(echo "default_scene_sid" | sha256sum | cut -d' ' -f1)/"
+  export DEFAULT_SCENE_SID="$(echo "default_scene_sid" | sha256sum | cut -d' ' -f1)"
   export BASE_ASSETS_PATH="$(echo "base_assets_path" | sha256sum | cut -d' ' -f1)/" # HACK need a trailing slash so webpack'ed semantics line up
   export RETICULUM_SERVER=$(echo "reticulum_server" | sha256sum | cut -d' ' -f1) 
   export THUMBNAIL_SERVER=$(echo "thumbnail_server" | sha256sum | cut -d' ' -f1) 
