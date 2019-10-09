@@ -55,6 +55,6 @@ region = "us-west-1"
 EOTOML
 
 cat build-config.toml
-sudo /usr/bin/hab-user-toml-install hubs build-config.toml
+sudo /usr/bin/hab-user-toml-install $pkg_name build-config.toml
 hab svc start $PKG
 sudo /usr/bin/hab-pkg-upload results/*.hart
