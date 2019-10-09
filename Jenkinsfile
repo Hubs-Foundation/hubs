@@ -59,8 +59,8 @@ pipeline {
           def gitMessage = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'[%an] %s'").trim()
           def gitSha = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
           def text = (
-            "*<http://localhost:8080/job/${env.JOB_NAME}/${env.BUILD_NUMBER}|#${hubsVersion}>* *${env.JOB_NAME}* " +
-            "<https://github.com/mozilla/hubs/commit/$gitSha|$gitSha> " +
+            "*<http://localhost:8080/job/${env.JOB_NAME}/${env.BUILD_NUMBER}|#${env.BUILD_NUMBER}>* *${env.JOB_NAME}* " +
+            "<https://github.com/mozilla/hubs/commit/$gitSha|$gitSha> ${hubsVersion}" +
             "Hubs: ```${gitSha} ${gitMessage}```\n" +
             "<${smokeURL}?required_version=${hubsVersion}|Smoke Test> - to push:\n" +
             "`/mr hubs deploy ${hubsVersion} s3://${targetS3Bucket}`"
