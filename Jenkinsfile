@@ -59,11 +59,11 @@ pipeline {
           def gitMessage = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'[%an] %s'").trim()
           def gitSha = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
           def text = (
-            "*<http://localhost:8080/job/${env.JOB_NAME}/${env.BUILD_NUMBER}|#${env.BUILD_NUMBER}>* *${env.JOB_NAME}* " +
+            "*<http://localhost:8080/job/${env.JOB_NAME}/${env.BUILD_NUMBER}|#${hubsVersion}>* *${env.JOB_NAME}* " +
             "<https://github.com/mozilla/hubs/commit/$gitSha|$gitSha> " +
             "Hubs: ```${gitSha} ${gitMessage}```\n" +
             "<${smokeURL}?required_version=${hubsVersion}|Smoke Test> - to push:\n" +
-            "`/mr hubs deploy ${env.BUILD_NUMBER} s3://${targetS3Bucket}`"
+            "`/mr hubs deploy ${hubsVersion} s3://${targetS3Bucket}`"
           )
           def payload = 'payload=' + JsonOutput.toJson([
             text      : text,
