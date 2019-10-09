@@ -42,9 +42,6 @@ pipeline {
           def nonCorsProxyDomains = env.NON_CORS_PROXY_DOMAINS
           def defaultSceneSid = env.DEFAULT_SCENE_SID
           def slackURL = env.SLACK_URL
-          def habOrg = env.HAB_ORG
-          def habRing = env.HAB_RING
-          def habHost = env.HAB_HOST
 
           def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh \\\"${defaultSceneSid}\\\" \\\"${baseAssetsPath}\\\" \\\"${reticulumServer}\\\" \\\"${thumbnailServer}\\\" \\\"${corsProxyServer}\\\" \\\"${nonCorsProxyDomains}\\\" \\\"${targetS3Bucket}\\\" \\\"${sentryDsn}\\\" \\\"${gaTrackingId}\\\" \\\"${env.BUILD_NUMBER}\\\" \\\"${env.GIT_COMMIT}\\\" \\\"${habOrg}\\\" \\\"${habRing}\\\" \\\"${habHost}\\\""
           sh "/usr/bin/script --return -c ${shellString(habCommand)} /dev/null"
