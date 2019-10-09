@@ -8,7 +8,7 @@ const HAND_OFFSET = new THREE.Matrix4().compose(
   new THREE.Quaternion().setFromEuler(new THREE.Euler(-40 * THREE.Math.DEG2RAD, 0, 0)),
   new THREE.Vector3(1, 1, 1)
 );
-const RAY_ROTATION = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 12);
+const RAY_ROTATION = new THREE.Quaternion();
 
 export class ViveControllerDevice {
   constructor(gamepad) {
@@ -18,15 +18,14 @@ export class ViveControllerDevice {
     this.gamepad = gamepad;
 
     if (this.gamepad.id === "HTC Vive Focus Plus Controller") {
+      RAY_ROTATION.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 15);
       this.buttonMap = [
         { name: "touchpad", buttonId: 0 },
         { name: "trigger", buttonId: 1 },
         { name: "grip", buttonId: 2 }
       ];
     } else {
-      if (gamepad.axes.length === 2) {
-        this.isViveWand = true;
-      }
+      RAY_ROTATION.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 12);
       this.buttonMap = [
         { name: "touchpad", buttonId: 0 },
         { name: "trigger", buttonId: 1 },
