@@ -31,6 +31,7 @@ do_build() {
   export THUMBNAIL_SERVER=$(echo "thumbnail_server" | sha256sum | cut -d' ' -f1) 
   export CORS_PROXY_SERVER=$(echo "cors_proxy_server" | sha256sum | cut -d' ' -f1) 
   export NON_CORS_PROXY_DOMAINS=$(echo "non_cors_proxy_domains" | sha256sum | cut -d' ' -f1) 
+  export POSTGREST_SERVER=$(echo "postgrest_server" | sha256sum | cut -d' ' -f1) 
   export SENTRY_DSN=$(echo "sentry_dsn" | sha256sum | cut -d' ' -f1) 
   export GA_TRACKING_ID=$(echo "ga_tracking_id" | sha256sum | cut -d' ' -f1) 
   export BUILD_VERSION="${pkg_version}.$(echo $pkg_prefix | cut -d '/' -f 7)"
