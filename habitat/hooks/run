@@ -39,7 +39,7 @@ then
   {{ pkgPathFor "core/aws-cli" }}/bin/aws s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "max-age=31556926" --exclude "*" --include "*.wasm" --content-type "application/wasm" "$TEMP_DIST_PATH/assets" "s3://{{ cfg.deploy.target }}/hubs/assets"
   
   {{ pkgPathFor "core/aws-cli" }}/bin/aws s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "no-cache" --delete "$TEMP_DIST_PATH/pages" "s3://{{ cfg.deploy.target }}/hubs/pages/latest"
-  {{ pkgPathFor "core/aws-cli" }}/bin/aws s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "no-cache" --delete "$TEMP_DIST_PATH/pages" "s3://{{ cfg.deploy.target }}/hubs/pages/releases/{{ pkg.version }}"
+  {{ pkgPathFor "core/aws-cli" }}/bin/aws s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "no-cache" --delete "$TEMP_DIST_PATH/pages" "s3://{{ cfg.deploy.target }}/hubs/pages/releases/{{ pkg.version }}.{{ pkg.release }}"
 fi
 
 exec sleep 999999999999
