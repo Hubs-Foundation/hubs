@@ -1,4 +1,4 @@
-import { hasReticulumServer } from "./utils/phoenix-utils";
+import { hasReticulumServer } from "./phoenix-utils";
 
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
 if (process.env.CORS_PROXY_SERVER) {
