@@ -338,6 +338,7 @@ export default class AvatarEditor extends Component {
             }
             key={a.id}
             className={classNames("item", { selected: a.id === this.state.avatar[propName] })}
+            style={{ paddingBottom: `${(a.images.preview.width / a.images.preview.height) * 100}%` }}
           >
             <img src={a.images.preview.url} />
           </div>
@@ -429,7 +430,6 @@ export default class AvatarEditor extends Component {
                 {debug && this.textField("parent_avatar_listing_id", "Parent Avatar Listing ID")}
                 {debug && this.textarea("description", "Description")}
                 {!!this.state.baseAvatarResults.length && this.selectListingGrid("parent_avatar_listing_id", "Model")}
-                {/* {!avatar.parent_avatar_listing_id && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")} */}
 
                 <label>Skin</label>
                 {this.mapField("base_map", "Base Map", "image/*")}
