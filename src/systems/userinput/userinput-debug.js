@@ -11,27 +11,27 @@ const replacer = (k, v) => {
   return v;
 };
 function describeCurrentMasks(userinput) {
-  const sb = [];
+  const strings = [];
   userinput.masked.forEach((maskers, i) => {
     let val;
     if (!userinput.actives[i]) return;
     if (maskers.length) {
       val = JSON.stringify(userinput.sortedBindings[i], replacer);
-      sb.push(DELIMITER);
-      sb.push(`Binding #${i}:`);
+      strings.push(DELIMITER);
+      strings.push(`Binding #${i}:`);
       if (val) val = val.replace(/{"(\w{3,})":/g, '{\n  "$1":').replace(/,"(\w{3,})":/g, ',\n  "$1":');
-      sb.push(`${val}\n`);
+      strings.push(`${val}\n`);
     }
     maskers.forEach(masker => {
       val = JSON.stringify(userinput.sortedBindings[masker], replacer);
       if (val) val = val.replace(/{"(\w{3,})":/g, '{\n  "$1":').replace(/,"(\w{3,})":/g, ',\n  "$1":');
-      sb.push(`- Masked by #${masker}:\n${val}`);
+      strings.push(`- Masked by #${masker}:\n${val}`);
     });
     if (maskers.length) {
-      sb.push(`\n`);
+      strings.push(`\n`);
     }
   });
-  return sb.join("\n");
+  return strings.join("\n");
 }
 
 AFRAME.registerSystem("userinput-debug", {
@@ -86,10 +86,10 @@ AFRAME.registerSystem("userinput-debug", {
       console.log("xformStates", userinput.xformStates);
       const { sortedBindings, actives, masked } = userinput;
       for (const i in sortedBindings) {
-        const sb = [];
+        const strings = [];
         if (masked[i].length > 0) {
           for (const j of masked[i]) {
-            sb.push(JSON.stringify(sortedBindings[j]));
+            strings.push(JSON.stringify(sortedBindings[j]));
           }
         }
 
@@ -109,7 +109,7 @@ AFRAME.registerSystem("userinput-debug", {
             "maskedBy: ",
             masked[i],
             "\n",
-            sb.join("\n"),
+            strings.join("\n"),
             "\n"
           );
         }
