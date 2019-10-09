@@ -1,3 +1,5 @@
+import { hasReticulumServer } from "./utils/phoenix-utils";
+
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
 if (process.env.CORS_PROXY_SERVER) {
   nonCorsProxyDomains.push(process.env.CORS_PROXY_SERVER);
@@ -39,7 +41,7 @@ export const scaledThumbnailUrlFor = (url, width, height) => {
   try {
     const urlHostname = new URL(url).hostname;
 
-    if (process.env.RETICULUM_SERVER) {
+    if (hasReticulumServer()) {
       const retHostname = new URL(`https://${process.env.RETICULUM_SERVER}`).hostname;
       if (retHostname === urlHostname) return url;
     }

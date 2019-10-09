@@ -32,7 +32,7 @@ pipeline {
       steps {
         script {
           def baseAssetsPath = env.BASE_ASSETS_PATH
-          def targetS3Url = env.TARGET_S3_URL
+          def targetS3Bucket = env.TARGET_S3_BUCKET
           def sentryDsn = env.SENTRY_DSN
           def gaTrackingId = env.GA_TRACKING_ID
           def smokeURL = env.SMOKE_URL
@@ -43,8 +43,18 @@ pipeline {
           def defaultSceneSid = env.DEFAULT_SCENE_SID
           def slackURL = env.SLACK_URL
 
-          def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh \\\"${defaultSceneSid}\\\" \\\"${baseAssetsPath}\\\" \\\"${reticulumServer}\\\" \\\"${thumbnailServer}\\\" \\\"${corsProxyServer}\\\" \\\"${nonCorsProxyDomains}\\\" \\\"${targetS3Url}\\\" \\\"${sentryDsn}\\\" \\\"${gaTrackingId}\\\" \\\"${env.BUILD_NUMBER}\\\" \\\"${env.GIT_COMMIT}\\\""
+          def habCommand = "/bin/bash scripts/hab-build-and-push.sh \\\"${defaultSceneSid}\\\" \\\"${baseAssetsPath}\\\" \\\"${reticulumServer}\\\" \\\"${thumbnailServer}\\\" \\\"${corsProxyServer}\\\" \\\"${nonCorsProxyDomains}\\\" \\\"${targetS3Bucket}\\\" \\\"${sentryDsn}\\\" \\\"${gaTrackingId}\\\" \\\"${env.BUILD_NUMBER}\\\" \\\"${env.GIT_COMMIT}\\\""
           sh "/usr/bin/script --return -c ${shellString(habCommand)} /dev/null"
+
+          def s = $/eval 'ls -rt results/*.hart | head -n 1'/$
+          def hart = sh(returnStdout: true, script: "${s}").trim()
+          s = $/eval 'tail -n +6 ${hart} | xzcat | tar tf - | grep IDENT'/$
+          def identPath = sh(returnStdout: true, script: "${s}").trim()
+          s = $/eval 'tail -n +6 ${hart} | xzcat | tar xf - "${identPath}" -O'/$
+          def packageIdent = sh(returnStdout: true, script: "${s}").trim()
+          def packageTimeVersion = packageIdent.tokenize('/')[3]
+          def (major, minor, version) = packageIdent.tokenize('/')[2].tokenize('.')
+          def hubsVersion = "${major}.${minor}.${version}.${packageTimeVersion}"
 
           def gitMessage = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'[%an] %s'").trim()
           def gitSha = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
@@ -52,8 +62,8 @@ pipeline {
             "*<http://localhost:8080/job/${env.JOB_NAME}/${env.BUILD_NUMBER}|#${env.BUILD_NUMBER}>* *${env.JOB_NAME}* " +
             "<https://github.com/mozilla/hubs/commit/$gitSha|$gitSha> " +
             "Hubs: ```${gitSha} ${gitMessage}```\n" +
-            "<${smokeURL}?required_version=${env.BUILD_NUMBER}|Smoke Test> - to push:\n" +
-            "`/mr hubs deploy ${env.BUILD_NUMBER} ${targetS3Url}`"
+            "<${smokeURL}?required_version=${hubsVersion}|Smoke Test> - to push:\n" +
+            "`/mr hubs deploy ${env.BUILD_NUMBER} s3://${targetS3Bucket}`"
           )
           def payload = 'payload=' + JsonOutput.toJson([
             text      : text,

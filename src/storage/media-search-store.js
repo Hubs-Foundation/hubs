@@ -1,5 +1,5 @@
 import { EventTarget } from "event-target-shim";
-import { getReticulumFetchUrl, fetchReticulumAuthenticated } from "../utils/phoenix-utils";
+import { getReticulumFetchUrl, fetchReticulumAuthenticated, hasReticulumServer } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 
 export const SOURCES = ["poly", "sketchfab", "videos", "scenes", "avatars", "gifs", "images", "twitch"];
@@ -250,7 +250,7 @@ export default class MediaSearchStore extends EventTarget {
       searchParams.set("selectAction", selectAction);
     }
 
-    if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
+    if (hasReticulumServer() && document.location.host !== process.env.RETICULUM_SERVER) {
       searchParams.set("media_source", source);
       pushHistoryPath(this.history, this.history.location.pathname, searchParams.toString());
     } else {

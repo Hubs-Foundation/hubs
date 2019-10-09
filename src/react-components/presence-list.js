@@ -17,6 +17,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { pushHistoryPath, withSlug } from "../utils/history";
+import { hasReticulumServer } from "../utils/phoenix-utils";
 
 function getPresenceImage(ctx) {
   if (ctx && ctx.mobile) {
@@ -33,7 +34,7 @@ function getPresenceImage(ctx) {
 export function navigateToClientInfo(history, clientId) {
   const currentParams = new URLSearchParams(history.location.search);
 
-  if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
+  if (hasReticulumServer() && document.location.host !== process.env.RETICULUM_SERVER) {
     currentParams.set("client_id", clientId);
     pushHistoryPath(history, history.location.pathname, currentParams.toString());
   } else {
