@@ -651,7 +651,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: "/var/middle-mouse-move-y" },
       dest: { value: paths.actions.inspectPanY },
-      xform: xforms.scale(0.005)
+      xform: xforms.scale(0.001)
     },
     {
       src: {
