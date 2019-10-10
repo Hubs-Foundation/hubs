@@ -1,3 +1,8 @@
+/* eslint-disable */
+
+import transcoderWasmFile from "../loaders/basis_transcoder.wasm";
+import transcoderJSFile from "file-loader!../loaders/basis_transcoder.js";
+
 /**
  * @author Don McCurdy / https://www.donmccurdy.com
  * @author Austin Eng / https://github.com/austinEng
@@ -16,6 +21,7 @@
  * of web workers, before transferring the transcoded compressed texture back
  * to the main thread.
  */
+
 THREE.BasisTextureLoader = function(manager) {
   THREE.Loader.call(this, manager);
 
@@ -173,7 +179,7 @@ THREE.BasisTextureLoader.prototype = Object.assign(Object.create(THREE.Loader.pr
       var jsLoader = new THREE.FileLoader(this.manager);
       jsLoader.setPath(this.transcoderPath);
       var jsContent = new Promise((resolve, reject) => {
-        jsLoader.load("basis_transcoder.js", resolve, undefined, reject);
+        jsLoader.load(transcoderJSFile, resolve, undefined, reject);
       });
 
       // Load transcoder WASM binary.
@@ -181,7 +187,7 @@ THREE.BasisTextureLoader.prototype = Object.assign(Object.create(THREE.Loader.pr
       binaryLoader.setPath(this.transcoderPath);
       binaryLoader.setResponseType("arraybuffer");
       var binaryContent = new Promise((resolve, reject) => {
-        binaryLoader.load("basis_transcoder.wasm", resolve, undefined, reject);
+        binaryLoader.load(transcoderWasmFile, resolve, undefined, reject);
       });
 
       this.transcoderPending = Promise.all([jsContent, binaryContent]).then(([jsContent, binaryContent]) => {
@@ -399,3 +405,5 @@ THREE.BasisTextureLoader.BasisWorker = function() {
     return { width, height, hasAlpha, mipmaps, format: config.format };
   }
 };
+
+export default THREE.BasisTextureLoader;
