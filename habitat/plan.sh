@@ -47,8 +47,9 @@ do_build() {
   npm rebuild node-sass # HACK sometimes node-sass build fails
 
   export RETICULUM_SERVER=$(echo "reticulum_server" | sha256sum | cut -d' ' -f1)
-  export ITA_SERVER=$(echo "ita_server" | sha256sum | cut -d' ' -f1)
   export POSTGREST_SERVER=$(echo "postgrest_server" | sha256sum | cut -d' ' -f1)
+  export ITA_SERVER=$(echo "ita_server" | sha256sum | cut -d' ' -f1)
+
   npm run build
   cp -R dist/* ../dist # it will get packaged with the rest of the stuff, below
   cd ..
