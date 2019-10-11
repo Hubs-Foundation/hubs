@@ -38,7 +38,8 @@ THREE.BasisTextureLoader = function(manager) {
     astcSupported: false,
     etcSupported: false,
     dxtSupported: false,
-    pvrtcSupported: false
+    pvrtcSupported: false,
+    returnBuffer: false
   };
 };
 
@@ -123,7 +124,7 @@ THREE.BasisTextureLoader.prototype = Object.assign(Object.create(THREE.Loader.pr
       .then(message => {
         var config = this.workerConfig;
 
-        var { width, height, mipmaps, format } = message;
+        var { width, height, mipmaps, format, hasAlpha, buffer } = message;
 
         var texture;
 
@@ -158,6 +159,11 @@ THREE.BasisTextureLoader.prototype = Object.assign(Object.create(THREE.Loader.pr
         texture.magFilter = THREE.LinearFilter;
         texture.generateMipmaps = false;
         texture.needsUpdate = true;
+
+        texture.image.hasAlpha = hasAlpha;
+        if (this.workerConfig.returnBuffer) {
+          texture.image.data = buffer;
+        }
 
         return texture;
       });
@@ -325,7 +331,23 @@ THREE.BasisTextureLoader.BasisWorker = function() {
               buffers.push(mipmaps[i].data.buffer);
             }
 
-            self.postMessage({ type: "transcode", id: message.id, width, height, hasAlpha, mipmaps, format }, buffers);
+            if (config.returnBuffer) {
+              buffers.push(message.buffer);
+            }
+
+            self.postMessage(
+              {
+                type: "transcode",
+                id: message.id,
+                width,
+                height,
+                hasAlpha,
+                mipmaps,
+                format,
+                buffer: config.returnBuffer ? message.buffer : null
+              },
+              buffers
+            );
           } catch (error) {
             console.error(error);
 
