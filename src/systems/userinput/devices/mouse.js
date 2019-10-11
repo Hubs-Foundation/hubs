@@ -33,12 +33,16 @@ export class MouseDevice {
     ["mousedown", "wheel"].map(x => canvas.addEventListener(x, queueEvent));
     ["mousemove", "mouseup"].map(x => window.addEventListener(x, queueEvent));
 
-    document.addEventListener("wheel", e => {
-      // Do not capture wheel events if they are being sent to an modal/overlay
-      if (!isInModal()) {
-        e.preventDefault();
-      }
-    });
+    document.addEventListener(
+      "wheel",
+      e => {
+        // Do not capture wheel events if they are being sent to an modal/overlay
+        if (!isInModal()) {
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
   }
 
   process(event) {
