@@ -1,4 +1,5 @@
 import { BatchRawUniformGroup } from "@mozillareality/three-batch-manager";
+import { CAMERA_MODE_INSPECT } from "../camera-system";
 
 const tempVec3 = new Array(3);
 const tempVec4 = new Array(4);
@@ -50,7 +51,7 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
   update(time) {
     const interaction = AFRAME.scenes[0].systems.interaction;
     const cameraSystem = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem;
-    const inspected = cameraSystem.inspected;
+    const inspecting = cameraSystem.mode === CAMERA_MODE_INSPECT && !cameraSystem.enableLights;
     const inspectedMeshesFromBatch = cameraSystem.inspectedMeshesFromBatch;
     let interactorOne, interactorTwo;
 
@@ -65,7 +66,7 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
         instanceId,
         mesh.visible &&
         (mesh.parent && mesh.parent.visible) &&
-        (!inspected || inspectedMeshesFromBatch.indexOf(mesh) !== -1)
+        (!inspecting || inspectedMeshesFromBatch.indexOf(mesh) !== -1)
           ? mesh.matrixWorld
           : HIDE_MATRIX
       );

@@ -53,6 +53,7 @@ import FeedbackDialog from "./feedback-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
+import ObjectInfoDialog from "./object-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
 import LobbyChatBox from "./lobby-chat-box.js";
@@ -62,6 +63,7 @@ import MicLevelWidget from "./mic-level-widget.js";
 import OutputLevelWidget from "./output-level-widget.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
+import ObjectList from "./object-list.js";
 import SettingsMenu from "./settings-menu.js";
 import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
@@ -75,6 +77,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import qsTruthy from "../utils/qs_truthy";
+import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
 addLocaleData([...en]);
@@ -207,7 +210,13 @@ class UIRoot extends Component {
 
     signedIn: false,
     videoShareMediaSource: null,
-    showVideoShareFailed: false
+    showVideoShareFailed: false,
+
+    objectInfo: null,
+    objectDisplayString: "",
+    objectSrc: "",
+    isObjectListExpanded: false,
+    isPresenceListExpanded: false
   };
 
   constructor(props) {
@@ -1431,6 +1440,7 @@ class UIRoot extends Component {
 
     const clientInfoClientId = getClientInfoClientId(this.props.history.location);
     const showClientInfo = !!clientInfoClientId;
+    const showObjectInfo = !!(this.state.objectInfo && this.state.objectInfo.object3D);
 
     const discordBridges = this.discordBridges();
     const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
@@ -1688,7 +1698,23 @@ class UIRoot extends Component {
                 performConditionalSignIn={this.props.performConditionalSignIn}
               />
             )}
-            {(!enteredOrWatching || this.isWaitingForAutoExit()) && (
+            {showObjectInfo && (
+              <ObjectInfoDialog
+                scene={this.props.scene}
+                el={this.state.objectInfo}
+                objectDisplayString={this.state.objectDisplayString}
+                src={this.state.objectSrc}
+                hubChannel={this.props.hubChannel}
+                onClose={() => {
+                  if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
+                    this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
+                  }
+                  this.setState({ isObjectListExpanded: false, objectInfo: null });
+                }}
+              />
+            )}
+            {((!enteredOrWatching && !this.state.isObjectListExpanded && !showObjectInfo) ||
+              this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
                 <PresenceLog
                   entries={presenceLogEntries}
@@ -1724,6 +1750,7 @@ class UIRoot extends Component {
                 />
               )}
             {enteredOrWatchingOrPreload &&
+              !this.state.objectInfo &&
               !this.state.frozen && (
                 <InWorldChatBox
                   discordBridges={discordBridges}
@@ -1733,11 +1760,18 @@ class UIRoot extends Component {
                   history={this.props.history}
                 />
               )}
-            {this.state.frozen && (
-              <button className={styles.leaveButton} onClick={() => this.exit("left")}>
-                <FormattedMessage id="entry.leave-room" />
-              </button>
-            )}
+            {this.state.frozen &&
+              !showVREntryButton && (
+                <button className={styles.leaveButton} onClick={() => this.exit("left")}>
+                  <FormattedMessage id="entry.leave-room" />
+                </button>
+              )}
+            {this.state.frozen /* Case when we exit immersive mode while frozen */ &&
+              showVREntryButton && (
+                <button className={styles.leaveButton} onClick={() => exit2DInterstitialAndEnterVR(true)}>
+                  <FormattedMessage id="entry.enter-in-vr" />
+                </button>
+              )}
             {this.state.frozen && (
               <div className={cx(styles.uiInteractive, emojiStyles.emojiPanel)}>
                 <EmojiButton type="smile" state={this.state.emojiState} onClick={this.changeEmoji} />
@@ -1893,6 +1927,26 @@ class UIRoot extends Component {
             )}
             {streamingTip}
 
+            <ObjectList
+              scene={this.props.scene}
+              onExpand={(expand, uninspect) => {
+                if (expand) {
+                  this.setState({ isPresenceListExpanded: false, isObjectListExpanded: expand });
+                } else {
+                  this.setState({ isObjectListExpanded: expand });
+                }
+
+                if (uninspect) {
+                  this.setState({ objectInfo: null });
+                  if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
+                    this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
+                  }
+                }
+              }}
+              expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
+              onInspectObject={(el, s) => this.setState({ objectInfo: el, objectDisplayString: s, objectSrc: s })}
+            />
+
             <PresenceList
               history={this.props.history}
               presences={this.props.presences}
@@ -1901,6 +1955,14 @@ class UIRoot extends Component {
               email={this.props.store.state.credentials.email}
               onSignIn={this.showSignInDialog}
               onSignOut={this.signOut}
+              expanded={!this.state.isObjectListExpanded && this.state.isPresenceListExpanded}
+              onExpand={expand => {
+                if (expand) {
+                  this.setState({ isPresenceListExpanded: expand, isObjectListExpanded: false });
+                } else {
+                  this.setState({ isPresenceListExpanded: expand });
+                }
+              }}
             />
 
             {!streaming &&

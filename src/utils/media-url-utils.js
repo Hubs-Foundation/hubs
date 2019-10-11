@@ -1,3 +1,5 @@
+import { hasReticulumServer } from "./phoenix-utils";
+
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
 if (process.env.CORS_PROXY_SERVER) {
   nonCorsProxyDomains.push(process.env.CORS_PROXY_SERVER);
@@ -39,7 +41,7 @@ export const scaledThumbnailUrlFor = (url, width, height) => {
   try {
     const urlHostname = new URL(url).hostname;
 
-    if (process.env.RETICULUM_SERVER) {
+    if (hasReticulumServer()) {
       const retHostname = new URL(`https://${process.env.RETICULUM_SERVER}`).hostname;
       if (retHostname === urlHostname) return url;
     }
@@ -114,9 +116,9 @@ export const guessContentType = url => {
   const extension = new URL(url, window.location).pathname.split(".").pop();
   return commonKnownContentTypes[extension];
 };
-const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/scenes\/(\w+)\/?\S*/;
-const hubsAvatarRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/avatars\/(?<id>\w+)\/?\S*/;
-const hubsRoomRegex = /(https?:\/\/)?(hub.link)|(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/(\w+)\/?\S*/;
+const hubsSceneRegex = /https?:\/\/(hubs\.local(:\d+)?|(smoke-)?hubs\.mozilla\.com|(dev\.)?reticulum\.io)\/scenes\/(\w+)\/?\S*/;
+const hubsAvatarRegex = /https?:\/\/(hubs\.local(:\d+)?|(smoke-)?hubs\.mozilla\.com|(dev\.)?reticulum\.io)\/avatars\/(?<id>\w+)\/?\S*/;
+const hubsRoomRegex = /(https?:\/\/)?(hub\.link)|(hubs\.local(:\d+)?|(smoke-)?hubs\.mozilla\.com|(dev\.)?reticulum\.io)\/(\w+)\/?\S*/;
 
 export const isHubsSceneUrl = hubsSceneRegex.test.bind(hubsSceneRegex);
 export const isHubsRoomUrl = url => !isHubsSceneUrl(url) && hubsRoomRegex.test(url);

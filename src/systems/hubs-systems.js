@@ -64,7 +64,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.physicsSystem.tick(dt);
     this.spriteSystem.tick(t, dt);
     this.batchManagerSystem.tick(t);
-    this.cameraSystem.tick(this.el);
+    this.cameraSystem.tick(this.el, dt);
   },
 
   remove() {

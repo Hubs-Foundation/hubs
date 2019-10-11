@@ -69,6 +69,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.normalize_vec2
     },
     {
+      src: { value: paths.device.mouse.wheel },
+      dest: { value: paths.actions.dCharSpeed },
+      xform: xforms.scale(-0.3)
+    },
+    {
       src: { value: paths.device.keyboard.key("shift") },
       dest: { value: paths.actions.boost },
       xform: xforms.copy
@@ -585,7 +590,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.mouse.wheel },
       dest: { value: paths.actions.cursor.right.mediaVolumeMod },
-      xform: xforms.scale(-0.3)
+      xform: xforms.scale(-0.3),
+      priority: 1
     }
   ],
   [sets.inputFocused]: [
@@ -622,6 +628,32 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       ],
       dest: { value: paths.actions.stopInspecting },
       xform: xforms.any
+    },
+    {
+      src: { value: paths.device.mouse.wheel },
+      dest: { value: paths.actions.inspectZoom },
+      xform: xforms.scale(-5.0),
+      priority: 1
+    },
+    {
+      src: {
+        value: paths.device.mouse.buttonRight
+      },
+      dest: {
+        value: paths.noop
+      },
+      xform: xforms.noop,
+      priority: 101
+    },
+    {
+      src: {
+        value: paths.device.mouse.buttonRight
+      },
+      dest: {
+        value: paths.noop
+      },
+      xform: xforms.noop,
+      priority: 101
     }
   ]
 });

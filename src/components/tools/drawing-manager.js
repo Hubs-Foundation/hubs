@@ -10,31 +10,40 @@ AFRAME.registerComponent("drawing-manager", {
     this.drawingToPen = new Map();
   },
 
-  destroyDrawing() {
-    this.drawingToPen.delete(this.drawing);
-    this.drawing = null;
-    this.drawingEl = null;
+  createDrawing() {
+    return new Promise(resolve => {
+      this.drawingEl = document.createElement("a-entity");
+      this.drawingEl.setAttribute("networked", "template: #interactable-drawing");
+      this.el.sceneEl.appendChild(this.drawingEl);
+
+      const handNetworkedDrawingInit = e => {
+        if (e.detail.name === "networked-drawing") {
+          this.drawing = this.drawingEl.components["networked-drawing"];
+          this.drawingEl.removeEventListener("componentinitialized", handNetworkedDrawingInit);
+          resolve();
+        }
+      };
+
+      this.drawingEl.addEventListener("componentinitialized", handNetworkedDrawingInit);
+    });
+  },
+
+  destroyDrawing(networkedDrawing) {
+    if (this.drawing === networkedDrawing) {
+      this.drawingToPen.delete(this.drawing);
+      this.drawing = null;
+      this.drawingEl = null;
+    }
   },
 
   getDrawing(pen) {
     //TODO: future handling of multiple drawings
     return new Promise((resolve, reject) => {
       if (!this.drawingEl) {
-        this.drawingEl = document.createElement("a-entity");
-        this.drawingEl.setAttribute("networked", "template: #interactable-drawing");
-        this.el.sceneEl.appendChild(this.drawingEl);
-
-        this.drawingEl.addEventListener(
-          "componentinitialized",
-          e => {
-            if (e.detail.name == "networked-drawing") {
-              this.drawing = this.drawingEl.components["networked-drawing"];
-              this.drawingToPen.set(this.drawing, pen);
-              resolve(this.drawing);
-            }
-          },
-          { once: true }
-        );
+        this.createDrawing().then(() => {
+          this.drawingToPen.set(this.drawing, pen);
+          resolve(this.drawing);
+        });
       } else if (
         this.drawing &&
         (!this.drawingToPen.has(this.drawing) || this.drawingToPen.get(this.drawing) === pen)

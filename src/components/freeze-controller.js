@@ -1,5 +1,6 @@
 import { paths } from "../systems/userinput/paths";
 import { SOUND_FREEZE, SOUND_THAW } from "../systems/sound-effects-system";
+import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 
 /**
  * Toggles freezing of network traffic on the given event.
@@ -14,7 +15,7 @@ AFRAME.registerComponent("freeze-controller", {
   tick: function() {
     const scene = this.el.sceneEl;
     if (!scene.is("entered")) return;
-    const inspecting = !!scene.systems["hubs-systems"].cameraSystem.inspected;
+    const inspecting = scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT;
     if (inspecting) {
       if (this.el.is("frozen")) {
         this.onToggle();

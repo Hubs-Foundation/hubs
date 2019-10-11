@@ -1,5 +1,7 @@
 import { paths } from "../systems/userinput/paths";
 import { SOUND_SNAP_ROTATE } from "../systems/sound-effects-system";
+import qsTruthy from "../utils/qs_truthy";
+const enableWheelSpeed = qsTruthy("wheelSpeed") || qsTruthy("wheelspeed") || qsTruthy("ws");
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
@@ -24,6 +26,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   init: function() {
+    this.charSpeed = 1;
     this.navGroup = null;
     this.navNode = null;
     this.velocity = new THREE.Vector3(0, 0, 0);
@@ -137,6 +140,10 @@ AFRAME.registerComponent("character-controller", {
       if (userinputAngularVelocity !== null && userinputAngularVelocity !== undefined) {
         this.angularVelocity = userinputAngularVelocity;
       }
+      if (enableWheelSpeed) {
+        const dCharSpeed = userinput.get(paths.actions.dCharSpeed) || 0;
+        this.charSpeed = THREE.Math.clamp(this.charSpeed + this.charSpeed * dCharSpeed, 0.1, 5);
+      }
       const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
 
       pivot.updateMatrices();
@@ -173,9 +180,9 @@ AFRAME.registerComponent("character-controller", {
 
       const boost = userinput.get(paths.actions.boost) ? 2 : 1;
       move.makeTranslation(
-        this.velocity.x * distance * boost,
-        this.velocity.y * distance * boost,
-        this.velocity.z * distance * boost
+        this.velocity.x * distance * boost * this.charSpeed,
+        this.velocity.y * distance * boost * this.charSpeed,
+        this.velocity.z * distance * boost * this.charSpeed
       );
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 

@@ -1,3 +1,5 @@
+@import 'shared';
+
 %drop-menu {
   position: absolute;
   top: 72px;
@@ -43,6 +45,21 @@
   justify-content: space-between;
   align-items: center;
   margin: 6px 0;
+}
+:local(.row-no-margin) {
+  width: 100%;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  font-weight: bold;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0px 0;
+  padding: 0px 16px;
+  &:hover{
+    background-color: $action-color-light;
+    color: white;
+  }
 }
 
 :local(.row-header) {

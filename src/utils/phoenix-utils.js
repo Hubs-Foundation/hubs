@@ -3,9 +3,18 @@ import { generateHubName } from "../utils/name-generation";
 
 import Store from "../storage/store";
 
+export function hasReticulumServer() {
+  // NOTE avoid constant expression elimination of RETICULUM_SERVER by comparing with "" becuase we inject configs
+  return process.env.RETICULUM_SERVER.length !== 0;
+}
+
+export function isLocalClient() {
+  return hasReticulumServer() && document.location.host !== process.env.RETICULUM_SERVER;
+}
+
 const resolverLink = document.createElement("a");
 export function getReticulumFetchUrl(path, absolute = false) {
-  if (process.env.RETICULUM_SERVER) {
+  if (hasReticulumServer()) {
     return `https://${process.env.RETICULUM_SERVER}${path}`;
   } else if (absolute) {
     resolverLink.href = path;
@@ -60,8 +69,7 @@ export async function connectToReticulum(debug = false, params = null) {
     const reticulumMeta = await getReticulumMeta();
     socketHost = socketHost || process.env.RETICULUM_SOCKET_SERVER || reticulumMeta.phx_host;
     socketPort =
-      socketPort ||
-      (process.env.RETICULUM_SERVER ? new URL(`${socketProtocol}//${process.env.RETICULUM_SERVER}`).port : "443");
+      socketPort || (hasReticulumServer() ? new URL(`${socketProtocol}//${process.env.RETICULUM_SERVER}`).port : "443");
     return `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}`;
   };
 
@@ -171,7 +179,7 @@ export async function createAndRedirectToNewHub(name, sceneId, replace) {
     }
   }
 
-  if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
+  if (isLocalClient()) {
     url = `/hub.html?hub_id=${hub.hub_id}`;
   }
 
