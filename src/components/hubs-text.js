@@ -296,6 +296,8 @@ AFRAME.registerComponent("text", {
         .replace(tabRegex, "\t");
       geometryUpdateData.width = computeWidth(data.wrapPixels, data.wrapCount, font.widthFactor);
       geometry.update(Object.assign(geometryUpdateBase, data, geometryUpdateData));
+      geometry.boundingBox = null;
+      geometry.boundingSphere = null;
     };
   })()
 });
