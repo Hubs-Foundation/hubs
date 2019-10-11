@@ -103,7 +103,9 @@ const mountUI = async retPhxChannel => {
 
   // If POSTGREST_SERVER is set, we're talking directly to PostgREST over a tunnel, and will be managing the
   // perms token ourselves. If we're not, we talk to reticulum and presume it will handle perms token forwarding.
-  if (process.env.POSTGREST_SERVER && process.env.POSTGREST_SERVER !== "") {
+
+  // careful -- avoid constant expression for configs due to injection breakage
+  if (process.env.POSTGREST_SERVER && process.env.POSTGREST_SERVER.length > 0) {
     dataProvider = postgrestClient(process.env.POSTGREST_SERVER);
     authProvider = postgrestAuthenticatior.createAuthProvider(retPhxChannel);
     await postgrestAuthenticatior.refreshPermsToken();
@@ -111,6 +113,7 @@ const mountUI = async retPhxChannel => {
     // Refresh perms regularly
     setInterval(() => postgrestAuthenticatior.refreshPermsToken(), 60000);
   } else {
+    const server = process.env.RETICULUM_SERVER || document.location.host;
     dataProvider = postgrestClient("//" + process.env.RETICULUM_SERVER + "/api/postgrest");
     authProvider = postgrestAuthenticatior.createAuthProvider();
     postgrestAuthenticatior.setAuthToken(store.state.credentials.token);
