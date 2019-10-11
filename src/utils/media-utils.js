@@ -5,7 +5,7 @@ import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { validMaterials } from "../components/hoverable-visuals";
-import { proxiedUrlFor } from "../utils/media-url-utils";
+import { proxiedUrlFor, guessContentType } from "../utils/media-url-utils";
 import Linkify from "linkify-it";
 import tlds from "tlds";
 
@@ -199,7 +199,7 @@ export const addMedia = (
   });
   if (needsToBeUploaded) {
     // Video camera videos are converted to mp4 for compatibility
-    const desiredContentType = contentSubtype === "video-camera" ? "video/mp4" : null;
+    const desiredContentType = contentSubtype === "video-camera" ? "video/mp4" : src.type || guessContentType(src.name);
 
     upload(src, desiredContentType)
       .then(response => {
@@ -438,6 +438,36 @@ export async function createImageTexture(url, filter) {
   texture.anisotropy = 4;
 
   return texture;
+}
+
+import HubsBasisTextureLoader from "../loaders/HubsBasisTextureLoader";
+export const basisTextureLoader = new HubsBasisTextureLoader();
+let basisInitComplete = false;
+
+export function createBasisTexture(url) {
+  return new Promise((resolve, reject) => {
+    if (!basisInitComplete) {
+      basisTextureLoader.detectSupport(AFRAME.scenes[0].renderer);
+      basisInitComplete = true;
+    }
+    basisTextureLoader.load(
+      url,
+      function(texture) {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.onUpdate = function() {
+          // Delete texture data once it has been uploaded to the GPU
+          texture.mipmaps.length = 0;
+        };
+        // texture.anisotropy = 4;
+        resolve(texture);
+      },
+      undefined,
+      function(error) {
+        console.error(error);
+        reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
+      }
+    );
+  });
 }
 
 export function addMeshScaleAnimation(mesh, initialScale, onComplete) {
