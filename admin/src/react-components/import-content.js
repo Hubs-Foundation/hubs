@@ -106,7 +106,6 @@ class ImportContentComponent extends Component {
         importMessage = "Unable to import content.";
       }
     }
-    console.log(importMessage);
 
     return (
       <Card>
