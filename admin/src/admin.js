@@ -18,14 +18,17 @@ import { AccountList, AccountEdit } from "./react-components/accounts";
 import { ProjectList, ProjectShow } from "./react-components/projects";
 import { ServiceEditor } from "./react-components/service-editor";
 import { SystemEditor } from "./react-components/system-editor";
+import { ImportContent } from "./react-components/import-content";
 import Store from "hubs/src/storage/store";
 
 const store = new Store();
+window.APP = { store };
 
 import registerTelemetry from "hubs/src/telemetry";
 registerTelemetry("/admin", "Hubs Admin");
 
 const systemRoute = <Route exact path="/system" component={SystemEditor} />;
+const importRoute = <Route exact path="/import" component={ImportContent} />;
 const serviceRoutes = serviceNames.map(s => {
   return <Route exact key={s} path={`/services/${s}`} render={props => <ServiceEditor {...props} service={s} />} />;
 });
@@ -47,7 +50,7 @@ class AdminUI extends Component {
       <Admin
         dashboard={SystemEditor}
         appLayout={AdminLayout}
-        customRoutes={[systemRoute].concat(serviceRoutes)}
+        customRoutes={[systemRoute, importRoute].concat(serviceRoutes)}
         dataProvider={this.props.dataProvider}
         authProvider={this.props.authProvider}
         loginPage={false}
@@ -130,15 +133,21 @@ const mountUI = async retPhxChannel => {
 document.addEventListener("DOMContentLoaded", async () => {
   const socket = await connectToReticulum();
 
-  // Reticulum global channel
-  const retPhxChannel = socket.channel(`ret`, { hub_id: "admin", token: store.state.credentials.token });
-  retPhxChannel
-    .join()
-    .receive("ok", async () => {
-      mountUI(retPhxChannel);
-    })
-    .receive("error", res => {
-      document.location = "/?sign_in&sign_in_destination=admin";
-      console.error(res);
-    });
+  const redirectToLogin = () => (document.location = "/?sign_in&sign_in_destination=admin");
+
+  if (store.state.credentials && store.state.credentials.token) {
+    // Reticulum global channel
+    const retPhxChannel = socket.channel(`ret`, { hub_id: "admin", token: store.state.credentials.token });
+    retPhxChannel
+      .join()
+      .receive("ok", async () => {
+        mountUI(retPhxChannel);
+      })
+      .receive("error", res => {
+        document.location = "/?sign_in&sign_in_destination=admin";
+        console.error(res);
+      });
+  } else {
+    redirectToLogin();
+  }
 });

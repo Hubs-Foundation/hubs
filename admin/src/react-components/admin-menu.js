@@ -84,12 +84,34 @@ class Menu extends Component {
   render() {
     return (
       <List className={this.props.classes.root}>
-        <ListItem className={this.props.classes.item} component={NavLink} activeStyle={{ backgroundColor: "#D0D0D0" }} key="system" to="/system">
+        <ListItem
+          className={this.props.classes.item}
+          component={NavLink}
+          activeStyle={{ backgroundColor: "#D0D0D0" }}
+          key="system"
+          to="/system"
+        >
           <ListItemIcon className={this.props.classes.icon}>
             <ComputerIcon />
           </ListItemIcon>
           <ListItemText className={this.props.classes.text} primary="System" />
         </ListItem>
+        <Collapse in={true} timeout="auto" unmountOnExit>
+          <List component="nav" disablePadding>
+            <ListItem
+              className={classNames(this.props.classes.item, this.props.classes.nested)}
+              component={NavLink}
+              activeStyle={{ backgroundColor: "#D0D0D0" }}
+              key="import"
+              to="/import"
+            >
+              <ListItemIcon className={this.props.classes.icon}>
+                <ViewIcon />
+              </ListItemIcon>
+              <ListItemText className={this.props.classes.text} primary="Import Content" />
+            </ListItem>
+          </List>
+        </Collapse>
         <ListItem className={this.props.classes.item}>
           <ListItemIcon className={this.props.classes.icon}>
             <LibraryBooksIcon />
