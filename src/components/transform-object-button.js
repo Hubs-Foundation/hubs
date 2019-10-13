@@ -43,9 +43,13 @@ AFRAME.registerComponent("transform-button", {
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.targetEl = networkedEl;
     });
-    const rightHand = document.getElementById("player-right-controller");
-    const leftHand = document.getElementById("player-left-controller");
     this.onGrabStart = e => {
+      if (!this.leftHand || !this.rightHand) {
+        this.leftHand = document.getElementById("player-left-controller");
+        this.rightHand = document.getElementById("player-right-controller");
+        if (!this.leftHand || !this.rightHand) return;
+      }
+
       if (!this.targetEl) {
         return;
       }
@@ -59,9 +63,9 @@ AFRAME.registerComponent("transform-button", {
       this.transformSystem.startTransform(
         this.targetEl.object3D,
         e.object3D.el.id === "right-cursor"
-          ? rightHand.object3D
+          ? this.rightHand.object3D
           : e.object3D.el.id === "left-cursor"
-            ? leftHand.object3D
+            ? this.leftHand.object3D
             : e.object3D,
         this.data
       );

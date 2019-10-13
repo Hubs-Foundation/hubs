@@ -24,7 +24,6 @@ AFRAME.registerComponent("visibility-while-frozen", {
     this.camWorldPos = new THREE.Vector3();
     this.cam2WorldPos = new THREE.Vector3();
     this.objWorldPos = new THREE.Vector3();
-    this.cam = document.getElementById("avatar-pov-node").object3D;
     this.cam2 = this.el.sceneEl.camera;
 
     let hoverableSearch = this.el;
@@ -58,6 +57,12 @@ AFRAME.registerComponent("visibility-while-frozen", {
   },
 
   updateVisibility() {
+    if (!this.cam) {
+      const avatarPovNode = document.getElementById("avatar-pov-node");
+      if (!avatarPovNode) return;
+      this.cam = avatarPovNode.object3D;
+    }
+
     const isFrozen = this.el.sceneEl.is("frozen");
 
     let isWithinDistance = true;

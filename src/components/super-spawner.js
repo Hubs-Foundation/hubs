@@ -78,7 +78,7 @@ AFRAME.registerComponent("super-spawner", {
 
     this.onSpawnEvent = this.onSpawnEvent.bind(this);
 
-    this.sceneEl = document.querySelector("a-scene");
+    this.sceneEl = this.el.sceneEl;
 
     this.tempSpawnHandPosition = new THREE.Vector3();
   },
