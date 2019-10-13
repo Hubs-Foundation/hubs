@@ -101,7 +101,6 @@ AFRAME.registerComponent("ik-controller", {
     this.isInView = true;
     this.hasConvergedHips = false;
     this.lastCameraTransform = new THREE.Matrix4();
-    this.playerCamera = document.getElementById("viewing-camera").getObject3D("camera");
 
     this.el.sceneEl.systems["frame-scheduler"].schedule(this._runScheduledWork, "ik");
     this.forceIkUpdate = true;
@@ -295,6 +294,13 @@ AFRAME.registerComponent("ik-controller", {
     return function() {
       const camera = this.ikRoot.camera.object3D;
       camera.getWorldPosition(cameraWorld);
+
+      if (!this.playerCamera) {
+        const viewingCamera = document.getElementById("viewing-camera");
+        if (!viewingCamera) return;
+
+        this.playerCamera = viewingCamera.getObject3D("camera");
+      }
 
       this.isInView = isInViewOfCamera(this.playerCamera, cameraWorld);
     };
