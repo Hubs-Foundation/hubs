@@ -8,6 +8,7 @@ import AuthChannel from "./utils/auth-channel";
 import { createAndRedirectToNewHub, connectToReticulum, fetchReticulumAuthenticated } from "./utils/phoenix-utils";
 import Store from "./storage/store";
 import jwtDecode from "jwt-decode";
+import configs from "./utils/configs";
 
 const qs = new URLSearchParams(location.search);
 registerTelemetry("/home", "Hubs Home Page");
@@ -60,7 +61,7 @@ window.addEventListener("beforeinstallprompt", e => {
 
 (async () => {
   if (qs.get("new") !== null) {
-    createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, true);
+    createAndRedirectToNewHub(null, configs.DEFAULT_SCENE_SID, true);
     return;
   }
 

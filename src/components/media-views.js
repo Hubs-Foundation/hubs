@@ -1,4 +1,5 @@
 /* global performance THREE AFRAME NAF MediaStream process setTimeout */
+import configs from "../utils/configs";
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
 import { paths } from "../systems/userinput/paths";
@@ -132,7 +133,7 @@ function createVideoTexture(url, contentType) {
       // If hls.js is supported we always use it as it gives us better events
     } else if (AFRAME.utils.material.isHLS(url, contentType)) {
       if (HLS.isSupported()) {
-        const corsProxyPrefix = `https://${process.env.CORS_PROXY_SERVER}/`;
+        const corsProxyPrefix = `https://${configs.CORS_PROXY_SERVER}/`;
         const baseUrl = url.startsWith(corsProxyPrefix) ? url.substring(corsProxyPrefix.length) : url;
         const hls = new HLS({
           xhrSetup: (xhr, u) => {
