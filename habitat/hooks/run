@@ -10,36 +10,43 @@ rm -rf $TEMP_DIST_PATH
 mkdir -p $TEMP_DIST_PATH
 cp -R {{ pkg.path }}/dist/* $TEMP_DIST_PATH
 
-# Every config available to this package will be injected into the text assets if the asset
-# had the correct sha256sum as per the plan.sh build settings
+# Replace base assets path
+find $TEMP_DIST_PATH -type f -name *.html -exec sed -i "s/$(echo "base_assets_path" | sha256sum | cut -d' ' -f1)\//{{ strReplace cfg.general.base_assets_path "/" "\\/" }}/g" {} \;
+find $TEMP_DIST_PATH -type f -name *.css -exec sed -i "s/$(echo "base_assets_path" | sha256sum | cut -d' ' -f1)\//{{ strReplace cfg.general.base_assets_path "/" "\\/" }}/g" {} \;
+
+# Inject window.env by splitting file on expected BUILD_CONFIGS line
+cd $TEMP_DIST_PATH/pages
+
+for f in *.html
+do
+  csplit $f /BUILD_CONFIGS/ > /dev/null
+  cat xx00 > $f
+  echo "<script>" >> $f
+  echo "  window.env = {};" >> $f
 
 {{#each cfg.general ~}}
-
-# HACK, need to special case base asset path in pages because of weirdness with trailing slash -- webpack
-# seems to gracefully handle the extra trailing slash when injected at build time on HTML tags.
-if [[ "{{ @key }}" == "base_assets_path" ]] ;
-then
-  find $TEMP_DIST_PATH -type f -name *.html -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)\//{{ strReplace this "/" "\\/" }}/g" {} \;
-  find $TEMP_DIST_PATH -type f -name *.css -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)\//{{ strReplace this "/" "\\/" }}/g" {} \;
-  find $TEMP_DIST_PATH -type f -name *.js -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)\//{{ strReplace this "/" "\\/" }}/g" {} \;
-else
-  find $TEMP_DIST_PATH -type f -name *.html -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)/{{ strReplace this "/" "\\/" }}/g" {} \;
-  find $TEMP_DIST_PATH -type f -name *.css -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)/{{ strReplace this "/" "\\/" }}/g" {} \;
-  find $TEMP_DIST_PATH -type f -name *.js -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)/{{ strReplace this "/" "\\/" }}/g" {} \;
-fi
-
+  echo "  window.env[\"{{ @key }}\".toUpperCase()] = \"{{ this }}\";">> $f
 {{/each}}
+
+  echo "</script>" >> $f
+
+  cat xx01 >> $f
+  rm xx00
+  rm xx01
+done
+
+cd -
 
 # need to upload wasm blobs with wasm content type explicitly because, unlike all
 # other assets, AWS's built-in MIME type dictionary doesn't know about that one
 
-if [[ "{{ cfg.deploy.type }}" == "s3" ]] ;
-then
-  {{ pkgPathFor "core/aws-cli" }}/bin/aws s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "max-age=31556926" --include "*" --exclude "*.wasm" "$TEMP_DIST_PATH/assets" "s3://{{ cfg.deploy.target }}/hubs/assets"
-  {{ pkgPathFor "core/aws-cli" }}/bin/aws s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "max-age=31556926" --exclude "*" --include "*.wasm" --content-type "application/wasm" "$TEMP_DIST_PATH/assets" "s3://{{ cfg.deploy.target }}/hubs/assets"
-  
-  {{ pkgPathFor "core/aws-cli" }}/bin/aws s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "no-cache" --delete "$TEMP_DIST_PATH/pages" "s3://{{ cfg.deploy.target }}/hubs/pages/latest"
-  {{ pkgPathFor "core/aws-cli" }}/bin/aws s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "no-cache" --delete "$TEMP_DIST_PATH/pages" "s3://{{ cfg.deploy.target }}/hubs/pages/releases/{{ pkg.version }}.{{ pkg.release }}"
-fi
+#if [[ "{{ cfg.deploy.type }}" == "s3" ]] ;
+#then
+#  {{ pkgPathFor "core/aws-cli" }}/bin/aws s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "max-age=31556926" --include "*" --exclude "*.wasm" "$TEMP_DIST_PATH/assets" "s3://{{ cfg.deploy.target }}/hubs/assets"
+#  {{ pkgPathFor "core/aws-cli" }}/bin/aws s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "max-age=31556926" --exclude "*" --include "*.wasm" --content-type "application/wasm" "$TEMP_DIST_PATH/assets" "s3://{{ cfg.deploy.target }}/hubs/assets"
+#  
+#  {{ pkgPathFor "core/aws-cli" }}/bin/aws s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "no-cache" --delete "$TEMP_DIST_PATH/pages" "s3://{{ cfg.deploy.target }}/hubs/pages/latest"
+#  {{ pkgPathFor "core/aws-cli" }}/bin/aws s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "no-cache" --delete "$TEMP_DIST_PATH/pages" "s3://{{ cfg.deploy.target }}/hubs/pages/releases/{{ pkg.version }}.{{ pkg.release }}"
+#fi
 
 exec sleep 999999999999

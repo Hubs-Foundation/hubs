@@ -26,6 +26,9 @@ do_build() {
   npm rebuild node-sass # HACK sometimes node-sass build fails
   npm rebuild node-sass # HACK sometimes node-sass build fails
 
+  # We inject a random token into the build for the base assets path
+  export BASE_ASSETS_PATH="$(echo "base_assets_path" | sha256sum | cut -d' ' -f1)/" # HACK need a trailing slash so webpack'ed semantics line up
+
   npm run build
 
   # admin
