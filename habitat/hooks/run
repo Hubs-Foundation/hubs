@@ -10,10 +10,9 @@ rm -rf $TEMP_DIST_PATH
 mkdir -p $TEMP_DIST_PATH
 cp -R {{ pkg.path }}/dist/* $TEMP_DIST_PATH
 
-# Replace base assets path
+# Replace base assets path in static references
 find $TEMP_DIST_PATH -type f -name *.html -exec sed -i "s/$(echo "base_assets_path" | sha256sum | cut -d' ' -f1)\//{{ strReplace cfg.general.base_assets_path "/" "\\/" }}/g" {} \;
 find $TEMP_DIST_PATH -type f -name *.css -exec sed -i "s/$(echo "base_assets_path" | sha256sum | cut -d' ' -f1)\//{{ strReplace cfg.general.base_assets_path "/" "\\/" }}/g" {} \;
-find $TEMP_DIST_PATH -type f -name *.js -exec sed -i "s/$(echo "base_assets_path" | sha256sum | cut -d' ' -f1)\//{{ strReplace cfg.general.base_assets_path "/" "\\/" }}/g" {} \;
 
 # Inject window.env by splitting file on expected BUILD_CONFIGS line
 cd $TEMP_DIST_PATH/pages
