@@ -1,5 +1,6 @@
 import ReactDOM from "react-dom";
 import React, { Component } from "react";
+import "./utils/configs";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import styles from "./assets/stylesheets/discord.scss";
 import discordBotLogo from "./assets/images/discord-bot-logo.png";
