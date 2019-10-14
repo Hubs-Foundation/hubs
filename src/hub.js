@@ -425,7 +425,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     }
   }
 
-  console.log(`Janus host: ${hub.host}`);
+  console.log(`Janus host: ${hub.host}:${hub.port}`);
 
   remountUI({
     onSendMessage: messageDispatch.dispatch,
@@ -469,7 +469,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   const connectToScene = async () => {
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,
-      serverURL: `wss://${hub.host}`,
+      serverURL: `wss://${hub.host}:${hub.port}`,
       debug: !!isDebug
     });
 
@@ -1116,6 +1116,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI,
     mediaSearchStore
   );
+  document.getElementById("avatar-rig").messageDispatch = messageDispatch;
 
   let isInitialJoin = true;
 

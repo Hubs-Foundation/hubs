@@ -67,8 +67,6 @@ export const AvatarListingList = props => (
       <OwnedFileImage source="orm_map_owned_file_id" aspect="square" />
       <TextField source="attributions" />
       <BooleanField source="allow_remixing" />
-      <TextField source="reviewed_at" />
-      <DateField source="inserted_at" />
       <DateField source="updated_at" />
       <FeatureAvatarListingButton />
       <EditButton />

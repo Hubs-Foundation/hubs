@@ -1,5 +1,6 @@
 import { isHubsSceneUrl, isHubsRoomUrl, isHubsAvatarUrl } from "../utils/media-url-utils";
 import { guessContentType } from "../utils/media-url-utils";
+import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 
 AFRAME.registerComponent("open-media-button", {
   schema: {
@@ -31,10 +32,13 @@ AFRAME.registerComponent("open-media-button", {
       }
     };
 
-    this.onClick = () => {
+    this.onClick = async () => {
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
 
+      const exitImmersive = async () => await handleExitTo2DInterstitial(false, () => {}, true);
+
       if (this.data.onlyOpenLink) {
+        await exitImmersive();
         window.open(this.src);
       } else if (isHubsAvatarUrl(this.src)) {
         const avatarId = new URL(this.src).pathname.split("/").pop();
@@ -42,8 +46,10 @@ AFRAME.registerComponent("open-media-button", {
       } else if (isHubsSceneUrl(this.src) && mayChangeScene) {
         this.el.sceneEl.emit("scene_media_selected", this.src);
       } else if (isHubsRoomUrl(this.src)) {
+        await exitImmersive();
         location.href = this.src;
       } else {
+        await exitImmersive();
         window.open(this.src);
       }
     };

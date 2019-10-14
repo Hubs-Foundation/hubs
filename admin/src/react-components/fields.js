@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import LaunchIcon from "@material-ui/icons/Launch";
-import { getReticulumFetchUrl } from "./../../utils/phoenix-utils";
+import { getReticulumFetchUrl } from "hubs/src/utils/phoenix-utils";
 import { ReferenceField } from "react-admin";
 
 const styles = {
@@ -106,6 +106,38 @@ OwnedFileDownloadField.propTypes = {
 OwnedFileDownloadField.defaultProps = {
   addLabel: true
 };
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  } else if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(2)} KB`;
+  } else if (bytes < 1024 * 1024 * 1024) {
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  } else {
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  }
+}
+
+function OwnedFileSizeFieldInternal({ record }) {
+  return <span>{formatFileSize(record.content_length)}</span>;
+}
+
+export const OwnedFileSizeField = withStyles(styles)(({ label, basePath, record, source }) => {
+  return (
+    <ConditionalReferenceField
+      label={label}
+      basePath={basePath}
+      source={source}
+      reference="owned_files"
+      linkType={false}
+      record={record}
+      defaultValue={<span>N/A</span>}
+    >
+      <OwnedFileSizeFieldInternal />
+    </ConditionalReferenceField>
+  );
+});
 
 export const SceneLink = withStyles(styles)(({ source, record = {}, classes }) => {
   const src = getReticulumFetchUrl(`/scenes/${record.scene_sid || record.scene_listing_sid}`);

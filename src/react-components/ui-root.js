@@ -1764,11 +1764,18 @@ class UIRoot extends Component {
                   history={this.props.history}
                 />
               )}
-            {this.state.frozen && (
-              <button className={styles.leaveButton} onClick={() => this.exit("left")}>
-                <FormattedMessage id="entry.leave-room" />
-              </button>
-            )}
+            {this.state.frozen &&
+              !showVREntryButton && (
+                <button className={styles.leaveButton} onClick={() => this.exit("left")}>
+                  <FormattedMessage id="entry.leave-room" />
+                </button>
+              )}
+            {this.state.frozen /* Case when we exit immersive mode while frozen */ &&
+              showVREntryButton && (
+                <button className={styles.leaveButton} onClick={() => exit2DInterstitialAndEnterVR(true)}>
+                  <FormattedMessage id="entry.enter-in-vr" />
+                </button>
+              )}
             {this.state.frozen && (
               <div className={cx(styles.uiInteractive, emojiStyles.emojiPanel)}>
                 <EmojiButton type="smile" state={this.state.emojiState} onClick={this.changeEmoji} />
