@@ -2,7 +2,8 @@
 const configs = {};
 
 ["RETICULUM_SERVER", "POSTGREST_SERVER", "ITA_SERVER", "CONFIGURABLE_SERVICES"].forEach(x => {
-  configs[x] = window.env && typeof window.env[x] !== "undefined" ? window.env[x] : process.env[x];
+  const el = document.querySelector(`meta[name='env:${x.toLowerCase()}']`);
+  configs[x] = el ? el.getAttribute("content") : process.env[x];
 });
 
 export default configs;

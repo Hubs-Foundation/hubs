@@ -21,14 +21,10 @@ for f in *.html
 do
   csplit $f /BUILD_CONFIGS/ > /dev/null
   cat xx00 > $f
-  echo "<script>" >> $f
-  echo "  window.env = {};" >> $f
 
 {{#each cfg.general ~}}
-  echo "  window.env[\"{{ @key }}\".toUpperCase()] = \"{{ this }}\";">> $f
+  echo "<meta name=\"env:{{ @key }}\" content=\"{{ this }}\"/>" >> $f
 {{/each}}
-
-  echo "</script>" >> $f
 
   cat xx01 >> $f
   rm xx00
