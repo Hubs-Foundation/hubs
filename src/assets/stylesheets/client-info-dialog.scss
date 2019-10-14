@@ -5,8 +5,10 @@
 }
 
 :local(.object-display-string) {
-  margin: 0 30px 0 2px;
+  width: 80%;
+  margin: 0 10%;
   text-align: center;
+  overflow-wrap: break-word;
 }
 
 :local(.cancel-text) {
