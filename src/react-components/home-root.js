@@ -220,10 +220,7 @@ class HomeRoot extends Component {
                 )}
               </div>
             </div>
-            <div
-              className={styles.heroContent}
-              style={{ backgroundImage: window.CONFIG && `url(${window.CONFIG.home_hero_background})` }}
-            >
+            <div className={styles.heroContent}>
               {!this.props.hideHero &&
                 (this.props.favoriteHubsResult &&
                 this.props.favoriteHubsResult.entries &&
@@ -387,8 +384,8 @@ class HomeRoot extends Component {
             <img src={hubLogo} />
           </div>
           <div className={styles.blurb}>
-            {window.CONFIG.hero_blurb ? (
-              <span>{window.CONFIG.hero_blurb}</span>
+            {window.APP_CONFIG.hero_blurb ? (
+              <span>{window.APP_CONFIG.hero_blurb}</span>
             ) : (
               <FormattedMessage id="home.hero_blurb" />
             )}
