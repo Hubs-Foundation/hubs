@@ -19,7 +19,7 @@ cd $TEMP_DIST_PATH/pages
 
 for f in *.html
 do
-  csplit $f /BUILD_CONFIGS/ > /dev/null
+  csplit $f /META_TAGS/ > /dev/null
   cat xx00 > $f
 
 {{#each cfg.general ~}}
