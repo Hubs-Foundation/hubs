@@ -387,7 +387,11 @@ class HomeRoot extends Component {
             <img src={hubLogo} />
           </div>
           <div className={styles.blurb}>
-            <FormattedMessage id="home.hero_blurb" />
+            {window.CONFIG.hero_blurb ? (
+              <span>{window.CONFIG.hero_blurb}</span>
+            ) : (
+              <FormattedMessage id="home.hero_blurb" />
+            )}
           </div>
         </div>
         <div className={styles.ctaButtons}>
