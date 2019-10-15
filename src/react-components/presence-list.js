@@ -1,3 +1,4 @@
+import configs from "../utils/configs";
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
@@ -34,7 +35,7 @@ function getPresenceImage(ctx) {
 export function navigateToClientInfo(history, clientId) {
   const currentParams = new URLSearchParams(history.location.search);
 
-  if (hasReticulumServer() && document.location.host !== process.env.RETICULUM_SERVER) {
+  if (hasReticulumServer() && document.location.host !== configs.RETICULUM_SERVER) {
     currentParams.set("client_id", clientId);
     pushHistoryPath(history, history.location.pathname, currentParams.toString());
   } else {
