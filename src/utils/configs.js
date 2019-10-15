@@ -9,7 +9,6 @@ const configs = {};
   "NON_CORS_PROXY_DOMAINS",
   "SENTRY_DSN",
   "GA_TRACKING_ID",
-  "BUILD_VERSION",
   "BASE_ASSETS_PATH"
 ].forEach(x => {
   const el = document.querySelector(`meta[name='env:${x.toLowerCase()}']`);

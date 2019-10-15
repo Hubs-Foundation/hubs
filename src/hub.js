@@ -2,7 +2,7 @@ import "@babel/polyfill";
 import configs from "./utils/configs";
 import "./utils/debug-log";
 
-console.log(`Hubs version: ${configs.BUILD_VERSION || "?"}`);
+console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
 import happyEmoji from "./assets/images/chest-emojis/screen-effect/happy.png";
@@ -903,8 +903,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  if (qs.get("required_version") && configs.BUILD_VERSION) {
-    const buildNumber = configs.BUILD_VERSION.split(" ", 1)[0]; // e.g. "123 (abcd5678)"
+  if (qs.get("required_version") && process.env.BUILD_VERSION) {
+    const buildNumber = process.env.BUILD_VERSION.split(" ", 1)[0]; // e.g. "123 (abcd5678)"
 
     if (qs.get("required_version") !== buildNumber) {
       remountUI({ roomUnavailableReason: "version_mismatch" });
