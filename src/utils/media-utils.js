@@ -442,14 +442,9 @@ export async function createImageTexture(url, filter) {
 
 import HubsBasisTextureLoader from "../loaders/HubsBasisTextureLoader";
 export const basisTextureLoader = new HubsBasisTextureLoader();
-let basisInitComplete = false;
 
 export function createBasisTexture(url) {
   return new Promise((resolve, reject) => {
-    if (!basisInitComplete) {
-      basisTextureLoader.detectSupport(AFRAME.scenes[0].renderer);
-      basisInitComplete = true;
-    }
     basisTextureLoader.load(
       url,
       function(texture) {

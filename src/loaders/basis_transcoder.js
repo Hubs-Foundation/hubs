@@ -1,4 +1,4 @@
-
+/* eslint-disable */
 var BASIS = (function() {
   var _scriptDir = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : undefined;
   return (
@@ -18,4 +18,3 @@ if (typeof exports === 'object' && typeof module === 'object')
       define([], function() { return BASIS; });
     else if (typeof exports === 'object')
       exports["BASIS"] = BASIS;
-    

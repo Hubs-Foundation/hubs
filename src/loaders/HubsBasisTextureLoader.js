@@ -86,6 +86,11 @@ THREE.BasisTextureLoader.prototype = Object.assign(Object.create(THREE.Loader.pr
   load: function(url, onLoad, onProgress, onError) {
     var loader = new THREE.FileLoader(this.manager);
 
+    if (!this.ranDetect) {
+      this.detectSupport(AFRAME.scenes[0].renderer);
+      this.ranDetect = true;
+    }
+
     loader.setResponseType("arraybuffer");
 
     loader.load(
