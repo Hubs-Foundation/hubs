@@ -1,6 +1,7 @@
+// We should technically be able to just include three here, but our dependancies are tangled such that not having aframe is a bit difficult
+import "./utils/configs";
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
-// We should technically be able to just include three here, but our dependancies are tangled such that not having aframe is a bit difficult
 import "aframe";
 import "./utils/logging";
 

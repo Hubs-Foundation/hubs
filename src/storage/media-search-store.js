@@ -1,4 +1,5 @@
 import { EventTarget } from "event-target-shim";
+import configs from "../utils/configs";
 import { getReticulumFetchUrl, fetchReticulumAuthenticated, hasReticulumServer } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 
@@ -250,7 +251,7 @@ export default class MediaSearchStore extends EventTarget {
       searchParams.set("selectAction", selectAction);
     }
 
-    if (hasReticulumServer() && document.location.host !== process.env.RETICULUM_SERVER) {
+    if (hasReticulumServer() && document.location.host !== configs.RETICULUM_SERVER) {
       searchParams.set("media_source", source);
       pushHistoryPath(this.history, this.history.location.pathname, searchParams.toString());
     } else {
