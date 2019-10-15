@@ -122,6 +122,9 @@ const mountUI = async retPhxChannel => {
     postgrestAuthenticatior.setAuthToken(store.state.credentials.token);
   }
 
+  window.APP.dataProvider = dataProvider;
+  window.APP.authProvider = authProvider;
+
   ReactDOM.render(
     <IntlProvider locale={lang} messages={messages}>
       <AdminUI dataProvider={dataProvider} authProvider={authProvider} />
