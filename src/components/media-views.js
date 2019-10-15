@@ -1,4 +1,4 @@
-/* global performance THREE AFRAME NAF MediaStream process setTimeout */
+/* global performance THREE AFRAME NAF MediaStream setTimeout */
 import configs from "../utils/configs";
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
