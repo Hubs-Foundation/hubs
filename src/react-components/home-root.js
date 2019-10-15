@@ -189,9 +189,11 @@ class HomeRoot extends Component {
                   <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
                     <FormattedMessage id="home.community_link" />
                   </a>
-                  <a href="/spoke" rel="noreferrer noopener">
-                    Spoke
-                  </a>
+                  {window.APP_CONFIG.disable_spoke ? null : (
+                    <a href="/spoke" rel="noreferrer noopener">
+                      Spoke
+                    </a>
+                  )}
                   {this.props.showAdmin && (
                     <a href="/admin" rel="noreferrer noopener">
                       <i>
