@@ -28,6 +28,7 @@ do_build() {
 
   # We inject a random token into the build for the base assets path
   export BASE_ASSETS_PATH="$(echo "base_assets_path" | sha256sum | cut -d' ' -f1)/" # HACK need a trailing slash so webpack'ed semantics line up
+  export BUILD_VERSION="${pkg_version}.$(echo $pkg_prefix | cut -d '/' -f 7)"
 
   npm run build
 
