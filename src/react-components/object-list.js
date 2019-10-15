@@ -4,8 +4,8 @@ import classNames from "classnames";
 import rootStyles from "../assets/stylesheets/ui-root.scss";
 import styles from "../assets/stylesheets/presence-list.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBoxes } from "@fortawesome/free-solid-svg-icons/faBoxes";
-import { faBox } from "@fortawesome/free-solid-svg-icons/faBox";
+import { faCubes } from "@fortawesome/free-solid-svg-icons/faCubes";
+import { faCube } from "@fortawesome/free-solid-svg-icons/faCube";
 import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faNewspaper } from "@fortawesome/free-solid-svg-icons/faNewspaper";
@@ -41,7 +41,7 @@ const DISPLAY_IMAGE = new Map([
   [SORT_ORDER_IMAGE, faImage],
   [SORT_ORDER_PDF, faNewspaper],
   [SORT_ORDER_UNIDENTIFIED, faQuestion],
-  [SORT_ORDER_MODEL, faBox]
+  [SORT_ORDER_MODEL, faCube]
 ]);
 
 function getDisplayString(el) {
@@ -182,7 +182,7 @@ export default class ObjectList extends Component {
             [rootStyles.presenceInfoSelected]: this.props.expanded
           })}
         >
-          <FontAwesomeIcon icon={faBoxes} />
+          <FontAwesomeIcon icon={faCubes} />
           <span className={rootStyles.occupantCount}>{this.state.filteredEntities.length}</span>
         </div>
         {this.props.expanded && this.renderExpandedList()}

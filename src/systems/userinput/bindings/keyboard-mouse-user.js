@@ -14,6 +14,9 @@ const togglePenWithP = "/vars/mouse-and-keyboard/drop_pen_with_p";
 const togglePenWithHud = "/vars/mouse-and-keyboard/drop_pen_with_hud";
 const togglePen = "/vars/mouse-and-keyboard/togglePen";
 
+const qs = new URLSearchParams(location.search);
+const inspectZoomSpeed = parseFloat(qs.get("izs")) || -10.0;
+
 const k = name => {
   return `/keyboard-mouse-user/keyboard-var/${name}`;
 };
@@ -645,27 +648,32 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.mouse.wheel },
       dest: { value: paths.actions.inspectZoom },
-      xform: xforms.scale(-5.0),
+      xform: xforms.scale(inspectZoomSpeed),
       priority: 1
     },
     {
-      src: {
-        value: paths.device.mouse.buttonRight
-      },
-      dest: {
-        value: paths.noop
-      },
-      xform: xforms.noop,
-      priority: 101
+      src: { value: paths.device.mouse.movementXY },
+      dest: { x: "/var/movementX", y: "/var/movementY" },
+      xform: xforms.split_vec2
+    },
+    {
+      src: { bool: paths.device.mouse.buttonMiddle, value: "/var/movementY" },
+      dest: { value: "/var/middle-mouse-move-y" },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/middle-mouse-move-y" },
+      dest: { value: paths.actions.inspectPanY },
+      xform: xforms.scale(0.001)
     },
     {
       src: {
         value: paths.device.mouse.buttonRight
       },
       dest: {
-        value: paths.noop
+        value: paths.actions.resetInspectView
       },
-      xform: xforms.noop,
+      xform: xforms.rising,
       priority: 101
     }
   ],
