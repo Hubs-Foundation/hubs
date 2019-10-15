@@ -3,6 +3,11 @@ import { withStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import CardContent from "@material-ui/core/CardContent";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import Warning from "@material-ui/icons/Warning";
 import Snackbar from "@material-ui/core/Snackbar";
 import SnackbarContent from "@material-ui/core/SnackbarContent";
 import FormControl from "@material-ui/core/FormControl";
@@ -46,6 +51,9 @@ const styles = () => ({
   warning: {
     backgroundColor: amber[700]
   },
+  warningIcon: {
+    color: amber[700]
+  },
   icon: {
     fontSize: 20
   },
@@ -68,11 +76,21 @@ class ImportContentComponent extends Component {
     lastImportedUrl: null,
     lastImportedAsset: null,
     addBaseTag: false,
-    addDefaultTag: false
+    addDefaultTag: false,
+    reticulumMeta: {}
   };
 
   handleUrlChanged(ev) {
     this.setState({ url: ev.target.value });
+  }
+
+  async componentDidMount() {
+    this.updateReticulumMeta();
+  }
+
+  async updateReticulumMeta() {
+    const reticulumMeta = await fetchReticulumAuthenticated(`/api/v1/meta?include_repo`);
+    this.setState({ reticulumMeta });
   }
 
   apiInfoForSubmittedUrl(url) {
@@ -160,6 +178,7 @@ class ImportContentComponent extends Component {
     }
 
     this.setState({ importing: false });
+    this.updateReticulumMeta();
   }
 
   render() {
@@ -206,13 +225,53 @@ class ImportContentComponent extends Component {
       // Do nothing
     }
 
+    const needsBaseAvatar = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.avatar_listings.base;
+    const needsDefaultAvatar = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.avatar_listings.default;
+    const needsDefaultScene = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.scene_listings.default;
+
     return (
       <Card>
         <Title title="Import Content" />
         <CardContent>
-          <p>
-            Enter the URL to an avatar or scene on another Hubs site (such as hubs.mozilla.com) and it will be imported.
-          </p>
+          Enter the URL to an avatar or scene on another Hubs site (such as hubs.mozilla.com) and it will be imported.
+          <List>
+            {needsBaseAvatar && (
+              <ListItem>
+                <ListItemIcon className={this.props.classes.warningIcon}>
+                  <Warning />
+                </ListItemIcon>
+                <ListItemText
+                  inset
+                  primary="You need to add a base avatar."
+                  secondary="Base avatars will be provided as choices when customizing avatars."
+                />
+              </ListItem>
+            )}
+            {needsDefaultAvatar && (
+              <ListItem>
+                <ListItemIcon className={this.props.classes.warningIcon}>
+                  <Warning />
+                </ListItemIcon>
+                <ListItemText
+                  inset
+                  primary="You need to add at least one default avatar."
+                  secondary="New users will be assigned one of the default avatars."
+                />
+              </ListItem>
+            )}
+            {needsDefaultScene && (
+              <ListItem>
+                <ListItemIcon className={this.props.classes.warningIcon}>
+                  <Warning />
+                </ListItemIcon>
+                <ListItemText
+                  inset
+                  primary="You need to add at least one default scene."
+                  secondary="New rooms will be assigned a default scene, which can be changed after room creation."
+                />
+              </ListItem>
+            )}
+          </List>
         </CardContent>
         <form className={this.props.classes.container} onSubmit={e => this.onSubmit(e)}>
           <FormControl>
