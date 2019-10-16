@@ -346,7 +346,7 @@ class HomeRoot extends Component {
         className={classNames(styles.primaryButton, styles.ctaButton)}
         onClick={e => {
           e.preventDefault();
-          createAndRedirectToNewHub(null, configs.DEFAULT_SCENE_SID, false);
+          createAndRedirectToNewHub(null, null, false);
         }}
       >
         <FormattedMessage id="home.create_a_room" />
