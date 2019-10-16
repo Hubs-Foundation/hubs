@@ -183,6 +183,7 @@ AFRAME.registerSystem("interaction", {
       this.options.rightHand.entity = document.getElementById("player-right-controller");
       this.options.rightRemote.entity = document.getElementById("right-cursor");
       this.options.leftRemote.entity = document.getElementById("left-cursor");
+      this.ready = true;
     });
   },
 
