@@ -212,7 +212,6 @@ AFRAME.registerComponent("camera-tool", {
       this.durationLabel.object3D.visible = false;
 
       this.snapMenu = this.el.querySelector(".camera-snap-menu");
-      this.playerCamera = document.getElementById("viewing-camera").getObject3D("camera");
       this.snapButton = this.el.querySelector(".snap-button");
       this.recordButton = this.el.querySelector(".record-button");
 
@@ -238,6 +237,10 @@ AFRAME.registerComponent("camera-tool", {
 
       this.cameraSystem = this.el.sceneEl.systems["camera-tools"];
       this.cameraSystem.register(this.el);
+
+      waitForDOMContentLoaded().then(() => {
+        this.playerCamera = document.getElementById("viewing-camera").getObject3D("camera");
+      });
     });
   },
 
@@ -742,6 +745,7 @@ AFRAME.registerComponent("camera-tool", {
     const cameraForwardPoint = new THREE.Vector3();
     const cameraForwardWorld = new THREE.Vector3();
     return function() {
+      if (!this.playerCamera) return;
       this.el.object3D.getWorldPosition(cameraWorld);
       this.playerCamera.getWorldPosition(playerWorld);
       playerToCamera.subVectors(playerWorld, cameraWorld);

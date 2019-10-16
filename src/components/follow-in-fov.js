@@ -20,6 +20,7 @@ AFRAME.registerComponent("follow-in-fov", {
 
   tick(t, dt) {
     if (!this.el.object3D.visible) return;
+    if (!this.data.target) return;
 
     const obj = this.el.object3D;
     const target = this.data.target.object3D;
