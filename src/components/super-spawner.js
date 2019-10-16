@@ -115,12 +115,12 @@ AFRAME.registerComponent("super-spawner", {
       false
     ).entity;
 
-    const cursor =
-      (e.detail && e.detail.object3D) || this.el.sceneEl.systems.interaction.options.rightRemote.entity.object3D;
+    const interaction = this.el.sceneEl.systems.interaction;
+    if (!interaction.ready) return; //DOMContentReady workaround
+    const cursor = (e.detail && e.detail.object3D) || interaction.options.rightRemote.entity.object3D;
+
     const left = cursor.el.id.indexOf("right") === -1;
-    const hand = left
-      ? this.el.sceneEl.systems.interaction.options.leftHand.entity.object3D
-      : this.el.sceneEl.systems.interaction.options.rightHand.entity.object3D;
+    const hand = left ? interaction.options.leftHand.entity.object3D : interaction.options.rightHand.entity.object3D;
     cursor.getWorldPosition(entity.object3D.position);
     cursor.getWorldQuaternion(entity.object3D.quaternion);
     entity.object3D.matrixNeedsUpdate = true;
@@ -130,7 +130,6 @@ AFRAME.registerComponent("super-spawner", {
     }
 
     const userinput = AFRAME.scenes[0].systems.userinput;
-    const interaction = AFRAME.scenes[0].systems.interaction;
     const willAnimateFromCursor =
       this.data.animateFromCursor &&
       (userinput.get(paths.actions.rightHand.matrix) || userinput.get(paths.actions.leftHand.matrix));
