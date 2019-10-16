@@ -116,7 +116,7 @@ AFRAME.registerComponent("super-spawner", {
     ).entity;
 
     const interaction = this.el.sceneEl.systems.interaction;
-    if (!interaction.options.leftHand.entity) return; //DOMContentReady workaround
+    if (!interaction.ready) return; //DOMContentReady workaround
     const cursor = (e.detail && e.detail.object3D) || interaction.options.rightRemote.entity.object3D;
 
     const left = cursor.el.id.indexOf("right") === -1;
