@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
+import Typography from "@material-ui/core/Typography";
 import Card from "@material-ui/core/Card";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import CardContent from "@material-ui/core/CardContent";
@@ -17,7 +18,6 @@ import Checkbox from "@material-ui/core/Checkbox";
 import Icon from "@material-ui/core/Icon";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
-import { green, amber } from "@material-ui/core/colors";
 import { Title } from "react-admin";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
@@ -26,6 +26,7 @@ import clsx from "classnames";
 import { GET_MANY_REFERENCE } from "react-admin";
 import { sceneApproveNew, sceneReviewed } from "./scene-actions";
 import { avatarApproveNew, avatarReviewed } from "./avatar-actions";
+import withCommonStyles from "../utils/with-common-styles";
 
 const RESULTS = {
   new_listing: "new_listing",
@@ -33,40 +34,7 @@ const RESULTS = {
   failed: "failed"
 };
 
-const styles = () => ({
-  container: {
-    display: "flex",
-    flexWrap: "wrap",
-    padding: "24px",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "flex-start"
-  },
-  button: {
-    margin: "10px 10px 0 0"
-  },
-  success: {
-    backgroundColor: green[600]
-  },
-  warning: {
-    backgroundColor: amber[700]
-  },
-  warningIcon: {
-    color: amber[700]
-  },
-  icon: {
-    fontSize: 20
-  },
-  message: {
-    display: "flex",
-    alignItems: "center"
-  },
-  snackContents: {
-    "& a": {
-      color: "white"
-    }
-  }
-});
+const styles = withCommonStyles(() => ({}));
 
 class ImportContentComponent extends Component {
   state = {
@@ -230,136 +198,152 @@ class ImportContentComponent extends Component {
     const needsDefaultScene = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.scene_listings.default;
 
     return (
-      <Card>
+      <Card className={this.props.classes.container}>
         <Title title="Import Content" />
-        <CardContent>
-          Enter the URL to an avatar or scene on another Hubs site (such as hubs.mozilla.com) and it will be imported.
-          <List>
-            {needsBaseAvatar && (
-              <ListItem>
-                <ListItemIcon className={this.props.classes.warningIcon}>
-                  <Warning />
-                </ListItemIcon>
-                <ListItemText
-                  inset
-                  primary="You need to add a base avatar."
-                  secondary="Base avatars will be provided as choices when customizing avatars."
-                />
-              </ListItem>
-            )}
-            {needsDefaultAvatar && (
-              <ListItem>
-                <ListItemIcon className={this.props.classes.warningIcon}>
-                  <Warning />
-                </ListItemIcon>
-                <ListItemText
-                  inset
-                  primary="You need to add at least one default avatar."
-                  secondary="New users will be assigned one of the default avatars."
-                />
-              </ListItem>
-            )}
-            {needsDefaultScene && (
-              <ListItem>
-                <ListItemIcon className={this.props.classes.warningIcon}>
-                  <Warning />
-                </ListItemIcon>
-                <ListItemText
-                  inset
-                  primary="You need to add at least one default scene."
-                  secondary="New rooms will be assigned a default scene, which can be changed after room creation."
-                />
-              </ListItem>
-            )}
-          </List>
-        </CardContent>
-        <form className={this.props.classes.container} onSubmit={e => this.onSubmit(e)}>
-          <FormControl>
-            <FormGroup>
-              <TextField
-                key="url"
-                id="url"
-                label="URL to import"
-                value={this.state.url}
-                onChange={this.handleUrlChanged.bind(this)}
-                type="text"
-                fullWidth
-                disabled={this.state.importing}
-                margin="normal"
-              />
-              {isAvatar && (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={this.state.addBaseTag}
-                      onChange={e => this.setState({ addBaseTag: e.target.checked })}
-                      value="addBaseTag"
-                    />
-                  }
-                  label="Import as a base avatar. Base avatars will be offered to users to re-skin when creating a custom avatar."
-                />
-              )}
-              {(isScene || isAvatar) && (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={this.state.addDefaultTag}
-                      onChange={e => this.setState({ addDefaultTag: e.target.checked })}
-                      value="addDefaultTag"
-                    />
-                  }
-                  label={`${
-                    isScene
-                      ? "Import as a default scene. Default scenes will be used when creating new rooms."
-                      : "Import as a default avatar. New users will be assigned default avatars."
-                  }`}
-                />
-              )}
-            </FormGroup>
-          </FormControl>
-          {this.state.importing ? (
-            <CircularProgress />
-          ) : (
-            <Button
-              onClick={this.onSubmit.bind(this)}
-              className={this.props.classes.button}
-              variant="contained"
-              color="primary"
-            >
-              Import
-            </Button>
-          )}
-          <Snackbar
-            anchorOrigin={{ horizontal: "center", vertical: "bottom" }}
-            open={!!importMessage}
-            autoHideDuration={10000}
-            onClose={() => this.setState({ importResult: null, lastImportedUrl: null })}
+        <CardContent className={this.props.classes.info}>
+          <Typography component="h3" variant="h6">
+            Enter the URL to an avatar or scene on another Hubs site such as{" "}
+            <a href="https://hubs.mozilla.com" target="_blank" rel="noopener noreferrer">
+              hubs.mozilla.com
+            </a>{" "}
+            to import it into your Hubs Cloud instance.
+          </Typography>
+          <Button
+            className={this.props.classes.button}
+            variant="outlined"
+            href="https://github.com/mozilla/hubs-cloud/wiki/Suggested-Content"
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            <SnackbarContent
-              className={clsx({
-                [this.props.classes.success]:
-                  this.state.importResult === RESULTS.new_listing ||
-                  this.state.importResult === RESULTS.existing_listing,
-                [this.props.classes.warning]: this.state.importResult === RESULTS.failed
-              })}
-              message={
-                <span id="import-snackbar" className={this.props.classes.message}>
-                  <Icon className={clsx(this.props.classes.icon, this.props.classes.iconVariant)} />
-                  {importMessage}
-                </span>
-              }
-              action={[
-                <IconButton
-                  key="close"
-                  color="inherit"
-                  onClick={() => this.setState({ importResult: null, lastImportedUrl: null })}
-                >
-                  <CloseIcon className={this.props.classes.icon} />
-                </IconButton>
-              ]}
-            ></SnackbarContent>
-          </Snackbar>
-        </form>
+            Find Content
+          </Button>
+          {(needsBaseAvatar || needsDefaultAvatar || needsDefaultScene) && (
+            <List>
+              {needsBaseAvatar && (
+                <ListItem>
+                  <ListItemIcon className={this.props.classes.warningIcon}>
+                    <Warning />
+                  </ListItemIcon>
+                  <ListItemText
+                    inset
+                    primary="You need to add a base avatar."
+                    secondary="Base avatars will be provided as choices when customizing avatars."
+                  />
+                </ListItem>
+              )}
+              {needsDefaultAvatar && (
+                <ListItem>
+                  <ListItemIcon className={this.props.classes.warningIcon}>
+                    <Warning />
+                  </ListItemIcon>
+                  <ListItemText
+                    inset
+                    primary="You need to add at least one default avatar."
+                    secondary="New users will be assigned one of the default avatars."
+                  />
+                </ListItem>
+              )}
+              {needsDefaultScene && (
+                <ListItem>
+                  <ListItemIcon className={this.props.classes.warningIcon}>
+                    <Warning />
+                  </ListItemIcon>
+                  <ListItemText
+                    inset
+                    primary="You need to add at least one default scene."
+                    secondary="New rooms will be assigned a default scene, which can be changed after room creation."
+                  />
+                </ListItem>
+              )}
+            </List>
+          )}
+          <form className={this.props.classes.info} onSubmit={e => this.onSubmit(e)}>
+            <FormControl>
+              <FormGroup>
+                <TextField
+                  key="url"
+                  id="url"
+                  label="URL to import"
+                  value={this.state.url}
+                  onChange={this.handleUrlChanged.bind(this)}
+                  type="text"
+                  fullWidth
+                  disabled={this.state.importing}
+                  margin="normal"
+                />
+                {isAvatar && (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={this.state.addBaseTag}
+                        onChange={e => this.setState({ addBaseTag: e.target.checked })}
+                        value="addBaseTag"
+                      />
+                    }
+                    label="Import as a base avatar. Base avatars will be offered to users to re-skin when creating a custom avatar."
+                  />
+                )}
+                {(isScene || isAvatar) && (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={this.state.addDefaultTag}
+                        onChange={e => this.setState({ addDefaultTag: e.target.checked })}
+                        value="addDefaultTag"
+                      />
+                    }
+                    label={`${
+                      isScene
+                        ? "Import as a default scene. Default scenes will be used when creating new rooms."
+                        : "Import as a default avatar. New users will be assigned default avatars."
+                    }`}
+                  />
+                )}
+              </FormGroup>
+            </FormControl>
+            {this.state.importing ? (
+              <CircularProgress />
+            ) : (
+              <Button
+                onClick={this.onSubmit.bind(this)}
+                className={this.props.classes.button}
+                variant="contained"
+                color="primary"
+              >
+                Import
+              </Button>
+            )}
+          </form>
+        </CardContent>
+        <Snackbar
+          anchorOrigin={{ horizontal: "center", vertical: "bottom" }}
+          open={!!importMessage}
+          autoHideDuration={10000}
+          onClose={() => this.setState({ importResult: null, lastImportedUrl: null })}
+        >
+          <SnackbarContent
+            className={clsx({
+              [this.props.classes.success]:
+                this.state.importResult === RESULTS.new_listing || this.state.importResult === RESULTS.existing_listing,
+              [this.props.classes.warning]: this.state.importResult === RESULTS.failed
+            })}
+            message={
+              <span id="import-snackbar" className={this.props.classes.message}>
+                <Icon className={clsx(this.props.classes.icon, this.props.classes.iconVariant)} />
+                {importMessage}
+              </span>
+            }
+            action={[
+              <IconButton
+                key="close"
+                color="inherit"
+                onClick={() => this.setState({ importResult: null, lastImportedUrl: null })}
+              >
+                <CloseIcon className={this.props.classes.icon} />
+              </IconButton>
+            ]}
+          ></SnackbarContent>
+        </Snackbar>
       </Card>
     );
   }
