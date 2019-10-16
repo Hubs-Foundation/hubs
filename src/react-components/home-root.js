@@ -1,4 +1,3 @@
-import configs from "../utils/configs";
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
