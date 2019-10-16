@@ -186,7 +186,7 @@ class MediaTiles extends Component {
               <FontAwesomeIcon icon={faPencilAlt} />
             </StateLink>
           )}
-          {(entry.type === "avatar" || entry.type === "avatar_listing") && (
+          {entry.type === "avatar_listing" && (
             <StateLink
               onClick={e => {
                 e.preventDefault();
