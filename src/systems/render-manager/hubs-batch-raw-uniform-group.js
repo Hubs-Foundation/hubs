@@ -50,6 +50,7 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
 
   update(time) {
     const interaction = AFRAME.scenes[0].systems.interaction;
+    if (!interaction.options.leftHand.entity) return; //DOMContentReady workaround
     const cameraSystem = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem;
     const inspecting = cameraSystem.mode === CAMERA_MODE_INSPECT && !cameraSystem.enableLights;
     const inspectedMeshesFromBatch = cameraSystem.inspectedMeshesFromBatch;

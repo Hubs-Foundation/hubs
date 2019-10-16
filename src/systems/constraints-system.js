@@ -97,6 +97,7 @@ export class ConstraintsSystem {
 
   tick() {
     const interaction = AFRAME.scenes[0].systems.interaction;
+    if (!interaction.options.leftHand.entity) return; //DOMContentReady workaround
 
     this.tickInteractor(
       "offersHandConstraint",

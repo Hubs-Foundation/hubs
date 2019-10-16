@@ -56,6 +56,7 @@ AFRAME.registerComponent("hoverable-visuals", {
 
     let interactorOne, interactorTwo;
     const interaction = AFRAME.scenes[0].systems.interaction;
+    if (!interaction.options.leftHand.entity) return; //DOMContentReady workaround
     if (interaction.state.leftHand.hovered === this.el && !interaction.state.leftHand.held) {
       interactorOne = interaction.options.leftHand.entity.object3D;
     }
