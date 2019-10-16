@@ -17,12 +17,37 @@ export class ViveControllerDevice {
     navigator.getVRDisplays();
     this.gamepad = gamepad;
 
-    if (this.gamepad.id === "HTC Vive Focus Plus Controller") {
+    if (this.gamepad.id === "OpenVR Cosmos") {
+      RAY_ROTATION.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 12);
+      //TODO: verify this button order
+      this.buttonMap = [
+        { name: "trigger", buttonId: 0 },
+        { name: "grip", buttonId: 1 },
+        { name: "bumper", buttonId: 2 },
+        { name: "primary", buttonId: 3 },
+        { name: "secondary", buttonId: 4 },
+        { name: "joystick", buttonId: 5 }
+      ];
+    } else if (this.gamepad.id === "HTC Vive Focus Plus Controller") {
       RAY_ROTATION.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 15);
       this.buttonMap = [
         { name: "touchpad", buttonId: 0 },
         { name: "trigger", buttonId: 1 },
         { name: "grip", buttonId: 2 }
+      ];
+    } else if (this.gamepad.axes.length === 4) {
+      RAY_ROTATION.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 12);
+      this.buttonMap = [
+        { name: "touchpad", buttonId: 0 },
+        { name: "trigger", buttonId: 1 },
+        { name: "grip", buttonId: 2 },
+        { name: "primary", buttonId: 3 },
+        { name: "secondary", buttonId: 4 },
+        { name: "joystick", buttonId: 5 },
+        { name: "index", buttonId: 6 },
+        { name: "middle", buttonId: 7 },
+        { name: "ring", buttonId: 8 },
+        { name: "pinky", buttonId: 9 }
       ];
     } else {
       RAY_ROTATION.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 12);
@@ -30,7 +55,7 @@ export class ViveControllerDevice {
         { name: "touchpad", buttonId: 0 },
         { name: "trigger", buttonId: 1 },
         { name: "grip", buttonId: 2 },
-        { name: "top", buttonId: 3 }
+        { name: "primary", buttonId: 3 }
       ];
     }
     this.axisMap = [
