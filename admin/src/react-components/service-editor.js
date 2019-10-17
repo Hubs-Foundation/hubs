@@ -1,29 +1,36 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
 import CardContent from "@material-ui/core/CardContent";
 import TextField from "@material-ui/core/TextField";
+import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import { Title } from "react-admin";
+import withCommonStyles from "../utils/with-common-styles";
 import {
   getConfig,
   getConfigValue,
   setConfigValue,
   getServiceDisplayName,
+  getCategoryDisplayName,
+  getCategoryDescription,
   isDescriptor,
-  putConfig
+  putConfig,
+  schemaCategories
 } from "../utils/ita";
 
-const styles = () => ({
-  container: {
-    display: "flex",
-    flexWrap: "wrap"
-  },
-  button: {
-    margin: "10px 10px 0 0"
-  }
-});
+const styles = withCommonStyles(() => ({}));
+
+function TabContainer(props) {
+  return (
+    <Typography component="div" style={{ padding: 8 * 3 }}>
+      {props.children}
+    </Typography>
+  );
+}
 
 function getDescriptors(schema) {
   const descriptors = [];
@@ -44,12 +51,13 @@ function getDescriptors(schema) {
 class ConfigurationEditor extends Component {
   state = {
     schema: null,
-    config: null
+    config: null,
+    category: schemaCategories[0]
   };
 
   componentDidMount() {
-    this.setState({ schema: this.props.schemas[this.props.service] });
-    getConfig(this.props.service).then(config => this.setState({ config: config }));
+    //this.setState({ schema: this.props.schemas[this.props.category] });
+    //getConfig(this.props.service).then(config => this.setState({ config: config }));
   }
 
   onChange(path, ev) {
@@ -60,11 +68,11 @@ class ConfigurationEditor extends Component {
   }
 
   onSubmit() {
-    putConfig(this.props.service, this.state.config);
+    //putConfig(this.props.service, this.state.config);
   }
 
   onRevert() {
-    getConfig(this.props.service).then(config => this.setState({ config: config }));
+    //getConfig(this.props.service).then(config => this.setState({ config: config }));
   }
 
   renderSimpleInput(path, descriptor, currentValue) {
@@ -97,7 +105,8 @@ class ConfigurationEditor extends Component {
   }
 
   renderTree(schema, config) {
-    const configurables = getDescriptors(schema).map(([path, descriptor]) => {
+    return [];
+    /*const configurables = getDescriptors(schema).map(([path, descriptor]) => {
       return this.renderConfigurable(path, descriptor, getConfigValue(config, path));
     });
 
@@ -123,16 +132,34 @@ class ConfigurationEditor extends Component {
           </Button>
         </div>
       </form>
-    );
+    );*/
   }
 
   render() {
-    const { service } = this.props;
     const { config, schema } = this.state;
     return (
-      <Card>
-        <Title title={getServiceDisplayName(service)} />
-        <CardContent>{schema && config ? this.renderTree(schema, config) : <LinearProgress />}</CardContent>
+      <Card className={this.props.classes.container}>
+        <Title title="Server Settings" />
+        <CardContent className={this.props.classes.info}>
+          <Tabs
+            value={this.state.category}
+            indicatorColor="primary"
+            textColor="primary"
+            variant="scrollable"
+            scrollButtons="auto"
+            onChange={(e, category) => this.setState({ category })}
+          >
+            {schemaCategories.map(c => (
+              <Tab label={getCategoryDisplayName(c)} key={c} value={c} />
+            ))}
+          </Tabs>
+          <TabContainer>
+            <Typography variant="subtitle1" gutterBottom>
+              {getCategoryDescription(this.state.category)}
+            </Typography>
+            {schema && config ? this.renderTree(schema, config) : <LinearProgress />}
+          </TabContainer>
+        </CardContent>
       </Card>
     );
   }

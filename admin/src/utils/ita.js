@@ -1,19 +1,42 @@
 import configs from "./configs";
 
 const schemaCategories = ["api_keys", "content", "email", "advanced"];
-const namesForSchemaCategories = {
-  api_keys: "API Keys",
-  content: "Content",
-  email: "Email",
-  advanced: "Advanced"
-};
-
 const serviceNames = configs.CONFIGURABLE_SERVICES.split(",");
 let currentAuthToken = null;
 
 const setAuthToken = function(token) {
   currentAuthToken = token;
 };
+
+function getCategoryDisplayName(category) {
+  switch (category) {
+    case "api_keys":
+      return "API Keys";
+    case "content":
+      return "Content";
+    case "email":
+      return "Email";
+    case "advanced":
+      return "Advanced";
+    default:
+      return null;
+  }
+}
+
+function getCategoryDescription(category) {
+  switch (category) {
+    case "api_keys":
+      return "API keys for 3rd party services, used in media search and telemetry.";
+    case "content":
+      return "User contributed content settings.";
+    case "email":
+      return "Custom SMTP email provider settings. Leave as-is to use AWS Simple Email Service on your Email Zone.";
+    case "advanced":
+      return "Advanced Settings for those who know what they're doing.";
+    default:
+      return null;
+  }
+}
 
 function getServiceDisplayName(service) {
   switch (service) {
@@ -147,10 +170,11 @@ const schemaByCategories = schema => {
 
 export {
   schemaCategories,
-  namesForSchemaCategories,
   serviceNames,
   isDescriptor,
   getServiceDisplayName,
+  getCategoryDisplayName,
+  getCategoryDescription,
   getSchemas,
   getConfig,
   putConfig,

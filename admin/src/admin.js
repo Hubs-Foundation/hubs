@@ -24,13 +24,16 @@ import { AccountList, AccountEdit } from "./react-components/accounts";
 import { ProjectList, ProjectShow } from "./react-components/projects";
 import { SystemEditor } from "./react-components/system-editor";
 import { ServiceEditor } from "./react-components/service-editor";
+import { ImportContent } from "./react-components/import-content";
 import Store from "hubs/src/storage/store";
 import registerTelemetry from "hubs/src/telemetry";
 
 const store = new Store();
-let itaSchemas;
+window.APP = { store };
 
 registerTelemetry("/admin", "Hubs Admin");
+
+let itaSchemas;
 
 class AdminUI extends Component {
   static propTypes = {
@@ -118,6 +121,9 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
     postgrestAuthenticatior.setAuthToken(store.state.credentials.token);
   }
 
+  window.APP.dataProvider = dataProvider;
+  window.APP.authProvider = authProvider;
+
   ReactDOM.render(
     <IntlProvider locale={lang} messages={messages}>
       <AdminUI dataProvider={dataProvider} authProvider={authProvider} customRoutes={customRoutes} layout={layout} />
@@ -135,29 +141,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const systemRoute = <Route exact path="/system" component={SystemEditor} />;
-  const serviceRoutes = schemaCategories.map(c => {
-    return (
-      <Route
-        exact
-        key={c}
-        path={`/services/${c}`}
-        render={props => <ServiceEditor {...props} schemas={itaSchemas} categories={schemaCategories} category={c} />}
-      />
-    );
-  });
-  const customRoutes = [systemRoute].concat(serviceRoutes);
+  const importRoute = <Route exact path="/import" component={ImportContent} />;
+  const serverSetupRoute = (
+    <Route
+      path="/server-setup"
+      render={props => <ServiceEditor {...props} schemas={itaSchemas} categories={schemaCategories} />}
+    />
+  );
+
+  const customRoutes = [systemRoute, importRoute, serverSetupRoute];
 
   const layout = props => <Layout {...props} menu={props => <AdminMenu {...props} services={schemaCategories} />} />;
 
-  // Reticulum global channel
-  const retPhxChannel = socket.channel(`ret`, { hub_id: "admin", token: store.state.credentials.token });
-  retPhxChannel
-    .join()
-    .receive("ok", async () => {
-      mountUI(retPhxChannel, customRoutes, layout);
-    })
-    .receive("error", res => {
-      document.location = "/?sign_in&sign_in_destination=admin";
-      console.error(res);
-    });
+  const redirectToLogin = () => (document.location = "/?sign_in&sign_in_destination=admin");
+
+  if (store.state.credentials && store.state.credentials.token) {
+    // Reticulum global channel
+    const retPhxChannel = socket.channel(`ret`, { hub_id: "admin", token: store.state.credentials.token });
+    retPhxChannel
+      .join()
+      .receive("ok", async () => {
+        mountUI(retPhxChannel, customRoutes, layout);
+      })
+      .receive("error", res => {
+        document.location = "/?sign_in&sign_in_destination=admin";
+        console.error(res);
+      });
+  } else {
+    redirectToLogin();
+  }
 });
