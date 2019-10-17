@@ -1,3 +1,4 @@
+import "./utils/configs";
 import "@babel/polyfill";
 import "./utils/debug-log";
 
