@@ -387,20 +387,25 @@
           }
         }
 
-        :local(.edit-avatar) {
+        :local(.tile-actions) {
           position: absolute;
           top: 6px;
           right: 7px;
-          color: black;
-          background: #ffffffde;
-          border-radius: 30px;
-          width: 30px;
-          height: 30px;
-          text-align: center;
-          line-height: 27px;
-          &:hover {
-            background: $action-color;
-            color: white;
+          a {
+            color: black;
+            background: #ffffffde;
+            border-radius: 30px;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            display: block;
+            margin-bottom: 5px;
+
+            &:hover {
+              background: $action-color;
+              color: white;
+            }
           }
         }
       }
