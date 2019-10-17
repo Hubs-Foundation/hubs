@@ -125,11 +125,10 @@ class MediaBrowser extends Component {
     const searchParams = new URLSearchParams(props.history.location.search);
     const result = props.mediaSearchStore.result;
 
-    const newState = { result, query: this.state.query || searchParams.get("q") || "" };
+    const newState = { result, query: searchParams.get("q") || "" };
     const urlSource = this.getUrlSource(searchParams);
     newState.showNav = !!(searchParams.get("media_nav") !== "false");
     newState.selectAction = searchParams.get("selectAction") || "spawn";
-    newState.query = searchParams.get("q") || "";
 
     if (result && result.suggestions && result.suggestions.length > 0) {
       newState.facets = result.suggestions.map(s => {
@@ -411,7 +410,10 @@ class MediaBrowser extends Component {
                 ))}
               {activeFilter === "similar" && (
                 <a className={classNames(styles.facet, "selected")}>
-                  Similar to: &quote;{searchParams.get("similar_name")}&quote;
+                  <FormattedMessage
+                    id="media-browser.similar-to-facet"
+                    values={{ name: searchParams.get("similar_name") }}
+                  />
                 </a>
               )}
             </div>

@@ -187,26 +187,21 @@ class MediaTiles extends Component {
             </StateLink>
           )}
           {entry.type === "avatar_listing" && (
-            <StateLink
+            <a
               onClick={e => {
                 e.preventDefault();
                 this.props.onShowSimilar(entry.id, entry.name);
               }}
-              history={this.props.history}
               title="Show Similar"
             >
               <FontAwesomeIcon icon={faSearch} />
-            </StateLink>
+            </a>
           )}
           {entry.type === "avatar_listing" &&
             entry.allow_remixing && (
-              <StateLink
-                onClick={e => this.handleCopyAvatar(e, entry)}
-                history={this.props.history}
-                title="Copy to my avatars"
-              >
+              <a onClick={e => this.handleCopyAvatar(e, entry)} title="Copy to my avatars">
                 <FontAwesomeIcon icon={faClone} />
-              </StateLink>
+              </a>
             )}
         </div>
         {!entry.type.endsWith("_image") && (
