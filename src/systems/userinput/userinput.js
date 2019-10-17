@@ -332,7 +332,11 @@ AFRAME.registerSystem("userinput", {
         }
       }
       // HACK Firefox Nightly bug causes corrupt gamepad names for OpenVR, so do startsWith
-      if (e.gamepad.id.startsWith("OpenVR Gamepad") || e.gamepad.id === "HTC Vive Focus Plus Controller") {
+      if (
+        e.gamepad.id.startsWith("OpenVR Gamepad") ||
+        e.gamepad.id === "HTC Vive Focus Plus Controller" ||
+        e.gamepad.id === "OpenVR Cosmos"
+      ) {
         gamepadDevice = new ViveControllerDevice(e.gamepad);
       } else if (e.gamepad.id.startsWith("Oculus Touch")) {
         gamepadDevice = new OculusTouchControllerDevice(e.gamepad);

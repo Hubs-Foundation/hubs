@@ -36,6 +36,7 @@ const touchCharacterAcceleration = v("left/touch/characterAcceleration");
 const lCharacterAcceleration = v("left/characterAcceleration");
 const characterAcceleration = v("nonNormalizedCharacterAcceleration");
 const leftBoost = v("left/boost");
+const leftUndoDrawing = v("left/drawing/undo");
 
 const rButton = paths.device.vive.right.button;
 const rAxis = paths.device.vive.right.axis;
@@ -65,6 +66,7 @@ const leftCursorDrop2 = v("left/cursorDrop2");
 const rTriggerStopTeleport = v("right/trigger/stopTeleport");
 const rTouchpadStopTeleport = v("right/touchpad/stopTeleport");
 const rootForFrozenOverrideWhenHolding = "rootForFrozenOverrideWhenHolding";
+const rightUndoDrawing = v("right/drawing/undo");
 
 const ensureFrozenViaDpad = v("dpad/ensureFrozen");
 const ensureFrozenViaKeyboard = v("keyboard/ensureFrozen");
@@ -159,7 +161,7 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.copy
     },
     {
-      src: [lButton("touchpad").touched, lButton("top").touched],
+      src: [lButton("touchpad").touched, lButton("primary").touched],
       dest: {
         value: paths.actions.leftHand.thumb
       },
@@ -214,7 +216,7 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.copy
     },
     {
-      src: [rButton("touchpad").touched, rButton("top").touched],
+      src: [rButton("touchpad").touched, rButton("primary").touched],
       dest: {
         value: paths.actions.rightHand.thumb
       },
@@ -730,7 +732,7 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: {
-        value: lButton("top").pressed
+        value: lButton("primary").pressed
       },
       dest: {
         value: leftBoost
@@ -739,7 +741,7 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: {
-        value: rButton("top").pressed
+        value: rButton("primary").pressed
       },
       dest: {
         value: rightBoost
@@ -772,7 +774,12 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.copy
     },
     {
-      src: [lButton("top").pressed, lButton("trigger").pressed, lButton("grip").pressed, lButton("touchpad").pressed],
+      src: [
+        lButton("primary").pressed,
+        lButton("trigger").pressed,
+        lButton("grip").pressed,
+        lButton("touchpad").pressed
+      ],
       dest: { value: wakeLeft },
       xform: xforms.any
     },
@@ -782,7 +789,12 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.rising
     },
     {
-      src: [rButton("top").pressed, rButton("trigger").pressed, rButton("grip").pressed, rButton("touchpad").pressed],
+      src: [
+        rButton("primary").pressed,
+        rButton("trigger").pressed,
+        rButton("grip").pressed,
+        rButton("touchpad").pressed
+      ],
       dest: { value: wakeRight },
       xform: xforms.any
     },
@@ -1024,13 +1036,18 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.touch_axis_scroll(0.05)
     },
     {
-      src: { value: rButton("top").pressed },
+      src: [rButton("primary").pressed, lButton("secondary").pressed],
+      dest: { value: leftUndoDrawing },
+      xform: xforms.any
+    },
+    {
+      src: { value: leftUndoDrawing },
       dest: { value: paths.actions.leftHand.undoDrawing },
       xform: xforms.rising,
       priority: 2
     },
     {
-      src: { value: lButton("top").pressed },
+      src: { value: lButton("primary").pressed },
       dest: { value: paths.actions.leftHand.switchDrawMode },
       xform: xforms.rising,
       priority: 2
@@ -1243,7 +1260,7 @@ export const viveUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: { value: rButton("top").pressed },
+      src: { value: rButton("primary").pressed },
       dest: { value: paths.actions.cursor.right.undoDrawing },
       xform: xforms.rising,
       priority: 2
@@ -1322,7 +1339,7 @@ export const viveUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: { value: lButton("top").pressed },
+      src: { value: lButton("primary").pressed },
       dest: { value: paths.actions.cursor.left.undoDrawing },
       xform: xforms.rising,
       priority: 2
@@ -1415,13 +1432,18 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.touch_axis_scroll(0.05)
     },
     {
-      src: { value: lButton("top").pressed },
+      src: [lButton("primary").pressed, rButton("secondary").pressed],
+      dest: { value: rightUndoDrawing },
+      xform: xforms.any
+    },
+    {
+      src: { value: rightUndoDrawing },
       dest: { value: paths.actions.rightHand.undoDrawing },
       xform: xforms.rising,
       priority: 2
     },
     {
-      src: { value: rButton("top").pressed },
+      src: { value: rButton("primary").pressed },
       dest: { value: paths.actions.rightHand.switchDrawMode },
       xform: xforms.rising,
       priority: 2
