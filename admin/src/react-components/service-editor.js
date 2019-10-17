@@ -11,7 +11,6 @@ import {
   getConfigValue,
   setConfigValue,
   getServiceDisplayName,
-  getSchemas,
   isDescriptor,
   putConfig
 } from "../utils/ita";
@@ -25,8 +24,6 @@ const styles = () => ({
     margin: "10px 10px 0 0"
   }
 });
-
-const schemas = getSchemas();
 
 function getDescriptors(schema) {
   const descriptors = [];
@@ -51,7 +48,7 @@ class ConfigurationEditor extends Component {
   };
 
   componentDidMount() {
-    schemas.then(schemas => this.setState({ schema: schemas[this.props.service] }));
+    this.setState({ schema: this.props.schemas[this.props.service] });
     getConfig(this.props.service).then(config => this.setState({ config: config }));
   }
 
