@@ -410,7 +410,9 @@ class MediaBrowser extends Component {
                   </a>
                 ))}
               {activeFilter === "similar" && (
-                <a className={classNames(styles.facet, "selected")}>Similar to: "{searchParams.get("similar_name")}"</a>
+                <a className={classNames(styles.facet, "selected")}>
+                  Similar to: &quote;{searchParams.get("similar_name")}&quote;
+                </a>
               )}
             </div>
           )}
