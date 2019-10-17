@@ -1,5 +1,5 @@
+import "./utils/configs";
 import "@babel/polyfill";
-import configs from "./utils/configs";
 import "./utils/debug-log";
 
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);

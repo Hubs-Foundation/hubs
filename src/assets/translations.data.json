@@ -146,6 +146,7 @@
     "media-browser.create-scene": "Create Scene with Spoke",
     "media-browser.hub.joined-prefix": "Joined ",
     "media-browser.hub.joined-prefix": "Visited ",
+    "media-browser.similar-to-facet": "Similar to: \"{name}\"",
     "audio.title": "Audio Setup",
     "audio.talk_to_test": "talk",
     "audio.click_to_test": "click",
