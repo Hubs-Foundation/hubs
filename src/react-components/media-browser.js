@@ -129,6 +129,7 @@ class MediaBrowser extends Component {
     const urlSource = this.getUrlSource(searchParams);
     newState.showNav = !!(searchParams.get("media_nav") !== "false");
     newState.selectAction = searchParams.get("selectAction") || "spawn";
+    newState.query = searchParams.get("q") || "";
 
     if (result && result.suggestions && result.suggestions.length > 0) {
       newState.facets = result.suggestions.map(s => {
