@@ -36,6 +36,7 @@ const touchCharacterAcceleration = v("left/touch/characterAcceleration");
 const lCharacterAcceleration = v("left/characterAcceleration");
 const characterAcceleration = v("nonNormalizedCharacterAcceleration");
 const leftBoost = v("left/boost");
+const leftUndoDrawing = v("left/drawing/undo");
 
 const rButton = paths.device.vive.right.button;
 const rAxis = paths.device.vive.right.axis;
@@ -65,6 +66,7 @@ const leftCursorDrop2 = v("left/cursorDrop2");
 const rTriggerStopTeleport = v("right/trigger/stopTeleport");
 const rTouchpadStopTeleport = v("right/touchpad/stopTeleport");
 const rootForFrozenOverrideWhenHolding = "rootForFrozenOverrideWhenHolding";
+const rightUndoDrawing = v("right/drawing/undo");
 
 const ensureFrozenViaDpad = v("dpad/ensureFrozen");
 const ensureFrozenViaKeyboard = v("keyboard/ensureFrozen");
@@ -1034,7 +1036,12 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.touch_axis_scroll(0.05)
     },
     {
-      src: { value: rButton("primary").pressed },
+      src: [rButton("primary").pressed, lButton("secondary").pressed],
+      dest: { value: leftUndoDrawing },
+      xform: xforms.any
+    },
+    {
+      src: { value: leftUndoDrawing },
       dest: { value: paths.actions.leftHand.undoDrawing },
       xform: xforms.rising,
       priority: 2
@@ -1425,7 +1432,12 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.touch_axis_scroll(0.05)
     },
     {
-      src: { value: lButton("primary").pressed },
+      src: [lButton("primary").pressed, rButton("secondary").pressed],
+      dest: { value: rightUndoDrawing },
+      xform: xforms.any
+    },
+    {
+      src: { value: rightUndoDrawing },
       dest: { value: paths.actions.rightHand.undoDrawing },
       xform: xforms.rising,
       priority: 2
@@ -1538,22 +1550,6 @@ export const indexUserBindings = addSetsToBindings({
       },
       dest: { value: lTouchY },
       xform: xforms.copy
-    }
-  ],
-  [sets.rightHandHoldingPen]: [
-    {
-      src: { value: rButton("secondary").pressed },
-      dest: { value: paths.actions.rightHand.undoDrawing },
-      xform: xforms.rising,
-      priority: 2
-    }
-  ],
-  [sets.leftHandHoldingPen]: [
-    {
-      src: { value: lButton("secondary").pressed },
-      dest: { value: paths.actions.leftHand.undoDrawing },
-      xform: xforms.rising,
-      priority: 2
     }
   ]
 });
