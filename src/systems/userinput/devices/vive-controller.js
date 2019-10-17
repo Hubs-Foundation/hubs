@@ -19,14 +19,13 @@ export class ViveControllerDevice {
 
     if (this.gamepad.id === "OpenVR Cosmos") {
       RAY_ROTATION.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 12);
-      //TODO: verify this button order
       this.buttonMap = [
         { name: "trigger", buttonId: 0 },
         { name: "grip", buttonId: 1 },
-        { name: "bumper", buttonId: 2 },
-        { name: "primary", buttonId: 3 },
-        { name: "secondary", buttonId: 4 },
-        { name: "joystick", buttonId: 5 }
+        { name: "primary", buttonId: 2 },
+        { name: "secondary", buttonId: 3 },
+        { name: "joystick", buttonId: 4 },
+        { name: "bumper", buttonId: 5 }
       ];
     } else if (this.gamepad.id === "HTC Vive Focus Plus Controller") {
       RAY_ROTATION.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 15);
