@@ -70,9 +70,13 @@ const rightUndoDrawing = v("right/drawing/undo");
 
 const ensureFrozenViaDpad = v("dpad/ensureFrozen");
 const ensureFrozenViaKeyboard = v("keyboard/ensureFrozen");
+const ensureFrozenViaButtons = v("buttons/ensureFrozen");
 
 const thawViaDpad = v("dpad/thaw");
 const thawViaKeyboard = v("keyboard/thaw");
+const thawViaButtons = v("buttons/thaw");
+
+const freezeButtons = v("buttons/freeze");
 
 const rSnapRight1 = v("right/snap-right");
 const rSnapLeft1 = v("right/snap-left");
@@ -124,12 +128,12 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.copy
     },
     {
-      src: [ensureFrozenViaDpad, ensureFrozenViaKeyboard],
+      src: [ensureFrozenViaDpad, ensureFrozenViaKeyboard, ensureFrozenViaButtons],
       dest: { value: paths.actions.ensureFrozen },
       xform: xforms.any
     },
     {
-      src: [thawViaDpad, thawViaKeyboard],
+      src: [thawViaDpad, thawViaKeyboard, thawViaButtons],
       dest: { value: paths.actions.thaw },
       xform: xforms.any
     },
@@ -802,6 +806,26 @@ export const viveUserBindings = addSetsToBindings({
       src: { value: wakeRight },
       dest: { value: paths.actions.cursor.right.wake },
       xform: xforms.rising
+    },
+    {
+      src: [
+        rButton("secondary").pressed,
+        lButton("secondary").pressed,
+        rButton("bumper").pressed,
+        lButton("bumper").pressed
+      ],
+      dest: { value: freezeButtons },
+      xform: xforms.any
+    },
+    {
+      src: { value: freezeButtons },
+      dest: { value: ensureFrozenViaButtons },
+      xform: xforms.copy
+    },
+    {
+      src: { value: freezeButtons },
+      dest: { value: thawViaButtons },
+      xform: xforms.falling
     }
   ],
   [sets.rightHandTeleporting]: [
