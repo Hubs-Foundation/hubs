@@ -13,9 +13,11 @@ const wakeRight = `${name}right/wake`;
 const lButton = paths.device.vive.left.button;
 const lAxis = paths.device.vive.left.axis;
 const lPose = paths.device.vive.left.pose;
+const lJoy = v("left/joy");
 const lJoyScaled = v("left/joy/scaled");
 const lJoyXScaled = v("left/joyX/scaled");
 const lJoyYScaled = v("left/joyY/scaled");
+const lJoyYDeadzoned = v("left/joyY/deadzoned");
 const lTouch = v("left/touch");
 const lTouchScaled = v("left/touch/scaled");
 const lTouchXScaled = v("left/touchX/scaled");
@@ -26,6 +28,11 @@ const lDpadSouth1 = v("left/dpad/south1");
 const lDpadEast1 = v("left/dpad/east1");
 const lDpadWest1 = v("left/dpad/west1");
 const lDpadCenter1 = v("left/dpad/center1");
+const lDpadNorth2 = v("left/dpad/north2");
+const lDpadSouth2 = v("left/dpad/south2");
+const lDpadEast2 = v("left/dpad/east2");
+const lDpadWest2 = v("left/dpad/west2");
+const lDpadCenter2 = v("left/dpad/center2");
 const lTriggerFallingStopDrawing = v("left/trigger/falling/stopDrawing");
 const lGripFallingStopDrawing = v("left/grip/falling/stopDrawing");
 const lTriggerRisingGrab = v("left/trigger/rising/grab");
@@ -43,6 +50,7 @@ const rAxis = paths.device.vive.right.axis;
 const rPose = paths.device.vive.right.pose;
 const rTouch = v("right/touch");
 const rJoy = v("right/joy");
+const rJoyYDeadzoned = v("right/joyY/deadzoned");
 const rDpadNorth1 = v("right/dpad/north1");
 const rDpadSouth1 = v("right/dpad/south1");
 const rDpadEast1 = v("right/dpad/east1");
@@ -1602,6 +1610,119 @@ export const viveFocusPlusUserBindings = addSetsToBindings({
       dest: { value: paths.actions.rightHand.drop },
       xform: xforms.rising,
       priority: 2
+    }
+  ]
+});
+
+export const viveCosmosUserBindings = addSetsToBindings({
+  [sets.global]: [
+    {
+      src: {
+        value: lAxis("touchY")
+      },
+      dest: { value: lTouchY },
+      xform: xforms.copy
+    }
+  ],
+  [sets.leftHandHoldingPen]: [
+    {
+      src: {
+        x: lAxis("joyX"),
+        y: lAxis("joyY")
+      },
+      dest: {
+        value: lJoy
+      },
+      xform: xforms.compose_vec2,
+      priority: 1
+    },
+    {
+      src: {
+        value: lJoy
+      },
+      dest: {
+        north: lDpadNorth2,
+        south: lDpadSouth2,
+        east: lDpadEast2,
+        west: lDpadWest2,
+        center: lDpadCenter2
+      },
+      xform: xforms.vec2dpad(0.35, false, true)
+    },
+    {
+      src: { value: leftGripPressed2 },
+      dest: { value: paths.actions.leftHand.drop },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: {
+        value: lDpadEast2,
+        override: "/device/overrides/foo"
+      },
+      dest: { value: paths.actions.leftHand.penNextColor },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: {
+        value: lDpadWest2,
+        override: "/device/overrides/foo"
+      },
+      dest: { value: paths.actions.leftHand.penPrevColor },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: {
+        value: lAxis("joyY")
+      },
+      dest: {
+        value: lJoyYDeadzoned
+      },
+      xform: xforms.deadzone(0.1),
+      priority: 1
+    },
+    {
+      src: { value: lJoyYDeadzoned },
+      dest: { value: paths.actions.leftHand.scalePenTip },
+      xform: xforms.scaleExp(-0.005, 5),
+      priority: 1
+    }
+  ],
+  [sets.rightHandHoldingPen]: [
+    {
+      src: { value: rightGripPressed2 },
+      dest: { value: paths.actions.rightHand.drop },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: { value: rDpadEast2 },
+      dest: { value: paths.actions.rightHand.penNextColor },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: { value: rDpadWest2 },
+      dest: { value: paths.actions.rightHand.penPrevColor },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: {
+        value: rAxis("joyY")
+      },
+      dest: {
+        value: rJoyYDeadzoned
+      },
+      xform: xforms.deadzone(0.1)
+    },
+    {
+      src: { value: rJoyYDeadzoned },
+      dest: { value: paths.actions.rightHand.scalePenTip },
+      xform: xforms.scaleExp(-0.005, 5),
+      priority: 1
     }
   ]
 });
