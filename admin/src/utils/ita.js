@@ -14,7 +14,7 @@ function getServiceDisplayName(service) {
 }
 
 function getEndpoint(path) {
-  return `${process.env.ITA_SERVER}/${path}`;
+  return `${process.env.ITA_SERVER}/api/ita/${path}`;
 }
 
 function getSchemas() {
