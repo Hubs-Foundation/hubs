@@ -8,10 +8,11 @@ import { faSquare } from "@fortawesome/free-solid-svg-icons/faSquare";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
-
+import { SOUND_PREFERENCE_MENU_HOVER, SOUND_PREFERENCE_MENU_SELECT } from "../systems/sound-effects-system";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import { lang, messages } from "../utils/i18n";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 addLocaleData([...en]);
 
 const messageIdForOption = {
@@ -19,11 +20,62 @@ const messageIdForOption = {
   smooth: "preferences.turningModeSmooth"
 };
 
+class NumberRangeSelector extends Component {
+  static propTypes = {
+    min: PropTypes.number,
+    max: PropTypes.number,
+    curr: PropTypes.number,
+    onSelect: PropTypes.func,
+    playHoverSound: PropTypes.func
+  };
+  state = {
+    displayCurr: 0
+  };
+  render() {
+    return (
+      <div className={classNames(styles.numberWithRange)}>
+        <div className={classNames(styles.rangeSlider)}>
+          <input
+            type="range"
+            min={this.props.min}
+            max={this.props.max}
+            value={this.props.curr}
+            onChange={e => {
+              this.props.onSelect(e.target.value);
+            }}
+            onMouseEnter={() => {
+              this.props.playHoverSound && this.props.playHoverSound();
+            }}
+            onMouseUp={() => {
+              this.props.onSelect(this.props.curr, true);
+            }}
+            onMouseDown={() => {
+              this.props.onSelect(this.props.curr, true);
+            }}
+          />
+        </div>
+        <input
+          type="text"
+          value={this.props.curr}
+          onChange={e => {
+            const num = parseInt(e.target.value);
+            this.props.onSelect(num ? num : 0, true);
+          }}
+          onMouseEnter={() => {
+            this.props.playHoverSound && this.props.playHoverSound();
+          }}
+        />
+      </div>
+    );
+  }
+}
+
 class FlipSelector extends Component {
   static propTypes = {
     options: PropTypes.array,
     onSelect: PropTypes.func,
-    currOption: PropTypes.number
+    currOption: PropTypes.number,
+    playHoverSound: PropTypes.func
   };
   state = {
     nextOptionHovered: false,
@@ -31,12 +83,14 @@ class FlipSelector extends Component {
   };
   onMouseOverNextOption = () => {
     this.setState({ nextOptionHovered: true });
+    this.props.playHoverSound && this.props.playHoverSound();
   };
   onMouseOutNextOption = () => {
     this.setState({ nextOptionHovered: false });
   };
   onMouseOverPrevOption = () => {
     this.setState({ prevOptionHovered: true });
+    this.props.playHoverSound && this.props.playHoverSound();
   };
   onMouseOutPrevOption = () => {
     this.setState({ prevOptionHovered: false });
@@ -46,11 +100,12 @@ class FlipSelector extends Component {
       <div className={classNames(styles.rowSelectionArea)}>
         <div className={classNames(styles.flipSelector)}>
           <FontAwesomeIcon
-            onMouseOver={this.onMouseOverPrevOption}
-            onMouseOut={this.onMouseOutPrevOption}
+            onMouseEnter={this.onMouseOverPrevOption}
+            onMouseLeave={this.onMouseOutPrevOption}
             onClick={() => {
               const currOption = (this.props.currOption + this.props.options.length - 1) % this.props.options.length;
               this.props.onSelect(this.props.options[currOption], currOption);
+              this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
             }}
             className={classNames(
               this.state.prevOptionHovered ? styles.prevOptionHoveredScale : styles.prevOptionScale
@@ -59,8 +114,8 @@ class FlipSelector extends Component {
           />
           <FormattedMessage id={messageIdForOption[this.props.options[this.props.currOption]]} />
           <FontAwesomeIcon
-            onMouseOver={this.onMouseOverNextOption}
-            onMouseOut={this.onMouseOutNextOption}
+            onMouseEnter={this.onMouseOverNextOption}
+            onMouseLeave={this.onMouseOutNextOption}
             onClick={() => {
               const currOption = (this.props.currOption + 1) % this.props.options.length;
               this.props.onSelect(this.props.options[currOption], currOption);
@@ -79,13 +134,15 @@ class FlipSelector extends Component {
 class CheckBox extends Component {
   static propTypes = {
     checked: PropTypes.bool,
-    onCheck: PropTypes.func
+    onCheck: PropTypes.func,
+    playHoverSound: PropTypes.func
   };
   state = {
     checkBoxHovered: false
   };
   onMouseOverCheckBox = () => {
     this.setState({ checkBoxHovered: true });
+    this.props.playHoverSound && this.props.playHoverSound();
   };
   onMouseOutCheckBox = () => {
     this.setState({ checkBoxHovered: false });
@@ -94,8 +151,8 @@ class CheckBox extends Component {
     return (
       <i className={classNames(styles.rowSelectionArea)} onClick={() => this.props.onCheck()}>
         <FontAwesomeIcon
-          onMouseOver={this.onMouseOverCheckBox}
-          onMouseOut={this.onMouseOutCheckBox}
+          onMouseEnter={this.onMouseOverCheckBox}
+          onMouseLeave={this.onMouseOutCheckBox}
           className={classNames(this.state.checkBoxHovered ? styles.checkBoxScaleHover : styles.checkBoxScale)}
           icon={this.props.checked ? faCheckSquare : faSquare}
         />
@@ -148,8 +205,8 @@ class PreferenceRow extends Component {
     return (
       <div
         className={classNames(styles.row, this.state.hovered ? styles.rowScaleHover : styles.rowScale)}
-        onMouseOver={this.onMouseOver}
-        onMouseOut={this.onMouseOut}
+        onMouseEnter={this.onMouseOver}
+        onMouseLeave={this.onMouseOut}
       >
         {this.props.children}
       </div>
@@ -166,13 +223,18 @@ export default class PreferencesScreen extends Component {
   };
   state = {
     muteMicOnEntry: false,
-    turningModeCurrOption: 0
+    turningModeCurrOption: 0,
+    turnSnapDegree: 45
   };
   componentDidMount() {
     const prefs = this.props.store.state.preferences;
     this.setState({
       muteMicOnEntry: !!prefs.muteMicOnEntry,
-      turningModeCurrOption: prefs.turningMode ? TURNING_MODE_OPTIONS.indexOf(prefs.turningMode) : 0
+      turningModeCurrOption: prefs.turningMode ? TURNING_MODE_OPTIONS.indexOf(prefs.turningMode) : 0,
+      turnSnapDegree: prefs.turnSnapDegree ? prefs.turnSnapDegree : 45
+    });
+    waitForDOMContentLoaded().then(() => {
+      this.sfx = AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem;
     });
   }
 
@@ -184,6 +246,10 @@ export default class PreferencesScreen extends Component {
           onSelect={(selection, currOption) => {
             this.props.store.update({ preferences: { turningMode: selection } });
             this.setState({ turningModeCurrOption: currOption });
+            this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
+          }}
+          playHoverSound={() => {
+            this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_HOVER);
           }}
           currOption={this.state.turningModeCurrOption}
           options={TURNING_MODE_OPTIONS}
@@ -200,13 +266,38 @@ export default class PreferencesScreen extends Component {
               preferences: { muteMicOnEntry }
             });
             this.setState({ muteMicOnEntry });
+            this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
           }}
           checked={this.state.muteMicOnEntry}
+          playHoverSound={() => {
+            this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_HOVER);
+          }}
+        />
+      </PreferenceRow>
+    );
+    const turnSnapDegree = (
+      <PreferenceRow key="preferences.turnSnapDegree">
+        <PreferenceRowName id="preferences.turnSnapDegree" />
+        <NumberRangeSelector
+          min={1}
+          max={90}
+          curr={this.state.turnSnapDegree}
+          onSelect={(value, playSound) => {
+            const turnSnapDegree = parseInt(value);
+            this.props.store.update({
+              preferences: { turnSnapDegree }
+            });
+            this.setState({ turnSnapDegree });
+            playSound && this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
+          }}
+          playHoverSound={() => {
+            this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_HOVER);
+          }}
         />
       </PreferenceRow>
     );
     // TODO: Sort rows by fuzzy search
-    const rows = [snapTurnRow, userPrefRow];
+    const rows = [snapTurnRow, userPrefRow, turnSnapDegree];
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={classNames(styles.root)}>

@@ -258,7 +258,7 @@
     "preferences.turningMode": "Turning Mode",
     "preferences.turningModeSnap": "Snap",
     "preferences.turningModeSmooth": "Smooth",
-    "preferences.snapTurnDegrees": "Degrees turned per snap",
+    "preferences.turnSnapDegree": "Degrees turned per snap",
     "preferences.smoothTurnSpeed": "Turn speed",
     "preferences.touchscreenMovementScheme": "Touchscreen Movement Control Scheme",
     "preferences.touchscreenJoysticks": "On-Screen Joysticks",
