@@ -6,7 +6,7 @@
   width: 100%;
   display: flex;
   flex-flow: column;
-  background: $light-blue;
+  background: $light-grey;
   align-items: center;
 
   p {
@@ -18,14 +18,17 @@
   top: 1em;
   right: 1em;
   position: absolute;
-  background: $action-color-light;
   transform: scale(2);
+  cursor: pointer;
+  color: black;
+  &:hover{
+    color: $action-color;
+  }
 }
 :local(.row) {
   width: 80%;
   display: flex;
   flex-flow: row;
-  background: $bright-blue;
 }
 :local(.rowScale) {
   p {
@@ -44,11 +47,9 @@
 :local(.rowName) {
   width: 80%;
   text-align: end;
-  background: $twitter-action-color;
   margin-inline-end: 1em;
 }
 :local(.rowNameHover) {
-  background: $action-color;
 }
 :local(.rowSelectionArea) {
   width: 20%;
@@ -56,8 +57,11 @@
   flex-flow: row;
   align-items: center;
   justify-content: space-around;
-  background: $discord-action-color;
   text-align: center;
+
+  svg {
+    cursor: pointer;
+  }
 }
 
 :local(.flipSelector){
@@ -66,10 +70,10 @@
   flex-flow: row;
   justify-content: space-between;
   align-items: center;
-  background: $duck-yellow;
 
   svg {
     width: 30% !important;
+    cursor: pointer;
   }
   span {
     width: 40% !important;
@@ -101,18 +105,20 @@
   display: flex;
   flex-flow: row;
   width: 20%;
+  justify-content: space-between;
+  align-items: center;
 
   input[type=text] {
     width: 20%;
     text-align: center;
     font-size: x-large;
     font-weight: bold;
-    background: $darkest-grey;
+    background: $dark-grey;
     color: white;
   }
 }
 :local(.rangeSlider) {
-  width: 80%;
+  width: 70%;
 }
 
 input[type=range] {
