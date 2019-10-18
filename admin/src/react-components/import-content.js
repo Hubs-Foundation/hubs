@@ -201,7 +201,7 @@ class ImportContentComponent extends Component {
       <Card className={this.props.classes.container}>
         <Title title="Import Content" />
         <CardContent className={this.props.classes.info}>
-          <Typography component="h3" variant="h6" gutterBottom>
+          <Typography variant="headline" gutterBottom>
             Enter the URL to an avatar or scene on another Hubs site such as{" "}
             <a href="https://hubs.mozilla.com" target="_blank" rel="noopener noreferrer">
               hubs.mozilla.com

@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const serverSetupRoute = (
     <Route
       path="/server-setup"
-      render={props => <ServiceEditor {...props} schemas={itaSchemas} categories={schemaCategories} />}
+      render={props => <ServiceEditor {...props} schema={itaSchemas} categories={schemaCategories} />}
     />
   );
 

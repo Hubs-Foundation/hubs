@@ -28,9 +28,9 @@ function getCategoryDescription(category) {
     case "api_keys":
       return "API keys for 3rd party services, used in media search and telemetry.";
     case "content":
-      return "User contributed content settings.";
+      return "User-contributed content settings.";
     case "email":
-      return "Custom SMTP email provider settings. Leave as-is to use AWS Simple Email Service on your Email Zone.";
+      return "Custom SMTP email provider settings. Leave blank to use AWS Simple Email Service on your Email Zone.";
     case "advanced":
       return "Advanced Settings for those who know what they're doing.";
     default:
@@ -63,6 +63,7 @@ function fetchWithAuth(req) {
   const options = {};
   options.headers = new Headers();
   options.headers.set("Authorization", `Bearer ${currentAuthToken}`);
+  options.headers.set("Content-Type", "application/json");
   return fetch(req, options);
 }
 
@@ -76,7 +77,7 @@ function getConfig(service) {
 
 function putConfig(service, config) {
   const req = new Request(getEndpoint(`configs/${service}`), {
-    method: "POST",
+    method: "PATCH",
     body: JSON.stringify(config)
   });
   return fetchWithAuth(req).then(resp => resp.json());
@@ -128,41 +129,25 @@ const schemaByCategories = schema => {
   for (const cat of schemaCategories) {
     o[cat] = JSON.parse(JSON.stringify(schema)); // Cheap copy
 
-    // Walk the schema copy, removing any elements not in the category
-    for (const svc in o[cat]) {
-      for (const f in o[cat][svc]) {
-        for (const g in o[cat][svc][f]) {
-          const v = o[cat][svc][f][g];
-          if (isDescriptor(v)) {
-            if (v.category !== cat) {
-              delete o[cat][svc][f][g];
+    // Remove nodes not belonging to category and clear empties
+    const walk = n => {
+      for (const x in n) {
+        const v = n[x];
+        if (isDescriptor(v)) {
+          if (v.category !== cat) {
+            delete n[x];
+          }
+        } else {
+          walk(v);
 
-              if (Object.keys(o[cat][svc][f]).length === 0) {
-                delete o[cat][svc][f];
-              }
-            }
-          } else {
-            for (const h in v) {
-              if (v[h].category !== cat) {
-                delete v[h];
-
-                if (Object.keys(o[cat][svc][f][g]).length === 0) {
-                  delete o[cat][svc][f][g];
-                }
-
-                if (Object.keys(o[cat][svc][f]).length === 0) {
-                  delete o[cat][svc][f];
-                }
-              }
-            }
+          if (Object.keys(n[x]).length === 0) {
+            delete n[x];
           }
         }
       }
+    };
 
-      if (Object.keys(o[cat][svc]).length === 0) {
-        delete o[cat][svc];
-      }
-    }
+    walk(o[cat]);
   }
 
   return o;
