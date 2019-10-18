@@ -1070,13 +1070,13 @@ export const viveUserBindings = addSetsToBindings({
     {
       src: [rButton("primary").pressed, lButton("secondary").pressed],
       dest: { value: leftUndoDrawing },
-      xform: xforms.any
+      xform: xforms.any,
+      priority: 1
     },
     {
       src: { value: leftUndoDrawing },
       dest: { value: paths.actions.leftHand.undoDrawing },
-      xform: xforms.rising,
-      priority: 2
+      xform: xforms.rising
     },
     {
       src: { value: lButton("primary").pressed },
@@ -1466,13 +1466,13 @@ export const viveUserBindings = addSetsToBindings({
     {
       src: [lButton("primary").pressed, rButton("secondary").pressed],
       dest: { value: rightUndoDrawing },
-      xform: xforms.any
+      xform: xforms.any,
+      priority: 1
     },
     {
       src: { value: rightUndoDrawing },
       dest: { value: paths.actions.rightHand.undoDrawing },
-      xform: xforms.rising,
-      priority: 2
+      xform: xforms.rising
     },
     {
       src: { value: rButton("primary").pressed },
