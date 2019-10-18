@@ -24,7 +24,8 @@ import {
   viveUserBindings,
   viveWandUserBindings,
   indexUserBindings,
-  viveFocusPlusUserBindings
+  viveFocusPlusUserBindings,
+  viveCosmosUserBindings
 } from "./bindings/vive-user";
 import { wmrUserBindings } from "./bindings/windows-mixed-reality-user";
 import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
@@ -281,7 +282,10 @@ AFRAME.registerSystem("userinput", {
           mapping && this.registeredMappings.add(mapping);
 
           if (activeDevice instanceof ViveControllerDevice && activeDevice.gamepad) {
-            if (activeDevice.gamepad.id === "HTC Vive Focus Plus Controller") {
+            if (activeDevice.gamepad.id === "OpenVR Cosmos") {
+              //HTC Vive Cosmos Controller
+              this.registeredMappings.add(viveCosmosUserBindings);
+            } else if (activeDevice.gamepad.id === "HTC Vive Focus Plus Controller") {
               //HTC Vive Focus Plus Controller
               this.registeredMappings.add(viveFocusPlusUserBindings);
             } else if (activeDevice.gamepad.axes.length === 4) {
