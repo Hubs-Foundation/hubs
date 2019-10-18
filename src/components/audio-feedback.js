@@ -1,4 +1,5 @@
 import { findAncestorWithComponent } from "../utils/scene-graph";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 // This computation is expensive, so we run on at most one avatar per frame, including quiet avatars.
 // However if we detect an avatar is seen speaking (its volume is above DISABLE_AT_VOLUME_THRESHOLD)
@@ -164,7 +165,8 @@ AFRAME.registerComponent("scale-audio-feedback", {
     maxScale: { default: 1.5 }
   },
 
-  init() {
+  async init() {
+    await waitForDOMContentLoaded();
     this.camera = document.getElementById("viewing-camera").object3D;
   },
 
@@ -172,7 +174,7 @@ AFRAME.registerComponent("scale-audio-feedback", {
     // TODO: come up with a cleaner way to handle this.
     // bone's are "hidden" by scaling them with bone-visibility, without this we would overwrite that.
     if (!this.el.object3D.visible) return;
-
+    if (!this.camera) return;
     if (!this.analyser) this.analyser = getAnalyser(this.el);
 
     const { minScale, maxScale } = this.data;

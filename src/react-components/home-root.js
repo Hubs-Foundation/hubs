@@ -1,3 +1,4 @@
+import configs from "../utils/configs";
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
@@ -347,7 +348,7 @@ class HomeRoot extends Component {
         className={classNames(styles.primaryButton, styles.ctaButton)}
         onClick={e => {
           e.preventDefault();
-          createAndRedirectToNewHub(null, process.env.DEFAULT_SCENE_SID, false);
+          createAndRedirectToNewHub(null, configs.DEFAULT_SCENE_SID, false);
         }}
       >
         <FormattedMessage id="home.create_a_room" />

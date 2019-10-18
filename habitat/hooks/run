@@ -10,25 +10,28 @@ rm -rf $TEMP_DIST_PATH
 mkdir -p $TEMP_DIST_PATH
 cp -R {{ pkg.path }}/dist/* $TEMP_DIST_PATH
 
-# Every config available to this package will be injected into the text assets if the asset
-# had the correct sha256sum as per the plan.sh build settings
+# Replace base assets path in static references
+find $TEMP_DIST_PATH -type f -name *.html -exec sed -i "s/$(echo "base_assets_path" | sha256sum | cut -d' ' -f1)\//{{ strReplace cfg.general.base_assets_path "/" "\\/" }}/g" {} \;
+find $TEMP_DIST_PATH -type f -name *.css -exec sed -i "s/$(echo "base_assets_path" | sha256sum | cut -d' ' -f1)\//{{ strReplace cfg.general.base_assets_path "/" "\\/" }}/g" {} \;
+
+# Inject window.env by splitting file on expected BUILD_CONFIGS line
+cd $TEMP_DIST_PATH/pages
+
+for f in *.html
+do
+  csplit $f /META_TAGS/ > /dev/null
+  cat xx00 > $f
 
 {{#each cfg.general ~}}
-
-# HACK, need to special case base asset path in pages because of weirdness with trailing slash -- webpack
-# seems to gracefully handle the extra trailing slash when injected at build time on HTML tags.
-if [[ "{{ @key }}" == "base_assets_path" ]] ;
-then
-  find $TEMP_DIST_PATH -type f -name *.html -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)\//{{ strReplace this "/" "\\/" }}/g" {} \;
-  find $TEMP_DIST_PATH -type f -name *.css -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)\//{{ strReplace this "/" "\\/" }}/g" {} \;
-  find $TEMP_DIST_PATH -type f -name *.js -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)\//{{ strReplace this "/" "\\/" }}/g" {} \;
-else
-  find $TEMP_DIST_PATH -type f -name *.html -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)/{{ strReplace this "/" "\\/" }}/g" {} \;
-  find $TEMP_DIST_PATH -type f -name *.css -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)/{{ strReplace this "/" "\\/" }}/g" {} \;
-  find $TEMP_DIST_PATH -type f -name *.js -exec sed -i "s/$(echo "{{ @key }}" | sha256sum | cut -d' ' -f1)/{{ strReplace this "/" "\\/" }}/g" {} \;
-fi
-
+  echo "<meta name=\"env:{{ @key }}\" content=\"{{ this }}\"/>" >> $f
 {{/each}}
+
+  cat xx01 >> $f
+  rm xx00
+  rm xx01
+done
+
+cd -
 
 # need to upload wasm blobs with wasm content type explicitly because, unlike all
 # other assets, AWS's built-in MIME type dictionary doesn't know about that one

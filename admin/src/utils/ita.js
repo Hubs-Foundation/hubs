@@ -1,4 +1,6 @@
-const serviceNames = process.env.CONFIGURABLE_SERVICES.split(",");
+import configs from "./configs";
+
+const serviceNames = configs.CONFIGURABLE_SERVICES.split(",");
 
 function getServiceDisplayName(service) {
   switch (service) {
@@ -14,7 +16,7 @@ function getServiceDisplayName(service) {
 }
 
 function getEndpoint(path) {
-  return `${process.env.ITA_SERVER}/api/ita/${path}`;
+  return `${configs.ITA_SERVER}/${path}`;
 }
 
 function getSchemas() {

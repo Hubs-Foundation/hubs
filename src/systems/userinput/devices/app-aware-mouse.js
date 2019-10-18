@@ -33,16 +33,24 @@ export class AppAwareMouseDevice {
     this.prevDirection.copy(this.prevDirection);
 
     if (!this.cursorController) {
-      this.cursorController = document.getElementById("right-cursor-controller").components["cursor-controller"];
+      const rightCursorController = document.getElementById("right-cursor-controller");
+
+      if (rightCursorController && rightCursorController.components) {
+        this.cursorController = rightCursorController.components["cursor-controller"];
+      }
     }
 
     if (!this.camera) {
-      this.camera = document.getElementById("viewing-camera").components.camera.camera;
+      const viewingCamera = document.getElementById("viewing-camera");
+
+      if (viewingCamera && viewingCamera.components) {
+        this.camera = viewingCamera.components.camera.camera;
+      }
     }
 
     const buttonLeft = frame.get(paths.device.mouse.buttonLeft);
     const buttonRight = frame.get(paths.device.mouse.buttonRight);
-    if (buttonLeft && !this.prevButtonLeft) {
+    if (buttonLeft && !this.prevButtonLeft && this.cursorController) {
       const rawIntersections = [];
       this.cursorController.raycaster.intersectObjects(
         AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem.targets,
@@ -76,10 +84,12 @@ export class AppAwareMouseDevice {
       frame.setValueType(paths.device.smartMouse.shouldMoveCamera, true);
     }
 
-    const coords = frame.get(paths.device.mouse.coords);
-    frame.setPose(
-      paths.device.smartMouse.cursorPose,
-      calculateCursorPose(this.camera, coords, this.origin, this.direction, this.cursorPose)
-    );
+    if (this.camera) {
+      const coords = frame.get(paths.device.mouse.coords);
+      frame.setPose(
+        paths.device.smartMouse.cursorPose,
+        calculateCursorPose(this.camera, coords, this.origin, this.direction, this.cursorPose)
+      );
+    }
   }
 }

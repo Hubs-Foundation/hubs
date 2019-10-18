@@ -50,11 +50,17 @@ export default class DialogContainer extends Component {
 
   render() {
     return (
-      <div className={classNames("dialog-overlay", this.props.className)}>
+      <div
+        className={classNames(
+          "dialog-overlay",
+          this.props.noOverlay ? "dialog-overlay__no-pointer-events" : "",
+          this.props.className
+        )}
+      >
         <div
           className={classNames(
             "dialog",
-            this.props.noOverlay ? "" : "dialog__dark-background",
+            this.props.noOverlay ? "dialog__no-pointer-events" : "dialog__dark-background",
             this.props.noOverlay ? "dialog__align-end" : ""
           )}
           onClick={this.onContainerClicked}

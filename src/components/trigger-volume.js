@@ -32,6 +32,8 @@ AFRAME.registerComponent("trigger-volume", {
     this.boundingBox.setFromCenterAndSize(boundingBoxWorldPositionVec, sizeVec);
   },
   tick() {
+    if (!this.data.target) return;
+
     const colliders = this.data.colliders;
 
     for (let i = 0; i < colliders.length; i++) {

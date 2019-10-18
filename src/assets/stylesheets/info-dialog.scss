@@ -8,7 +8,12 @@
   color: black;
   z-index: 20;
   display: flex;
+
+  &__no-pointer-events {
+    pointer-events: none;
+  }
 }
+
 
 .dialog {
   display: flex;
@@ -102,7 +107,12 @@
   }
 
   &__wide {
-    max-width: 640px;
+    @media(min-width: 640px){
+      max-width: 640px;
+    }
+    @media(max-width: 639px){
+      max-width: 100%;
+    }
   }
 }
 

@@ -11,6 +11,7 @@ import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalL
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
 
 import styles from "../assets/stylesheets/media-browser.scss";
 import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
@@ -32,7 +33,8 @@ class MediaTiles extends Component {
     urlSource: PropTypes.string,
     handleEntryClicked: PropTypes.func,
     handlePager: PropTypes.func,
-    onCopyAvatar: PropTypes.func
+    onCopyAvatar: PropTypes.func,
+    onShowSimilar: PropTypes.func
   };
 
   handleCopyAvatar = async (e, entry) => {
@@ -172,28 +174,36 @@ class MediaTiles extends Component {
         >
           {thumbnailElement}
         </a>
-        {entry.type === "avatar" && (
-          <StateLink
-            className={styles.editAvatar}
-            stateKey="overlay"
-            stateValue="avatar-editor"
-            stateDetail={{ avatarId: entry.id }}
-            history={this.props.history}
-          >
-            <FontAwesomeIcon icon={faPencilAlt} />
-          </StateLink>
-        )}
-        {entry.type === "avatar_listing" &&
-          entry.allow_remixing && (
+        <div className={styles.tileActions}>
+          {entry.type === "avatar" && (
             <StateLink
-              className={styles.editAvatar}
-              onClick={e => this.handleCopyAvatar(e, entry)}
+              stateKey="overlay"
+              stateValue="avatar-editor"
+              stateDetail={{ avatarId: entry.id }}
               history={this.props.history}
-              title="Copy to my avatars"
+              title="Edit"
             >
-              <FontAwesomeIcon icon={faClone} />
+              <FontAwesomeIcon icon={faPencilAlt} />
             </StateLink>
           )}
+          {entry.type === "avatar_listing" && (
+            <a
+              onClick={e => {
+                e.preventDefault();
+                this.props.onShowSimilar(entry.id, entry.name);
+              }}
+              title="Show Similar"
+            >
+              <FontAwesomeIcon icon={faSearch} />
+            </a>
+          )}
+          {entry.type === "avatar_listing" &&
+            entry.allow_remixing && (
+              <a onClick={e => this.handleCopyAvatar(e, entry)} title="Copy to my avatars">
+                <FontAwesomeIcon icon={faClone} />
+              </a>
+            )}
+        </div>
         {!entry.type.endsWith("_image") && (
           <div className={styles.info}>
             <a

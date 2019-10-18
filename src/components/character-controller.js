@@ -166,6 +166,9 @@ AFRAME.registerComponent("character-controller", {
           this.accelerationInput.z + acc[1]
         );
       }
+      if (userinput.get(paths.actions.toggleFly)) {
+        this.el.messageDispatch.dispatch("/fly");
+      }
 
       pivotPos.copy(pivot.position);
       pivotPos.applyMatrix4(root.matrix);

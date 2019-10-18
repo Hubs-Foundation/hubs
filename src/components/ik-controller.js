@@ -1,3 +1,4 @@
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 const { Vector3, Quaternion, Matrix4, Euler } = THREE;
 
 function quaternionAlmostEquals(epsilon, u, v) {
@@ -101,7 +102,9 @@ AFRAME.registerComponent("ik-controller", {
     this.isInView = true;
     this.hasConvergedHips = false;
     this.lastCameraTransform = new THREE.Matrix4();
-    this.playerCamera = document.getElementById("viewing-camera").getObject3D("camera");
+    waitForDOMContentLoaded().then(() => {
+      this.playerCamera = document.getElementById("viewing-camera").getObject3D("camera");
+    });
 
     this.el.sceneEl.systems["frame-scheduler"].schedule(this._runScheduledWork, "ik");
     this.forceIkUpdate = true;
@@ -293,6 +296,8 @@ AFRAME.registerComponent("ik-controller", {
     };
 
     return function() {
+      if (!this.playerCamera) return;
+
       const camera = this.ikRoot.camera.object3D;
       camera.getWorldPosition(cameraWorld);
 

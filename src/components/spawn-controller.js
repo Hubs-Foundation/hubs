@@ -1,4 +1,5 @@
 import { getLastWorldPosition } from "../utils/three-utils";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 /**
  * Used on a avatar-rig to move the avatar to a random spawn point on entry.
@@ -14,7 +15,10 @@ AFRAME.registerComponent("spawn-controller", {
   },
   init() {
     this.moveToSpawnPoint = this.moveToSpawnPoint.bind(this);
-    this.data.target.addEventListener(this.data.loadedEvent, this.moveToSpawnPoint);
+
+    waitForDOMContentLoaded().then(() => {
+      this.data.target.addEventListener(this.data.loadedEvent, this.moveToSpawnPoint);
+    });
   },
   moveToSpawnPoint() {
     const spawnPoints = document.querySelectorAll("[spawn-point]");

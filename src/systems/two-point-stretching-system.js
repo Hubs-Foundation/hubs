@@ -22,6 +22,7 @@ export class TwoPointStretchingSystem {
 
   tick() {
     const interaction = AFRAME.scenes[0].systems.interaction;
+    if (!interaction.ready) return; //DOMContentReady workaround
     const { leftHand, rightHand, rightRemote, leftRemote } = interaction.state;
 
     const stretching =
