@@ -62,6 +62,35 @@ export const SCHEMA = {
       }
     },
 
+    preferences: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        turningMode: { type: "string" }, // "snap" || "smooth"
+        turnSnapDegree: { type: "number" },
+        touchscreenMovementScheme: { type: "string" }, // "joysticks" || "pinch"
+        micActivationScheme: { type: "string" }, // "push to talk" || "open mic"
+        muteMicOnEntry: { type: "bool" },
+        disableBatching: { type: "bool" },
+        enableReticulumDebugging: { type: "bool" },
+        fixedResolution: { type: "bool" },
+        maxResolution: { type: ["number", "number"] },
+        showPhysicsDebugging: { type: "bool" },
+        showOnScreenUserInputDebuggingInfo: { type: "bool" },
+        enableUserInputMaskLogging: { type: "bool" },
+        changeMovementSpeedWithMouseWheel: { type: "bool" },
+        allowMultipleHubsInstances: { type: "bool" },
+        disableTelemetry: { type: "bool" },
+        enableVRStats: { type: "bool" },
+        enableAvatarEditorDebugger: { type: "bool" },
+        materialSettings: { type: "string" }, // "auto" || "hi-res" || "low-res"
+        skipLoadingScreen: { type: "bool" },
+        enableSpatializedAudio: { type: "bool" },
+        disableRendering: { type: "bool" },
+        baseMovementSpeed: { type: "number" }
+      }
+    },
+
     // Legacy
     confirmedDiscordRooms: {
       type: "array",
@@ -129,6 +158,7 @@ export const SCHEMA = {
     credentials: { $ref: "#/definitions/credentials" },
     activity: { $ref: "#/definitions/activity" },
     settings: { $ref: "#/definitions/settings" },
+    preferences: { $ref: "#/definitions/preferences" },
     confirmedDiscordRooms: { $ref: "#/definitions/confirmedDiscordRooms" }, // Legacy
     confirmedBroadcastedRooms: { $ref: "#/definitions/confirmedBroadcastedRooms" },
     uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" },
@@ -165,7 +195,8 @@ export default class Store extends EventTarget {
       uploadPromotionTokens: [],
       creatorAssignmentTokens: [],
       embedTokens: [],
-      onLoadActions: []
+      onLoadActions: [],
+      preferences: {}
     });
 
     this._shouldResetAvatarOnInit = false;

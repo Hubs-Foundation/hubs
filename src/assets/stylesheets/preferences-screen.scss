@@ -1,0 +1,99 @@
+@import 'shared.scss';
+:local(.root) {
+  position: absolute;
+  box-sizing: border-box;
+  top: 0px;
+  width: 100%;
+  display: flex;
+  flex-flow: column;
+  background: $light-blue;
+  align-items: center;
+
+  p {
+    margin-block-start: 0.2em;
+    margin-block-end: 0.2em;
+  }
+}
+:local(.float-right) {
+  top: 1em;
+  right: 1em;
+  position: absolute;
+  background: $action-color-light;
+  transform: scale(2);
+}
+:local(.row) {
+  width: 80%;
+  display: flex;
+  flex-flow: row;
+  background: $bright-blue;
+}
+:local(.rowScale) {
+  p {
+    font-size: 1.4em;
+    margin-block-start: 0.3em;
+    margin-block-end: 0.3em;
+  }
+}
+:local(.rowScaleHover) {
+  p {
+    font-size: 1.6em;
+    margin-block-start: 0.2em;
+    margin-block-end: 0.2em;
+  }
+}
+:local(.rowName) {
+  width: 80%;
+  text-align: end;
+  background: $twitter-action-color;
+  margin-inline-end: 1em;
+}
+:local(.rowNameHover) {
+  background: $action-color;
+}
+:local(.rowSelectionArea) {
+  width: 20%;
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: space-around;
+  background: $discord-action-color;
+  text-align: center;
+}
+
+:local(.flipSelector){
+  width: 100%;
+  display: flex;
+  flex-flow: row;
+  justify-content: space-between;
+  align-items: center;
+  background: $duck-yellow;
+
+  svg {
+    width: 30% !important;
+  }
+  span {
+    width: 40% !important;
+    font-size: x-large;
+    font-style: italic;
+  }
+}
+:local(.checkBoxScale) {
+  transform: scale(2);
+}
+:local(.checkBoxScaleHover) {
+  transform: scale(2.2);
+}
+
+:local(.prevOptionScale) {
+  height: 2em;
+}
+:local(.nextOptionScale) {
+  height: 2em;
+}
+
+:local(.prevOptionHoveredScale) {
+  height: 2.2em;
+}
+:local(.nextOptionHoveredScale) {
+  height: 2.2em;
+}

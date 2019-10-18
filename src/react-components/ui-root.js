@@ -60,6 +60,7 @@ import LobbyChatBox from "./lobby-chat-box.js";
 import InWorldChatBox from "./in-world-chat-box.js";
 import AvatarEditor from "./avatar-editor";
 import MicLevelWidget from "./mic-level-widget.js";
+import PreferencesScreen from "./preferences-screen.js";
 import OutputLevelWidget from "./output-level-widget.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
@@ -189,6 +190,7 @@ class UIRoot extends Component {
     didConnectToNetworkedScene: false,
     noMoreLoadingUpdates: false,
     hideLoader: false,
+    showPrefs: false,
     watching: false,
     isStreaming: false,
     showStreamingTip: false,
@@ -1377,11 +1379,26 @@ class UIRoot extends Component {
         </IntlProvider>
       );
     if (isExited) return this.renderExitedPane();
-    if (isLoading) {
+    if (!this.state.showPrefs && isLoading) {
       return (
-        <Loader scene={this.props.scene} finished={this.state.noMoreLoadingUpdates} onLoaded={this.onLoadingFinished} />
+        <Loader
+          scene={this.props.scene}
+          finished={this.state.noMoreLoadingUpdates}
+          onLoaded={this.onLoadingFinished}
+          connected={this.state.didConnectToNetworkedScene}
+        />
       );
     }
+
+    if (this.state.showPrefs)
+      return (
+        <PreferencesScreen
+          onClose={() => {
+            this.setState({ showPrefs: false });
+          }}
+          store={this.props.store}
+        />
+      );
     if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();
     if (this.props.isBotMode) return this.renderBotMode();
 
@@ -1981,6 +1998,9 @@ class UIRoot extends Component {
                   scene={this.props.scene}
                   performConditionalSignIn={this.props.performConditionalSignIn}
                   showNonHistoriedDialog={this.showNonHistoriedDialog}
+                  showPreferencesScreen={() => {
+                    this.setState({ showPrefs: true });
+                  }}
                   pushHistoryState={this.pushHistoryState}
                 />
               )}
