@@ -28,7 +28,7 @@ class ServerAccessComponent extends Component {
         <Title title="SSH Access" />
         <CardContent className={this.props.classes.info}>
           <Typography variant="subheading" gutterBottom>
-            Connecting to servers
+            Connecting to Servers
           </Typography>
           <Typography variant="body1" gutterBottom>
             To SSH into your server(s), you will use the SSH private key file you generated before deploying Hubs Cloud.
