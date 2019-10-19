@@ -24,6 +24,7 @@ import { AccountList, AccountEdit } from "./react-components/accounts";
 import { ProjectList, ProjectShow } from "./react-components/projects";
 import { SystemEditor } from "./react-components/system-editor";
 import { ServiceEditor } from "./react-components/service-editor";
+import { ServerAccess } from "./react-components/server-access";
 import { ImportContent } from "./react-components/import-content";
 import Store from "hubs/src/storage/store";
 import registerTelemetry from "hubs/src/telemetry";
@@ -137,19 +138,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (store.state && store.state.credentials && store.state.credentials.token) {
     setItaAuthToken(store.state.credentials.token);
-    itaSchemas = schemaByCategories(await getItaSchemas());
+    try {
+      itaSchemas = schemaByCategories(await getItaSchemas());
+    } catch (e) {
+      // Let the admin console run but skip showing configs.
+    }
   }
 
   const systemRoute = <Route exact path="/system" component={SystemEditor} />;
   const importRoute = <Route exact path="/import" component={ImportContent} />;
-  const serverSetupRoute = (
-    <Route
-      path="/server-setup"
-      render={props => <ServiceEditor {...props} schema={itaSchemas} categories={schemaCategories} />}
-    />
-  );
+  const accessRoute = <Route exact path="/server-access" component={ServerAccess} />;
 
-  const customRoutes = [systemRoute, importRoute, serverSetupRoute];
+  const customRoutes = [systemRoute, importRoute, accessRoute];
+
+  if (itaSchemas) {
+    customRoutes.push(
+      <Route
+        path="/server-setup"
+        render={props => <ServiceEditor {...props} schema={itaSchemas} categories={schemaCategories} />}
+      />
+    );
+  }
 
   const layout = props => <Layout {...props} menu={props => <AdminMenu {...props} services={schemaCategories} />} />;
 

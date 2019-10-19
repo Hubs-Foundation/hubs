@@ -143,6 +143,18 @@ class Menu extends Component {
               </ListItemIcon>
               <ListItemText className={this.props.classes.text} primary="Server Config" />
             </ListItem>
+            <ListItem
+              className={classNames(this.props.classes.item, this.props.classes.nested)}
+              component={NavLink}
+              activeStyle={{ backgroundColor: "#D0D0D0" }}
+              key="server-access"
+              to="/server-access"
+            >
+              <ListItemIcon className={this.props.classes.icon}>
+                <ViewIcon />
+              </ListItemIcon>
+              <ListItemText className={this.props.classes.text} primary="SSH Access" />
+            </ListItem>
           </List>
         </Collapse>
       </List>

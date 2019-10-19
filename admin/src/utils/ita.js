@@ -71,6 +71,10 @@ function getSchemas() {
   return fetchWithAuth(getEndpoint("schemas")).then(resp => resp.json());
 }
 
+function getAdminInfo() {
+  return fetchWithAuth(getEndpoint("admin-info")).then(resp => resp.json());
+}
+
 function getConfig(service) {
   return fetchWithAuth(getEndpoint(`configs/${service}/ps`)).then(resp => resp.json());
 }
@@ -166,5 +170,6 @@ export {
   getConfigValue,
   setConfigValue,
   setAuthToken,
-  schemaByCategories
+  schemaByCategories,
+  getAdminInfo
 };
