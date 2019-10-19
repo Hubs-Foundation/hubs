@@ -182,6 +182,10 @@ class CDNBandwidthComponent extends Component {
                 :<pre>{this.state.externalStorageDomain}</pre>
               </li>
               <li>
+                In the &apos;DNS&apos; section of your Cloudflare domain settings, add a CNAME record for:
+                <pre>{document.location.hostname}</pre>
+              </li>
+              <li>
                 In the &apos;SSL/TLS section&apos; of your Cloudflare domain settings, set the encryption mode to
                 &apos;Full&apos;.
               </li>
