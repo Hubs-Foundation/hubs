@@ -36,7 +36,10 @@ class SystemEditorComponent extends Component {
       <Card className={this.props.classes.container}>
         <Title title="Hubs Cloud" />
         <CardContent className={this.props.classes.info}>
-          <Typography component="p">
+          <Typography variant="subheading" gutterBottom>
+            Home
+          </Typography>
+          <Typography variant="body1" gutterBottom>
             Welcome to Hubs Cloud. Need help? Check out the{" "}
             <a
               href="https://github.com/mozilla/hubs-cloud/wiki/Getting-Started"
