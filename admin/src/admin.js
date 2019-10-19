@@ -25,7 +25,7 @@ import { ProjectList, ProjectShow } from "./react-components/projects";
 import { SystemEditor } from "./react-components/system-editor";
 import { ServiceEditor } from "./react-components/service-editor";
 import { ServerAccess } from "./react-components/server-access";
-import { CDNBandwidth } from "./react-components/cdn-bandwidth";
+import { DataTransfer } from "./react-components/data-transfer";
 import { ImportContent } from "./react-components/import-content";
 import Store from "hubs/src/storage/store";
 import registerTelemetry from "hubs/src/telemetry";
@@ -149,9 +149,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const systemRoute = <Route exact path="/system" component={SystemEditor} />;
   const importRoute = <Route exact path="/import" component={ImportContent} />;
   const accessRoute = <Route exact path="/server-access" component={ServerAccess} />;
-  const cdnRoute = <Route exact path="/cdn-bandwidth" component={CDNBandwidth} />;
+  const dtRoute = <Route exact path="/data-transfer" component={DataTransfer} />;
 
-  const customRoutes = [systemRoute, importRoute, accessRoute, cdnRoute];
+  const customRoutes = [systemRoute, importRoute, accessRoute, dtRoute];
 
   if (itaSchemas) {
     customRoutes.push(

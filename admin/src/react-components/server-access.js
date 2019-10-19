@@ -27,7 +27,10 @@ class ServerAccessComponent extends Component {
       <Card className={this.props.classes.container}>
         <Title title="SSH Access" />
         <CardContent className={this.props.classes.info}>
-          <Typography variant="subheading" gutterBottom>
+          <Typography variant="body2" gutterBottom>
+            Hubs Cloud sets up your servers with SSH access and Two-Factor Authentication.
+          </Typography>
+          <Typography variant="subheading" className={this.props.classes.section} gutterBottom>
             Connecting to Servers
           </Typography>
           <Typography variant="body1" gutterBottom>
@@ -37,13 +40,13 @@ class ServerAccessComponent extends Component {
             Each of your servers has a name. The name can be found in your cloud provider&apos;s console in the server
             list. (For example, on AWS Console, go to EC2 -&gt; Instances.)
           </Typography>
-          <Typography variant="body1" gutterBottom>
+          <Typography variant="body1" gutterBottom component="div">
             To connect to a server, run the following command:
+            <div className={this.props.classes.command}>
+              ssh -i &lt;key file&gt; ubuntu@&lt;server name&gt;.{this.state.serverDomain}
+            </div>
           </Typography>
-          <blockquote>
-            <pre>ssh -i &lt;key file&gt; ubuntu@&lt;server name&gt;.{this.state.serverDomain}</pre>
-          </blockquote>
-          <Typography variant="subheading" gutterBottom>
+          <Typography variant="subheading" className={this.props.classes.section} gutterBottom>
             Two-Factor Verification
           </Typography>
           <Typography variant="body1" gutterBottom>
@@ -65,8 +68,7 @@ class ServerAccessComponent extends Component {
               Show QR Code
             </Button>
           )}
-          <p />
-          <Typography variant="subheading" gutterBottom>
+          <Typography variant="subheading" className={this.props.classes.section} gutterBottom>
             More Information
           </Typography>
           <Typography variant="body1" gutterBottom>

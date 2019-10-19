@@ -141,7 +141,7 @@ class Menu extends Component {
               <ListItemIcon className={this.props.classes.icon}>
                 <ViewIcon />
               </ListItemIcon>
-              <ListItemText className={this.props.classes.text} primary="Server Config" />
+              <ListItemText className={this.props.classes.text} primary="Server Settings" />
             </ListItem>
             <ListItem
               className={classNames(this.props.classes.item, this.props.classes.nested)}
@@ -159,8 +159,8 @@ class Menu extends Component {
               className={classNames(this.props.classes.item, this.props.classes.nested)}
               component={NavLink}
               activeStyle={{ backgroundColor: "#D0D0D0" }}
-              key="cdn-bandwidth"
-              to="/cdn-bandwidth"
+              key="data-transfer"
+              to="/data-transfer"
             >
               <ListItemIcon className={this.props.classes.icon}>
                 <ViewIcon />

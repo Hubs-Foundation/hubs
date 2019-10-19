@@ -27,21 +27,6 @@ const styles = withCommonStyles(() => ({
     height: "200px",
     fontFamily: "monospace",
     marginTop: "8px"
-  },
-  domain: {
-    fontFamily: "monospace",
-    padding: "12px",
-    margin: "12px",
-    borderRadius: "4px",
-    backgroundColor: "whitesmoke"
-  },
-  steps: {
-    "& li": {
-      margin: "6px 0px"
-    }
-  },
-  section: {
-    marginTop: "12px"
   }
 }));
 
@@ -92,7 +77,7 @@ const workerScript = externalCorsProxyDomain => {
   });`;
 };
 
-class CDNBandwidthComponent extends Component {
+class DataTransferComponent extends Component {
   state = {
     externalCorsProxyDomain: "",
     externalStorageDomain: "",
@@ -173,10 +158,11 @@ class CDNBandwidthComponent extends Component {
         <Title title="CDN Bandwidth" />
         <form onSubmit={this.onSubmit.bind(this)}>
           <CardContent className={this.props.classes.info}>
-            <Typography variant="body1" gutterBottom>
-              Hubs Cloud uses bandwidth from your cloud provider to deliver content. You can potentially reduce your
-              data transfer costs by switching the CDN for CORS proxying and stored files to Cloudflare, which does not
-              charge for data transfer costs to your users.
+            <Typography variant="body2" gutterBottom>
+              Hubs Cloud uses bandwidth from your cloud provider to deliver content.
+              <br />
+              You can potentially reduce your data transfer costs by switching the CDN for CORS proxying and stored
+              files to Cloudflare, which does not charge for data transfer costs to your users.
             </Typography>
             <Typography variant="subheading" gutterBottom className={this.props.classes.section}>
               CORS Proxy
@@ -198,7 +184,7 @@ class CDNBandwidthComponent extends Component {
                   <a href="https://cloudflare.com" target="_blank" rel="noopener noreferrer">
                     Cloudflare
                   </a>
-                  :<div className={this.props.classes.domain}>{this.state.externalCorsProxyDomain}</div>
+                  :<div className={this.props.classes.command}>{this.state.externalCorsProxyDomain}</div>
                 </li>
                 <li>
                   Enable{" "}
@@ -261,11 +247,11 @@ class CDNBandwidthComponent extends Component {
                   <a href="https://cloudflare.com" target="_blank" rel="noopener noreferrer">
                     Cloudflare
                   </a>
-                  :<div className={this.props.classes.domain}>{this.state.externalStorageDomain}</div>
+                  :<div className={this.props.classes.command}>{this.state.externalStorageDomain}</div>
                 </li>
                 <li>
                   In the &apos;DNS&apos; section of your Cloudflare domain settings, add a CNAME record for:
-                  <div className={this.props.classes.domain}>{document.location.hostname}</div>
+                  <div className={this.props.classes.command}>{document.location.hostname}</div>
                 </li>
                 <li>
                   In the &apos;SSL/TLS section&apos; of your Cloudflare domain settings, set the encryption mode to
@@ -331,4 +317,4 @@ class CDNBandwidthComponent extends Component {
   }
 }
 
-export const CDNBandwidth = withStyles(styles)(CDNBandwidthComponent);
+export const DataTransfer = withStyles(styles)(DataTransferComponent);

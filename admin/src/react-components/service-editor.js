@@ -193,7 +193,7 @@ class ConfigurationEditor extends Component {
             ))}
           </Tabs>
           <TabContainer>
-            <Typography variant="caption" gutterBottom>
+            <Typography variant="body2" gutterBottom>
               {getCategoryDescription(this.state.category)}
             </Typography>
             {schema && config ? this.renderTree(schema, category, config) : <LinearProgress />}

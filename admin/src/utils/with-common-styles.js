@@ -43,6 +43,23 @@ const getCommon = theme => ({
     "& a": {
       color: "white"
     }
+  },
+  command: {
+    fontFamily: "monospace",
+    padding: "12px",
+    margin: "12px",
+    borderRadius: "4px",
+    backgroundColor: "whitesmoke"
+  },
+  steps: {
+    "& li": {
+      margin: "6px 0px"
+    }
+  },
+  section: {
+    "&:not(:first-child)": {
+      marginTop: "12px"
+    }
   }
 });
 
