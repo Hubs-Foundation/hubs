@@ -17,7 +17,11 @@ addLocaleData([...en]);
 
 const messageIdForOption = {
   snap: "preferences.turningModeSnap",
-  smooth: "preferences.turningModeSmooth"
+  smooth: "preferences.turningModeSmooth",
+  joysticks: "preferences.touchscreenJoysticks",
+  pinch: "preferences.touchscreenPinch",
+  pushToTalk: "preferences.pushToTalk",
+  openMic: "preferences.openMic"
 };
 
 class NumberRangeSelector extends Component {
@@ -215,6 +219,9 @@ class PreferenceRow extends Component {
 }
 
 const TURNING_MODE_OPTIONS = ["snap", "smooth"];
+const TOUCHSCREEN_MOVEMENT_SCHEME_OPTIONS = ["joysticks", "pinch"];
+const MIC_ACTIVATION_SCHEME_OPTIONS = ["pushToTalk", "openMic"];
+const MATERIAL_OPTIONS = ["auto", "hi-res", "low-res"];
 
 export default class PreferencesScreen extends Component {
   static propTypes = {
@@ -224,6 +231,7 @@ export default class PreferencesScreen extends Component {
   state = {
     muteMicOnEntry: false,
     turningModeCurrOption: 0,
+    micActivationSchemeCurrOption: 0,
     turnSnapDegree: 45
   };
   componentDidMount() {
@@ -231,6 +239,9 @@ export default class PreferencesScreen extends Component {
     this.setState({
       muteMicOnEntry: !!prefs.muteMicOnEntry,
       turningModeCurrOption: prefs.turningMode ? TURNING_MODE_OPTIONS.indexOf(prefs.turningMode) : 0,
+      micActivationSchemeCurrOption: prefs.micActivationScheme
+        ? MIC_ACTIVATION_SCHEME_OPTIONS.indexOf(prefs.micActivationScheme)
+        : 0,
       turnSnapDegree: prefs.turnSnapDegree ? prefs.turnSnapDegree : 45
     });
     waitForDOMContentLoaded().then(() => {
@@ -253,6 +264,23 @@ export default class PreferencesScreen extends Component {
           }}
           currOption={this.state.turningModeCurrOption}
           options={TURNING_MODE_OPTIONS}
+        />
+      </PreferenceRow>
+    );
+    const micActivationScheme = (
+      <PreferenceRow key="preferences.micActivationScheme">
+        <PreferenceRowName id="preferences.micActivationScheme" />
+        <FlipSelector
+          onSelect={(selection, currOption) => {
+            this.props.store.update({ preferences: { micActivationScheme: selection } });
+            this.setState({ micActivationSchemeCurrOption: currOption });
+            this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
+          }}
+          playHoverSound={() => {
+            this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_HOVER);
+          }}
+          currOption={this.state.micActivationSchemeCurrOption}
+          options={MIC_ACTIVATION_SCHEME_OPTIONS}
         />
       </PreferenceRow>
     );
@@ -297,7 +325,7 @@ export default class PreferencesScreen extends Component {
       </PreferenceRow>
     );
     // TODO: Sort rows by fuzzy search
-    const rows = [snapTurnRow, userPrefRow, turnSnapDegree];
+    const rows = [snapTurnRow, turnSnapDegree, userPrefRow, micActivationScheme];
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={classNames(styles.root)}>
