@@ -165,7 +165,7 @@ class Menu extends Component {
               <ListItemIcon className={this.props.classes.icon}>
                 <ViewIcon />
               </ListItemIcon>
-              <ListItemText className={this.props.classes.text} primary="CDN Bandwidth" />
+              <ListItemText className={this.props.classes.text} primary="Data Transfer" />
             </ListItem>
           </List>
         </Collapse>

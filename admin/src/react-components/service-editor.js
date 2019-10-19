@@ -203,7 +203,7 @@ class ConfigurationEditor extends Component {
           anchorOrigin={{ horizontal: "center", vertical: "bottom" }}
           open={this.state.saved || !!this.state.saveError}
           autoHideDuration={10000}
-          onClose={() => this.setState({ saved: false })}
+          onClose={() => this.setState({ saved: false, saveError: null })}
         >
           <SnackbarContent
             className={clsx({
