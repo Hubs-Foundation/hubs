@@ -51,7 +51,7 @@ class ServerAccessComponent extends Component {
             a rotating six digit number.
           </Typography>
           <Typography variant="body1" gutterBottom>
-            To generate a verification code, you will need to set up a 2fa device such a phone with the Google
+            To generate a verification code, you will need to set up a 2fa device such as a phone with the Google
             Authenticator app by scanning the QR code below.
           </Typography>
           {this.state.showQrCode ? (
