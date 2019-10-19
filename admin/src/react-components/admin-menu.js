@@ -155,6 +155,18 @@ class Menu extends Component {
               </ListItemIcon>
               <ListItemText className={this.props.classes.text} primary="SSH Access" />
             </ListItem>
+            <ListItem
+              className={classNames(this.props.classes.item, this.props.classes.nested)}
+              component={NavLink}
+              activeStyle={{ backgroundColor: "#D0D0D0" }}
+              key="cdn-bandwidth"
+              to="/cdn-bandwidth"
+            >
+              <ListItemIcon className={this.props.classes.icon}>
+                <ViewIcon />
+              </ListItemIcon>
+              <ListItemText className={this.props.classes.text} primary="CDN Bandwidth" />
+            </ListItem>
           </List>
         </Collapse>
       </List>
