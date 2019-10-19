@@ -80,7 +80,7 @@ class CDNBandwidthComponent extends Component {
     const adminInfo = await getAdminInfo();
     this.setState({
       externalCorsProxyDomain: adminInfo.external_cors_proxy_domain,
-      externalStorgeDomain: adminInfo.external_storage_domain
+      externalStorageDomain: adminInfo.external_storage_domain
     });
   }
 
