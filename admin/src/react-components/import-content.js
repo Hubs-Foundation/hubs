@@ -201,12 +201,18 @@ class ImportContentComponent extends Component {
       <Card className={this.props.classes.container}>
         <Title title="Import Content" />
         <CardContent className={this.props.classes.info}>
-          <Typography variant="headline" gutterBottom>
-            Enter the URL to an avatar or scene on another Hubs site such as{" "}
+          <Typography variant="subheading" gutterBottom>
+            Importing Content
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            You can import avatars and scenes from any other Hubs Cloud site, such as{" "}
             <a href="https://hubs.mozilla.com" target="_blank" rel="noopener noreferrer">
               hubs.mozilla.com
-            </a>{" "}
-            to import it into your Hubs Cloud instance.
+            </a>
+            .
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            Enter the URL to an avatar or scene to import it into your Hubs Cloud instance.
           </Typography>
           <Button
             className={this.props.classes.button}
@@ -215,7 +221,7 @@ class ImportContentComponent extends Component {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Find Content
+            Find Avatars &amp; Scenes
           </Button>
           {(needsBaseAvatar || needsDefaultAvatar || needsDefaultScene) && (
             <List>
@@ -263,7 +269,7 @@ class ImportContentComponent extends Component {
                 <TextField
                   key="url"
                   id="url"
-                  label="URL to import"
+                  label="Avatar or Scene URL"
                   value={this.state.url}
                   onChange={this.handleUrlChanged.bind(this)}
                   type="text"
