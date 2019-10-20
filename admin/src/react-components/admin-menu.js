@@ -150,7 +150,7 @@ class Menu extends Component {
               <ListItemIcon className={this.props.classes.icon}>
                 <ViewIcon />
               </ListItemIcon>
-              <ListItemText className={this.props.classes.text} primary="SSH Access" />
+              <ListItemText className={this.props.classes.text} primary="Server Access" />
             </ListItem>
             <ListItem
               className={classNames(this.props.classes.item, this.props.classes.nested)}
