@@ -30,7 +30,7 @@ function getCategoryDescription(category) {
     case "content":
       return "User-contributed content settings.";
     case "email":
-      return "Custom SMTP email provider settings. Leave blank to use AWS Simple Email Service on your Email Zone.";
+      return "Custom SMTP email provider settings. Leave blank to use your cloud provider's email service.";
     case "advanced":
       return "Advanced Settings for those who know what they're doing.";
     default:
