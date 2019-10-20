@@ -155,7 +155,7 @@ class DataTransferComponent extends Component {
 
     return (
       <Card className={this.props.classes.container}>
-        <Title title="CDN Bandwidth" />
+        <Title title="Data Transfer" />
         <form onSubmit={this.onSubmit.bind(this)}>
           <CardContent className={this.props.classes.info}>
             <Typography variant="body2" gutterBottom>

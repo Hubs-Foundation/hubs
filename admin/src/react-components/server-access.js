@@ -25,7 +25,7 @@ class ServerAccessComponent extends Component {
   render() {
     return (
       <Card className={this.props.classes.container}>
-        <Title title="SSH Access" />
+        <Title title="Server Access" />
         <CardContent className={this.props.classes.info}>
           <Typography variant="body2" gutterBottom>
             Hubs Cloud sets up your servers with SSH access and Two-Factor Authentication.
