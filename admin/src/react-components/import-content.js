@@ -201,18 +201,17 @@ class ImportContentComponent extends Component {
       <Card className={this.props.classes.container}>
         <Title title="Import Content" />
         <CardContent className={this.props.classes.info}>
-          <Typography variant="subheading" gutterBottom>
-            Importing Content
-          </Typography>
-          <Typography variant="body1" gutterBottom>
+          <Typography variant="body2" gutterBottom>
             You can import avatars and scenes from any other Hubs Cloud site, such as{" "}
             <a href="https://hubs.mozilla.com" target="_blank" rel="noopener noreferrer">
               hubs.mozilla.com
             </a>
-            .
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            Enter the URL to an avatar or scene to import it into your Hubs Cloud instance.
+            .<br />
+            Please ensure the content you import has a permissible license (such as
+            <a href="https://creativecommons.org/licenses/by/2.0/" rel="noopener noreferrer" target="_blank">
+              CC-BY
+            </a>
+            ) or is licensed to you for redistribution.
           </Typography>
           <Button
             className={this.props.classes.button}
@@ -223,6 +222,12 @@ class ImportContentComponent extends Component {
           >
             Find Avatars &amp; Scenes
           </Button>
+          <Typography variant="subheading" gutterBottom className={this.props.classes.section}>
+            Importing Content
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            Enter the URL to an avatar or scene to import it into your Hubs Cloud instance.
+          </Typography>
           {(needsBaseAvatar || needsDefaultAvatar || needsDefaultScene) && (
             <List>
               {needsBaseAvatar && (

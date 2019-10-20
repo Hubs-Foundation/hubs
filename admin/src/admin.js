@@ -146,12 +146,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  const systemRoute = <Route exact path="/system" component={SystemEditor} />;
+  const homeRoute = <Route exact path="/home" component={SystemEditor} />;
   const importRoute = <Route exact path="/import" component={ImportContent} />;
   const accessRoute = <Route exact path="/server-access" component={ServerAccess} />;
   const dtRoute = <Route exact path="/data-transfer" component={DataTransfer} />;
 
-  const customRoutes = [systemRoute, importRoute, accessRoute, dtRoute];
+  const customRoutes = [homeRoute, importRoute, accessRoute, dtRoute];
 
   if (itaSchemas) {
     customRoutes.push(

@@ -36,11 +36,11 @@ class SystemEditorComponent extends Component {
       <Card className={this.props.classes.container}>
         <Title title="Hubs Cloud" />
         <CardContent className={this.props.classes.info}>
-          <Typography variant="subheading" gutterBottom>
-            Home
+          <Typography variant="title" gutterBottom>
+            Welcome to Hubs Cloud
           </Typography>
           <Typography variant="body1" gutterBottom>
-            Welcome to Hubs Cloud. Need help? Check out the{" "}
+            Need help? Check out the{" "}
             <a
               href="https://github.com/mozilla/hubs-cloud/wiki/Getting-Started"
               target="_blank"
@@ -51,7 +51,7 @@ class SystemEditorComponent extends Component {
             guide.
           </Typography>
 
-          {(needsAvatars || needsScenes) && (
+          {this.state.reticulumMeta && (needsAvatars || needsScenes) && (
             <List>
               {needsAvatars && (
                 <ListItem>

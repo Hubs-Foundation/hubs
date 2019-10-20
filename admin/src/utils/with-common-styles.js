@@ -23,6 +23,10 @@ const getCommon = theme => ({
     color: amber[700]
   },
 
+  successIcon: {
+    color: green[700]
+  },
+
   button: {
     margin: "10px 10px 0 0"
   },

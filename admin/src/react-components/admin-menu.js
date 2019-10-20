@@ -9,8 +9,9 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import ComputerIcon from "@material-ui/icons/Computer";
+import HomeIcon from "@material-ui/icons/Home";
 import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
+import BackupIcon from "@material-ui/icons/Backup";
 import ViewIcon from "@material-ui/icons/ViewList";
 import SettingsIcon from "@material-ui/icons/Settings";
 import Collapse from "@material-ui/core/Collapse";
@@ -88,13 +89,19 @@ class Menu extends Component {
           className={this.props.classes.item}
           component={NavLink}
           activeStyle={{ backgroundColor: "#D0D0D0" }}
-          key="system"
-          to="/system"
+          key="home"
+          to="/home"
         >
           <ListItemIcon className={this.props.classes.icon}>
-            <ComputerIcon />
+            <HomeIcon />
           </ListItemIcon>
-          <ListItemText className={this.props.classes.text} primary="System" />
+          <ListItemText className={this.props.classes.text} primary="Home" />
+        </ListItem>
+        <ListItem className={this.props.classes.item}>
+          <ListItemIcon className={this.props.classes.icon}>
+            <LibraryBooksIcon />
+          </ListItemIcon>
+          <ListItemText className={this.props.classes.text} primary="Content" />
         </ListItem>
         <Collapse in={true} timeout="auto" unmountOnExit>
           <List component="nav" disablePadding>
@@ -106,20 +113,10 @@ class Menu extends Component {
               to="/import"
             >
               <ListItemIcon className={this.props.classes.icon}>
-                <ViewIcon />
+                <BackupIcon />
               </ListItemIcon>
               <ListItemText className={this.props.classes.text} primary="Import Content" />
             </ListItem>
-          </List>
-        </Collapse>
-        <ListItem className={this.props.classes.item}>
-          <ListItemIcon className={this.props.classes.icon}>
-            <LibraryBooksIcon />
-          </ListItemIcon>
-          <ListItemText className={this.props.classes.text} primary="Content" />
-        </ListItem>
-        <Collapse in={true} timeout="auto" unmountOnExit>
-          <List component="nav" disablePadding>
             {this.props.resources.map(this.renderResource.bind(this))}
           </List>
         </Collapse>
