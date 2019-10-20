@@ -54,7 +54,7 @@ class ServerAccessComponent extends Component {
             a rotating six digit number.
           </Typography>
           <Typography variant="body1" gutterBottom>
-            First, you will need to set up a 2fa device such as a phone with an app such as Google Authenticator.
+            First, you will need to set up a device by installing a two-factor app such as Google Authenticator.
           </Typography>
           <Typography variant="body1" gutterBottom>
             To generate a code, use the authenticator app to scan the QR code below.
