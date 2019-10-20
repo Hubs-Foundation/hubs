@@ -34,7 +34,7 @@ class ServerAccessComponent extends Component {
             Connecting to Servers
           </Typography>
           <Typography variant="body1" gutterBottom>
-            To SSH into your server(s), you will use the SSH private key file you generated before deploying Hubs Cloud.
+            To SSH into your server(s), you will use the SSH private key file you created before deploying Hubs Cloud.
           </Typography>
           <Typography variant="body1" gutterBottom>
             Each of your servers has a name. The name can be found in your cloud provider&apos;s console in the server
