@@ -1,3 +1,4 @@
+import "./utils/configs";
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import InfiniteScroll from "react-infinite-scroller";

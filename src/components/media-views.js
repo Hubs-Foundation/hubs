@@ -1,4 +1,5 @@
-/* global performance THREE AFRAME NAF MediaStream process setTimeout */
+/* global performance THREE AFRAME NAF MediaStream setTimeout */
+import configs from "../utils/configs";
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
 import { paths } from "../systems/userinput/paths";
@@ -24,11 +25,11 @@ const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 
 export const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
-  let s = "|";
-  for (let j = 0; j <= 20; j++) {
+  let s = "[";
+  for (let j = 1; j <= 20; j++) {
     s += i >= j ? "|" : " ";
   }
-  s += "|";
+  s += "]";
   VOLUME_LABELS[i] = s;
 }
 
@@ -132,7 +133,7 @@ function createVideoTexture(url, contentType) {
       // If hls.js is supported we always use it as it gives us better events
     } else if (AFRAME.utils.material.isHLS(url, contentType)) {
       if (HLS.isSupported()) {
-        const corsProxyPrefix = `https://${process.env.CORS_PROXY_SERVER}/`;
+        const corsProxyPrefix = `https://${configs.CORS_PROXY_SERVER}/`;
         const baseUrl = url.startsWith(corsProxyPrefix) ? url.substring(corsProxyPrefix.length) : url;
         const hls = new HLS({
           xhrSetup: (xhr, u) => {
@@ -387,14 +388,14 @@ AFRAME.registerComponent("media-video", {
   },
 
   seekForward() {
-    if ((!this.videoIsLive && NAF.utils.isMine(this.networkedEl)) || NAF.utils.takeOwnership(this.networkedEl)) {
+    if (!this.videoIsLive && (NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
       this.video.currentTime += 30;
       this.el.setAttribute("media-video", "time", this.video.currentTime);
     }
   },
 
   seekBack() {
-    if ((!this.videoIsLive && NAF.utils.isMine(this.networkedEl)) || NAF.utils.takeOwnership(this.networkedEl)) {
+    if (!this.videoIsLive && (NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
       this.video.currentTime -= 10;
       this.el.setAttribute("media-video", "time", this.video.currentTime);
     }

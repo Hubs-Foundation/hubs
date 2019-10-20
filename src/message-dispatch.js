@@ -1,3 +1,4 @@
+import "./utils/configs";
 import { getAbsoluteHref } from "./utils/media-url-utils";
 import { spawnChatMessage } from "./react-components/chat-message";
 import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "./systems/sound-effects-system";

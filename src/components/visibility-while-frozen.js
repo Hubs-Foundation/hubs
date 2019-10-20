@@ -1,4 +1,5 @@
 import { getLastWorldPosition } from "../utils/three-utils";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 const isMobile = AFRAME.utils.device.isMobile();
 
@@ -24,8 +25,12 @@ AFRAME.registerComponent("visibility-while-frozen", {
     this.camWorldPos = new THREE.Vector3();
     this.cam2WorldPos = new THREE.Vector3();
     this.objWorldPos = new THREE.Vector3();
-    this.cam = document.getElementById("avatar-pov-node").object3D;
     this.cam2 = this.el.sceneEl.camera;
+
+    waitForDOMContentLoaded().then(() => {
+      this.cam = document.getElementById("avatar-pov-node").object3D;
+      this.updateVisibility();
+    });
 
     let hoverableSearch = this.el;
 
@@ -58,6 +63,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
   },
 
   updateVisibility() {
+    if (!this.cam) return;
     const isFrozen = this.el.sceneEl.is("frozen");
 
     let isWithinDistance = true;

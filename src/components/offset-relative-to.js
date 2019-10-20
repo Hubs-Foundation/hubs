@@ -1,3 +1,5 @@
+import { waitForDOMContentLoaded } from "../utils/async-utils";
+
 /**
  * Positions an entity relative to a given target when the given event is fired.
  * @component offset-relative-to
@@ -25,11 +27,14 @@ AFRAME.registerComponent("offset-relative-to", {
   },
   init() {
     this.updateOffset = this.updateOffset.bind(this);
-    if (this.data.on) {
-      this.el.sceneEl.addEventListener(this.data.on, this.updateOffset);
-    } else {
-      this.updateOffset();
-    }
+
+    waitForDOMContentLoaded().then(() => {
+      if (this.data.on) {
+        this.el.sceneEl.addEventListener(this.data.on, this.updateOffset);
+      } else {
+        this.updateOffset();
+      }
+    });
   },
 
   updateOffset: (function() {

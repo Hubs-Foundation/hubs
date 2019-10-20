@@ -125,7 +125,7 @@ class MediaBrowser extends Component {
     const searchParams = new URLSearchParams(props.history.location.search);
     const result = props.mediaSearchStore.result;
 
-    const newState = { result, query: this.state.query || searchParams.get("q") || "" };
+    const newState = { result, query: searchParams.get("q") || "" };
     const urlSource = this.getUrlSource(searchParams);
     newState.showNav = !!(searchParams.get("media_nav") !== "false");
     newState.selectAction = searchParams.get("selectAction") || "spawn";
@@ -180,6 +180,10 @@ class MediaBrowser extends Component {
 
   onCopyAvatar = () => {
     this.handleFacetClicked({ params: { filter: "my-avatars" } });
+  };
+
+  onShowSimilar = (id, name) => {
+    this.handleFacetClicked({ params: { similar_to: id, similar_name: name } });
   };
 
   selectEntry = entry => {
@@ -250,6 +254,8 @@ class MediaBrowser extends Component {
     const hideSearch = urlSource === "favorites";
     const showEmptyStringOnNoResult = urlSource !== "avatars" && urlSource !== "scenes";
 
+    const facets = this.state.facets && this.state.facets.length > 0 && this.state.facets;
+
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
     if (this.state.selectNextResult) return <div />;
     const handleCustomClicked = urlSource => {
@@ -265,7 +271,8 @@ class MediaBrowser extends Component {
       }
     };
 
-    const activeFilter = searchParams.get("filter") || (!searchParams.get("q") && "");
+    const activeFilter =
+      searchParams.get("filter") || (searchParams.get("similar_to") && "similar") || (!searchParams.get("q") && "");
 
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
@@ -389,10 +396,10 @@ class MediaBrowser extends Component {
             </div>
           )}
 
-          {this.state.facets &&
-            this.state.facets.length > 0 && (
-              <div className={styles.facets}>
-                {this.state.facets.map((s, i) => (
+          {(facets || activeFilter === "similar") && (
+            <div className={styles.facets}>
+              {facets &&
+                facets.map((s, i) => (
                   <a
                     onClick={() => this.handleFacetClicked(s)}
                     key={i}
@@ -401,8 +408,16 @@ class MediaBrowser extends Component {
                     {s.text}
                   </a>
                 ))}
-              </div>
-            )}
+              {activeFilter === "similar" && (
+                <a className={classNames(styles.facet, "selected")}>
+                  <FormattedMessage
+                    id="media-browser.similar-to-facet"
+                    values={{ name: searchParams.get("similar_name") }}
+                  />
+                </a>
+              )}
+            </div>
+          )}
 
           {this.props.mediaSearchStore.isFetching ||
           this._sendQueryTimeout ||
@@ -414,6 +429,7 @@ class MediaBrowser extends Component {
               urlSource={urlSource}
               handleEntryClicked={this.handleEntryClicked}
               onCopyAvatar={this.onCopyAvatar}
+              onShowSimilar={this.onShowSimilar}
               handlePager={this.handlePager}
             />
           ) : (

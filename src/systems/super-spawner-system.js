@@ -60,6 +60,7 @@ export class SuperSpawnerSystem {
 
   tick() {
     const interaction = AFRAME.scenes[0].systems.interaction;
+    if (!interaction.ready) return; //DOMContentReady workaround
     this.maybeSpawn(
       interaction.state.leftHand,
       interaction.options.leftHand.entity,

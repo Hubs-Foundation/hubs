@@ -17,12 +17,44 @@ export class ViveControllerDevice {
     navigator.getVRDisplays();
     this.gamepad = gamepad;
 
-    if (this.gamepad.id === "HTC Vive Focus Plus Controller") {
+    if (this.gamepad.id === "OpenVR Cosmos") {
+      RAY_ROTATION.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 12);
+      this.buttonMap = [
+        { name: "trigger", buttonId: 0 },
+        { name: "grip", buttonId: 1 },
+        { name: "primary", buttonId: 2 },
+        { name: "secondary", buttonId: 3 },
+        { name: "joystick", buttonId: 4 },
+        { name: "bumper", buttonId: 5 }
+      ];
+      this.axisMap = [{ name: "joyX", axisId: 0 }, { name: "joyY", axisId: 1 }];
+    } else if (this.gamepad.id === "HTC Vive Focus Plus Controller") {
       RAY_ROTATION.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 15);
       this.buttonMap = [
         { name: "touchpad", buttonId: 0 },
         { name: "trigger", buttonId: 1 },
         { name: "grip", buttonId: 2 }
+      ];
+      this.axisMap = [{ name: "touchX", axisId: 0 }, { name: "touchY", axisId: 1 }];
+    } else if (this.gamepad.axes.length === 4) {
+      RAY_ROTATION.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 12);
+      this.buttonMap = [
+        { name: "touchpad", buttonId: 0 },
+        { name: "trigger", buttonId: 1 },
+        { name: "grip", buttonId: 2 },
+        { name: "primary", buttonId: 3 },
+        { name: "secondary", buttonId: 4 },
+        { name: "joystick", buttonId: 5 },
+        { name: "index", buttonId: 6 },
+        { name: "middle", buttonId: 7 },
+        { name: "ring", buttonId: 8 },
+        { name: "pinky", buttonId: 9 }
+      ];
+      this.axisMap = [
+        { name: "touchX", axisId: 0 },
+        { name: "touchY", axisId: 1 },
+        { name: "joyX", axisId: 2 },
+        { name: "joyY", axisId: 3 }
       ];
     } else {
       RAY_ROTATION.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 12);
@@ -30,15 +62,10 @@ export class ViveControllerDevice {
         { name: "touchpad", buttonId: 0 },
         { name: "trigger", buttonId: 1 },
         { name: "grip", buttonId: 2 },
-        { name: "top", buttonId: 3 }
+        { name: "primary", buttonId: 3 }
       ];
+      this.axisMap = [{ name: "touchX", axisId: 0 }, { name: "touchY", axisId: 1 }];
     }
-    this.axisMap = [
-      { name: "touchX", axisId: 0 },
-      { name: "touchY", axisId: 1 },
-      { name: "joyX", axisId: 2 },
-      { name: "joyY", axisId: 3 }
-    ];
 
     this.pose = new Pose();
     this.rayObjectRotation = new THREE.Quaternion();

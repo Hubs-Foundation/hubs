@@ -38,6 +38,8 @@ AFRAME.registerComponent("stats-plus", {
     const scene = this.el.sceneEl;
     this.stats = createStats(scene);
     this.statsEl = document.querySelector(".rs-base");
+    // HACK for now in rare case where dom isn't ready, just bail
+    if (!this.statsEl) return;
 
     // Add header to stats panel so we can collapse it
     const statsHeaderEl = document.createElement("div");
@@ -125,6 +127,7 @@ AFRAME.registerComponent("stats-plus", {
   },
   tick(time) {
     const stats = this.stats;
+    if (!this.statsEl) return;
     if (this.data || this.vrStatsEnabled) {
       // Update rStats
       stats("rAF").tick();

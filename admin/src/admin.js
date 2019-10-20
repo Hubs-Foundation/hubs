@@ -1,3 +1,4 @@
+import configs from "./utils/configs";
 import ReactDOM from "react-dom";
 import React, { Component } from "react";
 import { Route } from "react-router-dom";
@@ -107,16 +108,15 @@ const mountUI = async retPhxChannel => {
   // If POSTGREST_SERVER is set, we're talking directly to PostgREST over a tunnel, and will be managing the
   // perms token ourselves. If we're not, we talk to reticulum and presume it will handle perms token forwarding.
 
-  // careful -- avoid constant expression for configs due to injection breakage
-  if (process.env.POSTGREST_SERVER && process.env.POSTGREST_SERVER.length > 0) {
-    dataProvider = postgrestClient(process.env.POSTGREST_SERVER);
+  if (configs.POSTGREST_SERVER && configs.POSTGREST_SERVER.length > 0) {
+    dataProvider = postgrestClient(configs.POSTGREST_SERVER);
     authProvider = postgrestAuthenticatior.createAuthProvider(retPhxChannel);
     await postgrestAuthenticatior.refreshPermsToken();
 
     // Refresh perms regularly
     setInterval(() => postgrestAuthenticatior.refreshPermsToken(), 60000);
   } else {
-    const server = process.env.RETICULUM_SERVER || document.location.host;
+    const server = configs.RETICULUM_SERVER || document.location.host;
     dataProvider = postgrestClient("//" + server + "/api/postgrest");
     authProvider = postgrestAuthenticatior.createAuthProvider();
     postgrestAuthenticatior.setAuthToken(store.state.credentials.token);

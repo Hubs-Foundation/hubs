@@ -24,7 +24,8 @@ import {
   viveUserBindings,
   viveWandUserBindings,
   indexUserBindings,
-  viveFocusPlusUserBindings
+  viveFocusPlusUserBindings,
+  viveCosmosUserBindings
 } from "./bindings/vive-user";
 import { wmrUserBindings } from "./bindings/windows-mixed-reality-user";
 import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
@@ -281,7 +282,10 @@ AFRAME.registerSystem("userinput", {
           mapping && this.registeredMappings.add(mapping);
 
           if (activeDevice instanceof ViveControllerDevice && activeDevice.gamepad) {
-            if (activeDevice.gamepad.id === "HTC Vive Focus Plus Controller") {
+            if (activeDevice.gamepad.id === "OpenVR Cosmos") {
+              //HTC Vive Cosmos Controller
+              this.registeredMappings.add(viveCosmosUserBindings);
+            } else if (activeDevice.gamepad.id === "HTC Vive Focus Plus Controller") {
               //HTC Vive Focus Plus Controller
               this.registeredMappings.add(viveFocusPlusUserBindings);
             } else if (activeDevice.gamepad.axes.length === 4) {
@@ -332,7 +336,11 @@ AFRAME.registerSystem("userinput", {
         }
       }
       // HACK Firefox Nightly bug causes corrupt gamepad names for OpenVR, so do startsWith
-      if (e.gamepad.id.startsWith("OpenVR Gamepad") || e.gamepad.id === "HTC Vive Focus Plus Controller") {
+      if (
+        e.gamepad.id.startsWith("OpenVR Gamepad") ||
+        e.gamepad.id === "HTC Vive Focus Plus Controller" ||
+        e.gamepad.id === "OpenVR Cosmos"
+      ) {
         gamepadDevice = new ViveControllerDevice(e.gamepad);
       } else if (e.gamepad.id.startsWith("Oculus Touch")) {
         gamepadDevice = new OculusTouchControllerDevice(e.gamepad);

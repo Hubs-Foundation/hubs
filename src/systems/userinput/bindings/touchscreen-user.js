@@ -158,7 +158,7 @@ export const touchscreenUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.touchscreen.pinch.delta },
       dest: { value: paths.actions.inspectZoom },
-      xform: xforms.scale(0.25),
+      xform: xforms.scale(0.025),
       priority: 1
     }
   ]

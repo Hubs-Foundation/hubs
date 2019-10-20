@@ -1,3 +1,4 @@
+import "./utils/configs";
 import "@babel/polyfill";
 import "./utils/debug-log";
 
@@ -1116,6 +1117,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI,
     mediaSearchStore
   );
+  document.getElementById("avatar-rig").messageDispatch = messageDispatch;
 
   let isInitialJoin = true;
 
