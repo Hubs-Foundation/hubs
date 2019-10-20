@@ -57,7 +57,7 @@ class ServerAccessComponent extends Component {
             First, you will need to set up a device by installing a two-factor app such as Google Authenticator.
           </Typography>
           <Typography variant="body1" gutterBottom>
-            To generate a code, use the authenticator app to scan the QR code below.
+            To generate a code, open the authenticator app and scan the QR code below.
           </Typography>
           {this.state.showQrCode ? (
             <img src={this.state.qrCodeData} />
