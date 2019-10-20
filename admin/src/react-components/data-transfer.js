@@ -175,7 +175,7 @@ class DataTransferComponent extends Component {
               . As such, you will be using data transfer to send all 3rd party content to your users.
             </Typography>
             <Typography variant="body1" gutterBottom>
-              You can avoid this data transfer cost by using a Cloudflare Worker for CORS proxying:
+              You can minimize this data transfer cost by using a Cloudflare Worker for CORS proxying:
             </Typography>
             <Typography variant="body1" component="div" gutterBottom>
               <ol className={this.props.classes.steps}>
@@ -238,7 +238,7 @@ class DataTransferComponent extends Component {
               Uploaded avatars, scenes, and files will use data transfer to serve your users.
             </Typography>
             <Typography variant="body1" gutterBottom>
-              You can avoid this data transfer cost by switching the stored files CDN to Cloudflare.
+              You can minimize this data transfer cost by switching the stored files CDN to Cloudflare.
             </Typography>
             <Typography variant="body1" component="div" gutterBottom>
               <ol className={this.props.classes.steps}>
