@@ -207,7 +207,7 @@ class ImportContentComponent extends Component {
               hubs.mozilla.com
             </a>
             .<br />
-            Please ensure the content you import has a permissible license (such as
+            Please ensure the content you import has a permissible license (such as{" "}
             <a href="https://creativecommons.org/licenses/by/2.0/" rel="noopener noreferrer" target="_blank">
               CC-BY
             </a>
