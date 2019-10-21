@@ -139,6 +139,13 @@ function createVideoTexture(url, contentType) {
         const corsProxyPrefix = `https://${configs.CORS_PROXY_SERVER}/`;
         const baseUrl = url.startsWith(corsProxyPrefix) ? url.substring(corsProxyPrefix.length) : url;
         const setupHls = () => {
+          if (texture.hls) {
+            texture.hls.stopLoad();
+            texture.hls.detachMedia();
+            texture.hls.destroy();
+            texture.hls = null;
+          }
+
           const hls = new HLS({
             xhrSetup: (xhr, u) => {
               if (u.startsWith(corsProxyPrefix)) {
