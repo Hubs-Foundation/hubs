@@ -8,7 +8,7 @@ function almostEquals(epsilon, u, v) {
 AFRAME.registerComponent("pen-laser", {
   schema: {
     color: { type: "color", default: "#FF0033" },
-    laserVisible: { default: false },
+    laserInHand: { default: false },
     remoteLaserVisible: { default: false },
     laserOrigin: { default: { x: 0, y: 0, z: 0 } },
     remoteLaserOrigin: { default: { x: 0, y: 0, z: 0 } },
@@ -83,8 +83,14 @@ AFRAME.registerComponent("pen-laser", {
         this.el.parentEl.components.networked.initialized && this.el.parentEl.components.networked.isMine();
       let laserVisible = false;
 
-      if (isMine && this.data.laserVisible) {
+      if (isMine) {
         origin.copy(this.data.laserOrigin);
+
+        if (!this.data.laserInHand) {
+          // On 2d mode, shift downards
+          origin.y = origin.y - 0.4;
+        }
+
         target.copy(this.data.laserTarget);
         laserVisible = true;
       } else if (!isMine && this.data.remoteLaserVisible) {
