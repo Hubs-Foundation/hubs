@@ -432,7 +432,8 @@ export default class SceneEntryManager {
             width: 720 * (screen.width / screen.height),
             height: 720,
             frameRate: 30
-          }
+          },
+          audio: true
         },
         true
       );
