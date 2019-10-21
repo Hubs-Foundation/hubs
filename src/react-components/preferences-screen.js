@@ -38,6 +38,19 @@ class NumberRangeSelector extends Component {
   render() {
     return (
       <div className={classNames(styles.numberWithRange)}>
+        <div className={classNames(styles.numberInNumberWithRange)}>
+          <input
+            type="text"
+            value={this.props.curr}
+            onChange={e => {
+              const num = parseInt(e.target.value);
+              this.props.onSelect(num ? num : 0, true);
+            }}
+            onMouseEnter={() => {
+              this.props.playHoverSound && this.props.playHoverSound();
+            }}
+          />
+        </div>
         <div className={classNames(styles.rangeSlider)}>
           <input
             type="range"
@@ -58,17 +71,6 @@ class NumberRangeSelector extends Component {
             }}
           />
         </div>
-        <input
-          type="text"
-          value={this.props.curr}
-          onChange={e => {
-            const num = parseInt(e.target.value);
-            this.props.onSelect(num ? num : 0, true);
-          }}
-          onMouseEnter={() => {
-            this.props.playHoverSound && this.props.playHoverSound();
-          }}
-        />
       </div>
     );
   }
@@ -104,6 +106,8 @@ class FlipSelector extends Component {
       <div className={classNames(styles.rowSelectionArea)}>
         <div className={classNames(styles.flipSelector)}>
           <FontAwesomeIcon
+            fixedWidth
+            size="lg"
             onMouseEnter={this.onMouseOverPrevOption}
             onMouseLeave={this.onMouseOutPrevOption}
             onClick={() => {
@@ -118,6 +122,8 @@ class FlipSelector extends Component {
           />
           <FormattedMessage id={messageIdForOption[this.props.options[this.props.currOption]]} />
           <FontAwesomeIcon
+            fixedWidth
+            size="lg"
             onMouseEnter={this.onMouseOverNextOption}
             onMouseLeave={this.onMouseOutNextOption}
             onClick={() => {
@@ -153,14 +159,16 @@ class CheckBox extends Component {
   };
   render() {
     return (
-      <i className={classNames(styles.rowSelectionArea)} onClick={() => this.props.onCheck()}>
-        <FontAwesomeIcon
-          onMouseEnter={this.onMouseOverCheckBox}
-          onMouseLeave={this.onMouseOutCheckBox}
-          className={classNames(this.state.checkBoxHovered ? styles.checkBoxScaleHover : styles.checkBoxScale)}
-          icon={this.props.checked ? faCheckSquare : faSquare}
-        />
-      </i>
+      <div className={classNames(styles.rowSelectionArea)} onClick={() => this.props.onCheck()}>
+        <i className={classNames(styles.checkBoxArea)}>
+          <FontAwesomeIcon
+            onMouseEnter={this.onMouseOverCheckBox}
+            onMouseLeave={this.onMouseOutCheckBox}
+            className={classNames(this.state.checkBoxHovered ? styles.checkBoxScaleHover : styles.checkBoxScale)}
+            icon={this.props.checked ? faCheckSquare : faSquare}
+          />
+        </i>
+      </div>
     );
   }
 }
@@ -183,9 +191,9 @@ class PreferenceRowName extends Component {
 
   render() {
     return (
-      <p className={classNames(styles.rowName, this.state.nameHovered ? styles.rowNameHover : "")}>
+      <span className={classNames(styles.rowName, this.state.nameHovered ? styles.rowNameHover : "")}>
         <FormattedMessage id={this.props.id} />
-      </p>
+      </span>
     );
   }
 }
