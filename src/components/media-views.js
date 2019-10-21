@@ -167,13 +167,6 @@ function createVideoTexture(url, contentType) {
           hls.attachMedia(videoEl);
 
           hls.on(HLS.Events.ERROR, function(event, data) {
-            console.log("error");
-            console.log(data);
-            if (data.details === "levelLoadTimeOut") {
-              console.log("Level load timeout, try again");
-              return;
-            }
-
             if (data.fatal) {
               switch (data.type) {
                 case HLS.ErrorTypes.NETWORK_ERROR:
@@ -195,7 +188,10 @@ function createVideoTexture(url, contentType) {
 
         // Sometimes for weird streams HLS fails to initialize.
         const setupInterval = setInterval(() => {
-          if (isReady()) {
+          // Stop retrying if the src changed.
+          const isNoLongerSrc = this.data.src !== url;
+
+          if (isReady() || isNoLongerSrc) {
             clearInterval(setupInterval);
           } else {
             console.warn("HLS failed to read video, trying again");
