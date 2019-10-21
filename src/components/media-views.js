@@ -22,6 +22,7 @@ const parseGIF = promisifyWorker(new GIFWorker());
 const isIOS = AFRAME.utils.device.isIOS();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
+const HLS_TIMEOUT = 10000; // HLS can sometimes fail, we re-try after this duration
 
 export const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
@@ -124,6 +125,8 @@ function createVideoTexture(url, contentType) {
     const texture = new THREE.VideoTexture(videoEl);
     texture.minFilter = THREE.LinearFilter;
     texture.encoding = THREE.sRGBEncoding;
+    const isReady = () =>
+      (texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width);
 
     // Set src on video to begin loading.
     if (url.startsWith("hubs://")) {
@@ -135,40 +138,63 @@ function createVideoTexture(url, contentType) {
       if (HLS.isSupported()) {
         const corsProxyPrefix = `https://${configs.CORS_PROXY_SERVER}/`;
         const baseUrl = url.startsWith(corsProxyPrefix) ? url.substring(corsProxyPrefix.length) : url;
-        const hls = new HLS({
-          xhrSetup: (xhr, u) => {
-            if (u.startsWith(corsProxyPrefix)) {
-              u = u.substring(corsProxyPrefix.length);
+        const setupHls = () => {
+          const hls = new HLS({
+            xhrSetup: (xhr, u) => {
+              if (u.startsWith(corsProxyPrefix)) {
+                u = u.substring(corsProxyPrefix.length);
+              }
+
+              // HACK HLS.js resolves relative urls internally, but our CORS proxying screws it up. Resolve relative to the original unproxied url.
+              // TODO extend HLS.js to allow overriding of its internal resolving instead
+              if (!u.startsWith("http")) {
+                u = buildAbsoluteURL(baseUrl, u.startsWith("/") ? u : `/${u}`);
+              }
+
+              xhr.open("GET", proxiedUrlFor(u));
+            }
+          });
+
+          texture.hls = hls;
+          hls.loadSource(url);
+          hls.attachMedia(videoEl);
+
+          hls.on(HLS.Events.ERROR, function(event, data) {
+            console.log("error");
+            console.log(data);
+            if (data.details === "levelLoadTimeOut") {
+              console.log("Level load timeout, try again");
+              return;
             }
 
-            // HACK HLS.js resolves relative urls internally, but our CORS proxying screws it up. Resolve relative to the original unproxied url.
-            // TODO extend HLS.js to allow overriding of its internal resolving instead
-            if (!u.startsWith("http")) {
-              u = buildAbsoluteURL(baseUrl, u.startsWith("/") ? u : `/${u}`);
+            if (data.fatal) {
+              switch (data.type) {
+                case HLS.ErrorTypes.NETWORK_ERROR:
+                  // try to recover network error
+                  hls.startLoad();
+                  break;
+                case HLS.ErrorTypes.MEDIA_ERROR:
+                  hls.recoverMediaError();
+                  break;
+                default:
+                  reject(event);
+                  return;
+              }
             }
+          });
+        };
 
-            xhr.open("GET", proxiedUrlFor(u));
+        setupHls();
+
+        // Sometimes for weird streams HLS fails to initialize.
+        const setupInterval = setInterval(() => {
+          if (isReady()) {
+            clearInterval(setupInterval);
+          } else {
+            console.warn("HLS failed to read video, trying again");
+            setupHls();
           }
-        });
-        texture.hls = hls;
-        hls.loadSource(url);
-        hls.attachMedia(videoEl);
-        hls.on(HLS.Events.ERROR, function(event, data) {
-          if (data.fatal) {
-            switch (data.type) {
-              case HLS.ErrorTypes.NETWORK_ERROR:
-                // try to recover network error
-                hls.startLoad();
-                break;
-              case HLS.ErrorTypes.MEDIA_ERROR:
-                hls.recoverMediaError();
-                break;
-              default:
-                reject(event);
-                return;
-            }
-          }
-        });
+        }, HLS_TIMEOUT);
         // If not, see if native support will work
       } else if (videoEl.canPlayType(contentType)) {
         videoEl.src = url;
@@ -184,7 +210,7 @@ function createVideoTexture(url, contentType) {
     // NOTE: We used to use the canplay event here to yield the texture, but that fails to fire on iOS Safari
     // and also sometimes in Chrome it seems.
     const poll = () => {
-      if ((texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width)) {
+      if (isReady()) {
         resolve(texture);
       } else {
         setTimeout(poll, 500);
