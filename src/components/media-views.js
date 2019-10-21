@@ -872,6 +872,15 @@ AFRAME.registerComponent("media-image", {
         geometry = new THREE.SphereBufferGeometry(1, 64, 32);
         // invert the geometry on the x-axis so that all of the faces point inward
         geometry.scale(-1, 1, 1);
+
+        // Flip uvs on the geometry
+        if (!texture.flipY) {
+          const uvs = geometry.attributes.uv.array;
+
+          for (let i = 1; i < uvs.length; i += 2) {
+            uvs[i] = 1 - uvs[i];
+          }
+        }
       } else {
         geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
         material.side = THREE.DoubleSide;
