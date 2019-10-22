@@ -65,6 +65,10 @@ class NumberRangeSelector extends Component {
           <input
             type="text"
             value={this.props.curr}
+            onClick={e => {
+              e.target.focus();
+              e.target.select();
+            }}
             onChange={e => {
               const num = parseInt(e.target.value);
               this.props.onSelect(num ? num : 0, true);

@@ -138,6 +138,7 @@ $widescreenControlsWidth: 50%;
     display:flex;
     width: 15%;
     justify-content: center;
+    cursor: pointer;
 
     input[type=text] {
       width: 67%;
@@ -146,6 +147,7 @@ $widescreenControlsWidth: 50%;
       font-weight: bold;
       background: $dark-grey;
       color: white;
+      cursor: pointer;
     }
   }
   :local(.rangeSlider) {
