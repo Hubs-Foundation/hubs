@@ -12,8 +12,6 @@ function getServiceDisplayName(service) {
       return "Reticulum";
     case "ita":
       return "Ita";
-    case "app-config":
-      return "App Config";
     default:
       return null;
   }
