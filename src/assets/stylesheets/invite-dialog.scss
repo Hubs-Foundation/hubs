@@ -12,12 +12,12 @@
   text-align: center;
   position: relative;
   font-size: 1.0em;
-  color: white;
+  color: $action-text;
   pointer-events: auto;
   z-index: 3;
   
   a {
-    color: white;
+    color: $action-text;
     text-decoration: underline;
     font-weight: bold;
   }
