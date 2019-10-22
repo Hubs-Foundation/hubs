@@ -1,4 +1,11 @@
 @import 'shared.scss';
+
+$smallScreenWidth : 600px;
+$itemHeight : 2.5rem;
+$defaultFontSize: 1.4rem;
+$hoverFontSize: 1.6rem;
+$widescreenControlsWidth: 50%;
+
 :local(.root) {
   position: absolute;
   box-sizing: border-box;
@@ -8,11 +15,6 @@
   flex-flow: column;
   background: $light-grey;
   align-items: center;
-
-  span {
-    margin-block-start: 0.2rem;
-    margin-block-end: 0.2rem;
-  }
 }
 :local(.float-right) {
   top: 1rem;
@@ -30,19 +32,24 @@
   display: flex;
   flex-flow: row;
   align-items: center;
-  background: $darkest-grey;
-  height: 2.5em;
+  background: lightgreen;
+  height: $itemHeight;
+  @media( max-width:$smallScreenWidth ) {
+    width: 100%;
+    flex-flow: column;
+    height: 2*$itemHeight;
+  }
 }
 :local(.rowScale) {
   span {
-    font-size: 1.0rem;
-    background: red;
+    font-size: $defaultFontSize;
+    background: lightsteelblue;
   }
 }
 :local(.rowScaleHover) {
   span {
-    font-size: 1.2rem;
-    background: pink;
+    font-size: $hoverFontSize;
+    background: lightblue;
   }
 }
 :local(.rowName) {
@@ -50,21 +57,27 @@
   flex-flow: column;
   justify-content: space-around;
   width: 50%;
+  height: $itemHeight;
   text-align: end;
-  margin-inline-end: 1rem;
-  background: green;
-
-  span {
-    background: white;
+  @media( max-width:$smallScreenWidth ) {
+    width: 100%;
+    text-align: center;
+    margin-inline-end: 0rem;
   }
+  margin-inline-end: 1rem;
 }
 :local(.rowSelectionArea) {
+  height: $itemHeight;
   width: 50%;
+  @media( max-width:$smallScreenWidth ) {
+    width: 100%;
+    justify-content: center;
+  }
   display: flex;
   flex-flow: row;
   align-items: center;
   text-align: center;
-  background: purple;
+  background: lightslategray;
 
   svg {
     cursor: pointer;
@@ -72,7 +85,7 @@
 }
 
 :local(.flipSelector){
-  width: 40%;
+  width: $widescreenControlsWidth;
   display: flex;
   flex-flow: row;
   justify-content: space-between;
@@ -113,13 +126,17 @@
 :local(.numberWithRange){
   display: flex;
   flex-flow: row;
-  width: 50%;
-  justify-content: space-between;
+  width: $widescreenControlsWidth;
+  @media( max-width:$smallScreenWidth ) {
+    width: 100%;
+    justify-content: center;
+  }
+  justify-content: flex-start;
   align-items: center;
 
   :local(.numberInNumberWithRange) {
     display:flex;
-    width: 30%;
+    width: 15%;
     justify-content: center;
 
     input[type=text] {
@@ -131,16 +148,17 @@
       color: white;
     }
   }
+  :local(.rangeSlider) {
+    width: 35%;
+    background: lightseagreen;
+    max-height: 2.5rem;
+  }
 }
 
-:local(.rangeSlider) {
-  width: 70%;
-  background: lightseagreen;
-}
 
 :local(.checkBoxArea) {
   display: flex;
-  width: 20%;
+  width: $widescreenControlsWidth;
   justify-content: center;
   color: lightblue;
 }

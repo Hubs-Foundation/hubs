@@ -33,8 +33,31 @@ class NumberRangeSelector extends Component {
     playHoverSound: PropTypes.func
   };
   state = {
-    displayCurr: 0
+    isDragging: false
   };
+  constructor(props) {
+    super(props);
+    this.myRoot = React.createRef();
+    this.stopDragging = this.stopDragging.bind(this);
+    this.drag = this.drag.bind(this);
+    window.addEventListener("mouseup", this.stopDragging);
+    window.addEventListener("mousemove", this.drag);
+  }
+  componentWillUnmount() {
+    window.removeEventListener("mouseup", this.stopDragging);
+    window.removeEventListener("mousemove", this.drag);
+  }
+
+  stopDragging() {
+    this.setState({ isDragging: false });
+  }
+
+  drag(e) {
+    if (!this.state.isDragging) return;
+    const t = Math.max(0, Math.min((e.clientX - this.myRoot.current.offsetLeft) / this.myRoot.current.clientWidth, 1));
+    this.props.onSelect(this.props.min + t * (this.props.max - this.props.min));
+  }
+
   render() {
     return (
       <div className={classNames(styles.numberWithRange)}>
@@ -51,7 +74,19 @@ class NumberRangeSelector extends Component {
             }}
           />
         </div>
-        <div className={classNames(styles.rangeSlider)}>
+        <div
+          ref={this.myRoot}
+          className={classNames(styles.rangeSlider)}
+          onMouseDown={e => {
+            e.preventDefault();
+            this.setState({ isDragging: true });
+            const t = Math.max(
+              0,
+              Math.min((e.clientX - this.myRoot.current.offsetLeft) / this.myRoot.current.clientWidth, 1)
+            );
+            this.props.onSelect(this.props.min + t * (this.props.max - this.props.min));
+          }}
+        >
           <input
             type="range"
             min={this.props.min}
@@ -63,12 +98,12 @@ class NumberRangeSelector extends Component {
             onMouseEnter={() => {
               this.props.playHoverSound && this.props.playHoverSound();
             }}
-            onMouseUp={() => {
-              this.props.onSelect(this.props.curr, true);
-            }}
-            onMouseDown={() => {
-              this.props.onSelect(this.props.curr, true);
-            }}
+            //onMouseUp={() => {
+            //  this.props.onSelect(this.props.curr, true);
+            //}}
+            //onMouseDown={() => {
+            //  this.props.onSelect(this.props.curr, true);
+            //}}
           />
         </div>
       </div>
