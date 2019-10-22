@@ -19,9 +19,6 @@ const fetchJson = (url, options) => {
   if (!requestHeaders.has("Content-Type") && !(options && options.body && options.body instanceof FormData)) {
     requestHeaders.set("Content-Type", "application/json");
   }
-  if (options.user && options.user.authenticated && options.user.token) {
-    requestHeaders.set("Authorization", `Bearer ${options.user.token}`);
-  }
 
   return fetch(url, { ...options, headers: requestHeaders })
     .then(response =>
