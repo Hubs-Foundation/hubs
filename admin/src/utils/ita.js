@@ -1,5 +1,7 @@
+import Store from "hubs/src/storage/store";
 import configs from "./configs";
 
+const store = new Store();
 const serviceNames = configs.CONFIGURABLE_SERVICES.split(",");
 
 function getServiceDisplayName(service) {
@@ -10,17 +12,22 @@ function getServiceDisplayName(service) {
       return "Reticulum";
     case "ita":
       return "Ita";
+    case "app-config":
+      return "App Config";
     default:
       return null;
   }
 }
 
 function getEndpoint(path) {
-  return `${configs.ITA_SERVER}/${path}`;
+  return `${configs.ITA_SERVER}/api/ita/${path}`;
 }
 
 function getSchemas() {
-  return fetch(getEndpoint("schemas")).then(resp => resp.json());
+  return fetch(
+    getEndpoint("schemas"),
+    { headers: { Authorization: `Bearer ${store.state.credentials.token}` } }
+  ).then(resp => resp.json());
 }
 
 function getConfig(service) {
