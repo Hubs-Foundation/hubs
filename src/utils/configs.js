@@ -2,7 +2,6 @@
 const configs = {};
 
 [
-  "DEFAULT_SCENE_SID",
   "RETICULUM_SERVER",
   "THUMBNAIL_SERVER",
   "CORS_PROXY_SERVER",

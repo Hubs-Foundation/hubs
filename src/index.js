@@ -1,5 +1,3 @@
-import configs from "./utils/configs";
-
 import React from "react";
 import ReactDOM from "react-dom";
 
@@ -62,7 +60,7 @@ window.addEventListener("beforeinstallprompt", e => {
 
 (async () => {
   if (qs.get("new") !== null) {
-    createAndRedirectToNewHub(null, configs.DEFAULT_SCENE_SID, true);
+    createAndRedirectToNewHub(null, null, true);
     return;
   }
 
