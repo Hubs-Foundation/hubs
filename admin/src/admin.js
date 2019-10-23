@@ -27,6 +27,7 @@ import { ServiceEditor } from "./react-components/service-editor";
 import { ServerAccess } from "./react-components/server-access";
 import { DataTransfer } from "./react-components/data-transfer";
 import { ImportContent } from "./react-components/import-content";
+import { AppSettings } from "./react-components/app-settings";
 import Store from "hubs/src/storage/store";
 import registerTelemetry from "hubs/src/telemetry";
 
@@ -150,8 +151,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const importRoute = <Route exact path="/import" component={ImportContent} />;
   const accessRoute = <Route exact path="/server-access" component={ServerAccess} />;
   const dtRoute = <Route exact path="/data-transfer" component={DataTransfer} />;
+  const appSettingsRoute = <Route exact path="/app-settings" component={AppSettings} />;
 
-  const customRoutes = [homeRoute, importRoute, accessRoute, dtRoute];
+  const customRoutes = [homeRoute, importRoute, accessRoute, dtRoute, appSettingsRoute];
 
   if (itaSchemas) {
     customRoutes.push(

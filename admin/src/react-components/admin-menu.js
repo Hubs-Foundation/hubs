@@ -132,6 +132,18 @@ class Menu extends Component {
               className={classNames(this.props.classes.item, this.props.classes.nested)}
               component={NavLink}
               activeStyle={{ backgroundColor: "#D0D0D0" }}
+              key="app-settings"
+              to="/app-settings"
+            >
+              <ListItemIcon className={this.props.classes.icon}>
+                <ViewIcon />
+              </ListItemIcon>
+              <ListItemText className={this.props.classes.text} primary="App Settings" />
+            </ListItem>
+            <ListItem
+              className={classNames(this.props.classes.item, this.props.classes.nested)}
+              component={NavLink}
+              activeStyle={{ backgroundColor: "#D0D0D0" }}
               key="server-setup"
               to="/server-setup"
             >
