@@ -13,8 +13,12 @@ const ask = q => new Promise(res => rl.question(q, res));
 (async () => {
   console.log("Logging into Hubs Cloud.\n");
   const host = await ask("Host (eg hubs.mozilla.com): ");
+  if (!host) {
+    console.log("Invalid host.");
+    process.exit(1);
+  }
 
-  const url = `https://${host}/api/v1/meta`;
+  const url = new URL(`https://${host}/api/v1/meta`);
   try {
     const res = await fetch(url);
     const meta = await res.json();
@@ -29,7 +33,6 @@ const ask = q => new Promise(res => rl.question(q, res));
 
   configs.RETICULUM_SERVER = host;
   configs.RETICULUM_SOCKET_PROTOCOL = "wss:";
-  configs.RETICULUM_SOCKET_PORT = 443;
 
   const socket = await connectToReticulum(false, null, Socket);
   const store = new Store();
@@ -49,6 +52,6 @@ const ask = q => new Promise(res => rl.question(q, res));
 
   writeFileSync(".ret.credentials", JSON.stringify(creds));
   rl.close();
-  console.log("Logged in. Credentials written to .ret.credentials. Run npm run logout to remove credentials.");
+  console.log("Login successful.\nCredentials written to .ret.credentials. Run npm run logout to remove credentials.");
   process.exit(0);
 })();

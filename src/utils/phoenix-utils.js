@@ -72,9 +72,7 @@ export async function connectToReticulum(debug = false, params = null, socketCla
     const reticulumMeta = await getReticulumMeta();
     socketHost = socketHost || configs.RETICULUM_SOCKET_SERVER || reticulumMeta.phx_host;
     socketPort =
-      socketPort ||
-      configs.RETICULUM_SOCKET_PORT ||
-      (hasReticulumServer() ? new URL(`${socketProtocol}//${configs.RETICULUM_SERVER}`).port : "443");
+      socketPort || (hasReticulumServer() ? new URL(`${socketProtocol}//${configs.RETICULUM_SERVER}`).port : "443");
     return `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}`;
   };
 
