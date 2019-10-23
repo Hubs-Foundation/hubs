@@ -23,92 +23,6 @@ const messageIdForOption = {
   openMic: "preferences.openMic"
 };
 
-class NumberRangeSelector extends Component {
-  static propTypes = {
-    min: PropTypes.number,
-    max: PropTypes.number,
-    curr: PropTypes.number,
-    onSelect: PropTypes.func,
-    playHoverSound: PropTypes.func
-  };
-  state = {
-    isDragging: false
-  };
-  constructor(props) {
-    super(props);
-    this.myRoot = React.createRef();
-    this.stopDragging = this.stopDragging.bind(this);
-    this.drag = this.drag.bind(this);
-    window.addEventListener("mouseup", this.stopDragging);
-    window.addEventListener("mousemove", this.drag);
-  }
-  componentWillUnmount() {
-    window.removeEventListener("mouseup", this.stopDragging);
-    window.removeEventListener("mousemove", this.drag);
-  }
-
-  stopDragging() {
-    this.setState({ isDragging: false });
-  }
-
-  drag(e) {
-    if (!this.state.isDragging) return;
-    const t = Math.max(0, Math.min((e.clientX - this.myRoot.current.offsetLeft) / this.myRoot.current.clientWidth, 1));
-    this.props.onSelect(this.props.min + t * (this.props.max - this.props.min));
-  }
-
-  render() {
-    return (
-      <div className={classNames(styles.numberWithRange)}>
-        <div className={classNames(styles.numberInNumberWithRange)}>
-          <input
-            type="text"
-            value={this.props.curr}
-            onClick={e => {
-              e.preventDefault();
-              e.target.focus();
-              e.target.select();
-            }}
-            onChange={e => {
-              const num = parseInt(e.target.value);
-              this.props.onSelect(num ? num : 0, true);
-            }}
-            onMouseEnter={() => {
-              this.props.playHoverSound && this.props.playHoverSound();
-            }}
-          />
-        </div>
-        <div
-          ref={this.myRoot}
-          className={classNames(styles.rangeSlider)}
-          onMouseDown={e => {
-            e.preventDefault();
-            this.setState({ isDragging: true });
-            const t = Math.max(
-              0,
-              Math.min((e.clientX - this.myRoot.current.offsetLeft) / this.myRoot.current.clientWidth, 1)
-            );
-            this.props.onSelect(this.props.min + t * (this.props.max - this.props.min));
-          }}
-        >
-          <input
-            type="range"
-            min={this.props.min}
-            max={this.props.max}
-            value={this.props.curr}
-            onChange={e => {
-              this.props.onSelect(e.target.value);
-            }}
-            onMouseEnter={() => {
-              this.props.playHoverSound && this.props.playHoverSound();
-            }}
-          />
-        </div>
-      </div>
-    );
-  }
-}
-
 class FlipSelector extends Component {
   static propTypes = {
     options: PropTypes.array,
@@ -176,64 +90,6 @@ class FlipSelector extends Component {
   }
 }
 
-class PreferenceRowName extends Component {
-  static propTypes = {
-    id: PropTypes.string
-  };
-
-  state = {
-    nameHovered: false
-  };
-  onMouseOverName = () => {
-    this.setState({ nameHovered: true });
-  };
-
-  onMouseOutName = () => {
-    this.setState({ nameHovered: false });
-  };
-
-  render() {
-    return (
-      <span className={classNames(styles.rowName, this.state.nameHovered ? styles.rowNameHover : "")}>
-        <FormattedMessage id={this.props.id} />
-      </span>
-    );
-  }
-}
-
-class PreferenceRow extends Component {
-  static propTypes = {
-    children: PropTypes.node.isRequired
-  };
-  state = {
-    hovered: false
-  };
-
-  onMouseOver = () => {
-    this.setState({ hovered: true });
-  };
-  onMouseOut = () => {
-    this.setState({ hovered: false });
-  };
-
-  render() {
-    return (
-      <div
-        className={classNames(styles.row, this.state.hovered ? styles.rowScaleHover : styles.rowScale)}
-        onMouseEnter={this.onMouseOver}
-        onMouseLeave={this.onMouseOut}
-      >
-        {this.props.children}
-      </div>
-    );
-  }
-}
-
-const TURNING_MODE_OPTIONS = ["snap", "smooth"];
-const TOUCHSCREEN_MOVEMENT_SCHEME_OPTIONS = ["joysticks", "pinch"];
-const MIC_ACTIVATION_SCHEME_OPTIONS = ["pushToTalk", "openMic"];
-const MATERIAL_OPTIONS = ["auto", "hi-res", "low-res"];
-
 export default class PreferencesScreen extends Component {
   static propTypes = {
     onClose: PropTypes.func,
@@ -246,96 +102,12 @@ export default class PreferencesScreen extends Component {
     turnSnapDegree: 45
   };
   componentDidMount() {
-    const prefs = this.props.store.state.preferences;
-    this.setState({
-      muteMicOnEntry: !!prefs.muteMicOnEntry,
-      turningModeCurrOption: prefs.turningMode ? TURNING_MODE_OPTIONS.indexOf(prefs.turningMode) : 0,
-      micActivationSchemeCurrOption: prefs.micActivationScheme
-        ? MIC_ACTIVATION_SCHEME_OPTIONS.indexOf(prefs.micActivationScheme)
-        : 0,
-      turnSnapDegree: prefs.turnSnapDegree ? prefs.turnSnapDegree : 45
-    });
     waitForDOMContentLoaded().then(() => {
       this.sfx = AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem;
     });
   }
 
   render() {
-    const snapTurnRow = (
-      <PreferenceRow key="preferences.turningMode">
-        <PreferenceRowName id="preferences.turningMode" />
-        <FlipSelector
-          onSelect={(selection, currOption) => {
-            this.props.store.update({ preferences: { turningMode: selection } });
-            this.setState({ turningModeCurrOption: currOption });
-            this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
-          }}
-          playHoverSound={() => {
-            this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_HOVER);
-          }}
-          currOption={this.state.turningModeCurrOption}
-          options={TURNING_MODE_OPTIONS}
-        />
-      </PreferenceRow>
-    );
-    //const micActivationSchemeRow = (
-    //  <PreferenceRow key="preferences.micActivationScheme">
-    //    <PreferenceRowName id="preferences.micActivationScheme" />
-    //    <FlipSelector
-    //      onSelect={(selection, currOption) => {
-    //        this.props.store.update({ preferences: { micActivationScheme: selection } });
-    //        this.setState({ micActivationSchemeCurrOption: currOption });
-    //        this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
-    //      }}
-    //      playHoverSound={() => {
-    //        this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_HOVER);
-    //      }}
-    //      currOption={this.state.micActivationSchemeCurrOption}
-    //      options={MIC_ACTIVATION_SCHEME_OPTIONS}
-    //    />
-    //  </PreferenceRow>
-    //);
-    // const micPrefRow = (
-    //   <PreferenceRow key="preferences.muteMicOnEntry">
-    //     <PreferenceRowName id="preferences.muteMicOnEntry" />
-    //     <CheckBox
-    //       onCheck={() => {
-    //         const muteMicOnEntry = !this.props.store.state.preferences.muteMicOnEntry;
-    //         this.props.store.update({
-    //           preferences: { muteMicOnEntry }
-    //         });
-    //         this.setState({ muteMicOnEntry });
-    //         this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
-    //       }}
-    //       checked={this.state.muteMicOnEntry}
-    //       playHoverSound={() => {
-    //         this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_HOVER);
-    //       }}
-    //     />
-    //   </PreferenceRow>
-    // );
-    const turnSnapDegree = (
-      <PreferenceRow key="preferences.turnSnapDegree">
-        <PreferenceRowName id="preferences.turnSnapDegree" />
-        <NumberRangeSelector
-          min={1}
-          max={90}
-          curr={this.state.turnSnapDegree}
-          onSelect={(value, playSound) => {
-            const turnSnapDegree = parseInt(value);
-            this.props.store.update({
-              preferences: { turnSnapDegree }
-            });
-            this.setState({ turnSnapDegree });
-            playSound && this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
-          }}
-          playHoverSound={() => {
-            this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_HOVER);
-          }}
-        />
-      </PreferenceRow>
-    );
-    // TODO: Add search text field and sort rows by fuzzy search
     const preferenceListItem = props => {
       return (
         <PreferenceListItem
@@ -351,7 +123,7 @@ export default class PreferencesScreen extends Component {
         />
       );
     };
-    const rowInfo = [
+    const itemInfos = [
       { key: "disableBatching", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
       { key: "enableFlyMode", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
       { key: "enableSmoothLocomotion", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
@@ -388,12 +160,14 @@ export default class PreferencesScreen extends Component {
         options: [{ value: "pushToTalk", text: "Push to Talk" }, { value: "openMic", text: "Open Mic" }]
       },
       {
-        key: "materialSettings",
-        prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-        options: [{ value: "auto", text: "Auto" }, { value: "hiRes", text: "high" }, { value: "lowRes", text: "low" }]
+        key: "baseMovementSpeed",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+        min: 0,
+        max: 10
       }
     ];
-    const rows = rowInfo.map(preferenceListItem);
+    // TODO: Add search text field and sort rows by fuzzy search
+    const items = itemInfos.map(preferenceListItem);
 
     return (
       <IntlProvider locale={lang} messages={messages}>
@@ -407,7 +181,7 @@ export default class PreferencesScreen extends Component {
                 <span>Preferences</span>
               </div>
             </div>
-            <div className={classNames(styles.scrollingContent)}>{rows}</div>
+            <div className={classNames(styles.scrollingContent)}>{items}</div>
           </div>
         </div>
       </IntlProvider>

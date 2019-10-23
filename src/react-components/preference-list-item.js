@@ -2,9 +2,11 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/preferences-screen.scss";
 import classNames from "classnames";
+import { SOUND_PREFERENCE_MENU_SELECT } from "../systems/sound-effects-system";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import { CheckBox } from "./checkbox.js";
+import { NumberRangeSelector } from "./number-range-selector.js";
 addLocaleData([...en]);
 export const PREFERENCE_LIST_ITEM_TYPE = {
   CHECK_BOX: 1,
@@ -19,7 +21,6 @@ export class PreferenceListItem extends Component {
     prefType: PropTypes.number,
     min: PropTypes.number,
     max: PropTypes.number,
-    currentValue: PropTypes.number,
     onChange: PropTypes.func,
     options: PropTypes.array
   };
@@ -68,6 +69,20 @@ export class PreferenceListItem extends Component {
           >
             {options}
           </select>
+        );
+      case PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE:
+        return (
+          <NumberRangeSelector
+            min={this.props.min}
+            max={this.props.max}
+            currentValue={this.props.store.state.preferences[this.props.storeKey]}
+            onChange={(value, playSound) => {
+              this.props.store.update({
+                preferences: { [this.props.storeKey]: value }
+              });
+              playSound && this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
+            }}
+          />
         );
       default:
         return <div />;

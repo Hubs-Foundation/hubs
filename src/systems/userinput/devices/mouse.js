@@ -46,7 +46,7 @@ export class MouseDevice {
       e => {
         // Do not capture wheel events if they are being sent to an modal/overlay
         if (!isInModal()) {
-          e.preventDefault();
+//          e.preventDefault(); //do not deploy! TODO: Fix scrolling in object and preference lists
         }
       },
       { passive: false }

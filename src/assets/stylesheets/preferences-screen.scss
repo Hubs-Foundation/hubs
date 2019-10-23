@@ -1,6 +1,6 @@
 @import 'shared.scss';
 
-$smallScreenWidth : 700px;
+$smallScreenWidth : 1000px;
 $itemHeight : 2.5rem;
 $defaultFontSize: 1.4rem;
 $hoverFontSize: 1.6rem;
@@ -37,12 +37,10 @@ $titleFontWeight: bolder;
     justify-content: space-around;
     height: $itemHeight;
     @media( min-width:$smallScreenWidth+1 ) {
-      width: 50%;
       text-align: end;
       justify-content: space-around;
     }
     @media( max-width:$smallScreenWidth ) {
-      width: 100%;
       text-align: center;
       justify-content: center;
       align-items: center;
@@ -50,23 +48,32 @@ $titleFontWeight: bolder;
   }
   :local(.left) {
     @media( min-width:$smallScreenWidth+1 ) {
+      width: 70%;
       margin-inline-end: 1rem;
     }
     @media( max-width:$smallScreenWidth ) {
+      width: 100%;
       margin-inline-end: 0rem;
     }
   }
   :local(.right) {
     @media( min-width:$smallScreenWidth+1 ) {
+      width: 30%;
       margin-inline-start: 1rem;
     }
     @media( max-width:$smallScreenWidth ) {
+      width: 100%;
       margin-inline-start: 0rem;
     }
   }
   font-size: $defaultFontSize;
   select {
-    width: 50%;
+    @media( min-width:$smallScreenWidth+1 ) {
+      width: 100%;
+    }
+    @media( max-width:$smallScreenWidth ) {
+      width: 80%;
+    }
     height: $itemHeight;
     font-size: $defaultFontSize;
   }
@@ -79,10 +86,10 @@ $titleFontWeight: bolder;
   bottom: 0px;
   width: 100%;
   overflow-y: auto;
+  background: aliceblue;
   :local(.scrollingContent) {
     display: flex;
     flex-flow: column;
-    // background: $light-grey;
     align-items: center;
     margin-top: $titleHeight;
   }
