@@ -49,6 +49,6 @@ const ask = q => new Promise(res => rl.question(q, res));
 
   writeFileSync(".ret.credentials", JSON.stringify(creds));
   rl.close();
-  console.log("Logged in. Run npm run logout to remove credentials.");
+  console.log("Logged in. Credentials written to .ret.credentials. Run npm run logout to remove credentials.");
   process.exit(0);
 })();
