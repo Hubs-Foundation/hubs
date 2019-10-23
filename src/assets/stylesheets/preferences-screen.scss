@@ -1,22 +1,26 @@
 @import 'shared.scss';
 
-$smallScreenWidth : 1000px;
+$smallScreenWidth : 800px;
 $itemHeight : 2.5rem;
 $defaultFontSize: 1.4rem;
 $hoverFontSize: 1.6rem;
-$widescreenControlsWidth: 50%;
+$widescreenControlsWidth: 100%;
 $titleFontSize: 1.6rem;
 $titleHeight: 3.0rem;
 $titleFontWeight: bolder;
+$backgroundColor: lightslategray;
 
 :local(.root) {
   :local(.hovered) {
     background: lightsteelblue;
   }
+  :local(.selectHovered) {
+    background: aliceblue;
+  }
 }
 
 :local(.preferenceListItem){
-  background: lightslategray;
+  background: $backgroundColor;
   display: flex;
   align-items: center;
   @media( min-width:$smallScreenWidth+1 ) {
@@ -76,6 +80,7 @@ $titleFontWeight: bolder;
     }
     height: $itemHeight;
     font-size: $defaultFontSize;
+    background-color: $backgroundColor;
   }
 }
 
@@ -129,7 +134,7 @@ $titleFontWeight: bolder;
   display: flex;
   flex-flow: row;
   align-items: center;
-  background: lightslategray;
+  background: $backgroundColor;
   height: $itemHeight;
   @media( max-width:$smallScreenWidth ) {
     width: 100%;
@@ -228,7 +233,7 @@ $titleFontWeight: bolder;
 
   :local(.numberInNumberWithRange) {
     display:flex;
-    width: 15%;
+    width: 30%;
     justify-content: center;
     cursor: pointer;
 
@@ -243,7 +248,7 @@ $titleFontWeight: bolder;
     }
   }
   :local(.rangeSlider) {
-    width: 35%;
+    width: 70%;
     // background: lightslategray;
     max-height: 2.5rem;
   }

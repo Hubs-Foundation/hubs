@@ -190,7 +190,7 @@ class UIRoot extends Component {
     didConnectToNetworkedScene: false,
     noMoreLoadingUpdates: false,
     hideLoader: false,
-    showPrefs: false,
+    showPrefs: true,
     watching: false,
     isStreaming: false,
     showStreamingTip: false,
@@ -1379,7 +1379,25 @@ class UIRoot extends Component {
         </IntlProvider>
       );
     if (isExited) return this.renderExitedPane();
-    if (!this.state.showPrefs && isLoading) {
+    if (isLoading && this.state.showPrefs) {
+      return (
+        <div>
+          <Loader
+            scene={this.props.scene}
+            finished={this.state.noMoreLoadingUpdates}
+            onLoaded={this.onLoadingFinished}
+            connected={this.state.didConnectToNetworkedScene}
+          />
+          <PreferencesScreen
+            onClose={() => {
+              this.setState({ showPrefs: false });
+            }}
+            store={this.props.store}
+          />
+        </div>
+      );
+    }
+    if (isLoading) {
       return (
         <Loader
           scene={this.props.scene}
@@ -1389,8 +1407,7 @@ class UIRoot extends Component {
         />
       );
     }
-
-    if (this.state.showPrefs)
+    if (this.state.showPrefs) {
       return (
         <PreferencesScreen
           onClose={() => {
@@ -1399,6 +1416,8 @@ class UIRoot extends Component {
           store={this.props.store}
         />
       );
+    }
+
     if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();
     if (this.props.isBotMode) return this.renderBotMode();
 

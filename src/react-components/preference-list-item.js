@@ -3,11 +3,9 @@ import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/preferences-screen.scss";
 import classNames from "classnames";
 import { SOUND_PREFERENCE_MENU_SELECT } from "../systems/sound-effects-system";
-import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
-import en from "react-intl/locale-data/en";
+import { FormattedMessage } from "react-intl";
 import { CheckBox } from "./checkbox.js";
 import { NumberRangeSelector } from "./number-range-selector.js";
-addLocaleData([...en]);
 export const PREFERENCE_LIST_ITEM_TYPE = {
   CHECK_BOX: 1,
   FLIP_SELECTOR: 2,
@@ -25,7 +23,8 @@ export class PreferenceListItem extends Component {
     options: PropTypes.array
   };
   state = {
-    hovered: false
+    hovered: false,
+    selectHovered: false
   };
   UNSAFE_componentWillMount() {
     this.renderControls = this.renderControls.bind(this);
@@ -63,6 +62,16 @@ export class PreferenceListItem extends Component {
         });
         return (
           <select
+            className={classNames({
+              [styles.hovered]: this.state.hovered,
+              [styles.selectHovered]: this.state.selectHovered
+            })}
+            onMouseEnter={() => {
+              this.setState({ selectHovered: true });
+            }}
+            onMouseLeave={() => {
+              this.setState({ selectHovered: false });
+            }}
             onChange={e => {
               this.props.store.update({ preferences: { [this.props.storeKey]: e.target.value } });
             }}

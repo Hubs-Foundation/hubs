@@ -4,91 +4,12 @@ import styles from "../assets/stylesheets/preferences-screen.scss";
 import classNames from "classnames";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
-import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
-import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
-import { SOUND_PREFERENCE_MENU_HOVER, SOUND_PREFERENCE_MENU_SELECT } from "../systems/sound-effects-system";
-import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
+import { IntlProvider, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import { lang, messages } from "../utils/i18n";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { PreferenceListItem, PREFERENCE_LIST_ITEM_TYPE } from "./preference-list-item";
 addLocaleData([...en]);
-
-const messageIdForOption = {
-  snap: "preferences.turningModeSnap",
-  smooth: "preferences.turningModeSmooth",
-  joysticks: "preferences.touchscreenJoysticks",
-  pinch: "preferences.touchscreenPinch",
-  pushToTalk: "preferences.pushToTalk",
-  openMic: "preferences.openMic"
-};
-
-class FlipSelector extends Component {
-  static propTypes = {
-    options: PropTypes.array,
-    onSelect: PropTypes.func,
-    currOption: PropTypes.number,
-    playHoverSound: PropTypes.func
-  };
-  state = {
-    nextOptionHovered: false,
-    prevOptionHovered: false
-  };
-  onMouseOverNextOption = () => {
-    this.setState({ nextOptionHovered: true });
-    this.props.playHoverSound && this.props.playHoverSound();
-  };
-  onMouseOutNextOption = () => {
-    this.setState({ nextOptionHovered: false });
-  };
-  onMouseOverPrevOption = () => {
-    this.setState({ prevOptionHovered: true });
-    this.props.playHoverSound && this.props.playHoverSound();
-  };
-  onMouseOutPrevOption = () => {
-    this.setState({ prevOptionHovered: false });
-  };
-  render() {
-    return (
-      <div className={classNames(styles.rowSelectionArea)}>
-        <div className={classNames(styles.flipSelector)}>
-          <FontAwesomeIcon
-            fixedWidth
-            size="lg"
-            onMouseEnter={this.onMouseOverPrevOption}
-            onMouseLeave={this.onMouseOutPrevOption}
-            onClick={e => {
-              e.preventDefault();
-              const currOption = (this.props.currOption + this.props.options.length - 1) % this.props.options.length;
-              this.props.onSelect(this.props.options[currOption], currOption);
-              this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
-            }}
-            className={classNames(
-              this.state.prevOptionHovered ? styles.prevOptionHoveredScale : styles.prevOptionScale
-            )}
-            icon={faAngleLeft}
-          />
-          <FormattedMessage id={messageIdForOption[this.props.options[this.props.currOption]]} />
-          <FontAwesomeIcon
-            fixedWidth
-            size="lg"
-            onMouseEnter={this.onMouseOverNextOption}
-            onMouseLeave={this.onMouseOutNextOption}
-            onClick={e => {
-              e.preventDefault();
-              const currOption = (this.props.currOption + 1) % this.props.options.length;
-              this.props.onSelect(this.props.options[currOption], currOption);
-            }}
-            className={classNames(
-              this.state.nextOptionHovered ? styles.nextOptionHoveredScale : styles.nextOptionScale
-            )}
-            icon={faAngleRight}
-          />
-        </div>
-      </div>
-    );
-  }
-}
 
 export default class PreferencesScreen extends Component {
   static propTypes = {

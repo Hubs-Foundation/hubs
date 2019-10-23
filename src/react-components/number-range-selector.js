@@ -42,7 +42,7 @@ export class NumberRangeSelector extends Component {
         <div className={classNames(styles.numberInNumberWithRange)}>
           <input
             type="text"
-            value={this.props.currentValue}
+            value={this.props.currentValue.toFixed(2)}
             onClick={e => {
               e.preventDefault();
               e.target.focus();
