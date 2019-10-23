@@ -10,7 +10,7 @@ if (!existsSync(".ret.credentials")) {
 }
 
 const { host, token } = JSON.parse(readFileSync(".ret.credentials"));
-console.log(`Deploying Hubs to ${host}.`);
+console.log(`Deploying to ${host}.`);
 
 const getTs = (() => {
   const p = n => (n < 10 ? `0${n}` : n);
@@ -46,7 +46,7 @@ const getTs = (() => {
   //  });
   //}
 
-  console.log("Building Hubs Client.");
+  console.log("Building Client.");
 
   //await new Promise((resolve, reject) => {
   //  exec("npm ci", { }, err => {
@@ -62,7 +62,7 @@ const getTs = (() => {
   //  });
   //});
 
-  console.log("Building Hubs Admin Console.");
+  console.log("Building Admin Console.");
 
   //await new Promise((resolve, reject) => {
   //  exec("npm ci", { cwd: "./admin" }, err => {
