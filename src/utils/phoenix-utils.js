@@ -58,18 +58,23 @@ export async function getReticulumMeta() {
   return reticulumMeta;
 }
 
-export async function connectToReticulum(debug = false, params = null) {
+export async function connectToReticulum(debug = false, params = null, socketClass = Socket) {
   const qs = new URLSearchParams(location.search);
 
   const getNewSocketUrl = async () => {
-    const socketProtocol = qs.get("phx_protocol") || (document.location.protocol === "https:" ? "wss:" : "ws:");
+    const socketProtocol =
+      qs.get("phx_protocol") ||
+      configs.RETICULUM_SOCKET_PROTOCOL ||
+      (document.location.protocol === "https:" ? "wss:" : "ws:");
     let socketHost = qs.get("phx_host");
     let socketPort = qs.get("phx_port");
 
     const reticulumMeta = await getReticulumMeta();
     socketHost = socketHost || configs.RETICULUM_SOCKET_SERVER || reticulumMeta.phx_host;
     socketPort =
-      socketPort || (hasReticulumServer() ? new URL(`${socketProtocol}//${configs.RETICULUM_SERVER}`).port : "443");
+      socketPort ||
+      configs.RETICULUM_SOCKET_PORT ||
+      (hasReticulumServer() ? new URL(`${socketProtocol}//${configs.RETICULUM_SERVER}`).port : "443");
     return `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}`;
   };
 
@@ -88,7 +93,7 @@ export async function connectToReticulum(debug = false, params = null) {
     socketSettings.params = params;
   }
 
-  const socket = new Socket(`${socketUrl}/socket`, socketSettings);
+  const socket = new socketClass(`${socketUrl}/socket`, socketSettings);
   socket.connect();
   socket.onError(async () => {
     // On error, underlying reticulum node may have died, so rebalance by
