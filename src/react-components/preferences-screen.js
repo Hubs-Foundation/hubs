@@ -7,7 +7,6 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { IntlProvider, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import { lang, messages } from "../utils/i18n";
-import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { PreferenceListItem, PREFERENCE_LIST_ITEM_TYPE } from "./preference-list-item";
 addLocaleData([...en]);
 
@@ -16,17 +15,6 @@ export default class PreferencesScreen extends Component {
     onClose: PropTypes.func,
     store: PropTypes.object
   };
-  state = {
-    muteMicOnEntry: false,
-    turningModeCurrOption: 0,
-    micActivationSchemeCurrOption: 0,
-    turnSnapDegree: 45
-  };
-  componentDidMount() {
-    waitForDOMContentLoaded().then(() => {
-      this.sfx = AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem;
-    });
-  }
 
   render() {
     const preferenceListItem = props => {
@@ -83,7 +71,7 @@ export default class PreferencesScreen extends Component {
       {
         key: "baseMovementSpeed",
         prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
-        min: 0,
+        min: 0.5,
         max: 10
       }
     ];

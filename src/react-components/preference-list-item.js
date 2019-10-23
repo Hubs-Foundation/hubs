@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/preferences-screen.scss";
 import classNames from "classnames";
-import { SOUND_PREFERENCE_MENU_SELECT } from "../systems/sound-effects-system";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
+import { SOUND_PREFERENCE_MENU_HOVER, SOUND_PREFERENCE_MENU_SELECT } from "../systems/sound-effects-system";
 import { FormattedMessage } from "react-intl";
 import { CheckBox } from "./checkbox.js";
 import { NumberRangeSelector } from "./number-range-selector.js";
@@ -29,6 +30,9 @@ export class PreferenceListItem extends Component {
   UNSAFE_componentWillMount() {
     this.renderControls = this.renderControls.bind(this);
     this.props.store.addEventListener("statechanged", this.storeUpdated);
+    waitForDOMContentLoaded().then(() => {
+      this.sfx = AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem;
+    });
   }
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
@@ -67,6 +71,7 @@ export class PreferenceListItem extends Component {
               [styles.selectHovered]: this.state.selectHovered
             })}
             onMouseEnter={() => {
+              this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_HOVER);
               this.setState({ selectHovered: true });
             }}
             onMouseLeave={() => {
@@ -91,6 +96,9 @@ export class PreferenceListItem extends Component {
               });
               playSound && this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
             }}
+            playHoverSound={() => {
+              this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_HOVER);
+            }}
           />
         );
       default:
@@ -104,6 +112,7 @@ export class PreferenceListItem extends Component {
       <div
         className={classNames({ [styles.hovered]: this.state.hovered }, styles.preferenceListItem)}
         onMouseEnter={() => {
+          this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_HOVER);
           this.setState({ hovered: true });
         }}
         onMouseLeave={() => {
