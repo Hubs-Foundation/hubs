@@ -89,7 +89,10 @@ const getTs = (() => {
   //  });
   //});
   console.log("Packaging Build.");
-  await tar.c({ gzip: true, C: "dist", file: "build.tar.gz" }, ["."]);
+  const buildFile = `hubs-build-${buildEnv.BUILD_VERSION}.tar.gz`;
+  await tar.c({ gzip: true, C: "dist", file: buildFile }, ["."]);
+  const uploadRes = await fetch(`https://${host}/api/ita/deploy/hubs/upload_url`, { headers });
+  const uploadInfo = await uploadRes.json();
 
   process.exit(0);
 })();
