@@ -66,28 +66,34 @@ export const SCHEMA = {
       type: "object",
       additionalProperties: false,
       properties: {
-        turningMode: { type: "string" }, // "snap" || "smooth"
-        turnSnapDegree: { type: "number" },
-        touchscreenMovementScheme: { type: "string" }, // "joysticks" || "pinch"
-        micActivationScheme: { type: "string" }, // "push to talk" || "open mic"
         muteMicOnEntry: { type: "bool" },
+        muteVideosOnLoad: { type: "bool" },
+        requireUserGestureToLoad: { type: "bool" },
+        enableSmoothLocomotion: { type: "bool" },
+        enableFlyMode: { type: "bool" },
+        disableWorldUpdatePatch: { type: "bool" },
+        lowBandwidthMode: { type: "bool" },
         disableBatching: { type: "bool" },
         enableReticulumDebugging: { type: "bool" },
-        fixedResolution: { type: "bool" },
-        maxResolution: { type: ["number", "number"] },
+        automaticResolution: { type: "bool" },
         showPhysicsDebugging: { type: "bool" },
-        showOnScreenUserInputDebuggingInfo: { type: "bool" },
+        showOnScreenUserInputDebugging: { type: "bool" },
         enableUserInputMaskLogging: { type: "bool" },
         changeMovementSpeedWithMouseWheel: { type: "bool" },
         allowMultipleHubsInstances: { type: "bool" },
         disableTelemetry: { type: "bool" },
         enableVRStats: { type: "bool" },
         enableAvatarEditorDebugger: { type: "bool" },
-        materialSettings: { type: "string" }, // "auto" || "hi-res" || "low-res"
         skipLoadingScreen: { type: "bool" },
         enableSpatializedAudio: { type: "bool" },
         disableRendering: { type: "bool" },
-        baseMovementSpeed: { type: "number" }
+        turningMode: { type: "string" }, // "snap" || "smooth"
+        touchscreenMovementScheme: { type: "string" }, // "joysticks" || "pinch"
+        micActivationScheme: { type: "string" }, // "push to talk" || "open mic"
+        materialSettings: { type: "string" }, // "auto" || "hi-res" || "low-res"
+        baseMovementSpeed: { type: "number" },
+        turnSnapDegree: { type: "number" },
+        maxResolution: { type: ["number", "number"] }
       }
     },
 

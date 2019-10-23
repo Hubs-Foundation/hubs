@@ -1,28 +1,118 @@
 @import 'shared.scss';
 
-$smallScreenWidth : 600px;
+$smallScreenWidth : 700px;
 $itemHeight : 2.5rem;
 $defaultFontSize: 1.4rem;
 $hoverFontSize: 1.6rem;
 $widescreenControlsWidth: 50%;
+$titleFontSize: 1.6rem;
+$titleHeight: 3.0rem;
+$titleFontWeight: bolder;
 
 :local(.root) {
+  :local(.hovered) {
+    background: lightsteelblue;
+  }
+}
+
+:local(.preferenceListItem){
+  background: lightslategray;
+  display: flex;
+  align-items: center;
+  @media( min-width:$smallScreenWidth+1 ) {
+    width: 90%;
+    flex-flow: row;
+    height: $itemHeight;
+  }
+  @media( max-width:$smallScreenWidth ) {
+    width: 100%;
+    flex-flow: column;
+    height: 2*$itemHeight;
+    margin-bottom: 0.5rem;
+  }
+
+  :local(.part) {
+    display: flex;
+    flex-flow: column;
+    justify-content: space-around;
+    height: $itemHeight;
+    @media( min-width:$smallScreenWidth+1 ) {
+      width: 50%;
+      text-align: end;
+      justify-content: space-around;
+    }
+    @media( max-width:$smallScreenWidth ) {
+      width: 100%;
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+  :local(.left) {
+    @media( min-width:$smallScreenWidth+1 ) {
+      margin-inline-end: 1rem;
+    }
+    @media( max-width:$smallScreenWidth ) {
+      margin-inline-end: 0rem;
+    }
+  }
+  :local(.right) {
+    @media( min-width:$smallScreenWidth+1 ) {
+      margin-inline-start: 1rem;
+    }
+    @media( max-width:$smallScreenWidth ) {
+      margin-inline-start: 0rem;
+    }
+  }
+  font-size: $defaultFontSize;
+  select {
+    width: 50%;
+    height: $itemHeight;
+    font-size: $defaultFontSize;
+  }
+}
+
+:local(.contentContainer) {
   position: absolute;
   box-sizing: border-box;
   top: 0px;
+  bottom: 0px;
   width: 100%;
-  display: flex;
-  flex-flow: column;
-  background: $light-grey;
-  align-items: center;
+  overflow-y: auto;
+  :local(.scrollingContent) {
+    display: flex;
+    flex-flow: column;
+    // background: $light-grey;
+    align-items: center;
+    margin-top: $titleHeight;
+  }
+  :local(.titleBar) {
+    position: fixed;
+    top: 0px;
+    width: 100%;
+    height: $titleHeight;
+    background: $light-grey;
+  }
+  :local(.title) {
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    align-items: center;
+    height: $titleHeight;
+    font-size: $titleFontSize;
+    font-weight: $titleFontWeight;
+  }
 }
+
+
 :local(.float-right) {
   top: 1rem;
-  right: 1rem;
+  right: 2rem;
   position: absolute;
   transform: scale(2);
   cursor: pointer;
   color: black;
+  z-index: 1;
   &:hover{
     color: $action-color;
   }
@@ -32,7 +122,7 @@ $widescreenControlsWidth: 50%;
   display: flex;
   flex-flow: row;
   align-items: center;
-  background: lightgreen;
+  background: lightslategray;
   height: $itemHeight;
   @media( max-width:$smallScreenWidth ) {
     width: 100%;
@@ -43,18 +133,19 @@ $widescreenControlsWidth: 50%;
 :local(.rowScale) {
   span {
     font-size: $defaultFontSize;
-    background: lightsteelblue;
+    // background: lightsteelblue;
   }
 }
 :local(.rowScaleHover) {
   span {
     font-size: $hoverFontSize;
-    background: lightblue;
+    // background: lightblue;
   }
 }
 :local(.rowName) {
   display: flex;
   flex-flow: column;
+  flex-wrap: nowrap;
   justify-content: space-around;
   width: 50%;
   height: $itemHeight;
@@ -77,7 +168,7 @@ $widescreenControlsWidth: 50%;
   flex-flow: row;
   align-items: center;
   text-align: center;
-  background: lightslategray;
+  // background: lightslategray;
 
   svg {
     cursor: pointer;
@@ -95,19 +186,13 @@ $widescreenControlsWidth: 50%;
     width: auto !important;
     height: 2.5rem !important;
     cursor: pointer;
-    background: yellow;
+    // background: yellow;
   }
   span {
     font-size: x-large;
     font-weight: bold;
-    background: white;
+    // background: lavender;
   }
-}
-:local(.checkBoxScale) {
-  transform: scale(2);
-}
-:local(.checkBoxScaleHover) {
-  transform: scale(2.2);
 }
 
 :local(.prevOptionScale) {
@@ -145,24 +230,33 @@ $widescreenControlsWidth: 50%;
       text-align: center;
       font-size: x-large;
       font-weight: bold;
-      background: $dark-grey;
-      color: white;
+      // background: $dark-grey;
+      // color: lavender;
       cursor: pointer;
     }
   }
   :local(.rangeSlider) {
     width: 35%;
-    background: lightseagreen;
+    // background: lightslategray;
     max-height: 2.5rem;
   }
 }
 
+:local(.checkBox) {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  font-size: 2.0rem;
+  :local(.hovered){
+    font-size: 2.2rem;
+  }
+}
 
 :local(.checkBoxArea) {
   display: flex;
   width: $widescreenControlsWidth;
   justify-content: center;
-  color: lightblue;
+  // color: lightblue;
 }
 
 input[type=range] {

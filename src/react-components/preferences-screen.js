@@ -3,8 +3,6 @@ import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/preferences-screen.scss";
 import classNames from "classnames";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheckSquare } from "@fortawesome/free-solid-svg-icons/faCheckSquare";
-import { faSquare } from "@fortawesome/free-solid-svg-icons/faSquare";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
@@ -13,6 +11,7 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import { lang, messages } from "../utils/i18n";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
+import { PreferenceListItem, PREFERENCE_LIST_ITEM_TYPE } from "./preference-list-item";
 addLocaleData([...en]);
 
 const messageIdForOption = {
@@ -66,6 +65,7 @@ class NumberRangeSelector extends Component {
             type="text"
             value={this.props.curr}
             onClick={e => {
+              e.preventDefault();
               e.target.focus();
               e.target.select();
             }}
@@ -102,12 +102,6 @@ class NumberRangeSelector extends Component {
             onMouseEnter={() => {
               this.props.playHoverSound && this.props.playHoverSound();
             }}
-            //onMouseUp={() => {
-            //  this.props.onSelect(this.props.curr, true);
-            //}}
-            //onMouseDown={() => {
-            //  this.props.onSelect(this.props.curr, true);
-            //}}
           />
         </div>
       </div>
@@ -149,7 +143,8 @@ class FlipSelector extends Component {
             size="lg"
             onMouseEnter={this.onMouseOverPrevOption}
             onMouseLeave={this.onMouseOutPrevOption}
-            onClick={() => {
+            onClick={e => {
+              e.preventDefault();
               const currOption = (this.props.currOption + this.props.options.length - 1) % this.props.options.length;
               this.props.onSelect(this.props.options[currOption], currOption);
               this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
@@ -165,7 +160,8 @@ class FlipSelector extends Component {
             size="lg"
             onMouseEnter={this.onMouseOverNextOption}
             onMouseLeave={this.onMouseOutNextOption}
-            onClick={() => {
+            onClick={e => {
+              e.preventDefault();
               const currOption = (this.props.currOption + 1) % this.props.options.length;
               this.props.onSelect(this.props.options[currOption], currOption);
             }}
@@ -175,38 +171,6 @@ class FlipSelector extends Component {
             icon={faAngleRight}
           />
         </div>
-      </div>
-    );
-  }
-}
-
-class CheckBox extends Component {
-  static propTypes = {
-    checked: PropTypes.bool,
-    onCheck: PropTypes.func,
-    playHoverSound: PropTypes.func
-  };
-  state = {
-    checkBoxHovered: false
-  };
-  onMouseOverCheckBox = () => {
-    this.setState({ checkBoxHovered: true });
-    this.props.playHoverSound && this.props.playHoverSound();
-  };
-  onMouseOutCheckBox = () => {
-    this.setState({ checkBoxHovered: false });
-  };
-  render() {
-    return (
-      <div className={classNames(styles.rowSelectionArea)} onClick={() => this.props.onCheck()}>
-        <i className={classNames(styles.checkBoxArea)}>
-          <FontAwesomeIcon
-            onMouseEnter={this.onMouseOverCheckBox}
-            onMouseLeave={this.onMouseOutCheckBox}
-            className={classNames(this.state.checkBoxHovered ? styles.checkBoxScaleHover : styles.checkBoxScale)}
-            icon={this.props.checked ? faCheckSquare : faSquare}
-          />
-        </i>
       </div>
     );
   }
@@ -314,42 +278,42 @@ export default class PreferencesScreen extends Component {
         />
       </PreferenceRow>
     );
-    const micActivationScheme = (
-      <PreferenceRow key="preferences.micActivationScheme">
-        <PreferenceRowName id="preferences.micActivationScheme" />
-        <FlipSelector
-          onSelect={(selection, currOption) => {
-            this.props.store.update({ preferences: { micActivationScheme: selection } });
-            this.setState({ micActivationSchemeCurrOption: currOption });
-            this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
-          }}
-          playHoverSound={() => {
-            this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_HOVER);
-          }}
-          currOption={this.state.micActivationSchemeCurrOption}
-          options={MIC_ACTIVATION_SCHEME_OPTIONS}
-        />
-      </PreferenceRow>
-    );
-    const userPrefRow = (
-      <PreferenceRow key="preferences.muteMicOnEntry">
-        <PreferenceRowName id="preferences.muteMicOnEntry" />
-        <CheckBox
-          onCheck={() => {
-            const muteMicOnEntry = !this.props.store.state.preferences.muteMicOnEntry;
-            this.props.store.update({
-              preferences: { muteMicOnEntry }
-            });
-            this.setState({ muteMicOnEntry });
-            this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
-          }}
-          checked={this.state.muteMicOnEntry}
-          playHoverSound={() => {
-            this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_HOVER);
-          }}
-        />
-      </PreferenceRow>
-    );
+    //const micActivationSchemeRow = (
+    //  <PreferenceRow key="preferences.micActivationScheme">
+    //    <PreferenceRowName id="preferences.micActivationScheme" />
+    //    <FlipSelector
+    //      onSelect={(selection, currOption) => {
+    //        this.props.store.update({ preferences: { micActivationScheme: selection } });
+    //        this.setState({ micActivationSchemeCurrOption: currOption });
+    //        this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
+    //      }}
+    //      playHoverSound={() => {
+    //        this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_HOVER);
+    //      }}
+    //      currOption={this.state.micActivationSchemeCurrOption}
+    //      options={MIC_ACTIVATION_SCHEME_OPTIONS}
+    //    />
+    //  </PreferenceRow>
+    //);
+    // const micPrefRow = (
+    //   <PreferenceRow key="preferences.muteMicOnEntry">
+    //     <PreferenceRowName id="preferences.muteMicOnEntry" />
+    //     <CheckBox
+    //       onCheck={() => {
+    //         const muteMicOnEntry = !this.props.store.state.preferences.muteMicOnEntry;
+    //         this.props.store.update({
+    //           preferences: { muteMicOnEntry }
+    //         });
+    //         this.setState({ muteMicOnEntry });
+    //         this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
+    //       }}
+    //       checked={this.state.muteMicOnEntry}
+    //       playHoverSound={() => {
+    //         this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_HOVER);
+    //       }}
+    //     />
+    //   </PreferenceRow>
+    // );
     const turnSnapDegree = (
       <PreferenceRow key="preferences.turnSnapDegree">
         <PreferenceRowName id="preferences.turnSnapDegree" />
@@ -371,15 +335,80 @@ export default class PreferencesScreen extends Component {
         />
       </PreferenceRow>
     );
-    // TODO: Sort rows by fuzzy search
-    const rows = [snapTurnRow, turnSnapDegree, userPrefRow, micActivationScheme];
+    // TODO: Add search text field and sort rows by fuzzy search
+    const preferenceListItem = props => {
+      return (
+        <PreferenceListItem
+          key={props.key}
+          store={this.props.store}
+          storeKey={props.key}
+          prefType={props.prefType}
+          min={props.min}
+          max={props.max}
+          currentValue={props.currentValue}
+          onChange={props.onChange}
+          options={props.options}
+        />
+      );
+    };
+    const rowInfo = [
+      { key: "disableBatching", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "enableFlyMode", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "enableSmoothLocomotion", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "requireUserGestureToLoad", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "muteMicOnEntry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "muteVideosOnLoad", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "enableReticulumDebugging", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "automaticResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "showPhysicsDebugging", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "showOnScreenUserInputDebugging", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "enableUserInputMaskLogging", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "changeMovementSpeedWithMouseWheel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "disableTelemetry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "enableVRStats", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "enableAvatarEditorDebugger", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "enableSpatializedAudio", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "disableRendering", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "lowBandwidthMode", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      { key: "disableWorldUpdatePatch", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX },
+      {
+        key: "turningMode",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+        options: [{ value: "snap", text: "Snap" }, { value: "smooth", text: "Smooth" }]
+      },
+      {
+        key: "touchscreenMovementScheme",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+        options: [{ value: "joysticks", text: "On-Screen Joysticks" }, { value: "pinch", text: "Pinch and Drag" }]
+      },
+      {
+        key: "micActivationScheme",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+        options: [{ value: "pushToTalk", text: "Push to Talk" }, { value: "openMic", text: "Open Mic" }]
+      },
+      {
+        key: "materialSettings",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+        options: [{ value: "auto", text: "Auto" }, { value: "hiRes", text: "high" }, { value: "lowRes", text: "low" }]
+      }
+    ];
+    const rows = rowInfo.map(preferenceListItem);
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={classNames(styles.root)}>
           <i className={classNames(styles.floatRight)} onClick={e => this.props.onClose(e)}>
             <FontAwesomeIcon icon={faTimes} />
           </i>
-          {rows}
+          <div className={classNames(styles.contentContainer)}>
+            <div className={classNames(styles.titleBar)}>
+              <div className={classNames(styles.title)}>
+                <span>Preferences</span>
+              </div>
+            </div>
+            <div className={classNames(styles.scrollingContent)}>{rows}</div>
+          </div>
         </div>
       </IntlProvider>
     );
