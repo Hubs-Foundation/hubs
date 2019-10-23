@@ -1,32 +1,42 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import Card from "@material-ui/core/Card";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
 import CardContent from "@material-ui/core/CardContent";
+import Snackbar from "@material-ui/core/Snackbar";
+import SnackbarContent from "@material-ui/core/SnackbarContent";
 import TextField from "@material-ui/core/TextField";
+import Typography from "@material-ui/core/Typography";
+import Icon from "@material-ui/core/Icon";
+import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/icons/Close";
+import clsx from "classnames";
 import Button from "@material-ui/core/Button";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import { Title } from "react-admin";
+import withCommonStyles from "../utils/with-common-styles";
 import {
   getConfig,
   getConfigValue,
   setConfigValue,
-  getServiceDisplayName,
-  getSchemas,
+  getCategoryDisplayName,
+  getCategoryDescription,
   isDescriptor,
-  putConfig
+  putConfig,
+  schemaCategories
 } from "../utils/ita";
 
-const styles = () => ({
-  container: {
-    display: "flex",
-    flexWrap: "wrap"
-  },
-  button: {
-    margin: "10px 10px 0 0"
-  }
-});
+const styles = withCommonStyles(() => ({}));
 
-const schemas = getSchemas();
+function TabContainer(props) {
+  return (
+    <Typography component="div" style={{ padding: 8 * 3 }}>
+      {props.children}
+    </Typography>
+  );
+}
 
 function getDescriptors(schema) {
   const descriptors = [];
@@ -47,12 +57,33 @@ function getDescriptors(schema) {
 class ConfigurationEditor extends Component {
   state = {
     schema: null,
-    config: null
+    config: null,
+    category: schemaCategories[0],
+    saving: false,
+    saved: false,
+    saveError: null
   };
 
   componentDidMount() {
-    schemas.then(schemas => this.setState({ schema: schemas[this.props.service] }));
-    getConfig(this.props.service).then(config => this.setState({ config: config }));
+    this.fetchConfigsForCategory();
+    //this.setState({ schema: this.props.schema[this.props.category] });
+    //getConfig(this.props.service).then(config => this.setState({ config: config }));
+  }
+
+  async fetchConfigsForCategory() {
+    const servicesForCategory = Object.keys(this.props.schema[this.state.category]);
+
+    const config = {};
+
+    for (const service of servicesForCategory) {
+      config[service] = await getConfig(service);
+    }
+
+    this.setState({ config });
+  }
+
+  handleTabChange(event, category) {
+    this.setState({ category, config: null }, () => this.fetchConfigsForCategory());
   }
 
   onChange(path, ev) {
@@ -62,12 +93,27 @@ class ConfigurationEditor extends Component {
     this.setState({ config: config });
   }
 
-  onSubmit() {
-    putConfig(this.props.service, this.state.config);
-  }
+  onSubmit(e) {
+    e.preventDefault();
 
-  onRevert() {
-    getConfig(this.props.service).then(config => this.setState({ config: config }));
+    this.setState({ saving: true }, async () => {
+      try {
+        for (const [service, config] of Object.entries(this.state.config)) {
+          if (Object.keys(config).length > 0) {
+            const res = await putConfig(service, config);
+
+            if (res.error) {
+              this.setState({ saveError: `Error saving: ${res.error}` });
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        this.setState({ saveError: e.toString() });
+      }
+
+      this.setState({ saving: false, saved: true });
+    });
   }
 
   renderSimpleInput(path, descriptor, currentValue) {
@@ -77,9 +123,10 @@ class ConfigurationEditor extends Component {
       <TextField
         key={displayPath}
         id={displayPath}
-        label={displayPath}
-        value={currentValue !== undefined ? currentValue : descriptor.default}
+        label={descriptor.name || displayPath}
+        value={currentValue || ""}
         onChange={ev => this.onChange(path, ev)}
+        helperText={descriptor.description}
         type={inputType}
         fullWidth
         margin="normal"
@@ -99,43 +146,83 @@ class ConfigurationEditor extends Component {
     }
   }
 
-  renderTree(schema, config) {
-    const configurables = getDescriptors(schema).map(([path, descriptor]) => {
-      return this.renderConfigurable(path, descriptor, getConfigValue(config, path));
-    });
+  renderTree(schema, category, config) {
+    const configurables = getDescriptors(schema[category]).map(([path, descriptor]) =>
+      this.renderConfigurable(path, descriptor, getConfigValue(config, path))
+    );
 
     return (
-      <form className={this.props.classes.container}>
+      <form onSubmit={this.onSubmit.bind(this)}>
         {configurables}
         <div>
-          <Button
-            onClick={this.onSubmit.bind(this)}
-            className={this.props.classes.button}
-            variant="contained"
-            color="primary"
-          >
-            Save
-          </Button>
-          <Button
-            onClick={this.onRevert.bind(this)}
-            className={this.props.classes.button}
-            variant="contained"
-            color="primary"
-          >
-            Revert
-          </Button>
+          {this.state.saving ? (
+            <CircularProgress />
+          ) : (
+            <Button
+              onClick={this.onSubmit.bind(this)}
+              className={this.props.classes.button}
+              variant="contained"
+              color="primary"
+            >
+              Save
+            </Button>
+          )}
         </div>
       </form>
     );
   }
 
   render() {
-    const { service } = this.props;
-    const { config, schema } = this.state;
+    const { config, category } = this.state;
+    const { schema } = this.props;
+
     return (
-      <Card>
-        <Title title={getServiceDisplayName(service)} />
-        <CardContent>{schema && config ? this.renderTree(schema, config) : <LinearProgress />}</CardContent>
+      <Card className={this.props.classes.container}>
+        <Title title="Server Settings" />
+        <CardContent className={this.props.classes.info}>
+          <Tabs
+            value={this.state.category}
+            indicatorColor="primary"
+            textColor="primary"
+            variant="scrollable"
+            scrollButtons="auto"
+            onChange={this.handleTabChange.bind(this)}
+          >
+            {schemaCategories.map(c => (
+              <Tab label={getCategoryDisplayName(c)} key={c} value={c} />
+            ))}
+          </Tabs>
+          <TabContainer>
+            <Typography variant="body2" gutterBottom>
+              {getCategoryDescription(this.state.category)}
+            </Typography>
+            {schema && config ? this.renderTree(schema, category, config) : <LinearProgress />}
+          </TabContainer>
+        </CardContent>
+        <Snackbar
+          anchorOrigin={{ horizontal: "center", vertical: "bottom" }}
+          open={this.state.saved || !!this.state.saveError}
+          autoHideDuration={10000}
+          onClose={() => this.setState({ saved: false, saveError: null })}
+        >
+          <SnackbarContent
+            className={clsx({
+              [this.props.classes.success]: !this.state.saveError,
+              [this.props.classes.warning]: !!this.state.saveError
+            })}
+            message={
+              <span id="import-snackbar" className={this.props.classes.message}>
+                <Icon className={clsx(this.props.classes.icon, this.props.classes.iconVariant)} />
+                {this.state.saveError || "Settings saved."}
+              </span>
+            }
+            action={[
+              <IconButton key="close" color="inherit" onClick={() => this.setState({ saved: false })}>
+                <CloseIcon className={this.props.classes.icon} />
+              </IconButton>
+            ]}
+          ></SnackbarContent>
+        </Snackbar>
       </Card>
     );
   }

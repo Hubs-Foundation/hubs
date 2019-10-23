@@ -83,6 +83,8 @@ class AvatarPreview extends Component {
     this.scene.add(light);
     this.scene.add(new THREE.HemisphereLight(0xb1e3ff, 0xb1e3ff, 2.5));
 
+    this.loadId = 0;
+
     this.camera.position.set(-0.2, 0.5, 0.5);
     this.camera.matrixAutoUpdate = true;
 
@@ -90,7 +92,7 @@ class AvatarPreview extends Component {
     this.controls.update();
 
     if (this.props.avatarGltfUrl) {
-      this.loadPreviewAvatar(this.props.avatarGltfUrl).then(this.setAvatar);
+      this.loadCurrentAvatarGltfUrl();
     }
 
     const clock = new THREE.Clock();
@@ -179,11 +181,20 @@ class AvatarPreview extends Component {
       }
       if (this.props.avatarGltfUrl) {
         this.setState({ error: null, loading: true });
-        await this.loadPreviewAvatar(this.props.avatarGltfUrl).then(this.setAvatar);
+        await this.loadCurrentAvatarGltfUrl();
       }
     }
     this.applyMaps(oldProps, this.props);
   };
+
+  loadCurrentAvatarGltfUrl() {
+    const newLoadId = ++this.loadId;
+    return this.loadPreviewAvatar(this.props.avatarGltfUrl).then(avatar => {
+      // If we had started loading another avatar while we were loading this one, throw this one away
+      if (newLoadId !== this.loadId) return;
+      this.setAvatar(avatar);
+    });
+  }
 
   applyMaps(oldProps, newProps) {
     return Promise.all(

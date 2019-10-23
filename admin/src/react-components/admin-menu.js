@@ -9,8 +9,9 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import ComputerIcon from "@material-ui/icons/Computer";
+import HomeIcon from "@material-ui/icons/Home";
 import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
+import BackupIcon from "@material-ui/icons/Backup";
 import ViewIcon from "@material-ui/icons/ViewList";
 import SettingsIcon from "@material-ui/icons/Settings";
 import Collapse from "@material-ui/core/Collapse";
@@ -84,11 +85,17 @@ class Menu extends Component {
   render() {
     return (
       <List className={this.props.classes.root}>
-        <ListItem className={this.props.classes.item} component={NavLink} activeStyle={{ backgroundColor: "#D0D0D0" }} key="system" to="/system">
+        <ListItem
+          className={this.props.classes.item}
+          component={NavLink}
+          activeStyle={{ backgroundColor: "#D0D0D0" }}
+          key="home"
+          to="/home"
+        >
           <ListItemIcon className={this.props.classes.icon}>
-            <ComputerIcon />
+            <HomeIcon />
           </ListItemIcon>
-          <ListItemText className={this.props.classes.text} primary="System" />
+          <ListItemText className={this.props.classes.text} primary="Home" />
         </ListItem>
         <ListItem className={this.props.classes.item}>
           <ListItemIcon className={this.props.classes.icon}>
@@ -98,6 +105,18 @@ class Menu extends Component {
         </ListItem>
         <Collapse in={true} timeout="auto" unmountOnExit>
           <List component="nav" disablePadding>
+            <ListItem
+              className={classNames(this.props.classes.item, this.props.classes.nested)}
+              component={NavLink}
+              activeStyle={{ backgroundColor: "#D0D0D0" }}
+              key="import"
+              to="/import"
+            >
+              <ListItemIcon className={this.props.classes.icon}>
+                <BackupIcon />
+              </ListItemIcon>
+              <ListItemText className={this.props.classes.text} primary="Import Content" />
+            </ListItem>
             {this.props.resources.map(this.renderResource.bind(this))}
           </List>
         </Collapse>
@@ -105,11 +124,46 @@ class Menu extends Component {
           <ListItemIcon className={this.props.classes.icon}>
             <SettingsIcon />
           </ListItemIcon>
-          <ListItemText className={this.props.classes.text} primary="Services" />
+          <ListItemText className={this.props.classes.text} primary="Setup" />
         </ListItem>
         <Collapse in={true} timeout="auto" unmountOnExit>
           <List component="nav" disablePadding>
-            {this.props.services.map(this.renderService.bind(this))}
+            <ListItem
+              className={classNames(this.props.classes.item, this.props.classes.nested)}
+              component={NavLink}
+              activeStyle={{ backgroundColor: "#D0D0D0" }}
+              key="server-setup"
+              to="/server-setup"
+            >
+              <ListItemIcon className={this.props.classes.icon}>
+                <ViewIcon />
+              </ListItemIcon>
+              <ListItemText className={this.props.classes.text} primary="Server Settings" />
+            </ListItem>
+            <ListItem
+              className={classNames(this.props.classes.item, this.props.classes.nested)}
+              component={NavLink}
+              activeStyle={{ backgroundColor: "#D0D0D0" }}
+              key="server-access"
+              to="/server-access"
+            >
+              <ListItemIcon className={this.props.classes.icon}>
+                <ViewIcon />
+              </ListItemIcon>
+              <ListItemText className={this.props.classes.text} primary="Server Access" />
+            </ListItem>
+            <ListItem
+              className={classNames(this.props.classes.item, this.props.classes.nested)}
+              component={NavLink}
+              activeStyle={{ backgroundColor: "#D0D0D0" }}
+              key="data-transfer"
+              to="/data-transfer"
+            >
+              <ListItemIcon className={this.props.classes.icon}>
+                <ViewIcon />
+              </ListItemIcon>
+              <ListItemText className={this.props.classes.text} primary="Data Transfer" />
+            </ListItem>
           </List>
         </Collapse>
       </List>

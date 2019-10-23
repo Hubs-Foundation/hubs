@@ -26,7 +26,7 @@ export const MEDIA_SOURCE_DEFAULT_FILTERS = {
   favorites: "my-favorites"
 };
 
-const SEARCH_CONTEXT_PARAMS = ["q", "filter", "cursor"];
+const SEARCH_CONTEXT_PARAMS = ["q", "filter", "cursor", "similar_to"];
 
 // This class is responsible for fetching and storing media search results and provides a
 // convenience API for performing history updates relevant to search navigation.
@@ -128,6 +128,9 @@ export default class MediaSearchStore extends EventTarget {
     const location = this.history.location;
     const searchParams = new URLSearchParams(location.search);
 
+    searchParams.delete("similar_to");
+    searchParams.delete("similar_name");
+
     if (query) {
       searchParams.set("q", query);
     } else {
@@ -156,6 +159,8 @@ export default class MediaSearchStore extends EventTarget {
     searchParams.delete("q");
     searchParams.delete("filter");
     searchParams.delete("cursor");
+    searchParams.delete("similar_to");
+    searchParams.delete("similar_name");
 
     if (!keepNav) {
       searchParams.delete("media_nav");

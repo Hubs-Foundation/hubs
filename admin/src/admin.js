@@ -3,7 +3,12 @@ import ReactDOM from "react-dom";
 import React, { Component } from "react";
 import { Route } from "react-router-dom";
 import PropTypes from "prop-types";
-import { serviceNames } from "./utils/ita";
+import {
+  schemaByCategories,
+  schemaCategories,
+  getSchemas as getItaSchemas,
+  setAuthToken as setItaAuthToken
+} from "./utils/ita";
 import { connectToReticulum } from "hubs/src/utils/phoenix-utils";
 import { Admin, Layout, Resource, ListGuesser } from "react-admin";
 //import { EditGuesser, CreateGuesser } from "react-admin";
@@ -17,21 +22,20 @@ import { FeaturedSceneListingList, FeaturedSceneListingEdit } from "./react-comp
 import { PendingSceneList } from "./react-components/pending-scenes";
 import { AccountList, AccountEdit } from "./react-components/accounts";
 import { ProjectList, ProjectShow } from "./react-components/projects";
-import { ServiceEditor } from "./react-components/service-editor";
 import { SystemEditor } from "./react-components/system-editor";
+import { ServiceEditor } from "./react-components/service-editor";
+import { ServerAccess } from "./react-components/server-access";
+import { DataTransfer } from "./react-components/data-transfer";
+import { ImportContent } from "./react-components/import-content";
 import Store from "hubs/src/storage/store";
+import registerTelemetry from "hubs/src/telemetry";
 
 const store = new Store();
+window.APP = { store };
 
-import registerTelemetry from "hubs/src/telemetry";
 registerTelemetry("/admin", "Hubs Admin");
 
-const systemRoute = <Route exact path="/system" component={SystemEditor} />;
-const serviceRoutes = serviceNames.map(s => {
-  return <Route exact key={s} path={`/services/${s}`} render={props => <ServiceEditor {...props} service={s} />} />;
-});
-
-const AdminLayout = props => <Layout {...props} menu={props => <AdminMenu {...props} services={serviceNames} />} />;
+let itaSchemas;
 
 class AdminUI extends Component {
   static propTypes = {
@@ -47,8 +51,8 @@ class AdminUI extends Component {
     return (
       <Admin
         dashboard={SystemEditor}
-        appLayout={AdminLayout}
-        customRoutes={[systemRoute].concat(serviceRoutes)}
+        appLayout={this.props.layout}
+        customRoutes={this.props.customRoutes}
         dataProvider={this.props.dataProvider}
         authProvider={this.props.authProvider}
         loginPage={false}
@@ -98,14 +102,14 @@ class AdminUI extends Component {
 import { IntlProvider } from "react-intl";
 import { lang, messages } from "./utils/i18n";
 
-const mountUI = async retPhxChannel => {
+const mountUI = async (retPhxChannel, customRoutes, layout) => {
   let dataProvider;
   let authProvider;
 
   // If POSTGREST_SERVER is set, we're talking directly to PostgREST over a tunnel, and will be managing the
   // perms token ourselves. If we're not, we talk to reticulum and presume it will handle perms token forwarding.
 
-  if (configs.POSTGREST_SERVER && configs.POSTGREST_SERVER.length > 0) {
+  if (configs.POSTGREST_SERVER) {
     dataProvider = postgrestClient(configs.POSTGREST_SERVER);
     authProvider = postgrestAuthenticatior.createAuthProvider(retPhxChannel);
     await postgrestAuthenticatior.refreshPermsToken();
@@ -119,9 +123,12 @@ const mountUI = async retPhxChannel => {
     postgrestAuthenticatior.setAuthToken(store.state.credentials.token);
   }
 
+  window.APP.dataProvider = dataProvider;
+  window.APP.authProvider = authProvider;
+
   ReactDOM.render(
     <IntlProvider locale={lang} messages={messages}>
-      <AdminUI dataProvider={dataProvider} authProvider={authProvider} />
+      <AdminUI dataProvider={dataProvider} authProvider={authProvider} customRoutes={customRoutes} layout={layout} />
     </IntlProvider>,
     document.getElementById("ui-root")
   );
@@ -130,15 +137,48 @@ const mountUI = async retPhxChannel => {
 document.addEventListener("DOMContentLoaded", async () => {
   const socket = await connectToReticulum();
 
-  // Reticulum global channel
-  const retPhxChannel = socket.channel(`ret`, { hub_id: "admin", token: store.state.credentials.token });
-  retPhxChannel
-    .join()
-    .receive("ok", async () => {
-      mountUI(retPhxChannel);
-    })
-    .receive("error", res => {
-      document.location = "/?sign_in&sign_in_destination=admin";
-      console.error(res);
-    });
+  if (store.state && store.state.credentials && store.state.credentials.token) {
+    setItaAuthToken(store.state.credentials.token);
+    try {
+      itaSchemas = schemaByCategories(await getItaSchemas());
+    } catch (e) {
+      // Let the admin console run but skip showing configs.
+    }
+  }
+
+  const homeRoute = <Route exact path="/home" component={SystemEditor} />;
+  const importRoute = <Route exact path="/import" component={ImportContent} />;
+  const accessRoute = <Route exact path="/server-access" component={ServerAccess} />;
+  const dtRoute = <Route exact path="/data-transfer" component={DataTransfer} />;
+
+  const customRoutes = [homeRoute, importRoute, accessRoute, dtRoute];
+
+  if (itaSchemas) {
+    customRoutes.push(
+      <Route
+        path="/server-setup"
+        render={props => <ServiceEditor {...props} schema={itaSchemas} categories={schemaCategories} />}
+      />
+    );
+  }
+
+  const layout = props => <Layout {...props} menu={props => <AdminMenu {...props} services={schemaCategories} />} />;
+
+  const redirectToLogin = () => (document.location = "/?sign_in&sign_in_destination=admin");
+
+  if (store.state.credentials && store.state.credentials.token) {
+    // Reticulum global channel
+    const retPhxChannel = socket.channel(`ret`, { hub_id: "admin", token: store.state.credentials.token });
+    retPhxChannel
+      .join()
+      .receive("ok", async () => {
+        mountUI(retPhxChannel, customRoutes, layout);
+      })
+      .receive("error", res => {
+        document.location = "/?sign_in&sign_in_destination=admin";
+        console.error(res);
+      });
+  } else {
+    redirectToLogin();
+  }
 });
