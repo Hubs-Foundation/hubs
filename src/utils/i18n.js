@@ -6,7 +6,7 @@ export const lang = (localeData[navigatorLang] && navigatorLang) || "en";
 
 export const messages = localeData[lang] || localeData.en;
 
-if (window.APP_CONFIG.translations && window.APP_CONFIG.translations[lang]) {
+if (window.APP_CONFIG && window.APP_CONFIG.translations && window.APP_CONFIG.translations[lang]) {
   const configTranslations = window.APP_CONFIG.translations[lang];
   for (const messageKey in configTranslations) {
     if (!configTranslations.hasOwnProperty(messageKey)) continue;
