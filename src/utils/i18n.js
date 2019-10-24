@@ -6,12 +6,11 @@ export const lang = (localeData[navigatorLang] && navigatorLang) || "en";
 
 export const messages = localeData[lang] || localeData.en;
 
-for (const appConfigKey in window.APP_CONFIG) {
-  if (!window.APP_CONFIG.hasOwnProperty(appConfigKey)) continue;
-  if (!appConfigKey.startsWith("translations_")) continue;
-  const [, lang, ...messageKeyParts] = appConfigKey.split("_");
-  if (lang !== lang) continue;
-
-  const messageKey = messageKeyParts.join("_");
-  messages[messageKey] = window.APP_CONFIG[appConfigKey];
+if (window.APP_CONFIG.translations && window.APP_CONFIG.translations[lang]) {
+  const configTranslations = window.APP_CONFIG.translations[lang];
+  for (const messageKey in configTranslations) {
+    if (!configTranslations.hasOwnProperty(messageKey)) continue;
+    if (!configTranslations[messageKey]) continue;
+    messages[messageKey] = configTranslations[messageKey];
+  }
 }

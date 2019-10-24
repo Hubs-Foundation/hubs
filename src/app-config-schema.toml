@@ -1,2 +1,2 @@
 translations.en."home.hero_blurb" = { "type" = "string" }
-disable_spoke = { "type" = "boolean", default = "false" }
+features.disable_spoke = { "type" = "boolean", "default" = "false" }
