@@ -1118,15 +1118,14 @@
                 <a-entity text="value:View your desktop to continue; width:1; align:center;" position="0 0 0.01"></a-entity>
             </a-entity>
         </a-entity>
-        <a-entity id="viewing-rig" set-yxz-order matrix-auto-update>
+        <a-entity id="viewing-rig" set-yxz-order>
             <a-entity
                 id="viewing-camera"
                 camera
                 set-active-camera
                 rotation
                 set-yxz-order
-                pitch-yaw-rotator
-                matrix-auto-update>
+                pitch-yaw-rotator>
                 <a-sphere segments-height="10" segments-width="10" id="inspect-sphere"></a-sphere>
             </a-entity>
         </a-entity>

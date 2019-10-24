@@ -119,7 +119,7 @@ const orbit = (function() {
         .applyQuaternion(target.quaternion)
     );
     target.matrixNeedsUpdate = true;
-    childMatch(rig, camera, target);
+    childMatch2(rig, camera, target);
   };
 })();
 
