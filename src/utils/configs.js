@@ -19,4 +19,9 @@ const configs = {};
   }
 });
 
+// Also include APP_CONFIG that reticulum injects as a script in the page head.
+if (window.APP_CONFIG) {
+  configs.APP_CONFIG = window.APP_CONFIG;
+}
+
 export default configs;
