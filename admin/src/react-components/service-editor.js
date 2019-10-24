@@ -62,7 +62,7 @@ class ConfigurationEditor extends Component {
     this.state = {
       schema: null,
       config: null,
-      category: props.categories[1],
+      category: props.categories[0],
       saving: false,
       saved: false,
       saveError: null
