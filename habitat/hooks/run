@@ -40,17 +40,11 @@ AWSCLI={{ pkgPathFor "core/aws-cli" }}/bin/aws
 
 if [[ "{{ cfg.deploy.type }}" == "s3" ]] ;
 then
-  # Do not upload/deploy if the release has already been pushed to the bucket.
-  #
-  # The main reason for this because when a node starts, it may be running an out-of-date client package,
-  # and we don't want to push old code if another node has pushed a more recent version.
-  if ! $AWSCLI s3 ls --region {{ cfg.deploy.region }} "s3://{{ cfg.deploy.target }}/hubs/pages/releases/{{ pkg.version }}.{{ pkg.release }}" ; then
-    $AWSCLI s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "max-age=31556926" --include "*" --exclude "*.wasm" "$TEMP_DIST_PATH/assets" "s3://{{ cfg.deploy.target }}/hubs/assets"
-    $AWSCLI s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "max-age=31556926" --exclude "*" --include "*.wasm" --content-type "application/wasm" "$TEMP_DIST_PATH/assets" "s3://{{ cfg.deploy.target }}/hubs/assets"
-    
-    $AWSCLI s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "no-cache" --delete "$TEMP_DIST_PATH/pages" "s3://{{ cfg.deploy.target }}/hubs/pages/latest"
-    $AWSCLI s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "no-cache" --delete "$TEMP_DIST_PATH/pages" "s3://{{ cfg.deploy.target }}/hubs/pages/releases/{{ pkg.version }}.{{ pkg.release }}"
-  fi
+  $AWSCLI s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "max-age=31556926" --include "*" --exclude "*.wasm" "$TEMP_DIST_PATH/assets" "s3://{{ cfg.deploy.target }}/hubs/assets"
+  $AWSCLI s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "max-age=31556926" --exclude "*" --include "*.wasm" --content-type "application/wasm" "$TEMP_DIST_PATH/assets" "s3://{{ cfg.deploy.target }}/hubs/assets"
+  
+  $AWSCLI s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "no-cache" --delete "$TEMP_DIST_PATH/pages" "s3://{{ cfg.deploy.target }}/hubs/pages/latest"
+  $AWSCLI s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "no-cache" --delete "$TEMP_DIST_PATH/pages" "s3://{{ cfg.deploy.target }}/hubs/pages/releases/{{ pkg.version }}.{{ pkg.release }}"
 fi
 
 exec sleep 999999999999

@@ -12,7 +12,7 @@ if (!existsSync(".ret.credentials")) {
 }
 
 const { host, token } = JSON.parse(readFileSync(".ret.credentials"));
-const spinner = ora(`Deploying to ${host}.`).start();
+console.log(`Deploying to ${host}.`);
 const step = ora({ indent: 2 }).start();
 
 const getTs = (() => {
@@ -39,6 +39,9 @@ const getTs = (() => {
   }
 
   buildEnv.BUILD_VERSION = `1.0.0.${getTs()}`;
+  buildEnv.ITA_SERVER = "";
+  buildEnv.POSTGREST_SERVER = "";
+
   const env = Object.assign(process.env, buildEnv);
 
   for (const d in ["./dist", "./admin/dist"]) {
@@ -98,13 +101,12 @@ const getTs = (() => {
   await tar.c({ gzip: true, C: "dist", file: "_build.tar.gz" }, ["."]);
   step.text = `Uploading Build ${buildEnv.BUILD_VERSION}.`;
   const req = request({ url, method: "put", body: readFileSync("_build.tar.gz") }); // Tried and failed to get this to use a stream :P
-  unlinkSync("_build.tar.gz");
   await new Promise(res => req.on("end", res));
+  unlinkSync("_build.tar.gz");
   step.text = "Build uploaded, deploying.";
-  await fetch(`https://${host}/api/ita/deploy/hubs`, { headers, method: "POST", body: { version } });
-  step.text = "Deploy finished.";
-  step.stop();
-  spinner.text = `Deployed to ${host}`;
-  spinner.succeed();
+  console.log("\n" + version);
+  await fetch(`https://${host}/api/ita/deploy/hubs`, { headers, method: "POST", body: JSON.stringify({ version }) });
+  step.text = `Deployed to ${host}`;
+  step.succeed();
   process.exit(0);
 })();
