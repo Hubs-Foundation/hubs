@@ -52,24 +52,14 @@ export function disposeNode(node) {
 }
 
 export const setMatrixWorld = (() => {
-  const IDENTITY = new THREE.Matrix4().identity();
   const helperMatrix = new THREE.Matrix4();
   const inverseParentWorld = new THREE.Matrix4();
   return function setMatrixWorld(object3D, m) {
-    if (!object3D.parent.matrixIsModified) {
-      object3D.parent.applyMatrix(IDENTITY);
-    }
     object3D.parent.updateMatrices();
-    if (!object3D.matrixIsModified) {
-      object3D.applyMatrix(IDENTITY);
-    }
     inverseParentWorld.getInverse(object3D.parent.matrixWorld);
     helperMatrix.multiplyMatrices(inverseParentWorld, m);
-    object3D.matrixWorld.copy(m);
-    object3D.matrix.copy(helperMatrix);
-    object3D.matrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
+    helperMatrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
     object3D.matrixNeedsUpdate = true;
-    object3D.updateMatrices();
   };
 })();
 
