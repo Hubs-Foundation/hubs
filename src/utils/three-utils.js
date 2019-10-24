@@ -51,15 +51,59 @@ export function disposeNode(node) {
   }
 }
 
-const IDENTITY = new THREE.Matrix4().identity();
-export function setMatrixWorld(object3D, m) {
-  if (!object3D.matrixIsModified) {
-    object3D.applyMatrix(IDENTITY); // hack around our matrix optimizations
-  }
-  object3D.matrixWorld.copy(m);
-  object3D.matrix = object3D.matrix.getInverse(object3D.parent.matrixWorld).multiply(object3D.matrixWorld);
-  object3D.matrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
-}
+export const setMatrixWorld = (() => {
+  const IDENTITY = new THREE.Matrix4().identity();
+  const helperMatrix = new THREE.Matrix4();
+  const inverseParentWorld = new THREE.Matrix4();
+  return function setMatrixWorld(object3D, m, firstCall = true) {
+    if (!object3D.parent.matrixIsModified) {
+      object3D.parent.applyMatrix(IDENTITY);
+    }
+    object3D.parent.updateMatrices();
+    if (firstCall && !object3D.matrixIsModified) {
+      object3D.applyMatrix(IDENTITY);
+    }
+    inverseParentWorld.getInverse(object3D.parent.matrixWorld);
+    helperMatrix.multiplyMatrices(inverseParentWorld, m);
+    object3D.matrixWorld.copy(m);
+    object3D.matrix.copy(helperMatrix);
+    object3D.matrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
+    object3D.updateMatrices();
+
+    for (let i = 0; i < object3D.children.length; i++) {
+      setMatrixWorld(
+        object3D.children[i],
+        helperMatrix.multiplyMatrices(object3D.matrixWorld, object3D.children[i].matrix),
+        false
+      );
+    }
+  };
+})();
+
+//export const setMatrixWorld = (() => {
+//  const IDENTITY = new THREE.Matrix4().identity();
+//  const helperMatrix = new THREE.Matrix4();
+//  const inverseParentWorld = new THREE.Matrix4();
+//  return function setMatrixWorld(object3D, m) {
+//    object3D.parent.updateMatrices();
+//    object3D.updateMatrices();
+//    if (!object3D.parent.matrixIsModified) {
+//      object3D.parent.applyMatrix(IDENTITY);
+//    }
+//    object3D.parent.updateMatrices();
+//    object3D.updateMatrices();
+//    if (!object3D.matrixIsModified) {
+//      object3D.applyMatrix(IDENTITY);
+//    }
+//    object3D.updateMatrices();
+//
+//    inverseParentWorld.getInverse(object3D.parent.matrixWorld);
+//    helperMatrix.multiplyMatrices(inverseParentWorld, m);
+//    helperMatrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
+//    object3D.matrixNeedsUpdate = true;
+//    object3D.updateMatrices();
+//  };
+//})();
 
 // Modified version of Don McCurdy's AnimationUtils.clone
 // https://github.com/mrdoob/three.js/pull/14494

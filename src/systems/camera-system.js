@@ -64,6 +64,18 @@ export const childMatch = (function() {
     parent.matrixNeedsUpdate = true;
   };
 })();
+export const childMatch2 = (function() {
+  const childInverse = new THREE.Matrix4();
+  const newParentMatrix = new THREE.Matrix4();
+  // transform the parent such that its child matches the target
+  return function childMatch2(parent, child, target) {
+    child.updateMatrices();
+    target.updateMatrices();
+    child.matrix.getInverse(childInverse);
+    newParentMatrix.multiplyMatrices(target.matrixWorld, childInverse);
+    setMatrixWorld(parent, newParentMatrix);
+  };
+})();
 
 const IDENTITY = new THREE.Matrix4().identity();
 
@@ -348,6 +360,7 @@ export class CameraSystem {
 
   tick = (function() {
     const translation = new THREE.Matrix4();
+    const helperMatrix = new THREE.Matrix4();
     return function tick(scene, dt) {
       if (!this.enteredScene && scene.is("entered")) {
         this.enteredScene = true;
@@ -398,8 +411,8 @@ export class CameraSystem {
           translation.makeTranslation(0, 2, 8);
         }
         this.avatarRig.object3D.updateMatrices();
-        this.viewingRig.object3D.matrixWorld.copy(this.avatarRig.object3D.matrixWorld).multiply(translation);
-        setMatrixWorld(this.viewingRig.object3D, this.viewingRig.object3D.matrixWorld);
+        helperMatrix.copy(this.avatarRig.object3D.matrixWorld).multiply(translation);
+        setMatrixWorld(this.viewingRig.object3D, helperMatrix);
         this.avatarPOV.object3D.quaternion.copy(this.viewingCamera.object3D.quaternion);
         this.avatarPOV.object3D.matrixNeedsUpdate = true;
       } else if (this.mode === CAMERA_MODE_INSPECT) {
