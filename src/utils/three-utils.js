@@ -68,7 +68,6 @@ export const setMatrixWorld = (() => {
     object3D.matrixWorld.copy(m);
     object3D.matrix.copy(helperMatrix);
     object3D.matrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
-    object3D.updateMatrices();
 
     for (let i = 0; i < object3D.children.length; i++) {
       setMatrixWorld(
