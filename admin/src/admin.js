@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import React, { Component } from "react";
 import { Route } from "react-router-dom";
 import PropTypes from "prop-types";
+import toml from "@iarna/toml";
 import {
   schemaByCategories,
   schemaCategories,
@@ -23,11 +24,10 @@ import { PendingSceneList } from "./react-components/pending-scenes";
 import { AccountList, AccountEdit } from "./react-components/accounts";
 import { ProjectList, ProjectShow } from "./react-components/projects";
 import { SystemEditor } from "./react-components/system-editor";
-import { ServiceEditor } from "./react-components/service-editor";
+import { ServiceEditor, AppConfigEditor } from "./react-components/service-editor";
 import { ServerAccess } from "./react-components/server-access";
 import { DataTransfer } from "./react-components/data-transfer";
 import { ImportContent } from "./react-components/import-content";
-import { AppSettings } from "./react-components/app-settings";
 import Store from "hubs/src/storage/store";
 import registerTelemetry from "hubs/src/telemetry";
 
@@ -151,9 +151,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   const importRoute = <Route exact path="/import" component={ImportContent} />;
   const accessRoute = <Route exact path="/server-access" component={ServerAccess} />;
   const dtRoute = <Route exact path="/data-transfer" component={DataTransfer} />;
-  const appSettingsRoute = <Route exact path="/app-settings" component={AppSettings} />;
 
-  const customRoutes = [homeRoute, importRoute, accessRoute, dtRoute, appSettingsRoute];
+  const appConfigSchema = toml.parse(await fetch("/app-config-schema.toml").then(r => r.text()));
+  const appConfigRoute = (
+    <Route
+      path="/app-settings"
+      render={props => (
+        <AppConfigEditor {...props} schema={appConfigSchema} categories={["translations", "features"]} />
+      )}
+    />
+  );
+
+  const customRoutes = [homeRoute, importRoute, accessRoute, dtRoute, appConfigRoute];
 
   if (itaSchemas) {
     customRoutes.push(

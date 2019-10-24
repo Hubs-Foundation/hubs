@@ -12,10 +12,12 @@ import Typography from "@material-ui/core/Typography";
 import Icon from "@material-ui/core/Icon";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
-import clsx from "classnames";
 import Button from "@material-ui/core/Button";
 import LinearProgress from "@material-ui/core/LinearProgress";
+import clsx from "classnames";
 import { Title } from "react-admin";
+
+import Store from "hubs/src/storage/store";
 import withCommonStyles from "../utils/with-common-styles";
 import {
   getConfig,
@@ -24,9 +26,9 @@ import {
   getCategoryDisplayName,
   getCategoryDescription,
   isDescriptor,
-  putConfig,
-  schemaCategories
+  putConfig
 } from "../utils/ita";
+import * as AppConfigUtils from "../utils/app-config";
 
 const styles = withCommonStyles(() => ({}));
 
@@ -55,31 +57,28 @@ function getDescriptors(schema) {
 }
 
 class ConfigurationEditor extends Component {
-  state = {
-    schema: null,
-    config: null,
-    category: schemaCategories[0],
-    saving: false,
-    saved: false,
-    saveError: null
-  };
-
-  componentDidMount() {
-    this.fetchConfigsForCategory();
-    //this.setState({ schema: this.props.schema[this.props.category] });
-    //getConfig(this.props.service).then(config => this.setState({ config: config }));
+  constructor(props) {
+    super(props);
+    this.state = {
+      schema: null,
+      config: null,
+      category: props.categories[1],
+      saving: false,
+      saved: false,
+      saveError: null
+    };
   }
 
   async fetchConfigsForCategory() {
-    const servicesForCategory = Object.keys(this.props.schema[this.state.category]);
+    throw new Error("Not implemented");
+  }
 
-    const config = {};
+  async putConfig() {
+    throw new Error("Not implemented");
+  }
 
-    for (const service of servicesForCategory) {
-      config[service] = await getConfig(service);
-    }
-
-    this.setState({ config });
+  componentDidMount() {
+    this.fetchConfigsForCategory();
   }
 
   handleTabChange(event, category) {
@@ -100,7 +99,7 @@ class ConfigurationEditor extends Component {
       try {
         for (const [service, config] of Object.entries(this.state.config)) {
           if (Object.keys(config).length > 0) {
-            const res = await putConfig(service, config);
+            const res = await this.putConfig(service, config);
 
             if (res.error) {
               this.setState({ saveError: `Error saving: ${res.error}` });
@@ -188,7 +187,7 @@ class ConfigurationEditor extends Component {
             scrollButtons="auto"
             onChange={this.handleTabChange.bind(this)}
           >
-            {schemaCategories.map(c => (
+            {this.props.categories.map(c => (
               <Tab label={getCategoryDisplayName(c)} key={c} value={c} />
             ))}
           </Tabs>
@@ -228,4 +227,43 @@ class ConfigurationEditor extends Component {
   }
 }
 
-export const ServiceEditor = withStyles(styles)(ConfigurationEditor);
+const ServiceEditor = withStyles(styles)(
+  class ServiceEditor extends ConfigurationEditor {
+    async fetchConfigsForCategory() {
+      const servicesForCategory = Object.keys(this.props.schema[this.state.category]);
+
+      const config = {};
+
+      for (const service of servicesForCategory) {
+        config[service] = await getConfig(service);
+      }
+
+      this.setState({ config });
+    }
+    async putConfig(service, config) {
+      return putConfig(service, config);
+    }
+  }
+);
+
+const AppConfigEditor = withStyles(styles)(
+  class ServiceEditor extends ConfigurationEditor {
+    constructor(props) {
+      super(props);
+      const store = new Store();
+      if (store.state && store.state.credentials && store.state.credentials.token) {
+        AppConfigUtils.setAuthToken(store.state.credentials.token);
+      }
+    }
+    async fetchConfigsForCategory() {
+      const config = await AppConfigUtils.getConfig();
+      const categoryConfig = config[this.state.category] || {};
+      this.setState({ config: categoryConfig });
+    }
+    async putConfig(service, config) {
+      return AppConfigUtils.putConfig({ [this.state.category]: { [service]: config } });
+    }
+  }
+);
+
+export { ServiceEditor, AppConfigEditor };
