@@ -80,31 +80,6 @@ export const setMatrixWorld = (() => {
   };
 })();
 
-//export const setMatrixWorld = (() => {
-//  const IDENTITY = new THREE.Matrix4().identity();
-//  const helperMatrix = new THREE.Matrix4();
-//  const inverseParentWorld = new THREE.Matrix4();
-//  return function setMatrixWorld(object3D, m) {
-//    object3D.parent.updateMatrices();
-//    object3D.updateMatrices();
-//    if (!object3D.parent.matrixIsModified) {
-//      object3D.parent.applyMatrix(IDENTITY);
-//    }
-//    object3D.parent.updateMatrices();
-//    object3D.updateMatrices();
-//    if (!object3D.matrixIsModified) {
-//      object3D.applyMatrix(IDENTITY);
-//    }
-//    object3D.updateMatrices();
-//
-//    inverseParentWorld.getInverse(object3D.parent.matrixWorld);
-//    helperMatrix.multiplyMatrices(inverseParentWorld, m);
-//    helperMatrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
-//    object3D.matrixNeedsUpdate = true;
-//    object3D.updateMatrices();
-//  };
-//})();
-
 // Modified version of Don McCurdy's AnimationUtils.clone
 // https://github.com/mrdoob/three.js/pull/14494
 
