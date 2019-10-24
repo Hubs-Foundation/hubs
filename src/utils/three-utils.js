@@ -55,12 +55,12 @@ export const setMatrixWorld = (() => {
   const IDENTITY = new THREE.Matrix4().identity();
   const helperMatrix = new THREE.Matrix4();
   const inverseParentWorld = new THREE.Matrix4();
-  return function setMatrixWorld(object3D, m, firstCall = true) {
+  return function setMatrixWorld(object3D, m) {
     if (!object3D.parent.matrixIsModified) {
       object3D.parent.applyMatrix(IDENTITY);
     }
     object3D.parent.updateMatrices();
-    if (firstCall && !object3D.matrixIsModified) {
+    if (!object3D.matrixIsModified) {
       object3D.applyMatrix(IDENTITY);
     }
     inverseParentWorld.getInverse(object3D.parent.matrixWorld);
@@ -68,14 +68,8 @@ export const setMatrixWorld = (() => {
     object3D.matrixWorld.copy(m);
     object3D.matrix.copy(helperMatrix);
     object3D.matrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
-
-    for (let i = 0; i < object3D.children.length; i++) {
-      setMatrixWorld(
-        object3D.children[i],
-        helperMatrix.multiplyMatrices(object3D.matrixWorld, object3D.children[i].matrix),
-        false
-      );
-    }
+    object3D.matrixNeedsUpdate = true;
+    object3D.updateMatrices();
   };
 })();
 
