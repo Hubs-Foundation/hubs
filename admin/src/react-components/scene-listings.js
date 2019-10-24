@@ -14,7 +14,9 @@ import {
   ReferenceField,
   DateField,
   BooleanField,
-  Filter
+  Filter,
+  ArrayInput,
+  SimpleFormIterator
 } from "react-admin";
 
 const SceneListingFilter = props => (
@@ -28,6 +30,11 @@ export const SceneListingEdit = props => (
   <Edit {...props}>
     <SimpleForm>
       <TextInput source="name" />
+      <ArrayInput source="tags.tags" defaultValue={[]}>
+        <SimpleFormIterator>
+          <TextInput />
+        </SimpleFormIterator>
+      </ArrayInput>
       <SelectInput
         label="Status"
         source="state"

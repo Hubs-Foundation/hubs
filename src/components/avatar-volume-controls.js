@@ -38,7 +38,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
 
   update() {
     if (this.audio) {
-      this.audio.setVolume(this.data.volume);
+      this.audio.gain.gain.value = this.data.volume;
     }
   },
 
