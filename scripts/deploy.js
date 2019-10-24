@@ -130,7 +130,7 @@ const getTs = (() => {
 
   await fetch(`https://${host}/api/ita/deploy/hubs`, { headers, method: "POST", body: JSON.stringify({ version }) });
 
-  step.text = `Deployed to ${host}`;
+  step.text = `Deployed to ${host}.`;
   step.succeed();
   process.exit(0);
 })();
