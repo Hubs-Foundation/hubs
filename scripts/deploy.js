@@ -95,17 +95,25 @@ const getTs = (() => {
       res();
     });
   });
-  step.text = "Packaging Build.";
+  step.text = "Preparing Deploy.";
   const uploadRes = await fetch(`https://${host}/api/ita/deploy/hubs/upload_url`, { headers });
   const { url, version } = await uploadRes.json();
+
+  step.text = "Packaging Build.";
   await tar.c({ gzip: true, C: "dist", file: "_build.tar.gz" }, ["."]);
   step.text = `Uploading Build ${buildEnv.BUILD_VERSION}.`;
   const req = request({ url, method: "put", body: readFileSync("_build.tar.gz") }); // Tried and failed to get this to use a stream :P
   await new Promise(res => req.on("end", res));
   unlinkSync("_build.tar.gz");
+
   step.text = "Build uploaded, deploying.";
+
+  // Wait for S3 flush, kind of a hack.
+  await new Promise(res => setTimeout(res, 5000));
+
   console.log("\n" + version);
   await fetch(`https://${host}/api/ita/deploy/hubs`, { headers, method: "POST", body: JSON.stringify({ version }) });
+
   step.text = `Deployed to ${host}`;
   step.succeed();
   process.exit(0);
