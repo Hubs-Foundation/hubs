@@ -102,8 +102,25 @@ const getTs = (() => {
   step.text = "Packaging Build.";
   await tar.c({ gzip: true, C: "dist", file: "_build.tar.gz" }, ["."]);
   step.text = `Uploading Build ${buildEnv.BUILD_VERSION}.`;
-  const req = request({ url, method: "put", body: readFileSync("_build.tar.gz") }); // Tried and failed to get this to use a stream :P
-  await new Promise(res => req.on("end", res));
+
+  const runUpload = async attempt => {
+    if (attempt > 3) {
+      throw new Error("Upload failed.");
+    }
+
+    const req = request({ url, method: "put", body: readFileSync("_build.tar.gz") }); // Tried and failed to get this to use a stream :P
+    await new Promise(res => {
+      req.on("error", async () => {
+        step.text = `Upload failed. Retrying attempt #${attempt + 1}/3`;
+        await runUpload(attempt + 1);
+        res();
+      });
+
+      req.on("end", res);
+    });
+  };
+
+  await runUpload(0);
   unlinkSync("_build.tar.gz");
 
   step.text = "Build uploaded, deploying.";
@@ -111,7 +128,6 @@ const getTs = (() => {
   // Wait for S3 flush, kind of a hack.
   await new Promise(res => setTimeout(res, 5000));
 
-  console.log("\n" + version);
   await fetch(`https://${host}/api/ita/deploy/hubs`, { headers, method: "POST", body: JSON.stringify({ version }) });
 
   step.text = `Deployed to ${host}`;
