@@ -1,6 +1,7 @@
 import { paths } from "../systems/userinput/paths";
 import { SOUND_SNAP_ROTATE } from "../systems/sound-effects-system";
 import qsTruthy from "../utils/qs_truthy";
+import { childMatch } from "../systems/camera-system";
 const enableWheelSpeed = qsTruthy("wheelSpeed") || qsTruthy("wheelspeed") || qsTruthy("ws");
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
@@ -8,6 +9,70 @@ const EPS = 10e-6;
 const MAX_WARNINGS = 10;
 
 const NAV_ZONE = "character";
+
+function v3String(vec3) {
+  return ["", vec3.x, vec3.y, vec3.z, ""].join("\n");
+}
+function m4String(mat4) {
+  function numString(n) {
+    return `${n >= 0 ? " " : ""}${n.toFixed(2)}`;
+  }
+  return [
+    "",
+    "_".repeat(30),
+    [0, 1, 2, 3].map(i => [0, 4, 8, 12].map(j => numString(mat4.elements[j + i])).join(" | ")).join("\n"),
+    "‾".repeat(18),
+    ""
+  ].join("\n");
+}
+
+window.logCharInfo = function() {
+  const rig = document.getElementById("avatar-rig").object3D;
+  const pivot = rig.el.components["character-controller"].data.pivot.object3D;
+  console.log("rig is", m4String(rig.matrixWorld), "pivot is", m4String(pivot.matrixWorld));
+};
+
+export const cancelPitchAndRoll = (function() {
+  const initial = {
+    viewZ: new THREE.Vector3()
+  };
+  const final = {
+    viewX: new THREE.Vector3(),
+    viewY: new THREE.Vector3(),
+    viewZ: new THREE.Vector3()
+  };
+  const s = new THREE.Vector3();
+  const v = new THREE.Vector3();
+  const up = new THREE.Vector3();
+  const mat4 = new THREE.Matrix4();
+  return function cancelPitchAndRoll(inMat4, outMat4) {
+    mat4.identity();
+    mat4.extractRotation(inMat4);
+    console.log("cancelPitchAndRoll");
+    console.log("in:", m4String(inMat4), "rotation is", m4String(mat4));
+    initial.viewZ.setFromMatrixColumn(mat4, 2);
+    final.viewZ
+      .copy(initial.viewZ)
+      .sub(v.copy(initial.viewZ).projectOnVector(up.set(0, 1, 0)))
+      .normalize();
+    final.viewY.set(0, 1, 0);
+    final.viewX.crossVectors(v.copy(final.viewZ).multiplyScalar(-1), final.viewY);
+    mat4.makeBasis(final.viewX, final.viewY, v);
+    console.log("new basis is", m4String(mat4));
+    // TODO: support scale!
+    // mat4.scale(
+    //  s.set(
+    //    v.setFromMatrixColumn(inMat4, 0).length(),
+    //    v.setFromMatrixColumn(inMat4, 1).length(),
+    //    v.setFromMatrixColumn(inMat4, 2).length()
+    //  )
+    //);
+    console.log("scaled basis", m4String(mat4));
+    mat4.setPosition(v.setFromMatrixColumn(inMat4, 3));
+    console.log("out:", m4String(mat4));
+    outMat4.copy(mat4);
+  };
+})();
 
 /**
  * Avatar movement controller that listens to move, rotate and teleportation events and moves the avatar accordingly.
@@ -88,6 +153,64 @@ AFRAME.registerComponent("character-controller", {
     this.pendingSnapRotationMatrix.copy(this.rightRotationMatrix);
     this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
   },
+
+  waypointTo: (function() {
+    const startCancelled = new THREE.Matrix4();
+    const finalCancelled = new THREE.Matrix4();
+    const final = new THREE.Matrix4();
+    const uncancel = new THREE.Matrix4();
+    const s = new THREE.Vector3();
+    const v = new THREE.Vector3();
+    return function waypointTo(inMat4) {
+      this.el.object3D.updateMatrices();
+      this.data.pivot.object3D.updateMatrices();
+      console.log(
+        "At the beginning,",
+        "waypoint is:",
+        m4String(inMat4),
+        "rig is",
+        m4String(this.el.object3D.matrixWorld),
+        "pivot is",
+        m4String(this.data.pivot.object3D.matrixWorld)
+      );
+
+      cancelPitchAndRoll(inMat4, finalCancelled);
+      cancelPitchAndRoll(this.data.pivot.object3D.matrixWorld, startCancelled);
+      console.log(
+        "Cancelling waypoint puts it at",
+        m4String(finalCancelled),
+        "Cancelling pivot puts it at",
+        m4String(startCancelled)
+      );
+      uncancel.getInverse(startCancelled).multiply(this.data.pivot.object3D.matrixWorld);
+      final.copy(finalCancelled).multiply(uncancel);
+      console.log("uncancel is", m4String(uncancel), "final is", m4String(final));
+      childMatch(this.el.object3D, this.data.pivot.object3D, final);
+      this.el.object3D.updateMatrices();
+      this.data.pivot.object3D.updateMatrices();
+      console.log(
+        "At the end, pivot is",
+        m4String(this.data.pivot.object3D.matrixWorld),
+        "rig is",
+        m4String(this.el.object3D.matrixWorld)
+      );
+      // TODO: Add scale support to childMatch!
+      this.el.object3D.scale.set(
+        v.setFromMatrixColumn(inMat4, 0).length(),
+        v.setFromMatrixColumn(inMat4, 1).length(),
+        v.setFromMatrixColumn(inMat4, 2).length()
+      );
+      this.el.object3D.matrixNeedsUpdate = true;
+      this.el.object3D.updateMatrices();
+
+      console.log(
+        "At the end, pivot is",
+        m4String(this.data.pivot.object3D.matrixWorld),
+        "rig is",
+        m4String(this.el.object3D.matrixWorld)
+      );
+    };
+  })(),
 
   // We assume the rig is at the root, and its local position === its world position.
   teleportTo: (function() {

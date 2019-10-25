@@ -54,8 +54,7 @@ export const childMatch = (function() {
   const twq = new THREE.Quaternion();
   // transform the parent such that its child matches the target
   return function childMatch(parent, child, target) {
-    target.updateMatrices();
-    decompose(target.matrixWorld, twp, twq);
+    decompose(target, twp, twq);
     cp.copy(child.position);
     cq.copy(child.quaternion);
     cqI.copy(cq).inverse();
@@ -107,7 +106,8 @@ const orbit = (function() {
         .applyQuaternion(target.quaternion)
     );
     target.matrixNeedsUpdate = true;
-    childMatch(rig, camera, target);
+    target.updateMatrices();
+    childMatch(rig, camera, target.matrixWorld);
   };
 })();
 
@@ -143,7 +143,8 @@ const moveRigSoCameraLooksAtObject = (function() {
     );
     target.quaternion.copy(owq);
     target.matrixNeedsUpdate = true;
-    childMatch(rig, camera, target);
+    target.updateMatrices();
+    childMatch(rig, camera, target.matrixWorld);
   };
 })();
 

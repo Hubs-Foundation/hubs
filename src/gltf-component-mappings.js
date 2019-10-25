@@ -85,6 +85,9 @@ AFRAME.GLTFModelPlus.registerComponent("visible", "visible", (el, componentName,
   }
 });
 AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point");
+AFRAME.GLTFModelPlus.registerComponent("way-point", "way-point", (el, componentName, componentData) => {
+  el.appendChild(document.importNode(document.getElementById("way-point-template")));
+});
 AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
 AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentName, componentData) => {
   const nav = AFRAME.scenes[0].systems.nav;

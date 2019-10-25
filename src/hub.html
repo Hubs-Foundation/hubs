@@ -67,6 +67,16 @@
 
             <a-asset-item id="drawing-pen" response-type="arraybuffer" src="./assets/models/DrawingPen.glb"></a-asset-item>
 
+            <template id="visible-thing-template">
+                <a-entity material="flatShading: true" geometry="primitive: cone"></a-entity>
+            </template>
+            <template id="way-point-template">
+                <a-entity>
+                    <a-entity is-remote-hover-target class="way-point-icon" tags="singleActionButton: true" sprite="name: scale-action.png" billboard>
+                    </a-entity>
+                </a-entity>
+            </template>
+
             <template id="remote-avatar">
                 <a-entity networked-avatar ik-root player-info matrix-auto-update visible="false">
                     <a-entity class="camera" matrix-auto-update></a-entity>
