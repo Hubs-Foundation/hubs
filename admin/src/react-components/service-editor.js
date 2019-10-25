@@ -26,7 +26,8 @@ import {
   getCategoryDisplayName,
   getCategoryDescription,
   isDescriptor,
-  putConfig
+  putConfig,
+  schemaCategories
 } from "../utils/ita";
 import * as AppConfigUtils from "../utils/app-config";
 
@@ -56,20 +57,48 @@ function getDescriptors(schema) {
   return descriptors;
 }
 
+function isEmptyObject(obj) {
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 class ConfigurationEditor extends Component {
   constructor(props) {
     super(props);
     this.state = {
       schema: null,
       config: null,
-      category: props.categories[0],
+      category: this.firstAvailableCategory(),
       saving: false,
       saved: false,
       saveError: null
     };
   }
 
+  firstAvailableCategory() {
+    for (const category of schemaCategories) {
+      if (!this.props.schema[category] || isEmptyObject(this.props.schema[category])) continue;
+      return category;
+    }
+  }
+
   async fetchConfigsForCategory() {
+    const servicesForCategory = Object.keys(this.props.schema[this.state.category]);
+
+    const config = {};
+
+    for (const service of servicesForCategory) {
+      config[service] = await this.getConfig(service);
+    }
+
+    this.setState({ config });
+  }
+
+  async getConfig() {
     throw new Error("Not implemented");
   }
 
@@ -187,9 +216,11 @@ class ConfigurationEditor extends Component {
             scrollButtons="auto"
             onChange={this.handleTabChange.bind(this)}
           >
-            {this.props.categories.map(c => (
-              <Tab label={getCategoryDisplayName(c)} key={c} value={c} />
-            ))}
+            {schemaCategories
+              .filter(c => this.props.schema[c] && !isEmptyObject(this.props.schema[c]))
+              .map(c => (
+                <Tab label={getCategoryDisplayName(c)} key={c} value={c} />
+              ))}
           </Tabs>
           <TabContainer>
             <Typography variant="body2" gutterBottom>
@@ -229,18 +260,10 @@ class ConfigurationEditor extends Component {
 
 const ServiceEditor = withStyles(styles)(
   class ServiceEditor extends ConfigurationEditor {
-    async fetchConfigsForCategory() {
-      const servicesForCategory = Object.keys(this.props.schema[this.state.category]);
-
-      const config = {};
-
-      for (const service of servicesForCategory) {
-        config[service] = await getConfig(service);
-      }
-
-      this.setState({ config });
+    getConfig(service) {
+      return getConfig(service);
     }
-    async putConfig(service, config) {
+    putConfig(service, config) {
       return putConfig(service, config);
     }
   }
@@ -255,13 +278,11 @@ const AppConfigEditor = withStyles(styles)(
         AppConfigUtils.setAuthToken(store.state.credentials.token);
       }
     }
-    async fetchConfigsForCategory() {
-      const config = await AppConfigUtils.getConfig();
-      const categoryConfig = config[this.state.category] || {};
-      this.setState({ config: categoryConfig });
+    getConfig() {
+      return AppConfigUtils.getConfig();
     }
-    async putConfig(service, config) {
-      return AppConfigUtils.putConfig({ [this.state.category]: { [service]: config } });
+    putConfig(service, config) {
+      return AppConfigUtils.putConfig(config);
     }
   }
 );

@@ -155,14 +155,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const customRoutes = [homeRoute, importRoute, accessRoute, dtRoute];
 
   try {
-    const appConfigSchema = toml.parse(await fetch("/hubs/schema.toml").then(r => r.text()));
+    const appConfigSchema = schemaByCategories({
+      hubs: toml.parse(await fetch("/hubs/schema.toml").then(r => r.text()))
+    });
     const appConfigRoute = (
-      <Route
-        path="/app-settings"
-        render={props => (
-          <AppConfigEditor {...props} schema={appConfigSchema} categories={["translations", "features"]} />
-        )}
-      />
+      <Route path="/app-settings" render={props => <AppConfigEditor {...props} schema={appConfigSchema} />} />
     );
     customRoutes.push(appConfigRoute);
   } catch (e) {
@@ -171,10 +168,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (itaSchemas) {
     customRoutes.push(
-      <Route
-        path="/server-setup"
-        render={props => <ServiceEditor {...props} schema={itaSchemas} categories={schemaCategories} />}
-      />
+      <Route path="/server-setup" render={props => <ServiceEditor {...props} schema={itaSchemas} />} />
     );
   }
 

@@ -1,6 +1,6 @@
 import configs from "./configs";
 
-const schemaCategories = ["api_keys", "content", "email", "advanced"];
+const schemaCategories = ["api_keys", "content", "email", "advanced", "translations", "features"];
 const serviceNames = configs.CONFIGURABLE_SERVICES.split(",");
 let currentAuthToken = null;
 
