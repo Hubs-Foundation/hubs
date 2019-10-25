@@ -190,7 +190,7 @@ class HomeRoot extends Component {
                   <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
                     <FormattedMessage id="home.community_link" />
                   </a>
-                  {configs.APP_CONFIG && configs.APP_CONFIG.features.disable_spoke ? null : (
+                  {configs.feature("disable_spoke") ? null : (
                     <a href="/spoke" rel="noreferrer noopener">
                       Spoke
                     </a>

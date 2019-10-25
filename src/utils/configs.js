@@ -24,4 +24,8 @@ if (window.APP_CONFIG) {
   configs.APP_CONFIG = window.APP_CONFIG;
 }
 
+configs.feature = featureName => {
+  return configs.APP_CONFIG && configs.APP_CONFIG.features && configs.APP_CONFIG.features[featureName];
+};
+
 export default configs;
