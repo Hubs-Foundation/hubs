@@ -1,6 +1,6 @@
 import configs from "./configs";
 
-const schemaCategories = ["api_keys", "content", "email", "advanced"];
+const schemaCategories = ["api_keys", "content", "email", "advanced", "translations", "features"];
 const serviceNames = configs.CONFIGURABLE_SERVICES.split(",");
 let currentAuthToken = null;
 
@@ -18,6 +18,10 @@ function getCategoryDisplayName(category) {
       return "Email";
     case "advanced":
       return "Advanced";
+    case "translations":
+      return "Translations";
+    case "features":
+      return "Features";
     default:
       return null;
   }
@@ -33,6 +37,10 @@ function getCategoryDescription(category) {
       return "Custom SMTP email provider settings. Leave blank to use your cloud provider's email service.";
     case "advanced":
       return "Advanced Settings for those who know what they're doing.";
+    case "translations":
+      return "Text that you can change.";
+    case "features":
+      return "Features that you can toggle.";
     default:
       return null;
   }

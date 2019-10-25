@@ -12,10 +12,12 @@ import Typography from "@material-ui/core/Typography";
 import Icon from "@material-ui/core/Icon";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
-import clsx from "classnames";
 import Button from "@material-ui/core/Button";
 import LinearProgress from "@material-ui/core/LinearProgress";
+import clsx from "classnames";
 import { Title } from "react-admin";
+
+import Store from "hubs/src/storage/store";
 import withCommonStyles from "../utils/with-common-styles";
 import {
   getConfig,
@@ -27,6 +29,7 @@ import {
   putConfig,
   schemaCategories
 } from "../utils/ita";
+import * as AppConfigUtils from "../utils/app-config";
 
 const styles = withCommonStyles(() => ({}));
 
@@ -54,20 +57,33 @@ function getDescriptors(schema) {
   return descriptors;
 }
 
-class ConfigurationEditor extends Component {
-  state = {
-    schema: null,
-    config: null,
-    category: schemaCategories[0],
-    saving: false,
-    saved: false,
-    saveError: null
-  };
+function isEmptyObject(obj) {
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      return false;
+    }
+  }
+  return true;
+}
 
-  componentDidMount() {
-    this.fetchConfigsForCategory();
-    //this.setState({ schema: this.props.schema[this.props.category] });
-    //getConfig(this.props.service).then(config => this.setState({ config: config }));
+class ConfigurationEditor extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      schema: null,
+      config: null,
+      category: this.firstAvailableCategory(),
+      saving: false,
+      saved: false,
+      saveError: null
+    };
+  }
+
+  firstAvailableCategory() {
+    for (const category of schemaCategories) {
+      if (!this.props.schema[category] || isEmptyObject(this.props.schema[category])) continue;
+      return category;
+    }
   }
 
   async fetchConfigsForCategory() {
@@ -76,10 +92,22 @@ class ConfigurationEditor extends Component {
     const config = {};
 
     for (const service of servicesForCategory) {
-      config[service] = await getConfig(service);
+      config[service] = await this.getConfig(service);
     }
 
     this.setState({ config });
+  }
+
+  async getConfig() {
+    throw new Error("Not implemented");
+  }
+
+  async putConfig() {
+    throw new Error("Not implemented");
+  }
+
+  componentDidMount() {
+    this.fetchConfigsForCategory();
   }
 
   handleTabChange(event, category) {
@@ -100,7 +128,7 @@ class ConfigurationEditor extends Component {
       try {
         for (const [service, config] of Object.entries(this.state.config)) {
           if (Object.keys(config).length > 0) {
-            const res = await putConfig(service, config);
+            const res = await this.putConfig(service, config);
 
             if (res.error) {
               this.setState({ saveError: `Error saving: ${res.error}` });
@@ -188,9 +216,11 @@ class ConfigurationEditor extends Component {
             scrollButtons="auto"
             onChange={this.handleTabChange.bind(this)}
           >
-            {schemaCategories.map(c => (
-              <Tab label={getCategoryDisplayName(c)} key={c} value={c} />
-            ))}
+            {schemaCategories
+              .filter(c => this.props.schema[c] && !isEmptyObject(this.props.schema[c]))
+              .map(c => (
+                <Tab label={getCategoryDisplayName(c)} key={c} value={c} />
+              ))}
           </Tabs>
           <TabContainer>
             <Typography variant="body2" gutterBottom>
@@ -228,4 +258,33 @@ class ConfigurationEditor extends Component {
   }
 }
 
-export const ServiceEditor = withStyles(styles)(ConfigurationEditor);
+const ServiceEditor = withStyles(styles)(
+  class ServiceEditor extends ConfigurationEditor {
+    getConfig(service) {
+      return getConfig(service);
+    }
+    putConfig(service, config) {
+      return putConfig(service, config);
+    }
+  }
+);
+
+const AppConfigEditor = withStyles(styles)(
+  class AppConfigEditor extends ConfigurationEditor {
+    constructor(props) {
+      super(props);
+      const store = new Store();
+      if (store.state && store.state.credentials && store.state.credentials.token) {
+        AppConfigUtils.setAuthToken(store.state.credentials.token);
+      }
+    }
+    getConfig() {
+      return AppConfigUtils.getConfig();
+    }
+    putConfig(service, config) {
+      return AppConfigUtils.putConfig(config);
+    }
+  }
+);
+
+export { ServiceEditor, AppConfigEditor };

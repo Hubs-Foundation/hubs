@@ -16,7 +16,7 @@ const getCommon = theme => ({
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    alignItems: "flex-start"
+    width: "100%"
   },
 
   warningIcon: {

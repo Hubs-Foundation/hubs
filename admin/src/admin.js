@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import React, { Component } from "react";
 import { Route } from "react-router-dom";
 import PropTypes from "prop-types";
+import toml from "@iarna/toml";
 import {
   schemaByCategories,
   schemaCategories,
@@ -23,7 +24,7 @@ import { PendingSceneList } from "./react-components/pending-scenes";
 import { AccountList, AccountEdit } from "./react-components/accounts";
 import { ProjectList, ProjectShow } from "./react-components/projects";
 import { SystemEditor } from "./react-components/system-editor";
-import { ServiceEditor } from "./react-components/service-editor";
+import { ServiceEditor, AppConfigEditor } from "./react-components/service-editor";
 import { ServerAccess } from "./react-components/server-access";
 import { DataTransfer } from "./react-components/data-transfer";
 import { ImportContent } from "./react-components/import-content";
@@ -153,12 +154,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const customRoutes = [homeRoute, importRoute, accessRoute, dtRoute];
 
+  try {
+    const appConfigSchema = schemaByCategories({
+      hubs: toml.parse(await fetch("/hubs/schema.toml").then(r => r.text()))
+    });
+    const appConfigRoute = (
+      <Route path="/app-settings" render={props => <AppConfigEditor {...props} schema={appConfigSchema} />} />
+    );
+    customRoutes.push(appConfigRoute);
+  } catch (e) {
+    console.error("Could not initialize app config.", e);
+  }
+
   if (itaSchemas) {
     customRoutes.push(
-      <Route
-        path="/server-setup"
-        render={props => <ServiceEditor {...props} schema={itaSchemas} categories={schemaCategories} />}
-      />
+      <Route path="/server-setup" render={props => <ServiceEditor {...props} schema={itaSchemas} />} />
     );
   }
 
