@@ -247,7 +247,7 @@ const ServiceEditor = withStyles(styles)(
 );
 
 const AppConfigEditor = withStyles(styles)(
-  class ServiceEditor extends ConfigurationEditor {
+  class AppConfigEditor extends ConfigurationEditor {
     constructor(props) {
       super(props);
       const store = new Store();

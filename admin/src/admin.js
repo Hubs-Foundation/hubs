@@ -152,17 +152,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   const accessRoute = <Route exact path="/server-access" component={ServerAccess} />;
   const dtRoute = <Route exact path="/data-transfer" component={DataTransfer} />;
 
-  const appConfigSchema = toml.parse(await fetch("/app-config-schema.toml").then(r => r.text()));
-  const appConfigRoute = (
-    <Route
-      path="/app-settings"
-      render={props => (
-        <AppConfigEditor {...props} schema={appConfigSchema} categories={["translations", "features"]} />
-      )}
-    />
-  );
+  const customRoutes = [homeRoute, importRoute, accessRoute, dtRoute];
 
-  const customRoutes = [homeRoute, importRoute, accessRoute, dtRoute, appConfigRoute];
+  try {
+    const appConfigSchema = toml.parse(await fetch("/hubs/schema.toml").then(r => r.text()));
+    const appConfigRoute = (
+      <Route
+        path="/app-settings"
+        render={props => (
+          <AppConfigEditor {...props} schema={appConfigSchema} categories={["translations", "features"]} />
+        )}
+      />
+    );
+    customRoutes.push(appConfigRoute);
+  } catch (e) {
+    console.error("Could not initialize app config.", e);
+  }
 
   if (itaSchemas) {
     customRoutes.push(
