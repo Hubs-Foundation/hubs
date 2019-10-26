@@ -68,7 +68,7 @@ body {
     min-height: max-content;
     margin-top: 16px;
     &:disabled {
-      background-color: $action-color-light;
+      background-color: $action-color-disabled;
       cursor: default;
     }
   }

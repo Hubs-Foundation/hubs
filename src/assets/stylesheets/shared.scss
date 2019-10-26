@@ -13,21 +13,36 @@ $darker-grey: rgba(64, 64, 64, 1.0);
 $darkest-grey: rgba(32, 32, 32, 1.0);
 $bright-blue: #2F80ED;
 $light-blue: #6FC0FD;
-$action-color: #FF3464;
-$action-color-light: #FF74A4;
-$action-color-transparent: rgba(255, 52, 100, 0.9);
-$action-text: white;
-$text-field-text-color: black;
-$text-field-background-color: white;
-$spoke-action-color: $bright-blue;
-$twitter-action-color: #1da1f2;
-$discord-action-color: #7289da;
 $semi-bold: 600;
 $duck-yellow: #FFC000;
 
+$action-color: #FF3464;
+$action-color-highlight: #FF74A4;
+$action-color-disabled: #FF74A4;
+$action-color-transparent: rgba(255, 52, 100, 0.9);
+$action-text: white;
+$action-button-secondary-background: white;
+$action-subtitle-text: $light-text;
 $hud-panel-background: rgba(79, 79, 79, 0.45);
-$notice-text: white;
-$notice-widget: $light-blue;
+$notice-text-color: white;
+$notice-widget-color: $light-blue;
+$text-field-text-color: black;
+$text-field-background-color: white;
+$panel-action-button-secondary-background: #f4f4f4;
+$action-button-secondary-icon: $dark-grey; // eg avatar upload button 
+$panel-text-color: black;
+$panel-text-color: black;
+$panel-link-underline-color: $dark-grey;
+$panel-widget-color: $dark-grey;
+$panel-subtitle-color: $dark-grey;
+$panel-subtext-color: $grey-text;
+$panel-subtext-link-color: $dark-grey-text;
+$panel-icon-color: $darker-grey;
+$favorited-color: $duck-yellow;
+$spoke-action-color: $bright-blue;
+$spoke-action-text-color: white;
+$twitter-action-color: #1da1f2;
+$discord-action-color: #7289da;
 
 %unselectable {
   -moz-user-select: none;
@@ -178,13 +193,13 @@ $notice-widget: $light-blue;
 
 %action-button-secondary {
   @extend %action-button;
-  background-color: white;
+  background-color: $action-button-secondary-background;
   color: $action-color;
 }
 
 %action-button-secondary-modal {
   @extend %action-button;
-  background-color: #f4f4f4;
+  background-color: $panel-action-button-secondary-background;
   color: $action-color;
 }
 

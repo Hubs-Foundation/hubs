@@ -120,11 +120,11 @@
 
   :local(.tip-cancel-text) {
     @extend %link-button;
-    color: $notice-text;
+    color: $notice-text-color;
   }
 
   :local(.tip-cancel) {
-    color: $notice-widget;
+    color: $notice-widget-color;
     appearance: none;
     -moz-appearance: none;
     -webkit-appearance: none;

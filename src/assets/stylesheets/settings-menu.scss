@@ -22,7 +22,7 @@
   position: relative;
   margin: 0px 18px 0px 10px;
   font-size: 1.1em;
-  color: $darker-grey;
+  color: $panel-icon-color;
 
   img {
     position: absolute;
@@ -51,21 +51,21 @@
   width: 90%;
 
   button, a {
-    color: black;
+    color: $panel-text-color;
     margin: 2px 12px;
     display: flex;
     justify-content: center;
     align-items: center;
     white-space: nowrap;
     font-weight: bold;
-    text-decoration-color: $dark-grey;
+    text-decoration-color: $panel-link-underline-color;
   }
 
   button {
     @extend %default-font;
     @extend %link-button;
     font-weight: bold;
-    text-decoration-color: $dark-grey;
+    text-decoration-color: $panel-subtitle-color;
     padding: 0;
     justify-content: flex-start;
     text-align: center;
@@ -80,7 +80,7 @@
   font-weight: normal;
 
   a, button {
-    color: $dark-grey;
+    color: $panel-subtitle-color;
     margin: 2px 12px;
     display: flex;
     justify-content: flex-start;
@@ -93,7 +93,7 @@
     @extend %default-font;
     @extend %link-button;
     font-weight: normal;
-    text-decoration-color: $dark-grey;
+    text-decoration-color: $panel-subtitle-color;
     padding: 0;
     justify-content: flex-start;
     text-align: center;

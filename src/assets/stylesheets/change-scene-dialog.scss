@@ -41,7 +41,7 @@
   border: none;
   white-space: nowrap;
   background: transparent;
-  color: black;
+  color: $text-field-text-color;
   font-size: 1.2em;
   align-self: center;
   overflow: hidden;
@@ -65,5 +65,5 @@
 :local(.spoke-launch) {
   @extend %spoke-action-button;
   margin-top: 18px;
-  color: white !important; // TODO HACK because of dialog <a> style overriding color
+  color: $spoke-action-text-color !important; // TODO HACK because of dialog <a> style overriding color
 }

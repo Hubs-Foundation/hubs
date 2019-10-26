@@ -130,7 +130,7 @@
 }
 
 :local(.code) {
-  color: black;
+  color: $text-field-text-color;
   font-weight: bold;
   text-decoration: none;
   font-size: 2.0em;
@@ -147,9 +147,9 @@
     @extend %default-font;
     font-weight: bold;
     text-decoration: none;
-    color: black;
+    color: $text-field-text-color;
     text-align: center;
-    background-color: white;
+    background-color: $text-field-background-color;
     border: 1px solid #e2e2e2;
     border-radius: 12px;
     margin: 12px;
@@ -164,7 +164,7 @@
 :local(.digit) {
   padding: 0 8px;
   margin: 2px;
-  background-color: white;
+  background-color: $text-field-text-color;
   border: 1px solid #e2e2e2;
   border-radius: 12px;
   width: 32px;
@@ -215,9 +215,9 @@
     @extend %default-font;
     font-weight: bold;
     text-decoration: none;
-    color: black;
+    color: $text-field-text-color;
     text-align: center;
-    background-color: white;
+    background-color: $text-field-background-color;
     border: 1px solid #e2e2e2;
     border-radius: 12px;
     margin: 12px 0 0 0;
@@ -242,7 +242,7 @@
   outline-style: none;
   border: 0;
   background-color: transparent;
-  color: white;
+  color: $action-text;
 }
 
 :local(.subscribe) {
@@ -250,7 +250,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: $action-text;
 
   input {
     @extend %checkbox;

@@ -10,7 +10,7 @@
 
 :local(.collapse-button) {
   @extend %fa-icon-button;
-  color: $dark-grey;
+  color: $panel-widget-color;
   display: inline;
   position: absolute;
   top: 0px;
@@ -26,7 +26,7 @@
   position: absolute;
   top: 0px;
   right: 24px;
-  color: $dark-grey;
+  color: $panel-widget-color;
   display: inline;
 
   i {
@@ -35,7 +35,7 @@
 }
 
 :local(.favorited) {
-  color: $duck-yellow;
+  color: $favorited-color;
 }
 
 :local(.collapse-button):hover {
@@ -49,7 +49,7 @@
   text-align: left;
   flex-direction: row;
   cursor: pointer;
-  color: white;
+  color: $action-text;
   align-items: center;
   @extend %default-font;
   border: 0;
@@ -65,7 +65,7 @@
 
   :local(.label) {
     @extend %glass-text;
-    color: white;
+    color: $action-text;
     flex: 10 1 auto;
     margin-left: 20px;
     font-size: 1.0em;
@@ -81,7 +81,7 @@
   :local(.subtitle) {
     font-size: 0.8em;
     font-weight: normal;
-    color: $light-text;
+    color: $action-subtitle-text;
   }
 }
 
@@ -115,7 +115,7 @@
   :local(.room-subtitle) {
     font-size: 0.8em;
     text-transform: uppercase;
-    color: $dark-grey;
+    color: $panel-subtitle-color;
     margin-bottom: 8px;
   }
 
@@ -145,7 +145,7 @@
       cursor: pointer;
       border: 0;
       text-decoration: underline;
-      text-decoration-color: $dark-grey;
+      text-decoration-color: $panel-subtitle-color;
       background: transparent;
     }
   }
@@ -171,7 +171,7 @@
     text-decoration: none;
     cursor: pointer;
     display: flex;
-    color: $dark-grey;
+    color: $panel-subtitle-color;
     align-items: center;
     justify-content: center;
     i {
@@ -225,7 +225,7 @@
   }
 
   :local(.webvr-link) {
-    color: white;
+    color: $action-text;
     flex: 1;
     min-height: max-content;
   }

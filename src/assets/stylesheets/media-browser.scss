@@ -246,7 +246,7 @@
       white-space: nowrap;
 
       &:hover{
-        background-color: $action-color-light;
+        background-color: $action-color-highlight;
         color: white;
       }
       &.selected{
