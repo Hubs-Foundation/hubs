@@ -1,5 +1,7 @@
 import { paths } from "../systems/userinput/paths";
 import { SOUND_SNAP_ROTATE } from "../systems/sound-effects-system";
+import { easeOutQuadratic } from "../utils/easing";
+import { getPooledMatrix4, freePooledMatrix4 } from "../utils/mat4-pool";
 import qsTruthy from "../utils/qs_truthy";
 import { childMatch } from "../systems/camera-system";
 const enableWheelSpeed = qsTruthy("wheelSpeed") || qsTruthy("wheelspeed") || qsTruthy("ws");
@@ -7,30 +9,34 @@ const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
 const MAX_WARNINGS = 10;
-
 const NAV_ZONE = "character";
+const WAYPOINT_TRAVEL_TIME = 1000;
+const WAYPOINT_DOWN_TIME = 0;
 
-function v3String(vec3) {
-  return ["", vec3.x, vec3.y, vec3.z, ""].join("\n");
-}
-function m4String(mat4) {
-  function numString(n) {
-    return `${n >= 0 ? " " : ""}${n.toFixed(2)}`;
-  }
-  return [
-    "",
-    "_".repeat(30),
-    [0, 1, 2, 3].map(i => [0, 4, 8, 12].map(j => numString(mat4.elements[j + i])).join(" | ")).join("\n"),
-    "‾".repeat(18),
-    ""
-  ].join("\n");
-}
-
-window.logCharInfo = function() {
-  const rig = document.getElementById("avatar-rig").object3D;
-  const pivot = rig.el.components["character-controller"].data.pivot.object3D;
-  console.log("rig is", m4String(rig.matrixWorld), "pivot is", m4String(pivot.matrixWorld));
-};
+export const interpolateAffine = (function() {
+  const mat4 = new THREE.Matrix4();
+  const startQ = new THREE.Quaternion();
+  const endQ = new THREE.Quaternion();
+  const interpolatedQ = new THREE.Quaternion();
+  const interpolatedP = new THREE.Vector3();
+  const startP = new THREE.Vector3();
+  const endP = new THREE.Vector3();
+  const startS = new THREE.Vector3();
+  const endS = new THREE.Vector3();
+  const interpolatedS = new THREE.Vector3(1, 1, 1);
+  return function(start, end, progress, outMat4) {
+    startQ.setFromRotationMatrix(mat4.extractRotation(start));
+    endQ.setFromRotationMatrix(mat4.extractRotation(end));
+    THREE.Quaternion.slerp(startQ, endQ, interpolatedQ, progress);
+    interpolatedP.lerpVectors(startP.setFromMatrixColumn(start, 3), endP.setFromMatrixColumn(end, 3), progress);
+    interpolatedS.lerpVectors(startS.setFromMatrixScale(start), endS.setFromMatrixScale(end), progress);
+    return outMat4.compose(
+      interpolatedP,
+      interpolatedQ,
+      interpolatedS
+    );
+  };
+})();
 
 export const cancelPitchAndRoll = (function() {
   const initial = {
@@ -41,15 +47,12 @@ export const cancelPitchAndRoll = (function() {
     viewY: new THREE.Vector3(),
     viewZ: new THREE.Vector3()
   };
-  const s = new THREE.Vector3();
   const v = new THREE.Vector3();
   const up = new THREE.Vector3();
   const mat4 = new THREE.Matrix4();
   return function cancelPitchAndRoll(inMat4, outMat4) {
     mat4.identity();
     mat4.extractRotation(inMat4);
-    console.log("cancelPitchAndRoll");
-    console.log("in:", m4String(inMat4), "rotation is", m4String(mat4));
     initial.viewZ.setFromMatrixColumn(mat4, 2);
     final.viewZ
       .copy(initial.viewZ)
@@ -58,8 +61,7 @@ export const cancelPitchAndRoll = (function() {
     final.viewY.set(0, 1, 0);
     final.viewX.crossVectors(v.copy(final.viewZ).multiplyScalar(-1), final.viewY);
     mat4.makeBasis(final.viewX, final.viewY, v);
-    console.log("new basis is", m4String(mat4));
-    // TODO: support scale!
+    // TODO: What about scale ??
     // mat4.scale(
     //  s.set(
     //    v.setFromMatrixColumn(inMat4, 0).length(),
@@ -67,9 +69,7 @@ export const cancelPitchAndRoll = (function() {
     //    v.setFromMatrixColumn(inMat4, 2).length()
     //  )
     //);
-    console.log("scaled basis", m4String(mat4));
     mat4.setPosition(v.setFromMatrixColumn(inMat4, 3));
-    console.log("out:", m4String(mat4));
     outMat4.copy(mat4);
   };
 })();
@@ -108,6 +108,8 @@ AFRAME.registerComponent("character-controller", {
       this.navGroup = null;
       this.navNode = null;
     });
+    this.waypoints = [];
+    this.prevWaypointTravelTime = 0;
   },
 
   update: function() {
@@ -154,64 +156,6 @@ AFRAME.registerComponent("character-controller", {
     this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
   },
 
-  waypointTo: (function() {
-    const startCancelled = new THREE.Matrix4();
-    const finalCancelled = new THREE.Matrix4();
-    const final = new THREE.Matrix4();
-    const uncancel = new THREE.Matrix4();
-    const s = new THREE.Vector3();
-    const v = new THREE.Vector3();
-    return function waypointTo(inMat4) {
-      this.el.object3D.updateMatrices();
-      this.data.pivot.object3D.updateMatrices();
-      console.log(
-        "At the beginning,",
-        "waypoint is:",
-        m4String(inMat4),
-        "rig is",
-        m4String(this.el.object3D.matrixWorld),
-        "pivot is",
-        m4String(this.data.pivot.object3D.matrixWorld)
-      );
-
-      cancelPitchAndRoll(inMat4, finalCancelled);
-      cancelPitchAndRoll(this.data.pivot.object3D.matrixWorld, startCancelled);
-      console.log(
-        "Cancelling waypoint puts it at",
-        m4String(finalCancelled),
-        "Cancelling pivot puts it at",
-        m4String(startCancelled)
-      );
-      uncancel.getInverse(startCancelled).multiply(this.data.pivot.object3D.matrixWorld);
-      final.copy(finalCancelled).multiply(uncancel);
-      console.log("uncancel is", m4String(uncancel), "final is", m4String(final));
-      childMatch(this.el.object3D, this.data.pivot.object3D, final);
-      this.el.object3D.updateMatrices();
-      this.data.pivot.object3D.updateMatrices();
-      console.log(
-        "At the end, pivot is",
-        m4String(this.data.pivot.object3D.matrixWorld),
-        "rig is",
-        m4String(this.el.object3D.matrixWorld)
-      );
-      // TODO: Add scale support to childMatch!
-      this.el.object3D.scale.set(
-        v.setFromMatrixColumn(inMat4, 0).length(),
-        v.setFromMatrixColumn(inMat4, 1).length(),
-        v.setFromMatrixColumn(inMat4, 2).length()
-      );
-      this.el.object3D.matrixNeedsUpdate = true;
-      this.el.object3D.updateMatrices();
-
-      console.log(
-        "At the end, pivot is",
-        m4String(this.data.pivot.object3D.matrixWorld),
-        "rig is",
-        m4String(this.el.object3D.matrixWorld)
-      );
-    };
-  })(),
-
   // We assume the rig is at the root, and its local position === its world position.
   teleportTo: (function() {
     const rig = new THREE.Vector3();
@@ -237,6 +181,47 @@ AFRAME.registerComponent("character-controller", {
     };
   })(),
 
+  // Use this API for waypoint travel so that your matrix doesn't end up in the pool
+  // If you have a throw-away matrix, you can push it onto `this.waypoints` and it'll end up in the pool
+  enqueueWaypointTravelTo(inMat4) {
+    const pooledMatrix = getPooledMatrix4();
+    this.waypoints.push(pooledMatrix.copy(inMat4));
+  },
+
+  calculateFinalWaypointTransform: (function() {
+    const startCancelled = new THREE.Matrix4();
+    const finalCancelled = new THREE.Matrix4();
+    const uncancel = new THREE.Matrix4();
+    return function calculateFinalWaypointTransform(inMat4, final) {
+      this.el.object3D.updateMatrices();
+      this.data.pivot.object3D.updateMatrices();
+      cancelPitchAndRoll(inMat4, finalCancelled);
+      cancelPitchAndRoll(this.data.pivot.object3D.matrixWorld, startCancelled);
+      uncancel.getInverse(startCancelled).multiply(this.data.pivot.object3D.matrixWorld);
+      final.copy(finalCancelled).multiply(uncancel);
+    };
+  })(),
+  travelByWaypoint: (function() {
+    const v = new THREE.Vector3();
+    const final = new THREE.Matrix4();
+    // Transform the rig such that the pivot's forward direction matches the waypoint's,
+    return function travelByWaypoint(inMat4) {
+      this.calculateFinalWaypointTransform(inMat4, final);
+      childMatch(this.el.object3D, this.data.pivot.object3D, final);
+      this.el.object3D.updateMatrices();
+      this.data.pivot.object3D.updateMatrices();
+      // TODO: Fix bug with 2D mode non uniform scale.
+      // TODO: Handle scale earlier (e.g. in childMatch)?
+      this.el.object3D.scale.set(
+        v.setFromMatrixColumn(inMat4, 0).length(),
+        v.setFromMatrixColumn(inMat4, 0).length(), // TODO: support non-uniform scale
+        v.setFromMatrixColumn(inMat4, 0).length()
+      );
+      this.el.object3D.matrixNeedsUpdate = true;
+      this.el.object3D.updateMatrices();
+    };
+  })(),
+
   tick: (function() {
     const move = new THREE.Matrix4();
     const trans = new THREE.Matrix4();
@@ -253,6 +238,31 @@ AFRAME.registerComponent("character-controller", {
 
     return function(t, dt) {
       if (!this.el.sceneEl.is("entered")) return;
+
+      if (
+        !this.activeWaypoint &&
+        this.waypoints.length &&
+        t > this.prevWaypointTravelTime + (WAYPOINT_TRAVEL_TIME + WAYPOINT_DOWN_TIME)
+      ) {
+        this.activeWaypoint = this.waypoints.splice(0, 1)[0];
+        this.data.pivot.object3D.updateMatrices();
+        this.startPoint = new THREE.Matrix4().copy(this.data.pivot.object3D.matrixWorld);
+        this.prevWaypointTravelTime = t;
+      }
+      if (this.activeWaypoint && t < this.prevWaypointTravelTime + WAYPOINT_TRAVEL_TIME) {
+        const progress = THREE.Math.clamp((t - this.prevWaypointTravelTime) / WAYPOINT_TRAVEL_TIME, 0, 1);
+        const interpolatedWaypoint = interpolateAffine(
+          this.startPoint,
+          this.activeWaypoint,
+          easeOutQuadratic(progress),
+          new THREE.Matrix4()
+        );
+        this.travelByWaypoint(interpolatedWaypoint);
+      }
+      if (this.activeWaypoint && t > this.prevWaypointTravelTime + WAYPOINT_TRAVEL_TIME) {
+        freePooledMatrix4(this.activeWaypoint);
+        this.activeWaypoint = null;
+      }
       const deltaSeconds = dt / 1000;
       const root = this.el.object3D;
       const pivot = this.data.pivot.object3D;

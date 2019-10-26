@@ -2,35 +2,54 @@ AFRAME.registerComponent("visible-thing", {
   schema: {},
   init() {
     this.el.appendChild(document.importNode(document.getElementById("visible-thing-template").content, true));
-  },
-  remove() {
-    this.el.querySelector(".way-point-icon").object3D.removeEventListener("interact", this.teleport);
   }
 });
 AFRAME.registerComponent("way-point", {
-  schema: {},
+  schema: {
+    reparent: { default: false }, // Attach to moving objects
+    maintainUp: { default: true }, // Maintain the user's perceived up vector. Suggestion: Require this to be explicitly enabled by users to prevent accidental nauseua
+    disallowIfOccupied: { default: false }
+  },
   init() {
     this.el.appendChild(document.importNode(document.getElementById("way-point-template").content, true));
-    this.teleport = this.teleport.bind(this);
-    console.log(this);
+    this.enqueueWaypointTravelToHere = this.enqueueWaypointTravelToHere.bind(this);
+    // Some browsers require a timeout here.
+    // I can't remember if it is the .way-point-icon element or the object3D that isn't available.
     setTimeout(() => {
-      if (!this.el.parentNode) return;
-      this.el.querySelector(".way-point-icon").object3D.addEventListener("interact", this.teleport);
+      if (this.didRemove) return;
+      this.el.querySelector(".way-point-icon").object3D.addEventListener("interact", this.enqueueWaypointTravelToHere);
     }, 0);
   },
-  teleport() {
+  enqueueWaypointTravelToHere() {
     this.characterController =
       this.characterController || document.getElementById("avatar-rig").components["character-controller"];
-    this.characterController.waypointTo(this.el.object3D.matrixWorld);
+    this.characterController && this.characterController.enqueueWaypointTravelTo(this.el.object3D.matrixWorld);
   },
   remove() {
-    this.el.querySelector(".way-point-icon").object3D.removeEventListener("interact", this.teleport);
+    this.didRemove = true;
+    this.el.querySelector(".way-point-icon").object3D.removeEventListener("interact", this.enqueueWaypointTravel);
   }
 });
 
 AFRAME.registerSystem("make-some-waypoints-for-testing", {
   init() {
     const v = new THREE.Vector3();
+
+    const el11 = document.createElement("a-entity");
+    this.el.appendChild(el11);
+    el11.setAttribute("way-point", "foo", "bar");
+    el11.object3D.position.set(0, 10, 30);
+    el11.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
+    el11.object3D.scale.set(5, 5, 5);
+    el11.object3D.matrixNeedsUpdate = true;
+
+    const el12 = document.createElement("a-entity");
+    this.el.appendChild(el12);
+    el12.setAttribute("way-point", "foo", "bar");
+    el12.object3D.position.set(0, 12, 0);
+    el12.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
+    el12.object3D.scale.set(1, 3, 1);
+    el12.object3D.matrixNeedsUpdate = true;
 
     const el0 = document.createElement("a-entity");
     this.el.appendChild(el0);
@@ -99,21 +118,6 @@ AFRAME.registerSystem("make-some-waypoints-for-testing", {
     el10.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
     el10.object3D.matrixNeedsUpdate = true;
 
-    const el11 = document.createElement("a-entity");
-    this.el.appendChild(el11);
-    el11.setAttribute("way-point", "foo", "bar");
-    el11.object3D.position.set(0, 10, 0);
-    el11.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
-    el11.object3D.scale.set(3, 3, 3);
-    el11.object3D.matrixNeedsUpdate = true;
-
-    const el12 = document.createElement("a-entity");
-    this.el.appendChild(el12);
-    el12.setAttribute("way-point", "foo", "bar");
-    el12.object3D.position.set(0, 12, 0);
-    el12.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
-    el12.object3D.scale.set(1, 3, 1);
-    el12.object3D.matrixNeedsUpdate = true;
 
     //const el8 = document.createElement("a-entity");
     //this.el.appendChild(el8);

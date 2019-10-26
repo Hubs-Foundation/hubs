@@ -1,5 +1,6 @@
 import { findAncestorWithComponent } from "../utils/scene-graph";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
+import { easeOutQuadratic } from "../utils/easing";
 
 // This computation is expensive, so we run on at most one avatar per frame, including quiet avatars.
 // However if we detect an avatar is seen speaking (its volume is above DISABLE_AT_VOLUME_THRESHOLD)
@@ -187,10 +188,6 @@ AFRAME.registerComponent("scale-audio-feedback", {
     object3D.matrixNeedsUpdate = true;
   }
 });
-
-function easeOutQuadratic(t) {
-  return t * (2 - t);
-}
 
 /**
  * Animates a morph target based on an audio-analyser in a parent entity
