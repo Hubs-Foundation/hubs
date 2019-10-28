@@ -4,6 +4,7 @@ import { easeOutQuadratic } from "../utils/easing";
 import { getPooledMatrix4, freePooledMatrix4 } from "../utils/mat4-pool";
 import qsTruthy from "../utils/qs_truthy";
 import { childMatch } from "../systems/camera-system";
+import { interpolateAffine } from "../utils/three-utils";
 const enableWheelSpeed = qsTruthy("wheelSpeed") || qsTruthy("wheelspeed") || qsTruthy("ws");
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
@@ -12,31 +13,6 @@ const MAX_WARNINGS = 10;
 const NAV_ZONE = "character";
 const WAYPOINT_TRAVEL_TIME = 300;
 const WAYPOINT_DOWN_TIME = 0;
-
-export const interpolateAffine = (function() {
-  const mat4 = new THREE.Matrix4();
-  const startQ = new THREE.Quaternion();
-  const endQ = new THREE.Quaternion();
-  const interpolatedQ = new THREE.Quaternion();
-  const interpolatedP = new THREE.Vector3();
-  const startP = new THREE.Vector3();
-  const endP = new THREE.Vector3();
-  const startS = new THREE.Vector3();
-  const endS = new THREE.Vector3();
-  const interpolatedS = new THREE.Vector3(1, 1, 1);
-  return function(start, end, progress, outMat4) {
-    startQ.setFromRotationMatrix(mat4.extractRotation(start));
-    endQ.setFromRotationMatrix(mat4.extractRotation(end));
-    THREE.Quaternion.slerp(startQ, endQ, interpolatedQ, progress);
-    interpolatedP.lerpVectors(startP.setFromMatrixColumn(start, 3), endP.setFromMatrixColumn(end, 3), progress);
-    interpolatedS.lerpVectors(startS.setFromMatrixScale(start), endS.setFromMatrixScale(end), progress);
-    return outMat4.compose(
-      interpolatedP,
-      interpolatedQ,
-      interpolatedS
-    );
-  };
-})();
 
 export const cancelPitchAndRoll = (function() {
   const initial = {
@@ -63,6 +39,7 @@ export const cancelPitchAndRoll = (function() {
     final.viewX.crossVectors(v.copy(final.viewZ).multiplyScalar(-1), final.viewY);
     mat4.makeBasis(final.viewX, final.viewY, final.viewZ);
     mat4.scale(
+      //// TODO: Fix bug with 2D mode non uniform scale.
       s.set(
         v.setFromMatrixColumn(inMat4, 0).length(),
         v.setFromMatrixColumn(inMat4, 1).length(),
@@ -202,7 +179,6 @@ AFRAME.registerComponent("character-controller", {
     };
   })(),
   travelByWaypoint: (function() {
-    const v = new THREE.Vector3();
     const final = new THREE.Matrix4();
     // Transform the rig such that the pivot's forward direction matches the waypoint's,
     return function travelByWaypoint(inMat4) {
@@ -210,13 +186,6 @@ AFRAME.registerComponent("character-controller", {
       childMatch(this.el.object3D, this.data.pivot.object3D, final);
       this.el.object3D.updateMatrices();
       this.data.pivot.object3D.updateMatrices();
-      //// TODO: Fix bug with 2D mode non uniform scale.
-      //// TODO: Handle scale earlier (e.g. in childMatch)?
-      //this.el.object3D.scale.set(
-      //  v.setFromMatrixColumn(inMat4, 0).length(),
-      //  v.setFromMatrixColumn(inMat4, 0).length(), // TODO: support non-uniform scale
-      //  v.setFromMatrixColumn(inMat4, 0).length()
-      //);
       this.el.object3D.matrixNeedsUpdate = true;
       this.el.object3D.updateMatrices();
     };

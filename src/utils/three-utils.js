@@ -189,3 +189,42 @@ export function findNode(root, pred) {
   }
   return null;
 }
+
+export const interpolateAffine = (function() {
+  const mat4 = new THREE.Matrix4();
+  const end = {
+    position: new THREE.Vector3(),
+    quaternion: new THREE.Quaternion(),
+    scale: new THREE.Vector3()
+  };
+  const start = {
+    position: new THREE.Vector3(),
+    quaternion: new THREE.Quaternion(),
+    scale: new THREE.Vector3()
+  };
+  const interpolated = {
+    position: new THREE.Vector3(),
+    quaternion: new THREE.Quaternion(),
+    scale: new THREE.Vector3()
+  };
+  return function(startMat4, endMat4, progress, outMat4) {
+    start.quaternion.setFromRotationMatrix(mat4.extractRotation(startMat4));
+    end.quaternion.setFromRotationMatrix(mat4.extractRotation(endMat4));
+    THREE.Quaternion.slerp(start.quaternion, end.quaternion, interpolated.quaternion, progress);
+    interpolated.position.lerpVectors(
+      start.position.setFromMatrixColumn(startMat4, 3),
+      end.position.setFromMatrixColumn(endMat4, 3),
+      progress
+    );
+    interpolated.scale.lerpVectors(
+      start.scale.setFromMatrixScale(startMat4),
+      end.scale.setFromMatrixScale(endMat4),
+      progress
+    );
+    return outMat4.compose(
+      interpolated.position,
+      interpolated.quaternion,
+      interpolated.scale
+    );
+  };
+})();

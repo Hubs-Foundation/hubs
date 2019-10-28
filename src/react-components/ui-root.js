@@ -1356,10 +1356,10 @@ class UIRoot extends Component {
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
     const preload = this.props.showPreload;
 
-    const isLoading = false;
-//      !preload &&
-//      (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) &&
-//      !(this.props.showSafariMicDialog || this.props.showSafariDialog || this.props.showWebAssemblyDialog);
+    const isLoading =
+      !preload &&
+      (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) &&
+      !(this.props.showSafariMicDialog || this.props.showSafariDialog || this.props.showWebAssemblyDialog);
 
     const rootStyles = {
       [styles.ui]: true,

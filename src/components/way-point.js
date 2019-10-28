@@ -142,7 +142,6 @@ AFRAME.registerSystem("make-some-waypoints-for-testing", {
     el14.object3D.scale.set(6, 6, 6);
     el14.object3D.matrixNeedsUpdate = true;
 
-
     //const el8 = document.createElement("a-entity");
     //this.el.appendChild(el8);
     //el8.setAttribute("visible-thing", "foo", "bar");
