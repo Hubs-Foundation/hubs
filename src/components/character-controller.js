@@ -1,5 +1,5 @@
 import { paths } from "../systems/userinput/paths";
-import { SOUND_SNAP_ROTATE } from "../systems/sound-effects-system";
+import { SOUND_SNAP_ROTATE, SOUND_TELEPORT_START, SOUND_TELEPORT_END } from "../systems/sound-effects-system";
 import { easeOutQuadratic } from "../utils/easing";
 import { getPooledMatrix4, freePooledMatrix4 } from "../utils/mat4-pool";
 import qsTruthy from "../utils/qs_truthy";
@@ -10,7 +10,7 @@ const MAX_DELTA = 0.2;
 const EPS = 10e-6;
 const MAX_WARNINGS = 10;
 const NAV_ZONE = "character";
-const WAYPOINT_TRAVEL_TIME = 1000;
+const WAYPOINT_TRAVEL_TIME = 300;
 const WAYPOINT_DOWN_TIME = 0;
 
 export const interpolateAffine = (function() {
@@ -47,6 +47,7 @@ export const cancelPitchAndRoll = (function() {
     viewY: new THREE.Vector3(),
     viewZ: new THREE.Vector3()
   };
+  const s = new THREE.Vector3();
   const v = new THREE.Vector3();
   const up = new THREE.Vector3();
   const mat4 = new THREE.Matrix4();
@@ -60,15 +61,14 @@ export const cancelPitchAndRoll = (function() {
       .normalize();
     final.viewY.set(0, 1, 0);
     final.viewX.crossVectors(v.copy(final.viewZ).multiplyScalar(-1), final.viewY);
-    mat4.makeBasis(final.viewX, final.viewY, v);
-    // TODO: What about scale ??
-    // mat4.scale(
-    //  s.set(
-    //    v.setFromMatrixColumn(inMat4, 0).length(),
-    //    v.setFromMatrixColumn(inMat4, 1).length(),
-    //    v.setFromMatrixColumn(inMat4, 2).length()
-    //  )
-    //);
+    mat4.makeBasis(final.viewX, final.viewY, final.viewZ);
+    mat4.scale(
+      s.set(
+        v.setFromMatrixColumn(inMat4, 0).length(),
+        v.setFromMatrixColumn(inMat4, 1).length(),
+        v.setFromMatrixColumn(inMat4, 2).length()
+      )
+    );
     mat4.setPosition(v.setFromMatrixColumn(inMat4, 3));
     outMat4.copy(mat4);
   };
@@ -210,13 +210,13 @@ AFRAME.registerComponent("character-controller", {
       childMatch(this.el.object3D, this.data.pivot.object3D, final);
       this.el.object3D.updateMatrices();
       this.data.pivot.object3D.updateMatrices();
-      // TODO: Fix bug with 2D mode non uniform scale.
-      // TODO: Handle scale earlier (e.g. in childMatch)?
-      this.el.object3D.scale.set(
-        v.setFromMatrixColumn(inMat4, 0).length(),
-        v.setFromMatrixColumn(inMat4, 0).length(), // TODO: support non-uniform scale
-        v.setFromMatrixColumn(inMat4, 0).length()
-      );
+      //// TODO: Fix bug with 2D mode non uniform scale.
+      //// TODO: Handle scale earlier (e.g. in childMatch)?
+      //this.el.object3D.scale.set(
+      //  v.setFromMatrixColumn(inMat4, 0).length(),
+      //  v.setFromMatrixColumn(inMat4, 0).length(), // TODO: support non-uniform scale
+      //  v.setFromMatrixColumn(inMat4, 0).length()
+      //);
       this.el.object3D.matrixNeedsUpdate = true;
       this.el.object3D.updateMatrices();
     };
@@ -238,6 +238,8 @@ AFRAME.registerComponent("character-controller", {
 
     return function(t, dt) {
       if (!this.el.sceneEl.is("entered")) return;
+      const vrMode = this.el.sceneEl.is("vr-mode");
+      this.sfx = this.sfx || this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
 
       if (
         !this.activeWaypoint &&
@@ -248,8 +250,9 @@ AFRAME.registerComponent("character-controller", {
         this.data.pivot.object3D.updateMatrices();
         this.startPoint = new THREE.Matrix4().copy(this.data.pivot.object3D.matrixWorld);
         this.prevWaypointTravelTime = t;
+        this.teleportSound = this.sfx.playSoundLooped(SOUND_TELEPORT_START);
       }
-      if (this.activeWaypoint && t < this.prevWaypointTravelTime + WAYPOINT_TRAVEL_TIME) {
+      if (this.activeWaypoint && !vrMode && t < this.prevWaypointTravelTime + WAYPOINT_TRAVEL_TIME) {
         const progress = THREE.Math.clamp((t - this.prevWaypointTravelTime) / WAYPOINT_TRAVEL_TIME, 0, 1);
         const interpolatedWaypoint = interpolateAffine(
           this.startPoint,
@@ -259,9 +262,14 @@ AFRAME.registerComponent("character-controller", {
         );
         this.travelByWaypoint(interpolatedWaypoint);
       }
-      if (this.activeWaypoint && t > this.prevWaypointTravelTime + WAYPOINT_TRAVEL_TIME) {
+      if (this.activeWaypoint && (vrMode || t > this.prevWaypointTravelTime + WAYPOINT_TRAVEL_TIME)) {
+        this.travelByWaypoint(this.activeWaypoint);
         freePooledMatrix4(this.activeWaypoint);
         this.activeWaypoint = null;
+        if (this.teleportSound) {
+          this.sfx.stopSoundNode(this.teleportSound);
+        }
+        this.sfx.playSoundOneShot(SOUND_TELEPORT_END);
       }
       const deltaSeconds = dt / 1000;
       const root = this.el.object3D;

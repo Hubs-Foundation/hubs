@@ -38,9 +38,9 @@ AFRAME.registerSystem("make-some-waypoints-for-testing", {
     const el11 = document.createElement("a-entity");
     this.el.appendChild(el11);
     el11.setAttribute("way-point", "foo", "bar");
-    el11.object3D.position.set(0, 10, 30);
+    el11.object3D.position.set(0, 10, 10);
     el11.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
-    el11.object3D.scale.set(5, 5, 5);
+    el11.object3D.scale.set(6, 6, 6);
     el11.object3D.matrixNeedsUpdate = true;
 
     const el12 = document.createElement("a-entity");
@@ -48,7 +48,7 @@ AFRAME.registerSystem("make-some-waypoints-for-testing", {
     el12.setAttribute("way-point", "foo", "bar");
     el12.object3D.position.set(0, 12, 0);
     el12.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
-    el12.object3D.scale.set(1, 3, 1);
+    //el12.object3D.scale.set(1, 3, 1); // TODO: non-uniform scale
     el12.object3D.matrixNeedsUpdate = true;
 
     const el0 = document.createElement("a-entity");
@@ -58,12 +58,12 @@ AFRAME.registerSystem("make-some-waypoints-for-testing", {
     el0.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
     el0.object3D.matrixNeedsUpdate = true;
 
-    const el6 = document.createElement("a-entity");
-    this.el.appendChild(el6);
-    el6.setAttribute("way-point", "foo", "bar");
-    el6.object3D.position.set(5, 2.0, 0);
-    el6.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
-    el6.object3D.matrixNeedsUpdate = true;
+    const el2 = document.createElement("a-entity");
+    this.el.appendChild(el2);
+    el2.setAttribute("way-point", "foo", "bar");
+    el2.object3D.position.set(0, 1.6, 5);
+    el2.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
+    el2.object3D.matrixNeedsUpdate = true;
 
     const el4 = document.createElement("a-entity");
     this.el.appendChild(el4);
@@ -72,12 +72,13 @@ AFRAME.registerSystem("make-some-waypoints-for-testing", {
     el4.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), -Math.PI / 2);
     el4.object3D.matrixNeedsUpdate = true;
 
-    const el2 = document.createElement("a-entity");
-    this.el.appendChild(el2);
-    el2.setAttribute("way-point", "foo", "bar");
-    el2.object3D.position.set(0, 1.6, 5);
-    el2.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
-    el2.object3D.matrixNeedsUpdate = true;
+    const el15 = document.createElement("a-entity");
+    this.el.appendChild(el15);
+    el15.setAttribute("way-point", "foo", "bar");
+    el15.object3D.position.set(0, 10, 10);
+    el15.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
+    el15.object3D.scale.set(6, 6, 6);
+    el15.object3D.matrixNeedsUpdate = true;
 
     const el3 = document.createElement("a-entity");
     this.el.appendChild(el3);
@@ -86,6 +87,13 @@ AFRAME.registerSystem("make-some-waypoints-for-testing", {
     el3.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI);
     el3.object3D.matrixNeedsUpdate = true;
 
+    const el6 = document.createElement("a-entity");
+    this.el.appendChild(el6);
+    el6.setAttribute("way-point", "foo", "bar");
+    el6.object3D.position.set(5, 2.0, 0);
+    el6.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
+    el6.object3D.matrixNeedsUpdate = true;
+
     const el5 = document.createElement("a-entity");
     this.el.appendChild(el5);
     el5.setAttribute("way-point", "foo", "bar");
@@ -93,30 +101,46 @@ AFRAME.registerSystem("make-some-waypoints-for-testing", {
     el5.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 4);
     el5.object3D.matrixNeedsUpdate = true;
 
+    const el13 = document.createElement("a-entity");
+    this.el.appendChild(el13);
+    el13.setAttribute("way-point", "foo", "bar");
+    el13.object3D.position.set(0, 10, 10);
+    el13.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
+    el13.object3D.scale.set(6, 6, 6);
+    el13.object3D.matrixNeedsUpdate = true;
+
     const el7 = document.createElement("a-entity");
     this.el.appendChild(el7);
     el7.setAttribute("way-point", "foo", "bar");
     el7.object3D.position.set(1, 4, 0);
     el7.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), -Math.PI / 2);
     el7.object3D.matrixNeedsUpdate = true;
-    const el8 = document.createElement("a-entity");
-    this.el.appendChild(el8);
-    el8.setAttribute("way-point", "foo", "bar");
-    el8.object3D.position.set(-1, 4, 0);
-    el8.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
-    el8.object3D.matrixNeedsUpdate = true;
     const el9 = document.createElement("a-entity");
     this.el.appendChild(el9);
     el9.setAttribute("way-point", "foo", "bar");
     el9.object3D.position.set(0, 4, 1);
     el9.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI);
     el9.object3D.matrixNeedsUpdate = true;
+    const el8 = document.createElement("a-entity");
+    this.el.appendChild(el8);
+    el8.setAttribute("way-point", "foo", "bar");
+    el8.object3D.position.set(-1, 4, 0);
+    el8.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
+    el8.object3D.matrixNeedsUpdate = true;
     const el10 = document.createElement("a-entity");
     this.el.appendChild(el10);
     el10.setAttribute("way-point", "foo", "bar");
     el10.object3D.position.set(0, 4, -1);
     el10.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
     el10.object3D.matrixNeedsUpdate = true;
+
+    const el14 = document.createElement("a-entity");
+    this.el.appendChild(el14);
+    el14.setAttribute("way-point", "foo", "bar");
+    el14.object3D.position.set(0, 10, 10);
+    el14.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
+    el14.object3D.scale.set(6, 6, 6);
+    el14.object3D.matrixNeedsUpdate = true;
 
 
     //const el8 = document.createElement("a-entity");
