@@ -344,8 +344,8 @@ module.exports = (env, argv) => ({
     ]),
     new CopyWebpackPlugin([
       {
-        from: "src/app-config-schema.toml",
-        to: "app-config-schema.toml"
+        from: "src/schema.toml",
+        to: "schema.toml"
       }
     ]),
     // Extract required css and add a content hash.
