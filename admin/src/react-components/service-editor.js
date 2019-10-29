@@ -8,6 +8,7 @@ import CardContent from "@material-ui/core/CardContent";
 import Snackbar from "@material-ui/core/Snackbar";
 import SnackbarContent from "@material-ui/core/SnackbarContent";
 import TextField from "@material-ui/core/TextField";
+import Switch from "@material-ui/core/Switch";
 import Typography from "@material-ui/core/Typography";
 import Icon from "@material-ui/core/Icon";
 import IconButton from "@material-ui/core/IconButton";
@@ -33,13 +34,20 @@ import * as AppConfigUtils from "../utils/app-config";
 
 const styles = withCommonStyles(theme => {
   return {
+    inputDescription: {
+      display: "block",
+      color: theme.palette.text.secondary,
+      fontSize: "0.75rem",
+      marginTop: "0.5em",
+      borderTop: "1px solid rgba(0, 0, 0, 0.42)"
+    },
     fileInput: {
-      marginTop: "1em",
-      marginBottom: "2em",
+      marginTop: "2em",
+      marginBottom: "1em",
       "& .name": {
         color: theme.palette.text.secondary,
         display: "block",
-        marginBottom: "1em",
+        marginBottom: "0.5em",
         "&.filled": {
           fontSize: "0.75rem"
         }
@@ -49,6 +57,16 @@ const styles = withCommonStyles(theme => {
         maxHeight: "50px",
         marginRight: "1em",
         verticalAlign: "middle"
+      }
+    },
+    switchInput: {
+      margin: "2em 0",
+      "& label": {
+        marginLeft: "-1em",
+        fontSize: "1rem"
+      },
+      "& .switch": {
+        marginTop: "-0.1em"
       }
     }
   };
@@ -93,7 +111,7 @@ class ConfigurationEditor extends Component {
     this.state = {
       schema: null,
       config: null,
-      category: this.firstAvailableCategory(),
+      category: "images", //this.firstAvailableCategory(),
       saving: false,
       saved: false,
       saveError: null
@@ -206,7 +224,20 @@ class ConfigurationEditor extends Component {
             Upload
           </Button>
         </label>
-        <span>{descriptor.description}</span>
+        <span className={this.props.classes.inputDescription}>{descriptor.description}</span>
+      </div>
+    );
+  }
+
+  renderSwitchInput(path, descriptor, currentValue) {
+    const displayPath = path.join(" > ");
+    return (
+      <div className={this.props.classes.switchInput}>
+        <label>
+          <Switch className="switch" checked={currentValue} onChange={ev => this.onChange(path, ev.target.checked)} />
+          {descriptor.name || displayPath}
+        </label>
+        <span className={this.props.classes.inputDescription}>{descriptor.description}</span>
       </div>
     );
   }
@@ -218,6 +249,7 @@ class ConfigurationEditor extends Component {
       case "file":
         return this.renderFileInput(path, descriptor, currentValue);
       case "boolean":
+        return this.renderSwitchInput(path, descriptor, currentValue);
       case "string":
       case "number":
       default:
