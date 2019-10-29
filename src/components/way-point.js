@@ -1,3 +1,4 @@
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { squareDistanceBetween } from "../utils/three-utils";
 AFRAME.registerComponent("visible-thing", {
   schema: {},
@@ -5,6 +6,35 @@ AFRAME.registerComponent("visible-thing", {
     this.el.appendChild(document.importNode(document.getElementById("visible-thing-template").content, true));
   }
 });
+AFRAME.registerComponent("show-sibling-on-hover", {
+  schema: {
+    target: { type: "string" }
+  },
+  init() {
+    waitForDOMContentLoaded().then(() => {
+      this.model = this.el.parentNode.querySelector(this.data.target);
+      this.model.object3D.visible = false;
+
+      this.onHover = () => {
+        this.hovering = true;
+        this.model.object3D.visible = true;
+      };
+      this.onHoverOut = () => {
+        this.hovering = false;
+        this.model.object3D.visible = false;
+      };
+      this.el.object3D.addEventListener("hovered", this.onHover);
+      this.el.object3D.addEventListener("unhovered", this.onHoverOut);
+    });
+  },
+  remove() {
+    if (this.didInit) {
+      this.el.object3D.removeEventListener("hovered", this.onHover);
+      this.el.object3D.removeEventListener("unhovered", this.onHoverOut);
+    }
+  }
+});
+
 AFRAME.registerComponent("way-point", {
   schema: {
     reparent: { default: false }, // Attach to moving objects
@@ -70,13 +100,17 @@ AFRAME.registerComponent("scale-in-screen-space", {
     addedScale: { type: "vec3", default: { x: 1, y: 1, z: 1 } }
   },
   tick: (function() {
+    const parentScale = new THREE.Vector3();
     return function tick() {
       this.viewingCamera = this.viewingCamera || document.getElementById("viewing-camera");
       const distance = Math.sqrt(squareDistanceBetween(this.el.object3D, this.viewingCamera.object3D));
+      const parent = this.el.object3D.parent;
+      parent.updateMatrices();
+      parentScale.setFromMatrixScale(parent.matrixWorld);
       this.el.object3D.scale.set(
-        this.data.baseScale.x + distance * this.data.addedScale.x,
-        this.data.baseScale.y + distance * this.data.addedScale.y,
-        this.data.baseScale.z + distance * this.data.addedScale.z
+        (1 / parentScale.x) * (this.data.baseScale.x + distance * this.data.addedScale.x),
+        (1 / parentScale.y) * (this.data.baseScale.y + distance * this.data.addedScale.y),
+        (1 / parentScale.z) * (this.data.baseScale.z + distance * this.data.addedScale.z)
       );
       this.el.object3D.matrixNeedsUpdate = true;
     };

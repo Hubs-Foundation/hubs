@@ -84,7 +84,8 @@ const hasButtonComponent = (function() {
     "text-button",
     "pin-networked-object-button",
     "mic-button",
-    "inspect-button"
+    "inspect-button",
+    "show-sibling-on-hover"
   ];
   return function hasButtonComponent(components) {
     for (let i = 0; i < BUTTON_COMPONENT_NAMES.length; i++) {

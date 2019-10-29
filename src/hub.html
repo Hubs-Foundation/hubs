@@ -65,20 +65,29 @@
             <img id="action-button" crossorigin="anonymous" src="./assets/hud/action_button.9.png">
             <img id="button" crossorigin="anonymous" src="./assets/hud/button.9.png">
 
-            <a-asset-item id="drawing-pen" response-type="arraybuffer" src="./assets/models/DrawingPen.glb"></a-asset-item>
+            <a-asset-item id="spawn-point" response-type="arraybuffer" src="./assets/models/spawn-point.glb"></a-asset-item>
 
             <template id="visible-thing-template">
                 <a-entity material="flatShading: true" geometry="primitive: cone"></a-entity>
             </template>
             <template id="way-point-template">
                 <a-entity visibility-while-frozen="requireHoverOnNonMobile: false;">
-                    <a-entity is-remote-hover-target class="way-point-icon"
-                              tags="singleActionButton: true" sprite="name: way-point.png"
+                    <a-entity is-remote-hover-target
+                              class="way-point-icon"
+                              tags="singleActionButton: true"
+                              sprite="name: spawn-point.png"
                               billboard
                               scale-in-screen-space="baseScale: 0.35 0.35 0.35;
                                                      addedScale: 0.02 0.02 0.02"
-                              position="0 0.2 0"
+                              position="0 0 0"
+                              show-sibling-on-hover="target: .waypoint-model"
                               >
+                    </a-entity>
+                    <a-entity
+                        class="waypoint-model"
+                        gltf-model-plus="inflate: true; src: #spawn-point;"
+                        position="0 -1.6 0"
+                        rotation="0 180 0">
                     </a-entity>
                 </a-entity>
             </template>
