@@ -71,8 +71,14 @@
                 <a-entity material="flatShading: true" geometry="primitive: cone"></a-entity>
             </template>
             <template id="way-point-template">
-                <a-entity>
-                    <a-entity is-remote-hover-target class="way-point-icon" tags="singleActionButton: true" sprite="name: scale-action.png" billboard>
+                <a-entity visibility-while-frozen="requireHoverOnNonMobile: false;">
+                    <a-entity is-remote-hover-target class="way-point-icon"
+                              tags="singleActionButton: true" sprite="name: way-point.png"
+                              billboard
+                              scale-in-screen-space="baseScale: 0.35 0.35 0.35;
+                                                     addedScale: 0.02 0.02 0.02"
+                              position="0 0.2 0"
+                              >
                     </a-entity>
                 </a-entity>
             </template>
@@ -216,6 +222,7 @@
             <template id="interactable-media">
                 <a-entity
                     class="interactable"
+                    way-point="keepOrientation: true; offset: 0 0 1"
                     body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 15;"
                     owned-object-limiter="counter: #media-counter"
                     set-unowned-body-kinematic

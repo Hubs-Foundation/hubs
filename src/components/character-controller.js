@@ -11,7 +11,7 @@ const MAX_DELTA = 0.2;
 const EPS = 10e-6;
 const MAX_WARNINGS = 10;
 const NAV_ZONE = "character";
-const WAYPOINT_TRAVEL_TIME = 300;
+const WAYPOINT_TRAVEL_TIME = 250;
 const WAYPOINT_DOWN_TIME = 0;
 
 export const cancelPitchAndRoll = (function() {
@@ -23,8 +23,8 @@ export const cancelPitchAndRoll = (function() {
     viewY: new THREE.Vector3(),
     viewZ: new THREE.Vector3()
   };
-  const s = new THREE.Vector3();
   const v = new THREE.Vector3();
+  const s = new THREE.Vector3();
   const up = new THREE.Vector3();
   const mat4 = new THREE.Matrix4();
   return function cancelPitchAndRoll(inMat4, outMat4) {
@@ -38,14 +38,7 @@ export const cancelPitchAndRoll = (function() {
     final.viewY.set(0, 1, 0);
     final.viewX.crossVectors(v.copy(final.viewZ).multiplyScalar(-1), final.viewY);
     mat4.makeBasis(final.viewX, final.viewY, final.viewZ);
-    mat4.scale(
-      //// TODO: Fix bug with 2D mode non uniform scale.
-      s.set(
-        v.setFromMatrixColumn(inMat4, 0).length(),
-        v.setFromMatrixColumn(inMat4, 1).length(),
-        v.setFromMatrixColumn(inMat4, 2).length()
-      )
-    );
+    //mat4.scale(s.setFromMatrixScale(inMat4));
     mat4.setPosition(v.setFromMatrixColumn(inMat4, 3));
     outMat4.copy(mat4);
   };
@@ -141,6 +134,7 @@ AFRAME.registerComponent("character-controller", {
     const targetForHead = new THREE.Vector3();
     const targetForRig = new THREE.Vector3();
     return function teleportTo(targetWorldPosition) {
+      this.isMovementDisabled = false;
       const o = this.el.object3D;
       o.getWorldPosition(rig);
       this.data.pivot.object3D.getWorldPosition(head);
@@ -160,15 +154,17 @@ AFRAME.registerComponent("character-controller", {
 
   // Use this API for waypoint travel so that your matrix doesn't end up in the pool
   // If you have a throw-away matrix, you can push it onto `this.waypoints` and it'll end up in the pool
-  enqueueWaypointTravelTo(inMat4) {
+  enqueueWaypointTravelTo(inMat4, options) {
     const pooledMatrix = getPooledMatrix4();
-    this.waypoints.push(pooledMatrix.copy(inMat4));
+    this.waypoints.push({ waypoint: pooledMatrix.copy(inMat4), options });
   },
 
   calculateFinalWaypointTransform: (function() {
     const startCancelled = new THREE.Matrix4();
     const finalCancelled = new THREE.Matrix4();
     const uncancel = new THREE.Matrix4();
+    const s = new THREE.Vector3();
+    const v = new THREE.Vector3();
     return function calculateFinalWaypointTransform(inMat4, final) {
       this.el.object3D.updateMatrices();
       this.data.pivot.object3D.updateMatrices();
@@ -176,16 +172,34 @@ AFRAME.registerComponent("character-controller", {
       cancelPitchAndRoll(this.data.pivot.object3D.matrixWorld, startCancelled);
       uncancel.getInverse(startCancelled).multiply(this.data.pivot.object3D.matrixWorld);
       final.copy(finalCancelled).multiply(uncancel);
+
+      //final.scale(
+      //  //// TODO: Fix bug with 2D mode non uniform scale.
+      //  s.set(
+      //    v.setFromMatrixColumn(inMat4, 0).length(),
+      //    v.setFromMatrixColumn(inMat4, 1).length(),
+      //    v.setFromMatrixColumn(inMat4, 2).length()
+      //  )
+      //);
     };
   })(),
   travelByWaypoint: (function() {
     const final = new THREE.Matrix4();
+    const v = new THREE.Vector3();
     // Transform the rig such that the pivot's forward direction matches the waypoint's,
     return function travelByWaypoint(inMat4) {
       this.calculateFinalWaypointTransform(inMat4, final);
       childMatch(this.el.object3D, this.data.pivot.object3D, final);
       this.el.object3D.updateMatrices();
       this.data.pivot.object3D.updateMatrices();
+      // TODO: Take care of scale earlier (e.g. in childMatch), because scaling here will mean your view will be above (s>1) or below (s<1) the intended view point
+      // TODO: Fix bug with 2D mode non uniform scale.
+      //      this.el.object3D.scale.set(
+      //        v.setFromMatrixColumn(inMat4, 0).length(),
+      //        v.setFromMatrixColumn(inMat4, 1).length(),
+      //        v.setFromMatrixColumn(inMat4, 2).length()
+      //      );
+//      console.log(this.el.object3D.scale);
       this.el.object3D.matrixNeedsUpdate = true;
       this.el.object3D.updateMatrices();
     };
@@ -215,7 +229,9 @@ AFRAME.registerComponent("character-controller", {
         this.waypoints.length &&
         t > this.prevWaypointTravelTime + (WAYPOINT_TRAVEL_TIME + WAYPOINT_DOWN_TIME)
       ) {
-        this.activeWaypoint = this.waypoints.splice(0, 1)[0];
+        const { waypoint, options = {} } = this.waypoints.splice(0, 1)[0];
+        this.activeWaypoint = waypoint;
+        this.isMovementDisabled = options.disableMovement;
         this.data.pivot.object3D.updateMatrices();
         this.startPoint = new THREE.Matrix4().copy(this.data.pivot.object3D.matrixWorld);
         this.prevWaypointTravelTime = t;
@@ -292,11 +308,8 @@ AFRAME.registerComponent("character-controller", {
       this.accelerationInput.set(0, 0, 0);
 
       const boost = userinput.get(paths.actions.boost) ? 2 : 1;
-      move.makeTranslation(
-        this.velocity.x * distance * boost * this.charSpeed,
-        this.velocity.y * distance * boost * this.charSpeed,
-        this.velocity.z * distance * boost * this.charSpeed
-      );
+      const speed = this.isMovementDisabled ? 0 : distance * boost * this.charSpeed;
+      move.makeTranslation(this.velocity.x * speed, this.velocity.y * speed, this.velocity.z * speed);
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 
       // Translate to middle of playspace (player rig)
@@ -326,7 +339,7 @@ AFRAME.registerComponent("character-controller", {
 
       this.pendingSnapRotationMatrix.identity(); // Revert to identity
 
-      if (this.velocity.lengthSq() > EPS && !this.data.fly) {
+      if (!this.isMovementDisabled && this.velocity.lengthSq() > EPS && !this.data.fly) {
         this.setPositionOnNavMesh(startPos, root.position, root);
       }
 

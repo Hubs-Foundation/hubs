@@ -64,6 +64,19 @@ export const childMatch = (function() {
   };
 })();
 
+export const childMatch2 = (function() {
+  const childInverse = new THREE.Matrix4();
+  const newParentMatrix = new THREE.Matrix4();
+  // transform the parent such that its child matches the target
+  return function childMatch2(parent, child, target) {
+    child.updateMatrices();
+    child.matrix.getInverse(childInverse);
+    newParentMatrix.multiplyMatrices(target, childInverse);
+    setMatrixWorld(parent, newParentMatrix);
+    child.updateMatrices();
+  };
+})();
+
 const IDENTITY = new THREE.Matrix4().identity();
 
 const orbit = (function() {

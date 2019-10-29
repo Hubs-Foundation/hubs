@@ -25,10 +25,10 @@ AFRAME.registerComponent("visibility-while-frozen", {
     this.camWorldPos = new THREE.Vector3();
     this.cam2WorldPos = new THREE.Vector3();
     this.objWorldPos = new THREE.Vector3();
-    this.cam2 = this.el.sceneEl.camera;
 
     waitForDOMContentLoaded().then(() => {
       this.cam = document.getElementById("avatar-pov-node").object3D;
+      this.cam2 = this.el.sceneEl.camera;
       this.updateVisibility();
     });
 
@@ -63,7 +63,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
   },
 
   updateVisibility() {
-    if (!this.cam) return;
+    if (!this.cam || !this.cam2) return;
     const isFrozen = this.el.sceneEl.is("frozen");
 
     let isWithinDistance = true;

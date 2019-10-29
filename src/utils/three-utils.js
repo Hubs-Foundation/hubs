@@ -59,6 +59,7 @@ export function setMatrixWorld(object3D, m) {
   object3D.matrixWorld.copy(m);
   object3D.matrix = object3D.matrix.getInverse(object3D.parent.matrixWorld).multiply(object3D.matrixWorld);
   object3D.matrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
+  object3D.childrenNeedMatrixUpdate = true;
 }
 
 // Modified version of Don McCurdy's AnimationUtils.clone
@@ -226,5 +227,17 @@ export const interpolateAffine = (function() {
       interpolated.quaternion,
       interpolated.scale
     );
+  };
+})();
+
+export const squareDistanceBetween = (function() {
+  const posA = new THREE.Vector3();
+  const posB = new THREE.Vector3();
+  return function(objA, objB) {
+    objA.updateMatrices();
+    objB.updateMatrices();
+    posA.setFromMatrixColumn(objA.matrixWorld, 3);
+    posB.setFromMatrixColumn(objB.matrixWorld, 3);
+    return posA.distanceToSquared(posB);
   };
 })();
