@@ -68,6 +68,22 @@ const styles = withCommonStyles(theme => {
       "& .switch": {
         marginTop: "-0.1em"
       }
+    },
+    colorInput: {
+      margin: "2em 0",
+      "& label": {
+        fontSize: "1rem"
+      },
+      "& input": {
+        margin: 0,
+        marginRight: "1em",
+        padding: "4px",
+        border: "1px solid hsl(0, 0%, 90%)",
+        backgroundColor: "hsl(0, 0%, 90%)",
+        borderRadius: "3px",
+        height: "32px",
+        verticalAlign: "middle"
+      }
     }
   };
 });
@@ -111,7 +127,7 @@ class ConfigurationEditor extends Component {
     this.state = {
       schema: null,
       config: null,
-      category: "images", //this.firstAvailableCategory(),
+      category: this.firstAvailableCategory(),
       saving: false,
       saved: false,
       saveError: null
@@ -232,9 +248,27 @@ class ConfigurationEditor extends Component {
   renderSwitchInput(path, descriptor, currentValue) {
     const displayPath = path.join(" > ");
     return (
-      <div className={this.props.classes.switchInput}>
+      <div key={displayPath} className={this.props.classes.switchInput}>
         <label>
           <Switch className="switch" checked={currentValue} onChange={ev => this.onChange(path, ev.target.checked)} />
+          {descriptor.name || displayPath}
+        </label>
+        <span className={this.props.classes.inputDescription}>{descriptor.description}</span>
+      </div>
+    );
+  }
+
+  renderColorInput(path, descriptor, currentValue) {
+    const displayPath = path.join(" > ");
+    return (
+      <div key={displayPath} className={this.props.classes.colorInput}>
+        <label>
+          <input
+            type="color"
+            value={currentValue}
+            onChange={ev => this.onChange(path, ev.target.value)}
+            title={currentValue}
+          />
           {descriptor.name || displayPath}
         </label>
         <span className={this.props.classes.inputDescription}>{descriptor.description}</span>
@@ -250,6 +284,8 @@ class ConfigurationEditor extends Component {
         return this.renderFileInput(path, descriptor, currentValue);
       case "boolean":
         return this.renderSwitchInput(path, descriptor, currentValue);
+      case "color":
+        return this.renderColorInput(path, descriptor, currentValue);
       case "string":
       case "number":
       default:
