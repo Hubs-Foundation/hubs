@@ -31,7 +31,28 @@ import {
 } from "../utils/ita";
 import * as AppConfigUtils from "../utils/app-config";
 
-const styles = withCommonStyles(() => ({}));
+const styles = withCommonStyles(theme => {
+  return {
+    fileInput: {
+      marginTop: "1em",
+      marginBottom: "2em",
+      "& .name": {
+        color: theme.palette.text.secondary,
+        display: "block",
+        marginBottom: "1em",
+        "&.filled": {
+          fontSize: "0.75rem"
+        }
+      },
+      "& .image": {
+        width: "50px",
+        maxHeight: "50px",
+        marginRight: "1em",
+        verticalAlign: "middle"
+      }
+    }
+  };
+});
 
 function TabContainer(props) {
   return (
@@ -162,8 +183,32 @@ class ConfigurationEditor extends Component {
   }
 
   renderFileInput(path, descriptor, currentValue) {
+    let imageURL;
+    if (!currentValue) {
+      imageURL = null;
+    } else if (currentValue instanceof File) {
+      imageURL = URL.createObjectURL(currentValue);
+    } else if (currentValue.origin) {
+      imageURL = currentValue.origin;
+    } else {
+      imageURL = currentValue;
+    }
+
     const displayPath = path.join(" > ");
-    return <input key={displayPath} type="file" onChange={ev => this.onChange(path, ev.target.files[0])} />;
+
+    return (
+      <div key={displayPath} className={this.props.classes.fileInput}>
+        <div className={clsx("name", { filled: !!imageURL })}>{descriptor.name || displayPath}</div>
+        <label>
+          {imageURL && <img className="image" src={imageURL} />}
+          <input type="file" onChange={ev => this.onChange(path, ev.target.files[0])} style={{ display: "none" }} />
+          <Button variant="outlined" color="secondary" size="small" onClick={e => e.target.parentNode.click()}>
+            Upload
+          </Button>
+        </label>
+        <span>{descriptor.description}</span>
+      </div>
+    );
   }
 
   renderConfigurable(path, descriptor, currentValue) {
