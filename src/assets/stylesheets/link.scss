@@ -8,8 +8,8 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: white;
-  color: black;
+  background-color: $link-background-color;
+  color: $link-text-color;
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -19,12 +19,12 @@ body {
 
 button {
   outline: none;
-  -webkit-tap-highlight-color: rgba(255, 255, 255, 0); 
+  -webkit-tap-highlight-color: $link-button-highlight-color;
   -webkit-tap-highlight-color: transparent;
 }
 
 a {
-  color: black;
+  color: $link-text-color;
 }
 
 .link-root {
@@ -72,7 +72,7 @@ a {
   display: flex;
   flex-direction: row;
   align-items: center;
-  color: black;
+  color: $link-text-color;
   font-weight: bold;
   font-size: 1.2em;
 
@@ -102,7 +102,7 @@ a {
 }
 
 :local(.code-loading-panel) {
-  background: rgba(0.4, 0.4, 0.4, 0.85);
+  background: $link-code-loading-background;
 }
 
 :local(.entry-footer-image) {
@@ -145,7 +145,7 @@ a {
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr 1fr;
   text-align: center;
-  background-color: #f7f7f7;
+  background-color: $link-keypad-background-color;
   border-radius: 24px;
   padding: 12px;
 }
@@ -163,22 +163,22 @@ a {
   cursor: pointer;
   line-height: 68px;
   margin: 8px;
-  background: white;
+  background: $link-button-background-color;
 }
 
 :local(.keypad-button):active {
-  background-color: $light-grey;
+  background-color: $link-button-active-background-color;
 }
 
 :local(.keypad-button):disabled {
-  color: $light-grey;
+  color: $link-button-disabled-color;
 }
 
 :local(.keypad-backspace) , :local(.keypad-backspace):disabled , :local(.keypad-backspace):active, :local(.keypad-toggle-mode), :local(.keypad-toggle-mode):disabled, :local(.keypad-toggle-mode):active {
   border: none;
   background: transparent;
   box-shadow: none;
-  color: black;
+  color: $link-text-color;
 }
 
 :local(.keypad-backspace) {
@@ -187,7 +187,7 @@ a {
 
 :local(.keypad-backspace):active {
   background-color: transparent;
-  color: $light-grey;
+  color: $link-button-active-color;
 }
 
 :local(.keypad-toggle-mode) {
@@ -200,7 +200,7 @@ a {
   width: 300px;
   text-align: center;
   font-size: 2.0em;
-  color: black;
+  color: $link-text-color;
   display: flex;
   justify-content: center;
 }
@@ -232,7 +232,7 @@ a {
 :local(.headset-icon) {
   width: 64px;
   height: 64px;
-  background-color: #333;
+  background-color: $link-icon-color;
   border-radius: 32px;
   margin-bottom: 8px;
   padding-right: 2px;

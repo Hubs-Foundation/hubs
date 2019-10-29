@@ -47,12 +47,12 @@
 :local(.scene-name) {
   font-size: 20px;
   font-weight: $semi-bold;
-  color: black;
+  color: $panel-text-color;
 }
 
 :local(.scene-creator) {
   font-size: 16px;
-  color: $grey-text;
+  color: $panel-subtext-color;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -84,6 +84,6 @@
 }
 
 :local(.attribution-author) {
-  color: $grey-text;
+  color: $panel-subtext-color;
   font-weight: normal;
 }

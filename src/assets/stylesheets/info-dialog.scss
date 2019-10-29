@@ -5,7 +5,7 @@
   left: 0;
   position: fixed;
   pointer-events: auto;
-  color: black;
+  color: $panel-overlay-text-color;
   z-index: 20;
   display: flex;
 
@@ -28,7 +28,7 @@
   }
 
   &__dark-background {
-    background-color: rgba(0,0,0,.85);
+    background-color: $panel-overlay-background-color;
   }
 
   &__box {
@@ -47,7 +47,7 @@
       flex-direction: column;
       text-align: center;
       position: relative;
-      background-color: white;
+      background-color: $full-panel-background-color;
 
 
       @media (max-width: 801px) {
@@ -62,7 +62,7 @@
       &__body {
         font-size: 0.9em;
         font-weight: bold;
-        color: black;
+        color: $panel-text-color;
         display: flex;
         flex-direction: column;
         height: 100%;
@@ -73,8 +73,8 @@
           margin: 0;
         }
 
-        a { color: black }
-        a.info-dialog--action-button { color: white; }
+        a { color: $panel-text-color }
+        a.info-dialog--action-button { color: $action-text; }
       }
 
       &__links {
@@ -83,7 +83,7 @@
         margin: 16px 0;
         a {
           margin: 0 12px;
-          color: black;
+          color: $panel-text-color;
         }
       }
 
@@ -91,7 +91,7 @@
         position: absolute;
         left: 18px;
         top: 18px;
-        color: black;
+        color: $panel-widget-color;
         font-size: 1.6em;
         font-weight: bold;
 

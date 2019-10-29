@@ -17,12 +17,12 @@
   height: 0; 
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  border-bottom: 5px solid $white-transparent;
+  border-bottom: 5px solid $menu-attach-point-color;
   position: absolute;
 }
 
 :local(.contents) {
-  background-color: white;
+  background-color: $menu-background-color;
   border-radius: 12px;
   padding: 18px;
   min-width: 260px;
@@ -58,14 +58,14 @@
   padding: 0px 16px;
   &:hover{
     background-color: $action-color-highlight;
-    color: white;
+    color: $action-text;
   }
 }
 
 :local(.row-header) {
   margin-top: 18px;
   margin-bottom: 4px;
-  color: $dark-grey;
+  color: $menu-header-text-color;
   font-weight: normal;
   text-transform: uppercase;
   font-size: 0.8em;
@@ -83,13 +83,13 @@
   overflow: hidden;
 
   a {
-    color: black;
-    text-decoration-color: $dark-grey;
+    color: $menu-link-color;
+    text-decoration-color: $menu-link-underline-color;
   }
 
   :local(.list-item-link) {
     text-decoration: underline;
-    text-decoration-color: $dark-grey;
+    text-decoration-color: $menu-link-underline-color;
     cursor: pointer;
   }
 }

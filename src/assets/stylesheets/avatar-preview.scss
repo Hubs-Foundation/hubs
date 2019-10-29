@@ -3,7 +3,7 @@
 :local(.preview) {
   position: relative;
   overflow: hidden;
-  background: #eaeaea;
+  background: $tile-selected-color;
   border-radius: 20px;
 
   .loader {

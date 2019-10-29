@@ -21,7 +21,7 @@
     height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-bottom: 5px solid $bright-blue;
+    border-bottom: 5px solid $notice-background-color;
     position: absolute;
     top: -5px;
   }
@@ -291,7 +291,7 @@ body.vr-mode {
     height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-bottom: 5px solid $bright-blue;
+    border-bottom: 5px solid $notice-background-color;
     position: absolute;
     top: -5px;
   }
@@ -322,7 +322,7 @@ body.vr-mode {
 
 :local(.avatar-editor) {
   position:absolute;
-  background: $panel-background-color;
+  background: $full-panel-background-color;
   top: 0;
   left: 0;
   width: 100%;

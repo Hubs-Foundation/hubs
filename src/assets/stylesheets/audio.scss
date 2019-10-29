@@ -38,7 +38,7 @@
       margin-right: 8px;
     }
 
-    color: $darker-grey;
+    color: $panel-text-color;
   }
 
 
@@ -67,10 +67,10 @@
       @extend %glass-text;
 
       appearance: none;
-      background-color: white;
+      background-color: $text-field-background-color;
       -moz-appearance: none;
       -webkit-appearance: none;
-      border: 1px solid #e2e2e2;
+      border: 1px solid $text-field-border-color;
       padding: 6px;
       font-weight: bold;
       font-size: 0.9em;
@@ -121,7 +121,7 @@
       text-align: center;
       font-size: 0.8em;
       bottom: 12px;
-      color: white;
+      color: $action-text;
     }
 
     &__icon-part {

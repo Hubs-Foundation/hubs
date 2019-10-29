@@ -61,7 +61,7 @@
       height: 0;
       border-left: 5px solid transparent;
       border-right: 5px solid transparent;
-      border-bottom: 5px solid $bright-blue;
+      border-bottom: 5px solid $notice-background-color;
       position: absolute;
       top: -5px;
     }
@@ -143,8 +143,8 @@
     flex-direction: column;
     border-radius: 28px;
     padding: 3px 3px 6px 3px;
-    background-color: rgba(72, 72, 72, 0.2);
-    border: 2px solid rgba(72, 72, 72, 0.3);
+    background-color: $hud-dropdown-background-color;
+    border: $hud-dropdown-border-color;
     pointer-events: auto;
     z-index: 1;
 

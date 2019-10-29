@@ -39,8 +39,8 @@
 
 :local(.bottom-links-main) {
   font-size: 0.8em;
-  border-top: 1px solid $light-grey;
-  border-bottom: 1px solid $light-grey;
+  border-top: 1px solid $panel-rule-color;
+  border-bottom: 1px solid $panel-rule-color;
   margin-top: 12px;
   display: grid;
   grid-template-columns: 33% 33% 33%;

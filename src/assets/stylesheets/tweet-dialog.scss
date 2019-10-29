@@ -14,7 +14,7 @@
 
 :local(.editor) {
   background-color: $text-field-background-color;
-  border: 2px solid #a4d9f9;
+  border: 2px solid $twitter-editor-border-color;
   margin: 24px 36px 0px 36px;
   padding: 18px;
   padding-bottom: 20px;

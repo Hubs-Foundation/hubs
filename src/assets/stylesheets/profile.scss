@@ -56,19 +56,15 @@
 
       a {
         margin: 0px 12px;
-        color: $dark-grey-text;
+        color: $tile-inset-text;
       }
-    }
-
-    :local(.darkened) {
-      background-color: $darkest-transparent;
     }
   }
 
   :local(.title) {
     @extend %top-title;
     width: 100%;
-    color: black;
+    color: $panel-text-color;
     text-align: center;
   }
 
@@ -82,7 +78,7 @@
     @extend %default-font;
 
     font-size: 1.1em;
-    color: black;
+    color: $text-field-text-color;
     outline: none;
     line-height: 2.0em;
     padding-left: 1.25em;
@@ -124,8 +120,18 @@
     position: absolute;
     top: 15px;
     right: 20px;
-    color: black;
+    color: $tile-button-icon-color;
     font-size: 16pt;
+    background: $tile-button-background-color;
+    border-radius: 30px;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 30px;
+    &:hover {
+      background: $action-color;
+      color: $tile-button-icon-hover-color;
+    }
   }
 
   :local(.close) {

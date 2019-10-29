@@ -44,7 +44,7 @@
 .loader-center,
 .loader:before,
 .loader:after {
-  background: #555;
+  background: $loading-spinner-color;
   -webkit-animation: loader-animation 1s infinite ease-in-out;
   animation: loader-animation 1s infinite ease-in-out;
   width: 0.6em;

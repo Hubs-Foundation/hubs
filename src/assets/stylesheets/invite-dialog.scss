@@ -150,7 +150,7 @@
     color: $text-field-text-color;
     text-align: center;
     background-color: $text-field-background-color;
-    border: 1px solid #e2e2e2;
+    border: 1px solid $text-field-border-color;
     border-radius: 12px;
     margin: 12px;
     font-size: 1.8em;
@@ -164,8 +164,8 @@
 :local(.digit) {
   padding: 0 8px;
   margin: 2px;
-  background-color: $text-field-text-color;
-  border: 1px solid #e2e2e2;
+  background-color: $text-field-background-color;
+  border: 1px solid $text-field-border-color;
   border-radius: 12px;
   width: 32px;
   height: 64px;
@@ -218,7 +218,7 @@
     color: $text-field-text-color;
     text-align: center;
     background-color: $text-field-background-color;
-    border: 1px solid #e2e2e2;
+    border: 1px solid $text-field-border-color;
     border-radius: 12px;
     margin: 12px 0 0 0;
     font-size: 1.2em;
@@ -285,7 +285,7 @@
       height: 0;
       border-left: 5px solid transparent;
       border-right: 5px solid transparent;
-      border-bottom: 5px solid $bright-blue;
+      border-bottom: 5px solid $notice-background-color;
       position: absolute;
       top: -5px;
     }

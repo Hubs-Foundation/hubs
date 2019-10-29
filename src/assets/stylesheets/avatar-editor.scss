@@ -157,7 +157,7 @@
         position: relative;
 
         &.selected{
-          background: #eaeaea;
+          background: $tile-selected-color;
         }
         &.custom{
           width: 100%;

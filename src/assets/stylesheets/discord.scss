@@ -7,7 +7,7 @@ $mobile-breakpoint-width: 450px;
 
 body {
   @extend %default-font;
-  background: black;
+  background: $discord-background-color;
   color: $discord-text-color;
   margin: 0;
 }
