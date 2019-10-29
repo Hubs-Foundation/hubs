@@ -2,4 +2,5 @@
 translations.en."home.hero_blurb" = { "category" = "translations", "type" = "string" }
 features.disable_spoke = { "category" = "features", "type" = "boolean", "default" = "false" }
 images.logo = { "category" = "images", "type" = "file" }
-colors.primary_action = { "category" = "colors", "type" = "color" }
+images.home_background = { "category" = "images", "type" = "file" }
+colors.primary-action = { "category" = "colors", "type" = "color" }

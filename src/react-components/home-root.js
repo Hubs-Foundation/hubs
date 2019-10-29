@@ -223,7 +223,10 @@ class HomeRoot extends Component {
                 )}
               </div>
             </div>
-            <div className={styles.heroContent}>
+            <div
+              className={styles.heroContent}
+              style={{ backgroundImage: configs.image("home_background", null, true) }}
+            >
               {!this.props.hideHero &&
                 (this.props.favoriteHubsResult &&
                 this.props.favoriteHubsResult.entries &&
@@ -361,7 +364,7 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel} key={1}>
         <div className={styles.container}>
           <div className={classNames([styles.logo, styles.logoMargin])}>
-            <img src={configs.APP_CONFIG.images.logo ? configs.APP_CONFIG.images.logo : hubLogo} />
+            <img src={configs.image("logo", hubLogo)} />
           </div>
         </div>
         <div className={styles.ctaButtons}>
@@ -384,7 +387,7 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel}>
         <div className={styles.container}>
           <div className={styles.logo}>
-            <img src={configs.APP_CONFIG.images.logo ? configs.APP_CONFIG.images.logo : hubLogo} />
+            <img src={configs.image("logo", hubLogo)} />
           </div>
           <div className={styles.blurb}>
             <FormattedMessage id="home.hero_blurb" />

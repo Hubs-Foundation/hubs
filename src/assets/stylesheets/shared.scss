@@ -13,7 +13,7 @@ $darker-grey: rgba(64, 64, 64, 1.0);
 $darkest-grey: rgba(32, 32, 32, 1.0);
 $bright-blue: #2F80ED;
 $light-blue: #6FC0FD;
-$action-color: #FF3464;
+$action-color: var(--primary-action, #FF3464);
 $action-color-light: #FF74A4;
 $action-color-transparent: rgba(255, 52, 100, 0.9);
 $hud-panel-background: rgba(79, 79, 79, 0.45);
