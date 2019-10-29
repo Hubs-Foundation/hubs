@@ -26,13 +26,20 @@ $action-subtitle-text: $light-text;
 $hud-panel-background: rgba(79, 79, 79, 0.45);
 $hud-panel-text-color: $light-text;
 $hud-panel-link-color: white;
+$notice-background-color: $bright-blue;
 $notice-text-color: white;
 $notice-widget-color: $light-blue;
 $text-field-text-color: black;
+$text-field-widget-color: black;
 $text-field-background-color: white;
 $panel-action-button-secondary-background: #f4f4f4;
+$overlay-button-background-color: white; // favorite button
+$overlay-button-icon-color: $dark-grey; // favorite button
 $action-button-secondary-icon: $dark-grey; // eg avatar upload button 
 $panel-text-color: black;
+$panel-background-color: $white-transparent;
+$menu-background-color: white;
+$menu-icon-color: $dark-grey;
 $panel-link-underline-color: $dark-grey;
 $panel-widget-color: $dark-grey;
 $panel-widget-disabled-color: $dark-grey;
@@ -51,11 +58,18 @@ $discord-action-color: #7289da;
 $loading-background-color: #d7e5ec;
 $loading-spinner-color: #555;
 $loading-text-color: $darker-grey;
-$lobby-overlay-widget-background-color: $white-transparent;
-$spawned-overlay-widget-background-color: black;
+$lobby-overlay-widget-background-color: $white-transparent; // lobby chat bubbles
+$spawned-overlay-widget-background-color: black; // in-VR chat bubbles
 $spawned-overlay-widget-source-text-color: $light-text;
 $spawned-overlay-widget-text-color: white;
 $spawned-overlay-widget-link-color: white;
+$lightbox-text-color: white; // connect to device dialog
+$lightbox-text-field-color: white; // connect to device dialog
+$lightbox-text-field-text-color: black; // connect to device dialog
+$lightbox-background-color: rgba(0, 0, 0, 0.9);
+$lightbox-icon-background-color: white;
+$lightbox-widget-color: $darker-grey;
+
 $home-background-color: white;
 $home-header-background-color: white;
 $home-footer-background-color: white;
@@ -63,6 +77,28 @@ $home-header-link-color: black;
 $home-footer-text-color: black;
 $home-footer-link-color: $dark-grey;
 $home-text-color: black;
+
+$scene-text-color: white;
+$scene-overlay-text-color: black;
+$scene-loading-overlay-color: rgba(255, 255, 255, 0.2);
+
+$discord-text-color: white;
+$discord-background-color: #2A2D32;
+$discord-subtitle-color: #A3A3A3;
+$discord-action-color: #7289DA;
+$discord-secondary-action-color: $darker-grey;
+
+$post-session-splash-text-color: white;
+$post-session-splash-background-color: black;
+
+$vr-interstitial-background-color: rgba(0, 0, 0, 0.9);
+$vr-interstitial-text-color: $light-text;
+
+$tile-button-tip-background-color: $darker-grey;
+$tile-button-tip-text-color: $light-text;
+$tile-button-icon-color: white;
+$tile-button-icon-hover-color: black;
+$tile-button-background-color: $ffffffde;
 
 %unselectable {
   -moz-user-select: none;

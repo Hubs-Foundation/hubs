@@ -47,12 +47,12 @@ body {
   :local(.title) {
     @extend %top-title;
     width: 100%;
-    color: black;
+    color: $panel-text-color;
     text-align: center;
   }
 
   :local(.selected-message) {
-    color: $grey-text;
+    color: $panel-subtext-color;
     margin-top: 16px;
     height: 48px;
   }
@@ -85,21 +85,21 @@ body {
   :local(.copy-tip) {
     position: absolute;
     padding: 5px 20px;
-    background: $darker-grey;
+    background: $tile-button-tip-background-color;
     top: 5px;
     right: 10px;
     border-radius: 20px;
     height: 20px;
     line-height: 20px;
-    color: $light-text;
+    color: $tile-button-tip-text-color;
   }
 
   :local(.edit-avatar) {
     position: absolute;
     top: 6px;
     right: 7px;
-    color: black;
-    background: #ffffffde;
+    color: $tile-button-icon-color;
+    background: $tile-button-background-color;
     border-radius: 30px;
     width: 30px;
     height: 30px;
@@ -107,7 +107,7 @@ body {
     line-height: 27px;
     &:hover {
       background: $action-color;
-      color: white;
+      color: $tile-button-icon-hover-color;
     }
   }
 }

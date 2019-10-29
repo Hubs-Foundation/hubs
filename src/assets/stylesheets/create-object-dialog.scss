@@ -36,12 +36,8 @@
 }
 
 :local(.cancel-icon) {
-  color: $darkest-grey;
+  color: $text-field-widget-color;
   cursor: pointer;
-
-  &:hover {
-    color: #FF3D7F
-  }
 }
 
 :local(.upload-icon) {
@@ -69,7 +65,7 @@
   border: none;
   white-space: nowrap;
   background: transparent;
-  color: black;
+  color: $text-field-text-color;
   font-size: 1.2em;
   align-self: center;
   overflow: hidden;

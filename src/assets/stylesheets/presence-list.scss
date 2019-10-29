@@ -32,7 +32,7 @@
 
   a {
     text-decoration: underline;
-    text-decoration-color: $dark-grey;
+    text-decoration-color: $panel-link-underline-color;
     font-weight: bold;
     cursor: pointer;
     margin-left: 24px;
@@ -58,7 +58,7 @@
 
   i {
     margin-left: 12px;
-    color: $dark-grey;
+    color: $menu-icon-color;
   }
 
   i:hover {

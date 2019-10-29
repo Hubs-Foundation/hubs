@@ -2,10 +2,10 @@
 
 :local(.dialog) {
   position: absolute;
-  color: white;
+  color: $lightbox-text-color;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.9);
+  background-color: $lightbox-background-color;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -33,7 +33,7 @@
 }
 
 :local(.domain) , :local(.code) {
-  color: white;
+  color: $lightbox-text-color;
   font-weight: bold;
   text-decoration: none;
 }
@@ -43,9 +43,9 @@
   font-size: 3em;
   font-weight: bold;
   text-decoration: none;
-  color: black;
+  color: $lightbox-text-field-text-color;
   text-align: center;
-  background-color: white;
+  background-color: $lightbox-text-field-color;
   border: 1px solid #e2e2e2;
   border-radius: 12px;
   margin: 12px;
@@ -55,7 +55,7 @@
 }
 
 :local(.code) {
-  color: black;
+  color: $lightbox-text-field-text-color;
   font-weight: bold;
   text-decoration: none;
   font-size: 2.5em;
@@ -66,7 +66,7 @@
 :local(.imageHeader) {
   width: 100px;
   height: 100px;
-  background-color: white;
+  background-color: $lightbox-icon-background-color;
   border-radius: 50px;
   fill: black;
   margin-bottom: 24px;
@@ -86,7 +86,7 @@
 :local(.digit) {
   padding: 0 8px;
   margin: 2px;
-  background-color: white;
+  background-color: $lightbox-text-color;
   border: 1px solid #e2e2e2;
   border-radius: 12px;
   width: 32px;
@@ -112,7 +112,7 @@
 
 :local(.close-button) {
   @extend %action-button;
-  background-color: $darker-grey;
+  background-color: $lightbox-widget-color;
   margin-top: 24px;
 }
 

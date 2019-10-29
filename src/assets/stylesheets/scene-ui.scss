@@ -9,11 +9,11 @@
   left: 0;
   position: absolute;
   pointer-events: none;
-  color: white;
+  color: $scene-text-color;
 }
 
 :local(.whiteOverlay) {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: $scene-loading-overlay-color;
   top: 0;
   left: 0;
   width: 100%;
@@ -51,7 +51,7 @@
 :local(.tweetButton) {
   @extend %action-button;
   margin-top: 12px;
-  background-color: #1b95e0;
+  background-color: $twitter-action-color;
   align-self: center;
   padding-right: 32px;
   display: flex;
@@ -75,7 +75,7 @@
 
 :local(.info) {
   position: absolute;
-  color: black;
+  color: $scene-overlay-text-color;
   text-shadow: 0px 0px 10px #888;
   bottom: 12px;
   left: 12px;
@@ -94,7 +94,7 @@
 
   a {
     font-size: 0.8em;
-    color: black;
+    color: $scene-overlay-text-color;
     pointer-events: auto;
   }
 }
@@ -137,7 +137,7 @@
   font-weight: bold;
 
   :local(.madeWith) {
-    color: black;
+    color: $scene-overlay-text-color;
     text-shadow: 0px 0px 4px #333;
     margin-left: 4px;
     position: absolute;
@@ -167,11 +167,11 @@
   position: absolute;
   right: 10px;
   top: -12px;
-  color: white;
+  color: $action-text;
 }
 
 :local(.unavailable) {
-  color: white;
+  color: $post-session-splash-text-color;
   display: flex;
   align-items: center;
   justify-content: center;
