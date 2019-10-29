@@ -36,7 +36,7 @@
 }
 
 :local(.permission-disabled) {
-  color: $dark-grey;
+  color: $panel-widget-disabled-color;
 }
 
 :local(.permission-disabled input) {

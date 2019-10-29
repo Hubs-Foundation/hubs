@@ -21,7 +21,7 @@
     -webkit-user-select: text;
     -ms-user-select: text;
 
-    background-color: $white-transparent;
+    background-color: $lobby-overlay-widget-background-color;
     margin: 0px 64px 8px 8px;
     font-size: 0.8em;
     padding: 8px 16px;
@@ -153,7 +153,7 @@
 
   :local(.presence-log-entry) {
     background-color: $hud-panel-background;
-    color: $light-text;
+    color: $hud-panel-text-color;
     min-height: 18px;
 
     // If this is selectable, tap holding on mobile anywhere on the screen will result
@@ -164,7 +164,7 @@
     -ms-user-select: none;
 
     a {
-      color: white;
+      color: $hud-panel-link-color;
     }
   }
 }
@@ -177,8 +177,8 @@
   margin: 0;
 
   :local(.presence-log-entry) {
-    background-color: black;
-    color: white;
+    background-color: $spawned-overlay-widget-background-color;
+    color: $spawned-overlay-widget-text-color;
     min-height: 18px;
     padding: 8px 16px;
     border-radius: 16px;
@@ -191,7 +191,7 @@
     }
 
     a {
-      color: white;
+      color: $spawned-overlay-widget-link-color;
     }
   }
 
@@ -215,7 +215,7 @@
     font-weight: normal;
     font-size: 0.7em;
     white-space: nowrap;
-    color: $light-text;
+    color: $spawned-overlay-widget-source-text-color;
   }
 
   :local(.message-source-link) {

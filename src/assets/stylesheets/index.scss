@@ -11,8 +11,8 @@ $header-section-width: 350px;
 body {
   margin: 0;
   padding: 0;
-  background-color: white;
-  color: black;
+  background-color: $home-background-color;
+  color: $home-text-color;
   @extend %default-font;
 }
 
@@ -35,7 +35,7 @@ body {
 
 :local(.header-content) {
   padding: 0.5em 1.75em 0.5em 1.75em;
-  background-color: white;
+  background-color: $home-header-background-color;
   min-height: 65px;
   height: 65px;
   display: flex;
@@ -70,7 +70,7 @@ body {
       a {
         display: flex;
         margin: 0 16px;
-        color: black;
+        color: $home-header-link-color;
         font-weight: bold;
         font-size: 1.4em;
         text-decoration: none;
@@ -252,7 +252,7 @@ body {
     justify-content: center;
     align-items: center;
     font-weight: bold;
-    color: black;
+    color: $home-header-link-color;
     margin-top: 8px;
 
     img {
@@ -261,7 +261,7 @@ body {
     }
 
     a { 
-      color: black;
+      color: $home-header-link-color;
       margin-right: 4px;
       margin-left: 2px;
     }
@@ -276,7 +276,7 @@ body {
   justify-content: flex-end;
 
   @media (max-width: 768px), (max-height: 480px) {
-    background-color: white;
+    background-color: $home-footer-background-color;
     padding: 0 0 2em 0;
     margin: 0;
     justify-content: center;
@@ -284,7 +284,7 @@ body {
 
   :local(.links) {
     text-align: center;
-    color: black;
+    color: $home-footer-text-color;
     display: flex;
     flex-direction: column;
 
@@ -313,7 +313,7 @@ body {
     }
 
     :local(.link) {
-      color: $dark-grey;
+      color: $home-footer-link-color;
       font-weight: bold;
       margin: 0 18px;
 
@@ -326,7 +326,7 @@ body {
       margin-top: 8px;
 
       a {
-        color: black;
+        color: $home-footer-text-color;
       }
     }
   }
