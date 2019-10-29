@@ -3,4 +3,4 @@ translations.en."home.hero_blurb" = { "category" = "translations", "type" = "str
 features.disable_spoke = { "category" = "features", "type" = "boolean", "default" = "false", "name" = "Disable Spoke", "description" = "Hide links to Spoke." }
 images.logo = { "category" = "images", "type" = "file", "name" = "App Logo", "description" = "Logo used across the app." }
 images.home_background = { "category" = "images", "type" = "file" }
-colors.primary-action = { "category" = "colors", "type" = "color", "name" = "Primary Color", "description" = "Used for CTA buttons and accents." }
+colors.action-color = { "category" = "colors", "type" = "color", "name" = "Primary Color", "description" = "Used for call to action buttons and accents." }
