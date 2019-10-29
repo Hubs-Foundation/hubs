@@ -4,7 +4,7 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import en from "react-intl/locale-data/en";
 
-import configs from "../utils/configs";
+import configs from "../utils/configs.js";
 import { lang, messages } from "../utils/i18n";
 import { playVideoWithStopOnBlur } from "../utils/video-utils.js";
 import homeVideoWebM from "../assets/video/home.webm";
@@ -361,7 +361,7 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel} key={1}>
         <div className={styles.container}>
           <div className={classNames([styles.logo, styles.logoMargin])}>
-            <img src={hubLogo} />
+            <img src={configs.APP_CONFIG.images.logo ? configs.APP_CONFIG.images.logo : hubLogo} />
           </div>
         </div>
         <div className={styles.ctaButtons}>
@@ -384,7 +384,7 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel}>
         <div className={styles.container}>
           <div className={styles.logo}>
-            <img src={hubLogo} />
+            <img src={configs.APP_CONFIG.images.logo ? configs.APP_CONFIG.images.logo : hubLogo} />
           </div>
           <div className={styles.blurb}>
             <FormattedMessage id="home.hero_blurb" />

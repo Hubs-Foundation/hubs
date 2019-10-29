@@ -114,8 +114,7 @@ class ConfigurationEditor extends Component {
     this.setState({ category, config: null }, () => this.fetchConfigsForCategory());
   }
 
-  onChange(path, ev) {
-    const val = ev.target.value;
+  onChange(path, val) {
     const config = this.state.config;
     setConfigValue(config, path, val);
     this.setState({ config: config });
@@ -153,7 +152,7 @@ class ConfigurationEditor extends Component {
         id={displayPath}
         label={descriptor.name || displayPath}
         value={currentValue || ""}
-        onChange={ev => this.onChange(path, ev)}
+        onChange={ev => this.onChange(path, ev.target.value)}
         helperText={descriptor.description}
         type={inputType}
         fullWidth
@@ -162,10 +161,17 @@ class ConfigurationEditor extends Component {
     );
   }
 
+  renderFileInput(path, descriptor, currentValue) {
+    const displayPath = path.join(" > ");
+    return <input key={displayPath} type="file" onChange={ev => this.onChange(path, ev.target.files[0])} />;
+  }
+
   renderConfigurable(path, descriptor, currentValue) {
     switch (descriptor.type) {
       case "list":
         return null;
+      case "file":
+        return this.renderFileInput(path, descriptor, currentValue);
       case "boolean":
       case "string":
       case "number":
