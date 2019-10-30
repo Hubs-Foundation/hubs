@@ -74,9 +74,11 @@
   }
 
   :local(.form-field-text) {
-    @extend %form-field-on-white;
     @extend %default-font;
 
+    border: 1px solid $text-field-border-color;
+    background-color: $text-field-background-color;
+    border-radius: 10px;
     font-size: 1.1em;
     color: $text-field-text-color;
     outline: none;

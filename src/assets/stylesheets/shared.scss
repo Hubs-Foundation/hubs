@@ -1,8 +1,5 @@
 $light-transparent: rgba(0, 0, 0, 0.2);
 $white-transparent: rgba(255, 255, 255, 0.90);
-$dark-transparent: rgba(0, 0, 0, 0.4);
-$darker-transparent: rgba(0, 0, 0, 0.6);
-$darkest-transparent: rgba(0, 0, 0, 0.9);
 $grey-text: rgba(127, 127, 127, 1.0);
 $dark-grey-text: rgba(64, 64, 64, 1.0);
 $light-text: rgba(240, 240, 240, 1.0);
@@ -88,6 +85,7 @@ $spawned-overlay-widget-source-text-color: $light-text;
 $spawned-overlay-widget-text-color: white;
 $spawned-overlay-widget-link-color: white;
 $lightbox-text-color: white; // connect to device dialog
+$lightbox-icon-color: black;
 $lightbox-text-field-color: white; // connect to device dialog
 $lightbox-text-field-border-color: #e2e2e2; // connect to device dialog
 $lightbox-text-field-text-color: black; // connect to device dialog
@@ -189,12 +187,6 @@ $icon-button-border-color: white;
   align-items: center;
   text-align: center;
   margin: 0;
-}
-
-%form-field-on-white {
-  border: 1px solid $text-field-border-color;
-  background-color: white;
-  border-radius: 10px;
 }
 
 %input-field {
