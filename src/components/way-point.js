@@ -1,9 +1,38 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
-import { squareDistanceBetween } from "../utils/three-utils";
+import { setMatrixWorld, squareDistanceBetween } from "../utils/three-utils";
+const MIN_JUMP_DISTANCE_SQUARED = 2 ** 2; //meters
 AFRAME.registerComponent("visible-thing", {
   schema: {},
   init() {
     this.el.appendChild(document.importNode(document.getElementById("visible-thing-template").content, true));
+  }
+});
+AFRAME.registerComponent("show-child-on-hover", {
+  schema: {
+    target: { type: "string" }
+  },
+  init() {
+    waitForDOMContentLoaded().then(() => {
+      this.model = this.el.querySelector(this.data.target);
+      this.model.object3D.visible = false;
+
+      this.onHover = () => {
+        this.hovering = true;
+        this.model.object3D.visible = true;
+      };
+      this.onHoverOut = () => {
+        this.hovering = false;
+        this.model.object3D.visible = false;
+      };
+      this.el.object3D.addEventListener("hovered", this.onHover);
+      this.el.object3D.addEventListener("unhovered", this.onHoverOut);
+    });
+  },
+  remove() {
+    if (this.didInit) {
+      this.el.object3D.removeEventListener("hovered", this.onHover);
+      this.el.object3D.removeEventListener("unhovered", this.onHoverOut);
+    }
   }
 });
 AFRAME.registerComponent("show-sibling-on-hover", {
@@ -37,57 +66,140 @@ AFRAME.registerComponent("show-sibling-on-hover", {
 
 AFRAME.registerComponent("way-point", {
   schema: {
+    templateId: { default: "way-point-icon-template" },
     reparent: { default: false }, // Attach to moving objects
     maintainUp: { default: true }, // Maintain the user's perceived up vector. Suggestion: Require this to be explicitly enabled by users to prevent accidental nauseua
     disallowIfOccupied: { default: false },
     disableMovement: { default: false },
     keepOrientation: { default: false },
-    offset: { type: "vec3", default: { x: 0, y: 0, z: 0 } }
+    offset: { type: "vec3", default: { x: 0, y: 0, z: 0 } },
+    modelSelector: { type: "string" }
   },
-  init() {
-    this.el.appendChild(document.importNode(document.getElementById("way-point-template").content, true));
-    this.enqueueWaypointTravelToHere = this.enqueueWaypointTravelToHere.bind(this);
-    // Some browsers require a timeout here.
-    // I can't remember if it is the .way-point-icon element or the object3D that isn't available.
-    setTimeout(() => {
-      if (this.didRemove) return;
-      this.el.querySelector(".way-point-icon").object3D.addEventListener("interact", this.enqueueWaypointTravelToHere);
-    }, 0);
-  },
-  enqueueWaypointTravelToHere: (function() {
+  init: (function() {
+    const mat4 = new THREE.Matrix4();
+    const flipZ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+    return function init() {
+      // Delay waypoint initialization because cloning objects is busted
+      // TODO: fix
+      setTimeout(() => {
+        this.el.appendChild(document.importNode(document.getElementById(this.data.templateId).content, true));
+        this.enqueueWaypointTravelToHere = this.enqueueWaypointTravelToHere.bind(this);
+        this.enqueueWaypointTravelToHereIfFarAway = this.enqueueWaypointTravelToHereIfFarAway.bind(this);
+        this.calculateTarget = this.calculateTarget.bind(this); //TODO: remove?
+        // Some browsers require a timeout after importNode
+        setTimeout(() => {
+          if (this.didRemove) return;
+          const icon = this.el.querySelector(".way-point-icon");
+          if (icon) {
+            icon.object3D.addEventListener("interact", this.enqueueWaypointTravelToHere);
+          } else {
+            this.el.object3D.addEventListener("interact", this.enqueueWaypointTravelToHereIfFarAway);
+          }
+          if (this.data.modelSelector) {
+            this.model = this.el.querySelector(this.data.modelSelector);
+            this.model.object3D.visible = false;
+            if (this.model) {
+              this.onHover = () => {
+                this.viewingCamera = this.viewingCamera || document.getElementById("viewing-camera");
+                const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
+                this.model.object3D.visible =
+                  isPinned &&
+                  squareDistanceBetween(this.el.object3D, this.viewingCamera.object3D) > MIN_JUMP_DISTANCE_SQUARED;
+                this.hovering = true;
+                if (this.model) {
+                  this.calculateTarget(mat4);
+                  setMatrixWorld(this.model.object3D, mat4);
+                  this.model.object3D.updateMatrices();
+                  this.model.object3D.position.set(
+                    this.model.object3D.position.x,
+                    this.model.object3D.position.y - 1.6,
+                    this.model.object3D.position.z
+                  );
+                  this.model.object3D.quaternion.multiply(flipZ);
+                  this.model.object3D.matrixNeedsUpdate = true;
+                }
+              };
+              this.onHoverOut = () => {
+                this.hovering = false;
+                this.model.object3D.visible = false;
+              };
+              this.el.object3D.addEventListener("hovered", this.onHover);
+              this.el.object3D.addEventListener("unhovered", this.onHoverOut);
+            }
+          }
+        }, 0);
+      }, 0);
+    };
+  })(),
+  enqueueWaypointTravelToHereIfFarAway: (function() {
+    return function() {
+      this.viewingCamera = this.viewingCamera || document.getElementById("viewing-camera");
+      const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
+      const squareDistance = squareDistanceBetween(this.el.object3D, this.viewingCamera.object3D);
+      if (isPinned && squareDistance > MIN_JUMP_DISTANCE_SQUARED) {
+        this.enqueueWaypointTravelToInFrontOf();
+      }
+    };
+  })(),
+  calculateTarget: (function() {
     const mat4 = new THREE.Matrix4();
     const rotMat4 = new THREE.Matrix4();
     const position = new THREE.Vector3();
     const quaternion = new THREE.Quaternion();
     const offset = new THREE.Vector3();
     const scale = new THREE.Vector3();
+    return function(inMat4) {
+      this.avatarPOV = this.avatarPOV || document.getElementById("avatar-pov-node");
+      this.characterController =
+        this.characterController || document.getElementById("avatar-rig").components["character-controller"];
+      this.avatarPOV.object3D.updateMatrices();
+      this.el.object3D.updateMatrices();
+      position.setFromMatrixColumn(this.el.object3D.matrixWorld, 3).add(
+        offset.copy(this.data.offset).applyQuaternion(
+          this.data.keepOrientation
+            ? quaternion.setFromRotationMatrix(rotMat4.extractRotation(this.avatarPOV.object3D.matrixWorld)) // TODO: Try making forward = (object - head), up = worldUp or headUp (minus projection on forward), and side = their cross
+            : quaternion.setFromRotationMatrix(rotMat4.extractRotation(this.el.object3D.matrixWorld))
+        )
+      );
+      scale.setFromMatrixScale(this.el.object3D.matrixWorld);
+      mat4.compose(
+        position,
+        quaternion,
+        scale
+      );
+      return inMat4.copy(mat4);
+    };
+  })(),
+  enqueueWaypointTravelToInFrontOf: (function() {
+    const mat4 = new THREE.Matrix4();
+    return function() {
+      this.calculateTarget(mat4);
+      this.characterController && this.characterController.enqueueWaypointTravelTo(mat4, this.data);
+    };
+  })(),
+  enqueueWaypointTravelToHere: (function() {
+    const mat4 = new THREE.Matrix4();
     return function() {
       this.avatarPOV = this.avatarPOV || document.getElementById("avatar-pov-node");
       this.characterController =
         this.characterController || document.getElementById("avatar-rig").components["character-controller"];
       this.avatarPOV.object3D.updateMatrices();
       this.el.object3D.updateMatrices();
-      //position
-      //  .setFromMatrixColumn(this.el.object3D.matrixWorld, 3)
-      //  .add(
-      //    offset
-      //      .copy(this.data.offset)
-      //      .applyQuaternion(
-      //        this.data.keepOrientation
-      //          ? quaternion.setFromRotationMatrix(rotMat4.extractRotation(this.avatarPOV.object3D.matrixWorld))
-      //          : quaternion.setFromRotationMatrix(this.el.object3D.matrixWorld)
-      //      )
-      //  );
-      //scale.setFromMatrixScale(this.el.object3D.matrixWorld);
-      //mat4.compose(
-      //  position,
-      //  quaternion,
-      //  scale
-      //);
       mat4.copy(this.el.object3D.matrixWorld);
       this.characterController && this.characterController.enqueueWaypointTravelTo(mat4, this.data);
     };
   })(),
+  tick() {
+    if (this.model) {
+      this.viewingCamera = this.viewingCamera || document.getElementById("viewing-camera");
+
+      const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
+      this.model.object3D.visible =
+        isPinned &&
+        !!this.hovering &&
+        squareDistanceBetween(this.el.object3D, this.viewingCamera.object3D) > MIN_JUMP_DISTANCE_SQUARED; // TODO: Remove for perf reasons
+    }
+  },
   remove() {
     this.didRemove = true;
     this.el.querySelector(".way-point-icon").object3D.removeEventListener("interact", this.enqueueWaypointTravel);
