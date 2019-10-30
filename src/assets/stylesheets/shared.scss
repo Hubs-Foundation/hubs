@@ -153,6 +153,9 @@ $tile-empty-text-color: grey;
 $overflow-tip-background-color: rgba(220, 220, 220, 0.5);
 $overflow-tip-icon-color: black;
 
+$icon-button-background-color: black;
+$icon-button-border-color: white;
+
 %unselectable {
   -moz-user-select: none;
   -webkit-user-select: none;
@@ -166,7 +169,7 @@ $overflow-tip-icon-color: black;
 
 %glass-text {
   font-family: 'Open Sans', sans-serif;
-  color: black;
+  color: $panel-text-color;
 }
 
 %glass-icon {
@@ -175,7 +178,7 @@ $overflow-tip-icon-color: black;
 }
 
 %rounded-border {
-  border: 1px solid #e2e2e2;
+  border: 1px solid $text-field-border-color;
   box-sizing: border-box;
   border-radius: 10px;
 }
@@ -189,7 +192,7 @@ $overflow-tip-icon-color: black;
 }
 
 %form-field-on-white {
-  border: 1px solid #e2e2e2;
+  border: 1px solid $text-field-border-color;
   background-color: white;
   border-radius: 10px;
 }
@@ -197,7 +200,7 @@ $overflow-tip-icon-color: black;
 %input-field {
   @extend %rounded-border;
   @extend %default-font;
-  color: black;
+  color: $text-field-text-color;
   font-size: 1.2em;
   background-color: transparent;
   line-height: 2.0em;
@@ -228,7 +231,7 @@ $overflow-tip-icon-color: black;
   }
 
   background: $action-color;
-  color: white;
+  color: $action-text;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -286,7 +289,7 @@ $overflow-tip-icon-color: black;
 
   background: $action-color;
   font-size: 1em;
-  color: white;
+  color: $action-text;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -312,9 +315,8 @@ $overflow-tip-icon-color: black;
   color: $action-color;
 }
 
-
 %action-button-selected {
-  background: white;
+  background: $action-button-secondary-background;
   color: $action-color;
 }
 
@@ -353,7 +355,6 @@ $overflow-tip-icon-color: black;
   -moz-appearance: none;
   -webkit-appearance: none;
   background: transparent;
-  color: white;
   border: none;
   font-size: 64pt;
   outline-style: none;
@@ -366,8 +367,8 @@ $overflow-tip-icon-color: black;
   -webkit-appearance: none;
   width: 2em;
   height: 2em;
-  border: 1px solid #e2e2e2;
-  background-color: white;
+  border: 1px solid $text-field-border-color;
+  background-color: $text-field-background-color;
   border-radius: 6px;
   vertical-align: sub;
   margin: 0 0.7em
@@ -390,7 +391,7 @@ $overflow-tip-icon-color: black;
   display: block;
   background: none;
   border: none;
-  color: black;
+  color: $panel-text-color;
   cursor: pointer;
   font-size: 0.8em;
   outline-style: none;
@@ -409,10 +410,10 @@ $overflow-tip-icon-color: black;
 }
 
 %fa-icon-button-icon {
-  background: black;
+  background: $icon-button-background-color;
   width: 40px !important;
   height: 40px;
-  border: 3px solid white;
+  border: 3px solid $icon-button-border-color;
   border-radius: 40px;
   display: inline-block;
   font-size: 22px;
@@ -441,8 +442,8 @@ $overflow-tip-icon-color: black;
   pointer-events: auto;
   z-index: 2;
   font-size: 0.8em;
-  color: white;
+  color: $notice-text-color;
   padding: 12px 24px;
-  background-color: $bright-blue;
+  background-color: $notice-background-color;
   text-align: center;
 }

@@ -46,7 +46,7 @@
   color: $lightbox-text-field-text-color;
   text-align: center;
   background-color: $lightbox-text-field-color;
-  border: 1px solid #e2e2e2;
+  border: 1px solid $lightbox-text-field-border-color;
   border-radius: 12px;
   margin: 12px;
   padding: 14px;
@@ -87,7 +87,7 @@
   padding: 0 8px;
   margin: 2px;
   background-color: $lightbox-text-color;
-  border: 1px solid #e2e2e2;
+  border: 1px solid $lightbox-text-field-border-color;
   border-radius: 12px;
   width: 32px;
   height: 64px;
