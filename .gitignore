@@ -64,3 +64,4 @@ dist/
 
 certs/
 results/
+.ret.credentials
