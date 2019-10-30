@@ -253,6 +253,7 @@
   .close-button {
     font-size: 1.6em;
     align-self: flex-start;
+    cursor: pointer;
     @media (max-width: 768px) {
       padding-left: 0.5em;
     }

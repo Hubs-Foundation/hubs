@@ -85,6 +85,7 @@
 
       :local(.search-clear), :local(.search-icon) {
         color: $text-field-widget-color;
+        cursor: pointer;
         margin: 0 18px;
         font-size: 1.2em;
       }
@@ -413,13 +414,13 @@
 
     :local(.tile):local(.create-tile) {
       display: flex;
-      margin-bottom: 3em;
+      margin-bottom: 4em;
 
       :local(.tile-link) {
         flex: 1;
         text-decoration: none;
         :local(.tile-content) {
-          background-color: $tile-background-color;
+          background-color: $tile-alt-background-color;
           display: flex;
           align-items: center;
           flex-direction: column;
@@ -435,6 +436,10 @@
           }
         }
       }
+    }
+
+    :local(.tile):local(.create-avatar-tile) {
+      margin-bottom: 3em;
     }
 
     :local(.tiles-variable) {
