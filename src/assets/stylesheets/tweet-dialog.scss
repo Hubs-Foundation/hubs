@@ -13,8 +13,8 @@
 }
 
 :local(.editor) {
-  background-color: $text-field-background-color;
-  border: 2px solid $twitter-editor-border-color;
+  background-color: var(--text-field-background-color);
+  border: 2px solid var(--twitter-editor-border-color);
   margin: 24px 36px 0px 36px;
   padding: 18px;
   padding-bottom: 20px;
@@ -37,7 +37,7 @@
   }
   
   a {
-    color: $twitter-link-color;
+    color: var(--twitter-link-color);
   }
 
   button {
@@ -105,7 +105,7 @@
   }
 
   :local(.tweet-button):disabled {
-    background-color: $panel-widget-disabled-color;
+    background-color: var(--panel-widget-disabled-color);
   }
 }
 
@@ -121,5 +121,5 @@
   height: 40px;
 }
 :local(.dialog-background) {
-  background-color: $twitter-panel-background-color;
+  background-color: var(--twitter-panel-background-color);
 }

@@ -26,7 +26,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  background-color: $loading-background-color;
+  background-color: var(--loading-background-color);
   width: 100%;
   height: 100%;
   display: flex;
@@ -44,7 +44,7 @@
 .loader-center,
 .loader:before,
 .loader:after {
-  background: $loading-spinner-color;
+  background: var(--loading-spinner-color);
   -webkit-animation: loader-animation 1s infinite ease-in-out;
   animation: loader-animation 1s infinite ease-in-out;
   width: 0.6em;
@@ -52,7 +52,7 @@
   border-radius: 5px;
 }
 .loader {
-  color: $loading-spinner-color;
+  color: var(--loading-spinner-color);
   text-indent: -9999em;
   margin-left: 4em;
   margin-top: 4em;
@@ -108,6 +108,6 @@
 :local(.loading-text) {
   font-weight: normal;
   font-size: 0.8em;
-  color: $loading-text-color;
+  color: var(--loading-text-color);
   margin-top: 0;
 }

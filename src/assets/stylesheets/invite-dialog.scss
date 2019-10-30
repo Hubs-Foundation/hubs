@@ -1,7 +1,7 @@
 @import 'shared.scss';
 
 :local(.dialog) {
-  background-color: $action-color-transparent;
+  background-color: var(--action-color-transparent);
   border-radius: 12px;
   box-shadow: 0px 5px 30px 1px #333;
   display: flex;
@@ -12,12 +12,12 @@
   text-align: center;
   position: relative;
   font-size: 1.0em;
-  color: $action-text;
+  color: var(--action-text);
   pointer-events: auto;
   z-index: 3;
   
   a {
-    color: $action-text;
+    color: var(--action-text);
     text-decoration: underline;
     font-weight: bold;
   }
@@ -100,7 +100,7 @@
     @extend %action-button;
     pointer-events: auto;
     display: none;
-    background-color: $hud-panel-background;
+    background-color: var(--hud-panel-background);
     height: 28px;
     font-size: 0.8em;
 
@@ -124,13 +124,13 @@
   height: 0; 
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  border-bottom: 5px solid $action-color;
+  border-bottom: 5px solid var(--action-color);
   position: absolute;
   top: -5px;
 }
 
 :local(.code) {
-  color: $text-field-text-color;
+  color: var(--text-field-text-color);
   font-weight: bold;
   text-decoration: none;
   font-size: 2.0em;
@@ -147,10 +147,10 @@
     @extend %default-font;
     font-weight: bold;
     text-decoration: none;
-    color: $text-field-text-color;
+    color: var(--text-field-text-color);
     text-align: center;
-    background-color: $text-field-background-color;
-    border: 1px solid $text-field-border-color;
+    background-color: var(--text-field-background-color);
+    border: 1px solid var(--text-field-border-color);
     border-radius: 12px;
     margin: 12px;
     font-size: 1.8em;
@@ -164,8 +164,8 @@
 :local(.digit) {
   padding: 0 8px;
   margin: 2px;
-  background-color: $text-field-background-color;
-  border: 1px solid $text-field-border-color;
+  background-color: var(--text-field-background-color);
+  border: 1px solid var(--text-field-border-color);
   border-radius: 12px;
   width: 32px;
   height: 64px;
@@ -215,10 +215,10 @@
     @extend %default-font;
     font-weight: bold;
     text-decoration: none;
-    color: $text-field-text-color;
+    color: var(--text-field-text-color);
     text-align: center;
-    background-color: $text-field-background-color;
-    border: 1px solid $text-field-border-color;
+    background-color: var(--text-field-background-color);
+    border: 1px solid var(--text-field-border-color);
     border-radius: 12px;
     margin: 12px 0 0 0;
     font-size: 1.2em;
@@ -242,7 +242,7 @@
   outline-style: none;
   border: 0;
   background-color: transparent;
-  color: $action-text;
+  color: var(--action-text);
 }
 
 :local(.subscribe) {
@@ -250,7 +250,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: $action-text;
+  color: var(--action-text);
 
   input {
     @extend %checkbox;
@@ -285,7 +285,7 @@
       height: 0;
       border-left: 5px solid transparent;
       border-right: 5px solid transparent;
-      border-bottom: 5px solid $notice-background-color;
+      border-bottom: 5px solid var(--notice-background-color);
       position: absolute;
       top: -5px;
     }

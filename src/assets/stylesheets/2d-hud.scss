@@ -34,7 +34,7 @@
   justify-content: space-around;
   align-items: center;
   padding: 5px;
-  background-color: $hud-panel-background;
+  background-color: var(--hud-panel-background);
   border-radius: 30px;
 
   :local(.top-tip) {
@@ -61,7 +61,7 @@
       height: 0;
       border-left: 5px solid transparent;
       border-right: 5px solid transparent;
-      border-bottom: 5px solid $notice-background-color;
+      border-bottom: 5px solid var(--notice-background-color);
       position: absolute;
       top: -5px;
     }
@@ -120,11 +120,11 @@
 
   :local(.tip-cancel-text) {
     @extend %link-button;
-    color: $notice-text-color;
+    color: var(--notice-text-color);
   }
 
   :local(.tip-cancel) {
-    color: $notice-widget-color;
+    color: var(--notice-widget-color);
     appearance: none;
     -moz-appearance: none;
     -webkit-appearance: none;
@@ -143,8 +143,8 @@
     flex-direction: column;
     border-radius: 28px;
     padding: 3px 3px 6px 3px;
-    background-color: $hud-dropdown-background-color;
-    border: 2px solid $hud-dropdown-border-color;
+    background-color: var(--hud-dropdown-background-color);
+    border: 2px solid var(--hud-dropdown-border-color);
     pointer-events: auto;
     z-index: 1;
 

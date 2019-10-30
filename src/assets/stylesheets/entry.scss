@@ -10,7 +10,7 @@
 
 :local(.collapse-button) {
   @extend %fa-icon-button;
-  color: $panel-widget-color;
+  color: var(--panel-widget-color);
   display: inline;
   position: absolute;
   top: 0px;
@@ -26,7 +26,7 @@
   position: absolute;
   top: 0px;
   right: 24px;
-  color: $panel-widget-color;
+  color: var(--panel-widget-color);
   display: inline;
 
   i {
@@ -35,11 +35,11 @@
 }
 
 :local(.favorited) {
-  color: $favorited-color;
+  color: var(--favorited-color);
 }
 
 :local(.collapse-button):hover {
-  color: $action-color;
+  color: var(--action-color);
 }
 
 :local(.entry-button) {
@@ -49,7 +49,7 @@
   text-align: left;
   flex-direction: row;
   cursor: pointer;
-  color: $action-text;
+  color: var(--action-text);
   align-items: center;
   @extend %default-font;
   border: 0;
@@ -65,7 +65,7 @@
 
   :local(.label) {
     @extend %glass-text;
-    color: $action-text;
+    color: var(--action-text);
     flex: 10 1 auto;
     margin-left: 20px;
     font-size: 1.0em;
@@ -81,7 +81,7 @@
   :local(.subtitle) {
     font-size: 0.8em;
     font-weight: normal;
-    color: $action-subtitle-text;
+    color: var(--action-subtitle-text);
   }
 }
 
@@ -89,11 +89,11 @@
   @extend %action-button-secondary;
 
   :local(.label) {
-    color: $action-color;
+    color: var(--action-color);
   }
 
   :local(.subtitle) {
-    color: $action-color;
+    color: var(--action-color);
   }
 }
 
@@ -115,7 +115,7 @@
   :local(.room-subtitle) {
     font-size: 0.8em;
     text-transform: uppercase;
-    color: $panel-subtitle-color;
+    color: var(--panel-subtitle-color);
     margin-bottom: 8px;
   }
 
@@ -145,7 +145,7 @@
       cursor: pointer;
       border: 0;
       text-decoration: underline;
-      text-decoration-color: $panel-subtitle-color;
+      text-decoration-color: var(--panel-subtitle-color);
       background: transparent;
     }
   }
@@ -171,7 +171,7 @@
     text-decoration: none;
     cursor: pointer;
     display: flex;
-    color: $panel-subtitle-color;
+    color: var(--panel-subtitle-color);
     align-items: center;
     justify-content: center;
     i {
@@ -225,7 +225,7 @@
   }
 
   :local(.webvr-link) {
-    color: $action-text;
+    color: var(--action-text);
     flex: 1;
     min-height: max-content;
   }
@@ -250,7 +250,7 @@
     margin-bottom: 10px;
     font-size: 0.8em;
     cursor: pointer;
-    color: $action-color;
+    color: var(--action-color);
     text-decoration: underline;
   }
 }

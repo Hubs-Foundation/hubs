@@ -1,7 +1,7 @@
 .exited-panel {
   position: absolute;
-  color: $post-session-splash-text-color;
-  background-color: $post-session-splash-background-color;
+  color: var(--post-session-splash-text-color);
+  background-color: var(--post-session-splash-background-color);
   width: 100%;
   height: 100%;
   display: flex;
@@ -19,7 +19,7 @@
     text-align: center;
     
     a {
-      color: $post-session-splash-secondary-action-color;
+      color: var(--post-session-splash-secondary-action-color);
     }
   }
 }

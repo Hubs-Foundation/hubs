@@ -7,7 +7,7 @@
   box-sizing: border-box;
   align-items: flex-start;
   height: 100%;
-  color: $panel-text-color;
+  color: var(--panel-text-color);
 
   @media (max-width: 768px) {
     padding: 0.5em;
@@ -24,7 +24,7 @@
   .info {
     text-align: center;
     width: 100%;
-    color: $panel-subtext-color;
+    color: var(--panel-subtext-color);
     margin: 1em 0;
 
     p {
@@ -33,7 +33,7 @@
     }
 
     a {
-      color: $panel-subtext-link-color;
+      color: var(--panel-subtext-link-color);
       margin-left: 5px;
     }
   }
@@ -92,9 +92,9 @@
         min-height: 50px;
         border-radius: 8px;
         margin-right: 5px;
-        background: $panel-action-button-secondary-background;
+        background: var(--panel-action-button-secondary-background);
         overflow: hidden;
-        color: $action-button-secondary-icon;
+        color: var(--action-button-secondary-icon);
         position: relative;
         svg {
           position: absolute;
@@ -107,7 +107,7 @@
       }
       a {
         margin-left: 10px;
-        color: $action-color;
+        color: var(--action-color);
       }
     }
 
@@ -149,7 +149,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        color: $panel-subtext-color;
+        color: var(--panel-subtext-color);
         text-align: center;
         cursor: pointer;
         margin-bottom: 5px;
@@ -157,7 +157,7 @@
         position: relative;
 
         &.selected{
-          background: $tile-selected-color;
+          background: var(--tile-selected-color);
         }
         &.custom{
           width: 100%;
@@ -204,11 +204,11 @@
     hr {
       width: 100%;
       border: none;
-      border-bottom: 1px solid $panel-widget-color;
+      border-bottom: 1px solid var(--panel-widget-color);
     }
 
     a {
-      color: $panel-text-color;
+      color: var(--panel-text-color);
     }
   }
 
@@ -227,7 +227,7 @@
     margin-bottom: 0.5em;
   }
   .form-submit:disabled {
-    background-color: $action-color-disabled;
+    background-color: var(--action-color-disabled);
   }
 
   .split {
@@ -242,11 +242,11 @@
   }
 
   .delete-avatar {
-    color: $panel-subtext-link-color;
+    color: var(--panel-subtext-link-color);
     a {
       cursor: pointer;
       text-decoration: underline;
-      color: $action-color;
+      color: var(--action-color);
     }
   }
 

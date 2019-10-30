@@ -3,7 +3,7 @@
 :local(.preview) {
   position: relative;
   overflow: hidden;
-  background: $tile-selected-color;
+  background: var(--tile-selected-color);
   border-radius: 20px;
 
   .loader {
@@ -12,7 +12,7 @@
     top: calc(50% - 4.5em);
   }
   .error {
-    color: $panel-subtext-color;
+    color: var(--panel-subtext-color);
     text-align: center;
     padding: 1.5em;
     position: absolute;

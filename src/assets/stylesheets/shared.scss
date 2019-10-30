@@ -1,157 +1,4 @@
-$white-transparent: rgba(255, 255, 255, 0.90);
-$grey-text: rgba(127, 127, 127, 1.0);
-$dark-grey-text: rgba(64, 64, 64, 1.0);
-$light-text: rgba(240, 240, 240, 1.0);
-$lighter-grey: #f0f0f0;
-$light-grey: lightgrey;
-$dark-grey: rgba(128, 128, 128, 1.0);
-$darker-grey: rgba(64, 64, 64, 1.0);
-$darkest-grey: rgba(32, 32, 32, 1.0);
-$bright-blue: #2F80ED;
-$light-blue: #6FC0FD;
-$semi-bold: 600;
-$duck-yellow: #FFC000;
-
-$action-color: #FF3464;
-$action-color-highlight: #FF74A4;
-$action-color-disabled: #FF74A4;
-$action-color-transparent: rgba(255, 52, 100, 0.9);
-$action-text: white;
-$action-button-secondary-background: white;
-$action-subtitle-text: $light-text;
-$hud-panel-background: rgba(79, 79, 79, 0.45);
-$hud-dropdown-background-color: rgba(72, 72, 72, 0.2);
-$hud-dropdown-border-color: rgba(72, 72, 72, 0.3);
-$hud-panel-text-color: $light-text;
-$hud-panel-link-color: white;
-$notice-background-color: $bright-blue;
-$notice-text-color: white;
-$notice-widget-color: $light-blue;
-$text-field-text-color: black;
-$text-field-widget-color: $darkest-grey;
-$text-field-background-color: white;
-$text-field-placeholder-color: $dark-grey;
-$text-field-disabled-color: $dark-grey;
-$text-field-text-color: black;
-$text-field-border-color: #e2e2e2;
-$overlay-text-field-text-color: white;
-$overlay-text-field-widget-color: $dark-grey;
-$overlay-text-field-background-color: rgba(64, 64, 64, 0.55);
-$overlay-text-field-focused-background-color: $darker-grey;
-$overlay-text-field-placeholder-color: $dark-grey;
-$overlay-text-field-disabled-color: $dark-grey;
-$panel-action-button-secondary-background: #f4f4f4;
-$overlay-button-background-color: white; // favorite button
-$overlay-button-icon-color: $dark-grey; // favorite button
-$action-button-secondary-icon: $dark-grey; // eg avatar upload button 
-$panel-text-color: black;
-$panel-background-color: $white-transparent;
-$panel-overlay-text-color: black;
-$panel-overlay-background-color: rgba(0,0,0,0.85);
-$full-panel-background-color: rgba(255, 255, 255, 0.98);
-$menu-background-color: white;
-$menu-link-color: black;
-$menu-link-underline-color: $dark-grey;
-$menu-header-text-color: $dark-grey;
-$menu-icon-color: $dark-grey;
-$menu-attach-point-color: $white-transparent;
-$panel-rule-color: $light-grey;
-$panel-link-underline-color: $dark-grey;
-$panel-widget-color: $dark-grey;
-$panel-widget-disabled-color: $dark-grey;
-$panel-subtitle-color: $dark-grey;
-$panel-subtext-color: $grey-text;
-$panel-subtext-link-color: $dark-grey-text;
-$panel-subtext-disabled-color: $light-grey;
-$panel-icon-color: $darker-grey;
-$overlay-text-color: black;
-$favorited-color: $duck-yellow;
-$spoke-action-color: $bright-blue;
-$spoke-action-text-color: white;
-$twitter-action-color: #1da1f2;
-$twitter-link-color: #5e93c5;
-$twitter-panel-background-color: #e6ecf0;
-$twitter-editor-border-color: #a4d9f9;
-
-$discord-action-color: #7289da;
-$loading-background-color: #d7e5ec;
-$loading-spinner-color: #555;
-$loading-text-color: $darker-grey;
-$lobby-overlay-widget-background-color: $white-transparent; // lobby chat bubbles
-$lobby-overlay-widget-thumbnail-border-color: rgba(255, 255, 255, 0.15); // lobby chat bubbles
-$spawned-overlay-widget-background-color: black; // in-VR chat bubbles
-$spawned-overlay-widget-source-text-color: $light-text;
-$spawned-overlay-widget-text-color: white;
-$spawned-overlay-widget-link-color: white;
-$lightbox-text-color: white; // connect to device dialog
-$lightbox-icon-color: black;
-$lightbox-text-field-color: white; // connect to device dialog
-$lightbox-text-field-border-color: #e2e2e2; // connect to device dialog
-$lightbox-text-field-text-color: black; // connect to device dialog
-$lightbox-background-color: rgba(0, 0, 0, 0.9);
-$lightbox-icon-background-color: white;
-$lightbox-widget-color: $darker-grey;
-$chat-popup-background-color: $darker-grey;
-$chat-popup-text-color: $light-text;
-
-$home-background-color: white;
-$home-header-background-color: white;
-$home-footer-background-color: white;
-$home-header-link-color: black;
-$home-footer-text-color: black;
-$home-footer-link-color: $dark-grey;
-$home-text-color: black;
-$home-media-panel-background-color: rgba(255, 255, 255, 0.6);
-
-$link-background-color: white;
-$link-text-color: black;
-$link-button-highlight-color: rgba(255, 255, 255, 0);
-$link-keypad-background-color: #f7f7f7;
-$link-button-background-color: white;
-$link-button-active-background-color: $light-grey;
-$link-button-active-color: $light-grey;
-$link-button-disabled-color: $light-grey;
-$link-icon-color: #333;
-$link-code-loading-background: rgba(0.4, 0.4, 0.4, 0.85);
-
-$scene-text-color: white;
-$scene-overlay-text-color: black;
-$scene-loading-overlay-color: rgba(255, 255, 255, 0.2);
-
-$discord-text-color: white;
-$discord-background-color: #2A2D32;
-$discord-subtitle-color: #A3A3A3;
-$discord-action-color: #7289DA;
-$discord-secondary-text-color: $grey-text;
-$discord-secondary-action-color: $darker-grey;
-
-$post-session-splash-text-color: white;
-$post-session-splash-background-color: black;
-$post-session-splash-secondary-action-color: $light-text;
-
-$vr-interstitial-background-color: rgba(0, 0, 0, 0.9);
-$vr-interstitial-text-color: $light-text;
-
-$tile-button-tip-background-color: $darker-grey;
-$tile-button-tip-text-color: $light-text;
-$tile-button-icon-color: black;
-$tile-button-icon-hover-color: white;
-$tile-button-background-color: #ffffffde;
-$tile-inset-text: $dark-grey-text;
-$tile-selected-color: #eaeaea;
-$tile-title-color: black;
-$tile-subtitle-color: $dark-grey-text;
-$tile-subtitle-link-color: $dark-grey;
-$tile-subtext-color: $grey-text;
-$tile-background-color: $light-grey;
-$tile-alt-background-color: $lighter-grey;
-$tile-empty-text-color: grey;
-
-$overflow-tip-background-color: rgba(220, 220, 220, 0.5);
-$overflow-tip-icon-color: black;
-
-$icon-button-background-color: black;
-$icon-button-border-color: white;
+@import 'colors';
 
 %unselectable {
   -moz-user-select: none;
@@ -166,7 +13,7 @@ $icon-button-border-color: white;
 
 %glass-text {
   font-family: 'Open Sans', sans-serif;
-  color: $panel-text-color;
+  color: var(--panel-text-color);
 }
 
 %glass-icon {
@@ -175,7 +22,7 @@ $icon-button-border-color: white;
 }
 
 %rounded-border {
-  border: 1px solid $text-field-border-color;
+  border: 1px solid var(--text-field-border-color);
   box-sizing: border-box;
   border-radius: 10px;
 }
@@ -191,7 +38,7 @@ $icon-button-border-color: white;
 %input-field {
   @extend %rounded-border;
   @extend %default-font;
-  color: $text-field-text-color;
+  color: var(--text-field-text-color);
   font-size: 1.2em;
   background-color: transparent;
   line-height: 2.0em;
@@ -221,8 +68,8 @@ $icon-button-border-color: white;
     padding: 18px 48px;
   }
 
-  background: $action-color;
-  color: $action-text;
+  background: var(--action-color);
+  color: var(--action-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -278,9 +125,9 @@ $icon-button-border-color: white;
   border-radius: 28px;
   padding: 0px 18px;
 
-  background: $action-color;
+  background: var(--action-color);
   font-size: 1em;
-  color: $action-text;
+  color: var(--action-text);
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -296,39 +143,39 @@ $icon-button-border-color: white;
 
 %action-button-secondary {
   @extend %action-button;
-  background-color: $action-button-secondary-background;
-  color: $action-color;
+  background-color: var(--action-button-secondary-background);
+  color: var(--action-color);
 }
 
 %action-button-secondary-modal {
   @extend %action-button;
-  background-color: $panel-action-button-secondary-background;
-  color: $action-color;
+  background-color: var(--panel-action-button-secondary-background);
+  color: var(--action-color);
 }
 
 %action-button-selected {
-  background: $action-button-secondary-background;
-  color: $action-color;
+  background: var(--action-button-secondary-background);
+  color: var(--action-color);
 }
 
 %bottom-action-button {
   @extend %bottom-button;
-  background: $action-color;
+  background: var(--action-color);
 }
 
 %spoke-action-button {
   @extend %action-button;
-  background-color: $spoke-action-color;
+  background-color: var(--spoke-action-color);
 }
 
 %discord-action-button {
   @extend %action-button;
-  background-color: $discord-action-color;
+  background-color: var(--discord-action-color);
 }
 
 %twitter-action-button {
   @extend %action-button;
-  background-color: $twitter-action-color;
+  background-color: var(--twitter-action-color);
 }
 
 %top-title {
@@ -358,15 +205,15 @@ $icon-button-border-color: white;
   -webkit-appearance: none;
   width: 2em;
   height: 2em;
-  border: 1px solid $text-field-border-color;
-  background-color: $text-field-background-color;
+  border: 1px solid var(--text-field-border-color);
+  background-color: var(--text-field-background-color);
   border-radius: 6px;
   vertical-align: sub;
   margin: 0 0.7em
 }
 
 %checkbox-checked {
-  outline: 9px solid $action-color;
+  outline: 9px solid var(--action-color);
   outline-offset: -15px;
 }
 
@@ -382,7 +229,7 @@ $icon-button-border-color: white;
   display: block;
   background: none;
   border: none;
-  color: $panel-text-color;
+  color: var(--panel-text-color);
   cursor: pointer;
   font-size: 0.8em;
   outline-style: none;
@@ -401,10 +248,10 @@ $icon-button-border-color: white;
 }
 
 %fa-icon-button-icon {
-  background: $icon-button-background-color;
+  background: var(--icon-button-background-color);
   width: 40px !important;
   height: 40px;
-  border: 3px solid $icon-button-border-color;
+  border: 3px solid var(--icon-button-border-color);
   border-radius: 40px;
   display: inline-block;
   font-size: 22px;
@@ -433,8 +280,8 @@ $icon-button-border-color: white;
   pointer-events: auto;
   z-index: 2;
   font-size: 0.8em;
-  color: $notice-text-color;
+  color: var(--notice-text-color);
   padding: 12px 24px;
-  background-color: $notice-background-color;
+  background-color: var(--notice-background-color);
   text-align: center;
 }

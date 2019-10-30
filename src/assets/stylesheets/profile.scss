@@ -11,7 +11,7 @@
   display: flex;
   pointer-events: auto;
   z-index: 9;
-  background-color: $full-panel-background-color;
+  background-color: var(--full-panel-background-color);
 
 
   a {
@@ -56,7 +56,7 @@
 
       a {
         margin: 0px 12px;
-        color: $tile-inset-text;
+        color: var(--tile-inset-text);
       }
     }
   }
@@ -64,7 +64,7 @@
   :local(.title) {
     @extend %top-title;
     width: 100%;
-    color: $panel-text-color;
+    color: var(--panel-text-color);
     text-align: center;
   }
 
@@ -76,11 +76,11 @@
   :local(.form-field-text) {
     @extend %default-font;
 
-    border: 1px solid $text-field-border-color;
-    background-color: $text-field-background-color;
+    border: 1px solid var(--text-field-border-color);
+    background-color: var(--text-field-background-color);
     border-radius: 10px;
     font-size: 1.1em;
-    color: $text-field-text-color;
+    color: var(--text-field-text-color);
     outline: none;
     line-height: 2.0em;
     padding-left: 1.25em;
@@ -122,17 +122,17 @@
     position: absolute;
     top: 15px;
     right: 20px;
-    color: $tile-button-icon-color;
+    color: var(--tile-button-icon-color);
     font-size: 12pt;
-    background: $tile-button-background-color;
+    background: var(--tile-button-background-color);
     border-radius: 30px;
     width: 30px;
     height: 30px;
     text-align: center;
     line-height: 30px;
     &:hover {
-      background: $action-color;
-      color: $tile-button-icon-hover-color;
+      background: var(--action-color);
+      color: var(--tile-button-icon-hover-color);
     }
   }
 

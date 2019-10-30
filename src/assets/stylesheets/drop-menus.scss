@@ -17,12 +17,12 @@
   height: 0; 
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  border-bottom: 5px solid $menu-attach-point-color;
+  border-bottom: 5px solid var(--menu-attach-point-color);
   position: absolute;
 }
 
 :local(.contents) {
-  background-color: $menu-background-color;
+  background-color: var(--menu-background-color);
   border-radius: 12px;
   padding: 18px;
   min-width: 260px;
@@ -57,15 +57,15 @@
   margin: 0px 0;
   padding: 0px 16px;
   &:hover{
-    background-color: $action-color-highlight;
-    color: $action-text;
+    background-color: var(--action-color-highlight);
+    color: var(--action-text);
   }
 }
 
 :local(.row-header) {
   margin-top: 18px;
   margin-bottom: 4px;
-  color: $menu-header-text-color;
+  color: var(--menu-header-text-color);
   font-weight: normal;
   text-transform: uppercase;
   font-size: 0.8em;
@@ -83,13 +83,13 @@
   overflow: hidden;
 
   a {
-    color: $menu-link-color;
-    text-decoration-color: $menu-link-underline-color;
+    color: var(--menu-link-color);
+    text-decoration-color: var(--menu-link-underline-color);
   }
 
   :local(.list-item-link) {
     text-decoration: underline;
-    text-decoration-color: $menu-link-underline-color;
+    text-decoration-color: var(--menu-link-underline-color);
     cursor: pointer;
   }
 }

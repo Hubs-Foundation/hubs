@@ -7,8 +7,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: $text-field-background-color;
-  border: 1px solid $text-field-border-color;
+  background-color: var(--text-field-background-color);
+  border: 1px solid var(--text-field-border-color);
   border-radius: 16px;
 }
 
@@ -30,7 +30,7 @@
   overflow: hidden;
   resize: none;
   background-color: transparent;
-  color: $text-field-text-color;
+  color: var(--text-field-text-color);
   padding: 8px 1.25em;
   line-height: 28px;
   font-size: 1.1em;
@@ -41,18 +41,18 @@
 }
 
 :local(.message-entry-input)::placeholder{
-  color: $text-field-placeholder-color;
+  color: var(--text-field-placeholder-color);
   font-weight: 300;
   font-style: italic;
 }
 
 :local(.message-entry-button) {
-  color: $action-color;
+  color: var(--action-color);
   appearance: none;
   -moz-appearance: none;
   -webkit-appearance: none;
   outline-style: none;
-  background-color: $text-field-background-color;
+  background-color: var(--text-field-background-color);
   min-width: 40px;
   height: 100%;
   bottom: 0px;
@@ -63,16 +63,16 @@
 }
 
 :local(.message-entry-button):disabled {
-  color: $text-field-disabled-color;
+  color: var(--text-field-disabled-color);
   background-color: transparent;
 }
 
 :local(.message-entry-button-in-room) {
-  color: $overlay-text-field-widget-color;
+  color: var(--overlay-text-field-widget-color);
 }
 
 :local(.message-entry-button-in-room):hover {
-  color: $action-color;
+  color: var(--action-color);
 }
 
 :local(.message-entry-upload) {
@@ -95,13 +95,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: $overlay-text-field-background-color;
+  background-color: var(--overlay-text-field-background-color);
   border-radius: 16px;
   pointer-events: auto;
   transition: opacity 0.15s linear;
 
   :local(.message-entry-input-in-room) {
-    color: $overlay-text-field-text-color;
+    color: var(--overlay-text-field-text-color);
     padding: 8px 0px;
     margin-left: 4px;
   }
@@ -136,7 +136,7 @@
 
 :local(.message-entry-in-room):focus-within, :local(.message-entry-in-room):hover {
   transition: background-color 0.15s linear;
-  background-color: $overlay-text-field-focused-background-color;
+  background-color: var(--overlay-text-field-focused-background-color);
 
   :local(.message-entry-button-in-room) {
     border: 0;

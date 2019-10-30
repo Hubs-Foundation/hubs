@@ -1,3 +1,4 @@
+@import 'root-vars';
 @import 'shared';
 
 body {
@@ -47,12 +48,12 @@ body {
   :local(.title) {
     @extend %top-title;
     width: 100%;
-    color: $panel-text-color;
+    color: var(--panel-text-color);
     text-align: center;
   }
 
   :local(.selected-message) {
-    color: $panel-subtext-color;
+    color: var(--panel-subtext-color);
     margin-top: 16px;
     height: 48px;
   }
@@ -68,7 +69,7 @@ body {
     min-height: max-content;
     margin-top: 16px;
     &:disabled {
-      background-color: $action-color-disabled;
+      background-color: var(--action-color-disabled);
       cursor: default;
     }
   }
@@ -85,29 +86,29 @@ body {
   :local(.copy-tip) {
     position: absolute;
     padding: 5px 20px;
-    background: $tile-button-tip-background-color;
+    background: var(--tile-button-tip-background-color);
     top: 5px;
     right: 10px;
     border-radius: 20px;
     height: 20px;
     line-height: 20px;
-    color: $tile-button-tip-text-color;
+    color: var(--tile-button-tip-text-color);
   }
 
   :local(.edit-avatar) {
     position: absolute;
     top: 6px;
     right: 7px;
-    color: $tile-button-icon-color;
-    background: $tile-button-background-color;
+    color: var(--tile-button-icon-color);
+    background: var(--tile-button-background-color);
     border-radius: 30px;
     width: 30px;
     height: 30px;
     text-align: center;
     line-height: 30px;
     &:hover {
-      background: $action-color;
-      color: $tile-button-icon-hover-color;
+      background: var(--action-color);
+      color: var(--tile-button-icon-hover-color);
     }
   }
 }

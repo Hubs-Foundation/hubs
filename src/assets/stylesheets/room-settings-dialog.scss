@@ -36,7 +36,7 @@
 }
 
 :local(.permission-disabled) {
-  color: $panel-widget-disabled-color;
+  color: var(--panel-widget-disabled-color);
 }
 
 :local(.permission-disabled input) {

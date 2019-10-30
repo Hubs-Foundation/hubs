@@ -17,7 +17,7 @@
 
 :local(.collapse-button) {
   @extend %fa-icon-button;
-  color: $panel-widget-color;
+  color: var(--panel-widget-color);
   margin: 0 10px;
 
   i {
@@ -119,7 +119,7 @@
   }
 
   button:disabled {
-    color: $panel-widget-disabled-color;
+    color: var(--panel-widget-disabled-color);
 
     :local(.button-icon) {
       filter: saturate(0);
@@ -132,6 +132,6 @@
 }
 
 :local(.primary-action-button) {
-  background: $action-color !important;
-  color: $action-text !important;
+  background: var(--action-color) !important;
+  color: var(--action-text) !important;
 }
