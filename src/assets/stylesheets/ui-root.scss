@@ -118,7 +118,7 @@ body.vr-mode {
   border: 0;
   width: 43px;
   height: 43px;
-  color: var(--overlay-button-icon-color);
+  color: var(--unfavorited-color);
 
   @media (max-width: 1080px) {
     display: none;
