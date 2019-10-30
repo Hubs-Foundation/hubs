@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
+
+import configs from "../utils/configs";
 import styles from "../assets/stylesheets/scene-ui.scss";
 import hubLogo from "../assets/images/hub-preview-white.png";
 import spokeLogo from "../assets/images/spoke_logo_black.png";
@@ -137,7 +139,7 @@ class SceneUI extends Component {
             <div className={styles.mainPanel}>
               <WithHoverSound>
                 <a href="/" className={styles.logo}>
-                  <img src={hubLogo} />
+                  <img src={configs.image("logo", hubLogo)} />
                 </a>
               </WithHoverSound>
               <div className={styles.logoTagline}>
@@ -172,12 +174,14 @@ class SceneUI extends Component {
             <div className={styles.name}>{this.props.sceneName}</div>
             <div className={styles.attribution}>{attributions}</div>
           </div>
-          <div className={styles.spoke}>
-            <div className={styles.madeWith}>made with</div>
-            <a href="/spoke">
-              <img src={spokeLogo} />
-            </a>
-          </div>
+          {!configs.feature("disable_spoke") && (
+            <div className={styles.spoke}>
+              <div className={styles.madeWith}>made with</div>
+              <a href="/spoke">
+                <img src={spokeLogo} />
+              </a>
+            </div>
+          )}
           {this.state.showCustomRoomDialog && (
             <CreateRoomDialog
               includeScenePrompt={false}

@@ -1,5 +1,4 @@
 // We should technically be able to just include three here, but our dependancies are tangled such that not having aframe is a bit difficult
-import "./utils/configs";
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "aframe";
@@ -9,9 +8,10 @@ import ReactDOM from "react-dom";
 import React from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
-
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
+
+import configs from "./utils/configs";
 import { lang, messages } from "./utils/i18n";
 addLocaleData([...en]);
 
@@ -123,7 +123,7 @@ class AvatarUI extends React.Component {
             </button>
           )}
         </div>
-        <img className={styles.logo} src={hubLogo} />
+        <img className={styles.logo} src={configs.image("logo", hubLogo)} />
       </form>
     );
   }
