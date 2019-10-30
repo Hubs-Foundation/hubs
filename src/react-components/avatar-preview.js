@@ -62,7 +62,8 @@ function fitBoxInFrustum(camera, box, center, margin = DEFAULT_MARGIN) {
 class AvatarPreview extends Component {
   static propTypes = {
     avatarGltfUrl: PropTypes.string,
-    className: PropTypes.string
+    className: PropTypes.string,
+    onGltfLoaded: PropTypes.func
   };
   constructor(props) {
     super(props);
@@ -187,13 +188,13 @@ class AvatarPreview extends Component {
     this.applyMaps(oldProps, this.props);
   };
 
-  loadCurrentAvatarGltfUrl() {
+  async loadCurrentAvatarGltfUrl() {
     const newLoadId = ++this.loadId;
-    return this.loadPreviewAvatar(this.props.avatarGltfUrl).then(avatar => {
-      // If we had started loading another avatar while we were loading this one, throw this one away
-      if (newLoadId !== this.loadId) return;
-      this.setAvatar(avatar);
-    });
+    const gltf = await this.loadPreviewAvatar(this.props.avatarGltfUrl);
+    // If we had started loading another avatar while we were loading this one, throw this one away
+    if (newLoadId !== this.loadId) return;
+    if (gltf && this.props.onGltfLoaded) this.props.onGltfLoaded(gltf);
+    this.setAvatar(gltf.scene);
   }
 
   applyMaps(oldProps, newProps) {
@@ -267,7 +268,7 @@ class AvatarPreview extends Component {
       this.originalMaps = {};
     }
 
-    return gltf.scene;
+    return gltf;
   };
 
   applyMapToPreview = (name, image) => {
