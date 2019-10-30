@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import configs from "../utils/configs";
 import { SCHEMA } from "../storage/store";
 import styles from "../assets/stylesheets/profile.scss";
-import hubLogo from "../assets/images/hub-preview-white.png";
+import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import { WithHoverSound } from "./wrap-with-audio";
 import { fetchAvatar } from "../utils/avatar-utils";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";

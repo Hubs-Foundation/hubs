@@ -25,7 +25,7 @@ import AvatarPreview from "./react-components/avatar-preview";
 import { fetchAvatar, remixAvatar } from "./utils/avatar-utils";
 
 import styles from "./assets/stylesheets/avatar.scss";
-import hubLogo from "./assets/images/hub-preview-white.png";
+import hubLogo from "./assets/images/hub-preview-light-no-shadow.png";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";

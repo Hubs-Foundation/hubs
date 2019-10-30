@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 
 import configs from "../utils/configs";
-import hubLogo from "../assets/images/hub-preview-white.png";
+import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import styles from "../assets/stylesheets/preload-overlay.scss";
 
 const isMobile = AFRAME.utils.device.isMobile();

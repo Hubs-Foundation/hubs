@@ -21,6 +21,7 @@ body {
   :local(.logo) {
     width: 150px;
     margin-bottom: 22px;
+    filter: drop-shadow(0 0 2px #888);
 
     @media (min-width: 500px) {
       position: absolute;
