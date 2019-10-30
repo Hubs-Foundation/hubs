@@ -13,6 +13,7 @@ export const PREFERENCE_LIST_ITEM_TYPE = {
   DROP_DOWN: 2,
   NUMBER_WITH_RANGE: 3
 };
+
 export class PreferenceListItem extends Component {
   static propTypes = {
     store: PropTypes.object,
@@ -21,7 +22,10 @@ export class PreferenceListItem extends Component {
     min: PropTypes.number,
     max: PropTypes.number,
     onChange: PropTypes.func,
-    options: PropTypes.array
+    options: PropTypes.array,
+    defaultNumber: PropTypes.number,
+    defaultString: PropTypes.string,
+    defaultBool: PropTypes.bool
   };
   state = {
     hovered: false,
@@ -44,11 +48,13 @@ export class PreferenceListItem extends Component {
 
   renderControls() {
     let options;
+    let storedPref;
     switch (this.props.prefType) {
       case PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX:
+        storedPref = this.props.store.state.preferences[this.props.storeKey];
         return (
           <CheckBox
-            checked={this.props.store.state.preferences[this.props.storeKey]}
+            checked={storedPref === undefined ? this.props.defaultBool : storedPref}
             onChange={() => {
               this.props.store.update({
                 preferences: { [this.props.storeKey]: !this.props.store.state.preferences[this.props.storeKey] }
@@ -58,8 +64,14 @@ export class PreferenceListItem extends Component {
         );
       case PREFERENCE_LIST_ITEM_TYPE.SELECT:
         options = this.props.options.map((o, i) => {
+          const opts = {};
+          const storedPref = this.props.store.state.preferences[this.props.storeKey];
+          if (o.value === storedPref || (storedPref === undefined && o.value === this.props.defaultString)) {
+            opts.selected = "selected";
+          }
+
           return (
-            <option key={`${this.props.storeKey}_${i}`} value={o.value}>
+            <option key={`${this.props.storeKey}_${i}`} value={o.value} {...opts}>
               {o.text}
             </option>
           );
@@ -89,7 +101,7 @@ export class PreferenceListItem extends Component {
           <NumberRangeSelector
             min={this.props.min}
             max={this.props.max}
-            currentValue={this.props.store.state.preferences[this.props.storeKey]}
+            currentValue={this.props.store.state.preferences[this.props.storeKey] || this.props.defaultNumber}
             onChange={(value, playSound) => {
               this.props.store.update({
                 preferences: { [this.props.storeKey]: value }
