@@ -6,7 +6,7 @@ import en from "react-intl/locale-data/en";
 
 import configs from "../utils/configs";
 import styles from "../assets/stylesheets/scene-ui.scss";
-import hubLogo from "../assets/images/hub-preview-white.png";
+import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import spokeLogo from "../assets/images/spoke_logo_black.png";
 import { createAndRedirectToNewHub } from "../utils/phoenix-utils";
 import { WithHoverSound } from "./wrap-with-audio";

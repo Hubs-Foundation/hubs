@@ -67,6 +67,7 @@
 :local(.logo) {
   width: 100%;
   display: block;
+  filter: drop-shadow(0 0 2px #888);
 
   img {
     width: 100%;
