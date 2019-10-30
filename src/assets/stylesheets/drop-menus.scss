@@ -10,6 +10,7 @@
 
   bottom: 0;
   z-index: 5;
+  color: var(--menu-text-color);
 }
 
 %attach-point {
@@ -81,13 +82,20 @@
   margin-right: 24px;
   max-width: 45vw;
   overflow: hidden;
+  color: var(--menu-text-color);
 
   a {
     color: var(--menu-link-color);
     text-decoration-color: var(--menu-link-underline-color);
   }
 
+  button {
+    color: var(--menu-text-color);
+    text-decoration-color: var(--menu-link-underline-color);
+  }
+
   :local(.list-item-link) {
+    color: var(--menu-link-color);
     text-decoration: underline;
     text-decoration-color: var(--menu-link-underline-color);
     cursor: pointer;

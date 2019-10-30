@@ -165,6 +165,7 @@
     height: 38px;
     min-height: 38px;
     border-bottom: 1px solid var(--panel-rule-color);
+    color: var(--panel-text-color);
     white-space: nowrap;
     padding-left: 12px;
     margin: 0 12px;
@@ -486,6 +487,10 @@
     @media (max-width: 801px) {
       width: 50px;
       height: 35px;
+    }
+
+    a {
+      color: var(--panel-widget-color);
     }
   }
 
