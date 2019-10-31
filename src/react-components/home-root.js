@@ -181,12 +181,16 @@ class HomeRoot extends Component {
             <div className={styles.headerContent}>
               <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
                 <div className={styles.links}>
-                  <a href="/whats-new">
-                    <FormattedMessage id="home.whats_new_link" />
-                  </a>
-                  <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
-                    <FormattedMessage id="home.source_link" />
-                  </a>
+                  {configs.feature("show_whats_new_link") && (
+                    <a href="/whats-new">
+                      <FormattedMessage id="home.whats_new_link" />
+                    </a>
+                  )}
+                  {configs.feature("show_source_link") && (
+                    <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
+                      <FormattedMessage id="home.source_link" />
+                    </a>
+                  )}
                   {configs.feature("show_community_link") && (
                     <a href={configs.link("community", "https://discord.gg/wHmY4nd")} rel="noreferrer noopener">
                       <FormattedMessage id="home.community_link" />
@@ -253,18 +257,20 @@ class HomeRoot extends Component {
                       </a>
                     </div>
 
-                    <div className={styles.secondaryLink}>
-                      <div>
-                        <FormattedMessage id="home.add_to_discord_1" />
+                    {configs.feature("show_discord_bot_link") && (
+                      <div className={styles.secondaryLink}>
+                        <div>
+                          <FormattedMessage id="home.add_to_discord_1" />
+                        </div>
+                        <img src={discordLogoSmall} />
+                        <a href="/discord">
+                          <FormattedMessage id="home.add_to_discord_2" />
+                        </a>
+                        <div>
+                          <FormattedMessage id="home.add_to_discord_3" />
+                        </div>
                       </div>
-                      <img src={discordLogoSmall} />
-                      <a href="/discord">
-                        <FormattedMessage id="home.add_to_discord_2" />
-                      </a>
-                      <div>
-                        <FormattedMessage id="home.add_to_discord_3" />
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -282,14 +288,16 @@ class HomeRoot extends Component {
                       <FormattedMessage id="home.join_us" />
                     </a>
                   )}
-                  <a
-                    className={styles.link}
-                    rel="noopener noreferrer"
-                    href="#"
-                    onClick={this.onLinkClicked(this.showUpdatesDialog)}
-                  >
-                    <FormattedMessage id="home.get_updates" />
-                  </a>
+                  {configs.feature("show_newsletter_dialog") && (
+                    <a
+                      className={styles.link}
+                      rel="noopener noreferrer"
+                      href="#"
+                      onClick={this.onLinkClicked(this.showUpdatesDialog)}
+                    >
+                      <FormattedMessage id="home.get_updates" />
+                    </a>
+                  )}
                   <a
                     className={styles.link}
                     rel="noopener noreferrer"

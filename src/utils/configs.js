@@ -36,7 +36,10 @@ if (window.APP_CONFIG) {
 }
 
 configs.feature = featureName => {
-  return configs.APP_CONFIG && configs.APP_CONFIG.features && configs.APP_CONFIG.features[featureName];
+  const isLocalDevelopment = process.env.NODE_ENV === "development";
+  const enableAll = isLocalDevelopment || process.env.ENABLE_ALL_FEATURES;
+  const features = configs.APP_CONFIG && configs.APP_CONFIG.features;
+  return enableAll || (features && features[featureName]);
 };
 
 configs.image = (imageName, defaultImage, cssUrl) => {
