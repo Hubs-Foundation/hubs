@@ -106,6 +106,14 @@
       position:relative;
       width: 111px;
       height: 111px;
+      color: var(--panel-widget-color);
+      
+      &__talking {
+        position: absolute;
+        top: 0;
+        left: 0;
+        color: var(--notice-background-color);
+      }
     }
 
     &__icon_clickable {
@@ -113,6 +121,14 @@
       width: 111px;
       height: 111px;
       cursor: pointer;
+
+      &__pending {
+        color: var(--action-color);
+      }
+
+      &__playing {
+        color: var(--notice-background-color);
+      }
     }
 
     &__test_label {
