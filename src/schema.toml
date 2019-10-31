@@ -1,14 +1,14 @@
 # App config schema
-translations.en."home.hero_blurb" = { "category" = "translations", "type" = "string", "name" = "Hero Blurb", "description" = "Blurb displayed on the front page." }
-features.enable_spoke = { "category" = "features", "type" = "boolean", "default" = "false", "name" = "Enable Spoke", "description" = "Show links to Spoke." }
-features.show_terms = { "category" = "features", "type" = "boolean", "default" = "false", "name" = "Show Terms of Use", "description" = "Show links to the terms of use." }
-features.show_privacy = { "category" = "features", "type" = "boolean", "default" = "false", "name" = "Show Privacy Notice", "description" = "Show links to the privacy notice." }
-features.show_controls_link = { "category" = "features", "type" = "boolean", "default" = "false", "name" = "Show Controls Links", "description" = "Show links to controls documentation." }
-features.show_features_link = { "category" = "features", "type" = "boolean", "default" = "false", "name" = "Show Features Links", "description" = "Show links to features documentation." }
-images.logo = { "category" = "images", "type" = "file", "name" = "App Logo", "description" = "Logo used across the app." }
-images.home_background = { "category" = "images", "type" = "file" }
-colors.action-color = { "category" = "colors", "type" = "color", "name" = "Primary Color", "description" = "Used for call to action buttons and accents." }
-links.terms_of_use = { "category" = "links", "type" = "string", "name" = "Terms of Use", "description" = "Link to your terms of use page."}
-links.privacy_notice = { "category" = "links", "type" = "string", "name" = "Privacy Notice", "description" = "Link to your privacy page."}
-links.controls = { "category" = "links", "type" = "string", "name" = "Controls Documentation", "description" = "Link to controls documentation."}
-links.features = { "category" = "links", "type" = "string", "name" = "Features Documentation", "description" = "Link to features documentation."}
+translations.en."home.hero_blurb" = { category = "translations", type = "string", name = "Hero Blurb", description = "Blurb displayed on the front page." }
+features.enable_spoke = { category = "features", type = "boolean", default = "false", name = "Enable Spoke", description = "Show links to Spoke." }
+features.show_terms = { category = "features", type = "boolean", default = "false", name = "Show Terms of Use", description = "Show links to the terms of use." }
+features.show_privacy = { category = "features", type = "boolean", default = "false", name = "Show Privacy Notice", description = "Show links to the privacy notice." }
+features.show_controls_link = { category = "features", type = "boolean", default = "false", name = "Show Controls Links", description = "Show links to controls documentation." }
+features.show_features_link = { category = "features", type = "boolean", default = "false", name = "Show Features Links", description = "Show links to features documentation." }
+images.logo = { category = "images", type = "file", name = "App Logo", description = "Logo used across the app." }
+images.home_background = { category = "images", type = "file" }
+colors.action-color = { category = "colors", type = "color", name = "Primary Color", description = "Used for call to action buttons and accents." }
+links.terms_of_use = { category = "links", type = "string", name = "Terms of Use", description = "Link to your terms of use page."}
+links.privacy_notice = { category = "links", type = "string", name = "Privacy Notice", description = "Link to your privacy page."}
+links.controls = { category = "links", type = "string", name = "Controls Documentation", description = "Link to controls documentation."}
+links.features = { category = "links", type = "string", name = "Features Documentation", description = "Link to features documentation."}
