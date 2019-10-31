@@ -1,6 +1,6 @@
 import configs from "./configs";
 
-const schemaCategories = ["api_keys", "content", "email", "advanced", "translations", "features", "images", "colors"];
+const schemaCategories = ["api_keys", "content", "email", "advanced", "translations", "features", "images", "colors", "links"];
 const serviceNames = configs.CONFIGURABLE_SERVICES.split(",");
 let currentAuthToken = null;
 
@@ -26,6 +26,8 @@ function getCategoryDisplayName(category) {
       return "Images";
     case "colors":
       return "Colors";
+    case "links":
+      return "Links";
     default:
       return null;
   }
@@ -49,6 +51,8 @@ function getCategoryDescription(category) {
       return "Replace images in the app.";
     case "colors":
       return "Replace colors in the app.";
+    case "links":
+      return "Replace links in the app.";
     default:
       return null;
   }

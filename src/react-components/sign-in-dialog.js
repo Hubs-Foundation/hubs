@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 
+import configs from "../utils/configs";
 import styles from "../assets/stylesheets/sign-in-dialog.scss";
 import DialogContainer from "./dialog-container";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
@@ -63,16 +64,32 @@ export default class SignInDialog extends Component {
             onChange={e => this.setState({ email: e.target.value })}
             className={styles.emailField}
           />
-          <p className={styles.terms}>
-            By proceeding, you agree to the{" "}
-            <a rel="noopener noreferrer" target="_blank" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
-              terms of use
-            </a>{" "}
-            and{" "}
-            <a rel="noopener noreferrer" target="_blank" href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md">
-              privacy notice
-            </a>.
-          </p>
+          {(configs.feature("show_terms") || configs.feature("show_privacy")) && (
+            <p className={styles.terms}>
+              By proceeding, you agree to the{" "}
+              {configs.feature("show_terms") && (
+                <>
+                  <a
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    href={configs.links("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+                  >
+                    terms of use
+                  </a>{" "}
+                </>
+              )}
+              {configs.feature("show_terms") && configs.feature("show_privacy") && "and "}
+              {configs.feature("show_privacy") && (
+                <a
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  href={configs.links("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+                >
+                  privacy notice
+                </a>
+              )}.
+            </p>
+          )}
           <button type="submit" className={styles.nextButton}>
             next
           </button>

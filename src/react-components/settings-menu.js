@@ -2,8 +2,6 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import classNames from "classnames";
-import StateLink from "./state-link.js";
-import { resetTips } from "../systems/tips";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
@@ -13,6 +11,10 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
+
+import configs from "../utils/configs";
+import StateLink from "./state-link.js";
+import { resetTips } from "../systems/tips";
 import { showFullScreenIfAvailable } from "../utils/fullscreen";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 
@@ -295,22 +297,26 @@ export default class SettingsMenu extends Component {
               <a className={styles.bottomLink} href="/?report" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.report" />
               </a>
-              <a
-                className={styles.bottomLink}
-                href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                <FormattedMessage id="settings.terms" />
-              </a>
-              <a
-                className={styles.bottomLink}
-                href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                <FormattedMessage id="settings.privacy" />
-              </a>
+              {configs.feature("show_terms") && (
+                <a
+                  className={styles.bottomLink}
+                  href={configs.links("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <FormattedMessage id="settings.terms" />
+                </a>
+              )}
+              {configs.feature("show_privacy") && (
+                <a
+                  className={styles.bottomLink}
+                  href={configs.links("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <FormattedMessage id="settings.privacy" />
+                </a>
+              )}
             </div>
           </div>
         </div>

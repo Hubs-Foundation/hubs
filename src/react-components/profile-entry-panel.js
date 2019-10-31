@@ -9,7 +9,6 @@ import configs from "../utils/configs";
 import { SCHEMA } from "../storage/store";
 import styles from "../assets/stylesheets/profile.scss";
 import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
-import { WithHoverSound } from "./wrap-with-audio";
 import { fetchAvatar } from "../utils/avatar-utils";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { replaceHistoryState } from "../utils/history";
@@ -193,29 +192,27 @@ class ProfileEntryPanel extends Component {
               </div>
             )}
 
-            <WithHoverSound>
-              <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
-            </WithHoverSound>
+            <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
             <div className={styles.links}>
-              <WithHoverSound>
+              {configs.feature("show_terms") && (
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+                  href={configs.links("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
                 >
                   <FormattedMessage id="profile.terms_of_use" />
                 </a>
-              </WithHoverSound>
+              )}
 
-              <WithHoverSound>
+              {configs.feature("show_privacy") && (
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+                  href={configs.links("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
                 >
                   <FormattedMessage id="profile.privacy_notice" />
                 </a>
-              </WithHoverSound>
+              )}
             </div>
           </div>
         </form>

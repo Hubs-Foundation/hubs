@@ -294,22 +294,26 @@ class HomeRoot extends Component {
                   >
                     <FormattedMessage id="home.report_issue" />
                   </a>
-                  <a
-                    className={styles.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
-                  >
-                    <FormattedMessage id="home.terms_of_use" />
-                  </a>
-                  <a
-                    className={styles.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
-                  >
-                    <FormattedMessage id="home.privacy_notice" />
-                  </a>
+                  {configs.feature("show_terms") && (
+                    <a
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={configs.links("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+                    >
+                      <FormattedMessage id="home.terms_of_use" />
+                    </a>
+                  )}
+                  {configs.feature("show_privacy") && (
+                    <a
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={configs.links("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+                    >
+                      <FormattedMessage id="home.privacy_notice" />
+                    </a>
+                  )}
 
                   <img className={styles.mozLogo} src={mozLogo} />
                 </div>

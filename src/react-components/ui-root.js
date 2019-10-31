@@ -7,6 +7,7 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import screenfull from "screenfull";
 
+import configs from "../utils/configs";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
@@ -36,7 +37,6 @@ import MediaBrowser from "./media-browser";
 import CreateObjectDialog from "./create-object-dialog.js";
 import ChangeSceneDialog from "./change-scene-dialog.js";
 import AvatarUrlDialog from "./avatar-url-dialog.js";
-import HelpDialog from "./help-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
 import LinkDialog from "./link-dialog.js";
@@ -917,22 +917,24 @@ class UIRoot extends Component {
       subtitle = (
         <div>
           Sorry, this room is no longer available.
-          <p />A room may be closed if we receive reports that it violates our{" "}
-          <WithHoverSound>
-            <a target="_blank" rel="noreferrer noopener" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
-              Terms of Use
-            </a>
-          </WithHoverSound>
-          .<br />
-          If you have questions, contact us at{" "}
-          <WithHoverSound>
-            <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>
-          </WithHoverSound>
+          <p />
+          {configs.feature("show_terms") && (
+            <>
+              A room may be closed if we receive reports that it violates our{" "}
+              <a
+                target="_blank"
+                rel="noreferrer noopener"
+                href={configs.links("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+              >
+                Terms of Use
+              </a>
+              .<br />
+            </>
+          )}
+          If you have questions, contact us at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>
           .<p />
           If you&apos;d like to run your own server, hubs&apos;s source code is available on{" "}
-          <WithHoverSound>
-            <a href="https://github.com/mozilla/hubs">GitHub</a>
-          </WithHoverSound>
+          <a href="https://github.com/mozilla/hubs">GitHub</a>
           .
         </div>
       );
@@ -1623,12 +1625,6 @@ class UIRoot extends Component {
               stateValue="close_room"
               history={this.props.history}
               render={() => this.renderDialog(CloseRoomDialog, { onConfirm: () => this.props.hubChannel.closeHub() })}
-            />
-            <StateRoute
-              stateKey="modal"
-              stateValue="help"
-              history={this.props.history}
-              render={() => this.renderDialog(HelpDialog)}
             />
             <StateRoute
               stateKey="modal"
