@@ -236,7 +236,7 @@
     :local(.facet) {
       @extend %action-button;
       background-color: transparent;
-      color: var(--action-color);
+      color: var(--action-label-color);
       border: 0;
       border-radius: 12px;
       font-weight: normal;
@@ -504,7 +504,7 @@
 
     :local(.create-button) {
       font-weight: bold;
-      color: var(--action-color);
+      color: var(--action-label-color);
 
       @media (min-width: 800px) {
         margin-right: 12px;
@@ -514,7 +514,7 @@
     :local(.create-link) {
       font-weight: bold;
       font-size: 0.8em;
-      color: var(--action-color);
+      color: var(--action-label-color);
 
       @media (max-width: 801px) {
         display: none;

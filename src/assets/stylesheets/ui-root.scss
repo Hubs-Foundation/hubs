@@ -228,7 +228,7 @@ body.vr-mode {
 }
 
 :local(.presence-info-selected) {
-  color: var(--action-color);
+  color: var(--action-label-color);
 }
 
 :local(.corner-button) {
@@ -258,7 +258,7 @@ body.vr-mode {
 }
 
 :local(.corner-button-selected) {
-  color: var(--action-color);
+  color: var(--action-label-color);
 }
 
 :local(.leave-button) {

@@ -39,7 +39,7 @@
 }
 
 :local(.collapse-button):hover {
-  color: var(--action-color);
+  color: var(--action-label-color);
 }
 
 :local(.entry-button) {
@@ -89,15 +89,15 @@
   @extend %action-button-secondary;
 
   :local(.label) {
-    color: var(--action-color);
+    color: var(--action-label-color);
   }
 
   :local(.icon) {
-    color: var(--action-color);
+    color: var(--action-label-color);
   }
 
   :local(.subtitle) {
-    color: var(--action-color);
+    color: var(--action-label-color);
   }
 }
 
@@ -254,7 +254,7 @@
     margin-bottom: 10px;
     font-size: 0.8em;
     cursor: pointer;
-    color: var(--action-color);
+    color: var(--action-label-color);
     text-decoration: underline;
   }
 }

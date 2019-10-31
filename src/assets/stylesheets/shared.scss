@@ -144,18 +144,18 @@
 %action-button-secondary {
   @extend %action-button;
   background-color: var(--action-button-secondary-background);
-  color: var(--action-color);
+  color: var(--action-label-color);
 }
 
 %action-button-secondary-modal {
   @extend %action-button;
   background-color: var(--panel-action-button-secondary-background);
-  color: var(--action-color);
+  color: var(--action-label-color);
 }
 
 %action-button-selected {
   background: var(--action-button-secondary-background);
-  color: var(--action-color);
+  color: var(--action-label-color);
 }
 
 %bottom-action-button {

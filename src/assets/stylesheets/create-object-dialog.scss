@@ -41,11 +41,11 @@
 }
 
 :local(.upload-icon) {
-  color: var(--action-color);
+  color: var(--action-label-color);
   cursor: pointer;
 
   &:hover {
-    color: var(--action-color-highlight);
+    color: var(--action-label-color-highlight);
   }
 }
 

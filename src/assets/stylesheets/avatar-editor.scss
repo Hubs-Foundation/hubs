@@ -107,7 +107,7 @@
       }
       a {
         margin-left: 10px;
-        color: var(--action-color);
+        color: var(--action-label-color);
       }
     }
 
@@ -246,7 +246,7 @@
     a {
       cursor: pointer;
       text-decoration: underline;
-      color: var(--action-color);
+      color: var(--action-label-color);
     }
   }
 

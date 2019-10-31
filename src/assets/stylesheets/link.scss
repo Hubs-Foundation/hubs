@@ -155,7 +155,7 @@ a {
   @extend %big-icon-button;
   @extend %default-font;
   font-weight: bold;
-  color: var(--action-color);
+  color: var(--action-label-color);
   font-size: 1.4em;
   border-radius: 128px;
   box-shadow: 0px 2px 12px #ccc;
