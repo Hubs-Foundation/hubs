@@ -924,7 +924,7 @@ class UIRoot extends Component {
               <a
                 target="_blank"
                 rel="noreferrer noopener"
-                href={configs.links("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+                href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
               >
                 Terms of Use
               </a>

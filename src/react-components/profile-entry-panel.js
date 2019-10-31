@@ -198,7 +198,7 @@ class ProfileEntryPanel extends Component {
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={configs.links("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+                  href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
                 >
                   <FormattedMessage id="profile.terms_of_use" />
                 </a>
@@ -208,7 +208,7 @@ class ProfileEntryPanel extends Component {
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={configs.links("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+                  href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
                 >
                   <FormattedMessage id="profile.privacy_notice" />
                 </a>

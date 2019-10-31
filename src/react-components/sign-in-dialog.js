@@ -72,7 +72,7 @@ export default class SignInDialog extends Component {
                   <a
                     rel="noopener noreferrer"
                     target="_blank"
-                    href={configs.links("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+                    href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
                   >
                     terms of use
                   </a>{" "}
@@ -83,7 +83,7 @@ export default class SignInDialog extends Component {
                 <a
                   rel="noopener noreferrer"
                   target="_blank"
-                  href={configs.links("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+                  href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
                 >
                   privacy notice
                 </a>

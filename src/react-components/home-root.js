@@ -190,7 +190,7 @@ class HomeRoot extends Component {
                   <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
                     <FormattedMessage id="home.community_link" />
                   </a>
-                  {!configs.feature("disable_spoke") && (
+                  {configs.feature("enable_spoke") && (
                     <a href="/spoke" rel="noreferrer noopener">
                       Spoke
                     </a>
@@ -299,7 +299,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      href={configs.links("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+                      href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
                     >
                       <FormattedMessage id="home.terms_of_use" />
                     </a>
@@ -309,7 +309,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      href={configs.links("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+                      href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
                     >
                       <FormattedMessage id="home.privacy_notice" />
                     </a>

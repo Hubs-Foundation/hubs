@@ -44,7 +44,7 @@ configs.image = (imageName, defaultImage, cssUrl) => {
   return url && cssUrl ? `url(${url})` : url;
 };
 
-configs.links = (linkName, defaultValue) => {
+configs.link = (linkName, defaultValue) => {
   return (configs.APP_CONFIG && configs.APP_CONFIG.links && configs.APP_CONFIG.links[linkName]) || defaultValue;
 };
 

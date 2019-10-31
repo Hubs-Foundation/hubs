@@ -174,7 +174,7 @@ class SceneUI extends Component {
             <div className={styles.name}>{this.props.sceneName}</div>
             <div className={styles.attribution}>{attributions}</div>
           </div>
-          {!configs.feature("disable_spoke") && (
+          {configs.feature("enable_spoke") && (
             <div className={styles.spoke}>
               <div className={styles.madeWith}>made with</div>
               <a href="/spoke">
