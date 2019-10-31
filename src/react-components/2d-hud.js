@@ -9,6 +9,9 @@ import { FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { micLevelForVolume } from "../components/audio-feedback";
+import ShareScreenIconActive from "../assets/images/share_screen_active.svgi";
+import ShareScreenIcon from "../assets/images/share_screen.svgi";
+import { SVGI } from "./svgi";
 
 const SPRITESHEET_ICONS = {
   MIC: [
@@ -166,8 +169,7 @@ class TopHUD extends Component {
 
     return (
       <div
-        className={cx(styles.iconButton, styles[`share_${primaryVideoShareType}`], {
-          [styles.active]: this.props.videoShareMediaSource === primaryVideoShareType,
+        className={cx(styles.iconButton, {
           [styles.disabled]: this.state.mediaDisabled,
           [styles.videoShare]: true
         })}
@@ -179,13 +181,16 @@ class TopHUD extends Component {
         onClick={this.state.mediaDisabled ? noop : maybeHandlePrimaryShare}
         onMouseOver={this.state.mediaDisabled ? noop : showExtrasOnHover}
       >
+        <SVGI
+          className={cx(styles.iconButtonIcon)}
+          src={this.props.videoShareMediaSource === primaryVideoShareType ? ShareScreenIconActive : ShareScreenIcon}
+        />
         {videoShareExtraOptionTypes.length > 0 && (
           <div className={cx(styles.videoShareExtraOptions)} onMouseOut={hideExtrasOnOut}>
             {videoShareExtraOptionTypes.map(type => (
               <div
                 key={type}
-                className={cx(styles.iconButton, styles[`share_${type}`], {
-                  [styles.active]: this.props.videoShareMediaSource === type,
+                className={cx(styles.iconButton, {
                   [styles.disabled]: this.state.mediaDisabled
                 })}
                 title={
@@ -195,7 +200,12 @@ class TopHUD extends Component {
                 }
                 onClick={this.state.mediaDisabled ? noop : () => this.handleVideoShareClicked(type)}
                 onMouseOver={this.state.mediaDisabled ? noop : showExtrasOnHover}
-              />
+              >
+                <SVGI
+                  className={cx(styles.iconButtonIcon)}
+                  src={this.props.videoShareMediaSource === type ? ShareScreenIconActive : ShareScreenIcon}
+                />
+              </div>
             ))}
           </div>
         )}

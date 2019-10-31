@@ -62,6 +62,31 @@
   margin: 0px 10px;
 }
 
+:local(.message-entry-spawn) {
+  color: var(--overlay-text-field-widget-color);
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+  min-width: 40px;
+  height: 100%;
+  bottom: 0px;
+  font-size: 1.5em;
+  cursor: pointer;
+  border: 0;
+  background-color: transparent;
+  margin: 0px 10px;
+}
+
+:local(.message-entry-spawn):hover {
+  color: var(--action-color);
+}
+
+:local(.message-entry-spawn):disabled {
+  color: var(--text-field-disabled-color);
+  background-color: transparent;
+}
+
 :local(.message-entry-button):disabled {
   color: var(--text-field-disabled-color);
   background-color: transparent;
@@ -108,23 +133,6 @@
 
   :local(.message-entry-input-no-spawn) {
     padding: 8px 1.25em;
-  }
-
-  :local(.message-entry-spawn) {
-    @extend %action-button;
-    background-color: transparent;
-    height: 32px;
-    width: 32px;
-    bottom: 8px;
-    min-width: auto;
-    background-size: 100%;
-    background-image: url(../images/spawn_message_dark.png);
-    background-repeat: no-repeat;
-    padding: 0;
-  }
-
-  :local(.message-entry-spawn):hover {
-    background-image: url(../images/spawn_message_dark-hover.png);
   }
 
   :local(.message-entry-button-in-room) {

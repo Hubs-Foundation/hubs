@@ -2,14 +2,15 @@ import React from "react";
 import { FormattedMessage } from "react-intl";
 import PropTypes from "prop-types";
 
-import MobileScreenEntryImg from "../assets/images/mobile_screen_entry.svg";
-import DesktopScreenEntryImg from "../assets/images/desktop_screen_entry.svg";
-import GenericVREntryImg from "../assets/images/generic_vr_entry.svg";
-import GearVREntryImg from "../assets/images/gearvr_entry.svg";
-import DaydreamEntryImg from "../assets/images/daydream_entry.svg";
+import MobileScreenEntryImg from "../assets/images/mobile_screen_entry.svgi";
+import DesktopScreenEntryImg from "../assets/images/desktop_screen_entry.svgi";
+import GenericVREntryImg from "../assets/images/generic_vr_entry.svgi";
+import GearVREntryImg from "../assets/images/gearvr_entry.svgi";
+import DaydreamEntryImg from "../assets/images/daydream_entry.svgi";
 import styles from "../assets/stylesheets/entry.scss";
 import { WithHoverSound } from "./wrap-with-audio";
 import cx from "classnames";
+import { SVGI } from "./svgi";
 
 const EntryButton = props => {
   return (
@@ -18,7 +19,7 @@ const EntryButton = props => {
         className={cx([{ [styles.entryButton]: true, [styles.entryButtonSecondary]: props.secondary }])}
         onClick={props.onClick}
       >
-        <img src={props.iconSrc} className={styles.icon} />
+        <SVGI src={props.iconSrc} className={styles.icon} />
         <div className={styles.label}>
           <div className={styles.contents}>
             <span>

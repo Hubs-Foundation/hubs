@@ -92,6 +92,10 @@
     color: var(--action-color);
   }
 
+  :local(.icon) {
+    color: var(--action-color);
+  }
+
   :local(.subtitle) {
     color: var(--action-color);
   }
