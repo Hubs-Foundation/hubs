@@ -327,7 +327,7 @@ class HomeRoot extends Component {
                     </a>
                   )}
 
-                  <img className={styles.mozLogo} src={mozLogo} />
+                  <img className={styles.mozLogo} src={configs.image("company_logo", mozLogo)} />
                 </div>
               </div>
             </div>

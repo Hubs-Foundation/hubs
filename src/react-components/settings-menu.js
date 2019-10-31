@@ -263,9 +263,11 @@ export default class SettingsMenu extends Component {
               <div />
             )}
             <div className={classNames([styles.bottomLinksMain])}>
-              <a href="/whats-new" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="settings.whats-new" />
-              </a>
+              {configs.feature("show_whats_new_link") && (
+                <a href="/whats-new" target="_blank" rel="noreferrer noopener">
+                  <FormattedMessage id="settings.whats-new" />
+                </a>
+              )}
               <button
                 onClick={e => {
                   e.preventDefault();

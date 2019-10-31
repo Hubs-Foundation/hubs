@@ -78,6 +78,7 @@
   grid-template-columns: 33% 33% 33%;
   padding-top: 12px;
   font-weight: normal;
+  min-width: 300px;
 
   a, button {
     color: $dark-grey;
