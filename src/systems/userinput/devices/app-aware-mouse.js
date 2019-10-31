@@ -64,8 +64,18 @@ export class AppAwareMouseDevice {
       const isPinned =
         remoteHoverTarget && remoteHoverTarget.components.pinnable && remoteHoverTarget.components.pinnable.data.pinned;
       const isFrozen = AFRAME.scenes[0].is("frozen");
+      const template =
+        remoteHoverTarget &&
+        remoteHoverTarget.components.networked &&
+        remoteHoverTarget.components.networked.data.template;
+      const isStaticControlledMedia = template && template === "#static-controlled-media";
+      const isStaticMedia = template && template === "#static-media";
       this.clickedOnAnything =
-        (isInteractable && (isFrozen || !isPinned) && (remoteHoverTarget && canMove(remoteHoverTarget))) ||
+        (isInteractable &&
+          (isFrozen || !isPinned) &&
+          (remoteHoverTarget && canMove(remoteHoverTarget)) &&
+          !isStaticControlledMedia &&
+          !isStaticMedia) ||
         userinput.activeSets.includes(sets.rightCursorHoldingPen) ||
         userinput.activeSets.includes(sets.rightCursorHoldingInteractable) ||
         userinput.activeSets.includes(sets.rightCursorHoldingCamera);
