@@ -11,6 +11,12 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { micLevelForVolume } from "../components/audio-feedback";
 import ShareScreenIconActive from "../assets/images/share_screen_active.svgi";
 import ShareScreenIcon from "../assets/images/share_screen.svgi";
+import ShareCameraIconActive from "../assets/images/share_camera_active.svgi";
+import ShareCameraIcon from "../assets/images/share_camera.svgi";
+import PenIcon from "../assets/images/pen.svgi";
+import PenIconActive from "../assets/images/pen_active.svgi";
+import CameraIcon from "../assets/images/camera.svgi";
+import CameraIconActive from "../assets/images/camera_active.svgi";
 import { SVGI } from "./svgi";
 
 const SPRITESHEET_ICONS = {
@@ -166,6 +172,13 @@ class TopHUD extends Component {
     };
 
     const capitalize = str => str[0].toUpperCase() + str.slice(1);
+    const iconForType = (type, active) => {
+      if (active) {
+        return type === "screen" ? ShareScreenIconActive : ShareCameraIconActive;
+      } else {
+        return type === "screen" ? ShareScreenIcon : ShareCameraIcon;
+      }
+    };
 
     return (
       <div
@@ -183,7 +196,7 @@ class TopHUD extends Component {
       >
         <SVGI
           className={cx(styles.iconButtonIcon)}
-          src={this.props.videoShareMediaSource === primaryVideoShareType ? ShareScreenIconActive : ShareScreenIcon}
+          src={iconForType(primaryVideoShareType, this.props.videoShareMediaSource === primaryVideoShareType)}
         />
         {videoShareExtraOptionTypes.length > 0 && (
           <div className={cx(styles.videoShareExtraOptions)} onMouseOut={hideExtrasOnOut}>
@@ -203,7 +216,7 @@ class TopHUD extends Component {
               >
                 <SVGI
                   className={cx(styles.iconButtonIcon)}
-                  src={this.props.videoShareMediaSource === type ? ShareScreenIconActive : ShareScreenIcon}
+                  src={iconForType(type, this.props.videoShareMediaSource === type)}
                 />
               </div>
             ))}
@@ -280,21 +293,29 @@ class TopHUD extends Component {
               }
             />
             <div
-              className={cx(styles.iconButton, styles.pen, {
-                [styles.active]: this.props.isCursorHoldingPen,
+              className={cx(styles.iconButton, {
                 [styles.disabled]: this.state.penDisabled
               })}
               title={`Pen${this.state.penDisabled ? " Disabled" : ""}`}
               onClick={this.state.penDisabled ? noop : this.props.onSpawnPen}
-            />
+            >
+              <SVGI
+                className={cx(styles.iconButtonIcon)}
+                src={this.props.isCursorHoldingPen ? PenIconActive : PenIcon}
+              />
+            </div>
             <div
-              className={cx(styles.iconButton, styles.camera, {
-                [styles.active]: this.props.hasActiveCamera,
+              className={cx(styles.iconButton, {
                 [styles.disabled]: this.state.cameraDisabled
               })}
               title={`Camera${this.state.cameraDisabled ? " Disabled" : ""}`}
               onClick={this.state.cameraDisabled ? noop : this.props.onSpawnCamera}
-            />
+            >
+              <SVGI
+                className={cx(styles.iconButtonIcon)}
+                src={this.props.hasActiveCamera ? CameraIconActive : CameraIcon}
+              />
+            </div>
           </div>
         )}
       </div>
