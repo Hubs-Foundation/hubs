@@ -203,6 +203,9 @@
   color: var(--notice-background-color);
 }
 
+:local(.spawn) {
+  color: var(--action-color);
+}
 
 :local(.iconButton.small) {
   width: 30px;

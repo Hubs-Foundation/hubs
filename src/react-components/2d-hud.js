@@ -9,6 +9,7 @@ import { FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { micLevelForVolume } from "../components/audio-feedback";
+import SpawnIcon from "../assets/images/spawn.svgi";
 import ShareScreenIconActive from "../assets/images/share_screen_active.svgi";
 import ShareScreenIcon from "../assets/images/share_screen.svgi";
 import ShareCameraIconActive from "../assets/images/share_camera_active.svgi";
@@ -283,15 +284,17 @@ class TopHUD extends Component {
               title={this.props.muted ? "Unmute Mic" : "Mute Mic"}
               onClick={this.props.onToggleMute}
             />
-            <button
-              className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn, {
+            <div
+              className={cx(styles.iconButton, {
                 [styles.disabled]: this.state.mediaDisabled
               })}
               title={`Create${this.state.mediaDisabled ? " Disabled" : ""}`}
               onClick={
                 this.state.mediaDisabled ? noop : () => this.props.mediaSearchStore.sourceNavigateToDefaultSource()
               }
-            />
+            >
+              <SVGI className={cx(styles.iconButtonIcon, styles.spawn)} src={SpawnIcon} />
+            </div>
             <div
               className={cx(styles.iconButton, {
                 [styles.disabled]: this.state.penDisabled
