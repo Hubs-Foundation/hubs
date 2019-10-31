@@ -9,7 +9,7 @@ import spritesheetNoticePng from "../assets/images/spritesheets/sprite-system-no
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import vert from "./sprites/sprite.vert";
 import frag from "./sprites/sprite.frag";
-import Color from "color";
+import { getThemeColorShifter, waitForThemeReady } from "../utils/theme";
 
 const multiviewVertPrefix = [
   // GLSL 3.0 conversion
@@ -185,86 +185,6 @@ function createGeometry(maxSprites) {
 
 const ZEROS = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-// Goal of this algorithm is to take a ctx pointing to a spritesheet
-// that has a single saturated color, and convert it to another.
-const colorShiftPixels = toColor => async (ctx, w, h) => {
-  const to = Color(toColor);
-
-  const data = ctx.getImageData(0, 0, w, h);
-  const d = data.data;
-  const histo = {};
-
-  // Assumes saturated color is very un-greyscale
-  const isGreyscale = (() => {
-    const isClose = (x, y) => Math.abs(x - y) < 5;
-    return (r, g, b) => isClose(r, g) && isClose(g, b) && isClose(r, b);
-  })();
-
-  for (let i = 0, l = d.length; i < l; i += 4) {
-    const r = d[i];
-    const g = d[i + 1];
-    const b = d[i + 2];
-
-    // Compute a histogram of non-greyscale color frequencies
-    if (!isGreyscale(r, g, b)) {
-      const sum = r + g * 1000 + b * 1000000;
-
-      // hacky but unique key for a color.
-      if (!histo[sum]) {
-        histo[sum] = { r, g, b, c: 1 };
-      } else {
-        histo[sum].c++;
-      }
-    }
-  }
-
-  let max = 0;
-  let from;
-
-  // Find most common non-greyscale color to determine HSL shift
-  for (const { r, g, b, c } of Object.values(histo)) {
-    if (c > max) {
-      max = c;
-      from = Color({ r, g, b });
-    }
-  }
-
-  const toHsl = to.hsl();
-  const fromHsl = from.hsl();
-  const dh = toHsl.hue() - fromHsl.hue();
-  const ds = toHsl.saturationl() / fromHsl.saturationl();
-  const dl = toHsl.lightness() / fromHsl.lightness();
-  const cache = {};
-
-  for (let i = 0, l = d.length; i < l; i += 4) {
-    const r = d[i];
-    const g = d[i + 1];
-    const b = d[i + 2];
-
-    // Compute a histogram of non-greyscale color frequencies
-    if (!isGreyscale(r, g, b)) {
-      const sum = r + g * 1000 + b * 1000000;
-
-      if (!cache[sum]) {
-        let hsl = Color({ r, g, b }).hsl();
-        hsl = hsl.rotate(dh);
-        hsl.color[1] *= ds;
-        hsl.color[2] *= dl;
-
-        const [nr, ng, nb] = hsl.rgb().array();
-        cache[sum] = { nr, ng, nb };
-      }
-
-      const { nr, ng, nb } = cache[sum];
-      d[i] = nr;
-      d[i + 1] = ng;
-      d[i + 2] = nb;
-    }
-  }
-
-  ctx.putImageData(data, 0, 0);
-};
-
 export class SpriteSystem {
   raycast(raycaster, intersects) {
     for (const [sheetType, slots] of Object.entries(this.slots)) {
@@ -303,33 +223,35 @@ export class SpriteSystem {
       frag
     );
 
-    for (const [spritesheetPng, color, type] of [
-      [spritesheetActionPng, "#0000FF", "action"],
-      [spritesheetNoticePng, "#00FF00", "notice"]
-    ]) {
-      Promise.all([createImageTexture(spritesheetPng, colorShiftPixels(color)), waitForDOMContentLoaded()]).then(
-        ([spritesheetTexture]) => {
-          const material = new THREE.RawShaderMaterial({
-            uniforms: {
-              u_spritesheet: { value: spritesheetTexture },
-              hubs_Time: { value: 0 }
-            },
-            vertexShader,
-            fragmentShader,
-            side: THREE.DoubleSide,
-            transparent: true
-          });
-          const mesh = (this.meshes[type] = new THREE.Mesh(createGeometry(this.maxSprites), material));
-          const el = document.createElement("a-entity");
-          el.classList.add("ui");
-          scene.appendChild(el);
-          el.setObject3D("mesh", mesh);
-          mesh.frustumCulled = false;
-          mesh.renderOrder = window.APP.RENDER_ORDER.HUD_ICONS;
-          mesh.raycast = this.raycast.bind(this);
-        }
-      );
-    }
+    const domReady = waitForDOMContentLoaded();
+    const themeReady = waitForThemeReady();
+
+    Promise.all([domReady, themeReady]).then(() => {
+      for (const [spritesheetPng, type] of [[spritesheetActionPng, "action"], [spritesheetNoticePng, "notice"]]) {
+        Promise.all([createImageTexture(spritesheetPng, getThemeColorShifter(type)), waitForDOMContentLoaded()]).then(
+          ([spritesheetTexture]) => {
+            const material = new THREE.RawShaderMaterial({
+              uniforms: {
+                u_spritesheet: { value: spritesheetTexture },
+                hubs_Time: { value: 0 }
+              },
+              vertexShader,
+              fragmentShader,
+              side: THREE.DoubleSide,
+              transparent: true
+            });
+            const mesh = (this.meshes[type] = new THREE.Mesh(createGeometry(this.maxSprites), material));
+            const el = document.createElement("a-entity");
+            el.classList.add("ui");
+            scene.appendChild(el);
+            el.setObject3D("mesh", mesh);
+            mesh.frustumCulled = false;
+            mesh.renderOrder = window.APP.RENDER_ORDER.HUD_ICONS;
+            mesh.raycast = this.raycast.bind(this);
+          }
+        );
+      }
+    });
   }
 
   tick(t) {
