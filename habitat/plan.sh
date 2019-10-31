@@ -47,6 +47,7 @@ do_build() {
   mv dist/*.html dist/pages
   mv dist/hub.service.js dist/pages
   mv dist/manifest.webmanifest dist/pages
+  mv dist/app-config-schema.toml dist/pages
 }
 
 do_install() {

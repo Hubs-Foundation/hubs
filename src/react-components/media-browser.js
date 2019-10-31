@@ -125,7 +125,7 @@ class MediaBrowser extends Component {
     const searchParams = new URLSearchParams(props.history.location.search);
     const result = props.mediaSearchStore.result;
 
-    const newState = { result, query: searchParams.get("q") || "" };
+    const newState = { result, query: this.state.query || searchParams.get("q") || "" };
     const urlSource = this.getUrlSource(searchParams);
     newState.showNav = !!(searchParams.get("media_nav") !== "false");
     newState.selectAction = searchParams.get("selectAction") || "spawn";
@@ -197,13 +197,15 @@ class MediaBrowser extends Component {
   };
 
   handleFacetClicked = facet => {
-    const searchParams = this.getSearchClearedSearchParams(true, true, true);
+    this.setState({ query: "" }, () => {
+      const searchParams = this.getSearchClearedSearchParams(true, true, true);
 
-    for (const [k, v] of Object.entries(facet.params)) {
-      searchParams.set(k, v);
-    }
+      for (const [k, v] of Object.entries(facet.params)) {
+        searchParams.set(k, v);
+      }
 
-    pushHistoryPath(this.props.history, this.props.history.location.pathname, searchParams.toString());
+      pushHistoryPath(this.props.history, this.props.history.location.pathname, searchParams.toString());
+    });
   };
 
   getSearchClearedSearchParams = (keepSource, keepNav, keepSelectAction) => {
