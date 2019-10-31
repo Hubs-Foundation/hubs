@@ -1,6 +1,16 @@
 import configs from "./configs";
 
-const schemaCategories = ["api_keys", "content", "email", "advanced", "translations", "features", "images", "colors", "links"];
+const schemaCategories = [
+  "api_keys",
+  "content",
+  "email",
+  "advanced",
+  "translations",
+  "features",
+  "images",
+  "colors",
+  "links"
+];
 const serviceNames = configs.CONFIGURABLE_SERVICES.split(",");
 let currentAuthToken = null;
 
@@ -109,7 +119,16 @@ function putConfig(service, config) {
 
 // An object is considered to be a config descriptor if it at least has
 // a "type" key and has no keys which aren't valid descriptor metadata.
-const DESCRIPTOR_FIELDS = ["default", "type", "of", "unmanaged", "category", "name", "description"];
+const DESCRIPTOR_FIELDS = [
+  "default",
+  "type",
+  "of",
+  "unmanaged",
+  "category",
+  "name",
+  "description",
+  "show_on_self_hosted"
+];
 function isDescriptor(obj) {
   if (typeof obj !== "object") return false;
   if (!("type" in obj)) return false;

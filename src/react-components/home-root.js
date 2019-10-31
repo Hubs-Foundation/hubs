@@ -187,9 +187,11 @@ class HomeRoot extends Component {
                   <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
                     <FormattedMessage id="home.source_link" />
                   </a>
-                  <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
-                    <FormattedMessage id="home.community_link" />
-                  </a>
+                  {configs.feature("show_community_link") && (
+                    <a href={configs.link("community", "https://discord.gg/wHmY4nd")} rel="noreferrer noopener">
+                      <FormattedMessage id="home.community_link" />
+                    </a>
+                  )}
                   {configs.feature("enable_spoke") && (
                     <a href="/spoke" rel="noreferrer noopener">
                       Spoke
@@ -270,14 +272,16 @@ class HomeRoot extends Component {
             <div className={styles.footerContent}>
               <div className={styles.links}>
                 <div className={styles.top}>
-                  <a
-                    className={styles.link}
-                    rel="noopener noreferrer"
-                    href="#"
-                    onClick={this.onLinkClicked(this.showJoinUsDialog)}
-                  >
-                    <FormattedMessage id="home.join_us" />
-                  </a>
+                  {configs.feature("show_join_us_dialog") && (
+                    <a
+                      className={styles.link}
+                      rel="noopener noreferrer"
+                      href="#"
+                      onClick={this.onLinkClicked(this.showJoinUsDialog)}
+                    >
+                      <FormattedMessage id="home.join_us" />
+                    </a>
+                  )}
                   <a
                     className={styles.link}
                     rel="noopener noreferrer"

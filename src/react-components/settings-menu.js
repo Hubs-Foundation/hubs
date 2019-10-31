@@ -295,9 +295,15 @@ export default class SettingsMenu extends Component {
                   <FormattedMessage id="settings.features" />
                 </a>
               )}
-              <a href="https://discord.gg/wHmY4nd" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="settings.community" />
-              </a>
+              {configs.feature("show_community_link") && (
+                <a
+                  href={configs.link("community", "https://discord.gg/wHmY4nd")}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <FormattedMessage id="settings.community" />
+                </a>
+              )}
               <button
                 onClick={e => {
                   e.preventDefault();
