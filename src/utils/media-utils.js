@@ -122,15 +122,18 @@ export const addMedia = (
     scene.emit("media-loading", { src: src });
   }, 100);
 
-  ["model-loaded", "video-loaded", "image-loaded", "pdf-loaded"].forEach(eventName => {
-    entity.addEventListener(
-      eventName,
-      async () => {
-        clearTimeout(fireLoadingTimeout);
-        scene.emit("media-loaded", { src: src });
-      },
-      { once: true }
-    );
+  const eventNames = ["model-loaded", "video-loaded", "image-loaded", "pdf-loaded"];
+
+  const cb = async () => {
+    clearTimeout(fireLoadingTimeout);
+    entity.emit("media-loaded", { src: src });
+    eventNames.forEach(eventName => {
+      entity.removeEventListener(eventName, cb);
+    });
+  };
+
+  eventNames.forEach(eventName => {
+    entity.addEventListener(eventName, cb);
   });
 
   const orientation = new Promise(function(resolve) {

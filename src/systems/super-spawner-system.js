@@ -30,29 +30,36 @@ export class SuperSpawnerSystem {
       false
     ).entity;
 
-    spawnedEntity.object3D.position.copy(
-      data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
-    );
-    spawnedEntity.object3D.rotation.copy(
-      data.useCustomSpawnRotation ? data.spawnRotation : superSpawner.el.object3D.rotation
-    );
+    if (data.useCustomSpawnPosition) {
+      spawnedEntity.object3D.position.copy(data.spawnPosition);
+    } else {
+      superSpawner.el.object3D.getWorldPosition(spawnedEntity.object3D.position);
+    }
+    if (data.useCustomSpawnRotation) {
+      spawnedEntity.object3D.rotation.copy(data.spawnRotation);
+    } else {
+      superSpawner.el.object3D.getWorldQuaternion(spawnedEntity.object3D.quaternion);
+    }
     spawnedEntity.object3D.matrixNeedsUpdate = true;
     state.held = spawnedEntity;
 
-    const targetScale = superSpawner.el.object3D.scale.clone();
+    const targetScale = new THREE.Vector3();
+    superSpawner.el.object3D.getWorldScale(targetScale);
 
     superSpawner.activateCooldown();
     state.spawning = true;
 
     spawnedEntity.addEventListener(
-      "model-loaded",
+      "media-loaded",
       () => {
-        if (spawnedEntity.object3DMap.mesh) {
-          spawnedEntity.object3DMap.mesh.scale.copy(data.useCustomSpawnScale ? data.spawnScale : targetScale);
-          spawnedEntity.object3DMap.mesh.matrixNeedsUpdate = true;
-        }
+        spawnedEntity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : targetScale);
+        spawnedEntity.object3D.matrixNeedsUpdate = true;
 
         state.spawning = false;
+
+        if (data.spawnedEntityCallback) {
+          data.spawnedEntityCallback(spawnedEntity);
+        }
       },
       { once: true }
     );

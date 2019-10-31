@@ -366,6 +366,176 @@
                 </a-entity>
             </template>
 
+            <template id="interactable-emoji-media">
+                <a-entity
+                    class="interactable"
+                    emoji
+                    body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 15;"
+                    owned-object-limiter="counter: #emoji-counter"
+                    set-unowned-body-kinematic
+                    is-remote-hover-target
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; inspectable: true;"
+                    destroy-at-extreme-distances
+                    scalable-when-grabbed
+                    floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
+                    set-yxz-order
+                    matrix-auto-update
+                    position-at-box-shape-border__freeze="target:.freeze-menu;"
+                    hoverable-visuals
+                >
+                    <a-entity
+                        id="particle-emitter"
+                        particle-emitter="particleCount: 0"
+                        scale="0.25 0.25 0.25"
+                        position="0 0.25 0"
+                    ></a-entity>
+                    <a-entity class="ui interactable-ui">
+                        <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media">
+                            <a-entity
+                                mixin="rounded-text-action-button"
+                                is-remote-hover-target
+                                tags="singleActionButton:true"
+                                pin-networked-object-button="tipSelector:.pin-button-tip; labelSelector:.pin-button-label;"
+                                position="0 0.125 0.01">
+                                <a-entity
+                                    class="pin-button-label"
+                                    visible="false"
+                                    text=" value:pin; width:1.75; align:center;"
+                                    text-raycast-hack
+                                    position="0 0 0.01">
+                                </a-entity>
+                            </a-entity>
+                            <a-entity
+                                class="pin-button-tip"
+                                text="value:Pinning will broadcast this object to Discord.; width:1.75; align:center; color:#fff;"
+                                visible="false"
+                                text-raycast-hack
+                                slice9="
+                                    color: #0F40A9;
+                                    width: 1.8;
+                                    height: 0.2;
+                                    left: 64;
+                                    top: 64;
+                                    right: 66;
+                                    bottom: 66;
+                                    opacity: 1.0;
+                                    src: #button"
+                                position="0 0.6 0.01">
+                            </a-entity>
+                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
+                                <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
+                                <a-entity
+                                    sprite
+                                    icon-button="image: camera-action.png; hoverImage: camera-action.png;"
+                                    scale="0.165 0.165 0.165"
+                                    position="-0.125 0.005 0.02"
+                                ></a-entity>
+                            </a-entity>
+                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: true" position="0.25 0.375 0.01">
+                                <a-entity text=" value:track; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
+                                <a-entity
+                                    sprite
+                                    icon-button="image: camera-action.png; hoverImage: camera-action.png;"
+                                    scale="0.165 0.165 0.165"
+                                    position="-0.125 0.005 0.01"
+                                ></a-entity>
+                            </a-entity>
+                            <a-entity
+                                mixin="rounded-button"
+                                is-remote-hover-target
+                                tags="singleActionButton: true;"
+                                hide-when-pinned-and-forbidden="whenPinned: true"
+                                remove-networked-object-button
+                                position="0 -0.375 0.01">
+                                <a-entity
+                                    sprite="name: remove-action.png"
+                                    icon-button="image: remove-action.png; hoverImage: remove-action.png"
+                                    scale="0.165 0.165 0.165"
+                                    position="0 0 0.001"
+                                ></a-entity>
+                            </a-entity>
+                            <a-entity
+                                mixin="rounded-button"
+                                is-remote-hover-target
+                                tags="singleActionButton: true;"
+                                drop-object-button
+                                hide-when-pinned-and-forbidden="whenPinned: true"
+                                position="0 -0.625 0.01">
+                                <a-entity
+                                    sprite
+                                    icon-button="image: drop-action.png; hoverImage: drop-action.png"
+                                    scale="0.165 0.165 0.165"
+                                    position="0 0 0.001"
+                                ></a-entity>
+                            </a-entity>
+                            <a-entity
+                                class="deserialize-drawing"
+                                visible="false"
+                                mixin="rounded-button"
+                                is-remote-hover-target
+                                tags="singleActionButton: true;"
+                                deserialize-drawing-button
+                                position="0.250 -0.625 0.01">
+                                <a-entity
+                                    sprite
+                                    icon-button="image: deserialize-action.png; hoverImage: deserialize-action.png"
+                                    scale="0.165 0.165 0.165"
+                                    position="0 0 0.001"
+                                ></a-entity>
+                            </a-entity>
+                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" open-media-button="onlyOpenLink: true" position="0.43 -0.375 0.01">
+                                <a-entity text="value:open link; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" clone-media-button position="-0.43 -0.375 0.01">
+                                <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity
+                                mixin="rounded-action-button"
+                                tags="isHoldable: true; holdableButton: true;"
+                                is-remote-hover-target
+                                transform-button
+                                transform-button-selector
+                                hide-when-pinned-and-forbidden
+                                position="-0.3 -0.125 0.01">
+                                <a-entity
+                                    sprite
+                                    icon-button="image: rotate-action.png; hoverImage: rotate-action.png;"
+                                    scale="0.165 0.165 0.165"
+                                    position="0 0 0.001"
+                                ></a-entity>
+                            </a-entity>
+                            <a-entity
+                                mixin="rounded-action-button"
+                                tags="isHoldable: true; holdableButton: true;"
+                                is-remote-hover-target
+                                inspect-button
+                                position="0 -0.125 0.01">
+                                <a-entity
+                                    sprite
+                                    icon-button="image: recenter-action.png; hoverImage: recenter-action.png"
+                                    scale="0.165 0.165 0.165"
+                                    position="0 0 0.001"
+                                ></a-entity>
+                            </a-entity>
+                            <a-entity
+                                mixin="rounded-action-button"
+                                tags="isHoldable: true; holdableButton: true;"
+                                is-remote-hover-target
+                                transform-button="mode: scale;"
+                                hide-when-pinned-and-forbidden
+                                position="0.3 -0.125 0.01">
+                                <a-entity
+                                    sprite
+                                    icon-button="image: scale-action.png; hoverImage: scale-action.png"
+                                    scale="0.165 0.165 0.165"
+                                    position="0 0 0.001"
+                                ></a-entity>
+                            </a-entity>
+                        </a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
             <template id="interactable-pen">
                 <a-entity
                     class="pen interactable"
@@ -793,15 +963,6 @@
                     opacity: 1.0;
                     src: #button"
             ></a-mixin>
-
-            <a-mixin id="emoji-button"
-                is-remote-hover-target
-                visibility-while-frozen="requireHoverOnNonMobile: false"
-                sprite
-                position="0.0 0 0.005"
-                tags="singleActionButton: true;"
-                material="alphaTest: 0.1;"
-            ></a-mixin>
         </a-assets>
 
         <!-- HACK - We use this object to trigger initial batch preparation -->
@@ -811,6 +972,8 @@
         <a-entity id="media-counter" networked-counter="max: 20;"></a-entity>
 
         <a-entity id="pen-counter" networked-counter="max: 10;"></a-entity>
+
+        <a-entity id="emoji-counter" networked-counter="max: 2;"></a-entity>
 
         <a-entity id="camera-counter" networked-counter="max: 1;"></a-entity>
 
@@ -982,32 +1145,9 @@
             </a-entity>
 
             <a-entity
-                offset-relative-to="target: #viewing-camera; offset: 0 -0.5 -1.5; on: stateadded; lookAt: true"
-                vr-mode-toggle-visibility
-                vr-mode-toggle-class="class: ui"
-                emoji-hud>
-                <a-entity
-                    is-remote-hover-target
-                    visibility-while-frozen="requireHoverOnNonMobile: false"
-                    slice9="
-                        color: #000000;
-                        width: 1.5;
-                        height: 0.2;
-                        left: 64;
-                        top: 64;
-                        right: 66;
-                        bottom: 66;
-                        opacity: 0.2;
-                        src: #button;">
-                </a-entity>
-                <a-entity mixin="emoji-button" data-emoji="smile"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="happy"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="surprise"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="disgust"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="angry"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="sad"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="eww"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="hearts"></a-entity>
+                offset-relative-to="target: #viewing-camera; offset: 0 -1 -1.5; on: stateadded; lookAt: true"
+                emoji-hud
+                >
             </a-entity>
 
             <a-entity

@@ -69,7 +69,14 @@ AFRAME.registerComponent("super-spawner", {
     /**
      * If true, will spawn the object at the cursor and animate it into the hand.
      */
-    animateFromCursor: { type: "boolean" }
+    animateFromCursor: { type: "boolean" },
+
+    /**
+     * Optional callback to be called on spawned entities
+     */
+    spawnedEntityCallback: {
+      default: null
+    }
   },
 
   init() {
@@ -168,6 +175,9 @@ AFRAME.registerComponent("super-spawner", {
     }
     if (entity.components["body-helper"].body) {
       entity.components["body-helper"].body.syncToPhysics(true);
+    }
+    if (this.data.spawnedEntityCallback) {
+      this.data.spawnedEntityCallback(entity);
     }
   },
 
