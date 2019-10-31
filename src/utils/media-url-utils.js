@@ -117,7 +117,7 @@ export const guessContentType = url => {
 };
 const hubsSceneRegex = /https?:\/\/(hubs\.local(:\d+)?|(smoke-)?hubs\.mozilla\.com|(dev\.)?reticulum\.io)\/scenes\/(\w+)\/?\S*/;
 const hubsAvatarRegex = /https?:\/\/(hubs\.local(:\d+)?|(smoke-)?hubs\.mozilla\.com|(dev\.)?reticulum\.io)\/avatars\/(?<id>\w+)\/?\S*/;
-const hubsRoomRegex = /(https?:\/\/)?(hub\.link)|(hubs\.local(:\d+)?|(smoke-)?hubs\.mozilla\.com|(dev\.)?reticulum\.io)\/(\w+)\/?\S*/;
+const hubsRoomRegex = /(https?:\/\/)?(hub\.link)|(hubs\.local(:\d+)?|(smoke-)?hubs\.mozilla\.com|(dev\.)?reticulum\.io)\/([a-zA-Z0-9]{7})\/?\S*/;
 
 export const isHubsSceneUrl = hubsSceneRegex.test.bind(hubsSceneRegex);
 export const isHubsRoomUrl = url => !isHubsSceneUrl(url) && hubsRoomRegex.test(url);
