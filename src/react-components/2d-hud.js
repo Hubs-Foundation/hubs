@@ -4,7 +4,6 @@ import cx from "classnames";
 
 import styles from "../assets/stylesheets/2d-hud.scss";
 import uiStyles from "../assets/stylesheets/ui-root.scss";
-import spritesheet from "../assets/images/spritesheets/css-spritesheet.css";
 import { FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
@@ -18,29 +17,28 @@ import PenIcon from "../assets/images/pen.svgi";
 import PenIconActive from "../assets/images/pen_active.svgi";
 import CameraIcon from "../assets/images/camera.svgi";
 import CameraIconActive from "../assets/images/camera_active.svgi";
+import Mic0 from "../assets/images/mic-0.svgi";
+import Mic1 from "../assets/images/mic-1.svgi";
+import Mic2 from "../assets/images/mic-2.svgi";
+import Mic3 from "../assets/images/mic-3.svgi";
+import Mic4 from "../assets/images/mic-4.svgi";
+import Mic5 from "../assets/images/mic-5.svgi";
+import Mic6 from "../assets/images/mic-6.svgi";
+import Mic7 from "../assets/images/mic-7.svgi";
+import MicOff0 from "../assets/images/mic-off-0.svgi";
+import MicOff1 from "../assets/images/mic-off-1.svgi";
+import MicOff2 from "../assets/images/mic-off-2.svgi";
+import MicOff3 from "../assets/images/mic-off-3.svgi";
+import MicOff4 from "../assets/images/mic-off-4.svgi";
+import MicOff5 from "../assets/images/mic-off-5.svgi";
+import MicOff6 from "../assets/images/mic-off-6.svgi";
+import MicOff7 from "../assets/images/mic-off-7.svgi";
+
 import { SVGI } from "./svgi";
 
-const SPRITESHEET_ICONS = {
-  MIC: [
-    spritesheet.mic0,
-    spritesheet.mic1,
-    spritesheet.mic2,
-    spritesheet.mic3,
-    spritesheet.mic4,
-    spritesheet.mic5,
-    spritesheet.mic6,
-    spritesheet.mic7
-  ],
-  MIC_OFF: [
-    spritesheet.micOff0,
-    spritesheet.micOff1,
-    spritesheet.micOff2,
-    spritesheet.micOff3,
-    spritesheet.micOff4,
-    spritesheet.micOff5,
-    spritesheet.micOff6,
-    spritesheet.micOff7
-  ]
+const MIC_ICONS = {
+  on: [Mic0, Mic1, Mic2, Mic3, Mic4, Mic5, Mic6, Mic7],
+  off: [MicOff0, MicOff1, MicOff2, MicOff3, MicOff4, MicOff5, MicOff6, MicOff7]
 };
 
 const noop = () => {};
@@ -269,7 +267,7 @@ class TopHUD extends Component {
     }
 
     const micLevel = this.state.micLevel;
-    const micIconClass = this.props.muted ? SPRITESHEET_ICONS.MIC_OFF[micLevel] : SPRITESHEET_ICONS.MIC[micLevel];
+    const micIcon = MIC_ICONS[this.props.muted ? "off" : "on"][micLevel];
     // Hide buttons when frozen.
     return (
       <div className={cx(styles.container, styles.top, styles.unselectable, uiStyles.uiInteractive)}>
@@ -280,10 +278,12 @@ class TopHUD extends Component {
             {tip}
             {videoSharingButtons}
             <div
-              className={cx(styles.iconButton, micIconClass)}
+              className={cx(styles.iconButton)}
               title={this.props.muted ? "Unmute Mic" : "Mute Mic"}
               onClick={this.props.onToggleMute}
-            />
+            >
+              <SVGI className={cx(styles.iconButtonIcon)} src={micIcon} />
+            </div>
             <div
               className={cx(styles.iconButton, {
                 [styles.disabled]: this.state.mediaDisabled

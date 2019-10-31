@@ -878,6 +878,9 @@
             <a-entity
                 id="player-hud"
                 hud-controller="head: #viewing-camera;"
+                vr-mode-toggle-class="class: ui"
+                vr-mode-toggle-visibility
+                vr-mode-toggle-playing__hud-controller
             >
                 <a-entity visibility-while-frozen="requireHoverOnNonMobile: false;" rotation="30 0 0">
                     <a-entity class="leave-btn" position="0 0 0" scale="0.7 0.7 0.7" leave-room-button is-remote-hover-target tags="singleActionButton: true;">
@@ -886,7 +889,7 @@
                         </a-entity>
                     </a-entity>
                 </a-entity>
-                <a-entity in-world-hud rotation="30 0 0" >
+                <a-entity in-world-hud visibility-while-frozen="visible: false; requireHoverOnNonMobile: false;" rotation="30 0 0" >
                     <a-rounded height="0.08" width="0.2" color="#000000" position="-0.44 -0.045 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
                     <a-image scale="0.07 0.06 0.06" position="-0.38 -0.005 0.001" src="#presence-count" material="alphaTest:0.1;"></a-image>
                     <a-entity id="hud-presence-count" text="value: ; width:1.1; align:center;" position="-0.30 -0.005 0" matrix-auto-update="target: text;"></a-entity>

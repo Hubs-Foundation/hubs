@@ -28,8 +28,7 @@
     "test": "npm run lint && npm run test:unit && npm run build",
     "test:unit": "ava",
     "stats": "rimraf ./dist && webpack --mode=production --json",
-    "spritesheet": "npm run spritesheet:css && npm run spritesheet:system-action && npm run spritesheet:system-notice",
-    "spritesheet:css": "spritesheet-js -f custom-scale-css-modules -p src/assets/images/spritesheets/ --customCanvasWidth 840 --customCanvasWidth 840 -n css-spritesheet src/assets/images/css-sprites/* --hubsFlag anything --customHeight 40 --customWidth 40",
+    "spritesheet": "npm run spritesheet:system-action && npm run spritesheet:system-notice",
     "spritesheet:system-action": "spritesheet-js -f json -p src/assets/images/spritesheets/ --padding 8 --divisibleByTwo -n sprite-system-action-spritesheet --powerOfTwo src/assets/images/sprites/action/*",
     "spritesheet:system-notice": "spritesheet-js -f json -p src/assets/images/spritesheets/ --padding 8 --divisibleByTwo -n sprite-system-notice-spritesheet --powerOfTwo src/assets/images/sprites/notice/*"
   },
