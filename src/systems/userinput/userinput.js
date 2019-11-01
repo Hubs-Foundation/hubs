@@ -268,6 +268,33 @@ AFRAME.registerSystem("userinput", {
     nonVRGamepadMappings.set(XboxControllerDevice, xboxControllerUserBindings);
     nonVRGamepadMappings.set(GamepadDevice, gamepadBindings);
 
+    const addExtraMappings = (activeDevice) => {
+      if (activeDevice instanceof ViveControllerDevice && activeDevice.gamepad) {
+        if (activeDevice.gamepad.id === "OpenVR Cosmos") {
+          //HTC Vive Cosmos Controller
+          this.registeredMappings.add(viveCosmosUserBindings);
+        } else if (activeDevice.gamepad.id === "HTC Vive Focus Plus Controller") {
+          //HTC Vive Focus Plus Controller
+          this.registeredMappings.add(viveFocusPlusUserBindings);
+        } else if (activeDevice.gamepad.axes.length === 4) {
+          //Valve Index Controller
+          this.registeredMappings.add(indexUserBindings);
+        } else {
+          //HTC Vive Controller (wands)
+          this.registeredMappings.add(viveWandUserBindings);
+        }
+      }
+    }
+
+    const deleteExtraMappings = (activeDevice) => {
+      if (activeDevice instanceof ViveControllerDevice && activeDevice.gamepad) {
+        this.registeredMappings.delete(viveCosmosUserBindings);
+        this.registeredMappings.delete(viveFocusPlusUserBindings);
+        this.registeredMappings.delete(indexUserBindings);
+        this.registeredMappings.delete(viveWandUserBindings);
+      }
+    }
+
     const updateBindingsForVRMode = () => {
       const inVRMode = this.el.sceneEl.is("vr-mode");
       const isMobile = AFRAME.utils.device.isMobile();
@@ -280,22 +307,7 @@ AFRAME.registerSystem("userinput", {
           const activeDevice = this.activeDevices.items[i];
           const mapping = vrGamepadMappings.get(activeDevice.constructor);
           mapping && this.registeredMappings.add(mapping);
-
-          if (activeDevice instanceof ViveControllerDevice && activeDevice.gamepad) {
-            if (activeDevice.gamepad.id === "OpenVR Cosmos") {
-              //HTC Vive Cosmos Controller
-              this.registeredMappings.add(viveCosmosUserBindings);
-            } else if (activeDevice.gamepad.id === "HTC Vive Focus Plus Controller") {
-              //HTC Vive Focus Plus Controller
-              this.registeredMappings.add(viveFocusPlusUserBindings);
-            } else if (activeDevice.gamepad.axes.length === 4) {
-              //Valve Index Controller
-              this.registeredMappings.add(indexUserBindings);
-            } else {
-              //HTC Vive Controller (wands)
-              this.registeredMappings.add(viveWandUserBindings);
-            }
-          }
+          addExtraMappings(activeDevice);
         }
 
         // Handle cardboard by looking of VR device caps
@@ -312,6 +324,7 @@ AFRAME.registerSystem("userinput", {
         // remove mappings for all active VR input devices
         for (let i = 0; i < this.activeDevices.items.length; i++) {
           const activeDevice = this.activeDevices.items[i];
+          deleteExtraMappings(activeDevice);
           this.registeredMappings.delete(vrGamepadMappings.get(activeDevice.constructor));
         }
         this.registeredMappings.add(isMobile ? touchscreenUserBindings : keyboardMouseUserBindings);
