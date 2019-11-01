@@ -4,6 +4,7 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import en from "react-intl/locale-data/en";
 
+import configs from "../utils/configs";
 import { lang, messages } from "../utils/i18n";
 import { playVideoWithStopOnBlur } from "../utils/video-utils.js";
 import homeVideoWebM from "../assets/video/home.webm";
@@ -189,9 +190,11 @@ class HomeRoot extends Component {
                   <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
                     <FormattedMessage id="home.community_link" />
                   </a>
-                  <a href="/spoke" rel="noreferrer noopener">
-                    Spoke
-                  </a>
+                  {configs.feature("disable_spoke") ? null : (
+                    <a href="/spoke" rel="noreferrer noopener">
+                      Spoke
+                    </a>
+                  )}
                   {this.props.showAdmin && (
                     <a href="/admin" rel="noreferrer noopener">
                       <i>
@@ -220,7 +223,10 @@ class HomeRoot extends Component {
                 )}
               </div>
             </div>
-            <div className={styles.heroContent}>
+            <div
+              className={styles.heroContent}
+              style={{ backgroundImage: configs.image("home_background", null, true) }}
+            >
               {!this.props.hideHero &&
                 (this.props.favoriteHubsResult &&
                 this.props.favoriteHubsResult.entries &&
@@ -358,7 +364,7 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel} key={1}>
         <div className={styles.container}>
           <div className={classNames([styles.logo, styles.logoMargin])}>
-            <img src={hubLogo} />
+            <img src={configs.image("logo", hubLogo)} />
           </div>
         </div>
         <div className={styles.ctaButtons}>
@@ -381,7 +387,7 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel}>
         <div className={styles.container}>
           <div className={styles.logo}>
-            <img src={hubLogo} />
+            <img src={configs.image("logo", hubLogo)} />
           </div>
           <div className={styles.blurb}>
             <FormattedMessage id="home.hero_blurb" />

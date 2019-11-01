@@ -342,6 +342,12 @@ module.exports = (env, argv) => ({
         to: "manifest.webmanifest"
       }
     ]),
+    new CopyWebpackPlugin([
+      {
+        from: "src/schema.toml",
+        to: "schema.toml"
+      }
+    ]),
     // Extract required css and add a content hash.
     new MiniCssExtractPlugin({
       filename: "assets/stylesheets/[name]-[contenthash].css",
