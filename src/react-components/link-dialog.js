@@ -46,9 +46,14 @@ export default class LinkDialog extends Component {
               <div>
                 <FormattedMessage id="link.in_your_browser" />
               </div>
-                <a href={`https://${messages["app-short-domain"]}`} className={styles.domain} target="_blank" rel="noopener noreferrer">
-                  <FormattedMessage id="app-short-domain" />
-                </a>
+              <a
+                href={`https://${messages["app-short-domain"]}`}
+                className={styles.domain}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FormattedMessage id="app-short-domain" />
+              </a>
               <div>
                 <FormattedMessage id="link.enter_code" />
               </div>
