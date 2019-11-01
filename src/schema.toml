@@ -3,7 +3,6 @@ translations.en."home.hero_blurb" = { category = "translations", type = "string"
 translations.en."settings.community" = { category = "translations", type = "string", name = "Community Prompt", description = "Prompt for joining your community." }
 translations.en."app-name" = { category = "translations", type = "string", name = "App Name", description = "Name used across the app." }
 translations.en."company-name" = { category = "translations", type = "string", name = "Company Name", description = "Company name used across the app." }
-translations.en."app-domain" = { category = "translations", type = "string", name = "App Domain", description = "Primary app domain." }
 translations.en."app-short-domain" = { category = "translations", type = "string", name = "Short App Domain", description = "Short app domain." }
 translations.en."contact-email" = { category = "translations", type = "string", name = "Contact email", description = "General contact email." }
 

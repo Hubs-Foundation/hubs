@@ -10,9 +10,9 @@ AFRAME.registerComponent("tweet-media-button", {
       const hasDiscordBridges = window.APP.hubChannel && window.APP.hubChannel.discordBridges().length > 0;
 
       const text = !hasDiscordBridges
-        ? `Taken in ${messages["app-domain"]} - ` +
+        ? `Taken in ${location.hostname} - ` +
           `join me now at ${messages["app-short-domain"]}/${window.APP.hubChannel.hubId}! `
-        : `Taken in ${messages["app-domain"]} `;
+        : `Taken in ${location.hostname} `;
 
       const { src, contentSubtype } = this.targetEl.components["media-loader"].data;
       this.el.sceneEl.emit("action_media_tweet", { url: src, contentSubtype, text, el: this.targetEl });
