@@ -127,7 +127,7 @@ AFRAME.registerComponent("character-controller", {
 
   // Use this API for waypoint travel so that your matrix doesn't end up in the pool
   // If you have a throw-away matrix, you can push it onto `this.waypoints` and it'll end up in the pool
-  enqueueWaypointTravelTo(inMat4, options, travelTime, allowQuickTakeover) {
+  enqueueWaypointTravelTo(inMat4, options = {}, travelTime, allowQuickTakeover) {
     const pooledMatrix = getPooledMatrix4();
     options.travelTime = travelTime || DEFAULT_WAYPOINT_TRAVEL_TIME;
     options.allowQuickTakeover = allowQuickTakeover;

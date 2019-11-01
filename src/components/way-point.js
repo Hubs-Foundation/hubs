@@ -171,6 +171,10 @@ AFRAME.registerComponent("way-point", {
         this.characterController =
           this.characterController || document.getElementById("avatar-rig").components["character-controller"];
 
+
+        const distance = Math.sqrt(squareDistanceBetween(this.el.object3D, this.viewingCamera.object3D));
+        this.distanceMod = distance / viewingDistance;
+
         waypoint.compose(
           v4.addVectors(
             v5.setFromMatrixColumn(this.el.object3D.matrixWorld, 3),
@@ -179,7 +183,7 @@ AFRAME.registerComponent("way-point", {
               .sub(v2.setFromMatrixColumn(this.el.object3D.matrixWorld, 3))
               .projectOnPlane(v3.set(0, 1, 0))
               .normalize()
-              .multiplyScalar(viewingDistance * 1.25)
+              .multiplyScalar(viewingDistance * this.distanceMod)
           ),
           quaternion.setFromRotationMatrix(m1.extractRotation(this.viewingCamera.object3D.matrixWorld)),
           v6.setFromMatrixScale(this.el.object3D.matrixWorld)
@@ -268,9 +272,26 @@ AFRAME.registerComponent("way-point", {
         this.holding = true;
         this.holdTime = t;
         this.shouldStartHold = false;
-        if (window.lastFocusedItem !== this.el) {
-          this.distanceMod = DEFAULT_DISTANCE_MOD;
-        }
+
+        this.avatarPOV = this.avatarPOV || document.getElementById("avatar-pov-node");
+        this.characterController =
+          this.characterController || document.getElementById("avatar-rig").components["character-controller"];
+        this.avatarPOV.object3D.updateMatrices();
+        this.el.object3D.updateMatrices();
+        const box = getBox(this.el, this.el.getObject3D("mesh") || this.el, true);
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+        const viewingDistance = calculateViewingDistance(
+          this.el.sceneEl.camera.fov,
+          this.el.sceneEl.camera.aspect,
+          this.el,
+          box,
+          center,
+          this.el.sceneEl.is("vr-mode")
+        );
+        const distance = Math.sqrt(squareDistanceBetween(this.el.object3D, this.viewingCamera.object3D));
+        this.distanceMod = distance / viewingDistance;
+        console.log("distance mod is ", this.distanceMod);
         window.lastFocusedItem = this.el;
         window.isHoldingWaypoint = true;
       }
@@ -288,7 +309,7 @@ AFRAME.registerComponent("way-point", {
         this.distanceMod = THREE.Math.clamp(
           this.distanceMod + deltaDistance + (5 * this.prevDeltaDistance) / 6,
           0.1,
-          100
+          10
         );
         //this.onInteract();
 
