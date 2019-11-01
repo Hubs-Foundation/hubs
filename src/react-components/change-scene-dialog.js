@@ -1,10 +1,12 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import styles from "../assets/stylesheets/change-scene-dialog.scss";
+import { FormattedMessage } from "react-intl";
 import cx from "classnames";
+
+import configs from "../utils/configs";
+import styles from "../assets/stylesheets/change-scene-dialog.scss";
 import DialogContainer from "./dialog-container.js";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
-import { FormattedMessage } from "react-intl";
 
 export default class ChangeSceneDialog extends Component {
   state = {
@@ -46,9 +48,13 @@ export default class ChangeSceneDialog extends Component {
           <div>
             <p>
               Paste a URL to a{" "}
-              <a href="/spoke" target="_blank" rel="noopener noreferrer">
-                Spoke
-              </a>{" "}
+              {configs.feature("enable_spoke") && (
+                <>
+                  <a href="/spoke" target="_blank" rel="noopener noreferrer">
+                    Spoke
+                  </a>{" "}
+                </>
+              )}
               scene or a URL to a{" "}
               <a href="https://en.wikipedia.org/wiki/GlTF#GLB" target="_blank" rel="noopener noreferrer">
                 GLB
@@ -73,14 +79,16 @@ export default class ChangeSceneDialog extends Component {
                   <FormattedMessage id="change-scene-dialog.change-scene" />
                 </button>
               </div>
-              <div className={styles.spokeCreate}>
-                <div>
-                  <FormattedMessage id="change-scene-dialog.create-in-spoke" />
+              {configs.feature("enable_spoke") && (
+                <div className={styles.spokeCreate}>
+                  <div>
+                    <FormattedMessage id="change-scene-dialog.create-in-spoke" />
+                  </div>
+                  <a className={styles.spokeLaunch} href="/spoke/new" target="_blank" rel="noopener noreferrer">
+                    <FormattedMessage id="change-scene-dialog.new-spoke-project" />
+                  </a>
                 </div>
-                <a className={styles.spokeLaunch} href="/spoke/new" target="_blank" rel="noopener noreferrer">
-                  <FormattedMessage id="change-scene-dialog.new-spoke-project" />
-                </a>
-              </div>
+              )}
             </div>
           </form>
         </div>
