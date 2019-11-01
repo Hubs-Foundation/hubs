@@ -306,14 +306,16 @@ export default class SettingsMenu extends Component {
                   <FormattedMessage id="settings.community" />
                 </a>
               )}
-              <button
-                onClick={e => {
-                  e.preventDefault();
-                  this.props.pushHistoryState("modal", "feedback");
-                }}
-              >
-                <FormattedMessage id="settings.send-feedback" />
-              </button>
+              {configs.feature("show_feedback_ui") && (
+                <button
+                  onClick={e => {
+                    e.preventDefault();
+                    this.props.pushHistoryState("modal", "feedback");
+                  }}
+                >
+                  <FormattedMessage id="settings.send-feedback" />
+                </button>
+              )}
               <a className={styles.bottomLink} href="/?report" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.report" />
               </a>

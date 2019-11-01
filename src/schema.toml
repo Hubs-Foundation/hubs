@@ -14,6 +14,7 @@ features.show_discord_bot_link = { category = "features", type = "boolean", show
 features.show_whats_new_link = { category = "features", type = "boolean", show_on_self_hosted = "false" }
 features.show_source_link = { category = "features", type = "boolean", show_on_self_hosted = "false" }
 features.show_newsletter_dialog = { category = "features", type = "boolean", show_on_self_hosted = "false" }
+features.show_feedback_ui = { category = "features", type = "boolean", show_on_self_hosted = "false" }
 
 images.logo = { category = "images", type = "file", name = "App Logo", description = "Logo used across the app." }
 images.company_logo = { category = "images", type = "file", name = "Company Logo", description = "Company logo used across the app." }

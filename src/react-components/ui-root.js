@@ -2010,11 +2010,13 @@ class UIRoot extends Component {
                   }}
                 />
                 {!watching && !streaming ? (
-                  <div className={styles.nagCornerButton}>
-                    <button onClick={() => this.pushHistoryState("modal", "feedback")}>
-                      <FormattedMessage id="feedback.prompt" />
-                    </button>
-                  </div>
+                  configs.feature("show_feedback_ui") && (
+                    <div className={styles.nagCornerButton}>
+                      <button onClick={() => this.pushHistoryState("modal", "feedback")}>
+                        <FormattedMessage id="feedback.prompt" />
+                      </button>
+                    </div>
+                  )
                 ) : (
                   <div className={styles.nagCornerButton}>
                     <button onClick={() => this.setState({ hide: true })}>
