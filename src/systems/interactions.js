@@ -192,8 +192,11 @@ AFRAME.registerSystem("interaction", {
     if (state.held) {
       const networked = state.held.components["networked"];
       const lostOwnership = networked && networked.data && networked.data.owner !== NAF.clientId;
-      if (userinput.get(options.dropPath) || lostOwnership) {
+      if (userinput.get(options.dropPath)) {
         state.held = null;
+      }
+      if (lostOwnership) {
+        console.warn("lost ownership?", lostOwnership); //TODO : must handle case where you're holding something you don't own, e.g. in order to change your motion controls
       }
     } else {
       state.hovered = options.hoverFn.call(
@@ -209,7 +212,7 @@ AFRAME.registerSystem("interaction", {
         if (
           isTagged(entity, "isHoldable") &&
           userinput.get(options.grabPath) &&
-          (isFrozen || !isPinned) &&
+          (isFrozen || !isPinned || entity.components["way-point"]) &&
           canMove(entity)
         ) {
           state.held = entity;

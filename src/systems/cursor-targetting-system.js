@@ -1,5 +1,16 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
+const noop = function() {};
+AFRAME.registerComponent("overwrite-raycast-as-noop", {
+  init() {
+    this.mesh = this.mesh || this.el.getObject3D("mesh");
+    setTimeout(() => {
+      this.el.object3D.raycast = noop;
+      this.el.getObject3D("mesh").raycast = noop;
+    }, 1000);
+  }
+});
+
 export class CursorTargettingSystem {
   constructor() {
     this.targets = [];

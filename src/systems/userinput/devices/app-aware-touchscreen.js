@@ -8,6 +8,7 @@ const MOVE_CURSOR_JOB = "MOVE CURSOR";
 const MOVE_CAMERA_JOB = "MOVE CAMERA";
 const FIRST_PINCHER_JOB = "FIRST PINCHER";
 const SECOND_PINCHER_JOB = "SECOND PINCHER";
+const MAX_DELTA = 10;
 
 const TAP_PATHS = [
   paths.device.touchscreen.tap1,
@@ -59,7 +60,12 @@ function shouldMoveCursor(touch, raycaster) {
   const isPinned =
     remoteHoverTarget && remoteHoverTarget.components.pinnable && remoteHoverTarget.components.pinnable.data.pinned;
   const isFrozen = AFRAME.scenes[0].is("frozen");
-  return isInteractable && (isFrozen || !isPinned) && (remoteHoverTarget && canMove(remoteHoverTarget));
+  return (
+    isInteractable &&
+    (isFrozen || (!isPinned || (remoteHoverTarget && remoteHoverTarget.components["way-point"]))) &&
+    (remoteHoverTarget && canMove(remoteHoverTarget)) &&
+    remoteHoverTarget
+  );
 }
 
 export class AppAwareTouchscreenDevice {
@@ -159,6 +165,15 @@ export class AppAwareTouchscreenDevice {
           (touch.clientX / window.innerWidth) * 2 - 1,
           -(touch.clientY / window.innerHeight) * 2 + 1
         );
+        if (assignment.waypoint) {
+          assignment.delta[0] += (touch.clientX - assignment.clientX) / 50;
+          assignment.delta[0] = THREE.Math.clamp(assignment.delta[0], -MAX_DELTA, MAX_DELTA);
+          assignment.delta[1] += touch.clientY - assignment.clientY;
+          assignment.delta[1] = THREE.Math.clamp(assignment.delta[1], -MAX_DELTA, MAX_DELTA);
+          window.isTouchscreen = true;
+          assignment.clientX = touch.clientX;
+          assignment.clientY = touch.clientY;
+        }
         break;
       case MOVE_CAMERA_JOB:
         assignment.delta[0] += touch.clientX - assignment.clientX;
@@ -197,9 +212,13 @@ export class AppAwareTouchscreenDevice {
       let assignment;
 
       // First touch or third touch and other two fingers were pinching
-      if (shouldMoveCursor(touch, this.raycaster)) {
+      const remoteHoverTarget = shouldMoveCursor(touch, this.raycaster);
+      if (remoteHoverTarget) {
         assignment = assign(touch, MOVE_CURSOR_JOB, this.assignments);
-
+        assignment.waypoint = remoteHoverTarget.components["way-point"];
+        if (assignment.waypoint) {
+          assignment.delta = [0, 0]; // will also move camera
+        }
         // Grabbing objects is delayed by several frames:
         // - We don't want the physics constraint to be applied too early, which results in crazy velocities
         // - We don't want to mis-trigger grabs if the user is about to put down a second finger.
@@ -222,7 +241,7 @@ export class AppAwareTouchscreenDevice {
     } else if (isSecondTouch || isThirdTouch) {
       const cursorJob = findByJob(MOVE_CURSOR_JOB, this.assignments);
 
-      if (isSecondTouch && cursorJob && cursorJob.framesUntilGrab < 0) {
+      if (isSecondTouch && cursorJob && !cursorJob.waypoint && cursorJob.framesUntilGrab < 0) {
         // The second touch is happening after grab activated, so assign this touch to first pinch.
         const first = assign(touch, FIRST_PINCHER_JOB, this.assignments);
         first.clientX = touch.clientX;
@@ -295,7 +314,10 @@ export class AppAwareTouchscreenDevice {
       this.pinch.delta = 0;
     }
     const cameraMover =
-      jobIsAssigned(MOVE_CAMERA_JOB, this.assignments) && findByJob(MOVE_CAMERA_JOB, this.assignments);
+      jobIsAssigned(MOVE_CAMERA_JOB, this.assignments) && findByJob(MOVE_CAMERA_JOB, this.assignments); // ||
+    // (jobIsAssigned(MOVE_CURSOR_JOB, this.assignments) &&
+    //   findByJob(MOVE_CURSOR_JOB, this.assignments).waypoint &&
+    //   findByJob(MOVE_CURSOR_JOB, this.assignments))
     if (cameraMover) {
       cameraMover.delta[0] = 0;
       cameraMover.delta[1] = 0;
@@ -332,6 +354,11 @@ export class AppAwareTouchscreenDevice {
         }
 
         assignment.framesUntilUnassign--;
+      }
+
+      if (assignment.waypoint) {
+        const delta = assignment.delta;
+        frame.setVector2(path.touchCameraDelta, delta[0] / window.innerWidth, delta[1] / window.innerHeight);
       }
     }
 

@@ -62,6 +62,19 @@ export default class ObjectInfoDialog extends Component {
     }
   }
 
+  enqueueWaypointTravel() {
+    if (this.characterController) {
+      console.log("has already.");
+    }
+    this.characterController =
+      this.characterController || document.getElementById("avatar-rig").components["character-controller"];
+    if (this.characterController) {
+      console.log("has now");
+      this.characterController.enqueueWaypointTravelTo(this.props.el.object3D.matrixWorld);
+      this.props.onClose();
+    }
+  }
+
   delete() {
     const targetEl = this.props.el;
 
@@ -107,6 +120,11 @@ export default class ObjectInfoDialog extends Component {
             <button onClick={this.toggleLights.bind(this)}>
               <FormattedMessage id={`object-info.${this.state.enableLights ? "lower" : "raise"}-lights`} />
             </button>
+            {this.props.scene.is("entered") && (
+              <button onClick={this.enqueueWaypointTravel.bind(this)}>
+                <FormattedMessage id="object-info.waypoint" />
+              </button>
+            )}
             {this.props.scene.is("entered") &&
               !this.state.pinned &&
               this.props.hubChannel &&

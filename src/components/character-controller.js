@@ -4,45 +4,16 @@ import { easeOutQuadratic } from "../utils/easing";
 import { getPooledMatrix4, freePooledMatrix4 } from "../utils/mat4-pool";
 import qsTruthy from "../utils/qs_truthy";
 import { childMatch } from "../systems/camera-system";
-import { interpolateAffine } from "../utils/three-utils";
+import { calculateCameraTransformForWaypoint, interpolateAffine } from "../utils/three-utils";
 const enableWheelSpeed = qsTruthy("wheelSpeed") || qsTruthy("wheelspeed") || qsTruthy("ws");
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
 const MAX_WARNINGS = 10;
 const NAV_ZONE = "character";
-const WAYPOINT_TRAVEL_TIME = 250;
+const DEFAULT_WAYPOINT_TRAVEL_TIME = 0;
+let WAYPOINT_TRAVEL_TIME = 0; //TODO:variable name and location
 const WAYPOINT_DOWN_TIME = 0;
-
-export const cancelPitchAndRoll = (function() {
-  const initial = {
-    viewZ: new THREE.Vector3()
-  };
-  const final = {
-    viewX: new THREE.Vector3(),
-    viewY: new THREE.Vector3(),
-    viewZ: new THREE.Vector3()
-  };
-  const v = new THREE.Vector3();
-  const s = new THREE.Vector3();
-  const up = new THREE.Vector3();
-  const mat4 = new THREE.Matrix4();
-  return function cancelPitchAndRoll(inMat4, outMat4) {
-    mat4.identity();
-    mat4.extractRotation(inMat4);
-    initial.viewZ.setFromMatrixColumn(mat4, 2);
-    final.viewZ
-      .copy(initial.viewZ)
-      .sub(v.copy(initial.viewZ).projectOnVector(up.set(0, 1, 0)))
-      .normalize();
-    final.viewY.set(0, 1, 0);
-    final.viewX.crossVectors(v.copy(final.viewZ).multiplyScalar(-1), final.viewY);
-    mat4.makeBasis(final.viewX, final.viewY, final.viewZ);
-    //mat4.scale(s.setFromMatrixScale(inMat4));
-    mat4.setPosition(v.setFromMatrixColumn(inMat4, 3));
-    outMat4.copy(mat4);
-  };
-})();
 
 /**
  * Avatar movement controller that listens to move, rotate and teleportation events and moves the avatar accordingly.
@@ -61,6 +32,8 @@ AFRAME.registerComponent("character-controller", {
   },
 
   init: function() {
+    this.tick = this.tick.bind(this);
+    this.activeWaypointOptions = {};
     this.charSpeed = 1;
     this.navGroup = null;
     this.navNode = null;
@@ -154,43 +127,23 @@ AFRAME.registerComponent("character-controller", {
 
   // Use this API for waypoint travel so that your matrix doesn't end up in the pool
   // If you have a throw-away matrix, you can push it onto `this.waypoints` and it'll end up in the pool
-  enqueueWaypointTravelTo(inMat4, options) {
+  enqueueWaypointTravelTo(inMat4, options, travelTime, allowQuickTakeover) {
     const pooledMatrix = getPooledMatrix4();
+    options.travelTime = travelTime || DEFAULT_WAYPOINT_TRAVEL_TIME;
+    options.allowQuickTakeover = allowQuickTakeover;
     this.waypoints.push({ waypoint: pooledMatrix.copy(inMat4), options });
   },
 
-  calculateFinalWaypointTransform: (function() {
-    const startCancelled = new THREE.Matrix4();
-    const finalCancelled = new THREE.Matrix4();
-    const uncancel = new THREE.Matrix4();
-    const s = new THREE.Vector3();
-    const v = new THREE.Vector3();
-    return function calculateFinalWaypointTransform(inMat4, final) {
-      this.el.object3D.updateMatrices();
-      this.data.pivot.object3D.updateMatrices();
-      cancelPitchAndRoll(inMat4, finalCancelled);
-      cancelPitchAndRoll(this.data.pivot.object3D.matrixWorld, startCancelled);
-      uncancel.getInverse(startCancelled).multiply(this.data.pivot.object3D.matrixWorld);
-      final.copy(finalCancelled).multiply(uncancel);
-
-      //final.scale(
-      //  //// TODO: Fix bug with 2D mode non uniform scale.
-      //  s.set(
-      //    v.setFromMatrixColumn(inMat4, 0).length(),
-      //    v.setFromMatrixColumn(inMat4, 1).length(),
-      //    v.setFromMatrixColumn(inMat4, 2).length()
-      //  )
-      //);
-    };
-  })(),
   travelByWaypoint: (function() {
     const final = new THREE.Matrix4();
-    const v = new THREE.Vector3();
+    // const v = new THREE.Vector3();
     // Transform the rig such that the pivot's forward direction matches the waypoint's,
     return function travelByWaypoint(inMat4) {
-      this.calculateFinalWaypointTransform(inMat4, final);
+      this.data.pivot.object3D.updateMatrices();
+      calculateCameraTransformForWaypoint(this.data.pivot.object3D.matrixWorld, inMat4, final);
       childMatch(this.el.object3D, this.data.pivot.object3D, final);
       this.el.object3D.updateMatrices();
+
       this.data.pivot.object3D.updateMatrices();
       // TODO: Take care of scale earlier (e.g. in childMatch), because scaling here will mean your view will be above (s>1) or below (s<1) the intended view point
       // TODO: Fix bug with 2D mode non uniform scale.
@@ -199,8 +152,8 @@ AFRAME.registerComponent("character-controller", {
       //        v.setFromMatrixColumn(inMat4, 1).length(),
       //        v.setFromMatrixColumn(inMat4, 2).length()
       //      );
-//      console.log(this.el.object3D.scale);
-      this.el.object3D.matrixNeedsUpdate = true;
+      //      console.log(this.el.object3D.scale);
+      //this.el.object3D.matrixNeedsUpdate = true;
       this.el.object3D.updateMatrices();
     };
   })(),
@@ -219,25 +172,40 @@ AFRAME.registerComponent("character-controller", {
     const startPos = new THREE.Vector3();
     const startScale = new THREE.Vector3();
 
+    const dummyPOV = new THREE.Vector4(); // Spin the rig, but allow free motion of the head along the way
+    const calculatedDummyPOV = new THREE.Matrix4();
+
     return function(t, dt) {
       if (!this.el.sceneEl.is("entered")) return;
       const vrMode = this.el.sceneEl.is("vr-mode");
       this.sfx = this.sfx || this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
 
       if (
-        !this.activeWaypoint &&
         this.waypoints.length &&
-        t > this.prevWaypointTravelTime + (WAYPOINT_TRAVEL_TIME + WAYPOINT_DOWN_TIME)
+        (this.activeWaypointOptions.allowQuickTakeover ||
+          (!this.activeWaypoint && t > this.prevWaypointTravelTime + (WAYPOINT_TRAVEL_TIME + WAYPOINT_DOWN_TIME)))
       ) {
+        if (
+          this.activeWaypointOptions.allowQuickTakeover &&
+          t <= this.prevWaypointTravelTime + (WAYPOINT_TRAVEL_TIME + WAYPOINT_DOWN_TIME)
+        ) {
+          console.log("waypoint needs release");
+          //freePooledMatrix4(this.activeWaypoint);
+          if (this.teleportSound) {
+            this.sfx.stopSoundNode(this.teleportSound);
+          }
+        }
         const { waypoint, options = {} } = this.waypoints.splice(0, 1)[0];
         this.activeWaypoint = waypoint;
+        this.activeWaypointOptions = options;
         this.isMovementDisabled = options.disableMovement;
+        console.log(options.allowQuickTakeover);
+        WAYPOINT_TRAVEL_TIME = options.travelTime || DEFAULT_WAYPOINT_TRAVEL_TIME;
         this.data.pivot.object3D.updateMatrices();
         this.startPoint = new THREE.Matrix4().copy(this.data.pivot.object3D.matrixWorld);
         this.prevWaypointTravelTime = t;
-        this.teleportSound = this.sfx.playSoundLooped(SOUND_TELEPORT_START);
-      }
-      if (this.activeWaypoint && !vrMode && t < this.prevWaypointTravelTime + WAYPOINT_TRAVEL_TIME) {
+        //        this.teleportSound = this.sfx.playSoundLooped(SOUND_TELEPORT_START);
+      } else if (this.activeWaypoint && !vrMode && t - this.prevWaypointTravelTime <= WAYPOINT_TRAVEL_TIME) {
         const progress = THREE.Math.clamp((t - this.prevWaypointTravelTime) / WAYPOINT_TRAVEL_TIME, 0, 1);
         const interpolatedWaypoint = interpolateAffine(
           this.startPoint,
@@ -247,14 +215,22 @@ AFRAME.registerComponent("character-controller", {
         );
         this.travelByWaypoint(interpolatedWaypoint);
       }
-      if (this.activeWaypoint && (vrMode || t > this.prevWaypointTravelTime + WAYPOINT_TRAVEL_TIME)) {
+      if (
+        this.activeWaypoint &&
+        (vrMode ||
+          t >= this.prevWaypointTravelTime + DEFAULT_WAYPOINT_TRAVEL_TIME ||
+          (this.waypoints.length && this.activeWaypointOptions.allowQuickTakeover))
+      ) {
+        console.log("quick takeover", t, this.waypoints.length && this.activeWaypointOptions.allowQuickTakeover);
         this.travelByWaypoint(this.activeWaypoint);
         freePooledMatrix4(this.activeWaypoint);
         this.activeWaypoint = null;
         if (this.teleportSound) {
           this.sfx.stopSoundNode(this.teleportSound);
         }
-        this.sfx.playSoundOneShot(SOUND_TELEPORT_END);
+        if (!this.activeWaypointOptions.allowQuickTakeover) {
+          this.sfx.playSoundOneShot(SOUND_TELEPORT_END);
+        }
       }
       const deltaSeconds = dt / 1000;
       const root = this.el.object3D;
@@ -284,12 +260,17 @@ AFRAME.registerComponent("character-controller", {
       if (userinput.get(paths.actions.snapRotateRight)) {
         this.snapRotateRight();
       }
+      const cameraDelta = userinput.get(paths.actions.cameraDelta);
       const acc = userinput.get(paths.actions.characterAcceleration);
       if (acc) {
         this.accelerationInput.set(
           this.accelerationInput.x + acc[0],
           this.accelerationInput.y + 0,
-          this.accelerationInput.z + acc[1]
+          this.accelerationInput.z +
+            acc[1] +
+            (!this.el.sceneEl.is("frozen") && !window.isHoldingWaypoint && cameraDelta
+              ? cameraDelta[1] * (window.isTouchscreen ? 10 : 1) * dt
+              : 0)
         );
       }
       if (userinput.get(paths.actions.toggleFly)) {

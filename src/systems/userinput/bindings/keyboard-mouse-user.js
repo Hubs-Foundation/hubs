@@ -626,6 +626,14 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.rising
     }
   ],
+
+  [sets.rightCursorHoldingWaypoint]: [
+    {
+      src: { value: paths.device.mouse.wheel },
+      dest: { value: paths.actions.waypointDeltaDistance },
+      xform: xforms.copy
+    }
+  ],
   [sets.inspecting]: [
     {
       src: { value: paths.device.keyboard.key("space") },

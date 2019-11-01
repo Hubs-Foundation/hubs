@@ -73,6 +73,7 @@
             <template id="way-point-interactable-template">
                 <a-entity>
                     <a-entity
+                        overwrite-raycast-as-noop
                         class="waypoint-model"
                         gltf-model-plus="inflate: true; src: #spawn-point;"
                         position="0 -1.6 0"
@@ -94,6 +95,7 @@
                               >
                     </a-entity>
                     <a-entity
+                        is-not-remote-hover-target
                         class="waypoint-model"
                         gltf-model-plus="inflate: true; src: #spawn-point;"
                         position="0 -1.6 0"
@@ -255,6 +257,7 @@
                     matrix-auto-update
                     position-at-box-shape-border__freeze="target:.freeze-menu;"
                     way-point="templateId: way-point-interactable-template; keepOrientation: true; offset: 0 0 1; modelSelector: .waypoint-model"
+                    pinnable
                     hoverable-visuals
                 >
                     <a-entity class="ui interactable-ui">

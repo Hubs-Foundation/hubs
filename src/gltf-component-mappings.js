@@ -148,6 +148,17 @@ function mediaInflator(el, componentName, componentData, components) {
     const hasVolume = componentName === "video";
     const templateName = isControlled || hasVolume ? "#static-controlled-media" : "#static-media";
 
+    console.log(
+      isControlled,
+      componentData.controls,
+      hasVolume,
+      components.networked.id,
+      "got some other thing",
+      el,
+      componentName,
+      componentData,
+      templateName
+    );
     el.setAttribute("networked", {
       template: templateName,
       owner: "scene",

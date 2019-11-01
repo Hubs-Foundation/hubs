@@ -12,6 +12,7 @@ sets.rightCursorHoldingCamera = "rightCursorHoldingCamera";
 sets.rightCursorHoldingInteractable = "rightCursorHoldingInteractable";
 sets.rightCursorHoldingUI = "rightCursorHoldingUI";
 sets.rightCursorHoldingNothing = "rightCursorHoldingNothing";
+sets.rightCursorHoldingWaypoint = "rightCursorHoldingWaypoint";
 sets.leftCursorHoveringOnPen = "leftCursorHoveringOnPen";
 sets.leftCursorHoveringOnCamera = "leftCursorHoveringOnCamera";
 sets.leftCursorHoveringOnInteractable = "leftCursorHoveringOnInteractable";

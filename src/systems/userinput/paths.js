@@ -23,6 +23,7 @@ paths.actions.toggleFreeze = "/actions/toggleFreeze";
 paths.actions.thaw = "/actions/thaw";
 paths.actions.muteMic = "/actions/muteMic";
 paths.actions.toggleFly = "/actions/toggleFly";
+paths.actions.waypointDeltaDistance = "/actions/waypointDeltaDistance";
 paths.actions.focusChat = "/actions/focusChat";
 paths.actions.focusChatCommand = "/actions/focusChatCommand";
 paths.actions.toggleCamera = "/actions/toggleCamera";

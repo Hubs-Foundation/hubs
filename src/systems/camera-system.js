@@ -1,5 +1,5 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
-import { setMatrixWorld } from "../utils/three-utils";
+import { setMatrixWorld, calculateViewingDistance } from "../utils/three-utils";
 import { paths } from "./userinput/paths";
 import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
@@ -22,22 +22,6 @@ function getBatch(inspected, batchManagerSystem) {
         batchManagerSystem.batchManager.batchForMesh.get(inspected.el.object3DMap.mesh)))
   );
 }
-
-const calculateViewingDistance = (function() {
-  return function calculateViewingDistance(camera, object, box, center) {
-    const halfYExtents = Math.max(Math.abs(box.max.y - center.y), Math.abs(center.y - box.min.y));
-    const halfXExtents = Math.max(Math.abs(box.max.x - center.x), Math.abs(center.x - box.min.x));
-    const halfVertFOV = THREE.Math.degToRad(camera.el.sceneEl.camera.fov / 2);
-    const halfHorFOV =
-      Math.atan(Math.tan(halfVertFOV) * camera.el.sceneEl.camera.aspect) * (object.el.sceneEl.is("vr-mode") ? 0.5 : 1);
-    const margin = 1.05;
-    const length1 = Math.abs((halfYExtents * margin) / Math.tan(halfVertFOV));
-    const length2 = Math.abs((halfXExtents * margin) / Math.tan(halfHorFOV));
-    const length3 = Math.abs(box.max.z - center.z) + Math.max(length1, length2);
-    const length = object.el.sceneEl.is("vr-mode") ? Math.max(0.25, length3) : length3;
-    return length || 1.25;
-  };
-})();
 
 const decompose = (function() {
   const scale = new THREE.Vector3();
@@ -146,7 +130,9 @@ const moveRigSoCameraLooksAtObject = (function() {
 
     const box = getBox(object.el, object.el.getObject3D("mesh") || object, true);
     box.getCenter(center);
-    const dist = calculateViewingDistance(camera, object, box, center) * distanceMod;
+    const dist =
+      calculateViewingDistance(object.el.sceneEl.camera.fov, object.el.sceneEl.camera.aspect, object, box, center) *
+      distanceMod;
     target.position.addVectors(
       owp,
       oForw

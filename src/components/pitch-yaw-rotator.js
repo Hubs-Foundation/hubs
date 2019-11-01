@@ -12,6 +12,8 @@ const rotatePitchAndYaw = (function() {
   const UP = new THREE.Vector3(0, 1, 0);
 
   return function rotatePitchAndYaw(o, p, y) {
+    o.parent.updateMatrices();
+    o.updateMatrices();
     o.parent.getWorldQuaternion(opq);
     o.getWorldQuaternion(owq);
     oq.copy(o.quaternion);
@@ -37,6 +39,7 @@ const rotatePitchAndYaw = (function() {
     } else {
       o.quaternion.copy(q);
       o.matrixNeedsUpdate = true;
+      o.updateMatrices();
     }
   };
 })();
@@ -58,7 +61,11 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
         scene.is("entered") ? paths.actions.cameraDelta : paths.actions.lobbyCameraDelta
       );
       if (cameraDelta) {
-        rotatePitchAndYaw(this.el.object3D, this.pendingXRotation + cameraDelta[1], cameraDelta[0]);
+        rotatePitchAndYaw(
+          this.el.object3D,
+          this.el.sceneEl.is("frozen") && !window.isHoldingWaypoint ? this.pendingXRotation + cameraDelta[1] : 0,
+          cameraDelta[0]
+        );
       } else if (this.pendingXRotation) {
         rotatePitchAndYaw(this.el.object3D, this.pendingXRotation, 0);
       }

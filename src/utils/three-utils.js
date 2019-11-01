@@ -241,3 +241,79 @@ export const squareDistanceBetween = (function() {
     return posA.distanceToSquared(posB);
   };
 })();
+
+export function isAlmostUniformVector3(v, epsilonHalf = 0.005) {
+  return Math.abs(v.x - v.y) < epsilonHalf && Math.abs(v.x - v.z) < epsilonHalf;
+}
+export function almostEqual(a, b, epsilon = 0.01) {
+  return Math.abs(a - b) < epsilon;
+}
+
+export const affixToWorldUp = (function() {
+  const inRotationMat4 = new THREE.Matrix4();
+  const inForward = new THREE.Vector3();
+  const outForward = new THREE.Vector3();
+  const outSide = new THREE.Vector3();
+  const worldUp = new THREE.Vector3(); // Could be called "outUp"
+  const v = new THREE.Vector3();
+  const inMat4Copy = new THREE.Matrix4();
+  return function affixToWorldUp(inMat4, outMat4) {
+    inRotationMat4.identity().extractRotation(inMat4Copy.copy(inMat4));
+    inForward.setFromMatrixColumn(inRotationMat4, 2);
+    outForward
+      .copy(inForward)
+      .sub(v.copy(inForward).projectOnVector(worldUp.set(0, 1, 0)))
+      .normalize()
+      .multiplyScalar(-1);
+    outSide.crossVectors(outForward, worldUp);
+    outMat4.makeBasis(outSide, worldUp, outForward);
+    //outMat4.scale(v.setFromMatrixScale(inMat4Copy)); //TODO: Fix scale
+    outMat4.setPosition(v.setFromMatrixColumn(inMat4Copy, 3));
+  };
+})();
+
+export const calculateCameraTransformForWaypoint = (function() {
+  const upAffixedCameraTransform = new THREE.Matrix4();
+  const upAffixedWaypointTransform = new THREE.Matrix4();
+  const detachFromWorldUp = new THREE.Matrix4();
+  return function calculateCameraTransformForWaypoint(cameraTransform, waypointTransform, outMat4) {
+    affixToWorldUp(cameraTransform, upAffixedCameraTransform);
+    detachFromWorldUp.getInverse(upAffixedCameraTransform).multiply(cameraTransform);
+    affixToWorldUp(waypointTransform, upAffixedWaypointTransform); // TODO: Option not to fix world up
+    outMat4.copy(upAffixedWaypointTransform).multiply(detachFromWorldUp); // TODO: Try opposite matrix order that agrees more with intuition
+  };
+})();
+
+export const calculateCameraTransformForWaypoint2 = (function() {
+  return function calculateCameraTransformForWaypoint2(cameraTransform, waypointTransform, outMat4) {
+    calculateCameraTransformForWaypoint(cameraTransform, waypointTransform, outMat4);
+
+    return outMat4;
+  };
+})();
+export const calculateCameraTransformForWaypoint3 = (function() {
+  const upAffixedCameraTransform = new THREE.Matrix4();
+  const upAffixedWaypointTransform = new THREE.Matrix4();
+  const detachFromWorldUp = new THREE.Matrix4();
+  return function calculateCameraTransformForWaypoint3(cameraTransform, waypointTransform, outMat4) {
+    affixToWorldUp(cameraTransform, upAffixedCameraTransform);
+    detachFromWorldUp.getInverse(upAffixedCameraTransform).multiply(cameraTransform);
+    affixToWorldUp(waypointTransform, upAffixedWaypointTransform); // TODO: Option not to fix world up
+    outMat4.copy(upAffixedWaypointTransform).multiply(detachFromWorldUp); // TODO: Try opposite matrix order that agrees more with intuition
+  };
+})();
+
+export const calculateViewingDistance = (function() {
+  return function calculateViewingDistance(fov, aspect, object, box, center, vrMode) {
+    const halfYExtents = Math.max(Math.abs(box.max.y - center.y), Math.abs(center.y - box.min.y));
+    const halfXExtents = Math.max(Math.abs(box.max.x - center.x), Math.abs(center.x - box.min.x));
+    const halfVertFOV = THREE.Math.degToRad(fov / 2);
+    const halfHorFOV = Math.atan(Math.tan(halfVertFOV) * aspect) * (vrMode ? 0.5 : 1);
+    const margin = 1.05;
+    const length1 = Math.abs((halfYExtents * margin) / Math.tan(halfVertFOV));
+    const length2 = Math.abs((halfXExtents * margin) / Math.tan(halfHorFOV));
+    const length3 = Math.abs(box.max.z - center.z) + Math.max(length1, length2);
+    const length = vrMode ? Math.max(0.25, length3) : length3;
+    return length || 1.25;
+  };
+})();
