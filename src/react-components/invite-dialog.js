@@ -38,7 +38,7 @@ export default class InviteDialog extends Component {
 
   shareClicked = url => {
     this.setState({ shareButtonActive: true });
-    share({ url, title: "Join me now in #hubs!" }).then(() => {
+    share({ url, title: `Join me now in #${messages["app-name"].toLowerCase()}!` }).then(() => {
       this.setState({ shareButtonActive: false });
     });
   };

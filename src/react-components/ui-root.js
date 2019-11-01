@@ -937,9 +937,13 @@ class UIRoot extends Component {
             <FormattedMessage id="contact-email" />
           </a>
           .<p />
-          If you&apos;d like to run your own server, hubs&apos;s source code is available on{" "}
-          <a href="https://github.com/mozilla/hubs">GitHub</a>
-          .
+          {configs.feature("show_source_link") && (
+            <>
+              If you&apos;d like to run your own server, Hubs&apos;s source code is available on{" "}
+              <a href="https://github.com/mozilla/hubs">GitHub</a>
+              .
+            </>
+          )}
         </div>
       );
     } else if (this.props.platformUnsupportedReason === "no_data_channels") {
@@ -955,9 +959,9 @@ class UIRoot extends Component {
               WebRTC Data Channels
             </a>
           </WithHoverSound>
-          , which is required to use Hubs.
+          , which is required to use {messages["app-name"]}.
           <br />
-          If you&quot;d like to use Hubs with Oculus or SteamVR, you can{" "}
+          If you&quot;d like to use {messages["app-name"]} with Oculus or SteamVR, you can{" "}
           <WithHoverSound>
             <a href="https://www.mozilla.org/firefox" rel="noreferrer noopener">
               Download Firefox
