@@ -10,6 +10,7 @@ import screenfull from "screenfull";
 import configs from "../utils/configs";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
+import hubLogo from "../assets/images/logo.svg";
 import styles from "../assets/stylesheets/ui-root.scss";
 import emojiStyles from "../assets/stylesheets/ui-emoji.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
@@ -985,7 +986,7 @@ class UIRoot extends Component {
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="exited-panel">
-          <img className="exited-panel__logo" src="../assets/images/logo.svg" />
+          <img className="exited-panel__logo" src={configs.image("logo", hubLogo)} />
           <div className="exited-panel__subtitle">{subtitle}</div>
         </div>
       </IntlProvider>
@@ -995,7 +996,7 @@ class UIRoot extends Component {
   renderBotMode = () => {
     return (
       <div className="loading-panel">
-        <img className="loading-panel__logo" src="../assets/images/logo.svg" />
+        <img className="loading-panel__logo" src={configs.image("logo", hubLogo)} />
         <input type="file" id="bot-audio-input" accept="audio/*" />
         <input type="file" id="bot-data-input" accept="application/json" />
       </div>
