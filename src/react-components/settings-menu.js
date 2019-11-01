@@ -316,9 +316,16 @@ export default class SettingsMenu extends Component {
                   <FormattedMessage id="settings.send-feedback" />
                 </button>
               )}
-              <a className={styles.bottomLink} href="/?report" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="settings.report" />
-              </a>
+              {configs.feature("show_issue_report_link") && (
+                <a
+                  className={styles.bottomLink}
+                  href={configs.link("issue_report", "/?report")}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <FormattedMessage id="settings.report" />
+                </a>
+              )}
               {configs.feature("show_terms") && (
                 <a
                   className={styles.bottomLink}

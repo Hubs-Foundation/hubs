@@ -298,14 +298,25 @@ class HomeRoot extends Component {
                       <FormattedMessage id="home.get_updates" />
                     </a>
                   )}
-                  <a
-                    className={styles.link}
-                    rel="noopener noreferrer"
-                    href="#"
-                    onClick={this.onLinkClicked(this.showReportDialog)}
-                  >
-                    <FormattedMessage id="home.report_issue" />
-                  </a>
+                  {configs.feature("show_issue_report_link") ? (
+                    <a
+                      className={styles.link}
+                      href={configs.link("issue_report", "/?report")}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
+                      <FormattedMessage id="settings.report" />
+                    </a>
+                  ) : (
+                    <a
+                      className={styles.link}
+                      rel="noopener noreferrer"
+                      href="#"
+                      onClick={this.onLinkClicked(this.showReportDialog)}
+                    >
+                      <FormattedMessage id="home.report_issue" />
+                    </a>
+                  )}
                   {configs.feature("show_terms") && (
                     <a
                       className={styles.link}

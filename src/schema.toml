@@ -8,6 +8,7 @@ features.show_controls_link = { category = "features", type = "boolean", name = 
 features.show_features_link = { category = "features", type = "boolean", name = "Show Features Links", description = "Show links to features documentation." }
 features.show_community_link = { category = "features", type = "boolean", name = "Show Community Links", description = "Show links to your community." }
 features.show_company_logo = { category = "features", type = "boolean", name = "Show Company Logo", description = "Show the company logo across the app." }
+features.show_issue_report_link = { category = "features", type = "boolean", name = "Show Issue Report Link", description = "Show a link for reporting issues." }
 
 features.enable_spoke = { category = "features", type = "boolean", show_on_self_hosted = "false" }
 features.show_join_us_dialog = { category = "features", type = "boolean", show_on_self_hosted = "false" }
@@ -28,3 +29,4 @@ links.privacy_notice = { category = "links", type = "string", name = "Privacy No
 links.controls = { category = "links", type = "string", name = "Controls Documentation", description = "Link to controls documentation."}
 links.features = { category = "links", type = "string", name = "Features Documentation", description = "Link to features documentation."}
 links.community = { category = "links", type = "string", name = "Community", description = "Link to your community."}
+links.issue_report = { category = "links", type = "string", name = "Issue Report", description = "Link for reporting issues."}
