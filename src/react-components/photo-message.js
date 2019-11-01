@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import { messages } from "../utils/i18n";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
 
@@ -11,7 +12,9 @@ export default function PhotoMessage({ name, body: { src: url }, className, mayS
   const landingPageUrl = getLandingPageForPhoto(url);
   const onShareClicked = share.bind(null, {
     url: landingPageUrl,
-    title: `Taken in #hubs, join me at https://hub.link/${hubId}`
+    title:
+      `Taken in #${messages["app-name"].toLowerCase()}, ` +
+      `join me at https://${messages["app-short-domain"]}/${hubId}`
   });
   return (
     <div className={className}>
