@@ -1,13 +1,15 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
-import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
-import { upload } from "../utils/media-utils";
-import { ensureAvatarMaterial } from "../utils/avatar-utils";
 import classNames from "classnames";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploadAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import configs from "../utils/configs";
+import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
+import { upload } from "../utils/media-utils";
+import { ensureAvatarMaterial } from "../utils/avatar-utils";
 
 import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
@@ -488,17 +490,21 @@ export default class AvatarEditor extends Component {
               />
             </div>
             <div className="info">
-              <p>
-                <a target="_blank" rel="noopener noreferrer" href="https://tryquilt.io/">
-                  <FormattedMessage id="avatar-editor.quilt-link" />
-                </a>
-              </p>
-              <p>
-                <FormattedMessage id="avatar-editor.info" />
-                <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
-                  <FormattedMessage id="avatar-editor.info-link" />
-                </a>
-              </p>
+              {configs.feature("show_avatar_editor_link") && (
+                <p>
+                  <a target="_blank" rel="noopener noreferrer" href="https://tryquilt.io/">
+                    <FormattedMessage id="avatar-editor.quilt-link" />
+                  </a>
+                </p>
+              )}
+              {configs.feature("show_avatar_pipelines_link") && (
+                <p>
+                  <FormattedMessage id="avatar-editor.info" />
+                  <a target="_blank" rel="noopener noreferrer" href="https://github.com/MozillaReality/hubs-avatar-pipelines">
+                    <FormattedMessage id="avatar-editor.info-link" />
+                  </a>
+                </p>
+              )}
             </div>
             <div>
               <input
