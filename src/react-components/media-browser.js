@@ -10,6 +10,7 @@ import { faLink } from "@fortawesome/free-solid-svg-icons/faLink";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+import configs from "../utils/configs";
 import styles from "../assets/stylesheets/media-browser.scss";
 import { pushHistoryPath, pushHistoryState, sluglessPath } from "../utils/history";
 import { SOURCES } from "../storage/media-search-store";
@@ -346,14 +347,20 @@ class MediaBrowser extends Component {
                   )}
                 {urlSource === "scenes" && (
                   <div className={styles.engineAttributionContents}>
-                    <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
-                    <a href="/spoke" target="_blank" rel="noreferrer noopener">
-                      <FormattedMessage id="media-browser.spoke" />
-                    </a>
-                    |
-                    <a target="_blank" rel="noopener noreferrer" href="/?report">
-                      <FormattedMessage id="media-browser.report_issue" />
-                    </a>
+                    {configs.feature("enable_spoke") && (
+                      <>
+                        <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
+                        <a href="/spoke" target="_blank" rel="noreferrer noopener">
+                          <FormattedMessage id="media-browser.spoke" />
+                        </a>
+                      </>
+                    )}
+                    {configs.feature("enable_spoke") && configs.feature("show_issue_report_link") && "|"}
+                    {configs.feature("show_issue_report_link") && (
+                      <a target="_blank" rel="noopener noreferrer" href={configs.link("issue_report", "/?report")}>
+                        <FormattedMessage id="media-browser.report_issue" />
+                      </a>
+                    )}
                   </div>
                 )}
               </div>

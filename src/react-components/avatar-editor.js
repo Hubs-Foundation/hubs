@@ -1,13 +1,16 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
-import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
-import { upload } from "../utils/media-utils";
-import { ensureAvatarMaterial } from "../utils/avatar-utils";
 import classNames from "classnames";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploadAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import { messages } from "../utils/i18n";
+import configs from "../utils/configs";
+import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
+import { upload } from "../utils/media-utils";
+import { ensureAvatarMaterial } from "../utils/avatar-utils";
 
 import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
@@ -443,11 +446,11 @@ export default class AvatarEditor extends Component {
                 <label>Share Settings</label>
                 {this.checkbox(
                   "allow_promotion",
-                  "Allow Mozilla to promote your avatar, and show it in search results.",
+                  `Allow ${messages["company-name"]} to promote your avatar, and show it in search results.`,
                   <span>
                     Allow{" "}
                     <a
-                      href="https://github.com/mozilla/hubs/blob/master/PROMOTION.md"
+                      href={configs.link("promotion", "https://github.com/mozilla/hubs/blob/master/PROMOTION.md")}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -461,7 +464,7 @@ export default class AvatarEditor extends Component {
                   <span>
                     Allow{" "}
                     <a
-                      href="https://github.com/mozilla/hubs/blob/master/REMIXING.md"
+                      href={configs.link("remixing", "https://github.com/mozilla/hubs/blob/master/REMIXING.md")}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -488,17 +491,25 @@ export default class AvatarEditor extends Component {
               />
             </div>
             <div className="info">
-              <p>
-                <a target="_blank" rel="noopener noreferrer" href="https://tryquilt.io/">
-                  <FormattedMessage id="avatar-editor.quilt-link" />
-                </a>
-              </p>
-              <p>
-                <FormattedMessage id="avatar-editor.info" />
-                <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
-                  <FormattedMessage id="avatar-editor.info-link" />
-                </a>
-              </p>
+              {configs.feature("show_avatar_editor_link") && (
+                <p>
+                  <a target="_blank" rel="noopener noreferrer" href="https://tryquilt.io/">
+                    <FormattedMessage id="avatar-editor.quilt-link" />
+                  </a>
+                </p>
+              )}
+              {configs.feature("show_avatar_pipelines_link") && (
+                <p>
+                  <FormattedMessage id="avatar-editor.info" />
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://github.com/MozillaReality/hubs-avatar-pipelines"
+                  >
+                    <FormattedMessage id="avatar-editor.info-link" />
+                  </a>
+                </p>
+              )}
             </div>
             <div>
               <input

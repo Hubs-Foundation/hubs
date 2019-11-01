@@ -2,8 +2,6 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import classNames from "classnames";
-import StateLink from "./state-link.js";
-import { resetTips } from "../systems/tips";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faUserAlt } from "@fortawesome/free-solid-svg-icons/faUserAlt";
@@ -14,6 +12,10 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
+
+import configs from "../utils/configs";
+import StateLink from "./state-link.js";
+import { resetTips } from "../systems/tips";
 import { showFullScreenIfAvailable } from "../utils/fullscreen";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 
@@ -264,9 +266,11 @@ export default class SettingsMenu extends Component {
               <div />
             )}
             <div className={classNames([styles.bottomLinksMain])}>
-              <a href="/whats-new" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="settings.whats-new" />
-              </a>
+              {configs.feature("show_whats_new_link") && (
+                <a href="/whats-new" target="_blank" rel="noreferrer noopener">
+                  <FormattedMessage id="settings.whats-new" />
+                </a>
+              )}
               <button
                 onClick={e => {
                   e.preventDefault();
@@ -276,44 +280,75 @@ export default class SettingsMenu extends Component {
               >
                 <FormattedMessage id="settings.tips" />
               </button>
-              <a href="https://github.com/mozilla/hubs/wiki/Hubs-Controls" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="settings.controls" />
-              </a>
+              {configs.feature("show_controls_link") && (
+                <a
+                  href={configs.link("controls", "https://github.com/mozilla/hubs/wiki/Hubs-Controls")}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <FormattedMessage id="settings.controls" />
+                </a>
+              )}
             </div>
             <div className={classNames([styles.bottomLinks])}>
-              <a href="https://github.com/mozilla/hubs/wiki/Hubs-Features" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="settings.features" />
-              </a>
-              <a href="https://discord.gg/wHmY4nd" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="settings.community" />
-              </a>
-              <button
-                onClick={e => {
-                  e.preventDefault();
-                  this.props.pushHistoryState("modal", "feedback");
-                }}
-              >
-                <FormattedMessage id="settings.send-feedback" />
-              </button>
-              <a className={styles.bottomLink} href="/?report" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="settings.report" />
-              </a>
-              <a
-                className={styles.bottomLink}
-                href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                <FormattedMessage id="settings.terms" />
-              </a>
-              <a
-                className={styles.bottomLink}
-                href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                <FormattedMessage id="settings.privacy" />
-              </a>
+              {configs.feature("show_features_link") && (
+                <a
+                  href={configs.link("features", "https://github.com/mozilla/hubs/wiki/Hubs-Features")}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <FormattedMessage id="settings.features" />
+                </a>
+              )}
+              {configs.feature("show_community_link") && (
+                <a
+                  href={configs.link("community", "https://discord.gg/wHmY4nd")}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <FormattedMessage id="settings.community" />
+                </a>
+              )}
+              {configs.feature("show_feedback_ui") && (
+                <button
+                  onClick={e => {
+                    e.preventDefault();
+                    this.props.pushHistoryState("modal", "feedback");
+                  }}
+                >
+                  <FormattedMessage id="settings.send-feedback" />
+                </button>
+              )}
+              {configs.feature("show_issue_report_link") && (
+                <a
+                  className={styles.bottomLink}
+                  href={configs.link("issue_report", "/?report")}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <FormattedMessage id="settings.report" />
+                </a>
+              )}
+              {configs.feature("show_terms") && (
+                <a
+                  className={styles.bottomLink}
+                  href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <FormattedMessage id="settings.terms" />
+                </a>
+              )}
+              {configs.feature("show_privacy") && (
+                <a
+                  className={styles.bottomLink}
+                  href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <FormattedMessage id="settings.privacy" />
+                </a>
+              )}
             </div>
           </div>
         </div>

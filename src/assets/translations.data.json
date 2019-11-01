@@ -1,7 +1,11 @@
 {
   "en": {
+    "app-name": "Hubs",
+    "app-short-domain": "hub.link",
+    "contact-email": "hubs@mozilla.com",
+    "company-name": "Mozilla",
     "auth.verified-title": "E-Mail Verified!",
-    "auth.verified": "Your email has been verified!\nYou can now close this browser tab and return to Hubs.",
+    "auth.verified": "Your email has been verified!\nYou can now close this browser tab and return to %app-name%.",
     "auth.spoke-verified": "You email has been verified!\nYou can now close this browser tab and return to Spoke.",
     "sign-in.prompt": "Sign in to pin objects in rooms.",
     "sign-in.admin": "Check your email for a verification email. Once verified, enter your email to create your account or sign in.",
@@ -191,7 +195,7 @@
     "home.join_us": "Join the Conversation",
     "home.have_code": "Have a room code?",
     "home.add_to_discord_1": "Add the",
-    "home.add_to_discord_2": "Hubs Bot",
+    "home.add_to_discord_2": "%app-name% Bot",
     "home.add_to_discord_3": "to Discord",
     "home.create_with_spoke": "Create a Scene",
     "home.report_issue": "Report Issues",
@@ -232,7 +236,7 @@
     "invite.or_visit": "or share permalink",
     "invite.or_visit_modal": "or by visiting permalink",
     "invite.embed": "or embed on a page",
-    "invite.embed-tip": "Please be mindful of where you embed a Hubs room.\nGo to Room Settings to lock down permissions for this room.",
+    "invite.embed-tip": "Please be mindful of where you embed a %app-name% room.\nGo to Room Settings to lock down permissions for this room.",
     "spoke.primary_tagline": "make your space",
     "spoke.secondary_tagline": "Create 3D social scenes for ",
     "spoke.thank_you": "Thank you for downloading Spoke!",
@@ -303,7 +307,7 @@
     "tips.desktop.video_share_mode": "You're streaming. Select again to stop sharing video.",
     "tips.desktop.pen_mode": "Press ESC or right click to drop pen. Ctrl-Z to undo.",
     "tips.desktop.mute_mode": "You are muted. Click or press M to un-mute.",
-    "tips.desktop.look": "Welcome to Hubs! 👋 Click and drag to look around.",
+    "tips.desktop.look": "Welcome to %app-name%! 👋 Click and drag to look around.",
     "tips.desktop.locomotion": "Great! Now, use the W A S D keys to move. Hold shift to boost.",
     "tips.desktop.turning": "Perfect. Use the Q and E keys to rotate.",
     "tips.desktop.spawn_menu-pre": "To create objects, click the ",
@@ -373,6 +377,6 @@
     "tweet-dialog.close": "close",
     "oauth-dialog.sign-in.twitter": "Connect to Twitter",
     "oauth-dialog.sign-in.discord": "Sign in to Discord",
-    "oauth-dialog.message.twitter": "Connect to Twitter to send tweets from Hubs."
+    "oauth-dialog.message.twitter": "Connect to Twitter to send tweets from %app-name%."
   }
 }

@@ -67,7 +67,7 @@
     font-weight: bold;
     text-decoration-color: var(--panel-subtitle-color);
     padding: 0;
-    justify-content: flex-start;
+    justify-content: center;
     text-align: center;
   }
 }
@@ -78,12 +78,13 @@
   grid-template-columns: 33% 33% 33%;
   padding-top: 12px;
   font-weight: normal;
+  min-width: 300px;
 
   a, button {
     color: var(--panel-subtitle-color);
     margin: 2px 12px;
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
     white-space: nowrap;
     text-decoration: none;
@@ -95,7 +96,7 @@
     font-weight: normal;
     text-decoration-color: var(--panel-subtitle-color);
     padding: 0;
-    justify-content: flex-start;
+    justify-content: center;
     text-align: center;
   }
 }

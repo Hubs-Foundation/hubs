@@ -13,6 +13,7 @@ import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
 
+import configs from "../utils/configs";
 import styles from "../assets/stylesheets/media-browser.scss";
 import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import StateLink from "./state-link";
@@ -67,12 +68,14 @@ class MediaTiles extends Component {
               })}
             >
               {urlSource === "scenes" ? (
-                <a href="/spoke/new" rel="noopener noreferrer" target="_blank" className={styles.tileLink}>
-                  <div className={styles.tileContent}>
-                    <FontAwesomeIcon icon={faPlus} />
-                    <FormattedMessage id="media-browser.create-scene" />
-                  </div>
-                </a>
+                configs.feature("enable_spoke") && (
+                  <a href="/spoke/new" rel="noopener noreferrer" target="_blank" className={styles.tileLink}>
+                    <div className={styles.tileContent}>
+                      <FontAwesomeIcon icon={faPlus} />
+                      <FormattedMessage id="media-browser.create-scene" />
+                    </div>
+                  </a>
+                )
               ) : (
                 <a
                   onClick={e => {

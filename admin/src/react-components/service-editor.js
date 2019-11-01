@@ -294,9 +294,9 @@ class ConfigurationEditor extends Component {
   }
 
   renderTree(schema, category, config) {
-    const configurables = getDescriptors(schema[category]).map(([path, descriptor]) =>
-      this.renderConfigurable(path, descriptor, getConfigValue(config, path))
-    );
+    const configurables = getDescriptors(schema[category])
+      .filter(([, descriptor]) => descriptor.show_on_self_hosted !== "false")
+      .map(([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path)));
 
     return (
       <form onSubmit={this.onSubmit.bind(this)}>
