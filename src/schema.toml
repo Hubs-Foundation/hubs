@@ -2,6 +2,7 @@
 translations.en."home.hero_blurb" = { category = "translations", type = "string", name = "Hero Blurb", description = "Blurb displayed on the front page." }
 translations.en."settings.community" = { category = "translations", type = "string", name = "Community Prompt", description = "Prompt for joining your community." }
 translations.en."app-name" = { category = "translations", type = "string", name = "App Name", description = "Name used across the app." }
+translations.en."company-name" = { category = "translations", type = "string", name = "Company Name", description = "Company name used across the app." }
 translations.en."app-domain" = { category = "translations", type = "string", name = "App Domain", description = "Primary app domain." }
 translations.en."app-short-domain" = { category = "translations", type = "string", name = "Short App Domain", description = "Short app domain." }
 
@@ -35,3 +36,5 @@ links.controls = { category = "links", type = "string", name = "Controls Documen
 links.features = { category = "links", type = "string", name = "Features Documentation", description = "Link to features documentation."}
 links.community = { category = "links", type = "string", name = "Community", description = "Link to your community."}
 links.issue_report = { category = "links", type = "string", name = "Issue Report", description = "Link for reporting issues."}
+links.promotion = { category = "links", type = "string", name = "Promotion Info", description = "Link to info about promotion info and licensing."}
+links.remixing = { category = "links", type = "string", name = "Remixing Info", description = "Link to info about remixing info and licensing."}

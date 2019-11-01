@@ -3,6 +3,7 @@
     "app-name": "Hubs",
     "app-domain": "hubs.mozilla.com",
     "app-short-domain": "hubs.link",
+    "company-name": "Mozilla",
     "auth.verified-title": "E-Mail Verified!",
     "auth.verified": "Your email has been verified!\nYou can now close this browser tab and return to Hubs.",
     "auth.spoke-verified": "You email has been verified!\nYou can now close this browser tab and return to Spoke.",
