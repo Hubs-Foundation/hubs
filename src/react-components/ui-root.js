@@ -840,7 +840,7 @@ class UIRoot extends Component {
   };
 
   onMiniInviteClicked = () => {
-    const link = "https://hub.link/" + this.props.hubId;
+    const link = `https://${messages["app-short-domain"]}/${this.props.hubId}`;
 
     this.setState({ miniInviteActivated: true });
     setTimeout(() => {
@@ -1844,24 +1844,20 @@ class UIRoot extends Component {
                     !hasTopTip &&
                     entered &&
                     !streaming && (
-                      <WithHoverSound>
-                        <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
-                          <span>
-                            {this.state.miniInviteActivated
-                              ? navigator.share
-                                ? "sharing..."
-                                : "copied!"
-                              : "hub.link/" + this.props.hubId}
-                          </span>
-                        </button>
-                      </WithHoverSound>
+                      <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
+                        <span>
+                          {this.state.miniInviteActivated
+                            ? navigator.share
+                              ? "sharing..."
+                              : "copied!"
+                            : `${messages["app-short-domain"]}/` + this.props.hubId}
+                        </span>
+                      </button>
                     )}
                   {showVREntryButton && (
-                    <WithHoverSound>
-                      <button className={inviteStyles.enterButton} onClick={() => exit2DInterstitialAndEnterVR(true)}>
-                        <FormattedMessage id="entry.enter-in-vr" />
-                      </button>
-                    </WithHoverSound>
+                    <button className={inviteStyles.enterButton} onClick={() => exit2DInterstitialAndEnterVR(true)}>
+                      <FormattedMessage id="entry.enter-in-vr" />
+                    </button>
                   )}
                   {embed && (
                     <a href={baseUrl} className={inviteStyles.enterButton} target="_blank" rel="noopener noreferrer">
