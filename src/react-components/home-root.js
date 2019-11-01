@@ -326,8 +326,9 @@ class HomeRoot extends Component {
                       <FormattedMessage id="home.privacy_notice" />
                     </a>
                   )}
-
-                  <img className={styles.mozLogo} src={configs.image("company_logo", mozLogo)} />
+                  {configs.feature("show_company_logo") && (
+                    <img className={styles.mozLogo} src={configs.image("company_logo", mozLogo)} />
+                  )}
                 </div>
               </div>
             </div>
