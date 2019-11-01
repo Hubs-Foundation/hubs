@@ -475,24 +475,27 @@ AFRAME.registerComponent("media-video", {
       }
 
       if (!src.startsWith("hubs://")) {
-        // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
-        texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
+        // iOS video audio is broken, see: https://github.com/mozilla/hubs/issues/1797
+        if (!isIOS) {
+          // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
+          texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
 
-        if (this.data.audioType === "pannernode") {
-          this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-          this.audio.setDistanceModel(this.data.distanceModel);
-          this.audio.setRolloffFactor(this.data.rolloffFactor);
-          this.audio.setRefDistance(this.data.refDistance);
-          this.audio.setMaxDistance(this.data.maxDistance);
-          this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
-          this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
-          this.audio.panner.coneOuterGain = this.data.coneOuterGain;
-        } else {
-          this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
+          if (this.data.audioType === "pannernode") {
+            this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+            this.audio.setDistanceModel(this.data.distanceModel);
+            this.audio.setRolloffFactor(this.data.rolloffFactor);
+            this.audio.setRefDistance(this.data.refDistance);
+            this.audio.setMaxDistance(this.data.maxDistance);
+            this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
+            this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
+            this.audio.panner.coneOuterGain = this.data.coneOuterGain;
+          } else {
+            this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
+          }
+
+          this.audio.setNodeSource(texture.audioSource);
+          this.el.setObject3D("sound", this.audio);
         }
-
-        this.audio.setNodeSource(texture.audioSource);
-        this.el.setObject3D("sound", this.audio);
       }
 
       this.video = texture.image;
