@@ -932,7 +932,10 @@ class UIRoot extends Component {
               .<br />
             </>
           )}
-          If you have questions, contact us at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>
+          If you have questions, contact us at{" "}
+          <a href={`mailto:${messages["contact-email"]}`}>
+            <FormattedMessage id="contact-email" />
+          </a>
           .<p />
           If you&apos;d like to run your own server, hubs&apos;s source code is available on{" "}
           <a href="https://github.com/mozilla/hubs">GitHub</a>
