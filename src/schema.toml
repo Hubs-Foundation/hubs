@@ -15,6 +15,7 @@ features.show_company_logo = { category = "features", type = "boolean", name = "
 features.show_issue_report_link = { category = "features", type = "boolean", name = "Show Issue Report Link", description = "Show a link for reporting issues." }
 features.show_avatar_editor_link = { category = "features", type = "boolean", name = "Show Avatar Editor Links", description = "Show links to avatar editors like Quilt." }
 features.show_avatar_pipelines_link = { category = "features", type = "boolean", name = "Show Avatar Pipelines Links", description = "Show links to avatar pipeline info." }
+features.show_model_collection_link = { category = "features", type = "boolean", name = "Show Model Collection Link", description = "Show link to a collection of models." }
 
 features.enable_spoke = { category = "features", type = "boolean", show_on_self_hosted = "false" }
 features.show_join_us_dialog = { category = "features", type = "boolean", show_on_self_hosted = "false" }
@@ -38,3 +39,4 @@ links.community = { category = "links", type = "string", name = "Community", des
 links.issue_report = { category = "links", type = "string", name = "Issue Report", description = "Link for reporting issues."}
 links.promotion = { category = "links", type = "string", name = "Promotion Info", description = "Link to info about promotion info and licensing."}
 links.remixing = { category = "links", type = "string", name = "Remixing Info", description = "Link to info about remixing info and licensing."}
+links.model_collection = { category = "links", type = "string", name = "Model Collection", description = "Link to a collection of recommended models."}

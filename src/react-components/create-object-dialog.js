@@ -6,6 +6,7 @@ import { faPaperclip } from "@fortawesome/free-solid-svg-icons/faPaperclip";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
 import { messages } from "../utils/i18n";
+import configs from "../utils/configs";
 import giphyLogo from "../assets/images/giphy_logo.png";
 import styles from "../assets/stylesheets/create-object-dialog.scss";
 import ducky from "../assets/models/DuckyMesh.glb";
@@ -27,13 +28,23 @@ const references = (
     For models, try{" "}
     <a href="https://sketchfab.com/search?features=downloadable&type=models" target="_blank" rel="noopener noreferrer">
       Sketchfab
-    </a>,{" "}
+    </a>{" "}
+    and{" "}
     <a href="http://poly.google.com/" target="_blank" rel="noopener noreferrer">
       Google Poly
-    </a>, or our{" "}
-    <a href="https://sketchfab.com/mozillareality" target="_blank" rel="noopener noreferrer">
-      collection
-    </a>.
+    </a>
+    {configs.feature("show_model_collection_link") && (
+      <>
+        , or our{" "}
+        <a
+          href={configs.link("model_collection", "https://sketchfab.com/mozillareality")}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          collection
+        </a>
+      </>
+    )}.
   </span>
 );
 
