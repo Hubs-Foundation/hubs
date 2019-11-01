@@ -149,6 +149,8 @@ class MediaTiles extends Component {
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
           muted
           autoPlay
+          playsInline
+          loop
           src={proxiedUrlFor(imageSrc)}
         />
       ) : (
