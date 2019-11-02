@@ -19,15 +19,15 @@ import hmdIcon from "../assets/images/hmd-icon.svgi";
 import { faMobileAlt } from "@fortawesome/free-solid-svg-icons/faMobileAlt";
 import { pushHistoryPath, withSlug } from "../utils/history";
 import { hasReticulumServer } from "../utils/phoenix-utils";
-import { SVGI } from "./svgi";
+import { InlineSVG } from "./svgi";
 
 function getPresenceIcon(ctx) {
   if (ctx && ctx.mobile) {
     return <FontAwesomeIcon icon={faMobileAlt} />;
   } else if (ctx && ctx.hmd) {
-    return <SVGI src={hmdIcon} />;
+    return <InlineSVG src={hmdIcon} />;
   } else if (ctx && ctx.discord) {
-    return <SVGI src={discordIcon} />;
+    return <InlineSVG src={discordIcon} />;
   } else {
     return <FontAwesomeIcon icon={faDesktop} />;
   }

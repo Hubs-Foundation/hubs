@@ -1,24 +1,24 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-function SVGI(props) {
+function InlineSVG(props) {
   const filteredProps = { ...props };
   delete filteredProps.src;
   return <div {...filteredProps} dangerouslySetInnerHTML={{ __html: props.src }} />;
 }
 
-SVGI.propTypes = {
+InlineSVG.propTypes = {
   src: PropTypes.string
 };
 
-function SVGIButton(props) {
+function InlineSVGButton(props) {
   const filteredProps = { ...props };
   delete filteredProps.src;
   return <button {...filteredProps} dangerouslySetInnerHTML={{ __html: props.src }} />;
 }
 
-SVGIButton.propTypes = {
+InlineSVGButton.propTypes = {
   src: PropTypes.string
 };
 
-export { SVGI, SVGIButton };
+export { InlineSVG, InlineSVGButton };

@@ -10,7 +10,7 @@ import DaydreamEntryImg from "../assets/images/daydream_entry.svgi";
 import styles from "../assets/stylesheets/entry.scss";
 import { WithHoverSound } from "./wrap-with-audio";
 import cx from "classnames";
-import { SVGI } from "./svgi";
+import { InlineSVG } from "./svgi";
 
 const EntryButton = props => {
   return (
@@ -19,7 +19,7 @@ const EntryButton = props => {
         className={cx([{ [styles.entryButton]: true, [styles.entryButtonSecondary]: props.secondary }])}
         onClick={props.onClick}
       >
-        <SVGI src={props.iconSrc} className={styles.icon} />
+        <InlineSVG src={props.iconSrc} className={styles.icon} />
         <div className={styles.label}>
           <div className={styles.contents}>
             <span>

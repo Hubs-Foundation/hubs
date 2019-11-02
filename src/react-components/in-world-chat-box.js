@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { spawnChatMessage } from "./chat-message";
 import { pushHistoryState } from "../utils/history";
-import { SVGIButton } from "./svgi";
+import { InlineSVGButton } from "./svgi";
 
 const isMobile = AFRAME.utils.device.isMobile();
 
@@ -114,7 +114,7 @@ class InWorldChatBox extends Component {
             placeholder={this.props.discordBridges.length ? `Send to room and ${discordSnippet}...` : "Send to room..."}
           />
           {this.props.enableSpawning && (
-            <SVGIButton
+            <InlineSVGButton
               title={"Create"}
               className={classNames([styles.messageEntrySpawn])}
               src={spawnMessageIcon}
@@ -128,7 +128,7 @@ class InWorldChatBox extends Component {
               }}
             />
           )}
-          <SVGIButton
+          <InlineSVGButton
             type="submit"
             title={"Submit"}
             className={classNames([

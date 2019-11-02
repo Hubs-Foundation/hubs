@@ -34,7 +34,7 @@ import MicOff5 from "../assets/images/mic-off-5.svgi";
 import MicOff6 from "../assets/images/mic-off-6.svgi";
 import MicOff7 from "../assets/images/mic-off-7.svgi";
 
-import { SVGI } from "./svgi";
+import { InlineSVG } from "./svgi";
 
 const MIC_ICONS = {
   on: [Mic0, Mic1, Mic2, Mic3, Mic4, Mic5, Mic6, Mic7],
@@ -193,7 +193,7 @@ class TopHUD extends Component {
         onClick={this.state.mediaDisabled ? noop : maybeHandlePrimaryShare}
         onMouseOver={this.state.mediaDisabled ? noop : showExtrasOnHover}
       >
-        <SVGI
+        <InlineSVG
           className={cx(styles.iconButtonIcon)}
           src={iconForType(primaryVideoShareType, this.props.videoShareMediaSource === primaryVideoShareType)}
         />
@@ -213,7 +213,7 @@ class TopHUD extends Component {
                 onClick={this.state.mediaDisabled ? noop : () => this.handleVideoShareClicked(type)}
                 onMouseOver={this.state.mediaDisabled ? noop : showExtrasOnHover}
               >
-                <SVGI
+                <InlineSVG
                   className={cx(styles.iconButtonIcon)}
                   src={iconForType(type, this.props.videoShareMediaSource === type)}
                 />
@@ -282,7 +282,7 @@ class TopHUD extends Component {
               title={this.props.muted ? "Unmute Mic" : "Mute Mic"}
               onClick={this.props.onToggleMute}
             >
-              <SVGI className={cx(styles.iconButtonIcon)} src={micIcon} />
+              <InlineSVG className={cx(styles.iconButtonIcon)} src={micIcon} />
             </div>
             <div
               className={cx(styles.iconButton, {
@@ -293,7 +293,7 @@ class TopHUD extends Component {
                 this.state.mediaDisabled ? noop : () => this.props.mediaSearchStore.sourceNavigateToDefaultSource()
               }
             >
-              <SVGI className={cx(styles.iconButtonIcon, styles.spawn)} src={SpawnIcon} />
+              <InlineSVG className={cx(styles.iconButtonIcon, styles.spawn)} src={SpawnIcon} />
             </div>
             <div
               className={cx(styles.iconButton, {
@@ -302,7 +302,7 @@ class TopHUD extends Component {
               title={`Pen${this.state.penDisabled ? " Disabled" : ""}`}
               onClick={this.state.penDisabled ? noop : this.props.onSpawnPen}
             >
-              <SVGI
+              <InlineSVG
                 className={cx(styles.iconButtonIcon)}
                 src={this.props.isCursorHoldingPen ? PenIconActive : PenIcon}
               />
@@ -314,7 +314,7 @@ class TopHUD extends Component {
               title={`Camera${this.state.cameraDisabled ? " Disabled" : ""}`}
               onClick={this.state.cameraDisabled ? noop : this.props.onSpawnCamera}
             >
-              <SVGI
+              <InlineSVG
                 className={cx(styles.iconButtonIcon)}
                 src={this.props.hasActiveCamera ? CameraIconActive : CameraIcon}
               />
