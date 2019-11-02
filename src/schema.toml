@@ -29,16 +29,17 @@ images.logo = { category = "images", type = "file", name = "App Logo", descripti
 images.company_logo = { category = "images", type = "file", name = "Company Logo", description = "Company logo used across the app." }
 images.home_background = { category = "images", type = "file" }
 
-colors.action-color = { category = "colors", type = "color", name = "Primary Color", description = "Call to action button color." }
-colors.action-color-highlight = { category = "colors", type = "color", name = "Highlighted Primary Color", description = "Highlighted call to action color." }
-colors.action-color-disabled = { category = "colors", type = "color", name = "Disabled Primary Color", description = "Disabled call to action color." }
-colors.action-text-color = { category = "colors", type = "color", name = "Primary Text Color", description = "Call to action button text color." }
-colors.action-subtitle-color = { category = "colors", type = "color", name = "Primary Subtitle Color", description = "Call to action button subtitle text color." }
-colors.action-label-color = { category = "colors", type = "color", name = "Primary Label Color", description = "Call to action label color." }
-colors.notice-background-color = { category = "colors", type = "color", name = "Secondary Color", description = "Notice and indicator color." }
-colors.notice-text-color = { category = "colors", type = "color", name = "Secondary Text Color", description = "Notice and indicator text color." }
-colors.notice-widget-color = { category = "colors", type = "color", name = "Secondary Widget Color", description = "Notice and indicator UI widget color." }
-colors.favorited-color = { category = "colors", type = "color", name = "Favorited Color", description = "Favorited Color" }
+theme.dark-theme = { category = "theme", type = "boolean", name = "Dark Mode", description = "Use dark UI styling." }
+theme.action-color = { category = "theme", type = "color", name = "Primary Color", description = "Call to action button color." }
+theme.action-color-highlight = { category = "theme", type = "color", name = "Highlighted Primary Color", description = "Highlighted call to action color." }
+theme.action-color-disabled = { category = "theme", type = "color", name = "Disabled Primary Color", description = "Disabled call to action color." }
+theme.action-text-color = { category = "theme", type = "color", name = "Primary Text Color", description = "Call to action button text color." }
+theme.action-subtitle-color = { category = "theme", type = "color", name = "Primary Subtitle Color", description = "Call to action button subtitle text color." }
+theme.action-label-color = { category = "theme", type = "color", name = "Primary Label Color", description = "Call to action label color." }
+theme.notice-background-color = { category = "theme", type = "color", name = "Secondary Color", description = "Notice and indicator color." }
+theme.notice-text-color = { category = "theme", type = "color", name = "Secondary Text Color", description = "Notice and indicator text color." }
+theme.notice-widget-color = { category = "theme", type = "color", name = "Secondary Widget Color", description = "Notice and indicator UI widget color." }
+theme.favorited-color = { category = "theme", type = "color", name = "Favorited Color", description = "Favorited Color" }
 
 links.terms_of_use = { category = "links", type = "string", name = "Terms of Use", description = "Link to your terms of use page."}
 links.privacy_notice = { category = "links", type = "string", name = "Privacy Notice", description = "Link to your privacy page."}

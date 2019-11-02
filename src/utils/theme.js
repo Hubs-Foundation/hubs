@@ -18,16 +18,20 @@ const DEFAULT_COLORS = {
 };
 
 function getThemeColor(name) {
-  if (window.APP_CONFIG && window.APP_CONFIG.colors && window.APP_CONFIG.colors[name])
-    return window.APP_CONFIG.colors[name];
+  if (window.APP_CONFIG && window.APP_CONFIG.theme && window.APP_CONFIG.theme[name])
+    return window.APP_CONFIG.theme[name];
 
   return DEFAULT_COLORS[name];
 }
 
 waitForDOMContentLoaded().then(() => {
-  const el = document.querySelector(`meta[name='theme']`);
-  const theme = el ? el.getAttribute("content") : "light";
-  document.body.classList.add(`${theme}-theme`);
+  console.log(window.APP_CONFIG);
+  if (window.APP_CONFIG && window.APP_CONFIG.theme && window.APP_CONFIG.theme["dark-theme"]) {
+    document.body.classList.add("dark-theme");
+  } else {
+    document.body.classList.add("light-theme");
+  }
+
   const actionColor = getThemeColor("action-color");
   const actionHoverColor = getThemeColor("action-color-highlight");
 

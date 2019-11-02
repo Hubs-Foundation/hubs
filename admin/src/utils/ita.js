@@ -8,7 +8,7 @@ const schemaCategories = [
   "translations",
   "features",
   "images",
-  "colors",
+  "theme",
   "links"
 ];
 const serviceNames = configs.CONFIGURABLE_SERVICES.split(",");
@@ -34,8 +34,8 @@ function getCategoryDisplayName(category) {
       return "Features";
     case "images":
       return "Images";
-    case "colors":
-      return "Colors";
+    case "theme":
+      return "Theme";
     case "links":
       return "Links";
     default:
