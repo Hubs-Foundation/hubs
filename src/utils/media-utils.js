@@ -333,6 +333,7 @@ export async function createImageTexture(url, filter) {
 
   if (filter) {
     const image = new Image();
+    image.crossOrigin = "anonymous";
     const load = new Promise(res => image.addEventListener("load", res, { once: true }));
     image.src = url;
     await load;

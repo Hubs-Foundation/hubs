@@ -1,64 +1,77 @@
 import { waitForDOMContentLoaded } from "./async-utils";
-import ColorShiftWorker from "../workers/color-shift.worker.js";
-import { promisifyWorker } from "./promisify-worker.js";
-const colorShift = promisifyWorker(new ColorShiftWorker());
+import "./configs";
+
+// Node these should be synchronized with the top of shared.scss
+const DEFAULT_ACTION_COLOR = "#FF3464";
+const DEFAULT_ACTION_COLOR_LIGHT = "#FF74A4";
+
+const DEFAULT_COLORS = {
+  "action-color": DEFAULT_ACTION_COLOR,
+  "action-label-color": DEFAULT_ACTION_COLOR,
+  "action-color-disabled": DEFAULT_ACTION_COLOR_LIGHT,
+  "action-color-highlight": DEFAULT_ACTION_COLOR_LIGHT,
+  "action-text-color": "#FFFFFF",
+  "action-subtitle-text-color": "#F0F0F0",
+  "notice-background-color": "#2F80ED",
+  "notice-text-color": "#FFFFFF",
+  "favorited-color": "#FFC000"
+};
+
+function getThemeColor(name) {
+  if (window.APP_CONFIG && window.APP_CONFIG.colors && window.APP_CONFIG.colors[name])
+    return window.APP_CONFIG.colors[name];
+
+  return DEFAULT_COLORS[name];
+}
 
 waitForDOMContentLoaded().then(() => {
   const el = document.querySelector(`meta[name='theme']`);
   const theme = el ? el.getAttribute("content") : "light";
   document.body.classList.add(`${theme}-theme`);
-  const actionColor = "#ff3464";
-  const actionHoverColor = "#fc3545";
+  const actionColor = getThemeColor("action-color");
+  const actionHoverColor = getThemeColor("action-color-highlight");
 
-  // NOTE, using the object-based {} setAttribute variant in a-frame
-  // seems to not work in Firefox here -- the entities with the mixins are not
-  // updated.
-  document
-    .querySelector("#rounded-text-button")
-    .setAttribute(
-      "text-button",
-      `textHoverColor: ${actionHoverColor}; textColor: ${actionColor}; backgroundColor: #fff; backgroundHoverColor: #aaa;`
-    );
+  if (document.querySelector("#rounded-text-button")) {
+    // NOTE, using the object-based {} setAttribute variant in a-frame
+    // seems to not work in Firefox here -- the entities with the mixins are not
+    // updated.
+    document
+      .querySelector("#rounded-text-button")
+      .setAttribute(
+        "text-button",
+        `textHoverColor: ${actionHoverColor}; textColor: ${actionColor}; backgroundColor: #fff; backgroundHoverColor: #aaa;`
+      );
 
-  document
-    .querySelector("#rounded-button")
-    .setAttribute(
-      "text-button",
-      `textHoverColor: ${actionHoverColor}; textColor: ${actionColor}; backgroundColor: #fff; backgroundHoverColor: #aaa;`
-    );
+    document
+      .querySelector("#rounded-button")
+      .setAttribute(
+        "text-button",
+        `textHoverColor: ${actionHoverColor}; textColor: ${actionColor}; backgroundColor: #fff; backgroundHoverColor: #aaa;`
+      );
 
-  document
-    .querySelector("#rounded-text-action-button")
-    .setAttribute(
-      "text-button",
-      `textHoverColor: #fff; textColor: #fff; backgroundColor: ${actionColor}; backgroundHoverColor: ${actionHoverColor}`
-    );
+    document
+      .querySelector("#rounded-text-action-button")
+      .setAttribute(
+        "text-button",
+        `textHoverColor: #fff; textColor: #fff; backgroundColor: ${actionColor}; backgroundHoverColor: ${actionHoverColor}`
+      );
 
-  document
-    .querySelector("#rounded-action-button")
-    .setAttribute(
-      "text-button",
-      `textHoverColor: #fff; textColor: #fff; backgroundColor: ${actionColor}; backgroundHoverColor: ${actionHoverColor}`
-    );
+    document
+      .querySelector("#rounded-action-button")
+      .setAttribute(
+        "text-button",
+        `textHoverColor: #fff; textColor: #fff; backgroundColor: ${actionColor}; backgroundHoverColor: ${actionHoverColor}`
+      );
+  }
 });
 
 function applyThemeToTextButton(el, highlighted) {
-  el.setAttribute("text-button", "backgroundColor", highlighted ? "#fff" : "#ff3550");
-  el.setAttribute("text-button", "backgroundHoverColor", highlighted ? "#bbb" : "#fc3545");
+  el.setAttribute("text-button", "backgroundColor", highlighted ? "#fff" : getThemeColor("action-color"));
+  el.setAttribute(
+    "text-button",
+    "backgroundHoverColor",
+    highlighted ? "#fff" : getThemeColor("action-color-highlight")
+  );
 }
 
-function getThemeColorShifter(type) {
-  // Goal of this algorithm is to take a ctx pointing to a spritesheet
-  // that has a single saturated color, and convert it to another.
-  return async (ctx, w, h) => {
-    const data = ctx.getImageData(0, 0, w, h);
-    const res = await colorShift(data.data.buffer, [data.data.buffer], { type: type });
-    ctx.putImageData(new ImageData(res, w, h), 0, 0);
-  };
-}
-
-async function waitForThemeReady() {
-  return;
-}
-
-export { applyThemeToTextButton, getThemeColorShifter, waitForThemeReady };
+export { applyThemeToTextButton, getThemeColor };

@@ -9,7 +9,7 @@ import spritesheetNoticePng from "../assets/images/spritesheets/sprite-system-no
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import vert from "./sprites/sprite.vert";
 import frag from "./sprites/sprite.frag";
-import { getThemeColorShifter, waitForThemeReady } from "../utils/theme";
+import { getThemeColorShifter } from "../utils/theme-sprites";
 
 const multiviewVertPrefix = [
   // GLSL 3.0 conversion
@@ -224,9 +224,8 @@ export class SpriteSystem {
     );
 
     const domReady = waitForDOMContentLoaded();
-    const themeReady = waitForThemeReady();
 
-    Promise.all([domReady, themeReady]).then(() => {
+    Promise.all([domReady]).then(() => {
       for (const [spritesheetPng, type] of [[spritesheetActionPng, "action"], [spritesheetNoticePng, "notice"]]) {
         Promise.all([createImageTexture(spritesheetPng, getThemeColorShifter(type)), waitForDOMContentLoaded()]).then(
           ([spritesheetTexture]) => {

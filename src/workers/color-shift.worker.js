@@ -1,9 +1,8 @@
 import Color from "color";
 
-function getColorShifter(type) {
+function getColorShifter(type, color) {
   const from = type === "action" ? Color("#ff3464") : Color("#2F80ED");
-  //const to = type === "action" ? Color("#ff3464") : Color("#2F80ED");
-  const to = type === "action" ? Color("#0000ff") : Color("#00ff00");
+  const to = Color(color);
 
   const toHsl = to.hsl();
   const fromHsl = from.hsl();
@@ -53,6 +52,6 @@ function getColorShifter(type) {
 }
 
 self.onmessage = async msg => {
-  const result = await getColorShifter(msg.data.type)(new Uint8ClampedArray(msg.data.payload));
+  const result = await getColorShifter(msg.data.type, msg.data.color)(new Uint8ClampedArray(msg.data.payload));
   self.postMessage({ id: msg.data.id, result });
 };
