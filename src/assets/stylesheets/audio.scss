@@ -112,7 +112,7 @@
         position: absolute;
         top: 0;
         left: 0;
-        color: var(--notice-background-color);
+        color: $notice-background-color;
       }
     }
 
@@ -123,11 +123,11 @@
       cursor: pointer;
 
       &__pending {
-        color: var(--action-color);
+        color: $action-color;
       }
 
       &__playing {
-        color: var(--notice-background-color);
+        color: $notice-background-color;
       }
     }
 
@@ -137,7 +137,7 @@
       text-align: center;
       font-size: 0.8em;
       bottom: 12px;
-      color: var(--action-text);
+      color: $action-text-color;
     }
 
     &__icon-part {

@@ -62,7 +62,7 @@
   }
 
   i:hover {
-    color: var(--action-label-color);
+    color: $action-label-color;
   }
 }
 
@@ -72,7 +72,7 @@
 }
 
 :local(.moderator-badge) {
-  color: var(--action-label-color);
+  color: $action-label-color;
   margin-left: 4px;
   text-decoration: none;
 }

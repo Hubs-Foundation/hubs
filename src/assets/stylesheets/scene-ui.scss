@@ -168,7 +168,7 @@
   position: absolute;
   right: 10px;
   top: -12px;
-  color: var(--action-text);
+  color: $action-text-color;
 }
 
 :local(.unavailable) {

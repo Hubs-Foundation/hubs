@@ -78,7 +78,7 @@
   font-weight: $semi-bold;
 
   a {
-    color: var(--action-label-color);
+    color: $action-label-color;
     text-decoration: none;
   }
 }

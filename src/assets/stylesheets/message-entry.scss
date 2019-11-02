@@ -47,7 +47,7 @@
 }
 
 :local(.message-entry-button) {
-  color: var(--action-label-color);
+  color: $action-label-color;
   appearance: none;
   -moz-appearance: none;
   -webkit-appearance: none;
@@ -79,7 +79,7 @@
 }
 
 :local(.message-entry-spawn):hover {
-  color: var(--action-label-color);
+  color: $action-label-color;
 }
 
 :local(.message-entry-spawn):disabled {
@@ -97,7 +97,7 @@
 }
 
 :local(.message-entry-button-in-room):hover {
-  color: var(--action-label-color);
+  color: $action-label-color;
 }
 
 :local(.message-entry-upload) {

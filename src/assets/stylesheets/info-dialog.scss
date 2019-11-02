@@ -74,7 +74,7 @@
         }
 
         a { color: var(--panel-text-color) }
-        a.info-dialog--action-button { color: var(--action-text); }
+        a.info-dialog--action-button { color: $action-text-color; }
       }
 
       &__links {

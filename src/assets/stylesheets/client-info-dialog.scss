@@ -132,6 +132,6 @@
 }
 
 :local(.primary-action-button) {
-  background: var(--action-color) !important;
-  color: var(--action-text) !important;
+  background: $action-color !important;
+  color: $action-text-color !important;
 }

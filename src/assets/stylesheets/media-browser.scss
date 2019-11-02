@@ -57,7 +57,7 @@
       font-weight: bold;
 
       i {
-        color: var(--favorited-color);
+        color: $favorited-color;
         margin-right: 12px;
       }
     }
@@ -193,7 +193,7 @@
 
     :local(.nav-source-selected) {
       font-weight: bold;
-      border-bottom: 3px solid var(--action-color);
+      border-bottom: 3px solid $action-color;
     }
 
     :local(.nav-scroll-arrow) {
@@ -236,7 +236,7 @@
     :local(.facet) {
       @extend %action-button;
       background-color: transparent;
-      color: var(--action-label-color);
+      color: $action-label-color;
       border: 0;
       border-radius: 12px;
       font-weight: normal;
@@ -248,12 +248,12 @@
       white-space: nowrap;
 
       &:hover{
-        background-color: var(--action-color-highlight);
-        color: var(--action-text);
+        background-color: $action-color-highlight;
+        color: $action-text-color;
       }
       &.selected{
-        background-color: var(--action-color);
-        color: var(--action-text);
+        background-color: $action-color;
+        color: $action-text-color;
       }
 
       @media(max-width: 801px) {
@@ -263,7 +263,7 @@
 
     :local(.nav-source-selected) {
       font-weight: bold;
-      border-bottom: 3px solid var(--action-color);
+      border-bottom: 3px solid $action-color;
     }
 
     :local(.nav-scroll-arrow) {
@@ -405,7 +405,7 @@
             margin-bottom: 5px;
 
             &:hover {
-              background: var(--action-color);
+              background: $action-color;
               color: var(--tile-button-icon-hover-color);
             }
           }
@@ -504,7 +504,7 @@
 
     :local(.create-button) {
       font-weight: bold;
-      color: var(--action-label-color);
+      color: $action-label-color;
 
       @media (min-width: 800px) {
         margin-right: 12px;
@@ -514,7 +514,7 @@
     :local(.create-link) {
       font-weight: bold;
       font-size: 0.8em;
-      color: var(--action-label-color);
+      color: $action-label-color;
 
       @media (max-width: 801px) {
         display: none;

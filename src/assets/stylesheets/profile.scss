@@ -132,7 +132,7 @@
     text-align: center;
     line-height: 30px;
     &:hover {
-      background: var(--action-color);
+      background: $action-color;
       color: var(--tile-button-icon-hover-color);
     }
   }

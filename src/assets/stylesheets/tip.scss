@@ -14,7 +14,7 @@
   }
 
   :local(.tip-cancel) {
-    color: var(--notice-widget-color);
+    color: $notice-widget-color;
     appearance: none;
     -moz-appearance: none;
     -webkit-appearance: none;
@@ -56,7 +56,7 @@
       cursor: pointer;
       margin: 0 6px;
       border-radius: 18px;
-      background-color: var(--action-color);
+      background-color: $action-color;
     }
 
     :local(.spawn_menu-icon) {
@@ -78,7 +78,7 @@
 
   :local(.tip-link) {
     @extend %link-button;
-    color: var(--notice-text-color);
+    color: $notice-text-color;
   }
 }
 

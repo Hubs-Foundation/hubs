@@ -41,7 +41,7 @@
 }
 
 :local(.upload-icon) {
-  color: var(--action-label-color);
+  color: $action-label-color;
   cursor: pointer;
 
   &:hover {

@@ -35,11 +35,11 @@
 }
 
 :local(.favorited) {
-  color: var(--favorited-color);
+  color: $favorited-color;
 }
 
 :local(.collapse-button):hover {
-  color: var(--action-label-color);
+  color: $action-label-color;
 }
 
 :local(.entry-button) {
@@ -49,7 +49,7 @@
   text-align: left;
   flex-direction: row;
   cursor: pointer;
-  color: var(--action-text);
+  color: $action-text-color;
   align-items: center;
   @extend %default-font;
   border: 0;
@@ -65,7 +65,7 @@
 
   :local(.label) {
     @extend %glass-text;
-    color: var(--action-text);
+    color: $action-text-color;
     flex: 10 1 auto;
     margin-left: 20px;
     font-size: 1.0em;
@@ -81,7 +81,7 @@
   :local(.subtitle) {
     font-size: 0.8em;
     font-weight: normal;
-    color: var(--action-subtitle-text);
+    color: $action-subtitle-text-color;
   }
 }
 
@@ -89,15 +89,15 @@
   @extend %action-button-secondary;
 
   :local(.label) {
-    color: var(--action-label-color);
+    color: $action-label-color;
   }
 
   :local(.icon) {
-    color: var(--action-label-color);
+    color: $action-label-color;
   }
 
   :local(.subtitle) {
-    color: var(--action-label-color);
+    color: $action-label-color;
   }
 }
 
@@ -229,7 +229,7 @@
   }
 
   :local(.webvr-link) {
-    color: var(--action-text);
+    color: $action-text-color;
     flex: 1;
     min-height: max-content;
   }
@@ -254,7 +254,7 @@
     margin-bottom: 10px;
     font-size: 0.8em;
     cursor: pointer;
-    color: var(--action-label-color);
+    color: $action-label-color;
     text-decoration: underline;
   }
 }

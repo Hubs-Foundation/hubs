@@ -68,7 +68,7 @@
     }
 
     a {
-      color: var(--action-label-color);
+      color: $action-label-color;
     }
 
     @media (max-width: 1000px) {
@@ -96,7 +96,7 @@
 
       &:hover {
         @media (pointer: fine) {
-          background-color: var(--action-color);
+          background-color: $action-color;
         }
       }
     }

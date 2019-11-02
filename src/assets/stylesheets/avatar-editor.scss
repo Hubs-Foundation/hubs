@@ -107,7 +107,7 @@
       }
       a {
         margin-left: 10px;
-        color: var(--action-label-color);
+        color: $action-label-color;
       }
     }
 
@@ -227,7 +227,7 @@
     margin-bottom: 0.5em;
   }
   .form-submit:disabled {
-    background-color: var(--action-color-disabled);
+    background-color: $action-color-disabled;
   }
 
   .split {
@@ -246,7 +246,7 @@
     a {
       cursor: pointer;
       text-decoration: underline;
-      color: var(--action-label-color);
+      color: $action-label-color;
     }
   }
 

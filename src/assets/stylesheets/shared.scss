@@ -1,6 +1,20 @@
 @import 'colors';
 
-%unselectable {
+$default-action-color: #FF3464;
+$default-action-color-light: #FF74A4;
+$action-color: var(--action-color, $default-action-color);
+$action-label-color: var(--action-label-color, $default-action-color);
+$action-color-disabled: var(--action-color-disabled, $default-action-color-light);
+$action-color-highlight: var(--action-color-highlight, $default-action-color-light);
+$action-color-transparent: var(--action-color-transparent, rgba(255, 52, 100, 0.9));
+$action-text-color: var(--action-text-color, white);
+$action-subtitle-text-color: var(--action-subtitle-text-color, $light-text);
+$notice-background-color: var(--notice-background-color, $bright-blue);
+$notice-text-color: var(--notice-text-color, white);
+$notice-widget-color: var(--notice-widget-color, $bright-blue);
+$favorited-color: var(--favorited-color, $duck-yellow);
+
+%unselectable  {
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -68,8 +82,8 @@
     padding: 18px 48px;
   }
 
-  background: var(--action-color);
-  color: var(--action-text);
+  background: $action-color;
+  color: $action-text-color;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -125,9 +139,9 @@
   border-radius: 28px;
   padding: 0px 18px;
 
-  background: var(--action-color);
+  background: $action-color;
   font-size: 1em;
-  color: var(--action-text);
+  color: $action-text-color;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -144,23 +158,23 @@
 %action-button-secondary {
   @extend %action-button;
   background-color: var(--action-button-secondary-background);
-  color: var(--action-label-color);
+  color: $action-label-color;
 }
 
 %action-button-secondary-modal {
   @extend %action-button;
   background-color: var(--panel-action-button-secondary-background);
-  color: var(--action-label-color);
+  color: $action-label-color;
 }
 
 %action-button-selected {
   background: var(--action-button-secondary-background);
-  color: var(--action-label-color);
+  color: $action-label-color;
 }
 
 %bottom-action-button {
   @extend %bottom-button;
-  background: var(--action-color);
+  background: $action-color;
 }
 
 %spoke-action-button {
@@ -214,7 +228,7 @@
 }
 
 %checkbox-checked {
-  outline: 9px solid var(--action-color);
+  outline: 9px solid $action-color;
   outline-offset: -15px;
 }
 
@@ -281,8 +295,8 @@
   pointer-events: auto;
   z-index: 2;
   font-size: 0.8em;
-  color: var(--notice-text-color);
+  color: $notice-text-color;
   padding: 12px 24px;
-  background-color: var(--notice-background-color);
+  background-color: $notice-background-color;
   text-align: center;
 }

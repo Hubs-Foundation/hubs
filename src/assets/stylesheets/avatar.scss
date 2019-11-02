@@ -71,7 +71,7 @@ body {
     min-height: max-content;
     margin-top: 16px;
     &:disabled {
-      background-color: var(--action-color-disabled);
+      background-color: $action-color-disabled;
       cursor: default;
     }
   }
@@ -109,7 +109,7 @@ body {
     text-align: center;
     line-height: 30px;
     &:hover {
-      background: var(--action-color);
+      background: $action-color;
       color: var(--tile-button-icon-hover-color);
     }
   }
