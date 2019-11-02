@@ -9,7 +9,10 @@ function setAuthToken(token) {
 function fetchAppConfigs(method, body) {
   return fetch("/api/v1/app_configs", {
     method,
-    headers: { Authorization: `Bearer ${currentAuthToken}` },
+    headers: {
+      Authorization: `Bearer ${currentAuthToken}`,
+      "Content-Type": "application/json"
+    },
     body
   });
 }
