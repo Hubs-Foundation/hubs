@@ -66,11 +66,15 @@ waitForDOMContentLoaded().then(() => {
 });
 
 function applyThemeToTextButton(el, highlighted) {
-  el.setAttribute("text-button", "backgroundColor", highlighted ? "#fff" : getThemeColor("action-color"));
+  el.setAttribute(
+    "text-button",
+    "backgroundColor",
+    highlighted ? getThemeColor("action-color-highlight") : getThemeColor("action-color")
+  );
   el.setAttribute(
     "text-button",
     "backgroundHoverColor",
-    highlighted ? "#fff" : getThemeColor("action-color-highlight")
+    highlighted ? "#aaa" : getThemeColor("action-color-highlight")
   );
 }
 
