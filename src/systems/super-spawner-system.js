@@ -20,6 +20,12 @@ export class SuperSpawnerSystem {
     entity.object3D.updateMatrices();
     entity.object3D.matrix.decompose(entity.object3D.position, entity.object3D.quaternion, entity.object3D.scale);
     const data = superSpawner.data;
+
+    const targetScale = new THREE.Vector3(data.spawnScale.x, data.spawnScale.y, data.spawnScale.z);
+    if (!data.useCustomSpawnScale) {
+      superSpawner.el.object3D.getWorldScale(targetScale);
+    }
+
     const spawnedEntity = addMedia(
       data.src,
       data.template,
@@ -27,31 +33,30 @@ export class SuperSpawnerSystem {
       null,
       data.resolve,
       data.resize,
-      false
+      false,
+      true,
+      targetScale
     ).entity;
 
-    spawnedEntity.object3D.position.copy(
-      data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
-    );
-    spawnedEntity.object3D.rotation.copy(
-      data.useCustomSpawnRotation ? data.spawnRotation : superSpawner.el.object3D.rotation
-    );
+    if (data.useCustomSpawnPosition) {
+      spawnedEntity.object3D.position.copy(data.spawnPosition);
+    } else {
+      superSpawner.el.object3D.getWorldPosition(spawnedEntity.object3D.position);
+    }
+    if (data.useCustomSpawnRotation) {
+      spawnedEntity.object3D.rotation.copy(data.spawnRotation);
+    } else {
+      superSpawner.el.object3D.getWorldQuaternion(spawnedEntity.object3D.quaternion);
+    }
     spawnedEntity.object3D.matrixNeedsUpdate = true;
     state.held = spawnedEntity;
-
-    const targetScale = superSpawner.el.object3D.scale.clone();
 
     superSpawner.activateCooldown();
     state.spawning = true;
 
     spawnedEntity.addEventListener(
-      "model-loaded",
+      "media-loaded",
       () => {
-        if (spawnedEntity.object3DMap.mesh) {
-          spawnedEntity.object3DMap.mesh.scale.copy(data.useCustomSpawnScale ? data.spawnScale : targetScale);
-          spawnedEntity.object3DMap.mesh.matrixNeedsUpdate = true;
-        }
-
         state.spawning = false;
       },
       { once: true }

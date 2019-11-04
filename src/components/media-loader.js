@@ -44,6 +44,8 @@ AFRAME.registerComponent("media-loader", {
     fileIsOwned: { type: "boolean" },
     src: { type: "string" },
     resize: { default: false },
+    useCustomMeshScale: { default: false },
+    customMeshScale: { default: { x: 1, y: 1, z: 1 } },
     resolve: { default: false },
     contentType: { default: null },
     contentSubtype: { default: null },
@@ -71,11 +73,18 @@ AFRAME.registerComponent("media-loader", {
     const center = new THREE.Vector3();
     return function(resize) {
       const mesh = this.el.getObject3D("mesh");
-      const box = getBox(this.el, mesh);
-      const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
-      mesh.scale.multiplyScalar(scaleCoefficient);
-      const { min, max } = box;
-      center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
+      if (this.data.useCustomMeshScale) {
+        mesh.scale.copy(this.data.customMeshScale);
+        const box = getBox(this.el, mesh);
+        const { min, max } = box;
+        center.addVectors(min, max).multiplyScalar(0.5);
+      } else {
+        const box = getBox(this.el, mesh);
+        const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
+        mesh.scale.multiplyScalar(scaleCoefficient);
+        const { min, max } = box;
+        center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
+      }
       mesh.position.sub(center);
       mesh.matrixNeedsUpdate = true;
     };

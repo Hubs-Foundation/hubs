@@ -98,7 +98,9 @@ export const addMedia = (
   contentSubtype = null,
   resolve = false,
   resize = false,
-  animate = true
+  animate = true,
+  useCustomMeshScale = false,
+  customMeshScale = null
 ) => {
   const scene = AFRAME.scenes[0];
 
@@ -107,6 +109,8 @@ export const addMedia = (
   const needsToBeUploaded = src instanceof File;
   entity.setAttribute("media-loader", {
     resize,
+    useCustomMeshScale,
+    customMeshScale,
     resolve,
     animate,
     src: typeof src === "string" ? src : "",
@@ -122,15 +126,18 @@ export const addMedia = (
     scene.emit("media-loading", { src: src });
   }, 100);
 
-  ["model-loaded", "video-loaded", "image-loaded", "pdf-loaded"].forEach(eventName => {
-    entity.addEventListener(
-      eventName,
-      async () => {
-        clearTimeout(fireLoadingTimeout);
-        scene.emit("media-loaded", { src: src });
-      },
-      { once: true }
-    );
+  const eventNames = ["model-loaded", "video-loaded", "image-loaded", "pdf-loaded"];
+
+  const cb = async () => {
+    clearTimeout(fireLoadingTimeout);
+    entity.emit("media-loaded", { src: src });
+    eventNames.forEach(eventName => {
+      entity.removeEventListener(eventName, cb);
+    });
+  };
+
+  eventNames.forEach(eventName => {
+    entity.addEventListener(eventName, cb);
   });
 
   const orientation = new Promise(function(resolve) {
