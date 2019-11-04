@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 
 import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/sign-in-dialog.scss";
 import DialogContainer from "./dialog-container";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
@@ -67,19 +68,17 @@ export default class SignInDialog extends Component {
           {(configs.feature("show_terms") || configs.feature("show_privacy")) && (
             <p className={styles.terms}>
               By proceeding, you agree to the{" "}
-              {configs.feature("show_terms") && (
-                <>
-                  <a
-                    rel="noopener noreferrer"
-                    target="_blank"
-                    href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
-                  >
-                    terms of use
-                  </a>{" "}
-                </>
-              )}
+              <IfFeature name="show_terms">
+                <a
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+                >
+                  terms of use
+                </a>{" "}
+              </IfFeature>
               {configs.feature("show_terms") && configs.feature("show_privacy") && "and "}
-              {configs.feature("show_privacy") && (
+              <IfFeature name="show_privacy">
                 <a
                   rel="noopener noreferrer"
                   target="_blank"
@@ -87,7 +86,7 @@ export default class SignInDialog extends Component {
                 >
                   privacy notice
                 </a>
-              )}.
+              </IfFeature>.
             </p>
           )}
           <button type="submit" className={styles.nextButton}>

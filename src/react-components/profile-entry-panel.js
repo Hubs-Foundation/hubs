@@ -194,7 +194,7 @@ class ProfileEntryPanel extends Component {
 
             <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
             <div className={styles.links}>
-              {configs.feature("show_terms") && (
+              <IfFeature name="show_terms">
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
@@ -202,9 +202,9 @@ class ProfileEntryPanel extends Component {
                 >
                   <FormattedMessage id="profile.terms_of_use" />
                 </a>
-              )}
+              </IfFeature>
 
-              {configs.feature("show_privacy") && (
+              <IfFeature name="show_privacy">
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
@@ -212,7 +212,7 @@ class ProfileEntryPanel extends Component {
                 >
                   <FormattedMessage id="profile.privacy_notice" />
                 </a>
-              )}
+              </IfFeature>
             </div>
           </div>
         </form>

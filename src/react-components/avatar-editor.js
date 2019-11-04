@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { messages } from "../utils/i18n";
 import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
 import { upload } from "../utils/media-utils";
 import { ensureAvatarMaterial } from "../utils/avatar-utils";
@@ -491,14 +492,14 @@ export default class AvatarEditor extends Component {
               />
             </div>
             <div className="info">
-              {configs.feature("show_avatar_editor_link") && (
+              <IfFeature name="show_avatar_editor_link">
                 <p>
                   <a target="_blank" rel="noopener noreferrer" href="https://tryquilt.io/">
                     <FormattedMessage id="avatar-editor.quilt-link" />
                   </a>
                 </p>
-              )}
-              {configs.feature("show_avatar_pipelines_link") && (
+              </IfFeature>
+              <IfFeature name="show_avatar_pipelines_link">
                 <p>
                   <FormattedMessage id="avatar-editor.info" />
                   <a
@@ -509,7 +510,7 @@ export default class AvatarEditor extends Component {
                     <FormattedMessage id="avatar-editor.info-link" />
                   </a>
                 </p>
-              )}
+              </IfFeature>
             </div>
             <div>
               <input

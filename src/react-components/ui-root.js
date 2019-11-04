@@ -8,6 +8,7 @@ import en from "react-intl/locale-data/en";
 import screenfull from "screenfull";
 
 import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import hubLogo from "../assets/images/logo.svg";
@@ -919,31 +920,27 @@ class UIRoot extends Component {
         <div>
           Sorry, this room is no longer available.
           <p />
-          {configs.feature("show_terms") && (
-            <>
-              A room may be closed if we receive reports that it violates our{" "}
-              <a
-                target="_blank"
-                rel="noreferrer noopener"
-                href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
-              >
-                Terms of Use
-              </a>
-              .<br />
-            </>
-          )}
+          <IfFeature name="show_terms">
+            A room may be closed if we receive reports that it violates our{" "}
+            <a
+              target="_blank"
+              rel="noreferrer noopener"
+              href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+            >
+              Terms of Use
+            </a>
+            .<br />
+          </IfFeature>
           If you have questions, contact us at{" "}
           <a href={`mailto:${messages["contact-email"]}`}>
             <FormattedMessage id="contact-email" />
           </a>
           .<p />
-          {configs.feature("show_source_link") && (
-            <>
-              If you&apos;d like to run your own server, Hubs&apos;s source code is available on{" "}
-              <a href="https://github.com/mozilla/hubs">GitHub</a>
-              .
-            </>
-          )}
+          <IfFeature name="show_source_link">
+            If you&apos;d like to run your own server, Hubs&apos;s source code is available on{" "}
+            <a href="https://github.com/mozilla/hubs">GitHub</a>
+            .
+          </IfFeature>
         </div>
       );
     } else if (this.props.platformUnsupportedReason === "no_data_channels") {
@@ -2014,13 +2011,13 @@ class UIRoot extends Component {
                   }}
                 />
                 {!watching && !streaming ? (
-                  configs.feature("show_feedback_ui") && (
+                  <IfFeature name="show_feedback_ui">
                     <div className={styles.nagCornerButton}>
                       <button onClick={() => this.pushHistoryState("modal", "feedback")}>
                         <FormattedMessage id="feedback.prompt" />
                       </button>
                     </div>
-                  )
+                  </IfFeature>
                 ) : (
                   <div className={styles.nagCornerButton}>
                     <button onClick={() => this.setState({ hide: true })}>

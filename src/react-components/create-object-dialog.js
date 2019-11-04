@@ -7,6 +7,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
 import { messages } from "../utils/i18n";
 import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import giphyLogo from "../assets/images/giphy_logo.png";
 import styles from "../assets/stylesheets/create-object-dialog.scss";
 import ducky from "../assets/models/DuckyMesh.glb";
@@ -33,18 +34,16 @@ const references = (
     <a href="http://poly.google.com/" target="_blank" rel="noopener noreferrer">
       Google Poly
     </a>
-    {configs.feature("show_model_collection_link") && (
-      <>
-        , or our{" "}
-        <a
-          href={configs.link("model_collection", "https://sketchfab.com/mozillareality")}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          collection
-        </a>
-      </>
-    )}.
+    <IfFeature name="show_model_collection_link">
+      , or our{" "}
+      <a
+        href={configs.link("model_collection", "https://sketchfab.com/mozillareality")}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        collection
+      </a>
+    </IfFeature>.
   </span>
 );
 

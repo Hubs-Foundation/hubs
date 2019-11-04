@@ -4,6 +4,7 @@ import { FormattedMessage } from "react-intl";
 import classNames from "classnames";
 
 import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/oauth-dialog.scss";
 
@@ -21,19 +22,17 @@ export default class OAuthDialog extends Component {
         <div>We&apos;ll ask for access to your e-mail address so you can skip signing in next time.</div>
         <p className={styles.privacyNotice}>
           By proceeding, you agree to the{" "}
-          {configs.feature("show_terms") && (
-            <>
-              <a
-                rel="noopener noreferrer"
-                target="_blank"
-                href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
-              >
-                terms of use
-              </a>{" "}
-            </>
-          )}
+          <IfFeature name="show_terms">
+            <a
+              rel="noopener noreferrer"
+              target="_blank"
+              href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+            >
+              terms of use
+            </a>{" "}
+          </IfFeature>
           {configs.feature("show_terms") && configs.feature("show_privacy") && "and "}
-          {configs.feature("show_privacy") && (
+          <IfFeature name="show_privacy">
             <a
               rel="noopener noreferrer"
               target="_blank"
@@ -41,7 +40,7 @@ export default class OAuthDialog extends Component {
             >
               privacy notice
             </a>
-          )}.
+          </IfFeature>.
         </p>
       </div>
     );

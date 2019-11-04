@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import cx from "classnames";
 
-import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/change-scene-dialog.scss";
 import DialogContainer from "./dialog-container.js";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
@@ -48,13 +48,11 @@ export default class ChangeSceneDialog extends Component {
           <div>
             <p>
               Paste a URL to a{" "}
-              {configs.feature("enable_spoke") && (
-                <>
-                  <a href="/spoke" target="_blank" rel="noopener noreferrer">
-                    Spoke
-                  </a>{" "}
-                </>
-              )}
+              <IfFeature name="enable_spoke">
+                <a href="/spoke" target="_blank" rel="noopener noreferrer">
+                  Spoke
+                </a>{" "}
+              </IfFeature>
               scene or a URL to a{" "}
               <a href="https://en.wikipedia.org/wiki/GlTF#GLB" target="_blank" rel="noopener noreferrer">
                 GLB
@@ -79,7 +77,7 @@ export default class ChangeSceneDialog extends Component {
                   <FormattedMessage id="change-scene-dialog.change-scene" />
                 </button>
               </div>
-              {configs.feature("enable_spoke") && (
+              <IfFeature name="enable_spoke">
                 <div className={styles.spokeCreate}>
                   <div>
                     <FormattedMessage id="change-scene-dialog.create-in-spoke" />
@@ -88,7 +86,7 @@ export default class ChangeSceneDialog extends Component {
                     <FormattedMessage id="change-scene-dialog.new-spoke-project" />
                   </a>
                 </div>
-              )}
+              </IfFeature>
             </div>
           </form>
         </div>

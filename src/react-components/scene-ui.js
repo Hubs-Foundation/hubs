@@ -5,6 +5,7 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 
 import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/scene-ui.scss";
 import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import spokeLogo from "../assets/images/spoke_logo_black.png";
@@ -174,14 +175,14 @@ class SceneUI extends Component {
             <div className={styles.name}>{this.props.sceneName}</div>
             <div className={styles.attribution}>{attributions}</div>
           </div>
-          {configs.feature("enable_spoke") && (
+          <IfFeature name="enable_spoke">
             <div className={styles.spoke}>
               <div className={styles.madeWith}>made with</div>
               <a href="/spoke">
                 <img src={spokeLogo} />
               </a>
             </div>
-          )}
+          </IfFeature>
           {this.state.showCustomRoomDialog && (
             <CreateRoomDialog
               includeScenePrompt={false}
