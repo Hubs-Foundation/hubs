@@ -32,6 +32,8 @@ import {
 } from "../utils/ita";
 import * as AppConfigUtils from "../utils/app-config";
 
+const qs = new URLSearchParams(location.hash.split("?")[1]);
+
 const styles = withCommonStyles(theme => {
   return {
     inputDescription: {
@@ -295,7 +297,7 @@ class ConfigurationEditor extends Component {
 
   renderTree(schema, category, config) {
     const configurables = getDescriptors(schema[category])
-      .filter(([, descriptor]) => descriptor.internal !== "true")
+      .filter(([, descriptor]) => qs.get("show_internal_configs") !== null || descriptor.internal !== "true")
       .map(([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path)));
 
     return (
