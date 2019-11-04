@@ -61,11 +61,7 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
         scene.is("entered") ? paths.actions.cameraDelta : paths.actions.lobbyCameraDelta
       );
       if (cameraDelta) {
-        rotatePitchAndYaw(
-          this.el.object3D,
-          this.el.sceneEl.is("frozen") && !window.isHoldingWaypoint ? this.pendingXRotation + cameraDelta[1] : 0,
-          cameraDelta[0]
-        );
+        rotatePitchAndYaw(this.el.object3D, this.pendingXRotation + cameraDelta[1], cameraDelta[0]);
       } else if (this.pendingXRotation) {
         rotatePitchAndYaw(this.el.object3D, this.pendingXRotation, 0);
       }

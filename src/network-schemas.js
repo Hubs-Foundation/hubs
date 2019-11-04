@@ -212,6 +212,25 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add({
+    template: "#waypoint",
+    components: [
+      {
+        component: "position",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
+      {
+        component: "rotation",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
+      },
+      {
+        component: "scale",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
+      "waypoint"
+    ]
+  });
+
+  NAF.schemas.add({
     template: "#interactable-pen",
     components: [
       {

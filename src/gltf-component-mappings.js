@@ -104,6 +104,17 @@ AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentNa
 
 AFRAME.GLTFModelPlus.registerComponent("pinnable", "pinnable");
 
+AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentName, componentData) => {
+  if (componentData.canBeOccupied) {
+    el.setAttribute("networked", {
+      template: "#waypoint",
+      owner: "scene",
+      persistent: true,
+      networkId: componentData.id
+    });
+  }
+});
+
 AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
   if (componentData.id) {
     el.setAttribute("networked", {

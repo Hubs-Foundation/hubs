@@ -378,9 +378,9 @@ AFRAME.registerComponent("scale-in-screen-space", {
   })()
 });
 
-const ENABLE_WAYPOINT_TESTS = true;
+const ENABLE_WAYPOINT_TESTS = false;
 if (ENABLE_WAYPOINT_TESTS) {
-  AFRAME.registerSystem("make-some-waypoints-for-testing", {
+  AFRAME.registerSystem("make-some-way-points-for-testing", {
     init() {
       const v = new THREE.Vector3();
 

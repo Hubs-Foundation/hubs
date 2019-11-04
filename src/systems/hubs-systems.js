@@ -14,15 +14,19 @@ import { LobbyCameraSystem } from "./lobby-camera-system";
 import { InteractionSfxSystem } from "./interaction-sfx-system";
 import { SpriteSystem } from "./sprites";
 import { CameraSystem } from "./camera-system";
+import { WaypointSystem } from "./waypoint-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
+    waitForDOMContentLoaded().then(() => {
+      this.DOMContentDidLoad = true;
+    });
     this.cursorTogglingSystem = new CursorTogglingSystem();
     this.interactionSfxSystem = new InteractionSfxSystem();
     this.superSpawnerSystem = new SuperSpawnerSystem();
     this.cursorTargettingSystem = new CursorTargettingSystem();
-    this.physicsSystem = new PhysicsSystem(this.el.sceneEl.object3D);
+    this.physicsSystem = new PhysicsSystem(this.el.object3D);
     this.constraintsSystem = new ConstraintsSystem(this.physicsSystem);
     this.twoPointStretchingSystem = new TwoPointStretchingSystem();
     this.singleActionButtonSystem = new SingleActionButtonSystem();
@@ -36,10 +40,8 @@ AFRAME.registerSystem("hubs-systems", {
     this.batchManagerSystem = new BatchManagerSystem(this.el.sceneEl.object3D, this.el.sceneEl.renderer);
     this.spriteSystem = new SpriteSystem(this.el);
     this.cameraSystem = new CameraSystem(this.batchManagerSystem);
+    this.waypointSystem = new WaypointSystem(this.el);
     this.drawingMenuSystem = new DrawingMenuSystem(this.el.sceneEl);
-    waitForDOMContentLoaded().then(() => {
-      this.DOMContentDidLoad = true;
-    });
   },
 
   tick(t, dt) {
@@ -69,6 +71,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.spriteSystem.tick(t, dt);
     this.batchManagerSystem.tick(t);
     this.cameraSystem.tick(this.el, dt);
+    this.waypointSystem.tick(t, dt);
   },
 
   remove() {

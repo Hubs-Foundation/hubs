@@ -67,6 +67,33 @@
 
             <a-asset-item id="spawn-point" response-type="arraybuffer" src="./assets/models/spawn-point.glb"></a-asset-item>
 
+            <template id="waypoint">
+                <a-entity waypoint></a-entity>
+            </template>
+
+            <template id="occupiable-waypoint-template">
+            </template>
+            <template id="occupiable-waypoint-icon-template">
+                <a-entity
+                    is-remote-hover-target
+                    class="way-point-icon"
+                    tags="singleActionButton: true"
+                    sprite="name: spawn-point.png"
+                    billboard
+                    scale-in-screen-space="baseScale: 0.35 0.35 0.35;
+                                           addedScale: 0.02 0.02 0.02"
+                    position="0 0 0">
+                </a-entity>
+            </template>
+            <template id="teleport-waypoint">
+            </template>
+            <template id="teleport-waypoint-icon">
+            </template>
+            <template id="latch-waypoint">
+            </template>
+            <template id="latch-waypoint-icon">
+            </template>
+
             <template id="visible-thing-template">
                 <a-entity material="flatShading: true" geometry="primitive: cone"></a-entity>
             </template>
@@ -82,20 +109,20 @@
                 </a-entity>
             </template>
             <template id="way-point-icon-template">
-                <a-entity visibility-while-frozen="requireHoverOnNonMobile: false;">
-                    <a-entity is-remote-hover-target
-                              class="way-point-icon"
-                              tags="singleActionButton: true"
-                              sprite="name: spawn-point.png"
-                              billboard
-                              scale-in-screen-space="baseScale: 0.35 0.35 0.35;
-                                                     addedScale: 0.02 0.02 0.02"
-                              position="0 0 0"
-                              show-sibling-on-hover="target: .waypoint-model"
-                              >
+                <a-entity>
+                    <a-entity
+                        is-remote-hover-target
+                        class="way-point-icon"
+                        tags="singleActionButton: true"
+                        sprite="name: spawn-point.png"
+                        billboard
+                        scale-in-screen-space="baseScale: 0.35 0.35 0.35;
+                                               addedScale: 0.02 0.02 0.02"
+                        position="0 0 0"
+                        show-sibling-on-hover="target: .waypoint-model">
                     </a-entity>
                     <a-entity
-                        is-not-remote-hover-target
+                        overwrite-raycast-as-noop
                         class="waypoint-model"
                         gltf-model-plus="inflate: true; src: #spawn-point;"
                         position="0 -1.6 0"
@@ -1128,6 +1155,8 @@
         <!-- Objects -->
         <a-entity id="objects-root">
             <a-entity id="objects-scene"></a-entity>
+        </a-entity>
+        <a-entity id="foo-bar-baz">
         </a-entity>
 
         <a-entity

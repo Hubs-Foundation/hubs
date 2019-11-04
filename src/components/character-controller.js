@@ -189,7 +189,6 @@ AFRAME.registerComponent("character-controller", {
           this.activeWaypointOptions.allowQuickTakeover &&
           t <= this.prevWaypointTravelTime + (WAYPOINT_TRAVEL_TIME + WAYPOINT_DOWN_TIME)
         ) {
-          console.log("waypoint needs release");
           //freePooledMatrix4(this.activeWaypoint);
           if (this.teleportSound) {
             this.sfx.stopSoundNode(this.teleportSound);
@@ -199,7 +198,6 @@ AFRAME.registerComponent("character-controller", {
         this.activeWaypoint = waypoint;
         this.activeWaypointOptions = options;
         this.isMovementDisabled = options.disableMovement;
-        console.log(options.allowQuickTakeover);
         WAYPOINT_TRAVEL_TIME = options.travelTime || DEFAULT_WAYPOINT_TRAVEL_TIME;
         this.data.pivot.object3D.updateMatrices();
         this.startPoint = new THREE.Matrix4().copy(this.data.pivot.object3D.matrixWorld);
@@ -266,11 +264,7 @@ AFRAME.registerComponent("character-controller", {
         this.accelerationInput.set(
           this.accelerationInput.x + acc[0],
           this.accelerationInput.y + 0,
-          this.accelerationInput.z +
-            acc[1] +
-            (!this.el.sceneEl.is("frozen") && !window.isHoldingWaypoint && cameraDelta
-              ? cameraDelta[1] * (window.isTouchscreen ? 10 : 1) * dt
-              : 0)
+          this.accelerationInput.z + acc[1]
         );
       }
       if (userinput.get(paths.actions.toggleFly)) {
