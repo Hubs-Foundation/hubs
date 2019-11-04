@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+
+import { messages } from "../utils/i18n";
 import DialogContainer from "./dialog-container.js";
 
 export default class SafariMicDialog extends Component {
@@ -7,7 +9,7 @@ export default class SafariMicDialog extends Component {
       <DialogContainer title="Microphone Access Required" {...this.props}>
         <div>
           <div>
-            Hubs requires microphone permissions in Safari. <br />
+            {messages["app-name"]} requires microphone permissions in Safari. <br />
             Please reload and allow microphone access to continue.
           </div>
           <div className="invite-form">

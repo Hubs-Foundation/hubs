@@ -1,12 +1,12 @@
-import "./utils/configs";
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import InfiniteScroll from "react-infinite-scroller";
 import markdownit from "markdown-it";
-import registerTelemetry from "./telemetry";
 
+import configs from "./utils/configs";
+import registerTelemetry from "./telemetry";
 import "./assets/stylesheets/whats-new.scss";
-import hubsLogo from "./assets/images/hub-preview-light-no-shadow.png";
+import hubLogo from "./assets/images/hub-preview-light-no-shadow.png";
 
 registerTelemetry("/whats-new", "Hubs What's New");
 
@@ -89,7 +89,7 @@ class WhatsNew extends Component {
         <div className="container">
           <div className="header">
             <a href="/">
-              <img className="logo" src={hubsLogo} />
+              <img className="logo" src={configs.image("logo", hubLogo)} />
             </a>
           </div>
           <div className="main">
