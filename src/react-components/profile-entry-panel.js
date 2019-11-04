@@ -6,6 +6,7 @@ import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import { SCHEMA } from "../storage/store";
 import styles from "../assets/stylesheets/profile.scss";
 import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
