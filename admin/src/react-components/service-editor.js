@@ -295,7 +295,7 @@ class ConfigurationEditor extends Component {
 
   renderTree(schema, category, config) {
     const configurables = getDescriptors(schema[category])
-      .filter(([, descriptor]) => descriptor.show_on_self_hosted !== "false")
+      .filter(([, descriptor]) => descriptor.internal !== "true")
       .map(([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path)));
 
     return (
