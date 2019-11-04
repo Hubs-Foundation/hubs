@@ -4,6 +4,7 @@
     "app-short-domain": "hub.link",
     "contact-email": "hubs@mozilla.com",
     "company-name": "Mozilla",
+    "share-hashtag": "#hubs",
     "auth.verified-title": "E-Mail Verified!",
     "auth.verified": "Your email has been verified!\nYou can now close this browser tab and return to %app-name%.",
     "auth.spoke-verified": "You email has been verified!\nYou can now close this browser tab and return to Spoke.",

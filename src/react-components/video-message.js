@@ -10,9 +10,7 @@ import { share } from "../utils/share";
 export default function VideoMessage({ name, body: { src: url }, className, maySpawn, hubId }) {
   const onShareClicked = share.bind(null, {
     url: url,
-    title:
-      `Taken in #${messages["app-name"].toLowerCase()}, ` +
-      `join me at https://${messages["app-short-domain"]}/${hubId}`
+    title: `Taken in ${messages["share-hashtag"]}, join me at https://${messages["app-short-domain"]}/${hubId}`
   });
   return (
     <div className={className}>

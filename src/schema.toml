@@ -6,6 +6,7 @@ translations.en."app-name" = { category = "translations", type = "string", name 
 translations.en."company-name" = { category = "translations", type = "string", name = "Company Name", description = "Company name used across the app." }
 translations.en."app-short-domain" = { category = "translations", type = "string", name = "Short App Domain", description = "Short app domain." }
 translations.en."contact-email" = { category = "translations", type = "string", name = "Contact email", description = "General contact email." }
+translations.en."share-hashtag" = { category = "translations", type = "string", name = "Share Hashtag", description = "Hashtag used in share messages." }
 
 features.show_terms = { category = "features", type = "boolean", name = "Show Terms of Use", description = "Show links to the terms of use." }
 features.show_privacy = { category = "features", type = "boolean", name = "Show Privacy Notice", description = "Show links to the privacy notice." }

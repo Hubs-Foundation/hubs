@@ -74,7 +74,7 @@ class SceneUI extends Component {
     }
 
     const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
-    const tweetText = `${this.props.sceneName} in #${messages["app-name"].toLowerCase()}`;
+    const tweetText = `${this.props.sceneName} in ${messages["share-hashtag"]}`;
     const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(sceneUrl)}&text=${encodeURIComponent(
       tweetText
     )}`;

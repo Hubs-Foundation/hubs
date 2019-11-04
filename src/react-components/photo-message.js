@@ -12,9 +12,7 @@ export default function PhotoMessage({ name, body: { src: url }, className, mayS
   const landingPageUrl = getLandingPageForPhoto(url);
   const onShareClicked = share.bind(null, {
     url: landingPageUrl,
-    title:
-      `Taken in #${messages["app-name"].toLowerCase()}, ` +
-      `join me at https://${messages["app-short-domain"]}/${hubId}`
+    title: `Taken in ${messages["share-hashtag"]}, join me at https://${messages["app-short-domain"]}/${hubId}`
   });
   return (
     <div className={className}>
