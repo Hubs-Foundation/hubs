@@ -32,9 +32,8 @@ export class SuperSpawnerSystem {
       ObjectContentOrigins.SPAWNER,
       null,
       data.resolve,
-      data.resize,
+      data.fitToBox,
       false,
-      true,
       targetScale
     ).entity;
 

@@ -97,10 +97,9 @@ export const addMedia = (
   contentOrigin,
   contentSubtype = null,
   resolve = false,
-  resize = false,
+  fitToBox = false,
   animate = true,
-  useCustomMeshScale = false,
-  customMeshScale = null
+  customMeshScale = { x: 1, y: 1, z: 1 }
 ) => {
   const scene = AFRAME.scenes[0];
 
@@ -108,8 +107,7 @@ export const addMedia = (
   entity.setAttribute("networked", { template: template });
   const needsToBeUploaded = src instanceof File;
   entity.setAttribute("media-loader", {
-    resize,
-    useCustomMeshScale,
+    fitToBox,
     customMeshScale,
     resolve,
     animate,

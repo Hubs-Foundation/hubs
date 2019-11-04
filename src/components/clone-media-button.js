@@ -19,8 +19,8 @@ AFRAME.registerComponent("clone-media-button", {
 
     this.onClick = () => {
       const src = this.src;
-      const { contentSubtype, resize } = this.targetEl.components["media-loader"].data;
-      const { entity } = addMedia(src, "#interactable-media", ObjectContentOrigins.URL, contentSubtype, true, resize);
+      const { contentSubtype, fitToBox } = this.targetEl.components["media-loader"].data;
+      const { entity } = addMedia(src, "#interactable-media", ObjectContentOrigins.URL, contentSubtype, true, fitToBox);
 
       entity.object3D.matrixNeedsUpdate = true;
 
