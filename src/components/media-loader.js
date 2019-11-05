@@ -43,7 +43,8 @@ AFRAME.registerComponent("media-loader", {
     fileId: { type: "string" },
     fileIsOwned: { type: "boolean" },
     src: { type: "string" },
-    resize: { default: false },
+    fitToBox: { default: false },
+    customMeshScale: { type: "vec3", default: { x: 1, y: 1, z: 1 } },
     resolve: { default: false },
     contentType: { default: null },
     contentSubtype: { default: null },
@@ -69,13 +70,20 @@ AFRAME.registerComponent("media-loader", {
 
   updateScale: (function() {
     const center = new THREE.Vector3();
-    return function(resize) {
+    return function(fitToBox) {
       const mesh = this.el.getObject3D("mesh");
-      const box = getBox(this.el, mesh);
-      const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
-      mesh.scale.multiplyScalar(scaleCoefficient);
-      const { min, max } = box;
-      center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
+      if (fitToBox) {
+        const box = getBox(this.el, mesh);
+        const scaleCoefficient = getScaleCoefficient(0.5, box);
+        mesh.scale.multiplyScalar(scaleCoefficient);
+        const { min, max } = box;
+        center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
+      } else {
+        mesh.scale.copy(this.data.customMeshScale);
+        const box = getBox(this.el, mesh);
+        const { min, max } = box;
+        center.addVectors(min, max).multiplyScalar(0.5);
+      }
       mesh.position.sub(center);
       mesh.matrixNeedsUpdate = true;
     };
@@ -224,7 +232,7 @@ AFRAME.registerComponent("media-loader", {
     if (this.data.animate) {
       if (!this.animating) {
         this.animating = true;
-        if (shouldUpdateScale) this.updateScale(this.data.resize);
+        if (shouldUpdateScale) this.updateScale(this.data.fitToBox);
         const mesh = this.el.getObject3D("mesh");
         const scale = { x: 0.001, y: 0.001, z: 0.001 };
         scale.x = mesh.scale.x < scale.x ? mesh.scale.x * 0.001 : scale.x;
@@ -233,7 +241,7 @@ AFRAME.registerComponent("media-loader", {
         addMeshScaleAnimation(mesh, scale, finish);
       }
     } else {
-      if (shouldUpdateScale) this.updateScale(this.data.resize);
+      if (shouldUpdateScale) this.updateScale(this.data.fitToBox);
       finish();
     }
   },
@@ -388,7 +396,7 @@ AFRAME.registerComponent("media-loader", {
             contentType: contentType,
             inflate: true,
             batch: !disableBatching && batchMeshes,
-            modelToWorldScale: this.data.resize ? 0.0001 : 1.0
+            modelToWorldScale: this.data.fitToBox ? 0.0001 : 1.0
           })
         );
       } else if (contentType.startsWith("text/html")) {

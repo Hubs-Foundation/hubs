@@ -268,7 +268,7 @@ AFRAME.registerSystem("userinput", {
     nonVRGamepadMappings.set(XboxControllerDevice, xboxControllerUserBindings);
     nonVRGamepadMappings.set(GamepadDevice, gamepadBindings);
 
-    const addExtraMappings = (activeDevice) => {
+    const addExtraMappings = activeDevice => {
       if (activeDevice instanceof ViveControllerDevice && activeDevice.gamepad) {
         if (activeDevice.gamepad.id === "OpenVR Cosmos") {
           //HTC Vive Cosmos Controller
@@ -284,16 +284,16 @@ AFRAME.registerSystem("userinput", {
           this.registeredMappings.add(viveWandUserBindings);
         }
       }
-    }
+    };
 
-    const deleteExtraMappings = (activeDevice) => {
+    const deleteExtraMappings = activeDevice => {
       if (activeDevice instanceof ViveControllerDevice && activeDevice.gamepad) {
         this.registeredMappings.delete(viveCosmosUserBindings);
         this.registeredMappings.delete(viveFocusPlusUserBindings);
         this.registeredMappings.delete(indexUserBindings);
         this.registeredMappings.delete(viveWandUserBindings);
       }
-    }
+    };
 
     const updateBindingsForVRMode = () => {
       const inVRMode = this.el.sceneEl.is("vr-mode");
