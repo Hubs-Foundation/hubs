@@ -130,7 +130,7 @@ AFRAME.registerComponent("character-controller", {
   enqueueWaypointTravelTo(inMat4, options = {}, travelTime, allowQuickTakeover) {
     const pooledMatrix = getPooledMatrix4();
     const tt = travelTime || DEFAULT_WAYPOINT_TRAVEL_TIME;
-    options.allowQuickTakeover = allowQuickTakeover;
+//    options.allowQuickTakeover = allowQuickTakeover;
     this.waypoints.push({ waypoint: pooledMatrix.copy(inMat4), options, travelTime: tt });
   },
 

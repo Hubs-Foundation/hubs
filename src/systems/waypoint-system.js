@@ -18,6 +18,9 @@ const THERE_CAN_ONLY_BE_ONE_HIGHLANDER_TIMEOUT = 1000; // Should be enough time 
 //
 //
 //
+function isOccupiableSpawnPoint(waypointComponent) {
+  return waypointComponent.data.canBeOccupied && waypointComponent.data.canBeSpawnPoint;
+}
 function isUnoccupiableSpawnPoint(waypointComponent) {
   return !waypointComponent.data.canBeOccupied && waypointComponent.data.canBeSpawnPoint;
 }
@@ -88,8 +91,10 @@ export class WaypointSystem {
   tryToOccupy(waypointComponent) {
     return new Promise(resolve => {
       setTimeout(() => {
-        if (seemsOkToSpawnAt(waypointComponent)) {
-          NAF.utils.takeOwnership(waypointComponent.el);
+        if (
+          seemsOkToSpawnAt(waypointComponent) &&
+          (NAF.utils.isMine(waypointComponent.el) || NAF.utils.takeOwnership(waypointComponent.el))
+        ) {
           waypointComponent.el.setAttribute("waypoint", { willBeOccupied: true });
           setTimeout(() => {
             if (NAF.utils.isMine(waypointComponent.el)) {
@@ -122,7 +127,7 @@ export class WaypointSystem {
     return candidates.length && candidates.splice(Math.floor(Math.random() * candidates.length), 1)[0];
   }
   getSpawnPoint() {
-    const candidates = Array.from(this.ready);
+    const candidates = this.ready.filter(isOccupiableSpawnPoint);
     return this.acquireSpawnPointFromCandidates(candidates).then(candidate => {
       candidate.el.setAttribute("waypoint", { isOccupied: true, willBeOccupied: false });
       //TODO: When should waypoints become unoccupied?
@@ -203,7 +208,7 @@ export class WaypointSystem {
     window.logReady = false;
   }
   releaseAnyOccupiedWaypoints() {
-    for (let i = 0; i < this.ready; i++) {
+    for (let i = 0; i < this.ready.length; i++) {
       if (NAF.utils.isMine(this.ready[i].el) && this.ready[i].data.canBeOccupied) {
         this.ready[i].el.setAttribute("waypoint", { isOccupied: false, willBeOccupied: false });
       }
@@ -231,15 +236,14 @@ export class WaypointSystem {
   }
   moveToSpawnPoint = (function() {
     return function moveToSpawnPoint() {
-      this.releaseAnyOccupiedWaypoints();
       if (this.isMovingToSpawnPoint) {
-        console.log("already trying to move, trying again in a few seconds");
         setTimeout(() => {
           this.moveToSpawnPoint();
         }, 3000);
+        return;
       }
+      this.releaseAnyOccupiedWaypoints();
       this.isMovingToSpawnPoint = true;
-      console.log("starting to move");
       DEBUG_RENDER_COLORED_RECTANGLE("blue");
       this.avatarPOV = this.avatarPOV || document.getElementById("avatar-pov-node");
       this.avatarPOV.object3D.updateMatrices();
@@ -255,14 +259,12 @@ export class WaypointSystem {
             0
           );
           DEBUG_RENDER_COLORED_RECTANGLE("green");
-          console.log("not moving anymore");
           this.isMovingToSpawnPoint = false;
         },
         reason => {
           console.warn(reason);
           DEBUG_RENDER_COLORED_RECTANGLE("red");
           this.moveToUnoccupiableSpawnPoint();
-          console.log("not moving anymore2 ");
           this.isMovingToSpawnPoint = false;
         }
       );
