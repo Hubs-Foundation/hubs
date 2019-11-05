@@ -19,14 +19,23 @@ AFRAME.registerComponent("clone-media-button", {
 
     this.onClick = () => {
       const src = this.src;
-      const { contentSubtype, fitToBox } = this.targetEl.components["media-loader"].data;
-      const { entity } = addMedia(src, "#interactable-media", ObjectContentOrigins.URL, contentSubtype, true, fitToBox);
-
+      const { contentSubtype, fitToBox, customMeshScale } = this.targetEl.components["media-loader"].data;
+      const { entity } = addMedia(
+        src,
+        "#interactable-media",
+        ObjectContentOrigins.URL,
+        contentSubtype,
+        true,
+        fitToBox,
+        false,
+        customMeshScale
+      );
+      entity.object3D.scale.copy(this.targetEl.object3D.scale);
       entity.object3D.matrixNeedsUpdate = true;
 
       entity.setAttribute("offset-relative-to", {
         target: "#avatar-pov-node",
-        offset: { x: 0, y: 0, z: -1.5 }
+        offset: { x: 0, y: 0, z: -1.5 * this.targetEl.object3D.scale.z }
       });
     };
   },

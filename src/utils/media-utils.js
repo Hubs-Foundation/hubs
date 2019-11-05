@@ -128,7 +128,7 @@ export const addMedia = (
 
   const cb = async () => {
     clearTimeout(fireLoadingTimeout);
-    entity.emit("media-loaded", { src: src });
+    entity.emit("media-loaded", { src });
     eventNames.forEach(eventName => {
       entity.removeEventListener(eventName, cb);
     });
