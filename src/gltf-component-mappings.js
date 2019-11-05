@@ -115,7 +115,7 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 
   el.setAttribute("media-loader", {
     src: componentData.src,
-    resize: componentData.contentSubtype ? false : true,
+    fitToBox: componentData.contentSubtype ? false : true,
     resolve: true,
     fileIsOwned: true,
     animate: false,
@@ -185,7 +185,7 @@ function mediaInflator(el, componentName, componentData, components) {
 
   el.setAttribute("media-loader", {
     src,
-    resize: true,
+    fitToBox: true,
     resolve: true,
     fileIsOwned: true,
     animate: false,

@@ -97,8 +97,9 @@ export const addMedia = (
   contentOrigin,
   contentSubtype = null,
   resolve = false,
-  resize = false,
-  animate = true
+  fitToBox = false,
+  animate = true,
+  customMeshScale = { x: 1, y: 1, z: 1 }
 ) => {
   const scene = AFRAME.scenes[0];
 
@@ -106,7 +107,8 @@ export const addMedia = (
   entity.setAttribute("networked", { template: template });
   const needsToBeUploaded = src instanceof File;
   entity.setAttribute("media-loader", {
-    resize,
+    fitToBox,
+    customMeshScale,
     resolve,
     animate,
     src: typeof src === "string" ? src : "",
@@ -126,7 +128,7 @@ export const addMedia = (
 
   const cb = async () => {
     clearTimeout(fireLoadingTimeout);
-    entity.emit("media-loaded", { src: src });
+    entity.emit("media-loaded", { src });
     eventNames.forEach(eventName => {
       entity.removeEventListener(eventName, cb);
     });

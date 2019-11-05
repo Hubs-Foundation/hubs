@@ -20,14 +20,21 @@ export class SuperSpawnerSystem {
     entity.object3D.updateMatrices();
     entity.object3D.matrix.decompose(entity.object3D.position, entity.object3D.quaternion, entity.object3D.scale);
     const data = superSpawner.data;
+
+    const targetScale = new THREE.Vector3(data.spawnScale.x, data.spawnScale.y, data.spawnScale.z);
+    if (!data.useCustomSpawnScale) {
+      superSpawner.el.object3D.getWorldScale(targetScale);
+    }
+
     const spawnedEntity = addMedia(
       data.src,
       data.template,
       ObjectContentOrigins.SPAWNER,
       null,
       data.resolve,
-      data.resize,
-      false
+      data.fitToBox,
+      false,
+      targetScale
     ).entity;
 
     if (data.useCustomSpawnPosition) {
@@ -43,18 +50,12 @@ export class SuperSpawnerSystem {
     spawnedEntity.object3D.matrixNeedsUpdate = true;
     state.held = spawnedEntity;
 
-    const targetScale = new THREE.Vector3();
-    superSpawner.el.object3D.getWorldScale(targetScale);
-
     superSpawner.activateCooldown();
     state.spawning = true;
 
     spawnedEntity.addEventListener(
       "media-loaded",
       () => {
-        spawnedEntity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : targetScale);
-        spawnedEntity.object3D.matrixNeedsUpdate = true;
-
         state.spawning = false;
 
         if (data.spawnedEntityCallback) {

@@ -22,10 +22,33 @@ const configs = {};
 // Also include APP_CONFIG that reticulum injects as a script in the page head.
 if (window.APP_CONFIG) {
   configs.APP_CONFIG = window.APP_CONFIG;
+  const { colors } = configs.APP_CONFIG;
+  if (colors) {
+    const colorVars = [];
+    for (const key in colors) {
+      if (!colors.hasOwnProperty(key)) continue;
+      colorVars.push(`--${key}: ${colors[key]};`);
+    }
+    const style = document.createElement("style");
+    style.innerHTML = `:root{${colorVars.join("\n")}}`;
+    document.head.prepend(style);
+  }
 }
 
 configs.feature = featureName => {
-  return configs.APP_CONFIG && configs.APP_CONFIG.features && configs.APP_CONFIG.features[featureName];
+  const isLocalDevelopment = process.env.NODE_ENV === "development";
+  const enableAll = isLocalDevelopment || process.env.ENABLE_ALL_FEATURES;
+  const features = configs.APP_CONFIG && configs.APP_CONFIG.features;
+  return enableAll || (features && features[featureName]);
+};
+
+configs.image = (imageName, defaultImage, cssUrl) => {
+  const url = (configs.APP_CONFIG && configs.APP_CONFIG.images && configs.APP_CONFIG.images[imageName]) || defaultImage;
+  return url && cssUrl ? `url(${url})` : url;
+};
+
+configs.link = (linkName, defaultValue) => {
+  return (configs.APP_CONFIG && configs.APP_CONFIG.links && configs.APP_CONFIG.links[linkName]) || defaultValue;
 };
 
 export default configs;

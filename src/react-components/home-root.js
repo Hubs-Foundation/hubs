@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import en from "react-intl/locale-data/en";
 
 import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import { lang, messages } from "../utils/i18n";
 import { playVideoWithStopOnBlur } from "../utils/video-utils.js";
 import homeVideoWebM from "../assets/video/home.webm";
@@ -181,20 +182,26 @@ class HomeRoot extends Component {
             <div className={styles.headerContent}>
               <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
                 <div className={styles.links}>
-                  <a href="/whats-new">
-                    <FormattedMessage id="home.whats_new_link" />
-                  </a>
-                  <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
-                    <FormattedMessage id="home.source_link" />
-                  </a>
-                  <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
-                    <FormattedMessage id="home.community_link" />
-                  </a>
-                  {configs.feature("disable_spoke") ? null : (
+                  <IfFeature name="show_whats_new_link">
+                    <a href="/whats-new">
+                      <FormattedMessage id="home.whats_new_link" />
+                    </a>
+                  </IfFeature>
+                  <IfFeature name="show_source_link">
+                    <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
+                      <FormattedMessage id="home.source_link" />
+                    </a>
+                  </IfFeature>
+                  <IfFeature name="show_community_link">
+                    <a href={configs.link("community", "https://discord.gg/wHmY4nd")} rel="noreferrer noopener">
+                      <FormattedMessage id="home.community_link" />
+                    </a>
+                  </IfFeature>
+                  <IfFeature name="enable_spoke">
                     <a href="/spoke" rel="noreferrer noopener">
                       Spoke
                     </a>
-                  )}
+                  </IfFeature>
                   {this.props.showAdmin && (
                     <a href="/admin" rel="noreferrer noopener">
                       <i>
@@ -223,7 +230,10 @@ class HomeRoot extends Component {
                 )}
               </div>
             </div>
-            <div className={styles.heroContent}>
+            <div
+              className={styles.heroContent}
+              style={{ backgroundImage: configs.image("home_background", null, true) }}
+            >
               {!this.props.hideHero &&
                 (this.props.favoriteHubsResult &&
                 this.props.favoriteHubsResult.entries &&
@@ -248,18 +258,20 @@ class HomeRoot extends Component {
                       </a>
                     </div>
 
-                    <div className={styles.secondaryLink}>
-                      <div>
-                        <FormattedMessage id="home.add_to_discord_1" />
+                    <IfFeature name="show_discord_bot_link">
+                      <div className={styles.secondaryLink}>
+                        <div>
+                          <FormattedMessage id="home.add_to_discord_1" />
+                        </div>
+                        <img src={discordLogoSmall} />
+                        <a href="/discord">
+                          <FormattedMessage id="home.add_to_discord_2" />
+                        </a>
+                        <div>
+                          <FormattedMessage id="home.add_to_discord_3" />
+                        </div>
                       </div>
-                      <img src={discordLogoSmall} />
-                      <a href="/discord">
-                        <FormattedMessage id="home.add_to_discord_2" />
-                      </a>
-                      <div>
-                        <FormattedMessage id="home.add_to_discord_3" />
-                      </div>
-                    </div>
+                    </IfFeature>
                   </div>
                 </div>
               )}
@@ -267,48 +279,70 @@ class HomeRoot extends Component {
             <div className={styles.footerContent}>
               <div className={styles.links}>
                 <div className={styles.top}>
-                  <a
-                    className={styles.link}
-                    rel="noopener noreferrer"
-                    href="#"
-                    onClick={this.onLinkClicked(this.showJoinUsDialog)}
-                  >
-                    <FormattedMessage id="home.join_us" />
-                  </a>
-                  <a
-                    className={styles.link}
-                    rel="noopener noreferrer"
-                    href="#"
-                    onClick={this.onLinkClicked(this.showUpdatesDialog)}
-                  >
-                    <FormattedMessage id="home.get_updates" />
-                  </a>
-                  <a
-                    className={styles.link}
-                    rel="noopener noreferrer"
-                    href="#"
-                    onClick={this.onLinkClicked(this.showReportDialog)}
-                  >
-                    <FormattedMessage id="home.report_issue" />
-                  </a>
-                  <a
-                    className={styles.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
-                  >
-                    <FormattedMessage id="home.terms_of_use" />
-                  </a>
-                  <a
-                    className={styles.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
-                  >
-                    <FormattedMessage id="home.privacy_notice" />
-                  </a>
-
-                  <img className={styles.mozLogo} src={mozLogo} />
+                  <IfFeature name="show_join_us_dialog">
+                    <a
+                      className={styles.link}
+                      rel="noopener noreferrer"
+                      href="#"
+                      onClick={this.onLinkClicked(this.showJoinUsDialog)}
+                    >
+                      <FormattedMessage id="home.join_us" />
+                    </a>
+                  </IfFeature>
+                  <IfFeature name="show_newsletter_dialog">
+                    <a
+                      className={styles.link}
+                      rel="noopener noreferrer"
+                      href="#"
+                      onClick={this.onLinkClicked(this.showUpdatesDialog)}
+                    >
+                      <FormattedMessage id="home.get_updates" />
+                    </a>
+                  </IfFeature>
+                  <IfFeature name="show_issue_report_link">
+                    {configs.feature("show_issue_report_dialog") ? (
+                      <a
+                        className={styles.link}
+                        rel="noopener noreferrer"
+                        href="#"
+                        onClick={this.onLinkClicked(this.showReportDialog)}
+                      >
+                        <FormattedMessage id="home.report_issue" />
+                      </a>
+                    ) : (
+                      <a
+                        className={styles.link}
+                        href={configs.link("issue_report", "/?report")}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                      >
+                        <FormattedMessage id="settings.report" />
+                      </a>
+                    )}
+                  </IfFeature>
+                  <IfFeature name="show_terms">
+                    <a
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+                    >
+                      <FormattedMessage id="home.terms_of_use" />
+                    </a>
+                  </IfFeature>
+                  <IfFeature name="show_privacy">
+                    <a
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+                    >
+                      <FormattedMessage id="home.privacy_notice" />
+                    </a>
+                  </IfFeature>
+                  <IfFeature name="show_company_logo">
+                    <img className={styles.mozLogo} src={configs.image("company_logo", mozLogo)} />
+                  </IfFeature>
                 </div>
               </div>
             </div>
@@ -361,7 +395,7 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel} key={1}>
         <div className={styles.container}>
           <div className={classNames([styles.logo, styles.logoMargin])}>
-            <img src={hubLogo} />
+            <img src={configs.image("logo", hubLogo)} />
           </div>
         </div>
         <div className={styles.ctaButtons}>
@@ -384,7 +418,7 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel}>
         <div className={styles.container}>
           <div className={styles.logo}>
-            <img src={hubLogo} />
+            <img src={configs.image("logo", hubLogo)} />
           </div>
           <div className={styles.blurb}>
             <FormattedMessage id="home.hero_blurb" />
