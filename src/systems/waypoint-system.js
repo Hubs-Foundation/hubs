@@ -1,4 +1,6 @@
 import { setMatrixWorld, calculateCameraTransformForWaypoint, interpolateAffine } from "../utils/three-utils";
+import { RENDER_COLORED_RECTANGLE } from "./waypoint-tests";
+const THERE_CAN_ONLY_BE_ONE_HIGHLANDER_TIMEOUT = 1500; // Should be enough time to resolve multiple ownership requests
 //
 // Waypoints, Seats, Chairs, and attachments
 //
@@ -15,10 +17,6 @@ import { setMatrixWorld, calculateCameraTransformForWaypoint, interpolateAffine 
 //willMaintainWorldUp: { default: true }
 //
 //
-function isOccupied(component) {
-  return false;
-}
-
 function loadTemplateAndAddToScene(scene, templateId) {
   return new Promise(resolve => {
     const content = document.importNode(document.getElementById(templateId).content.children[0]);
@@ -54,13 +52,24 @@ function getPooledElOrLoadFromTemplate(scene, templateId) {
 //  "latch-waypoint-icon-template"
 function loadTemplatesForWaypointData(scene, data) {
   const promises = [];
-  if (true || data.canBeClicked) {
-    const el = getPooledElOrLoadFromTemplate(scene, "occupiable-waypoint-icon-template").then(el2 => {
-      return el2;
-    });
+  if (data.canBeClicked) {
+    const el = getPooledElOrLoadFromTemplate(scene, "teleport-waypoint-icon");
     promises.push(el);
   }
   return promises;
+}
+function isOrWillBeOccupied(waypointComponent) {
+  return (
+    (waypointComponent.data.willBeOccupied || waypointComponent.data.isOccupied) &&
+    NAF.utils.getNetworkOwner(waypointComponent.el) !== "scene"
+  );
+}
+function seemsOkToSpawnAt(waypointComponent) {
+  return (
+    waypointComponent.data.canBeSpawnPoint &&
+    waypointComponent.data.canBeOccupied &&
+    !isOrWillBeOccupied(waypointComponent)
+  );
 }
 
 export class WaypointSystem {
@@ -72,25 +81,81 @@ export class WaypointSystem {
     this.eventHandlers = [];
     this.scene = scene;
   }
-  onInteractWithWaypointIcon(waypointEl, iconEl) {
+  tryToOccupy(waypointComponent) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        if (seemsOkToSpawnAt(waypointComponent)) {
+          NAF.utils.takeOwnership(waypointComponent.el);
+          waypointComponent.el.setAttribute("waypoint", { willBeOccupied: true });
+          setTimeout(() => {
+            if (NAF.utils.isMine(waypointComponent.el)) {
+              resolve(true);
+            } else {
+              console.log("tried take ownership but then wasn't mine");
+              RENDER_COLORED_RECTANGLE("black");
+              resolve(false);
+            }
+          }, THERE_CAN_ONLY_BE_ONE_HIGHLANDER_TIMEOUT);
+        } else {
+          console.log("didn't seem OK to spawn here");
+          resolve(false);
+        }
+      }, Math.floor(Math.random() * 1000));
+    });
+  }
+  acquireSpawnPointFromCandidates(candidates) {
+    if (!candidates.length) return Promise.reject("Could not find suitable spawn point.");
+    const candidate = candidates.pop();
+    return this.tryToOccupy(candidate).then(didOccupy => {
+      if (didOccupy) {
+        return Promise.resolve(candidate);
+      } else {
+        return this.acquireSpawnPointFromCandidates(candidates);
+      }
+    });
+  }
+  getSpawnPoint() {
+    const candidates = Array.from(this.ready);
+    console.log("Trying to find spawn point in:", candidates);
+    return this.acquireSpawnPointFromCandidates(candidates).then(candidate => {
+      candidate.el.setAttribute("waypoint", { isOccupied: true, willBeOccupied: false });
+      this.previousSpawnPoint = candidate;
+      //TODO: When should waypoints become unoccupied?
+      this.giveUpTimeout = setTimeout(() => {
+        if (NAF.utils.isMine(candidate.el)) {
+          console.log("giving up occupancy of waypoint...");
+          RENDER_COLORED_RECTANGLE("white");
+          candidate.el.setAttribute("waypoint", { isOccupied: false });
+        } else {
+          RENDER_COLORED_RECTANGLE("yellow");
+          console.log("somehow lost ownership...");
+        }
+      }, 20000);
+      return Promise.resolve(candidate);
+    });
+  }
+  onInteractWithWaypointIcon(iconEl, waypointEl) {
     return function onInteract() {
-      console.log("interacted with icon ", iconEl, "for waypoint", waypointEl);
       this.characterController =
         this.characterController || document.getElementById("avatar-rig").components["character-controller"];
-      iconEl.object3D.updateMatrices();
-      this.characterController.enqueueWaypointTravelTo(iconEl.object3D.matrixWorld);
+      waypointEl.object3D.updateMatrices();
+      this.characterController.enqueueWaypointTravelTo(
+        waypointEl.object3D.matrixWorld,
+        waypointEl.components["waypoint"].data,
+        300
+      );
     }.bind(this);
   }
   registerComponent(c) {
     this.components.push(c);
     this.loading.push(c);
-    Promise.all(loadTemplatesForWaypointData(this.scene, c)).then(els => {
+    Promise.all(loadTemplatesForWaypointData(this.scene, c.data)).then(els => {
       this.loading.splice(this.loading.indexOf(c), 1);
       this.ready.push(c);
       this.els[c.el.object3D.uuid] = this.els[c.el.object3D.uuid] || [];
       this.els[c.el.object3D.uuid].push(...els);
       for (let i = 0; i < els.length; i++) {
-        if (els[i].classList.contains("way-point-icon")) {
+        if (els[i].classList.contains("way-point-icon") && c.data.canBeClicked) {
           this.eventHandlers[els[i].object3D.uuid] = this.eventHandlers[els[i].object3D.uuid] || {};
           this.eventHandlers[els[i].object3D.uuid]["interact"] = this.onInteractWithWaypointIcon(els[i], c.el);
 
@@ -123,22 +188,40 @@ export class WaypointSystem {
     }
     window.logReady = false;
   }
-
+  releaseAnyOccupiedWaypoints() {
+    if (this.giveUpTimeout) clearTimeout(this.giveUpTimeout);
+    if (this.previousSpawnPoint) {
+      if (NAF.utils.isMine(this.previousSpawnPoint.el)) {
+        this.previousSpawnPoint.el.setAttribute("waypoint", { isOccupied: false, willBeOccupied: false });
+        RENDER_COLORED_RECTANGLE("orange");
+      }
+      this.previousSpawnPoint = null;
+    }
+  }
   moveToSpawnPoint = (function() {
     return function moveToSpawnPoint() {
+      this.releaseAnyOccupiedWaypoints();
+      RENDER_COLORED_RECTANGLE("blue");
       this.avatarPOV = this.avatarPOV || document.getElementById("avatar-pov-node");
       this.avatarPOV.object3D.updateMatrices();
       this.characterController =
         this.characterController || document.getElementById("avatar-rig").components["character-controller"];
-      for (let i = 0; i < this.ready.length; i++) {
-        const component = this.ready[i];
-        if (component.canBeSpawnPoint && (!component.canBeOccupied || !isOccupied(component))) {
-          component.el.object3D.updateMatrices();
-          console.log("traveling to waypoint", component);
-          this.characterController.enqueueWaypointTravelTo(component.el.object3D.matrixWorld);
-          return;
+
+      this.getSpawnPoint().then(
+        waypointComponent => {
+          waypointComponent.el.object3D.updateMatrices();
+          this.characterController.enqueueWaypointTravelTo(
+            waypointComponent.el.object3D.matrixWorld,
+            waypointComponent.data,
+            0
+          );
+          RENDER_COLORED_RECTANGLE("green");
+        },
+        reason => {
+          console.warn(reason);
+          RENDER_COLORED_RECTANGLE("red");
         }
-      }
+      );
     };
   })();
 }
@@ -147,6 +230,8 @@ AFRAME.registerComponent("waypoint", {
   schema: {
     canBeSpawnPoint: { default: false },
     canBeOccupied: { default: false },
+    willBeOccupied: { default: false },
+    isOccupied: { default: false },
     canBeClicked: { default: false },
     willDisableMotion: { default: false },
     willMaintainWorldUp: { default: true }
@@ -157,142 +242,5 @@ AFRAME.registerComponent("waypoint", {
   },
   remove() {
     this.system.unregisterComponent(this);
-  }
-});
-
-AFRAME.registerSystem("make-some-waypoints-for-testing", {
-  init() {
-    const v = new THREE.Vector3();
-
-    const el11 = document.createElement("a-entity");
-    this.el.appendChild(el11);
-    el11.setAttribute("waypoint", "foo", "bar");
-    el11.object3D.position.set(0, 5, 15);
-    el11.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
-    el11.object3D.scale.set(6, 6, 6);
-    el11.object3D.matrixNeedsUpdate = true;
-
-    const el16 = document.createElement("a-entity");
-    this.el.appendChild(el16);
-    el16.setAttribute("waypoint", "foo", "bar");
-    el16.object3D.position.set(0, 5, -15);
-    el16.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI);
-    el16.object3D.scale.set(6, 6, 6);
-    el16.object3D.matrixNeedsUpdate = true;
-
-    const el17 = document.createElement("a-entity");
-    this.el.appendChild(el17);
-    el17.setAttribute("waypoint", "foo", "bar");
-    el17.object3D.position.set(0, 10, -15);
-    el17.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI);
-    el17.object3D.scale.set(1, 1, 1);
-    el17.object3D.matrixNeedsUpdate = true;
-
-    const el12 = document.createElement("a-entity");
-    this.el.appendChild(el12);
-    el12.setAttribute("waypoint", "foo", "bar");
-    el12.object3D.position.set(0, 12, 0);
-    el12.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
-    //el12.object3D.scale.set(1, 3, 1); // TODO: non-uniform scale
-    el12.object3D.matrixNeedsUpdate = true;
-
-    const el0 = document.createElement("a-entity");
-    this.el.appendChild(el0);
-    el0.setAttribute("waypoint", "foo", "bar");
-    el0.object3D.position.set(5, 1.6, 0);
-    el0.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
-    el0.object3D.matrixNeedsUpdate = true;
-
-    const el2 = document.createElement("a-entity");
-    this.el.appendChild(el2);
-    el2.setAttribute("waypoint", "foo", "bar");
-    el2.object3D.position.set(0, 1.6, 5);
-    el2.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
-    el2.object3D.matrixNeedsUpdate = true;
-
-    const el4 = document.createElement("a-entity");
-    this.el.appendChild(el4);
-    el4.setAttribute("waypoint", "foo", "bar");
-    el4.object3D.position.set(-5, 1.6, 0);
-    el4.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), -Math.PI / 2);
-    el4.object3D.matrixNeedsUpdate = true;
-
-    const el15 = document.createElement("a-entity");
-    this.el.appendChild(el15);
-    el15.setAttribute("waypoint", "foo", "bar");
-    el15.object3D.position.set(0, 10, 10);
-    el15.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
-    el15.object3D.scale.set(6, 6, 6);
-    el15.object3D.matrixNeedsUpdate = true;
-
-    const el3 = document.createElement("a-entity");
-    this.el.appendChild(el3);
-    el3.setAttribute("waypoint", "foo", "bar");
-    el3.object3D.position.set(0, 1.6, -5);
-    el3.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI);
-    el3.object3D.matrixNeedsUpdate = true;
-
-    const el6 = document.createElement("a-entity");
-    this.el.appendChild(el6);
-    el6.setAttribute("waypoint", "foo", "bar");
-    el6.object3D.position.set(5, 2.0, 0);
-    el6.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
-    el6.object3D.matrixNeedsUpdate = true;
-
-    const el5 = document.createElement("a-entity");
-    this.el.appendChild(el5);
-    el5.setAttribute("waypoint", "foo", "bar");
-    el5.object3D.position.set(5, 1.6, 5);
-    el5.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 4);
-    el5.object3D.matrixNeedsUpdate = true;
-
-    const el13 = document.createElement("a-entity");
-    this.el.appendChild(el13);
-    el13.setAttribute("waypoint", "foo", "bar");
-    el13.object3D.position.set(0, 10, 10);
-    el13.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
-    el13.object3D.scale.set(6, 6, 6);
-    el13.object3D.matrixNeedsUpdate = true;
-
-    const el7 = document.createElement("a-entity");
-    this.el.appendChild(el7);
-    el7.setAttribute("waypoint", "foo", "bar");
-    el7.object3D.position.set(1, 4, 0);
-    el7.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), -Math.PI / 2);
-    el7.object3D.matrixNeedsUpdate = true;
-    const el9 = document.createElement("a-entity");
-    this.el.appendChild(el9);
-    el9.setAttribute("waypoint", "foo", "bar");
-    el9.object3D.position.set(0, 4, 1);
-    el9.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI);
-    el9.object3D.matrixNeedsUpdate = true;
-    const el8 = document.createElement("a-entity");
-    this.el.appendChild(el8);
-    el8.setAttribute("waypoint", "foo", "bar");
-    el8.object3D.position.set(-1, 4, 0);
-    el8.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
-    el8.object3D.matrixNeedsUpdate = true;
-    const el10 = document.createElement("a-entity");
-    this.el.appendChild(el10);
-    el10.setAttribute("waypoint", "foo", "bar");
-    el10.object3D.position.set(0, 4, -1);
-    el10.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
-    el10.object3D.matrixNeedsUpdate = true;
-
-    const el14 = document.createElement("a-entity");
-    this.el.appendChild(el14);
-    el14.setAttribute("waypoint", "disableMovement", true);
-    el14.object3D.position.set(0, 10, 10);
-    el14.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
-    el14.object3D.scale.set(6, 6, 6);
-    el14.object3D.matrixNeedsUpdate = true;
-
-    //const el8 = document.createElement("a-entity");
-    //this.el.appendChild(el8);
-    //el8.setAttribute("visible-thing", "foo", "bar");
-    //el8.object3D.position.set(-5, 4, 0);
-    //el8.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 1).normalize(), -Math.PI / 2);
-    //el8.object3D.matrixNeedsUpdate = true;
-    //window.visibleThing = el8;
   }
 });

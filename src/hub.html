@@ -67,7 +67,7 @@
 
             <a-asset-item id="spawn-point" response-type="arraybuffer" src="./assets/models/spawn-point.glb"></a-asset-item>
 
-            <template id="waypoint">
+            <template id="waypoint-avatar">
                 <a-entity waypoint></a-entity>
             </template>
 
@@ -88,6 +88,16 @@
             <template id="teleport-waypoint">
             </template>
             <template id="teleport-waypoint-icon">
+              <a-entity
+                  is-remote-hover-target
+                  class="way-point-icon"
+                  tags="singleActionButton: true"
+                  sprite="name: spawn-point.png"
+                  billboard
+                  scale-in-screen-space="baseScale: 0.35 0.35 0.35;
+                                         addedScale: 0.02 0.02 0.02"
+                  position="0 0 0">
+              </a-entity>
             </template>
             <template id="latch-waypoint">
             </template>
@@ -283,7 +293,6 @@
                     set-yxz-order
                     matrix-auto-update
                     position-at-box-shape-border__freeze="target:.freeze-menu;"
-                    way-point="templateId: way-point-interactable-template; keepOrientation: true; offset: 0 0 1; modelSelector: .waypoint-model"
                     pinnable
                     hoverable-visuals
                 >
@@ -1155,8 +1164,6 @@
         <!-- Objects -->
         <a-entity id="objects-root">
             <a-entity id="objects-scene"></a-entity>
-        </a-entity>
-        <a-entity id="foo-bar-baz">
         </a-entity>
 
         <a-entity

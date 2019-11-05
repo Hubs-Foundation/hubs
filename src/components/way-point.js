@@ -321,7 +321,6 @@ AFRAME.registerComponent("way-point", {
         if (cameraDelta) {
           this.distanceMod = this.distanceMod + cameraDelta[1] * (window.isTouchscreen ? 3 : 1);
         }
-        console.log(t, "enqueue");
         this.enqueueWaypointTravelToInFrontOf();
       }
       if (this.shouldStopHold) {

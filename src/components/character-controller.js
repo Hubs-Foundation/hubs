@@ -129,9 +129,9 @@ AFRAME.registerComponent("character-controller", {
   // If you have a throw-away matrix, you can push it onto `this.waypoints` and it'll end up in the pool
   enqueueWaypointTravelTo(inMat4, options = {}, travelTime, allowQuickTakeover) {
     const pooledMatrix = getPooledMatrix4();
-    options.travelTime = travelTime || DEFAULT_WAYPOINT_TRAVEL_TIME;
+    const tt = travelTime || DEFAULT_WAYPOINT_TRAVEL_TIME;
     options.allowQuickTakeover = allowQuickTakeover;
-    this.waypoints.push({ waypoint: pooledMatrix.copy(inMat4), options });
+    this.waypoints.push({ waypoint: pooledMatrix.copy(inMat4), options, travelTime: tt });
   },
 
   travelByWaypoint: (function() {
@@ -140,8 +140,9 @@ AFRAME.registerComponent("character-controller", {
     // Transform the rig such that the pivot's forward direction matches the waypoint's,
     return function travelByWaypoint(inMat4) {
       this.data.pivot.object3D.updateMatrices();
-      calculateCameraTransformForWaypoint(this.data.pivot.object3D.matrixWorld, inMat4, final);
-      childMatch(this.el.object3D, this.data.pivot.object3D, final);
+      //calculateCameraTransformForWaypoint(this.data.pivot.object3D.matrixWorld, inMat4, final);
+      //childMatch(this.el.object3D, this.data.pivot.object3D, final);
+      childMatch(this.el.object3D, this.data.pivot.object3D, inMat4);
       this.el.object3D.updateMatrices();
 
       this.data.pivot.object3D.updateMatrices();
@@ -194,11 +195,11 @@ AFRAME.registerComponent("character-controller", {
             this.sfx.stopSoundNode(this.teleportSound);
           }
         }
-        const { waypoint, options = {} } = this.waypoints.splice(0, 1)[0];
+        const { waypoint, options = {}, travelTime } = this.waypoints.splice(0, 1)[0];
         this.activeWaypoint = waypoint;
         this.activeWaypointOptions = options;
         this.isMovementDisabled = options.disableMovement;
-        WAYPOINT_TRAVEL_TIME = options.travelTime || DEFAULT_WAYPOINT_TRAVEL_TIME;
+        WAYPOINT_TRAVEL_TIME = travelTime || DEFAULT_WAYPOINT_TRAVEL_TIME;
         this.data.pivot.object3D.updateMatrices();
         this.startPoint = new THREE.Matrix4().copy(this.data.pivot.object3D.matrixWorld);
         this.prevWaypointTravelTime = t;
@@ -216,10 +217,9 @@ AFRAME.registerComponent("character-controller", {
       if (
         this.activeWaypoint &&
         (vrMode ||
-          t >= this.prevWaypointTravelTime + DEFAULT_WAYPOINT_TRAVEL_TIME ||
+          t >= this.prevWaypointTravelTime + WAYPOINT_TRAVEL_TIME ||
           (this.waypoints.length && this.activeWaypointOptions.allowQuickTakeover))
       ) {
-        console.log("quick takeover", t, this.waypoints.length && this.activeWaypointOptions.allowQuickTakeover);
         this.travelByWaypoint(this.activeWaypoint);
         freePooledMatrix4(this.activeWaypoint);
         this.activeWaypoint = null;
