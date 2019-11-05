@@ -1,8 +1,11 @@
 const TEST_WAYPOINTS_OCCUPYING = false;
 const TEST_WAYPOINTS_CLICKING = false;
 
+const DEBUG = true;
+
 let c;
-export function RENDER_COLORED_RECTANGLE(color) {
+export function DEBUG_RENDER_COLORED_RECTANGLE(color) {
+  if (!DEBUG) return;
   if (!c) {
     c = document.createElement("canvas");
     c.style.zIndex = 10;

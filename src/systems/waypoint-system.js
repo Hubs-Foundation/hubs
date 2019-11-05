@@ -1,6 +1,6 @@
 import { setMatrixWorld, calculateCameraTransformForWaypoint, interpolateAffine } from "../utils/three-utils";
-import { RENDER_COLORED_RECTANGLE } from "./waypoint-tests";
-const THERE_CAN_ONLY_BE_ONE_HIGHLANDER_TIMEOUT = 1500; // Should be enough time to resolve multiple ownership requests
+import { DEBUG_RENDER_COLORED_RECTANGLE } from "./waypoint-tests";
+const THERE_CAN_ONLY_BE_ONE_HIGHLANDER_TIMEOUT = 1000; // Should be enough time to resolve multiple ownership requests
 //
 // Waypoints, Seats, Chairs, and attachments
 //
@@ -17,6 +17,10 @@ const THERE_CAN_ONLY_BE_ONE_HIGHLANDER_TIMEOUT = 1500; // Should be enough time 
 //willMaintainWorldUp: { default: true }
 //
 //
+//
+function isUnoccupiableSpawnPoint(waypointComponent) {
+  return !waypointComponent.data.canBeOccupied && waypointComponent.data.canBeSpawnPoint;
+}
 function loadTemplateAndAddToScene(scene, templateId) {
   return new Promise(resolve => {
     const content = document.importNode(document.getElementById(templateId).content.children[0]);
@@ -91,21 +95,20 @@ export class WaypointSystem {
             if (NAF.utils.isMine(waypointComponent.el)) {
               resolve(true);
             } else {
-              console.log("tried take ownership but then wasn't mine");
-              RENDER_COLORED_RECTANGLE("black");
+              DEBUG_RENDER_COLORED_RECTANGLE("black");
               resolve(false);
             }
           }, THERE_CAN_ONLY_BE_ONE_HIGHLANDER_TIMEOUT);
         } else {
-          console.log("didn't seem OK to spawn here");
           resolve(false);
         }
-      }, Math.floor(Math.random() * 1000));
+      }, Math.floor(Math.random() * 500));
     });
   }
   acquireSpawnPointFromCandidates(candidates) {
     if (!candidates.length) return Promise.reject("Could not find suitable spawn point.");
-    const candidate = candidates.pop();
+    const candidateIndex = Math.floor(Math.random() * candidates.length);
+    const candidate = candidates.splice(candidateIndex, 1)[0];
     return this.tryToOccupy(candidate).then(didOccupy => {
       if (didOccupy) {
         return Promise.resolve(candidate);
@@ -114,23 +117,15 @@ export class WaypointSystem {
       }
     });
   }
+  getUnoccupiableSpawnPoint() {
+    const candidates = this.ready.filter(isUnoccupiableSpawnPoint);
+    return candidates.length && candidates.splice(Math.floor(Math.random() * candidates.length), 1)[0];
+  }
   getSpawnPoint() {
     const candidates = Array.from(this.ready);
-    console.log("Trying to find spawn point in:", candidates);
     return this.acquireSpawnPointFromCandidates(candidates).then(candidate => {
       candidate.el.setAttribute("waypoint", { isOccupied: true, willBeOccupied: false });
-      this.previousSpawnPoint = candidate;
       //TODO: When should waypoints become unoccupied?
-      this.giveUpTimeout = setTimeout(() => {
-        if (NAF.utils.isMine(candidate.el)) {
-          console.log("giving up occupancy of waypoint...");
-          RENDER_COLORED_RECTANGLE("white");
-          candidate.el.setAttribute("waypoint", { isOccupied: false });
-        } else {
-          RENDER_COLORED_RECTANGLE("yellow");
-          console.log("somehow lost ownership...");
-        }
-      }, 20000);
       return Promise.resolve(candidate);
     });
   }
@@ -165,8 +160,27 @@ export class WaypointSystem {
     });
   }
   unregisterComponent(c) {
-    const i = this.components.indexOf(c);
-    this.components.splice(i, 1);
+    const ci = this.components.indexOf(c);
+    if (ci !== -1) {
+      this.components.splice(ci, 1);
+    }
+    const li = this.loading.indexOf(c);
+    if (li !== -1) {
+      this.loading.splice(li, 1);
+    }
+    const ri = this.ready.indexOf(c);
+    if (ri !== -1) {
+      this.ready.splice(ri, 1);
+      const els = this.els[c.el.object3D.uuid];
+      for (let i = 0; i < els.length; i++) {
+        if (this.eventHandlers[els[i].object3D.uuid] && this.eventHandlers[els[i].object3D.uuid]["interact"]) {
+          els[i].object3D.removeEventListener("interact", this.eventHandlers[els[i].object3D.uuid]["interact"]);
+          console.log("removing interaction event listener from", els[i]);
+          this.eventHandlers[els[i].object3D.uuid].delete("interact");
+        }
+      }
+      this.els[c.el.object3D.uuid].length = 0;
+    }
   }
 
   tick() {
@@ -189,19 +203,44 @@ export class WaypointSystem {
     window.logReady = false;
   }
   releaseAnyOccupiedWaypoints() {
-    if (this.giveUpTimeout) clearTimeout(this.giveUpTimeout);
-    if (this.previousSpawnPoint) {
-      if (NAF.utils.isMine(this.previousSpawnPoint.el)) {
-        this.previousSpawnPoint.el.setAttribute("waypoint", { isOccupied: false, willBeOccupied: false });
-        RENDER_COLORED_RECTANGLE("orange");
+    for (let i = 0; i < this.ready; i++) {
+      if (NAF.utils.isMine(this.ready[i].el) && this.ready[i].data.canBeOccupied) {
+        this.ready[i].el.setAttribute("waypoint", { isOccupied: false, willBeOccupied: false });
       }
-      this.previousSpawnPoint = null;
+    }
+  }
+  moveToUnoccupiableSpawnPoint() {
+    this.releaseAnyOccupiedWaypoints();
+
+    this.avatarPOV = this.avatarPOV || document.getElementById("avatar-pov-node");
+    this.avatarPOV.object3D.updateMatrices();
+    this.characterController =
+      this.characterController || document.getElementById("avatar-rig").components["character-controller"];
+    const waypointComponent = this.getUnoccupiableSpawnPoint();
+    if (waypointComponent) {
+      waypointComponent.el.object3D.updateMatrices();
+      this.characterController.enqueueWaypointTravelTo(
+        waypointComponent.el.object3D.matrixWorld,
+        waypointComponent.data,
+        0
+      );
+      DEBUG_RENDER_COLORED_RECTANGLE("cyan");
+    } else {
+      DEBUG_RENDER_COLORED_RECTANGLE("purple");
     }
   }
   moveToSpawnPoint = (function() {
     return function moveToSpawnPoint() {
       this.releaseAnyOccupiedWaypoints();
-      RENDER_COLORED_RECTANGLE("blue");
+      if (this.isMovingToSpawnPoint) {
+        console.log("already trying to move, trying again in a few seconds");
+        setTimeout(() => {
+          this.moveToSpawnPoint();
+        }, 3000);
+      }
+      this.isMovingToSpawnPoint = true;
+      console.log("starting to move");
+      DEBUG_RENDER_COLORED_RECTANGLE("blue");
       this.avatarPOV = this.avatarPOV || document.getElementById("avatar-pov-node");
       this.avatarPOV.object3D.updateMatrices();
       this.characterController =
@@ -215,11 +254,16 @@ export class WaypointSystem {
             waypointComponent.data,
             0
           );
-          RENDER_COLORED_RECTANGLE("green");
+          DEBUG_RENDER_COLORED_RECTANGLE("green");
+          console.log("not moving anymore");
+          this.isMovingToSpawnPoint = false;
         },
         reason => {
           console.warn(reason);
-          RENDER_COLORED_RECTANGLE("red");
+          DEBUG_RENDER_COLORED_RECTANGLE("red");
+          this.moveToUnoccupiableSpawnPoint();
+          console.log("not moving anymore2 ");
+          this.isMovingToSpawnPoint = false;
         }
       );
     };
