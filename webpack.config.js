@@ -102,7 +102,6 @@ module.exports = (env, argv) => ({
     link: path.join(__dirname, "src", "link.js"),
     spoke: path.join(__dirname, "src", "spoke.js"),
     discord: path.join(__dirname, "src", "discord.js"),
-    admin: path.join(__dirname, "src", "admin.js"),
     "whats-new": path.join(__dirname, "src", "whats-new.js")
   },
   output: {
@@ -228,12 +227,6 @@ module.exports = (env, argv) => ({
   optimization: {
     splitChunks: {
       cacheGroups: {
-        admindeps: {
-          test: /[\\/]node_modules[\\/](@material-ui|material-ui|jss-|ra-|react-admin|react-autosuggest|react-jss|react-redux|react-router-redux|react-themable|redux|redux-|theming)/,
-          priority: 150,
-          name: "admindeps",
-          chunks: "all"
-        },
         vendors: {
           test: matchRegex({
             include: /([\\/]node_modules[\\/]|[\\/]vendor[\\/])/,
@@ -325,11 +318,6 @@ module.exports = (env, argv) => ({
       chunks: ["vendor", "whats-new"],
       inject: "head"
     }),
-    new HTMLWebpackPlugin({
-      filename: "admin.html",
-      template: path.join(__dirname, "src", "admin.html"),
-      chunks: ["vendor", "engine", "admindeps", "admin"]
-    }),
     new CopyWebpackPlugin([
       {
         from: "src/assets/images/favicon.ico",
@@ -354,6 +342,12 @@ module.exports = (env, argv) => ({
         to: "manifest.webmanifest"
       }
     ]),
+    new CopyWebpackPlugin([
+      {
+        from: "src/schema.toml",
+        to: "schema.toml"
+      }
+    ]),
     // Extract required css and add a content hash.
     new MiniCssExtractPlugin({
       filename: "assets/stylesheets/[name]-[contenthash].css",
@@ -372,7 +366,8 @@ module.exports = (env, argv) => ({
         BUILD_VERSION: process.env.BUILD_VERSION,
         SENTRY_DSN: process.env.SENTRY_DSN,
         GA_TRACKING_ID: process.env.GA_TRACKING_ID,
-        POSTGREST_SERVER: process.env.POSTGREST_SERVER
+        POSTGREST_SERVER: process.env.POSTGREST_SERVER,
+        ENABLE_ALL_FEATURES: process.env.ENABLE_ALL_FEATURES
       })
     })
   ]

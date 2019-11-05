@@ -24,11 +24,6 @@ AFRAME.registerComponent("super-spawner", {
     resolve: { default: false },
 
     /**
-     * Whether to resize the media on load.
-     */
-    resize: { default: false },
-
-    /**
      * The template to use for this object
      */
     template: { default: "" },
@@ -78,7 +73,7 @@ AFRAME.registerComponent("super-spawner", {
 
     this.onSpawnEvent = this.onSpawnEvent.bind(this);
 
-    this.sceneEl = document.querySelector("a-scene");
+    this.sceneEl = this.el.sceneEl;
 
     this.tempSpawnHandPosition = new THREE.Vector3();
   },
@@ -112,25 +107,21 @@ AFRAME.registerComponent("super-spawner", {
       ObjectContentOrigins.SPAWNER,
       null,
       this.data.resolve,
-      false
+      false,
+      this.data.useCustomSpawnScale ? this.data.spawnScale : { x: 1, y: 1, z: 1 }
     ).entity;
 
-    const cursor =
-      (e.detail && e.detail.object3D) || this.el.sceneEl.systems.interaction.options.rightRemote.entity.object3D;
+    const interaction = this.el.sceneEl.systems.interaction;
+    if (!interaction.ready) return; //DOMContentReady workaround
+    const cursor = (e.detail && e.detail.object3D) || interaction.options.rightRemote.entity.object3D;
+
     const left = cursor.el.id.indexOf("right") === -1;
-    const hand = left
-      ? this.el.sceneEl.systems.interaction.options.leftHand.entity.object3D
-      : this.el.sceneEl.systems.interaction.options.rightHand.entity.object3D;
+    const hand = left ? interaction.options.leftHand.entity.object3D : interaction.options.rightHand.entity.object3D;
     cursor.getWorldPosition(entity.object3D.position);
     cursor.getWorldQuaternion(entity.object3D.quaternion);
     entity.object3D.matrixNeedsUpdate = true;
 
-    if (this.data.useCustomSpawnScale) {
-      entity.object3D.scale.copy(this.data.spawnScale);
-    }
-
     const userinput = AFRAME.scenes[0].systems.userinput;
-    const interaction = AFRAME.scenes[0].systems.interaction;
     const willAnimateFromCursor =
       this.data.animateFromCursor &&
       (userinput.get(paths.actions.rightHand.matrix) || userinput.get(paths.actions.leftHand.matrix));

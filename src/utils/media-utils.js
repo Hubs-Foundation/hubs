@@ -6,6 +6,8 @@ import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { validMaterials } from "../components/hoverable-visuals";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 
+import anime from "animejs";
+
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
 // Map<String, Promise<Object>
@@ -95,8 +97,9 @@ export const addMedia = (
   contentOrigin,
   contentSubtype = null,
   resolve = false,
-  resize = false,
-  animate = true
+  fitToBox = false,
+  animate = true,
+  customMeshScale = { x: 1, y: 1, z: 1 }
 ) => {
   const scene = AFRAME.scenes[0];
 
@@ -104,7 +107,8 @@ export const addMedia = (
   entity.setAttribute("networked", { template: template });
   const needsToBeUploaded = src instanceof File;
   entity.setAttribute("media-loader", {
-    resize,
+    fitToBox,
+    customMeshScale,
     resolve,
     animate,
     src: typeof src === "string" ? src : "",
@@ -120,15 +124,18 @@ export const addMedia = (
     scene.emit("media-loading", { src: src });
   }, 100);
 
-  ["model-loaded", "video-loaded", "image-loaded", "pdf-loaded"].forEach(eventName => {
-    entity.addEventListener(
-      eventName,
-      async () => {
-        clearTimeout(fireLoadingTimeout);
-        scene.emit("media-loaded", { src: src });
-      },
-      { once: true }
-    );
+  const eventNames = ["model-loaded", "video-loaded", "image-loaded", "pdf-loaded"];
+
+  const cb = async () => {
+    clearTimeout(fireLoadingTimeout);
+    entity.emit("media-loaded", { src });
+    eventNames.forEach(eventName => {
+      entity.removeEventListener(eventName, cb);
+    });
+  };
+
+  eventNames.forEach(eventName => {
+    entity.addEventListener(eventName, cb);
   });
 
   const orientation = new Promise(function(resolve) {
@@ -339,4 +346,51 @@ export async function createImageTexture(url) {
   texture.anisotropy = 4;
 
   return texture;
+}
+
+export function addMeshScaleAnimation(mesh, initialScale, onComplete) {
+  const step = (function() {
+    const lastValue = {};
+    return function(anim) {
+      const value = anim.animatables[0].target;
+
+      value.x = Math.max(Number.MIN_VALUE, value.x);
+      value.y = Math.max(Number.MIN_VALUE, value.y);
+      value.z = Math.max(Number.MIN_VALUE, value.z);
+
+      // For animation timeline.
+      if (value.x === lastValue.x && value.y === lastValue.y && value.z === lastValue.z) {
+        return;
+      }
+
+      lastValue.x = value.x;
+      lastValue.y = value.y;
+      lastValue.z = value.z;
+
+      mesh.scale.set(value.x, value.y, value.z);
+      mesh.matrixNeedsUpdate = true;
+    };
+  })();
+
+  const config = {
+    duration: 400,
+    easing: "easeOutElastic",
+    elasticity: 400,
+    loop: 0,
+    round: false,
+    x: mesh.scale.x,
+    y: mesh.scale.y,
+    z: mesh.scale.z,
+    targets: [initialScale],
+    update: anim => step(anim),
+    complete: anim => {
+      step(anim);
+      if (onComplete) onComplete();
+    }
+  };
+
+  mesh.scale.copy(initialScale);
+  mesh.matrixNeedsUpdate = true;
+
+  return anime(config);
 }

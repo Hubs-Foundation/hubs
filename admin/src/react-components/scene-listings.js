@@ -1,5 +1,5 @@
 import React from "react";
-import { SceneLink, OwnedFileImage } from "./fields";
+import { SceneLink, OwnedFileImage, OwnedFileSizeField } from "./fields";
 import { FeatureSceneListingButton } from "./feature-listing-buttons";
 
 import {
@@ -14,7 +14,9 @@ import {
   ReferenceField,
   DateField,
   BooleanField,
-  Filter
+  Filter,
+  ArrayInput,
+  SimpleFormIterator
 } from "react-admin";
 
 const SceneListingFilter = props => (
@@ -28,8 +30,16 @@ export const SceneListingEdit = props => (
   <Edit {...props}>
     <SimpleForm>
       <TextInput source="name" />
-      <TextInput source="description" />
-      <SelectInput source="state" choices={[{ id: "active", name: "active" }, { id: "delisted", name: "delisted" }]} />
+      <ArrayInput source="tags.tags" defaultValue={[]}>
+        <SimpleFormIterator>
+          <TextInput />
+        </SimpleFormIterator>
+      </ArrayInput>
+      <SelectInput
+        label="Status"
+        source="state"
+        choices={[{ id: "active", name: "active" }, { id: "delisted", name: "delisted" }]}
+      />
     </SimpleForm>
   </Edit>
 );
@@ -38,18 +48,20 @@ export const SceneListingList = props => (
   <List {...props} filters={<SceneListingFilter />}>
     <Datagrid>
       <OwnedFileImage source="screenshot_owned_file_id" />
+      <OwnedFileSizeField label="Model size" source="model_owned_file_id" />
       <TextField source="name" />
-      <TextField source="description" />
       <SceneLink source="scene_listing_sid" />
       <ReferenceField label="Scene" source="scene_id" reference="scenes">
         <TextField source="name" />
       </ReferenceField>
-      <BooleanField source="_allow_remixing" />
-      <BooleanField source="_allow_promotion" />
-      <TextField source="reviewed_at" />
-      <DateField source="inserted_at" />
+      <ReferenceField label="Allow remixing" source="scene_id" reference="scenes" linkType={false}>
+        <BooleanField source="allow_remixing" />
+      </ReferenceField>
+      <ReferenceField label="Allow promotion" source="scene_id" reference="scenes" linkType={false}>
+        <BooleanField source="allow_promotion" />
+      </ReferenceField>
       <DateField source="updated_at" />
-      <TextField source="state" />
+      <TextField label="Status" source="state" />
       <FeatureSceneListingButton />
       <EditButton />
     </Datagrid>

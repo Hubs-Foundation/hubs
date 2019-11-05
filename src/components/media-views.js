@@ -1,4 +1,5 @@
-/* global performance THREE AFRAME NAF MediaStream process setTimeout */
+/* global performance THREE AFRAME NAF MediaStream setTimeout */
+import configs from "../utils/configs";
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
 import { paths } from "../systems/userinput/paths";
@@ -21,14 +22,15 @@ const parseGIF = promisifyWorker(new GIFWorker());
 const isIOS = AFRAME.utils.device.isIOS();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
+const HLS_TIMEOUT = 10000; // HLS can sometimes fail, we re-try after this duration
 
 export const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
-  let s = "|";
-  for (let j = 0; j <= 20; j++) {
+  let s = "[";
+  for (let j = 1; j <= 20; j++) {
     s += i >= j ? "|" : " ";
   }
-  s += "|";
+  s += "]";
   VOLUME_LABELS[i] = s;
 }
 
@@ -114,84 +116,6 @@ async function createVideoEl() {
   videoEl.crossOrigin = "anonymous";
 
   return videoEl;
-}
-
-function createVideoTexture(url, contentType) {
-  return new Promise(async (resolve, reject) => {
-    const videoEl = await createVideoEl();
-
-    const texture = new THREE.VideoTexture(videoEl);
-    texture.minFilter = THREE.LinearFilter;
-    texture.encoding = THREE.sRGBEncoding;
-
-    // Set src on video to begin loading.
-    if (url.startsWith("hubs://")) {
-      const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
-      const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
-      videoEl.srcObject = new MediaStream(stream.getVideoTracks());
-      // If hls.js is supported we always use it as it gives us better events
-    } else if (AFRAME.utils.material.isHLS(url, contentType)) {
-      if (HLS.isSupported()) {
-        const corsProxyPrefix = `https://${process.env.CORS_PROXY_SERVER}/`;
-        const baseUrl = url.startsWith(corsProxyPrefix) ? url.substring(corsProxyPrefix.length) : url;
-        const hls = new HLS({
-          xhrSetup: (xhr, u) => {
-            if (u.startsWith(corsProxyPrefix)) {
-              u = u.substring(corsProxyPrefix.length);
-            }
-
-            // HACK HLS.js resolves relative urls internally, but our CORS proxying screws it up. Resolve relative to the original unproxied url.
-            // TODO extend HLS.js to allow overriding of its internal resolving instead
-            if (!u.startsWith("http")) {
-              u = buildAbsoluteURL(baseUrl, u.startsWith("/") ? u : `/${u}`);
-            }
-
-            xhr.open("GET", proxiedUrlFor(u));
-          }
-        });
-        texture.hls = hls;
-        hls.loadSource(url);
-        hls.attachMedia(videoEl);
-        hls.on(HLS.Events.ERROR, function(event, data) {
-          if (data.fatal) {
-            switch (data.type) {
-              case HLS.ErrorTypes.NETWORK_ERROR:
-                // try to recover network error
-                hls.startLoad();
-                break;
-              case HLS.ErrorTypes.MEDIA_ERROR:
-                hls.recoverMediaError();
-                break;
-              default:
-                reject(event);
-                return;
-            }
-          }
-        });
-        // If not, see if native support will work
-      } else if (videoEl.canPlayType(contentType)) {
-        videoEl.src = url;
-        videoEl.onerror = reject;
-      } else {
-        reject("HLS unsupported");
-      }
-    } else {
-      videoEl.src = url;
-      videoEl.onerror = reject;
-    }
-
-    // NOTE: We used to use the canplay event here to yield the texture, but that fails to fire on iOS Safari
-    // and also sometimes in Chrome it seems.
-    const poll = () => {
-      if ((texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width)) {
-        resolve(texture);
-      } else {
-        setTimeout(poll, 500);
-      }
-    };
-
-    poll();
-  });
 }
 
 function scaleToAspectRatio(el, ratio) {
@@ -387,14 +311,14 @@ AFRAME.registerComponent("media-video", {
   },
 
   seekForward() {
-    if ((!this.videoIsLive && NAF.utils.isMine(this.networkedEl)) || NAF.utils.takeOwnership(this.networkedEl)) {
+    if (!this.videoIsLive && (NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
       this.video.currentTime += 30;
       this.el.setAttribute("media-video", "time", this.video.currentTime);
     }
   },
 
   seekBack() {
-    if ((!this.videoIsLive && NAF.utils.isMine(this.networkedEl)) || NAF.utils.takeOwnership(this.networkedEl)) {
+    if (!this.videoIsLive && (NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
       this.video.currentTime -= 10;
       this.el.setAttribute("media-video", "time", this.video.currentTime);
     }
@@ -482,7 +406,7 @@ AFRAME.registerComponent("media-video", {
     }
 
     // Only update playback position for videos you don't own
-    if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
+    if (this.video && (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl)))) {
       if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
         this.tryUpdateVideoPlaybackState(this.data.videoPaused, this.data.time);
       } else {
@@ -542,7 +466,7 @@ AFRAME.registerComponent("media-video", {
 
     let texture;
     try {
-      texture = await createVideoTexture(src, this.data.contentType);
+      texture = await this.createVideoTexture();
 
       // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
       if (this.data.src !== src) {
@@ -551,24 +475,27 @@ AFRAME.registerComponent("media-video", {
       }
 
       if (!src.startsWith("hubs://")) {
-        // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
-        texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
+        // iOS video audio is broken, see: https://github.com/mozilla/hubs/issues/1797
+        if (!isIOS) {
+          // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
+          texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
 
-        if (this.data.audioType === "pannernode") {
-          this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-          this.audio.setDistanceModel(this.data.distanceModel);
-          this.audio.setRolloffFactor(this.data.rolloffFactor);
-          this.audio.setRefDistance(this.data.refDistance);
-          this.audio.setMaxDistance(this.data.maxDistance);
-          this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
-          this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
-          this.audio.panner.coneOuterGain = this.data.coneOuterGain;
-        } else {
-          this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
+          if (this.data.audioType === "pannernode") {
+            this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+            this.audio.setDistanceModel(this.data.distanceModel);
+            this.audio.setRolloffFactor(this.data.rolloffFactor);
+            this.audio.setRefDistance(this.data.refDistance);
+            this.audio.setMaxDistance(this.data.maxDistance);
+            this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
+            this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
+            this.audio.panner.coneOuterGain = this.data.coneOuterGain;
+          } else {
+            this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
+          }
+
+          this.audio.setNodeSource(texture.audioSource);
+          this.el.setObject3D("sound", this.audio);
         }
-
-        this.audio.setNodeSource(texture.audioSource);
-        this.el.setObject3D("sound", this.audio);
       }
 
       this.video = texture.image;
@@ -645,11 +572,120 @@ AFRAME.registerComponent("media-video", {
 
     this.updatePlaybackState(true);
 
-    if (this.video.muted) {
+    if (this.video && this.video.muted) {
       this.videoMutedAt = performance.now();
     }
 
     this.el.emit("video-loaded", { projection: projection });
+  },
+
+  async createVideoTexture() {
+    const url = this.data.src;
+    const contentType = this.data.contentType;
+
+    return new Promise(async (resolve, reject) => {
+      const videoEl = await createVideoEl();
+
+      const texture = new THREE.VideoTexture(videoEl);
+      texture.minFilter = THREE.LinearFilter;
+      texture.encoding = THREE.sRGBEncoding;
+      const isReady = () =>
+        (texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width);
+
+      // Set src on video to begin loading.
+      if (url.startsWith("hubs://")) {
+        const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
+        const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
+        videoEl.srcObject = new MediaStream(stream.getVideoTracks());
+        // If hls.js is supported we always use it as it gives us better events
+      } else if (AFRAME.utils.material.isHLS(url, contentType)) {
+        if (HLS.isSupported()) {
+          const corsProxyPrefix = `https://${configs.CORS_PROXY_SERVER}/`;
+          const baseUrl = url.startsWith(corsProxyPrefix) ? url.substring(corsProxyPrefix.length) : url;
+          const setupHls = () => {
+            if (texture.hls) {
+              texture.hls.stopLoad();
+              texture.hls.detachMedia();
+              texture.hls.destroy();
+              texture.hls = null;
+            }
+
+            const hls = new HLS({
+              xhrSetup: (xhr, u) => {
+                if (u.startsWith(corsProxyPrefix)) {
+                  u = u.substring(corsProxyPrefix.length);
+                }
+
+                // HACK HLS.js resolves relative urls internally, but our CORS proxying screws it up. Resolve relative to the original unproxied url.
+                // TODO extend HLS.js to allow overriding of its internal resolving instead
+                if (!u.startsWith("http")) {
+                  u = buildAbsoluteURL(baseUrl, u.startsWith("/") ? u : `/${u}`);
+                }
+
+                xhr.open("GET", proxiedUrlFor(u));
+              }
+            });
+
+            texture.hls = hls;
+            hls.loadSource(url);
+            hls.attachMedia(videoEl);
+
+            hls.on(HLS.Events.ERROR, function(event, data) {
+              if (data.fatal) {
+                switch (data.type) {
+                  case HLS.ErrorTypes.NETWORK_ERROR:
+                    // try to recover network error
+                    hls.startLoad();
+                    break;
+                  case HLS.ErrorTypes.MEDIA_ERROR:
+                    hls.recoverMediaError();
+                    break;
+                  default:
+                    reject(event);
+                    return;
+                }
+              }
+            });
+          };
+
+          setupHls();
+
+          // Sometimes for weird streams HLS fails to initialize.
+          const setupInterval = setInterval(() => {
+            // Stop retrying if the src changed.
+            const isNoLongerSrc = this.data.src !== url;
+
+            if (isReady() || isNoLongerSrc) {
+              clearInterval(setupInterval);
+            } else {
+              console.warn("HLS failed to read video, trying again");
+              setupHls();
+            }
+          }, HLS_TIMEOUT);
+          // If not, see if native support will work
+        } else if (videoEl.canPlayType(contentType)) {
+          videoEl.src = url;
+          videoEl.onerror = reject;
+        } else {
+          reject("HLS unsupported");
+        }
+      } else {
+        videoEl.src = url;
+        videoEl.onerror = reject;
+      }
+
+      // NOTE: We used to use the canplay event here to yield the texture, but that fails to fire on iOS Safari
+      // and also sometimes in Chrome it seems.
+      const poll = () => {
+        if (isReady()) {
+          resolve(texture);
+        } else {
+          setTimeout(poll, 500);
+        }
+      };
+
+      poll();
+    });
   },
 
   updateHoverMenuBasedOnLiveState() {
@@ -839,6 +875,15 @@ AFRAME.registerComponent("media-image", {
         geometry = new THREE.SphereBufferGeometry(1, 64, 32);
         // invert the geometry on the x-axis so that all of the faces point inward
         geometry.scale(-1, 1, 1);
+
+        // Flip uvs on the geometry
+        if (!texture.flipY) {
+          const uvs = geometry.attributes.uv.array;
+
+          for (let i = 1; i < uvs.length; i += 2) {
+            uvs[i] = 1 - uvs[i];
+          }
+        }
       } else {
         geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
         material.side = THREE.DoubleSide;

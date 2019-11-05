@@ -1,10 +1,11 @@
 import Raven from "raven-js";
+import configs from "./utils/configs";
 
 const ga = window.ga;
 
 export default function registerTelemetry(trackedPage, trackedTitle) {
-  const sentryDsn = process.env.SENTRY_DSN;
-  const gaTrackingId = process.env.GA_TRACKING_ID;
+  const sentryDsn = configs.SENTRY_DSN;
+  const gaTrackingId = configs.GA_TRACKING_ID;
 
   if (sentryDsn) {
     console.log("Tracking: Sentry DSN: " + sentryDsn);

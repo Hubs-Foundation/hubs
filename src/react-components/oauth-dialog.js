@@ -1,9 +1,12 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import DialogContainer from "./dialog-container.js";
 import { FormattedMessage } from "react-intl";
-import styles from "../assets/stylesheets/oauth-dialog.scss";
 import classNames from "classnames";
+
+import configs from "../utils/configs";
+import IfFeature from "./if-feature";
+import DialogContainer from "./dialog-container.js";
+import styles from "../assets/stylesheets/oauth-dialog.scss";
 
 export default class OAuthDialog extends Component {
   static propTypes = {
@@ -19,13 +22,25 @@ export default class OAuthDialog extends Component {
         <div>We&apos;ll ask for access to your e-mail address so you can skip signing in next time.</div>
         <p className={styles.privacyNotice}>
           By proceeding, you agree to the{" "}
-          <a rel="noopener noreferrer" target="_blank" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
-            terms of use
-          </a>{" "}
-          and{" "}
-          <a rel="noopener noreferrer" target="_blank" href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md">
-            privacy notice
-          </a>.
+          <IfFeature name="show_terms">
+            <a
+              rel="noopener noreferrer"
+              target="_blank"
+              href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+            >
+              terms of use
+            </a>{" "}
+          </IfFeature>
+          {configs.feature("show_terms") && configs.feature("show_privacy") && "and "}
+          <IfFeature name="show_privacy">
+            <a
+              rel="noopener noreferrer"
+              target="_blank"
+              href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+            >
+              privacy notice
+            </a>
+          </IfFeature>.
         </p>
       </div>
     );

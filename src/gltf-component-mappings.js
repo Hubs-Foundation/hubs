@@ -47,20 +47,15 @@ AFRAME.GLTFModelPlus.registerComponent("light", "light", (el, componentName, com
 AFRAME.GLTFModelPlus.registerComponent("ambient-light", "ambient-light");
 AFRAME.GLTFModelPlus.registerComponent("directional-light", "directional-light");
 AFRAME.GLTFModelPlus.registerComponent("hemisphere-light", "hemisphere-light");
-function decayMigration(el, componentName, componentData) {
-  if (componentData.range === 0) {
-    componentData.decay = 0;
-  }
-  el.setAttribute(componentName, componentData);
-}
-AFRAME.GLTFModelPlus.registerComponent("point-light", "point-light", decayMigration);
-AFRAME.GLTFModelPlus.registerComponent("spot-light", "spot-light", decayMigration);
+AFRAME.GLTFModelPlus.registerComponent("point-light", "point-light");
+AFRAME.GLTFModelPlus.registerComponent("spot-light", "spot-light");
 
 AFRAME.GLTFModelPlus.registerComponent("skybox", "skybox");
 AFRAME.GLTFModelPlus.registerComponent("layers", "layers");
 AFRAME.GLTFModelPlus.registerComponent("shadow", "shadow");
 AFRAME.GLTFModelPlus.registerComponent("water", "water");
 AFRAME.GLTFModelPlus.registerComponent("scale-audio-feedback", "scale-audio-feedback");
+AFRAME.GLTFModelPlus.registerComponent("morph-audio-feedback", "morph-audio-feedback");
 AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
 AFRAME.GLTFModelPlus.registerComponent(
@@ -120,7 +115,7 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 
   el.setAttribute("media-loader", {
     src: componentData.src,
-    resize: true,
+    fitToBox: componentData.contentSubtype ? false : true,
     resolve: true,
     fileIsOwned: true,
     animate: false,
@@ -190,7 +185,7 @@ function mediaInflator(el, componentName, componentData, components) {
 
   el.setAttribute("media-loader", {
     src,
-    resize: true,
+    fitToBox: true,
     resolve: true,
     fileIsOwned: true,
     animate: false,
@@ -329,3 +324,5 @@ AFRAME.GLTFModelPlus.registerComponent("trimesh", "trimesh", el => {
 });
 
 AFRAME.GLTFModelPlus.registerComponent("particle-emitter", "particle-emitter");
+
+AFRAME.GLTFModelPlus.registerComponent("networked-drawing-buffer", "networked-drawing-buffer");

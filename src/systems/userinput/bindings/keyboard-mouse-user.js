@@ -14,6 +14,9 @@ const togglePenWithP = "/vars/mouse-and-keyboard/drop_pen_with_p";
 const togglePenWithHud = "/vars/mouse-and-keyboard/drop_pen_with_hud";
 const togglePen = "/vars/mouse-and-keyboard/togglePen";
 
+const qs = new URLSearchParams(location.search);
+const inspectZoomSpeed = parseFloat(qs.get("izs")) || -10.0;
+
 const k = name => {
   return `/keyboard-mouse-user/keyboard-var/${name}`;
 };
@@ -69,9 +72,15 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.normalize_vec2
     },
     {
+      src: { value: paths.device.mouse.wheel },
+      dest: { value: paths.actions.dCharSpeed },
+      xform: xforms.scale(-0.3)
+    },
+    {
       src: { value: paths.device.keyboard.key("shift") },
       dest: { value: paths.actions.boost },
-      xform: xforms.copy
+      xform: xforms.copy,
+      priority: 1
     },
     {
       src: { value: paths.device.keyboard.key("Escape") },
@@ -81,6 +90,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.keyboard.key("q") },
       dest: { value: paths.actions.snapRotateLeft },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("f") },
+      dest: { value: paths.actions.toggleFly },
       xform: xforms.rising
     },
     {
@@ -397,7 +411,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
         value: paths.device.keyboard.key("q")
       },
       dest: { value: "/var/shift+q" },
-      xform: xforms.copyIfTrue
+      xform: xforms.copyIfTrue,
+      priority: 1
     },
     {
       src: { value: "/var/shift+q" },
@@ -410,7 +425,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
         value: paths.device.keyboard.key("e")
       },
       dest: { value: "/var/shift+e" },
-      xform: xforms.copyIfTrue
+      xform: xforms.copyIfTrue,
+      priority: 1
     },
     {
       src: { value: "/var/shift+e" },
@@ -423,7 +439,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
         value: paths.device.keyboard.key("q")
       },
       dest: { value: "/var/notshift+q" },
-      xform: xforms.copyIfFalse
+      xform: xforms.copyIfFalse,
+      priority: 1
     },
     {
       src: { value: "/var/notshift+q" },
@@ -437,7 +454,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
         value: paths.device.keyboard.key("e")
       },
       dest: { value: "/var/notshift+e" },
-      xform: xforms.copyIfFalse
+      xform: xforms.copyIfFalse,
+      priority: 1
     },
     {
       src: { value: "/var/notshift+e" },
@@ -527,7 +545,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: {
         value: k("wheelWithShift")
       },
-      xform: xforms.copyIfTrue
+      xform: xforms.copyIfTrue,
+      priority: 1
     },
     {
       src: {
@@ -537,7 +556,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: {
         value: k("wheelWithoutShift")
       },
-      xform: xforms.copyIfFalse
+      xform: xforms.copyIfFalse,
+      priority: 1
     },
     {
       src: {
@@ -570,7 +590,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.keyboard.key("shift") },
       dest: { value: paths.actions.transformModifier },
-      xform: xforms.copy
+      xform: xforms.copy,
+      priority: 1
     }
   ],
   [sets.rightCursorHoveringOnInteractable]: [
@@ -585,7 +606,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.mouse.wheel },
       dest: { value: paths.actions.cursor.right.mediaVolumeMod },
-      xform: xforms.scale(-0.3)
+      xform: xforms.scale(-0.3),
+      priority: 1
     }
   ],
   [sets.inputFocused]: [
@@ -622,6 +644,45 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       ],
       dest: { value: paths.actions.stopInspecting },
       xform: xforms.any
+    },
+    {
+      src: { value: paths.device.mouse.wheel },
+      dest: { value: paths.actions.inspectZoom },
+      xform: xforms.scale(inspectZoomSpeed),
+      priority: 1
+    },
+    {
+      src: { value: paths.device.mouse.movementXY },
+      dest: { x: "/var/movementX", y: "/var/movementY" },
+      xform: xforms.split_vec2
+    },
+    {
+      src: { bool: paths.device.mouse.buttonMiddle, value: "/var/movementY" },
+      dest: { value: "/var/middle-mouse-move-y" },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/middle-mouse-move-y" },
+      dest: { value: paths.actions.inspectPanY },
+      xform: xforms.scale(0.001)
+    },
+    {
+      src: {
+        value: paths.device.mouse.buttonRight
+      },
+      dest: {
+        value: paths.actions.resetInspectView
+      },
+      xform: xforms.rising,
+      priority: 101
+    }
+  ],
+  [sets.debugUserInput]: [
+    {
+      src: { value: paths.device.keyboard.key("m") },
+      dest: { value: paths.actions.debugUserInput.describeCurrentMasks },
+      xform: xforms.rising,
+      priority: 10
     }
   ]
 });

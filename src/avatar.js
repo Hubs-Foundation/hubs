@@ -1,6 +1,6 @@
+// We should technically be able to just include three here, but our dependancies are tangled such that not having aframe is a bit difficult
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
-// We should technically be able to just include three here, but our dependancies are tangled such that not having aframe is a bit difficult
 import "aframe";
 import "./utils/logging";
 
@@ -8,9 +8,10 @@ import ReactDOM from "react-dom";
 import React from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
-
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
+
+import configs from "./utils/configs";
 import { lang, messages } from "./utils/i18n";
 addLocaleData([...en]);
 
@@ -24,7 +25,7 @@ import AvatarPreview from "./react-components/avatar-preview";
 import { fetchAvatar, remixAvatar } from "./utils/avatar-utils";
 
 import styles from "./assets/stylesheets/avatar.scss";
-import hubLogo from "./assets/images/hub-preview-white.png";
+import hubLogo from "./assets/images/hub-preview-light-no-shadow.png";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
@@ -122,7 +123,7 @@ class AvatarUI extends React.Component {
             </button>
           )}
         </div>
-        <img className={styles.logo} src={hubLogo} />
+        <img className={styles.logo} src={configs.image("logo", hubLogo)} />
       </form>
     );
   }

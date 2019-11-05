@@ -19,7 +19,9 @@ The following GitHub projects are part of the Hubs platform and governed by thes
 We are happy to receive contributions to the Hubs platform in a number of different ways as outlined below. Please note that all contributions are subject to approval by the project maintainers. We ask (but do not require) that those interested in contributing to Hubs consider joining the public [Hubs Discord server](https://discord.gg/wHmY4nd) to connect with the dev team, ask questions, and view discussions about work being done on the project. 
 
 ### 💻 Code Contributions
-Hubs has a client-server architecture that gives multiple users the ability to connect to a shared room on the server. If you are interested in contributing to the Hubs client, follow the instructions in the [Readme](README.md) to get started. If you want to contribute to the networking or infrastructure, consider looking at the [reticulum](https://github.com/mozilla/reticulum) or [janus](https://github.com/mozilla/janus-plugin-sfu) repositories. If you are interested in working on the code for Spoke, the 3D editor used to create custom environments for Hubs rooms, explore the [Spoke](https://github.com/mozilla/spoke) respository. 
+Hubs has a client-server architecture that gives multiple users the ability to connect to a shared room on the server. If you are interested in contributing to the Hubs client, follow the instructions in the [Readme](README.md) to get started. If you want to contribute to the networking or infrastructure, consider looking at the [reticulum](https://github.com/mozilla/reticulum) or [janus](https://github.com/mozilla/janus-plugin-sfu) repositories. If you are interested in working on the code for Spoke, the 3D editor used to create custom environments for Hubs rooms, explore the [Spoke](https://github.com/mozilla/spoke) repository.
+
+For more information on the inner workings of Hubs and the architectural decisions behind the project, check out [this presentation on the Mozilla Hubs Code Base](https://vimeo.com/365531296) by Engineering Lead Greg Fodor.
 
 Issues that are open are tagged. If you explore a bug or feature request that you'd like to fix, make a comment on the case so we know you're looking into it! We try to use the '[good first issue](https://github.com/mozilla/hubs/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)' tag to identify some cases that may be easier than others to begin with as you get started with the code base. 
 
@@ -30,6 +32,7 @@ Steps to contributing code to the Hubs project:
 3. Fix the bug! Test out your changes on your local setup and let us know if you have questions or want another opinion about the fix. 
 4. Submit your PR for a code review and someone from the team will take a look and give feedback. Make sure you follow up! We'll close the PR if it seems like you've abandoned it by not responding to any questions or comments we leave in the review. If your PR adds a new feature, consider requesting the 'What's New' tag. With the 'What's New' tag, any text in the main body of the PR up to (and including) an image will be added to the [hubs website](https://hubs.mozilla.com/whats-new). Gifs are especially appreciated! [This pull request](https://github.com/mozilla/hubs/pull/1536) shows an example of how the 'What's New' tag can be used.
 5. Celebrate! 🎉 You're helping Mozilla's mission to make the web an open and accessible place for social experiences! 
+
 
 
 ### 🐛Filing Issues and Feature Requests

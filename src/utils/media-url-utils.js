@@ -1,6 +1,9 @@
-const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
-if (process.env.CORS_PROXY_SERVER) {
-  nonCorsProxyDomains.push(process.env.CORS_PROXY_SERVER);
+import { hasReticulumServer } from "./phoenix-utils";
+import configs from "./configs";
+
+const nonCorsProxyDomains = (configs.NON_CORS_PROXY_DOMAINS || "").split(",");
+if (configs.CORS_PROXY_SERVER) {
+  nonCorsProxyDomains.push(configs.CORS_PROXY_SERVER);
 }
 
 const commonKnownContentTypes = {
@@ -32,15 +35,13 @@ const farsparkEncodeUrl = url => {
 };
 
 export const scaledThumbnailUrlFor = (url, width, height) => {
-  const farsparkUrl = `https://${process.env.THUMBNAIL_SERVER}/thumbnail/${farsparkEncodeUrl(
-    url
-  )}?w=${width}&h=${height}`;
+  const farsparkUrl = `https://${configs.THUMBNAIL_SERVER}/thumbnail/${farsparkEncodeUrl(url)}?w=${width}&h=${height}`;
 
   try {
     const urlHostname = new URL(url).hostname;
 
-    if (process.env.RETICULUM_SERVER) {
-      const retHostname = new URL(`https://${process.env.RETICULUM_SERVER}`).hostname;
+    if (hasReticulumServer()) {
+      const retHostname = new URL(`https://${configs.RETICULUM_SERVER}`).hostname;
       if (retHostname === urlHostname) return url;
     }
   } catch (e) {
@@ -65,7 +66,7 @@ export const proxiedUrlFor = url => {
     // Ignore
   }
 
-  return `https://${process.env.CORS_PROXY_SERVER}/${url}`;
+  return `https://${configs.CORS_PROXY_SERVER}/${url}`;
 };
 
 export function getAbsoluteUrl(baseUrl, relativeUrl) {
@@ -82,9 +83,9 @@ export const getCustomGLTFParserURLResolver = gltfUrl => url => {
   if (/^data:.*,.*$/i.test(url)) return url;
   if (/^blob:.*$/i.test(url)) return url;
 
-  if (process.env.CORS_PROXY_SERVER) {
+  if (configs.CORS_PROXY_SERVER) {
     // For absolute paths with a CORS proxied gltf URL, re-write the url properly to be proxied
-    const corsProxyPrefix = `https://${process.env.CORS_PROXY_SERVER}/`;
+    const corsProxyPrefix = `https://${configs.CORS_PROXY_SERVER}/`;
 
     if (gltfUrl.startsWith(corsProxyPrefix)) {
       const originalUrl = decodeURIComponent(gltfUrl.substring(corsProxyPrefix.length));
@@ -114,9 +115,9 @@ export const guessContentType = url => {
   const extension = new URL(url, window.location).pathname.split(".").pop();
   return commonKnownContentTypes[extension];
 };
-const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/scenes\/(\w+)\/?\S*/;
-const hubsAvatarRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/avatars\/(?<id>\w+)\/?\S*/;
-const hubsRoomRegex = /(https?:\/\/)?(hub.link)|(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com|(dev\.)?reticulum.io)\/(\w+)\/?\S*/;
+const hubsSceneRegex = /https?:\/\/(hubs\.local(:\d+)?|(smoke-)?hubs\.mozilla\.com|(dev\.)?reticulum\.io)\/scenes\/(\w+)\/?\S*/;
+const hubsAvatarRegex = /https?:\/\/(hubs\.local(:\d+)?|(smoke-)?hubs\.mozilla\.com|(dev\.)?reticulum\.io)\/avatars\/(?<id>\w+)\/?\S*/;
+const hubsRoomRegex = /(https?:\/\/)?(hub\.link)|(hubs\.local(:\d+)?|(smoke-)?hubs\.mozilla\.com|(dev\.)?reticulum\.io)\/([a-zA-Z0-9]{7})\/?\S*/;
 
 export const isHubsSceneUrl = hubsSceneRegex.test.bind(hubsSceneRegex);
 export const isHubsRoomUrl = url => !isHubsSceneUrl(url) && hubsRoomRegex.test(url);

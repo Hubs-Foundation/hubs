@@ -24,6 +24,7 @@
     right: 32px;
     bottom: 32px;
     display: none;
+    filter: drop-shadow(0 0 4px #888);
 
     @media (min-width: 500px) {
       display: block;
@@ -99,8 +100,6 @@
 
   :local(.preview) {
     flex: 1;
-    border-radius: 20px;
-    overflow: hidden;
     display: flex;
     position: relative;
     max-width: 300px;

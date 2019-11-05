@@ -1134,7 +1134,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 4
     }
   ],
-  [sets.rightCursorHoldingCamera]: [
+  [sets.leftCursorHoldingCamera]: [
     {
       src: { value: leftTriggerPressed2 },
       dest: { value: paths.actions.cursor.left.takeSnapshot },

@@ -9,12 +9,12 @@ import { HoverMenuSystem } from "./hover-menu-system";
 import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
-
 import { BatchManagerSystem } from "./render-manager-system";
 import { LobbyCameraSystem } from "./lobby-camera-system";
 import { InteractionSfxSystem } from "./interaction-sfx-system";
 import { SpriteSystem } from "./sprites";
 import { CameraSystem } from "./camera-system";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -37,9 +37,13 @@ AFRAME.registerSystem("hubs-systems", {
     this.spriteSystem = new SpriteSystem(this.el);
     this.cameraSystem = new CameraSystem(this.batchManagerSystem);
     this.drawingMenuSystem = new DrawingMenuSystem(this.el.sceneEl);
+    waitForDOMContentLoaded().then(() => {
+      this.DOMContentDidLoad = true;
+    });
   },
 
   tick(t, dt) {
+    if (!this.DOMContentDidLoad) return;
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
     systems.interaction.tick2();
@@ -64,7 +68,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.physicsSystem.tick(dt);
     this.spriteSystem.tick(t, dt);
     this.batchManagerSystem.tick(t);
-    this.cameraSystem.tick(this.el);
+    this.cameraSystem.tick(this.el, dt);
   },
 
   remove() {

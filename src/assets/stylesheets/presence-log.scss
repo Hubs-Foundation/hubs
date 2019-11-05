@@ -94,7 +94,9 @@
       background-color: transparent;
 
       &:hover {
-        background-color: $action-color;
+        @media (pointer: fine) {
+          background-color: $action-color;
+        }
       }
     }
 

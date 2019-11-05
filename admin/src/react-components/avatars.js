@@ -22,8 +22,8 @@ import { withStyles } from "@material-ui/core/styles";
 // Quite ugly but simplest way to have AvatarPreview work is to import aframe.
 // We can technically untangle the dependencies for this, but doesn't seem worth it for admin.
 import "aframe";
-import AvatarPreview from "../avatar-preview";
-import { getReticulumFetchUrl } from "../../utils/phoenix-utils";
+import AvatarPreview from "./avatar-preview";
+import { getReticulumFetchUrl } from "hubs/src/utils/phoenix-utils";
 
 const AvatarFilter = props => (
   <Filter {...props}>
@@ -99,8 +99,6 @@ export const AvatarList = props => (
       <OwnedFileImage source="orm_map_owned_file_id" aspect="square" />
       <TextField source="attributions" />
       <BooleanField source="allow_remixing" />
-      <TextField source="reviewed_at" />
-      <DateField source="inserted_at" />
       <DateField source="updated_at" />
       <EditButton />
       <ApproveAvatarButton />

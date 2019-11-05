@@ -1,12 +1,17 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
+import classNames from "classnames";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploadAlt";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import { messages } from "../utils/i18n";
+import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
 import { upload } from "../utils/media-utils";
 import { ensureAvatarMaterial } from "../utils/avatar-utils";
-import classNames from "classnames";
-import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
@@ -48,7 +53,7 @@ export default class AvatarEditor extends Component {
       this.setState({ avatar, previewGltfUrl: avatar.base_gltf_url });
     } else {
       const { entries } = await fetchReticulumAuthenticated(`/api/v1/media/search?filter=base&source=avatar_listings`);
-      const baseAvatarResults = entries.map(e => ({ id: e.id, name: e.name, gltfs: e.gltfs }));
+      const baseAvatarResults = entries.map(e => ({ id: e.id, name: e.name, gltfs: e.gltfs, images: e.images }));
       if (baseAvatarResults.length) {
         const randomAvatarResult = baseAvatarResults[Math.floor(Math.random() * baseAvatarResults.length)];
         this.setState({
@@ -215,7 +220,13 @@ export default class AvatarEditor extends Component {
   mapField = (name, label, accept, disabled = false, title) => (
     <div className="file-input-row" key={name} title={title}>
       <label htmlFor={`avatar-file_${name}`}>
-        <div className="img-box">{this.state.avatar.files[name] && <img src={this.state.avatar.files[name]} />}</div>
+        <div className="img-box">
+          {this.state.avatar.files[name] ? (
+            <img src={this.state.avatar.files[name]} />
+          ) : (
+            <FontAwesomeIcon icon={faCloudUploadAlt} />
+          )}
+        </div>
         <span>{label}</span>
       </label>
       <input
@@ -264,7 +275,7 @@ export default class AvatarEditor extends Component {
   );
 
   textField = (name, placeholder, disabled, required) => (
-    <div>
+    <div className="text-field-container">
       <label htmlFor={`#avatar-${name}`}>{placeholder}</label>
       <input
         id={`avatar-${name}`}
@@ -317,6 +328,58 @@ export default class AvatarEditor extends Component {
     </div>
   );
 
+  selectListingGrid = (propName, placeholder) => (
+    <div className="select-grid-container">
+      <label htmlFor={`#avatar-${propName}`}>{placeholder}</label>
+      <div className="select-grid">
+        {this.state.baseAvatarResults.map(a => (
+          <div
+            onClick={() =>
+              this.setState({
+                avatar: { ...this.state.avatar, [propName]: a.id },
+                previewGltfUrl: this.getPreviewUrl(a.id)
+              })
+            }
+            key={a.id}
+            className={classNames("item", { selected: a.id === this.state.avatar[propName] })}
+            style={{ paddingBottom: `${(a.images.preview.width / a.images.preview.height) * 100}%` }}
+          >
+            <img src={a.images.preview.url} />
+          </div>
+        ))}
+      </div>
+      <input
+        id="avatar-file_glb"
+        type="file"
+        accept="model/gltf+binary,.glb"
+        onChange={e => {
+          const file = e.target.files[0];
+          e.target.value = null;
+          this.inputFiles["glb"] = file;
+          URL.revokeObjectURL(this.state.avatar.files["glb"]);
+          this.setState({
+            avatar: {
+              ...this.state.avatar,
+              [propName]: "",
+              files: {
+                ...this.state.avatar.files,
+                glb: URL.createObjectURL(file)
+              }
+            },
+            previewGltfUrl: this.getPreviewUrl("")
+          });
+        }}
+      />
+      <label
+        htmlFor="avatar-file_glb"
+        className={classNames("item", "custom", { selected: "" === this.state.avatar[propName] })}
+      >
+        <FontAwesomeIcon icon={faCloudUploadAlt} />
+        &nbsp; Custom GLB
+      </label>
+    </div>
+  );
+
   textarea = (name, placeholder, disabled) => (
     <div>
       <textarea
@@ -363,15 +426,16 @@ export default class AvatarEditor extends Component {
           </div>
         ) : this.props.signedIn ? (
           <form onSubmit={this.uploadAvatar} className="center">
+            {this.textField("name", "Name", false, true)}
             <div className="split">
               <div className="form-body">
                 {debug && this.textField("avatar_id", "Avatar ID", true)}
                 {debug && this.textField("parent_avatar_id", "Parent Avatar ID")}
                 {debug && this.textField("parent_avatar_listing_id", "Parent Avatar Listing ID")}
-                {this.textField("name", "Name", false, true)}
                 {debug && this.textarea("description", "Description")}
-                {!!this.state.baseAvatarResults.length && this.selectListingField("parent_avatar_listing_id", "Model")}
-                {!avatar.parent_avatar_listing_id && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
+                {!!this.state.baseAvatarResults.length && this.selectListingGrid("parent_avatar_listing_id", "Model")}
+
+                <label>Skin</label>
                 {this.mapField("base_map", "Base Map", "image/*")}
                 <details>
                   <summary>Advanced</summary>
@@ -379,13 +443,15 @@ export default class AvatarEditor extends Component {
                   {this.mapField("normal_map", "Normal Map", "image/*")}
                   {this.mapField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
                 </details>
+
+                <label>Share Settings</label>
                 {this.checkbox(
                   "allow_promotion",
-                  "Allow Mozilla to promote your avatar, and show it in search results.",
+                  `Allow ${messages["company-name"]} to promote your avatar, and show it in search results.`,
                   <span>
                     Allow{" "}
                     <a
-                      href="https://github.com/mozilla/hubs/blob/master/PROMOTION.md"
+                      href={configs.link("promotion", "https://github.com/mozilla/hubs/blob/master/PROMOTION.md")}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -399,7 +465,7 @@ export default class AvatarEditor extends Component {
                   <span>
                     Allow{" "}
                     <a
-                      href="https://github.com/mozilla/hubs/blob/master/REMIXING.md"
+                      href={configs.link("remixing", "https://github.com/mozilla/hubs/blob/master/REMIXING.md")}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -426,17 +492,25 @@ export default class AvatarEditor extends Component {
               />
             </div>
             <div className="info">
-              <p>
-                <a target="_blank" rel="noopener noreferrer" href="https://tryquilt.io/">
-                  <FormattedMessage id="avatar-editor.quilt-link" />
-                </a>
-              </p>
-              <p>
-                <FormattedMessage id="avatar-editor.info" />
-                <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
-                  <FormattedMessage id="avatar-editor.info-link" />
-                </a>
-              </p>
+              <IfFeature name="show_avatar_editor_link">
+                <p>
+                  <a target="_blank" rel="noopener noreferrer" href="https://tryquilt.io/">
+                    <FormattedMessage id="avatar-editor.quilt-link" />
+                  </a>
+                </p>
+              </IfFeature>
+              <IfFeature name="show_avatar_pipelines_link">
+                <p>
+                  <FormattedMessage id="avatar-editor.info" />
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://github.com/MozillaReality/hubs-avatar-pipelines"
+                  >
+                    <FormattedMessage id="avatar-editor.info-link" />
+                  </a>
+                </p>
+              </IfFeature>
             </div>
             <div>
               <input

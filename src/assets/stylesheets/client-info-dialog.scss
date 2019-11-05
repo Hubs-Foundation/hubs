@@ -1,5 +1,30 @@
 @import 'shared';
 
+:local(.title-and-close){
+  display: flex;
+}
+
+:local(.object-display-string) {
+  width: 80%;
+  margin: 0 10%;
+  text-align: center;
+  overflow-wrap: break-word;
+}
+
+:local(.cancel-text) {
+  margin: 10px 0px 0px 0px;
+}
+
+:local(.collapse-button) {
+  @extend %fa-icon-button;
+  color: $dark-grey;
+  margin: 0 10px;
+
+  i {
+    font-size: 1.2em;
+  }
+}
+
 :local(.client-info-dialog) {
   .dialog__box__contents__title {
     margin-bottom: 10px;
@@ -86,6 +111,11 @@
     width: 200px;
     display: flex;
     flex-direction: row;
+
+    @media (max-width: 801px) {
+      width: 100px;
+      margin-top: 4px;
+    }
   }
 
   button:disabled {
@@ -99,4 +129,9 @@
   :local(.cancel) {
     @extend %action-button;
   }
+}
+
+:local(.primary-action-button) {
+  background: $action-color !important;
+  color: white !important;
 }

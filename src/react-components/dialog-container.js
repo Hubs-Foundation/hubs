@@ -12,6 +12,7 @@ export default class DialogContainer extends Component {
     onClose: PropTypes.func,
     closable: PropTypes.bool,
     wide: PropTypes.bool,
+    noOverlay: PropTypes.bool,
     className: PropTypes.string,
     allowOverflow: PropTypes.bool,
     additionalClass: PropTypes.string
@@ -49,8 +50,21 @@ export default class DialogContainer extends Component {
 
   render() {
     return (
-      <div className={classNames("dialog-overlay", this.props.className)}>
-        <div className="dialog" onClick={this.onContainerClicked}>
+      <div
+        className={classNames(
+          "dialog-overlay",
+          this.props.noOverlay ? "dialog-overlay__no-pointer-events" : "",
+          this.props.className
+        )}
+      >
+        <div
+          className={classNames(
+            "dialog",
+            this.props.noOverlay ? "dialog__no-pointer-events" : "dialog__dark-background",
+            this.props.noOverlay ? "dialog__align-end" : ""
+          )}
+          onClick={this.onContainerClicked}
+        >
           <div className={`dialog__box ${this.props.wide ? "dialog__wide" : ""} `}>
             <div
               className={classNames(
@@ -60,7 +74,8 @@ export default class DialogContainer extends Component {
               )}
             >
               {this.props.closable &&
-                this.props.onClose && (
+                this.props.onClose &&
+                !this.props.noOverlay && (
                   <WithHoverSound>
                     <button className="dialog__box__contents__close" onClick={() => this.props.onClose()}>
                       <i>

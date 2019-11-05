@@ -44,7 +44,7 @@ const CAPTURE_HEIGHT = isMobileVR ? 360 : 720;
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
 const CAPTURE_DURATIONS = [3, 7, 15, 30, 60, Infinity];
-const DEFAULT_CAPTURE_DURATION = 3;
+const DEFAULT_CAPTURE_DURATION = 7;
 const COUNTDOWN_DURATION = 3;
 const VIDEO_LOOPS = 3; // Number of times to loop the videos we spawn before stopping them (for perf)
 const MAX_DURATION_TO_LIMIT_LOOPS = 31; // Max duration for which we limit loops (eg GIFs vs long form videos)
@@ -212,7 +212,6 @@ AFRAME.registerComponent("camera-tool", {
       this.durationLabel.object3D.visible = false;
 
       this.snapMenu = this.el.querySelector(".camera-snap-menu");
-      this.playerCamera = document.getElementById("viewing-camera").getObject3D("camera");
       this.snapButton = this.el.querySelector(".snap-button");
       this.recordButton = this.el.querySelector(".record-button");
 
@@ -238,6 +237,10 @@ AFRAME.registerComponent("camera-tool", {
 
       this.cameraSystem = this.el.sceneEl.systems["camera-tools"];
       this.cameraSystem.register(this.el);
+
+      waitForDOMContentLoaded().then(() => {
+        this.playerCamera = document.getElementById("viewing-camera").getObject3D("camera");
+      });
     });
   },
 
@@ -742,6 +745,7 @@ AFRAME.registerComponent("camera-tool", {
     const cameraForwardPoint = new THREE.Vector3();
     const cameraForwardWorld = new THREE.Vector3();
     return function() {
+      if (!this.playerCamera) return;
       this.el.object3D.getWorldPosition(cameraWorld);
       this.playerCamera.getWorldPosition(playerWorld);
       playerToCamera.subVectors(playerWorld, cameraWorld);

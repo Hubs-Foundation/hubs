@@ -226,7 +226,11 @@ export default class SceneEntryManager {
   };
 
   _signInAndPinOrUnpinElement = (el, pin) => {
-    const action = pin ? () => this._pinElement(el) : async () => await this._unpinElement(el);
+    const action = pin
+      ? () => this._pinElement(el)
+      : async () => {
+          await this._unpinElement(el);
+        };
 
     this.performConditionalSignIn(() => this.hubChannel.signedIn, action, pin ? "pin" : "unpin", () => {
       // UI pins/un-pins the entity optimistically, so we undo that here.
@@ -428,7 +432,8 @@ export default class SceneEntryManager {
             width: 720 * (screen.width / screen.height),
             height: 720,
             frameRate: 30
-          }
+          },
+          audio: true
         },
         true
       );

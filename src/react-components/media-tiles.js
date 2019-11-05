@@ -11,7 +11,9 @@ import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalL
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
 
+import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/media-browser.scss";
 import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import StateLink from "./state-link";
@@ -32,7 +34,8 @@ class MediaTiles extends Component {
     urlSource: PropTypes.string,
     handleEntryClicked: PropTypes.func,
     handlePager: PropTypes.func,
-    onCopyAvatar: PropTypes.func
+    onCopyAvatar: PropTypes.func,
+    onShowSimilar: PropTypes.func
   };
 
   handleCopyAvatar = async (e, entry) => {
@@ -61,12 +64,14 @@ class MediaTiles extends Component {
               className={classNames(styles.tile, styles.createTile)}
             >
               {urlSource === "scenes" ? (
-                <a href="/spoke/new" rel="noopener noreferrer" target="_blank" className={styles.tileLink}>
-                  <div className={styles.tileContent}>
-                    <FontAwesomeIcon icon={faPlus} />
-                    <FormattedMessage id="media-browser.create-scene" />
-                  </div>
-                </a>
+                <IfFeature name="enable_spoke">
+                  <a href="/spoke/new" rel="noopener noreferrer" target="_blank" className={styles.tileLink}>
+                    <div className={styles.tileContent}>
+                      <FontAwesomeIcon icon={faPlus} />
+                      <FormattedMessage id="media-browser.create-scene" />
+                    </div>
+                  </a>
+                </IfFeature>
               ) : (
                 <a
                   onClick={e => {
@@ -147,6 +152,8 @@ class MediaTiles extends Component {
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
           muted
           autoPlay
+          playsInline
+          loop
           src={proxiedUrlFor(imageSrc)}
         />
       ) : (
@@ -172,28 +179,36 @@ class MediaTiles extends Component {
         >
           {thumbnailElement}
         </a>
-        {entry.type === "avatar" && (
-          <StateLink
-            className={styles.editAvatar}
-            stateKey="overlay"
-            stateValue="avatar-editor"
-            stateDetail={{ avatarId: entry.id }}
-            history={this.props.history}
-          >
-            <FontAwesomeIcon icon={faPencilAlt} />
-          </StateLink>
-        )}
-        {entry.type === "avatar_listing" &&
-          entry.allow_remixing && (
+        <div className={styles.tileActions}>
+          {entry.type === "avatar" && (
             <StateLink
-              className={styles.editAvatar}
-              onClick={e => this.handleCopyAvatar(e, entry)}
+              stateKey="overlay"
+              stateValue="avatar-editor"
+              stateDetail={{ avatarId: entry.id }}
               history={this.props.history}
-              title="Copy to my avatars"
+              title="Edit"
             >
-              <FontAwesomeIcon icon={faClone} />
+              <FontAwesomeIcon icon={faPencilAlt} />
             </StateLink>
           )}
+          {entry.type === "avatar_listing" && (
+            <a
+              onClick={e => {
+                e.preventDefault();
+                this.props.onShowSimilar(entry.id, entry.name);
+              }}
+              title="Show Similar"
+            >
+              <FontAwesomeIcon icon={faSearch} />
+            </a>
+          )}
+          {entry.type === "avatar_listing" &&
+            entry.allow_remixing && (
+              <a onClick={e => this.handleCopyAvatar(e, entry)} title="Copy to my avatars">
+                <FontAwesomeIcon icon={faClone} />
+              </a>
+            )}
+        </div>
         {!entry.type.endsWith("_image") && (
           <div className={styles.info}>
             <a

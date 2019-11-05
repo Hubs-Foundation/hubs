@@ -1,4 +1,5 @@
 import { paths } from "../systems/userinput/paths";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 const AMMO_BODY_ATTRIBUTES = { type: "kinematic", collisionFilterMask: COLLISION_LAYERS.HANDS };
 
@@ -43,9 +44,15 @@ AFRAME.registerComponent("transform-button", {
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.targetEl = networkedEl;
     });
-    const rightHand = document.getElementById("player-right-controller");
-    const leftHand = document.getElementById("player-left-controller");
+    let leftHand, rightHand;
+
+    waitForDOMContentLoaded().then(() => {
+      leftHand = document.getElementById("player-left-controller");
+      rightHand = document.getElementById("player-right-controller");
+    });
     this.onGrabStart = e => {
+      if (!leftHand || !rightHand) return;
+
       if (!this.targetEl) {
         return;
       }

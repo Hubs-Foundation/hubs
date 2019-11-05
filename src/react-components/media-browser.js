@@ -10,6 +10,8 @@ import { faLink } from "@fortawesome/free-solid-svg-icons/faLink";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/media-browser.scss";
 import { pushHistoryPath, pushHistoryState, sluglessPath } from "../utils/history";
 import { SOURCES } from "../storage/media-search-store";
@@ -182,6 +184,10 @@ class MediaBrowser extends Component {
     this.handleFacetClicked({ params: { filter: "my-avatars" } });
   };
 
+  onShowSimilar = (id, name) => {
+    this.handleFacetClicked({ params: { similar_to: id, similar_name: name } });
+  };
+
   selectEntry = entry => {
     if (!this.props.onMediaSearchResultEntrySelected) return;
     this.props.onMediaSearchResultEntrySelected(entry, this.state.selectAction);
@@ -193,13 +199,15 @@ class MediaBrowser extends Component {
   };
 
   handleFacetClicked = facet => {
-    const searchParams = this.getSearchClearedSearchParams(true, true, true);
+    this.setState({ query: "" }, () => {
+      const searchParams = this.getSearchClearedSearchParams(true, true, true);
 
-    for (const [k, v] of Object.entries(facet.params)) {
-      searchParams.set(k, v);
-    }
+      for (const [k, v] of Object.entries(facet.params)) {
+        searchParams.set(k, v);
+      }
 
-    pushHistoryPath(this.props.history, this.props.history.location.pathname, searchParams.toString());
+      pushHistoryPath(this.props.history, this.props.history.location.pathname, searchParams.toString());
+    });
   };
 
   getSearchClearedSearchParams = (keepSource, keepNav, keepSelectAction) => {
@@ -250,6 +258,8 @@ class MediaBrowser extends Component {
     const hideSearch = urlSource === "favorites";
     const showEmptyStringOnNoResult = urlSource !== "avatars" && urlSource !== "scenes";
 
+    const facets = this.state.facets && this.state.facets.length > 0 && this.state.facets;
+
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
     if (this.state.selectNextResult) return <div />;
     const handleCustomClicked = urlSource => {
@@ -265,7 +275,8 @@ class MediaBrowser extends Component {
       }
     };
 
-    const activeFilter = searchParams.get("filter") || (!searchParams.get("q") && "");
+    const activeFilter =
+      searchParams.get("filter") || (searchParams.get("similar_to") && "similar") || (!searchParams.get("q") && "");
 
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
@@ -339,14 +350,18 @@ class MediaBrowser extends Component {
                   )}
                 {urlSource === "scenes" && (
                   <div className={styles.engineAttributionContents}>
-                    <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
-                    <a href="/spoke" target="_blank" rel="noreferrer noopener">
-                      <FormattedMessage id="media-browser.spoke" />
-                    </a>
-                    |
-                    <a target="_blank" rel="noopener noreferrer" href="/?report">
-                      <FormattedMessage id="media-browser.report_issue" />
-                    </a>
+                    <IfFeature name="enable_spoke">
+                      <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
+                      <a href="/spoke" target="_blank" rel="noreferrer noopener">
+                        <FormattedMessage id="media-browser.spoke" />
+                      </a>
+                    </IfFeature>
+                    {configs.feature("enable_spoke") && configs.feature("show_issue_report_link") && "|"}
+                    <IfFeature name="show_issue_report_link">
+                      <a target="_blank" rel="noopener noreferrer" href={configs.link("issue_report", "/?report")}>
+                        <FormattedMessage id="media-browser.report_issue" />
+                      </a>
+                    </IfFeature>
                   </div>
                 )}
               </div>
@@ -389,10 +404,10 @@ class MediaBrowser extends Component {
             </div>
           )}
 
-          {this.state.facets &&
-            this.state.facets.length > 0 && (
-              <div className={styles.facets}>
-                {this.state.facets.map((s, i) => (
+          {(facets || activeFilter === "similar") && (
+            <div className={styles.facets}>
+              {facets &&
+                facets.map((s, i) => (
                   <a
                     onClick={() => this.handleFacetClicked(s)}
                     key={i}
@@ -401,8 +416,16 @@ class MediaBrowser extends Component {
                     {s.text}
                   </a>
                 ))}
-              </div>
-            )}
+              {activeFilter === "similar" && (
+                <a className={classNames(styles.facet, "selected")}>
+                  <FormattedMessage
+                    id="media-browser.similar-to-facet"
+                    values={{ name: searchParams.get("similar_name") }}
+                  />
+                </a>
+              )}
+            </div>
+          )}
 
           {this.props.mediaSearchStore.isFetching ||
           this._sendQueryTimeout ||
@@ -414,6 +437,7 @@ class MediaBrowser extends Component {
               urlSource={urlSource}
               handleEntryClicked={this.handleEntryClicked}
               onCopyAvatar={this.onCopyAvatar}
+              onShowSimilar={this.onShowSimilar}
               handlePager={this.handlePager}
             />
           ) : (

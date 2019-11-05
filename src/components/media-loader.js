@@ -1,5 +1,5 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
-import { resolveUrl, injectCustomShaderChunks } from "../utils/media-utils";
+import { resolveUrl, injectCustomShaderChunks, addMeshScaleAnimation } from "../utils/media-utils";
 import {
   isNonCorsProxyDomain,
   guessContentType,
@@ -16,8 +16,6 @@ import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effect
 import { loadModel } from "./gltf-model-plus";
 import { cloneObject3D } from "../utils/three-utils";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
-
-import anime from "animejs";
 
 import { SHAPE } from "three-ammo/constants";
 
@@ -45,7 +43,8 @@ AFRAME.registerComponent("media-loader", {
     fileId: { type: "string" },
     fileIsOwned: { type: "boolean" },
     src: { type: "string" },
-    resize: { default: false },
+    fitToBox: { default: false },
+    customMeshScale: { type: "vec3", default: { x: 1, y: 1, z: 1 } },
     resolve: { default: false },
     contentType: { default: null },
     contentSubtype: { default: null },
@@ -71,13 +70,20 @@ AFRAME.registerComponent("media-loader", {
 
   updateScale: (function() {
     const center = new THREE.Vector3();
-    return function(resize) {
+    return function(fitToBox) {
       const mesh = this.el.getObject3D("mesh");
-      const box = getBox(this.el, mesh);
-      const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
-      mesh.scale.multiplyScalar(scaleCoefficient);
-      const { min, max } = box;
-      center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
+      if (fitToBox) {
+        const box = getBox(this.el, mesh);
+        const scaleCoefficient = getScaleCoefficient(0.5, box);
+        mesh.scale.multiplyScalar(scaleCoefficient);
+        const { min, max } = box;
+        center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
+      } else {
+        mesh.scale.copy(this.data.customMeshScale);
+        const box = getBox(this.el, mesh);
+        const { min, max } = box;
+        center.addVectors(min, max).multiplyScalar(0.5);
+      }
       mesh.position.sub(center);
       mesh.matrixNeedsUpdate = true;
     };
@@ -226,65 +232,18 @@ AFRAME.registerComponent("media-loader", {
     if (this.data.animate) {
       if (!this.animating) {
         this.animating = true;
-        if (shouldUpdateScale) this.updateScale(this.data.resize);
+        if (shouldUpdateScale) this.updateScale(this.data.fitToBox);
         const mesh = this.el.getObject3D("mesh");
         const scale = { x: 0.001, y: 0.001, z: 0.001 };
         scale.x = mesh.scale.x < scale.x ? mesh.scale.x * 0.001 : scale.x;
         scale.y = mesh.scale.y < scale.y ? mesh.scale.x * 0.001 : scale.y;
         scale.z = mesh.scale.z < scale.z ? mesh.scale.x * 0.001 : scale.z;
-        this.addMeshScaleAnimation(mesh, scale, finish);
+        addMeshScaleAnimation(mesh, scale, finish);
       }
     } else {
-      if (shouldUpdateScale) this.updateScale(this.data.resize);
+      if (shouldUpdateScale) this.updateScale(this.data.fitToBox);
       finish();
     }
-  },
-
-  addMeshScaleAnimation(mesh, initialScale, onComplete) {
-    const step = (function() {
-      const lastValue = {};
-      return function(anim) {
-        const value = anim.animatables[0].target;
-
-        value.x = Math.max(Number.MIN_VALUE, value.x);
-        value.y = Math.max(Number.MIN_VALUE, value.y);
-        value.z = Math.max(Number.MIN_VALUE, value.z);
-
-        // For animation timeline.
-        if (value.x === lastValue.x && value.y === lastValue.y && value.z === lastValue.z) {
-          return;
-        }
-
-        lastValue.x = value.x;
-        lastValue.y = value.y;
-        lastValue.z = value.z;
-
-        mesh.scale.set(value.x, value.y, value.z);
-        mesh.matrixNeedsUpdate = true;
-      };
-    })();
-
-    const config = {
-      duration: 400,
-      easing: "easeOutElastic",
-      elasticity: 400,
-      loop: 0,
-      round: false,
-      x: mesh.scale.x,
-      y: mesh.scale.y,
-      z: mesh.scale.z,
-      targets: [initialScale],
-      update: anim => step(anim),
-      complete: anim => {
-        step(anim);
-        onComplete();
-      }
-    };
-
-    mesh.scale.copy(initialScale);
-    mesh.matrixNeedsUpdate = true;
-
-    return anime(config);
   },
 
   async update(oldData) {
@@ -437,7 +396,7 @@ AFRAME.registerComponent("media-loader", {
             contentType: contentType,
             inflate: true,
             batch: !disableBatching && batchMeshes,
-            modelToWorldScale: this.data.resize ? 0.0001 : 1.0
+            modelToWorldScale: this.data.fitToBox ? 0.0001 : 1.0
           })
         );
       } else if (contentType.startsWith("text/html")) {

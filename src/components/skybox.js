@@ -238,6 +238,7 @@ AFRAME.registerComponent("skybox", {
     this.el.setObject3D("mesh", this.sky);
     this.skyScene = new THREE.Scene();
     this.cubeCamera = new THREE.CubeCamera(1, 100000, 512);
+    this.cubeCamera.children.forEach(o => (o.matrixNeedsUpdate = true));
     this.skyScene.add(this.cubeCamera);
 
     this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
