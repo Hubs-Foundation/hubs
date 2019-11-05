@@ -100,6 +100,7 @@ const normalizedFrame = (function() {
 })();
 
 const getSheetType = sprite => (spritesheetAction.frames[sprite.data.name] ? "action" : "notice");
+const SHEET_TYPES = ["action", "notice"];
 
 const raycastOnSprite = (function() {
   const vA = new THREE.Vector3();
@@ -187,7 +188,10 @@ const ZEROS = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 export class SpriteSystem {
   raycast(raycaster, intersects) {
-    for (const [sheetType, slots] of Object.entries(this.slots)) {
+    for (let i = 0; i < SHEET_TYPES.length; i++) {
+      const sheetType = SHEET_TYPES[i];
+      const slots = this.slots[sheetType];
+
       for (let i = 0, l = slots.length; i < l; i++) {
         if (!slots[i]) continue;
 
@@ -197,6 +201,7 @@ export class SpriteSystem {
         }
       }
     }
+
     return intersects;
   }
   constructor(scene) {
@@ -256,7 +261,9 @@ export class SpriteSystem {
   tick(t) {
     if (!this.meshes.action || !this.meshes.notice) return;
 
-    for (const [sheetType, mesh] of Object.entries(this.meshes)) {
+    for (let i = 0; i < SHEET_TYPES.length; i++) {
+      const sheetType = SHEET_TYPES[i];
+      const mesh = this.meshes[sheetType];
       mesh.material.uniforms.hubs_Time.value = t;
       mesh.material.uniformsNeedUpdate = true;
 
