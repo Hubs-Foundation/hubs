@@ -29,8 +29,9 @@ features.show_feedback_ui = { category = "features", type = "boolean", internal 
 features.show_issue_report_dialog = { category = "features", type = "boolean", internal = "true" }
 
 images.logo = { category = "images", type = "file", name = "App Logo", description = "Logo used across the app." }
+images.favicon = { category = "images", type = "file", name = "Favicon", description = "Icon for the app." }
 images.company_logo = { category = "images", type = "file", name = "Company Logo", description = "Company logo used across the app." }
-images.home_background = { category = "images", type = "file" }
+images.home_background = { category = "images", type = "file", name = "Home background", description = "Background image on the home page." }
 
 colors.action-color = { category = "colors", type = "color", name = "Primary Color", description = "Used for call to action buttons and accents." }
 
