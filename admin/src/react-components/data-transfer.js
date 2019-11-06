@@ -80,9 +80,9 @@ const workerScript = externalCorsProxyDomain => {
 class DataTransferComponent extends Component {
   state = {
     externalCorsProxyDomain: "",
-    externalStorageDomain: "",
+    externalAssetsDomain: "",
     enableExternalCorsDomain: false,
-    enableExternalStorageDomain: false,
+    enableExternalAssetsDomain: false,
     saving: false,
     saveError: false,
     loading: false
@@ -94,11 +94,11 @@ class DataTransferComponent extends Component {
 
     this.setState({
       externalCorsProxyDomain: adminInfo.external_cors_proxy_domain,
-      externalStorageDomain: adminInfo.external_storage_domain,
+      externalAssetsDomain: adminInfo.external_assets_domain,
       enableExternalCorsDomain:
         !!retConfig && !!retConfig.phx && retConfig.phx.cors_proxy_url_host === adminInfo.external_cors_proxy_domain,
-      enableExternalStorageDomain:
-        !!retConfig && !!retConfig.uploads && retConfig.uploads.host === `https://${adminInfo.external_storage_domain}`,
+      enableExternalAssetsDomain:
+        !!retConfig && !!retConfig.uploads && retConfig.uploads.host === `https://${adminInfo.external_assets_domain}`,
       loading: false
     });
   }
@@ -108,7 +108,7 @@ class DataTransferComponent extends Component {
 
     this.setState({ saving: true }, async () => {
       const corsDomain = this.state.enableExternalCorsDomain ? this.state.externalCorsProxyDomain : "";
-      const storageDomain = this.state.enableExternalStorageDomain ? this.state.externalStorageDomain : "";
+      const assetsDomain = this.state.enableExternalAssetsDomain ? this.state.externalAssetsDomain : "";
 
       const configs = {
         reticulum: {
@@ -116,17 +116,19 @@ class DataTransferComponent extends Component {
             cors_proxy_url_host: corsDomain
           },
           uploads: {
-            host: storageDomain ? `https://${storageDomain}` : ""
+            host: assetsDomain ? `https://${assetsDomain}` : ""
           }
         },
         hubs: {
           general: {
-            cors_proxy_server: corsDomain
+            cors_proxy_server: corsDomain,
+            base_assets_path: assetsDomain ? `https://${assetsDomain}` : ""
           }
         },
         spoke: {
           general: {
-            cors_proxy_server: corsDomain
+            cors_proxy_server: corsDomain,
+            base_assets_path: assetsDomain ? `https://${assetsDomain}` : ""
           }
         }
       };
@@ -247,7 +249,7 @@ class DataTransferComponent extends Component {
                   <a href="https://cloudflare.com" target="_blank" rel="noopener noreferrer">
                     Cloudflare
                   </a>
-                  :<div className={this.props.classes.command}>{this.state.externalStorageDomain}</div>
+                  :<div className={this.props.classes.command}>{this.state.externalAssetsDomain}</div>
                 </li>
                 <li>
                   In the &apos;DNS&apos; section of your Cloudflare domain settings, add a CNAME record for:
@@ -258,7 +260,7 @@ class DataTransferComponent extends Component {
                   &apos;Full&apos;.
                 </li>
                 <li>
-                  Enable the &apos;Use Cloudflare Storage CDN&apos; setting below and click &apos;Save&apos; on this
+                  Enable the &apos;Use Cloudflare Assets CDN&apos; setting below and click &apos;Save&apos; on this
                   page.
                 </li>
                 <li>Verify your new CDN is working by uploading a file into a room.</li>
@@ -266,12 +268,12 @@ class DataTransferComponent extends Component {
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={this.state.enableExternalStorageDomain}
-                    onChange={e => this.setState({ enableExternalStorageDomain: e.target.checked })}
-                    value="enableExternalStorageDomain"
+                    checked={this.state.enableExternalAssetsDomain}
+                    onChange={e => this.setState({ enableExternalAssetsDomain: e.target.checked })}
+                    value="enableExternalAssetsDomain"
                   />
                 }
-                label="Use Cloudflare Storage CDN"
+                label="Use Cloudflare Assets CDN"
               />
             </Typography>
             {this.state.saving ? (
