@@ -367,7 +367,7 @@ module.exports = (env, argv) => ({
         SENTRY_DSN: process.env.SENTRY_DSN,
         GA_TRACKING_ID: process.env.GA_TRACKING_ID,
         POSTGREST_SERVER: process.env.POSTGREST_SERVER,
-        ENABLE_ALL_FEATURES: process.env.ENABLE_ALL_FEATURES
+        USE_FEATURE_CONFIG: process.env.USE_FEATURE_CONFIG
       })
     })
   ]
