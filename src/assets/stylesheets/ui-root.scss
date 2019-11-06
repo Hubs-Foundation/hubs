@@ -4,7 +4,7 @@
   position: absolute;
   left: 8px;
   top: 72px;
-  background-color: $bright-blue;
+  background-color: $notice-background-color;
   padding: 12px 24px;
   border-radius: 28px;
   display: flex;
@@ -21,7 +21,7 @@
     height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-bottom: 5px solid $bright-blue;
+    border-bottom: 5px solid $notice-background-color;
     position: absolute;
     top: -5px;
   }
@@ -33,10 +33,10 @@
     border: none;
     cursor: pointer;
     background: transparent;
-    color: $light-blue;
+    color: $notice-widget-color;
   }
   :local(.streaming-tip-message){
-    color: white;
+    color: $notice-text-color;
     user-select: text;
     display: flex;
     flex-flow: column;
@@ -77,7 +77,7 @@ body.vr-mode {
 }
 
 :local(.ui-dialog-box-contents) {
-  background-color: $white-transparent;
+  background-color: var(--panel-background-color);
   border-radius: 18px 18px 0 0;
   width: 100%;
   max-width: 600px;
@@ -103,7 +103,7 @@ body.vr-mode {
   left: 16px;
   margin: 22px 0;
   padding: 0;
-  background-color: white;
+  background-color: var(--overlay-button-background-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -118,7 +118,7 @@ body.vr-mode {
   border: 0;
   width: 43px;
   height: 43px;
-  color: $dark-grey;
+  color: var(--unfavorited-color);
 
   @media (max-width: 1080px) {
     display: none;
@@ -162,7 +162,8 @@ body.vr-mode {
   align-items: center;
   justify-content: flex-end;
   font-size: 1.3em;
-  background-color: white;
+  background-color: var(--menu-background-color);
+  color: var(--menu-icon-color);
   border-radius: 24px;
   font-weight: bold;
   padding: 8px 18px;
@@ -202,7 +203,8 @@ body.vr-mode {
   align-items: center;
   justify-content: flex-end;
   font-size: 1.3em;
-  background-color: white;
+  background-color: var(--menu-background-color);
+  color: var(--menu-icon-color);
   border-radius: 24px;
   font-weight: bold;
   padding: 8px 18px;
@@ -226,7 +228,7 @@ body.vr-mode {
 }
 
 :local(.presence-info-selected) {
-  color: $action-color;
+  color: $action-label-color;
 }
 
 :local(.corner-button) {
@@ -241,7 +243,8 @@ body.vr-mode {
   align-items: center;
   justify-content: center;
   font-size: 1.3em;
-  background-color: white;
+  color: var(--overlay-button-icon-color);
+  background-color: var(--overlay-button-background-color);
   border-radius: 24px;
   font-weight: bold;
   padding: 10px 12px;
@@ -255,7 +258,7 @@ body.vr-mode {
 }
 
 :local(.corner-button-selected) {
-  color: $action-color;
+  color: $action-label-color;
 }
 
 :local(.leave-button) {
@@ -291,7 +294,7 @@ body.vr-mode {
     height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-bottom: 5px solid $bright-blue;
+    border-bottom: 5px solid $notice-background-color;
     position: absolute;
     top: -5px;
   }
@@ -299,8 +302,8 @@ body.vr-mode {
 
 :local(.interstitial) {
   @extend %default-font;
-  background-color: rgba(0, 0, 0, 0.9);
-  color: $light-text;
+  background-color: var(--vr-interstitial-background-color);
+  color: var(--vr-interstitial-text-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -322,7 +325,7 @@ body.vr-mode {
 
 :local(.avatar-editor) {
   position:absolute;
-  background: white;
+  background: var(--full-panel-background-color);
   top: 0;
   left: 0;
   width: 100%;

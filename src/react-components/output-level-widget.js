@@ -48,27 +48,21 @@ export default class OutputLevelWidget extends Component {
   }
 
   render() {
-    const maxLevelHeight = 111;
-    const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
+    const iconClass = `audio-setup-panel__levels__icon_clickable__${this.state.tonePlaying ? "playing" : "pending"}`;
+
     return (
       <WithHoverSound>
         <div className="audio-setup-panel__levels__icon_clickable" onClick={this.playTestTone}>
-          <img
-            src="../assets/images/level_action_background.png"
-            srcSet="../assets/images/level_action_background@2x.png 2x"
-            className="audio-setup-panel__levels__icon-part"
-          />
-          <img
-            src="../assets/images/level_action_fill.png"
-            srcSet="../assets/images/level_action_fill@2x.png 2x"
-            className="audio-setup-panel__levels__icon-part"
-            style={speakerClip}
-          />
           <img
             src="../assets/images/speaker_level.png"
             srcSet="../assets/images/speaker_level@2x.png 2x"
             className="audio-setup-panel__levels__icon-part"
           />
+          <div className={iconClass}>
+            <svg width="111" height="111" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="55.5" cy="55.5" r="55.5" fill="currentColor" fillOpacity="0.8" />
+            </svg>
+          </div>
           <div className="audio-setup-panel__levels__test_label">
             <FormattedMessage id="audio.click_to_test" />
           </div>

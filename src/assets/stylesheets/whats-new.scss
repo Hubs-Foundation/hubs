@@ -63,7 +63,7 @@ h1 {
   margin: 0;
 }
 .title a:link, .title a:active .title a:hover, .title a:visited {
-  color: black;
+  color: var(--home-text-color);
 }
 .title {
   flex: 1;

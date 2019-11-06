@@ -1,4 +1,5 @@
 import "./utils/configs";
+import "./utils/theme";
 import "@babel/polyfill";
 import "./utils/debug-log";
 

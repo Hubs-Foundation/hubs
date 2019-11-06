@@ -61,7 +61,11 @@ class MediaTiles extends Component {
           {(urlSource === "avatars" || urlSource === "scenes") && (
             <div
               style={{ width: `${createTileWidth}px`, height: `${createTileHeight}px` }}
-              className={classNames(styles.tile, styles.createTile)}
+              className={classNames({
+                [styles.tile]: true,
+                [styles.createTile]: true,
+                [styles.createAvatarTile]: urlSource === "avatars"
+              })}
             >
               {urlSource === "scenes" ? (
                 <IfFeature name="enable_spoke">
