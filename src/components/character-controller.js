@@ -140,8 +140,8 @@ AFRAME.registerComponent("character-controller", {
     // Transform the rig such that the pivot's forward direction matches the waypoint's,
     return function travelByWaypoint(inMat4) {
       this.data.pivot.object3D.updateMatrices();
-      //calculateCameraTransformForWaypoint(this.data.pivot.object3D.matrixWorld, inMat4, final);
-      //childMatch(this.el.object3D, this.data.pivot.object3D, final);
+      calculateCameraTransformForWaypoint(this.data.pivot.object3D.matrixWorld, inMat4, final);
+      childMatch(this.el.object3D, this.data.pivot.object3D, final);
       childMatch(this.el.object3D, this.data.pivot.object3D, inMat4);
       this.el.object3D.updateMatrices();
 

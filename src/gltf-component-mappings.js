@@ -92,12 +92,13 @@ AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point", (el, compon
     willDisableMotion: false,
     willMaintainWorldUp: true
   });
-  el.setAttribute("networked", {
-    template: "#waypoint-avatar",
-    owner: "scene",
-    persistent: true,
-    networkId: componentData.id
-  });
+  //el.setAttribute("networked", {
+  //  template: "#waypoint-avatar",
+  //  owner: "scene",
+  //  persistent: true
+  //  networkId: componentData.id
+  //});
+  // TODO : Must put some kind of id into the spawn-point in order for the `networked` occupiable spawn points to work.
 });
 AFRAME.GLTFModelPlus.registerComponent("way-point", "way-point");
 AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
@@ -119,14 +120,7 @@ AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentNa
 AFRAME.GLTFModelPlus.registerComponent("pinnable", "pinnable");
 
 AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentName, componentData) => {
-  if (componentData.canBeOccupied) {
-    el.setAttribute("networked", {
-      template: "#waypoint-avatar",
-      owner: "scene",
-      persistent: true,
-      networkId: componentData.id
-    });
-  }
+  console.log("should make waypoint", el, componentName, componentData);
 });
 
 AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
@@ -173,17 +167,6 @@ function mediaInflator(el, componentName, componentData, components) {
     const hasVolume = componentName === "video";
     const templateName = isControlled || hasVolume ? "#static-controlled-media" : "#static-media";
 
-    console.log(
-      isControlled,
-      componentData.controls,
-      hasVolume,
-      components.networked.id,
-      "got some other thing",
-      el,
-      componentName,
-      componentData,
-      templateName
-    );
     el.setAttribute("networked", {
       template: templateName,
       owner: "scene",

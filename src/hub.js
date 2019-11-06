@@ -367,8 +367,6 @@ async function updateEnvironmentForHub(hub) {
     // Clear the three.js image cache and load the loading environment before switching to the new one.
     THREE.Cache.clear();
 
-    sceneEl.systems["hubs-systems"].waypointSystem.releaseAnyOccupiedWaypoints();
-
     environmentEl.addEventListener(
       "model-loaded",
       () => {
