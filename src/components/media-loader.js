@@ -339,7 +339,12 @@ AFRAME.registerComponent("media-loader", {
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
         this.el.setAttribute(
           "media-image",
-          Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, contentType, batch: !disableBatching })
+          Object.assign({}, this.data.mediaOptions, {
+            src: accessibleUrl,
+            contentType,
+            batch: !disableBatching,
+            additionalScaling: this.data.customMeshScale
+          })
         );
 
         if (this.el.components["position-at-box-shape-border__freeze"]) {
@@ -354,7 +359,8 @@ AFRAME.registerComponent("media-loader", {
           Object.assign({}, this.data.mediaOptions, {
             src: accessibleUrl,
             contentType,
-            batch: false // Batching disabled until atlas is updated properly
+            batch: false, // Batching disabled until atlas is updated properly
+            additionalScaling: this.data.customMeshScale
           })
         );
         this.el.setAttribute("media-pager", {});
@@ -432,7 +438,8 @@ AFRAME.registerComponent("media-loader", {
           Object.assign({}, this.data.mediaOptions, {
             src: thumbnail,
             contentType: guessContentType(thumbnail) || "image/png",
-            batch: !disableBatching
+            batch: !disableBatching,
+            additionalScaling: this.data.customMeshScale
           })
         );
         if (this.el.components["position-at-box-shape-border__freeze"]) {

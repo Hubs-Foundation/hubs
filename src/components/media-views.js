@@ -118,10 +118,11 @@ async function createVideoEl() {
   return videoEl;
 }
 
-function scaleToAspectRatio(el, ratio) {
+function scaleToAspectRatio(el, ratio, additionalScaling) {
   const width = Math.min(1.0, 1.0 / ratio);
   const height = Math.min(1.0, ratio);
   el.object3DMap.mesh.scale.set(width, height, 1);
+  el.object3DMap.mesh.scale.multiply(additionalScaling);
   el.object3DMap.mesh.matrixNeedsUpdate = true;
 }
 
@@ -229,7 +230,8 @@ AFRAME.registerComponent("media-video", {
     projection: { type: "string", default: "flat" },
     time: { type: "number" },
     tickRate: { default: 1000 }, // ms interval to send time interval updates
-    syncTolerance: { default: 2 }
+    syncTolerance: { default: 2 },
+    additionalScaling: { type: "vec3", default: { x: 1, y: 1, z: 1 } }
   },
 
   init() {
@@ -567,7 +569,7 @@ AFRAME.registerComponent("media-video", {
     this.mesh.material.needsUpdate = true;
 
     if (projection === "flat") {
-      scaleToAspectRatio(this.el, texture.image.videoHeight / texture.image.videoWidth);
+      scaleToAspectRatio(this.el, texture.image.videoHeight / texture.image.videoWidth, this.data.additionalScaling);
     }
 
     this.updatePlaybackState(true);
@@ -787,7 +789,8 @@ AFRAME.registerComponent("media-image", {
     src: { type: "string" },
     projection: { type: "string", default: "flat" },
     contentType: { type: "string" },
-    batch: { default: false }
+    batch: { default: false },
+    additionalScaling: { type: "vec3", default: { x: 1, y: 1, z: 1 } }
   },
 
   remove() {
@@ -900,7 +903,7 @@ AFRAME.registerComponent("media-image", {
     this.mesh.material.needsUpdate = true;
 
     if (projection === "flat") {
-      scaleToAspectRatio(this.el, ratio);
+      scaleToAspectRatio(this.el, ratio, this.data.additionalScaling);
     }
 
     if (texture !== errorTexture && this.data.batch) {
@@ -917,7 +920,8 @@ AFRAME.registerComponent("media-pdf", {
     projection: { type: "string", default: "flat" },
     contentType: { type: "string" },
     index: { default: 0 },
-    batch: { default: false }
+    batch: { default: false },
+    additionalScaling: { type: "vec3", default: { x: 1, y: 1, z: 1 } }
   },
 
   init() {
@@ -1004,7 +1008,7 @@ AFRAME.registerComponent("media-pdf", {
     this.mesh.material.map.needsUpdate = true;
     this.mesh.material.needsUpdate = true;
 
-    scaleToAspectRatio(this.el, ratio);
+    scaleToAspectRatio(this.el, ratio, this.data.additionalScaling);
 
     if (texture !== errorTexture && this.data.batch) {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.mesh);
