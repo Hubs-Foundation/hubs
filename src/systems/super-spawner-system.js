@@ -1,6 +1,14 @@
 import { addMedia } from "../utils/media-utils";
 import { ObjectContentOrigins } from "../object-types";
 
+function setNonNullVec3Components(target, values) {
+  target.set(
+    values.x === null ? target.x : values.x,
+    values.y === null ? target.y : values.y,
+    values.z === null ? target.z : values.z
+  );
+}
+
 // WARNING: This system mutates interaction system state!
 export class SuperSpawnerSystem {
   maybeSpawn(state, entity, grabPath) {
@@ -21,10 +29,9 @@ export class SuperSpawnerSystem {
     entity.object3D.matrix.decompose(entity.object3D.position, entity.object3D.quaternion, entity.object3D.scale);
     const data = superSpawner.data;
 
-    const targetScale = new THREE.Vector3(data.spawnScale.x, data.spawnScale.y, data.spawnScale.z);
-    if (!data.useCustomSpawnScale) {
-      superSpawner.el.object3D.getWorldScale(targetScale);
-    }
+    const targetScale = new THREE.Vector3();
+    superSpawner.el.object3D.getWorldScale(targetScale);
+    setNonNullVec3Components(targetScale, data.spawnScale);
 
     const spawnedEntity = addMedia(
       data.src,
@@ -37,16 +44,12 @@ export class SuperSpawnerSystem {
       targetScale
     ).entity;
 
-    if (data.useCustomSpawnPosition) {
-      spawnedEntity.object3D.position.copy(data.spawnPosition);
-    } else {
-      superSpawner.el.object3D.getWorldPosition(spawnedEntity.object3D.position);
-    }
-    if (data.useCustomSpawnRotation) {
-      spawnedEntity.object3D.rotation.copy(data.spawnRotation);
-    } else {
-      superSpawner.el.object3D.getWorldQuaternion(spawnedEntity.object3D.quaternion);
-    }
+    superSpawner.el.object3D.getWorldPosition(spawnedEntity.object3D.position);
+    setNonNullVec3Components(spawnedEntity.object3D.position, data.spawnPosition);
+
+    superSpawner.el.object3D.getWorldQuaternion(spawnedEntity.object3D.quaternion);
+    setNonNullVec3Components(spawnedEntity.object3D.rotation, data.spawnRotation);
+
     spawnedEntity.object3D.matrixNeedsUpdate = true;
     state.held = spawnedEntity;
 

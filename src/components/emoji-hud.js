@@ -57,15 +57,16 @@ AFRAME.registerComponent("emoji-hud", {
     entity.setAttribute("super-spawner", {
       src: url,
       template: "#interactable-emoji-media",
+      spawnRotation: { x: 0, y: NaN, z: 0 },
       spawnedEntityCallback: spawnedEntity => {
         spawnedEntity.querySelector("#particle-emitter").setAttribute("particle-emitter", particleEmitterConfig);
+        spawnedEntity.object3D.rotation.set(0, spawnedEntity.object3D.rotation.y, 0);
+        spawnedEntity.object3D.matrixNeedsUpdate = true;
       }
     });
     this.el.appendChild(entity);
   }
 });
-
-//particle-emitter="startSize: 0.1; endSize: 0.25; sizeRandomness: 0.25; lifetime: 1; lifetimeRandomness: 1; ageRandomness: 1; startVelocity: 0 1 0; endVelocity: 0 0.5 0; "
 
 AFRAME.registerComponent("emoji", {
   schema: {
@@ -109,19 +110,16 @@ AFRAME.registerComponent("emoji", {
       if (this.lastEmitTime < now && currentOpacity > 0.001) {
         const timeSinceStop = Math.min(now - this.lastEmitTime, emitFadeTime);
         const opacity = 1 - timeSinceStop / emitFadeTime;
-        // console.log(timeSinceStop, opacity);
         const particleCount = opacity < 0.001 && currentParticleCount > 0 ? 0 : this.originalParticleCount;
         this.particleConfig.particleCount = particleCount;
         this.particleConfig.startOpacity = opacity;
         this.particleConfig.middleOpacity = opacity;
         particleEmitter.el.setAttribute("particle-emitter", this.particleConfig, true);
-        // console.log("hide");
       } else if (this.lastEmitTime >= now && currentOpacity < 0.001) {
         this.particleConfig.particleCount = this.originalParticleCount;
         this.particleConfig.startOpacity = 1;
         this.particleConfig.middleOpacity = 1;
         particleEmitter.el.setAttribute("particle-emitter", this.particleConfig, true);
-        // console.log("show");
       }
     }
   }

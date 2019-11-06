@@ -31,20 +31,17 @@ AFRAME.registerComponent("super-spawner", {
     /**
      * Spawn the object at a custom position, rather than at the center of the spanwer.
      */
-    useCustomSpawnPosition: { default: false },
-    spawnPosition: { type: "vec3" },
+    spawnPosition: { type: "vec3", default: { x: NaN, y: NaN, z: NaN } },
 
     /**
      * Spawn the object with a custom orientation, rather than copying that of the spawner.
      */
-    useCustomSpawnRotation: { default: false },
-    spawnRotation: { type: "vec4" },
+    spawnRotation: { type: "vec3", default: { x: NaN, y: NaN, z: NaN } },
 
     /**
      * Spawn the object with a custom scale, rather than copying that of the spawner.
      */
-    useCustomSpawnScale: { default: false },
-    spawnScale: { type: "vec3" },
+    spawnScale: { type: "vec3", default: { x: NaN, y: NaN, z: NaN } },
 
     /**
      * The spawner will become invisible and ungrabbable for this ammount of time after being grabbed. This can prevent rapidly spawning objects.
@@ -115,7 +112,11 @@ AFRAME.registerComponent("super-spawner", {
       null,
       this.data.resolve,
       false,
-      this.data.useCustomSpawnScale ? this.data.spawnScale : { x: 1, y: 1, z: 1 }
+      {
+        x: this.data.spawnScale.x === null ? 1 : this.data.spawnScale.x,
+        y: this.data.spawnScale.y === null ? 1 : this.data.spawnScale.y,
+        z: this.data.spawnScale.z === null ? 1 : this.data.spawnScale.z
+      }
     ).entity;
 
     const interaction = this.el.sceneEl.systems.interaction;
