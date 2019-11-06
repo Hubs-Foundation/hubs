@@ -136,7 +136,7 @@ function registerNetworkSchemas() {
       },
       {
         component: "emoji",
-        property: "emitting"
+        property: "emitEndTime"
       },
       "scale",
       "media-loader",
