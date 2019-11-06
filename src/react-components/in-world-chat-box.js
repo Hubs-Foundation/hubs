@@ -4,12 +4,14 @@ import classNames from "classnames";
 import styles from "../assets/stylesheets/message-entry.scss";
 import ChatCommandHelp from "./chat-command-help";
 import sendMessageIcon from "../assets/images/send_message.svgi";
+import spawnMessageIcon from "../assets/images/spawn_message.svgi";
 import { faCamera } from "@fortawesome/free-solid-svg-icons/faCamera";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { spawnChatMessage } from "./chat-message";
 import { pushHistoryState } from "../utils/history";
+import { InlineSVGButton } from "./svgi";
 
 const isMobile = AFRAME.utils.device.isMobile();
 
@@ -112,9 +114,10 @@ class InWorldChatBox extends Component {
             placeholder={this.props.discordBridges.length ? `Send to room and ${discordSnippet}...` : "Send to room..."}
           />
           {this.props.enableSpawning && (
-            <button
+            <InlineSVGButton
               title={"Create"}
               className={classNames([styles.messageEntrySpawn])}
+              src={spawnMessageIcon}
               onClick={() => {
                 if (this.state.pendingMessage.length > 0) {
                   spawnChatMessage(this.state.pendingMessage);
@@ -125,7 +128,7 @@ class InWorldChatBox extends Component {
               }}
             />
           )}
-          <button
+          <InlineSVGButton
             type="submit"
             title={"Submit"}
             className={classNames([
@@ -133,7 +136,7 @@ class InWorldChatBox extends Component {
               styles.messageEntryButtonInRoom,
               styles.messageEntrySubmit
             ])}
-            dangerouslySetInnerHTML={{ __html: sendMessageIcon }}
+            src={sendMessageIcon}
           />
         </div>
       </form>

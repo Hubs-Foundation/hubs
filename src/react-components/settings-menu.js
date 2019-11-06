@@ -4,6 +4,7 @@ import { FormattedMessage } from "react-intl";
 import classNames from "classnames";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
+import { faUserAlt } from "@fortawesome/free-solid-svg-icons/faUserAlt";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faDoorClosed } from "@fortawesome/free-solid-svg-icons/faDoorClosed";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
@@ -68,7 +69,9 @@ export default class SettingsMenu extends Component {
             </div>
             <div className={rowClasses}>
               <div className={styles.icon}>
-                <img src="../assets/images/change_avatar.svg" />
+                <i>
+                  <FontAwesomeIcon icon={faUserAlt} />
+                </i>
               </div>
               <div className={styles.listItem}>
                 <StateLink

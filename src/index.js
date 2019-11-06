@@ -8,6 +8,7 @@ import AuthChannel from "./utils/auth-channel";
 import { createAndRedirectToNewHub, connectToReticulum, fetchReticulumAuthenticated } from "./utils/phoenix-utils";
 import Store from "./storage/store";
 import jwtDecode from "jwt-decode";
+import "./utils/theme";
 
 const qs = new URLSearchParams(location.search);
 registerTelemetry("/home", "Hubs Home Page");

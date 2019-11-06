@@ -17,10 +17,13 @@ if (configs.APP_CONFIG && configs.APP_CONFIG.translations && configs.APP_CONFIG.
   }
 }
 
-export const messages = Object.fromEntries(
-  Object.entries(_messages).map(([key, message]) => [
+export const messages = Object.entries(_messages)
+  .map(([key, message]) => [
     key,
     // Replace nested message keys (e.g. %app-name%) with their messages.
     message.replace(/%([\w-.]+)%/i, (_match, subkey) => _messages[subkey])
   ])
-);
+  .reduce((acc, entry) => {
+    acc[entry[0]] = entry[1];
+    return acc;
+  }, {});
