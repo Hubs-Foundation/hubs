@@ -23,11 +23,10 @@
 
 .loading-panel {
   @extend %default-font;
-  color: white;
   position: absolute;
   top: 0;
   left: 0;
-  background-color: #d7e5ec;
+  background-color: var(--loading-background-color);
   width: 100%;
   height: 100%;
   display: flex;
@@ -46,7 +45,7 @@
 .loader-center,
 .loader:before,
 .loader:after {
-  background: #555;
+  background: var(--loading-spinner-color);
   -webkit-animation: loader-animation 1s infinite ease-in-out;
   animation: loader-animation 1s infinite ease-in-out;
   width: 0.6em;
@@ -54,7 +53,7 @@
   border-radius: 5px;
 }
 .loader {
-  color: #555;
+  color: var(--loading-spinner-color);
   text-indent: -9999em;
   margin-left: 4em;
   margin-top: 4em;
@@ -110,6 +109,6 @@
 :local(.loading-text) {
   font-weight: normal;
   font-size: 0.8em;
-  color: $darker-grey;
+  color: var(--loading-text-color);
   margin-top: 0;
 }

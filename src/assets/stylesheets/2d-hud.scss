@@ -34,7 +34,7 @@
   justify-content: space-around;
   align-items: center;
   padding: 5px;
-  background-color: $hud-panel-background;
+  background-color: var(--hud-panel-background);
   border-radius: 30px;
 
   :local(.top-tip) {
@@ -61,7 +61,7 @@
       height: 0;
       border-left: 5px solid transparent;
       border-right: 5px solid transparent;
-      border-bottom: 5px solid $bright-blue;
+      border-bottom: 5px solid $notice-background-color;
       position: absolute;
       top: -5px;
     }
@@ -120,11 +120,11 @@
 
   :local(.tip-cancel-text) {
     @extend %link-button;
-    color: white;
+    color: $notice-text-color;
   }
 
   :local(.tip-cancel) {
-    color: $light-blue;
+    color: $notice-widget-color;
     appearance: none;
     -moz-appearance: none;
     -webkit-appearance: none;
@@ -143,8 +143,8 @@
     flex-direction: column;
     border-radius: 28px;
     padding: 3px 3px 6px 3px;
-    background-color: rgba(72, 72, 72, 0.2);
-    border: 2px solid rgba(72, 72, 72, 0.3);
+    background-color: var(--hud-dropdown-background-color);
+    border: 2px solid var(--hud-dropdown-border-color);
     pointer-events: auto;
     z-index: 1;
 
@@ -191,6 +191,22 @@
   }
 }
 
+:local(.iconButton:hover) {
+  @media (pointer: fine) {
+    filter: brightness(1.20);
+  }
+}
+
+:local(.iconButtonIcon) {
+  width: 100%;
+  height: 100%;
+  color: $notice-background-color;
+}
+
+:local(.spawn) {
+  color: $action-color;
+}
+
 :local(.iconButton.small) {
   width: 30px;
   height: 30px;
@@ -208,167 +224,4 @@
 
 :local(.iconButton.video-share) {
   position: relative;
-}
-
-
-:local(.iconButton.pen) {
-  background-image: url(../hud/pen_off.png);
-}
-:local(.iconButton.pen:hover) {
-  @media (pointer: fine) {
-    background-image: url(../hud/pen_off-hover.png);
-  }
-
-  @media (pointer: coarse) {
-    background-image: url(../hud/pen_off.png);
-  }
-}
-
-:local(.iconButton.pen.active) {
-  background-image: url(../hud/pen_on.png);
-}
-:local(.iconButton.pen.active:hover) {
-  @media (pointer: fine) {
-    background-image: url(../hud/pen_on-hover.png);
-  }
-
-  @media (pointer: coarse) {
-    background-image: url(../hud/pen_on.png);
-  }  
-}
-
-:local(.iconButton.camera) {
-  background-image: url(../hud/camera_off.png);
-}
-:local(.iconButton.camera:hover) {
-  @media (pointer: fine) {
-    background-image: url(../hud/camera_off-hover.png);
-  }
-
-  @media (pointer: coarse) {
-    background-image: url(../hud/camera_off.png);
-  }
-}
-
-:local(.iconButton.camera.active) {
-  background-image: url(../hud/camera_on.png);
-}
-:local(.iconButton.camera.active:hover) {
-  @media (pointer: fine) {
-    background-image: url(../hud/camera_on-hover.png);
-  }
-
-  @media (pointer: coarse) {
-    background-image: url(../hud/camera_on.png);
-  }  
-}
-
-:local(.iconButton.freeze) {
-  background-image: url(../hud/freeze_off.png);
-}
-:local(.iconButton.freeze:hover) {
-  @media (pointer: fine) {
-    background-image: url(../hud/freeze_off-hover.png);
-  }
-
-  @media (pointer: coarse) {
-    background-image: url(../hud/freeze_off.png);
-  }
-}
-:local(.iconButton.freeze.active) {
-  background-image: url(../hud/freeze_on.png);
-}
-:local(.iconButton.freeze.active:hover) {
-  @media (pointer: fine) {
-    background-image: url(../hud/freeze_on-hover.png);
-  }
-
-  @media (pointer: coarse) {
-    background-image: url(../hud/freeze_on.png);
-  }
-}
-
-:local(.iconButton.spawn) {
-  background-image: url(../hud/spawn.png);
-}
-
-:local(.iconButton.mobile-media-picker) {
-  background-image: url(../hud/spawn_photo.png);
-}
-
-:local(.iconButton.share_camera) {
-  background-image: url(../hud/share_camera_off.png);
-}
-:local(.iconButton.share_camera:hover) {
-  @media (pointer: fine) {
-    background-image: url(../hud/share_camera_off-hover.png);
-  }
-
-  @media (pointer: coarse) {
-    background-image: url(../hud/share_camera_off.png);
-  }
-}
-
-:local(.iconButton.share_camera.active) {
-  background-image: url(../hud/share_camera_on.png);
-}
-:local(.iconButton.share_camera.active:hover) {
-  @media (pointer: fine) {
-    background-image: url(../hud/share_camera_on-hover.png);
-  }
-
-  @media (pointer: coarse) {
-    background-image: url(../hud/share_camera_on.png);
-  }
-}
-
-:local(.iconButton.share_screen) {
-  background-image: url(../hud/share_screen_off.png);
-}
-:local(.iconButton.share_screen:hover) {
-  @media (pointer: fine) {
-    background-image: url(../hud/share_screen_off-hover.png);
-  }
-
-  @media (pointer: coarse) {
-    background-image: url(../hud/share_screen_off.png);
-  }
-}
-
-:local(.iconButton.share_screen.active) {
-  background-image: url(../hud/share_screen_on.png);
-}
-:local(.iconButton.share_screen.active:hover) {
-  @media (pointer: fine) {
-    background-image: url(../hud/share_screen_on-hover.png);
-  }
-
-  @media (pointer: coarse) {
-    background-image: url(../hud/share_screen_on-hover.png);
-  }
-}
-
-:local(.iconButton.share_window) {
-  background-image: url(../hud/share_window_off.png);
-}
-:local(.iconButton.share_window:hover) {
-  @media (pointer: fine) {
-    background-image: url(../hud/share_window_off-hover.png);
-  }
-
-  @media (pointer: coarse) {
-    background-image: url(../hud/share_window_off.png);
-  }
-}
-:local(.iconButton.share_window.active) {
-  background-image: url(../hud/share_window_on.png);
-}
-:local(.iconButton.share_window.active:hover) {
-  @media (pointer: fine) {
-    background-image: url(../hud/share_window_on-hover.png);
-  }
-
-  @media (pointer: coarse) {
-    background-image: url(../hud/share_window_on.png);
-  }
 }

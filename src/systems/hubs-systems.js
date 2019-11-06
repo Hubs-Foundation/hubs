@@ -34,7 +34,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.lobbyCameraSystem = new LobbyCameraSystem();
     this.spriteSystem = new SpriteSystem(this.el);
     this.batchManagerSystem = new BatchManagerSystem(this.el.sceneEl.object3D, this.el.sceneEl.renderer);
-    this.spriteSystem = new SpriteSystem(this.el);
     this.cameraSystem = new CameraSystem(this.batchManagerSystem);
     this.drawingMenuSystem = new DrawingMenuSystem(this.el.sceneEl);
     waitForDOMContentLoaded().then(() => {

@@ -267,7 +267,7 @@ class ConfigurationEditor extends Component {
         <label>
           <input
             type="color"
-            value={currentValue}
+            value={currentValue || ""}
             onChange={ev => this.onChange(path, ev.target.value)}
             title={currentValue}
           />

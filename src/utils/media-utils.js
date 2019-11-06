@@ -333,13 +333,31 @@ export function addAndArrangeMedia(el, media, contentSubtype, snapCount, mirrorO
 
 export const textureLoader = new HubsTextureLoader().setCrossOrigin("anonymous");
 
-export async function createImageTexture(url) {
-  const texture = new THREE.Texture();
+export async function createImageTexture(url, filter) {
+  let texture;
 
-  try {
-    await textureLoader.loadTextureAsync(texture, url);
-  } catch (e) {
-    throw new Error(`'${url}' could not be fetched (Error code: ${e.status}; Response: ${e.statusText})`);
+  if (filter) {
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    const load = new Promise(res => image.addEventListener("load", res, { once: true }));
+    image.src = url;
+    await load;
+    const canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(image, 0, 0);
+    await filter(ctx, image.width, image.height);
+
+    texture = new THREE.CanvasTexture(canvas);
+  } else {
+    texture = new THREE.Texture();
+
+    try {
+      await textureLoader.loadTextureAsync(texture, url);
+    } catch (e) {
+      throw new Error(`'${url}' could not be fetched (Error code: ${e.status}; Response: ${e.statusText})`);
+    }
   }
 
   texture.encoding = THREE.sRGBEncoding;

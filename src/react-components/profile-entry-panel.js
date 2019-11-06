@@ -138,7 +138,7 @@ class ProfileEntryPanel extends Component {
           </a>
         </div>
         <form onSubmit={this.saveStateAndFinish} className={styles.form}>
-          <div className={classNames([styles.box, styles.darkened])}>
+          <div className={classNames([styles.box])}>
             <label htmlFor="#profile-entry-display-name" className={styles.title}>
               <FormattedMessage id="profile.header" />
             </label>

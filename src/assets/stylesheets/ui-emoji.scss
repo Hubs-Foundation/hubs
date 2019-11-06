@@ -13,7 +13,7 @@
   align-items: center;
 
   padding: 5px;
-  background-color: $hud-panel-background;
+  background-color: var(--hud-panel-background);
   border-radius: 300px;
 
   z-index: 2;

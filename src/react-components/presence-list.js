@@ -6,29 +6,30 @@ import classNames from "classnames";
 
 import rootStyles from "../assets/stylesheets/ui-root.scss";
 import styles from "../assets/stylesheets/presence-list.scss";
-import PhoneImage from "../assets/images/presence_phone.png";
-import DesktopImage from "../assets/images/presence_desktop.png";
-import DiscordImage from "../assets/images/presence_discord.png";
-import CameraImage from "../assets/images/presence_camera.png";
-import HMDImage from "../assets/images/presence_vr.png";
 import maskEmail from "../utils/mask-email";
 import StateLink from "./state-link.js";
 import { WithHoverSound } from "./wrap-with-audio";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+import { faDesktop } from "@fortawesome/free-solid-svg-icons/faDesktop";
+import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
+import discordIcon from "../assets/images/discord.svgi";
+import hmdIcon from "../assets/images/hmd-icon.svgi";
+import { faMobileAlt } from "@fortawesome/free-solid-svg-icons/faMobileAlt";
 import { pushHistoryPath, withSlug } from "../utils/history";
 import { hasReticulumServer } from "../utils/phoenix-utils";
+import { InlineSVG } from "./svgi";
 
-function getPresenceImage(ctx) {
+function getPresenceIcon(ctx) {
   if (ctx && ctx.mobile) {
-    return PhoneImage;
+    return <FontAwesomeIcon icon={faMobileAlt} />;
   } else if (ctx && ctx.hmd) {
-    return HMDImage;
+    return <InlineSVG src={hmdIcon} />;
   } else if (ctx && ctx.discord) {
-    return DiscordImage;
+    return <InlineSVG src={discordIcon} />;
   } else {
-    return DesktopImage;
+    return <FontAwesomeIcon icon={faDesktop} />;
   }
 }
 
@@ -65,7 +66,7 @@ export default class PresenceList extends Component {
     const context = meta.context;
     const profile = meta.profile;
     const recording = meta.streaming || meta.recording;
-    const image = recording ? CameraImage : getPresenceImage(context);
+    const icon = recording ? <FontAwesomeIcon icon={faVideo} /> : getPresenceIcon(context);
     const isBot = context && context.discord;
     const isOwner = meta.roles && meta.roles.owner;
     const badge = isOwner && (
@@ -78,7 +79,7 @@ export default class PresenceList extends Component {
       <WithHoverSound key={sessionId}>
         <div className={styles.row}>
           <div className={styles.icon}>
-            <img src={image} />
+            <i>{icon}</i>
           </div>
           <div
             className={classNames({
