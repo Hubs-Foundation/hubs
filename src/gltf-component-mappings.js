@@ -92,13 +92,7 @@ AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point", (el, compon
     willDisableMotion: false,
     willMaintainWorldUp: true
   });
-  //el.setAttribute("networked", {
-  //  template: "#waypoint-avatar",
-  //  owner: "scene",
-  //  persistent: true
-  //  networkId: componentData.id
-  //});
-  // TODO : Must put some kind of id into the spawn-point in order for the `networked` occupiable spawn points to work.
+  // TODO : Must put a networkId into the spawn-point in order for networked occupiable spawn points to work.
 });
 AFRAME.GLTFModelPlus.registerComponent("way-point", "way-point");
 AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");

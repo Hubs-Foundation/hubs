@@ -32,7 +32,6 @@ function releasePooledEl(templateId, el) {
   pooledEls[templateId].push(el);
 }
 function getPooledElOrLoadFromTemplate(scene, templateId) {
-  console.log(`spawning ${templateId}`);
   let pool = pooledEls[templateId];
   if (!pool) {
     pool = [];
@@ -58,7 +57,6 @@ function loadTemplatesForWaypointData(scene, data) {
   } else if (isUnoccupiableSpawnPoint(data)) {
     promises.push(getPooledElOrLoadFromTemplate(scene, "teleport-waypoint-icon"));
   } else if (isOccupiableSpawnPoint(data)) {
-    console.log("occupiable waypoint!", data);
     promises.push(getPooledElOrLoadFromTemplate(scene, "occupiable-waypoint-icon"));
   } else {
     promises.push(getPooledElOrLoadFromTemplate(scene, "teleport-waypoint-icon"));
@@ -90,7 +88,6 @@ export class WaypointSystem {
         shouldTryToOccupy(waypointComponent) &&
         (NAF.utils.isMine(waypointComponent.el) || NAF.utils.takeOwnership(waypointComponent.el))
       ) {
-        console.log("not occupied so gonna try to take it", waypointComponent.data.isOccupied);
         waypointComponent.el.setAttribute("waypoint", { willBeOccupied: true });
         setTimeout(() => {
           if (NAF.utils.isMine(waypointComponent.el)) {
@@ -132,7 +129,6 @@ export class WaypointSystem {
   }
   teleportToWaypoint(iconEl, waypointComponent) {
     return function onInteract() {
-      console.log("teleportToWaypoint");
       this.releaseAnyOccupiedWaypoints();
       this.characterController =
         this.characterController || document.getElementById("avatar-rig").components["character-controller"];
@@ -146,11 +142,9 @@ export class WaypointSystem {
   }
   tryTeleportToOccupiableWaypoint(iconEl, waypointComponent) {
     return function onInteract() {
-      console.log("tryTeleportToOccupiableWaypoint");
       this.releaseAnyOccupiedWaypoints();
       this.tryToOccupy(waypointComponent).then(didOccupy => {
         if (didOccupy) {
-          console.log("tryOccupySuccess!");
           this.characterController =
             this.characterController || document.getElementById("avatar-rig").components["character-controller"];
           waypointComponent.el.object3D.updateMatrices();
@@ -160,7 +154,7 @@ export class WaypointSystem {
             300
           );
         } else {
-          console.log("failed to occupy");
+          console.log("failed to occupy waypoint", waypointComponent);
         }
       });
     }.bind(this);
@@ -180,7 +174,7 @@ export class WaypointSystem {
   }
   setupEventHandlersFor(component) {
     return function setupEventHandlers(elFromTemplate) {
-      if (isTagged(elFromTemplate, "singleActionButton") && (true || component.data.canBeClicked)) {
+      if (isTagged(elFromTemplate, "singleActionButton") && component.data.canBeClicked) {
         this.eventHandlers[elFromTemplate.object3D.uuid] = this.eventHandlers[elFromTemplate.object3D.uuid] || {};
         let onInteract = () => {
           console.log("interacted with", elFromTemplate, "associated with waypoint", component);
@@ -324,23 +318,20 @@ AFRAME.registerComponent("waypoint", {
   },
   init() {
     this.system = this.el.sceneEl.systems["hubs-systems"].waypointSystem;
-    this.system.registerComponent(this, this.el.sceneEl);
-    this.loggedUpdateCount = 0;
-    this.updateCount = 0;
-    this.ticks = 0;
+    this.didRegisterWithSystem = false;
   },
-  update(data) {
-    console.log(data);
-    this.updateCount += 1;
-  },
-  tick() {
-    this.ticks = this.ticks + 1;
-    if (this.updateCount > this.loggedUpdateCount) {
-      this.loggedUpdateCount = this.updateCount;
-      console.log(this.updateCount, this.ticks);
+  play() {
+    if (!this.didRegisterWithSystem) {
+      this.system.registerComponent(this, this.el.sceneEl);
+      this.didRegisterWithSystem = true;
     }
   },
+  tick() {},
   remove() {
-    this.system.unregisterComponent(this);
+    if (!this.didRegisterWithSystem) {
+      console.warn("Waypoint removed without ever having registered with the system.");
+    } else {
+      this.system.unregisterComponent(this);
+    }
   }
 });
