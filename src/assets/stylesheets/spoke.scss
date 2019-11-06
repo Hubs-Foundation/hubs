@@ -1,3 +1,5 @@
+@import 'root-vars';
+@import 'colors';
 @import 'shared';
 @import 'loader';
 
@@ -151,7 +153,7 @@ body {
   height: 64px;
   border-radius: 32px;
 
-  background-color: $spoke-action-color;
+  background-color: var(--spoke-action-color);
   margin-top: 64px;
   display: flex;
   flex-direction: column;

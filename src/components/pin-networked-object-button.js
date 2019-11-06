@@ -1,5 +1,6 @@
 import { getPromotionTokenForFile } from "../utils/media-utils";
 import { SOUND_PIN } from "../systems/sound-effects-system";
+import { applyThemeToTextButton } from "../utils/theme";
 
 AFRAME.registerComponent("pin-networked-object-button", {
   schema: {
@@ -92,7 +93,6 @@ AFRAME.registerComponent("pin-networked-object-button", {
 
     if (!canPin) return;
     this.labelEl.setAttribute("text", "value", isPinned ? "un-pin" : "pin");
-    this.el.setAttribute("text-button", "backgroundColor", isPinned ? "#fff" : "#ff3550");
-    this.el.setAttribute("text-button", "backgroundHoverColor", isPinned ? "#bbb" : "#fc3545");
+    applyThemeToTextButton(this.el, isPinned);
   }
 });

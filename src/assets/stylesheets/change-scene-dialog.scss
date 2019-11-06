@@ -41,7 +41,7 @@
   border: none;
   white-space: nowrap;
   background: transparent;
-  color: black;
+  color: var(--text-field-text-color);
   font-size: 1.2em;
   align-self: center;
   overflow: hidden;
@@ -54,7 +54,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-top: 1px solid #e2e2e2;
+  border-top: 1px solid var(--panel-rule-color);
   margin-top: 64px;
 
   div {
@@ -65,5 +65,5 @@
 :local(.spoke-launch) {
   @extend %spoke-action-button;
   margin-top: 18px;
-  color: white !important; // TODO HACK because of dialog <a> style overriding color
+  color: var(--spoke-action-text-color) !important; // TODO HACK because of dialog <a> style overriding color
 }

@@ -14,7 +14,7 @@
   }
 
   :local(.tip-cancel) {
-    color: $light-blue;
+    color: $notice-widget-color;
     appearance: none;
     -moz-appearance: none;
     -webkit-appearance: none;
@@ -78,7 +78,7 @@
 
   :local(.tip-link) {
     @extend %link-button;
-    color: white;
+    color: $notice-text-color;
   }
 }
 

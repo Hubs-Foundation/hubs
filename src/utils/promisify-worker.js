@@ -25,12 +25,12 @@ export function promisifyWorker(worker) {
     }
   };
 
-  return function(data, transfer) {
+  return function(data, transfer, args = {}) {
     const id = nextItemId++;
     const promise = new Promise((resolve, reject) => {
       outstanding[id] = { resolve, reject };
     });
-    worker.postMessage({ id, payload: data }, transfer);
+    worker.postMessage(Object.assign(args, { id, payload: data }), transfer);
     return promise;
   };
 }
