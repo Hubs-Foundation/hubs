@@ -326,8 +326,8 @@ module.exports = (env, argv) => ({
     ]),
     new CopyWebpackPlugin([
       {
-        from: "src/assets/images/hub-preview.png",
-        to: "hub-preview.png"
+        from: "src/assets/images/app-thumbnail.png",
+        to: "app-thumbnail.png"
       }
     ]),
     new CopyWebpackPlugin([

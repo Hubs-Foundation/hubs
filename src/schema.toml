@@ -31,6 +31,7 @@ features.show_issue_report_dialog = { category = "features", type = "boolean", i
 images.logo = { category = "images", type = "file", name = "App Logo", description = "Logo used across the app." }
 images.favicon = { category = "images", type = "file", name = "Favicon", description = "Icon for the app." }
 images.app_icon = { category = "images", type = "file", name = "App Icon", description = "Icon for the app." }
+images.app_thumbnail = { category = "images", type = "file", name = "App Thumbnail", description = "Thumbnail for app." }
 images.company_logo = { category = "images", type = "file", name = "Company Logo", description = "Company logo used across the app." }
 images.home_background = { category = "images", type = "file", name = "Home background", description = "Background image on the home page." }
 
