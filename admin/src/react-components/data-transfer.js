@@ -163,7 +163,7 @@ class DataTransferComponent extends Component {
             <Typography variant="body2" gutterBottom>
               Hubs Cloud uses bandwidth from your cloud provider to deliver content.
               <br />
-              You can potentially reduce your data transfer costs by switching the CDN for CORS proxying and stored
+              You can potentially reduce your data transfer costs by switching the CDN for CORS proxying, assets, and stored
               files to Cloudflare, which does not charge for data transfer costs to your users.
             </Typography>
             <Typography variant="subheading" gutterBottom className={this.props.classes.section}>
@@ -240,7 +240,7 @@ class DataTransferComponent extends Component {
               Static assets and uploaded avatars, scenes, and files will use data transfer to serve your users.
             </Typography>
             <Typography variant="body1" gutterBottom>
-              You can minimize this data transfer cost by switching the stored files CDN to Cloudflare.
+              You can minimize this data transfer cost by switching the assets CDN to Cloudflare.
             </Typography>
             <Typography variant="body1" component="div" gutterBottom>
               <ol className={this.props.classes.steps}>
