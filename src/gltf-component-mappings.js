@@ -144,7 +144,7 @@ function mediaInflator(el, componentName, componentData, components) {
     isControlled =
       componentData.controls || isHubsDestinationUrl(componentData.src) || isHubsDestinationUrl(componentData.href);
 
-    const hasVolume = componentName === "video";
+    const hasVolume = componentName === "video" || componentName === "audio";
     const templateName = isControlled || hasVolume ? "#static-controlled-media" : "#static-media";
 
     el.setAttribute("networked", {
@@ -161,7 +161,7 @@ function mediaInflator(el, componentName, componentData, components) {
     mediaOptions.projection = componentData.projection;
   }
 
-  if (componentName === "video") {
+  if (componentName === "video" || componentName === "audio") {
     mediaOptions.videoPaused = !componentData.autoPlay;
     mediaOptions.volume = componentData.volume;
     mediaOptions.loop = componentData.loop;
@@ -194,6 +194,13 @@ function mediaInflator(el, componentName, componentData, components) {
 }
 
 AFRAME.GLTFModelPlus.registerComponent("image", "image", mediaInflator);
+AFRAME.GLTFModelPlus.registerComponent("audio", "audio", mediaInflator, (name, property, value) => {
+  if (property === "paused") {
+    return { name: "video-pause-state", property, value };
+  } else {
+    return null;
+  }
+});
 AFRAME.GLTFModelPlus.registerComponent("video", "video", mediaInflator, (name, property, value) => {
   if (property === "paused") {
     return { name: "video-pause-state", property, value };
