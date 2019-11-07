@@ -122,13 +122,13 @@ class DataTransferComponent extends Component {
         hubs: {
           general: {
             cors_proxy_server: corsDomain,
-            base_assets_path: assetsDomain ? `https://${assetsDomain}` : ""
+            base_assets_path: assetsDomain ? `https://${assetsDomain}/` : ""
           }
         },
         spoke: {
           general: {
             cors_proxy_server: corsDomain,
-            base_assets_path: assetsDomain ? `https://${assetsDomain}` : ""
+            base_assets_path: assetsDomain ? `https://${assetsDomain}/` : ""
           }
         }
       };
