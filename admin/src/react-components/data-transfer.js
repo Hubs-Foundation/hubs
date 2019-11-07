@@ -189,11 +189,9 @@ class DataTransferComponent extends Component {
                   :<div className={this.props.classes.command}>{this.state.externalCorsProxyDomain}</div>
                 </li>
                 <li>
-                  Enable{" "}
-                  <a href="https://workers.cloudflare.com" target="_blank" rel="noopener noreferrer">
-                    Cloudflare Workers
-                  </a>{" "}
-                  on your domain.
+                  In the &apos;DNS&apos; section of your Cloudflare domain settings, add new CNAME record with Name set
+                  to <pre>@</pre> and Domain Name set to:
+                  <div className={this.props.classes.command}>{document.location.hostname}</div>
                 </li>
                 <li>
                   In the Workers section of your Cloudflare domain, launch the editor, click &quot;Add Script&quot; on
