@@ -196,8 +196,8 @@ class DataTransferComponent extends Component {
                   on your domain.
                 </li>
                 <li>
-                  In the Workers section of your Cloudflare domain, launch the editor, paste the following worker script
-                  to run on your domain, and click Deploy:
+                  In the Workers section of your Cloudflare domain, launch the editor, click &quot;Add Script&quot; on
+                  the left, paste the following worker script to run on your domain, and click Deploy:
                   <br />
                   <textarea
                     className={this.props.classes.worker}
@@ -254,7 +254,7 @@ class DataTransferComponent extends Component {
                 <li>
                   In the &apos;DNS&apos; section of your Cloudflare domain settings, add new CNAME record with Name set
                   to <pre>@</pre> and Domain Name set to:
-                  <div className={this.props.classes.command}>{document.location.hostname}</div>
+                  <div className={this.props.classes.command}>{this.state.externalAssetsDomain}</div>
                 </li>
                 <li>
                   In the &apos;SSL/TLS section&apos; of your Cloudflare domain settings, set the encryption mode to
