@@ -163,8 +163,8 @@ class DataTransferComponent extends Component {
             <Typography variant="body2" gutterBottom>
               Hubs Cloud uses bandwidth from your cloud provider to deliver content.
               <br />
-              You can potentially reduce your data transfer costs by switching the CDN for CORS proxying, assets, and stored
-              files to Cloudflare, which does not charge for data transfer costs to your users.
+              You can potentially reduce your data transfer costs by switching the CDN for CORS proxying, assets, and
+              stored files to Cloudflare, which does not charge for data transfer costs to your users.
             </Typography>
             <Typography variant="subheading" gutterBottom className={this.props.classes.section}>
               CORS Proxy
@@ -252,7 +252,8 @@ class DataTransferComponent extends Component {
                   :<div className={this.props.classes.command}>{this.state.externalAssetsDomain}</div>
                 </li>
                 <li>
-                  In the &apos;DNS&apos; section of your Cloudflare domain settings, add a CNAME record for:
+                  In the &apos;DNS&apos; section of your Cloudflare domain settings, add new CNAME record with Name set
+                  to <pre>@</pre> and Domain Name set to:
                   <div className={this.props.classes.command}>{document.location.hostname}</div>
                 </li>
                 <li>
