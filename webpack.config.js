@@ -338,12 +338,6 @@ module.exports = (env, argv) => ({
     ]),
     new CopyWebpackPlugin([
       {
-        from: "src/assets/manifest.webmanifest",
-        to: "manifest.webmanifest"
-      }
-    ]),
-    new CopyWebpackPlugin([
-      {
         from: "src/schema.toml",
         to: "schema.toml"
       }
