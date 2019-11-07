@@ -39,7 +39,7 @@ const workerScript = externalCorsProxyDomain => {
     const origin = request.headers.get("Origin");
     const proxyUrl = new URL(PROXY_HOST);
     // eslint-disable-next-line no-useless-escape
-    let targetUrl = request.url.substring(PROXY_HOST.length + 1).replace(/^http(s?):\/([^/])/, "http$1://$2");
+    let targetUrl = request.url.substring(PROXY_HOST.length + 1).replace(/^http(s?):\\/([^/])/, "http$1://$2");
     
     if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
       targetUrl = proxyUrl.protocol + "//" + targetUrl;
@@ -197,7 +197,7 @@ class DataTransferComponent extends Component {
                 </li>
                 <li>
                   In the Workers section of your Cloudflare domain, launch the editor, click &quot;Add Script&quot; on
-                  the left, paste the following worker script to run on your domain, and click Deploy:
+                  the left and name it &apos;cors-proxy&apos; Then, paste and save the following worker script.
                   <br />
                   <textarea
                     className={this.props.classes.worker}
@@ -205,6 +205,11 @@ class DataTransferComponent extends Component {
                     readOnly
                     onFocus={e => e.target.select()}
                   />
+                  <br />
+                </li>
+                <li>
+                  Once your script is saved, go back to the Workers panel. Choose &apos;Add Route&apos;, choose your <pre>cors-proxy</pre> script and set the route to:
+                  <div className={this.props.classes.command}>https://{this.state.externalCorsProxyDomain}/*</div>
                 </li>
                 <li>
                   Verify your worker is working.{" "}
