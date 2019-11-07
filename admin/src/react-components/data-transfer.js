@@ -234,10 +234,10 @@ class DataTransferComponent extends Component {
               />
             </Typography>
             <Typography variant="subheading" gutterBottom className={this.props.classes.section}>
-              Stored Files
+              Assets &amp; Stored Files
             </Typography>
             <Typography variant="body1" gutterBottom>
-              Uploaded avatars, scenes, and files will use data transfer to serve your users.
+              Static assets and uploaded avatars, scenes, and files will use data transfer to serve your users.
             </Typography>
             <Typography variant="body1" gutterBottom>
               You can minimize this data transfer cost by switching the stored files CDN to Cloudflare.
