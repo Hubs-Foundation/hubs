@@ -2,6 +2,7 @@
 import configs from "../utils/configs";
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
+import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js/dist/hls.light.js";
 import { addAndArrangeMedia, createImageTexture } from "../utils/media-utils";
@@ -23,6 +24,7 @@ const isIOS = AFRAME.utils.device.isIOS();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 const HLS_TIMEOUT = 10000; // HLS can sometimes fail, we re-try after this duration
+const audioIconTexture = new THREE.TextureLoader().load(audioIcon);
 
 export const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
@@ -563,10 +565,14 @@ AFRAME.registerComponent("media-video", {
       this.el.setObject3D("mesh", this.mesh);
     }
 
-    this.mesh.material.map = texture;
+    if (this.data.contentType === "audio/mpeg") {
+      this.mesh.material.map = audioIconTexture;
+    } else {
+      this.mesh.material.map = texture;
+    }
     this.mesh.material.needsUpdate = true;
 
-    if (projection === "flat") {
+    if (projection === "flat" && this.data.contentType !== "audio/mpeg") {
       scaleToAspectRatio(this.el, texture.image.videoHeight / texture.image.videoWidth);
     }
 
@@ -586,11 +592,19 @@ AFRAME.registerComponent("media-video", {
     return new Promise(async (resolve, reject) => {
       const videoEl = await createVideoEl();
 
-      const texture = new THREE.VideoTexture(videoEl);
-      texture.minFilter = THREE.LinearFilter;
-      texture.encoding = THREE.sRGBEncoding;
-      const isReady = () =>
-        (texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width);
+      let texture, isReady;
+      if (contentType === "audio/mpeg") {
+        // We want to treat audio almost exactly like video, so we mock a video texture with an image property.
+        texture = new THREE.Texture();
+        texture.image = videoEl;
+        isReady = () => true;
+      } else {
+        texture = new THREE.VideoTexture(videoEl);
+        texture.minFilter = THREE.LinearFilter;
+        texture.encoding = THREE.sRGBEncoding;
+        isReady = () =>
+          (texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width);
+      }
 
       // Set src on video to begin loading.
       if (url.startsWith("hubs://")) {
