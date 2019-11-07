@@ -122,13 +122,13 @@ class DataTransferComponent extends Component {
         hubs: {
           general: {
             cors_proxy_server: corsDomain,
-            base_assets_path: assetsDomain ? `https://${assetsDomain}/` : ""
+            base_assets_path: assetsDomain ? `https://${assetsDomain}/hubs/` : ""
           }
         },
         spoke: {
           general: {
             cors_proxy_server: corsDomain,
-            base_assets_path: assetsDomain ? `https://${assetsDomain}/` : ""
+            base_assets_path: assetsDomain ? `https://${assetsDomain}/spoke/` : ""
           }
         }
       };
@@ -268,7 +268,17 @@ class DataTransferComponent extends Component {
                   Enable the &apos;Use Cloudflare Assets CDN&apos; setting below and click &apos;Save&apos; on this
                   page.
                 </li>
-                <li>Verify your new CDN is working by uploading a file into a room.</li>
+                <li>
+                  Verify your new CDN is working.{" "}
+                  <a
+                    href={`${this.state.externalAssetsDomain}/hubs/pages/latest/whats-new.html}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    this link
+                  </a>{" "}
+                  should open the What&apos;s New page.
+                </li>
               </ol>
               <FormControlLabel
                 control={
