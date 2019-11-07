@@ -210,7 +210,7 @@ class DataTransferComponent extends Component {
                 <li>
                   Once your script is saved, go back to the Workers panel. Choose &apos;Add Route&apos;, choose your{" "}
                   <pre>cors-proxy</pre> script and set the route to:
-                  <div className={this.props.classes.command}>{`https://${this.state.externalCorsProxyDomain}/*`}</div>
+                  <div className={this.props.classes.command}>{`${this.state.externalCorsProxyDomain}/*`}</div>
                 </li>
                 <li>
                   Verify your worker is working.{" "}
