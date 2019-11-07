@@ -366,6 +366,9 @@ async function updateEnvironmentForHub(hub) {
 
     // Clear the three.js image cache and load the loading environment before switching to the new one.
     THREE.Cache.clear();
+    const waypointSystem = sceneEl.systems["hubs-systems"].waypointSystem;
+    console.log("release");
+    waypointSystem.releaseAnyOccupiedWaypoints();
 
     environmentEl.addEventListener(
       "model-loaded",
@@ -377,7 +380,7 @@ async function updateEnvironmentForHub(hub) {
 
             // We've already entered, so move to new spawn point once new environment is loaded
             if (sceneEl.is("entered")) {
-              sceneEl.systems["hubs-systems"].waypointSystem.moveToSpawnPoint();
+              waypointSystem.moveToSpawnPoint();
               // document.querySelector("#avatar-rig").components["spawn-controller"].moveToSpawnPoint();
             }
           },

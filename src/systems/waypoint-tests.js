@@ -1,8 +1,8 @@
-window.logWaypointInfo = function() {
+window.logWaypointInfo = function(includeNetworkInfo) {
   AFRAME.scenes[0].systems["hubs-systems"].waypointSystem.components.forEach(c => {
     console.log(c.el);
     console.log(c.data);
-    if (NAF.utils.getNetworkedEntity(c.el)) {
+    if (includeNetworkInfo && NAF.utils.getNetworkedEntity(c.el)) {
       console.log("object creator is:", NAF.utils.getCreator(c.el));
       console.log("object owner is:", NAF.utils.getNetworkOwner(c.el));
       console.log("my client id is:", NAF.clientId);
@@ -11,25 +11,25 @@ window.logWaypointInfo = function() {
 };
 
 export const DebugDrawRect = (function() {
-  let c;
+  let canvas;
   return function DebugDrawRect(color) {
-    if (!c) {
-      c = document.createElement("canvas");
-      c.style.zIndex = 10;
-      c.style.position = "relative";
-      document.body.prepend(c);
+    if (!canvas) {
+      canvas = document.createElement("canvas");
+      canvas.style.zIndex = 10;
+      canvas.style.position = "relative";
+      document.body.prepend(canvas);
     }
-    c.style.backgroundColor = color;
+    canvas.style.backgroundColor = color;
   };
 })();
 
 const ENABLE_TESTS = true;
 if (ENABLE_TESTS) {
-  AFRAME.registerSystem("waypoint-test-spawning", {
+  AFRAME.registerSystem("waypoint-test-occupiable-spawn", {
     tick() {
-      if (!window.TEST_WAYPOINTS_SPAWNING) return;
-      window.TEST_WAYPOINTS_SPAWNING = false;
-      console.log("TESTING WAYPOINT SPAWNING");
+      if (!window.TEST_WAYPOINTS_OCCUPIABLE_SPAWN) return;
+      window.TEST_WAYPOINTS_OCCUPIABLE_SPAWN = false;
+      console.log("CREATING OCCUPIABLE SPAWN POINTS");
       const v = new THREE.Vector3();
 
       const entity01 = document.createElement("a-entity");
@@ -66,23 +66,23 @@ if (ENABLE_TESTS) {
       entity02.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
       entity02.object3D.matrixNeedsUpdate = true;
 
-      const entity04 = document.createElement("a-entity");
-      entity04.setAttribute("waypoint", {
+      const entity03 = document.createElement("a-entity");
+      entity03.setAttribute("waypoint", {
         canBeSpawnPoint: true,
         canBeOccupied: true,
         canBeClicked: false,
         willDisableMotion: false,
         willMaintainWorldUp: true
       });
-      entity04.setAttribute("networked", {
+      entity03.setAttribute("networked", {
         template: "#waypoint-avatar",
         attachTemplateToLocal: false
       });
 
-      this.el.appendChild(entity04);
-      entity04.object3D.position.set(-5, 1.6, 0);
-      entity04.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), -Math.PI / 2);
-      entity04.object3D.matrixNeedsUpdate = true;
+      this.el.appendChild(entity03);
+      entity03.object3D.position.set(-5, 1.6, 0);
+      entity03.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), -Math.PI / 2);
+      entity03.object3D.matrixNeedsUpdate = true;
     }
   });
 

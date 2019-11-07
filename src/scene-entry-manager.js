@@ -51,7 +51,8 @@ export default class SceneEntryManager {
 
   enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
     document.getElementById("viewing-camera").removeAttribute("scene-preview-camera");
-    await this.scene.systems["hubs-systems"].waypointSystem.moveToSpawnPoint();
+    const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
+    await waypointSystem.moveToSpawnPoint();
 
     if (isDebug) {
       NAF.connection.adapter.session.options.verbose = true;
