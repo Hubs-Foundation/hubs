@@ -3,7 +3,7 @@ import { SOUND_SNAP_ROTATE, SOUND_TELEPORT_START, SOUND_TELEPORT_END } from "../
 import { easeOutQuadratic } from "../utils/easing";
 import { getPooledMatrix4, freePooledMatrix4 } from "../utils/mat4-pool";
 import qsTruthy from "../utils/qs_truthy";
-import { childMatch } from "../systems/camera-system";
+import { childMatch3 } from "../systems/camera-system";
 import { calculateCameraTransformForWaypoint, interpolateAffine } from "../utils/three-utils";
 const enableWheelSpeed = qsTruthy("wheelSpeed") || qsTruthy("wheelspeed") || qsTruthy("ws");
 const CLAMP_VELOCITY = 0.01;
@@ -136,26 +136,10 @@ AFRAME.registerComponent("character-controller", {
 
   travelByWaypoint: (function() {
     const final = new THREE.Matrix4();
-    // const v = new THREE.Vector3();
-    // Transform the rig such that the pivot's forward direction matches the waypoint's,
     return function travelByWaypoint(inMat4) {
       this.data.pivot.object3D.updateMatrices();
       calculateCameraTransformForWaypoint(this.data.pivot.object3D.matrixWorld, inMat4, final);
-      childMatch(this.el.object3D, this.data.pivot.object3D, final);
-      childMatch(this.el.object3D, this.data.pivot.object3D, inMat4);
-      this.el.object3D.updateMatrices();
-
-      this.data.pivot.object3D.updateMatrices();
-      // TODO: Take care of scale earlier (e.g. in childMatch), because scaling here will mean your view will be above (s>1) or below (s<1) the intended view point
-      // TODO: Fix bug with 2D mode non uniform scale.
-      //      this.el.object3D.scale.set(
-      //        v.setFromMatrixColumn(inMat4, 0).length(),
-      //        v.setFromMatrixColumn(inMat4, 1).length(),
-      //        v.setFromMatrixColumn(inMat4, 2).length()
-      //      );
-      //      console.log(this.el.object3D.scale);
-      //this.el.object3D.matrixNeedsUpdate = true;
-      this.el.object3D.updateMatrices();
+      childMatch3(this.el.object3D, this.data.pivot.object3D, final);
     };
   })(),
 

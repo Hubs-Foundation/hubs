@@ -48,13 +48,13 @@ export const childMatch = (function() {
   };
 })();
 
-export const childMatch2 = (function() {
+export const childMatch3 = (function() {
   const childInverse = new THREE.Matrix4();
   const newParentMatrix = new THREE.Matrix4();
   // transform the parent such that its child matches the target
-  return function childMatch2(parent, child, target) {
+  return function childMatch3(parent, child, target) {
     child.updateMatrices();
-    child.matrix.getInverse(childInverse);
+    childInverse.getInverse(child.matrix);
     newParentMatrix.multiplyMatrices(target, childInverse);
     setMatrixWorld(parent, newParentMatrix);
     child.updateMatrices();
@@ -104,7 +104,7 @@ const orbit = (function() {
     );
     target.matrixNeedsUpdate = true;
     target.updateMatrices();
-    childMatch(rig, camera, target.matrixWorld);
+    childMatch3(rig, camera, target.matrixWorld);
   };
 })();
 
@@ -143,7 +143,7 @@ const moveRigSoCameraLooksAtObject = (function() {
     target.quaternion.copy(owq);
     target.matrixNeedsUpdate = true;
     target.updateMatrices();
-    childMatch(rig, camera, target.matrixWorld);
+    childMatch3(rig, camera, target.matrixWorld);
   };
 })();
 

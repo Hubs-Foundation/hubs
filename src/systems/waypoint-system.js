@@ -47,22 +47,31 @@ function getPooledElOrLoadFromTemplate(scene, templateId) {
   );
 }
 
-function isTeleportWaypoint(data) {
+function isOccupiableTeleportWaypoint(data) {
+  return data.canBeClicked && data.canBeOccupied && !data.canBeSpawnPoint;
+}
+function isUnoccupiableTeleportWaypoint(data) {
   return data.canBeClicked && !data.canBeOccupied && !data.canBeSpawnPoint;
 }
-function loadTemplatesForWaypointData(scene, data) {
-  const promises = [];
-  if (isTeleportWaypoint(data)) {
-    promises.push(getPooledElOrLoadFromTemplate(scene, "teleport-waypoint-icon"));
+function templatesToLoadForWaypointData(data) {
+  const templateIds = [];
+  if (isOccupiableTeleportWaypoint(data)) {
+    templateIds.push("occupiable-waypoint-icon");
   } else if (isUnoccupiableSpawnPoint(data)) {
-    promises.push(getPooledElOrLoadFromTemplate(scene, "teleport-waypoint-icon"));
+    templateIds.push("teleport-waypoint-icon");
   } else if (isOccupiableSpawnPoint(data)) {
-    promises.push(getPooledElOrLoadFromTemplate(scene, "occupiable-waypoint-icon"));
+    templateIds.push("occupiable-waypoint-icon");
+  } else if (isUnoccupiableTeleportWaypoint(data)) {
+    templateIds.push("teleport-waypoint-icon");
   } else {
-    promises.push(getPooledElOrLoadFromTemplate(scene, "teleport-waypoint-icon"));
+    templateIds.push("teleport-waypoint-icon");
   }
-  return promises;
+  return templateIds;
 }
+function loadTemplatesForWaypointData(scene, data) {
+  return templatesToLoadForWaypointData(data).map(templateId => getPooledElOrLoadFromTemplate(scene, templateId));
+}
+
 function isOrWillBeOccupied(waypointComponent) {
   return (
     (waypointComponent.data.willBeOccupied || waypointComponent.data.isOccupied) &&
@@ -78,54 +87,19 @@ export class WaypointSystem {
     this.components = [];
     this.loading = [];
     this.ready = [];
+    this.waypointForTemplateEl = {};
     this.elementsFromTemplatesFor = {};
     this.eventHandlers = [];
     this.scene = scene;
   }
-  tryToOccupy(waypointComponent) {
-    return new Promise(resolve => {
-      if (
-        shouldTryToOccupy(waypointComponent) &&
-        (NAF.utils.isMine(waypointComponent.el) || NAF.utils.takeOwnership(waypointComponent.el))
-      ) {
-        waypointComponent.el.setAttribute("waypoint", { willBeOccupied: true });
-        setTimeout(() => {
-          if (NAF.utils.isMine(waypointComponent.el)) {
-            waypointComponent.el.setAttribute("waypoint", { isOccupied: true, willBeOccupied: false });
-            resolve(true);
-          } else {
-            debugDrawRect("black");
-            resolve(false);
-          }
-        }, ENSURE_OWNERSHIP_RETAINED_TIMEOUT);
-      } else {
-        resolve(false);
-      }
-    });
-  }
-  acquireSpawnPointFromCandidates(candidates) {
-    if (!candidates.length) return Promise.reject("Could not find suitable spawn point.");
-    const candidate = candidates.splice(Math.floor(Math.random() * candidates.length), 1)[0];
-    return randomDelay()
-      .then(() => this.tryToOccupy(candidate))
-      .then(didOccupy => {
-        if (didOccupy) {
-          return Promise.resolve(candidate);
-        } else {
-          return this.acquireSpawnPointFromCandidates(candidates);
-        }
-      });
-  }
-  getUnoccupiableSpawnPoint() {
-    const candidates = this.ready.filter(component => isUnoccupiableSpawnPoint(component.data));
-    return candidates.length && candidates.splice(Math.floor(Math.random() * candidates.length), 1)[0];
-  }
-  getSpawnPoint() {
-    const candidates = this.ready.filter(component => isOccupiableSpawnPoint(component.data));
-    return this.acquireSpawnPointFromCandidates(candidates).then(candidate => {
-      //TODO: When should waypoints become unoccupied?
-      return Promise.resolve(candidate);
-    });
+  releaseAnyOccupiedWaypoints() {
+    const occupiableWaypoints = this.ready.filter(
+      waypointComponent => waypointComponent.data.canBeOccupied && NAF.utils.isMine(waypointComponent.el)
+    );
+    for (let i = 0; i < occupiableWaypoints.length; i++) {
+      occupiableWaypoints[i].el.setAttribute("waypoint", { isOccupied: false, willBeOccupied: false });
+      debugDrawRect("white");
+    }
   }
   teleportToWaypoint(iconEl, waypointComponent) {
     return function onInteract() {
@@ -159,19 +133,6 @@ export class WaypointSystem {
       });
     }.bind(this);
   }
-  registerComponent(component) {
-    this.components.push(component);
-    this.loading.push(component);
-    const setupEventHandlers = this.setupEventHandlersFor(component);
-    this.elementsFromTemplatesFor[component.el.object3D.uuid] =
-      this.elementsFromTemplatesFor[component.el.object3D.uuid] || [];
-    Promise.all(loadTemplatesForWaypointData(this.scene, component.data)).then(elementsFromTemplates => {
-      this.loading.splice(this.loading.indexOf(component), 1);
-      this.ready.push(component);
-      this.elementsFromTemplatesFor[component.el.object3D.uuid].push(...elementsFromTemplates);
-      elementsFromTemplates.forEach(setupEventHandlers);
-    });
-  }
   setupEventHandlersFor(component) {
     return function setupEventHandlers(elFromTemplate) {
       if (isTagged(elFromTemplate, "singleActionButton") && component.data.canBeClicked) {
@@ -189,6 +150,22 @@ export class WaypointSystem {
       }
     }.bind(this);
   }
+  registerComponent(component) {
+    this.components.push(component);
+    this.loading.push(component);
+    const setupEventHandlers = this.setupEventHandlersFor(component);
+    this.elementsFromTemplatesFor[component.el.object3D.uuid] =
+      this.elementsFromTemplatesFor[component.el.object3D.uuid] || [];
+    Promise.all(loadTemplatesForWaypointData(this.scene, component.data)).then(elementsFromTemplates => {
+      this.loading.splice(this.loading.indexOf(component), 1);
+      this.ready.push(component);
+      this.elementsFromTemplatesFor[component.el.object3D.uuid].push(...elementsFromTemplates);
+      elementsFromTemplates.forEach(setupEventHandlers);
+      elementsFromTemplates.forEach(el => {
+        this.waypointForTemplateEl[el.object3D.uuid] = component;
+      });
+    });
+  }
   unregisterComponent(component) {
     const ci = this.components.indexOf(component);
     if (ci !== -1) {
@@ -205,52 +182,24 @@ export class WaypointSystem {
       for (let i = 0; i < elementsFromTemplates.length; i++) {
         if (
           this.eventHandlers[elementsFromTemplates[i].object3D.uuid] &&
-          this.eventHandlers[elementsFromTemplates[i].object3D.uuid]["interact"]
+          this.eventHandlers[elementsFromTemplates[i].object3D.uuid].interact
         ) {
           elementsFromTemplates[i].object3D.removeEventListener(
             "interact",
-            this.eventHandlers[elementsFromTemplates[i].object3D.uuid]["interact"]
+            this.eventHandlers[elementsFromTemplates[i].object3D.uuid].interact
           );
-          delete this.eventHandlers[elementsFromTemplates[i].object3D.uuid]["interact"];
+          delete this.eventHandlers[elementsFromTemplates[i].object3D.uuid].interact;
         }
       }
       this.elementsFromTemplatesFor[component.el.object3D.uuid].length = 0;
     }
   }
-
-  tick() {
-    const isEntered = this.scene.is("entered");
-    if (isEntered && !this.wasEntered) {
-      this.moveToSpawnPoint();
-    }
-    this.wasEntered = isEntered;
-
-    function tickTemplateEl(elementFromTemplate, waypointComponent) {
-      if (
-        elementFromTemplate.classList.contains("teleport-waypoint-icon") ||
-        elementFromTemplate.classList.contains("occupiable-waypoint-icon")
-      ) {
-        waypointComponent.el.object3D.updateMatrices();
-        setMatrixWorld(elementFromTemplate.object3D, waypointComponent.el.object3D.matrixWorld);
-      }
-    }
-    function tickWaypoint(waypointComponent) {
-      const elementsFromTemplates = this.elementsFromTemplatesFor[waypointComponent.el.object3D.uuid];
-      elementsFromTemplates.forEach(el => tickTemplateEl(el, waypointComponent));
-    }
-    this.ready.forEach(tickWaypoint.bind(this));
-  }
-  releaseAnyOccupiedWaypoints() {
-    const occupiableWaypoints = this.ready.filter(
-      waypointComponent => waypointComponent.data.canBeOccupied && NAF.utils.isMine(waypointComponent.el)
-    );
-    for (let i = 0; i < occupiableWaypoints.length; i++) {
-      occupiableWaypoints[i].el.setAttribute("waypoint", { isOccupied: false, willBeOccupied: false });
-    }
+  getUnoccupiableSpawnPoint() {
+    const candidates = this.ready.filter(component => isUnoccupiableSpawnPoint(component.data));
+    return candidates.length && candidates.splice(Math.floor(Math.random() * candidates.length), 1)[0];
   }
   moveToUnoccupiableSpawnPoint() {
     this.releaseAnyOccupiedWaypoints();
-
     this.avatarPOV = this.avatarPOV || document.getElementById("avatar-pov-node");
     this.avatarPOV.object3D.updateMatrices();
     this.characterController =
@@ -268,13 +217,51 @@ export class WaypointSystem {
       debugDrawRect("purple");
     }
   }
+  tryToOccupy(waypointComponent) {
+    return new Promise(resolve => {
+      if (
+        shouldTryToOccupy(waypointComponent) &&
+        (NAF.utils.isMine(waypointComponent.el) || NAF.utils.takeOwnership(waypointComponent.el))
+      ) {
+        waypointComponent.el.setAttribute("waypoint", { willBeOccupied: true });
+        setTimeout(() => {
+          if (NAF.utils.isMine(waypointComponent.el)) {
+            waypointComponent.el.setAttribute("waypoint", { isOccupied: true, willBeOccupied: false });
+            resolve(true);
+          } else {
+            debugDrawRect("black");
+            resolve(false);
+          }
+        }, ENSURE_OWNERSHIP_RETAINED_TIMEOUT);
+      } else {
+        resolve(false);
+      }
+    });
+  }
+  tryToOccupyAnyOf(candidates) {
+    if (!candidates.length) return Promise.reject("Could not find suitable spawn point.");
+    const candidate = candidates.splice(Math.floor(Math.random() * candidates.length), 1)[0];
+    return randomDelay()
+      .then(() => this.tryToOccupy(candidate))
+      .then(didOccupy => {
+        if (didOccupy) {
+          return Promise.resolve(candidate);
+        } else {
+          return this.tryToOccupyAnyOf(candidates);
+        }
+      });
+  }
+  getOccupiableSpawnPoint() {
+    return this.tryToOccupyAnyOf(this.ready.filter(component => isOccupiableSpawnPoint(component.data)));
+  }
   moveToSpawnPoint = (function() {
     return function moveToSpawnPoint() {
       if (this.isMovingToSpawnPoint) {
-        setTimeout(() => {
-          this.moveToSpawnPoint();
-        }, 3000);
-        return;
+        return new Promise(resolve => {
+          setTimeout(() => {
+            this.moveToSpawnPoint().then(resolve);
+          }, 3000);
+        });
       }
       this.releaseAnyOccupiedWaypoints();
       this.isMovingToSpawnPoint = true;
@@ -284,7 +271,7 @@ export class WaypointSystem {
       this.characterController =
         this.characterController || document.getElementById("avatar-rig").components["character-controller"];
 
-      this.getSpawnPoint().then(
+      return this.getOccupiableSpawnPoint().then(
         waypointComponent => {
           waypointComponent.el.object3D.updateMatrices();
           this.characterController.enqueueWaypointTravelTo(
@@ -304,17 +291,36 @@ export class WaypointSystem {
       );
     };
   })();
+
+  tick() {
+    function tickTemplateEl(elementFromTemplate, waypointComponent) {
+      if (
+        elementFromTemplate.classList.contains("teleport-waypoint-icon") ||
+        elementFromTemplate.classList.contains("occupiable-waypoint-icon")
+      ) {
+        waypointComponent.el.object3D.updateMatrices();
+        setMatrixWorld(elementFromTemplate.object3D, waypointComponent.el.object3D.matrixWorld);
+      }
+    }
+    function tickWaypoint(waypointComponent) {
+      const elementsFromTemplates = this.elementsFromTemplatesFor[waypointComponent.el.object3D.uuid];
+      elementsFromTemplates.forEach(el => tickTemplateEl(el, waypointComponent));
+      //TODO: What should waypoints be doing?
+    }
+    this.ready.forEach(tickWaypoint.bind(this));
+  }
 }
 
 AFRAME.registerComponent("waypoint", {
   schema: {
     canBeSpawnPoint: { default: false },
     canBeOccupied: { default: false },
-    willBeOccupied: { default: false },
-    isOccupied: { default: false },
     canBeClicked: { default: false },
     willDisableMotion: { default: false },
-    willMaintainWorldUp: { default: true }
+    willMaintainWorldUp: { default: true },
+
+    willBeOccupied: { default: false },
+    isOccupied: { default: false }
   },
   init() {
     this.system = this.el.sceneEl.systems["hubs-systems"].waypointSystem;
@@ -326,7 +332,6 @@ AFRAME.registerComponent("waypoint", {
       this.didRegisterWithSystem = true;
     }
   },
-  tick() {},
   remove() {
     if (!this.didRegisterWithSystem) {
       console.warn("Waypoint removed without ever having registered with the system.");
