@@ -2,7 +2,7 @@ import { setMatrixWorld } from "../utils/three-utils";
 import { DebugDrawRect } from "./waypoint-tests";
 import { isTagged } from "../components/tags";
 import { getCurrentPlayerHeight } from "../utils/get-current-player-height";
-const ENSURE_OWNERSHIP_RETAINED_TIMEOUT = 500; // Should be enough time to resolve multiple ownership requests
+const ENSURE_OWNERSHIP_RETAINED_TIMEOUT = 1000; // Should be enough time to resolve multiple ownership requests
 const DEBUG = true;
 function debugDrawRect(color) {
   return DEBUG && DebugDrawRect(color);
@@ -79,7 +79,8 @@ function loadTemplatesForWaypointData(scene, data) {
 function shouldTryToOccupy(waypointComponent) {
   return (
     waypointComponent.data.canBeOccupied &&
-    !(waypointComponent.data.isOccupied && NAF.utils.getNetworkOwner(waypointComponent.el) !== "scene")
+    (NAF.utils.isMine(waypointComponent.el) ||
+      !(waypointComponent.data.isOccupied && NAF.utils.getNetworkOwner(waypointComponent.el) !== "scene"))
   );
 }
 
@@ -145,16 +146,16 @@ export class WaypointSystem {
             .filter(wp => wp !== waypointComponent && isOccupiedByMe(wp))
             .forEach(unoccupyWaypoint);
 
-          this.characterController =
-            this.characterController || document.getElementById("avatar-rig").components["character-controller"];
-          waypointComponent.el.object3D.updateMatrices();
+          //this.characterController =
+          //  this.characterController || document.getElementById("avatar-rig").components["character-controller"];
+          //waypointComponent.el.object3D.updateMatrices();
 
+          //this.characterController.enqueueWaypointTravelTo(
+          //  waypointComponent.el.object3D.matrixWorld,
+          //  waypointComponent.data,
+          //  0
+          //);
           debugDrawRect("lightgreen");
-          this.characterController.enqueueWaypointTravelTo(
-            waypointComponent.el.object3D.matrixWorld,
-            waypointComponent.data,
-            0
-          );
         } else {
           console.log("Could not occupy waypoint:", waypointComponent);
         }
@@ -343,14 +344,14 @@ export class WaypointSystem {
           if (waypointComponentOrNull) {
             const waypointComponent = waypointComponentOrNull;
             resolvedWaypointOrNull = waypointComponent;
-            waypointComponent.el.object3D.updateMatrices();
-            this.characterController =
-              this.characterController || document.getElementById("avatar-rig").components["character-controller"];
-            this.characterController.enqueueWaypointTravelTo(
-              waypointComponent.el.object3D.matrixWorld,
-              waypointComponent.data,
-              0
-            );
+            //waypointComponent.el.object3D.updateMatrices();
+            //this.characterController =
+            //  this.characterController || document.getElementById("avatar-rig").components["character-controller"];
+            //this.characterController.enqueueWaypointTravelTo(
+            //  waypointComponent.el.object3D.matrixWorld,
+            //  waypointComponent.data,
+            //  0
+            //);
             debugDrawRect("lightgreen");
           } else if (waypointComponentOrNull === null) {
             resolvedWaypointOrNull = this.moveToUnoccupiableSpawnPoint();
