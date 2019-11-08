@@ -37,8 +37,6 @@ const workerScript = (workerDomain, assetsDomain) => {
   const STORAGE_HOST = "${document.location.origin}";
   const ASSETS_HOST = "https://${assetsDomain}";
 
-  let cache = caches.default;
-  
   addEventListener("fetch", e => {
     const request = e.request;
     const origin = request.headers.get("Origin");
@@ -47,14 +45,11 @@ const workerScript = (workerDomain, assetsDomain) => {
     const isCorsProxy = request.url.indexOf(CORS_PROXY_HOST) === 0;
     const proxyUrl = new URL(isCorsProxy ? CORS_PROXY_HOST : PROXY_HOST);
     const targetPath = request.url.substring((isCorsProxy ? CORS_PROXY_HOST : PROXY_HOST).length + 1);
-    let useCache = false;
     let targetUrl;
   
     if (targetPath.indexOf("files/") === 0) {
-      useCache = true;
       targetUrl = \`\${STORAGE_HOST}/\${targetPath}\`;
     } else if (targetPath.indexOf("hubs/") === 0 || targetPath.indexOf("spoke/") === 0 || targetPath.indexOf("admin/") === 0) {
-      useCache = true;
       targetUrl = \`\${ASSETS_HOST}/\${targetPath}\`;
     } else {
       if (!isCorsProxy) {
@@ -72,28 +67,7 @@ const workerScript = (workerDomain, assetsDomain) => {
     requestHeaders.delete("Origin"); // Some domains disallow access from improper Origins
   
     e.respondWith((async () => {
-      let cacheReq;
-      let res;
-      let fetched = false;
-  
-      if (useCache) {
-        cacheReq = new Request(targetUrl, { headers: requestHeaders, method: request.method, redirect: "manual" });
-        res = await cache.match(cacheReq, {});
-      }
-  
-      if (!res) {
-        res = await fetch(targetUrl, { headers: requestHeaders, method: request.method, redirect: "manual", referrer: request.referrer, referrerPolicy: request.referrerPolicy });      
-        fetched = true;
-      }
-  
-      let body = res.body;
-  
-      if (useCache && fetched) {
-        const [body1, body2] = res.body.tee();
-        body = body2;
-        await cache.put(cacheReq, new Response(body1, { status: res.status, statusText: res.statusText, headers: res.headers }));
-      }
-  
+      const res = await fetch(targetUrl, { headers: requestHeaders, method: request.method, redirect: "manual", referrer: request.referrer, referrerPolicy: request.referrerPolicy });      
       const responseHeaders = new Headers(res.headers);
       const redirectLocation = responseHeaders.get("Location") || responseHeaders.get("location");
   
@@ -116,7 +90,7 @@ const workerScript = (workerDomain, assetsDomain) => {
       responseHeaders.set("Vary", "Origin");
       responseHeaders.set('X-Content-Type-Options', "nosniff");
   
-      return new Response(body, { status: res.status, statusText: res.statusText, headers: responseHeaders });  
+      return new Response(res.body, { status: res.status, statusText: res.statusText, headers: responseHeaders });  
     })());
   });`;
 };
@@ -203,8 +177,8 @@ class DataTransferComponent extends Component {
             <Typography variant="body2" gutterBottom>
               Hubs Cloud uses bandwidth from your cloud provider to deliver content.
               <br />
-              You can potentially reduce your data transfer costs by switching your CDN to Cloudflare, which does not
-              charge for data transfer costs to your users.
+              You can reduce your data transfer costs by switching your CDN to Cloudflare, which does not charge for
+              data transfer costs to your users.
             </Typography>
             <Typography variant="subheading" gutterBottom className={this.props.classes.section}>
               Worker Setup
@@ -250,6 +224,9 @@ class DataTransferComponent extends Component {
                   <b>Full</b>.
                 </li>
                 <li>
+                  In the &apos;Caching&apos; section of your Cloudflare domain settings, turn <b>off</b> Always Online.
+                </li>
+                <li>
                   In the Workers section of your Cloudflare domain, launch the editor, click &quot;Add Script&quot; on
                   the left and name it <pre>hubs-worker</pre>
                 </li>
@@ -292,6 +269,10 @@ class DataTransferComponent extends Component {
                 <li>
                   Once *both* links above are working, enable the &apos;Use Cloudflare Worker&apos; setting below and
                   click &apos;Save&apos; on this page.
+                </li>
+                <li>
+                  If you need more than 100,000 requests per day for content, you&apos;ll need to add a Worker Unlimited
+                  Subscription for an additional $5/mo.
                 </li>
               </ol>
               <FormControlLabel

@@ -1,4 +1,4 @@
-import { green, amber } from "@material-ui/core/colors";
+import { blue, green, amber } from "@material-ui/core/colors";
 
 const getCommon = theme => ({
   container: {
@@ -17,6 +17,10 @@ const getCommon = theme => ({
     flexDirection: "column",
     justifyContent: "center",
     width: "100%"
+  },
+
+  infoIcon: {
+    color: blue[200]
   },
 
   warningIcon: {

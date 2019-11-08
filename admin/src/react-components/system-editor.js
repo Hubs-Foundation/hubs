@@ -9,9 +9,10 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import Warning from "@material-ui/icons/Warning";
+import Info from "@material-ui/icons/Info";
 import { fetchReticulumAuthenticated } from "hubs/src/utils/phoenix-utils";
 import withCommonStyles from "../utils/with-common-styles";
-import { getAdminInfo } from "../utils/ita";
+import { getAdminInfo, getConfig } from "../utils/ita";
 
 // Send quota to use as heuristic for checking if in SES sandbox
 // https://forums.aws.amazon.com/thread.jspa?threadID=61090
@@ -26,7 +27,9 @@ class SystemEditorComponent extends Component {
 
   async componentDidMount() {
     const adminInfo = await getAdminInfo();
-    this.setState({ adminInfo });
+    const retConfig = await getConfig("reticulum");
+
+    this.setState({ adminInfo, retConfig });
     this.updateReticulumMeta();
   }
 
@@ -38,10 +41,17 @@ class SystemEditorComponent extends Component {
   render() {
     const needsAvatars = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.avatar_listings.any;
     const needsScenes = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.scene_listings.any;
+
     const isInSESSandbox =
       this.state.adminInfo &&
       this.state.adminInfo.using_ses &&
       this.state.adminInfo.ses_max_24_hour_send <= MAX_AWS_SES_QUOTA_FOR_SANDBOX;
+
+    const isUsingCloudflare =
+      this.state.adminInfo &&
+      this.state.retConfig &&
+      this.state.retConfig.phx &&
+      this.state.retConfig.phx.cors_proxy_url_host === `cors-proxy.${this.state.adminInfo.worker_domain}`;
 
     return (
       <Card className={this.props.classes.container}>
@@ -121,6 +131,18 @@ class SystemEditorComponent extends Component {
                     inset
                     primary="Your system has no scenes."
                     secondary="Choose 'Import Content' on the left to load scenes."
+                  />
+                </ListItem>
+              )}
+              {!isUsingCloudflare && (
+                <ListItem>
+                  <ListItemIcon className={this.props.classes.infoIcon}>
+                    <Info />
+                  </ListItemIcon>
+                  <ListItemText
+                    inset
+                    primary="You are using your cloud provider to serve content."
+                    secondary="You can reduce data transfer costs by using Cloudflare's CDN to serve content. Choose 'Data Transfer' on the left for more info."
                   />
                 </ListItem>
               )}
