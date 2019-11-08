@@ -54,7 +54,7 @@ const workerScript = (workerDomain, assetsDomain) => {
       useCache = true;
       targetUrl = \`\${ASSETS_HOST}/\${targetPath}\`;
     } else {
-      targetUrl = request.url.substring(PROXY_HOST.length + 1).replace(/^http(s?):/([^/])/, "http$1://$2");
+      targetUrl = request.url.substring(PROXY_HOST.length + 1).replace(/^http(s?):\/([^/])/, "http$1://$2");
   
       if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
         targetUrl = proxyUrl.protocol + "//" + targetUrl;
@@ -302,7 +302,7 @@ class DataTransferComponent extends Component {
                 <CloseIcon className={this.props.classes.icon} />
               </IconButton>
             ]}
-          ></SnackbarContent>
+          />
         </Snackbar>
       </Card>
     );
