@@ -118,8 +118,29 @@ class DataTransferComponent extends Component {
     });
   }
 
-  onSubmit(e) {
+  async onSubmit(e) {
     e.preventDefault();
+
+    // Sanity check
+    if (this.state.enableWorker) {
+      const abort = () => {
+        this.setState({
+          saveError: "Your worker isn't working. Check that you've performed all of the above steps."
+        });
+      };
+
+      try {
+        const res = await fetch(`https://${this.state.workerDomain}/hubs/pages/latest/whats-new.html`);
+
+        if (!res.ok) {
+          abort();
+          return;
+        }
+      } catch (e) {
+        abort();
+        return;
+      }
+    }
 
     this.setState({ saving: true }, async () => {
       const workerDomain = this.state.enableWorker ? this.state.workerDomain : "";
@@ -160,7 +181,7 @@ class DataTransferComponent extends Component {
         this.setState({ saveError: e.toString() });
       }
 
-      this.setState({ saving: false, saved: true });
+      this.setState({ saving: false, saved: true, saveError: null });
     });
   }
 
