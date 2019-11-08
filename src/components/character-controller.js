@@ -16,6 +16,35 @@ const DEFAULT_WAYPOINT_TRAVEL_TIME = 0;
 let WAYPOINT_TRAVEL_TIME = 0; //TODO:variable name and location
 const WAYPOINT_DOWN_TIME = 0;
 
+const applySnap = (function() {
+  const inMat4Copy = new THREE.Matrix4();
+  const startRotation = new THREE.Matrix4();
+  const endRotation = new THREE.Matrix4();
+  const v = new THREE.Vector3();
+  return function applySnap(inMat4, snapMat4, outMat4) {
+    inMat4Copy.copy(inMat4);
+    return outMat4
+      .copy(endRotation.copy(snapMat4).multiply(startRotation.extractRotation(inMat4Copy)))
+      .scale(v.setFromMatrixScale(inMat4Copy))
+      .setPosition(v.setFromMatrixPosition(inMat4Copy));
+  };
+})();
+
+const calculateDisplacementToDesiredPOV = (function() {
+  const translationCoordinateSpace = new THREE.Matrix4();
+  const translated = new THREE.Matrix4();
+  const localTranslation = new THREE.Matrix4();
+  return function calculateDisplacementToDesiredPOV(povMat4, fly, localDisplacement, displacementToDesiredPOV) {
+    localTranslation.makeTranslation(localDisplacement.x, localDisplacement.y, localDisplacement.z);
+    translationCoordinateSpace.extractRotation(povMat4);
+    if (!fly) {
+      affixToWorldUp(translationCoordinateSpace, translationCoordinateSpace);
+    }
+    translated.copy(translationCoordinateSpace).multiply(localTranslation);
+    return displacementToDesiredPOV.setFromMatrixPosition(translated);
+  };
+})();
+
 /**
  * Avatar movement controller that listens to move, rotate and teleportation events and moves the avatar accordingly.
  * The controller accounts for playspace offset and orientation and depends on the nav mesh system for translation.
@@ -24,7 +53,7 @@ const WAYPOINT_DOWN_TIME = 0;
  */
 AFRAME.registerComponent("character-controller", {
   schema: {
-    groundAcc: { default: 5.5 },
+    groundAcc: { default: 2.9 },
     easing: { default: 10 },
     pivot: { type: "selector" },
     snapRotationDegrees: { default: THREE.Math.DEG2RAD * 45 },
@@ -33,6 +62,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   init: function() {
+    this.findPOVPositionAboveNavMesh = this.findPOVPositionAboveNavMesh.bind(this);
     this.tick = this.tick.bind(this);
     this.activeWaypointOptions = {};
     this.charSpeed = 1;
@@ -40,13 +70,11 @@ AFRAME.registerComponent("character-controller", {
     this.navNode = null;
     this.velocity = new THREE.Vector3(0, 0, 0);
     this.accelerationInput = new THREE.Vector3(0, 0, 0);
-    this.pendingSnapRotationMatrix = new THREE.Matrix4();
+    this.snapRotation = new THREE.Matrix4();
     this.angularVelocity = 0; // Scalar value because we only allow rotation around Y
     this._withinWarningLimit = true;
     this._warningCount = 0;
     this.setAccelerationInput = this.setAccelerationInput.bind(this);
-    this.snapRotateLeft = this.snapRotateLeft.bind(this);
-    this.snapRotateRight = this.snapRotateRight.bind(this);
     this.setAngularVelocity = this.setAngularVelocity.bind(this);
     this.el.sceneEl.addEventListener("nav-mesh-loaded", () => {
       this.navGroup = null;
@@ -78,7 +106,7 @@ AFRAME.registerComponent("character-controller", {
     this.accelerationInput.set(0, 0, 0);
     this.velocity.set(0, 0, 0);
     this.angularVelocity = 0;
-    this.pendingSnapRotationMatrix.identity();
+    this.snapRotation.identity();
   },
 
   setAccelerationInput: function(event) {
@@ -88,16 +116,6 @@ AFRAME.registerComponent("character-controller", {
 
   setAngularVelocity: function(event) {
     this.angularVelocity = event.detail.value;
-  },
-
-  snapRotateLeft: function() {
-    this.pendingSnapRotationMatrix.copy(this.leftRotationMatrix);
-    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
-  },
-
-  snapRotateRight: function() {
-    this.pendingSnapRotationMatrix.copy(this.rightRotationMatrix);
-    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
   },
 
   // We assume the rig is at the root, and its local position === its world position.
@@ -148,7 +166,15 @@ AFRAME.registerComponent("character-controller", {
   })(),
 
   tick: (function() {
-    return function(t, dt) {
+    const snapRotatedPOV = new THREE.Matrix4();
+    const newPOV = new THREE.Matrix4();
+    const displacementToDesiredPOV = new THREE.Vector3();
+
+    const startPOVPosition = new THREE.Vector3();
+    const desiredPOVPosition = new THREE.Vector3();
+    const newPOVPosition = new THREE.Vector3();
+
+    return function tick(t, dt) {
       if (!this.el.sceneEl.is("entered")) return;
       const vrMode = this.el.sceneEl.is("vr-mode");
       this.sfx = this.sfx || this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
@@ -205,74 +231,48 @@ AFRAME.registerComponent("character-controller", {
       }
 
       const userinput = AFRAME.scenes[0].systems.userinput;
-      if (userinput.get(paths.actions.snapRotateLeft)) {
-        this.snapRotateLeft();
-      }
-      if (userinput.get(paths.actions.snapRotateRight)) {
-        this.snapRotateRight();
-      }
       if (userinput.get(paths.actions.toggleFly)) {
         this.el.messageDispatch.dispatch("/fly");
+      }
+      if (userinput.get(paths.actions.snapRotateLeft)) {
+        this.snapRotation.copy(this.leftRotationMatrix);
+        this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
+      } else if (userinput.get(paths.actions.snapRotateRight)) {
+        this.snapRotation.copy(this.rightRotationMatrix);
+        this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
       }
       const characterAcceleration = userinput.get(paths.actions.characterAcceleration);
       if (characterAcceleration) {
         this.accelerationInput.set(
           this.accelerationInput.x + characterAcceleration[0],
           this.accelerationInput.y,
-          this.accelerationInput.z + characterAcceleration[1]
+          -1 * (this.accelerationInput.z + characterAcceleration[1])
         );
       }
-
-      this.el.object3D.updateMatrices();
       this.data.pivot.object3D.updateMatrices();
-
-      const m1 = new THREE.Matrix4().extractRotation(this.data.pivot.object3D.matrixWorld);
-      const m2 = new THREE.Matrix4()
-        .identity()
-        .copy(this.pendingSnapRotationMatrix)
-        .multiply(m1);
-      const scale = new THREE.Vector3().setFromMatrixScale(this.data.pivot.object3D.matrixWorld);
-      const position = new THREE.Vector3().setFromMatrixPosition(this.data.pivot.object3D.matrixWorld);
-      const snappedPOV = new THREE.Matrix4()
-        .copy(m2)
-        .scale(scale)
-        .setPosition(position.x, position.y, position.z);
-      const upAffixedPOVTransform = new THREE.Matrix4().extractRotation(snappedPOV);
-      if (!this.data.fly) {
-        affixToWorldUp(upAffixedPOVTransform, upAffixedPOVTransform);
-      }
-      const translationMat = new THREE.Matrix4()
-        .identity()
-        .copy(upAffixedPOVTransform)
-        .multiply(
-          new THREE.Matrix4()
-            .makeTranslation(this.accelerationInput.x, this.accelerationInput.y, -this.accelerationInput.z)
-            .multiplyScalar((this.data.groundAcc * dt) / 1000)
-        );
-      const translationMat2 = new THREE.Matrix4().makeTranslation(
-        translationMat.elements[12],
-        translationMat.elements[13],
-        translationMat.elements[14]
+      applySnap(this.data.pivot.object3D.matrixWorld, this.snapRotation, snapRotatedPOV);
+      calculateDisplacementToDesiredPOV(
+        snapRotatedPOV,
+        this.data.fly,
+        this.accelerationInput.multiplyScalar(
+          ((userinput.get(paths.actions.boost) ? 2 : 1) * this.data.groundAcc * dt) / 1000
+        ),
+        displacementToDesiredPOV
       );
-      const newPOV = new THREE.Matrix4().copy(translationMat2).multiply(snappedPOV);
+      newPOV
+        .makeTranslation(displacementToDesiredPOV.x, displacementToDesiredPOV.y, displacementToDesiredPOV.z)
+        .multiply(snapRotatedPOV);
       if (!this.data.fly) {
-        const footPosition = new THREE.Vector3().setFromMatrixPosition(newPOV);
-        const newFootPosition = new THREE.Vector3();
-        const playerHeight = getCurrentPlayerHeight();
-        footPosition.y -= playerHeight;
-        this.findPositionOnNavMesh(
-          new THREE.Vector3().setFromMatrixPosition(this.el.object3D.matrixWorld),
-          footPosition,
-          newFootPosition
+        this.findPOVPositionAboveNavMesh(
+          startPOVPosition.setFromMatrixPosition(this.data.pivot.object3D.matrixWorld),
+          desiredPOVPosition.setFromMatrixPosition(newPOV),
+          newPOVPosition
         );
-        newFootPosition.y += playerHeight;
-        newPOV.setPosition(newFootPosition);
+        newPOV.setPosition(newPOVPosition);
       }
-
       childMatch3(this.el.object3D, this.data.pivot.object3D, newPOV);
-
-      this.pendingSnapRotationMatrix.identity(); // Revert to identity
       this.accelerationInput.set(0, 0, 0);
+      this.snapRotation.identity();
     };
   })(),
 
@@ -294,6 +294,20 @@ AFRAME.registerComponent("character-controller", {
       pathfinder.getClosestNode(pos, NAV_ZONE, this.navGroup);
   },
 
+  findPOVPositionAboveNavMesh: (function() {
+    const startingFeetPosition = new THREE.Vector3();
+    const desiredFeetPosition = new THREE.Vector3();
+    return function findPOVPositionAboveNavMesh(startPOVPosition, desiredPOVPosition, outPOVPosition) {
+      const playerHeight = getCurrentPlayerHeight();
+      startingFeetPosition.copy(startPOVPosition);
+      startingFeetPosition.y -= playerHeight;
+      desiredFeetPosition.copy(desiredPOVPosition);
+      desiredFeetPosition.y -= playerHeight;
+      this.findPositionOnNavMesh(startingFeetPosition, desiredFeetPosition, outPOVPosition);
+      outPOVPosition.y += playerHeight;
+    };
+  })(),
+
   findPositionOnNavMesh: function(start, end, outPos) {
     const { pathfinder } = this.el.sceneEl.systems.nav;
     if (!(NAV_ZONE in pathfinder.zones)) return;
@@ -303,65 +317,5 @@ AFRAME.registerComponent("character-controller", {
     this._setNavNode(end);
     this.navNode = pathfinder.clampStep(start, end, this.navNode, NAV_ZONE, this.navGroup, outPos);
     return outPos;
-  },
-
-  setPositionOnNavMesh: function(start, end, object3D) {
-    const { pathfinder } = this.el.sceneEl.systems.nav;
-    if (!(NAV_ZONE in pathfinder.zones)) return;
-    if (this.navGroup === null) {
-      this.navGroup = pathfinder.getGroup(NAV_ZONE, end, true, true);
-    }
-    this._setNavNode(end);
-    this.navNode = pathfinder.clampStep(start, end, this.navNode, NAV_ZONE, this.navGroup, object3D.position);
-    object3D.matrixNeedsUpdate = true;
-  },
-
-  updateVelocity: function(dt, pivot) {
-    const data = this.data;
-    const velocity = this.velocity;
-
-    // If FPS too low, reset velocity.
-    if (dt > MAX_DELTA) {
-      velocity.x = 0;
-      velocity.y = 0;
-      velocity.z = 0;
-      return;
-    }
-
-    // Decay velocity.
-    if (velocity.x !== 0) {
-      velocity.x -= velocity.x * data.easing * dt;
-    }
-    if (velocity.y !== 0) {
-      velocity.y -= velocity.y * data.easing * dt;
-    }
-    if (velocity.z !== 0) {
-      velocity.z -= velocity.z * data.easing * dt;
-    }
-
-    const dvx = data.groundAcc * dt * this.accelerationInput.x;
-    const dvz = data.groundAcc * dt * -this.accelerationInput.z;
-    velocity.x += dvx;
-
-    if (this.data.fly) {
-      velocity.y += dvz * -Math.sin(pivot.rotation.x);
-      velocity.z += dvz * Math.cos(pivot.rotation.x);
-    } else {
-      velocity.z += dvz;
-    }
-
-    const decay = 0.7;
-    this.accelerationInput.x = this.accelerationInput.x * decay;
-    this.accelerationInput.z = this.accelerationInput.z * decay;
-
-    if (Math.abs(velocity.x) < CLAMP_VELOCITY) {
-      velocity.x = 0;
-    }
-    if (Math.abs(velocity.y) < CLAMP_VELOCITY) {
-      velocity.y = 0;
-    }
-    if (Math.abs(velocity.z) < CLAMP_VELOCITY) {
-      velocity.z = 0;
-    }
   }
 });
