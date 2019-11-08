@@ -230,8 +230,8 @@ class DataTransferComponent extends Component {
                   <div className={this.props.classes.command}>{document.location.hostname}</div>
                 </li>
                 <li>
-                  In the &apos;DNS&apos; section of your Cloudflare domain settings, add new CNAME record with Name set
-                  to <pre>cors-proxy</pre> and Domain Name set to:
+                  In the &apos;DNS&apos; section of your Cloudflare domain settings, add a second CNAME record with Name
+                  set to <pre>cors-proxy</pre> and Domain Name set to:
                   <div className={this.props.classes.command}>{document.location.hostname}</div>
                 </li>
                 <li>
