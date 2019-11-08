@@ -37,13 +37,15 @@ const workerScript = (workerDomain, assetsDomain) => {
   const ASSETS_HOST = "https://${assetsDomain}";
   
   let cache = caches.default;
-  
+
   addEventListener("fetch", e => {
     const request = e.request;
     const origin = request.headers.get("Origin");
     const proxyUrl = new URL(PROXY_HOST);
     // eslint-disable-next-line no-useless-escape
-    const targetPath = request.url.substring(PROXY_HOST.length + 1);
+  
+    const isCorsProxy = request.url.indexOf("https://cors-proxy.") === 0;
+    const targetPath = request.url.replace(/^https:\/\/cors-proxy\./, "https://").substring(PROXY_HOST.length + 1);
     let useCache = false;
     let targetUrl;
   
@@ -54,7 +56,11 @@ const workerScript = (workerDomain, assetsDomain) => {
       useCache = true;
       targetUrl = \`\${ASSETS_HOST}/\${targetPath}\`;
     } else {
-      targetUrl = request.url.substring(PROXY_HOST.length + 1).replace(/^http(s?):\/([^/])/, "http$1://$2");
+      if (!isCorsProxy) {
+        // Do not allow cors proxying from main domain, always require cors-proxy. subdomain to ensure CSP stays sane.
+        return;
+      }
+      targetUrl = targetPath.replace(/^http(s?):\/([^/])/, "http$1://$2");
   
       if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
         targetUrl = proxyUrl.protocol + "//" + targetUrl;
@@ -139,7 +145,7 @@ class DataTransferComponent extends Component {
       const configs = {
         reticulum: {
           phx: {
-            cors_proxy_url_host: workerDomain
+            cors_proxy_url_host: `cors-proxy.${workerDomain}`
           },
           uploads: {
             host: workerDomain ? `https://${workerDomain}` : ""
@@ -147,13 +153,13 @@ class DataTransferComponent extends Component {
         },
         hubs: {
           general: {
-            cors_proxy_server: workerDomain,
+            cors_proxy_server: `cors-proxy.${workerDomain}`,
             base_assets_path: workerDomain ? `https://${workerDomain}/hubs/` : ""
           }
         },
         spoke: {
           general: {
-            cors_proxy_server: workerDomain,
+            cors_proxy_server: `cors-proxy.${workerDomain}`,
             base_assets_path: workerDomain ? `https://${workerDomain}/spoke/` : ""
           }
         }
@@ -223,6 +229,11 @@ class DataTransferComponent extends Component {
                   <div className={this.props.classes.command}>{document.location.hostname}</div>
                 </li>
                 <li>
+                  In the &apos;DNS&apos; section of your Cloudflare domain settings, add new CNAME record with Name set
+                  to <pre>cors-proxy</pre> and Domain Name set to:
+                  <div className={this.props.classes.command}>{document.location.hostname}</div>
+                </li>
+                <li>
                   In the Workers section of your Cloudflare domain, launch the editor, click &quot;Add Script&quot; on
                   the left and name it &apos;hubs-worker&apos; Then, paste and save the following worker script.
                   <br />
@@ -237,22 +248,31 @@ class DataTransferComponent extends Component {
                 <li>
                   Once your script is saved, go back to the Workers panel. Choose &apos;Add Route&apos;, choose your{" "}
                   <pre>hubs-worker</pre> script and set the route to:
-                  <div className={this.props.classes.command}>{`${this.state.workerDomain}/*`}</div>
+                  <div className={this.props.classes.command}>{`*${this.state.workerDomain}/*`}</div>
+                  (Note the leading asterisk)
                 </li>
                 <li>
                   Verify your worker is working.{" "}
                   <a
-                    href={`https://${this.state.workerDomain}/https://www.mozilla.org`}
+                    href={`https://cors-proxy.${this.state.workerDomain}/https://www.mozilla.org`}
                     rel="noopener noreferrer"
                     target="_blank"
                   >
                     This link
                   </a>{" "}
-                  should show the Mozilla homepage.
+                  should show the Mozilla homepage, and
+                  <a
+                    href={`https://${this.state.workerDomain}/hubs/pages/latest/whats-new.html`}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    this link
+                  </a>{" "}
+                  should should the Hubs &quot;What&apos;s New&quot; page. .
                 </li>
                 <li>
-                  Once working, enable the &apos;Use Cloudflare Worker&apos; setting below and click &apos;Save&apos; on
-                  this page.
+                  Once *both* links above are working, enable the &apos;Use Cloudflare Worker&apos; setting below and
+                  click &apos;Save&apos; on this page.
                 </li>
               </ol>
               <FormControlLabel
