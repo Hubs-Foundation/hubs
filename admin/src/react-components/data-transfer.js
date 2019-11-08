@@ -32,6 +32,7 @@ const styles = withCommonStyles(() => ({
 
 const workerScript = (workerDomain, assetsDomain) => {
   return `  const ALLOWED_ORIGINS = ["${document.location.origin}"];
+  const CORS_PROXY_HOST = "https://cors-proxy.${workerDomain}";
   const PROXY_HOST = "https://${workerDomain}";
   const STORAGE_HOST = "${document.location.origin}";
   const ASSETS_HOST = "https://${assetsDomain}";
@@ -41,11 +42,11 @@ const workerScript = (workerDomain, assetsDomain) => {
   addEventListener("fetch", e => {
     const request = e.request;
     const origin = request.headers.get("Origin");
-    const proxyUrl = new URL(PROXY_HOST);
     // eslint-disable-next-line no-useless-escape
   
-    const isCorsProxy = request.url.indexOf("https://cors-proxy.") === 0;
-    const targetPath = request.url.replace(/^https:\/\/cors-proxy\./, "https://").substring(PROXY_HOST.length + 1);
+    const isCorsProxy = request.url.indexOf(CORS_PROXY_HOST) === 0;
+    const proxyUrl = new URL(isCorsProxy ? CORS_PROXY_HOST : PROXY_HOST);
+    const targetPath = request.url.substring((isCorsProxy ? CORS_PROXY_HOST : PROXY_HOST).length + 1);
     let useCache = false;
     let targetUrl;
   
