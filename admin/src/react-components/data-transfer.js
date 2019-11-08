@@ -267,8 +267,8 @@ class DataTransferComponent extends Component {
                   should should the Hubs &quot;What&apos;s New&quot; page.
                 </li>
                 <li>
-                  Once *both* links above are working, enable the &apos;Use Cloudflare Worker&apos; setting below and
-                  click &apos;Save&apos; on this page.
+                  Once <b>both</b> links above are working, enable the &apos;Use Cloudflare Worker&apos; setting below
+                  and click &apos;Save&apos; on this page.
                 </li>
                 <li>
                   If you need more than 100,000 requests per day for content, you&apos;ll need to add a Worker Unlimited
