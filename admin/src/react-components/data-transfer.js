@@ -226,17 +226,24 @@ class DataTransferComponent extends Component {
                 </li>
                 <li>
                   In the &apos;DNS&apos; section of your Cloudflare domain settings, add new CNAME record with Name set
-                  to <pre>@</pre> and Domain Name set to:
+                  to
+                  <div className={this.props.classes.command}>@</div>
+                  and Domain Name set to:
                   <div className={this.props.classes.command}>{document.location.hostname}</div>
                 </li>
                 <li>
                   In the &apos;DNS&apos; section of your Cloudflare domain settings, add a second CNAME record with Name
-                  set to <pre>cors-proxy</pre> and Domain Name set to:
+                  set to
+                  <div className={this.props.classes.command}>cors-proxy</div>
+                  and Domain Name set to:
                   <div className={this.props.classes.command}>{document.location.hostname}</div>
                 </li>
                 <li>
                   In the Workers section of your Cloudflare domain, launch the editor, click &quot;Add Script&quot; on
-                  the left and name it &apos;hubs-worker&apos; Then, paste and save the following worker script.
+                  the left and name it <pre>hubs-worker</pre>
+                </li>
+                <li>
+                  Paste and save the following worker script.
                   <br />
                   <textarea
                     className={this.props.classes.worker}
@@ -247,10 +254,10 @@ class DataTransferComponent extends Component {
                   <br />
                 </li>
                 <li>
-                  Once your script is saved, go back to the Workers panel. Choose &apos;Add Route&apos;, choose your{" "}
-                  <pre>hubs-worker</pre> script and set the route to:
+                  Once your script is saved, go back to the Workers panel. Choose &apos;Add Route&apos;, choose the
+                  script <pre>hubs-worker</pre> set the route to:
                   <div className={this.props.classes.command}>{`*${this.state.workerDomain}/*`}</div>
-                  (Note the leading asterisk)
+                  <b>Note the leading asterisk!</b>
                 </li>
                 <li>
                   Verify your worker is working.{" "}
@@ -261,7 +268,7 @@ class DataTransferComponent extends Component {
                   >
                     This link
                   </a>{" "}
-                  should show the Mozilla homepage, and
+                  should show the Mozilla homepage, and&nbsp;
                   <a
                     href={`https://${this.state.workerDomain}/hubs/pages/latest/whats-new.html`}
                     rel="noopener noreferrer"
