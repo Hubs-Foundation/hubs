@@ -246,6 +246,10 @@ class DataTransferComponent extends Component {
                   <div className={this.props.classes.command}>{document.location.hostname}</div>
                 </li>
                 <li>
+                  In the &apos;SSL/TLS&apos; section of your Cloudflare domain settings, set the encryption mode to{" "}
+                  <b>Full</b>.
+                </li>
+                <li>
                   In the Workers section of your Cloudflare domain, launch the editor, click &quot;Add Script&quot; on
                   the left and name it <pre>hubs-worker</pre>
                 </li>
