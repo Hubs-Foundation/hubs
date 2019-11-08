@@ -7,16 +7,21 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCubes } from "@fortawesome/free-solid-svg-icons/faCubes";
 import { faCube } from "@fortawesome/free-solid-svg-icons/faCube";
 import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
+import { faMusic } from "@fortawesome/free-solid-svg-icons/faMusic";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faNewspaper } from "@fortawesome/free-solid-svg-icons/faNewspaper";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 
 const SORT_ORDER_VIDEO = 0;
-const SORT_ORDER_IMAGE = 1;
-const SORT_ORDER_PDF = 2;
-const SORT_ORDER_MODEL = 3;
-const SORT_ORDER_UNIDENTIFIED = 4;
+const SORT_ORDER_AUDIO = 1;
+const SORT_ORDER_IMAGE = 2;
+const SORT_ORDER_PDF = 3;
+const SORT_ORDER_MODEL = 4;
+const SORT_ORDER_UNIDENTIFIED = 5;
 function mediaSortOrder(el) {
+  if (el.components["media-video"] && el.components["media-video"].data.contentType.startsWith("audio/")) {
+    return SORT_ORDER_AUDIO;
+  }
   if (el.components["media-video"]) return SORT_ORDER_VIDEO;
   if (el.components["media-image"]) return SORT_ORDER_IMAGE;
   if (el.components["media-pdf"]) return SORT_ORDER_PDF;
@@ -30,6 +35,7 @@ function mediaSort(el1, el2) {
 
 const THUMBNAIL_TITLE = new Map([
   [SORT_ORDER_VIDEO, "Video"],
+  [SORT_ORDER_AUDIO, "Audio"],
   [SORT_ORDER_IMAGE, "Image"],
   [SORT_ORDER_PDF, "PDF"],
   [SORT_ORDER_UNIDENTIFIED, "Unknown Media Type"],
@@ -38,6 +44,7 @@ const THUMBNAIL_TITLE = new Map([
 
 const DISPLAY_IMAGE = new Map([
   [SORT_ORDER_VIDEO, faVideo],
+  [SORT_ORDER_AUDIO, faMusic],
   [SORT_ORDER_IMAGE, faImage],
   [SORT_ORDER_PDF, faNewspaper],
   [SORT_ORDER_UNIDENTIFIED, faQuestion],
