@@ -269,7 +269,7 @@ class DataTransferComponent extends Component {
                   >
                     this link
                   </a>{" "}
-                  should should the Hubs &quot;What&apos;s New&quot; page. .
+                  should should the Hubs &quot;What&apos;s New&quot; page.
                 </li>
                 <li>
                   Once *both* links above are working, enable the &apos;Use Cloudflare Worker&apos; setting below and
