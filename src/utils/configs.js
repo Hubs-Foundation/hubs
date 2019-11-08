@@ -19,7 +19,10 @@ const configs = {};
   }
 });
 
-// Also include APP_CONFIG that reticulum injects as a script in the page head.
+// Also include configs that reticulum injects as a script in the page head.
+
+configs.AVAILABLE_INTEGRATIONS = window.AVAILABLE_INTEGRATIONS;
+
 if (window.APP_CONFIG) {
   configs.APP_CONFIG = window.APP_CONFIG;
   const { theme } = configs.APP_CONFIG;
