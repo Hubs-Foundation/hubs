@@ -59,7 +59,7 @@ export function setMatrixWorld(object3D, m) {
   object3D.matrixWorld.copy(m);
   object3D.matrix = object3D.matrix.getInverse(object3D.parent.matrixWorld).multiply(object3D.matrixWorld);
   object3D.matrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
-  object3D.childrenNeedMatrixUpdate = true;
+  object3D.childrenNeedMatrixWorldUpdate = true;
 }
 
 // Modified version of Don McCurdy's AnimationUtils.clone
@@ -266,7 +266,7 @@ export const affixToWorldUp = (function() {
       .normalize()
       .multiplyScalar(-1);
     outSide.crossVectors(outForward, worldUp);
-    outMat4.makeBasis(outSide, worldUp, outForward);
+    outMat4.makeBasis(outSide, worldUp, outForward.multiplyScalar(-1));
     //outMat4.scale(v.setFromMatrixScale(inMat4Copy)); //TODO: Fix scale
     outMat4.setPosition(v.setFromMatrixColumn(inMat4Copy, 3));
   };

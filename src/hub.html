@@ -81,8 +81,7 @@
                     sprite="name: spawn-point.png"
                     billboard
                     scale-in-screen-space="baseScale: 0.35 0.35 0.35;
-                                           addedScale: 0.02 0.02 0.02"
-                    position="0 0 0">
+                                           addedScale: 0.02 0.02 0.02">
                 </a-entity>
             </template>
             <template id="teleport-waypoint">
@@ -95,8 +94,7 @@
                   sprite="name: spawn-point.png"
                   billboard
                   scale-in-screen-space="baseScale: 0.35 0.35 0.35;
-                                         addedScale: 0.02 0.02 0.02"
-                  position="0 0 0">
+                                         addedScale: 0.02 0.02 0.02">
               </a-entity>
             </template>
             <template id="teleport-waypoint-icon">
@@ -107,8 +105,7 @@
                   sprite="name: spawn-point.png"
                   billboard
                   scale-in-screen-space="baseScale: 0.35 0.35 0.35;
-                                         addedScale: 0.02 0.02 0.02"
-                  position="0 0 0">
+                                         addedScale: 0.02 0.02 0.02">
               </a-entity>
             </template>
             <template id="latch-waypoint">
@@ -116,18 +113,11 @@
             <template id="latch-waypoint-icon">
             </template>
 
-            <template id="visible-thing-template">
-                <a-entity material="flatShading: true" geometry="primitive: cone"></a-entity>
-            </template>
-            <template id="way-point-interactable-template">
-                <a-entity>
-                    <a-entity
-                        overwrite-raycast-as-noop
-                        class="waypoint-model"
-                        gltf-model-plus="inflate: true; src: #spawn-point;"
-                        position="0 -1.6 0"
-                        rotation="0 180 0">
-                    </a-entity>
+            <template id="waypoint-preview-avatar-template">
+                <a-entity
+                    overwrite-raycast-as-noop
+                    class="waypoint-preview-avatar"
+                    gltf-model-plus="inflate: true; src: #spawn-point;">
                 </a-entity>
             </template>
             <template id="way-point-icon-template">
@@ -960,6 +950,7 @@
             character-controller="pivot: #avatar-pov-node"
             ik-root
             player-info
+            set-yxz-order
             periodic-full-syncs
             visible="false"
         >
@@ -1060,7 +1051,7 @@
                 rotation
                 pitch-yaw-rotator
                 set-yxz-order
-                matrix-auto-update
+                position="0 1.6 0"
             >
                 <a-entity
                     id="gaze-teleport"

@@ -4,7 +4,8 @@ import { easeOutQuadratic } from "../utils/easing";
 import { getPooledMatrix4, freePooledMatrix4 } from "../utils/mat4-pool";
 import qsTruthy from "../utils/qs_truthy";
 import { childMatch3 } from "../systems/camera-system";
-import { calculateCameraTransformForWaypoint, interpolateAffine } from "../utils/three-utils";
+import { calculateCameraTransformForWaypoint, interpolateAffine, affixToWorldUp } from "../utils/three-utils";
+import { getCurrentPlayerHeight } from "../utils/get-current-player-height";
 const enableWheelSpeed = qsTruthy("wheelSpeed") || qsTruthy("wheelspeed") || qsTruthy("ws");
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
@@ -130,36 +131,23 @@ AFRAME.registerComponent("character-controller", {
   enqueueWaypointTravelTo(inMat4, options = {}, travelTime, allowQuickTakeover) {
     const pooledMatrix = getPooledMatrix4();
     const tt = travelTime || DEFAULT_WAYPOINT_TRAVEL_TIME;
-//    options.allowQuickTakeover = allowQuickTakeover;
+    //    options.allowQuickTakeover = allowQuickTakeover;
     this.waypoints.push({ waypoint: pooledMatrix.copy(inMat4), options, travelTime: tt });
   },
 
   travelByWaypoint: (function() {
     const final = new THREE.Matrix4();
+    const translatedUp = new THREE.Matrix4();
     return function travelByWaypoint(inMat4) {
+      translatedUp.copy(inMat4);
+      translatedUp.elements[13] += getCurrentPlayerHeight();
       this.data.pivot.object3D.updateMatrices();
-      calculateCameraTransformForWaypoint(this.data.pivot.object3D.matrixWorld, inMat4, final);
+      calculateCameraTransformForWaypoint(this.data.pivot.object3D.matrixWorld, translatedUp, final);
       childMatch3(this.el.object3D, this.data.pivot.object3D, final);
     };
   })(),
 
   tick: (function() {
-    const move = new THREE.Matrix4();
-    const trans = new THREE.Matrix4();
-    const transInv = new THREE.Matrix4();
-    const pivotPos = new THREE.Vector3();
-    const rotationAxis = new THREE.Vector3(0, 1, 0);
-    const yawMatrix = new THREE.Matrix4();
-    const rotationMatrix = new THREE.Matrix4();
-    const rotationInvMatrix = new THREE.Matrix4();
-    const pivotRotationMatrix = new THREE.Matrix4();
-    const pivotRotationInvMatrix = new THREE.Matrix4();
-    const startPos = new THREE.Vector3();
-    const startScale = new THREE.Vector3();
-
-    const dummyPOV = new THREE.Vector4(); // Spin the rig, but allow free motion of the head along the way
-    const calculatedDummyPOV = new THREE.Matrix4();
-
     return function(t, dt) {
       if (!this.el.sceneEl.is("entered")) return;
       const vrMode = this.el.sceneEl.is("vr-mode");
@@ -186,6 +174,7 @@ AFRAME.registerComponent("character-controller", {
         WAYPOINT_TRAVEL_TIME = travelTime || DEFAULT_WAYPOINT_TRAVEL_TIME;
         this.data.pivot.object3D.updateMatrices();
         this.startPoint = new THREE.Matrix4().copy(this.data.pivot.object3D.matrixWorld);
+        this.startPoint.elements[13] -= getCurrentPlayerHeight();
         this.prevWaypointTravelTime = t;
         //        this.teleportSound = this.sfx.playSoundLooped(SOUND_TELEPORT_START);
       } else if (this.activeWaypoint && !vrMode && t - this.prevWaypointTravelTime <= WAYPOINT_TRAVEL_TIME) {
@@ -214,95 +203,76 @@ AFRAME.registerComponent("character-controller", {
           this.sfx.playSoundOneShot(SOUND_TELEPORT_END);
         }
       }
-      const deltaSeconds = dt / 1000;
-      const root = this.el.object3D;
-      const pivot = this.data.pivot.object3D;
-      const distance = this.data.groundAcc * deltaSeconds;
 
       const userinput = AFRAME.scenes[0].systems.userinput;
-      const userinputAngularVelocity = userinput.get(paths.actions.angularVelocity);
-      if (userinputAngularVelocity !== null && userinputAngularVelocity !== undefined) {
-        this.angularVelocity = userinputAngularVelocity;
-      }
-      if (enableWheelSpeed) {
-        const dCharSpeed = userinput.get(paths.actions.dCharSpeed) || 0;
-        this.charSpeed = THREE.Math.clamp(this.charSpeed + this.charSpeed * dCharSpeed, 0.1, 5);
-      }
-      const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
-
-      pivot.updateMatrices();
-      root.updateMatrices();
-
-      startScale.copy(root.scale);
-      startPos.copy(root.position);
-
       if (userinput.get(paths.actions.snapRotateLeft)) {
         this.snapRotateLeft();
       }
       if (userinput.get(paths.actions.snapRotateRight)) {
         this.snapRotateRight();
       }
-      const cameraDelta = userinput.get(paths.actions.cameraDelta);
-      const acc = userinput.get(paths.actions.characterAcceleration);
-      if (acc) {
-        this.accelerationInput.set(
-          this.accelerationInput.x + acc[0],
-          this.accelerationInput.y + 0,
-          this.accelerationInput.z + acc[1]
-        );
-      }
       if (userinput.get(paths.actions.toggleFly)) {
         this.el.messageDispatch.dispatch("/fly");
       }
-
-      pivotPos.copy(pivot.position);
-      pivotPos.applyMatrix4(root.matrix);
-      trans.setPosition(pivotPos);
-      transInv.makeTranslation(-pivotPos.x, -pivotPos.y, -pivotPos.z);
-      rotationMatrix.makeRotationAxis(rotationAxis, root.rotation.y);
-      rotationInvMatrix.makeRotationAxis(rotationAxis, -root.rotation.y);
-      pivotRotationMatrix.makeRotationAxis(rotationAxis, pivot.rotation.y);
-      pivotRotationInvMatrix.makeRotationAxis(rotationAxis, -pivot.rotation.y);
-      this.updateVelocity(deltaSeconds, pivot);
-      this.accelerationInput.set(0, 0, 0);
-
-      const boost = userinput.get(paths.actions.boost) ? 2 : 1;
-      const speed = this.isMovementDisabled ? 0 : distance * boost * this.charSpeed;
-      move.makeTranslation(this.velocity.x * speed, this.velocity.y * speed, this.velocity.z * speed);
-      yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
-
-      // Translate to middle of playspace (player rig)
-      root.matrix.premultiply(transInv);
-      // Zero playspace (player rig) rotation
-      root.matrix.premultiply(rotationInvMatrix);
-      // Zero pivot (camera/head) rotation
-      root.matrix.premultiply(pivotRotationInvMatrix);
-      // Apply joystick translation
-      root.matrix.premultiply(move);
-      // Apply joystick yaw rotation
-      root.matrix.premultiply(yawMatrix);
-      // Apply snap rotation if necessary
-      root.matrix.premultiply(this.pendingSnapRotationMatrix);
-      // Reapply pivot (camera/head) rotation
-      root.matrix.premultiply(pivotRotationMatrix);
-      // Reapply playspace (player rig) rotation
-      root.matrix.premultiply(rotationMatrix);
-      // Reapply playspace (player rig) translation
-      root.matrix.premultiply(trans);
-      // update pos/rot/scale
-      root.matrix.decompose(root.position, root.quaternion, root.scale);
-
-      // TODO: the above matrix trnsfomraitons introduce some floating point errors in scale, this reverts them to
-      // avoid spamming network with fake scale updates
-      root.scale.copy(startScale);
-
-      this.pendingSnapRotationMatrix.identity(); // Revert to identity
-
-      if (!this.isMovementDisabled && this.velocity.lengthSq() > EPS && !this.data.fly) {
-        this.setPositionOnNavMesh(startPos, root.position, root);
+      const characterAcceleration = userinput.get(paths.actions.characterAcceleration);
+      if (characterAcceleration) {
+        this.accelerationInput.set(
+          this.accelerationInput.x + characterAcceleration[0],
+          this.accelerationInput.y,
+          this.accelerationInput.z + characterAcceleration[1]
+        );
       }
 
-      root.matrixNeedsUpdate = true;
+      this.el.object3D.updateMatrices();
+      this.data.pivot.object3D.updateMatrices();
+
+      const m1 = new THREE.Matrix4().extractRotation(this.data.pivot.object3D.matrixWorld);
+      const m2 = new THREE.Matrix4()
+        .identity()
+        .copy(this.pendingSnapRotationMatrix)
+        .multiply(m1);
+      const scale = new THREE.Vector3().setFromMatrixScale(this.data.pivot.object3D.matrixWorld);
+      const position = new THREE.Vector3().setFromMatrixPosition(this.data.pivot.object3D.matrixWorld);
+      const snappedPOV = new THREE.Matrix4()
+        .copy(m2)
+        .scale(scale)
+        .setPosition(position.x, position.y, position.z);
+      const upAffixedPOVTransform = new THREE.Matrix4().extractRotation(snappedPOV);
+      if (!this.data.fly) {
+        affixToWorldUp(upAffixedPOVTransform, upAffixedPOVTransform);
+      }
+      const translationMat = new THREE.Matrix4()
+        .identity()
+        .copy(upAffixedPOVTransform)
+        .multiply(
+          new THREE.Matrix4()
+            .makeTranslation(this.accelerationInput.x, this.accelerationInput.y, -this.accelerationInput.z)
+            .multiplyScalar((this.data.groundAcc * dt) / 1000)
+        );
+      const translationMat2 = new THREE.Matrix4().makeTranslation(
+        translationMat.elements[12],
+        translationMat.elements[13],
+        translationMat.elements[14]
+      );
+      const newPOV = new THREE.Matrix4().copy(translationMat2).multiply(snappedPOV);
+      if (!this.data.fly) {
+        const footPosition = new THREE.Vector3().setFromMatrixPosition(newPOV);
+        const newFootPosition = new THREE.Vector3();
+        const playerHeight = getCurrentPlayerHeight();
+        footPosition.y -= playerHeight;
+        this.findPositionOnNavMesh(
+          new THREE.Vector3().setFromMatrixPosition(this.el.object3D.matrixWorld),
+          footPosition,
+          newFootPosition
+        );
+        newFootPosition.y += playerHeight;
+        newPOV.setPosition(newFootPosition);
+      }
+
+      childMatch3(this.el.object3D, this.data.pivot.object3D, newPOV);
+
+      this.pendingSnapRotationMatrix.identity(); // Revert to identity
+      this.accelerationInput.set(0, 0, 0);
     };
   })(),
 
@@ -322,6 +292,17 @@ AFRAME.registerComponent("character-controller", {
     this.navNode =
       pathfinder.getClosestNode(pos, NAV_ZONE, this.navGroup, true) ||
       pathfinder.getClosestNode(pos, NAV_ZONE, this.navGroup);
+  },
+
+  findPositionOnNavMesh: function(start, end, outPos) {
+    const { pathfinder } = this.el.sceneEl.systems.nav;
+    if (!(NAV_ZONE in pathfinder.zones)) return;
+    if (this.navGroup === null) {
+      this.navGroup = pathfinder.getGroup(NAV_ZONE, end, true, true);
+    }
+    this._setNavNode(end);
+    this.navNode = pathfinder.clampStep(start, end, this.navNode, NAV_ZONE, this.navGroup, outPos);
+    return outPos;
   },
 
   setPositionOnNavMesh: function(start, end, object3D) {
