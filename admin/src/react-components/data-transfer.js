@@ -131,7 +131,8 @@ class DataTransferComponent extends Component {
     this.setState({
       workerDomain: adminInfo.worker_domain,
       assetsDomain: adminInfo.assets_domain,
-      enableWorker: !!retConfig && !!retConfig.phx && retConfig.phx.cors_proxy_url_host === adminInfo.workerDomain,
+      enableWorker:
+        !!retConfig && !!retConfig.phx && retConfig.phx.cors_proxy_url_host === `cors-proxy.${adminInfo.worker_domain}`,
       loading: false
     });
   }
