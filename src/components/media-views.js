@@ -402,7 +402,10 @@ AFRAME.registerComponent("media-video", {
       const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
       this.playPauseButton.object3D.visible =
         !!this.video && !this.videoIsLive && (!isPinned || window.APP.hubChannel.can("pin_objects"));
-      this.snapButton.object3D.visible = !!this.video && window.APP.hubChannel.can("spawn_and_move_media");
+      this.snapButton.object3D.visible =
+        !!this.video &&
+        !this.data.contentType.startsWith("audio/") &&
+        window.APP.hubChannel.can("spawn_and_move_media");
       this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
       this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
     }
@@ -565,14 +568,14 @@ AFRAME.registerComponent("media-video", {
       this.el.setObject3D("mesh", this.mesh);
     }
 
-    if (this.data.contentType === "audio/mpeg") {
+    if (this.data.contentType.startsWith("audio/")) {
       this.mesh.material.map = audioIconTexture;
     } else {
       this.mesh.material.map = texture;
     }
     this.mesh.material.needsUpdate = true;
 
-    if (projection === "flat" && this.data.contentType !== "audio/mpeg") {
+    if (projection === "flat" && !this.data.contentType.startsWith("audio/")) {
       scaleToAspectRatio(this.el, texture.image.videoHeight / texture.image.videoWidth);
     }
 
@@ -593,7 +596,7 @@ AFRAME.registerComponent("media-video", {
       const videoEl = await createVideoEl();
 
       let texture, isReady;
-      if (contentType === "audio/mpeg") {
+      if (contentType.startsWith("audio/")) {
         // We want to treat audio almost exactly like video, so we mock a video texture with an image property.
         texture = new THREE.Texture();
         texture.image = videoEl;

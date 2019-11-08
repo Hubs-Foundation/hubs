@@ -19,7 +19,7 @@ const SORT_ORDER_PDF = 3;
 const SORT_ORDER_MODEL = 4;
 const SORT_ORDER_UNIDENTIFIED = 5;
 function mediaSortOrder(el) {
-  if (el.components["media-video"] && el.components["media-video"].data.contentType === "audio/mpeg") {
+  if (el.components["media-video"] && el.components["media-video"].data.contentType.startsWith("audio/")) {
     return SORT_ORDER_AUDIO;
   }
   if (el.components["media-video"]) return SORT_ORDER_VIDEO;
