@@ -283,25 +283,6 @@ export const calculateCameraTransformForWaypoint = (function() {
   };
 })();
 
-export const calculateCameraTransformForWaypoint2 = (function() {
-  return function calculateCameraTransformForWaypoint2(cameraTransform, waypointTransform, outMat4) {
-    calculateCameraTransformForWaypoint(cameraTransform, waypointTransform, outMat4);
-
-    return outMat4;
-  };
-})();
-export const calculateCameraTransformForWaypoint3 = (function() {
-  const upAffixedCameraTransform = new THREE.Matrix4();
-  const upAffixedWaypointTransform = new THREE.Matrix4();
-  const detachFromWorldUp = new THREE.Matrix4();
-  return function calculateCameraTransformForWaypoint3(cameraTransform, waypointTransform, outMat4) {
-    affixToWorldUp(cameraTransform, upAffixedCameraTransform);
-    detachFromWorldUp.getInverse(upAffixedCameraTransform).multiply(cameraTransform);
-    affixToWorldUp(waypointTransform, upAffixedWaypointTransform); // TODO: Option not to fix world up
-    outMat4.copy(upAffixedWaypointTransform).multiply(detachFromWorldUp); // TODO: Try opposite matrix order that agrees more with intuition
-  };
-})();
-
 export const calculateViewingDistance = (function() {
   return function calculateViewingDistance(fov, aspect, object, box, center, vrMode) {
     const halfYExtents = Math.max(Math.abs(box.max.y - center.y), Math.abs(center.y - box.min.y));
@@ -328,5 +309,17 @@ export const rotateInPlaceAroundWorldUp = (function() {
       .copy(endRotation.makeRotationY(theta).multiply(startRotation.extractRotation(inMat4Copy)))
       .scale(v.setFromMatrixScale(inMat4Copy))
       .setPosition(v.setFromMatrixPosition(inMat4Copy));
+  };
+})();
+
+export const childMatch = (function() {
+  const childInverse = new THREE.Matrix4();
+  const newParentMatrix = new THREE.Matrix4();
+  // transform the parent such that its child matches the target
+  return function childMatch(parent, child, target) {
+    child.updateMatrices();
+    childInverse.getInverse(child.matrix);
+    newParentMatrix.multiplyMatrices(target, childInverse);
+    setMatrixWorld(parent, newParentMatrix);
   };
 })();

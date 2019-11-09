@@ -3,8 +3,13 @@ import { SOUND_SNAP_ROTATE, SOUND_TELEPORT_START, SOUND_TELEPORT_END } from "../
 import { easeOutQuadratic } from "../utils/easing";
 import { getPooledMatrix4, freePooledMatrix4 } from "../utils/mat4-pool";
 import qsTruthy from "../utils/qs_truthy";
-import { childMatch3 } from "../systems/camera-system";
-import { rotateInPlaceAroundWorldUp, calculateCameraTransformForWaypoint, interpolateAffine, affixToWorldUp } from "../utils/three-utils";
+import {
+  childMatch,
+  rotateInPlaceAroundWorldUp,
+  calculateCameraTransformForWaypoint,
+  interpolateAffine,
+  affixToWorldUp
+} from "../utils/three-utils";
 import { getCurrentPlayerHeight } from "../utils/get-current-player-height";
 import { m4String } from "../utils/pretty-print";
 const enableWheelSpeed = qsTruthy("wheelSpeed") || qsTruthy("wheelspeed") || qsTruthy("ws");
@@ -163,7 +168,7 @@ AFRAME.registerComponent("character-controller", {
       rotateInPlaceAroundWorldUp(translatedUp, Math.PI, translatedUp); // Waypoints are backwards
       this.data.pivot.object3D.updateMatrices();
       calculateCameraTransformForWaypoint(this.data.pivot.object3D.matrixWorld, translatedUp, final);
-      childMatch3(this.el.object3D, this.data.pivot.object3D, final);
+      childMatch(this.el.object3D, this.data.pivot.object3D, final);
     };
   })(),
 
@@ -272,7 +277,7 @@ AFRAME.registerComponent("character-controller", {
         );
         newPOV.setPosition(newPOVPosition);
       }
-      childMatch3(this.el.object3D, this.data.pivot.object3D, newPOV);
+      childMatch(this.el.object3D, this.data.pivot.object3D, newPOV);
       this.accelerationInput.set(0, 0, 0);
       this.snapRotation.identity();
     };

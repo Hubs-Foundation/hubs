@@ -1,5 +1,5 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
-import { setMatrixWorld, calculateViewingDistance } from "../utils/three-utils";
+import { childMatch, setMatrixWorld, calculateViewingDistance } from "../utils/three-utils";
 import { paths } from "./userinput/paths";
 import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
@@ -30,38 +30,7 @@ const decompose = (function() {
   };
 })();
 
-export const childMatch = (function() {
-  const cp = new THREE.Vector3();
-  const cq = new THREE.Quaternion();
-  const cqI = new THREE.Quaternion();
-  const twp = new THREE.Vector3();
-  const twq = new THREE.Quaternion();
-  // transform the parent such that its child matches the target
-  return function childMatch(parent, child, target) {
-    decompose(target, twp, twq);
-    cp.copy(child.position);
-    cq.copy(child.quaternion);
-    cqI.copy(cq).inverse();
-    parent.quaternion.copy(twq).multiply(cqI);
-    parent.position.subVectors(twp, cp.applyQuaternion(parent.quaternion));
-    parent.matrixNeedsUpdate = true;
-  };
-})();
-
-export const childMatch3 = (function() {
-  const childInverse = new THREE.Matrix4();
-  const newParentMatrix = new THREE.Matrix4();
-  // transform the parent such that its child matches the target
-  return function childMatch3(parent, child, target) {
-    child.updateMatrices();
-    childInverse.getInverse(child.matrix);
-    newParentMatrix.multiplyMatrices(target, childInverse);
-    setMatrixWorld(parent, newParentMatrix);
-  };
-})();
-
 const IDENTITY = new THREE.Matrix4().identity();
-
 const orbit = (function() {
   const owq = new THREE.Quaternion();
   const owp = new THREE.Vector3();
@@ -103,7 +72,7 @@ const orbit = (function() {
     );
     target.matrixNeedsUpdate = true;
     target.updateMatrices();
-    childMatch3(rig, camera, target.matrixWorld);
+    childMatch(rig, camera, target.matrixWorld);
   };
 })();
 
@@ -142,7 +111,7 @@ const moveRigSoCameraLooksAtObject = (function() {
     target.quaternion.copy(owq);
     target.matrixNeedsUpdate = true;
     target.updateMatrices();
-    childMatch3(rig, camera, target.matrixWorld);
+    childMatch(rig, camera, target.matrixWorld);
   };
 })();
 
