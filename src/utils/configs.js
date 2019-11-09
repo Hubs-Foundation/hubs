@@ -1,5 +1,6 @@
 // Read configs from global variable if available, otherwise use the process.env injected from build.
 const configs = {};
+let isAdmin = false;
 
 [
   "RETICULUM_SERVER",
@@ -42,6 +43,7 @@ configs.feature = featureName => {
   const isLocalDevelopment = process.env.NODE_ENV === "development";
   const enableAll = isLocalDevelopment || process.env.ENABLE_ALL_FEATURES;
   const features = configs.APP_CONFIG && configs.APP_CONFIG.features;
+  features.enable_spoke = isAdmin || features.enable_spoke;
   return enableAll || (features && features[featureName]);
 };
 
@@ -52,6 +54,10 @@ configs.image = (imageName, defaultImage, cssUrl) => {
 
 configs.link = (linkName, defaultValue) => {
   return (configs.APP_CONFIG && configs.APP_CONFIG.links && configs.APP_CONFIG.links[linkName]) || defaultValue;
+};
+
+configs.setIsAdmin = _isAdmin => {
+  isAdmin = _isAdmin;
 };
 
 export default configs;

@@ -9,6 +9,7 @@ import { createAndRedirectToNewHub, connectToReticulum, fetchReticulumAuthentica
 import Store from "./storage/store";
 import jwtDecode from "jwt-decode";
 import "./utils/theme";
+import configs from "./utils/configs";
 
 const qs = new URLSearchParams(location.search);
 registerTelemetry("/home", "Hubs Home Page");
@@ -79,6 +80,7 @@ window.addEventListener("beforeinstallprompt", e => {
     retPhxChannel.join().receive("ok", () => {
       retPhxChannel.push("refresh_perms_token").receive("ok", ({ perms_token }) => {
         const perms = jwtDecode(perms_token);
+        configs.setIsAdmin(perms.postgrest_role === "ret_admin");
 
         if (perms.postgrest_role === "ret_admin") {
           showAdmin = true;
