@@ -46,7 +46,7 @@ if (ENABLE_TESTS) {
       });
       this.el.appendChild(entity01);
       entity01.object3D.position.set(5, 1.6, 0);
-      entity01.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
+      entity01.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), -Math.PI / 2);
       entity01.object3D.matrixNeedsUpdate = true;
 
       const entity02 = document.createElement("a-entity");
@@ -63,7 +63,7 @@ if (ENABLE_TESTS) {
       });
       this.el.appendChild(entity02);
       entity02.object3D.position.set(0, 1.6, 5);
-      entity02.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
+      entity02.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI);
       entity02.object3D.matrixNeedsUpdate = true;
 
       const entity03 = document.createElement("a-entity");
@@ -81,7 +81,7 @@ if (ENABLE_TESTS) {
 
       this.el.appendChild(entity03);
       entity03.object3D.position.set(-5, 1.6, 0);
-      entity03.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), -Math.PI / 2);
+      entity03.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
       entity03.object3D.matrixNeedsUpdate = true;
     }
   });
@@ -107,7 +107,7 @@ if (ENABLE_TESTS) {
       });
       this.el.appendChild(entity01);
       entity01.object3D.position.set(5, 1.6, 0);
-      entity01.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
+      entity01.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), -Math.PI / 2);
       entity01.object3D.matrixNeedsUpdate = true;
 
       const entity02 = document.createElement("a-entity");
@@ -124,7 +124,7 @@ if (ENABLE_TESTS) {
       });
       this.el.appendChild(entity02);
       entity02.object3D.position.set(0, 1.6, 5);
-      entity02.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
+      entity02.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI);
       entity02.object3D.matrixNeedsUpdate = true;
 
       const entity03 = document.createElement("a-entity");
@@ -142,7 +142,7 @@ if (ENABLE_TESTS) {
 
       this.el.appendChild(entity03);
       entity03.object3D.position.set(-5, 1.6, 0);
-      entity03.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), -Math.PI / 2);
+      entity03.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
       entity03.object3D.matrixNeedsUpdate = true;
     }
   });
@@ -168,7 +168,7 @@ if (ENABLE_TESTS) {
       });
       this.el.appendChild(entity01);
       entity01.object3D.position.set(5, 1.6, 0);
-      entity01.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
+      entity01.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), -Math.PI / 2);
       entity01.object3D.matrixNeedsUpdate = true;
 
       const entity02 = document.createElement("a-entity");
@@ -185,7 +185,7 @@ if (ENABLE_TESTS) {
       });
       this.el.appendChild(entity02);
       entity02.object3D.position.set(0, 1.6, 5);
-      entity02.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
+      entity02.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI);
       entity02.object3D.matrixNeedsUpdate = true;
 
       const entity03 = document.createElement("a-entity");
@@ -203,7 +203,7 @@ if (ENABLE_TESTS) {
 
       this.el.appendChild(entity03);
       entity03.object3D.position.set(-5, 1.6, 0);
-      entity03.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), -Math.PI / 2);
+      entity03.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
       entity03.object3D.matrixNeedsUpdate = true;
     }
   });
@@ -229,7 +229,7 @@ if (ENABLE_TESTS) {
       });
       this.el.appendChild(entity01);
       entity01.object3D.position.set(5, 1.6, 0);
-      entity01.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
+      entity01.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), -Math.PI / 2);
       entity01.object3D.matrixNeedsUpdate = true;
 
       const entity02 = document.createElement("a-entity");
@@ -246,7 +246,7 @@ if (ENABLE_TESTS) {
       });
       this.el.appendChild(entity02);
       entity02.object3D.position.set(0, 1.6, 5);
-      entity02.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), 0);
+      entity02.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI);
       entity02.object3D.matrixNeedsUpdate = true;
 
       const entity03 = document.createElement("a-entity");
@@ -264,7 +264,7 @@ if (ENABLE_TESTS) {
 
       this.el.appendChild(entity03);
       entity03.object3D.position.set(-5, 1.6, 0);
-      entity03.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), -Math.PI / 2);
+      entity03.object3D.quaternion.setFromAxisAngle(v.set(0, 1, 0), Math.PI / 2);
       entity03.object3D.matrixNeedsUpdate = true;
     }
   });

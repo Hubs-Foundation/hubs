@@ -4,8 +4,9 @@ import { easeOutQuadratic } from "../utils/easing";
 import { getPooledMatrix4, freePooledMatrix4 } from "../utils/mat4-pool";
 import qsTruthy from "../utils/qs_truthy";
 import { childMatch3 } from "../systems/camera-system";
-import { calculateCameraTransformForWaypoint, interpolateAffine, affixToWorldUp } from "../utils/three-utils";
+import { rotateInPlaceAroundWorldUp, calculateCameraTransformForWaypoint, interpolateAffine, affixToWorldUp } from "../utils/three-utils";
 import { getCurrentPlayerHeight } from "../utils/get-current-player-height";
+import { m4String } from "../utils/pretty-print";
 const enableWheelSpeed = qsTruthy("wheelSpeed") || qsTruthy("wheelspeed") || qsTruthy("ws");
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
@@ -158,7 +159,8 @@ AFRAME.registerComponent("character-controller", {
     const translatedUp = new THREE.Matrix4();
     return function travelByWaypoint(inMat4) {
       translatedUp.copy(inMat4);
-      translatedUp.elements[13] += getCurrentPlayerHeight();
+      translatedUp.elements[13] += getCurrentPlayerHeight(); // Waypoints are placed at your feet
+      rotateInPlaceAroundWorldUp(translatedUp, Math.PI, translatedUp); // Waypoints are backwards
       this.data.pivot.object3D.updateMatrices();
       calculateCameraTransformForWaypoint(this.data.pivot.object3D.matrixWorld, translatedUp, final);
       childMatch3(this.el.object3D, this.data.pivot.object3D, final);

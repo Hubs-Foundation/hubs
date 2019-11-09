@@ -1,4 +1,4 @@
-import { setMatrixWorld } from "../utils/three-utils";
+import { setMatrixWorld, rotateInPlaceAroundWorldUp } from "../utils/three-utils";
 import { DebugDrawRect } from "./waypoint-tests";
 import { isTagged } from "../components/tags";
 import { getCurrentPlayerHeight } from "../utils/get-current-player-height";
@@ -61,14 +61,14 @@ function templatesToLoadForWaypointData(data) {
   const templateIds = [];
   if (isOccupiableTeleportWaypoint(data)) {
     templateIds.push("occupiable-waypoint-icon");
-  } else if (isUnoccupiableSpawnPoint(data)) {
-    templateIds.push("teleport-waypoint-icon");
-  } else if (isOccupiableSpawnPoint(data)) {
-    templateIds.push("occupiable-waypoint-icon");
   } else if (isUnoccupiableTeleportWaypoint(data)) {
     templateIds.push("teleport-waypoint-icon");
+  } else if (isUnoccupiableSpawnPoint(data)) {
+    //    templateIds.push("teleport-waypoint-icon");
+  } else if (isOccupiableSpawnPoint(data)) {
+    //    templateIds.push("occupiable-waypoint-icon");
   } else {
-    templateIds.push("teleport-waypoint-icon");
+    //templateIds.push("teleport-waypoint-icon");
   }
   return templateIds;
 }
@@ -145,16 +145,6 @@ export class WaypointSystem {
           previouslyOccupiedWaypoints
             .filter(wp => wp !== waypointComponent && isOccupiedByMe(wp))
             .forEach(unoccupyWaypoint);
-
-          //this.characterController =
-          //  this.characterController || document.getElementById("avatar-rig").components["character-controller"];
-          //waypointComponent.el.object3D.updateMatrices();
-
-          //this.characterController.enqueueWaypointTravelTo(
-          //  waypointComponent.el.object3D.matrixWorld,
-          //  waypointComponent.data,
-          //  0
-          //);
           debugDrawRect("lightgreen");
         } else {
           console.log("Could not occupy waypoint:", waypointComponent);
@@ -167,7 +157,6 @@ export class WaypointSystem {
       this.eventHandlers[elFromTemplate.object3D.uuid] = this.eventHandlers[elFromTemplate.object3D.uuid] || {};
       if (
         component.data.canBeClicked &&
-        !component.data.canBeSpawnPoint &&
         (elFromTemplate.classList.contains("teleport-waypoint-icon") ||
           elFromTemplate.classList.contains("occupiable-waypoint-icon"))
       ) {
@@ -175,12 +164,8 @@ export class WaypointSystem {
           component.el.object3D.updateMatrices();
           if (this.waypointPreviewAvatar) {
             this.waypointPreviewAvatar.object3D.visible = true;
-
-            const target = new THREE.Matrix4().identity();
-            target.makeRotationY(Math.PI);
-            const t2 = new THREE.Matrix4().identity();
-            t2.copy(component.el.object3D.matrixWorld).multiply(target);
-            setMatrixWorld(this.waypointPreviewAvatar.object3D, t2);
+            component.el.object3D.updateMatrices();
+            setMatrixWorld(this.waypointPreviewAvatar.object3D, component.el.object3D.matrixWorld);
           }
         };
         const onUnhover = () => {
@@ -276,11 +261,13 @@ export class WaypointSystem {
     return waypointComponent;
   }
   tryToOccupy(waypointComponent) {
+    const previousPOV = new THREE.Matrix4();
     return new Promise(resolve => {
       this.avatarPOV = this.avatarPOV || document.getElementById("avatar-pov-node");
       this.avatarPOV.object3D.updateMatrices();
-      const previousPOV = this.avatarPOV.object3D.matrixWorld.clone();
+      previousPOV.copy(this.avatarPOV.object3D.matrixWorld);
       previousPOV.elements[13] -= getCurrentPlayerHeight();
+      rotateInPlaceAroundWorldUp(previousPOV, Math.PI, previousPOV);
 
       waypointComponent.el.object3D.updateMatrices();
       this.characterController =
@@ -368,6 +355,7 @@ export class WaypointSystem {
         elementFromTemplate.classList.contains("teleport-waypoint-icon") ||
         elementFromTemplate.classList.contains("occupiable-waypoint-icon")
       ) {
+        elementFromTemplate.object3D.visible = this.scene.is("frozen");
         waypointComponent.el.object3D.updateMatrices();
         const target = new THREE.Matrix4().identity();
         target.makeRotationY(Math.PI);

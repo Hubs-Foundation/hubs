@@ -259,12 +259,11 @@ export const affixToWorldUp = (function() {
   const inMat4Copy = new THREE.Matrix4();
   return function affixToWorldUp(inMat4, outMat4) {
     inRotationMat4.identity().extractRotation(inMat4Copy.copy(inMat4));
-    inForward.setFromMatrixColumn(inRotationMat4, 2);
+    inForward.setFromMatrixColumn(inRotationMat4, 2).multiplyScalar(-1);
     outForward
       .copy(inForward)
       .sub(v.copy(inForward).projectOnVector(worldUp.set(0, 1, 0)))
-      .normalize()
-      .multiplyScalar(-1);
+      .normalize();
     outSide.crossVectors(outForward, worldUp);
     outMat4.makeBasis(outSide, worldUp, outForward.multiplyScalar(-1));
     //outMat4.scale(v.setFromMatrixScale(inMat4Copy)); //TODO: Fix scale
@@ -315,5 +314,19 @@ export const calculateViewingDistance = (function() {
     const length3 = Math.abs(box.max.z - center.z) + Math.max(length1, length2);
     const length = vrMode ? Math.max(0.25, length3) : length3;
     return length || 1.25;
+  };
+})();
+
+export const rotateInPlaceAroundWorldUp = (function() {
+  const inMat4Copy = new THREE.Matrix4();
+  const startRotation = new THREE.Matrix4();
+  const endRotation = new THREE.Matrix4();
+  const v = new THREE.Vector3();
+  return function rotateInPlaceAroundWorldUp(inMat4, theta, outMat4) {
+    inMat4Copy.copy(inMat4);
+    return outMat4
+      .copy(endRotation.makeRotationY(theta).multiply(startRotation.extractRotation(inMat4Copy)))
+      .scale(v.setFromMatrixScale(inMat4Copy))
+      .setPosition(v.setFromMatrixPosition(inMat4Copy));
   };
 })();
