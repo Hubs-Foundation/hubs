@@ -362,7 +362,16 @@ export class WaypointSystem {
         target.elements[13] = getCurrentPlayerHeight();
         const t2 = new THREE.Matrix4().identity();
         t2.copy(waypointComponent.el.object3D.matrixWorld).multiply(target);
-        setMatrixWorld(elementFromTemplate.object3D, t2);
+        elementFromTemplate.object3D.updateMatrices();
+        const scale = new THREE.Vector3().setFromMatrixScale(elementFromTemplate.object3D.matrixWorld);
+        if (window.logStuff) {
+          console.log(scale);
+        }
+        const t3 = new THREE.Matrix4()
+          .extractRotation(t2)
+          .scale(scale)
+          .copyPosition(t2);
+        setMatrixWorld(elementFromTemplate.object3D, t3);
       }
     };
     function tickWaypoint(waypointComponent) {
@@ -371,6 +380,7 @@ export class WaypointSystem {
       // TODO: When the icon is hovered, show the transparent waypoint preview model
     }
     this.ready.forEach(tickWaypoint.bind(this));
+    window.logStuff = false;
   }
 }
 
