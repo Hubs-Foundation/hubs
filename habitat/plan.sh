@@ -49,6 +49,7 @@ do_build() {
   mv dist/schema.toml dist/pages
   mv dist/favicon.ico dist/pages
   mv dist/app-thumbnail.png dist/pages
+  mv dist/app-icon.png dist/pages
 }
 
 do_install() {
