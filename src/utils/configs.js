@@ -1,5 +1,6 @@
 // Read configs from global variable if available, otherwise use the process.env injected from build.
 const configs = {};
+let isAdmin = false;
 
 [
   "RETICULUM_SERVER",
@@ -19,7 +20,10 @@ const configs = {};
   }
 });
 
-// Also include APP_CONFIG that reticulum injects as a script in the page head.
+// Also include configs that reticulum injects as a script in the page head.
+
+configs.AVAILABLE_INTEGRATIONS = window.AVAILABLE_INTEGRATIONS;
+
 if (window.APP_CONFIG) {
   configs.APP_CONFIG = window.APP_CONFIG;
   const { theme } = configs.APP_CONFIG;
@@ -39,6 +43,9 @@ configs.feature = featureName => {
   const isLocalDevelopment = process.env.NODE_ENV === "development";
   const enableAll = isLocalDevelopment && !process.env.USE_FEATURE_CONFIG;
   const features = configs.APP_CONFIG && configs.APP_CONFIG.features;
+  if (features) {
+    features.enable_spoke = isAdmin || features.enable_spoke;
+  }
   return enableAll || (features && features[featureName]);
 };
 
@@ -49,6 +56,10 @@ configs.image = (imageName, defaultImage, cssUrl) => {
 
 configs.link = (linkName, defaultValue) => {
   return (configs.APP_CONFIG && configs.APP_CONFIG.links && configs.APP_CONFIG.links[linkName]) || defaultValue;
+};
+
+configs.setIsAdmin = _isAdmin => {
+  isAdmin = _isAdmin;
 };
 
 export default configs;
