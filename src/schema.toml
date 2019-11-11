@@ -1,12 +1,12 @@
 # App config schema
 
-translations.en."home.hero_blurb" = { category = "translations", type = "string", name = "Hero Blurb", description = "Blurb displayed on the front page." }
-translations.en."settings.community" = { category = "translations", type = "string", name = "Community Prompt", description = "Prompt for joining your community." }
 translations.en."app-name" = { category = "translations", type = "string", name = "App Name", description = "Name used across the app." }
+translations.en."app-description" = { category = "translations", type = "string", name = "App Description", description = "App description used across the app." }
 translations.en."company-name" = { category = "translations", type = "string", name = "Company Name", description = "Company name used across the app." }
+translations.en."share-hashtag" = { category = "translations", type = "string", name = "Share Hashtag", description = "Hashtag used in share messages." }
 translations.en."app-short-domain" = { category = "translations", type = "string", name = "Short App Domain", description = "Short app domain." }
 translations.en."contact-email" = { category = "translations", type = "string", name = "Contact email", description = "General contact email." }
-translations.en."share-hashtag" = { category = "translations", type = "string", name = "Share Hashtag", description = "Hashtag used in share messages." }
+translations.en."settings.community" = { category = "translations", type = "string", name = "Community Prompt", description = "Prompt for joining your community." }
 
 features.permissive_rooms = { category = "features", type = "boolean", name = "Permissive Rooms", description = "Use permissive room settings for new rooms." }
 features.show_terms = { category = "features", type = "boolean", name = "Show Terms of Use", description = "Show links to the terms of use." }
@@ -30,8 +30,11 @@ features.show_feedback_ui = { category = "features", type = "boolean", internal 
 features.show_issue_report_dialog = { category = "features", type = "boolean", internal = "true" }
 
 images.logo = { category = "images", type = "file", name = "App Logo", description = "Logo used across the app." }
+images.favicon = { category = "images", type = "file", name = "Favicon", description = "Icon for the app." }
+images.app_icon = { category = "images", type = "file", name = "App Icon", description = "Icon for the app." }
+images.app_thumbnail = { category = "images", type = "file", name = "App Thumbnail", description = "Thumbnail for app." }
 images.company_logo = { category = "images", type = "file", name = "Company Logo", description = "Company logo used across the app." }
-images.home_background = { category = "images", type = "file" }
+images.home_background = { category = "images", type = "file", name = "Home background", description = "Background image on the home page." }
 
 theme.dark-theme = { category = "theme", type = "boolean", name = "Dark Mode", description = "Use dark UI styling." }
 theme.action-color = { category = "theme", type = "color", name = "Primary Color", description = "Call to action button color." }

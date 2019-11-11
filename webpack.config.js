@@ -326,20 +326,20 @@ module.exports = (env, argv) => ({
     ]),
     new CopyWebpackPlugin([
       {
-        from: "src/assets/images/hub-preview.png",
-        to: "hub-preview.png"
+        from: "src/assets/images/app-icon.png",
+        to: "app-icon.png"
+      }
+    ]),
+    new CopyWebpackPlugin([
+      {
+        from: "src/assets/images/app-thumbnail.png",
+        to: "app-thumbnail.png"
       }
     ]),
     new CopyWebpackPlugin([
       {
         from: "src/hub.service.js",
         to: "hub.service.js"
-      }
-    ]),
-    new CopyWebpackPlugin([
-      {
-        from: "src/assets/manifest.webmanifest",
-        to: "manifest.webmanifest"
       }
     ]),
     new CopyWebpackPlugin([
@@ -367,7 +367,7 @@ module.exports = (env, argv) => ({
         SENTRY_DSN: process.env.SENTRY_DSN,
         GA_TRACKING_ID: process.env.GA_TRACKING_ID,
         POSTGREST_SERVER: process.env.POSTGREST_SERVER,
-        ENABLE_ALL_FEATURES: process.env.ENABLE_ALL_FEATURES
+        USE_FEATURE_CONFIG: process.env.USE_FEATURE_CONFIG
       })
     })
   ]

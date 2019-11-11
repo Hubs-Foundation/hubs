@@ -421,7 +421,7 @@ class HomeRoot extends Component {
             <img src={configs.image("logo", hubLogo)} />
           </div>
           <div className={styles.blurb}>
-            <FormattedMessage id="home.hero_blurb" />
+            <FormattedMessage id="app-description" />
           </div>
         </div>
         <div className={styles.ctaButtons}>
