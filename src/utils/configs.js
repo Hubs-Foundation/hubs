@@ -22,12 +22,12 @@ const configs = {};
 // Also include APP_CONFIG that reticulum injects as a script in the page head.
 if (window.APP_CONFIG) {
   configs.APP_CONFIG = window.APP_CONFIG;
-  const { colors } = configs.APP_CONFIG;
-  if (colors) {
+  const { theme } = configs.APP_CONFIG;
+  if (theme) {
     const colorVars = [];
-    for (const key in colors) {
-      if (!colors.hasOwnProperty(key)) continue;
-      colorVars.push(`--${key}: ${colors[key]};`);
+    for (const key in theme) {
+      if (!theme.hasOwnProperty(key)) continue;
+      colorVars.push(`--${key}: ${theme[key]};`);
     }
     const style = document.createElement("style");
     style.innerHTML = `:root{${colorVars.join("\n")}}`;

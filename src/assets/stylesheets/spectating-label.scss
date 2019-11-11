@@ -1,6 +1,8 @@
+@import 'shared';
+
 :local(.label) {
   position: absolute;
-  color: black;
+  color: var(--overlay-text-color);
   text-shadow: 0px 0px 10px #888;
   bottom: 12px;
   left: 12px;
