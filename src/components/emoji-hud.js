@@ -12,47 +12,90 @@ const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 const emojis = [emoji_0, emoji_1, emoji_2, emoji_3, emoji_4, emoji_5];
 
 AFRAME.registerComponent("emoji-hud", {
+  schema: {
+    spawnerScale: { default: 0.0625 },
+    spawnedScale: { default: 0.25 }
+  },
   init() {
-    const spawnerEntity = document.createElement("a-entity");
-    const url = new URL(emojis[0], window.location.href).href;
-    spawnerEntity.setAttribute("media-loader", { src: url });
-    spawnerEntity.setAttribute("scale", { x: 0.125, y: 0.125, z: 0.125 });
-    spawnerEntity.setAttribute("is-remote-hover-target", "");
-    spawnerEntity.setAttribute("tags", { isHandCollisionTarget: true });
-    spawnerEntity.setAttribute("visibility-while-frozen", { requireHoverOnNonMobile: false });
-    spawnerEntity.setAttribute("css-class", "interactable");
-    spawnerEntity.setAttribute("body-helper", {
-      mass: 0,
-      type: TYPE.STATIC,
-      collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
-      collisionFilterMask: COLLISION_LAYERS.DEFAULT_SPAWNER
-    });
-    const particleEmitterConfig = {
-      src: url,
-      resolve: false,
-      particleCount: 10,
-      startSize: 0.01,
-      endSize: 0.1,
-      sizeRandomness: 0.05,
-      lifetime: 0.5,
-      lifetimeRandomness: 0.1,
-      ageRandomness: 0.1,
-      startVelocity: { x: 0, y: 1, z: 0 },
-      endVelocity: { x: 0, y: 0.5, z: 0 },
-      startOpacity: 1,
-      middleOpacity: 1,
-      endOpacity: 0
-    };
-    spawnerEntity.addEventListener("spawned-entity-loaded", e => {
-      e.detail.target.querySelector("#particle-emitter").setAttribute("particle-emitter", particleEmitterConfig);
-      e.detail.target.object3D.matrixNeedsUpdate = true;
-    });
-    spawnerEntity.setAttribute("vertical-billboard-spawner-helper", "");
-    spawnerEntity.setAttribute("super-spawner", {
-      src: url,
-      template: "#interactable-emoji-media",
-      spawnScale: { x: 0.25, y: 0.25, z: 0.25 }
-    });
-    this.el.appendChild(spawnerEntity);
+    const width = this.data.spawnerScale;
+    const spacing = width / 5;
+
+    for (let i = 0; i < emojis.length; i++) {
+      const spawnerEntity = document.createElement("a-entity");
+      const url = new URL(emojis[i], window.location.href).href;
+      spawnerEntity.setAttribute("media-loader", { src: url });
+      spawnerEntity.setAttribute("scale", { x: width, y: width, z: width });
+      spawnerEntity.setAttribute("is-remote-hover-target", "");
+      spawnerEntity.setAttribute("tags", { isHandCollisionTarget: true });
+      spawnerEntity.setAttribute("visibility-while-frozen", { requireHoverOnNonMobile: false });
+      spawnerEntity.setAttribute("css-class", "interactable");
+      spawnerEntity.setAttribute("body-helper", {
+        mass: 0,
+        type: TYPE.STATIC,
+        collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
+        collisionFilterMask: COLLISION_LAYERS.DEFAULT_SPAWNER
+      });
+
+      const particleEmitterConfig = {
+        src: url,
+        resolve: false,
+        particleCount: 10,
+        startSize: 0.01,
+        endSize: 0.1,
+        sizeRandomness: 0.05,
+        lifetime: 0.5,
+        lifetimeRandomness: 0.1,
+        ageRandomness: 0.1,
+        startVelocity: { x: 0, y: 1, z: 0 },
+        endVelocity: { x: 0, y: 0.5, z: 0 },
+        startOpacity: 1,
+        middleOpacity: 1,
+        endOpacity: 0
+      };
+
+      spawnerEntity.addEventListener("spawned-entity-loaded", this._callback.bind(this, particleEmitterConfig));
+      spawnerEntity.setAttribute("vertical-billboard-spawner-helper", "");
+      spawnerEntity.setAttribute("super-spawner", {
+        src: url,
+        template: "#interactable-emoji-media",
+        spawnScale: { x: this.data.spawnedScale, y: this.data.spawnedScale, z: this.data.spawnedScale }
+      });
+
+      const cylinder = document.createElement("a-cylinder");
+      cylinder.setAttribute("visibility-while-frozen", { requireHoverOnNonMobile: false });
+      cylinder.setAttribute("material", { opacity: 0.2, color: "#2f7fee" });
+      cylinder.setAttribute("segment-height", 1);
+      cylinder.setAttribute("segment-radial", 8);
+      cylinder.setAttribute("scale", { x: width / 2, y: spacing / 4, z: spacing });
+      cylinder.setAttribute("rotation", { x: 45, y: 0, z: 0 });
+
+      //evenly space out the emojis
+      const sign = i & 1 ? -1 : 1;
+      let x = 0;
+      let z = 0;
+      if (emojis.length % 2 === 0) {
+        x = (spacing / 2 + width / 2 + Math.floor(i / 2) * (width + spacing)) * sign;
+        z = (Math.floor(i / 2) * width) / 2;
+      } else if (i !== 0) {
+        x = (width + spacing) * Math.floor((i + 1) / 2) * -sign;
+        z = Math.floor(((i + 1) / 2) * width) / 2;
+      }
+      spawnerEntity.object3D.position.x = x;
+      spawnerEntity.object3D.position.z = z;
+      spawnerEntity.object3D.matrixNeedsUpdate = true;
+
+      cylinder.object3D.position.x = x;
+      cylinder.object3D.position.y = -width / 2;
+      cylinder.object3D.position.z = z;
+      cylinder.object3D.matrixNeedsUpdate = true;
+
+      this.el.appendChild(spawnerEntity);
+      this.el.appendChild(cylinder);
+    }
+  },
+
+  _callback(particleEmitterConfig, e) {
+    e.detail.target.querySelector("#particle-emitter").setAttribute("particle-emitter", particleEmitterConfig);
+    e.detail.target.object3D.matrixNeedsUpdate = true;
   }
 });
