@@ -10,9 +10,7 @@ import { lang, messages } from "../utils/i18n";
 import { playVideoWithStopOnBlur } from "../utils/video-utils.js";
 import homeVideoWebM from "../assets/video/home.webm";
 import homeVideoMp4 from "../assets/video/home.mp4";
-import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import discordLogoSmall from "../assets/images/discord-logo-small.png";
-import mozLogo from "../assets/images/moz-logo-black.png";
 import classNames from "classnames";
 import { isLocalClient, createAndRedirectToNewHub, connectToReticulum } from "../utils/phoenix-utils";
 import maskEmail from "../utils/mask-email";
@@ -341,7 +339,7 @@ class HomeRoot extends Component {
                     </a>
                   </IfFeature>
                   <IfFeature name="show_company_logo">
-                    <img className={styles.mozLogo} src={configs.image("company_logo", mozLogo)} />
+                    <img className={styles.mozLogo} src={configs.image("company_logo")} />
                   </IfFeature>
                 </div>
               </div>
@@ -395,7 +393,7 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel} key={1}>
         <div className={styles.container}>
           <div className={classNames([styles.logo, styles.logoMargin])}>
-            <img src={configs.image("logo", hubLogo)} />
+            <img src={configs.image("logo")} />
           </div>
         </div>
         <div className={styles.ctaButtons}>
@@ -418,7 +416,7 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel}>
         <div className={styles.container}>
           <div className={styles.logo}>
-            <img src={configs.image("logo", hubLogo)} />
+            <img src={configs.image("logo")} />
           </div>
           <div className={styles.blurb}>
             <FormattedMessage id="app-description" />
