@@ -29,16 +29,6 @@ AFRAME.registerComponent("super-spawner", {
     template: { default: "" },
 
     /**
-     * Spawn the object at a custom position, rather than at the center of the spanwer.
-     */
-    spawnPosition: { type: "vec3", default: { x: NaN, y: NaN, z: NaN } },
-
-    /**
-     * Spawn the object with a custom orientation, rather than copying that of the spawner.
-     */
-    spawnRotation: { type: "vec3", default: { x: NaN, y: NaN, z: NaN } },
-
-    /**
      * Spawn the object with a custom scale, rather than copying that of the spawner.
      */
     spawnScale: { type: "vec3", default: { x: NaN, y: NaN, z: NaN } },
@@ -49,11 +39,6 @@ AFRAME.registerComponent("super-spawner", {
     spawnCooldown: { default: 1 },
 
     /**
-     * Center the spawned object on the hand that grabbed it after it finishes loading. By default the object will be grabbed relative to where the spawner was grabbed
-     */
-    centerSpawnedObject: { default: false },
-
-    /**
      * Optional event to listen for to spawn an object on the preferred superHand
      */
     spawnEvent: { type: "string" },
@@ -61,14 +46,7 @@ AFRAME.registerComponent("super-spawner", {
     /**
      * If true, will spawn the object at the cursor and animate it into the hand.
      */
-    animateFromCursor: { type: "boolean" },
-
-    /**
-     * Optional callback to be called on spawned entities
-     */
-    spawnedEntityCallback: {
-      default: null
-    }
+    animateFromCursor: { type: "boolean" }
   },
 
   init() {
@@ -105,7 +83,7 @@ AFRAME.registerComponent("super-spawner", {
       return;
     }
 
-    const entity = addMedia(
+    const spawnedEntity = addMedia(
       this.data.src,
       this.data.template,
       ObjectContentOrigins.SPAWNER,
@@ -125,9 +103,11 @@ AFRAME.registerComponent("super-spawner", {
 
     const left = cursor.el.id.indexOf("right") === -1;
     const hand = left ? interaction.options.leftHand.entity.object3D : interaction.options.rightHand.entity.object3D;
-    cursor.getWorldPosition(entity.object3D.position);
-    cursor.getWorldQuaternion(entity.object3D.quaternion);
-    entity.object3D.matrixNeedsUpdate = true;
+    cursor.getWorldPosition(spawnedEntity.object3D.position);
+    cursor.getWorldQuaternion(spawnedEntity.object3D.quaternion);
+    spawnedEntity.object3D.matrixNeedsUpdate = true;
+
+    this.el.emit("spawned-entity-created", { target: spawnedEntity });
 
     const userinput = AFRAME.scenes[0].systems.userinput;
     const willAnimateFromCursor =
@@ -135,27 +115,31 @@ AFRAME.registerComponent("super-spawner", {
       (userinput.get(paths.actions.rightHand.matrix) || userinput.get(paths.actions.leftHand.matrix));
     if (!willAnimateFromCursor) {
       if (left) {
-        interaction.state.leftRemote.held = entity;
+        interaction.state.leftRemote.held = spawnedEntity;
         interaction.state.leftRemote.spawning = true;
       } else {
-        interaction.state.rightRemote.held = entity;
+        interaction.state.rightRemote.held = spawnedEntity;
         interaction.state.rightRemote.spawning = true;
       }
     }
     this.activateCooldown();
-    await waitForEvent("model-loaded", entity);
+    await waitForEvent("model-loaded", spawnedEntity);
 
-    cursor.getWorldPosition(entity.object3D.position);
-    cursor.getWorldQuaternion(entity.object3D.quaternion);
-    entity.object3D.matrixNeedsUpdate = true;
+    cursor.getWorldPosition(spawnedEntity.object3D.position);
+    cursor.getWorldQuaternion(spawnedEntity.object3D.quaternion);
+    spawnedEntity.object3D.matrixNeedsUpdate = true;
 
     if (willAnimateFromCursor) {
       hand.getWorldPosition(this.handPosition);
-      entity.setAttribute("animation__spawn-at-cursor", {
+      spawnedEntity.setAttribute("animation__spawn-at-cursor", {
         property: "position",
         delay: 500,
         dur: 1500,
-        from: { x: entity.object3D.position.x, y: entity.object3D.position.y, z: entity.object3D.position.z },
+        from: {
+          x: spawnedEntity.object3D.position.x,
+          y: spawnedEntity.object3D.position.y,
+          z: spawnedEntity.object3D.position.z
+        },
         to: { x: this.handPosition.x, y: this.handPosition.y, z: this.handPosition.z },
         easing: "easeInOutBack"
       });
@@ -166,12 +150,17 @@ AFRAME.registerComponent("super-spawner", {
         interaction.state.rightRemote.spawning = false;
       }
     }
-    if (entity.components["body-helper"].body) {
-      entity.components["body-helper"].body.syncToPhysics(true);
+    if (spawnedEntity.components["body-helper"].body) {
+      spawnedEntity.components["body-helper"].body.syncToPhysics(true);
     }
-    if (this.data.spawnedEntityCallback) {
-      this.data.spawnedEntityCallback(entity);
-    }
+
+    spawnedEntity.addEventListener(
+      "media-loaded",
+      () => {
+        this.el.emit("spawned-entity-loaded", { target: spawnedEntity });
+      },
+      { once: true }
+    );
   },
 
   activateCooldown() {
@@ -200,5 +189,42 @@ AFRAME.registerComponent("super-spawner", {
         this.cooldownTimeout = null;
       }, this.data.spawnCooldown * 1000);
     }
+  }
+});
+
+// This component ensures that an object spawned for a super-spawner will always spawn oriented "upright", facing the camera, regardless of the initial spawner orientation.
+AFRAME.registerComponent("vertical-billboard-spawner-helper", {
+  schema: {
+    camera: { type: "selector", default: "#avatar-pov-node" }
+  },
+  init() {
+    this._handleEvent = this._handleEvent.bind(this);
+    this.el.addEventListener("spawned-entity-created", this._handleEvent);
+  },
+  _handleEvent: (() => {
+    const objectUp = new THREE.Vector3();
+    const objectForward = new THREE.Vector3();
+    const defaultRight = new THREE.Vector3(1, 0, 0);
+    const cameraWorldPosition = new THREE.Vector3();
+    return function(e) {
+      const object3D = e.detail.target.object3D;
+      const cameraObject3D = this.data.camera.object3D;
+      object3D.updateMatrices();
+      cameraObject3D.getWorldPosition(cameraWorldPosition);
+      object3D.lookAt(cameraWorldPosition);
+      objectUp.set(0, 1, 0);
+      objectUp.transformDirection(object3D.matrixWorld);
+      const angle = objectUp.angleTo(THREE.Object3D.DefaultUp);
+      objectUp.projectOnPlane(THREE.Object3D.DefaultUp).normalize();
+      objectForward.set(0, 0, 1);
+      objectForward.transformDirection(cameraObject3D.matrixWorld);
+      objectForward.projectOnPlane(THREE.Object3D.DefaultUp).normalize();
+      const dot = objectUp.dot(objectForward);
+      object3D.rotateOnAxis(defaultRight, -Math.sign(dot) * angle);
+      object3D.matrixNeedsUpdate = true;
+    };
+  })(),
+  remove() {
+    this.el.removeEventListener("spawned-entity-created", this._handleEvent);
   }
 });

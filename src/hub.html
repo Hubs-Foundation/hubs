@@ -372,6 +372,7 @@
                     emoji
                     body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 15;"
                     owned-object-limiter="counter: #emoji-counter"
+                    owned-object-cleanup-timeout="counter: #emoji-counter; ttl: 2;"
                     set-unowned-body-kinematic
                     is-remote-hover-target
                     tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; inspectable: true;"
@@ -391,37 +392,6 @@
                     ></a-entity>
                     <a-entity class="ui interactable-ui">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media">
-                            <a-entity
-                                mixin="rounded-text-action-button"
-                                is-remote-hover-target
-                                tags="singleActionButton:true"
-                                pin-networked-object-button="tipSelector:.pin-button-tip; labelSelector:.pin-button-label;"
-                                position="0 0.125 0.01">
-                                <a-entity
-                                    class="pin-button-label"
-                                    visible="false"
-                                    text=" value:pin; width:1.75; align:center;"
-                                    text-raycast-hack
-                                    position="0 0 0.01">
-                                </a-entity>
-                            </a-entity>
-                            <a-entity
-                                class="pin-button-tip"
-                                text="value:Pinning will broadcast this object to Discord.; width:1.75; align:center; color:#fff;"
-                                visible="false"
-                                text-raycast-hack
-                                slice9="
-                                    color: #0F40A9;
-                                    width: 1.8;
-                                    height: 0.2;
-                                    left: 64;
-                                    top: 64;
-                                    right: 66;
-                                    bottom: 66;
-                                    opacity: 1.0;
-                                    src: #button"
-                                position="0 0.6 0.01">
-                            </a-entity>
                             <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
                                 <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
                                 <a-entity
@@ -1122,10 +1092,17 @@
                 <a-entity id="stats" stats-plus="false" position="0 0 -1"></a-entity>
             </a-entity>
 
-            <a-entity
-                offset-relative-to="target: #viewing-camera; offset: 0 -1 -1.5; on: stateadded; lookAt: true"
-                emoji-hud
-                >
+            <a-entity emoji-hud offset-relative-to="target: #viewing-camera; offset: 0 -1 -1.5; on: stateadded; lookAt: true">
+                <a-cylinder
+                    visibility-while-frozen="requireHoverOnNonMobile: false"
+                    material="opacity: 0.5; color: #2f7fee"
+                    segments-height="1"
+                    segments-radial="8"
+                    scale="0.075 0.04 0.025"
+                    position="0 -0.06 0"
+                    rotation="45 0 0"
+                    rotation
+                ></a-cylinder>
             </a-entity>
 
             <a-entity

@@ -45,12 +45,13 @@ export class SuperSpawnerSystem {
     ).entity;
 
     superSpawner.el.object3D.getWorldPosition(spawnedEntity.object3D.position);
-    setNonNullVec3Components(spawnedEntity.object3D.position, data.spawnPosition);
 
     superSpawner.el.object3D.getWorldQuaternion(spawnedEntity.object3D.quaternion);
-    setNonNullVec3Components(spawnedEntity.object3D.rotation, data.spawnRotation);
 
     spawnedEntity.object3D.matrixNeedsUpdate = true;
+
+    superSpawner.el.emit("spawned-entity-created", { target: spawnedEntity });
+
     state.held = spawnedEntity;
 
     superSpawner.activateCooldown();
@@ -60,10 +61,7 @@ export class SuperSpawnerSystem {
       "media-loaded",
       () => {
         state.spawning = false;
-
-        if (data.spawnedEntityCallback) {
-          data.spawnedEntityCallback(spawnedEntity);
-        }
+        superSpawner.el.emit("spawned-entity-loaded", { target: spawnedEntity });
       },
       { once: true }
     );
