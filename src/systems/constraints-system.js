@@ -37,8 +37,7 @@ export class ConstraintsSystem {
         prevState.spawning &&
         state.held &&
         state.held.components.tags &&
-        state.held.components.tags.data[constraintTag] &&
-        (!state.held.components["way-point"] || state.held.sceneEl.is("frozen"))
+        state.held.components.tags.data[constraintTag]
       ) {
         state.held.setAttribute("body-helper", {
           type: "dynamic",
@@ -69,24 +68,16 @@ export class ConstraintsSystem {
         delete this.constraints[entityId];
       }
 
-      if (prevState.held.components["body-helper"].data.activationState === ACTIVATION_STATE.DISABLE_DEACTIVATION) {
+      if (!this.constraintPairs[heldEntityId] || this.constraintPairs[heldEntityId].length < 1) {
         prevState.held.setAttribute("body-helper", { activationState: ACTIVATION_STATE.ACTIVE_TAG });
       }
     }
     if (!state.spawning && state.held && state.held.components.tags.data[constraintTag]) {
-      const first =
-        !state.held.components["way-point"] ||
-        (state.held.sceneEl.is("frozen") ||
-          !(state.held.components.pinnable && state.held.components.pinnable.data.pinned));
-      if (
-        first &&
-        (!state.held.components["networked"] || NAF.utils.isMine(state.held) || NAF.utils.takeOwnership(state.held))
-      ) {
+      if (!state.held.components["networked"] || NAF.utils.isMine(state.held) || NAF.utils.takeOwnership(state.held)) {
         state.held.setAttribute("body-helper", {
           type: "dynamic",
           activationState: ACTIVATION_STATE.DISABLE_DEACTIVATION
         });
-
         const heldEntityId = state.held.id;
         const body = state.held.components["body-helper"].body;
         const targetEl = document.querySelector(`#${entityId}`);
@@ -99,8 +90,7 @@ export class ConstraintsSystem {
           this.constraintPairs[heldEntityId].push(entityId);
         }
       } else {
-        //todo wrong comment now. waypoints.
-        console.warn("TODO why does taking ownership cause objects to fall.");
+        console.log("Failed to obtain ownership while trying to create constraint on networked object.");
       }
     }
   }

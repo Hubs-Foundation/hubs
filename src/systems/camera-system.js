@@ -54,7 +54,7 @@ const orbit = (function() {
     rig.getWorldQuaternion(rwq);
 
     dhQ.setFromAxisAngle(UP.set(0, 1, 0).applyQuaternion(owq), 0.1 * dh * dt);
-    target.quaternion.copy(cwq).premultiply(dhQ); // TODO: audit premultiply
+    target.quaternion.copy(cwq).premultiply(dhQ);
     const dPos = new THREE.Vector3().subVectors(cwp, owp);
     const zoom = 1 - dz * dt;
     const newLength = dPos.length() * zoom;
@@ -64,7 +64,7 @@ const orbit = (function() {
     }
 
     dvQ.setFromAxisAngle(RIGHT.set(1, 0, 0).applyQuaternion(target.quaternion), 0.1 * dv * dt);
-    target.quaternion.premultiply(dvQ); // TODO: audit premultiply
+    target.quaternion.premultiply(dvQ);
     target.position.addVectors(owp, dPos.applyQuaternion(dhQ).applyQuaternion(dvQ)).add(
       UP.set(0, 1, 0)
         .multiplyScalar(panY * newLength)
