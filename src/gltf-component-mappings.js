@@ -154,7 +154,6 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
   }
 
   if (componentData.time) {
-    console.log("time was", componentData.time);
     el.setAttribute("media-video", { time: componentData.time });
   }
 });
