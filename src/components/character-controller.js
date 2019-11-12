@@ -8,8 +8,10 @@ import {
   rotateInPlaceAroundWorldUp,
   calculateCameraTransformForWaypoint,
   interpolateAffine,
-  affixToWorldUp
+  affixToWorldUp,
+  squareDistanceBetween
 } from "../utils/three-utils";
+
 import { getCurrentPlayerHeight } from "../utils/get-current-player-height";
 import { m4String } from "../utils/pretty-print";
 const enableWheelSpeed = qsTruthy("wheelSpeed") || qsTruthy("wheelspeed") || qsTruthy("ws");
@@ -119,6 +121,10 @@ AFRAME.registerComponent("character-controller", {
     const final = new THREE.Matrix4();
     const translatedUp = new THREE.Matrix4();
     return function travelByWaypoint(inMat4) {
+      if (!this.data.fly) {
+        this.el.messageDispatch.dispatch("/fly");
+        this.shouldLandWhenPossible = true;
+      }
       translatedUp.copy(inMat4);
       // TODO: Have to move forward a little too for center-object to center-eye difference
       translatedUp.elements[13] += getCurrentPlayerHeight(); // Waypoints are placed at your feet
@@ -217,7 +223,11 @@ AFRAME.registerComponent("character-controller", {
         );
       }
       if (userinput.get(paths.actions.toggleFly)) {
+        this.shouldLandWhenPossible = false;
         this.el.messageDispatch.dispatch("/fly");
+      }
+      if (!this.data.fly && this.shouldLandWhenPossible) {
+        this.shouldLandWhenPossible = false;
       }
       calculateDisplacementToDesiredPOV(
         snapRotatedPOV,
@@ -230,14 +240,20 @@ AFRAME.registerComponent("character-controller", {
       newPOV
         .makeTranslation(displacementToDesiredPOV.x, displacementToDesiredPOV.y, displacementToDesiredPOV.z)
         .multiply(snapRotatedPOV);
-      if (!this.data.fly) {
-        newPOV.setPosition(
-          this.findPOVPositionAboveNavMesh(
-            startPOVPosition.setFromMatrixPosition(this.data.pivot.object3D.matrixWorld),
-            desiredPOVPosition.setFromMatrixPosition(newPOV),
-            newPOVPosition
-          )
+      const mightLand = this.data.fly && this.shouldLandWhenPossible;
+      if (mightLand || !this.data.fly) {
+        this.findPOVPositionAboveNavMesh(
+          startPOVPosition.setFromMatrixPosition(this.data.pivot.object3D.matrixWorld),
+          desiredPOVPosition.setFromMatrixPosition(newPOV),
+          newPOVPosition
         );
+        if (mightLand && desiredPOVPosition.distanceToSquared(newPOVPosition) < 0.4) {
+          this.shouldLandWhenPossible = false;
+          this.el.messageDispatch.dispatch("/fly");
+          newPOV.setPosition(newPOVPosition);
+        } else if (!this.data.fly) {
+          newPOV.setPosition(newPOVPosition);
+        }
       }
       childMatch(this.el.object3D, this.data.pivot.object3D, newPOV);
       this.relativeMotion.set(0, 0, 0);
