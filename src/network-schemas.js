@@ -212,7 +212,7 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add({
-    template: "#waypoint-avatar",
+    template: "#template-waypoint-avatar,
     components: [
       {
         component: "position",

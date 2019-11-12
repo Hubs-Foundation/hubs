@@ -118,7 +118,7 @@ AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentNam
       el.setAttribute("waypoint", componentData);
     }
     el.setAttribute("networked", {
-      template: "#waypoint-avatar",
+      template: "#template-waypoint-avatar,
       attachTemplateToLocal: false,
       owner: "scene",
       persistent: true,
