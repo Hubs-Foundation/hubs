@@ -124,6 +124,7 @@ AFRAME.registerComponent("character-controller", {
       if (!this.data.fly) {
         this.el.messageDispatch.dispatch("/fly");
         this.shouldLandWhenPossible = true;
+        this.shouldUnoccupyWaypointsOnceMoving = true;
       }
       translatedUp.copy(inMat4);
       // TODO: Have to move forward a little too for center-object to center-eye difference
@@ -142,12 +143,16 @@ AFRAME.registerComponent("character-controller", {
 
     const startPOVPosition = new THREE.Vector3();
     const desiredPOVPosition = new THREE.Vector3();
-    const newPOVPosition = new THREE.Vector3();
+    const navMeshSnappedPOVPosition = new THREE.Vector3();
+    const initialScale = new THREE.Vector3();
 
     return function tick(t, dt) {
       if (!this.el.sceneEl.is("entered")) return;
       const vrMode = this.el.sceneEl.is("vr-mode");
       this.sfx = this.sfx || this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
+      this.waypointSystem = this.waypointSystem || this.el.sceneEl.systems["hubs-systems"].waypointSystem;
+
+      initialScale.copy(this.el.object3D.scale);
 
       if (
         this.waypoints.length &&
@@ -240,22 +245,31 @@ AFRAME.registerComponent("character-controller", {
       newPOV
         .makeTranslation(displacementToDesiredPOV.x, displacementToDesiredPOV.y, displacementToDesiredPOV.z)
         .multiply(snapRotatedPOV);
-      const mightLand = this.data.fly && this.shouldLandWhenPossible;
-      if (mightLand || !this.data.fly) {
-        this.findPOVPositionAboveNavMesh(
-          startPOVPosition.setFromMatrixPosition(this.data.pivot.object3D.matrixWorld),
-          desiredPOVPosition.setFromMatrixPosition(newPOV),
-          newPOVPosition
-        );
-        if (mightLand && desiredPOVPosition.distanceToSquared(newPOVPosition) < 0.4) {
+      const triedToMove = displacementToDesiredPOV.lengthSq() > 0.001;
+      this.findPOVPositionAboveNavMesh(
+        startPOVPosition.setFromMatrixPosition(this.data.pivot.object3D.matrixWorld),
+        desiredPOVPosition.setFromMatrixPosition(newPOV),
+        navMeshSnappedPOVPosition
+      );
+      const squareDistanceToNavSnappedPOVPosition = desiredPOVPosition.distanceToSquared(navMeshSnappedPOVPosition);
+      if (this.data.fly && this.shouldLandWhenPossible && triedToMove && squareDistanceToNavSnappedPOVPosition < 0.5) {
+        this.shouldLandWhenPossible = false;
+        this.el.messageDispatch.dispatch("/fly");
+        newPOV.setPosition(navMeshSnappedPOVPosition);
+      } else if (!this.data.fly) {
+        newPOV.setPosition(navMeshSnappedPOVPosition);
+      }
+      if (this.shouldUnoccupyWaypointsOnceMoving && triedToMove) {
+        this.shouldUnoccupyWaypointsOnceMoving = false;
+        this.waypointSystem.releaseAnyOccupiedWaypoints();
+        if (this.data.fly && this.shouldLandWhenPossible && squareDistanceToNavSnappedPOVPosition < 2) {
+          newPOV.setPosition(navMeshSnappedPOVPosition);
           this.shouldLandWhenPossible = false;
           this.el.messageDispatch.dispatch("/fly");
-          newPOV.setPosition(newPOVPosition);
-        } else if (!this.data.fly) {
-          newPOV.setPosition(newPOVPosition);
         }
       }
       childMatch(this.el.object3D, this.data.pivot.object3D, newPOV);
+      this.el.object3D.scale.copy(initialScale);
       this.relativeMotion.set(0, 0, 0);
       this.dXZ = 0;
     };
