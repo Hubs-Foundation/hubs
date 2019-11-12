@@ -349,16 +349,20 @@ async function updateEnvironmentForHub(hub) {
 
     environmentScene.appendChild(environmentEl);
 
-    environmentEl.addEventListener(
-      "model-loaded",
-      () => {
-        // Show the canvas once the model has loaded
-        document.querySelector(".a-canvas").classList.remove("a-hidden");
+    return new Promise(resolve =>
+      environmentEl.addEventListener(
+        "model-loaded",
+        () => {
+          // Show the canvas once the model has loaded
+          document.querySelector(".a-canvas").classList.remove("a-hidden");
 
-        //TODO: check if the environment was made with spoke to determine if a shape should be added
-        traverseMeshesAndAddShapes(environmentEl);
-      },
-      { once: true }
+          //TODO: check if the environment was made with spoke to determine if a shape should be added
+          traverseMeshesAndAddShapes(environmentEl);
+
+          resolve();
+        },
+        { once: true }
+      )
     );
   } else {
     // Change environment
@@ -530,8 +534,8 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
       adapter.unreliableTransport = sendViaPhoenix(false);
     });
 
-    const loadEnvironmentAndConnect = () => {
-      updateEnvironmentForHub(hub);
+    const loadEnvironmentAndConnect = async () => {
+      await updateEnvironmentForHub(hub);
 
       scene.components["networked-scene"]
         .connect()
