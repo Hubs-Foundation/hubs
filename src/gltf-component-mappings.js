@@ -94,7 +94,6 @@ AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point", (el, compon
   });
   // TODO : Must put a networkId into the spawn-point in order for networked occupiable spawn points to work.
 });
-AFRAME.GLTFModelPlus.registerComponent("way-point", "way-point");
 AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
 AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentName, componentData) => {
   const nav = AFRAME.scenes[0].systems.nav;
@@ -113,8 +112,21 @@ AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentNa
 
 AFRAME.GLTFModelPlus.registerComponent("pinnable", "pinnable");
 
-AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentName, componentData) => {
-  console.log("should make waypoint", el, componentName, componentData);
+AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentName, componentData, components) => {
+  if (componentData.canBeOccupied) {
+    if (!NAF.entities.getEntity(components.networked.id)) {
+      el.setAttribute("waypoint", componentData);
+    }
+    el.setAttribute("networked", {
+      template: "#waypoint-avatar",
+      attachTemplateToLocal: false,
+      owner: "scene",
+      persistent: true,
+      networkId: components.networked.id
+    });
+  } else {
+    el.setAttribute("waypoint", componentData);
+  }
 });
 
 AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
@@ -146,6 +158,7 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
   }
 
   if (componentData.time) {
+    console.log("time was", componentData.time);
     el.setAttribute("media-video", { time: componentData.time });
   }
 });

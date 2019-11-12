@@ -13,7 +13,6 @@ import {
 import { getCurrentPlayerHeight } from "../utils/get-current-player-height";
 import { m4String } from "../utils/pretty-print";
 const enableWheelSpeed = qsTruthy("wheelSpeed") || qsTruthy("wheelspeed") || qsTruthy("ws");
-const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
 const MAX_WARNINGS = 10;
@@ -21,20 +20,6 @@ const NAV_ZONE = "character";
 const DEFAULT_WAYPOINT_TRAVEL_TIME = 0;
 let WAYPOINT_TRAVEL_TIME = 0; //TODO:variable name and location
 const WAYPOINT_DOWN_TIME = 0;
-
-const applySnap = (function() {
-  const inMat4Copy = new THREE.Matrix4();
-  const startRotation = new THREE.Matrix4();
-  const endRotation = new THREE.Matrix4();
-  const v = new THREE.Vector3();
-  return function applySnap(inMat4, snapMat4, outMat4) {
-    inMat4Copy.copy(inMat4);
-    return outMat4
-      .copy(endRotation.copy(snapMat4).multiply(startRotation.extractRotation(inMat4Copy)))
-      .scale(v.setFromMatrixScale(inMat4Copy))
-      .setPosition(v.setFromMatrixPosition(inMat4Copy));
-  };
-})();
 
 const calculateDisplacementToDesiredPOV = (function() {
   const translationCoordinateSpace = new THREE.Matrix4();
@@ -62,8 +47,7 @@ AFRAME.registerComponent("character-controller", {
     groundAcc: { default: 2.9 },
     easing: { default: 10 },
     pivot: { type: "selector" },
-    snapRotationDegrees: { default: THREE.Math.DEG2RAD * 45 },
-    rotationSpeed: { default: -3 },
+    snapRotationRadian: { default: THREE.Math.DEG2RAD * 45 },
     fly: { default: false }
   },
 
@@ -74,14 +58,12 @@ AFRAME.registerComponent("character-controller", {
     this.charSpeed = 1;
     this.navGroup = null;
     this.navNode = null;
-    this.velocity = new THREE.Vector3(0, 0, 0);
-    this.accelerationInput = new THREE.Vector3(0, 0, 0);
-    this.snapRotation = new THREE.Matrix4();
-    this.angularVelocity = 0; // Scalar value because we only allow rotation around Y
+    this.relativeMotion = new THREE.Vector3(0, 0, 0);
+    this.dXZ = 0;
     this._withinWarningLimit = true;
     this._warningCount = 0;
-    this.setAccelerationInput = this.setAccelerationInput.bind(this);
-    this.setAngularVelocity = this.setAngularVelocity.bind(this);
+    this.enqueueRelativeMotion = this.enqueueRelativeMotion.bind(this);
+    this.enqueueInPlaceRotationAroundWorldUp = this.enqueueInPlaceRotationAroundWorldUp.bind(this);
     this.el.sceneEl.addEventListener("nav-mesh-loaded", () => {
       this.navGroup = null;
       this.navNode = null;
@@ -90,38 +72,12 @@ AFRAME.registerComponent("character-controller", {
     this.prevWaypointTravelTime = 0;
   },
 
-  update: function() {
-    this.leftRotationMatrix = new THREE.Matrix4().makeRotationY(this.data.snapRotationDegrees);
-    this.rightRotationMatrix = new THREE.Matrix4().makeRotationY(-this.data.snapRotationDegrees);
+  enqueueRelativeMotion: function(motion) {
+    this.relativeMotion.add(motion);
   },
 
-  play: function() {
-    const eventSrc = this.el.sceneEl;
-    eventSrc.addEventListener("move", this.setAccelerationInput);
-    eventSrc.addEventListener("rotateY", this.setAngularVelocity);
-  },
-
-  pause: function() {
-    const eventSrc = this.el.sceneEl;
-    eventSrc.removeEventListener("move", this.setAccelerationInput);
-    eventSrc.removeEventListener("rotateY", this.setAngularVelocity);
-    this.reset();
-  },
-
-  reset() {
-    this.accelerationInput.set(0, 0, 0);
-    this.velocity.set(0, 0, 0);
-    this.angularVelocity = 0;
-    this.snapRotation.identity();
-  },
-
-  setAccelerationInput: function(event) {
-    const axes = event.detail.axis;
-    this.accelerationInput.set(axes[0], 0, axes[1]);
-  },
-
-  setAngularVelocity: function(event) {
-    this.angularVelocity = event.detail.value;
+  enqueueInPlaceRotationAroundWorldUp: function(dXZ) {
+    this.dXZ += dXZ;
   },
 
   // We assume the rig is at the root, and its local position === its world position.
@@ -164,6 +120,7 @@ AFRAME.registerComponent("character-controller", {
     const translatedUp = new THREE.Matrix4();
     return function travelByWaypoint(inMat4) {
       translatedUp.copy(inMat4);
+      // TODO: Have to move forward a little too for center-object to center-eye difference
       translatedUp.elements[13] += getCurrentPlayerHeight(); // Waypoints are placed at your feet
       rotateInPlaceAroundWorldUp(translatedUp, Math.PI, translatedUp); // Waypoints are backwards
       this.data.pivot.object3D.updateMatrices();
@@ -238,30 +195,34 @@ AFRAME.registerComponent("character-controller", {
       }
 
       const userinput = AFRAME.scenes[0].systems.userinput;
+      const snapRotateLeft = userinput.get(paths.actions.snapRotateLeft);
+      const snapRotateRight = userinput.get(paths.actions.snapRotateRight);
+      if (snapRotateLeft || snapRotateRight) {
+        this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
+      }
+      this.data.pivot.object3D.updateMatrices();
+      rotateInPlaceAroundWorldUp(
+        this.data.pivot.object3D.matrixWorld,
+        this.dXZ +
+          (snapRotateLeft ? this.data.snapRotationRadian : 0) +
+          (snapRotateRight ? -1 * this.data.snapRotationRadian : 0),
+        snapRotatedPOV
+      );
+      const characterAcceleration = userinput.get(paths.actions.characterAcceleration);
+      if (characterAcceleration) {
+        this.relativeMotion.set(
+          this.relativeMotion.x + characterAcceleration[0],
+          this.relativeMotion.y,
+          -1 * (this.relativeMotion.z + characterAcceleration[1])
+        );
+      }
       if (userinput.get(paths.actions.toggleFly)) {
         this.el.messageDispatch.dispatch("/fly");
       }
-      if (userinput.get(paths.actions.snapRotateLeft)) {
-        this.snapRotation.copy(this.leftRotationMatrix);
-        this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
-      } else if (userinput.get(paths.actions.snapRotateRight)) {
-        this.snapRotation.copy(this.rightRotationMatrix);
-        this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
-      }
-      const characterAcceleration = userinput.get(paths.actions.characterAcceleration);
-      if (characterAcceleration) {
-        this.accelerationInput.set(
-          this.accelerationInput.x + characterAcceleration[0],
-          this.accelerationInput.y,
-          -1 * (this.accelerationInput.z + characterAcceleration[1])
-        );
-      }
-      this.data.pivot.object3D.updateMatrices();
-      applySnap(this.data.pivot.object3D.matrixWorld, this.snapRotation, snapRotatedPOV);
       calculateDisplacementToDesiredPOV(
         snapRotatedPOV,
         this.data.fly,
-        this.accelerationInput.multiplyScalar(
+        this.relativeMotion.multiplyScalar(
           ((userinput.get(paths.actions.boost) ? 2 : 1) * this.data.groundAcc * dt) / 1000
         ),
         displacementToDesiredPOV
@@ -270,16 +231,17 @@ AFRAME.registerComponent("character-controller", {
         .makeTranslation(displacementToDesiredPOV.x, displacementToDesiredPOV.y, displacementToDesiredPOV.z)
         .multiply(snapRotatedPOV);
       if (!this.data.fly) {
-        this.findPOVPositionAboveNavMesh(
-          startPOVPosition.setFromMatrixPosition(this.data.pivot.object3D.matrixWorld),
-          desiredPOVPosition.setFromMatrixPosition(newPOV),
-          newPOVPosition
+        newPOV.setPosition(
+          this.findPOVPositionAboveNavMesh(
+            startPOVPosition.setFromMatrixPosition(this.data.pivot.object3D.matrixWorld),
+            desiredPOVPosition.setFromMatrixPosition(newPOV),
+            newPOVPosition
+          )
         );
-        newPOV.setPosition(newPOVPosition);
       }
       childMatch(this.el.object3D, this.data.pivot.object3D, newPOV);
-      this.accelerationInput.set(0, 0, 0);
-      this.snapRotation.identity();
+      this.relativeMotion.set(0, 0, 0);
+      this.dXZ = 0;
     };
   })(),
 
@@ -312,6 +274,7 @@ AFRAME.registerComponent("character-controller", {
       desiredFeetPosition.y -= playerHeight;
       this.findPositionOnNavMesh(startingFeetPosition, desiredFeetPosition, outPOVPosition);
       outPOVPosition.y += playerHeight;
+      return outPOVPosition;
     };
   })(),
 

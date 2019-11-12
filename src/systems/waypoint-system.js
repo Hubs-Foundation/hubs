@@ -80,7 +80,10 @@ function shouldTryToOccupy(waypointComponent) {
   return (
     waypointComponent.data.canBeOccupied &&
     (NAF.utils.isMine(waypointComponent.el) ||
-      !(waypointComponent.data.isOccupied && NAF.utils.getNetworkOwner(waypointComponent.el) !== "scene"))
+      !(
+        waypointComponent.data.isOccupied &&
+        NAF.connection.connectedClients[NAF.utils.getNetworkOwner(waypointComponent.el)]
+      ))
   );
 }
 
@@ -100,6 +103,7 @@ function unoccupyWaypoints(waypointComponents) {
   waypointComponents.filter(isOccupiedByMe).forEach(unoccupyWaypoint);
 }
 function occupyWaypoint(waypointComponent) {
+  console.log("occupying", waypointComponent);
   waypointComponent.el.setAttribute("waypoint", { isOccupied: true });
 }
 
@@ -364,9 +368,6 @@ export class WaypointSystem {
         t2.copy(waypointComponent.el.object3D.matrixWorld).multiply(target);
         elementFromTemplate.object3D.updateMatrices();
         const scale = new THREE.Vector3().setFromMatrixScale(elementFromTemplate.object3D.matrixWorld);
-        if (window.logStuff) {
-          console.log(scale);
-        }
         const t3 = new THREE.Matrix4()
           .extractRotation(t2)
           .scale(scale)
@@ -391,7 +392,6 @@ AFRAME.registerComponent("waypoint", {
     canBeClicked: { default: false },
     willDisableMotion: { default: false },
     willMaintainWorldUp: { default: true },
-
     isOccupied: { default: false }
   },
   init() {
@@ -399,6 +399,12 @@ AFRAME.registerComponent("waypoint", {
     this.didRegisterWithSystem = false;
   },
   play() {
+    if (this.canBeOccupied) {
+      const persistentFirstSync = NAF.entities.getPersistentFirstSync(this.el.components.networked.data.networkId);
+      if (persistentFirstSync) {
+        this.el.components.networked.data.applyPersistentFirstSync();
+      }
+    }
     if (!this.didRegisterWithSystem) {
       this.system.registerComponent(this, this.el.sceneEl);
       this.didRegisterWithSystem = true;
