@@ -19,15 +19,10 @@ const URL_SOURCE_TO_TO_API_SOURCE = {
 
 const desiredSources = ["poly", "sketchfab", "videos", "scenes", "avatars", "gifs", "images", "twitch"];
 const availableIntegrations = configs.AVAILABLE_INTEGRATIONS;
-let availableSources;
-if (availableIntegrations) {
-  availableSources = desiredSources.filter(source => {
-    const apiSource = URL_SOURCE_TO_TO_API_SOURCE[source];
-    return !availableIntegrations.hasOwnProperty(apiSource) || availableIntegrations[apiSource];
-  });
-} else {
-  availableSources = desiredSources;
-}
+const availableSources = desiredSources.filter(source => {
+  const apiSource = URL_SOURCE_TO_TO_API_SOURCE[source];
+  return !availableIntegrations.hasOwnProperty(apiSource) || availableIntegrations[apiSource];
+});
 export const SOURCES = availableSources;
 
 export const MEDIA_SOURCE_DEFAULT_FILTERS = {
