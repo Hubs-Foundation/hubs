@@ -200,10 +200,6 @@ export function resolveActionSets() {
     sets.rightCursorHoveringOnUI,
     !rightHand.held && !rightHand.hovered && !rightRemote.held && isUI(rightRemote.hovered)
   );
-  userinput.toggleSet(
-    sets.rightCursorHoldingWaypoint,
-    !rightHand.held && !rightHand.hovered && rightRemote.held && rightRemote.held.components["way-point"]
-  );
 
   userinput.toggleSet(sets.leftCursorHoldingNothing, !leftHand.held && !leftRemote.held);
   userinput.toggleSet(sets.rightCursorHoldingNothing, !rightHand.held && !rightRemote.held);

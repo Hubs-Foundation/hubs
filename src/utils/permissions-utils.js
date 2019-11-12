@@ -98,7 +98,6 @@ function getPendingOrExistingEntityMetadata(networkId) {
   }
 
   const entity = NAF.entities.getEntity(networkId);
-  console.log(networkId, entity);
   if (!entity) return null;
 
   const { template, creator } = entity.components.networked.data;
