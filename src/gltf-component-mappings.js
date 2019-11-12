@@ -114,19 +114,15 @@ AFRAME.GLTFModelPlus.registerComponent("pinnable", "pinnable");
 
 AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentName, componentData, components) => {
   if (componentData.canBeOccupied) {
-    if (!NAF.entities.getEntity(components.networked.id)) {
-      el.setAttribute("waypoint", componentData);
-    }
     el.setAttribute("networked", {
-      template: "#template-waypoint-avatar,
+      template: "#template-waypoint-avatar",
       attachTemplateToLocal: false,
       owner: "scene",
       persistent: true,
       networkId: components.networked.id
     });
-  } else {
-    el.setAttribute("waypoint", componentData);
   }
+  el.setAttribute("waypoint", componentData);
 });
 
 AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {

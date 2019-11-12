@@ -34,7 +34,7 @@ if (ENABLE_TESTS) {
 
       const entity01 = document.createElement("a-entity");
       entity01.setAttribute("networked", {
-        template: "#template-waypoint-avatar,
+        template: "#template-waypoint-avatar",
         attachTemplateToLocal: false
       });
       entity01.setAttribute("waypoint", {
@@ -58,7 +58,7 @@ if (ENABLE_TESTS) {
         willMaintainWorldUp: true
       });
       entity02.setAttribute("networked", {
-        template: "#template-waypoint-avatar,
+        template: "#template-waypoint-avatar",
         attachTemplateToLocal: false
       });
       this.el.appendChild(entity02);
@@ -75,7 +75,7 @@ if (ENABLE_TESTS) {
         willMaintainWorldUp: true
       });
       entity03.setAttribute("networked", {
-        template: "#template-waypoint-avatar,
+        template: "#template-waypoint-avatar",
         attachTemplateToLocal: false
       });
 
@@ -95,7 +95,7 @@ if (ENABLE_TESTS) {
 
       const entity01 = document.createElement("a-entity");
       entity01.setAttribute("networked", {
-        template: "#template-waypoint-avatar,
+        template: "#template-waypoint-avatar",
         attachTemplateToLocal: false
       });
       entity01.setAttribute("waypoint", {
@@ -119,7 +119,7 @@ if (ENABLE_TESTS) {
         willMaintainWorldUp: true
       });
       entity02.setAttribute("networked", {
-        template: "#template-waypoint-avatar,
+        template: "#template-waypoint-avatar",
         attachTemplateToLocal: false
       });
       this.el.appendChild(entity02);
@@ -136,7 +136,7 @@ if (ENABLE_TESTS) {
         willMaintainWorldUp: true
       });
       entity03.setAttribute("networked", {
-        template: "#template-waypoint-avatar,
+        template: "#template-waypoint-avatar",
         attachTemplateToLocal: false
       });
 
@@ -156,7 +156,7 @@ if (ENABLE_TESTS) {
 
       const entity01 = document.createElement("a-entity");
       entity01.setAttribute("networked", {
-        template: "#template-waypoint-avatar,
+        template: "#template-waypoint-avatar",
         attachTemplateToLocal: false
       });
       entity01.setAttribute("waypoint", {
@@ -180,7 +180,7 @@ if (ENABLE_TESTS) {
         willMaintainWorldUp: true
       });
       entity02.setAttribute("networked", {
-        template: "#template-waypoint-avatar,
+        template: "#template-waypoint-avatar",
         attachTemplateToLocal: false
       });
       this.el.appendChild(entity02);
@@ -197,7 +197,7 @@ if (ENABLE_TESTS) {
         willMaintainWorldUp: true
       });
       entity03.setAttribute("networked", {
-        template: "#template-waypoint-avatar,
+        template: "#template-waypoint-avatar",
         attachTemplateToLocal: false
       });
 
@@ -217,7 +217,7 @@ if (ENABLE_TESTS) {
 
       const entity01 = document.createElement("a-entity");
       entity01.setAttribute("networked", {
-        template: "#template-waypoint-avatar,
+        template: "#template-waypoint-avatar",
         attachTemplateToLocal: false
       });
       entity01.setAttribute("waypoint", {
@@ -241,7 +241,7 @@ if (ENABLE_TESTS) {
         willMaintainWorldUp: true
       });
       entity02.setAttribute("networked", {
-        template: "#template-waypoint-avatar,
+        template: "#template-waypoint-avatar",
         attachTemplateToLocal: false
       });
       this.el.appendChild(entity02);
@@ -258,7 +258,7 @@ if (ENABLE_TESTS) {
         willMaintainWorldUp: true
       });
       entity03.setAttribute("networked", {
-        template: "#template-waypoint-avatar,
+        template: "#template-waypoint-avatar",
         attachTemplateToLocal: false
       });
 

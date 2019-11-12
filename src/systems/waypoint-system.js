@@ -398,14 +398,11 @@ AFRAME.registerComponent("waypoint", {
     this.system = this.el.sceneEl.systems["hubs-systems"].waypointSystem;
     this.didRegisterWithSystem = false;
   },
-  play() {
-    if (this.canBeOccupied) {
-      const persistentFirstSync = NAF.entities.getPersistentFirstSync(this.el.components.networked.data.networkId);
-      if (persistentFirstSync) {
-        this.el.components.networked.data.applyPersistentFirstSync();
-      }
-    }
+  tick() {
     if (!this.didRegisterWithSystem) {
+      if (this.el.components.networked) {
+        this.el.components.networked.applyPersistentFirstSync();
+      }
       this.system.registerComponent(this, this.el.sceneEl);
       this.didRegisterWithSystem = true;
     }
