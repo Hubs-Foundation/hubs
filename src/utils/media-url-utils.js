@@ -121,10 +121,7 @@ const hubsRoomRegex = /(https?:\/\/)?(hub\.link)|(hubs\.local(:\d+)?|(smoke-)?hu
 
 export const isHubsSceneUrl = hubsSceneRegex.test.bind(hubsSceneRegex);
 export const isHubsRoomUrl = url => !isHubsSceneUrl(url) && hubsRoomRegex.test(url);
-export const isHubsDestinationUrl = url => {
-  console.log(url, "url is scene?", isHubsSceneUrl(url), "url is room", isHubsRoomUrl(url));
-  return isHubsSceneUrl(url) || isHubsRoomUrl(url);
-};
+export const isHubsDestinationUrl = url => isHubsSceneUrl(url) || isHubsRoomUrl(url);
 export const isHubsAvatarUrl = hubsAvatarRegex.test.bind(hubsAvatarRegex);
 
 export const idForAvatarUrl = url => {
