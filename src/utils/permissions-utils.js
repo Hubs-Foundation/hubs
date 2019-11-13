@@ -138,13 +138,6 @@ function stashPersistentSync(message, entityData) {
   }
 }
 
-const PHOENIX_RELIABLE_NAF = "phx-reliable";
-export function applyPersistentSync(networkId) {
-  if (!persistentSyncs[networkId]) return;
-  NAF.connection.adapter.onData(authorizeOrSanitizeMessage(persistentSyncs[networkId]), PHOENIX_RELIABLE_NAF);
-  delete persistentSyncs[networkId];
-}
-
 const emptyObject = {};
 export function authorizeOrSanitizeMessage(message) {
   const { dataType, from_session_id } = message;
@@ -212,4 +205,11 @@ export function authorizeOrSanitizeMessage(message) {
     // Fall through for other data types. Namely, "drawing-<networkId>" messages at the moment.
     return message;
   }
+}
+
+const PHOENIX_RELIABLE_NAF = "phx-reliable";
+export function applyPersistentSync(networkId) {
+  if (!persistentSyncs[networkId]) return;
+  NAF.connection.adapter.onData(authorizeOrSanitizeMessage(persistentSyncs[networkId]), PHOENIX_RELIABLE_NAF);
+  delete persistentSyncs[networkId];
 }
