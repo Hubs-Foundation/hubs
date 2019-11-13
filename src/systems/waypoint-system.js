@@ -156,7 +156,7 @@ export class WaypointSystem {
             .forEach(unoccupyWaypoint);
           debugDrawRect("lightgreen");
         } else {
-          console.log("Could not occupy waypoint:", waypointComponent);
+          debugDrawRect("lightred");
         }
       });
     }.bind(this);
