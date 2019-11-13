@@ -50,12 +50,13 @@
 
 :local(.tweetButton) {
   @extend %action-button;
-  margin-top: 12px;
   background-color: var(--twitter-action-color);
   align-self: center;
   padding-right: 32px;
   display: flex;
   flex-direction: row;
+  margin-right: 12px;
+  flex: 1;
 
   img {
     width: 42px;
@@ -154,12 +155,14 @@
 :local(.createButtons) {
   position: relative;
   display: flex;
+  margin-bottom: 12px;
 }
 
 :local(.createButton) {
   @extend %action-button;
   width: 100%;
   border: 0;
+  flex: 1;
 }
 
 :local(.optionsButton) {
@@ -177,4 +180,11 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+}
+
+:local(.cloneButton) {
+  @extend %action-button;
+  display: flex;
+  border: 0;
+  min-width: auto;
 }

@@ -116,7 +116,9 @@ const onReady = async () => {
     sceneName: sceneInfo.name,
     sceneDescription: sceneInfo.description,
     sceneAttributions: sceneInfo.attributions,
-    sceneScreenshotURL: sceneInfo.screenshot_url
+    sceneScreenshotURL: sceneInfo.screenshot_url,
+    sceneType: sceneInfo.type,
+    sceneAllowRemixing: sceneInfo.allow_remixing
   });
 };
 

@@ -18,6 +18,7 @@ import styles from "../assets/stylesheets/media-browser.scss";
 import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import StateLink from "./state-link";
 import { remixAvatar } from "../utils/avatar-utils";
+import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
 
 dayjs.extend(relativeTime);
 
@@ -35,6 +36,7 @@ class MediaTiles extends Component {
     handleEntryClicked: PropTypes.func,
     handlePager: PropTypes.func,
     onCopyAvatar: PropTypes.func,
+    onCopyScene: PropTypes.func,
     onShowSimilar: PropTypes.func
   };
 
@@ -42,6 +44,14 @@ class MediaTiles extends Component {
     e.preventDefault();
     await remixAvatar(entry.id, entry.name);
     this.props.onCopyAvatar();
+  };
+
+  handleCopyScene = async (e, entry) => {
+    e.preventDefault();
+    await fetchReticulumAuthenticated("/api/v1/scenes", "POST", {
+      parent_scene_id: entry.id
+    });
+    this.props.onCopyScene();
   };
 
   render() {
@@ -209,6 +219,12 @@ class MediaTiles extends Component {
           {entry.type === "avatar_listing" &&
             entry.allow_remixing && (
               <a onClick={e => this.handleCopyAvatar(e, entry)} title="Copy to my avatars">
+                <FontAwesomeIcon icon={faClone} />
+              </a>
+            )}
+          {entry.type === "scene_listing" &&
+            entry.allow_remixing && (
+              <a onClick={e => this.handleCopyScene(e, entry)} title="Copy to my scenes">
                 <FontAwesomeIcon icon={faClone} />
               </a>
             )}
