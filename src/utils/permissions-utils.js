@@ -116,7 +116,34 @@ function authorizeOrSanitizeMessageData(data, sender, senderPermissions) {
   }
 }
 
+// If we receive a sync from a persistent object that we don't have an entity for yet, it must be a scene-owned object
+// (since we guarantee that pinned objects are loaded before connecting NAF).
+// Since we need to get metadata (the template id in particular) from the entity, we must stash these messages until
+// the scene has loaded.
+// Components which require this data must call applyPersistentSync after they are initialized
 const persistentSyncs = {};
+function stashPersistentSync(message, entityData) {
+  if (!persistentSyncs[entityData.networkId]) {
+    persistentSyncs[entityData.networkId] = {
+      dataType: "u",
+      data: entityData,
+      clientId: message.clientId,
+      from_session_id: message.from_session_id
+    };
+  } else {
+    const currentData = persistentSyncs[entityData.networkId].data;
+    const currentComponents = currentData.components;
+    Object.assign(currentData, entityData);
+    currentData.components = Object.assign(currentComponents, entityData.components);
+  }
+}
+
+const PHOENIX_RELIABLE_NAF = "phx-reliable";
+export function applyPersistentSync(networkId) {
+  if (!persistentSyncs[networkId]) return;
+  NAF.connection.adapter.onData(authorizeOrSanitizeMessage(persistentSyncs[networkId]), PHOENIX_RELIABLE_NAF);
+  delete persistentSyncs[networkId];
+}
 
 const emptyObject = {};
 export function authorizeOrSanitizeMessage(message) {
@@ -144,21 +171,7 @@ export function authorizeOrSanitizeMessage(message) {
       if (!message.data.d.hasOwnProperty(index)) continue;
       const entityData = message.data.d[index];
       if (entityData.persistent && !NAF.entities.getEntity(entityData.networkId)) {
-        if (!persistentSyncs[entityData.networkId]) {
-          persistentSyncs[entityData.networkId] = {
-            dataType: "u",
-            data: entityData,
-            clientId: message.clientId,
-            from_session_id: message.from_session_id
-          };
-        } else {
-          const currentComponents = persistentSyncs[entityData.networkId].data.components;
-          Object.assign(persistentSyncs[entityData.networkId].data, entityData);
-          persistentSyncs[entityData.networkId].data.components = Object.assign(
-            currentComponents,
-            entityData.components
-          );
-        }
+        stashPersistentSync(message, entityData);
         message.data.d[index] = null;
         stashedAny = true;
       } else {
@@ -199,11 +212,4 @@ export function authorizeOrSanitizeMessage(message) {
     // Fall through for other data types. Namely, "drawing-<networkId>" messages at the moment.
     return message;
   }
-}
-
-const PHOENIX_RELIABLE_NAF = "phx-reliable";
-export function applyPersistentSync(networkId) {
-  if (!persistentSyncs[networkId]) return;
-  NAF.connection.adapter.onData(authorizeOrSanitizeMessage(persistentSyncs[networkId]), PHOENIX_RELIABLE_NAF);
-  delete persistentSyncs[networkId];
 }
