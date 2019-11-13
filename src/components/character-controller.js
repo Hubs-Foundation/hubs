@@ -130,6 +130,7 @@ AFRAME.registerComponent("character-controller", {
       // TODO: Have to move forward a little too for center-object to center-eye difference
       translatedUp.elements[13] += getCurrentPlayerHeight(); // Waypoints are placed at your feet
       rotateInPlaceAroundWorldUp(translatedUp, Math.PI, translatedUp); // Waypoints are backwards
+      translatedUp.multiply(new THREE.Matrix4().makeTranslation(0, 0, -0.25)); // head-to-eye
       this.data.pivot.object3D.updateMatrices();
       calculateCameraTransformForWaypoint(this.data.pivot.object3D.matrixWorld, translatedUp, final);
       childMatch(this.el.object3D, this.data.pivot.object3D, final);

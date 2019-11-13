@@ -10,7 +10,6 @@ AFRAME.registerComponent("overwrite-raycast-as-noop", {
     } else {
       this.el.addEventListener("model-loaded", () => {
         this.mesh = this.el.getObject3D("mesh");
-        console.log("model-loaded under", this.el, this.mesh);
         if (this.mesh) {
           this.mesh.raycast = noop;
         }
