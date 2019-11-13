@@ -14,8 +14,8 @@ export function jobIsAssigned(job, assignments) {
   );
 }
 
-export function assign(touch, job, assignments, doubleAssign) {
-  if (!doubleAssign && (touchIsAssigned(touch, assignments) || jobIsAssigned(job, assignments))) {
+export function assign(touch, job, assignments) {
+  if (touchIsAssigned(touch, assignments) || jobIsAssigned(job, assignments)) {
     console.error("cannot reassign touches or jobs. unassign first");
     return undefined;
   }
