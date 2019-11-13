@@ -82,6 +82,7 @@ function shouldTryToOccupy(waypointComponent) {
     (NAF.utils.isMine(waypointComponent.el) ||
       !(
         waypointComponent.data.isOccupied &&
+        NAF.utils.getNetworkOwner(waypointComponent.el) &&
         NAF.connection.connectedClients[NAF.utils.getNetworkOwner(waypointComponent.el)]
       ))
   );
@@ -103,7 +104,6 @@ function unoccupyWaypoints(waypointComponents) {
   waypointComponents.filter(isOccupiedByMe).forEach(unoccupyWaypoint);
 }
 function occupyWaypoint(waypointComponent) {
-  console.log("occupying", waypointComponent);
   waypointComponent.el.setAttribute("waypoint", { isOccupied: true });
 }
 
@@ -113,9 +113,11 @@ export class WaypointSystem {
     this.components = [];
     this.loading = [];
     this.ready = [];
+    this.preregistered = [];
     this.waypointForTemplateEl = {};
     this.elementsFromTemplatesFor = {};
     this.eventHandlers = [];
+    this.lostOwnershipOfWaypoint = this.lostOwnershipOfWaypoint.bind(this);
     loadTemplateAndAddToScene(scene, "waypoint-preview-avatar-template").then(el => {
       this.waypointPreviewAvatar = el;
       this.waypointPreviewAvatar.object3D.visible = false;
@@ -125,6 +127,9 @@ export class WaypointSystem {
   releaseAnyOccupiedWaypoints() {
     debugDrawRect("lightyellow");
     unoccupyWaypoints(this.ready);
+    if (this.currentWaypoint) {
+      this.currentWaypoint.el.removeEventListener("ownership-lost", this.lostOwnershipOfWaypoint);
+    }
   }
 
   teleportToWaypoint(iconEl, waypointComponent) {
@@ -196,7 +201,11 @@ export class WaypointSystem {
       }
     }.bind(this);
   }
+  preregisterComponent(component) {
+    this.preregistered.push(component);
+  }
   registerComponent(component) {
+    this.preregistered.splice(this.preregistered.indexOf(component), 1);
     this.components.push(component);
     this.loading.push(component);
     const setupEventHandlers = this.setupEventHandlersFor(component);
@@ -264,6 +273,12 @@ export class WaypointSystem {
     }
     return waypointComponent;
   }
+  lostOwnershipOfWaypoint(e) {
+    if (this.currentWaypoint && this.currentWaypoint.el === e.detail.el) {
+      this.mightNeedRespawn = true;
+      this.ownershipLostTime = performance.now();
+    }
+  }
   tryToOccupy(waypointComponent) {
     const previousPOV = new THREE.Matrix4();
     return new Promise(resolve => {
@@ -271,6 +286,7 @@ export class WaypointSystem {
       this.avatarPOV.object3D.updateMatrices();
       previousPOV.copy(this.avatarPOV.object3D.matrixWorld);
       previousPOV.elements[13] -= getCurrentPlayerHeight();
+      previousPOV.multiply(new THREE.Matrix4().makeTranslation(0, 0, 0.25)); //eye to head
       rotateInPlaceAroundWorldUp(previousPOV, Math.PI, previousPOV);
 
       waypointComponent.el.object3D.updateMatrices();
@@ -283,14 +299,16 @@ export class WaypointSystem {
       );
       if (shouldTryToOccupy(waypointComponent) && isMineOrTakeOwnership(waypointComponent.el)) {
         occupyWaypoint(waypointComponent);
+        this.currentWaypoint = waypointComponent;
         setTimeout(() => {
           if (NAF.utils.isMine(waypointComponent.el)) {
+            waypointComponent.el.addEventListener("ownership-lost", this.lostOwnershipOfWaypoint);
             resolve(true);
           } else {
             this.characterController.enqueueWaypointTravelTo(previousPOV, waypointComponent.data, 0);
             resolve(false);
           }
-        }, ENSURE_OWNERSHIP_RETAINED_TIMEOUT);
+        }, 0);
       } else {
         this.characterController.enqueueWaypointTravelTo(previousPOV, waypointComponent.data, 0);
         resolve(false);
@@ -301,19 +319,21 @@ export class WaypointSystem {
     if (!waypoints.length) return Promise.resolve(null);
     const previouslyOccupiedWaypoints = this.ready.filter(isOccupiedByMe);
     const candidate = waypoints.splice(Math.floor(Math.random() * waypoints.length), 1)[0];
-    return randomDelay()
-      .then(() => this.tryToOccupy(candidate))
-      .then(didOccupy => {
-        if (didOccupy) {
-          previouslyOccupiedWaypoints.filter(wp => wp !== candidate && isOccupiedByMe(wp)).forEach(unoccupyWaypoint);
-          return Promise.resolve(candidate);
-        } else {
-          return this.tryToOccupyAnyOf(waypoints);
-        }
-      });
+    return this.tryToOccupy(candidate).then(didOccupy => {
+      if (didOccupy) {
+        previouslyOccupiedWaypoints.filter(wp => wp !== candidate && isOccupiedByMe(wp)).forEach(unoccupyWaypoint);
+        return Promise.resolve(candidate);
+      } else {
+        return this.tryToOccupyAnyOf(waypoints);
+      }
+    });
   }
   moveToSpawnPoint() {
+    if (this.currentMoveToSpawn) {
+      return this.currentMoveToSpawn;
+    }
     if (!this.nextMoveToSpawn) {
+      this.waitOneTick = true;
       this.nextMoveToSpawn = new Promise(resolve => {
         this.nextMoveToSpawnResolve = resolve;
       });
@@ -322,7 +342,12 @@ export class WaypointSystem {
   }
 
   tick() {
-    if (!this.currentMoveToSpawn && this.nextMoveToSpawn) {
+    if (this.waitOneTick) {
+      this.waitOneTick = false;
+      return;
+    }
+    if (!this.preregistered.length && !this.currentMoveToSpawn && this.nextMoveToSpawn) {
+      this.mightNeedRespawn = false;
       this.currentMoveToSpawn = this.nextMoveToSpawn;
       this.currentMoveToSpawnResolve = this.nextMoveToSpawnResolve;
       this.nextMoveToSpawn = null;
@@ -352,6 +377,9 @@ export class WaypointSystem {
           this.currentMoveToSpawnResolve = null;
         }
       );
+    } else if (this.mightNeedRespawn && performance.now() - this.ownershipLostTime < 8000) {
+      this.mightNeedRespawn = false;
+      this.moveToSpawnPoint();
     }
 
     const tickTemplateEl = (elementFromTemplate, waypointComponent) => {
@@ -365,7 +393,9 @@ export class WaypointSystem {
         target.makeRotationY(Math.PI);
         target.elements[13] = getCurrentPlayerHeight();
         const t2 = new THREE.Matrix4().identity();
-        t2.copy(waypointComponent.el.object3D.matrixWorld).multiply(target);
+        t2.copy(waypointComponent.el.object3D.matrixWorld)
+          .multiply(target)
+          .multiply(new THREE.Matrix4().makeTranslation(0, 0, -0.25)); //head to eye
         elementFromTemplate.object3D.updateMatrices();
         const scale = new THREE.Vector3().setFromMatrixScale(elementFromTemplate.object3D.matrixWorld);
         const t3 = new THREE.Matrix4()
@@ -397,6 +427,7 @@ AFRAME.registerComponent("waypoint", {
   init() {
     this.system = this.el.sceneEl.systems["hubs-systems"].waypointSystem;
     this.didRegisterWithSystem = false;
+    this.system.preregisterComponent(this);
   },
   tick() {
     if (!this.didRegisterWithSystem) {

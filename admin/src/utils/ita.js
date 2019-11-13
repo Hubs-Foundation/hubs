@@ -1,6 +1,16 @@
 import configs from "./configs";
 
-const schemaCategories = ["api_keys", "content", "email", "advanced"];
+const schemaCategories = [
+  "api_keys",
+  "content",
+  "email",
+  "advanced",
+  "translations",
+  "features",
+  "images",
+  "theme",
+  "links"
+];
 const serviceNames = configs.CONFIGURABLE_SERVICES.split(",");
 let currentAuthToken = null;
 
@@ -18,6 +28,16 @@ function getCategoryDisplayName(category) {
       return "Email";
     case "advanced":
       return "Advanced";
+    case "translations":
+      return "Translations";
+    case "features":
+      return "Features";
+    case "images":
+      return "Images";
+    case "theme":
+      return "Theme";
+    case "links":
+      return "Links";
     default:
       return null;
   }
@@ -33,6 +53,16 @@ function getCategoryDescription(category) {
       return "Custom SMTP email provider settings. Leave blank to use your cloud provider's email service.";
     case "advanced":
       return "Advanced Settings for those who know what they're doing.";
+    case "translations":
+      return "Text that you can change.";
+    case "features":
+      return "Features that you can toggle.";
+    case "images":
+      return "Replace images in the app.";
+    case "colors":
+      return "Replace colors in the app.";
+    case "links":
+      return "Replace links in the app.";
     default:
       return null;
   }
@@ -89,7 +119,7 @@ function putConfig(service, config) {
 
 // An object is considered to be a config descriptor if it at least has
 // a "type" key and has no keys which aren't valid descriptor metadata.
-const DESCRIPTOR_FIELDS = ["default", "type", "of", "unmanaged", "category", "name", "description"];
+const DESCRIPTOR_FIELDS = ["default", "type", "of", "unmanaged", "category", "name", "description", "internal"];
 function isDescriptor(obj) {
   if (typeof obj !== "object") return false;
   if (!("type" in obj)) return false;

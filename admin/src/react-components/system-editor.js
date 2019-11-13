@@ -11,6 +11,11 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import Warning from "@material-ui/icons/Warning";
 import { fetchReticulumAuthenticated } from "hubs/src/utils/phoenix-utils";
 import withCommonStyles from "../utils/with-common-styles";
+import { getAdminInfo } from "../utils/ita";
+
+// Send quota to use as heuristic for checking if in SES sandbox
+// https://forums.aws.amazon.com/thread.jspa?threadID=61090
+const MAX_AWS_SES_QUOTA_FOR_SANDBOX = 200;
 
 const styles = withCommonStyles(() => ({}));
 
@@ -19,7 +24,9 @@ class SystemEditorComponent extends Component {
     reticulumMeta: {}
   };
 
-  componentDidMount() {
+  async componentDidMount() {
+    const adminInfo = await getAdminInfo();
+    this.setState({ adminInfo });
     this.updateReticulumMeta();
   }
 
@@ -31,6 +38,10 @@ class SystemEditorComponent extends Component {
   render() {
     const needsAvatars = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.avatar_listings.any;
     const needsScenes = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.scene_listings.any;
+    const isInSESSandbox =
+      this.state.adminInfo &&
+      this.state.adminInfo.using_ses &&
+      this.state.adminInfo.ses_max_24_hour_send <= MAX_AWS_SES_QUOTA_FOR_SANDBOX;
 
     return (
       <Card className={this.props.classes.container}>
@@ -51,8 +62,44 @@ class SystemEditorComponent extends Component {
             guide.
           </Typography>
 
-          {this.state.reticulumMeta && (needsAvatars || needsScenes) && (
+          {this.state.reticulumMeta && this.state.adminInfo && (needsAvatars || needsScenes || isInSESSandbox) && (
             <List>
+              {isInSESSandbox && (
+                <ListItem>
+                  <ListItemIcon className={this.props.classes.warningIcon}>
+                    <Warning />
+                  </ListItemIcon>
+                  <ListItemText
+                    inset
+                    primary={
+                      <span>
+                        Your AWS account is in the{" "}
+                        <a
+                          href="https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          AWS Simple Email Service Sandbox
+                        </a>{" "}
+                      </span>
+                    }
+                    secondary={
+                      <span>
+                        Users will not be able to log in until the system can send email. You&apos;ll need to either{" "}
+                        <a
+                          href="https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          follow the instructions
+                        </a>{" "}
+                        to request a limit increase, or set custom email settings in{" "}
+                        <a href="/admin#/server-setup">Server Settings</a>
+                      </span>
+                    }
+                  />
+                </ListItem>
+              )}
               {needsAvatars && (
                 <ListItem>
                   <ListItemIcon className={this.props.classes.warningIcon}>

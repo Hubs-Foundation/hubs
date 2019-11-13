@@ -2,6 +2,7 @@
 import configs from "../utils/configs";
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
+import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js/dist/hls.light.js";
 import { addAndArrangeMedia, createImageTexture } from "../utils/media-utils";
@@ -23,6 +24,7 @@ const isIOS = AFRAME.utils.device.isIOS();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 const HLS_TIMEOUT = 10000; // HLS can sometimes fail, we re-try after this duration
+const audioIconTexture = new THREE.TextureLoader().load(audioIcon);
 
 export const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
@@ -400,7 +402,10 @@ AFRAME.registerComponent("media-video", {
       const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
       this.playPauseButton.object3D.visible =
         !!this.video && !this.videoIsLive && (!isPinned || window.APP.hubChannel.can("pin_objects"));
-      this.snapButton.object3D.visible = !!this.video && window.APP.hubChannel.can("spawn_and_move_media");
+      this.snapButton.object3D.visible =
+        !!this.video &&
+        !this.data.contentType.startsWith("audio/") &&
+        window.APP.hubChannel.can("spawn_and_move_media");
       this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
       this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
     }
@@ -475,24 +480,27 @@ AFRAME.registerComponent("media-video", {
       }
 
       if (!src.startsWith("hubs://")) {
-        // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
-        texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
+        // iOS video audio is broken, see: https://github.com/mozilla/hubs/issues/1797
+        if (!isIOS) {
+          // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
+          texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
 
-        if (this.data.audioType === "pannernode") {
-          this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-          this.audio.setDistanceModel(this.data.distanceModel);
-          this.audio.setRolloffFactor(this.data.rolloffFactor);
-          this.audio.setRefDistance(this.data.refDistance);
-          this.audio.setMaxDistance(this.data.maxDistance);
-          this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
-          this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
-          this.audio.panner.coneOuterGain = this.data.coneOuterGain;
-        } else {
-          this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
+          if (this.data.audioType === "pannernode") {
+            this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+            this.audio.setDistanceModel(this.data.distanceModel);
+            this.audio.setRolloffFactor(this.data.rolloffFactor);
+            this.audio.setRefDistance(this.data.refDistance);
+            this.audio.setMaxDistance(this.data.maxDistance);
+            this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
+            this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
+            this.audio.panner.coneOuterGain = this.data.coneOuterGain;
+          } else {
+            this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
+          }
+
+          this.audio.setNodeSource(texture.audioSource);
+          this.el.setObject3D("sound", this.audio);
         }
-
-        this.audio.setNodeSource(texture.audioSource);
-        this.el.setObject3D("sound", this.audio);
       }
 
       this.video = texture.image;
@@ -560,10 +568,14 @@ AFRAME.registerComponent("media-video", {
       this.el.setObject3D("mesh", this.mesh);
     }
 
-    this.mesh.material.map = texture;
+    if (this.data.contentType.startsWith("audio/")) {
+      this.mesh.material.map = audioIconTexture;
+    } else {
+      this.mesh.material.map = texture;
+    }
     this.mesh.material.needsUpdate = true;
 
-    if (projection === "flat") {
+    if (projection === "flat" && !this.data.contentType.startsWith("audio/")) {
       scaleToAspectRatio(this.el, texture.image.videoHeight / texture.image.videoWidth);
     }
 
@@ -583,11 +595,19 @@ AFRAME.registerComponent("media-video", {
     return new Promise(async (resolve, reject) => {
       const videoEl = await createVideoEl();
 
-      const texture = new THREE.VideoTexture(videoEl);
-      texture.minFilter = THREE.LinearFilter;
-      texture.encoding = THREE.sRGBEncoding;
-      const isReady = () =>
-        (texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width);
+      let texture, isReady;
+      if (contentType.startsWith("audio/")) {
+        // We want to treat audio almost exactly like video, so we mock a video texture with an image property.
+        texture = new THREE.Texture();
+        texture.image = videoEl;
+        isReady = () => true;
+      } else {
+        texture = new THREE.VideoTexture(videoEl);
+        texture.minFilter = THREE.LinearFilter;
+        texture.encoding = THREE.sRGBEncoding;
+        isReady = () =>
+          (texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width);
+      }
 
       // Set src on video to begin loading.
       if (url.startsWith("hubs://")) {

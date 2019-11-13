@@ -7,8 +7,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: white;
-  border: 1px solid #e2e2e2;
+  background-color: var(--text-field-background-color);
+  border: 1px solid var(--text-field-border-color);
   border-radius: 16px;
 }
 
@@ -30,7 +30,7 @@
   overflow: hidden;
   resize: none;
   background-color: transparent;
-  color: black;
+  color: var(--text-field-text-color);
   padding: 8px 1.25em;
   line-height: 28px;
   font-size: 1.1em;
@@ -41,18 +41,18 @@
 }
 
 :local(.message-entry-input)::placeholder{
-  color: $dark-grey;
+  color: var(--text-field-placeholder-color);
   font-weight: 300;
   font-style: italic;
 }
 
 :local(.message-entry-button) {
-  color: $action-color;
+  color: $action-label-color;
   appearance: none;
   -moz-appearance: none;
   -webkit-appearance: none;
   outline-style: none;
-  background-color: white;
+  background-color: var(--text-field-background-color);
   min-width: 40px;
   height: 100%;
   bottom: 0px;
@@ -62,17 +62,42 @@
   margin: 0px 10px;
 }
 
+:local(.message-entry-spawn) {
+  color: var(--overlay-text-field-widget-color);
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+  min-width: 40px;
+  height: 100%;
+  bottom: 0px;
+  font-size: 1.5em;
+  cursor: pointer;
+  border: 0;
+  background-color: transparent;
+  margin: 0px;
+}
+
+:local(.message-entry-spawn):hover {
+  color: $action-label-color;
+}
+
+:local(.message-entry-spawn):disabled {
+  color: var(--text-field-disabled-color);
+  background-color: transparent;
+}
+
 :local(.message-entry-button):disabled {
-  color: $dark-grey;
+  color: var(--text-field-disabled-color);
   background-color: transparent;
 }
 
 :local(.message-entry-button-in-room) {
-  color: $dark-grey;
+  color: var(--overlay-text-field-widget-color);
 }
 
 :local(.message-entry-button-in-room):hover {
-  color: $action-color;
+  color: $action-label-color;
 }
 
 :local(.message-entry-upload) {
@@ -95,36 +120,19 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(64, 64, 64, 0.55);
+  background-color: var(--overlay-text-field-background-color);
   border-radius: 16px;
   pointer-events: auto;
   transition: opacity 0.15s linear;
 
   :local(.message-entry-input-in-room) {
-    color: white;
+    color: var(--overlay-text-field-text-color);
     padding: 8px 0px;
     margin-left: 4px;
   }
 
   :local(.message-entry-input-no-spawn) {
     padding: 8px 1.25em;
-  }
-
-  :local(.message-entry-spawn) {
-    @extend %action-button;
-    background-color: transparent;
-    height: 32px;
-    width: 32px;
-    bottom: 8px;
-    min-width: auto;
-    background-size: 100%;
-    background-image: url(../images/spawn_message_dark.png);
-    background-repeat: no-repeat;
-    padding: 0;
-  }
-
-  :local(.message-entry-spawn):hover {
-    background-image: url(../images/spawn_message_dark-hover.png);
   }
 
   :local(.message-entry-button-in-room) {
@@ -136,7 +144,7 @@
 
 :local(.message-entry-in-room):focus-within, :local(.message-entry-in-room):hover {
   transition: background-color 0.15s linear;
-  background-color: $darker-grey;
+  background-color: var(--overlay-text-field-focused-background-color);
 
   :local(.message-entry-button-in-room) {
     border: 0;

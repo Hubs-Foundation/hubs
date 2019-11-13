@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import copy from "copy-to-clipboard";
+
+import { messages } from "../utils/i18n";
 import DialogContainer from "./dialog-container.js";
 import { WithHoverSound } from "./wrap-with-audio";
 
@@ -18,7 +20,10 @@ export default class SafariDialog extends Component {
     return (
       <DialogContainer title="Open in Safari" {...this.props}>
         <div>
-          <div>Hubs does not support your current browser on iOS. Copy and paste this link directly in Safari.</div>
+          <div>
+            {messages["app-name"]} does not support your current browser on iOS. Copy and paste this link directly in
+            Safari.
+          </div>
           <div className="invite-form">
             <input
               type="text"

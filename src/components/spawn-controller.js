@@ -17,8 +17,7 @@ AFRAME.registerComponent("spawn-controller", {
     this.moveToSpawnPoint = this.moveToSpawnPoint.bind(this);
 
     waitForDOMContentLoaded().then(() => {
-      console.warn("Normal spawning is disabled!");
-      //      this.data.target.addEventListener(this.data.loadedEvent, this.moveToSpawnPoint);
+      this.data.target.addEventListener(this.data.loadedEvent, this.moveToSpawnPoint);
     });
   },
   moveToSpawnPoint() {

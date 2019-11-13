@@ -3,8 +3,11 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
+
+import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/scene-ui.scss";
-import hubLogo from "../assets/images/hub-preview-white.png";
+import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import spokeLogo from "../assets/images/spoke_logo_black.png";
 import { createAndRedirectToNewHub } from "../utils/phoenix-utils";
 import { WithHoverSound } from "./wrap-with-audio";
@@ -72,7 +75,7 @@ class SceneUI extends Component {
     }
 
     const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
-    const tweetText = `${this.props.sceneName} in #hubs`;
+    const tweetText = `${this.props.sceneName} in ${messages["share-hashtag"]}`;
     const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(sceneUrl)}&text=${encodeURIComponent(
       tweetText
     )}`;
@@ -137,7 +140,7 @@ class SceneUI extends Component {
             <div className={styles.mainPanel}>
               <WithHoverSound>
                 <a href="/" className={styles.logo}>
-                  <img src={hubLogo} />
+                  <img src={configs.image("logo", hubLogo)} />
                 </a>
               </WithHoverSound>
               <div className={styles.logoTagline}>
@@ -172,12 +175,14 @@ class SceneUI extends Component {
             <div className={styles.name}>{this.props.sceneName}</div>
             <div className={styles.attribution}>{attributions}</div>
           </div>
-          <div className={styles.spoke}>
-            <div className={styles.madeWith}>made with</div>
-            <a href="/spoke">
-              <img src={spokeLogo} />
-            </a>
-          </div>
+          <IfFeature name="enable_spoke">
+            <div className={styles.spoke}>
+              <div className={styles.madeWith}>made with</div>
+              <a href="/spoke">
+                <img src={spokeLogo} />
+              </a>
+            </div>
+          </IfFeature>
           {this.state.showCustomRoomDialog && (
             <CreateRoomDialog
               includeScenePrompt={false}

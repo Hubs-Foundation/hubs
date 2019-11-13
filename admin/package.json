@@ -18,6 +18,7 @@
     "test": "npm run lint && npm run build"
   },
   "dependencies": {
+    "@iarna/toml": "^2.2.3",
     "aframe": "github:mozillareality/aframe#hubs/master",
     "classnames": "^2.2.5",
     "hubs": "file:..",

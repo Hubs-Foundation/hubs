@@ -449,7 +449,7 @@
                 <a-entity
                     class="pen interactable"
                     body-helper="type: dynamic; mass: 0.001; collisionFilterGroup: 1; collisionFilterMask: 15; gravity: 0 0 0;"
-                    media-loader="src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;"
+                    gltf-model-plus="src: #drawing-pen; inflate: true;"
                     owned-object-limiter="counter: #pen-counter"
                     set-unowned-body-kinematic
                     is-remote-hover-target
@@ -786,11 +786,6 @@
             </template>
 
             <a-mixin id="rounded-text-button"
-                text-button="
-                    textHoverColor: #ff3464;
-                    textColor: #ff3464;
-                    backgroundHoverColor: #aaa;
-                    backgroundColor: #fff;"
                 slice9="
                     width: 0.45;
                     height: 0.2;
@@ -803,11 +798,6 @@
             ></a-mixin>
 
             <a-mixin id="rounded-button"
-                text-button="
-                    textHoverColor: #ff3464;
-                    textColor: #ff3464;
-                    backgroundHoverColor: #aaa;
-                    backgroundColor: #fff;"
                 slice9="
                     width: 0.2;
                     height: 0.2;
@@ -820,12 +810,6 @@
             ></a-mixin>
 
             <a-mixin id="rounded-text-action-button"
-                text-button="
-                    textHoverColor: #fff;
-                    textColor: #fff;
-                    backgroundColor: #ff3464;
-                    backgroundHoverColor: #fc3545;
-                    "
                 slice9="
                     width: 0.45;
                     height: 0.2;
@@ -838,12 +822,6 @@
             ></a-mixin>
 
             <a-mixin id="rounded-action-button"
-                text-button="
-                    textHoverColor: #fff;
-                    textColor: #fff;
-                    backgroundColor: #ff3464;
-                    backgroundHoverColor: #fc3545;
-                    "
                 slice9="
                     width: 0.2;
                     height: 0.2;

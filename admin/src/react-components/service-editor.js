@@ -8,14 +8,17 @@ import CardContent from "@material-ui/core/CardContent";
 import Snackbar from "@material-ui/core/Snackbar";
 import SnackbarContent from "@material-ui/core/SnackbarContent";
 import TextField from "@material-ui/core/TextField";
+import Switch from "@material-ui/core/Switch";
 import Typography from "@material-ui/core/Typography";
 import Icon from "@material-ui/core/Icon";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
-import clsx from "classnames";
 import Button from "@material-ui/core/Button";
 import LinearProgress from "@material-ui/core/LinearProgress";
+import clsx from "classnames";
 import { Title } from "react-admin";
+
+import Store from "hubs/src/storage/store";
 import withCommonStyles from "../utils/with-common-styles";
 import {
   getConfig,
@@ -27,8 +30,65 @@ import {
   putConfig,
   schemaCategories
 } from "../utils/ita";
+import * as AppConfigUtils from "../utils/app-config";
 
-const styles = withCommonStyles(() => ({}));
+const qs = new URLSearchParams(location.hash.split("?")[1]);
+
+const styles = withCommonStyles(theme => {
+  return {
+    inputDescription: {
+      display: "block",
+      color: theme.palette.text.secondary,
+      fontSize: "0.75rem",
+      marginTop: "0.5em",
+      borderTop: "1px solid rgba(0, 0, 0, 0.42)"
+    },
+    fileInput: {
+      marginTop: "2em",
+      marginBottom: "1em",
+      "& .name": {
+        color: theme.palette.text.secondary,
+        display: "block",
+        marginBottom: "0.5em",
+        "&.filled": {
+          fontSize: "0.75rem"
+        }
+      },
+      "& .image": {
+        width: "50px",
+        maxHeight: "50px",
+        marginRight: "1em",
+        verticalAlign: "middle"
+      }
+    },
+    switchInput: {
+      margin: "2em 0",
+      "& label": {
+        marginLeft: "-1em",
+        fontSize: "1rem"
+      },
+      "& .switch": {
+        marginTop: "-0.1em"
+      }
+    },
+    colorInput: {
+      margin: "2em 0",
+      "& label": {
+        fontSize: "1rem"
+      },
+      "& input": {
+        margin: 0,
+        marginRight: "1em",
+        padding: "4px",
+        border: "1px solid hsl(0, 0%, 90%)",
+        backgroundColor: "hsl(0, 0%, 90%)",
+        borderRadius: "3px",
+        height: "32px",
+        verticalAlign: "middle"
+      }
+    }
+  };
+});
 
 function TabContainer(props) {
   return (
@@ -54,20 +114,33 @@ function getDescriptors(schema) {
   return descriptors;
 }
 
-class ConfigurationEditor extends Component {
-  state = {
-    schema: null,
-    config: null,
-    category: schemaCategories[0],
-    saving: false,
-    saved: false,
-    saveError: null
-  };
+function isEmptyObject(obj) {
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      return false;
+    }
+  }
+  return true;
+}
 
-  componentDidMount() {
-    this.fetchConfigsForCategory();
-    //this.setState({ schema: this.props.schema[this.props.category] });
-    //getConfig(this.props.service).then(config => this.setState({ config: config }));
+class ConfigurationEditor extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      schema: null,
+      config: null,
+      category: this.firstAvailableCategory(),
+      saving: false,
+      saved: false,
+      saveError: null
+    };
+  }
+
+  firstAvailableCategory() {
+    for (const category of schemaCategories) {
+      if (!this.props.schema[category] || isEmptyObject(this.props.schema[category])) continue;
+      return category;
+    }
   }
 
   async fetchConfigsForCategory() {
@@ -76,18 +149,29 @@ class ConfigurationEditor extends Component {
     const config = {};
 
     for (const service of servicesForCategory) {
-      config[service] = await getConfig(service);
+      config[service] = await this.getConfig(service);
     }
 
     this.setState({ config });
+  }
+
+  async getConfig() {
+    throw new Error("Not implemented");
+  }
+
+  async putConfig() {
+    throw new Error("Not implemented");
+  }
+
+  componentDidMount() {
+    this.fetchConfigsForCategory();
   }
 
   handleTabChange(event, category) {
     this.setState({ category, config: null }, () => this.fetchConfigsForCategory());
   }
 
-  onChange(path, ev) {
-    const val = ev.target.value;
+  onChange(path, val) {
     const config = this.state.config;
     setConfigValue(config, path, val);
     this.setState({ config: config });
@@ -100,7 +184,7 @@ class ConfigurationEditor extends Component {
       try {
         for (const [service, config] of Object.entries(this.state.config)) {
           if (Object.keys(config).length > 0) {
-            const res = await putConfig(service, config);
+            const res = await this.putConfig(service, config);
 
             if (res.error) {
               this.setState({ saveError: `Error saving: ${res.error}` });
@@ -125,7 +209,7 @@ class ConfigurationEditor extends Component {
         id={displayPath}
         label={descriptor.name || displayPath}
         value={currentValue || ""}
-        onChange={ev => this.onChange(path, ev)}
+        onChange={ev => this.onChange(path, ev.target.value)}
         helperText={descriptor.description}
         type={inputType}
         fullWidth
@@ -134,11 +218,76 @@ class ConfigurationEditor extends Component {
     );
   }
 
+  renderFileInput(path, descriptor, currentValue) {
+    let imageURL;
+    if (!currentValue) {
+      imageURL = null;
+    } else if (currentValue instanceof File) {
+      imageURL = URL.createObjectURL(currentValue);
+    } else if (currentValue.origin) {
+      imageURL = currentValue.origin;
+    } else {
+      imageURL = currentValue;
+    }
+
+    const displayPath = path.join(" > ");
+
+    return (
+      <div key={displayPath} className={this.props.classes.fileInput}>
+        <div className={clsx("name", { filled: !!imageURL })}>{descriptor.name || displayPath}</div>
+        <label>
+          {imageURL && <img className="image" src={imageURL} />}
+          <input type="file" onChange={ev => this.onChange(path, ev.target.files[0])} style={{ display: "none" }} />
+          <Button variant="outlined" color="secondary" size="small" onClick={e => e.target.parentNode.click()}>
+            Upload
+          </Button>
+        </label>
+        <span className={this.props.classes.inputDescription}>{descriptor.description}</span>
+      </div>
+    );
+  }
+
+  renderSwitchInput(path, descriptor, currentValue) {
+    const displayPath = path.join(" > ");
+    return (
+      <div key={displayPath} className={this.props.classes.switchInput}>
+        <label>
+          <Switch className="switch" checked={currentValue} onChange={ev => this.onChange(path, ev.target.checked)} />
+          {descriptor.name || displayPath}
+        </label>
+        <span className={this.props.classes.inputDescription}>{descriptor.description}</span>
+      </div>
+    );
+  }
+
+  renderColorInput(path, descriptor, currentValue) {
+    const displayPath = path.join(" > ");
+    return (
+      <div key={displayPath} className={this.props.classes.colorInput}>
+        <label>
+          <input
+            type="color"
+            value={currentValue || ""}
+            onChange={ev => this.onChange(path, ev.target.value)}
+            title={currentValue}
+          />
+          {descriptor.name || displayPath}
+        </label>
+        <span className={this.props.classes.inputDescription}>{descriptor.description}</span>
+      </div>
+    );
+  }
+
   renderConfigurable(path, descriptor, currentValue) {
     switch (descriptor.type) {
       case "list":
         return null;
+      case "file":
+        return this.renderFileInput(path, descriptor, currentValue);
       case "boolean":
+        return this.renderSwitchInput(path, descriptor, currentValue);
+      case "color":
+        return this.renderColorInput(path, descriptor, currentValue);
       case "string":
       case "number":
       default:
@@ -147,9 +296,9 @@ class ConfigurationEditor extends Component {
   }
 
   renderTree(schema, category, config) {
-    const configurables = getDescriptors(schema[category]).map(([path, descriptor]) =>
-      this.renderConfigurable(path, descriptor, getConfigValue(config, path))
-    );
+    const configurables = getDescriptors(schema[category])
+      .filter(([, descriptor]) => qs.get("show_internal_configs") !== null || descriptor.internal !== "true")
+      .map(([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path)));
 
     return (
       <form onSubmit={this.onSubmit.bind(this)}>
@@ -188,9 +337,11 @@ class ConfigurationEditor extends Component {
             scrollButtons="auto"
             onChange={this.handleTabChange.bind(this)}
           >
-            {schemaCategories.map(c => (
-              <Tab label={getCategoryDisplayName(c)} key={c} value={c} />
-            ))}
+            {schemaCategories
+              .filter(c => this.props.schema[c] && !isEmptyObject(this.props.schema[c]))
+              .map(c => (
+                <Tab label={getCategoryDisplayName(c)} key={c} value={c} />
+              ))}
           </Tabs>
           <TabContainer>
             <Typography variant="body2" gutterBottom>
@@ -228,4 +379,33 @@ class ConfigurationEditor extends Component {
   }
 }
 
-export const ServiceEditor = withStyles(styles)(ConfigurationEditor);
+const ServiceEditor = withStyles(styles)(
+  class ServiceEditor extends ConfigurationEditor {
+    getConfig(service) {
+      return getConfig(service);
+    }
+    putConfig(service, config) {
+      return putConfig(service, config);
+    }
+  }
+);
+
+const AppConfigEditor = withStyles(styles)(
+  class AppConfigEditor extends ConfigurationEditor {
+    constructor(props) {
+      super(props);
+      const store = new Store();
+      if (store.state && store.state.credentials && store.state.credentials.token) {
+        AppConfigUtils.setAuthToken(store.state.credentials.token);
+      }
+    }
+    getConfig() {
+      return AppConfigUtils.getConfig();
+    }
+    putConfig(service, config) {
+      return AppConfigUtils.putConfig(config);
+    }
+  }
+);
+
+export { ServiceEditor, AppConfigEditor };

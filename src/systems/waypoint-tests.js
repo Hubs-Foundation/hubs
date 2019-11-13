@@ -1,3 +1,16 @@
+window.logOccupiableWaypointInfo = function(includeNetworkInfo) {
+  AFRAME.scenes[0].systems["hubs-systems"].waypointSystem.components.forEach(c => {
+    if (c.data.canBeOccupied) {
+      console.log(c.el);
+      console.log(c.data);
+      if (includeNetworkInfo && NAF.utils.getNetworkedEntity(c.el)) {
+        console.log("object creator is:", NAF.utils.getCreator(c.el));
+        console.log("object owner is:", NAF.utils.getNetworkOwner(c.el));
+        console.log("my client id is:", NAF.clientId);
+      }
+    }
+  });
+};
 window.logWaypointInfo = function(includeNetworkInfo) {
   AFRAME.scenes[0].systems["hubs-systems"].waypointSystem.components.forEach(c => {
     console.log(c.el);

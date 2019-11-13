@@ -1,3 +1,6 @@
+import configs from "../utils/configs";
+import { messages } from "../utils/i18n";
+
 AFRAME.registerComponent("tweet-media-button", {
   init() {
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
@@ -8,8 +11,9 @@ AFRAME.registerComponent("tweet-media-button", {
       const hasDiscordBridges = window.APP.hubChannel && window.APP.hubChannel.discordBridges().length > 0;
 
       const text = !hasDiscordBridges
-        ? `Taken in hubs.mozilla.com - join me now at hub.link/${window.APP.hubChannel.hubId}! `
-        : `Taken in hubs.mozilla.com `;
+        ? `Taken in ${location.hostname} - ` +
+          `join me now at ${messages["app-short-domain"]}/${window.APP.hubChannel.hubId}! `
+        : `Taken in ${location.hostname} `;
 
       const { src, contentSubtype } = this.targetEl.components["media-loader"].data;
       this.el.sceneEl.emit("action_media_tweet", { url: src, contentSubtype, text, el: this.targetEl });
@@ -17,6 +21,10 @@ AFRAME.registerComponent("tweet-media-button", {
   },
 
   play() {
+    if (!configs.AVAILABLE_INTEGRATIONS.twitter) {
+      this.el.object3D.visible = false;
+      return;
+    }
     this.el.object3D.addEventListener("interact", this.onClick);
   },
 

@@ -1,3 +1,4 @@
+import "./utils/theme";
 import "./utils/configs";
 import "./assets/stylesheets/link.scss";
 import "aframe";
