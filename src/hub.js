@@ -530,7 +530,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
     const loadEnvironmentAndConnect = () => {
       if (qsTruthy("delay")) {
-        setTimeout(() => updateEnvironmentForHub(hub), 10000);
+        setTimeout(() => updateEnvironmentForHub(hub), 20000);
       } else {
         updateEnvironmentForHub(hub);
       }
@@ -1319,7 +1319,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         scene.addEventListener(
           "didConnectToNetworkedScene",
           () => {
-            console.log("BPDEBUG clientId", NAF.clientId);
             oscillator.stop();
             track.enabled = false;
           },
@@ -1395,7 +1394,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (stale_fields.includes("scene")) {
       if (qsTruthy("delay")) {
-        setTimeout(() => updateEnvironmentForHub(hub), 10000);
+        setTimeout(() => updateEnvironmentForHub(hub), 20000);
       } else {
         updateEnvironmentForHub(hub);
       }

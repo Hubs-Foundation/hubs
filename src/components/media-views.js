@@ -236,7 +236,6 @@ AFRAME.registerComponent("media-video", {
   },
 
   init() {
-    console.log("BPDEBUG video init");
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
     this.tryUpdateVideoPlaybackState = this.tryUpdateVideoPlaybackState.bind(this);
     this.updateSrc = this.updateSrc.bind(this);
@@ -287,7 +286,6 @@ AFRAME.registerComponent("media-video", {
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
-      console.log("BPDEBUG applying video persistent first sync", this.networkedEl.components.networked.data.networkId);
       applyPersistentSync(this.networkedEl.components.networked.data.networkId);
       this.updatePlaybackState();
 

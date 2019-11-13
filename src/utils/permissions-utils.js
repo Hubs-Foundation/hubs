@@ -129,14 +129,6 @@ export function authorizeOrSanitizeMessage(message) {
     return message;
   }
 
-  // If we have a persistent sync for an entity that does not exist yet, we need to stash it and wait
-  // for a scene load or scene change before applying it.
-  if (dataType === "u" && message.data.persistent && !NAF.entities.getEntity(message.data.networkId)) {
-    persistentSyncs[message.data.networkId] = message;
-    console.log("BPDEBUG stashed first sync", message.data.networkId, message);
-    return emptyObject;
-  }
-
   const presenceState = window.APP.hubChannel.presence.state[from_session_id];
 
   if (!presenceState) {
@@ -149,30 +141,53 @@ export function authorizeOrSanitizeMessage(message) {
 
   if (dataType === "um") {
     let sanitizedAny = false;
+    let stashedAny = false;
     for (const index in message.data.d) {
       if (!message.data.d.hasOwnProperty(index)) continue;
-      const authorizedOrSanitized = authorizeOrSanitizeMessageData(
-        message.data.d[index],
-        from_session_id,
-        senderPermissions
-      );
-      if (!authorizedOrSanitized) {
+      const entityData = message.data.d[index];
+      if (entityData.persistent && !NAF.entities.getEntity(entityData.networkId)) {
+        if (!persistentSyncs[entityData.networkId]) {
+          persistentSyncs[entityData.networkId] = {
+            dataType: "u",
+            data: entityData,
+            clientId: message.clientId,
+            from_session_id: message.from_session_id
+          };
+        } else {
+          const currentComponents = persistentSyncs[entityData.networkId].data.components;
+          Object.assign(persistentSyncs[entityData.networkId].data, entityData);
+          persistentSyncs[entityData.networkId].data.components = Object.assign(
+            currentComponents,
+            entityData.components
+          );
+        }
         message.data.d[index] = null;
-        sanitizedAny = true;
+        stashedAny = true;
+      } else {
+        const authorizedOrSanitized = authorizeOrSanitizeMessageData(entityData, from_session_id, senderPermissions);
+        if (!authorizedOrSanitized) {
+          message.data.d[index] = null;
+          sanitizedAny = true;
+        }
       }
     }
 
-    if (sanitizedAny) {
+    if (sanitizedAny || stashedAny) {
       message.data.d = message.data.d.filter(x => x != null);
     }
 
     return message;
   } else if (dataType === "u") {
-    const authorizedOrSanitized = authorizeOrSanitizeMessageData(message.data, from_session_id, senderPermissions);
-    if (authorizedOrSanitized) {
-      return message;
-    } else {
+    if (message.data.persistent && !NAF.entities.getEntity(message.data.networkId)) {
+      persistentSyncs[message.data.networkId] = message;
       return emptyObject;
+    } else {
+      const authorizedOrSanitized = authorizeOrSanitizeMessageData(message.data, from_session_id, senderPermissions);
+      if (authorizedOrSanitized) {
+        return message;
+      } else {
+        return emptyObject;
+      }
     }
   } else if (dataType === "r") {
     const entityMetadata = getPendingOrExistingEntityMetadata(message.data.networkId);
@@ -191,7 +206,6 @@ export function authorizeOrSanitizeMessage(message) {
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 export function applyPersistentSync(networkId) {
   if (!persistentSyncs[networkId]) return;
-  console.log("BPDEBUG applying naf persistent first sync", networkId, persistentSyncs[networkId]);
   NAF.connection.adapter.onData(authorizeOrSanitizeMessage(persistentSyncs[networkId]), PHOENIX_RELIABLE_NAF);
   delete persistentSyncs[networkId];
 }
