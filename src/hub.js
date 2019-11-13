@@ -529,11 +529,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     });
 
     const loadEnvironmentAndConnect = () => {
-      if (qsTruthy("delay")) {
-        setTimeout(() => updateEnvironmentForHub(hub), 20000);
-      } else {
-        updateEnvironmentForHub(hub);
-      }
+      updateEnvironmentForHub(hub);
 
       scene.components["networked-scene"]
         .connect()
@@ -1393,11 +1389,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateUIForHub(hub);
 
     if (stale_fields.includes("scene")) {
-      if (qsTruthy("delay")) {
-        setTimeout(() => updateEnvironmentForHub(hub), 20000);
-      } else {
-        updateEnvironmentForHub(hub);
-      }
+      updateEnvironmentForHub(hub);
 
       addToPresenceLog({
         type: "scene_changed",
