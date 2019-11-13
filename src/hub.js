@@ -478,7 +478,6 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
 
     scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
-
       let newHostPollInterval = null;
 
       // When reconnecting, update the server URL if necessary
