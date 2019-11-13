@@ -96,9 +96,7 @@ function getPendingOrExistingEntityMetadata(networkId) {
   }
 
   const entity = NAF.entities.getEntity(networkId);
-  if (!entity) {
-    return null;
-  }
+  if (!entity) return null;
 
   const { template, creator } = entity.components.networked.data;
   const isPinned = entity.components.pinnable && entity.components.pinnable.data.pinned;
