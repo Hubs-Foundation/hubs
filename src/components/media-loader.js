@@ -250,11 +250,11 @@ AFRAME.registerComponent("media-loader", {
     try {
       const { src, contentSubtype } = this.data;
 
+      if (!src) return;
+
       if (src !== oldData.src && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
       }
-
-      if (!src) return;
 
       let canonicalUrl = src;
       let accessibleUrl = src;
