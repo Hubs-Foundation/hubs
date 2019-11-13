@@ -478,6 +478,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
 
     scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
+
       let newHostPollInterval = null;
 
       // When reconnecting, update the server URL if necessary
@@ -528,7 +529,11 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     });
 
     const loadEnvironmentAndConnect = () => {
-      updateEnvironmentForHub(hub);
+      if (qsTruthy("delay")) {
+        setTimeout(() => updateEnvironmentForHub(hub), 10000);
+      } else {
+        updateEnvironmentForHub(hub);
+      }
 
       scene.components["networked-scene"]
         .connect()
@@ -1314,6 +1319,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         scene.addEventListener(
           "didConnectToNetworkedScene",
           () => {
+            console.log("BPDEBUG clientId", NAF.clientId);
             oscillator.stop();
             track.enabled = false;
           },
@@ -1388,7 +1394,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateUIForHub(hub);
 
     if (stale_fields.includes("scene")) {
-      updateEnvironmentForHub(hub);
+      if (qsTruthy("delay")) {
+        setTimeout(() => updateEnvironmentForHub(hub), 10000);
+      } else {
+        updateEnvironmentForHub(hub);
+      }
 
       addToPresenceLog({
         type: "scene_changed",

@@ -96,7 +96,9 @@ function getPendingOrExistingEntityMetadata(networkId) {
   }
 
   const entity = NAF.entities.getEntity(networkId);
-  if (!entity) return null;
+  if (!entity) {
+    return null;
+  }
 
   const { template, creator } = entity.components.networked.data;
   const isPinned = entity.components.pinnable && entity.components.pinnable.data.pinned;
@@ -116,6 +118,8 @@ function authorizeOrSanitizeMessageData(data, sender, senderPermissions) {
   }
 }
 
+const persistentSyncs = {};
+
 const emptyObject = {};
 export function authorizeOrSanitizeMessage(message) {
   const { dataType, from_session_id } = message;
@@ -123,6 +127,14 @@ export function authorizeOrSanitizeMessage(message) {
   if (dataType === "u" && message.data.isFirstSync && !message.data.persistent) {
     // The server has already authorized first sync messages that result in an instantiation.
     return message;
+  }
+
+  // If we have a persistent sync for an entity that does not exist yet, we need to stash it and wait
+  // for a scene load or scene change before applying it.
+  if (dataType === "u" && message.data.persistent && !NAF.entities.getEntity(message.data.networkId)) {
+    persistentSyncs[message.data.networkId] = message;
+    console.log("BPDEBUG stashed first sync", message.data.networkId, message);
+    return emptyObject;
   }
 
   const presenceState = window.APP.hubChannel.presence.state[from_session_id];
@@ -174,4 +186,12 @@ export function authorizeOrSanitizeMessage(message) {
     // Fall through for other data types. Namely, "drawing-<networkId>" messages at the moment.
     return message;
   }
+}
+
+const PHOENIX_RELIABLE_NAF = "phx-reliable";
+export function applyPersistentSync(networkId) {
+  if (!persistentSyncs[networkId]) return;
+  console.log("BPDEBUG applying naf persistent first sync", networkId, persistentSyncs[networkId]);
+  NAF.connection.adapter.onData(authorizeOrSanitizeMessage(persistentSyncs[networkId]), PHOENIX_RELIABLE_NAF);
+  delete persistentSyncs[networkId];
 }
