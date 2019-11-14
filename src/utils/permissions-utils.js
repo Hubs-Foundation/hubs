@@ -125,9 +125,6 @@ export function authorizeOrSanitizeMessage(message) {
   if (dataType === "u" && message.data.isFirstSync && !message.data.persistent) {
     // The server has already authorized first sync messages that result in an instantiation.
     return message;
-  } else if (dataType === "u" && message.data.isFirstSync) {
-    console.log("authorizing first persistent sync", message);
-    return message;
   }
 
   const presenceState = window.APP.hubChannel.presence.state[from_session_id];
