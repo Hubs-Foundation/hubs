@@ -9,12 +9,13 @@ import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/scene-ui.scss";
 import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import spokeLogo from "../assets/images/spoke_logo_black.png";
-import { createAndRedirectToNewHub } from "../utils/phoenix-utils";
+import { createAndRedirectToNewHub, fetchReticulumAuthenticated, getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { WithHoverSound } from "./wrap-with-audio";
 import CreateRoomDialog from "./create-room-dialog.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisH } from "@fortawesome/free-solid-svg-icons/faEllipsisH";
-import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
+import { faCodeBranch } from "@fortawesome/free-solid-svg-icons/faCodeBranch";
+import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 
 import { lang, messages } from "../utils/i18n";
 
@@ -29,15 +30,15 @@ class SceneUI extends Component {
     sceneDescription: PropTypes.string,
     sceneAttributions: PropTypes.object,
     sceneScreenshotURL: PropTypes.string,
-    sceneType: PropTypes.string,
+    sceneProjectId: PropTypes.string,
     sceneAllowRemixing: PropTypes.bool,
-    unavailable: PropTypes.bool
+    unavailable: PropTypes.bool,
+    isOwner: PropTypes.bool
   };
 
   state = {
     showScreenshot: false,
-    showCustomRoomDialog: false,
-    copyMessage: null
+    showCustomRoomDialog: false
   };
 
   constructor(props) {
@@ -63,14 +64,14 @@ class SceneUI extends Component {
     createAndRedirectToNewHub(this.state.customRoomName, this.props.sceneId);
   };
 
-  copyScene = async e => {
+  remixScene = async e => {
     e.preventDefault();
-    this.setState({ copyMessage: "copying..." });
-    await fetchReticulumAuthenticated("/api/v1/scenes", "POST", {
+    const { scenes } = await fetchReticulumAuthenticated("/api/v1/scenes", "POST", {
       parent_scene_id: this.props.sceneId
     });
-    this.setState({ copyMessage: "Copied!" });
-    setTimeout(() => this.setState({ copyMessage: null }), 2000);
+    const projectUrl = getReticulumFetchUrl(`/spoke/projects/${scenes[0].project_id}`);
+    console.log(projectUrl);
+    window.open(projectUrl, "_blank");
   };
 
   render() {
@@ -88,8 +89,7 @@ class SceneUI extends Component {
       );
     }
 
-    const { sceneType, sceneAllowRemixing } = this.props;
-    const copyMessage = this.state.copyMessage;
+    const { sceneAllowRemixing, isOwner, sceneProjectId } = this.props;
 
     const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
     const tweetText = `${this.props.sceneName} in ${messages["share-hashtag"]}`;
@@ -97,7 +97,6 @@ class SceneUI extends Component {
       tweetText
     )}`;
 
-    console.log(sceneType, sceneAllowRemixing);
     let attributions;
 
     const toAttributionSpan = a => {
@@ -179,27 +178,31 @@ class SceneUI extends Component {
                   </button>
                 </WithHoverSound>
               </div>
-              <div className={styles.createButtons}>
-                <WithHoverSound>
-                  <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>
-                    <img src="../assets/images/twitter.svg" />
-                    <div>
-                      <FormattedMessage id="scene.tweet_button" />
-                    </div>
-                  </a>
-                </WithHoverSound>
-
-                {copyMessage ? (
-                  <div className={styles.copyTip}>{copyMessage}</div>
-                ) : (
-                  sceneType === "scene_listing" &&
-                  sceneAllowRemixing && (
-                    <button className={styles.cloneButton} title="Copy to my scenes" onClick={this.copyScene}>
-                      <FontAwesomeIcon icon={faClone} />
-                    </button>
-                  )
-                )}
-              </div>
+              {isOwner && sceneProjectId ? (
+                <a
+                  target="_blank"
+                  href={getReticulumFetchUrl(`/spoke/projects/${sceneProjectId}`)}
+                  className={styles.spokeButton}
+                >
+                  <FontAwesomeIcon icon={faPencilAlt} />
+                  <FormattedMessage id="scene.edit_button" />
+                </a>
+              ) : (
+                sceneAllowRemixing && (
+                  <button className={styles.spokeButton} onClick={this.remixScene}>
+                    <FontAwesomeIcon icon={faCodeBranch} />
+                    <FormattedMessage id="scene.remix_button" />
+                  </button>
+                )
+              )}
+              <WithHoverSound>
+                <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>
+                  <img src="../assets/images/twitter.svg" />
+                  <div>
+                    <FormattedMessage id="scene.tweet_button" />
+                  </div>
+                </a>
+              </WithHoverSound>
             </div>
           </div>
           <div className={styles.info}>
