@@ -10,6 +10,8 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   schema: {},
 
   init() {
+    this.characterController = this.el.sceneEl.systems["hubs-systems"].characterController;
+
     this.onEnterVr = this.onEnterVr.bind(this);
     this.onExitVr = this.onExitVr.bind(this);
     this.onFirstInteraction = this.onFirstInteraction.bind(this);
@@ -117,9 +119,6 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   tick: (function() {
     const v = new THREE.Vector3();
     return function tick() {
-      this.characterController =
-        this.characterController || document.getElementById("avatar-rig").components["character-controller"];
-
       if (!this.inVr) {
         if (this.moving) {
           this.characterController.enqueueRelativeMotion(v.set(this.moveEvent.axis[0], 0, this.moveEvent.axis[1]));

@@ -15,6 +15,7 @@ import { InteractionSfxSystem } from "./interaction-sfx-system";
 import { SpriteSystem } from "./sprites";
 import { CameraSystem } from "./camera-system";
 import { WaypointSystem } from "./waypoint-system";
+import { CharacterControllerSystem } from "./character-controller-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 AFRAME.registerSystem("hubs-systems", {
@@ -37,10 +38,11 @@ AFRAME.registerSystem("hubs-systems", {
     this.soundEffectsSystem = new SoundEffectsSystem();
     this.lobbyCameraSystem = new LobbyCameraSystem();
     this.spriteSystem = new SpriteSystem(this.el);
-    this.batchManagerSystem = new BatchManagerSystem(this.el.sceneEl.object3D, this.el.sceneEl.renderer);
+    this.batchManagerSystem = new BatchManagerSystem(this.el.object3D, this.el.renderer);
     this.cameraSystem = new CameraSystem(this.batchManagerSystem);
-    this.waypointSystem = new WaypointSystem(this.el);
-    this.drawingMenuSystem = new DrawingMenuSystem(this.el.sceneEl);
+    this.drawingMenuSystem = new DrawingMenuSystem(this.el);
+    this.characterController = new CharacterControllerSystem(this.el);
+    this.waypointSystem = new WaypointSystem(this.el, this.characterController);
   },
 
   tick(t, dt) {
@@ -48,6 +50,7 @@ AFRAME.registerSystem("hubs-systems", {
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
     systems.interaction.tick2();
+    this.characterController.tick(t, dt);
     this.cursorTogglingSystem.tick(systems.interaction, systems.userinput, this.el);
     this.interactionSfxSystem.tick(systems.interaction, systems.userinput, this.soundEffectsSystem);
     this.superSpawnerSystem.tick();

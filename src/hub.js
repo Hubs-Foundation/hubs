@@ -47,7 +47,6 @@ import "./components/emoji-hud";
 import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
 import "./components/hand-controls2";
-import "./components/character-controller";
 import "./components/hoverable-visuals";
 import "./components/hover-visuals";
 import "./components/offset-relative-to";
