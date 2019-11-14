@@ -84,7 +84,7 @@ AFRAME.GLTFModelPlus.registerComponent("visible", "visible", (el, componentName,
     el.setAttribute(componentName, componentData);
   }
 });
-AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point", (el, componentName, componentData) => {
+AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point", el => {
   el.setAttribute("waypoint", {
     canBeSpawnPoint: true,
     canBeOccupied: false,
@@ -92,7 +92,6 @@ AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point", (el, compon
     willDisableMotion: false,
     willMaintainWorldUp: true
   });
-  // TODO : Must put a networkId into the spawn-point in order for networked occupiable spawn points to work.
 });
 AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
 AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentName, componentData) => {

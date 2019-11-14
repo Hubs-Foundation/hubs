@@ -1,5 +1,5 @@
 import { paths } from "./userinput/paths";
-import { SOUND_SNAP_ROTATE, SOUND_TELEPORT_END } from "./sound-effects-system";
+import { SOUND_SNAP_ROTATE, SOUND_WAYPOINT_START, SOUND_WAYPOINT_END } from "./sound-effects-system";
 import { easeOutQuadratic } from "../utils/easing";
 import { getPooledMatrix4, freePooledMatrix4 } from "../utils/mat4-pool";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
@@ -102,7 +102,7 @@ export class CharacterControllerSystem {
     const translatedUp = new THREE.Matrix4();
     return function travelByWaypoint(inMat4) {
       if (!this.fly) {
-        this.avatarRig.messageDispatch.dispatch("/fly");
+        this.fly = true;
         this.shouldLandWhenPossible = true;
         this.shouldUnoccupyWaypointsOnceMoving = true;
       }
@@ -159,8 +159,8 @@ export class CharacterControllerSystem {
         this.startPoint.elements[11] *= -1;
         this.startPoint.elements[13] -= getCurrentPlayerHeight();
         this.prevWaypointTravelTime = t;
-        if (!vrMode && this.waypointTravelTime > 0) {
-          this.sfx.playSoundOneShot(SOUND_SNAP_ROTATE);
+        if (!vrMode && this.waypointTravelTime > 100) {
+          this.sfx.playSoundOneShot(SOUND_WAYPOINT_START);
         }
       }
 
@@ -181,7 +181,7 @@ export class CharacterControllerSystem {
         freePooledMatrix4(this.activeWaypoint);
         this.activeWaypoint = null;
         if (vrMode || this.waypointTravelTime > 0) {
-          this.sfx.playSoundOneShot(SOUND_TELEPORT_END);
+          this.sfx.playSoundOneShot(SOUND_WAYPOINT_END);
         }
       }
 
@@ -238,7 +238,7 @@ export class CharacterControllerSystem {
         !this.activeWaypoint
       ) {
         this.shouldLandWhenPossible = false;
-        this.avatarRig.messageDispatch.dispatch("/fly");
+        this.fly = false;
         newPOV.setPosition(navMeshSnappedPOVPosition);
       } else if (!this.fly) {
         newPOV.setPosition(navMeshSnappedPOVPosition);
@@ -249,7 +249,7 @@ export class CharacterControllerSystem {
         if (this.fly && this.shouldLandWhenPossible && squareDistanceToNavSnappedPOVPosition < 2) {
           newPOV.setPosition(navMeshSnappedPOVPosition);
           this.shouldLandWhenPossible = false;
-          this.avatarRig.messageDispatch.dispatch("/fly");
+          this.fly = false;
         }
       }
       childMatch(this.avatarRig.object3D, this.avatarPOV.object3D, newPOV);

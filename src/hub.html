@@ -65,14 +65,13 @@
             <img id="action-button" crossorigin="anonymous" src="./assets/hud/action_button.9.png">
             <img id="button" crossorigin="anonymous" src="./assets/hud/button.9.png">
 
+            <a-asset-item id="drawing-pen" response-type="arraybuffer" src="./assets/models/DrawingPen.glb"></a-asset-item>
             <a-asset-item id="spawn-point" response-type="arraybuffer" src="./assets/models/spawn-point.glb"></a-asset-item>
 
             <template id="template-waypoint-avatar">
                 <a-entity waypoint></a-entity>
             </template>
 
-            <template id="occupiable-waypoint-template">
-            </template>
             <template id="occupiable-waypoint-icon">
                 <a-entity
                     is-remote-hover-target
@@ -80,22 +79,9 @@
                     tags="singleActionButton: true"
                     sprite="name: spawn-point.png"
                     billboard
-                    scale-in-screen-space="baseScale: 0.15 0.15 0.15;
+                    scale-in-screen-space="baseScale: 0.10 0.10 0.10;
                                            addedScale: 0.05 0.05 0.05">
                 </a-entity>
-            </template>
-            <template id="teleport-waypoint">
-            </template>
-            <template id="teleport-to-lock-waypoint-icon">
-              <a-entity
-                  is-remote-hover-target
-                  class="way-point-icon"
-                  tags="singleActionButton: true"
-                  sprite="name: spawn-point.png"
-                  billboard
-                  scale-in-screen-space="baseScale: 0.15 0.15 0.15;
-                                         addedScale: 0.05 0.05 0.05">
-              </a-entity>
             </template>
             <template id="teleport-waypoint-icon">
               <a-entity
@@ -104,15 +90,10 @@
                   tags="singleActionButton: true"
                   sprite="name: spawn-point.png"
                   billboard
-                  scale-in-screen-space="baseScale: 0.15 0.15 0.15;
+                  scale-in-screen-space="baseScale: 0.10 0.10 0.10;
                                          addedScale: 0.05 0.05 0.05">
               </a-entity>
             </template>
-            <template id="latch-waypoint">
-            </template>
-            <template id="latch-waypoint-icon">
-            </template>
-
             <template id="waypoint-preview-avatar-template">
                 <a-entity
                     overwrite-raycast-as-noop
@@ -120,29 +101,6 @@
                     gltf-model-plus="inflate: true; src: #spawn-point;">
                 </a-entity>
             </template>
-            <template id="way-point-icon-template">
-                <a-entity>
-                    <a-entity
-                        is-remote-hover-target
-                        class="way-point-icon"
-                        tags="singleActionButton: true"
-                        sprite="name: spawn-point.png"
-                        billboard
-                        scale-in-screen-space="baseScale: 0.35 0.35 0.35;
-                                               addedScale: 0.02 0.02 0.02"
-                        position="0 0 0"
-                        show-sibling-on-hover="target: .waypoint-model">
-                    </a-entity>
-                    <a-entity
-                        overwrite-raycast-as-noop
-                        class="waypoint-model"
-                        gltf-model-plus="inflate: true; src: #spawn-point;"
-                        position="0 -1.6 0"
-                        rotation="0 180 0">
-                    </a-entity>
-                </a-entity>
-            </template>
-
             <template id="remote-avatar">
                 <a-entity networked-avatar ik-root player-info matrix-auto-update visible="false">
                     <a-entity class="camera" matrix-auto-update></a-entity>
@@ -286,16 +244,13 @@
                     owned-object-limiter="counter: #media-counter"
                     set-unowned-body-kinematic
                     is-remote-hover-target
-                    tags="isHandCollisionTarget: true; isHoldable: true;
-                    offersHandConstraint: true; offersRemoteConstraint: true;
-                    inspectable: true; singleActionButton: true;"
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; inspectable: true;"
                     destroy-at-extreme-distances
                     scalable-when-grabbed
                     floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
                     set-yxz-order
                     matrix-auto-update
                     position-at-box-shape-border__freeze="target:.freeze-menu;"
-                    pinnable
                     hoverable-visuals
                 >
                     <a-entity class="ui interactable-ui">
