@@ -11,7 +11,8 @@ AFRAME.registerComponent("emoji", {
   },
 
   play() {
-    this.lastVelocity = this.el.components["body-helper"].body.getVelocity().length2();
+    this.lastLinearVelocity = this.el.components["body-helper"].body.physicsBody.getLinearVelocity().length2();
+    this.lastAngularVelocity = this.el.components["body-helper"].body.physicsBody.getAngularVelocity().length2();
   },
 
   tick(t, dt) {
@@ -30,10 +31,15 @@ AFRAME.registerComponent("emoji", {
     if (particleEmitter && isMine) {
       const now = performance.now();
 
-      const acc = ((this.el.components["body-helper"].body.getVelocity().length2() - this.lastVelocity) / dt) * 1000;
-      this.lastVelocity = this.el.components["body-helper"].body.getVelocity().length2();
+      const linearVelocity = this.el.components["body-helper"].body.physicsBody.getLinearVelocity().length2();
+      const linearAcceleration = ((linearVelocity - this.lastLinearVelocity) / dt) * 1000;
+      this.lastLinearVelocity = linearVelocity;
 
-      if (Math.abs(acc) > 10000) {
+      const angularVelocity = this.el.components["body-helper"].body.physicsBody.getAngularVelocity().length2();
+      const angularAcceleration = ((angularVelocity - this.lastAngularVelocity) / dt) * 1000;
+      this.lastAngularVelocity = angularVelocity;
+
+      if (Math.abs(linearAcceleration) > 10000 || Math.abs(angularAcceleration) > 10000) {
         this.data.emitEndTime = now + this.data.emitDecayTime * 1000;
       }
 
