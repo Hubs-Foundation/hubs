@@ -23,27 +23,6 @@ function loadTemplateAndAddToScene(scene, templateId) {
     resolve(content);
   });
 }
-const pooledEls = {};
-//TODO:
-function releasePooledEl(templateId, el) {
-  pooledEls[templateId].push(el);
-}
-function getPooledElOrLoadFromTemplate(scene, templateId) {
-  let pool = pooledEls[templateId];
-  if (!pool) {
-    pool = [];
-    pooledEls[templateId] = pool;
-  }
-  const el = pool.shift();
-  return (
-    (el &&
-      new Promise(resolve => {
-        resolve(el);
-      })) ||
-    loadTemplateAndAddToScene(scene, templateId)
-  );
-}
-
 function isOccupiableTeleportWaypoint(data) {
   return data.canBeClicked && data.canBeOccupied && !data.canBeSpawnPoint;
 }
@@ -66,7 +45,7 @@ function templatesToLoadForWaypointData(data) {
   return templateIds;
 }
 function loadTemplatesForWaypointData(scene, data) {
-  return templatesToLoadForWaypointData(data).map(templateId => getPooledElOrLoadFromTemplate(scene, templateId));
+  return templatesToLoadForWaypointData(data).map(templateId => loadTemplateAndAddToScene(scene, templateId));
 }
 
 function shouldTryToOccupy(waypointComponent) {
@@ -229,6 +208,7 @@ export class WaypointSystem {
             this.eventHandlers[elementsFromTemplates[i].object3D.uuid].interact
           );
           delete this.eventHandlers[elementsFromTemplates[i].object3D.uuid].interact;
+          elementsFromTemplates[i].parentNode.removeChild(elementsFromTemplates[i]);
         }
       }
       this.elementsFromTemplatesFor[component.el.object3D.uuid].length = 0;
@@ -237,20 +217,6 @@ export class WaypointSystem {
   getUnoccupiableSpawnPoint() {
     const candidates = this.ready.filter(component => isUnoccupiableSpawnPoint(component.data));
     return candidates.length && candidates.splice(Math.floor(Math.random() * candidates.length), 1)[0];
-  }
-  moveToUnoccupiableSpawnPoint() {
-    this.avatarPOV = this.avatarPOV || document.getElementById("avatar-pov-node");
-    this.avatarPOV.object3D.updateMatrices();
-    const waypointComponent = this.getUnoccupiableSpawnPoint();
-    if (waypointComponent) {
-      this.releaseAnyOccupiedWaypoints();
-      waypointComponent.el.object3D.updateMatrices();
-      this.characterController.enqueueWaypointTravelTo(waypointComponent.el.object3D.matrixWorld);
-      debugDrawRect("lightblue");
-    } else {
-      debugDrawRect("lightred");
-    }
-    return waypointComponent;
   }
   lostOwnershipOfWaypoint(e) {
     if (this.currentWaypoint && this.currentWaypoint.el === e.detail.el) {
@@ -301,7 +267,20 @@ export class WaypointSystem {
     }
     return this.nextMoveToSpawn;
   }
-
+  moveToUnoccupiableSpawnPoint() {
+    this.avatarPOV = this.avatarPOV || document.getElementById("avatar-pov-node");
+    this.avatarPOV.object3D.updateMatrices();
+    const waypointComponent = this.getUnoccupiableSpawnPoint();
+    if (waypointComponent) {
+      this.releaseAnyOccupiedWaypoints();
+      waypointComponent.el.object3D.updateMatrices();
+      this.characterController.enqueueWaypointTravelTo(waypointComponent.el.object3D.matrixWorld, true);
+      debugDrawRect("lightblue");
+    } else {
+      debugDrawRect("lightred");
+    }
+    return waypointComponent;
+  }
   tick() {
     if (this.waitOneTick) {
       this.waitOneTick = false;
@@ -341,7 +320,6 @@ export class WaypointSystem {
       this.mightNeedRespawn = false;
       this.moveToSpawnPoint();
     }
-
     const tickTemplateEl = (elementFromTemplate, waypointComponent) => {
       if (
         elementFromTemplate.classList.contains("teleport-waypoint-icon") ||
@@ -391,14 +369,12 @@ AFRAME.registerComponent("waypoint", {
   play() {
     if (!this.didRegisterWithSystem) {
       if (this.el.components.networked) {
-        console.log("applying first sync");
         applyPersistentSync(this.el.components.networked.data.networkId);
       }
       this.system.registerComponent(this, this.el.sceneEl);
       this.didRegisterWithSystem = true;
     }
   },
-  tick() {},
   remove() {
     if (!this.didRegisterWithSystem) {
       console.warn("Waypoint removed without ever having registered with the system.");

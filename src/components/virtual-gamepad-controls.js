@@ -116,21 +116,18 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.el.sceneEl.emit("rotateX", this.lookDx);
   },
 
-  tick: (function() {
-    const v = new THREE.Vector3();
-    return function tick() {
-      if (!this.inVr) {
-        if (this.moving) {
-          this.characterController.enqueueRelativeMotion(v.set(this.moveEvent.axis[0], 0, this.moveEvent.axis[1]));
-        }
-
-        if (this.rotating) {
-          this.characterController.enqueueInPlaceRotationAroundWorldUp(this.lookDy);
-          this.el.sceneEl.emit("rotateX", this.lookDx);
-        }
-      }
-    };
-  })(),
+  tick() {
+    if (this.inVr) {
+      return;
+    }
+    if (this.moving) {
+      this.characterController.enqueueRelativeMotion(this.displacement);
+    }
+    if (this.rotating) {
+      this.characterController.enqueueInPlaceRotationAroundWorldUp(this.lookDy);
+      this.el.sceneEl.emit("rotateX", this.lookDx);
+    }
+  },
 
   onEnterVr() {
     // Hide the joystick controls
