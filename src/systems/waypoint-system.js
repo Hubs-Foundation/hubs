@@ -349,7 +349,6 @@ export class WaypointSystem {
       // TODO: When the icon is hovered, show the transparent waypoint preview model
     }
     this.ready.forEach(tickWaypoint.bind(this));
-    window.logStuff = false;
   }
 }
 

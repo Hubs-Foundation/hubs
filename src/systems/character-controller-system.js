@@ -71,7 +71,6 @@ export class CharacterControllerSystem {
     this.dXZ += dXZ;
   }
   // We assume the rig is at the root, and its local position === its world position.
-  //TODO: Use enqueue waypoint
   teleportTo = (function() {
     const rig = new THREE.Vector3();
     const head = new THREE.Vector3();
@@ -79,6 +78,7 @@ export class CharacterControllerSystem {
     const targetForHead = new THREE.Vector3();
     const targetForRig = new THREE.Vector3();
     return function teleportTo(targetWorldPosition) {
+      //TODO: Use enqueue waypoint
       this.isMovementDisabled = false;
       const o = this.avatarRig.object3D;
       o.getWorldPosition(rig);
@@ -90,8 +90,7 @@ export class CharacterControllerSystem {
 
       const pathfinder = this.scene.systems.nav.pathfinder;
       this.navGroup = pathfinder.getGroup(NAV_ZONE, targetForRig, true, true);
-      this.navNode = null;
-      this._setNavNode(targetForRig);
+      this.navNode = this.getClosestNode(targetForRig);
       pathfinder.clampStep(rig, targetForRig, this.navNode, NAV_ZONE, this.navGroup, o.position);
       o.matrixNeedsUpdate = true;
     };
@@ -193,6 +192,9 @@ export class CharacterControllerSystem {
       if (!this.fly && this.shouldLandWhenPossible) {
         this.shouldLandWhenPossible = false;
       }
+      if (this.fly) {
+        this.navNode = null;
+      }
       const snapRotateLeft = userinput.get(paths.actions.snapRotateLeft);
       const snapRotateRight = userinput.get(paths.actions.snapRotateRight);
       if (snapRotateLeft) {
@@ -259,12 +261,12 @@ export class CharacterControllerSystem {
     };
   })();
 
-  _setNavNode(pos) {
-    if (this.navNode !== null) return;
-    const { pathfinder } = this.scene.systems.nav;
-    this.navNode =
+  getClosestNode(pos) {
+    const pathfinder = this.scene.systems.nav.pathfinder;
+    return (
       pathfinder.getClosestNode(pos, NAV_ZONE, this.navGroup, true) ||
-      pathfinder.getClosestNode(pos, NAV_ZONE, this.navGroup);
+      pathfinder.getClosestNode(pos, NAV_ZONE, this.navGroup)
+    );
   }
 
   findPOVPositionAboveNavMesh = (function() {
@@ -283,12 +285,10 @@ export class CharacterControllerSystem {
   })();
 
   findPositionOnNavMesh(start, end, outPos) {
-    const { pathfinder } = this.scene.systems.nav;
+    const pathfinder = this.scene.systems.nav.pathfinder;
     if (!(NAV_ZONE in pathfinder.zones)) return;
-    if (this.navGroup === null) {
-      this.navGroup = pathfinder.getGroup(NAV_ZONE, end, true, true);
-    }
-    this._setNavNode(end);
+    this.navGroup = pathfinder.getGroup(NAV_ZONE, end, true, true);
+    this.navNode = this.getClosestNode(end);
     this.navNode = pathfinder.clampStep(start, end, this.navNode, NAV_ZONE, this.navGroup, outPos);
     return outPos;
   }

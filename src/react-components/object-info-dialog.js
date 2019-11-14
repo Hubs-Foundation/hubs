@@ -63,9 +63,9 @@ export default class ObjectInfoDialog extends Component {
   }
 
   enqueueWaypointTravel() {
-    this.characterController =
-      this.characterController || document.getElementById("avatar-rig").components["character-controller"];
-    this.characterController.enqueueWaypointTravelTo(this.props.el.object3D.matrixWorld);
+    this.props.scene.systems["hubs-systems"].characterController.enqueueWaypointTravelTo(
+      this.props.el.object3D.matrixWorld
+    );
     this.props.onClose();
   }
 
