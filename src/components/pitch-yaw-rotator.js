@@ -25,15 +25,10 @@ const rotatePitchAndYaw = (function() {
     pq.setFromAxisAngle(right, p);
     yq.setFromAxisAngle(UP, y);
 
-    q.copy(opq)
-      .inverse()
-      .multiply(yq)
-      .multiply(pq)
-      .multiply(owq);
-    //q.copy(owq)
-    //  .premultiply(pq)
-    //  .premultiply(yq)
-    //  .premultiply(opq.inverse());
+    q.copy(owq)
+      .premultiply(pq)
+      .premultiply(yq)
+      .premultiply(opq.inverse());
     v.set(0, 1, 0).applyQuaternion(q);
     const newUpDot = v.dot(UP);
     v.set(0, 0, 1).applyQuaternion(q);
