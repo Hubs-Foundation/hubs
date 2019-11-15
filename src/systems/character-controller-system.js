@@ -126,6 +126,8 @@ export class CharacterControllerSystem {
     const navMeshSnappedPOVPosition = new THREE.Vector3();
     const initialScale = new THREE.Vector3();
     const AVERAGE_WAYPOINT_TRAVEL_SPEED_METERS_PER_SECOND = 50;
+    const startTransform = new THREE.Matrix4();
+    const interpolatedWaypoint = new THREE.Matrix4();
 
     return function tick(t, dt) {
       if (!this.scene.is("entered")) return;
@@ -149,16 +151,9 @@ export class CharacterControllerSystem {
                 .setFromMatrixPosition(this.avatarPOV.object3D.matrixWorld)
                 .distanceTo(new THREE.Vector3().setFromMatrixPosition(waypoint)) /
                 AVERAGE_WAYPOINT_TRAVEL_SPEED_METERS_PER_SECOND);
-        this.startPoint = new THREE.Matrix4().copy(this.avatarPOV.object3D.matrixWorld);
-        this.startPoint.elements[0] *= -1;
-        this.startPoint.elements[1] *= -1;
-        this.startPoint.elements[2] *= -1;
-        this.startPoint.elements[3] *= -1;
-        this.startPoint.elements[8] *= -1;
-        this.startPoint.elements[9] *= -1;
-        this.startPoint.elements[10] *= -1;
-        this.startPoint.elements[11] *= -1;
-        this.startPoint.elements[13] -= getCurrentPlayerHeight();
+        rotateInPlaceAroundWorldUp(this.avatarPOV.object3D.matrixWorld, Math.PI, startTransform);
+        startTransform.elements[13] -= getCurrentPlayerHeight();
+        startTransform.multiply(new THREE.Matrix4().makeTranslation(0, 0, -0.25));
         this.prevWaypointTravelTime = t;
         if (!vrMode && this.waypointTravelTime > 100) {
           this.sfx.playSoundOneShot(SOUND_WAYPOINT_START);
@@ -169,12 +164,7 @@ export class CharacterControllerSystem {
         this.waypointTravelTime === 0 || t >= this.prevWaypointTravelTime + this.waypointTravelTime;
       if (this.activeWaypoint && !animationIsOver) {
         const progress = THREE.Math.clamp((t - this.prevWaypointTravelTime) / this.waypointTravelTime, 0, 1);
-        const interpolatedWaypoint = interpolateAffine(
-          this.startPoint,
-          this.activeWaypoint,
-          easeOutQuadratic(progress),
-          new THREE.Matrix4()
-        );
+        interpolateAffine(startTransform, this.activeWaypoint, easeOutQuadratic(progress), interpolatedWaypoint);
         this.travelByWaypoint(interpolatedWaypoint);
       }
       if (this.activeWaypoint && (this.waypoints.length || animationIsOver)) {
