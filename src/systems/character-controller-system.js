@@ -40,10 +40,6 @@ export class CharacterControllerSystem {
   constructor(scene) {
     this.scene = scene;
     this.fly = false;
-    this.enqueueRelativeMotion = this.enqueueRelativeMotion.bind(this);
-    this.enqueueInPlaceRotationAroundWorldUp = this.enqueueInPlaceRotationAroundWorldUp.bind(this);
-    this.findPOVPositionAboveNavMesh = this.findPOVPositionAboveNavMesh.bind(this); //TODO: need this?
-    this.tick = this.tick.bind(this); //TODO: need this?
     this.waypoints = [];
     this.prevWaypointTravelTime = 0;
     this.waypointTravelTime = 0;
