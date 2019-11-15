@@ -8,6 +8,8 @@ AFRAME.registerComponent("scale-in-screen-space", {
     const parentScale = new THREE.Vector3();
     return function tick() {
       this.viewingCamera = this.viewingCamera || document.getElementById("viewing-camera");
+      // TODO: This calculates the distance to the viewing camera, the correct distance might be to the viewing plane.
+      // This seemed accurate enough in my testing.
       const distance = Math.sqrt(squareDistanceBetween(this.el.object3D, this.viewingCamera.object3D));
       const parent = this.el.object3D.parent;
       parent.updateMatrices();
