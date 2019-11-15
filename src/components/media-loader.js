@@ -32,8 +32,6 @@ const fetchContentType = url => {
   return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
 };
 
-const boundingBox = new THREE.Box3();
-
 const batchMeshes = qsTruthy("batchMeshes");
 const disableBatching = qsTruthy("disableBatching");
 
@@ -188,19 +186,24 @@ AFRAME.registerComponent("media-loader", {
     this.removeShape("loader");
   },
 
-  updateHoverableVisuals() {
-    const hoverableVisuals = this.el.components["hoverable-visuals"];
+  updateHoverableVisuals: (function() {
+    const boundingBox = new THREE.Box3();
+    const boundingSphere = new THREE.Sphere();
+    return function() {
+      const hoverableVisuals = this.el.components["hoverable-visuals"];
 
-    if (hoverableVisuals) {
-      if (!this.injectedCustomShaderChunks) {
-        this.injectedCustomShaderChunks = true;
-        hoverableVisuals.uniforms = injectCustomShaderChunks(this.el.object3D);
+      if (hoverableVisuals) {
+        if (!this.injectedCustomShaderChunks) {
+          this.injectedCustomShaderChunks = true;
+          hoverableVisuals.uniforms = injectCustomShaderChunks(this.el.object3D);
+        }
+
+        boundingBox.setFromObject(this.el.object3DMap.mesh);
+        boundingBox.getBoundingSphere(boundingSphere);
+        hoverableVisuals.geometryRadius = boundingSphere.radius / this.el.object3D.scale.y;
       }
-
-      boundingBox.setFromObject(this.el.object3DMap.mesh);
-      boundingBox.getBoundingSphere(hoverableVisuals.boundingSphere);
-    }
-  },
+    };
+  })(),
 
   onMediaLoaded(physicsShape = null, shouldUpdateScale) {
     const el = this.el;
