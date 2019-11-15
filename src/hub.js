@@ -172,7 +172,7 @@ if (isEmbed && !qs.get("embed_token")) {
 }
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
-window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
+window.APP.quality = qs.get("quality") || (isMobile || isMobileVR ? "low" : "high");
 
 import "./components/owned-object-limiter";
 import "./components/set-unowned-body-kinematic";
