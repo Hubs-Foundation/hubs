@@ -7,7 +7,7 @@ INTERNAL_ZONE_NAME=$3
 if [[ -z "$STACK_NAME" || -z "$EXTERNAL_ZONE_NAME" || -z "$INTERNAL_ZONE_NAME" ]] ; then 
   echo -e "Usage: scripts/use-hubs-cloud-stack.sh <stack-name> <domain> <internal-domain>
 
-Switches your local client to connect to a remote Hubs Cloud instance.
+Switches your local client to connect to a remote Hubs Cloud instance by modifying .env.defaults.
 
 For example if your stack is "myhubs" at "myhubs.com" and your internal domain is "myhubs-internal.com" run:
 
