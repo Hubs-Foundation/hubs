@@ -109,7 +109,11 @@ export class WaypointSystem {
       this.releaseAnyOccupiedWaypoints();
       waypointComponent.el.object3D.updateMatrices();
       debugDrawRect("lightpurple");
-      this.characterController.enqueueWaypointTravelTo(waypointComponent.el.object3D.matrixWorld);
+      this.characterController.enqueueWaypointTravelTo(
+        waypointComponent.el.object3D.matrixWorld,
+        false,
+        waypointComponent.data.willDisableMotion
+      );
     }.bind(this);
   }
   tryTeleportToOccupiableWaypoint(iconEl, waypointComponent) {
@@ -118,7 +122,11 @@ export class WaypointSystem {
       this.tryToOccupy(waypointComponent).then(didOccupy => {
         if (didOccupy) {
           waypointComponent.el.object3D.updateMatrices();
-          this.characterController.enqueueWaypointTravelTo(waypointComponent.el.object3D.matrixWorld);
+          this.characterController.enqueueWaypointTravelTo(
+            waypointComponent.el.object3D.matrixWorld,
+            false,
+            waypointComponent.data.willDisableMotion
+          );
           previouslyOccupiedWaypoints
             .filter(wp => wp !== waypointComponent && isOccupiedByMe(wp))
             .forEach(unoccupyWaypoint);
@@ -274,7 +282,11 @@ export class WaypointSystem {
     if (waypointComponent) {
       this.releaseAnyOccupiedWaypoints();
       waypointComponent.el.object3D.updateMatrices();
-      this.characterController.enqueueWaypointTravelTo(waypointComponent.el.object3D.matrixWorld, true);
+      this.characterController.enqueueWaypointTravelTo(
+        waypointComponent.el.object3D.matrixWorld,
+        true,
+        waypointComponent.data.willDisableMotion
+      );
       debugDrawRect("lightblue");
     } else {
       debugDrawRect("lightred");
@@ -305,7 +317,11 @@ export class WaypointSystem {
               .filter(wp => wp !== waypointComponent && isOccupiedByMe(wp))
               .forEach(unoccupyWaypoint);
             waypointComponent.el.object3D.updateMatrices();
-            this.characterController.enqueueWaypointTravelTo(waypointComponent.el.object3D.matrixWorld, true);
+            this.characterController.enqueueWaypointTravelTo(
+              waypointComponent.el.object3D.matrixWorld,
+              true,
+              waypointComponent.data.willDisableMotion
+            );
             resolvedWaypointOrNull = waypointComponent;
             debugDrawRect("lightgreen");
           } else if (waypointComponentOrNull === null) {

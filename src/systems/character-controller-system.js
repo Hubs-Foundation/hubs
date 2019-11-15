@@ -61,8 +61,8 @@ export class CharacterControllerSystem {
     });
   }
   // Use this API for waypoint travel so that your matrix doesn't end up in the pool
-  enqueueWaypointTravelTo(inMat4, isInstant) {
-    this.waypoints.push({ waypoint: getPooledMatrix4().copy(inMat4), isInstant }); //TODO: don't create new object
+  enqueueWaypointTravelTo(inMat4, isInstant, willDisableMotion) {
+    this.waypoints.push({ waypoint: getPooledMatrix4().copy(inMat4), isInstant, willDisableMotion }); //TODO: don't create new object
   }
   enqueueRelativeMotion(motion) {
     this.relativeMotion.add(motion);
@@ -77,9 +77,9 @@ export class CharacterControllerSystem {
     const deltaFromHeadToTargetForHead = new THREE.Vector3();
     const targetForHead = new THREE.Vector3();
     const targetForRig = new THREE.Vector3();
+    //TODO: Use enqueue waypoint
     return function teleportTo(targetWorldPosition) {
-      //TODO: Use enqueue waypoint
-      this.isMovementDisabled = false;
+      this.isMotionDisabled = false;
       const o = this.avatarRig.object3D;
       o.getWorldPosition(rig);
       this.avatarPOV.object3D.getWorldPosition(head);
@@ -136,7 +136,9 @@ export class CharacterControllerSystem {
       initialScale.copy(this.avatarRig.object3D.scale);
 
       if (!this.activeWaypoint && this.waypoints.length) {
-        const { waypoint, isInstant } = this.waypoints.splice(0, 1)[0];
+        const { waypoint, isInstant, willDisableMotion } = this.waypoints.splice(0, 1)[0];
+        this.isMotionDisabled = willDisableMotion;
+        this.triedToMoveCount = 0;
         this.activeWaypoint = waypoint;
         this.avatarPOV.object3D.updateMatrices();
         this.waypointTravelTime =
@@ -216,6 +218,7 @@ export class CharacterControllerSystem {
       }
       this.avatarPOV.object3D.updateMatrices();
       rotateInPlaceAroundWorldUp(this.avatarPOV.object3D.matrixWorld, this.dXZ, snapRotatedPOV);
+
       calculateDisplacementToDesiredPOV(
         snapRotatedPOV,
         this.fly,
@@ -232,29 +235,39 @@ export class CharacterControllerSystem {
       );
       const triedToMove = displacementToDesiredPOV.lengthSq() > 0.001;
       const squareDistanceToNavSnappedPOVPosition = desiredPOVPosition.distanceToSquared(navMeshSnappedPOVPosition);
-      if (
-        this.fly &&
-        this.shouldLandWhenPossible &&
-        triedToMove &&
-        squareDistanceToNavSnappedPOVPosition < 0.5 &&
-        !this.activeWaypoint
-      ) {
-        this.shouldLandWhenPossible = false;
-        this.fly = false;
-        newPOV.setPosition(navMeshSnappedPOVPosition);
-      } else if (!this.fly) {
-        newPOV.setPosition(navMeshSnappedPOVPosition);
+      this.triedToMoveCount += triedToMove ? 1 : 0;
+      if (this.triedToMoveCount > 20) {
+        // TODO: Show tip indicating that you are stuck and will get unstuck if you keep trying.
+        this.isMotionDisabled = false;
       }
-      if (!this.activeWaypoint && this.shouldUnoccupyWaypointsOnceMoving && triedToMove) {
-        this.shouldUnoccupyWaypointsOnceMoving = false;
-        this.waypointSystem.releaseAnyOccupiedWaypoints();
-        if (this.fly && this.shouldLandWhenPossible && squareDistanceToNavSnappedPOVPosition < 2) {
-          newPOV.setPosition(navMeshSnappedPOVPosition);
+
+      if (this.isMotionDisabled) {
+        childMatch(this.avatarRig.object3D, this.avatarPOV.object3D, snapRotatedPOV);
+      } else {
+        if (
+          this.fly &&
+          this.shouldLandWhenPossible &&
+          triedToMove &&
+          squareDistanceToNavSnappedPOVPosition < 0.5 &&
+          !this.activeWaypoint
+        ) {
           this.shouldLandWhenPossible = false;
           this.fly = false;
+          newPOV.setPosition(navMeshSnappedPOVPosition);
+        } else if (!this.fly) {
+          newPOV.setPosition(navMeshSnappedPOVPosition);
         }
+        if (!this.activeWaypoint && this.shouldUnoccupyWaypointsOnceMoving && triedToMove) {
+          this.shouldUnoccupyWaypointsOnceMoving = false;
+          this.waypointSystem.releaseAnyOccupiedWaypoints();
+          if (this.fly && this.shouldLandWhenPossible && squareDistanceToNavSnappedPOVPosition < 3) {
+            newPOV.setPosition(navMeshSnappedPOVPosition);
+            this.shouldLandWhenPossible = false;
+            this.fly = false;
+          }
+        }
+        childMatch(this.avatarRig.object3D, this.avatarPOV.object3D, newPOV);
       }
-      childMatch(this.avatarRig.object3D, this.avatarPOV.object3D, newPOV);
       this.avatarRig.object3D.scale.copy(initialScale);
       this.relativeMotion.set(0, 0, 0);
       this.dXZ = 0;
