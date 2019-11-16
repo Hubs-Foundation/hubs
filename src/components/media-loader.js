@@ -343,7 +343,11 @@ AFRAME.registerComponent("media-loader", {
             src: accessibleUrl,
             contentType,
             batch: !disableBatching,
-            additionalScaling: this.data.customMeshScale
+            additionalScaling: {
+              x: this.data.customMeshScale.x,
+              y: this.data.customMeshScale.y,
+              z: this.data.customMeshScale.z
+            }
           })
         );
 
@@ -360,7 +364,11 @@ AFRAME.registerComponent("media-loader", {
             src: accessibleUrl,
             contentType,
             batch: false, // Batching disabled until atlas is updated properly
-            additionalScaling: this.data.customMeshScale
+            additionalScaling: {
+              x: this.data.customMeshScale.x,
+              y: this.data.customMeshScale.y,
+              z: this.data.customMeshScale.z
+            }
           })
         );
         this.el.setAttribute("media-pager", {});
@@ -439,7 +447,11 @@ AFRAME.registerComponent("media-loader", {
             src: thumbnail,
             contentType: guessContentType(thumbnail) || "image/png",
             batch: !disableBatching,
-            additionalScaling: this.data.customMeshScale
+            additionalScaling: {
+              x: this.data.customMeshScale.x,
+              y: this.data.customMeshScale.y,
+              z: this.data.customMeshScale.z
+            }
           })
         );
         if (this.el.components["position-at-box-shape-border__freeze"]) {

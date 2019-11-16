@@ -391,25 +391,7 @@
                         position="0 0.25 0"
                     ></a-entity>
                     <a-entity class="ui interactable-ui">
-                        <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media">
-                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
-                                <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
-                                <a-entity
-                                    sprite
-                                    icon-button="image: camera-action.png; hoverImage: camera-action.png;"
-                                    scale="0.165 0.165 0.165"
-                                    position="-0.125 0.005 0.02"
-                                ></a-entity>
-                            </a-entity>
-                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: true" position="0.25 0.375 0.01">
-                                <a-entity text=" value:track; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
-                                <a-entity
-                                    sprite
-                                    icon-button="image: camera-action.png; hoverImage: camera-action.png;"
-                                    scale="0.165 0.165 0.165"
-                                    position="-0.125 0.005 0.01"
-                                ></a-entity>
-                            </a-entity>
+                        <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media; visibleIfOwned: false;">
                             <a-entity
                                 mixin="rounded-button"
                                 is-remote-hover-target
@@ -420,83 +402,6 @@
                                 <a-entity
                                     sprite="name: remove-action.png"
                                     icon-button="image: remove-action.png; hoverImage: remove-action.png"
-                                    scale="0.165 0.165 0.165"
-                                    position="0 0 0.001"
-                                ></a-entity>
-                            </a-entity>
-                            <a-entity
-                                mixin="rounded-button"
-                                is-remote-hover-target
-                                tags="singleActionButton: true;"
-                                drop-object-button
-                                hide-when-pinned-and-forbidden="whenPinned: true"
-                                position="0 -0.625 0.01">
-                                <a-entity
-                                    sprite
-                                    icon-button="image: drop-action.png; hoverImage: drop-action.png"
-                                    scale="0.165 0.165 0.165"
-                                    position="0 0 0.001"
-                                ></a-entity>
-                            </a-entity>
-                            <a-entity
-                                class="deserialize-drawing"
-                                visible="false"
-                                mixin="rounded-button"
-                                is-remote-hover-target
-                                tags="singleActionButton: true;"
-                                deserialize-drawing-button
-                                position="0.250 -0.625 0.01">
-                                <a-entity
-                                    sprite
-                                    icon-button="image: deserialize-action.png; hoverImage: deserialize-action.png"
-                                    scale="0.165 0.165 0.165"
-                                    position="0 0 0.001"
-                                ></a-entity>
-                            </a-entity>
-                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" open-media-button="onlyOpenLink: true" position="0.43 -0.375 0.01">
-                                <a-entity text="value:open link; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
-                            </a-entity>
-                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" clone-media-button position="-0.43 -0.375 0.01">
-                                <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
-                            </a-entity>
-                            <a-entity
-                                mixin="rounded-action-button"
-                                tags="isHoldable: true; holdableButton: true;"
-                                is-remote-hover-target
-                                transform-button
-                                transform-button-selector
-                                hide-when-pinned-and-forbidden
-                                position="-0.3 -0.125 0.01">
-                                <a-entity
-                                    sprite
-                                    icon-button="image: rotate-action.png; hoverImage: rotate-action.png;"
-                                    scale="0.165 0.165 0.165"
-                                    position="0 0 0.001"
-                                ></a-entity>
-                            </a-entity>
-                            <a-entity
-                                mixin="rounded-action-button"
-                                tags="isHoldable: true; holdableButton: true;"
-                                is-remote-hover-target
-                                inspect-button
-                                position="0 -0.125 0.01">
-                                <a-entity
-                                    sprite
-                                    icon-button="image: recenter-action.png; hoverImage: recenter-action.png"
-                                    scale="0.165 0.165 0.165"
-                                    position="0 0 0.001"
-                                ></a-entity>
-                            </a-entity>
-                            <a-entity
-                                mixin="rounded-action-button"
-                                tags="isHoldable: true; holdableButton: true;"
-                                is-remote-hover-target
-                                transform-button="mode: scale;"
-                                hide-when-pinned-and-forbidden
-                                position="0.3 -0.125 0.01">
-                                <a-entity
-                                    sprite
-                                    icon-button="image: scale-action.png; hoverImage: scale-action.png"
                                     scale="0.165 0.165 0.165"
                                     position="0 0 0.001"
                                 ></a-entity>
@@ -1092,7 +997,7 @@
                 <a-entity id="stats" stats-plus="false" position="0 0 -1"></a-entity>
             </a-entity>
 
-            <a-entity emoji-hud offset-relative-to="target: #viewing-camera; offset: 0 -0.25 -0.35; on: stateadded; lookAt: true"></a-entity>
+            <a-entity emoji-hud offset-relative-to="target: #viewing-camera; offset: 0 -0.2 -0.35; on: stateadded; lookAt: true"></a-entity>
 
             <a-entity
                 id="player-left-controller"

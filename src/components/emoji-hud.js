@@ -96,6 +96,5 @@ AFRAME.registerComponent("emoji-hud", {
 
   _callback(particleEmitterConfig, e) {
     e.detail.target.querySelector("#particle-emitter").setAttribute("particle-emitter", particleEmitterConfig);
-    e.detail.target.object3D.matrixNeedsUpdate = true;
   }
 });
