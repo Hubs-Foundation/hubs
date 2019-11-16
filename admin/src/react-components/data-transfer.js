@@ -30,29 +30,47 @@ const styles = withCommonStyles(() => ({
   }
 }));
 
-const workerScript = externalCorsProxyDomain => {
+const workerScript = (workerDomain, assetsDomain) => {
   return `  const ALLOWED_ORIGINS = ["${document.location.origin}"];
-  const PROXY_HOST = "https://${externalCorsProxyDomain}";
+  const CORS_PROXY_HOST = "https://cors-proxy.${workerDomain}";
+  const PROXY_HOST = "https://${workerDomain}";
+  const STORAGE_HOST = "${document.location.origin}";
+  const ASSETS_HOST = "https://${assetsDomain}";
 
   addEventListener("fetch", e => {
     const request = e.request;
     const origin = request.headers.get("Origin");
-    const proxyUrl = new URL(PROXY_HOST);
     // eslint-disable-next-line no-useless-escape
-    let targetUrl = request.url.substring(PROXY_HOST.length + 1).replace(/^http(s?):\/([^/])/, "http$1://$2");
-    
-    if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
-      targetUrl = proxyUrl.protocol + "//" + targetUrl;
+  
+    const isCorsProxy = request.url.indexOf(CORS_PROXY_HOST) === 0;
+    const proxyUrl = new URL(isCorsProxy ? CORS_PROXY_HOST : PROXY_HOST);
+    const targetPath = request.url.substring((isCorsProxy ? CORS_PROXY_HOST : PROXY_HOST).length + 1);
+    let targetUrl;
+  
+    if (targetPath.indexOf("files/") === 0) {
+      targetUrl = \`\${STORAGE_HOST}/\${targetPath}\`;
+    } else if (targetPath.indexOf("hubs/") === 0 || targetPath.indexOf("spoke/") === 0 || targetPath.indexOf("admin/") === 0) {
+      targetUrl = \`\${ASSETS_HOST}/\${targetPath}\`;
+    } else {
+      if (!isCorsProxy) {
+        // Do not allow cors proxying from main domain, always require cors-proxy. subdomain to ensure CSP stays sane.
+        return;
+      }
+      targetUrl = targetPath.replace(/^http(s?):\/([^/])/, "http$1://$2");
+  
+      if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
+        targetUrl = proxyUrl.protocol + "//" + targetUrl;
+      }
     }
     
     const requestHeaders = new Headers(request.headers);
     requestHeaders.delete("Origin"); // Some domains disallow access from improper Origins
-
+  
     e.respondWith((async () => {
-      const res = await fetch(targetUrl, { headers: requestHeaders, method: request.method, redirect: "manual", referrer: request.referrer, referrerPolicy: request.referrerPolicy });
+      const res = await fetch(targetUrl, { headers: requestHeaders, method: request.method, redirect: "manual", referrer: request.referrer, referrerPolicy: request.referrerPolicy });      
       const responseHeaders = new Headers(res.headers);
       const redirectLocation = responseHeaders.get("Location") || responseHeaders.get("location");
-
+  
       if(redirectLocation) {
         if (!redirectLocation.startsWith("/")) {
           responseHeaders.set("Location",  proxyUrl.protocol + "//" + proxyUrl.host + "/" + redirectLocation);
@@ -61,28 +79,27 @@ const workerScript = externalCorsProxyDomain => {
           responseHeaders.set("Location",  proxyUrl.protocol + "//" + proxyUrl.host + "/" + tUrl.origin + redirectLocation);
         }
       }
-
+  
       if (origin && ALLOWED_ORIGINS.indexOf(origin) >= 0) {
         responseHeaders.set("Access-Control-Allow-Origin", origin);
         responseHeaders.set("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
         responseHeaders.set("Access-Control-Allow-Headers", "Range");
         responseHeaders.set("Access-Control-Expose-Headers", "Accept-Ranges, Content-Encoding, Content-Length, Content-Range");
       }
-
+  
       responseHeaders.set("Vary", "Origin");
       responseHeaders.set('X-Content-Type-Options', "nosniff");
-
-      return new Response(res.body, { status: res.status, statusText: res.statusText, headers: responseHeaders });
+  
+      return new Response(res.body, { status: res.status, statusText: res.statusText, headers: responseHeaders });  
     })());
   });`;
 };
 
 class DataTransferComponent extends Component {
   state = {
-    externalCorsProxyDomain: "",
-    externalStorageDomain: "",
-    enableExternalCorsDomain: false,
-    enableExternalStorageDomain: false,
+    workerDomain: "",
+    assetsDomain: "",
+    enableWorker: false,
     saving: false,
     saveError: false,
     loading: false
@@ -93,40 +110,60 @@ class DataTransferComponent extends Component {
     const retConfig = await getConfig("reticulum");
 
     this.setState({
-      externalCorsProxyDomain: adminInfo.external_cors_proxy_domain,
-      externalStorageDomain: adminInfo.external_storage_domain,
-      enableExternalCorsDomain:
-        !!retConfig && !!retConfig.phx && retConfig.phx.cors_proxy_url_host === adminInfo.external_cors_proxy_domain,
-      enableExternalStorageDomain:
-        !!retConfig && !!retConfig.uploads && retConfig.uploads.host === `https://${adminInfo.external_storage_domain}`,
+      workerDomain: adminInfo.worker_domain,
+      assetsDomain: adminInfo.assets_domain,
+      enableWorker:
+        !!retConfig && !!retConfig.phx && retConfig.phx.cors_proxy_url_host === `cors-proxy.${adminInfo.worker_domain}`,
       loading: false
     });
   }
 
-  onSubmit(e) {
+  async onSubmit(e) {
     e.preventDefault();
 
+    // Sanity check
+    if (this.state.enableWorker) {
+      const abort = () => {
+        this.setState({
+          saveError: "Your worker isn't working. Check that you've performed all of the above steps."
+        });
+      };
+
+      try {
+        const res = await fetch(`https://${this.state.workerDomain}/hubs/pages/latest/whats-new.html`);
+
+        if (!res.ok) {
+          abort();
+          return;
+        }
+      } catch (e) {
+        abort();
+        return;
+      }
+    }
+
     this.setState({ saving: true }, async () => {
-      const corsDomain = this.state.enableExternalCorsDomain ? this.state.externalCorsProxyDomain : "";
-      const storageDomain = this.state.enableExternalStorageDomain ? this.state.externalStorageDomain : "";
+      const workerDomain = this.state.enableWorker ? this.state.workerDomain : "";
 
       const configs = {
         reticulum: {
           phx: {
-            cors_proxy_url_host: corsDomain
+            cors_proxy_url_host: `cors-proxy.${workerDomain}`
           },
           uploads: {
-            host: storageDomain ? `https://${storageDomain}` : ""
+            host: workerDomain ? `https://${workerDomain}` : ""
           }
         },
         hubs: {
           general: {
-            cors_proxy_server: corsDomain
+            cors_proxy_server: `cors-proxy.${workerDomain}`,
+            base_assets_path: workerDomain ? `https://${workerDomain}/hubs/` : ""
           }
         },
         spoke: {
           general: {
-            cors_proxy_server: corsDomain
+            cors_proxy_server: `cors-proxy.${workerDomain}`,
+            base_assets_path: workerDomain ? `https://${workerDomain}/spoke/` : ""
           }
         }
       };
@@ -144,7 +181,7 @@ class DataTransferComponent extends Component {
         this.setState({ saveError: e.toString() });
       }
 
-      this.setState({ saving: false, saved: true });
+      this.setState({ saving: false, saved: true, saveError: null });
     });
   }
 
@@ -161,11 +198,11 @@ class DataTransferComponent extends Component {
             <Typography variant="body2" gutterBottom>
               Hubs Cloud uses bandwidth from your cloud provider to deliver content.
               <br />
-              You can potentially reduce your data transfer costs by switching the CDN for CORS proxying and stored
-              files to Cloudflare, which does not charge for data transfer costs to your users.
+              You can reduce your data transfer costs by switching your CDN to Cloudflare, which does not charge for
+              data transfer costs to your users.
             </Typography>
             <Typography variant="subheading" gutterBottom className={this.props.classes.section}>
-              CORS Proxy
+              Worker Setup
             </Typography>
             <Typography variant="body1" gutterBottom>
               All 3rd party content (videos, images, models) in Hubs Cloud requires CORS proxying due to the{" "}
@@ -175,103 +212,99 @@ class DataTransferComponent extends Component {
               . As such, you will be using data transfer to send all 3rd party content to your users.
             </Typography>
             <Typography variant="body1" gutterBottom>
-              You can minimize this data transfer cost by using a Cloudflare Worker for CORS proxying:
+              Additionally, you will incur data transfer costs for serving avatars, scenes, and other assets.
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              You can minimize this data transfer cost by using a Cloudflare Worker to serve this content:
             </Typography>
             <Typography variant="body1" component="div" gutterBottom>
               <ol className={this.props.classes.steps}>
                 <li>
-                  Register and set up this domain name on{" "}
+                  Register this domain and set it up on{" "}
                   <a href="https://cloudflare.com" target="_blank" rel="noopener noreferrer">
                     Cloudflare
                   </a>
-                  :<div className={this.props.classes.command}>{this.state.externalCorsProxyDomain}</div>
+                  :<div className={this.props.classes.command}>{this.state.workerDomain}</div>
                 </li>
                 <li>
-                  Enable{" "}
-                  <a href="https://workers.cloudflare.com" target="_blank" rel="noopener noreferrer">
-                    Cloudflare Workers
-                  </a>{" "}
-                  on your domain.
+                  In the &apos;DNS&apos; section of your Cloudflare domain settings, add new CNAME record with Name set
+                  to
+                  <div className={this.props.classes.command}>@</div>
+                  and Domain Name set to:
+                  <div className={this.props.classes.command}>{document.location.hostname}</div>
                 </li>
                 <li>
-                  In the Workers section of your Cloudflare domain, launch the editor, paste the following worker script
-                  to run on your domain, and click Deploy:
+                  In the &apos;DNS&apos; section of your Cloudflare domain settings, add a second CNAME record with Name
+                  set to
+                  <div className={this.props.classes.command}>cors-proxy</div>
+                  and Domain Name set to:
+                  <div className={this.props.classes.command}>{document.location.hostname}</div>
+                </li>
+                <li>
+                  In the &apos;SSL/TLS&apos; section of your Cloudflare domain settings, set the encryption mode to{" "}
+                  <b>Full</b>.
+                </li>
+                <li>
+                  In the &apos;Caching&apos; section of your Cloudflare domain settings, turn <b>off</b> Always Online.
+                </li>
+                <li>
+                  In the Workers section of your Cloudflare domain, launch the editor, click &quot;Add Script&quot; on
+                  the left and name it <pre>hubs-worker</pre>
+                </li>
+                <li>
+                  Paste and save the following worker script.
                   <br />
                   <textarea
                     className={this.props.classes.worker}
-                    value={workerScript(this.state.externalCorsProxyDomain)}
+                    value={workerScript(this.state.workerDomain, this.state.assetsDomain)}
                     readOnly
                     onFocus={e => e.target.select()}
                   />
+                  <br />
+                </li>
+                <li>
+                  Once your script is saved, go back to the Workers panel. Choose &apos;Add Route&apos;, choose the
+                  script <pre>hubs-worker</pre> set the route to:
+                  <div className={this.props.classes.command}>{`*${this.state.workerDomain}/*`}</div>
+                  <b>Note the leading asterisk!</b>
                 </li>
                 <li>
                   Verify your worker is working.{" "}
                   <a
-                    href={`https://${this.state.externalCorsProxyDomain}/https://www.mozilla.org`}
+                    href={`https://cors-proxy.${this.state.workerDomain}/https://www.mozilla.org`}
                     rel="noopener noreferrer"
                     target="_blank"
                   >
                     This link
                   </a>{" "}
-                  should show the Mozilla homepage.
+                  should show the Mozilla homepage, and&nbsp;
+                  <a
+                    href={`https://${this.state.workerDomain}/hubs/pages/latest/whats-new.html`}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    this link
+                  </a>{" "}
+                  should should the Hubs &quot;What&apos;s New&quot; page.
                 </li>
                 <li>
-                  Once working, enable the &apos;Use Cloudflare CORS Proxy&apos; setting below and click
-                  &apos;Save&apos; on this page.
+                  Once <b>both</b> links above are working, enable the &apos;Use Cloudflare Worker&apos; setting below
+                  and click &apos;Save&apos; on this page.
+                </li>
+                <li>
+                  If you need more than 100,000 requests per day for content, you&apos;ll need to add a Worker Unlimited
+                  Subscription for an additional $5/mo.
                 </li>
               </ol>
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={this.state.enableExternalCorsDomain}
-                    onChange={e => this.setState({ enableExternalCorsDomain: e.target.checked })}
-                    value="enableExternalCorsDomain"
+                    checked={this.state.enableWorker}
+                    onChange={e => this.setState({ enableWorker: e.target.checked })}
+                    value="enableWorker"
                   />
                 }
-                label="Use Cloudflare CORS Proxy"
-              />
-            </Typography>
-            <Typography variant="subheading" gutterBottom className={this.props.classes.section}>
-              Stored Files
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              Uploaded avatars, scenes, and files will use data transfer to serve your users.
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              You can minimize this data transfer cost by switching the stored files CDN to Cloudflare.
-            </Typography>
-            <Typography variant="body1" component="div" gutterBottom>
-              <ol className={this.props.classes.steps}>
-                <li>
-                  Register and set up this domain name on{" "}
-                  <a href="https://cloudflare.com" target="_blank" rel="noopener noreferrer">
-                    Cloudflare
-                  </a>
-                  :<div className={this.props.classes.command}>{this.state.externalStorageDomain}</div>
-                </li>
-                <li>
-                  In the &apos;DNS&apos; section of your Cloudflare domain settings, add a CNAME record for:
-                  <div className={this.props.classes.command}>{document.location.hostname}</div>
-                </li>
-                <li>
-                  In the &apos;SSL/TLS section&apos; of your Cloudflare domain settings, set the encryption mode to
-                  &apos;Full&apos;.
-                </li>
-                <li>
-                  Enable the &apos;Use Cloudflare Storage CDN&apos; setting below and click &apos;Save&apos; on this
-                  page.
-                </li>
-                <li>Verify your new CDN is working by uploading a file into a room.</li>
-              </ol>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={this.state.enableExternalStorageDomain}
-                    onChange={e => this.setState({ enableExternalStorageDomain: e.target.checked })}
-                    value="enableExternalStorageDomain"
-                  />
-                }
-                label="Use Cloudflare Storage CDN"
+                label="Use Cloudflare Worker"
               />
             </Typography>
             {this.state.saving ? (
@@ -310,7 +343,7 @@ class DataTransferComponent extends Component {
                 <CloseIcon className={this.props.classes.icon} />
               </IconButton>
             ]}
-          ></SnackbarContent>
+          />
         </Snackbar>
       </Card>
     );
