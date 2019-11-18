@@ -51,7 +51,8 @@
   margin: 12px;
   padding: 14px;
   display: block;
-  width: 295px;
+  min-width: 295px;
+  width: max-content;
 }
 
 :local(.code) {

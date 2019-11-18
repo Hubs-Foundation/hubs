@@ -1,4 +1,5 @@
 [general]
+shortlink_domain = "hub.link"
 reticulum_server = "dev.reticulum.io"
 cors_proxy_server = "cors-proxy-dev.reticulum.io"
 thumbnail_server = "nearspark-dev.reticulum.io"
