@@ -28,7 +28,8 @@ const getCommon = theme => ({
   },
 
   button: {
-    margin: "10px 10px 0 0"
+    margin: "10px 10px 0 0",
+    width: "max-content"
   },
   success: {
     backgroundColor: green[600]
