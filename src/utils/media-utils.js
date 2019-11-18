@@ -99,7 +99,8 @@ export const addMedia = (
   resolve = false,
   fitToBox = false,
   animate = true,
-  customMeshScale = { x: 1, y: 1, z: 1 }
+  customMeshScale = { x: 1, y: 1, z: 1 },
+  mediaOptions = {}
 ) => {
   const scene = AFRAME.scenes[0];
 
@@ -113,7 +114,8 @@ export const addMedia = (
     animate,
     src: typeof src === "string" ? src : "",
     contentSubtype,
-    fileIsOwned: !needsToBeUploaded
+    fileIsOwned: !needsToBeUploaded,
+    mediaOptions
   });
 
   entity.object3D.matrixNeedsUpdate = true;

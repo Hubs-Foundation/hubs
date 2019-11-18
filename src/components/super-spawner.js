@@ -46,7 +46,13 @@ AFRAME.registerComponent("super-spawner", {
     /**
      * If true, will spawn the object at the cursor and animate it into the hand.
      */
-    animateFromCursor: { type: "boolean" }
+    animateFromCursor: { type: "boolean" },
+
+    mediaOptions: {
+      default: {},
+      parse: v => (typeof v === "object" ? v : JSON.parse(v)),
+      stringify: JSON.stringify
+    }
   },
 
   init() {

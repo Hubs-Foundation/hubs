@@ -41,7 +41,8 @@ export class SuperSpawnerSystem {
       data.resolve,
       data.fitToBox,
       false,
-      targetScale
+      targetScale,
+      data.mediaOptions
     ).entity;
 
     superSpawner.el.object3D.getWorldPosition(spawnedEntity.object3D.position);

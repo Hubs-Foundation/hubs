@@ -337,12 +337,16 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
+        let batch = !disableBatching;
+        if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
+          batch = false;
+        }
         this.el.setAttribute(
           "media-image",
           Object.assign({}, this.data.mediaOptions, {
             src: accessibleUrl,
             contentType,
-            batch: !disableBatching,
+            batch: batch,
             additionalScaling: {
               x: this.data.customMeshScale.x,
               y: this.data.customMeshScale.y,
@@ -403,13 +407,17 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
+        let batch = !disableBatching && batchMeshes;
+        if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
+          batch = false;
+        }
         this.el.setAttribute(
           "gltf-model-plus",
           Object.assign({}, this.data.mediaOptions, {
             src: accessibleUrl,
             contentType: contentType,
             inflate: true,
-            batch: !disableBatching && batchMeshes,
+            batch: batch,
             modelToWorldScale: this.data.fitToBox ? 0.0001 : 1.0
           })
         );
@@ -441,12 +449,16 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
+        let batch = !disableBatching;
+        if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
+          batch = false;
+        }
         this.el.setAttribute(
           "media-image",
           Object.assign({}, this.data.mediaOptions, {
             src: thumbnail,
             contentType: guessContentType(thumbnail) || "image/png",
-            batch: !disableBatching,
+            batch: batch,
             additionalScaling: {
               x: this.data.customMeshScale.x,
               y: this.data.customMeshScale.y,

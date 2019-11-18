@@ -23,7 +23,7 @@ AFRAME.registerComponent("emoji-hud", {
     for (let i = 0; i < emojis.length; i++) {
       const spawnerEntity = document.createElement("a-entity");
       const url = new URL(emojis[i], window.location.href).href;
-      spawnerEntity.setAttribute("media-loader", { src: url });
+      spawnerEntity.setAttribute("media-loader", { src: url, mediaOptions: { batch: false } });
       spawnerEntity.setAttribute("scale", { x: width, y: width, z: width });
       spawnerEntity.setAttribute("is-remote-hover-target", "");
       spawnerEntity.setAttribute("tags", { isHandCollisionTarget: true });
@@ -58,7 +58,8 @@ AFRAME.registerComponent("emoji-hud", {
       spawnerEntity.setAttribute("super-spawner", {
         src: url,
         template: "#interactable-emoji-media",
-        spawnScale: { x: this.data.spawnedScale, y: this.data.spawnedScale, z: this.data.spawnedScale }
+        spawnScale: { x: this.data.spawnedScale, y: this.data.spawnedScale, z: this.data.spawnedScale },
+        mediaOptions: { batch: false }
       });
 
       const cylinder = document.createElement("a-cylinder");
@@ -86,7 +87,7 @@ AFRAME.registerComponent("emoji-hud", {
 
       cylinder.object3D.position.x = x;
       cylinder.object3D.position.y = -width / 2;
-      cylinder.object3D.position.z = z;
+      cylinder.object3D.position.z = z + 0.01; //move back to avoid transparency issues with emojis
       cylinder.object3D.matrixNeedsUpdate = true;
 
       this.el.appendChild(spawnerEntity);
