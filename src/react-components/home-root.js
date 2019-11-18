@@ -72,8 +72,11 @@ class HomeRoot extends Component {
 
   componentDidMount() {
     if (this.props.authVerify) {
-      this.showAuthDialog(true);
-      this.verifyAuth().then(this.showAuthDialog);
+      this.showAuthDialog(true, false);
+
+      this.verifyAuth().then(verified => {
+        this.showAuthDialog(false, verified);
+      });
       return;
     }
     if (this.props.showSignIn) {
@@ -90,8 +93,16 @@ class HomeRoot extends Component {
   async verifyAuth() {
     const authChannel = new AuthChannel(this.props.store);
     authChannel.setSocket(await connectToReticulum());
-    await authChannel.verifyAuthentication(this.props.authTopic, this.props.authToken, this.props.authPayload);
-    this.setState({ signedIn: true, email: this.props.store.state.credentials.email });
+
+    try {
+      await authChannel.verifyAuthentication(this.props.authTopic, this.props.authToken, this.props.authPayload);
+      this.setState({ signedIn: true, email: this.props.store.state.credentials.email });
+      return true;
+    } catch (e) {
+      // Error during verification, likely invalid/expired token
+      console.warn(e);
+      return false;
+    }
   }
 
   showDialog = (DialogClass, props = {}) => {
@@ -100,8 +111,8 @@ class HomeRoot extends Component {
     });
   };
 
-  showAuthDialog = verifying => {
-    this.showDialog(AuthDialog, { verifying, authOrigin: this.props.authOrigin });
+  showAuthDialog = (verifying, verified) => {
+    this.showDialog(AuthDialog, { verifying, verified, authOrigin: this.props.authOrigin });
   };
 
   loadHomeVideo = () => {
