@@ -17,7 +17,7 @@ AFRAME.registerComponent("hoverable-visuals", {
   init() {
     // uniforms and boundingSphere are set from the component responsible for loading the mesh.
     this.uniforms = null;
-    this.boundingSphere = new THREE.Sphere();
+    this.geometryRadius = 0;
     this.scene = AFRAME.scenes[0];
 
     this.sweepParams = [0, 0];
@@ -87,7 +87,11 @@ AFRAME.registerComponent("hoverable-visuals", {
 
     if (interactorOne || interactorTwo || isFrozen) {
       const worldY = this.el.object3D.matrixWorld.elements[13];
-      const scaledRadius = this.el.object3D.scale.y * this.boundingSphere.radius;
+      const ms1 = this.el.object3D.matrixWorld.elements[4];
+      const ms2 = this.el.object3D.matrixWorld.elements[5];
+      const ms3 = this.el.object3D.matrixWorld.elements[6];
+      const worldScale = Math.sqrt(ms1 * ms1 + ms2 * ms2 + ms3 * ms3);
+      const scaledRadius = worldScale * this.geometryRadius;
       this.sweepParams[0] = worldY - scaledRadius;
       this.sweepParams[1] = worldY + scaledRadius;
     }

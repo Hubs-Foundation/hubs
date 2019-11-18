@@ -191,6 +191,7 @@ export function injectCustomShaderChunks(obj) {
     if (!object.material) return;
 
     object.material = mapMaterials(object, material => {
+      if (material.hubs_InjectedCustomShaderChunks) return material;
       if (!validMaterials.includes(material.type)) {
         return material;
       }
@@ -230,7 +231,7 @@ export function injectCustomShaderChunks(obj) {
           // Used in the fragment shader below.
           hubs_WorldPosition = wt.xyz;
         }
-      `;
+        `;
 
         const vlines = shader.vertexShader.split("\n");
         const vindex = vlines.findIndex(line => vertexRegex.test(line));
@@ -258,6 +259,7 @@ export function injectCustomShaderChunks(obj) {
         shaderUniforms.push(shader.uniforms);
       };
       newMaterial.needsUpdate = true;
+      newMaterial.hubs_InjectedCustomShaderChunks = true;
       return newMaterial;
     });
   });

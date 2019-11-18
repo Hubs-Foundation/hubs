@@ -24,6 +24,7 @@ AFRAME.registerComponent("emoji-hud", {
       const spawnerEntity = document.createElement("a-entity");
       const url = new URL(emojis[i], window.location.href).href;
       spawnerEntity.setAttribute("media-loader", { src: url, mediaOptions: { batch: false } });
+      spawnerEntity.setAttribute("hoverable-visuals", "");
       spawnerEntity.setAttribute("scale", { x: width, y: width, z: width });
       spawnerEntity.setAttribute("is-remote-hover-target", "");
       spawnerEntity.setAttribute("tags", { isHandCollisionTarget: true });
