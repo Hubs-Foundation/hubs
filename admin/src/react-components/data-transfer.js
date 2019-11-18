@@ -47,15 +47,16 @@ const workerScript = (workerDomain, assetsDomain) => {
     const targetPath = request.url.substring((isCorsProxy ? CORS_PROXY_HOST : PROXY_HOST).length + 1);
     let targetUrl;
   
-    if (targetPath.indexOf("files/") === 0) {
+    if (targetPath.startsWith("files/")) {
       targetUrl = \`\${STORAGE_HOST}/\${targetPath}\`;
-    } else if (targetPath.indexOf("hubs/") === 0 || targetPath.indexOf("spoke/") === 0 || targetPath.indexOf("admin/") === 0) {
+    } else if (targetPath.startsWith("hubs/") || targetPath.startsWith("spoke/") || targetPath.startsWith("admin/")) {
       targetUrl = \`\${ASSETS_HOST}/\${targetPath}\`;
     } else {
       if (!isCorsProxy) {
         // Do not allow cors proxying from main domain, always require cors-proxy. subdomain to ensure CSP stays sane.
         return;
       }
+      // This is a weird workaround that seems to stem from the cloudflare worker receiving the wrong url
       targetUrl = targetPath.replace(/^http(s?):\/([^/])/, "http$1://$2");
   
       if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
