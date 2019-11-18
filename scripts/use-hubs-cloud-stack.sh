@@ -2,10 +2,10 @@
 
 STACK_NAME=$1
 EXTERNAL_ZONE_NAME=$2
-SHORT_LINK_ZONE_NAME=$3
+SHORTLINK_ZONE_NAME=$3
 INTERNAL_ZONE_NAME=$4
 
-if [[ -z "$STACK_NAME" || -z "$EXTERNAL_ZONE_NAME" || -z "$SHORT_LINK_ZONE_NAME" || -z "$INTERNAL_ZONE_NAME" ]] ; then 
+if [[ -z "$STACK_NAME" || -z "$EXTERNAL_ZONE_NAME" || -z "$SHORTLINK_ZONE_NAME" || -z "$INTERNAL_ZONE_NAME" ]] ; then 
   echo -e "Usage: scripts/use-hubs-cloud-stack.sh <stack-name> <domain> <internal-domain>
 
 Switches your local client to connect to a remote Hubs Cloud instance by modifying .env.defaults.
@@ -27,7 +27,7 @@ To switch back to the Mozilla dev servers, run scripts/use-mozilla-dev.sh"
 fi
 
 cat > .env.defaults << EOF
-SHORTLINK_DOMAIN="$SHORT_LINK_ZONE_NAME"
+SHORTLINK_DOMAIN="$SHORTLINK_ZONE_NAME"
 
 RETICULUM_SERVER="$EXTERNAL_ZONE_NAME"
 
