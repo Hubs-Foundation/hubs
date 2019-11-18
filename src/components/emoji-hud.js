@@ -23,6 +23,7 @@ AFRAME.registerComponent("emoji-hud", {
     for (let i = 0; i < emojis.length; i++) {
       const spawnerEntity = document.createElement("a-entity");
       const url = new URL(emojis[i], window.location.href).href;
+      spawnerEntity.setAttribute("hoverable-visuals", "");
       spawnerEntity.setAttribute("media-loader", { src: url });
       spawnerEntity.setAttribute("scale", { x: width, y: width, z: width });
       spawnerEntity.setAttribute("is-remote-hover-target", "");

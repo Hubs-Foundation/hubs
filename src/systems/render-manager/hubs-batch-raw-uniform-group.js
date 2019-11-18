@@ -79,7 +79,11 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
         const hoverableVisuals = el.components["hoverable-visuals"];
         if (hoverableVisuals) {
           const worldY = obj.matrixWorld.elements[13];
-          const scaledRadius = obj.scale.y * hoverableVisuals.boundingSphere.radius;
+          const ms1 = obj.matrixWorld.elements[4];
+          const ms2 = obj.matrixWorld.elements[5];
+          const ms3 = obj.matrixWorld.elements[6];
+          const worldScale = Math.sqrt(ms1 * ms1 + ms2 * ms2 + ms3 * ms3);
+          const scaledRadius = worldScale * hoverableVisuals.geometryRadius;
 
           const isPinned = el.components.pinnable && el.components.pinnable.data.pinned;
           const isSpawner = !!el.components["super-spawner"];
