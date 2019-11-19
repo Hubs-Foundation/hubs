@@ -129,9 +129,7 @@ export class WaypointSystem {
             false,
             waypointComponent.data
           );
-          previouslyOccupiedWaypoints
-            .filter(wp => wp !== waypointComponent && isOccupiedByMe(wp))
-            .forEach(unoccupyWaypoint);
+          unoccupyWaypoints(previouslyOccupiedWaypoints.filter(wp => wp !== waypointComponent));
           debugDrawRect("lightgreen");
         } else {
           debugDrawRect("lightred");
@@ -239,6 +237,9 @@ export class WaypointSystem {
     return new Promise(resolve => {
       if (shouldTryToOccupy(waypointComponent) && isMineOrTakeOwnership(waypointComponent.el)) {
         occupyWaypoint(waypointComponent);
+        if (this.currentWaypoint) {
+          this.currentWaypoint.el.removeEventListener("ownership-lost", this.lostOwnershipOfWaypoint);
+        }
         this.currentWaypoint = waypointComponent;
         waypointComponent.el.addEventListener("ownership-lost", this.lostOwnershipOfWaypoint);
         resolve(true);
@@ -306,9 +307,7 @@ export class WaypointSystem {
         waypointComponentOrNull => {
           if (waypointComponentOrNull) {
             const waypointComponent = waypointComponentOrNull;
-            previouslyOccupiedWaypoints
-              .filter(wp => wp !== waypointComponent && isOccupiedByMe(wp))
-              .forEach(unoccupyWaypoint);
+            unoccupyWaypoints(previouslyOccupiedWaypoints.filter(wp => wp !== waypointComponent));
             waypointComponent.el.object3D.updateMatrices();
             this.characterController.enqueueWaypointTravelTo(
               waypointComponent.el.object3D.matrixWorld,
