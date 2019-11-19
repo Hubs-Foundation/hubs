@@ -3,8 +3,17 @@ import { addMedia } from "../utils/media-utils";
 import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
 import { paths } from "../systems/userinput/paths";
+import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
+
+function setNonNullVec3Components(target, values) {
+  target.set(
+    values.x === null ? target.x : values.x,
+    values.y === null ? target.y : values.y,
+    values.z === null ? target.z : values.z
+  );
+}
 
 /**
  * Spawns networked objects when grabbed or when a specified event is fired.
@@ -64,15 +73,21 @@ AFRAME.registerComponent("super-spawner", {
     this.sceneEl = this.el.sceneEl;
 
     this.tempSpawnHandPosition = new THREE.Vector3();
+
+    this.handleMediaLoaded = this.handleMediaLoaded.bind(this);
+
+    this.spawnedMediaScale = null;
   },
 
   play() {
+    this.el.addEventListener("media-loaded", this.handleMediaLoaded);
     if (this.data.spawnEvent) {
       this.el.sceneEl.addEventListener(this.data.spawnEvent, this.onSpawnEvent);
     }
   },
 
   pause() {
+    this.el.removeEventListener("media-loaded", this.handleMediaLoaded);
     if (this.data.spawnEvent) {
       this.el.sceneEl.removeEventListener(this.data.spawnEvent, this.onSpawnEvent);
     }
@@ -82,6 +97,22 @@ AFRAME.registerComponent("super-spawner", {
       this.el.setAttribute("visible", true);
       this.el.classList.add("interactable");
     }
+  },
+
+  handleMediaLoaded(e) {
+    const spawnedEntity = e.target;
+    this.spawnedMediaScale = spawnedEntity.object3D.scale.clone();
+    setNonNullVec3Components(this.spawnedMediaScale, this.data.spawnScale);
+
+    const boxSize =
+      spawnedEntity.components["media-image"] ||
+      spawnedEntity.components["media-video"] ||
+      spawnedEntity.components["media-pdf"]
+        ? 1
+        : 0.5;
+
+    const scaleCoefficient = getScaleCoefficient(boxSize, getBox(spawnedEntity, spawnedEntity.object3D));
+    this.spawnedMediaScale.divideScalar(scaleCoefficient);
   },
 
   async onSpawnEvent(e) {

@@ -42,7 +42,6 @@ AFRAME.registerComponent("media-loader", {
     fileIsOwned: { type: "boolean" },
     src: { type: "string" },
     fitToBox: { default: false },
-    customMeshScale: { type: "vec3", default: { x: 1, y: 1, z: 1 } },
     resolve: { default: false },
     contentType: { default: null },
     contentSubtype: { default: null },
@@ -70,18 +69,11 @@ AFRAME.registerComponent("media-loader", {
     const center = new THREE.Vector3();
     return function(fitToBox) {
       const mesh = this.el.getObject3D("mesh");
-      if (fitToBox) {
-        const box = getBox(this.el, mesh);
-        const scaleCoefficient = getScaleCoefficient(0.5, box);
-        mesh.scale.multiplyScalar(scaleCoefficient);
-        const { min, max } = box;
-        center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
-      } else {
-        mesh.scale.copy(this.data.customMeshScale);
-        const box = getBox(this.el, mesh);
-        const { min, max } = box;
-        center.addVectors(min, max).multiplyScalar(0.5);
-      }
+      const box = getBox(this.el, mesh);
+      const scaleCoefficient = fitToBox ? getScaleCoefficient(0.5, box) : 1;
+      mesh.scale.multiplyScalar(scaleCoefficient);
+      const { min, max } = box;
+      center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
       mesh.position.sub(center);
       mesh.matrixNeedsUpdate = true;
     };
@@ -230,6 +222,8 @@ AFRAME.registerComponent("media-loader", {
       if (pager) {
         pager.repositionToolbar();
       }
+
+      el.emit("media-loaded");
     };
 
     if (this.data.animate) {
@@ -349,12 +343,7 @@ AFRAME.registerComponent("media-loader", {
           Object.assign({}, this.data.mediaOptions, {
             src: accessibleUrl,
             contentType,
-            batch: batch,
-            additionalScaling: {
-              x: this.data.customMeshScale.x,
-              y: this.data.customMeshScale.y,
-              z: this.data.customMeshScale.z
-            }
+            batch: batch
           })
         );
 
@@ -370,12 +359,7 @@ AFRAME.registerComponent("media-loader", {
           Object.assign({}, this.data.mediaOptions, {
             src: accessibleUrl,
             contentType,
-            batch: false, // Batching disabled until atlas is updated properly
-            additionalScaling: {
-              x: this.data.customMeshScale.x,
-              y: this.data.customMeshScale.y,
-              z: this.data.customMeshScale.z
-            }
+            batch: false // Batching disabled until atlas is updated properly
           })
         );
         this.el.setAttribute("media-pager", {});
@@ -461,12 +445,7 @@ AFRAME.registerComponent("media-loader", {
           Object.assign({}, this.data.mediaOptions, {
             src: thumbnail,
             contentType: guessContentType(thumbnail) || "image/png",
-            batch: batch,
-            additionalScaling: {
-              x: this.data.customMeshScale.x,
-              y: this.data.customMeshScale.y,
-              z: this.data.customMeshScale.z
-            }
+            batch: batch
           })
         );
         if (this.el.components["position-at-box-shape-border__freeze"]) {

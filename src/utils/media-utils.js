@@ -99,7 +99,6 @@ export const addMedia = (
   resolve = false,
   fitToBox = false,
   animate = true,
-  customMeshScale = { x: 1, y: 1, z: 1 },
   mediaOptions = {}
 ) => {
   const scene = AFRAME.scenes[0];
@@ -109,7 +108,6 @@ export const addMedia = (
   const needsToBeUploaded = src instanceof File;
   entity.setAttribute("media-loader", {
     fitToBox,
-    customMeshScale,
     resolve,
     animate,
     src: typeof src === "string" ? src : "",
@@ -121,24 +119,6 @@ export const addMedia = (
   entity.object3D.matrixNeedsUpdate = true;
 
   scene.appendChild(entity);
-
-  const fireLoadingTimeout = setTimeout(() => {
-    scene.emit("media-loading", { src: src });
-  }, 100);
-
-  const eventNames = ["model-loaded", "video-loaded", "image-loaded", "pdf-loaded"];
-
-  const cb = async () => {
-    clearTimeout(fireLoadingTimeout);
-    entity.emit("media-loaded", { src });
-    eventNames.forEach(eventName => {
-      entity.removeEventListener(eventName, cb);
-    });
-  };
-
-  eventNames.forEach(eventName => {
-    entity.addEventListener(eventName, cb);
-  });
 
   const orientation = new Promise(function(resolve) {
     if (needsToBeUploaded) {
