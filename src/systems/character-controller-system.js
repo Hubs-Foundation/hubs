@@ -46,6 +46,7 @@ export class CharacterControllerSystem {
     this.navGroup = null;
     this.navNode = null;
     this.relativeMotion = new THREE.Vector3(0, 0, 0);
+    this.nextRelativeMotion = new THREE.Vector3(0, 0, 0);
     this.dXZ = 0;
     this.scene.addEventListener("nav-mesh-loaded", () => {
       this.navGroup = null;
@@ -61,6 +62,7 @@ export class CharacterControllerSystem {
     this.waypoints.push({ transform: getPooledMatrix4().copy(inTransform), isInstant, waypointComponentData }); //TODO: don't create new object
   }
   enqueueRelativeMotion(motion) {
+    motion.z *= -1;
     this.relativeMotion.add(motion);
   }
   enqueueInPlaceRotationAroundWorldUp(dXZ) {
@@ -225,12 +227,15 @@ export class CharacterControllerSystem {
         this.relativeMotion.set(
           this.relativeMotion.x + characterAcceleration[0],
           this.relativeMotion.y,
-          -1 * (this.relativeMotion.z + characterAcceleration[1])
+          this.relativeMotion.z + -1 * characterAcceleration[1]
         );
       }
+      const lerpC = 0.85; // TODO: To support drifting ("ice skating"), motion needs to keep initial direction
+      this.nextRelativeMotion.copy(this.relativeMotion).multiplyScalar(lerpC);
+      this.relativeMotion.multiplyScalar(1 - lerpC);
+
       this.avatarPOV.object3D.updateMatrices();
       rotateInPlaceAroundWorldUp(this.avatarPOV.object3D.matrixWorld, this.dXZ, snapRotatedPOV);
-
       calculateDisplacementToDesiredPOV(
         snapRotatedPOV,
         this.fly,
@@ -280,7 +285,7 @@ export class CharacterControllerSystem {
         }
         childMatch(this.avatarRig.object3D, this.avatarPOV.object3D, newPOV);
       }
-      this.relativeMotion.set(0, 0, 0);
+      this.relativeMotion.copy(this.nextRelativeMotion);
       this.dXZ = 0;
     };
   })();
