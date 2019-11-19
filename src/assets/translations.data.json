@@ -1,10 +1,10 @@
 {
   "en": {
-    "app-name": "Hubs",
-    "app-short-domain": "hub.link",
-    "contact-email": "hubs@mozilla.com",
-    "company-name": "Mozilla",
-    "share-hashtag": "#hubs",
+    "app-name": "App",
+    "app-short-domain": "app.link",
+    "contact-email": "app@company.com",
+    "company-name": "Company",
+    "share-hashtag": "#app",
     "app-description": "Share a virtual room with friends.\nWatch videos, play with 3D objects, or just hang out.",
     "auth.verified-title": "E-Mail Verified!",
     "auth.verified": "Your email has been verified!\nYou can now close this browser tab and return to %app-name%.",
