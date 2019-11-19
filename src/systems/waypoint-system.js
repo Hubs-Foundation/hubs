@@ -1,4 +1,4 @@
-import { setMatrixWorld, rotateInPlaceAroundWorldUp } from "../utils/three-utils";
+import { setMatrixWorld } from "../utils/three-utils";
 import { DebugDrawRect } from "./waypoint-tests";
 import { isTagged } from "../components/tags";
 import { getCurrentPlayerHeight } from "../utils/get-current-player-height";
@@ -112,7 +112,7 @@ export class WaypointSystem {
       this.characterController.enqueueWaypointTravelTo(
         waypointComponent.el.object3D.matrixWorld,
         false,
-        waypointComponent.data.willDisableMotion
+        waypointComponent.data
       );
     }.bind(this);
   }
@@ -125,7 +125,7 @@ export class WaypointSystem {
           this.characterController.enqueueWaypointTravelTo(
             waypointComponent.el.object3D.matrixWorld,
             false,
-            waypointComponent.data.willDisableMotion
+            waypointComponent.data
           );
           previouslyOccupiedWaypoints
             .filter(wp => wp !== waypointComponent && isOccupiedByMe(wp))
@@ -147,7 +147,10 @@ export class WaypointSystem {
       ) {
         const onHover = () => {
           component.el.object3D.updateMatrices();
-          if (this.waypointPreviewAvatar) {
+          if (
+            this.waypointPreviewAvatar &&
+            !this.waypointForTemplateEl[elFromTemplate.object3D.uuid].data.willMaintainInitialOrientation
+          ) {
             this.waypointPreviewAvatar.object3D.visible = true;
             component.el.object3D.updateMatrices();
             setMatrixWorld(this.waypointPreviewAvatar.object3D, component.el.object3D.matrixWorld);
@@ -233,15 +236,7 @@ export class WaypointSystem {
     }
   }
   tryToOccupy(waypointComponent) {
-    const previousPOV = new THREE.Matrix4();
     return new Promise(resolve => {
-      this.avatarPOV = this.avatarPOV || document.getElementById("avatar-pov-node");
-      this.avatarPOV.object3D.updateMatrices();
-      previousPOV.copy(this.avatarPOV.object3D.matrixWorld);
-      previousPOV.elements[13] -= getCurrentPlayerHeight();
-      previousPOV.multiply(new THREE.Matrix4().makeTranslation(0, 0, 0.25)); //eye to head
-      rotateInPlaceAroundWorldUp(previousPOV, Math.PI, previousPOV);
-
       if (shouldTryToOccupy(waypointComponent) && isMineOrTakeOwnership(waypointComponent.el)) {
         occupyWaypoint(waypointComponent);
         this.currentWaypoint = waypointComponent;
@@ -276,8 +271,6 @@ export class WaypointSystem {
     return this.nextMoveToSpawn;
   }
   moveToUnoccupiableSpawnPoint() {
-    this.avatarPOV = this.avatarPOV || document.getElementById("avatar-pov-node");
-    this.avatarPOV.object3D.updateMatrices();
     const waypointComponent = this.getUnoccupiableSpawnPoint();
     if (waypointComponent) {
       this.releaseAnyOccupiedWaypoints();
@@ -285,7 +278,7 @@ export class WaypointSystem {
       this.characterController.enqueueWaypointTravelTo(
         waypointComponent.el.object3D.matrixWorld,
         true,
-        waypointComponent.data.willDisableMotion
+        waypointComponent.data
       );
       debugDrawRect("lightblue");
     } else {
@@ -320,7 +313,7 @@ export class WaypointSystem {
             this.characterController.enqueueWaypointTravelTo(
               waypointComponent.el.object3D.matrixWorld,
               true,
-              waypointComponent.data.willDisableMotion
+              waypointComponent.data
             );
             resolvedWaypointOrNull = waypointComponent;
             debugDrawRect("lightgreen");
@@ -349,7 +342,7 @@ export class WaypointSystem {
         const t2 = new THREE.Matrix4().identity();
         t2.copy(waypointComponent.el.object3D.matrixWorld)
           .multiply(target)
-          .multiply(new THREE.Matrix4().makeTranslation(0, 0, -0.25)); //head to eye
+          .multiply(new THREE.Matrix4().makeTranslation(0, 0, -0.15)); //head to eye
         elementFromTemplate.object3D.updateMatrices();
         const scale = new THREE.Vector3().setFromMatrixScale(elementFromTemplate.object3D.matrixWorld);
         const t3 = new THREE.Matrix4()
@@ -374,6 +367,8 @@ AFRAME.registerComponent("waypoint", {
     canBeOccupied: { default: false },
     canBeClicked: { default: false },
     willDisableMotion: { default: false },
+    snapToNavMesh: { default: false },
+    willMaintainInitialOrientation: { default: false },
     willMaintainWorldUp: { default: true },
     isOccupied: { default: false }
   },

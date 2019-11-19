@@ -41,7 +41,7 @@ export class CharacterControllerSystem {
     this.scene = scene;
     this.fly = false;
     this.waypoints = [];
-    this.prevWaypointTravelTime = 0;
+    this.waypointTravelStartTime = 0;
     this.waypointTravelTime = 0;
     this.navGroup = null;
     this.navNode = null;
@@ -57,8 +57,8 @@ export class CharacterControllerSystem {
     });
   }
   // Use this API for waypoint travel so that your matrix doesn't end up in the pool
-  enqueueWaypointTravelTo(inMat4, isInstant, willDisableMotion) {
-    this.waypoints.push({ waypoint: getPooledMatrix4().copy(inMat4), isInstant, willDisableMotion }); //TODO: don't create new object
+  enqueueWaypointTravelTo(inTransform, isInstant, waypointComponentData) {
+    this.waypoints.push({ transform: getPooledMatrix4().copy(inTransform), isInstant, waypointComponentData }); //TODO: don't create new object
   }
   enqueueRelativeMotion(motion) {
     this.relativeMotion.add(motion);
@@ -76,39 +76,55 @@ export class CharacterControllerSystem {
     //TODO: Use enqueue waypoint
     return function teleportTo(targetWorldPosition) {
       this.isMotionDisabled = false;
-      const o = this.avatarRig.object3D;
-      o.getWorldPosition(rig);
+      this.avatarRig.object3D.getWorldPosition(rig);
       this.avatarPOV.object3D.getWorldPosition(head);
       targetForHead.copy(targetWorldPosition);
       targetForHead.y += this.avatarPOV.object3D.position.y;
       deltaFromHeadToTargetForHead.copy(targetForHead).sub(head);
       targetForRig.copy(rig).add(deltaFromHeadToTargetForHead);
-
-      const pathfinder = this.scene.systems.nav.pathfinder;
-      this.navGroup = pathfinder.getGroup(NAV_ZONE, targetForRig, true, true);
-      this.navNode = this.getClosestNode(targetForRig);
-      pathfinder.clampStep(rig, targetForRig, this.navNode, NAV_ZONE, this.navGroup, o.position);
-      o.matrixNeedsUpdate = true;
+      this.findPositionOnNavMesh(targetForRig, targetForRig, this.avatarRig.object3D.position);
+      this.avatarRig.object3D.matrixNeedsUpdate = true;
     };
   })();
 
   travelByWaypoint = (function() {
-    const final = new THREE.Matrix4();
-    const translatedUp = new THREE.Matrix4();
-    return function travelByWaypoint(inMat4) {
-      if (!this.fly) {
+    const inMat4Copy = new THREE.Matrix4();
+    const inPosition = new THREE.Vector3();
+    const outPosition = new THREE.Vector3();
+    const translation = new THREE.Matrix4();
+    const initialOrientation = new THREE.Matrix4();
+    const finalScale = new THREE.Vector3();
+    const finalPosition = new THREE.Vector3();
+    const finalPOV = new THREE.Matrix4();
+    return function travelByWaypoint(inMat4, snapToNavMesh, willMaintainInitialOrientation) {
+      this.avatarPOV.object3D.updateMatrices();
+      if (!this.fly && !snapToNavMesh) {
         this.fly = true;
         this.shouldLandWhenPossible = true;
         this.shouldUnoccupyWaypointsOnceMoving = true;
       }
-      translatedUp.copy(inMat4);
-      // TODO: Have to move forward a little too for center-object to center-eye difference
-      translatedUp.elements[13] += getCurrentPlayerHeight(); // Waypoints are placed at your feet
-      rotateInPlaceAroundWorldUp(translatedUp, Math.PI, translatedUp); // Waypoints are backwards
-      translatedUp.multiply(new THREE.Matrix4().makeTranslation(0, 0, -0.25)); // head-to-eye
-      this.avatarPOV.object3D.updateMatrices();
-      calculateCameraTransformForWaypoint(this.avatarPOV.object3D.matrixWorld, translatedUp, final);
-      childMatch(this.avatarRig.object3D, this.avatarPOV.object3D, final);
+      inMat4Copy.copy(inMat4);
+      rotateInPlaceAroundWorldUp(inMat4Copy, Math.PI, finalPOV);
+      if (snapToNavMesh) {
+        inPosition.setFromMatrixPosition(inMat4Copy);
+        this.findPositionOnNavMesh(inPosition, inPosition, outPosition);
+        finalPOV.setPosition(outPosition);
+        translation.makeTranslation(0, getCurrentPlayerHeight(), -0.15);
+      } else {
+        translation.makeTranslation(0, 1.6, -0.15);
+      }
+      finalPOV.multiply(translation);
+      if (willMaintainInitialOrientation) {
+        initialOrientation.extractRotation(this.avatarPOV.object3D.matrixWorld);
+        finalScale.setFromMatrixScale(finalPOV);
+        finalPosition.setFromMatrixPosition(finalPOV);
+        finalPOV
+          .copy(initialOrientation)
+          .scale(finalScale)
+          .setPosition(finalPosition);
+      }
+      calculateCameraTransformForWaypoint(this.avatarPOV.object3D.matrixWorld, finalPOV, finalPOV);
+      childMatch(this.avatarRig.object3D, this.avatarPOV.object3D, finalPOV);
     };
   })();
 
@@ -124,6 +140,8 @@ export class CharacterControllerSystem {
     const AVERAGE_WAYPOINT_TRAVEL_SPEED_METERS_PER_SECOND = 50;
     const startTransform = new THREE.Matrix4();
     const interpolatedWaypoint = new THREE.Matrix4();
+    const startTranslation = new THREE.Matrix4();
+    const waypointPosition = new THREE.Vector3();
 
     return function tick(t, dt) {
       if (!this.scene.is("entered")) return;
@@ -134,38 +152,49 @@ export class CharacterControllerSystem {
       initialScale.copy(this.avatarRig.object3D.scale);
 
       if (!this.activeWaypoint && this.waypoints.length) {
-        const { waypoint, isInstant, willDisableMotion } = this.waypoints.splice(0, 1)[0];
-        this.isMotionDisabled = willDisableMotion;
+        this.activeWaypoint = this.waypoints.splice(0, 1)[0];
+        this.isMotionDisabled = this.activeWaypoint.waypointComponentData.willDisableMotion;
         this.triedToMoveCount = 0;
-        this.activeWaypoint = waypoint;
         this.avatarPOV.object3D.updateMatrices();
         this.waypointTravelTime =
-          vrMode || isInstant
+          vrMode || this.activeWaypoint.isInstant
             ? 0
             : 1000 *
               (new THREE.Vector3()
                 .setFromMatrixPosition(this.avatarPOV.object3D.matrixWorld)
-                .distanceTo(new THREE.Vector3().setFromMatrixPosition(waypoint)) /
+                .distanceTo(waypointPosition.setFromMatrixPosition(this.activeWaypoint.transform)) /
                 AVERAGE_WAYPOINT_TRAVEL_SPEED_METERS_PER_SECOND);
         rotateInPlaceAroundWorldUp(this.avatarPOV.object3D.matrixWorld, Math.PI, startTransform);
-        startTransform.elements[13] -= getCurrentPlayerHeight();
-        startTransform.multiply(new THREE.Matrix4().makeTranslation(0, 0, -0.25));
-        this.prevWaypointTravelTime = t;
+        startTransform.multiply(startTranslation.makeTranslation(0, -1 * getCurrentPlayerHeight(), -0.15));
+        this.waypointTravelStartTime = t;
         if (!vrMode && this.waypointTravelTime > 100) {
           this.sfx.playSoundOneShot(SOUND_WAYPOINT_START);
         }
       }
 
       const animationIsOver =
-        this.waypointTravelTime === 0 || t >= this.prevWaypointTravelTime + this.waypointTravelTime;
+        this.waypointTravelTime === 0 || t >= this.waypointTravelStartTime + this.waypointTravelTime;
       if (this.activeWaypoint && !animationIsOver) {
-        const progress = THREE.Math.clamp((t - this.prevWaypointTravelTime) / this.waypointTravelTime, 0, 1);
-        interpolateAffine(startTransform, this.activeWaypoint, easeOutQuadratic(progress), interpolatedWaypoint);
-        this.travelByWaypoint(interpolatedWaypoint);
+        const progress = THREE.Math.clamp((t - this.waypointTravelStartTime) / this.waypointTravelTime, 0, 1);
+        interpolateAffine(
+          startTransform,
+          this.activeWaypoint.transform,
+          easeOutQuadratic(progress),
+          interpolatedWaypoint
+        );
+        this.travelByWaypoint(
+          interpolatedWaypoint,
+          false,
+          this.activeWaypoint.waypointComponentData.willMaintainInitialOrientation
+        );
       }
       if (this.activeWaypoint && (this.waypoints.length || animationIsOver)) {
-        this.travelByWaypoint(this.activeWaypoint);
-        freePooledMatrix4(this.activeWaypoint);
+        this.travelByWaypoint(
+          this.activeWaypoint.transform,
+          this.activeWaypoint.waypointComponentData.snapToNavMesh,
+          this.activeWaypoint.waypointComponentData.willMaintainInitialOrientation
+        );
+        freePooledMatrix4(this.activeWaypoint.transform);
         this.activeWaypoint = null;
         if (vrMode || this.waypointTravelTime > 0) {
           this.sfx.playSoundOneShot(SOUND_WAYPOINT_END);
