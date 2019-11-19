@@ -1,7 +1,6 @@
 import { setMatrixWorld } from "../utils/three-utils";
 import { DebugDrawRect } from "./waypoint-tests";
 import { isTagged } from "../components/tags";
-import { getCurrentPlayerHeight } from "../utils/get-current-player-height";
 import { applyPersistentSync } from "../utils/permissions-utils";
 const DEBUG = false;
 function debugDrawRect(color) {
@@ -24,10 +23,10 @@ function loadTemplateAndAddToScene(scene, templateId) {
   });
 }
 function isOccupiableTeleportWaypoint(data) {
-  return data.canBeClicked && data.canBeOccupied && !data.canBeSpawnPoint;
+  return data.canBeClicked && data.canBeOccupied;
 }
 function isUnoccupiableTeleportWaypoint(data) {
-  return data.canBeClicked && !data.canBeOccupied && !data.canBeSpawnPoint;
+  return data.canBeClicked && !data.canBeOccupied;
 }
 function templatesToLoadForWaypointData(data) {
   const templateIds = [];
@@ -79,10 +78,13 @@ function occupyWaypoint(waypointComponent) {
   waypointComponent.el.setAttribute("waypoint", { isOccupied: true });
 }
 
+function uuid(el) {
+  return el.object3D.uuid;
+}
+
 export class WaypointSystem {
   constructor(scene, characterController) {
     this.scene = scene;
-    this.components = [];
     this.loading = [];
     this.ready = [];
     this.waypointForTemplateEl = {};
@@ -138,19 +140,16 @@ export class WaypointSystem {
     }.bind(this);
   }
   setupEventHandlersFor(component) {
-    return function setupEventHandlers(elFromTemplate) {
-      this.eventHandlers[elFromTemplate.object3D.uuid] = this.eventHandlers[elFromTemplate.object3D.uuid] || {};
+    return function setupEventHandlers(el) {
+      const id = uuid(el);
+      this.eventHandlers[id] = this.eventHandlers[id] || {};
       if (
         component.data.canBeClicked &&
-        (elFromTemplate.classList.contains("teleport-waypoint-icon") ||
-          elFromTemplate.classList.contains("occupiable-waypoint-icon"))
+        (el.classList.contains("teleport-waypoint-icon") || el.classList.contains("occupiable-waypoint-icon"))
       ) {
         const onHover = () => {
           component.el.object3D.updateMatrices();
-          if (
-            this.waypointPreviewAvatar &&
-            !this.waypointForTemplateEl[elFromTemplate.object3D.uuid].data.willMaintainInitialOrientation
-          ) {
+          if (this.waypointPreviewAvatar && !this.waypointForTemplateEl[id].data.willMaintainInitialOrientation) {
             this.waypointPreviewAvatar.object3D.visible = true;
             component.el.object3D.updateMatrices();
             setMatrixWorld(this.waypointPreviewAvatar.object3D, component.el.object3D.matrixWorld);
@@ -161,46 +160,45 @@ export class WaypointSystem {
             this.waypointPreviewAvatar.object3D.visible = false;
           }
         };
-        elFromTemplate.object3D.addEventListener("hovered", onHover);
-        elFromTemplate.object3D.addEventListener("unhovered", onUnhover);
-        this.eventHandlers[elFromTemplate.object3D.uuid]["hovered"] = onHover;
-        this.eventHandlers[elFromTemplate.object3D.uuid]["unhovered"] = onUnhover;
+        el.object3D.addEventListener("hovered", onHover);
+        el.object3D.addEventListener("unhovered", onUnhover);
+        this.eventHandlers[id]["hovered"] = onHover;
+        this.eventHandlers[id]["unhovered"] = onUnhover;
       }
-      if (isTagged(elFromTemplate, "singleActionButton") && component.data.canBeClicked) {
+      if (isTagged(el, "singleActionButton") && component.data.canBeClicked) {
         let onInteract = () => {
-          console.log("interacted with", elFromTemplate, "associated with waypoint", component);
+          console.log("interacted with", el, "associated with waypoint", component);
         };
-        if (elFromTemplate.classList.contains("teleport-waypoint-icon")) {
-          onInteract = this.teleportToWaypoint(elFromTemplate, component);
-        } else if (elFromTemplate.classList.contains("occupiable-waypoint-icon")) {
-          onInteract = this.tryTeleportToOccupiableWaypoint(elFromTemplate, component);
+        if (el.classList.contains("teleport-waypoint-icon")) {
+          onInteract = this.teleportToWaypoint(el, component);
+        } else if (el.classList.contains("occupiable-waypoint-icon")) {
+          onInteract = this.tryTeleportToOccupiableWaypoint(el, component);
         }
-        elFromTemplate.object3D.addEventListener("interact", onInteract);
-        this.eventHandlers[elFromTemplate.object3D.uuid]["interact"] = onInteract;
+        el.object3D.addEventListener("interact", onInteract);
+        this.eventHandlers[id]["interact"] = onInteract;
       }
     }.bind(this);
   }
   registerComponent(component) {
-    this.components.push(component);
     this.loading.push(component);
     const setupEventHandlers = this.setupEventHandlersFor(component);
-    this.elementsFromTemplatesFor[component.el.object3D.uuid] =
-      this.elementsFromTemplatesFor[component.el.object3D.uuid] || [];
+    const waypointId = uuid(component.el);
+    this.elementsFromTemplatesFor[waypointId] = this.elementsFromTemplatesFor[waypointId] || [];
     Promise.all(loadTemplatesForWaypointData(this.scene, component.data)).then(elementsFromTemplates => {
-      this.loading.splice(this.loading.indexOf(component), 1);
+      const li = this.loading.indexOf(component);
+      if (li === -1) {
+        return null;
+      }
+      this.loading.splice(li, 1);
       this.ready.push(component);
-      this.elementsFromTemplatesFor[component.el.object3D.uuid].push(...elementsFromTemplates);
-      elementsFromTemplates.forEach(setupEventHandlers);
+      this.elementsFromTemplatesFor[waypointId].push(...elementsFromTemplates);
       elementsFromTemplates.forEach(el => {
-        this.waypointForTemplateEl[el.object3D.uuid] = component;
+        this.waypointForTemplateEl[uuid(el)] = component;
       });
+      elementsFromTemplates.forEach(setupEventHandlers);
     });
   }
   unregisterComponent(component) {
-    const ci = this.components.indexOf(component);
-    if (ci !== -1) {
-      this.components.splice(ci, 1);
-    }
     const li = this.loading.indexOf(component);
     if (li !== -1) {
       this.loading.splice(li, 1);
@@ -208,21 +206,24 @@ export class WaypointSystem {
     const ri = this.ready.indexOf(component);
     if (ri !== -1) {
       this.ready.splice(ri, 1);
-      const elementsFromTemplates = this.elementsFromTemplatesFor[component.el.object3D.uuid];
+      const waypointId = uuid(component.el);
+      const elementsFromTemplates = this.elementsFromTemplatesFor[waypointId];
       for (let i = 0; i < elementsFromTemplates.length; i++) {
-        if (
-          this.eventHandlers[elementsFromTemplates[i].object3D.uuid] &&
-          this.eventHandlers[elementsFromTemplates[i].object3D.uuid].interact
-        ) {
-          elementsFromTemplates[i].object3D.removeEventListener(
-            "interact",
-            this.eventHandlers[elementsFromTemplates[i].object3D.uuid].interact
-          );
-          delete this.eventHandlers[elementsFromTemplates[i].object3D.uuid].interact;
-          elementsFromTemplates[i].parentNode.removeChild(elementsFromTemplates[i]);
+        const el = elementsFromTemplates[i];
+        const id = uuid(el);
+        if (this.eventHandlers[id]) {
+          const removeEventListener = eventName => {
+            if (this.eventHandlers[id][eventName]) {
+              console.log("removing ", eventName, "from", el);
+              el.object3D.removeEventListener(eventName, this.eventHandlers[id][eventName]);
+              delete this.eventHandlers[id][eventName];
+            }
+          };
+          ["interact", "hovered", "unhovered"].map(removeEventListener);
         }
+        el.parentNode.removeChild(el);
       }
-      this.elementsFromTemplatesFor[component.el.object3D.uuid].length = 0;
+      this.elementsFromTemplatesFor[waypointId].length = 0;
     }
   }
   getUnoccupiableSpawnPoint() {
@@ -352,9 +353,8 @@ export class WaypointSystem {
       }
     };
     function tickWaypoint(waypointComponent) {
-      const elementsFromTemplates = this.elementsFromTemplatesFor[waypointComponent.el.object3D.uuid];
+      const elementsFromTemplates = this.elementsFromTemplatesFor[uuid(waypointComponent.el)];
       elementsFromTemplates.forEach(el => tickTemplateEl(el, waypointComponent));
-      // TODO: When the icon is hovered, show the transparent waypoint preview model
     }
     this.ready.forEach(tickWaypoint.bind(this));
   }
