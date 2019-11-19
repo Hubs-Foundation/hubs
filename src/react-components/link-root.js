@@ -4,7 +4,6 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 
 import configs from "../utils/configs";
-import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import { lang, messages } from "../utils/i18n";
 import classNames from "classnames";
 import styles from "../assets/stylesheets/link.scss";
@@ -165,7 +164,7 @@ class LinkRoot extends Component {
         <div className={styles.link}>
           <div className={styles.linkContents}>
             <a className={styles.logo} href="/">
-              <img src={configs.image("logo", hubLogo)} />
+              <img src={configs.image("logo")} />
             </a>
             {this.state.entered.length === this.maxAllowedChars() && (
               <div className={classNames("loading-panel", styles.codeLoadingPanel)}>

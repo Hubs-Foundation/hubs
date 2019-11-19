@@ -9,7 +9,6 @@ import configs from "../utils/configs";
 import IfFeature from "./if-feature";
 import { SCHEMA } from "../storage/store";
 import styles from "../assets/stylesheets/profile.scss";
-import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import { fetchAvatar } from "../utils/avatar-utils";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { replaceHistoryState } from "../utils/history";
@@ -217,7 +216,7 @@ class ProfileEntryPanel extends Component {
             </div>
           </div>
         </form>
-        <img className={styles.logo} src={configs.image("logo", hubLogo)} />
+        <img className={styles.logo} src={configs.image("logo")} />
       </div>
     );
   }
