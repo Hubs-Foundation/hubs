@@ -6,6 +6,7 @@ export const getCurrentPlayerHeight = (function() {
     avatarRig = avatarRig || document.getElementById("avatar-rig");
     avatarPOV.object3D.updateMatrices();
     avatarRig.object3D.updateMatrices();
-    return avatarPOV.object3D.matrixWorld.elements[13] - avatarRig.object3D.matrixWorld.elements[13];
+    return avatarPOV.object3D.matrix.elements[13]; //local
+    //return avatarPOV.object3D.matrixWorld.elements[13] - avatarRig.object3D.matrixWorld.elements[13]; //world
   };
 })();

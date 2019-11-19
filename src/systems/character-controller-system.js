@@ -136,7 +136,6 @@ export class CharacterControllerSystem {
     const startPOVPosition = new THREE.Vector3();
     const desiredPOVPosition = new THREE.Vector3();
     const navMeshSnappedPOVPosition = new THREE.Vector3();
-    const initialScale = new THREE.Vector3();
     const AVERAGE_WAYPOINT_TRAVEL_SPEED_METERS_PER_SECOND = 50;
     const startTransform = new THREE.Matrix4();
     const interpolatedWaypoint = new THREE.Matrix4();
@@ -148,8 +147,6 @@ export class CharacterControllerSystem {
       const vrMode = this.scene.is("vr-mode");
       this.sfx = this.sfx || this.scene.systems["hubs-systems"].soundEffectsSystem;
       this.waypointSystem = this.waypointSystem || this.scene.systems["hubs-systems"].waypointSystem;
-
-      initialScale.copy(this.avatarRig.object3D.scale);
 
       if (!this.activeWaypoint && this.waypoints.length) {
         this.activeWaypoint = this.waypoints.splice(0, 1)[0];
@@ -283,7 +280,6 @@ export class CharacterControllerSystem {
         }
         childMatch(this.avatarRig.object3D, this.avatarPOV.object3D, newPOV);
       }
-      this.avatarRig.object3D.scale.copy(initialScale);
       this.relativeMotion.set(0, 0, 0);
       this.dXZ = 0;
     };
@@ -291,6 +287,10 @@ export class CharacterControllerSystem {
 
   getClosestNode(pos) {
     const pathfinder = this.scene.systems.nav.pathfinder;
+    if (!pathfinder.zones[NAV_ZONE].groups[this.navGroup]) {
+      console.log("can't find closest node");
+      return null;
+    }
     return (
       pathfinder.getClosestNode(pos, NAV_ZONE, this.navGroup, true) ||
       pathfinder.getClosestNode(pos, NAV_ZONE, this.navGroup)
@@ -317,7 +317,11 @@ export class CharacterControllerSystem {
     if (!(NAV_ZONE in pathfinder.zones)) return;
     this.navGroup = pathfinder.getGroup(NAV_ZONE, end, true, true);
     this.navNode = this.getClosestNode(end);
-    this.navNode = pathfinder.clampStep(start, end, this.navNode, NAV_ZONE, this.navGroup, outPos);
+    if (!this.navNode) {
+      outPos.copy(end);
+    } else {
+      this.navNode = pathfinder.clampStep(start, end, this.navNode, NAV_ZONE, this.navGroup, outPos);
+    }
     return outPos;
   }
 }

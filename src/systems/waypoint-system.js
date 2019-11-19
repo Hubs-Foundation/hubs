@@ -338,11 +338,10 @@ export class WaypointSystem {
         waypointComponent.el.object3D.updateMatrices();
         const target = new THREE.Matrix4().identity();
         target.makeRotationY(Math.PI);
-        target.elements[13] = getCurrentPlayerHeight();
         const t2 = new THREE.Matrix4().identity();
         t2.copy(waypointComponent.el.object3D.matrixWorld)
           .multiply(target)
-          .multiply(new THREE.Matrix4().makeTranslation(0, 0, -0.15)); //head to eye
+          .multiply(new THREE.Matrix4().makeTranslation(0, 1.6, -0.15));
         elementFromTemplate.object3D.updateMatrices();
         const scale = new THREE.Vector3().setFromMatrixScale(elementFromTemplate.object3D.matrixWorld);
         const t3 = new THREE.Matrix4()

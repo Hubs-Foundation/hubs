@@ -266,7 +266,7 @@ export const affixToWorldUp = (function() {
       .normalize();
     outSide.crossVectors(outForward, worldUp);
     outMat4.makeBasis(outSide, worldUp, outForward.multiplyScalar(-1));
-    //outMat4.scale(v.setFromMatrixScale(inMat4Copy)); //TODO: Fix scale
+    outMat4.scale(v.setFromMatrixScale(inMat4Copy));
     outMat4.setPosition(v.setFromMatrixColumn(inMat4Copy, 3));
   };
 })();
@@ -278,8 +278,8 @@ export const calculateCameraTransformForWaypoint = (function() {
   return function calculateCameraTransformForWaypoint(cameraTransform, waypointTransform, outMat4) {
     affixToWorldUp(cameraTransform, upAffixedCameraTransform);
     detachFromWorldUp.getInverse(upAffixedCameraTransform).multiply(cameraTransform);
-    affixToWorldUp(waypointTransform, upAffixedWaypointTransform); // TODO: Option not to fix world up
-    outMat4.copy(upAffixedWaypointTransform).multiply(detachFromWorldUp); // TODO: Try opposite matrix order that agrees more with intuition
+    affixToWorldUp(waypointTransform, upAffixedWaypointTransform);
+    outMat4.copy(upAffixedWaypointTransform).multiply(detachFromWorldUp);
   };
 })();
 
