@@ -228,10 +228,7 @@ class HomeRoot extends Component {
                 )}
               </div>
             </div>
-            <div
-              className={styles.heroContent}
-              style={{ backgroundImage: configs.image("home_background", null, true) }}
-            >
+            <div className={styles.heroContent} style={{ backgroundImage: configs.image("home_background", true) }}>
               {!this.props.hideHero &&
                 (this.props.favoriteHubsResult &&
                 this.props.favoriteHubsResult.entries &&
@@ -339,7 +336,7 @@ class HomeRoot extends Component {
                     </a>
                   </IfFeature>
                   <IfFeature name="show_company_logo">
-                    <img className={styles.mozLogo} src={configs.image("company_logo")} />
+                    <img className={styles.companyLogo} src={configs.image("company_logo")} />
                   </IfFeature>
                 </div>
               </div>
