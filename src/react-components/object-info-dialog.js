@@ -71,7 +71,7 @@ export default class ObjectInfoDialog extends Component {
       this.viewingCamera.object3D.updateMatrices();
       targetMatrix.copy(this.viewingCamera.object3D.matrixWorld);
       affixToWorldUp(targetMatrix, targetMatrix);
-      translation.makeTranslation(0, -1.6, 1.15);
+      translation.makeTranslation(0, -1.6, 0.15);
       targetMatrix.multiply(translation);
       rotateInPlaceAroundWorldUp(targetMatrix, Math.PI, targetMatrix);
 

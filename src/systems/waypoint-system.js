@@ -214,7 +214,6 @@ export class WaypointSystem {
         if (this.eventHandlers[id]) {
           const removeEventListener = eventName => {
             if (this.eventHandlers[id][eventName]) {
-              console.log("removing ", eventName, "from", el);
               el.object3D.removeEventListener(eventName, this.eventHandlers[id][eventName]);
               delete this.eventHandlers[id][eventName];
             }
