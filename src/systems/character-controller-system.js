@@ -35,7 +35,7 @@ const calculateDisplacementToDesiredPOV = (function() {
  * @namespace avatar
  */
 const SNAP_ROTATION_RADIAN = THREE.Math.DEG2RAD * 45;
-const BASE_SPEED = 2.9; //TODO: in what units?
+const BASE_SPEED = 3.2; //TODO: in what units?
 export class CharacterControllerSystem {
   constructor(scene) {
     this.scene = scene;
@@ -230,7 +230,7 @@ export class CharacterControllerSystem {
           this.relativeMotion.z + -1 * characterAcceleration[1]
         );
       }
-      const lerpC = 0.85; // TODO: To support drifting ("ice skating"), motion needs to keep initial direction
+      const lerpC = vrMode ? 0 : 0.85; // TODO: To support drifting ("ice skating"), motion needs to keep initial direction
       this.nextRelativeMotion.copy(this.relativeMotion).multiplyScalar(lerpC);
       this.relativeMotion.multiplyScalar(1 - lerpC);
 
