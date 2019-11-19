@@ -41,6 +41,7 @@ class SystemEditorComponent extends Component {
   render() {
     const needsAvatars = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.avatar_listings.any;
     const needsScenes = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.scene_listings.any;
+    const exceededStorageQuota = this.state.reticulumMeta.repo && this.state.reticulumMeta.repo.storage.in_quota;
 
     const isInSESSandbox =
       this.state.adminInfo &&
@@ -72,82 +73,101 @@ class SystemEditorComponent extends Component {
             guide.
           </Typography>
 
-          {this.state.reticulumMeta && this.state.adminInfo && (needsAvatars || needsScenes || isInSESSandbox) && (
-            <List>
-              {isInSESSandbox && (
-                <ListItem>
-                  <ListItemIcon className={this.props.classes.warningIcon}>
-                    <Warning />
-                  </ListItemIcon>
-                  <ListItemText
-                    inset
-                    primary={
-                      <span>
-                        Your AWS account is in the{" "}
-                        <a
-                          href="https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          AWS Simple Email Service Sandbox
-                        </a>{" "}
-                      </span>
-                    }
-                    secondary={
-                      <span>
-                        Users will not be able to log in until the system can send email. You&apos;ll need to either{" "}
-                        <a
-                          href="https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          follow the instructions
-                        </a>{" "}
-                        to request a limit increase, or set custom email settings in{" "}
-                        <a href="/admin#/server-setup">Server Settings</a>
-                      </span>
-                    }
-                  />
-                </ListItem>
-              )}
-              {needsAvatars && (
-                <ListItem>
-                  <ListItemIcon className={this.props.classes.warningIcon}>
-                    <Warning />
-                  </ListItemIcon>
-                  <ListItemText
-                    inset
-                    primary="Your system has no avatars."
-                    secondary="Choose 'Import Content' on the left to load avatars."
-                  />
-                </ListItem>
-              )}
-              {needsScenes && (
-                <ListItem>
-                  <ListItemIcon className={this.props.classes.warningIcon}>
-                    <Warning />
-                  </ListItemIcon>
-                  <ListItemText
-                    inset
-                    primary="Your system has no scenes."
-                    secondary="Choose 'Import Content' on the left to load scenes."
-                  />
-                </ListItem>
-              )}
-              {!isUsingCloudflare && (
-                <ListItem>
-                  <ListItemIcon className={this.props.classes.infoIcon}>
-                    <Info />
-                  </ListItemIcon>
-                  <ListItemText
-                    inset
-                    primary="You are using your cloud provider to serve content."
-                    secondary="You can reduce data transfer costs by using Cloudflare's CDN to serve content. Choose 'Data Transfer' on the left for more info."
-                  />
-                </ListItem>
-              )}
-            </List>
-          )}
+          {this.state.reticulumMeta &&
+            this.state.adminInfo &&
+            (needsAvatars || needsScenes || isInSESSandbox || exceededStorageQuota) && (
+              <List>
+                {isInSESSandbox && (
+                  <ListItem>
+                    <ListItemIcon className={this.props.classes.warningIcon}>
+                      <Warning />
+                    </ListItemIcon>
+                    <ListItemText
+                      inset
+                      primary={
+                        <span>
+                          Your AWS account is in the{" "}
+                          <a
+                            href="https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            AWS Simple Email Service Sandbox
+                          </a>{" "}
+                        </span>
+                      }
+                      secondary={
+                        <span>
+                          Users will not be able to log in until the system can send email. You&apos;ll need to either{" "}
+                          <a
+                            href="https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            follow the instructions
+                          </a>{" "}
+                          to request a limit increase, or set custom email settings in{" "}
+                          <a href="/admin#/server-setup">Server Settings</a>
+                        </span>
+                      }
+                    />
+                  </ListItem>
+                )}
+                {exceededStorageQuota && (
+                  <ListItem>
+                    <ListItemIcon className={this.props.classes.warningIcon}>
+                      <Warning />
+                    </ListItemIcon>
+                    <ListItemText
+                      inset
+                      primary={<span>You have exceeded your specified storage limit.</span>}
+                      secondary={
+                        <span>
+                          Visitors will not be able to upload new scenes, avatars, or files until you increase the
+                          &apos;Storage Limit&apos; in your stack settings.
+                        </span>
+                      }
+                    />
+                  </ListItem>
+                )}
+                {needsAvatars && (
+                  <ListItem>
+                    <ListItemIcon className={this.props.classes.warningIcon}>
+                      <Warning />
+                    </ListItemIcon>
+                    <ListItemText
+                      inset
+                      primary="Your system has no avatars."
+                      secondary="Choose 'Import Content' on the left to load avatars."
+                    />
+                  </ListItem>
+                )}
+                {needsScenes && (
+                  <ListItem>
+                    <ListItemIcon className={this.props.classes.warningIcon}>
+                      <Warning />
+                    </ListItemIcon>
+                    <ListItemText
+                      inset
+                      primary="Your system has no scenes."
+                      secondary="Choose 'Import Content' on the left to load scenes."
+                    />
+                  </ListItem>
+                )}
+                {!isUsingCloudflare && (
+                  <ListItem>
+                    <ListItemIcon className={this.props.classes.infoIcon}>
+                      <Info />
+                    </ListItemIcon>
+                    <ListItemText
+                      inset
+                      primary="You are using your cloud provider to serve content."
+                      secondary="You can reduce data transfer costs by using Cloudflare's CDN to serve content. Choose 'Data Transfer' on the left for more info."
+                    />
+                  </ListItem>
+                )}
+              </List>
+            )}
         </CardContent>
       </Card>
     );
