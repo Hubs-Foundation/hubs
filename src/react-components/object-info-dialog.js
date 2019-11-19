@@ -25,6 +25,7 @@ export default class ObjectInfoDialog extends Component {
 
   componentDidMount() {
     this.updatePinnedState = this.updatePinnedState.bind(this);
+    this.viewingCamera = document.getElementById("viewing-camera");
     this.pin = this.pin.bind(this);
     this.unpin = this.unpin.bind(this);
     this.props.scene.addEventListener("uninspect", this.props.onClose);
@@ -67,8 +68,8 @@ export default class ObjectInfoDialog extends Component {
     const targetMatrix = new THREE.Matrix4();
     const translation = new THREE.Matrix4();
     return function enqueueWaypointTravel() {
-      this.props.el.object3D.updateMatrices();
-      targetMatrix.copy(this.props.el.object3D.matrixWorld);
+      this.viewingCamera.object3D.updateMatrices();
+      targetMatrix.copy(this.viewingCamera.object3D.matrixWorld);
       affixToWorldUp(targetMatrix, targetMatrix);
       translation.makeTranslation(0, -1.6, 1.15);
       targetMatrix.multiply(translation);
