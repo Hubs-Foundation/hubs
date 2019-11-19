@@ -107,7 +107,7 @@
       }
       a {
         margin-left: 10px;
-        color: $action-label-color;
+        color: var(--panel-subtext-link-color);
       }
     }
 
@@ -199,6 +199,10 @@
 
     .license {
       font-size: 8pt;
+      color: var(--panel-subtext-color);
+      a {
+        color: var(--panel-subtext-link-color)
+      }
     }
 
     hr {
@@ -242,7 +246,7 @@
   }
 
   .delete-avatar {
-    color: var(--panel-subtext-link-color);
+    color: var(--panel-subtext-color);
     a {
       cursor: pointer;
       text-decoration: underline;
@@ -254,6 +258,7 @@
     font-size: 1.6em;
     align-self: flex-start;
     cursor: pointer;
+    color: var(--panel-widget-color);
     @media (max-width: 768px) {
       padding-left: 0.5em;
     }
