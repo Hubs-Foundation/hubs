@@ -55,7 +55,7 @@ AFRAME.registerComponent("emoji-hud", {
       };
 
       spawnerEntity.addEventListener("spawned-entity-loaded", this._callback.bind(this, particleEmitterConfig));
-      spawnerEntity.setAttribute("vertical-billboard-spawner-helper", "");
+      spawnerEntity.setAttribute("vertical-billboard-spawner-helper", { enableInVR: false });
       spawnerEntity.setAttribute("super-spawner", {
         src: url,
         template: "#interactable-emoji-media",

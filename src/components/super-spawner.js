@@ -232,10 +232,13 @@ AFRAME.registerComponent("super-spawner", {
 // This component ensures that an object spawned for a super-spawner will always spawn oriented "upright", facing the camera, regardless of the initial spawner orientation.
 AFRAME.registerComponent("vertical-billboard-spawner-helper", {
   schema: {
-    camera: { type: "selector", default: "#avatar-pov-node" }
+    camera: { type: "selector", default: "#avatar-pov-node" },
+    enableInVR: { default: true }
   },
   init() {
     this._handleEvent = this._handleEvent.bind(this);
+  },
+  play() {
     this.el.addEventListener("spawned-entity-created", this._handleEvent);
   },
   _handleEvent: (() => {
@@ -244,6 +247,9 @@ AFRAME.registerComponent("vertical-billboard-spawner-helper", {
     const defaultRight = new THREE.Vector3(1, 0, 0);
     const cameraWorldPosition = new THREE.Vector3();
     return function(e) {
+      if (!this.data.enableInVR && this.el.sceneEl.is("vr-mode")) {
+        return;
+      }
       const object3D = e.detail.target.object3D;
       const cameraObject3D = this.data.camera.object3D;
       object3D.updateMatrices();
@@ -261,7 +267,7 @@ AFRAME.registerComponent("vertical-billboard-spawner-helper", {
       object3D.matrixNeedsUpdate = true;
     };
   })(),
-  remove() {
+  pause() {
     this.el.removeEventListener("spawned-entity-created", this._handleEvent);
   }
 });
