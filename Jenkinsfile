@@ -32,6 +32,7 @@ pipeline {
       steps {
         script {
           def baseAssetsPath = env.BASE_ASSETS_PATH
+          def shortlinkDomain = env.SHORTLINK_DOMAIN
           def targetS3Bucket = env.TARGET_S3_BUCKET
           def sentryDsn = env.SENTRY_DSN
           def gaTrackingId = env.GA_TRACKING_ID
@@ -42,7 +43,7 @@ pipeline {
           def nonCorsProxyDomains = env.NON_CORS_PROXY_DOMAINS
           def slackURL = env.SLACK_URL
 
-          def habCommand = "/bin/bash scripts/hab-build-and-push.sh \\\"${baseAssetsPath}\\\" \\\"${reticulumServer}\\\" \\\"${thumbnailServer}\\\" \\\"${corsProxyServer}\\\" \\\"${nonCorsProxyDomains}\\\" \\\"${targetS3Bucket}\\\" \\\"${sentryDsn}\\\" \\\"${gaTrackingId}\\\" \\\"${env.BUILD_NUMBER}\\\" \\\"${env.GIT_COMMIT}\\\""
+          def habCommand = "/bin/bash scripts/hab-build-and-push.sh \\\"${baseAssetsPath}\\\" \\\"${shortlinkDomain}\\\" \\\"${reticulumServer}\\\" \\\"${thumbnailServer}\\\" \\\"${corsProxyServer}\\\" \\\"${nonCorsProxyDomains}\\\" \\\"${targetS3Bucket}\\\" \\\"${sentryDsn}\\\" \\\"${gaTrackingId}\\\" \\\"${env.BUILD_NUMBER}\\\" \\\"${env.GIT_COMMIT}\\\""
           sh "/usr/bin/script --return -c ${shellString(habCommand)} /dev/null"
 
           def s = $/eval 'ls -rt results/*.hart | head -n 1'/$

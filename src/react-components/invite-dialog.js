@@ -5,6 +5,7 @@ import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import configs from "../utils/configs";
 
 import { messages } from "../utils/i18n";
 import { share, canShare } from "../utils/share";
@@ -54,7 +55,7 @@ export default class InviteDialog extends Component {
     const { entryCode, embedUrl } = this.props;
 
     const entryCodeString = pad(entryCode, 6);
-    const shortLinkText = `${messages["app-short-domain"]}/${this.props.hubId}`;
+    const shortLinkText = `${configs.SHORTLINK_DOMAIN}/${this.props.hubId}`;
     const shortLink = "https://" + shortLinkText;
     const embedText = `<iframe src="${embedUrl}" style="width: 1024px; height: 768px;" allow="microphone; camera; vr; speaker;"></iframe>`;
 
@@ -71,12 +72,12 @@ export default class InviteDialog extends Component {
         <div>
           <FormattedMessage id={`invite.enter_via${this.props.isModal ? "_modal" : ""}`} />
           <a
-            href={`https://${messages["app-short-domain"]}`}
+            href={`https://${configs.SHORTLINK_DOMAIN}`}
             target="_blank"
             className={styles.hubLinkLink}
             rel="noopener noreferrer"
           >
-            <FormattedMessage id="app-short-domain" />
+            {configs.SHORTLINK_DOMAIN}
           </a>
           <FormattedMessage id="invite.and_enter_code" />
         </div>

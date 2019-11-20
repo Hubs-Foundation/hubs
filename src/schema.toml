@@ -5,7 +5,6 @@ translations.en."app-description" = { category = "translations", type = "string"
 translations.en."app-tagline" = { category = "translations", type = "string", name = "App Tagline", description = "A shorter app description used across the app." }
 translations.en."company-name" = { category = "translations", type = "string", name = "Company Name", description = "Company name used across the app." }
 translations.en."share-hashtag" = { category = "translations", type = "string", name = "Share Hashtag", description = "Hashtag used in share messages." }
-translations.en."app-short-domain" = { category = "translations", type = "string", name = "Short App Domain", description = "Short app domain." }
 translations.en."contact-email" = { category = "translations", type = "string", name = "Contact email", description = "General contact email." }
 translations.en."settings.community" = { category = "translations", type = "string", name = "Community Prompt", description = "Prompt for joining your community." }
 

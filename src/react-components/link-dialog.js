@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 
-import { messages } from "../utils/i18n";
+import configs from "../utils/configs";
 import LinkDialogHeader from "../assets/images/link_dialog_header.svg";
 import { WithHoverSound } from "./wrap-with-audio";
 
@@ -47,12 +47,12 @@ export default class LinkDialog extends Component {
                 <FormattedMessage id="link.in_your_browser" />
               </div>
               <a
-                href={`https://${messages["app-short-domain"]}`}
+                href={`https://${configs.SHORTLINK_DOMAIN}`}
                 className={styles.domain}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <FormattedMessage id="app-short-domain" />
+                {configs.SHORTLINK_DOMAIN}
               </a>
               <div>
                 <FormattedMessage id="link.enter_code" />
