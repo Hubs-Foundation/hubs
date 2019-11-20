@@ -1,5 +1,4 @@
 import configs from "../utils/configs";
-import { messages } from "../utils/i18n";
 
 AFRAME.registerComponent("tweet-media-button", {
   init() {
