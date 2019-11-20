@@ -5,7 +5,6 @@ import { IntlProvider, FormattedMessage } from "react-intl";
 import configs from "../utils/configs";
 import { lang, messages } from "../utils/i18n";
 import loaderStyles from "../assets/stylesheets/loader.scss";
-import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 
 class Loader extends Component {
   static propTypes = {
@@ -101,7 +100,7 @@ class Loader extends Component {
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="loading-panel">
-          <img className="loading-panel__logo" src={configs.image("logo", hubLogo)} />
+          <img className="loading-panel__logo" src={configs.image("logo")} />
 
           {this.props.finished ? nomore : usual}
 

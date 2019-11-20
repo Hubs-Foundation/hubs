@@ -10,9 +10,7 @@ import { lang, messages } from "../utils/i18n";
 import { playVideoWithStopOnBlur } from "../utils/video-utils.js";
 import homeVideoWebM from "../assets/video/home.webm";
 import homeVideoMp4 from "../assets/video/home.mp4";
-import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import discordLogoSmall from "../assets/images/discord-logo-small.png";
-import mozLogo from "../assets/images/moz-logo-black.png";
 import classNames from "classnames";
 import { isLocalClient, createAndRedirectToNewHub, connectToReticulum } from "../utils/phoenix-utils";
 import maskEmail from "../utils/mask-email";
@@ -72,8 +70,11 @@ class HomeRoot extends Component {
 
   componentDidMount() {
     if (this.props.authVerify) {
-      this.showAuthDialog(true);
-      this.verifyAuth().then(this.showAuthDialog);
+      this.showAuthDialog(true, false);
+
+      this.verifyAuth().then(verified => {
+        this.showAuthDialog(false, verified);
+      });
       return;
     }
     if (this.props.showSignIn) {
@@ -90,8 +91,16 @@ class HomeRoot extends Component {
   async verifyAuth() {
     const authChannel = new AuthChannel(this.props.store);
     authChannel.setSocket(await connectToReticulum());
-    await authChannel.verifyAuthentication(this.props.authTopic, this.props.authToken, this.props.authPayload);
-    this.setState({ signedIn: true, email: this.props.store.state.credentials.email });
+
+    try {
+      await authChannel.verifyAuthentication(this.props.authTopic, this.props.authToken, this.props.authPayload);
+      this.setState({ signedIn: true, email: this.props.store.state.credentials.email });
+      return true;
+    } catch (e) {
+      // Error during verification, likely invalid/expired token
+      console.warn(e);
+      return false;
+    }
   }
 
   showDialog = (DialogClass, props = {}) => {
@@ -100,8 +109,8 @@ class HomeRoot extends Component {
     });
   };
 
-  showAuthDialog = verifying => {
-    this.showDialog(AuthDialog, { verifying, authOrigin: this.props.authOrigin });
+  showAuthDialog = (verifying, verified) => {
+    this.showDialog(AuthDialog, { verifying, verified, authOrigin: this.props.authOrigin });
   };
 
   loadHomeVideo = () => {
@@ -230,10 +239,7 @@ class HomeRoot extends Component {
                 )}
               </div>
             </div>
-            <div
-              className={styles.heroContent}
-              style={{ backgroundImage: configs.image("home_background", null, true) }}
-            >
+            <div className={styles.heroContent} style={{ backgroundImage: configs.image("home_background", true) }}>
               {!this.props.hideHero &&
                 (this.props.favoriteHubsResult &&
                 this.props.favoriteHubsResult.entries &&
@@ -341,7 +347,7 @@ class HomeRoot extends Component {
                     </a>
                   </IfFeature>
                   <IfFeature name="show_company_logo">
-                    <img className={styles.mozLogo} src={configs.image("company_logo", mozLogo)} />
+                    <img className={styles.companyLogo} src={configs.image("company_logo")} />
                   </IfFeature>
                 </div>
               </div>
@@ -395,7 +401,7 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel} key={1}>
         <div className={styles.container}>
           <div className={classNames([styles.logo, styles.logoMargin])}>
-            <img src={configs.image("logo", hubLogo)} />
+            <img src={configs.image("logo")} />
           </div>
         </div>
         <div className={styles.ctaButtons}>
@@ -418,7 +424,7 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel}>
         <div className={styles.container}>
           <div className={styles.logo}>
-            <img src={configs.image("logo", hubLogo)} />
+            <img src={configs.image("logo")} />
           </div>
           <div className={styles.blurb}>
             <FormattedMessage id="app-description" />

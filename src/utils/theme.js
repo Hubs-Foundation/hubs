@@ -25,7 +25,6 @@ function getThemeColor(name) {
 }
 
 waitForDOMContentLoaded().then(() => {
-  console.log(window.APP_CONFIG);
   if (window.APP_CONFIG && window.APP_CONFIG.theme && window.APP_CONFIG.theme["dark-theme"]) {
     document.body.classList.add("dark-theme");
   } else {

@@ -1,4 +1,4 @@
-import { green, amber } from "@material-ui/core/colors";
+import { blue, green, amber } from "@material-ui/core/colors";
 
 const getCommon = theme => ({
   container: {
@@ -19,6 +19,10 @@ const getCommon = theme => ({
     width: "100%"
   },
 
+  infoIcon: {
+    color: blue[200]
+  },
+
   warningIcon: {
     color: amber[700]
   },
@@ -28,7 +32,8 @@ const getCommon = theme => ({
   },
 
   button: {
-    margin: "10px 10px 0 0"
+    margin: "10px 10px 0 0",
+    width: "max-content"
   },
   success: {
     backgroundColor: green[600]

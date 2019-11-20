@@ -10,7 +10,6 @@ import configs from "../utils/configs";
 import IfFeature from "./if-feature";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
-import hubLogo from "../assets/images/logo.svg";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
@@ -831,7 +830,7 @@ class UIRoot extends Component {
   };
 
   onMiniInviteClicked = () => {
-    const link = `https://${messages["app-short-domain"]}/${this.props.hubId}`;
+    const link = `https://${configs.SHORTLINK_DOMAIN}/${this.props.hubId}`;
 
     this.setState({ miniInviteActivated: true });
     setTimeout(() => {
@@ -980,7 +979,7 @@ class UIRoot extends Component {
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="exited-panel">
-          <img className="exited-panel__logo" src={configs.image("logo", hubLogo)} />
+          <img className="exited-panel__logo" src={configs.image("logo")} />
           <div className="exited-panel__subtitle">{subtitle}</div>
         </div>
       </IntlProvider>
@@ -990,7 +989,7 @@ class UIRoot extends Component {
   renderBotMode = () => {
     return (
       <div className="loading-panel">
-        <img className="loading-panel__logo" src={configs.image("logo", hubLogo)} />
+        <img className="loading-panel__logo" src={configs.image("logo")} />
         <input type="file" id="bot-audio-input" accept="audio/*" />
         <input type="file" id="bot-data-input" accept="application/json" />
       </div>
@@ -1822,7 +1821,7 @@ class UIRoot extends Component {
                             ? navigator.share
                               ? "sharing..."
                               : "copied!"
-                            : `${messages["app-short-domain"]}/` + this.props.hubId}
+                            : `${configs.SHORTLINK_DOMAIN}/` + this.props.hubId}
                         </span>
                       </button>
                     )}

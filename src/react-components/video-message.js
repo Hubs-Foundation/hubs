@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import configs from "../utils/configs";
 
 import { messages } from "../utils/i18n";
 import styles from "../assets/stylesheets/presence-log.scss";
@@ -10,7 +11,7 @@ import { share } from "../utils/share";
 export default function VideoMessage({ name, body: { src: url }, className, maySpawn, hubId }) {
   const onShareClicked = share.bind(null, {
     url: url,
-    title: `Taken in ${messages["share-hashtag"]}, join me at https://${messages["app-short-domain"]}/${hubId}`
+    title: `Taken in ${messages["share-hashtag"]}, join me at https://${configs.SHORTLINK_DOMAIN}/${hubId}`
   });
   return (
     <div className={className}>

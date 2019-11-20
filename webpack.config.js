@@ -357,7 +357,7 @@ module.exports = (env, argv) => ({
     new webpack.DefinePlugin({
       "process.env": JSON.stringify({
         NODE_ENV: argv.mode,
-        DEFAULT_SCENE_SID: process.env.DEFAULT_SCENE_SID,
+        SHORTLINK_DOMAIN: process.env.SHORTLINK_DOMAIN,
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
         RETICULUM_SOCKET_SERVER: process.env.RETICULUM_SOCKET_SERVER,
         THUMBNAIL_SERVER: process.env.THUMBNAIL_SERVER,

@@ -12,7 +12,7 @@ AFRAME.registerComponent("tweet-media-button", {
 
       const text = !hasDiscordBridges
         ? `Taken in ${location.hostname} - ` +
-          `join me now at ${messages["app-short-domain"]}/${window.APP.hubChannel.hubId}! `
+          `join me now at ${configs.SHORTLINK_DOMAIN}/${window.APP.hubChannel.hubId}! `
         : `Taken in ${location.hostname} `;
 
       const { src, contentSubtype } = this.targetEl.components["media-loader"].data;

@@ -11,6 +11,7 @@ import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import pdfjs from "pdfjs-dist";
+import { applyPersistentSync } from "../utils/permissions-utils";
 
 // Using external CDN to reduce build size
 pdfjs.GlobalWorkerOptions.workerSrc =
@@ -285,7 +286,7 @@ AFRAME.registerComponent("media-video", {
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
-      this.networkedEl.components.networked.applyPersistentFirstSync();
+      applyPersistentSync(this.networkedEl.components.networked.data.networkId);
       this.updatePlaybackState();
 
       // For scene-owned videos, take ownership after a random delay if nobody
