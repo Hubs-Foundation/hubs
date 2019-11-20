@@ -34,7 +34,8 @@ class SceneUI extends Component {
     sceneAllowRemixing: PropTypes.bool,
     unavailable: PropTypes.bool,
     isOwner: PropTypes.bool,
-    isSignedIn: PropTypes.bool
+    isSignedIn: PropTypes.bool,
+    parentScene: PropTypes.object
   };
 
   state = {
@@ -89,7 +90,7 @@ class SceneUI extends Component {
       );
     }
 
-    const { sceneAllowRemixing, isOwner, isSignedIn, sceneProjectId } = this.props;
+    const { sceneAllowRemixing, isOwner, isSignedIn, sceneProjectId, parentScene } = this.props;
 
     const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
     const tweetText = `${this.props.sceneName} in ${messages["share-hashtag"]}`;
@@ -130,7 +131,19 @@ class SceneUI extends Component {
         attributions = (
           <span>
             <span>{this.props.sceneAttributions.creator ? `by ${this.props.sceneAttributions.creator}` : ""}</span>
-            &nbsp;
+            {parentScene &&
+              parentScene.attributions &&
+              parentScene.attributions.creator && (
+                <span className="remix">
+                  &nbsp;(Remixed fron&nbsp;
+                  {toAttributionSpan({
+                    name: parentScene.name,
+                    url: parentScene.url,
+                    author: parentScene.attributions.creator
+                  })}
+                  )
+                </span>
+              )}
             <br />
             {this.props.sceneAttributions.content && this.props.sceneAttributions.content.map(toAttributionSpan)}
           </span>

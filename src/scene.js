@@ -112,6 +112,9 @@ const onReady = async () => {
   sceneModelEntity.appendChild(gltfEl);
   sceneRoot.appendChild(sceneModelEntity);
 
+  const parentId = sceneInfo.parent_scene_id || sceneInfo.parent_scene_listing_id;
+  const parentScene = parentId && (await fetchReticulumAuthenticated(`/api/v1/scenes/${parentId}`)).scenes[0];
+
   remountUI({
     sceneName: sceneInfo.name,
     sceneDescription: sceneInfo.description,
@@ -120,7 +123,8 @@ const onReady = async () => {
     sceneProjectId: sceneInfo.project_id,
     sceneAllowRemixing: sceneInfo.allow_remixing,
     isOwner: sceneInfo.account_id && sceneInfo.account_id === window.APP.store.credentialsAccountId,
-    isSignedIn: !!window.APP.store.credentialsAccountId
+    isSignedIn: !!window.APP.store.credentialsAccountId,
+    parentScene: parentScene
   });
 };
 
