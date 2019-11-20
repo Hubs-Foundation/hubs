@@ -7,7 +7,6 @@ import en from "react-intl/locale-data/en";
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/scene-ui.scss";
-import spokeLogo from "../assets/images/spoke_logo_black.png";
 import { createAndRedirectToNewHub } from "../utils/phoenix-utils";
 import { WithHoverSound } from "./wrap-with-audio";
 import CreateRoomDialog from "./create-room-dialog.js";
@@ -143,7 +142,7 @@ class SceneUI extends Component {
                 </a>
               </WithHoverSound>
               <div className={styles.logoTagline}>
-                <FormattedMessage id="scene.logo_tagline" />
+                <FormattedMessage id="app-tagline" />
               </div>
               <div className={styles.createButtons}>
                 <WithHoverSound>
@@ -178,7 +177,7 @@ class SceneUI extends Component {
             <div className={styles.spoke}>
               <div className={styles.madeWith}>made with</div>
               <a href="/spoke">
-                <img src={spokeLogo} />
+                <img src={configs.image("editor_logo")} />
               </a>
             </div>
           </IfFeature>

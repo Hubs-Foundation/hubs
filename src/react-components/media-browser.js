@@ -353,7 +353,7 @@ class MediaBrowser extends Component {
                     <IfFeature name="enable_spoke">
                       <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
                       <a href="/spoke" target="_blank" rel="noreferrer noopener">
-                        <FormattedMessage id="media-browser.spoke" />
+                        <FormattedMessage id="editor-name" />
                       </a>
                     </IfFeature>
                     {configs.feature("enable_spoke") && configs.feature("show_issue_report_link") && "|"}

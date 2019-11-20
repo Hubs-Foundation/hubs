@@ -1,5 +1,6 @@
 import appLogo from "../assets/images/app-logo.png";
 import companyLogo from "../assets/images/company-logo.png";
+import sceneEditorLogo from "../assets/images/editor-logo.png";
 
 // Read configs from global variable if available, otherwise use the process.env injected from build.
 const configs = {};
@@ -58,7 +59,8 @@ let localDevImages = {};
 if (isLocalDevelopment) {
   localDevImages = {
     logo: appLogo,
-    company_logo: companyLogo
+    company_logo: companyLogo,
+    editor_logo: sceneEditorLogo
   };
 }
 
