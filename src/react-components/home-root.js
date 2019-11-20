@@ -208,7 +208,7 @@ class HomeRoot extends Component {
                   </IfFeature>
                   <IfFeature name="enable_spoke">
                     <a href="/spoke" rel="noreferrer noopener">
-                      Spoke
+                      <FormattedMessage id="editor-name" />
                     </a>
                   </IfFeature>
                   {this.props.showAdmin && (

@@ -50,7 +50,7 @@ export default class ChangeSceneDialog extends Component {
               Paste a URL to a{" "}
               <IfFeature name="enable_spoke">
                 <a href="/spoke" target="_blank" rel="noopener noreferrer">
-                  Spoke
+                  <FormattedMessage id="editor-name" />
                 </a>{" "}
               </IfFeature>
               scene or a URL to a{" "}
