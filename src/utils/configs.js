@@ -1,5 +1,9 @@
+import appLogo from "../assets/images/app-logo.png";
+import companyLogo from "../assets/images/company-logo.png";
+
 // Read configs from global variable if available, otherwise use the process.env injected from build.
 const configs = {};
+let isAdmin = false;
 
 [
   "RETICULUM_SERVER",
@@ -8,6 +12,7 @@ const configs = {};
   "NON_CORS_PROXY_DOMAINS",
   "SENTRY_DSN",
   "GA_TRACKING_ID",
+  "SHORTLINK_DOMAIN",
   "BASE_ASSETS_PATH"
 ].forEach(x => {
   const el = document.querySelector(`meta[name='env:${x.toLowerCase()}']`);
@@ -19,13 +24,58 @@ const configs = {};
   }
 });
 
-// Also include APP_CONFIG that reticulum injects as a script in the page head.
+// Also include configs that reticulum injects as a script in the page head.
+
+configs.AVAILABLE_INTEGRATIONS = window.AVAILABLE_INTEGRATIONS || {};
+
 if (window.APP_CONFIG) {
   configs.APP_CONFIG = window.APP_CONFIG;
+  const { theme } = configs.APP_CONFIG;
+  if (theme) {
+    const colorVars = [];
+    for (const key in theme) {
+      if (!theme.hasOwnProperty(key)) continue;
+      colorVars.push(`--${key}: ${theme[key]};`);
+    }
+    const style = document.createElement("style");
+    style.innerHTML = `:root{${colorVars.join("\n")}}`;
+    document.head.prepend(style);
+  }
 }
 
+const isLocalDevelopment = process.env.NODE_ENV === "development";
+
 configs.feature = featureName => {
-  return configs.APP_CONFIG && configs.APP_CONFIG.features && configs.APP_CONFIG.features[featureName];
+  const enableAll = isLocalDevelopment && !process.env.USE_FEATURE_CONFIG;
+
+  const features = configs.APP_CONFIG && configs.APP_CONFIG.features;
+
+  const forceEnableSpoke = featureName === "enable_spoke" && isAdmin;
+
+  return forceEnableSpoke || enableAll || (features && features[featureName]);
+};
+
+let localDevImages = {};
+if (isLocalDevelopment) {
+  localDevImages = {
+    logo: appLogo,
+    company_logo: companyLogo
+  };
+}
+
+configs.image = (imageName, cssUrl) => {
+  const url =
+    (configs.APP_CONFIG && configs.APP_CONFIG.images && configs.APP_CONFIG.images[imageName]) ||
+    localDevImages[imageName];
+  return url && cssUrl ? `url(${url})` : url;
+};
+
+configs.link = (linkName, defaultValue) => {
+  return (configs.APP_CONFIG && configs.APP_CONFIG.links && configs.APP_CONFIG.links[linkName]) || defaultValue;
+};
+
+configs.setIsAdmin = _isAdmin => {
+  isAdmin = _isAdmin;
 };
 
 export default configs;

@@ -326,8 +326,14 @@ module.exports = (env, argv) => ({
     ]),
     new CopyWebpackPlugin([
       {
-        from: "src/assets/images/hub-preview.png",
-        to: "hub-preview.png"
+        from: "src/assets/images/app-icon.png",
+        to: "app-icon.png"
+      }
+    ]),
+    new CopyWebpackPlugin([
+      {
+        from: "src/assets/images/app-thumbnail.png",
+        to: "app-thumbnail.png"
       }
     ]),
     new CopyWebpackPlugin([
@@ -338,14 +344,8 @@ module.exports = (env, argv) => ({
     ]),
     new CopyWebpackPlugin([
       {
-        from: "src/assets/manifest.webmanifest",
-        to: "manifest.webmanifest"
-      }
-    ]),
-    new CopyWebpackPlugin([
-      {
-        from: "src/app-config-schema.toml",
-        to: "app-config-schema.toml"
+        from: "src/schema.toml",
+        to: "schema.toml"
       }
     ]),
     // Extract required css and add a content hash.
@@ -357,7 +357,7 @@ module.exports = (env, argv) => ({
     new webpack.DefinePlugin({
       "process.env": JSON.stringify({
         NODE_ENV: argv.mode,
-        DEFAULT_SCENE_SID: process.env.DEFAULT_SCENE_SID,
+        SHORTLINK_DOMAIN: process.env.SHORTLINK_DOMAIN,
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
         RETICULUM_SOCKET_SERVER: process.env.RETICULUM_SOCKET_SERVER,
         THUMBNAIL_SERVER: process.env.THUMBNAIL_SERVER,
@@ -366,7 +366,8 @@ module.exports = (env, argv) => ({
         BUILD_VERSION: process.env.BUILD_VERSION,
         SENTRY_DSN: process.env.SENTRY_DSN,
         GA_TRACKING_ID: process.env.GA_TRACKING_ID,
-        POSTGREST_SERVER: process.env.POSTGREST_SERVER
+        POSTGREST_SERVER: process.env.POSTGREST_SERVER,
+        USE_FEATURE_CONFIG: process.env.USE_FEATURE_CONFIG
       })
     })
   ]

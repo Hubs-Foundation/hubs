@@ -50,24 +50,24 @@ export default class MicLevelWidget extends Component {
 
   render() {
     const maxLevelHeight = 111;
+
     const micClip = {
       clip: `rect(${maxLevelHeight - Math.floor(this.state.volume * maxLevelHeight)}px, 111px, 111px, 0px)`
     };
 
     return (
       <div className="audio-setup-panel__levels__icon">
-        <img
-          src="../assets/images/level_background.png"
-          srcSet="../assets/images/level_background@2x.png 2x"
-          className="audio-setup-panel__levels__icon-part"
-        />
         {!this.props.muteOnEntry && (
-          <img
-            src="../assets/images/level_fill.png"
-            srcSet="../assets/images/level_fill@2x.png 2x"
-            className="audio-setup-panel__levels__icon-part"
-            style={micClip}
-          />
+          <svg width="111" height="111" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="55.5" cy="55.5" r="55.5" fill="currentColor" fillOpacity="0.8" />
+          </svg>
+        )}
+        {!this.props.muteOnEntry && (
+          <div className="audio-setup-panel__levels__icon__talking" style={micClip}>
+            <svg width="111" height="111" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="55.5" cy="55.5" r="55.5" fill="currentColor" fillOpacity="0.8" />
+            </svg>
+          </div>
         )}
         {this.props.hasAudioTrack && !this.props.muteOnEntry ? (
           <img

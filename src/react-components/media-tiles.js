@@ -13,6 +13,7 @@ import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
 
+import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/media-browser.scss";
 import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import StateLink from "./state-link";
@@ -60,15 +61,21 @@ class MediaTiles extends Component {
           {(urlSource === "avatars" || urlSource === "scenes") && (
             <div
               style={{ width: `${createTileWidth}px`, height: `${createTileHeight}px` }}
-              className={classNames(styles.tile, styles.createTile)}
+              className={classNames({
+                [styles.tile]: true,
+                [styles.createTile]: true,
+                [styles.createAvatarTile]: urlSource === "avatars"
+              })}
             >
               {urlSource === "scenes" ? (
-                <a href="/spoke/new" rel="noopener noreferrer" target="_blank" className={styles.tileLink}>
-                  <div className={styles.tileContent}>
-                    <FontAwesomeIcon icon={faPlus} />
-                    <FormattedMessage id="media-browser.create-scene" />
-                  </div>
-                </a>
+                <IfFeature name="enable_spoke">
+                  <a href="/spoke/new" rel="noopener noreferrer" target="_blank" className={styles.tileLink}>
+                    <div className={styles.tileContent}>
+                      <FontAwesomeIcon icon={faPlus} />
+                      <FormattedMessage id="media-browser.create-scene" />
+                    </div>
+                  </a>
+                </IfFeature>
               ) : (
                 <a
                   onClick={e => {
@@ -149,6 +156,8 @@ class MediaTiles extends Component {
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
           muted
           autoPlay
+          playsInline
+          loop
           src={proxiedUrlFor(imageSrc)}
         />
       ) : (

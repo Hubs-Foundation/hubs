@@ -7,6 +7,7 @@
   box-sizing: border-box;
   align-items: flex-start;
   height: 100%;
+  color: var(--panel-text-color);
 
   @media (max-width: 768px) {
     padding: 0.5em;
@@ -23,7 +24,7 @@
   .info {
     text-align: center;
     width: 100%;
-    color: $grey-text;
+    color: var(--panel-subtext-color);
     margin: 1em 0;
 
     p {
@@ -32,7 +33,7 @@
     }
 
     a {
-      color: $dark-grey-text;
+      color: var(--panel-subtext-link-color);
       margin-left: 5px;
     }
   }
@@ -91,9 +92,9 @@
         min-height: 50px;
         border-radius: 8px;
         margin-right: 5px;
-        background: #eaeaea;
+        background: var(--panel-action-button-secondary-background);
         overflow: hidden;
-        color: $dark-grey;
+        color: var(--action-button-secondary-icon);
         position: relative;
         svg {
           position: absolute;
@@ -106,7 +107,7 @@
       }
       a {
         margin-left: 10px;
-        color: $action-color;
+        color: var(--panel-subtext-link-color);
       }
     }
 
@@ -148,7 +149,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        color: $darker-grey;
+        color: var(--panel-subtext-color);
         text-align: center;
         cursor: pointer;
         margin-bottom: 5px;
@@ -156,7 +157,7 @@
         position: relative;
 
         &.selected{
-          background: #eaeaea;
+          background: var(--tile-selected-color);
         }
         &.custom{
           width: 100%;
@@ -198,16 +199,20 @@
 
     .license {
       font-size: 8pt;
+      color: var(--panel-subtext-color);
+      a {
+        color: var(--panel-subtext-link-color)
+      }
     }
 
     hr {
       width: 100%;
       border: none;
-      border-bottom: 1px solid $dark-grey;
+      border-bottom: 1px solid var(--panel-widget-color);
     }
 
     a {
-      color: black;
+      color: var(--panel-text-color);
     }
   }
 
@@ -226,7 +231,7 @@
     margin-bottom: 0.5em;
   }
   .form-submit:disabled {
-    background-color: $action-color-light;
+    background-color: $action-color-disabled;
   }
 
   .split {
@@ -241,17 +246,19 @@
   }
 
   .delete-avatar {
-    color: $dark-grey;
+    color: var(--panel-subtext-color);
     a {
       cursor: pointer;
       text-decoration: underline;
-      color: $action-color;
+      color: $action-label-color;
     }
   }
 
   .close-button {
     font-size: 1.6em;
     align-self: flex-start;
+    cursor: pointer;
+    color: var(--panel-widget-color);
     @media (max-width: 768px) {
       padding-left: 0.5em;
     }

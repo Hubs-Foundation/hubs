@@ -24,11 +24,6 @@ AFRAME.registerComponent("super-spawner", {
     resolve: { default: false },
 
     /**
-     * Whether to resize the media on load.
-     */
-    resize: { default: false },
-
-    /**
      * The template to use for this object
      */
     template: { default: "" },
@@ -112,7 +107,8 @@ AFRAME.registerComponent("super-spawner", {
       ObjectContentOrigins.SPAWNER,
       null,
       this.data.resolve,
-      false
+      false,
+      this.data.useCustomSpawnScale ? this.data.spawnScale : { x: 1, y: 1, z: 1 }
     ).entity;
 
     const interaction = this.el.sceneEl.systems.interaction;
@@ -124,10 +120,6 @@ AFRAME.registerComponent("super-spawner", {
     cursor.getWorldPosition(entity.object3D.position);
     cursor.getWorldQuaternion(entity.object3D.quaternion);
     entity.object3D.matrixNeedsUpdate = true;
-
-    if (this.data.useCustomSpawnScale) {
-      entity.object3D.scale.copy(this.data.spawnScale);
-    }
 
     const userinput = AFRAME.scenes[0].systems.userinput;
     const willAnimateFromCursor =

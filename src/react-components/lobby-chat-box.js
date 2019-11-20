@@ -5,6 +5,7 @@ import styles from "../assets/stylesheets/message-entry.scss";
 import { WithHoverSound } from "./wrap-with-audio";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import sendMessageIcon from "../assets/images/send_message.svgi";
+import { InlineSVGButton } from "./svgi";
 
 class LobbyChatBox extends Component {
   static propTypes = {
@@ -66,11 +67,11 @@ class LobbyChatBox extends Component {
             placeholder={messageEntryPlaceholder}
           />
           <WithHoverSound>
-            <button
+            <InlineSVGButton
               className={classNames([styles.messageEntryButton, styles.messageEntrySubmit])}
               disabled={this.props.occupantCount <= 1 ? true : false}
               type="submit"
-              dangerouslySetInnerHTML={{ __html: sendMessageIcon }}
+              src={sendMessageIcon}
             />
           </WithHoverSound>
         </div>

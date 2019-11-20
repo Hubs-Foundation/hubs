@@ -1,8 +1,8 @@
 @import 'shared.scss';
 
 :local(.command-help) {
-  background-color: $darker-grey;
-  color: $light-text;
+  background-color: var(--chat-popup-background-color);
+  color: var(--chat-popup-text-color);
   position: absolute;
   display: flex;
   flex-direction: column;

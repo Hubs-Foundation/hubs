@@ -3,8 +3,6 @@ import configs from "../utils/configs";
 import { getReticulumFetchUrl, fetchReticulumAuthenticated, hasReticulumServer } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 
-export const SOURCES = ["poly", "sketchfab", "videos", "scenes", "avatars", "gifs", "images", "twitch"];
-
 const EMPTY_RESULT = { entries: [], meta: {} };
 
 const URL_SOURCE_TO_TO_API_SOURCE = {
@@ -18,6 +16,14 @@ const URL_SOURCE_TO_TO_API_SOURCE = {
   twitch: "twitch",
   favorites: "favorites"
 };
+
+const desiredSources = ["poly", "sketchfab", "videos", "scenes", "avatars", "gifs", "images", "twitch"];
+const availableIntegrations = configs.AVAILABLE_INTEGRATIONS;
+const availableSources = desiredSources.filter(source => {
+  const apiSource = URL_SOURCE_TO_TO_API_SOURCE[source];
+  return !availableIntegrations.hasOwnProperty(apiSource) || availableIntegrations[apiSource];
+});
+export const SOURCES = availableSources;
 
 export const MEDIA_SOURCE_DEFAULT_FILTERS = {
   gifs: "trending",

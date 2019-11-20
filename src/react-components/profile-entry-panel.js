@@ -5,10 +5,10 @@ import classNames from "classnames";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import { SCHEMA } from "../storage/store";
 import styles from "../assets/stylesheets/profile.scss";
-import hubLogo from "../assets/images/hub-preview-white.png";
-import { WithHoverSound } from "./wrap-with-audio";
 import { fetchAvatar } from "../utils/avatar-utils";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { replaceHistoryState } from "../utils/history";
@@ -137,7 +137,7 @@ class ProfileEntryPanel extends Component {
           </a>
         </div>
         <form onSubmit={this.saveStateAndFinish} className={styles.form}>
-          <div className={classNames([styles.box, styles.darkened])}>
+          <div className={classNames([styles.box])}>
             <label htmlFor="#profile-entry-display-name" className={styles.title}>
               <FormattedMessage id="profile.header" />
             </label>
@@ -192,33 +192,31 @@ class ProfileEntryPanel extends Component {
               </div>
             )}
 
-            <WithHoverSound>
-              <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
-            </WithHoverSound>
+            <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
             <div className={styles.links}>
-              <WithHoverSound>
+              <IfFeature name="show_terms">
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+                  href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
                 >
                   <FormattedMessage id="profile.terms_of_use" />
                 </a>
-              </WithHoverSound>
+              </IfFeature>
 
-              <WithHoverSound>
+              <IfFeature name="show_privacy">
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+                  href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
                 >
                   <FormattedMessage id="profile.privacy_notice" />
                 </a>
-              </WithHoverSound>
+              </IfFeature>
             </div>
           </div>
         </form>
-        <img className={styles.logo} src={hubLogo} />
+        <img className={styles.logo} src={configs.image("logo")} />
       </div>
     );
   }

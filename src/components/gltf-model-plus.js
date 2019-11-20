@@ -512,6 +512,8 @@ AFRAME.registerComponent("gltf-model-plus", {
         this.el.appendChild(this.inflatedEl);
 
         object3DToSet = this.inflatedEl.object3D;
+        object3DToSet.visible = false;
+
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
         // Wait one tick for the appended custom elements to be connected before attaching templates
         await nextTick();
@@ -551,6 +553,7 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       rewires.forEach(f => f());
 
+      object3DToSet.visible = true;
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
       gltfCache.release(src);

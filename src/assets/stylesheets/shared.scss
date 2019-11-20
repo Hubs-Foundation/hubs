@@ -1,29 +1,19 @@
-$light-transparent: rgba(0, 0, 0, 0.2);
-$white-transparent: rgba(255, 255, 255, 0.90);
-$dark-transparent: rgba(0, 0, 0, 0.4);
-$darker-transparent: rgba(0, 0, 0, 0.6);
-$darkest-transparent: rgba(0, 0, 0, 0.9);
-$grey-text: rgba(127, 127, 127, 1.0);
-$dark-grey-text: rgba(64, 64, 64, 1.0);
-$light-text: rgba(240, 240, 240, 1.0);
-$lighter-grey: #f0f0f0;
-$light-grey: lightgrey;
-$dark-grey: rgba(128, 128, 128, 1.0);
-$darker-grey: rgba(64, 64, 64, 1.0);
-$darkest-grey: rgba(32, 32, 32, 1.0);
-$bright-blue: #2F80ED;
-$light-blue: #6FC0FD;
-$action-color: #FF3464;
-$action-color-light: #FF74A4;
-$action-color-transparent: rgba(255, 52, 100, 0.9);
-$hud-panel-background: rgba(79, 79, 79, 0.45);
-$spoke-action-color: $bright-blue;
-$twitter-action-color: #1da1f2;
-$discord-action-color: #7289da;
-$semi-bold: 600;
-$duck-yellow: #FFC000;
+@import 'colors';
 
-%unselectable {
+$default-action-color: #FF3464;
+$default-action-color-light: #FF74A4;
+$action-color: var(--action-color, $default-action-color);
+$action-label-color: var(--action-label-color, $default-action-color);
+$action-color-disabled: var(--action-color-disabled, $default-action-color-light);
+$action-color-highlight: var(--action-color-highlight, $default-action-color-light);
+$action-text-color: var(--action-text-color, white);
+$action-subtitle-text-color: var(--action-subtitle-text-color, $light-text);
+$notice-background-color: var(--notice-background-color, $bright-blue);
+$notice-text-color: var(--notice-text-color, white);
+$notice-widget-color: var(--notice-widget-color, $light-blue);
+$favorited-color: var(--favorited-color, $duck-yellow);
+
+%unselectable  {
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -36,7 +26,7 @@ $duck-yellow: #FFC000;
 
 %glass-text {
   font-family: 'Open Sans', sans-serif;
-  color: black;
+  color: var(--panel-text-color);
 }
 
 %glass-icon {
@@ -45,7 +35,7 @@ $duck-yellow: #FFC000;
 }
 
 %rounded-border {
-  border: 1px solid #e2e2e2;
+  border: 1px solid var(--text-field-border-color);
   box-sizing: border-box;
   border-radius: 10px;
 }
@@ -58,16 +48,10 @@ $duck-yellow: #FFC000;
   margin: 0;
 }
 
-%form-field-on-white {
-  border: 1px solid #e2e2e2;
-  background-color: white;
-  border-radius: 10px;
-}
-
 %input-field {
   @extend %rounded-border;
   @extend %default-font;
-  color: black;
+  color: var(--text-field-text-color);
   font-size: 1.2em;
   background-color: transparent;
   line-height: 2.0em;
@@ -98,7 +82,7 @@ $duck-yellow: #FFC000;
   }
 
   background: $action-color;
-  color: white;
+  color: $action-text-color;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -156,7 +140,7 @@ $duck-yellow: #FFC000;
 
   background: $action-color;
   font-size: 1em;
-  color: white;
+  color: $action-text-color;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -172,20 +156,19 @@ $duck-yellow: #FFC000;
 
 %action-button-secondary {
   @extend %action-button;
-  background-color: white;
-  color: $action-color;
+  background-color: var(--action-button-secondary-background);
+  color: $action-label-color;
 }
 
 %action-button-secondary-modal {
   @extend %action-button;
-  background-color: #f4f4f4;
-  color: $action-color;
+  background-color: var(--panel-action-button-secondary-background);
+  color: $action-label-color;
 }
 
-
 %action-button-selected {
-  background: white;
-  color: $action-color;
+  background: var(--action-button-secondary-background);
+  color: $action-label-color;
 }
 
 %bottom-action-button {
@@ -195,22 +178,23 @@ $duck-yellow: #FFC000;
 
 %spoke-action-button {
   @extend %action-button;
-  background-color: $spoke-action-color;
+  background-color: var(--spoke-action-color);
 }
 
 %discord-action-button {
   @extend %action-button;
-  background-color: $discord-action-color;
+  background-color: var(--discord-action-color);
 }
 
 %twitter-action-button {
   @extend %action-button;
-  background-color: $twitter-action-color;
+  background-color: var(--twitter-action-color);
 }
 
 %top-title {
   font-size: 1.5em;
   font-weight: bold;
+  color: var(--panel-text-color);
 }
 
 %top-subtitle {
@@ -223,7 +207,6 @@ $duck-yellow: #FFC000;
   -moz-appearance: none;
   -webkit-appearance: none;
   background: transparent;
-  color: white;
   border: none;
   font-size: 64pt;
   outline-style: none;
@@ -236,8 +219,8 @@ $duck-yellow: #FFC000;
   -webkit-appearance: none;
   width: 2em;
   height: 2em;
-  border: 1px solid #e2e2e2;
-  background-color: white;
+  border: 1px solid var(--text-field-border-color);
+  background-color: var(--text-field-background-color);
   border-radius: 6px;
   vertical-align: sub;
   margin: 0 0.7em
@@ -260,7 +243,7 @@ $duck-yellow: #FFC000;
   display: block;
   background: none;
   border: none;
-  color: black;
+  color: var(--panel-text-color);
   cursor: pointer;
   font-size: 0.8em;
   outline-style: none;
@@ -279,10 +262,10 @@ $duck-yellow: #FFC000;
 }
 
 %fa-icon-button-icon {
-  background: black;
+  background: var(--icon-button-background-color);
   width: 40px !important;
   height: 40px;
-  border: 3px solid white;
+  border: 3px solid var(--icon-button-border-color);
   border-radius: 40px;
   display: inline-block;
   font-size: 22px;
@@ -311,8 +294,8 @@ $duck-yellow: #FFC000;
   pointer-events: auto;
   z-index: 2;
   font-size: 0.8em;
-  color: white;
+  color: $notice-text-color;
   padding: 12px 24px;
-  background-color: $bright-blue;
+  background-color: $notice-background-color;
   text-align: center;
 }

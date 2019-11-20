@@ -25,14 +25,14 @@
 :local(.sign-in) {
   display: flex;
   justify-content: center;
-  border-top: 1px solid $light-grey;
+  border-top: 1px solid var(--panel-rule-color);
   margin-top: 12px;
   padding-top: 12px;
   font-size: 0.8em;
 
   a {
     text-decoration: underline;
-    text-decoration-color: $dark-grey;
+    text-decoration-color: var(--panel-link-underline-color);
     font-weight: bold;
     cursor: pointer;
     margin-left: 24px;
@@ -58,11 +58,11 @@
 
   i {
     margin-left: 12px;
-    color: $dark-grey;
+    color: var(--menu-icon-color);
   }
 
   i:hover {
-    color: $action-color;
+    color: $action-label-color;
   }
 }
 
@@ -72,7 +72,7 @@
 }
 
 :local(.moderator-badge) {
-  color: $action-color;
+  color: $action-label-color;
   margin-left: 4px;
   text-decoration: none;
 }

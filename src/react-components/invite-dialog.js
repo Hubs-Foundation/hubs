@@ -3,9 +3,12 @@ import PropTypes from "prop-types";
 import copy from "copy-to-clipboard";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
-import { share, canShare } from "../utils/share";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import configs from "../utils/configs";
+
+import { messages } from "../utils/i18n";
+import { share, canShare } from "../utils/share";
 
 import { WithHoverSound } from "./wrap-with-audio";
 import styles from "../assets/stylesheets/invite-dialog.scss";
@@ -36,7 +39,7 @@ export default class InviteDialog extends Component {
 
   shareClicked = url => {
     this.setState({ shareButtonActive: true });
-    share({ url, title: "Join me now in #hubs!" }).then(() => {
+    share({ url, title: `Join me now in ${messages["share-hashtag"]}!` }).then(() => {
       this.setState({ shareButtonActive: false });
     });
   };
@@ -52,7 +55,7 @@ export default class InviteDialog extends Component {
     const { entryCode, embedUrl } = this.props;
 
     const entryCodeString = pad(entryCode, 6);
-    const shortLinkText = `hub.link/${this.props.hubId}`;
+    const shortLinkText = `${configs.SHORTLINK_DOMAIN}/${this.props.hubId}`;
     const shortLink = "https://" + shortLinkText;
     const embedText = `<iframe src="${embedUrl}" style="width: 1024px; height: 768px;" allow="microphone; camera; vr; speaker;"></iframe>`;
 
@@ -68,11 +71,14 @@ export default class InviteDialog extends Component {
         </WithHoverSound>
         <div>
           <FormattedMessage id={`invite.enter_via${this.props.isModal ? "_modal" : ""}`} />
-          <WithHoverSound>
-            <a href="https://hub.link" target="_blank" className={styles.hubLinkLink} rel="noopener noreferrer">
-              hub.link
-            </a>
-          </WithHoverSound>
+          <a
+            href={`https://${configs.SHORTLINK_DOMAIN}`}
+            target="_blank"
+            className={styles.hubLinkLink}
+            rel="noopener noreferrer"
+          >
+            {configs.SHORTLINK_DOMAIN}
+          </a>
           <FormattedMessage id="invite.and_enter_code" />
         </div>
         <div className={styles.code}>

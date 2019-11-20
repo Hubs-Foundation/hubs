@@ -1,6 +1,6 @@
 # Privacy Notice for Hubs and Spoke
 
-Version 3.2.3, July 11, 2019
+Version 3.3, November 15, 2019
 
 ## At Mozilla (that’s us), we believe that privacy is fundamental to a healthy internet.
 
@@ -62,6 +62,7 @@ In this Privacy Notice, we explain what data may be accessible to Mozilla or oth
 - **Account data**: You do not need to create an account to use Hubs. If you decide to create an account with your email address, we receive your email address to send you a login link, but stores only a hashed version of your email address. If you decide to use Discord to create your account, we receive the email address associated with your Discord account and your Discord avatar. 
 - **Technical data**: We receive and store data about Room URLs and names; the type of device you use to interact with Hubs, as well as its operating system, language, the name and version of browser; and other data to load and operate the Room.
 - **Interaction data**: We receive data about your interactions with the Hubs service itself such as the number of Rooms created, messages sent through or to third-party services like Slack and Discord, the maximum number of users in a particular room at one same time, the start and end time of a user’s interaction with Hubs, the amount of time a user interacts with Hubs through Virtual Reality, the first time in a particular month or day that a user begins to use Hubs. Mozilla uses third party services to store and analyze these operational messages. We also also use Google Analytics, which places a cookie on your device, to obtain metrics on how users engage with our websites. This helps us to improve site content.
+- **Website data**: We use Google Analytics to better understand how you interact with Hubs apps and websites. For example, we may use cookies to track de-identified information such as the number of Hubs rooms you create or enter, interactions with buttons and menus, and session length. To consistently improve the Hubs experience, we collect information about browser type and version, viewport size, and screen resolution. This allows us to understand how people interact with Hubs so we can improve it. We also collect your location, and the language setting in your browser to make sure it looks right for you. If you’d prefer to opt out of Google Analytics data collection, you can install the [Google Analytics Opt-out Browser Add-on](https://tools.google.com/dlpage/gaoptout), which stops data transmission to Google Analytics.
 - **Error Data**: In order to diagnose problems, Hubs sends Mozilla logs of error messages (which include the Room URL, response time for requests, the page you were on when you encountered the error, your operating system, browser information, and may include your IP address). 
 - You can learn more by looking at the [code itself](https://github.com/mozilla/hubs) for Hubs.  [Janus SFU](https://github.com/mozilla/janus-plugin-sfu), [Reticulum](https://github.com/mozilla/reticulum), [Hubs](https://github.com/mozilla/hubs), [Hubs-Ops](https://github.com/mozilla/hubs-ops), [Discord Bot](https://github.com/MozillaReality/hubs-discord-bot)
 </details>

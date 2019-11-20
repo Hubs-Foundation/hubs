@@ -7,6 +7,8 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import screenfull from "screenfull";
 
+import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
@@ -36,7 +38,6 @@ import MediaBrowser from "./media-browser";
 import CreateObjectDialog from "./create-object-dialog.js";
 import ChangeSceneDialog from "./change-scene-dialog.js";
 import AvatarUrlDialog from "./avatar-url-dialog.js";
-import HelpDialog from "./help-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
 import LinkDialog from "./link-dialog.js";
@@ -841,7 +842,7 @@ class UIRoot extends Component {
   };
 
   onMiniInviteClicked = () => {
-    const link = "https://hub.link/" + this.props.hubId;
+    const link = `https://${configs.SHORTLINK_DOMAIN}/${this.props.hubId}`;
 
     this.setState({ miniInviteActivated: true });
     setTimeout(() => {
@@ -919,23 +920,28 @@ class UIRoot extends Component {
       subtitle = (
         <div>
           Sorry, this room is no longer available.
-          <p />A room may be closed if we receive reports that it violates our{" "}
-          <WithHoverSound>
-            <a target="_blank" rel="noreferrer noopener" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
+          <p />
+          <IfFeature name="show_terms">
+            A room may be closed if we receive reports that it violates our{" "}
+            <a
+              target="_blank"
+              rel="noreferrer noopener"
+              href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+            >
               Terms of Use
             </a>
-          </WithHoverSound>
-          .<br />
+            .<br />
+          </IfFeature>
           If you have questions, contact us at{" "}
-          <WithHoverSound>
-            <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>
-          </WithHoverSound>
+          <a href={`mailto:${messages["contact-email"]}`}>
+            <FormattedMessage id="contact-email" />
+          </a>
           .<p />
-          If you&apos;d like to run your own server, hubs&apos;s source code is available on{" "}
-          <WithHoverSound>
+          <IfFeature name="show_source_link">
+            If you&apos;d like to run your own server, Hubs&apos;s source code is available on{" "}
             <a href="https://github.com/mozilla/hubs">GitHub</a>
-          </WithHoverSound>
-          .
+            .
+          </IfFeature>
         </div>
       );
     } else if (this.props.platformUnsupportedReason === "no_data_channels") {
@@ -951,9 +957,9 @@ class UIRoot extends Component {
               WebRTC Data Channels
             </a>
           </WithHoverSound>
-          , which is required to use Hubs.
+          , which is required to use {messages["app-name"]}.
           <br />
-          If you&quot;d like to use Hubs with Oculus or SteamVR, you can{" "}
+          If you&quot;d like to use {messages["app-name"]} with Oculus or SteamVR, you can{" "}
           <WithHoverSound>
             <a href="https://www.mozilla.org/firefox" rel="noreferrer noopener">
               Download Firefox
@@ -985,7 +991,7 @@ class UIRoot extends Component {
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="exited-panel">
-          <img className="exited-panel__logo" src="../assets/images/logo.svg" />
+          <img className="exited-panel__logo" src={configs.image("logo")} />
           <div className="exited-panel__subtitle">{subtitle}</div>
         </div>
       </IntlProvider>
@@ -995,7 +1001,7 @@ class UIRoot extends Component {
   renderBotMode = () => {
     return (
       <div className="loading-panel">
-        <img className="loading-panel__logo" src="../assets/images/logo.svg" />
+        <img className="loading-panel__logo" src={configs.image("logo")} />
         <input type="file" id="bot-audio-input" accept="audio/*" />
         <input type="file" id="bot-data-input" accept="application/json" />
       </div>
@@ -1662,12 +1668,6 @@ class UIRoot extends Component {
             />
             <StateRoute
               stateKey="modal"
-              stateValue="help"
-              history={this.props.history}
-              render={() => this.renderDialog(HelpDialog)}
-            />
-            <StateRoute
-              stateKey="modal"
               stateValue="support"
               history={this.props.history}
               render={() => this.renderDialog(InviteTeamDialog, { hubChannel: this.props.hubChannel })}
@@ -1880,24 +1880,20 @@ class UIRoot extends Component {
                     !hasTopTip &&
                     entered &&
                     !streaming && (
-                      <WithHoverSound>
-                        <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
-                          <span>
-                            {this.state.miniInviteActivated
-                              ? navigator.share
-                                ? "sharing..."
-                                : "copied!"
-                              : "hub.link/" + this.props.hubId}
-                          </span>
-                        </button>
-                      </WithHoverSound>
+                      <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
+                        <span>
+                          {this.state.miniInviteActivated
+                            ? navigator.share
+                              ? "sharing..."
+                              : "copied!"
+                            : `${configs.SHORTLINK_DOMAIN}/` + this.props.hubId}
+                        </span>
+                      </button>
                     )}
                   {showVREntryButton && (
-                    <WithHoverSound>
-                      <button className={inviteStyles.enterButton} onClick={() => exit2DInterstitialAndEnterVR(true)}>
-                        <FormattedMessage id="entry.enter-in-vr" />
-                      </button>
-                    </WithHoverSound>
+                    <button className={inviteStyles.enterButton} onClick={() => exit2DInterstitialAndEnterVR(true)}>
+                      <FormattedMessage id="entry.enter-in-vr" />
+                    </button>
                   )}
                   {embed && (
                     <a href={baseUrl} className={inviteStyles.enterButton} target="_blank" rel="noopener noreferrer">
@@ -2053,11 +2049,13 @@ class UIRoot extends Component {
                   }}
                 />
                 {!watching && !streaming ? (
-                  <div className={styles.nagCornerButton}>
-                    <button onClick={() => this.pushHistoryState("modal", "feedback")}>
-                      <FormattedMessage id="feedback.prompt" />
-                    </button>
-                  </div>
+                  <IfFeature name="show_feedback_ui">
+                    <div className={styles.nagCornerButton}>
+                      <button onClick={() => this.pushHistoryState("modal", "feedback")}>
+                        <FormattedMessage id="feedback.prompt" />
+                      </button>
+                    </div>
+                  </IfFeature>
                 ) : (
                   <div className={styles.nagCornerButton}>
                     <button onClick={() => this.setState({ hide: true })}>

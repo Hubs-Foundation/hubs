@@ -10,6 +10,7 @@
 
   bottom: 0;
   z-index: 5;
+  color: var(--menu-text-color);
 }
 
 %attach-point {
@@ -17,12 +18,12 @@
   height: 0; 
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  border-bottom: 5px solid $white-transparent;
+  border-bottom: 5px solid var(--menu-attach-point-color);
   position: absolute;
 }
 
 :local(.contents) {
-  background-color: white;
+  background-color: var(--menu-background-color);
   border-radius: 12px;
   padding: 18px;
   min-width: 260px;
@@ -57,15 +58,15 @@
   margin: 0px 0;
   padding: 0px 16px;
   &:hover{
-    background-color: $action-color-light;
-    color: white;
+    background-color: $action-color-highlight;
+    color: $action-text-color;
   }
 }
 
 :local(.row-header) {
   margin-top: 18px;
   margin-bottom: 4px;
-  color: $dark-grey;
+  color: var(--menu-header-text-color);
   font-weight: normal;
   text-transform: uppercase;
   font-size: 0.8em;
@@ -81,15 +82,22 @@
   margin-right: 24px;
   max-width: 45vw;
   overflow: hidden;
+  color: var(--menu-text-color);
 
   a {
-    color: black;
-    text-decoration-color: $dark-grey;
+    color: var(--menu-link-color);
+    text-decoration-color: var(--menu-link-underline-color);
+  }
+
+  button {
+    color: var(--menu-text-color);
+    text-decoration-color: var(--menu-link-underline-color);
   }
 
   :local(.list-item-link) {
+    color: var(--menu-link-color);
     text-decoration: underline;
-    text-decoration-color: $dark-grey;
+    text-decoration-color: var(--menu-link-underline-color);
     cursor: pointer;
   }
 }

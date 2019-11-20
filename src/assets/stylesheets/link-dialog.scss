@@ -2,10 +2,10 @@
 
 :local(.dialog) {
   position: absolute;
-  color: white;
+  color: var(--lightbox-text-color);
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.9);
+  background-color: var(--lightbox-background-color);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -33,7 +33,7 @@
 }
 
 :local(.domain) , :local(.code) {
-  color: white;
+  color: var(--lightbox-text-color);
   font-weight: bold;
   text-decoration: none;
 }
@@ -43,19 +43,20 @@
   font-size: 3em;
   font-weight: bold;
   text-decoration: none;
-  color: black;
+  color: var(--lightbox-text-field-text-color);
   text-align: center;
-  background-color: white;
-  border: 1px solid #e2e2e2;
+  background-color: var(--lightbox-text-field-color);
+  border: 1px solid var(--lightbox-text-field-border-color);
   border-radius: 12px;
   margin: 12px;
   padding: 14px;
   display: block;
-  width: 295px;
+  min-width: 295px;
+  width: max-content;
 }
 
 :local(.code) {
-  color: black;
+  color: var(--lightbox-text-field-text-color);
   font-weight: bold;
   text-decoration: none;
   font-size: 2.5em;
@@ -66,9 +67,9 @@
 :local(.imageHeader) {
   width: 100px;
   height: 100px;
-  background-color: white;
+  background-color: var(--lightbox-icon-background-color);
   border-radius: 50px;
-  fill: black;
+  fill: var(--lightbox-icon-color);
   margin-bottom: 24px;
   padding-right: 4px;
 
@@ -86,8 +87,8 @@
 :local(.digit) {
   padding: 0 8px;
   margin: 2px;
-  background-color: white;
-  border: 1px solid #e2e2e2;
+  background-color: var(--lightbox-text-color);
+  border: 1px solid var(--lightbox-text-field-border-color);
   border-radius: 12px;
   width: 32px;
   height: 64px;
@@ -112,7 +113,7 @@
 
 :local(.close-button) {
   @extend %action-button;
-  background-color: $darker-grey;
+  background-color: var(--lightbox-widget-color);
   margin-top: 24px;
 }
 

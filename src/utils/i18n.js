@@ -6,13 +6,24 @@ const navigatorLang = ((navigator.languages && navigator.languages[0]) || naviga
   .split(/[_-]+/)[0];
 export const lang = (localeData[navigatorLang] && navigatorLang) || "en";
 
-export const messages = localeData[lang] || localeData.en;
+const _messages = localeData[lang] || localeData.en;
 
 if (configs.APP_CONFIG && configs.APP_CONFIG.translations && configs.APP_CONFIG.translations[lang]) {
   const configTranslations = configs.APP_CONFIG.translations[lang];
   for (const messageKey in configTranslations) {
     if (!configTranslations.hasOwnProperty(messageKey)) continue;
     if (!configTranslations[messageKey]) continue;
-    messages[messageKey] = configTranslations[messageKey];
+    _messages[messageKey] = configTranslations[messageKey];
   }
 }
+
+export const messages = Object.entries(_messages)
+  .map(([key, message]) => [
+    key,
+    // Replace nested message keys (e.g. %app-name%) with their messages.
+    message.replace(/%([\w-.]+)%/i, (_match, subkey) => _messages[subkey])
+  ])
+  .reduce((acc, entry) => {
+    acc[entry[0]] = entry[1];
+    return acc;
+  }, {});

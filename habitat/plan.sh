@@ -46,8 +46,10 @@ do_build() {
   mkdir -p dist/pages
   mv dist/*.html dist/pages
   mv dist/hub.service.js dist/pages
-  mv dist/manifest.webmanifest dist/pages
-  mv dist/app-config-schema.toml dist/pages
+  mv dist/schema.toml dist/pages
+  mv dist/favicon.ico dist/pages
+  mv dist/app-thumbnail.png dist/pages
+  mv dist/app-icon.png dist/pages
 }
 
 do_install() {

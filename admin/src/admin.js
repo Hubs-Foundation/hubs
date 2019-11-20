@@ -11,7 +11,7 @@ import {
   setAuthToken as setItaAuthToken
 } from "./utils/ita";
 import { connectToReticulum } from "hubs/src/utils/phoenix-utils";
-import { Admin, Layout, Resource, ListGuesser } from "react-admin";
+import { Admin, Layout, Resource } from "react-admin";
 //import { EditGuesser, CreateGuesser } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
 import { AdminMenu } from "./react-components/admin-menu";
@@ -93,8 +93,6 @@ class AdminUI extends Component {
         <Resource name="owned_files" />
 
         <Resource name="projects" list={ProjectList} show={ProjectShow} />
-
-        <Resource name="hubs_metrics" list={ListGuesser} />
       </Admin>
     );
   }

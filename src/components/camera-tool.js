@@ -606,7 +606,9 @@ AFRAME.registerComponent("camera-tool", {
           playerHudWasVisible = this.playerHud.visible;
           this.playerHud.visible = false;
           if (this.el.sceneEl.systems["hubs-systems"]) {
-            this.el.sceneEl.systems["hubs-systems"].spriteSystem.mesh.visible = false;
+            for (const mesh of Object.values(this.el.sceneEl.systems["hubs-systems"].spriteSystem.meshes)) {
+              mesh.visible = false;
+            }
           }
         }
 
@@ -646,7 +648,9 @@ AFRAME.registerComponent("camera-tool", {
         if (this.playerHud) {
           this.playerHud.visible = playerHudWasVisible;
           if (this.el.sceneEl.systems["hubs-systems"]) {
-            this.el.sceneEl.systems["hubs-systems"].spriteSystem.mesh.visible = true;
+            for (const mesh of Object.values(this.el.sceneEl.systems["hubs-systems"].spriteSystem.meshes)) {
+              mesh.visible = true;
+            }
           }
         }
         this.lastUpdate = now;
