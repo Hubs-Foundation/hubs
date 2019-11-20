@@ -1,4 +1,7 @@
 /* global performance */
+
+import { SOUND_SPAWN_EMOJI } from "../systems/sound-effects-system";
+
 AFRAME.registerComponent("emoji", {
   schema: {
     emitDecayTime: { default: 1.5 },
@@ -13,6 +16,7 @@ AFRAME.registerComponent("emoji", {
   play() {
     this.lastLinearVelocity = this.el.components["body-helper"].body.physicsBody.getLinearVelocity().length2();
     this.lastAngularVelocity = this.el.components["body-helper"].body.physicsBody.getAngularVelocity().length2();
+    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPAWN_EMOJI);
   },
 
   tick(t, dt) {
@@ -47,7 +51,7 @@ AFRAME.registerComponent("emoji", {
       const currentOpacity = particleEmitter.data.startOpacity;
       const emitFadeTime = this.data.emitFadeTime * 1000;
 
-      if (now < this.data.emitEndTime && currentOpacity < 0.001) {
+      if (now < this.data.emitEndTime && currentOpacity < 1) {
         this.particleConfig.particleCount = this.originalParticleCount;
         this.particleConfig.startOpacity = 1;
         this.particleConfig.middleOpacity = 1;

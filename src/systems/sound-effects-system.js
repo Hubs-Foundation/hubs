@@ -14,6 +14,7 @@ import URL_FREEZE from "../assets/sfx/Eb_blip.mp3";
 import URL_TACK from "../assets/sfx/tack.mp3";
 import URL_MEDIA_LOADED from "../assets/sfx/A_bendUp.mp3";
 import URL_MEDIA_LOADING from "../assets/sfx/suspense.mp3";
+import URL_SPAWN_EMOJI from "../assets/sfx/emoji.mp3";
 
 let soundEnum = 0;
 export const SOUND_HOVER_OR_GRAB = soundEnum++;
@@ -37,6 +38,7 @@ export const SOUND_PIN = soundEnum++;
 export const SOUND_MEDIA_LOADING = soundEnum++;
 export const SOUND_MEDIA_LOADED = soundEnum++;
 export const SOUND_CAMERA_TOOL_COUNTDOWN = soundEnum++;
+export const SOUND_SPAWN_EMOJI = soundEnum++;
 
 // Safari doesn't support the promise form of decodeAudioData, so we polyfill it.
 function decodeAudioData(audioContext, arrayBuffer) {
@@ -70,7 +72,8 @@ export class SoundEffectsSystem {
       [SOUND_FREEZE, URL_FREEZE],
       [SOUND_PIN, URL_TACK],
       [SOUND_MEDIA_LOADING, URL_MEDIA_LOADING],
-      [SOUND_MEDIA_LOADED, URL_MEDIA_LOADED]
+      [SOUND_MEDIA_LOADED, URL_MEDIA_LOADED],
+      [SOUND_SPAWN_EMOJI, URL_SPAWN_EMOJI]
     ];
     const loading = new Map();
     const load = url => {

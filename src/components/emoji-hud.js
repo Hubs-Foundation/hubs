@@ -48,7 +48,7 @@ AFRAME.registerComponent("emoji-hud", {
         lifetimeRandomness: 0.1,
         ageRandomness: 0.1,
         startVelocity: { x: 0, y: 1, z: 0 },
-        endVelocity: { x: 0, y: 0.5, z: 0 },
+        endVelocity: { x: 0, y: 0.25, z: 0 },
         startOpacity: 1,
         middleOpacity: 1,
         endOpacity: 0
