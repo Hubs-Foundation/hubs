@@ -33,7 +33,8 @@ class SceneUI extends Component {
     sceneProjectId: PropTypes.string,
     sceneAllowRemixing: PropTypes.bool,
     unavailable: PropTypes.bool,
-    isOwner: PropTypes.bool
+    isOwner: PropTypes.bool,
+    isSignedIn: PropTypes.bool
   };
 
   state = {
@@ -70,7 +71,6 @@ class SceneUI extends Component {
       parent_scene_id: this.props.sceneId
     });
     const projectUrl = getReticulumFetchUrl(`/spoke/projects/${scenes[0].project_id}`);
-    console.log(projectUrl);
     window.open(projectUrl, "_blank");
   };
 
@@ -89,7 +89,7 @@ class SceneUI extends Component {
       );
     }
 
-    const { sceneAllowRemixing, isOwner, sceneProjectId } = this.props;
+    const { sceneAllowRemixing, isOwner, isSignedIn, sceneProjectId } = this.props;
 
     const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
     const tweetText = `${this.props.sceneName} in ${messages["share-hashtag"]}`;
@@ -181,6 +181,7 @@ class SceneUI extends Component {
               {isOwner && sceneProjectId ? (
                 <a
                   target="_blank"
+                  rel="noopener noreferrer"
                   href={getReticulumFetchUrl(`/spoke/projects/${sceneProjectId}`)}
                   className={styles.spokeButton}
                 >
@@ -188,6 +189,7 @@ class SceneUI extends Component {
                   <FormattedMessage id="scene.edit_button" />
                 </a>
               ) : (
+                isSignedIn &&
                 sceneAllowRemixing && (
                   <button className={styles.spokeButton} onClick={this.remixScene}>
                     <FontAwesomeIcon icon={faCodeBranch} />
