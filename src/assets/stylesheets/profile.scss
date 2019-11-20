@@ -57,7 +57,7 @@
 
       a {
         margin: 0px 12px;
-        color: var(--tile-inset-text);
+        color: var(--panel-subtext-link-color);
       }
     }
   }
@@ -143,5 +143,6 @@
     height: 35px;
     position: absolute;
     font-size: 1.6em;
+    color: var(--panel-widget-color);
   }
 }

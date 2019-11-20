@@ -1,3 +1,6 @@
+import appLogo from "../assets/images/app-logo.png";
+import companyLogo from "../assets/images/company-logo.png";
+
 // Read configs from global variable if available, otherwise use the process.env injected from build.
 const configs = {};
 let isAdmin = false;
@@ -40,8 +43,9 @@ if (window.APP_CONFIG) {
   }
 }
 
+const isLocalDevelopment = process.env.NODE_ENV === "development";
+
 configs.feature = featureName => {
-  const isLocalDevelopment = process.env.NODE_ENV === "development";
   const enableAll = isLocalDevelopment && !process.env.USE_FEATURE_CONFIG;
 
   const features = configs.APP_CONFIG && configs.APP_CONFIG.features;
@@ -51,8 +55,18 @@ configs.feature = featureName => {
   return forceEnableSpoke || enableAll || (features && features[featureName]);
 };
 
-configs.image = (imageName, defaultImage, cssUrl) => {
-  const url = (configs.APP_CONFIG && configs.APP_CONFIG.images && configs.APP_CONFIG.images[imageName]) || defaultImage;
+let localDevImages = {};
+if (isLocalDevelopment) {
+  localDevImages = {
+    logo: appLogo,
+    company_logo: companyLogo
+  };
+}
+
+configs.image = (imageName, cssUrl) => {
+  const url =
+    (configs.APP_CONFIG && configs.APP_CONFIG.images && configs.APP_CONFIG.images[imageName]) ||
+    localDevImages[imageName];
   return url && cssUrl ? `url(${url})` : url;
 };
 
