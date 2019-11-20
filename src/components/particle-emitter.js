@@ -2,14 +2,14 @@ import { ParticleEmitter } from "@mozillareality/three-particle-emitter";
 import { textureLoader } from "../utils/media-utils";
 import { resolveUrl } from "../utils/media-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
+import defaultSrcImage from "../assets/images/app-icon.png";
+
+const defaultSrcUrl = new URL(defaultSrcImage, window.location.href).href;
 
 AFRAME.registerComponent("particle-emitter", {
   schema: {
     resolve: { type: "boolean", default: true },
-    src: {
-      type: "string",
-      default: "https://assets-prod.reticulum.io/spoke/assets/images/dot-75db99b125fe4e9afbe58696320bea73.png"
-    },
+    src: { type: "string", default: defaultSrcUrl },
     startColor: { type: "color" },
     middleColor: { type: "color" },
     endColor: { type: "color" },
@@ -36,6 +36,9 @@ AFRAME.registerComponent("particle-emitter", {
     this.particleEmitter.visible = false;
     this.el.setObject3D("particle-emitter", this.particleEmitter);
     this.updateParticles = false;
+    if (this.data.src === defaultSrcUrl) {
+      this.data.resolve = false;
+    }
   },
 
   async setTexture(src, resolve) {

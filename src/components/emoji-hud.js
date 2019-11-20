@@ -18,7 +18,7 @@ AFRAME.registerComponent("emoji-hud", {
   },
   init() {
     const width = this.data.spawnerScale;
-    const spacing = width / 5;
+    const spacing = width / 3;
 
     for (let i = 0; i < emojis.length; i++) {
       const spawnerEntity = document.createElement("a-entity");
@@ -40,13 +40,13 @@ AFRAME.registerComponent("emoji-hud", {
       const particleEmitterConfig = {
         src: url,
         resolve: false,
-        particleCount: 10,
+        particleCount: 20,
         startSize: 0.01,
         endSize: 0.1,
         sizeRandomness: 0.05,
-        lifetime: 0.5,
-        lifetimeRandomness: 0.1,
-        ageRandomness: 0.1,
+        lifetime: 1,
+        lifetimeRandomness: 0.2,
+        ageRandomness: 1,
         startVelocity: { x: 0, y: 1, z: 0 },
         endVelocity: { x: 0, y: 0.25, z: 0 },
         startOpacity: 1,
@@ -68,7 +68,7 @@ AFRAME.registerComponent("emoji-hud", {
       cylinder.setAttribute("material", { opacity: 0.2, color: "#2f7fee" });
       cylinder.setAttribute("segments-height", 1);
       cylinder.setAttribute("segments-radial", 16);
-      cylinder.setAttribute("scale", { x: width / 2, y: spacing / 4, z: spacing });
+      cylinder.setAttribute("scale", { x: width / 2, y: width / 20, z: width / 5 });
       cylinder.setAttribute("rotation", { x: 45, y: 0, z: 0 });
 
       //evenly space out the emojis
