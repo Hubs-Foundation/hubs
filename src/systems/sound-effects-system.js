@@ -14,6 +14,7 @@ import URL_FREEZE from "../assets/sfx/Eb_blip.mp3";
 import URL_TACK from "../assets/sfx/tack.mp3";
 import URL_MEDIA_LOADED from "../assets/sfx/A_bendUp.mp3";
 import URL_MEDIA_LOADING from "../assets/sfx/suspense.mp3";
+import { setMatrixWorld } from "../utils/three-utils";
 
 let soundEnum = 0;
 export const SOUND_HOVER_OR_GRAB = soundEnum++;
@@ -45,10 +46,25 @@ function decodeAudioData(audioContext, arrayBuffer) {
   });
 }
 
+function isFinishedPlaying(positionalAudio) {
+  return !positionalAudio.isPlaying && !positionalAudio.source.loop;
+}
+
 export class SoundEffectsSystem {
-  constructor() {
+  constructor(scene) {
     this.pendingEffects = [];
+    this.positionalAudiosStationary = [];
+    this.positionalAudiosFollowingObject3Ds = [];
+
     this.audioContext = THREE.AudioContext.getContext();
+    this.scene = scene;
+    this.scene.audioListener = this.scene.audioListener || new THREE.AudioListener();
+    if (this.scene.camera) {
+      this.scene.camera.add(this.scene.audioListener);
+    }
+    this.scene.addEventListener("camera-set-active", evt => {
+      evt.detail.cameraEl.getObject3D("camera").add(this.scene.audioListener);
+    });
     const soundsAndUrls = [
       [SOUND_HOVER_OR_GRAB, URL_TICK],
       [SOUND_THAW, URL_TICK],
@@ -104,6 +120,35 @@ export class SoundEffectsSystem {
     return source;
   }
 
+  enqueuePositionalSound(sound, loop) {
+    const audioBuffer = this.sounds.get(sound);
+    if (!audioBuffer) return null;
+
+    const positionalAudio = new THREE.PositionalAudio(this.scene.audioListener);
+    const source = this.scene.audioListener.context.createBufferSource();
+    source.buffer = audioBuffer;
+    source.loop = loop || false;
+    positionalAudio.setNodeSource(source);
+    this.scene.object3D.add(positionalAudio);
+    this.pendingEffects.push(source);
+    return positionalAudio;
+  }
+
+  playPositionalSoundAt(sound, position, loop) {
+    const positionalAudio = this.enqueuePositionalSound(sound, loop);
+    if (!positionalAudio) return null;
+    positionalAudio.position.copy(position);
+    positionalAudio.matrixWorldNeedsUpdate = true;
+    this.positionalAudiosStationary.push(positionalAudio);
+  }
+
+  playPositionalSoundFollowing(sound, object3D, loop) {
+    const positionalAudio = this.enqueuePositionalSound(sound, loop);
+    if (!positionalAudio) return null;
+    this.positionalAudiosFollowingObject3Ds.push({ positionalAudio, object3D });
+    return positionalAudio;
+  }
+
   playSoundOneShot(sound) {
     return this.enqueueSound(sound, false);
   }
@@ -135,10 +180,46 @@ export class SoundEffectsSystem {
     }
   }
 
+  stopPositionalAudio(inPositionalAudio) {
+    const pendingIndex = this.pendingEffects.indexOf(inPositionalAudio.source);
+    if (pendingIndex !== -1) {
+      this.pendingEffects.splice(pendingIndex, 1);
+    }
+    inPositionalAudio.disconnect();
+    inPositionalAudio.parent.remove(inPositionalAudio);
+    this.positionalAudiosStationary = this.positionalAudiosStationary.filter(
+      positionalAudio => positionalAudio !== inPositionalAudio
+    );
+    this.positionalAudiosFollowingObject3Ds = this.positionalAudiosFollowingObject3Ds.filter(
+      ({ positionalAudio }) => positionalAudio !== inPositionalAudio
+    );
+  }
+
   tick() {
     for (let i = 0; i < this.pendingEffects.length; i++) {
       this.pendingEffects[i].start();
     }
     this.pendingEffects.length = 0;
+
+    for (let i = this.positionalAudiosStationary.length - 1; i >= 0; i--) {
+      const positionalAudio = this.positionalAudiosStationary[i];
+      if (isFinishedPlaying(positionalAudio)) {
+        positionalAudio.disconnect();
+        positionalAudio.parent.remove(positionalAudio);
+        this.positionalAudiosStationary.splice(i, 1);
+      }
+    }
+
+    for (let i = this.positionalAudiosFollowingObject3Ds.length - 1; i >= 0; i--) {
+      const { positionalAudio, object3D } = this.positionalAudiosFollowingObject3Ds[i];
+      if (isFinishedPlaying(positionalAudio) || !object3D.parent) {
+        positionalAudio.disconnect();
+        positionalAudio.parent.remove(positionalAudio);
+        this.positionalAudiosFollowingObject3Ds.splice(i, 1);
+      } else {
+        object3D.updateMatrices();
+        setMatrixWorld(positionalAudio, object3D.matrixWorld);
+      }
+    }
   }
 }

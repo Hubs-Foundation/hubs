@@ -30,7 +30,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverButtonSystem = new HoverButtonSystem();
     this.hoverMenuSystem = new HoverMenuSystem();
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
-    this.soundEffectsSystem = new SoundEffectsSystem();
+    this.soundEffectsSystem = new SoundEffectsSystem(this.el);
     this.lobbyCameraSystem = new LobbyCameraSystem();
     this.spriteSystem = new SpriteSystem(this.el);
     this.batchManagerSystem = new BatchManagerSystem(this.el.sceneEl.object3D, this.el.sceneEl.renderer);
