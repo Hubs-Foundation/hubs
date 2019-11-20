@@ -41,7 +41,7 @@ class SystemEditorComponent extends Component {
   render() {
     const needsAvatars = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.avatar_listings.any;
     const needsScenes = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.scene_listings.any;
-    const exceededStorageQuota = this.state.reticulumMeta.repo && this.state.reticulumMeta.repo.storage.in_quota;
+    const exceededStorageQuota = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.storage.in_quota;
 
     const isInSESSandbox =
       this.state.adminInfo &&
