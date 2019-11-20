@@ -66,8 +66,8 @@ AFRAME.registerComponent("emoji-hud", {
       const cylinder = document.createElement("a-cylinder");
       cylinder.setAttribute("visibility-while-frozen", { requireHoverOnNonMobile: false });
       cylinder.setAttribute("material", { opacity: 0.2, color: "#2f7fee" });
-      cylinder.setAttribute("segment-height", 1);
-      cylinder.setAttribute("segment-radial", 8);
+      cylinder.setAttribute("segments-height", 1);
+      cylinder.setAttribute("segments-radial", 16);
       cylinder.setAttribute("scale", { x: width / 2, y: spacing / 4, z: spacing });
       cylinder.setAttribute("rotation", { x: 45, y: 0, z: 0 });
 
