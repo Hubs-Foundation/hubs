@@ -1,7 +1,10 @@
 # App config schema
 
 translations.en."app-name" = { category = "translations", type = "string", name = "App Name", description = "Name used across the app." }
+translations.en."app-full-name" = { category = "translations", type = "string", internal = "true" }
+translations.en."app-twitter-user" = { category = "translations", type = "string", internal = "true" }
 translations.en."app-description" = { category = "translations", type = "string", name = "App Description", description = "App description used across the app." }
+translations.en."app-tagline" = { category = "translations", type = "string", name = "App Tagline", description = "A shorter app description used across the app." }
 translations.en."company-name" = { category = "translations", type = "string", name = "Company Name", description = "Company name used across the app." }
 translations.en."share-hashtag" = { category = "translations", type = "string", name = "Share Hashtag", description = "Hashtag used in share messages." }
 translations.en."app-short-domain" = { category = "translations", type = "string", name = "Short App Domain", description = "Short app domain." }
