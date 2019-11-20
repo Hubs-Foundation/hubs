@@ -53,14 +53,17 @@ export class PreferenceListItem extends Component {
       case PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX:
         storedPref = this.props.store.state.preferences[this.props.storeKey];
         return (
-          <CheckBox
-            checked={storedPref === undefined ? this.props.defaultBool : storedPref}
-            onChange={() => {
-              this.props.store.update({
-                preferences: { [this.props.storeKey]: !this.props.store.state.preferences[this.props.storeKey] }
-              });
-            }}
-          />
+          <div className={classNames(styles.checkbox)}>
+            <input
+              type="checkbox"
+              checked={storedPref === undefined ? this.props.defaultBool : storedPref}
+              onChange={() => {
+                this.props.store.update({
+                  preferences: { [this.props.storeKey]: !this.props.store.state.preferences[this.props.storeKey] }
+                });
+              }}
+            />
+          </div>
         );
       case PREFERENCE_LIST_ITEM_TYPE.SELECT:
         options = this.props.options.map((o, i) => {

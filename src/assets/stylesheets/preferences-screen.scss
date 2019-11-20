@@ -116,6 +116,20 @@ $backgroundColor: lightslategray;
   }
 }
 
+:local(.checkbox) {
+  width: 100%;
+  height: 100%;
+}
+
+:local(input[type=checkbox]) {
+  width: 90%;
+  height: 90%;
+  mix-blend-mode: color-burn;
+  &:hover {
+    mix-blend-mode: normal;
+  }
+}
+
 
 :local(.float-right) {
   top: 1rem;
@@ -233,14 +247,14 @@ $backgroundColor: lightslategray;
 
   :local(.numberInNumberWithRange) {
     display:flex;
-    width: 30%;
+    width: 40%;
     justify-content: center;
     cursor: pointer;
 
     input[type=text] {
-      width: 67%;
+      width: 80%;
       text-align: center;
-      font-size: x-large;
+      font-size: large;
       font-weight: bold;
       // background: $dark-grey;
       // color: lavender;
@@ -248,7 +262,7 @@ $backgroundColor: lightslategray;
     }
   }
   :local(.rangeSlider) {
-    width: 70%;
+    width: 60%;
     // background: lightslategray;
     max-height: 2.5rem;
   }
