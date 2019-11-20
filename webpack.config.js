@@ -314,24 +314,6 @@ module.exports = (env, argv) => ({
     }),
     new CopyWebpackPlugin([
       {
-        from: "src/assets/images/favicon.ico",
-        to: "favicon.ico"
-      }
-    ]),
-    new CopyWebpackPlugin([
-      {
-        from: "src/assets/images/app-icon.png",
-        to: "app-icon.png"
-      }
-    ]),
-    new CopyWebpackPlugin([
-      {
-        from: "src/assets/images/app-thumbnail.png",
-        to: "app-thumbnail.png"
-      }
-    ]),
-    new CopyWebpackPlugin([
-      {
         from: "src/hub.service.js",
         to: "hub.service.js"
       }
