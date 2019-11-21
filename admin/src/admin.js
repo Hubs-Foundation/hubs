@@ -43,8 +43,32 @@ const theme = createMuiTheme({
   overrides: {
     MuiDrawer: {
       docked: {
-        background: "#ff0000",
+        background: "#222222"
+      }
+    },
+    MuiList: {
+      root: {
+        "& .active": {
+          background: "#FF3464 !important"
+        }
+      },
+      active: {
         color: "#ff0000"
+      }
+    },
+    MuiListItemText: {
+      root: {
+        color: "#eeeeee"
+      }
+    },
+    MuiListItemIcon: {
+      root: {
+        color: "#999999"
+      }
+    },
+    MuiTypography: {
+      subheading: {
+        color: "auto" // Needed to override menu items
       }
     }
   },
@@ -54,6 +78,10 @@ const theme = createMuiTheme({
     },
     action: {
       selected: "#ff0000"
+    },
+    text: {
+      primary: "#ff0000",
+      secondary: "#00ff00"
     }
   }
 });
