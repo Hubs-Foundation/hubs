@@ -284,16 +284,16 @@ class HomeRoot extends Component {
               )}
             </div>
             <div className={styles.footerContent}>
-              <UnlessFeature name="hide_powered_by">
-                <div className={styles.poweredBy}>
+              <div className={styles.poweredBy}>
+                <UnlessFeature name="hide_powered_by">
                   <span className={styles.prefix}>
                     <FormattedMessage id="home.powered_by_prefix" />
                   </span>
                   <a className={styles.link} href="https://github.com/mozilla/hubs-cloud">
                     <FormattedMessage id="home.powered_by_link" />
                   </a>
-                </div>
-              </UnlessFeature>
+                </UnlessFeature>
+              </div>
               <div className={styles.links}>
                 <div className={styles.top}>
                   <IfFeature name="show_join_us_dialog">
