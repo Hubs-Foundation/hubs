@@ -46,13 +46,10 @@ function decodeAudioData(audioContext, arrayBuffer) {
   });
 }
 
-function isFinishedPlaying(positionalAudio) {
-  return !positionalAudio.isPlaying && !positionalAudio.source.loop;
-}
-
 export class SoundEffectsSystem {
   constructor(scene) {
-    this.pendingEffects = [];
+    this.pendingAudioSourceNodes = [];
+    this.pendingPositionalAudios = [];
     this.positionalAudiosStationary = [];
     this.positionalAudiosFollowingObject3Ds = [];
 
@@ -116,7 +113,7 @@ export class SoundEffectsSystem {
     source.buffer = audioBuffer;
     source.connect(this.audioContext.destination);
     source.loop = loop;
-    this.pendingEffects.push(source);
+    this.pendingAudioSourceNodes.push(source);
     return source;
   }
 
@@ -124,13 +121,9 @@ export class SoundEffectsSystem {
     const audioBuffer = this.sounds.get(sound);
     if (!audioBuffer) return null;
 
-    const positionalAudio = new THREE.PositionalAudio(this.scene.audioListener);
-    const source = this.scene.audioListener.context.createBufferSource();
-    source.buffer = audioBuffer;
-    source.loop = loop || false;
-    positionalAudio.setNodeSource(source);
-    this.scene.object3D.add(positionalAudio);
-    this.pendingEffects.push(source);
+    const positionalAudio = new THREE.PositionalAudio(this.scene.audioListener).setBuffer(audioBuffer);
+    positionalAudio.loop = loop;
+    this.pendingPositionalAudios.push(positionalAudio);
     return positionalAudio;
   }
 
@@ -167,26 +160,31 @@ export class SoundEffectsSystem {
     source.connect(gain);
     gain.connect(this.audioContext.destination);
     source.loop = true;
-    this.pendingEffects.push(source);
+    this.pendingAudioSourceNodes.push(source);
     return { gain, source };
   }
 
   stopSoundNode(node) {
-    const index = this.pendingEffects.indexOf(node);
+    const index = this.pendingAudioSourceNodes.indexOf(node);
     if (index !== -1) {
-      this.pendingEffects.splice(index, 1);
+      this.pendingAudioSourceNodes.splice(index, 1);
     } else {
       node.stop();
     }
   }
 
   stopPositionalAudio(inPositionalAudio) {
-    const pendingIndex = this.pendingEffects.indexOf(inPositionalAudio.source);
+    const pendingIndex = this.pendingPositionalAudios.indexOf(inPositionalAudio);
     if (pendingIndex !== -1) {
-      this.pendingEffects.splice(pendingIndex, 1);
+      this.pendingPositionalAudios.splice(pendingIndex, 1);
+    } else {
+      if (inPositionalAudio.isPlaying) {
+        inPositionalAudio.stop();
+      }
+      if (inPositionalAudio.parent) {
+        inPositionalAudio.parent.remove(inPositionalAudio);
+      }
     }
-    inPositionalAudio.disconnect();
-    inPositionalAudio.parent.remove(inPositionalAudio);
     this.positionalAudiosStationary = this.positionalAudiosStationary.filter(
       positionalAudio => positionalAudio !== inPositionalAudio
     );
@@ -196,26 +194,31 @@ export class SoundEffectsSystem {
   }
 
   tick() {
-    for (let i = 0; i < this.pendingEffects.length; i++) {
-      this.pendingEffects[i].start();
+    for (let i = 0; i < this.pendingAudioSourceNodes.length; i++) {
+      this.pendingAudioSourceNodes[i].start();
     }
-    this.pendingEffects.length = 0;
+    this.pendingAudioSourceNodes.length = 0;
+
+    for (let i = 0; i < this.pendingPositionalAudios.length; i++) {
+      const pendingPositionalAudio = this.pendingPositionalAudios[i];
+      this.scene.object3D.add(pendingPositionalAudio);
+      pendingPositionalAudio.play();
+    }
+    this.pendingPositionalAudios.length = 0;
 
     for (let i = this.positionalAudiosStationary.length - 1; i >= 0; i--) {
       const positionalAudio = this.positionalAudiosStationary[i];
-      if (isFinishedPlaying(positionalAudio)) {
-        positionalAudio.disconnect();
-        positionalAudio.parent.remove(positionalAudio);
-        this.positionalAudiosStationary.splice(i, 1);
+      if (!positionalAudio.isPlaying) {
+        this.stopPositionalAudio(positionalAudio);
       }
     }
 
     for (let i = this.positionalAudiosFollowingObject3Ds.length - 1; i >= 0; i--) {
-      const { positionalAudio, object3D } = this.positionalAudiosFollowingObject3Ds[i];
-      if (isFinishedPlaying(positionalAudio) || !object3D.parent) {
-        positionalAudio.disconnect();
-        positionalAudio.parent.remove(positionalAudio);
-        this.positionalAudiosFollowingObject3Ds.splice(i, 1);
+      const positionalAudioAndObject3D = this.positionalAudiosFollowingObject3Ds[i];
+      const positionalAudio = positionalAudioAndObject3D.positionalAudio;
+      const object3D = positionalAudioAndObject3D.object3D;
+      if (!positionalAudio.isPlaying || !object3D.parent) {
+        this.stopPositionalAudio(positionalAudio);
       } else {
         object3D.updateMatrices();
         setMatrixWorld(positionalAudio, object3D.matrixWorld);

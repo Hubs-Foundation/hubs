@@ -102,9 +102,14 @@ AFRAME.registerComponent("media-loader", {
   },
 
   remove() {
-    if (this.loadingSoundNode) {
-      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.stopSoundNode(this.loadingSoundNode);
-      this.loadingSoundNode = null;
+    const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
+    if (this.loadingSoundEffect) {
+      sfx.stopPositionalAudio(this.loadingSoundEffect);
+      this.loadingSoundEffect = null;
+    }
+    if (this.loadedSoundEffect) {
+      sfx.stopPositionalAudio(this.loadedSoundEffect);
+      this.loadedSoundEffect = null;
     }
   },
 
@@ -163,8 +168,10 @@ AFRAME.registerComponent("media-loader", {
       (!this.networkedEl || NAF.utils.isMine(this.networkedEl)) &&
       this.data.playSoundEffect
     ) {
-      this.loadingSoundNode = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundLooped(
-        SOUND_MEDIA_LOADING
+      this.loadingSoundEffect = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playPositionalSoundFollowing(
+        SOUND_MEDIA_LOADING,
+        this.el.object3D,
+        true
       );
     }
 
@@ -173,9 +180,9 @@ AFRAME.registerComponent("media-loader", {
 
   clearLoadingTimeout() {
     clearTimeout(this.showLoaderTimeout);
-    if (this.loadingSoundNode) {
-      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.stopSoundNode(this.loadingSoundNode);
-      this.loadingSoundNode = null;
+    if (this.loadingSoundEffect) {
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.stopPositionalAudio(this.loadingSoundEffect);
+      this.loadingSoundEffect = null;
     }
     if (this.loaderMixer) {
       this.loadingClip.stop();
@@ -207,7 +214,11 @@ AFRAME.registerComponent("media-loader", {
     this.clearLoadingTimeout();
 
     if (this.el.sceneEl.is("entered") && this.data.playSoundEffect) {
-      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_MEDIA_LOADED);
+      this.loadedSoundEffect = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playPositionalSoundFollowing(
+        SOUND_MEDIA_LOADED,
+        this.el.object3D,
+        false
+      );
     }
 
     const finish = () => {
