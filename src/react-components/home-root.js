@@ -27,8 +27,6 @@ import AuthDialog from "./auth-dialog.js";
 import JoinUsDialog from "./join-us-dialog.js";
 import ReportDialog from "./report-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
-import UpdatesDialog from "./updates-dialog.js";
-import DialogContainer from "./dialog-container.js";
 import MediaTiles from "./media-tiles";
 
 addLocaleData([...en]);
@@ -45,7 +43,6 @@ class HomeRoot extends Component {
     authToken: PropTypes.string,
     authPayload: PropTypes.string,
     authOrigin: PropTypes.string,
-    listSignup: PropTypes.bool,
     report: PropTypes.bool,
     installEvent: PropTypes.object,
     hideHero: PropTypes.bool,
@@ -82,9 +79,7 @@ class HomeRoot extends Component {
       this.showSignInDialog(false);
     }
     this.loadHomeVideo();
-    if (this.props.listSignup) {
-      this.showUpdatesDialog();
-    } else if (this.props.report) {
+    if (this.props.report) {
       this.showReportDialog();
     }
   }
@@ -128,15 +123,6 @@ class HomeRoot extends Component {
   showJoinUsDialog = () => this.showDialog(JoinUsDialog);
 
   showReportDialog = () => this.showDialog(ReportDialog);
-
-  showUpdatesDialog = () =>
-    this.showDialog(UpdatesDialog, {
-      onSubmittedEmail: () => {
-        this.showDialog(
-          <DialogContainer>Great! Please check your e-mail to confirm your subscription.</DialogContainer>
-        );
-      }
-    });
 
   showSignInDialog = (closable = true) => {
     let messageId = "sign-in.prompt";
