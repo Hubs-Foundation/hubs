@@ -16,7 +16,10 @@ AFRAME.registerComponent("emoji", {
   play() {
     this.lastLinearVelocity = this.el.components["body-helper"].body.physicsBody.getLinearVelocity().length2();
     this.lastAngularVelocity = this.el.components["body-helper"].body.physicsBody.getAngularVelocity().length2();
-    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPAWN_EMOJI);
+    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playPositionalSoundFollowing(
+      SOUND_SPAWN_EMOJI,
+      this.el.object3D
+    );
   },
 
   tick(t, dt) {
