@@ -128,7 +128,7 @@ async function isHubsServer(url) {
     return originIsHubsServer.get(origin);
   }
 
-  const isHubsServer = (await fetch(origin, { method: "HEAD" })).headers.has("hubs-server");
+  const isHubsServer = (await fetch(origin, { method: "HEAD" })).headers.has("hub-name");
   originIsHubsServer.set(origin, isHubsServer);
 }
 
@@ -137,10 +137,13 @@ const hubsAvatarRegex = /https?:\/\/[^/]+\/avatars\/(?<id>\w+)\/?\S*/;
 const hubsRoomRegex = /(https?:\/\/)?[^/]+\/([a-zA-Z0-9]{7})\/?\S*/;
 
 export const isHubsSceneUrl = async url => (await isHubsServer(url)) && hubsSceneRegex.test(url);
+
 export const isHubsRoomUrl = async url =>
   (await isHubsServer(url)) && !(await isHubsSceneUrl(url)) && hubsRoomRegex.test(url);
+
 export const isHubsDestinationUrl = async url =>
   (await isHubsServer(url)) && ((await isHubsSceneUrl(url)) || (await isHubsRoomUrl(url)));
+
 export const isHubsAvatarUrl = async url => (await isHubsServer(url)) && hubsAvatarRegex.test(url);
 
 export const idForAvatarUrl = url => {
