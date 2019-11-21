@@ -237,6 +237,7 @@ class ImportContentComponent extends Component {
                   </ListItemIcon>
                   <ListItemText
                     inset
+                    primaryTypographyProps={{ variant: "headline" }}
                     primary="You need to add a base avatar."
                     secondary="Base avatars will be provided as choices when customizing avatars."
                   />
@@ -249,6 +250,7 @@ class ImportContentComponent extends Component {
                   </ListItemIcon>
                   <ListItemText
                     inset
+                    primaryTypographyProps={{ variant: "headline" }}
                     primary="You need to add at least one default avatar."
                     secondary="New users will be assigned one of the default avatars."
                   />
@@ -261,6 +263,7 @@ class ImportContentComponent extends Component {
                   </ListItemIcon>
                   <ListItemText
                     inset
+                    primaryTypographyProps={{ variant: "headline" }}
                     primary="You need to add at least one default scene."
                     secondary="New rooms will be assigned a default scene, which can be changed after room creation."
                   />

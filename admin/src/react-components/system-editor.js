@@ -59,7 +59,7 @@ class SystemEditorComponent extends Component {
         <Title title="Hubs Cloud" />
         <CardContent className={this.props.classes.info}>
           <Typography variant="title" gutterBottom>
-            Welcome to Hubs Cloud
+            Hubs Cloud is Live
           </Typography>
           <Typography variant="body1" gutterBottom>
             Need help? Check out the{" "}
@@ -84,6 +84,7 @@ class SystemEditorComponent extends Component {
                     </ListItemIcon>
                     <ListItemText
                       inset
+                      primaryTypographyProps={{ variant: "headline" }}
                       primary={
                         <span>
                           Your AWS account is in the{" "}
@@ -120,6 +121,7 @@ class SystemEditorComponent extends Component {
                     </ListItemIcon>
                     <ListItemText
                       inset
+                      primaryTypographyProps={{ variant: "headline" }}
                       primary={<span>You have exceeded your specified storage limit.</span>}
                       secondary={
                         <span>
@@ -137,6 +139,7 @@ class SystemEditorComponent extends Component {
                     </ListItemIcon>
                     <ListItemText
                       inset
+                      primaryTypographyProps={{ variant: "headline" }}
                       primary="Your system has no avatars."
                       secondary="Choose 'Import Content' on the left to load avatars."
                     />
@@ -149,6 +152,7 @@ class SystemEditorComponent extends Component {
                     </ListItemIcon>
                     <ListItemText
                       inset
+                      primaryTypographyProps={{ variant: "headline" }}
                       primary="Your system has no scenes."
                       secondary="Choose 'Import Content' on the left to load scenes."
                     />
@@ -161,6 +165,7 @@ class SystemEditorComponent extends Component {
                     </ListItemIcon>
                     <ListItemText
                       inset
+                      primaryTypographyProps={{ variant: "headline" }}
                       primary="You are using your cloud provider to serve content."
                       secondary="You can reduce data transfer costs by using Cloudflare's CDN to serve content. Choose 'Data Transfer' on the left for more info."
                     />

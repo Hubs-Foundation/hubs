@@ -43,13 +43,18 @@ const theme = createMuiTheme({
   overrides: {
     MuiDrawer: {
       docked: {
-        background: "#222222"
+        background: "#222222",
+        height: "100vh"
       }
     },
     MuiList: {
       root: {
         "& .active": {
           background: "#FF3464 !important"
+        },
+
+        "& .active svg": {
+          color: "#FFA7C6"
         }
       },
       active: {
@@ -58,7 +63,12 @@ const theme = createMuiTheme({
     },
     MuiListItemText: {
       root: {
-        color: "#eeeeee"
+        color: "#eeeeee",
+
+        "& span": {
+          // Used to set menu text
+          fontSize: 14
+        }
       }
     },
     MuiListItemIcon: {
@@ -73,15 +83,20 @@ const theme = createMuiTheme({
     }
   },
   palette: {
+    primary: {
+      main: "#FF3464"
+    },
     secondary: {
       main: "#000000"
     },
     action: {
       selected: "#ff0000"
-    },
-    text: {
-      primary: "#ff0000",
-      secondary: "#00ff00"
+    }
+  },
+  typography: {
+    fontFamily: "Open Sans, sans-serif",
+    headline: {
+      fontSize: "16px !important"
     }
   }
 });
