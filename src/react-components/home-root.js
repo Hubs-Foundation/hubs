@@ -6,6 +6,7 @@ import en from "react-intl/locale-data/en";
 
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
+import UnlessFeature from "./unless-feature";
 import { lang, messages } from "../utils/i18n";
 import { playVideoWithStopOnBlur } from "../utils/video-utils.js";
 import homeVideoWebM from "../assets/video/home.webm";
@@ -283,6 +284,16 @@ class HomeRoot extends Component {
               )}
             </div>
             <div className={styles.footerContent}>
+              <UnlessFeature name="hide_powered_by">
+                <div className={styles.poweredBy}>
+                  <span className={styles.prefix}>
+                    <FormattedMessage id="home.powered_by_prefix" />
+                  </span>
+                  <a className={styles.link} href="https://github.com/mozilla/hubs-cloud">
+                    <FormattedMessage id="home.powered_by_link" />
+                  </a>
+                </div>
+              </UnlessFeature>
               <div className={styles.links}>
                 <div className={styles.top}>
                   <IfFeature name="show_join_us_dialog">
@@ -293,16 +304,6 @@ class HomeRoot extends Component {
                       onClick={this.onLinkClicked(this.showJoinUsDialog)}
                     >
                       <FormattedMessage id="home.join_us" />
-                    </a>
-                  </IfFeature>
-                  <IfFeature name="show_newsletter_dialog">
-                    <a
-                      className={styles.link}
-                      rel="noopener noreferrer"
-                      href="#"
-                      onClick={this.onLinkClicked(this.showUpdatesDialog)}
-                    >
-                      <FormattedMessage id="home.get_updates" />
                     </a>
                   </IfFeature>
                   <IfFeature name="show_issue_report_link">

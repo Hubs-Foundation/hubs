@@ -195,6 +195,8 @@
     "home.room_create_options": "options",
     "home.room_create_button": "Create Room",
     "home.create_name.validation_warning": "Invalid name, limited to 4 to 64 characters and limited symbols.",
+    "home.powered_by_prefix": "Powered by",
+    "home.powered_by_link": "Hubs Cloud",
     "home.join_us": "Join the Conversation",
     "home.have_code": "Have a room code?",
     "home.add_to_discord_1": "Add the",
