@@ -203,12 +203,22 @@ const inflateEntities = function(indexToEntityMap, node, templates, isRoot, mode
   return el;
 };
 
-function inflateComponents(inflatedEntity, indexToEntityMap) {
-  let previousInflation;
+async function inflateComponents(inflatedEntity, indexToEntityMap) {
+  console.log("BPDEBUG inflating entity");
+  let isFirstInflation = true;
+  const objectInflations = [];
+
   inflatedEntity.object3D.traverse(async object3D => {
-    if (previousInflation) {
-      await previousInflation;
+    console.log("BPDEBUG inflating object3D");
+    const objectInflation = {};
+    objectInflation.promise = new Promise(resolve => (objectInflation.resolve = resolve));
+    objectInflations.push(objectInflation);
+
+    if (!isFirstInflation) {
+      await objectInflations.shift().promise;
     }
+    isFirstInflation = false;
+
     const entityComponents = getHubsComponents(object3D);
     const el = object3D.el;
 
@@ -216,11 +226,17 @@ function inflateComponents(inflatedEntity, indexToEntityMap) {
       for (const prop in entityComponents) {
         if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
           const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-          previousInflation = inflator(el, componentName, entityComponents[prop], entityComponents, indexToEntityMap);
+          console.log("BPDEBUG awaiting component inflation", componentName);
+          await inflator(el, componentName, entityComponents[prop], entityComponents, indexToEntityMap);
+          console.log("BPDEBUG component inflation complete", componentName);
         }
       }
     }
+
+    objectInflation.resolve();
   });
+
+  await objectInflations.shift().promise;
 }
 
 function attachTemplate(root, name, templateRoot) {
