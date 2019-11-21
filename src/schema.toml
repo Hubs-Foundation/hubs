@@ -23,13 +23,13 @@ features.show_issue_report_link = { category = "features", type = "boolean", nam
 features.show_avatar_editor_link = { category = "features", type = "boolean", name = "Show Avatar Editor Links", description = "Show links to avatar editors like Quilt." }
 features.show_avatar_pipelines_link = { category = "features", type = "boolean", name = "Show Avatar Pipelines Links", description = "Show links to avatar pipeline info." }
 features.show_model_collection_link = { category = "features", type = "boolean", name = "Show Model Collection Link", description = "Show link to a collection of models." }
+features.hide_powered_by = { category = "features", type = "boolean", name = "Hide Powered By Hubs", description = "Hides the 'Powered by Hubs Cloud' notice on the home page and loading screens." }
 
 features.enable_spoke = { category = "features", type = "boolean", internal = "true" }
 features.show_join_us_dialog = { category = "features", type = "boolean", internal = "true" }
 features.show_discord_bot_link = { category = "features", type = "boolean", internal = "true" }
 features.show_whats_new_link = { category = "features", type = "boolean", internal = "true" }
 features.show_source_link = { category = "features", type = "boolean", internal = "true" }
-features.show_newsletter_dialog = { category = "features", type = "boolean", internal = "true" }
 features.show_feedback_ui = { category = "features", type = "boolean", internal = "true" }
 features.show_issue_report_dialog = { category = "features", type = "boolean", internal = "true" }
 

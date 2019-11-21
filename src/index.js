@@ -36,7 +36,6 @@ const remountUI = function() {
       authToken={qs.get("auth_token")}
       authPayload={qs.get("auth_payload")}
       authOrigin={qs.get("auth_origin")}
-      listSignup={qs.has("list_signup")}
       showSignIn={qs.has("sign_in")}
       signInDestination={qs.get("sign_in_destination")}
       signInReason={qs.get("sign_in_reason")}
