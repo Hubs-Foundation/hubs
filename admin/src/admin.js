@@ -30,6 +30,7 @@ import { DataTransfer } from "./react-components/data-transfer";
 import { ImportContent } from "./react-components/import-content";
 import Store from "hubs/src/storage/store";
 import registerTelemetry from "hubs/src/telemetry";
+import { createMuiTheme } from "@material-ui/core/styles";
 
 const store = new Store();
 window.APP = { store };
@@ -37,6 +38,26 @@ window.APP = { store };
 registerTelemetry("/admin", "Hubs Admin");
 
 let itaSchemas;
+
+const theme = createMuiTheme({
+  overrides: {
+    MuiDrawer: {
+      docked: {
+        background: "#ff0000",
+        color: "#ff0000"
+      }
+    }
+  },
+  palette: {
+    secondary: {
+      main: "#000000"
+    },
+    action: {
+      selected: "#ff0000"
+    }
+  }
+});
+console.log(theme);
 
 class AdminUI extends Component {
   static propTypes = {
@@ -58,6 +79,7 @@ class AdminUI extends Component {
         authProvider={this.props.authProvider}
         loginPage={false}
         logoutButton={() => <span />}
+        theme={theme}
       >
         <Resource name="pending_scenes" list={PendingSceneList} />
         <Resource
@@ -139,7 +161,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (store.state && store.state.credentials && store.state.credentials.token) {
     setItaAuthToken(store.state.credentials.token);
     try {
-      itaSchemas = schemaByCategories(await getItaSchemas());
+      //itaSchemas = schemaByCategories(await getItaSchemas());
     } catch (e) {
       // Let the admin console run but skip showing configs.
     }
@@ -152,7 +174,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const customRoutes = [homeRoute, importRoute, accessRoute, dtRoute];
 
-  try {
+  /*try {
     const appConfigSchema = schemaByCategories({
       hubs: toml.parse(await fetch("/hubs/schema.toml").then(r => r.text()))
     });
@@ -162,7 +184,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     customRoutes.push(appConfigRoute);
   } catch (e) {
     console.error("Could not initialize app config.", e);
-  }
+  }*/
 
   if (itaSchemas) {
     customRoutes.push(
