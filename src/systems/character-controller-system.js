@@ -11,8 +11,10 @@ import {
   affixToWorldUp
 } from "../utils/three-utils";
 import { getCurrentPlayerHeight } from "../utils/get-current-player-height";
+import qsTruthy from "../utils/qs_truthy";
 //import { m4String } from "../utils/pretty-print";
 const NAV_ZONE = "character";
+const qsAllowWaypointLerp = qsTruthy("waypointLerp");
 
 const calculateDisplacementToDesiredPOV = (function() {
   const translationCoordinateSpace = new THREE.Matrix4();
@@ -143,6 +145,7 @@ export class CharacterControllerSystem {
     const interpolatedWaypoint = new THREE.Matrix4();
     const startTranslation = new THREE.Matrix4();
     const waypointPosition = new THREE.Vector3();
+    const v = new THREE.Vector3();
 
     return function tick(t, dt) {
       if (!this.scene.is("entered")) return;
@@ -156,7 +159,7 @@ export class CharacterControllerSystem {
         this.triedToMoveCount = 0;
         this.avatarPOV.object3D.updateMatrices();
         this.waypointTravelTime =
-          vrMode || this.activeWaypoint.isInstant
+          (vrMode && !qsAllowWaypointLerp) || this.activeWaypoint.isInstant
             ? 0
             : 1000 *
               (new THREE.Vector3()
@@ -236,10 +239,14 @@ export class CharacterControllerSystem {
 
       this.avatarPOV.object3D.updateMatrices();
       rotateInPlaceAroundWorldUp(this.avatarPOV.object3D.matrixWorld, this.dXZ, snapRotatedPOV);
+
+      const playerScale = v.setFromMatrixColumn(this.avatarPOV.object3D.matrixWorld, 1).length();
       calculateDisplacementToDesiredPOV(
         snapRotatedPOV,
         this.fly,
-        this.relativeMotion.multiplyScalar(((userinput.get(paths.actions.boost) ? 2 : 1) * BASE_SPEED * dt) / 1000),
+        this.relativeMotion.multiplyScalar(
+          ((userinput.get(paths.actions.boost) ? 2 : 1) * BASE_SPEED * Math.sqrt(playerScale) * dt) / 1000
+        ),
         displacementToDesiredPOV
       );
       newPOV
@@ -293,7 +300,6 @@ export class CharacterControllerSystem {
   getClosestNode(pos) {
     const pathfinder = this.scene.systems.nav.pathfinder;
     if (!pathfinder.zones[NAV_ZONE].groups[this.navGroup]) {
-      console.log("can't find closest node");
       return null;
     }
     return (

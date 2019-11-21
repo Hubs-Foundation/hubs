@@ -10,6 +10,7 @@ AFRAME.registerComponent("track-pose", {
       o.matrix.copy(matrix);
       o.matrix.decompose(o.position, o.quaternion, o.scale);
       o.matrixIsModified = true;
+      o.matrixWorldNeedsUpdate = true;
     }
   }
 });

@@ -117,6 +117,7 @@ const MAX_LANDING_ANGLE = 45;
 const DRAW_TIME_MS = 400;
 const q = new THREE.Quaternion();
 const vecHelper = new THREE.Vector3();
+const v = new THREE.Vector3();
 
 AFRAME.registerComponent("teleporter", {
   schema: {
@@ -236,7 +237,9 @@ AFRAME.registerComponent("teleporter", {
       .applyQuaternion(q)
       .normalize();
     this.rayCurve.setDirection(this.direction);
-    this.v0.copy(this.direction).multiplyScalar(speed);
+    this.el.object3D.updateMatrices();
+    const playerScale = v.setFromMatrixColumn(this.characterController.avatarPOV.object3D.matrixWorld, 1).length();
+    this.v0.copy(this.direction).multiplyScalar(speed * Math.sqrt(playerScale));
 
     let collidedIndex = this.rayCurve.numPoints - 1;
 
