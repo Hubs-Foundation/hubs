@@ -63,7 +63,7 @@ const theme = createMuiTheme({
     },
     MuiListItemIcon: {
       root: {
-        color: "#999999"
+        color: "#aaaaaa"
       }
     },
     MuiTypography: {
