@@ -413,7 +413,7 @@ AFRAME.registerSystem("userinput", {
   },
 
   maybeToggleXboxMapping() {
-    if (this.isMobile || this.isMobileVR) return;
+    if (hackyMobileSafariTest() || this.isMobile || this.isMobileVR) return;
 
     const vrAxesSum =
       (this.get(paths.device.vive.left.axesSum) || 0) +
@@ -421,7 +421,7 @@ AFRAME.registerSystem("userinput", {
       (this.get(paths.device.leftOculusTouch.axesSum) || 0) +
       (this.get(paths.device.rightOculusTouch.axesSum) || 0);
     const mouseMovement = this.get(paths.device.mouse.movementXY);
-    const nonXboxActivity = (mouseMovement[0] || mouseMovement[1]) > 2 || vrAxesSum > 0.5;
+    const nonXboxActivity = (mouseMovement && (mouseMovement[0] || mouseMovement[1])) > 2 || vrAxesSum > 0.5;
 
     const hasXboxMapping = this.registeredMappings.has(xboxControllerUserBindings);
 
