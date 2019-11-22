@@ -30,7 +30,7 @@ function detectTouchScreen() {
 // is present until we fix conflicts between simultaneous mouse
 // and touchscreen interactions.
 export function hackyMobileSafariTest() {
-  return /\b(Macintosh)\b/i.test(navigator.userAgent) && detectTouchScreen();
+  return /\b(Macintosh|iPad|iPhone)\b/i.test(navigator.userAgent) && detectTouchScreen();
   // e.g. Match
   // Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.1 Safari/605.1.15
   // but not
