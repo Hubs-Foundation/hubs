@@ -112,8 +112,9 @@ const onReady = async () => {
   sceneModelEntity.appendChild(gltfEl);
   sceneRoot.appendChild(sceneModelEntity);
 
-  const parentId = sceneInfo.parent_scene_id || sceneInfo.parent_scene_listing_id;
-  const parentScene = parentId && (await fetchReticulumAuthenticated(`/api/v1/scenes/${parentId}`)).scenes[0];
+  const parentScene =
+    sceneInfo.parent_scene_id &&
+    (await fetchReticulumAuthenticated(`/api/v1/scenes/${sceneInfo.parent_scene_id}`)).scenes[0];
 
   remountUI({
     sceneName: sceneInfo.name,

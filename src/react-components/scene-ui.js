@@ -66,15 +66,6 @@ class SceneUI extends Component {
     createAndRedirectToNewHub(this.state.customRoomName, this.props.sceneId);
   };
 
-  remixScene = async e => {
-    e.preventDefault();
-    const { scenes } = await fetchReticulumAuthenticated("/api/v1/scenes", "POST", {
-      parent_scene_id: this.props.sceneId
-    });
-    const projectUrl = getReticulumFetchUrl(`/spoke/projects/${scenes[0].project_id}`);
-    window.open(projectUrl, "_blank");
-  };
-
   render() {
     if (this.props.unavailable) {
       return (
@@ -90,7 +81,7 @@ class SceneUI extends Component {
       );
     }
 
-    const { sceneAllowRemixing, isOwner, isSignedIn, sceneProjectId, parentScene } = this.props;
+    const { sceneAllowRemixing, isOwner, sceneProjectId, parentScene } = this.props;
 
     const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
     const tweetText = `${this.props.sceneName} in ${messages["share-hashtag"]}`;
@@ -202,12 +193,16 @@ class SceneUI extends Component {
                   <FormattedMessage id="scene.edit_button" />
                 </a>
               ) : (
-                isSignedIn &&
                 sceneAllowRemixing && (
-                  <button className={styles.spokeButton} onClick={this.remixScene}>
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={getReticulumFetchUrl(`/spoke/projects/new?sceneId=${sceneProjectId}`)}
+                    className={styles.spokeButton}
+                  >
                     <FontAwesomeIcon icon={faCodeBranch} />
                     <FormattedMessage id="scene.remix_button" />
-                  </button>
+                  </a>
                 )
               )}
               <WithHoverSound>
