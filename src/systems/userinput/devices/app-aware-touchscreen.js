@@ -64,9 +64,6 @@ function shouldMoveCursor(touch, raycaster) {
     remoteHoverTarget && remoteHoverTarget.components.networked && remoteHoverTarget.components.networked.data.template;
   const isStaticControlledMedia = template && template === "#static-controlled-media";
   const isStaticMedia = template && template === "#static-media";
-  if (intersection) {
-    console.log(intersection, isInteractable, remoteHoverTarget, isPinned, isFrozen, template);
-  }
   return (
     isInteractable &&
     (isFrozen || !isPinned) &&
