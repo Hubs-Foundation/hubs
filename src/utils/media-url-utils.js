@@ -128,13 +128,14 @@ async function isHubsServer(url) {
     return originIsHubsServer.get(origin);
   }
 
+  let isHubsServer;
   try {
-    const isHubsServer = (await fetch(origin, { method: "HEAD" })).headers.has("hub-name");
-    originIsHubsServer.set(origin, isHubsServer);
-    return isHubsServer;
+    isHubsServer = (await fetch(origin, { method: "HEAD" })).headers.has("hub-name");
   } catch (e) {
-    return false;
+    isHubsServer = false;
   }
+  originIsHubsServer.set(origin, isHubsServer);
+  return isHubsServer;
 }
 
 const hubsSceneRegex = /https?:\/\/[^/]+\/scenes\/(\w+)\/?\S*/;
