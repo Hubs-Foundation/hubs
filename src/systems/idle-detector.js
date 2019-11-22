@@ -1,5 +1,5 @@
 import { paths } from "./userinput/paths";
-const IDLE_TIMEOUT_MS = 20 * 1000;
+const IDLE_TIMEOUT_MS = 2 * 60 * 60 * 1000;
 const INPUT_CHECK_INTERVAL_MS = 1000;
 
 AFRAME.registerSystem("idle-detector", {
