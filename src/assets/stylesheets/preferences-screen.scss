@@ -92,18 +92,18 @@ $backgroundColor: lightslategray;
   width: 100%;
   overflow-y: auto;
   background: aliceblue;
+  margin-top: $titleHeight;
   :local(.scrollingContent) {
     display: flex;
     flex-flow: column;
     align-items: center;
-    margin-top: $titleHeight;
   }
   :local(.titleBar) {
     position: fixed;
     top: 0px;
     width: 100%;
     height: $titleHeight;
-    background: $light-grey;
+    background: $light-blue;
   }
   :local(.title) {
     display: flex;
@@ -113,6 +113,25 @@ $backgroundColor: lightslategray;
     height: $titleHeight;
     font-size: $titleFontSize;
     font-weight: $titleFontWeight;
+  }
+  :local(.sectionBar) {
+    width: 100%;
+    height: $titleHeight;
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    align-items: center;
+  }
+  :local(.sectionTitle) {
+    width: 90%;
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    align-items: center;
+    height: $titleHeight;
+    font-size: $titleFontSize;
+    font-weight: $titleFontWeight;
+    background: $light-grey;
   }
 }
 

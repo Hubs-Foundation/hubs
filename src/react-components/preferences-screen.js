@@ -99,7 +99,17 @@ export default class PreferencesScreen extends Component {
                 <span>Preferences</span>
               </div>
             </div>
+            <div className={classNames(styles.sectionBar)}>
+              <div className={classNames(styles.sectionTitle)}>
+                <span>General</span>
+              </div>
+            </div>
             <div className={classNames(styles.scrollingContent)}>{general}</div>
+            <div className={classNames(styles.sectionBar)}>
+              <div className={classNames(styles.sectionTitle)}>
+                <span>Advanced</span>
+              </div>
+            </div>
             <div className={classNames(styles.scrollingContent)}>{advanced}</div>
           </div>
         </div>
