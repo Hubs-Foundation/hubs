@@ -59,7 +59,7 @@ class SystemEditorComponent extends Component {
         <Title title="Hubs Cloud" />
         <CardContent className={this.props.classes.info}>
           <Typography variant="title" gutterBottom>
-            Welcome to Hubs Cloud
+            🐣 Hubs Cloud is live
           </Typography>
           <Typography variant="body1" gutterBottom>
             Need help? Check out the{" "}

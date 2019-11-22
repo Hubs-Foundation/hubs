@@ -16,6 +16,7 @@ import ViewIcon from "@material-ui/icons/ViewList";
 import SettingsIcon from "@material-ui/icons/Settings";
 import Collapse from "@material-ui/core/Collapse";
 import { getServiceDisplayName } from "../utils/ita";
+import HubsCloudLogo from "../assets/images/hubs_cloud_dark.png";
 
 const mapStateToProps = state => ({
   resources: getResources(state)
@@ -24,16 +25,51 @@ const mapStateToProps = state => ({
 const styles = () => ({
   root: {
     width: "100%",
-    paddingTop: 0
+    paddingTop: 0,
+
+    "& .active": {
+      background: "#FF3464 !important"
+    },
+
+    "& .active svg": {
+      color: "#FFA7C6"
+    },
+
+    active: {
+      color: "#ff0000"
+    }
   },
   item: {
     padding: "8px 16px"
   },
+  logo: {
+    margin: 0,
+    padding: 0,
+
+    "& img": {
+      padding: "0 12px 8px 12px",
+      width: "200px"
+    }
+  },
   icon: {
-    marginRight: 0
+    marginRight: 0,
+    color: "#aaaaaa"
   },
   text: {
-    paddingLeft: 10
+    paddingLeft: 10,
+
+    "& span": {
+      // Used to override typography
+      color: "#eeeeee",
+      fontSize: 14
+    },
+
+    "@media (max-width: 599.95px) and (min-width: 0px)": {
+      // Used to override typography on mobile
+      "& span": {
+        color: "#333333"
+      }
+    }
   },
   nested: {
     paddingLeft: 40
@@ -54,7 +90,6 @@ class Menu extends Component {
       <ListItem
         className={classNames(this.props.classes.item, this.props.classes.nested)}
         component={NavLink}
-        activeStyle={{ backgroundColor: "#D0D0D0" }}
         key={service}
         to={`/services/${service}`}
       >
@@ -72,7 +107,6 @@ class Menu extends Component {
       <ListItem
         className={classNames(this.props.classes.item, this.props.classes.nested)}
         component={NavLink}
-        activeStyle={{ backgroundColor: "#D0D0D0" }}
         key={resource.name}
         to={`/${resource.name}`}
       >
@@ -85,6 +119,9 @@ class Menu extends Component {
   render() {
     return (
       <List className={this.props.classes.root}>
+        <ListItem className={this.props.classes.logo}>
+          <img className={this.props.classes.logo} src={HubsCloudLogo} />
+        </ListItem>
         <ListItem
           className={this.props.classes.item}
           component={NavLink}
@@ -108,7 +145,6 @@ class Menu extends Component {
             <ListItem
               className={classNames(this.props.classes.item, this.props.classes.nested)}
               component={NavLink}
-              activeStyle={{ backgroundColor: "#D0D0D0" }}
               key="import"
               to="/import"
             >
@@ -131,7 +167,6 @@ class Menu extends Component {
             <ListItem
               className={classNames(this.props.classes.item, this.props.classes.nested)}
               component={NavLink}
-              activeStyle={{ backgroundColor: "#D0D0D0" }}
               key="app-settings"
               to="/app-settings"
             >
@@ -143,7 +178,6 @@ class Menu extends Component {
             <ListItem
               className={classNames(this.props.classes.item, this.props.classes.nested)}
               component={NavLink}
-              activeStyle={{ backgroundColor: "#D0D0D0" }}
               key="server-setup"
               to="/server-setup"
             >
@@ -155,7 +189,6 @@ class Menu extends Component {
             <ListItem
               className={classNames(this.props.classes.item, this.props.classes.nested)}
               component={NavLink}
-              activeStyle={{ backgroundColor: "#D0D0D0" }}
               key="server-access"
               to="/server-access"
             >
@@ -167,7 +200,6 @@ class Menu extends Component {
             <ListItem
               className={classNames(this.props.classes.item, this.props.classes.nested)}
               component={NavLink}
-              activeStyle={{ backgroundColor: "#D0D0D0" }}
               key="data-transfer"
               to="/data-transfer"
             >
