@@ -25,7 +25,6 @@ function detectTouchScreen() {
 // Touchscreen controls depend on iPad and iPhone detection,
 // which recently regressed. For UA matching "Macintosh", enable
 // touchscreen controls if there exists a touchscreen.
-//
 // We cannot always enable touchscreen controls when a touchscreen
 // is present until we fix conflicts between simultaneous mouse
 // and touchscreen interactions.
