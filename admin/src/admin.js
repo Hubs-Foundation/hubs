@@ -11,7 +11,7 @@ import {
   setAuthToken as setItaAuthToken
 } from "./utils/ita";
 import { connectToReticulum } from "hubs/src/utils/phoenix-utils";
-import { Admin, Layout, Resource } from "react-admin";
+import { AppBar, Admin, Layout, Resource } from "react-admin";
 //import { EditGuesser, CreateGuesser } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
 import { AdminMenu } from "./react-components/admin-menu";
@@ -30,7 +30,7 @@ import { DataTransfer } from "./react-components/data-transfer";
 import { ImportContent } from "./react-components/import-content";
 import Store from "hubs/src/storage/store";
 import registerTelemetry from "hubs/src/telemetry";
-import { createMuiTheme } from "@material-ui/core/styles";
+import { createMuiTheme, withStyles } from "@material-ui/core/styles";
 
 const store = new Store();
 window.APP = { store };
@@ -46,40 +46,6 @@ const theme = createMuiTheme({
         background: "#222222",
         height: "100vh"
       }
-    },
-    MuiList: {
-      root: {
-        "& .active": {
-          background: "#FF3464 !important"
-        },
-
-        "& .active svg": {
-          color: "#FFA7C6"
-        }
-      },
-      active: {
-        color: "#ff0000"
-      }
-    },
-    MuiListItemText: {
-      root: {
-        color: "#eeeeee",
-
-        "& span": {
-          // Used to set menu text
-          fontSize: 14
-        }
-      }
-    },
-    MuiListItemIcon: {
-      root: {
-        color: "#aaaaaa"
-      }
-    },
-    MuiTypography: {
-      subheading: {
-        color: "auto" // Needed to override menu items
-      }
     }
   },
   palette: {
@@ -94,13 +60,9 @@ const theme = createMuiTheme({
     }
   },
   typography: {
-    fontFamily: "Open Sans, sans-serif",
-    headline: {
-      fontSize: "16px !important"
-    }
+    fontFamily: "Open Sans, sans-serif"
   }
 });
-console.log(theme);
 
 class AdminUI extends Component {
   static propTypes = {
@@ -197,6 +159,13 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
     document.getElementById("ui-root")
   );
 };
+const HiddenAppBar = withStyles({
+  hideOnDesktop: {
+    "@media (min-width: 768px) and (min-height: 480px)": {
+      display: "none"
+    }
+  }
+})(props => <AppBar {...props} className={props.classes.hideOnDesktop} />);
 
 document.addEventListener("DOMContentLoaded", async () => {
   const socket = await connectToReticulum();
@@ -204,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (store.state && store.state.credentials && store.state.credentials.token) {
     setItaAuthToken(store.state.credentials.token);
     try {
-      //itaSchemas = schemaByCategories(await getItaSchemas());
+      itaSchemas = schemaByCategories(await getItaSchemas());
     } catch (e) {
       // Let the admin console run but skip showing configs.
     }
@@ -217,7 +186,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const customRoutes = [homeRoute, importRoute, accessRoute, dtRoute];
 
-  /*try {
+  try {
     const appConfigSchema = schemaByCategories({
       hubs: toml.parse(await fetch("/hubs/schema.toml").then(r => r.text()))
     });
@@ -227,7 +196,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     customRoutes.push(appConfigRoute);
   } catch (e) {
     console.error("Could not initialize app config.", e);
-  }*/
+  }
 
   if (itaSchemas) {
     customRoutes.push(
@@ -235,7 +204,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   }
 
-  const layout = props => <Layout {...props} menu={props => <AdminMenu {...props} services={schemaCategories} />} />;
+  const layout = props => (
+    <Layout {...props} appBar={HiddenAppBar} menu={props => <AdminMenu {...props} services={schemaCategories} />} />
+  );
 
   const redirectToLogin = () => (document.location = "/?sign_in&sign_in_destination=admin");
 
