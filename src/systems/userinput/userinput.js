@@ -40,6 +40,7 @@ import { resolveActionSets } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "../../utils/vr-caps-detect";
+import { hackyMobileSafariTest } from "../../utils/detect-touchscreen";
 import { ArrayBackedSet } from "./array-backed-set";
 
 function arrayContentsDiffer(a, b) {
@@ -239,12 +240,13 @@ AFRAME.registerSystem("userinput", {
 
     const isMobile = AFRAME.utils.device.isMobile();
     const isMobileVR = AFRAME.utils.device.isMobileVR();
+    const forceEnableTouchscreen = hackyMobileSafariTest();
 
-    if (!(isMobile || isMobileVR)) {
+    if (!(isMobile || isMobileVR || forceEnableTouchscreen)) {
       this.activeDevices.add(new MouseDevice());
       this.activeDevices.add(new AppAwareMouseDevice());
       this.activeDevices.add(new KeyboardDevice());
-    } else if (!isMobileVR) {
+    } else if (!isMobileVR || forceEnableTouchscreen) {
       this.activeDevices.add(new AppAwareTouchscreenDevice());
       this.activeDevices.add(new KeyboardDevice());
       this.activeDevices.add(new GyroDevice());
@@ -298,10 +300,13 @@ AFRAME.registerSystem("userinput", {
     const updateBindingsForVRMode = () => {
       const inVRMode = this.el.sceneEl.is("vr-mode");
       const isMobile = AFRAME.utils.device.isMobile();
+      const forceEnableTouchscreen = hackyMobileSafariTest();
 
       if (inVRMode) {
         console.log("Using VR bindings.");
-        this.registeredMappings.delete(isMobile ? touchscreenUserBindings : keyboardMouseUserBindings);
+        this.registeredMappings.delete(
+          isMobile || forceEnableTouchscreen ? touchscreenUserBindings : keyboardMouseUserBindings
+        );
         // add mappings for all active VR input devices
         for (let i = 0; i < this.activeDevices.items.length; i++) {
           const activeDevice = this.activeDevices.items[i];
@@ -327,7 +332,9 @@ AFRAME.registerSystem("userinput", {
           deleteExtraMappings(activeDevice);
           this.registeredMappings.delete(vrGamepadMappings.get(activeDevice.constructor));
         }
-        this.registeredMappings.add(isMobile ? touchscreenUserBindings : keyboardMouseUserBindings);
+        this.registeredMappings.add(
+          isMobile || forceEnableTouchscreen ? touchscreenUserBindings : keyboardMouseUserBindings
+        );
       }
 
       for (let i = 0; i < this.activeDevices.items.length; i++) {
