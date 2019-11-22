@@ -406,15 +406,15 @@ AFRAME.registerComponent("media-loader", {
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(
           "image-loaded",
-          () => {
+          async () => {
             const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
 
-            if (isHubsAvatarUrl(src)) {
+            if (await isHubsAvatarUrl(src)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#avatar-link-hover-menu",
                 dirs: ["forward", "back"]
               });
-            } else if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
+            } else if ((await isHubsRoomUrl(src)) || ((await isHubsSceneUrl(src)) && mayChangeScene)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#hubs-destination-hover-menu",
                 dirs: ["forward", "back"]
