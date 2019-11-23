@@ -146,7 +146,7 @@ function registerNetworkSchemas() {
       "media-loader",
       "pinnable",
       {
-        selector: "#particle-emitter",
+        selector: ".particle-emitter",
         component: "particle-emitter"
       }
     ]

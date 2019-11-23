@@ -354,7 +354,7 @@ AFRAME.registerComponent("media-loader", {
           Object.assign({}, this.data.mediaOptions, {
             src: accessibleUrl,
             contentType,
-            batch: batch
+            batch
           })
         );
 
@@ -415,7 +415,7 @@ AFRAME.registerComponent("media-loader", {
             src: accessibleUrl,
             contentType: contentType,
             inflate: true,
-            batch: batch,
+            batch,
             modelToWorldScale: this.data.fitToBox ? 0.0001 : 1.0
           })
         );
@@ -456,7 +456,7 @@ AFRAME.registerComponent("media-loader", {
           Object.assign({}, this.data.mediaOptions, {
             src: thumbnail,
             contentType: guessContentType(thumbnail) || "image/png",
-            batch: batch
+            batch
           })
         );
         if (this.el.components["position-at-box-shape-border__freeze"]) {

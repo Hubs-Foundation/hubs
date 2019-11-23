@@ -29,6 +29,18 @@ const particles = [
   emoji_particle_6
 ];
 
+function setOffsetVector(i, totalNumEmojis, width, spacing, offsetVector) {
+  const sign = i & 1 ? -1 : 1;
+  offsetVector.y = 0;
+  if (totalNumEmojis % 2 === 0) {
+    offsetVector.x = (spacing / 2 + width / 2 + Math.floor(i / 2) * (width + spacing)) * sign;
+    offsetVector.z = (Math.floor(i / 2) * width) / 2;
+  } else if (i !== 0) {
+    offsetVector.x = (width + spacing) * Math.floor((i + 1) / 2) * -sign;
+    offsetVector.z = (Math.floor((i + 1) / 2) * width) / 2;
+  }
+}
+
 AFRAME.registerComponent("emoji-hud", {
   schema: {
     spawnerScale: { default: 0.1 },
@@ -44,6 +56,7 @@ AFRAME.registerComponent("emoji-hud", {
 
   init: (() => {
     const cameraWorldPosition = new THREE.Vector3();
+    const offsetVector = new THREE.Vector3();
     return function() {
       this._onFrozen = this._onFrozen.bind(this);
 
@@ -102,7 +115,7 @@ AFRAME.registerComponent("emoji-hud", {
         });
 
         spawnerEntity.addEventListener("spawned-entity-loaded", e => {
-          e.detail.target.querySelector("#particle-emitter").setAttribute("particle-emitter", particleEmitterConfig);
+          e.detail.target.querySelector(".particle-emitter").setAttribute("particle-emitter", particleEmitterConfig);
           e.detail.target.setAttribute("emoji", { particleEmitterConfig: particleEmitterConfig });
         });
 
@@ -120,24 +133,12 @@ AFRAME.registerComponent("emoji-hud", {
         cylinder.setAttribute("scale", { x: width / 2, y: width / 20, z: width / 5 });
         cylinder.setAttribute("rotation", { x: 45, y: 0, z: 0 });
 
-        //evenly space out the emojis
-        const sign = i & 1 ? -1 : 1;
-        let x = 0;
-        let z = 0;
-        if (emojis.length % 2 === 0) {
-          x = (spacing / 2 + width / 2 + Math.floor(i / 2) * (width + spacing)) * sign;
-          z = (Math.floor(i / 2) * width) / 2;
-        } else if (i !== 0) {
-          x = (width + spacing) * Math.floor((i + 1) / 2) * -sign;
-          z = (Math.floor((i + 1) / 2) * width) / 2;
-        }
-        spawnerEntity.object3D.position.x = x;
-        spawnerEntity.object3D.position.z = z;
+        setOffsetVector(i, emojis.length, width, spacing, offsetVector);
+
+        spawnerEntity.object3D.position.copy(offsetVector);
         spawnerEntity.object3D.matrixNeedsUpdate = true;
 
-        cylinder.object3D.position.x = x;
-        cylinder.object3D.position.y = -width / 2;
-        cylinder.object3D.position.z = z + 0.01; //move back to avoid transparency issues with emojis
+        cylinder.object3D.position.set(offsetVector.x, -width / 2, offsetVector.z + 0.01); //move back to avoid transparency issues with emojis
         cylinder.object3D.matrixNeedsUpdate = true;
 
         this.el.appendChild(spawnerEntity);

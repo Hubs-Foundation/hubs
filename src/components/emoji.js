@@ -25,7 +25,7 @@ AFRAME.registerComponent("emoji", {
       SOUND_SPAWN_EMOJI,
       this.el.object3D
     );
-    this.particleEmitter = this.el.querySelector("#particle-emitter");
+    this.particleEmitter = this.el.querySelector(".particle-emitter");
   },
 
   update() {
