@@ -74,7 +74,7 @@ class AdminUI extends Component {
   };
 
   componentDidMount() {
-    detectIdle();
+    if (process.env.NODE_ENV !== "development") detectIdle();
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);
   }
