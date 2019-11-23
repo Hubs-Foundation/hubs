@@ -138,6 +138,10 @@ function registerNetworkSchemas() {
         component: "emoji",
         property: "emitEndTime"
       },
+      {
+        component: "emoji",
+        property: "particleEmitterConfig"
+      },
       "scale",
       "media-loader",
       "pinnable",
