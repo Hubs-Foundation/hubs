@@ -339,6 +339,9 @@ async function updateEnvironmentForHub(hub) {
     sceneUrl = proxiedUrlFor(sceneUrl);
   }
 
+  if (sceneUrl === "https://uploads-prod.reticulum.io/files/0d095478-bb2e-45ff-9a9d-abfa0bbc770c.bin") {
+    sceneUrl = `https://${document.location.hostname}/files/0d095478-bb2e-45ff-9a9d-abfa0bbc770c.bin`;
+  }
   console.log(`Scene URL: ${sceneUrl}`);
 
   let environmentEl = null;
