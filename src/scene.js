@@ -124,7 +124,6 @@ const onReady = async () => {
     sceneProjectId: sceneInfo.project_id,
     sceneAllowRemixing: sceneInfo.allow_remixing,
     isOwner: sceneInfo.account_id && sceneInfo.account_id === window.APP.store.credentialsAccountId,
-    isSignedIn: !!window.APP.store.credentialsAccountId,
     parentScene: parentScene
   });
 };

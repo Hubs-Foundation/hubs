@@ -9,7 +9,7 @@ import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/scene-ui.scss";
 import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import spokeLogo from "../assets/images/spoke_logo_black.png";
-import { createAndRedirectToNewHub, fetchReticulumAuthenticated, getReticulumFetchUrl } from "../utils/phoenix-utils";
+import { createAndRedirectToNewHub, getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { WithHoverSound } from "./wrap-with-audio";
 import CreateRoomDialog from "./create-room-dialog.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -34,7 +34,6 @@ class SceneUI extends Component {
     sceneAllowRemixing: PropTypes.bool,
     unavailable: PropTypes.bool,
     isOwner: PropTypes.bool,
-    isSignedIn: PropTypes.bool,
     parentScene: PropTypes.object
   };
 
