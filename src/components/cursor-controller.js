@@ -110,7 +110,6 @@ AFRAME.registerComponent("cursor-controller", {
       getLastWorldPosition(camera.object3D, cameraPos);
       cameraPos.y = cursor.object3D.position.y;
       cursor.object3D.lookAt(cameraPos);
-      cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
       cursor.object3D.matrixNeedsUpdate = true;
 
       // TODO : Check if the selected object being transformed is for this cursor!
