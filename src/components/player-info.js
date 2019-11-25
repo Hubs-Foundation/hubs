@@ -120,7 +120,7 @@ AFRAME.registerComponent("player-info", {
       modBadgeEl.object3D.visible = !this.isRecording && this.isOwner;
     }
   },
-  applyProperties() {
+  applyProperties(e) {
     this.applyDisplayName();
 
     const modelEl = this.el.querySelector(".model");
@@ -129,10 +129,12 @@ AFRAME.registerComponent("player-info", {
       modelEl.setAttribute("gltf-model-plus", "src", this.data.avatarSrc);
     }
 
-    const uniforms = injectCustomShaderChunks(this.el.object3D);
-    this.el.querySelectorAll("[hover-visuals]").forEach(el => {
-      el.components["hover-visuals"].uniforms = uniforms;
-    });
+    if (!e || e.target === modelEl) {
+      const uniforms = injectCustomShaderChunks(this.el.object3D);
+      this.el.querySelectorAll("[hover-visuals]").forEach(el => {
+        el.components["hover-visuals"].uniforms = uniforms;
+      });
+    }
   },
   handleModelError() {
     window.APP.store.resetToRandomDefaultAvatar();
