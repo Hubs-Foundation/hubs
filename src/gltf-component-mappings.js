@@ -157,13 +157,15 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
   }
 });
 
-function mediaInflator(el, componentName, componentData, components) {
+async function mediaInflator(el, componentName, componentData, components) {
   let isControlled = true;
 
   if (components.networked) {
     // TODO: When non-hubs links can be traversed, make all link components controlled so you can open them.
     isControlled =
-      componentData.controls || isHubsDestinationUrl(componentData.src) || isHubsDestinationUrl(componentData.href);
+      componentData.controls ||
+      (await isHubsDestinationUrl(componentData.src)) ||
+      (await isHubsDestinationUrl(componentData.href));
 
     const hasVolume = componentName === "video" || componentName === "audio";
     const templateName = isControlled || hasVolume ? "#static-controlled-media" : "#static-media";

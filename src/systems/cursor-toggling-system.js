@@ -1,6 +1,7 @@
 import { paths } from "./userinput/paths";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { isTagged } from "../components/tags";
+import { hackyMobileSafariTest } from "../utils/detect-touchscreen";
 
 function shouldEnableRemote(scene, hand, remote, teleporting, woke) {
   const vrRemotePenIntersection =
@@ -61,6 +62,7 @@ export class CursorTogglingSystem {
     const isMobile = AFRAME.utils.device.isMobile();
     const shouldEnableRightRemote =
       isMobile ||
+      hackyMobileSafariTest() ||
       (!inspectingInVR &&
         shouldEnableRemote(
           scene,

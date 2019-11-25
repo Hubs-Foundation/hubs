@@ -203,8 +203,20 @@ const inflateEntities = function(indexToEntityMap, node, templates, isRoot, mode
   return el;
 };
 
-function inflateComponents(inflatedEntity, indexToEntityMap) {
-  inflatedEntity.object3D.traverse(object3D => {
+async function inflateComponents(inflatedEntity, indexToEntityMap) {
+  let isFirstInflation = true;
+  const objectInflations = [];
+
+  inflatedEntity.object3D.traverse(async object3D => {
+    const objectInflation = {};
+    objectInflation.promise = new Promise(resolve => (objectInflation.resolve = resolve));
+    objectInflations.push(objectInflation);
+
+    if (!isFirstInflation) {
+      await objectInflations.shift().promise;
+    }
+    isFirstInflation = false;
+
     const entityComponents = getHubsComponents(object3D);
     const el = object3D.el;
 
@@ -212,11 +224,15 @@ function inflateComponents(inflatedEntity, indexToEntityMap) {
       for (const prop in entityComponents) {
         if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
           const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-          inflator(el, componentName, entityComponents[prop], entityComponents, indexToEntityMap);
+          await inflator(el, componentName, entityComponents[prop], entityComponents, indexToEntityMap);
         }
       }
     }
+
+    objectInflation.resolve();
   });
+
+  await objectInflations.shift().promise;
 }
 
 function attachTemplate(root, name, templateRoot) {
@@ -519,7 +535,7 @@ AFRAME.registerComponent("gltf-model-plus", {
         await nextTick();
         if (src != this.lastSrc) return; // TODO: there must be a nicer pattern for this
 
-        inflateComponents(this.inflatedEl, indexToEntityMap);
+        await inflateComponents(this.inflatedEl, indexToEntityMap);
 
         for (const name in this.templates) {
           attachTemplate(this.el, name, this.templates[name]);

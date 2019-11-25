@@ -100,7 +100,6 @@ module.exports = (env, argv) => ({
     scene: path.join(__dirname, "src", "scene.js"),
     avatar: path.join(__dirname, "src", "avatar.js"),
     link: path.join(__dirname, "src", "link.js"),
-    spoke: path.join(__dirname, "src", "spoke.js"),
     discord: path.join(__dirname, "src", "discord.js"),
     "whats-new": path.join(__dirname, "src", "whats-new.js")
   },
@@ -303,11 +302,6 @@ module.exports = (env, argv) => ({
       chunks: ["vendor", "engine", "link"]
     }),
     new HTMLWebpackPlugin({
-      filename: "spoke.html",
-      template: path.join(__dirname, "src", "spoke.html"),
-      chunks: ["vendor", "spoke"]
-    }),
-    new HTMLWebpackPlugin({
       filename: "discord.html",
       template: path.join(__dirname, "src", "discord.html"),
       chunks: ["vendor", "discord"]
@@ -318,24 +312,6 @@ module.exports = (env, argv) => ({
       chunks: ["vendor", "whats-new"],
       inject: "head"
     }),
-    new CopyWebpackPlugin([
-      {
-        from: "src/assets/images/favicon.ico",
-        to: "favicon.ico"
-      }
-    ]),
-    new CopyWebpackPlugin([
-      {
-        from: "src/assets/images/app-icon.png",
-        to: "app-icon.png"
-      }
-    ]),
-    new CopyWebpackPlugin([
-      {
-        from: "src/assets/images/app-thumbnail.png",
-        to: "app-thumbnail.png"
-      }
-    ]),
     new CopyWebpackPlugin([
       {
         from: "src/hub.service.js",
@@ -357,7 +333,7 @@ module.exports = (env, argv) => ({
     new webpack.DefinePlugin({
       "process.env": JSON.stringify({
         NODE_ENV: argv.mode,
-        DEFAULT_SCENE_SID: process.env.DEFAULT_SCENE_SID,
+        SHORTLINK_DOMAIN: process.env.SHORTLINK_DOMAIN,
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
         RETICULUM_SOCKET_SERVER: process.env.RETICULUM_SOCKET_SERVER,
         THUMBNAIL_SERVER: process.env.THUMBNAIL_SERVER,
