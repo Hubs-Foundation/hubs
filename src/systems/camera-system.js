@@ -98,9 +98,16 @@ const moveRigSoCameraLooksAtObject = (function() {
 
     const box = getBox(object.el, object.el.getObject3D("mesh") || object, true);
     box.getCenter(center);
+    const vrMode = object.el.sceneEl.is("vr-mode");
     const dist =
-      calculateViewingDistance(object.el.sceneEl.camera.fov, object.el.sceneEl.camera.aspect, object, box, center) *
-      distanceMod;
+      calculateViewingDistance(
+        object.el.sceneEl.camera.fov,
+        object.el.sceneEl.camera.aspect,
+        object,
+        box,
+        center,
+        vrMode
+      ) * distanceMod;
     target.position.addVectors(
       owp,
       oForw
