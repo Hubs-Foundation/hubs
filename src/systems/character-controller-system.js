@@ -312,7 +312,7 @@ export class CharacterControllerSystem {
     const startingFeetPosition = new THREE.Vector3();
     const desiredFeetPosition = new THREE.Vector3();
     return function findPOVPositionAboveNavMesh(startPOVPosition, desiredPOVPosition, outPOVPosition) {
-      const playerHeight = getCurrentPlayerHeight();
+      const playerHeight = getCurrentPlayerHeight(true);
       startingFeetPosition.copy(startPOVPosition);
       startingFeetPosition.y -= playerHeight;
       desiredFeetPosition.copy(desiredPOVPosition);

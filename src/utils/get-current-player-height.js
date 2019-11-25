@@ -1,12 +1,14 @@
 export const getCurrentPlayerHeight = (function() {
   let avatarPOV;
   let avatarRig;
-  return function getCurrentPlayerHeight() {
+  return function getCurrentPlayerHeight(world) {
     avatarPOV = avatarPOV || document.getElementById("avatar-pov-node");
     avatarRig = avatarRig || document.getElementById("avatar-rig");
     avatarPOV.object3D.updateMatrices();
     avatarRig.object3D.updateMatrices();
-    return avatarPOV.object3D.matrix.elements[13]; //local
-    //return avatarPOV.object3D.matrixWorld.elements[13] - avatarRig.object3D.matrixWorld.elements[13]; //world
+    if (world) {
+      return avatarPOV.object3D.matrixWorld.elements[13] - avatarRig.object3D.matrixWorld.elements[13];
+    }
+    return avatarPOV.object3D.matrix.elements[13];
   };
 })();
