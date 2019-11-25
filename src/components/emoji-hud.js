@@ -46,7 +46,7 @@ AFRAME.registerComponent("emoji-hud", {
     spawnerScale: { default: 0.1 },
     spawnedScale: { default: 0.5 },
     camera: { type: "selector" },
-    hudAngle: { default: -0.4 },
+    hudAngle: { default: -0.5 },
     minHudAngle: { default: -0.2 },
     maxHudAngle: { default: 0.7 },
     hudDistance: { default: 0.4 },
@@ -59,9 +59,12 @@ AFRAME.registerComponent("emoji-hud", {
     const offsetVector = new THREE.Vector3();
     return function() {
       this._onFrozen = this._onFrozen.bind(this);
+      this._onThaw = this._onThaw.bind(this);
 
       const width = this.data.spawnerPlatformWidth;
       const spacing = this.data.spawnerPlatformSpacing;
+
+      this.spawnerEntities = [];
 
       for (let i = 0; i < emojis.length; i++) {
         const spawnerEntity = document.createElement("a-entity");
@@ -143,22 +146,37 @@ AFRAME.registerComponent("emoji-hud", {
 
         this.el.appendChild(spawnerEntity);
         this.el.appendChild(cylinder);
+
+        this.spawnerEntities.push(spawnerEntity);
       }
     };
   })(),
 
   play() {
     this.el.sceneEl.addEventListener("stateadded", this._onFrozen);
+    this.el.sceneEl.addEventListener("stateremoved", this._onThaw);
     this._updateOffset();
   },
 
   pause() {
     this.el.sceneEl.removeEventListener("stateadded", this._onFrozen);
+    this.el.sceneEl.removeEventListener("stateremoved", this._onThaw);
   },
 
   _onFrozen(e) {
     if (e.detail === "frozen") {
       this._updateOffset();
+      for (let i = 0; i < this.spawnerEntities.length; i++) {
+        this.spawnerEntities[i].setAttribute("tags", { isHandCollisionTarget: true });
+      }
+    }
+  },
+
+  _onThaw(e) {
+    if (e.detail === "frozen") {
+      for (let i = 0; i < this.spawnerEntities.length; i++) {
+        this.spawnerEntities[i].setAttribute("tags", { isHandCollisionTarget: false });
+      }
     }
   },
 
