@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import cx from "classnames";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
@@ -12,7 +11,6 @@ import IfFeature from "./if-feature";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
-import emojiStyles from "../assets/stylesheets/ui-emoji.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
@@ -175,8 +173,6 @@ class UIRoot extends Component {
   };
 
   state = {
-    emojiState: "empty",
-
     enterInVR: false,
     muteOnEntry: false,
     entered: false,
@@ -337,7 +333,6 @@ class UIRoot extends Component {
     }
 
     this.playerRig = scene.querySelector("#avatar-rig");
-    this.playerRig.addEventListener("emoji_changed", ({ detail }) => this.setState({ emojiState: detail.emojiType }));
   }
 
   componentWillUnmount() {
@@ -498,11 +493,6 @@ class UIRoot extends Component {
     }
 
     this.setState({ exited: true });
-  };
-
-  changeEmoji = type => {
-    const newEmoji = this.state.emojiState === type ? "empty" : type;
-    this.playerRig.setAttribute("player-info", { emojiType: newEmoji });
   };
 
   isWaitingForAutoExit = () => {
@@ -1508,13 +1498,6 @@ class UIRoot extends Component {
     const streamer = getCurrentStreamer();
     const streamerName = streamer && streamer.displayName;
 
-    const EmojiButton = ({ type, state, onClick }) => (
-      <div
-        className={cx(emojiStyles.iconEmoji, emojiStyles[type], { [emojiStyles.active]: state === type })}
-        onClick={() => onClick(type)}
-      />
-    );
-
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
@@ -1776,18 +1759,6 @@ class UIRoot extends Component {
                   <FormattedMessage id="entry.enter-in-vr" />
                 </button>
               )}
-            {this.state.frozen && (
-              <div className={cx(styles.uiInteractive, emojiStyles.emojiPanel)}>
-                <EmojiButton type="smile" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="happy" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="surprise" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="disgust" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="angry" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="sad" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="eww" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="hearts" state={this.state.emojiState} onClick={this.changeEmoji} />
-              </div>
-            )}
             {!this.state.frozen &&
               !watching &&
               !preload && (

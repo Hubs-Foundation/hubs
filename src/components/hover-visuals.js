@@ -16,6 +16,7 @@ AFRAME.registerComponent("hover-visuals", {
     this.hadLeftVisualLastFrame = false;
     this.hadRightVisualLastFrame = false;
     this.uniforms = null;
+    this.sweepParams = [0, 1.0];
   },
   remove() {
     this.uniforms = null;
@@ -65,6 +66,8 @@ AFRAME.registerComponent("hover-visuals", {
 
     for (let i = 0, l = this.uniforms.length; i < l; i++) {
       const uniform = this.uniforms[i];
+      uniform.hubs_SweepParams.value = this.sweepParams;
+
       uniform.hubs_HighlightInteractorTwo.value = !hideVisual;
       uniform.hubs_InteractorTwoPos.value[0] = elements[12];
       uniform.hubs_InteractorTwoPos.value[1] = elements[13];

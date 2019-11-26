@@ -6,7 +6,7 @@ import "./utils/debug-log";
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
-import happyEmoji from "./assets/images/chest-emojis/screen-effect/happy.png";
+import initialBatchImage from "./assets/images/app-icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 
 import "aframe";
@@ -42,6 +42,7 @@ import "./components/mute-mic";
 import "./components/bone-mute-state-indicator";
 import "./components/bone-visibility";
 import "./components/in-world-hud";
+import "./components/emoji";
 import "./components/emoji-hud";
 import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
@@ -175,6 +176,7 @@ THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
 
 import "./components/owned-object-limiter";
+import "./components/owned-object-cleanup-timeout";
 import "./components/set-unowned-body-kinematic";
 import "./components/scalable-when-grabbed";
 import "./components/networked-counter";
@@ -639,7 +641,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // HACK - Trigger initial batch preparation with an invisible object
   scene
     .querySelector("#batch-prep")
-    .setAttribute("media-image", { batch: true, src: happyEmoji, contentType: "image/png" });
+    .setAttribute("media-image", { batch: true, src: initialBatchImage, contentType: "image/png" });
 
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;

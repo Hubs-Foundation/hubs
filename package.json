@@ -49,7 +49,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
     "@mozillareality/three-batch-manager": "^0.1.4",
-    "@mozillareality/three-particle-emitter": "^0.1.5",
+    "@mozillareality/three-particle-emitter": "^0.2.1",
     "aframe": "github:mozillareality/aframe#hubs/master",
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "^1.0.0",

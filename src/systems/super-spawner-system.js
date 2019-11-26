@@ -8,6 +8,7 @@ export class SuperSpawnerSystem {
     const superSpawner = state.hovered && state.hovered.components["super-spawner"];
     if (
       superSpawner &&
+      superSpawner.spawnedMediaScale &&
       !superSpawner.cooldownTimeout &&
       userinput.get(grabPath) &&
       window.APP.hubChannel.can("spawn_and_move_media")
@@ -21,33 +22,23 @@ export class SuperSpawnerSystem {
     entity.object3D.matrix.decompose(entity.object3D.position, entity.object3D.quaternion, entity.object3D.scale);
     const data = superSpawner.data;
 
-    const targetScale = new THREE.Vector3(data.spawnScale.x, data.spawnScale.y, data.spawnScale.z);
-    if (!data.useCustomSpawnScale) {
-      superSpawner.el.object3D.getWorldScale(targetScale);
-    }
-
     const spawnedEntity = addMedia(
       data.src,
       data.template,
       ObjectContentOrigins.SPAWNER,
       null,
       data.resolve,
-      data.fitToBox,
+      true,
       false,
-      targetScale
+      data.mediaOptions
     ).entity;
 
-    if (data.useCustomSpawnPosition) {
-      spawnedEntity.object3D.position.copy(data.spawnPosition);
-    } else {
-      superSpawner.el.object3D.getWorldPosition(spawnedEntity.object3D.position);
-    }
-    if (data.useCustomSpawnRotation) {
-      spawnedEntity.object3D.rotation.copy(data.spawnRotation);
-    } else {
-      superSpawner.el.object3D.getWorldQuaternion(spawnedEntity.object3D.quaternion);
-    }
+    superSpawner.el.object3D.getWorldPosition(spawnedEntity.object3D.position);
+    superSpawner.el.object3D.getWorldQuaternion(spawnedEntity.object3D.quaternion);
     spawnedEntity.object3D.matrixNeedsUpdate = true;
+
+    superSpawner.el.emit("spawned-entity-created", { target: spawnedEntity });
+
     state.held = spawnedEntity;
 
     superSpawner.activateCooldown();
@@ -56,7 +47,10 @@ export class SuperSpawnerSystem {
     spawnedEntity.addEventListener(
       "media-loaded",
       () => {
+        spawnedEntity.object3D.scale.copy(superSpawner.spawnedMediaScale);
+        spawnedEntity.object3D.matrixNeedsUpdate = true;
         state.spawning = false;
+        superSpawner.el.emit("spawned-entity-loaded", { target: spawnedEntity });
       },
       { once: true }
     );

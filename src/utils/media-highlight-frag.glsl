@@ -1,8 +1,8 @@
 if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo || hubs_IsFrozen) {
   float ratio = 0.0;
+  float size = hubs_SweepParams.t - hubs_SweepParams.s;
 
   if (hubs_EnableSweepingEffect) {
-    float size = hubs_SweepParams.t - hubs_SweepParams.s;
     float line = mod(hubs_Time / 500.0 * size, size * 3.0) + hubs_SweepParams.s - size / 3.0;
 
     if (hubs_WorldPosition.y < line) {
@@ -12,7 +12,7 @@ if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo || hubs_IsFrozen)
   }
 
   // Highlight with a gradient falling off with distance.
-  float pulse = 9.0 + 3.0 * (sin(hubs_Time / 1000.0) + 1.0);
+  float pulse = 1.0 / (size + 0.2) * 8.0 + 1.0 / (size + 0.3) * 3.0 * (sin(hubs_Time / 1000.0) + 1.0);
 
   if (hubs_HighlightInteractorOne) {
     float dist1 = distance(hubs_WorldPosition, hubs_InteractorOnePos);
