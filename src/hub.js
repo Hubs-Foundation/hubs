@@ -3,7 +3,7 @@ import "./utils/theme";
 import "@babel/polyfill";
 import "./utils/debug-log";
 
-console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
+console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
 import happyEmoji from "./assets/images/chest-emojis/screen-effect/happy.png";

@@ -30,7 +30,12 @@ export default class AuthChannel {
 
   verifyAuthentication(authTopic, authToken, authPayload) {
     const channel = this.socket.channel(authTopic);
-    return new Promise((resolve, reject) =>
+    return new Promise((resolve, reject) => {
+      channel.onError(() => {
+        channel.leave();
+        reject();
+      });
+
       channel
         .join()
         .receive("ok", () => {
@@ -41,8 +46,8 @@ export default class AuthChannel {
 
           channel.push("auth_verified", { token: authToken, payload: authPayload });
         })
-        .receive("error", reject)
-    );
+        .receive("error", reject);
+    });
   }
 
   async startAuthentication(email, hubChannel) {

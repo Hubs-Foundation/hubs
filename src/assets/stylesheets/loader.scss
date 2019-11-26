@@ -37,9 +37,29 @@
 
 .loading-panel__logo {
   width: 247px;
-  height: 57px;
   margin: 20px 0 10px 0;
   filter: drop-shadow(0 0 4px #888);
+}
+
+.loading-panel__powered-by {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  font-weight: normal;
+  font-size: 0.8em;
+  color: var(--loading-text-color);
+
+  @media (max-width: 768px), (max-height: 480px) {
+    display: none;
+  }
+
+  a {
+    color: var(--loading-text-color);
+  }
+}
+
+.loading-panel__powered-by__prefix {
+  margin-right: 4px;
 }
 
 .loader-center,

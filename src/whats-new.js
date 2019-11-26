@@ -6,7 +6,6 @@ import markdownit from "markdown-it";
 import configs from "./utils/configs";
 import registerTelemetry from "./telemetry";
 import "./assets/stylesheets/whats-new.scss";
-import hubLogo from "./assets/images/hub-preview-light-no-shadow.png";
 
 registerTelemetry("/whats-new", "Hubs What's New");
 
@@ -89,7 +88,7 @@ class WhatsNew extends Component {
         <div className="container">
           <div className="header">
             <a href="/">
-              <img className="logo" src={configs.image("logo", hubLogo)} />
+              <img className="logo" src={configs.image("logo")} />
             </a>
           </div>
           <div className="main">

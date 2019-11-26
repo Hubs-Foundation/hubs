@@ -136,7 +136,6 @@ body {
   justify-content: center;
   position: relative;
   flex: 1;
-  background-image: url('../images/home-hero-background.jpg');
   background-size: cover;
   padding: 1.5em;
 
@@ -274,13 +273,37 @@ body {
   min-height: 80px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
 
   @media (max-width: 768px), (max-height: 480px) {
     background-color: var(--home-footer-background-color);
     padding: 0 0 2em 0;
     margin: 0;
     justify-content: center;
+    flex-direction: column;
+  }
+
+  :local(.powered-by) {
+    text-align: center;
+    align-self: flex-end;
+    color: var(--home-footer-text-color);
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+
+    @media (max-width: 768px), (max-height: 480px) {
+      align-self: center;
+    }
+
+    :local(.prefix) {
+      font-size: 0.8em;
+      margin-bottom: 2px;
+    }
+
+    :local(.link) {
+      color: var(--home-footer-link-color);
+      font-weight: bold;
+    }
   }
 
   :local(.links) {
@@ -289,7 +312,7 @@ body {
     display: flex;
     flex-direction: column;
 
-    :local(.moz-logo) {
+    :local(.company-logo) {
       height: 49px;
       margin-left: 18px;
 

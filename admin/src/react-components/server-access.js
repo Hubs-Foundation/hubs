@@ -60,7 +60,7 @@ class ServerAccessComponent extends Component {
             To generate a code, open the authenticator app and scan the QR code below.
           </Typography>
           {this.state.showQrCode ? (
-            <img src={this.state.qrCodeData} />
+            <img style={{ width: "256px", height: "256px" }} src={this.state.qrCodeData} />
           ) : (
             <Button
               className={this.props.classes.button}
