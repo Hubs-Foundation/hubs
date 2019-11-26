@@ -167,7 +167,7 @@ AFRAME.registerComponent("emoji-hud", {
     if (e.detail === "frozen") {
       this._updateOffset();
       for (let i = 0; i < this.spawnerEntities.length; i++) {
-        this.spawnerEntities[i].setAttribute("tags", { isHandCollisionTarget: true });
+        this.spawnerEntities[i].components.tags.data.isHandCollisionTarget = true;
       }
     }
   },
@@ -175,7 +175,7 @@ AFRAME.registerComponent("emoji-hud", {
   _onThaw(e) {
     if (e.detail === "frozen") {
       for (let i = 0; i < this.spawnerEntities.length; i++) {
-        this.spawnerEntities[i].setAttribute("tags", { isHandCollisionTarget: false });
+        this.spawnerEntities[i].components.tags.data.isHandCollisionTarget = false;
       }
     }
   },
