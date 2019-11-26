@@ -1,5 +1,6 @@
 import { paths } from "./userinput/paths";
-const IDLE_TIMEOUT_MS = 2 * 60 * 60 * 1000;
+const qs = new URLSearchParams(location.search);
+const IDLE_TIMEOUT_MS = (parseInt(qs.get("idle_timeout"), 10) || 2 * 60 * 60) * 1000;
 const INPUT_CHECK_INTERVAL_MS = 1000;
 
 AFRAME.registerSystem("idle-detector", {

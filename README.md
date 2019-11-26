@@ -55,7 +55,8 @@ This will allow the CSP checks to pass that are served up by Reticulum so you ca
 ## Query Params
 
 - `allow_multi` - Allow multiple instances off the app in the same browser session
-- `no_idle` - Disable the idle detector timeout
+- `allow_idle` - Disable the idle detector timeout
+- `idle_timeout` - Idle timeout in seconds
 - `avatar_scale` - Scale your self!
 - `quality` - Either "low" or "high". Force assets to a certain quality level
 - `mobile` - Force mobile mode

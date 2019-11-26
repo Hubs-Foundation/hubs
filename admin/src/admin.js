@@ -33,6 +33,8 @@ import Store from "hubs/src/storage/store";
 import registerTelemetry from "hubs/src/telemetry";
 import { createMuiTheme, withStyles } from "@material-ui/core/styles";
 
+const qs = new URLSearchParams(location.hash.split("?")[1]);
+
 const store = new Store();
 window.APP = { store };
 
@@ -74,7 +76,7 @@ class AdminUI extends Component {
   };
 
   componentDidMount() {
-    if (process.env.NODE_ENV !== "development") detectIdle();
+    if (process.env.NODE_ENV !== "development" || qs.get("idle_timeout")) detectIdle();
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);
   }

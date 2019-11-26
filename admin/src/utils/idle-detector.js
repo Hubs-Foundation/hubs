@@ -1,4 +1,5 @@
-const IDLE_TIMEOUT_MS = 1 * 60 * 60 * 1000;
+const qs = new URLSearchParams(location.hash.split("?")[1]);
+const IDLE_TIMEOUT_MS = (parseInt(qs.get("idle_timeout"), 10) || 1 * 60 * 60) * 1000;
 let idleTimeout;
 
 function resetTimeout() {
