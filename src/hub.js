@@ -134,6 +134,7 @@ import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/permissions";
 import "./systems/exit-on-blur";
+import "./systems/idle-detector";
 import "./systems/camera-tools";
 import "./systems/userinput/userinput";
 import "./systems/userinput/userinput-debug";
@@ -199,8 +200,8 @@ import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
 import { warmSerializeElement } from "./utils/serialize-element";
 
-import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
-import detectConcurrentLoad from "./utils/concurrent-load-detector.js";
+import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect";
+import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
 
@@ -262,6 +263,8 @@ const qsVREntryType = qs.get("vr_entry_type");
 function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
+  const disableAutoExitOnIdle =
+    qsTruthy("allow_idle") || (process.env.NODE_ENV === "development" && !qs.get("idle_timeout"));
   const isCursorHoldingPen =
     scene &&
     (scene.systems.userinput.activeSets.includes(userinputSets.rightCursorHoldingPen) ||
@@ -278,6 +281,7 @@ function mountUI(props = {}) {
               scene,
               isBotMode,
               disableAutoExitOnConcurrentLoad,
+              disableAutoExitOnIdle,
               forcedVREntryType,
               store,
               mediaSearchStore,

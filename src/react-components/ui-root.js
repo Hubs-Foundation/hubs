@@ -117,6 +117,7 @@ class UIRoot extends Component {
     exitScene: PropTypes.func,
     onSendMessage: PropTypes.func,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
+    disableAutoExitOnIdle: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
     isBotMode: PropTypes.bool,
     store: PropTypes.object,
@@ -198,6 +199,7 @@ class UIRoot extends Component {
 
     autoExitTimerStartedAt: null,
     autoExitTimerInterval: null,
+    autoExitMessage: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
     muted: false,
@@ -268,8 +270,26 @@ class UIRoot extends Component {
     }
   }
 
+  onConcurrentLoad = () => {
+    if (this.props.disableAutoExitOnConcurrentLoad) return;
+    this.startAutoExitTimer("autoexit.concurrent_subtitle");
+  };
+
+  onIdleDetected = () => {
+    if (this.props.disableAutoExitOnIdle || this.state.isStreaming) return;
+    this.startAutoExitTimer("autoexit.idle_subtitle");
+  };
+
+  onActivityDetected = () => {
+    if (this.state.autoExitTimerInterval) {
+      this.endAutoExitTimer();
+    }
+  };
+
   componentDidMount() {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
+    window.addEventListener("idle_detected", this.onIdleDetected);
+    window.addEventListener("activity_detected", this.onActivityDetected);
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
       if (this.state.showShareDialog) {
         this.setState({ showShareDialog: false });
@@ -463,8 +483,8 @@ class UIRoot extends Component {
     }
   };
 
-  onConcurrentLoad = () => {
-    if (this.props.disableAutoExitOnConcurrentLoad) return;
+  startAutoExitTimer = autoExitMessage => {
+    if (this.state.autoExitTimerInterval) return;
 
     const autoExitTimerInterval = setInterval(() => {
       let secondsRemainingBeforeAutoExit = Infinity;
@@ -478,7 +498,7 @@ class UIRoot extends Component {
       this.checkForAutoExit();
     }, 500);
 
-    this.setState({ autoExitTimerStartedAt: new Date(), autoExitTimerInterval });
+    this.setState({ autoExitTimerStartedAt: new Date(), autoExitTimerInterval, autoExitMessage });
   };
 
   checkForAutoExit = () => {
@@ -488,6 +508,10 @@ class UIRoot extends Component {
   };
 
   exit = reason => {
+    window.removeEventListener("concurrentload", this.onConcurrentLoad);
+    window.removeEventListener("idle_detected", this.onIdleDetected);
+    window.removeEventListener("activity_detected", this.onActivityDetected);
+
     if (this.props.exitScene) {
       this.props.exitScene(reason);
     }
@@ -504,6 +528,7 @@ class UIRoot extends Component {
     this.setState({
       autoExitTimerStartedAt: null,
       autoExitTimerInterval: null,
+      autoExitMessage: null,
       secondsRemainingBeforeAutoExit: Infinity
     });
   };
@@ -1398,6 +1423,7 @@ class UIRoot extends Component {
       !preload &&
       (this.isWaitingForAutoExit() ? (
         <AutoExitWarning
+          message={this.state.autoExitMessage}
           secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
           onCancel={this.endAutoExitTimer}
         />
