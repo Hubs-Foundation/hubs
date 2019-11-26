@@ -78,7 +78,7 @@ class SceneUI extends Component {
       );
     }
 
-    const { sceneAllowRemixing, isOwner, sceneProjectId, parentScene } = this.props;
+    const { sceneAllowRemixing, isOwner, sceneProjectId, parentScene, sceneId } = this.props;
 
     const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
     const tweetText = `${this.props.sceneName} in ${messages["share-hashtag"]}`;
@@ -194,7 +194,7 @@ class SceneUI extends Component {
                   <a
                     target="_blank"
                     rel="noopener noreferrer"
-                    href={getReticulumFetchUrl(`/spoke/projects/new?sceneId=${sceneProjectId}`)}
+                    href={getReticulumFetchUrl(`/spoke/projects/new?sceneId=${sceneId}`)}
                     className={styles.spokeButton}
                   >
                     <FontAwesomeIcon icon={faCodeBranch} />
