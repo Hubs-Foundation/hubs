@@ -24,7 +24,7 @@ import "./utils/audio-context-fix";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
-import { detectOS, detect } from "detect-browser";
+import { detectOS } from "detect-browser";
 import {
   getReticulumFetchUrl,
   getReticulumMeta,
@@ -603,18 +603,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (detectedOS === "iOS" && !navigator.mediaDevices) {
     remountUI({ showSafariDialog: true });
     return;
-  }
-
-  // HACK: On Safari for iOS & MacOS, if mic permission is not granted, subscriber webrtc negotiation fails.
-  // So we need to insist on microphone grants to continue.
-  const browser = detect();
-  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
-    try {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (e) {
-      remountUI({ showSafariMicDialog: true });
-      return;
-    }
   }
 
   const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
