@@ -6,7 +6,7 @@ import "./utils/debug-log";
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
-import initialBatchImage from "./assets/images/app-icon.png";
+import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 
 import "aframe";
