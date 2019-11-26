@@ -18,7 +18,6 @@ AFRAME.registerComponent("hoverable-visuals", {
     // uniforms and boundingSphere are set from the component responsible for loading the mesh.
     this.uniforms = null;
     this.geometryRadius = 0;
-    this.scene = AFRAME.scenes[0];
 
     this.sweepParams = [0, 0];
   },
@@ -27,7 +26,7 @@ AFRAME.registerComponent("hoverable-visuals", {
     this.boundingBox = null;
 
     // Used when the object is batched
-    const batchManagerSystem = this.scene.systems["hubs-systems"].batchManagerSystem;
+    const batchManagerSystem = this.el.sceneEl.systems["hubs-systems"].batchManagerSystem;
     this.el.object3D.traverse(object => {
       if (!object.material) return;
       forEachMaterial(object, material => {
@@ -55,7 +54,7 @@ AFRAME.registerComponent("hoverable-visuals", {
     const toggling = this.el.sceneEl.systems["hubs-systems"].cursorTogglingSystem;
 
     let interactorOne, interactorTwo;
-    const interaction = AFRAME.scenes[0].systems.interaction;
+    const interaction = this.el.sceneEl.systems.interaction;
     if (!interaction.ready) return; //DOMContentReady workaround
     if (interaction.state.leftHand.hovered === this.el && !interaction.state.leftHand.held) {
       interactorOne = interaction.options.leftHand.entity.object3D;
