@@ -22,17 +22,11 @@ function loadTemplateAndAddToScene(scene, templateId) {
     resolve(content);
   });
 }
-function isOccupiableTeleportWaypoint(data) {
-  return data.canBeClicked && data.canBeOccupied;
-}
-function isUnoccupiableTeleportWaypoint(data) {
-  return data.canBeClicked && !data.canBeOccupied;
-}
 function templatesToLoadForWaypointData(data) {
   const templateIds = [];
-  if (isOccupiableTeleportWaypoint(data)) {
+  if (data.canBeClicked && data.canBeOccupied) {
     templateIds.push("occupiable-waypoint-icon");
-  } else if (isUnoccupiableTeleportWaypoint(data)) {
+  } else if (data.canBeClicked && !data.canBeOccupied) {
     templateIds.push("teleport-waypoint-icon");
   } else if (isUnoccupiableSpawnPoint(data)) {
     //    templateIds.push("teleport-waypoint-icon");
