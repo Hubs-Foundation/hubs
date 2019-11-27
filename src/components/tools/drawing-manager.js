@@ -20,8 +20,8 @@ AFRAME.registerComponent("drawing-manager", {
   },
 
   createDrawing() {
-    if (!this.drawingPromise) {
-      this.drawingPromise = new Promise(resolve => {
+    if (!this.createDrawingPromise) {
+      this.createDrawingPromise = new Promise(resolve => {
         this.drawingEl = document.createElement("a-entity");
         this.drawingEl.setAttribute("networked", "template: #interactable-drawing");
         this.el.sceneEl.appendChild(this.drawingEl);
@@ -37,7 +37,7 @@ AFRAME.registerComponent("drawing-manager", {
         this.drawingEl.addEventListener("componentinitialized", handNetworkedDrawingInit);
       });
     }
-    return this.drawingPromise;
+    return this.createDrawingPromise;
   },
 
   destroyDrawing(networkedDrawing) {
@@ -45,27 +45,32 @@ AFRAME.registerComponent("drawing-manager", {
       this.drawingToPen.delete(this.drawing);
       this.drawing = null;
       this.drawingEl = null;
+      this.createDrawingPromise = null;
+      this.getDrawingPromise = null;
     }
   },
 
   getDrawing(pen) {
     //TODO: future handling of multiple drawings
-    return new Promise((resolve, reject) => {
-      if (!this.drawingEl) {
-        this.createDrawing().then(() => {
+    if (!this.getDrawingPromise) {
+      this.getDrawingPromise = new Promise((resolve, reject) => {
+        if (!this.drawingEl) {
+          this.createDrawing().then(() => {
+            this.drawingToPen.set(this.drawing, pen);
+            resolve(this.drawing);
+          });
+        } else if (
+          this.drawing &&
+          (!this.drawingToPen.has(this.drawing) || this.drawingToPen.get(this.drawing) === pen)
+        ) {
           this.drawingToPen.set(this.drawing, pen);
           resolve(this.drawing);
-        });
-      } else if (
-        this.drawing &&
-        (!this.drawingToPen.has(this.drawing) || this.drawingToPen.get(this.drawing) === pen)
-      ) {
-        this.drawingToPen.set(this.drawing, pen);
-        resolve(this.drawing);
-      } else {
-        reject();
-      }
-    });
+        } else {
+          reject();
+        }
+      });
+    }
+    return this.getDrawingPromise;
   },
 
   returnDrawing(pen) {
