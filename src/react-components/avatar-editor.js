@@ -24,6 +24,18 @@ const defaultEditors = [
     url: "https://tryquilt.io/?gltf=$AVATAR_GLTF"
   }
 ];
+const useEditorWhitelist = true;
+const editorWhitelist = [
+  ...defaultEditors,
+  {
+    name: "Skindex Editor",
+    url: "https://www.minecraftskins.com/skin-editor"
+  },
+  {
+    name: "MinecraftSkins.net Editor",
+    url: "https://www.minecraftskins.net/skineditor"
+  }
+];
 
 const fetchAvatar = async avatarId => {
   const { avatars } = await fetchReticulumAuthenticated(`${AVATARS_API}/${avatarId}`);
@@ -416,13 +428,12 @@ export default class AvatarEditor extends Component {
   );
 
   handleGltfLoaded = gltf => {
-    const json = gltf.parser.json;
-    if (json.extensionsUsed && json.extensionsUsed.indexOf("MOZ_hubs_avatar") !== -1) {
-      const hubsAvatarMeta = json.extensions["MOZ_hubs_avatar"];
-      this.setState({ editorLinks: hubsAvatarMeta.editors || defaultEditors });
-    } else {
-      this.setState({ editorLinks: defaultEditors });
+    const ext = gltf.parser.json.extensions && gltf.parser.json.extensions["MOZ_hubs_avatar"];
+    let editorLinks = (ext && ext.editors) || defaultEditors;
+    if (useEditorWhitelist) {
+      editorLinks = editorLinks.filter(e => editorWhitelist.some(w => w.name === e.name && w.url === e.url));
     }
+    this.setState({ editorLinks });
   };
 
   render() {
