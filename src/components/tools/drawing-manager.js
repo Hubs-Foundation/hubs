@@ -5,27 +5,39 @@
  * @component drawing-manager
  */
 AFRAME.registerComponent("drawing-manager", {
+  schema: {
+    penSpawner: { type: "selector" }
+  },
+
   init() {
     this.el.object3D.visible = false;
     this.drawingToPen = new Map();
+    this.data.penSpawner.addEventListener("spawned-entity-created", () => {
+      if (!this.drawingEl) {
+        this.createDrawing();
+      }
+    });
   },
 
   createDrawing() {
-    return new Promise(resolve => {
-      this.drawingEl = document.createElement("a-entity");
-      this.drawingEl.setAttribute("networked", "template: #interactable-drawing");
-      this.el.sceneEl.appendChild(this.drawingEl);
+    if (!this.drawingPromise) {
+      this.drawingPromise = new Promise(resolve => {
+        this.drawingEl = document.createElement("a-entity");
+        this.drawingEl.setAttribute("networked", "template: #interactable-drawing");
+        this.el.sceneEl.appendChild(this.drawingEl);
 
-      const handNetworkedDrawingInit = e => {
-        if (e.detail.name === "networked-drawing") {
-          this.drawing = this.drawingEl.components["networked-drawing"];
-          this.drawingEl.removeEventListener("componentinitialized", handNetworkedDrawingInit);
-          resolve();
-        }
-      };
+        const handNetworkedDrawingInit = e => {
+          if (e.detail.name === "networked-drawing") {
+            this.drawing = this.drawingEl.components["networked-drawing"];
+            this.drawingEl.removeEventListener("componentinitialized", handNetworkedDrawingInit);
+            resolve();
+          }
+        };
 
-      this.drawingEl.addEventListener("componentinitialized", handNetworkedDrawingInit);
-    });
+        this.drawingEl.addEventListener("componentinitialized", handNetworkedDrawingInit);
+      });
+    }
+    return this.drawingPromise;
   },
 
   destroyDrawing(networkedDrawing) {
