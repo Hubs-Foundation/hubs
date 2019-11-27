@@ -60,9 +60,12 @@ AFRAME.registerComponent("media-loader", {
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
     this.animating = false;
 
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.networkedEl = networkedEl;
-    });
+    NAF.utils
+      .getNetworkedEntity(this.el)
+      .then(networkedEl => {
+        this.networkedEl = networkedEl;
+      })
+      .catch(() => {}); //ignore exception, entity might not be networked
   },
 
   updateScale: (function() {
@@ -483,9 +486,12 @@ AFRAME.registerComponent("media-pager", {
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
 
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.networkedEl = networkedEl;
-    });
+    NAF.utils
+      .getNetworkedEntity(this.el)
+      .then(networkedEl => {
+        this.networkedEl = networkedEl;
+      })
+      .catch(() => {}); //ignore exception, entity might not be networked
 
     this.el.addEventListener("pdf-loaded", async () => {
       await this._ensureUI();
@@ -534,7 +540,7 @@ AFRAME.registerComponent("media-pager", {
   },
 
   onNext() {
-    if (!NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
+    if (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
     const newIndex = Math.min(this.data.index + 1, this.data.maxIndex);
     this.el.setAttribute("media-pdf", "index", newIndex);
     this.el.setAttribute("media-pager", "index", newIndex);
@@ -542,7 +548,7 @@ AFRAME.registerComponent("media-pager", {
   },
 
   onPrev() {
-    if (!NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
+    if (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
     const newIndex = Math.max(this.data.index - 1, 0);
     this.el.setAttribute("media-pdf", "index", newIndex);
     this.el.setAttribute("media-pager", "index", newIndex);

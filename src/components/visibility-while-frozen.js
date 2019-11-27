@@ -47,9 +47,14 @@ AFRAME.registerComponent("visibility-while-frozen", {
       console.error("Didn't find a remote hover target.");
     }
 
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.networkedEl = networkedEl;
-    });
+    if (!this.data.visibleIfOwned) {
+      NAF.utils
+        .getNetworkedEntity(this.el)
+        .then(networkedEl => {
+          this.networkedEl = networkedEl;
+        })
+        .then(() => {}); //ignore exception, entity might not be networked
+    }
 
     this.onStateChange = evt => {
       if (!evt.detail === "frozen") return;
