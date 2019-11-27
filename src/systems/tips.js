@@ -1,5 +1,6 @@
 import { sets } from "./userinput/sets";
 import { paths } from "./userinput/paths";
+import configs from "../utils/configs";
 
 // The output of this system is activeTips which shows, if any, the tips to show at the top
 // and bottom of the screen. There are named tips (eg locomotion) that each have validators.
@@ -322,7 +323,8 @@ const VALIDATORS = {
     return scene.is("muted") ? VALID : INVALID;
   },
   feedback: function(userinput, scene, mediaCounter, store) {
-    if (store && store.state.activity.entryCount >= NUM_ENTRIES_FOR_FEEDBACK_TIP) return VALID;
+    if (configs.feature("show_feedback_ui") && store && store.state.activity.entryCount >= NUM_ENTRIES_FOR_FEEDBACK_TIP)
+      return VALID;
     return INVALID;
   }
 };

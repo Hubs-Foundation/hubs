@@ -46,7 +46,7 @@ do_build() {
   mkdir -p dist/pages
   mv dist/*.html dist/pages
   mv dist/hub.service.js dist/pages
-  mv dist/manifest.webmanifest dist/pages
+  mv dist/schema.toml dist/pages
 }
 
 do_install() {

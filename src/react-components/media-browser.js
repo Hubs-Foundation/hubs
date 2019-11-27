@@ -10,6 +10,8 @@ import { faLink } from "@fortawesome/free-solid-svg-icons/faLink";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/media-browser.scss";
 import { pushHistoryPath, pushHistoryState, sluglessPath } from "../utils/history";
 import { SOURCES } from "../storage/media-search-store";
@@ -125,7 +127,7 @@ class MediaBrowser extends Component {
     const searchParams = new URLSearchParams(props.history.location.search);
     const result = props.mediaSearchStore.result;
 
-    const newState = { result, query: searchParams.get("q") || "" };
+    const newState = { result, query: this.state.query || searchParams.get("q") || "" };
     const urlSource = this.getUrlSource(searchParams);
     newState.showNav = !!(searchParams.get("media_nav") !== "false");
     newState.selectAction = searchParams.get("selectAction") || "spawn";
@@ -182,6 +184,10 @@ class MediaBrowser extends Component {
     this.handleFacetClicked({ params: { filter: "my-avatars" } });
   };
 
+  onCopyScene = () => {
+    this.handleFacetClicked({ params: { filter: "my-scenes" } });
+  };
+
   onShowSimilar = (id, name) => {
     this.handleFacetClicked({ params: { similar_to: id, similar_name: name } });
   };
@@ -197,13 +203,15 @@ class MediaBrowser extends Component {
   };
 
   handleFacetClicked = facet => {
-    const searchParams = this.getSearchClearedSearchParams(true, true, true);
+    this.setState({ query: "" }, () => {
+      const searchParams = this.getSearchClearedSearchParams(true, true, true);
 
-    for (const [k, v] of Object.entries(facet.params)) {
-      searchParams.set(k, v);
-    }
+      for (const [k, v] of Object.entries(facet.params)) {
+        searchParams.set(k, v);
+      }
 
-    pushHistoryPath(this.props.history, this.props.history.location.pathname, searchParams.toString());
+      pushHistoryPath(this.props.history, this.props.history.location.pathname, searchParams.toString());
+    });
   };
 
   getSearchClearedSearchParams = (keepSource, keepNav, keepSelectAction) => {
@@ -346,14 +354,18 @@ class MediaBrowser extends Component {
                   )}
                 {urlSource === "scenes" && (
                   <div className={styles.engineAttributionContents}>
-                    <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
-                    <a href="/spoke" target="_blank" rel="noreferrer noopener">
-                      <FormattedMessage id="media-browser.spoke" />
-                    </a>
-                    |
-                    <a target="_blank" rel="noopener noreferrer" href="/?report">
-                      <FormattedMessage id="media-browser.report_issue" />
-                    </a>
+                    <IfFeature name="enable_spoke">
+                      <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
+                      <a href="/spoke" target="_blank" rel="noreferrer noopener">
+                        <FormattedMessage id="editor-name" />
+                      </a>
+                    </IfFeature>
+                    {configs.feature("enable_spoke") && configs.feature("show_issue_report_link") && "|"}
+                    <IfFeature name="show_issue_report_link">
+                      <a target="_blank" rel="noopener noreferrer" href={configs.link("issue_report", "/?report")}>
+                        <FormattedMessage id="media-browser.report_issue" />
+                      </a>
+                    </IfFeature>
                   </div>
                 )}
               </div>
@@ -429,6 +441,7 @@ class MediaBrowser extends Component {
               urlSource={urlSource}
               handleEntryClicked={this.handleEntryClicked}
               onCopyAvatar={this.onCopyAvatar}
+              onCopyScene={this.onCopyScene}
               onShowSimilar={this.onShowSimilar}
               handlePager={this.handlePager}
             />

@@ -9,7 +9,7 @@ AFRAME.registerComponent("open-media-button", {
   init() {
     this.label = this.el.querySelector("[text]");
 
-    this.updateSrc = () => {
+    this.updateSrc = async () => {
       if (!this.targetEl.parentNode) return; // If removed
       const src = (this.src = this.targetEl.components["media-loader"].data.src);
       const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
@@ -20,11 +20,11 @@ AFRAME.registerComponent("open-media-button", {
       if (visible) {
         let label = "open link";
         if (!this.data.onlyOpenLink) {
-          if (isHubsAvatarUrl(src)) {
+          if (await isHubsAvatarUrl(src)) {
             label = "use avatar";
-          } else if (isHubsSceneUrl(src) && mayChangeScene) {
+          } else if ((await isHubsSceneUrl(src)) && mayChangeScene) {
             label = "use scene";
-          } else if (isHubsRoomUrl(src)) {
+          } else if (await isHubsRoomUrl(src)) {
             label = "visit room";
           }
         }
@@ -40,12 +40,12 @@ AFRAME.registerComponent("open-media-button", {
       if (this.data.onlyOpenLink) {
         await exitImmersive();
         window.open(this.src);
-      } else if (isHubsAvatarUrl(this.src)) {
+      } else if (await isHubsAvatarUrl(this.src)) {
         const avatarId = new URL(this.src).pathname.split("/").pop();
         window.APP.store.update({ profile: { avatarId } });
-      } else if (isHubsSceneUrl(this.src) && mayChangeScene) {
+      } else if ((await isHubsSceneUrl(this.src)) && mayChangeScene) {
         this.el.sceneEl.emit("scene_media_selected", this.src);
-      } else if (isHubsRoomUrl(this.src)) {
+      } else if (await isHubsRoomUrl(this.src)) {
         await exitImmersive();
         location.href = this.src;
       } else {

@@ -36,20 +36,16 @@
 }
 
 :local(.cancel-icon) {
-  color: $darkest-grey;
+  color: var(--text-field-widget-color);
   cursor: pointer;
-
-  &:hover {
-    color: #FF3D7F
-  }
 }
 
 :local(.upload-icon) {
-  color: $action-color;
+  color: $action-label-color;
   cursor: pointer;
 
   &:hover {
-    color: $action-color-light;
+    color: var(--action-label-color-highlight);
   }
 }
 
@@ -69,7 +65,7 @@
   border: none;
   white-space: nowrap;
   background: transparent;
-  color: black;
+  color: var(--text-field-text-color);
   font-size: 1.2em;
   align-self: center;
   overflow: hidden;

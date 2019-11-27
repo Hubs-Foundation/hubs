@@ -21,7 +21,8 @@
     -webkit-user-select: text;
     -ms-user-select: text;
 
-    background-color: $white-transparent;
+    background-color: var(--lobby-overlay-widget-background-color);
+    color: var(--lobby-overlay-widget-text-color);
     margin: 0px 64px 8px 8px;
     font-size: 0.8em;
     padding: 8px 16px;
@@ -67,7 +68,7 @@
     }
 
     a {
-      color: $action-color;
+      color: $action-label-color;
     }
 
     @media (max-width: 1000px) {
@@ -122,7 +123,7 @@
       img {
         height: 35px;
         margin-left: 8px;
-        border: 2px solid rgba(255,255,255,0.15);
+        border: 2px solid var(--lobby-overlay-widget-thumbnail-border-color);
         display: block;
         border-radius: 5px;
       }
@@ -152,8 +153,8 @@
   max-width: 700px;
 
   :local(.presence-log-entry) {
-    background-color: $hud-panel-background;
-    color: $light-text;
+    background-color: var(--hud-panel-background);
+    color: var(--hud-panel-text-color);
     min-height: 18px;
 
     // If this is selectable, tap holding on mobile anywhere on the screen will result
@@ -164,7 +165,7 @@
     -ms-user-select: none;
 
     a {
-      color: white;
+      color: var(--hud-panel-link-color);
     }
   }
 }
@@ -177,8 +178,8 @@
   margin: 0;
 
   :local(.presence-log-entry) {
-    background-color: black;
-    color: white;
+    background-color: var(--spawned-overlay-widget-background-color);
+    color: var(--spawned-overlay-widget-text-color);
     min-height: 18px;
     padding: 8px 16px;
     border-radius: 16px;
@@ -191,7 +192,7 @@
     }
 
     a {
-      color: white;
+      color: var(--spawned-overlay-widget-link-color);
     }
   }
 
@@ -215,7 +216,7 @@
     font-weight: normal;
     font-size: 0.7em;
     white-space: nowrap;
-    color: $light-text;
+    color: var(--spawned-overlay-widget-source-text-color);
   }
 
   :local(.message-source-link) {

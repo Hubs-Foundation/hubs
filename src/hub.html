@@ -12,9 +12,7 @@
     <link rel="manifest" href="/manifest.webmanifest">
     <!-- iOS (for "Add to Homescreen") -->
     <meta name="mobile-web-app-capable" content="yes">
-    <!-- Microsoft Edge (Windows) -->
-    <meta name="application-name" content="Hubs">
-    <title>Room | Hubs by Mozilla</title>
+    <title>Room | App by Company</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700" rel="stylesheet">
     <script>
         // HACK Chrome on iOS breaks completely if we don't do this because a-frame's webvr-polyfill doesn't recognize
@@ -366,11 +364,56 @@
                 </a-entity>
             </template>
 
+            <template id="interactable-emoji-media">
+                <a-entity
+                    class="interactable"
+                    emoji
+                    body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 15;"
+                    owned-object-limiter="counter: #emoji-counter"
+                    owned-object-cleanup-timeout="counter: #emoji-counter; ttl: 3;"
+                    set-unowned-body-kinematic
+                    is-remote-hover-target
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; inspectable: true;"
+                    destroy-at-extreme-distances
+                    scalable-when-grabbed
+                    floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
+                    set-yxz-order
+                    matrix-auto-update
+                    position-at-box-shape-border__freeze="target:.freeze-menu;"
+                    hoverable-visuals
+                >
+                    <a-entity
+                        class="particle-emitter"
+                        particle-emitter="particleCount: 0"
+                        scale="0.25 0.25 0.25"
+                        position="0 0.25 -0.01"
+                    ></a-entity>
+                    <a-entity class="ui interactable-ui">
+                        <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media; visibleIfOwned: false;">
+                            <a-entity
+                                mixin="rounded-button"
+                                is-remote-hover-target
+                                tags="singleActionButton: true;"
+                                hide-when-pinned-and-forbidden="whenPinned: true"
+                                remove-networked-object-button
+                                position="0 -0.375 0.01">
+                                <a-entity
+                                    sprite="name: remove-action.png"
+                                    icon-button="image: remove-action.png; hoverImage: remove-action.png"
+                                    scale="0.165 0.165 0.165"
+                                    position="0 0 0.001"
+                                ></a-entity>
+                            </a-entity>
+                        </a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
             <template id="interactable-pen">
                 <a-entity
                     class="pen interactable"
                     body-helper="type: dynamic; mass: 0.001; collisionFilterGroup: 1; collisionFilterMask: 15; gravity: 0 0 0;"
-                    media-loader="src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;"
+                    gltf-model-plus="src: #drawing-pen; inflate: true;"
                     owned-object-limiter="counter: #pen-counter"
                     set-unowned-body-kinematic
                     is-remote-hover-target
@@ -707,11 +750,6 @@
             </template>
 
             <a-mixin id="rounded-text-button"
-                text-button="
-                    textHoverColor: #ff3464;
-                    textColor: #ff3464;
-                    backgroundHoverColor: #aaa;
-                    backgroundColor: #fff;"
                 slice9="
                     width: 0.45;
                     height: 0.2;
@@ -724,11 +762,6 @@
             ></a-mixin>
 
             <a-mixin id="rounded-button"
-                text-button="
-                    textHoverColor: #ff3464;
-                    textColor: #ff3464;
-                    backgroundHoverColor: #aaa;
-                    backgroundColor: #fff;"
                 slice9="
                     width: 0.2;
                     height: 0.2;
@@ -741,12 +774,6 @@
             ></a-mixin>
 
             <a-mixin id="rounded-text-action-button"
-                text-button="
-                    textHoverColor: #fff;
-                    textColor: #fff;
-                    backgroundColor: #ff3464;
-                    backgroundHoverColor: #fc3545;
-                    "
                 slice9="
                     width: 0.45;
                     height: 0.2;
@@ -759,12 +786,6 @@
             ></a-mixin>
 
             <a-mixin id="rounded-action-button"
-                text-button="
-                    textHoverColor: #fff;
-                    textColor: #fff;
-                    backgroundColor: #ff3464;
-                    backgroundHoverColor: #fc3545;
-                    "
                 slice9="
                     width: 0.2;
                     height: 0.2;
@@ -793,15 +814,6 @@
                     opacity: 1.0;
                     src: #button"
             ></a-mixin>
-
-            <a-mixin id="emoji-button"
-                is-remote-hover-target
-                visibility-while-frozen="requireHoverOnNonMobile: false"
-                sprite
-                position="0.0 0 0.005"
-                tags="singleActionButton: true;"
-                material="alphaTest: 0.1;"
-            ></a-mixin>
         </a-assets>
 
         <!-- HACK - We use this object to trigger initial batch preparation -->
@@ -812,9 +824,11 @@
 
         <a-entity id="pen-counter" networked-counter="max: 10;"></a-entity>
 
+        <a-entity id="emoji-counter" networked-counter="max: 2;"></a-entity>
+
         <a-entity id="camera-counter" networked-counter="max: 1;"></a-entity>
 
-        <a-entity id="drawing-manager" drawing-manager></a-entity>
+        <a-entity id="drawing-manager" drawing-manager="penSpawner: #pen-spawner"></a-entity>
 
         <a-entity
             id="right-cursor-controller"
@@ -981,34 +995,7 @@
                 <a-entity id="stats" stats-plus="false" position="0 0 -1"></a-entity>
             </a-entity>
 
-            <a-entity
-                offset-relative-to="target: #viewing-camera; offset: 0 -0.5 -1.5; on: stateadded; lookAt: true"
-                vr-mode-toggle-visibility
-                vr-mode-toggle-class="class: ui"
-                emoji-hud>
-                <a-entity
-                    is-remote-hover-target
-                    visibility-while-frozen="requireHoverOnNonMobile: false"
-                    slice9="
-                        color: #000000;
-                        width: 1.5;
-                        height: 0.2;
-                        left: 64;
-                        top: 64;
-                        right: 66;
-                        bottom: 66;
-                        opacity: 0.2;
-                        src: #button;">
-                </a-entity>
-                <a-entity mixin="emoji-button" data-emoji="smile"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="happy"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="surprise"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="disgust"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="angry"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="sad"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="eww"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="hearts"></a-entity>
-            </a-entity>
+            <a-entity emoji-hud="camera: #avatar-pov-node;"></a-entity>
 
             <a-entity
                 id="player-left-controller"
@@ -1090,12 +1077,12 @@
         </a-entity>
 
         <a-entity
+            id="pen-spawner"
             action-to-event="path: /actions/spawnPen; event: spawn_pen; withPermission: spawn_drawing"
             super-spawner="
                 template: #interactable-pen;
                 spawnEvent: spawn_pen;
                 animateFromCursor: true;
-                useCustomSpawnScale: true;
                 spawnScale: 0.5, 0.5, 0.5;
                 "
         ></a-entity>

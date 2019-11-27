@@ -203,8 +203,20 @@ const inflateEntities = function(indexToEntityMap, node, templates, isRoot, mode
   return el;
 };
 
-function inflateComponents(inflatedEntity, indexToEntityMap) {
-  inflatedEntity.object3D.traverse(object3D => {
+async function inflateComponents(inflatedEntity, indexToEntityMap) {
+  let isFirstInflation = true;
+  const objectInflations = [];
+
+  inflatedEntity.object3D.traverse(async object3D => {
+    const objectInflation = {};
+    objectInflation.promise = new Promise(resolve => (objectInflation.resolve = resolve));
+    objectInflations.push(objectInflation);
+
+    if (!isFirstInflation) {
+      await objectInflations.shift().promise;
+    }
+    isFirstInflation = false;
+
     const entityComponents = getHubsComponents(object3D);
     const el = object3D.el;
 
@@ -212,11 +224,15 @@ function inflateComponents(inflatedEntity, indexToEntityMap) {
       for (const prop in entityComponents) {
         if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
           const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-          inflator(el, componentName, entityComponents[prop], entityComponents, indexToEntityMap);
+          await inflator(el, componentName, entityComponents[prop], entityComponents, indexToEntityMap);
         }
       }
     }
+
+    objectInflation.resolve();
   });
+
+  await objectInflations.shift().promise;
 }
 
 function attachTemplate(root, name, templateRoot) {
@@ -512,12 +528,14 @@ AFRAME.registerComponent("gltf-model-plus", {
         this.el.appendChild(this.inflatedEl);
 
         object3DToSet = this.inflatedEl.object3D;
+        object3DToSet.visible = false;
+
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
         // Wait one tick for the appended custom elements to be connected before attaching templates
         await nextTick();
         if (src != this.lastSrc) return; // TODO: there must be a nicer pattern for this
 
-        inflateComponents(this.inflatedEl, indexToEntityMap);
+        await inflateComponents(this.inflatedEl, indexToEntityMap);
 
         for (const name in this.templates) {
           attachTemplate(this.el, name, this.templates[name]);
@@ -551,6 +569,7 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       rewires.forEach(f => f());
 
+      object3DToSet.visible = true;
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
       gltfCache.release(src);

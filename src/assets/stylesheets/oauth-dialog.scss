@@ -17,7 +17,7 @@
 :local(.oauth-button) {
   @extend %action-button;
   margin-top: 24px;
-  color: white !important;
+  color: $action-text-color !important;
   flex-direction: row;
 }
 :local(.oauth-twitter-button) {

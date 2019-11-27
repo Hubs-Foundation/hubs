@@ -1,5 +1,3 @@
-import configs from "./utils/configs";
-
 import React from "react";
 import ReactDOM from "react-dom";
 
@@ -10,6 +8,8 @@ import AuthChannel from "./utils/auth-channel";
 import { createAndRedirectToNewHub, connectToReticulum, fetchReticulumAuthenticated } from "./utils/phoenix-utils";
 import Store from "./storage/store";
 import jwtDecode from "jwt-decode";
+import "./utils/theme";
+import configs from "./utils/configs";
 
 const qs = new URLSearchParams(location.search);
 registerTelemetry("/home", "Hubs Home Page");
@@ -36,7 +36,6 @@ const remountUI = function() {
       authToken={qs.get("auth_token")}
       authPayload={qs.get("auth_payload")}
       authOrigin={qs.get("auth_origin")}
-      listSignup={qs.has("list_signup")}
       showSignIn={qs.has("sign_in")}
       signInDestination={qs.get("sign_in_destination")}
       signInReason={qs.get("sign_in_reason")}
@@ -62,7 +61,7 @@ window.addEventListener("beforeinstallprompt", e => {
 
 (async () => {
   if (qs.get("new") !== null) {
-    createAndRedirectToNewHub(null, configs.DEFAULT_SCENE_SID, true);
+    createAndRedirectToNewHub(null, null, true);
     return;
   }
 
@@ -80,6 +79,7 @@ window.addEventListener("beforeinstallprompt", e => {
     retPhxChannel.join().receive("ok", () => {
       retPhxChannel.push("refresh_perms_token").receive("ok", ({ perms_token }) => {
         const perms = jwtDecode(perms_token);
+        configs.setIsAdmin(perms.postgrest_role === "ret_admin");
 
         if (perms.postgrest_role === "ret_admin") {
           showAdmin = true;

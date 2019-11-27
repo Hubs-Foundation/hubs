@@ -1,14 +1,14 @@
 #!/bin/bash
 
-export DEFAULT_SCENE_SID=$1
-export BASE_ASSETS_PATH=$2
+export BASE_ASSETS_PATH=$1
+export SHORTLINK_DOMAIN=$2
 export RETICULUM_SERVER=$3
 export THUMBNAIL_SERVER=$4
 export CORS_PROXY_SERVER=$5
 export NON_CORS_PROXY_DOMAINS=$6
 export TARGET_S3_BUCKET=$7
 export SENTRY_DSN=$8
-export GA_TRACKING_ID=${9}
+export GA_TRACKING_ID=$9
 export BUILD_NUMBER=${10}
 export GIT_COMMIT=${11}
 export BUILD_VERSION="${BUILD_NUMBER} (${GIT_COMMIT})"
@@ -39,8 +39,8 @@ hab svc stop $PKG
 # Apparently these vars come in from jenkins with quotes already
 cat > build-config.toml << EOTOML
 [general]
-default_scene_sid = $DEFAULT_SCENE_SID
 base_assets_path = $BASE_ASSETS_PATH
+shortlink_domain = $SHORTLINK_DOMAIN
 reticulum_server = $RETICULUM_SERVER
 thumbnail_server = $THUMBNAIL_SERVER
 cors_proxy_server = $CORS_PROXY_SERVER
@@ -58,3 +58,4 @@ cat build-config.toml
 sudo /usr/bin/hab-user-toml-install $pkg_name build-config.toml
 hab svc start $PKG
 sudo /usr/bin/hab-pkg-upload results/*.hart
+sudo /usr/bin/hab-ret-pkg-upload results/*.hart

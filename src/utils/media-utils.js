@@ -97,8 +97,9 @@ export const addMedia = (
   contentOrigin,
   contentSubtype = null,
   resolve = false,
-  resize = false,
-  animate = true
+  fitToBox = false,
+  animate = true,
+  mediaOptions = {}
 ) => {
   const scene = AFRAME.scenes[0];
 
@@ -106,32 +107,18 @@ export const addMedia = (
   entity.setAttribute("networked", { template: template });
   const needsToBeUploaded = src instanceof File;
   entity.setAttribute("media-loader", {
-    resize,
+    fitToBox,
     resolve,
     animate,
     src: typeof src === "string" ? src : "",
     contentSubtype,
-    fileIsOwned: !needsToBeUploaded
+    fileIsOwned: !needsToBeUploaded,
+    mediaOptions
   });
 
   entity.object3D.matrixNeedsUpdate = true;
 
   scene.appendChild(entity);
-
-  const fireLoadingTimeout = setTimeout(() => {
-    scene.emit("media-loading", { src: src });
-  }, 100);
-
-  ["model-loaded", "video-loaded", "image-loaded", "pdf-loaded"].forEach(eventName => {
-    entity.addEventListener(
-      eventName,
-      async () => {
-        clearTimeout(fireLoadingTimeout);
-        scene.emit("media-loaded", { src: src });
-      },
-      { once: true }
-    );
-  });
 
   const orientation = new Promise(function(resolve) {
     if (needsToBeUploaded) {
@@ -184,6 +171,7 @@ export function injectCustomShaderChunks(obj) {
     if (!object.material) return;
 
     object.material = mapMaterials(object, material => {
+      if (material.hubs_InjectedCustomShaderChunks) return material;
       if (!validMaterials.includes(material.type)) {
         return material;
       }
@@ -223,7 +211,7 @@ export function injectCustomShaderChunks(obj) {
           // Used in the fragment shader below.
           hubs_WorldPosition = wt.xyz;
         }
-      `;
+        `;
 
         const vlines = shader.vertexShader.split("\n");
         const vindex = vlines.findIndex(line => vertexRegex.test(line));
@@ -251,6 +239,7 @@ export function injectCustomShaderChunks(obj) {
         shaderUniforms.push(shader.uniforms);
       };
       newMaterial.needsUpdate = true;
+      newMaterial.hubs_InjectedCustomShaderChunks = true;
       return newMaterial;
     });
   });
@@ -328,13 +317,31 @@ export function addAndArrangeMedia(el, media, contentSubtype, snapCount, mirrorO
 
 export const textureLoader = new HubsTextureLoader().setCrossOrigin("anonymous");
 
-export async function createImageTexture(url) {
-  const texture = new THREE.Texture();
+export async function createImageTexture(url, filter) {
+  let texture;
 
-  try {
-    await textureLoader.loadTextureAsync(texture, url);
-  } catch (e) {
-    throw new Error(`'${url}' could not be fetched (Error code: ${e.status}; Response: ${e.statusText})`);
+  if (filter) {
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    const load = new Promise(res => image.addEventListener("load", res, { once: true }));
+    image.src = url;
+    await load;
+    const canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(image, 0, 0);
+    await filter(ctx, image.width, image.height);
+
+    texture = new THREE.CanvasTexture(canvas);
+  } else {
+    texture = new THREE.Texture();
+
+    try {
+      await textureLoader.loadTextureAsync(texture, url);
+    } catch (e) {
+      throw new Error(`'${url}' could not be fetched (Error code: ${e.status}; Response: ${e.statusText})`);
+    }
   }
 
   texture.encoding = THREE.sRGBEncoding;

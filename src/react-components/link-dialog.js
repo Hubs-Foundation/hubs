@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
+
+import configs from "../utils/configs";
 import LinkDialogHeader from "../assets/images/link_dialog_header.svg";
 import { WithHoverSound } from "./wrap-with-audio";
 
@@ -44,11 +46,14 @@ export default class LinkDialog extends Component {
               <div>
                 <FormattedMessage id="link.in_your_browser" />
               </div>
-              <WithHoverSound>
-                <a href="https://hub.link" className={styles.domain} target="_blank" rel="noopener noreferrer">
-                  hub.link
-                </a>
-              </WithHoverSound>
+              <a
+                href={`https://${configs.SHORTLINK_DOMAIN}`}
+                className={styles.domain}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {configs.SHORTLINK_DOMAIN}
+              </a>
               <div>
                 <FormattedMessage id="link.enter_code" />
               </div>

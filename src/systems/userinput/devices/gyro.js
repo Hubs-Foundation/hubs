@@ -58,7 +58,7 @@ export class GyroDevice {
   }
 
   write(frame) {
-    if (!this.hasPolyfill) {
+    if (!this.hasPolyfill || !this.vrDisplay || !this.frameData) {
       return;
     }
     const hmdEuler = this.hmdEuler;

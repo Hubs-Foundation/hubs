@@ -1,7 +1,9 @@
+@import 'root-vars';
 @import 'shared';
 
 body {
   margin: 0;
+  background-color: var(--full-panel-background-color);
 }
 
 :local(.avatar-landing) {
@@ -21,6 +23,7 @@ body {
   :local(.logo) {
     width: 150px;
     margin-bottom: 22px;
+    filter: drop-shadow(0 0 4px #888);
 
     @media (min-width: 500px) {
       position: absolute;
@@ -47,12 +50,12 @@ body {
   :local(.title) {
     @extend %top-title;
     width: 100%;
-    color: black;
+    color: var(--panel-text-color);
     text-align: center;
   }
 
   :local(.selected-message) {
-    color: $grey-text;
+    color: var(--panel-subtext-color);
     margin-top: 16px;
     height: 48px;
   }
@@ -68,7 +71,7 @@ body {
     min-height: max-content;
     margin-top: 16px;
     &:disabled {
-      background-color: $action-color-light;
+      background-color: $action-color-disabled;
       cursor: default;
     }
   }
@@ -85,29 +88,29 @@ body {
   :local(.copy-tip) {
     position: absolute;
     padding: 5px 20px;
-    background: $darker-grey;
+    background: var(--tile-button-tip-background-color);
     top: 5px;
     right: 10px;
     border-radius: 20px;
     height: 20px;
     line-height: 20px;
-    color: $light-text;
+    color: var(--tile-button-tip-text-color);
   }
 
   :local(.edit-avatar) {
     position: absolute;
     top: 6px;
     right: 7px;
-    color: black;
-    background: #ffffffde;
+    color: var(--tile-button-icon-color);
+    background: var(--tile-button-background-color);
     border-radius: 30px;
     width: 30px;
     height: 30px;
     text-align: center;
-    line-height: 27px;
+    line-height: 30px;
     &:hover {
       background: $action-color;
-      color: white;
+      color: var(--tile-button-icon-hover-color);
     }
   }
 }

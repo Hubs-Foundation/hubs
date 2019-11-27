@@ -1,16 +1,16 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import cx from "classnames";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import screenfull from "screenfull";
 
+import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
-import emojiStyles from "../assets/stylesheets/ui-emoji.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
@@ -36,12 +36,10 @@ import MediaBrowser from "./media-browser";
 import CreateObjectDialog from "./create-object-dialog.js";
 import ChangeSceneDialog from "./change-scene-dialog.js";
 import AvatarUrlDialog from "./avatar-url-dialog.js";
-import HelpDialog from "./help-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
 import LinkDialog from "./link-dialog.js";
 import SafariDialog from "./safari-dialog.js";
-import SafariMicDialog from "./safari-mic-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
 import RoomSettingsDialog from "./room-settings-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
@@ -118,6 +116,7 @@ class UIRoot extends Component {
     exitScene: PropTypes.func,
     onSendMessage: PropTypes.func,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
+    disableAutoExitOnIdle: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
     isBotMode: PropTypes.bool,
     store: PropTypes.object,
@@ -150,7 +149,6 @@ class UIRoot extends Component {
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
     showSafariDialog: PropTypes.bool,
-    showSafariMicDialog: PropTypes.bool,
     showWebAssemblyDialog: PropTypes.bool,
     showOAuthDialog: PropTypes.bool,
     onCloseOAuthDialog: PropTypes.func,
@@ -174,8 +172,6 @@ class UIRoot extends Component {
   };
 
   state = {
-    emojiState: "empty",
-
     enterInVR: false,
     muteOnEntry: false,
     entered: false,
@@ -201,6 +197,7 @@ class UIRoot extends Component {
 
     autoExitTimerStartedAt: null,
     autoExitTimerInterval: null,
+    autoExitMessage: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
     muted: false,
@@ -222,9 +219,6 @@ class UIRoot extends Component {
   constructor(props) {
     super(props);
 
-    if (props.showSafariMicDialog) {
-      this.state.dialog = <SafariMicDialog closable={false} />;
-    }
     if (props.showSafariDialog) {
       this.state.dialog = <SafariDialog closable={false} />;
     }
@@ -271,8 +265,26 @@ class UIRoot extends Component {
     }
   }
 
+  onConcurrentLoad = () => {
+    if (this.props.disableAutoExitOnConcurrentLoad) return;
+    this.startAutoExitTimer("autoexit.concurrent_subtitle");
+  };
+
+  onIdleDetected = () => {
+    if (this.props.disableAutoExitOnIdle || this.state.isStreaming) return;
+    this.startAutoExitTimer("autoexit.idle_subtitle");
+  };
+
+  onActivityDetected = () => {
+    if (this.state.autoExitTimerInterval) {
+      this.endAutoExitTimer();
+    }
+  };
+
   componentDidMount() {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
+    window.addEventListener("idle_detected", this.onIdleDetected);
+    window.addEventListener("activity_detected", this.onActivityDetected);
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
       if (this.state.showShareDialog) {
         this.setState({ showShareDialog: false });
@@ -336,7 +348,6 @@ class UIRoot extends Component {
     }
 
     this.playerRig = scene.querySelector("#avatar-rig");
-    this.playerRig.addEventListener("emoji_changed", ({ detail }) => this.setState({ emojiState: detail.emojiType }));
   }
 
   componentWillUnmount() {
@@ -467,8 +478,8 @@ class UIRoot extends Component {
     }
   };
 
-  onConcurrentLoad = () => {
-    if (this.props.disableAutoExitOnConcurrentLoad) return;
+  startAutoExitTimer = autoExitMessage => {
+    if (this.state.autoExitTimerInterval) return;
 
     const autoExitTimerInterval = setInterval(() => {
       let secondsRemainingBeforeAutoExit = Infinity;
@@ -482,7 +493,7 @@ class UIRoot extends Component {
       this.checkForAutoExit();
     }, 500);
 
-    this.setState({ autoExitTimerStartedAt: new Date(), autoExitTimerInterval });
+    this.setState({ autoExitTimerStartedAt: new Date(), autoExitTimerInterval, autoExitMessage });
   };
 
   checkForAutoExit = () => {
@@ -492,16 +503,15 @@ class UIRoot extends Component {
   };
 
   exit = reason => {
+    window.removeEventListener("concurrentload", this.onConcurrentLoad);
+    window.removeEventListener("idle_detected", this.onIdleDetected);
+    window.removeEventListener("activity_detected", this.onActivityDetected);
+
     if (this.props.exitScene) {
       this.props.exitScene(reason);
     }
 
     this.setState({ exited: true });
-  };
-
-  changeEmoji = type => {
-    const newEmoji = this.state.emojiState === type ? "empty" : type;
-    this.playerRig.setAttribute("player-info", { emojiType: newEmoji });
   };
 
   isWaitingForAutoExit = () => {
@@ -513,6 +523,7 @@ class UIRoot extends Component {
     this.setState({
       autoExitTimerStartedAt: null,
       autoExitTimerInterval: null,
+      autoExitMessage: null,
       secondsRemainingBeforeAutoExit: Infinity
     });
   };
@@ -839,7 +850,7 @@ class UIRoot extends Component {
   };
 
   onMiniInviteClicked = () => {
-    const link = "https://hub.link/" + this.props.hubId;
+    const link = `https://${configs.SHORTLINK_DOMAIN}/${this.props.hubId}`;
 
     this.setState({ miniInviteActivated: true });
     setTimeout(() => {
@@ -917,23 +928,28 @@ class UIRoot extends Component {
       subtitle = (
         <div>
           Sorry, this room is no longer available.
-          <p />A room may be closed if we receive reports that it violates our{" "}
-          <WithHoverSound>
-            <a target="_blank" rel="noreferrer noopener" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
+          <p />
+          <IfFeature name="show_terms">
+            A room may be closed if we receive reports that it violates our{" "}
+            <a
+              target="_blank"
+              rel="noreferrer noopener"
+              href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+            >
               Terms of Use
             </a>
-          </WithHoverSound>
-          .<br />
+            .<br />
+          </IfFeature>
           If you have questions, contact us at{" "}
-          <WithHoverSound>
-            <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>
-          </WithHoverSound>
+          <a href={`mailto:${messages["contact-email"]}`}>
+            <FormattedMessage id="contact-email" />
+          </a>
           .<p />
-          If you&apos;d like to run your own server, hubs&apos;s source code is available on{" "}
-          <WithHoverSound>
+          <IfFeature name="show_source_link">
+            If you&apos;d like to run your own server, Hubs&apos;s source code is available on{" "}
             <a href="https://github.com/mozilla/hubs">GitHub</a>
-          </WithHoverSound>
-          .
+            .
+          </IfFeature>
         </div>
       );
     } else if (this.props.platformUnsupportedReason === "no_data_channels") {
@@ -949,9 +965,9 @@ class UIRoot extends Component {
               WebRTC Data Channels
             </a>
           </WithHoverSound>
-          , which is required to use Hubs.
+          , which is required to use {messages["app-name"]}.
           <br />
-          If you&quot;d like to use Hubs with Oculus or SteamVR, you can{" "}
+          If you&quot;d like to use {messages["app-name"]} with Oculus or SteamVR, you can{" "}
           <WithHoverSound>
             <a href="https://www.mozilla.org/firefox" rel="noreferrer noopener">
               Download Firefox
@@ -983,7 +999,7 @@ class UIRoot extends Component {
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="exited-panel">
-          <img className="exited-panel__logo" src="../assets/images/logo.svg" />
+          <img className="exited-panel__logo" src={configs.image("logo")} />
           <div className="exited-panel__subtitle">{subtitle}</div>
         </div>
       </IntlProvider>
@@ -993,7 +1009,7 @@ class UIRoot extends Component {
   renderBotMode = () => {
     return (
       <div className="loading-panel">
-        <img className="loading-panel__logo" src="../assets/images/logo.svg" />
+        <img className="loading-panel__logo" src={configs.image("logo")} />
         <input type="file" id="bot-audio-input" accept="audio/*" />
         <input type="file" id="bot-data-input" accept="application/json" />
       </div>
@@ -1359,7 +1375,7 @@ class UIRoot extends Component {
     const isLoading =
       !preload &&
       (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) &&
-      !(this.props.showSafariMicDialog || this.props.showSafariDialog || this.props.showWebAssemblyDialog);
+      !(this.props.showSafariDialog || this.props.showWebAssemblyDialog);
 
     const rootStyles = {
       [styles.ui]: true,
@@ -1402,6 +1418,7 @@ class UIRoot extends Component {
       !preload &&
       (this.isWaitingForAutoExit() ? (
         <AutoExitWarning
+          message={this.state.autoExitMessage}
           secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
           onCancel={this.endAutoExitTimer}
         />
@@ -1501,13 +1518,6 @@ class UIRoot extends Component {
 
     const streamer = getCurrentStreamer();
     const streamerName = streamer && streamer.displayName;
-
-    const EmojiButton = ({ type, state, onClick }) => (
-      <div
-        className={cx(emojiStyles.iconEmoji, emojiStyles[type], { [emojiStyles.active]: state === type })}
-        onClick={() => onClick(type)}
-      />
-    );
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1623,12 +1633,6 @@ class UIRoot extends Component {
               stateValue="close_room"
               history={this.props.history}
               render={() => this.renderDialog(CloseRoomDialog, { onConfirm: () => this.props.hubChannel.closeHub() })}
-            />
-            <StateRoute
-              stateKey="modal"
-              stateValue="help"
-              history={this.props.history}
-              render={() => this.renderDialog(HelpDialog)}
             />
             <StateRoute
               stateKey="modal"
@@ -1776,18 +1780,6 @@ class UIRoot extends Component {
                   <FormattedMessage id="entry.enter-in-vr" />
                 </button>
               )}
-            {this.state.frozen && (
-              <div className={cx(styles.uiInteractive, emojiStyles.emojiPanel)}>
-                <EmojiButton type="smile" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="happy" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="surprise" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="disgust" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="angry" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="sad" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="eww" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="hearts" state={this.state.emojiState} onClick={this.changeEmoji} />
-              </div>
-            )}
             {!this.state.frozen &&
               !watching &&
               !preload && (
@@ -1844,24 +1836,20 @@ class UIRoot extends Component {
                     !hasTopTip &&
                     entered &&
                     !streaming && (
-                      <WithHoverSound>
-                        <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
-                          <span>
-                            {this.state.miniInviteActivated
-                              ? navigator.share
-                                ? "sharing..."
-                                : "copied!"
-                              : "hub.link/" + this.props.hubId}
-                          </span>
-                        </button>
-                      </WithHoverSound>
+                      <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
+                        <span>
+                          {this.state.miniInviteActivated
+                            ? navigator.share
+                              ? "sharing..."
+                              : "copied!"
+                            : `${configs.SHORTLINK_DOMAIN}/` + this.props.hubId}
+                        </span>
+                      </button>
                     )}
                   {showVREntryButton && (
-                    <WithHoverSound>
-                      <button className={inviteStyles.enterButton} onClick={() => exit2DInterstitialAndEnterVR(true)}>
-                        <FormattedMessage id="entry.enter-in-vr" />
-                      </button>
-                    </WithHoverSound>
+                    <button className={inviteStyles.enterButton} onClick={() => exit2DInterstitialAndEnterVR(true)}>
+                      <FormattedMessage id="entry.enter-in-vr" />
+                    </button>
                   )}
                   {embed && (
                     <a href={baseUrl} className={inviteStyles.enterButton} target="_blank" rel="noopener noreferrer">
@@ -2014,11 +2002,13 @@ class UIRoot extends Component {
                   }}
                 />
                 {!watching && !streaming ? (
-                  <div className={styles.nagCornerButton}>
-                    <button onClick={() => this.pushHistoryState("modal", "feedback")}>
-                      <FormattedMessage id="feedback.prompt" />
-                    </button>
-                  </div>
+                  <IfFeature name="show_feedback_ui">
+                    <div className={styles.nagCornerButton}>
+                      <button onClick={() => this.pushHistoryState("modal", "feedback")}>
+                        <FormattedMessage id="feedback.prompt" />
+                      </button>
+                    </div>
+                  </IfFeature>
                 ) : (
                   <div className={styles.nagCornerButton}>
                     <button onClick={() => this.setState({ hide: true })}>

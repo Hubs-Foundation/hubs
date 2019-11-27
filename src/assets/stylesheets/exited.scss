@@ -1,7 +1,7 @@
 .exited-panel {
   position: absolute;
-  color: white;
-  background-color: black;
+  color: var(--post-session-splash-text-color);
+  background-color: var(--post-session-splash-background-color);
   width: 100%;
   height: 100%;
   display: flex;
@@ -11,6 +11,7 @@
 
   &__logo {
     width: 150px;
+    filter: drop-shadow(0 0 4px #888);
   }
 
   &__subtitle {
@@ -19,7 +20,7 @@
     text-align: center;
     
     a {
-      color: $light-text;
+      color: var(--post-session-splash-secondary-action-color);
     }
   }
 }
@@ -35,6 +36,7 @@
 
   &__title {
     @extend %top-title;
+    text-align: center;
   }
   
   &__subtitle {

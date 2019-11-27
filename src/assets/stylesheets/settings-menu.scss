@@ -22,7 +22,7 @@
   position: relative;
   margin: 0px 18px 0px 10px;
   font-size: 1.1em;
-  color: $darker-grey;
+  color: var(--panel-icon-color);
 
   img {
     position: absolute;
@@ -39,8 +39,8 @@
 
 :local(.bottom-links-main) {
   font-size: 0.8em;
-  border-top: 1px solid $light-grey;
-  border-bottom: 1px solid $light-grey;
+  border-top: 1px solid var(--panel-rule-color);
+  border-bottom: 1px solid var(--panel-rule-color);
   margin-top: 12px;
   display: grid;
   grid-template-columns: 33% 33% 33%;
@@ -51,23 +51,23 @@
   width: 90%;
 
   button, a {
-    color: black;
+    color: var(--panel-text-color);
     margin: 2px 12px;
     display: flex;
     justify-content: center;
     align-items: center;
     white-space: nowrap;
     font-weight: bold;
-    text-decoration-color: $dark-grey;
+    text-decoration-color: var(--panel-link-underline-color);
   }
 
   button {
     @extend %default-font;
     @extend %link-button;
     font-weight: bold;
-    text-decoration-color: $dark-grey;
+    text-decoration-color: var(--panel-subtitle-color);
     padding: 0;
-    justify-content: flex-start;
+    justify-content: center;
     text-align: center;
   }
 }
@@ -78,12 +78,13 @@
   grid-template-columns: 33% 33% 33%;
   padding-top: 12px;
   font-weight: normal;
+  min-width: 300px;
 
   a, button {
-    color: $dark-grey;
+    color: var(--panel-subtitle-color);
     margin: 2px 12px;
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
     white-space: nowrap;
     text-decoration: none;
@@ -93,9 +94,9 @@
     @extend %default-font;
     @extend %link-button;
     font-weight: normal;
-    text-decoration-color: $dark-grey;
+    text-decoration-color: var(--panel-subtitle-color);
     padding: 0;
-    justify-content: flex-start;
+    justify-content: center;
     text-align: center;
   }
 }

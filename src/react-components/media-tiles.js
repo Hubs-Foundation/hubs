@@ -13,10 +13,12 @@ import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
 
+import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/media-browser.scss";
 import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import StateLink from "./state-link";
 import { remixAvatar } from "../utils/avatar-utils";
+import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
 
 dayjs.extend(relativeTime);
 
@@ -34,6 +36,7 @@ class MediaTiles extends Component {
     handleEntryClicked: PropTypes.func,
     handlePager: PropTypes.func,
     onCopyAvatar: PropTypes.func,
+    onCopyScene: PropTypes.func,
     onShowSimilar: PropTypes.func
   };
 
@@ -41,6 +44,14 @@ class MediaTiles extends Component {
     e.preventDefault();
     await remixAvatar(entry.id, entry.name);
     this.props.onCopyAvatar();
+  };
+
+  handleCopyScene = async (e, entry) => {
+    e.preventDefault();
+    await fetchReticulumAuthenticated("/api/v1/scenes", "POST", {
+      parent_scene_id: entry.id
+    });
+    this.props.onCopyScene();
   };
 
   render() {
@@ -60,15 +71,21 @@ class MediaTiles extends Component {
           {(urlSource === "avatars" || urlSource === "scenes") && (
             <div
               style={{ width: `${createTileWidth}px`, height: `${createTileHeight}px` }}
-              className={classNames(styles.tile, styles.createTile)}
+              className={classNames({
+                [styles.tile]: true,
+                [styles.createTile]: true,
+                [styles.createAvatarTile]: urlSource === "avatars"
+              })}
             >
               {urlSource === "scenes" ? (
-                <a href="/spoke/new" rel="noopener noreferrer" target="_blank" className={styles.tileLink}>
-                  <div className={styles.tileContent}>
-                    <FontAwesomeIcon icon={faPlus} />
-                    <FormattedMessage id="media-browser.create-scene" />
-                  </div>
-                </a>
+                <IfFeature name="enable_spoke">
+                  <a href="/spoke/new" rel="noopener noreferrer" target="_blank" className={styles.tileLink}>
+                    <div className={styles.tileContent}>
+                      <FontAwesomeIcon icon={faPlus} />
+                      <FormattedMessage id="media-browser.create-scene" />
+                    </div>
+                  </a>
+                </IfFeature>
               ) : (
                 <a
                   onClick={e => {
@@ -149,6 +166,8 @@ class MediaTiles extends Component {
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
           muted
           autoPlay
+          playsInline
+          loop
           src={proxiedUrlFor(imageSrc)}
         />
       ) : (
@@ -200,6 +219,12 @@ class MediaTiles extends Component {
           {entry.type === "avatar_listing" &&
             entry.allow_remixing && (
               <a onClick={e => this.handleCopyAvatar(e, entry)} title="Copy to my avatars">
+                <FontAwesomeIcon icon={faClone} />
+              </a>
+            )}
+          {entry.type === "scene_listing" &&
+            entry.allow_remixing && (
+              <a onClick={e => this.handleCopyScene(e, entry)} title="Copy to my scenes">
                 <FontAwesomeIcon icon={faClone} />
               </a>
             )}

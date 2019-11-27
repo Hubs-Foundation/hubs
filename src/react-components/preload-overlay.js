@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import hubLogo from "../assets/images/hub-preview-white.png";
-import styles from "../assets/stylesheets/preload-overlay.scss";
 import { FormattedMessage } from "react-intl";
+
+import configs from "../utils/configs";
+import styles from "../assets/stylesheets/preload-overlay.scss";
 
 const isMobile = AFRAME.utils.device.isMobile();
 
@@ -21,7 +22,7 @@ export default class PreloadOverlay extends Component {
           {this.props.hubScene && <img className={styles.screenshot} src={this.props.hubScene.screenshot_url} />}
         </div>
         <a href="/" target="_blank" rel="noopener noreferrer" className={styles.logo}>
-          <img src={hubLogo} />
+          <img src={configs.image("logo")} />
         </a>
         <div className={styles.mainPanel}>
           <div className={styles.hubName}>{this.props.hubName}</div>

@@ -1,3 +1,4 @@
+@import 'root-vars';
 @import 'shared';
 
 @import 'loader';
@@ -9,7 +10,7 @@
 @import 'info-dialog';
 
 body {
-  background-color: #d7e5ec;
+  background-color: var(--loading-background-color);
 }
 
 body.vr-mode-stretch {
