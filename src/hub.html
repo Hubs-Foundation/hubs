@@ -828,7 +828,7 @@
 
         <a-entity id="camera-counter" networked-counter="max: 1;"></a-entity>
 
-        <a-entity id="drawing-manager" drawing-manager></a-entity>
+        <a-entity id="drawing-manager" drawing-manager="penSpawner: #pen-spawner"></a-entity>
 
         <a-entity
             id="right-cursor-controller"
@@ -1077,6 +1077,7 @@
         </a-entity>
 
         <a-entity
+            id="pen-spawner"
             action-to-event="path: /actions/spawnPen; event: spawn_pen; withPermission: spawn_drawing"
             super-spawner="
                 template: #interactable-pen;
