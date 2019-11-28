@@ -148,8 +148,8 @@ AFRAME.registerComponent("pen", {
     this.penLaserAttributesUpdated = false;
     this.penLaserAttributes = {
       color: "#FF0033",
+      laserVisible: false,
       laserInHand: false,
-      remoteLaserVisible: false,
       laserOrigin: { x: 0, y: 0, z: 0 },
       remoteLaserOrigin: { x: 0, y: 0, z: 0 },
       laserTarget: { x: 0, y: 0, z: 0 }
@@ -204,20 +204,20 @@ AFRAME.registerComponent("pen", {
 
       this._updatePenTip(intersection);
 
-      const remoteLaserVisible = this.data.drawMode === DRAW_MODE.PROJECTION && !!intersection;
-      const laserInHand = this.el.sceneEl.is("vr-mode") && !!intersection && remoteLaserVisible;
+      const laserVisible = this.data.drawMode === DRAW_MODE.PROJECTION && !!intersection;
+      const laserInHand = this.el.sceneEl.is("vr-mode") && laserVisible;
+
+      if (this.penLaserAttributes.laserVisible !== laserVisible) {
+        this.penLaserAttributes.laserVisible = laserVisible;
+        this.penLaserAttributesUpdated = true;
+      }
 
       if (this.penLaserAttributes.laserInHand !== laserInHand) {
         this.penLaserAttributes.laserInHand = laserInHand;
         this.penLaserAttributesUpdated = true;
       }
 
-      if (this.penLaserAttributes.remoteLaserVisible !== remoteLaserVisible) {
-        this.penLaserAttributes.remoteLaserVisible = remoteLaserVisible;
-        this.penLaserAttributesUpdated = true;
-      }
-
-      if (remoteLaserVisible || laserInHand) {
+      if (laserVisible) {
         this._updateLaser(cursorPose, intersection);
       }
 
