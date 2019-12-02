@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import cx from "classnames";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
@@ -12,7 +11,6 @@ import IfFeature from "./if-feature";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
-import emojiStyles from "../assets/stylesheets/ui-emoji.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
@@ -42,7 +40,6 @@ import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
 import LinkDialog from "./link-dialog.js";
 import SafariDialog from "./safari-dialog.js";
-import SafariMicDialog from "./safari-mic-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
 import RoomSettingsDialog from "./room-settings-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
@@ -119,6 +116,7 @@ class UIRoot extends Component {
     exitScene: PropTypes.func,
     onSendMessage: PropTypes.func,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
+    disableAutoExitOnIdle: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
     isBotMode: PropTypes.bool,
     store: PropTypes.object,
@@ -151,7 +149,6 @@ class UIRoot extends Component {
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
     showSafariDialog: PropTypes.bool,
-    showSafariMicDialog: PropTypes.bool,
     showWebAssemblyDialog: PropTypes.bool,
     showOAuthDialog: PropTypes.bool,
     onCloseOAuthDialog: PropTypes.func,
@@ -175,8 +172,6 @@ class UIRoot extends Component {
   };
 
   state = {
-    emojiState: "empty",
-
     enterInVR: false,
     muteOnEntry: false,
     entered: false,
@@ -202,6 +197,7 @@ class UIRoot extends Component {
 
     autoExitTimerStartedAt: null,
     autoExitTimerInterval: null,
+    autoExitMessage: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
     muted: false,
@@ -223,9 +219,6 @@ class UIRoot extends Component {
   constructor(props) {
     super(props);
 
-    if (props.showSafariMicDialog) {
-      this.state.dialog = <SafariMicDialog closable={false} />;
-    }
     if (props.showSafariDialog) {
       this.state.dialog = <SafariDialog closable={false} />;
     }
@@ -272,8 +265,26 @@ class UIRoot extends Component {
     }
   }
 
+  onConcurrentLoad = () => {
+    if (this.props.disableAutoExitOnConcurrentLoad) return;
+    this.startAutoExitTimer("autoexit.concurrent_subtitle");
+  };
+
+  onIdleDetected = () => {
+    if (this.props.disableAutoExitOnIdle || this.state.isStreaming) return;
+    this.startAutoExitTimer("autoexit.idle_subtitle");
+  };
+
+  onActivityDetected = () => {
+    if (this.state.autoExitTimerInterval) {
+      this.endAutoExitTimer();
+    }
+  };
+
   componentDidMount() {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
+    window.addEventListener("idle_detected", this.onIdleDetected);
+    window.addEventListener("activity_detected", this.onActivityDetected);
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
       if (this.state.showShareDialog) {
         this.setState({ showShareDialog: false });
@@ -337,7 +348,6 @@ class UIRoot extends Component {
     }
 
     this.playerRig = scene.querySelector("#avatar-rig");
-    this.playerRig.addEventListener("emoji_changed", ({ detail }) => this.setState({ emojiState: detail.emojiType }));
   }
 
   componentWillUnmount() {
@@ -468,8 +478,8 @@ class UIRoot extends Component {
     }
   };
 
-  onConcurrentLoad = () => {
-    if (this.props.disableAutoExitOnConcurrentLoad) return;
+  startAutoExitTimer = autoExitMessage => {
+    if (this.state.autoExitTimerInterval) return;
 
     const autoExitTimerInterval = setInterval(() => {
       let secondsRemainingBeforeAutoExit = Infinity;
@@ -483,7 +493,7 @@ class UIRoot extends Component {
       this.checkForAutoExit();
     }, 500);
 
-    this.setState({ autoExitTimerStartedAt: new Date(), autoExitTimerInterval });
+    this.setState({ autoExitTimerStartedAt: new Date(), autoExitTimerInterval, autoExitMessage });
   };
 
   checkForAutoExit = () => {
@@ -493,16 +503,15 @@ class UIRoot extends Component {
   };
 
   exit = reason => {
+    window.removeEventListener("concurrentload", this.onConcurrentLoad);
+    window.removeEventListener("idle_detected", this.onIdleDetected);
+    window.removeEventListener("activity_detected", this.onActivityDetected);
+
     if (this.props.exitScene) {
       this.props.exitScene(reason);
     }
 
     this.setState({ exited: true });
-  };
-
-  changeEmoji = type => {
-    const newEmoji = this.state.emojiState === type ? "empty" : type;
-    this.playerRig.setAttribute("player-info", { emojiType: newEmoji });
   };
 
   isWaitingForAutoExit = () => {
@@ -514,6 +523,7 @@ class UIRoot extends Component {
     this.setState({
       autoExitTimerStartedAt: null,
       autoExitTimerInterval: null,
+      autoExitMessage: null,
       secondsRemainingBeforeAutoExit: Infinity
     });
   };
@@ -1364,7 +1374,7 @@ class UIRoot extends Component {
     const isLoading =
       !preload &&
       (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) &&
-      !(this.props.showSafariMicDialog || this.props.showSafariDialog || this.props.showWebAssemblyDialog);
+      !(this.props.showSafariDialog || this.props.showWebAssemblyDialog);
 
     const rootStyles = {
       [styles.ui]: true,
@@ -1407,6 +1417,7 @@ class UIRoot extends Component {
       !preload &&
       (this.isWaitingForAutoExit() ? (
         <AutoExitWarning
+          message={this.state.autoExitMessage}
           secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
           onCancel={this.endAutoExitTimer}
         />
@@ -1506,13 +1517,6 @@ class UIRoot extends Component {
 
     const streamer = getCurrentStreamer();
     const streamerName = streamer && streamer.displayName;
-
-    const EmojiButton = ({ type, state, onClick }) => (
-      <div
-        className={cx(emojiStyles.iconEmoji, emojiStyles[type], { [emojiStyles.active]: state === type })}
-        onClick={() => onClick(type)}
-      />
-    );
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1775,18 +1779,6 @@ class UIRoot extends Component {
                   <FormattedMessage id="entry.enter-in-vr" />
                 </button>
               )}
-            {this.state.frozen && (
-              <div className={cx(styles.uiInteractive, emojiStyles.emojiPanel)}>
-                <EmojiButton type="smile" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="happy" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="surprise" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="disgust" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="angry" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="sad" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="eww" state={this.state.emojiState} onClick={this.changeEmoji} />
-                <EmojiButton type="hearts" state={this.state.emojiState} onClick={this.changeEmoji} />
-              </div>
-            )}
             {!this.state.frozen &&
               !watching &&
               !preload && (

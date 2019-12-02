@@ -6,7 +6,7 @@ import "./utils/debug-log";
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
-import happyEmoji from "./assets/images/chest-emojis/screen-effect/happy.png";
+import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 
 import "aframe";
@@ -24,7 +24,7 @@ import "./utils/audio-context-fix";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
-import { detectOS, detect } from "detect-browser";
+import { detectOS } from "detect-browser";
 import {
   getReticulumFetchUrl,
   getReticulumMeta,
@@ -43,6 +43,7 @@ import "./components/mute-mic";
 import "./components/bone-mute-state-indicator";
 import "./components/bone-visibility";
 import "./components/in-world-hud";
+import "./components/emoji";
 import "./components/emoji-hud";
 import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
@@ -133,6 +134,7 @@ import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/permissions";
 import "./systems/exit-on-blur";
+import "./systems/idle-detector";
 import "./systems/camera-tools";
 import "./systems/userinput/userinput";
 import "./systems/userinput/userinput-debug";
@@ -175,6 +177,7 @@ THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
 
 import "./components/owned-object-limiter";
+import "./components/owned-object-cleanup-timeout";
 import "./components/set-unowned-body-kinematic";
 import "./components/scalable-when-grabbed";
 import "./components/networked-counter";
@@ -197,8 +200,8 @@ import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
 import { warmSerializeElement } from "./utils/serialize-element";
 
-import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
-import detectConcurrentLoad from "./utils/concurrent-load-detector.js";
+import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect";
+import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
 
@@ -260,6 +263,8 @@ const qsVREntryType = qs.get("vr_entry_type");
 function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
+  const disableAutoExitOnIdle =
+    qsTruthy("allow_idle") || (process.env.NODE_ENV === "development" && !qs.get("idle_timeout"));
   const isCursorHoldingPen =
     scene &&
     (scene.systems.userinput.activeSets.includes(userinputSets.rightCursorHoldingPen) ||
@@ -276,6 +281,7 @@ function mountUI(props = {}) {
               scene,
               isBotMode,
               disableAutoExitOnConcurrentLoad,
+              disableAutoExitOnIdle,
               forcedVREntryType,
               store,
               mediaSearchStore,
@@ -601,18 +607,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // HACK: On Safari for iOS & MacOS, if mic permission is not granted, subscriber webrtc negotiation fails.
-  // So we need to insist on microphone grants to continue.
-  const browser = detect();
-  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
-    try {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (e) {
-      remountUI({ showSafariMicDialog: true });
-      return;
-    }
-  }
-
   const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
 
@@ -641,7 +635,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // HACK - Trigger initial batch preparation with an invisible object
   scene
     .querySelector("#batch-prep")
-    .setAttribute("media-image", { batch: true, src: happyEmoji, contentType: "image/png" });
+    .setAttribute("media-image", { batch: true, src: initialBatchImage, contentType: "image/png" });
 
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;

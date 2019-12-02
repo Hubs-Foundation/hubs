@@ -57,7 +57,11 @@ export function setMatrixWorld(object3D, m) {
     object3D.applyMatrix(IDENTITY); // hack around our matrix optimizations
   }
   object3D.matrixWorld.copy(m);
-  object3D.matrix = object3D.matrix.getInverse(object3D.parent.matrixWorld).multiply(object3D.matrixWorld);
+  if (object3D.parent) {
+    object3D.matrix = object3D.matrix.getInverse(object3D.parent.matrixWorld).multiply(object3D.matrixWorld);
+  } else {
+    object3D.matrix.copy(object3D.matrixWorld);
+  }
   object3D.matrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
   object3D.childrenNeedMatrixWorldUpdate = true;
 }

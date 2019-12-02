@@ -184,6 +184,10 @@ class MediaBrowser extends Component {
     this.handleFacetClicked({ params: { filter: "my-avatars" } });
   };
 
+  onCopyScene = () => {
+    this.handleFacetClicked({ params: { filter: "my-scenes" } });
+  };
+
   onShowSimilar = (id, name) => {
     this.handleFacetClicked({ params: { similar_to: id, similar_name: name } });
   };
@@ -437,6 +441,7 @@ class MediaBrowser extends Component {
               urlSource={urlSource}
               handleEntryClicked={this.handleEntryClicked}
               onCopyAvatar={this.onCopyAvatar}
+              onCopyScene={this.onCopyScene}
               onShowSimilar={this.onShowSimilar}
               handlePager={this.handlePager}
             />

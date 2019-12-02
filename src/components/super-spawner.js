@@ -3,8 +3,17 @@ import { addMedia } from "../utils/media-utils";
 import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
 import { paths } from "../systems/userinput/paths";
+import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
+
+function setNonNullVec3Components(target, values) {
+  target.set(
+    values.x === null ? target.x : values.x,
+    values.y === null ? target.y : values.y,
+    values.z === null ? target.z : values.z
+  );
+}
 
 /**
  * Spawns networked objects when grabbed or when a specified event is fired.
@@ -29,32 +38,14 @@ AFRAME.registerComponent("super-spawner", {
     template: { default: "" },
 
     /**
-     * Spawn the object at a custom position, rather than at the center of the spanwer.
-     */
-    useCustomSpawnPosition: { default: false },
-    spawnPosition: { type: "vec3" },
-
-    /**
-     * Spawn the object with a custom orientation, rather than copying that of the spawner.
-     */
-    useCustomSpawnRotation: { default: false },
-    spawnRotation: { type: "vec4" },
-
-    /**
      * Spawn the object with a custom scale, rather than copying that of the spawner.
      */
-    useCustomSpawnScale: { default: false },
-    spawnScale: { type: "vec3" },
+    spawnScale: { type: "vec3", default: { x: NaN, y: NaN, z: NaN } },
 
     /**
      * The spawner will become invisible and ungrabbable for this ammount of time after being grabbed. This can prevent rapidly spawning objects.
      */
     spawnCooldown: { default: 1 },
-
-    /**
-     * Center the spawned object on the hand that grabbed it after it finishes loading. By default the object will be grabbed relative to where the spawner was grabbed
-     */
-    centerSpawnedObject: { default: false },
 
     /**
      * Optional event to listen for to spawn an object on the preferred superHand
@@ -64,7 +55,13 @@ AFRAME.registerComponent("super-spawner", {
     /**
      * If true, will spawn the object at the cursor and animate it into the hand.
      */
-    animateFromCursor: { type: "boolean" }
+    animateFromCursor: { type: "boolean" },
+
+    mediaOptions: {
+      default: {},
+      parse: v => (typeof v === "object" ? v : JSON.parse(v)),
+      stringify: JSON.stringify
+    }
   },
 
   init() {
@@ -76,15 +73,21 @@ AFRAME.registerComponent("super-spawner", {
     this.sceneEl = this.el.sceneEl;
 
     this.tempSpawnHandPosition = new THREE.Vector3();
+
+    this.handleMediaLoaded = this.handleMediaLoaded.bind(this);
+
+    this.spawnedMediaScale = null;
   },
 
   play() {
+    this.el.addEventListener("media-loaded", this.handleMediaLoaded);
     if (this.data.spawnEvent) {
       this.el.sceneEl.addEventListener(this.data.spawnEvent, this.onSpawnEvent);
     }
   },
 
   pause() {
+    this.el.removeEventListener("media-loaded", this.handleMediaLoaded);
     if (this.data.spawnEvent) {
       this.el.sceneEl.removeEventListener(this.data.spawnEvent, this.onSpawnEvent);
     }
@@ -96,19 +99,39 @@ AFRAME.registerComponent("super-spawner", {
     }
   },
 
+  handleMediaLoaded(e) {
+    const spawnedEntity = e.target;
+    this.spawnedMediaScale = spawnedEntity.object3D.scale.clone();
+    setNonNullVec3Components(this.spawnedMediaScale, this.data.spawnScale);
+
+    const boxSize =
+      spawnedEntity.components["media-image"] ||
+      spawnedEntity.components["media-video"] ||
+      spawnedEntity.components["media-pdf"]
+        ? 1
+        : 0.5;
+
+    const scaleCoefficient = getScaleCoefficient(boxSize, getBox(spawnedEntity, spawnedEntity.object3D));
+    this.spawnedMediaScale.divideScalar(scaleCoefficient);
+  },
+
   async onSpawnEvent(e) {
     if (this.cooldownTimeout || !this.el.sceneEl.is("entered")) {
       return;
     }
 
-    const entity = addMedia(
+    const spawnedEntity = addMedia(
       this.data.src,
       this.data.template,
       ObjectContentOrigins.SPAWNER,
       null,
       this.data.resolve,
       false,
-      this.data.useCustomSpawnScale ? this.data.spawnScale : { x: 1, y: 1, z: 1 }
+      {
+        x: this.data.spawnScale.x === null ? 1 : this.data.spawnScale.x,
+        y: this.data.spawnScale.y === null ? 1 : this.data.spawnScale.y,
+        z: this.data.spawnScale.z === null ? 1 : this.data.spawnScale.z
+      }
     ).entity;
 
     const interaction = this.el.sceneEl.systems.interaction;
@@ -117,9 +140,11 @@ AFRAME.registerComponent("super-spawner", {
 
     const left = cursor.el.id.indexOf("right") === -1;
     const hand = left ? interaction.options.leftHand.entity.object3D : interaction.options.rightHand.entity.object3D;
-    cursor.getWorldPosition(entity.object3D.position);
-    cursor.getWorldQuaternion(entity.object3D.quaternion);
-    entity.object3D.matrixNeedsUpdate = true;
+    cursor.getWorldPosition(spawnedEntity.object3D.position);
+    cursor.getWorldQuaternion(spawnedEntity.object3D.quaternion);
+    spawnedEntity.object3D.matrixNeedsUpdate = true;
+
+    this.el.emit("spawned-entity-created", { target: spawnedEntity });
 
     const userinput = AFRAME.scenes[0].systems.userinput;
     const willAnimateFromCursor =
@@ -127,27 +152,31 @@ AFRAME.registerComponent("super-spawner", {
       (userinput.get(paths.actions.rightHand.matrix) || userinput.get(paths.actions.leftHand.matrix));
     if (!willAnimateFromCursor) {
       if (left) {
-        interaction.state.leftRemote.held = entity;
+        interaction.state.leftRemote.held = spawnedEntity;
         interaction.state.leftRemote.spawning = true;
       } else {
-        interaction.state.rightRemote.held = entity;
+        interaction.state.rightRemote.held = spawnedEntity;
         interaction.state.rightRemote.spawning = true;
       }
     }
     this.activateCooldown();
-    await waitForEvent("model-loaded", entity);
+    await waitForEvent("model-loaded", spawnedEntity);
 
-    cursor.getWorldPosition(entity.object3D.position);
-    cursor.getWorldQuaternion(entity.object3D.quaternion);
-    entity.object3D.matrixNeedsUpdate = true;
+    cursor.getWorldPosition(spawnedEntity.object3D.position);
+    cursor.getWorldQuaternion(spawnedEntity.object3D.quaternion);
+    spawnedEntity.object3D.matrixNeedsUpdate = true;
 
     if (willAnimateFromCursor) {
       hand.getWorldPosition(this.handPosition);
-      entity.setAttribute("animation__spawn-at-cursor", {
+      spawnedEntity.setAttribute("animation__spawn-at-cursor", {
         property: "position",
         delay: 500,
         dur: 1500,
-        from: { x: entity.object3D.position.x, y: entity.object3D.position.y, z: entity.object3D.position.z },
+        from: {
+          x: spawnedEntity.object3D.position.x,
+          y: spawnedEntity.object3D.position.y,
+          z: spawnedEntity.object3D.position.z
+        },
         to: { x: this.handPosition.x, y: this.handPosition.y, z: this.handPosition.z },
         easing: "easeInOutBack"
       });
@@ -158,9 +187,17 @@ AFRAME.registerComponent("super-spawner", {
         interaction.state.rightRemote.spawning = false;
       }
     }
-    if (entity.components["body-helper"].body) {
-      entity.components["body-helper"].body.syncToPhysics(true);
+    if (spawnedEntity.components["body-helper"].body) {
+      spawnedEntity.components["body-helper"].body.syncToPhysics(true);
     }
+
+    spawnedEntity.addEventListener(
+      "media-loaded",
+      () => {
+        this.el.emit("spawned-entity-loaded", { target: spawnedEntity });
+      },
+      { once: true }
+    );
   },
 
   activateCooldown() {

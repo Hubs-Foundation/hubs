@@ -12,7 +12,7 @@ const AutoExitWarning = props => (
       <FormattedMessage id="autoexit.title_units" />
     </div>
     <div className="autoexit-panel__subtitle">
-      <FormattedMessage id="autoexit.subtitle" />
+      <FormattedMessage id={props.message} />
     </div>
     <WithHoverSound>
       <div className="autoexit-panel__cancel-button" onClick={props.onCancel}>
@@ -23,6 +23,7 @@ const AutoExitWarning = props => (
 );
 
 AutoExitWarning.propTypes = {
+  message: PropTypes.string,
   secondsRemaining: PropTypes.number,
   onCancel: PropTypes.func
 };
