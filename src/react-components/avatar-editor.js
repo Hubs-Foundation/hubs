@@ -530,7 +530,7 @@ export default class AvatarEditor extends Component {
                       key={name}
                       target="_blank"
                       rel="noopener noreferrer"
-                      href={url.replace("$AVATAR_GLTF", this.state.previewGltfUrl)}
+                      href={url.replace("$AVATAR_GLTF", encodeURIComponent(this.state.previewGltfUrl))}
                     >
                       {name}
                     </a>
