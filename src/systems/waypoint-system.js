@@ -1,11 +1,6 @@
 import { setMatrixWorld } from "../utils/three-utils";
-import { DebugDrawRect } from "./waypoint-tests";
 import { isTagged } from "../components/tags";
 import { applyPersistentSync } from "../utils/permissions-utils";
-const DEBUG = false;
-function debugDrawRect(color) {
-  return DEBUG && DebugDrawRect(color);
-}
 function isMineOrTakeOwnership(el) {
   return NAF.utils.isMine(el) || NAF.utils.takeOwnership(el);
 }
@@ -63,7 +58,6 @@ function isOccupiedByMe(waypointComponent) {
 }
 function unoccupyWaypoint(waypointComponent) {
   waypointComponent.el.setAttribute("waypoint", { isOccupied: false });
-  debugDrawRect("yellow");
 }
 function unoccupyWaypoints(waypointComponents) {
   waypointComponents.filter(isOccupiedByMe).forEach(unoccupyWaypoint);
@@ -93,7 +87,6 @@ export class WaypointSystem {
   }
 
   releaseAnyOccupiedWaypoints() {
-    debugDrawRect("lightyellow");
     unoccupyWaypoints(this.ready);
     if (this.currentWaypoint) {
       this.currentWaypoint.el.removeEventListener("ownership-lost", this.lostOwnershipOfWaypoint);
@@ -104,7 +97,6 @@ export class WaypointSystem {
     return function onInteract() {
       this.releaseAnyOccupiedWaypoints();
       waypointComponent.el.object3D.updateMatrices();
-      debugDrawRect("lightpurple");
       this.characterController.enqueueWaypointTravelTo(
         waypointComponent.el.object3D.matrixWorld,
         false,
@@ -124,9 +116,6 @@ export class WaypointSystem {
             waypointComponent.data
           );
           unoccupyWaypoints(previouslyOccupiedWaypoints.filter(wp => wp !== waypointComponent));
-          debugDrawRect("lightgreen");
-        } else {
-          debugDrawRect("lightred");
         }
       });
     }.bind(this);
@@ -275,9 +264,6 @@ export class WaypointSystem {
         true,
         waypointComponent.data
       );
-      debugDrawRect("lightblue");
-    } else {
-      debugDrawRect("lightred");
     }
     return waypointComponent;
   }
@@ -292,7 +278,6 @@ export class WaypointSystem {
       this.currentMoveToSpawnResolve = this.nextMoveToSpawnResolve;
       this.nextMoveToSpawn = null;
       this.nextMoveToSpawnResolve = null;
-      debugDrawRect("orange");
 
       let resolvedWaypointOrNull;
 
@@ -309,7 +294,6 @@ export class WaypointSystem {
               waypointComponent.data
             );
             resolvedWaypointOrNull = waypointComponent;
-            debugDrawRect("lightgreen");
           } else if (waypointComponentOrNull === null) {
             resolvedWaypointOrNull = this.moveToUnoccupiableSpawnPoint();
           }
