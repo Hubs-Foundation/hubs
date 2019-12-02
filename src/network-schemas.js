@@ -275,7 +275,7 @@ function registerNetworkSchemas() {
       {
         selector: "#pen",
         component: "pen-laser",
-        property: "remoteLaserVisible"
+        property: "laserVisible"
       },
       {
         selector: "#pen",
