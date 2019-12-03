@@ -174,7 +174,6 @@ class UIRoot extends Component {
 
   state = {
     enterInVR: false,
-    muteOnEntry: false,
     entered: false,
     dialog: null,
     showShareDialog: false,
@@ -352,13 +351,22 @@ class UIRoot extends Component {
     this.playerRig = scene.querySelector("#avatar-rig");
   }
 
+  UNSAFE_componentWillMount() {
+    this.props.store.addEventListener("statechanged", this.storeUpdated);
+  }
+
   componentWillUnmount() {
     this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
     this.props.scene.removeEventListener("exit", this.exitEventHandler);
     this.props.scene.removeEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.removeEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.removeEventListener("share_video_failed", this.onShareVideoFailed);
+    this.props.store.removeEventListener("statechanged", this.storeUpdated);
   }
+
+  storeUpdated = () => {
+    this.forceUpdate();
+  };
 
   showContextualSignInDialog = () => {
     const {
@@ -742,7 +750,8 @@ class UIRoot extends Component {
     // Push the new history state before going into VR, otherwise menu button will take us back
     clearHistoryState(this.props.history);
 
-    await this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.muteOnEntry);
+    const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
+    await this.props.enterScene(this.state.mediaStream, this.state.enterInVR, muteOnEntry);
 
     this.setState({ entered: true, showShareDialog: false });
 
@@ -1237,6 +1246,7 @@ class UIRoot extends Component {
 
   renderAudioSetupPanel = () => {
     const subtitleId = isMobilePhoneOrVR ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
+    const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
     return (
       <div className="audio-setup-panel">
         <div
@@ -1268,7 +1278,7 @@ class UIRoot extends Component {
             <MicLevelWidget
               scene={this.props.scene}
               hasAudioTrack={!!this.state.audioTrack}
-              muteOnEntry={this.state.muteOnEntry}
+              muteOnEntry={muteOnEntry}
             />
             <OutputLevelWidget />
           </div>
@@ -1319,8 +1329,12 @@ class UIRoot extends Component {
           <input
             id="mute-on-entry"
             type="checkbox"
-            onChange={() => this.setState({ muteOnEntry: !this.state.muteOnEntry })}
-            checked={this.state.muteOnEntry}
+            onChange={() =>
+              this.props.store.update({
+                preferences: { muteMicOnEntry: !this.props.store.state.preferences["muteMicOnEntry"] }
+              })
+            }
+            checked={this.props.store.state.preferences["muteMicOnEntry"] || false}
           />
           <label htmlFor="mute-on-entry">
             <FormattedMessage id="entry.mute-on-entry" />
