@@ -69,6 +69,7 @@ export class PhysicsSystem {
       for (let i = 0; i < this.bodies.length; i++) {
         if (this.bodies[i].type === TYPE.DYNAMIC) {
           this.bodies[i].syncFromPhysics();
+          this.bodies[i].object3D.matrixNeedsUpdate = true;
         }
       }
     }
