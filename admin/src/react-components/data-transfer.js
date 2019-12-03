@@ -57,7 +57,7 @@ const workerScript = (workerDomain, assetsDomain) => {
         return;
       }
       // This is a weird workaround that seems to stem from the cloudflare worker receiving the wrong url
-      targetUrl = targetPath.replace(/^http(s?):\/([^/])/, "http$1://$2");
+      targetUrl = targetPath.replace(/^http(s?):\\/([^/])/, "http$1://$2");
   
       if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
         targetUrl = proxyUrl.protocol + "//" + targetUrl;
