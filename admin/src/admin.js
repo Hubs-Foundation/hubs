@@ -10,9 +10,9 @@ import {
   getSchemas as getItaSchemas,
   setAuthToken as setItaAuthToken
 } from "./utils/ita";
+import { detectIdle } from "./utils/idle-detector";
 import { connectToReticulum } from "hubs/src/utils/phoenix-utils";
-import { Admin, Layout, Resource } from "react-admin";
-//import { EditGuesser, CreateGuesser } from "react-admin";
+import { AppBar, Admin, Layout, Resource } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
 import { AdminMenu } from "./react-components/admin-menu";
 import { SceneList, SceneEdit } from "./react-components/scenes";
@@ -28,8 +28,12 @@ import { ServiceEditor, AppConfigEditor } from "./react-components/service-edito
 import { ServerAccess } from "./react-components/server-access";
 import { DataTransfer } from "./react-components/data-transfer";
 import { ImportContent } from "./react-components/import-content";
+import { AutoEndSessionDialog } from "./react-components/auto-end-session-dialog";
 import Store from "hubs/src/storage/store";
 import registerTelemetry from "hubs/src/telemetry";
+import { createMuiTheme, withStyles } from "@material-ui/core/styles";
+
+const qs = new URLSearchParams(location.hash.split("?")[1]);
 
 const store = new Store();
 window.APP = { store };
@@ -38,62 +42,118 @@ registerTelemetry("/admin", "Hubs Admin");
 
 let itaSchemas;
 
+const theme = createMuiTheme({
+  overrides: {
+    MuiDrawer: {
+      docked: {
+        background: "#222222",
+        height: "100vh"
+      }
+    }
+  },
+  palette: {
+    primary: {
+      main: "#FF3464"
+    },
+    secondary: {
+      main: "#000000"
+    }
+  },
+  typography: {
+    fontFamily: "Open Sans, sans-serif"
+  }
+});
+
 class AdminUI extends Component {
   static propTypes = {
     dataProvider: PropTypes.func,
-    authProvider: PropTypes.func
+    authProvider: PropTypes.func,
+    onEndSession: PropTypes.func
   };
 
-  constructor(props) {
-    super(props);
+  state = {
+    showAutoEndSessionDialog: false
+  };
+
+  componentDidMount() {
+    if (process.env.NODE_ENV !== "development" || qs.get("idle_timeout")) detectIdle();
+    window.addEventListener("idle_detected", this.onIdleDetected);
+    window.addEventListener("activity_detected", this.onActivityDetected);
   }
+
+  componentWillUnmount() {
+    window.removeEventListener("idle_detected", this.onIdleDetected);
+    window.removeEventListener("activity_detected", this.onActivityDetected);
+  }
+
+  onIdleDetected = () => {
+    if (this.state.showAutoEndSessionDialog) return;
+    this.setState({ showAutoEndSessionDialog: true });
+  };
+
+  onActivityDetected = () => {
+    if (!this.state.showAutoEndSessionDialog || this.state.sessionEnded) return;
+    this.setState({ showAutoEndSessionDialog: false });
+  };
 
   render() {
     return (
-      <Admin
-        dashboard={SystemEditor}
-        appLayout={this.props.layout}
-        customRoutes={this.props.customRoutes}
-        dataProvider={this.props.dataProvider}
-        authProvider={this.props.authProvider}
-        loginPage={false}
-        logoutButton={() => <span />}
-      >
-        <Resource name="pending_scenes" list={PendingSceneList} />
-        <Resource
-          name="scene_listings"
-          list={SceneListingList}
-          edit={SceneListingEdit}
-          options={{ label: "Approved scenes" }}
-        />
-        <Resource
-          name="featured_scene_listings"
-          list={FeaturedSceneListingList}
-          edit={FeaturedSceneListingEdit}
-          options={{ label: "Featured scenes" }}
-        />
+      <>
+        <Admin
+          dashboard={SystemEditor}
+          appLayout={this.props.layout}
+          customRoutes={this.props.customRoutes}
+          dataProvider={this.props.dataProvider}
+          authProvider={this.props.authProvider}
+          loginPage={false}
+          logoutButton={() => <span />}
+          theme={theme}
+        >
+          <Resource name="pending_scenes" list={PendingSceneList} />
+          <Resource
+            name="scene_listings"
+            list={SceneListingList}
+            edit={SceneListingEdit}
+            options={{ label: "Approved scenes" }}
+          />
+          <Resource
+            name="featured_scene_listings"
+            list={FeaturedSceneListingList}
+            edit={FeaturedSceneListingEdit}
+            options={{ label: "Featured scenes" }}
+          />
 
-        <Resource name="pending_avatars" list={AvatarList} />
-        <Resource
-          name="avatar_listings"
-          list={AvatarListingList}
-          edit={AvatarListingEdit}
-          options={{ label: "Approved avatars" }}
-        />
-        <Resource
-          name="featured_avatar_listings"
-          list={AvatarListingList}
-          edit={AvatarListingEdit}
-          options={{ label: "Featured avatars" }}
-        />
+          <Resource name="pending_avatars" list={AvatarList} />
+          <Resource
+            name="avatar_listings"
+            list={AvatarListingList}
+            edit={AvatarListingEdit}
+            options={{ label: "Approved avatars" }}
+          />
+          <Resource
+            name="featured_avatar_listings"
+            list={AvatarListingList}
+            edit={AvatarListingEdit}
+            options={{ label: "Featured avatars" }}
+          />
 
-        <Resource name="accounts" list={AccountList} edit={AccountEdit} />
-        <Resource name="scenes" list={SceneList} edit={SceneEdit} />
-        <Resource name="avatars" list={AvatarList} edit={AvatarEdit} />
-        <Resource name="owned_files" />
+          <Resource name="accounts" list={AccountList} edit={AccountEdit} />
+          <Resource name="scenes" list={SceneList} edit={SceneEdit} />
+          <Resource name="avatars" list={AvatarList} edit={AvatarEdit} />
+          <Resource name="owned_files" />
 
-        <Resource name="projects" list={ProjectList} show={ProjectShow} />
-      </Admin>
+          <Resource name="projects" list={ProjectList} show={ProjectShow} />
+        </Admin>
+        {this.state.showAutoEndSessionDialog && (
+          <AutoEndSessionDialog
+            onCancel={() => this.setState({ showAutoEndSessionDialog: false })}
+            onEndSession={() => {
+              this.props.onEndSession();
+              this.setState({ sessionEnded: true });
+            }}
+          />
+        )}
+      </>
     );
   }
 }
@@ -108,13 +168,15 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
   // If POSTGREST_SERVER is set, we're talking directly to PostgREST over a tunnel, and will be managing the
   // perms token ourselves. If we're not, we talk to reticulum and presume it will handle perms token forwarding.
 
+  let permsTokenRefreshInterval;
+
   if (configs.POSTGREST_SERVER) {
     dataProvider = postgrestClient(configs.POSTGREST_SERVER);
     authProvider = postgrestAuthenticatior.createAuthProvider(retPhxChannel);
     await postgrestAuthenticatior.refreshPermsToken();
 
     // Refresh perms regularly
-    setInterval(() => postgrestAuthenticatior.refreshPermsToken(), 60000);
+    permsTokenRefreshInterval = setInterval(() => postgrestAuthenticatior.refreshPermsToken(), 60000);
   } else {
     const server = configs.RETICULUM_SERVER || document.location.host;
     dataProvider = postgrestClient("//" + server + "/api/postgrest");
@@ -125,13 +187,31 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
   window.APP.dataProvider = dataProvider;
   window.APP.authProvider = authProvider;
 
+  const onEndSession = () => {
+    if (permsTokenRefreshInterval) clearInterval(permsTokenRefreshInterval);
+    retPhxChannel.socket.disconnect();
+  };
+
   ReactDOM.render(
     <IntlProvider locale={lang} messages={messages}>
-      <AdminUI dataProvider={dataProvider} authProvider={authProvider} customRoutes={customRoutes} layout={layout} />
+      <AdminUI
+        dataProvider={dataProvider}
+        authProvider={authProvider}
+        customRoutes={customRoutes}
+        layout={layout}
+        onEndSession={onEndSession}
+      />
     </IntlProvider>,
     document.getElementById("ui-root")
   );
 };
+const HiddenAppBar = withStyles({
+  hideOnDesktop: {
+    "@media (min-width: 768px) and (min-height: 480px)": {
+      display: "none"
+    }
+  }
+})(props => <AppBar {...props} className={props.classes.hideOnDesktop} />);
 
 document.addEventListener("DOMContentLoaded", async () => {
   const socket = await connectToReticulum();
@@ -170,7 +250,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   }
 
-  const layout = props => <Layout {...props} menu={props => <AdminMenu {...props} services={schemaCategories} />} />;
+  const layout = props => (
+    <Layout {...props} appBar={HiddenAppBar} menu={props => <AdminMenu {...props} services={schemaCategories} />} />
+  );
 
   const redirectToLogin = () => (document.location = "/?sign_in&sign_in_destination=admin");
 

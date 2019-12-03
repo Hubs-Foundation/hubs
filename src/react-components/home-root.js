@@ -6,6 +6,7 @@ import en from "react-intl/locale-data/en";
 
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
+import UnlessFeature from "./unless-feature";
 import { lang, messages } from "../utils/i18n";
 import { playVideoWithStopOnBlur } from "../utils/video-utils.js";
 import homeVideoWebM from "../assets/video/home.webm";
@@ -26,8 +27,6 @@ import AuthDialog from "./auth-dialog.js";
 import JoinUsDialog from "./join-us-dialog.js";
 import ReportDialog from "./report-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
-import UpdatesDialog from "./updates-dialog.js";
-import DialogContainer from "./dialog-container.js";
 import MediaTiles from "./media-tiles";
 
 addLocaleData([...en]);
@@ -44,7 +43,6 @@ class HomeRoot extends Component {
     authToken: PropTypes.string,
     authPayload: PropTypes.string,
     authOrigin: PropTypes.string,
-    listSignup: PropTypes.bool,
     report: PropTypes.bool,
     installEvent: PropTypes.object,
     hideHero: PropTypes.bool,
@@ -81,9 +79,7 @@ class HomeRoot extends Component {
       this.showSignInDialog(false);
     }
     this.loadHomeVideo();
-    if (this.props.listSignup) {
-      this.showUpdatesDialog();
-    } else if (this.props.report) {
+    if (this.props.report) {
       this.showReportDialog();
     }
   }
@@ -127,15 +123,6 @@ class HomeRoot extends Component {
   showJoinUsDialog = () => this.showDialog(JoinUsDialog);
 
   showReportDialog = () => this.showDialog(ReportDialog);
-
-  showUpdatesDialog = () =>
-    this.showDialog(UpdatesDialog, {
-      onSubmittedEmail: () => {
-        this.showDialog(
-          <DialogContainer>Great! Please check your e-mail to confirm your subscription.</DialogContainer>
-        );
-      }
-    });
 
   showSignInDialog = (closable = true) => {
     let messageId = "sign-in.prompt";
@@ -208,7 +195,7 @@ class HomeRoot extends Component {
                   </IfFeature>
                   <IfFeature name="enable_spoke">
                     <a href="/spoke" rel="noreferrer noopener">
-                      Spoke
+                      <FormattedMessage id="editor-name" />
                     </a>
                   </IfFeature>
                   {this.props.showAdmin && (
@@ -283,6 +270,16 @@ class HomeRoot extends Component {
               )}
             </div>
             <div className={styles.footerContent}>
+              <div className={styles.poweredBy}>
+                <UnlessFeature name="hide_powered_by">
+                  <span className={styles.prefix}>
+                    <FormattedMessage id="home.powered_by_prefix" />
+                  </span>
+                  <a className={styles.link} href="https://github.com/mozilla/hubs-cloud">
+                    <FormattedMessage id="home.powered_by_link" />
+                  </a>
+                </UnlessFeature>
+              </div>
               <div className={styles.links}>
                 <div className={styles.top}>
                   <IfFeature name="show_join_us_dialog">
@@ -293,16 +290,6 @@ class HomeRoot extends Component {
                       onClick={this.onLinkClicked(this.showJoinUsDialog)}
                     >
                       <FormattedMessage id="home.join_us" />
-                    </a>
-                  </IfFeature>
-                  <IfFeature name="show_newsletter_dialog">
-                    <a
-                      className={styles.link}
-                      rel="noopener noreferrer"
-                      href="#"
-                      onClick={this.onLinkClicked(this.showUpdatesDialog)}
-                    >
-                      <FormattedMessage id="home.get_updates" />
                     </a>
                   </IfFeature>
                   <IfFeature name="show_issue_report_link">

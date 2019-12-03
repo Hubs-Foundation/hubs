@@ -99,7 +99,7 @@ export const addMedia = (
   resolve = false,
   fitToBox = false,
   animate = true,
-  customMeshScale = { x: 1, y: 1, z: 1 }
+  mediaOptions = {}
 ) => {
   const scene = AFRAME.scenes[0];
 
@@ -108,35 +108,17 @@ export const addMedia = (
   const needsToBeUploaded = src instanceof File;
   entity.setAttribute("media-loader", {
     fitToBox,
-    customMeshScale,
     resolve,
     animate,
     src: typeof src === "string" ? src : "",
     contentSubtype,
-    fileIsOwned: !needsToBeUploaded
+    fileIsOwned: !needsToBeUploaded,
+    mediaOptions
   });
 
   entity.object3D.matrixNeedsUpdate = true;
 
   scene.appendChild(entity);
-
-  const fireLoadingTimeout = setTimeout(() => {
-    scene.emit("media-loading", { src: src });
-  }, 100);
-
-  const eventNames = ["model-loaded", "video-loaded", "image-loaded", "pdf-loaded"];
-
-  const cb = async () => {
-    clearTimeout(fireLoadingTimeout);
-    entity.emit("media-loaded", { src });
-    eventNames.forEach(eventName => {
-      entity.removeEventListener(eventName, cb);
-    });
-  };
-
-  eventNames.forEach(eventName => {
-    entity.addEventListener(eventName, cb);
-  });
 
   const orientation = new Promise(function(resolve) {
     if (needsToBeUploaded) {
@@ -189,6 +171,7 @@ export function injectCustomShaderChunks(obj) {
     if (!object.material) return;
 
     object.material = mapMaterials(object, material => {
+      if (material.hubs_InjectedCustomShaderChunks) return material;
       if (!validMaterials.includes(material.type)) {
         return material;
       }
@@ -228,7 +211,7 @@ export function injectCustomShaderChunks(obj) {
           // Used in the fragment shader below.
           hubs_WorldPosition = wt.xyz;
         }
-      `;
+        `;
 
         const vlines = shader.vertexShader.split("\n");
         const vindex = vlines.findIndex(line => vertexRegex.test(line));
@@ -256,6 +239,7 @@ export function injectCustomShaderChunks(obj) {
         shaderUniforms.push(shader.uniforms);
       };
       newMaterial.needsUpdate = true;
+      newMaterial.hubs_InjectedCustomShaderChunks = true;
       return newMaterial;
     });
   });

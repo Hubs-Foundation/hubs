@@ -8,6 +8,12 @@ self.addEventListener("activate", function(e) {
 
 self.addEventListener("fetch", function() {});
 
+// Reticulum will inject an overrided app name.
+// eslint-disable-next-line prefer-const
+let appFullName = "";
+
+// DO NOT REMOVE/EDIT THIS COMMENT - META_TAGS
+
 self.addEventListener("push", function(e) {
   const payload = JSON.parse(e.data.text());
 
@@ -18,7 +24,7 @@ self.addEventListener("push", function(e) {
         if (client.url.indexOf(e.notification.data.hub_id) >= 0) return;
       }
 
-      return self.registration.showNotification("Hubs by Mozilla", {
+      return self.registration.showNotification(appFullName, {
         body: "Someone has joined " + payload.hub_name,
         image: payload.image,
         icon: "/favicon.ico",

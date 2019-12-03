@@ -9,7 +9,7 @@ AFRAME.registerComponent("pen-laser", {
   schema: {
     color: { type: "color", default: "#FF0033" },
     laserVisible: { default: false },
-    remoteLaserVisible: { default: false },
+    laserInHand: { default: false },
     laserOrigin: { default: { x: 0, y: 0, z: 0 } },
     remoteLaserOrigin: { default: { x: 0, y: 0, z: 0 } },
     laserTarget: { default: { x: 0, y: 0, z: 0 } }
@@ -85,9 +85,15 @@ AFRAME.registerComponent("pen-laser", {
 
       if (isMine && this.data.laserVisible) {
         origin.copy(this.data.laserOrigin);
+
+        if (!this.data.laserInHand) {
+          // On 2d mode, shift downards
+          origin.y = origin.y - 0.4;
+        }
+
         target.copy(this.data.laserTarget);
         laserVisible = true;
-      } else if (!isMine && this.data.remoteLaserVisible) {
+      } else if (!isMine && this.data.laserVisible) {
         this.originBuffer.update(dt);
         this.targetBuffer.update(dt);
         origin.copy(this.originBuffer.getPosition());

@@ -16,7 +16,7 @@ import "./components/scene-components";
 import "./components/debug";
 import "./systems/nav";
 
-import { getReticulumFetchUrl } from "./utils/phoenix-utils";
+import { fetchReticulumAuthenticated } from "./utils/phoenix-utils";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -89,7 +89,7 @@ const onReady = async () => {
     camera.setAttribute("scene-preview-camera", "");
   });
 
-  const res = await fetch(getReticulumFetchUrl(`/api/v1/scenes/${sceneId}`)).then(r => r.json());
+  const res = await fetchReticulumAuthenticated(`/api/v1/scenes/${sceneId}`);
   const sceneInfo = res.scenes[0];
 
   // Delisted/Removed
@@ -112,11 +112,20 @@ const onReady = async () => {
   sceneModelEntity.appendChild(gltfEl);
   sceneRoot.appendChild(sceneModelEntity);
 
+  const parentScene =
+    sceneInfo.parent_scene_id &&
+    (await fetchReticulumAuthenticated(`/api/v1/scenes/${sceneInfo.parent_scene_id}`)).scenes[0];
+
   remountUI({
     sceneName: sceneInfo.name,
     sceneDescription: sceneInfo.description,
     sceneAttributions: sceneInfo.attributions,
-    sceneScreenshotURL: sceneInfo.screenshot_url
+    sceneScreenshotURL: sceneInfo.screenshot_url,
+    sceneId: sceneInfo.scene_id,
+    sceneProjectId: sceneInfo.project_id,
+    sceneAllowRemixing: sceneInfo.allow_remixing,
+    isOwner: sceneInfo.account_id && sceneInfo.account_id === window.APP.store.credentialsAccountId,
+    parentScene: parentScene
   });
 };
 

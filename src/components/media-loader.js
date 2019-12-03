@@ -32,8 +32,6 @@ const fetchContentType = url => {
   return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
 };
 
-const boundingBox = new THREE.Box3();
-
 const batchMeshes = qsTruthy("batchMeshes");
 const disableBatching = qsTruthy("disableBatching");
 
@@ -44,7 +42,6 @@ AFRAME.registerComponent("media-loader", {
     fileIsOwned: { type: "boolean" },
     src: { type: "string" },
     fitToBox: { default: false },
-    customMeshScale: { type: "vec3", default: { x: 1, y: 1, z: 1 } },
     resolve: { default: false },
     contentType: { default: null },
     contentSubtype: { default: null },
@@ -63,27 +60,23 @@ AFRAME.registerComponent("media-loader", {
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
     this.animating = false;
 
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.networkedEl = networkedEl;
-    });
+    NAF.utils
+      .getNetworkedEntity(this.el)
+      .then(networkedEl => {
+        this.networkedEl = networkedEl;
+      })
+      .catch(() => {}); //ignore exception, entity might not be networked
   },
 
   updateScale: (function() {
     const center = new THREE.Vector3();
     return function(fitToBox) {
       const mesh = this.el.getObject3D("mesh");
-      if (fitToBox) {
-        const box = getBox(this.el, mesh);
-        const scaleCoefficient = getScaleCoefficient(0.5, box);
-        mesh.scale.multiplyScalar(scaleCoefficient);
-        const { min, max } = box;
-        center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
-      } else {
-        mesh.scale.copy(this.data.customMeshScale);
-        const box = getBox(this.el, mesh);
-        const { min, max } = box;
-        center.addVectors(min, max).multiplyScalar(0.5);
-      }
+      const box = getBox(this.el, mesh);
+      const scaleCoefficient = fitToBox ? getScaleCoefficient(0.5, box) : 1;
+      mesh.scale.multiplyScalar(scaleCoefficient);
+      const { min, max } = box;
+      center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
       mesh.position.sub(center);
       mesh.matrixNeedsUpdate = true;
     };
@@ -102,9 +95,14 @@ AFRAME.registerComponent("media-loader", {
   },
 
   remove() {
-    if (this.loadingSoundNode) {
-      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.stopSoundNode(this.loadingSoundNode);
-      this.loadingSoundNode = null;
+    const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
+    if (this.loadingSoundEffect) {
+      sfx.stopPositionalAudio(this.loadingSoundEffect);
+      this.loadingSoundEffect = null;
+    }
+    if (this.loadedSoundEffect) {
+      sfx.stopPositionalAudio(this.loadedSoundEffect);
+      this.loadedSoundEffect = null;
     }
   },
 
@@ -163,8 +161,10 @@ AFRAME.registerComponent("media-loader", {
       (!this.networkedEl || NAF.utils.isMine(this.networkedEl)) &&
       this.data.playSoundEffect
     ) {
-      this.loadingSoundNode = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundLooped(
-        SOUND_MEDIA_LOADING
+      this.loadingSoundEffect = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playPositionalSoundFollowing(
+        SOUND_MEDIA_LOADING,
+        this.el.object3D,
+        true
       );
     }
 
@@ -173,9 +173,9 @@ AFRAME.registerComponent("media-loader", {
 
   clearLoadingTimeout() {
     clearTimeout(this.showLoaderTimeout);
-    if (this.loadingSoundNode) {
-      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.stopSoundNode(this.loadingSoundNode);
-      this.loadingSoundNode = null;
+    if (this.loadingSoundEffect) {
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.stopPositionalAudio(this.loadingSoundEffect);
+      this.loadingSoundEffect = null;
     }
     if (this.loaderMixer) {
       this.loadingClip.stop();
@@ -188,26 +188,35 @@ AFRAME.registerComponent("media-loader", {
     this.removeShape("loader");
   },
 
-  updateHoverableVisuals() {
-    const hoverableVisuals = this.el.components["hoverable-visuals"];
+  updateHoverableVisuals: (function() {
+    const boundingBox = new THREE.Box3();
+    const boundingSphere = new THREE.Sphere();
+    return function() {
+      const hoverableVisuals = this.el.components["hoverable-visuals"];
 
-    if (hoverableVisuals) {
-      if (!this.injectedCustomShaderChunks) {
-        this.injectedCustomShaderChunks = true;
-        hoverableVisuals.uniforms = injectCustomShaderChunks(this.el.object3D);
+      if (hoverableVisuals) {
+        if (!this.injectedCustomShaderChunks) {
+          this.injectedCustomShaderChunks = true;
+          hoverableVisuals.uniforms = injectCustomShaderChunks(this.el.object3D);
+        }
+
+        boundingBox.setFromObject(this.el.object3DMap.mesh);
+        boundingBox.getBoundingSphere(boundingSphere);
+        hoverableVisuals.geometryRadius = boundingSphere.radius / this.el.object3D.scale.y;
       }
-
-      boundingBox.setFromObject(this.el.object3DMap.mesh);
-      boundingBox.getBoundingSphere(hoverableVisuals.boundingSphere);
-    }
-  },
+    };
+  })(),
 
   onMediaLoaded(physicsShape = null, shouldUpdateScale) {
     const el = this.el;
     this.clearLoadingTimeout();
 
     if (this.el.sceneEl.is("entered") && this.data.playSoundEffect) {
-      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_MEDIA_LOADED);
+      this.loadedSoundEffect = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playPositionalSoundFollowing(
+        SOUND_MEDIA_LOADED,
+        this.el.object3D,
+        false
+      );
     }
 
     const finish = () => {
@@ -227,6 +236,8 @@ AFRAME.registerComponent("media-loader", {
       if (pager) {
         pager.repositionToolbar();
       }
+
+      el.emit("media-loaded");
     };
 
     if (this.data.animate) {
@@ -337,9 +348,17 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
+        let batch = !disableBatching;
+        if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
+          batch = false;
+        }
         this.el.setAttribute(
           "media-image",
-          Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, contentType, batch: !disableBatching })
+          Object.assign({}, this.data.mediaOptions, {
+            src: accessibleUrl,
+            contentType,
+            batch
+          })
         );
 
         if (this.el.components["position-at-box-shape-border__freeze"]) {
@@ -389,13 +408,17 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
+        let batch = !disableBatching && batchMeshes;
+        if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
+          batch = false;
+        }
         this.el.setAttribute(
           "gltf-model-plus",
           Object.assign({}, this.data.mediaOptions, {
             src: accessibleUrl,
             contentType: contentType,
             inflate: true,
-            batch: !disableBatching && batchMeshes,
+            batch,
             modelToWorldScale: this.data.fitToBox ? 0.0001 : 1.0
           })
         );
@@ -406,15 +429,15 @@ AFRAME.registerComponent("media-loader", {
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(
           "image-loaded",
-          () => {
+          async () => {
             const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
 
-            if (isHubsAvatarUrl(src)) {
+            if (await isHubsAvatarUrl(src)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#avatar-link-hover-menu",
                 dirs: ["forward", "back"]
               });
-            } else if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
+            } else if ((await isHubsRoomUrl(src)) || ((await isHubsSceneUrl(src)) && mayChangeScene)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#hubs-destination-hover-menu",
                 dirs: ["forward", "back"]
@@ -427,12 +450,16 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
+        let batch = !disableBatching;
+        if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
+          batch = false;
+        }
         this.el.setAttribute(
           "media-image",
           Object.assign({}, this.data.mediaOptions, {
             src: thumbnail,
             contentType: guessContentType(thumbnail) || "image/png",
-            batch: !disableBatching
+            batch
           })
         );
         if (this.el.components["position-at-box-shape-border__freeze"]) {
@@ -459,9 +486,12 @@ AFRAME.registerComponent("media-pager", {
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
 
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.networkedEl = networkedEl;
-    });
+    NAF.utils
+      .getNetworkedEntity(this.el)
+      .then(networkedEl => {
+        this.networkedEl = networkedEl;
+      })
+      .catch(() => {}); //ignore exception, entity might not be networked
 
     this.el.addEventListener("pdf-loaded", async () => {
       await this._ensureUI();
@@ -510,7 +540,7 @@ AFRAME.registerComponent("media-pager", {
   },
 
   onNext() {
-    if (!NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
+    if (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
     const newIndex = Math.min(this.data.index + 1, this.data.maxIndex);
     this.el.setAttribute("media-pdf", "index", newIndex);
     this.el.setAttribute("media-pager", "index", newIndex);
@@ -518,7 +548,7 @@ AFRAME.registerComponent("media-pager", {
   },
 
   onPrev() {
-    if (!NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
+    if (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
     const newIndex = Math.max(this.data.index - 1, 0);
     this.el.setAttribute("media-pdf", "index", newIndex);
     this.el.setAttribute("media-pager", "index", newIndex);

@@ -2,29 +2,32 @@ import { ParticleEmitter } from "@mozillareality/three-particle-emitter";
 import { textureLoader } from "../utils/media-utils";
 import { resolveUrl } from "../utils/media-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
+import defaultSrcImage from "../assets/images/warning_icon.png";
+
+const defaultSrcUrl = new URL(defaultSrcImage, window.location.href).href;
 
 AFRAME.registerComponent("particle-emitter", {
   schema: {
     resolve: { type: "boolean", default: true },
-    src: { type: "string" },
+    src: { type: "string", default: defaultSrcUrl },
     startColor: { type: "color" },
     middleColor: { type: "color" },
     endColor: { type: "color" },
-    startOpacity: { type: "number" },
-    middleOpacity: { type: "number" },
-    endOpacity: { type: "number" },
-    colorCurve: { type: "string" },
-    sizeCurve: { type: "string" },
-    startSize: { type: "number" },
-    endSize: { type: "number" },
+    startOpacity: { type: "number", default: 1 },
+    middleOpacity: { type: "number", default: 1 },
+    endOpacity: { type: "number", default: 1 },
+    colorCurve: { type: "string", default: "linear" },
+    sizeCurve: { type: "string", default: "linear" },
+    startSize: { type: "number", default: 1 },
+    endSize: { type: "number", default: 1 },
     sizeRandomness: { type: "number" },
     ageRandomness: { type: "number" },
-    lifetime: { type: "number" },
+    lifetime: { type: "number", default: 1 },
     lifetimeRandomness: { type: "number" },
-    particleCount: { type: "number" },
-    startVelocity: { type: "vec3" },
-    endVelocity: { type: "vec3" },
-    velocityCurve: { type: "string" },
+    particleCount: { type: "number", default: 10 },
+    startVelocity: { type: "vec3", default: { x: 0, y: 0, z: 1 } },
+    endVelocity: { type: "vec3", default: { x: 0, y: 0, z: 1 } },
+    velocityCurve: { type: "string", default: "linear" },
     angularVelocity: { type: "number" }
   },
 
@@ -33,6 +36,9 @@ AFRAME.registerComponent("particle-emitter", {
     this.particleEmitter.visible = false;
     this.el.setObject3D("particle-emitter", this.particleEmitter);
     this.updateParticles = false;
+    if (this.data.src === defaultSrcUrl) {
+      this.data.resolve = false;
+    }
   },
 
   async setTexture(src, resolve) {

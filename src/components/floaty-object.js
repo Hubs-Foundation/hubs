@@ -68,6 +68,9 @@ AFRAME.registerComponent("floaty-object", {
     if (this.hasBeenHereBefore) return;
     this.hasBeenHereBefore = true;
     if (this.data.autoLockOnLoad) {
+      this.el.setAttribute("body-helper", {
+        gravity: { x: 0, y: 0, z: 0 }
+      });
       this.setLocked(true);
     }
   },
@@ -107,7 +110,10 @@ AFRAME.registerComponent("floaty-object", {
         });
       }
     } else {
-      this.el.setAttribute("body-helper", { collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE });
+      this.el.setAttribute("body-helper", {
+        collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE,
+        gravity: { x: 0, y: -9.8, z: 0 }
+      });
     }
 
     if (this.data.autoLockOnRelease) {
@@ -117,6 +123,7 @@ AFRAME.registerComponent("floaty-object", {
 
   onGrab() {
     this.el.setAttribute("body-helper", {
+      gravity: { x: 0, y: 0, z: 0 },
       collisionFilterMask: COLLISION_LAYERS.HANDS
     });
     this.setLocked(false);

@@ -14,6 +14,8 @@ import URL_FREEZE from "../assets/sfx/Eb_blip.mp3";
 import URL_TACK from "../assets/sfx/tack.mp3";
 import URL_MEDIA_LOADED from "../assets/sfx/A_bendUp.mp3";
 import URL_MEDIA_LOADING from "../assets/sfx/suspense.mp3";
+import URL_SPAWN_EMOJI from "../assets/sfx/emoji.mp3";
+import { setMatrixWorld } from "../utils/three-utils";
 
 let soundEnum = 0;
 export const SOUND_HOVER_OR_GRAB = soundEnum++;
@@ -39,6 +41,7 @@ export const SOUND_MEDIA_LOADED = soundEnum++;
 export const SOUND_CAMERA_TOOL_COUNTDOWN = soundEnum++;
 export const SOUND_PREFERENCE_MENU_HOVER = soundEnum++;
 export const SOUND_PREFERENCE_MENU_SELECT = soundEnum++;
+export const SOUND_SPAWN_EMOJI = soundEnum++;
 
 // Safari doesn't support the promise form of decodeAudioData, so we polyfill it.
 function decodeAudioData(audioContext, arrayBuffer) {
@@ -48,9 +51,21 @@ function decodeAudioData(audioContext, arrayBuffer) {
 }
 
 export class SoundEffectsSystem {
-  constructor() {
-    this.pendingEffects = [];
+  constructor(scene) {
+    this.pendingAudioSourceNodes = [];
+    this.pendingPositionalAudios = [];
+    this.positionalAudiosStationary = [];
+    this.positionalAudiosFollowingObject3Ds = [];
+
     this.audioContext = THREE.AudioContext.getContext();
+    this.scene = scene;
+    this.scene.audioListener = this.scene.audioListener || new THREE.AudioListener();
+    if (this.scene.camera) {
+      this.scene.camera.add(this.scene.audioListener);
+    }
+    this.scene.addEventListener("camera-set-active", evt => {
+      evt.detail.cameraEl.getObject3D("camera").add(this.scene.audioListener);
+    });
     const soundsAndUrls = [
       [SOUND_HOVER_OR_GRAB, URL_TICK],
       [SOUND_THAW, URL_TICK],
@@ -74,7 +89,8 @@ export class SoundEffectsSystem {
       [SOUND_MEDIA_LOADING, URL_MEDIA_LOADING],
       [SOUND_MEDIA_LOADED, URL_MEDIA_LOADED],
       [SOUND_PREFERENCE_MENU_HOVER, URL_FREEZE],
-      [SOUND_PREFERENCE_MENU_SELECT, URL_TICK]
+      [SOUND_PREFERENCE_MENU_SELECT, URL_TICK],
+      [SOUND_SPAWN_EMOJI, URL_SPAWN_EMOJI]
     ];
     const loading = new Map();
     const load = url => {
@@ -104,8 +120,33 @@ export class SoundEffectsSystem {
     source.buffer = audioBuffer;
     source.connect(this.audioContext.destination);
     source.loop = loop;
-    this.pendingEffects.push(source);
+    this.pendingAudioSourceNodes.push(source);
     return source;
+  }
+
+  enqueuePositionalSound(sound, loop) {
+    const audioBuffer = this.sounds.get(sound);
+    if (!audioBuffer) return null;
+
+    const positionalAudio = new THREE.PositionalAudio(this.scene.audioListener).setBuffer(audioBuffer);
+    positionalAudio.loop = loop;
+    this.pendingPositionalAudios.push(positionalAudio);
+    return positionalAudio;
+  }
+
+  playPositionalSoundAt(sound, position, loop) {
+    const positionalAudio = this.enqueuePositionalSound(sound, loop);
+    if (!positionalAudio) return null;
+    positionalAudio.position.copy(position);
+    positionalAudio.matrixWorldNeedsUpdate = true;
+    this.positionalAudiosStationary.push(positionalAudio);
+  }
+
+  playPositionalSoundFollowing(sound, object3D, loop) {
+    const positionalAudio = this.enqueuePositionalSound(sound, loop);
+    if (!positionalAudio) return null;
+    this.positionalAudiosFollowingObject3Ds.push({ positionalAudio, object3D });
+    return positionalAudio;
   }
 
   playSoundOneShot(sound) {
@@ -126,23 +167,69 @@ export class SoundEffectsSystem {
     source.connect(gain);
     gain.connect(this.audioContext.destination);
     source.loop = true;
-    this.pendingEffects.push(source);
+    this.pendingAudioSourceNodes.push(source);
     return { gain, source };
   }
 
   stopSoundNode(node) {
-    const index = this.pendingEffects.indexOf(node);
+    const index = this.pendingAudioSourceNodes.indexOf(node);
     if (index !== -1) {
-      this.pendingEffects.splice(index, 1);
+      this.pendingAudioSourceNodes.splice(index, 1);
     } else {
       node.stop();
     }
   }
 
-  tick() {
-    for (let i = 0; i < this.pendingEffects.length; i++) {
-      this.pendingEffects[i].start();
+  stopPositionalAudio(inPositionalAudio) {
+    const pendingIndex = this.pendingPositionalAudios.indexOf(inPositionalAudio);
+    if (pendingIndex !== -1) {
+      this.pendingPositionalAudios.splice(pendingIndex, 1);
+    } else {
+      if (inPositionalAudio.isPlaying) {
+        inPositionalAudio.stop();
+      }
+      if (inPositionalAudio.parent) {
+        inPositionalAudio.parent.remove(inPositionalAudio);
+      }
     }
-    this.pendingEffects.length = 0;
+    this.positionalAudiosStationary = this.positionalAudiosStationary.filter(
+      positionalAudio => positionalAudio !== inPositionalAudio
+    );
+    this.positionalAudiosFollowingObject3Ds = this.positionalAudiosFollowingObject3Ds.filter(
+      ({ positionalAudio }) => positionalAudio !== inPositionalAudio
+    );
+  }
+
+  tick() {
+    for (let i = 0; i < this.pendingAudioSourceNodes.length; i++) {
+      this.pendingAudioSourceNodes[i].start();
+    }
+    this.pendingAudioSourceNodes.length = 0;
+
+    for (let i = 0; i < this.pendingPositionalAudios.length; i++) {
+      const pendingPositionalAudio = this.pendingPositionalAudios[i];
+      this.scene.object3D.add(pendingPositionalAudio);
+      pendingPositionalAudio.play();
+    }
+    this.pendingPositionalAudios.length = 0;
+
+    for (let i = this.positionalAudiosStationary.length - 1; i >= 0; i--) {
+      const positionalAudio = this.positionalAudiosStationary[i];
+      if (!positionalAudio.isPlaying) {
+        this.stopPositionalAudio(positionalAudio);
+      }
+    }
+
+    for (let i = this.positionalAudiosFollowingObject3Ds.length - 1; i >= 0; i--) {
+      const positionalAudioAndObject3D = this.positionalAudiosFollowingObject3Ds[i];
+      const positionalAudio = positionalAudioAndObject3D.positionalAudio;
+      const object3D = positionalAudioAndObject3D.object3D;
+      if (!positionalAudio.isPlaying || !object3D.parent) {
+        this.stopPositionalAudio(positionalAudio);
+      } else {
+        object3D.updateMatrices();
+        setMatrixWorld(positionalAudio, object3D.matrixWorld);
+      }
+    }
   }
 }

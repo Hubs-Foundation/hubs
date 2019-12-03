@@ -24,8 +24,14 @@
         HACK Another hack to fix a-frame's device detection in Chrome when WebXR or WebVR flags are enabled in
         chrome://flags. See https://github.com/mozilla/hubs/issues/892
         */
-        if (navigator.xr && !navigator.xr.requestDevice) {
+        if (!/Oculus/.test(navigator.userAgent) && navigator.xr && !navigator.xr.requestDevice) {
             navigator.xr.requestDevice = () => Promise.reject({message: "Hubs: requestDevice not supported."});
+        }
+        /*
+        Call getVRDisplays to force Oculus Browser to use WebVR, which in turn disables the WebXR API.
+        */
+        if (/Oculus/.test(navigator.userAgent)) {
+            navigator.getVRDisplays();
         }
     </script>
     <!-- Google Analytics -->
@@ -48,7 +54,15 @@
         capture-system
         local-audio-analyser
         class="grab-cursor"
-        renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: false;"
+        renderer="
+            antialias: true;
+            colorManagement: true;
+            sortObjects: true;
+            physicallyCorrectLights: true;
+            alpha: false;
+            webgl2: true;
+            multiview: false;
+            forceWebVR: true;"
         shadow="type: pcfsoft"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
@@ -355,6 +369,51 @@
                                 <a-entity
                                     sprite
                                     icon-button="image: scale-action.png; hoverImage: scale-action.png"
+                                    scale="0.165 0.165 0.165"
+                                    position="0 0 0.001"
+                                ></a-entity>
+                            </a-entity>
+                        </a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="interactable-emoji-media">
+                <a-entity
+                    class="interactable"
+                    emoji
+                    body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 15;"
+                    owned-object-limiter="counter: #emoji-counter"
+                    owned-object-cleanup-timeout="counter: #emoji-counter; ttl: 3;"
+                    set-unowned-body-kinematic
+                    is-remote-hover-target
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; inspectable: true;"
+                    destroy-at-extreme-distances
+                    scalable-when-grabbed
+                    floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
+                    set-yxz-order
+                    matrix-auto-update
+                    position-at-box-shape-border__freeze="target:.freeze-menu;"
+                    hoverable-visuals
+                >
+                    <a-entity
+                        class="particle-emitter"
+                        particle-emitter="particleCount: 0"
+                        scale="0.25 0.25 0.25"
+                        position="0 0.25 -0.01"
+                    ></a-entity>
+                    <a-entity class="ui interactable-ui">
+                        <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media; visibleIfOwned: false;">
+                            <a-entity
+                                mixin="rounded-button"
+                                is-remote-hover-target
+                                tags="singleActionButton: true;"
+                                hide-when-pinned-and-forbidden="whenPinned: true"
+                                remove-networked-object-button
+                                position="0 -0.375 0.01">
+                                <a-entity
+                                    sprite="name: remove-action.png"
+                                    icon-button="image: remove-action.png; hoverImage: remove-action.png"
                                     scale="0.165 0.165 0.165"
                                     position="0 0 0.001"
                                 ></a-entity>
@@ -769,15 +828,6 @@
                     opacity: 1.0;
                     src: #button"
             ></a-mixin>
-
-            <a-mixin id="emoji-button"
-                is-remote-hover-target
-                visibility-while-frozen="requireHoverOnNonMobile: false"
-                sprite
-                position="0.0 0 0.005"
-                tags="singleActionButton: true;"
-                material="alphaTest: 0.1;"
-            ></a-mixin>
         </a-assets>
 
         <!-- HACK - We use this object to trigger initial batch preparation -->
@@ -788,9 +838,11 @@
 
         <a-entity id="pen-counter" networked-counter="max: 10;"></a-entity>
 
+        <a-entity id="emoji-counter" networked-counter="max: 2;"></a-entity>
+
         <a-entity id="camera-counter" networked-counter="max: 1;"></a-entity>
 
-        <a-entity id="drawing-manager" drawing-manager></a-entity>
+        <a-entity id="drawing-manager" drawing-manager="penSpawner: #pen-spawner"></a-entity>
 
         <a-entity
             id="right-cursor-controller"
@@ -957,34 +1009,7 @@
                 <a-entity id="stats" stats-plus="false" position="0 0 -1"></a-entity>
             </a-entity>
 
-            <a-entity
-                offset-relative-to="target: #viewing-camera; offset: 0 -0.5 -1.5; on: stateadded; lookAt: true"
-                vr-mode-toggle-visibility
-                vr-mode-toggle-class="class: ui"
-                emoji-hud>
-                <a-entity
-                    is-remote-hover-target
-                    visibility-while-frozen="requireHoverOnNonMobile: false"
-                    slice9="
-                        color: #000000;
-                        width: 1.5;
-                        height: 0.2;
-                        left: 64;
-                        top: 64;
-                        right: 66;
-                        bottom: 66;
-                        opacity: 0.2;
-                        src: #button;">
-                </a-entity>
-                <a-entity mixin="emoji-button" data-emoji="smile"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="happy"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="surprise"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="disgust"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="angry"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="sad"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="eww"></a-entity>
-                <a-entity mixin="emoji-button" data-emoji="hearts"></a-entity>
-            </a-entity>
+            <a-entity emoji-hud="camera: #avatar-pov-node;"></a-entity>
 
             <a-entity
                 id="player-left-controller"
@@ -1066,12 +1091,12 @@
         </a-entity>
 
         <a-entity
+            id="pen-spawner"
             action-to-event="path: /actions/spawnPen; event: spawn_pen; withPermission: spawn_drawing"
             super-spawner="
                 template: #interactable-pen;
                 spawnEvent: spawn_pen;
                 animateFromCursor: true;
-                useCustomSpawnScale: true;
                 spawnScale: 0.5, 0.5, 0.5;
                 "
         ></a-entity>

@@ -17,7 +17,8 @@ AFRAME.registerComponent("visibility-while-frozen", {
     withinDistance: { type: "number" },
     visible: { type: "boolean", default: true },
     requireHoverOnNonMobile: { type: "boolean", default: true },
-    withPermission: { type: "string" }
+    withPermission: { type: "string" },
+    visibleIfOwned: { type: "boolean", default: true }
   },
 
   init() {
@@ -44,6 +45,15 @@ AFRAME.registerComponent("visibility-while-frozen", {
     }
     if (!this.hoverable && this.data.requireHoverOnNonMobile) {
       console.error("Didn't find a remote hover target.");
+    }
+
+    if (!this.data.visibleIfOwned) {
+      NAF.utils
+        .getNetworkedEntity(this.el)
+        .then(networkedEl => {
+          this.networkedEl = networkedEl;
+        })
+        .then(() => {}); //ignore exception, entity might not be networked
     }
 
     this.onStateChange = evt => {
@@ -105,6 +115,10 @@ AFRAME.registerComponent("visibility-while-frozen", {
           (this.el.sceneEl.systems.interaction.state.rightRemote.hovered === this.hoverable ||
             this.el.sceneEl.systems.interaction.state.leftRemote.hovered === this.hoverable)) ||
           isVisible);
+    }
+
+    if (!this.data.visibleIfOwned) {
+      shouldBeVisible = shouldBeVisible && this.networkedEl && !NAF.utils.isMine(this.networkedEl);
     }
 
     if (isVisible !== shouldBeVisible) {

@@ -184,6 +184,10 @@ class MediaBrowser extends Component {
     this.handleFacetClicked({ params: { filter: "my-avatars" } });
   };
 
+  onCopyScene = () => {
+    this.handleFacetClicked({ params: { filter: "my-scenes" } });
+  };
+
   onShowSimilar = (id, name) => {
     this.handleFacetClicked({ params: { similar_to: id, similar_name: name } });
   };
@@ -353,7 +357,7 @@ class MediaBrowser extends Component {
                     <IfFeature name="enable_spoke">
                       <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
                       <a href="/spoke" target="_blank" rel="noreferrer noopener">
-                        <FormattedMessage id="media-browser.spoke" />
+                        <FormattedMessage id="editor-name" />
                       </a>
                     </IfFeature>
                     {configs.feature("enable_spoke") && configs.feature("show_issue_report_link") && "|"}
@@ -437,6 +441,7 @@ class MediaBrowser extends Component {
               urlSource={urlSource}
               handleEntryClicked={this.handleEntryClicked}
               onCopyAvatar={this.onCopyAvatar}
+              onCopyScene={this.onCopyScene}
               onShowSimilar={this.onShowSimilar}
               handlePager={this.handlePager}
             />
