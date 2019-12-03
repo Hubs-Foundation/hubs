@@ -133,22 +133,23 @@ $backgroundColor: lightslategray;
     font-weight: $titleFontWeight;
     background: $light-grey;
   }
+
+  input {
+    cursor: pointer;
+    @extend %checkbox;
+  }
+  input:checked {
+    @extend %checkbox-checked;
+  }
 }
 
 :local(.checkbox) {
   width: 100%;
   height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
-:local(input[type=checkbox]) {
-  width: 90%;
-  height: 90%;
-  mix-blend-mode: color-burn;
-  &:hover {
-    mix-blend-mode: normal;
-  }
-}
-
 
 :local(.float-right) {
   top: 1rem;
