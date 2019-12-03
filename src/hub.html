@@ -24,8 +24,12 @@
         HACK Another hack to fix a-frame's device detection in Chrome when WebXR or WebVR flags are enabled in
         chrome://flags. See https://github.com/mozilla/hubs/issues/892
         */
-        if (navigator.xr && !navigator.xr.requestDevice) {
+        if (!/Oculus/.test(navigator.userAgent) && navigator.xr && !navigator.xr.requestDevice) {
             navigator.xr.requestDevice = () => Promise.reject({message: "Hubs: requestDevice not supported."});
+        }
+        // Call getVRDisplays to force Oculus Browser to use WebVR, which in turn disables the WebXR API.
+        if (/Oculus/.test(navigator.userAgent)) {
+            navigator.getVRDisplays();
         }
     </script>
     <!-- Google Analytics -->
@@ -48,7 +52,15 @@
         capture-system
         local-audio-analyser
         class="grab-cursor"
-        renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: false;"
+        renderer="
+            antialias: true;
+            colorManagement: true;
+            sortObjects: true;
+            physicallyCorrectLights: true;
+            alpha: false;
+            webgl2: true;
+            multiview: false;
+            forceWebVR: true;"
         shadow="type: pcfsoft"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
