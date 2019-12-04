@@ -5,6 +5,7 @@ import { copySittingToStandingTransform } from "./copy-sitting-to-standing-trans
 
 const ONES = new THREE.Vector3(1, 1, 1);
 const HAND_OFFSET = new THREE.Matrix4().makeTranslation(0, 0, -0.04);
+const m = new THREE.Matrix4();
 
 const TOUCHPAD = paths.device.daydream.button("touchpad");
 const TOUCHPAD_X = paths.device.daydream.axis("touchpadX");
@@ -41,7 +42,7 @@ export class DaydreamControllerDevice {
         this.rayObject = document.querySelector(this.selector).object3D;
       }
       this.rayObject.updateMatrixWorld();
-      this.rayObjectRotation.setFromRotationMatrix(this.rayObject.matrixWorld);
+      this.rayObjectRotation.setFromRotationMatrix(m.extractRotation(this.rayObject.matrixWorld));
       this.pose.position.setFromMatrixPosition(this.rayObject.matrixWorld);
       this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
       this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);

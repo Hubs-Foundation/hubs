@@ -393,6 +393,7 @@
     "client-info.add-owner": "Promote",
     "client-info.remove-owner": "Demote",
     "object-info.delete-button": "Delete",
+    "object-info.waypoint": "Go",
     "object-info.pin-button": "Pin",
     "object-info.raise-lights": "Show Background",
     "object-info.lower-lights": "Hide Background",

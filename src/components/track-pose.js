@@ -3,13 +3,15 @@ AFRAME.registerComponent("track-pose", {
     path: { type: "string" }
   },
 
-  tick() {
-    const matrix = AFRAME.scenes[0].systems.userinput.get(this.data.path);
-    if (matrix) {
-      const o = this.el.object3D;
-      o.matrix.copy(matrix);
-      o.matrix.decompose(o.position, o.quaternion, o.scale);
-      o.matrixIsModified = true;
+  play() {
+    if (!this.didRegister) {
+      this.didRegister = true;
+      this.el.sceneEl.systems["hubs-systems"].cursorPoseTrackingSystem.register(this.el.object3D, this.data.path);
+    }
+  },
+  remove() {
+    if (this.didRegister) {
+      this.el.sceneEl.systems["hubs-systems"].cursorPoseTrackingSystem.unregister(this.el.object3D);
     }
   }
 });

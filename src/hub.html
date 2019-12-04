@@ -78,7 +78,39 @@
             <img id="button" crossorigin="anonymous" src="./assets/hud/button.9.png">
 
             <a-asset-item id="drawing-pen" response-type="arraybuffer" src="./assets/models/DrawingPen.glb"></a-asset-item>
+            <a-asset-item id="spawn-point" response-type="arraybuffer" src="./assets/models/spawn-point.glb"></a-asset-item>
 
+            <template id="template-waypoint-avatar">
+                <a-entity waypoint></a-entity>
+            </template>
+
+            <template id="occupiable-waypoint-icon">
+                <a-entity
+                    is-remote-hover-target
+                    class="occupiable-waypoint-icon"
+                    tags="singleActionButton: true"
+                    sprite="name: spawn-point.png"
+                    billboard
+                    scale-in-screen-space="baseScale: 0.10 0.10 0.10; addedScale: 0.05 0.05 0.05">
+                </a-entity>
+            </template>
+            <template id="teleport-waypoint-icon">
+                <a-entity
+                    is-remote-hover-target
+                    class="teleport-waypoint-icon"
+                    tags="singleActionButton: true"
+                    sprite="name: spawn-point.png"
+                    billboard
+                    scale-in-screen-space="baseScale: 0.10 0.10 0.10; addedScale: 0.05 0.05 0.05">
+                </a-entity>
+            </template>
+            <template id="waypoint-preview-avatar-template">
+                <a-entity
+                    overwrite-raycast-as-noop
+                    class="waypoint-preview-avatar"
+                    gltf-model-plus="inflate: true; src: #spawn-point;">
+                </a-entity>
+            </template>
             <template id="remote-avatar">
                 <a-entity networked-avatar ik-root player-info matrix-auto-update visible="false">
                     <a-entity class="camera" matrix-auto-update></a-entity>
@@ -862,7 +894,7 @@
             segments-height="9"
             body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
             shape-helper="type: sphere; sphereRadius: 0.02; fit: manual;"
-        >
+            scale-in-screen-space="baseScale: 0.10 0.10 0.10; addedScale: 0.4 0.4 0.4">
             <a-entity
                 sprite
                 icon-button="image: rotate-cursor.png"
@@ -881,7 +913,7 @@
             segments-height="9"
             body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
             shape-helper="type: sphere; sphereRadius: 0.02; fit: manual;"
-        >
+            scale-in-screen-space="baseScale: 0.10 0.10 0.10; addedScale: 0.4 0.4 0.4">
             <a-entity
                 sprite
                 icon-button="image: rotate-cursor.png"
@@ -895,10 +927,9 @@
         <!-- Avatar Rig -->
         <a-entity
             id="avatar-rig"
-            spawn-controller="loadedEvent: entered; target: #avatar-rig"
-            character-controller="pivot: #avatar-pov-node"
             ik-root
             player-info
+            set-yxz-order
             periodic-full-syncs
             visible="false"
         >
@@ -999,7 +1030,7 @@
                 rotation
                 pitch-yaw-rotator
                 set-yxz-order
-                matrix-auto-update
+                position="0 1.6 0"
             >
                 <a-entity
                     id="gaze-teleport"

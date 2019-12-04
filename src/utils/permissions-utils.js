@@ -71,7 +71,9 @@ function authorizeEntityManipulation(entityMetadata, sender, senderPermissions) 
   const { template, creator, isPinned } = entityMetadata;
   const isCreator = sender === creator;
 
-  if (template.endsWith("-avatar")) {
+  if (template.endsWith("-waypoint-avatar")) {
+    return true;
+  } else if (template.endsWith("-avatar")) {
     return isCreator;
   } else if (template.endsWith("-media")) {
     return (!isPinned || senderPermissions.pin_objects) && (isCreator || senderPermissions.spawn_and_move_media);

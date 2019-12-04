@@ -22,6 +22,8 @@ export const rightOculusTouchButtonMap = [
 const LEFT_HAND_OFFSET = new THREE.Matrix4().makeTranslation(-0.025, -0.03, 0.1);
 const RIGHT_HAND_OFFSET = new THREE.Matrix4().makeTranslation(0.025, -0.03, 0.1);
 
+const m = new THREE.Matrix4();
+
 export class OculusTouchControllerDevice {
   constructor(gamepad) {
     this.rayObjectRotation = new THREE.Quaternion();
@@ -75,10 +77,11 @@ export class OculusTouchControllerDevice {
 
     this.rayObject = this.rayObject || document.querySelector(this.selector).object3D;
     this.rayObject.updateMatrixWorld();
-    this.rayObjectRotation.setFromRotationMatrix(this.rayObject.matrixWorld);
+    this.rayObjectRotation.setFromRotationMatrix(m.extractRotation(this.rayObject.matrixWorld));
     this.pose.position.setFromMatrixPosition(this.rayObject.matrixWorld);
     this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
-    this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
+    this.pose.orientation.copy(this.rayObjectRotation);
+
     frame.setPose(this.path.pose, this.pose);
     if (this.gamepad.pose.position && this.gamepad.pose.orientation) {
       frame.setMatrix4(

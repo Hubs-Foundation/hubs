@@ -196,6 +196,9 @@ THREE.Object3D.prototype.lookAt = (function() {
 
     const parent = this.parent;
 
+    if (parent) {
+      parent.updateMatrices();
+    }
     this.updateMatrices(); // hubs change
 
     position.setFromMatrixPosition(this.matrixWorld);
@@ -213,5 +216,6 @@ THREE.Object3D.prototype.lookAt = (function() {
       q1.setFromRotationMatrix(m1);
       this.quaternion.premultiply(q1.inverse());
     }
+    this.matrixNeedsUpdate = true;
   };
 })();

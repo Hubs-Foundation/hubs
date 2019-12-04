@@ -5,6 +5,7 @@ import { copySittingToStandingTransform } from "./copy-sitting-to-standing-trans
 import { waitForDOMContentLoaded } from "../../../utils/async-utils";
 
 const ONES = new THREE.Vector3(1, 1, 1);
+const m = new THREE.Matrix4();
 
 const TOUCHPAD = paths.device.oculusgo.touchpad;
 const TRIGGER = paths.device.oculusgo.trigger;
@@ -50,7 +51,8 @@ export class OculusGoControllerDevice {
       this.rayObject.getWorldQuaternion(this.q);
       frame.setValueType(paths.actions.rayObjectRotation, this.q);
       const rayMatrixWorld = this.rayObject.matrixWorld;
-      this.rayObjectRotation.setFromRotationMatrix(rayMatrixWorld);
+      this.rayObjectRotation.setFromRotationMatrix(m.extractRotation(this.rayObject.matrixWorld));
+
       this.pose.position.setFromMatrixPosition(rayMatrixWorld);
       this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
       this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);

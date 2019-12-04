@@ -365,7 +365,7 @@
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
 			"sourceSize": {"w":64,"h":64}
 		},
-		"spawn_message.png":
+		"spawn_message_dark-hover.png":
 		{
 			"frame": {"x":882,"y":328,"w":64,"h":64},
 			"rotated": false,
@@ -373,7 +373,7 @@
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
 			"sourceSize": {"w":64,"h":64}
 		},
-		"spawn_message_dark-hover.png":
+		"spawn_message_dark.png":
 		{
 			"frame": {"x":882,"y":408,"w":64,"h":64},
 			"rotated": false,
@@ -381,7 +381,7 @@
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
 			"sourceSize": {"w":64,"h":64}
 		},
-		"spawn_message_dark.png":
+		"spawn_message.png":
 		{
 			"frame": {"x":882,"y":488,"w":64,"h":64},
 			"rotated": false,

@@ -26,6 +26,8 @@ export const SOUND_PEN_CHANGE_COLOR = soundEnum++;
 export const SOUND_TOGGLE_MIC = soundEnum++;
 export const SOUND_TELEPORT_START = soundEnum++;
 export const SOUND_TELEPORT_END = soundEnum++;
+export const SOUND_WAYPOINT_START = soundEnum++;
+export const SOUND_WAYPOINT_END = soundEnum++;
 export const SOUND_SNAP_ROTATE = soundEnum++;
 export const SOUND_SPAWN_PEN = soundEnum++;
 export const SOUND_PEN_START_DRAW = soundEnum++;
@@ -76,6 +78,8 @@ export class SoundEffectsSystem {
       [SOUND_CAMERA_TOOL_COUNTDOWN, URL_TICK],
       [SOUND_TELEPORT_START, URL_TELEPORT_LOOP],
       [SOUND_TELEPORT_END, URL_QUICK_TURN],
+      [SOUND_WAYPOINT_START, URL_QUICK_TURN],
+      [SOUND_WAYPOINT_END, URL_TICK],
       [SOUND_SNAP_ROTATE, URL_TAP_MELLOW],
       [SOUND_SPAWN_PEN, URL_PEN_SPAWN],
       [SOUND_PEN_START_DRAW, URL_PEN_DRAW],

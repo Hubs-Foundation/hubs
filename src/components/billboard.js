@@ -62,7 +62,7 @@ AFRAME.registerComponent("billboard", {
 
       if (!this.playerCamera) return;
 
-      this.isInView = isInViewOfCamera(this.el.object3D, this.playerCamera);
+      this.isInView = this.el.sceneEl.is("vr-mode") ? true : isInViewOfCamera(this.el.object3D, this.playerCamera);
     };
   })(),
 

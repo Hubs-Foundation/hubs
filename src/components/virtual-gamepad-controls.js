@@ -10,6 +10,8 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   schema: {},
 
   init() {
+    this.characterController = this.el.sceneEl.systems["hubs-systems"].characterController;
+
     this.onEnterVr = this.onEnterVr.bind(this);
     this.onExitVr = this.onExitVr.bind(this);
     this.onFirstInteraction = this.onFirstInteraction.bind(this);
@@ -71,15 +73,9 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.moving = false;
     this.rotating = false;
 
-    this.moveEvent = {
-      axis: [0, 0]
-    };
-    this.rotateYEvent = {
-      value: 0
-    };
-    this.rotateXEvent = {
-      value: 0
-    };
+    this.displacement = new THREE.Vector3();
+    this.lookDy = 0;
+    this.lookDx = 0;
 
     this.el.sceneEl.addEventListener("enter-vr", this.onEnterVr);
     this.el.sceneEl.addEventListener("exit-vr", this.onExitVr);
@@ -94,49 +90,42 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   onMoveJoystickChanged(event, joystick) {
     const angle = joystick.angle.radian;
     const force = joystick.force < 1 ? joystick.force : 1;
-    const moveStrength = 1.85;
-    const x = Math.cos(angle) * force * moveStrength;
-    const z = Math.sin(angle) * force * moveStrength;
+    this.displacement.set(Math.cos(angle), 0, Math.sin(angle)).multiplyScalar(force * 1.85);
     this.moving = true;
-    this.moveEvent.axis[0] = x;
-    this.moveEvent.axis[1] = z;
   },
 
   onMoveJoystickEnd() {
     this.moving = false;
-    this.moveEvent.axis[0] = 0;
-    this.moveEvent.axis[1] = 0;
-    this.el.sceneEl.emit("move", this.moveEvent);
+    this.displacement.set(0, 0, 0);
   },
 
   onLookJoystickChanged(event, joystick) {
     // Set pitch and yaw angles on right stick move
     const angle = joystick.angle.radian;
     const force = joystick.force < 1 ? joystick.force : 1;
-    const turnStrength = 0.5;
+    const turnStrength = 0.05;
     this.rotating = true;
-    this.rotateYEvent.value = Math.cos(angle) * force * turnStrength;
-    this.rotateXEvent.value = Math.sin(angle) * force * turnStrength;
+    this.lookDy = -Math.cos(angle) * force * turnStrength;
+    this.lookDx = Math.sin(angle) * force * turnStrength;
   },
 
   onLookJoystickEnd() {
     this.rotating = false;
-    this.rotateYEvent.value = 0;
-    this.rotateXEvent.value = 0;
-    this.el.sceneEl.emit("rotateY", this.rotateYEvent);
-    this.el.sceneEl.emit("rotateX", this.rotateXEvent);
+    this.lookDx = 0;
+    this.lookDy = 0;
+    this.el.sceneEl.emit("rotateX", this.lookDx);
   },
 
   tick() {
-    if (!this.inVr) {
-      if (this.moving) {
-        this.el.sceneEl.emit("move", this.moveEvent);
-      }
-
-      if (this.rotating) {
-        this.el.sceneEl.emit("rotateY", this.rotateYEvent);
-        this.el.sceneEl.emit("rotateX", this.rotateXEvent);
-      }
+    if (this.inVr) {
+      return;
+    }
+    if (this.moving) {
+      this.characterController.enqueueRelativeMotion(this.displacement);
+    }
+    if (this.rotating) {
+      this.characterController.enqueueInPlaceRotationAroundWorldUp(this.lookDy);
+      this.el.sceneEl.emit("rotateX", this.lookDx);
     }
   },
 
