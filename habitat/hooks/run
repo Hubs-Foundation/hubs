@@ -49,13 +49,11 @@ fi
 
 if [[ "{{ cfg.deploy.type }}" == "cp" ]] ;
 then
-  mkdir -p "{{ cfg.deploy.target }}/hubs"
-  mkdir -p "{{ cfg.deploy.target }}/hubs/pages/latest"
-  mkdir -p "{{ cfg.deploy.target }}/hubs/pages/releases/{{ pkg.version }}.{{ pkg.release }}"
+  mkdir -p "{{ cfg.deploy.target }}/hubs/pages/releases"
 
-  cp -R "$TEMP_DIST_PATH/assets/*" "{{ cfg.deploy.target }}/hubs/assets"
-  cp -R "$TEMP_DIST_PATH/pages/*" "{{ cfg.deploy.target }}/hubs/pages/latest"
-  cp -R "$TEMP_DIST_PATH/pages/*" "{{ cfg.deploy.target }}/hubs/pages/release/{{ pkg.version }}.{{ pkg.release }}"
+  cp -R "$TEMP_DIST_PATH/assets" "{{ cfg.deploy.target }}/hubs"
+  cp -R "$TEMP_DIST_PATH/pages" "{{ cfg.deploy.target }}/hubs/pages/latest"
+  cp -R "{{ cfg.deploy.target }}/hubs/pages/latest" "{{ cfg.deploy.target }}/hubs/pages/releases/{{ pkg.version }}.{{ pkg.release }}"
 fi
 
 exec sleep 999999999999
