@@ -590,8 +590,6 @@ AFRAME.registerComponent("camera-tool", {
 
           playerHead.visible = true;
           playerHead.el.components["bone-visibility"].tick();
-          playerHead.updateMatrices(true, true);
-          playerHead.updateMatrixWorld(true, true);
         }
 
         let playerHudWasVisible = false;
@@ -636,8 +634,6 @@ AFRAME.registerComponent("camera-tool", {
         if (playerHead) {
           playerHead.visible = false;
           playerHead.el.components["bone-visibility"].tick();
-          playerHead.updateMatrices(true, true);
-          playerHead.updateMatrixWorld(true, true);
         }
         if (this.playerHud) {
           this.playerHud.visible = playerHudWasVisible;
