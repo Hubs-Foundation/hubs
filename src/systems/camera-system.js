@@ -1,5 +1,5 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
-import { setMatrixWorld } from "../utils/three-utils";
+import { childMatch, setMatrixWorld, calculateViewingDistance } from "../utils/three-utils";
 import { paths } from "./userinput/paths";
 import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
@@ -23,22 +23,6 @@ function getBatch(inspected, batchManagerSystem) {
   );
 }
 
-const calculateViewingDistance = (function() {
-  return function calculateViewingDistance(camera, object, box, center) {
-    const halfYExtents = Math.max(Math.abs(box.max.y - center.y), Math.abs(center.y - box.min.y));
-    const halfXExtents = Math.max(Math.abs(box.max.x - center.x), Math.abs(center.x - box.min.x));
-    const halfVertFOV = THREE.Math.degToRad(camera.el.sceneEl.camera.fov / 2);
-    const halfHorFOV =
-      Math.atan(Math.tan(halfVertFOV) * camera.el.sceneEl.camera.aspect) * (object.el.sceneEl.is("vr-mode") ? 0.5 : 1);
-    const margin = 1.05;
-    const length1 = Math.abs((halfYExtents * margin) / Math.tan(halfVertFOV));
-    const length2 = Math.abs((halfXExtents * margin) / Math.tan(halfHorFOV));
-    const length3 = Math.abs(box.max.z - center.z) + Math.max(length1, length2);
-    const length = object.el.sceneEl.is("vr-mode") ? Math.max(0.25, length3) : length3;
-    return length || 1.25;
-  };
-})();
-
 const decompose = (function() {
   const scale = new THREE.Vector3();
   return function decompose(m, p, q) {
@@ -46,27 +30,7 @@ const decompose = (function() {
   };
 })();
 
-export const childMatch = (function() {
-  const cp = new THREE.Vector3();
-  const cq = new THREE.Quaternion();
-  const cqI = new THREE.Quaternion();
-  const twp = new THREE.Vector3();
-  const twq = new THREE.Quaternion();
-  // transform the parent such that its child matches the target
-  return function childMatch(parent, child, target) {
-    target.updateMatrices();
-    decompose(target.matrixWorld, twp, twq);
-    cp.copy(child.position);
-    cq.copy(child.quaternion);
-    cqI.copy(cq).inverse();
-    parent.quaternion.copy(twq).multiply(cqI);
-    parent.position.subVectors(twp, cp.applyQuaternion(parent.quaternion));
-    parent.matrixNeedsUpdate = true;
-  };
-})();
-
 const IDENTITY = new THREE.Matrix4().identity();
-
 const orbit = (function() {
   const owq = new THREE.Quaternion();
   const owp = new THREE.Vector3();
@@ -107,7 +71,8 @@ const orbit = (function() {
         .applyQuaternion(target.quaternion)
     );
     target.matrixNeedsUpdate = true;
-    childMatch(rig, camera, target);
+    target.updateMatrices();
+    childMatch(rig, camera, target.matrixWorld);
   };
 })();
 
@@ -133,7 +98,16 @@ const moveRigSoCameraLooksAtObject = (function() {
 
     const box = getBox(object.el, object.el.getObject3D("mesh") || object, true);
     box.getCenter(center);
-    const dist = calculateViewingDistance(camera, object, box, center) * distanceMod;
+    const vrMode = object.el.sceneEl.is("vr-mode");
+    const dist =
+      calculateViewingDistance(
+        object.el.sceneEl.camera.fov,
+        object.el.sceneEl.camera.aspect,
+        object,
+        box,
+        center,
+        vrMode
+      ) * distanceMod;
     target.position.addVectors(
       owp,
       oForw
@@ -143,7 +117,8 @@ const moveRigSoCameraLooksAtObject = (function() {
     );
     target.quaternion.copy(owq);
     target.matrixNeedsUpdate = true;
-    childMatch(rig, camera, target);
+    target.updateMatrices();
+    childMatch(rig, camera, target.matrixWorld);
   };
 })();
 

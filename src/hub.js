@@ -38,6 +38,7 @@ import { authorizeOrSanitizeMessage } from "./utils/permissions-utils";
 import Cookies from "js-cookie";
 
 import "./components/scene-components";
+import "./components/scale-in-screen-space";
 import "./components/mute-mic";
 import "./components/bone-mute-state-indicator";
 import "./components/bone-visibility";
@@ -47,7 +48,6 @@ import "./components/emoji-hud";
 import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
 import "./components/hand-controls2";
-import "./components/character-controller";
 import "./components/hoverable-visuals";
 import "./components/hover-visuals";
 import "./components/offset-relative-to";
@@ -372,6 +372,8 @@ async function updateEnvironmentForHub(hub) {
 
     // Clear the three.js image cache and load the loading environment before switching to the new one.
     THREE.Cache.clear();
+    const waypointSystem = sceneEl.systems["hubs-systems"].waypointSystem;
+    waypointSystem.releaseAnyOccupiedWaypoints();
 
     environmentEl.addEventListener(
       "model-loaded",
@@ -383,7 +385,7 @@ async function updateEnvironmentForHub(hub) {
 
             // We've already entered, so move to new spawn point once new environment is loaded
             if (sceneEl.is("entered")) {
-              document.querySelector("#avatar-rig").components["spawn-controller"].moveToSpawnPoint();
+              waypointSystem.moveToSpawnPoint();
             }
           },
           { once: true }

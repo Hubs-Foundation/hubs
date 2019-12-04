@@ -84,7 +84,15 @@ AFRAME.GLTFModelPlus.registerComponent("visible", "visible", (el, componentName,
     el.setAttribute(componentName, componentData);
   }
 });
-AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point");
+AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point", el => {
+  el.setAttribute("waypoint", {
+    canBeSpawnPoint: true,
+    canBeOccupied: false,
+    canBeClicked: false,
+    willDisableMotion: false,
+    willMaintainWorldUp: true
+  });
+});
 AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
 AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentName, componentData) => {
   const nav = AFRAME.scenes[0].systems.nav;
@@ -102,6 +110,19 @@ AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentNa
 });
 
 AFRAME.GLTFModelPlus.registerComponent("pinnable", "pinnable");
+
+AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentName, componentData, components) => {
+  if (componentData.canBeOccupied) {
+    el.setAttribute("networked", {
+      template: "#template-waypoint-avatar",
+      attachTemplateToLocal: false,
+      owner: "scene",
+      persistent: true,
+      networkId: components.networked.id
+    });
+  }
+  el.setAttribute("waypoint", componentData);
+});
 
 AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
   if (componentData.id) {

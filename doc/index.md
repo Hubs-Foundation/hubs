@@ -10,7 +10,6 @@
     - [avatar-replay](#components/avatar/avatar-replay)
     - [bone-mute-state-indicator](#components/avatar/bone-mute-state-indicator)
     - [bone-visibility](#components/avatar/bone-visibility)
-    - [character-controller](#components/avatar/character-controller)
     - [hand-pose](#components/avatar/hand-pose)
     - [hand-pose-controller](#components/avatar/hand-pose-controller)
     - [ik-root](#components/avatar/ik-root)
@@ -184,15 +183,6 @@ Scales an object to near-zero if the object is invisible. Useful for bones repre
 
 `src/components/bone-visibility.js`
           
-
-<a name="components/avatar/character-controller"></a>
-#### character-controller
-
-Avatar movement controller that listens to move, rotate and teleportation events and moves the avatar accordingly. The controller accounts for playspace offset and orientation and depends on the nav mesh system for translation.
-
-`src/components/character-controller.js`
-          
-
 <a name="components/avatar/hand-pose"></a>
 #### hand-pose
 
