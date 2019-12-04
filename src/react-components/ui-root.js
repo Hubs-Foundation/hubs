@@ -116,7 +116,6 @@ class UIRoot extends Component {
     enterScene: PropTypes.func,
     exitScene: PropTypes.func,
     onSendMessage: PropTypes.func,
-    disableAutoExitOnConcurrentLoad: PropTypes.bool,
     disableAutoExitOnIdle: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
     isBotMode: PropTypes.bool,
@@ -267,7 +266,7 @@ class UIRoot extends Component {
   }
 
   onConcurrentLoad = () => {
-    if (this.props.disableAutoExitOnConcurrentLoad) return;
+    if (qsTruthy("allow_multi") || this.props.store.state.preferences["allowMultipleHubsInstances"]) return;
     this.startAutoExitTimer("autoexit.concurrent_subtitle");
   };
 

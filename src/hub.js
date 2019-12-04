@@ -262,7 +262,6 @@ const qsVREntryType = qs.get("vr_entry_type");
 
 function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
-  const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const disableAutoExitOnIdle =
     qsTruthy("allow_idle") || (process.env.NODE_ENV === "development" && !qs.get("idle_timeout"));
   const isCursorHoldingPen =
@@ -280,7 +279,6 @@ function mountUI(props = {}) {
             {...{
               scene,
               isBotMode,
-              disableAutoExitOnConcurrentLoad,
               disableAutoExitOnIdle,
               forcedVREntryType,
               store,
