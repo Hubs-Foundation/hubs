@@ -56,6 +56,7 @@ AFRAME.registerComponent("cursor-controller", {
   tick2: (() => {
     const rawIntersections = [];
     const cameraPos = new THREE.Vector3();
+    const v = new THREE.Vector3();
 
     return function(t, left) {
       const userinput = AFRAME.scenes[0].systems.userinput;
@@ -71,6 +72,16 @@ AFRAME.registerComponent("cursor-controller", {
         return;
       }
 
+      this.el.sceneEl.systems["hubs-systems"].characterController.avatarPOV.object3D.updateMatrices();
+      const playerScale = v
+        .setFromMatrixColumn(
+          this.el.sceneEl.systems["hubs-systems"].characterController.avatarPOV.object3D.matrixWorld,
+          1
+        )
+        .length();
+      this.raycaster.far = this.data.far * playerScale;
+      this.raycaster.near = this.data.near * playerScale;
+
       const interaction = AFRAME.scenes[0].systems.interaction;
       const isGrabbing = left ? !!interaction.state.leftRemote.held : !!interaction.state.rightRemote.held;
       if (!isGrabbing) {
@@ -84,7 +95,7 @@ AFRAME.registerComponent("cursor-controller", {
         );
         this.intersection = rawIntersections[0];
         this.intersectionIsValid = !!interaction.updateCursorIntersection(this.intersection, left);
-        this.distance = this.intersectionIsValid ? this.intersection.distance : this.data.defaultDistance;
+        this.distance = this.intersectionIsValid ? this.intersection.distance : this.data.defaultDistance * playerScale;
       }
 
       const { cursor, minDistance, far, camera } = this.data;
@@ -92,14 +103,13 @@ AFRAME.registerComponent("cursor-controller", {
       const cursorModDelta =
         userinput.get(left ? paths.actions.cursor.left.modDelta : paths.actions.cursor.right.modDelta) || 0;
       if (isGrabbing && !userinput.activeSets.includes(left ? sets.leftCursorHoldingUI : sets.rightCursorHoldingUI)) {
-        this.distance = THREE.Math.clamp(this.distance - cursorModDelta, minDistance, far);
+        this.distance = THREE.Math.clamp(this.distance - cursorModDelta, minDistance, far * playerScale);
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);
       // The cursor will always be oriented towards the player about its Y axis, so objects held by the cursor will rotate towards the player.
       getLastWorldPosition(camera.object3D, cameraPos);
       cameraPos.y = cursor.object3D.position.y;
       cursor.object3D.lookAt(cameraPos);
-      cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
       cursor.object3D.matrixNeedsUpdate = true;
 
       // TODO : Check if the selected object being transformed is for this cursor!

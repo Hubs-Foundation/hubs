@@ -10,6 +10,8 @@ const TRIGGER = paths.device.gearVRController.button("trigger");
 const TOUCHPAD_X = paths.device.gearVRController.axis("touchpadX");
 const TOUCHPAD_Y = paths.device.gearVRController.axis("touchpadY");
 
+const m = new THREE.Matrix4();
+
 export class GearVRControllerDevice {
   constructor(gamepad) {
     this.gamepad = gamepad;
@@ -48,7 +50,7 @@ export class GearVRControllerDevice {
         this.rayObject = document.querySelector(this.selector).object3D;
       }
       this.rayObject.updateMatrixWorld();
-      this.rayObjectRotation.setFromRotationMatrix(this.rayObject.matrixWorld);
+      this.rayObjectRotation.setFromRotationMatrix(m.extractRotation(this.rayObject.matrixWorld));
       this.pose.position.setFromMatrixPosition(this.rayObject.matrixWorld);
       this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
       this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);

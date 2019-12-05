@@ -9,6 +9,7 @@ const HAND_OFFSET = new THREE.Matrix4().compose(
   new THREE.Vector3(1, 1, 1)
 );
 const RAY_ROTATION = new THREE.Quaternion();
+const m = new THREE.Matrix4();
 
 export class ViveControllerDevice {
   constructor(gamepad) {
@@ -112,7 +113,7 @@ export class ViveControllerDevice {
     const el = document.querySelector(this.selector);
     const rayObject = el.object3D;
     rayObject.updateMatrixWorld();
-    this.rayObjectRotation.setFromRotationMatrix(rayObject.matrixWorld);
+    this.rayObjectRotation.setFromRotationMatrix(m.extractRotation(rayObject.matrixWorld));
     this.pose.position.setFromMatrixPosition(rayObject.matrixWorld);
     this.pose.direction
       .set(0, 0, -1)

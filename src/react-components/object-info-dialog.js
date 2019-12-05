@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../utils/three-utils";
 import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/client-info-dialog.scss";
@@ -24,6 +25,7 @@ export default class ObjectInfoDialog extends Component {
 
   componentDidMount() {
     this.updatePinnedState = this.updatePinnedState.bind(this);
+    this.viewingCamera = document.getElementById("viewing-camera");
     this.pin = this.pin.bind(this);
     this.unpin = this.unpin.bind(this);
     this.props.scene.addEventListener("uninspect", this.props.onClose);
@@ -61,6 +63,27 @@ export default class ObjectInfoDialog extends Component {
       cameraSystem.hideEverythingButThisObject(this.props.el.object3D);
     }
   }
+
+  enqueueWaypointTravel = (function() {
+    const targetMatrix = new THREE.Matrix4();
+    const translation = new THREE.Matrix4();
+    return function enqueueWaypointTravel() {
+      this.viewingCamera.object3D.updateMatrices();
+      targetMatrix.copy(this.viewingCamera.object3D.matrixWorld);
+      affixToWorldUp(targetMatrix, targetMatrix);
+      translation.makeTranslation(0, -1.6, 0.15);
+      targetMatrix.multiply(translation);
+      rotateInPlaceAroundWorldUp(targetMatrix, Math.PI, targetMatrix);
+
+      this.props.scene.systems["hubs-systems"].characterController.enqueueWaypointTravelTo(targetMatrix, true, {
+        willDisableMotion: false,
+        willDisableTeleporting: false,
+        snapToNavMesh: false,
+        willMaintainInitialOrientation: false
+      });
+      this.props.onClose();
+    };
+  })().bind(this);
 
   delete() {
     const targetEl = this.props.el;
@@ -107,6 +130,11 @@ export default class ObjectInfoDialog extends Component {
             <button onClick={this.toggleLights.bind(this)}>
               <FormattedMessage id={`object-info.${this.state.enableLights ? "lower" : "raise"}-lights`} />
             </button>
+            {this.props.scene.is("entered") && (
+              <button onClick={this.enqueueWaypointTravel}>
+                <FormattedMessage id="object-info.waypoint" />
+              </button>
+            )}
             {this.props.scene.is("entered") &&
               !this.state.pinned &&
               this.props.hubChannel &&

@@ -63,6 +63,7 @@ export function setMatrixWorld(object3D, m) {
     object3D.matrix.copy(object3D.matrixWorld);
   }
   object3D.matrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
+  object3D.childrenNeedMatrixWorldUpdate = true;
 }
 
 // Modified version of Don McCurdy's AnimationUtils.clone
@@ -193,3 +194,136 @@ export function findNode(root, pred) {
   }
   return null;
 }
+
+export const interpolateAffine = (function() {
+  const mat4 = new THREE.Matrix4();
+  const end = {
+    position: new THREE.Vector3(),
+    quaternion: new THREE.Quaternion(),
+    scale: new THREE.Vector3()
+  };
+  const start = {
+    position: new THREE.Vector3(),
+    quaternion: new THREE.Quaternion(),
+    scale: new THREE.Vector3()
+  };
+  const interpolated = {
+    position: new THREE.Vector3(),
+    quaternion: new THREE.Quaternion(),
+    scale: new THREE.Vector3()
+  };
+  return function(startMat4, endMat4, progress, outMat4) {
+    start.quaternion.setFromRotationMatrix(mat4.extractRotation(startMat4));
+    end.quaternion.setFromRotationMatrix(mat4.extractRotation(endMat4));
+    THREE.Quaternion.slerp(start.quaternion, end.quaternion, interpolated.quaternion, progress);
+    interpolated.position.lerpVectors(
+      start.position.setFromMatrixColumn(startMat4, 3),
+      end.position.setFromMatrixColumn(endMat4, 3),
+      progress
+    );
+    interpolated.scale.lerpVectors(
+      start.scale.setFromMatrixScale(startMat4),
+      end.scale.setFromMatrixScale(endMat4),
+      progress
+    );
+    return outMat4.compose(
+      interpolated.position,
+      interpolated.quaternion,
+      interpolated.scale
+    );
+  };
+})();
+
+export const squareDistanceBetween = (function() {
+  const posA = new THREE.Vector3();
+  const posB = new THREE.Vector3();
+  return function(objA, objB) {
+    objA.updateMatrices();
+    objB.updateMatrices();
+    posA.setFromMatrixColumn(objA.matrixWorld, 3);
+    posB.setFromMatrixColumn(objB.matrixWorld, 3);
+    return posA.distanceToSquared(posB);
+  };
+})();
+
+export function isAlmostUniformVector3(v, epsilonHalf = 0.005) {
+  return Math.abs(v.x - v.y) < epsilonHalf && Math.abs(v.x - v.z) < epsilonHalf;
+}
+export function almostEqual(a, b, epsilon = 0.01) {
+  return Math.abs(a - b) < epsilon;
+}
+
+export const affixToWorldUp = (function() {
+  const inRotationMat4 = new THREE.Matrix4();
+  const inForward = new THREE.Vector3();
+  const outForward = new THREE.Vector3();
+  const outSide = new THREE.Vector3();
+  const worldUp = new THREE.Vector3(); // Could be called "outUp"
+  const v = new THREE.Vector3();
+  const inMat4Copy = new THREE.Matrix4();
+  return function affixToWorldUp(inMat4, outMat4) {
+    inRotationMat4.identity().extractRotation(inMat4Copy.copy(inMat4));
+    inForward.setFromMatrixColumn(inRotationMat4, 2).multiplyScalar(-1);
+    outForward
+      .copy(inForward)
+      .sub(v.copy(inForward).projectOnVector(worldUp.set(0, 1, 0)))
+      .normalize();
+    outSide.crossVectors(outForward, worldUp);
+    outMat4.makeBasis(outSide, worldUp, outForward.multiplyScalar(-1));
+    outMat4.scale(v.setFromMatrixScale(inMat4Copy));
+    outMat4.setPosition(v.setFromMatrixColumn(inMat4Copy, 3));
+  };
+})();
+
+export const calculateCameraTransformForWaypoint = (function() {
+  const upAffixedCameraTransform = new THREE.Matrix4();
+  const upAffixedWaypointTransform = new THREE.Matrix4();
+  const detachFromWorldUp = new THREE.Matrix4();
+  return function calculateCameraTransformForWaypoint(cameraTransform, waypointTransform, outMat4) {
+    affixToWorldUp(cameraTransform, upAffixedCameraTransform);
+    detachFromWorldUp.getInverse(upAffixedCameraTransform).multiply(cameraTransform);
+    affixToWorldUp(waypointTransform, upAffixedWaypointTransform);
+    outMat4.copy(upAffixedWaypointTransform).multiply(detachFromWorldUp);
+  };
+})();
+
+export const calculateViewingDistance = (function() {
+  return function calculateViewingDistance(fov, aspect, object, box, center, vrMode) {
+    const halfYExtents = Math.max(Math.abs(box.max.y - center.y), Math.abs(center.y - box.min.y));
+    const halfXExtents = Math.max(Math.abs(box.max.x - center.x), Math.abs(center.x - box.min.x));
+    const halfVertFOV = THREE.Math.degToRad(fov / 2);
+    const halfHorFOV = Math.atan(Math.tan(halfVertFOV) * aspect) * (vrMode ? 0.5 : 1);
+    const margin = 1.05;
+    const length1 = Math.abs((halfYExtents * margin) / Math.tan(halfVertFOV));
+    const length2 = Math.abs((halfXExtents * margin) / Math.tan(halfHorFOV));
+    const length3 = Math.abs(box.max.z - center.z) + Math.max(length1, length2);
+    const length = vrMode ? Math.max(0.25, length3) : length3;
+    return length || 1.25;
+  };
+})();
+
+export const rotateInPlaceAroundWorldUp = (function() {
+  const inMat4Copy = new THREE.Matrix4();
+  const startRotation = new THREE.Matrix4();
+  const endRotation = new THREE.Matrix4();
+  const v = new THREE.Vector3();
+  return function rotateInPlaceAroundWorldUp(inMat4, theta, outMat4) {
+    inMat4Copy.copy(inMat4);
+    return outMat4
+      .copy(endRotation.makeRotationY(theta).multiply(startRotation.extractRotation(inMat4Copy)))
+      .scale(v.setFromMatrixScale(inMat4Copy))
+      .setPosition(v.setFromMatrixPosition(inMat4Copy));
+  };
+})();
+
+export const childMatch = (function() {
+  const childInverse = new THREE.Matrix4();
+  const newParentMatrix = new THREE.Matrix4();
+  // transform the parent such that its child matches the target
+  return function childMatch(parent, child, target) {
+    child.updateMatrices();
+    childInverse.getInverse(child.matrix);
+    newParentMatrix.multiplyMatrices(target, childInverse);
+    setMatrixWorld(parent, newParentMatrix);
+  };
+})();
