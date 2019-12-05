@@ -49,7 +49,7 @@ const workerScript = (workerDomain, assetsDomain) => {
   
     if (targetPath.startsWith("files/")) {
       targetUrl = \`\${STORAGE_HOST}/\${targetPath}\`;
-    } else if (targetPath.startsWith("hubs/") || targetPath.startsWith("spoke/") || targetPath.startsWith("admin/")) {
+    } else if (targetPath.startsWith("hubs/") || targetPath.startsWith("spoke/") || targetPath.startsWith("admin/") || targetPath.startsWith("assets/")) {
       targetUrl = \`\${ASSETS_HOST}/\${targetPath}\`;
     } else {
       if (!isCorsProxy) {
