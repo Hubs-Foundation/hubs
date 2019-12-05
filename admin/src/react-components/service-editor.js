@@ -28,7 +28,8 @@ import {
   getCategoryDescription,
   isDescriptor,
   putConfig,
-  schemaCategories
+  schemaCategories,
+  getAdminInfo
 } from "../utils/ita";
 import * as AppConfigUtils from "../utils/app-config";
 
@@ -163,8 +164,10 @@ class ConfigurationEditor extends Component {
     throw new Error("Not implemented");
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.fetchConfigsForCategory();
+    const adminInfo = await getAdminInfo();
+    this.setState({ provider: adminInfo.provider });
   }
 
   handleTabChange(event, category) {
@@ -345,7 +348,7 @@ class ConfigurationEditor extends Component {
           </Tabs>
           <TabContainer>
             <Typography variant="body2" gutterBottom>
-              {getCategoryDescription(this.state.category)}
+              {getCategoryDescription(this.state.category, this.state.provider)}
             </Typography>
             {schema && config ? this.renderTree(schema, category, config) : <LinearProgress />}
           </TabContainer>

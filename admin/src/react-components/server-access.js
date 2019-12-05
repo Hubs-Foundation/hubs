@@ -19,7 +19,11 @@ class ServerAccessComponent extends Component {
 
   async componentDidMount() {
     const adminInfo = await getAdminInfo();
-    this.setState({ qrCodeData: adminInfo.ssh_totp_qr_data, serverDomain: adminInfo.server_domain });
+    this.setState({
+      qrCodeData: adminInfo.ssh_totp_qr_data,
+      serverDomain: adminInfo.server_domain,
+      provider: adminInfo.provider
+    });
   }
 
   render() {
@@ -42,9 +46,14 @@ class ServerAccessComponent extends Component {
           </Typography>
           <Typography variant="body1" gutterBottom component="div">
             To connect to a server, run the following command:
-            <div className={this.props.classes.command}>
-              ssh -i &lt;key file&gt; ubuntu@&lt;server name&gt;.{this.state.serverDomain}
-            </div>
+            {this.state.provider === "arbortect" && (
+              <div className={this.props.classes.command}>ssh -i &lt;key file&gt; root@{this.state.serverDomain}</div>
+            )}
+            {this.state.provider === "aws" && (
+              <div className={this.props.classes.command}>
+                ssh -i &lt;key file&gt; ubuntu@&lt;server name&gt;.{this.state.serverDomain}
+              </div>
+            )}
           </Typography>
           <Typography variant="subheading" className={this.props.classes.section} gutterBottom>
             Two-Factor Verification
