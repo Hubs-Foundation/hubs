@@ -342,6 +342,7 @@ AFRAME.registerComponent("waypoint", {
     canBeOccupied: { default: false },
     canBeClicked: { default: false },
     willDisableMotion: { default: false },
+    willDisableTeleporting: { default: false },
     snapToNavMesh: { default: false },
     willMaintainInitialOrientation: { default: false },
     willMaintainWorldUp: { default: true },

@@ -156,7 +156,7 @@ export class CharacterControllerSystem {
       if (!this.activeWaypoint && this.waypoints.length) {
         this.activeWaypoint = this.waypoints.splice(0, 1)[0];
         this.isMotionDisabled = this.activeWaypoint.waypointComponentData.willDisableMotion;
-        this.triedToMoveCount = 0;
+        this.isTeleportingDisabled = this.activeWaypoint.waypointComponentData.willDisableTeleporting;
         this.avatarPOV.object3D.updateMatrices();
         this.waypointTravelTime =
           (vrMode && !qsAllowWaypointLerp) || this.activeWaypoint.isInstant
@@ -259,11 +259,6 @@ export class CharacterControllerSystem {
       );
       const triedToMove = displacementToDesiredPOV.lengthSq() > 0.001;
       const squareDistanceToNavSnappedPOVPosition = desiredPOVPosition.distanceToSquared(navMeshSnappedPOVPosition);
-      this.triedToMoveCount += triedToMove ? 1 : 0;
-      if (this.triedToMoveCount > 20) {
-        // TODO: Show tip indicating that you are stuck and will get unstuck if you keep trying.
-        this.isMotionDisabled = false;
-      }
 
       if (this.isMotionDisabled) {
         childMatch(this.avatarRig.object3D, this.avatarPOV.object3D, snapRotatedPOV);
