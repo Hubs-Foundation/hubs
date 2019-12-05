@@ -188,7 +188,7 @@ AFRAME.registerComponent("teleporter", {
     const { start, confirm, speed } = this.data;
     const object3D = this.el.object3D;
 
-    if (!this.isTeleporting && userinput.get(start)) {
+    if (!this.isTeleporting && userinput.get(start) && !this.characterController.isTeleportingDisabled) {
       this.isTeleporting = true;
       this.timeTeleporting = 0;
       this.hit = false;
@@ -266,6 +266,9 @@ AFRAME.registerComponent("teleporter", {
         collidedIndex = i;
         break;
       }
+    }
+    if (this.characterController.isTeleportingDisabled) {
+      this.hit = false;
     }
 
     const percentToDraw = this.timeTeleporting > DRAW_TIME_MS ? 1 : this.timeTeleporting / DRAW_TIME_MS;
