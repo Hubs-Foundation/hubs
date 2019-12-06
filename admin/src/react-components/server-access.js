@@ -40,10 +40,12 @@ class ServerAccessComponent extends Component {
           <Typography variant="body1" gutterBottom>
             To SSH into your server(s), you will use the SSH private key file you created before deploying Hubs Cloud.
           </Typography>
-          <Typography variant="body1" gutterBottom>
-            Each of your servers has a name. The name can be found in your cloud provider&apos;s console in the server
-            list. (For example, on AWS Console, go to EC2 -&gt; Instances.)
-          </Typography>
+          {this.state.provider !== "arbortect" && (
+            <Typography variant="body1" gutterBottom>
+              Each of your servers has a name. The name can be found in your cloud provider&apos;s console in the server
+              list. (For example, on AWS Console, go to EC2 -&gt; Instances.)
+            </Typography>
+          )}
           <Typography variant="body1" gutterBottom component="div">
             To connect to a server, run the following command:
             {this.state.provider === "arbortect" && (
