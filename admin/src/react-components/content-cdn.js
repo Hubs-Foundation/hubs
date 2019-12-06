@@ -197,14 +197,15 @@ class ContentCDNComponent extends Component {
         <Title title="Content CDN" />
         <form onSubmit={this.onSubmit.bind(this)}>
           <CardContent className={this.props.classes.info}>
-            {this.state.provider === "arbortect" ? (
+            {this.state.provider === "arbortect" && (
               <Typography variant="body2" gutterBottom>
                 You can greatly reduce load on your server and improve loading times by setting up Cloudflare as your
                 CDN.
                 <br />
                 Once enabled, Cloudflare will cache content, reduce latency, and reduce bandwidth used by your server.
               </Typography>
-            ) : (
+            )}
+            {this.state.provider && this.state.provider !== "arbortect" && (
               <Typography variant="body2" gutterBottom>
                 Hubs Cloud uses bandwidth from your cloud provider to deliver content.
                 <br />
@@ -222,12 +223,12 @@ class ContentCDNComponent extends Component {
               </a>
               . As such, you will be using data transfer to send all 3rd party content to your users.
             </Typography>
-            {this.state.provider !== "arbortect" && (
+            {this.state.provider && this.state.provider !== "arbortect" && (
               <Typography variant="body1" gutterBottom>
                 Additionally, you will incur data transfer costs for serving avatars, scenes, and other assets.
               </Typography>
             )}
-            {this.state.provider !== "arbortect" && (
+            {this.state.provider && this.state.provider !== "arbortect" && (
               <Typography variant="body1" gutterBottom>
                 You can minimize this data transfer cost by using a Cloudflare Worker to serve this content:
               </Typography>
