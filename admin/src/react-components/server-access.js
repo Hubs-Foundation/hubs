@@ -57,29 +57,33 @@ class ServerAccessComponent extends Component {
               </div>
             )}
           </Typography>
-          <Typography variant="subheading" className={this.props.classes.section} gutterBottom>
-            Two-Factor Verification
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            Upon connecting, you&apos;ll need a one-time Verification Code. This is a two-factor security measure and is
-            a rotating six digit number.
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            First, you will need to set up a device by installing a two-factor app such as Google Authenticator.
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            To generate a code, open the authenticator app and scan the QR code below.
-          </Typography>
-          {this.state.showQrCode ? (
-            <img style={{ width: "256px", height: "256px" }} src={this.state.qrCodeData} />
-          ) : (
-            <Button
-              className={this.props.classes.button}
-              variant="outlined"
-              onClick={() => this.setState({ showQrCode: true })}
-            >
-              Show QR Code
-            </Button>
+          {this.state.qrCodeData && (
+            <div>
+              <Typography variant="subheading" className={this.props.classes.section} gutterBottom>
+                Two-Factor Verification
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                Upon connecting, you&apos;ll need a one-time Verification Code. This is a two-factor security measure
+                and is a rotating six digit number.
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                First, you will need to set up a device by installing a two-factor app such as Google Authenticator.
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                To generate a code, open the authenticator app and scan the QR code below.
+              </Typography>
+              {this.state.showQrCode ? (
+                <img style={{ width: "256px", height: "256px" }} src={this.state.qrCodeData} />
+              ) : (
+                <Button
+                  className={this.props.classes.button}
+                  variant="outlined"
+                  onClick={() => this.setState({ showQrCode: true })}
+                >
+                  Show QR Code
+                </Button>
+              )}
+            </div>
           )}
           <Typography variant="subheading" className={this.props.classes.section} gutterBottom>
             More Information
