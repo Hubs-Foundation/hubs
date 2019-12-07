@@ -130,8 +130,6 @@ const getTs = (() => {
   unlinkSync("_build.tar.gz");
 
   step.text = "Build uploaded, deploying.";
-  console.log(uploadedUrl);
-  console.log(version);
 
   // Wait for S3 flush, kind of a hack.
   await new Promise(res => setTimeout(res, 5000));
