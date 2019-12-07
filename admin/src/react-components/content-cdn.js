@@ -34,7 +34,7 @@ const workerScript = (workerDomain, assetsDomain) => {
   return `  const ALLOWED_ORIGINS = ["${document.location.origin}"];
   const CORS_PROXY_HOST = "https://cors-proxy.${workerDomain}";
   const PROXY_HOST = "https://${workerDomain}";
-  const STORAGE_HOST = "${document.location.origin}";
+  const HUB_HOST = "${document.location.origin}";
   const ASSETS_HOST = "https://${assetsDomain}";
 
   addEventListener("fetch", e => {
@@ -47,8 +47,8 @@ const workerScript = (workerDomain, assetsDomain) => {
     const targetPath = request.url.substring((isCorsProxy ? CORS_PROXY_HOST : PROXY_HOST).length + 1);
     let targetUrl;
   
-    if (targetPath.startsWith("files/")) {
-      targetUrl = \`\${STORAGE_HOST}/\${targetPath}\`;
+    if (targetPath.startsWith("files/") || targetPath.startsWith("thumbnail/")) {
+      targetUrl = \`\${HUB_HOST}/\${targetPath}\`;
     } else if (targetPath.startsWith("hubs/") || targetPath.startsWith("spoke/") || targetPath.startsWith("admin/") || targetPath.startsWith("assets/")) {
       targetUrl = \`\${ASSETS_HOST}/\${targetPath}\`;
     } else {
@@ -147,6 +147,9 @@ class ContentCDNComponent extends Component {
     this.setState({ saving: true }, async () => {
       const workerDomain = this.state.enableWorker ? this.state.workerDomain : "";
 
+      // For arbortect, we enable thumbnail CDN proxying
+      const useWorkerForThumbnails = this.state.provider === "arbortect";
+
       const configs = {
         reticulum: {
           phx: {
@@ -159,13 +162,15 @@ class ContentCDNComponent extends Component {
         hubs: {
           general: {
             cors_proxy_server: `cors-proxy.${workerDomain}`,
-            base_assets_path: workerDomain ? `https://${workerDomain}/hubs/` : ""
+            base_assets_path: workerDomain ? `https://${workerDomain}/hubs/` : "",
+            thumbnail_server: workerDomain && useWorkerForThumbnails ? workerDomain : ""
           }
         },
         spoke: {
           general: {
             cors_proxy_server: `cors-proxy.${workerDomain}`,
-            base_assets_path: workerDomain ? `https://${workerDomain}/spoke/` : ""
+            base_assets_path: workerDomain ? `https://${workerDomain}/spoke/` : "",
+            thumbnail_server: workerDomain && useWorkerForThumbnails ? workerDomain : ""
           }
         }
       };
