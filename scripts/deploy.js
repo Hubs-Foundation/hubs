@@ -3,7 +3,6 @@ import { exec } from "child_process";
 import rmdir from "rimraf";
 import ncp from "ncp";
 import tar from "tar";
-import request from "request";
 import ora from "ora";
 import FormData from "form-data";
 
