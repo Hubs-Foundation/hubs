@@ -17,8 +17,13 @@ AFRAME.registerComponent("avatar-volume-controls", {
     this.volumeLabel = this.el.querySelector(".avatar-volume-label");
     this.volumeUpButton.object3D.addEventListener("interact", this.volumeUp);
     this.volumeDownButton.object3D.addEventListener("interact", this.volumeDown);
+    this.update = this.update.bind(this);
+    window.APP.store.addEventListener("statechanged", this.update);
 
     this.updateVolumeLabel();
+  },
+  remove() {
+    window.APP.store.removeEventListener("statechanged", this.update);
   },
 
   changeVolumeBy(v) {
@@ -38,7 +43,11 @@ AFRAME.registerComponent("avatar-volume-controls", {
 
   update() {
     if (this.audio) {
-      this.audio.gain.gain.value = this.data.volume;
+      const globalVoiceVolume =
+        window.APP.store.state.preferences.globalVoiceVolume !== undefined
+          ? window.APP.store.state.preferences.globalVoiceVolume
+          : 100;
+      this.audio.gain.gain.value = (globalVoiceVolume / 100) * this.data.volume;
     }
   },
 

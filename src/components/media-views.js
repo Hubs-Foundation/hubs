@@ -422,7 +422,11 @@ AFRAME.registerComponent("media-video", {
 
     // Volume is local, always update it
     if (this.audio) {
-      this.audio.gain.gain.value = this.data.volume;
+      const globalMediaVolume =
+        window.APP.store.state.preferences.globalMediaVolume !== undefined
+          ? window.APP.store.state.preferences.globalMediaVolume
+          : 100;
+      this.audio.gain.gain.value = (globalMediaVolume / 100) * this.data.volume;
     }
   },
 

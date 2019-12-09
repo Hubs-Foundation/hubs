@@ -293,6 +293,9 @@ $backgroundColor: lightslategray;
     }
   }
   :local(.rangeSlider) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 60%;
     // background: lightslategray;
     max-height: 2.5rem;

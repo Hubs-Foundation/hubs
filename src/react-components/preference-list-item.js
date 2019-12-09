@@ -155,7 +155,11 @@ export class PreferenceListItem extends Component {
           <NumberRangeSelector
             min={this.props.min}
             max={this.props.max}
-            currentValue={this.props.store.state.preferences[this.props.storeKey] || this.props.defaultNumber}
+            currentValue={
+              this.props.store.state.preferences[this.props.storeKey] !== undefined
+                ? this.props.store.state.preferences[this.props.storeKey]
+                : this.props.defaultNumber
+            }
             onChange={(value, playSound) => {
               this.props.store.update({
                 preferences: { [this.props.storeKey]: value }

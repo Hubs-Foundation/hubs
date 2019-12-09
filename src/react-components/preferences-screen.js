@@ -46,7 +46,21 @@ export default class PreferencesScreen extends Component {
     const general = [
       { key: "muteMicOnEntry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION }
+      { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
+      {
+        key: "globalVoiceVolume",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+        min: 0,
+        max: 200,
+        defaultNumber: 100
+      },
+      {
+        key: "globalMediaVolume",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+        min: 0,
+        max: 200,
+        defaultNumber: 100
+      }
     ].map(preferenceListItem);
 
     return (
