@@ -18,6 +18,25 @@ import styles from "../assets/stylesheets/avatar-editor.scss";
 
 const AVATARS_API = "/api/v1/avatars";
 
+const defaultEditors = [
+  {
+    name: "Quilt",
+    url: "https://tryquilt.io/?gltf=$AVATAR_GLTF"
+  }
+];
+const useEditorWhitelist = true;
+const editorWhitelist = [
+  ...defaultEditors,
+  {
+    name: "Skindex Editor",
+    url: "https://www.minecraftskins.com/skin-editor"
+  },
+  {
+    name: "MinecraftSkins.net Editor",
+    url: "https://www.minecraftskins.net/skineditor"
+  }
+];
+
 const fetchAvatar = async avatarId => {
   const { avatars } = await fetchReticulumAuthenticated(`${AVATARS_API}/${avatarId}`);
   return avatars[0];
@@ -37,6 +56,7 @@ export default class AvatarEditor extends Component {
 
   state = {
     baseAvatarResults: [],
+    editorLinks: defaultEditors,
     previewGltfUrl: null
   };
 
@@ -407,6 +427,15 @@ export default class AvatarEditor extends Component {
     </div>
   );
 
+  handleGltfLoaded = gltf => {
+    const ext = gltf.parser.json.extensions && gltf.parser.json.extensions["MOZ_hubs_avatar"];
+    let editorLinks = (ext && ext.editors) || defaultEditors;
+    if (useEditorWhitelist) {
+      editorLinks = editorLinks.filter(e => editorWhitelist.some(w => w.name === e.name && w.url === e.url));
+    }
+    this.setState({ editorLinks });
+  };
+
   render() {
     const { debug } = this.props;
     const { avatar } = this.state;
@@ -487,6 +516,7 @@ export default class AvatarEditor extends Component {
               <AvatarPreview
                 className="preview"
                 avatarGltfUrl={this.state.previewGltfUrl}
+                onGltfLoaded={this.handleGltfLoaded}
                 {...this.inputFiles}
                 ref={p => (this.preview = p)}
               />
@@ -494,9 +524,17 @@ export default class AvatarEditor extends Component {
             <div className="info">
               <IfFeature name="show_avatar_editor_link">
                 <p>
-                  <a target="_blank" rel="noopener noreferrer" href="https://tryquilt.io/">
-                    <FormattedMessage id="avatar-editor.quilt-link" />
-                  </a>
+                  <FormattedMessage id="avatar-editor.external-editor-info" />
+                  {this.state.editorLinks.map(({ name, url }) => (
+                    <a
+                      key={name}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={url.replace("$AVATAR_GLTF", encodeURIComponent(this.state.previewGltfUrl))}
+                    >
+                      {name}
+                    </a>
+                  ))}
                 </p>
               </IfFeature>
               <IfFeature name="show_avatar_pipelines_link">

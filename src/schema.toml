@@ -20,7 +20,7 @@ features.show_features_link = { category = "features", type = "boolean", name = 
 features.show_community_link = { category = "features", type = "boolean", name = "Show Community Links", description = "Show links to your community." }
 features.show_company_logo = { category = "features", type = "boolean", name = "Show Company Logo", description = "Show the company logo across the app." }
 features.show_issue_report_link = { category = "features", type = "boolean", name = "Show Issue Report Link", description = "Show a link for reporting issues." }
-features.show_avatar_editor_link = { category = "features", type = "boolean", name = "Show Avatar Editor Links", description = "Show links to avatar editors like Quilt." }
+features.show_avatar_editor_link = { category = "features", type = "boolean", name = "Show Avatar Editor Links", description = "Show links to avatar editors like Quilt.", internal = "true" }
 features.show_avatar_pipelines_link = { category = "features", type = "boolean", name = "Show Avatar Pipelines Links", description = "Show links to avatar pipeline info." }
 features.show_model_collection_link = { category = "features", type = "boolean", name = "Show Model Collection Link", description = "Show link to a collection of models." }
 features.hide_powered_by = { category = "features", type = "boolean", name = "Hide Powered By Hubs", description = "Hides the 'Powered by Hubs Cloud' notice on the home page and loading screens." }

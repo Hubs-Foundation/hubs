@@ -90,6 +90,7 @@ AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point", el => {
     canBeOccupied: false,
     canBeClicked: false,
     willDisableMotion: false,
+    willDisableTeleporting: false,
     willMaintainWorldUp: true
   });
 });

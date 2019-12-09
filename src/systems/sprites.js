@@ -111,6 +111,7 @@ const raycastOnSprite = (function() {
   const intersectionInfo = { distance: 0, point, object: null };
 
   return function raycast(raycaster, intersects) {
+    this.updateMatrices();
     vA.set(-0.5, 0.5, 0).applyMatrix4(this.matrixWorld);
     vB.set(0.5, 0.5, 0).applyMatrix4(this.matrixWorld);
     vC.set(-0.5, -0.5, 0).applyMatrix4(this.matrixWorld);

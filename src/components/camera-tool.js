@@ -552,8 +552,6 @@ AFRAME.registerComponent("camera-tool", {
   },
 
   tock: (function() {
-    const tempHeadScale = new THREE.Vector3();
-
     return function tock() {
       const sceneEl = this.el.sceneEl;
       const renderer = this.renderer || sceneEl.renderer;
@@ -578,11 +576,7 @@ AFRAME.registerComponent("camera-tool", {
         this.takeSnapshotNextTick ||
         (this.updateRenderTargetNextTick && (this.viewfinderInViewThisFrame || this.videoRecorder))
       ) {
-        let tempHeadVisible;
         if (playerHead) {
-          tempHeadVisible = playerHead.visible;
-          tempHeadScale.copy(playerHead.scale);
-
           // We want to scale our own head in between frames now that we're taking a video/photo.
           let scale = 1;
           // TODO: The local-audio-analyser has the non-networked media stream, which is active
@@ -640,8 +634,8 @@ AFRAME.registerComponent("camera-tool", {
         renderer.vr.enabled = tmpVRFlag;
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
         if (playerHead) {
-          playerHead.visible = tempHeadVisible;
-          playerHead.scale.copy(tempHeadScale);
+          playerHead.visible = false;
+          playerHead.scale.set(0.00000001, 0.00000001, 0.00000001);
           playerHead.updateMatrices(true, true);
           playerHead.updateMatrixWorld(true, true);
         }

@@ -1,6 +1,46 @@
-import { setMatrixWorld } from "../utils/three-utils";
+import { setMatrixWorld, affixToWorldUp } from "../utils/three-utils";
 import { isTagged } from "../components/tags";
 import { applyPersistentSync } from "../utils/permissions-utils";
+const calculateIconTransform = (function() {
+  const up = new THREE.Vector3();
+  const backward = new THREE.Vector3();
+  const forward = new THREE.Vector3();
+  const camToWaypoint = new THREE.Vector3();
+  const v1 = new THREE.Vector3();
+  const m1 = new THREE.Matrix4();
+  const position = new THREE.Vector3();
+  let scale = 1;
+
+  return function calculateIconTransform(waypoint, viewingCamera, outMat4) {
+    waypoint.updateMatrices();
+    viewingCamera.updateMatrices();
+    affixToWorldUp(m1.copy(waypoint.matrixWorld), m1).extractBasis(v1, up, backward);
+    position
+      .setFromMatrixPosition(waypoint.matrixWorld)
+      .add(v1.addVectors(up.multiplyScalar(1.6), backward.multiplyScalar(0.15)));
+    camToWaypoint.subVectors(position, v1.setFromMatrixPosition(viewingCamera.matrixWorld));
+    const distance = camToWaypoint.length();
+    const minDistance = distance < 0.2 * v1.setFromMatrixColumn(viewingCamera.matrixWorld, 0).length();
+    if (distance < minDistance) {
+      scale = 0.00001;
+      camToWaypoint.set(0, 0, -1);
+    } else {
+      scale = 0.1 + 0.05 * distance;
+    }
+    forward
+      .copy(camToWaypoint)
+      .projectOnPlane(up.set(0, 1, 0))
+      .normalize();
+
+    return outMat4
+      .makeBasis(
+        v1.crossVectors(forward, up).multiplyScalar(scale),
+        up.multiplyScalar(scale),
+        forward.multiplyScalar(scale * -1)
+      )
+      .setPosition(position);
+  };
+})();
 function isMineOrTakeOwnership(el) {
   return NAF.utils.isMine(el) || NAF.utils.takeOwnership(el);
 }
@@ -72,6 +112,7 @@ function uuid(el) {
 
 export class WaypointSystem {
   constructor(scene, characterController) {
+    this.helperMat4 = new THREE.Matrix4();
     this.scene = scene;
     this.loading = [];
     this.ready = [];
@@ -312,20 +353,13 @@ export class WaypointSystem {
         elementFromTemplate.classList.contains("occupiable-waypoint-icon")
       ) {
         elementFromTemplate.object3D.visible = this.scene.is("frozen");
-        waypointComponent.el.object3D.updateMatrices();
-        const target = new THREE.Matrix4().identity();
-        target.makeRotationY(Math.PI);
-        const t2 = new THREE.Matrix4().identity();
-        t2.copy(waypointComponent.el.object3D.matrixWorld)
-          .multiply(target)
-          .multiply(new THREE.Matrix4().makeTranslation(0, 1.6, -0.15));
-        elementFromTemplate.object3D.updateMatrices();
-        const scale = new THREE.Vector3().setFromMatrixScale(elementFromTemplate.object3D.matrixWorld);
-        const t3 = new THREE.Matrix4()
-          .extractRotation(t2)
-          .scale(scale)
-          .copyPosition(t2);
-        setMatrixWorld(elementFromTemplate.object3D, t3);
+        if (elementFromTemplate.object3D.visible) {
+          this.viewingCamera = this.viewingCamera || document.getElementById("viewing-camera").object3D;
+          setMatrixWorld(
+            elementFromTemplate.object3D,
+            calculateIconTransform(waypointComponent.el.object3D, this.viewingCamera, this.helperMat4)
+          );
+        }
       }
     };
     function tickWaypoint(waypointComponent) {
@@ -342,6 +376,7 @@ AFRAME.registerComponent("waypoint", {
     canBeOccupied: { default: false },
     canBeClicked: { default: false },
     willDisableMotion: { default: false },
+    willDisableTeleporting: { default: false },
     snapToNavMesh: { default: false },
     willMaintainInitialOrientation: { default: false },
     willMaintainWorldUp: { default: true },
