@@ -14,6 +14,8 @@ const emojiRegex = /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udb
 const urlRegex = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)$/;
 const textureLoader = new THREE.TextureLoader();
 
+const CHAT_MESSAGE_TEXTURE_SIZE = 1024;
+
 // Hacky word wrapping, needed because the SVG conversion doesn't properly deal
 // with wrapping in Firefox for some reason. (The CSS white-space is set to pre)
 const wordWrap = body => {
@@ -78,7 +80,7 @@ const messageBodyDom = (body, from, fromSessionId, includeFromLink, history) => 
   );
 };
 
-function renderChatMessage(body, from, allowEmojiRender, lowResolution) {
+function renderChatMessage(body, from, allowEmojiRender) {
   const isOneLine = body.split("\n").length === 1;
   const context = messageCanvas.getContext("2d");
   const emoji = toEmojis(body);
@@ -111,12 +113,12 @@ function renderChatMessage(body, from, allowEmojiRender, lowResolution) {
 
   return new Promise(resolve => {
     ReactDOM.render(entryDom, el, () => {
-      const textureSize = 1024;
-
-      const ratio = el.offsetHeight / el.offsetWidth;
-      const scale = (textureSize * Math.min(1.0, 1.0 / ratio)) / el.offsetWidth;
-      messageCanvas.width = el.offsetWidth * scale;
-      messageCanvas.height = el.offsetHeight * scale;
+      const width = el.offsetWidth;
+      const height = el.offsetHeight;
+      const ratio = height / width;
+      const scale = (CHAT_MESSAGE_TEXTURE_SIZE * Math.min(1.0, 1.0 / ratio)) / el.offsetWidth;
+      messageCanvas.width = width * scale;
+      messageCanvas.height = height * scale;
 
       const xhtml = encodeURIComponent(`
           <svg xmlns="http://www.w3.org/2000/svg" width="${messageCanvas.width}px" height="${messageCanvas.height}px">
@@ -133,7 +135,7 @@ function renderChatMessage(body, from, allowEmojiRender, lowResolution) {
         el.remove();
         img.onload = null;
         img.src = "";
-        messageCanvas.toBlob(resolve);
+        messageCanvas.toBlob(blob => resolve([blob, width, height]));
       };
 
       img.src = "data:image/svg+xml," + xhtml;
@@ -144,8 +146,7 @@ function renderChatMessage(body, from, allowEmojiRender, lowResolution) {
 export async function createInWorldLogMessage({ name, type, body }) {
   if (type !== "chat") return;
 
-  const lowResolution = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
-  const blob = await renderChatMessage(body, name, false, lowResolution);
+  const [blob, width, height] = await renderChatMessage(body, name, false);
   const entity = document.createElement("a-entity");
   const meshEntity = document.createElement("a-entity");
 
@@ -200,8 +201,8 @@ export async function createInWorldLogMessage({ name, type, body }) {
     const mesh = new THREE.Mesh(geometry, material);
     meshEntity.setObject3D("mesh", mesh);
     meshEntity.meshMaterial = material;
-    const scaleFactor = 4000.0 / (lowResolution ? 3.0 : 1.0);
-    meshEntity.object3DMap.mesh.scale.set(texture.image.width / scaleFactor, texture.image.height / scaleFactor, 1);
+    const scaleFactor = 400;
+    meshEntity.object3DMap.mesh.scale.set(width / scaleFactor, height / scaleFactor, 1);
   });
 }
 
@@ -213,7 +214,7 @@ export async function spawnChatMessage(body, from) {
     return;
   }
 
-  const blob = await renderChatMessage(body, from, true, false);
+  const [blob] = await renderChatMessage(body, from, true);
   document.querySelector("a-scene").emit("add_media", new File([blob], "message.png", { type: "image/png" }));
 }
 
