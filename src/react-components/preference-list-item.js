@@ -5,7 +5,6 @@ import classNames from "classnames";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { SOUND_PREFERENCE_MENU_HOVER, SOUND_PREFERENCE_MENU_SELECT } from "../systems/sound-effects-system";
 import { FormattedMessage } from "react-intl";
-import { CheckBox } from "./checkbox.js";
 import { NumberRangeSelector } from "./number-range-selector.js";
 export const PREFERENCE_LIST_ITEM_TYPE = {
   CHECK_BOX: 1,
@@ -14,6 +13,54 @@ export const PREFERENCE_LIST_ITEM_TYPE = {
   NUMBER_WITH_RANGE: 3
 };
 
+export class MaxResolutionPreferenceItem extends Component {
+  static propTypes = {
+    store: PropTypes.object
+  };
+  render() {
+    return (
+      <div className={classNames(styles.maxResolutionPreferenceItem)}>
+        <input
+          tabIndex="0"
+          type="number"
+          step="1"
+          min="0"
+          value={this.props.store.state.preferences.maxResolutionWidth || 0}
+          onClick={e => {
+            e.preventDefault();
+            e.target.focus();
+            e.target.select();
+          }}
+          onChange={e => {
+            const num = parseInt(e.target.value);
+            this.props.store.update({
+              preferences: { maxResolutionWidth: num ? num : 0 }
+            });
+          }}
+        />
+        x
+        <input
+          tabIndex="0"
+          type="number"
+          step="1"
+          min="0"
+          value={this.props.store.state.preferences.maxResolutionHeight || 0}
+          onClick={e => {
+            e.preventDefault();
+            e.target.focus();
+            e.target.select();
+          }}
+          onChange={e => {
+            const num = parseInt(e.target.value);
+            this.props.store.update({
+              preferences: { maxResolutionHeight: num ? num : 0 }
+            });
+          }}
+        />
+      </div>
+    );
+  }
+}
 export class PreferenceListItem extends Component {
   static propTypes = {
     store: PropTypes.object,
@@ -55,6 +102,7 @@ export class PreferenceListItem extends Component {
         return (
           <div className={classNames(styles.checkbox)}>
             <input
+              tabIndex="0"
               type="checkbox"
               checked={storedPref === undefined ? this.props.defaultBool : storedPref}
               onChange={() => {
@@ -65,6 +113,8 @@ export class PreferenceListItem extends Component {
             />
           </div>
         );
+      case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
+        return <MaxResolutionPreferenceItem store={this.props.store} />;
       case PREFERENCE_LIST_ITEM_TYPE.SELECT:
         options = this.props.options.map((o, i) => {
           const opts = {};
@@ -81,6 +131,7 @@ export class PreferenceListItem extends Component {
         });
         return (
           <select
+            tabIndex="0"
             className={classNames({
               [styles.hovered]: this.state.hovered,
               [styles.selectHovered]: this.state.selectHovered

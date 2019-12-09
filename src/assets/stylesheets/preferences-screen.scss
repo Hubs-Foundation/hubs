@@ -19,6 +19,17 @@ $backgroundColor: lightslategray;
   }
 }
 
+:local(.maxResolutionPreferenceItem) {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: center;
+
+  input {
+    width:12%;
+  }
+}
+
 :local(.preferenceListItem){
   background: $backgroundColor;
   display: flex;

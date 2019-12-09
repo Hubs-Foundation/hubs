@@ -28,7 +28,7 @@ export class KeyboardDevice {
               e.key === "8" ||
               e.key === "9" ||
               e.key === "0")) ||
-          e.key === "Tab"
+          (e.key === "Tab" && !(window.APP && window.APP.preferenceScreenIsVisible))
         ) {
           e.preventDefault();
           return false;

@@ -44,11 +44,17 @@ export default class SettingsMenu extends Component {
   };
 
   componentDidMount() {
-    document.querySelector(".a-canvas").addEventListener("mouseup", () => {
+    this.onMouseUp = () => {
       if (this.state.expanded) {
         this.setState({ expanded: false });
       }
-    });
+    };
+    this.acanvas = document.querySelector(".a-canvas");
+    this.acanvas.addEventListener("mouseup", this.onMouseUp);
+  }
+
+  componentWillUnmount() {
+    this.acanvas.removeEventListener("mouseup", this.onMouseUp);
   }
 
   renderExpandedMenu() {
