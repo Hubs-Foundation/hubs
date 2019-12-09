@@ -272,6 +272,7 @@ export const affixToWorldUp = (function() {
     outMat4.makeBasis(outSide, worldUp, outForward.multiplyScalar(-1));
     outMat4.scale(v.setFromMatrixScale(inMat4Copy));
     outMat4.setPosition(v.setFromMatrixColumn(inMat4Copy, 3));
+    return outMat4;
   };
 })();
 
