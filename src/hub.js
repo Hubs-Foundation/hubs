@@ -1,4 +1,4 @@
-import "./hacks";
+import "./webxr-bypass-hacks";
 import "./utils/configs";
 import "./utils/theme";
 import "@babel/polyfill";
