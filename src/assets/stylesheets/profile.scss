@@ -46,7 +46,10 @@
     min-width: 300px;
     max-width: 700px;
     min-height: 200px;
-    max-height: 1000px;
+    max-height: 100vh;
+    @media (min-height: 1000px) {
+      max-height: 1000px;
+    }
     height: 90%;
 
     :local(.links) {
@@ -101,6 +104,7 @@
     display: flex;
     position: relative;
     max-width: 300px;
+    overflow: hidden;
   }
 
   :local(.choose-avatar) {
