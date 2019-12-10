@@ -1,3 +1,4 @@
+import "./hacks";
 import "./utils/configs";
 import "./utils/theme";
 import "@babel/polyfill";
