@@ -161,8 +161,12 @@ class SystemEditorComponent extends Component {
                     </ListItemIcon>
                     <ListItemText
                       inset
-                      primary="You are using your cloud provider to serve content."
-                      secondary="You can reduce data transfer costs by using Cloudflare's CDN to serve content. Choose 'Data Transfer' on the left for more info."
+                      primary={
+                        this.state.adminInfo.provider === "arbortect"
+                          ? "You are not using a CDN."
+                          : "You are using your cloud provider to serve content."
+                      }
+                      secondary="You can reduce costs and improve performance by using Cloudflare's CDN to serve content. Choose 'Content CDN' on the left for more info."
                     />
                   </ListItem>
                 )}

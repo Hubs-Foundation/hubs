@@ -34,7 +34,7 @@ const workerScript = (workerDomain, assetsDomain) => {
   return `  const ALLOWED_ORIGINS = ["${document.location.origin}"];
   const CORS_PROXY_HOST = "https://cors-proxy.${workerDomain}";
   const PROXY_HOST = "https://${workerDomain}";
-  const STORAGE_HOST = "${document.location.origin}";
+  const HUB_HOST = "${document.location.origin}";
   const ASSETS_HOST = "https://${assetsDomain}";
 
   addEventListener("fetch", e => {
@@ -47,9 +47,9 @@ const workerScript = (workerDomain, assetsDomain) => {
     const targetPath = request.url.substring((isCorsProxy ? CORS_PROXY_HOST : PROXY_HOST).length + 1);
     let targetUrl;
   
-    if (targetPath.startsWith("files/")) {
-      targetUrl = \`\${STORAGE_HOST}/\${targetPath}\`;
-    } else if (targetPath.startsWith("hubs/") || targetPath.startsWith("spoke/") || targetPath.startsWith("admin/")) {
+    if (targetPath.startsWith("files/") || targetPath.startsWith("thumbnail/")) {
+      targetUrl = \`\${HUB_HOST}/\${targetPath}\`;
+    } else if (targetPath.startsWith("hubs/") || targetPath.startsWith("spoke/") || targetPath.startsWith("admin/") || targetPath.startsWith("assets/")) {
       targetUrl = \`\${ASSETS_HOST}/\${targetPath}\`;
     } else {
       if (!isCorsProxy) {
@@ -57,7 +57,7 @@ const workerScript = (workerDomain, assetsDomain) => {
         return;
       }
       // This is a weird workaround that seems to stem from the cloudflare worker receiving the wrong url
-      targetUrl = targetPath.replace(/^http(s?):\/([^/])/, "http$1://$2");
+      targetUrl = targetPath.replace(/^http(s?):\\/([^/])/, "http$1://$2");
   
       if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
         targetUrl = proxyUrl.protocol + "//" + targetUrl;
@@ -96,7 +96,7 @@ const workerScript = (workerDomain, assetsDomain) => {
   });`;
 };
 
-class DataTransferComponent extends Component {
+class ContentCDNComponent extends Component {
   state = {
     workerDomain: "",
     assetsDomain: "",
@@ -113,6 +113,7 @@ class DataTransferComponent extends Component {
     this.setState({
       workerDomain: adminInfo.worker_domain,
       assetsDomain: adminInfo.assets_domain,
+      provider: adminInfo.provider,
       enableWorker:
         !!retConfig && !!retConfig.phx && retConfig.phx.cors_proxy_url_host === `cors-proxy.${adminInfo.worker_domain}`,
       loading: false
@@ -146,6 +147,9 @@ class DataTransferComponent extends Component {
     this.setState({ saving: true }, async () => {
       const workerDomain = this.state.enableWorker ? this.state.workerDomain : "";
 
+      // For arbortect, we enable thumbnail CDN proxying
+      const useWorkerForThumbnails = this.state.provider === "arbortect";
+
       const configs = {
         reticulum: {
           phx: {
@@ -158,13 +162,15 @@ class DataTransferComponent extends Component {
         hubs: {
           general: {
             cors_proxy_server: `cors-proxy.${workerDomain}`,
-            base_assets_path: workerDomain ? `https://${workerDomain}/hubs/` : ""
+            base_assets_path: workerDomain ? `https://${workerDomain}/hubs/` : "",
+            thumbnail_server: workerDomain && useWorkerForThumbnails ? workerDomain : ""
           }
         },
         spoke: {
           general: {
             cors_proxy_server: `cors-proxy.${workerDomain}`,
-            base_assets_path: workerDomain ? `https://${workerDomain}/spoke/` : ""
+            base_assets_path: workerDomain ? `https://${workerDomain}/spoke/` : "",
+            thumbnail_server: workerDomain && useWorkerForThumbnails ? workerDomain : ""
           }
         }
       };
@@ -193,15 +199,25 @@ class DataTransferComponent extends Component {
 
     return (
       <Card className={this.props.classes.container}>
-        <Title title="Data Transfer" />
+        <Title title="Content CDN" />
         <form onSubmit={this.onSubmit.bind(this)}>
           <CardContent className={this.props.classes.info}>
-            <Typography variant="body2" gutterBottom>
-              Hubs Cloud uses bandwidth from your cloud provider to deliver content.
-              <br />
-              You can reduce your data transfer costs by switching your CDN to Cloudflare, which does not charge for
-              data transfer costs to your users.
-            </Typography>
+            {this.state.provider === "arbortect" && (
+              <Typography variant="body2" gutterBottom>
+                You can greatly reduce load on your server and improve loading times by setting up Cloudflare as your
+                CDN.
+                <br />
+                Once enabled, Cloudflare will cache content, reduce latency, and reduce bandwidth used by your server.
+              </Typography>
+            )}
+            {this.state.provider && this.state.provider !== "arbortect" && (
+              <Typography variant="body2" gutterBottom>
+                Hubs Cloud uses bandwidth from your cloud provider to deliver content.
+                <br />
+                You can reduce your data transfer costs by switching your CDN to Cloudflare, which does not charge for
+                data transfer costs to your users.
+              </Typography>
+            )}
             <Typography variant="subheading" gutterBottom className={this.props.classes.section}>
               Worker Setup
             </Typography>
@@ -212,12 +228,16 @@ class DataTransferComponent extends Component {
               </a>
               . As such, you will be using data transfer to send all 3rd party content to your users.
             </Typography>
-            <Typography variant="body1" gutterBottom>
-              Additionally, you will incur data transfer costs for serving avatars, scenes, and other assets.
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              You can minimize this data transfer cost by using a Cloudflare Worker to serve this content:
-            </Typography>
+            {this.state.provider && this.state.provider !== "arbortect" && (
+              <Typography variant="body1" gutterBottom>
+                Additionally, you will incur data transfer costs for serving avatars, scenes, and other assets.
+              </Typography>
+            )}
+            {this.state.provider && this.state.provider !== "arbortect" && (
+              <Typography variant="body1" gutterBottom>
+                You can minimize this data transfer cost by using a Cloudflare Worker to serve this content:
+              </Typography>
+            )}
             <Typography variant="body1" component="div" gutterBottom>
               <ol className={this.props.classes.steps}>
                 <li>
@@ -351,4 +371,4 @@ class DataTransferComponent extends Component {
   }
 }
 
-export const DataTransfer = withStyles(styles)(DataTransferComponent);
+export const ContentCDN = withStyles(styles)(ContentCDNComponent);

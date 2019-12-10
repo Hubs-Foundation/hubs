@@ -43,14 +43,18 @@ function getCategoryDisplayName(category) {
   }
 }
 
-function getCategoryDescription(category) {
+function getCategoryDescription(category, provider) {
   switch (category) {
     case "api_keys":
       return "API keys for 3rd party services, used in media search and telemetry.";
     case "content":
       return "User-contributed content settings.";
     case "email":
-      return "Custom SMTP email provider settings. Leave blank to use your cloud provider's email service.";
+      if (provider === "arbortect") {
+        return "Custom SMTP email provider settings. Leave blank to use the SMTP settings you chose when configuring your server.";
+      } else {
+        return "Custom SMTP email provider settings. Leave blank to use your cloud provider's email service.";
+      }
     case "advanced":
       return "Advanced Settings for those who know what they're doing.";
     case "translations":
