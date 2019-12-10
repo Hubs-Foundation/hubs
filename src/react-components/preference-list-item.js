@@ -6,6 +6,8 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { SOUND_PREFERENCE_MENU_HOVER, SOUND_PREFERENCE_MENU_SELECT } from "../systems/sound-effects-system";
 import { FormattedMessage } from "react-intl";
 import { NumberRangeSelector } from "./number-range-selector.js";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUndo } from "@fortawesome/free-solid-svg-icons/faUndo";
 export const PREFERENCE_LIST_ITEM_TYPE = {
   CHECK_BOX: 1,
   FLIP_SELECTOR: 2,
@@ -200,7 +202,28 @@ export class PreferenceListItem extends Component {
         <div className={classNames(styles.part, styles.left, styles.label)}>
           <FormattedMessage id={`preferences.${this.props.storeKey}`} />
         </div>
-        <div className={classNames(styles.part, styles.right)}>{controls}</div>
+        <div className={classNames(styles.part, styles.right)}>
+          {controls}
+          <button
+            className={classNames(styles.resetToDefaultButton)}
+            onClick={() => {
+              switch (this.props.prefType) {
+                case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
+                  delete this.props.store.state.preferences.maxResolutionWidth;
+                  delete this.props.store.state.preferences.maxResolutionHeight;
+                  break;
+                default:
+                  delete this.props.store.state.preferences[this.props.storeKey];
+                  break;
+              }
+              this.forceUpdate();
+            }}
+          >
+            <i title="Reset to default">
+              <FontAwesomeIcon icon={faUndo} />
+            </i>
+          </button>
+        </div>
       </div>
     );
   }

@@ -27,6 +27,7 @@ $backgroundColor: lightslategray;
 
   input {
     width:12%;
+    min-width: 3em;
     font-size: large;
     font-weight: bold;
     text-align: center;
@@ -84,6 +85,8 @@ input::-webkit-inner-spin-button {
     }
   }
   :local(.right) {
+    display: flex;
+    flex-flow: row;
     @media( min-width:$smallScreenWidth+1 ) {
       width: 30%;
       margin-inline-start: 1rem;
@@ -262,6 +265,10 @@ input::-webkit-inner-spin-button {
     font-weight: bold;
     // background: lavender;
   }
+}
+
+:local(.resetToDefaultButton){
+  margin-left: 5%;
 }
 
 :local(.prevOptionScale) {
