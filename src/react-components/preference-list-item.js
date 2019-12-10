@@ -25,7 +25,11 @@ export class MaxResolutionPreferenceItem extends Component {
           type="number"
           step="1"
           min="0"
-          value={this.props.store.state.preferences.maxResolutionWidth || 0}
+          value={
+            this.props.store.state.preferences.maxResolutionWidth === undefined
+              ? 1920
+              : this.props.store.state.preferences.maxResolutionWidth
+          }
           onClick={e => {
             e.preventDefault();
             e.target.focus();
@@ -44,7 +48,11 @@ export class MaxResolutionPreferenceItem extends Component {
           type="number"
           step="1"
           min="0"
-          value={this.props.store.state.preferences.maxResolutionHeight || 0}
+          value={
+            this.props.store.state.preferences.maxResolutionHeight === undefined
+              ? 1920
+              : this.props.store.state.preferences.maxResolutionHeight
+          }
           onClick={e => {
             e.preventDefault();
             e.target.focus();
