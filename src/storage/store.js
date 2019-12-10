@@ -72,7 +72,8 @@ export const SCHEMA = {
         maxResolutionWidth: { type: "number" },
         maxResolutionHeight: { type: "number" },
         globalVoiceVolume: { type: "number" },
-        globalMediaVolume: { type: "number" }
+        globalMediaVolume: { type: "number" },
+        snapRotationDegrees: { type: "number" }
       }
     },
 

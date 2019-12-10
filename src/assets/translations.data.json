@@ -254,6 +254,7 @@
     "preferences.maxResolution": "Max Resolution (width x height in pixels)",
     "preferences.globalVoiceVolume": "Incoming Voice Volume",
     "preferences.globalMediaVolume": "Media Volume",
+    "preferences.snapRotationDegrees": "Rotation per snap (in degrees)",
     "preferences.requiresRefresh": "This change will take effect when you refresh the page.",
     "preferences.turningMode": "Turning Mode",
     "preferences.turningModeSnap": "Snap",

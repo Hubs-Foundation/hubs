@@ -217,10 +217,16 @@ export class CharacterControllerSystem {
       const snapRotateLeft = userinput.get(paths.actions.snapRotateLeft);
       const snapRotateRight = userinput.get(paths.actions.snapRotateRight);
       if (snapRotateLeft) {
-        this.dXZ += SNAP_ROTATION_RADIAN;
+        this.dXZ +=
+          window.APP.store.state.preferences.snapRotationDegrees === undefined
+            ? SNAP_ROTATION_RADIAN
+            : (window.APP.store.state.preferences.snapRotationDegrees * Math.PI) / 180;
       }
       if (snapRotateRight) {
-        this.dXZ -= SNAP_ROTATION_RADIAN;
+        this.dXZ -=
+          window.APP.store.state.preferences.snapRotationDegrees === undefined
+            ? SNAP_ROTATION_RADIAN
+            : (window.APP.store.state.preferences.snapRotationDegrees * Math.PI) / 180;
       }
       if (snapRotateLeft || snapRotateRight) {
         this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);

@@ -61,6 +61,13 @@ export default class PreferencesScreen extends Component {
         min: 0,
         max: 200,
         defaultNumber: 100
+      },
+      {
+        key: "snapRotationDegrees",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+        min: 0,
+        max: 90,
+        defaultNumber: 45
       }
     ].map(preferenceListItem);
 
@@ -74,6 +81,11 @@ export default class PreferencesScreen extends Component {
             <div className={classNames(styles.titleBar)}>
               <div className={classNames(styles.title)}>
                 <span>Preferences</span>
+              </div>
+            </div>
+            <div className={classNames(styles.sectionBar)}>
+              <div className={classNames(styles.sectionTitle)}>
+                <span>General</span>
               </div>
             </div>
             <div className={classNames(styles.scrollingContent)}>{general}</div>
