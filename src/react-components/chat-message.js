@@ -9,9 +9,12 @@ import serializeElement from "../utils/serialize-element";
 import { navigateToClientInfo } from "./presence-list";
 
 const messageCanvas = document.createElement("canvas");
+
 const emojiRegex = /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|[\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|[\ud83c[\ude32-\ude3a]|[\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])/;
 const urlRegex = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)$/;
 const textureLoader = new THREE.TextureLoader();
+
+const CHAT_MESSAGE_TEXTURE_SIZE = 1024;
 
 // Hacky word wrapping, needed because the SVG conversion doesn't properly deal
 // with wrapping in Firefox for some reason. (The CSS white-space is set to pre)
@@ -77,7 +80,7 @@ const messageBodyDom = (body, from, fromSessionId, includeFromLink, history) => 
   );
 };
 
-function renderChatMessage(body, from, allowEmojiRender, lowResolution) {
+function renderChatMessage(body, from, allowEmojiRender) {
   const isOneLine = body.split("\n").length === 1;
   const context = messageCanvas.getContext("2d");
   const emoji = toEmojis(body);
@@ -110,34 +113,29 @@ function renderChatMessage(body, from, allowEmojiRender, lowResolution) {
 
   return new Promise(resolve => {
     ReactDOM.render(entryDom, el, () => {
-      // Scale by 12x
-      let objectScale = "8.33%";
-      let scale = 12;
-
-      if (lowResolution) {
-        // In low res, scale by 4x
-        objectScale = "25%";
-        scale = 4;
-      }
-
-      messageCanvas.width = el.offsetWidth * (scale + 0.1);
-      messageCanvas.height = el.offsetHeight * (scale + 0.1);
+      const width = el.offsetWidth;
+      const height = el.offsetHeight;
+      const ratio = height / width;
+      const scale = (CHAT_MESSAGE_TEXTURE_SIZE * Math.min(1.0, 1.0 / ratio)) / el.offsetWidth;
+      messageCanvas.width = width * scale;
+      messageCanvas.height = height * scale;
 
       const xhtml = encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" width="${messageCanvas.width}" height="${messageCanvas.height}">
-            <foreignObject width="${objectScale}" height="${objectScale}" style="transform: scale(${scale});">
+          <svg xmlns="http://www.w3.org/2000/svg" width="${messageCanvas.width}px" height="${messageCanvas.height}px">
+            <foreignObject width="100%" height="100%" style="transform: scale(${scale});">
               ${serializeElement(el)}
             </foreignObject>
           </svg>
     `);
       const img = new Image();
 
-      img.onload = async () => {
+      img.onload = () => {
         context.drawImage(img, 0, 0);
-        const blob = await new Promise(resolve => messageCanvas.toBlob(resolve));
         ReactDOM.unmountComponentAtNode(el);
         el.remove();
-        resolve(blob);
+        img.onload = null;
+        img.src = "";
+        messageCanvas.toBlob(blob => resolve([blob, width, height]));
       };
 
       img.src = "data:image/svg+xml," + xhtml;
@@ -148,8 +146,7 @@ function renderChatMessage(body, from, allowEmojiRender, lowResolution) {
 export async function createInWorldLogMessage({ name, type, body }) {
   if (type !== "chat") return;
 
-  const lowResolution = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
-  const blob = await renderChatMessage(body, name, false, lowResolution);
+  const [blob, width, height] = await renderChatMessage(body, name, false);
   const entity = document.createElement("a-entity");
   const meshEntity = document.createElement("a-entity");
 
@@ -204,8 +201,8 @@ export async function createInWorldLogMessage({ name, type, body }) {
     const mesh = new THREE.Mesh(geometry, material);
     meshEntity.setObject3D("mesh", mesh);
     meshEntity.meshMaterial = material;
-    const scaleFactor = 4000.0 / (lowResolution ? 3.0 : 1.0);
-    meshEntity.object3DMap.mesh.scale.set(texture.image.width / scaleFactor, texture.image.height / scaleFactor, 1);
+    const scaleFactor = 400;
+    meshEntity.object3DMap.mesh.scale.set(width / scaleFactor, height / scaleFactor, 1);
   });
 }
 
@@ -217,7 +214,7 @@ export async function spawnChatMessage(body, from) {
     return;
   }
 
-  const blob = await renderChatMessage(body, from, true, false);
+  const [blob] = await renderChatMessage(body, from, true);
   document.querySelector("a-scene").emit("add_media", new File([blob], "message.png", { type: "image/png" }));
 }
 
