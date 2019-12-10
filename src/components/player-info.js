@@ -47,6 +47,7 @@ AFRAME.registerComponent("player-info", {
     this.updateDisplayName = this.updateDisplayName.bind(this);
     this.applyDisplayName = this.applyDisplayName.bind(this);
     this.handleModelError = this.handleModelError.bind(this);
+    this.update = this.update.bind(this);
 
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
@@ -71,6 +72,10 @@ AFRAME.registerComponent("player-info", {
     if (this.isLocalPlayerInfo) {
       this.el.querySelector(".model").addEventListener("model-error", this.handleModelError);
     }
+    window.APP.store.addEventListener("statechanged", this.update);
+
+    this.el.sceneEl.addEventListener("stateadded", this.update);
+    this.el.sceneEl.addEventListener("stateremoved", this.update);
   },
   pause() {
     this.el.removeEventListener("model-loaded", this.applyProperties);
@@ -78,6 +83,9 @@ AFRAME.registerComponent("player-info", {
     if (this.isLocalPlayerInfo) {
       this.el.querySelector(".model").removeEventListener("model-error", this.handleModelError);
     }
+    this.el.sceneEl.removeEventListener("stateadded", this.update);
+    this.el.sceneEl.removeEventListener("stateremoved", this.update);
+    window.APP.store.removeEventListener("statechanged", this.update);
   },
 
   update() {
@@ -100,24 +108,28 @@ AFRAME.registerComponent("player-info", {
     this.applyDisplayName();
   },
   applyDisplayName() {
+    const infoShouldBeHidden =
+      window.APP.store.state.preferences.onlyShowNametagsInFreeze && !this.el.sceneEl.is("frozen");
     const nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && nametagEl) {
       nametagEl.setAttribute("text", { value: this.displayName });
+      nametagEl.object3D.visible = !infoShouldBeHidden;
     }
     const communityIdentifierEl = this.el.querySelector(".communityIdentifier");
     if (communityIdentifierEl) {
       if (this.communityIdentifier) {
         communityIdentifierEl.setAttribute("text", { value: this.communityIdentifier });
+        communityIdentifierEl.object3D.visible = !infoShouldBeHidden;
       }
     }
     const recordingBadgeEl = this.el.querySelector(".recordingBadge");
     if (recordingBadgeEl) {
-      recordingBadgeEl.object3D.visible = this.isRecording;
+      recordingBadgeEl.object3D.visible = this.isRecording && !infoShouldBeHidden;
     }
 
     const modBadgeEl = this.el.querySelector(".modBadge");
     if (modBadgeEl) {
-      modBadgeEl.object3D.visible = !this.isRecording && this.isOwner;
+      modBadgeEl.object3D.visible = !this.isRecording && this.isOwner && !infoShouldBeHidden;
     }
   },
   applyProperties(e) {

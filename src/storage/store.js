@@ -67,6 +67,7 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         muteMicOnEntry: { type: "bool" },
+        onlyShowNametagsInFreeze: { type: "bool" },
         allowMultipleHubsInstances: { type: "bool" },
         maxResolutionWidth: { type: "number" },
         maxResolutionHeight: { type: "number" },
