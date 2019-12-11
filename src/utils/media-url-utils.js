@@ -35,7 +35,24 @@ const farsparkEncodeUrl = url => {
 };
 
 export const scaledThumbnailUrlFor = (url, width, height) => {
-  const farsparkUrl = `https://${configs.THUMBNAIL_SERVER}/thumbnail/${farsparkEncodeUrl(url)}?w=${width}&h=${height}`;
+  let extension = "";
+  try {
+    const pathParts = new URL(url).pathname.split(".");
+
+    if (pathParts.length > 1) {
+      const extensionCandidate = pathParts.pop();
+      if (commonKnownContentTypes[extensionCandidate]) {
+        extension = `.${extensionCandidate}`;
+      }
+    }
+  } catch (e) {
+    extension = ".png";
+  }
+
+  // HACK: the extension is needed to ensure CDN caching on Cloudflare
+  const thumbnailUrl = `https://${configs.THUMBNAIL_SERVER}/thumbnail/${farsparkEncodeUrl(
+    url
+  )}${extension}?w=${width}&h=${height}`;
 
   try {
     const urlHostname = new URL(url).hostname;
@@ -45,10 +62,10 @@ export const scaledThumbnailUrlFor = (url, width, height) => {
       if (retHostname === urlHostname) return url;
     }
   } catch (e) {
-    return farsparkUrl;
+    return thumbnailUrl;
   }
 
-  return farsparkUrl;
+  return thumbnailUrl;
 };
 
 export const isNonCorsProxyDomain = hostname => {

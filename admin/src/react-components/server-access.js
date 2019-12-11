@@ -19,7 +19,11 @@ class ServerAccessComponent extends Component {
 
   async componentDidMount() {
     const adminInfo = await getAdminInfo();
-    this.setState({ qrCodeData: adminInfo.ssh_totp_qr_data, serverDomain: adminInfo.server_domain });
+    this.setState({
+      qrCodeData: adminInfo.ssh_totp_qr_data,
+      serverDomain: adminInfo.server_domain,
+      provider: adminInfo.provider
+    });
   }
 
   render() {
@@ -36,39 +40,50 @@ class ServerAccessComponent extends Component {
           <Typography variant="body1" gutterBottom>
             To SSH into your server(s), you will use the SSH private key file you created before deploying Hubs Cloud.
           </Typography>
-          <Typography variant="body1" gutterBottom>
-            Each of your servers has a name. The name can be found in your cloud provider&apos;s console in the server
-            list. (For example, on AWS Console, go to EC2 -&gt; Instances.)
-          </Typography>
+          {this.state.provider !== "arbortect" && (
+            <Typography variant="body1" gutterBottom>
+              Each of your servers has a name. The name can be found in your cloud provider&apos;s console in the server
+              list. (For example, on AWS Console, go to EC2 -&gt; Instances.)
+            </Typography>
+          )}
           <Typography variant="body1" gutterBottom component="div">
             To connect to a server, run the following command:
-            <div className={this.props.classes.command}>
-              ssh -i &lt;key file&gt; ubuntu@&lt;server name&gt;.{this.state.serverDomain}
+            {this.state.provider === "arbortect" && (
+              <div className={this.props.classes.command}>ssh -i &lt;key file&gt; root@{this.state.serverDomain}</div>
+            )}
+            {this.state.provider === "aws" && (
+              <div className={this.props.classes.command}>
+                ssh -i &lt;key file&gt; ubuntu@&lt;server name&gt;.{this.state.serverDomain}
+              </div>
+            )}
+          </Typography>
+          {this.state.qrCodeData && (
+            <div>
+              <Typography variant="subheading" className={this.props.classes.section} gutterBottom>
+                Two-Factor Verification
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                Upon connecting, you&apos;ll need a one-time Verification Code. This is a two-factor security measure
+                and is a rotating six digit number.
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                First, you will need to set up a device by installing a two-factor app such as Google Authenticator.
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                To generate a code, open the authenticator app and scan the QR code below.
+              </Typography>
+              {this.state.showQrCode ? (
+                <img style={{ width: "256px", height: "256px" }} src={this.state.qrCodeData} />
+              ) : (
+                <Button
+                  className={this.props.classes.button}
+                  variant="outlined"
+                  onClick={() => this.setState({ showQrCode: true })}
+                >
+                  Show QR Code
+                </Button>
+              )}
             </div>
-          </Typography>
-          <Typography variant="subheading" className={this.props.classes.section} gutterBottom>
-            Two-Factor Verification
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            Upon connecting, you&apos;ll need a one-time Verification Code. This is a two-factor security measure and is
-            a rotating six digit number.
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            First, you will need to set up a device by installing a two-factor app such as Google Authenticator.
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            To generate a code, open the authenticator app and scan the QR code below.
-          </Typography>
-          {this.state.showQrCode ? (
-            <img style={{ width: "256px", height: "256px" }} src={this.state.qrCodeData} />
-          ) : (
-            <Button
-              className={this.props.classes.button}
-              variant="outlined"
-              onClick={() => this.setState({ showQrCode: true })}
-            >
-              Show QR Code
-            </Button>
           )}
           <Typography variant="subheading" className={this.props.classes.section} gutterBottom>
             More Information

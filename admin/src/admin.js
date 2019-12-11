@@ -1,3 +1,4 @@
+import "./webxr-bypass-hacks";
 import configs from "./utils/configs";
 import ReactDOM from "react-dom";
 import React, { Component } from "react";
@@ -26,7 +27,7 @@ import { ProjectList, ProjectShow } from "./react-components/projects";
 import { SystemEditor } from "./react-components/system-editor";
 import { ServiceEditor, AppConfigEditor } from "./react-components/service-editor";
 import { ServerAccess } from "./react-components/server-access";
-import { DataTransfer } from "./react-components/data-transfer";
+import { ContentCDN } from "./react-components/content-cdn";
 import { ImportContent } from "./react-components/import-content";
 import { AutoEndSessionDialog } from "./react-components/auto-end-session-dialog";
 import Store from "hubs/src/storage/store";
@@ -228,9 +229,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const homeRoute = <Route exact path="/home" component={SystemEditor} />;
   const importRoute = <Route exact path="/import" component={ImportContent} />;
   const accessRoute = <Route exact path="/server-access" component={ServerAccess} />;
-  const dtRoute = <Route exact path="/data-transfer" component={DataTransfer} />;
+  const cdnRoute = <Route exact path="/content-cdn" component={ContentCDN} />;
 
-  const customRoutes = [homeRoute, importRoute, accessRoute, dtRoute];
+  const customRoutes = [homeRoute, importRoute, accessRoute, cdnRoute];
 
   try {
     const appConfigSchema = schemaByCategories({

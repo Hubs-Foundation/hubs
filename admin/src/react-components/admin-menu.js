@@ -200,13 +200,13 @@ class Menu extends Component {
             <ListItem
               className={classNames(this.props.classes.item, this.props.classes.nested)}
               component={NavLink}
-              key="data-transfer"
-              to="/data-transfer"
+              key="content-cdn"
+              to="/content-cdn"
             >
               <ListItemIcon className={this.props.classes.icon}>
                 <ViewIcon />
               </ListItemIcon>
-              <ListItemText className={this.props.classes.text} primary="Data Transfer" />
+              <ListItemText className={this.props.classes.text} primary="Content CDN" />
             </ListItem>
           </List>
         </Collapse>

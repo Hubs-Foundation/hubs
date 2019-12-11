@@ -33,18 +33,28 @@ done
 
 cd -
 
-# need to upload wasm blobs with wasm content type explicitly because, unlike all
-# other assets, AWS's built-in MIME type dictionary doesn't know about that one
-
-AWSCLI={{ pkgPathFor "core/aws-cli" }}/bin/aws
-
 if [[ "{{ cfg.deploy.type }}" == "s3" ]] ;
 then
+  # need to upload wasm blobs with wasm content type explicitly because, unlike all
+  # other assets, AWS's built-in MIME type dictionary doesn't know about that one
+
+  AWSCLI={{ pkgPathFor "core/aws-cli" }}/bin/aws
+
   $AWSCLI s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "public, max-age=31536000" --include "*" --exclude "*.wasm" "$TEMP_DIST_PATH/assets" "s3://{{ cfg.deploy.target }}/hubs/assets"
   $AWSCLI s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "public, max-age=31536000" --exclude "*" --include "*.wasm" --content-type "application/wasm" "$TEMP_DIST_PATH/assets" "s3://{{ cfg.deploy.target }}/hubs/assets"
   
   $AWSCLI s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "no-cache" --delete "$TEMP_DIST_PATH/pages" "s3://{{ cfg.deploy.target }}/hubs/pages/latest"
   $AWSCLI s3 sync --region {{ cfg.deploy.region }} --acl public-read --cache-control "no-cache" --delete "$TEMP_DIST_PATH/pages" "s3://{{ cfg.deploy.target }}/hubs/pages/releases/{{ pkg.version }}.{{ pkg.release }}"
+fi
+
+if [[ "{{ cfg.deploy.type }}" == "cp" ]] ;
+then
+  mkdir -p "{{ cfg.deploy.target }}/hubs/pages/releases"
+  mkdir -p "{{ cfg.deploy.target }}/hubs/pages/latest"
+
+  cp -R "$TEMP_DIST_PATH/assets" "{{ cfg.deploy.target }}/hubs"
+  cp -R $TEMP_DIST_PATH/pages/* "{{ cfg.deploy.target }}/hubs/pages/latest"
+  cp -R "{{ cfg.deploy.target }}/hubs/pages/latest" "{{ cfg.deploy.target }}/hubs/pages/releases/{{ pkg.version }}.{{ pkg.release }}"
 fi
 
 exec sleep 999999999999

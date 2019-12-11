@@ -1,3 +1,4 @@
+import "./webxr-bypass-hacks";
 // We should technically be able to just include three here, but our dependancies are tangled such that not having aframe is a bit difficult
 import "./utils/theme";
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
