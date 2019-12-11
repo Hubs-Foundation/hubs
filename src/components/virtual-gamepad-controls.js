@@ -37,37 +37,41 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     document.body.appendChild(this.mockJoystickContainer);
 
     // Setup gamepad elements
-    const leftTouchZone = document.createElement("div");
-    leftTouchZone.classList.add(styles.touchZone, styles.left);
-    document.body.appendChild(leftTouchZone);
+    if (window.APP.store.state.preferences.enableOnScreenJoystickLeft) {
+      const leftTouchZone = document.createElement("div");
+      leftTouchZone.classList.add(styles.touchZone, styles.left);
+      document.body.appendChild(leftTouchZone);
 
-    this.leftTouchZone = leftTouchZone;
+      this.leftTouchZone = leftTouchZone;
 
-    this.leftStick = nipplejs.create({
-      zone: this.leftTouchZone,
-      color: "white",
-      fadeTime: 0
-    });
+      this.leftStick = nipplejs.create({
+        zone: this.leftTouchZone,
+        color: "white",
+        fadeTime: 0
+      });
 
-    this.leftStick.on("start", this.onFirstInteraction);
-    this.leftStick.on("move", this.onMoveJoystickChanged);
-    this.leftStick.on("end", this.onMoveJoystickEnd);
+      this.leftStick.on("start", this.onFirstInteraction);
+      this.leftStick.on("move", this.onMoveJoystickChanged);
+      this.leftStick.on("end", this.onMoveJoystickEnd);
+    }
 
-    const rightTouchZone = document.createElement("div");
-    rightTouchZone.classList.add(styles.touchZone, styles.right);
-    document.body.appendChild(rightTouchZone);
+    if (window.APP.store.state.preferences.enableOnScreenJoystickRight) {
+      const rightTouchZone = document.createElement("div");
+      rightTouchZone.classList.add(styles.touchZone, styles.right);
+      document.body.appendChild(rightTouchZone);
 
-    this.rightTouchZone = rightTouchZone;
+      this.rightTouchZone = rightTouchZone;
 
-    this.rightStick = nipplejs.create({
-      zone: this.rightTouchZone,
-      color: "white",
-      fadeTime: 0
-    });
+      this.rightStick = nipplejs.create({
+        zone: this.rightTouchZone,
+        color: "white",
+        fadeTime: 0
+      });
 
-    this.rightStick.on("start", this.onFirstInteraction);
-    this.rightStick.on("move", this.onLookJoystickChanged);
-    this.rightStick.on("end", this.onLookJoystickEnd);
+      this.rightStick.on("start", this.onFirstInteraction);
+      this.rightStick.on("move", this.onLookJoystickChanged);
+      this.rightStick.on("end", this.onLookJoystickEnd);
+    }
 
     this.inVr = false;
     this.moving = false;
@@ -82,8 +86,8 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   },
 
   onFirstInteraction() {
-    this.leftStick.off("start", this.onFirstInteraction);
-    this.rightStick.off("start", this.onFirstInteraction);
+    if (this.leftStick) this.leftStick.off("start", this.onFirstInteraction);
+    if (this.rightStick) this.rightStick.off("start", this.onFirstInteraction);
     document.body.removeChild(this.mockJoystickContainer);
   },
 
@@ -132,22 +136,22 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   onEnterVr() {
     // Hide the joystick controls
     this.inVr = true;
-    this.leftTouchZone.style.display = "none";
-    this.rightTouchZone.style.display = "none";
+    if (this.leftTouchZone) this.leftTouchZone.style.display = "none";
+    if (this.rightTouchZone) this.rightTouchZone.style.display = "none";
   },
 
   onExitVr() {
     // Show the joystick controls
     this.inVr = false;
-    this.leftTouchZone.style.display = "block";
-    this.rightTouchZone.style.display = "block";
+    if (this.leftTouchZone) this.leftTouchZone.style.display = "block";
+    if (this.rightTouchZone) this.rightTouchZone.style.display = "block";
   },
 
   remove() {
     this.el.sceneEl.removeEventListener("entervr", this.onEnterVr);
     this.el.sceneEl.removeEventListener("exitvr", this.onExitVr);
     document.body.removeChild(this.mockJoystickContainer);
-    document.body.removeChild(this.leftTouchZone);
-    document.body.removeChild(this.rightTouchZone);
+    if (this.leftTouchZone) document.body.removeChild(this.leftTouchZone);
+    if (this.rightTouchZone) document.body.removeChild(this.rightTouchZone);
   }
 });

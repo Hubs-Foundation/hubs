@@ -67,6 +67,8 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         muteMicOnEntry: { type: "bool" },
+        enableOnScreenJoystickLeft: { type: "bool" },
+        enableOnScreenJoystickRight: { type: "bool" },
         onlyShowNametagsInFreeze: { type: "bool" },
         allowMultipleHubsInstances: { type: "bool" },
         maxResolutionWidth: { type: "number" },

@@ -79,6 +79,11 @@ export default class PreferencesScreen extends Component {
       }
     ].map(preferenceListItem);
 
+    const touchscreen = [
+      { key: "enableOnScreenJoystickLeft", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+      { key: "enableOnScreenJoystickRight", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+    ].map(preferenceListItem);
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={classNames(styles.root)}>
@@ -97,6 +102,12 @@ export default class PreferencesScreen extends Component {
               </div>
             </div>
             <div className={classNames(styles.scrollingContent)}>{general}</div>
+            <div className={classNames(styles.sectionBar)}>
+              <div className={classNames(styles.sectionTitle)}>
+                <span>Touchscreen</span>
+              </div>
+            </div>
+            <div className={classNames(styles.scrollingContent)}>{touchscreen}</div>
           </div>
         </div>
       </IntlProvider>
