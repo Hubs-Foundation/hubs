@@ -10,9 +10,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUndo } from "@fortawesome/free-solid-svg-icons/faUndo";
 export const PREFERENCE_LIST_ITEM_TYPE = {
   CHECK_BOX: 1,
-  FLIP_SELECTOR: 2,
-  DROP_DOWN: 2,
-  NUMBER_WITH_RANGE: 3
+  SELECT: 2,
+  NUMBER_WITH_RANGE: 3,
+  MAX_RESOLUTION: 4
 };
 
 export class MaxResolutionPreferenceItem extends Component {
@@ -129,7 +129,10 @@ export class PreferenceListItem extends Component {
         options = this.props.options.map((o, i) => {
           const opts = {};
           const storedPref = this.props.store.state.preferences[this.props.storeKey];
-          if (o.value === storedPref || (storedPref === undefined && o.value === this.props.defaultString)) {
+          if (
+            o.value === storedPref ||
+            ((storedPref === undefined || storedPref === "") && o.value === this.props.defaultString)
+          ) {
             opts.selected = "selected";
           }
 

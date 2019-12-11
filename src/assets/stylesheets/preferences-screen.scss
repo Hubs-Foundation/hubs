@@ -98,6 +98,7 @@ input::-webkit-inner-spin-button {
   }
   font-size: $defaultFontSize;
   select {
+    text-align-last: center;
     @media( min-width:$smallScreenWidth+1 ) {
       width: 100%;
     }
@@ -258,12 +259,10 @@ input::-webkit-inner-spin-button {
     width: auto !important;
     height: 2.5rem !important;
     cursor: pointer;
-    // background: yellow;
   }
   span {
     font-size: x-large;
     font-weight: bold;
-    // background: lavender;
   }
 }
 
@@ -306,8 +305,6 @@ input::-webkit-inner-spin-button {
       text-align: center;
       font-size: large;
       font-weight: bold;
-      // background: $dark-grey;
-      // color: lavender;
       cursor: pointer;
     }
   }
@@ -316,7 +313,6 @@ input::-webkit-inner-spin-button {
     align-items: center;
     justify-content: center;
     width: 60%;
-    // background: lightslategray;
     max-height: 2.5rem;
   }
 }

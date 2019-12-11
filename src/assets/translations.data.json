@@ -254,6 +254,7 @@
     "preferences.maxResolution": "Max Resolution (width x height in pixels)",
     "preferences.globalVoiceVolume": "Incoming Voice Volume",
     "preferences.globalMediaVolume": "Media Volume",
+    "preferences.materialQualitySetting": "Material quality (requires restart)",
     "preferences.snapRotationDegrees": "Rotation per snap (in degrees)",
     "preferences.allowMultipleHubsInstances": "Disable check for multiple hubs instances",
     "preferences.requiresRefresh": "This change will take effect when you refresh the page.",

@@ -10,6 +10,8 @@ import { lang, messages } from "../utils/i18n";
 import { PreferenceListItem, PREFERENCE_LIST_ITEM_TYPE } from "./preference-list-item";
 addLocaleData([...en]);
 
+const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
+
 export default class PreferencesScreen extends Component {
   static propTypes = {
     onClose: PropTypes.func,
@@ -48,6 +50,12 @@ export default class PreferencesScreen extends Component {
       { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
+      {
+        key: "materialQualitySetting",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+        options: [{ value: "low", text: "Low" }, { value: "high", text: "High" }],
+        defaultString: isMobile ? "low" : "high"
+      },
       {
         key: "globalVoiceVolume",
         prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
