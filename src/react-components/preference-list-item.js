@@ -175,7 +175,7 @@ export class PreferenceListItem extends Component {
             }
             onChange={(value, playSound) => {
               this.props.store.update({
-                preferences: { [this.props.storeKey]: value }
+                preferences: { [this.props.storeKey]: Number.parseFloat(value) }
               });
               playSound && this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
             }}
@@ -190,7 +190,6 @@ export class PreferenceListItem extends Component {
   }
 
   render() {
-    const controls = this.renderControls();
     return (
       <div
         className={classNames({ [styles.hovered]: this.state.hovered }, styles.preferenceListItem)}
@@ -206,7 +205,7 @@ export class PreferenceListItem extends Component {
           <FormattedMessage id={`preferences.${this.props.storeKey}`} />
         </div>
         <div className={classNames(styles.part, styles.right)}>
-          {controls}
+          {this.renderControls()}
           <button
             className={classNames(styles.resetToDefaultButton)}
             onClick={() => {

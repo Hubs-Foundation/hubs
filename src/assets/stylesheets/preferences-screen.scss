@@ -8,14 +8,14 @@ $widescreenControlsWidth: 100%;
 $titleFontSize: 1.6rem;
 $titleHeight: 3.0rem;
 $titleFontWeight: bolder;
-$backgroundColor: lightslategray;
+$backgroundColor: var(--full-panel-background-color);
 
 :local(.root) {
   :local(.hovered) {
-    background: lightsteelblue;
+    background: var(--preferences-menu-hovered-color);
   }
   :local(.selectHovered) {
-    background: aliceblue;
+    background: var(--preferences-menu-select-hovered-color);
   }
 }
 
@@ -44,7 +44,12 @@ input::-webkit-inner-spin-button {
 }
 
 :local(.preferenceListItem){
-  background: $backgroundColor;
+  &:nth-child(2n + 1) {
+    background-color: var(--preferences-menu-row-background-color-odd)
+  }
+  &:nth-child(2n) {
+    background-color: var(--preferences-menu-row-background-color-even)
+  }
   display: flex;
   align-items: center;
   @media( min-width:$smallScreenWidth+1 ) {
@@ -107,7 +112,7 @@ input::-webkit-inner-spin-button {
     }
     height: $itemHeight;
     font-size: $defaultFontSize;
-    background-color: $backgroundColor;
+    background-color: var(--preferences-menu-background-color);
   }
 }
 
@@ -117,8 +122,8 @@ input::-webkit-inner-spin-button {
   top: 0px;
   bottom: 0px;
   width: 100%;
+  background: var(--preferences-menu-background-color);
   overflow-y: auto;
-  background: aliceblue;
   margin-top: $titleHeight;
   :local(.scrollingContent) {
     display: flex;
@@ -130,7 +135,7 @@ input::-webkit-inner-spin-button {
     top: 0px;
     width: 100%;
     height: $titleHeight;
-    background: $light-blue;
+    background: var(--preferences-menu-title-background-color);
   }
   :local(.title) {
     display: flex;
@@ -158,7 +163,7 @@ input::-webkit-inner-spin-button {
     height: $titleHeight;
     font-size: $titleFontSize;
     font-weight: $titleFontWeight;
-    background: $light-grey;
+    background: var(--preferences-menu-section-background-color);
   }
 
   input {
@@ -195,7 +200,6 @@ input::-webkit-inner-spin-button {
   display: flex;
   flex-flow: row;
   align-items: center;
-  background: $backgroundColor;
   height: $itemHeight;
   @media( max-width:$smallScreenWidth ) {
     width: 100%;
@@ -206,13 +210,11 @@ input::-webkit-inner-spin-button {
 :local(.rowScale) {
   span {
     font-size: $defaultFontSize;
-    // background: lightsteelblue;
   }
 }
 :local(.rowScaleHover) {
   span {
     font-size: $hoverFontSize;
-    // background: lightblue;
   }
 }
 :local(.rowName) {
@@ -241,7 +243,6 @@ input::-webkit-inner-spin-button {
   flex-flow: row;
   align-items: center;
   text-align: center;
-  // background: lightslategray;
 
   svg {
     cursor: pointer;
@@ -331,7 +332,6 @@ input::-webkit-inner-spin-button {
   display: flex;
   width: $widescreenControlsWidth;
   justify-content: center;
-  // color: lightblue;
 }
 
 input[type=range] {
@@ -348,7 +348,7 @@ input[type=range]::-webkit-slider-runnable-track {
   cursor: pointer;
   animate: 0.2s;
   box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  background: #3071a9;
+  background: var(--preferences-menu-range-track-color);
   border-radius: 1.3px;
   border: 0.2px solid #010101;
 }
@@ -358,13 +358,13 @@ input[type=range]::-webkit-slider-thumb {
   height: 36px;
   width: 16px;
   border-radius: 3px;
-  background: #ffffff;
+  background: var(--preferences-menu-range-thumb-color);
   cursor: pointer;
   -webkit-appearance: none;
   margin-top: -14px;
 }
 input[type=range]:focus::-webkit-slider-runnable-track {
-  background: #367ebd;
+  background: var(--preferences-menu-range-background-color);
 }
 input[type=range]::-moz-range-track {
   width: 100%;
@@ -372,7 +372,7 @@ input[type=range]::-moz-range-track {
   cursor: pointer;
   animate: 0.2s;
   box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  background: #3071a9;
+  background: var(--preferences-menu-range-track-color);
   border-radius: 1.3px;
   border: 0.2px solid #010101;
 }
@@ -382,7 +382,7 @@ input[type=range]::-moz-range-thumb {
   height: 36px;
   width: 16px;
   border-radius: 3px;
-  background: #ffffff;
+  background: var(--preferences-menu-range-thumb-color);
   cursor: pointer;
 }
 input[type=range]::-ms-track {
@@ -396,13 +396,13 @@ input[type=range]::-ms-track {
   color: transparent;
 }
 input[type=range]::-ms-fill-lower {
-  background: #2a6495;
+  background: var(--preferences-menu-range-fill-lower-color);
   border: 0.2px solid #010101;
   border-radius: 2.6px;
   box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
 }
 input[type=range]::-ms-fill-upper {
-  background: #3071a9;
+  background: var(--preferences-menu-range-fill-upper-color);
   border: 0.2px solid #010101;
   border-radius: 2.6px;
   box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
@@ -417,8 +417,8 @@ input[type=range]::-ms-thumb {
   cursor: pointer;
 }
 input[type=range]:focus::-ms-fill-lower {
-  background: #3071a9;
+  background: var(--preferences-menu-range-fill-lower-focus-color);
 }
 input[type=range]:focus::-ms-fill-upper {
-  background: #367ebd;
+  background: var(--preferences-menu-range-fill-upper-focus-color);
 }
