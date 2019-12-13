@@ -17,6 +17,7 @@ import Icon from "@material-ui/core/Icon";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import clsx from "classnames";
+import configs from "../utils/configs";
 
 // NOTE there's a mysterious uncaught exception in a promise when this component is shown, that seems
 // to be coupled with the "All 3rd party content" typography block. It's a mystery.
@@ -132,7 +133,10 @@ class ContentCDNComponent extends Component {
       };
 
       try {
-        const res = await fetch(`https://${this.state.workerDomain}/hubs/pages/latest/whats-new.html`);
+        // Need to CORS-proxy the CORS-proxy because CSP will block us otherwise!
+        const res = await fetch(
+          `https://${configs.CORS_PROXY_SERVER}/https://${this.state.workerDomain}/hubs/pages/latest/whats-new.html`
+        );
 
         if (!res.ok) {
           abort();
