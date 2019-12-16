@@ -36,42 +36,16 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.mockJoystickContainer.appendChild(rightMock);
     document.body.appendChild(this.mockJoystickContainer);
 
-    // Setup gamepad elements
-    if (window.APP.store.state.preferences.enableOnScreenJoystickLeft) {
-      const leftTouchZone = document.createElement("div");
-      leftTouchZone.classList.add(styles.touchZone, styles.left);
-      document.body.appendChild(leftTouchZone);
-
-      this.leftTouchZone = leftTouchZone;
-
-      this.leftStick = nipplejs.create({
-        zone: this.leftTouchZone,
-        color: "white",
-        fadeTime: 0
-      });
-
-      this.leftStick.on("start", this.onFirstInteraction);
-      this.leftStick.on("move", this.onMoveJoystickChanged);
-      this.leftStick.on("end", this.onMoveJoystickEnd);
+    this.enableLeft = window.APP.store.state.preferences.enableOnScreenJoystickLeft;
+    if (this.enableLeft) {
+      this.createLeftStick();
     }
-
-    if (window.APP.store.state.preferences.enableOnScreenJoystickRight) {
-      const rightTouchZone = document.createElement("div");
-      rightTouchZone.classList.add(styles.touchZone, styles.right);
-      document.body.appendChild(rightTouchZone);
-
-      this.rightTouchZone = rightTouchZone;
-
-      this.rightStick = nipplejs.create({
-        zone: this.rightTouchZone,
-        color: "white",
-        fadeTime: 0
-      });
-
-      this.rightStick.on("start", this.onFirstInteraction);
-      this.rightStick.on("move", this.onLookJoystickChanged);
-      this.rightStick.on("end", this.onLookJoystickEnd);
+    this.enableRight = window.APP.store.state.preferences.enableOnScreenJoystickRight;
+    if (this.enableRight) {
+      this.createRightStick();
     }
+    this.onPreferenceChange = this.onPreferenceChange.bind(this);
+    window.APP.store.addEventListener("statechanged", this.onPreferenceChange);
 
     this.inVr = false;
     this.moving = false;
@@ -85,13 +59,66 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.el.sceneEl.addEventListener("exit-vr", this.onExitVr);
   },
 
+  onPreferenceChange() {
+    const newEnableLeft = window.APP.store.state.preferences.enableOnScreenJoystickLeft;
+    const newEnableRight = window.APP.store.state.preferences.enableOnScreenJoystickRight;
+    if (!this.enableLeft && newEnableLeft) {
+      this.createLeftStick();
+    } else if (this.enableLeft && !newEnableLeft) {
+      this.leftStick.destroy();
+      this.leftTouchZone.parentNode.removeChild(this.leftTouchZone);
+      this.leftStick = null;
+      this.leftTouchZone = null;
+    }
+    if (!this.enableRight && newEnableRight) {
+      this.createRightStick();
+    } else if (this.enableRight && !newEnableRight) {
+      this.rightStick.destroy();
+      this.rightTouchZone.parentNode.removeChild(this.rightTouchZone);
+      this.rightStick = null;
+      this.rightTouchZone = null;
+    }
+    this.enableLeft = newEnableLeft;
+    this.enableRight = newEnableRight;
+  },
+
+  createRightStick() {
+    this.rightTouchZone = document.createElement("div");
+    this.rightTouchZone.classList.add(styles.touchZone, styles.right);
+    document.body.appendChild(this.rightTouchZone);
+    this.rightStick = nipplejs.create({
+      zone: this.rightTouchZone,
+      color: "white",
+      fadeTime: 0
+    });
+    this.rightStick.on("start", this.onFirstInteraction);
+    this.rightStick.on("move", this.onLookJoystickChanged);
+    this.rightStick.on("end", this.onLookJoystickEnd);
+  },
+
+  createLeftStick() {
+    this.leftTouchZone = document.createElement("div");
+    this.leftTouchZone.classList.add(styles.touchZone, styles.left);
+    document.body.appendChild(this.leftTouchZone);
+    this.leftStick = nipplejs.create({
+      zone: this.leftTouchZone,
+      color: "white",
+      fadeTime: 0
+    });
+    this.leftStick.on("start", this.onFirstInteraction);
+    this.leftStick.on("move", this.onMoveJoystickChanged);
+    this.leftStick.on("end", this.onMoveJoystickEnd);
+  },
+
   onFirstInteraction() {
     if (this.leftStick) this.leftStick.off("start", this.onFirstInteraction);
     if (this.rightStick) this.rightStick.off("start", this.onFirstInteraction);
-    document.body.removeChild(this.mockJoystickContainer);
+    if (this.mockJoystickContainer) document.body.removeChild(this.mockJoystickContainer);
+    this.mockJoystickContainer = null;
   },
 
   onMoveJoystickChanged(event, joystick) {
+    if (window.APP.preferenceScreenIsVisible) return;
     const angle = joystick.angle.radian;
     const force = joystick.force < 1 ? joystick.force : 1;
     this.displacement.set(Math.cos(angle), 0, Math.sin(angle)).multiplyScalar(force * 1.85);
@@ -104,6 +131,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   },
 
   onLookJoystickChanged(event, joystick) {
+    if (window.APP.preferenceScreenIsVisible) return;
     // Set pitch and yaw angles on right stick move
     const angle = joystick.angle.radian;
     const force = joystick.force < 1 ? joystick.force : 1;
