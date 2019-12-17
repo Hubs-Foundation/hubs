@@ -401,15 +401,6 @@ async function updateEnvironmentForHub(hub, entryManager) {
           { once: true }
         );
 
-        environmentEl.addEventListener(
-          "model-error",
-          () => {
-            remountUI({ roomUnavailableReason: "scene_error" });
-            entryManager.exitScene();
-          },
-          { once: true }
-        );
-
         environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
       },
       { once: true }
