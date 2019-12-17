@@ -353,9 +353,16 @@ async function updateEnvironmentForHub(hub, entryManager) {
   if (environmentScene.childNodes.length === 0) {
     const environmentEl = document.createElement("a-entity");
 
+    const sceneErrorHandler = () => {
+      remountUI({ roomUnavailableReason: "scene_error" });
+      entryManager.exitScene();
+    };
+
     environmentEl.addEventListener(
       "model-loaded",
       () => {
+        environmentEl.removeEventListener("model-error", sceneErrorHandler);
+
         // Show the canvas once the model has loaded
         document.querySelector(".a-canvas").classList.remove("a-hidden");
 
@@ -365,14 +372,7 @@ async function updateEnvironmentForHub(hub, entryManager) {
       { once: true }
     );
 
-    environmentEl.addEventListener(
-      "model-error",
-      () => {
-        remountUI({ roomUnavailableReason: "scene_error" });
-        entryManager.exitScene();
-      },
-      { once: true }
-    );
+    environmentEl.addEventListener("model-error", sceneErrorHandler, { once: true });
 
     environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
     environmentScene.appendChild(environmentEl);
