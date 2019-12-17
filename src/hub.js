@@ -314,7 +314,7 @@ async function updateUIForHub(hub) {
   });
 }
 
-async function updateEnvironmentForHub(hub) {
+async function updateEnvironmentForHub(hub, entryManager) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
 
@@ -352,9 +352,6 @@ async function updateEnvironmentForHub(hub) {
 
   if (environmentScene.childNodes.length === 0) {
     const environmentEl = document.createElement("a-entity");
-    environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
-
-    environmentScene.appendChild(environmentEl);
 
     environmentEl.addEventListener(
       "model-loaded",
@@ -367,6 +364,18 @@ async function updateEnvironmentForHub(hub) {
       },
       { once: true }
     );
+
+    environmentEl.addEventListener(
+      "model-error",
+      () => {
+        remountUI({ roomUnavailableReason: "scene_error" });
+        entryManager.exitScene();
+      },
+      { once: true }
+    );
+
+    environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
+    environmentScene.appendChild(environmentEl);
   } else {
     // Change environment
     environmentEl = environmentScene.childNodes[0];
@@ -388,6 +397,15 @@ async function updateEnvironmentForHub(hub) {
             if (sceneEl.is("entered")) {
               waypointSystem.moveToSpawnPoint();
             }
+          },
+          { once: true }
+        );
+
+        environmentEl.addEventListener(
+          "model-error",
+          () => {
+            remountUI({ roomUnavailableReason: "scene_error" });
+            entryManager.exitScene();
           },
           { once: true }
         );
@@ -537,7 +555,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     });
 
     const loadEnvironmentAndConnect = () => {
-      updateEnvironmentForHub(hub);
+      updateEnvironmentForHub(hub, entryManager);
 
       scene.components["networked-scene"]
         .connect()
@@ -1386,7 +1404,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateUIForHub(hub);
 
     if (stale_fields.includes("scene")) {
-      updateEnvironmentForHub(hub);
+      updateEnvironmentForHub(hub, entryManager);
 
       addToPresenceLog({
         type: "scene_changed",
