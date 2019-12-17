@@ -172,6 +172,7 @@
     "exit.subtitle.disconnected": "You have disconnected from the room. Refresh the page to try to reconnect.",
     "exit.subtitle.left": "You have left the room.",
     "exit.subtitle.full": "This room is full, please try again later.",
+    "exit.subtitle.scene_error": "The scene failed to load.",
     "exit.subtitle.connect_error": "Unable to connect to this room, please try again later.",
     "exit.subtitle.version_mismatch": "The version you deployed is not available yet. Your browser will refresh in 5 seconds.",
     "autoexit.title": "Auto-ending session in ",
