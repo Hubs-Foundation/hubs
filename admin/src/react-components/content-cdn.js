@@ -157,7 +157,7 @@ class ContentCDNComponent extends Component {
       const configs = {
         reticulum: {
           phx: {
-            cors_proxy_url_host: `cors-proxy.${workerDomain}`
+            cors_proxy_url_host: workerDomain ? `cors-proxy.${workerDomain}` : ""
           },
           uploads: {
             host: workerDomain ? `https://${workerDomain}` : ""
@@ -165,14 +165,14 @@ class ContentCDNComponent extends Component {
         },
         hubs: {
           general: {
-            cors_proxy_server: `cors-proxy.${workerDomain}`,
+            cors_proxy_server: workerDomain ? `cors-proxy.${workerDomain}` : "",
             base_assets_path: workerDomain ? `https://${workerDomain}/hubs/` : "",
             thumbnail_server: workerDomain && useWorkerForThumbnails ? workerDomain : ""
           }
         },
         spoke: {
           general: {
-            cors_proxy_server: `cors-proxy.${workerDomain}`,
+            cors_proxy_server: workerDomain ? `cors-proxy.${workerDomain}` : "",
             base_assets_path: workerDomain ? `https://${workerDomain}/spoke/` : "",
             thumbnail_server: workerDomain && useWorkerForThumbnails ? workerDomain : ""
           }
