@@ -982,7 +982,7 @@ class UIRoot extends Component {
         <div>
           <FormattedMessage id={exitSubtitleId} />
           <p />
-          {!["left", "disconnected"].includes(this.props.roomUnavailableReason) && (
+          {!["left", "disconnected", "scene_error"].includes(this.props.roomUnavailableReason) && (
             <div>
               You can also{" "}
               <WithHoverSound>
