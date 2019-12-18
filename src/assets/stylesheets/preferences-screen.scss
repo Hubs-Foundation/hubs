@@ -10,15 +10,6 @@ $titleHeight: 3.0rem;
 $titleFontWeight: bolder;
 $backgroundColor: var(--full-panel-background-color);
 
-:local(.root) {
-  :local(.hovered) {
-    background: var(--preferences-menu-hovered-color);
-  }
-  :local(.selectHovered) {
-    background: var(--preferences-menu-select-hovered-color);
-  }
-}
-
 :local(.maxResolutionPreferenceItem) {
   display: flex;
   flex-flow: row;
@@ -44,12 +35,6 @@ input::-webkit-inner-spin-button {
 }
 
 :local(.preferenceListItem){
-  &:nth-child(2n + 1) {
-    background-color: var(--preferences-menu-row-background-color-odd)
-  }
-  &:nth-child(2n) {
-    background-color: var(--preferences-menu-row-background-color-even)
-  }
   display: flex;
   align-items: center;
   @media( min-width:$smallScreenWidth+1 ) {
@@ -112,7 +97,6 @@ input::-webkit-inner-spin-button {
     }
     height: $itemHeight;
     font-size: $defaultFontSize;
-    background-color: var(--preferences-menu-background-color);
   }
 }
 
@@ -135,7 +119,6 @@ input::-webkit-inner-spin-button {
     top: 0px;
     width: 100%;
     height: $titleHeight;
-    background: var(--preferences-menu-title-background-color);
   }
   :local(.title) {
     display: flex;
@@ -163,7 +146,6 @@ input::-webkit-inner-spin-button {
     height: $titleHeight;
     font-size: $titleFontSize;
     font-weight: $titleFontWeight;
-    background: var(--preferences-menu-section-background-color);
   }
 
   input {
@@ -348,7 +330,6 @@ input[type=range]::-webkit-slider-runnable-track {
   cursor: pointer;
   animate: 0.2s;
   box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  background: var(--preferences-menu-range-track-color);
   border-radius: 1.3px;
   border: 0.2px solid #010101;
 }
