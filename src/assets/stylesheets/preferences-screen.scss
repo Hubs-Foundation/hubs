@@ -17,7 +17,6 @@ $backgroundColor: var(--full-panel-background-color);
   justify-content: center;
 
   input {
-    width:12%;
     min-width: 3em;
     font-size: large;
     font-weight: bold;
@@ -38,12 +37,10 @@ input::-webkit-inner-spin-button {
   display: flex;
   align-items: center;
   @media( min-width:$smallScreenWidth+1 ) {
-    width: 90%;
     flex-flow: row;
     height: $itemHeight;
   }
   @media( max-width:$smallScreenWidth ) {
-    width: 100%;
     flex-flow: column;
     height: 2*$itemHeight;
     margin-bottom: 0.5rem;
@@ -55,7 +52,6 @@ input::-webkit-inner-spin-button {
     justify-content: space-around;
     height: $itemHeight;
     @media( min-width:$smallScreenWidth+1 ) {
-      text-align: end;
       justify-content: space-around;
     }
     @media( max-width:$smallScreenWidth ) {
@@ -65,36 +61,24 @@ input::-webkit-inner-spin-button {
     }
   }
   :local(.left) {
+    flex: 1;
     @media( min-width:$smallScreenWidth+1 ) {
-      width: 70%;
       margin-inline-end: 1rem;
     }
     @media( max-width:$smallScreenWidth ) {
-      width: 100%;
       margin-inline-end: 0rem;
     }
   }
   :local(.right) {
     display: flex;
     flex-flow: row;
-    @media( min-width:$smallScreenWidth+1 ) {
-      width: 30%;
-      margin-inline-start: 1rem;
-    }
-    @media( max-width:$smallScreenWidth ) {
-      width: 100%;
-      margin-inline-start: 0rem;
-    }
   }
   font-size: $defaultFontSize;
   select {
+    border-color: var(--text-field-border-color);
+    min-width: 200px;
+    background: transparent;
     text-align-last: center;
-    @media( min-width:$smallScreenWidth+1 ) {
-      width: 100%;
-    }
-    @media( max-width:$smallScreenWidth ) {
-      width: 80%;
-    }
     height: $itemHeight;
     font-size: $defaultFontSize;
   }
@@ -112,13 +96,15 @@ input::-webkit-inner-spin-button {
   :local(.scrollingContent) {
     display: flex;
     flex-flow: column;
-    align-items: center;
+    max-width: 80%;
+    padding-left: 10%;
   }
   :local(.titleBar) {
     position: fixed;
     top: 0px;
     width: 100%;
     height: $titleHeight;
+    background: var(--preferences-menu-background-color);
   }
   :local(.title) {
     display: flex;
@@ -158,11 +144,9 @@ input::-webkit-inner-spin-button {
 }
 
 :local(.checkbox) {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: end;
 }
 
 :local(.float-right) {
@@ -250,7 +234,9 @@ input::-webkit-inner-spin-button {
 }
 
 :local(.resetToDefaultButton){
-  margin-left: 5%;
+  background: transparent;
+  border: none;
+  font-size: medium;
 }
 
 :local(.prevOptionScale) {
