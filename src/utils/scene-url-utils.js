@@ -1,12 +1,19 @@
 import { isHubsSceneUrl, proxiedUrlFor } from "../utils/media-url-utils";
 
 export async function isValidGLB(url) {
-  return fetch(url).then(r => {
+  return fetch(url).then(async r => {
     const reader = r.body.getReader();
-    return reader.read().then(result => {
-      reader.cancel();
-      return String.fromCharCode.apply(null, result.value.slice(0, 4)) === "glTF";
-    });
+    let header = "";
+    function readChunk({ done, value }) {
+      header += String.fromCharCode.apply(null, value.slice(0, 4));
+      if (!done && header.length < 4) {
+        return reader.read().then(readChunk);
+      } else {
+        reader.cancel();
+      }
+    }
+    await reader.read().then(readChunk);
+    return header.startsWith("glTF");
   });
 }
 
