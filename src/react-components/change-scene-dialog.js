@@ -7,10 +7,13 @@ import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/change-scene-dialog.scss";
 import DialogContainer from "./dialog-container.js";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
+import { messages } from "../utils/i18n";
+import { isValidSceneUrl } from "../utils/scene-url-utils";
 
 export default class ChangeSceneDialog extends Component {
   state = {
-    url: ""
+    url: "",
+    submitting: false
   };
 
   static propTypes = {
@@ -18,9 +21,21 @@ export default class ChangeSceneDialog extends Component {
     onClose: PropTypes.func
   };
 
+  constructor(props) {
+    super(props);
+    this.urlValidationPromise = null;
+  }
+
   onUrlChange = e => {
-    this.setState({
-      url: e.target && e.target.value
+    const urlInput = e.target;
+    const url = urlInput.value;
+    this.setState({ url });
+
+    urlInput.setCustomValidity("");
+
+    this.urlValidationPromise = new Promise(async resolve => {
+      urlInput.setCustomValidity((await isValidSceneUrl(url.trim())) ? "" : messages["invalid-scene-url"]);
+      resolve();
     });
   };
 
@@ -29,14 +44,23 @@ export default class ChangeSceneDialog extends Component {
     this.setState({ url: "" });
   };
 
-  onChangeClicked = e => {
+  onSubmit = async e => {
     e.preventDefault();
 
-    if (this.state.url) {
-      this.props.onChange(this.state.url);
-    }
+    this.setState({ submitting: true });
 
-    this.props.onClose();
+    const form = e.target;
+
+    if (this.state.url) {
+      await this.urlValidationPromise;
+      if (form.checkValidity()) {
+        this.props.onChange(this.state.url.trim());
+        this.props.onClose();
+      } else {
+        form.reportValidity();
+        this.setState({ submitting: false });
+      }
+    }
   };
 
   render() {
@@ -59,7 +83,7 @@ export default class ChangeSceneDialog extends Component {
               </a>.
             </p>
           </div>
-          <form onSubmit={this.onChangeClicked}>
+          <form onSubmit={this.onSubmit}>
             <div className={styles.changeSceneForm}>
               <div className={styles.inputBorder}>
                 <input
@@ -73,7 +97,7 @@ export default class ChangeSceneDialog extends Component {
                 />
               </div>
               <div className={styles.buttons}>
-                <button className={styles.actionButton}>
+                <button className={styles.actionButton} disabled={this.state.submitting}>
                   <FormattedMessage id="change-scene-dialog.change-scene" />
                 </button>
               </div>
