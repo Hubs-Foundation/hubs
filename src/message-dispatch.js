@@ -1,5 +1,7 @@
 import "./utils/configs";
 import { getAbsoluteHref } from "./utils/media-url-utils";
+import { isValidSceneUrl } from "./utils/scene-url-utils";
+import { messages } from "./utils/i18n";
 import { spawnChatMessage } from "./react-components/chat-message";
 import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "./systems/sound-effects-system";
 import ducky from "./assets/models/DuckyMesh.glb";
@@ -21,7 +23,7 @@ export default class MessageDispatch {
 
   dispatch = message => {
     if (message.startsWith("/")) {
-      const commandParts = message.substring(1).split(" ");
+      const commandParts = message.substring(1).split(/\s+/);
       this.dispatchCommand(commandParts[0], ...commandParts.slice(1));
       document.activeElement.blur(); // Commands should blur
     } else {
@@ -29,7 +31,7 @@ export default class MessageDispatch {
     }
   };
 
-  dispatchCommand = (command, ...args) => {
+  dispatchCommand = async (command, ...args) => {
     const entered = this.scene.is("entered");
 
     if (!entered) {
@@ -94,10 +96,13 @@ export default class MessageDispatch {
         break;
       case "scene":
         if (args[0]) {
-          err = this.hubChannel.updateScene(args[0]);
-
-          if (err === "unauthorized") {
-            this.addToPresenceLog({ type: "log", body: "You do not have permission to change the scene." });
+          if (await isValidSceneUrl(args[0])) {
+            err = this.hubChannel.updateScene(args[0]);
+            if (err === "unauthorized") {
+              this.addToPresenceLog({ type: "log", body: "You do not have permission to change the scene." });
+            }
+          } else {
+            this.addToPresenceLog({ type: "log", body: messages["invalid-scene-url"] });
           }
         } else if (this.hubChannel.canOrWillIfCreator("update_hub")) {
           this.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
