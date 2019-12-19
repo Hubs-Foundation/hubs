@@ -127,6 +127,21 @@
   --overflow-tip-icon-color: black;
   --icon-button-background-color: black;
   --icon-button-border-color: white;
+  --preferences-menu-background-color: white;
+  --preferences-menu-row-background-color-even: lightgray;
+  --preferences-menu-row-background-color-odd: gray;
+  --preferences-menu-row-background-color-hovered: lightblue;
+  --preferences-menu-section-background-color: slategray;
+  --preferences-menu-title-background-color: lightslategray;
+  --preferences-menu-range-background-color: #367ebd;
+  --preferences-menu-range-thumb-color: black;
+  --preferences-menu-range-track-color: #3071a9;
+  --preferences-menu-range-fill-lower-color: #2a6495;
+  --preferences-menu-range-fill-upper-color: #3071a9;
+  --preferences-menu-range-fill-lower-focus-color: #3071a9;
+  --preferences-menu-range-fill-upper-focus-color: #367ebd;
+  --preferences-menu-select-hovered-color: aliceblue;
+  --preferences-menu-hovered-color: aliceblue;
 }
 
 .dark-theme {
@@ -217,4 +232,19 @@
   --overflow-tip-icon-color: black;
   --icon-button-background-color: black;
   --icon-button-border-color: #{$dark-grey};
+  --preferences-menu-background-color: white;
+  --preferences-menu-row-background-color-even: $light-grey;
+  --preferences-menu-row-background-color-odd: gray;
+  --preferences-menu-row-background-color-hovered: lightblue;
+  --preferences-menu-section-background-color: slategray;
+  --preferences-menu-title-background-color: lightslategray;
+  --preferences-menu-range-background-color: #367ebd;
+  --preferences-menu-range-thumb-color: black;
+  --preferences-menu-range-track-color: #3071a9;
+  --preferences-menu-range-fill-lower-color: #2a6495;
+  --preferences-menu-range-fill-upper-color: #3071a9;
+  --preferences-menu-range-fill-lower-focus-color: #3071a9;
+  --preferences-menu-range-fill-upper-focus-color: #367ebd;
+  --preferences-menu-select-hovered-color: aliceblue;
+  --preferences-menu-hovered-color: aliceblue;
 }

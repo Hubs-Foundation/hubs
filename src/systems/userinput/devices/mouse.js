@@ -45,7 +45,7 @@ export class MouseDevice {
       "wheel",
       e => {
         // Do not capture wheel events if they are being sent to an modal/overlay
-        if (!isInModal()) {
+        if (!isInModal() && !window.APP.preferenceScreenIsVisible) {
           e.preventDefault();
         }
       },

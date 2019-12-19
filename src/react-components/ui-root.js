@@ -58,6 +58,7 @@ import LobbyChatBox from "./lobby-chat-box.js";
 import InWorldChatBox from "./in-world-chat-box.js";
 import AvatarEditor from "./avatar-editor";
 import MicLevelWidget from "./mic-level-widget.js";
+import PreferencesScreen from "./preferences-screen.js";
 import OutputLevelWidget from "./output-level-widget.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
@@ -115,7 +116,6 @@ class UIRoot extends Component {
     enterScene: PropTypes.func,
     exitScene: PropTypes.func,
     onSendMessage: PropTypes.func,
-    disableAutoExitOnConcurrentLoad: PropTypes.bool,
     disableAutoExitOnIdle: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
     isBotMode: PropTypes.bool,
@@ -173,7 +173,6 @@ class UIRoot extends Component {
 
   state = {
     enterInVR: false,
-    muteOnEntry: false,
     entered: false,
     dialog: null,
     showShareDialog: false,
@@ -185,6 +184,7 @@ class UIRoot extends Component {
     didConnectToNetworkedScene: false,
     noMoreLoadingUpdates: false,
     hideLoader: false,
+    showPrefs: false,
     watching: false,
     isStreaming: false,
     showStreamingTip: false,
@@ -266,7 +266,7 @@ class UIRoot extends Component {
   }
 
   onConcurrentLoad = () => {
-    if (this.props.disableAutoExitOnConcurrentLoad) return;
+    if (qsTruthy("allow_multi") || this.props.store.state.preferences["allowMultipleHubsInstances"]) return;
     this.startAutoExitTimer("autoexit.concurrent_subtitle");
   };
 
@@ -350,13 +350,22 @@ class UIRoot extends Component {
     this.playerRig = scene.querySelector("#avatar-rig");
   }
 
+  UNSAFE_componentWillMount() {
+    this.props.store.addEventListener("statechanged", this.storeUpdated);
+  }
+
   componentWillUnmount() {
     this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
     this.props.scene.removeEventListener("exit", this.exitEventHandler);
     this.props.scene.removeEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.removeEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.removeEventListener("share_video_failed", this.onShareVideoFailed);
+    this.props.store.removeEventListener("statechanged", this.storeUpdated);
   }
+
+  storeUpdated = () => {
+    this.forceUpdate();
+  };
 
   showContextualSignInDialog = () => {
     const {
@@ -740,7 +749,8 @@ class UIRoot extends Component {
     // Push the new history state before going into VR, otherwise menu button will take us back
     clearHistoryState(this.props.history);
 
-    await this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.muteOnEntry);
+    const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
+    await this.props.enterScene(this.state.mediaStream, this.state.enterInVR, muteOnEntry);
 
     this.setState({ entered: true, showShareDialog: false });
 
@@ -1234,6 +1244,7 @@ class UIRoot extends Component {
 
   renderAudioSetupPanel = () => {
     const subtitleId = isMobilePhoneOrVR ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
+    const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
     return (
       <div className="audio-setup-panel">
         <div
@@ -1265,7 +1276,7 @@ class UIRoot extends Component {
             <MicLevelWidget
               scene={this.props.scene}
               hasAudioTrack={!!this.state.audioTrack}
-              muteOnEntry={this.state.muteOnEntry}
+              muteOnEntry={muteOnEntry}
             />
             <OutputLevelWidget />
           </div>
@@ -1316,8 +1327,12 @@ class UIRoot extends Component {
           <input
             id="mute-on-entry"
             type="checkbox"
-            onChange={() => this.setState({ muteOnEntry: !this.state.muteOnEntry })}
-            checked={this.state.muteOnEntry}
+            onChange={() =>
+              this.props.store.update({
+                preferences: { muteMicOnEntry: !this.props.store.state.preferences["muteMicOnEntry"] }
+              })
+            }
+            checked={this.props.store.state.preferences["muteMicOnEntry"] || false}
           />
           <label htmlFor="mute-on-entry">
             <FormattedMessage id="entry.mute-on-entry" />
@@ -1392,11 +1407,45 @@ class UIRoot extends Component {
         </IntlProvider>
       );
     if (isExited) return this.renderExitedPane();
-    if (isLoading) {
+    if (isLoading && this.state.showPrefs) {
       return (
-        <Loader scene={this.props.scene} finished={this.state.noMoreLoadingUpdates} onLoaded={this.onLoadingFinished} />
+        <div>
+          <Loader
+            scene={this.props.scene}
+            finished={this.state.noMoreLoadingUpdates}
+            onLoaded={this.onLoadingFinished}
+            connected={this.state.didConnectToNetworkedScene}
+          />
+          <PreferencesScreen
+            onClose={() => {
+              this.setState({ showPrefs: false });
+            }}
+            store={this.props.store}
+          />
+        </div>
       );
     }
+    if (isLoading) {
+      return (
+        <Loader
+          scene={this.props.scene}
+          finished={this.state.noMoreLoadingUpdates}
+          onLoaded={this.onLoadingFinished}
+          connected={this.state.didConnectToNetworkedScene}
+        />
+      );
+    }
+    if (this.state.showPrefs) {
+      return (
+        <PreferencesScreen
+          onClose={() => {
+            this.setState({ showPrefs: false });
+          }}
+          store={this.props.store}
+        />
+      );
+    }
+
     if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();
     if (this.props.isBotMode) return this.renderBotMode();
 
@@ -1968,6 +2017,9 @@ class UIRoot extends Component {
                   scene={this.props.scene}
                   performConditionalSignIn={this.props.performConditionalSignIn}
                   showNonHistoriedDialog={this.showNonHistoriedDialog}
+                  showPreferencesScreen={() => {
+                    this.setState({ showPrefs: true });
+                  }}
                   pushHistoryState={this.pushHistoryState}
                 />
               )}

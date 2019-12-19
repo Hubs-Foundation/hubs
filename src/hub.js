@@ -107,6 +107,7 @@ import "./components/hubs-text";
 import "./components/billboard";
 import "./components/periodic-full-syncs";
 import "./components/inspect-button";
+import "./components/set-max-resolution";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
@@ -175,7 +176,14 @@ if (isEmbed && !qs.get("embed_token")) {
 }
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
-window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
+window.APP.quality =
+  window.APP.store.state.preferences.materialQualitySetting === "low"
+    ? "low"
+    : window.APP.store.state.preferences.materialQualitySetting === "high"
+      ? "high"
+      : isMobile || isMobileVR
+        ? "low"
+        : "high";
 
 import "./components/owned-object-limiter";
 import "./components/owned-object-cleanup-timeout";
@@ -263,7 +271,6 @@ const qsVREntryType = qs.get("vr_entry_type");
 
 function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
-  const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const disableAutoExitOnIdle =
     qsTruthy("allow_idle") || (process.env.NODE_ENV === "development" && !qs.get("idle_timeout"));
   const isCursorHoldingPen =
@@ -281,7 +288,6 @@ function mountUI(props = {}) {
             {...{
               scene,
               isBotMode,
-              disableAutoExitOnConcurrentLoad,
               disableAutoExitOnIdle,
               forcedVREntryType,
               store,

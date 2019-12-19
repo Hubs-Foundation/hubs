@@ -62,6 +62,24 @@ export const SCHEMA = {
       }
     },
 
+    preferences: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        muteMicOnEntry: { type: "bool" },
+        enableOnScreenJoystickLeft: { type: "bool" },
+        enableOnScreenJoystickRight: { type: "bool" },
+        onlyShowNametagsInFreeze: { type: "bool" },
+        allowMultipleHubsInstances: { type: "bool" },
+        maxResolutionWidth: { type: "number" },
+        maxResolutionHeight: { type: "number" },
+        globalVoiceVolume: { type: "number" },
+        globalMediaVolume: { type: "number" },
+        snapRotationDegrees: { type: "number" },
+        materialQualitySetting: { type: "string" }
+      }
+    },
+
     // Legacy
     confirmedDiscordRooms: {
       type: "array",
@@ -129,6 +147,7 @@ export const SCHEMA = {
     credentials: { $ref: "#/definitions/credentials" },
     activity: { $ref: "#/definitions/activity" },
     settings: { $ref: "#/definitions/settings" },
+    preferences: { $ref: "#/definitions/preferences" },
     confirmedDiscordRooms: { $ref: "#/definitions/confirmedDiscordRooms" }, // Legacy
     confirmedBroadcastedRooms: { $ref: "#/definitions/confirmedBroadcastedRooms" },
     uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" },
@@ -165,7 +184,8 @@ export default class Store extends EventTarget {
       uploadPromotionTokens: [],
       creatorAssignmentTokens: [],
       embedTokens: [],
-      onLoadActions: []
+      onLoadActions: [],
+      preferences: {}
     });
 
     this._shouldResetAvatarOnInit = false;

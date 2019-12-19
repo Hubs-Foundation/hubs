@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faUserAlt } from "@fortawesome/free-solid-svg-icons/faUserAlt";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
+import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import { faDoorClosed } from "@fortawesome/free-solid-svg-icons/faDoorClosed";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
@@ -34,6 +35,7 @@ export default class SettingsMenu extends Component {
     hubChannel: PropTypes.object,
     performConditionalSignIn: PropTypes.func,
     showNonHistoriedDialog: PropTypes.func,
+    showPreferencesScreen: PropTypes.func,
     pushHistoryState: PropTypes.func
   };
 
@@ -42,11 +44,17 @@ export default class SettingsMenu extends Component {
   };
 
   componentDidMount() {
-    document.querySelector(".a-canvas").addEventListener("mouseup", () => {
+    this.onMouseUp = () => {
       if (this.state.expanded) {
         this.setState({ expanded: false });
       }
-    });
+    };
+    this.acanvas = document.querySelector(".a-canvas");
+    this.acanvas.addEventListener("mouseup", this.onMouseUp);
+  }
+
+  componentWillUnmount() {
+    this.acanvas.removeEventListener("mouseup", this.onMouseUp);
   }
 
   renderExpandedMenu() {
@@ -105,6 +113,23 @@ export default class SettingsMenu extends Component {
                   }}
                 >
                   <FormattedMessage id="settings.favorites" />
+                </div>
+              </div>
+            </div>
+            <div className={rowClasses}>
+              <div className={styles.icon}>
+                <i>
+                  <FontAwesomeIcon icon={faCog} />
+                </i>
+              </div>
+              <div className={styles.listItem}>
+                <div
+                  className={styles.listItemLink}
+                  onClick={() => {
+                    this.props.showPreferencesScreen();
+                  }}
+                >
+                  <FormattedMessage id="settings.preferences" />
                 </div>
               </div>
             </div>
