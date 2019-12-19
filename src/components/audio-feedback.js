@@ -182,7 +182,13 @@ AFRAME.registerComponent("scale-audio-feedback", {
 
     const { object3D } = this.el;
 
-    const scale = getAudioFeedbackScale(this.el.object3D, this.camera, minScale, maxScale, this.analyser.volume);
+    const scale = getAudioFeedbackScale(
+      this.el.object3D,
+      this.camera,
+      minScale,
+      maxScale,
+      this.analyser ? this.analyser.volume : 0
+    );
 
     object3D.scale.setScalar(scale);
     object3D.matrixNeedsUpdate = true;
@@ -213,7 +219,7 @@ AFRAME.registerComponent("morph-audio-feedback", {
 
     const { minValue, maxValue } = this.data;
     this.mesh.morphTargetInfluences[this.morphNumber] = THREE.Math.mapLinear(
-      easeOutQuadratic(this.analyser.volume),
+      easeOutQuadratic(this.analyser ? this.analyser.volume : 0),
       0,
       1,
       minValue,
