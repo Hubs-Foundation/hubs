@@ -45,19 +45,11 @@ const RESULTS = {
   failed: "failed"
 };
 
-const STAGE = {
-  start: "start",
-  load: "load",
-  selecting: "selecting",
-  importing: "import"
-};
-
 const styles = withCommonStyles(() => ({}));
 
 class ImportContentComponent extends Component {
   state = {
     urls: "",
-    stage: STAGE.start,
     imports: [],
     addBaseTag: false,
     addDefaultTag: false,
@@ -91,28 +83,42 @@ class ImportContentComponent extends Component {
 
   addImport(url, type, asset, isDefault, isBase, isFeatured) {
     const { imports } = this.state;
-    imports.push({ url, type, asset, result: RESULTS.selecting, isDefault, isBase, isFeatured, isEnabled: true });
+    imports.push({
+      url,
+      type,
+      asset,
+      result: RESULTS.selecting,
+      isDefault,
+      isBase,
+      isFeatured,
+      isImported: false,
+      isEnabled: true
+    });
     this.setState({ imports });
   }
 
   setImportResult(url, result) {
-    this.setImportFields(i => (i.result = result));
+    this.setImportFields(url, i => (i.result = result));
+  }
+
+  setImportIsImported(url, isEnabled) {
+    this.setImportFields(url, i => (i.isEnabled = isEnabled));
   }
 
   setImportIsEnabled(url, isEnabled) {
-    this.setImportFields(i => (i.isEnabled = isEnabled));
+    this.setImportFields(url, i => (i.isEnabled = isEnabled));
   }
 
   setImportIsDefault(url, isDefault) {
-    this.setImportFields(i => (i.isDefault = isDefault));
+    this.setImportFields(url, i => (i.isDefault = isDefault));
   }
 
   setImportIsBase(url, isBase) {
-    this.setImportFields(i => (i.isBase = isBase));
+    this.setImportFields(url, i => (i.isBase = isBase));
   }
 
   setImportIsFeatured(url, isFeatured) {
-    this.setImportFields(i => (i.isFeatured = isFeatured));
+    this.setImportFields(url, i => (i.isFeatured = isFeatured));
   }
 
   setImportFields(url, setter) {
@@ -138,7 +144,6 @@ class ImportContentComponent extends Component {
     const needsDefaultAvatar = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.avatar_listings.default;
     const needsDefaultScene = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.scene_listings.default;
 
-    this.setState({ stage: STAGE.load });
     let hadUrl = false;
 
     for (let i = 0; i < urls.length; i++) {
@@ -156,18 +161,14 @@ class ImportContentComponent extends Component {
       const isBase = isAvatar && needsBaseAvatar && i === 0;
       this.addImport(url, type, asset, isDefault, isBase, true /* isFeatured */);
       hadUrl = true;
-
-      console.log(asset);
     }
 
     if (!hadUrl) {
       this.setState({ loadFailed: true });
-    } else {
-      this.setState({ stage: STAGE.selecting });
     }
   }
 
-  async onSubmit(e) {
+  async onImport(e) {
     if (e) e.preventDefault();
 
     const url = this.state.url;
@@ -175,7 +176,6 @@ class ImportContentComponent extends Component {
     const { url: apiUrl, isScene } = apiInfo;
     const type = isScene ? "scenes" : "avatars";
     const columnPrefix = isScene ? "scene" : "avatar";
-    this.setState({ stage: STAGE.importing });
     this.addImport(url, type);
 
     this.setImportResult(url, null, RESULTS.importing);
@@ -235,13 +235,11 @@ class ImportContentComponent extends Component {
     }
     console.log(this.state.imports);
 
-    this.setState({ importing: STAGE.start });
     this.updateReticulumMeta();
   }
 
   renderImportTable() {
-    const { stage, imports } = this.state;
-    const hasAvatar = !!imports.find(i => i.type === "avatars");
+    const { imports } = this.state;
 
     const rowForImportRecord = r => {
       let icon;
@@ -291,61 +289,59 @@ class ImportContentComponent extends Component {
 
       const screenshotUrl = `https://${configs.CORS_PROXY_SERVER}/${r.asset.screenshot_url || r.asset.files.thumbnail}`;
 
-      if (stage === STAGE.selecting) {
+      if (!r.isImported) {
         return (
           <TableRow key={r.url}>
             <TableCell>
               <Checkbox
                 checked={r.isEnabled}
-                onChange={e => this.setImportIsEnabled(r, e.target.checked)}
+                onChange={e => this.setImportIsEnabled(r.url, e.target.checked)}
                 value="enabled"
               />
             </TableCell>
             <TableCell>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={r.isDefault}
-                    onChange={e => this.setImportIsDefault(r, e.target.checked)}
-                    value="default"
-                  />
-                }
-                label="Set to Default"
-              />
-            </TableCell>
-            {hasAvatar && (
-              <TableCell>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      disabled={!r.isEnabled}
+                      checked={r.isDefault}
+                      onChange={e => this.setImportIsDefault(r.url, e.target.checked)}
+                      value="default"
+                    />
+                  }
+                  label="Set to Default"
+                />
                 {r.type === "avatars" && (
                   <FormControlLabel
                     control={
                       <Checkbox
+                        disabled={!r.isEnabled}
                         checked={r.isBase}
-                        onChange={e => this.setImportIsBase(r, e.target.checked)}
+                        onChange={e => this.setImportIsBase(r.url, e.target.checked)}
                         value="base"
                       />
                     }
                     label="Set to Base"
                   />
                 )}
-              </TableCell>
-            )}
-            <TableCell>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={r.isFeatured}
-                    onChange={e => this.setImportIsFeatured(r, e.target.checked)}
-                    value="featured"
-                  />
-                }
-                label="Featured"
-              />
-              )}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      disabled={!r.isEnabled}
+                      checked={r.isFeatured}
+                      onChange={e => this.setImportIsFeatured(r.url, e.target.checked)}
+                      value="featured"
+                    />
+                  }
+                  label="Featured"
+                />
+              </div>
             </TableCell>
             <TableCell>
               <img src={screenshotUrl} style={{ width: "100px" }} />
             </TableCell>
-            <TableCell>
+            <TableCell align="right">
               <a href={r.url} target="_blank" rel="noopener noreferrer">
                 {r.asset.name}
               </a>
@@ -359,7 +355,7 @@ class ImportContentComponent extends Component {
             <TableCell>
               <img src={screenshotUrl} style={{ width: "100px" }} />
             </TableCell>
-            <TableCell>
+            <TableCell align="right">
               <a href={r.url} target="_blank" rel="noopener noreferrer">
                 {r.asset.name}
               </a>
@@ -369,33 +365,18 @@ class ImportContentComponent extends Component {
       }
     };
 
-    const head =
-      stage === STAGE.selecting ? (
-        <TableHead>
-          <TableRow>
-            <TableCell>Import</TableCell>
-            <TableCell>Default</TableCell>
-            {hasAvatar && <TableCell>Base</TableCell>}
-            <TableCell>Featured</TableCell>
-            <TableCell>Preview</TableCell>
-            <TableCell>Name</TableCell>
-          </TableRow>
-        </TableHead>
-      ) : (
-        <TableHead>
-          <TableRow>
-            <TableCell></TableCell>
-            <TableCell></TableCell>
-            <TableCell></TableCell>
-            <TableCell></TableCell>
-          </TableRow>
-        </TableHead>
-      );
     return (
       <CardContent>
         <Paper>
           <Table>
-            {head}
+            <TableHead>
+              <TableRow>
+                <TableCell>Import?</TableCell>
+                <TableCell>Info</TableCell>
+                <TableCell>Preview</TableCell>
+                <TableCell align="right">Name</TableCell>
+              </TableRow>
+            </TableHead>
             <TableBody>{imports.map(rowForImportRecord)}</TableBody>
           </Table>
         </Paper>
@@ -407,7 +388,11 @@ class ImportContentComponent extends Component {
     const needsBaseAvatar = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.avatar_listings.base;
     const needsDefaultAvatar = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.avatar_listings.default;
     const needsDefaultScene = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.scene_listings.default;
-    const { urls, stage, loadFailed } = this.state;
+    const { urls, imports, loadFailed } = this.state;
+    const unimportedCount = imports ? imports.filter(i => !i.isImported).length : 0;
+    const readyToImportCount = imports ? imports.filter(i => i.isEnabled && !i.isImported).length : 0;
+    const importCount = imports ? imports.length : 0;
+    const isImportingAny = imports ? imports.find(i => i.result === RESULTS.importing) : false;
 
     return (
       <Card className={this.props.classes.container}>
@@ -482,7 +467,7 @@ class ImportContentComponent extends Component {
               )}
             </List>
           )}
-          <form className={this.props.classes.info} onSubmit={e => this.onSubmit(e)}>
+          <form className={this.props.classes.info}>
             <FormControl>
               <FormGroup>
                 <TextField
@@ -503,19 +488,29 @@ class ImportContentComponent extends Component {
               variant="contained"
               color="primary"
             >
-              Next
+              Preview Import
             </Button>
           </form>
-          {stage === STAGE.load && <CircularProgress />}
-          {stage === STAGE.selecting && (
+          {this.state.isLoading && <CircularProgress />}
+          {unimportedCount > 0 && (
             <div>
               <p />
               <Typography variant="subheading" gutterBottom>
-                Next, choose the content you&apos;d like to import, and which content flags to set.
+                Next, choose the content you&apos;d like to import, and which content flags to set. Then, click Import.
               </Typography>
             </div>
           )}
-          {(stage === STAGE.selecting || stage === STAGE.import) && this.renderImportTable()}
+          {importCount > 0 && this.renderImportTable()}
+          {readyToImportCount > 0 && !isImportingAny && (
+            <Button
+              onClick={this.onImport.bind(this)}
+              className={this.props.classes.button}
+              variant="contained"
+              color="primary"
+            >
+              Import {readyToImportCount} Item{readyToImportCount > 1 && "s"}
+            </Button>
+          )}
           <Snackbar
             anchorOrigin={{ horizontal: "center", vertical: "bottom" }}
             open={!!loadFailed}
