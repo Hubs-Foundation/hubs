@@ -31,13 +31,12 @@ import Button from "@material-ui/core/Button";
 import { fetchReticulumAuthenticated } from "hubs/src/utils/phoenix-utils";
 import clsx from "classnames";
 import { GET_MANY_REFERENCE } from "react-admin";
-import { sceneApproveNew, sceneReviewed } from "./scene-actions";
-import { avatarApproveNew, avatarReviewed } from "./avatar-actions";
+import { sceneApproveNew, sceneApproveExisting, sceneReviewed } from "./scene-actions";
+import { avatarApproveNew, avatarApproveExisting, avatarReviewed } from "./avatar-actions";
 import withCommonStyles from "../utils/with-common-styles";
 import configs from "../utils/configs";
 
 const RESULTS = {
-  selecting: "selecting",
   pending: "pending",
   importing: "importing",
   new_listing: "new_listing",
@@ -81,13 +80,14 @@ class ImportContentComponent extends Component {
     }
   }
 
-  addImport(url, type, asset, isDefault, isBase, isFeatured) {
+  addImport(url, importUrl, type, asset, isDefault, isBase, isFeatured) {
     const { imports } = this.state;
     imports.push({
       url,
+      importUrl,
       type,
       asset,
-      result: RESULTS.selecting,
+      result: RESULTS.pending,
       isDefault,
       isBase,
       isFeatured,
@@ -99,10 +99,10 @@ class ImportContentComponent extends Component {
 
   setImportResult(url, result) {
     this.setImportFields(url, i => (i.result = result));
-  }
 
-  setImportIsImported(url, isEnabled) {
-    this.setImportFields(url, i => (i.isEnabled = isEnabled));
+    if (result === RESULTS.new_listing || result === RESULTS.existing_listing || result === RESULTS.failed) {
+      this.setImportFields(url, i => (i.isImported = true));
+    }
   }
 
   setImportIsEnabled(url, isEnabled) {
@@ -145,224 +145,231 @@ class ImportContentComponent extends Component {
     const needsDefaultScene = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.scene_listings.default;
 
     let hadUrl = false;
+    await new Promise(r => this.setState({ imports: [] }, r));
+    this.setState({ isLoading: true });
 
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i];
       const apiInfo = this.apiInfoForSubmittedUrl(url);
-      const { url: apiUrl, isScene } = apiInfo;
+      const { url: importUrl, isScene } = apiInfo;
       const isAvatar = !isScene;
 
-      if (!apiUrl) continue;
+      if (!importUrl) continue;
 
-      const res = await fetch(`https://${configs.CORS_PROXY_SERVER}/${apiUrl}`);
+      const res = await fetch(`https://${configs.CORS_PROXY_SERVER}/${importUrl}`);
       const type = isScene ? "scenes" : "avatars";
       const asset = (await res.json())[type][0];
       const isDefault = (isScene && needsDefaultScene) || (isAvatar && needsDefaultAvatar);
       const isBase = isAvatar && needsBaseAvatar && i === 0;
-      this.addImport(url, type, asset, isDefault, isBase, true /* isFeatured */);
+      this.addImport(url, importUrl, type, asset, isDefault, isBase, true /* isFeatured */);
       hadUrl = true;
     }
 
     if (!hadUrl) {
       this.setState({ loadFailed: true });
     }
+
+    this.setState({ urls: "", isLoading: false });
   }
 
   async onImport(e) {
     if (e) e.preventDefault();
+    const { imports } = this.state;
 
-    const url = this.state.url;
-    const apiInfo = this.apiInfoForSubmittedUrl(url);
-    const { url: apiUrl, isScene } = apiInfo;
-    const type = isScene ? "scenes" : "avatars";
-    const columnPrefix = isScene ? "scene" : "avatar";
-    this.addImport(url, type);
+    for (let i = 0; i < imports.length; i++) {
+      const { url, type, importUrl, isEnabled, isImported, isBase, isDefault, isFeatured } = imports[i];
+      if (isImported || !isEnabled) continue;
 
-    this.setImportResult(url, null, RESULTS.importing);
+      this.setImportResult(url, RESULTS.importing);
 
-    const res = await fetchReticulumAuthenticated(`/api/v1/${type}`, "POST", { url: apiUrl });
-    const asset = res[type][0];
-    const tags = [];
+      const isScene = type === "scenes";
+      const isAvatar = !isScene;
+      const columnPrefix = isScene ? "scene" : "avatar";
+      let res;
 
-    if (this.state.addBaseTag) {
-      tags.push("base");
-    }
+      try {
+        res = await fetchReticulumAuthenticated(`/api/v1/${type}`, "POST", { url: importUrl });
+      } catch (e) {
+        this.setImportResult(url, RESULTS.failed);
+        continue;
+      }
 
-    if (this.state.addDefaultTag) {
-      tags.push("default");
-    }
+      const asset = res[type][0];
+      const tags = [];
 
-    this.setState({ url: "" });
+      if (isAvatar && isBase) {
+        tags.push("base");
+      }
 
-    const dataProvider = window.APP.dataProvider;
-    const approveNew = isScene ? sceneApproveNew : avatarApproveNew;
-    const reviewed = isScene ? sceneReviewed : avatarReviewed;
+      if (isDefault) {
+        tags.push("default");
+      }
 
-    // Import API returns the sid, need to look up the asset by sid and then check for a listing.
-    const sid = asset[`${columnPrefix}_id`];
+      if (isFeatured) {
+        tags.push("featured");
+      }
 
-    const objectRes = await dataProvider(GET_MANY_REFERENCE, type, {
-      sort: { field: "id", order: "desc" },
-      target: `${columnPrefix}_sid`,
-      id: sid
-    });
-    const objId = objectRes.data[0].id;
-    const listingRes = await dataProvider(GET_MANY_REFERENCE, `${columnPrefix}_listings`, {
-      sort: { field: "id", order: "desc" },
-      target: `_${columnPrefix}_id`,
-      id: objId
-    });
+      const approveNew = isScene ? sceneApproveNew : avatarApproveNew;
+      const approveExisting = isScene ? sceneApproveExisting : avatarApproveExisting;
+      const reviewed = isScene ? sceneReviewed : avatarReviewed;
 
-    // If there is an existing listing, object ends up in pending, otherwise create a listing.
-    if (listingRes.data.length === 0) {
+      const dataProvider = window.APP.dataProvider;
+
+      // Import API returns the sid, need to look up the asset by sid and then check for a listing.
+      const sid = asset[`${columnPrefix}_id`];
+
+      const objectRes = await dataProvider(GET_MANY_REFERENCE, type, {
+        sort: { field: "id", order: "desc" },
+        target: `${columnPrefix}_sid`,
+        id: sid
+      });
+      const objId = objectRes.data[0].id;
+      const listingRes = await dataProvider(GET_MANY_REFERENCE, `${columnPrefix}_listings`, {
+        sort: { field: "id", order: "desc" },
+        target: `_${columnPrefix}_id`,
+        id: objId
+      });
+
+      // If there is an existing listing, object ends up in pending, otherwise create a listing.
+      const isNew = listingRes.data.length === 0;
+      const approve = isNew ? approveNew : approveExisting;
       const exec = async f => {
         const d = f();
         await dataProvider(d.meta.fetch, d.meta.resource, d.payload);
       };
 
-      await exec(() => {
-        const d = approveNew(objectRes.data[0]);
+      if (!isNew) {
+        objectRes.data[0].avatar_listing_id = listingRes.data[0].id;
+      }
 
-        // Add any tags due to form
-        d.payload.data.tags.tags = tags;
+      await exec(() => {
+        const d = approve(objectRes.data[0]);
+
+        if (!d.payload.data.tags) {
+          d.payload.data.tags = { tags };
+        } else {
+          for (const t of tags) {
+            if (d.payload.data.tags.tags.indexOf(t) < 0) {
+              d.payload.data.tags.tags.push(t);
+            }
+          }
+        }
+
         return d;
       });
 
-      await exec(() => reviewed(objId));
-      this.setImportResult(url, asset, RESULTS.new_listing);
-    } else {
-      this.setImportResult(url, asset, RESULTS.existing_listing);
-    }
-    console.log(this.state.imports);
+      if (isNew) {
+        await exec(() => reviewed(objId));
+      }
 
-    this.updateReticulumMeta();
+      this.setImportResult(url, isNew ? RESULTS.new_listing : RESULTS.existing_listing);
+
+      this.updateReticulumMeta();
+    }
   }
 
   renderImportTable() {
     const { imports } = this.state;
+    const isImportingAny = imports ? !!imports.find(i => i.result === RESULTS.importing) : false;
 
     const rowForImportRecord = r => {
-      let icon;
-      let status;
+      let icon = null;
+      let status = null;
       const listingType = r.type === "scenes" ? "scene_listings" : "avatar_listings";
 
       switch (r.result) {
-        case RESULTS.pending:
-          icon = <div />;
-          status = "pending";
-          break;
         case RESULTS.importing:
           icon = <CircularProgress size={18} />;
-          status = "importing";
           break;
         case RESULTS.failed:
           icon = <Warning />;
-          status = "failed";
           break;
         case RESULTS.new_listing:
           icon = <Done />;
           status = (
-            <span>
-              Imported{" "}
-              <a href={r.url} target="_blank" rel="noopener noreferrer">
-                {r.asset.name}
-              </a>
-              .<br />
+            <p>
+              Import Successful.
+              <br />
               Go to <a href={`/admin?#/${listingType}`}>approved {r.type}</a> to manage.
-            </span>
+            </p>
           );
           break;
         case RESULTS.existing_listing:
           icon = <Done />;
           status = (
-            <span>
-              Updated{" "}
-              <a href={r.url} target="_blank" rel="noopener noreferrer">
-                {r.asset.name}
-              </a>
-              .<br />
-              Go to <a href={`/admin?#/pending_${r.type}`}>pending {r.type}</a> to approve changes.
-            </span>
+            <p>
+              Update Successful.
+              <br />
+              Go to <a href={`/admin?#/${listingType}`}>approved {r.type}</a> to manage.
+            </p>
           );
           break;
       }
 
       const screenshotUrl = `https://${configs.CORS_PROXY_SERVER}/${r.asset.screenshot_url || r.asset.files.thumbnail}`;
 
-      if (!r.isImported) {
-        return (
-          <TableRow key={r.url}>
-            <TableCell>
-              <Checkbox
-                checked={r.isEnabled}
-                onChange={e => this.setImportIsEnabled(r.url, e.target.checked)}
-                value="enabled"
-              />
-            </TableCell>
-            <TableCell>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      disabled={!r.isEnabled}
-                      checked={r.isDefault}
-                      onChange={e => this.setImportIsDefault(r.url, e.target.checked)}
-                      value="default"
-                    />
-                  }
-                  label="Set to Default"
+      return (
+        <TableRow key={r.url}>
+          <TableCell>
+            {icon ||
+              (!isImportingAny && (
+                <Checkbox
+                  checked={r.isEnabled}
+                  onChange={e => this.setImportIsEnabled(r.url, e.target.checked)}
+                  value="enabled"
                 />
-                {r.type === "avatars" && (
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        disabled={!r.isEnabled}
-                        checked={r.isBase}
-                        onChange={e => this.setImportIsBase(r.url, e.target.checked)}
-                        value="base"
-                      />
-                    }
-                    label="Set to Base"
+              ))}
+          </TableCell>
+          <TableCell>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    disabled={!r.isEnabled || isImportingAny || r.isImported}
+                    checked={r.isDefault}
+                    onChange={e => this.setImportIsDefault(r.url, e.target.checked)}
+                    value="default"
                   />
-                )}
+                }
+                label="Set to Default"
+              />
+              {r.type === "avatars" && (
                 <FormControlLabel
                   control={
                     <Checkbox
-                      disabled={!r.isEnabled}
-                      checked={r.isFeatured}
-                      onChange={e => this.setImportIsFeatured(r.url, e.target.checked)}
-                      value="featured"
+                      disabled={!r.isEnabled || isImportingAny || r.isImported}
+                      checked={r.isBase}
+                      onChange={e => this.setImportIsBase(r.url, e.target.checked)}
+                      value="base"
                     />
                   }
-                  label="Featured"
+                  label="Set to Base"
                 />
-              </div>
-            </TableCell>
-            <TableCell>
-              <img src={screenshotUrl} style={{ width: "100px" }} />
-            </TableCell>
-            <TableCell align="right">
-              <a href={r.url} target="_blank" rel="noopener noreferrer">
-                {r.asset.name}
-              </a>
-            </TableCell>
-          </TableRow>
-        );
-      } else {
-        return (
-          <TableRow key={r.url}>
-            <TableCell>{icon}</TableCell>
-            <TableCell>
-              <img src={screenshotUrl} style={{ width: "100px" }} />
-            </TableCell>
-            <TableCell align="right">
-              <a href={r.url} target="_blank" rel="noopener noreferrer">
-                {r.asset.name}
-              </a>
-            </TableCell>
-          </TableRow>
-        );
-      }
+              )}
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    disabled={!r.isEnabled || isImportingAny || r.isImported}
+                    checked={r.isFeatured}
+                    onChange={e => this.setImportIsFeatured(r.url, e.target.checked)}
+                    value="featured"
+                  />
+                }
+                label="Featured"
+              />
+            </div>
+          </TableCell>
+          <TableCell>
+            <img src={screenshotUrl} style={{ width: "100px" }} />
+          </TableCell>
+          <TableCell align="right">
+            <a href={r.url} target="_blank" rel="noopener noreferrer">
+              {r.asset.name}
+            </a>
+            {status}
+          </TableCell>
+        </TableRow>
+      );
     };
 
     return (
@@ -425,7 +432,7 @@ class ImportContentComponent extends Component {
           <Typography variant="body1" gutterBottom>
             Enter a comma-separted list of URLs avatars or scenes to import them into your Hubs Cloud instance.
             <br />
-            Or, specify a .pack file which contains a list of URLs (one per line.)
+            Or, specify a .pack file which contains a list of URLs, one per line.
           </Typography>
           {(needsBaseAvatar || needsDefaultAvatar || needsDefaultScene) && (
             <List>
@@ -482,17 +489,19 @@ class ImportContentComponent extends Component {
                 />
               </FormGroup>
             </FormControl>
-            <Button
-              onClick={this.onStartReady.bind(this)}
-              className={this.props.classes.button}
-              variant="contained"
-              color="primary"
-            >
-              Preview Import
-            </Button>
+            {!this.state.isLoading && (
+              <Button
+                onClick={this.onStartReady.bind(this)}
+                className={this.props.classes.button}
+                variant="contained"
+                color="primary"
+              >
+                Preview Import
+              </Button>
+            )}
           </form>
           {this.state.isLoading && <CircularProgress />}
-          {unimportedCount > 0 && (
+          {!this.state.isLoading && unimportedCount > 0 && (
             <div>
               <p />
               <Typography variant="subheading" gutterBottom>
@@ -500,8 +509,8 @@ class ImportContentComponent extends Component {
               </Typography>
             </div>
           )}
-          {importCount > 0 && this.renderImportTable()}
-          {readyToImportCount > 0 && !isImportingAny && (
+          {!this.state.isLoading && importCount > 0 && this.renderImportTable()}
+          {!this.state.isLoading && readyToImportCount > 0 && !isImportingAny && (
             <Button
               onClick={this.onImport.bind(this)}
               className={this.props.classes.button}
