@@ -134,7 +134,7 @@ class ImportContentComponent extends Component {
     this.setState({ imports });
   }
 
-  async onStartReady(e) {
+  async onPreviewImport(e) {
     if (e) e.preventDefault();
 
     const urls = this.state.urls.split(/[, ]+/);
@@ -148,9 +148,30 @@ class ImportContentComponent extends Component {
     await new Promise(r => this.setState({ imports: [] }, r));
     this.setState({ isLoading: true });
 
+    const importableUrls = [];
+
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i];
+
+      if (url.endsWith(".pack")) {
+        const res = await fetch(`https://${configs.CORS_PROXY_SERVER}/${url}`);
+        const packUrls = (await res.text()).split("\n");
+        for (const u of packUrls) {
+          if (u.trim() !== "") {
+            importableUrls.push(u);
+          }
+        }
+      } else {
+        importableUrls.push(url);
+      }
+    }
+
+    for (let i = 0; i < importableUrls.length; i++) {
+      const url = importableUrls[i];
+      console.log(url);
       const apiInfo = this.apiInfoForSubmittedUrl(url);
+      if (!apiInfo) continue;
+
       const { url: importUrl, isScene } = apiInfo;
       const isAvatar = !isScene;
 
@@ -239,7 +260,7 @@ class ImportContentComponent extends Component {
       };
 
       if (!isNew) {
-        objectRes.data[0].avatar_listing_id = listingRes.data[0].id;
+        objectRes.data[0][`${columnPrefix}_listing_id`] = listingRes.data[0].id;
       }
 
       await exec(() => {
@@ -491,7 +512,7 @@ class ImportContentComponent extends Component {
             </FormControl>
             {!this.state.isLoading && (
               <Button
-                onClick={this.onStartReady.bind(this)}
+                onClick={this.onPreviewImport.bind(this)}
                 className={this.props.classes.button}
                 variant="contained"
                 color="primary"
