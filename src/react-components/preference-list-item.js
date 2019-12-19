@@ -1,13 +1,15 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import styles from "../assets/stylesheets/preferences-screen.scss";
 import classNames from "classnames";
-import { waitForDOMContentLoaded } from "../utils/async-utils";
-import { SOUND_PREFERENCE_MENU_SELECT } from "../systems/sound-effects-system";
 import { FormattedMessage } from "react-intl";
-import { NumberRangeSelector } from "./number-range-selector.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUndo } from "@fortawesome/free-solid-svg-icons/faUndo";
+
+import styles from "../assets/stylesheets/preferences-screen.scss";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
+import { SOUND_PREFERENCE_MENU_SELECT } from "../systems/sound-effects-system";
+import { NumberRangeSelector } from "./number-range-selector.js";
+
 export const PREFERENCE_LIST_ITEM_TYPE = {
   CHECK_BOX: 1,
   SELECT: 2,
@@ -44,7 +46,7 @@ export class MaxResolutionPreferenceItem extends Component {
             });
           }}
         />
-        x
+        &nbsp;x&nbsp;
         <input
           tabIndex="0"
           type="number"
@@ -143,24 +145,31 @@ export class PreferenceListItem extends Component {
           );
         });
         return (
-          <select
-            tabIndex="0"
-            className={classNames({
-              [styles.hovered]: this.state.hovered,
-              [styles.selectHovered]: this.state.selectHovered
-            })}
-            onMouseEnter={() => {
-              this.setState({ selectHovered: true });
-            }}
-            onMouseLeave={() => {
-              this.setState({ selectHovered: false });
-            }}
-            onChange={e => {
-              this.props.store.update({ preferences: { [this.props.storeKey]: e.target.value } });
-            }}
-          >
-            {options}
-          </select>
+          <div className={styles.dropdown}>
+            <select
+              tabIndex="0"
+              className={classNames({
+                [styles.hovered]: this.state.hovered,
+                [styles.selectHovered]: this.state.selectHovered
+              })}
+              onMouseEnter={() => {
+                this.setState({ selectHovered: true });
+              }}
+              onMouseLeave={() => {
+                this.setState({ selectHovered: false });
+              }}
+              onChange={e => {
+                this.props.store.update({ preferences: { [this.props.storeKey]: e.target.value } });
+              }}
+            >
+              {options}
+            </select>
+            <img
+              className={styles.dropdownArrow}
+              src="../assets/images/dropdown_arrow.png"
+              srcSet="../assets/images/dropdown_arrow@2x.png 2x"
+            />
+          </div>
         );
       case PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE:
         return (

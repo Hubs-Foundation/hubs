@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
+
 import styles from "../assets/stylesheets/preferences-screen.scss";
+
 export class NumberRangeSelector extends Component {
   static propTypes = {
     min: PropTypes.number,

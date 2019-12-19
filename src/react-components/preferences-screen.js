@@ -1,13 +1,15 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import styles from "../assets/stylesheets/preferences-screen.scss";
 import classNames from "classnames";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { IntlProvider, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
+
+import styles from "../assets/stylesheets/preferences-screen.scss";
 import { lang, messages } from "../utils/i18n";
 import { PreferenceListItem, PREFERENCE_LIST_ITEM_TYPE } from "./preference-list-item";
+
 addLocaleData([...en]);
 
 const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
@@ -87,7 +89,7 @@ export default class PreferencesScreen extends Component {
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={classNames(styles.root)}>
-          <i className={classNames(styles.floatRight)} onClick={e => this.props.onClose(e)}>
+          <i className={classNames(styles.closeButton)} onClick={e => this.props.onClose(e)}>
             <FontAwesomeIcon icon={faTimes} />
           </i>
           <div className={classNames(styles.contentContainer)}>
