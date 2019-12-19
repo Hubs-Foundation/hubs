@@ -184,7 +184,7 @@ class UIRoot extends Component {
     didConnectToNetworkedScene: false,
     noMoreLoadingUpdates: false,
     hideLoader: false,
-    showPrefs: false,
+    showPrefs: true,
     watching: false,
     isStreaming: false,
     showStreamingTip: false,

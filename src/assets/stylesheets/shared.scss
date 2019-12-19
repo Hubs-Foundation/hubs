@@ -299,3 +299,27 @@ $favorited-color: var(--favorited-color, $duck-yellow);
   background-color: $notice-background-color;
   text-align: center;
 }
+
+%dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+%dropdown-select {
+  @extend %rounded-border;
+  @extend %default-font;
+  @extend %glass-text;
+  appearance: none;
+  background-color: var(--text-field-background-color);
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--text-field-border-color);
+  padding: 6px;
+  font-weight: bold;
+  padding-right: 30px;
+}
+%dropdown-arrow {
+  pointer-events: none;
+  position: absolute;
+  right: 7.5%;
+}
