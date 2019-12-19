@@ -7,8 +7,7 @@ export class NumberRangeSelector extends Component {
     min: PropTypes.number,
     max: PropTypes.number,
     currentValue: PropTypes.number,
-    onChange: PropTypes.func,
-    playHoverSound: PropTypes.func
+    onChange: PropTypes.func
   };
   state = {
     isDragging: false
@@ -52,9 +51,6 @@ export class NumberRangeSelector extends Component {
               const num = parseInt(e.target.value);
               this.props.onChange(num ? num : 0, true);
             }}
-            onMouseEnter={() => {
-              this.props.playHoverSound && this.props.playHoverSound();
-            }}
           />
         </div>
         <div
@@ -77,9 +73,6 @@ export class NumberRangeSelector extends Component {
             value={this.props.currentValue}
             onChange={e => {
               this.props.onChange(e.target.value);
-            }}
-            onMouseEnter={() => {
-              this.props.playHoverSound && this.props.playHoverSound();
             }}
           />
         </div>
