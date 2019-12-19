@@ -265,16 +265,7 @@ class ImportContentComponent extends Component {
 
       await exec(() => {
         const d = approve(objectRes.data[0]);
-
-        if (!d.payload.data.tags) {
-          d.payload.data.tags = { tags };
-        } else {
-          for (const t of tags) {
-            if (d.payload.data.tags.tags.indexOf(t) < 0) {
-              d.payload.data.tags.tags.push(t);
-            }
-          }
-        }
+        d.payload.data.tags = { tags };
 
         return d;
       });
