@@ -166,9 +166,10 @@ class ImportContentComponent extends Component {
       }
     }
 
+    let first = true;
+
     for (let i = 0; i < importableUrls.length; i++) {
       const url = importableUrls[i];
-      console.log(url);
       const apiInfo = this.apiInfoForSubmittedUrl(url);
       if (!apiInfo) continue;
 
@@ -181,8 +182,9 @@ class ImportContentComponent extends Component {
       const type = isScene ? "scenes" : "avatars";
       const asset = (await res.json())[type][0];
       const isDefault = (isScene && needsDefaultScene) || (isAvatar && needsDefaultAvatar);
-      const isBase = isAvatar && needsBaseAvatar && i === 0;
+      const isBase = isAvatar && needsBaseAvatar && first; // Only set first avatar to be base by default
       this.addImport(url, importUrl, type, asset, isDefault, isBase, true /* isFeatured */);
+      first = false;
       hadUrl = true;
     }
 
