@@ -283,6 +283,7 @@ class ImportContentComponent extends Component {
   renderImportTable() {
     const { imports } = this.state;
     const isImportingAny = imports ? !!imports.find(i => i.result === RESULTS.importing) : false;
+    const hasNonImported = imports ? !!imports.find(i => !i.isImported) : false;
 
     const rowForImportRecord = r => {
       let icon = null;
@@ -394,17 +395,19 @@ class ImportContentComponent extends Component {
             <TableHead>
               <TableRow>
                 <TableCell>
-                  <Checkbox
-                    indeterminate={numSelected > 0 && numSelected < rowCount}
-                    checked={numSelected === rowCount}
-                    onChange={e => {
-                      for (const { isImported, url } of imports) {
-                        if (!isImported) {
-                          this.setImportIsEnabled(url, e.target.checked);
+                  {hasNonImported && !isImportingAny && (
+                    <Checkbox
+                      indeterminate={numSelected > 0 && numSelected < rowCount}
+                      checked={numSelected === rowCount}
+                      onChange={e => {
+                        for (const { isImported, url } of imports) {
+                          if (!isImported) {
+                            this.setImportIsEnabled(url, e.target.checked);
+                          }
                         }
-                      }
-                    }}
-                  />
+                      }}
+                    />
+                  )}
                 </TableCell>
                 <TableCell>Info</TableCell>
                 <TableCell>Preview</TableCell>
@@ -547,6 +550,7 @@ class ImportContentComponent extends Component {
               Import {readyToImportCount} Item{readyToImportCount > 1 && "s"}
             </Button>
           )}
+          {isImportingAny && <CircularProgress />}
           <Snackbar
             anchorOrigin={{ horizontal: "center", vertical: "bottom" }}
             open={!!loadFailed}
