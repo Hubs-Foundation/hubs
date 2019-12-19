@@ -17,6 +17,7 @@ import Icon from "@material-ui/core/Icon";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import clsx from "classnames";
+import configs from "../utils/configs";
 
 // NOTE there's a mysterious uncaught exception in a promise when this component is shown, that seems
 // to be coupled with the "All 3rd party content" typography block. It's a mystery.
@@ -132,7 +133,10 @@ class ContentCDNComponent extends Component {
       };
 
       try {
-        const res = await fetch(`https://${this.state.workerDomain}/hubs/pages/latest/whats-new.html`);
+        // Need to CORS-proxy the CORS-proxy because CSP will block us otherwise!
+        const res = await fetch(
+          `https://${configs.CORS_PROXY_SERVER}/https://${this.state.workerDomain}/hubs/pages/latest/whats-new.html`
+        );
 
         if (!res.ok) {
           abort();
@@ -153,7 +157,7 @@ class ContentCDNComponent extends Component {
       const configs = {
         reticulum: {
           phx: {
-            cors_proxy_url_host: `cors-proxy.${workerDomain}`
+            cors_proxy_url_host: workerDomain ? `cors-proxy.${workerDomain}` : ""
           },
           uploads: {
             host: workerDomain ? `https://${workerDomain}` : ""
@@ -161,14 +165,14 @@ class ContentCDNComponent extends Component {
         },
         hubs: {
           general: {
-            cors_proxy_server: `cors-proxy.${workerDomain}`,
+            cors_proxy_server: workerDomain ? `cors-proxy.${workerDomain}` : "",
             base_assets_path: workerDomain ? `https://${workerDomain}/hubs/` : "",
             thumbnail_server: workerDomain && useWorkerForThumbnails ? workerDomain : ""
           }
         },
         spoke: {
           general: {
-            cors_proxy_server: `cors-proxy.${workerDomain}`,
+            cors_proxy_server: workerDomain ? `cors-proxy.${workerDomain}` : "",
             base_assets_path: workerDomain ? `https://${workerDomain}/spoke/` : "",
             thumbnail_server: workerDomain && useWorkerForThumbnails ? workerDomain : ""
           }

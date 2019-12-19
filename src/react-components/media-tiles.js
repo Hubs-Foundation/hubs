@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import dayjs from "dayjs-ext";
 import relativeTime from "dayjs-ext/plugin/relativeTime";
-import { FormattedMessage } from "react-intl";
+import { injectIntl, FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
@@ -19,6 +19,7 @@ import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import StateLink from "./state-link";
 import { remixAvatar } from "../utils/avatar-utils";
 import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
+import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 
 dayjs.extend(relativeTime);
 
@@ -30,6 +31,7 @@ const PUBLISHER_FOR_ENTRY_TYPE = {
 
 class MediaTiles extends Component {
   static propTypes = {
+    intl: PropTypes.object,
     result: PropTypes.object,
     history: PropTypes.object,
     urlSource: PropTypes.string,
@@ -182,6 +184,8 @@ class MediaTiles extends Component {
       (entry.attributions && entry.attributions.publisher && entry.attributions.publisher.name) ||
       PUBLISHER_FOR_ENTRY_TYPE[entry.type];
 
+    const { formatMessage } = this.props.intl;
+
     return (
       <div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`${entry.id}_${idx}`}>
         <a
@@ -226,6 +230,17 @@ class MediaTiles extends Component {
             entry.allow_remixing && (
               <a onClick={e => this.handleCopyScene(e, entry)} title="Copy to my scenes">
                 <FontAwesomeIcon icon={faClone} />
+              </a>
+            )}
+          {entry.type === "scene" &&
+            entry.project_id && (
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href={getReticulumFetchUrl(`/spoke/projects/${entry.project_id}`)}
+                title={formatMessage({ id: "scene.edit_button" })}
+              >
+                <FontAwesomeIcon icon={faPencilAlt} />
               </a>
             )}
         </div>
@@ -279,4 +294,4 @@ class MediaTiles extends Component {
     );
   };
 }
-export default MediaTiles;
+export default injectIntl(MediaTiles);

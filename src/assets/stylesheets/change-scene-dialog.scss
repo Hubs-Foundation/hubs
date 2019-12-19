@@ -15,6 +15,9 @@
   margin-right: 6px;
   width: 128px;
   text-align: center;
+  &:disabled {
+    background-color: $action-color-disabled;
+  }
 }
 
 :local(.buttons) {
