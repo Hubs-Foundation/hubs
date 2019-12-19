@@ -184,6 +184,7 @@ module.exports = (env, argv) => ({
         CONFIGURABLE_SERVICES: process.env.CONFIGURABLE_SERVICES,
         ITA_SERVER: process.env.ITA_SERVER,
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
+        CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,
         POSTGREST_SERVER: process.env.POSTGREST_SERVER
       })
     })
