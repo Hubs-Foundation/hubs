@@ -384,13 +384,28 @@ class ImportContentComponent extends Component {
       );
     };
 
+    const numSelected = imports ? imports.filter(i => i.isEnabled && !i.isImported).length : 0;
+    const rowCount = imports ? imports.length : 0;
+
     return (
       <CardContent>
         <Paper>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Import?</TableCell>
+                <TableCell>
+                  <Checkbox
+                    indeterminate={numSelected > 0 && numSelected < rowCount}
+                    checked={numSelected === rowCount}
+                    onChange={e => {
+                      for (const { isImported, url } of imports) {
+                        if (!isImported) {
+                          this.setImportIsEnabled(url, e.target.checked);
+                        }
+                      }
+                    }}
+                  />
+                </TableCell>
                 <TableCell>Info</TableCell>
                 <TableCell>Preview</TableCell>
                 <TableCell align="right">Name</TableCell>
