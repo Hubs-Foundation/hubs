@@ -1,8 +1,7 @@
 @import 'shared.scss';
 
 $smallScreenWidth : 800px;
-$itemHeight : 2.5rem;
-$defaultFontSize: 1.4rem;
+$itemHeight : 3.0rem;
 $hoverFontSize: 1.6rem;
 $widescreenControlsWidth: 100%;
 $titleFontSize: 1.6rem;
@@ -61,6 +60,7 @@ input::-webkit-inner-spin-button {
     }
   }
   :local(.left) {
+    font-size: large;
     flex: 1;
     @media( min-width:$smallScreenWidth+1 ) {
       margin-inline-end: 1rem;
@@ -73,14 +73,13 @@ input::-webkit-inner-spin-button {
     display: flex;
     flex-flow: row;
   }
-  font-size: $defaultFontSize;
   select {
+    font-size: medium;
     border-color: var(--text-field-border-color);
     min-width: 200px;
     background: transparent;
     text-align-last: center;
     height: $itemHeight;
-    font-size: $defaultFontSize;
   }
 }
 
@@ -175,7 +174,6 @@ input::-webkit-inner-spin-button {
 }
 :local(.rowScale) {
   span {
-    font-size: $defaultFontSize;
   }
 }
 :local(.rowScaleHover) {
