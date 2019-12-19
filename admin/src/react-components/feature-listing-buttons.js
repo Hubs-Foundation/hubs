@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import Button from "@material-ui/core/Button";
 import { listingFeature, listingUnfeature } from "./listing-actions";
 
-const isFeatured = record => (record.tags.tags || []).includes("featured");
+const isFeatured = record => (record.tags ? (record.tags.tags || []).includes("featured") : false);
 
 function FeatureListingButton(props) {
   const { feature, unfeature, record, resource } = props;
