@@ -57,6 +57,7 @@ input::-webkit-inner-spin-button {
       text-align: center;
       justify-content: center;
       align-items: center;
+      height: 2*$itemHeight;
     }
   }
   :local(.left) {
@@ -184,6 +185,7 @@ input::-webkit-inner-spin-button {
     width: 100%;
     text-align: center;
     margin-inline-end: 0rem;
+    height: 2*$itemHeight;
   }
   margin-inline-end: 1rem;
 }
@@ -193,6 +195,7 @@ input::-webkit-inner-spin-button {
   @media( max-width:$smallScreenWidth ) {
     width: 100%;
     justify-content: center;
+    height: 2*$itemHeight;
   }
   display: flex;
   flex-flow: row;
