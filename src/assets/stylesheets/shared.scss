@@ -7,7 +7,7 @@ $action-label-color: var(--action-label-color, $default-action-color);
 $action-color-disabled: var(--action-color-disabled, $default-action-color-light);
 $action-color-highlight: var(--action-color-highlight, $default-action-color-light);
 $action-text-color: var(--action-text-color, white);
-$action-subtitle-text-color: var(--action-subtitle-text-color, $light-text);
+$action-subtitle-color: var(--action-subtitle-color, $light-text);
 $notice-background-color: var(--notice-background-color, $bright-blue);
 $notice-text-color: var(--notice-text-color, white);
 $notice-widget-color: var(--notice-widget-color, $light-blue);
