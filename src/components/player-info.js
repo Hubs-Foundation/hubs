@@ -119,7 +119,7 @@ AFRAME.registerComponent("player-info", {
     if (communityIdentifierEl) {
       if (this.communityIdentifier) {
         communityIdentifierEl.setAttribute("text", { value: this.communityIdentifier });
-        communityIdentifierEl.object3D.visible = !infoShouldBeHidden;
+        communityIdentifierEl.object3D.visible = this.el.sceneEl.is("frozen");
       }
     }
     const recordingBadgeEl = this.el.querySelector(".recordingBadge");
