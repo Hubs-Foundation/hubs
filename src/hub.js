@@ -136,6 +136,7 @@ import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/permissions";
 import "./systems/exit-on-blur";
+import "./systems/auto-pixel-ratio";
 import "./systems/idle-detector";
 import "./systems/camera-tools";
 import "./systems/userinput/userinput";
@@ -371,6 +372,8 @@ async function updateEnvironmentForHub(hub, entryManager) {
 
         // Show the canvas once the model has loaded
         document.querySelector(".a-canvas").classList.remove("a-hidden");
+
+        sceneEl.addState("visible");
 
         //TODO: check if the environment was made with spoke to determine if a shape should be added
         traverseMeshesAndAddShapes(environmentEl);
