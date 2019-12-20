@@ -84,6 +84,7 @@ if (showLog) {
     debugLog.scrollTop = debugLog.scrollHeight - debugLog.clientHeight;
   };
 
+  const origConsoleInfo = console.info;
   const origConsoleLog = console.log;
   const origConsoleError = console.error;
   const origConsoleWarn = console.warn;
@@ -136,6 +137,11 @@ if (showLog) {
   console.log = function() {
     origConsoleLog.apply(null, arguments);
     log("log", arguments);
+  };
+
+  console.info = function() {
+    origConsoleInfo.apply(null, arguments);
+    log("info", arguments);
   };
 
   window.onunhandledrejection = e => log("error", [e.reason.message, e.reason.code, e.reason.name]);
