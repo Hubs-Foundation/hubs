@@ -32,8 +32,9 @@ export class WindowsMixedRealityControllerDevice {
     this.orientation = new THREE.Quaternion();
   }
   write(frame) {
+    if (!this.gamepad) return;
     this.gamepad = navigator.getGamepads()[this.gamepad.index];
-    if (!this.gamepad.connected) return;
+    if (!this.gamepad || !this.gamepad.connected) return;
 
     const path = paths.device.wmr[this.gamepad.hand || "right"];
 
