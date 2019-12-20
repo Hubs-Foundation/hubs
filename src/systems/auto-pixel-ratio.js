@@ -18,8 +18,10 @@ AFRAME.registerSystem("auto-pixel-ratio", {
   tick(time, delta) {
     if (!this.enabled) return;
     if (!this.el.is("visible")) return;
-    this.secondsSinceSceneVisible += delta / 1000;
-    if (this.secondsSinceSceneVisible < SKIP_SECONDS_AFTER_SCENE_VISIBLE) return;
+    if (this.secondsSinceSceneVisible < SKIP_SECONDS_AFTER_SCENE_VISIBLE) {
+      this.secondsSinceSceneVisible += delta / 1000;
+      return;
+    }
 
     this.deltas.push(delta);
     this.secondsSinceMeasurementStart += delta / 1000;
