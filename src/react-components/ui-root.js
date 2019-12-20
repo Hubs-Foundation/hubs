@@ -1426,11 +1426,7 @@ class UIRoot extends Component {
     }
     if (isLoading) {
       return (
-        <Loader
-          scene={this.props.scene}
-          finished={this.state.noMoreLoadingUpdates}
-          onLoaded={this.onLoadingFinished}
-        />
+        <Loader scene={this.props.scene} finished={this.state.noMoreLoadingUpdates} onLoaded={this.onLoadingFinished} />
       );
     }
     if (this.state.showPrefs) {
