@@ -1,6 +1,5 @@
 import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
-import { isHubsDestinationUrl } from "./utils/media-url-utils";
 import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 
@@ -162,11 +161,7 @@ async function mediaInflator(el, componentName, componentData, components) {
   let isControlled = true;
 
   if (components.networked) {
-    // TODO: When non-hubs links can be traversed, make all link components controlled so you can open them.
-    isControlled =
-      componentData.controls ||
-      (await isHubsDestinationUrl(componentData.src)) ||
-      (await isHubsDestinationUrl(componentData.href));
+    isControlled = componentData.controls || componentName === "link";
 
     const hasVolume = componentName === "video" || componentName === "audio";
     const templateName = isControlled || hasVolume ? "#static-controlled-media" : "#static-media";
