@@ -266,7 +266,13 @@ class UIRoot extends Component {
   }
 
   onConcurrentLoad = () => {
-    if (qsTruthy("allow_multi") || this.props.store.state.preferences["allowMultipleHubsInstances"]) return;
+    if (
+      qsTruthy("allow_multi") ||
+      (this.props.store.state &&
+        this.props.store.state.preferences &&
+        this.props.store.state.preferences["allowMultipleHubsInstances"])
+    )
+      return;
     this.startAutoExitTimer("autoexit.concurrent_subtitle");
   };
 
@@ -576,7 +582,8 @@ class UIRoot extends Component {
 
   setMediaStreamToDefault = async () => {
     let hasAudio = false;
-    const { lastUsedMicDeviceId } = this.props.store.state.settings;
+    const lastUsedMicDeviceId =
+      this.props.store.state && this.props.store.state.settings && this.props.store.state.settings.lastUsedMicDeviceId;
 
     // Try to fetch last used mic, if there was one.
     if (lastUsedMicDeviceId) {
@@ -749,7 +756,11 @@ class UIRoot extends Component {
     // Push the new history state before going into VR, otherwise menu button will take us back
     clearHistoryState(this.props.history);
 
-    const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
+    const muteOnEntry =
+      (this.props.store.state &&
+        this.props.store.state.preferences &&
+        this.props.store.state.preferences["muteMicOnEntry"]) ||
+      false;
     await this.props.enterScene(this.state.mediaStream, this.state.enterInVR, muteOnEntry);
 
     this.setState({ entered: true, showShareDialog: false });
@@ -796,7 +807,12 @@ class UIRoot extends Component {
   };
 
   setAvatarUrl = url => {
-    this.props.store.update({ profile: { ...this.props.store.state.profile, ...{ avatarId: url } } });
+    this.props.store.update({
+      profile: {
+        ...(this.props.store.state && this.props.store.state.profile ? this.props.store.state.profile : {}),
+        ...{ avatarId: url }
+      }
+    });
   };
 
   closeDialog = () => {
@@ -882,7 +898,10 @@ class UIRoot extends Component {
   };
 
   onStoreChanged = () => {
-    const broadcastedRoomConfirmed = this.props.store.state.confirmedBroadcastedRooms.includes(this.props.hubId);
+    const broadcastedRoomConfirmed =
+      this.props.store.state &&
+      this.props.store.state.confirmedBroadcastedRooms &&
+      this.props.store.state.confirmedBroadcastedRooms.includes(this.props.hubId);
     if (broadcastedRoomConfirmed !== this.state.broadcastTipDismissed) {
       this.setState({ broadcastTipDismissed: broadcastedRoomConfirmed });
     }
@@ -1026,7 +1045,10 @@ class UIRoot extends Component {
   };
 
   renderEntryStartPanel = () => {
-    const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
+    const { hasAcceptedProfile, hasChangedName } =
+      this.props.store.state && this.props.store.state.activity
+        ? this.props.store.state.activity
+        : { hasAcceptedProfile: false, hasChangedName: false };
     const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
 
     return (
@@ -1244,7 +1266,11 @@ class UIRoot extends Component {
 
   renderAudioSetupPanel = () => {
     const subtitleId = isMobilePhoneOrVR ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
-    const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
+    const muteOnEntry =
+      (this.props.store.state &&
+        this.props.store.state.preferences &&
+        this.props.store.state.preferences["muteMicOnEntry"]) ||
+      false;
     return (
       <div className="audio-setup-panel">
         <div
@@ -1332,7 +1358,12 @@ class UIRoot extends Component {
                 preferences: { muteMicOnEntry: !this.props.store.state.preferences["muteMicOnEntry"] }
               })
             }
-            checked={this.props.store.state.preferences["muteMicOnEntry"] || false}
+            checked={
+              (this.props.store.state &&
+                this.props.store.state.preferences &&
+                this.props.store.state.preferences["muteMicOnEntry"]) ||
+              false
+            }
           />
           <label htmlFor="mute-on-entry">
             <FormattedMessage id="entry.mute-on-entry" />
@@ -1527,7 +1558,7 @@ class UIRoot extends Component {
       !watching &&
       !hasTopTip &&
       !inEntryFlow &&
-      !this.props.store.state.activity.hasOpenedShare &&
+      !(this.props.store.state && this.props.store.state.activity && this.props.store.state.activity.hasOpenedShare) &&
       this.occupantCount() <= 1;
 
     const showChooseSceneButton =
@@ -1992,7 +2023,9 @@ class UIRoot extends Component {
               presences={this.props.presences}
               sessionId={this.props.sessionId}
               signedIn={this.state.signedIn}
-              email={this.props.store.state.credentials.email}
+              email={
+                this.props.store.state && this.props.store.state.credentials && this.props.store.state.credentials.email
+              }
               onSignIn={this.showSignInDialog}
               onSignOut={this.signOut}
               expanded={!this.state.isObjectListExpanded && this.state.isPresenceListExpanded}

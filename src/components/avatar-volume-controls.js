@@ -44,7 +44,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
   update() {
     if (this.audio) {
       const globalVoiceVolume =
-        window.APP.store.state.preferences.globalVoiceVolume !== undefined
+        window.APP.store.state && window.APP.store.state.preferences.globalVoiceVolume !== undefined
           ? window.APP.store.state.preferences.globalVoiceVolume
           : 100;
       this.audio.gain.gain.value = (globalVoiceVolume / 100) * this.data.volume;

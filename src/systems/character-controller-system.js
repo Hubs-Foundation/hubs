@@ -218,12 +218,16 @@ export class CharacterControllerSystem {
       const snapRotateRight = userinput.get(paths.actions.snapRotateRight);
       if (snapRotateLeft) {
         this.dXZ +=
+          !window.APP.store.state ||
+          !window.APP.store.state.preferences ||
           window.APP.store.state.preferences.snapRotationDegrees === undefined
             ? SNAP_ROTATION_RADIAN
             : (window.APP.store.state.preferences.snapRotationDegrees * Math.PI) / 180;
       }
       if (snapRotateRight) {
         this.dXZ -=
+          !window.APP.store.state ||
+          !window.APP.store.state.preferences ||
           window.APP.store.state.preferences.snapRotationDegrees === undefined
             ? SNAP_ROTATION_RADIAN
             : (window.APP.store.state.preferences.snapRotationDegrees * Math.PI) / 180;

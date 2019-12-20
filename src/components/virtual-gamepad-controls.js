@@ -36,11 +36,17 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.mockJoystickContainer.appendChild(rightMock);
     document.body.appendChild(this.mockJoystickContainer);
 
-    this.enableLeft = window.APP.store.state.preferences.enableOnScreenJoystickLeft;
+    this.enableLeft =
+      window.APP.store.state &&
+      window.APP.store.state.preferences &&
+      window.APP.store.state.preferences.enableOnScreenJoystickLeft;
     if (this.enableLeft) {
       this.createLeftStick();
     }
-    this.enableRight = window.APP.store.state.preferences.enableOnScreenJoystickRight;
+    this.enableRight =
+      window.APP.store.state &&
+      window.APP.store.state.preferences &&
+      window.APP.store.state.preferences.enableOnScreenJoystickRight;
     if (this.enableRight) {
       this.createRightStick();
     }
@@ -60,8 +66,14 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   },
 
   onPreferenceChange() {
-    const newEnableLeft = window.APP.store.state.preferences.enableOnScreenJoystickLeft;
-    const newEnableRight = window.APP.store.state.preferences.enableOnScreenJoystickRight;
+    const newEnableLeft =
+      window.APP.store.state &&
+      window.APP.store.state.preferences &&
+      window.APP.store.state.preferences.enableOnScreenJoystickLeft;
+    const newEnableRight =
+      window.APP.store.state &&
+      window.APP.store.state.preferences &&
+      window.APP.store.state.preferences.enableOnScreenJoystickRight;
     if (!this.enableLeft && newEnableLeft) {
       this.createLeftStick();
     } else if (this.enableLeft && !newEnableLeft) {

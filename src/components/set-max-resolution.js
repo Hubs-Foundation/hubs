@@ -3,9 +3,13 @@ AFRAME.registerComponent("set-max-resolution", {
     const store = window.APP.store;
     this.onStoreChanged = () => {
       const width =
-        store.state.preferences.maxResolutionWidth === undefined ? 1920 : store.state.preferences.maxResolutionWidth;
+        !store.state || !store.state.preferences || store.state.preferences.maxResolutionWidth === undefined
+          ? 1920
+          : store.state.preferences.maxResolutionWidth;
       const height =
-        store.state.preferences.maxResolutionHeight === undefined ? 1920 : store.state.preferences.maxResolutionHeight;
+        !store.state || !store.state.preferences || store.state.preferences.maxResolutionHeight === undefined
+          ? 1920
+          : store.state.preferences.maxResolutionHeight;
       this.el.sceneEl.maxCanvasSize = { width, height };
       this.el.sceneEl.resize();
     };

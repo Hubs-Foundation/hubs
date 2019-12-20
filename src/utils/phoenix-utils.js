@@ -114,7 +114,8 @@ export function getLandingPageForPhoto(photoUrl) {
 }
 
 export function fetchReticulumAuthenticated(url, method = "GET", payload) {
-  const { token } = window.APP.store.state.credentials;
+  const token =
+    window.APP.store.state && window.APP.store.state.credentials && window.APP.store.state.credentials.token;
   const retUrl = getReticulumFetchUrl(url);
   const params = {
     headers: { "content-type": "application/json" },
@@ -147,7 +148,7 @@ export async function createAndRedirectToNewHub(name, sceneId, replace) {
 
   const headers = { "content-type": "application/json" };
   const store = new Store();
-  if (store.state && store.state.credentials.token) {
+  if (store.state && store.state.credentials && store.state.credentials.token) {
     headers.authorization = `bearer ${store.state.credentials.token}`;
   }
 

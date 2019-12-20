@@ -47,7 +47,8 @@ class ProfileEntryPanel extends Component {
   }
 
   getStateFromProfile = () => {
-    const { displayName, avatarId } = this.props.store.state.profile;
+    const { displayName, avatarId } =
+      this.props.store.state && this.props.store.state.profile ? this.props.store.state.profile : {};
     return { displayName, avatarId };
   };
 
@@ -119,6 +120,9 @@ class ProfileEntryPanel extends Component {
   }
 
   refetchAvatar = async () => {
+    if (!this.state.avatarId) {
+      return;
+    }
     const avatar = await fetchAvatar(this.state.avatarId);
     if (this.state.avatarId !== avatar.avatar_id) return; // This is an old result, ignore it
     this.setState({ avatar });

@@ -30,6 +30,8 @@ export class MaxResolutionPreferenceItem extends Component {
           step="1"
           min="0"
           value={
+            !this.props.store.state ||
+            !this.props.store.state.preferences ||
             this.props.store.state.preferences.maxResolutionWidth === undefined
               ? 1920
               : this.props.store.state.preferences.maxResolutionWidth
@@ -53,6 +55,8 @@ export class MaxResolutionPreferenceItem extends Component {
           step="1"
           min="0"
           value={
+            !this.props.store.state ||
+            !this.props.store.state.preferences ||
             this.props.store.state.preferences.maxResolutionHeight === undefined
               ? 1920
               : this.props.store.state.preferences.maxResolutionHeight
@@ -110,7 +114,10 @@ export class PreferenceListItem extends Component {
     let storedPref;
     switch (this.props.prefType) {
       case PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX:
-        storedPref = this.props.store.state.preferences[this.props.storeKey];
+        storedPref =
+          this.props.store.state && this.props.store.state.preferences
+            ? this.props.store.state.preferences[this.props.storeKey]
+            : undefined;
         return (
           <div className={classNames(styles.checkbox)}>
             <input
@@ -118,9 +125,11 @@ export class PreferenceListItem extends Component {
               type="checkbox"
               checked={storedPref === undefined ? this.props.defaultBool : storedPref}
               onChange={() => {
-                this.props.store.update({
-                  preferences: { [this.props.storeKey]: !this.props.store.state.preferences[this.props.storeKey] }
-                });
+                if (this.props.store.state && this.props.store.state.preferences) {
+                  this.props.store.update({
+                    preferences: { [this.props.storeKey]: !this.props.store.state.preferences[this.props.storeKey] }
+                  });
+                }
               }}
             />
           </div>
@@ -130,7 +139,10 @@ export class PreferenceListItem extends Component {
       case PREFERENCE_LIST_ITEM_TYPE.SELECT:
         options = this.props.options.map((o, i) => {
           const opts = {};
-          const storedPref = this.props.store.state.preferences[this.props.storeKey];
+          const storedPref =
+            this.props.store.state && this.props.store.state.preferences
+              ? this.props.store.state.preferences[this.props.storeKey]
+              : undefined;
           if (
             o.value === storedPref ||
             ((storedPref === undefined || storedPref === "") && o.value === this.props.defaultString)
@@ -177,6 +189,8 @@ export class PreferenceListItem extends Component {
             min={this.props.min}
             max={this.props.max}
             currentValue={
+              this.props.store.state &&
+              this.props.store.state.preferences &&
               this.props.store.state.preferences[this.props.storeKey] !== undefined
                 ? this.props.store.state.preferences[this.props.storeKey]
                 : this.props.defaultNumber
@@ -215,11 +229,15 @@ export class PreferenceListItem extends Component {
             onClick={() => {
               switch (this.props.prefType) {
                 case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
-                  delete this.props.store.state.preferences.maxResolutionWidth;
-                  delete this.props.store.state.preferences.maxResolutionHeight;
+                  if (this.props.store.state && this.props.store.state.preferences) {
+                    delete this.props.store.state.preferences.maxResolutionWidth;
+                    delete this.props.store.state.preferences.maxResolutionHeight;
+                  }
                   break;
                 default:
-                  delete this.props.store.state.preferences[this.props.storeKey];
+                  if (this.props.store.state && this.props.store.state.preferences) {
+                    delete this.props.store.state.preferences[this.props.storeKey];
+                  }
                   break;
               }
               this.forceUpdate();

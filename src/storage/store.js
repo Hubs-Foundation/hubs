@@ -201,7 +201,7 @@ export default class Store extends EventTarget {
   }
 
   _signOutOnExpiredAuthToken = () => {
-    if (!this.state.credentials.token) return;
+    if (!this.state.credentials || !this.state.credentials.token) return;
 
     const expiry = jwtDecode(this.state.credentials.token).exp * 1000;
     if (expiry <= Date.now()) {
@@ -219,7 +219,7 @@ export default class Store extends EventTarget {
     }
 
     // Regenerate name to encourage users to change it.
-    if (!this.state.activity.hasChangedName) {
+    if (!this.state.activity || !this.state.activity.hasChangedName) {
       this.update({ profile: { displayName: generateRandomName() } });
     }
   };
@@ -239,7 +239,7 @@ export default class Store extends EventTarget {
   }
 
   get credentialsAccountId() {
-    if (this.state.credentials.token) {
+    if (this.state.credentials && this.state.credentials.token) {
       return jwtDecode(this.state.credentials.token).sub;
     } else {
       return null;
@@ -267,11 +267,13 @@ export default class Store extends EventTarget {
   }
 
   executeOnLoadActions(sceneEl) {
-    for (let i = 0; i < this.state.onLoadActions.length; i++) {
-      const { action, args } = this.state.onLoadActions[i];
+    if (this.state.onLoadActions) {
+      for (let i = 0; i < this.state.onLoadActions.length; i++) {
+        const { action, args } = this.state.onLoadActions[i];
 
-      if (action === "emit_scene_event") {
-        sceneEl.emit(args.event, args.detail);
+        if (action === "emit_scene_event") {
+          sceneEl.emit(args.event, args.detail);
+        }
       }
     }
 

@@ -177,9 +177,13 @@ if (isEmbed && !qs.get("embed_token")) {
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality =
+  window.APP.store.state &&
+  window.APP.store.state.preferences &&
   window.APP.store.state.preferences.materialQualitySetting === "low"
     ? "low"
-    : window.APP.store.state.preferences.materialQualitySetting === "high"
+    : window.APP.store.state &&
+      window.APP.store.state.preferences &&
+      window.APP.store.state.preferences.materialQualitySetting === "high"
       ? "high"
       : isMobile || isMobileVR
         ? "low"

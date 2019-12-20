@@ -162,7 +162,12 @@ export default class SceneEntryManager {
   };
 
   _setPlayerInfoFromProfile = async () => {
-    const avatarId = this.store.state.profile.avatarId;
+    let avatarId = this.store.state && this.store.state.profile && this.store.state.profile.avatarId;
+    if (avatarId === undefined) {
+      await this.store.initProfile();
+      avatarId = this.store.state && this.store.state.profile && this.store.state.profile.avatarId;
+      if (avatarId === undefined) return;
+    }
     const avatarSrc = await getAvatarSrc(avatarId);
 
     this.avatarRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });

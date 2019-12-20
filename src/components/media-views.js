@@ -425,6 +425,8 @@ AFRAME.registerComponent("media-video", {
     // Volume is local, always update it
     if (this.audio) {
       const globalMediaVolume =
+        window.APP.store.state &&
+        window.APP.store.state.preferences &&
         window.APP.store.state.preferences.globalMediaVolume !== undefined
           ? window.APP.store.state.preferences.globalMediaVolume
           : 100;

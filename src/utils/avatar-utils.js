@@ -9,6 +9,9 @@ export const AVATAR_TYPES = {
 };
 
 export function getAvatarType(avatarId) {
+  if (avatarId === undefined) {
+    return;
+  }
   if (avatarId.startsWith("http")) return AVATAR_TYPES.URL;
   return AVATAR_TYPES.SKINNABLE;
 }

@@ -25,7 +25,7 @@ export default class HubChannel extends EventTarget {
     super();
     this.store = store;
     this.hubId = hubId;
-    this._signedIn = !!this.store.state.credentials.token;
+    this._signedIn = this.store.state && this.store.state.credentials && !!this.store.state.credentials.token;
     this._permissions = {};
     this._blockedSessionIds = new Set();
   }
@@ -154,7 +154,8 @@ export default class HubChannel extends EventTarget {
 
   getEntryTimingFlags = () => {
     const entryTimingFlags = { isNewDaily: true, isNewMonthly: true, isNewDayWindow: true, isNewMonthWindow: true };
-    const storedLastEnteredAt = this.store.state.activity.lastEnteredAt;
+    const storedLastEnteredAt =
+      this.store.state && this.store.state.activity && this.store.state.activity.lastEnteredAt;
 
     if (!storedLastEnteredAt) {
       return entryTimingFlags;
@@ -187,7 +188,9 @@ export default class HubChannel extends EventTarget {
   };
 
   sendProfileUpdate = () => {
-    this.channel.push("events:profile_updated", { profile: this.store.state.profile });
+    if (this.store.state) {
+      this.channel.push("events:profile_updated", { profile: this.store.state.profile });
+    }
   };
 
   updateScene = url => {
@@ -225,6 +228,7 @@ export default class HubChannel extends EventTarget {
 
   _getCreatorAssignmentToken = () => {
     const creatorAssignmentTokenEntry =
+      this.store.state &&
       this.store.state.creatorAssignmentTokens &&
       this.store.state.creatorAssignmentTokens.find(t => t.hubId === this.hubId);
 
