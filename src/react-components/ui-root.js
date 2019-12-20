@@ -1414,7 +1414,6 @@ class UIRoot extends Component {
             scene={this.props.scene}
             finished={this.state.noMoreLoadingUpdates}
             onLoaded={this.onLoadingFinished}
-            connected={this.state.didConnectToNetworkedScene}
           />
           <PreferencesScreen
             onClose={() => {
@@ -1431,7 +1430,6 @@ class UIRoot extends Component {
           scene={this.props.scene}
           finished={this.state.noMoreLoadingUpdates}
           onLoaded={this.onLoadingFinished}
-          connected={this.state.didConnectToNetworkedScene}
         />
       );
     }
