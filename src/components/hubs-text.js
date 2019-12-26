@@ -273,6 +273,7 @@ AFRAME.registerComponent("text", {
     // Place text slightly in front to avoid Z-fighting.
     mesh.position.z = data.zOffset;
     mesh.scale.set(textScale, -1 * textScale, textScale);
+    mesh.matrixNeedsUpdate = true;
   },
 
   /**
