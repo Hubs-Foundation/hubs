@@ -64,7 +64,7 @@ class SystemEditorComponent extends Component {
           <Typography variant="body1" gutterBottom>
             Need help? Check out the{" "}
             <a
-              href="https://github.com/mozilla/hubs-cloud/wiki/Getting-Started"
+              href="https://hubs.mozilla.com/docs/hubs-cloud-getting-started.html"
               target="_blank"
               rel="noopener noreferrer"
             >

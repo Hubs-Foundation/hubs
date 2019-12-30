@@ -90,7 +90,11 @@ class ServerAccessComponent extends Component {
           </Typography>
           <Typography variant="body1" gutterBottom>
             Documentation about server setup and tips for common tasks can be found in the{" "}
-            <a href="https://github.com/mozilla/hubs-cloud/wiki/Server-Guide" rel="noopener noreferrer" target="_blank">
+            <a
+              href="https://hubs.mozilla.com/docs/hubs-cloud-accessing-servers.html"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
               Server Guide
             </a>
             .

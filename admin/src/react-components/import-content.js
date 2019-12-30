@@ -452,7 +452,7 @@ class ImportContentComponent extends Component {
           <Button
             className={this.props.classes.button}
             variant="outlined"
-            href="https://github.com/mozilla/hubs-cloud/wiki/Suggested-Content"
+            href="https://hubs.mozilla.com/docs/hubs-cloud-asset-packs.html"
             target="_blank"
             rel="noopener noreferrer"
           >
