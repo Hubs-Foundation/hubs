@@ -157,21 +157,21 @@ function enableSweepingEffect(comp) {
 
 function createGeometry(maxSprites) {
   const geometry = new THREE.BufferGeometry();
-  geometry.addAttribute("a_vertices", new THREE.BufferAttribute(new Float32Array(maxSprites * 3 * 4), 3, false));
-  geometry.addAttribute(
+  geometry.setAttribute("a_vertices", new THREE.BufferAttribute(new Float32Array(maxSprites * 3 * 4), 3, false));
+  geometry.setAttribute(
     "a_hubs_EnableSweepingEffect",
     new THREE.BufferAttribute(new Float32Array(maxSprites * 4), 1, false)
   );
-  geometry.addAttribute(
+  geometry.setAttribute(
     "a_hubs_SweepParams",
     new THREE.BufferAttribute(new Float32Array(maxSprites * 4 * 2), 2, false)
   );
-  geometry.addAttribute("a_uvs", new THREE.BufferAttribute(new Float32Array(maxSprites * 2 * 4), 2, false));
+  geometry.setAttribute("a_uvs", new THREE.BufferAttribute(new Float32Array(maxSprites * 2 * 4), 2, false));
   const mvCols = new THREE.InterleavedBuffer(new Float32Array(maxSprites * 16 * 4), 16);
-  geometry.addAttribute("mvCol0", new THREE.InterleavedBufferAttribute(mvCols, 4, 0, false));
-  geometry.addAttribute("mvCol1", new THREE.InterleavedBufferAttribute(mvCols, 4, 4, false));
-  geometry.addAttribute("mvCol2", new THREE.InterleavedBufferAttribute(mvCols, 4, 8, false));
-  geometry.addAttribute("mvCol3", new THREE.InterleavedBufferAttribute(mvCols, 4, 12, false));
+  geometry.setAttribute("mvCol0", new THREE.InterleavedBufferAttribute(mvCols, 4, 0, false));
+  geometry.setAttribute("mvCol1", new THREE.InterleavedBufferAttribute(mvCols, 4, 4, false));
+  geometry.setAttribute("mvCol2", new THREE.InterleavedBufferAttribute(mvCols, 4, 8, false));
+  geometry.setAttribute("mvCol3", new THREE.InterleavedBufferAttribute(mvCols, 4, 12, false));
   const indices = new Array(3 * 2 * maxSprites);
   for (let i = 0; i < maxSprites; i++) {
     indices[i * 3 * 2 + 0] = i * 4 + 0;
