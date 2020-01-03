@@ -98,6 +98,7 @@
     "three": "github:mozillareality/three.js#hubs/master",
     "three-ammo": "github:infinitelee/three-ammo#master",
     "three-bmfont-text": "^2.3.0",
+    "three-buffer-vertex-data": "github:mozillareality/three-buffer-vertex-data#hubs/master",
     "three-mesh-bvh": "^0.1.2",
     "three-pathfinding": "github:MozillaReality/three-pathfinding#hubs/master2",
     "three-to-ammo": "github:infinitelee/three-to-ammo",
