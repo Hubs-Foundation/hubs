@@ -1723,7 +1723,11 @@ class UIRoot extends Component {
               stateValue="room_info"
               history={this.props.history}
               render={() =>
-                this.renderDialog(RoomInfoDialog, { scene: this.props.hubScene, hubName: this.props.hubName })
+                this.renderDialog(RoomInfoDialog, {
+                  store: this.props.store,
+                  scene: this.props.hubScene,
+                  hubName: this.props.hubName
+                })
               }
             />
             <StateRoute
