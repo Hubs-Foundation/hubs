@@ -7,10 +7,17 @@ import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
 export default class RoomInfoDialog extends Component {
   static propTypes = {
     hubName: PropTypes.string,
-    scene: PropTypes.object
+    scene: PropTypes.object,
+    store: PropTypes.object
   };
 
   render() {
+    const showSceneLink =
+      (this.props.store.credentialsAccountId &&
+        this.props.scene.account_id === this.props.store.credentialsAccountId) ||
+      this.props.scene.allow_promotion ||
+      this.props.scene.allow_remixing;
+
     const toAttributionDiv = (a, i) => {
       if (a.url) {
         const source = a.url.includes("sketchfab.com")
@@ -59,16 +66,24 @@ export default class RoomInfoDialog extends Component {
       <DialogContainer title={title} wide={true} {...this.props}>
         <div className={styles.roomInfo}>
           <div className={styles.sceneScreenshot}>
-            <a href={this.props.scene.url} target="_blank" rel="noopener noreferrer">
+            {showSceneLink ? (
+              <a href={this.props.scene.url} target="_blank" rel="noopener noreferrer">
+                <img src={scaledThumbnailUrlFor(this.props.scene.screenshot_url, 400, 480)} />
+              </a>
+            ) : (
               <img src={scaledThumbnailUrlFor(this.props.scene.screenshot_url, 400, 480)} />
-            </a>
+            )}
           </div>
           <div className={styles.sceneDetails}>
             <div className={styles.sceneMain}>
               <div className={styles.sceneName}>
-                <a href={this.props.scene.url} target="_blank" rel="noopener noreferrer">
-                  {this.props.scene.name}
-                </a>
+                {showSceneLink ? (
+                  <a href={this.props.scene.url} target="_blank" rel="noopener noreferrer">
+                    {this.props.scene.name}
+                  </a>
+                ) : (
+                  <span>{this.props.scene.name}</span>
+                )}
               </div>
               <div className={styles.sceneCreator}>{creator}</div>
             </div>
