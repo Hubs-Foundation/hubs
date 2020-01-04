@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/room-info-dialog.scss";
 import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
+import { allowDisplayOfSceneLink } from "../utils/scene-url-utils";
 
 export default class RoomInfoDialog extends Component {
   static propTypes = {
@@ -12,11 +13,7 @@ export default class RoomInfoDialog extends Component {
   };
 
   render() {
-    const showSceneLink =
-      (this.props.store.credentialsAccountId &&
-        this.props.scene.account_id === this.props.store.credentialsAccountId) ||
-      this.props.scene.allow_promotion ||
-      this.props.scene.allow_remixing;
+    const showSceneLink = allowDisplayOfSceneLink(this.props.scene, this.props.store);
 
     const toAttributionDiv = (a, i) => {
       if (a.url) {
