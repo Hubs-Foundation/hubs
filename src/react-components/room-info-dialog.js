@@ -3,14 +3,18 @@ import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/room-info-dialog.scss";
 import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
+import { allowDisplayOfSceneLink } from "../utils/scene-url-utils";
 
 export default class RoomInfoDialog extends Component {
   static propTypes = {
     hubName: PropTypes.string,
-    scene: PropTypes.object
+    scene: PropTypes.object,
+    store: PropTypes.object
   };
 
   render() {
+    const showSceneLink = allowDisplayOfSceneLink(this.props.scene, this.props.store);
+
     const toAttributionDiv = (a, i) => {
       if (a.url) {
         const source = a.url.includes("sketchfab.com")
@@ -59,16 +63,24 @@ export default class RoomInfoDialog extends Component {
       <DialogContainer title={title} wide={true} {...this.props}>
         <div className={styles.roomInfo}>
           <div className={styles.sceneScreenshot}>
-            <a href={this.props.scene.url} target="_blank" rel="noopener noreferrer">
+            {showSceneLink ? (
+              <a href={this.props.scene.url} target="_blank" rel="noopener noreferrer">
+                <img src={scaledThumbnailUrlFor(this.props.scene.screenshot_url, 400, 480)} />
+              </a>
+            ) : (
               <img src={scaledThumbnailUrlFor(this.props.scene.screenshot_url, 400, 480)} />
-            </a>
+            )}
           </div>
           <div className={styles.sceneDetails}>
             <div className={styles.sceneMain}>
               <div className={styles.sceneName}>
-                <a href={this.props.scene.url} target="_blank" rel="noopener noreferrer">
-                  {this.props.scene.name}
-                </a>
+                {showSceneLink ? (
+                  <a href={this.props.scene.url} target="_blank" rel="noopener noreferrer">
+                    {this.props.scene.name}
+                  </a>
+                ) : (
+                  <span>{this.props.scene.name}</span>
+                )}
               </div>
               <div className={styles.sceneCreator}>{creator}</div>
             </div>
