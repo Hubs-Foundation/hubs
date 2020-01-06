@@ -325,6 +325,11 @@ async function updateEnvironmentForHub(hub, entryManager) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
 
+  const sceneErrorHandler = () => {
+    remountUI({ roomUnavailableReason: "scene_error" });
+    entryManager.exitScene();
+  };
+
   const environmentScene = document.querySelector("#environment-scene");
   const sceneEl = document.querySelector("a-scene");
 
@@ -359,11 +364,6 @@ async function updateEnvironmentForHub(hub, entryManager) {
 
   if (environmentScene.childNodes.length === 0) {
     const environmentEl = document.createElement("a-entity");
-
-    const sceneErrorHandler = () => {
-      remountUI({ roomUnavailableReason: "scene_error" });
-      entryManager.exitScene();
-    };
 
     environmentEl.addEventListener(
       "model-loaded",
@@ -400,6 +400,7 @@ async function updateEnvironmentForHub(hub, entryManager) {
         environmentEl.addEventListener(
           "model-loaded",
           () => {
+            environmentEl.removeEventListener("model-error", sceneErrorHandler);
             traverseMeshesAndAddShapes(environmentEl);
 
             // We've already entered, so move to new spawn point once new environment is loaded
@@ -414,6 +415,7 @@ async function updateEnvironmentForHub(hub, entryManager) {
       },
       { once: true }
     );
+    environmentEl.addEventListener("model-error", sceneErrorHandler, { once: true });
 
     environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironment });
   }
