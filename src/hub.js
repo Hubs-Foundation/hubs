@@ -558,11 +558,21 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
     const loadEnvironmentAndConnect = () => {
       updateEnvironmentForHub(hub, entryManager);
+      function onConnectionError() {
+        console.error("Unknown error occurred while attempting to connect to networked scene.");
+        remountUI({ roomUnavailableReason: "connect_error" });
+        entryManager.exitScene();
+      }
 
+      const connectionErrorTimeout = setTimeout(onConnectionError, 30000);
       scene.components["networked-scene"]
         .connect()
-        .then(() => scene.emit("didConnectToNetworkedScene"))
+        .then(() => {
+          clearTimeout(connectionErrorTimeout);
+          scene.emit("didConnectToNetworkedScene");
+        })
         .catch(connectError => {
+          clearTimeout(connectionErrorTimeout);
           // hacky until we get return codes
           const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
           console.error(connectError);
