@@ -1506,7 +1506,8 @@ class UIRoot extends Component {
       [styles.backgrounded]: this.isInModalOrOverlay()
     });
 
-    const showVREntryButton = entered && isMobileVR;
+    // MobileVR browsers always show settings panel as an overlay when exiting immersive mode.
+    const showSettingsAsOverlay = entered && isMobileVR;
 
     const presenceLogEntries = this.props.presenceLogEntries || [];
 
@@ -1529,7 +1530,6 @@ class UIRoot extends Component {
       (hasDiscordBridges || (hasEmbedPresence && !this.props.embed)) && !this.state.broadcastTipDismissed;
 
     const showInviteTip =
-      !showVREntryButton &&
       !hasTopTip &&
       !entered &&
       !embed &&
@@ -1541,7 +1541,6 @@ class UIRoot extends Component {
       this.occupantCount() <= 1;
 
     const showChooseSceneButton =
-      !showVREntryButton &&
       !entered &&
       !embed &&
       !preload &&
@@ -1841,18 +1840,11 @@ class UIRoot extends Component {
                   history={this.props.history}
                 />
               )}
-            {this.state.frozen &&
-              !showVREntryButton && (
-                <button className={styles.leaveButton} onClick={() => this.exit("left")}>
-                  <FormattedMessage id="entry.leave-room" />
-                </button>
-              )}
-            {this.state.frozen /* Case when we exit immersive mode while frozen */ &&
-              showVREntryButton && (
-                <button className={styles.leaveButton} onClick={() => exit2DInterstitialAndEnterVR(true)}>
-                  <FormattedMessage id="entry.enter-in-vr" />
-                </button>
-              )}
+            {this.state.frozen && (
+              <button className={styles.leaveButton} onClick={() => this.exit("left")}>
+                <FormattedMessage id="entry.leave-room" />
+              </button>
+            )}
             {!this.state.frozen &&
               !watching &&
               !preload && (
@@ -1864,7 +1856,7 @@ class UIRoot extends Component {
                   })}
                 >
                   {!embed &&
-                    !showVREntryButton &&
+                    !hasTopTip &&
                     !streaming && (
                       <WithHoverSound>
                         <button
@@ -1904,7 +1896,6 @@ class UIRoot extends Component {
                     </div>
                   )}
                   {!embed &&
-                    !showVREntryButton &&
                     this.occupantCount() > 1 &&
                     !hasTopTip &&
                     entered &&
@@ -1919,11 +1910,6 @@ class UIRoot extends Component {
                         </span>
                       </button>
                     )}
-                  {showVREntryButton && (
-                    <button className={inviteStyles.enterButton} onClick={() => exit2DInterstitialAndEnterVR(true)}>
-                      <FormattedMessage id="entry.enter-in-vr" />
-                    </button>
-                  )}
                   {embed && (
                     <a href={baseUrl} className={inviteStyles.enterButton} target="_blank" rel="noopener noreferrer">
                       <FormattedMessage id="entry.open-in-window" />
@@ -2040,6 +2026,8 @@ class UIRoot extends Component {
                   hubChannel={this.props.hubChannel}
                   hubScene={this.props.hubScene}
                   scene={this.props.scene}
+                  showAsOverlay={showSettingsAsOverlay}
+                  onCloseOverlay={() => exit2DInterstitialAndEnterVR(true)}
                   performConditionalSignIn={this.props.performConditionalSignIn}
                   showNonHistoriedDialog={this.showNonHistoriedDialog}
                   showPreferencesScreen={() => {
