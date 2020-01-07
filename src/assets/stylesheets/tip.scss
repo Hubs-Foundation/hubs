@@ -85,5 +85,11 @@
 }
 
 :local(.tour-tip-root) {
-  bottom: 40vh;
+  @media(min-height: 700px) {
+    bottom: 20vh;
+  }
+
+  @media(min-height: 800px) {
+    bottom: 25vh;
+  }
 }
