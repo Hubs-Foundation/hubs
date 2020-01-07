@@ -2078,14 +2078,14 @@ class UIRoot extends Component {
                   }}
                 />
                 {!watching && !streaming ? (
-                  <UnlessFeature name="show_help_ui">
-                    <IfFeature name="show_feedback_ui">
-                      <div className={styles.nagCornerButton}>
-                        <button onClick={() => this.pushHistoryState("modal", "feedback")}>
-                          <FormattedMessage id="feedback.prompt" />
-                        </button>
-                      </div>
-                    </IfFeature>
+                  <UnlessFeature name="show_feedback_ui">
+                    <div className={styles.nagCornerButton}>
+                      <button onClick={() => this.pushHistoryState("modal", "help")} className={styles.helpButton}>
+                        <i>
+                          <FontAwesomeIcon icon={faQuestion} />
+                        </i>
+                      </button>
+                    </div>
                   </UnlessFeature>
                 ) : (
                   <div className={styles.nagCornerButton}>
@@ -2094,23 +2094,16 @@ class UIRoot extends Component {
                     </button>
                   </div>
                 )}
-                {!watching && !streaming ? (
-                  <IfFeature name="show_help_ui">
-                    <div className={styles.nagCornerButton}>
-                      <button onClick={() => this.pushHistoryState("modal", "help")} className={styles.helpButton}>
-                        <i>
-                          <FontAwesomeIcon icon={faQuestion} />
-                        </i>
-                      </button>
-                    </div>
-                  </IfFeature>
-                ) : (
-                  <div className={styles.nagCornerButton}>
-                    <button onClick={() => this.setState({ hide: true })}>
-                      <FormattedMessage id="hide-ui.prompt" />
-                    </button>
-                  </div>
-                )}
+                {!watching &&
+                  !streaming && (
+                    <IfFeature name="show_feedback_ui">
+                      <div className={styles.nagCornerButton}>
+                        <button onClick={() => this.pushHistoryState("modal", "feedback")}>
+                          <FormattedMessage id="feedback.prompt" />
+                        </button>
+                      </div>
+                    </IfFeature>
+                  )}
 
                 {!streaming && (
                   <button

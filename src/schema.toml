@@ -30,7 +30,6 @@ features.show_join_us_dialog = { category = "features", type = "boolean", intern
 features.show_discord_bot_link = { category = "features", type = "boolean", internal = "true" }
 features.show_whats_new_link = { category = "features", type = "boolean", internal = "true" }
 features.show_source_link = { category = "features", type = "boolean", internal = "true" }
-features.show_help_ui = { category = "features", type = "boolean", internal = "true" }
 features.show_feedback_ui = { category = "features", type = "boolean", internal = "true" }
 features.show_issue_report_dialog = { category = "features", type = "boolean", internal = "true" }
 
