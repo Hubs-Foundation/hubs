@@ -8,6 +8,7 @@ import screenfull from "screenfull";
 
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
+import UnlessFeature from "./unless-feature";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
@@ -48,6 +49,7 @@ import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported
 import WebAssemblyUnsupportedDialog from "./webassembly-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import FeedbackDialog from "./feedback-dialog.js";
+import HelpDialog from "./help-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
@@ -71,6 +73,7 @@ import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../uti
 import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
 
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -344,7 +347,13 @@ class UIRoot extends Component {
     });
 
     if (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now")) {
-      setTimeout(() => this.handleForceEntry(), 2000);
+      this.props.scene.addEventListener(
+        "loading_finished",
+        () => {
+          setTimeout(() => this.handleForceEntry(), 1000);
+        },
+        { once: true }
+      );
     }
 
     this.playerRig = scene.querySelector("#avatar-rig");
@@ -422,6 +431,7 @@ class UIRoot extends Component {
 
   onLoadingFinished = () => {
     this.setState({ noMoreLoadingUpdates: true });
+    this.props.scene.emit("loading_finished");
 
     if (this.props.onLoaded) {
       this.props.onLoaded();
@@ -1743,6 +1753,17 @@ class UIRoot extends Component {
             />
             <StateRoute
               stateKey="modal"
+              stateValue="help"
+              history={this.props.history}
+              render={() =>
+                this.renderDialog(HelpDialog, {
+                  history: this.props.history,
+                  onClose: () => this.pushHistoryState("modal", null)
+                })
+              }
+            />
+            <StateRoute
+              stateKey="modal"
               stateValue="tweet"
               history={this.props.history}
               render={() => this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog })}
@@ -2057,10 +2078,29 @@ class UIRoot extends Component {
                   }}
                 />
                 {!watching && !streaming ? (
-                  <IfFeature name="show_feedback_ui">
+                  <UnlessFeature name="show_help_ui">
+                    <IfFeature name="show_feedback_ui">
+                      <div className={styles.nagCornerButton}>
+                        <button onClick={() => this.pushHistoryState("modal", "feedback")}>
+                          <FormattedMessage id="feedback.prompt" />
+                        </button>
+                      </div>
+                    </IfFeature>
+                  </UnlessFeature>
+                ) : (
+                  <div className={styles.nagCornerButton}>
+                    <button onClick={() => this.setState({ hide: true })}>
+                      <FormattedMessage id="hide-ui.prompt" />
+                    </button>
+                  </div>
+                )}
+                {!watching && !streaming ? (
+                  <IfFeature name="show_help_ui">
                     <div className={styles.nagCornerButton}>
-                      <button onClick={() => this.pushHistoryState("modal", "feedback")}>
-                        <FormattedMessage id="feedback.prompt" />
+                      <button onClick={() => this.pushHistoryState("modal", "help")} className={styles.helpButton}>
+                        <i>
+                          <FontAwesomeIcon icon={faQuestion} />
+                        </i>
                       </button>
                     </div>
                   </IfFeature>

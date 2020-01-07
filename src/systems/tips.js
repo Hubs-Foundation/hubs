@@ -43,8 +43,7 @@ const TIPS = {
       "object_pin",
       "invite",
       "pen_color",
-      "pen_size",
-      "feedback"
+      "pen_size"
     ]
   },
   mobile: {
@@ -58,8 +57,7 @@ const TIPS = {
       "object_rotate_button",
       "object_scale_button",
       "object_pin",
-      "invite",
-      "feedback"
+      "invite"
     ]
   },
   standalone: { top: [], bottom: [] }
@@ -69,7 +67,7 @@ const TIPS = {
 const LOCAL_CLOSE_TIPS = ["feedback", "invite", "object_pin"];
 
 // These tips will remain active even if the user closes the tips globally.
-const KEEP_ACTIVE_AFTER_GLOBAL_CLOSE = ["feedback"];
+const KEEP_ACTIVE_AFTER_GLOBAL_CLOSE = ["freeze_gesture", "menu_hover", "feedback"];
 
 let localStorageCache = null;
 let finishedScopes = {}; // Optimization, lets system skip scopes altogether once finished.

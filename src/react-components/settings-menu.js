@@ -15,6 +15,7 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
 
 import configs from "../utils/configs";
+import { messages } from "../utils/i18n";
 import IfFeature from "./if-feature";
 import StateLink from "./state-link.js";
 import { resetTips } from "../systems/tips";
@@ -319,7 +320,7 @@ export default class SettingsMenu extends Component {
             <div className={classNames([styles.bottomLinks])}>
               <IfFeature name="show_features_link">
                 <a
-                  href={configs.link("features", "https://github.com/mozilla/hubs/wiki/Hubs-Features")}
+                  href={configs.link("features", messages["help.docs_url"])}
                   target="_blank"
                   rel="noreferrer noopener"
                 >

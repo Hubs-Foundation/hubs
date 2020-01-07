@@ -2,7 +2,9 @@
 
 :local(.tip-root) {
   @extend %tip-bubble;
-  bottom: 80px;
+
+  bottom: 33vh;
+    
   width: auto;
   padding: 4px 24px 4px 12px;
 
