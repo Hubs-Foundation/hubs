@@ -43,7 +43,8 @@ const TIPS = {
       "object_pin",
       "invite",
       "pen_color",
-      "pen_size"
+      "pen_size",
+      "feedback"
     ]
   },
   mobile: {
@@ -57,7 +58,8 @@ const TIPS = {
       "object_rotate_button",
       "object_scale_button",
       "object_pin",
-      "invite"
+      "invite",
+      "feedback"
     ]
   },
   standalone: { top: [], bottom: [] }
@@ -320,9 +322,9 @@ const VALIDATORS = {
   mute_mode: function(userinput, scene) {
     return scene.is("muted") ? VALID : INVALID;
   },
-  feedback: function(userinput, scene, mediaCounter, store) {
-    if (configs.feature("show_feedback_ui") && store && store.state.activity.entryCount >= NUM_ENTRIES_FOR_FEEDBACK_TIP)
-      return VALID;
+  feedback: function(/*userinput, scene, mediaCounter, store*/) {
+    /*if (configs.feature("show_feedback_ui") && store && store.state.activity.entryCount >= NUM_ENTRIES_FOR_FEEDBACK_TIP)
+      return VALID;*/
     return INVALID;
   }
 };
