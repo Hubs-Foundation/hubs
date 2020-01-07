@@ -1,6 +1,5 @@
 import { sets } from "./userinput/sets";
 import { paths } from "./userinput/paths";
-import configs from "../utils/configs";
 
 // The output of this system is activeTips which shows, if any, the tips to show at the top
 // and bottom of the screen. There are named tips (eg locomotion) that each have validators.
@@ -23,7 +22,6 @@ const VALID = 1;
 const FINISH = 2;
 
 const LOCAL_STORAGE_KEY = "__hubs_finished_tips";
-const NUM_ENTRIES_FOR_FEEDBACK_TIP = 3;
 
 const TIPS = {
   desktop: {

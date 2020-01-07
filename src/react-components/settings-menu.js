@@ -319,11 +319,7 @@ export default class SettingsMenu extends Component {
             </div>
             <div className={classNames([styles.bottomLinks])}>
               <IfFeature name="show_features_link">
-                <a
-                  href={configs.link("features", messages["help.docs_url"])}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
+                <a href={configs.link("features", messages["help.docs_url"])} target="_blank" rel="noreferrer noopener">
                   <FormattedMessage id="settings.features" />
                 </a>
               </IfFeature>

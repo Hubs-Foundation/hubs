@@ -79,6 +79,10 @@
     pointer-events: auto;
   }
 
+  :local(.invite-button-lowered) {
+    margin-top: 50px;
+  }
+
   :local(.enter-button) {
     @extend %action-button;
     pointer-events: auto;

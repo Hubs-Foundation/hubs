@@ -1865,13 +1865,13 @@ class UIRoot extends Component {
                 >
                   {!embed &&
                     !showVREntryButton &&
-                    !hasTopTip &&
                     !streaming && (
                       <WithHoverSound>
                         <button
                           className={classNames({
                             [inviteStyles.inviteButton]: true,
-                            [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered
+                            [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered,
+                            [inviteStyles.inviteButtonLowered]: hasTopTip
                           })}
                           onClick={() => this.toggleShareDialog()}
                         >
