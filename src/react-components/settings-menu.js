@@ -334,7 +334,7 @@ export default class SettingsMenu extends Component {
                   onClick={e => {
                     e.preventDefault();
                     resetTips();
-                    this.unexpand();
+                    this.setState({ expanded: false });
                   }}
                 >
                   <FormattedMessage id="settings.tips" />
@@ -347,6 +347,48 @@ export default class SettingsMenu extends Component {
                   >
                     <FormattedMessage id="settings.controls" />
                   </a>
+                </IfFeature>
+              </div>
+            )}
+            {!hideExtranousItems && (
+              <div className={classNames([styles.bottomLinks])}>
+                <IfFeature name="show_features_link">
+                  <a
+                    href={configs.link("features", messages["help.docs_url"])}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    <FormattedMessage id="settings.features" />
+                  </a>
+                </IfFeature>
+                <IfFeature name="show_community_link">
+                  <a
+                    href={configs.link("community", "https://discord.gg/wHmY4nd")}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    <FormattedMessage id="settings.community" />
+                  </a>
+                </IfFeature>
+                <IfFeature name="show_feedback_ui">
+                  <button
+                    onClick={e => {
+                      e.preventDefault();
+                      resetTips();
+                      this.unexpand();
+                    }}
+                  >
+                    <FormattedMessage id="settings.tips" />
+                  </button>
+                  <IfFeature name="show_controls_link">
+                    <a
+                      href={configs.link("controls", "https://github.com/mozilla/hubs/wiki/Hubs-Controls")}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
+                      <FormattedMessage id="settings.controls" />
+                    </a>
+                  </IfFeature>
                 </IfFeature>
               </div>
             )}
