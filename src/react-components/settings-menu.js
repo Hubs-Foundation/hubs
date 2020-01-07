@@ -34,7 +34,7 @@ export default class SettingsMenu extends Component {
     mediaSearchStore: PropTypes.object,
     scene: PropTypes.object,
     showAsOverlay: PropTypes.bool, // Shows the settings as an overlay menu, instead of a dropdown
-    onCloseOverlay: PropTypes.func, // Shows the settings as an overlay menu, instead of a dropdown
+    onCloseOverlay: PropTypes.func,
     hubScene: PropTypes.object,
     hubChannel: PropTypes.object,
     performConditionalSignIn: PropTypes.func,
