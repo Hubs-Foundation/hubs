@@ -1,5 +1,6 @@
 import { paths } from "../systems/userinput/paths";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
+import { setMatrixWorld } from "../utils/three-utils";
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 const AMMO_BODY_ATTRIBUTES = { type: "kinematic", collisionFilterMask: COLLISION_LAYERS.HANDS };
 
@@ -7,13 +8,8 @@ const TRANSFORM_MODE = {
   AXIS: "axis",
   PUPPET: "puppet",
   CURSOR: "cursor",
-  ALIGN: "align",
-  SCALE: "scale"
+  ALIGN: "align"
 };
-
-const SCALE_SENSITIVITY = 100;
-const MIN_SCALE = 0.1;
-const MAX_SCALE = 100;
 
 const STEP_LENGTH = Math.PI / 10;
 const CAMERA_WORLD_QUATERNION = new THREE.Quaternion();
@@ -30,6 +26,131 @@ function qAlmostEquals(a, b) {
     Math.abs(a.x - b.x) < eps && Math.abs(a.y - b.y) < eps && Math.abs(a.z - b.z) < eps && Math.abs(a.w - b.w) < eps
   );
 }
+
+const calculatePlaneMatrix = (function() {
+  const planeMatrix = new THREE.Matrix4();
+  const planeUp = new THREE.Vector3();
+  const planeForward = new THREE.Vector3();
+  const planeRight = new THREE.Vector3();
+  const planePosition = new THREE.Vector3();
+  const camPosition = new THREE.Vector3();
+
+  return function calculatePlaneMatrix(camera, button) {
+    camera.updateMatrices();
+    camPosition.setFromMatrixPosition(camera.matrixWorld);
+    button.updateMatrices();
+    planePosition.setFromMatrixPosition(button.matrixWorld);
+    planeForward.subVectors(planePosition, camPosition);
+    planeForward.y = 0;
+    planeForward.normalize();
+    planeUp.set(0, 1, 0);
+    planeRight.crossVectors(planeForward, planeUp);
+    planeMatrix.makeBasis(planeRight, planeUp, planeForward.multiplyScalar(-1));
+    planeMatrix[12] = planePosition[0];
+    planeMatrix[13] = planePosition[1];
+    planeMatrix[14] = planePosition[2];
+    return planeMatrix;
+  };
+})();
+
+AFRAME.registerComponent("scale-button", {
+  init() {
+    this.isScaling = false;
+    this.plane = new THREE.Mesh(
+      new THREE.PlaneBufferGeometry(100000, 100000, 2, 2),
+      new THREE.MeshBasicMaterial({
+        visible: true,
+        wireframe: true,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.3
+      })
+    );
+    this.planeRotation = new THREE.Matrix4();
+    this.planeUp = new THREE.Vector3();
+    this.planeRight = new THREE.Vector3();
+    this.intersections = [];
+    this.initialIntersectionPoint = new THREE.Vector3();
+    this.intersectionPoint = new THREE.Vector3();
+    this.initialObjectScale = new THREE.Vector3();
+    this.desiredObjectScale = new THREE.Vector3();
+    this.deltaScale = new THREE.Vector3();
+    this.objectMatrix = new THREE.Matrix4();
+    this.dragVector = new THREE.Vector3();
+    this.currentObjectScale = new THREE.Vector3();
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.objectToScale = networkedEl.object3D;
+    });
+    this.startScaling = e => {
+      if (this.isScaling || !this.objectToScale) {
+        return;
+      }
+      if (!this.didGetObjectReferences) {
+        this.didGetObjectReferences = true;
+        this.leftEventer = document.getElementById("left-cursor").object3D;
+        this.leftRaycaster = document.getElementById("left-cursor-controller").components[
+          "cursor-controller"
+        ].raycaster;
+        this.rightRaycaster = document.getElementById("right-cursor-controller").components[
+          "cursor-controller"
+        ].raycaster;
+        this.viewingCamera = document.getElementById("viewing-camera").object3D;
+      }
+      setMatrixWorld(this.plane, calculatePlaneMatrix(this.viewingCamera, this.el.object3D));
+      this.planeRotation.extractRotation(this.plane.matrixWorld);
+      this.planeUp.set(0, 1, 0).applyMatrix4(this.planeRotation);
+      this.planeRight.set(1, 0, 0).applyMatrix4(this.planeRotation);
+      this.raycaster = e.object3D === this.leftEventer ? this.leftRaycaster : this.rightRaycaster;
+      this.intersections.length = 0;
+      const far = this.raycaster.far;
+      this.raycaster.far = 1000;
+      this.plane.raycast(this.raycaster, this.intersections);
+      this.raycaster.far = far;
+      const intersection = this.intersections[0];
+      if (!intersection) return;
+      this.isScaling = true;
+      this.initialIntersectionPoint.copy(intersection.point);
+      this.objectToScale.updateMatrices();
+      this.initialObjectScale.setFromMatrixScale(this.objectToScale.matrixWorld);
+      window.APP.store.update({ activity: { hasScaled: true } });
+    };
+    this.endScaling = () => {
+      this.isScaling = false;
+    };
+    this.el.object3D.addEventListener("holdable-button-down", this.startScaling);
+    this.el.object3D.addEventListener("holdable-button-up", this.endScaling);
+  },
+  tick() {
+    if (!this.isScaling) return;
+    this.intersections.length = 0;
+    const far = this.raycaster.far;
+    this.raycaster.far = 1000;
+    this.plane.raycast(this.raycaster, this.intersections);
+    this.raycaster.far = far;
+    const intersection = this.intersections[0];
+    if (!intersection) return;
+    this.intersectionPoint.copy(intersection.point);
+    this.dragVector.subVectors(this.intersectionPoint, this.initialIntersectionPoint);
+    const dotFactor = this.dragVector.dot(this.planeUp) + this.dragVector.dot(this.planeRight);
+    let scaleFactor = 1;
+    if (dotFactor > 0) {
+      scaleFactor = 1 + dotFactor / 4;
+    } else if (dotFactor < 0) {
+      scaleFactor = 1 / (1 + Math.abs(dotFactor) / 4);
+    }
+    this.desiredObjectScale.copy(this.initialObjectScale).multiplyScalar(scaleFactor);
+    this.objectToScale.updateMatrices();
+    this.currentObjectScale.setFromMatrixScale(this.objectToScale.matrixWorld);
+    this.deltaScale.set(
+      this.desiredObjectScale.x / this.currentObjectScale.x,
+      this.desiredObjectScale.y / this.currentObjectScale.y,
+      this.desiredObjectScale.z / this.currentObjectScale.z
+    );
+    this.objectMatrix.copy(this.objectToScale.matrixWorld);
+    this.objectMatrix.scale(this.deltaScale);
+    setMatrixWorld(this.objectToScale, this.objectMatrix);
+  }
+});
 
 AFRAME.registerComponent("transform-button", {
   schema: {
@@ -209,8 +330,6 @@ AFRAME.registerSystem("transform-selected-object", {
     if (this.mode === TRANSFORM_MODE.ALIGN) {
       this.store.update({ activity: { hasRecentered: true } });
       return;
-    } else if (this.mode === TRANSFORM_MODE.SCALE) {
-      this.store.update({ activity: { hasScaled: true } });
     } else {
       this.store.update({ activity: { hasRotated: true } });
     }
@@ -249,7 +368,6 @@ AFRAME.registerSystem("transform-selected-object", {
     this.target.matrixNeedsUpdate = true;
   },
 
-  // TODO: stabilize scaling in VR. currently feels broken
   cursorAxisOrScaleTick() {
     const {
       plane,
@@ -285,7 +403,7 @@ AFRAME.registerSystem("transform-selected-object", {
       .projectOnPlane(normal)
       .applyQuaternion(q.copy(plane.quaternion).inverse())
       .multiplyScalar(SENSITIVITY / cameraToPlaneDistance);
-    if (this.mode === TRANSFORM_MODE.CURSOR || this.mode === TRANSFORM_MODE.SCALE) {
+    if (this.mode === TRANSFORM_MODE.CURSOR) {
       const modify = AFRAME.scenes[0].systems.userinput.get(paths.actions.transformModifier);
 
       this.dyAll = this.dyStore + finalProjectedVec.y;
@@ -309,15 +427,6 @@ AFRAME.registerSystem("transform-selected-object", {
         q2.setFromAxisAngle(v, this.dxApplied);
 
         this.target.quaternion.premultiply(q).premultiply(q2);
-      } else {
-        const scaleFactor =
-          THREE.Math.clamp(finalProjectedVec.y + finalProjectedVec.x, -0.0005, 0.0005) * SCALE_SENSITIVITY;
-
-        const newScale = this.target.scale.x * (1.0 + scaleFactor);
-
-        if (newScale > MIN_SCALE && newScale < MAX_SCALE) {
-          this.target.scale.multiplyScalar(1.0 + scaleFactor);
-        }
       }
 
       this.target.matrixNeedsUpdate = true;
