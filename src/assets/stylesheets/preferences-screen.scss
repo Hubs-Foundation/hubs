@@ -81,6 +81,7 @@ input::-webkit-inner-spin-button {
       height: 38px;
       padding-left: 1em;
       padding-right: 2.5em;
+      cursor: pointer;
     }
     :local(.dropdownArrow) {
       @extend %dropdown-arrow;
@@ -106,7 +107,7 @@ input::-webkit-inner-spin-button {
 
   :local(.close-button) {
     @extend %panel-widget;
-    top: 32px;
+    top: 24px;
     left: 24px;
 
     font-size: 1.6em;
@@ -194,6 +195,11 @@ input::-webkit-inner-spin-button {
   border: none;
   font-size: medium;
   padding: 0px 0px 0px 12px;
+  cursor: pointer;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
 }
 
 :local(.prev-option-scale) {
@@ -302,6 +308,7 @@ $ie-bottom-track-color: $track-color !default;
   background: transparent;
   margin: $thumb-height / 2 0;
   width: $track-width;
+  cursor: pointer;
 
   &::-moz-focus-outer {
     border: 0;
@@ -333,6 +340,7 @@ $ie-bottom-track-color: $track-color !default;
 
   &::-webkit-slider-thumb {
     @include thumb;
+    cursor: pointer;
     -webkit-appearance: none;
     margin-top: ((-$track-border-width * 2 + $track-height) / 2 - $thumb-height / 2);
   }
@@ -348,6 +356,7 @@ $ie-bottom-track-color: $track-color !default;
 
   &::-moz-range-thumb {
     @include thumb;
+    cursor: pointer;
   }
 
   &::-ms-track {
@@ -374,6 +383,7 @@ $ie-bottom-track-color: $track-color !default;
 
   &::-ms-thumb {
     @include thumb;
+    cursor: pointer;
     margin-top: $track-height / 4;
   }
 
