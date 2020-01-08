@@ -14,7 +14,7 @@ import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
-import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
+import { ReactAudioContext } from "./wrap-with-audio";
 import {
   pushHistoryState,
   clearHistoryState,
@@ -309,6 +309,7 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("share_video_failed", this.onShareVideoFailed);
     this.props.scene.addEventListener("exit", this.exitEventHandler);
     this.props.scene.addEventListener("action_exit_watch", () => this.setState({ watching: false, hide: false }));
+    this.props.scene.addEventListener("action_advance_lobby", () => this.setState({ watching: false, hide: false }));
 
     const scene = this.props.scene;
 
@@ -976,22 +977,18 @@ class UIRoot extends Component {
       subtitle = (
         <div>
           Your browser does not support{" "}
-          <WithHoverSound>
-            <a
-              href="https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createDataChannel#Browser_compatibility"
-              rel="noreferrer noopener"
-            >
-              WebRTC Data Channels
-            </a>
-          </WithHoverSound>
+          <a
+            href="https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createDataChannel#Browser_compatibility"
+            rel="noreferrer noopener"
+          >
+            WebRTC Data Channels
+          </a>
           , which is required to use {messages["app-name"]}.
           <br />
           If you&quot;d like to use {messages["app-name"]} with Oculus or SteamVR, you can{" "}
-          <WithHoverSound>
-            <a href="https://www.mozilla.org/firefox" rel="noreferrer noopener">
-              Download Firefox
-            </a>
-          </WithHoverSound>
+          <a href="https://www.mozilla.org/firefox" rel="noreferrer noopener">
+            Download Firefox
+          </a>
           .
         </div>
       );
@@ -1004,10 +1001,7 @@ class UIRoot extends Component {
           <p />
           {!["left", "disconnected", "scene_error"].includes(this.props.roomUnavailableReason) && (
             <div>
-              You can also{" "}
-              <WithHoverSound>
-                <a href="/">create a new room</a>
-              </WithHoverSound>
+              You can also <a href="/">create a new room</a>
               .
             </div>
           )}
@@ -1094,7 +1088,7 @@ class UIRoot extends Component {
           !this.props.entryDisallowed && (
             <div className={entryStyles.buttonContainer}>
               {!isMobileVR && (
-                <a
+                <button
                   onClick={e => {
                     e.preventDefault();
                     this.attemptLink();
@@ -1107,9 +1101,10 @@ class UIRoot extends Component {
                       id={isMobile ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"}
                     />
                   </div>
-                </a>
+                </button>
               )}
-              <a
+              <button
+                autoFocus
                 onClick={e => {
                   e.preventDefault();
 
@@ -1125,7 +1120,7 @@ class UIRoot extends Component {
                 className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
               >
                 <FormattedMessage id="entry.enter-room" />
-              </a>
+              </button>
             </div>
           )}
         {this.props.entryDisallowed &&
@@ -1192,7 +1187,7 @@ class UIRoot extends Component {
               <DaydreamEntryButton secondary={true} onClick={this.enterDaydream} subtitle={null} />
             )}
             {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
-              <TwoDEntryButton onClick={this.enter2D} />
+              <TwoDEntryButton autoFocus={true} onClick={this.enter2D} />
             )}
           </div>
         ) : (
@@ -1227,25 +1222,19 @@ class UIRoot extends Component {
           </div>
           <div className="mic-grant-panel__button-container">
             {granted ? (
-              <WithHoverSound>
-                <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                  <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
-                </button>
-              </WithHoverSound>
+              <button autoFocus className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
+                <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
+              </button>
             ) : (
-              <WithHoverSound>
-                <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                  <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
-                </button>
-              </WithHoverSound>
+              <button autoFocus className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
+                <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
+              </button>
             )}
           </div>
           <div className="mic-grant-panel__next-container">
-            <WithHoverSound>
-              <button className={classNames("mic-grant-panel__next")} onClick={this.onMicGrantButton}>
-                <FormattedMessage id="audio.granted-next" />
-              </button>
-            </WithHoverSound>
+            <button autoFocus className={classNames("mic-grant-panel__next")} onClick={this.onMicGrantButton}>
+              <FormattedMessage id="audio.granted-next" />
+            </button>
           </div>
         </div>
       </div>
@@ -1292,20 +1281,18 @@ class UIRoot extends Component {
           </div>
           {this.state.audioTrack && this.state.micDevices.length > 1 ? (
             <div className="audio-setup-panel__device-chooser">
-              <WithHoverSound>
-                <select
-                  className="audio-setup-panel__device-chooser__dropdown"
-                  value={this.selectedMicDeviceId()}
-                  onChange={this.micDeviceChanged}
-                >
-                  {this.state.micDevices.map(d => (
-                    <option key={d.deviceId} value={d.deviceId}>
-                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                      {d.label}
-                    </option>
-                  ))}
-                </select>
-              </WithHoverSound>
+              <select
+                className="audio-setup-panel__device-chooser__dropdown"
+                value={this.selectedMicDeviceId()}
+                onChange={this.micDeviceChanged}
+              >
+                {this.state.micDevices.map(d => (
+                  <option key={d.deviceId} value={d.deviceId}>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    {d.label}
+                  </option>
+                ))}
+              </select>
               <img
                 className="audio-setup-panel__device-chooser__mic-icon"
                 src="../assets/images/mic_small.png"
@@ -1349,11 +1336,9 @@ class UIRoot extends Component {
           </label>
         </div>
         <div className="audio-setup-panel__enter-button-container">
-          <WithHoverSound>
-            <button className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
-              <FormattedMessage id="audio.enter-now" />
-            </button>
-          </WithHoverSound>
+          <button autoFocus className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
+            <FormattedMessage id="audio.enter-now" />
+          </button>
         </div>
       </div>
     );
@@ -1858,18 +1843,16 @@ class UIRoot extends Component {
                   {!embed &&
                     !hasTopTip &&
                     !streaming && (
-                      <WithHoverSound>
-                        <button
-                          className={classNames({
-                            [inviteStyles.inviteButton]: true,
-                            [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered,
-                            [inviteStyles.inviteButtonLowered]: hasTopTip
-                          })}
-                          onClick={() => this.toggleShareDialog()}
-                        >
-                          <FormattedMessage id="entry.share-button" />
-                        </button>
-                      </WithHoverSound>
+                      <button
+                        className={classNames({
+                          [inviteStyles.inviteButton]: true,
+                          [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered,
+                          [inviteStyles.inviteButtonLowered]: hasTopTip
+                        })}
+                        onClick={() => this.toggleShareDialog()}
+                      >
+                        <FormattedMessage id="entry.share-button" />
+                      </button>
                     )}
                   {showChooseSceneButton && (
                     <button

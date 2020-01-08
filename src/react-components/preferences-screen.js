@@ -89,9 +89,11 @@ export default class PreferencesScreen extends Component {
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={classNames(styles.root)}>
-          <i className={classNames(styles.closeButton)} onClick={e => this.props.onClose(e)}>
-            <FontAwesomeIcon icon={faTimes} />
-          </i>
+          <button autoFocus className={classNames(styles.closeButton)} onClick={e => this.props.onClose(e)}>
+            <i>
+              <FontAwesomeIcon icon={faTimes} />
+            </i>
+          </button>
           <div className={classNames(styles.contentContainer)}>
             <div className={classNames(styles.titleBar)}>
               <div className={classNames(styles.title)}>

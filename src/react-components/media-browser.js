@@ -287,11 +287,11 @@ class MediaBrowser extends Component {
         <div className={classNames([styles.box, styles.darkened])}>
           <div className={classNames(styles.header, { [styles.noSearch]: hideSearch })}>
             <div className={styles.headerLeft}>
-              <a onClick={() => this.close()}>
+              <button onClick={() => this.close()}>
                 <i>
                   <FontAwesomeIcon icon={faTimes} />
                 </i>
-              </a>
+              </button>
             </div>
             <div className={styles.headerCenter}>
               {urlSource === "favorites" && (

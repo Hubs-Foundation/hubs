@@ -16,6 +16,7 @@ const EntryButton = props => {
   return (
     <WithHoverSound>
       <button
+        autoFocus={props.autoFocus}
         className={cx([{ [styles.entryButton]: true, [styles.entryButtonSecondary]: props.secondary }])}
         onClick={props.onClick}
       >
@@ -42,6 +43,7 @@ const EntryButton = props => {
 
 EntryButton.propTypes = {
   onClick: PropTypes.func,
+  autoFocus: PropTypes.bool,
   iconSrc: PropTypes.string,
   secondary: PropTypes.bool,
   prefixMessageId: PropTypes.string,
