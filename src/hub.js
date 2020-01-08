@@ -415,7 +415,10 @@ async function updateEnvironmentForHub(hub, entryManager) {
       },
       { once: true }
     );
-    environmentEl.addEventListener("model-error", sceneErrorHandler, { once: true });
+
+    if (!sceneEl.is("entered")) {
+      environmentEl.addEventListener("model-error", sceneErrorHandler, { once: true });
+    }
 
     environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironment });
   }
