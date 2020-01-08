@@ -7,7 +7,6 @@ console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 import "./assets/stylesheets/scene.scss";
 
 import "aframe";
-import "networked-aframe/src/index";
 import "./utils/logging";
 import "./utils/threejs-world-update";
 import { patchWebGLRenderingContext } from "./utils/webgl";
@@ -40,9 +39,6 @@ window.APP.quality = window.APP.store.state.preferences.materialQualitySetting |
 import "./components/event-repeater";
 
 import registerTelemetry from "./telemetry";
-import registerNetworkSchemas from "./network-schemas";
-
-registerNetworkSchemas();
 
 disableiOSZoom();
 
