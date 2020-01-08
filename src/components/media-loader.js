@@ -539,12 +539,6 @@ AFRAME.registerComponent("media-pager", {
     }
   },
 
-  remove() {
-    if (this.toolbar) {
-      this.toolbar.parentNode.removeChild(this.toolbar);
-    }
-  },
-
   onNext() {
     if (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
     const newIndex = Math.min(this.data.index + 1, this.data.maxIndex);
