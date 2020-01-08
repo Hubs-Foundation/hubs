@@ -60,12 +60,14 @@ AFRAME.registerComponent("media-loader", {
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
     this.animating = false;
 
-    NAF.utils
-      .getNetworkedEntity(this.el)
-      .then(networkedEl => {
-        this.networkedEl = networkedEl;
-      })
-      .catch(() => {}); //ignore exception, entity might not be networked
+    if (NAF) {
+      NAF.utils
+        .getNetworkedEntity(this.el)
+        .then(networkedEl => {
+          this.networkedEl = networkedEl;
+        })
+        .catch(() => {}); //ignore exception, entity might not be networked
+    }
   },
 
   updateScale: (function() {
