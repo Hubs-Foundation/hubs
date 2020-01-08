@@ -1041,10 +1041,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       perms_token: null,
       context: {
         mobile: isMobile || isMobileVR,
-        hmd: availableVREntryTypes.isInHMD,
         embed: isEmbed
       }
     };
+
+    if (isMobileVR) {
+      params.context.hmd = true;
+    }
 
     if (permsToken) {
       params.perms_token = permsToken;
