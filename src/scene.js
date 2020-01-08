@@ -40,6 +40,9 @@ window.APP.quality = window.APP.store.state.preferences.materialQualitySetting |
 import "./components/event-repeater";
 
 import registerTelemetry from "./telemetry";
+import registerNetworkSchemas from "./network-schemas";
+
+registerNetworkSchemas();
 
 disableiOSZoom();
 
