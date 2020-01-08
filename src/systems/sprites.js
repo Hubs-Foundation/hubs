@@ -157,7 +157,10 @@ function enableSweepingEffect(comp) {
 
 function createGeometry(maxSprites) {
   const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute("a_vertices", new THREE.BufferAttribute(new Float32Array(maxSprites * 3 * 4), 3, false));
+  // We need to use "position" as the attribute name here. It was previously "a_vertices". It seems three.js
+  // might assume that geometries have a "position" attribute in some cases,
+  // like in https://github.com/mrdoob/three.js/pull/18044
+  geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(maxSprites * 3 * 4), 3, false));
   geometry.setAttribute(
     "a_hubs_EnableSweepingEffect",
     new THREE.BufferAttribute(new Float32Array(maxSprites * 4), 1, false)
@@ -357,7 +360,7 @@ export class SpriteSystem {
 
     this.updateUVs(sprite);
 
-    const aVertices = mesh.geometry.attributes["a_vertices"];
+    const aVertices = mesh.geometry.attributes["position"];
     aVertices.setXYZ(i * 4 + 0, -0.5, 0.5, 0);
     aVertices.setXYZ(i * 4 + 1, 0.5, 0.5, 0);
     aVertices.setXYZ(i * 4 + 2, -0.5, -0.5, 0);
