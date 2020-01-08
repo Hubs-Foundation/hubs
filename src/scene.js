@@ -1,13 +1,13 @@
 import "./webxr-bypass-hacks";
 import "./utils/theme";
 import "./utils/configs";
-import "networked-aframe/src/index";
 
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/scene.scss";
 
 import "aframe";
+import "networked-aframe/src/index";
 import "./utils/logging";
 import "./utils/threejs-world-update";
 import { patchWebGLRenderingContext } from "./utils/webgl";
