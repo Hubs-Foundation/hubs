@@ -1,6 +1,8 @@
 import "./webxr-bypass-hacks";
 import "./utils/theme";
 import "./utils/configs";
+import "networked-aframe/src/index";
+
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/scene.scss";
