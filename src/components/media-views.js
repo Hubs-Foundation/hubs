@@ -844,7 +844,7 @@ AFRAME.registerComponent("media-image", {
       if (this.mesh && this.mesh.material.map && (src !== oldData.src || version !== oldData.version)) {
         this.mesh.material.map = null;
         this.mesh.material.needsUpdate = true;
-        if (this.mesh.map !== errorTexture) {
+        if (this.mesh.material.map !== errorTexture) {
           textureCache.release(oldData.src, oldData.version);
           this.currentSrcIsRetained = false;
         }
