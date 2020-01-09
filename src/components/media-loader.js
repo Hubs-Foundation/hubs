@@ -270,6 +270,10 @@ AFRAME.registerComponent("media-loader", {
 
     if (versionChanged) {
       this.el.emit("media_refreshing");
+      this.data.animate = false;
+
+      // Play the sound effect on a refresh only if we are the owner
+      this.data.playSoundEffect = NAF.utils.isMine(this.networkedEl);
     }
 
     return this.resolveAndLoad(srcChanged, force, force);
@@ -277,13 +281,22 @@ AFRAME.registerComponent("media-loader", {
 
   refresh() {
     if (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
-    const { version } = this.data;
-    this.el.setAttribute("media-loader", { version: version + 1 });
+
+    // When we refresh, we bump the version to the current timestamp.
+    //
+    // The only use-case for refresh right now is re-fetching screenshots.
+    //
+    // Note that this means if you re-paste the same URL, you will still get the original
+    // version 1 from the first time it was pasted and will need to refresh to get the latest.
+    //
+    // If we didn't do that, the result would be a re-fetch of the underlying asset on
+    // *every* paste. So duplicates, cloning, etc, would all re-fetch.
+    this.el.setAttribute("media-loader", { version: Math.floor(Date.now() / 1000) });
   },
 
   async resolveAndLoad(srcChanged = false, force = false) {
     try {
-      const { src, contentSubtype } = this.data;
+      const { src, version, contentSubtype } = this.data;
 
       if (!src) return;
 
@@ -304,7 +317,7 @@ AFRAME.registerComponent("media-loader", {
         isNonCorsProxyDomain(parsedUrl.hostname) && (guessContentType(src) || "").startsWith("model/gltf");
 
       if (this.data.resolve && !src.startsWith("data:") && !isLocalModelAsset) {
-        const result = await resolveUrl(src, force);
+        const result = await resolveUrl(src, version, force);
         canonicalUrl = result.origin;
         // handle protocol relative urls
         if (canonicalUrl.startsWith("//")) {
@@ -382,6 +395,7 @@ AFRAME.registerComponent("media-loader", {
           "media-image",
           Object.assign({}, this.data.mediaOptions, {
             src: accessibleUrl,
+            version,
             contentType,
             batch
           })
@@ -484,6 +498,7 @@ AFRAME.registerComponent("media-loader", {
           "media-image",
           Object.assign({}, this.data.mediaOptions, {
             src: thumbnail,
+            version,
             contentType: guessContentType(thumbnail) || "image/png",
             batch
           })
