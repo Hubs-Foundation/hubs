@@ -486,9 +486,6 @@ AFRAME.registerComponent("media-pager", {
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
     this.onSnap = this.onSnap.bind(this);
-    this.localSnapCount = 0;
-    this.isSnapping = false;
-    this.onSnapImageLoaded = () => (this.isSnapping = false);
 
     NAF.utils
       .getNetworkedEntity(this.el)
