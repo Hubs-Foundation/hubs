@@ -112,11 +112,11 @@ export default class ObjectInfoDialog extends Component {
       <DialogContainer noOverlay={true} wide={true} {...this.props}>
         <div className={styles.roomInfo}>
           <div className={styles.titleAndClose}>
-            <a className={entryStyles.collapseButton} onClick={onClose}>
+            <button autoFocus className={entryStyles.collapseButton} onClick={onClose}>
               <i>
                 <FontAwesomeIcon icon={faTimes} />
               </i>
-            </a>
+            </button>
             <a
               className={styles.objectDisplayString}
               href={this.props.objectDisplayString}

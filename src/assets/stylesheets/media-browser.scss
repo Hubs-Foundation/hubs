@@ -482,15 +482,15 @@
     margin: 0 0 0 32px;
     display: flex;
     width: 250px;
-    font-size: 1.6em;
 
     @media (max-width: 801px) {
       width: 50px;
       height: 35px;
     }
 
-    a {
-      color: var(--panel-widget-color);
+    button {
+      font-size: 1.6em;
+      @extend %panel-widget;
     }
   }
 

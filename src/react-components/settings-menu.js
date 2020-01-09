@@ -92,7 +92,7 @@ export default class SettingsMenu extends Component {
         {!this.props.showAsOverlay && <div className={styles.attachPoint} />}
         <div className={styles.contents}>
           {this.props.showAsOverlay && (
-            <button className={styles.closeButton} onClick={() => this.props.onCloseOverlay()}>
+            <button autoFocus className={styles.closeButton} onClick={() => this.props.onCloseOverlay()}>
               <i>
                 <FontAwesomeIcon icon={faTimes} />
               </i>

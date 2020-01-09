@@ -280,6 +280,14 @@ $favorited-color: var(--favorited-color, $duck-yellow);
   margin-left: 16px;
 }
 
+%panel-widget {
+  cursor: pointer;
+  color: var(--panel-widget-color);
+  outline-style: none;
+  background: none;
+  border: none;
+}
+
 %tip-bubble {
   position: absolute;
   left: 50%;

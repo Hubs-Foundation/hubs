@@ -88,16 +88,12 @@
       }
 
       &__close {
+        @extend %panel-widget;
         position: absolute;
         left: 18px;
         top: 18px;
-        color: var(--panel-widget-color);
         font-size: 1.6em;
         font-weight: bold;
-
-        background: none;
-        cursor: pointer;
-        border: none;
       }
     }
 
