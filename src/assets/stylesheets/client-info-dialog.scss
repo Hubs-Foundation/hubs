@@ -17,7 +17,7 @@
 
 :local(.collapse-button) {
   @extend %fa-icon-button;
-  color: var(--panel-widget-color);
+  @extend %panel-widget;
   margin: 0 10px;
 
   i {

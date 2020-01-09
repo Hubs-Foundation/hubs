@@ -1,6 +1,7 @@
 import "./webxr-bypass-hacks";
 import "./utils/theme";
 import "./utils/configs";
+
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/scene.scss";

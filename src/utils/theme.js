@@ -11,7 +11,7 @@ const DEFAULT_COLORS = {
   "action-color-disabled": DEFAULT_ACTION_COLOR_LIGHT,
   "action-color-highlight": DEFAULT_ACTION_COLOR_LIGHT,
   "action-text-color": "#FFFFFF",
-  "action-subtitle-text-color": "#F0F0F0",
+  "action-subtitle-color": "#F0F0F0",
   "notice-background-color": "#2F80ED",
   "notice-text-color": "#FFFFFF",
   "favorited-color": "#FFC000"

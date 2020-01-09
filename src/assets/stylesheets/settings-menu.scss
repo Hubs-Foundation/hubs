@@ -1,7 +1,27 @@
 @import 'shared.scss';
 @import 'drop-menus.scss';
 
-:local(.settings-menu) {
+:local(.settings-menu-overlay-wrap) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--panel-overlay-background-color);
+}
+
+:local(.settings-menu-overlay) {
+  :local(.contents) {
+    position: relative;
+    min-width: auto;
+    padding: 32px 72px;
+  }
+}
+
+:local(.settings-menu-drop) {
   @extend %drop-menu;
   left: 16px;
 }
@@ -10,6 +30,17 @@
   @extend %attach-point;
   top: -5px;
   left: 16px;
+}
+
+:local(.close-button) {
+  @extend %panel-widget;
+
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  font-size: 1.6em;
+  font-weight: bold;
+  border: none;
 }
 
 :local(.settings-row) {

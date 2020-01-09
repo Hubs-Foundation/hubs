@@ -2,7 +2,9 @@
 
 :local(.tip-root) {
   @extend %tip-bubble;
+
   bottom: 80px;
+
   width: auto;
   padding: 4px 24px 4px 12px;
 
@@ -82,3 +84,12 @@
   }
 }
 
+:local(.tour-tip-root) {
+  @media(min-height: 700px) {
+    bottom: 20vh;
+  }
+
+  @media(min-height: 800px) {
+    bottom: 25vh;
+  }
+}

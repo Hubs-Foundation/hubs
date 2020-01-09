@@ -145,6 +145,14 @@ body.vr-mode {
     pointer-events: auto;
   }
 
+  :local(.help-button) {
+    color: var(--menu-icon-color);
+    width: 43px;
+    height: 43px;
+    min-width: auto;
+    font-size: 1.2em;
+  }
+
   @media (max-width: 1080px) {
     display: none;
   }

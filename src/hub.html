@@ -150,19 +150,19 @@
                                     <a-entity billboard class="freeze-menu" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;" avatar-volume-controls>
                                         <a-entity class="avatar-volume-label" text="value: 0%; anchor: center; align: center; color: #ff3464; letterSpacing: 4; width:1.5;" text-raycast-hack position="0.0 0.675 0.35" scale="1.25 1.25 1.25"></a-entity>
                                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.45 0.675 0.35" class="avatar-volume-down-button">
-                                            <a-entity text="value: -; anchor: center; align: center; color: #ccc; letterSpacing: 4; width: 2.5;" text-raycast-hack position="0 0 0.01" scale="0.85 0.85 0.85"></a-entity>
+                                            <a-entity text="value: -; anchor: center; align: center; color: #ccc; letterSpacing: 4; width: 2.5;" text-raycast-hack position="0 0 0.001" scale="0.85 0.85 0.85"></a-entity>
                                         </a-entity>
                                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0.45 0.675 0.35" class="avatar-volume-up-button">
-                                            <a-entity text="value: +; anchor: center; align: center; color: #ccc; letterSpacing: 4; width: 2.5;" text-raycast-hack position="0 0 0.01" scale="0.85 0.85 0.85"></a-entity>
+                                            <a-entity text="value: +; anchor: center; align: center; color: #ccc; letterSpacing: 4; width: 2.5;" text-raycast-hack position="0 0 0.001" scale="0.85 0.85 0.85"></a-entity>
                                         </a-entity>
                                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" block-button position="0 0 .35">
-                                            <a-entity text="value:Hide; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                                            <a-entity text="value:Hide; width:2.5; align:center;" text-raycast-hack position="0 0 0.001"></a-entity>
                                         </a-entity>
                                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" visible-if-permitted="mute_users" mute-button position="0 -0.3 .35" scale="0.8 0.8 0.8">
-                                            <a-entity text="value:Mute; width:2.5; align:center;" text-raycast-hack visible-if-permitted="mute_users" position="0 0 0.01"></a-entity>
+                                            <a-entity text="value:Mute; width:2.5; align:center;" text-raycast-hack visible-if-permitted="mute_users" position="0 0 0.001"></a-entity>
                                         </a-entity>
                                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" visible-if-permitted="kick_users" kick-button position="0 -0.5 .35" scale="0.8 0.8 0.8">
-                                            <a-entity text="value:Kick; width:2.5; align:center;" text-raycast-hack visible-if-permitted="kick_users" position="0 0 0.01"></a-entity>
+                                            <a-entity text="value:Kick; width:2.5; align:center;" text-raycast-hack visible-if-permitted="kick_users" position="0 0 0.001"></a-entity>
                                         </a-entity>
                                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: false; selector: .Head;" position="-0.40 0.375 0.35">
                                             <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
@@ -179,7 +179,7 @@
                                                 sprite
                                                 icon-button="image: camera-action.png; hoverImage: camera-action.png;"
                                                 scale="0.165 0.165 0.165"
-                                                position="-0.125 0.005 0.01"
+                                                position="-0.125 0.005 0.001"
                                             ></a-entity>
                                         </a-entity>
                                     </a-entity>
@@ -247,13 +247,13 @@
                                 is-remote-hover-target
                                 tags="singleActionButton:true"
                                 pin-networked-object-button="tipSelector:.pin-button-tip; labelSelector:.pin-button-label;"
-                                position="0 0.125 0.01">
+                                position="0 0.125 0.001">
                                 <a-entity
                                     class="pin-button-label"
                                     visible="false"
                                     text=" value:pin; width:1.75; align:center;"
                                     text-raycast-hack
-                                    position="0 0 0.01">
+                                    position="0 0 0.001">
                                 </a-entity>
                             </a-entity>
                             <a-entity
@@ -271,9 +271,9 @@
                                     bottom: 66;
                                     opacity: 1.0;
                                     src: #button"
-                                position="0 0.6 0.01">
+                                position="0 0.6 0.001">
                             </a-entity>
-                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
+                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.001">
                                 <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
                                 <a-entity
                                     sprite
@@ -282,13 +282,13 @@
                                     position="-0.125 0.005 0.02"
                                 ></a-entity>
                             </a-entity>
-                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: true" position="0.25 0.375 0.01">
+                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: true" position="0.25 0.375 0.001">
                                 <a-entity text=" value:track; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
                                 <a-entity
                                     sprite
                                     icon-button="image: camera-action.png; hoverImage: camera-action.png;"
                                     scale="0.165 0.165 0.165"
-                                    position="-0.125 0.005 0.01"
+                                    position="-0.125 0.005 0.001"
                                 ></a-entity>
                             </a-entity>
                             <a-entity
@@ -297,7 +297,7 @@
                                 tags="singleActionButton: true;"
                                 hide-when-pinned-and-forbidden="whenPinned: true"
                                 remove-networked-object-button
-                                position="0 -0.375 0.01">
+                                position="0 -0.375 0.001">
                                 <a-entity
                                     sprite="name: remove-action.png"
                                     icon-button="image: remove-action.png; hoverImage: remove-action.png"
@@ -311,7 +311,7 @@
                                 tags="singleActionButton: true;"
                                 drop-object-button
                                 hide-when-pinned-and-forbidden="whenPinned: true"
-                                position="0 -0.625 0.01">
+                                position="0 -0.625 0.001">
                                 <a-entity
                                     sprite
                                     icon-button="image: drop-action.png; hoverImage: drop-action.png"
@@ -326,7 +326,7 @@
                                 is-remote-hover-target
                                 tags="singleActionButton: true;"
                                 deserialize-drawing-button
-                                position="0.250 -0.625 0.01">
+                                position="0.250 -0.625 0.001">
                                 <a-entity
                                     sprite
                                     icon-button="image: deserialize-action.png; hoverImage: deserialize-action.png"
@@ -334,10 +334,10 @@
                                     position="0 0 0.001"
                                 ></a-entity>
                             </a-entity>
-                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" open-media-button="onlyOpenLink: true" position="0.43 -0.375 0.01">
+                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" open-media-button="onlyOpenLink: true" position="0.43 -0.375 0.001">
                                 <a-entity text="value:open link; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
-                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" clone-media-button position="-0.43 -0.375 0.01">
+                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" clone-media-button position="-0.43 -0.375 0.001">
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
                             <a-entity
@@ -347,7 +347,7 @@
                                 transform-button
                                 transform-button-selector
                                 hide-when-pinned-and-forbidden
-                                position="-0.3 -0.125 0.01">
+                                position="-0.3 -0.125 0.001">
                                 <a-entity
                                     sprite
                                     icon-button="image: rotate-action.png; hoverImage: rotate-action.png;"
@@ -360,7 +360,7 @@
                                 tags="isHoldable: true; holdableButton: true;"
                                 is-remote-hover-target
                                 inspect-button
-                                position="0 -0.125 0.01">
+                                position="0 -0.125 0.001">
                                 <a-entity
                                     sprite
                                     icon-button="image: recenter-action.png; hoverImage: recenter-action.png"
@@ -374,7 +374,7 @@
                                 is-remote-hover-target
                                 transform-button="mode: scale;"
                                 hide-when-pinned-and-forbidden
-                                position="0.3 -0.125 0.01">
+                                position="0.3 -0.125 0.001">
                                 <a-entity
                                     sprite
                                     icon-button="image: scale-action.png; hoverImage: scale-action.png"
@@ -409,7 +409,7 @@
                         class="particle-emitter"
                         particle-emitter="particleCount: 0"
                         scale="0.25 0.25 0.25"
-                        position="0 0.25 -0.01"
+                        position="0 0.25 -0.001"
                     ></a-entity>
                     <a-entity class="ui interactable-ui">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media; visibleIfOwned: false;">
@@ -419,7 +419,7 @@
                                 tags="singleActionButton: true;"
                                 hide-when-pinned-and-forbidden="whenPinned: true"
                                 remove-networked-object-button
-                                position="0 -0.375 0.01">
+                                position="0 -0.375 0.001">
                                 <a-entity
                                     sprite="name: remove-action.png"
                                     icon-button="image: remove-action.png; hoverImage: remove-action.png"
@@ -455,7 +455,7 @@
                         pen-laser
                     ></a-entity>
                     <a-entity class="ui delete-button pen-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_drawing" >
-                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" remove-networked-object-button position="0 0 0.01">
+                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" remove-networked-object-button position="0 0 0.001">
                             <a-entity
                                 sprite
                                 icon-button="image: remove-action.png; hoverImage: remove-action.png;"
@@ -505,7 +505,7 @@
                                 sprite class="snap-icon"
                                 icon-button="image: snap_camera.png; hoverImage: snap_camera.png;"
                                 scale="0.2 0.2 0.2"
-                                position="0 0.002 0.01"
+                                position="0 0.002 0.001"
                             ></a-entity>
                         </a-entity>
                         <a-entity class="record-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 -0.15 0.075" scale="0.75 0.75 0.75">
@@ -513,13 +513,13 @@
                                 sprite class="record-icon"
                                 icon-button="image: record-action.png; hoverImage: record-action.png;"
                                 scale="0.175 0.175 0.175"
-                                position="0 0 0.01"
+                                position="0 0 0.001"
                             ></a-entity>
                             <a-entity
                                 sprite class="record-alpha-icon"
                                 icon-button="image: record-action-alpha.png; hoverImage: record-action-alpha.png;"
                                 scale="0.175 0.175 0.175"
-                                position="0 0 0.01"
+                                position="0 0 0.001"
                             ></a-entity>
                         </a-entity>
                         <a-entity class="cancel-button" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0 -0.15 0.075" scale="0.65 0.65 0.65">
@@ -527,7 +527,7 @@
                                 sprite
                                 icon-button="image: close-action.png; hoverImage: close-action.png;"
                                 scale="0.075 0.075 0.075"
-                                position="0 0 0.01"
+                                position="0 0 0.001"
                             ></a-entity>
                         </a-entity>
                         <a-entity class="prev-duration" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.135 -0.15 0.075" scale="0.5 0.5 0.5">
@@ -535,7 +535,7 @@
                                 sprite
                                 icon-button="image: prev.png; hoverImage: prev.png;"
                                 scale="0.075 0.075 0.075"
-                                position="0 0 0.01"
+                                position="0 0 0.001"
                             ></a-entity>
                         </a-entity>
                         <a-entity class="next-duration" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0.135 -0.15 0.075" scale="0.5 0.5 0.5">
@@ -543,7 +543,7 @@
                                 sprite
                                 icon-button="image: next.png; hoverImage: next.png;"
                                 scale="0.075 0.075 0.075"
-                                position="0 0 0.01"
+                                position="0 0 0.001"
                             ></a-entity>
                         </a-entity>
                         <a-entity class="stop-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0.15 0.08" scale="0.75 0.75 0.75">
@@ -551,19 +551,19 @@
                                 sprite class="stop-icon"
                                 icon-button="image: stop-action.png; hoverImage: stop-action.png;"
                                 scale="0.125 0.125 0.125"
-                                position="0 0 0.01"
+                                position="0 0 0.001"
                             ></a-entity>
                         </a-entity>
                     </a-entity>
                     <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_camera">
-                        <a-entity mixin="rounded-action-button" class="capture-audio" is-remote-hover-target tags="singleActionButton: true;" position="0 0.125 0.01">
+                        <a-entity mixin="rounded-action-button" class="capture-audio" is-remote-hover-target tags="singleActionButton: true;" position="0 0.125 0.001">
                             <a-entity sprite class="capture-audio-icon"
                                 icon-button="image: unmute-action.png; hoverImage: unmute-action.png; activeImage: mute-action.png; activeHoverImage: mute-action.png"
                                 scale="0.165 0.165 0.165"
                                 position="0 0 0.001"
                             ></a-entity>
                         </a-entity>
-                        <a-entity mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" transform-button="mode: align;" position="-0.15 -0.125 0.01">
+                        <a-entity mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" transform-button="mode: align;" position="-0.15 -0.125 0.001">
                             <a-entity
                                 sprite
                                 icon-button="image: recenter-action.png; hoverImage: recenter-action.png;"
@@ -571,7 +571,7 @@
                                 position="0 0 0.001"
                             ></a-entity>
                         </a-entity>
-                        <a-entity mixin="rounded-action-button" is-remote-hover-target tags="isHoldable: true; holdableButton: true;" transform-button transform-button-selector position="0.15 -0.125 0.01">
+                        <a-entity mixin="rounded-action-button" is-remote-hover-target tags="isHoldable: true; holdableButton: true;" transform-button transform-button-selector position="0.15 -0.125 0.001">
                             <a-entity
                                 sprite
                                 icon-button="image: rotate-action.png; hoverImage: rotate-action.png;"
@@ -579,7 +579,7 @@
                                 position="0 0 0.001"
                             ></a-entity>
                         </a-entity>
-                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" remove-networked-object-button position="0 -0.350 0.01">
+                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" remove-networked-object-button position="0 -0.350 0.001">
                             <a-entity
                                 sprite
                                 icon-button="image: remove-action.png; hoverImage: remove-action.png;"
@@ -598,7 +598,7 @@
                     is-remote-hover-target
                 >
                     <a-entity class="ui drawing-menu" visible="false">
-                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" position="0.075 0.125 0.01" class="undo-drawing">
+                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" position="0.075 0.125 0.001" class="undo-drawing">
                             <a-entity
                                 sprite
                                 icon-button="image: undo-action.png; hoverImage: undo-action.png;"
@@ -606,7 +606,7 @@
                                 position="0 0 0.001"
                             ></a-entity>
                         </a-entity>
-                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" position="0.075 -0.125 0.01" class="delete-drawing">
+                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" position="0.075 -0.125 0.001" class="delete-drawing">
                             <a-entity
                                 sprite
                                 icon-button="image: remove-action.png; hoverImage: remove-action.png;"
@@ -614,7 +614,7 @@
                                 position="0 0 0.001"
                             ></a-entity>
                         </a-entity>
-                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" position="-0.125 0 0.01" class="serialize-drawing">
+                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" position="-0.125 0 0.001" class="serialize-drawing">
                             <a-entity
                                 sprite
                                 icon-button="image: serialize-action.png; hoverImage: serialize-action.png;"
@@ -634,18 +634,28 @@
                                 sprite
                                 icon-button="image: prev.png; hoverImage: prev.png;"
                                 scale="0.075 0.075 0.075"
-                                position="0 0 0.01"
+                                position="0 0 0.001"
                             ></a-entity>
                         </a-entity>
                     </a-entity>
-                    <a-entity class="page-label" text="value:.; width:2; align:center;" text-raycast-hack></a-entity>
+                    <a-entity class="page-label" position="0 0.1 0" text="value:.; width:2; align:center;" text-raycast-hack></a-entity>
+                    <a-entity class="snap-button" position="0 -0.1 0" scale="0.75 0.75 1">
+                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.2">
+                            <a-entity
+                                sprite
+                                icon-button="image: snap-page.png; hoverImage: snap-page.png;"
+                                scale="0.115 0.115 0.115"
+                                position="0 0 0.001"
+                            ></a-entity>
+                        </a-entity>
+                    </a-entity>
                     <a-entity class="next-button" position="0.3 0 0">
                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.2">
                             <a-entity
                                 sprite
                                 icon-button="image: next.png; hoverImage: next.png;"
                                 scale="0.075 0.075 0.075"
-                                position="0 0 0.01"
+                                position="0 0 0.001"
                             ></a-entity>
                         </a-entity>
                     </a-entity>
@@ -666,11 +676,11 @@
                         position="0 0.225 0"
                         class="video-snap-button"
                     ></a-entity>
-                    <a-entity mixin="rounded-twitter-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" tweet-media-button visibility-on-content-type="contentType: video/mp4; contentSubtype: video-camera; visible: true;" position="0 0.285 0.01">
+                    <a-entity mixin="rounded-twitter-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" tweet-media-button visibility-on-content-type="contentType: video/mp4; contentSubtype: video-camera; visible: true;" position="0 0.285 0.001">
                         <a-entity text="value:tweet; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                     <a-entity class="video-time-label" text="value: 0; anchor: center; align: center; color: #aaa;" text-raycast-hack position="0 -0.24 0" scale="0.75 0.75 0.75"></a-entity>
-                    <a-entity class="video-volume-label" text="value: 0%; anchor: center; align: center; color: #ccc; letterSpacing: 4;" text-raycast-hack position="0.0 0.14 0.015" scale="1.25 1.25 1.25"></a-entity>
+                    <a-entity class="video-volume-label" text="value: 0%; anchor: center; align: center; color: #ccc; letterSpacing: 4;" text-raycast-hack position="0.0 0.14 0.0015" scale="1.25 1.25 1.25"></a-entity>
                     <a-entity
                         is-remote-hover-target
                         tags="singleActionButton: true; isHoverMenuChild: true;"
@@ -727,7 +737,7 @@
 
             <template id="hubs-destination-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
-                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.01">
+                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.001">
                         <a-entity text="value:value; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
@@ -735,10 +745,10 @@
 
             <template id="avatar-link-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
-                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.01">
+                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.001">
                         <a-entity text="width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
-                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" remix-avatar-button position="0 -0.35 0.01" visible="false">
+                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" remix-avatar-button position="0 -0.35 0.001" visible="false">
                         <a-entity text="width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
@@ -746,7 +756,7 @@
 
             <template id="link-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
-                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.01">
+                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.001">
                         <a-entity text="value:open link; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
@@ -754,7 +764,7 @@
 
             <template id="photo-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
-                    <a-entity mixin="rounded-twitter-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" tweet-media-button position="0 0.285 0.01">
+                    <a-entity mixin="rounded-twitter-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" tweet-media-button position="0 0.285 0.001">
                         <a-entity text="value:tweet; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
@@ -766,7 +776,7 @@
                     position="0 0 0.1"
                     visibility-while-frozen="visible: false; withinDistance: 100; requireHoverOnNonMobile: false;"
                 >
-                    <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.4" unmute-video-button position="0 -0.5 0.01">
+                    <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.4" unmute-video-button position="0 -0.5 0.001">
                         <a-entity text="value:unmute; width:2; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
@@ -920,7 +930,7 @@
                 <a-entity visibility-while-frozen="requireHoverOnNonMobile: false;" rotation="30 0 0">
                     <a-entity class="leave-btn" position="0 0 0" scale="0.7 0.7 0.7" leave-room-button is-remote-hover-target tags="singleActionButton: true;">
                         <a-entity mixin="rounded-text-action-button" slice9="width: 0.8" scale="0.8 0.8 1.0">
-                            <a-entity text=" value:leave room; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                            <a-entity text=" value:leave room; width:2; align:center;" text-raycast-hack position="0 0 0.001"></a-entity>
                         </a-entity>
                     </a-entity>
                 </a-entity>
@@ -930,7 +940,7 @@
                     <a-entity id="hud-presence-count" text="value: ; width:1.1; align:center;" position="-0.30 -0.005 0" matrix-auto-update="target: text;"></a-entity>
                     <a-entity class="invite-btn" position="0 0.18 0" scale="0.7 0.7 0.7" is-remote-hover-target tags="singleActionButton: true;">
                         <a-entity mixin="rounded-text-action-button" slice9="width: 0.7" scale="0.8 0.8 1.0">
-                            <a-entity text=" value:invite; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                            <a-entity text=" value:invite; width:2; align:center;" text-raycast-hack position="0 0 0.001"></a-entity>
                         </a-entity>
                     </a-entity>
                     <a-rounded visible="false" vr-mode-toggle-visibility id="hud-tooltip" height="0.08" width="0.4" color="#000000" position="-0.2 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
@@ -1115,16 +1125,16 @@
                     textHoverColor: #fff;
                     textColor: #fff;
                     backgroundColor: #2f80ed;"
-                position="0 0 0.01">
-                <a-entity class="close-notice-button" close-vr-notice-button is-remote-hover-target tags="singleActionButton: true;" position="0 -0.075 0.01" scale="0.6 0.6 0.6">
+                position="0 0 0.001">
+                <a-entity class="close-notice-button" close-vr-notice-button is-remote-hover-target tags="singleActionButton: true;" position="0 -0.075 0.001" scale="0.6 0.6 0.6">
                     <a-entity
                         sprite
                         icon-button="image: close-white.png; hoverImage: close-white.png;"
                         scale="0.05 0.05 0.05"
-                        position="0 0.005 0.01"
+                        position="0 0.005 0.001"
                     ></a-entity>
                 </a-entity>
-                <a-entity text="value:View your desktop to continue; width:1; align:center;" position="0 0 0.01"></a-entity>
+                <a-entity text="value:View your desktop to continue; width:1; align:center;" position="0 0 0.001"></a-entity>
             </a-entity>
         </a-entity>
         <a-entity id="viewing-rig" set-yxz-order matrix-auto-update>

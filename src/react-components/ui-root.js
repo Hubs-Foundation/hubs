@@ -8,12 +8,13 @@ import screenfull from "screenfull";
 
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
+import UnlessFeature from "./unless-feature";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
-import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
+import { ReactAudioContext } from "./wrap-with-audio";
 import {
   pushHistoryState,
   clearHistoryState,
@@ -48,6 +49,7 @@ import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported
 import WebAssemblyUnsupportedDialog from "./webassembly-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import FeedbackDialog from "./feedback-dialog.js";
+import HelpDialog from "./help-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
@@ -71,6 +73,7 @@ import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../uti
 import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
 
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -306,6 +309,7 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("share_video_failed", this.onShareVideoFailed);
     this.props.scene.addEventListener("exit", this.exitEventHandler);
     this.props.scene.addEventListener("action_exit_watch", () => this.setState({ watching: false, hide: false }));
+    this.props.scene.addEventListener("action_advance_lobby", () => this.setState({ watching: false, hide: false }));
 
     const scene = this.props.scene;
 
@@ -344,7 +348,13 @@ class UIRoot extends Component {
     });
 
     if (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now")) {
-      setTimeout(() => this.handleForceEntry(), 2000);
+      this.props.scene.addEventListener(
+        "loading_finished",
+        () => {
+          setTimeout(() => this.handleForceEntry(), 1000);
+        },
+        { once: true }
+      );
     }
 
     this.playerRig = scene.querySelector("#avatar-rig");
@@ -422,6 +432,7 @@ class UIRoot extends Component {
 
   onLoadingFinished = () => {
     this.setState({ noMoreLoadingUpdates: true });
+    this.props.scene.emit("loading_finished");
 
     if (this.props.onLoaded) {
       this.props.onLoaded();
@@ -966,22 +977,18 @@ class UIRoot extends Component {
       subtitle = (
         <div>
           Your browser does not support{" "}
-          <WithHoverSound>
-            <a
-              href="https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createDataChannel#Browser_compatibility"
-              rel="noreferrer noopener"
-            >
-              WebRTC Data Channels
-            </a>
-          </WithHoverSound>
+          <a
+            href="https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createDataChannel#Browser_compatibility"
+            rel="noreferrer noopener"
+          >
+            WebRTC Data Channels
+          </a>
           , which is required to use {messages["app-name"]}.
           <br />
           If you&quot;d like to use {messages["app-name"]} with Oculus or SteamVR, you can{" "}
-          <WithHoverSound>
-            <a href="https://www.mozilla.org/firefox" rel="noreferrer noopener">
-              Download Firefox
-            </a>
-          </WithHoverSound>
+          <a href="https://www.mozilla.org/firefox" rel="noreferrer noopener">
+            Download Firefox
+          </a>
           .
         </div>
       );
@@ -994,10 +1001,7 @@ class UIRoot extends Component {
           <p />
           {!["left", "disconnected", "scene_error"].includes(this.props.roomUnavailableReason) && (
             <div>
-              You can also{" "}
-              <WithHoverSound>
-                <a href="/">create a new room</a>
-              </WithHoverSound>
+              You can also <a href="/">create a new room</a>
               .
             </div>
           )}
@@ -1084,7 +1088,7 @@ class UIRoot extends Component {
           !this.props.entryDisallowed && (
             <div className={entryStyles.buttonContainer}>
               {!isMobileVR && (
-                <a
+                <button
                   onClick={e => {
                     e.preventDefault();
                     this.attemptLink();
@@ -1097,9 +1101,10 @@ class UIRoot extends Component {
                       id={isMobile ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"}
                     />
                   </div>
-                </a>
+                </button>
               )}
-              <a
+              <button
+                autoFocus
                 onClick={e => {
                   e.preventDefault();
 
@@ -1115,7 +1120,7 @@ class UIRoot extends Component {
                 className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
               >
                 <FormattedMessage id="entry.enter-room" />
-              </a>
+              </button>
             </div>
           )}
         {this.props.entryDisallowed &&
@@ -1182,7 +1187,7 @@ class UIRoot extends Component {
               <DaydreamEntryButton secondary={true} onClick={this.enterDaydream} subtitle={null} />
             )}
             {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
-              <TwoDEntryButton onClick={this.enter2D} />
+              <TwoDEntryButton autoFocus={true} onClick={this.enter2D} />
             )}
           </div>
         ) : (
@@ -1217,25 +1222,19 @@ class UIRoot extends Component {
           </div>
           <div className="mic-grant-panel__button-container">
             {granted ? (
-              <WithHoverSound>
-                <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                  <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
-                </button>
-              </WithHoverSound>
+              <button autoFocus className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
+                <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
+              </button>
             ) : (
-              <WithHoverSound>
-                <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                  <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
-                </button>
-              </WithHoverSound>
+              <button autoFocus className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
+                <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
+              </button>
             )}
           </div>
           <div className="mic-grant-panel__next-container">
-            <WithHoverSound>
-              <button className={classNames("mic-grant-panel__next")} onClick={this.onMicGrantButton}>
-                <FormattedMessage id="audio.granted-next" />
-              </button>
-            </WithHoverSound>
+            <button autoFocus className={classNames("mic-grant-panel__next")} onClick={this.onMicGrantButton}>
+              <FormattedMessage id="audio.granted-next" />
+            </button>
           </div>
         </div>
       </div>
@@ -1282,20 +1281,18 @@ class UIRoot extends Component {
           </div>
           {this.state.audioTrack && this.state.micDevices.length > 1 ? (
             <div className="audio-setup-panel__device-chooser">
-              <WithHoverSound>
-                <select
-                  className="audio-setup-panel__device-chooser__dropdown"
-                  value={this.selectedMicDeviceId()}
-                  onChange={this.micDeviceChanged}
-                >
-                  {this.state.micDevices.map(d => (
-                    <option key={d.deviceId} value={d.deviceId}>
-                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                      {d.label}
-                    </option>
-                  ))}
-                </select>
-              </WithHoverSound>
+              <select
+                className="audio-setup-panel__device-chooser__dropdown"
+                value={this.selectedMicDeviceId()}
+                onChange={this.micDeviceChanged}
+              >
+                {this.state.micDevices.map(d => (
+                  <option key={d.deviceId} value={d.deviceId}>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    {d.label}
+                  </option>
+                ))}
+              </select>
               <img
                 className="audio-setup-panel__device-chooser__mic-icon"
                 src="../assets/images/mic_small.png"
@@ -1339,11 +1336,9 @@ class UIRoot extends Component {
           </label>
         </div>
         <div className="audio-setup-panel__enter-button-container">
-          <WithHoverSound>
-            <button className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
-              <FormattedMessage id="audio.enter-now" />
-            </button>
-          </WithHoverSound>
+          <button autoFocus className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
+            <FormattedMessage id="audio.enter-now" />
+          </button>
         </div>
       </div>
     );
@@ -1496,7 +1491,8 @@ class UIRoot extends Component {
       [styles.backgrounded]: this.isInModalOrOverlay()
     });
 
-    const showVREntryButton = entered && isMobileVR;
+    // MobileVR browsers always show settings panel as an overlay when exiting immersive mode.
+    const showSettingsAsOverlay = entered && isMobileVR;
 
     const presenceLogEntries = this.props.presenceLogEntries || [];
 
@@ -1519,7 +1515,6 @@ class UIRoot extends Component {
       (hasDiscordBridges || (hasEmbedPresence && !this.props.embed)) && !this.state.broadcastTipDismissed;
 
     const showInviteTip =
-      !showVREntryButton &&
       !hasTopTip &&
       !entered &&
       !embed &&
@@ -1531,7 +1526,6 @@ class UIRoot extends Component {
       this.occupantCount() <= 1;
 
     const showChooseSceneButton =
-      !showVREntryButton &&
       !entered &&
       !embed &&
       !preload &&
@@ -1743,6 +1737,17 @@ class UIRoot extends Component {
             />
             <StateRoute
               stateKey="modal"
+              stateValue="help"
+              history={this.props.history}
+              render={() =>
+                this.renderDialog(HelpDialog, {
+                  history: this.props.history,
+                  onClose: () => this.pushHistoryState("modal", null)
+                })
+              }
+            />
+            <StateRoute
+              stateKey="modal"
               stateValue="tweet"
               history={this.props.history}
               render={() => this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog })}
@@ -1820,18 +1825,11 @@ class UIRoot extends Component {
                   history={this.props.history}
                 />
               )}
-            {this.state.frozen &&
-              !showVREntryButton && (
-                <button className={styles.leaveButton} onClick={() => this.exit("left")}>
-                  <FormattedMessage id="entry.leave-room" />
-                </button>
-              )}
-            {this.state.frozen /* Case when we exit immersive mode while frozen */ &&
-              showVREntryButton && (
-                <button className={styles.leaveButton} onClick={() => exit2DInterstitialAndEnterVR(true)}>
-                  <FormattedMessage id="entry.enter-in-vr" />
-                </button>
-              )}
+            {this.state.frozen && (
+              <button className={styles.leaveButton} onClick={() => this.exit("left")}>
+                <FormattedMessage id="entry.leave-room" />
+              </button>
+            )}
             {!this.state.frozen &&
               !watching &&
               !preload && (
@@ -1843,20 +1841,17 @@ class UIRoot extends Component {
                   })}
                 >
                   {!embed &&
-                    !showVREntryButton &&
-                    !hasTopTip &&
                     !streaming && (
-                      <WithHoverSound>
-                        <button
-                          className={classNames({
-                            [inviteStyles.inviteButton]: true,
-                            [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered
-                          })}
-                          onClick={() => this.toggleShareDialog()}
-                        >
-                          <FormattedMessage id="entry.share-button" />
-                        </button>
-                      </WithHoverSound>
+                      <button
+                        className={classNames({
+                          [inviteStyles.inviteButton]: true,
+                          [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered,
+                          [inviteStyles.inviteButtonLowered]: hasTopTip
+                        })}
+                        onClick={() => this.toggleShareDialog()}
+                      >
+                        <FormattedMessage id="entry.share-button" />
+                      </button>
                     )}
                   {showChooseSceneButton && (
                     <button
@@ -1883,7 +1878,6 @@ class UIRoot extends Component {
                     </div>
                   )}
                   {!embed &&
-                    !showVREntryButton &&
                     this.occupantCount() > 1 &&
                     !hasTopTip &&
                     entered &&
@@ -1898,11 +1892,6 @@ class UIRoot extends Component {
                         </span>
                       </button>
                     )}
-                  {showVREntryButton && (
-                    <button className={inviteStyles.enterButton} onClick={() => exit2DInterstitialAndEnterVR(true)}>
-                      <FormattedMessage id="entry.enter-in-vr" />
-                    </button>
-                  )}
                   {embed && (
                     <a href={baseUrl} className={inviteStyles.enterButton} target="_blank" rel="noopener noreferrer">
                       <FormattedMessage id="entry.open-in-window" />
@@ -2019,6 +2008,8 @@ class UIRoot extends Component {
                   hubChannel={this.props.hubChannel}
                   hubScene={this.props.hubScene}
                   scene={this.props.scene}
+                  showAsOverlay={showSettingsAsOverlay}
+                  onCloseOverlay={() => exit2DInterstitialAndEnterVR(true)}
                   performConditionalSignIn={this.props.performConditionalSignIn}
                   showNonHistoriedDialog={this.showNonHistoriedDialog}
                   showPreferencesScreen={() => {
@@ -2057,13 +2048,15 @@ class UIRoot extends Component {
                   }}
                 />
                 {!watching && !streaming ? (
-                  <IfFeature name="show_feedback_ui">
+                  <UnlessFeature name="show_feedback_ui">
                     <div className={styles.nagCornerButton}>
-                      <button onClick={() => this.pushHistoryState("modal", "feedback")}>
-                        <FormattedMessage id="feedback.prompt" />
+                      <button onClick={() => this.pushHistoryState("modal", "help")} className={styles.helpButton}>
+                        <i>
+                          <FontAwesomeIcon icon={faQuestion} />
+                        </i>
                       </button>
                     </div>
-                  </IfFeature>
+                  </UnlessFeature>
                 ) : (
                   <div className={styles.nagCornerButton}>
                     <button onClick={() => this.setState({ hide: true })}>
@@ -2071,6 +2064,16 @@ class UIRoot extends Component {
                     </button>
                   </div>
                 )}
+                {!watching &&
+                  !streaming && (
+                    <IfFeature name="show_feedback_ui">
+                      <div className={styles.nagCornerButton}>
+                        <button onClick={() => this.pushHistoryState("modal", "feedback")}>
+                          <FormattedMessage id="feedback.prompt" />
+                        </button>
+                      </div>
+                    </IfFeature>
+                  )}
 
                 {!streaming && (
                   <button
