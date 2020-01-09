@@ -59,7 +59,6 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
-    this.resolveAndLoad = this.resolveAndLoad.bind(this);
     this.refresh = this.refresh.bind(this);
     this.animating = false;
 
@@ -260,25 +259,6 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
-  update(oldData) {
-    const { src, version } = this.data;
-
-    if (!src) return;
-    const srcChanged = oldData.src !== src;
-    const versionChanged = !!(oldData.version && oldData.version !== version);
-    const skipCache = versionChanged;
-
-    if (versionChanged) {
-      this.el.emit("media_refreshing");
-      this.data.animate = false;
-
-      // Play the sound effect on a refresh only if we are the owner
-      this.data.playSoundEffect = NAF.utils.isMine(this.networkedEl);
-    }
-
-    return this.resolveAndLoad(srcChanged, skipCache);
-  },
-
   refresh() {
     if (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
 
@@ -288,7 +268,23 @@ AFRAME.registerComponent("media-loader", {
     this.el.setAttribute("media-loader", { version: Math.floor(Date.now() / 1000) });
   },
 
-  async resolveAndLoad(srcChanged = false, skipCache = false) {
+  async update(oldData) {
+    const { src, version } = this.data;
+
+    if (!src) return;
+    const srcChanged = oldData.src !== src;
+    const versionChanged = !!(oldData.version && oldData.version !== version);
+
+    if (versionChanged) {
+      this.el.emit("media_refreshing");
+
+      // Don't animate if its a refresh.
+      this.data.animate = false;
+
+      // Play the sound effect on a refresh only if we are the owner
+      this.data.playSoundEffect = NAF.utils.isMine(this.networkedEl);
+    }
+
     try {
       const { src, version, contentSubtype } = this.data;
 
@@ -311,7 +307,7 @@ AFRAME.registerComponent("media-loader", {
         isNonCorsProxyDomain(parsedUrl.hostname) && (guessContentType(src) || "").startsWith("model/gltf");
 
       if (this.data.resolve && !src.startsWith("data:") && !isLocalModelAsset) {
-        const result = await resolveUrl(src, version, skipCache);
+        const result = await resolveUrl(src, version);
         canonicalUrl = result.origin;
         // handle protocol relative urls
         if (canonicalUrl.startsWith("//")) {

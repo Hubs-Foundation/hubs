@@ -12,13 +12,12 @@ const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
 // Map<String, Promise<Object>
 const resolveUrlCache = new Map();
-export const resolveUrl = async (url, version = 1, skipCache = false) => {
+export const resolveUrl = async (url, version = 1) => {
   const key = `${url}_${version}`;
   if (resolveUrlCache.has(key)) return resolveUrlCache.get(key);
 
   const resultPromise = fetch(mediaAPIEndpoint, {
     method: "POST",
-    cache: skipCache ? "default" : "reload",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ media: { url }, version })
   }).then(async response => {
