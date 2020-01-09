@@ -41,7 +41,7 @@ AFRAME.registerComponent("media-loader", {
     fileId: { type: "string" },
     fileIsOwned: { type: "boolean" },
     src: { type: "string" },
-    version: { type: "number", default: 1 },
+    version: { type: "number", default: 1 }, // Used to force a re-resolution
     fitToBox: { default: false },
     resolve: { default: false },
     contentType: { default: null },
@@ -265,8 +265,14 @@ AFRAME.registerComponent("media-loader", {
 
     if (!src) return;
     const srcChanged = oldData.src !== src;
-    const forceIfVersionChanged = !!(oldData.version && oldData.version !== version);
-    return this.resolveAndLoad(srcChanged, forceIfVersionChanged);
+    const versionChanged = !!(oldData.version && oldData.version !== version);
+    const force = versionChanged;
+
+    if (versionChanged) {
+      this.el.emit("media_refreshing");
+    }
+
+    return this.resolveAndLoad(srcChanged, force, force);
   },
 
   refresh() {
@@ -318,6 +324,8 @@ AFRAME.registerComponent("media-loader", {
       // We don't want to emit media_resolved for index updates.
       if (srcChanged) {
         this.el.emit("media_resolved", { src, raw: accessibleUrl, contentType });
+      } else {
+        this.el.emit("media_refreshed", { src, raw: accessibleUrl, contentType });
       }
 
       if (

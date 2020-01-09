@@ -92,6 +92,7 @@ import "./components/follow-in-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
+import "./components/refresh-media-button";
 import "./components/tweet-media-button";
 import "./components/remix-avatar-button";
 import "./components/transform-object-button";
