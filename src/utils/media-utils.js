@@ -12,14 +12,14 @@ const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
 // Map<String, Promise<Object>
 const resolveUrlCache = new Map();
-export const resolveUrl = async (url, index) => {
-  const cacheKey = `${url}|${index}`;
-  if (resolveUrlCache.has(cacheKey)) return resolveUrlCache.get(cacheKey);
+export const resolveUrl = async (url, force = false) => {
+  if (!force && resolveUrlCache.has(url)) return resolveUrlCache.get(url);
 
   const resultPromise = fetch(mediaAPIEndpoint, {
     method: "POST",
+    cache: force ? "default" : "reload",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ media: { url, index } })
+    body: JSON.stringify({ media: { url }, force })
   }).then(async response => {
     if (!response.ok) {
       const message = `Error resolving url "${url}":`;
@@ -33,7 +33,7 @@ export const resolveUrl = async (url, index) => {
     return response.json();
   });
 
-  resolveUrlCache.set(cacheKey, resultPromise);
+  resolveUrlCache.set(url, resultPromise);
   return resultPromise;
 };
 
