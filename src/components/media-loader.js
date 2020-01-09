@@ -266,7 +266,7 @@ AFRAME.registerComponent("media-loader", {
     if (!src) return;
     const srcChanged = oldData.src !== src;
     const versionChanged = !!(oldData.version && oldData.version !== version);
-    const force = versionChanged;
+    const skipCache = versionChanged;
 
     if (versionChanged) {
       this.el.emit("media_refreshing");
@@ -276,7 +276,7 @@ AFRAME.registerComponent("media-loader", {
       this.data.playSoundEffect = NAF.utils.isMine(this.networkedEl);
     }
 
-    return this.resolveAndLoad(srcChanged, force);
+    return this.resolveAndLoad(srcChanged, skipCache);
   },
 
   refresh() {
@@ -288,7 +288,7 @@ AFRAME.registerComponent("media-loader", {
     this.el.setAttribute("media-loader", { version: Math.floor(Date.now() / 1000) });
   },
 
-  async resolveAndLoad(srcChanged = false, force = false) {
+  async resolveAndLoad(srcChanged = false, skipCache = false) {
     try {
       const { src, version, contentSubtype } = this.data;
 
@@ -311,7 +311,7 @@ AFRAME.registerComponent("media-loader", {
         isNonCorsProxyDomain(parsedUrl.hostname) && (guessContentType(src) || "").startsWith("model/gltf");
 
       if (this.data.resolve && !src.startsWith("data:") && !isLocalModelAsset) {
-        const result = await resolveUrl(src, version, force);
+        const result = await resolveUrl(src, version, skipCache);
         canonicalUrl = result.origin;
         // handle protocol relative urls
         if (canonicalUrl.startsWith("//")) {
