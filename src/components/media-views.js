@@ -900,6 +900,8 @@ AFRAME.registerComponent("media-image", {
     const projection = this.data.projection;
 
     if (this.mesh && this.data.batch) {
+      // This is a no-op if the mesh was just created.
+      // Otherwise we want to ensure the texture gets updated.
       batchManagerSystem.removeObject(this.mesh);
     }
 
