@@ -183,33 +183,16 @@ AFRAME.registerComponent("networked-drawing", {
     const mesh = new THREE.Mesh(geometry, material);
 
     mesh.userData.gltfExtensions = {
-      MOZ_hubs_components: { "networked-drawing-buffer": { buffer: this.networkBuffer } }
+      MOZ_hubs_components: {
+        version: 4,
+        "networked-drawing-buffer": { buffer: this.networkBuffer }
+      }
     };
 
-    const chunks = await new Promise(resolve => {
-      exporter.parseChunks(
-        mesh,
-        resolve,
-        e => {
-          new Error(`Error serializing drawing. ${e}`);
-        },
-        {
-          mode: "glb",
-          includeCustomExtensions: true
-        }
-      );
-    });
-
-    const json = chunks.json;
-    if (!json.extensions) {
-      json.extensions = {};
-    }
-    json.extensions.MOZ_hubs_components = { version: 4 };
-    json.asset.generator = `Mozilla Hubs Serialize Drawing`;
-
-    const glb = await new Promise((resolve, reject) => {
-      exporter.createGLBBlob(chunks, resolve, e => {
-        reject(new Error(`Error creating glb blob. ${e}`));
+    const glb = await new Promise(resolve => {
+      exporter.parse(mesh, resolve, {
+        binary: true,
+        includeCustomExtensions: true
       });
     });
 
