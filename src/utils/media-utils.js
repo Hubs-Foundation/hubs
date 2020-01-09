@@ -92,6 +92,21 @@ function getOrientation(file, callback) {
   reader.readAsArrayBuffer(file);
 }
 
+function getLatestMediaVersionOfSrc(src) {
+  const els = document.querySelectorAll("[media-loader]");
+  let version = 1;
+
+  for (const el of els) {
+    const loader = el.components["media-loader"];
+
+    if (loader.data.src === src) {
+      version = Math.max(version, loader.data.version);
+    }
+  }
+
+  return version;
+}
+
 export const addMedia = (
   src,
   template,
@@ -107,11 +122,17 @@ export const addMedia = (
   const entity = document.createElement("a-entity");
   entity.setAttribute("networked", { template: template });
   const needsToBeUploaded = src instanceof File;
+
+  // If we're re-pasting an existing src in the scene, we should use the latest version
+  // seen across any other entities. Otherwise, start with version 1.
+  const version = getLatestMediaVersionOfSrc(src);
+
   entity.setAttribute("media-loader", {
     fitToBox,
     resolve,
     animate,
     src: typeof src === "string" ? src : "",
+    version,
     contentSubtype,
     fileIsOwned: !needsToBeUploaded,
     mediaOptions
