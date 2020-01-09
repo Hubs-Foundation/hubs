@@ -10,7 +10,7 @@ AFRAME.registerComponent("refresh-media-button", {
 
         // Hide button + do the sound effect here, so only the person who clicked hears it, not everyone.
         this.el.object3D.visible = false;
-        const loadingSoundEffect = sfx.playPositionalSoundFollowing(SOUND_MEDIA_LOADING, this.targetEl, true);
+        const loadingSoundEffect = sfx.playPositionalSoundFollowing(SOUND_MEDIA_LOADING, this.targetEl.object3D, true);
 
         this.targetEl.addEventListener(
           "media_refreshed",
