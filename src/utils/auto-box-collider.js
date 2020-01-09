@@ -3,7 +3,7 @@
 // possible AABB -- we could return a tighter one if we examined all of the vertices
 // of the geometry for ourselves, but we don't care enough for what we're using this
 // for to do so much work.
-const computeObjectAABB = (function() {
+export const computeObjectAABB = (function() {
   const bounds = new THREE.Box3();
   return function(root, target) {
     target.makeEmpty();
