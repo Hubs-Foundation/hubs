@@ -1841,7 +1841,6 @@ class UIRoot extends Component {
                   })}
                 >
                   {!embed &&
-                    !hasTopTip &&
                     !streaming && (
                       <button
                         className={classNames({
