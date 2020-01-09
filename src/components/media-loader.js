@@ -276,7 +276,7 @@ AFRAME.registerComponent("media-loader", {
       this.data.playSoundEffect = NAF.utils.isMine(this.networkedEl);
     }
 
-    return this.resolveAndLoad(srcChanged, force, force);
+    return this.resolveAndLoad(srcChanged, force);
   },
 
   refresh() {
