@@ -10,7 +10,7 @@
     "auth.verified-title": "Email Verified!",
     "auth.verify-failed": "Unable to sign in with this link. It may have already been used or has expired.",
     "auth.verified": "Your email has been verified!\nYou can now close this browser tab and return to %app-name%.",
-    "auth.spoke-verified": "You email has been verified!\nYou can now close this browser tab and return to %editor-name%.",
+    "auth.spoke-verified": "Your email has been verified!\nYou can now close this browser tab and return to %editor-name%.",
     "sign-in.prompt": "Sign in to pin objects in rooms.",
     "sign-in.admin": "Check your email for a verification email. Once verified, enter your email to create your account or sign in.",
     "sign-in.admin-no-permission": "You don't have access to admin tools. Sign into another account or ask an administrator to grant you permission.",
