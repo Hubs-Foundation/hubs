@@ -285,12 +285,6 @@ AFRAME.registerComponent("media-loader", {
     // When we refresh, we bump the version to the current timestamp.
     //
     // The only use-case for refresh right now is re-fetching screenshots.
-    //
-    // Note that this means if you re-paste the same URL, you will still get the original
-    // version 1 from the first time it was pasted and will need to refresh to get the latest.
-    //
-    // If we didn't do that, the result would be a re-fetch of the underlying asset on
-    // *every* paste. So duplicates, cloning, etc, would all re-fetch.
     this.el.setAttribute("media-loader", { version: Math.floor(Date.now() / 1000) });
   },
 
