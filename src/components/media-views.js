@@ -968,7 +968,7 @@ AFRAME.registerComponent("media-pdf", {
     const file = new File([blob], "snap.png", TYPE_IMG_PNG);
 
     this.localSnapCount++;
-    const { entity } = addAndArrangeMedia(this.el, file, "photo-snapshot", this.localSnapCount, false, 1.25);
+    const { entity } = addAndArrangeMedia(this.el, file, "photo-snapshot", this.localSnapCount, false, 1);
     entity.addEventListener("image-loaded", this.onSnapImageLoaded, ONCE_TRUE);
   },
 
