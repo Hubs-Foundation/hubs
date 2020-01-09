@@ -103,7 +103,7 @@ AFRAME.registerComponent("camera-tool", {
       format: THREE.RGBAFormat,
       minFilter: THREE.LinearFilter,
       magFilter: THREE.NearestFilter,
-      encoding: THREE.sRGBEncoding,
+      encoding: THREE.GammaEncoding,
       depth: false,
       stencil: false
     });
