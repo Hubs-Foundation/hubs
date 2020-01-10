@@ -274,7 +274,7 @@ export function getPromotionTokenForFile(fileId) {
 
 const mediaPos = new THREE.Vector3();
 
-export function addAndArrangeMedia(el, media, contentSubtype, snapCount, mirrorOrientation = false) {
+export function addAndArrangeMedia(el, media, contentSubtype, snapCount, mirrorOrientation = false, distance = 0.75) {
   const { entity, orientation } = addMedia(media, "#interactable-media", undefined, contentSubtype, false);
 
   const pos = el.object3D.position;
@@ -291,8 +291,8 @@ export function addAndArrangeMedia(el, media, contentSubtype, snapCount, mirrorO
   const idx = (snapCount % 6) + 3;
 
   mediaPos.set(
-    Math.cos(Math.PI * 2 * (idx / 6.0)) * 0.75,
-    Math.sin(Math.PI * 2 * (idx / 6.0)) * 0.75,
+    Math.cos(Math.PI * 2 * (idx / 6.0)) * distance,
+    Math.sin(Math.PI * 2 * (idx / 6.0)) * distance,
     -0.05 + idx * 0.001
   );
 

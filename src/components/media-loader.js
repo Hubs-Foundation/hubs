@@ -512,6 +512,7 @@ AFRAME.registerComponent("media-pager", {
     this.toolbar = null;
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
+    this.onSnap = this.onSnap.bind(this);
 
     NAF.utils
       .getNetworkedEntity(this.el)
@@ -541,10 +542,12 @@ AFRAME.registerComponent("media-pager", {
     setTimeout(() => {
       this.nextButton = this.el.querySelector(".next-button [text-button]");
       this.prevButton = this.el.querySelector(".prev-button [text-button]");
+      this.snapButton = this.el.querySelector(".snap-button [text-button]");
       this.pageLabel = this.el.querySelector(".page-label");
 
       this.nextButton.object3D.addEventListener("interact", this.onNext);
       this.prevButton.object3D.addEventListener("interact", this.onPrev);
+      this.snapButton.object3D.addEventListener("interact", this.onSnap);
 
       this.update();
       this.el.emit("pager-loaded");
@@ -557,12 +560,6 @@ AFRAME.registerComponent("media-pager", {
     if (this.pageLabel) {
       this.pageLabel.setAttribute("text", "value", `${this.data.index + 1}/${this.data.maxIndex + 1}`);
       this.repositionToolbar();
-    }
-  },
-
-  remove() {
-    if (this.toolbar) {
-      this.toolbar.parentNode.removeChild(this.toolbar);
     }
   },
 
@@ -580,6 +577,10 @@ AFRAME.registerComponent("media-pager", {
     this.el.setAttribute("media-pdf", "index", newIndex);
     this.el.setAttribute("media-pager", "index", newIndex);
     this.el.emit("pager-page-changed");
+  },
+
+  onSnap() {
+    this.el.emit("pager-snap-clicked");
   },
 
   repositionToolbar() {
