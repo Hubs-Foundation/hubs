@@ -43,6 +43,7 @@ import "./components/scale-in-screen-space";
 import "./components/mute-mic";
 import "./components/bone-mute-state-indicator";
 import "./components/bone-visibility";
+import "./components/fader";
 import "./components/in-world-hud";
 import "./components/emoji";
 import "./components/emoji-hud";
@@ -407,6 +408,11 @@ async function updateEnvironmentForHub(hub, entryManager) {
             if (sceneEl.is("entered")) {
               waypointSystem.moveToSpawnPoint();
             }
+
+            const fader = document.getElementById("viewing-camera").components["fader"];
+
+            // Add a slight delay before de-in to reduce hitching.
+            setTimeout(() => fader.fadeIn(), 2000);
           },
           { once: true }
         );
@@ -1408,7 +1414,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateUIForHub(hub);
 
     if (stale_fields.includes("scene")) {
-      updateEnvironmentForHub(hub, entryManager);
+      const fader = document.getElementById("viewing-camera").components["fader"];
+
+      fader.fadeOut().then(() => updateEnvironmentForHub(hub, entryManager));
 
       addToPresenceLog({
         type: "scene_changed",
