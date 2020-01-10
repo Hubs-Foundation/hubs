@@ -1,7 +1,7 @@
 @import 'shared';
 
 :local(.title) {
-  text-align: left;
+  text-align: center;
   font-weight: bold;
   margin: 0 12px;
 }
@@ -47,12 +47,12 @@
 :local(.scene-name) {
   font-size: 20px;
   font-weight: $semi-bold;
-  color: black;
+  color: var(--panel-text-color);
 }
 
 :local(.scene-creator) {
   font-size: 16px;
-  color: $grey-text;
+  color: var(--panel-subtext-color);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -78,12 +78,12 @@
   font-weight: $semi-bold;
 
   a {
-    color: $action-color;
+    color: $action-label-color;
     text-decoration: none;
   }
 }
 
 :local(.attribution-author) {
-  color: $grey-text;
+  color: var(--panel-subtext-color);
   font-weight: normal;
 }

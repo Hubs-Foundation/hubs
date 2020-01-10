@@ -6,11 +6,15 @@ import classNames from "classnames";
 import Linkify from "react-linkify";
 import { toArray as toEmojis } from "react-emoji-render";
 import serializeElement from "../utils/serialize-element";
+import { navigateToClientInfo } from "./presence-list";
 
 const messageCanvas = document.createElement("canvas");
+
 const emojiRegex = /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|[\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|[\ud83c[\ude32-\ude3a]|[\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])/;
 const urlRegex = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)$/;
 const textureLoader = new THREE.TextureLoader();
+
+const CHAT_MESSAGE_TEXTURE_SIZE = 1024;
 
 // Hacky word wrapping, needed because the SVG conversion doesn't properly deal
 // with wrapping in Firefox for some reason. (The CSS white-space is set to pre)
@@ -40,7 +44,7 @@ const wordWrap = body => {
   return outWords.join(" ");
 };
 
-const messageBodyDom = (body, from) => {
+const messageBodyDom = (body, from, fromSessionId, includeFromLink, history) => {
   // Support wrapping text in ` to get monospace, and multiline.
   const multiLine = body.split("\n").length > 1;
   const wrapStyle = multiLine ? styles.messageWrapMulti : styles.messageWrap;
@@ -50,6 +54,8 @@ const messageBodyDom = (body, from) => {
     [styles.messageBodyMulti]: multiLine,
     [styles.messageBodyMono]: mono
   };
+  const includeClientLink = includeFromLink && fromSessionId && history && NAF.clientId !== fromSessionId;
+  const onFromClick = includeClientLink ? () => navigateToClientInfo(history, fromSessionId) : () => {};
 
   if (!multiLine) {
     body = wordWrap(body);
@@ -59,7 +65,14 @@ const messageBodyDom = (body, from) => {
 
   return (
     <div className={wrapStyle}>
-      {from && <div className={styles.messageSource}>{from}:</div>}
+      {from && (
+        <div
+          onClick={onFromClick}
+          className={classNames({ [styles.messageSource]: true, [styles.messageSourceLink]: includeClientLink })}
+        >
+          {from}:
+        </div>
+      )}
       <div className={classNames(messageBodyClasses)}>
         <Linkify properties={{ target: "_blank", rel: "noopener referrer" }}>{toEmojis(cleanedBody)}</Linkify>
       </div>
@@ -67,7 +80,7 @@ const messageBodyDom = (body, from) => {
   );
 };
 
-function renderChatMessage(body, from, allowEmojiRender, lowResolution) {
+function renderChatMessage(body, from, allowEmojiRender) {
   const isOneLine = body.split("\n").length === 1;
   const context = messageCanvas.getContext("2d");
   const emoji = toEmojis(body);
@@ -100,33 +113,29 @@ function renderChatMessage(body, from, allowEmojiRender, lowResolution) {
 
   return new Promise(resolve => {
     ReactDOM.render(entryDom, el, () => {
-      // Scale by 12x
-      let objectScale = "8.33%";
-      let scale = 12;
-
-      if (lowResolution) {
-        // In low res, scale by 4x
-        objectScale = "25%";
-        scale = 4;
-      }
-
-      messageCanvas.width = el.offsetWidth * (scale + 0.1);
-      messageCanvas.height = el.offsetHeight * (scale + 0.1);
+      const width = el.offsetWidth;
+      const height = el.offsetHeight;
+      const ratio = height / width;
+      const scale = (CHAT_MESSAGE_TEXTURE_SIZE * Math.min(1.0, 1.0 / ratio)) / el.offsetWidth;
+      messageCanvas.width = width * scale;
+      messageCanvas.height = height * scale;
 
       const xhtml = encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" width="${messageCanvas.width}" height="${messageCanvas.height}">
-            <foreignObject width="${objectScale}" height="${objectScale}" style="transform: scale(${scale});">
+          <svg xmlns="http://www.w3.org/2000/svg" width="${messageCanvas.width}px" height="${messageCanvas.height}px">
+            <foreignObject width="100%" height="100%" style="transform: scale(${scale});">
               ${serializeElement(el)}
             </foreignObject>
           </svg>
     `);
       const img = new Image();
 
-      img.onload = async () => {
+      img.onload = () => {
         context.drawImage(img, 0, 0);
-        const blob = await new Promise(resolve => messageCanvas.toBlob(resolve));
-        el.parentNode.removeChild(el);
-        resolve(blob);
+        ReactDOM.unmountComponentAtNode(el);
+        el.remove();
+        img.onload = null;
+        img.src = "";
+        messageCanvas.toBlob(blob => resolve([blob, width, height]));
       };
 
       img.src = "data:image/svg+xml," + xhtml;
@@ -137,16 +146,15 @@ function renderChatMessage(body, from, allowEmojiRender, lowResolution) {
 export async function createInWorldLogMessage({ name, type, body }) {
   if (type !== "chat") return;
 
-  const lowResolution = AFRAME.utils.device.isMobile();
-  const blob = await renderChatMessage(body, name, false, lowResolution);
+  const [blob, width, height] = await renderChatMessage(body, name, false);
   const entity = document.createElement("a-entity");
   const meshEntity = document.createElement("a-entity");
 
   document.querySelector("a-scene").appendChild(entity);
 
   entity.appendChild(meshEntity);
-  entity.setAttribute("follow-in-lower-fov", {
-    target: "#player-camera",
+  entity.setAttribute("follow-in-fov", {
+    target: "#avatar-pov-node",
     offset: { x: 0, y: 0.0, z: -0.8 }
   });
 
@@ -189,12 +197,12 @@ export async function createInWorldLogMessage({ name, type, body }) {
     material.generateMipmaps = false;
     material.needsUpdate = true;
 
-    const geometry = new THREE.PlaneGeometry();
+    const geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
     const mesh = new THREE.Mesh(geometry, material);
     meshEntity.setObject3D("mesh", mesh);
     meshEntity.meshMaterial = material;
-    const scaleFactor = 4000.0 / (lowResolution ? 3.0 : 1.0);
-    meshEntity.object3DMap.mesh.scale.set(texture.image.width / scaleFactor, texture.image.height / scaleFactor, 1);
+    const scaleFactor = 400;
+    meshEntity.object3DMap.mesh.scale.set(width / scaleFactor, height / scaleFactor, 1);
   });
 }
 
@@ -206,7 +214,7 @@ export async function spawnChatMessage(body, from) {
     return;
   }
 
-  const blob = await renderChatMessage(body, from, true, false);
+  const [blob] = await renderChatMessage(body, from, true);
   document.querySelector("a-scene").emit("add_media", new File([blob], "message.png", { type: "image/png" }));
 }
 
@@ -219,7 +227,7 @@ export default function ChatMessage(props) {
           onClick={() => spawnChatMessage(props.body)}
         />
       )}
-      {messageBodyDom(props.body, props.name)}
+      {messageBodyDom(props.body, props.name, props.sessionId, props.includeFromLink, props.history)}
     </div>
   );
 }
@@ -228,5 +236,8 @@ ChatMessage.propTypes = {
   name: PropTypes.string,
   maySpawn: PropTypes.bool,
   body: PropTypes.string,
-  className: PropTypes.string
+  sessionId: PropTypes.string,
+  history: PropTypes.object,
+  className: PropTypes.string,
+  includeFromLink: PropTypes.bool
 };

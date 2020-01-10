@@ -1,4 +1,7 @@
 import { getLastWorldPosition } from "../utils/three-utils";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
+
+const isMobile = AFRAME.utils.device.isMobile();
 
 /**
  * Toggles the visibility of this entity when the scene is frozen.
@@ -8,14 +11,45 @@ import { getLastWorldPosition } from "../utils/three-utils";
 AFRAME.registerComponent("visibility-while-frozen", {
   schema: {
     withinDistance: { type: "number" },
-    visible: { type: "boolean", default: true }
+    visible: { type: "boolean", default: true },
+    requireHoverOnNonMobile: { type: "boolean", default: true },
+    withPermission: { type: "string" },
+    visibleIfOwned: { type: "boolean", default: true }
   },
 
   init() {
     this.updateVisibility = this.updateVisibility.bind(this);
     this.camWorldPos = new THREE.Vector3();
     this.objWorldPos = new THREE.Vector3();
-    this.cam = this.el.sceneEl.camera.el.object3D;
+
+    waitForDOMContentLoaded().then(() => {
+      this.cam = document.getElementById("avatar-pov-node").object3D;
+      this.updateVisibility();
+    });
+
+    let hoverableSearch = this.el;
+
+    while (hoverableSearch !== document) {
+      if (hoverableSearch.getAttribute("is-remote-hover-target") !== null) {
+        this.hoverable = hoverableSearch;
+        break;
+      }
+
+      hoverableSearch = hoverableSearch.parentNode;
+    }
+    if (!this.hoverable && this.data.requireHoverOnNonMobile) {
+      console.error("Didn't find a remote hover target.");
+    }
+
+    if (!this.data.visibleIfOwned) {
+      NAF.utils
+        .getNetworkedEntity(this.el)
+        .then(networkedEl => {
+          this.networkedEl = networkedEl;
+        })
+        .then(() => {}); //ignore exception, entity might not be networked
+    }
+
     this.onStateChange = evt => {
       if (!evt.detail === "frozen") return;
       this.updateVisibility();
@@ -24,22 +58,22 @@ AFRAME.registerComponent("visibility-while-frozen", {
   },
 
   tick() {
-    if (!this.data.withinDistance) return;
-
     const isFrozen = this.el.sceneEl.is("frozen");
-    const isVisible = this.el.getAttribute("visible");
-    if (!isFrozen && !isVisible) return;
+    const isVisible = this.el.object3D.visible;
+    const shouldNotBeVisible = isFrozen === !this.data.visible;
+    if (!isVisible && shouldNotBeVisible) return;
 
     this.updateVisibility();
   },
 
   updateVisibility() {
+    if (!this.cam) return;
     const isFrozen = this.el.sceneEl.is("frozen");
 
     let isWithinDistance = true;
     const isVisible = this.el.object3D.visible;
 
-    if (this.data.withinDistance !== undefined) {
+    if (this.data.withinDistance) {
       if (!isVisible) {
         // Edge case, if the object is not visible force a matrix update
         // since the main matrix update loop will not do it.
@@ -54,9 +88,28 @@ AFRAME.registerComponent("visibility-while-frozen", {
         this.camWorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance;
     }
 
-    const isRotating = AFRAME.scenes[0].systems["rotate-selected-object"].rotating;
-    const shouldBeVisible =
-      ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) && isWithinDistance && !isRotating;
+    const isTransforming = this.el.sceneEl.systems["transform-selected-object"].transforming;
+
+    const allowed = !this.data.withPermission || window.APP.hubChannel.canOrWillIfCreator(this.data.withPermission);
+
+    let shouldBeVisible =
+      allowed &&
+      ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) &&
+      isWithinDistance &&
+      !isTransforming;
+
+    if (this.data.requireHoverOnNonMobile && !isMobile) {
+      shouldBeVisible =
+        shouldBeVisible &&
+        ((this.hoverable &&
+          (this.el.sceneEl.systems.interaction.state.rightRemote.hovered === this.hoverable ||
+            this.el.sceneEl.systems.interaction.state.leftRemote.hovered === this.hoverable)) ||
+          isVisible);
+    }
+
+    if (!this.data.visibleIfOwned) {
+      shouldBeVisible = shouldBeVisible && this.networkedEl && !NAF.utils.isMine(this.networkedEl);
+    }
 
     if (isVisible !== shouldBeVisible) {
       this.el.setAttribute("visible", shouldBeVisible);
@@ -66,11 +119,21 @@ AFRAME.registerComponent("visibility-while-frozen", {
   play() {
     this.el.sceneEl.addEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.addEventListener("stateremoved", this.onStateChange);
+
+    if (this.hoverable) {
+      this.hoverable.object3D.addEventListener("hovered", this.updateVisibility);
+      this.hoverable.object3D.addEventListener("unhovered", this.updateVisibility);
+    }
   },
 
   pause() {
     this.el.sceneEl.removeEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateChange);
+
+    if (this.hoverable) {
+      this.hoverable.object3D.addEventListener("hovered", this.updateVisibility);
+      this.hoverable.object3D.addEventListener("unhovered", this.updateVisibility);
+    }
   }
 });
 

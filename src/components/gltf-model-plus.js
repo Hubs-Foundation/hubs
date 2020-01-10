@@ -1,14 +1,61 @@
 import nextTick from "../utils/next-tick";
-import { forEachMaterial } from "../utils/material-utils";
+import { mapMaterials } from "../utils/material-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import MobileStandardMaterial from "../materials/MobileStandardMaterial";
-import { getCustomGLTFParserURLResolver } from "../utils/media-utils";
+import { textureLoader } from "../utils/media-utils";
+import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
+import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
+import { disposeNode, cloneObject3D } from "../utils/three-utils";
+
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
-const GLTFCache = {};
+class GLTFCache {
+  cache = new Map();
 
-function inflateComponent(el, componentName, componentData) {
+  set(src, gltf) {
+    this.cache.set(src, {
+      gltf,
+      count: 0
+    });
+    return this.retain(src);
+  }
+
+  has(src) {
+    return this.cache.has(src);
+  }
+
+  get(src) {
+    return this.cache.get(src);
+  }
+
+  retain(src) {
+    const cacheItem = this.cache.get(src);
+    cacheItem.count++;
+    return cacheItem;
+  }
+
+  release(src) {
+    const cacheItem = this.cache.get(src);
+
+    if (!cacheItem) {
+      console.error(`Releasing uncached gltf ${src}`);
+      return;
+    }
+
+    cacheItem.count--;
+    if (cacheItem.count <= 0) {
+      cacheItem.gltf.scene.traverse(disposeNode);
+      this.cache.delete(src);
+    }
+  }
+}
+const gltfCache = new GLTFCache();
+const inflightGltfs = new Map();
+
+const extractZipFile = promisifyWorker(new SketchfabZipWorker());
+
+function defaultInflator(el, componentName, componentData) {
   if (!AFRAME.components[componentName]) {
     throw new Error(`Inflator failed. "${componentName}" component does not exist.`);
   }
@@ -25,60 +72,47 @@ AFRAME.GLTFModelPlus = {
   // eslint-disable-next-line no-unused-vars
   components: {},
   registerComponent(componentKey, componentName, inflator) {
-    inflator = inflator || inflateComponent;
+    inflator = inflator || defaultInflator;
     AFRAME.GLTFModelPlus.components[componentKey] = { inflator, componentName };
   }
 };
 
-function parallelTraverse(a, b, callback) {
-  callback(a, b);
-
-  for (let i = 0; i < a.children.length; i++) {
-    parallelTraverse(a.children[i], b.children[i], callback);
-  }
-}
-
-// Modified version of Don McCurdy's AnimationUtils.clone
-// https://github.com/mrdoob/three.js/pull/14494
-function cloneSkinnedMesh(source) {
-  const cloneLookup = new Map();
-
-  const clone = source.clone();
-
-  parallelTraverse(source, clone, function(sourceNode, clonedNode) {
-    cloneLookup.set(sourceNode, clonedNode);
-    if (sourceNode.isMesh && sourceNode.geometry.boundsTree) {
-      clonedNode.geometry.boundsTree = sourceNode.geometry.boundsTree;
+function generateMeshBVH(object3D) {
+  object3D.traverse(obj => {
+    // note that we might already have a bounds tree if this was a clone of an object with one
+    const hasBufferGeometry = obj.isMesh && obj.geometry.isBufferGeometry;
+    const hasBoundsTree = hasBufferGeometry && obj.geometry.boundsTree;
+    if (hasBufferGeometry && !hasBoundsTree && obj.geometry.attributes.position) {
+      const geo = obj.geometry;
+      const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
+      // only bother using memory and time making a BVH if there are a reasonable number of tris,
+      // and if there are too many it's too painful and large to tolerate doing it (at least until
+      // we put this in a web worker)
+      if (triCount > 1000 && triCount < 1000000) {
+        // note that bounds tree construction creates an index as a side effect if one doesn't already exist
+        geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 30 });
+      }
     }
   });
-
-  source.traverse(function(sourceMesh) {
-    if (!sourceMesh.isSkinnedMesh) return;
-
-    const sourceBones = sourceMesh.skeleton.bones;
-    const clonedMesh = cloneLookup.get(sourceMesh);
-
-    clonedMesh.skeleton = sourceMesh.skeleton.clone();
-
-    clonedMesh.skeleton.bones = sourceBones.map(function(sourceBone) {
-      if (!cloneLookup.has(sourceBone)) {
-        throw new Error("Required bones are not descendants of the given object.");
-      }
-
-      return cloneLookup.get(sourceBone);
-    });
-
-    clonedMesh.bind(clonedMesh.skeleton, sourceMesh.bindMatrix);
-  });
-
-  return clone;
 }
 
 function cloneGltf(gltf) {
   return {
-    animations: gltf.animations,
-    scene: cloneSkinnedMesh(gltf.scene)
+    animations: gltf.scene.animations,
+    scene: cloneObject3D(gltf.scene)
   };
+}
+
+function getHubsComponents(node) {
+  const hubsComponents =
+    node.userData.gltfExtensions &&
+    (node.userData.gltfExtensions.MOZ_hubs_components || node.userData.gltfExtensions.HUBS_components);
+
+  // We can remove support for legacy components when our environment, avatar and interactable models are
+  // updated to match Spoke output.
+  const legacyComponents = node.userData.components;
+
+  return hubsComponents || legacyComponents;
 }
 
 /// Walks the tree of three.js objects starting at the given node, using the GLTF data
@@ -87,7 +121,7 @@ function cloneGltf(gltf) {
 /// or templates associated with any of their nodes.)
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
-const inflateEntities = function(node, templates, isRoot, modelToWorldScale = 1) {
+const inflateEntities = function(indexToEntityMap, node, templates, isRoot, modelToWorldScale = 1) {
   // TODO: Remove this once we update the legacy avatars to the new node names
   if (node.name === "Chest") {
     node.name = "Spine";
@@ -101,19 +135,13 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale = 1)
   const childEntities = [];
   const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
   for (const child of children) {
-    const el = inflateEntities(child, templates);
+    const el = inflateEntities(indexToEntityMap, child, templates);
     if (el) {
       childEntities.push(el);
     }
   }
 
-  const hubsComponents = node.userData.gltfExtensions && node.userData.gltfExtensions.HUBS_components;
-
-  // We can remove support for legacy components when our environment, avatar and interactable models are
-  // updated to match Spoke output.
-  const legacyComponents = node.userData.components;
-
-  const entityComponents = hubsComponents || legacyComponents;
+  const entityComponents = getHubsComponents(node);
 
   const nodeHasBehavior = !!entityComponents || node.name in templates;
   if (!nodeHasBehavior && !childEntities.length && !isRoot) {
@@ -149,10 +177,16 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale = 1)
   }
 
   // Set the name of the `THREE.Group` to match the name of the node,
+  // so that templates can be attached to the correct AFrame entity.
+  el.object3D.name = node.name;
+
+  // Set the uuid of the `THREE.Group` to match the uuid of the node,
   // so that `THREE.PropertyBinding` will find (and later animate)
   // the group. See `PropertyBinding.findNode`:
   // https://github.com/mrdoob/three.js/blob/dev/src/animation/PropertyBinding.js#L211
-  el.object3D.name = node.name;
+  el.object3D.uuid = node.uuid;
+  node.uuid = THREE.Math.generateUUID();
+
   if (node.animations) {
     // Pass animations up to the group object so that when we can pass the group as
     // the optional root in `THREE.AnimationMixer.clipAction` and use the hierarchy
@@ -161,17 +195,45 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale = 1)
     node.parent.animations = node.animations;
   }
 
-  if (entityComponents) {
-    for (const prop in entityComponents) {
-      if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
-        const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-        inflator(el, componentName, entityComponents[prop], entityComponents);
-      }
-    }
+  const gltfIndex = node.userData.gltfIndex;
+  if (gltfIndex !== undefined) {
+    indexToEntityMap[gltfIndex] = el;
   }
 
   return el;
 };
+
+async function inflateComponents(inflatedEntity, indexToEntityMap) {
+  let isFirstInflation = true;
+  const objectInflations = [];
+
+  inflatedEntity.object3D.traverse(async object3D => {
+    const objectInflation = {};
+    objectInflation.promise = new Promise(resolve => (objectInflation.resolve = resolve));
+    objectInflations.push(objectInflation);
+
+    if (!isFirstInflation) {
+      await objectInflations.shift().promise;
+    }
+    isFirstInflation = false;
+
+    const entityComponents = getHubsComponents(object3D);
+    const el = object3D.el;
+
+    if (entityComponents && el) {
+      for (const prop in entityComponents) {
+        if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
+          const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
+          await inflator(el, componentName, entityComponents[prop], entityComponents, indexToEntityMap);
+        }
+      }
+    }
+
+    objectInflation.resolve();
+  });
+
+  await objectInflations.shift().promise;
+}
 
 function attachTemplate(root, name, templateRoot) {
   const targetEls = root.querySelectorAll("." + name);
@@ -189,31 +251,90 @@ function attachTemplate(root, name, templateRoot) {
   }
 }
 
-function getFilesFromSketchfabZip(src) {
-  return new Promise((resolve, reject) => {
-    const worker = new SketchfabZipWorker();
-    worker.onmessage = e => {
-      const [success, fileMapOrError] = e.data;
-      (success ? resolve : reject)(fileMapOrError);
-    };
-    worker.postMessage(src);
-  });
+function getHubsComponentsExtension(node) {
+  if (node.extensions && node.extensions.MOZ_hubs_components) {
+    return node.extensions.MOZ_hubs_components;
+  } else if (node.extensions && node.extensions.HUBS_components) {
+    return node.extensions.HUBS_components;
+  } else if (node.extras && node.extras.gltfExtensions && node.extras.gltfExtensions.MOZ_hubs_components) {
+    return node.extras.gltfExtensions.MOZ_hubs_components;
+  }
 }
 
-async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
+// Versions are documented here: https://github.com/mozilla/hubs/wiki/MOZ_hubs_components-Changelog
+// Make sure to update the wiki and Spoke when bumping a version
+function runMigration(version, json) {
+  if (version < 2) {
+    //old heightfields will be on the same node as the nav-mesh, delete those
+    const oldHeightfieldNode = json.nodes.find(node => {
+      const components = getHubsComponentsExtension(node);
+      return components && components.heightfield && components["nav-mesh"];
+    });
+    if (oldHeightfieldNode) {
+      if (oldHeightfieldNode.extensions && oldHeightfieldNode.extensions.MOZ_hubs_components) {
+        delete oldHeightfieldNode.extensions.MOZ_hubs_components.heightfield;
+      } else if (oldHeightfieldNode.extensions && oldHeightfieldNode.extensions.HUBS_components) {
+        delete oldHeightfieldNode.extensions.HUBS_components.heightfield;
+      } else if (
+        oldHeightfieldNode.extras &&
+        oldHeightfieldNode.extras.gltfExtensions &&
+        oldHeightfieldNode.extras.gltfExtensions.MOZ_hubs_components
+      ) {
+        delete oldHeightfieldNode.extras.gltfExtensions.MOZ_hubs_components;
+      }
+    }
+  }
+
+  if (version < 4) {
+    // Lights prior to version 4 should treat range === 0 as if it has zero decay
+    if (json.nodes) {
+      for (const node of json.nodes) {
+        const components = getHubsComponentsExtension(node);
+
+        if (!components) {
+          continue;
+        }
+
+        const light = components["spot-light"] || components["point-light"];
+
+        if (light && light.range === 0) {
+          light.decay = 0;
+        }
+      }
+    }
+  }
+}
+
+export async function loadGLTF(src, contentType, preferredTechnique, onProgress, jsonPreprocessor) {
   let gltfUrl = src;
   let fileMap;
 
-  if (contentType.includes("model/gltf+zip") || contentType.includes("application/x-zip-compressed")) {
-    fileMap = await getFilesFromSketchfabZip(gltfUrl);
+  if (contentType && (contentType.includes("model/gltf+zip") || contentType.includes("application/x-zip-compressed"))) {
+    fileMap = await extractZipFile(gltfUrl);
     gltfUrl = fileMap["scene.gtlf"];
   }
 
-  const gltfLoader = new THREE.GLTFLoader();
-  gltfLoader.customURLResolver = getCustomGLTFParserURLResolver(gltfUrl);
-  gltfLoader.setLazy(true);
+  const loadingManager = new THREE.LoadingManager();
+  loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
+  const gltfLoader = new THREE.GLTFLoader(loadingManager);
 
-  const { parser } = await new Promise((resolve, reject) => gltfLoader.load(gltfUrl, resolve, onProgress, reject));
+  const parser = await new Promise((resolve, reject) => gltfLoader.createParser(gltfUrl, resolve, onProgress, reject));
+
+  parser.textureLoader = textureLoader;
+
+  if (jsonPreprocessor) {
+    parser.json = jsonPreprocessor(parser.json);
+  }
+
+  let version = 0;
+  if (
+    parser.json.extensions &&
+    parser.json.extensions.MOZ_hubs_components &&
+    parser.json.extensions.MOZ_hubs_components.hasOwnProperty("version")
+  ) {
+    version = parser.json.extensions.MOZ_hubs_components.version;
+  }
+  runMigration(version, parser.json);
 
   const materials = parser.json.materials;
   if (materials) {
@@ -231,25 +352,32 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     }
   }
 
-  const gltf = await new Promise((resolve, reject) =>
-    parser.parse(
-      (scene, scenes, cameras, animations, json) => {
-        resolve({ scene, scenes, cameras, animations, json });
-      },
-      e => {
-        reject(e);
+  const nodes = parser.json.nodes;
+
+  if (nodes) {
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+
+      if (!node.extras) {
+        node.extras = {};
       }
-    )
-  );
+
+      node.extras.gltfIndex = i;
+    }
+  }
+
+  const gltf = await new Promise(parser.parse.bind(parser));
 
   gltf.scene.traverse(object => {
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
 
-    forEachMaterial(object, material => {
+    object.material = mapMaterials(object, material => {
       if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
-        object.material = MobileStandardMaterial.fromStandardMaterial(object.material);
+        return MobileStandardMaterial.fromStandardMaterial(material);
       }
+
+      return material;
     });
   });
 
@@ -258,7 +386,47 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     Object.keys(fileMap).forEach(URL.revokeObjectURL);
   }
 
+  gltf.scene.animations = gltf.animations;
+
   return gltf;
+}
+
+export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
+  const preferredTechnique =
+    window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness";
+
+  if (useCache) {
+    if (gltfCache.has(src)) {
+      gltfCache.retain(src);
+      return cloneGltf(gltfCache.get(src).gltf);
+    } else {
+      if (inflightGltfs.has(src)) {
+        const gltf = await inflightGltfs.get(src);
+        gltfCache.retain(src);
+        return cloneGltf(gltf);
+      } else {
+        const promise = loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor);
+        inflightGltfs.set(src, promise);
+        const gltf = await promise;
+        inflightGltfs.delete(src);
+        gltfCache.set(src, gltf);
+        return cloneGltf(gltf);
+      }
+    }
+  } else {
+    return loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor);
+  }
+}
+
+function resolveAsset(src) {
+  // If the src attribute is a selector, get the url from the asset item.
+  if (src && src.charAt(0) === "#") {
+    const assetEl = document.getElementById(src.substring(1));
+    if (assetEl) {
+      return assetEl.getAttribute("src");
+    }
+  }
+  return src;
 }
 
 /**
@@ -273,17 +441,29 @@ AFRAME.registerComponent("gltf-model-plus", {
     contentType: { type: "string" },
     useCache: { default: true },
     inflate: { default: false },
+    batch: { default: false },
     modelToWorldScale: { type: "number", default: 1 }
   },
 
   init() {
-    this.preferredTechnique =
-      window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness";
+    // This can be set externally if a consumer wants to do some node preprocssing.
+    this.jsonPreprocessor = null;
+
     this.loadTemplates();
   },
 
   update() {
-    this.applySrc(this.data.src, this.data.contentType);
+    this.applySrc(resolveAsset(this.data.src), this.data.contentType);
+  },
+
+  remove() {
+    if (this.data.batch && this.model) {
+      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.el.object3DMap.mesh);
+    }
+    const src = resolveAsset(this.data.src);
+    if (src) {
+      gltfCache.release(src);
+    }
   },
 
   loadTemplates() {
@@ -294,66 +474,69 @@ AFRAME.registerComponent("gltf-model-plus", {
     });
   },
 
-  async loadModel(src, contentType, technique, useCache) {
-    if (useCache) {
-      if (!GLTFCache[src]) {
-        GLTFCache[src] = await loadGLTF(src, contentType, technique);
-      }
-
-      return cloneGltf(GLTFCache[src]);
-    } else {
-      return await loadGLTF(src, contentType, technique);
-    }
-  },
-
   async applySrc(src, contentType) {
     try {
-      // If the src attribute is a selector, get the url from the asset item.
-      if (src && src.charAt(0) === "#") {
-        const assetEl = document.getElementById(src.substring(1));
-        src = assetEl.getAttribute("src");
-      }
-
       if (src === this.lastSrc) return;
+
+      const lastSrc = this.lastSrc;
       this.lastSrc = src;
 
       if (!src) {
         if (this.inflatedEl) {
           console.warn("gltf-model-plus set to an empty source, unloading inflated model.");
-          this.removeInflatedEl();
+          this.disposeLastInflatedEl();
         }
         return;
       }
 
-      const gltf = await this.loadModel(src, contentType, this.preferredTechnique, this.data.useCache);
+      this.el.emit("model-loading");
+      const gltf = await loadModel(src, contentType, this.data.useCache, this.jsonPreprocessor);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
       if (src != this.lastSrc) return;
 
       // If we had inflated something already before, clean that up
-      this.removeInflatedEl();
+      this.disposeLastInflatedEl();
 
       this.model = gltf.scene || gltf.scenes[0];
-      this.model.animations = gltf.animations;
+
+      if (this.data.batch) {
+        this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.model);
+      }
 
       if (gltf.animations.length > 0) {
         this.el.setAttribute("animation-mixer", {});
-        this.el.components["animation-mixer"].initMixer(gltf.animations);
+        this.el.components["animation-mixer"].initMixer(this.model.animations);
+      } else {
+        generateMeshBVH(this.model);
       }
+
+      const indexToEntityMap = {};
 
       let object3DToSet = this.model;
       if (
         this.data.inflate &&
-        (this.inflatedEl = inflateEntities(this.model, this.templates, true, this.data.modelToWorldScale))
+        (this.inflatedEl = inflateEntities(
+          indexToEntityMap,
+          this.model,
+          this.templates,
+          true,
+          this.data.modelToWorldScale
+        ))
       ) {
         this.el.appendChild(this.inflatedEl);
 
         object3DToSet = this.inflatedEl.object3D;
+        object3DToSet.visible = false;
+
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
         // Wait one tick for the appended custom elements to be connected before attaching templates
         await nextTick();
         if (src != this.lastSrc) return; // TODO: there must be a nicer pattern for this
+
+        await inflateComponents(this.inflatedEl, indexToEntityMap);
+
         for (const name in this.templates) {
           attachTemplate(this.el, name, this.templates[name]);
         }
@@ -379,46 +562,43 @@ AFRAME.registerComponent("gltf-model-plus", {
         environmentMapComponent.applyEnvironmentMap(object3DToSet);
       }
 
+      if (lastSrc) {
+        gltfCache.release(lastSrc);
+      }
       this.el.setObject3D("mesh", object3DToSet);
 
       rewires.forEach(f => f());
 
-      // generate acceleration structures for raycasting against
-      object3DToSet.traverse(obj => {
-        // note that we might already have a bounds tree if this was a clone of an object with one
-        const hasBufferGeometry = obj.isMesh && obj.geometry.isBufferGeometry;
-        const hasBoundsTree = hasBufferGeometry && obj.geometry.boundsTree;
-        if (hasBufferGeometry && !hasBoundsTree) {
-          // we can't currently build a BVH for geometries with groups, because the groups rely on the
-          // existing ordering of the index, which we kill as a result of building the tree
-          if (obj.geometry.groups && obj.geometry.groups.length) {
-            console.warn("BVH construction not supported for geometry with groups; raycasting may suffer.");
-          } else {
-            const geo = obj.geometry;
-            const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
-            // only bother using memory and time making a BVH if there are a reasonable number of tris,
-            // and if there are too many it's too painful and large to tolerate doing it (at least until
-            // we put this in a web worker)
-            if (triCount > 1000 && triCount < 1000000) {
-              geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 30 });
-              geo.setIndex(geo.boundsTree.index);
-            }
-          }
-        }
-      });
-
+      object3DToSet.visible = true;
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
-      delete GLTFCache[src];
+      gltfCache.release(src);
       console.error("Failed to load glTF model", e, this);
       this.el.emit("model-error", { format: "gltf", src });
     }
   },
 
-  removeInflatedEl() {
+  disposeLastInflatedEl() {
     if (this.inflatedEl) {
       this.inflatedEl.parentNode.removeChild(this.inflatedEl);
+
+      this.inflatedEl.object3D.traverse(x => {
+        if (x.material && x.material.dispose) {
+          x.material.dispose();
+        }
+
+        if (x.geometry) {
+          if (x.geometry.dispose) {
+            x.geometry.dispose();
+          }
+
+          x.geometry.boundsTree = null;
+        }
+      });
+
       delete this.inflatedEl;
+
+      this.el.removeAttribute("animation-mixer");
     }
   }
 });

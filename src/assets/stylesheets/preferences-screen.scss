@@ -1,0 +1,400 @@
+@import 'shared.scss';
+
+$smallScreenWidth : 475px;
+$itemHeight : 3.0rem;
+$hoverFontSize: 1.6rem;
+$widescreenControlsWidth: 100%;
+$widescreenBreakpoint: 600px;
+$backgroundColor: var(--full-panel-background-color);
+
+:local(.max-resolution-preference-item) {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: center;
+
+  input {
+    @extend %input-field;
+    width: 6em;
+    font-size: 11pt;
+    text-align: center;
+    height: 38px;
+  }
+}
+
+input[type='number'] {
+  -moz-appearance:textfield;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+:local(.preference-list-non-checkbox){
+  @media (max-width: $widescreenBreakpoint) {
+    flex-direction: column;
+  }
+}
+
+:local(.preference-list-item){
+  display: flex;
+  align-items: center;
+  margin: 12px 0;
+
+  :local(.part) {
+    display: flex;
+    flex-flow: column;
+    justify-content: space-around;
+    @media( min-width:$smallScreenWidth+1 ) {
+      justify-content: space-around;
+    }
+    @media( max-width:$smallScreenWidth ) {
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+  :local(.checkbox-margin) {
+    margin-right: 8px;
+    width: 48px;
+  }
+  :local(.left) {
+    flex: 1;
+    @media( min-width:$smallScreenWidth+1 ) {
+      margin-inline-end: 1rem;
+    }
+    @media( max-width:$smallScreenWidth ) {
+      margin-inline-end: 0rem;
+    }
+  }
+  :local(.right) {
+    display: flex;
+    flex-flow: row;
+  }
+  :local(.dropdown) {
+    @extend %dropdown;
+    select {
+      @extend %dropdown-select;
+      font-size: 11pt;
+      font-weight: normal;
+      height: 38px;
+      padding-left: 1em;
+      padding-right: 2.5em;
+      cursor: pointer;
+    }
+    :local(.dropdownArrow) {
+      @extend %dropdown-arrow;
+      right: 0.9em;
+    }
+  }
+}
+
+:local(.preferences-panel) {
+  top: 0px;
+  bottom: 0px;
+  width: 100%;
+  height: 100%;
+  background: var(--full-panel-background-color);
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+:local(.panel-margin) {
+  margin-top: 18px;
+
+  :local(.close-button) {
+    @extend %panel-widget;
+    top: 24px;
+    left: 24px;
+
+    font-size: 1.6em;
+    position: absolute;
+    z-index: 1;
+  }
+}
+
+:local(.content-container) {
+  @extend %default-font;
+  font-size: 11pt;
+  overflow-y: auto;
+  font-weight: bold;
+  box-sizing: border-box;
+  height: calc(100vh - 16px);
+
+  @media (max-width: $widescreenBreakpoint) {
+    margin-top: 0;
+    height: calc(100vh - 48px);
+  }
+
+  :local(.scrolling-content) {
+    display: flex;
+    flex-flow: column;
+    max-width: 80%;
+    padding-left: 10%;
+  }
+  :local(.section-bar) {
+    width: 100%;
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    align-items: center;
+  }
+  :local(.section-title) {
+    width: 90%;
+    display: flex;
+    flex-flow: row;
+    justify-content: flex-start;
+
+    @media (max-width: $widescreenBreakpoint) {
+      justify-content: center;
+    }
+
+    align-items: center;
+    color: var(--menu-header-text-color);
+    font-weight: normal;
+    text-transform: uppercase;
+    margin: 12px 0;
+  }
+
+  input[type=checkbox] {
+    cursor: pointer;
+    @extend %checkbox;
+  }
+  input[type=checkbox]:checked {
+    @extend %checkbox-checked;
+  }
+}
+
+:local(.checkbox) {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+}
+
+:local(.row) {
+  width: 90%;
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+}
+:local(.row-name) {
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: space-around;
+  width: 50%;
+  text-align: end;
+  margin-inline-end: 1rem;
+}
+
+:local(.reset-to-default-button){
+  background: transparent;
+  border: none;
+  font-size: medium;
+  padding: 0px 0px 0px 12px;
+  cursor: pointer;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+}
+
+:local(.prev-option-scale) {
+  height: 2rem;
+}
+:local(.next-option-scale) {
+  height: 2rem;
+}
+
+:local(.prev-option-hovered-scale) {
+  height: 2.2rem;
+}
+:local(.next-option-hovered-scale) {
+  height: 2.2rem;
+}
+:local(.number-with-range){
+  display: flex;
+  flex-flow: row;
+  width: $widescreenControlsWidth;
+  @media( max-width:$smallScreenWidth ) {
+    width: 100%;
+    justify-content: center;
+  }
+  justify-content: flex-start;
+  align-items: center;
+
+  :local(.number-in-number-with-range) {
+    display:flex;
+    justify-content: center;
+    cursor: pointer;
+
+    input[type=text] {
+      @extend %input-field;
+      font-size: 11pt;
+      text-align: center;
+      cursor: pointer;
+      width: 6em;
+      height: 38px;
+    }
+  }
+  :local(.range-slider) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-height: 2.5rem;
+    min-width: 200px;
+    padding: 0px 0px 0px 12px;
+  }
+}
+
+// Styling Cross-Browser Compatible Range Inputs with Sass
+// Github: https://github.com/darlanrod/input-range-sass
+// Author: Darlan Rod https://github.com/darlanrod
+// Version 1.5.2
+// MIT License
+
+$track-color: var(--text-field-border-color) !default;
+$thumb-color: $action-color !default;
+
+$thumb-radius: 10px !default;
+$thumb-height: 20px !default;
+$thumb-width: 20px !default;
+$thumb-shadow-size: 0px !default;
+$thumb-shadow-blur: 0px !default;
+$thumb-shadow-color: rgba(0, 0, 0, .2) !default;
+$thumb-border-width: 0px !default;
+$thumb-border-color: #eceff1 !default;
+
+$track-width: 100% !default;
+$track-height: 8px !default;
+$track-shadow-size: 0px !default;
+$track-shadow-blur: 0px !default;
+$track-shadow-color: rgba(0, 0, 0, .2) !default;
+$track-border-width: 0px !default;
+$track-border-color: #cfd8dc !default;
+
+$track-radius: 5px !default;
+$contrast: 5% !default;
+
+$ie-bottom-track-color: $track-color !default;
+
+@mixin shadow($shadow-size, $shadow-blur, $shadow-color) {
+  box-shadow: $shadow-size $shadow-size $shadow-blur $shadow-color, 0 0 $shadow-size lighten($shadow-color, 5%);
+}
+
+@mixin track {
+  cursor: default;
+  height: $track-height;
+  transition: all .2s ease;
+  width: $track-width;
+}
+
+@mixin thumb {
+  @include shadow($thumb-shadow-size, $thumb-shadow-blur, $thumb-shadow-color);
+  background: $thumb-color;
+  border: $thumb-border-width solid $thumb-border-color;
+  border-radius: $thumb-radius;
+  box-sizing: border-box;
+  cursor: default;
+  height: $thumb-height;
+  width: $thumb-width;
+}
+
+[type='range'] {
+  -webkit-appearance: none;
+  background: transparent;
+  margin: $thumb-height / 2 0;
+  width: $track-width;
+  cursor: pointer;
+
+  &::-moz-focus-outer {
+    border: 0;
+  }
+
+  &:focus {
+    outline: 0;
+
+    &::-webkit-slider-runnable-track {
+      background: $track-color;
+    }
+
+    &::-ms-fill-lower {
+      background: $track-color;
+    }
+
+    &::-ms-fill-upper {
+      background: $track-color;
+    }
+  }
+
+  &::-webkit-slider-runnable-track {
+    @include track;
+    @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
+    background: $track-color;
+    border: $track-border-width solid $track-border-color;
+    border-radius: $track-radius;
+  }
+
+  &::-webkit-slider-thumb {
+    @include thumb;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: ((-$track-border-width * 2 + $track-height) / 2 - $thumb-height / 2);
+  }
+
+  &::-moz-range-track {
+    @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
+    @include track;
+    background: $track-color;
+    border: $track-border-width solid $track-border-color;
+    border-radius: $track-radius;
+    height: $track-height / 2;
+  }
+
+  &::-moz-range-thumb {
+    @include thumb;
+    cursor: pointer;
+  }
+
+  &::-ms-track {
+    @include track;
+    background: transparent;
+    border-color: transparent;
+    border-width: ($thumb-height / 2) 0;
+    color: transparent;
+  }
+
+  &::-ms-fill-lower {
+    @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
+    background: $ie-bottom-track-color;
+    border: $track-border-width solid $track-border-color;
+    border-radius: ($track-radius * 2);
+  }
+
+  &::-ms-fill-upper {
+    @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
+    background: $track-color;
+    border: $track-border-width solid $track-border-color;
+    border-radius: ($track-radius * 2);
+  }
+
+  &::-ms-thumb {
+    @include thumb;
+    cursor: pointer;
+    margin-top: $track-height / 4;
+  }
+
+  &:disabled {
+    &::-webkit-slider-thumb,
+    &::-moz-range-thumb,
+    &::-ms-thumb,
+    &::-webkit-slider-runnable-track,
+    &::-ms-fill-lower,
+    &::-ms-fill-upper {
+      cursor: not-allowed;
+    }
+  }
+}

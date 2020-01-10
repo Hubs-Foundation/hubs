@@ -1,21 +1,15 @@
 
 # Component Docs
 - Systems
-  - [app-mode](#systems/app-mode)
   - [exit-on-blur](#systems/exit-on-blur)
   - [personal-space-bubble](#systems/personal-space-bubble)
 - Components
-  - [app-mode](#components/app-mode)
-    - [app-mode-toggle-playing](#components/app-mode/app-mode-toggle-playing)
-    - [app-mode-toggle-attribute](#components/app-mode/app-mode-toggle-attribute)
-    - [app-mode-input-mappings](#components/app-mode/app-mode-input-mappings)
   - [avatar](#components/avatar)
     - [networked-audio-analyser](#components/avatar/networked-audio-analyser)
     - [scale-audio-feedback](#components/avatar/scale-audio-feedback)
     - [avatar-replay](#components/avatar/avatar-replay)
     - [bone-mute-state-indicator](#components/avatar/bone-mute-state-indicator)
     - [bone-visibility](#components/avatar/bone-visibility)
-    - [character-controller](#components/avatar/character-controller)
     - [hand-pose](#components/avatar/hand-pose)
     - [hand-pose-controller](#components/avatar/hand-pose-controller)
     - [ik-root](#components/avatar/ik-root)
@@ -50,7 +44,6 @@
     - [mute-mic](#components/network/mute-mic)
     - [networked-counter](#components/network/networked-counter)
     - [networked-video-player](#components/network/networked-video-player)
-    - [super-networked-interactable](#components/network/super-networked-interactable)
     - [super-spawner](#components/network/super-spawner)
   - [ui](#components/ui)
     - [hud-controller](#components/ui/hud-controller)
@@ -61,25 +54,14 @@
     - [ui-class-while-frozen](#components/ui/ui-class-while-frozen)
   - [user-input](#components/user-input)
     - [cardboard-controls](#components/user-input/cardboard-controls)
-    - [controls-shape-offset](#components/user-input/controls-shape-offset)
     - [cursor-controller](#components/user-input/cursor-controller)
     - [hand-controls2](#components/user-input/hand-controls2)
-    - [haptic-feedback](#components/user-input/haptic-feedback)
     - [virtual-gamepad-controls](#components/user-input/virtual-gamepad-controls)
-    - [wasd-to-analog2d](#components/user-input/wasd-to-analog2d)
   - [vr-mode](#components/vr-mode)
     - [vr-mode-toggle-visibility](#components/vr-mode/vr-mode-toggle-visibility)
     - [vr-mode-toggle-playing](#components/vr-mode/vr-mode-toggle-playing)
 
 ## Systems
-
-<a name="systems/app-mode"></a>
-#### app-mode
-
-Simple system for keeping track of a modal app state
-
-`src/systems/app-mode.js`
-    
 
 <a name="systems/exit-on-blur"></a>
 #### exit-on-blur
@@ -201,15 +183,6 @@ Scales an object to near-zero if the object is invisible. Useful for bones repre
 
 `src/components/bone-visibility.js`
           
-
-<a name="components/avatar/character-controller"></a>
-#### character-controller
-
-Avatar movement controller that listens to move, rotate and teleportation events and moves the avatar accordingly. The controller accounts for playspace offset and orientation and depends on the nav mesh system for translation.
-
-`src/components/character-controller.js`
-          
-
 <a name="components/avatar/hand-pose"></a>
 #### hand-pose
 
@@ -261,7 +234,7 @@ Sets player info state, including avatar choice and display name.
 <a name="components/avatar/spawn-controller"></a>
 #### spawn-controller
 
-Used on a player-rig to move the player to a random spawn point on entry.
+Used on a avatar-rig to move the avatar to a random spawn point on entry.
 
 `src/components/spawn-controller.js`
           
@@ -309,15 +282,6 @@ Instantiates and plays a network video stream, setting the video as the source m
 
 `src/components/networked-video-player.js`
           
-
-<a name="components/network/super-networked-interactable"></a>
-#### super-networked-interactable
-
-Manages ownership and haptics on an interatable
-
-`src/components/super-networked-interactable.js`
-          
-
 <a name="components/network/super-spawner"></a>
 #### super-spawner
 
@@ -337,15 +301,6 @@ Polls the Gamepad API for Cardboard Button input and emits cardboardbutton event
 
 `src/components/cardboard-controls.js`
           
-
-<a name="components/user-input/controls-shape-offset"></a>
-#### controls-shape-offset
-
-Sets the offset of the aframe-physics shape on this entity based on the current VR controller type
-
-`src/components/controls-shape-offset.js`
-          
-
 <a name="components/user-input/cursor-controller"></a>
 #### cursor-controller
 
@@ -360,14 +315,6 @@ Controls virtual cursor behavior in various modalities to affect teleportation, 
 Converts events from various 6DoF and 3DoF controllers into hand-pose events.
 
 `src/components/hand-controls2.js`
-          
-
-<a name="components/user-input/haptic-feedback"></a>
-#### haptic-feedback
-
-Listens for haptic events and actuates hardware controllers accordingly
-
-`src/components/haptic-feedback.js`
           
 
 <a name="components/user-input/virtual-gamepad-controls"></a>
@@ -429,7 +376,7 @@ Sets layer flags on the underlying Object3D
 <a name="components/environment/nav-mesh-helper"></a>
 #### nav-mesh-helper
 
-Initializes teleport-controls when the environment bundle has loaded.
+Initializes teleporters when the environment bundle has loaded.
 
 `src/components/nav-mesh-helper.js`
           
@@ -465,7 +412,7 @@ Positions the HUD and toggles app mode based on where the user is looking
 <a name="components/ui/icon-button"></a>
 #### icon-button
 
-A button with an image, tooltip, hover states and haptics.
+A button with an image, tooltip, and hover states.
 
 `src/components/icon-button.js`
           
@@ -481,7 +428,7 @@ HUD panel for muting, freezing, and space bubble controls.
 <a name="components/ui/text-button"></a>
 #### text-button
 
-A button with text and haptics
+A button with text 
 
 `src/components/text-button.js`
           
@@ -502,35 +449,6 @@ Toggles the interactivity of a UI entity while the scene is frozen.
 `src/components/visible-while-frozen.js`
           
     
-
-<a name="components/app-mode"></a>
-### app-mode
-      
-<a name="components/app-mode/app-mode-toggle-playing"></a>
-#### app-mode-toggle-playing
-
-Toggle the isPlaying state of a component based on app mode
-
-`src/systems/app-mode.js`
-          
-
-<a name="components/app-mode/app-mode-toggle-attribute"></a>
-#### app-mode-toggle-attribute
-
-Toggle a boolean property of a component based on app mode
-
-`src/systems/app-mode.js`
-          
-
-<a name="components/app-mode/app-mode-input-mappings"></a>
-#### app-mode-input-mappings
-
-Toggle aframe input mappings action set based on app mode
-
-`src/systems/app-mode.js`
-          
-    
-
 <a name="components/vr-mode"></a>
 ### vr-mode
       

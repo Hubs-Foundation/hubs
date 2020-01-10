@@ -71,7 +71,7 @@ function penBindings(hand, forCursor) {
   const padCenterStripTouched = paths.device.wmr.v(hand + "/pad/centerStrip/touched");
   const { padWest, padEast, padCenter, padCenterStrip } = dpadVariables(hand);
 
-  const actions = paths.actions[forCursor ? "cursor" : hand + "Hand"];
+  const actions = forCursor ? paths.actions.cursor[hand] : paths.actions[hand + "Hand"];
 
   return [
     neverFrozenBinding,
@@ -159,6 +159,11 @@ function freezeBindings() {
       src: { value: paths.device.keyboard.key(" ") },
       dest: { value: keyboardSaceFalling },
       xform: xforms.falling
+    },
+    {
+      src: { value: paths.device.keyboard.key("Tab") },
+      dest: { value: paths.actions.toggleFreeze },
+      xform: xforms.rising
     },
     {
       src: { value: leftPadPressed },
@@ -288,7 +293,7 @@ function cursorModDeltaBindings() {
     },
     {
       src: { value: rPadNorthOrSouthPressedY },
-      dest: { value: paths.actions.cursor.modDelta },
+      dest: { value: paths.actions.cursor.right.modDelta },
       xform: xforms.scale(0.1)
     }
   ];
@@ -311,20 +316,20 @@ function cursorMediaVolumeModBindings() {
     },
     {
       src: { value: padY, touching: padCenterStripTouched },
-      dest: { value: paths.actions.cursor.mediaVolumeMod },
+      dest: { value: paths.actions.cursor[hand].mediaVolumeMod },
       xform: xforms.touch_axis_scroll(-0.1)
     }
   ];
 }
 
 function holdingCameraBindings(hand, forCursor) {
-  const actions = paths.actions[forCursor ? "cursor" : hand + "Hand"];
+  const actions = forCursor ? paths.actions.cursor[hand] : paths.actions[hand + "Hand"];
   return [
     neverFrozenBinding,
     {
       src: { value: paths.device.wmr[hand].trigger.pressed },
       dest: { value: actions.takeSnapshot },
-      xform: xforms.rising
+      xform: xforms.copy
     }
   ];
 }
@@ -396,13 +401,23 @@ function teleportationAndRotationBindings() {
 export const wmrUserBindings = addSetsToBindings({
   [sets.global]: [
     {
+      src: { value: paths.device.wmr.left.matrix },
+      dest: { value: paths.actions.leftHand.matrix },
+      xform: xforms.copy
+    },
+    {
+      src: { value: paths.device.wmr.right.matrix },
+      dest: { value: paths.actions.rightHand.matrix },
+      xform: xforms.copy
+    },
+    {
       src: { value: paths.device.wmr.left.pose },
       dest: { value: paths.actions.leftHand.pose },
       xform: xforms.copy
     },
     {
       src: { value: paths.device.wmr.right.pose },
-      dest: { value: paths.actions.cursor.pose },
+      dest: { value: paths.actions.cursor.right.pose },
       xform: xforms.copy
     },
     {
@@ -432,11 +447,137 @@ export const wmrUserBindings = addSetsToBindings({
         value: paths.actions.focusChat
       },
       xform: xforms.rising
+    },
+    {
+      src: {
+        value: paths.device.keyboard.key("/")
+      },
+      dest: {
+        value: paths.actions.focusChatCommand
+      },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("Escape") },
+      dest: { value: paths.actions.mediaExit },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("1")
+      },
+      dest: { value: "/var/shift+1" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+1" },
+      dest: { value: paths.actions.mediaSearch1 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("2")
+      },
+      dest: { value: "/var/shift+2" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+2" },
+      dest: { value: paths.actions.mediaSearch2 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("3")
+      },
+      dest: { value: "/var/shift+3" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+3" },
+      dest: { value: paths.actions.mediaSearch3 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("4")
+      },
+      dest: { value: "/var/shift+4" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+4" },
+      dest: { value: paths.actions.mediaSearch4 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("5")
+      },
+      dest: { value: "/var/shift+5" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+5" },
+      dest: { value: paths.actions.mediaSearch5 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("6")
+      },
+      dest: { value: "/var/shift+6" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+6" },
+      dest: { value: paths.actions.mediaSearch6 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("7")
+      },
+      dest: { value: "/var/shift+7" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+7" },
+      dest: { value: paths.actions.mediaSearch7 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("8")
+      },
+      dest: { value: "/var/shift+8" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+8" },
+      dest: { value: paths.actions.mediaSearch8 },
+      xform: xforms.rising
     }
   ],
 
   [sets.leftHandHoveringOnNothing]: [],
-  [sets.cursorHoveringOnNothing]: [],
+  [sets.rightCursorHoveringOnNothing]: [],
   [sets.rightHandHoveringOnNothing]: [],
 
   [sets.rightHandTeleporting]: [
@@ -447,15 +588,15 @@ export const wmrUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.cursorHoveringOnUI]: [
+  [sets.rightCursorHoveringOnUI]: [
     {
       src: { value: rTriggerPressed },
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.rising
     }
   ],
 
-  [sets.cursorHoveringOnVideo]: [...cursorMediaVolumeModBindings()],
+  [sets.rightCursorHoveringOnVideo]: [...cursorMediaVolumeModBindings()],
 
   [sets.leftHandHoveringOnInteractable]: [
     {
@@ -464,7 +605,7 @@ export const wmrUserBindings = addSetsToBindings({
       xform: xforms.rising
     }
   ],
-  [sets.cursorHoveringOnInteractable]: [
+  [sets.rightCursorHoveringOnInteractable]: [
     {
       src: { value: rGripPressed },
       dest: { value: rGripRising },
@@ -477,7 +618,7 @@ export const wmrUserBindings = addSetsToBindings({
     },
     {
       src: [rGripRising, rTriggerRising],
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.any
     }
   ],
@@ -497,7 +638,7 @@ export const wmrUserBindings = addSetsToBindings({
       xform: xforms.falling
     }
   ],
-  [sets.cursorHoldingInteractable]: [
+  [sets.rightCursorHoldingInteractable]: [
     neverFrozenBinding,
     ...cursorModDeltaBindings(),
     {
@@ -512,7 +653,7 @@ export const wmrUserBindings = addSetsToBindings({
     },
     {
       src: [rGripFalling, rTriggerFalling],
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.any
     }
   ],
@@ -526,19 +667,19 @@ export const wmrUserBindings = addSetsToBindings({
   ],
 
   [sets.leftHandHoveringOnPen]: [],
-  [sets.cursorHoveringOnPen]: [],
+  [sets.rightCursorHoveringOnPen]: [],
   [sets.rightHandHoveringOnPen]: [],
 
   [sets.leftHandHoldingPen]: penBindings("left"),
-  [sets.cursorHoldingPen]: penBindings("right", true),
+  [sets.rightCursorHoldingPen]: penBindings("right", true),
   [sets.rightHandHoldingPen]: penBindings("right"),
 
   [sets.leftHandHoveringOnCamera]: [],
-  [sets.cursorHoveringOnCamera]: [],
+  [sets.rightCursorHoveringOnCamera]: [],
   [sets.rightHandHoveringOnCamera]: [],
 
   [sets.leftHandHoldingCamera]: holdingCameraBindings("left"),
-  [sets.cursorHoldingCamera]: holdingCameraBindings("right", true),
+  [sets.rightCursorHoldingCamera]: holdingCameraBindings("right", true),
   [sets.rightHandHoldingCamera]: holdingCameraBindings("right"),
 
   [sets.inputFocused]: [

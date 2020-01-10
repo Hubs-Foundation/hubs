@@ -1,45 +1,111 @@
+import configs from "../utils/configs";
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import classNames from "classnames";
 
+import rootStyles from "../assets/stylesheets/ui-root.scss";
 import styles from "../assets/stylesheets/presence-list.scss";
-import PhoneImage from "../assets/images/presence_phone.png";
-import DesktopImage from "../assets/images/presence_desktop.png";
-import HMDImage from "../assets/images/presence_vr.png";
 import maskEmail from "../utils/mask-email";
+import StateLink from "./state-link.js";
 import { WithHoverSound } from "./wrap-with-audio";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
+import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+import { faDesktop } from "@fortawesome/free-solid-svg-icons/faDesktop";
+import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
+import discordIcon from "../assets/images/discord.svgi";
+import hmdIcon from "../assets/images/hmd-icon.svgi";
+import { faMobileAlt } from "@fortawesome/free-solid-svg-icons/faMobileAlt";
+import { pushHistoryPath, withSlug } from "../utils/history";
+import { hasReticulumServer } from "../utils/phoenix-utils";
+import { InlineSVG } from "./svgi";
+
+function getPresenceIcon(ctx) {
+  if (ctx && ctx.hmd) {
+    return <InlineSVG src={hmdIcon} />;
+  } else if (ctx && ctx.mobile) {
+    return <FontAwesomeIcon icon={faMobileAlt} />;
+  } else if (ctx && ctx.discord) {
+    return <InlineSVG src={discordIcon} />;
+  } else {
+    return <FontAwesomeIcon icon={faDesktop} />;
+  }
+}
+
+export function navigateToClientInfo(history, clientId) {
+  const currentParams = new URLSearchParams(history.location.search);
+
+  if (hasReticulumServer() && document.location.host !== configs.RETICULUM_SERVER) {
+    currentParams.set("client_id", clientId);
+    pushHistoryPath(history, history.location.pathname, currentParams.toString());
+  } else {
+    pushHistoryPath(history, withSlug(history.location, `/clients/${clientId}`), currentParams.toString());
+  }
+}
 
 export default class PresenceList extends Component {
   static propTypes = {
     presences: PropTypes.object,
+    history: PropTypes.object,
     sessionId: PropTypes.string,
     signedIn: PropTypes.bool,
     email: PropTypes.string,
     onSignIn: PropTypes.func,
-    onSignOut: PropTypes.func
+    onSignOut: PropTypes.func,
+    expanded: PropTypes.bool,
+    onExpand: PropTypes.func
+  };
+
+  navigateToClientInfo = clientId => {
+    navigateToClientInfo(this.props.history, clientId);
   };
 
   domForPresence = ([sessionId, data]) => {
-    const meta = data.metas[0];
+    const meta = data.metas[data.metas.length - 1];
     const context = meta.context;
     const profile = meta.profile;
-
-    const image = context && context.mobile ? PhoneImage : context && context.hmd ? HMDImage : DesktopImage;
+    const recording = meta.streaming || meta.recording;
+    const icon = recording ? <FontAwesomeIcon icon={faVideo} /> : getPresenceIcon(context);
+    const isBot = context && context.discord;
+    const isOwner = meta.roles && meta.roles.owner;
+    const badge = isOwner && (
+      <span className={styles.moderatorBadge} title="Moderator">
+        &#x2605;
+      </span>
+    );
 
     return (
       <WithHoverSound key={sessionId}>
         <div className={styles.row}>
-          <div className={styles.device}>
-            <img src={image} />
+          <div className={styles.icon}>
+            <i>{icon}</i>
           </div>
           <div
             className={classNames({
-              [styles.displayName]: true,
-              [styles.selfDisplayName]: sessionId === this.props.sessionId
+              [styles.listItem]: true
             })}
           >
-            {profile && profile.displayName}
+            {sessionId === this.props.sessionId ? (
+              <StateLink className={styles.self} stateKey="overlay" stateValue="profile" history={this.props.history}>
+                {profile && profile.displayName}
+                {badge}
+                <i>
+                  <FontAwesomeIcon icon={faPencilAlt} />
+                </i>
+              </StateLink>
+            ) : (
+              <div>
+                {!isBot ? (
+                  <button className={styles.clientLink} onClick={() => this.navigateToClientInfo(sessionId)}>
+                    {profile && profile.displayName}
+                  </button>
+                ) : (
+                  <span>{profile && profile.displayName}</span>
+                )}
+                {badge}
+              </div>
+            )}
           </div>
           <div className={styles.presence}>
             <FormattedMessage id={`presence.in_${meta.presence}`} />
@@ -49,8 +115,17 @@ export default class PresenceList extends Component {
     );
   };
 
-  render() {
-    // Draw self first
+  componentDidMount() {
+    document.querySelector(".a-canvas").addEventListener(
+      "mouseup",
+      () => {
+        this.props.onExpand(false);
+      },
+      { once: true }
+    );
+  }
+
+  renderExpandedList() {
     return (
       <div className={styles.presenceList}>
         <div className={styles.attachPoint} />
@@ -80,6 +155,28 @@ export default class PresenceList extends Component {
             )}
           </div>
         </div>
+      </div>
+    );
+  }
+
+  render() {
+    const occupantCount = this.props.presences ? Object.entries(this.props.presences).length : 0;
+    return (
+      <div>
+        <div
+          title={"Participants"}
+          onClick={() => {
+            this.props.onExpand(!this.props.expanded);
+          }}
+          className={classNames({
+            [rootStyles.presenceInfo]: true,
+            [rootStyles.presenceInfoSelected]: this.props.expanded
+          })}
+        >
+          <FontAwesomeIcon icon={faUsers} />
+          <span className={rootStyles.occupantCount}>{occupantCount}</span>
+        </div>
+        {this.props.expanded && this.renderExpandedList()}
       </div>
     );
   }

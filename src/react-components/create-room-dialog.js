@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
 import { WithHoverSound } from "./wrap-with-audio";
 
-const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
+const HUB_NAME_PATTERN = "^.{1,64}$";
 
 export default class CreateRoomDialog extends Component {
   static propTypes = {
@@ -41,7 +41,7 @@ export default class CreateRoomDialog extends Component {
                 className="custom-scene-form__link_field"
                 value={this.state.customRoomName}
                 pattern={HUB_NAME_PATTERN}
-                title="Invalid name, limited to 4 to 64 characters and limited symbols."
+                title="Names must be at most 64 characters."
                 onChange={e => this.setState({ customRoomName: e.target.value })}
                 required
               />

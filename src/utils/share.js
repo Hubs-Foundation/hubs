@@ -1,8 +1,15 @@
+const isMobileVR = AFRAME.utils.device.isMobileVR();
+
+export function canShare() {
+  // TODO, fix up when OB/FxR support sharing
+  return navigator.share && !isMobileVR;
+}
+
 /**
  * Wraps navigator.share with a fallback to twitter for unsupported browsers
  */
 export function share(opts) {
-  if (navigator.share) {
+  if (canShare()) {
     return navigator.share(opts);
   } else {
     const { title, url } = opts;

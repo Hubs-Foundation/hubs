@@ -3,6 +3,7 @@ AFRAME.registerComponent("spot-light", {
     color: { type: "color" },
     intensity: { default: 1.0 },
     range: { default: 0 },
+    decay: { default: 2 },
     innerConeAngle: { default: 0 },
     outerConeAngle: { default: Math.PI / 4.0 },
     castShadow: { default: true },
@@ -17,7 +18,6 @@ AFRAME.registerComponent("spot-light", {
     this.light.position.set(0, 0, 0);
     this.light.target.position.set(0, 0, 1);
     this.light.add(this.light.target);
-    this.light.decay = 2;
     this.light.matrixNeedsUpdate = true;
     this.light.target.matrixNeedsUpdate = true;
     this.el.setObject3D("spot-light", this.light);
@@ -37,6 +37,10 @@ AFRAME.registerComponent("spot-light", {
 
     if (this.data.range !== prevData.range) {
       light.distance = this.data.range;
+    }
+
+    if (this.data.decay !== prevData.decay) {
+      light.decay = this.data.decay;
     }
 
     if (this.data.innerConeAngle !== prevData.innerConeAngle || this.data.outerConeAngle !== prevData.outerConeAngle) {

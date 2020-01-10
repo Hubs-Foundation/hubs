@@ -50,11 +50,17 @@ export class GyroDevice {
     this.prevY = this.hmdEuler.y;
     this.dXBuffer = new CircularBuffer(6);
     this.dYBuffer = new CircularBuffer(6);
-    this.vrDisplay = window.webvrpolyfill.getPolyfillDisplays()[0];
-    this.frameData = new window.webvrpolyfill.constructor.VRFrameData();
+    this.hasPolyfill = window.webvrpolyfill;
+    if (this.hasPolyfill) {
+      this.vrDisplay = window.webvrpolyfill.getPolyfillDisplays()[0];
+      this.frameData = new window.webvrpolyfill.constructor.VRFrameData();
+    }
   }
 
   write(frame) {
+    if (!this.hasPolyfill || !this.vrDisplay || !this.frameData) {
+      return;
+    }
     const hmdEuler = this.hmdEuler;
     this.vrDisplay.getFrameData(this.frameData);
     if (this.frameData.pose.orientation !== null) {
@@ -62,8 +68,11 @@ export class GyroDevice {
       hmdEuler.setFromQuaternion(this.hmdQuaternion, "YXZ");
     }
 
-    const dX = THREE.Math.RAD2DEG * difference(hmdEuler.x, this.prevX);
-    const dY = THREE.Math.RAD2DEG * difference(hmdEuler.y, this.prevY);
+    // Don't use gyro values when device is lying flat
+    if (hmdEuler.x < -Math.PI * 0.475) return;
+
+    const dX = difference(hmdEuler.x, this.prevX);
+    const dY = difference(hmdEuler.y, this.prevY);
 
     this.dXBuffer.push(Math.abs(dX) < 0.001 ? 0 : dX);
     this.dYBuffer.push(Math.abs(dY) < 0.001 ? 0 : dY);
@@ -73,7 +82,7 @@ export class GyroDevice {
 
     this.prevX = hmdEuler.x;
     this.prevY = hmdEuler.y;
-    frame[paths.device.gyro.averageDeltaX] = this.averageDeltaX;
-    frame[paths.device.gyro.averageDeltaY] = this.averageDeltaY;
+    frame.setValueType(paths.device.gyro.averageDeltaX, this.averageDeltaX);
+    frame.setValueType(paths.device.gyro.averageDeltaY, this.averageDeltaY);
   }
 }

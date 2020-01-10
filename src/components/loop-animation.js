@@ -6,7 +6,10 @@ import { findAncestorWithComponent } from "../utils/scene-graph";
  */
 AFRAME.registerComponent("loop-animation", {
   schema: {
-    clip: { type: "string" }
+    paused: { type: "boolean", default: false },
+    /* DEPRECATED: Use activeClipIndex instead since animation names are not unique */
+    clip: { type: "string", default: "" },
+    activeClipIndex: { type: "int", default: 0 }
   },
 
   init() {
@@ -21,14 +24,20 @@ AFRAME.registerComponent("loop-animation", {
   },
 
   update(oldData) {
-    if (oldData.clip !== this.data.clip && this.mixerEl) {
-      this.updateClip();
+    if (this.mixerEl) {
+      if (oldData.clip !== this.data.clip || oldData.activeClipIndex !== this.data.activeClipIndex) {
+        this.updateClip();
+      }
+
+      if (oldData.paused !== this.data.paused && this.currentAction) {
+        this.currentAction.paused = this.data.paused;
+      }
     }
   },
 
   updateClip() {
     const { mixer, animations } = this.mixerEl.components["animation-mixer"];
-    const clipName = this.data.clip;
+    const { clip: clipName, activeClipIndex } = this.data;
 
     if (animations.length === 0) {
       return;
@@ -36,10 +45,10 @@ AFRAME.registerComponent("loop-animation", {
 
     let clip;
 
-    if (!clipName) {
-      clip = animations[0];
-    } else {
+    if (clipName !== "") {
       clip = animations.find(({ name }) => name === clipName);
+    } else {
+      clip = animations[activeClipIndex];
     }
 
     if (!clip) {

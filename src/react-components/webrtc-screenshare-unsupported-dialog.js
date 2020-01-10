@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+
+import { messages } from "../utils/i18n";
 import DialogContainer from "./dialog-container.js";
 
 export default class WebRTCScreenshareUnsupportedDialog extends Component {
@@ -7,9 +9,9 @@ export default class WebRTCScreenshareUnsupportedDialog extends Component {
       <DialogContainer title="Share Screen" {...this.props}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
           <p>
-            Your browser doesn&apos;t seem to support WebRTC screen sharing.
+            Your browser doesn&apos;t seem to support screen sharing.
             <br />
-            To share your screen in Hubs, you can use Firefox.
+            To share your screen in ${messages["app-name"]}, you can use Firefox.
           </p>
           <a
             className="info-dialog--action-button"
@@ -20,14 +22,14 @@ export default class WebRTCScreenshareUnsupportedDialog extends Component {
             Download Firefox
           </a>
           <p style={{ fontSize: "0.8em" }}>
-            To test WebRTC screen sharing in your browser, see this&nbsp;
+            You can try&nbsp;
             <a
               href="https://www.webrtc-experiment.com/screen-sharing/#5591174797993739"
               target="_blank"
               rel="noopener noreferrer"
             >
-              WebRTC experiment
-            </a>.
+              testing WebRTC screen sharing
+            </a>&nbsp;in your browser.
           </p>
         </div>
       </DialogContainer>

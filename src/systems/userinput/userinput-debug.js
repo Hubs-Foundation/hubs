@@ -1,6 +1,39 @@
 import { paths } from "./paths";
 import qsTruthy from "../../utils/qs_truthy";
 
+const PATHS_TO_SHOW = ["/actions/", "/device/", "/var/"];
+const DELIMITER = "-----------------------------------";
+
+const replacer = (k, v) => {
+  if (typeof v === "number") {
+    return `${v >= 0 ? "+" : ""}${v.toFixed(3)}`;
+  }
+  return v;
+};
+function describeCurrentMasks(userinput) {
+  const strings = [];
+  userinput.masked.forEach((maskers, i) => {
+    let val;
+    if (!userinput.actives[i]) return;
+    if (maskers.length) {
+      val = JSON.stringify(userinput.sortedBindings[i], replacer);
+      strings.push(DELIMITER);
+      strings.push(`Binding #${i}:`);
+      if (val) val = val.replace(/{"(\w{3,})":/g, '{\n  "$1":').replace(/,"(\w{3,})":/g, ',\n  "$1":');
+      strings.push(`${val}\n`);
+    }
+    maskers.forEach(masker => {
+      val = JSON.stringify(userinput.sortedBindings[masker], replacer);
+      if (val) val = val.replace(/{"(\w{3,})":/g, '{\n  "$1":').replace(/,"(\w{3,})":/g, ',\n  "$1":');
+      strings.push(`- Masked by #${masker}:\n${val}`);
+    });
+    if (maskers.length) {
+      strings.push(`\n`);
+    }
+  });
+  return strings.join("\n");
+}
+
 AFRAME.registerSystem("userinput-debug", {
   active: true,
 
@@ -10,22 +43,20 @@ AFRAME.registerSystem("userinput-debug", {
     const userinput = AFRAME.scenes[0].systems.userinput;
 
     if (this.userinputFrameStatus) {
-      const replacer = (k, v) => {
-        if (typeof v === "number") {
-          return `${v >= 0 ? "+" : ""}${v.toFixed(3)}`;
-        }
-        return v;
-      };
       const pathsOutput = [];
       const { frame } = userinput;
-      for (const key in frame) {
-        if (!frame.hasOwnProperty(key)) continue;
-        if (!["/actions/"].some(x => key.startsWith(x))) continue;
-        let val = JSON.stringify(frame[key], replacer);
+      for (const key in frame.values) {
+        if (!frame.get(key)) continue;
+        if (!PATHS_TO_SHOW.some(x => key.startsWith(x))) continue;
+        let val = JSON.stringify(frame.get(key), replacer);
         if (val) val = val.replace(/{"(\w{3,})":/g, '{\n  "$1":').replace(/,"(\w{3,})":/g, ',\n  "$1":');
         pathsOutput.push(`${key} -> ${val}`);
       }
       this.userinputFrameStatus.textContent = pathsOutput.join("\n");
+    }
+
+    if (userinput.get(paths.actions.debugUserInput.describeCurrentMasks)) {
+      console.log(describeCurrentMasks(userinput));
     }
 
     if (userinput.get(paths.actions.logDebugFrame)) {
@@ -34,6 +65,7 @@ AFRAME.registerSystem("userinput-debug", {
         this.userinputFrameStatus.id = "userinput-frame-status";
         this.userinputFrameStatus.style = `
           position: absolute;
+          z-index: 2;
           left: 0; bottom: 0;
           background: white;
           white-space: pre;
@@ -54,10 +86,10 @@ AFRAME.registerSystem("userinput-debug", {
       console.log("xformStates", userinput.xformStates);
       const { sortedBindings, actives, masked } = userinput;
       for (const i in sortedBindings) {
-        const sb = [];
+        const strings = [];
         if (masked[i].length > 0) {
           for (const j of masked[i]) {
-            sb.push(JSON.stringify(sortedBindings[j]));
+            strings.push(JSON.stringify(sortedBindings[j]));
           }
         }
 
@@ -77,7 +109,7 @@ AFRAME.registerSystem("userinput-debug", {
             "maskedBy: ",
             masked[i],
             "\n",
-            sb.join("\n"),
+            strings.join("\n"),
             "\n"
           );
         }

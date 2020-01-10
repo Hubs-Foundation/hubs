@@ -3,14 +3,17 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
+
+import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/scene-ui.scss";
-import hubLogo from "../assets/images/hub-preview-white.png";
-import spokeLogo from "../assets/images/spoke_logo_black.png";
-import { createAndRedirectToNewHub } from "../utils/phoenix-utils";
+import { createAndRedirectToNewHub, getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { WithHoverSound } from "./wrap-with-audio";
 import CreateRoomDialog from "./create-room-dialog.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisH } from "@fortawesome/free-solid-svg-icons/faEllipsisH";
+import { faCodeBranch } from "@fortawesome/free-solid-svg-icons/faCodeBranch";
+import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 
 import { lang, messages } from "../utils/i18n";
 
@@ -24,7 +27,12 @@ class SceneUI extends Component {
     sceneName: PropTypes.string,
     sceneDescription: PropTypes.string,
     sceneAttributions: PropTypes.object,
-    sceneScreenshotURL: PropTypes.string
+    sceneScreenshotURL: PropTypes.string,
+    sceneProjectId: PropTypes.string,
+    sceneAllowRemixing: PropTypes.bool,
+    unavailable: PropTypes.bool,
+    isOwner: PropTypes.bool,
+    parentScene: PropTypes.object
   };
 
   state = {
@@ -56,8 +64,24 @@ class SceneUI extends Component {
   };
 
   render() {
+    if (this.props.unavailable) {
+      return (
+        <IntlProvider locale={lang} messages={messages}>
+          <div className={styles.ui}>
+            <div className={styles.unavailable}>
+              <div>
+                <FormattedMessage id="scene.unavailable" />
+              </div>
+            </div>
+          </div>
+        </IntlProvider>
+      );
+    }
+
+    const { sceneAllowRemixing, isOwner, sceneProjectId, parentScene, sceneId } = this.props;
+
     const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
-    const tweetText = `${this.props.sceneName} in #hubs`;
+    const tweetText = `${this.props.sceneName} in ${messages["share-hashtag"]}`;
     const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(sceneUrl)}&text=${encodeURIComponent(
       tweetText
     )}`;
@@ -95,7 +119,19 @@ class SceneUI extends Component {
         attributions = (
           <span>
             <span>{this.props.sceneAttributions.creator ? `by ${this.props.sceneAttributions.creator}` : ""}</span>
-            &nbsp;
+            {parentScene &&
+              parentScene.attributions &&
+              parentScene.attributions.creator && (
+                <span className="remix">
+                  &nbsp;(Remixed fron&nbsp;
+                  {toAttributionSpan({
+                    name: parentScene.name,
+                    url: parentScene.url,
+                    author: parentScene.attributions.creator
+                  })}
+                  )
+                </span>
+              )}
             <br />
             {this.props.sceneAttributions.content && this.props.sceneAttributions.content.map(toAttributionSpan)}
           </span>
@@ -122,11 +158,11 @@ class SceneUI extends Component {
             <div className={styles.mainPanel}>
               <WithHoverSound>
                 <a href="/" className={styles.logo}>
-                  <img src={hubLogo} />
+                  <img src={configs.image("logo")} />
                 </a>
               </WithHoverSound>
               <div className={styles.logoTagline}>
-                <FormattedMessage id="scene.logo_tagline" />
+                <FormattedMessage id="app-tagline" />
               </div>
               <div className={styles.createButtons}>
                 <WithHoverSound>
@@ -143,6 +179,29 @@ class SceneUI extends Component {
                   </button>
                 </WithHoverSound>
               </div>
+              {isOwner && sceneProjectId ? (
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={getReticulumFetchUrl(`/spoke/projects/${sceneProjectId}`)}
+                  className={styles.spokeButton}
+                >
+                  <FontAwesomeIcon icon={faPencilAlt} />
+                  <FormattedMessage id="scene.edit_button" />
+                </a>
+              ) : (
+                sceneAllowRemixing && (
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={getReticulumFetchUrl(`/spoke/projects/new?sceneId=${sceneId}`)}
+                    className={styles.spokeButton}
+                  >
+                    <FontAwesomeIcon icon={faCodeBranch} />
+                    <FormattedMessage id="scene.remix_button" />
+                  </a>
+                )
+              )}
               <WithHoverSound>
                 <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>
                   <img src="../assets/images/twitter.svg" />
@@ -157,12 +216,14 @@ class SceneUI extends Component {
             <div className={styles.name}>{this.props.sceneName}</div>
             <div className={styles.attribution}>{attributions}</div>
           </div>
-          <div className={styles.spoke}>
-            <div className={styles.madeWith}>made with</div>
-            <a href="/spoke">
-              <img src={spokeLogo} />
-            </a>
-          </div>
+          <IfFeature name="enable_spoke">
+            <div className={styles.spoke}>
+              <div className={styles.madeWith}>made with</div>
+              <a href="/spoke">
+                <img src={configs.image("editor_logo")} />
+              </a>
+            </div>
+          </IfFeature>
           {this.state.showCustomRoomDialog && (
             <CreateRoomDialog
               includeScenePrompt={false}

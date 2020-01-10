@@ -1,0 +1,65 @@
+# App config schema
+
+translations.en."app-name" = { category = "translations", type = "string", name = "App Name", description = "Name used across the app." }
+translations.en."app-description" = { category = "translations", type = "string", name = "App Description", description = "App description used across the app." }
+translations.en."app-tagline" = { category = "translations", type = "string", name = "App Tagline", description = "A shorter app description used across the app." }
+translations.en."company-name" = { category = "translations", type = "string", name = "Company Name", description = "Company name used across the app." }
+translations.en."share-hashtag" = { category = "translations", type = "string", name = "Share Hashtag", description = "Hashtag used in share messages." }
+translations.en."contact-email" = { category = "translations", type = "string", name = "Contact email", description = "General contact email." }
+translations.en."settings.community" = { category = "translations", type = "string", name = "Community Prompt", description = "Prompt for joining your community." }
+
+translations.en."app-full-name" = { category = "translations", type = "string", internal = "true" }
+translations.en."app-twitter-user" = { category = "translations", type = "string", internal = "true" }
+translations.en."editor-name" = { category = "translations", type = "string", internal = "true" }
+
+features.permissive_rooms = { category = "features", type = "boolean", name = "Permissive Rooms", description = "Enable full content creation permissions on new rooms." }
+features.show_terms = { category = "features", type = "boolean", name = "Show Terms of Use", description = "Show links to the terms of use." }
+features.show_privacy = { category = "features", type = "boolean", name = "Show Privacy Notice", description = "Show links to the privacy notice." }
+features.show_controls_link = { category = "features", type = "boolean", name = "Show Controls Links", description = "Show links to controls documentation." }
+features.show_features_link = { category = "features", type = "boolean", name = "Show Features Links", description = "Show links to features documentation." }
+features.show_community_link = { category = "features", type = "boolean", name = "Show Community Links", description = "Show links to your community." }
+features.show_company_logo = { category = "features", type = "boolean", name = "Show Company Logo", description = "Show the company logo across the app." }
+features.show_issue_report_link = { category = "features", type = "boolean", name = "Show Issue Report Link", description = "Show a link for reporting issues." }
+features.show_avatar_editor_link = { category = "features", type = "boolean", name = "Show Avatar Editor Links", description = "Show links to avatar editors like Quilt.", internal = "true" }
+features.show_avatar_pipelines_link = { category = "features", type = "boolean", name = "Show Avatar Pipelines Links", description = "Show links to avatar pipeline info." }
+features.show_model_collection_link = { category = "features", type = "boolean", name = "Show Model Collection Link", description = "Show link to a collection of models." }
+features.hide_powered_by = { category = "features", type = "boolean", name = "Hide Powered By Hubs", description = "Hides the 'Powered by Hubs Cloud' notice on the home page and loading screens." }
+
+features.enable_spoke = { category = "features", type = "boolean", internal = "true" }
+features.show_join_us_dialog = { category = "features", type = "boolean", internal = "true" }
+features.show_discord_bot_link = { category = "features", type = "boolean", internal = "true" }
+features.show_whats_new_link = { category = "features", type = "boolean", internal = "true" }
+features.show_source_link = { category = "features", type = "boolean", internal = "true" }
+features.show_feedback_ui = { category = "features", type = "boolean", internal = "true" }
+features.show_issue_report_dialog = { category = "features", type = "boolean", internal = "true" }
+
+images.logo = { category = "images", type = "file", name = "App Logo", description = "Logo used across the app." }
+images.favicon = { category = "images", type = "file", name = "Favicon", description = "Icon for the app." }
+images.app_icon = { category = "images", type = "file", name = "App Icon", description = "Icon for the app." }
+images.app_thumbnail = { category = "images", type = "file", name = "App Thumbnail", description = "Thumbnail for app." }
+images.company_logo = { category = "images", type = "file", name = "Company Logo", description = "Company logo used across the app." }
+images.home_background = { category = "images", type = "file", name = "Home background", description = "Background image on the home page." }
+
+images.editor_logo = { category = "images", type = "file", internal = "true" }
+
+theme.dark-theme = { category = "theme", type = "boolean", name = "Dark Mode", description = "Use dark UI styling." }
+theme.action-color = { category = "theme", type = "color", name = "Primary Color", description = "Call to action button color." }
+theme.action-color-highlight = { category = "theme", type = "color", name = "Highlighted Primary Color", description = "Highlighted call to action color." }
+theme.action-color-disabled = { category = "theme", type = "color", name = "Disabled Primary Color", description = "Disabled call to action color." }
+theme.action-text-color = { category = "theme", type = "color", name = "Primary Text Color", description = "Call to action button text color." }
+theme.action-subtitle-color = { category = "theme", type = "color", name = "Primary Subtitle Color", description = "Call to action button subtitle text color." }
+theme.action-label-color = { category = "theme", type = "color", name = "Primary Label Color", description = "Call to action label color." }
+theme.notice-background-color = { category = "theme", type = "color", name = "Secondary Color", description = "Notice and indicator color." }
+theme.notice-text-color = { category = "theme", type = "color", name = "Secondary Text Color", description = "Notice and indicator text color." }
+theme.notice-widget-color = { category = "theme", type = "color", name = "Secondary Widget Color", description = "Notice and indicator UI widget color." }
+theme.favorited-color = { category = "theme", type = "color", name = "Favorited Color", description = "Favorited Color" }
+
+links.terms_of_use = { category = "links", type = "string", name = "Terms of Use", description = "Link to your terms of use page."}
+links.privacy_notice = { category = "links", type = "string", name = "Privacy Notice", description = "Link to your privacy page."}
+links.controls = { category = "links", type = "string", name = "Controls Documentation", description = "Link to controls documentation."}
+links.features = { category = "links", type = "string", name = "Features Documentation", description = "Link to features documentation."}
+links.community = { category = "links", type = "string", name = "Community", description = "Link to your community."}
+links.issue_report = { category = "links", type = "string", name = "Issue Report", description = "Link for reporting issues."}
+links.promotion = { category = "links", type = "string", name = "Promotion Info", description = "Link to info about promotion info and licensing."}
+links.remixing = { category = "links", type = "string", name = "Remixing Info", description = "Link to info about remixing info and licensing."}
+links.model_collection = { category = "links", type = "string", name = "Model Collection", description = "Link to a collection of recommended models."}

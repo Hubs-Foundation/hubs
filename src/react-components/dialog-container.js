@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { WithHoverSound } from "./wrap-with-audio";
+import classNames from "classnames";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default class DialogContainer extends Component {
   static propTypes = {
@@ -8,7 +10,11 @@ export default class DialogContainer extends Component {
     children: PropTypes.node.isRequired,
     onClose: PropTypes.func,
     closable: PropTypes.bool,
-    wide: PropTypes.bool
+    wide: PropTypes.bool,
+    noOverlay: PropTypes.bool,
+    className: PropTypes.string,
+    allowOverflow: PropTypes.bool,
+    additionalClass: PropTypes.string
   };
 
   static defaultProps = {
@@ -43,19 +49,39 @@ export default class DialogContainer extends Component {
 
   render() {
     return (
-      <div className="dialog-overlay">
-        <div className="dialog" onClick={this.onContainerClicked}>
+      <div
+        className={classNames(
+          "dialog-overlay",
+          this.props.noOverlay ? "dialog-overlay__no-pointer-events" : "",
+          this.props.className
+        )}
+      >
+        <div
+          className={classNames(
+            "dialog",
+            this.props.noOverlay ? "dialog__no-pointer-events" : "dialog__dark-background",
+            this.props.noOverlay ? "dialog__align-end" : ""
+          )}
+          onClick={this.onContainerClicked}
+        >
           <div className={`dialog__box ${this.props.wide ? "dialog__wide" : ""} `}>
-            <div className="dialog__box__contents">
+            <div
+              className={classNames(
+                "dialog__box__contents",
+                this.props.allowOverflow ? "dialog__box__contents-overflow" : null,
+                this.props.additionalClass
+              )}
+            >
               {this.props.closable &&
-                this.props.onClose && (
-                  <WithHoverSound>
-                    <button className="dialog__box__contents__close" onClick={() => this.props.onClose()}>
-                      <span>×</span>
-                    </button>
-                  </WithHoverSound>
+                this.props.onClose &&
+                !this.props.noOverlay && (
+                  <button autoFocus className="dialog__box__contents__close" onClick={() => this.props.onClose()}>
+                    <i>
+                      <FontAwesomeIcon icon={faTimes} />
+                    </i>
+                  </button>
                 )}
-              <div className="dialog__box__contents__title">{this.props.title}</div>
+              {this.props.title && <div className="dialog__box__contents__title">{this.props.title}</div>}
               <div className="dialog__box__contents__body">{this.props.children}</div>
               <div className="dialog__box__contents__button-container" />
             </div>

@@ -1,5 +1,4 @@
-import { AppModes } from "../systems/app-mode.js";
-
+import { CAMERA_MODE_FIRST_PERSON } from "../systems/camera-system";
 const TWOPI = Math.PI * 2;
 function deltaAngle(a, b) {
   const p = Math.abs(b - a) % TWOPI;
@@ -17,37 +16,36 @@ AFRAME.registerComponent("hud-controller", {
     offset: { default: 0.7 }, // distance from hud above head,
     lookCutoff: { default: 20 }, // angle at which the hud should be "on",
     animRange: { default: 30 }, // degrees over which to animate the hud into view
-    yawCutoff: { default: 50 }, // yaw degrees at wich the hud should reoirent even if the user is looking up
-    showTip: { type: "bool" }
+    yawCutoff: { default: 50 } // yaw degrees at wich the hud should reoirent even if the user is looking up
   },
   init() {
+    this.onChildHovered = this.onChildHovered.bind(this);
+    this.removeHoverEvents = this.removeHoverEvents.bind(this);
     this.isYLocked = false;
     this.lockedHeadPositionY = 0;
     this.lookDir = new THREE.Vector3();
     this.lookEuler = new THREE.Euler();
-  },
-
-  pause() {
-    // TODO: this assumes full control over current app mode reguardless of what else might be manipulating it, this is obviously wrong
-    const AppModeSystem = this.el.sceneEl.systems["app-mode"];
-    AppModeSystem.setMode(AppModes.DEFAULT);
+    this.store = window.APP.store;
+    this.hoverableChildren = this.el.querySelectorAll("[is-remote-hover-target]");
   },
 
   tick() {
     const hud = this.el.object3D;
     const head = this.data.head.object3D;
-    const sceneEl = this.el.sceneEl;
 
-    const { offset, lookCutoff, animRange, yawCutoff, showTip } = this.data;
+    const { offset, lookCutoff, animRange, yawCutoff } = this.data;
 
     const pitch = head.rotation.x * THREE.Math.RAD2DEG;
     const yawDif = deltaAngle(head.rotation.y, hud.rotation.y) * THREE.Math.RAD2DEG;
 
+    // HUD is always visible until first hover, to increase discoverability.
+    const forceHudVisible = !this.store.state.activity.hasHoveredInWorldHud;
+
     // animate the hud into place over animRange degrees as the user aproaches the lookCutoff angle
     let t = 1 - THREE.Math.clamp(lookCutoff - pitch, 0, animRange) / animRange;
 
-    // HUD is locked down while showing tooltip
-    if (showTip) {
+    // HUD is locked down while showing tooltip or if forced.
+    if (forceHudVisible) {
       t = 1;
     }
 
@@ -78,18 +76,34 @@ AFRAME.registerComponent("hud-controller", {
       hud.rotation.z = 0;
     }
 
-    hud.visible = !hudOutOfView;
+    hud.visible =
+      (!hudOutOfView || forceHudVisible) &&
+      this.el.sceneEl.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_FIRST_PERSON;
     hud.position.y = (this.isYLocked ? this.lockedHeadPositionY : head.position.y) + offset + (1 - t) * offset;
     hud.rotation.x = (1 - t) * THREE.Math.DEG2RAD * 90;
     hud.matrixNeedsUpdate = true;
+  },
 
-    // update the app mode when the HUD locks on or off
-    // TODO: this assumes full control over current app mode reguardless of what else might be manipulating it, this is obviously wrong
-    const AppModeSystem = sceneEl.systems["app-mode"];
-    if (pitch > lookCutoff && AppModeSystem.mode !== AppModes.HUD) {
-      AppModeSystem.setMode(AppModes.HUD);
-    } else if (pitch < lookCutoff && AppModeSystem.mode === AppModes.HUD) {
-      AppModeSystem.setMode(AppModes.DEFAULT);
+  play() {
+    for (let i = 0; i < this.hoverableChildren.length; i++) {
+      this.hoverableChildren[i].object3D.addEventListener("hovered", this.onChildHovered);
+    }
+  },
+
+  pause() {
+    this.removeHoverEvents();
+  },
+
+  removeHoverEvents() {
+    for (let i = 0; i < this.hoverableChildren.length; i++) {
+      this.hoverableChildren[i].object3D.removeEventListener("hovered", this.onChildHovered);
+    }
+  },
+
+  onChildHovered() {
+    if (!this.store.state.activity.hasHoveredInWorldHud) {
+      this.store.update({ activity: { hasHoveredInWorldHud: true } });
+      this.removeHoverEvents();
     }
   }
 });

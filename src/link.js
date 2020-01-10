@@ -1,4 +1,8 @@
+import "./webxr-bypass-hacks";
+import "./utils/theme";
+import "./utils/configs";
 import "./assets/stylesheets/link.scss";
+import "aframe";
 import React from "react";
 import ReactDOM from "react-dom";
 import registerTelemetry from "./telemetry";
@@ -6,19 +10,16 @@ import LinkRoot from "./react-components/link-root";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import Store from "./storage/store";
-import { detectInHMD } from "./utils/vr-caps-detect.js";
 
 registerTelemetry("/link", "Hubs Device Link");
 
-const socket = connectToReticulum();
 const store = new Store();
-store.init();
 
 const linkChannel = new LinkChannel(store);
 
-linkChannel.setSocket(socket);
+(async () => {
+  const socket = await connectToReticulum();
+  linkChannel.setSocket(socket);
+})();
 
-ReactDOM.render(
-  <LinkRoot store={store} linkChannel={linkChannel} showHeadsetLinkOption={detectInHMD()} />,
-  document.getElementById("link-root")
-);
+ReactDOM.render(<LinkRoot store={store} linkChannel={linkChannel} />, document.getElementById("link-root"));

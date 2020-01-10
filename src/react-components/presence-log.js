@@ -6,12 +6,17 @@ import { FormattedMessage } from "react-intl";
 
 import ChatMessage from "./chat-message";
 import PhotoMessage from "./photo-message";
+import VideoMessage from "./video-message";
+import ImageMessage from "./image-message";
+import { getPresenceContextForSession } from "../utils/phoenix-utils";
 
 export default class PresenceLog extends Component {
   static propTypes = {
     entries: PropTypes.array,
     inRoom: PropTypes.bool,
-    hubId: PropTypes.string
+    hubId: PropTypes.string,
+    history: PropTypes.object,
+    presences: PropTypes.object
   };
 
   constructor(props) {
@@ -21,10 +26,13 @@ export default class PresenceLog extends Component {
   domForEntry = e => {
     const entryClasses = {
       [styles.presenceLogEntry]: true,
-      [styles.presenceLogEntryWithButton]: e.type === "chat" && e.maySpawn,
+      [styles.presenceLogEntryWithButton]: (e.type === "chat" || e.type === "image") && e.maySpawn,
       [styles.presenceLogChat]: e.type === "chat",
       [styles.expired]: !!e.expired
     };
+
+    const presenceContext = e.sessionId ? getPresenceContextForSession(this.props.presences, e.sessionId) : {};
+    const isBot = !!presenceContext.discord;
 
     switch (e.type) {
       case "join":
@@ -66,11 +74,35 @@ export default class PresenceLog extends Component {
             className={classNames(entryClasses)}
             body={e.body}
             maySpawn={e.maySpawn}
+            sessionId={e.sessionId}
+            includeFromLink={this.props.inRoom && !isBot}
+            history={this.props.history}
           />
         );
-      case "spawn":
+      case "image":
+        return (
+          <ImageMessage
+            key={e.key}
+            name={e.name}
+            className={classNames(entryClasses, styles.media)}
+            body={e.body}
+            maySpawn={e.maySpawn}
+          />
+        );
+      case "photo":
         return (
           <PhotoMessage
+            key={e.key}
+            name={e.name}
+            className={classNames(entryClasses, styles.media)}
+            body={e.body}
+            maySpawn={e.maySpawn}
+            hubId={this.props.hubId}
+          />
+        );
+      case "video":
+        return (
+          <VideoMessage
             key={e.key}
             name={e.name}
             className={classNames(entryClasses, styles.media)}

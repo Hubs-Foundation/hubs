@@ -1,3 +1,4 @@
+import "./animation";
 import "./ambient-light";
 import "./animation-mixer";
 import "./audio-feedback";
@@ -17,7 +18,10 @@ import "./scene-preview-camera";
 import "./skybox";
 import "./spawn-controller";
 import "./spot-light";
-import "./sticky-object";
+import "./floaty-object";
 import "./super-spawner";
 import "./water";
 import "./environment-map";
+import "./trigger-volume";
+import "./video-pause-state";
+import "./particle-emitter";

@@ -113,4 +113,10 @@ export default class SharedBufferGeometry {
     this.current.attributes.normal.needsUpdate = true;
     this.current.attributes.position.needsUpdate = true;
   }
+
+  computeBoundingSpheres() {
+    for (let i = 0; i < this.geometries.length; i++) {
+      this.geometries[i].computeBoundingSphere();
+    }
+  }
 }

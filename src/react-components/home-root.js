@@ -1,49 +1,56 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import en from "react-intl/locale-data/en";
 
+import configs from "../utils/configs";
+import IfFeature from "./if-feature";
+import UnlessFeature from "./unless-feature";
 import { lang, messages } from "../utils/i18n";
 import { playVideoWithStopOnBlur } from "../utils/video-utils.js";
 import homeVideoWebM from "../assets/video/home.webm";
 import homeVideoMp4 from "../assets/video/home.mp4";
-import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
-import mozLogo from "../assets/images/moz-logo-black.png";
+import discordLogoSmall from "../assets/images/discord-logo-small.png";
 import classNames from "classnames";
-import { ENVIRONMENT_URLS } from "../assets/environments/environments";
-import { connectToReticulum } from "../utils/phoenix-utils";
+import { isLocalClient, createAndRedirectToNewHub, connectToReticulum } from "../utils/phoenix-utils";
 import maskEmail from "../utils/mask-email";
+import checkIsMobile from "../utils/is-mobile";
+import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
+import mediaBrowserStyles from "../assets/stylesheets/media-browser.scss";
+import AuthChannel from "../utils/auth-channel";
 
 import styles from "../assets/stylesheets/index.scss";
 
-import HubCreatePanel from "./hub-create-panel.js";
 import AuthDialog from "./auth-dialog.js";
-import JoinUsDialog from "./join-us-dialog.js";
-import ReportDialog from "./report-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
-import UpdatesDialog from "./updates-dialog.js";
-import DialogContainer from "./dialog-container.js";
-import { WithHoverSound } from "./wrap-with-audio";
+import MediaTiles from "./media-tiles";
 
 addLocaleData([...en]);
+
+const isMobile = checkIsMobile();
 
 class HomeRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
-    sceneId: PropTypes.string,
     store: PropTypes.object,
     authChannel: PropTypes.object,
     authVerify: PropTypes.bool,
     authTopic: PropTypes.string,
     authToken: PropTypes.string,
+    authPayload: PropTypes.string,
     authOrigin: PropTypes.string,
-    listSignup: PropTypes.bool,
-    report: PropTypes.bool,
-    initialEnvironment: PropTypes.string
+    installEvent: PropTypes.object,
+    hideHero: PropTypes.bool,
+    showAdmin: PropTypes.bool,
+    favoriteHubsResult: PropTypes.object,
+    showSignIn: PropTypes.bool,
+    signInDestination: PropTypes.string,
+    signInReason: PropTypes.string
   };
 
   state = {
-    environments: [],
     dialog: null,
     signedIn: null,
     mailingListEmail: "",
@@ -58,33 +65,32 @@ class HomeRoot extends Component {
 
   componentDidMount() {
     if (this.props.authVerify) {
-      this.showAuthDialog(true);
-      this.verifyAuth().then(this.showAuthDialog);
+      this.showAuthDialog(true, false);
+
+      this.verifyAuth().then(verified => {
+        this.showAuthDialog(false, verified);
+      });
       return;
     }
-    if (this.props.sceneId) {
-      this.loadEnvironmentFromScene();
-    } else {
-      this.loadEnvironments();
+    if (this.props.showSignIn) {
+      this.showSignInDialog(false);
     }
     this.loadHomeVideo();
-    if (this.props.listSignup) {
-      this.showUpdatesDialog();
-    } else if (this.props.report) {
-      this.showReportDialog();
-    }
   }
 
   async verifyAuth() {
-    const socket = connectToReticulum();
-    const channel = socket.channel(this.props.authTopic);
-    await new Promise((resolve, reject) =>
-      channel
-        .join()
-        .receive("ok", resolve)
-        .receive("error", reject)
-    );
-    channel.push("auth_verified", { token: this.props.authToken });
+    const authChannel = new AuthChannel(this.props.store);
+    authChannel.setSocket(await connectToReticulum());
+
+    try {
+      await authChannel.verifyAuthentication(this.props.authTopic, this.props.authToken, this.props.authPayload);
+      this.setState({ signedIn: true, email: this.props.store.state.credentials.email });
+      return true;
+    } catch (e) {
+      // Error during verification, likely invalid/expired token
+      console.warn(e);
+      return false;
+    }
   }
 
   showDialog = (DialogClass, props = {}) => {
@@ -93,12 +99,13 @@ class HomeRoot extends Component {
     });
   };
 
-  showAuthDialog = verifying => {
-    this.showDialog(AuthDialog, { closable: false, verifying, authOrigin: this.props.authOrigin });
+  showAuthDialog = (verifying, verified) => {
+    this.showDialog(AuthDialog, { verifying, verified, authOrigin: this.props.authOrigin });
   };
 
   loadHomeVideo = () => {
     const videoEl = document.querySelector("#background-video");
+    if (!videoEl) return;
     videoEl.playbackRate = 0.9;
     playVideoWithStopOnBlur(videoEl);
   };
@@ -107,15 +114,28 @@ class HomeRoot extends Component {
     this.setState({ dialog: null });
   };
 
-  showSignInDialog = () => {
+  showSignInDialog = (closable = true) => {
+    let messageId = "sign-in.prompt";
+
+    if (this.props.signInReason === "admin_no_permission") {
+      messageId = "sign-in.admin-no-permission";
+    } else if (this.props.signInDestination === "admin") {
+      messageId = "sign-in.admin";
+    }
+
     this.showDialog(SignInDialog, {
-      message: messages["sign-in.prompt"],
+      message: messages[messageId],
+      closable: closable,
       onSignIn: async email => {
         const { authComplete } = await this.props.authChannel.startAuthentication(email);
         this.showDialog(SignInDialog, { authStarted: true });
         await authComplete;
         this.setState({ signedIn: true, email });
         this.closeDialog();
+
+        if (this.props.signInDestination === "admin") {
+          document.location = isLocalClient() ? "/admin.html" : "/admin";
+        }
       }
     });
   };
@@ -123,46 +143,6 @@ class HomeRoot extends Component {
   signOut = () => {
     this.props.authChannel.signOut();
     this.setState({ signedIn: false });
-  };
-
-  loadEnvironmentFromScene = async () => {
-    let sceneUrlBase = "/api/v1/scenes";
-    if (process.env.RETICULUM_SERVER) {
-      sceneUrlBase = `https://${process.env.RETICULUM_SERVER}${sceneUrlBase}`;
-    }
-    const sceneInfoUrl = `${sceneUrlBase}/${this.props.sceneId}`;
-    const resp = await fetch(sceneInfoUrl).then(r => r.json());
-    const scene = resp.scenes[0];
-    const attribution = scene.attribution && scene.attribution.split("\n").join(", ");
-    const authors = attribution && [{ organization: { name: attribution } }];
-    // Transform the scene info into a an environment bundle structure.
-    this.setState({
-      environments: [
-        {
-          scene_id: this.props.sceneId,
-          meta: {
-            title: scene.name,
-            authors,
-            images: [{ type: "preview-thumbnail", srcset: scene.screenshot_url }]
-          }
-        }
-      ]
-    });
-  };
-
-  loadEnvironments = () => {
-    const environments = [];
-
-    const environmentLoads = ENVIRONMENT_URLS.map(src =>
-      (async () => {
-        const res = await fetch(src);
-        const data = await res.json();
-        data.bundle_url = src;
-        environments.push(data);
-      })()
-    );
-
-    Promise.all(environmentLoads).then(() => this.setState({ environments }));
   };
 
   onLinkClicked = trigger => {
@@ -179,39 +159,44 @@ class HomeRoot extends Component {
       [styles.noninteractive]: !!this.state.dialog
     });
 
+    const showFTUEVideo = false;
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.home}>
           <div className={mainContentClassNames}>
-            <div className={styles.videoContainer}>
-              <video playsInline muted loop autoPlay className={styles.backgroundVideo} id="background-video">
-                <source src={homeVideoWebM} type="video/webm" />
-                <source src={homeVideoMp4} type="video/mp4" />
-              </video>
-            </div>
             <div className={styles.headerContent}>
               <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
                 <div className={styles.links}>
-                  <WithHoverSound>
+                  <IfFeature name="show_whats_new_link">
                     <a href="/whats-new">
                       <FormattedMessage id="home.whats_new_link" />
                     </a>
-                  </WithHoverSound>
-                  <WithHoverSound>
+                  </IfFeature>
+                  <IfFeature name="show_source_link">
                     <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
                       <FormattedMessage id="home.source_link" />
                     </a>
-                  </WithHoverSound>
-                  <WithHoverSound>
-                    <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
+                  </IfFeature>
+                  <IfFeature name="show_community_link">
+                    <a href={configs.link("community", "https://discord.gg/wHmY4nd")} rel="noreferrer noopener">
                       <FormattedMessage id="home.community_link" />
                     </a>
-                  </WithHoverSound>
-                  <WithHoverSound>
+                  </IfFeature>
+                  <IfFeature name="enable_spoke">
                     <a href="/spoke" rel="noreferrer noopener">
-                      Spoke
+                      <FormattedMessage id="editor-name" />
                     </a>
-                  </WithHoverSound>
+                  </IfFeature>
+                  {this.props.showAdmin && (
+                    <a href="/admin" rel="noreferrer noopener">
+                      <i>
+                        <FontAwesomeIcon icon={faCog} />
+                      </i>
+                      &nbsp;
+                      <FormattedMessage id="home.admin" />
+                    </a>
+                  )}
                 </div>
               </div>
               <div className={styles.signIn}>
@@ -231,109 +216,106 @@ class HomeRoot extends Component {
                 )}
               </div>
             </div>
-            <div className={styles.heroContent}>
-              <div className={styles.attribution}>
-                Medieval Fantasy Book by{" "}
-                <a
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  href="https://sketchfab.com/models/06d5a80a04fc4c5ab552759e9a97d91a?utm_campaign=06d5a80a04fc4c5ab552759e9a97d91a&utm_medium=embed&utm_source=oembed"
-                >
-                  Pixel
-                </a>
-              </div>
-              <div className={styles.container}>
-                <div className={styles.logo}>
-                  <img src={hubLogo} />
-                </div>
-                <div className={styles.title}>
-                  <FormattedMessage id="home.hero_title" />
-                </div>
-                {this.state.environments.length === 0 && (
-                  <div className="loader-wrap">
-                    <div className="loader">
-                      <div className="loader-center" />
+            <div className={styles.heroContent} style={{ backgroundImage: configs.image("home_background", true) }}>
+              {!this.props.hideHero &&
+                (this.props.favoriteHubsResult &&
+                this.props.favoriteHubsResult.entries &&
+                this.props.favoriteHubsResult.entries.length > 0 &&
+                this.state.signedIn
+                  ? this.renderFavoriteHero()
+                  : this.renderNonFavoriteHero())}
+              {!this.props.hideHero && (
+                <div className={classNames(styles.heroPanel, styles.rightPanel)}>
+                  {showFTUEVideo && (
+                    <div className={styles.heroVideo}>
+                      <video playsInline muted loop autoPlay>
+                        <source src={homeVideoWebM} type="video/webm" />
+                        <source src={homeVideoMp4} type="video/mp4" />
+                      </video>
                     </div>
-                  </div>
-                )}
-              </div>
-              <div className={styles.create}>
-                <HubCreatePanel
-                  initialEnvironment={this.props.initialEnvironment}
-                  environments={this.state.environments}
-                />
-              </div>
-              {this.state.environments.length > 1 && (
-                <div>
-                  <WithHoverSound>
-                    <div className={styles.joinButton}>
+                  )}
+                  <div>
+                    <div className={styles.secondaryLink}>
                       <a href="/link">
-                        <FormattedMessage id="home.join_room" />
+                        <FormattedMessage id="home.have_code" />
                       </a>
                     </div>
-                  </WithHoverSound>
-                  <WithHoverSound>
-                    <div className={styles.spokeButton}>
-                      <a href="/spoke">
-                        <FormattedMessage id="home.create_with_spoke" />
-                      </a>
-                    </div>
-                  </WithHoverSound>
+
+                    <IfFeature name="show_discord_bot_link">
+                      <div className={styles.secondaryLink}>
+                        <div>
+                          <FormattedMessage id="home.add_to_discord_1" />
+                        </div>
+                        <img src={discordLogoSmall} />
+                        <a href="/discord">
+                          <FormattedMessage id="home.add_to_discord_2" />
+                        </a>
+                        <div>
+                          <FormattedMessage id="home.add_to_discord_3" />
+                        </div>
+                      </div>
+                    </IfFeature>
+                  </div>
                 </div>
               )}
             </div>
             <div className={styles.footerContent}>
+              <div className={styles.poweredBy}>
+                <UnlessFeature name="hide_powered_by">
+                  <span className={styles.prefix}>
+                    <FormattedMessage id="home.powered_by_prefix" />
+                  </span>
+                  <a className={styles.link} href="https://github.com/mozilla/hubs-cloud">
+                    <FormattedMessage id="home.powered_by_link" />
+                  </a>
+                </UnlessFeature>
+              </div>
               <div className={styles.links}>
                 <div className={styles.top}>
-                  <WithHoverSound>
-                    <a
-                      className={styles.link}
-                      rel="noopener noreferrer"
-                      href="/#/joinus"
-                    >
+                  <IfFeature name="show_join_us_dialog">
+                    <a className={styles.link} rel="noopener noreferrer" href="/#/joinus">
                       <FormattedMessage id="home.join_us" />
                     </a>
-                  </WithHoverSound>
-                  <WithHoverSound>
-                    <a
-                      className={styles.link}
-                      rel="noopener noreferrer"
-                      href="/#/update"
-                    >
-                      <FormattedMessage id="home.get_updates" />
-                    </a>
-                  </WithHoverSound>
-                  <WithHoverSound>
-                    <a
-                      className={styles.link}
-                      rel="noopener noreferrer"
-                      href="/#/report"
-                    >
-                      <FormattedMessage id="home.report_issue" />
-                    </a>
-                  </WithHoverSound>
-                  <WithHoverSound>
+                  </IfFeature>
+                  <IfFeature name="show_issue_report_link">
+                    {configs.feature("show_issue_report_dialog") ? (
+                      <a className={styles.link} rel="noopener noreferrer" href="/#/report">
+                        <FormattedMessage id="home.report_issue" />
+                      </a>
+                    ) : (
+                      <a
+                        className={styles.link}
+                        href={configs.link("issue_report", "/#/report")}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                      >
+                        <FormattedMessage id="settings.report" />
+                      </a>
+                    )}
+                  </IfFeature>
+                  <IfFeature name="show_terms">
                     <a
                       className={styles.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+                      href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
                     >
                       <FormattedMessage id="home.terms_of_use" />
                     </a>
-                  </WithHoverSound>
-                  <WithHoverSound>
+                  </IfFeature>
+                  <IfFeature name="show_privacy">
                     <a
                       className={styles.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+                      href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
                     >
                       <FormattedMessage id="home.privacy_notice" />
                     </a>
-                  </WithHoverSound>
-
-                  <img className={styles.mozLogo} src={mozLogo} />
+                  </IfFeature>
+                  <IfFeature name="show_company_logo">
+                    <img className={styles.companyLogo} src={configs.image("company_logo")} />
+                  </IfFeature>
                 </div>
               </div>
             </div>
@@ -341,6 +323,85 @@ class HomeRoot extends Component {
           {this.state.dialog}
         </div>
       </IntlProvider>
+    );
+  }
+
+  renderPwaButton() {
+    return (
+      <button
+        className={classNames(styles.secondaryButton)}
+        style={this.props.installEvent || this.state.installed ? {} : { visibility: "hidden" }}
+        onClick={() => {
+          this.props.installEvent.prompt();
+
+          this.props.installEvent.userChoice.then(choiceResult => {
+            if (choiceResult.outcome === "accepted") {
+              this.setState({ installed: true });
+            }
+          });
+        }}
+      >
+        <i>
+          <FontAwesomeIcon icon={faPlus} />
+        </i>
+        <FormattedMessage id={`home.${isMobile ? "mobile" : "desktop"}.add_pwa`} />
+      </button>
+    );
+  }
+
+  renderCreateButton() {
+    return (
+      <button
+        className={classNames(styles.primaryButton, styles.ctaButton)}
+        onClick={e => {
+          e.preventDefault();
+          createAndRedirectToNewHub(null, null, false);
+        }}
+      >
+        <FormattedMessage id="home.create_a_room" />
+      </button>
+    );
+  }
+
+  renderFavoriteHero() {
+    return [
+      <div className={styles.heroPanel} key={1}>
+        <div className={styles.container}>
+          <div className={classNames([styles.logo, styles.logoMargin])}>
+            <img src={configs.image("logo")} />
+          </div>
+        </div>
+        <div className={styles.ctaButtons}>
+          {this.renderCreateButton()}
+          {this.renderPwaButton()}
+        </div>
+      </div>,
+      <div className={styles.heroPanel} key={2}>
+        <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
+          <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
+            <MediaTiles result={this.props.favoriteHubsResult} urlSource="favorites" />
+          </div>
+        </div>
+      </div>
+    ];
+  }
+
+  renderNonFavoriteHero() {
+    return (
+      <div className={styles.heroPanel}>
+        <div className={styles.container}>
+          <div className={styles.logo}>
+            <img src={configs.image("logo")} />
+          </div>
+          <div className={styles.blurb}>
+            <FormattedMessage id="app-description" />
+          </div>
+        </div>
+        <div className={styles.ctaButtons}>
+          {this.renderCreateButton()}
+          {this.renderPwaButton()}
+        </div>
+      </div>
     );
   }
 }

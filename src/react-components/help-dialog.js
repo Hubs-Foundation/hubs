@@ -1,68 +1,44 @@
 import React, { Component } from "react";
-import { FormattedMessage } from "react-intl";
 import DialogContainer from "./dialog-container.js";
-import { WithHoverSound } from "./wrap-with-audio";
+import PropTypes from "prop-types";
+import styles from "../assets/stylesheets/help-dialog.scss";
+import configs from "../utils/configs";
+import { messages } from "../utils/i18n";
+import { resetTips } from "../systems/tips";
 
 export default class HelpDialog extends Component {
+  static propTypes = {
+    onClose: PropTypes.func
+  };
   render() {
     return (
-      <DialogContainer title="Getting Started" {...this.props}>
-        <div className="info-dialog__help">
-          <p style={{ textAlign: "center" }}>
-            Join the Hubs community on{" "}
-            <WithHoverSound>
-              <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/wHmY4nd">
-                Discord
-              </a>
-            </WithHoverSound>
-            !
-          </p>
-          <p>When in a room, other avatars can see and hear you.</p>
-          <p>
-            Use your controller&apos;s action button to teleport from place to place. If it has a grip, use it to pick
-            up objects.
-          </p>
-          <p>
-            In VR, <b>look up</b> to find your menu.
-          </p>
-          <p>
-            The <b>Mic Toggle</b> mutes your mic.
-          </p>
-          <p>
-            The <b>Pause Toggle</b> pauses all other avatars and lets you block others or pin or remove objects.
-          </p>
-          <p>
-            See detailed{" "}
-            <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/wiki/Hubs-Features">
-              feature
-            </a>{" "}
-            and{" "}
-            <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/wiki/Hubs-Controls">
-              controls
-            </a>{" "}
-            documentation.
-          </p>
-          <p className="dialog__box__contents__links">
-            <WithHoverSound>
-              <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
-                <FormattedMessage id="profile.terms_of_use" />
-              </a>
-            </WithHoverSound>
-            <WithHoverSound>
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
-              >
-                <FormattedMessage id="profile.privacy_notice" />
-              </a>
-            </WithHoverSound>
-            <WithHoverSound>
-              <a target="_blank" rel="noopener noreferrer" href="/?report">
-                <FormattedMessage id="help.report_issue" />
-              </a>
-            </WithHoverSound>
-          </p>
+      <DialogContainer title="Help" {...this.props}>
+        <div className={styles.helpDialog}>
+          <div>To get started, you can take a tour.</div>
+          <div>
+            Or, you can{" "}
+            <a href={configs.link("features", messages["help.docs_url"])} rel="noreferrer noopener" target="_blank">
+              browse the documentation
+            </a>.
+          </div>
+          <button
+            className={styles.tourButton}
+            onClick={e => {
+              e.preventDefault();
+              resetTips();
+              this.props.onClose();
+            }}
+          >
+            Start Tour
+          </button>
+          <a
+            className={styles.docsLink}
+            href={configs.link("features", messages["help.docs_url"])}
+            rel="noreferrer noopener"
+            target="_blank"
+          >
+            Browse Documentation
+          </a>
         </div>
       </DialogContainer>
     );

@@ -5,42 +5,72 @@
  * @component drawing-manager
  */
 AFRAME.registerComponent("drawing-manager", {
+  schema: {
+    penSpawner: { type: "selector" }
+  },
+
   init() {
-    this._onComponentInitialized = this._onComponentInitialized.bind(this);
-
+    this.el.object3D.visible = false;
     this.drawingToPen = new Map();
-  },
-
-  remove() {
-    if (this.drawingEl) {
-      this.drawingEl.removeEventListener("componentinitialized", this._onComponentInitialized);
-    }
-  },
-
-  _onComponentInitialized(e) {
-    if (e.detail.name == "networked-drawing") {
-      this.drawing = this.drawingEl.components["networked-drawing"];
-    }
+    this.data.penSpawner.addEventListener("spawned-entity-created", () => {
+      if (!this.drawingEl) {
+        this.createDrawing();
+      }
+    });
   },
 
   createDrawing() {
-    if (!this.drawingEl) {
-      this.drawingEl = document.createElement("a-entity");
-      this.drawingEl.setAttribute("networked", "template: #interactable-drawing");
-      this.el.sceneEl.appendChild(this.drawingEl);
+    if (!this.createDrawingPromise) {
+      this.createDrawingPromise = new Promise(resolve => {
+        this.drawingEl = document.createElement("a-entity");
+        this.drawingEl.setAttribute("networked", "template: #interactable-drawing");
+        this.el.sceneEl.appendChild(this.drawingEl);
 
-      this.drawingEl.addEventListener("componentinitialized", this._onComponentInitialized);
+        const handNetworkedDrawingInit = e => {
+          if (e.detail.name === "networked-drawing") {
+            this.drawing = this.drawingEl.components["networked-drawing"];
+            this.drawingEl.removeEventListener("componentinitialized", handNetworkedDrawingInit);
+            resolve();
+          }
+        };
+
+        this.drawingEl.addEventListener("componentinitialized", handNetworkedDrawingInit);
+      });
+    }
+    return this.createDrawingPromise;
+  },
+
+  destroyDrawing(networkedDrawing) {
+    if (this.drawing === networkedDrawing) {
+      this.drawingToPen.delete(this.drawing);
+      this.drawing = null;
+      this.drawingEl = null;
+      this.createDrawingPromise = null;
+      this.getDrawingPromise = null;
     }
   },
 
   getDrawing(pen) {
     //TODO: future handling of multiple drawings
-    if (this.drawing && (!this.drawingToPen.has(this.drawing) || this.drawingToPen.get(this.drawing) === pen)) {
-      this.drawingToPen.set(this.drawing, pen);
-      return this.drawing;
+    if (!this.getDrawingPromise) {
+      this.getDrawingPromise = new Promise((resolve, reject) => {
+        if (!this.drawingEl) {
+          this.createDrawing().then(() => {
+            this.drawingToPen.set(this.drawing, pen);
+            resolve(this.drawing);
+          });
+        } else if (
+          this.drawing &&
+          (!this.drawingToPen.has(this.drawing) || this.drawingToPen.get(this.drawing) === pen)
+        ) {
+          this.drawingToPen.set(this.drawing, pen);
+          resolve(this.drawing);
+        } else {
+          reject();
+        }
+      });
     }
-
-    return null;
+    return this.getDrawingPromise;
   },
 
   returnDrawing(pen) {

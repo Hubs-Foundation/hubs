@@ -2,6 +2,11 @@
   position: absolute;
   height: 20vh;
   bottom: 0;
+
+  /* Orientation selector fails here when keyboard pops up on shorter screens */
+  @media(min-aspect-ratio: 15/9) {
+    height: 30vh;
+  }
 }
 
 :local(.touchZone.left) {
@@ -19,10 +24,15 @@
   height: 0;
   left: 0;
   right: 0;
-  bottom: 10vh;
-  display: flex;
+  bottom: 15vh;
   align-items: center;
   justify-content: space-around;
+  display: none;
+
+  /* Orientation selector fails here when keyboard pops up on shorter screens */
+  @media (min-aspect-ratio: 15/9) {
+    display: flex;
+  }
 }
 
 :local(.mockJoystick) {

@@ -1,20 +1,14 @@
 /**
- * Initializes teleport-controls when the environment bundle has loaded.
+ * Initializes teleporters when the environment bundle has loaded.
  * @namespace environment
  * @component nav-mesh-helper
  */
 AFRAME.registerComponent("nav-mesh-helper", {
-  schema: {
-    teleportControls: { type: "selectorAll", default: "[teleport-controls]" }
-  },
-
   init: function() {
-    const teleportControls = this.data.teleportControls;
     this.el.addEventListener("model-loaded", () => {
-      if (!teleportControls) return;
-
-      for (let i = 0; i < teleportControls.length; i++) {
-        teleportControls[i].components["teleport-controls"].queryCollisionEntities();
+      const teleporters = document.querySelectorAll("[teleporter]");
+      for (let i = 0; i < teleporters.length; i++) {
+        teleporters[i].components["teleporter"].queryCollisionEntities();
       }
     });
   }

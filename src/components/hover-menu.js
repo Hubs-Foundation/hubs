@@ -3,15 +3,13 @@ AFRAME.registerComponent("hover-menu", {
   schema: {
     template: { type: "selector" },
     dirs: { type: "array" },
-    dim: { default: true }
+    dim: { default: true },
+    withPermission: { type: "string" }
   },
 
   async init() {
-    this.onHoverStateChange = this.onHoverStateChange.bind(this);
     this.onFrozenStateChange = this.onFrozenStateChange.bind(this);
-
-    this.hovering = this.el.parentNode.is("hovered");
-
+    this.hovering = false;
     await this.getHoverMenu();
     this.applyHoverState();
   },
@@ -24,7 +22,7 @@ AFRAME.registerComponent("hover-menu", {
       setTimeout(() => {
         this.menu = menu;
         this.el.setAttribute("position-at-box-shape-border", {
-          target: ".video-toolbar",
+          target: ".hover-container",
           dirs: this.data.dirs,
           animate: false,
           scale: false
@@ -39,29 +37,21 @@ AFRAME.registerComponent("hover-menu", {
     this.applyHoverState();
   },
 
-  onHoverStateChange(e) {
-    this.hovering = e.type === "hover-start";
-    this.applyHoverState();
-  },
-
   applyHoverState() {
     if (!this.menu) return;
-    this.menu.object3D.visible = !this.el.sceneEl.is("frozen") && this.hovering;
+    const allowed = !this.data.withPermission || window.APP.hubChannel.canOrWillIfCreator(this.data.withPermission);
+    this.menu.object3D.visible = allowed && !this.el.sceneEl.is("frozen") && this.hovering;
     if (this.data.dim && this.el.object3DMap.mesh && this.el.object3DMap.mesh.material) {
       this.el.object3DMap.mesh.material.color.setScalar(this.menu.object3D.visible ? 0.5 : 1);
     }
   },
 
   play() {
-    this.el.addEventListener("hover-start", this.onHoverStateChange);
-    this.el.addEventListener("hover-end", this.onHoverStateChange);
     this.el.sceneEl.addEventListener("stateadded", this.onFrozenStateChange);
     this.el.sceneEl.addEventListener("stateremoved", this.onFrozenStateChange);
   },
 
   pause() {
-    this.el.removeEventListener("hover-start", this.onHoverStateChange);
-    this.el.removeEventListener("hover-end", this.onHoverStateChange);
     this.el.sceneEl.removeEventListener("stateadded", this.onFrozenStateChange);
     this.el.sceneEl.removeEventListener("stateremoved", this.onFrozenStateChange);
   }

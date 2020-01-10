@@ -2,114 +2,50 @@ import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
+import { validMaterials } from "../components/hoverable-visuals";
+import { proxiedUrlFor } from "../utils/media-url-utils";
 
-const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
-if (process.env.CORS_PROXY_SERVER) {
-  nonCorsProxyDomains.push(process.env.CORS_PROXY_SERVER);
-}
+import anime from "animejs";
+
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
-const commonKnownContentTypes = {
-  gltf: "model/gltf",
-  glb: "model/gltf-binary",
-  png: "image/png",
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  pdf: "application/pdf",
-  mp4: "video/mp4",
-  mp3: "audio/mpeg"
-};
-
-// thanks to https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
-function b64EncodeUnicode(str) {
-  // first we use encodeURIComponent to get percent-encoded UTF-8, then we convert the percent-encodings
-  // into raw bytes which can be fed into btoa.
-  const CHAR_RE = /%([0-9A-F]{2})/g;
-  return btoa(encodeURIComponent(str).replace(CHAR_RE, (_, p1) => String.fromCharCode("0x" + p1)));
-}
-
-const farsparkEncodeUrl = url => {
-  // farspark doesn't know how to read '=' base64 padding characters
-  // translate base64 + to - and / to _ for URL safety
-  return b64EncodeUnicode(url)
-    .replace(/=+$/g, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
-};
-
-export const scaledThumbnailUrlFor = (url, width, height) => {
-  if (process.env.RETICULUM_SERVER && process.env.RETICULUM_SERVER.includes("hubs.local")) {
-    return url;
-  }
-
-  return `https://${process.env.FARSPARK_SERVER}/thumbnail/${farsparkEncodeUrl(url)}?w=${width}&h=${height}`;
-};
-
-export const proxiedUrlFor = (url, index) => {
-  if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
-
-  // Skip known domains that do not require CORS proxying.
-  try {
-    const parsedUrl = new URL(url);
-    if (nonCorsProxyDomains.find(domain => parsedUrl.hostname.endsWith(domain))) return url;
-  } catch (e) {
-    // Ignore
-  }
-
-  if (index != null || !process.env.CORS_PROXY_SERVER) {
-    const method = index != null ? "extract" : "raw";
-    return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${farsparkEncodeUrl(url)}`;
-  } else {
-    return `https://${process.env.CORS_PROXY_SERVER}/${url}`;
-  }
-};
-
+// Map<String, Promise<Object>
 const resolveUrlCache = new Map();
-export const resolveUrl = async (url, index) => {
-  const cacheKey = `${url}|${index}`;
-  if (resolveUrlCache.has(cacheKey)) return resolveUrlCache.get(cacheKey);
-  const resolved = await fetch(mediaAPIEndpoint, {
+export const resolveUrl = async (url, version = 1) => {
+  const key = `${url}_${version}`;
+  if (resolveUrlCache.has(key)) return resolveUrlCache.get(key);
+
+  const resultPromise = fetch(mediaAPIEndpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ media: { url, index } })
-  }).then(r => r.json());
-  resolveUrlCache.set(cacheKey, resolved);
-  return resolved;
-};
-
-export const getCustomGLTFParserURLResolver = gltfUrl => (url, path) => {
-  if (typeof url !== "string" || url === "") return "";
-  if (/^(https?:)?\/\//i.test(url)) return url;
-  if (/^data:.*,.*$/i.test(url)) return url;
-  if (/^blob:.*$/i.test(url)) return url;
-
-  if (process.env.CORS_PROXY_SERVER) {
-    // For absolute paths with a CORS proxied gltf URL, re-write the url properly to be proxied
-    const corsProxyPrefix = `https://${process.env.CORS_PROXY_SERVER}/`;
-
-    if (gltfUrl.startsWith(corsProxyPrefix)) {
-      const originalUrl = decodeURIComponent(gltfUrl.substring(corsProxyPrefix.length));
-      const originalUrlParts = originalUrl.split("/");
-
-      // Drop the .gltf filename
-      const assetUrl = originalUrlParts.slice(0, originalUrlParts.length - 1).join("/") + "/" + url;
-      return corsProxyPrefix + assetUrl;
+    body: JSON.stringify({ media: { url }, version })
+  }).then(async response => {
+    if (!response.ok) {
+      const message = `Error resolving url "${url}":`;
+      try {
+        const body = await response.text();
+        throw new Error(message + " " + body);
+      } catch (e) {
+        throw new Error(message + " " + response.statusText);
+      }
     }
-  }
+    return response.json();
+  });
 
-  return path + url;
+  resolveUrlCache.set(key, resultPromise);
+  return resultPromise;
 };
 
-export const guessContentType = url => {
-  if (url.startsWith("hubs://") && url.endsWith("/video")) return "video/vnd.hubs-webrtc";
-  const extension = new URL(url).pathname.split(".").pop();
-  return commonKnownContentTypes[extension];
-};
-
-export const upload = file => {
+export const upload = (file, desiredContentType) => {
   const formData = new FormData();
   formData.append("media", file);
   formData.append("promotion_mode", "with_token");
+
+  if (desiredContentType) {
+    formData.append("desired_content_type", desiredContentType);
+  }
+
   return fetch(mediaAPIEndpoint, {
     method: "POST",
     body: formData
@@ -155,44 +91,55 @@ function getOrientation(file, callback) {
   reader.readAsArrayBuffer(file);
 }
 
-let interactableId = 0;
-export const addMedia = (src, template, contentOrigin, resolve = false, resize = false) => {
+function getLatestMediaVersionOfSrc(src) {
+  const els = document.querySelectorAll("[media-loader]");
+  let version = 1;
+
+  for (const el of els) {
+    const loader = el.components["media-loader"];
+
+    if (loader.data.src === src) {
+      version = Math.max(version, loader.data.version);
+    }
+  }
+
+  return version;
+}
+
+export const addMedia = (
+  src,
+  template,
+  contentOrigin,
+  contentSubtype = null,
+  resolve = false,
+  fitToBox = false,
+  animate = true,
+  mediaOptions = {}
+) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
-  entity.id = "interactable-media-" + interactableId++;
   entity.setAttribute("networked", { template: template });
   const needsToBeUploaded = src instanceof File;
+
+  // If we're re-pasting an existing src in the scene, we should use the latest version
+  // seen across any other entities. Otherwise, start with version 1.
+  const version = getLatestMediaVersionOfSrc(src);
+
   entity.setAttribute("media-loader", {
-    resize,
+    fitToBox,
     resolve,
+    animate,
     src: typeof src === "string" ? src : "",
-    fileIsOwned: !needsToBeUploaded
+    version,
+    contentSubtype,
+    fileIsOwned: !needsToBeUploaded,
+    mediaOptions
   });
+
+  entity.object3D.matrixNeedsUpdate = true;
+
   scene.appendChild(entity);
-
-  const fireLoadingTimeout = setTimeout(() => {
-    scene.emit("media-loading", { src: src });
-  }, 100);
-
-  ["model-loaded", "video-loaded", "image-loaded"].forEach(eventName => {
-    entity.addEventListener(eventName, () => {
-      clearTimeout(fireLoadingTimeout);
-
-      if (!entity.classList.contains("pen") && !entity.getAttribute("animation__spawn-start")) {
-        entity.setAttribute("animation__spawn-start", {
-          property: "scale",
-          delay: 0,
-          dur: 200,
-          from: { x: entity.object3D.scale.x / 4, y: entity.object3D.scale.y / 4, z: entity.object3D.scale.z / 4 },
-          to: { x: entity.object3D.scale.x, y: entity.object3D.scale.y, z: entity.object3D.scale.z },
-          easing: "easeInQuad"
-        });
-      }
-
-      scene.emit("media-loaded", { src: src });
-    });
-  });
 
   const orientation = new Promise(function(resolve) {
     if (needsToBeUploaded) {
@@ -204,9 +151,12 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
     }
   });
   if (needsToBeUploaded) {
-    upload(src)
+    // Video camera videos are converted to mp4 for compatibility
+    const desiredContentType = contentSubtype === "video-camera" ? "video/mp4" : null;
+
+    upload(src, desiredContentType)
       .then(response => {
-        const srcUrl = new URL(response.raw);
+        const srcUrl = new URL(proxiedUrlFor(response.origin));
         srcUrl.searchParams.set("token", response.meta.access_token);
         entity.setAttribute("media-loader", { resolve: false, src: srcUrl.href, fileId: response.file_id });
         window.APP.store.update({
@@ -234,14 +184,15 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
 export function injectCustomShaderChunks(obj) {
   const vertexRegex = /\bskinning_vertex\b/;
   const fragRegex = /\bgl_FragColor\b/;
-  const validMaterials = ["MeshStandardMaterial", "MeshBasicMaterial", "MobileStandardMaterial"];
 
-  const shaderUniforms = new Map();
+  const shaderUniforms = [];
+  const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
 
   obj.traverse(object => {
     if (!object.material) return;
 
     object.material = mapMaterials(object, material => {
+      if (material.hubs_InjectedCustomShaderChunks) return material;
       if (!validMaterials.includes(material.type)) {
         return material;
       }
@@ -250,14 +201,22 @@ export function injectCustomShaderChunks(obj) {
       // material, so maps cannot be updated at runtime. This breaks UI elements who have
       // hover/toggle state, so for now just skip these while we figure out a more correct
       // solution.
-      if (object.el.classList.contains("ui")) return material;
-      if (object.el.classList.contains("hud")) return material;
-      if (object.el.getAttribute("text-button")) return material;
+      if (
+        object.el.classList.contains("ui") ||
+        object.el.classList.contains("hud") ||
+        object.el.getAttribute("text-button")
+      )
+        return material;
+
+      // Used when the object is batched
+      batchManagerSystem.meshToEl.set(object, obj.el);
 
       const newMaterial = material.clone();
+      // This will not run if the object is never rendered unbatched, since its unbatched shader will never be compiled
       newMaterial.onBeforeCompile = shader => {
         if (!vertexRegex.test(shader.vertexShader)) return;
 
+        shader.uniforms.hubs_IsFrozen = { value: false };
         shader.uniforms.hubs_EnableSweepingEffect = { value: false };
         shader.uniforms.hubs_SweepParams = { value: [0, 0] };
         shader.uniforms.hubs_InteractorOnePos = { value: [0, 0, 0] };
@@ -267,18 +226,19 @@ export function injectCustomShaderChunks(obj) {
         shader.uniforms.hubs_Time = { value: 0 };
 
         const vchunk = `
-        if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo) {
+        if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo || hubs_IsFrozen) {
           vec4 wt = modelMatrix * vec4(transformed, 1);
 
           // Used in the fragment shader below.
           hubs_WorldPosition = wt.xyz;
         }
-      `;
+        `;
 
         const vlines = shader.vertexShader.split("\n");
         const vindex = vlines.findIndex(line => vertexRegex.test(line));
         vlines.splice(vindex + 1, 0, vchunk);
         vlines.unshift("varying vec3 hubs_WorldPosition;");
+        vlines.unshift("uniform bool hubs_IsFrozen;");
         vlines.unshift("uniform bool hubs_HighlightInteractorOne;");
         vlines.unshift("uniform bool hubs_HighlightInteractorTwo;");
         shader.vertexShader = vlines.join("\n");
@@ -287,6 +247,7 @@ export function injectCustomShaderChunks(obj) {
         const findex = flines.findIndex(line => fragRegex.test(line));
         flines.splice(findex + 1, 0, mediaHighlightFrag);
         flines.unshift("varying vec3 hubs_WorldPosition;");
+        flines.unshift("uniform bool hubs_IsFrozen;");
         flines.unshift("uniform bool hubs_EnableSweepingEffect;");
         flines.unshift("uniform vec2 hubs_SweepParams;");
         flines.unshift("uniform bool hubs_HighlightInteractorOne;");
@@ -296,9 +257,10 @@ export function injectCustomShaderChunks(obj) {
         flines.unshift("uniform float hubs_Time;");
         shader.fragmentShader = flines.join("\n");
 
-        shaderUniforms.set(newMaterial.uuid, shader.uniforms);
+        shaderUniforms.push(shader.uniforms);
       };
       newMaterial.needsUpdate = true;
+      newMaterial.hubs_InjectedCustomShaderChunks = true;
       return newMaterial;
     });
   });
@@ -308,4 +270,150 @@ export function injectCustomShaderChunks(obj) {
 
 export function getPromotionTokenForFile(fileId) {
   return window.APP.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
+}
+
+const mediaPos = new THREE.Vector3();
+
+export function addAndArrangeMedia(el, media, contentSubtype, snapCount, mirrorOrientation = false, distance = 0.75) {
+  const { entity, orientation } = addMedia(media, "#interactable-media", undefined, contentSubtype, false);
+
+  const pos = el.object3D.position;
+
+  entity.object3D.position.set(pos.x, pos.y, pos.z);
+  entity.object3D.rotation.copy(el.object3D.rotation);
+
+  if (mirrorOrientation) {
+    entity.object3D.rotateY(Math.PI);
+  }
+
+  // Generate photos in a circle around camera, starting from the bottom.
+  // Prevent z-fighting but place behind viewfinder
+  const idx = (snapCount % 6) + 3;
+
+  mediaPos.set(
+    Math.cos(Math.PI * 2 * (idx / 6.0)) * distance,
+    Math.sin(Math.PI * 2 * (idx / 6.0)) * distance,
+    -0.05 + idx * 0.001
+  );
+
+  el.object3D.localToWorld(mediaPos);
+  entity.object3D.visible = false;
+
+  const handler = () => {
+    entity.object3D.visible = true;
+    entity.setAttribute("animation__photo_pos", {
+      property: "position",
+      dur: 800,
+      from: { x: pos.x, y: pos.y, z: pos.z },
+      to: { x: mediaPos.x, y: mediaPos.y, z: mediaPos.z },
+      easing: "easeOutElastic"
+    });
+  };
+
+  let eventType = null;
+
+  if (contentSubtype.startsWith("photo")) {
+    entity.addEventListener("image-loaded", handler, { once: true });
+    eventType = "photo";
+  } else if (contentSubtype.startsWith("video")) {
+    entity.addEventListener("video-loaded", handler, { once: true });
+    eventType = "video";
+  } else {
+    console.error("invalid type " + contentSubtype);
+    return;
+  }
+
+  entity.object3D.matrixNeedsUpdate = true;
+
+  entity.addEventListener(
+    "media_resolved",
+    () => {
+      el.emit(`${eventType}_taken`, entity.components["media-loader"].data.src);
+    },
+    { once: true }
+  );
+
+  return { entity, orientation };
+}
+
+export const textureLoader = new HubsTextureLoader().setCrossOrigin("anonymous");
+
+export async function createImageTexture(url, filter) {
+  let texture;
+
+  if (filter) {
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    const load = new Promise(res => image.addEventListener("load", res, { once: true }));
+    image.src = url;
+    await load;
+    const canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(image, 0, 0);
+    await filter(ctx, image.width, image.height);
+
+    texture = new THREE.CanvasTexture(canvas);
+  } else {
+    texture = new THREE.Texture();
+
+    try {
+      await textureLoader.loadTextureAsync(texture, url);
+    } catch (e) {
+      throw new Error(`'${url}' could not be fetched (Error code: ${e.status}; Response: ${e.statusText})`);
+    }
+  }
+
+  texture.encoding = THREE.sRGBEncoding;
+  texture.anisotropy = 4;
+
+  return texture;
+}
+
+export function addMeshScaleAnimation(mesh, initialScale, onComplete) {
+  const step = (function() {
+    const lastValue = {};
+    return function(anim) {
+      const value = anim.animatables[0].target;
+
+      value.x = Math.max(Number.MIN_VALUE, value.x);
+      value.y = Math.max(Number.MIN_VALUE, value.y);
+      value.z = Math.max(Number.MIN_VALUE, value.z);
+
+      // For animation timeline.
+      if (value.x === lastValue.x && value.y === lastValue.y && value.z === lastValue.z) {
+        return;
+      }
+
+      lastValue.x = value.x;
+      lastValue.y = value.y;
+      lastValue.z = value.z;
+
+      mesh.scale.set(value.x, value.y, value.z);
+      mesh.matrixNeedsUpdate = true;
+    };
+  })();
+
+  const config = {
+    duration: 400,
+    easing: "easeOutElastic",
+    elasticity: 400,
+    loop: 0,
+    round: false,
+    x: mesh.scale.x,
+    y: mesh.scale.y,
+    z: mesh.scale.z,
+    targets: [initialScale],
+    update: anim => step(anim),
+    complete: anim => {
+      step(anim);
+      if (onComplete) onComplete();
+    }
+  };
+
+  mesh.scale.copy(initialScale);
+  mesh.matrixNeedsUpdate = true;
+
+  return anime(config);
 }

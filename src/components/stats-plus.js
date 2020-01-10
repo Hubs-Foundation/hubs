@@ -1,4 +1,6 @@
 import "./stats-plus.css";
+import qsTruthy from "../utils/qs_truthy";
+
 // Adapted from https://github.com/aframevr/aframe/blob/master/src/components/scene/stats.js
 
 function createStats(scene) {
@@ -8,9 +10,15 @@ function createStats(scene) {
   return new window.rStats({
     css: [], // Our stylesheet is injected from AFrame.
     values: {
-      fps: { caption: "fps", below: 30 }
+      fps: { caption: "fps", below: 30 },
+      batchdraws: { caption: "Draws" },
+      batchinstances: { caption: "Instances" },
+      batchatlassize: { caption: "Atlas Size" }
     },
-    groups: [{ caption: "Framerate", values: ["fps", "raf"] }],
+    groups: [
+      { caption: "Framerate", values: ["fps", "raf", "physics"] },
+      { caption: "Batching", values: ["batchdraws", "batchinstances", "batchatlassize"] }
+    ],
     plugins: plugins
   });
 }
@@ -30,6 +38,8 @@ AFRAME.registerComponent("stats-plus", {
     const scene = this.el.sceneEl;
     this.stats = createStats(scene);
     this.statsEl = document.querySelector(".rs-base");
+    // HACK for now in rare case where dom isn't ready, just bail
+    if (!this.statsEl) return;
 
     // Add header to stats panel so we can collapse it
     const statsHeaderEl = document.createElement("div");
@@ -55,6 +65,7 @@ AFRAME.registerComponent("stats-plus", {
     this.lastFpsUpdate = performance.now();
     this.lastFps = 0;
     this.frameCount = 0;
+    this.inVR = scene.is("vr-mode");
 
     if (scene.isMobile) {
       this.statsEl.classList.add("rs-mobile");
@@ -63,6 +74,45 @@ AFRAME.registerComponent("stats-plus", {
 
     scene.addEventListener("enter-vr", this.onEnterVr);
     scene.addEventListener("exit-vr", this.onExitVr);
+
+    this.vrStatsEnabled = qsTruthy("vrstats");
+    if (this.vrStatsEnabled) {
+      this.initVRStats();
+    }
+    this.lastUpdate = 0;
+  },
+  initVRStats() {
+    this.vrPanel = document.createElement("a-entity");
+    this.vrPanel.setAttribute("text", { width: 0.5, whiteSpace: "pre", value: "_", baseline: "bottom" });
+    this.vrPanel.addEventListener(
+      "loaded",
+      () =>
+        this.vrPanel.object3D.traverse(x => {
+          if (x.material) x.material.depthTest = false;
+        }),
+      { once: true }
+    );
+    this.el.append(this.vrPanel);
+    const background = document.createElement("a-plane");
+    background.setAttribute("color", "#333333");
+    background.setAttribute("material", "shader", "flat");
+    background.setAttribute("material", "depthTest", false);
+    background.setAttribute("width", 0.1);
+    background.setAttribute("height", 0.12);
+    background.setAttribute("position", "-0.2 0.055 0");
+    this.el.append(background);
+  },
+  toggleVRStats() {
+    if (this.vrStatsEnabled) {
+      this.el.object3D.visible = false;
+      this.vrStatsEnabled = false;
+    } else {
+      if (!this.vrPanel) {
+        this.initVRStats();
+      }
+      this.el.object3D.visible = true;
+      this.vrStatsEnabled = true;
+    }
   },
   update(oldData) {
     if (oldData !== this.data) {
@@ -75,14 +125,25 @@ AFRAME.registerComponent("stats-plus", {
       }
     }
   },
-  tick() {
-    if (this.data) {
+  tick(time) {
+    const stats = this.stats;
+    if (!this.statsEl) return;
+    if (this.data || this.vrStatsEnabled) {
       // Update rStats
-      const stats = this.stats;
       stats("rAF").tick();
       stats("FPS").frame();
+      stats("physics").set(this.el.sceneEl.systems["hubs-systems"].physicsSystem.stepDuration);
+
+      const batchManagerSystem = this.el.sceneEl.systems["hubs-systems"].batchManagerSystem;
+      if (batchManagerSystem.batchingEnabled) {
+        const batchManager = batchManagerSystem.batchManager;
+        stats("batchdraws").set(batchManager.batches.length);
+        stats("batchinstances").set(batchManager.instanceCount);
+        stats("batchatlassize").set(batchManager.atlas.arrayDepth);
+      }
+
       stats().update();
-    } else {
+    } else if (!this.inVR) {
       // Update the fps counter
       const now = performance.now();
       this.frameCount++;
@@ -98,8 +159,29 @@ AFRAME.registerComponent("stats-plus", {
         this.frameCount = 0;
       }
     }
+    if (this.vrStatsEnabled && time - this.lastUpdate > 100) {
+      this.vrPanel.setAttribute(
+        "text",
+        "value",
+        [
+          `f ${stats("fps")
+            .value()
+            .toFixed(0)}`,
+          `r ${stats("raf")
+            .value()
+            .toFixed(0)}`,
+          `p ${stats("physics")
+            .value()
+            .toFixed(0)}`,
+          `c ${this.el.sceneEl.renderer.info.render.calls}`,
+          `t ${(this.el.sceneEl.renderer.info.render.triangles / 1000).toFixed(0)}k`
+        ].join("\n")
+      );
+      this.lastUpdate = time;
+    }
   },
   onEnterVr() {
+    this.inVR = true;
     // Hide all stats elements when entering VR on mobile
     if (this.el.sceneEl.isMobile) {
       this.statsEl.classList.add(HIDDEN_CLASS);
@@ -107,6 +189,7 @@ AFRAME.registerComponent("stats-plus", {
     }
   },
   onExitVr() {
+    this.inVR = false;
     // Revert to previous state whe exiting VR on mobile
     if (this.el.sceneEl.isMobile) {
       if (this.data) {

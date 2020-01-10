@@ -136,7 +136,10 @@ export default class LinkChannel {
           decryptObject(payload.public_key, privateKey, payload.data).then(resolve);
         });
 
-        channel.join().receive("error", r => console.error(r));
+        channel
+          .join()
+          .receive("ok", data => (this.socket.params().session_id = data.session_id))
+          .receive("error", r => console.error(r));
       });
     });
   };

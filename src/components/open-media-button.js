@@ -1,20 +1,55 @@
-const hubsRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/(\w+)\/?\S*/;
-const isHubsUrl = hubsRegex.test.bind(hubsRegex);
+import { isHubsSceneUrl, isHubsRoomUrl, isHubsAvatarUrl } from "../utils/media-url-utils";
+import { guessContentType } from "../utils/media-url-utils";
+import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 
 AFRAME.registerComponent("open-media-button", {
+  schema: {
+    onlyOpenLink: { type: "boolean" }
+  },
   init() {
     this.label = this.el.querySelector("[text]");
 
-    this.updateSrc = () => {
-      this.src = this.targetEl.components["media-loader"].data.src;
-      this.label.setAttribute("text", "value", isHubsUrl(this.src) ? "visit" : "open link");
+    this.updateSrc = async () => {
+      if (!this.targetEl.parentNode) return; // If removed
+      const src = (this.src = this.targetEl.components["media-loader"].data.src);
+      const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
+      const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
+
+      this.el.object3D.visible = !!visible;
+
+      if (visible) {
+        let label = "open link";
+        if (!this.data.onlyOpenLink) {
+          if (await isHubsAvatarUrl(src)) {
+            label = "use avatar";
+          } else if ((await isHubsSceneUrl(src)) && mayChangeScene) {
+            label = "use scene";
+          } else if (await isHubsRoomUrl(src)) {
+            label = "visit room";
+          }
+        }
+        this.label.setAttribute("text", "value", label);
+      }
     };
 
-    this.onClick = () => {
-      const directNavigate = isHubsUrl(this.src);
-      if (directNavigate) {
+    this.onClick = async () => {
+      const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
+
+      const exitImmersive = async () => await handleExitTo2DInterstitial(false, () => {}, true);
+
+      if (this.data.onlyOpenLink) {
+        await exitImmersive();
+        window.open(this.src);
+      } else if (await isHubsAvatarUrl(this.src)) {
+        const avatarId = new URL(this.src).pathname.split("/").pop();
+        window.APP.store.update({ profile: { avatarId } });
+      } else if ((await isHubsSceneUrl(this.src)) && mayChangeScene) {
+        this.el.sceneEl.emit("scene_media_selected", this.src);
+      } else if (await isHubsRoomUrl(this.src)) {
+        await exitImmersive();
         location.href = this.src;
       } else {
+        await exitImmersive();
         window.open(this.src);
       }
     };
@@ -27,10 +62,10 @@ AFRAME.registerComponent("open-media-button", {
   },
 
   play() {
-    this.el.addEventListener("grab-start", this.onClick);
+    this.el.object3D.addEventListener("interact", this.onClick);
   },
 
   pause() {
-    this.el.removeEventListener("grab-start", this.onClick);
+    this.el.object3D.removeEventListener("interact", this.onClick);
   }
 });

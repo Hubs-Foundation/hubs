@@ -1,0 +1,116 @@
+@import 'root-vars';
+@import 'shared';
+
+body {
+  margin: 0;
+  background-color: var(--full-panel-background-color);
+}
+
+:local(.avatar-landing) {
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+ 
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  pointer-events: auto;
+  flex-direction: column;
+
+  @extend %default-font;
+  @extend %unselectable;
+
+  :local(.logo) {
+    width: 150px;
+    margin-bottom: 22px;
+    filter: drop-shadow(0 0 4px #888);
+
+    @media (min-width: 500px) {
+      position: absolute;
+      right: 15px;
+      bottom: 15px;
+      margin-bottom: 0;
+    }
+  }
+
+  :local(.box) {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 60vw;
+    min-width: 300px;
+    max-width: 700px;
+    min-height: 200px;
+    max-height: 1000px;
+    height: 100%;
+    padding: 40px;
+  }
+
+  :local(.title) {
+    @extend %top-title;
+    width: 100%;
+    color: var(--panel-text-color);
+    text-align: center;
+  }
+
+  :local(.selected-message) {
+    color: var(--panel-subtext-color);
+    margin-top: 16px;
+    height: 48px;
+  }
+
+  :local(.attributions) {
+    @extend %top-subtitle;
+    margin-bottom: 1em;
+  }
+
+  :local(.form-submit) {
+    @extend %bottom-action-button;
+    margin: 0;
+    min-height: max-content;
+    margin-top: 16px;
+    &:disabled {
+      background-color: $action-color-disabled;
+      cursor: default;
+    }
+  }
+
+  :local(.preview) {
+    flex: 1;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    position: relative;
+    max-width: 300px;
+  }
+
+  :local(.copy-tip) {
+    position: absolute;
+    padding: 5px 20px;
+    background: var(--tile-button-tip-background-color);
+    top: 5px;
+    right: 10px;
+    border-radius: 20px;
+    height: 20px;
+    line-height: 20px;
+    color: var(--tile-button-tip-text-color);
+  }
+
+  :local(.edit-avatar) {
+    position: absolute;
+    top: 6px;
+    right: 7px;
+    color: var(--tile-button-icon-color);
+    background: var(--tile-button-background-color);
+    border-radius: 30px;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 30px;
+    &:hover {
+      background: $action-color;
+      color: var(--tile-button-icon-hover-color);
+    }
+  }
+}

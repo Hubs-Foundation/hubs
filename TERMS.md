@@ -1,44 +1,44 @@
 # Terms of Service for Hubs and Spoke
 
-Version 3.0, Effective October 16, 2018
+Version 3.3, Effective November 15, 2019
 
 [Hubs by Mozilla](https://hubs.mozilla.com) is a real-time communications platform for Virtual Reality, Augmented Reality, Desktop, Laptop, Mobile, or however else you browse the internet.
 
 Spoke is a tool to arrange 3D models into scenes for use in Hubs. 
 
-These Terms of Service explain your rights and responsibilities when you use Hubs.
+These Terms of Service explain your rights and responsibilities when you use Hubs and Spoke.
 
 ### 1. Privacy Policy
-The Hubs [Privacy Notice](https://github.com/mozilla/hubs/blob/master/PRIVACY.md) explains what information we collect when you use Hubs by Mozilla and how that information is handled and shared.
+The Hubs [Privacy Notice](https://github.com/mozilla/hubs/blob/master/PRIVACY.md) explains what information we collect when you use Hubs or Spoke and how that information is handled and shared.
 
 ### 2. Communications and Content
 
-Hubs allows users to send information (such as audio, video, images, 3D models, and scenes) to other users. 
+Hubs allows users to send information (such as audio, video, text, images, 3D models, and scenes) to other users. 
 
-Spoke allows users to arrange 3D Room models into scenes that can appear in Hubs. 
+Spoke allows users to arrange 3D Room models into scenes that can appear in Hubs. You can also use Hubs to customize your in-room Avatar. 
 
 By using Hubs or Spoke, you agree to give Mozilla all rights necessary to operate Hubs and Spoke. This includes, but is not limited to, a license and permission to process, transmit, and display the information you send through Hubs or Spoke. It also includes permission to gather and share information as described in the [Privacy Notice](https://github.com/mozilla/hubs/blob/master/PRIVACY.md) for Hubs and Spoke. 
 
-When you submit information to Hubs or Spoke, you grant us a worldwide, royalty-free, perpetual, irrevocable, non-exclusive, transferable, and sublicensable license to use, copy, modify, adapt, prepare derivative works from, distribute, perform, and display that information, audio, video, images, or 3D models. You also agree that we may remove metadata associated with the information or data you submit, and you irrevocably waive any claims and assertions of moral rights or attribution with respect to the data you submit. If you allow allow remixing of a scene you create using Spoke, you agree to license your scene under a [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/legalcode) license. 
+When you submit information to Hubs or Spoke, you grant us a worldwide, royalty-free, perpetual, irrevocable, non-exclusive, transferable, and sublicensable license to use, copy, modify, adapt, prepare derivative works from, distribute, perform, and display that information, audio, video, images, or 3D models. You also agree that we may remove metadata associated with the information or data you submit. If you allow allow remixing of a scene or avatar you create, you agree to license your scene under a [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/legalcode) license. 
 
 You also represent and warrant that you have the authority to grant Mozilla all rights and permissions necessary for the operation of Hubs and Spoke. 
 
 To learn more about how Hubs operates, you can see the source code [here](https://github.com/mozilla/hubs).
-To learn more about how Spoke operates, you can see the source code [here](https://github.com/mozillareality/spoke).
+To learn more about how Spoke operates, you can see the source code [here](https://github.com/mozilla/spoke).
 
 Any ideas, suggestions, and feedback about Hubs or Spoke that you provide to us are entirely voluntary, and you agree that Mozilla may use such ideas, suggestions, and feedback without compensation or obligation to you.
 
 You are solely responsible for the information you send, create, or edit using Hubs or Spoke, and the consequences of sending, creating, or editing that information. 
 
 ### 3. Conditions of Use 
-By using Mozilla Hubs, you agree that your use will comply with Mozilla’s [Conditions of Use](https://www.mozilla.org/en-US/about/legal/acceptable-use/). Mozilla reserves the right to remove any content, suspend any users, and shut down any room it reasonably believes has violated these conditions.
+By using Hubs or Spoke, you agree that your use will comply with Mozilla’s [Conditions of Use](https://www.mozilla.org/en-US/about/legal/acceptable-use/). Mozilla reserves the right to remove any content, suspend any users, and shut down any room it reasonably believes has violated these conditions.
 
 Please also be aware of [Mozilla’s Community Participation Guidelines](https://www.mozilla.org/en-US/about/governance/policies/participation/), which address participation in Mozilla communities. 
 
 ### 4. Mozilla's Rights
 Mozilla does not grant you any intellectual property rights in Hubs or Spoke unless these Terms specifically say otherwise. For example, these Terms do not provide the right to use any of Mozilla’s copyrights, trade names, trademarks, service marks, logos, domain names, or other distinctive brand features.
 
-Mozilla distributes the Hubs and Spoke software under an open source license. To learn more, you can read the [license for Spoke]((https://github.com/mozillareality/spoke/blob/master/LICENSE)), and you can read the [license for Hubs](https://github.com/mozilla/hubs/blob/master/LICENSE) or read the [FAQ](https://www.mozilla.org/en-US/MPL/2.0/FAQ/).
+Mozilla distributes the Hubs and Spoke software under an open source license. To learn more, you can read the [license for Spoke]((https://github.com/mozilla/spoke/blob/master/LICENSE)), and you can read the [license for Hubs](https://github.com/mozilla/hubs/blob/master/LICENSE) or read the [FAQ](https://www.mozilla.org/en-US/MPL/2.0/FAQ/).
 
 ### 5. Services Interruption; Term; Termination
 We are continuing to develop Hubs and Spoke. As a result, we plan to upgrade and change them over time. To do this, we might have to temporarily suspend their service and it is not always possible for us to give notice. You will not be entitled to claim expenses or damages for such suspension or limitation of the use of Hubs or Spoke.

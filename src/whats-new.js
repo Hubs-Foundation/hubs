@@ -2,10 +2,10 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import InfiniteScroll from "react-infinite-scroller";
 import markdownit from "markdown-it";
-import registerTelemetry from "./telemetry";
 
+import configs from "./utils/configs";
+import registerTelemetry from "./telemetry";
 import "./assets/stylesheets/whats-new.scss";
-import hubsLogo from "./assets/images/hub-preview-light-no-shadow.png";
 
 registerTelemetry("/whats-new", "Hubs What's New");
 
@@ -26,7 +26,6 @@ function formatBody(pull) {
 class WhatsNew extends Component {
   state = {
     notes: [],
-    pageOffset: 0,
     hasMore: true,
     currentDate: null
   };
@@ -40,7 +39,7 @@ class WhatsNew extends Component {
       "state=closed",
       "base=master",
       "per_page=30",
-      `page=${page + this.state.pageOffset}`
+      `page=${page}`
     ].join("&");
     const resp = await fetch(`${endpoint}?${params}`, {
       headers: { authorization: `token ${token}` }
@@ -55,7 +54,8 @@ class WhatsNew extends Component {
     const merged = pulls.filter(x => x.merged_at && !!x.labels.find(l => l.name === "whats new"));
 
     if (!merged.length) {
-      this.setState({ pageOffset: this.state.pageOffset + 1 });
+      // Just trigger a render again so that InfiniteScroll will load the next page.
+      this.setState({});
       return;
     }
 
@@ -88,7 +88,7 @@ class WhatsNew extends Component {
         <div className="container">
           <div className="header">
             <a href="/">
-              <img className="logo" src={hubsLogo} />
+              <img className="logo" src={configs.image("logo")} />
             </a>
           </div>
           <div className="main">
@@ -97,10 +97,12 @@ class WhatsNew extends Component {
               {this.state.notes.map((note, i) => {
                 return (
                   <div key={i} className="note">
-                    <h2 className={note.merged_at ? "date" : "date-blank"}>{formatDate(note.merged_at)}</h2>
-                    <h2 className="title">
-                      <a href={note.html_url}>{note.title}</a>
-                    </h2>
+                    <div className="note-header">
+                      <h2 className={note.merged_at ? "date" : "date-blank"}>{formatDate(note.merged_at)}</h2>
+                      <h2 className="title">
+                        <a href={note.html_url}>{note.title}</a>
+                      </h2>
+                    </div>
                     {/* Setting HTML generated directly by markdownit, which is safe by default:
                       https://github.com/markdown-it/markdown-it/blob/master/docs/security.md */}
                     <p className="body" dangerouslySetInnerHTML={{ __html: note.body }} />

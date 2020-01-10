@@ -14,9 +14,9 @@
   font-family: monospace;
   cursor: pointer;
   position: absolute;
-  top: 50px; 
-  right: 6px;
-  padding: 8px 12px;
+  bottom: 0px;
+  right: 2px;
+  padding: 4px 8px;
   color: #aaa;
   font-size: 10px;
   -moz-user-select: none;

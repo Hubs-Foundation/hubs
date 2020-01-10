@@ -1,37 +1,49 @@
 import qsTruthy from "./utils/qs_truthy";
-import screenfull from "screenfull";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
+import { hackyMobileSafariTest } from "./utils/detect-touchscreen";
 
-const playerHeight = 1.6;
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
+const forceEnableTouchscreen = hackyMobileSafariTest();
+const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
-const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
-import { addMedia, proxiedUrlFor, getPromotionTokenForFile } from "./utils/media-utils";
+import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
+import {
+  isIn2DInterstitial,
+  handleExitTo2DInterstitial,
+  exit2DInterstitialAndEnterVR,
+  forceExitFrom2DInterstitial
+} from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
+import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
+import { pushHistoryState } from "./utils/history";
+import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 
-function requestFullscreen() {
-  if (screenfull.enabled && !screenfull.isFullscreen) screenfull.request();
-}
+const isIOS = AFRAME.utils.device.isIOS();
 
 export default class SceneEntryManager {
-  constructor(hubChannel, authChannel) {
+  constructor(hubChannel, authChannel, availableVREntryTypes, history) {
     this.hubChannel = hubChannel;
     this.authChannel = authChannel;
+    this.availableVREntryTypes = availableVREntryTypes;
     this.store = window.APP.store;
+    this.mediaSearchStore = window.APP.mediaSearchStore;
     this.scene = document.querySelector("a-scene");
-    this.cursorController = document.querySelector("#cursor-controller");
-    this.playerRig = document.querySelector("#player-rig");
+    this.rightCursorController = document.getElementById("right-cursor-controller");
+    this.leftCursorController = document.getElementById("left-cursor-controller");
+    this.avatarRig = document.getElementById("avatar-rig");
     this._entered = false;
-    this.onRequestAuthentication = () => {};
+    this.performConditionalSignIn = () => {};
+    this.history = history;
   }
 
   init = () => {
     this.whenSceneLoaded(() => {
-      this.cursorController.components["cursor-controller"].enabled = false;
+      this.rightCursorController.components["cursor-controller"].enabled = false;
+      this.leftCursorController.components["cursor-controller"].enabled = false;
     });
   };
 
@@ -39,47 +51,34 @@ export default class SceneEntryManager {
     return this._entered;
   };
 
-  enterScene = async (mediaStream, enterInVR) => {
-    const playerCamera = document.querySelector("#player-camera");
-    playerCamera.removeAttribute("scene-preview-camera");
-    playerCamera.object3D.position.set(0, playerHeight, 0);
-
-    // Get aframe inspector url using the webpack file-loader.
-    // Set the aframe-inspector url to our hosted copy.
-    this.scene.setAttribute("inspector", { url: aframeInspectorUrl });
+  enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
+    document.getElementById("viewing-camera").removeAttribute("scene-preview-camera");
+    const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
+    waypointSystem.moveToSpawnPoint();
 
     if (isDebug) {
       NAF.connection.adapter.session.options.verbose = true;
     }
 
-    let isCardboard = false;
-
     if (enterInVR) {
+      // This specific scene state var is used to check if the user went through the
+      // entry flow and chose VR entry, and is used to preempt VR mode on refreshes.
+      this.scene.addState("vr-entered");
+
       // HACK - A-Frame calls getVRDisplays at module load, we want to do it here to
       // force gamepads to become live.
       navigator.getVRDisplays();
 
-      isCardboard =
-        AFRAME.utils.device
-          .getVRDisplay()
-          .displayName.toLowerCase()
-          .indexOf("cardboard") >= 0;
-
-      this.scene.enterVR();
-    } else if (AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isIOS()) {
-      document.body.addEventListener("touchend", requestFullscreen);
+      await exit2DInterstitialAndEnterVR(true);
     }
 
-    if (!isCardboard) {
-      this.playerRig.removeAttribute("cardboard-controls");
-    }
-
-    if (isMobile || qsTruthy("mobile")) {
-      this.playerRig.setAttribute("virtual-gamepad-controls", {});
+    if (isMobile || forceEnableTouchscreen || qsTruthy("mobile")) {
+      this.avatarRig.setAttribute("virtual-gamepad-controls", {});
     }
 
     this._setupPlayerRig();
     this._setupBlocking();
+    this._setupKicking();
     this._setupMedia(mediaStream);
     this._setupCamera();
 
@@ -87,22 +86,23 @@ export default class SceneEntryManager {
 
     this._spawnAvatar();
 
+    this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_ENTER_SCENE);
+
     if (isBotMode) {
       this._runBot(mediaStream);
+      this.scene.addState("entered");
       return;
     }
 
-    this.scene.setAttribute("motion-capture-replayer", "enabled", false);
-    this.scene.systems["motion-capture-replayer"].remove();
-
     if (mediaStream) {
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
+      await NAF.connection.adapter.setLocalMediaStream(mediaStream);
     }
 
     this.scene.classList.remove("hand-cursor");
     this.scene.classList.add("no-cursor");
 
-    this.cursorController.components["cursor-controller"].enabled = true;
+    this.rightCursorController.components["cursor-controller"].enabled = true;
+    this.leftCursorController.components["cursor-controller"].enabled = true;
     this._entered = true;
 
     // Delay sending entry event telemetry until VR display is presenting.
@@ -111,12 +111,19 @@ export default class SceneEntryManager {
         await nextTick();
       }
 
-      this.hubChannel.sendEntryEvent().then(() => {
+      this.hubChannel.sendEnteredEvent().then(() => {
         this.store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
       });
     })();
 
+    // Bump stored entry count after 30s
+    setTimeout(() => this.store.bumpEntryCount(), 30000);
+
     this.scene.addState("entered");
+
+    if (muteOnEntry) {
+      this.scene.emit("action_mute");
+    }
   };
 
   whenSceneLoaded = callback => {
@@ -142,29 +149,43 @@ export default class SceneEntryManager {
       this.scene.renderer.setAnimationLoop(null); // Stop animation loop, TODO A-Frame should do this
     }
     document.body.removeChild(this.scene);
-    document.body.removeEventListener("touchend", requestFullscreen);
   };
 
   _setupPlayerRig = () => {
-    this._updatePlayerRigWithProfile();
-    this.store.addEventListener("statechanged", this._updatePlayerRigWithProfile);
+    this._setPlayerInfoFromProfile();
+    this.store.addEventListener("statechanged", this._setPlayerInfoFromProfile);
 
     const avatarScale = parseInt(qs.get("avatar_scale"), 10);
-
     if (avatarScale) {
-      this.playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
+      this.avatarRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
     }
   };
 
-  _updatePlayerRigWithProfile = () => {
-    const { avatarId, displayName } = this.store.state.profile;
-    this.playerRig.setAttribute("player-info", {
-      displayName,
-      avatarSrc: avatarId && avatarId.startsWith("http") ? proxiedUrlFor(avatarId) : `#${avatarId || "botdefault"}`
+  _setPlayerInfoFromProfile = async () => {
+    const avatarId = this.store.state.profile.avatarId;
+    const avatarSrc = await getAvatarSrc(avatarId);
+
+    this.avatarRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
+  };
+
+  _setupKicking = () => {
+    // This event is only received by the kicker
+    document.body.addEventListener("kicked", ({ detail }) => {
+      const { clientId: kickedClientId } = detail;
+      const { entities } = NAF.connection.entities;
+      for (const id in entities) {
+        const entity = entities[id];
+        if (NAF.utils.getCreator(entity) !== kickedClientId) continue;
+
+        if (entity.components.networked.data.persistent) {
+          NAF.utils.takeOwnership(entity);
+          this._unpinElement(entity);
+          entity.parentNode.removeChild(entity);
+        } else {
+          NAF.entities.removeEntity(id);
+        }
+      }
     });
-    const hudController = this.playerRig.querySelector("[hud-controller]");
-    hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });
-    this.scene.emit("username-changed", { username: displayName });
   };
 
   _setupBlocking = () => {
@@ -173,7 +194,7 @@ export default class SceneEntryManager {
     });
 
     document.body.addEventListener("unblocked", ev => {
-      NAF.connection.entities.completeSync(ev.detail.clientId);
+      NAF.connection.entities.completeSync(ev.detail.clientId, true);
     });
   };
 
@@ -198,60 +219,63 @@ export default class SceneEntryManager {
 
     try {
       await this.hubChannel.pin(networkId, gltfNode, fileId, fileAccessToken, promotionToken);
+      this.store.update({ activity: { hasPinned: true } });
     } catch (e) {
       if (e.reason === "invalid_token") {
         await this.authChannel.signOut(this.hubChannel);
-        this._signInAndPinElement(el);
+        this._signInAndPinOrUnpinElement(el);
       } else {
         console.warn("Pin failed for unknown reason", e);
       }
     }
   };
 
-  _signInAndPinElement = el => {
-    if (this.hubChannel.signedIn) {
-      this._pinElement(el);
-    } else {
-      const wasInVR = this.scene.is("vr-mode");
-      if (wasInVR) this.scene.exitVR();
-      const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
+  _signInAndPinOrUnpinElement = (el, pin) => {
+    const action = pin
+      ? () => this._pinElement(el)
+      : async () => {
+          await this._unpinElement(el);
+        };
 
-      this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete", continueTextId, async () => {
-        let pinningFailed = false;
-        if (this.hubChannel.signedIn) {
-          try {
-            await this._pinElement(el);
-          } catch (e) {
-            pinningFailed = true;
-          }
-        } else {
-          pinningFailed = true;
-        }
+    this.performConditionalSignIn(() => this.hubChannel.signedIn, action, pin ? "pin" : "unpin", () => {
+      // UI pins/un-pins the entity optimistically, so we undo that here.
+      // Note we have to disable the sign in flow here otherwise this will recurse.
+      this._disableSignInOnPinAction = true;
+      el.setAttribute("pinnable", "pinned", !pin);
+      this._disableSignInOnPinAction = false;
+    });
+  };
 
-        if (pinningFailed) {
-          // UI pins the entity optimistically, so we undo that here.
-          el.setAttribute("pinnable", "pinned", false);
-        }
+  _unpinElement = el => {
+    const components = el.components;
+    const networked = components.networked;
 
-        if (wasInVR) this.scene.enterVR();
-      });
-    }
+    if (!networked || !networked.data || !NAF.utils.isMine(el)) return;
+
+    const networkId = components.networked.data.networkId;
+    el.setAttribute("networked", { persistent: false });
+
+    const mediaLoader = components["media-loader"];
+    const fileId = mediaLoader.data && mediaLoader.data.fileId;
+
+    this.hubChannel.unpin(networkId, fileId);
   };
 
   _setupMedia = mediaStream => {
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
+      if (!this.hubChannel.can("spawn_and_move_media")) return;
       const { entity, orientation } = addMedia(
         src,
         "#interactable-media",
         contentOrigin,
+        null,
         !(src instanceof MediaStream),
         true
       );
-
       orientation.then(or => {
         entity.setAttribute("offset-relative-to", {
-          target: "#player-camera",
+          target: "#avatar-pov-node",
           offset,
           orientation: or
         });
@@ -267,31 +291,57 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("pinned", e => {
-      this._signInAndPinElement(e.detail.el);
+      if (this._disableSignInOnPinAction) return;
+      this._signInAndPinOrUnpinElement(e.detail.el, true);
     });
 
     this.scene.addEventListener("unpinned", e => {
-      const el = e.detail.el;
-      const components = el.components;
-      const networked = components.networked;
-
-      if (!networked || !networked.data || !NAF.utils.isMine(el)) return;
-
-      const networkId = components.networked.data.networkId;
-      el.setAttribute("networked", { persistent: false });
-
-      const mediaLoader = components["media-loader"];
-      const fileId = mediaLoader.data && mediaLoader.data.fileId;
-
-      this.hubChannel.unpin(networkId, fileId);
+      if (this._disableSignInOnPinAction) return;
+      this._signInAndPinOrUnpinElement(e.detail.el, false);
     });
 
     this.scene.addEventListener("object_spawned", e => {
       this.hubChannel.sendObjectSpawnedEvent(e.detail.objectType);
     });
 
+    this.scene.addEventListener("action_spawn", () => {
+      handleExitTo2DInterstitial(false, () => window.APP.mediaSearchStore.pushExitMediaBrowserHistory());
+      window.APP.mediaSearchStore.sourceNavigateToDefaultSource();
+    });
+
+    this.scene.addEventListener("action_invite", () => {
+      handleExitTo2DInterstitial(false, () => this.history.goBack());
+      pushHistoryState(this.history, "overlay", "invite");
+    });
+
+    this.scene.addEventListener("action_kick_client", ({ detail: { clientId } }) => {
+      this.performConditionalSignIn(
+        () => this.hubChannel.can("kick_users"),
+        async () => await window.APP.hubChannel.kick(clientId),
+        "kick-user"
+      );
+    });
+
+    this.scene.addEventListener("action_mute_client", ({ detail: { clientId } }) => {
+      this.performConditionalSignIn(
+        () => this.hubChannel.can("mute_users"),
+        () => window.APP.hubChannel.mute(clientId),
+        "mute-user"
+      );
+    });
+
+    this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
+
     document.addEventListener("paste", e => {
-      if (e.target.matches("input, textarea") && document.activeElement === e.target) return;
+      if (
+        (e.target.matches("input, textarea") || e.target.contentEditable === "true") &&
+        document.activeElement === e.target
+      )
+        return;
+
+      // Never paste into scene if dialog is open
+      const uiRoot = document.querySelector(".ui-root");
+      if (uiRoot && uiRoot.classList.contains("in-modal-or-overlay")) return;
 
       const url = e.clipboardData.getData("text");
       const files = e.clipboardData.files && e.clipboardData.files;
@@ -308,8 +358,20 @@ export default class SceneEntryManager {
 
     document.addEventListener("drop", e => {
       e.preventDefault();
-      const url = e.dataTransfer.getData("url");
+
+      let url = e.dataTransfer.getData("url");
+
+      if (!url) {
+        // Sometimes dataTransfer text contains a valid URL, so try for that.
+        try {
+          url = new URL(e.dataTransfer.getData("text")).href;
+        } catch (e) {
+          // Nope, not this time.
+        }
+      }
+
       const files = e.dataTransfer.files;
+
       if (url) {
         spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
       } else {
@@ -322,23 +384,37 @@ export default class SceneEntryManager {
     let currentVideoShareEntity;
     let isHandlingVideoShare = false;
 
-    const shareVideoMediaStream = async constraints => {
+    const shareVideoMediaStream = async (constraints, isDisplayMedia) => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
-      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      let newStream;
+
+      try {
+        if (isDisplayMedia) {
+          newStream = await navigator.mediaDevices.getDisplayMedia(constraints);
+        } else {
+          newStream = await navigator.mediaDevices.getUserMedia(constraints);
+        }
+      } catch (e) {
+        isHandlingVideoShare = false;
+        this.scene.emit("share_video_failed");
+        return;
+      }
+
       const videoTracks = newStream ? newStream.getVideoTracks() : [];
 
       if (videoTracks.length > 0) {
         newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
-        NAF.connection.adapter.setLocalMediaStream(mediaStream);
+        await NAF.connection.adapter.setLocalMediaStream(mediaStream);
         currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
 
         // Wire up custom removal event which will stop the stream.
         currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
       }
 
-      this.scene.emit("share_video_enabled", { source: constraints.video.mediaSource });
+      this.scene.emit("share_video_enabled", { source: isDisplayMedia ? "screen" : "camera" });
+      this.scene.addState("sharing_video");
       isHandlingVideoShare = false;
     };
 
@@ -346,43 +422,34 @@ export default class SceneEntryManager {
       shareVideoMediaStream({
         video: {
           mediaSource: "camera",
-          width: 720,
-          frameRate: 30
-        }
-      });
-    });
-
-    this.scene.addEventListener("action_share_window", () => {
-      shareVideoMediaStream({
-        video: {
-          mediaSource: "window",
-          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
-          // other than your current monitor that has a different aspect ratio.
-          width: 720 * (screen.width / screen.height),
-          height: 720,
+          width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
           frameRate: 30
         }
       });
     });
 
     this.scene.addEventListener("action_share_screen", () => {
-      shareVideoMediaStream({
-        video: {
-          mediaSource: "screen",
-          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
-          // other than your current monitor that has a different aspect ratio.
-          width: 720 * (screen.width / screen.height),
-          height: 720,
-          frameRate: 30
-        }
-      });
+      shareVideoMediaStream(
+        {
+          video: {
+            // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
+            // other than your current monitor that has a different aspect ratio.
+            width: 720 * (screen.width / screen.height),
+            height: 720,
+            frameRate: 30
+          },
+          audio: true
+        },
+        true
+      );
     });
 
-    this.scene.addEventListener("action_end_video_sharing", () => {
+    this.scene.addEventListener("action_end_video_sharing", async () => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
       if (currentVideoShareEntity && currentVideoShareEntity.parentNode) {
+        NAF.utils.takeOwnership(currentVideoShareEntity);
         currentVideoShareEntity.parentNode.removeChild(currentVideoShareEntity);
       }
 
@@ -390,45 +457,71 @@ export default class SceneEntryManager {
         mediaStream.removeTrack(track);
       }
 
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
+      await NAF.connection.adapter.setLocalMediaStream(mediaStream);
       currentVideoShareEntity = null;
 
       this.scene.emit("share_video_disabled");
+      this.scene.removeState("sharing_video");
       isHandlingVideoShare = false;
+    });
+
+    this.scene.addEventListener("action_selected_media_result_entry", async e => {
+      // TODO spawn in space when no rights
+      const { entry, selectAction } = e.detail;
+      if (selectAction !== "spawn") return;
+
+      const delaySpawn = isIn2DInterstitial() && !isMobileVR;
+      await exit2DInterstitialAndEnterVR();
+
+      // If user has HMD lifted up or gone through interstitial, delay spawning for now. eventually show a modal
+      if (delaySpawn) {
+        setTimeout(() => {
+          spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
+        }, 3000);
+      } else {
+        spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
+      }
+    });
+
+    this.mediaSearchStore.addEventListener("media-exit", () => {
+      exit2DInterstitialAndEnterVR();
     });
   };
 
   _setupCamera = () => {
-    this.scene.addEventListener("action_spawn_camera", () => {
-      const entity = document.createElement("a-entity");
-      entity.setAttribute("networked", { template: "#interactable-camera" });
-      entity.setAttribute("offset-relative-to", {
-        target: "#player-camera",
-        offset: { x: 0, y: 0, z: -1.5 }
-      });
-      this.scene.appendChild(entity);
+    this.scene.addEventListener("action_toggle_camera", () => {
+      if (!this.hubChannel.can("spawn_camera")) return;
+      const myCamera = this.scene.systems["camera-tools"].getMyCamera();
+
+      if (myCamera) {
+        myCamera.parentNode.removeChild(myCamera);
+        this.scene.removeState("camera");
+      } else {
+        const entity = document.createElement("a-entity");
+        entity.setAttribute("networked", { template: "#interactable-camera" });
+        entity.setAttribute("offset-relative-to", {
+          target: "#avatar-pov-node",
+          offset: { x: 0, y: 0, z: -1.5 }
+        });
+        this.scene.appendChild(entity);
+        this.scene.addState("camera");
+      }
+
+      // Need to wait a frame so camera is registered with system.
+      setTimeout(() => this.scene.emit("camera_toggled"));
     });
 
-    this.scene.addEventListener("photo_taken", e => {
-      this.hubChannel.sendMessage({ src: e.detail }, "spawn");
-    });
+    this.scene.addEventListener("photo_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "photo"));
+    this.scene.addEventListener("video_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "video"));
   };
 
   _spawnAvatar = () => {
-    this.playerRig.setAttribute("networked", "template: #remote-avatar-template; attachTemplateToLocal: false;");
-    this.playerRig.setAttribute("networked-avatar", "");
-    this.playerRig.emit("entered");
+    this.avatarRig.setAttribute("networked", "template: #remote-avatar; attachTemplateToLocal: false;");
+    this.avatarRig.setAttribute("networked-avatar", "");
+    this.avatarRig.emit("entered");
   };
 
   _runBot = async mediaStream => {
-    console.log("Running bot");
-
-    this.playerRig.setAttribute("avatar-replay", {
-      camera: "#player-camera",
-      leftController: "#player-left-controller",
-      rightController: "#player-right-controller"
-    });
-
     const audioEl = document.createElement("audio");
     let audioInput;
     let dataInput;
@@ -440,20 +533,59 @@ export default class SceneEntryManager {
       await nextTick();
     } while (!audioInput || !dataInput);
 
-    audioInput.onchange = () => {
+    const getAudio = () => {
       audioEl.loop = true;
       audioEl.muted = true;
       audioEl.crossorigin = "anonymous";
       audioEl.src = URL.createObjectURL(audioInput.files[0]);
       document.body.appendChild(audioEl);
     };
-    dataInput.onchange = () => {
-      const url = URL.createObjectURL(dataInput.files[0]);
-      this.playerRig.setAttribute("avatar-replay", { recordingUrl: url });
+
+    if (audioInput.files && audioInput.files.length > 0) {
+      getAudio();
+    } else {
+      audioInput.onchange = getAudio;
+    }
+
+    const camera = document.querySelector("#avatar-pov-node");
+    const leftController = document.querySelector("#player-left-controller");
+    const rightController = document.querySelector("#player-right-controller");
+    const getRecording = () => {
+      fetch(URL.createObjectURL(dataInput.files[0]))
+        .then(resp => resp.json())
+        .then(recording => {
+          camera.setAttribute("replay", "");
+          camera.components["replay"].poses = recording.camera.poses;
+
+          leftController.setAttribute("replay", "");
+          leftController.components["replay"].poses = recording.left.poses;
+          leftController.removeAttribute("visibility-by-path");
+          leftController.removeAttribute("track-pose");
+          leftController.setAttribute("visible", true);
+
+          rightController.setAttribute("replay", "");
+          rightController.components["replay"].poses = recording.right.poses;
+          rightController.removeAttribute("visibility-by-path");
+          rightController.removeAttribute("track-pose");
+          rightController.setAttribute("visible", true);
+        });
     };
+
+    if (dataInput.files && dataInput.files.length > 0) {
+      getRecording();
+    } else {
+      dataInput.onchange = getRecording;
+    }
+
     await new Promise(resolve => audioEl.addEventListener("canplay", resolve));
-    mediaStream.addTrack(audioEl.captureStream().getAudioTracks()[0]);
-    NAF.connection.adapter.setLocalMediaStream(mediaStream);
+    mediaStream.addTrack(
+      audioEl.captureStream
+        ? audioEl.captureStream().getAudioTracks()[0]
+        : audioEl.mozCaptureStream
+          ? audioEl.mozCaptureStream().getAudioTracks()[0]
+          : null
+    );
+    await NAF.connection.adapter.setLocalMediaStream(mediaStream);
     audioEl.play();
   };
 }

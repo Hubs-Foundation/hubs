@@ -4,17 +4,32 @@
   top: 0;
   left: 0;
   position: fixed;
-  color: black;
-  z-index: 10;
+  pointer-events: auto;
+  color: var(--panel-overlay-text-color);
+  z-index: 20;
+  display: flex;
+
+  &__no-pointer-events {
+    pointer-events: none;
+  }
 }
+
 
 .dialog {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,.85);
+
+  &__align-end {
+    align-items: end;
+    bottom: 0;
+    position: absolute;
+  }
+
+  &__dark-background {
+    background-color: var(--panel-overlay-background-color);
+  }
 
   &__box {
     max-width: 30em;
@@ -32,7 +47,12 @@
       flex-direction: column;
       text-align: center;
       position: relative;
-      background-color: white;
+      background-color: var(--full-panel-background-color);
+
+
+      @media (max-width: 801px) {
+        padding: 5px;
+      }
 
       &__title {
         @extend %top-title;
@@ -42,15 +62,19 @@
       &__body {
         font-size: 0.9em;
         font-weight: bold;
-        color: black;
+        color: var(--panel-text-color);
         display: flex;
         flex-direction: column;
         height: 100%;
         margin: 10px 0;
         white-space: pre-wrap;
 
-        a { color: black }
-        a.info-dialog--action-button { color: white; }
+        @media (max-width: 801px) {
+          margin: 0;
+        }
+
+        a { color: var(--panel-text-color) }
+        a.info-dialog--action-button { color: $action-text-color; }
       }
 
       &__links {
@@ -59,28 +83,32 @@
         margin: 16px 0;
         a {
           margin: 0 12px;
-          color: black;
+          color: var(--panel-text-color);
         }
       }
 
-
       &__close {
+        @extend %panel-widget;
         position: absolute;
-        right: 12px;
-        top: 6px;
-        color: black;
-        font-size: 1.8em;
+        left: 18px;
+        top: 18px;
+        font-size: 1.6em;
         font-weight: bold;
-
-        background: none;
-        cursor: pointer;
-        border: none;
       }
+    }
+
+    &__contents-overflow {
+      overflow-y: visible;
     }
   }
 
   &__wide {
-    max-width: 640px;
+    @media(min-width: 640px){
+      max-width: 640px;
+    }
+    @media(max-width: 639px){
+      max-width: 100%;
+    }
   }
 }
 

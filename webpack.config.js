@@ -9,9 +9,9 @@ const selfsigned = require("selfsigned");
 const webpack = require("webpack");
 const cors = require("cors");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
@@ -81,15 +81,27 @@ function matchRegex({ include, exclude }) {
   };
 }
 
+const babelConfig = JSON.parse(
+  fs
+    .readFileSync(path.resolve(__dirname, ".babelrc"))
+    .toString()
+    .replace(/\/\/.+/g, "")
+);
+
 module.exports = (env, argv) => ({
+  node: {
+    // need to specify this manually because some random lodash code will try to access
+    // Buffer on the global object if it exists, so webpack will polyfill on its behalf
+    Buffer: false
+  },
   entry: {
     index: path.join(__dirname, "src", "index.js"),
     hub: path.join(__dirname, "src", "hub.js"),
     scene: path.join(__dirname, "src", "scene.js"),
+    avatar: path.join(__dirname, "src", "avatar.js"),
     link: path.join(__dirname, "src", "link.js"),
-    spoke: path.join(__dirname, "src", "spoke.js"),
-    "whats-new": path.join(__dirname, "src", "whats-new.js"),
-    "avatar-selector": path.join(__dirname, "src", "avatar-selector.js")
+    discord: path.join(__dirname, "src", "discord.js"),
+    "whats-new": path.join(__dirname, "src", "whats-new.js")
   },
   output: {
     filename: "assets/js/[name]-[chunkhash].js",
@@ -98,7 +110,7 @@ module.exports = (env, argv) => ({
   devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
   devServer: {
     https: createHTTPSConfig(),
-    host: process.env.HOST_IP || "0.0.0.0",
+    host: "0.0.0.0",
     public: `${host}:8080`,
     useLocalIp: true,
     allowedHosts: [host],
@@ -145,6 +157,13 @@ module.exports = (env, argv) => ({
         }
       },
       {
+        // We reference the sources of some libraries directly, and they use async/await,
+        // so we have to run it through babel in order to support the Samsung browser on Oculus Go.
+        test: [path.resolve(__dirname, "node_modules/naf-janus-adapter")],
+        loader: "babel-loader",
+        options: babelConfig
+      },
+      {
         test: /\.js$/,
         include: [path.resolve(__dirname, "src")],
         // Exclude JS assets in node_modules because they are already transformed and often big.
@@ -153,20 +172,20 @@ module.exports = (env, argv) => ({
       },
       {
         test: /\.(scss|css)$/,
-        loader: ExtractTextPlugin.extract({
-          fallback: "style-loader",
-          use: [
-            {
-              loader: "css-loader",
-              options: {
-                name: "[path][name]-[hash].[ext]",
-                localIdentName: "[name]__[local]__[hash:base64:5]",
-                camelCase: true
-              }
-            },
-            "sass-loader"
-          ]
-        })
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader
+          },
+          {
+            loader: "css-loader",
+            options: {
+              name: "[path][name]-[hash].[ext]",
+              localIdentName: "[name]__[local]__[hash:base64:5]",
+              camelCase: true
+            }
+          },
+          "sass-loader"
+        ]
       },
       {
         test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm)$/,
@@ -181,23 +200,32 @@ module.exports = (env, argv) => ({
         }
       },
       {
-        test: /\.(glsl)$/,
+        test: /\.(svgi)$/,
+        use: {
+          loader: "svg-inline-loader"
+        }
+      },
+      {
+        test: /\.(wasm)$/,
+        type: "javascript/auto",
+        use: {
+          loader: "file-loader",
+          options: {
+            outputPath: "assets/wasm",
+            name: "[name]-[hash].[ext]"
+          }
+        }
+      },
+      {
+        test: /\.(glsl|frag|vert)$/,
         use: { loader: "raw-loader" }
       }
     ]
   },
 
   optimization: {
-    // necessary due to https://github.com/visionmedia/debug/issues/547
-    minimizer: [new UglifyJsPlugin({ sourceMap: true, uglifyOptions: { compress: { collapse_vars: false } } })],
     splitChunks: {
       cacheGroups: {
-        engine: {
-          test: /([\\/]src[\\/]workers|[\\/]node_modules[\\/](aframe|cannon|three\.js))/,
-          priority: 100,
-          name: "engine",
-          chunks: "all"
-        },
         vendors: {
           test: matchRegex({
             include: /([\\/]node_modules[\\/]|[\\/]vendor[\\/])/,
@@ -206,11 +234,20 @@ module.exports = (env, argv) => ({
           priority: 50,
           name: "vendor",
           chunks: "all"
+        },
+        engine: {
+          test: /([\\/]src[\\/]workers|[\\/]node_modules[\\/](aframe|cannon|three))/,
+          priority: 100,
+          name: "engine",
+          chunks: "all"
         }
       }
     }
   },
   plugins: [
+    new BundleAnalyzerPlugin({
+      analyzerMode: env && env.BUNDLE_ANALYZER ? "server" : "disabled"
+    }),
     // Each output page needs a HTMLWebpackPlugin entry
     new HTMLWebpackPlugin({
       filename: "index.html",
@@ -246,14 +283,28 @@ module.exports = (env, argv) => ({
       ]
     }),
     new HTMLWebpackPlugin({
-      filename: "link.html",
-      template: path.join(__dirname, "src", "link.html"),
-      chunks: ["vendor", "link"]
+      filename: "avatar.html",
+      template: path.join(__dirname, "src", "avatar.html"),
+      chunks: ["vendor", "engine", "avatar"],
+      inject: "head",
+      meta: [
+        {
+          "http-equiv": "origin-trial",
+          "data-feature": "WebVR (For Chrome M62+)",
+          "data-expires": process.env.ORIGIN_TRIAL_EXPIRES,
+          content: process.env.ORIGIN_TRIAL_TOKEN
+        }
+      ]
     }),
     new HTMLWebpackPlugin({
-      filename: "spoke.html",
-      template: path.join(__dirname, "src", "spoke.html"),
-      chunks: ["vendor", "spoke"]
+      filename: "link.html",
+      template: path.join(__dirname, "src", "link.html"),
+      chunks: ["vendor", "engine", "link"]
+    }),
+    new HTMLWebpackPlugin({
+      filename: "discord.html",
+      template: path.join(__dirname, "src", "discord.html"),
+      chunks: ["vendor", "discord"]
     }),
     new HTMLWebpackPlugin({
       filename: "whats-new.html",
@@ -261,48 +312,38 @@ module.exports = (env, argv) => ({
       chunks: ["vendor", "whats-new"],
       inject: "head"
     }),
-    new HTMLWebpackPlugin({
-      filename: "avatar-selector.html",
-      template: path.join(__dirname, "src", "avatar-selector.html"),
-      chunks: ["vendor", "engine", "avatar-selector"],
-      inject: "head"
-    }),
-    new CopyWebpackPlugin([
-      {
-        from: "src/assets/images/favicon.ico",
-        to: "favicon.ico"
-      }
-    ]),
-    new CopyWebpackPlugin([
-      {
-        from: "src/assets/images/hub-preview.png",
-        to: "hub-preview.png"
-      }
-    ]),
     new CopyWebpackPlugin([
       {
         from: "src/hub.service.js",
         to: "hub.service.js"
       }
     ]),
+    new CopyWebpackPlugin([
+      {
+        from: "src/schema.toml",
+        to: "schema.toml"
+      }
+    ]),
     // Extract required css and add a content hash.
-    new ExtractTextPlugin({
-      filename: "assets/stylesheets/[name]-[md5:contenthash:hex:20].css",
+    new MiniCssExtractPlugin({
+      filename: "assets/stylesheets/[name]-[contenthash].css",
       disable: argv.mode !== "production"
     }),
     // Define process.env variables in the browser context.
     new webpack.DefinePlugin({
       "process.env": JSON.stringify({
         NODE_ENV: argv.mode,
+        SHORTLINK_DOMAIN: process.env.SHORTLINK_DOMAIN,
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
-        FARSPARK_SERVER: process.env.FARSPARK_SERVER,
+        RETICULUM_SOCKET_SERVER: process.env.RETICULUM_SOCKET_SERVER,
+        THUMBNAIL_SERVER: process.env.THUMBNAIL_SERVER,
         CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,
         NON_CORS_PROXY_DOMAINS: process.env.NON_CORS_PROXY_DOMAINS,
-        ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER,
-        EXTRA_ENVIRONMENTS: process.env.EXTRA_ENVIRONMENTS,
         BUILD_VERSION: process.env.BUILD_VERSION,
         SENTRY_DSN: process.env.SENTRY_DSN,
-        GA_TRACKING_ID: process.env.GA_TRACKING_ID
+        GA_TRACKING_ID: process.env.GA_TRACKING_ID,
+        POSTGREST_SERVER: process.env.POSTGREST_SERVER,
+        USE_FEATURE_CONFIG: process.env.USE_FEATURE_CONFIG
       })
     })
   ]

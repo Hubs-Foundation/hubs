@@ -2,8 +2,11 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 
+import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/sign-in-dialog.scss";
 import DialogContainer from "./dialog-container";
+import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 
 export default class SignInDialog extends Component {
   static propTypes = {
@@ -12,7 +15,12 @@ export default class SignInDialog extends Component {
     onSignIn: PropTypes.func,
     onContinue: PropTypes.func,
     message: PropTypes.string,
-    continueText: PropTypes.string
+    continueText: PropTypes.string,
+    closable: PropTypes.bool
+  };
+
+  static defaultProps = {
+    closable: true
   };
 
   state = {
@@ -52,19 +60,35 @@ export default class SignInDialog extends Component {
             required
             placeholder="Your email address"
             value={this.state.email}
+            onFocus={e => handleTextFieldFocus(e.target)}
+            onBlur={() => handleTextFieldBlur()}
             onChange={e => this.setState({ email: e.target.value })}
             className={styles.emailField}
           />
-          <p className={styles.terms}>
-            By proceeding, you agree to the{" "}
-            <a rel="noopener noreferrer" target="_blank" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
-              terms of use
-            </a>{" "}
-            and{" "}
-            <a rel="noopener noreferrer" target="_blank" href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md">
-              privacy notice
-            </a>.
-          </p>
+          {(configs.feature("show_terms") || configs.feature("show_privacy")) && (
+            <p className={styles.terms}>
+              By proceeding, you agree to the{" "}
+              <IfFeature name="show_terms">
+                <a
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+                >
+                  terms of use
+                </a>{" "}
+              </IfFeature>
+              {configs.feature("show_terms") && configs.feature("show_privacy") && "and "}
+              <IfFeature name="show_privacy">
+                <a
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+                >
+                  privacy notice
+                </a>
+              </IfFeature>.
+            </p>
+          )}
           <button type="submit" className={styles.nextButton}>
             next
           </button>

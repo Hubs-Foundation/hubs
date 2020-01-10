@@ -5,34 +5,77 @@ paths.actions.log = "/actions/log";
 paths.actions.toggleScreenShare = "/actions/toggleScreenShare";
 paths.actions.snapRotateLeft = "/actions/snapRotateLeft";
 paths.actions.snapRotateRight = "/actions/snapRotateRight";
+paths.actions.angularVelocity = "/actions/angularVelocity";
 paths.actions.logDebugFrame = "/actions/logDebugFrame";
+paths.actions.logInteractionState = "/actions/logInteractionState";
+paths.actions.debugUserInput = {};
+paths.actions.debugUserInput.describeCurrentMasks = "/actions/debugUserInput/describeCurrentMasks";
 paths.actions.cameraDelta = "/actions/cameraDelta";
+paths.actions.lobbyCameraDelta = "/actions/lobbyCameraDelta";
 paths.actions.characterAcceleration = "/actions/characterAcceleration";
+paths.actions.dCharSpeed = "/actions/dCharSpeed";
 paths.actions.boost = "/actions/boost";
 paths.actions.startGazeTeleport = "/actions/startTeleport";
 paths.actions.stopGazeTeleport = "/actions/stopTeleport";
 paths.actions.spawnPen = "/actions/spawnPen";
 paths.actions.ensureFrozen = "/actions/ensureFrozen";
+paths.actions.toggleFreeze = "/actions/toggleFreeze";
 paths.actions.thaw = "/actions/thaw";
 paths.actions.muteMic = "/actions/muteMic";
+paths.actions.toggleFly = "/actions/toggleFly";
+paths.actions.waypointDeltaDistance = "/actions/waypointDeltaDistance";
 paths.actions.focusChat = "/actions/focusChat";
-paths.actions.rotateModifier = "/actions/rotateModifier";
+paths.actions.focusChatCommand = "/actions/focusChatCommand";
+paths.actions.toggleCamera = "/actions/toggleCamera";
+paths.actions.takeSnapshot = "/actions/takeSnapshot";
+paths.actions.mediaExit = "/actions/mediaExit";
+paths.actions.mediaSearch1 = "/actions/mediaSearch1";
+paths.actions.mediaSearch2 = "/actions/mediaSearch2";
+paths.actions.mediaSearch3 = "/actions/mediaSearch3";
+paths.actions.mediaSearch4 = "/actions/mediaSearch4";
+paths.actions.mediaSearch5 = "/actions/mediaSearch5";
+paths.actions.mediaSearch6 = "/actions/mediaSearch6";
+paths.actions.mediaSearch7 = "/actions/mediaSearch7";
+paths.actions.mediaSearch8 = "/actions/mediaSearch8";
+paths.actions.transformModifier = "/actions/transformModifier";
 paths.actions.rayObjectRotation = "/actions/rayObjectRotation";
 paths.actions.cursor = {};
-paths.actions.cursor.pose = "/actions/cursorPose";
-paths.actions.cursor.grab = "/actions/cursorGrab";
-paths.actions.cursor.drop = "/actions/cursorDrop";
-paths.actions.cursor.modDelta = "/actions/cursorModDelta";
-paths.actions.cursor.startDrawing = "/actions/cursorStartDrawing";
-paths.actions.cursor.stopDrawing = "/actions/cursorStopDrawing";
-paths.actions.cursor.undoDrawing = "/actions/cursorUndoDrawing";
-paths.actions.cursor.penNextColor = "/actions/cursorPenNextColor";
-paths.actions.cursor.penPrevColor = "/actions/cursorPenPrevColor";
-paths.actions.cursor.scalePenTip = "/actions/cursorScalePenTip";
-paths.actions.cursor.scaleGrabbedGrabbable = "/actions/cursorScaleGrabbedGrabbable";
-paths.actions.cursor.mediaVolumeMod = "/actions/cursor/mediaVolumeMod";
-paths.actions.cursor.takeSnapshot = "/actions/cursorTakeSnapshot";
+paths.actions.cursor.right = {};
+paths.actions.cursor.right.pose = "/actions/cursor/right/Pose";
+paths.actions.cursor.right.hideLine = "/actions/cursor/right/HideLine";
+paths.actions.cursor.right.grab = "/actions/cursor/right/Grab";
+paths.actions.cursor.right.drop = "/actions/cursor/right/Drop";
+paths.actions.cursor.right.modDelta = "/actions/cursor/right/ModDelta";
+paths.actions.cursor.right.startDrawing = "/actions/cursor/right/StartDrawing";
+paths.actions.cursor.right.stopDrawing = "/actions/cursor/right/StopDrawing";
+paths.actions.cursor.right.undoDrawing = "/actions/cursor/right/UndoDrawing";
+paths.actions.cursor.right.penNextColor = "/actions/cursor/right/PenNextColor";
+paths.actions.cursor.right.penPrevColor = "/actions/cursor/right/PenPrevColor";
+paths.actions.cursor.right.scalePenTip = "/actions/cursor/right/ScalePenTip";
+paths.actions.cursor.right.scaleGrabbedGrabbable = "/actions/cursor/right/ScaleGrabbedGrabbable";
+paths.actions.cursor.right.mediaVolumeMod = "/actions/cursor/right//mediaVolumeMod";
+paths.actions.cursor.right.takeSnapshot = "/actions/cursor/right/TakeSnapshot";
+paths.actions.cursor.right.wake = "/actions/cursor/right/wake";
+paths.actions.cursor.left = {};
+paths.actions.cursor.left.pose = "/actions/cursor/left/Pose";
+paths.actions.cursor.left.hideLine = "/actions/cursor/left/HideLine";
+paths.actions.cursor.left.grab = "/actions/cursor/left/Grab";
+paths.actions.cursor.left.drop = "/actions/cursor/left/Drop";
+paths.actions.cursor.left.modDelta = "/actions/cursor/left/ModDelta";
+paths.actions.cursor.left.startDrawing = "/actions/cursor/left/StartDrawing";
+paths.actions.cursor.left.stopDrawing = "/actions/cursor/left/StopDrawing";
+paths.actions.cursor.left.undoDrawing = "/actions/cursor/left/UndoDrawing";
+paths.actions.cursor.left.penNextColor = "/actions/cursor/left/PenNextColor";
+paths.actions.cursor.left.penPrevColor = "/actions/cursor/left/PenPrevColor";
+paths.actions.cursor.left.scalePenTip = "/actions/cursor/left/ScalePenTip";
+paths.actions.cursor.left.scaleGrabbedGrabbable = "/actions/cursor/left/ScaleGrabbedGrabbable";
+paths.actions.cursor.left.mediaVolumeMod = "/actions/cursor/left//mediaVolumeMod";
+paths.actions.cursor.left.takeSnapshot = "/actions/cursor/left/TakeSnapshot";
+paths.actions.cursor.left.wake = "/actions/cursor/left/wake";
+paths.actions.pen = {};
+paths.actions.pen.remove = "/actions/pen/remove";
 paths.actions.rightHand = {};
+paths.actions.rightHand.matrix = "/actions/rightHand/matrix";
 paths.actions.rightHand.pose = "/actions/rightHandPose";
 paths.actions.rightHand.grab = "/actions/rightHandGrab";
 paths.actions.rightHand.drop = "/actions/rightHandDrop";
@@ -40,16 +83,18 @@ paths.actions.rightHand.modDelta = "/actions/rightHandModDelta";
 paths.actions.rightHand.startDrawing = "/actions/rightHandStartDrawing";
 paths.actions.rightHand.stopDrawing = "/actions/rightHandStopDrawing";
 paths.actions.rightHand.undoDrawing = "/actions/rightHandUndoDrawing";
+paths.actions.rightHand.switchDrawMode = "/actions/rightHandSwitchDrawMode";
 paths.actions.rightHand.penNextColor = "/actions/rightHandPenNextColor";
 paths.actions.rightHand.penPrevColor = "/actions/rightHandPenPrevColor";
 paths.actions.rightHand.scalePenTip = "/actions/rightHandScalePenTip";
-paths.actions.rightHand.startTeleport = "/actions/rightHandStartTeleport";
-paths.actions.rightHand.stopTeleport = "/actions/rightHandStopTeleport";
+paths.actions.rightHand.startTeleport = "/actions/rightHand/startTeleport";
+paths.actions.rightHand.stopTeleport = "/actions/rightHand/stopTeleport";
 paths.actions.rightHand.takeSnapshot = "/actions/rightHandTakeSnapshot";
 paths.actions.rightHand.thumb = "/actions/rightHand/thumbDown";
 paths.actions.rightHand.index = "/actions/rightHand/indexDown";
 paths.actions.rightHand.middleRingPinky = "/actions/rightHand/middleRingPinkyDown";
 paths.actions.leftHand = {};
+paths.actions.leftHand.matrix = "/actions/leftHand/matrix";
 paths.actions.leftHand.pose = "/actions/leftHandPose";
 paths.actions.leftHand.grab = "/actions/leftHandGrab";
 paths.actions.leftHand.drop = "/actions/leftHandDrop";
@@ -57,17 +102,27 @@ paths.actions.leftHand.modDelta = "/actions/leftHandModDelta";
 paths.actions.leftHand.startDrawing = "/actions/leftHandStartDrawing";
 paths.actions.leftHand.stopDrawing = "/actions/leftHandStopDrawing";
 paths.actions.leftHand.undoDrawing = "/actions/leftHandUndoDrawing";
+paths.actions.leftHand.switchDrawMode = "/actions/leftHandSwitchDrawMode";
 paths.actions.leftHand.penNextColor = "/actions/leftHandPenNextColor";
 paths.actions.leftHand.penPrevColor = "/actions/leftHandPenPrevColor";
 paths.actions.leftHand.scalePenTip = "/actions/leftHandScalePenTip";
-paths.actions.leftHand.startTeleport = "/actions/leftHandStartTeleport";
-paths.actions.leftHand.stopTeleport = "/actions/leftHandStopTeleport";
+paths.actions.leftHand.startTeleport = "/actions/leftHand/startTeleport";
+paths.actions.leftHand.stopTeleport = "/actions/leftHand/stopTeleport";
 paths.actions.leftHand.takeSnapshot = "/actions/leftHandTakeSnapshot";
 paths.actions.leftHand.thumb = "/actions/leftHand/thumbDown";
 paths.actions.leftHand.index = "/actions/leftHand/indexDown";
 paths.actions.leftHand.middleRingPinky = "/actions/leftHand/middleRingPinkyDown";
 paths.actions.camera = {};
 paths.actions.camera.exitMirror = "/actions/cameraExitMirror";
+paths.actions.stopInspecting = "/actions/stopInspecting";
+paths.actions.inspectZoom = "/actions/inspectZoom";
+paths.actions.inspectPanY = "/actions/inspectPanY";
+paths.actions.resetInspectView = "/actions/resetInspectView";
+paths.actions.nextCameraMode = "/actions/nextCameraMode";
+paths.haptics = {};
+paths.haptics.actuators = {};
+paths.haptics.actuators.left = "/haptics/actuators/left";
+paths.haptics.actuators.right = "/haptics/actuators/right";
 
 paths.device = {};
 paths.device.mouse = {};
@@ -75,10 +130,12 @@ paths.device.mouse.coords = "/device/mouse/coords";
 paths.device.mouse.movementXY = "/device/mouse/movementXY";
 paths.device.mouse.buttonLeft = "/device/mouse/buttonLeft";
 paths.device.mouse.buttonRight = "/device/mouse/buttonRight";
+paths.device.mouse.buttonMiddle = "/device/mouse/buttonMiddle";
 paths.device.mouse.wheel = "/device/mouse/wheel";
 paths.device.smartMouse = {};
 paths.device.smartMouse.cursorPose = "/device/smartMouse/cursorPose";
 paths.device.smartMouse.cameraDelta = "/device/smartMouse/cameraDelta";
+paths.device.smartMouse.shouldMoveCamera = "/device/smartMouse/shouldMoveCamera";
 paths.device.touchscreen = {};
 paths.device.touchscreen.cursorPose = "/device/touchscreen/cursorPose";
 paths.device.touchscreen.touchCameraDelta = "/device/touchscreen/touchCameraDelta";
@@ -88,7 +145,14 @@ paths.device.touchscreen.pinch = {};
 paths.device.touchscreen.pinch.delta = "/device/touchscreen/pinch/delta";
 paths.device.touchscreen.pinch.initialDistance = "/device/touchscreen/pinch/initialDistance";
 paths.device.touchscreen.pinch.currentDistance = "/device/touchscreen/pinch/currentDistance";
+paths.device.touchscreen.isTouching = "/device/touchscreen/isTouching";
 paths.device.touchscreen.isTouchingGrabbable = "/device/touchscreen/isTouchingGrabbable";
+paths.device.touchscreen.tap1 = "/device/touchscreen/tap1";
+paths.device.touchscreen.tap2 = "/device/touchscreen/tap2";
+paths.device.touchscreen.tap3 = "/device/touchscreen/tap3";
+paths.device.touchscreen.tap4 = "/device/touchscreen/tap4";
+paths.device.touchscreen.tap5 = "/device/touchscreen/tap5";
+paths.device.touchscreen.anything = "/device/touchscreen/anything";
 paths.device.gyro = {};
 paths.device.gyro.averageDeltaX = "/device/gyro/averageDeltaX";
 paths.device.gyro.averageDeltaY = "/device/gyro/averageDeltaY";
@@ -96,8 +160,15 @@ paths.device.hud = {};
 paths.device.hud.penButton = "/device/hud/penButton";
 
 paths.device.keyboard = {
-  key: key => {
-    return `/device/keyboard/${key.toLowerCase()}`;
+  map: new Map(),
+  key: function(k) {
+    let path = this.map.get(k);
+    if (path) {
+      return path;
+    }
+    path = `/device/keyboard/${k === " " ? "space" : k.toLowerCase()}`;
+    this.map.set(k, path);
+    return path;
   }
 };
 
@@ -112,6 +183,7 @@ paths.device.gamepad = gamepadIndex => ({
 
 const xbox = "/device/xbox/";
 paths.device.xbox = {
+  v: name => `/vars/xbox/${name}`,
   button: buttonName => ({
     pressed: `${xbox}button/${buttonName}/pressed`,
     touched: `${xbox}button/${buttonName}/touched`,
@@ -119,34 +191,35 @@ paths.device.xbox = {
   }),
   axis: axisName => {
     return `${xbox}axis/${axisName}`;
-  }
+  },
+  axesSum: `${xbox}axis/sum`
 };
 
-const oculusgo = "/device/oculusgo/";
 paths.device.oculusgo = {
   // TODO remove these in favor of the direct accessors
   button: buttonName => ({
-    pressed: `${oculusgo}button/${buttonName}/pressed`,
-    touched: `${oculusgo}button/${buttonName}/touched`,
-    value: `${oculusgo}button/${buttonName}/value`
+    pressed: `/device/oculusgo/button/${buttonName}/pressed`,
+    touched: `/device/oculusgo/button/${buttonName}/touched`,
+    value: `/device/oculusgo/button/${buttonName}/value`
   }),
   axis: axisName => {
-    return `${oculusgo}axis/${axisName}`;
+    return `/device/oculusgo/axis/${axisName}`;
   },
   //
   trigger: {
-    pressed: `${oculusgo}button/trigger/pressed`,
-    touched: `${oculusgo}button/trigger/touched`,
-    value: `${oculusgo}button/trigger/value`
+    pressed: "/device/oculusgo/button/trigger/pressed",
+    touched: "/device/oculusgo/button/trigger/touched",
+    value: "/device/oculusgo/button/trigger/value"
   },
   touchpad: {
-    pressed: `${oculusgo}button/touchpad/pressed`,
-    touched: `${oculusgo}button/touchpad/touched`,
-    value: `${oculusgo}button/touchpad/value`,
-    axisX: `${oculusgo}axis/touchpadX`,
-    axisY: `${oculusgo}axis/touchpadY`
+    pressed: "/device/oculusgo/button/touchpad/pressed",
+    touched: "/device/oculusgo/button/touchpad/touched",
+    value: "/device/oculusgo/button/touchpad/value",
+    axisX: "/device/oculusgo/axis/touchpadX",
+    axisY: "/device/oculusgo/axis/touchpadY"
   },
-  pose: `${oculusgo}pose`,
+  pose: "/device/oculusgo/pose",
+  matrix: "/device/oculusgo/matrix",
   v: name => {
     return `/vars/oculusgo/${name}`;
   }
@@ -163,6 +236,7 @@ paths.device.gearVRController = {
     return `${gearVRController}axis/${axisName}`;
   },
   pose: `${gearVRController}pose`,
+  matrix: `${gearVRController}matrix`,
   v: name => {
     return `/vars/gearVRController/${name}`;
   }
@@ -178,7 +252,8 @@ paths.device.daydream = {
   axis: axisName => {
     return `${daydream}axis/${axisName}`;
   },
-  pose: `${daydream}pose`
+  pose: `${daydream}pose`,
+  matrix: `${daydream}matrix`
 };
 
 const rightOculusTouch = "/device/rightOculusTouch/";
@@ -191,7 +266,9 @@ paths.device.rightOculusTouch = {
   axis: axisName => {
     return `${rightOculusTouch}axis/${axisName}`;
   },
-  pose: `${rightOculusTouch}pose`
+  axesSum: `${rightOculusTouch}axis/sum`,
+  pose: `${rightOculusTouch}pose`,
+  matrix: `${rightOculusTouch}matrix`
 };
 
 const leftOculusTouch = "/device/leftOculusTouch/";
@@ -204,7 +281,9 @@ paths.device.leftOculusTouch = {
   axis: axisName => {
     return `${leftOculusTouch}axis/${axisName}`;
   },
-  pose: `${leftOculusTouch}pose`
+  axesSum: `${leftOculusTouch}axis/sum`,
+  pose: `${leftOculusTouch}pose`,
+  matrix: `${leftOculusTouch}matrix`
 };
 
 paths.device.vive = {};
@@ -217,7 +296,9 @@ paths.device.vive.left = {
   axis: axisName => {
     return `/device/vive/left/axis/${axisName}`;
   },
-  pose: `/device/vive/left/pose`
+  axesSum: "/device/vive/left/axis/sum",
+  pose: `/device/vive/left/pose`,
+  matrix: `/device/vive/left/matrix`
 };
 paths.device.vive.right = {
   button: buttonName => ({
@@ -228,7 +309,9 @@ paths.device.vive.right = {
   axis: axisName => {
     return `/device/vive/right/axis/${axisName}`;
   },
-  pose: `/device/vive/right/pose`
+  axesSum: "/device/vive/right/axis/sum",
+  pose: `/device/vive/right/pose`,
+  matrix: `/device/vive/right/matrix`
 };
 
 function button(device, side, name) {
@@ -257,7 +340,8 @@ function wmrController(side) {
     grip: button(wmr, side, "grip"),
     menu: button(wmr, side, "menu"),
     joystick: axes(wmr, side, "joystick"),
-    pose: `${wmr}${side}/pose`
+    pose: `${wmr}${side}/pose`,
+    matrix: `${wmr}${side}/matrix`
   };
 }
 paths.device.wmr = {};

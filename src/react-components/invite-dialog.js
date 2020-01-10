@@ -3,7 +3,12 @@ import PropTypes from "prop-types";
 import copy from "copy-to-clipboard";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
-import { share } from "../utils/share";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import configs from "../utils/configs";
+
+import { messages } from "../utils/i18n";
+import { share, canShare } from "../utils/share";
 
 import { WithHoverSound } from "./wrap-with-audio";
 import styles from "../assets/stylesheets/invite-dialog.scss";
@@ -19,7 +24,12 @@ export default class InviteDialog extends Component {
     entryCode: PropTypes.number,
     hubId: PropTypes.string,
     allowShare: PropTypes.bool,
-    onClose: PropTypes.func
+    isModal: PropTypes.bool,
+    onClose: PropTypes.func,
+    hasPush: PropTypes.bool,
+    isSubscribed: PropTypes.bool,
+    onSubscribeChanged: PropTypes.func,
+    embedUrl: PropTypes.string
   };
 
   state = {
@@ -29,7 +39,7 @@ export default class InviteDialog extends Component {
 
   shareClicked = url => {
     this.setState({ shareButtonActive: true });
-    share({ url, title: "Join me now in #hubs!" }).then(() => {
+    share({ url, title: `Join me now in ${messages["share-hashtag"]}!` }).then(() => {
       this.setState({ shareButtonActive: false });
     });
   };
@@ -42,27 +52,33 @@ export default class InviteDialog extends Component {
   };
 
   render() {
-    const { entryCode } = this.props;
+    const { entryCode, embedUrl } = this.props;
 
     const entryCodeString = pad(entryCode, 6);
-    const shortLinkText = `hub.link/${this.props.hubId}`;
+    const shortLinkText = `${configs.SHORTLINK_DOMAIN}/${this.props.hubId}`;
     const shortLink = "https://" + shortLinkText;
+    const embedText = `<iframe src="${embedUrl}" style="width: 1024px; height: 768px;" allow="microphone; camera; vr; speaker;"></iframe>`;
 
     return (
-      <div className={styles.dialog}>
-        <div className={styles.attachPoint} />
+      <div className={classNames({ [styles.dialog]: true, [styles.modal]: this.props.isModal })}>
+        {!this.props.isModal && <div className={styles.attachPoint} />}
         <WithHoverSound>
-          <div className={styles.close} onClick={() => this.props.onClose()}>
-            <span>×</span>
-          </div>
+          <button className={styles.close} onClick={() => this.props.onClose()}>
+            <i>
+              <FontAwesomeIcon icon={faTimes} />
+            </i>
+          </button>
         </WithHoverSound>
         <div>
-          <FormattedMessage id="invite.enter_via" />
-          <WithHoverSound>
-            <a href="https://hub.link" target="_blank" className={styles.hubLinkLink} rel="noopener noreferrer">
-              hub.link
-            </a>
-          </WithHoverSound>
+          <FormattedMessage id={`invite.enter_via${this.props.isModal ? "_modal" : ""}`} />
+          <a
+            href={`https://${configs.SHORTLINK_DOMAIN}`}
+            target="_blank"
+            className={styles.hubLinkLink}
+            rel="noopener noreferrer"
+          >
+            {configs.SHORTLINK_DOMAIN}
+          </a>
           <FormattedMessage id="invite.and_enter_code" />
         </div>
         <div className={styles.code}>
@@ -73,7 +89,7 @@ export default class InviteDialog extends Component {
           ))}
         </div>
         <div>
-          <FormattedMessage id="invite.or_visit" />
+          <FormattedMessage id={`invite.or_visit${this.props.isModal ? "_modal" : ""}`} />
         </div>
         <div className={styles.domain}>
           <input type="text" readOnly onFocus={e => e.target.select()} value={shortLinkText} />
@@ -85,7 +101,7 @@ export default class InviteDialog extends Component {
             </button>
           </WithHoverSound>
           {this.props.allowShare &&
-            navigator.share && (
+            canShare() && (
               <WithHoverSound>
                 <button className={styles.linkButton} onClick={this.shareClicked.bind(this, shortLink)}>
                   <span>{this.state.shareButtonActive ? "sharing..." : "share"}</span>
@@ -93,7 +109,7 @@ export default class InviteDialog extends Component {
               </WithHoverSound>
             )}
           {this.props.allowShare &&
-            !navigator.share && (
+            !canShare() && (
               <WithHoverSound>
                 <button className={styles.linkButton} onClick={this.shareClicked.bind(this, shortLink)}>
                   <FormattedMessage id="invite.tweet" />
@@ -101,6 +117,52 @@ export default class InviteDialog extends Component {
               </WithHoverSound>
             )}
         </div>
+        {embedUrl && (
+          <div className={styles.embed}>
+            <div>
+              <FormattedMessage id={`invite.embed`} />
+            </div>
+            <div className={styles.embedText}>
+              <input
+                type="text"
+                readOnly
+                onFocus={e => {
+                  e.target.select();
+                  this.setState({ showEmbedTip: true });
+                }}
+                onBlur={() => this.setState({ showEmbedTip: false })}
+                value={embedText}
+              />
+            </div>
+            {this.state.showEmbedTip && (
+              <div className={styles.embedTipWrap}>
+                <div className={styles.embedTip}>
+                  <div className={styles.embedTipAttachPoint} />
+                  <FormattedMessage id="invite.embed-tip" />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        {this.props.hasPush && (
+          <div className={styles.subscribe}>
+            <input
+              id="subscribe"
+              type="checkbox"
+              onChange={() => this.props.onSubscribeChanged()}
+              checked={this.props.isSubscribed}
+            />
+            <label htmlFor="subscribe">
+              <FormattedMessage id="entry.notify_me" />
+            </label>
+          </div>
+        )}
+
+        {this.props.isModal && (
+          <button className={styles.enterVrButton} onClick={() => this.props.onClose()}>
+            <FormattedMessage id="entry.return-to-vr" />
+          </button>
+        )}
       </div>
     );
   }

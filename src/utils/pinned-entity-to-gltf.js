@@ -7,6 +7,8 @@ export default function pinnedEntityToGltf(el) {
   const networkId = components.networked.data.networkId;
 
   const gltfComponents = {};
+  // TODO: Move to MOZ_hubs_components and include version number. Requires migration of existing room objects.
+  // Please do this before making a breaking change to the data stored here.
   const gltfNode = { name: networkId, extensions: { HUBS_components: gltfComponents } };
 
   // Adapted from three.js GLTFExporter
@@ -21,16 +23,18 @@ export default function pinnedEntityToGltf(el) {
 
   if (components["media-loader"]) {
     const mediaSrc = components["media-loader"].data.src;
+    const mediaVersion = components["media-loader"].data.version;
+    const mediaContentSubtype = components["media-loader"].data.contentSubtype;
 
     if (mediaSrc.startsWith("hubs://") && mediaSrc.endsWith("/video")) {
       // Do not persist hubs client video urls
       return null;
     }
 
-    gltfComponents.media = { src: mediaSrc, id: networkId };
+    gltfComponents.media = { src: mediaSrc, version: mediaVersion, contentSubtype: mediaContentSubtype, id: networkId };
 
-    if (components["media-pager"]) {
-      gltfComponents.media.pageIndex = components["media-pager"].data.index;
+    if (components["media-pdf"]) {
+      gltfComponents.media.pageIndex = components["media-pdf"].data.index;
     }
 
     if (components["media-video"] && components["media-video"].data.videoPaused) {

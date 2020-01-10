@@ -1,5 +1,7 @@
 import "three/examples/js/pmrem/PMREMGenerator";
 import "three/examples/js/pmrem/PMREMCubeUVPacker";
+import qsTruthy from "../utils/qs_truthy";
+const isBotMode = qsTruthy("bot");
 
 /**
  * @author zz85 / https://github.com/zz85
@@ -227,7 +229,7 @@ AFRAME.registerComponent("skybox", {
     mieCoefficient: { type: "number", default: 0.005 },
     mieDirectionalG: { type: "number", default: 0.8 },
     inclination: { type: "number", default: 0 },
-    azimuth: { type: "number", default: 0 },
+    azimuth: { type: "number", default: 0.15 },
     distance: { type: "number", default: 8000 }
   },
 
@@ -236,11 +238,14 @@ AFRAME.registerComponent("skybox", {
     this.el.setObject3D("mesh", this.sky);
     this.skyScene = new THREE.Scene();
     this.cubeCamera = new THREE.CubeCamera(1, 100000, 512);
+    this.cubeCamera.children.forEach(o => (o.matrixNeedsUpdate = true));
     this.skyScene.add(this.cubeCamera);
 
-    // HACK: Render environment map on next frame to avoid bug where the render target texture is black.
     this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
-    requestAnimationFrame(this.updateEnvironmentMap);
+    // HACK: Render environment map on next frame to avoid bug where the render target texture is black.
+    // This is likely due to the custom elements attached callback being synchronous on Chrome but not Firefox.
+    // Added timeout due to additional case where texture is black in Firefox.
+    requestAnimationFrame(() => setTimeout(this.updateEnvironmentMap));
   },
 
   update(oldData) {
@@ -297,15 +302,18 @@ AFRAME.registerComponent("skybox", {
   updateEnvironmentMap() {
     const environmentMapComponent = this.el.sceneEl.components["environment-map"];
 
-    if (environmentMapComponent) {
+    if (environmentMapComponent && !isBotMode) {
       const renderer = this.el.sceneEl.renderer;
       this.skyScene.add(this.sky);
       this.cubeCamera.update(renderer, this.skyScene);
       this.el.setObject3D("mesh", this.sky);
+      const vrEnabled = renderer.vr.enabled;
+      renderer.vr.enabled = false;
       const pmremGenerator = new THREE.PMREMGenerator(this.cubeCamera.renderTarget.texture);
       pmremGenerator.update(renderer);
       const pmremCubeUVPacker = new THREE.PMREMCubeUVPacker(pmremGenerator.cubeLods);
       pmremCubeUVPacker.update(renderer);
+      renderer.vr.enabled = vrEnabled;
       environmentMapComponent.updateEnvironmentMap(pmremCubeUVPacker.CubeUVRenderTarget.texture);
       pmremGenerator.dispose();
       pmremCubeUVPacker.dispose();

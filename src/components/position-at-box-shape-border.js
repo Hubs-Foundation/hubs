@@ -1,5 +1,7 @@
 import { getBox } from "../utils/auto-box-collider.js";
 import { getLastWorldPosition } from "../utils/three-utils";
+import { CAMERA_MODE_FIRST_PERSON } from "../systems/camera-system";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 const PI = Math.PI;
 const HALF_PI = PI / 2;
@@ -8,6 +10,7 @@ const right = new THREE.Vector3(1, 0, 0);
 const forward = new THREE.Vector3(0, 0, 1);
 const left = new THREE.Vector3(-1, 0, 0);
 const back = new THREE.Vector3(0, 0, -1);
+const zero = new THREE.Vector3(0, 0, 0);
 const dirs = {
   left: {
     dir: left,
@@ -31,11 +34,6 @@ const dirs = {
   }
 };
 
-const inverseHalfExtents = {
-  x: "z",
-  z: "x"
-};
-
 AFRAME.registerComponent("position-at-box-shape-border", {
   multiple: true,
   schema: {
@@ -48,8 +46,11 @@ AFRAME.registerComponent("position-at-box-shape-border", {
   init() {
     this.cam = this.el.sceneEl.camera.el.object3D;
     this._updateBox = this._updateBox.bind(this);
+    this._setupTarget = this._setupTarget.bind(this);
     this.halfExtents = new THREE.Vector3();
     this.el.sceneEl.systems["frame-scheduler"].schedule(this._updateBox, "media-components");
+
+    this._setupTarget();
   },
 
   remove() {
@@ -60,25 +61,28 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     this.dirs = this.data.dirs.map(d => dirs[d]);
   },
 
+  async _setupTarget() {
+    await waitForDOMContentLoaded();
+
+    this.targetEl = this.el.querySelector(this.data.target);
+    this.target = this.targetEl.object3D;
+
+    this.targetEl.addEventListener("animationcomplete", () => {
+      this.targetEl.removeAttribute("animation__show");
+    });
+
+    this.target.scale.setScalar(0.01); // To avoid "pop" of gigantic button first time
+    this.target.matrixNeedsUpdate = true;
+  },
+
   tick() {
-    if (!this.target) {
-      this.targetEl = this.el.querySelector(this.data.target);
-      this.target = this.targetEl.object3D;
-
-      this.targetEl.addEventListener("animationcomplete", () => {
-        this.targetEl.removeAttribute("animation__show");
-      });
-
-      this.target.scale.setScalar(0.01); // To avoid "pop" of gigantic button first time
-      this.target.matrixNeedsUpdate = true;
-      return;
-    }
+    if (!this.target) return;
 
     if (!this.el.getObject3D("mesh")) {
       return;
     }
 
-    const isVisible = this.targetEl.getAttribute("visible");
+    const isVisible = this.targetEl.object3D.visible;
     const opening = isVisible && !this.wasVisible;
     const scaleChanged =
       this.el.object3D.scale.x !== this.previousScaleX ||
@@ -89,7 +93,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     // If the target is being shown or the scale changed while the opening animation is being run,
     // we need to start or re-start the animation.
     if (opening || (scaleChanged && isAnimating)) {
-      this._updateBox(this.data.animate);
+      this._updateBox(this.data.animate, true);
     }
 
     this.wasVisible = isVisible;
@@ -102,46 +106,67 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     const camWorldPos = new THREE.Vector3();
     const targetPosition = new THREE.Vector3();
     const pointOnBoxFace = new THREE.Vector3();
+    const pointOnBoxFaceToCamera = new THREE.Vector3();
+    const boxCenter = new THREE.Vector3();
     const tempParentWorldScale = new THREE.Vector3();
+    const boxFaceNormal = new THREE.Vector3();
+    const min = new THREE.Vector3(0.001, 0.001, 0.001);
 
-    return function(animate) {
-      if (!this.halfExtents || this.mesh !== this.el.getObject3D("mesh") || this.shape !== this.el.components.shape) {
+    return function(animate, forceNewExtents) {
+      if (forceNewExtents || this.mesh !== this.el.getObject3D("mesh")) {
         this.mesh = this.el.getObject3D("mesh");
-        this.shape = this.el.components.shape;
 
-        if (this.el.components.shape) {
-          this.shape = this.el.components.shape;
-          this.halfExtents.copy(this.shape.data.halfExtents);
-        } else {
-          const box = getBox(this.el, this.mesh);
-          this.halfExtents = box.min
-            .clone()
-            .negate()
-            .add(box.max)
-            .multiplyScalar(0.51 / this.el.object3D.scale.x);
-        }
+        const box = getBox(this.el, this.mesh);
+        this.halfExtents = box.min
+          .clone()
+          .negate()
+          .add(box.max)
+          .multiplyScalar(0.65);
+
+        this.halfExtents.max(min);
       }
+
+      if (!this.target) return;
+
       getLastWorldPosition(this.cam, camWorldPos);
 
-      let minSquareDistance = Infinity;
+      let targetSquareDistance = Infinity;
       let targetDir = this.dirs[0].dir;
       let targetHalfExtentStr = this.dirs[0].halfExtent;
       let targetHalfExtent = this.halfExtents[targetHalfExtentStr];
       let targetRotation = this.dirs[0].rotation;
+      let targetCameraDot = -1.1;
+
+      this.el.object3D.updateMatrices();
 
       for (let i = 0; i < this.dirs.length; i++) {
         const dir = this.dirs[i].dir;
         const halfExtentStr = this.dirs[i].halfExtent;
         const halfExtent = this.halfExtents[halfExtentStr];
         pointOnBoxFace.copy(dir).multiplyScalar(halfExtent);
+        boxCenter.copy(zero);
+
         this.el.object3D.localToWorld(pointOnBoxFace);
+        this.el.object3D.localToWorld(boxCenter);
+
+        pointOnBoxFaceToCamera.subVectors(camWorldPos, pointOnBoxFace);
+        pointOnBoxFaceToCamera.normalize();
+
+        boxFaceNormal.subVectors(pointOnBoxFace, boxCenter);
+        boxFaceNormal.normalize();
+
+        // Compute dot between camera + box normal to ensure menus are going to be
+        // somewhat perpendicular to camera frustum
+        const cameraAngleDotBoxNormal = boxFaceNormal.dot(pointOnBoxFaceToCamera);
+
         const squareDistance = pointOnBoxFace.distanceToSquared(camWorldPos);
-        if (squareDistance < minSquareDistance) {
-          minSquareDistance = squareDistance;
+        if (cameraAngleDotBoxNormal > targetCameraDot) {
+          targetSquareDistance = squareDistance;
           targetDir = dir;
           targetHalfExtent = halfExtent;
           targetRotation = this.dirs[i].rotation;
           targetHalfExtentStr = halfExtentStr;
+          targetCameraDot = cameraAngleDotBoxNormal;
         }
       }
 
@@ -150,9 +175,12 @@ AFRAME.registerComponent("position-at-box-shape-border", {
 
       tempParentWorldScale.setFromMatrixScale(this.target.parent.matrixWorld);
 
-      const distance = Math.sqrt(minSquareDistance);
-      const scale = this.halfExtents[inverseHalfExtents[targetHalfExtentStr]] * distance;
-      const targetScale = Math.min(2.0, Math.max(0.5, scale * tempParentWorldScale.x));
+      const distance = Math.sqrt(targetSquareDistance);
+      const scale = Math.max(this.halfExtents.x, this.halfExtents.z) * distance;
+      const targetScale = Math.min(
+        this.el.sceneEl.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_FIRST_PERSON ? 2.0 : 4.0,
+        Math.max(0.5, scale * tempParentWorldScale.x)
+      );
       const finalScale = this.data.scale ? targetScale / tempParentWorldScale.x : 1;
 
       if (animate) {

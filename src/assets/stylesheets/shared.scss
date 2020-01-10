@@ -1,24 +1,19 @@
-$light-transparent: rgba(0, 0, 0, 0.2);
-$white-transparent: rgba(255, 255, 255, 0.90);
-$dark-transparent: rgba(0, 0, 0, 0.4);
-$darker-transparent: rgba(0, 0, 0, 0.6);
-$darkest-transparent: rgba(0, 0, 0, 0.9);
-$grey-text: rgba(127, 127, 127, 1.0);
-$dark-grey-text: rgba(64, 64, 64, 1.0);
-$light-text: rgba(240, 240, 240, 1.0);
-$light-grey: lightgrey;
-$dark-grey: rgba(128, 128, 128, 1.0);
-$darker-grey: rgba(64, 64, 64, 1.0);
-$darkest-grey: rgba(32, 32, 32, 1.0);
-$bright-blue: #2F80ED;
-$action-color: #FF3464;
-$action-color-light: #FF74A4;
-$action-color-transparent: rgba(255, 52, 100, 0.9);
-$hud-panel-background: rgba(79, 79, 79, 0.45);
-$spoke-action-color: $bright-blue;
-$semi-bold: 600;
+@import 'colors';
 
-%unselectable {
+$default-action-color: #FF3464;
+$default-action-color-light: #FF74A4;
+$action-color: var(--action-color, $default-action-color);
+$action-label-color: var(--action-label-color, $default-action-color);
+$action-color-disabled: var(--action-color-disabled, $default-action-color-light);
+$action-color-highlight: var(--action-color-highlight, $default-action-color-light);
+$action-text-color: var(--action-text-color, white);
+$action-subtitle-color: var(--action-subtitle-color, $light-text);
+$notice-background-color: var(--notice-background-color, $bright-blue);
+$notice-text-color: var(--notice-text-color, white);
+$notice-widget-color: var(--notice-widget-color, $light-blue);
+$favorited-color: var(--favorited-color, $duck-yellow);
+
+%unselectable  {
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -31,7 +26,7 @@ $semi-bold: 600;
 
 %glass-text {
   font-family: 'Open Sans', sans-serif;
-  color: black;
+  color: var(--panel-text-color);
 }
 
 %glass-icon {
@@ -40,7 +35,7 @@ $semi-bold: 600;
 }
 
 %rounded-border {
-  border: 1px solid #e2e2e2;
+  border: 1px solid var(--text-field-border-color);
   box-sizing: border-box;
   border-radius: 10px;
 }
@@ -53,16 +48,10 @@ $semi-bold: 600;
   margin: 0;
 }
 
-%form-field-on-white {
-  border: 1px solid #e2e2e2;
-  background-color: white;
-  border-radius: 10px;
-}
-
 %input-field {
   @extend %rounded-border;
   @extend %default-font;
-  color: black;
+  color: var(--text-field-text-color);
   font-size: 1.2em;
   background-color: transparent;
   line-height: 2.0em;
@@ -92,8 +81,8 @@ $semi-bold: 600;
     padding: 18px 48px;
   }
 
-  background: #FF3464;
-  color: white;
+  background: $action-color;
+  color: $action-text-color;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -114,6 +103,26 @@ $semi-bold: 600;
   @media (max-width: 768px) {
     width: 327px;
   }
+
+  @media (max-width: 375px) {
+    width: 300px;
+  }
+}
+
+%link-button {
+  text-decoration: underline;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+  border: 0;
+  background: none;
+  font-size: 1.0em;
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 %action-button {
@@ -129,9 +138,9 @@ $semi-bold: 600;
   border-radius: 28px;
   padding: 0px 18px;
 
-  background: #FF3464;
+  background: $action-color;
   font-size: 1em;
-  color: white;
+  color: $action-text-color;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -140,25 +149,52 @@ $semi-bold: 600;
   height: 48px;
 }
 
+%entry-action-button {
+  border-radius: 30px;
+  height: 60px;
+}
+
 %action-button-secondary {
   @extend %action-button;
-  background-color: white;
-  color: $action-color;
+  background-color: var(--action-button-secondary-background);
+  color: $action-label-color;
+}
+
+%action-button-secondary-modal {
+  @extend %action-button;
+  background-color: var(--panel-action-button-secondary-background);
+  color: $action-label-color;
 }
 
 %action-button-selected {
-  background: white;
-  color: $action-color;
+  background: var(--action-button-secondary-background);
+  color: $action-label-color;
 }
 
 %bottom-action-button {
   @extend %bottom-button;
-  background: #FF3464;
+  background: $action-color;
+}
+
+%spoke-action-button {
+  @extend %action-button;
+  background-color: var(--spoke-action-color);
+}
+
+%discord-action-button {
+  @extend %action-button;
+  background-color: var(--discord-action-color);
+}
+
+%twitter-action-button {
+  @extend %action-button;
+  background-color: var(--twitter-action-color);
 }
 
 %top-title {
   font-size: 1.5em;
   font-weight: bold;
+  color: var(--panel-text-color);
 }
 
 %top-subtitle {
@@ -171,20 +207,20 @@ $semi-bold: 600;
   -moz-appearance: none;
   -webkit-appearance: none;
   background: transparent;
-  color: white;
   border: none;
   font-size: 64pt;
   outline-style: none;
 }
 
 %checkbox {
+  cursor: pointer;
   appearance: none;
   -moz-appearance: none;
   -webkit-appearance: none;
   width: 2em;
   height: 2em;
-  border: 1px solid #e2e2e2;
-  background-color: white;
+  border: 1px solid var(--text-field-border-color);
+  background-color: var(--text-field-background-color);
   border-radius: 6px;
   vertical-align: sub;
   margin: 0 0.7em
@@ -207,7 +243,7 @@ $semi-bold: 600;
   display: block;
   background: none;
   border: none;
-  color: black;
+  color: var(--panel-text-color);
   cursor: pointer;
   font-size: 0.8em;
   outline-style: none;
@@ -226,10 +262,10 @@ $semi-bold: 600;
 }
 
 %fa-icon-button-icon {
-  background: black;
+  background: var(--icon-button-background-color);
   width: 40px !important;
   height: 40px;
-  border: 3px solid white;
+  border: 3px solid var(--icon-button-border-color);
   border-radius: 40px;
   display: inline-block;
   font-size: 22px;
@@ -242,4 +278,56 @@ $semi-bold: 600;
 
 %fa-icon-button-text {
   margin-left: 16px;
+}
+
+%panel-widget {
+  cursor: pointer;
+  color: var(--panel-widget-color);
+  outline-style: none;
+  background: none;
+  border: none;
+}
+
+%tip-bubble {
+  position: absolute;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  border-radius: 28px;
+  border: 0;
+  pointer-events: auto;
+  z-index: 2;
+  font-size: 0.8em;
+  color: $notice-text-color;
+  padding: 12px 24px;
+  background-color: $notice-background-color;
+  text-align: center;
+}
+
+%dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+%dropdown-select {
+  @extend %rounded-border;
+  @extend %default-font;
+  @extend %glass-text;
+  appearance: none;
+  background-color: var(--text-field-background-color);
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--text-field-border-color);
+  padding: 6px;
+  font-weight: bold;
+  padding-right: 30px;
+}
+%dropdown-arrow {
+  pointer-events: none;
+  position: absolute;
+  right: 7.5%;
 }

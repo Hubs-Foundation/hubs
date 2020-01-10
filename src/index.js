@@ -1,70 +1,124 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { HashRouter as Router, Route, Link } from "react-router-dom";
+import { HashRouter, Route } from "react-router-dom";
 
 import "./assets/stylesheets/index.scss";
 import registerTelemetry from "./telemetry";
 import HomeRoot from "./react-components/home-root";
 import AuthChannel from "./utils/auth-channel";
-import { createAndRedirectToNewHub, connectToReticulum } from "./utils/phoenix-utils";
+import { createAndRedirectToNewHub, connectToReticulum, fetchReticulumAuthenticated } from "./utils/phoenix-utils";
 import Store from "./storage/store";
 import JoinUsDialog from "./react-components/join-us-dialog";
-import UpdatesDialog from "./react-components/updates-dialog";
 import ReportDialog from "./react-components/report-dialog";
+import jwtDecode from "jwt-decode";
+import "./utils/theme";
+import configs from "./utils/configs";
 
 const qs = new URLSearchParams(location.search);
 registerTelemetry("/home", "Hubs Home Page");
 
-const { pathname } = document.location;
-const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathname.substring(1).split("/")[1]);
+const store = new Store();
+window.APP = { store };
 
-(() => {
-  if (qs.get("new") !== null) {
-    createAndRedirectToNewHub(
-      null,
-      null,
-      "https://asset-bundles-prod.reticulum.io/rooms/atrium/Atrium.bundle.json",
-      true
-    );
-    return;
-  }
+const authChannel = new AuthChannel(store);
+let installEvent = null;
+let favoriteHubsResult = null;
+let mountedUI = false;
+let hideHero = true;
+let showAdmin = false;
 
-  const store = new Store();
-  const authChannel = new AuthChannel(store);
-  authChannel.setSocket(connectToReticulum());
+const remountUI = function() {
+  mountedUI = true;
 
   function root() {
     return (
       <HomeRoot
-        initialEnvironment={qs.get("initial_environment")}
-        sceneId={sceneId || ""}
         store={store}
         authChannel={authChannel}
         authVerify={qs.has("auth_topic")}
         authTopic={qs.get("auth_topic")}
         authToken={qs.get("auth_token")}
+        authPayload={qs.get("auth_payload")}
         authOrigin={qs.get("auth_origin")}
-        listSignup={qs.has("list_signup")}
-        report={qs.has("report")}
+        showSignIn={qs.has("sign_in")}
+        signInDestination={qs.get("sign_in_destination")}
+        signInReason={qs.get("sign_in_reason")}
+        hideHero={hideHero}
+        showAdmin={showAdmin}
+        favoriteHubsResult={favoriteHubsResult}
+        installEvent={installEvent}
       />
     );
   }
+
   const router = (
-    <Router>
+    <HashRouter>
       <div>
         <Route exact path="/" component={root} />
-        <Route path="/joinus" render={() => <CloseButton><JoinUsDialog /></CloseButton>} />
-        <Route path="/update" render={() => <UpdatesDialog />} />
+        <Route
+          path="/joinus"
+          render={() => (
+            <CloseButton>
+              <JoinUsDialog />
+            </CloseButton>
+          )}
+        />
         <Route path="/report" render={() => <ReportDialog />} />
       </div>
-    </Router>
+    </HashRouter>
   );
+
   ReactDOM.render(router, document.getElementById("home-root"));
+};
+
+// PWA install prompt
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  installEvent = e;
+
+  if (mountedUI) {
+    remountUI();
+  }
+});
+
+(async () => {
+  if (qs.get("new") !== null) {
+    createAndRedirectToNewHub(null, null, true);
+    return;
+  }
+
+  const socket = await connectToReticulum();
+
+  authChannel.setSocket(socket);
+  remountUI();
+
+  if (authChannel.signedIn) {
+    // Fetch favorite rooms
+    const path = `/api/v1/media/search?source=favorites&type=hubs&user=${store.credentialsAccountId}`;
+    favoriteHubsResult = await fetchReticulumAuthenticated(path);
+
+    const retPhxChannel = socket.channel(`ret`, { hub_id: "index", token: store.state.credentials.token });
+    retPhxChannel.join().receive("ok", () => {
+      retPhxChannel.push("refresh_perms_token").receive("ok", ({ perms_token }) => {
+        const perms = jwtDecode(perms_token);
+        configs.setIsAdmin(perms.postgrest_role === "ret_admin");
+
+        if (perms.postgrest_role === "ret_admin") {
+          showAdmin = true;
+          remountUI();
+        }
+
+        retPhxChannel.leave();
+      });
+    });
+  }
+
+  hideHero = false;
+  remountUI();
 })();
-class CloseButton extends React.Component{
-  render(){
-    return (
-      <button>CLick</button>
-    );
+
+class CloseButton extends React.Component {
+  render() {
+    return <button>CLick</button>;
   }
 }
