@@ -273,7 +273,7 @@ class HomeRoot extends Component {
               <div className={styles.links}>
                 <div className={styles.top}>
                   <IfFeature name="show_join_us_dialog">
-                    <a className={styles.link} rel="noopener noreferrer" href="/#/joinus">
+                    <a className={styles.link} rel="noopener noreferrer" href="/#/join-us">
                       <FormattedMessage id="home.join_us" />
                     </a>
                   </IfFeature>

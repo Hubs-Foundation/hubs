@@ -57,7 +57,7 @@ const remountUI = function() {
     <HashRouter>
       <>
         {root}
-        <Route path="/joinus" render={() => <JoinUsDialog onClose={returnToRoot} />} />
+        <Route path="/join-us" render={() => <JoinUsDialog onClose={returnToRoot} />} />
         <Route path="/report" render={() => <ReportDialog onClose={returnToRoot} />} />
       </>
     </HashRouter>
