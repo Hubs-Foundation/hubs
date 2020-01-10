@@ -30,41 +30,36 @@ let showAdmin = false;
 const remountUI = function() {
   mountedUI = true;
 
-  function root() {
-    return (
-      <HomeRoot
-        store={store}
-        authChannel={authChannel}
-        authVerify={qs.has("auth_topic")}
-        authTopic={qs.get("auth_topic")}
-        authToken={qs.get("auth_token")}
-        authPayload={qs.get("auth_payload")}
-        authOrigin={qs.get("auth_origin")}
-        showSignIn={qs.has("sign_in")}
-        signInDestination={qs.get("sign_in_destination")}
-        signInReason={qs.get("sign_in_reason")}
-        hideHero={hideHero}
-        showAdmin={showAdmin}
-        favoriteHubsResult={favoriteHubsResult}
-        installEvent={installEvent}
-      />
-    );
+  const root = (
+    <HomeRoot
+      store={store}
+      authChannel={authChannel}
+      authVerify={qs.has("auth_topic")}
+      authTopic={qs.get("auth_topic")}
+      authToken={qs.get("auth_token")}
+      authPayload={qs.get("auth_payload")}
+      authOrigin={qs.get("auth_origin")}
+      showSignIn={qs.has("sign_in")}
+      signInDestination={qs.get("sign_in_destination")}
+      signInReason={qs.get("sign_in_reason")}
+      hideHero={hideHero}
+      showAdmin={showAdmin}
+      favoriteHubsResult={favoriteHubsResult}
+      installEvent={installEvent}
+    />
+  );
+
+  function returnToRoot() {
+    location.href = "/#/";
   }
 
   const router = (
     <HashRouter>
-      <div>
-        <Route exact path="/" component={root} />
-        <Route
-          path="/joinus"
-          render={() => (
-            <CloseButton>
-              <JoinUsDialog />
-            </CloseButton>
-          )}
-        />
-        <Route path="/report" render={() => <ReportDialog />} />
-      </div>
+      <>
+        {root}
+        <Route path="/joinus" render={() => <JoinUsDialog onClose={returnToRoot} />} />
+        <Route path="/report" render={() => <ReportDialog onClose={returnToRoot} />} />
+      </>
     </HashRouter>
   );
 
@@ -116,9 +111,3 @@ window.addEventListener("beforeinstallprompt", e => {
   hideHero = false;
   remountUI();
 })();
-
-class CloseButton extends React.Component {
-  render() {
-    return <button>CLick</button>;
-  }
-}
