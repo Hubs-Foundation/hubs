@@ -858,7 +858,7 @@ AFRAME.registerComponent("media-image", {
           cacheItem = textureCache.retain(src, version);
         }
       } else {
-        const inflightKey = `${src}_${version}`;
+        const inflightKey = textureCache.key(src, version);
 
         if (src === "error") {
           cacheItem = errorCacheItem;
