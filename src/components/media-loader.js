@@ -269,9 +269,9 @@ AFRAME.registerComponent("media-loader", {
   },
 
   async update(oldData) {
-    const { src, version } = this.data;
-
+    const { src, version, contentSubtype } = this.data;
     if (!src) return;
+
     const srcChanged = oldData.src !== src;
     const versionChanged = !!(oldData.version && oldData.version !== version);
 
@@ -286,10 +286,6 @@ AFRAME.registerComponent("media-loader", {
     }
 
     try {
-      const { src, version, contentSubtype } = this.data;
-
-      if (!src) return;
-
       if (srcChanged && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
       }
