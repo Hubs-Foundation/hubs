@@ -67,7 +67,7 @@ export async function getAvailableVREntryTypes() {
 
   let displays = [];
   try {
-    if (isMobile) {
+    if (isWebVRCapableBrowser || isMobile) {
       // We pull the displays on non-WebVR capable mobile browsers so we can pick up cardboard.
       displays = isWebVRCapableBrowser || isCardboardCapableBrowser ? await navigator.getVRDisplays() : [];
     }
