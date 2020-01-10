@@ -6,6 +6,9 @@ AFRAME.registerComponent("pinnable", {
   init() {
     this._fireEventsAndAnimate = this._fireEventsAndAnimate.bind(this);
 
+    // Fire pinned events when media is refreshed since the version will be bumped.
+    this.el.addEventListener("media_refreshed", this._fireEventsAndAnimate);
+
     // Fire pinned events when page changes so we can persist the page.
     this.el.addEventListener("pager-page-changed", this._fireEventsAndAnimate);
 

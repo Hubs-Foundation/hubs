@@ -41,6 +41,7 @@ AFRAME.registerComponent("media-loader", {
     fileId: { type: "string" },
     fileIsOwned: { type: "boolean" },
     src: { type: "string" },
+    version: { type: "number", default: 1 }, // Used to force a re-resolution
     fitToBox: { default: false },
     resolve: { default: false },
     contentType: { default: null },
@@ -58,6 +59,7 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
+    this.refresh = this.refresh.bind(this);
     this.animating = false;
 
     NAF.utils
@@ -257,13 +259,34 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
+  refresh() {
+    if (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
+
+    // When we refresh, we bump the version to the current timestamp.
+    //
+    // The only use-case for refresh right now is re-fetching screenshots.
+    this.el.setAttribute("media-loader", { version: Math.floor(Date.now() / 1000) });
+  },
+
   async update(oldData) {
+    const { src, version, contentSubtype } = this.data;
+    if (!src) return;
+
+    const srcChanged = oldData.src !== src;
+    const versionChanged = !!(oldData.version && oldData.version !== version);
+
+    if (versionChanged) {
+      this.el.emit("media_refreshing");
+
+      // Don't animate if its a refresh.
+      this.data.animate = false;
+
+      // Play the sound effect on a refresh only if we are the owner
+      this.data.playSoundEffect = NAF.utils.isMine(this.networkedEl);
+    }
+
     try {
-      const { src, contentSubtype } = this.data;
-
-      if (!src) return;
-
-      if (src !== oldData.src && !this.showLoaderTimeout) {
+      if (srcChanged && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
       }
 
@@ -280,7 +303,7 @@ AFRAME.registerComponent("media-loader", {
         isNonCorsProxyDomain(parsedUrl.hostname) && (guessContentType(src) || "").startsWith("model/gltf");
 
       if (this.data.resolve && !src.startsWith("data:") && !isLocalModelAsset) {
-        const result = await resolveUrl(src);
+        const result = await resolveUrl(src, version);
         canonicalUrl = result.origin;
         // handle protocol relative urls
         if (canonicalUrl.startsWith("//")) {
@@ -298,8 +321,10 @@ AFRAME.registerComponent("media-loader", {
       contentType = contentType || guessContentType(canonicalUrl) || (await fetchContentType(accessibleUrl));
 
       // We don't want to emit media_resolved for index updates.
-      if (src !== oldData.src) {
+      if (srcChanged) {
         this.el.emit("media_resolved", { src, raw: accessibleUrl, contentType });
+      } else {
+        this.el.emit("media_refreshed", { src, raw: accessibleUrl, contentType });
       }
 
       if (
@@ -356,6 +381,7 @@ AFRAME.registerComponent("media-loader", {
           "media-image",
           Object.assign({}, this.data.mediaOptions, {
             src: accessibleUrl,
+            version,
             contentType,
             batch
           })
@@ -458,6 +484,7 @@ AFRAME.registerComponent("media-loader", {
           "media-image",
           Object.assign({}, this.data.mediaOptions, {
             src: thumbnail,
+            version,
             contentType: guessContentType(thumbnail) || "image/png",
             batch
           })

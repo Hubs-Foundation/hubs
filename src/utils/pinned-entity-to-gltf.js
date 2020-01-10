@@ -23,6 +23,7 @@ export default function pinnedEntityToGltf(el) {
 
   if (components["media-loader"]) {
     const mediaSrc = components["media-loader"].data.src;
+    const mediaVersion = components["media-loader"].data.version;
     const mediaContentSubtype = components["media-loader"].data.contentSubtype;
 
     if (mediaSrc.startsWith("hubs://") && mediaSrc.endsWith("/video")) {
@@ -30,7 +31,7 @@ export default function pinnedEntityToGltf(el) {
       return null;
     }
 
-    gltfComponents.media = { src: mediaSrc, contentSubtype: mediaContentSubtype, id: networkId };
+    gltfComponents.media = { src: mediaSrc, version: mediaVersion, contentSubtype: mediaContentSubtype, id: networkId };
 
     if (components["media-pdf"]) {
       gltfComponents.media.pageIndex = components["media-pdf"].data.index;
