@@ -50,8 +50,9 @@ export async function getAvailableVREntryTypes() {
   // This needs to be kept up-to-date with the latest browsers that can support VR and Hubs.
   // Checking for navigator.getVRDisplays always passes b/c of polyfill.
   const isWebVRCapableBrowser = window.hasNativeWebVRImplementation;
+  const isWebXRCapableBrowser = window.hasNativeWebXRImplementation;
 
-  const isDaydreamCapableBrowser = !!(isWebVRCapableBrowser && browser.name === "chrome" && !isSamsungBrowser);
+  const isDaydreamCapableBrowser = !!(isWebXRCapableBrowser && browser.name === "chrome" && !isSamsungBrowser);
   const isIDevice = AFRAME.utils.device.isIOS();
   const isFirefoxBrowser = browser.name === "firefox";
   const isUIWebView = typeof navigator.mediaDevices === "undefined";
@@ -66,9 +67,7 @@ export async function getAvailableVREntryTypes() {
 
   let displays = [];
   try {
-    // Skip getVRDisplays on desktop Chrome since the API is in a broken state there.
-    // See https://github.com/mozilla/hubs/issues/892
-    if (browser.name !== "chrome" || isMobile) {
+    if (isMobile) {
       // We pull the displays on non-WebVR capable mobile browsers so we can pick up cardboard.
       displays = isWebVRCapableBrowser || isCardboardCapableBrowser ? await navigator.getVRDisplays() : [];
     }
@@ -85,9 +84,8 @@ export async function getAvailableVREntryTypes() {
       : VR_DEVICE_AVAILABILITY.yes;
 
   // HACK -- we prompt the user to install firefox if they click the VR button on a non-WebVR compatible
-  // browser. once we change this (ie when Chrome has VR support) then this check can be removed. Without this
-  // check if you have FF on Mac/Linux you'll get the confusing flow of having a VR button but then
-  // being asked to download FF.
+  // browser. Without this check if you have FF on Mac/Linux you'll get the confusing flow of having a
+  // VR button but then being asked to download FF.
   const isNonWebVRFirefox = !isWebVRCapableBrowser && isFirefoxBrowser;
   let generic = isMobile || isNonWebVRFirefox ? VR_DEVICE_AVAILABILITY.no : VR_DEVICE_AVAILABILITY.maybe;
   let cardboard = VR_DEVICE_AVAILABILITY.no;
@@ -131,6 +129,10 @@ export async function getAvailableVREntryTypes() {
       // If we didn't detect daydream in a daydream capable browser, we definitely can't run daydream at all.
       daydream = VR_DEVICE_AVAILABILITY.no;
     }
+  }
+
+  if (isWebXRCapableBrowser) {
+    generic = VR_DEVICE_AVAILABILITY.yes;
   }
 
   return { screen, generic, gearvr, daydream, cardboard, safari };

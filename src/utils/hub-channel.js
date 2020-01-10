@@ -101,7 +101,7 @@ export default class HubChannel extends EventTarget {
     this.channel.push("events:entering_cancelled", {});
   };
 
-  sendEnteredEvent = async () => {
+  sendEnteredEvent = async isPresenting => {
     if (!this.channel) {
       console.warn("No phoenix channel initialized before room entry.");
       return;
@@ -109,12 +109,8 @@ export default class HubChannel extends EventTarget {
 
     let entryDisplayType = "Screen";
 
-    if (navigator.getVRDisplays) {
-      const vrDisplay = (await navigator.getVRDisplays()).find(d => d.isPresenting);
-
-      if (vrDisplay) {
-        entryDisplayType = vrDisplay.displayName;
-      }
+    if (isPresenting) {
+      entryDisplayType = "VR";
     }
 
     // This is fairly hacky, but gets the # of initial occupants

@@ -65,9 +65,11 @@ export default class SceneEntryManager {
       // entry flow and chose VR entry, and is used to preempt VR mode on refreshes.
       this.scene.addState("vr-entered");
 
-      // HACK - A-Frame calls getVRDisplays at module load, we want to do it here to
-      // force gamepads to become live.
-      navigator.getVRDisplays();
+      if (!window.hasNativeWebXRImplementation) {
+        // HACK - A-Frame calls getVRDisplays at module load, we want to do it here to
+        // force gamepads to become live.
+        navigator.getVRDisplays();
+      }
 
       await exit2DInterstitialAndEnterVR(true);
     }
@@ -107,11 +109,11 @@ export default class SceneEntryManager {
 
     // Delay sending entry event telemetry until VR display is presenting.
     (async () => {
-      while (enterInVR && !(await navigator.getVRDisplays()).find(d => d.isPresenting)) {
+      while (enterInVR && !this.scene.renderer.vr.isPresenting()) {
         await nextTick();
       }
 
-      this.hubChannel.sendEnteredEvent().then(() => {
+      this.hubChannel.sendEnteredEvent(this.scene.renderer.vr.isPresenting()).then(() => {
         this.store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
       });
     })();

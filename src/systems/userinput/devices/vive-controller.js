@@ -13,9 +13,11 @@ const m = new THREE.Matrix4();
 
 export class ViveControllerDevice {
   constructor(gamepad) {
-    // wake the gamepad api up. otherwise it does not report touch controllers.
-    // in chrome it still won't unless you enter vr.
-    navigator.getVRDisplays();
+    if (window.hasNativeWebVRImplementation) {
+      // wake the gamepad api up. otherwise it does not report touch controllers.
+      // in chrome it still won't unless you enter vr.
+      navigator.getVRDisplays();
+    }
     this.gamepad = gamepad;
 
     if (this.gamepad.id === "OpenVR Cosmos") {
