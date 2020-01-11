@@ -32,6 +32,7 @@
         physics="debug: false; driver: ammo; debugDrawMode: 1; iterations: 4;"
         hubs-systems
         capture-system
+        listed-media
         local-audio-analyser
         class="grab-cursor"
         renderer="
@@ -239,6 +240,7 @@
                     matrix-auto-update
                     position-at-box-shape-border__freeze="target:.freeze-menu;"
                     hoverable-visuals
+                    listed-media
                 >
                     <a-entity class="ui interactable-ui">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media">

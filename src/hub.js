@@ -148,6 +148,7 @@ import "./systems/tips";
 import "./systems/interactions";
 import "./systems/hubs-systems";
 import "./systems/capture-system";
+import "./systems/listed-media";
 import { SOUND_CHAT_MESSAGE } from "./systems/sound-effects-system";
 
 import "./gltf-component-mappings";

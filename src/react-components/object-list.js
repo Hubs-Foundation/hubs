@@ -94,7 +94,7 @@ export default class ObjectList extends Component {
 
   state = {
     inspecting: false,
-    filteredEntities: []
+    mediaEntities: []
   };
 
   componentDidMount() {
@@ -103,33 +103,17 @@ export default class ObjectList extends Component {
         this.props.onExpand(false, true);
       }
     });
-    this.updateFilteredEntities = this.updateFilteredEntities.bind(this);
-    this.observer = new MutationObserver(this.updateFilteredEntities);
-    this.observer.observe(this.props.scene, { childList: true, attributes: true, subtree: true });
-    this.updateFilteredEntities();
+    this.updateMediaEntities = this.updateMediaEntities.bind(this);
+    this.updateMediaEntities();
+    this.props.scene.addEventListener("listed_media_changed", () => this.updateMediaEntities());
   }
 
-  updateFilteredEntities() {
-    const filteredEntities = Object.keys(NAF.entities.entities)
-      .filter(id => {
-        return (
-          NAF.entities.entities[id] &&
-          NAF.entities.entities[id].components &&
-          NAF.entities.entities[id].components.networked &&
-          NAF.entities.entities[id].components.networked.data &&
-          NAF.entities.entities[id].components.networked.data.template === "#interactable-media"
-        );
-      })
-      .map(id => {
-        return NAF.entities.entities[id];
-      })
-      .sort(mediaSort);
-    if (this.state.filteredEntities.length !== filteredEntities.length) {
-      this.setState({
-        filteredEntities
-      });
-    }
+  updateMediaEntities() {
+    const mediaEntities = [...this.props.scene.systems["listed-media"].els];
+    mediaEntities.sort(mediaSort);
+    this.setState({ mediaEntities });
   }
+
   componentDidUpdate() {}
 
   domForEntity(el, i) {
@@ -167,7 +151,7 @@ export default class ObjectList extends Component {
     return (
       <div className={styles.presenceList}>
         <div className={styles.contents}>
-          <div className={styles.rows}>{this.state.filteredEntities.map(this.domForEntity.bind(this))}</div>
+          <div className={styles.rows}>{this.state.mediaEntities.map(this.domForEntity.bind(this))}</div>
         </div>
       </div>
     );
@@ -180,7 +164,7 @@ export default class ObjectList extends Component {
           title={"Media"}
           onClick={() => {
             this.props.onExpand(
-              !this.props.expanded && this.state.filteredEntities.length > 0,
+              !this.props.expanded && this.state.mediaEntities.length > 0,
               !AFRAME.utils.device.isMobileVR()
             );
           }}
@@ -190,7 +174,7 @@ export default class ObjectList extends Component {
           })}
         >
           <FontAwesomeIcon icon={faCubes} />
-          <span className={rootStyles.occupantCount}>{this.state.filteredEntities.length}</span>
+          <span className={rootStyles.occupantCount}>{this.state.mediaEntities.length}</span>
         </div>
         {this.props.expanded && this.renderExpandedList()}
       </div>

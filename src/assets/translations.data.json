@@ -365,7 +365,7 @@
     "client-info.cancel": "Cancel",
     "client-info.add-owner": "Promote",
     "client-info.remove-owner": "Demote",
-    "object-info.delete-button": "Delete",
+    "object-info.delete-button": "Remove",
     "object-info.waypoint": "Go",
     "object-info.pin-button": "Pin",
     "object-info.raise-lights": "Show Background",
