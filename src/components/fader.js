@@ -20,7 +20,7 @@ AFRAME.registerComponent("fader", {
     this.mesh = mesh;
   },
 
-  async fadeOut() {
+  fadeOut() {
     return this.beginTransition("out");
   },
 
