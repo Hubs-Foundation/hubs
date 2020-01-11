@@ -224,11 +224,15 @@ export class PreferenceListItem extends Component {
             onClick={() => {
               switch (this.props.prefType) {
                 case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
-                  delete this.props.store.state.preferences.maxResolutionWidth;
-                  delete this.props.store.state.preferences.maxResolutionHeight;
+                  this.props.store.update({
+                    preferences: {
+                      maxResolutionWidth: undefined,
+                      maxResolutionHeight: undefined
+                    }
+                  });
                   break;
                 default:
-                  delete this.props.store.state.preferences[this.props.storeKey];
+                  this.props.store.update({ preferences: { [this.props.storeKey]: undefined } });
                   break;
               }
               this.forceUpdate();
