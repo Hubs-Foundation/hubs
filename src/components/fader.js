@@ -21,22 +21,22 @@ AFRAME.registerComponent("fader", {
   },
 
   async fadeOut() {
-    this.el.setAttribute("fader", { direction: "out" });
-
-    return new Promise(res => {
-      if (this.mesh.material.opacity === 1) {
-        res();
-      } else {
-        this._resolveFinish = res;
-      }
-    });
+    return this.beginTransition("out");
   },
 
-  async fadeIn() {
-    this.el.setAttribute("fader", { direction: "in" });
+  fadeIn() {
+    return this.beginTransition("in");
+  },
+
+  async beginTransition(direction) {
+    if (this._resolveFinish) {
+      throw new Error("Cannot fade while a fade is happening.");
+    }
+
+    this.el.setAttribute("fader", { direction });
 
     return new Promise(res => {
-      if (this.mesh.material.opacity === 0) {
+      if (this.mesh.material.opacity === (direction == "in" ? 0 : 1)) {
         res();
       } else {
         this._resolveFinish = res;
