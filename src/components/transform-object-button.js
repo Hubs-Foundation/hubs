@@ -46,9 +46,9 @@ const calculatePlaneMatrix = (function() {
     planeUp.set(0, 1, 0);
     planeRight.crossVectors(planeForward, planeUp);
     planeMatrix.makeBasis(planeRight, planeUp, planeForward.multiplyScalar(-1));
-    planeMatrix[12] = planePosition[0];
-    planeMatrix[13] = planePosition[1];
-    planeMatrix[14] = planePosition[2];
+    planeMatrix.elements[12] = planePosition.x;
+    planeMatrix.elements[13] = planePosition.y;
+    planeMatrix.elements[14] = planePosition.z;
     return planeMatrix;
   };
 })();
@@ -60,7 +60,7 @@ AFRAME.registerComponent("scale-button", {
       new THREE.PlaneBufferGeometry(100000, 100000, 2, 2),
       new THREE.MeshBasicMaterial({
         visible: true,
-        wireframe: true,
+        wireframe: false,
         side: THREE.DoubleSide,
         transparent: true,
         opacity: 0.3
@@ -101,12 +101,7 @@ AFRAME.registerComponent("scale-button", {
       this.planeUp.set(0, 1, 0).applyMatrix4(this.planeRotation);
       this.planeRight.set(1, 0, 0).applyMatrix4(this.planeRotation);
       this.raycaster = e.object3D === this.leftEventer ? this.leftRaycaster : this.rightRaycaster;
-      this.intersections.length = 0;
-      const far = this.raycaster.far;
-      this.raycaster.far = 1000;
-      this.plane.raycast(this.raycaster, this.intersections);
-      this.raycaster.far = far;
-      const intersection = this.intersections[0];
+      const intersection = this.raycastOnPlane();
       if (!intersection) return;
       this.isScaling = true;
       this.initialIntersectionPoint.copy(intersection.point);
@@ -120,14 +115,17 @@ AFRAME.registerComponent("scale-button", {
     this.el.object3D.addEventListener("holdable-button-down", this.startScaling);
     this.el.object3D.addEventListener("holdable-button-up", this.endScaling);
   },
-  tick() {
-    if (!this.isScaling) return;
+  raycastOnPlane() {
     this.intersections.length = 0;
     const far = this.raycaster.far;
     this.raycaster.far = 1000;
     this.plane.raycast(this.raycaster, this.intersections);
     this.raycaster.far = far;
-    const intersection = this.intersections[0];
+    return this.intersections[0];
+  },
+  tick() {
+    if (!this.isScaling) return;
+    const intersection = this.raycastOnPlane();
     if (!intersection) return;
     this.intersectionPoint.copy(intersection.point);
     this.dragVector.subVectors(this.intersectionPoint, this.initialIntersectionPoint);
