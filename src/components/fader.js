@@ -50,9 +50,9 @@ AFRAME.registerComponent("fader", {
     if (!this.mesh.visible) return;
 
     if (this.data.direction === "in") {
-      mat.opacity = Math.max(0, mat.opacity - (1.0 / FADE_DURATION_MS) * dt);
+      mat.opacity = Math.max(0, mat.opacity - (1.0 / FADE_DURATION_MS) * Math.min(dt, 50));
     } else if (this.data.direction === "out") {
-      mat.opacity = Math.min(1, mat.opacity + (1.0 / FADE_DURATION_MS) * dt);
+      mat.opacity = Math.min(1, mat.opacity + (1.0 / FADE_DURATION_MS) * Math.min(dt, 50));
     }
 
     if (mat.opacity === 0 || mat.opacity === 1) {
