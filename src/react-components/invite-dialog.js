@@ -98,7 +98,7 @@ export default class InviteDialog extends Component {
             </i>
           </button>
         </WithHoverSound>
-        <div>
+        <div className={styles.linkcode}>
           <FormattedMessage id={`invite.enter_via${this.props.isModal ? "_modal" : ""}`} />
           <a
             href={`https://${configs.SHORTLINK_DOMAIN}`}
@@ -108,7 +108,9 @@ export default class InviteDialog extends Component {
           >
             {configs.SHORTLINK_DOMAIN}
           </a>
+          {/* <div className={styles.linkcode}> */}
           <FormattedMessage id="invite.and_enter_code" />
+          {/* </div> */}
         </div>
         <div className={styles.code}>
           {entryCodeString.split("").map((d, i) => (
@@ -117,7 +119,7 @@ export default class InviteDialog extends Component {
             </div>
           ))}
         </div>
-        <div>
+        <div className={styles.codehours}>
           <FormattedMessage id="invite.duration_of_code" />
         </div>
         {embedUrl && (
