@@ -313,7 +313,7 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("share_video_failed", this.onShareVideoFailed);
     this.props.scene.addEventListener("exit", this.exitEventHandler);
     this.props.scene.addEventListener("action_exit_watch", () => this.setState({ watching: false, hide: false }));
-    this.props.scene.addEventListener("action_advance_lobby", () => this.setState({ watching: false, hide: false }));
+    this.props.scene.addEventListener("action_toggle_ui", () => this.setState({ hide: !this.state.hide }));
 
     const scene = this.props.scene;
 

@@ -48,6 +48,12 @@ AFRAME.registerSystem("ui-hotkeys", {
     if (this.userinput.get(paths.actions.toggleCamera)) {
       this.el.emit("action_toggle_camera");
     }
+
+    if (this.userinput.get(paths.actions.toggleUI)) {
+      if (this.el.sceneEl.is("entered")) {
+        this.el.emit("action_toggle_ui");
+      }
+    }
   },
 
   focusChat: function(prefix) {
