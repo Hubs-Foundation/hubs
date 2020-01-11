@@ -257,7 +257,11 @@ class UIRoot extends Component {
       window.requestAnimationFrame(() => {
         window.setTimeout(() => {
           if (!this.props.isBotMode) {
-            this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
+            try {
+              this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
+            } catch {
+              this.exit("scene_error"); // https://github.com/mozilla/hubs/issues/1950
+            }
           }
 
           if (!this.state.hideLoader) {
@@ -1409,7 +1413,6 @@ class UIRoot extends Component {
             scene={this.props.scene}
             finished={this.state.noMoreLoadingUpdates}
             onLoaded={this.onLoadingFinished}
-            connected={this.state.didConnectToNetworkedScene}
           />
           <PreferencesScreen
             onClose={() => {
@@ -1422,12 +1425,7 @@ class UIRoot extends Component {
     }
     if (isLoading) {
       return (
-        <Loader
-          scene={this.props.scene}
-          finished={this.state.noMoreLoadingUpdates}
-          onLoaded={this.onLoadingFinished}
-          connected={this.state.didConnectToNetworkedScene}
-        />
+        <Loader scene={this.props.scene} finished={this.state.noMoreLoadingUpdates} onLoaded={this.onLoadingFinished} />
       );
     }
     if (this.state.showPrefs) {
