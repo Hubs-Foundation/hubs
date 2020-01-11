@@ -25,6 +25,7 @@ import React from "react";
 import SceneUI from "./react-components/scene-ui";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 
+import "./systems/scene-systems";
 import "./gltf-component-mappings";
 
 import { App } from "./App";

@@ -62,12 +62,16 @@ AFRAME.registerComponent("media-loader", {
     this.refresh = this.refresh.bind(this);
     this.animating = false;
 
-    NAF.utils
-      .getNetworkedEntity(this.el)
-      .then(networkedEl => {
-        this.networkedEl = networkedEl;
-      })
-      .catch(() => {}); //ignore exception, entity might not be networked
+    try {
+      NAF.utils
+        .getNetworkedEntity(this.el)
+        .then(networkedEl => {
+          this.networkedEl = networkedEl;
+        })
+        .catch(() => {}); //ignore exception, entity might not be networked
+    } catch (e) {
+      // NAF may not exist on scene landing page
+    }
   },
 
   updateScale: (function() {
