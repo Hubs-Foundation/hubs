@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { HashRouter, Route } from "react-router-dom";
 
 import "./assets/stylesheets/index.scss";
 import registerTelemetry from "./telemetry";
@@ -7,6 +8,8 @@ import HomeRoot from "./react-components/home-root";
 import AuthChannel from "./utils/auth-channel";
 import { createAndRedirectToNewHub, connectToReticulum, fetchReticulumAuthenticated } from "./utils/phoenix-utils";
 import Store from "./storage/store";
+import JoinUsDialog from "./react-components/join-us-dialog";
+import ReportDialog from "./react-components/report-dialog";
 import jwtDecode from "jwt-decode";
 import "./utils/theme";
 import configs from "./utils/configs";
@@ -42,11 +45,25 @@ const remountUI = function() {
       hideHero={hideHero}
       showAdmin={showAdmin}
       favoriteHubsResult={favoriteHubsResult}
-      report={qs.has("report")}
       installEvent={installEvent}
     />
   );
-  ReactDOM.render(root, document.getElementById("home-root"));
+
+  function returnToRoot() {
+    location.href = "/#/";
+  }
+
+  const router = (
+    <HashRouter>
+      <>
+        {root}
+        <Route path="/join-us" render={() => <JoinUsDialog onClose={returnToRoot} />} />
+        <Route path="/report" render={() => <ReportDialog onClose={returnToRoot} />} />
+      </>
+    </HashRouter>
+  );
+
+  ReactDOM.render(router, document.getElementById("home-root"));
 };
 
 // PWA install prompt

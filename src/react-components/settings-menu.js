@@ -13,8 +13,10 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
 import configs from "../utils/configs";
+import { messages } from "../utils/i18n";
 import IfFeature from "./if-feature";
 import StateLink from "./state-link.js";
 import { resetTips } from "../systems/tips";
@@ -31,6 +33,8 @@ export default class SettingsMenu extends Component {
     toggleStreamerMode: PropTypes.func,
     mediaSearchStore: PropTypes.object,
     scene: PropTypes.object,
+    showAsOverlay: PropTypes.bool, // Shows the settings as an overlay menu, instead of a dropdown
+    onCloseOverlay: PropTypes.func,
     hubScene: PropTypes.object,
     hubChannel: PropTypes.object,
     performConditionalSignIn: PropTypes.func,
@@ -43,12 +47,14 @@ export default class SettingsMenu extends Component {
     expanded: false
   };
 
+  unexpand() {
+    if (this.state.expanded && !this.props.showAsOverlay) {
+      this.setState({ expanded: false });
+    }
+  }
+
   componentDidMount() {
-    this.onMouseUp = () => {
-      if (this.state.expanded) {
-        this.setState({ expanded: false });
-      }
-    };
+    this.onMouseUp = () => this.unexpand();
     this.acanvas = document.querySelector(".a-canvas");
     this.acanvas.addEventListener("mouseup", this.onMouseUp);
   }
@@ -60,21 +66,44 @@ export default class SettingsMenu extends Component {
   renderExpandedMenu() {
     const rowClasses = classNames([styles.row, styles.settingsRow]);
     const rowHeader = classNames([styles.row, styles.settingsRow, styles.rowHeader]);
+
+    // When showing as overlay, hide some menu items for now since the overlay mode is intended for immersive
+    // mode browsers which have limited vertical screen real estate.
+    //
+    // The reason I didn't do this with CSS is because this changes available functionality, so being more
+    // explicit in code seems like a wise idea.
+    const hideExtranousItems = this.props.showAsOverlay;
+
     const showRoomSettings = !!this.props.hubChannel.canOrWillIfCreator("update_hub");
     const showCloseRoom = !!this.props.hubChannel.canOrWillIfCreator("close_hub");
-    const showRoomInfo = !!this.props.hubScene;
+    const showRoomInfo = !!this.props.hubScene && !hideExtranousItems;
     const showRoomSection = showRoomSettings || showRoomInfo || showCloseRoom;
-    const showStreamerMode = this.props.scene.is("entered") && !!this.props.hubChannel.canOrWillIfCreator("kick_users");
+    const showStreamerMode =
+      this.props.scene.is("entered") && !!this.props.hubChannel.canOrWillIfCreator("kick_users") && !hideExtranousItems;
 
     // Draw self first
     return (
-      <div className={styles.settingsMenu}>
-        <div className={styles.attachPoint} />
+      <div
+        className={classNames({
+          [styles.settingsMenuDrop]: !this.props.showAsOverlay,
+          [styles.settingsMenuOverlay]: this.props.showAsOverlay
+        })}
+      >
+        {!this.props.showAsOverlay && <div className={styles.attachPoint} />}
         <div className={styles.contents}>
+          {this.props.showAsOverlay && (
+            <button autoFocus className={styles.closeButton} onClick={() => this.props.onCloseOverlay()}>
+              <i>
+                <FontAwesomeIcon icon={faTimes} />
+              </i>
+            </button>
+          )}
           <div className={styles.rows}>
-            <div className={rowHeader}>
-              <FormattedMessage id="settings.row-profile" />
-            </div>
+            {!hideExtranousItems && (
+              <div className={rowHeader}>
+                <FormattedMessage id="settings.row-profile" />
+              </div>
+            )}
             <div className={rowClasses}>
               <div className={styles.icon}>
                 <i>
@@ -86,7 +115,7 @@ export default class SettingsMenu extends Component {
                   stateKey="overlay"
                   stateValue="profile"
                   history={this.props.history}
-                  onClick={() => this.setState({ expanded: false })}
+                  onClick={() => this.unexpand()}
                 >
                   <FormattedMessage id="settings.change-avatar" />
                 </StateLink>
@@ -133,11 +162,12 @@ export default class SettingsMenu extends Component {
                 </div>
               </div>
             </div>
-            {showRoomSection && (
-              <div className={rowHeader}>
-                <FormattedMessage id="settings.row-room" />
-              </div>
-            )}
+            {showRoomSection &&
+              !hideExtranousItems && (
+                <div className={rowHeader}>
+                  <FormattedMessage id="settings.row-room" />
+                </div>
+              )}
             {showRoomSettings && (
               <div className={rowClasses}>
                 <div className={styles.icon}>
@@ -154,7 +184,7 @@ export default class SettingsMenu extends Component {
                         () => {
                           showFullScreenIfAvailable();
                           this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
-                          this.setState({ expanded: false });
+                          this.unexpand();
                         },
                         "change-scene"
                       );
@@ -182,7 +212,7 @@ export default class SettingsMenu extends Component {
                         () => this.props.hubChannel.can("update_hub"),
                         () => {
                           this.props.pushHistoryState("modal", "room_settings");
-                          this.setState({ expanded: false });
+                          this.unexpand();
                         },
                         "room-settings"
                       );
@@ -210,7 +240,7 @@ export default class SettingsMenu extends Component {
                         () => this.props.hubChannel.can("update_hub"),
                         () => {
                           this.props.pushHistoryState("modal", "close_room");
-                          this.setState({ expanded: false });
+                          this.unexpand();
                         },
                         "close-room"
                       );
@@ -233,36 +263,38 @@ export default class SettingsMenu extends Component {
                     stateKey="modal"
                     stateValue="room_info"
                     history={this.props.history}
-                    onClick={() => this.setState({ expanded: false })}
+                    onClick={() => this.unexpand()}
                   >
                     <FormattedMessage id="settings.room-info" />
                   </StateLink>
                 </div>
               </div>
             )}
-            <div className={rowClasses}>
-              <div className={styles.icon}>
-                <i>
-                  <FontAwesomeIcon icon={faPlus} />
-                </i>
+            {!hideExtranousItems && (
+              <div className={rowClasses}>
+                <div className={styles.icon}>
+                  <i>
+                    <FontAwesomeIcon icon={faPlus} />
+                  </i>
+                </div>
+                <div className={styles.listItem}>
+                  <a
+                    href="#"
+                    onClick={e => {
+                      e.preventDefault();
+                      this.props.showNonHistoriedDialog(LeaveRoomDialog, {
+                        destinationUrl: "/",
+                        messageType: "create-room"
+                      });
+                      this.unexpand();
+                    }}
+                  >
+                    <FormattedMessage id="settings.create-room" />
+                  </a>
+                </div>
               </div>
-              <div className={styles.listItem}>
-                <a
-                  href="#"
-                  onClick={e => {
-                    e.preventDefault();
-                    this.props.showNonHistoriedDialog(LeaveRoomDialog, {
-                      destinationUrl: "/",
-                      messageType: "create-room"
-                    });
-                    this.setState({ expanded: false });
-                  }}
-                >
-                  <FormattedMessage id="settings.create-room" />
-                </a>
-              </div>
-            </div>
-            {showStreamerMode ? (
+            )}
+            {showStreamerMode && !hideExtranousItems ? (
               <div className={rowHeader}>
                 <FormattedMessage id="settings.row-tools" />
               </div>
@@ -281,7 +313,7 @@ export default class SettingsMenu extends Component {
                     className={styles.listItemLink}
                     onClick={() => {
                       this.props.toggleStreamerMode(true);
-                      this.setState({ expanded: false });
+                      this.unexpand();
                     }}
                   >
                     <FormattedMessage id="settings.enable-streamer-mode" />
@@ -291,91 +323,95 @@ export default class SettingsMenu extends Component {
             ) : (
               <div />
             )}
-            <div className={classNames([styles.bottomLinksMain])}>
-              <IfFeature name="show_whats_new_link">
-                <a href="/whats-new" target="_blank" rel="noreferrer noopener">
-                  <FormattedMessage id="settings.whats-new" />
-                </a>
-              </IfFeature>
-              <button
-                onClick={e => {
-                  e.preventDefault();
-                  resetTips();
-                  this.setState({ expanded: false });
-                }}
-              >
-                <FormattedMessage id="settings.tips" />
-              </button>
-              <IfFeature name="show_controls_link">
-                <a
-                  href={configs.link("controls", "https://github.com/mozilla/hubs/wiki/Hubs-Controls")}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  <FormattedMessage id="settings.controls" />
-                </a>
-              </IfFeature>
-            </div>
-            <div className={classNames([styles.bottomLinks])}>
-              <IfFeature name="show_features_link">
-                <a
-                  href={configs.link("features", "https://github.com/mozilla/hubs/wiki/Hubs-Features")}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  <FormattedMessage id="settings.features" />
-                </a>
-              </IfFeature>
-              <IfFeature name="show_community_link">
-                <a
-                  href={configs.link("community", "https://discord.gg/wHmY4nd")}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  <FormattedMessage id="settings.community" />
-                </a>
-              </IfFeature>
-              <IfFeature name="show_feedback_ui">
+            {!hideExtranousItems && (
+              <div className={classNames([styles.bottomLinksMain])}>
+                <IfFeature name="show_whats_new_link">
+                  <a href="/whats-new" target="_blank" rel="noreferrer noopener">
+                    <FormattedMessage id="settings.whats-new" />
+                  </a>
+                </IfFeature>
                 <button
                   onClick={e => {
                     e.preventDefault();
-                    this.props.pushHistoryState("modal", "feedback");
+                    resetTips();
+                    this.setState({ expanded: false });
                   }}
                 >
-                  <FormattedMessage id="settings.send-feedback" />
+                  <FormattedMessage id="settings.tips" />
                 </button>
-              </IfFeature>
-              <IfFeature name="show_issue_report_link">
-                <a
-                  className={styles.bottomLink}
-                  href={configs.link("issue_report", "/?report")}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  <FormattedMessage id="settings.report" />
-                </a>
-              </IfFeature>
-              <IfFeature name="show_terms">
-                <a
-                  className={styles.bottomLink}
-                  href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  <FormattedMessage id="settings.terms" />
-                </a>
-              </IfFeature>
-              <IfFeature name="show_privacy">
-                <a
-                  className={styles.bottomLink}
-                  href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  <FormattedMessage id="settings.privacy" />
-                </a>
-              </IfFeature>
-            </div>
+                <IfFeature name="show_controls_link">
+                  <a
+                    href={configs.link("controls", "https://github.com/mozilla/hubs/wiki/Hubs-Controls")}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    <FormattedMessage id="settings.controls" />
+                  </a>
+                </IfFeature>
+              </div>
+            )}
+            {!hideExtranousItems && (
+              <div className={classNames([styles.bottomLinks])}>
+                <IfFeature name="show_features_link">
+                  <a
+                    href={configs.link("features", messages["help.docs_url"])}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    <FormattedMessage id="settings.features" />
+                  </a>
+                </IfFeature>
+                <IfFeature name="show_community_link">
+                  <a
+                    href={configs.link("community", "https://discord.gg/wHmY4nd")}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    <FormattedMessage id="settings.community" />
+                  </a>
+                </IfFeature>
+                <IfFeature name="show_feedback_ui">
+                  <button
+                    onClick={e => {
+                      e.preventDefault();
+                      this.props.pushHistoryState("modal", "feedback");
+                    }}
+                  >
+                    <FormattedMessage id="settings.send-feedback" />
+                  </button>
+                </IfFeature>
+                <IfFeature name="show_issue_report_link">
+                  <a
+                    className={styles.bottomLink}
+                    href={configs.link("issue_report", "/#/report")}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    <FormattedMessage id="settings.report" />
+                  </a>
+                </IfFeature>
+                <IfFeature name="show_terms">
+                  <a
+                    className={styles.bottomLink}
+                    href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    <FormattedMessage id="settings.terms" />
+                  </a>
+                </IfFeature>
+                <IfFeature name="show_privacy">
+                  <a
+                    className={styles.bottomLink}
+                    href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    <FormattedMessage id="settings.privacy" />
+                  </a>
+                </IfFeature>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -385,15 +421,21 @@ export default class SettingsMenu extends Component {
   render() {
     return (
       <div>
-        <FontAwesomeIcon
-          icon={faBars}
-          onClick={() => this.setState({ expanded: !this.state.expanded })}
-          className={classNames({
-            [rootStyles.cornerButton]: true,
-            [rootStyles.cornerButtonSelected]: this.state.expanded
-          })}
-        />
-        {this.state.expanded && this.renderExpandedMenu()}
+        {!this.props.showAsOverlay && (
+          <FontAwesomeIcon
+            icon={faBars}
+            onClick={() => this.setState({ expanded: !this.state.expanded })}
+            className={classNames({
+              [rootStyles.cornerButton]: true,
+              [rootStyles.cornerButtonSelected]: this.state.expanded
+            })}
+          />
+        )}
+        {this.props.showAsOverlay ? (
+          <div className={styles.settingsMenuOverlayWrap}>{this.renderExpandedMenu()}</div>
+        ) : (
+          this.state.expanded && this.renderExpandedMenu()
+        )}
       </div>
     );
   }

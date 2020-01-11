@@ -130,11 +130,11 @@ class ProfileEntryPanel extends Component {
     return (
       <div className={styles.profileEntry}>
         <div className={styles.close}>
-          <a onClick={() => this.props.onClose()}>
+          <button autoFocus onClick={() => this.props.onClose()}>
             <i>
               <FontAwesomeIcon icon={faTimes} />
             </i>
-          </a>
+          </button>
         </div>
         <form onSubmit={this.saveStateAndFinish} className={styles.form}>
           <div className={classNames([styles.box])}>

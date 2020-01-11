@@ -1,6 +1,5 @@
 import { sets } from "./userinput/sets";
 import { paths } from "./userinput/paths";
-import configs from "../utils/configs";
 
 // The output of this system is activeTips which shows, if any, the tips to show at the top
 // and bottom of the screen. There are named tips (eg locomotion) that each have validators.
@@ -23,7 +22,6 @@ const VALID = 1;
 const FINISH = 2;
 
 const LOCAL_STORAGE_KEY = "__hubs_finished_tips";
-const NUM_ENTRIES_FOR_FEEDBACK_TIP = 3;
 
 const TIPS = {
   desktop: {
@@ -69,7 +67,7 @@ const TIPS = {
 const LOCAL_CLOSE_TIPS = ["feedback", "invite", "object_pin"];
 
 // These tips will remain active even if the user closes the tips globally.
-const KEEP_ACTIVE_AFTER_GLOBAL_CLOSE = ["feedback"];
+const KEEP_ACTIVE_AFTER_GLOBAL_CLOSE = ["freeze_gesture", "menu_hover", "feedback"];
 
 let localStorageCache = null;
 let finishedScopes = {}; // Optimization, lets system skip scopes altogether once finished.
@@ -322,9 +320,9 @@ const VALIDATORS = {
   mute_mode: function(userinput, scene) {
     return scene.is("muted") ? VALID : INVALID;
   },
-  feedback: function(userinput, scene, mediaCounter, store) {
-    if (configs.feature("show_feedback_ui") && store && store.state.activity.entryCount >= NUM_ENTRIES_FOR_FEEDBACK_TIP)
-      return VALID;
+  feedback: function(/*userinput, scene, mediaCounter, store*/) {
+    /*if (configs.feature("show_feedback_ui") && store && store.state.activity.entryCount >= NUM_ENTRIES_FOR_FEEDBACK_TIP)
+      return VALID;*/
     return INVALID;
   }
 };

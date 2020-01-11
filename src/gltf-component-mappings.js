@@ -134,14 +134,20 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
     });
   }
 
-  el.setAttribute("media-loader", {
+  const mediaLoaderAttributes = {
     src: componentData.src,
     fitToBox: componentData.contentSubtype ? false : true,
     resolve: true,
     fileIsOwned: true,
     animate: false,
     contentSubtype: componentData.contentSubtype
-  });
+  };
+
+  if (componentData.version) {
+    mediaLoaderAttributes.version = componentData.version;
+  }
+
+  el.setAttribute("media-loader", mediaLoaderAttributes);
 
   if (componentData.pageIndex) {
     el.setAttribute("media-pdf", { index: componentData.pageIndex });

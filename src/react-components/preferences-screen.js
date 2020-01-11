@@ -88,28 +88,28 @@ export default class PreferencesScreen extends Component {
 
     return (
       <IntlProvider locale={lang} messages={messages}>
-        <div className={classNames(styles.root)}>
-          <i className={classNames(styles.closeButton)} onClick={e => this.props.onClose(e)}>
-            <FontAwesomeIcon icon={faTimes} />
-          </i>
-          <div className={classNames(styles.contentContainer)}>
-            <div className={classNames(styles.titleBar)}>
-              <div className={classNames(styles.title)}>
-                <span>Preferences</span>
+        <div className={classNames(styles.preferencesPanel)}>
+          <div className={classNames(styles.panelMargin)}>
+            <button autoFocus className={classNames(styles.closeButton)} onClick={e => this.props.onClose(e)}>
+              <i>
+                <FontAwesomeIcon icon={faTimes} />
+              </i>
+            </button>
+
+            <div className={classNames(styles.contentContainer)}>
+              <div className={classNames(styles.sectionBar)}>
+                <div className={classNames(styles.sectionTitle)}>
+                  <span>General</span>
+                </div>
               </div>
-            </div>
-            <div className={classNames(styles.sectionBar)}>
-              <div className={classNames(styles.sectionTitle)}>
-                <span>General</span>
+              <div className={classNames(styles.scrollingContent)}>{general}</div>
+              <div className={classNames(styles.sectionBar)}>
+                <div className={classNames(styles.sectionTitle)}>
+                  <span>Touchscreen</span>
+                </div>
               </div>
+              <div className={classNames(styles.scrollingContent)}>{touchscreen}</div>
             </div>
-            <div className={classNames(styles.scrollingContent)}>{general}</div>
-            <div className={classNames(styles.sectionBar)}>
-              <div className={classNames(styles.sectionTitle)}>
-                <span>Touchscreen</span>
-              </div>
-            </div>
-            <div className={classNames(styles.scrollingContent)}>{touchscreen}</div>
           </div>
         </div>
       </IntlProvider>

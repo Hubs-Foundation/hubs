@@ -35,7 +35,10 @@ function registerNetworkSchemas() {
         component: "rotation",
         requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
-      "scale",
+      {
+        component: "scale",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
       "player-info",
       "networked-avatar",
       {
@@ -90,7 +93,10 @@ function registerNetworkSchemas() {
         component: "rotation",
         requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
-      "scale",
+      {
+        component: "scale",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
       // TODO: Optimize checking mediaOptions with requiresNetworkUpdate.
       "media-loader",
       {
@@ -142,7 +148,10 @@ function registerNetworkSchemas() {
         component: "emoji",
         property: "particleEmitterConfig"
       },
-      "scale",
+      {
+        component: "scale",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
       "media-loader",
       "pinnable",
       {
@@ -215,7 +224,10 @@ function registerNetworkSchemas() {
         component: "rotation",
         requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
-      "scale",
+      {
+        component: "scale",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
       "networked-drawing"
     ]
   });
@@ -285,7 +297,10 @@ function registerNetworkSchemas() {
         component: "rotation",
         requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
-      "scale",
+      {
+        component: "scale",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
       {
         selector: "#pen",
         component: "pen",

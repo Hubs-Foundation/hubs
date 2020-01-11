@@ -43,6 +43,7 @@ import "./components/scale-in-screen-space";
 import "./components/mute-mic";
 import "./components/bone-mute-state-indicator";
 import "./components/bone-visibility";
+import "./components/fader";
 import "./components/in-world-hud";
 import "./components/emoji";
 import "./components/emoji-hud";
@@ -92,6 +93,7 @@ import "./components/follow-in-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
+import "./components/refresh-media-button";
 import "./components/tweet-media-button";
 import "./components/remix-avatar-button";
 import "./components/transform-object-button";
@@ -325,6 +327,11 @@ async function updateEnvironmentForHub(hub, entryManager) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
 
+  const sceneErrorHandler = () => {
+    remountUI({ roomUnavailableReason: "scene_error" });
+    entryManager.exitScene();
+  };
+
   const environmentScene = document.querySelector("#environment-scene");
   const sceneEl = document.querySelector("a-scene");
 
@@ -359,11 +366,6 @@ async function updateEnvironmentForHub(hub, entryManager) {
 
   if (environmentScene.childNodes.length === 0) {
     const environmentEl = document.createElement("a-entity");
-
-    const sceneErrorHandler = () => {
-      remountUI({ roomUnavailableReason: "scene_error" });
-      entryManager.exitScene();
-    };
 
     environmentEl.addEventListener(
       "model-loaded",
@@ -400,12 +402,18 @@ async function updateEnvironmentForHub(hub, entryManager) {
         environmentEl.addEventListener(
           "model-loaded",
           () => {
+            environmentEl.removeEventListener("model-error", sceneErrorHandler);
             traverseMeshesAndAddShapes(environmentEl);
 
             // We've already entered, so move to new spawn point once new environment is loaded
             if (sceneEl.is("entered")) {
               waypointSystem.moveToSpawnPoint();
             }
+
+            const fader = document.getElementById("viewing-camera").components["fader"];
+
+            // Add a slight delay before de-in to reduce hitching.
+            setTimeout(() => fader.fadeIn(), 2000);
           },
           { once: true }
         );
@@ -414,6 +422,10 @@ async function updateEnvironmentForHub(hub, entryManager) {
       },
       { once: true }
     );
+
+    if (!sceneEl.is("entered")) {
+      environmentEl.addEventListener("model-error", sceneErrorHandler, { once: true });
+    }
 
     environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironment });
   }
@@ -556,11 +568,21 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
     const loadEnvironmentAndConnect = () => {
       updateEnvironmentForHub(hub, entryManager);
+      function onConnectionError() {
+        console.error("Unknown error occurred while attempting to connect to networked scene.");
+        remountUI({ roomUnavailableReason: "connect_error" });
+        entryManager.exitScene();
+      }
 
+      const connectionErrorTimeout = setTimeout(onConnectionError, 30000);
       scene.components["networked-scene"]
         .connect()
-        .then(() => scene.emit("didConnectToNetworkedScene"))
+        .then(() => {
+          clearTimeout(connectionErrorTimeout);
+          scene.emit("didConnectToNetworkedScene");
+        })
         .catch(connectError => {
+          clearTimeout(connectionErrorTimeout);
           // hacky until we get return codes
           const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
           console.error(connectError);
@@ -1041,10 +1063,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       perms_token: null,
       context: {
         mobile: isMobile || isMobileVR,
-        hmd: availableVREntryTypes.isInHMD,
         embed: isEmbed
       }
     };
+
+    if (isMobileVR) {
+      params.context.hmd = true;
+    }
 
     if (permsToken) {
       params.perms_token = permsToken;
@@ -1404,7 +1429,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateUIForHub(hub);
 
     if (stale_fields.includes("scene")) {
-      updateEnvironmentForHub(hub, entryManager);
+      const fader = document.getElementById("viewing-camera").components["fader"];
+
+      fader.fadeOut().then(() => updateEnvironmentForHub(hub, entryManager));
 
       addToPresenceLog({
         type: "scene_changed",

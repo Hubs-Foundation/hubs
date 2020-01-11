@@ -108,8 +108,11 @@ AFRAME.registerComponent("player-info", {
     this.applyDisplayName();
   },
   applyDisplayName() {
+    const store = window.APP.store;
+
     const infoShouldBeHidden =
-      window.APP.store.state.preferences.onlyShowNametagsInFreeze && !this.el.sceneEl.is("frozen");
+      this.isLocalPlayerInfo || (store.state.preferences.onlyShowNametagsInFreeze && !this.el.sceneEl.is("frozen"));
+
     const nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && nametagEl) {
       nametagEl.setAttribute("text", { value: this.displayName });
@@ -119,7 +122,7 @@ AFRAME.registerComponent("player-info", {
     if (communityIdentifierEl) {
       if (this.communityIdentifier) {
         communityIdentifierEl.setAttribute("text", { value: this.communityIdentifier });
-        communityIdentifierEl.object3D.visible = !infoShouldBeHidden;
+        communityIdentifierEl.object3D.visible = this.el.sceneEl.is("frozen");
       }
     }
     const recordingBadgeEl = this.el.querySelector(".recordingBadge");

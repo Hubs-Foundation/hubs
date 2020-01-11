@@ -1,15 +1,13 @@
 @import 'shared.scss';
 
-$smallScreenWidth : 800px;
+$smallScreenWidth : 475px;
 $itemHeight : 3.0rem;
 $hoverFontSize: 1.6rem;
 $widescreenControlsWidth: 100%;
-$sectionTitleFontSize: 1.1rem;
-$titleHeight: 3.0rem;
-$sectionTitleFontWeight: bolder;
+$widescreenBreakpoint: 600px;
 $backgroundColor: var(--full-panel-background-color);
 
-:local(.maxResolutionPreferenceItem) {
+:local(.max-resolution-preference-item) {
   display: flex;
   flex-flow: row;
   align-items: center;
@@ -33,24 +31,21 @@ input::-webkit-inner-spin-button {
   -webkit-appearance: none;
 }
 
-:local(.preferenceListItem){
+:local(.preference-list-non-checkbox){
+  @media (max-width: $widescreenBreakpoint) {
+    flex-direction: column;
+  }
+}
+
+:local(.preference-list-item){
   display: flex;
   align-items: center;
-  @media( min-width:$smallScreenWidth+1 ) {
-    flex-flow: row;
-    height: $itemHeight;
-  }
-  @media( max-width:$smallScreenWidth ) {
-    flex-flow: column;
-    height: 2*$itemHeight;
-    margin-bottom: 0.5rem;
-  }
+  margin: 12px 0;
 
   :local(.part) {
     display: flex;
     flex-flow: column;
     justify-content: space-around;
-    height: $itemHeight;
     @media( min-width:$smallScreenWidth+1 ) {
       justify-content: space-around;
     }
@@ -58,8 +53,11 @@ input::-webkit-inner-spin-button {
       text-align: center;
       justify-content: center;
       align-items: center;
-      height: 2*$itemHeight;
     }
+  }
+  :local(.checkbox-margin) {
+    margin-right: 8px;
+    width: 48px;
   }
   :local(.left) {
     flex: 1;
@@ -83,6 +81,7 @@ input::-webkit-inner-spin-button {
       height: 38px;
       padding-left: 1em;
       padding-right: 2.5em;
+      cursor: pointer;
     }
     :local(.dropdownArrow) {
       @extend %dropdown-arrow;
@@ -91,56 +90,73 @@ input::-webkit-inner-spin-button {
   }
 }
 
-:local(.contentContainer) {
-  @extend %default-font;
-  font-size: 11pt;
-  font-weight: bold;
-  position: absolute;
-  box-sizing: border-box;
+:local(.preferences-panel) {
   top: 0px;
   bottom: 0px;
   width: 100%;
+  height: 100%;
   background: var(--full-panel-background-color);
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+:local(.panel-margin) {
+  margin-top: 18px;
+
+  :local(.close-button) {
+    @extend %panel-widget;
+    top: 24px;
+    left: 24px;
+
+    font-size: 1.6em;
+    position: absolute;
+    z-index: 1;
+  }
+}
+
+:local(.content-container) {
+  @extend %default-font;
+  font-size: 11pt;
   overflow-y: auto;
-  margin-top: $titleHeight;
-  :local(.scrollingContent) {
+  font-weight: bold;
+  box-sizing: border-box;
+  height: calc(100vh - 16px);
+
+  @media (max-width: $widescreenBreakpoint) {
+    margin-top: 0;
+    height: calc(100vh - 48px);
+  }
+
+  :local(.scrolling-content) {
     display: flex;
     flex-flow: column;
     max-width: 80%;
     padding-left: 10%;
   }
-  :local(.titleBar) {
-    position: fixed;
-    top: 0px;
+  :local(.section-bar) {
     width: 100%;
-    height: $titleHeight;
-    background: var(--full-panel-background-color);
-  }
-  :local(.title) {
-    @extend %top-title;
-    display: flex;
-    flex-flow: row;
-    justify-content: center;
-    align-items: center;
-    height: $titleHeight;
-  }
-  :local(.sectionBar) {
-    width: 100%;
-    height: $titleHeight;
     display: flex;
     flex-flow: row;
     justify-content: center;
     align-items: center;
   }
-  :local(.sectionTitle) {
+  :local(.section-title) {
     width: 90%;
     display: flex;
     flex-flow: row;
-    justify-content: center;
+    justify-content: flex-start;
+
+    @media (max-width: $widescreenBreakpoint) {
+      justify-content: center;
+    }
+
     align-items: center;
-    height: $titleHeight;
-    font-size: $sectionTitleFontSize;
-    font-weight: $sectionTitleFontWeight;
+    color: var(--menu-header-text-color);
+    font-weight: normal;
+    text-transform: uppercase;
+    margin: 12px 0;
   }
 
   input[type=checkbox] {
@@ -158,65 +174,48 @@ input::-webkit-inner-spin-button {
   justify-content: end;
 }
 
-:local(.closeButton) {
-  top: 0.5em;
-  left: 1em;
-  font-size: 1.6em;
-  position: absolute;
-  cursor: pointer;
-  color: var(--panel-widget-color);
-  z-index: 1;
-}
 :local(.row) {
   width: 90%;
   display: flex;
   flex-flow: row;
   align-items: center;
-  height: $itemHeight;
-  @media( max-width:$smallScreenWidth ) {
-    width: 100%;
-    flex-flow: column;
-    height: 2*$itemHeight;
-  }
 }
-:local(.rowName) {
+:local(.row-name) {
   display: flex;
   flex-flow: column;
   flex-wrap: nowrap;
   justify-content: space-around;
   width: 50%;
-  height: $itemHeight;
   text-align: end;
-  @media( max-width:$smallScreenWidth ) {
-    width: 100%;
-    text-align: center;
-    margin-inline-end: 0rem;
-    height: 2*$itemHeight;
-  }
   margin-inline-end: 1rem;
 }
 
-:local(.resetToDefaultButton){
+:local(.reset-to-default-button){
   background: transparent;
   border: none;
   font-size: medium;
   padding: 0px 0px 0px 12px;
+  cursor: pointer;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
 }
 
-:local(.prevOptionScale) {
+:local(.prev-option-scale) {
   height: 2rem;
 }
-:local(.nextOptionScale) {
+:local(.next-option-scale) {
   height: 2rem;
 }
 
-:local(.prevOptionHoveredScale) {
+:local(.prev-option-hovered-scale) {
   height: 2.2rem;
 }
-:local(.nextOptionHoveredScale) {
+:local(.next-option-hovered-scale) {
   height: 2.2rem;
 }
-:local(.numberWithRange){
+:local(.number-with-range){
   display: flex;
   flex-flow: row;
   width: $widescreenControlsWidth;
@@ -227,7 +226,7 @@ input::-webkit-inner-spin-button {
   justify-content: flex-start;
   align-items: center;
 
-  :local(.numberInNumberWithRange) {
+  :local(.number-in-number-with-range) {
     display:flex;
     justify-content: center;
     cursor: pointer;
@@ -241,7 +240,7 @@ input::-webkit-inner-spin-button {
       height: 38px;
     }
   }
-  :local(.rangeSlider) {
+  :local(.range-slider) {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -309,6 +308,7 @@ $ie-bottom-track-color: $track-color !default;
   background: transparent;
   margin: $thumb-height / 2 0;
   width: $track-width;
+  cursor: pointer;
 
   &::-moz-focus-outer {
     border: 0;
@@ -340,6 +340,7 @@ $ie-bottom-track-color: $track-color !default;
 
   &::-webkit-slider-thumb {
     @include thumb;
+    cursor: pointer;
     -webkit-appearance: none;
     margin-top: ((-$track-border-width * 2 + $track-height) / 2 - $thumb-height / 2);
   }
@@ -355,6 +356,7 @@ $ie-bottom-track-color: $track-color !default;
 
   &::-moz-range-thumb {
     @include thumb;
+    cursor: pointer;
   }
 
   &::-ms-track {
@@ -381,6 +383,7 @@ $ie-bottom-track-color: $track-color !default;
 
   &::-ms-thumb {
     @include thumb;
+    cursor: pointer;
     margin-top: $track-height / 4;
   }
 

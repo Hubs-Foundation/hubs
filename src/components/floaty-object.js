@@ -34,7 +34,7 @@ AFRAME.registerComponent("floaty-object", {
     }
 
     const interaction = AFRAME.scenes[0].systems.interaction;
-    const isHeld = interaction.isHeld(this.el);
+    const isHeld = interaction && interaction.isHeld(this.el);
     if (isHeld && !this.wasHeld) {
       this.onGrab();
     }

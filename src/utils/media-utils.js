@@ -12,14 +12,14 @@ const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
 // Map<String, Promise<Object>
 const resolveUrlCache = new Map();
-export const resolveUrl = async (url, index) => {
-  const cacheKey = `${url}|${index}`;
-  if (resolveUrlCache.has(cacheKey)) return resolveUrlCache.get(cacheKey);
+export const resolveUrl = async (url, version = 1) => {
+  const key = `${url}_${version}`;
+  if (resolveUrlCache.has(key)) return resolveUrlCache.get(key);
 
   const resultPromise = fetch(mediaAPIEndpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ media: { url, index } })
+    body: JSON.stringify({ media: { url }, version })
   }).then(async response => {
     if (!response.ok) {
       const message = `Error resolving url "${url}":`;
@@ -33,7 +33,7 @@ export const resolveUrl = async (url, index) => {
     return response.json();
   });
 
-  resolveUrlCache.set(cacheKey, resultPromise);
+  resolveUrlCache.set(key, resultPromise);
   return resultPromise;
 };
 
@@ -91,6 +91,21 @@ function getOrientation(file, callback) {
   reader.readAsArrayBuffer(file);
 }
 
+function getLatestMediaVersionOfSrc(src) {
+  const els = document.querySelectorAll("[media-loader]");
+  let version = 1;
+
+  for (const el of els) {
+    const loader = el.components["media-loader"];
+
+    if (loader.data.src === src) {
+      version = Math.max(version, loader.data.version);
+    }
+  }
+
+  return version;
+}
+
 export const addMedia = (
   src,
   template,
@@ -106,11 +121,17 @@ export const addMedia = (
   const entity = document.createElement("a-entity");
   entity.setAttribute("networked", { template: template });
   const needsToBeUploaded = src instanceof File;
+
+  // If we're re-pasting an existing src in the scene, we should use the latest version
+  // seen across any other entities. Otherwise, start with version 1.
+  const version = getLatestMediaVersionOfSrc(src);
+
   entity.setAttribute("media-loader", {
     fitToBox,
     resolve,
     animate,
     src: typeof src === "string" ? src : "",
+    version,
     contentSubtype,
     fileIsOwned: !needsToBeUploaded,
     mediaOptions
@@ -253,7 +274,7 @@ export function getPromotionTokenForFile(fileId) {
 
 const mediaPos = new THREE.Vector3();
 
-export function addAndArrangeMedia(el, media, contentSubtype, snapCount, mirrorOrientation = false) {
+export function addAndArrangeMedia(el, media, contentSubtype, snapCount, mirrorOrientation = false, distance = 0.75) {
   const { entity, orientation } = addMedia(media, "#interactable-media", undefined, contentSubtype, false);
 
   const pos = el.object3D.position;
@@ -270,8 +291,8 @@ export function addAndArrangeMedia(el, media, contentSubtype, snapCount, mirrorO
   const idx = (snapCount % 6) + 3;
 
   mediaPos.set(
-    Math.cos(Math.PI * 2 * (idx / 6.0)) * 0.75,
-    Math.sin(Math.PI * 2 * (idx / 6.0)) * 0.75,
+    Math.cos(Math.PI * 2 * (idx / 6.0)) * distance,
+    Math.sin(Math.PI * 2 * (idx / 6.0)) * distance,
     -0.05 + idx * 0.001
   );
 

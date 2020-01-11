@@ -1,6 +1,7 @@
 import "./webxr-bypass-hacks";
 import "./utils/theme";
 import "./utils/configs";
+
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/scene.scss";
@@ -24,6 +25,7 @@ import React from "react";
 import SceneUI from "./react-components/scene-ui";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 
+import "./systems/scene-systems";
 import "./gltf-component-mappings";
 
 import { App } from "./App";

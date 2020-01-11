@@ -22,10 +22,10 @@ import { hasReticulumServer } from "../utils/phoenix-utils";
 import { InlineSVG } from "./svgi";
 
 function getPresenceIcon(ctx) {
-  if (ctx && ctx.mobile) {
-    return <FontAwesomeIcon icon={faMobileAlt} />;
-  } else if (ctx && ctx.hmd) {
+  if (ctx && ctx.hmd) {
     return <InlineSVG src={hmdIcon} />;
+  } else if (ctx && ctx.mobile) {
+    return <FontAwesomeIcon icon={faMobileAlt} />;
   } else if (ctx && ctx.discord) {
     return <InlineSVG src={discordIcon} />;
   } else {

@@ -287,11 +287,11 @@ class MediaBrowser extends Component {
         <div className={classNames([styles.box, styles.darkened])}>
           <div className={classNames(styles.header, { [styles.noSearch]: hideSearch })}>
             <div className={styles.headerLeft}>
-              <a onClick={() => this.close()}>
+              <button onClick={() => this.close()}>
                 <i>
                   <FontAwesomeIcon icon={faTimes} />
                 </i>
-              </a>
+              </button>
             </div>
             <div className={styles.headerCenter}>
               {urlSource === "favorites" && (
@@ -362,7 +362,7 @@ class MediaBrowser extends Component {
                     </IfFeature>
                     {configs.feature("enable_spoke") && configs.feature("show_issue_report_link") && "|"}
                     <IfFeature name="show_issue_report_link">
-                      <a target="_blank" rel="noopener noreferrer" href={configs.link("issue_report", "/?report")}>
+                      <a target="_blank" rel="noopener noreferrer" href={configs.link("issue_report", "/#/report")}>
                         <FormattedMessage id="media-browser.report_issue" />
                       </a>
                     </IfFeature>

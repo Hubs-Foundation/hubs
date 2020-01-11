@@ -148,33 +148,37 @@ function disposeTexture(texture) {
 class TextureCache {
   cache = new Map();
 
-  set(src, texture) {
+  key(src, version) {
+    return `${src}_${version}`;
+  }
+
+  set(src, version, texture) {
     const image = texture.image;
-    this.cache.set(src, {
+    this.cache.set(this.key(src, version), {
       texture,
       ratio: (image.videoHeight || image.height) / (image.videoWidth || image.width),
       count: 0
     });
-    return this.retain(src);
+    return this.retain(src, version);
   }
 
-  has(src) {
-    return this.cache.has(src);
+  has(src, version) {
+    return this.cache.has(this.key(src, version));
   }
 
-  get(src) {
-    return this.cache.get(src);
+  get(src, version) {
+    return this.cache.get(this.key(src, version));
   }
 
-  retain(src) {
-    const cacheItem = this.cache.get(src);
+  retain(src, version) {
+    const cacheItem = this.cache.get(this.key(src, version));
     cacheItem.count++;
     // console.log("retain", src, cacheItem.count);
     return cacheItem;
   }
 
-  release(src) {
-    const cacheItem = this.cache.get(src);
+  release(src, version) {
+    const cacheItem = this.cache.get(this.key(src, version));
 
     if (!cacheItem) {
       console.error(`Releasing uncached texture src ${src}`);
@@ -186,7 +190,7 @@ class TextureCache {
     if (cacheItem.count <= 0) {
       // Unload the video element to prevent it from continuing to play in the background
       disposeTexture(cacheItem.texture);
-      this.cache.delete(src);
+      this.cache.delete(this.key(src, version));
     }
   }
 }
@@ -809,6 +813,7 @@ AFRAME.registerComponent("media-video", {
 AFRAME.registerComponent("media-image", {
   schema: {
     src: { type: "string" },
+    version: { type: "number" },
     projection: { type: "string", default: "flat" },
     contentType: { type: "string" },
     batch: { default: false }
@@ -819,7 +824,7 @@ AFRAME.registerComponent("media-image", {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
     }
     if (this.currentSrcIsRetained) {
-      textureCache.release(this.data.src);
+      textureCache.release(this.data.src, this.data.version);
       this.currentSrcIsRetained = false;
     }
   },
@@ -828,34 +833,38 @@ AFRAME.registerComponent("media-image", {
     let texture;
     let ratio = 1;
 
+    const batchManagerSystem = this.el.sceneEl.systems["hubs-systems"].batchManagerSystem;
+
     try {
-      const { src, contentType } = this.data;
+      const { src, version, contentType } = this.data;
       if (!src) return;
 
       this.el.emit("image-loading");
 
-      if (this.mesh && this.mesh.map && src !== oldData.src) {
+      if (this.mesh && this.mesh.material.map && (src !== oldData.src || version !== oldData.version)) {
         this.mesh.material.map = null;
         this.mesh.material.needsUpdate = true;
-        if (this.mesh.map !== errorTexture) {
-          textureCache.release(oldData.src);
+        if (this.mesh.material.map !== errorTexture) {
+          textureCache.release(oldData.src, oldData.version);
           this.currentSrcIsRetained = false;
         }
       }
 
       let cacheItem;
-      if (textureCache.has(src)) {
+      if (textureCache.has(src, version)) {
         if (this.currentSrcIsRetained) {
-          cacheItem = textureCache.get(src);
+          cacheItem = textureCache.get(src, version);
         } else {
-          cacheItem = textureCache.retain(src);
+          cacheItem = textureCache.retain(src, version);
         }
       } else {
+        const inflightKey = textureCache.key(src, version);
+
         if (src === "error") {
           cacheItem = errorCacheItem;
-        } else if (inflightTextures.has(src)) {
-          await inflightTextures.get(src);
-          cacheItem = textureCache.retain(src);
+        } else if (inflightTextures.has(inflightKey)) {
+          await inflightTextures.get(inflightKey);
+          cacheItem = textureCache.retain(src, version);
         } else {
           let promise;
           if (contentType.includes("image/gif")) {
@@ -865,15 +874,15 @@ AFRAME.registerComponent("media-image", {
           } else {
             throw new Error(`Unknown image content type: ${contentType}`);
           }
-          inflightTextures.set(src, promise);
+          inflightTextures.set(inflightKey, promise);
           texture = await promise;
-          inflightTextures.delete(src);
-          cacheItem = textureCache.set(src, texture);
+          inflightTextures.delete(inflightKey);
+          cacheItem = textureCache.set(src, version, texture);
         }
 
         // No way to cancel promises, so if src has changed or this entity was removed while we were creating the texture just throw it away.
-        if (this.data.src !== src || !this.el.parentNode) {
-          textureCache.release(src);
+        if (this.data.src !== src || this.data.version !== version || !this.el.parentNode) {
+          textureCache.release(src, version);
           return;
         }
       }
@@ -889,6 +898,12 @@ AFRAME.registerComponent("media-image", {
     }
 
     const projection = this.data.projection;
+
+    if (this.mesh && this.data.batch) {
+      // This is a no-op if the mesh was just created.
+      // Otherwise we want to ensure the texture gets updated.
+      batchManagerSystem.removeObject(this.mesh);
+    }
 
     if (!this.mesh || projection !== oldData.projection) {
       const material = new THREE.MeshBasicMaterial();
@@ -928,7 +943,7 @@ AFRAME.registerComponent("media-image", {
     }
 
     if (texture !== errorTexture && this.data.batch) {
-      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.mesh);
+      batchManagerSystem.addObject(this.mesh);
     }
 
     this.el.emit("image-loaded", { src: this.data.src, projection: projection });
@@ -945,23 +960,37 @@ AFRAME.registerComponent("media-pdf", {
   },
 
   init() {
+    this.snap = this.snap.bind(this);
     this.canvas = document.createElement("canvas");
     this.canvasContext = this.canvas.getContext("2d");
+    this.localSnapCount = 0;
+    this.isSnapping = false;
+    this.onSnapImageLoaded = () => (this.isSnapping = false);
     this.texture = new THREE.CanvasTexture(this.canvas);
 
     this.texture.encoding = THREE.sRGBEncoding;
     this.texture.minFilter = THREE.LinearFilter;
+
+    this.el.addEventListener("pager-snap-clicked", () => this.snap());
+  },
+
+  async snap() {
+    if (this.isSnapping) return;
+    this.isSnapping = true;
+    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
+
+    const blob = await new Promise(resolve => this.canvas.toBlob(resolve));
+    const file = new File([blob], "snap.png", TYPE_IMG_PNG);
+
+    this.localSnapCount++;
+    const { entity } = addAndArrangeMedia(this.el, file, "photo-snapshot", this.localSnapCount, false, 1);
+    entity.addEventListener("image-loaded", this.onSnapImageLoaded, ONCE_TRUE);
   },
 
   remove() {
     if (this.data.batch && this.mesh) {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
     }
-  },
-
-  currentTextureCacheKey() {
-    // We ensure a unique texture for each PDF entity, because they are drawn over during pagination.
-    return `${this.el.object3D.uuid}_${this.canvas.width}_${this.canvas.height}`;
   },
 
   async update(oldData) {

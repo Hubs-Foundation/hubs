@@ -11,7 +11,6 @@ class Loader extends Component {
   static propTypes = {
     scene: PropTypes.object,
     finished: PropTypes.bool,
-    connected: PropTypes.bool,
     onLoaded: PropTypes.func
   };
 
@@ -99,16 +98,6 @@ class Loader extends Component {
         ...
       </h4>
     );
-    const connected = (
-      <h4 className={loaderStyles.loadingText}>
-        <FormattedMessage id="loader.connected" />
-      </h4>
-    );
-    const connecting = (
-      <h4 className={loaderStyles.loadingText}>
-        <FormattedMessage id="loader.connecting" />
-      </h4>
-    );
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="loading-panel">
@@ -125,7 +114,6 @@ class Loader extends Component {
           </UnlessFeature>
 
           {this.props.finished ? nomore : usual}
-          {this.props.connected ? connected : connecting}
 
           <div className="loader-wrap loader-bottom">
             <div className="loader">

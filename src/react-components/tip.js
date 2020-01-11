@@ -19,9 +19,11 @@ export default class Tip extends Component {
 
   render() {
     const { tip, tipRegion, broadcastTarget, pushHistoryState } = this.props;
+    const rootStyles = [styles.tipRoot];
     let tipBody;
 
     if ([".spawn_menu", "_button"].find(x => tip.endsWith(x))) {
+      rootStyles.push(styles.tourTipRoot);
       tipBody = (
         <div className={styles.splitTip}>
           <FormattedMessage id={`tips.${tip}-pre`} />
@@ -63,6 +65,7 @@ export default class Tip extends Component {
         </div>
       );
     } else {
+      rootStyles.push(styles.tourTipRoot);
       tipBody = (
         <div className={styles.tip}>
           <FormattedMessage id={`tips.${tip}`} />
@@ -71,7 +74,7 @@ export default class Tip extends Component {
     }
 
     return (
-      <div className={styles.tipRoot}>
+      <div className={classNames(rootStyles)}>
         <button
           className={styles.tipCancel}
           onClick={() => (this.props.onClose ? this.props.onClose(tip, tipRegion) : handleTipClose(tip, tipRegion))}
