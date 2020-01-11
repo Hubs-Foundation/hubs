@@ -108,8 +108,11 @@ AFRAME.registerComponent("player-info", {
     this.applyDisplayName();
   },
   applyDisplayName() {
+    const store = window.APP.store;
+
     const infoShouldBeHidden =
-      window.APP.store.state.preferences.onlyShowNametagsInFreeze && !this.el.sceneEl.is("frozen");
+      this.isLocalPlayerInfo || (store.state.preferences.onlyShowNametagsInFreeze && !this.el.sceneEl.is("frozen"));
+
     const nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && nametagEl) {
       nametagEl.setAttribute("text", { value: this.displayName });
