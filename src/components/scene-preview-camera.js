@@ -50,7 +50,7 @@ AFRAME.registerComponent("scene-preview-camera", {
 
     let streamerCamera;
     if (hubsSystems) {
-      this.el.sceneEl.systems["hubs-systems"].cameraSystem.mode = CAMERA_MODE_SCENE_PREVIEW;
+      hubsSystems.cameraSystem.mode = CAMERA_MODE_SCENE_PREVIEW;
       streamerCamera = getStreamerCamera();
     }
 
