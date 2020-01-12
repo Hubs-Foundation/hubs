@@ -90,7 +90,25 @@
   font-weight: bold;
 }
 
-:local(.client-action-buttons) {
+:local(.action-button-sections) {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+:local(.left-action-buttons), :local(.right-action-buttons) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+:local(.navigation-button) {
+  @extend %action-button-secondary-modal;
+  min-width: 48px;
+}
+
+:local(.primary-action-buttons) {
   display: flex;
   flex-direction: column;
   justify-content: center;

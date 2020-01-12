@@ -5,6 +5,8 @@ import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/client-info-dialog.scss";
 import { FormattedMessage } from "react-intl";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
+import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import entryStyles from "../assets/stylesheets/entry.scss";
 
@@ -126,36 +128,52 @@ export default class ObjectInfoDialog extends Component {
               {this.props.objectDisplayString}
             </a>
           </div>
-          <div className={styles.clientActionButtons}>
-            <button onClick={this.toggleLights.bind(this)}>
-              <FormattedMessage id={`object-info.${this.state.enableLights ? "lower" : "raise"}-lights`} />
-            </button>
-            {this.props.scene.is("entered") && (
-              <button onClick={this.enqueueWaypointTravel}>
-                <FormattedMessage id="object-info.waypoint" />
+          <div className={styles.actionButtonSections}>
+            <div className={styles.leftActionButtons}>
+              <button className={styles.navigationButton} onClick={this.navigatePrev}>
+                <i>
+                  <FontAwesomeIcon icon={faChevronLeft} />
+                </i>
               </button>
-            )}
-            {this.props.scene.is("entered") &&
-              !this.state.pinned &&
-              this.props.hubChannel &&
-              this.props.hubChannel.can("spawn_and_move_media") && (
-                <button onClick={this.delete.bind(this)}>
-                  <FormattedMessage id="object-info.delete-button" />
+            </div>
+            <div className={styles.primaryActionButtons}>
+              <button onClick={this.toggleLights.bind(this)}>
+                <FormattedMessage id={`object-info.${this.state.enableLights ? "lower" : "raise"}-lights`} />
+              </button>
+              {this.props.scene.is("entered") && (
+                <button onClick={this.enqueueWaypointTravel}>
+                  <FormattedMessage id="object-info.waypoint" />
                 </button>
               )}
-            {this.props.scene.is("entered") &&
-              this.props.hubChannel &&
-              this.props.hubChannel.can("pin_objects") && (
-                <button
-                  className={this.state.pinned ? "" : styles.primaryActionButton}
-                  onClick={this.state.pinned ? this.unpin : this.pin}
-                >
-                  <FormattedMessage id={`object-info.${this.state.pinned ? "unpin-button" : "pin-button"}`} />
-                </button>
-              )}
-            <a className={styles.cancelText} href="#" onClick={onClose}>
-              <FormattedMessage id="client-info.cancel" />
-            </a>
+              {this.props.scene.is("entered") &&
+                !this.state.pinned &&
+                this.props.hubChannel &&
+                this.props.hubChannel.can("spawn_and_move_media") && (
+                  <button onClick={this.delete.bind(this)}>
+                    <FormattedMessage id="object-info.delete-button" />
+                  </button>
+                )}
+              {this.props.scene.is("entered") &&
+                this.props.hubChannel &&
+                this.props.hubChannel.can("pin_objects") && (
+                  <button
+                    className={this.state.pinned ? "" : styles.primaryActionButton}
+                    onClick={this.state.pinned ? this.unpin : this.pin}
+                  >
+                    <FormattedMessage id={`object-info.${this.state.pinned ? "unpin-button" : "pin-button"}`} />
+                  </button>
+                )}
+              <a className={styles.cancelText} href="#" onClick={onClose}>
+                <FormattedMessage id="client-info.cancel" />
+              </a>
+            </div>
+            <div className={styles.rightActionButtons}>
+              <button className={styles.navigationButton} onClick={this.navigateNext}>
+                <i>
+                  <FontAwesomeIcon icon={faChevronRight} />
+                </i>
+              </button>
+            </div>
           </div>
         </div>
       </DialogContainer>
