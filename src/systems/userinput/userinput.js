@@ -406,7 +406,21 @@ AFRAME.registerSystem("userinput", {
       gamepad && gamepadConnected({ gamepad });
     }
 
-    this.el.sceneEl.addEventListener("enter-vr", updateBindingsForVRMode);
+    const retrieveXRGamepads = ({ session }) => {
+      for (const inputSource of session.inputSources) {
+        inputSource.gamepad.hand = inputSource.handedness;
+        gamepadConnected({ gamepad: inputSource.gamepad });
+      }
+    };
+
+    this.el.sceneEl.addEventListener("enter-vr", () => {
+      if (window.hasNativeWebXRImplementation) {
+        const session = this.el.sceneEl.xrSession;
+        session.addEventListener("inputsourceschange", retrieveXRGamepads);
+        retrieveXRGamepads({ session });
+      }
+      updateBindingsForVRMode();
+    });
     this.el.sceneEl.addEventListener("exit-vr", updateBindingsForVRMode);
 
     updateBindingsForVRMode();

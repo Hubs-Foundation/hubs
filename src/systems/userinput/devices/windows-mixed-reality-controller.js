@@ -14,9 +14,11 @@ export class WindowsMixedRealityControllerDevice {
     this.rayObject = null;
     this.rayObjectRotation = new THREE.Quaternion();
 
-    // wake the gamepad api up. otherwise it does not report touch controllers.
-    // in chrome it still won't unless you enter vr.
-    navigator.getVRDisplays();
+    if (window.hasNativeWebVRImplementation) {
+      // wake the gamepad api up. otherwise it does not report touch controllers.
+      // in chrome it still won't unless you enter vr.
+      navigator.getVRDisplays();
+    }
 
     this.gamepad = gamepad;
     this.pose = new Pose();
