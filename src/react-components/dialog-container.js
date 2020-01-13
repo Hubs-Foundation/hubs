@@ -75,7 +75,7 @@ export default class DialogContainer extends Component {
               {this.props.closable &&
                 this.props.onClose &&
                 !this.props.noOverlay && (
-                  <button autoFocus className="dialog__box__contents__close" onClick={() => this.props.onClose()}>
+                  <button className="dialog__box__contents__close" onClick={() => this.props.onClose()}>
                     <i>
                       <FontAwesomeIcon icon={faTimes} />
                     </i>
