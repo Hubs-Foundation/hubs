@@ -1494,6 +1494,14 @@ class UIRoot extends Component {
 
     const presenceLogEntries = this.props.presenceLogEntries || [];
 
+    const switchToInspectingObject = el => {
+      const src = el.components["media-loader"].data.src;
+      this.setState({ objectInfo: el, objectDisplayString: src, objectSrc: src });
+      const cameraSystem = this.props.scene.systems["hubs-systems"].cameraSystem;
+      cameraSystem.uninspect();
+      cameraSystem.inspect(el.object3D, 1.5, true);
+    };
+
     const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
 
     // Allow scene picker pre-entry, otherwise wait until entry
@@ -1767,7 +1775,13 @@ class UIRoot extends Component {
                 el={this.state.objectInfo}
                 objectDisplayString={this.state.objectDisplayString}
                 src={this.state.objectSrc}
+                pinned={this.state.objectInfo && this.state.objectInfo.components["networked"].data.persistent}
                 hubChannel={this.props.hubChannel}
+                onPinChanged={() => switchToInspectingObject(this.state.objectInfo)}
+                onNavigated={idx => {
+                  const el = this.props.scene.systems["listed-media"].els[idx];
+                  switchToInspectingObject(el);
+                }}
                 onClose={() => {
                   if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
                     this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
@@ -1975,7 +1989,7 @@ class UIRoot extends Component {
                 }
               }}
               expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
-              onInspectObject={(el, s) => this.setState({ objectInfo: el, objectDisplayString: s, objectSrc: s })}
+              onInspectObject={el => switchToInspectingObject(el)}
             />
 
             <PresenceList
