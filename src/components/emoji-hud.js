@@ -77,7 +77,7 @@ AFRAME.registerComponent("emoji-hud", {
           z: this.data.spawnerScale
         });
         spawnerEntity.setAttribute("is-remote-hover-target", "");
-        spawnerEntity.setAttribute("tags", { isHandCollisionTarget: true });
+        spawnerEntity.setAttribute("tags", { isHandCollisionTarget: false });
         spawnerEntity.setAttribute("visibility-while-frozen", { requireHoverOnNonMobile: false });
         spawnerEntity.setAttribute("css-class", "interactable");
         spawnerEntity.setAttribute("body-helper", {
