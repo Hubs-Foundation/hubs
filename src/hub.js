@@ -252,6 +252,7 @@ function setupLobbyCamera() {
 
   camera.object3D.matrixNeedsUpdate = true;
 
+  camera.removeAttribute("scene-preview-camera");
   camera.setAttribute("scene-preview-camera", "positionOnly: true; duration: 60");
 }
 
@@ -989,10 +990,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const environmentScene = document.querySelector("#environment-scene");
 
   const onFirstEnvironmentLoad = () => {
-    if (!scene.is("entered")) {
-      setupLobbyCamera();
-    }
-
     // Replace renderer with a noop renderer to reduce bot resource usage.
     if (isBotMode) {
       runBotMode(scene, entryManager);
@@ -1004,6 +1001,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   environmentScene.addEventListener("model-loaded", onFirstEnvironmentLoad);
 
   environmentScene.addEventListener("model-loaded", () => {
+    if (!scene.is("entered")) {
+      setupLobbyCamera();
+    }
+
     // This will be run every time the environment is changed (including the first load.)
     remountUI({ environmentSceneLoaded: true });
     scene.emit("environment-scene-loaded");
