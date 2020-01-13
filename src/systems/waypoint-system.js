@@ -1,6 +1,7 @@
 import { setMatrixWorld, affixToWorldUp } from "../utils/three-utils";
 import { isTagged } from "../components/tags";
 import { applyPersistentSync } from "../utils/permissions-utils";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 const calculateIconTransform = (function() {
   const up = new THREE.Vector3();
   const backward = new THREE.Vector3();
@@ -124,9 +125,11 @@ export class WaypointSystem {
     this.elementsFromTemplatesFor = {};
     this.eventHandlers = [];
     this.lostOwnershipOfWaypoint = this.lostOwnershipOfWaypoint.bind(this);
-    loadTemplateAndAddToScene(scene, "waypoint-preview-avatar-template").then(el => {
-      this.waypointPreviewAvatar = el;
-      this.waypointPreviewAvatar.object3D.visible = false;
+    waitForDOMContentLoaded().then(() => {
+      loadTemplateAndAddToScene(scene, "waypoint-preview-avatar-template").then(el => {
+        this.waypointPreviewAvatar = el;
+        this.waypointPreviewAvatar.object3D.visible = false;
+      });
     });
     this.characterController = characterController;
   }
