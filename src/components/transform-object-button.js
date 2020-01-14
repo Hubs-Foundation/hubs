@@ -228,9 +228,6 @@ AFRAME.registerSystem("transform-selected-object", {
   },
 
   puppetingTick() {
-    // Find controller delta as a quaternion, then apply it to the object, snapping in fixed increments if desired:
-    // Snap to fixed angle increments by converting to an Euler,
-    // restricting the angles using Math.floor, and converting back to a quaternion.
     const {
       currentControllerOrientation,
       controllerOrientationDelta,
@@ -239,7 +236,10 @@ AFRAME.registerSystem("transform-selected-object", {
     } = this.puppet;
     this.hand.getWorldQuaternion(currentControllerOrientation);
     controllerOrientationDelta.copy(initialControllerOrientation_inverse).premultiply(currentControllerOrientation);
-    this.target.quaternion.copy(initialObjectOrientation).premultiply(controllerOrientationDelta);
+    this.target.quaternion
+      .copy(initialObjectOrientation)
+      .premultiply(controllerOrientationDelta)
+      .premultiply(controllerOrientationDelta);
     this.target.matrixNeedsUpdate = true;
   },
 
