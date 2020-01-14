@@ -97,6 +97,10 @@
   align-items: center;
 }
 
+:local(.action-button-placeholder) {
+  height: 48px;
+}
+
 :local(.left-action-buttons), :local(.right-action-buttons) {
   display: flex;
   justify-content: center;

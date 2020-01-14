@@ -184,13 +184,15 @@ export default class ObjectInfoDialog extends Component {
                 </button>
               )}
               {this.props.scene.is("entered") &&
-                !pinned &&
-                this.props.hubChannel &&
-                this.props.hubChannel.can("spawn_and_move_media") && (
-                  <button onClick={this.remove.bind(this)}>
-                    <FormattedMessage id="object-info.remove-button" />
-                  </button>
-                )}
+              !pinned &&
+              this.props.hubChannel &&
+              this.props.hubChannel.can("spawn_and_move_media") ? (
+                <button onClick={this.remove.bind(this)}>
+                  <FormattedMessage id="object-info.remove-button" />
+                </button>
+              ) : (
+                <div className={styles.actionButtonPlaceholder} />
+              )}
               {this.props.scene.is("entered") &&
                 this.props.hubChannel &&
                 this.props.hubChannel.can("pin_objects") && (
