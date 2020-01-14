@@ -1777,10 +1777,7 @@ class UIRoot extends Component {
                 pinned={this.state.objectInfo && this.state.objectInfo.components["networked"].data.persistent}
                 hubChannel={this.props.hubChannel}
                 onPinChanged={() => switchToInspectingObject(this.state.objectInfo)}
-                onNavigated={idx => {
-                  const el = this.props.scene.systems["listed-media"].els[idx];
-                  switchToInspectingObject(el);
-                }}
+                onNavigated={el => switchToInspectingObject(el)}
                 onClose={() => {
                   if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
                     this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();

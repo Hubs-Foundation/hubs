@@ -108,7 +108,7 @@ export default class ObjectInfoDialog extends Component {
     const { mediaEntities } = this.state;
     let targetIndex = (mediaEntities.indexOf(this.props.el) + direction) % mediaEntities.length;
     targetIndex = targetIndex === -1 ? mediaEntities.length - 1 : targetIndex;
-    this.props.onNavigated && this.props.onNavigated(targetIndex);
+    this.props.onNavigated && this.props.onNavigated(mediaEntities[targetIndex]);
   }
 
   remove() {
