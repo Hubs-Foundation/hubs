@@ -140,7 +140,7 @@ export default class ClientInfoDialog extends Component {
           <div className={styles.clientProfileImage}>
             <img src={this.state.avatarThumbnailUrl} />
           </div>
-          <div className={styles.clientActionButtons}>
+          <div className={styles.primaryActionButtons}>
             {mayAddOwner && (
               <button
                 onClick={() => this.addOwner()}
