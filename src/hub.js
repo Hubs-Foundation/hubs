@@ -1136,7 +1136,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     presenceLogEntries.push(entry);
     remountUI({ presenceLogEntries });
-    if (entry.type === "chat") {
+    if (entry.type === "chat" && scene.is("loaded")) {
       scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CHAT_MESSAGE);
     }
 
