@@ -1,4 +1,5 @@
 import { setMatrixWorld } from "../utils/three-utils";
+import { TRANSFORM_MODE } from "./transform-object-button";
 
 const calculatePlaneMatrix = (function() {
   const planeMatrix = new THREE.Matrix4();
@@ -75,12 +76,10 @@ AFRAME.registerComponent("scale-button", {
       if (!this.didGetObjectReferences) {
         this.didGetObjectReferences = true;
         this.leftEventer = document.getElementById("left-cursor").object3D;
-        this.leftRaycaster = document.getElementById("left-cursor-controller").components[
-          "cursor-controller"
-        ].raycaster;
-        this.rightRaycaster = document.getElementById("right-cursor-controller").components[
-          "cursor-controller"
-        ].raycaster;
+        this.leftCursorController = document.getElementById("left-cursor-controller");
+        this.leftRaycaster = this.leftCursorController.components["cursor-controller"].raycaster;
+        this.rightCursorController = document.getElementById("right-cursor-controller");
+        this.rightRaycaster = this.rightCursorController.components["cursor-controller"].raycaster;
         this.viewingCamera = document.getElementById("viewing-camera").object3D;
       }
       this.plane = e.object3D === this.leftEventer ? planeForLeftCursor : planeForRightCursor;
@@ -102,13 +101,28 @@ AFRAME.registerComponent("scale-button", {
         )
         .length();
       window.APP.store.update({ activity: { hasScaled: true } });
+
+      // TODO: Refactor transform-selected-object system so this isn't so awkward
+      this.transformSelectedObjectSystem =
+        this.transformSelectedObjectSystem || this.el.sceneEl.systems["transform-selected-object"];
+      this.transformSelectedObjectSystem.transforming = true;
+      this.transformSelectedObjectSystem.mode = TRANSFORM_MODE.SCALE;
+      this.transformSelectedObjectSystem.target = this.objectToScale;
+      this.transformSelectedObjectSystem.hand =
+        e.object3D === this.leftEventer ? this.leftCursorController.object3D : this.rightCursorController.object3D;
     };
     this.endScaling = e => {
+      if (!this.isScaling) {
+        return;
+      }
       if (
         (e.object3D === this.leftEventer && this.raycaster === this.leftRaycaster) ||
         (e.object3D !== this.leftEventer && this.raycaster === this.rightRaycaster)
       ) {
         this.isScaling = false;
+        this.transformSelectedObjectSystem =
+          this.transformSelectedObjectSystem || this.el.sceneEl.systems["transform-selected-object"];
+        this.transformSelectedObjectSystem.transforming = false;
       }
     };
     this.el.object3D.addEventListener("holdable-button-down", this.startScaling);

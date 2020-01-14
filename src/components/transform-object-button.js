@@ -3,11 +3,12 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 const AMMO_BODY_ATTRIBUTES = { type: "kinematic", collisionFilterMask: COLLISION_LAYERS.HANDS };
 
-const TRANSFORM_MODE = {
+export const TRANSFORM_MODE = {
   AXIS: "axis",
   PUPPET: "puppet",
   CURSOR: "cursor",
-  ALIGN: "align"
+  ALIGN: "align",
+  SCALE: "scale"
 };
 
 const STEP_LENGTH = Math.PI / 10;
@@ -319,6 +320,10 @@ AFRAME.registerSystem("transform-selected-object", {
   tick() {
     if (!this.transforming) {
       return;
+    }
+
+    if (this.mode === TRANSFORM_MODE.SCALE) {
+      return; // Taken care of by scale-button
     }
 
     if (this.mode === TRANSFORM_MODE.ALIGN) {
