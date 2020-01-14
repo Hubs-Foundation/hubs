@@ -107,6 +107,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 48px;
 }
 
 :local(.navigation-button) {
@@ -119,6 +120,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin: 0px 24px;
 
   button {
     position: relative;
