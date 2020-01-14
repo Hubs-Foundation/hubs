@@ -15,7 +15,6 @@ export default class ObjectInfoDialog extends Component {
   static propTypes = {
     scene: PropTypes.object,
     el: PropTypes.object,
-    objectDisplayString: PropTypes.string,
     pinned: PropTypes.bool,
     src: PropTypes.string,
     onClose: PropTypes.func,
@@ -155,13 +154,8 @@ export default class ObjectInfoDialog extends Component {
                 <FontAwesomeIcon icon={faTimes} />
               </i>
             </button>
-            <a
-              className={styles.objectDisplayString}
-              href={this.props.objectDisplayString}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {this.props.objectDisplayString}
+            <a className={styles.objectDisplayString} href={this.props.src} target="_blank" rel="noopener noreferrer">
+              <FormattedMessage id={`object-info.open-link`} />
             </a>
           </div>
           <div className={styles.actionButtonSections}>

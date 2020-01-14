@@ -366,6 +366,7 @@
     "client-info.add-owner": "Promote",
     "client-info.remove-owner": "Demote",
     "object-info.remove-button": "Remove",
+    "object-info.open-link": "Open Link",
     "object-info.waypoint": "Go To",
     "object-info.pin-button": "Pin",
     "object-info.raise-lights": "Show Background",
