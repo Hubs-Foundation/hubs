@@ -605,9 +605,9 @@ AFRAME.registerComponent("media-video", {
     const contentType = this.data.contentType;
 
     return new Promise(async (resolve, reject) => {
-      if (this.audioEl) {
+      if (this._audioSyncInterval) {
         clearInterval(this._audioSyncInterval);
-        this.audioEl = null;
+        this._audioSyncInterval = null;
       }
 
       const videoEl = await createVideoOrAudioEl("video");
@@ -813,6 +813,11 @@ AFRAME.registerComponent("media-video", {
 
   remove() {
     this.cleanUp();
+
+    if (this._audioSyncInterval) {
+      clearInterval(this._audioSyncInterval);
+      this._audioSyncInterval = null;
+    }
 
     if (this.audio) {
       this.el.removeObject3D("sound");
