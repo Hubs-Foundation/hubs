@@ -13,3 +13,13 @@ export function m4String(mat4) {
     ""
   ].join("\n");
 }
+export function qString(q) {
+  return ["", q.x, q.y, q.z, q.w, ""].join("\n");
+}
+if (new URL(location.href).hostname.indexOf("local") !== -1) {
+  window.prettyPrint = {
+    v3String,
+    m4String,
+    qString
+  };
+}

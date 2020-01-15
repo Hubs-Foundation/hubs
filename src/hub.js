@@ -112,6 +112,7 @@ import "./components/periodic-full-syncs";
 import "./components/inspect-button";
 import "./components/set-max-resolution";
 import { sets as userinputSets } from "./systems/userinput/sets";
+import "./utils/pretty-print";
 
 import ReactDOM from "react-dom";
 import React from "react";
