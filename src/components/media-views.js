@@ -108,19 +108,19 @@ async function createGIFTexture(url) {
  * @param {string} src - Url to a video file.
  * @returns {Element} Video element.
  */
-async function createVideoEl() {
-  const videoEl = document.createElement("video");
-  videoEl.setAttribute("playsinline", "");
-  videoEl.setAttribute("webkit-playsinline", "");
+async function createVideoOrAudioEl(type) {
+  const el = document.createElement(type);
+  el.setAttribute("playsinline", "");
+  el.setAttribute("webkit-playsinline", "");
   // iOS Safari requires the autoplay attribute, or it won't play the video at all.
-  videoEl.autoplay = true;
+  el.autoplay = true;
   // iOS Safari will not play videos without user interaction. We mute the video so that it can autoplay and then
   // allow the user to unmute it with an interaction in the unmute-video-button component.
-  videoEl.muted = isIOS;
-  videoEl.preload = "auto";
-  videoEl.crossOrigin = "anonymous";
+  el.muted = isIOS;
+  el.preload = "auto";
+  el.crossOrigin = "anonymous";
 
-  return videoEl;
+  return el;
 }
 
 function scaleToAspectRatio(el, ratio) {
@@ -222,6 +222,7 @@ function timeFmt(t) {
 AFRAME.registerComponent("media-video", {
   schema: {
     src: { type: "string" },
+    audioSrc: { type: "string" },
     contentType: { type: "string" },
     volume: { type: "number", default: 0.5 },
     loop: { type: "boolean", default: true },
@@ -480,9 +481,9 @@ AFRAME.registerComponent("media-video", {
       this.mesh.material.needsUpdate = true;
     }
 
-    let texture;
+    let texture, audioSource;
     try {
-      texture = await this.createVideoTexture();
+      ({ texture, audioSource } = await this.createVideoTextureAndAudioSource());
 
       // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
       if (this.data.src !== src) {
@@ -494,7 +495,7 @@ AFRAME.registerComponent("media-video", {
         // iOS video audio is broken, see: https://github.com/mozilla/hubs/issues/1797
         if (!isIOS) {
           // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
-          texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
+          const mediaAudioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(audioSource);
 
           if (this.data.audioType === "pannernode") {
             this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
@@ -509,7 +510,7 @@ AFRAME.registerComponent("media-video", {
             this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
           }
 
-          this.audio.setNodeSource(texture.audioSource);
+          this.audio.setNodeSource(mediaAudioSource);
           this.el.setObject3D("sound", this.audio);
         }
       }
@@ -599,14 +600,19 @@ AFRAME.registerComponent("media-video", {
     this.el.emit("video-loaded", { projection: projection });
   },
 
-  async createVideoTexture() {
+  async createVideoTextureAndAudioSource() {
     const url = this.data.src;
     const contentType = this.data.contentType;
 
     return new Promise(async (resolve, reject) => {
-      const videoEl = await createVideoEl();
+      if (this.audioEl) {
+        clearInterval(this._audioSyncInterval);
+        this.audioEl = null;
+      }
 
-      let texture, isReady;
+      const videoEl = await createVideoOrAudioEl("video");
+
+      let texture, audioEl, isReady;
       if (contentType.startsWith("audio/")) {
         // We want to treat audio almost exactly like video, so we mock a video texture with an image property.
         texture = new THREE.Texture();
@@ -700,13 +706,31 @@ AFRAME.registerComponent("media-video", {
       } else {
         videoEl.src = url;
         videoEl.onerror = reject;
+
+        if (this.data.audioSrc) {
+          audioEl = await createVideoOrAudioEl("audio");
+          audioEl.src = this.data.audioSrc;
+          audioEl.onerror = reject;
+
+          this._audioSyncInterval = setInterval(() => {
+            if (Math.abs(audioEl.currentTime - videoEl.currentTime) >= 0.33) {
+              // In Chrome, drift of a few frames seems persistent
+              audioEl.currentTime = videoEl.currentTime;
+            }
+
+            if (videoEl.paused !== audioEl.paused) {
+              videoEl.paused ? audioEl.pause() : audioEl.play();
+              audioEl.currentTime = videoEl.currentTime;
+            }
+          }, 1000);
+        }
       }
 
       // NOTE: We used to use the canplay event here to yield the texture, but that fails to fire on iOS Safari
       // and also sometimes in Chrome it seems.
       const poll = () => {
         if (isReady()) {
-          resolve(texture);
+          resolve({ texture, audioSource: audioEl || texture.image });
         } else {
           setTimeout(poll, 500);
         }
