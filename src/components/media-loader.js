@@ -237,12 +237,6 @@ AFRAME.registerComponent("media-loader", {
 
       this.updateHoverableVisuals();
 
-      const pager = el.components["media-pager"];
-
-      if (pager) {
-        pager.repositionToolbar();
-      }
-
       el.emit("media-loaded");
     };
 
@@ -513,37 +507,16 @@ AFRAME.registerComponent("media-pager", {
   },
 
   init() {
-    this.toolbar = null;
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
     this.onSnap = this.onSnap.bind(this);
 
-    NAF.utils
-      .getNetworkedEntity(this.el)
-      .then(networkedEl => {
-        this.networkedEl = networkedEl;
-      })
-      .catch(() => {}); //ignore exception, entity might not be networked
+    this.el.setAttribute("hover-menu__pager", { template: "#pager-hover-menu", dirs: ["forward", "back"] });
+    this.el.components["hover-menu__pager"].getHoverMenu().then(menu => {
+      // If we got removed while waiting, do nothing.
+      if (!this.el.parentNode) return;
 
-    this.el.addEventListener("pdf-loaded", async () => {
-      await this._ensureUI();
-      this.update();
-    });
-  },
-
-  async _ensureUI() {
-    if (this.hasSetupUI) return;
-    if (!this.data.maxIndex) return;
-
-    this.hasSetupUI = true;
-
-    // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
-    // request for the same page to read out the max-content-index header
-    const template = document.getElementById("paging-toolbar");
-    this.el.querySelector(".interactable-ui").appendChild(document.importNode(template.content, true));
-    this.toolbar = this.el.querySelector(".paging-toolbar");
-    // we have to wait a tick for the attach callbacks to get fired for the elements in a template
-    setTimeout(() => {
+      this.hoverMenu = menu;
       this.nextButton = this.el.querySelector(".next-button [text-button]");
       this.prevButton = this.el.querySelector(".prev-button [text-button]");
       this.snapButton = this.el.querySelector(".snap-button [text-button]");
@@ -555,15 +528,23 @@ AFRAME.registerComponent("media-pager", {
 
       this.update();
       this.el.emit("pager-loaded");
-    }, 0);
+    });
+
+    NAF.utils
+      .getNetworkedEntity(this.el)
+      .then(networkedEl => {
+        this.networkedEl = networkedEl;
+      })
+      .catch(() => {}); //ignore exception, entity might not be networked
+
+    this.el.addEventListener("pdf-loaded", async () => {
+      this.update();
+    });
   },
 
   async update() {
-    await this._ensureUI();
-
     if (this.pageLabel) {
       this.pageLabel.setAttribute("text", "value", `${this.data.index + 1}/${this.data.maxIndex + 1}`);
-      this.repositionToolbar();
     }
   },
 
@@ -585,14 +566,5 @@ AFRAME.registerComponent("media-pager", {
 
   onSnap() {
     this.el.emit("pager-snap-clicked");
-  },
-
-  repositionToolbar() {
-    const ammoShape = this.el.getAttribute("shape-helper");
-    if (!ammoShape) return;
-    if (!this.toolbar) return;
-
-    this.toolbar.object3D.position.y = 0.7;
-    this.toolbar.object3D.matrixNeedsUpdate = true;
   }
 });

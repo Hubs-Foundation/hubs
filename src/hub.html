@@ -628,10 +628,10 @@
                 </a-entity>
             </template>
 
-            <template id="paging-toolbar">
-                <a-entity class="ui paging-toolbar" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;">
-                    <a-entity class="prev-button" position="-0.3 0 0">
-                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.2">
+            <template id="pager-hover-menu">
+                <a-entity class="ui interactable-ui hover-container" visible="false">
+                    <a-entity class="prev-button" position="-0.35 0 0">
+                        <a-entity is-remote-hover-target tags="singleActionButton:true; isHoverMenuChild: true;" mixin="rounded-text-button" slice9="width: 0.2">
                             <a-entity
                                 sprite
                                 icon-button="image: prev.png; hoverImage: prev.png;"
@@ -640,9 +640,9 @@
                             ></a-entity>
                         </a-entity>
                     </a-entity>
-                    <a-entity class="page-label" position="0 0.1 0" text="value:.; width:2; align:center;" text-raycast-hack></a-entity>
-                    <a-entity class="snap-button" position="0 -0.1 0" scale="0.75 0.75 1">
-                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.2">
+                    <a-entity class="page-label" position="0 -0.2 0" text="value:.; width:2; align:center;" text-raycast-hack></a-entity>
+                    <a-entity class="snap-button" position="0 0.175 0" scale="0.75 0.75 1">
+                        <a-entity is-remote-hover-target tags="singleActionButton:true; isHoverMenuChild: true;" mixin="rounded-text-button" slice9="width: 0.2">
                             <a-entity
                                 sprite
                                 icon-button="image: snap-page.png; hoverImage: snap-page.png;"
@@ -651,8 +651,8 @@
                             ></a-entity>
                         </a-entity>
                     </a-entity>
-                    <a-entity class="next-button" position="0.3 0 0">
-                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.2">
+                    <a-entity class="next-button" position="0.35 0 0">
+                        <a-entity is-remote-hover-target tags="singleActionButton:true; isHoverMenuChild: true;" mixin="rounded-text-button" slice9="width: 0.2">
                             <a-entity
                                 sprite
                                 icon-button="image: next.png; hoverImage: next.png;"
@@ -1141,6 +1141,9 @@
                 </a-entity>
                 <a-entity text="value:View your desktop to continue; width:1; align:center;" position="0 0 0.001"></a-entity>
             </a-entity>
+        </a-entity>
+        <a-entity matrix-auto-update class="ui interactable-ui media-mirror" follow-in-fov="target: #avatar-pov-node; offset: 0 0 -0.8; angle: 39;" visible="false">
+            <a-entity id="media-mirror-target"></a-entity>
         </a-entity>
         <a-entity id="viewing-rig" set-yxz-order matrix-auto-update>
             <a-entity
