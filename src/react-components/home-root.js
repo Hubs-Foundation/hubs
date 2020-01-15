@@ -45,6 +45,7 @@ class HomeRoot extends Component {
     hideHero: PropTypes.bool,
     showAdmin: PropTypes.bool,
     favoriteHubsResult: PropTypes.object,
+    publicRoomsResult: PropTypes.object,
     showSignIn: PropTypes.bool,
     signInDestination: PropTypes.string,
     signInReason: PropTypes.string
@@ -218,6 +219,11 @@ class HomeRoot extends Component {
             </div>
             <div className={styles.heroContent} style={{ backgroundImage: configs.image("home_background", true) }}>
               {!this.props.hideHero &&
+                (this.props.publicRoomsResult &&
+                  this.props.publicRoomsResult.entries &&
+                  this.props.publicRoomsResult.entries.length > 0 &&
+                  this.renderPublicRoomsHero())}
+              {!this.props.hideHero &&
                 (this.props.favoriteHubsResult &&
                 this.props.favoriteHubsResult.entries &&
                 this.props.favoriteHubsResult.entries.length > 0 &&
@@ -363,7 +369,7 @@ class HomeRoot extends Component {
     );
   }
 
-  renderFavoriteHero() {
+  renderPublicRoomsHero() {
     return [
       <div className={styles.heroPanel} key={1}>
         <div className={styles.container}>
@@ -379,11 +385,23 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel} key={2}>
         <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
           <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-            <MediaTiles result={this.props.favoriteHubsResult} urlSource="favorites" />
+            <MediaTiles result={this.props.favoriteHubsResult} urlSource="public_rooms" />
           </div>
         </div>
       </div>
     ];
+  }
+
+  renderFavoriteHero() {
+    return (
+      <div className={styles.heroPanel} key={2}>
+        <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
+          <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
+            <MediaTiles result={this.props.publicRoomsResult} urlSource="favorites" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   renderNonFavoriteHero() {

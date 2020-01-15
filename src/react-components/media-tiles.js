@@ -185,6 +185,7 @@ class MediaTiles extends Component {
       PUBLISHER_FOR_ENTRY_TYPE[entry.type];
 
     const { formatMessage } = this.props.intl;
+    const { urlSource } = this.props;
 
     return (
       <div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`${entry.id}_${idx}`}>
@@ -283,8 +284,12 @@ class MediaTiles extends Component {
             {isHub && (
               <div className={styles.attribution}>
                 <div className={styles.lastJoined}>
-                  <FormattedMessage id="media-browser.hub.joined-prefix" />
-                  {dayjs(entry.last_activated_at).fromNow()}
+                  {urlSource === "public_rooms"
+                    ? "5 participants"
+                    : [
+                        <FormattedMessage key="1" id="media-browser.hub.joined-prefix" />,
+                        dayjs(entry.last_activated_at).fromNow()
+                      ]}
                 </div>
               </div>
             )}

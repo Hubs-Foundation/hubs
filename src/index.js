@@ -26,6 +26,7 @@ let favoriteHubsResult = null;
 let mountedUI = false;
 let hideHero = true;
 let showAdmin = false;
+let publicRoomsResult = null;
 
 const remountUI = function() {
   mountedUI = true;
@@ -45,6 +46,7 @@ const remountUI = function() {
       hideHero={hideHero}
       showAdmin={showAdmin}
       favoriteHubsResult={favoriteHubsResult}
+      publicRoomsResult={publicRoomsResult}
       installEvent={installEvent}
     />
   );
@@ -85,6 +87,9 @@ window.addEventListener("beforeinstallprompt", e => {
   const socket = await connectToReticulum();
 
   authChannel.setSocket(socket);
+  remountUI();
+
+  publicRoomsResult = await fetchReticulumAuthenticated("/api/v1/media/search?source=public_rooms");
   remountUI();
 
   if (authChannel.signedIn) {
