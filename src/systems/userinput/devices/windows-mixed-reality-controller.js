@@ -33,9 +33,11 @@ export class WindowsMixedRealityControllerDevice {
     this.position = new THREE.Vector3();
     this.orientation = new THREE.Quaternion();
   }
-  write(frame) {
-    if (!this.gamepad) return;
-    this.gamepad = navigator.getGamepads()[this.gamepad.index];
+  write(frame, scene, xrReferenceSpace) {
+    if (window.hasNativeWebVRImplementation) {
+      if (!this.gamepad) return;
+      this.gamepad = navigator.getGamepads()[this.gamepad.index];
+    }
     if (!this.gamepad || !this.gamepad.connected) return;
 
     const path = paths.device.wmr[this.gamepad.hand || "right"];
@@ -75,18 +77,32 @@ export class WindowsMixedRealityControllerDevice {
     this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
     frame.setPose(path.pose, this.pose);
 
-    if (this.gamepad.pose.position && this.gamepad.pose.orientation) {
-      frame.setMatrix4(
-        path.matrix,
-        this.matrix
-          .compose(
-            this.position.fromArray(this.gamepad.pose.position),
-            this.orientation.fromArray(this.gamepad.pose.orientation),
-            ONES
-          )
-          .premultiply(this.sittingToStandingMatrix)
-          .multiply(HAND_OFFSET)
+    let gamepadPose;
+    if (xrReferenceSpace) {
+      const xrPose = scene.frame.getPose(this.gamepad.targetRaySpace, xrReferenceSpace);
+      gamepadPose = xrPose && xrPose.transform;
+    } else {
+      gamepadPose = this.gamepad.pose;
+    }
+
+    if (gamepadPose && gamepadPose.position && gamepadPose.orientation) {
+      const position = xrReferenceSpace
+        ? this.position.copy(gamepadPose.position)
+        : this.position.fromArray(gamepadPose.position);
+      const orientation = xrReferenceSpace
+        ? this.orientation.copy(gamepadPose.orientation)
+        : this.orientation.fromArray(gamepadPose.orientation);
+      this.matrix.compose(
+        position,
+        orientation,
+        ONES
       );
+      if (!xrReferenceSpace) {
+        this.matrix.premultiply(this.sittingToStandingMatrix);
+      }
+      this.matrix.multiply(HAND_OFFSET);
+
+      frame.setMatrix4(path.matrix, this.matrix);
     }
 
     if (this.gamepad.hapticActuators && this.gamepad.hapticActuators[0]) {

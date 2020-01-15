@@ -355,22 +355,23 @@ AFRAME.registerSystem("userinput", {
           return; // multiple connect events without a disconnect event
         }
       }
+      const gamepadId = e.gamepad.primaryProfile || e.gamepad.id;
       // HACK Firefox Nightly bug causes corrupt gamepad names for OpenVR, so do startsWith
       if (
-        e.gamepad.id.startsWith("OpenVR Gamepad") ||
-        e.gamepad.id === "HTC Vive Focus Plus Controller" ||
-        e.gamepad.id === "OpenVR Cosmos"
+        gamepadId.startsWith("OpenVR Gamepad") ||
+        gamepadId === "HTC Vive Focus Plus Controller" ||
+        gamepadId === "OpenVR Cosmos"
       ) {
         gamepadDevice = new ViveControllerDevice(e.gamepad);
-      } else if (e.gamepad.id.startsWith("Oculus Touch")) {
+      } else if (gamepadId.startsWith("Oculus Touch")) {
         gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
-      } else if (e.gamepad.id.startsWith("Spatial Controller")) {
+      } else if (["Spatial Controller", "windows-mixed-reality"].some(n => gamepadId.startsWith(n))) {
         gamepadDevice = new WindowsMixedRealityControllerDevice(e.gamepad);
-      } else if (e.gamepad.id === "Oculus Go Controller") {
+      } else if (gamepadId === "Oculus Go Controller") {
         gamepadDevice = new OculusGoControllerDevice(e.gamepad);
-      } else if (e.gamepad.id === "Gear VR Controller" || e.gamepad.id === "HTC Vive Focus Controller") {
+      } else if (gamepadId === "Gear VR Controller" || gamepadId === "HTC Vive Focus Controller") {
         gamepadDevice = new GearVRControllerDevice(e.gamepad);
-      } else if (e.gamepad.id === "Daydream Controller") {
+      } else if (gamepadId === "Daydream Controller") {
         gamepadDevice = new DaydreamControllerDevice(e.gamepad);
       } else if (e.gamepad.mapping === "standard") {
         // Our XboxController device and bindings should be generic enough for most gamepads.
@@ -408,14 +409,20 @@ AFRAME.registerSystem("userinput", {
 
     const retrieveXRGamepads = ({ session }) => {
       for (const inputSource of session.inputSources) {
+        inputSource.gamepad.targetRaySpace = inputSource.targetRaySpace;
+        inputSource.gamepad.primaryProfile = inputSource.profiles[0];
         inputSource.gamepad.hand = inputSource.handedness;
         gamepadConnected({ gamepad: inputSource.gamepad });
       }
     };
 
+    this.xrReferenceSpace = null;
     this.el.sceneEl.addEventListener("enter-vr", () => {
       if (window.hasNativeWebXRImplementation) {
         const session = this.el.sceneEl.xrSession;
+        session.requestReferenceSpace("local-floor").then(referenceSpace => {
+          this.xrReferenceSpace = referenceSpace;
+        });
         session.addEventListener("inputsourceschange", retrieveXRGamepads);
         retrieveXRGamepads({ session });
       }
@@ -494,7 +501,7 @@ AFRAME.registerSystem("userinput", {
     }
 
     for (let i = 0; i < this.activeDevices.items.length; i++) {
-      this.activeDevices.items[i].write(this.frame);
+      this.activeDevices.items[i].write(this.frame, this.el.sceneEl, this.xrReferenceSpace);
     }
 
     for (let i = 0; i < this.sortedBindings.length; i++) {

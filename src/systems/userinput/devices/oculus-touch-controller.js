@@ -60,8 +60,10 @@ export class OculusTouchControllerDevice {
   }
 
   write(frame) {
-    if (!this.gamepad) return;
-    this.gamepad = navigator.getGamepads()[this.gamepad.index];
+    if (window.hasNativeWebVRImplementation) {
+      if (!this.gamepad) return;
+      this.gamepad = navigator.getGamepads()[this.gamepad.index];
+    }
     if (!this.gamepad || !this.gamepad.connected) return;
 
     this.buttonMap.forEach(b => {

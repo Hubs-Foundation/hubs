@@ -82,13 +82,15 @@ export class ViveControllerDevice {
   }
 
   write(frame) {
-    const gamepads = navigator.getGamepads();
-    if (gamepads.length < this.gamepad.index + 1) {
-      //workaround for: https://bugzilla.mozilla.org/show_bug.cgi?id=1568076
-      return;
+    if (window.hasNativeWebVRImplementation) {
+      const gamepads = navigator.getGamepads();
+      if (gamepads.length < this.gamepad.index + 1) {
+        //workaround for: https://bugzilla.mozilla.org/show_bug.cgi?id=1568076
+        return;
+      }
+      this.gamepad = gamepads[this.gamepad.index];
     }
-    this.gamepad = gamepads[this.gamepad.index];
-    if (!this.gamepad.connected) return;
+    if (!this.gamepad || !this.gamepad.connected) return;
 
     this.buttonMap.forEach(b => {
       const path = this.path.button(b.name);
