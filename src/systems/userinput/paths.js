@@ -120,6 +120,7 @@ paths.actions.inspectZoom = "/actions/inspectZoom";
 paths.actions.inspectPanY = "/actions/inspectPanY";
 paths.actions.resetInspectView = "/actions/resetInspectView";
 paths.actions.nextCameraMode = "/actions/nextCameraMode";
+paths.actions.reorientPlayerOculusTouch = "/actions/rightHand/reorientPlayerOculusTouch";
 paths.haptics = {};
 paths.haptics.actuators = {};
 paths.haptics.actuators.left = "/haptics/actuators/left";

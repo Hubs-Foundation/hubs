@@ -468,6 +468,15 @@ export const oculusTouchUserBindings = addSetsToBindings({
       xform: xforms.rising
     },
     {
+      src: {
+        value: rightButton("b").pressed
+      },
+      dest: {
+        value: paths.actions.reorientPlayerOculusTouch
+      },
+      xform: xforms.rising
+    },
+    {
       src: [keyboardBoost, leftBoost, rightBoost],
       dest: { value: paths.actions.boost },
       xform: xforms.any
