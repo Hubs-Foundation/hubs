@@ -708,6 +708,8 @@ AFRAME.registerComponent("media-video", {
         videoEl.onerror = reject;
 
         if (this.data.audioSrc) {
+          // If there's an audio src, create an audio element to play it that we keep in sync
+          // with the video while this component is active.
           audioEl = await createVideoOrAudioEl("audio");
           audioEl.src = this.data.audioSrc;
           audioEl.onerror = reject;
