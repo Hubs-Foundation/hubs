@@ -1,5 +1,6 @@
 import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
+import { ObjectContentOrigins } from "../object-types";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
@@ -114,12 +115,35 @@ export const addMedia = (
   resolve = false,
   fitToBox = false,
   animate = true,
-  mediaOptions = {}
+  mediaOptions = {},
+  networked = true
 ) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
-  entity.setAttribute("networked", { template: template });
+
+  if (networked) {
+    entity.setAttribute("networked", { template: template });
+  } else {
+    const templateBody = document
+      .importNode(document.body.querySelector(template).content, true)
+      .firstElementChild.cloneNode(true);
+    const elAttrs = templateBody.attributes;
+
+    // Merge root element attributes with this entity
+    for (let attrIdx = 0; attrIdx < elAttrs.length; attrIdx++) {
+      entity.setAttribute(elAttrs[attrIdx].name, elAttrs[attrIdx].value);
+    }
+
+    // Append all child elements
+    while (templateBody.firstElementChild) {
+      entity.appendChild(templateBody.firstElementChild);
+    }
+
+    // Components which are known to break when non-networked
+    entity.removeAttribute("pin-networked-object-button");
+  }
+
   const needsToBeUploaded = src instanceof File;
 
   // If we're re-pasting an existing src in the scene, we should use the latest version
@@ -179,6 +203,26 @@ export const addMedia = (
   }
 
   return { entity, orientation };
+};
+
+export const cloneMedia = (sourceEl, template, src = null, networked = true) => {
+  if (!src) {
+    ({ src } = sourceEl.components["media-loader"].data);
+  }
+
+  const { contentSubtype, fitToBox, mediaOptions } = sourceEl.components["media-loader"].data;
+
+  return addMedia(
+    src,
+    template,
+    ObjectContentOrigins.URL,
+    contentSubtype,
+    true,
+    fitToBox,
+    false,
+    mediaOptions,
+    networked
+  );
 };
 
 export function injectCustomShaderChunks(obj) {

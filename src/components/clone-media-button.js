@@ -1,5 +1,4 @@
-import { addMedia } from "../utils/media-utils";
-import { ObjectContentOrigins } from "../object-types";
+import { cloneMedia } from "../utils/media-utils";
 import { guessContentType } from "../utils/media-url-utils";
 
 AFRAME.registerComponent("clone-media-button", {
@@ -18,18 +17,7 @@ AFRAME.registerComponent("clone-media-button", {
     });
 
     this.onClick = () => {
-      const src = this.src;
-      const { contentSubtype, fitToBox, customMeshScale } = this.targetEl.components["media-loader"].data;
-      const { entity } = addMedia(
-        src,
-        "#interactable-media",
-        ObjectContentOrigins.URL,
-        contentSubtype,
-        true,
-        fitToBox,
-        false,
-        customMeshScale
-      );
+      const { entity } = cloneMedia(this.targetEl, "#interactable-media", this.src, false);
       entity.object3D.scale.copy(this.targetEl.object3D.scale);
       entity.object3D.matrixNeedsUpdate = true;
 
@@ -37,6 +25,14 @@ AFRAME.registerComponent("clone-media-button", {
         target: "#avatar-pov-node",
         offset: { x: 0, y: 0, z: -1.5 * this.targetEl.object3D.scale.z }
       });
+
+      entity.addEventListener(
+        "media_resolved",
+        () => {
+          this.el.sceneEl.systems["linked-media"].registerLinkage(this.targetEl, entity);
+        },
+        { once: true }
+      );
     };
   },
 
