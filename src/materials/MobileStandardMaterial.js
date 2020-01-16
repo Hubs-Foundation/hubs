@@ -81,6 +81,7 @@ export default class MobileStandardMaterial extends THREE.ShaderMaterial {
       vertexShader: VERTEX_SHADER,
       fragmentShader: FRAGMENT_SHADER,
       uniforms: {
+        ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog),
         uvTransform: { value: new THREE.Matrix3() },
         diffuse: { value: material.color },
         opacity: { value: material.opacity },
