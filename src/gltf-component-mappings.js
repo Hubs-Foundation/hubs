@@ -3,6 +3,25 @@ import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 
+function registerRootSceneComponent(componentName) {
+  AFRAME.GLTFModelPlus.registerComponent(componentName, componentName, (el, componentName, componentData) => {
+    const sceneEl = AFRAME.scenes[0];
+
+    sceneEl.setAttribute(componentName, componentData);
+
+    sceneEl.addEventListener(
+      "reset_scene",
+      () => {
+        sceneEl.removeAttribute(componentName);
+      },
+      { once: true }
+    );
+  });
+}
+
+registerRootSceneComponent("fog");
+registerRootSceneComponent("background");
+
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
 AFRAME.GLTFModelPlus.registerComponent("sound", "sound");
@@ -49,8 +68,6 @@ AFRAME.GLTFModelPlus.registerComponent("hemisphere-light", "hemisphere-light");
 AFRAME.GLTFModelPlus.registerComponent("point-light", "point-light");
 AFRAME.GLTFModelPlus.registerComponent("spot-light", "spot-light");
 
-AFRAME.GLTFModelPlus.registerComponent("background", "background");
-AFRAME.GLTFModelPlus.registerComponent("fog", "fog");
 AFRAME.GLTFModelPlus.registerComponent("simple-water", "simple-water");
 AFRAME.GLTFModelPlus.registerComponent("skybox", "skybox");
 AFRAME.GLTFModelPlus.registerComponent("layers", "layers");

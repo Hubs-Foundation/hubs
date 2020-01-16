@@ -217,6 +217,7 @@ import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-cap
 import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
+import Editor from "draft-js-plugins-editor/lib/Editor";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -1433,7 +1434,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (stale_fields.includes("scene")) {
       const fader = document.getElementById("viewing-camera").components["fader"];
 
-      fader.fadeOut().then(() => updateEnvironmentForHub(hub, entryManager));
+      fader.fadeOut().then(() => {
+        scene.emit("reset_scene");
+        updateEnvironmentForHub(hub, entryManager);
+      });
 
       addToPresenceLog({
         type: "scene_changed",

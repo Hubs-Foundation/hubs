@@ -1,12 +1,22 @@
 import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise";
 import waterNormalsUrl from "../assets/waternormals.jpg";
 
+const {
+  Mesh,
+  PlaneBufferGeometry,
+  MeshStandardMaterial,
+  MeshPhongMaterial,
+  Vector2,
+  TextureLoader,
+  RepeatWrapping
+} = THREE;
+
 /**
  * Adapted dynamic geometry code from: https://github.com/ditzel/UnityOceanWavesAndShip
  */
 
 class Octave {
-  constructor(speed = new THREE.Vector2(1, 1), scale = new THREE.Vector2(1, 1), height = 0.0025, alternate = true) {
+  constructor(speed = new Vector2(1, 1), scale = new Vector2(1, 1), height = 0.0025, alternate = true) {
     this.speed = speed;
     this.scale = scale;
     this.height = height;
@@ -14,25 +24,9 @@ class Octave {
   }
 }
 
-function vec2Equals(a, b) {
-  return a && b && a.x === b.x && a.y === b.y;
-}
-
-export default class SimpleWater extends THREE.Mesh {
-  static waterNormalsTexture = null;
-
-  static async loadNormalMap(url) {
-    if (!SimpleWater.waterNormalsTexture) {
-      SimpleWater.waterNormalsTexture = await new Promise((resolve, reject) => {
-        new THREE.TextureLoader().load(url, resolve, null, e => reject(`Error loading Image. ${e}`));
-      });
-      SimpleWater.waterNormalsTexture.wrapS = SimpleWater.waterNormalsTexture.wrapT = THREE.RepeatWrapping;
-    }
-    return SimpleWater.waterNormalsTexture;
-  }
-
-  constructor(resolution = 24, lowQuality = false) {
-    const geometry = new THREE.PlaneBufferGeometry(10, 10, resolution, resolution);
+export default class SimpleWater extends Mesh {
+  constructor(normalMap, resolution = 24, lowQuality = false) {
+    const geometry = new PlaneBufferGeometry(10, 10, resolution, resolution);
     geometry.rotateX(-Math.PI / 2);
 
     const waterUniforms = {
@@ -41,9 +35,11 @@ export default class SimpleWater extends THREE.Mesh {
       time: { value: 0 }
     };
 
-    const materialClass = lowQuality ? THREE.MeshPhongMaterial : THREE.MeshStandardMaterial;
+    const materialClass = lowQuality ? MeshPhongMaterial : MeshStandardMaterial;
 
-    const material = new materialClass({ color: 0x0054df });
+    normalMap.wrapS = normalMap.wrapT = RepeatWrapping;
+
+    const material = new materialClass({ color: 0x0054df, normalMap });
     material.name = "SimpleWaterMaterial";
 
     material.onBeforeCompile = shader => {
@@ -122,8 +118,8 @@ export default class SimpleWater extends THREE.Mesh {
 
     super(geometry, material);
 
+    this.lowQuality = lowQuality;
     this.waterUniforms = waterUniforms;
-    this.material.normalMap = SimpleWater.waterNormalsTexture;
 
     if (lowQuality) {
       this.material.specular.set(0xffffff);
@@ -135,8 +131,8 @@ export default class SimpleWater extends THREE.Mesh {
 
     this.resolution = resolution;
     this.octaves = [
-      new Octave(new THREE.Vector2(0.5, 0.5), new THREE.Vector2(1, 1), 0.01, true),
-      new Octave(new THREE.Vector2(0.05, 6), new THREE.Vector2(1, 20), 0.1, false)
+      new Octave(new Vector2(0.5, 0.5), new Vector2(1, 1), 0.01, true),
+      new Octave(new Vector2(0.05, 6), new Vector2(1, 20), 0.1, false)
     ];
 
     this.simplex = new SimplexNoise();
@@ -241,11 +237,33 @@ export default class SimpleWater extends THREE.Mesh {
     this.waterUniforms.time.value = time;
   }
 
-  copy(source, recursive) {
+  clone(recursive) {
+    return new SimpleWater(this.material.normalMap, this.resolution, this.lowQuality).copy(this, recursive);
+  }
+
+  copy(source, recursive = true) {
     super.copy(source, recursive);
-    this.waterUniforms = THREE.UniformsUtils.clone(source.waterUniforms);
+
+    this.opacity = source.opacity;
+    this.color.copy(source.color);
+    this.tideHeight = source.tideHeight;
+    this.tideScale.copy(source.tideScale);
+    this.tideSpeed.copy(source.tideSpeed);
+    this.waveHeight = source.waveHeight;
+    this.waveScale.copy(source.waveScale);
+    this.waveSpeed.copy(source.waveSpeed);
+    this.ripplesSpeed = source.ripplesSpeed;
+    this.ripplesScale = source.ripplesScale;
+
+    return this;
   }
 }
+
+function vec2Equals(a, b) {
+  return a && b && a.x === b.x && a.y === b.y;
+}
+
+let waterNormalMap = null;
 
 AFRAME.registerComponent("simple-water", {
   schema: {
@@ -262,12 +280,11 @@ AFRAME.registerComponent("simple-water", {
   },
 
   init() {
-    this.water = new SimpleWater(undefined, window.APP && window.APP.quality === "low");
+    if (!waterNormalMap) {
+      waterNormalMap = new TextureLoader().load(waterNormalsUrl);
+    }
+    this.water = new SimpleWater(waterNormalMap, undefined, window.APP && window.APP.quality === "low");
     this.el.setObject3D("mesh", this.water);
-
-    SimpleWater.loadNormalMap(waterNormalsUrl).then(normalMap => {
-      this.water.material.normalMap = normalMap;
-    });
   },
 
   update(oldData) {
@@ -313,9 +330,7 @@ AFRAME.registerComponent("simple-water", {
   },
 
   tick(time) {
-    if (this.water) {
-      this.water.update(time / 1000);
-    }
+    this.water.update(time / 1000);
   },
 
   remove() {
