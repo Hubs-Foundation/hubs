@@ -139,9 +139,6 @@ export const addMedia = (
     while (templateBody.firstElementChild) {
       entity.appendChild(templateBody.firstElementChild);
     }
-
-    // Components which are known to break when non-networked
-    entity.removeAttribute("pin-networked-object-button");
   }
 
   const needsToBeUploaded = src instanceof File;

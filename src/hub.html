@@ -434,6 +434,25 @@
                 </a-entity>
             </template>
 
+            <template id="linked-media">
+                <a-entity
+                    class="interactable"
+                    body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 15;"
+                    is-remote-hover-target
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
+                    set-unowned-body-kinematic
+                    destroy-at-extreme-distances
+                    scalable-when-grabbed
+                    floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
+                    set-yxz-order
+                    matrix-auto-update
+                    hoverable-visuals
+                >
+                    <a-entity class="ui interactable-ui">
+                    </a-entity>
+                </a-entity>
+            </template>
+
             <template id="interactable-pen">
                 <a-entity
                     class="pen interactable"
