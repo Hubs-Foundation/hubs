@@ -16,7 +16,19 @@ AFRAME.registerSystem("linked-media", {
       elA._handlingLinkage = false;
     };
 
-    elA.addEventListener("componentchanged", handler);
+    if (elA.components["media-loader"].data) {
+      elA.addEventListener("componentchanged", handler);
+    } else {
+      const waitForMediaLoader = evt => {
+        if (evt.detail.name === "media-loader") {
+          elA.removeEventListener("componentinitialized", waitForMediaLoader);
+          elA.addEventListener("componentchanged", handler);
+        }
+      };
+
+      elA.addEventListener("componentinitialized", waitForMediaLoader);
+    }
+
     return handler;
   },
 
