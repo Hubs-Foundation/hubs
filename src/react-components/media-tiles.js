@@ -12,6 +12,8 @@ import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
+import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
+import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 
 import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/media-browser.scss";
@@ -244,7 +246,20 @@ class MediaTiles extends Component {
                 <FontAwesomeIcon icon={faPencilAlt} />
               </a>
             )}
+          {entry.type === "hub" && (
+            <div className={styles.info}>
+              <FontAwesomeIcon icon={faUsers} />
+              <span>{entry.participant_count}</span>
+            </div>
+          )}
         </div>
+
+        {entry.favorited && (
+          <div className={styles.favorite}>
+            <FontAwesomeIcon icon={faStar} />
+          </div>
+        )}
+
         {!entry.type.endsWith("_image") && (
           <div className={styles.info}>
             <a
@@ -284,12 +299,8 @@ class MediaTiles extends Component {
             {isHub && (
               <div className={styles.attribution}>
                 <div className={styles.lastJoined}>
-                  {urlSource === "public_rooms"
-                    ? "5 participants"
-                    : [
-                        <FormattedMessage key="1" id="media-browser.hub.joined-prefix" />,
-                        dayjs(entry.last_activated_at).fromNow()
-                      ]}
+                  <FormattedMessage key="1" id="media-browser.hub.joined-prefix" />
+                  {dayjs(entry.last_activated_at).fromNow()}
                 </div>
               </div>
             )}

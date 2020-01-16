@@ -44,7 +44,7 @@ class HomeRoot extends Component {
     installEvent: PropTypes.object,
     hideHero: PropTypes.bool,
     showAdmin: PropTypes.bool,
-    favoriteHubsResult: PropTypes.object,
+    featuredRoomsResult: PropTypes.object,
     publicRoomsResult: PropTypes.object,
     showSignIn: PropTypes.bool,
     signInDestination: PropTypes.string,
@@ -219,16 +219,10 @@ class HomeRoot extends Component {
             </div>
             <div className={styles.heroContent} style={{ backgroundImage: configs.image("home_background", true) }}>
               {!this.props.hideHero &&
-                (this.props.publicRoomsResult &&
-                  this.props.publicRoomsResult.entries &&
-                  this.props.publicRoomsResult.entries.length > 0 &&
-                  this.renderPublicRoomsHero())}
-              {!this.props.hideHero &&
-                (this.props.favoriteHubsResult &&
-                this.props.favoriteHubsResult.entries &&
-                this.props.favoriteHubsResult.entries.length > 0 &&
-                this.state.signedIn
-                  ? this.renderFavoriteHero()
+                (this.props.featuredRoomsResult &&
+                this.props.featuredRoomsResult.entries &&
+                this.props.featuredRoomsResult.entries.length > 0
+                  ? this.renderFeaturedRoomsHero()
                   : this.renderNonFavoriteHero())}
               {!this.props.hideHero && (
                 <div className={classNames(styles.heroPanel, styles.rightPanel)}>
@@ -369,7 +363,7 @@ class HomeRoot extends Component {
     );
   }
 
-  renderPublicRoomsHero() {
+  renderFeaturedRoomsHero() {
     return [
       <div className={styles.heroPanel} key={1}>
         <div className={styles.container}>
@@ -385,19 +379,19 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel} key={2}>
         <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
           <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-            <MediaTiles result={this.props.favoriteHubsResult} urlSource="public_rooms" />
+            <MediaTiles result={this.props.featuredRoomsResult} urlSource="favorites" />
           </div>
         </div>
       </div>
     ];
   }
 
-  renderFavoriteHero() {
+  renderPublicRoomsHero() {
     return (
       <div className={styles.heroPanel} key={2}>
         <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
           <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-            <MediaTiles result={this.props.publicRoomsResult} urlSource="favorites" />
+            <MediaTiles result={this.props.publicRoomsResult} urlSource="public_rooms" />
           </div>
         </div>
       </div>

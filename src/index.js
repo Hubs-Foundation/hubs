@@ -22,11 +22,10 @@ window.APP = { store };
 
 const authChannel = new AuthChannel(store);
 let installEvent = null;
-let favoriteHubsResult = null;
+let featuredRoomsResult = null;
 let mountedUI = false;
 let hideHero = true;
 let showAdmin = false;
-let publicRoomsResult = null;
 
 const remountUI = function() {
   mountedUI = true;
@@ -45,8 +44,7 @@ const remountUI = function() {
       signInReason={qs.get("sign_in_reason")}
       hideHero={hideHero}
       showAdmin={showAdmin}
-      favoriteHubsResult={favoriteHubsResult}
-      publicRoomsResult={publicRoomsResult}
+      featuredRoomsResult={featuredRoomsResult}
       installEvent={installEvent}
     />
   );
@@ -78,6 +76,28 @@ window.addEventListener("beforeinstallprompt", e => {
   }
 });
 
+async function fetchFeaturedRooms() {
+  // Fetch favorite rooms
+  const [favoriteRoomsResult, publicRoomsResult] = await Promise.all([
+    authChannel.signedIn
+      ? fetchReticulumAuthenticated(
+          `/api/v1/media/search?source=favorites&type=hubs&user=${store.credentialsAccountId}`
+        )
+      : Promise.resolve({ entries: [] }),
+    fetchReticulumAuthenticated("/api/v1/media/search?source=public_rooms")
+  ]);
+
+  if (favoriteRoomsResult && publicRoomsResult) {
+    publicRoomsResult.entries.push(...favoriteRoomsResult.entries);
+    const ids = publicRoomsResult.entries.map(h => h.id);
+    publicRoomsResult.entries = publicRoomsResult.entries
+      .filter((h, i) => ids.lastIndexOf(h.id) === i)
+      .sort((a, b) => b.participant_count - a.participant_count);
+    featuredRoomsResult = publicRoomsResult;
+    remountUI();
+  }
+}
+
 (async () => {
   if (qs.get("new") !== null) {
     createAndRedirectToNewHub(null, null, true);
@@ -87,16 +107,7 @@ window.addEventListener("beforeinstallprompt", e => {
   const socket = await connectToReticulum();
 
   authChannel.setSocket(socket);
-  remountUI();
-
-  publicRoomsResult = await fetchReticulumAuthenticated("/api/v1/media/search?source=public_rooms");
-  remountUI();
-
   if (authChannel.signedIn) {
-    // Fetch favorite rooms
-    const path = `/api/v1/media/search?source=favorites&type=hubs&user=${store.credentialsAccountId}`;
-    favoriteHubsResult = await fetchReticulumAuthenticated(path);
-
     const retPhxChannel = socket.channel(`ret`, { hub_id: "index", token: store.state.credentials.token });
     retPhxChannel.join().receive("ok", () => {
       retPhxChannel.push("refresh_perms_token").receive("ok", ({ perms_token }) => {
@@ -115,4 +126,7 @@ window.addEventListener("beforeinstallprompt", e => {
 
   hideHero = false;
   remountUI();
+
+  await fetchFeaturedRooms();
+  setInterval(fetchFeaturedRooms, 30000);
 })();
