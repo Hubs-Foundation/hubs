@@ -217,7 +217,6 @@ import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-cap
 import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
-import Editor from "draft-js-plugins-editor/lib/Editor";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
