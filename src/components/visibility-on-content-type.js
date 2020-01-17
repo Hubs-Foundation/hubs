@@ -12,6 +12,8 @@ AFRAME.registerComponent("visibility-on-content-type", {
       this.networkedEl = el;
       el.addEventListener("media_resolved", ({ detail: { contentType } }) => this.updateVisibility(contentType));
       this.updateVisibility();
+    }).catch(() => {
+      // Non-networked, do not handle for now.
     });
   },
 

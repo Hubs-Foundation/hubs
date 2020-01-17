@@ -2,9 +2,14 @@ import configs from "../utils/configs";
 
 AFRAME.registerComponent("tweet-media-button", {
   init() {
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.targetEl = networkedEl;
-    });
+    NAF.utils
+      .getNetworkedEntity(this.el)
+      .then(networkedEl => {
+        this.targetEl = networkedEl;
+      })
+      .catch(() => {
+        // Non-networked, do not handle for now.
+      });
 
     this.onClick = () => {
       const hasDiscordBridges = window.APP.hubChannel && window.APP.hubChannel.discordBridges().length > 0;

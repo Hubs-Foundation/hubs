@@ -116,7 +116,8 @@ export const addMedia = (
   fitToBox = false,
   animate = true,
   mediaOptions = {},
-  networked = true
+  networked = true,
+  parentEl = null
 ) => {
   const scene = AFRAME.scenes[0];
 
@@ -160,7 +161,7 @@ export const addMedia = (
 
   entity.object3D.matrixNeedsUpdate = true;
 
-  scene.appendChild(entity);
+  (parentEl || scene).appendChild(entity);
 
   const orientation = new Promise(function(resolve) {
     if (needsToBeUploaded) {
@@ -202,7 +203,7 @@ export const addMedia = (
   return { entity, orientation };
 };
 
-export const cloneMedia = (sourceEl, template, src = null, networked = true) => {
+export const cloneMedia = (sourceEl, template, src = null, networked = true, parentEl = null) => {
   if (!src) {
     ({ src } = sourceEl.components["media-loader"].data);
   }
@@ -218,7 +219,8 @@ export const cloneMedia = (sourceEl, template, src = null, networked = true) => 
     fitToBox,
     false,
     mediaOptions,
-    networked
+    networked,
+    parentEl
   );
 };
 

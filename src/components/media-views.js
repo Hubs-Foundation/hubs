@@ -244,6 +244,8 @@ AFRAME.registerComponent("media-video", {
   init() {
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
     this.tryUpdateVideoPlaybackState = this.tryUpdateVideoPlaybackState.bind(this);
+    this.ensureOwned = this.ensureOwned.bind(this);
+    this.isMineOrLocal = this.isMineOrLocal.bind(this);
     this.updateSrc = this.updateSrc.bind(this);
 
     this.seekForward = this.seekForward.bind(this);
@@ -290,23 +292,29 @@ AFRAME.registerComponent("media-video", {
       this.updatePlaybackState();
     });
 
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.networkedEl = networkedEl;
-      applyPersistentSync(this.networkedEl.components.networked.data.networkId);
-      this.updatePlaybackState();
+    NAF.utils
+      .getNetworkedEntity(this.el)
+      .then(networkedEl => {
+        this.networkedEl = networkedEl;
+        applyPersistentSync(this.networkedEl.components.networked.data.networkId);
+        this.updatePlaybackState();
 
-      // For scene-owned videos, take ownership after a random delay if nobody
-      // else has so there is a timekeeper. Do not due this on iOS because iOS has an
-      // annoying "auto-pause" feature that forces one non-autoplaying video to play
-      // at once, which will pause the videos for everyone in the room if owned.
-      if (!isIOS && NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
-        setTimeout(() => {
-          if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
-            NAF.utils.takeOwnership(this.networkedEl);
-          }
-        }, 2000 + Math.floor(Math.random() * 2000));
-      }
-    });
+        // For scene-owned videos, take ownership after a random delay if nobody
+        // else has so there is a timekeeper. Do not due this on iOS because iOS has an
+        // annoying "auto-pause" feature that forces one non-autoplaying video to play
+        // at once, which will pause the videos for everyone in the room if owned.
+        if (!isIOS && NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
+          setTimeout(() => {
+            if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
+              NAF.utils.takeOwnership(this.networkedEl);
+            }
+          }, 2000 + Math.floor(Math.random() * 2000));
+        }
+      })
+      .catch(() => {
+        // Non-networked
+        this.updatePlaybackState();
+      });
 
     // from a-sound
     const sceneEl = this.el.sceneEl;
@@ -319,15 +327,26 @@ AFRAME.registerComponent("media-video", {
     });
   },
 
+  isMineOrLocal() {
+    return !this.el.components.networked || (this.networkedEl && NAF.utils.isMine(this.networkedEl));
+  },
+
+  ensureOwned() {
+    return (
+      !this.el.components.networked ||
+      ((this.networkedEl && NAF.utils.isMine(this.networkedEl)) || NAF.utils.takeOwnership(this.networkedEl))
+    );
+  },
+
   seekForward() {
-    if (!this.videoIsLive && (NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
+    if (!this.videoIsLive && this.ensureOwned()) {
       this.video.currentTime += 30;
       this.el.setAttribute("media-video", "time", this.video.currentTime);
     }
   },
 
   seekBack() {
-    if (!this.videoIsLive && (NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
+    if (!this.videoIsLive && this.ensureOwned()) {
       this.video.currentTime -= 10;
       this.el.setAttribute("media-video", "time", this.video.currentTime);
     }
@@ -365,12 +384,12 @@ AFRAME.registerComponent("media-video", {
 
   togglePlaying() {
     // See onPauseStateChanged for note about iOS
-    if (isIOS && this.video.paused && NAF.utils.isMine(this.networkedEl)) {
+    if (isIOS && this.video.paused && this.isMineOrLocal()) {
       this.video.play();
       return;
     }
 
-    if (this.networkedEl && (NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
+    if (this.ensureOwned()) {
       this.tryUpdateVideoPlaybackState(!this.data.videoPaused);
     }
   },
@@ -387,7 +406,7 @@ AFRAME.registerComponent("media-video", {
     // This specific case will diverge the network schema and the video player state, so that
     // this.data.videoPaused is false (so others will keep playing it) but our local player will
     // have stopped. So we deal with this special case as well when we press the play button.
-    if (isIOS && this.video.paused && NAF.utils.isMine(this.networkedEl)) {
+    if (isIOS && this.video.paused && this.isMineOrLocal()) {
       return;
     }
 

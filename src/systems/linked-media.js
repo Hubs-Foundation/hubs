@@ -70,6 +70,21 @@ AFRAME.registerSystem("linked-media", {
       const { index } = elA.components["media-pdf"].data;
       elB.setAttribute("media-pdf", { index });
     }
+
+    if (elA.components["media-video"]) {
+      const { time, videoPaused, loop, hidePlaybackControls } = elA.components["media-video"].data;
+
+      // Sync time, pause state, playback controls, and tighten sync tolerance since its local
+      const syncedVideoAttributes = { time, videoPaused, loop, hidePlaybackControls };
+
+      const targetIsNetworked = !elB.components.networked;
+      if (targetIsNetworked) {
+        syncedVideoAttributes.syncTolerance = 0.25;
+      }
+
+      elB.setAttribute("media-video", syncedVideoAttributes);
+      elB.components["media-video"].updatePlaybackState(true);
+    }
   }
 });
 

@@ -17,11 +17,12 @@ AFRAME.registerComponent("clone-media-button", {
     });
 
     this.onClick = () => {
-      const mirrorTarget = document.querySelector("#media-mirror-target");
-      const { entity } = cloneMedia(this.targetEl, "#linked-media", this.src, false);
+      const podiumTarget = document.querySelector("#media-podium-target");
+      const { entity } = cloneMedia(this.targetEl, "#linked-media", this.src, false, podiumTarget);
+      //const { entity } = cloneMedia(this.targetEl, "#linked-media", this.src);
 
       //entity.object3D.scale.copy(this.targetEl.object3D.scale);
-      entity.object3D.scale.set(1, 1, 1); // TODO remove
+      entity.object3D.scale.set(0.75, 0.75, 0.75); // TODO remove
       entity.object3D.matrixNeedsUpdate = true;
 
       /*entity.setAttribute("offset-relative-to", {
@@ -29,11 +30,11 @@ AFRAME.registerComponent("clone-media-button", {
         offset: { x: 0, y: 0, z: -1.5 * this.targetEl.object3D.scale.z }
       });*/
 
+      podiumTarget.parentEl.object3D.visible = true;
+
       entity.addEventListener(
-        "media_resolved",
+        "media-loaded",
         () => {
-          mirrorTarget.appendChild(entity);
-          mirrorTarget.parentEl.object3D.visible = true;
           this.el.sceneEl.systems["linked-media"].registerLinkage(this.targetEl, entity);
         },
         { once: true }
