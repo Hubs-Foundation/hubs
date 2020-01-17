@@ -355,6 +355,9 @@ AFRAME.registerSystem("userinput", {
           return; // multiple connect events without a disconnect event
         }
       }
+      if (!e.gamepad.handedness) {
+        e.gamepad.handedness = e.gamepad.hand;
+      }
       const gamepadId = e.gamepad.primaryProfile || e.gamepad.id;
       // HACK Firefox Nightly bug causes corrupt gamepad names for OpenVR, so do startsWith
       if (
@@ -363,7 +366,7 @@ AFRAME.registerSystem("userinput", {
         gamepadId === "OpenVR Cosmos"
       ) {
         gamepadDevice = new ViveControllerDevice(e.gamepad);
-      } else if (gamepadId.startsWith("Oculus Touch")) {
+      } else if (["Oculus Touch", "oculus-touch"].some(n => gamepadId.startsWith(n))) {
         gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
       } else if (["Spatial Controller", "windows-mixed-reality"].some(n => gamepadId.startsWith(n))) {
         gamepadDevice = new WindowsMixedRealityControllerDevice(e.gamepad);
@@ -411,7 +414,7 @@ AFRAME.registerSystem("userinput", {
       for (const inputSource of session.inputSources) {
         inputSource.gamepad.targetRaySpace = inputSource.targetRaySpace;
         inputSource.gamepad.primaryProfile = inputSource.profiles[0];
-        inputSource.gamepad.hand = inputSource.handedness;
+        inputSource.gamepad.handedness = inputSource.handedness;
         gamepadConnected({ gamepad: inputSource.gamepad });
       }
     };

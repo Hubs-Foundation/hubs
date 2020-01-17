@@ -28,7 +28,7 @@ export class OculusTouchControllerDevice {
   constructor(gamepad) {
     this.rayObjectRotation = new THREE.Quaternion();
 
-    if (window.hasNativeWebVRImplementation) {
+    if (!window.hasNativeWebXRImplementation) {
       // wake the gamepad api up. otherwise it does not report touch controllers.
       // in chrome it still won't unless you enter vr.
       navigator.getVRDisplays();
@@ -46,21 +46,21 @@ export class OculusTouchControllerDevice {
 
     this.gamepad = gamepad;
     this.pose = new Pose();
-    this.buttonMap = buttonMaps[gamepad.hand];
+    this.buttonMap = buttonMaps[gamepad.handedness];
     this.axisMap = [{ name: "joyX", axisId: 0 }, { name: "joyY", axisId: 1 }];
     this.sittingToStandingMatrix = new THREE.Matrix4().makeTranslation(0, 1.6, 0);
     copySittingToStandingTransform(this.sittingToStandingMatrix);
     this.matrix = new THREE.Matrix4();
-    this.path = devicePaths[gamepad.hand];
-    this.selector = `#player-${gamepad.hand}-controller`;
+    this.path = devicePaths[gamepad.handedness];
+    this.selector = `#player-${gamepad.handedness}-controller`;
 
     this.position = new THREE.Vector3();
     this.orientation = new THREE.Quaternion();
-    this.handOffset = this.gamepad.hand === "left" ? LEFT_HAND_OFFSET : RIGHT_HAND_OFFSET;
+    this.handOffset = this.gamepad.handedness === "left" ? LEFT_HAND_OFFSET : RIGHT_HAND_OFFSET;
   }
 
   write(frame) {
-    if (window.hasNativeWebVRImplementation) {
+    if (!window.hasNativeWebXRImplementation) {
       if (!this.gamepad) return;
       this.gamepad = navigator.getGamepads()[this.gamepad.index];
     }
@@ -101,7 +101,7 @@ export class OculusTouchControllerDevice {
       );
     }
     if (this.gamepad.hapticActuators && this.gamepad.hapticActuators[0]) {
-      frame.setValueType(paths.haptics.actuators[this.gamepad.hand], this.gamepad.hapticActuators[0]);
+      frame.setValueType(paths.haptics.actuators[this.gamepad.handedness], this.gamepad.hapticActuators[0]);
     }
   }
 }

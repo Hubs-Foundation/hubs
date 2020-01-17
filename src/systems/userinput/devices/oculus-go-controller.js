@@ -35,7 +35,7 @@ export class OculusGoControllerDevice {
   write(frame) {
     if (!this.rayObject || !this.headObject3D) return;
 
-    if (window.hasNativeWebVRImplementation) {
+    if (!window.hasNativeWebXRImplementation) {
       // Have to call navigator.getGamepads() in order for the gamepad object to update.
       navigator.getGamepads();
     }
@@ -68,7 +68,7 @@ export class OculusGoControllerDevice {
           paths.device.oculusgo.matrix,
           this.matrix
             .compose(
-              applyArmModel(this.gamepad.pose, this.gamepad.hand, this.headObject3D, 1.6),
+              applyArmModel(this.gamepad.pose, this.gamepad.handedness, this.headObject3D, 1.6),
               this.orientation.fromArray(this.gamepad.pose.orientation),
               ONES
             )

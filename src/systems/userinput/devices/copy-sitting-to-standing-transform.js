@@ -1,5 +1,5 @@
 export const copySittingToStandingTransform = function copySittingToStandingTransform(matrix) {
-  window.hasNativeWebVRImplementation &&
+  !window.hasNativeWebXRImplementation &&
     navigator.getVRDisplays &&
     navigator.getVRDisplays().then(displays => {
       if (displays[0] && displays[0].stageParameters && displays[0].stageParameters.sittingToStandingTransform) {

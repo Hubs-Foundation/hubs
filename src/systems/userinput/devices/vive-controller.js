@@ -13,7 +13,7 @@ const m = new THREE.Matrix4();
 
 export class ViveControllerDevice {
   constructor(gamepad) {
-    if (window.hasNativeWebVRImplementation) {
+    if (!window.hasNativeWebXRImplementation) {
       // wake the gamepad api up. otherwise it does not report touch controllers.
       // in chrome it still won't unless you enter vr.
       navigator.getVRDisplays();
@@ -72,7 +72,7 @@ export class ViveControllerDevice {
 
     this.pose = new Pose();
     this.rayObjectRotation = new THREE.Quaternion();
-    this.path = paths.device.vive[gamepad.hand || "right"];
+    this.path = paths.device.vive[gamepad.handedness || "right"];
     this.sittingToStandingMatrix = new THREE.Matrix4().makeTranslation(0, 1.6, 0);
     copySittingToStandingTransform(this.sittingToStandingMatrix);
 
@@ -82,7 +82,7 @@ export class ViveControllerDevice {
   }
 
   write(frame) {
-    if (window.hasNativeWebVRImplementation) {
+    if (!window.hasNativeWebXRImplementation) {
       const gamepads = navigator.getGamepads();
       if (gamepads.length < this.gamepad.index + 1) {
         //workaround for: https://bugzilla.mozilla.org/show_bug.cgi?id=1568076
@@ -106,9 +106,9 @@ export class ViveControllerDevice {
     });
 
     if (!this.selector) {
-      if (this.gamepad.hand) {
-        this.path = paths.device.vive[this.gamepad.hand];
-        this.selector = `#player-${this.gamepad.hand}-controller`;
+      if (this.gamepad.handedness) {
+        this.path = paths.device.vive[this.gamepad.handedness];
+        this.selector = `#player-${this.gamepad.handedness}-controller`;
         console.warn("gamepad hand eventually specified");
       } else {
         return;
@@ -141,7 +141,7 @@ export class ViveControllerDevice {
     }
 
     if (this.gamepad.hapticActuators && this.gamepad.hapticActuators[0]) {
-      frame.setValueType(paths.haptics.actuators[this.gamepad.hand], this.gamepad.hapticActuators[0]);
+      frame.setValueType(paths.haptics.actuators[this.gamepad.handedness], this.gamepad.hapticActuators[0]);
     }
   }
 }

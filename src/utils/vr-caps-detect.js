@@ -67,7 +67,7 @@ export async function getAvailableVREntryTypes() {
 
   let displays = [];
   try {
-    if (isWebVRCapableBrowser || isMobile) {
+    if ((isWebVRCapableBrowser && !isWebXRCapableBrowser) || isMobile) {
       // We pull the displays on non-WebVR capable mobile browsers so we can pick up cardboard.
       displays = isWebVRCapableBrowser || isCardboardCapableBrowser ? await navigator.getVRDisplays() : [];
     }
@@ -110,7 +110,7 @@ export async function getAvailableVREntryTypes() {
       ? VR_DEVICE_AVAILABILITY.yes
       : VR_DEVICE_AVAILABILITY.no;
 
-  if (isWebVRCapableBrowser) {
+  if (isWebVRCapableBrowser && !isWebXRCapableBrowser) {
     // Generic is supported for non-blacklisted devices and presentable HMDs.
     generic = displays.find(
       d => d.capabilities.canPresent && !GENERIC_ENTRY_TYPE_DEVICE_BLACKLIST.find(r => r.test(d.displayName))
