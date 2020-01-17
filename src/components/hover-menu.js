@@ -23,12 +23,12 @@ AFRAME.registerComponent("hover-menu", {
         this.menu = menu;
 
         // HACK workaround for now due to position-at-box-shape-border having problems
-        // with nested entities, when using 'podium' viewing.
+        // with nested entities, when using 'mirror' viewing.
         //
         // TODO Revisit once that component is removed/deprecated. If we disable repositioning,
         // the menu will only appear on the front of the object (which is fine for our purposes)
-        const isPodiumMedia = this.el.parentEl.id === "media-podium-target";
-        const enableRepositioning = !isPodiumMedia;
+        const isMirroredMedia = this.el.parentEl.id === "media-mirror-target";
+        const enableRepositioning = !isMirroredMedia;
 
         if (enableRepositioning) {
           this.el.setAttribute("position-at-box-shape-border", {

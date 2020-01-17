@@ -40,6 +40,11 @@ AFRAME.registerSystem("linked-media", {
     elA.setAttribute("linked-media", "");
     elB.setAttribute("linked-media", "");
 
+    // As a convenience, if elA is a video, we turn its volume off so we don't hear it twice
+    if (elA.components["media-video"]) {
+      elA.setAttribute("media-video", "volume", 0);
+    }
+
     this.handlers.push([elA, elB, handlerA, handlerB]);
   },
 
@@ -49,6 +54,11 @@ AFRAME.registerSystem("linked-media", {
       if (el === elA || el === elB) {
         elA.removeEventListener("componentchanged", handlerA);
         elB.removeEventListener("componentchanged", handlerB);
+      }
+
+      // As a convenience, if elA is a video, we restore its volume.
+      if (elA.components["media-video"]) {
+        elA.setAttribute("media-video", "volume", 0.5);
       }
     }
 

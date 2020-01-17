@@ -244,6 +244,7 @@ AFRAME.registerComponent("media-video", {
   init() {
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
     this.tryUpdateVideoPlaybackState = this.tryUpdateVideoPlaybackState.bind(this);
+    this.updatePlayButton = this.updatePlayButton.bind(this);
     this.ensureOwned = this.ensureOwned.bind(this);
     this.isMineOrLocal = this.isMineOrLocal.bind(this);
     this.updateSrc = this.updateSrc.bind(this);
@@ -425,9 +426,7 @@ AFRAME.registerComponent("media-video", {
       this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
       this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
 
-      const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
-      this.playPauseButton.object3D.visible =
-        !!this.video && !this.videoIsLive && (!isPinned || window.APP.hubChannel.can("pin_objects"));
+      this.updatePlayButton();
       this.snapButton.object3D.visible =
         !!this.video &&
         !this.data.contentType.startsWith("audio/") &&
@@ -453,6 +452,12 @@ AFRAME.registerComponent("media-video", {
           : 100;
       this.audio.gain.gain.value = (globalMediaVolume / 100) * this.data.volume;
     }
+  },
+
+  updatePlayButton() {
+    const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
+    this.playPauseButton.object3D.visible =
+      !this.videoIsLive && (!isPinned || window.APP.hubChannel.can("pin_objects"));
   },
 
   tryUpdateVideoPlaybackState(pause, currentTime) {
@@ -740,7 +745,7 @@ AFRAME.registerComponent("media-video", {
 
     this.seekForwardButton.object3D.visible = !this.videoIsLive;
     this.seekBackButton.object3D.visible = !this.videoIsLive;
-    this.playPauseButton.object3D.visible = !this.videoIsLive;
+    this.updatePlayButton();
 
     if (this.videoIsLive) {
       this.timeLabel.setAttribute("text", "value", "LIVE");
