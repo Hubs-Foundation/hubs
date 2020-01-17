@@ -79,6 +79,7 @@ import "./components/position-at-box-shape-border";
 import "./components/pinnable";
 import "./components/pin-networked-object-button";
 import "./components/mirror-media-button";
+import "./components/close-mirrored-media-button";
 import "./components/drop-object-button";
 import "./components/remove-networked-object-button";
 import "./components/camera-focus-button";

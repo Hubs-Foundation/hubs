@@ -1,4 +1,5 @@
 import { cloneMedia } from "../utils/media-utils";
+import { closeExistingMediaMirror } from "./close-mirrored-media-button";
 
 AFRAME.registerComponent("mirror-media-button", {
   init() {
@@ -16,19 +17,7 @@ AFRAME.registerComponent("mirror-media-button", {
     this.onClick = () => {
       const mirrorTarget = document.querySelector("#media-mirror-target");
 
-      // Remove old mirror target media element
-      if (mirrorTarget.firstChild) {
-        mirrorTarget.firstChild.setAttribute("animation__remove", {
-          property: "scale",
-          dur: 200,
-          to: { x: 0.01, y: 0.01, z: 0.01 },
-          easing: "easeInQuad"
-        });
-
-        mirrorTarget.firstChild.addEventListener("animationcomplete", () =>
-          mirrorTarget.removeChild(mirrorTarget.firstChild)
-        );
-      }
+      closeExistingMediaMirror();
 
       const { entity } = cloneMedia(this.targetEl, "#linked-media", this.src, false, mirrorTarget);
 
