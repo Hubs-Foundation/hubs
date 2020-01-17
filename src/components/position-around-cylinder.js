@@ -59,7 +59,7 @@ AFRAME.registerComponent("position-around-cylinder", {
     this.center.addVectors(this.AABB.min, this.AABB.max).multiplyScalar(0.5);
     this.targetMatrix.copy(calculateRotation(this.el.object3D, this.viewingCam));
     this.towardCamera.setFromMatrixColumn(this.targetMatrix, 2);
-    this.towardCamera.multiplyScalar(radius);
+    this.towardCamera.multiplyScalar(radius * 1.5); // multiply by 1.5 just to test my-super-cool-button
 
     this.targetPosition.addVectors(this.center, this.towardCamera);
     this.targetMatrix.elements[12] = this.targetPosition.x;
