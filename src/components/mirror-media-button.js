@@ -19,18 +19,12 @@ AFRAME.registerComponent("mirror-media-button", {
 
       closeExistingMediaMirror();
 
-      const { entity } = cloneMedia(this.targetEl, "#linked-media", this.src, false, mirrorTarget);
+      const { entity } = cloneMedia(this.targetEl, "#linked-media", this.src, false, mirrorTarget, this.targetEl);
 
       entity.object3D.scale.set(0.75, 0.75, 0.75);
       entity.object3D.matrixNeedsUpdate = true;
 
       mirrorTarget.parentEl.object3D.visible = true;
-
-      entity.addEventListener(
-        "media-loaded",
-        () => this.el.sceneEl.systems["linked-media"].registerLinkage(this.targetEl, entity),
-        { once: true }
-      );
     };
   },
 

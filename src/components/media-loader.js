@@ -52,6 +52,7 @@ AFRAME.registerComponent("media-loader", {
     contentType: { default: null },
     contentSubtype: { default: null },
     animate: { default: true },
+    linkedEl: { default: null },
     mediaOptions: {
       default: {},
       parse: v => (typeof v === "object" ? v : JSON.parse(v)),
@@ -242,6 +243,10 @@ AFRAME.registerComponent("media-loader", {
 
       this.updateHoverableVisuals();
 
+      if (this.data.linkedEl) {
+        this.el.sceneEl.systems["linked-media"].registerLinkage(this.data.linkedEl, this.el);
+      }
+
       el.emit("media-loaded");
     };
 
@@ -346,11 +351,12 @@ AFRAME.registerComponent("media-loader", {
         AFRAME.utils.material.isHLS(canonicalUrl, contentType)
       ) {
         let linkedVideoTexture, linkedAudioSource, linkedMediaElementAudioSource;
-        if (document.querySelector("[media-video]")) {
-          linkedVideoTexture = document.querySelector("[media-video]").components["media-video"].videoTexture;
-          linkedAudioSource = document.querySelector("[media-video]").components["media-video"].audioSource;
-          linkedMediaElementAudioSource = document.querySelector("[media-video]").components["media-video"]
-            .mediaElementAudioSource;
+        if (this.data.linkedEl) {
+          const linkedMediaVideo = this.data.linkedEl.components["media-video"];
+
+          linkedVideoTexture = linkedMediaVideo.videoTexture;
+          linkedAudioSource = linkedMediaVideo.audioSource;
+          linkedMediaElementAudioSource = linkedMediaVideo.mediaElementAudioSource;
         }
 
         const qsTime = parseInt(parsedUrl.searchParams.get("t"));
