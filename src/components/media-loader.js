@@ -3,7 +3,8 @@ import {
   resolveUrl,
   getDefaultResolveQuality,
   injectCustomShaderChunks,
-  addMeshScaleAnimation
+  addMeshScaleAnimation,
+  closeExistingMediaMirror
 } from "../utils/media-utils";
 import {
   isNonCorsProxyDomain,
@@ -52,7 +53,7 @@ AFRAME.registerComponent("media-loader", {
     contentType: { default: null },
     contentSubtype: { default: null },
     animate: { default: true },
-    linkedEl: { default: null },
+    linkedEl: { default: null }, // This is the element of which this is a linked derivative. See linked-media.js
     mediaOptions: {
       default: {},
       parse: v => (typeof v === "object" ? v : JSON.parse(v)),
@@ -65,6 +66,7 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
+    this.handleLinkedElRemoved = this.handleLinkedElRemoved.bind(this);
     this.refresh = this.refresh.bind(this);
     this.animating = false;
 
@@ -106,7 +108,21 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
+  handleLinkedElRemoved(e) {
+    if (e.detail.name === "media-loader") {
+      this.data.linkedEl.removeEventListener("componentremoved", this.handleLinkedElRemoved);
+
+      // this should be revisited if we ever use media linking for something other than media mirroring UX --
+      // right now it is assumed if there is a linkedEl, this is the currently active mirrored media
+      closeExistingMediaMirror();
+    }
+  },
+
   remove() {
+    if (this.data.linkedEl) {
+      this.data.linkedEl.removeEventListener("componentremoved", this.handleLinkedElRemoved);
+    }
+
     const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
     if (this.loadingSoundEffect) {
       sfx.stopPositionalAudio(this.loadingSoundEffect);
@@ -245,6 +261,7 @@ AFRAME.registerComponent("media-loader", {
 
       if (this.data.linkedEl) {
         this.el.sceneEl.systems["linked-media"].registerLinkage(this.data.linkedEl, this.el);
+        this.data.linkedEl.addEventListener("componentremoved", this.handleLinkedElRemoved);
       }
 
       el.emit("media-loaded");

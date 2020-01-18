@@ -1,5 +1,12 @@
 // Provides the idea of "media linking" -- if two media objects are linked
 // then updates to one (src, page, etc) will be reflected on the other, and vice versa.
+//
+// When you link a media element from A -> B via registerLinkage, a few notes:
+// - The media is assumed to be of the same kind, ideally created via media-utils/cloneMedia
+// - Sync is bidirectional, however, elB is assumed to be a 'derivate of' elA. this means:
+//   - for the video case, elA will have its volume set to zero and restored if elB is removed
+//   - when elA is removed, elB will be removed (done in media-loader) but not vice-versa
+//
 AFRAME.registerSystem("linked-media", {
   init: function() {
     this.handlers = [];
@@ -49,14 +56,14 @@ AFRAME.registerSystem("linked-media", {
   },
 
   deregisterLinkage: function(el) {
-    // Deregister elA -> elB, get list of elBs
+    // Deregister elA -> elB, get list of elBs, and remove them
     for (const [elA, elB, handlerA, handlerB] of this.handlers) {
       if (el === elA || el === elB) {
         elA.removeEventListener("componentchanged", handlerA);
         elB.removeEventListener("componentchanged", handlerB);
       }
 
-      // As a convenience, if elA is a video, we restore its volume.
+      // As a convenience, if elA is a video, we restore its volume to 50% since we muted it upon link.
       if (elA.components["media-video"]) {
         elA.setAttribute("media-video", "volume", 0.5);
       }

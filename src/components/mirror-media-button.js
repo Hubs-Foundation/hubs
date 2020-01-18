@@ -1,5 +1,5 @@
 import { cloneMedia } from "../utils/media-utils";
-import { closeExistingMediaMirror } from "./close-mirrored-media-button";
+import { closeExistingMediaMirror } from "../utils/media-utils";
 
 AFRAME.registerComponent("mirror-media-button", {
   init() {
@@ -14,12 +14,12 @@ AFRAME.registerComponent("mirror-media-button", {
       this.updateSrc();
     });
 
-    this.onClick = () => {
+    this.onClick = async () => {
       const mirrorTarget = document.querySelector("#media-mirror-target");
 
-      closeExistingMediaMirror();
+      await closeExistingMediaMirror();
 
-      const { entity } = cloneMedia(this.targetEl, "#linked-media", this.src, false, mirrorTarget, this.targetEl);
+      const { entity } = cloneMedia(this.targetEl, "#linked-media", this.src, false, true, mirrorTarget);
 
       entity.object3D.scale.set(0.75, 0.75, 0.75);
       entity.object3D.matrixNeedsUpdate = true;

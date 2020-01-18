@@ -212,7 +212,7 @@ export const addMedia = (
   return { entity, orientation };
 };
 
-export const cloneMedia = (sourceEl, template, src = null, networked = true, parentEl = null, linkedEl = null) => {
+export const cloneMedia = (sourceEl, template, src = null, networked = true, link = false, parentEl = null) => {
   if (!src) {
     ({ src } = sourceEl.components["media-loader"].data);
   }
@@ -230,7 +230,7 @@ export const cloneMedia = (sourceEl, template, src = null, networked = true, par
     mediaOptions,
     networked,
     parentEl,
-    linkedEl
+    link ? sourceEl : null
   );
 };
 
@@ -469,4 +469,26 @@ export function addMeshScaleAnimation(mesh, initialScale, onComplete) {
   mesh.matrixNeedsUpdate = true;
 
   return anime(config);
+}
+
+export function closeExistingMediaMirror() {
+  const mirrorTarget = document.querySelector("#media-mirror-target");
+
+  // Remove old mirror target media element
+  if (mirrorTarget.firstChild) {
+    mirrorTarget.firstChild.setAttribute("animation__remove", {
+      property: "scale",
+      dur: 200,
+      to: { x: 0.01, y: 0.01, z: 0.01 },
+      easing: "easeInQuad"
+    });
+
+    return new Promise(res => {
+      mirrorTarget.firstChild.addEventListener("animationcomplete", () => {
+        mirrorTarget.removeChild(mirrorTarget.firstChild);
+        mirrorTarget.parentEl.object3D.visible = false;
+        res();
+      });
+    });
+  }
 }
