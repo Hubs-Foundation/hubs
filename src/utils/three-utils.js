@@ -255,17 +255,6 @@ export function almostEqual(a, b, epsilon = 0.01) {
 export function almostEqualVector3(a, b, epsilon = 0.01) {
   return Math.abs(a.x - b.x) < epsilon && Math.abs(a.y - b.y) < epsilon && Math.abs(a.z - b.z) < epsilon;
 }
-export function almostEqualQuaternion(a, b, epsilon = 0.01) {
-  // TODO: Technically, quaternions a and b can represent the same orientation but with different numbers.
-  // e.g. Consider the axis-angle representations of a and b. If b has the reverse angle
-  // and reverse axis of a, then b represents the same orientation as a.
-  return (
-    Math.abs(a.x - b.x) < epsilon &&
-    Math.abs(a.y - b.y) < epsilon &&
-    Math.abs(a.z - b.z) < epsilon &&
-    Math.abs(a.w - b.w) < epsilon
-  );
-}
 
 export const affixToWorldUp = (function() {
   const inRotationMat4 = new THREE.Matrix4();
