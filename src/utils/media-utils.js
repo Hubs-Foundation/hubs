@@ -10,17 +10,24 @@ import { proxiedUrlFor } from "../utils/media-url-utils";
 import anime from "animejs";
 
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
+const isMobile = AFRAME.utils.device.isMobile();
+const isMobileVR = AFRAME.utils.device.isMobile();
 
 // Map<String, Promise<Object>
 const resolveUrlCache = new Map();
-export const resolveUrl = async (url, version = 1) => {
+export const getDefaultResolveQuality = (is360 = false) => {
+  const useLowerQuality = isMobile || isMobileVR;
+  return !is360 ? (useLowerQuality ? "low" : "high") : useLowerQuality ? "low_360" : "high_360";
+};
+
+export const resolveUrl = async (url, quality = null, version = 1) => {
   const key = `${url}_${version}`;
   if (resolveUrlCache.has(key)) return resolveUrlCache.get(key);
 
   const resultPromise = fetch(mediaAPIEndpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ media: { url }, version })
+    body: JSON.stringify({ media: { url, quality: quality || getDefaultResolveQuality() }, version })
   }).then(async response => {
     if (!response.ok) {
       const message = `Error resolving url "${url}":`;

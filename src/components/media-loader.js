@@ -1,5 +1,10 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
-import { resolveUrl, injectCustomShaderChunks, addMeshScaleAnimation } from "../utils/media-utils";
+import {
+  resolveUrl,
+  getDefaultResolveQuality,
+  injectCustomShaderChunks,
+  addMeshScaleAnimation
+} from "../utils/media-utils";
 import {
   isNonCorsProxyDomain,
   guessContentType,
@@ -289,6 +294,7 @@ AFRAME.registerComponent("media-loader", {
       }
 
       let canonicalUrl = src;
+      let canonicalAudioUrl = src;
       let accessibleUrl = src;
       let contentType = this.data.contentType;
       let thumbnail;
@@ -301,12 +307,21 @@ AFRAME.registerComponent("media-loader", {
         isNonCorsProxyDomain(parsedUrl.hostname) && (guessContentType(src) || "").startsWith("model/gltf");
 
       if (this.data.resolve && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalModelAsset) {
-        const result = await resolveUrl(src, version);
+        const is360 = !!(this.data.mediaOptions.projection && this.data.mediaOptions.projection.startsWith("360"));
+        const quality = getDefaultResolveQuality(is360);
+        const result = await resolveUrl(src, quality, version);
         canonicalUrl = result.origin;
+
         // handle protocol relative urls
         if (canonicalUrl.startsWith("//")) {
           canonicalUrl = location.protocol + canonicalUrl;
         }
+
+        canonicalAudioUrl = result.origin_audio;
+        if (canonicalAudioUrl && canonicalAudioUrl.startsWith("//")) {
+          canonicalAudioUrl = location.protocol + canonicalAudioUrl;
+        }
+
         contentType = (result.meta && result.meta.expected_content_type) || contentType;
         thumbnail = result.meta && result.meta.thumbnail && proxiedUrlFor(result.meta.thumbnail);
       }
@@ -346,7 +361,12 @@ AFRAME.registerComponent("media-loader", {
         );
         this.el.setAttribute(
           "media-video",
-          Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, time: startTime, contentType })
+          Object.assign({}, this.data.mediaOptions, {
+            src: accessibleUrl,
+            audioSrc: canonicalAudioUrl ? proxiedUrlFor(canonicalAudioUrl) : null,
+            time: startTime,
+            contentType
+          })
         );
         if (this.el.components["position-at-box-shape-border__freeze"]) {
           this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
