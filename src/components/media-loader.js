@@ -345,6 +345,14 @@ AFRAME.registerComponent("media-loader", {
         contentType.startsWith("audio/") ||
         AFRAME.utils.material.isHLS(canonicalUrl, contentType)
       ) {
+        let linkedVideoTexture, linkedAudioSource, linkedMediaElementAudioSource;
+        if (document.querySelector("[media-video]")) {
+          linkedVideoTexture = document.querySelector("[media-video]").components["media-video"].videoTexture;
+          linkedAudioSource = document.querySelector("[media-video]").components["media-video"].audioSource;
+          linkedMediaElementAudioSource = document.querySelector("[media-video]").components["media-video"]
+            .mediaElementAudioSource;
+        }
+
         const qsTime = parseInt(parsedUrl.searchParams.get("t"));
         const hashTime = parseInt(new URLSearchParams(parsedUrl.hash.substring(1)).get("t"));
         const startTime = hashTime || qsTime || 0;
@@ -365,7 +373,10 @@ AFRAME.registerComponent("media-loader", {
             src: accessibleUrl,
             audioSrc: canonicalAudioUrl ? proxiedUrlFor(canonicalAudioUrl) : null,
             time: startTime,
-            contentType
+            contentType,
+            linkedVideoTexture,
+            linkedAudioSource,
+            linkedMediaElementAudioSource
           })
         );
         if (this.el.components["position-at-box-shape-border__freeze"]) {

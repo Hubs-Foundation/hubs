@@ -497,7 +497,7 @@ AFRAME.registerComponent("media-video", {
   },
 
   async updateSrc(oldData) {
-    const { src } = this.data;
+    const { src, linkedVideoTexture, linkedAudioSource, linkedMediaElementAudioSource } = this.data;
 
     this.cleanUp();
     if (this.mesh && this.mesh.material) {
@@ -507,7 +507,12 @@ AFRAME.registerComponent("media-video", {
 
     let texture, audioSource;
     try {
-      ({ texture, audioSource } = await this.createVideoTextureAndAudioSource());
+      if (linkedVideoTexture) {
+        texture = linkedVideoTexture;
+        audioSource = linkedAudioSource;
+      } else {
+        ({ texture, audioSource } = await this.createVideoTextureAndAudioSource());
+      }
 
       // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
       if (this.data.src !== src) {
@@ -515,12 +520,15 @@ AFRAME.registerComponent("media-video", {
         return;
       }
 
+      this.mediaElementAudioSource = null;
+
       if (!src.startsWith("hubs://")) {
         // iOS video audio is broken, see: https://github.com/mozilla/hubs/issues/1797
         if (!isIOS) {
           // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
-          const mediaAudioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(audioSource);
-
+          const mediaElementAudioSource =
+            linkedMediaElementAudioSource ||
+            this.el.sceneEl.audioListener.context.createMediaElementSource(audioSource);
           if (this.data.audioType === "pannernode") {
             this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
             this.audio.setDistanceModel(this.data.distanceModel);
@@ -534,7 +542,8 @@ AFRAME.registerComponent("media-video", {
             this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
           }
 
-          this.audio.setNodeSource(mediaAudioSource);
+          this.mediaElementAudioSource = mediaElementAudioSource;
+          this.audio.setNodeSource(mediaElementAudioSource);
           this.el.setObject3D("sound", this.audio);
         }
       }
@@ -579,9 +588,13 @@ AFRAME.registerComponent("media-video", {
           dirs: ["forward", "back"]
         });
       }
+
+      this.videoTexture = texture;
+      this.audioSource = audioSource;
     } catch (e) {
       console.error("Error loading video", this.data.src, e);
       texture = errorTexture;
+      this.videoTexture = this.audioSource = null;
     }
 
     const projection = this.data.projection;
@@ -833,7 +846,9 @@ AFRAME.registerComponent("media-video", {
 
   cleanUp() {
     if (this.mesh && this.mesh.material) {
-      disposeTexture(this.mesh.material.map);
+      if (!this.data.linkedVideoTexture) {
+        disposeTexture(this.mesh.material.map);
+      }
     }
   },
 
@@ -855,6 +870,7 @@ AFRAME.registerComponent("media-video", {
       this.video.removeEventListener("pause", this.onPauseStateChange);
       this.video.removeEventListener("play", this.onPauseStateChange);
     }
+
     if (this.hoverMenu) {
       this.playPauseButton.object3D.removeEventListener("interact", this.togglePlaying);
       this.volumeUpButton.object3D.removeEventListener("interact", this.volumeUp);
