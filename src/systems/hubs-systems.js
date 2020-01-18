@@ -48,7 +48,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.waypointSystem = new WaypointSystem(this.el, this.characterController);
     this.cursorPoseTrackingSystem = new CursorPoseTrackingSystem();
     this.scaleInScreenSpaceSystem = new ScaleInScreenSpaceSystem();
-    this.menuPlacementSystem = new MenuPlacementSystem();
+    this.menuPlacementSystem = new MenuPlacementSystem(this.physicsSystem);
   },
 
   tick(t, dt) {
@@ -78,11 +78,11 @@ AFRAME.registerSystem("hubs-systems", {
     this.soundEffectsSystem.tick();
     this.lobbyCameraSystem.tick();
     this.physicsSystem.tick(dt);
-    this.spriteSystem.tick(t, dt);
     this.batchManagerSystem.tick(t);
     this.cameraSystem.tick(this.el, dt);
     this.waypointSystem.tick(t, dt);
-    this.menuPlacementSystem.tick();
+    this.menuPlacementSystem.tick(); // must run before sprite system
+    this.spriteSystem.tick(t, dt);
   },
 
   remove() {
