@@ -383,7 +383,7 @@ export default class SettingsMenu extends Component {
                 <IfFeature name="show_issue_report_link">
                   <a
                     className={styles.bottomLink}
-                    href={configs.link("issue_report", "/?report")}
+                    href={configs.link("issue_report", "/#/report")}
                     target="_blank"
                     rel="noreferrer noopener"
                   >

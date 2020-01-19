@@ -213,7 +213,6 @@ class UIRoot extends Component {
     showVideoShareFailed: false,
 
     objectInfo: null,
-    objectDisplayString: "",
     objectSrc: "",
     isObjectListExpanded: false,
     isPresenceListExpanded: false
@@ -257,7 +256,11 @@ class UIRoot extends Component {
       window.requestAnimationFrame(() => {
         window.setTimeout(() => {
           if (!this.props.isBotMode) {
-            this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
+            try {
+              this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
+            } catch {
+              this.exit("scene_error"); // https://github.com/mozilla/hubs/issues/1950
+            }
           }
 
           if (!this.state.hideLoader) {
@@ -309,7 +312,7 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("share_video_failed", this.onShareVideoFailed);
     this.props.scene.addEventListener("exit", this.exitEventHandler);
     this.props.scene.addEventListener("action_exit_watch", () => this.setState({ watching: false, hide: false }));
-    this.props.scene.addEventListener("action_advance_lobby", () => this.setState({ watching: false, hide: false }));
+    this.props.scene.addEventListener("action_toggle_ui", () => this.setState({ hide: !this.state.hide }));
 
     const scene = this.props.scene;
 
@@ -433,6 +436,7 @@ class UIRoot extends Component {
   onLoadingFinished = () => {
     this.setState({ noMoreLoadingUpdates: true });
     this.props.scene.emit("loading_finished");
+    this.props.scene.addState("loaded");
 
     if (this.props.onLoaded) {
       this.props.onLoaded();
@@ -1409,7 +1413,6 @@ class UIRoot extends Component {
             scene={this.props.scene}
             finished={this.state.noMoreLoadingUpdates}
             onLoaded={this.onLoadingFinished}
-            connected={this.state.didConnectToNetworkedScene}
           />
           <PreferencesScreen
             onClose={() => {
@@ -1422,12 +1425,7 @@ class UIRoot extends Component {
     }
     if (isLoading) {
       return (
-        <Loader
-          scene={this.props.scene}
-          finished={this.state.noMoreLoadingUpdates}
-          onLoaded={this.onLoadingFinished}
-          connected={this.state.didConnectToNetworkedScene}
-        />
+        <Loader scene={this.props.scene} finished={this.state.noMoreLoadingUpdates} onLoaded={this.onLoadingFinished} />
       );
     }
     if (this.state.showPrefs) {
@@ -1495,6 +1493,14 @@ class UIRoot extends Component {
     const showSettingsAsOverlay = entered && isMobileVR;
 
     const presenceLogEntries = this.props.presenceLogEntries || [];
+
+    const switchToInspectingObject = el => {
+      const src = el.components["media-loader"].data.src;
+      this.setState({ objectInfo: el, objectSrc: src });
+      const cameraSystem = this.props.scene.systems["hubs-systems"].cameraSystem;
+      cameraSystem.uninspect();
+      cameraSystem.inspect(el.object3D, 1.5, true);
+    };
 
     const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
 
@@ -1767,9 +1773,11 @@ class UIRoot extends Component {
               <ObjectInfoDialog
                 scene={this.props.scene}
                 el={this.state.objectInfo}
-                objectDisplayString={this.state.objectDisplayString}
                 src={this.state.objectSrc}
+                pinned={this.state.objectInfo && this.state.objectInfo.components["networked"].data.persistent}
                 hubChannel={this.props.hubChannel}
+                onPinChanged={() => switchToInspectingObject(this.state.objectInfo)}
+                onNavigated={el => switchToInspectingObject(el)}
                 onClose={() => {
                   if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
                     this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
@@ -1977,7 +1985,7 @@ class UIRoot extends Component {
                 }
               }}
               expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
-              onInspectObject={(el, s) => this.setState({ objectInfo: el, objectDisplayString: s, objectSrc: s })}
+              onInspectObject={el => switchToInspectingObject(el)}
             />
 
             <PresenceList

@@ -2,6 +2,7 @@
 
 :local(.title-and-close){
   display: flex;
+  justify-content: center;
 }
 
 :local(.object-display-string) {
@@ -9,6 +10,7 @@
   margin: 0 10%;
   text-align: center;
   overflow-wrap: break-word;
+  max-width: 400px;
 }
 
 :local(.cancel-text) {
@@ -90,11 +92,35 @@
   font-weight: bold;
 }
 
-:local(.client-action-buttons) {
+:local(.action-button-sections) {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+:local(.action-button-placeholder) {
+  height: 60px;
+}
+
+:local(.left-action-buttons), :local(.right-action-buttons) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 48px;
+}
+
+:local(.navigation-button) {
+  @extend %action-button-secondary-modal;
+  min-width: 48px;
+}
+
+:local(.primary-action-buttons) {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin: 0px 24px;
 
   button {
     position: relative;

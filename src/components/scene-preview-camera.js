@@ -46,8 +46,14 @@ AFRAME.registerComponent("scene-preview-camera", {
   },
 
   tick2: function() {
-    this.el.sceneEl.systems["hubs-systems"].cameraSystem.mode = CAMERA_MODE_SCENE_PREVIEW;
-    const streamerCamera = getStreamerCamera();
+    const hubsSystems = this.el.sceneEl.systems["hubs-systems"];
+
+    let streamerCamera;
+    if (hubsSystems) {
+      hubsSystems.cameraSystem.mode = CAMERA_MODE_SCENE_PREVIEW;
+      streamerCamera = getStreamerCamera();
+    }
+
     if (streamerCamera) {
       setMatrixWorld(this.el.object3D, streamerCamera.matrixWorld);
       // Move camera forward just a bit so that we don't see the avatar's eye cylinders.

@@ -32,6 +32,7 @@
         physics="debug: false; driver: ammo; debugDrawMode: 1; iterations: 4;"
         hubs-systems
         capture-system
+        listed-media
         local-audio-analyser
         class="grab-cursor"
         renderer="
@@ -239,6 +240,7 @@
                     matrix-auto-update
                     hoverable-visuals
                     menu-placement-root="menuSelector:.freeze-menu"
+                    listed-media
                 >
                     <a-entity class="ui interactable-ui">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media">
@@ -372,7 +374,7 @@
                                 mixin="rounded-action-button"
                                 tags="isHoldable: true; holdableButton: true;"
                                 is-remote-hover-target
-                                transform-button="mode: scale;"
+                                scale-button
                                 hide-when-pinned-and-forbidden
                                 position="0.3 -0.125 0.001">
                                 <a-entity
@@ -756,6 +758,9 @@
 
             <template id="link-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
+                    <a-entity mixin="rounded-text-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" refresh-media-button position="0 0.125 0.001">
+                        <a-entity text="value:refresh; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    </a-entity>
                     <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.001">
                         <a-entity text="value:open link; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
@@ -1143,6 +1148,7 @@
                 camera
                 set-active-camera
                 rotation
+                fader
                 set-yxz-order
                 pitch-yaw-rotator
                 matrix-auto-update>
