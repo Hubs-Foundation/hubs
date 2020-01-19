@@ -31,10 +31,8 @@ AFRAME.registerComponent("menu-placement-root", {
   }
 });
 
-function matchRootEl(rootEl) {
-  return function match(tuple) {
-    return tuple.rootEl === rootEl;
-  };
+function isFlatMedia(el) {
+  return !!(el.components["media-image"] || el.components["media-video"] || el.components["media-pdf"]);
 }
 
 const getBoundingSphereInfo = (function() {
@@ -64,7 +62,8 @@ const getBoundingSphereInfo = (function() {
       .applyMatrix4(meshRotationInverse.getInverse(meshRotation))
       .normalize();
 
-    if (!isAlmostUniformVector3(meshScale, 0.005)) {
+    if (!isFlatMedia(datum.rootEl) && !isAlmostUniformVector3(meshScale, 0.005)) {
+      // TODO: Only place the menus on the front and back of flat media.
       console.warn(
         "Non-uniform scale detected unexpectedly on an object3D. Menu placement may fail!\n",
         v3String(meshScale),
@@ -297,9 +296,6 @@ const recomputeMenuPlacement = (function() {
   };
   const desiredMenuTransform = new THREE.Matrix4();
 
-  // TODO: Fix issue where if you are standing INSIDE of a large mesh, the menu can be positioned in
-  // the OPPOSITE direction from your camera to the center of the mesh, but rotated "inward" towards
-  // the object because it is rotated towards you.
   return function recomputeMenuPlacement(datum, cameraPosition, cameraRotation, btCollisionWorld) {
     boundaryInfoIn.rootMesh = datum.rootMesh;
     boundaryInfoIn.localMeshToCenterDir.copy(datum.localMeshToCenterDir);
@@ -343,11 +339,21 @@ const recomputeMenuPlacement = (function() {
       convexSweepInfo.menuWorldScale
     );
     setMatrixWorld(datum.menuEl.object3D, desiredMenuTransform);
+    // TODO: If the camera is between desiredMenuPosition and centerOfBoundingSphere,
+    // then a new menu position should be chosen such that it is not in the opposite
+    // direction as the object is from the camera. In this case it is probably better
+    // to allow the menu to intersect the mesh, and possibly draw it on top by changing
+    // the render order.
   };
 })();
 
+function matchRootEl(rootEl) {
+  return function match(tuple) {
+    return tuple.rootEl === rootEl;
+  };
+}
+
 // TODO: Computing the boundaries of skinned/animated meshes does not work correctly.
-// TODO: 2D content should only show the menu on its front and back.
 // TODO: Cloning small objects sometimes results in the menu placement failing by
 // intersecting the mesh. However, when the objects are pinned and page is reloaded,
 // the menu placement algorithm works fine.
@@ -404,7 +410,7 @@ export class MenuPlacementSystem {
     this.data.splice(index, 1);
   }
   tickDatum = (function() {
-    const currentRootObjectScale = new THREE.Vector3();
+    const menuParentScale = new THREE.Vector3();
     const menuPosition = new THREE.Vector3();
     const menuToCamera = new THREE.Vector3();
     return function tickDatum(t, cameraPosition, cameraRotation, datum) {
@@ -429,8 +435,9 @@ export class MenuPlacementSystem {
       const distanceToMenu = menuToCamera
         .subVectors(cameraPosition, menuPosition.setFromMatrixPosition(datum.menuEl.object3D.matrixWorld))
         .length();
-      currentRootObjectScale.setFromMatrixScale(datum.rootEl.object3D.matrixWorld);
-      const endingScale = (0.4 * distanceToMenu) / currentRootObjectScale.x;
+      datum.menuEl.object3D.parent.updateMatrices();
+      menuParentScale.setFromMatrixScale(datum.menuEl.object3D.parent.matrixWorld);
+      const endingScale = (0.4 * distanceToMenu) / menuParentScale.x;
       if (isMenuOpening) {
         datum.menuOpenTime = t;
         datum.startScaleAtMenuOpenTime = endingScale * 0.8;
