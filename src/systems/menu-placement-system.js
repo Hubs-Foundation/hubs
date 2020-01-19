@@ -348,6 +348,9 @@ const recomputeMenuPlacement = (function() {
 
 // TODO: Computing the boundaries of skinned/animated meshes does not work correctly.
 // TODO: 2D content should only show the menu on its front and back.
+// TODO: Cloning small objects sometimes results in the menu placement failing by
+// intersecting the mesh. However, when the objects are pinned and page is reloaded,
+// the menu placement algorithm works fine.
 export class MenuPlacementSystem {
   constructor(physicsSystem) {
     this.physicsSystem = physicsSystem;
