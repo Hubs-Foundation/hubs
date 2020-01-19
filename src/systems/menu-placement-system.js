@@ -204,7 +204,6 @@ const recomputeMenuShapeInfo = (function() {
 
 let doConvexSweepTest;
 const createFunctionForConvexSweepTest = function() {
-  const bodyHelperSetAttributeData = { collisionFilterGroup: 0, collisionFilterMask: 0 };
   const menuBtHalfExtents = new Ammo.btVector3(0, 0, 0);
   const menuBtFromTransform = new Ammo.btTransform();
   const menuBtQuaternion = new Ammo.btQuaternion();
@@ -216,7 +215,7 @@ const createFunctionForConvexSweepTest = function() {
       (info.menuMaxUp - info.menuMinUp) / 2,
       0.001
     );
-    const menuBtBoxShape = new Ammo.btBoxShape(menuBtHalfExtents); // TODO: Do not recreate this every time
+    const menuBtBoxShape = new Ammo.btBoxShape(menuBtHalfExtents); // TODO: (performance) Do not recreate this every time
     menuBtFromTransform.setIdentity();
     menuBtFromTransform
       .getOrigin()
@@ -242,15 +241,22 @@ const createFunctionForConvexSweepTest = function() {
     }
     const group = bodyHelper.data.collisionFilterGroup;
     const mask = bodyHelper.data.collisionFilterMask;
-    bodyHelperSetAttributeData.collisionFilterGroup = SWEEP_TEST_LAYER;
-    bodyHelperSetAttributeData.collisionFilterMask = SWEEP_TEST_LAYER;
-    info.rootEl.setAttribute("body-helper", bodyHelperSetAttributeData);
+    // We avoid using setAttribute for the collisionFilter data because
+    // of the extra work that setAttribute does and because we do not need
+    // to check for overlapping pairs:
+    // https://github.com/InfiniteLee/three-ammo/blob/master/src/body.js#L219
+    const broadphaseProxy = bodyHelper.body.physicsBody.getBroadphaseProxy();
+    broadphaseProxy.set_m_collisionFilterGroup(SWEEP_TEST_LAYER);
+    broadphaseProxy.set_m_collisionFilterMask(SWEEP_TEST_LAYER);
     const menuBtClosestConvexResultCallback = new Ammo.ClosestConvexResultCallback(
       menuBtFromTransform.getOrigin(),
       menuBtToTransform.getOrigin()
-    ); // TODO: Do not recreate this every time
+    ); // TODO: (performance) Do not recreate this every time
     menuBtClosestConvexResultCallback.set_m_collisionFilterGroup(SWEEP_TEST_LAYER);
     menuBtClosestConvexResultCallback.set_m_collisionFilterMask(SWEEP_TEST_LAYER);
+    // TODO: (performance) Try creating a new Ammo.btDiscreteDynamicsWorld,
+    // adding ONLY the menu and mesh rigid bodies,
+    // then removing them after the convexSweepTest.
     btCollisionWorld.convexSweepTest(
       menuBtBoxShape,
       menuBtFromTransform,
@@ -258,9 +264,8 @@ const createFunctionForConvexSweepTest = function() {
       menuBtClosestConvexResultCallback,
       0.01
     );
-    bodyHelperSetAttributeData.collisionFilterGroup = group;
-    bodyHelperSetAttributeData.collisionFilterMask = mask;
-    info.rootEl.setAttribute("body-helper", bodyHelperSetAttributeData);
+    broadphaseProxy.set_m_collisionFilterGroup(group);
+    broadphaseProxy.set_m_collisionFilterMask(mask);
     const closestHitFraction = menuBtClosestConvexResultCallback.get_m_closestHitFraction();
     Ammo.destroy(menuBtBoxShape); //TODO: Is this how I'm supposed to free this memory?
     Ammo.destroy(menuBtClosestConvexResultCallback);
@@ -327,6 +332,9 @@ const recomputeMenuPlacement = (function() {
     convexSweepInfo.positionAtBoundary.copy(boundaryInfoOut.positionAtBoundary);
     convexSweepInfo.centerOfBoundingSphere.copy(boundaryInfoOut.centerOfBoundingSphere);
     convexSweepInfo.rootEl = datum.rootEl;
+    // TODO: (performance) We do not need to do the convexSweepTest every frame.
+    // We can stagger it based on time since last sweep or when the camera or
+    // mesh transforms change by some amount, and we can round-robin when necessary.
     const hitFraction = doConvexSweepTest(convexSweepInfo, btCollisionWorld);
     desiredMenuPosition.lerpVectors(
       boundaryInfoOut.positionAtBoundary,
@@ -450,6 +458,7 @@ export class MenuPlacementSystem {
         );
         datum.menuEl.object3D.scale.setScalar(currentScale);
         datum.menuEl.object3D.matrixNeedsUpdate = true;
+        // TODO: If scaling becomes a hotspot on mobile because all object menus open in freeze mode, we can round robin the scale updates.
       }
       datum.previousRootMesh = datum.rootMesh;
       datum.wasMenuVisible = isMenuVisible;
