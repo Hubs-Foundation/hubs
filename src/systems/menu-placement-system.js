@@ -106,8 +106,8 @@ const calculateBoundaryPlacementInfo = (function() {
   const meshScale = new THREE.Vector3();
   const meshToCenter = new THREE.Vector3();
   const cameraPosition = new THREE.Vector3();
-  const centerToCamera = new THREE.Vector3();
-  const centerToCameraXZ = new THREE.Vector3();
+  const centerToCameraDirection = new THREE.Vector3();
+  const centerToCameraDirectionXZ = new THREE.Vector3();
   const centerToBoundingCylinder = new THREE.Vector3();
   return function calculateBoundaryPlacementInfo(infoIn, infoOut) {
     // Calculate the center of the bounding sphere
@@ -125,16 +125,19 @@ const calculateBoundaryPlacementInfo = (function() {
     const camera = infoIn.camera;
     camera.updateMatrices();
     cameraPosition.setFromMatrixPosition(camera.matrixWorld);
-    centerToCamera.subVectors(cameraPosition, infoOut.centerOfBoundingSphere);
-    centerToCameraXZ
-      .copy(centerToCamera)
+    centerToCameraDirection.subVectors(cameraPosition, infoOut.centerOfBoundingSphere).normalize();
+    centerToCameraDirectionXZ
+      .copy(centerToCameraDirection)
       .projectOnPlane(UP)
       .normalize();
-    infoOut.positionAtBoundingCylinder.addVectors(
+    infoOut.positionAtBoundary.addVectors(
       infoOut.centerOfBoundingSphere,
-      centerToBoundingCylinder.copy(centerToCameraXZ).multiplyScalar(meshScale.x * infoIn.radiusDividedByMeshScale)
+      centerToBoundingCylinder
+        .copy(infoIn.billboard ? centerToCameraDirection : centerToCameraDirectionXZ)
+        .multiplyScalar(meshScale.x * infoIn.radiusDividedByMeshScale)
     );
-    infoOut.menuForwardDir.copy(centerToCameraXZ).multiplyScalar(-1);
+    const cameraBackwardsDir = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 2).normalize(); // TODO: Should billboarding be toward the camera object or in the direction of the camera? If it's in the direction of the camera, it looks less warped, but could clip the object
+    infoOut.menuForwardDir.copy(infoIn.billboard ? cameraBackwardsDir : centerToCameraDirectionXZ).multiplyScalar(-1);
   };
 })();
 
@@ -156,12 +159,12 @@ const recomputeMenuShapeInfo = (function() {
   const menuUp = new THREE.Vector3();
   const vertex = new THREE.Vector3();
   const menuPositionToVertex = new THREE.Vector3();
-  return function recomputeMenuShapeInfo(datum, positionAtCylinderBorder, desiredMenuQuaternion) {
+  return function recomputeMenuShapeInfo(datum, desiredMenuQuaternion) {
     const menu = datum.menuEl.object3D;
     menu.updateMatrices();
     menu.matrixWorld.decompose(menuPosition, menuQuaternion, initialScale);
     temporaryMenuTransform.compose(
-      positionAtCylinderBorder,
+      menuPosition,
       desiredMenuQuaternion,
       temporaryScale.set(1, 1, 1)
     );
@@ -229,12 +232,17 @@ const recomputeMenuShapeInfo = (function() {
   };
 })();
 
-const setRotationMatrixFromUpAndForward = (function() {
+const setRotationFromForward = (function() {
   const right = new THREE.Vector3();
   const backward = new THREE.Vector3();
-  return function setRotationMatrixFromUpAndForward(up, forward, rotationMatrix) {
-    // Assume up and forward are orthonormal vectors
-    return rotationMatrix.makeBasis(right.crossVectors(forward, up), up, backward.copy(forward).multiplyScalar(-1));
+  const up = new THREE.Vector3();
+  // Assume forward is normalized
+  return function setRotationFromForward(forward, rotationMatrix) {
+    // TODO: Fix edge case where forward is very close to world UP,
+    // which causes the accuracy of "right" vector to degrade.
+    right.crossVectors(forward, up.set(0, 1, 0)).normalize();
+    up.crossVectors(right, forward);
+    return rotationMatrix.makeBasis(right, up, backward.copy(forward).multiplyScalar(-1));
   };
 })();
 
@@ -256,11 +264,7 @@ const createFunctionForConvexSweepTest = function() {
     menuBtFromTransform.setIdentity();
     menuBtFromTransform
       .getOrigin()
-      .setValue(
-        info.positionAtBoundingCylinder.x,
-        info.positionAtBoundingCylinder.y,
-        info.positionAtBoundingCylinder.z
-      );
+      .setValue(info.positionAtBoundary.x, info.positionAtBoundary.y, info.positionAtBoundary.z);
     menuBtQuaternion.setValue(
       info.desiredMenuQuaternion.x,
       info.desiredMenuQuaternion.y,
@@ -318,11 +322,12 @@ const recomputeMenuPlacement = (function() {
     mesh: null,
     localMeshToCenterDir: new THREE.Vector3(),
     distanceToCenterDividedByMeshScale: 0,
-    radiusDividedByMeshScale: 0
+    radiusDividedByMeshScale: 0,
+    billboard: false
   };
   const boundaryInfoOut = {
     centerOfBoundingSphere: new THREE.Vector3(),
-    positionAtBoundingCylinder: new THREE.Vector3(),
+    positionAtBoundary: new THREE.Vector3(),
     menuForwardDir: new THREE.Vector3()
   };
   const convexSweepInfo = {
@@ -330,7 +335,7 @@ const recomputeMenuPlacement = (function() {
     menuMinRight: 0,
     menuMaxUp: 0,
     menuMinUp: 0,
-    positionAtBoundingCylinder: new THREE.Vector3(),
+    positionAtBoundary: new THREE.Vector3(),
     menuWorldScale: new THREE.Vector3(),
     centerOfBoundingSphere: new THREE.Vector3(),
     desiredMenuQuaternion: new THREE.Quaternion(),
@@ -344,19 +349,20 @@ const recomputeMenuPlacement = (function() {
     boundaryInfoIn.localMeshToCenterDir.copy(datum.localMeshToCenterDir);
     boundaryInfoIn.distanceToCenterDividedByMeshScale = datum.distanceToCenterDividedByMeshScale;
     boundaryInfoIn.radiusDividedByMeshScale = datum.radiusDividedByMeshScale;
+    boundaryInfoIn.billboard = true; // Bounding sphere vs bounding cylinder
     calculateBoundaryPlacementInfo(boundaryInfoIn, boundaryInfoOut);
-    setRotationMatrixFromUpAndForward(UP, boundaryInfoOut.menuForwardDir, desiredMenuRotation);
+    setRotationFromForward(boundaryInfoOut.menuForwardDir, desiredMenuRotation);
     desiredMenuQuaternion.setFromRotationMatrix(desiredMenuRotation);
     const shouldRecomputeMenuShapeInfo = !datum.didComputeMenuShapeInfoAtLeastOnce;
     if (shouldRecomputeMenuShapeInfo) {
-      recomputeMenuShapeInfo(datum, boundaryInfoOut.positionAtBoundingCylinder, desiredMenuQuaternion);
+      recomputeMenuShapeInfo(datum, desiredMenuQuaternion);
     }
     datum.menuEl.object3D.updateMatrices();
     menuWorldScale.setFromMatrixScale(datum.menuEl.object3D.matrixWorld);
     setMatrixWorld(
       datum.menuEl.object3D,
       menuTransformAtCylinderBorder.compose(
-        boundaryInfoOut.positionAtBoundingCylinder,
+        boundaryInfoOut.positionAtBoundary,
         desiredMenuQuaternion,
         menuWorldScale
       )
@@ -366,14 +372,14 @@ const recomputeMenuPlacement = (function() {
     convexSweepInfo.menuMinRight = datum.menuMinRight;
     convexSweepInfo.menuMaxUp = datum.menuMaxUp;
     convexSweepInfo.menuMinUp = datum.menuMinUp;
-    convexSweepInfo.positionAtBoundingCylinder.copy(boundaryInfoOut.positionAtBoundingCylinder);
+    convexSweepInfo.positionAtBoundary.copy(boundaryInfoOut.positionAtBoundary);
     convexSweepInfo.menuWorldScale.copy(menuWorldScale);
     convexSweepInfo.centerOfBoundingSphere.copy(boundaryInfoOut.centerOfBoundingSphere);
     convexSweepInfo.desiredMenuQuaternion.copy(desiredMenuQuaternion);
     convexSweepInfo.rootEl = datum.rootEl;
     const hitFraction = doConvexSweepTest(convexSweepInfo, btCollisionWorld);
     desiredMenuPosition.lerpVectors(
-      boundaryInfoOut.positionAtBoundingCylinder,
+      boundaryInfoOut.positionAtBoundary,
       boundaryInfoOut.centerOfBoundingSphere,
       hitFraction
     );
