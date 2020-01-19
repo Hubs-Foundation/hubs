@@ -5,6 +5,7 @@ import { computeObjectAABB } from "../utils/auto-box-collider";
 import { v3String } from "../utils/pretty-print";
 const SWEEP_TEST_LAYER = require("../constants").COLLISION_LAYERS.CONVEX_SWEEP_TEST;
 const FRACTION_FUDGE_FACTOR = 0.02; // Pull back from the hit point just a bit, because of the fudge factor in the convexSweepTest
+const UP = new THREE.Vector3(0, 1, 0);
 
 AFRAME.registerComponent("menu-placement-root", {
   schema: {
@@ -85,13 +86,55 @@ const getBoundingSphereInfo = (function() {
         mesh,
         datum.rootEl
       );
-      //TODO: Support for non-uniform scale is not particularly difficult, but requires a new code path without the same preformance optimizations. AFAIK we control the scale of these nodes, and always expect them to be uniform.
+      //TODO: As far as I can tell, we control the scale of these nodes,
+      // and always expect them to be uniform. Supporting non-uniform scale
+      // is not particularly difficult, but requires a new code path
+      // without the same performance optimizations.
     }
     const meshScaleX = meshScale.x;
     datum.localMeshToCenterDir.copy(localMeshToCenterDir);
     datum.distanceToCenterDividedByMeshScale = distanceToCenter / meshScaleX;
     datum.radiusDividedByMeshScale = radius / meshScaleX;
     datum.didGetBoundingSphereInfoAtLeastOnce = true;
+  };
+})();
+
+const calculateBoundaryPlacementInfo = (function() {
+  const meshPosition = new THREE.Vector3();
+  const meshQuaternion = new THREE.Quaternion();
+  const meshRotation = new THREE.Matrix4();
+  const meshScale = new THREE.Vector3();
+  const meshToCenter = new THREE.Vector3();
+  const cameraPosition = new THREE.Vector3();
+  const centerToCamera = new THREE.Vector3();
+  const centerToCameraXZ = new THREE.Vector3();
+  const centerToBoundingCylinder = new THREE.Vector3();
+  return function calculateBoundaryPlacementInfo(infoIn, infoOut) {
+    // Calculate the center of the bounding sphere
+    const mesh = infoIn.mesh;
+    mesh.updateMatrices();
+    mesh.matrixWorld.decompose(meshPosition, meshQuaternion, meshScale);
+    meshRotation.extractRotation(mesh.matrixWorld);
+    meshToCenter
+      .copy(infoIn.localMeshToCenterDir)
+      .applyMatrix4(meshRotation)
+      .multiplyScalar(meshScale.x * infoIn.distanceToCenterDividedByMeshScale);
+    infoOut.centerOfBoundingSphere.addVectors(meshPosition, meshToCenter);
+
+    // Calculate a position on the edge of the bounding cylinder, in the XZ-direction of the camera.
+    const camera = infoIn.camera;
+    camera.updateMatrices();
+    cameraPosition.setFromMatrixPosition(camera.matrixWorld);
+    centerToCamera.subVectors(cameraPosition, infoOut.centerOfBoundingSphere);
+    centerToCameraXZ
+      .copy(centerToCamera)
+      .projectOnPlane(UP)
+      .normalize();
+    infoOut.positionAtBoundingCylinder.addVectors(
+      infoOut.centerOfBoundingSphere,
+      centerToBoundingCylinder.copy(centerToCameraXZ).multiplyScalar(meshScale.x * infoIn.radiusDividedByMeshScale)
+    );
+    infoOut.menuForwardDir.copy(centerToCameraXZ).multiplyScalar(-1);
   };
 })();
 
@@ -186,125 +229,66 @@ const recomputeMenuShapeInfo = (function() {
   };
 })();
 
-const createRotationFromUpAndForward = (function() {
+const setRotationMatrixFromUpAndForward = (function() {
   const right = new THREE.Vector3();
   const backward = new THREE.Vector3();
-  return function createRotationFromUpAndForward(up, forward, inMat4) {
-    return inMat4.makeBasis(right.crossVectors(forward, up), up, backward.copy(forward).multiplyScalar(-1));
+  return function setRotationMatrixFromUpAndForward(up, forward, rotationMatrix) {
+    // Assume up and forward are orthonormal vectors
+    return rotationMatrix.makeBasis(right.crossVectors(forward, up), up, backward.copy(forward).multiplyScalar(-1));
   };
 })();
 
-const UP = new THREE.Vector3(0, 1, 0);
-const createFunctionToRecomputeMenuPlacement = function() {
-  const cameraPosition = new THREE.Vector3();
-  const centerToCamera = new THREE.Vector3();
+let doConvexSweepTest;
+const createFunctionForConvexSweepTest = function() {
+  const bodyHelperSetAttributeData = { collisionFilterGroup: 0, collisionFilterMask: 0 };
   const menuBtHalfExtents = new Ammo.btVector3(0, 0, 0);
-  //const menuBtBoxShape = new Ammo.btBoxShape(menuBtHalfExtents);
-  const menuBtBoxShape = new Ammo.btBoxShape(menuBtHalfExtents);
   const menuBtFromTransform = new Ammo.btTransform();
   const menuBtQuaternion = new Ammo.btQuaternion();
   const menuBtScale = new Ammo.btVector3();
   const menuBtToTransform = new Ammo.btTransform();
-  const menuBtClosestConvexResultCallback = new Ammo.ClosestConvexResultCallback(
-    menuBtFromTransform.getOrigin(),
-    menuBtToTransform.getOrigin()
-  );
-  const desiredMenuTransform = new THREE.Matrix4();
-  const menuWorldScale = new THREE.Vector3();
-  const desiredMenuPosition = new THREE.Vector3();
-  const desiredMenuRotation = new THREE.Matrix4();
-  const desiredMenuQuaternion = new THREE.Quaternion();
-  const menuTransformAtCylinderBorder = new THREE.Matrix4();
-
-  const meshPosition = new THREE.Vector3();
-  const meshQuaternion = new THREE.Quaternion();
-  const meshRotation = new THREE.Matrix4();
-  const meshScale = new THREE.Vector3();
-
-  const meshToCenter = new THREE.Vector3();
-  const centerOfBoundingSphere = new THREE.Vector3();
-
-  const centerToCameraXZ = new THREE.Vector3();
-  const menuForwardDir = new THREE.Vector3();
-  const positionAtBoundingCylinder = new THREE.Vector3();
-  const centerToBoundingCylinder = new THREE.Vector3();
-  const bodyHelperSetAttributeData = { collisionFilterGroup: 0, collisionFilterMask: 0 };
-
-  return function recomputeMenuPlacement(datum, camera, btCollisionWorld) {
-    // Calculate the center of the bounding sphere
-    const mesh = datum.rootMesh;
-    mesh.updateMatrices();
-    mesh.matrixWorld.decompose(meshPosition, meshQuaternion, meshScale);
-    meshRotation.extractRotation(mesh.matrixWorld);
-    meshToCenter
-      .copy(datum.localMeshToCenterDir)
-      .applyMatrix4(meshRotation)
-      .multiplyScalar(meshScale.x * datum.distanceToCenterDividedByMeshScale);
-    centerOfBoundingSphere.addVectors(meshPosition, meshToCenter);
-
-    // Calculate a position on the edge of the bounding cylinder, in the XZ-direction of the camera.
-    camera.updateMatrices();
-    cameraPosition.setFromMatrixPosition(camera.matrixWorld);
-    centerToCamera.subVectors(cameraPosition, centerOfBoundingSphere);
-    centerToCameraXZ
-      .copy(centerToCamera)
-      .projectOnPlane(UP)
-      .normalize();
-    positionAtBoundingCylinder.addVectors(
-      centerOfBoundingSphere,
-      centerToBoundingCylinder.copy(centerToCameraXZ).multiplyScalar(meshScale.x * datum.radiusDividedByMeshScale)
-    );
-
-    createRotationFromUpAndForward(UP, menuForwardDir.copy(centerToCameraXZ).multiplyScalar(-1), desiredMenuRotation);
-    desiredMenuQuaternion.setFromRotationMatrix(desiredMenuRotation);
-    const shouldRecomputeMenuShapeInfo = !datum.didComputeMenuShapeInfoAtLeastOnce;
-    if (shouldRecomputeMenuShapeInfo) {
-      recomputeMenuShapeInfo(datum, positionAtBoundingCylinder, desiredMenuQuaternion);
-    }
-    datum.menuEl.object3D.updateMatrices();
-    menuWorldScale.setFromMatrixScale(datum.menuEl.object3D.matrixWorld);
-    setMatrixWorld(
-      datum.menuEl.object3D,
-      menuTransformAtCylinderBorder.compose(
-        positionAtBoundingCylinder,
-        desiredMenuQuaternion,
-        menuWorldScale
-      )
-    );
-
+  return function doConvexSweepTest(info, btCollisionWorld) {
     menuBtHalfExtents.setValue(
-      (datum.menuMaxRight - datum.menuMinRight) / 2,
-      (datum.menuMaxUp - datum.menuMinUp) / 2,
-      0.005
+      (info.menuMaxRight - info.menuMinRight) / 2,
+      (info.menuMaxUp - info.menuMinUp) / 2,
+      0.001
     );
+    const menuBtBoxShape = new Ammo.btBoxShape(menuBtHalfExtents); // TODO: Do not recreate this every time
     menuBtFromTransform.setIdentity();
     menuBtFromTransform
       .getOrigin()
-      .setValue(positionAtBoundingCylinder.x, positionAtBoundingCylinder.y, positionAtBoundingCylinder.z);
+      .setValue(
+        info.positionAtBoundingCylinder.x,
+        info.positionAtBoundingCylinder.y,
+        info.positionAtBoundingCylinder.z
+      );
     menuBtQuaternion.setValue(
-      desiredMenuQuaternion.x,
-      desiredMenuQuaternion.y,
-      desiredMenuQuaternion.z,
-      desiredMenuQuaternion.w
+      info.desiredMenuQuaternion.x,
+      info.desiredMenuQuaternion.y,
+      info.desiredMenuQuaternion.z,
+      info.desiredMenuQuaternion.w
     );
     menuBtFromTransform.setRotation(menuBtQuaternion);
-    menuBtScale.setValue(menuWorldScale.x, menuWorldScale.y, menuWorldScale.z);
+    menuBtScale.setValue(info.menuWorldScale.x, info.menuWorldScale.y, info.menuWorldScale.z);
     menuBtBoxShape.setLocalScaling(menuBtScale);
     menuBtToTransform.setIdentity();
     menuBtToTransform
       .getOrigin()
-      .setValue(centerOfBoundingSphere.x, centerOfBoundingSphere.y, centerOfBoundingSphere.z);
+      .setValue(info.centerOfBoundingSphere.x, info.centerOfBoundingSphere.y, info.centerOfBoundingSphere.z);
     menuBtToTransform.setRotation(menuBtQuaternion);
 
-    const bodyHelper = datum.rootEl.components["body-helper"];
+    const bodyHelper = info.rootEl.components["body-helper"];
     if (!bodyHelper) {
-      console.error("No body-helper component found on root element. Cannot place the menu!", datum.rootEl);
+      console.error("No body-helper component found on root element. Cannot place the menu!", info.rootEl);
     }
     const group = bodyHelper.data.collisionFilterGroup;
     const mask = bodyHelper.data.collisionFilterMask;
     bodyHelperSetAttributeData.collisionFilterGroup = SWEEP_TEST_LAYER;
     bodyHelperSetAttributeData.collisionFilterMask = SWEEP_TEST_LAYER;
-    datum.rootEl.setAttribute("body-helper", bodyHelperSetAttributeData);
+    info.rootEl.setAttribute("body-helper", bodyHelperSetAttributeData);
+    const menuBtClosestConvexResultCallback = new Ammo.ClosestConvexResultCallback(
+      menuBtFromTransform.getOrigin(),
+      menuBtToTransform.getOrigin()
+    ); // TODO: Do not recreate this every time
     menuBtClosestConvexResultCallback.set_m_collisionFilterGroup(SWEEP_TEST_LAYER);
     menuBtClosestConvexResultCallback.set_m_collisionFilterMask(SWEEP_TEST_LAYER);
     btCollisionWorld.convexSweepTest(
@@ -316,10 +300,83 @@ const createFunctionToRecomputeMenuPlacement = function() {
     );
     bodyHelperSetAttributeData.collisionFilterGroup = group;
     bodyHelperSetAttributeData.collisionFilterMask = mask;
-    datum.rootEl.setAttribute("body-helper", bodyHelperSetAttributeData);
+    info.rootEl.setAttribute("body-helper", bodyHelperSetAttributeData);
     const closestHitFraction = menuBtClosestConvexResultCallback.get_m_closestHitFraction();
     const fractionToUse = closestHitFraction === 1 ? 0 : closestHitFraction - FRACTION_FUDGE_FACTOR; // If the fraction is 1, then we didn't collide at all. In that case, choose a number near 0 (or 0 itself) to place it at the edge of the bounding sphere.
-    desiredMenuPosition.lerpVectors(positionAtBoundingCylinder, centerOfBoundingSphere, fractionToUse);
+    return fractionToUse;
+  };
+};
+
+const recomputeMenuPlacement = (function() {
+  const menuWorldScale = new THREE.Vector3();
+  const desiredMenuPosition = new THREE.Vector3();
+  const desiredMenuRotation = new THREE.Matrix4();
+  const desiredMenuQuaternion = new THREE.Quaternion();
+  const menuTransformAtCylinderBorder = new THREE.Matrix4();
+  const boundaryInfoIn = {
+    camera: null,
+    mesh: null,
+    localMeshToCenterDir: new THREE.Vector3(),
+    distanceToCenterDividedByMeshScale: 0,
+    radiusDividedByMeshScale: 0
+  };
+  const boundaryInfoOut = {
+    centerOfBoundingSphere: new THREE.Vector3(),
+    positionAtBoundingCylinder: new THREE.Vector3(),
+    menuForwardDir: new THREE.Vector3()
+  };
+  const convexSweepInfo = {
+    menuMaxRight: 0,
+    menuMinRight: 0,
+    menuMaxUp: 0,
+    menuMinUp: 0,
+    positionAtBoundingCylinder: new THREE.Vector3(),
+    menuWorldScale: new THREE.Vector3(),
+    centerOfBoundingSphere: new THREE.Vector3(),
+    desiredMenuQuaternion: new THREE.Quaternion(),
+    rootEl: null
+  };
+  const desiredMenuTransform = new THREE.Matrix4();
+
+  return function recomputeMenuPlacement(datum, camera, btCollisionWorld) {
+    boundaryInfoIn.camera = camera;
+    boundaryInfoIn.mesh = datum.rootMesh;
+    boundaryInfoIn.localMeshToCenterDir.copy(datum.localMeshToCenterDir);
+    boundaryInfoIn.distanceToCenterDividedByMeshScale = datum.distanceToCenterDividedByMeshScale;
+    boundaryInfoIn.radiusDividedByMeshScale = datum.radiusDividedByMeshScale;
+    calculateBoundaryPlacementInfo(boundaryInfoIn, boundaryInfoOut);
+    setRotationMatrixFromUpAndForward(UP, boundaryInfoOut.menuForwardDir, desiredMenuRotation);
+    desiredMenuQuaternion.setFromRotationMatrix(desiredMenuRotation);
+    const shouldRecomputeMenuShapeInfo = !datum.didComputeMenuShapeInfoAtLeastOnce;
+    if (shouldRecomputeMenuShapeInfo) {
+      recomputeMenuShapeInfo(datum, boundaryInfoOut.positionAtBoundingCylinder, desiredMenuQuaternion);
+    }
+    datum.menuEl.object3D.updateMatrices();
+    menuWorldScale.setFromMatrixScale(datum.menuEl.object3D.matrixWorld);
+    setMatrixWorld(
+      datum.menuEl.object3D,
+      menuTransformAtCylinderBorder.compose(
+        boundaryInfoOut.positionAtBoundingCylinder,
+        desiredMenuQuaternion,
+        menuWorldScale
+      )
+    );
+
+    convexSweepInfo.menuMaxRight = datum.menuMaxRight;
+    convexSweepInfo.menuMinRight = datum.menuMinRight;
+    convexSweepInfo.menuMaxUp = datum.menuMaxUp;
+    convexSweepInfo.menuMinUp = datum.menuMinUp;
+    convexSweepInfo.positionAtBoundingCylinder.copy(boundaryInfoOut.positionAtBoundingCylinder);
+    convexSweepInfo.menuWorldScale.copy(menuWorldScale);
+    convexSweepInfo.centerOfBoundingSphere.copy(boundaryInfoOut.centerOfBoundingSphere);
+    convexSweepInfo.desiredMenuQuaternion.copy(desiredMenuQuaternion);
+    convexSweepInfo.rootEl = datum.rootEl;
+    const hitFraction = doConvexSweepTest(convexSweepInfo, btCollisionWorld);
+    desiredMenuPosition.lerpVectors(
+      boundaryInfoOut.positionAtBoundingCylinder,
+      boundaryInfoOut.centerOfBoundingSphere,
+      hitFraction
+    );
     desiredMenuTransform.compose(
       desiredMenuPosition,
       desiredMenuQuaternion,
@@ -327,7 +384,7 @@ const createFunctionToRecomputeMenuPlacement = function() {
     );
     setMatrixWorld(datum.menuEl.object3D, desiredMenuTransform);
   };
-};
+})();
 
 export class MenuPlacementSystem {
   constructor(physicsSystem) {
@@ -362,13 +419,12 @@ export class MenuPlacementSystem {
       menuEl.object3D.matrixNeedsUpdate = true;
       this.data.push({
         rootEl,
-        previousRootMesh: rootEl.getObject3D("mesh"),
+        rootMesh: null,
+        previousRootMesh: null,
         previousRootObjectScale: new THREE.Vector3().setFromMatrixScale(rootEl.object3D.matrixWorld),
         localMeshToCenterDir: new THREE.Vector3(),
         distanceToCenterDividedByMeshScale: 0,
         didGetBoundingSphereInfoAtLeastOnce: false,
-        rootMeshCylinderRadius: 0,
-        rootMeshTransformAtAABBComputeTime: new THREE.Matrix4(),
         menuEl,
         didComputeMenuShapeInfoAtLeastOnce: false,
         wasMenuVisible: false
@@ -404,9 +460,9 @@ export class MenuPlacementSystem {
       if (shouldGetBoundingSphereInfo) {
         getBoundingSphereInfo(datum);
       }
-      const shouldRecomputeMenuPlacement = isMenuVisible; // TODO: Should we this with the scheduler or do only once when the menu is first opening?
+      const shouldRecomputeMenuPlacement = isMenuVisible;
       if (shouldRecomputeMenuPlacement) {
-        this.recomputeMenuPlacement(datum, this.viewingCamera, this.btCollisionWorld);
+        recomputeMenuPlacement(datum, this.viewingCamera, this.btCollisionWorld);
       }
       const isMenuOpening = isMenuVisible && !datum.wasMenuVisible;
       currentRootObjectScale.setFromMatrixScale(datum.rootEl.object3D.matrixWorld);
@@ -435,9 +491,11 @@ export class MenuPlacementSystem {
     if (!Ammo || !(this.physicsSystem.world && this.physicsSystem.world.physicsWorld)) {
       return;
     }
-    if (!this.didThingAfterAmmoInitialized) {
-      this.didThingAfterAmmoInitialized = true;
-      this.recomputeMenuPlacement = createFunctionToRecomputeMenuPlacement();
+    if (!this.didInitializeAfterAmmo) {
+      // Must wait for Ammo / WASM initialization in order
+      // to initialize Ammo data structures like Ammo.btVector3
+      this.didInitializeAfterAmmo = true;
+      doConvexSweepTest = createFunctionForConvexSweepTest();
     }
     this.btCollisionWorld = this.btCollisionWorld || this.physicsSystem.world.physicsWorld;
     for (let i = 0; i < this.data.length; i++) {
@@ -445,18 +503,3 @@ export class MenuPlacementSystem {
     }
   }
 }
-
-// Strategy for menu placement:
-//  - Compute a bounding sphere for rootMesh := rootEl.getObject3D("mesh")
-//  - Recompute this sphere when the rootMesh changes.
-//  - Compute a bounding box for menuEl
-//  - Keep the sphere and box data in such a way that they can be updated
-//  by the current matrixWorld's of the menuEl.object3D / rootMesh
-//  - Whenever the menu position should be recalculated:
-//  -  - Find a position on the bounding cylinder to put the menu,
-//  -  - Do a convexSweepTest in the direction of the rootMesh (project on XZ) to find a better spot
-//  -  - Compute the desired _scale_ of the menu, given its distance from the camera
-//  -  - Figure out a good Y position of the menu based on the camera's Y and the top/bottom of the menu
-//  - Whenever the menu animation should restart:
-//  -  - Use the desired scale computed above to add an animation that targets the menu's localScale
-//  (unless I change the animation component)
