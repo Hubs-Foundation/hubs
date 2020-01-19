@@ -43,12 +43,11 @@ const getBoundingSphereInfo = (function() {
   const v = new THREE.Vector3();
   const sphere = new THREE.Sphere();
   const meshPosition = new THREE.Vector3();
-  const meshRotation = new THREE.Matrix4();
-  const meshRotationInverse = new THREE.Matrix4();
   const meshQuaternion = new THREE.Quaternion();
   const meshScale = new THREE.Vector3();
+  const meshRotation = new THREE.Matrix4();
+  const meshRotationInverse = new THREE.Matrix4();
   const meshPositionToCenter = new THREE.Vector3();
-  const localMeshToCenterDir = new THREE.Vector3();
   return function getBoundingSphereInfo(datum) {
     const mesh = datum.rootMesh;
     mesh.updateMatrices();
@@ -60,10 +59,10 @@ const getBoundingSphereInfo = (function() {
     meshRotation.extractRotation(mesh.matrixWorld);
     meshPositionToCenter.subVectors(center, meshPosition);
     const distanceToCenter = meshPositionToCenter.length();
-    localMeshToCenterDir
+    datum.localMeshToCenterDir
       .copy(meshPositionToCenter)
-      .normalize()
-      .applyMatrix4(meshRotationInverse.getInverse(meshRotation));
+      .applyMatrix4(meshRotationInverse.getInverse(meshRotation))
+      .normalize();
 
     if (!isAlmostUniformVector3(meshScale, 0.005)) {
       console.warn(
@@ -77,7 +76,6 @@ const getBoundingSphereInfo = (function() {
       // a different code path without the same performance optimizations.
     }
     const meshScaleX = meshScale.x;
-    datum.localMeshToCenterDir.copy(localMeshToCenterDir);
     datum.distanceToCenterDividedByMeshScale = distanceToCenter / meshScaleX;
     datum.radiusDividedByMeshScale = radius / meshScaleX;
     datum.didGetBoundingSphereInfoAtLeastOnce = true;
@@ -91,7 +89,7 @@ const calculateBoundaryPlacementInfo = (function() {
   const meshScale = new THREE.Vector3();
   const meshToCenter = new THREE.Vector3();
   const centerToCameraDirection = new THREE.Vector3();
-  const centerToBoundingCylinder = new THREE.Vector3();
+  const centerToPositionAtBoundary = new THREE.Vector3();
   // Calculate a position on the bounding sphere such that we could
   // place the menu there without intersecting the mesh.
   return function calculateBoundaryPlacementInfo(cameraPosition, infoIn, infoOut) {
@@ -107,7 +105,7 @@ const calculateBoundaryPlacementInfo = (function() {
     centerToCameraDirection.subVectors(cameraPosition, infoOut.centerOfBoundingSphere).normalize();
     infoOut.positionAtBoundary.addVectors(
       infoOut.centerOfBoundingSphere,
-      centerToBoundingCylinder
+      centerToPositionAtBoundary
         .copy(centerToCameraDirection)
         .multiplyScalar(meshScale.x * infoIn.radiusDividedByMeshScale)
     );
@@ -273,9 +271,7 @@ const createFunctionForConvexSweepTest = function() {
 };
 
 const recomputeMenuPlacement = (function() {
-  const menuWorldScale = new THREE.Vector3();
   const desiredMenuPosition = new THREE.Vector3();
-  const desiredMenuQuaternion = new THREE.Quaternion();
   const menuTransformAtBorder = new THREE.Matrix4();
   const boundaryInfoIn = {
     rootMesh: null,
@@ -310,21 +306,21 @@ const recomputeMenuPlacement = (function() {
     boundaryInfoIn.distanceToCenterDividedByMeshScale = datum.distanceToCenterDividedByMeshScale;
     boundaryInfoIn.radiusDividedByMeshScale = datum.radiusDividedByMeshScale;
     calculateBoundaryPlacementInfo(cameraPosition, boundaryInfoIn, boundaryInfoOut);
-    desiredMenuQuaternion.setFromRotationMatrix(cameraRotation);
+    convexSweepInfo.desiredMenuQuaternion.setFromRotationMatrix(cameraRotation);
     const shouldRecomputeMenuShapeInfo = !datum.didComputeMenuShapeInfoAtLeastOnce;
     if (shouldRecomputeMenuShapeInfo) {
-      recomputeMenuShapeInfo(datum, desiredMenuQuaternion);
+      recomputeMenuShapeInfo(datum, convexSweepInfo.desiredMenuQuaternion);
       // TODO: Recompute menu shape info when button visibility changes,
       // e.g. when the track/focus buttons become active after spawning a camera.
     }
     datum.menuEl.object3D.updateMatrices();
-    menuWorldScale.setFromMatrixScale(datum.menuEl.object3D.matrixWorld);
+    convexSweepInfo.menuWorldScale.setFromMatrixScale(datum.menuEl.object3D.matrixWorld);
     setMatrixWorld(
       datum.menuEl.object3D,
       menuTransformAtBorder.compose(
         boundaryInfoOut.positionAtBoundary,
-        desiredMenuQuaternion,
-        menuWorldScale
+        convexSweepInfo.desiredMenuQuaternion,
+        convexSweepInfo.menuWorldScale
       )
     );
 
@@ -333,9 +329,7 @@ const recomputeMenuPlacement = (function() {
     convexSweepInfo.menuMaxUp = datum.menuMaxUp;
     convexSweepInfo.menuMinUp = datum.menuMinUp;
     convexSweepInfo.positionAtBoundary.copy(boundaryInfoOut.positionAtBoundary);
-    convexSweepInfo.menuWorldScale.copy(menuWorldScale);
     convexSweepInfo.centerOfBoundingSphere.copy(boundaryInfoOut.centerOfBoundingSphere);
-    convexSweepInfo.desiredMenuQuaternion.copy(desiredMenuQuaternion);
     convexSweepInfo.rootEl = datum.rootEl;
     const hitFraction = doConvexSweepTest(convexSweepInfo, btCollisionWorld);
     desiredMenuPosition.lerpVectors(
@@ -345,14 +339,15 @@ const recomputeMenuPlacement = (function() {
     );
     desiredMenuTransform.compose(
       desiredMenuPosition,
-      desiredMenuQuaternion,
-      menuWorldScale
+      convexSweepInfo.desiredMenuQuaternion,
+      convexSweepInfo.menuWorldScale
     );
     setMatrixWorld(datum.menuEl.object3D, desiredMenuTransform);
   };
 })();
 
-// TODO: Can't compute correct boundaries for skinned/animated meshes.
+// TODO: Computing the boundaries of skinned/animated meshes does not work correctly.
+// TODO: 2D content should only show the menu on its front and back.
 export class MenuPlacementSystem {
   constructor(physicsSystem) {
     this.physicsSystem = physicsSystem;
@@ -378,12 +373,7 @@ export class MenuPlacementSystem {
         );
         return;
       }
-      menuEl.addEventListener("animationcomplete", () => {
-        menuEl.removeAttribute("animation__show");
-      });
 
-      menuEl.object3D.scale.setScalar(0.01); // To avoid "pop" of gigantic button first time, since the animation won't take effect until the next frame
-      menuEl.object3D.matrixNeedsUpdate = true;
       this.data.push({
         rootEl,
         rootMesh: null,
@@ -420,6 +410,7 @@ export class MenuPlacementSystem {
         return;
       }
       datum.rootEl.object3D.updateMatrices();
+      datum.menuEl.object3D.updateMatrices();
       const isMenuVisible = datum.menuEl.object3D.visible;
       const rootMeshChanged = datum.previousRootMesh !== datum.rootMesh;
       const shouldGetBoundingSphereInfo =
@@ -433,7 +424,7 @@ export class MenuPlacementSystem {
       }
       const isMenuOpening = isMenuVisible && !datum.wasMenuVisible;
       const distanceToMenu = menuToCamera
-        .subVectors(menuPosition.setFromMatrixPosition(datum.menuEl.object3D.matrixWorld), cameraPosition)
+        .subVectors(cameraPosition, menuPosition.setFromMatrixPosition(datum.menuEl.object3D.matrixWorld))
         .length();
       currentRootObjectScale.setFromMatrixScale(datum.rootEl.object3D.matrixWorld);
       const endingScale = (0.4 * distanceToMenu) / currentRootObjectScale.x;
@@ -445,7 +436,7 @@ export class MenuPlacementSystem {
         const currentScale = THREE.Math.lerp(
           datum.startScaleAtMenuOpenTime,
           endingScale,
-          elasticOut(THREE.Math.clamp((t - datum.menuOpenTime) / (window.customMS || MENU_ANIMATION_DURATION_MS), 0, 1))
+          elasticOut(THREE.Math.clamp((t - datum.menuOpenTime) / MENU_ANIMATION_DURATION_MS, 0, 1))
         );
         datum.menuEl.object3D.scale.setScalar(currentScale);
         datum.menuEl.object3D.matrixNeedsUpdate = true;
