@@ -7,6 +7,7 @@ import { elasticOut } from "../utils/easing";
 const SWEEP_TEST_LAYER = require("../constants").COLLISION_LAYERS.CONVEX_SWEEP_TEST;
 const FRACTION_FUDGE_FACTOR = 0.02; // Pull back from the hit point just a bit, because of the fudge factor in the convexSweepTest
 const MENU_ANIMATION_DURATION_MS = 750;
+const DISABLE_PERFORMANCE_OPTIMIZATIONS = false;
 
 AFRAME.registerComponent("menu-placement-root", {
   schema: {
@@ -309,7 +310,7 @@ const recomputeMenuPlacement = (function() {
     calculateBoundaryPlacementInfo(cameraPosition, boundaryInfoIn, boundaryInfoOut);
     convexSweepInfo.desiredMenuQuaternion.setFromRotationMatrix(cameraRotation);
     const shouldRecomputeMenuShapeInfo = !datum.didComputeMenuShapeInfoAtLeastOnce;
-    if (shouldRecomputeMenuShapeInfo) {
+    if (DISABLE_PERFORMANCE_OPTIMIZATIONS || shouldRecomputeMenuShapeInfo) {
       recomputeMenuShapeInfo(datum, convexSweepInfo.desiredMenuQuaternion);
       // TODO: Recompute menu shape info when button visibility changes,
       // e.g. when the track/focus buttons become active after spawning a camera.
@@ -432,11 +433,11 @@ export class MenuPlacementSystem {
       const rootMeshChanged = datum.previousRootMesh !== datum.rootMesh;
       const shouldGetBoundingSphereInfo =
         isMenuVisible && (!datum.didGetBoundingSphereInfoAtLeastOnce || rootMeshChanged);
-      if (shouldGetBoundingSphereInfo) {
+      if (DISABLE_PERFORMANCE_OPTIMIZATIONS || shouldGetBoundingSphereInfo) {
         getBoundingSphereInfo(datum);
       }
       const shouldRecomputeMenuPlacement = isMenuVisible;
-      if (shouldRecomputeMenuPlacement) {
+      if (DISABLE_PERFORMANCE_OPTIMIZATIONS || shouldRecomputeMenuPlacement) {
         recomputeMenuPlacement(datum, cameraPosition, cameraRotation, this.btCollisionWorld);
       }
       const isMenuOpening = isMenuVisible && !datum.wasMenuVisible;
