@@ -81,7 +81,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.batchManagerSystem.tick(t);
     this.cameraSystem.tick(this.el, dt);
     this.waypointSystem.tick(t, dt);
-    this.menuPlacementSystem.tick(); // must run before sprite system
+    this.menuPlacementSystem.tick(t); // must run before sprite system
     this.spriteSystem.tick(t, dt);
   },
 
