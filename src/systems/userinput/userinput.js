@@ -362,11 +362,11 @@ AFRAME.registerSystem("userinput", {
         e.gamepad.id === "OpenVR Cosmos"
       ) {
         gamepadDevice = new ViveControllerDevice(e.gamepad);
-      } else if (e.gamepad.id.startsWith("Oculus Touch")) {
+      } else if (e.gamepad.id.startsWith("Oculus Touch") || e.gamepad.id.startsWith("Pico Neo 2")) {
         gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
       } else if (e.gamepad.id.startsWith("Spatial Controller")) {
         gamepadDevice = new WindowsMixedRealityControllerDevice(e.gamepad);
-      } else if (e.gamepad.id === "Oculus Go Controller") {
+      } else if (e.gamepad.id === "Oculus Go Controller" || e.gamepad.id === "Pico G2 Controller") {
         gamepadDevice = new OculusGoControllerDevice(e.gamepad);
       } else if (e.gamepad.id === "Gear VR Controller" || e.gamepad.id === "HTC Vive Focus Controller") {
         gamepadDevice = new GearVRControllerDevice(e.gamepad);

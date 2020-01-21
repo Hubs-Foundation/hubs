@@ -108,7 +108,7 @@ async function createGIFTexture(url) {
  * @param {string} src - Url to a video file.
  * @returns {Element} Video element.
  */
-async function createVideoOrAudioEl(type) {
+function createVideoOrAudioEl(type) {
   const el = document.createElement(type);
   el.setAttribute("playsinline", "");
   el.setAttribute("webkit-playsinline", "");
@@ -505,13 +505,13 @@ AFRAME.registerComponent("media-video", {
       this.mesh.material.needsUpdate = true;
     }
 
-    let texture, audioSource;
+    let texture, audioSourceEl;
     try {
       if (linkedVideoTexture) {
         texture = linkedVideoTexture;
         audioSource = linkedAudioSource;
       } else {
-        ({ texture, audioSource } = await this.createVideoTextureAndAudioSource());
+        ({ texture, audioSourceEl } = await this.createVideoTextureAudioSourceEl());
       }
 
       // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
@@ -528,7 +528,8 @@ AFRAME.registerComponent("media-video", {
           // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
           const mediaElementAudioSource =
             linkedMediaElementAudioSource ||
-            this.el.sceneEl.audioListener.context.createMediaElementSource(audioSource);
+            this.el.sceneEl.audioListener.context.createMediaElementSource(audioSourceEl);
+
           if (this.data.audioType === "pannernode") {
             this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
             this.audio.setDistanceModel(this.data.distanceModel);
@@ -637,7 +638,7 @@ AFRAME.registerComponent("media-video", {
     this.el.emit("video-loaded", { projection: projection });
   },
 
-  async createVideoTextureAndAudioSource() {
+  async createVideoTextureAudioSourceEl() {
     const url = this.data.src;
     const contentType = this.data.contentType;
 
@@ -647,7 +648,7 @@ AFRAME.registerComponent("media-video", {
         this._audioSyncInterval = null;
       }
 
-      const videoEl = await createVideoOrAudioEl("video");
+      const videoEl = createVideoOrAudioEl("video");
 
       let texture, audioEl, isReady;
       if (contentType.startsWith("audio/")) {
@@ -747,7 +748,7 @@ AFRAME.registerComponent("media-video", {
         if (this.data.audioSrc) {
           // If there's an audio src, create an audio element to play it that we keep in sync
           // with the video while this component is active.
-          audioEl = await createVideoOrAudioEl("audio");
+          audioEl = createVideoOrAudioEl("audio");
           audioEl.src = this.data.audioSrc;
           audioEl.onerror = reject;
 
@@ -757,6 +758,7 @@ AFRAME.registerComponent("media-video", {
               audioEl.currentTime = videoEl.currentTime;
             }
 
+            // During pause state change, correct any drift that remains.
             if (videoEl.paused !== audioEl.paused) {
               videoEl.paused ? audioEl.pause() : audioEl.play();
               audioEl.currentTime = videoEl.currentTime;
@@ -769,7 +771,7 @@ AFRAME.registerComponent("media-video", {
       // and also sometimes in Chrome it seems.
       const poll = () => {
         if (isReady()) {
-          resolve({ texture, audioSource: audioEl || texture.image });
+          resolve({ texture, audioSourceEl: audioEl || texture.image });
         } else {
           setTimeout(poll, 500);
         }
