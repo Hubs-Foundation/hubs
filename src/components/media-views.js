@@ -407,9 +407,7 @@ AFRAME.registerComponent("media-video", {
   },
 
   updatePlaybackState(force) {
-    if (this.hoverMenu) {
-      this.updateHoverMenu();
-    }
+    this.updateHoverMenu();
 
     // Only update playback position for videos you don't own
     if (this.video && (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl)))) {
