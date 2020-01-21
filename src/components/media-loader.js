@@ -564,6 +564,7 @@ AFRAME.registerComponent("media-pager", {
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
     this.onSnap = this.onSnap.bind(this);
+    this.update = this.update.bind(this);
 
     this.el.setAttribute("hover-menu__pager", { template: "#pager-hover-menu", dirs: ["forward", "back"] });
     this.el.components["hover-menu__pager"].getHoverMenu().then(menu => {
@@ -588,6 +589,9 @@ AFRAME.registerComponent("media-pager", {
       .getNetworkedEntity(this.el)
       .then(networkedEl => {
         this.networkedEl = networkedEl;
+        this.networkedEl.addEventListener("pinned", this.update);
+        this.networkedEl.addEventListener("unpinned", this.update);
+        window.APP.hubChannel.addEventListener("permissions_updated", this.update);
       })
       .catch(() => {}); //ignore exception, entity might not be networked
 
@@ -599,6 +603,12 @@ AFRAME.registerComponent("media-pager", {
   async update() {
     if (this.pageLabel) {
       this.pageLabel.setAttribute("text", "value", `${this.data.index + 1}/${this.data.maxIndex + 1}`);
+    }
+
+    if (this.prevButton && this.nextButton && this.networkedEl) {
+      const isPinned = this.networkedEl.components.pinnable && this.networkedEl.components.pinnable.data.pinned;
+      this.prevButton.object3D.visible = this.nextButton.object3D.visible =
+        !isPinned || window.APP.hubChannel.can("pin_objects");
     }
   },
 
@@ -620,5 +630,14 @@ AFRAME.registerComponent("media-pager", {
 
   onSnap() {
     this.el.emit("pager-snap-clicked");
+  },
+
+  remove() {
+    if (this.networkedEl) {
+      this.networkedEl.removeEventListener("pinned", this.update);
+      this.networkedEl.removeEventListener("unpinned", this.update);
+    }
+
+    window.APP.hubChannel.removeEventListener("permissions_updated", this.update);
   }
 });

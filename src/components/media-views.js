@@ -294,26 +294,29 @@ AFRAME.registerComponent("media-video", {
       this.updatePlaybackState();
     });
 
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.networkedEl = networkedEl;
-      applyPersistentSync(this.networkedEl.components.networked.data.networkId);
-      this.updatePlaybackState();
+    NAF.utils
+      .getNetworkedEntity(this.el)
+      .then(networkedEl => {
+        this.networkedEl = networkedEl;
+        applyPersistentSync(this.networkedEl.components.networked.data.networkId);
+        this.updatePlaybackState();
 
-      this.networkedEl.addEventListener("pinned", this.updateHoverMenu);
-      this.networkedEl.addEventListener("unpinned", this.updateHoverMenu);
+        this.networkedEl.addEventListener("pinned", this.updateHoverMenu);
+        this.networkedEl.addEventListener("unpinned", this.updateHoverMenu);
+        window.APP.hubChannel.addEventListener("permissions_updated", this.updateHoverMenu);
 
-      // For scene-owned videos, take ownership after a random delay if nobody
-      // else has so there is a timekeeper. Do not due this on iOS because iOS has an
-      // annoying "auto-pause" feature that forces one non-autoplaying video to play
-      // at once, which will pause the videos for everyone in the room if owned.
-      if (!isIOS && NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
-        setTimeout(() => {
-          if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
-            NAF.utils.takeOwnership(this.networkedEl);
-          }
-        }, 2000 + Math.floor(Math.random() * 2000));
-      }
-    })
+        // For scene-owned videos, take ownership after a random delay if nobody
+        // else has so there is a timekeeper. Do not due this on iOS because iOS has an
+        // annoying "auto-pause" feature that forces one non-autoplaying video to play
+        // at once, which will pause the videos for everyone in the room if owned.
+        if (!isIOS && NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
+          setTimeout(() => {
+            if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
+              NAF.utils.takeOwnership(this.networkedEl);
+            }
+          }, 2000 + Math.floor(Math.random() * 2000));
+        }
+      })
       .catch(() => {
         // Non-networked
         this.updatePlaybackState();
@@ -493,7 +496,7 @@ AFRAME.registerComponent("media-video", {
     try {
       if (linkedVideoTexture) {
         texture = linkedVideoTexture;
-        audioSource = linkedAudioSource;
+        audioSourceEl = linkedAudioSource;
       } else {
         ({ texture, audioSourceEl } = await this.createVideoTextureAudioSourceEl());
       }
@@ -575,7 +578,7 @@ AFRAME.registerComponent("media-video", {
       }
 
       this.videoTexture = texture;
-      this.audioSource = audioSource;
+      this.audioSource = audioSourceEl;
     } catch (e) {
       console.error("Error loading video", this.data.src, e);
       texture = errorTexture;
@@ -861,8 +864,12 @@ AFRAME.registerComponent("media-video", {
       delete this.audio;
     }
 
-    this.networkedEl.removeEventListener("pinned", this.updateHoverMenu);
-    this.networkedEl.removeEventListener("unpinned", this.updateHoverMenu);
+    if (this.networkedEl) {
+      this.networkedEl.removeEventListener("pinned", this.updateHoverMenu);
+      this.networkedEl.removeEventListener("unpinned", this.updateHoverMenu);
+    }
+
+    window.APP.hubChannel.removeEventListener("permissions_updated", this.updateHoverMenu);
 
     if (this.video) {
       this.video.removeEventListener("pause", this.onPauseStateChange);
