@@ -443,8 +443,14 @@ AFRAME.registerComponent("skybox", {
     }
 
     if (this.data.distance !== oldData.distance) {
-      this.sky.distance = this.data.distance;
-      this.el.object3D.matrixNeedsUpdate = true;
+      const distance = this.data.distance;
+
+      // HACK Remove this if condition and always set the scale based on distance when the existing environments
+      // have their sky scales set to 1.
+      if (this.el.object3D.scale.x === 1) {
+        this.sky.distance = distance;
+        this.sky.matrixNeedsUpdate = true;
+      }      
     }
 
     this.updateEnvironmentMap();
