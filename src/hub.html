@@ -239,6 +239,7 @@
                     set-yxz-order
                     matrix-auto-update
                     position-at-box-shape-border__freeze="target:.freeze-menu;"
+                    position-at-box-shape-border__freeze-unprivileged="target:.freeze-unprivileged-menu;"
                     hoverable-visuals
                     listed-media
                 >
@@ -380,6 +381,24 @@
                                 <a-entity
                                     sprite
                                     icon-button="image: scale-action.png; hoverImage: scale-action.png"
+                                    scale="0.165 0.165 0.165"
+                                    position="0 0 0.001"
+                                ></a-entity>
+                            </a-entity>
+                        </a-entity>
+                        <a-entity class="freeze-unprivileged-menu" visibility-while-frozen="withinDistance: 100; withouttPermission: spawn_and_move_media">
+                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" open-media-button="onlyOpenLink: true" position="0 -0.375 0.001">
+                                <a-entity text="value:open link; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity
+                                mixin="rounded-action-button"
+                                tags="isHoldable: true; holdableButton: true;"
+                                is-remote-hover-target
+                                inspect-button
+                                position="0 0.125 0.001">
+                                <a-entity
+                                    sprite
+                                    icon-button="image: recenter-action.png; hoverImage: recenter-action.png"
                                     scale="0.165 0.165 0.165"
                                     position="0 0 0.001"
                                 ></a-entity>
