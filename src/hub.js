@@ -1434,7 +1434,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (stale_fields.includes("scene")) {
       const fader = document.getElementById("viewing-camera").components["fader"];
 
-      fader.fadeOut().then(() => updateEnvironmentForHub(hub, entryManager));
+      fader.fadeOut().then(() => {
+        scene.emit("reset_scene");
+        updateEnvironmentForHub(hub, entryManager);
+      });
 
       addToPresenceLog({
         type: "scene_changed",

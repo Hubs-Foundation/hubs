@@ -23,6 +23,7 @@ layout(std140) uniform InstanceData {
 } instanceData;
 
 out vec3 hubs_WorldPosition;
+out float fogDepth;
 
 in vec3 position;
 in vec2 uv;
@@ -59,8 +60,12 @@ void main() {
   vUVTransform = instanceData.uvTransforms[instanceIndex];
   vMapSettings = instanceData.mapSettings[instanceIndex];
 
-  gl_Position = projectionMatrix * viewMatrix * instanceData.transforms[instanceIndex] * vec4(position, 1.0);
+  vec4 mvPosition = viewMatrix * instanceData.transforms[instanceIndex] * vec4(position, 1.0);
+
+  gl_Position = projectionMatrix * mvPosition;
 
   hubs_WorldPosition = (instanceData.transforms[instanceIndex] * vec4(position, 1.0)).xyz;
   vInstance = instanceIndex;
+
+  fogDepth = -mvPosition.z;
 }
