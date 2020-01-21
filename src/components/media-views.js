@@ -243,6 +243,7 @@ AFRAME.registerComponent("media-video", {
 
   init() {
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
+    this.updateHoverMenu = this.updateHoverMenu.bind(this);
     this.tryUpdateVideoPlaybackState = this.tryUpdateVideoPlaybackState.bind(this);
     this.updateSrc = this.updateSrc.bind(this);
 
@@ -295,6 +296,9 @@ AFRAME.registerComponent("media-video", {
       applyPersistentSync(this.networkedEl.components.networked.data.networkId);
       this.updateHoverMenu();
       this.updatePlaybackState();
+
+      this.networkedEl.addEventListener("pinned", this.updateHoverMenu);
+      this.networkedEl.addEventListener("unpinned", this.updateHoverMenu);
 
       // For scene-owned videos, take ownership after a random delay if nobody
       // else has so there is a timekeeper. Do not due this on iOS because iOS has an
@@ -794,6 +798,9 @@ AFRAME.registerComponent("media-video", {
       this.audio.disconnect();
       delete this.audio;
     }
+
+    this.networkedEl.removeEventListener("pinned", this.updateHoverMenu);
+    this.networkedEl.removeEventListener("unpinned", this.updateHoverMenu);
 
     if (this.video) {
       this.video.removeEventListener("pause", this.onPauseStateChange);
