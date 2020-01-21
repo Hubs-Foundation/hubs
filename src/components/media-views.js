@@ -286,13 +286,14 @@ AFRAME.registerComponent("media-video", {
       this.snapButton.object3D.addEventListener("interact", this.snap);
 
       this.updateVolumeLabel();
-      this.updateHoverMenuBasedOnLiveState();
+      this.updateHoverMenu();
       this.updatePlaybackState();
     });
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
       applyPersistentSync(this.networkedEl.components.networked.data.networkId);
+      this.updateHoverMenu();
       this.updatePlaybackState();
 
       // For scene-owned videos, take ownership after a random delay if nobody
@@ -403,18 +404,7 @@ AFRAME.registerComponent("media-video", {
 
   updatePlaybackState(force) {
     if (this.hoverMenu) {
-      this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
-      this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
-
-      const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
-      this.playPauseButton.object3D.visible =
-        !!this.video && !this.videoIsLive && (!isPinned || window.APP.hubChannel.can("pin_objects"));
-      this.snapButton.object3D.visible =
-        !!this.video &&
-        !this.data.contentType.startsWith("audio/") &&
-        window.APP.hubChannel.can("spawn_and_move_media");
-      this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
-      this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
+      this.updateHoverMenu();
     }
 
     // Only update playback position for videos you don't own
@@ -524,7 +514,7 @@ AFRAME.registerComponent("media-video", {
           if (texture.hls.currentLevel >= 0) {
             const videoWasLive = !!this.videoIsLive;
             this.videoIsLive = texture.hls.levels[texture.hls.currentLevel].details.live;
-            this.updateHoverMenuBasedOnLiveState();
+            this.updateHoverMenu();
 
             if (!videoWasLive && this.videoIsLive) {
               // We just determined the video is live (there can be a delay due to autoplay issues, etc)
@@ -543,7 +533,7 @@ AFRAME.registerComponent("media-video", {
         }
       } else {
         this.videoIsLive = this.video.duration === Infinity;
-        this.updateHoverMenuBasedOnLiveState();
+        this.updateHoverMenu();
       }
 
       if (isIOS) {
@@ -716,12 +706,21 @@ AFRAME.registerComponent("media-video", {
     });
   },
 
-  updateHoverMenuBasedOnLiveState() {
+  updateHoverMenu() {
     if (!this.hoverMenu) return;
 
-    this.seekForwardButton.object3D.visible = !this.videoIsLive;
-    this.seekBackButton.object3D.visible = !this.videoIsLive;
-    this.playPauseButton.object3D.visible = !this.videoIsLive;
+    const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
+    this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
+    this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
+
+    this.snapButton.object3D.visible =
+      !!this.video && !this.data.contentType.startsWith("audio/") && window.APP.hubChannel.can("spawn_and_move_media");
+    this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
+
+    const mayModifyPlayHead =
+      !!this.video && !this.videoIsLive && (!isPinned || window.APP.hubChannel.can("pin_objects"));
+
+    this.playPauseButton.object3D.visible = this.seekForwardButton.object3D.visible = this.seekBackButton.object3D.visible = mayModifyPlayHead;
 
     if (this.videoIsLive) {
       this.timeLabel.setAttribute("text", "value", "LIVE");

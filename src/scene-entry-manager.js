@@ -290,15 +290,17 @@ export default class SceneEntryManager {
       spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
     });
 
-    this.scene.addEventListener("pinned", e => {
+    const handlePinEvent = (e, pinned) => {
       if (this._disableSignInOnPinAction) return;
-      this._signInAndPinOrUnpinElement(e.detail.el, true);
-    });
+      const el = e.detail.el;
 
-    this.scene.addEventListener("unpinned", e => {
-      if (this._disableSignInOnPinAction) return;
-      this._signInAndPinOrUnpinElement(e.detail.el, false);
-    });
+      if (NAF.utils.isMine(el)) {
+        this._signInAndPinOrUnpinElement(e.detail.el, pinned);
+      }
+    };
+
+    this.scene.addEventListener("pinned", e => handlePinEvent(e, true));
+    this.scene.addEventListener("unpinned", e => handlePinEvent(e, false));
 
     this.scene.addEventListener("object_spawned", e => {
       this.hubChannel.sendObjectSpawnedEvent(e.detail.objectType);
