@@ -25,6 +25,26 @@ AFRAME.registerComponent("follow-in-fov", {
     const obj = this.el.object3D;
     const target = this.data.target.object3D;
 
+    let isHovered = false;
+    const interaction = AFRAME.scenes[0].systems.interaction;
+    const hoveredEl = interaction.state.rightRemote.hovered;
+
+    if (hoveredEl) {
+      let el = this.el;
+
+      while (el) {
+        if (hoveredEl === el) {
+          isHovered = true;
+          break;
+        }
+
+        el = el.parentNode;
+      }
+    }
+
+    // Stop updating position if hovered over.
+    if (isHovered) return;
+
     // Compute position + rotation by projecting offset along a downward ray in target space,
     // and mask out Z rotation.
     this._applyMaskedTargetRotation(
