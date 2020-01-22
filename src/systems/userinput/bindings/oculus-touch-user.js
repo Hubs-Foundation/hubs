@@ -903,8 +903,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     {
       src: { value: upperButtons },
       dest: { value: paths.actions.startInspecting },
-      xform: xforms.rising,
-      priority: 2
+      xform: xforms.rising
     }
   ],
 
@@ -930,8 +929,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     {
       src: { value: upperButtons },
       dest: { value: paths.actions.startInspecting },
-      xform: xforms.rising,
-      priority: 2
+      xform: xforms.rising
     }
   ],
 

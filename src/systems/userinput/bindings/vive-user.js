@@ -85,6 +85,7 @@ const thawViaKeyboard = v("keyboard/thaw");
 const thawViaButtons = v("buttons/thaw");
 
 const freezeButtons = v("buttons/freeze");
+const focusButtons = v("buttons/focus");
 
 const rSnapRight1 = v("right/snap-right");
 const rSnapLeft1 = v("right/snap-left");
@@ -826,6 +827,11 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.any
     },
     {
+      src: [rButton("primary").pressed, lButton("primary").pressed],
+      dest: { value: focusButtons },
+      xform: xforms.any
+    },
+    {
       src: { value: freezeButtons },
       dest: { value: ensureFrozenViaButtons },
       xform: xforms.copy
@@ -1102,6 +1108,11 @@ export const viveUserBindings = addSetsToBindings({
       src: [rGripRisingGrab],
       dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.any
+    },
+    {
+      src: { value: focusButtons },
+      dest: { value: paths.actions.startInspecting },
+      xform: xforms.rising
     }
   ],
 
@@ -1121,6 +1132,11 @@ export const viveUserBindings = addSetsToBindings({
       src: [lGripRisingGrab],
       dest: { value: paths.actions.cursor.left.grab },
       xform: xforms.any
+    },
+    {
+      src: { value: focusButtons },
+      dest: { value: paths.actions.startInspecting },
+      xform: xforms.rising
     }
   ],
 
@@ -1723,6 +1739,13 @@ export const viveCosmosUserBindings = addSetsToBindings({
       dest: { value: paths.actions.rightHand.scalePenTip },
       xform: xforms.scaleExp(-0.005, 5),
       priority: 1
+    }
+  ],
+  [sets.inspecting]: [
+    {
+      src: { value: focusButtons },
+      dest: { value: paths.actions.stopInspecting },
+      xform: xforms.falling
     }
   ]
 });
