@@ -48,7 +48,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
-    "@mozillareality/three-batch-manager": "^0.1.6",
+    "@mozillareality/three-batch-manager": "^0.1.8",
     "@mozillareality/three-particle-emitter": "^0.2.1",
     "aframe": "github:mozillareality/aframe#hubs/master",
     "aframe-rounded": "^1.0.3",
