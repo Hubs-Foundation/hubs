@@ -56,6 +56,7 @@ const keyboardSnapRight = `${name}/keyboard/snap-right`;
 const keyboardSnapLeft = `${name}/keyboard/snap-left`;
 
 const lowerButtons = `${name}buttons/lower`;
+const upperButtons = `${name}buttons/upper`;
 
 const ensureFrozenViaButtons = `${name}buttons/ensureFrozen`;
 const ensureFrozenViaKeyboard = `${name}keyboard/ensureFrozen`;
@@ -311,6 +312,11 @@ export const oculusTouchUserBindings = addSetsToBindings({
       xform: xforms.any
     },
     {
+      src: [leftButton("y").pressed, rightButton("b").pressed],
+      dest: { value: upperButtons },
+      xform: xforms.any
+    },
+    {
       src: { value: lowerButtons },
       dest: { value: ensureFrozenViaButtons },
       xform: xforms.copy
@@ -460,10 +466,19 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: {
-        value: rightButton("b").pressed
+        value: leftButton("thumbStick").pressed
       },
       dest: {
         value: paths.actions.nextCameraMode
+      },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        value: rightButton("thumbStick").pressed
+      },
+      dest: {
+        value: paths.actions.toggleFly
       },
       xform: xforms.rising
     },
@@ -794,6 +809,14 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
+  [sets.inspecting]: [
+    {
+      src: { value: upperButtons },
+      dest: { value: paths.actions.stopInspecting },
+      xform: xforms.falling
+    }
+  ],
+
   [sets.leftHandHoldingInteractable]: [
     {
       src: { value: leftGripPressed2 },
@@ -876,6 +899,12 @@ export const oculusTouchUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.any,
       priority: 2
+    },
+    {
+      src: { value: upperButtons },
+      dest: { value: paths.actions.startInspecting },
+      xform: xforms.rising,
+      priority: 2
     }
   ],
 
@@ -896,6 +925,12 @@ export const oculusTouchUserBindings = addSetsToBindings({
       src: [leftGripRisingGrab],
       dest: { value: paths.actions.cursor.left.grab },
       xform: xforms.any,
+      priority: 2
+    },
+    {
+      src: { value: upperButtons },
+      dest: { value: paths.actions.startInspecting },
+      xform: xforms.rising,
       priority: 2
     }
   ],
