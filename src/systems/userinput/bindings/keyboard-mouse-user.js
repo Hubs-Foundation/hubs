@@ -13,6 +13,11 @@ const togglePenWithEsc = "/vars/mouse-and-keyboard/drop_pen_with_esc";
 const togglePenWithP = "/vars/mouse-and-keyboard/drop_pen_with_p";
 const togglePenWithHud = "/vars/mouse-and-keyboard/drop_pen_with_hud";
 const togglePen = "/vars/mouse-and-keyboard/togglePen";
+const startInspectingViaMouse = "/vars/mouse-and-keyboard/startInspectingViaMouse";
+const startInspectingViaKeyboard = "/vars/mouse-and-keyboard/startInspectingViaKeyboard";
+const stopInspectingViaMouse = "/vars/mouse-and-keyboard/stopInspectingViaMouse";
+const stopInspectingViaKeyboardEscape = "/vars/mouse-and-keyboard/stopInspectingViaKeyboardEscape";
+const stopInspectingViaKeyboardFocusRelease = "/vars/mouse-and-keyboard/stopInspectingViaKeyboardFocusRelease";
 
 const qs = new URLSearchParams(location.search);
 const inspectZoomSpeed = parseFloat(qs.get("izs")) || -10.0;
@@ -608,9 +613,21 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.mouse.buttonRight },
-      dest: { value: paths.actions.startInspecting },
+      dest: { value: startInspectingViaMouse },
       xform: xforms.rising,
       priority: 200
+    },
+    {
+      src: { value: paths.device.keyboard.key("f") },
+      dest: { value: startInspectingViaKeyboard },
+      xform: xforms.rising,
+      priority: 200
+    },
+    {
+      src: [startInspectingViaMouse, startInspectingViaKeyboard],
+      dest: { value: paths.actions.startInspecting },
+      xform: xforms.any,
+      priority: 201
     }
   ],
   [sets.rightCursorHoveringOnVideo]: [
@@ -653,7 +670,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
         paths.device.keyboard.key("e"),
         k("space-rising")
       ],
-      dest: { value: paths.actions.stopInspecting },
+      dest: { value: stopInspectingViaKeyboardEscape },
       xform: xforms.any
     },
     {
@@ -678,12 +695,20 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.scale(0.001)
     },
     {
-      src: {
-        value: paths.device.mouse.buttonRight
-      },
-      dest: { value: paths.actions.stopInspecting },
+      src: { value: paths.device.keyboard.key("f") },
+      dest: { value: stopInspectingViaKeyboardFocusRelease },
+      xform: xforms.falling
+    },
+    {
+      src: { value: paths.device.mouse.buttonRight },
+      dest: { value: stopInspectingViaMouse },
       xform: xforms.falling,
       priority: 101
+    },
+    {
+      src: [stopInspectingViaMouse, stopInspectingViaKeyboardEscape, stopInspectingViaKeyboardFocusRelease],
+      dest: { value: paths.actions.stopInspecting },
+      xform: xforms.any
     }
   ],
   [sets.debugUserInput]: [
