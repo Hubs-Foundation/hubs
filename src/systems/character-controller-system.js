@@ -42,6 +42,7 @@ export class CharacterControllerSystem {
   constructor(scene) {
     this.scene = scene;
     this.fly = false;
+    this.shouldLandWhenPossible = false;
     this.waypoints = [];
     this.waypointTravelStartTime = 0;
     this.waypointTravelTime = 0;
@@ -86,7 +87,7 @@ export class CharacterControllerSystem {
       targetForHead.y += this.avatarPOV.object3D.position.y;
       deltaFromHeadToTargetForHead.copy(targetForHead).sub(head);
       targetForRig.copy(rig).add(deltaFromHeadToTargetForHead);
-      this.findPositionOnNavMesh(targetForRig, targetForRig, this.avatarRig.object3D.position);
+      this.findPositionOnNavMesh(targetForRig, targetForRig, this.avatarRig.object3D.position, true);
       this.avatarRig.object3D.matrixNeedsUpdate = true;
     };
   })();
@@ -111,7 +112,7 @@ export class CharacterControllerSystem {
       rotateInPlaceAroundWorldUp(inMat4Copy, Math.PI, finalPOV);
       if (snapToNavMesh) {
         inPosition.setFromMatrixPosition(inMat4Copy);
-        this.findPositionOnNavMesh(inPosition, inPosition, outPosition);
+        this.findPositionOnNavMesh(inPosition, inPosition, outPosition, true);
         finalPOV.setPosition(outPosition);
         translation.makeTranslation(0, getCurrentPlayerHeight(), -0.15);
       } else {
@@ -204,10 +205,12 @@ export class CharacterControllerSystem {
       }
 
       const userinput = AFRAME.scenes[0].systems.userinput;
+      const wasFlying = this.fly;
       if (userinput.get(paths.actions.toggleFly)) {
         this.shouldLandWhenPossible = false;
-        this.avatarRig.messageDispatch.dispatch("/fly");
+        this.avatarRig.messageDispatch.dispatch("/fly"); // TODO: Separate the logic about displaying the message from toggling the fly state in such a way that it is clear that this.fly will be toggled here
       }
+      const didStopFlying = wasFlying && !this.fly;
       if (!this.fly && this.shouldLandWhenPossible) {
         this.shouldLandWhenPossible = false;
       }
@@ -258,21 +261,22 @@ export class CharacterControllerSystem {
       newPOV
         .makeTranslation(displacementToDesiredPOV.x, displacementToDesiredPOV.y, displacementToDesiredPOV.z)
         .multiply(snapRotatedPOV);
+      const shouldRecomputeNavGroupAndNavNode =
+        (didStopFlying || this.shouldLandWhenPossible) && !this.isMotionDisabled;
       this.findPOVPositionAboveNavMesh(
         startPOVPosition.setFromMatrixPosition(this.avatarPOV.object3D.matrixWorld),
         desiredPOVPosition.setFromMatrixPosition(newPOV),
-        navMeshSnappedPOVPosition
+        navMeshSnappedPOVPosition,
+        shouldRecomputeNavGroupAndNavNode
       );
-      const triedToMove = displacementToDesiredPOV.lengthSq() > 0.001;
-      const squareDistanceToNavSnappedPOVPosition = desiredPOVPosition.distanceToSquared(navMeshSnappedPOVPosition);
 
       if (this.isMotionDisabled) {
         childMatch(this.avatarRig.object3D, this.avatarPOV.object3D, snapRotatedPOV);
       } else {
+        const squareDistanceToNavSnappedPOVPosition = desiredPOVPosition.distanceToSquared(navMeshSnappedPOVPosition);
         if (
           this.fly &&
           this.shouldLandWhenPossible &&
-          triedToMove &&
           squareDistanceToNavSnappedPOVPosition < 0.5 &&
           !this.activeWaypoint
         ) {
@@ -282,6 +286,7 @@ export class CharacterControllerSystem {
         } else if (!this.fly) {
           newPOV.setPosition(navMeshSnappedPOVPosition);
         }
+        const triedToMove = displacementToDesiredPOV.lengthSq() > 0.001;
         if (!this.activeWaypoint && this.shouldUnoccupyWaypointsOnceMoving && triedToMove) {
           this.shouldUnoccupyWaypointsOnceMoving = false;
           this.waypointSystem.releaseAnyOccupiedWaypoints();
@@ -312,24 +317,41 @@ export class CharacterControllerSystem {
   findPOVPositionAboveNavMesh = (function() {
     const startingFeetPosition = new THREE.Vector3();
     const desiredFeetPosition = new THREE.Vector3();
-    return function findPOVPositionAboveNavMesh(startPOVPosition, desiredPOVPosition, outPOVPosition) {
+    // TODO: Here we assume the player is standing straight up, but in VR it is often the case
+    // that you want to lean over the edge of a balcony/table that does not have nav mesh below.
+    // We should find way to allow leaning over the edge of a balcony and maybe disallow putting
+    // your head through a wall.
+    return function findPOVPositionAboveNavMesh(
+      startPOVPosition,
+      desiredPOVPosition,
+      outPOVPosition,
+      shouldRecomputeGroupAndNode
+    ) {
       const playerHeight = getCurrentPlayerHeight(true);
       startingFeetPosition.copy(startPOVPosition);
       startingFeetPosition.y -= playerHeight;
       desiredFeetPosition.copy(desiredPOVPosition);
       desiredFeetPosition.y -= playerHeight;
-      this.findPositionOnNavMesh(startingFeetPosition, desiredFeetPosition, outPOVPosition);
+      this.findPositionOnNavMesh(
+        startingFeetPosition,
+        desiredFeetPosition,
+        outPOVPosition,
+        shouldRecomputeGroupAndNode
+      );
       outPOVPosition.y += playerHeight;
       return outPOVPosition;
     };
   })();
 
-  findPositionOnNavMesh(start, end, outPos) {
+  findPositionOnNavMesh(start, end, outPos, shouldRecomputeGroupAndNode) {
     const pathfinder = this.scene.systems.nav.pathfinder;
     if (!(NAV_ZONE in pathfinder.zones)) return;
-    this.navGroup = pathfinder.getGroup(NAV_ZONE, end, true, true);
-    this.navNode = this.getClosestNode(end);
-    if (!this.navNode) {
+    this.navGroup =
+      shouldRecomputeGroupAndNode || this.navGroup === null
+        ? pathfinder.getGroup(NAV_ZONE, end, true, true)
+        : this.navGroup;
+    this.navNode = shouldRecomputeGroupAndNode || this.navNode === null ? this.getClosestNode(end) : this.navNode;
+    if (this.navNode === null || this.navNode === undefined) {
       outPos.copy(end);
     } else {
       this.navNode = pathfinder.clampStep(start, end, this.navNode, NAV_ZONE, this.navGroup, outPos);
