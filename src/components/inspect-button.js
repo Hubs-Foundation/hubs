@@ -1,11 +1,4 @@
-function getInspectable(child) {
-  let el = child;
-  while (el) {
-    if (el.components && el.components.tags && el.components.tags.data.inspectable) return el;
-    el = el.parentNode;
-  }
-  return null;
-}
+import { getInspectable } from "../systems/camera-system";
 
 AFRAME.registerComponent("inspect-button", {
   tick() {

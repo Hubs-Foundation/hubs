@@ -605,6 +605,12 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.rising,
       priority: 1
+    },
+    {
+      src: { value: paths.device.mouse.buttonRight },
+      dest: { value: paths.actions.startInspecting },
+      xform: xforms.rising,
+      priority: 200
     }
   ],
   [sets.rightCursorHoveringOnVideo]: [
@@ -675,10 +681,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: {
         value: paths.device.mouse.buttonRight
       },
-      dest: {
-        value: paths.actions.resetInspectView
-      },
-      xform: xforms.rising,
+      dest: { value: paths.actions.stopInspecting },
+      xform: xforms.falling,
       priority: 101
     }
   ],

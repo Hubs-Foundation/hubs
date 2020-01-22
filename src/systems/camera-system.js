@@ -5,6 +5,15 @@ import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 
+export function getInspectable(child) {
+  let el = child;
+  while (el) {
+    if (el.components && el.components.tags && el.components.tags.data.inspectable) return el;
+    el = el.parentNode;
+  }
+  return null;
+}
+
 function inParentHierarchyOf(o, child) {
   while (child) {
     if (child === o) return true;
@@ -334,7 +343,19 @@ export class CameraSystem {
       this.viewingCameraRotator.on = true;
 
       this.userinput = this.userinput || scene.systems.userinput;
-      if (
+      this.interaction = this.interaction || scene.systems.interaction;
+
+      if (this.userinput.get(paths.actions.startInspecting) && this.mode !== CAMERA_MODE_INSPECT) {
+        const hoverEl = this.interaction.state.rightRemote.hovered || this.interaction.state.leftRemote.hovered;
+
+        if (hoverEl) {
+          const inspectable = getInspectable(hoverEl);
+
+          if (inspectable) {
+            this.inspect(inspectable.object3D);
+          }
+        }
+      } else if (
         !this.temporarilyDisableRegularExit &&
         this.mode === CAMERA_MODE_INSPECT &&
         this.userinput.get(paths.actions.stopInspecting)
@@ -342,6 +363,7 @@ export class CameraSystem {
         scene.emit("uninspect");
         this.uninspect();
       }
+
       if (this.userinput.get(paths.actions.nextCameraMode)) {
         this.nextMode();
       }
