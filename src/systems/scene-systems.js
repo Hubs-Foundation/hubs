@@ -1,4 +1,4 @@
-import { LobbyCameraSystem } from "./lobby-camera-system";
+import { ScenePreviewCameraSystem } from "./scene-preview-camera-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 AFRAME.registerSystem("scene-systems", {
@@ -6,11 +6,11 @@ AFRAME.registerSystem("scene-systems", {
     waitForDOMContentLoaded().then(() => {
       this.DOMContentDidLoad = true;
     });
-    this.lobbyCameraSystem = new LobbyCameraSystem();
+    this.scenePreviewCameraSystem = new ScenePreviewCameraSystem();
   },
 
   tick() {
     if (!this.DOMContentDidLoad) return;
-    this.lobbyCameraSystem.tick();
+    this.scenePreviewCameraSystem.tick();
   }
 });

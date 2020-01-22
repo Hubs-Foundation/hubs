@@ -1,6 +1,6 @@
 import { CAMERA_MODE_INSPECT } from "./camera-system.js";
 
-export class LobbyCameraSystem {
+export class ScenePreviewCameraSystem {
   constructor() {
     this.entities = [];
   }
