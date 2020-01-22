@@ -350,8 +350,15 @@ export class CharacterControllerSystem {
       shouldRecomputeGroupAndNode || this.navGroup === null
         ? pathfinder.getGroup(NAV_ZONE, end, true, true)
         : this.navGroup;
-    this.navNode = shouldRecomputeGroupAndNode || this.navNode === null ? this.getClosestNode(end) : this.navNode;
+    this.navNode =
+      shouldRecomputeGroupAndNode || this.navNode === null || this.navNode === undefined
+        ? this.getClosestNode(end)
+        : this.navNode;
     if (this.navNode === null || this.navNode === undefined) {
+      // this.navNode can be null if it has never been set or if getClosestNode fails,
+      // and it can be undefined if clampStep fails, so we have to check both. We do not
+      // simply check if it is falsey (!this.navNode), because 0 (zero) is a valid value,
+      // and 0 is falsey.
       outPos.copy(end);
     } else {
       this.navNode = pathfinder.clampStep(start, end, this.navNode, NAV_ZONE, this.navGroup, outPos);
