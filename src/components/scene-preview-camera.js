@@ -31,7 +31,7 @@ AFRAME.registerComponent("scene-preview-camera", {
     const systems = AFRAME.scenes[0].systems["hubs-systems"] || AFRAME.scenes[0].systems["scene-systems"];
 
     if (systems) {
-      systems.lobbyCameraSystem.register(this.el);
+      systems.scenePreviewCameraSystem.register(this.el);
     }
 
     this.startPoint = this.el.object3D.position.clone();
@@ -102,7 +102,7 @@ AFRAME.registerComponent("scene-preview-camera", {
     const systems = AFRAME.scenes[0].systems["hubs-systems"] || AFRAME.scenes[0].systems["scene-systems"];
 
     if (systems) {
-      systems.lobbyCameraSystem.unregister(this.el);
+      systems.scenePreviewCameraSystem.unregister(this.el);
     }
   }
 });
