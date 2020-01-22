@@ -85,7 +85,7 @@ const thawViaKeyboard = v("keyboard/thaw");
 const thawViaButtons = v("buttons/thaw");
 
 const freezeButtons = v("buttons/freeze");
-const focusButtons = v("buttons/focus");
+const inspectButtons = v("buttons/inspect");
 
 const rSnapRight1 = v("right/snap-right");
 const rSnapLeft1 = v("right/snap-left");
@@ -828,7 +828,7 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: [rButton("primary").pressed, lButton("primary").pressed],
-      dest: { value: focusButtons },
+      dest: { value: inspectButtons },
       xform: xforms.any
     },
     {
@@ -1110,7 +1110,7 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.any
     },
     {
-      src: { value: focusButtons },
+      src: { value: inspectButtons },
       dest: { value: paths.actions.startInspecting },
       xform: xforms.rising
     }
@@ -1134,7 +1134,7 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.any
     },
     {
-      src: { value: focusButtons },
+      src: { value: inspectButtons },
       dest: { value: paths.actions.startInspecting },
       xform: xforms.rising
     }
@@ -1743,7 +1743,7 @@ export const viveCosmosUserBindings = addSetsToBindings({
   ],
   [sets.inspecting]: [
     {
-      src: { value: focusButtons },
+      src: { value: inspectButtons },
       dest: { value: paths.actions.stopInspecting },
       xform: xforms.falling
     }
