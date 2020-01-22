@@ -59,7 +59,7 @@ export class OculusTouchControllerDevice {
     this.handOffset = this.gamepad.handedness === "left" ? LEFT_HAND_OFFSET : RIGHT_HAND_OFFSET;
   }
 
-  write(frame) {
+  write(frame, scene, xrReferenceSpace) {
     if (!window.hasNativeWebXRImplementation) {
       if (!this.gamepad) return;
       this.gamepad = navigator.getGamepads()[this.gamepad.index];
@@ -85,20 +85,34 @@ export class OculusTouchControllerDevice {
     this.pose.position.setFromMatrixPosition(this.rayObject.matrixWorld);
     this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
     this.pose.orientation.copy(this.rayObjectRotation);
-
     frame.setPose(this.path.pose, this.pose);
-    if (this.gamepad.pose.position && this.gamepad.pose.orientation) {
-      frame.setMatrix4(
-        this.path.matrix,
-        this.matrix
-          .compose(
-            this.position.fromArray(this.gamepad.pose.position),
-            this.orientation.fromArray(this.gamepad.pose.orientation),
-            ONES
-          )
-          .premultiply(this.sittingToStandingMatrix)
-          .multiply(this.handOffset)
+
+    let gamepadPose;
+    if (xrReferenceSpace) {
+      const xrPose = scene.frame.getPose(this.gamepad.targetRaySpace, xrReferenceSpace);
+      gamepadPose = xrPose && xrPose.transform;
+    } else {
+      gamepadPose = this.gamepad.pose;
+    }
+
+    if (gamepadPose && gamepadPose.position && gamepadPose.orientation) {
+      const position = xrReferenceSpace
+        ? this.position.copy(gamepadPose.position)
+        : this.position.fromArray(gamepadPose.position);
+      const orientation = xrReferenceSpace
+        ? this.orientation.copy(gamepadPose.orientation)
+        : this.orientation.fromArray(gamepadPose.orientation);
+      this.matrix.compose(
+        position,
+        orientation,
+        ONES
       );
+      if (!xrReferenceSpace) {
+        this.matrix.premultiply(this.sittingToStandingMatrix);
+      }
+      this.matrix.multiply(this.handOffset);
+
+      frame.setMatrix4(this.path.matrix, this.matrix);
     }
     if (this.gamepad.hapticActuators && this.gamepad.hapticActuators[0]) {
       frame.setValueType(paths.haptics.actuators[this.gamepad.handedness], this.gamepad.hapticActuators[0]);
