@@ -89,6 +89,10 @@ AFRAME.registerComponent("follow-in-fov", {
     obj.matrixNeedsUpdate = true;
   },
 
+  reset() {
+    this.started = false;
+  },
+
   _applyMaskedTargetRotation(x, y, z, to) {
     const target = this.data.target.object3D;
     this.snappedRot.set(x, y, z, target.rotation.order);

@@ -24,6 +24,7 @@ AFRAME.registerComponent("mirror-media-button", {
       entity.object3D.scale.set(0.75, 0.75, 0.75);
       entity.object3D.matrixNeedsUpdate = true;
 
+      mirrorTarget.parentEl.components["follow-in-fov"].reset();
       mirrorTarget.parentEl.object3D.visible = true;
     };
   },

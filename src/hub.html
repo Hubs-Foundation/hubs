@@ -333,7 +333,7 @@
                                 position="0 -0.625 0.001">
                                 <a-entity
                                     sprite
-                                    icon-button="image: recenter-action.png; hoverImage: recenter-action.png"
+                                    icon-button="image: focus-action.png; hoverImage: focus-action.png"
                                     scale="0.165 0.165 0.165"
                                     position="0 0 0.001"
                                 ></a-entity>
@@ -408,14 +408,14 @@
                                 <a-entity text="value:open link; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
                             <a-entity
-                                mixin="rounded-action-button"
+                                mixin="rounded-button"
                                 tags="isHoldable: true; holdableButton: true;"
                                 is-remote-hover-target
                                 inspect-button
                                 position="0 0.125 0.001">
                                 <a-entity
                                     sprite
-                                    icon-button="image: recenter-action.png; hoverImage: recenter-action.png"
+                                    icon-button="image: focus-action.png; hoverImage: focus-action.png"
                                     scale="0.165 0.165 0.165"
                                     position="0 0 0.001"
                                 ></a-entity>
@@ -475,7 +475,7 @@
                     class="interactable"
                     body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 15;"
                     is-remote-hover-target
-                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
+                    tags="offersRemoteConstraint: true;"
                     set-unowned-body-kinematic
                     destroy-at-extreme-distances
                     scalable-when-grabbed
