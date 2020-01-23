@@ -27,7 +27,8 @@ AFRAME.registerComponent("follow-in-fov", {
 
     let isHovered = false;
     const interaction = AFRAME.scenes[0].systems.interaction;
-    const hoveredEl = interaction.state.rightRemote.hovered;
+
+    const hoveredEl = interaction.state.rightRemote.hovered || interaction.state.leftRemote.hovered;
 
     if (hoveredEl) {
       let el = this.el;
@@ -42,7 +43,7 @@ AFRAME.registerComponent("follow-in-fov", {
       }
     }
 
-    // Stop updating position if hovered over.
+    // Stop updating position if the element or any subelement is hovered.
     if (isHovered) return;
 
     // Compute position + rotation by projecting offset along a downward ray in target space,
