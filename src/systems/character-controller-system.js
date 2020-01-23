@@ -250,14 +250,19 @@ export class CharacterControllerSystem {
       rotateInPlaceAroundWorldUp(this.avatarPOV.object3D.matrixWorld, this.dXZ, snapRotatedPOV);
 
       const playerScale = v.setFromMatrixColumn(this.avatarPOV.object3D.matrixWorld, 1).length();
-      calculateDisplacementToDesiredPOV(
-        snapRotatedPOV,
-        this.fly,
-        this.relativeMotion.multiplyScalar(
-          ((userinput.get(paths.actions.boost) ? 2 : 1) * BASE_SPEED * Math.sqrt(playerScale) * dt) / 1000
-        ),
-        displacementToDesiredPOV
-      );
+      if (this.relativeMotion.lengthSq() > 0.000001) {
+        calculateDisplacementToDesiredPOV(
+          snapRotatedPOV,
+          this.fly,
+          this.relativeMotion.multiplyScalar(
+            ((userinput.get(paths.actions.boost) ? 2 : 1) * BASE_SPEED * Math.sqrt(playerScale) * dt) / 1000
+          ),
+          displacementToDesiredPOV
+        );
+      } else {
+        displacementToDesiredPOV.set(0, 0, 0);
+      }
+
       newPOV
         .makeTranslation(displacementToDesiredPOV.x, displacementToDesiredPOV.y, displacementToDesiredPOV.z)
         .multiply(snapRotatedPOV);
