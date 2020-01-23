@@ -249,66 +249,63 @@ export class CharacterControllerSystem {
       this.avatarPOV.object3D.updateMatrices();
       rotateInPlaceAroundWorldUp(this.avatarPOV.object3D.matrixWorld, this.dXZ, snapRotatedPOV);
 
-      const playerScale = v.setFromMatrixColumn(this.avatarPOV.object3D.matrixWorld, 1).length();
-      if (this.relativeMotion.lengthSq() > 0.000001) {
-        calculateDisplacementToDesiredPOV(
-          snapRotatedPOV,
-          this.fly,
-          this.relativeMotion.multiplyScalar(
-            ((userinput.get(paths.actions.boost) ? 2 : 1) * BASE_SPEED * Math.sqrt(playerScale) * dt) / 1000
-          ),
-          displacementToDesiredPOV
-        );
-      } else {
-        displacementToDesiredPOV.set(0, 0, 0);
-      }
+      newPOV.copy(snapRotatedPOV);
 
-      newPOV
-        .makeTranslation(displacementToDesiredPOV.x, displacementToDesiredPOV.y, displacementToDesiredPOV.z)
-        .multiply(snapRotatedPOV);
-      const shouldRecomputeNavGroupAndNavNode =
-        (didStopFlying || this.shouldLandWhenPossible) && !this.isMotionDisabled;
-      const triedToMove = displacementToDesiredPOV.lengthSq() > 0.000001;
-      const shouldResnapToNavMesh = shouldRecomputeNavGroupAndNavNode || triedToMove;
+      if (!this.isMotionDisabled) {
+        const playerScale = v.setFromMatrixColumn(this.avatarPOV.object3D.matrixWorld, 1).length();
+        const triedToMove = this.relativeMotion.lengthSq() > 0.000001;
 
-      if (shouldResnapToNavMesh) {
-        this.findPOVPositionAboveNavMesh(
-          startPOVPosition.setFromMatrixPosition(this.avatarPOV.object3D.matrixWorld),
-          desiredPOVPosition.setFromMatrixPosition(newPOV),
-          navMeshSnappedPOVPosition,
-          shouldRecomputeNavGroupAndNavNode
-        );
-      } else {
-        navMeshSnappedPOVPosition.setFromMatrixPosition(newPOV);
-      }
+        if (triedToMove) {
+          calculateDisplacementToDesiredPOV(
+            snapRotatedPOV,
+            this.fly,
+            this.relativeMotion.multiplyScalar(
+              ((userinput.get(paths.actions.boost) ? 2 : 1) * BASE_SPEED * Math.sqrt(playerScale) * dt) / 1000
+            ),
+            displacementToDesiredPOV
+          );
 
-      if (this.isMotionDisabled) {
-        childMatch(this.avatarRig.object3D, this.avatarPOV.object3D, snapRotatedPOV);
-      } else {
-        const squareDistanceToNavSnappedPOVPosition = desiredPOVPosition.distanceToSquared(navMeshSnappedPOVPosition);
-        if (
-          this.fly &&
-          this.shouldLandWhenPossible &&
-          squareDistanceToNavSnappedPOVPosition < 0.5 &&
-          !this.activeWaypoint
-        ) {
-          this.shouldLandWhenPossible = false;
-          this.fly = false;
-          newPOV.setPosition(navMeshSnappedPOVPosition);
-        } else if (!this.fly) {
-          newPOV.setPosition(navMeshSnappedPOVPosition);
+          newPOV
+            .makeTranslation(displacementToDesiredPOV.x, displacementToDesiredPOV.y, displacementToDesiredPOV.z)
+            .multiply(snapRotatedPOV);
         }
+
+        const shouldRecomputeNavGroupAndNavNode = didStopFlying || this.shouldLandWhenPossible;
+        const shouldResnapToNavMesh = shouldRecomputeNavGroupAndNavNode || triedToMove;
+
+        let squareDistNavMeshCorrection = 0;
+
+        if (shouldResnapToNavMesh) {
+          this.findPOVPositionAboveNavMesh(
+            startPOVPosition.setFromMatrixPosition(this.avatarPOV.object3D.matrixWorld),
+            desiredPOVPosition.setFromMatrixPosition(newPOV),
+            navMeshSnappedPOVPosition,
+            shouldRecomputeNavGroupAndNavNode
+          );
+
+          squareDistNavMeshCorrection = desiredPOVPosition.distanceToSquared(navMeshSnappedPOVPosition);
+
+          if (this.fly && this.shouldLandWhenPossible && squareDistNavMeshCorrection < 0.5 && !this.activeWaypoint) {
+            this.shouldLandWhenPossible = false;
+            this.fly = false;
+            newPOV.setPosition(navMeshSnappedPOVPosition);
+          } else if (!this.fly) {
+            newPOV.setPosition(navMeshSnappedPOVPosition);
+          }
+        }
+
         if (!this.activeWaypoint && this.shouldUnoccupyWaypointsOnceMoving && triedToMove) {
           this.shouldUnoccupyWaypointsOnceMoving = false;
           this.waypointSystem.releaseAnyOccupiedWaypoints();
-          if (this.fly && this.shouldLandWhenPossible && squareDistanceToNavSnappedPOVPosition < 3) {
+          if (this.fly && this.shouldLandWhenPossible && (shouldResnapToNavMesh && squareDistNavMeshCorrection < 3)) {
             newPOV.setPosition(navMeshSnappedPOVPosition);
             this.shouldLandWhenPossible = false;
             this.fly = false;
           }
         }
-        childMatch(this.avatarRig.object3D, this.avatarPOV.object3D, newPOV);
       }
+
+      childMatch(this.avatarRig.object3D, this.avatarPOV.object3D, newPOV);
       this.relativeMotion.copy(this.nextRelativeMotion);
       this.dXZ = 0;
     };
