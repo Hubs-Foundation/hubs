@@ -263,12 +263,19 @@ export class CharacterControllerSystem {
         .multiply(snapRotatedPOV);
       const shouldRecomputeNavGroupAndNavNode =
         (didStopFlying || this.shouldLandWhenPossible) && !this.isMotionDisabled;
-      this.findPOVPositionAboveNavMesh(
-        startPOVPosition.setFromMatrixPosition(this.avatarPOV.object3D.matrixWorld),
-        desiredPOVPosition.setFromMatrixPosition(newPOV),
-        navMeshSnappedPOVPosition,
-        shouldRecomputeNavGroupAndNavNode
-      );
+      const triedToMove = displacementToDesiredPOV.lengthSq() > 0.000001;
+      const shouldResnapToNavMesh = shouldRecomputeNavGroupAndNavNode || triedToMove;
+
+      if (shouldResnapToNavMesh) {
+        this.findPOVPositionAboveNavMesh(
+          startPOVPosition.setFromMatrixPosition(this.avatarPOV.object3D.matrixWorld),
+          desiredPOVPosition.setFromMatrixPosition(newPOV),
+          navMeshSnappedPOVPosition,
+          shouldRecomputeNavGroupAndNavNode
+        );
+      } else {
+        navMeshSnappedPOVPosition.setFromMatrixPosition(newPOV);
+      }
 
       if (this.isMotionDisabled) {
         childMatch(this.avatarRig.object3D, this.avatarPOV.object3D, snapRotatedPOV);
@@ -286,7 +293,6 @@ export class CharacterControllerSystem {
         } else if (!this.fly) {
           newPOV.setPosition(navMeshSnappedPOVPosition);
         }
-        const triedToMove = displacementToDesiredPOV.lengthSq() > 0.001;
         if (!this.activeWaypoint && this.shouldUnoccupyWaypointsOnceMoving && triedToMove) {
           this.shouldUnoccupyWaypointsOnceMoving = false;
           this.waypointSystem.releaseAnyOccupiedWaypoints();
