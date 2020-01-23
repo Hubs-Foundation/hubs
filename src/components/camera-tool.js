@@ -376,11 +376,15 @@ AFRAME.registerComponent("camera-tool", {
     const track = this.videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
 
     // HACK: FF 73+ seems to fail to decode videos with no audio track, so we always include a silent track.
-    // Note that chrome won't generate the video without some data flowing to the track, hence the silence.
+    // Note that chrome won't generate the video without some data flowing to the track, hence the oscillator.
     const attachBlankAudio = () => {
       const context = THREE.AudioContext.getContext();
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
       const destination = context.createMediaStreamDestination();
-      context.createOscillator().connect(destination);
+      gain.gain.setValueAtTime(0.0001, context.currentTime);
+      oscillator.connect(destination);
+      gain.connect(destination);
       stream.addTrack(destination.stream.getAudioTracks()[0]);
     };
 
