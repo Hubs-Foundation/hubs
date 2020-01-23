@@ -580,7 +580,10 @@ AFRAME.registerComponent("media-video", {
     this.mesh.material.needsUpdate = true;
 
     if (projection === "flat" && !this.data.contentType.startsWith("audio/")) {
-      scaleToAspectRatio(this.el, texture.image.videoHeight / texture.image.videoWidth);
+      scaleToAspectRatio(
+        this.el,
+        (texture.image.videoHeight || texture.image.height) / (texture.image.videoWidth || texture.image.width)
+      );
     }
 
     this.updatePlaybackState(true);
