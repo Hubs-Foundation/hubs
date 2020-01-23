@@ -52,14 +52,12 @@ AFRAME.registerComponent("follow-in-fov", {
 
     // Compute position + rotation by projecting offset along a downward ray in target space,
     // and mask out Z rotation.
-    if (!isHovered) {
-      this._applyMaskedTargetRotation(
-        -this.data.angle * THREE.Math.DEG2RAD,
-        target.rotation.y,
-        0,
-        this.snappedXFormWorld
-      );
-    }
+    this._applyMaskedTargetRotation(
+      -this.data.angle * THREE.Math.DEG2RAD,
+      target.rotation.y,
+      0,
+      this.snappedXFormWorld
+    );
 
     this.targetPos.copy(this.offset);
     this.targetPos.applyMatrix4(this.snappedXFormWorld);
