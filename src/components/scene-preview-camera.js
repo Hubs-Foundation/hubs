@@ -28,6 +28,12 @@ AFRAME.registerComponent("scene-preview-camera", {
   },
 
   init: function() {
+    const systems = AFRAME.scenes[0].systems["hubs-systems"] || AFRAME.scenes[0].systems["scene-systems"];
+
+    if (systems) {
+      systems.scenePreviewCameraSystem.register(this.el);
+    }
+
     this.startPoint = this.el.object3D.position.clone();
     this.startRotation = this.el.object3D.quaternion.clone();
 
@@ -89,6 +95,14 @@ AFRAME.registerComponent("scene-preview-camera", {
         this.backwards = !this.backwards;
         this.startTime = performance.now();
       }
+    }
+  },
+
+  remove: function() {
+    const systems = AFRAME.scenes[0].systems["hubs-systems"] || AFRAME.scenes[0].systems["scene-systems"];
+
+    if (systems) {
+      systems.scenePreviewCameraSystem.unregister(this.el);
     }
   }
 });
