@@ -308,31 +308,32 @@
                                     position="0 0 0.001"
                                 ></a-entity>
                             </a-entity>
-                            <a-entity
-                                mixin="rounded-button"
-                                is-remote-hover-target
-                                tags="singleActionButton: true;"
-                                drop-object-button
-                                visibility-on-content-types="contentTypes: video/ audio/ image/ application/pdf; visible: false;"
-                                hide-when-pinned-and-forbidden="whenPinned: true"
-                                position="0 -0.625 0.001">
+                            <a-entity visibility-on-content-types="contentTypes: video/ audio/ image/ application/pdf; visible: false;">
                                 <a-entity
-                                    sprite
-                                    icon-button="image: drop-action.png; hoverImage: drop-action.png"
-                                    scale="0.165 0.165 0.165"
-                                    position="0 0 0.001"
-                                ></a-entity>
+                                    mixin="rounded-button"
+                                    is-remote-hover-target
+                                    tags="singleActionButton: true;"
+                                    drop-object-button
+                                    hide-when-pinned-and-forbidden="whenPinned: true"
+                                    position="0 -0.625 0.001">
+                                    <a-entity
+                                        sprite
+                                        icon-button="image: drop-action.png; hoverImage: drop-action.png"
+                                        scale="0.165 0.165 0.165"
+                                        position="0 0 0.001"
+                                    ></a-entity>
+                                </a-entity>
                             </a-entity>
                             <a-entity
                                 mixin="rounded-button"
                                 is-remote-hover-target
                                 tags="singleActionButton: true;"
-                                mirror-media-button
+                                inspect-button
                                 visibility-on-content-types="contentTypes: video/ audio/ image/ application/pdf;"
                                 position="0 -0.625 0.001">
                                 <a-entity
                                     sprite
-                                    icon-button="image: deserialize-action.png; hoverImage: deserialize-action.png"
+                                    icon-button="image: recenter-action.png; hoverImage: recenter-action.png"
                                     scale="0.165 0.165 0.165"
                                     position="0 0 0.001"
                                 ></a-entity>
@@ -377,11 +378,12 @@
                                 mixin="rounded-action-button"
                                 tags="isHoldable: true; holdableButton: true;"
                                 is-remote-hover-target
-                                inspect-button
+                                mirror-media-button
+                                visibility-on-content-types="contentTypes: video/ audio/ image/ application/pdf;"
                                 position="0 -0.125 0.001">
                                 <a-entity
                                     sprite
-                                    icon-button="image: recenter-action.png; hoverImage: recenter-action.png"
+                                    icon-button="image: inspect-action.png; hoverImage: inspect-action.png"
                                     scale="0.165 0.165 0.165"
                                     position="0 0 0.001"
                                 ></a-entity>
