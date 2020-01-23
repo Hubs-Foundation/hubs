@@ -327,7 +327,7 @@
                             <a-entity
                                 mixin="rounded-button"
                                 is-remote-hover-target
-                                tags="singleActionButton: true;"
+                                tags="isHoldable: true; holdableButton: true;"
                                 inspect-button
                                 visibility-on-content-types="contentTypes: video/ audio/ image/ application/pdf;"
                                 position="0 -0.625 0.001">
@@ -376,8 +376,8 @@
                             </a-entity>
                             <a-entity
                                 mixin="rounded-action-button"
-                                tags="isHoldable: true; holdableButton: true;"
                                 is-remote-hover-target
+                                tags="singleActionButton:true;"
                                 mirror-media-button
                                 visibility-on-content-types="contentTypes: video/ audio/ image/ application/pdf;"
                                 position="0 -0.125 0.001">
