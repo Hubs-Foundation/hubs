@@ -15,6 +15,7 @@ AFRAME.registerSystem("camera-tools", {
       playerModelEl.addEventListener("model-loading", () => (this.playerHead = null));
       playerModelEl.addEventListener("model-loaded", this.updatePlayerHead.bind(this));
       this.updatePlayerHead();
+      this.updateMyCamera();
     });
   },
 
