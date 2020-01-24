@@ -611,6 +611,12 @@ AFRAME.registerComponent("camera-tool", {
           playerHead.updateMatrixWorld(true, true);
         }
 
+        const bubbleSystem = this.el.sceneEl.systems["personal-space-bubble"];
+
+        for (const invader of bubbleSystem.invaders) {
+          invader.disable();
+        }
+
         let playerHudWasVisible = false;
 
         if (this.playerHud) {
@@ -656,6 +662,7 @@ AFRAME.registerComponent("camera-tool", {
           playerHead.updateMatrices(true, true);
           playerHead.updateMatrixWorld(true, true);
         }
+
         if (this.playerHud) {
           this.playerHud.visible = playerHudWasVisible;
           if (this.el.sceneEl.systems["hubs-systems"]) {
@@ -664,6 +671,11 @@ AFRAME.registerComponent("camera-tool", {
             }
           }
         }
+
+        for (const invader of bubbleSystem.invaders) {
+          invader.enable();
+        }
+
         this.lastUpdate = now;
 
         if (this.videoRecorder) {
