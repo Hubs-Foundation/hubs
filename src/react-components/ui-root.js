@@ -812,6 +812,7 @@ class UIRoot extends Component {
 
   setAvatarUrl = url => {
     this.props.store.update({ profile: { ...this.props.store.state.profile, ...{ avatarId: url } } });
+    this.props.scene.emit("avatar_updated");
   };
 
   closeDialog = () => {

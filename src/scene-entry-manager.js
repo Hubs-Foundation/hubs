@@ -153,7 +153,12 @@ export default class SceneEntryManager {
 
   _setupPlayerRig = () => {
     this._setPlayerInfoFromProfile();
-    this.store.addEventListener("statechanged", this._setPlayerInfoFromProfile);
+
+    // Explict user action changed avatar or updated existing avatar.
+    this.scene.addEventListener("avatar_updated", () => this._setPlayerInfoFromProfile(true));
+
+    // Store updates can occur to avatar id in cases like error, auth reset, etc.
+    this.store.addEventListener("statechanged", () => this._setPlayerInfoFromProfile());
 
     const avatarScale = parseInt(qs.get("avatar_scale"), 10);
     if (avatarScale) {
@@ -161,9 +166,9 @@ export default class SceneEntryManager {
     }
   };
 
-  _setPlayerInfoFromProfile = async () => {
+  _setPlayerInfoFromProfile = async (force = false) => {
     const avatarId = this.store.state.profile.avatarId;
-    if (this._lastFetchedAvatarId === avatarId) return; // Avoid continually refetching based upon state changing
+    if (!force && this._lastFetchedAvatarId === avatarId) return; // Avoid continually refetching based upon state changing
 
     this._lastFetchedAvatarId = avatarId;
     const avatarSrc = await getAvatarSrc(avatarId);
