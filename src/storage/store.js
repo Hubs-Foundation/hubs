@@ -76,7 +76,11 @@ export const SCHEMA = {
         globalVoiceVolume: { type: "number" },
         globalMediaVolume: { type: "number" },
         snapRotationDegrees: { type: "number" },
-        materialQualitySetting: { type: "string" }
+        materialQualitySetting: { type: "string" },
+        disableMovement: { type: "bool" },
+        disableBackwardsMovement: { type: "bool" },
+        disableStrafing: { type: "bool" },
+        disableTeleporter: { type: "bool" }
       }
     },
 

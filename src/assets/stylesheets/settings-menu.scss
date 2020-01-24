@@ -68,6 +68,10 @@
   }
 }
 
+:local(.svg-icon) {
+  transform: scale(0.8) translate(-4px, -5px);
+}
+
 :local(.bottom-links-main) {
   font-size: 0.8em;
   border-top: 1px solid var(--panel-rule-color);

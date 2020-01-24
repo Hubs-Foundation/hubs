@@ -22,6 +22,8 @@ import StateLink from "./state-link.js";
 import { resetTips } from "../systems/tips";
 import { showFullScreenIfAvailable } from "../utils/fullscreen";
 import LeaveRoomDialog from "./leave-room-dialog.js";
+import { InlineSVG } from "./svgi";
+import hmdIcon from "../assets/images/hmd-icon.svgi";
 
 import styles from "../assets/stylesheets/settings-menu.scss";
 import rootStyles from "../assets/stylesheets/ui-root.scss";
@@ -102,6 +104,18 @@ export default class SettingsMenu extends Component {
             {!hideExtranousItems && (
               <div className={rowHeader}>
                 <FormattedMessage id="settings.row-profile" />
+              </div>
+            )}
+            {this.props.showAsOverlay && (
+              <div className={rowClasses}>
+                <div className={styles.icon}>
+                  <InlineSVG className={styles.svgIcon} src={hmdIcon} />
+                </div>
+                <div className={styles.listItem}>
+                  <div className={styles.listItemLink} onClick={() => this.props.onCloseOverlay()}>
+                    <FormattedMessage id="settings.return-to-vr" />
+                  </div>
+                </div>
               </div>
             )}
             <div className={rowClasses}>
