@@ -323,6 +323,15 @@ export default class SettingsMenu extends Component {
             ) : (
               <div />
             )}
+            {this.props.showAsOverlay && (
+              <div className={rowClasses}>
+                <div className={classNames([styles.listItem, styles.secondaryLinkItem])}>
+                  <div className={styles.secondaryButton} onClick={() => this.props.onCloseOverlay()}>
+                    <FormattedMessage id="settings.return-to-vr" />
+                  </div>
+                </div>
+              </div>
+            )}
             {!hideExtranousItems && (
               <div className={classNames([styles.bottomLinksMain])}>
                 <IfFeature name="show_whats_new_link">

@@ -217,29 +217,37 @@ export class CharacterControllerSystem {
       if (this.fly) {
         this.navNode = null;
       }
+      const preferences = window.APP.store.state.preferences;
       const snapRotateLeft = userinput.get(paths.actions.snapRotateLeft);
       const snapRotateRight = userinput.get(paths.actions.snapRotateRight);
       if (snapRotateLeft) {
         this.dXZ +=
-          window.APP.store.state.preferences.snapRotationDegrees === undefined
+          preferences.snapRotationDegrees === undefined
             ? SNAP_ROTATION_RADIAN
-            : (window.APP.store.state.preferences.snapRotationDegrees * Math.PI) / 180;
+            : (preferences.snapRotationDegrees * Math.PI) / 180;
       }
       if (snapRotateRight) {
         this.dXZ -=
-          window.APP.store.state.preferences.snapRotationDegrees === undefined
+          preferences.snapRotationDegrees === undefined
             ? SNAP_ROTATION_RADIAN
-            : (window.APP.store.state.preferences.snapRotationDegrees * Math.PI) / 180;
+            : (preferences.snapRotationDegrees * Math.PI) / 180;
       }
       if (snapRotateLeft || snapRotateRight) {
         this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
       }
       const characterAcceleration = userinput.get(paths.actions.characterAcceleration);
       if (characterAcceleration) {
+        const zCharacterAcceleration = -1 * characterAcceleration[1];
         this.relativeMotion.set(
-          this.relativeMotion.x + characterAcceleration[0],
+          this.relativeMotion.x +
+            (preferences.disableMovement || preferences.disableStrafing ? 0 : characterAcceleration[0]),
           this.relativeMotion.y,
-          this.relativeMotion.z + -1 * characterAcceleration[1]
+          this.relativeMotion.z +
+            (preferences.disableMovement
+              ? 0
+              : preferences.disableBackwardsMovement
+                ? Math.min(0, zCharacterAcceleration)
+                : zCharacterAcceleration)
         );
       }
       const lerpC = vrMode ? 0 : 0.85; // TODO: To support drifting ("ice skating"), motion needs to keep initial direction
