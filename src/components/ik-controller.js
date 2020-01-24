@@ -308,7 +308,19 @@ AFRAME.registerComponent("ik-controller", {
       const camera = this.ikRoot.camera.object3D;
       camera.getWorldPosition(cameraWorld);
 
+      // Check player camera
       this.isInView = isInViewOfCamera(this.playerCamera, cameraWorld);
+
+      if (!this.isInView) {
+        // Check in-game camera if rendering to viewfinder and owned
+        const cameraTools = this.el.sceneEl.systems["camera-tools"];
+
+        if (cameraTools) {
+          cameraTools.ifMyCameraRenderingViewfinder(cameraTool => {
+            this.isInView = this.isInView || isInViewOfCamera(cameraTool.camera, cameraWorld);
+          });
+        }
+      }
     };
   })()
 });
