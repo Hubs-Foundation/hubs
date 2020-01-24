@@ -611,12 +611,6 @@ AFRAME.registerComponent("camera-tool", {
           playerHead.updateMatrixWorld(true, true);
         }
 
-        const bubbleSystem = this.el.sceneEl.systems["personal-space-bubble"];
-
-        for (const invader of bubbleSystem.invaders) {
-          invader.disable();
-        }
-
         let playerHudWasVisible = false;
 
         if (this.playerHud) {
@@ -626,6 +620,14 @@ AFRAME.registerComponent("camera-tool", {
             for (const mesh of Object.values(this.el.sceneEl.systems["hubs-systems"].spriteSystem.meshes)) {
               mesh.visible = false;
             }
+          }
+        }
+
+        const bubbleSystem = this.el.sceneEl.systems["personal-space-bubble"];
+
+        if (bubbleSystem) {
+          for (const invader of bubbleSystem.invaders) {
+            invader.disable();
           }
         }
 
@@ -672,8 +674,10 @@ AFRAME.registerComponent("camera-tool", {
           }
         }
 
-        for (const invader of bubbleSystem.invaders) {
-          invader.enable();
+        if (bubbleSystem) {
+          for (const invader of bubbleSystem.invaders) {
+            invader.enable();
+          }
         }
 
         this.lastUpdate = now;
