@@ -210,7 +210,8 @@ AFRAME.registerComponent("ik-controller", {
       //
       // Note that we position the avatar itself, *not* the hips, since positioning the
       // hips will use vertex skinning to do the root displacement, which results in
-      // frustum culling errors.
+      // frustum culling errors since three.js does not take into account skinning when
+      // computing frustum culling sphere bounds.
       avatar.position.setFromMatrixPosition(headTransform).add(invHipsToHeadVector);
 
       // Animate the hip rotation to follow the Y rotation of the camera with some damping.
