@@ -267,9 +267,13 @@ AFRAME.registerComponent("ik-controller", {
     // TODO: This coupling with personal-space-invader is not ideal.
     // There should be some intermediate thing managing multiple opinions about object visibility
     const spaceInvader = handObject3D.el.components["personal-space-invader"];
-    const handHiddenByPersonalSpace = spaceInvader && spaceInvader.invading;
 
-    handObject3D.visible = !handHiddenByPersonalSpace && controllerObject3D.visible;
+    if (spaceInvader) {
+      // If this hand has an invader, defer to it to manage visibility overall but tell it to hide based upon controller state
+      spaceInvader.setAlwaysHidden(!controllerObject3D.visible);
+    } else {
+      handObject3D.visible = controllerObject3D.visible;
+    }
 
     // Optimization: skip IK update if not in view and not forced by frame scheduler
     if (controllerObject3D.visible && (isInView || this.forceIkUpdate || this.data.alwaysUpdate)) {
