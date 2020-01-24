@@ -67,7 +67,6 @@ AFRAME.registerComponent("ik-controller", {
     leftHand: { type: "string", default: "LeftHand" },
     rightHand: { type: "string", default: "RightHand" },
     chest: { type: "string", default: "Spine" },
-    hips: { type: "string", default: "Hips" },
     rotationSpeed: { default: 5 },
     alwaysUpdate: { type: "boolean", default: false }
   },
@@ -115,6 +114,8 @@ AFRAME.registerComponent("ik-controller", {
   },
 
   update(oldData) {
+    this.avatar = this.el.object3D;
+
     if (this.data.leftEye !== oldData.leftEye) {
       this.leftEye = this.el.object3D.getObjectByName(this.data.leftEye);
     }
@@ -141,10 +142,6 @@ AFRAME.registerComponent("ik-controller", {
 
     if (this.data.chest !== oldData.chest) {
       this.chest = this.el.object3D.getObjectByName(this.data.chest);
-    }
-
-    if (this.data.hips !== oldData.hips) {
-      this.hips = this.el.object3D.getObjectByName(this.data.hips);
     }
 
     // Set middleEye's position to be right in the middle of the left and right eyes.
@@ -186,7 +183,7 @@ AFRAME.registerComponent("ik-controller", {
       }
 
       const {
-        hips,
+        avatar,
         head,
         neck,
         chest,
@@ -208,9 +205,13 @@ AFRAME.registerComponent("ik-controller", {
       // Compute the head position such that the hmd position would be in line with the middleEye
       headTransform.multiplyMatrices(cameraForward, invMiddleEyeToHead);
 
-      // Then position the hips such that the head is aligned with headTransform
+      // Then position the avatar such that the head is aligned with headTransform
       // (which positions middleEye in line with the hmd)
-      hips.position.setFromMatrixPosition(headTransform).add(invHipsToHeadVector);
+      //
+      // Note that we position the avatar itself, *not* the hips, since positioning the
+      // hips will use vertex skinning to do the root displacement, which results in
+      // frustum culling errors.
+      avatar.position.setFromMatrixPosition(headTransform).add(invHipsToHeadVector);
 
       // Animate the hip rotation to follow the Y rotation of the camera with some damping.
       cameraYRotation.setFromRotationMatrix(cameraForward, "YXZ");
@@ -219,20 +220,25 @@ AFRAME.registerComponent("ik-controller", {
       cameraYQuaternion.setFromEuler(cameraYRotation);
 
       if (this._hadFirstTick) {
-        Quaternion.slerp(hips.quaternion, cameraYQuaternion, hips.quaternion, (this.data.rotationSpeed * dt) / 1000);
+        Quaternion.slerp(
+          avatar.quaternion,
+          cameraYQuaternion,
+          avatar.quaternion,
+          (this.data.rotationSpeed * dt) / 1000
+        );
       } else {
-        hips.quaternion.copy(cameraYQuaternion);
+        avatar.quaternion.copy(cameraYQuaternion);
       }
 
-      this.hasConvergedHips = quaternionAlmostEquals(0.0001, cameraYQuaternion, hips.quaternion);
+      this.hasConvergedHips = quaternionAlmostEquals(0.0001, cameraYQuaternion, avatar.quaternion);
 
       // Take the head orientation computed from the hmd, remove the Y rotation already applied to it by the hips,
       // and apply it to the head
-      invHipsQuaternion.copy(hips.quaternion).inverse();
+      invHipsQuaternion.copy(avatar.quaternion).inverse();
       head.quaternion.setFromRotationMatrix(headTransform).premultiply(invHipsQuaternion);
 
-      hips.updateMatrix();
-      rootToChest.multiplyMatrices(hips.matrix, chest.matrix);
+      avatar.updateMatrix();
+      rootToChest.multiplyMatrices(avatar.matrix, chest.matrix);
       invRootToChest.getInverse(rootToChest);
 
       root.matrixNeedsUpdate = true;
