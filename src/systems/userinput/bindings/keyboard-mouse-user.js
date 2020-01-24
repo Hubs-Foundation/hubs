@@ -543,6 +543,14 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.falling,
       priority: 2
+    },
+    {
+      src: {
+        value: k("wheelWithShift")
+      },
+      dest: { value: paths.actions.cursor.right.scaleGrabbedGrabbable },
+      xform: xforms.noop,
+      priority: 2
     }
   ],
 
