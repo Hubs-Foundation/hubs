@@ -147,7 +147,7 @@ async function isHubsServer(url) {
 
   let isHubsServer;
   try {
-    isHubsServer = (await fetch(origin, { method: "HEAD" })).headers.has("hub-name");
+    isHubsServer = (await fetch(url, { redirect: "follow", method: "HEAD" })).headers.has("hub-name");
   } catch (e) {
     isHubsServer = false;
   }
