@@ -105,7 +105,7 @@ function getLatestMediaVersionOfSrc(src) {
   for (const el of els) {
     const loader = el.components["media-loader"];
 
-    if (loader.data.src === src) {
+    if (loader.data && loader.data.src === src) {
       version = Math.max(version, loader.data.version);
     }
   }
