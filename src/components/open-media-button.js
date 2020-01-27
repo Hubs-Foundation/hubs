@@ -12,7 +12,7 @@ AFRAME.registerComponent("open-media-button", {
       if (!this.targetEl.parentNode) return; // If removed
       const mediaLoader = this.targetEl.components["media-loader"];
       const src = (this.src = mediaLoader.data.src);
-      const contentType = (this.contentType = mediaLoader.data.contentType);
+      const contentSubtype = (this.contentSubtype = mediaLoader.data.contentSubtype);
       const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
 
@@ -21,11 +21,11 @@ AFRAME.registerComponent("open-media-button", {
       if (visible) {
         let label = "open link";
         if (!this.data.onlyOpenLink) {
-          if (contentType === "text/vnd.hubs-avatar") {
+          if (contentSubtype === "hubs-avatar") {
             label = "use avatar";
-          } else if (contentType === "text/vnd.hubs-scene" && mayChangeScene) {
+          } else if (contentSubtype === "hubs-scene" && mayChangeScene) {
             label = "use scene";
-          } else if (contentType === "text/vnd.hubs-room") {
+          } else if (contentSubtype === "hubs-room") {
             label = "visit room";
           }
         }
@@ -41,12 +41,12 @@ AFRAME.registerComponent("open-media-button", {
       if (this.data.onlyOpenLink) {
         await exitImmersive();
         window.open(this.src);
-      } else if (this.contentType === "text/vnd.hubs-avatar") {
+      } else if (this.contentSubtype === "hubs-avatar") {
         const avatarId = new URL(this.src).pathname.split("/").pop();
         window.APP.store.update({ profile: { avatarId } });
-      } else if (this.contentType === "text/vnd.hubs-scene" && mayChangeScene) {
+      } else if (this.contentSubtype === "hubs-scene" && mayChangeScene) {
         this.el.sceneEl.emit("scene_media_selected", this.src);
-      } else if (this.contentType === "text/vnd.hubs-room") {
+      } else if (this.contentSubtype === "hubs-room") {
         await exitImmersive();
         location.href = this.src;
       } else {

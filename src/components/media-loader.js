@@ -271,7 +271,8 @@ AFRAME.registerComponent("media-loader", {
   },
 
   async update(oldData) {
-    const { src, version, contentSubtype } = this.data;
+    const { src, version } = this.data;
+    let { contentSubtype } = this.data;
     if (!src) return;
 
     const srcChanged = oldData.src !== src;
@@ -322,6 +323,7 @@ AFRAME.registerComponent("media-loader", {
         }
 
         contentType = (result.meta && result.meta.expected_content_type) || contentType;
+        contentSubtype = contentSubtype || (result.meta && result.meta.expected_content_subtype) || null;
         thumbnail = result.meta && result.meta.thumbnail && proxiedUrlFor(result.meta.thumbnail);
       }
 
@@ -465,7 +467,7 @@ AFRAME.registerComponent("media-loader", {
             modelToWorldScale: this.data.fitToBox ? 0.0001 : 1.0
           })
         );
-      } else if (contentType.startsWith("text/html") || contentType.startsWith("text/vnd.hubs")) {
+      } else if (contentType.startsWith("text/html")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
         this.el.removeAttribute("media-pdf");
@@ -475,15 +477,12 @@ AFRAME.registerComponent("media-loader", {
           async () => {
             const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
 
-            if (contentType === "text/vnd.hubs-avatar") {
+            if (contentSubtype === "hubs-avatar") {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#avatar-link-hover-menu",
                 dirs: ["forward", "back"]
               });
-            } else if (
-              contentType === "text/vnd.hubs-room" ||
-              (contentType === "text/vnd.hubs-scene" && mayChangeScene)
-            ) {
+            } else if (contentSubtype === "hubs-room" || (contentSubtype === "hubs-scene" && mayChangeScene)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#hubs-destination-hover-menu",
                 dirs: ["forward", "back"]
