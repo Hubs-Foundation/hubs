@@ -5,14 +5,7 @@ import {
   injectCustomShaderChunks,
   addMeshScaleAnimation
 } from "../utils/media-utils";
-import {
-  isNonCorsProxyDomain,
-  guessContentType,
-  proxiedUrlFor,
-  isHubsRoomUrl,
-  isHubsSceneUrl,
-  isHubsAvatarUrl
-} from "../utils/media-url-utils";
+import { isNonCorsProxyDomain, guessContentType, proxiedUrlFor } from "../utils/media-url-utils";
 import { addAnimationComponents } from "../utils/animation";
 import qsTruthy from "../utils/qs_truthy";
 
@@ -472,7 +465,7 @@ AFRAME.registerComponent("media-loader", {
             modelToWorldScale: this.data.fitToBox ? 0.0001 : 1.0
           })
         );
-      } else if (contentType.startsWith("text/html")) {
+      } else if (contentType.startsWith("text/html") || contentType.startsWith("text/vnd.hubs")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
         this.el.removeAttribute("media-pdf");
@@ -482,12 +475,15 @@ AFRAME.registerComponent("media-loader", {
           async () => {
             const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
 
-            if (await isHubsAvatarUrl(src)) {
+            if (contentType === "text/vnd.hubs-avatar") {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#avatar-link-hover-menu",
                 dirs: ["forward", "back"]
               });
-            } else if ((await isHubsRoomUrl(src)) || ((await isHubsSceneUrl(src)) && mayChangeScene)) {
+            } else if (
+              contentType === "text/vnd.hubs-room" ||
+              (contentType === "text/vnd.hubs-scene" && mayChangeScene)
+            ) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#hubs-destination-hover-menu",
                 dirs: ["forward", "back"]

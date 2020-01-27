@@ -1,4 +1,3 @@
-import { isHubsSceneUrl, isHubsRoomUrl, isHubsAvatarUrl } from "../utils/media-url-utils";
 import { guessContentType } from "../utils/media-url-utils";
 import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 
@@ -11,7 +10,9 @@ AFRAME.registerComponent("open-media-button", {
 
     this.updateSrc = async () => {
       if (!this.targetEl.parentNode) return; // If removed
-      const src = (this.src = this.targetEl.components["media-loader"].data.src);
+      const mediaLoader = this.targetEl.components["media-loader"];
+      const src = (this.src = mediaLoader.data.src);
+      const contentType = (this.contentType = mediaLoader.data.contentType);
       const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
 
@@ -20,11 +21,11 @@ AFRAME.registerComponent("open-media-button", {
       if (visible) {
         let label = "open link";
         if (!this.data.onlyOpenLink) {
-          if (await isHubsAvatarUrl(src)) {
+          if (contentType === "text/vnd.hubs-avatar") {
             label = "use avatar";
-          } else if ((await isHubsSceneUrl(src)) && mayChangeScene) {
+          } else if (contentType === "text/vnd.hubs-scene" && mayChangeScene) {
             label = "use scene";
-          } else if (await isHubsRoomUrl(src)) {
+          } else if (contentType === "text/vnd.hubs-room") {
             label = "visit room";
           }
         }
@@ -40,12 +41,12 @@ AFRAME.registerComponent("open-media-button", {
       if (this.data.onlyOpenLink) {
         await exitImmersive();
         window.open(this.src);
-      } else if (await isHubsAvatarUrl(this.src)) {
+      } else if (this.contentType === "text/vnd.hubs-avatar") {
         const avatarId = new URL(this.src).pathname.split("/").pop();
         window.APP.store.update({ profile: { avatarId } });
-      } else if ((await isHubsSceneUrl(this.src)) && mayChangeScene) {
+      } else if (this.contentType === "text/vnd.hubs-scene" && mayChangeScene) {
         this.el.sceneEl.emit("scene_media_selected", this.src);
-      } else if (await isHubsRoomUrl(this.src)) {
+      } else if (this.contentType === "text/vnd.hubs-room") {
         await exitImmersive();
         location.href = this.src;
       } else {

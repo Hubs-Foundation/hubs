@@ -157,15 +157,8 @@ async function isHubsServer(url) {
 
 const hubsSceneRegex = /https?:\/\/[^/]+\/scenes\/(\w+)\/?\S*/;
 const hubsAvatarRegex = /https?:\/\/[^/]+\/avatars\/(?<id>\w+)\/?\S*/;
-const hubsRoomRegex = /(https?:\/\/)?[^/]+\/([a-zA-Z0-9]{7})\/?\S*/;
 
 export const isHubsSceneUrl = async url => (await isHubsServer(url)) && hubsSceneRegex.test(url);
-
-export const isHubsRoomUrl = async url =>
-  (await isHubsServer(url)) && !(await isHubsSceneUrl(url)) && hubsRoomRegex.test(url);
-
-export const isHubsDestinationUrl = async url =>
-  (await isHubsServer(url)) && ((await isHubsSceneUrl(url)) || (await isHubsRoomUrl(url)));
 
 export const isHubsAvatarUrl = async url => (await isHubsServer(url)) && hubsAvatarRegex.test(url);
 
