@@ -139,6 +139,7 @@ export default class SceneEntryManager {
   };
 
   exitScene = () => {
+    this.scene.exitVR();
     if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
       NAF.connection.adapter.localMediaStream.getTracks().forEach(t => t.stop());
     }
