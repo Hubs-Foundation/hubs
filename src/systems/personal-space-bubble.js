@@ -198,11 +198,18 @@ AFRAME.registerComponent("personal-space-invader", {
       }
     }
     this.invading = false;
+    this.alwaysHidden = false;
   },
 
   update() {
     this.radiusSquared = this.data.radius * this.data.radius;
     this.updateDebug();
+  },
+
+  // Allow external callers to tell this invader to always hide this element, regardless of invasion state
+  setAlwaysHidden(alwaysHidden) {
+    this.alwaysHidden = alwaysHidden;
+    this.applyInvasionToMesh(this.invading);
   },
 
   updateDebug() {
@@ -221,15 +228,42 @@ AFRAME.registerComponent("personal-space-invader", {
   setInvading(invading) {
     if (this.invading === invading) return;
 
-    if (this.targetMesh && this.targetMesh.material) {
+    this.applyInvasionToMesh(invading);
+    this.invading = invading;
+  },
+
+  disable() {
+    if (this.invading) {
+      this.applyInvasionToMesh(false);
+    }
+
+    this.disabled = true;
+    this.updateBoneVisibility();
+  },
+
+  enable() {
+    this.disabled = false;
+    this.applyInvasionToMesh(this.invading);
+    this.updateBoneVisibility();
+  },
+
+  updateBoneVisibility() {
+    // HACK, bone visibility typically takes a tick to update, but since we want to be able
+    // to have enable() and disable() be reflected this frame, we need to do it immediately.
+    this.el.components["bone-visibility"] && this.el.components["bone-visibility"].tick();
+  },
+
+  applyInvasionToMesh(invading) {
+    if (this.disabled) return;
+
+    if (this.targetMesh && this.targetMesh.material && !this.alwaysHidden) {
       forEachMaterial(this.targetMesh, material => {
         material.opacity = invading ? this.data.invadingOpacity : 1;
         material.transparent = invading;
       });
     } else {
-      this.el.object3D.visible = !invading;
+      this.el.object3D.visible = !invading && !this.alwaysHidden;
     }
-    this.invading = invading;
   }
 });
 
