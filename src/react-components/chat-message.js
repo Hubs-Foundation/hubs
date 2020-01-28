@@ -209,10 +209,8 @@ export async function createInWorldLogMessage({ name, type, body }) {
 export async function spawnChatMessage(body, from) {
   if (body.length === 0) return;
 
-  const urlOrText = coerceToUrl(body);
-
   try {
-    new URL(urlOrText);
+    new URL(coerceToUrl(body));
     document.querySelector("a-scene").emit("add_media", body);
     return;
   } catch (e) {
