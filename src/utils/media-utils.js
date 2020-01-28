@@ -5,9 +5,13 @@ import { mapMaterials } from "./material-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { validMaterials } from "../components/hoverable-visuals";
 import { proxiedUrlFor } from "../utils/media-url-utils";
-import { test as testStringForLink } from "linkifyjs";
+import Linkify from "linkify-it";
+import tlds from "tlds";
 
 import anime from "animejs";
+
+const linkify = Linkify();
+linkify.tlds(tlds);
 
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 const isMobile = AFRAME.utils.device.isMobile();
@@ -115,7 +119,7 @@ function getLatestMediaVersionOfSrc(src) {
 }
 
 export function coerceToUrl(urlOrText) {
-  if (!testStringForLink(urlOrText)) return urlOrText;
+  if (!linkify.test(urlOrText)) return urlOrText;
 
   // See: https://github.com/Soapbox/linkifyjs/blob/master/src/linkify.js#L52
   return urlOrText.indexOf("://") >= 0 ? urlOrText : `https://${urlOrText}`;
