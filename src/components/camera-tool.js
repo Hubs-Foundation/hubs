@@ -626,8 +626,8 @@ AFRAME.registerComponent("camera-tool", {
         const bubbleSystem = this.el.sceneEl.systems["personal-space-bubble"];
 
         if (bubbleSystem) {
-          for (const invader of bubbleSystem.invaders) {
-            invader.disable();
+          for (let i = 0, l = bubbleSystem.invaders.length; i < l; i++) {
+            bubbleSystem.invaders[i].disable();
           }
         }
 
@@ -675,8 +675,8 @@ AFRAME.registerComponent("camera-tool", {
         }
 
         if (bubbleSystem) {
-          for (const invader of bubbleSystem.invaders) {
-            invader.enable();
+          for (let i = 0, l = bubbleSystem.invaders.length; i < l; i++) {
+            bubbleSystem.invaders[i].enable();
           }
         }
 
