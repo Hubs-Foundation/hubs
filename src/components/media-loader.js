@@ -10,8 +10,8 @@ import {
   guessContentType,
   proxiedUrlFor,
   isHubsRoomUrl,
-  isHubsSceneUrl,
-  isHubsAvatarUrl
+  isLocalHubsSceneUrl,
+  isLocalHubsAvatarUrl
 } from "../utils/media-url-utils";
 import { addAnimationComponents } from "../utils/animation";
 import qsTruthy from "../utils/qs_truthy";
@@ -482,12 +482,12 @@ AFRAME.registerComponent("media-loader", {
           async () => {
             const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
 
-            if (await isHubsAvatarUrl(src)) {
+            if (await isLocalHubsAvatarUrl(src)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#avatar-link-hover-menu",
                 dirs: ["forward", "back"]
               });
-            } else if ((await isHubsRoomUrl(src)) || ((await isHubsSceneUrl(src)) && mayChangeScene)) {
+            } else if ((await isHubsRoomUrl(src)) || ((await isLocalHubsSceneUrl(src)) && mayChangeScene)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#hubs-destination-hover-menu",
                 dirs: ["forward", "back"]

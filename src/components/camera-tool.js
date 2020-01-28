@@ -623,6 +623,14 @@ AFRAME.registerComponent("camera-tool", {
           }
         }
 
+        const bubbleSystem = this.el.sceneEl.systems["personal-space-bubble"];
+
+        if (bubbleSystem) {
+          for (let i = 0, l = bubbleSystem.invaders.length; i < l; i++) {
+            bubbleSystem.invaders[i].disable();
+          }
+        }
+
         const tmpVRFlag = renderer.vr.enabled;
         const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
         delete sceneEl.object3D.onAfterRender;
@@ -656,6 +664,7 @@ AFRAME.registerComponent("camera-tool", {
           playerHead.updateMatrices(true, true);
           playerHead.updateMatrixWorld(true, true);
         }
+
         if (this.playerHud) {
           this.playerHud.visible = playerHudWasVisible;
           if (this.el.sceneEl.systems["hubs-systems"]) {
@@ -664,6 +673,13 @@ AFRAME.registerComponent("camera-tool", {
             }
           }
         }
+
+        if (bubbleSystem) {
+          for (let i = 0, l = bubbleSystem.invaders.length; i < l; i++) {
+            bubbleSystem.invaders[i].enable();
+          }
+        }
+
         this.lastUpdate = now;
 
         if (this.videoRecorder) {

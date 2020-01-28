@@ -147,7 +147,7 @@ async function isHubsServer(url) {
 
   let isHubsServer;
   try {
-    isHubsServer = (await fetch(origin, { method: "HEAD" })).headers.has("hub-name");
+    isHubsServer = (await fetch(proxiedUrlFor(origin), { method: "HEAD" })).headers.has("hub-name");
   } catch (e) {
     isHubsServer = false;
   }
@@ -159,15 +159,20 @@ const hubsSceneRegex = /https?:\/\/[^/]+\/scenes\/(\w+)\/?\S*/;
 const hubsAvatarRegex = /https?:\/\/[^/]+\/avatars\/(?<id>\w+)\/?\S*/;
 const hubsRoomRegex = /(https?:\/\/)?[^/]+\/([a-zA-Z0-9]{7})\/?\S*/;
 
+export const isLocalHubsUrl = async url =>
+  (await isHubsServer(url)) && new URL(url).origin === document.location.origin;
+
 export const isHubsSceneUrl = async url => (await isHubsServer(url)) && hubsSceneRegex.test(url);
+export const isLocalHubsSceneUrl = async url => (await isHubsSceneUrl(url)) && (await isLocalHubsUrl(url));
+
+export const isHubsAvatarUrl = async url => (await isHubsServer(url)) && hubsAvatarRegex.test(url);
+export const isLocalHubsAvatarUrl = async url => (await isHubsAvatarUrl(url)) && (await isLocalHubsUrl(url));
 
 export const isHubsRoomUrl = async url =>
-  (await isHubsServer(url)) && !(await isHubsSceneUrl(url)) && hubsRoomRegex.test(url);
+  (await isHubsServer(url)) && !(await isHubsAvatarUrl(url)) && !(await isHubsSceneUrl(url)) && hubsRoomRegex.test(url);
 
 export const isHubsDestinationUrl = async url =>
   (await isHubsServer(url)) && ((await isHubsSceneUrl(url)) || (await isHubsRoomUrl(url)));
-
-export const isHubsAvatarUrl = async url => (await isHubsServer(url)) && hubsAvatarRegex.test(url);
 
 export const idForAvatarUrl = url => {
   const match = url.match(hubsAvatarRegex);
