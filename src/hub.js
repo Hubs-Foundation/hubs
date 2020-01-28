@@ -814,7 +814,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // If VR headset is activated, refreshing page will fire vrdisplayactivate
     // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
     // to be entered and we haven't entered the room yet.
-    if (scene.is("vr-mode") && !scene.is("vr-entered")) {
+    if (scene.is("vr-mode") && !scene.is("vr-entered") && !isMobileVR) {
       console.log("Pre-emptively exiting VR mode.");
       scene.exitVR();
       return true;
@@ -918,7 +918,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   scene.addEventListener("leave_room_requested", () => {
-    scene.exitVR();
     entryManager.exitScene("left");
     remountUI({ roomUnavailableReason: "left" });
   });
