@@ -226,11 +226,7 @@ export const interpolateAffine = (function() {
       end.scale.setFromMatrixScale(endMat4),
       progress
     );
-    return outMat4.compose(
-      interpolated.position,
-      interpolated.quaternion,
-      interpolated.scale
-    );
+    return outMat4.compose(interpolated.position, interpolated.quaternion, interpolated.scale);
   };
 })();
 
@@ -328,10 +324,3 @@ export const childMatch = (function() {
     setMatrixWorld(parent, newParentMatrix);
   };
 })();
-
-export function extractAxisAngle(quaternion, outAxis) {
-  const halfAngle = Math.acos(quaternion._w);
-  const axisFactor = Math.sqrt(1 - quaternion._w * quaternion._w);
-  outAxis.set(quaternion._x / axisFactor, quaternion._y / axisFactor, quaternion._z / axisFactor);
-  return 2 * halfAngle;
-}

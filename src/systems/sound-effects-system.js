@@ -44,6 +44,9 @@ export const SOUND_CAMERA_TOOL_COUNTDOWN = soundEnum++;
 export const SOUND_PREFERENCE_MENU_HOVER = soundEnum++;
 export const SOUND_PREFERENCE_MENU_SELECT = soundEnum++;
 export const SOUND_SPAWN_EMOJI = soundEnum++;
+export const SOUND_SYNC_IRL_START = soundEnum++;
+export const SOUND_SYNC_IRL_COUNTDOWN = soundEnum++;
+export const SOUND_SYNC_IRL_END = soundEnum++;
 
 // Safari doesn't support the promise form of decodeAudioData, so we polyfill it.
 function decodeAudioData(audioContext, arrayBuffer) {
@@ -94,7 +97,10 @@ export class SoundEffectsSystem {
       [SOUND_MEDIA_LOADED, URL_MEDIA_LOADED],
       [SOUND_PREFERENCE_MENU_HOVER, URL_FREEZE],
       [SOUND_PREFERENCE_MENU_SELECT, URL_TICK],
-      [SOUND_SPAWN_EMOJI, URL_SPAWN_EMOJI]
+      [SOUND_SPAWN_EMOJI, URL_SPAWN_EMOJI],
+      [SOUND_SYNC_IRL_START, URL_FREEZE], // TODO: Choose sync sounds
+      [SOUND_SYNC_IRL_COUNTDOWN, URL_TICK], // TODO: Choose sync sounds
+      [SOUND_SYNC_IRL_END, URL_SPAWN_EMOJI] // TODO: Choose sync sounds
     ];
     const loading = new Map();
     const load = url => {

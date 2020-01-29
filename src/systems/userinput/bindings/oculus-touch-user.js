@@ -487,7 +487,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
         value: rightButton("b").pressed
       },
       dest: {
-        value: paths.actions.reorientPlayerOculusTouch
+        value: paths.actions.syncIRL
       },
       xform: xforms.rising
     },
