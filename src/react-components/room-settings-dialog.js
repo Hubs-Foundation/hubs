@@ -26,6 +26,31 @@ export default class RoomSettingsDialog extends Component {
     this.props.onClose();
   };
 
+  renderPrivacyDropdown(disabled, onChange) {
+    return (
+      <div className={styles.selectContainer}>
+        <select
+          value={this.state.privacy}
+          onChange={
+            onChange ||
+            (e =>
+              this.setState({
+                privacy: e.target.value
+              }))
+          }
+        >
+          <option value="public">Public (Listed on the homepage)</option>
+          <option value="private">Private (Only those with the link can join)</option>
+        </select>
+        <img
+          className="arrow"
+          src="../assets/images/dropdown_arrow.png"
+          srcSet="../assets/images/dropdown_arrow@2x.png 2x"
+        />
+      </div>
+    );
+  }
+
   renderCheckbox(member_permission, disabled, onChange) {
     return (
       <label className={cx(styles.permission, { [styles.permissionDisabled]: disabled })} key={member_permission}>
@@ -66,6 +91,10 @@ export default class RoomSettingsDialog extends Component {
             onChange={e => this.setState({ name: e.target.value })}
             className={styles.nameField}
           />
+          <span className={styles.subtitle}>
+            <FormattedMessage id="room-settings.room_privacy" />
+          </span>
+          {this.renderPrivacyDropdown()}
           <span className={styles.subtitle}>
             <FormattedMessage id="room-settings.permissions-subtitle" />
           </span>

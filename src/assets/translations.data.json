@@ -51,6 +51,7 @@
     "room-settings.spawn_camera": "Create cameras",
     "room-settings.spawn_drawing": "Create drawings",
     "room-settings.pin_objects": "Pin objects",
+    "room-settings.room_privacy": "Room privacy",
     "close-room.message": "Closing this room will remove yourself and others from the room, shutting it down permanently.\n\nAre you sure? This action cannot be undone.",
     "close-room.confirm": "Yes, Close Room",
     "close-room.cancel": "Cancel",

@@ -136,6 +136,7 @@ class UIRoot extends Component {
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
     hubName: PropTypes.string,
+    hubPrivacy: PropTypes.string,
     hubMemberPermissions: PropTypes.object,
     hubScene: PropTypes.object,
     hubIsBound: PropTypes.bool,
@@ -1672,7 +1673,11 @@ class UIRoot extends Component {
               history={this.props.history}
               render={() =>
                 this.renderDialog(RoomSettingsDialog, {
-                  initialSettings: { name: this.props.hubName, member_permissions: this.props.hubMemberPermissions },
+                  initialSettings: {
+                    name: this.props.hubName,
+                    member_permissions: this.props.hubMemberPermissions,
+                    privacy: this.props.hubPrivacy
+                  },
                   onChange: settings => this.props.hubChannel.updateHub(settings)
                 })
               }

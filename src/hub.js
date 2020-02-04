@@ -321,6 +321,7 @@ async function updateUIForHub(hub) {
     hubId: hub.hub_id,
     hubName: hub.name,
     hubMemberPermissions: hub.member_permissions,
+    hubPrivacy: hub.privacy,
     hubScene: hub.scene,
     hubEntryCode: hub.entry_code
   });

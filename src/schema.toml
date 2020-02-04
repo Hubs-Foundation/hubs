@@ -25,6 +25,9 @@ features.show_avatar_pipelines_link = { category = "features", type = "boolean",
 features.show_model_collection_link = { category = "features", type = "boolean", name = "Show Model Collection Link", description = "Show link to a collection of models." }
 features.hide_powered_by = { category = "features", type = "boolean", name = "Hide Powered By Hubs", description = "Hides the 'Powered by Hubs Cloud' notice on the home page and loading screens." }
 
+features.public_rooms = { category = "features", type = "boolean", name = "Public Rooms", description = "Allow users to create public rooms that will be listed on the homepage." }
+features.default_room_id = { category = "features", type = "string", name = "Homepage Room", description = "Use the specified room in place of the homepage."}
+
 features.enable_spoke = { category = "features", type = "boolean", internal = "true" }
 features.show_join_us_dialog = { category = "features", type = "boolean", internal = "true" }
 features.show_discord_bot_link = { category = "features", type = "boolean", internal = "true" }

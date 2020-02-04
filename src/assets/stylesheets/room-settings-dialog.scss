@@ -30,9 +30,26 @@
   padding-left: 1em;
 }
 
-:local(.permission) {
-  display: flex;
-  align-items: center;
+:local(.select-container) {
+  position: relative;
+  vertical-align: middle;
+  width: 100%;
+  margin: 0 1.25em;
+  margin-bottom: 1.5em;
+
+  .arrow{
+    position: absolute;
+    right: 10px;
+    bottom: 20px;
+  }
+
+  select {
+    @extend %input-field;
+    font-size: 16px;
+    height: 36px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+  }
 }
 
 :local(.permission-disabled) {
