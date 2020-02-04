@@ -97,9 +97,11 @@ export class SyncIRLSystem {
       positionRight.setFromMatrixPosition(rightController.object3D.matrixWorld);
       rigPosition.setFromMatrixPosition(avatarRig.object3D.matrixWorld);
       desiredRigPosition.subVectors(rigPosition, positionRight).add(TARGET_RIGHT_CONTROLLER_POSITION);
-      desiredRigTransform.compose(desiredRigPosition,
-                                  desiredRigOrientationQuat,
-                                  ONES);
+      desiredRigTransform.compose(
+        desiredRigPosition,
+        desiredRigOrientationQuat,
+        ONES
+      );
       setMatrixWorld(avatarRig.object3D, desiredRigTransform);
     };
   })();

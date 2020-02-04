@@ -226,7 +226,11 @@ export const interpolateAffine = (function() {
       end.scale.setFromMatrixScale(endMat4),
       progress
     );
-    return outMat4.compose(interpolated.position, interpolated.quaternion, interpolated.scale);
+    return outMat4.compose(
+      interpolated.position,
+      interpolated.quaternion,
+      interpolated.scale
+    );
   };
 })();
 
