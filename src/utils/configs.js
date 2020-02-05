@@ -46,18 +46,21 @@ if (window.APP_CONFIG) {
     style.innerHTML = `:root{${colorVars.join("\n")}}`;
     document.head.prepend(style);
   }
+} else {
+  configs.APP_CONFIG = {};
 }
 
 const isLocalDevelopment = process.env.NODE_ENV === "development";
 
 configs.feature = featureName => {
-  const enableAll = isLocalDevelopment && !process.env.USE_FEATURE_CONFIG;
-
-  const features = configs.APP_CONFIG && configs.APP_CONFIG.features;
-
-  const forceEnableSpoke = featureName === "enable_spoke" && isAdmin;
-
-  return forceEnableSpoke || enableAll || (features && features[featureName]);
+  const value = configs.APP_CONFIG.features[featureName];
+  if (typeof value === "boolean") {
+    const enableAll = isLocalDevelopment && !process.env.USE_FEATURE_CONFIG;
+    const forceEnableSpoke = featureName === "enable_spoke" && isAdmin;
+    return forceEnableSpoke || enableAll || value;
+  } else {
+    return value;
+  }
 };
 
 let localDevImages = {};
