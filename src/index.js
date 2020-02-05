@@ -22,7 +22,7 @@ window.APP = { store };
 
 const authChannel = new AuthChannel(store);
 let installEvent = null;
-let featuredRoomsResult = null;
+let featuredRooms = null;
 let mountedUI = false;
 let hideHero = true;
 let showAdmin = false;
@@ -44,7 +44,7 @@ const remountUI = function() {
       signInReason={qs.get("sign_in_reason")}
       hideHero={hideHero}
       showAdmin={showAdmin}
-      featuredRoomsResult={featuredRoomsResult}
+      featuredRooms={featuredRooms}
       installEvent={installEvent}
     />
   );
@@ -76,26 +76,23 @@ window.addEventListener("beforeinstallprompt", e => {
   }
 });
 
+// Fetch favorite + public rooms and maerge, sorting by participant count
 async function fetchFeaturedRooms() {
-  // Fetch favorite rooms
   const [favoriteRoomsResult, publicRoomsResult] = await Promise.all([
     authChannel.signedIn
       ? fetchReticulumAuthenticated(
-          `/api/v1/media/search?source=favorites&type=hubs&user=${store.credentialsAccountId}`
+          `/api/v1/media/search?source=favorites&type=rooms&user=${store.credentialsAccountId}`
         )
       : Promise.resolve({ entries: [] }),
     fetchReticulumAuthenticated("/api/v1/media/search?source=public_rooms")
   ]);
 
-  if (favoriteRoomsResult && publicRoomsResult) {
-    publicRoomsResult.entries.push(...favoriteRoomsResult.entries);
-    const ids = publicRoomsResult.entries.map(h => h.id);
-    publicRoomsResult.entries = publicRoomsResult.entries
-      .filter((h, i) => ids.lastIndexOf(h.id) === i)
-      .sort((a, b) => b.participant_count - a.participant_count);
-    featuredRoomsResult = publicRoomsResult;
-    remountUI();
-  }
+  publicRoomsResult.entries.push(...favoriteRoomsResult.entries);
+  const ids = publicRoomsResult.entries.map(h => h.id);
+  featuredRooms = publicRoomsResult.entries
+    .filter((h, i) => ids.lastIndexOf(h.id) === i)
+    .sort((a, b) => b.participant_count - a.participant_count);
+  remountUI();
 }
 
 (async () => {
@@ -127,6 +124,5 @@ async function fetchFeaturedRooms() {
   hideHero = false;
   remountUI();
 
-  await fetchFeaturedRooms();
-  setInterval(fetchFeaturedRooms, 30000);
+  fetchFeaturedRooms();
 })();

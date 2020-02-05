@@ -44,7 +44,7 @@ class HomeRoot extends Component {
     installEvent: PropTypes.object,
     hideHero: PropTypes.bool,
     showAdmin: PropTypes.bool,
-    featuredRoomsResult: PropTypes.object,
+    featuredRooms: PropTypes.array,
     publicRoomsResult: PropTypes.object,
     showSignIn: PropTypes.bool,
     signInDestination: PropTypes.string,
@@ -219,9 +219,7 @@ class HomeRoot extends Component {
             </div>
             <div className={styles.heroContent} style={{ backgroundImage: configs.image("home_background", true) }}>
               {!this.props.hideHero &&
-                (this.props.featuredRoomsResult &&
-                this.props.featuredRoomsResult.entries &&
-                this.props.featuredRoomsResult.entries.length > 0
+                (this.props.featuredRooms && this.props.featuredRooms.length > 0
                   ? this.renderFeaturedRoomsHero()
                   : this.renderNonFavoriteHero())}
               {!this.props.hideHero && (
@@ -379,7 +377,7 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel} key={2}>
         <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
           <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-            <MediaTiles result={this.props.featuredRoomsResult} urlSource="favorites" />
+            <MediaTiles entries={this.props.featuredRooms} urlSource="favorites" />
           </div>
         </div>
       </div>
@@ -391,7 +389,7 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel} key={2}>
         <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
           <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-            <MediaTiles result={this.props.publicRoomsResult} urlSource="public_rooms" />
+            <MediaTiles entries={this.props.publicRoomsResult} urlSource="public_rooms" />
           </div>
         </div>
       </div>

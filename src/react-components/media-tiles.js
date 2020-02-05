@@ -34,7 +34,11 @@ const PUBLISHER_FOR_ENTRY_TYPE = {
 class MediaTiles extends Component {
   static propTypes = {
     intl: PropTypes.object,
-    result: PropTypes.object,
+    entries: PropTypes.array,
+    hasNext: PropTypes.bool,
+    hasPrevious: PropTypes.bool,
+    isVariableWidth: PropTypes.bool,
+    page: PropTypes.number,
     history: PropTypes.object,
     urlSource: PropTypes.string,
     handleEntryClicked: PropTypes.func,
@@ -59,15 +63,9 @@ class MediaTiles extends Component {
   };
 
   render() {
-    const { urlSource, result } = this.props;
-    const entries = (result && result.entries) || [];
+    const { urlSource, hasNext, hasPrevious, page, isVariableWidth } = this.props;
+    const entries = this.props.entries || [];
     const [createTileWidth, createTileHeight] = this.getTileDimensions(false, urlSource === "avatars");
-    const searchParams = new URLSearchParams((this.props.history ? this.props.history.location : location).search);
-    const hasMeta = !!(result && result.meta);
-    const apiSource = (hasMeta && result.meta.source) || null;
-    const isVariableWidth = result && ["bing_images", "tenor"].includes(apiSource);
-    const hasNext = !!(hasMeta && result.meta.next_cursor) || false;
-    const hasPrevious = searchParams.get("cursor");
 
     return (
       <div className={styles.body}>
@@ -110,8 +108,7 @@ class MediaTiles extends Component {
           {entries.map(this.entryToTile)}
         </div>
 
-        {result &&
-          (hasNext || hasPrevious) &&
+        {(hasNext || hasPrevious) &&
           this.props.handlePager && (
             <div className={styles.pager}>
               <a
@@ -120,7 +117,7 @@ class MediaTiles extends Component {
               >
                 <FontAwesomeIcon icon={faAngleLeft} />
               </a>
-              <div className={styles.pageNumber}>{result.meta.page}</div>
+              <div className={styles.pageNumber}>{page}</div>
               <a
                 className={classNames({ [styles.nextPage]: true, [styles.pagerButtonDisabled]: !hasNext })}
                 onClick={() => this.props.handlePager(1)}
@@ -246,7 +243,7 @@ class MediaTiles extends Component {
                 <FontAwesomeIcon icon={faPencilAlt} />
               </a>
             )}
-          {entry.type === "hub" && (
+          {entry.type === "room" && (
             <div className={styles.info}>
               <FontAwesomeIcon icon={faUsers} />
               <span>{entry.participant_count}</span>
