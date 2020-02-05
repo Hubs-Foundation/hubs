@@ -1673,7 +1673,7 @@ class UIRoot extends Component {
               history={this.props.history}
               render={() =>
                 this.renderDialog(RoomSettingsDialog, {
-                  showPrivacySettings: configs.isAdmin() || configs.feature("public_rooms"),
+                  showPrivacySettings: this.props.hubChannel.can("update_hub_privacy"),
                   initialSettings: {
                     name: this.props.hubName,
                     member_permissions: this.props.hubMemberPermissions,
