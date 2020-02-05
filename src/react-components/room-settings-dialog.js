@@ -11,7 +11,8 @@ export default class RoomSettingsDialog extends Component {
   static propTypes = {
     initialSettings: PropTypes.object,
     onChange: PropTypes.func,
-    onClose: PropTypes.func
+    onClose: PropTypes.func,
+    showPrivacySettings: PropTypes.bool
   };
 
   constructor(props) {
@@ -72,6 +73,7 @@ export default class RoomSettingsDialog extends Component {
   }
 
   render() {
+    const { showPrivacySettings } = this.props;
     return (
       <DialogContainer title="Room Settings" {...this.props}>
         <form onSubmit={this.onSubmit} className={styles.roomSettingsForm}>
@@ -91,10 +93,12 @@ export default class RoomSettingsDialog extends Component {
             onChange={e => this.setState({ name: e.target.value })}
             className={styles.nameField}
           />
-          <span className={styles.subtitle}>
-            <FormattedMessage id="room-settings.room_privacy" />
-          </span>
-          {this.renderPrivacyDropdown()}
+          {showPrivacySettings && (
+            <span className={styles.subtitle}>
+              <FormattedMessage id="room-settings.room_privacy" />
+            </span>
+          )}
+          {showPrivacySettings && this.renderPrivacyDropdown()}
           <span className={styles.subtitle}>
             <FormattedMessage id="room-settings.permissions-subtitle" />
           </span>

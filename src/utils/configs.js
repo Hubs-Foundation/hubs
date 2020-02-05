@@ -52,10 +52,12 @@ if (window.APP_CONFIG) {
 
 const isLocalDevelopment = process.env.NODE_ENV === "development";
 
+const enableAllBlacklist = ["public_rooms"];
 configs.feature = featureName => {
   const value = configs.APP_CONFIG.features[featureName];
   if (typeof value === "boolean") {
-    const enableAll = isLocalDevelopment && !process.env.USE_FEATURE_CONFIG;
+    const enableAll =
+      isLocalDevelopment && !process.env.USE_FEATURE_CONFIG && !enableAllBlacklist.includes(featureName);
     const forceEnableSpoke = featureName === "enable_spoke" && isAdmin;
     return forceEnableSpoke || enableAll || value;
   } else {
@@ -86,5 +88,6 @@ configs.link = (linkName, defaultValue) => {
 configs.setIsAdmin = _isAdmin => {
   isAdmin = _isAdmin;
 };
+configs.isAdmin = () => isAdmin;
 
 export default configs;
