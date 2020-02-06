@@ -86,8 +86,10 @@ export default class RoomSettingsDialog extends Component {
                     onChange={this.onRoomAccessSettingsChange}
                   />
                   <div>
-                    Private
-                    <span>Only those with the link can join</span>
+                    <FormattedMessage id="room-settings.access-private" />
+                    <span>
+                      <FormattedMessage id="room-settings.access-private-subtitle" />
+                    </span>
                   </div>
                 </label>
                 <label>
@@ -98,8 +100,10 @@ export default class RoomSettingsDialog extends Component {
                     onChange={this.onRoomAccessSettingsChange}
                   />
                   <div>
-                    Public
-                    <span>Listed on the homepage</span>
+                    <FormattedMessage id="room-settings.access-public" />
+                    <span>
+                      <FormattedMessage id="room-settings.access-public-subtitle" />
+                    </span>
                   </div>
                 </label>
               </div>
