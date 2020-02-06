@@ -27,16 +27,16 @@ export default class RoomSettingsDialog extends Component {
     this.props.onClose();
   };
 
-  renderPrivacyDropdown(disabled, onChange) {
+  renderRoomAccessSettings(disabled, onChange) {
     return (
       <div className={styles.selectContainer}>
         <select
-          value={this.state.privacy}
+          value={this.state.allow_promotion ? "public" : "private"}
           onChange={
             onChange ||
             (e =>
               this.setState({
-                privacy: e.target.value
+                allow_promotion: e.target.value === "public"
               }))
           }
         >
@@ -98,7 +98,7 @@ export default class RoomSettingsDialog extends Component {
               <FormattedMessage id="room-settings.room_access" />
             </span>
           )}
-          {showRoomAccessSettings && this.renderPrivacyDropdown()}
+          {showRoomAccessSettings && this.renderRoomAccessSettings()}
           <span className={styles.subtitle}>
             <FormattedMessage id="room-settings.permissions-subtitle" />
           </span>
