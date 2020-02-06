@@ -221,7 +221,7 @@ class HomeRoot extends Component {
               {!this.props.hideHero &&
                 (this.props.featuredRooms && this.props.featuredRooms.length > 0
                   ? this.renderFeaturedRoomsHero()
-                  : this.renderNonFavoriteHero())}
+                  : this.renderNonFeaturedRoomsHero())}
               {!this.props.hideHero && (
                 <div className={classNames(styles.heroPanel, styles.rightPanel)}>
                   {showFTUEVideo && (
@@ -384,19 +384,7 @@ class HomeRoot extends Component {
     ];
   }
 
-  renderPublicRoomsHero() {
-    return (
-      <div className={styles.heroPanel} key={2}>
-        <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
-          <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-            <MediaTiles entries={this.props.publicRoomsResult} urlSource="public_rooms" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  renderNonFavoriteHero() {
+  renderNonFeaturedRoomsHero() {
     return (
       <div className={styles.heroPanel}>
         <div className={styles.container}>

@@ -184,7 +184,6 @@ class MediaTiles extends Component {
       PUBLISHER_FOR_ENTRY_TYPE[entry.type];
 
     const { formatMessage } = this.props.intl;
-    const { urlSource } = this.props;
 
     return (
       <div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`${entry.id}_${idx}`}>

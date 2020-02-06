@@ -76,7 +76,7 @@ window.addEventListener("beforeinstallprompt", e => {
   }
 });
 
-// Fetch favorite + public rooms and maerge, sorting by participant count
+// Fetch favorite + public rooms and merge, sorting by participant count
 async function fetchFeaturedRooms() {
   const [favoriteRoomsResult, publicRoomsResult] = await Promise.all([
     authChannel.signedIn
@@ -84,12 +84,11 @@ async function fetchFeaturedRooms() {
           `/api/v1/media/search?source=favorites&type=rooms&user=${store.credentialsAccountId}`
         )
       : Promise.resolve({ entries: [] }),
-    fetchReticulumAuthenticated("/api/v1/media/search?source=public_rooms")
+    fetchReticulumAuthenticated("/api/v1/media/search?source=rooms&filter=public")
   ]);
 
-  publicRoomsResult.entries.push(...favoriteRoomsResult.entries);
   const ids = publicRoomsResult.entries.map(h => h.id);
-  featuredRooms = publicRoomsResult.entries
+  featuredRooms = [...publicRoomsResult.entries, ...favoriteRoomsResult.entries]
     .filter((h, i) => ids.lastIndexOf(h.id) === i)
     .sort((a, b) => b.participant_count - a.participant_count);
   remountUI();
