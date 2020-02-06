@@ -2,6 +2,7 @@
 
 :local(.room-settings-form) {
   @extend %centered-flex-column;
+  padding: 1em;
 }
 
 :local(.subtitle) {
