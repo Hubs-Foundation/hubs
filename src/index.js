@@ -76,7 +76,7 @@ window.addEventListener("beforeinstallprompt", e => {
   }
 });
 
-// Fetch favorite + public rooms and merge, sorting by participant count
+// Fetch favorite + public rooms and merge, sorting by member count
 async function fetchFeaturedRooms() {
   const [favoriteRoomsResult, publicRoomsResult] = await Promise.all([
     authChannel.signedIn
@@ -90,7 +90,7 @@ async function fetchFeaturedRooms() {
   const ids = publicRoomsResult.entries.map(h => h.id);
   featuredRooms = [...publicRoomsResult.entries, ...favoriteRoomsResult.entries]
     .filter((h, i) => ids.lastIndexOf(h.id) === i)
-    .sort((a, b) => b.participant_count - a.participant_count);
+    .sort((a, b) => b.member_count - a.member_count);
   remountUI();
 }
 

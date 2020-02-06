@@ -245,7 +245,7 @@ class MediaTiles extends Component {
           {entry.type === "room" && (
             <div className={styles.info}>
               <FontAwesomeIcon icon={faUsers} />
-              <span>{entry.participant_count}</span>
+              <span>{entry.member_count}</span>
             </div>
           )}
         </div>

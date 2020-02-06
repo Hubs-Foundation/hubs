@@ -27,30 +27,10 @@ export default class RoomSettingsDialog extends Component {
     this.props.onClose();
   };
 
-  renderRoomAccessSettings(disabled, onChange) {
-    return (
-      <div className={styles.selectContainer}>
-        <select
-          value={this.state.allow_promotion ? "public" : "private"}
-          onChange={
-            onChange ||
-            (e =>
-              this.setState({
-                allow_promotion: e.target.value === "public"
-              }))
-          }
-        >
-          <option value="public">Public (Listed on the homepage)</option>
-          <option value="private">Private (Only those with the link can join)</option>
-        </select>
-        <img
-          className="arrow"
-          src="../assets/images/dropdown_arrow.png"
-          srcSet="../assets/images/dropdown_arrow@2x.png 2x"
-        />
-      </div>
-    );
-  }
+  onRoomAccessSettingsChange = e =>
+    this.setState({
+      allow_promotion: e.target.value === "public"
+    });
 
   renderCheckbox(member_permission, disabled, onChange) {
     return (
@@ -84,7 +64,6 @@ export default class RoomSettingsDialog extends Component {
             name="name"
             type="text"
             required
-            autoFocus
             autoComplete="off"
             placeholder="Room name"
             value={this.state.name}
@@ -94,11 +73,38 @@ export default class RoomSettingsDialog extends Component {
             className={styles.nameField}
           />
           {showRoomAccessSettings && (
-            <span className={styles.subtitle}>
-              <FormattedMessage id="room-settings.room_access" />
-            </span>
+            <>
+              <span className={styles.subtitle}>
+                <FormattedMessage id="room-settings.room-access-subtitle" />
+              </span>
+              <div className={styles.selectContainer}>
+                <label>
+                  <input
+                    type="radio"
+                    value="private"
+                    checked={!this.state.allow_promotion}
+                    onChange={this.onRoomAccessSettingsChange}
+                  />
+                  <div>
+                    Private
+                    <span>Only those with the link can join</span>
+                  </div>
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="public"
+                    checked={this.state.allow_promotion}
+                    onChange={this.onRoomAccessSettingsChange}
+                  />
+                  <div>
+                    Public
+                    <span>Listed on the homepage</span>
+                  </div>
+                </label>
+              </div>
+            </>
           )}
-          {showRoomAccessSettings && this.renderRoomAccessSettings()}
           <span className={styles.subtitle}>
             <FormattedMessage id="room-settings.permissions-subtitle" />
           </span>
