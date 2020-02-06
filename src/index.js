@@ -22,7 +22,7 @@ window.APP = { store };
 
 const authChannel = new AuthChannel(store);
 let installEvent = null;
-let favoriteHubsResult = null;
+let featuredRooms = null;
 let mountedUI = false;
 let hideHero = true;
 let showAdmin = false;
@@ -44,7 +44,7 @@ const remountUI = function() {
       signInReason={qs.get("sign_in_reason")}
       hideHero={hideHero}
       showAdmin={showAdmin}
-      favoriteHubsResult={favoriteHubsResult}
+      featuredRooms={featuredRooms}
       installEvent={installEvent}
     />
   );
@@ -76,6 +76,24 @@ window.addEventListener("beforeinstallprompt", e => {
   }
 });
 
+// Fetch favorite + public rooms and merge, sorting by member count
+async function fetchFeaturedRooms() {
+  const [favoriteRoomsResult, publicRoomsResult] = await Promise.all([
+    authChannel.signedIn
+      ? fetchReticulumAuthenticated(
+          `/api/v1/media/search?source=favorites&type=rooms&user=${store.credentialsAccountId}`
+        )
+      : Promise.resolve({ entries: [] }),
+    fetchReticulumAuthenticated("/api/v1/media/search?source=rooms&filter=public")
+  ]);
+
+  const ids = publicRoomsResult.entries.map(h => h.id);
+  featuredRooms = [...publicRoomsResult.entries, ...favoriteRoomsResult.entries]
+    .filter((h, i) => ids.lastIndexOf(h.id) === i)
+    .sort((a, b) => b.member_count - a.member_count);
+  remountUI();
+}
+
 (async () => {
   if (qs.get("new") !== null) {
     createAndRedirectToNewHub(null, null, true);
@@ -85,13 +103,7 @@ window.addEventListener("beforeinstallprompt", e => {
   const socket = await connectToReticulum();
 
   authChannel.setSocket(socket);
-  remountUI();
-
   if (authChannel.signedIn) {
-    // Fetch favorite rooms
-    const path = `/api/v1/media/search?source=favorites&type=hubs&user=${store.credentialsAccountId}`;
-    favoriteHubsResult = await fetchReticulumAuthenticated(path);
-
     const retPhxChannel = socket.channel(`ret`, { hub_id: "index", token: store.state.credentials.token });
     retPhxChannel.join().receive("ok", () => {
       retPhxChannel.push("refresh_perms_token").receive("ok", ({ perms_token }) => {
@@ -110,4 +122,6 @@ window.addEventListener("beforeinstallprompt", e => {
 
   hideHero = false;
   remountUI();
+
+  fetchFeaturedRooms();
 })();

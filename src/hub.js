@@ -1,5 +1,5 @@
 import "./webxr-bypass-hacks";
-import "./utils/configs";
+import configs from "./utils/configs";
 import "./utils/theme";
 import "@babel/polyfill";
 import "./utils/debug-log";
@@ -116,7 +116,7 @@ import { sets as userinputSets } from "./systems/userinput/sets";
 import ReactDOM from "react-dom";
 import React from "react";
 import { Router, Route } from "react-router-dom";
-import { createBrowserHistory } from "history";
+import { createBrowserHistory, createMemoryHistory } from "history";
 import { pushHistoryState } from "./utils/history";
 import UIRoot from "./react-components/ui-root";
 import AuthChannel from "./utils/auth-channel";
@@ -267,10 +267,11 @@ let routerBaseName = document.location.pathname
   .join("/");
 
 if (document.location.pathname.includes("hub.html")) {
-  routerBaseName = "";
+  routerBaseName = "/";
 }
 
-const history = createBrowserHistory({ basename: routerBaseName });
+// when loading the client as a "default room" on the homepage, use MemoryHistory since exposing all the client paths at the root is undesirable
+const history = routerBaseName === "/" ? createMemoryHistory() : createBrowserHistory({ basename: routerBaseName });
 window.APP.history = history;
 
 const qsVREntryType = qs.get("vr_entry_type");
@@ -321,6 +322,7 @@ async function updateUIForHub(hub) {
     hubId: hub.hub_id,
     hubName: hub.name,
     hubMemberPermissions: hub.member_permissions,
+    hubAllowPromotion: hub.allow_promotion,
     hubScene: hub.scene,
     hubEntryCode: hub.entry_code
   });
@@ -651,7 +653,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
+  const defaultRoomId = configs.feature("default_room_id");
+  const hubId =
+    qs.get("hub_id") || (document.location.pathname === "/" && defaultRoomId)
+      ? defaultRoomId
+      : document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
 
   const subscriptions = new Subscriptions(hubId);

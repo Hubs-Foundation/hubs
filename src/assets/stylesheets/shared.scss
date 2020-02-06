@@ -227,8 +227,36 @@ $favorited-color: var(--favorited-color, $duck-yellow);
 }
 
 %checkbox-checked {
-  outline: 9px solid $action-color;
-  outline-offset: -15px;
+  position: relative;
+  &::after {
+    content: ' ';
+    position: absolute;
+    background: $action-color;
+    top: 0.3em;
+    left: 0.3em;
+    right: 0.3em;
+    bottom: 0.3em;
+    border-radius: 0.3em;
+  }
+}
+
+%radio {
+  @extend %checkbox;
+  border-radius: 1em;
+}
+
+%radio-checked {
+  @extend %checkbox-checked;
+  &::after {
+    content: ' ';
+    position: absolute;
+    background: $action-color;
+    top: 0.3em;
+    left: 0.3em;
+    right: 0.3em;
+    bottom: 0.3em;
+    border-radius: 1em;
+  }
 }
 
 %background-agnostic {

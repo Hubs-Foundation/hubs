@@ -44,7 +44,8 @@ class HomeRoot extends Component {
     installEvent: PropTypes.object,
     hideHero: PropTypes.bool,
     showAdmin: PropTypes.bool,
-    favoriteHubsResult: PropTypes.object,
+    featuredRooms: PropTypes.array,
+    publicRoomsResult: PropTypes.object,
     showSignIn: PropTypes.bool,
     signInDestination: PropTypes.string,
     signInReason: PropTypes.string
@@ -218,12 +219,9 @@ class HomeRoot extends Component {
             </div>
             <div className={styles.heroContent} style={{ backgroundImage: configs.image("home_background", true) }}>
               {!this.props.hideHero &&
-                (this.props.favoriteHubsResult &&
-                this.props.favoriteHubsResult.entries &&
-                this.props.favoriteHubsResult.entries.length > 0 &&
-                this.state.signedIn
-                  ? this.renderFavoriteHero()
-                  : this.renderNonFavoriteHero())}
+                (this.props.featuredRooms && this.props.featuredRooms.length > 0
+                  ? this.renderFeaturedRoomsHero()
+                  : this.renderNonFeaturedRoomsHero())}
               {!this.props.hideHero && (
                 <div className={classNames(styles.heroPanel, styles.rightPanel)}>
                   {showFTUEVideo && (
@@ -363,7 +361,7 @@ class HomeRoot extends Component {
     );
   }
 
-  renderFavoriteHero() {
+  renderFeaturedRoomsHero() {
     return [
       <div className={styles.heroPanel} key={1}>
         <div className={styles.container}>
@@ -379,14 +377,14 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel} key={2}>
         <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
           <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-            <MediaTiles result={this.props.favoriteHubsResult} urlSource="favorites" />
+            <MediaTiles entries={this.props.featuredRooms} urlSource="favorites" />
           </div>
         </div>
       </div>
     ];
   }
 
-  renderNonFavoriteHero() {
+  renderNonFeaturedRoomsHero() {
     return (
       <div className={styles.heroPanel}>
         <div className={styles.container}>

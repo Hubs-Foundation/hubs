@@ -16,7 +16,14 @@ function isSameDay(da, db) {
 }
 
 // Permissions that will be assumed if the user becomes the creator.
-const HUB_CREATOR_PERMISSIONS = ["update_hub", "update_roles", "close_hub", "mute_users", "kick_users"];
+const HUB_CREATOR_PERMISSIONS = [
+  "update_hub",
+  "update_hub_promotion",
+  "update_roles",
+  "close_hub",
+  "mute_users",
+  "kick_users"
+];
 const VALID_PERMISSIONS =
   HUB_CREATOR_PERMISSIONS + ["tweet", "spawn_camera", "spawn_drawing", "spawn_and_move_media", "pin_objects"];
 

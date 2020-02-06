@@ -164,7 +164,7 @@ export default class PresenceList extends Component {
     return (
       <div>
         <div
-          title={"Participants"}
+          title={"Members"}
           onClick={() => {
             this.props.onExpand(!this.props.expanded);
           }}
