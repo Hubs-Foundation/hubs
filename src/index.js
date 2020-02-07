@@ -42,6 +42,7 @@ const remountUI = function() {
       authOrigin={qs.get("auth_origin")}
       showSignIn={qs.has("sign_in")}
       signInDestination={qs.get("sign_in_destination")}
+      signInDestinationUrl={qs.get("sign_in_destination_url")}
       signInReason={qs.get("sign_in_reason")}
       hideHero={hideHero}
       showAdmin={showAdmin}
@@ -124,7 +125,6 @@ async function fetchFeaturedRooms() {
       remountUI();
 
       retPhxChannel.leave();
-      socket.disconnect();
     });
   });
 

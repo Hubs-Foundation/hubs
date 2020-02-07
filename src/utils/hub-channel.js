@@ -268,6 +268,9 @@ export default class HubChannel extends EventTarget {
         .push("sign_out")
         .receive("ok", async () => {
           this._signedIn = false;
+          const params = this.channel.params();
+          delete params.auth_token;
+          delete params.perms_token;
           await this.fetchPermissions();
           resolve();
         })
