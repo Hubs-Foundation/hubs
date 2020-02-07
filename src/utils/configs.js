@@ -46,6 +46,10 @@ if (window.APP_CONFIG) {
     style.innerHTML = `:root{${colorVars.join("\n")}}`;
     document.head.prepend(style);
   }
+
+  if (!configs.APP_CONFIG.features) {
+    configs.APP_CONFIG.features = {};
+  }
 } else {
   configs.APP_CONFIG = {
     features: {}

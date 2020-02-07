@@ -44,6 +44,7 @@ class HomeRoot extends Component {
     installEvent: PropTypes.object,
     hideHero: PropTypes.bool,
     showAdmin: PropTypes.bool,
+    showCreate: PropTypes.bool,
     featuredRooms: PropTypes.array,
     publicRoomsResult: PropTypes.object,
     showSignIn: PropTypes.bool,
@@ -370,7 +371,7 @@ class HomeRoot extends Component {
           </div>
         </div>
         <div className={styles.ctaButtons}>
-          {this.renderCreateButton()}
+          {this.props.showCreate && this.renderCreateButton()}
           {this.renderPwaButton()}
         </div>
       </div>,
@@ -396,7 +397,7 @@ class HomeRoot extends Component {
           </div>
         </div>
         <div className={styles.ctaButtons}>
-          {this.renderCreateButton()}
+          {this.props.showCreate && this.renderCreateButton()}
           {this.renderPwaButton()}
         </div>
       </div>

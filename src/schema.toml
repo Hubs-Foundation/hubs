@@ -13,6 +13,8 @@ translations.en."app-twitter-user" = { category = "translations", type = "string
 translations.en."editor-name" = { category = "translations", type = "string", internal = "true" }
 
 features.permissive_rooms = { category = "features", type = "boolean", name = "Permissive Rooms", description = "Enable full content creation permissions on new rooms." }
+features.disable_room_creation = { category = "features", type = "boolean", name = "Disable room creation", description = "Disable creating rooms for non-administrators." }
+features.disable_sign_up = { category = "features", type = "boolean", name = "Disable account creation", description = "Prevent visitors from creating accounts. Accounts must be created by an administrator." }
 features.show_terms = { category = "features", type = "boolean", name = "Show Terms of Use", description = "Show links to the terms of use." }
 features.show_privacy = { category = "features", type = "boolean", name = "Show Privacy Notice", description = "Show links to the privacy notice." }
 features.show_controls_link = { category = "features", type = "boolean", name = "Show Controls Links", description = "Show links to controls documentation." }
