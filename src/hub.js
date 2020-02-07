@@ -655,9 +655,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const defaultRoomId = configs.feature("default_room_id");
   const hubId =
-    qs.get("hub_id") || (document.location.pathname === "/" && defaultRoomId)
+    qs.get("hub_id") ||
+    (document.location.pathname === "/" && defaultRoomId
       ? defaultRoomId
-      : document.location.pathname.substring(1).split("/")[0];
+      : document.location.pathname.substring(1).split("/")[0]);
   console.log(`Hub ID: ${hubId}`);
 
   const subscriptions = new Subscriptions(hubId);

@@ -14,24 +14,6 @@ export function getInspectable(child) {
   return null;
 }
 
-function inParentHierarchyOf(o, child) {
-  while (child) {
-    if (child === o) return true;
-    child = child.parent;
-  }
-  return false;
-}
-
-function getBatch(inspected, batchManagerSystem) {
-  return (
-    batchManagerSystem.batchManager &&
-    (batchManagerSystem.batchManager.batchForMesh.get(inspected) ||
-      (inspected.el &&
-        inspected.el.object3DMap.mesh &&
-        batchManagerSystem.batchManager.batchForMesh.get(inspected.el.object3DMap.mesh)))
-  );
-}
-
 const decompose = (function() {
   const scale = new THREE.Vector3();
   return function decompose(m, p, q) {
@@ -144,16 +126,33 @@ const NEXT_MODES = {
 };
 
 const CAMERA_LAYER_INSPECT = 4;
+// This layer is never actually rendered by a camera but lets the batching system know it should be rendered if inspecting
+export const CAMERA_LAYER_BATCH_INSPECT = 5;
+
 const ensureLightsAreSeenByCamera = function(o) {
   if (o.isLight) {
     o.layers.enable(CAMERA_LAYER_INSPECT);
   }
 };
 const enableInspectLayer = function(o) {
-  o.layers.enable(CAMERA_LAYER_INSPECT);
+  const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
+  const batch = batchManagerSystem.batchManager.batchForMesh.get(o);
+  if (batch) {
+    batch.layers.enable(CAMERA_LAYER_INSPECT);
+    o.layers.enable(CAMERA_LAYER_BATCH_INSPECT);
+  } else {
+    o.layers.enable(CAMERA_LAYER_INSPECT);
+  }
 };
 const disableInspectLayer = function(o) {
-  o.layers.disable(CAMERA_LAYER_INSPECT);
+  const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
+  const batch = batchManagerSystem.batchManager.batchForMesh.get(o);
+  if (batch) {
+    batch.layers.disable(CAMERA_LAYER_INSPECT);
+    o.layers.disable(CAMERA_LAYER_BATCH_INSPECT);
+  } else {
+    o.layers.disable(CAMERA_LAYER_INSPECT);
+  }
 };
 
 function setupSphere(sphere) {
@@ -181,7 +180,6 @@ export class CameraSystem {
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
     this.inspectZoom = 0;
-    this.inspectedMeshesFromBatch = [];
     this.batchManagerSystem = batchManagerSystem;
     this.mode = CAMERA_MODE_SCENE_PREVIEW;
     this.snapshot = { audioTransform: new THREE.Matrix4(), matrixWorld: new THREE.Matrix4() };
@@ -291,18 +289,7 @@ export class CameraSystem {
   }
 
   hideEverythingButThisObject(o) {
-    this.inspectedMeshesFromBatch.length = 0;
-    const batch = getBatch(o, this.batchManagerSystem);
-    (batch || o).traverse(enableInspectLayer);
-    if (batch) {
-      for (let instanceId = 0; instanceId < batch.ubo.meshes.length; instanceId++) {
-        const mesh = batch.ubo.meshes[instanceId];
-        if (!mesh) continue;
-        if (inParentHierarchyOf(this.inspected, mesh)) {
-          this.inspectedMeshesFromBatch.push(mesh);
-        }
-      }
-    }
+    o.traverse(enableInspectLayer);
 
     const scene = AFRAME.scenes[0];
     const vrMode = scene.is("vr-mode");
@@ -315,10 +302,8 @@ export class CameraSystem {
   }
 
   showEverythingAsNormal() {
-    this.inspectedMeshesFromBatch.length = 0;
-    this.inspectedMeshesFromBatch = [];
     if (this.inspected) {
-      (getBatch(this.inspected, this.batchManagerSystem) || this.inspected).traverse(disableInspectLayer);
+      this.inspected.traverse(disableInspectLayer);
     }
     const scene = AFRAME.scenes[0];
     const vrMode = scene.is("vr-mode");

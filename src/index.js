@@ -87,10 +87,9 @@ async function fetchFeaturedRooms() {
     fetchReticulumAuthenticated("/api/v1/media/search?source=rooms&filter=public")
   ]);
 
-  const ids = publicRoomsResult.entries.map(h => h.id);
-  featuredRooms = [...publicRoomsResult.entries, ...favoriteRoomsResult.entries]
-    .filter((h, i) => ids.lastIndexOf(h.id) === i)
-    .sort((a, b) => b.member_count - a.member_count);
+  const entries = [...publicRoomsResult.entries, ...favoriteRoomsResult.entries];
+  const ids = entries.map(h => h.id);
+  featuredRooms = entries.filter((h, i) => ids.lastIndexOf(h.id) === i).sort((a, b) => b.member_count - a.member_count);
   remountUI();
 }
 
