@@ -47,7 +47,9 @@ if (window.APP_CONFIG) {
     document.head.prepend(style);
   }
 } else {
-  configs.APP_CONFIG = {};
+  configs.APP_CONFIG = {
+    features: {}
+  };
 }
 
 const isLocalDevelopment = process.env.NODE_ENV === "development";
