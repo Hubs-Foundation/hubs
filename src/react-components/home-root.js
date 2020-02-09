@@ -199,7 +199,7 @@ class HomeRoot extends Component {
                     </a>
                   </IfFeature>
                   <IfFeature name="show_cloud">
-                    <a href="/cloud" rel="noreferrer noopener">
+                    <a href="https://hubs.mozilla.com/cloud" rel="noreferrer noopener">
                       <FormattedMessage id="home.cloud_link" />
                     </a>
                   </IfFeature>

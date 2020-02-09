@@ -14,7 +14,7 @@ import en from "react-intl/locale-data/en";
 import { lang, messages } from "./utils/i18n";
 
 addLocaleData([...en]);
-const marketplaceListingUrl = "https://gethubscloud.com";
+const marketplaceListingUrl = "https://hubs.mozilla.com/cloud";
 
 class DiscordLanding extends Component {
   componentDidMount() {}
