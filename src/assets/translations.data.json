@@ -214,6 +214,7 @@
     "home.whats_new_link": "What's New",
     "home.about_link": "About",
     "home.community_link": "Community",
+    "home.cloud_link": "Hubs Cloud",
     "home.admin": "Admin",
     "home.privacy_notice": "Privacy Notice",
     "home.terms_of_use": "Terms of Use",
@@ -396,6 +397,10 @@
     "tweet-dialog.close": "close",
     "oauth-dialog.sign-in.twitter": "Connect to Twitter",
     "oauth-dialog.sign-in.discord": "Sign in to Discord",
-    "oauth-dialog.message.twitter": "Connect to Twitter to send tweets from %app-name%."
+    "oauth-dialog.message.twitter": "Connect to Twitter to send tweets from %app-name%.",
+    "cloud.primary_tagline": "Hubs Cloud deploys server infrastructure for private,\ncollaborative 3D rooms that can be accessed on your\ndesktop, mobile phone, or VR headset.",
+    "cloud.secondary_tagline": "Get it today on the AWS Marketplace",
+    "cloud.call_to_action": "View AWS Marketplace Listing",
+    "cloud.splash_tag": "Configurable infrastructure for your own Hubs stack"
   }
 }
