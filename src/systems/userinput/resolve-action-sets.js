@@ -104,6 +104,7 @@ export function resolveActionSets() {
     !leftHand.held &&
       (leftHand.hovered &&
         ((leftHand.hovered.components.tags && leftHand.hovered.components.tags.data.offersRemoteConstraint) ||
+          (leftHand.hovered.components.tags && leftHand.hovered.components.tags.data.togglesHoveredActionSet) ||
           leftHand.hovered.components["super-spawner"]))
   );
   userinput.toggleSet(
@@ -111,6 +112,7 @@ export function resolveActionSets() {
     !rightHand.held &&
       (rightHand.hovered &&
         ((rightHand.hovered.components.tags && rightHand.hovered.components.tags.data.offersRemoteConstraint) ||
+          (rightHand.hovered.components.tags && rightHand.hovered.components.tags.data.togglesHoveredActionSet) ||
           rightHand.hovered.components["super-spawner"]))
   );
   userinput.toggleSet(
