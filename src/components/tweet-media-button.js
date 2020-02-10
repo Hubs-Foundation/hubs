@@ -8,7 +8,8 @@ AFRAME.registerComponent("tweet-media-button", {
         this.targetEl = networkedEl;
       })
       .catch(() => {
-        // Non-networked, do not handle for now.
+        // Non-networked, do not handle for now, and hide button.
+        this.object3D.visible = false;
       });
 
     this.onClick = () => {
