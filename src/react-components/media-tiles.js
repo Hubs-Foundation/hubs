@@ -154,7 +154,7 @@ class MediaTiles extends Component {
     const creator = entry.attributions && entry.attributions.creator;
     const isImage = entry.type.endsWith("_image");
     const isAvatar = ["avatar", "avatar_listing"].includes(entry.type);
-    const isHub = ["hub"].includes(entry.type);
+    const isHub = ["room"].includes(entry.type);
     const imageAspect = entry.images.preview.width / entry.images.preview.height;
 
     const [imageWidth, imageHeight] = this.getTileDimensions(isImage, isAvatar, imageAspect);

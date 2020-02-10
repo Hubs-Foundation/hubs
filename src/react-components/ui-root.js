@@ -1632,7 +1632,7 @@ class UIRoot extends Component {
                 mediaSearchStore={this.props.mediaSearchStore}
                 hubChannel={this.props.hubChannel}
                 onMediaSearchResultEntrySelected={(entry, selectAction) => {
-                  if (entry.type === "hub") {
+                  if (entry.type === "room") {
                     this.showNonHistoriedDialog(LeaveRoomDialog, {
                       destinationUrl: entry.url,
                       messageType: "join-room"
