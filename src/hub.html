@@ -307,16 +307,32 @@
                                     position="0 0 0.001"
                                 ></a-entity>
                             </a-entity>
+                            <a-entity visibility-on-content-types="contentTypes: video/ audio/ image/ application/pdf; visible: false;">
+                                <a-entity
+                                    mixin="rounded-button"
+                                    is-remote-hover-target
+                                    tags="singleActionButton: true;"
+                                    drop-object-button
+                                    hide-when-pinned-and-forbidden="whenPinned: true"
+                                    position="0 -0.625 0.001">
+                                    <a-entity
+                                        sprite
+                                        icon-button="image: drop-action.png; hoverImage: drop-action.png"
+                                        scale="0.165 0.165 0.165"
+                                        position="0 0 0.001"
+                                    ></a-entity>
+                                </a-entity>
+                            </a-entity>
                             <a-entity
                                 mixin="rounded-button"
                                 is-remote-hover-target
-                                tags="singleActionButton: true;"
-                                drop-object-button
-                                hide-when-pinned-and-forbidden="whenPinned: true"
+                                tags="isHoldable: true; holdableButton: true;"
+                                inspect-button
+                                visibility-on-content-types="contentTypes: video/ audio/ image/ application/pdf;"
                                 position="0 -0.625 0.001">
                                 <a-entity
                                     sprite
-                                    icon-button="image: drop-action.png; hoverImage: drop-action.png"
+                                    icon-button="image: focus-action.png; hoverImage: focus-action.png"
                                     scale="0.165 0.165 0.165"
                                     position="0 0 0.001"
                                 ></a-entity>
@@ -359,13 +375,14 @@
                             </a-entity>
                             <a-entity
                                 mixin="rounded-action-button"
-                                tags="isHoldable: true; holdableButton: true;"
                                 is-remote-hover-target
-                                inspect-button
+                                tags="singleActionButton:true;"
+                                mirror-media-button
+                                visibility-on-content-types="contentTypes: video/ audio/ image/ application/pdf;"
                                 position="0 -0.125 0.001">
                                 <a-entity
                                     sprite
-                                    icon-button="image: recenter-action.png; hoverImage: recenter-action.png"
+                                    icon-button="image: inspect-action.png; hoverImage: inspect-action.png"
                                     scale="0.165 0.165 0.165"
                                     position="0 0 0.001"
                                 ></a-entity>
@@ -390,14 +407,14 @@
                                 <a-entity text="value:open link; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
                             <a-entity
-                                mixin="rounded-action-button"
+                                mixin="rounded-button"
                                 tags="isHoldable: true; holdableButton: true;"
                                 is-remote-hover-target
                                 inspect-button
                                 position="0 0.125 0.001">
                                 <a-entity
                                     sprite
-                                    icon-button="image: recenter-action.png; hoverImage: recenter-action.png"
+                                    icon-button="image: focus-action.png; hoverImage: focus-action.png"
                                     scale="0.165 0.165 0.165"
                                     position="0 0 0.001"
                                 ></a-entity>
@@ -448,6 +465,21 @@
                                 ></a-entity>
                             </a-entity>
                         </a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="linked-media">
+                <a-entity
+                    class="interactable"
+                    body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 15;"
+                    is-remote-hover-target
+                    tags="togglesHoveredActionSet: true;"
+                    set-unowned-body-kinematic
+                    set-yxz-order
+                    matrix-auto-update
+                >
+                    <a-entity class="ui interactable-ui">
                     </a-entity>
                 </a-entity>
             </template>
@@ -646,10 +678,10 @@
                 </a-entity>
             </template>
 
-            <template id="paging-toolbar">
-                <a-entity class="ui paging-toolbar" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;">
-                    <a-entity class="prev-button" position="-0.3 0 0">
-                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.2">
+            <template id="pager-hover-menu">
+                <a-entity class="ui interactable-ui hover-container" visible="false">
+                    <a-entity class="prev-button" position="-0.35 0 0">
+                        <a-entity is-remote-hover-target tags="singleActionButton:true; isHoverMenuChild: true;" mixin="rounded-text-button" slice9="width: 0.2">
                             <a-entity
                                 sprite
                                 icon-button="image: prev.png; hoverImage: prev.png;"
@@ -658,9 +690,9 @@
                             ></a-entity>
                         </a-entity>
                     </a-entity>
-                    <a-entity class="page-label" position="0 0.1 0" text="value:.; width:2; align:center;" text-raycast-hack></a-entity>
-                    <a-entity class="snap-button" position="0 -0.1 0" scale="0.75 0.75 1">
-                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.2">
+                    <a-entity class="page-label" position="0 -0.2 0" text="value:.; width:2; align:center;" text-raycast-hack></a-entity>
+                    <a-entity class="snap-button" position="0 0.175 0" scale="0.75 0.75 1">
+                        <a-entity is-remote-hover-target tags="singleActionButton:true; isHoverMenuChild: true;" mixin="rounded-text-button" slice9="width: 0.2">
                             <a-entity
                                 sprite
                                 icon-button="image: snap-page.png; hoverImage: snap-page.png;"
@@ -669,8 +701,8 @@
                             ></a-entity>
                         </a-entity>
                     </a-entity>
-                    <a-entity class="next-button" position="0.3 0 0">
-                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.2">
+                    <a-entity class="next-button" position="0.35 0 0">
+                        <a-entity is-remote-hover-target tags="singleActionButton:true; isHoverMenuChild: true;" mixin="rounded-text-button" slice9="width: 0.2">
                             <a-entity
                                 sprite
                                 icon-button="image: next.png; hoverImage: next.png;"
@@ -691,12 +723,12 @@
                         tags="singleActionButton: true; isHoverMenuChild: true;"
                         sprite
                         icon-button="image: snap.png; hoverImage: snap-hover.png; activeImage: snap.png; activeHoverImage: snap-hover.png"
-                        visibility-on-content-type="contentType: video/mp4; contentSubtype: video-camera; visible: false;"
+                        visibility-on-content-types="contentTypes: video/mp4; contentSubtype: video-camera; visible: false;"
                         scale="0.075 0.075 0.075"
                         position="0 0.225 0"
                         class="video-snap-button"
                     ></a-entity>
-                    <a-entity mixin="rounded-twitter-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" tweet-media-button visibility-on-content-type="contentType: video/mp4; contentSubtype: video-camera; visible: true;" position="0 0.285 0.001">
+                    <a-entity mixin="rounded-twitter-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" tweet-media-button visibility-on-content-types="contentTypes: video/mp4; contentSubtype: video-camera; visible: true;" position="0 0.285 0.001">
                         <a-entity text="value:tweet; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                     <a-entity class="video-time-label" text="value: 0; anchor: center; align: center; color: #aaa;" text-raycast-hack position="0 -0.24 0" scale="0.75 0.75 0.75"></a-entity>
@@ -1158,6 +1190,17 @@
                     ></a-entity>
                 </a-entity>
                 <a-entity text="value:View your desktop to continue; width:1; align:center;" position="0 0 0.001"></a-entity>
+            </a-entity>
+        </a-entity>
+        <a-entity matrix-auto-update class="ui interactable-ui media-mirror" follow-in-fov="target: #avatar-pov-node; offset: 0 0 -0.8; angle: 39;" visible="false">
+            <a-entity id="media-mirror-target" position="0 0 -0.075"></a-entity>
+            <a-entity class="media-mirror-close" close-mirrored-media-button mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0 -0.35 0.001" scale="0.65 0.65 0.65">
+                <a-entity
+                    sprite
+                    icon-button="image: close-action.png; hoverImage: close-action.png;"
+                    scale="0.075 0.075 0.075"
+                    position="0 0 0.001"
+                ></a-entity>
             </a-entity>
         </a-entity>
         <a-entity id="viewing-rig" set-yxz-order matrix-auto-update>

@@ -1,6 +1,6 @@
-AFRAME.registerComponent("visibility-on-content-type", {
+AFRAME.registerComponent("visibility-on-content-types", {
   schema: {
-    contentType: { type: "string" },
+    contentTypes: { type: "string" }, // Space separate content types. Or partial type, like video/
     contentSubtype: { type: "string" },
     visible: { type: "boolean", default: true }
   },
@@ -8,11 +8,16 @@ AFRAME.registerComponent("visibility-on-content-type", {
   init() {
     this.updateVisibility = this.updateVisibility.bind(this);
 
-    NAF.utils.getNetworkedEntity(this.el).then(el => {
-      this.networkedEl = el;
-      el.addEventListener("media_resolved", ({ detail: { contentType } }) => this.updateVisibility(contentType));
-      this.updateVisibility();
-    });
+    NAF.utils
+      .getNetworkedEntity(this.el)
+      .then(el => {
+        this.networkedEl = el;
+        el.addEventListener("media_resolved", ({ detail: { contentType } }) => this.updateVisibility(contentType));
+        this.updateVisibility();
+      })
+      .catch(() => {
+        // Non-networked, do not handle for now.
+      });
   },
 
   updateVisibility(contentType) {
@@ -25,9 +30,23 @@ AFRAME.registerComponent("visibility-on-content-type", {
       (mediaVideo && mediaVideo.data.contentType) ||
       (mediaImage && mediaImage.data.contentType) ||
       (mediaPdf && mediaPdf.data.contentType);
-    const matchesType =
-      !this.data.contentType ||
-      (currentContentType && currentContentType.toLowerCase().split(";")[0] === this.data.contentType);
+
+    let matchesType = !this.data.contentTypes;
+
+    if (this.data.contentTypes && currentContentType) {
+      for (const contentType of this.data.contentTypes.split(" ")) {
+        const targetContentType = currentContentType.toLowerCase().split(";")[0];
+
+        if (
+          targetContentType === contentType ||
+          (contentType.endsWith("/") && targetContentType.startsWith(contentType))
+        ) {
+          matchesType = true;
+          break;
+        }
+      }
+    }
+
     const matchesSubtype =
       !this.data.contentSubtype ||
       (mediaLoader.data.contentSubtype && mediaLoader.data.contentSubtype === this.data.contentSubtype);

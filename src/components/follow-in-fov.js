@@ -25,6 +25,31 @@ AFRAME.registerComponent("follow-in-fov", {
     const obj = this.el.object3D;
     const target = this.data.target.object3D;
 
+    // Slow updating position if the element or any subelement is hovered.
+    let isHovered = false;
+    const interaction = AFRAME.scenes[0].systems.interaction;
+
+    const hoveredEl = interaction.state.rightRemote.hovered || interaction.state.leftRemote.hovered;
+
+    if (hoveredEl) {
+      let el = hoveredEl;
+
+      while (el) {
+        if (this.el === el) {
+          isHovered = true;
+          break;
+        }
+
+        el = el.parentNode;
+      }
+    }
+
+    if (!isHovered) {
+      this._hoveredFrames = 0;
+    } else {
+      this._hoveredFrames += 1;
+    }
+
     // Compute position + rotation by projecting offset along a downward ray in target space,
     // and mask out Z rotation.
     this._applyMaskedTargetRotation(
@@ -45,7 +70,11 @@ AFRAME.registerComponent("follow-in-fov", {
       obj.position.copy(this.targetPos);
       this.started = true;
     } else {
-      const t = this.data.speed * dt;
+      // Slow down movement if hovering by dampening speed each frame.
+      const speed = this._hoveredFrames
+        ? this.data.speed * (1.0 / ((this._hoveredFrames + 5.0) * 0.2))
+        : this.data.speed;
+      const t = speed * dt;
 
       obj.position.set(
         obj.position.x + (this.targetPos.x - obj.position.x) * t,
@@ -56,6 +85,10 @@ AFRAME.registerComponent("follow-in-fov", {
 
     this.snappedXFormWorld.decompose(this.tempVector, obj.quaternion, this.tempVector);
     obj.matrixNeedsUpdate = true;
+  },
+
+  reset() {
+    this.started = false;
   },
 
   _applyMaskedTargetRotation(x, y, z, to) {
