@@ -582,7 +582,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         entryManager.exitScene();
       }
 
-      const connectionErrorTimeout = setTimeout(onConnectionError, 30000);
+      const connectionErrorTimeout = setTimeout(onConnectionError, 90000);
       scene.components["networked-scene"]
         .connect()
         .then(() => {
