@@ -136,6 +136,7 @@ class UIRoot extends Component {
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
     hubName: PropTypes.string,
+    hubDescription: PropTypes.string,
     hubAllowPromotion: PropTypes.bool,
     hubMemberPermissions: PropTypes.object,
     hubScene: PropTypes.object,
@@ -1676,6 +1677,7 @@ class UIRoot extends Component {
                   showRoomAccessSettings: this.props.hubChannel.can("update_hub_promotion"),
                   initialSettings: {
                     name: this.props.hubName,
+                    description: this.props.hubDescription,
                     member_permissions: this.props.hubMemberPermissions,
                     allow_promotion: this.props.hubAllowPromotion
                   },
@@ -1733,7 +1735,8 @@ class UIRoot extends Component {
                 this.renderDialog(RoomInfoDialog, {
                   store: this.props.store,
                   scene: this.props.hubScene,
-                  hubName: this.props.hubName
+                  hubName: this.props.hubName,
+                  hubDescription: this.props.hubDescription
                 })
               }
             />

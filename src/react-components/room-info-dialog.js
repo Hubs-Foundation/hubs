@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import classNames from "classnames";
+
 import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/room-info-dialog.scss";
 import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
@@ -8,6 +10,7 @@ import { allowDisplayOfSceneLink } from "../utils/scene-url-utils";
 export default class RoomInfoDialog extends Component {
   static propTypes = {
     hubName: PropTypes.string,
+    hubDescription: PropTypes.string,
     scene: PropTypes.object,
     store: PropTypes.object
   };
@@ -57,10 +60,14 @@ export default class RoomInfoDialog extends Component {
       );
     }
 
-    const title = <div className={styles.title}>{this.props.hubName}</div>;
+    const title = <div className={styles.title}>Room & Scene Info</div>;
 
     return (
       <DialogContainer title={title} wide={true} {...this.props}>
+        <div className={styles.subtitle}>Room Info</div>
+        <b>{this.props.hubName}</b>
+        <div className={styles.description}>{this.props.hubDescription}</div>
+        <div className={styles.subtitle}>Scene Info</div>
         <div className={styles.roomInfo}>
           <div className={styles.sceneScreenshot}>
             {showSceneLink ? (

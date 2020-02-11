@@ -324,6 +324,8 @@ async function updateUIForHub(hub) {
   remountUI({
     hubId: hub.hub_id,
     hubName: hub.name,
+    hubDescription:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris interdum mauris non sem malesuada rutrum. Morbi viverra vestibulum justo, ac tempus libero mollis fermentum. Fusce scelerisque aliquet est, id iaculis purus lobortis placerat. Morbi blandit fringilla mi nec venenatis. Mauris lacus purus, malesuada non gravida et, vehicula sed neque. Suspendisse egestas nisl malesuada dui auctor iaculis. Quisque in mauris nisi. Curabitur malesuada nisl nec mi commodo accumsan. Aliquam nec dui velit. Aliquam sagittis tristique augue, eget ultrices nunc. In laoreet eget quam nec pretium. Vivamus faucibus a nulla ac tincidunt. Morbi vehicula malesuada metus sit amet viverra. ",
     hubMemberPermissions: hub.member_permissions,
     hubAllowPromotion: hub.allow_promotion,
     hubScene: hub.scene,

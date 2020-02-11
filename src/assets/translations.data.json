@@ -46,6 +46,7 @@
     "sign-in.out": "Sign Out",
     "room-settings.apply": "Apply",
     "room-settings.name-subtitle": "Rooms Name",
+    "room-settings.description-subtitle": "Rooms Description",
     "room-settings.room-access-subtitle": "Room Access",
     "room-settings.permissions-subtitle": "Room Member Permissions",
     "room-settings.spawn_and_move_media": "Create and move objects",
