@@ -155,14 +155,6 @@ const disableInspectLayer = function(o) {
   }
 };
 
-function setupSphere(sphere) {
-  sphere.object3D.traverse(o => o.layers.set(CAMERA_LAYER_INSPECT));
-  sphere.object3DMap.mesh.material.side = 2;
-  sphere.object3DMap.mesh.material.color.setHex(0x020202);
-  sphere.object3D.scale.multiplyScalar(100);
-  sphere.object3D.matrixNeedsUpdate = true;
-}
-
 function getAudio(o) {
   let audio;
   o.traverse(c => {
@@ -190,14 +182,12 @@ export class CameraSystem {
       this.viewingCamera = document.getElementById("viewing-camera");
       this.viewingRig = document.getElementById("viewing-rig");
 
-      const sphere = document.getElementById("inspect-sphere");
-      // TODO: Make this synchronous, don't use a-sphere
-      const i = setInterval(() => {
-        if (sphere.object3DMap && sphere.object3DMap.mesh) {
-          clearInterval(i);
-          setupSphere(sphere);
-        }
-      }, 2000);
+      const bg = new THREE.Mesh(
+        new THREE.BoxGeometry(100, 100, 100),
+        new THREE.MeshBasicMaterial({ color: 0x020202, side: THREE.BackSide })
+      );
+      bg.layers.set(CAMERA_LAYER_INSPECT);
+      this.viewingRig.object3D.add(bg);
     });
   }
 

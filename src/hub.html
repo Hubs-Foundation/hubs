@@ -930,7 +930,7 @@
 
         <a-sphere
             id="right-cursor"
-            material="depthTest: false; opacity:0.9;"
+            material="shader: flat; depthTest: false; opacity:0.9;"
             radius="0.02"
             segments-width="9"
             segments-height="9"
@@ -949,7 +949,7 @@
 
         <a-sphere
             id="left-cursor"
-            material="depthTest: false; opacity:0.9;"
+            material="shader: flat; depthTest: false; opacity:0.9;"
             radius="0.02"
             segments-width="9"
             segments-height="9"
@@ -1213,7 +1213,6 @@
                 set-yxz-order
                 pitch-yaw-rotator
                 matrix-auto-update>
-                <a-sphere segments-height="10" segments-width="10" id="inspect-sphere"></a-sphere>
             </a-entity>
         </a-entity>
     </a-scene>
