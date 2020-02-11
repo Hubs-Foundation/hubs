@@ -17,7 +17,8 @@
   :local(.contents) {
     position: relative;
     min-width: auto;
-    padding: 32px 72px;
+    padding: 24px 72px;
+    padding-bottom: 12px;
   }
 }
 
@@ -66,6 +67,14 @@
     position: absolute;
     top: -3px;
   }
+}
+
+:local(.secondary-link-item) {
+  margin: 0;
+}
+
+:local(.secondary-button) {
+  @extend %action-button-secondary-modal;
 }
 
 :local(.bottom-links-main) {

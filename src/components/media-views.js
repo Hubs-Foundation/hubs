@@ -108,19 +108,19 @@ async function createGIFTexture(url) {
  * @param {string} src - Url to a video file.
  * @returns {Element} Video element.
  */
-async function createVideoEl() {
-  const videoEl = document.createElement("video");
-  videoEl.setAttribute("playsinline", "");
-  videoEl.setAttribute("webkit-playsinline", "");
+function createVideoOrAudioEl(type) {
+  const el = document.createElement(type);
+  el.setAttribute("playsinline", "");
+  el.setAttribute("webkit-playsinline", "");
   // iOS Safari requires the autoplay attribute, or it won't play the video at all.
-  videoEl.autoplay = true;
+  el.autoplay = true;
   // iOS Safari will not play videos without user interaction. We mute the video so that it can autoplay and then
   // allow the user to unmute it with an interaction in the unmute-video-button component.
-  videoEl.muted = isIOS;
-  videoEl.preload = "auto";
-  videoEl.crossOrigin = "anonymous";
+  el.muted = isIOS;
+  el.preload = "auto";
+  el.crossOrigin = "anonymous";
 
-  return videoEl;
+  return el;
 }
 
 function scaleToAspectRatio(el, ratio) {
@@ -222,6 +222,7 @@ function timeFmt(t) {
 AFRAME.registerComponent("media-video", {
   schema: {
     src: { type: "string" },
+    audioSrc: { type: "string" },
     contentType: { type: "string" },
     volume: { type: "number", default: 0.5 },
     loop: { type: "boolean", default: true },
@@ -243,7 +244,10 @@ AFRAME.registerComponent("media-video", {
 
   init() {
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
+    this.updateHoverMenu = this.updateHoverMenu.bind(this);
     this.tryUpdateVideoPlaybackState = this.tryUpdateVideoPlaybackState.bind(this);
+    this.ensureOwned = this.ensureOwned.bind(this);
+    this.isMineOrLocal = this.isMineOrLocal.bind(this);
     this.updateSrc = this.updateSrc.bind(this);
 
     this.seekForward = this.seekForward.bind(this);
@@ -286,27 +290,37 @@ AFRAME.registerComponent("media-video", {
       this.snapButton.object3D.addEventListener("interact", this.snap);
 
       this.updateVolumeLabel();
-      this.updateHoverMenuBasedOnLiveState();
+      this.updateHoverMenu();
       this.updatePlaybackState();
     });
 
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.networkedEl = networkedEl;
-      applyPersistentSync(this.networkedEl.components.networked.data.networkId);
-      this.updatePlaybackState();
+    NAF.utils
+      .getNetworkedEntity(this.el)
+      .then(networkedEl => {
+        this.networkedEl = networkedEl;
+        applyPersistentSync(this.networkedEl.components.networked.data.networkId);
+        this.updatePlaybackState();
 
-      // For scene-owned videos, take ownership after a random delay if nobody
-      // else has so there is a timekeeper. Do not due this on iOS because iOS has an
-      // annoying "auto-pause" feature that forces one non-autoplaying video to play
-      // at once, which will pause the videos for everyone in the room if owned.
-      if (!isIOS && NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
-        setTimeout(() => {
-          if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
-            NAF.utils.takeOwnership(this.networkedEl);
-          }
-        }, 2000 + Math.floor(Math.random() * 2000));
-      }
-    });
+        this.networkedEl.addEventListener("pinned", this.updateHoverMenu);
+        this.networkedEl.addEventListener("unpinned", this.updateHoverMenu);
+        window.APP.hubChannel.addEventListener("permissions_updated", this.updateHoverMenu);
+
+        // For scene-owned videos, take ownership after a random delay if nobody
+        // else has so there is a timekeeper. Do not due this on iOS because iOS has an
+        // annoying "auto-pause" feature that forces one non-autoplaying video to play
+        // at once, which will pause the videos for everyone in the room if owned.
+        if (!isIOS && NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
+          setTimeout(() => {
+            if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
+              NAF.utils.takeOwnership(this.networkedEl);
+            }
+          }, 2000 + Math.floor(Math.random() * 2000));
+        }
+      })
+      .catch(() => {
+        // Non-networked
+        this.updatePlaybackState();
+      });
 
     // from a-sound
     const sceneEl = this.el.sceneEl;
@@ -319,15 +333,26 @@ AFRAME.registerComponent("media-video", {
     });
   },
 
+  isMineOrLocal() {
+    return !this.el.components.networked || (this.networkedEl && NAF.utils.isMine(this.networkedEl));
+  },
+
+  ensureOwned() {
+    return (
+      !this.el.components.networked ||
+      ((this.networkedEl && NAF.utils.isMine(this.networkedEl)) || NAF.utils.takeOwnership(this.networkedEl))
+    );
+  },
+
   seekForward() {
-    if (!this.videoIsLive && (NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
+    if (!this.videoIsLive && this.ensureOwned()) {
       this.video.currentTime += 30;
       this.el.setAttribute("media-video", "time", this.video.currentTime);
     }
   },
 
   seekBack() {
-    if (!this.videoIsLive && (NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
+    if (!this.videoIsLive && this.ensureOwned()) {
       this.video.currentTime -= 10;
       this.el.setAttribute("media-video", "time", this.video.currentTime);
     }
@@ -365,12 +390,12 @@ AFRAME.registerComponent("media-video", {
 
   togglePlaying() {
     // See onPauseStateChanged for note about iOS
-    if (isIOS && this.video.paused && NAF.utils.isMine(this.networkedEl)) {
+    if (isIOS && this.video.paused && this.isMineOrLocal()) {
       this.video.play();
       return;
     }
 
-    if (this.networkedEl && (NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
+    if (this.ensureOwned()) {
       this.tryUpdateVideoPlaybackState(!this.data.videoPaused);
     }
   },
@@ -387,7 +412,7 @@ AFRAME.registerComponent("media-video", {
     // This specific case will diverge the network schema and the video player state, so that
     // this.data.videoPaused is false (so others will keep playing it) but our local player will
     // have stopped. So we deal with this special case as well when we press the play button.
-    if (isIOS && this.video.paused && NAF.utils.isMine(this.networkedEl)) {
+    if (isIOS && this.video.paused && this.isMineOrLocal()) {
       return;
     }
 
@@ -402,20 +427,7 @@ AFRAME.registerComponent("media-video", {
   },
 
   updatePlaybackState(force) {
-    if (this.hoverMenu) {
-      this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
-      this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
-
-      const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
-      this.playPauseButton.object3D.visible =
-        !!this.video && !this.videoIsLive && (!isPinned || window.APP.hubChannel.can("pin_objects"));
-      this.snapButton.object3D.visible =
-        !!this.video &&
-        !this.data.contentType.startsWith("audio/") &&
-        window.APP.hubChannel.can("spawn_and_move_media");
-      this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
-      this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
-    }
+    this.updateHoverMenu();
 
     // Only update playback position for videos you don't own
     if (this.video && (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl)))) {
@@ -472,7 +484,7 @@ AFRAME.registerComponent("media-video", {
   },
 
   async updateSrc(oldData) {
-    const { src } = this.data;
+    const { src, linkedVideoTexture, linkedAudioSource, linkedMediaElementAudioSource } = this.data;
 
     this.cleanUp();
     if (this.mesh && this.mesh.material) {
@@ -480,9 +492,14 @@ AFRAME.registerComponent("media-video", {
       this.mesh.material.needsUpdate = true;
     }
 
-    let texture;
+    let texture, audioSourceEl;
     try {
-      texture = await this.createVideoTexture();
+      if (linkedVideoTexture) {
+        texture = linkedVideoTexture;
+        audioSourceEl = linkedAudioSource;
+      } else {
+        ({ texture, audioSourceEl } = await this.createVideoTextureAudioSourceEl());
+      }
 
       // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
       if (this.data.src !== src) {
@@ -490,11 +507,15 @@ AFRAME.registerComponent("media-video", {
         return;
       }
 
+      this.mediaElementAudioSource = null;
+
       if (!src.startsWith("hubs://")) {
         // iOS video audio is broken, see: https://github.com/mozilla/hubs/issues/1797
         if (!isIOS) {
           // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
-          texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
+          const mediaElementAudioSource =
+            linkedMediaElementAudioSource ||
+            this.el.sceneEl.audioListener.context.createMediaElementSource(audioSourceEl);
 
           if (this.data.audioType === "pannernode") {
             this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
@@ -509,7 +530,8 @@ AFRAME.registerComponent("media-video", {
             this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
           }
 
-          this.audio.setNodeSource(texture.audioSource);
+          this.mediaElementAudioSource = mediaElementAudioSource;
+          this.audio.setNodeSource(mediaElementAudioSource);
           this.el.setObject3D("sound", this.audio);
         }
       }
@@ -524,7 +546,7 @@ AFRAME.registerComponent("media-video", {
           if (texture.hls.currentLevel >= 0) {
             const videoWasLive = !!this.videoIsLive;
             this.videoIsLive = texture.hls.levels[texture.hls.currentLevel].details.live;
-            this.updateHoverMenuBasedOnLiveState();
+            this.updateHoverMenu();
 
             if (!videoWasLive && this.videoIsLive) {
               // We just determined the video is live (there can be a delay due to autoplay issues, etc)
@@ -543,7 +565,7 @@ AFRAME.registerComponent("media-video", {
         }
       } else {
         this.videoIsLive = this.video.duration === Infinity;
-        this.updateHoverMenuBasedOnLiveState();
+        this.updateHoverMenu();
       }
 
       if (isIOS) {
@@ -554,9 +576,13 @@ AFRAME.registerComponent("media-video", {
           dirs: ["forward", "back"]
         });
       }
+
+      this.videoTexture = texture;
+      this.audioSource = audioSourceEl;
     } catch (e) {
       console.error("Error loading video", this.data.src, e);
       texture = errorTexture;
+      this.videoTexture = this.audioSource = null;
     }
 
     const projection = this.data.projection;
@@ -587,7 +613,10 @@ AFRAME.registerComponent("media-video", {
     this.mesh.material.needsUpdate = true;
 
     if (projection === "flat" && !this.data.contentType.startsWith("audio/")) {
-      scaleToAspectRatio(this.el, texture.image.videoHeight / texture.image.videoWidth);
+      scaleToAspectRatio(
+        this.el,
+        (texture.image.videoHeight || texture.image.height) / (texture.image.videoWidth || texture.image.width)
+      );
     }
 
     this.updatePlaybackState(true);
@@ -599,14 +628,19 @@ AFRAME.registerComponent("media-video", {
     this.el.emit("video-loaded", { projection: projection });
   },
 
-  async createVideoTexture() {
+  async createVideoTextureAudioSourceEl() {
     const url = this.data.src;
     const contentType = this.data.contentType;
 
     return new Promise(async (resolve, reject) => {
-      const videoEl = await createVideoEl();
+      if (this._audioSyncInterval) {
+        clearInterval(this._audioSyncInterval);
+        this._audioSyncInterval = null;
+      }
 
-      let texture, isReady;
+      const videoEl = createVideoOrAudioEl("video");
+
+      let texture, audioEl, isReady;
       if (contentType.startsWith("audio/")) {
         // We want to treat audio almost exactly like video, so we mock a video texture with an image property.
         texture = new THREE.Texture();
@@ -700,13 +734,34 @@ AFRAME.registerComponent("media-video", {
       } else {
         videoEl.src = url;
         videoEl.onerror = reject;
+
+        if (this.data.audioSrc) {
+          // If there's an audio src, create an audio element to play it that we keep in sync
+          // with the video while this component is active.
+          audioEl = createVideoOrAudioEl("audio");
+          audioEl.src = this.data.audioSrc;
+          audioEl.onerror = reject;
+
+          this._audioSyncInterval = setInterval(() => {
+            if (Math.abs(audioEl.currentTime - videoEl.currentTime) >= 0.33) {
+              // In Chrome, drift of a few frames seems persistent
+              audioEl.currentTime = videoEl.currentTime;
+            }
+
+            // During pause state change, correct any drift that remains.
+            if (videoEl.paused !== audioEl.paused) {
+              videoEl.paused ? audioEl.pause() : audioEl.play();
+              audioEl.currentTime = videoEl.currentTime;
+            }
+          }, 1000);
+        }
       }
 
       // NOTE: We used to use the canplay event here to yield the texture, but that fails to fire on iOS Safari
       // and also sometimes in Chrome it seems.
       const poll = () => {
         if (isReady()) {
-          resolve(texture);
+          resolve({ texture, audioSourceEl: audioEl || texture.image });
         } else {
           setTimeout(poll, 500);
         }
@@ -716,12 +771,22 @@ AFRAME.registerComponent("media-video", {
     });
   },
 
-  updateHoverMenuBasedOnLiveState() {
+  updateHoverMenu() {
     if (!this.hoverMenu) return;
 
-    this.seekForwardButton.object3D.visible = !this.videoIsLive;
-    this.seekBackButton.object3D.visible = !this.videoIsLive;
-    this.playPauseButton.object3D.visible = !this.videoIsLive;
+    const pinnableElement = this.el.components["media-loader"].data.linkedEl || this.el;
+    const isPinned = pinnableElement.components.pinnable && pinnableElement.components.pinnable.data.pinned;
+    this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
+    this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
+
+    this.snapButton.object3D.visible =
+      !!this.video && !this.data.contentType.startsWith("audio/") && window.APP.hubChannel.can("spawn_and_move_media");
+    this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
+
+    const mayModifyPlayHead =
+      !!this.video && !this.videoIsLive && (!isPinned || window.APP.hubChannel.can("pin_objects"));
+
+    this.playPauseButton.object3D.visible = this.seekForwardButton.object3D.visible = this.seekBackButton.object3D.visible = mayModifyPlayHead;
 
     if (this.videoIsLive) {
       this.timeLabel.setAttribute("text", "value", "LIVE");
@@ -783,12 +848,19 @@ AFRAME.registerComponent("media-video", {
 
   cleanUp() {
     if (this.mesh && this.mesh.material) {
-      disposeTexture(this.mesh.material.map);
+      if (!this.data.linkedVideoTexture) {
+        disposeTexture(this.mesh.material.map);
+      }
     }
   },
 
   remove() {
     this.cleanUp();
+
+    if (this._audioSyncInterval) {
+      clearInterval(this._audioSyncInterval);
+      this._audioSyncInterval = null;
+    }
 
     if (this.audio) {
       this.el.removeObject3D("sound");
@@ -796,10 +868,18 @@ AFRAME.registerComponent("media-video", {
       delete this.audio;
     }
 
+    if (this.networkedEl) {
+      this.networkedEl.removeEventListener("pinned", this.updateHoverMenu);
+      this.networkedEl.removeEventListener("unpinned", this.updateHoverMenu);
+    }
+
+    window.APP.hubChannel.removeEventListener("permissions_updated", this.updateHoverMenu);
+
     if (this.video) {
       this.video.removeEventListener("pause", this.onPauseStateChange);
       this.video.removeEventListener("play", this.onPauseStateChange);
     }
+
     if (this.hoverMenu) {
       this.playPauseButton.object3D.removeEventListener("interact", this.togglePlaying);
       this.volumeUpButton.object3D.removeEventListener("interact", this.volumeUp);

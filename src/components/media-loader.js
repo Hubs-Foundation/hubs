@@ -1,12 +1,18 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
-import { resolveUrl, injectCustomShaderChunks, addMeshScaleAnimation } from "../utils/media-utils";
+import {
+  resolveUrl,
+  getDefaultResolveQuality,
+  injectCustomShaderChunks,
+  addMeshScaleAnimation,
+  closeExistingMediaMirror
+} from "../utils/media-utils";
 import {
   isNonCorsProxyDomain,
   guessContentType,
   proxiedUrlFor,
   isHubsRoomUrl,
-  isHubsSceneUrl,
-  isHubsAvatarUrl
+  isLocalHubsSceneUrl,
+  isLocalHubsAvatarUrl
 } from "../utils/media-url-utils";
 import { addAnimationComponents } from "../utils/animation";
 import qsTruthy from "../utils/qs_truthy";
@@ -32,7 +38,7 @@ const fetchContentType = url => {
   return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
 };
 
-const batchMeshes = qsTruthy("batchMeshes");
+const forceMeshBatching = qsTruthy("batchMeshes");
 const disableBatching = qsTruthy("disableBatching");
 
 AFRAME.registerComponent("media-loader", {
@@ -47,6 +53,7 @@ AFRAME.registerComponent("media-loader", {
     contentType: { default: null },
     contentSubtype: { default: null },
     animate: { default: true },
+    linkedEl: { default: null }, // This is the element of which this is a linked derivative. See linked-media.js
     mediaOptions: {
       default: {},
       parse: v => (typeof v === "object" ? v : JSON.parse(v)),
@@ -59,6 +66,7 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
+    this.handleLinkedElRemoved = this.handleLinkedElRemoved.bind(this);
     this.refresh = this.refresh.bind(this);
     this.animating = false;
 
@@ -100,7 +108,21 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
+  handleLinkedElRemoved(e) {
+    if (e.detail.name === "media-loader") {
+      this.data.linkedEl.removeEventListener("componentremoved", this.handleLinkedElRemoved);
+
+      // this should be revisited if we ever use media linking for something other than media mirroring UX --
+      // right now it is assumed if there is a linkedEl, this is the currently active mirrored media
+      closeExistingMediaMirror();
+    }
+  },
+
   remove() {
+    if (this.data.linkedEl) {
+      this.data.linkedEl.removeEventListener("componentremoved", this.handleLinkedElRemoved);
+    }
+
     const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
     if (this.loadingSoundEffect) {
       sfx.stopPositionalAudio(this.loadingSoundEffect);
@@ -237,10 +259,9 @@ AFRAME.registerComponent("media-loader", {
 
       this.updateHoverableVisuals();
 
-      const pager = el.components["media-pager"];
-
-      if (pager) {
-        pager.repositionToolbar();
+      if (this.data.linkedEl) {
+        this.el.sceneEl.systems["linked-media"].registerLinkage(this.data.linkedEl, this.el);
+        this.data.linkedEl.addEventListener("componentremoved", this.handleLinkedElRemoved);
       }
 
       el.emit("media-loaded");
@@ -295,6 +316,7 @@ AFRAME.registerComponent("media-loader", {
       }
 
       let canonicalUrl = src;
+      let canonicalAudioUrl = src;
       let accessibleUrl = src;
       let contentType = this.data.contentType;
       let thumbnail;
@@ -306,13 +328,22 @@ AFRAME.registerComponent("media-loader", {
       const isLocalModelAsset =
         isNonCorsProxyDomain(parsedUrl.hostname) && (guessContentType(src) || "").startsWith("model/gltf");
 
-      if (this.data.resolve && !src.startsWith("data:") && !isLocalModelAsset) {
-        const result = await resolveUrl(src, version);
+      if (this.data.resolve && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalModelAsset) {
+        const is360 = !!(this.data.mediaOptions.projection && this.data.mediaOptions.projection.startsWith("360"));
+        const quality = getDefaultResolveQuality(is360);
+        const result = await resolveUrl(src, quality, version);
         canonicalUrl = result.origin;
+
         // handle protocol relative urls
         if (canonicalUrl.startsWith("//")) {
           canonicalUrl = location.protocol + canonicalUrl;
         }
+
+        canonicalAudioUrl = result.origin_audio;
+        if (canonicalAudioUrl && canonicalAudioUrl.startsWith("//")) {
+          canonicalAudioUrl = location.protocol + canonicalAudioUrl;
+        }
+
         contentType = (result.meta && result.meta.expected_content_type) || contentType;
         thumbnail = result.meta && result.meta.thumbnail && proxiedUrlFor(result.meta.thumbnail);
       }
@@ -336,6 +367,15 @@ AFRAME.registerComponent("media-loader", {
         contentType.startsWith("audio/") ||
         AFRAME.utils.material.isHLS(canonicalUrl, contentType)
       ) {
+        let linkedVideoTexture, linkedAudioSource, linkedMediaElementAudioSource;
+        if (this.data.linkedEl) {
+          const linkedMediaVideo = this.data.linkedEl.components["media-video"];
+
+          linkedVideoTexture = linkedMediaVideo.videoTexture;
+          linkedAudioSource = linkedMediaVideo.audioSource;
+          linkedMediaElementAudioSource = linkedMediaVideo.mediaElementAudioSource;
+        }
+
         const qsTime = parseInt(parsedUrl.searchParams.get("t"));
         const hashTime = parseInt(new URLSearchParams(parsedUrl.hash.substring(1)).get("t"));
         const startTime = hashTime || qsTime || 0;
@@ -352,7 +392,15 @@ AFRAME.registerComponent("media-loader", {
         );
         this.el.setAttribute(
           "media-video",
-          Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, time: startTime, contentType })
+          Object.assign({}, this.data.mediaOptions, {
+            src: accessibleUrl,
+            audioSrc: canonicalAudioUrl ? proxiedUrlFor(canonicalAudioUrl) : null,
+            time: startTime,
+            contentType,
+            linkedVideoTexture,
+            linkedAudioSource,
+            linkedMediaElementAudioSource
+          })
         );
         if (this.el.components["position-at-box-shape-border__freeze"]) {
           this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
@@ -438,7 +486,9 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
-        let batch = !disableBatching && batchMeshes;
+        let batch =
+          !disableBatching &&
+          (forceMeshBatching || (AFRAME.utils.device.isMobile() && window.APP && window.APP.quality === "low"));
         if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
           batch = false;
         }
@@ -462,12 +512,12 @@ AFRAME.registerComponent("media-loader", {
           async () => {
             const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
 
-            if (await isHubsAvatarUrl(src)) {
+            if (await isLocalHubsAvatarUrl(src)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#avatar-link-hover-menu",
                 dirs: ["forward", "back"]
               });
-            } else if ((await isHubsRoomUrl(src)) || ((await isHubsSceneUrl(src)) && mayChangeScene)) {
+            } else if ((await isHubsRoomUrl(src)) || ((await isLocalHubsSceneUrl(src)) && mayChangeScene)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#hubs-destination-hover-menu",
                 dirs: ["forward", "back"]
@@ -513,37 +563,17 @@ AFRAME.registerComponent("media-pager", {
   },
 
   init() {
-    this.toolbar = null;
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
     this.onSnap = this.onSnap.bind(this);
+    this.update = this.update.bind(this);
 
-    NAF.utils
-      .getNetworkedEntity(this.el)
-      .then(networkedEl => {
-        this.networkedEl = networkedEl;
-      })
-      .catch(() => {}); //ignore exception, entity might not be networked
+    this.el.setAttribute("hover-menu__pager", { template: "#pager-hover-menu", dirs: ["forward", "back"] });
+    this.el.components["hover-menu__pager"].getHoverMenu().then(menu => {
+      // If we got removed while waiting, do nothing.
+      if (!this.el.parentNode) return;
 
-    this.el.addEventListener("pdf-loaded", async () => {
-      await this._ensureUI();
-      this.update();
-    });
-  },
-
-  async _ensureUI() {
-    if (this.hasSetupUI) return;
-    if (!this.data.maxIndex) return;
-
-    this.hasSetupUI = true;
-
-    // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
-    // request for the same page to read out the max-content-index header
-    const template = document.getElementById("paging-toolbar");
-    this.el.querySelector(".interactable-ui").appendChild(document.importNode(template.content, true));
-    this.toolbar = this.el.querySelector(".paging-toolbar");
-    // we have to wait a tick for the attach callbacks to get fired for the elements in a template
-    setTimeout(() => {
+      this.hoverMenu = menu;
       this.nextButton = this.el.querySelector(".next-button [text-button]");
       this.prevButton = this.el.querySelector(".prev-button [text-button]");
       this.snapButton = this.el.querySelector(".snap-button [text-button]");
@@ -555,15 +585,39 @@ AFRAME.registerComponent("media-pager", {
 
       this.update();
       this.el.emit("pager-loaded");
-    }, 0);
+    });
+
+    NAF.utils
+      .getNetworkedEntity(this.el)
+      .then(networkedEl => {
+        this.networkedEl = networkedEl;
+        this.networkedEl.addEventListener("pinned", this.update);
+        this.networkedEl.addEventListener("unpinned", this.update);
+        window.APP.hubChannel.addEventListener("permissions_updated", this.update);
+      })
+      .catch(() => {}); //ignore exception, entity might not be networked
+
+    this.el.addEventListener("pdf-loaded", async () => {
+      this.update();
+    });
   },
 
-  async update() {
-    await this._ensureUI();
+  async update(oldData) {
+    if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
+      if (oldData && typeof oldData.index === "number" && oldData.index !== this.data.index) {
+        this.el.emit("owned-pager-page-changed");
+      }
+    }
 
     if (this.pageLabel) {
       this.pageLabel.setAttribute("text", "value", `${this.data.index + 1}/${this.data.maxIndex + 1}`);
-      this.repositionToolbar();
+    }
+
+    if (this.prevButton && this.nextButton) {
+      const pinnableElement = this.el.components["media-loader"].data.linkedEl || this.el;
+      const isPinned = pinnableElement.components.pinnable && pinnableElement.components.pinnable.data.pinned;
+      this.prevButton.object3D.visible = this.nextButton.object3D.visible =
+        !isPinned || window.APP.hubChannel.can("pin_objects");
     }
   },
 
@@ -572,7 +626,6 @@ AFRAME.registerComponent("media-pager", {
     const newIndex = Math.min(this.data.index + 1, this.data.maxIndex);
     this.el.setAttribute("media-pdf", "index", newIndex);
     this.el.setAttribute("media-pager", "index", newIndex);
-    this.el.emit("pager-page-changed");
   },
 
   onPrev() {
@@ -580,19 +633,18 @@ AFRAME.registerComponent("media-pager", {
     const newIndex = Math.max(this.data.index - 1, 0);
     this.el.setAttribute("media-pdf", "index", newIndex);
     this.el.setAttribute("media-pager", "index", newIndex);
-    this.el.emit("pager-page-changed");
   },
 
   onSnap() {
     this.el.emit("pager-snap-clicked");
   },
 
-  repositionToolbar() {
-    const ammoShape = this.el.getAttribute("shape-helper");
-    if (!ammoShape) return;
-    if (!this.toolbar) return;
+  remove() {
+    if (this.networkedEl) {
+      this.networkedEl.removeEventListener("pinned", this.update);
+      this.networkedEl.removeEventListener("unpinned", this.update);
+    }
 
-    this.toolbar.object3D.position.y = 0.7;
-    this.toolbar.object3D.matrixNeedsUpdate = true;
+    window.APP.hubChannel.removeEventListener("permissions_updated", this.update);
   }
 });

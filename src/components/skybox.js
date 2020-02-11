@@ -3,6 +3,21 @@ import "three/examples/js/pmrem/PMREMCubeUVPacker";
 import qsTruthy from "../utils/qs_truthy";
 const isBotMode = qsTruthy("bot");
 
+const {
+  Scene,
+  CubeCamera,
+  Object3D,
+  Vector3,
+  BoxBufferGeometry,
+  ShaderMaterial,
+  UniformsUtils,
+  BackSide,
+  Mesh,
+  UniformsLib,
+  PMREMGenerator,
+  PMREMCubeUVPacker
+} = THREE;
+
 /**
  * @author zz85 / https://github.com/zz85
  *
@@ -19,207 +34,358 @@ const isBotMode = qsTruthy("bot");
  * Three.js integration by zz85 http://twitter.com/blurspline
  */
 
-THREE.Sky = function() {
-  const shader = THREE.Sky.SkyShader;
+const vertexShader = `
+#include <common>
+#include <fog_pars_vertex>
 
-  const material = new THREE.ShaderMaterial({
-    fragmentShader: shader.fragmentShader,
-    vertexShader: shader.vertexShader,
-    uniforms: THREE.UniformsUtils.clone(shader.uniforms),
-    side: THREE.BackSide
-  });
+uniform vec3 sunPosition;
+uniform float rayleigh;
+uniform float turbidity;
+uniform float mieCoefficient;
 
-  THREE.Mesh.call(this, new THREE.BoxBufferGeometry(1, 1, 1), material);
-};
+varying vec3 vWorldPosition;
+varying vec3 vSunDirection;
+varying float vSunfade;
+varying vec3 vBetaR;
+varying vec3 vBetaM;
+varying float vSunE;
 
-THREE.Sky.prototype = Object.create(THREE.Mesh.prototype);
-THREE.Sky.prototype.constructor = THREE.Sky;
+const vec3 up = vec3( 0.0, 1.0, 0.0 );
 
-THREE.Sky.SkyShader = {
-  uniforms: {
-    luminance: { value: 1 },
-    turbidity: { value: 2 },
-    rayleigh: { value: 1 },
-    mieCoefficient: { value: 0.005 },
-    mieDirectionalG: { value: 0.8 },
-    sunPosition: { value: new THREE.Vector3() }
-  },
+// constants for atmospheric scattering
+const float e = 2.71828182845904523536028747135266249775724709369995957;
+const float pi = 3.141592653589793238462643383279502884197169;
 
-  vertexShader: [
-    "uniform vec3 sunPosition;",
-    "uniform float rayleigh;",
-    "uniform float turbidity;",
-    "uniform float mieCoefficient;",
+// wavelength of used primaries, according to preetham
+const vec3 lambda = vec3( 680E-9, 550E-9, 450E-9 );
+// this pre-calcuation replaces older TotalRayleigh(vec3 lambda) function:
+// (8.0 * pow(pi, 3.0) * pow(pow(n, 2.0) - 1.0, 2.0) * (6.0 + 3.0 * pn)) / (3.0 * N * pow(lambda, vec3(4.0)) * (6.0 - 7.0 * pn))
+const vec3 totalRayleigh = vec3( 5.804542996261093E-6, 1.3562911419845635E-5, 3.0265902468824876E-5 );
 
-    "varying vec3 vWorldPosition;",
-    "varying vec3 vSunDirection;",
-    "varying float vSunfade;",
-    "varying vec3 vBetaR;",
-    "varying vec3 vBetaM;",
-    "varying float vSunE;",
+// mie stuff
+// K coefficient for the primaries
+const float v = 4.0;
+const vec3 K = vec3( 0.686, 0.678, 0.666 );
+// MieConst = pi * pow( ( 2.0 * pi ) / lambda, vec3( v - 2.0 ) ) * K
+const vec3 MieConst = vec3( 1.8399918514433978E14, 2.7798023919660528E14, 4.0790479543861094E14 );
 
-    "const vec3 up = vec3( 0.0, 1.0, 0.0 );",
+// earth shadow hack
+// cutoffAngle = pi / 1.95;
+const float cutoffAngle = 1.6110731556870734;
+const float steepness = 1.5;
+const float EE = 1000.0;
 
-    // constants for atmospheric scattering
-    "const float e = 2.71828182845904523536028747135266249775724709369995957;",
-    "const float pi = 3.141592653589793238462643383279502884197169;",
+float sunIntensity( float zenithAngleCos ) {
+  zenithAngleCos = clamp( zenithAngleCos, -1.0, 1.0 );
+  return EE * max( 0.0, 1.0 - pow( e, -( ( cutoffAngle - acos( zenithAngleCos ) ) / steepness ) ) );
+}
 
-    // wavelength of used primaries, according to preetham
-    "const vec3 lambda = vec3( 680E-9, 550E-9, 450E-9 );",
-    // this pre-calcuation replaces older TotalRayleigh(vec3 lambda) function:
-    // (8.0 * pow(pi, 3.0) * pow(pow(n, 2.0) - 1.0, 2.0) * (6.0 + 3.0 * pn)) / (3.0 * N * pow(lambda, vec3(4.0)) * (6.0 - 7.0 * pn))
-    "const vec3 totalRayleigh = vec3( 5.804542996261093E-6, 1.3562911419845635E-5, 3.0265902468824876E-5 );",
+vec3 totalMie( float T ) {
+  float c = ( 0.2 * T ) * 10E-18;
+  return 0.434 * c * MieConst;
+}
 
-    // mie stuff
-    // K coefficient for the primaries
-    "const float v = 4.0;",
-    "const vec3 K = vec3( 0.686, 0.678, 0.666 );",
-    // MieConst = pi * pow( ( 2.0 * pi ) / lambda, vec3( v - 2.0 ) ) * K
-    "const vec3 MieConst = vec3( 1.8399918514433978E14, 2.7798023919660528E14, 4.0790479543861094E14 );",
+void main() {
+  #include <begin_vertex>
 
-    // earth shadow hack
-    // cutoffAngle = pi / 1.95;
-    "const float cutoffAngle = 1.6110731556870734;",
-    "const float steepness = 1.5;",
-    "const float EE = 1000.0;",
+  vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+  vWorldPosition = worldPosition.xyz;
 
-    "float sunIntensity( float zenithAngleCos ) {",
-    "	zenithAngleCos = clamp( zenithAngleCos, -1.0, 1.0 );",
-    "	return EE * max( 0.0, 1.0 - pow( e, -( ( cutoffAngle - acos( zenithAngleCos ) ) / steepness ) ) );",
-    "}",
+  #include <project_vertex>
 
-    "vec3 totalMie( float T ) {",
-    "	float c = ( 0.2 * T ) * 10E-18;",
-    "	return 0.434 * c * MieConst;",
-    "}",
+  vSunDirection = normalize( sunPosition );
 
-    "void main() {",
+  vSunE = sunIntensity( dot( vSunDirection, up ) );
 
-    "	vec4 worldPosition = modelMatrix * vec4( position, 1.0 );",
-    "	vWorldPosition = worldPosition.xyz;",
+  vSunfade = 1.0 - clamp( 1.0 - exp( ( sunPosition.y / 450000.0 ) ), 0.0, 1.0 );
 
-    "	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+  float rayleighCoefficient = rayleigh - ( 1.0 * ( 1.0 - vSunfade ) );
 
-    "	vSunDirection = normalize( sunPosition );",
+  // extinction (absorbtion + out scattering)
+  // rayleigh coefficients
+  vBetaR = totalRayleigh * rayleighCoefficient;
 
-    "	vSunE = sunIntensity( dot( vSunDirection, up ) );",
+  // mie coefficients
+  vBetaM = totalMie( turbidity ) * mieCoefficient;
 
-    "	vSunfade = 1.0 - clamp( 1.0 - exp( ( sunPosition.y / 450000.0 ) ), 0.0, 1.0 );",
+  #include <fog_vertex>
+}
+`;
 
-    "	float rayleighCoefficient = rayleigh - ( 1.0 * ( 1.0 - vSunfade ) );",
+const fragmentShader = `
+#include <common>
+#include <fog_pars_fragment>
 
-    // extinction (absorbtion + out scattering)
-    // rayleigh coefficients
-    "	vBetaR = totalRayleigh * rayleighCoefficient;",
+varying vec3 vWorldPosition;
+varying vec3 vSunDirection;
+varying float vSunfade;
+varying vec3 vBetaR;
+varying vec3 vBetaM;
+varying float vSunE;
 
-    // mie coefficients
-    "	vBetaM = totalMie( turbidity ) * mieCoefficient;",
+uniform float luminance;
+uniform float mieDirectionalG;
 
-    "}"
-  ].join("\n"),
+const vec3 cameraPos = vec3( 0.0, 0.0, 0.0 );
 
-  fragmentShader: [
-    "varying vec3 vWorldPosition;",
-    "varying vec3 vSunDirection;",
-    "varying float vSunfade;",
-    "varying vec3 vBetaR;",
-    "varying vec3 vBetaM;",
-    "varying float vSunE;",
+// constants for atmospheric scattering
+const float pi = 3.141592653589793238462643383279502884197169;
 
-    "uniform float luminance;",
-    "uniform float mieDirectionalG;",
+const float n = 1.0003; // refractive index of air
+const float N = 2.545E25; // number of molecules per unit volume for air at
+// 288.15K and 1013mb (sea level -45 celsius)
 
-    "const vec3 cameraPos = vec3( 0.0, 0.0, 0.0 );",
+// optical length at zenith for molecules
+const float rayleighZenithLength = 8.4E3;
+const float mieZenithLength = 1.25E3;
+const vec3 up = vec3( 0.0, 1.0, 0.0 );
+// 66 arc seconds -> degrees, and the cosine of that
+const float sunAngularDiameterCos = 0.999956676946448443553574619906976478926848692873900859324;
 
-    // constants for atmospheric scattering
-    "const float pi = 3.141592653589793238462643383279502884197169;",
+// 3.0 / ( 16.0 * pi )
+const float THREE_OVER_SIXTEENPI = 0.05968310365946075;
+// 1.0 / ( 4.0 * pi )
+const float ONE_OVER_FOURPI = 0.07957747154594767;
 
-    "const float n = 1.0003;", // refractive index of air
-    "const float N = 2.545E25;", // number of molecules per unit volume for air at
-    // 288.15K and 1013mb (sea level -45 celsius)
+float rayleighPhase( float cosTheta ) {
+  return THREE_OVER_SIXTEENPI * ( 1.0 + pow( cosTheta, 2.0 ) );
+}
 
-    // optical length at zenith for molecules
-    "const float rayleighZenithLength = 8.4E3;",
-    "const float mieZenithLength = 1.25E3;",
-    "const vec3 up = vec3( 0.0, 1.0, 0.0 );",
-    // 66 arc seconds -> degrees, and the cosine of that
-    "const float sunAngularDiameterCos = 0.999956676946448443553574619906976478926848692873900859324;",
+float hgPhase( float cosTheta, float g ) {
+  float g2 = pow( g, 2.0 );
+  float inverse = 1.0 / pow( 1.0 - 2.0 * g * cosTheta + g2, 1.5 );
+  return ONE_OVER_FOURPI * ( ( 1.0 - g2 ) * inverse );
+}
 
-    // 3.0 / ( 16.0 * pi )
-    "const float THREE_OVER_SIXTEENPI = 0.05968310365946075;",
-    // 1.0 / ( 4.0 * pi )
-    "const float ONE_OVER_FOURPI = 0.07957747154594767;",
+// Filmic ToneMapping http://filmicgames.com/archives/75
+const float A = 0.15;
+const float B = 0.50;
+const float C = 0.10;
+const float D = 0.20;
+const float E = 0.02;
+const float F = 0.30;
 
-    "float rayleighPhase( float cosTheta ) {",
-    "	return THREE_OVER_SIXTEENPI * ( 1.0 + pow( cosTheta, 2.0 ) );",
-    "}",
+const float whiteScale = 1.0748724675633854; // 1.0 / Uncharted2Tonemap(1000.0)
 
-    "float hgPhase( float cosTheta, float g ) {",
-    "	float g2 = pow( g, 2.0 );",
-    "	float inverse = 1.0 / pow( 1.0 - 2.0 * g * cosTheta + g2, 1.5 );",
-    "	return ONE_OVER_FOURPI * ( ( 1.0 - g2 ) * inverse );",
-    "}",
+vec3 Uncharted2Tonemap( vec3 x ) {
+  return ( ( x * ( A * x + C * B ) + D * E ) / ( x * ( A * x + B ) + D * F ) ) - E / F;
+}
 
-    // Filmic ToneMapping http://filmicgames.com/archives/75
-    "const float A = 0.15;",
-    "const float B = 0.50;",
-    "const float C = 0.10;",
-    "const float D = 0.20;",
-    "const float E = 0.02;",
-    "const float F = 0.30;",
+void main() {
+  // optical length
+  // cutoff angle at 90 to avoid singularity in next formula.
+  float zenithAngle = acos( max( 0.0, dot( up, normalize( vWorldPosition - cameraPos ) ) ) );
+  float inverse = 1.0 / ( cos( zenithAngle ) + 0.15 * pow( 93.885 - ( ( zenithAngle * 180.0 ) / pi ), -1.253 ) );
+  float sR = rayleighZenithLength * inverse;
+  float sM = mieZenithLength * inverse;
 
-    "const float whiteScale = 1.0748724675633854;", // 1.0 / Uncharted2Tonemap(1000.0)
+  // combined extinction factor
+  vec3 Fex = exp( -( vBetaR * sR + vBetaM * sM ) );
 
-    "vec3 Uncharted2Tonemap( vec3 x ) {",
-    "	return ( ( x * ( A * x + C * B ) + D * E ) / ( x * ( A * x + B ) + D * F ) ) - E / F;",
-    "}",
+  // in scattering
+  float cosTheta = dot( normalize( vWorldPosition - cameraPos ), vSunDirection );
 
-    "void main() {",
-    // optical length
-    // cutoff angle at 90 to avoid singularity in next formula.
-    "	float zenithAngle = acos( max( 0.0, dot( up, normalize( vWorldPosition - cameraPos ) ) ) );",
-    "	float inverse = 1.0 / ( cos( zenithAngle ) + 0.15 * pow( 93.885 - ( ( zenithAngle * 180.0 ) / pi ), -1.253 ) );",
-    "	float sR = rayleighZenithLength * inverse;",
-    "	float sM = mieZenithLength * inverse;",
+  float rPhase = rayleighPhase( cosTheta * 0.5 + 0.5 );
+  vec3 betaRTheta = vBetaR * rPhase;
 
-    // combined extinction factor
-    "	vec3 Fex = exp( -( vBetaR * sR + vBetaM * sM ) );",
+  float mPhase = hgPhase( cosTheta, mieDirectionalG );
+  vec3 betaMTheta = vBetaM * mPhase;
 
-    // in scattering
-    "	float cosTheta = dot( normalize( vWorldPosition - cameraPos ), vSunDirection );",
+  vec3 Lin = pow( vSunE * ( ( betaRTheta + betaMTheta ) / ( vBetaR + vBetaM ) ) * ( 1.0 - Fex ), vec3( 1.5 ) );
+  Lin *= mix( vec3( 1.0 ), pow( vSunE * ( ( betaRTheta + betaMTheta ) / ( vBetaR + vBetaM ) ) * Fex, vec3( 1.0 / 2.0 ) ), clamp( pow( 1.0 - dot( up, vSunDirection ), 5.0 ), 0.0, 1.0 ) );
 
-    "	float rPhase = rayleighPhase( cosTheta * 0.5 + 0.5 );",
-    "	vec3 betaRTheta = vBetaR * rPhase;",
+  // nightsky
+  vec3 direction = normalize( vWorldPosition - cameraPos );
+  float theta = acos( direction.y ); // elevation --> y-axis, [-pi/2, pi/2]
+  float phi = atan( direction.z, direction.x ); // azimuth --> x-axis [-pi/2, pi/2]
+  vec2 uv = vec2( phi, theta ) / vec2( 2.0 * pi, pi ) + vec2( 0.5, 0.0 );
+  vec3 L0 = vec3( 0.1 ) * Fex;
 
-    "	float mPhase = hgPhase( cosTheta, mieDirectionalG );",
-    "	vec3 betaMTheta = vBetaM * mPhase;",
+  // composition + solar disc
+  float sundisk = smoothstep( sunAngularDiameterCos, sunAngularDiameterCos + 0.00002, cosTheta );
+  L0 += ( vSunE * 19000.0 * Fex ) * sundisk;
 
-    "	vec3 Lin = pow( vSunE * ( ( betaRTheta + betaMTheta ) / ( vBetaR + vBetaM ) ) * ( 1.0 - Fex ), vec3( 1.5 ) );",
-    "	Lin *= mix( vec3( 1.0 ), pow( vSunE * ( ( betaRTheta + betaMTheta ) / ( vBetaR + vBetaM ) ) * Fex, vec3( 1.0 / 2.0 ) ), clamp( pow( 1.0 - dot( up, vSunDirection ), 5.0 ), 0.0, 1.0 ) );",
+  vec3 texColor = ( Lin + L0 ) * 0.04 + vec3( 0.0, 0.0003, 0.00075 );
 
-    // nightsky
-    "	vec3 direction = normalize( vWorldPosition - cameraPos );",
-    "	float theta = acos( direction.y ); // elevation --> y-axis, [-pi/2, pi/2]",
-    "	float phi = atan( direction.z, direction.x ); // azimuth --> x-axis [-pi/2, pi/2]",
-    "	vec2 uv = vec2( phi, theta ) / vec2( 2.0 * pi, pi ) + vec2( 0.5, 0.0 );",
-    "	vec3 L0 = vec3( 0.1 ) * Fex;",
+  vec3 curr = Uncharted2Tonemap( ( log2( 2.0 / pow( luminance, 4.0 ) ) ) * texColor );
+  vec3 color = curr * whiteScale;
 
-    // composition + solar disc
-    "	float sundisk = smoothstep( sunAngularDiameterCos, sunAngularDiameterCos + 0.00002, cosTheta );",
-    "	L0 += ( vSunE * 19000.0 * Fex ) * sundisk;",
+  vec3 retColor = pow( color, vec3( 1.0 / ( 1.2 + ( 1.2 * vSunfade ) ) ) );
 
-    "	vec3 texColor = ( Lin + L0 ) * 0.04 + vec3( 0.0, 0.0003, 0.00075 );",
+  gl_FragColor = vec4( retColor, 1.0 );
 
-    "	vec3 curr = Uncharted2Tonemap( ( log2( 2.0 / pow( luminance, 4.0 ) ) ) * texColor );",
-    "	vec3 color = curr * whiteScale;",
+  #include <fog_fragment>
+}
+`;
 
-    "	vec3 retColor = pow( color, vec3( 1.0 / ( 1.2 + ( 1.2 * vSunfade ) ) ) );",
+export default class Sky extends Object3D {
+  static shader = {
+    uniforms: UniformsUtils.merge([
+      UniformsLib.fog,
+      {
+        luminance: { value: 1 },
+        turbidity: { value: 10 },
+        rayleigh: { value: 2 },
+        mieCoefficient: { value: 0.005 },
+        mieDirectionalG: { value: 0.8 },
+        sunPosition: { value: new Vector3() }
+      }
+    ]),
+    vertexShader,
+    fragmentShader
+  };
 
-    "	gl_FragColor = vec4( retColor, 1.0 );",
+  static _geometry = new BoxBufferGeometry(1, 1, 1);
 
-    "}"
-  ].join("\n")
-};
+  constructor() {
+    super();
+
+    const material = new ShaderMaterial({
+      fragmentShader: Sky.shader.fragmentShader,
+      vertexShader: Sky.shader.vertexShader,
+      uniforms: UniformsUtils.clone(Sky.shader.uniforms),
+      side: BackSide,
+      fog: true
+    });
+
+    this.skyScene = new Scene();
+    this.cubeCamera = new CubeCamera(1, 100000, 512);
+    this.skyScene.add(this.cubeCamera);
+
+    this.sky = new Mesh(Sky._geometry, material);
+    this.sky.name = "Sky";
+    this.add(this.sky);
+
+    this._inclination = 0;
+    this._azimuth = 0.15;
+    this._distance = 8000;
+    this.updateSunPosition();
+  }
+
+  get turbidity() {
+    return this.sky.material.uniforms.turbidity.value;
+  }
+
+  set turbidity(value) {
+    this.sky.material.uniforms.turbidity.value = value;
+  }
+
+  get rayleigh() {
+    return this.sky.material.uniforms.rayleigh.value;
+  }
+
+  set rayleigh(value) {
+    this.sky.material.uniforms.rayleigh.value = value;
+  }
+
+  get luminance() {
+    return this.sky.material.uniforms.luminance.value;
+  }
+
+  set luminance(value) {
+    this.sky.material.uniforms.luminance.value = value;
+  }
+
+  get mieCoefficient() {
+    return this.sky.material.uniforms.mieCoefficient.value;
+  }
+
+  set mieCoefficient(value) {
+    this.sky.material.uniforms.mieCoefficient.value = value;
+  }
+
+  get mieDirectionalG() {
+    return this.sky.material.uniforms.mieDirectionalG.value;
+  }
+
+  set mieDirectionalG(value) {
+    this.sky.material.uniforms.mieDirectionalG.value = value;
+  }
+
+  get inclination() {
+    return this._inclination;
+  }
+
+  set inclination(value) {
+    this._inclination = value;
+    this.updateSunPosition();
+  }
+
+  get azimuth() {
+    return this._azimuth;
+  }
+
+  set azimuth(value) {
+    this._azimuth = value;
+    this.updateSunPosition();
+  }
+
+  get distance() {
+    return this._distance;
+  }
+
+  set distance(value) {
+    this._distance = value;
+    this.updateSunPosition();
+  }
+
+  updateSunPosition() {
+    const theta = Math.PI * (this._inclination - 0.5);
+    const phi = 2 * Math.PI * (this._azimuth - 0.5);
+
+    const distance = this._distance;
+
+    const x = distance * Math.cos(phi);
+    const y = distance * Math.sin(phi) * Math.sin(theta);
+    const z = distance * Math.sin(phi) * Math.cos(theta);
+
+    this.sky.material.uniforms.sunPosition.value.set(x, y, z).normalize();
+    this.sky.scale.set(distance, distance, distance);
+  }
+
+  generateEnvironmentMap(renderer) {
+    this.skyScene.add(this.sky);
+    this.cubeCamera.update(renderer, this.skyScene);
+    this.add(this.sky);
+    const vrEnabled = renderer.vr.enabled;
+    renderer.vr.enabled = false;
+    const pmremGenerator = new PMREMGenerator(this.cubeCamera.renderTarget.texture);
+    pmremGenerator.update(renderer);
+    const pmremCubeUVPacker = new PMREMCubeUVPacker(pmremGenerator.cubeLods);
+    pmremCubeUVPacker.update(renderer);
+    renderer.vr.enabled = vrEnabled;
+    pmremGenerator.dispose();
+    pmremCubeUVPacker.dispose();
+    return pmremCubeUVPacker.CubeUVRenderTarget.texture;
+  }
+
+  copy(source, recursive = true) {
+    if (recursive) {
+      this.remove(this.sky);
+    }
+
+    super.copy(source, recursive);
+
+    if (recursive) {
+      const skyIndex = source.children.indexOf(source.sky);
+
+      if (skyIndex !== -1) {
+        this.sky = this.children[skyIndex];
+      }
+    }
+
+    this.turbidity = source.turbidity;
+    this.rayleigh = source.rayleigh;
+    this.luminance = source.luminance;
+    this.mieCoefficient = source.mieCoefficient;
+    this.mieDirectionalG = source.mieDirectionalG;
+    this.inclination = source.inclination;
+    this.azimuth = source.azimuth;
+    this.distance = source.distance;
+
+    return this;
+  }
+}
 
 AFRAME.registerComponent("skybox", {
   schema: {
@@ -234,12 +400,9 @@ AFRAME.registerComponent("skybox", {
   },
 
   init() {
-    this.sky = new THREE.Sky();
+    this.sky = new Sky();
+    this.sky.cubeCamera.children.forEach(o => (o.matrixNeedsUpdate = true));
     this.el.setObject3D("mesh", this.sky);
-    this.skyScene = new THREE.Scene();
-    this.cubeCamera = new THREE.CubeCamera(1, 100000, 512);
-    this.cubeCamera.children.forEach(o => (o.matrixNeedsUpdate = true));
-    this.skyScene.add(this.cubeCamera);
 
     this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
     // HACK: Render environment map on next frame to avoid bug where the render target texture is black.
@@ -249,51 +412,43 @@ AFRAME.registerComponent("skybox", {
   },
 
   update(oldData) {
-    const uniforms = this.sky.material.uniforms;
-
     if (this.data.turbidity !== oldData.turbidity) {
-      uniforms.turbidity.value = this.data.turbidity;
+      this.sky.turbidity = this.data.turbidity;
     }
 
     if (this.data.rayleigh !== oldData.rayleigh) {
-      uniforms.rayleigh.value = this.data.rayleigh;
+      this.sky.rayleigh = this.data.rayleigh;
     }
 
     if (this.data.luminance !== oldData.luminance) {
-      uniforms.luminance.value = this.data.luminance;
+      this.sky.luminance = this.data.luminance;
     }
 
     if (this.data.mieCoefficient !== oldData.mieCoefficient) {
-      uniforms.mieCoefficient.value = this.data.mieCoefficient;
+      this.sky.mieCoefficient = this.data.mieCoefficient;
     }
 
     if (this.data.mieDirectionalG !== oldData.mieDirectionalG) {
-      uniforms.mieDirectionalG.value = this.data.mieDirectionalG;
+      this.sky.mieDirectionalG = this.data.mieDirectionalG;
     }
 
-    if (
-      this.data.inclination !== oldData.inclination ||
-      this.data.azimuth !== oldData.azimuth ||
-      this.data.distance !== oldData.distance
-    ) {
-      const theta = Math.PI * (this.data.inclination - 0.5);
-      const phi = 2 * Math.PI * (this.data.azimuth - 0.5);
+    if (this.data.inclination !== oldData.inclination) {
+      this.sky.inclination = this.data.inclination;
+      this.el.object3D.matrixNeedsUpdate = true;
+    }
 
+    if (this.data.azimuth !== oldData.azimuth) {
+      this.sky.azimuth = this.data.azimuth;
+      this.el.object3D.matrixNeedsUpdate = true;
+    }
+
+    if (this.data.distance !== oldData.distance) {
       const distance = this.data.distance;
-
-      const x = distance * Math.cos(phi);
-      const y = distance * Math.sin(phi) * Math.sin(theta);
-      const z = distance * Math.sin(phi) * Math.cos(theta);
-
-      uniforms.sunPosition.value.set(x, y, z).normalize();
 
       // HACK Remove this if condition and always set the scale based on distance when the existing environments
       // have their sky scales set to 1.
-      if (this.el.object3D.scale.x === 1) {
-        this.sky.scale.set(distance, distance, distance);
-      }
-
-      this.el.object3D.matrixNeedsUpdate = true;
+      this.sky.distance = this.el.object3D.scale.x === 1 ? distance : 1;
+      this.sky.matrixNeedsUpdate = true;
     }
 
     this.updateEnvironmentMap();
@@ -304,19 +459,8 @@ AFRAME.registerComponent("skybox", {
 
     if (environmentMapComponent && !isBotMode) {
       const renderer = this.el.sceneEl.renderer;
-      this.skyScene.add(this.sky);
-      this.cubeCamera.update(renderer, this.skyScene);
-      this.el.setObject3D("mesh", this.sky);
-      const vrEnabled = renderer.vr.enabled;
-      renderer.vr.enabled = false;
-      const pmremGenerator = new THREE.PMREMGenerator(this.cubeCamera.renderTarget.texture);
-      pmremGenerator.update(renderer);
-      const pmremCubeUVPacker = new THREE.PMREMCubeUVPacker(pmremGenerator.cubeLods);
-      pmremCubeUVPacker.update(renderer);
-      renderer.vr.enabled = vrEnabled;
-      environmentMapComponent.updateEnvironmentMap(pmremCubeUVPacker.CubeUVRenderTarget.texture);
-      pmremGenerator.dispose();
-      pmremCubeUVPacker.dispose();
+      const envMap = this.sky.generateEnvironmentMap(renderer);
+      environmentMapComponent.updateEnvironmentMap(envMap);
     }
   },
 

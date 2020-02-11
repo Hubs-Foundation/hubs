@@ -119,6 +119,15 @@
   }
 }
 
+:local(.link-code){
+  height: 20px;
+  margin-top: 8px;
+}
+
+:local(.code-duration){
+  font-size : 0.7em;
+}
+
 :local(.invite-container-below-hud) {
   margin-top: 86px;
 }
@@ -140,6 +149,7 @@
   font-size: 2.0em;
   display: flex;
   margin: 12px;
+  margin-bottom : 0px;
 }
 
 :local(.keep-open) {

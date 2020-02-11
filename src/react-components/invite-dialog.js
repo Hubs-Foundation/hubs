@@ -62,32 +62,6 @@ export default class InviteDialog extends Component {
     return (
       <div className={classNames({ [styles.dialog]: true, [styles.modal]: this.props.isModal })}>
         {!this.props.isModal && <div className={styles.attachPoint} />}
-        <WithHoverSound>
-          <button className={styles.close} onClick={() => this.props.onClose()}>
-            <i>
-              <FontAwesomeIcon icon={faTimes} />
-            </i>
-          </button>
-        </WithHoverSound>
-        <div>
-          <FormattedMessage id={`invite.enter_via${this.props.isModal ? "_modal" : ""}`} />
-          <a
-            href={`https://${configs.SHORTLINK_DOMAIN}`}
-            target="_blank"
-            className={styles.hubLinkLink}
-            rel="noopener noreferrer"
-          >
-            {configs.SHORTLINK_DOMAIN}
-          </a>
-          <FormattedMessage id="invite.and_enter_code" />
-        </div>
-        <div className={styles.code}>
-          {entryCodeString.split("").map((d, i) => (
-            <div className={classNames({ [styles.digit]: true, [styles[`digit_${i}`]]: true })} key={`link_code_${i}`}>
-              {d}
-            </div>
-          ))}
-        </div>
         <div>
           <FormattedMessage id={`invite.or_visit${this.props.isModal ? "_modal" : ""}`} />
         </div>
@@ -116,6 +90,37 @@ export default class InviteDialog extends Component {
                 </button>
               </WithHoverSound>
             )}
+        </div>
+        <WithHoverSound>
+          <button className={styles.close} onClick={() => this.props.onClose()}>
+            <i>
+              <FontAwesomeIcon icon={faTimes} />
+            </i>
+          </button>
+        </WithHoverSound>
+        <div className={styles.linkCode}>
+          <FormattedMessage id={`invite.enter_via${this.props.isModal ? "_modal" : ""}`} />
+          <a
+            href={`https://${configs.SHORTLINK_DOMAIN}`}
+            target="_blank"
+            className={styles.hubLinkLink}
+            rel="noopener noreferrer"
+          >
+            {configs.SHORTLINK_DOMAIN}
+          </a>
+          {/* <div className={styles.linkcode}> */}
+          <FormattedMessage id="invite.and_enter_code" />
+          {/* </div> */}
+        </div>
+        <div className={styles.code}>
+          {entryCodeString.split("").map((d, i) => (
+            <div className={classNames({ [styles.digit]: true, [styles[`digit_${i}`]]: true })} key={`link_code_${i}`}>
+              {d}
+            </div>
+          ))}
+        </div>
+        <div className={styles.codeDuration}>
+          <FormattedMessage id="invite.duration_of_code" />
         </div>
         {embedUrl && (
           <div className={styles.embed}>

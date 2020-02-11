@@ -136,6 +136,7 @@ class UIRoot extends Component {
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
     hubName: PropTypes.string,
+    hubAllowPromotion: PropTypes.bool,
     hubMemberPermissions: PropTypes.object,
     hubScene: PropTypes.object,
     hubIsBound: PropTypes.bool,
@@ -812,6 +813,7 @@ class UIRoot extends Component {
 
   setAvatarUrl = url => {
     this.props.store.update({ profile: { ...this.props.store.state.profile, ...{ avatarId: url } } });
+    this.props.scene.emit("avatar_updated");
   };
 
   closeDialog = () => {
@@ -1630,7 +1632,7 @@ class UIRoot extends Component {
                 mediaSearchStore={this.props.mediaSearchStore}
                 hubChannel={this.props.hubChannel}
                 onMediaSearchResultEntrySelected={(entry, selectAction) => {
-                  if (entry.type === "hub") {
+                  if (entry.type === "room") {
                     this.showNonHistoriedDialog(LeaveRoomDialog, {
                       destinationUrl: entry.url,
                       messageType: "join-room"
@@ -1671,7 +1673,12 @@ class UIRoot extends Component {
               history={this.props.history}
               render={() =>
                 this.renderDialog(RoomSettingsDialog, {
-                  initialSettings: { name: this.props.hubName, member_permissions: this.props.hubMemberPermissions },
+                  showRoomAccessSettings: this.props.hubChannel.can("update_hub_promotion"),
+                  initialSettings: {
+                    name: this.props.hubName,
+                    member_permissions: this.props.hubMemberPermissions,
+                    allow_promotion: this.props.hubAllowPromotion
+                  },
                   onChange: settings => this.props.hubChannel.updateHub(settings)
                 })
               }

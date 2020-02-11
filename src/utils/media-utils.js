@@ -1,25 +1,38 @@
 import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
+import { ObjectContentOrigins } from "../object-types";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { validMaterials } from "../components/hoverable-visuals";
 import { proxiedUrlFor } from "../utils/media-url-utils";
+import Linkify from "linkify-it";
+import tlds from "tlds";
 
 import anime from "animejs";
 
+const linkify = Linkify();
+linkify.tlds(tlds);
+
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
+const isMobile = AFRAME.utils.device.isMobile();
+const isMobileVR = AFRAME.utils.device.isMobile();
 
 // Map<String, Promise<Object>
 const resolveUrlCache = new Map();
-export const resolveUrl = async (url, version = 1) => {
+export const getDefaultResolveQuality = (is360 = false) => {
+  const useLowerQuality = isMobile || isMobileVR;
+  return !is360 ? (useLowerQuality ? "low" : "high") : useLowerQuality ? "low_360" : "high_360";
+};
+
+export const resolveUrl = async (url, quality = null, version = 1) => {
   const key = `${url}_${version}`;
   if (resolveUrlCache.has(key)) return resolveUrlCache.get(key);
 
   const resultPromise = fetch(mediaAPIEndpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ media: { url }, version })
+    body: JSON.stringify({ media: { url, quality: quality || getDefaultResolveQuality() }, version })
   }).then(async response => {
     if (!response.ok) {
       const message = `Error resolving url "${url}":`;
@@ -98,12 +111,19 @@ function getLatestMediaVersionOfSrc(src) {
   for (const el of els) {
     const loader = el.components["media-loader"];
 
-    if (loader.data.src === src) {
+    if (loader.data && loader.data.src === src) {
       version = Math.max(version, loader.data.version);
     }
   }
 
   return version;
+}
+
+export function coerceToUrl(urlOrText) {
+  if (!linkify.test(urlOrText)) return urlOrText;
+
+  // See: https://github.com/Soapbox/linkifyjs/blob/master/src/linkify.js#L52
+  return urlOrText.indexOf("://") >= 0 ? urlOrText : `https://${urlOrText}`;
 }
 
 export const addMedia = (
@@ -114,12 +134,34 @@ export const addMedia = (
   resolve = false,
   fitToBox = false,
   animate = true,
-  mediaOptions = {}
+  mediaOptions = {},
+  networked = true,
+  parentEl = null,
+  linkedEl = null
 ) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
-  entity.setAttribute("networked", { template: template });
+
+  if (networked) {
+    entity.setAttribute("networked", { template: template });
+  } else {
+    const templateBody = document
+      .importNode(document.body.querySelector(template).content, true)
+      .firstElementChild.cloneNode(true);
+    const elAttrs = templateBody.attributes;
+
+    // Merge root element attributes with this entity
+    for (let attrIdx = 0; attrIdx < elAttrs.length; attrIdx++) {
+      entity.setAttribute(elAttrs[attrIdx].name, elAttrs[attrIdx].value);
+    }
+
+    // Append all child elements
+    while (templateBody.firstElementChild) {
+      entity.appendChild(templateBody.firstElementChild);
+    }
+  }
+
   const needsToBeUploaded = src instanceof File;
 
   // If we're re-pasting an existing src in the scene, we should use the latest version
@@ -130,16 +172,17 @@ export const addMedia = (
     fitToBox,
     resolve,
     animate,
-    src: typeof src === "string" ? src : "",
+    src: typeof src === "string" ? coerceToUrl(src) || src : "",
     version,
     contentSubtype,
     fileIsOwned: !needsToBeUploaded,
+    linkedEl,
     mediaOptions
   });
 
   entity.object3D.matrixNeedsUpdate = true;
 
-  scene.appendChild(entity);
+  (parentEl || scene).appendChild(entity);
 
   const orientation = new Promise(function(resolve) {
     if (needsToBeUploaded) {
@@ -179,6 +222,28 @@ export const addMedia = (
   }
 
   return { entity, orientation };
+};
+
+export const cloneMedia = (sourceEl, template, src = null, networked = true, link = false, parentEl = null) => {
+  if (!src) {
+    ({ src } = sourceEl.components["media-loader"].data);
+  }
+
+  const { contentSubtype, fitToBox, mediaOptions } = sourceEl.components["media-loader"].data;
+
+  return addMedia(
+    src,
+    template,
+    ObjectContentOrigins.URL,
+    contentSubtype,
+    true,
+    fitToBox,
+    false,
+    mediaOptions,
+    networked,
+    parentEl,
+    link ? sourceEl : null
+  );
 };
 
 export function injectCustomShaderChunks(obj) {
@@ -416,4 +481,26 @@ export function addMeshScaleAnimation(mesh, initialScale, onComplete) {
   mesh.matrixNeedsUpdate = true;
 
   return anime(config);
+}
+
+export function closeExistingMediaMirror() {
+  const mirrorTarget = document.querySelector("#media-mirror-target");
+
+  // Remove old mirror target media element
+  if (mirrorTarget.firstChild) {
+    mirrorTarget.firstChild.setAttribute("animation__remove", {
+      property: "scale",
+      dur: 200,
+      to: { x: 0.01, y: 0.01, z: 0.01 },
+      easing: "easeInQuad"
+    });
+
+    return new Promise(res => {
+      mirrorTarget.firstChild.addEventListener("animationcomplete", () => {
+        mirrorTarget.removeChild(mirrorTarget.firstChild);
+        mirrorTarget.parentEl.object3D.visible = false;
+        res();
+      });
+    });
+  }
 }

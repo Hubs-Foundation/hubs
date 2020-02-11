@@ -5,22 +5,13 @@ import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 
-function inParentHierarchyOf(o, child) {
-  while (child) {
-    if (child === o) return true;
-    child = child.parent;
+export function getInspectable(child) {
+  let el = child;
+  while (el) {
+    if (el.components && el.components.tags && el.components.tags.data.inspectable) return el;
+    el = el.parentNode;
   }
-  return false;
-}
-
-function getBatch(inspected, batchManagerSystem) {
-  return (
-    batchManagerSystem.batchManager &&
-    (batchManagerSystem.batchManager.batchForMesh.get(inspected) ||
-      (inspected.el &&
-        inspected.el.object3DMap.mesh &&
-        batchManagerSystem.batchManager.batchForMesh.get(inspected.el.object3DMap.mesh)))
-  );
+  return null;
 }
 
 const decompose = (function() {
@@ -135,25 +126,34 @@ const NEXT_MODES = {
 };
 
 const CAMERA_LAYER_INSPECT = 4;
+// This layer is never actually rendered by a camera but lets the batching system know it should be rendered if inspecting
+export const CAMERA_LAYER_BATCH_INSPECT = 5;
+
 const ensureLightsAreSeenByCamera = function(o) {
   if (o.isLight) {
     o.layers.enable(CAMERA_LAYER_INSPECT);
   }
 };
 const enableInspectLayer = function(o) {
-  o.layers.enable(CAMERA_LAYER_INSPECT);
+  const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
+  const batch = batchManagerSystem.batchManager.batchForMesh.get(o);
+  if (batch) {
+    batch.layers.enable(CAMERA_LAYER_INSPECT);
+    o.layers.enable(CAMERA_LAYER_BATCH_INSPECT);
+  } else {
+    o.layers.enable(CAMERA_LAYER_INSPECT);
+  }
 };
 const disableInspectLayer = function(o) {
-  o.layers.disable(CAMERA_LAYER_INSPECT);
+  const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
+  const batch = batchManagerSystem.batchManager.batchForMesh.get(o);
+  if (batch) {
+    batch.layers.disable(CAMERA_LAYER_INSPECT);
+    o.layers.disable(CAMERA_LAYER_BATCH_INSPECT);
+  } else {
+    o.layers.disable(CAMERA_LAYER_INSPECT);
+  }
 };
-
-function setupSphere(sphere) {
-  sphere.object3D.traverse(o => o.layers.set(CAMERA_LAYER_INSPECT));
-  sphere.object3DMap.mesh.material.side = 2;
-  sphere.object3DMap.mesh.material.color.setHex(0x020202);
-  sphere.object3D.scale.multiplyScalar(100);
-  sphere.object3D.matrixNeedsUpdate = true;
-}
 
 function getAudio(o) {
   let audio;
@@ -172,7 +172,6 @@ export class CameraSystem {
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
     this.inspectZoom = 0;
-    this.inspectedMeshesFromBatch = [];
     this.batchManagerSystem = batchManagerSystem;
     this.mode = CAMERA_MODE_SCENE_PREVIEW;
     this.snapshot = { audioTransform: new THREE.Matrix4(), matrixWorld: new THREE.Matrix4() };
@@ -183,14 +182,12 @@ export class CameraSystem {
       this.viewingCamera = document.getElementById("viewing-camera");
       this.viewingRig = document.getElementById("viewing-rig");
 
-      const sphere = document.getElementById("inspect-sphere");
-      // TODO: Make this synchronous, don't use a-sphere
-      const i = setInterval(() => {
-        if (sphere.object3DMap && sphere.object3DMap.mesh) {
-          clearInterval(i);
-          setupSphere(sphere);
-        }
-      }, 2000);
+      const bg = new THREE.Mesh(
+        new THREE.BoxGeometry(100, 100, 100),
+        new THREE.MeshBasicMaterial({ color: 0x020202, side: THREE.BackSide })
+      );
+      bg.layers.set(CAMERA_LAYER_INSPECT);
+      this.viewingRig.object3D.add(bg);
     });
   }
 
@@ -282,18 +279,7 @@ export class CameraSystem {
   }
 
   hideEverythingButThisObject(o) {
-    this.inspectedMeshesFromBatch.length = 0;
-    const batch = getBatch(o, this.batchManagerSystem);
-    (batch || o).traverse(enableInspectLayer);
-    if (batch) {
-      for (let instanceId = 0; instanceId < batch.ubo.meshes.length; instanceId++) {
-        const mesh = batch.ubo.meshes[instanceId];
-        if (!mesh) continue;
-        if (inParentHierarchyOf(this.inspected, mesh)) {
-          this.inspectedMeshesFromBatch.push(mesh);
-        }
-      }
-    }
+    o.traverse(enableInspectLayer);
 
     const scene = AFRAME.scenes[0];
     const vrMode = scene.is("vr-mode");
@@ -306,10 +292,8 @@ export class CameraSystem {
   }
 
   showEverythingAsNormal() {
-    this.inspectedMeshesFromBatch.length = 0;
-    this.inspectedMeshesFromBatch = [];
     if (this.inspected) {
-      (getBatch(this.inspected, this.batchManagerSystem) || this.inspected).traverse(disableInspectLayer);
+      this.inspected.traverse(disableInspectLayer);
     }
     const scene = AFRAME.scenes[0];
     const vrMode = scene.is("vr-mode");
@@ -334,7 +318,19 @@ export class CameraSystem {
       this.viewingCameraRotator.on = true;
 
       this.userinput = this.userinput || scene.systems.userinput;
-      if (
+      this.interaction = this.interaction || scene.systems.interaction;
+
+      if (this.userinput.get(paths.actions.startInspecting) && this.mode !== CAMERA_MODE_INSPECT) {
+        const hoverEl = this.interaction.state.rightRemote.hovered || this.interaction.state.leftRemote.hovered;
+
+        if (hoverEl) {
+          const inspectable = getInspectable(hoverEl);
+
+          if (inspectable) {
+            this.inspect(inspectable.object3D);
+          }
+        }
+      } else if (
         !this.temporarilyDisableRegularExit &&
         this.mode === CAMERA_MODE_INSPECT &&
         this.userinput.get(paths.actions.stopInspecting)
@@ -342,6 +338,7 @@ export class CameraSystem {
         scene.emit("uninspect");
         this.uninspect();
       }
+
       if (this.userinput.get(paths.actions.nextCameraMode)) {
         this.nextMode();
       }

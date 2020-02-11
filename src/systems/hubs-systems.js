@@ -10,7 +10,7 @@ import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
 import { BatchManagerSystem } from "./render-manager-system";
-import { LobbyCameraSystem } from "./lobby-camera-system";
+import { ScenePreviewCameraSystem } from "./scene-preview-camera-system";
 import { InteractionSfxSystem } from "./interaction-sfx-system";
 import { SpriteSystem } from "./sprites";
 import { CameraSystem } from "./camera-system";
@@ -39,7 +39,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverMenuSystem = new HoverMenuSystem();
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
     this.soundEffectsSystem = new SoundEffectsSystem(this.el);
-    this.lobbyCameraSystem = new LobbyCameraSystem();
+    this.scenePreviewCameraSystem = new ScenePreviewCameraSystem();
     this.spriteSystem = new SpriteSystem(this.el);
     this.batchManagerSystem = new BatchManagerSystem(this.el.object3D, this.el.renderer);
     this.cameraSystem = new CameraSystem(this.batchManagerSystem);
@@ -76,7 +76,7 @@ AFRAME.registerSystem("hubs-systems", {
       this.singleActionButtonSystem.didInteractRightThisFrame
     );
     this.soundEffectsSystem.tick();
-    this.lobbyCameraSystem.tick();
+    this.scenePreviewCameraSystem.tick();
     this.physicsSystem.tick(dt);
     this.batchManagerSystem.tick(t);
     this.cameraSystem.tick(this.el, dt);
