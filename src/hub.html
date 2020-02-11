@@ -403,15 +403,29 @@
                             </a-entity>
                         </a-entity>
                         <a-entity class="freeze-unprivileged-menu" visibility-while-frozen="withinDistance: 100; withoutPermission: spawn_and_move_media;">
-                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" open-media-button="onlyOpenLink: true" position="0 -0.125 0.001">
+                            <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" open-media-button="onlyOpenLink: true" position="0 -0.25 0.001">
                                 <a-entity text="value:open link; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity
+                                mixin="rounded-action-button"
+                                is-remote-hover-target
+                                tags="singleActionButton:true;"
+                                mirror-media-button
+                                visibility-on-content-types="contentTypes: video/ audio/ image/ application/vnd.apple.mpegurl application/x-mpegurl application/pdf;"
+                                position="0 0 0.001">
+                                <a-entity
+                                    sprite
+                                    icon-button="image: inspect-action.png; hoverImage: inspect-action.png"
+                                    scale="0.165 0.165 0.165"
+                                    position="0 0 0.001"
+                                ></a-entity>
                             </a-entity>
                             <a-entity
                                 mixin="rounded-button"
                                 tags="isHoldable: true; holdableButton: true;"
                                 is-remote-hover-target
                                 inspect-button
-                                position="0 0.125 0.001">
+                                position="0 0.25 0.001">
                                 <a-entity
                                     sprite
                                     icon-button="image: focus-action.png; hoverImage: focus-action.png"

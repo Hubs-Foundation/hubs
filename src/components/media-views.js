@@ -774,7 +774,8 @@ AFRAME.registerComponent("media-video", {
   updateHoverMenu() {
     if (!this.hoverMenu) return;
 
-    const isPinned = this.el.components.pinnable && this.el.components.pinnable.data.pinned;
+    const pinnableElement = this.el.components["media-loader"].data.linkedEl || this.el;
+    const isPinned = pinnableElement.components.pinnable && pinnableElement.components.pinnable.data.pinned;
     this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
     this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
 
