@@ -602,13 +602,20 @@ AFRAME.registerComponent("media-pager", {
     });
   },
 
-  async update() {
+  async update(oldData) {
+    if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
+      if (oldData && typeof oldData.index === "number" && oldData.index !== this.data.index) {
+        this.el.emit("owned-pager-page-changed");
+      }
+    }
+
     if (this.pageLabel) {
       this.pageLabel.setAttribute("text", "value", `${this.data.index + 1}/${this.data.maxIndex + 1}`);
     }
 
-    if (this.prevButton && this.nextButton && this.networkedEl) {
-      const isPinned = this.networkedEl.components.pinnable && this.networkedEl.components.pinnable.data.pinned;
+    if (this.prevButton && this.nextButton) {
+      const pinnableElement = this.el.components["media-loader"].data.linkedEl || this.el;
+      const isPinned = pinnableElement.components.pinnable && pinnableElement.components.pinnable.data.pinned;
       this.prevButton.object3D.visible = this.nextButton.object3D.visible =
         !isPinned || window.APP.hubChannel.can("pin_objects");
     }
@@ -619,7 +626,6 @@ AFRAME.registerComponent("media-pager", {
     const newIndex = Math.min(this.data.index + 1, this.data.maxIndex);
     this.el.setAttribute("media-pdf", "index", newIndex);
     this.el.setAttribute("media-pager", "index", newIndex);
-    this.el.emit("pager-page-changed");
   },
 
   onPrev() {
@@ -627,7 +633,6 @@ AFRAME.registerComponent("media-pager", {
     const newIndex = Math.max(this.data.index - 1, 0);
     this.el.setAttribute("media-pdf", "index", newIndex);
     this.el.setAttribute("media-pager", "index", newIndex);
-    this.el.emit("pager-page-changed");
   },
 
   onSnap() {
