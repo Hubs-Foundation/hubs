@@ -517,15 +517,24 @@ AFRAME.registerComponent("media-video", {
             linkedMediaElementAudioSource ||
             this.el.sceneEl.audioListener.context.createMediaElementSource(audioSourceEl);
 
+          if (this.el.components["listed-media"]) {
+            this.el.sceneEl.systems["hubs-systems"].sceneAudioSettingsSystem.unregisterMediaAudioSource(this.audio);
+          }
+
           if (this.data.audioType === "pannernode") {
             this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-            this.audio.setDistanceModel(this.data.distanceModel);
-            this.audio.setRolloffFactor(this.data.rolloffFactor);
-            this.audio.setRefDistance(this.data.refDistance);
-            this.audio.setMaxDistance(this.data.maxDistance);
-            this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
-            this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
-            this.audio.panner.coneOuterGain = this.data.coneOuterGain;
+
+            if (this.el.components["listed-media"]) {
+              this.el.sceneEl.systems["hubs-systems"].sceneAudioSettingsSystem.registerMediaAudioSource(this.audio);
+            } else {
+              this.audio.setDistanceModel(this.data.distanceModel);
+              this.audio.setRolloffFactor(this.data.rolloffFactor);
+              this.audio.setRefDistance(this.data.refDistance);
+              this.audio.setMaxDistance(this.data.maxDistance);
+              this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
+              this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
+              this.audio.panner.coneOuterGain = this.data.coneOuterGain;
+            }
           } else {
             this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
           }
@@ -885,6 +894,10 @@ AFRAME.registerComponent("media-video", {
       this.volumeDownButton.object3D.removeEventListener("interact", this.volumeDown);
       this.seekForwardButton.object3D.removeEventListener("interact", this.seekForward);
       this.seekBackButton.object3D.removeEventListener("interact", this.seekBack);
+    }
+
+    if (this.el.components["listed-media"]) {
+      this.el.sceneEl.systems["hubs-systems"].sceneAudioSettingsSystem.unregisterMediaAudioSource(this.audio);
     }
   }
 });

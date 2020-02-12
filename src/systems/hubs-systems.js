@@ -19,6 +19,7 @@ import { CharacterControllerSystem } from "./character-controller-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { CursorPoseTrackingSystem } from "./cursor-pose-tracking";
 import { ScaleInScreenSpaceSystem } from "./scale-in-screen-space";
+import { SceneAudioSettingsSystem } from "./scene-audio-settings-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -47,6 +48,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.waypointSystem = new WaypointSystem(this.el, this.characterController);
     this.cursorPoseTrackingSystem = new CursorPoseTrackingSystem();
     this.scaleInScreenSpaceSystem = new ScaleInScreenSpaceSystem();
+    this.sceneAudioSettingsSystem = new SceneAudioSettingsSystem(this.el);
   },
 
   tick(t, dt) {
