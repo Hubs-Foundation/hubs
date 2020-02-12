@@ -128,8 +128,10 @@ AFRAME.registerComponent("audio-source", {
 
     if (this.data.type === "avatar") {
       audioSettingsSystem.unregisterAvatarAudioSource(this.audioSource);
+      this.el.removeEventListener("sound-source-set", this.onSoundSourceSet);
     } else if (this.data.type === "media") {
       audioSettingsSystem.unregisterMediaAudioSource(this.audioSource);
+      this.el.removeEventListener("video-loaded", this.onVideoLoaded);
     }
   }
 });
