@@ -16,7 +16,10 @@ export default class RoomInfoDialog extends Component {
   };
 
   render() {
-    const showSceneLink = allowDisplayOfSceneLink(this.props.scene, this.props.store);
+    const hasDescription = !!this.props.hubDescription;
+    const hasScene = !!this.props.scene;
+
+    const showSceneLink = hasScene && allowDisplayOfSceneLink(this.props.scene, this.props.store);
 
     const toAttributionDiv = (a, i) => {
       if (a.url) {
@@ -51,7 +54,7 @@ export default class RoomInfoDialog extends Component {
     let attributions = null;
     let creator = null;
 
-    if (this.props.scene.attributions) {
+    if (hasScene && this.props.scene.attributions) {
       creator = this.props.scene.attributions.creator;
       attributions = (
         <div>
@@ -60,41 +63,50 @@ export default class RoomInfoDialog extends Component {
       );
     }
 
-    const title = <div className={styles.title}>Room & Scene Info</div>;
+    const title = (
+      <div className={styles.title}>{hasDescription && hasScene ? "Room & Scene Info" : this.props.hubName}</div>
+    );
 
     return (
       <DialogContainer title={title} wide={true} {...this.props}>
-        <div className={styles.subtitle}>Room Info</div>
-        <b>{this.props.hubName}</b>
-        <div className={styles.description}>{this.props.hubDescription}</div>
-        <div className={styles.subtitle}>Scene Info</div>
-        <div className={styles.roomInfo}>
-          <div className={styles.sceneScreenshot}>
-            {showSceneLink ? (
-              <a href={this.props.scene.url} target="_blank" rel="noopener noreferrer">
-                <img src={scaledThumbnailUrlFor(this.props.scene.screenshot_url, 400, 480)} />
-              </a>
-            ) : (
-              <img src={scaledThumbnailUrlFor(this.props.scene.screenshot_url, 400, 480)} />
-            )}
-          </div>
-          <div className={styles.sceneDetails}>
-            <div className={styles.sceneMain}>
-              <div className={styles.sceneName}>
+        {hasDescription && (
+          <>
+            {hasScene && <div className={styles.hubTitle}>{this.props.hubName}</div>}
+            <div className={styles.description}>{this.props.hubDescription}</div>
+          </>
+        )}
+        {hasScene && (
+          <>
+            <div className={styles.subtitle}>Scene Info</div>
+            <div className={styles.roomInfo}>
+              <div className={styles.sceneScreenshot}>
                 {showSceneLink ? (
                   <a href={this.props.scene.url} target="_blank" rel="noopener noreferrer">
-                    {this.props.scene.name}
+                    <img src={scaledThumbnailUrlFor(this.props.scene.screenshot_url, 400, 480)} />
                   </a>
                 ) : (
-                  <span>{this.props.scene.name}</span>
+                  <img src={scaledThumbnailUrlFor(this.props.scene.screenshot_url, 400, 480)} />
                 )}
               </div>
-              <div className={styles.sceneCreator}>{creator}</div>
+              <div className={styles.sceneDetails}>
+                <div className={styles.sceneMain}>
+                  <div className={styles.sceneName}>
+                    {showSceneLink ? (
+                      <a href={this.props.scene.url} target="_blank" rel="noopener noreferrer">
+                        {this.props.scene.name}
+                      </a>
+                    ) : (
+                      <span>{this.props.scene.name}</span>
+                    )}
+                  </div>
+                  <div className={styles.sceneCreator}>{creator}</div>
+                </div>
+                <div className={styles.sceneAttributions}>{attributions}</div>
+                <div className={styles.sceneButtons}> </div>
+              </div>
             </div>
-            <div className={styles.sceneAttributions}>{attributions}</div>
-            <div className={styles.sceneButtons}> </div>
-          </div>
-        </div>
+          </>
+        )}
       </DialogContainer>
     );
   }

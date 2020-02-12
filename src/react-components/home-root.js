@@ -20,6 +20,7 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import mediaBrowserStyles from "../assets/stylesheets/media-browser.scss";
 import AuthChannel from "../utils/auth-channel";
+import RoomInfoDialog from "./room-info-dialog.js";
 
 import styles from "../assets/stylesheets/index.scss";
 
@@ -102,6 +103,13 @@ class HomeRoot extends Component {
 
   showAuthDialog = (verifying, verified) => {
     this.showDialog(AuthDialog, { verifying, verified, authOrigin: this.props.authOrigin });
+  };
+
+  showHubInfo = hubEntry => {
+    this.showDialog(RoomInfoDialog, {
+      hubName: hubEntry.name,
+      hubDescription: hubEntry.description
+    });
   };
 
   loadHomeVideo = () => {
@@ -382,7 +390,7 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel} key={2}>
         <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
           <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-            <MediaTiles entries={this.props.featuredRooms} urlSource="favorites" />
+            <MediaTiles entries={this.props.featuredRooms} handleEntryInfo={this.showHubInfo} urlSource="favorites" />
           </div>
         </div>
       </div>

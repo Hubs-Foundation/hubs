@@ -401,21 +401,6 @@
           top: 6px;
           right: 7px;
 
-
-          :local(.info) {
-            color: var(--tile-button-icon-color);
-            background: var(--tile-button-background-color);
-            height: 30px;
-            border-radius: 30px;
-            line-height: 30px;
-            text-align: center;
-            display: block;
-            padding: 0 10px;
-            span {
-              margin-left: 5px;
-            }
-          }
-
           a {
             color: var(--tile-button-icon-color);
             background: var(--tile-button-background-color);
@@ -431,6 +416,21 @@
               background: $action-color;
               color: var(--tile-button-icon-hover-color);
             }
+          }
+        }
+
+        :local(.presence) {
+          position: absolute;
+          top: 165px;
+          right: 7px;
+          background: var(--tile-button-background-color);
+          height: 30px;
+          border-radius: 30px;
+          line-height: 30px;
+          padding: 0 10px;
+
+          span {
+            margin-left: 5px;
           }
         }
       }

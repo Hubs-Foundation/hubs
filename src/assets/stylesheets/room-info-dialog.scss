@@ -91,17 +91,24 @@
 :local(.description) {
   font-weight: normal;
   text-align: left;
-  margin-bottom: 20px;
   padding: 0px 12px;
 }
 
 :local(.subtitle) {
   margin: 1em;
-  margin-top: 0;
+  margin-top: 20px;
   font-size: 12pt;
   color: var(--menu-header-text-color);
   text-align: left;
   font-weight: normal;
   text-transform: uppercase;
   width: 100%
+}
+
+:local(.hub-title) {
+  font-weight: bold;
+  text-align: left;
+  margin: 0 12px;
+  margin-bottom: 10px;
+  font-size: 1.2em;
 }

@@ -1731,14 +1731,15 @@ class UIRoot extends Component {
               stateKey="modal"
               stateValue="room_info"
               history={this.props.history}
-              render={() =>
-                this.renderDialog(RoomInfoDialog, {
+              render={props => {
+                console.log(props);
+                return this.renderDialog(RoomInfoDialog, {
                   store: this.props.store,
                   scene: this.props.hubScene,
                   hubName: this.props.hubName,
                   hubDescription: this.props.hubDescription
-                })
-              }
+                });
+              }}
             />
             <StateRoute
               stateKey="modal"
