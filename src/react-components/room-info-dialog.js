@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import classNames from "classnames";
 
 import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/room-info-dialog.scss";
