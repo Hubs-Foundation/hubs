@@ -79,7 +79,7 @@ export class AudioSettingsSystem {
   };
 }
 
-AFRAME.registerComponent("audio-settings", {
+AFRAME.registerComponent("audio-source", {
   schema: {
     type: { type: "string" } // avatar, media
   },
