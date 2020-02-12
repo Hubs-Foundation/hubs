@@ -40,29 +40,24 @@ export class SceneAudioSettingsSystem {
   }
 
   registerMediaAudioSource(audioSource) {
-    console.log("registerMediaAudioSource", audioSource);
     this.mediaAudioSources.push(audioSource);
     updateMediaAudioSettings(audioSource, this.sceneAudioSettings);
   }
 
   unregisterMediaAudioSource(audioSource) {
-    console.log("unregisterMediaAudioSource", audioSource);
     this.mediaAudioSources.splice(this.mediaAudioSources.indexOf(audioSource, 1));
   }
 
   registerAvatarAudioSource(audioSource) {
-    console.log("registerAvatarAudioSource", audioSource);
     this.avatarAudioSources.push(audioSource);
     updateAvatarAudioSettings(audioSource, this.sceneAudioSettings);
   }
 
   unregisterAvatarAudioSource(audioSource) {
-    console.log("unregisterAvatarAudioSource", audioSource);
     this.avatarAudioSources.splice(this.avatarAudioSources.indexOf(audioSource, 1));
   }
 
   updateSceneAudioSettings(settings) {
-    console.log("updateSceneAudioSettings", settings);
     this.sceneAudioSettings = Object.assign({}, this.defaultSettings, settings);
 
     for (const mediaAudioSource of this.mediaAudioSources) {
@@ -75,7 +70,6 @@ export class SceneAudioSettingsSystem {
   }
 
   onSceneReset = () => {
-    console.log("onSceneReset");
     this.updateSceneAudioSettings(this.defaultSettings);
   };
 }
