@@ -195,6 +195,11 @@ class HomeRoot extends Component {
                       <FormattedMessage id="editor-name" />
                     </a>
                   </IfFeature>
+                  <IfFeature name="show_cloud">
+                    <a href="https://hubs.mozilla.com/cloud" rel="noreferrer noopener">
+                      <FormattedMessage id="home.cloud_link" />
+                    </a>
+                  </IfFeature>
                   {this.props.showAdmin && (
                     <a href="/admin" rel="noreferrer noopener">
                       <i>

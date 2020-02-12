@@ -215,6 +215,7 @@
     "home.whats_new_link": "What's New",
     "home.about_link": "About",
     "home.community_link": "Community",
+    "home.cloud_link": "Hubs Cloud",
     "home.admin": "Admin",
     "home.privacy_notice": "Privacy Notice",
     "home.terms_of_use": "Terms of Use",
@@ -237,11 +238,12 @@
     "link.do_not_close": "Your account and avatar will be transferred to the device.\nKeep this page open to use this code.",
     "link.connect_headset": "Enter on Device",
     "link.cancel": "cancel",
-    "invite.enter_via": "Enter via ",
+    "invite.enter_via": "Or use expiring ",
     "invite.enter_via_modal": "Others may enter via ",
     "invite.tweet": "tweet",
-    "invite.and_enter_code": " with code:",
-    "invite.or_visit": "or share permalink",
+    "invite.and_enter_code": " code:",
+    "invite.duration_of_code" : "new code every 72 hours",
+    "invite.or_visit": "Share room link:",
     "invite.or_visit_modal": "or by visiting permalink",
     "invite.embed": "or embed on a page",
     "invite.embed-tip": "Please be mindful of where you embed a %app-name% room.\nGo to Room Settings to lock down permissions for this room.",
@@ -397,6 +399,10 @@
     "tweet-dialog.close": "close",
     "oauth-dialog.sign-in.twitter": "Connect to Twitter",
     "oauth-dialog.sign-in.discord": "Sign in to Discord",
-    "oauth-dialog.message.twitter": "Connect to Twitter to send tweets from %app-name%."
+    "oauth-dialog.message.twitter": "Connect to Twitter to send tweets from %app-name%.",
+    "cloud.primary_tagline": "Hubs Cloud deploys server infrastructure for private,\ncollaborative 3D rooms that can be accessed on your\ndesktop, mobile phone, or VR headset.",
+    "cloud.secondary_tagline": "Get it today on the AWS Marketplace",
+    "cloud.call_to_action": "View AWS Marketplace Listing",
+    "cloud.splash_tag": "Configurable infrastructure for your own Hubs stack"
   }
 }

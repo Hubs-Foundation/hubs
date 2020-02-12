@@ -153,6 +153,8 @@ export async function createInWorldLogMessage({ name, type, body }) {
   document.querySelector("a-scene").appendChild(entity);
 
   entity.appendChild(meshEntity);
+  entity.setAttribute("class", "ui");
+  entity.setAttribute("is-remote-hover-target", {});
   entity.setAttribute("follow-in-fov", {
     target: "#avatar-pov-node",
     offset: { x: 0, y: 0.0, z: -0.8 }

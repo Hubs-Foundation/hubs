@@ -102,6 +102,7 @@ module.exports = (env, argv) => ({
     avatar: path.join(__dirname, "src", "avatar.js"),
     link: path.join(__dirname, "src", "link.js"),
     discord: path.join(__dirname, "src", "discord.js"),
+    cloud: path.join(__dirname, "src", "cloud.js"),
     "whats-new": path.join(__dirname, "src", "whats-new.js")
   },
   output: {
@@ -311,6 +312,12 @@ module.exports = (env, argv) => ({
       filename: "whats-new.html",
       template: path.join(__dirname, "src", "whats-new.html"),
       chunks: ["vendor", "whats-new"],
+      inject: "head"
+    }),
+    new HTMLWebpackPlugin({
+      filename: "cloud.html",
+      template: path.join(__dirname, "src", "cloud.html"),
+      chunks: ["vendor", "cloud"],
       inject: "head"
     }),
     new CopyWebpackPlugin([

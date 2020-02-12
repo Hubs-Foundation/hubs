@@ -38,6 +38,7 @@ features.show_whats_new_link = { category = "features", type = "boolean", intern
 features.show_source_link = { category = "features", type = "boolean", internal = "true" }
 features.show_feedback_ui = { category = "features", type = "boolean", internal = "true" }
 features.show_issue_report_dialog = { category = "features", type = "boolean", internal = "true" }
+features.show_cloud = { category = "features', type = "boolean", internal = "true" }
 
 images.logo = { category = "images", type = "file", name = "App Logo", description = "Logo used across the app." }
 images.favicon = { category = "images", type = "file", name = "Favicon", description = "Icon for the app." }

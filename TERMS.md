@@ -1,6 +1,6 @@
 # Terms of Service for Hubs and Spoke
 
-Version 3.3, Effective November 15, 2019
+Version 3.4, Effective February 9, 2020
 
 [Hubs by Mozilla](https://hubs.mozilla.com) is a real-time communications platform for Virtual Reality, Augmented Reality, Desktop, Laptop, Mobile, or however else you browse the internet.
 
@@ -19,7 +19,7 @@ Spoke allows users to arrange 3D Room models into scenes that can appear in Hubs
 
 By using Hubs or Spoke, you agree to give Mozilla all rights necessary to operate Hubs and Spoke. This includes, but is not limited to, a license and permission to process, transmit, and display the information you send through Hubs or Spoke. It also includes permission to gather and share information as described in the [Privacy Notice](https://github.com/mozilla/hubs/blob/master/PRIVACY.md) for Hubs and Spoke. 
 
-When you submit information to Hubs or Spoke, you grant us a worldwide, royalty-free, perpetual, irrevocable, non-exclusive, transferable, and sublicensable license to use, copy, modify, adapt, prepare derivative works from, distribute, perform, and display that information, audio, video, images, or 3D models. You also agree that we may remove metadata associated with the information or data you submit. If you allow allow remixing of a scene or avatar you create, you agree to license your scene under a [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/legalcode) license. 
+When you submit information to Hubs or Spoke, you continue to own the rights to your content. You grant us a worldwide, royalty-free, perpetual, irrevocable, non-exclusive, transferable, and sublicensable license to use, copy, modify, adapt, prepare derivative works from, distribute, perform, and display that information, audio, video, images, or 3D models for the purpose of operating Hubs and Spoke. You also agree that we may remove metadata associated with the information or data you submit. If you allow allow remixing of a scene or avatar you create, you agree to license your scene under a [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/legalcode) license. 
 
 You also represent and warrant that you have the authority to grant Mozilla all rights and permissions necessary for the operation of Hubs and Spoke. 
 

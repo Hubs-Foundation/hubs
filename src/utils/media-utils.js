@@ -1,5 +1,6 @@
 import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
+import { ObjectContentOrigins } from "../object-types";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
@@ -133,12 +134,34 @@ export const addMedia = (
   resolve = false,
   fitToBox = false,
   animate = true,
-  mediaOptions = {}
+  mediaOptions = {},
+  networked = true,
+  parentEl = null,
+  linkedEl = null
 ) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
-  entity.setAttribute("networked", { template: template });
+
+  if (networked) {
+    entity.setAttribute("networked", { template: template });
+  } else {
+    const templateBody = document
+      .importNode(document.body.querySelector(template).content, true)
+      .firstElementChild.cloneNode(true);
+    const elAttrs = templateBody.attributes;
+
+    // Merge root element attributes with this entity
+    for (let attrIdx = 0; attrIdx < elAttrs.length; attrIdx++) {
+      entity.setAttribute(elAttrs[attrIdx].name, elAttrs[attrIdx].value);
+    }
+
+    // Append all child elements
+    while (templateBody.firstElementChild) {
+      entity.appendChild(templateBody.firstElementChild);
+    }
+  }
+
   const needsToBeUploaded = src instanceof File;
 
   // If we're re-pasting an existing src in the scene, we should use the latest version
@@ -153,12 +176,13 @@ export const addMedia = (
     version,
     contentSubtype,
     fileIsOwned: !needsToBeUploaded,
+    linkedEl,
     mediaOptions
   });
 
   entity.object3D.matrixNeedsUpdate = true;
 
-  scene.appendChild(entity);
+  (parentEl || scene).appendChild(entity);
 
   const orientation = new Promise(function(resolve) {
     if (needsToBeUploaded) {
@@ -198,6 +222,28 @@ export const addMedia = (
   }
 
   return { entity, orientation };
+};
+
+export const cloneMedia = (sourceEl, template, src = null, networked = true, link = false, parentEl = null) => {
+  if (!src) {
+    ({ src } = sourceEl.components["media-loader"].data);
+  }
+
+  const { contentSubtype, fitToBox, mediaOptions } = sourceEl.components["media-loader"].data;
+
+  return addMedia(
+    src,
+    template,
+    ObjectContentOrigins.URL,
+    contentSubtype,
+    true,
+    fitToBox,
+    false,
+    mediaOptions,
+    networked,
+    parentEl,
+    link ? sourceEl : null
+  );
 };
 
 export function injectCustomShaderChunks(obj) {
@@ -435,4 +481,26 @@ export function addMeshScaleAnimation(mesh, initialScale, onComplete) {
   mesh.matrixNeedsUpdate = true;
 
   return anime(config);
+}
+
+export function closeExistingMediaMirror() {
+  const mirrorTarget = document.querySelector("#media-mirror-target");
+
+  // Remove old mirror target media element
+  if (mirrorTarget.firstChild) {
+    mirrorTarget.firstChild.setAttribute("animation__remove", {
+      property: "scale",
+      dur: 200,
+      to: { x: 0.01, y: 0.01, z: 0.01 },
+      easing: "easeInQuad"
+    });
+
+    return new Promise(res => {
+      mirrorTarget.firstChild.addEventListener("animationcomplete", () => {
+        mirrorTarget.removeChild(mirrorTarget.firstChild);
+        mirrorTarget.parentEl.object3D.visible = false;
+        res();
+      });
+    });
+  }
 }

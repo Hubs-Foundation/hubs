@@ -6,9 +6,18 @@
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
+    <meta property="og:url" content="https://hubs.mozilla.com/cloud">
+    <meta property="og:title" content="Hubs Cloud">
+    <meta property="og:description" content="Deploy Customized Hubs on AWS">
+    <meta property="og:image" content="https://hubs.mozilla.com/-logo.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:domain" value="hubs.mozilla.com">
+    <meta name="twitter:title" value="Hubs Cloud">
+    <meta name="twitter:description" content="Deploy Customized Hubs on AWS">
+    <meta property="twitter:image" content="https://hubs.mozilla.com/hubs-cloud-dark.png">
+    <meta name="twitter:url" value="https://hubs.mozilla.com/cloud">
     <link rel="shortcut icon" type="image/png" href="/favicon.ico">
-    <title>Scene</title>
+    <title>Get Hubs Cloud</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700" rel="stylesheet">
     <!-- Google Analytics -->
     <!-- NOTE GA tracking is disabled by default. You'll need to set the GA_TRACKING_ID build variable to enable it. -->
@@ -23,26 +32,6 @@
 </head>
 
 <body>
-    <a-scene
-        loading-screen="enabled: false"
-        renderer="
-            antialias: true;
-            gammaOutput: true;
-            sortObjects: true;
-            physicallyCorrectLights: true;
-            colorManagement: true;
-            alpha: false;"
-        shadow="type: pcfsoft"
-        environment-map
-    >
-        <a-entity
-            id="scene-root"
-            static-body="shape: none;"
-        ></a-entity>
-
-        <a-camera id="camera" fov="80" near="0.05" look-controls="enabled: false" wasd-controls="enabled: false"></a-camera>
-    </a-scene>
-
     <div id="ui-root"></div>
 </body>
 
