@@ -190,7 +190,7 @@
                         <template data-name="Head">
                             <a-entity
                                 networked-audio-source="rolloffFactor: 2.0;"
-                                avatar-audio-settings
+                                audio-settings="type: avatar"
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
                                 body-helper="type: kinematic; collisionFilterGroup: 4; collisionFilterMask: 1;"
@@ -242,6 +242,7 @@
                     position-at-box-shape-border__freeze-unprivileged="target:.freeze-unprivileged-menu;"
                     hoverable-visuals
                     listed-media
+                    audio-settings="type: media"
                 >
                     <a-entity class="ui interactable-ui">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media">

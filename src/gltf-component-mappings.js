@@ -379,10 +379,6 @@ AFRAME.GLTFModelPlus.registerComponent("particle-emitter", "particle-emitter");
 
 AFRAME.GLTFModelPlus.registerComponent("networked-drawing-buffer", "networked-drawing-buffer");
 
-AFRAME.GLTFModelPlus.registerComponent(
-  "scene-audio-settings",
-  "scene-audio-settings",
-  (el, _componentName, componentData) => {
-    el.sceneEl.systems["hubs-systems"].sceneAudioSettingsSystem.updateSceneAudioSettings(componentData);
-  }
-);
+AFRAME.GLTFModelPlus.registerComponent("audio-settings", "audio-settings", (el, _componentName, componentData) => {
+  el.sceneEl.systems["hubs-systems"].audioSettingsSystem.updateAudioSettings(componentData);
+});
