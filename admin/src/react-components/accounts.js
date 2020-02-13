@@ -1,5 +1,5 @@
 import React from "react";
-import { IdentityEditLink } from "./fields";
+import { IdentityEditLink, IdentityCreateLink } from "./fields";
 import { withStyles } from "@material-ui/core/styles";
 
 import {
@@ -37,12 +37,14 @@ export const AccountList = withStyles(styles)(props => {
         <TextField source="id" />
         <DateField source="inserted_at" />
         <DateField source="updated_at" />
-        <ReferenceManyField label="Name" target="_account_id" reference="identities">
+        <ReferenceManyField label="Identity" target="_account_id" reference="identities">
           <Datagrid classes={{ rowCell: classes.noBorder, thead: classes.hide }}>
             <TextField source="name" />
             <IdentityEditLink />
           </Datagrid>
         </ReferenceManyField>
+
+        <IdentityCreateLink />
         <BooleanField source="is_admin" />
         <EditButton />
       </Datagrid>
@@ -50,10 +52,21 @@ export const AccountList = withStyles(styles)(props => {
   );
 });
 
-export const AccountEdit = props => (
-  <Edit {...props}>
-    <SimpleForm>
-      <BooleanInput source="is_admin" />
-    </SimpleForm>
-  </Edit>
-);
+export const AccountEdit = withStyles(styles)(props => {
+  const { classes } = props;
+
+  return (
+    <Edit {...props}>
+      <SimpleForm>
+        <BooleanInput source="is_admin" />
+
+        <ReferenceManyField label="Identity" target="_account_id" reference="identities">
+          <Datagrid classes={{ rowCell: classes.noBorder, thead: classes.hide }}>
+            <TextField source="name" />
+            <IdentityEditLink />
+          </Datagrid>
+        </ReferenceManyField>
+      </SimpleForm>
+    </Edit>
+  );
+});

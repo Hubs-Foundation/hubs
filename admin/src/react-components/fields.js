@@ -8,7 +8,7 @@ import { ReferenceField } from "react-admin";
 const styles = {
   ownedFileImage: {},
 
-  sceneLink: {},
+  fieldLink: {},
   avatarLink: {},
 
   ownedFileImageAspect_square: {
@@ -142,7 +142,7 @@ export const OwnedFileSizeField = withStyles(styles)(({ label, basePath, record,
 export const SceneLink = withStyles(styles)(({ source, record = {}, classes }) => {
   const src = getReticulumFetchUrl(`/scenes/${record.scene_sid || record.scene_listing_sid}`);
   return (
-    <a href={src} className={classes.sceneLink} target="_blank" rel="noopener noreferrer">
+    <a href={src} className={classes.fieldLink} target="_blank" rel="noopener noreferrer">
       {record[source]}
       <LaunchIcon className={classes.icon} />
     </a>
@@ -173,11 +173,19 @@ AvatarLink.propTypes = {
 
 export const IdentityEditLink = withStyles(styles)(({ record = {}, classes }) => {
   return record ? (
-    <a href={`#/identities/${record.id}`} className={classes.sceneLink}>
-      Edit Name
+    <a href={`#/identities/${record.id}`} className={classes.fieldLink}>
+      Edit Identity
     </a>
   ) : (
     <div />
+  );
+});
+
+export const IdentityCreateLink = withStyles(styles)(({ record, classes }) => {
+  return (
+    <a href={`#/identities/create?account_id=${record.id}`} className={classes.fieldLink}>
+      Create Identity
+    </a>
   );
 });
 
