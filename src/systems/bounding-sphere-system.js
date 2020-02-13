@@ -1,5 +1,5 @@
 import { computeObjectAABB } from "../utils/auto-box-collider";
-import { setMatrixWorld, isAlmostUniformVector3 } from "../utils/three-utils";
+import { isAlmostUniformVector3 } from "../utils/three-utils";
 import { v3String } from "../utils/pretty-print";
 
 const computeBoundingSphereInfo = (function() {
@@ -9,7 +9,6 @@ const computeBoundingSphereInfo = (function() {
   const sphere = new THREE.Sphere();
   const meshPosition = new THREE.Vector3();
   const meshQuaternion = new THREE.Quaternion();
-  const temporaryTransform = new THREE.Matrix4();
   const meshScale = new THREE.Vector3();
   const meshRotation = new THREE.Matrix4();
   const meshRotationInverse = new THREE.Matrix4();

@@ -14,7 +14,7 @@ export class MenuAnimationSystem {
     this.els.push(el);
     this.data.set(el, { menuOpenTime: -1, startScaleAtMenuOpenTime: 0, wasMenuVisible: false });
   }
-  unregister() {
+  unregister(el) {
     this.els.splice(this.els.indexOf(el), 1);
     this.data.delete(el);
   }
