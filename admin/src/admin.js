@@ -141,6 +141,7 @@ class AdminUI extends Component {
           <Resource name="accounts" list={AccountList} edit={AccountEdit} />
           <Resource name="scenes" list={SceneList} edit={SceneEdit} />
           <Resource name="avatars" list={AvatarList} edit={AvatarEdit} />
+          <Resource name="identities" />
           <Resource name="owned_files" />
 
           <Resource name="projects" list={ProjectList} show={ProjectShow} />

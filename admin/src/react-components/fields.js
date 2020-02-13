@@ -170,3 +170,19 @@ AvatarLink.propTypes = {
   record: PropTypes.object,
   classes: PropTypes.object
 };
+
+export const IdentityEditLink = withStyles(styles)(({ record = {}, classes }) => {
+  return record ? (
+    <a href={`#/identities/${record.id}`} className={classes.sceneLink}>
+      Edit Name
+    </a>
+  ) : (
+    <div />
+  );
+});
+
+SceneLink.propTypes = {
+  source: PropTypes.string.isRequired,
+  record: PropTypes.object,
+  classes: PropTypes.object
+};

@@ -1,4 +1,6 @@
 import React from "react";
+import { IdentityEditLink } from "./fields";
+import { withStyles } from "@material-ui/core/styles";
 
 import {
   List,
@@ -10,9 +12,15 @@ import {
   TextField,
   DateField,
   BooleanField,
+  ReferenceManyField,
   EditButton,
   Filter
 } from "react-admin";
+
+const styles = {
+  hide: { display: "none" },
+  noBorder: { border: "0px" }
+};
 
 const AccountFilter = props => (
   <Filter {...props}>
@@ -20,17 +28,27 @@ const AccountFilter = props => (
   </Filter>
 );
 
-export const AccountList = props => (
-  <List {...props} filters={<AccountFilter />}>
-    <Datagrid>
-      <TextField source="id" />
-      <DateField source="inserted_at" />
-      <DateField source="updated_at" />
-      <BooleanField source="is_admin" />
-      <EditButton />
-    </Datagrid>
-  </List>
-);
+export const AccountList = withStyles(styles)(props => {
+  const { classes } = props;
+
+  return (
+    <List {...props} filters={<AccountFilter />}>
+      <Datagrid>
+        <TextField source="id" />
+        <DateField source="inserted_at" />
+        <DateField source="updated_at" />
+        <ReferenceManyField label="Name" target="_account_id" reference="identities">
+          <Datagrid classes={{ rowCell: classes.noBorder, thead: classes.hide }}>
+            <TextField source="name" />
+            <IdentityEditLink />
+          </Datagrid>
+        </ReferenceManyField>
+        <BooleanField source="is_admin" />
+        <EditButton />
+      </Datagrid>
+    </List>
+  );
+});
 
 export const AccountEdit = props => (
   <Edit {...props}>
