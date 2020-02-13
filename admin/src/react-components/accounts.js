@@ -58,6 +58,7 @@ export const AccountEdit = withStyles(styles)(props => {
   return (
     <Edit {...props}>
       <SimpleForm>
+        <TextField label="Account ID" source="id" />
         <BooleanInput source="is_admin" />
 
         <ReferenceManyField label="Identity" target="_account_id" reference="identities">
