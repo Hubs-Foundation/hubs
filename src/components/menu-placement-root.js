@@ -13,6 +13,7 @@ AFRAME.registerComponent("menu-placement-root", {
       const systems = this.el.sceneEl.systems["hubs-systems"];
       const menuEl = this.el.querySelector(this.data.menuSelector);
       systems.boundingSphereSystem.register(this.el);
+      systems.boundingSphereVisualizationSystem.register(this.el);
       systems.menuPlacementSystem.register(this.el, menuEl);
       systems.menuAnimationSystem.register(menuEl);
     }
@@ -22,6 +23,7 @@ AFRAME.registerComponent("menu-placement-root", {
       const systems = this.el.sceneEl.systems["hubs-systems"];
       const menuEl = this.el.querySelector(this.data.menuSelector);
       systems.boundingSphereSystem.unregister(this.el);
+      systems.boundingSphereVisualizationSystem.unregister(this.el);
       systems.menuPlacementSystem.unregister(this.el);
       systems.menuAnimationSystem.unregister(menuEl);
     }

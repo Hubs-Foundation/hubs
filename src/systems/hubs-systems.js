@@ -19,7 +19,8 @@ import { CharacterControllerSystem } from "./character-controller-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { CursorPoseTrackingSystem } from "./cursor-pose-tracking";
 import { ScaleInScreenSpaceSystem } from "./scale-in-screen-space";
-import { BoundingSphereSystem, BoundingSphereVisualizationSystem } from "./bounding-sphere-system";
+import { BoundingSphereSystem } from "./bounding-sphere-system";
+import { BoundingSphereVisualizationSystem } from "./bounding-sphere-visualization-system";
 import { MenuPlacementSystem } from "./menu-placement-system";
 import { MenuAnimationSystem } from "./menu-animation-system";
 
