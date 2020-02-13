@@ -105,7 +105,7 @@ class HomeRoot extends Component {
     this.showDialog(AuthDialog, { verifying, verified, authOrigin: this.props.authOrigin });
   };
 
-  showHubInfo = hubEntry => {
+  showRoomInfo = hubEntry => {
     this.showDialog(RoomInfoDialog, {
       hubName: hubEntry.name,
       hubDescription: hubEntry.description
@@ -390,7 +390,11 @@ class HomeRoot extends Component {
       <div className={styles.heroPanel} key={2}>
         <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
           <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-            <MediaTiles entries={this.props.featuredRooms} handleEntryInfo={this.showHubInfo} urlSource="favorites" />
+            <MediaTiles
+              entries={this.props.featuredRooms}
+              handleEntryInfoClicked={this.showRoomInfo}
+              urlSource="favorites"
+            />
           </div>
         </div>
       </div>

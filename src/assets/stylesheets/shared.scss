@@ -61,7 +61,7 @@ $favorited-color: var(--favorited-color, $duck-yellow);
   width: 100%;
 }
 
-%textarea {
+%input-textarea {
   @extend %input-field;
   padding: 0.4em 1em;
   line-height: 1.5em;

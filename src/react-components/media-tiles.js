@@ -43,7 +43,7 @@ class MediaTiles extends Component {
     history: PropTypes.object,
     urlSource: PropTypes.string,
     handleEntryClicked: PropTypes.func,
-    handleEntryInfo: PropTypes.func,
+    handleEntryInfoClicked: PropTypes.func,
     handlePager: PropTypes.func,
     onCopyAvatar: PropTypes.func,
     onCopyScene: PropTypes.func,
@@ -245,13 +245,13 @@ class MediaTiles extends Component {
               </a>
             )}
           {entry.type === "room" &&
-            this.props.handleEntryInfo &&
+            this.props.handleEntryInfoClicked &&
             entry.description && (
               <a
                 title="room info"
                 onClick={e => {
                   e.preventDefault();
-                  this.props.handleEntryInfo(entry);
+                  this.props.handleEntryInfoClicked(entry);
                 }}
               >
                 <FontAwesomeIcon icon={faInfo} />
@@ -305,7 +305,7 @@ class MediaTiles extends Component {
               <>
                 <div className={styles.attribution}>
                   <div className={styles.lastJoined}>
-                    <FormattedMessage key="1" id="media-browser.hub.joined-prefix" />
+                    <FormattedMessage id="media-browser.hub.joined-prefix" />
                     {dayjs(entry.last_activated_at).fromNow()}
                   </div>
                 </div>

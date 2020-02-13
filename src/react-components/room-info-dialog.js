@@ -1,12 +1,13 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import { injectIntl, FormattedMessage } from "react-intl";
 
 import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/room-info-dialog.scss";
 import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import { allowDisplayOfSceneLink } from "../utils/scene-url-utils";
 
-export default class RoomInfoDialog extends Component {
+class RoomInfoDialog extends Component {
   static propTypes = {
     hubName: PropTypes.string,
     hubDescription: PropTypes.string,
@@ -63,7 +64,9 @@ export default class RoomInfoDialog extends Component {
     }
 
     const title = (
-      <div className={styles.title}>{hasDescription && hasScene ? "Room & Scene Info" : this.props.hubName}</div>
+      <div className={styles.title}>
+        {hasDescription && hasScene ? <FormattedMessage id="room-info.title" /> : this.props.hubName}
+      </div>
     );
 
     return (
@@ -76,7 +79,9 @@ export default class RoomInfoDialog extends Component {
         )}
         {hasScene && (
           <>
-            <div className={styles.subtitle}>Scene Info</div>
+            <div className={styles.subtitle}>
+              <FormattedMessage id="room-info.scene-info" />
+            </div>
             <div className={styles.roomInfo}>
               <div className={styles.sceneScreenshot}>
                 {showSceneLink ? (
@@ -110,3 +115,4 @@ export default class RoomInfoDialog extends Component {
     );
   }
 }
+export default injectIntl(RoomInfoDialog);

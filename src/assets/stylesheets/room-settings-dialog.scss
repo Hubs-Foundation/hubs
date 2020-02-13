@@ -23,7 +23,7 @@
 }
 
 :local(.description-field) {
-  @extend %textarea;
+  @extend %input-textarea;
   margin-bottom: 1.5em;
   margin-top: 0;
 }
