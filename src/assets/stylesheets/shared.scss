@@ -61,6 +61,12 @@ $favorited-color: var(--favorited-color, $duck-yellow);
   width: 100%;
 }
 
+%input-textarea {
+  @extend %input-field;
+  padding: 0.4em 1em;
+  line-height: 1.5em;
+}
+
 %big-action-button {
   @extend %default-font;
   appearance: none;

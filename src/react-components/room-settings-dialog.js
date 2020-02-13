@@ -72,6 +72,20 @@ export default class RoomSettingsDialog extends Component {
             onChange={e => this.setState({ name: e.target.value })}
             className={styles.nameField}
           />
+          <span className={styles.subtitle}>
+            <FormattedMessage id="room-settings.description-subtitle" />
+          </span>
+          <textarea
+            name="description"
+            rows="5"
+            autoComplete="off"
+            placeholder="Room description"
+            value={this.state.description}
+            onFocus={e => handleTextFieldFocus(e.target)}
+            onBlur={() => handleTextFieldBlur()}
+            onChange={e => this.setState({ description: e.target.value })}
+            className={styles.descriptionField}
+          />
           {showRoomAccessSettings && (
             <>
               <span className={styles.subtitle}>

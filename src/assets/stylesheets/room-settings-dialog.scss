@@ -22,6 +22,12 @@
   margin-top: 0;
 }
 
+:local(.description-field) {
+  @extend %input-textarea;
+  margin-bottom: 1.5em;
+  margin-top: 0;
+}
+
 :local(.next-button), :local(.continue-button) {
   @extend %action-button;
   margin-top: 1em;
