@@ -171,23 +171,18 @@ AvatarLink.propTypes = {
   classes: PropTypes.object
 };
 
-export const IdentityEditLink = withStyles(styles)(({ record = {}, classes }) => {
-  return record ? (
+export const IdentityEditLink = withStyles(styles)(({ record = {}, classes }) => (
     <a href={`#/identities/${record.id}`} className={classes.fieldLink}>
       Edit Identity
     </a>
-  ) : (
-    <div />
   );
-});
 
-export const IdentityCreateLink = withStyles(styles)(({ record, classes }) => {
-  return (
+export const IdentityCreateLink = withStyles(styles)(({ record, classes }) => 
+  (
     <a href={`#/identities/create?account_id=${record.id}`} className={classes.fieldLink}>
       Create Identity
     </a>
   );
-});
 
 SceneLink.propTypes = {
   source: PropTypes.string.isRequired,
