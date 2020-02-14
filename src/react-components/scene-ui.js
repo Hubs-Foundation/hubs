@@ -30,6 +30,7 @@ class SceneUI extends Component {
     sceneScreenshotURL: PropTypes.string,
     sceneProjectId: PropTypes.string,
     sceneAllowRemixing: PropTypes.bool,
+    showCreateRoom: PropTypes.bool,
     unavailable: PropTypes.bool,
     isOwner: PropTypes.bool,
     parentScene: PropTypes.object
@@ -164,44 +165,48 @@ class SceneUI extends Component {
               <div className={styles.logoTagline}>
                 <FormattedMessage id="app-tagline" />
               </div>
-              <div className={styles.createButtons}>
-                <WithHoverSound>
-                  <button className={styles.createButton} onClick={this.createRoom}>
-                    <FormattedMessage id="scene.create_button" />
-                  </button>
-                </WithHoverSound>
-                <WithHoverSound>
-                  <button
-                    className={styles.optionsButton}
-                    onClick={() => this.setState({ showCustomRoomDialog: true })}
-                  >
-                    <FontAwesomeIcon icon={faEllipsisH} />
-                  </button>
-                </WithHoverSound>
-              </div>
-              {isOwner && sceneProjectId ? (
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={getReticulumFetchUrl(`/spoke/projects/${sceneProjectId}`)}
-                  className={styles.spokeButton}
-                >
-                  <FontAwesomeIcon icon={faPencilAlt} />
-                  <FormattedMessage id="scene.edit_button" />
-                </a>
-              ) : (
-                sceneAllowRemixing && (
+              {this.props.showCreateRoom && (
+                <div className={styles.createButtons}>
+                  <WithHoverSound>
+                    <button className={styles.createButton} onClick={this.createRoom}>
+                      <FormattedMessage id="scene.create_button" />
+                    </button>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <button
+                      className={styles.optionsButton}
+                      onClick={() => this.setState({ showCustomRoomDialog: true })}
+                    >
+                      <FontAwesomeIcon icon={faEllipsisH} />
+                    </button>
+                  </WithHoverSound>
+                </div>
+              )}
+              <IfFeature name="enable_spoke">
+                {isOwner && sceneProjectId ? (
                   <a
                     target="_blank"
                     rel="noopener noreferrer"
-                    href={getReticulumFetchUrl(`/spoke/projects/new?sceneId=${sceneId}`)}
+                    href={getReticulumFetchUrl(`/spoke/projects/${sceneProjectId}`)}
                     className={styles.spokeButton}
                   >
-                    <FontAwesomeIcon icon={faCodeBranch} />
-                    <FormattedMessage id="scene.remix_button" />
+                    <FontAwesomeIcon icon={faPencilAlt} />
+                    <FormattedMessage id="scene.edit_button" />
                   </a>
-                )
-              )}
+                ) : (
+                  sceneAllowRemixing && (
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={getReticulumFetchUrl(`/spoke/projects/new?sceneId=${sceneId}`)}
+                      className={styles.spokeButton}
+                    >
+                      <FontAwesomeIcon icon={faCodeBranch} />
+                      <FormattedMessage id="scene.remix_button" />
+                    </a>
+                  )
+                )}
+              </IfFeature>
               <WithHoverSound>
                 <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>
                   <img src="../assets/images/twitter.svg" />

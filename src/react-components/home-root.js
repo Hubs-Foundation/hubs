@@ -45,10 +45,12 @@ class HomeRoot extends Component {
     installEvent: PropTypes.object,
     hideHero: PropTypes.bool,
     showAdmin: PropTypes.bool,
+    showCreate: PropTypes.bool,
     featuredRooms: PropTypes.array,
     publicRoomsResult: PropTypes.object,
     showSignIn: PropTypes.bool,
     signInDestination: PropTypes.string,
+    signInDestinationUrl: PropTypes.string,
     signInReason: PropTypes.string
   };
 
@@ -130,6 +132,8 @@ class HomeRoot extends Component {
       messageId = "sign-in.admin-no-permission";
     } else if (this.props.signInDestination === "admin") {
       messageId = "sign-in.admin";
+    } else if (this.props.signInDestination === "hub") {
+      messageId = "sign-in.hub";
     }
 
     this.showDialog(SignInDialog, {
@@ -142,7 +146,9 @@ class HomeRoot extends Component {
         this.setState({ signedIn: true, email });
         this.closeDialog();
 
-        if (this.props.signInDestination === "admin") {
+        if (this.props.signInDestinationUrl) {
+          document.location = this.props.signInDestinationUrl;
+        } else if (this.props.signInDestination === "admin") {
           document.location = isLocalClient() ? "/admin.html" : "/admin";
         }
       }
@@ -383,7 +389,7 @@ class HomeRoot extends Component {
           </div>
         </div>
         <div className={styles.ctaButtons}>
-          {this.renderCreateButton()}
+          {this.props.showCreate && this.renderCreateButton()}
           {this.renderPwaButton()}
         </div>
       </div>,
@@ -413,7 +419,7 @@ class HomeRoot extends Component {
           </div>
         </div>
         <div className={styles.ctaButtons}>
-          {this.renderCreateButton()}
+          {this.props.showCreate && this.renderCreateButton()}
           {this.renderPwaButton()}
         </div>
       </div>

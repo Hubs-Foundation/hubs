@@ -26,6 +26,7 @@ let featuredRooms = null;
 let mountedUI = false;
 let hideHero = true;
 let showAdmin = false;
+let showCreate = false;
 
 const remountUI = function() {
   mountedUI = true;
@@ -41,9 +42,11 @@ const remountUI = function() {
       authOrigin={qs.get("auth_origin")}
       showSignIn={qs.has("sign_in")}
       signInDestination={qs.get("sign_in_destination")}
+      signInDestinationUrl={qs.get("sign_in_destination_url")}
       signInReason={qs.get("sign_in_reason")}
       hideHero={hideHero}
       showAdmin={showAdmin}
+      showCreate={showCreate}
       featuredRooms={featuredRooms}
       installEvent={installEvent}
     />
@@ -102,22 +105,28 @@ async function fetchFeaturedRooms() {
   const socket = await connectToReticulum();
 
   authChannel.setSocket(socket);
-  if (authChannel.signedIn) {
-    const retPhxChannel = socket.channel(`ret`, { hub_id: "index", token: store.state.credentials.token });
-    retPhxChannel.join().receive("ok", () => {
-      retPhxChannel.push("refresh_perms_token").receive("ok", ({ perms_token }) => {
-        const perms = jwtDecode(perms_token);
-        configs.setIsAdmin(perms.postgrest_role === "ret_admin");
+  const joinParams = { hub_id: "index" };
 
-        if (perms.postgrest_role === "ret_admin") {
-          showAdmin = true;
-          remountUI();
-        }
-
-        retPhxChannel.leave();
-      });
-    });
+  if (store.state.credentials && store.state.credentials.token) {
+    joinParams.token = store.state.credentials.token;
   }
+
+  const retPhxChannel = socket.channel("ret", joinParams);
+  retPhxChannel.join().receive("ok", () => {
+    retPhxChannel.push("refresh_perms_token").receive("ok", ({ perms_token }) => {
+      const perms = jwtDecode(perms_token);
+      configs.setIsAdmin(perms.postgrest_role === "ret_admin");
+
+      if (perms.postgrest_role === "ret_admin") {
+        showAdmin = true;
+      }
+
+      showCreate = !!perms.create_hub;
+      remountUI();
+
+      retPhxChannel.leave();
+    });
+  });
 
   hideHero = false;
   remountUI();
