@@ -53,9 +53,9 @@ export async function getReticulumMeta() {
   return reticulumMeta;
 }
 
-let cachedDirectReticulumHostAndPort;
+let directReticulumHostAndPort;
 
-async function refreshCachedDirectReticulumHostAndPort() {
+async function refreshDirectReticulumHostAndPort() {
   const qs = new URLSearchParams(location.search);
   let host = qs.get("phx_host");
   const reticulumMeta = await getReticulumMeta();
@@ -63,16 +63,16 @@ async function refreshCachedDirectReticulumHostAndPort() {
   const port =
     qs.get("phx_port") ||
     (hasReticulumServer() ? new URL(`${document.location.protocol}//${configs.RETICULUM_SERVER}`).port : "443");
-  cachedDirectReticulumHostAndPort = { host, port };
+  directReticulumHostAndPort = { host, port };
 }
 
 export function getDirectReticulumFetchUrl(path, absolute = false) {
-  if (!cachedDirectReticulumHostAndPort) {
+  if (!directReticulumHostAndPort) {
     console.warn("Cannot call getDirectReticulumFetchUrl before connectToReticulum. Returning non-direct url.");
     return getReticulumFetchUrl(path, absolute);
   }
 
-  const { host, port } = cachedDirectReticulumHostAndPort;
+  const { host, port } = directReticulumHostAndPort;
   return getReticulumFetchUrl(path, absolute, host, port);
 }
 
@@ -85,8 +85,8 @@ export async function connectToReticulum(debug = false, params = null, socketCla
   const qs = new URLSearchParams(location.search);
 
   const getNewSocketUrl = async () => {
-    await refreshCachedDirectReticulumHostAndPort();
-    const { host, port } = cachedDirectReticulumHostAndPort;
+    await refreshDirectReticulumHostAndPort();
+    const { host, port } = directReticulumHostAndPort;
     const protocol =
       qs.get("phx_protocol") ||
       configs.RETICULUM_SOCKET_PROTOCOL ||
