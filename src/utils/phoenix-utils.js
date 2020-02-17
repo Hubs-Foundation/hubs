@@ -16,9 +16,9 @@ const resolverLink = document.createElement("a");
 let reticulumMeta = null;
 let invalidatedReticulumMetaThisSession = false;
 
-export function getReticulumFetchUrl(path, absolute = false, host = null) {
+export function getReticulumFetchUrl(path, absolute = false, host = null, port = null) {
   if (hasReticulumServer() || host) {
-    return `https://${host || configs.RETICULUM_SERVER}${path}`;
+    return `https://${host || configs.RETICULUM_SERVER}${port ? `:${port}` : ""}${path}`;
   } else if (absolute) {
     resolverLink.href = path;
     return resolverLink.href;
@@ -53,29 +53,38 @@ export async function getReticulumMeta() {
   return reticulumMeta;
 }
 
-async function getDirectReticiulumHost() {
+async function getDirectReticulumHostAndPort() {
   const qs = new URLSearchParams(location.search);
   let host = qs.get("phx_host");
   const reticulumMeta = await getReticulumMeta();
   host = host || configs.RETICULUM_SOCKET_SERVER || reticulumMeta.phx_host;
-  return host;
+  let port = qs.get("phx_port");
+
+  const socketProtocol =
+    qs.get("phx_protocol") ||
+    configs.RETICULUM_SOCKET_PROTOCOL ||
+    (document.location.protocol === "https:" ? "wss:" : "ws:");
+
+  port = port || (hasReticulumServer() ? new URL(`${socketProtocol}//${configs.RETICULUM_SERVER}`).port : "443");
+  return { host, port };
 }
 
-let cachedDirectReticulumHost;
+let cachedDirectReticulumHostAndPort;
 
-export async function refreshCachedDirectReticulumHost() {
-  cachedDirectReticulumHost = await getDirectReticiulumHost();
+export async function refreshCachedDirectReticulumHostAndPort() {
+  cachedDirectReticulumHostAndPort = await getDirectReticulumHostAndPort();
 }
 
 export function getDirectReticulumFetchUrl(path, absolute = false) {
-  if (!cachedDirectReticulumHost) {
+  if (!cachedDirectReticulumHostAndPort) {
     console.warn(
       "Cannot call getDirectReticulumFetchUrl before refreshCachedDirectReticulumHost. Returning non-direct url."
     );
     return getReticulumFetchUrl(path, absolute);
   }
 
-  return getReticulumFetchUrl(path, absolute, cachedDirectReticulumHost);
+  const { host, port } = cachedDirectReticulumHostAndPort;
+  return getReticulumFetchUrl(path, absolute, host, port);
 }
 
 export async function invalidateReticulumMeta() {
@@ -87,17 +96,14 @@ export async function connectToReticulum(debug = false, params = null, socketCla
   const qs = new URLSearchParams(location.search);
 
   const getNewSocketUrl = async () => {
-    await refreshCachedDirectReticulumHost();
-    const socketHost = cachedDirectReticulumHost;
-    const socketProtocol =
+    await refreshCachedDirectReticulumHostAndPort();
+    const { host, port } = cachedDirectReticulumHostAndPort;
+    const protocol =
       qs.get("phx_protocol") ||
       configs.RETICULUM_SOCKET_PROTOCOL ||
       (document.location.protocol === "https:" ? "wss:" : "ws:");
-    let socketPort = qs.get("phx_port");
 
-    socketPort =
-      socketPort || (hasReticulumServer() ? new URL(`${socketProtocol}//${configs.RETICULUM_SERVER}`).port : "443");
-    return `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}`;
+    return `${protocol}//${host}${port ? `:${port}` : ""}`;
   };
 
   const socketUrl = await getNewSocketUrl();
