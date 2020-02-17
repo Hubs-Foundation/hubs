@@ -53,7 +53,9 @@ export async function getReticulumMeta() {
   return reticulumMeta;
 }
 
-async function getDirectReticulumHostAndPort() {
+let cachedDirectReticulumHostAndPort;
+
+async function refreshCachedDirectReticulumHostAndPort() {
   const qs = new URLSearchParams(location.search);
   let host = qs.get("phx_host");
   const reticulumMeta = await getReticulumMeta();
@@ -66,13 +68,7 @@ async function getDirectReticulumHostAndPort() {
     (document.location.protocol === "https:" ? "wss:" : "ws:");
 
   port = port || (hasReticulumServer() ? new URL(`${socketProtocol}//${configs.RETICULUM_SERVER}`).port : "443");
-  return { host, port };
-}
-
-let cachedDirectReticulumHostAndPort;
-
-async function refreshCachedDirectReticulumHostAndPort() {
-  cachedDirectReticulumHostAndPort = await getDirectReticulumHostAndPort();
+  cachedDirectReticulumHostAndPort = { host, port };
 }
 
 export function getDirectReticulumFetchUrl(path, absolute = false) {
