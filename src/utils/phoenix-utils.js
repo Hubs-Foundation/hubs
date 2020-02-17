@@ -71,7 +71,7 @@ async function getDirectReticulumHostAndPort() {
 
 let cachedDirectReticulumHostAndPort;
 
-export async function refreshCachedDirectReticulumHostAndPort() {
+async function refreshCachedDirectReticulumHostAndPort() {
   cachedDirectReticulumHostAndPort = await getDirectReticulumHostAndPort();
 }
 
