@@ -60,22 +60,15 @@ async function refreshCachedDirectReticulumHostAndPort() {
   let host = qs.get("phx_host");
   const reticulumMeta = await getReticulumMeta();
   host = host || configs.RETICULUM_SOCKET_SERVER || reticulumMeta.phx_host;
-  let port = qs.get("phx_port");
-
-  const socketProtocol =
-    qs.get("phx_protocol") ||
-    configs.RETICULUM_SOCKET_PROTOCOL ||
-    (document.location.protocol === "https:" ? "wss:" : "ws:");
-
-  port = port || (hasReticulumServer() ? new URL(`${socketProtocol}//${configs.RETICULUM_SERVER}`).port : "443");
+  const port =
+    qs.get("phx_port") ||
+    (hasReticulumServer() ? new URL(`${document.location.protocol}//${configs.RETICULUM_SERVER}`).port : "443");
   cachedDirectReticulumHostAndPort = { host, port };
 }
 
 export function getDirectReticulumFetchUrl(path, absolute = false) {
   if (!cachedDirectReticulumHostAndPort) {
-    console.warn(
-      "Cannot call getDirectReticulumFetchUrl before refreshCachedDirectReticulumHost. Returning non-direct url."
-    );
+    console.warn("Cannot call getDirectReticulumFetchUrl before connectToReticulum. Returning non-direct url.");
     return getReticulumFetchUrl(path, absolute);
   }
 
