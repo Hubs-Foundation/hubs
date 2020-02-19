@@ -10,7 +10,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { Title } from "react-admin";
 import Button from "@material-ui/core/Button";
 import withCommonStyles from "../utils/with-common-styles";
-import { getAdminInfo, getConfig, putConfig } from "../utils/ita";
+import { getAdminInfo, getEditableConfig, getConfig, putConfig } from "../utils/ita";
 import Snackbar from "@material-ui/core/Snackbar";
 import SnackbarContent from "@material-ui/core/SnackbarContent";
 import Icon from "@material-ui/core/Icon";
@@ -118,7 +118,7 @@ class ContentCDNComponent extends Component {
 
   async componentDidMount() {
     const adminInfo = await getAdminInfo();
-    const retConfig = await getConfig("reticulum");
+    const retConfig = await getEditableConfig("reticulum");
     let workerDomain = "";
 
     if (!!retConfig && !!retConfig.phx && retConfig.phx.cors_proxy_url_host.includes("workers.dev")) {

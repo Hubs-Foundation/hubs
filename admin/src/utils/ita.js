@@ -109,8 +109,12 @@ function getAdminInfo() {
   return fetchWithAuth(getEndpoint("admin-info")).then(resp => resp.json());
 }
 
-function getConfig(service) {
+function getEditableConfig(service) {
   return fetchWithAuth(getEndpoint(`configs/${service}/ps`)).then(resp => resp.json());
+}
+
+function getConfig(service) {
+  return fetchWithAuth(getEndpoint(`configs/${service}`)).then(resp => resp.json());
 }
 
 function putConfig(service, config) {
@@ -210,6 +214,7 @@ export {
   getCategoryDescription,
   getSchemas,
   getConfig,
+  getEditableConfig,
   putConfig,
   getConfigValue,
   setConfigValue,
