@@ -209,7 +209,7 @@ class ContentCDNComponent extends Component {
           general: {
             cors_proxy_server: workerDomain ? `${corsProxyDomain}` : "",
             base_assets_path: workerDomain ? `https://${proxyDomain}/hubs/` : "",
-            non_cors_proxy_domains: hubsNonCorsProxyDomains,
+            non_cors_proxy_domains: workerDomain ? hubsNonCorsProxyDomains : "",
             thumbnail_server: workerDomain && useWorkerForThumbnails ? `${proxyDomain}` : ""
           }
         },
@@ -217,7 +217,7 @@ class ContentCDNComponent extends Component {
           general: {
             cors_proxy_server: workerDomain ? `${corsProxyDomain}` : "",
             base_assets_path: workerDomain ? `https://${proxyDomain}/spoke/` : "",
-            non_cors_proxy_domains: spokeNonCorsProxyDomains,
+            non_cors_proxy_domains: workerDomain ? spokeNonCorsProxyDomains : "",
             thumbnail_server: workerDomain && useWorkerForThumbnails ? `${proxyDomain}` : ""
           }
         }
