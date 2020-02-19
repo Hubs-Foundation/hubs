@@ -183,11 +183,11 @@ class ContentCDNComponent extends Component {
       let hubsNonCorsProxyDomains = hubsConfig.general.non_cors_proxy_domains;
       let spokeNonCorsProxyDomains = spokeConfig.general.non_cors_proxy_domains;
 
-      if (!hubsNonCorsProxyDomains.includes(proxyDomain)) {
+      if (this.state.enableWorker && !hubsNonCorsProxyDomains.includes(proxyDomain)) {
         hubsNonCorsProxyDomains = [...hubsNonCorsProxyDomains.split(",").filter(x => x.length), proxyDomain].join(",");
       }
 
-      if (!spokeNonCorsProxyDomains.includes(proxyDomain)) {
+      if (!this.state.enableWorker && !spokeNonCorsProxyDomains.includes(proxyDomain)) {
         spokeNonCorsProxyDomains = [...spokeNonCorsProxyDomains.split(",").filter(x => x.length), proxyDomain].join(
           ","
         );
