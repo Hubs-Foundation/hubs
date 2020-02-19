@@ -121,7 +121,7 @@ class ContentCDNComponent extends Component {
     const retConfig = await getConfig("reticulum");
     let workerDomain = "";
 
-    if (!!retConfig && !!retConfig.phx && retConfig.phx.cors_proxy_url_host.indexOf("workers.dev") !== -1) {
+    if (!!retConfig && !!retConfig.phx && retConfig.phx.cors_proxy_url_host.includes("workers.dev")) {
       const corsProxyUrlParts = retConfig.phx.cors_proxy_url_host.split(".");
       workerDomain = corsProxyUrlParts[corsProxyUrlParts.length - 3] + ".workers.dev";
     }
@@ -174,6 +174,24 @@ class ContentCDNComponent extends Component {
     this.setState({ saving: true }, async () => {
       const workerDomain = this.state.enableWorker ? this.state.workerDomain : "";
       const workerInstanceName = this.state.enableWorker ? this.state.workerInstanceName : "";
+      const corsProxyDomain = `${workerInstanceName}-cors-proxy.${workerDomain}`;
+      const proxyDomain = `${workerInstanceName}-proxy.${workerDomain}`;
+
+      const hubsConfig = await getConfig("hubs");
+      const spokeConfig = await getConfig("spoke");
+
+      let hubsNonCorsProxyDomains = hubsConfig.general.non_cors_proxy_domains;
+      let spokeNonCorsProxyDomains = spokeConfig.general.non_cors_proxy_domains;
+
+      if (!hubsNonCorsProxyDomains.includes(proxyDomain)) {
+        hubsNonCorsProxyDomains = [...hubsNonCorsProxyDomains.split(",").filter(x => x.length), proxyDomain].join(",");
+      }
+
+      if (!spokeNonCorsProxyDomains.includes(proxyDomain)) {
+        spokeNonCorsProxyDomains = [...spokeNonCorsProxyDomains.split(",").filter(x => x.length), proxyDomain].join(
+          ","
+        );
+      }
 
       // For arbortect, we enable thumbnail CDN proxying
       const useWorkerForThumbnails = this.state.provider === "arbortect";
@@ -181,26 +199,26 @@ class ContentCDNComponent extends Component {
       const configs = {
         reticulum: {
           phx: {
-            cors_proxy_url_host: workerDomain ? `${workerInstanceName}-cors-proxy.${workerDomain}` : ""
+            cors_proxy_url_host: workerDomain ? `${corsProxyDomain}` : ""
           },
           uploads: {
-            host: workerDomain ? `https://${workerInstanceName}-proxy.${workerDomain}` : ""
+            host: workerDomain ? `https://${proxyDomain}` : ""
           }
         },
         hubs: {
           general: {
-            cors_proxy_server: workerDomain ? `${workerInstanceName}-cors-proxy.${workerDomain}` : "",
-            base_assets_path: workerDomain ? `https://${workerInstanceName}-proxy.${workerDomain}/hubs/` : "",
-            thumbnail_server:
-              workerDomain && useWorkerForThumbnails ? `${workerInstanceName}-proxy.${workerDomain}` : ""
+            cors_proxy_server: workerDomain ? `${corsProxyDomain}` : "",
+            base_assets_path: workerDomain ? `https://${proxyDomain}/hubs/` : "",
+            non_cors_proxy_domains: hubsNonCorsProxyDomains,
+            thumbnail_server: workerDomain && useWorkerForThumbnails ? `${proxyDomain}` : ""
           }
         },
         spoke: {
           general: {
-            cors_proxy_server: workerDomain ? `${workerInstanceName}-cors-proxy.${workerDomain}` : "",
-            base_assets_path: workerDomain ? `https://${workerInstanceName}-proxy.${workerDomain}/spoke/` : "",
-            thumbnail_server:
-              workerDomain && useWorkerForThumbnails ? `${workerInstanceName}-proxy.${workerDomain}` : ""
+            cors_proxy_server: workerDomain ? `${corsProxyDomain}` : "",
+            base_assets_path: workerDomain ? `https://${proxyDomain}/spoke/` : "",
+            non_cors_proxy_domains: spokeNonCorsProxyDomains,
+            thumbnail_server: workerDomain && useWorkerForThumbnails ? `${proxyDomain}` : ""
           }
         }
       };
@@ -300,7 +318,7 @@ class ContentCDNComponent extends Component {
                       In the Workers Dashboard click <b>Create Worker</b>.
                     </li>
                     <li>
-                      Enter the name for the worker as:
+                      Enter the name for the worker (at the top, above the script) as:
                       <div className={this.props.classes.command}>{this.state.workerInstanceName}-proxy</div>
                     </li>
                     <li>
