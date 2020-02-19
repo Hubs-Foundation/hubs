@@ -183,14 +183,17 @@ class ContentCDNComponent extends Component {
       let hubsNonCorsProxyDomains = hubsConfig.general.non_cors_proxy_domains;
       let spokeNonCorsProxyDomains = spokeConfig.general.non_cors_proxy_domains;
 
-      if (this.state.enableWorker && !hubsNonCorsProxyDomains.includes(proxyDomain)) {
-        hubsNonCorsProxyDomains = [...hubsNonCorsProxyDomains.split(",").filter(x => x.length), proxyDomain].join(",");
-      }
-
-      if (!this.state.enableWorker && !spokeNonCorsProxyDomains.includes(proxyDomain)) {
-        spokeNonCorsProxyDomains = [...spokeNonCorsProxyDomains.split(",").filter(x => x.length), proxyDomain].join(
-          ","
-        );
+      if (this.state.enableWorker) {
+        if (!hubsNonCorsProxyDomains.includes(proxyDomain)) {
+          hubsNonCorsProxyDomains = [...hubsNonCorsProxyDomains.split(",").filter(x => x.length), proxyDomain].join(
+            ","
+          );
+        }
+        if (!spokeNonCorsProxyDomains.includes(proxyDomain)) {
+          spokeNonCorsProxyDomains = [...spokeNonCorsProxyDomains.split(",").filter(x => x.length), proxyDomain].join(
+            ","
+          );
+        }
       }
 
       // For arbortect, we enable thumbnail CDN proxying
