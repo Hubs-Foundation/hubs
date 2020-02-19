@@ -202,7 +202,7 @@ class ContentCDNComponent extends Component {
       const configs = {
         reticulum: {
           phx: {
-            cors_proxy_url_host: workerDomain ? `${corsProxyDomain}` : ""
+            cors_proxy_url_host: workerDomain ? corsProxyDomain : ""
           },
           uploads: {
             host: workerDomain ? `https://${proxyDomain}` : ""
@@ -210,18 +210,18 @@ class ContentCDNComponent extends Component {
         },
         hubs: {
           general: {
-            cors_proxy_server: workerDomain ? `${corsProxyDomain}` : "",
+            cors_proxy_server: workerDomain ? corsProxyDomain : "",
             base_assets_path: workerDomain ? `https://${proxyDomain}/hubs/` : "",
             non_cors_proxy_domains: workerDomain ? hubsNonCorsProxyDomains : "",
-            thumbnail_server: workerDomain && useWorkerForThumbnails ? `${proxyDomain}` : ""
+            thumbnail_server: workerDomain && useWorkerForThumbnails ? proxyDomain : ""
           }
         },
         spoke: {
           general: {
-            cors_proxy_server: workerDomain ? `${corsProxyDomain}` : "",
+            cors_proxy_server: workerDomain ? corsProxyDomain : "",
             base_assets_path: workerDomain ? `https://${proxyDomain}/spoke/` : "",
             non_cors_proxy_domains: workerDomain ? spokeNonCorsProxyDomains : "",
-            thumbnail_server: workerDomain && useWorkerForThumbnails ? `${proxyDomain}` : ""
+            thumbnail_server: workerDomain && useWorkerForThumbnails ? proxyDomain : ""
           }
         }
       };
