@@ -404,8 +404,9 @@
     "oauth-dialog.sign-in.discord": "Sign in to Discord",
     "oauth-dialog.message.twitter": "Connect to Twitter to send tweets from %app-name%.",
     "cloud.primary_tagline": "Hubs Cloud deploys server infrastructure for private,\ncollaborative 3D rooms that can be accessed on your\ndesktop, mobile phone, or VR headset.",
-    "cloud.secondary_tagline": "Get it today on the AWS Marketplace",
-    "cloud.call_to_action": "View AWS Marketplace Listing",
+    "cloud.secondary_tagline": "Get it today on the AWS Marketplace.",
+    "cloud.call_to_action_personal": "Get Hubs Cloud Personal",
+    "cloud.call_to_action_enterprise": "Get Hubs Cloud Enterprise",
     "cloud.splash_tag": "Configurable infrastructure for your own Hubs stack"
   }
 }

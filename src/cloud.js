@@ -14,7 +14,8 @@ import en from "react-intl/locale-data/en";
 import { lang, messages } from "./utils/i18n";
 
 addLocaleData([...en]);
-const marketplaceListingUrl = "https://hubs.mozilla.com/cloud";
+const marketplaceEnterpriseListingUrl = "https://aws.amazon.com/marketplace/pp/B084WNGRRP";
+const marketplacePersonalListingUrl = "https://aws.amazon.com/marketplace/pp/B084RZH56R";
 
 class DiscordLanding extends Component {
   componentDidMount() {}
@@ -43,9 +44,16 @@ class DiscordLanding extends Component {
                   <FormattedMessage id="cloud.secondary_tagline" />
                 </div>
                 <div className={styles.actionButtons}>
-                  <a href={marketplaceListingUrl} className={styles.downloadButton}>
+                  <a href={marketplaceEnterpriseListingUrl} className={styles.downloadButton}>
                     <div>
-                      <FormattedMessage id="cloud.call_to_action" />
+                      <FormattedMessage id="cloud.call_to_action_enterprise" />
+                    </div>
+                  </a>
+                </div>
+                <div className={styles.actionButtons}>
+                  <a href={marketplacePersonalListingUrl} className={styles.downloadButton}>
+                    <div>
+                      <FormattedMessage id="cloud.call_to_action_personal" />
                     </div>
                   </a>
                 </div>
