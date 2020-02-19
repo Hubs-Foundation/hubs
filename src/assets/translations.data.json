@@ -407,6 +407,7 @@
     "cloud.secondary_tagline": "Get it today on the AWS Marketplace.",
     "cloud.call_to_action_personal": "Get Hubs Cloud Personal",
     "cloud.call_to_action_enterprise": "Get Hubs Cloud Enterprise",
+    "cloud.aws_quick_start": "Quick Start Guide",
     "cloud.splash_tag": "Configurable infrastructure for your own Hubs stack"
   }
 }

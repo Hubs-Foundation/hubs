@@ -16,6 +16,7 @@ import { lang, messages } from "./utils/i18n";
 addLocaleData([...en]);
 const marketplaceEnterpriseListingUrl = "https://aws.amazon.com/marketplace/pp/B084WNGRRP";
 const marketplacePersonalListingUrl = "https://aws.amazon.com/marketplace/pp/B084RZH56R";
+const awsQuickStartLink = "https://hubs.mozilla.com/docs/hubs-cloud-aws-quick-start.html";
 
 class DiscordLanding extends Component {
   componentDidMount() {}
@@ -54,6 +55,13 @@ class DiscordLanding extends Component {
                   <a href={marketplacePersonalListingUrl} className={styles.downloadButton}>
                     <div>
                       <FormattedMessage id="cloud.call_to_action_personal" />
+                    </div>
+                  </a>
+                </div>
+                <div className={styles.docLink}>
+                  <a href={awsQuickStartLink}>
+                    <div>
+                      <FormattedMessage id="cloud.aws_quick_start" />
                     </div>
                   </a>
                 </div>
