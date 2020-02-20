@@ -8,6 +8,7 @@ export const computeObjectAABB = (function() {
   return function(root, target) {
     target.makeEmpty();
     root.traverse(node => {
+      node.updateMatrices();
       const geometry = node.geometry;
       if (geometry != null) {
         if (geometry.boundingBox == null) {
