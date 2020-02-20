@@ -12,7 +12,7 @@ import Warning from "@material-ui/icons/Warning";
 import Info from "@material-ui/icons/Info";
 import { fetchReticulumAuthenticated } from "hubs/src/utils/phoenix-utils";
 import withCommonStyles from "../utils/with-common-styles";
-import { getAdminInfo, getConfig } from "../utils/ita";
+import { getAdminInfo, getEditableConfig } from "../utils/ita";
 
 // Send quota to use as heuristic for checking if in SES sandbox
 // https://forums.aws.amazon.com/thread.jspa?threadID=61090
@@ -27,7 +27,7 @@ class SystemEditorComponent extends Component {
 
   async componentDidMount() {
     const adminInfo = await getAdminInfo();
-    const retConfig = await getConfig("reticulum");
+    const retConfig = await getEditableConfig("reticulum");
 
     this.setState({ adminInfo, retConfig });
     this.updateReticulumMeta();
