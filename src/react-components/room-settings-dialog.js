@@ -73,6 +73,25 @@ export default class RoomSettingsDialog extends Component {
             className={styles.nameField}
           />
           <span className={styles.subtitle}>
+            <FormattedMessage id="room-settings.member-limit-subtitle" />
+          </span>
+          <div className={styles.memberCapContainer}>
+            <input
+              name="member_cap"
+              type="number"
+              required
+              min={0}
+              max={64}
+              placeholder="Member Limit"
+              value={this.state.member_cap}
+              onFocus={e => handleTextFieldFocus(e.target)}
+              onBlur={() => handleTextFieldBlur()}
+              onChange={e => this.setState({ member_cap: e.target.value })}
+              className={styles.nameField}
+            />
+            {this.state.member_cap == 0 && <span>(No limit)</span>}
+          </div>
+          <span className={styles.subtitle}>
             <FormattedMessage id="room-settings.description-subtitle" />
           </span>
           <textarea
@@ -80,7 +99,7 @@ export default class RoomSettingsDialog extends Component {
             rows="5"
             autoComplete="off"
             placeholder="Room description"
-            value={this.state.description}
+            value={this.state.description || ""}
             onFocus={e => handleTextFieldFocus(e.target)}
             onBlur={() => handleTextFieldBlur()}
             onChange={e => this.setState({ description: e.target.value })}

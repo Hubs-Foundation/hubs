@@ -21,6 +21,18 @@
   margin-bottom: 1.5em;
   margin-top: 0;
 }
+:local(.member-cap-container){
+  width: 100%;
+  position: relative;
+  span {
+    color: var(--panel-widget-disabled-color);
+    position: absolute;
+    right: 1em;
+    line-height: 2em;
+    padding: 5px;
+    height: 2em;
+  }
+}
 
 :local(.description-field) {
   @extend %input-textarea;

@@ -128,18 +128,12 @@ class UIRoot extends Component {
     authChannel: PropTypes.object,
     hubChannel: PropTypes.object,
     linkChannel: PropTypes.object,
-    hubEntryCode: PropTypes.number,
+    hub: PropTypes.object,
     availableVREntryTypes: PropTypes.object,
     environmentSceneLoaded: PropTypes.bool,
     entryDisallowed: PropTypes.bool,
     roomUnavailableReason: PropTypes.string,
     platformUnsupportedReason: PropTypes.string,
-    hubId: PropTypes.string,
-    hubName: PropTypes.string,
-    hubDescription: PropTypes.string,
-    hubAllowPromotion: PropTypes.bool,
-    hubMemberPermissions: PropTypes.object,
-    hubScene: PropTypes.object,
     hubIsBound: PropTypes.bool,
     isSupportAvailable: PropTypes.bool,
     presenceLogEntries: PropTypes.array,
@@ -877,7 +871,7 @@ class UIRoot extends Component {
   };
 
   onMiniInviteClicked = () => {
-    const link = `https://${configs.SHORTLINK_DOMAIN}/${this.props.hubId}`;
+    const link = `https://${configs.SHORTLINK_DOMAIN}/${this.props.hub.hub_id}`;
 
     this.setState({ miniInviteActivated: true });
     setTimeout(() => {
@@ -900,14 +894,14 @@ class UIRoot extends Component {
   };
 
   onStoreChanged = () => {
-    const broadcastedRoomConfirmed = this.props.store.state.confirmedBroadcastedRooms.includes(this.props.hubId);
+    const broadcastedRoomConfirmed = this.props.store.state.confirmedBroadcastedRooms.includes(this.props.hub.hub_id);
     if (broadcastedRoomConfirmed !== this.state.broadcastTipDismissed) {
       this.setState({ broadcastTipDismissed: broadcastedRoomConfirmed });
     }
   };
 
   confirmBroadcastedRoom = () => {
-    this.props.store.update({ confirmedBroadcastedRooms: [this.props.hubId] });
+    this.props.store.update({ confirmedBroadcastedRooms: [this.props.hub.hub_id] });
   };
 
   discordBridges = () => {
@@ -1054,10 +1048,10 @@ class UIRoot extends Component {
                 )
               }
             >
-              {this.props.hubName}
+              {this.props.hub.name}
             </button>
           ) : (
-            <span>{this.props.hubName}</span>
+            <span>{this.props.hub.name}</span>
           )}
           <button onClick={() => this.setState({ watching: true })} className={entryStyles.collapseButton}>
             <i>
@@ -1577,8 +1571,8 @@ class UIRoot extends Component {
             {this.state.dialog}
             {preload && (
               <PreloadOverlay
-                hubName={this.props.hubName}
-                hubScene={this.props.hubScene}
+                hubName={this.props.hub.name}
+                hubScene={this.props.hub.scene}
                 baseUrl={baseUrl}
                 onLoadClicked={this.props.onPreloadLoadClicked}
               />
@@ -1676,10 +1670,11 @@ class UIRoot extends Component {
                 this.renderDialog(RoomSettingsDialog, {
                   showRoomAccessSettings: this.props.hubChannel.can("update_hub_promotion"),
                   initialSettings: {
-                    name: this.props.hubName,
-                    description: this.props.hubDescription,
-                    member_permissions: this.props.hubMemberPermissions,
-                    allow_promotion: this.props.hubAllowPromotion
+                    name: this.props.hub.name,
+                    description: this.props.hub.description,
+                    member_permissions: this.props.hub.member_permissions,
+                    member_cap: this.props.hub.member_cap,
+                    allow_promotion: this.props.hub.allow_promotion
                   },
                   onChange: settings => this.props.hubChannel.updateHub(settings)
                 })
@@ -1734,9 +1729,9 @@ class UIRoot extends Component {
               render={() => {
                 return this.renderDialog(RoomInfoDialog, {
                   store: this.props.store,
-                  scene: this.props.hubScene,
-                  hubName: this.props.hubName,
-                  hubDescription: this.props.hubDescription
+                  scene: this.props.hub.scene,
+                  hubName: this.props.hub.name,
+                  hubDescription: this.props.hub.description
                 });
               }}
             />
@@ -1802,7 +1797,7 @@ class UIRoot extends Component {
                 <PresenceLog
                   entries={presenceLogEntries}
                   presences={this.props.presences}
-                  hubId={this.props.hubId}
+                  hubId={this.props.hub.hub_id}
                   history={this.props.history}
                 />
                 <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
@@ -1813,7 +1808,7 @@ class UIRoot extends Component {
                 inRoom={true}
                 presences={this.props.presences}
                 entries={presenceLogEntries}
-                hubId={this.props.hubId}
+                hubId={this.props.hub.hub_id}
                 history={this.props.history}
               />
             )}
@@ -1906,7 +1901,7 @@ class UIRoot extends Component {
                             ? navigator.share
                               ? "sharing..."
                               : "copied!"
-                            : `${configs.SHORTLINK_DOMAIN}/` + this.props.hubId}
+                            : `${configs.SHORTLINK_DOMAIN}/` + this.props.hub.hub_id}
                         </span>
                       </button>
                     )}
@@ -1918,7 +1913,7 @@ class UIRoot extends Component {
                   {this.state.showShareDialog && (
                     <InviteDialog
                       allowShare={!isMobileVR}
-                      entryCode={this.props.hubEntryCode}
+                      entryCode={this.props.hub.entry_code}
                       embedUrl={
                         this.props.embedToken && !isMobilePhoneOrVR
                           ? `${baseUrl}?embed_token=${this.props.embedToken}`
@@ -1929,7 +1924,7 @@ class UIRoot extends Component {
                         this.state.isSubscribed === undefined ? this.props.initialIsSubscribed : this.state.isSubscribed
                       }
                       onSubscribeChanged={() => this.onSubscribeChanged()}
-                      hubId={this.props.hubId}
+                      hubId={this.props.hub.hub_id}
                       onClose={() => this.setState({ showShareDialog: false })}
                     />
                   )}
@@ -1942,8 +1937,8 @@ class UIRoot extends Component {
               render={() => (
                 <InviteDialog
                   allowShare={!!navigator.share}
-                  entryCode={this.props.hubEntryCode}
-                  hubId={this.props.hubId}
+                  entryCode={this.props.hub.entry_code}
+                  hubId={this.props.hub.hub_id}
                   isModal={true}
                   onClose={() => {
                     this.props.history.goBack();
@@ -2024,7 +2019,7 @@ class UIRoot extends Component {
                   isStreaming={streaming}
                   toggleStreamerMode={this.toggleStreamerMode}
                   hubChannel={this.props.hubChannel}
-                  hubScene={this.props.hubScene}
+                  hubScene={this.props.hub.scene}
                   scene={this.props.scene}
                   showAsOverlay={showSettingsAsOverlay}
                   onCloseOverlay={() => exit2DInterstitialAndEnterVR(true)}

@@ -27,6 +27,10 @@ const HUB_CREATOR_PERMISSIONS = [
 const VALID_PERMISSIONS =
   HUB_CREATOR_PERMISSIONS + ["tweet", "spawn_camera", "spawn_drawing", "spawn_and_move_media", "pin_objects"];
 
+// Maximum number of people in the room/entering before users are forced to observer mode.
+// Eventually this should be moved to a room setting.
+const DEFAULT_MAX_OCCUPIED_ROOM_ENTRY_SLOTS = 24;
+
 export default class HubChannel extends EventTarget {
   constructor(store, hubId) {
     super();
@@ -52,6 +56,21 @@ export default class HubChannel extends EventTarget {
   canOrWillIfCreator(permission) {
     if (this._getCreatorAssignmentToken() && HUB_CREATOR_PERMISSIONS.includes(permission)) return true;
     return this.can(permission);
+  }
+
+  canEnterRoom(hub) {
+    if (!hub) return false;
+    if (this.canOrWillIfCreator("update_hub")) return true;
+
+    const roomEntrySlotCount = Object.values(this.presence.state).reduce((acc, { metas }) => {
+      const meta = metas[metas.length - 1];
+      const usingSlot = meta.presence === "room" || (meta.context && meta.context.entering);
+      return acc + (usingSlot ? 1 : 0);
+    }, 0);
+
+    console.log(roomEntrySlotCount, hub.member_cap);
+
+    return roomEntrySlotCount < (hub.member_cap || DEFAULT_MAX_OCCUPIED_ROOM_ENTRY_SLOTS);
   }
 
   // Migrates this hub channel to a new phoenix channel and presence
