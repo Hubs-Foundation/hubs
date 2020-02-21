@@ -52,7 +52,10 @@ export default class SceneEntryManager {
   };
 
   enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
-    document.getElementById("viewing-camera").removeAttribute("scene-preview-camera");
+    const cameraEl = document.getElementById("viewing-camera");
+    cameraEl.removeAttribute("scene-preview-camera");
+    cameraEl.object3D.position.set(0, 0, 0);
+    cameraEl.object3D.rotation.set(0, 0, 0);
     const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
     waypointSystem.moveToSpawnPoint();
 

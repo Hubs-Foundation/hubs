@@ -235,21 +235,22 @@ function getPlatformUnsupportedReason() {
 }
 
 function setupLobbyCamera() {
-  const camera = document.getElementById("viewing-camera");
+  const cameraEl = document.getElementById("viewing-camera");
   const previewCamera = document.getElementById("environment-scene").object3D.getObjectByName("scene-preview-camera");
 
+  const camera = cameraEl.object3DMap.camera;
   if (previewCamera) {
-    camera.object3D.position.copy(previewCamera.position);
-    camera.object3D.rotation.copy(previewCamera.rotation);
-    camera.object3D.rotation.reorder("YXZ");
+    camera.position.copy(previewCamera.position);
+    camera.rotation.copy(previewCamera.rotation);
+    camera.rotation.reorder("YXZ");
   } else {
-    const cameraPos = camera.object3D.position;
-    camera.object3D.position.set(cameraPos.x, 2.5, cameraPos.z);
+    const cameraPos = camera.position;
+    camera.position.set(cameraPos.x, 2.5, cameraPos.z);
   }
 
-  camera.object3D.matrixNeedsUpdate = true;
+  camera.matrixNeedsUpdate = true;
 
-  camera.setAttribute("scene-preview-camera", "positionOnly: true; duration: 60");
+  cameraEl.setAttribute("scene-preview-camera", "positionOnly: true; duration: 60");
 }
 
 let uiProps = {};
