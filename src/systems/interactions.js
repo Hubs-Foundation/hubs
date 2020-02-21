@@ -63,6 +63,15 @@ AFRAME.registerSystem("interaction", {
     return this.leftRemoteHoverTarget;
   },
 
+  isHoldingAnything() {
+    return !!(
+      this.state.leftHand.held ||
+      this.state.rightHand.held ||
+      this.state.rightRemote.held ||
+      this.state.leftRemote.held
+    );
+  },
+
   isHeld(el) {
     return (
       this.state.leftHand.held === el ||

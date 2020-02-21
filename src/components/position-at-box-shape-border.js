@@ -113,6 +113,10 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     const min = new THREE.Vector3(0.001, 0.001, 0.001);
 
     return function(animate, forceNewExtents) {
+      if (this.el.components["gltf-model-plus"]) {
+        this.el.removeAttribute(`position-at-box-shape-border__${this.id}`);
+        return;
+      }
       if (forceNewExtents || this.mesh !== this.el.getObject3D("mesh")) {
         this.mesh = this.el.getObject3D("mesh");
 

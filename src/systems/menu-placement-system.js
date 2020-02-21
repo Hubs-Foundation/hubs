@@ -4,32 +4,33 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 const SWEEP_TEST_LAYER = require("../constants").COLLISION_LAYERS.CONVEX_SWEEP_TEST;
 const HIT_FRACTION_FUDGE_FACTOR = 0.02;
 
-const calculateBoundaryPlacementInfo = (function() {
-  const meshPosition = new THREE.Vector3();
-  const meshQuaternion = new THREE.Quaternion();
-  const meshRotation = new THREE.Matrix4();
-  const meshScale = new THREE.Vector3();
-  const meshToCenter = new THREE.Vector3();
-  const centerToCameraDirection = new THREE.Vector3();
-  const centerToPositionAtBoundary = new THREE.Vector3();
-  // Calculate a position on the bounding sphere such that we could
-  // place the menu there without intersecting the mesh.
-  return function calculateBoundaryPlacementInfo(cameraPosition, mesh, boundingSphereInfo, infoOut) {
-    mesh.updateMatrices();
-    mesh.matrixWorld.decompose(meshPosition, meshQuaternion, meshScale);
-    meshRotation.extractRotation(mesh.matrixWorld);
-    meshToCenter
-      .copy(boundingSphereInfo.localMeshToCenterDir)
-      .applyMatrix4(meshRotation)
-      .multiplyScalar(meshScale.x * boundingSphereInfo.distanceToCenterDividedByMeshScale);
-    infoOut.centerOfBoundingSphere.addVectors(meshPosition, meshToCenter);
-    centerToCameraDirection.subVectors(cameraPosition, infoOut.centerOfBoundingSphere).normalize();
-    infoOut.positionAtBoundary.addVectors(
-      infoOut.centerOfBoundingSphere,
-      centerToPositionAtBoundary
-        .copy(centerToCameraDirection)
-        .multiplyScalar(meshScale.x * boundingSphereInfo.radiusDividedByMeshScale)
-    );
+const calculateDesiredMenuQuaternion = (function() {
+  const right = new THREE.Vector3();
+  const up = new THREE.Vector3();
+  const back = new THREE.Vector3();
+  const forward = new THREE.Vector3();
+  const rotation = new THREE.Matrix4();
+  return function calculateDesiredMenuQuaternion(
+    isVR,
+    cameraPosition,
+    intersectionPoint,
+    cameraRotation,
+    desiredMenuQuaternion
+  ) {
+    if (isVR) {
+      back.subVectors(cameraPosition, intersectionPoint).normalize();
+    } else {
+      back
+        .set(0, 0, 1)
+        .applyMatrix4(cameraRotation)
+        .normalize();
+    }
+    up.set(0, 1, 0);
+    forward.copy(back).multiplyScalar(-1);
+    right.crossVectors(forward, up).normalize();
+    up.crossVectors(right, forward);
+    rotation.makeBasis(right, up, back);
+    return desiredMenuQuaternion.setFromRotationMatrix(rotation);
   };
 })();
 
@@ -164,36 +165,19 @@ const createFunctionForConvexSweepTest = function() {
     const closestHitFraction = menuBtClosestConvexResultCallback.get_m_closestHitFraction();
     Ammo.destroy(menuBtBoxShape);
     Ammo.destroy(menuBtClosestConvexResultCallback);
-    const fractionToUse =
-      closestHitFraction === 1 ? 0 : THREE.Math.clamp(closestHitFraction - HIT_FRACTION_FUDGE_FACTOR, 0, 1);
+    const fractionToUse = THREE.Math.clamp(closestHitFraction - HIT_FRACTION_FUDGE_FACTOR, 0, 1);
     // Pull back from the hit point just a bit to guard against the convex sweep test allowing a small overlap.
-    // If the fraction is 1, then we didn't collide at all. In that case, return 0 so we place the menu
-    // at the edge of the bounding sphere.
     return fractionToUse;
   };
 };
 
 const recomputeMenuPlacement = (function() {
-  const boundaryInfoOut = {
-    centerOfBoundingSphere: new THREE.Vector3(),
-    positionAtBoundary: new THREE.Vector3()
-  };
   const desiredMenuPosition = new THREE.Vector3();
-  const menuTransformAtBorder = new THREE.Matrix4();
   const menuWorldScale = new THREE.Vector3();
+  const menuParentScale = new THREE.Vector3();
   const desiredMenuTransform = new THREE.Matrix4();
-  const desiredMenuQuaternion = new THREE.Quaternion();
 
-  return function recomputeMenuPlacement(
-    el,
-    datum,
-    cameraPosition,
-    cameraRotation,
-    btCollisionWorld,
-    boundingSphereInfo
-  ) {
-    calculateBoundaryPlacementInfo(cameraPosition, datum.mesh, boundingSphereInfo, boundaryInfoOut);
-    desiredMenuQuaternion.setFromRotationMatrix(cameraRotation);
+  return function recomputeMenuPlacement(el, isVR, datum, cameraPosition, cameraRotation, btCollisionWorld) {
     const shouldComputeMenuHalfExtents = !datum.didComputeMenuHalfExtents;
     if (shouldComputeMenuHalfExtents) {
       datum.didComputeMenuHalfExtents = true;
@@ -202,44 +186,37 @@ const recomputeMenuPlacement = (function() {
       calculateMenuHalfExtents(datum.menuEl.object3D, datum.menuHalfExtents);
     }
     datum.menuEl.object3D.updateMatrices();
-    menuWorldScale.setFromMatrixScale(datum.menuEl.object3D.matrixWorld);
-    setMatrixWorld(
-      datum.menuEl.object3D,
-      menuTransformAtBorder.compose(
-        boundaryInfoOut.positionAtBoundary,
-        desiredMenuQuaternion,
-        menuWorldScale
-      )
+    menuParentScale.setFromMatrixScale(datum.menuEl.object3D.parent.matrixWorld);
+    const distanceToMenu = new THREE.Vector3().subVectors(cameraPosition, datum.intersectionPoint).length();
+    menuWorldScale.setScalar(0.45 * distanceToMenu);
+    calculateDesiredMenuQuaternion(
+      isVR,
+      cameraPosition,
+      datum.intersectionPoint,
+      cameraRotation,
+      datum.desiredMenuQuaternion
     );
 
-    // TODO: (performance) We do not need to do the convexSweepTest every frame.
-    // We can stagger it based on time since last sweep or when the camera or
-    // mesh transforms change by some amount, and we can round-robin when necessary.
     const hitFraction = doConvexSweepTest(
       btCollisionWorld,
       el,
       datum.menuHalfExtents,
-      boundaryInfoOut.positionAtBoundary,
+      cameraPosition,
       menuWorldScale,
-      boundaryInfoOut.centerOfBoundingSphere,
-      desiredMenuQuaternion
+      datum.intersectionPoint,
+      datum.desiredMenuQuaternion
     );
-    desiredMenuPosition.lerpVectors(
-      boundaryInfoOut.positionAtBoundary,
-      boundaryInfoOut.centerOfBoundingSphere,
-      hitFraction
-    );
+    if (hitFraction === 0) {
+      desiredMenuPosition.lerpVectors(cameraPosition, datum.intersectionPoint, 0.8);
+    } else {
+      desiredMenuPosition.lerpVectors(cameraPosition, datum.intersectionPoint, hitFraction);
+    }
     desiredMenuTransform.compose(
       desiredMenuPosition,
-      desiredMenuQuaternion,
+      datum.desiredMenuQuaternion,
       menuWorldScale
     );
     setMatrixWorld(datum.menuEl.object3D, desiredMenuTransform);
-    // TODO: If the camera is between desiredMenuPosition and centerOfBoundingSphere,
-    // then a new menu position should be chosen such that it is not in the opposite
-    // direction as the object is from the camera. In this case it is probably better
-    // to allow the menu to intersect the mesh, and possibly draw it on top by changing
-    // the render order.
   };
 })();
 
@@ -248,9 +225,9 @@ const recomputeMenuPlacement = (function() {
 // intersecting the mesh. However, when the objects are pinned and page is reloaded,
 // the menu placement algorithm works fine.
 export class MenuPlacementSystem {
-  constructor(boundingSphereSystem, physicsSystem) {
-    this.boundingSphereSystem = boundingSphereSystem;
+  constructor(physicsSystem, interactionSystem) {
     this.physicsSystem = physicsSystem;
+    this.interactionSystem = interactionSystem;
     this.els = [];
     this.data = new Map();
     this.tick = this.tick.bind(this);
@@ -264,7 +241,9 @@ export class MenuPlacementSystem {
       mesh: null,
       menuEl,
       didComputeMenuHalfExtents: false,
-      menuHalfExtents: new THREE.Vector3()
+      menuHalfExtents: new THREE.Vector3(),
+      intersectionPoint: new THREE.Vector3(),
+      desiredMenuQuaternion: new THREE.Quaternion()
     });
   }
   unregister(el) {
@@ -289,22 +268,46 @@ export class MenuPlacementSystem {
         doConvexSweepTest = createFunctionForConvexSweepTest();
         this.btCollisionWorld = this.physicsSystem.world.physicsWorld;
       }
+      if (!this.leftCursorController) {
+        this.leftCursorController = document.getElementById("left-cursor-controller").components["cursor-controller"];
+        this.rightCursorController = document.getElementById("right-cursor-controller").components["cursor-controller"];
+      }
       this.viewingCamera.updateMatrices();
       cameraPosition.setFromMatrixPosition(this.viewingCamera.matrixWorld);
       cameraRotation.extractRotation(this.viewingCamera.matrixWorld);
       for (let i = 0; i < this.els.length; i++) {
         const el = this.els[i];
+        if (!el.components["gltf-model-plus"]) {
+          continue;
+        }
         const datum = this.data.get(el);
         datum.mesh = el.getObject3D("mesh");
         if (!datum.mesh) {
           continue;
         }
         const isMenuVisible = datum.menuEl.object3D.visible;
-        const shouldRecomputeMenuPlacement = isMenuVisible;
-        if (shouldRecomputeMenuPlacement) {
-          const boundingSphereInfo = this.boundingSphereSystem.data.get(el).boundingSphereInfo;
-          recomputeMenuPlacement(el, datum, cameraPosition, cameraRotation, this.btCollisionWorld, boundingSphereInfo);
+        const isMenuOpening = isMenuVisible && !datum.wasMenuVisible;
+        if (isMenuOpening) {
+          const intersection =
+            (this.interactionSystem.state.rightRemote.hovered === el && this.rightCursorController.intersection) ||
+            (this.interactionSystem.state.leftRemote.hovered === el && this.leftCursorController.intersection);
+          if (!intersection) {
+            // Must be on mobile, where all menus open simultaneously
+            el.object3D.updateMatrices();
+            datum.intersectionPoint.setFromMatrixPosition(el.object3D.matrixWorld);
+          } else {
+            datum.intersectionPoint.copy(intersection.point);
+          }
+          recomputeMenuPlacement(
+            el,
+            el.sceneEl.is("vr-mode"),
+            datum,
+            cameraPosition,
+            cameraRotation,
+            this.btCollisionWorld
+          );
         }
+        datum.wasMenuVisible = isMenuVisible;
       }
     };
   })();

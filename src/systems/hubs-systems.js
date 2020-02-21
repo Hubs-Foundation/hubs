@@ -19,8 +19,6 @@ import { CharacterControllerSystem } from "./character-controller-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { CursorPoseTrackingSystem } from "./cursor-pose-tracking";
 import { ScaleInScreenSpaceSystem } from "./scale-in-screen-space";
-import { BoundingSphereSystem } from "./bounding-sphere-system";
-import { BoundingSphereVisualizationSystem } from "./bounding-sphere-visualization-system";
 import { MenuPlacementSystem } from "./menu-placement-system";
 import { MenuAnimationSystem } from "./menu-animation-system";
 
@@ -51,9 +49,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.waypointSystem = new WaypointSystem(this.el, this.characterController);
     this.cursorPoseTrackingSystem = new CursorPoseTrackingSystem();
     this.scaleInScreenSpaceSystem = new ScaleInScreenSpaceSystem();
-    this.boundingSphereSystem = new BoundingSphereSystem();
-    this.boundingSphereVisualizationSystem = new BoundingSphereVisualizationSystem(this.el, this.boundingSphereSystem);
-    this.menuPlacementSystem = new MenuPlacementSystem(this.boundingSphereSystem, this.physicsSystem);
+    this.menuPlacementSystem = new MenuPlacementSystem(this.physicsSystem, this.el.systems.interaction);
     this.menuAnimationSystem = new MenuAnimationSystem();
   },
 
@@ -87,8 +83,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.batchManagerSystem.tick(t);
     this.cameraSystem.tick(this.el, dt);
     this.waypointSystem.tick(t, dt);
-    this.boundingSphereSystem.tick();
-    this.boundingSphereVisualizationSystem.tick();
     this.menuPlacementSystem.tick(); // must run before sprite system
     this.menuAnimationSystem.tick(t);
     this.spriteSystem.tick(t, dt);
