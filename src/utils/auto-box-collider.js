@@ -40,11 +40,15 @@ export const computeLocalBoundingBox = (function() {
             box.expandByPoint(localCoords);
           }
         } else if (node.geometry.isBufferGeometry && node.geometry.attributes.position) {
+          const isText = node.geometry.visibleGlyphs;
+          const array = node.geometry.attributes.position.array;
           for (let i = 0; i < node.geometry.attributes.position.count; i++) {
-            vertex
-              .fromBufferAttribute(node.geometry.attributes.position, i)
-              .applyMatrix4(node.matrixWorld)
-              .sub(position);
+            if (isText) {
+              vertex.set(array[2 * i], array[2 * i + 1], 0);
+            } else {
+              vertex.fromBufferAttribute(node.geometry.attributes.position, i);
+            }
+            vertex.applyMatrix4(node.matrixWorld).sub(position);
             if (isNaN(vertex.x)) continue;
             localCoords.set(xAxis.dot(vertex), yAxis.dot(vertex), zAxis.dot(vertex));
             box.expandByPoint(localCoords);

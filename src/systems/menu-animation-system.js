@@ -37,11 +37,8 @@ export class MenuAnimationSystem {
       cameraPosition.setFromMatrixPosition(this.viewingCamera.matrixWorld);
 
       for (let i = 0; i < this.els.length; i++) {
-        const el = this.els[i];
-        if (!el.components["gltf-model-plus"]) {
-          continue; // TODO: Should not have even been registered, in this case
-        }
-        const datum = this.data.get(el);
+        const el = this.els[i].el;
+        const datum = this.data.get(this.els[i]);
         const isMenuVisible = datum.menuEl.object3D.visible;
         const isMenuOpening = isMenuVisible && !datum.wasMenuVisible;
         const distanceToMenu = menuToCamera
@@ -50,7 +47,8 @@ export class MenuAnimationSystem {
         datum.menuEl.object3D.parent.updateMatrices();
         menuParentScale.setFromMatrixScale(datum.menuEl.object3D.parent.matrixWorld);
         if (isMenuOpening) {
-          datum.endingScale = (0.45 * distanceToMenu) / menuParentScale.x;
+          const scale = THREE.Math.clamp(0.45 * distanceToMenu, 0.05, 4);
+          datum.endingScale = scale / menuParentScale.x;
           datum.menuOpenTime = t;
           datum.startScaleAtMenuOpenTime = datum.endingScale * 0.8;
         }
@@ -60,9 +58,10 @@ export class MenuAnimationSystem {
             datum.endingScale,
             elasticOut(THREE.Math.clamp((t - datum.menuOpenTime) / MENU_ANIMATION_DURATION_MS, 0, 1))
           );
-          datum.menuEl.object3D.scale.setScalar(currentScale);
-          datum.menuEl.object3D.matrixNeedsUpdate = true;
-          // TODO: If scaling becomes a hotspot on mobile because all object menus open in freeze mode, we can round robin the scale updates.
+          if (datum.menuEl.object3D.scale.x !== currentScale) {
+            datum.menuEl.object3D.scale.setScalar(currentScale);
+            datum.menuEl.object3D.matrixNeedsUpdate = true;
+          }
         }
         datum.wasMenuVisible = isMenuVisible;
       }
