@@ -3,6 +3,25 @@ import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 
+function registerRootSceneComponent(componentName) {
+  AFRAME.GLTFModelPlus.registerComponent(componentName, componentName, (el, componentName, componentData) => {
+    const sceneEl = AFRAME.scenes[0];
+
+    sceneEl.setAttribute(componentName, componentData);
+
+    sceneEl.addEventListener(
+      "reset_scene",
+      () => {
+        sceneEl.removeAttribute(componentName);
+      },
+      { once: true }
+    );
+  });
+}
+
+registerRootSceneComponent("fog");
+registerRootSceneComponent("background");
+
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
 AFRAME.GLTFModelPlus.registerComponent("sound", "sound");
@@ -49,6 +68,7 @@ AFRAME.GLTFModelPlus.registerComponent("hemisphere-light", "hemisphere-light");
 AFRAME.GLTFModelPlus.registerComponent("point-light", "point-light");
 AFRAME.GLTFModelPlus.registerComponent("spot-light", "spot-light");
 
+AFRAME.GLTFModelPlus.registerComponent("simple-water", "simple-water");
 AFRAME.GLTFModelPlus.registerComponent("skybox", "skybox");
 AFRAME.GLTFModelPlus.registerComponent("layers", "layers");
 AFRAME.GLTFModelPlus.registerComponent("shadow", "shadow");
@@ -134,14 +154,20 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
     });
   }
 
-  el.setAttribute("media-loader", {
+  const mediaLoaderAttributes = {
     src: componentData.src,
     fitToBox: componentData.contentSubtype ? false : true,
     resolve: true,
     fileIsOwned: true,
     animate: false,
     contentSubtype: componentData.contentSubtype
-  });
+  };
+
+  if (componentData.version) {
+    mediaLoaderAttributes.version = componentData.version;
+  }
+
+  el.setAttribute("media-loader", mediaLoaderAttributes);
 
   if (componentData.pageIndex) {
     el.setAttribute("media-pdf", { index: componentData.pageIndex });
@@ -352,3 +378,7 @@ AFRAME.GLTFModelPlus.registerComponent("trimesh", "trimesh", el => {
 AFRAME.GLTFModelPlus.registerComponent("particle-emitter", "particle-emitter");
 
 AFRAME.GLTFModelPlus.registerComponent("networked-drawing-buffer", "networked-drawing-buffer");
+
+AFRAME.GLTFModelPlus.registerComponent("audio-settings", "audio-settings", (el, _componentName, componentData) => {
+  el.sceneEl.systems["hubs-systems"].audioSettingsSystem.updateAudioSettings(componentData);
+});

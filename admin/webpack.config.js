@@ -76,7 +76,7 @@ module.exports = (env, argv) => ({
     https: createHTTPSConfig(),
     host: process.env.HOST_IP || "0.0.0.0",
     port: process.env.PORT || "8989",
-    public: `${host}:8989`,
+    public: `${host}:${process.env.PORT || "8989"}`,
     useLocalIp: true,
     allowedHosts: [host],
     headers: {

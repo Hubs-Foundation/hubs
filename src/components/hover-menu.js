@@ -21,12 +21,28 @@ AFRAME.registerComponent("hover-menu", {
       // we have to wait a tick for the attach callbacks to get fired for the elements in a template
       setTimeout(() => {
         this.menu = menu;
-        this.el.setAttribute("position-at-box-shape-border", {
-          target: ".hover-container",
-          dirs: this.data.dirs,
-          animate: false,
-          scale: false
-        });
+
+        // HACK workaround for now due to position-at-box-shape-border having problems
+        // with nested entities, when using 'mirror' viewing.
+        //
+        // TODO Revisit once that component is removed/deprecated. If we disable repositioning,
+        // the menu will only appear on the front of the object (which is fine for our purposes)
+        const isMirroredMedia = this.el.parentEl.id === "media-mirror-target";
+        const enableRepositioning = !isMirroredMedia;
+
+        if (enableRepositioning) {
+          this.el.setAttribute("position-at-box-shape-border", {
+            target: ".hover-container",
+            dirs: this.data.dirs,
+            animate: false,
+            scale: false
+          });
+        } else {
+          const hoverContainer = this.el.querySelector(".hover-container");
+          hoverContainer.object3D.position.z = 0.001;
+          hoverContainer.object3D.matrixNeedsUpdate = true;
+        }
+
         resolve(this.menu);
       });
     }));

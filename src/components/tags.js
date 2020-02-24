@@ -8,10 +8,12 @@ AFRAME.registerComponent("tags", {
     isHoldable: { default: false },
     offersHandConstraint: { default: false },
     offersRemoteConstraint: { default: false },
+    togglesHoveredActionSet: { default: false },
     singleActionButton: { default: false },
     holdableButton: { default: false },
     isPen: { default: false },
     isHoverMenuChild: { default: false },
+    isStatic: { default: false },
     inspectable: { default: false }
   },
   update() {

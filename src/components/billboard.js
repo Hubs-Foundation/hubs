@@ -63,6 +63,17 @@ AFRAME.registerComponent("billboard", {
       if (!this.playerCamera) return;
 
       this.isInView = this.el.sceneEl.is("vr-mode") ? true : isInViewOfCamera(this.el.object3D, this.playerCamera);
+
+      if (!this.isInView) {
+        // Check in-game camera if rendering to viewfinder and owned
+        const cameraTools = this.el.sceneEl.systems["camera-tools"];
+
+        if (cameraTools) {
+          cameraTools.ifMyCameraRenderingViewfinder(cameraTool => {
+            this.isInView = this.isInView || isInViewOfCamera(this.el.object3D, cameraTool.camera);
+          });
+        }
+      }
     };
   })(),
 

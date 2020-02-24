@@ -358,23 +358,22 @@ AFRAME.registerSystem("userinput", {
       if (!e.gamepad.handedness) {
         e.gamepad.handedness = e.gamepad.hand;
       }
-      const gamepadId = e.gamepad.primaryProfile || e.gamepad.id;
       // HACK Firefox Nightly bug causes corrupt gamepad names for OpenVR, so do startsWith
       if (
-        gamepadId.startsWith("OpenVR Gamepad") ||
-        gamepadId === "HTC Vive Focus Plus Controller" ||
-        gamepadId === "OpenVR Cosmos"
+        e.gamepad.id.startsWith("OpenVR Gamepad") ||
+        e.gamepad.id === "HTC Vive Focus Plus Controller" ||
+        e.gamepad.id === "OpenVR Cosmos"
       ) {
         gamepadDevice = new ViveControllerDevice(e.gamepad);
-      } else if (["Oculus Touch", "oculus-touch"].some(n => gamepadId.startsWith(n))) {
+      } else if (e.gamepad.id.startsWith("Oculus Touch") || e.gamepad.id.startsWith("Pico Neo 2")) {
         gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
-      } else if (["Spatial Controller", "windows-mixed-reality"].some(n => gamepadId.startsWith(n))) {
+      } else if (e.gamepad.id.startsWith("Spatial Controller")) {
         gamepadDevice = new WindowsMixedRealityControllerDevice(e.gamepad);
-      } else if (gamepadId === "Oculus Go Controller") {
+      } else if (e.gamepad.id === "Oculus Go Controller" || e.gamepad.id === "Pico G2 Controller") {
         gamepadDevice = new OculusGoControllerDevice(e.gamepad);
-      } else if (gamepadId === "Gear VR Controller" || gamepadId === "HTC Vive Focus Controller") {
+      } else if (e.gamepad.id === "Gear VR Controller" || e.gamepad.id === "HTC Vive Focus Controller") {
         gamepadDevice = new GearVRControllerDevice(e.gamepad);
-      } else if (gamepadId === "Daydream Controller") {
+      } else if (e.gamepad.id === "Daydream Controller") {
         gamepadDevice = new DaydreamControllerDevice(e.gamepad);
       } else if (e.gamepad.mapping === "standard") {
         // Our XboxController device and bindings should be generic enough for most gamepads.

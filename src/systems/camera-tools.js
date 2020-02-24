@@ -8,12 +8,14 @@ AFRAME.registerSystem("camera-tools", {
     this.cameraEls = [];
     this.cameraUpdateCount = 0;
     this.ticks = 0;
+    this.updateMyCamera = this.updateMyCamera.bind(this);
 
     waitForDOMContentLoaded().then(() => {
       const playerModelEl = document.querySelector("#avatar-rig .model");
       playerModelEl.addEventListener("model-loading", () => (this.playerHead = null));
       playerModelEl.addEventListener("model-loaded", this.updatePlayerHead.bind(this));
       this.updatePlayerHead();
+      this.updateMyCamera();
     });
   },
 
@@ -24,24 +26,36 @@ AFRAME.registerSystem("camera-tools", {
 
   register(el) {
     this.cameraEls.push(el);
-    el.addEventListener("ownership-changed", this._onOwnershipChange);
-    delete this.myCamera;
+    el.addEventListener("ownership-changed", this.updateMyCamera);
+    this.updateMyCamera();
   },
 
   deregister(el) {
     this.cameraEls = this.cameraEls.filter(c => c !== el);
-    el.removeEventListener("ownership-changed", this._onOwnershipChange);
-    delete this.myCamera;
+    el.removeEventListener("ownership-changed", this.updateMyCamera);
+    this.updateMyCamera();
   },
 
   getMyCamera() {
-    if (this.myCamera !== undefined) return this.myCamera;
-    this.myCamera = this.cameraEls.find(NAF.utils.isMine) || null;
     return this.myCamera;
   },
 
-  _onOwnershipChange() {
-    this.myCamera = null;
+  ifMyCameraRenderingViewfinder(f) {
+    if (!this.myCamera) return;
+
+    const myCameraTool = this.myCamera.components["camera-tool"];
+
+    if (myCameraTool && myCameraTool.showCameraViewfinder && myCameraTool.camera) {
+      f(myCameraTool);
+    }
+  },
+
+  updateMyCamera() {
+    if (!this.cameraEls) {
+      this.myCamera = null;
+    } else {
+      this.myCamera = this.cameraEls.find(NAF.utils.isMine);
+    }
   },
 
   tick() {

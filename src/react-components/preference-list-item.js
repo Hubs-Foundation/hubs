@@ -195,9 +195,15 @@ export class PreferenceListItem extends Component {
   }
 
   render() {
+    const isCheckbox = this.props.prefType === PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
+
     return (
       <div
-        className={classNames({ [styles.hovered]: this.state.hovered }, styles.preferenceListItem)}
+        className={classNames(
+          { [styles.hovered]: this.state.hovered },
+          styles.preferenceListItem,
+          !isCheckbox && styles.preferenceListNonCheckbox
+        )}
         onMouseEnter={() => {
           this.setState({ hovered: true });
         }}
@@ -205,21 +211,28 @@ export class PreferenceListItem extends Component {
           this.setState({ hovered: false });
         }}
       >
+        <div className={classNames(styles.checkboxMargin)}>
+          {isCheckbox ? this.renderControls() : <span>&nbsp;</span>}
+        </div>
         <div className={classNames(styles.part, styles.left, styles.label)}>
           <FormattedMessage id={`preferences.${this.props.storeKey}`} />
         </div>
         <div className={classNames(styles.part, styles.right)}>
-          {this.renderControls()}
+          {!isCheckbox && this.renderControls()}
           <button
             className={classNames(styles.resetToDefaultButton)}
             onClick={() => {
               switch (this.props.prefType) {
                 case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
-                  delete this.props.store.state.preferences.maxResolutionWidth;
-                  delete this.props.store.state.preferences.maxResolutionHeight;
+                  this.props.store.update({
+                    preferences: {
+                      maxResolutionWidth: undefined,
+                      maxResolutionHeight: undefined
+                    }
+                  });
                   break;
                 default:
-                  delete this.props.store.state.preferences[this.props.storeKey];
+                  this.props.store.update({ preferences: { [this.props.storeKey]: undefined } });
                   break;
               }
               this.forceUpdate();

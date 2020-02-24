@@ -6,7 +6,7 @@ SHORTLINK_ZONE_NAME=$3
 INTERNAL_ZONE_NAME=$4
 
 if [[ -z "$STACK_NAME" || -z "$EXTERNAL_ZONE_NAME" || -z "$SHORTLINK_ZONE_NAME" || -z "$INTERNAL_ZONE_NAME" ]] ; then 
-  echo -e "Usage: scripts/use-hubs-cloud-stack.sh <stack-name> <domain> <internal-domain>
+  echo -e "Usage: scripts/use-hubs-cloud-stack.sh <stack-name> <domain> <short-link-domain> <internal-domain>
 
 Switches your local client to connect to a remote Hubs Cloud instance by modifying .env.defaults.
 
@@ -36,7 +36,7 @@ CORS_PROXY_SERVER="$STACK_NAME-cors-proxy.$INTERNAL_ZONE_NAME"
 
 # The thumbnailing backend to connect to.
 # See here for the server code: https://github.com/MozillaReality/farspark or https://github.com/MozillaReality/nearspark
-THUMBNAIL_SERVER="nearspark.$INTERNAL_ZONE_NAME"
+THUMBNAIL_SERVER="$STACK_NAME-nearspark.$INTERNAL_ZONE_NAME"
 
 # The root URL under which Hubs expects environment GLTF bundles to be served.
 ASSET_BUNDLE_SERVER="https://asset-bundles-prod.reticulum.io"

@@ -1,5 +1,5 @@
 import { BatchRawUniformGroup } from "@mozillareality/three-batch-manager";
-import { CAMERA_MODE_INSPECT } from "../camera-system";
+import { CAMERA_MODE_INSPECT, CAMERA_LAYER_BATCH_INSPECT } from "../camera-system";
 
 const tempVec3 = new Array(3);
 const tempVec4 = new Array(4);
@@ -18,6 +18,9 @@ export function sizeofInstances(instanceCount) {
         1); // time
   return instanceCount * INSTANCE_DATA_BYTE_LENGTH + hubsDataSize;
 }
+
+const inspectLayer = new THREE.Layers();
+inspectLayer.set(CAMERA_LAYER_BATCH_INSPECT);
 
 export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
   constructor(maxInstances, meshToEl) {
@@ -53,7 +56,6 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
     if (!interaction.ready) return; //DOMContentReady workaround
     const cameraSystem = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem;
     const inspecting = cameraSystem.mode === CAMERA_MODE_INSPECT && !cameraSystem.enableLights;
-    const inspectedMeshesFromBatch = cameraSystem.inspectedMeshesFromBatch;
     let interactorOne, interactorTwo;
 
     for (let instanceId = 0; instanceId < this.meshes.length; instanceId++) {
@@ -63,13 +65,14 @@ export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
       mesh.updateMatrices();
 
       // TODO need to account for nested visibility deeper than 1 level
-      this.setInstanceTransform(
-        instanceId,
+      const isVisible =
         mesh.visible &&
         (mesh.parent && mesh.parent.visible) &&
-        (!inspecting || inspectedMeshesFromBatch.indexOf(mesh) !== -1)
-          ? mesh.matrixWorld
-          : HIDE_MATRIX
+        mesh.el.object3D.visible &&
+        (mesh.el.object3D.parent && mesh.el.object3D.parent.visible);
+      this.setInstanceTransform(
+        instanceId,
+        isVisible && (!inspecting || mesh.layers.test(inspectLayer)) ? mesh.matrixWorld : HIDE_MATRIX
       );
       this.setInstanceColor(instanceId, mesh.material.color || DEFAULT_COLOR, mesh.material.opacity || 1);
 

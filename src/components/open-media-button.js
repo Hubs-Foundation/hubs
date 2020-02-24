@@ -1,4 +1,4 @@
-import { isHubsSceneUrl, isHubsRoomUrl, isHubsAvatarUrl } from "../utils/media-url-utils";
+import { isLocalHubsSceneUrl, isHubsRoomUrl, isLocalHubsAvatarUrl } from "../utils/media-url-utils";
 import { guessContentType } from "../utils/media-url-utils";
 import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 
@@ -20,9 +20,9 @@ AFRAME.registerComponent("open-media-button", {
       if (visible) {
         let label = "open link";
         if (!this.data.onlyOpenLink) {
-          if (await isHubsAvatarUrl(src)) {
+          if (await isLocalHubsAvatarUrl(src)) {
             label = "use avatar";
-          } else if ((await isHubsSceneUrl(src)) && mayChangeScene) {
+          } else if ((await isLocalHubsSceneUrl(src)) && mayChangeScene) {
             label = "use scene";
           } else if (await isHubsRoomUrl(src)) {
             label = "visit room";
@@ -40,10 +40,11 @@ AFRAME.registerComponent("open-media-button", {
       if (this.data.onlyOpenLink) {
         await exitImmersive();
         window.open(this.src);
-      } else if (await isHubsAvatarUrl(this.src)) {
+      } else if (await isLocalHubsAvatarUrl(this.src)) {
         const avatarId = new URL(this.src).pathname.split("/").pop();
         window.APP.store.update({ profile: { avatarId } });
-      } else if ((await isHubsSceneUrl(this.src)) && mayChangeScene) {
+        this.el.sceneEl.emit("avatar_updated");
+      } else if ((await isLocalHubsSceneUrl(this.src)) && mayChangeScene) {
         this.el.sceneEl.emit("scene_media_selected", this.src);
       } else if (await isHubsRoomUrl(this.src)) {
         await exitImmersive();

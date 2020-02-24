@@ -17,7 +17,7 @@
   left: 24px;
 
   i {
-    font-size: 1.2em;
+    font-size: 24px;
   }
 }
 
@@ -81,7 +81,7 @@
   :local(.subtitle) {
     font-size: 0.8em;
     font-weight: normal;
-    color: $action-subtitle-text-color;
+    color: $action-subtitle-color;
   }
 }
 

@@ -210,7 +210,7 @@ export class SpriteSystem {
   }
   constructor(scene) {
     this.missingSprites = [];
-    this.maxSprites = 512;
+    this.maxSprites = 1024;
     this.slots = { action: new Array(this.maxSprites), notice: new Array(this.maxSprites) };
     this.spriteWithIndex = { action: new Map(), notice: new Map() };
     this.indexWithSprite = { action: new Map(), notice: new Map() };

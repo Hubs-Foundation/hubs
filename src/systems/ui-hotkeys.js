@@ -32,7 +32,11 @@ AFRAME.registerSystem("ui-hotkeys", {
     }
 
     if (this.userinput.get(paths.actions.mediaExit)) {
-      if (window.APP.history.location.state && window.APP.history.location.state.value !== "avatar-editor") {
+      if (
+        window.APP.history.location.state &&
+        window.APP.history.location.state.value !== "avatar-editor" &&
+        window.APP.history.location.state.value !== "link"
+      ) {
         this.mediaSearchStore.pushExitMediaBrowserHistory();
       }
 
@@ -47,6 +51,12 @@ AFRAME.registerSystem("ui-hotkeys", {
 
     if (this.userinput.get(paths.actions.toggleCamera)) {
       this.el.emit("action_toggle_camera");
+    }
+
+    if (this.userinput.get(paths.actions.toggleUI)) {
+      if (this.el.sceneEl.is("entered")) {
+        this.el.emit("action_toggle_ui");
+      }
     }
   },
 

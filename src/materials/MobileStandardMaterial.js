@@ -81,6 +81,7 @@ export default class MobileStandardMaterial extends THREE.ShaderMaterial {
       vertexShader: VERTEX_SHADER,
       fragmentShader: FRAGMENT_SHADER,
       uniforms: {
+        ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog),
         uvTransform: { value: new THREE.Matrix3() },
         diffuse: { value: material.color },
         opacity: { value: material.opacity },
@@ -108,10 +109,42 @@ export default class MobileStandardMaterial extends THREE.ShaderMaterial {
     mobileMaterial.aoMap = material.aoMap;
     mobileMaterial.aoMapIntensity = material.aoMapIntensity;
     mobileMaterial.emissive = material.emissive;
+    mobileMaterial.emissiveIntensity = material.emissiveIntensity;
     mobileMaterial.emissiveMap = material.emissiveMap;
+
+    // TODO this actually needs to get called whenever any of these material properties change
+    mobileMaterial.refreshUniforms();
 
     return mobileMaterial;
   }
+
+  refreshUniforms() {
+    this.uniforms.opacity.value = this.opacity;
+
+    if (this.color) {
+      this.uniforms.diffuse.value.copy(this.color);
+    }
+
+    if (this.emissive) {
+      this.uniforms.emissive.value.copy(this.emissive).multiplyScalar(this.emissiveIntensity);
+    }
+
+    if (this.map) {
+      this.uniforms.map.value = this.map;
+    }
+
+    if (this.aoMap) {
+      this.uniforms.aoMap.value = this.aoMap;
+      this.uniforms.aoMapIntensity.value = this.aoMapIntensity;
+    }
+
+    const uvScaleMap = this.map || this.emissiveMap;
+    if (uvScaleMap && uvScaleMap.matrixAutoUpdate === true) {
+      uvScaleMap.updateMatrix();
+      this.uniforms.uvTransform.value.copy(uvScaleMap.matrix);
+    }
+  }
+
   clone() {
     return MobileStandardMaterial.fromStandardMaterial(this);
   }

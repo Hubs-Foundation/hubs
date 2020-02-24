@@ -92,7 +92,8 @@ module.exports = (env, argv) => ({
   node: {
     // need to specify this manually because some random lodash code will try to access
     // Buffer on the global object if it exists, so webpack will polyfill on its behalf
-    Buffer: false
+    Buffer: false,
+    fs: "empty"
   },
   entry: {
     index: path.join(__dirname, "src", "index.js"),
@@ -101,6 +102,7 @@ module.exports = (env, argv) => ({
     avatar: path.join(__dirname, "src", "avatar.js"),
     link: path.join(__dirname, "src", "link.js"),
     discord: path.join(__dirname, "src", "discord.js"),
+    cloud: path.join(__dirname, "src", "cloud.js"),
     "whats-new": path.join(__dirname, "src", "whats-new.js")
   },
   output: {
@@ -110,7 +112,7 @@ module.exports = (env, argv) => ({
   devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
   devServer: {
     https: createHTTPSConfig(),
-    host: process.env.HOST_IP || "0.0.0.0",
+    host: "0.0.0.0",
     public: `${host}:8080`,
     useLocalIp: true,
     allowedHosts: [host],
@@ -310,6 +312,12 @@ module.exports = (env, argv) => ({
       filename: "whats-new.html",
       template: path.join(__dirname, "src", "whats-new.html"),
       chunks: ["vendor", "whats-new"],
+      inject: "head"
+    }),
+    new HTMLWebpackPlugin({
+      filename: "cloud.html",
+      template: path.join(__dirname, "src", "cloud.html"),
+      chunks: ["vendor", "cloud"],
       inject: "head"
     }),
     new CopyWebpackPlugin([

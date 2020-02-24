@@ -9,9 +9,12 @@ import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+import { faInfo } from "@fortawesome/free-solid-svg-icons/faInfo";
 import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
+import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
+import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 
 import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/media-browser.scss";
@@ -32,10 +35,15 @@ const PUBLISHER_FOR_ENTRY_TYPE = {
 class MediaTiles extends Component {
   static propTypes = {
     intl: PropTypes.object,
-    result: PropTypes.object,
+    entries: PropTypes.array,
+    hasNext: PropTypes.bool,
+    hasPrevious: PropTypes.bool,
+    isVariableWidth: PropTypes.bool,
+    page: PropTypes.number,
     history: PropTypes.object,
     urlSource: PropTypes.string,
     handleEntryClicked: PropTypes.func,
+    handleEntryInfoClicked: PropTypes.func,
     handlePager: PropTypes.func,
     onCopyAvatar: PropTypes.func,
     onCopyScene: PropTypes.func,
@@ -57,15 +65,9 @@ class MediaTiles extends Component {
   };
 
   render() {
-    const { urlSource, result } = this.props;
-    const entries = (result && result.entries) || [];
+    const { urlSource, hasNext, hasPrevious, page, isVariableWidth } = this.props;
+    const entries = this.props.entries || [];
     const [createTileWidth, createTileHeight] = this.getTileDimensions(false, urlSource === "avatars");
-    const searchParams = new URLSearchParams((this.props.history ? this.props.history.location : location).search);
-    const hasMeta = !!(result && result.meta);
-    const apiSource = (hasMeta && result.meta.source) || null;
-    const isVariableWidth = result && ["bing_images", "tenor"].includes(apiSource);
-    const hasNext = !!(hasMeta && result.meta.next_cursor) || false;
-    const hasPrevious = searchParams.get("cursor");
 
     return (
       <div className={styles.body}>
@@ -108,8 +110,7 @@ class MediaTiles extends Component {
           {entries.map(this.entryToTile)}
         </div>
 
-        {result &&
-          (hasNext || hasPrevious) &&
+        {(hasNext || hasPrevious) &&
           this.props.handlePager && (
             <div className={styles.pager}>
               <a
@@ -118,7 +119,7 @@ class MediaTiles extends Component {
               >
                 <FontAwesomeIcon icon={faAngleLeft} />
               </a>
-              <div className={styles.pageNumber}>{result.meta.page}</div>
+              <div className={styles.pageNumber}>{page}</div>
               <a
                 className={classNames({ [styles.nextPage]: true, [styles.pagerButtonDisabled]: !hasNext })}
                 onClick={() => this.props.handlePager(1)}
@@ -155,7 +156,7 @@ class MediaTiles extends Component {
     const creator = entry.attributions && entry.attributions.creator;
     const isImage = entry.type.endsWith("_image");
     const isAvatar = ["avatar", "avatar_listing"].includes(entry.type);
-    const isHub = ["hub"].includes(entry.type);
+    const isHub = ["room"].includes(entry.type);
     const imageAspect = entry.images.preview.width / entry.images.preview.height;
 
     const [imageWidth, imageHeight] = this.getTileDimensions(isImage, isAvatar, imageAspect);
@@ -243,7 +244,27 @@ class MediaTiles extends Component {
                 <FontAwesomeIcon icon={faPencilAlt} />
               </a>
             )}
+          {entry.type === "room" &&
+            this.props.handleEntryInfoClicked &&
+            entry.description && (
+              <a
+                title="room info"
+                onClick={e => {
+                  e.preventDefault();
+                  this.props.handleEntryInfoClicked(entry);
+                }}
+              >
+                <FontAwesomeIcon icon={faInfo} />
+              </a>
+            )}
         </div>
+
+        {entry.favorited && (
+          <div className={styles.favorite}>
+            <FontAwesomeIcon icon={faStar} />
+          </div>
+        )}
+
         {!entry.type.endsWith("_image") && (
           <div className={styles.info}>
             <a
@@ -281,12 +302,18 @@ class MediaTiles extends Component {
                 </div>
               )}
             {isHub && (
-              <div className={styles.attribution}>
-                <div className={styles.lastJoined}>
-                  <FormattedMessage id="media-browser.hub.joined-prefix" />
-                  {dayjs(entry.last_activated_at).fromNow()}
+              <>
+                <div className={styles.attribution}>
+                  <div className={styles.lastJoined}>
+                    <FormattedMessage id="media-browser.hub.joined-prefix" />
+                    {dayjs(entry.last_activated_at).fromNow()}
+                  </div>
                 </div>
-              </div>
+                <div className={styles.presence}>
+                  <FontAwesomeIcon icon={faUsers} />
+                  <span>{entry.member_count}</span>
+                </div>
+              </>
             )}
           </div>
         )}

@@ -1,25 +1,40 @@
 import { objectTypeForOriginAndContentType } from "../object-types";
-import { getReticulumFetchUrl } from "./phoenix-utils";
+import { getReticulumFetchUrl, getDirectReticulumFetchUrl } from "./phoenix-utils";
+import { ObjectContentOrigins } from "../object-types";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { validMaterials } from "../components/hoverable-visuals";
 import { proxiedUrlFor } from "../utils/media-url-utils";
+import Linkify from "linkify-it";
+import tlds from "tlds";
 
 import anime from "animejs";
 
+const linkify = Linkify();
+linkify.tlds(tlds);
+
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
+const getDirectMediaAPIEndpoint = () => getDirectReticulumFetchUrl("/api/v1/media");
+
+const isMobile = AFRAME.utils.device.isMobile();
+const isMobileVR = AFRAME.utils.device.isMobile();
 
 // Map<String, Promise<Object>
 const resolveUrlCache = new Map();
-export const resolveUrl = async (url, index) => {
-  const cacheKey = `${url}|${index}`;
-  if (resolveUrlCache.has(cacheKey)) return resolveUrlCache.get(cacheKey);
+export const getDefaultResolveQuality = (is360 = false) => {
+  const useLowerQuality = isMobile || isMobileVR;
+  return !is360 ? (useLowerQuality ? "low" : "high") : useLowerQuality ? "low_360" : "high_360";
+};
+
+export const resolveUrl = async (url, quality = null, version = 1) => {
+  const key = `${url}_${version}`;
+  if (resolveUrlCache.has(key)) return resolveUrlCache.get(key);
 
   const resultPromise = fetch(mediaAPIEndpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ media: { url, index } })
+    body: JSON.stringify({ media: { url, quality: quality || getDefaultResolveQuality() }, version })
   }).then(async response => {
     if (!response.ok) {
       const message = `Error resolving url "${url}":`;
@@ -33,7 +48,7 @@ export const resolveUrl = async (url, index) => {
     return response.json();
   });
 
-  resolveUrlCache.set(cacheKey, resultPromise);
+  resolveUrlCache.set(key, resultPromise);
   return resultPromise;
 };
 
@@ -46,7 +61,9 @@ export const upload = (file, desiredContentType) => {
     formData.append("desired_content_type", desiredContentType);
   }
 
-  return fetch(mediaAPIEndpoint, {
+  // To eliminate the extra hop and avoid proxy timeouts, upload files directly
+  // to a reticulum host.
+  return fetch(getDirectMediaAPIEndpoint(), {
     method: "POST",
     body: formData
   }).then(r => r.json());
@@ -91,6 +108,28 @@ function getOrientation(file, callback) {
   reader.readAsArrayBuffer(file);
 }
 
+function getLatestMediaVersionOfSrc(src) {
+  const els = document.querySelectorAll("[media-loader]");
+  let version = 1;
+
+  for (const el of els) {
+    const loader = el.components["media-loader"];
+
+    if (loader.data && loader.data.src === src) {
+      version = Math.max(version, loader.data.version);
+    }
+  }
+
+  return version;
+}
+
+export function coerceToUrl(urlOrText) {
+  if (!linkify.test(urlOrText)) return urlOrText;
+
+  // See: https://github.com/Soapbox/linkifyjs/blob/master/src/linkify.js#L52
+  return urlOrText.indexOf("://") >= 0 ? urlOrText : `https://${urlOrText}`;
+}
+
 export const addMedia = (
   src,
   template,
@@ -99,26 +138,55 @@ export const addMedia = (
   resolve = false,
   fitToBox = false,
   animate = true,
-  mediaOptions = {}
+  mediaOptions = {},
+  networked = true,
+  parentEl = null,
+  linkedEl = null
 ) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
-  entity.setAttribute("networked", { template: template });
+
+  if (networked) {
+    entity.setAttribute("networked", { template: template });
+  } else {
+    const templateBody = document
+      .importNode(document.body.querySelector(template).content, true)
+      .firstElementChild.cloneNode(true);
+    const elAttrs = templateBody.attributes;
+
+    // Merge root element attributes with this entity
+    for (let attrIdx = 0; attrIdx < elAttrs.length; attrIdx++) {
+      entity.setAttribute(elAttrs[attrIdx].name, elAttrs[attrIdx].value);
+    }
+
+    // Append all child elements
+    while (templateBody.firstElementChild) {
+      entity.appendChild(templateBody.firstElementChild);
+    }
+  }
+
   const needsToBeUploaded = src instanceof File;
+
+  // If we're re-pasting an existing src in the scene, we should use the latest version
+  // seen across any other entities. Otherwise, start with version 1.
+  const version = getLatestMediaVersionOfSrc(src);
+
   entity.setAttribute("media-loader", {
     fitToBox,
     resolve,
     animate,
-    src: typeof src === "string" ? src : "",
+    src: typeof src === "string" ? coerceToUrl(src) || src : "",
+    version,
     contentSubtype,
     fileIsOwned: !needsToBeUploaded,
+    linkedEl,
     mediaOptions
   });
 
   entity.object3D.matrixNeedsUpdate = true;
 
-  scene.appendChild(entity);
+  (parentEl || scene).appendChild(entity);
 
   const orientation = new Promise(function(resolve) {
     if (needsToBeUploaded) {
@@ -158,6 +226,28 @@ export const addMedia = (
   }
 
   return { entity, orientation };
+};
+
+export const cloneMedia = (sourceEl, template, src = null, networked = true, link = false, parentEl = null) => {
+  if (!src) {
+    ({ src } = sourceEl.components["media-loader"].data);
+  }
+
+  const { contentSubtype, fitToBox, mediaOptions } = sourceEl.components["media-loader"].data;
+
+  return addMedia(
+    src,
+    template,
+    ObjectContentOrigins.URL,
+    contentSubtype,
+    true,
+    fitToBox,
+    false,
+    mediaOptions,
+    networked,
+    parentEl,
+    link ? sourceEl : null
+  );
 };
 
 export function injectCustomShaderChunks(obj) {
@@ -253,7 +343,7 @@ export function getPromotionTokenForFile(fileId) {
 
 const mediaPos = new THREE.Vector3();
 
-export function addAndArrangeMedia(el, media, contentSubtype, snapCount, mirrorOrientation = false) {
+export function addAndArrangeMedia(el, media, contentSubtype, snapCount, mirrorOrientation = false, distance = 0.75) {
   const { entity, orientation } = addMedia(media, "#interactable-media", undefined, contentSubtype, false);
 
   const pos = el.object3D.position;
@@ -270,8 +360,8 @@ export function addAndArrangeMedia(el, media, contentSubtype, snapCount, mirrorO
   const idx = (snapCount % 6) + 3;
 
   mediaPos.set(
-    Math.cos(Math.PI * 2 * (idx / 6.0)) * 0.75,
-    Math.sin(Math.PI * 2 * (idx / 6.0)) * 0.75,
+    Math.cos(Math.PI * 2 * (idx / 6.0)) * distance,
+    Math.sin(Math.PI * 2 * (idx / 6.0)) * distance,
     -0.05 + idx * 0.001
   );
 
@@ -395,4 +485,26 @@ export function addMeshScaleAnimation(mesh, initialScale, onComplete) {
   mesh.matrixNeedsUpdate = true;
 
   return anime(config);
+}
+
+export function closeExistingMediaMirror() {
+  const mirrorTarget = document.querySelector("#media-mirror-target");
+
+  // Remove old mirror target media element
+  if (mirrorTarget.firstChild) {
+    mirrorTarget.firstChild.setAttribute("animation__remove", {
+      property: "scale",
+      dur: 200,
+      to: { x: 0.01, y: 0.01, z: 0.01 },
+      easing: "easeInQuad"
+    });
+
+    return new Promise(res => {
+      mirrorTarget.firstChild.addEventListener("animationcomplete", () => {
+        mirrorTarget.removeChild(mirrorTarget.firstChild);
+        mirrorTarget.parentEl.object3D.visible = false;
+        res();
+      });
+    });
+  }
 }

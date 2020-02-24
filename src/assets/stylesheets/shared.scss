@@ -7,7 +7,7 @@ $action-label-color: var(--action-label-color, $default-action-color);
 $action-color-disabled: var(--action-color-disabled, $default-action-color-light);
 $action-color-highlight: var(--action-color-highlight, $default-action-color-light);
 $action-text-color: var(--action-text-color, white);
-$action-subtitle-text-color: var(--action-subtitle-text-color, $light-text);
+$action-subtitle-color: var(--action-subtitle-color, $light-text);
 $notice-background-color: var(--notice-background-color, $bright-blue);
 $notice-text-color: var(--notice-text-color, white);
 $notice-widget-color: var(--notice-widget-color, $light-blue);
@@ -59,6 +59,12 @@ $favorited-color: var(--favorited-color, $duck-yellow);
   padding-right: 1.25em;
   margin: 0.5em 0;
   width: 100%;
+}
+
+%input-textarea {
+  @extend %input-field;
+  padding: 0.4em 1em;
+  line-height: 1.5em;
 }
 
 %big-action-button {
@@ -227,8 +233,36 @@ $favorited-color: var(--favorited-color, $duck-yellow);
 }
 
 %checkbox-checked {
-  outline: 9px solid $action-color;
-  outline-offset: -15px;
+  position: relative;
+  &::after {
+    content: ' ';
+    position: absolute;
+    background: $action-color;
+    top: 0.3em;
+    left: 0.3em;
+    right: 0.3em;
+    bottom: 0.3em;
+    border-radius: 0.3em;
+  }
+}
+
+%radio {
+  @extend %checkbox;
+  border-radius: 1em;
+}
+
+%radio-checked {
+  @extend %checkbox-checked;
+  &::after {
+    content: ' ';
+    position: absolute;
+    background: $action-color;
+    top: 0.3em;
+    left: 0.3em;
+    right: 0.3em;
+    bottom: 0.3em;
+    border-radius: 1em;
+  }
 }
 
 %background-agnostic {
@@ -278,6 +312,14 @@ $favorited-color: var(--favorited-color, $duck-yellow);
 
 %fa-icon-button-text {
   margin-left: 16px;
+}
+
+%panel-widget {
+  cursor: pointer;
+  color: var(--panel-widget-color);
+  outline-style: none;
+  background: none;
+  border: none;
 }
 
 %tip-bubble {

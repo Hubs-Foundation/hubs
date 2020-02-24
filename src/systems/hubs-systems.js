@@ -10,7 +10,7 @@ import { SuperSpawnerSystem } from "./super-spawner-system";
 import { HapticFeedbackSystem } from "./haptic-feedback-system";
 import { SoundEffectsSystem } from "./sound-effects-system";
 import { BatchManagerSystem } from "./render-manager-system";
-import { LobbyCameraSystem } from "./lobby-camera-system";
+import { ScenePreviewCameraSystem } from "./scene-preview-camera-system";
 import { InteractionSfxSystem } from "./interaction-sfx-system";
 import { SpriteSystem } from "./sprites";
 import { CameraSystem } from "./camera-system";
@@ -19,6 +19,7 @@ import { CharacterControllerSystem } from "./character-controller-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { CursorPoseTrackingSystem } from "./cursor-pose-tracking";
 import { ScaleInScreenSpaceSystem } from "./scale-in-screen-space";
+import { AudioSettingsSystem } from "./audio-settings-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -38,7 +39,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverMenuSystem = new HoverMenuSystem();
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
     this.soundEffectsSystem = new SoundEffectsSystem(this.el);
-    this.lobbyCameraSystem = new LobbyCameraSystem();
+    this.scenePreviewCameraSystem = new ScenePreviewCameraSystem();
     this.spriteSystem = new SpriteSystem(this.el);
     this.batchManagerSystem = new BatchManagerSystem(this.el.object3D, this.el.renderer);
     this.cameraSystem = new CameraSystem(this.batchManagerSystem);
@@ -47,6 +48,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.waypointSystem = new WaypointSystem(this.el, this.characterController);
     this.cursorPoseTrackingSystem = new CursorPoseTrackingSystem();
     this.scaleInScreenSpaceSystem = new ScaleInScreenSpaceSystem();
+    this.audioSettingsSystem = new AudioSettingsSystem(this.el);
   },
 
   tick(t, dt) {
@@ -74,7 +76,7 @@ AFRAME.registerSystem("hubs-systems", {
       this.singleActionButtonSystem.didInteractRightThisFrame
     );
     this.soundEffectsSystem.tick();
-    this.lobbyCameraSystem.tick();
+    this.scenePreviewCameraSystem.tick();
     this.physicsSystem.tick(dt);
     this.spriteSystem.tick(t, dt);
     this.batchManagerSystem.tick(t);

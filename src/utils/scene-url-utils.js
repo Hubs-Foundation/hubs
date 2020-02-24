@@ -1,4 +1,4 @@
-import { isHubsSceneUrl, proxiedUrlFor } from "../utils/media-url-utils";
+import { isLocalHubsSceneUrl, proxiedUrlFor } from "../utils/media-url-utils";
 
 export async function isValidGLB(url) {
   return fetch(url).then(async r => {
@@ -20,9 +20,19 @@ export async function isValidGLB(url) {
 export async function isValidSceneUrl(url) {
   if (url.trim() === "") return false;
   if (!url.startsWith("http")) return false;
-  if (await isHubsSceneUrl(url)) {
+  if (await isLocalHubsSceneUrl(url)) {
     return true;
   } else {
     return isValidGLB(proxiedUrlFor(url));
   }
+}
+
+// To assist with content control, we avoid displaying scene links to users who are not the scene
+// creator, unless the scene is remixable or promotable.
+export function allowDisplayOfSceneLink(scene, store) {
+  return (
+    (store.credentialsAccountId && scene.account_id === store.credentialsAccountId) ||
+    scene.allow_promotion ||
+    scene.allow_remixing
+  );
 }

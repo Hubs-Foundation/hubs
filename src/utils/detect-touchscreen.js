@@ -21,6 +21,8 @@ function detectTouchScreen() {
   return hasTouchScreen;
 }
 
+let hackyMobileSafariTestValue = null;
+
 // HACK for https://github.com/mozilla/hubs/issues/1813
 // Touchscreen controls depend on iPad and iPhone detection,
 // which recently regressed. For UA matching "Macintosh", enable
@@ -29,7 +31,11 @@ function detectTouchScreen() {
 // is present until we fix conflicts between simultaneous mouse
 // and touchscreen interactions.
 export function hackyMobileSafariTest() {
-  return /\b(Macintosh|iPad|iPhone)\b/i.test(navigator.userAgent) && detectTouchScreen();
+  if (hackyMobileSafariTestValue === null) {
+    hackyMobileSafariTestValue = /\b(Macintosh|iPad|iPhone)\b/i.test(navigator.userAgent) && detectTouchScreen();
+  }
+
+  return hackyMobileSafariTestValue;
   // e.g. Match
   // Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.1 Safari/605.1.15
   // but not

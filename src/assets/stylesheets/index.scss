@@ -206,6 +206,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-height: 150px;
     :local(.primary-button) {
       @extend %big-action-button;
     }

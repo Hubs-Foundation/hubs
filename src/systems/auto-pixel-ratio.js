@@ -5,6 +5,7 @@ const FPS_THRESHOLD = 50;
 const SKIP_SECONDS_AFTER_SCENE_VISIBLE = 30;
 const MEASUREMENT_PERIOD_SECONDS = 5;
 const MIN_PIXEL_RATIO = 1;
+const REDUCTION_RATE = 1;
 
 AFRAME.registerSystem("auto-pixel-ratio", {
   init() {
@@ -22,6 +23,7 @@ AFRAME.registerSystem("auto-pixel-ratio", {
       this.secondsSinceSceneVisible += delta / 1000;
       return;
     }
+    if (document.visibilityState === "hidden") return;
 
     this.deltas.push(delta);
     this.secondsSinceMeasurementStart += delta / 1000;
@@ -32,7 +34,7 @@ AFRAME.registerSystem("auto-pixel-ratio", {
       const medianFps = 1000 / medianDelta;
 
       if (medianFps < FPS_THRESHOLD) {
-        const newPixelRatio = this.el.renderer.getPixelRatio() - 1;
+        const newPixelRatio = this.el.renderer.getPixelRatio() - REDUCTION_RATE;
         console.info(
           `Hubs auto-pixel-ratio: Median FPS (${medianFps.toFixed()}) was below ${FPS_THRESHOLD}. ` +
             `Reducing pixel ratio to ${newPixelRatio}.`

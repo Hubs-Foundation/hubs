@@ -11,7 +11,8 @@ export default class RoomSettingsDialog extends Component {
   static propTypes = {
     initialSettings: PropTypes.object,
     onChange: PropTypes.func,
-    onClose: PropTypes.func
+    onClose: PropTypes.func,
+    showRoomAccessSettings: PropTypes.bool
   };
 
   constructor(props) {
@@ -25,6 +26,11 @@ export default class RoomSettingsDialog extends Component {
     this.props.onChange(this.state);
     this.props.onClose();
   };
+
+  onRoomAccessSettingsChange = e =>
+    this.setState({
+      allow_promotion: e.target.value === "public"
+    });
 
   renderCheckbox(member_permission, disabled, onChange) {
     return (
@@ -47,6 +53,7 @@ export default class RoomSettingsDialog extends Component {
   }
 
   render() {
+    const { showRoomAccessSettings } = this.props;
     return (
       <DialogContainer title="Room Settings" {...this.props}>
         <form onSubmit={this.onSubmit} className={styles.roomSettingsForm}>
@@ -57,7 +64,6 @@ export default class RoomSettingsDialog extends Component {
             name="name"
             type="text"
             required
-            autoFocus
             autoComplete="off"
             placeholder="Room name"
             value={this.state.name}
@@ -66,6 +72,57 @@ export default class RoomSettingsDialog extends Component {
             onChange={e => this.setState({ name: e.target.value })}
             className={styles.nameField}
           />
+          <span className={styles.subtitle}>
+            <FormattedMessage id="room-settings.description-subtitle" />
+          </span>
+          <textarea
+            name="description"
+            rows="5"
+            autoComplete="off"
+            placeholder="Room description"
+            value={this.state.description}
+            onFocus={e => handleTextFieldFocus(e.target)}
+            onBlur={() => handleTextFieldBlur()}
+            onChange={e => this.setState({ description: e.target.value })}
+            className={styles.descriptionField}
+          />
+          {showRoomAccessSettings && (
+            <>
+              <span className={styles.subtitle}>
+                <FormattedMessage id="room-settings.room-access-subtitle" />
+              </span>
+              <div className={styles.selectContainer}>
+                <label>
+                  <input
+                    type="radio"
+                    value="private"
+                    checked={!this.state.allow_promotion}
+                    onChange={this.onRoomAccessSettingsChange}
+                  />
+                  <div>
+                    <FormattedMessage id="room-settings.access-private" />
+                    <span>
+                      <FormattedMessage id="room-settings.access-private-subtitle" />
+                    </span>
+                  </div>
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="public"
+                    checked={this.state.allow_promotion}
+                    onChange={this.onRoomAccessSettingsChange}
+                  />
+                  <div>
+                    <FormattedMessage id="room-settings.access-public" />
+                    <span>
+                      <FormattedMessage id="room-settings.access-public-subtitle" />
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </>
+          )}
           <span className={styles.subtitle}>
             <FormattedMessage id="room-settings.permissions-subtitle" />
           </span>

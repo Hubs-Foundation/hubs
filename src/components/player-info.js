@@ -40,7 +40,7 @@ AFRAME.registerComponent("player-info", {
   },
   init() {
     this.displayName = null;
-    this.communityIdentifier = null;
+    this.identityName = null;
     this.isOwner = false;
     this.isRecording = false;
     this.applyProperties = this.applyProperties.bind(this);
@@ -102,24 +102,27 @@ AFRAME.registerComponent("player-info", {
   },
   updateDisplayNameFromPresenceMeta(presenceMeta) {
     this.displayName = presenceMeta.profile.displayName;
-    this.communityIdentifier = presenceMeta.profile.communityIdentifier;
+    this.identityName = presenceMeta.profile.identityName;
     this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
     this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
     this.applyDisplayName();
   },
   applyDisplayName() {
+    const store = window.APP.store;
+
     const infoShouldBeHidden =
-      window.APP.store.state.preferences.onlyShowNametagsInFreeze && !this.el.sceneEl.is("frozen");
+      this.isLocalPlayerInfo || (store.state.preferences.onlyShowNametagsInFreeze && !this.el.sceneEl.is("frozen"));
+
     const nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && nametagEl) {
       nametagEl.setAttribute("text", { value: this.displayName });
       nametagEl.object3D.visible = !infoShouldBeHidden;
     }
-    const communityIdentifierEl = this.el.querySelector(".communityIdentifier");
-    if (communityIdentifierEl) {
-      if (this.communityIdentifier) {
-        communityIdentifierEl.setAttribute("text", { value: this.communityIdentifier });
-        communityIdentifierEl.object3D.visible = !infoShouldBeHidden;
+    const identityNameEl = this.el.querySelector(".identityName");
+    if (identityNameEl) {
+      if (this.identityName) {
+        identityNameEl.setAttribute("text", { value: this.identityName });
+        identityNameEl.object3D.visible = this.el.sceneEl.is("frozen");
       }
     }
     const recordingBadgeEl = this.el.querySelector(".recordingBadge");

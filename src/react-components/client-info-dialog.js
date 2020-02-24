@@ -117,12 +117,12 @@ export default class ClientInfoDialog extends Component {
   render() {
     const { profile, roles } = this.getPresenceEntry();
 
-    const { displayName, communityIdentifier } = profile;
+    const { displayName, identityName } = profile;
     const { hubChannel, clientId, onClose } = this.props;
     const title = (
       <div className={styles.title}>
         {displayName}
-        <div className={styles.communityIdentifier}>{communityIdentifier}</div>
+        <div className={styles.identityName}>{identityName}</div>
       </div>
     );
     const mayKick = hubChannel.canOrWillIfCreator("kick_users");
@@ -140,7 +140,7 @@ export default class ClientInfoDialog extends Component {
           <div className={styles.clientProfileImage}>
             <img src={this.state.avatarThumbnailUrl} />
           </div>
-          <div className={styles.clientActionButtons}>
+          <div className={styles.primaryActionButtons}>
             {mayAddOwner && (
               <button
                 onClick={() => this.addOwner()}

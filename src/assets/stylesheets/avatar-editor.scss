@@ -258,10 +258,11 @@
   }
 
   .close-button {
+    @extend %panel-widget;
+
     font-size: 1.6em;
     align-self: flex-start;
-    cursor: pointer;
-    color: var(--panel-widget-color);
+
     @media (max-width: 768px) {
       padding-left: 0.5em;
     }

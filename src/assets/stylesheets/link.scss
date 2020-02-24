@@ -72,10 +72,13 @@ a {
 :local(.link-contents) {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   color: var(--link-text-color);
   font-weight: bold;
   font-size: 1.2em;
+  max-width: 650px;
 
   @media (max-width: 690px) {
     flex-direction: column;
@@ -100,6 +103,15 @@ a {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+:local(.create-link) {
+  margin-top: 36px;
+  font-size: 0.8em;
+
+  @media(max-width: 690px) {
+    margin-top: 12px;
+  }
 }
 
 :local(.code-loading-panel) {
@@ -136,7 +148,7 @@ a {
   align-items: center;
   justify-content: center;
 
-  @media (min-width: 690px) , (max-height: 650px) {
+  @media (min-width: 691px) , (max-height: 650px) {
     display: none;
   }
 }
