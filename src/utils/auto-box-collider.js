@@ -1,13 +1,72 @@
-// Computes an AABB that surrounds the object in question and all of its children.
-// Note that if the children have rotations, this probably won't return the tightest
-// possible AABB -- we could return a tighter one if we examined all of the vertices
-// of the geometry for ourselves, but we don't care enough for what we're using this
-// for to do so much work.
+function isVisibleUpToRoot(node, root) {
+  let child = node;
+  while (child) {
+    if (child === root) return true;
+    if (!child.visible) return false;
+    child = child.parent;
+  }
+  console.error(`Root ${root} is not in the hierarchy of node ${node}`);
+  return false;
+}
+
+export const computeLocalBoundingBox = (function() {
+  const rotation = new THREE.Matrix4();
+  const xAxis = new THREE.Vector3();
+  const yAxis = new THREE.Vector3();
+  const zAxis = new THREE.Vector3();
+  const position = new THREE.Vector3();
+  const vertex = new THREE.Vector3();
+  const localCoords = new THREE.Vector3();
+  const scale = new THREE.Vector3();
+  return function computeLocalBoundingBox(root, box, excludeInvisible) {
+    box.makeEmpty();
+    root.updateMatrices();
+    rotation.extractRotation(root.matrixWorld).extractBasis(xAxis, yAxis, zAxis);
+    position.setFromMatrixPosition(root.matrixWorld);
+    root.traverse(node => {
+      if (excludeInvisible && !isVisibleUpToRoot(node, root)) {
+        return;
+      }
+      node.updateMatrices();
+      if (node.geometry) {
+        if (node.geometry.isGeometry) {
+          for (let i = 0; i < node.geometry.vertices; i++) {
+            vertex
+              .copy(node.geometry.vertices[i])
+              .applyMatrix4(node.matrixWorld)
+              .sub(position);
+            if (isNaN(vertex.x)) continue;
+            localCoords.set(xAxis.dot(vertex), yAxis.dot(vertex), zAxis.dot(vertex));
+            box.expandByPoint(localCoords);
+          }
+        } else if (node.geometry.isBufferGeometry && node.geometry.attributes.position) {
+          for (let i = 0; i < node.geometry.attributes.position.count; i++) {
+            vertex
+              .fromBufferAttribute(node.geometry.attributes.position, i)
+              .applyMatrix4(node.matrixWorld)
+              .sub(position);
+            if (isNaN(vertex.x)) continue;
+            localCoords.set(xAxis.dot(vertex), yAxis.dot(vertex), zAxis.dot(vertex));
+            box.expandByPoint(localCoords);
+          }
+        }
+      }
+    });
+    scale.setFromMatrixScale(root.matrixWorld);
+    box.max.divide(scale);
+    box.min.divide(scale);
+  };
+})();
+
 export const computeObjectAABB = (function() {
   const bounds = new THREE.Box3();
-  return function(root, target) {
+  return function computeObjectAABB(root, target, excludeInvisible) {
     target.makeEmpty();
+    root.updateMatrices();
     root.traverse(node => {
+      if (excludeInvisible && !isVisibleUpToRoot(node, root)) {
+        return;
+      }
       node.updateMatrices();
       const geometry = node.geometry;
       if (geometry != null) {
@@ -32,7 +91,7 @@ export function getBox(entity, boxRoot, worldSpace) {
   boxRoot.updateMatrices(true, true);
   boxRoot.updateMatrixWorld(true);
 
-  computeObjectAABB(boxRoot, box);
+  computeObjectAABB(boxRoot, box, false);
 
   if (!box.isEmpty()) {
     if (!worldSpace) {

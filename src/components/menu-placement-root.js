@@ -5,9 +5,9 @@ AFRAME.registerComponent("menu-placement-root", {
   init() {
     this.didRegisterWithSystems = false;
   },
-  // Can't register with the system in init() or play() because menus do not seem to exist yet
-  // under elements loaded from objects.gltf (The pinned room objects).
   tick() {
+    // Can't register with the system in init() or play() because menus do not seem to exist yet
+    // under elements loaded from objects.gltf (The pinned room objects).
     if (!this.didRegisterWithSystems) {
       this.didRegisterWithSystems = true;
       const systems = this.el.sceneEl.systems["hubs-systems"];

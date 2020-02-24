@@ -1,3 +1,4 @@
+import { findAncestorWithComponent } from "../utils/scene-graph";
 AFRAME.registerComponent("camera-focus-button", {
   schema: {
     track: { default: false },
@@ -14,6 +15,7 @@ AFRAME.registerComponent("camera-focus-button", {
         this.targetEl = networkedEl;
       }
     });
+    this.menuPlacementRoot = findAncestorWithComponent(this.el, "menu-placement-root");
 
     this.onClick = () => {
       const myCamera = this.cameraSystem.getMyCamera();
@@ -29,6 +31,11 @@ AFRAME.registerComponent("camera-focus-button", {
 
     if (isVisible !== shouldBeVisible) {
       this.el.setAttribute("visible", shouldBeVisible);
+      if (this.menuPlacementRoot) {
+        this.el.sceneEl.systems["hubs-systems"].menuPlacementSystem.shouldComputeMenuLocalBoundingBox(
+          this.menuPlacementRoot
+        );
+      }
     }
   },
 

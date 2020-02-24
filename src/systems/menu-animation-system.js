@@ -12,7 +12,13 @@ export class MenuAnimationSystem {
   }
   register(rootEl, menuEl) {
     this.els.push(rootEl);
-    this.data.set(rootEl, { menuEl, menuOpenTime: -1, startScaleAtMenuOpenTime: 0, wasMenuVisible: false, endingScale: 0 });
+    this.data.set(rootEl, {
+      menuEl,
+      menuOpenTime: -1,
+      startScaleAtMenuOpenTime: 0,
+      wasMenuVisible: false,
+      endingScale: 0
+    });
   }
   unregister(el) {
     this.els.splice(this.els.indexOf(el), 1);
