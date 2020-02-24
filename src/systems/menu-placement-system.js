@@ -1,15 +1,17 @@
 /* global Ammo */
+import { SOUND_SNAP_ROTATE } from "./sound-effects-system";
 import { setMatrixWorld } from "../utils/three-utils";
 import { v3String } from "../utils/pretty-print";
 import { computeLocalBoundingBox } from "../utils/auto-box-collider";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 const SWEEP_TEST_LAYER = require("../constants").COLLISION_LAYERS.CONVEX_SWEEP_TEST;
 const HIT_FRACTION_FUDGE_FACTOR = 0.02;
-const DRAW_DEBUG_BOXES = true;
+const NUM_CONVEX_SWEEPS_PER_MENU = 1;
+const DEBUG_COLORS = [0xff0000, 0xff7f00, 0xffff00, 0x00ff00, 0x0000ff, 0x4b0082, 0x9400d3, 0x00ffff];
 
 const drawBox = (function() {
   const transform = new THREE.Matrix4();
-  return function drawBox(position, quaternion, halfExtents, color = 0x222222) {
+  return function drawBox(position, quaternion, halfExtents, color = 0x222222, opacity = 0.3) {
     transform.compose(
       position,
       quaternion,
@@ -18,7 +20,7 @@ const drawBox = (function() {
     const geometry = new THREE.BoxBufferGeometry(2, 2, 2);
     const mesh = new THREE.Mesh(
       geometry,
-      new THREE.MeshBasicMaterial({ color, side: THREE.BackSide, transparent: true, opacity: 0.3 })
+      new THREE.MeshBasicMaterial({ color, side: THREE.BackSide, transparent: opacity !== 1, opacity })
     );
     setMatrixWorld(mesh, transform);
     AFRAME.scenes[0].object3D.add(mesh);
@@ -32,8 +34,21 @@ const calculateDesiredMenuQuaternion = (function() {
   const back = new THREE.Vector3();
   const forward = new THREE.Vector3();
   const rotation = new THREE.Matrix4();
-  return function calculateDesiredMenuQuaternion(cameraPosition, intersectionPoint, desiredMenuQuaternion) {
-    back.subVectors(cameraPosition, intersectionPoint).normalize();
+  return function calculateDesiredMenuQuaternion(
+    cameraPosition,
+    cameraRotation,
+    isVR,
+    intersectionPoint,
+    desiredMenuQuaternion
+  ) {
+    if (!isVR) {
+      back
+        .set(0, 0, 1)
+        .applyMatrix4(cameraRotation)
+        .normalize();
+    } else {
+      back.subVectors(cameraPosition, intersectionPoint).normalize();
+    }
     up.set(0, 1, 0);
     forward.copy(back).multiplyScalar(-1);
     right.crossVectors(forward, up).normalize();
@@ -42,12 +57,6 @@ const calculateDesiredMenuQuaternion = (function() {
     return desiredMenuQuaternion.setFromRotationMatrix(rotation);
   };
 })();
-
-function isVisibleUpToRoot(node, root) {
-  if (node === root) return true;
-  if (!node.visible) return false;
-  return isVisibleUpToRoot(node.parent, root);
-}
 
 const calculateMenuHalfExtents = (function() {
   const menuRotation = new THREE.Matrix4();
@@ -110,16 +119,15 @@ const createFunctionForConvexSweepTest = function(btCollisionWorld) {
       menuBtFromTransform,
       menuBtToTransform,
       menuBtClosestConvexResultCallback,
-      0.01
+      0.001
     );
     broadphaseProxy.set_m_collisionFilterGroup(group);
     broadphaseProxy.set_m_collisionFilterMask(mask);
     const closestHitFraction = menuBtClosestConvexResultCallback.get_m_closestHitFraction();
-    const fractionToUse = THREE.Math.clamp(closestHitFraction - HIT_FRACTION_FUDGE_FACTOR, 0, 1);
     // Pull back from the hit point just a bit to guard against the convex sweep test allowing a small overlap.
     Ammo.destroy(menuBtBoxShape);
     Ammo.destroy(menuBtClosestConvexResultCallback);
-    return fractionToUse;
+    return closestHitFraction;
   };
 };
 
@@ -133,12 +141,17 @@ const computeMenuPlacement3D = (function() {
   const desiredMenuTransform = new THREE.Matrix4();
   const halfExtents = new THREE.Vector3();
   const offsetToCenter = new THREE.Vector3();
-  return function computeMenuPlacement3D(el, datum, cameraPosition) {
+  return function computeMenuPlacement3D(el, datum, cameraPosition, cameraRotation, debug) {
     datum.menuEl.object3D.updateMatrices();
-    calculateDesiredMenuQuaternion(cameraPosition, datum.intersectionPoint, datum.desiredMenuQuaternion);
+    calculateDesiredMenuQuaternion(
+      cameraPosition,
+      cameraRotation,
+      el.sceneEl.is("vr-mode"),
+      datum.intersectionPoint,
+      datum.desiredMenuQuaternion
+    );
     const distanceToIntersection = new THREE.Vector3().subVectors(cameraPosition, datum.intersectionPoint).length();
     desiredMenuScale.setScalar(0.45 * distanceToIntersection);
-    console.log("desired scale is ", desiredMenuScale.x);
 
     const localMax = datum.menuLocalBoundingBox.max;
     const localMin = datum.menuLocalBoundingBox.min;
@@ -156,41 +169,72 @@ const computeMenuPlacement3D = (function() {
       desiredMenuScale
     );
     const center = new THREE.Vector3().copy(localCenter).applyMatrix4(desiredMat4);
-    drawBox(center, new THREE.Quaternion(), new THREE.Vector3(0.1, 0.1, 0.1), 0x00ff00);
     halfExtents.copy(localHalfExtents).multiply(desiredMenuScale);
-    halfExtents.z = -0.005;
+    halfExtents.z = 0.01;
     offsetToCenter.subVectors(datum.intersectionPoint, center);
     const pointA = new THREE.Vector3().copy(cameraPosition);
     const pointB = new THREE.Vector3().addVectors(datum.intersectionPoint, offsetToCenter);
-    const hitFraction = doConvexSweepTest(datum, el, halfExtents, pointA, pointB, datum.desiredMenuQuaternion);
-    if (hitFraction === 0) {
+    let hitFraction = 0;
+    let foundHit = false;
+    let attempt = 0;
+    let menuScaleForThisAttempt;
+    while (!foundHit && attempt < NUM_CONVEX_SWEEPS_PER_MENU) {
+      attempt += 1;
+      const fractionForThisAttempt = Math.max(attempt / NUM_CONVEX_SWEEPS_PER_MENU, 0.01);
+      menuScaleForThisAttempt = new THREE.Vector3().copy(desiredMenuScale).multiplyScalar(fractionForThisAttempt);
+      halfExtents.copy(localHalfExtents).multiply(menuScaleForThisAttempt);
+      halfExtents.z = 0.01;
+      const pointAForThisAttempt = new THREE.Vector3().lerpVectors(
+        pointA,
+        pointB,
+        fractionForThisAttempt - 1 / NUM_CONVEX_SWEEPS_PER_MENU
+      );
+      const pointBForThisAttempt = new THREE.Vector3().lerpVectors(pointA, pointB, fractionForThisAttempt);
+      hitFraction = doConvexSweepTest(
+        datum,
+        el,
+        halfExtents,
+        pointAForThisAttempt,
+        pointBForThisAttempt,
+        datum.desiredMenuQuaternion
+      );
+      const fractionToUse = THREE.Math.clamp(hitFraction - HIT_FRACTION_FUDGE_FACTOR, 0, 1);
+      if (hitFraction !== 0 && hitFraction !== 1) {
+        console.log("got hit!");
+        foundHit = true;
+
+        desiredMenuPosition.lerpVectors(
+          pointA,
+          pointB,
+          fractionForThisAttempt - 1 / NUM_CONVEX_SWEEPS_PER_MENU + fractionToUse * (1 / NUM_CONVEX_SWEEPS_PER_MENU)
+        );
+      }
+      if (debug) {
+        datum.debugBoxes = datum.debugBoxes || [];
+        datum.debugBoxes.push(
+          drawBox(
+            pointBForThisAttempt,
+            datum.desiredMenuQuaternion,
+            halfExtents,
+            DEBUG_COLORS[attempt % DEBUG_COLORS.length],
+            0.15
+          )
+        );
+      }
+      //AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
+      datum.menuEl.object3D.visible = false;
+    }
+    datum.menuEl.object3D.visible = true;
+    if (hitFraction === 0 || hitFraction === 1) {
       desiredMenuPosition.lerpVectors(pointA, pointB, 0.8);
-    } else {
-      desiredMenuPosition.lerpVectors(pointA, pointB, hitFraction);
     }
     desiredMenuTransform.compose(
       desiredMenuPosition,
       datum.desiredMenuQuaternion,
-      desiredMenuScale
+      menuScaleForThisAttempt
     );
-    if (DRAW_DEBUG_BOXES) {
-      //if (datum.debugBox2) {
-      //  datum.debugBox2.parent.remove(datum.debugBox2);
-      //}
-      //datum.debugBox2 = drawBox(center, worldQuaternion, halfExtents);
-    }
-    if (DRAW_DEBUG_BOXES) {
-      if (datum.debugBox) {
-        datum.debugBox.parent.remove(datum.debugBox);
-      }
-      datum.debugBox = drawBox(
-        new THREE.Vector3().addVectors(desiredMenuPosition, offsetToCenter.multiplyScalar(-1)),
-        datum.desiredMenuQuaternion,
-        halfExtents,
-        0xff0000
-      );
-    }
     setMatrixWorld(datum.menuEl.object3D, desiredMenuTransform);
+    datum.isComputing = false;
   };
 })();
 
@@ -212,7 +256,6 @@ export class MenuPlacementSystem {
       menuEl,
       shouldComputeMenuLocalBoundingBox: true,
       menuLocalBoundingBox: new THREE.Box3(),
-      menuScaleAtBBComputeTime: new THREE.Vector3(),
       intersectionPoint: new THREE.Vector3(),
       desiredMenuQuaternion: new THREE.Quaternion()
     });
@@ -243,6 +286,7 @@ export class MenuPlacementSystem {
 
   tick = (function() {
     const cameraPosition = new THREE.Vector3();
+    const cameraRotation = new THREE.Matrix4();
     return function tick() {
       if (!this.isReady) {
         this.isReady = this.tryGetReady();
@@ -252,9 +296,11 @@ export class MenuPlacementSystem {
       }
       this.viewingCamera.updateMatrices();
       cameraPosition.setFromMatrixPosition(this.viewingCamera.matrixWorld);
+      cameraRotation.extractRotation(this.viewingCamera.matrixWorld);
       for (let i = 0; i < this.els.length; i++) {
         const el = this.els[i];
         const datum = this.data.get(el);
+        if (datum.isComputing) continue;
         datum.mesh = el.getObject3D("mesh");
         if (!datum.mesh) {
           continue;
@@ -268,26 +314,6 @@ export class MenuPlacementSystem {
             if (datum.shouldComputeMenuLocalBoundingBox) {
               datum.shouldComputeMenuLocalBoundingBox = false;
               computeLocalBoundingBox(datum.menuEl.object3D, datum.menuLocalBoundingBox, true);
-              datum.menuScaleAtBBComputeTime.setFromMatrixScale(datum.menuEl.object3D.matrixWorld);
-              //const localMax = datum.menuLocalBoundingBox.max;
-              //const localMin = datum.menuLocalBoundingBox.min;
-              //const localCenter = new THREE.Vector3().addVectors(localMax, localMin).multiplyScalar(0.5);
-              //localCenter.z = 0;
-              //const localHalfExtents = new THREE.Vector3().subVectors(localMax, localMin).multiplyScalar(0.5);
-              //const worldPosition = new THREE.Vector3();
-              //const worldQuaternion = new THREE.Quaternion();
-              //const worldScale = new THREE.Vector3();
-              //datum.menuEl.object3D.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
-              //if (DRAW_DEBUG_BOXES) {
-              //  if (datum.debugBox2) {
-              //    datum.debugBox2.parent.remove(datum.debugBox2);
-              //  }
-              //  const center = new THREE.Vector3().copy(localCenter).applyMatrix4(datum.menuEl.object3D.matrixWorld);
-              //  const halfExtents = new THREE.Vector3().copy(localHalfExtents).multiply(worldScale);
-
-              //  halfExtents.z = -0.005;
-              //  datum.debugBox2 = drawBox(center, worldQuaternion, halfExtents);
-              //}
             }
             const intersection =
               (this.interactionSystem.state.rightRemote.hovered === el && this.rightCursorController.intersection) ||
@@ -299,7 +325,16 @@ export class MenuPlacementSystem {
             } else {
               datum.intersectionPoint.copy(intersection.point);
             }
-            computeMenuPlacement3D(el, datum, cameraPosition);
+            if (!datum.isComputing) {
+              if (datum.debugBoxes) {
+                for (let i = 0; i < datum.debugBoxes.length; i++) {
+                  datum.debugBoxes[i].parent.remove(datum.debugBoxes[i]);
+                }
+                datum.debugBoxes.length = 0;
+              }
+              datum.isComputing = true;
+              computeMenuPlacement3D(el, datum, cameraPosition, cameraRotation, this.debug);
+            }
           }
         }
         datum.wasMenuVisible = isMenuVisible;
