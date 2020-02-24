@@ -113,7 +113,7 @@ AFRAME.registerComponent("audio-source", {
       audioSettingsSystem.unregisterMediaAudioSource(this.audioSource);
     }
 
-    if (mediaVideo) {
+    if (mediaVideo && mediaVideo.audio) {
       this.audioSource = mediaVideo.audio;
       audioSettingsSystem.registerMediaAudioSource(this.audioSource);
     }
