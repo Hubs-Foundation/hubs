@@ -198,7 +198,6 @@ AFRAME.registerComponent("position-at-border", {
                 .multiply(desiredTargetScale)
             );
         } else {
-          //desiredTargetPosition.setFromMatrixPosition(this.target.matrixWorld);
           desiredTargetPosition.copy(this.meshCenter).add(
             centerToBorder
               .set(0, 0, this.meshHalfExtents.z + this.targetHalfExtents.z + 0.02)
