@@ -56,23 +56,6 @@ const calculateDesiredTargetQuaternion = (function() {
   };
 })();
 
-export class PositionAtBorderSystem {
-  constructor() {
-    this.components = [];
-  }
-  register(component) {
-    this.components.push(component);
-  }
-  unregister(component) {
-    this.components.splice(this.components.indexOf(component), 1);
-  }
-  tick() {
-    for (let i = 0; i < this.components.length; i++) {
-      this.components[i].tick2();
-    }
-  }
-}
-
 AFRAME.registerComponent("position-at-border", {
   multiple: true,
   schema: {
@@ -84,22 +67,15 @@ AFRAME.registerComponent("position-at-border", {
 
   init() {
     this.ready = false;
-    this.tick2 = this.tick2.bind(this);
-    this.el.sceneEl.systems["hubs-systems"].positionAtBorderSystem.register(this);
-  },
-
-  remove() {
-    this.el.sceneEl.systems["hubs-systems"].positionAtBorderSystem.unregister(this);
-    if (this.didRegisterWithAnimationSystem) {
-      this.el.sceneEl.systems["hubs-systems"].menuAnimationSystem.unregister(this);
-    }
+    this.didTryToGetReady = false;
+    this.tick = this.tick.bind(this);
   },
 
   markDirty() {
     this.isTargetBoundingBoxDirty = true;
   },
 
-  tick2: (function() {
+  tick: (function() {
     const cameraPosition = new THREE.Vector3();
     const cameraRotation = new THREE.Matrix4();
     const camToCenter = new THREE.Vector3();
@@ -111,17 +87,21 @@ AFRAME.registerComponent("position-at-border", {
     const desiredTargetTransform = new THREE.Matrix4();
     const centerToBorder = new THREE.Vector3();
     const currentMeshRotation = new THREE.Matrix4();
+    const currentMeshScale = new THREE.Vector3();
     const meshForward = new THREE.Vector3();
     const boxCorners = new THREE.Vector3();
-    return function tick2() {
-      if (this.triedToGetReady && !this.ready) {
-        return; // TODO: How to handle not finding a target?
+    return function tick() {
+      if (this.didTryToGetReady && !this.ready) {
+        return;
       }
       if (!this.ready) {
-        this.triedToGetReady = true;
+        this.didTryToGetReady = true;
         this.cam = document.getElementById("viewing-camera").object3D;
         const targetEl = this.el.querySelector(this.data.target);
-        if (!targetEl) return;
+        if (!targetEl) {
+          console.error(`could not find ${this.data.target} underneath element:`, this.el);
+          return;
+        }
         if (this.data.animate) {
           this.didRegisterWithAnimationSystem = true;
           this.el.sceneEl.systems["hubs-systems"].menuAnimationSystem.register(this, targetEl, this.data.scale);
@@ -151,6 +131,7 @@ AFRAME.registerComponent("position-at-border", {
         if (this.isTargetBoundingBoxDirty) {
           computeLocalBoundingBox(this.target, this.targetLocalBoundingBox, true);
           if (this.targetLocalBoundingBox.min.x === Infinity) {
+            // May be no visible elements in the target. Nothing to do in this case
             return;
           }
           this.isTargetBoundingBoxDirty = false;
@@ -194,7 +175,10 @@ AFRAME.registerComponent("position-at-border", {
           desiredCenterPoint.lerpVectors(cameraPosition, desiredCenterPoint, 0.8);
         } else {
           const meshSphereRadius =
-            boxCorners.subVectors(this.meshHalfExtents.max, this.meshHalfExtents.min).length() / 2;
+            boxCorners
+              .subVectors(this.meshLocalBoundingBox.max, this.meshLocalBoundingBox.min)
+              .multiply(currentMeshScale.setFromMatrixScale(currentMesh.matrixWorld))
+              .length() * 0.5;
           camToCenter.normalize().multiplyScalar(meshSphereRadius);
           desiredCenterPoint.copy(this.meshCenter).add(camToCenter);
         }
