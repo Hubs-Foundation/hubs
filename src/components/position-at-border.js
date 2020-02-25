@@ -206,7 +206,7 @@ AFRAME.registerComponent("position-at-border", {
           );
         }
         if (this.data.isFlat) {
-          desiredTargetQuaternion.setFromRotationMatrix(currentMeshRotation); //TODO: Rotate 180?
+          desiredTargetQuaternion.setFromRotationMatrix(currentMeshRotation);
           if (needsYRotate) {
             desiredTargetQuaternion.multiply(ROTATE_Y);
           }
