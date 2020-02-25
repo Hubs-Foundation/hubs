@@ -186,10 +186,19 @@ body {
   border-radius: 4px;
 
   background-color: $action-color;
-  margin-top: 64px;
+  margin-top: 32px;
   display: flex;
   flex-direction: column;
   font-size: 1.2em;
+}
+
+:local(.doc-link) {
+  a {
+    color: black;
+    font-weight: bold;
+  }
+
+  margin-top: 24px;
 }
 
 :local(.tutorial-buttons) {

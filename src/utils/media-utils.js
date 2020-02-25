@@ -1,5 +1,5 @@
 import { objectTypeForOriginAndContentType } from "../object-types";
-import { getReticulumFetchUrl } from "./phoenix-utils";
+import { getReticulumFetchUrl, getDirectReticulumFetchUrl } from "./phoenix-utils";
 import { ObjectContentOrigins } from "../object-types";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
@@ -15,6 +15,8 @@ const linkify = Linkify();
 linkify.tlds(tlds);
 
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
+const getDirectMediaAPIEndpoint = () => getDirectReticulumFetchUrl("/api/v1/media");
+
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobile();
 
@@ -59,7 +61,9 @@ export const upload = (file, desiredContentType) => {
     formData.append("desired_content_type", desiredContentType);
   }
 
-  return fetch(mediaAPIEndpoint, {
+  // To eliminate the extra hop and avoid proxy timeouts, upload files directly
+  // to a reticulum host.
+  return fetch(getDirectMediaAPIEndpoint(), {
     method: "POST",
     body: formData
   }).then(r => r.json());

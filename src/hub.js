@@ -324,6 +324,7 @@ async function updateUIForHub(hub) {
   remountUI({
     hubId: hub.hub_id,
     hubName: hub.name,
+    hubDescription: hub.description,
     hubMemberPermissions: hub.member_permissions,
     hubAllowPromotion: hub.allow_promotion,
     hubScene: hub.scene,
@@ -634,6 +635,15 @@ async function runBotMode(scene, entryManager) {
   entryManager.enterSceneWhenLoaded(new MediaStream(), false);
 }
 
+function checkForAccountRequired() {
+  // If the app requires an account to join a room, redirect to the sign in page.
+  if (!configs.feature("require_account_for_join")) return;
+  if (store.state.credentials && store.state.credentials.token) return;
+  document.location = `/?sign_in&sign_in_destination=hub&sign_in_destination_url=${encodeURIComponent(
+    document.location.toString()
+  )}`;
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   await store.initProfile();
 
@@ -657,12 +667,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const defaultRoomId = configs.feature("default_room_id");
+
   const hubId =
     qs.get("hub_id") ||
     (document.location.pathname === "/" && defaultRoomId
       ? defaultRoomId
       : document.location.pathname.substring(1).split("/")[0]);
   console.log(`Hub ID: ${hubId}`);
+
+  if (!defaultRoomId) {
+    // Default room won't work if account is required to access
+    checkForAccountRequired();
+  }
 
   const subscriptions = new Subscriptions(hubId);
 

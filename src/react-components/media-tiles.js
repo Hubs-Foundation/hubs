@@ -9,6 +9,7 @@ import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+import { faInfo } from "@fortawesome/free-solid-svg-icons/faInfo";
 import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
@@ -42,6 +43,7 @@ class MediaTiles extends Component {
     history: PropTypes.object,
     urlSource: PropTypes.string,
     handleEntryClicked: PropTypes.func,
+    handleEntryInfoClicked: PropTypes.func,
     handlePager: PropTypes.func,
     onCopyAvatar: PropTypes.func,
     onCopyScene: PropTypes.func,
@@ -242,12 +244,19 @@ class MediaTiles extends Component {
                 <FontAwesomeIcon icon={faPencilAlt} />
               </a>
             )}
-          {entry.type === "room" && (
-            <div className={styles.info}>
-              <FontAwesomeIcon icon={faUsers} />
-              <span>{entry.member_count}</span>
-            </div>
-          )}
+          {entry.type === "room" &&
+            this.props.handleEntryInfoClicked &&
+            entry.description && (
+              <a
+                title="room info"
+                onClick={e => {
+                  e.preventDefault();
+                  this.props.handleEntryInfoClicked(entry);
+                }}
+              >
+                <FontAwesomeIcon icon={faInfo} />
+              </a>
+            )}
         </div>
 
         {entry.favorited && (
@@ -293,12 +302,18 @@ class MediaTiles extends Component {
                 </div>
               )}
             {isHub && (
-              <div className={styles.attribution}>
-                <div className={styles.lastJoined}>
-                  <FormattedMessage key="1" id="media-browser.hub.joined-prefix" />
-                  {dayjs(entry.last_activated_at).fromNow()}
+              <>
+                <div className={styles.attribution}>
+                  <div className={styles.lastJoined}>
+                    <FormattedMessage id="media-browser.hub.joined-prefix" />
+                    {dayjs(entry.last_activated_at).fromNow()}
+                  </div>
                 </div>
-              </div>
+                <div className={styles.presence}>
+                  <FontAwesomeIcon icon={faUsers} />
+                  <span>{entry.member_count}</span>
+                </div>
+              </>
             )}
           </div>
         )}

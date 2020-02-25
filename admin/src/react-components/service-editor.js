@@ -21,7 +21,7 @@ import { Title } from "react-admin";
 import Store from "hubs/src/storage/store";
 import withCommonStyles from "../utils/with-common-styles";
 import {
-  getConfig,
+  getEditableConfig,
   getConfigValue,
   setConfigValue,
   getCategoryDisplayName,
@@ -385,7 +385,7 @@ class ConfigurationEditor extends Component {
 const ServiceEditor = withStyles(styles)(
   class ServiceEditor extends ConfigurationEditor {
     getConfig(service) {
-      return getConfig(service);
+      return getEditableConfig(service);
     }
     putConfig(service, config) {
       return putConfig(service, config);

@@ -13,6 +13,7 @@ AFRAME.registerComponent("tags", {
     holdableButton: { default: false },
     isPen: { default: false },
     isHoverMenuChild: { default: false },
+    isStatic: { default: false },
     inspectable: { default: false }
   },
   update() {

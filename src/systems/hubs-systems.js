@@ -20,6 +20,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { CursorPoseTrackingSystem } from "./cursor-pose-tracking";
 import { ScaleInScreenSpaceSystem } from "./scale-in-screen-space";
 import { MenuAnimationSystem } from "./menu-animation-system";
+import { AudioSettingsSystem } from "./audio-settings-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -49,6 +50,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.cursorPoseTrackingSystem = new CursorPoseTrackingSystem();
     this.scaleInScreenSpaceSystem = new ScaleInScreenSpaceSystem();
     this.menuAnimationSystem = new MenuAnimationSystem();
+    this.audioSettingsSystem = new AudioSettingsSystem(this.el);
   },
 
   tick(t, dt) {

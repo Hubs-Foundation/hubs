@@ -53,6 +53,7 @@
         rotate-selected-object
         environment-map
         set-max-resolution
+        light="defaultLightsEnabled: false"
     >
         <a-assets>
             <img id="presence-count" crossorigin="anonymous" src="./assets/hud/presence-count.png">
@@ -118,7 +119,7 @@
                                 ></a-entity>
                                 <a-entity
                                     billboard
-                                    class="communityIdentifier"
+                                    class="identityName"
                                     text="side: double; align: center; color: #ddd"
                                     visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"
                                     position="0 0.8 0"
@@ -190,6 +191,7 @@
                         <template data-name="Head">
                             <a-entity
                                 networked-audio-source="rolloffFactor: 2.0;"
+                                audio-source="type: avatar"
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
                                 body-helper="type: kinematic; collisionFilterGroup: 4; collisionFilterMask: 1;"
@@ -220,7 +222,42 @@
                     class="interactable"
                     body-helper="type: static; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 11;"
                     is-remote-hover-target
+                    position-at-box-shape-border__freeze="target:.freeze-menu;"
+                    tags="isStatic: true; togglesHoveredActionSet: true; inspectable: true;"
+                    listed-media
                 >
+                    <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100;">
+                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" open-media-button="onlyOpenLink: true" position="0 -0.25 0.001">
+                            <a-entity text="value:open link; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                        </a-entity>
+                        <a-entity
+                            mixin="rounded-action-button"
+                            is-remote-hover-target
+                            tags="singleActionButton:true;"
+                            mirror-media-button
+                            visibility-on-content-types="contentTypes: video/ audio/ image/ application/vnd.apple.mpegurl application/x-mpegurl application/pdf;"
+                            position="0 0 0.001">
+                            <a-entity
+                                sprite
+                                icon-button="image: inspect-action.png; hoverImage: inspect-action.png"
+                                scale="0.165 0.165 0.165"
+                                position="0 0 0.001"
+                            ></a-entity>
+                        </a-entity>
+                        <a-entity
+                            mixin="rounded-button"
+                            tags="isHoldable: true; holdableButton: true;"
+                            is-remote-hover-target
+                            inspect-button
+                            position="0 0.25 0.001">
+                            <a-entity
+                                sprite
+                                icon-button="image: focus-action.png; hoverImage: focus-action.png"
+                                scale="0.165 0.165 0.165"
+                                position="0 0 0.001"
+                            ></a-entity>
+                        </a-entity>
+                    </a-entity>
                 </a-entity>
             </template>
 
@@ -241,6 +278,7 @@
                     position-at-border__freeze="target:.freeze-menu"
                     position-at-border__freeze-unpriveleged="target:.freeze-unprivileged-menu"
                     listed-media
+                    audio-source="type: media"
                 >
                     <a-entity class="ui interactable-ui">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media">
