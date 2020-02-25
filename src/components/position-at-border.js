@@ -104,6 +104,9 @@ AFRAME.registerComponent("position-at-border", {
     if (this.didRegisterWithAnimationSystem) {
       this.el.sceneEl.systems["hubs-systems"].menuAnimationSystem.unregister(this);
     }
+    if (this.didRegisterWithPlacementSystem) {
+      this.el.sceneEl.systems["hubs-systems"].menuPlacementSystem.unregister(this);
+    }
   },
 
   markDirty() {
@@ -136,6 +139,11 @@ AFRAME.registerComponent("position-at-border", {
           this.didRegisterWithAnimationSystem = true;
           this.el.sceneEl.systems["hubs-systems"].menuAnimationSystem.register(this, targetEl, this.data.scale);
         }
+        if (!this.data.isFlat) {
+          this.didRegisterWithPlacementSystem = true;
+          console.log("registering");
+          this.el.sceneEl.systems["hubs-systems"].menuPlacementSystem.register(this, targetEl);
+        }
         this.target = targetEl.object3D;
         this.target.traverse(setRenderOrder);
         this.wasVisible = false;
@@ -158,7 +166,13 @@ AFRAME.registerComponent("position-at-border", {
       const isVisible = this.target.visible;
       const isOpening = isVisible && !this.wasVisible;
       this.wasVisible = isVisible;
-      if (isOpening) {
+      const isOverride =
+        this.didRegisterWithPlacementSystem &&
+        this.el.sceneEl.systems["hubs-systems"].menuPlacementSystem.data.get(this).useDrawOnTopFallBack;
+      if (isOverride) {
+        this.el.sceneEl.systems["hubs-systems"].menuPlacementSystem.data.get(this).useDrawOnTopFallBack = false;
+      }
+      if ((!this.didRegisterWithPlacementSystem || isOverride) && isOpening) {
         if (this.isTargetBoundingBoxDirty) {
           computeLocalBoundingBox(this.target, this.targetLocalBoundingBox, true);
           if (this.targetLocalBoundingBox.min.x === Infinity) {
