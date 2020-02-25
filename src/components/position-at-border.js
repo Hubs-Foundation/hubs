@@ -145,7 +145,6 @@ AFRAME.registerComponent("position-at-border", {
           this.el.sceneEl.systems["hubs-systems"].menuPlacementSystem.register(this, targetEl);
         }
         this.target = targetEl.object3D;
-        this.target.traverse(setRenderOrder);
         this.wasVisible = false;
         this.previousMesh = null;
         this.meshLocalBoundingBox = new THREE.Box3();
@@ -172,7 +171,8 @@ AFRAME.registerComponent("position-at-border", {
       if (isOverride) {
         this.el.sceneEl.systems["hubs-systems"].menuPlacementSystem.data.get(this).useDrawOnTopFallBack = false;
       }
-      if ((!this.didRegisterWithPlacementSystem || isOverride) && isOpening) {
+      if ((this.data.isFlat || !this.didRegisterWithPlacementSystem || isOverride) && isOpening) {
+        this.target.traverse(setRenderOrder);
         if (this.isTargetBoundingBoxDirty) {
           computeLocalBoundingBox(this.target, this.targetLocalBoundingBox, true);
           if (this.targetLocalBoundingBox.min.x === Infinity) {

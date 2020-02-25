@@ -9,6 +9,17 @@ const HIT_FRACTION_FUDGE_FACTOR = 0.01 * NUM_CONVEX_SWEEPS_PER_MENU;
 const MIN_SQUARE_DISTANCE_TO_MENU = 1;
 const DEBUG_COLORS = [0xff0000, 0xff7f00, 0xffff00, 0x00ff00, 0x0000ff, 0x4b0082, 0x9400d3, 0x00ffff];
 
+function resetRenderOrder(node) {
+  if (!node.isGroup && node.material) {
+    if (node.geometry && node.geometry.isBufferGeometry && node.geometry.visibleGlyphs) {
+      node.renderOrder = 0;
+    } else {
+      node.renderOrder = 0;
+    }
+    node.material.depthTest = true;
+  }
+}
+
 const drawBox = (function() {
   const transform = new THREE.Matrix4();
   return function drawBox(position, quaternion, halfExtents, color = 0x222222, opacity = 0.3) {
@@ -228,6 +239,8 @@ const computeMenuPlacement3D = (function() {
       desiredMenuPosition.lerpVectors(pointA, pointB, 0.8);
       menuScaleForThisAttempt = new THREE.Vector3().copy(desiredMenuScale).multiplyScalar(0.8);
       datum.useDrawOnTopFallBack = true;
+    } else {
+      datum.menuEl.object3D.traverse(resetRenderOrder);
     }
     desiredMenuTransform.compose(
       desiredMenuPosition,
@@ -298,6 +311,9 @@ export class MenuPlacementSystem {
       cameraPosition.setFromMatrixPosition(this.viewingCamera.matrixWorld);
       cameraRotation.extractRotation(this.viewingCamera.matrixWorld);
       for (let i = 0; i < this.els.length; i++) {
+        if (this.els[i].data.isFlat) {
+          continue; // TODO
+        }
         const el = this.els[i].el;
         const datum = this.data.get(this.els[i]);
         datum.mesh = el.getObject3D("mesh");
