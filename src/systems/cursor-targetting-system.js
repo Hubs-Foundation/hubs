@@ -21,7 +21,6 @@ AFRAME.registerComponent("overwrite-raycast-as-noop", {
 export class CursorTargettingSystem {
   constructor() {
     this.targets = [];
-    this.uiTargets = [];
     this.setDirty = this.setDirty.bind(this);
     this.dirty = true;
 
@@ -44,7 +43,7 @@ export class CursorTargettingSystem {
 
   tick(t) {
     if (this.dirty) {
-      this.populateEntities(this.targets, this.uiTargets);
+      this.populateEntities(this.targets);
       this.dirty = false;
     }
 
@@ -57,7 +56,7 @@ export class CursorTargettingSystem {
     }
   }
 
-  populateEntities(targets, uiTargets) {
+  populateEntities(targets) {
     targets.length = 0;
     // TODO: Do not querySelectorAll on the entire scene every time anything changes!
     const els = AFRAME.scenes[0].querySelectorAll(
@@ -65,11 +64,7 @@ export class CursorTargettingSystem {
     );
     for (let i = 0; i < els.length; i++) {
       if (els[i].object3D) {
-        if (els[i].classList.contains("ui")) {
-          uiTargets.push(els[i].object3D);
-        } else {
-          targets.push(els[i].object3D);
-        }
+        targets.push(els[i].object3D);
       }
     }
   }
