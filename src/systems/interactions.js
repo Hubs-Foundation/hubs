@@ -63,6 +63,13 @@ AFRAME.registerSystem("interaction", {
     return this.leftRemoteHoverTarget;
   },
 
+  getActiveIntersection() {
+    return (
+      (this.state.rightRemote.hovered && this.rightCursorControllerEl.components["cursor-controller"].intersection) ||
+      (this.state.leftRemote.hovered && this.leftCursorControllerEl.components["cursor-controller"].intersection)
+    );
+  },
+
   isHoldingAnything() {
     return !!(
       this.state.leftHand.held ||
@@ -192,6 +199,8 @@ AFRAME.registerSystem("interaction", {
       this.options.rightHand.entity = document.getElementById("player-right-controller");
       this.options.rightRemote.entity = document.getElementById("right-cursor");
       this.options.leftRemote.entity = document.getElementById("left-cursor");
+      this.rightCursorControllerEl = document.getElementById("right-cursor-controller");
+      this.leftCursorControllerEl = document.getElementById("left-cursor-controller");
       this.ready = true;
     });
   },

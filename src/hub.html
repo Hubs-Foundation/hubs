@@ -238,8 +238,8 @@
                     set-yxz-order
                     matrix-auto-update
                     hoverable-visuals
-                    menu-placement-root__freeze="menuSelector:.freeze-menu"
-                    menu-placement-root__freeze-unpriveleged="menuSelector: freeze-unprivileged-menu"
+                    position-at-border__freeze="target:.freeze-menu"
+                    position-at-border__freeze-unpriveleged="target: freeze-unprivileged-menu"
                     listed-media
                 >
                     <a-entity class="ui interactable-ui">
@@ -453,7 +453,7 @@
                     floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
                     set-yxz-order
                     matrix-auto-update
-                    position-at-box-shape-border__freeze="target:.freeze-menu;"
+                    position-at-border__freeze="target:.freeze-menu;"
                     hoverable-visuals
                 >
                     <a-entity
@@ -511,7 +511,7 @@
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
                     action-to-remove__pen="path: /actions/pen/remove;"
-                    menu-placement-root="menuSelector:.pen-menu"
+                    position-at-border="target:.pen-menu"
                     set-yxz-order
                 >
                     <a-entity
@@ -546,7 +546,7 @@
                     owned-object-limiter="counter: #camera-counter"
                     set-unowned-body-kinematic
                     scalable-when-grabbed
-                    menu-placement-root="menuSelector:.camera-menu"
+                    position-at-border="target:.camera-menu; isFlat: true"
                     set-yxz-order
                 >
                     <a-entity class="ui interactable-ui camera-snap-menu" visible-if-permitted="spawn_camera">

@@ -10,10 +10,11 @@ export class MenuAnimationSystem {
       this.viewingCamera = document.getElementById("viewing-camera").object3D;
     });
   }
-  register(rootEl, menuEl) {
+  register(rootEl, menuEl, chooseScale) {
     this.els.push(rootEl);
     this.data.set(rootEl, {
       menuEl,
+      chooseScale,
       menuOpenTime: -1,
       startScaleAtMenuOpenTime: 0,
       wasMenuVisible: false,
@@ -26,6 +27,7 @@ export class MenuAnimationSystem {
   }
   tick = (function() {
     const menuToCamera = new THREE.Vector3();
+    const menuScale = new THREE.Vector3();
     const menuParentScale = new THREE.Vector3();
     const menuPosition = new THREE.Vector3();
     const cameraPosition = new THREE.Vector3();
@@ -37,7 +39,6 @@ export class MenuAnimationSystem {
       cameraPosition.setFromMatrixPosition(this.viewingCamera.matrixWorld);
 
       for (let i = 0; i < this.els.length; i++) {
-        const el = this.els[i].el;
         const datum = this.data.get(this.els[i]);
         const isMenuVisible = datum.menuEl.object3D.visible;
         const isMenuOpening = isMenuVisible && !datum.wasMenuVisible;
@@ -47,7 +48,9 @@ export class MenuAnimationSystem {
         datum.menuEl.object3D.parent.updateMatrices();
         menuParentScale.setFromMatrixScale(datum.menuEl.object3D.parent.matrixWorld);
         if (isMenuOpening) {
-          const scale = THREE.Math.clamp(0.45 * distanceToMenu, 0.05, 4);
+          const scale = datum.chooseScale
+            ? THREE.Math.clamp(0.45 * distanceToMenu, 0.05, 4)
+            : menuScale.setFromMatrixScale(datum.menuEl.object3D.matrixWorld).x;
           datum.endingScale = scale / menuParentScale.x;
           datum.menuOpenTime = t;
           datum.startScaleAtMenuOpenTime = datum.endingScale * 0.8;

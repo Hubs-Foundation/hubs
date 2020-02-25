@@ -6,6 +6,49 @@ const HIGHLIGHT = new THREE.Color(23 / 255, 64 / 255, 118 / 255);
 const NO_HIGHLIGHT = new THREE.Color(190 / 255, 190 / 255, 190 / 255);
 const TRANSFORM_COLOR_1 = new THREE.Color(150 / 255, 80 / 255, 150 / 255);
 const TRANSFORM_COLOR_2 = new THREE.Color(23 / 255, 64 / 255, 118 / 255);
+
+function getEl(object3D) {
+  let o = object3D;
+  while (o) {
+    if (o.el) return o.el;
+    o = object3D.parent;
+  }
+  return null;
+}
+
+function isInSameHierarchyOf(elA, elB) {
+  let elBHoverTarget = elB;
+  while (elBHoverTarget && !elBHoverTarget.components["is-remote-hover-target"]) {
+    elBHoverTarget = elBHoverTarget.parentEl;
+  }
+  let candidate = elA;
+  while (candidate) {
+    if (candidate === elBHoverTarget) return true;
+    candidate = candidate.parentNode;
+  }
+  return false;
+}
+
+function determineIntersection(ui, nonUI) {
+  if (!ui) {
+    return nonUI;
+  }
+  if (!nonUI) {
+    return ui;
+  }
+  // Prefer the UI intersection because the UI is drawn on top.
+  // Only use the nonUI intersection if it is closer than the UI one and it's not a part of the same object
+  if (ui.distance < nonUI.distance) {
+    return ui;
+  }
+  const firstNonUIEl = getEl(nonUI.object);
+  const firstUIEl = getEl(ui.object);
+  if (isInSameHierarchyOf(firstUIEl, firstNonUIEl)) {
+    return ui;
+  }
+  return nonUI;
+}
+
 AFRAME.registerComponent("cursor-controller", {
   schema: {
     cursor: { type: "selector" },
@@ -55,6 +98,7 @@ AFRAME.registerComponent("cursor-controller", {
 
   tick2: (() => {
     const rawIntersections = [];
+    const rawUIIntersections = [];
     const cameraPos = new THREE.Vector3();
     const v = new THREE.Vector3();
 
@@ -86,6 +130,7 @@ AFRAME.registerComponent("cursor-controller", {
       const isGrabbing = left ? !!interaction.state.leftRemote.held : !!interaction.state.rightRemote.held;
       if (!isGrabbing) {
         rawIntersections.length = 0;
+        rawUIIntersections.length = 0;
         this.raycaster.ray.origin = cursorPose.position;
         this.raycaster.ray.direction = cursorPose.direction;
         this.raycaster.intersectObjects(
@@ -93,7 +138,14 @@ AFRAME.registerComponent("cursor-controller", {
           true,
           rawIntersections
         );
-        this.intersection = rawIntersections[0];
+        this.raycaster.intersectObjects(
+          AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem.uiTargets,
+          true,
+          rawUIIntersections
+        );
+        this.intersectionNonUI = rawIntersections[0];
+        this.intersectionUI = rawUIIntersections[0];
+        this.intersection = determineIntersection(this.intersectionUI, this.intersectionNonUI);
         this.intersectionIsValid = !!interaction.updateCursorIntersection(this.intersection, left);
         this.distance = this.intersectionIsValid ? this.intersection.distance : this.data.defaultDistance * playerScale;
       }

@@ -402,8 +402,8 @@ AFRAME.registerComponent("media-loader", {
             linkedMediaElementAudioSource
           })
         );
-        if (this.el.components["position-at-box-shape-border__freeze"]) {
-          this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
+        if (this.el.components["position-at-border__freeze"]) {
+          this.el.setAttribute("position-at-border__freeze", { isFlat: true });
         }
       } else if (contentType.startsWith("image/")) {
         this.el.removeAttribute("gltf-model-plus");
@@ -418,7 +418,7 @@ AFRAME.registerComponent("media-loader", {
             if (contentSubtype === "photo-camera") {
               this.el.setAttribute("hover-menu__photo", {
                 template: "#photo-hover-menu",
-                dirs: ["forward", "back"]
+                isFlat: true
               });
             }
           },
@@ -439,8 +439,8 @@ AFRAME.registerComponent("media-loader", {
           })
         );
 
-        if (this.el.components["position-at-box-shape-border__freeze"]) {
-          this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
+        if (this.el.components["position-at-border__freeze"]) {
+          this.el.setAttribute("position-at-border__freeze", { isFlat: true });
         }
       } else if (contentType.startsWith("application/pdf")) {
         this.el.removeAttribute("gltf-model-plus");
@@ -465,8 +465,8 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
 
-        if (this.el.components["position-at-box-shape-border__freeze"]) {
-          this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
+        if (this.el.components["position-at-border__freeze"]) {
+          this.el.setAttribute("position-at-border__freeze", { isFlat: true });
         }
       } else if (
         contentType.includes("application/octet-stream") ||
@@ -515,15 +515,15 @@ AFRAME.registerComponent("media-loader", {
             if (await isLocalHubsAvatarUrl(src)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#avatar-link-hover-menu",
-                dirs: ["forward", "back"]
+                isFlat: true
               });
             } else if ((await isHubsRoomUrl(src)) || ((await isLocalHubsSceneUrl(src)) && mayChangeScene)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#hubs-destination-hover-menu",
-                dirs: ["forward", "back"]
+                isFlat: true
               });
             } else {
-              this.el.setAttribute("hover-menu__link", { template: "#link-hover-menu", dirs: ["forward", "back"] });
+              this.el.setAttribute("hover-menu__link", { template: "#link-hover-menu", isFlat: true });
             }
             this.onMediaLoaded(SHAPE.BOX);
           },
@@ -543,8 +543,8 @@ AFRAME.registerComponent("media-loader", {
             batch
           })
         );
-        if (this.el.components["position-at-box-shape-border__freeze"]) {
-          this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
+        if (this.el.components["position-at-border__freeze"]) {
+          this.el.setAttribute("position-at-border__freeze", { isFlat: true });
         }
       } else {
         throw new Error(`Unsupported content type: ${contentType}`);
@@ -568,7 +568,7 @@ AFRAME.registerComponent("media-pager", {
     this.onSnap = this.onSnap.bind(this);
     this.update = this.update.bind(this);
 
-    this.el.setAttribute("hover-menu__pager", { template: "#pager-hover-menu", dirs: ["forward", "back"] });
+    this.el.setAttribute("hover-menu__pager", { template: "#pager-hover-menu", isFlat: true });
     this.el.components["hover-menu__pager"].getHoverMenu().then(menu => {
       // If we got removed while waiting, do nothing.
       if (!this.el.parentNode) return;

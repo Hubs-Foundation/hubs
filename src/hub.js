@@ -75,7 +75,7 @@ import "./components/media-views";
 import "./components/avatar-volume-controls";
 import "./components/pinch-to-move";
 import "./components/pitch-yaw-rotator";
-import "./components/position-at-box-shape-border";
+import "./components/position-at-border";
 import "./components/pinnable";
 import "./components/pin-networked-object-button";
 import "./components/mirror-media-button";
@@ -162,9 +162,10 @@ import { App } from "./App";
 
 window.APP = new App();
 window.APP.RENDER_ORDER = {
-  HUD_BACKGROUND: 1,
-  HUD_ICONS: 2,
-  CURSOR: 3
+  UI: 1,
+  TEXT: 2,
+  SPRITES: 3,
+  CURSOR: 4
 };
 const store = window.APP.store;
 const mediaSearchStore = window.APP.mediaSearchStore;

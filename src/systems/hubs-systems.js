@@ -19,7 +19,7 @@ import { CharacterControllerSystem } from "./character-controller-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { CursorPoseTrackingSystem } from "./cursor-pose-tracking";
 import { ScaleInScreenSpaceSystem } from "./scale-in-screen-space";
-import { MenuPlacementSystem } from "./menu-placement-system";
+import { PositionAtBorderSystem } from "../components/position-at-border";
 import { MenuAnimationSystem } from "./menu-animation-system";
 
 AFRAME.registerSystem("hubs-systems", {
@@ -49,7 +49,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.waypointSystem = new WaypointSystem(this.el, this.characterController);
     this.cursorPoseTrackingSystem = new CursorPoseTrackingSystem();
     this.scaleInScreenSpaceSystem = new ScaleInScreenSpaceSystem();
-    this.menuPlacementSystem = new MenuPlacementSystem(this.physicsSystem, this.el.systems.interaction);
+    this.positionAtBorderSystem = new PositionAtBorderSystem();
     this.menuAnimationSystem = new MenuAnimationSystem();
   },
 
@@ -83,7 +83,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.batchManagerSystem.tick(t);
     this.cameraSystem.tick(this.el, dt);
     this.waypointSystem.tick(t, dt);
-    this.menuPlacementSystem.tick(); // must run before sprite system
+    this.positionAtBorderSystem.tick();
     this.menuAnimationSystem.tick(t);
     this.spriteSystem.tick(t, dt);
   },

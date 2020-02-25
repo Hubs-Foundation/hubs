@@ -571,9 +571,9 @@ AFRAME.registerComponent("media-video", {
       if (isIOS) {
         const template = document.getElementById("video-unmute");
         this.el.appendChild(document.importNode(template.content, true));
-        this.el.setAttribute("position-at-box-shape-border__unmute-ui", {
+        this.el.setAttribute("position-at-border__unmute-ui", {
           target: ".unmute-ui",
-          dirs: ["forward", "back"]
+          isFlat: true
         });
       }
 

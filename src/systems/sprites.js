@@ -251,7 +251,8 @@ export class SpriteSystem {
             scene.appendChild(el);
             el.setObject3D("mesh", mesh);
             mesh.frustumCulled = false;
-            mesh.renderOrder = window.APP.RENDER_ORDER.HUD_ICONS;
+            mesh.renderOrder = window.APP.RENDER_ORDER.SPRITES;
+            mesh.material.depthTest = false;
             mesh.raycast = this.raycast.bind(this);
           }
         );
