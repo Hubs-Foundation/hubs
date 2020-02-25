@@ -36,8 +36,6 @@ function determineIntersection(ui, nonUI) {
   if (!nonUI) {
     return ui;
   }
-  // Prefer the UI intersection because the UI is drawn on top.
-  // Only use the nonUI intersection if it is closer than the UI one and it's not a part of the same object
   if (ui.distance < nonUI.distance) {
     return ui;
   }
