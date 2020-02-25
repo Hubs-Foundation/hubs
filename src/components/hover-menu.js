@@ -33,7 +33,7 @@ AFRAME.registerComponent("hover-menu", {
         if (enableRepositioning) {
           this.el.setAttribute("position-at-border", {
             target: ".hover-container",
-            isFlat: this.data.isFlat, // TODO: is this ever not flat?
+            isFlat: this.data.isFlat,
             animate: false,
             scale: false
           });

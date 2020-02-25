@@ -5,17 +5,6 @@ const MIN_SCALE = 0.05;
 const MAX_SCALE = 4;
 const ROTATE_Y = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
 
-function setRenderOrder(node) {
-  if (!node.isGroup && node.material) {
-    if (node.geometry && node.geometry.isBufferGeometry && node.geometry.visibleGlyphs) {
-      node.renderOrder = window.APP.RENDER_ORDER.TEXT;
-    } else {
-      node.renderOrder = window.APP.RENDER_ORDER.UI;
-    }
-    node.material.depthTest = false;
-  }
-}
-
 const getCurrentDataFromLocalBB = (function() {
   const currentPosition = new THREE.Vector3();
   const currentScale = new THREE.Vector3();
@@ -104,9 +93,6 @@ AFRAME.registerComponent("position-at-border", {
     if (this.didRegisterWithAnimationSystem) {
       this.el.sceneEl.systems["hubs-systems"].menuAnimationSystem.unregister(this);
     }
-    if (this.didRegisterWithPlacementSystem) {
-      this.el.sceneEl.systems["hubs-systems"].menuPlacementSystem.unregister(this);
-    }
   },
 
   markDirty() {
@@ -126,6 +112,7 @@ AFRAME.registerComponent("position-at-border", {
     const centerToBorder = new THREE.Vector3();
     const currentMeshRotation = new THREE.Matrix4();
     const meshForward = new THREE.Vector3();
+    const boxCorners = new THREE.Vector3();
     return function tick2() {
       if (this.triedToGetReady && !this.ready) {
         return; // TODO: How to handle not finding a target?
@@ -138,11 +125,6 @@ AFRAME.registerComponent("position-at-border", {
         if (this.data.animate) {
           this.didRegisterWithAnimationSystem = true;
           this.el.sceneEl.systems["hubs-systems"].menuAnimationSystem.register(this, targetEl, this.data.scale);
-        }
-        if (!this.data.isFlat) {
-          this.didRegisterWithPlacementSystem = true;
-          console.log("registering");
-          this.el.sceneEl.systems["hubs-systems"].menuPlacementSystem.register(this, targetEl);
         }
         this.target = targetEl.object3D;
         this.wasVisible = false;
@@ -165,14 +147,7 @@ AFRAME.registerComponent("position-at-border", {
       const isVisible = this.target.visible;
       const isOpening = isVisible && !this.wasVisible;
       this.wasVisible = isVisible;
-      const isOverride =
-        this.didRegisterWithPlacementSystem &&
-        this.el.sceneEl.systems["hubs-systems"].menuPlacementSystem.data.get(this).useDrawOnTopFallBack;
-      if (isOverride) {
-        this.el.sceneEl.systems["hubs-systems"].menuPlacementSystem.data.get(this).useDrawOnTopFallBack = false;
-      }
-      if ((this.data.isFlat || !this.didRegisterWithPlacementSystem || isOverride) && isOpening) {
-        this.target.traverse(setRenderOrder);
+      if (isOpening) {
         if (this.isTargetBoundingBoxDirty) {
           computeLocalBoundingBox(this.target, this.targetLocalBoundingBox, true);
           if (this.targetLocalBoundingBox.min.x === Infinity) {
@@ -180,6 +155,13 @@ AFRAME.registerComponent("position-at-border", {
           }
           this.isTargetBoundingBoxDirty = false;
         }
+        getCurrentDataFromLocalBB(
+          this.target,
+          this.targetLocalBoundingBox,
+          this.targetCenter,
+          this.targetHalfExtents,
+          this.targetOffsetToCenter
+        );
         const isMeshChanged = currentMesh !== this.previousMesh;
         if (isMeshChanged) {
           computeLocalBoundingBox(currentMesh, this.meshLocalBoundingBox, true);
@@ -203,14 +185,18 @@ AFRAME.registerComponent("position-at-border", {
         if (this.data.isFlat) {
           desiredCenterPoint.copy(this.meshCenter).add(
             centerToBorder
-              .set(0, 0, this.meshHalfExtents.z)
+              .set(0, 0, this.meshHalfExtents.z + this.targetHalfExtents.z + 0.02)
               .multiplyScalar(needsYRotate ? -1 : 1)
               .applyMatrix4(currentMeshRotation)
           );
         } else if (intersection) {
           desiredCenterPoint.copy(intersection.point);
+          desiredCenterPoint.lerpVectors(cameraPosition, desiredCenterPoint, 0.8);
         } else {
-          desiredCenterPoint.copy(this.meshCenter);
+          const meshSphereRadius =
+            boxCorners.subVectors(this.meshHalfExtents.max, this.meshHalfExtents.min).length() / 2;
+          camToCenter.normalize().multiplyScalar(meshSphereRadius);
+          desiredCenterPoint.copy(this.meshCenter).add(camToCenter);
         }
         if (this.data.scale) {
           camToCenter.subVectors(cameraPosition, desiredCenterPoint); //mutation on purpose
@@ -219,13 +205,6 @@ AFRAME.registerComponent("position-at-border", {
         } else {
           desiredTargetScale.setFromMatrixScale(this.target.matrixWorld);
         }
-        getCurrentDataFromLocalBB(
-          this.target,
-          this.targetLocalBoundingBox,
-          this.targetCenter,
-          this.targetHalfExtents,
-          this.targetOffsetToCenter
-        );
         if (this.data.scale) {
           desiredTargetPosition
             .copy(desiredCenterPoint)
@@ -235,7 +214,13 @@ AFRAME.registerComponent("position-at-border", {
                 .multiply(desiredTargetScale)
             );
         } else {
-          desiredTargetPosition.setFromMatrixPosition(this.target.matrixWorld);
+          //desiredTargetPosition.setFromMatrixPosition(this.target.matrixWorld);
+          desiredTargetPosition.copy(this.meshCenter).add(
+            centerToBorder
+              .set(0, 0, this.meshHalfExtents.z + this.targetHalfExtents.z + 0.02)
+              .multiplyScalar(needsYRotate ? -1 : 1)
+              .applyMatrix4(currentMeshRotation)
+          );
         }
         if (this.data.isFlat) {
           desiredTargetQuaternion.setFromRotationMatrix(currentMeshRotation); //TODO: Rotate 180?

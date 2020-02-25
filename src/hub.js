@@ -113,7 +113,6 @@ import "./components/billboard";
 import "./components/periodic-full-syncs";
 import "./components/inspect-button";
 import "./components/set-max-resolution";
-import "./components/menu-placement-root";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
@@ -162,10 +161,9 @@ import { App } from "./App";
 
 window.APP = new App();
 window.APP.RENDER_ORDER = {
-  UI: 1,
-  TEXT: 2,
-  SPRITES: 3,
-  CURSOR: 4
+  HUD_BACKGROUND: 1,
+  HUD_ICONS: 2,
+  CURSOR: 3
 };
 const store = window.APP.store;
 const mediaSearchStore = window.APP.mediaSearchStore;

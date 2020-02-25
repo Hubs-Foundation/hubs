@@ -21,7 +21,6 @@ import { CursorPoseTrackingSystem } from "./cursor-pose-tracking";
 import { ScaleInScreenSpaceSystem } from "./scale-in-screen-space";
 import { PositionAtBorderSystem } from "../components/position-at-border";
 import { MenuAnimationSystem } from "./menu-animation-system";
-import { MenuPlacementSystem } from "./menu-placement-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -52,7 +51,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.scaleInScreenSpaceSystem = new ScaleInScreenSpaceSystem();
     this.positionAtBorderSystem = new PositionAtBorderSystem();
     this.menuAnimationSystem = new MenuAnimationSystem();
-    this.menuPlacementSystem = new MenuPlacementSystem(this.physicsSystem, this.el.systems.interaction);
   },
 
   tick(t, dt) {
@@ -85,7 +83,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.batchManagerSystem.tick(t);
     this.cameraSystem.tick(this.el, dt);
     this.waypointSystem.tick(t, dt);
-    this.menuPlacementSystem.tick();
     this.positionAtBorderSystem.tick();
     this.menuAnimationSystem.tick(t);
     this.spriteSystem.tick(t, dt);
