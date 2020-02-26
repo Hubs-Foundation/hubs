@@ -211,6 +211,7 @@ class ConfigurationEditor extends Component {
         key={displayPath}
         id={displayPath}
         label={descriptor.name || displayPath}
+        inputProps={{ maxLength: 4096 }}
         value={currentValue || ""}
         onChange={ev => this.onChange(path, ev.target.value)}
         helperText={descriptor.description}
