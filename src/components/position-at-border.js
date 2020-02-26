@@ -71,6 +71,12 @@ AFRAME.registerComponent("position-at-border", {
     this.tick = this.tick.bind(this);
   },
 
+  remove() {
+    if (this.didRegisterWithAnimationSystem) {
+      this.el.sceneEl.systems["hubs-systems"].menuAnimationSystem.unregister(this);
+    }
+  },
+
   markDirty() {
     this.isTargetBoundingBoxDirty = true;
   },

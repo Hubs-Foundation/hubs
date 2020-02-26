@@ -3,16 +3,16 @@ import { elasticOut } from "../utils/easing";
 const MENU_ANIMATION_DURATION_MS = 750;
 export class MenuAnimationSystem {
   constructor() {
-    this.els = [];
+    this.components = [];
     this.data = new Map();
     this.tick = this.tick.bind(this);
     waitForDOMContentLoaded().then(() => {
       this.viewingCamera = document.getElementById("viewing-camera").object3D;
     });
   }
-  register(rootEl, menuEl, chooseScale) {
-    this.els.push(rootEl);
-    this.data.set(rootEl, {
+  register(component, menuEl, chooseScale) {
+    this.components.push(component);
+    this.data.set(component, {
       menuEl,
       chooseScale,
       menuOpenTime: -1,
@@ -21,9 +21,9 @@ export class MenuAnimationSystem {
       endingScale: 0
     });
   }
-  unregister(el) {
-    this.els.splice(this.els.indexOf(el), 1);
-    this.data.delete(el);
+  unregister(component) {
+    this.components.splice(this.components.indexOf(component), 1);
+    this.data.delete(component);
   }
   tick = (function() {
     const menuToCamera = new THREE.Vector3();
@@ -38,8 +38,8 @@ export class MenuAnimationSystem {
       this.viewingCamera.updateMatrices();
       cameraPosition.setFromMatrixPosition(this.viewingCamera.matrixWorld);
 
-      for (let i = 0; i < this.els.length; i++) {
-        const datum = this.data.get(this.els[i]);
+      for (let i = 0; i < this.components.length; i++) {
+        const datum = this.data.get(this.components[i]);
         const isMenuVisible = datum.menuEl.object3D.visible;
         const isMenuOpening = isMenuVisible && !datum.wasMenuVisible;
         const distanceToMenu = menuToCamera
