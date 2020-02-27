@@ -570,7 +570,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       rewires.forEach(f => f());
 
       object3DToSet.visible = true;
-      this.el.emit("model-loaded", { format: "gltf", model: this.model, src });
+      this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
       gltfCache.release(src);
       console.error("Failed to load glTF model", e, this);
