@@ -173,7 +173,9 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
         options.headers.set("Accept", "application/vnd.pgrst.object+json");
         options.headers.set("Prefer", "return=representation");
         options.method = "POST";
-        options.body = JSON.stringify(stripReadOnlyColumns(params.data));
+        const postParams = JSON.parse(JSON.stringify(params.data));
+        postParams.inserted_at = postParams.updated_at = new Date().toISOString();
+        options.body = JSON.stringify(stripReadOnlyColumns(postParams));
         break;
       }
 

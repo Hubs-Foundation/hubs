@@ -63,8 +63,8 @@ class ServerAccessComponent extends Component {
                 Two-Factor Verification
               </Typography>
               <Typography variant="body1" gutterBottom>
-                Upon connecting, you&apos;ll need a one-time Verification Code. This is a two-factor security measure
-                and is a rotating six digit number.
+                Upon connecting, if 2FA has been configured on your servers you&apos;ll need a one-time Verification
+                Code. This is a two-factor security measure and is a rotating six digit number.
               </Typography>
               <Typography variant="body1" gutterBottom>
                 First, you will need to set up a device by installing a two-factor app such as Google Authenticator.

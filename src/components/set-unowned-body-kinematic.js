@@ -12,7 +12,7 @@ AFRAME.registerComponent("set-unowned-body-kinematic", {
       // Do this in play instead of init so that the ammo-body and networked components are done
       this.didThisOnce = true;
 
-      if (!NAF.utils.isMine(this.el)) {
+      if (!this.el.components.networked || !NAF.utils.isMine(this.el)) {
         this.setBodyKinematic();
       }
     }

@@ -13,6 +13,9 @@ translations.en."app-twitter-user" = { category = "translations", type = "string
 translations.en."editor-name" = { category = "translations", type = "string", internal = "true" }
 
 features.permissive_rooms = { category = "features", type = "boolean", name = "Permissive Rooms", description = "Enable full content creation permissions on new rooms." }
+features.require_account_for_join = { category = "features", type = "boolean", name = "Require accounts for room access", description = "Require accounts for accessing rooms." }
+features.disable_room_creation = { category = "features", type = "boolean", name = "Disable room creation", description = "Disable creating rooms for non-administrators." }
+features.disable_sign_up = { category = "features", type = "boolean", name = "Disable account creation", description = "Prevent visitors from creating accounts. Accounts must be created by an administrator." }
 features.show_terms = { category = "features", type = "boolean", name = "Show Terms of Use", description = "Show links to the terms of use." }
 features.show_privacy = { category = "features", type = "boolean", name = "Show Privacy Notice", description = "Show links to the privacy notice." }
 features.show_controls_link = { category = "features", type = "boolean", name = "Show Controls Links", description = "Show links to controls documentation." }
@@ -25,13 +28,17 @@ features.show_avatar_pipelines_link = { category = "features", type = "boolean",
 features.show_model_collection_link = { category = "features", type = "boolean", name = "Show Model Collection Link", description = "Show link to a collection of models." }
 features.hide_powered_by = { category = "features", type = "boolean", name = "Hide Powered By Hubs", description = "Hides the 'Powered by Hubs Cloud' notice on the home page and loading screens." }
 
-features.enable_spoke = { category = "features", type = "boolean", internal = "true" }
+features.public_rooms = { category = "features", type = "boolean", name = "Public Rooms", description = "Allow visitors to set rooms to public to feature them on the homepage." }
+features.default_room_id = { category = "features", type = "string", name = "Homepage Room ID", description = "Use the specified room in place of the homepage."}
+features.enable_spoke = { category = "features", type = "boolean", name = "Enable Scene Editor", description = "Enable Scene Editor for all visitors."}
+
 features.show_join_us_dialog = { category = "features", type = "boolean", internal = "true" }
 features.show_discord_bot_link = { category = "features", type = "boolean", internal = "true" }
 features.show_whats_new_link = { category = "features", type = "boolean", internal = "true" }
 features.show_source_link = { category = "features", type = "boolean", internal = "true" }
 features.show_feedback_ui = { category = "features", type = "boolean", internal = "true" }
 features.show_issue_report_dialog = { category = "features", type = "boolean", internal = "true" }
+features.show_cloud = { category = "features", type = "boolean", internal = "true" }
 
 images.logo = { category = "images", type = "file", name = "App Logo", description = "Logo used across the app." }
 images.favicon = { category = "images", type = "file", name = "Favicon", description = "Icon for the app." }

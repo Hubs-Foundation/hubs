@@ -10,7 +10,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { Title } from "react-admin";
 import Button from "@material-ui/core/Button";
 import withCommonStyles from "../utils/with-common-styles";
-import { getAdminInfo, getConfig, putConfig } from "../utils/ita";
+import { getAdminInfo, getEditableConfig, getConfig, putConfig } from "../utils/ita";
 import Snackbar from "@material-ui/core/Snackbar";
 import SnackbarContent from "@material-ui/core/SnackbarContent";
 import Icon from "@material-ui/core/Icon";
@@ -28,13 +28,21 @@ const styles = withCommonStyles(() => ({
     height: "200px",
     fontFamily: "monospace",
     marginTop: "8px"
+  },
+
+  workerInput: {
+    padding: "8px",
+    width: "250px",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+    margin: "8px"
   }
 }));
 
-const workerScript = (workerDomain, assetsDomain) => {
+const workerScript = (workerDomain, workerInstanceName, assetsDomain) => {
   return `  const ALLOWED_ORIGINS = ["${document.location.origin}"];
-  const CORS_PROXY_HOST = "https://cors-proxy.${workerDomain}";
-  const PROXY_HOST = "https://${workerDomain}";
+  const CORS_PROXY_HOST = "https://${workerInstanceName}-cors-proxy.${workerDomain}";
+  const PROXY_HOST = "https://${workerInstanceName}-proxy.${workerDomain}";
   const HUB_HOST = "${document.location.origin}";
   const ASSETS_HOST = "https://${assetsDomain}";
 
@@ -86,7 +94,7 @@ const workerScript = (workerDomain, assetsDomain) => {
         responseHeaders.set("Access-Control-Allow-Origin", origin);
         responseHeaders.set("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
         responseHeaders.set("Access-Control-Allow-Headers", "Range");
-        responseHeaders.set("Access-Control-Expose-Headers", "Accept-Ranges, Content-Encoding, Content-Length, Content-Range");
+        responseHeaders.set("Access-Control-Expose-Headers", "Accept-Ranges, Content-Encoding, Content-Length, Content-Range, Hub-Name, Hub-Entity-Type");
       }
   
       responseHeaders.set("Vary", "Origin");
@@ -100,6 +108,7 @@ const workerScript = (workerDomain, assetsDomain) => {
 class ContentCDNComponent extends Component {
   state = {
     workerDomain: "",
+    workerInstanceName: "",
     assetsDomain: "",
     enableWorker: false,
     saving: false,
@@ -109,14 +118,28 @@ class ContentCDNComponent extends Component {
 
   async componentDidMount() {
     const adminInfo = await getAdminInfo();
-    const retConfig = await getConfig("reticulum");
+    const retConfig = await getEditableConfig("reticulum");
+    let workerDomain = "";
+
+    if (!!retConfig && !!retConfig.phx && retConfig.phx.cors_proxy_url_host.includes("workers.dev")) {
+      const corsProxyUrlParts = retConfig.phx.cors_proxy_url_host.split(".");
+      workerDomain = corsProxyUrlParts[corsProxyUrlParts.length - 3] + ".workers.dev";
+    }
+
+    const workerInstanceName =
+      "hubs-" +
+      adminInfo.server_domain
+        .split(".")
+        .join("-")
+        .toLowerCase()
+        .substring(0, 63 - "hubs-".length - "-cors-proxy".length);
 
     this.setState({
-      workerDomain: adminInfo.worker_domain,
       assetsDomain: adminInfo.assets_domain,
       provider: adminInfo.provider,
-      enableWorker:
-        !!retConfig && !!retConfig.phx && retConfig.phx.cors_proxy_url_host === `cors-proxy.${adminInfo.worker_domain}`,
+      workerInstanceName,
+      workerDomain,
+      enableWorker: !!workerDomain,
       loading: false
     });
   }
@@ -135,7 +158,7 @@ class ContentCDNComponent extends Component {
       try {
         // Need to CORS-proxy the CORS-proxy because CSP will block us otherwise!
         const res = await fetch(
-          `https://${configs.CORS_PROXY_SERVER}/https://${this.state.workerDomain}/hubs/pages/latest/whats-new.html`
+          `https://${configs.CORS_PROXY_SERVER}/https://${this.state.workerInstanceName}-proxy.${this.state.workerDomain}/hubs/pages/latest/whats-new.html`
         );
 
         if (!res.ok) {
@@ -150,6 +173,28 @@ class ContentCDNComponent extends Component {
 
     this.setState({ saving: true }, async () => {
       const workerDomain = this.state.enableWorker ? this.state.workerDomain : "";
+      const workerInstanceName = this.state.enableWorker ? this.state.workerInstanceName : "";
+      const corsProxyDomain = `${workerInstanceName}-cors-proxy.${workerDomain}`;
+      const proxyDomain = `${workerInstanceName}-proxy.${workerDomain}`;
+
+      const hubsConfig = await getConfig("hubs");
+      const spokeConfig = await getConfig("spoke");
+
+      let hubsNonCorsProxyDomains = hubsConfig.general.non_cors_proxy_domains;
+      let spokeNonCorsProxyDomains = spokeConfig.general.non_cors_proxy_domains;
+
+      if (this.state.enableWorker) {
+        if (!hubsNonCorsProxyDomains.includes(proxyDomain)) {
+          hubsNonCorsProxyDomains = [...hubsNonCorsProxyDomains.split(",").filter(x => x.length), proxyDomain].join(
+            ","
+          );
+        }
+        if (!spokeNonCorsProxyDomains.includes(proxyDomain)) {
+          spokeNonCorsProxyDomains = [...spokeNonCorsProxyDomains.split(",").filter(x => x.length), proxyDomain].join(
+            ","
+          );
+        }
+      }
 
       // For arbortect, we enable thumbnail CDN proxying
       const useWorkerForThumbnails = this.state.provider === "arbortect";
@@ -157,24 +202,26 @@ class ContentCDNComponent extends Component {
       const configs = {
         reticulum: {
           phx: {
-            cors_proxy_url_host: workerDomain ? `cors-proxy.${workerDomain}` : ""
+            cors_proxy_url_host: workerDomain ? corsProxyDomain : ""
           },
           uploads: {
-            host: workerDomain ? `https://${workerDomain}` : ""
+            host: workerDomain ? `https://${proxyDomain}` : ""
           }
         },
         hubs: {
           general: {
-            cors_proxy_server: workerDomain ? `cors-proxy.${workerDomain}` : "",
-            base_assets_path: workerDomain ? `https://${workerDomain}/hubs/` : "",
-            thumbnail_server: workerDomain && useWorkerForThumbnails ? workerDomain : ""
+            cors_proxy_server: workerDomain ? corsProxyDomain : "",
+            base_assets_path: workerDomain ? `https://${proxyDomain}/hubs/` : "",
+            non_cors_proxy_domains: workerDomain ? hubsNonCorsProxyDomains : "",
+            thumbnail_server: workerDomain && useWorkerForThumbnails ? proxyDomain : ""
           }
         },
         spoke: {
           general: {
-            cors_proxy_server: workerDomain ? `cors-proxy.${workerDomain}` : "",
-            base_assets_path: workerDomain ? `https://${workerDomain}/spoke/` : "",
-            thumbnail_server: workerDomain && useWorkerForThumbnails ? workerDomain : ""
+            cors_proxy_server: workerDomain ? corsProxyDomain : "",
+            base_assets_path: workerDomain ? `https://${proxyDomain}/spoke/` : "",
+            non_cors_proxy_domains: workerDomain ? spokeNonCorsProxyDomains : "",
+            thumbnail_server: workerDomain && useWorkerForThumbnails ? proxyDomain : ""
           }
         }
       };
@@ -200,6 +247,8 @@ class ContentCDNComponent extends Component {
     if (this.state.loading) {
       return <LinearProgress />;
     }
+
+    const hasValidWorkerDomain = (this.state.workerDomain || "").endsWith("workers.dev");
 
     return (
       <Card className={this.props.classes.container}>
@@ -245,81 +294,88 @@ class ContentCDNComponent extends Component {
             <Typography variant="body1" component="div" gutterBottom>
               <ol className={this.props.classes.steps}>
                 <li>
-                  Register this domain and set it up on{" "}
+                  Sign up for&nbsp;
                   <a href="https://cloudflare.com" target="_blank" rel="noopener noreferrer">
                     Cloudflare
                   </a>
-                  :<div className={this.props.classes.command}>{this.state.workerDomain}</div>
+                  .
                 </li>
                 <li>
-                  In the &apos;DNS&apos; section of your Cloudflare domain settings, add new CNAME record with Name set
-                  to
-                  <div className={this.props.classes.command}>@</div>
-                  and Domain Name set to:
-                  <div className={this.props.classes.command}>{document.location.hostname}</div>
+                  Once you&apos;ve signed up, go to the <b>Workers</b> panel. You&apos;ll be asked to create a workers
+                  subdomain.
                 </li>
                 <li>
-                  In the &apos;DNS&apos; section of your Cloudflare domain settings, add a second CNAME record with Name
-                  set to
-                  <div className={this.props.classes.command}>cors-proxy</div>
-                  and Domain Name set to:
-                  <div className={this.props.classes.command}>{document.location.hostname}</div>
-                </li>
-                <li>
-                  In the &apos;SSL/TLS&apos; section of your Cloudflare domain settings, set the encryption mode to{" "}
-                  <b>Full</b>.
-                </li>
-                <li>
-                  In the &apos;Caching&apos; section of your Cloudflare domain settings, turn <b>off</b> Always Online.
-                </li>
-                <li>
-                  In the Workers section of your Cloudflare domain, launch the editor, click &quot;Add Script&quot; on
-                  the left and name it <pre>hubs-worker</pre>
-                </li>
-                <li>
-                  Paste and save the following worker script.
-                  <br />
-                  <textarea
-                    className={this.props.classes.worker}
-                    value={workerScript(this.state.workerDomain, this.state.assetsDomain)}
-                    readOnly
-                    onFocus={e => e.target.select()}
+                  Enter your workers subdomain here:
+                  <p />
+                  <input
+                    type="text"
+                    placeholder="eg. mysite.workers.dev"
+                    className={this.props.classes.workerInput}
+                    value={this.state.workerDomain}
+                    onChange={e => this.setState({ workerDomain: e.target.value })}
                   />
-                  <br />
                 </li>
-                <li>
-                  Once your script is saved, go back to the Workers panel. Choose &apos;Add Route&apos;, choose the
-                  script <pre>hubs-worker</pre> set the route to:
-                  <div className={this.props.classes.command}>{`*${this.state.workerDomain}/*`}</div>
-                  <b>Note the leading asterisk!</b>
-                </li>
-                <li>
-                  Verify your worker is working.{" "}
-                  <a
-                    href={`https://cors-proxy.${this.state.workerDomain}/https://www.mozilla.org`}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    This link
-                  </a>{" "}
-                  should show the Mozilla homepage, and&nbsp;
-                  <a
-                    href={`https://${this.state.workerDomain}/hubs/pages/latest/whats-new.html`}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    this link
-                  </a>{" "}
-                  should should the Hubs &quot;What&apos;s New&quot; page.
-                </li>
-                <li>
-                  Once <b>both</b> links above are working, enable the &apos;Use Cloudflare Worker&apos; setting below
-                  and click &apos;Save&apos; on this page.
-                </li>
-                <li>
-                  If you need more than 100,000 requests per day for content, you&apos;ll need to add a Worker Unlimited
-                  Subscription for an additional $5/mo.
-                </li>
+                {hasValidWorkerDomain && (
+                  <>
+                    <li>
+                      In the Workers Dashboard click <b>Create Worker</b>.
+                    </li>
+                    <li>
+                      Enter the name for the worker (at the top, above the script) as:
+                      <div className={this.props.classes.command}>{this.state.workerInstanceName}-proxy</div>
+                    </li>
+                    <li>
+                      Paste, save, and deploy the following worker script for the worker.
+                      <br />
+                      <textarea
+                        className={this.props.classes.worker}
+                        value={workerScript(
+                          this.state.workerDomain,
+                          this.state.workerInstanceName,
+                          this.state.assetsDomain
+                        )}
+                        readOnly
+                        onFocus={e => e.target.select()}
+                      />
+                      <br />
+                    </li>
+                    <li>
+                      Repeat the steps above and create and deploy a new worker with the same script. Name this new
+                      worker:
+                      <div className={this.props.classes.command}>{this.state.workerInstanceName}-cors-proxy</div>
+                    </li>
+                    <li>
+                      Don&apos;t forget to save and <b>deploy</b> both scripts.
+                    </li>
+                    <li>
+                      Verify your workers are working.{" "}
+                      <a
+                        href={`https://${this.state.workerInstanceName}-cors-proxy.${this.state.workerDomain}/https://www.mozilla.org`}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        This link
+                      </a>{" "}
+                      should show the Mozilla homepage, and&nbsp;
+                      <a
+                        href={`https://${this.state.workerInstanceName}-proxy.${this.state.workerDomain}/hubs/pages/latest/whats-new.html`}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        this link
+                      </a>{" "}
+                      should should the Hubs &quot;What&apos;s New&quot; page.
+                    </li>
+                    <li>
+                      Once <b>both</b> links above are working, enable the &apos;Use Cloudflare Worker&apos; setting
+                      below and click &apos;Save&apos; on this page.
+                    </li>
+                    <li>
+                      If you need more than 100,000 requests per day for content, you&apos;ll need to add a Worker
+                      Unlimited Subscription for an additional $5/mo.
+                    </li>
+                  </>
+                )}
               </ol>
               <FormControlLabel
                 control={
@@ -335,14 +391,16 @@ class ContentCDNComponent extends Component {
             {this.state.saving ? (
               <CircularProgress />
             ) : (
-              <Button
-                onClick={this.onSubmit.bind(this)}
-                className={this.props.classes.button}
-                variant="contained"
-                color="primary"
-              >
-                Save
-              </Button>
+              (!this.state.enableWorker || hasValidWorkerDomain) && (
+                <Button
+                  onClick={this.onSubmit.bind(this)}
+                  className={this.props.classes.button}
+                  variant="contained"
+                  color="primary"
+                >
+                  Save
+                </Button>
+              )
             )}
           </CardContent>
         </form>

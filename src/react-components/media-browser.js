@@ -282,6 +282,13 @@ class MediaBrowser extends Component {
     const activeFilter =
       searchParams.get("filter") || (searchParams.get("similar_to") && "similar") || (!searchParams.get("q") && "");
 
+    const meta = this.state.result && this.state.result.meta;
+    const hasNext = !!(meta && meta.next_cursor);
+    const hasPrevious = searchParams.get("cursor");
+    const page = (meta && meta.page) || 0;
+    const apiSource = (meta && meta.source) || null;
+    const isVariableWidth = ["bing_images", "tenor"].includes(apiSource);
+
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
         <div className={classNames([styles.box, styles.darkened])}>
@@ -436,7 +443,11 @@ class MediaBrowser extends Component {
           entries.length > 0 ||
           !showEmptyStringOnNoResult ? (
             <MediaTiles
-              result={this.state.result}
+              entries={entries}
+              hasNext={hasNext}
+              hasPrevious={hasPrevious}
+              page={page}
+              isVariableWidth={isVariableWidth}
               history={this.props.history}
               urlSource={urlSource}
               handleEntryClicked={this.handleEntryClicked}

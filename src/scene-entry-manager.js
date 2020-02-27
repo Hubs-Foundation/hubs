@@ -139,6 +139,7 @@ export default class SceneEntryManager {
   };
 
   exitScene = () => {
+    this.scene.exitVR();
     if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
       NAF.connection.adapter.localMediaStream.getTracks().forEach(t => t.stop());
     }
@@ -148,12 +149,17 @@ export default class SceneEntryManager {
     if (this.scene.renderer) {
       this.scene.renderer.setAnimationLoop(null); // Stop animation loop, TODO A-Frame should do this
     }
-    document.body.removeChild(this.scene);
+    this.scene.parentNode.removeChild(this.scene);
   };
 
   _setupPlayerRig = () => {
     this._setPlayerInfoFromProfile();
-    this.store.addEventListener("statechanged", this._setPlayerInfoFromProfile);
+
+    // Explict user action changed avatar or updated existing avatar.
+    this.scene.addEventListener("avatar_updated", () => this._setPlayerInfoFromProfile(true));
+
+    // Store updates can occur to avatar id in cases like error, auth reset, etc.
+    this.store.addEventListener("statechanged", () => this._setPlayerInfoFromProfile());
 
     const avatarScale = parseInt(qs.get("avatar_scale"), 10);
     if (avatarScale) {
@@ -161,8 +167,11 @@ export default class SceneEntryManager {
     }
   };
 
-  _setPlayerInfoFromProfile = async () => {
+  _setPlayerInfoFromProfile = async (force = false) => {
     const avatarId = this.store.state.profile.avatarId;
+    if (!force && this._lastFetchedAvatarId === avatarId) return; // Avoid continually refetching based upon state changing
+
+    this._lastFetchedAvatarId = avatarId;
     const avatarSrc = await getAvatarSrc(avatarId);
 
     this.avatarRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });

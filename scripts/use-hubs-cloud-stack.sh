@@ -36,7 +36,7 @@ CORS_PROXY_SERVER="$STACK_NAME-cors-proxy.$INTERNAL_ZONE_NAME"
 
 # The thumbnailing backend to connect to.
 # See here for the server code: https://github.com/MozillaReality/farspark or https://github.com/MozillaReality/nearspark
-THUMBNAIL_SERVER="nearspark.$INTERNAL_ZONE_NAME"
+THUMBNAIL_SERVER="$STACK_NAME-nearspark.$INTERNAL_ZONE_NAME"
 
 # The root URL under which Hubs expects environment GLTF bundles to be served.
 ASSET_BUNDLE_SERVER="https://asset-bundles-prod.reticulum.io"

@@ -115,6 +115,7 @@ paths.actions.leftHand.index = "/actions/leftHand/indexDown";
 paths.actions.leftHand.middleRingPinky = "/actions/leftHand/middleRingPinkyDown";
 paths.actions.camera = {};
 paths.actions.camera.exitMirror = "/actions/cameraExitMirror";
+paths.actions.startInspecting = "/actions/startInspecting";
 paths.actions.stopInspecting = "/actions/stopInspecting";
 paths.actions.inspectZoom = "/actions/inspectZoom";
 paths.actions.inspectPanY = "/actions/inspectPanY";

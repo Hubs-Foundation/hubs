@@ -1,5 +1,5 @@
 import "./webxr-bypass-hacks";
-import "./utils/configs";
+import configs from "./utils/configs";
 import "./utils/theme";
 import "@babel/polyfill";
 import "./utils/debug-log";
@@ -66,7 +66,7 @@ import "./components/kick-button";
 import "./components/close-vr-notice-button";
 import "./components/leave-room-button";
 import "./components/visible-if-permitted";
-import "./components/visibility-on-content-type";
+import "./components/visibility-on-content-types";
 import "./components/hide-when-pinned-and-forbidden";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
@@ -78,6 +78,8 @@ import "./components/pitch-yaw-rotator";
 import "./components/position-at-box-shape-border";
 import "./components/pinnable";
 import "./components/pin-networked-object-button";
+import "./components/mirror-media-button";
+import "./components/close-mirrored-media-button";
 import "./components/drop-object-button";
 import "./components/remove-networked-object-button";
 import "./components/camera-focus-button";
@@ -116,7 +118,7 @@ import { sets as userinputSets } from "./systems/userinput/sets";
 import ReactDOM from "react-dom";
 import React from "react";
 import { Router, Route } from "react-router-dom";
-import { createBrowserHistory } from "history";
+import { createBrowserHistory, createMemoryHistory } from "history";
 import { pushHistoryState } from "./utils/history";
 import UIRoot from "./react-components/ui-root";
 import AuthChannel from "./utils/auth-channel";
@@ -150,6 +152,7 @@ import "./systems/interactions";
 import "./systems/hubs-systems";
 import "./systems/capture-system";
 import "./systems/listed-media";
+import "./systems/linked-media";
 import { SOUND_CHAT_MESSAGE } from "./systems/sound-effects-system";
 
 import "./gltf-component-mappings";
@@ -267,10 +270,11 @@ let routerBaseName = document.location.pathname
   .join("/");
 
 if (document.location.pathname.includes("hub.html")) {
-  routerBaseName = "";
+  routerBaseName = "/";
 }
 
-const history = createBrowserHistory({ basename: routerBaseName });
+// when loading the client as a "default room" on the homepage, use MemoryHistory since exposing all the client paths at the root is undesirable
+const history = routerBaseName === "/" ? createMemoryHistory() : createBrowserHistory({ basename: routerBaseName });
 window.APP.history = history;
 
 const qsVREntryType = qs.get("vr_entry_type");
@@ -320,7 +324,9 @@ async function updateUIForHub(hub) {
   remountUI({
     hubId: hub.hub_id,
     hubName: hub.name,
+    hubDescription: hub.description,
     hubMemberPermissions: hub.member_permissions,
+    hubAllowPromotion: hub.allow_promotion,
     hubScene: hub.scene,
     hubEntryCode: hub.entry_code
   });
@@ -577,7 +583,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         entryManager.exitScene();
       }
 
-      const connectionErrorTimeout = setTimeout(onConnectionError, 30000);
+      const connectionErrorTimeout = setTimeout(onConnectionError, 90000);
       scene.components["networked-scene"]
         .connect()
         .then(() => {
@@ -629,6 +635,15 @@ async function runBotMode(scene, entryManager) {
   entryManager.enterSceneWhenLoaded(new MediaStream(), false);
 }
 
+function checkForAccountRequired() {
+  // If the app requires an account to join a room, redirect to the sign in page.
+  if (!configs.feature("require_account_for_join")) return;
+  if (store.state.credentials && store.state.credentials.token) return;
+  document.location = `/?sign_in&sign_in_destination=hub&sign_in_destination_url=${encodeURIComponent(
+    document.location.toString()
+  )}`;
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   await store.initProfile();
 
@@ -651,8 +666,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
+  const defaultRoomId = configs.feature("default_room_id");
+
+  const hubId =
+    qs.get("hub_id") ||
+    (document.location.pathname === "/" && defaultRoomId
+      ? defaultRoomId
+      : document.location.pathname.substring(1).split("/")[0]);
   console.log(`Hub ID: ${hubId}`);
+
+  if (!defaultRoomId) {
+    // Default room won't work if account is required to access
+    checkForAccountRequired();
+  }
 
   const subscriptions = new Subscriptions(hubId);
 
@@ -814,7 +840,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // If VR headset is activated, refreshing page will fire vrdisplayactivate
     // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
     // to be entered and we haven't entered the room yet.
-    if (scene.is("vr-mode") && !scene.is("vr-entered")) {
+    if (scene.is("vr-mode") && !scene.is("vr-entered") && !isMobileVR) {
       console.log("Pre-emptively exiting VR mode.");
       scene.exitVR();
       return true;
@@ -918,7 +944,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   scene.addEventListener("leave_room_requested", () => {
-    scene.exitVR();
     entryManager.exitScene("left");
     remountUI({ roomUnavailableReason: "left" });
   });

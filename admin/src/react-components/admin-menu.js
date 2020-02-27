@@ -102,6 +102,8 @@ class Menu extends Component {
   }
 
   renderResource(resource) {
+    if (!resource.hasList) return null;
+
     const icon = resource.icon ? <resource.icon /> : <ViewIcon />;
     return (
       <ListItem

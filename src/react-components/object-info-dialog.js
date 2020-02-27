@@ -144,6 +144,7 @@ export default class ObjectInfoDialog extends Component {
 
   render() {
     const { pinned, onClose } = this.props;
+    const isStatic = this.props.el.components.tags && this.props.el.components.tags.data.isStatic;
 
     return (
       <DialogContainer noOverlay={true} wide={true} {...this.props}>
@@ -179,6 +180,7 @@ export default class ObjectInfoDialog extends Component {
               )}
               {this.props.scene.is("entered") &&
               !pinned &&
+              !isStatic &&
               this.props.hubChannel &&
               this.props.hubChannel.can("spawn_and_move_media") ? (
                 <button onClick={this.remove.bind(this)}>
@@ -188,6 +190,7 @@ export default class ObjectInfoDialog extends Component {
                 <div className={styles.actionButtonPlaceholder} />
               )}
               {this.props.scene.is("entered") &&
+                !isStatic &&
                 this.props.hubChannel &&
                 this.props.hubChannel.can("pin_objects") && (
                   <button className={pinned ? "" : styles.primaryActionButton} onClick={pinned ? this.unpin : this.pin}>

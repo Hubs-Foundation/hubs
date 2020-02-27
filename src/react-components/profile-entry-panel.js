@@ -71,6 +71,7 @@ class ProfileEntryPanel extends Component {
       }
     });
     this.props.finished();
+    this.scene.emit("avatar_updated");
   };
 
   stopPropagation = e => {

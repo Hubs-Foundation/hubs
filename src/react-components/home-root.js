@@ -20,6 +20,7 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import mediaBrowserStyles from "../assets/stylesheets/media-browser.scss";
 import AuthChannel from "../utils/auth-channel";
+import RoomInfoDialog from "./room-info-dialog.js";
 
 import styles from "../assets/stylesheets/index.scss";
 
@@ -44,9 +45,12 @@ class HomeRoot extends Component {
     installEvent: PropTypes.object,
     hideHero: PropTypes.bool,
     showAdmin: PropTypes.bool,
-    favoriteHubsResult: PropTypes.object,
+    showCreate: PropTypes.bool,
+    featuredRooms: PropTypes.array,
+    publicRoomsResult: PropTypes.object,
     showSignIn: PropTypes.bool,
     signInDestination: PropTypes.string,
+    signInDestinationUrl: PropTypes.string,
     signInReason: PropTypes.string
   };
 
@@ -103,6 +107,13 @@ class HomeRoot extends Component {
     this.showDialog(AuthDialog, { verifying, verified, authOrigin: this.props.authOrigin });
   };
 
+  showRoomInfo = hubEntry => {
+    this.showDialog(RoomInfoDialog, {
+      hubName: hubEntry.name,
+      hubDescription: hubEntry.description
+    });
+  };
+
   loadHomeVideo = () => {
     const videoEl = document.querySelector("#background-video");
     if (!videoEl) return;
@@ -121,6 +132,8 @@ class HomeRoot extends Component {
       messageId = "sign-in.admin-no-permission";
     } else if (this.props.signInDestination === "admin") {
       messageId = "sign-in.admin";
+    } else if (this.props.signInDestination === "hub") {
+      messageId = "sign-in.hub";
     }
 
     this.showDialog(SignInDialog, {
@@ -133,7 +146,9 @@ class HomeRoot extends Component {
         this.setState({ signedIn: true, email });
         this.closeDialog();
 
-        if (this.props.signInDestination === "admin") {
+        if (this.props.signInDestinationUrl) {
+          document.location = this.props.signInDestinationUrl;
+        } else if (this.props.signInDestination === "admin") {
           document.location = isLocalClient() ? "/admin.html" : "/admin";
         }
       }
@@ -188,6 +203,11 @@ class HomeRoot extends Component {
                       <FormattedMessage id="editor-name" />
                     </a>
                   </IfFeature>
+                  <IfFeature name="show_cloud">
+                    <a href="https://hubs.mozilla.com/cloud" rel="noreferrer noopener">
+                      <FormattedMessage id="home.cloud_link" />
+                    </a>
+                  </IfFeature>
                   {this.props.showAdmin && (
                     <a href="/admin" rel="noreferrer noopener">
                       <i>
@@ -218,12 +238,9 @@ class HomeRoot extends Component {
             </div>
             <div className={styles.heroContent} style={{ backgroundImage: configs.image("home_background", true) }}>
               {!this.props.hideHero &&
-                (this.props.favoriteHubsResult &&
-                this.props.favoriteHubsResult.entries &&
-                this.props.favoriteHubsResult.entries.length > 0 &&
-                this.state.signedIn
-                  ? this.renderFavoriteHero()
-                  : this.renderNonFavoriteHero())}
+                (this.props.featuredRooms && this.props.featuredRooms.length > 0
+                  ? this.renderFeaturedRoomsHero()
+                  : this.renderNonFeaturedRoomsHero())}
               {!this.props.hideHero && (
                 <div className={classNames(styles.heroPanel, styles.rightPanel)}>
                   {showFTUEVideo && (
@@ -363,7 +380,7 @@ class HomeRoot extends Component {
     );
   }
 
-  renderFavoriteHero() {
+  renderFeaturedRoomsHero() {
     return [
       <div className={styles.heroPanel} key={1}>
         <div className={styles.container}>
@@ -372,21 +389,25 @@ class HomeRoot extends Component {
           </div>
         </div>
         <div className={styles.ctaButtons}>
-          {this.renderCreateButton()}
+          {this.props.showCreate && this.renderCreateButton()}
           {this.renderPwaButton()}
         </div>
       </div>,
       <div className={styles.heroPanel} key={2}>
         <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
           <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-            <MediaTiles result={this.props.favoriteHubsResult} urlSource="favorites" />
+            <MediaTiles
+              entries={this.props.featuredRooms}
+              handleEntryInfoClicked={this.showRoomInfo}
+              urlSource="favorites"
+            />
           </div>
         </div>
       </div>
     ];
   }
 
-  renderNonFavoriteHero() {
+  renderNonFeaturedRoomsHero() {
     return (
       <div className={styles.heroPanel}>
         <div className={styles.container}>
@@ -398,7 +419,7 @@ class HomeRoot extends Component {
           </div>
         </div>
         <div className={styles.ctaButtons}>
-          {this.renderCreateButton()}
+          {this.props.showCreate && this.renderCreateButton()}
           {this.renderPwaButton()}
         </div>
       </div>

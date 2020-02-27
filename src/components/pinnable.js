@@ -10,7 +10,7 @@ AFRAME.registerComponent("pinnable", {
     this.el.addEventListener("media_refreshed", this._fireEventsAndAnimate);
 
     // Fire pinned events when page changes so we can persist the page.
-    this.el.addEventListener("pager-page-changed", this._fireEventsAndAnimate);
+    this.el.addEventListener("owned-pager-page-changed", this._fireEventsAndAnimate);
 
     // Fire pinned events when video state changes so we can persist the page.
     this.el.addEventListener("owned-video-state-changed", this._fireEventsAndAnimate);

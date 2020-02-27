@@ -389,10 +389,18 @@
           }
         }
 
+        :local(.favorite) {
+          position: absolute;
+          top: 6px;
+          left: 7px;
+          color: $favorited-color;
+        }
+
         :local(.tile-actions) {
           position: absolute;
           top: 6px;
           right: 7px;
+
           a {
             color: var(--tile-button-icon-color);
             background: var(--tile-button-background-color);
@@ -408,6 +416,21 @@
               background: $action-color;
               color: var(--tile-button-icon-hover-color);
             }
+          }
+        }
+
+        :local(.presence) {
+          position: absolute;
+          top: 165px;
+          right: 7px;
+          background: var(--tile-button-background-color);
+          height: 30px;
+          border-radius: 30px;
+          line-height: 30px;
+          padding: 0 10px;
+
+          span {
+            margin-left: 5px;
           }
         }
       }

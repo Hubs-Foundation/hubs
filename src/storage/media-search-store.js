@@ -17,7 +17,7 @@ const URL_SOURCE_TO_TO_API_SOURCE = {
   favorites: "favorites"
 };
 
-const desiredSources = ["poly", "sketchfab", "videos", "scenes", "avatars", "gifs", "images", "twitch"];
+const desiredSources = ["poly", "sketchfab", "videos", "scenes", "avatars", "gifs", "images"];
 const availableIntegrations = configs.AVAILABLE_INTEGRATIONS;
 const availableSources = desiredSources.filter(source => {
   const apiSource = URL_SOURCE_TO_TO_API_SOURCE[source];

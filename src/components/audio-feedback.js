@@ -118,7 +118,8 @@ function connectAnalyser(mediaStream) {
 
 function getAnalyser(el) {
   // Is this the local player
-  if (findAncestorWithComponent(el, "ik-root").id === "avatar-rig") {
+  const ikRootEl = findAncestorWithComponent(el, "ik-root");
+  if (ikRootEl && ikRootEl.id === "avatar-rig") {
     return el.sceneEl.systems["local-audio-analyser"];
   } else {
     const analyserEl = findAncestorWithComponent(el, "networked-audio-analyser");

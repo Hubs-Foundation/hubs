@@ -22,10 +22,11 @@ window.APP = { store };
 
 const authChannel = new AuthChannel(store);
 let installEvent = null;
-let favoriteHubsResult = null;
+let featuredRooms = null;
 let mountedUI = false;
 let hideHero = true;
 let showAdmin = false;
+let showCreate = false;
 
 const remountUI = function() {
   mountedUI = true;
@@ -41,10 +42,12 @@ const remountUI = function() {
       authOrigin={qs.get("auth_origin")}
       showSignIn={qs.has("sign_in")}
       signInDestination={qs.get("sign_in_destination")}
+      signInDestinationUrl={qs.get("sign_in_destination_url")}
       signInReason={qs.get("sign_in_reason")}
       hideHero={hideHero}
       showAdmin={showAdmin}
-      favoriteHubsResult={favoriteHubsResult}
+      showCreate={showCreate}
+      featuredRooms={featuredRooms}
       installEvent={installEvent}
     />
   );
@@ -76,6 +79,23 @@ window.addEventListener("beforeinstallprompt", e => {
   }
 });
 
+// Fetch favorite + public rooms and merge, sorting by member count
+async function fetchFeaturedRooms() {
+  const [favoriteRoomsResult, publicRoomsResult] = await Promise.all([
+    authChannel.signedIn
+      ? fetchReticulumAuthenticated(
+          `/api/v1/media/search?source=favorites&type=rooms&user=${store.credentialsAccountId}`
+        )
+      : Promise.resolve({ entries: [] }),
+    fetchReticulumAuthenticated("/api/v1/media/search?source=rooms&filter=public")
+  ]);
+
+  const entries = [...publicRoomsResult.entries, ...favoriteRoomsResult.entries];
+  const ids = entries.map(h => h.id);
+  featuredRooms = entries.filter((h, i) => ids.lastIndexOf(h.id) === i).sort((a, b) => b.member_count - a.member_count);
+  remountUI();
+}
+
 (async () => {
   if (qs.get("new") !== null) {
     createAndRedirectToNewHub(null, null, true);
@@ -85,29 +105,31 @@ window.addEventListener("beforeinstallprompt", e => {
   const socket = await connectToReticulum();
 
   authChannel.setSocket(socket);
-  remountUI();
+  const joinParams = { hub_id: "index" };
 
-  if (authChannel.signedIn) {
-    // Fetch favorite rooms
-    const path = `/api/v1/media/search?source=favorites&type=hubs&user=${store.credentialsAccountId}`;
-    favoriteHubsResult = await fetchReticulumAuthenticated(path);
-
-    const retPhxChannel = socket.channel(`ret`, { hub_id: "index", token: store.state.credentials.token });
-    retPhxChannel.join().receive("ok", () => {
-      retPhxChannel.push("refresh_perms_token").receive("ok", ({ perms_token }) => {
-        const perms = jwtDecode(perms_token);
-        configs.setIsAdmin(perms.postgrest_role === "ret_admin");
-
-        if (perms.postgrest_role === "ret_admin") {
-          showAdmin = true;
-          remountUI();
-        }
-
-        retPhxChannel.leave();
-      });
-    });
+  if (store.state.credentials && store.state.credentials.token) {
+    joinParams.token = store.state.credentials.token;
   }
+
+  const retPhxChannel = socket.channel("ret", joinParams);
+  retPhxChannel.join().receive("ok", () => {
+    retPhxChannel.push("refresh_perms_token").receive("ok", ({ perms_token }) => {
+      const perms = jwtDecode(perms_token);
+      configs.setIsAdmin(perms.postgrest_role === "ret_admin");
+
+      if (perms.postgrest_role === "ret_admin") {
+        showAdmin = true;
+      }
+
+      showCreate = !!perms.create_hub;
+      remountUI();
+
+      retPhxChannel.leave();
+    });
+  });
 
   hideHero = false;
   remountUI();
+
+  fetchFeaturedRooms();
 })();
