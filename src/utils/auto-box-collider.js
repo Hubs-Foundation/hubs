@@ -10,34 +10,25 @@ function isVisibleUpToRoot(node, root) {
 }
 
 export const computeLocalBoundingBox = (function() {
-  const rotation = new THREE.Matrix4();
-  const xAxis = new THREE.Vector3();
-  const yAxis = new THREE.Vector3();
-  const zAxis = new THREE.Vector3();
-  const position = new THREE.Vector3();
   const vertex = new THREE.Vector3();
-  const localCoords = new THREE.Vector3();
-  const scale = new THREE.Vector3();
+  const rootInverse = new THREE.Matrix4();
+  const toRootSpace = new THREE.Matrix4();
   return function computeLocalBoundingBox(root, box, excludeInvisible) {
     box.makeEmpty();
     root.updateMatrices();
-    rotation.extractRotation(root.matrixWorld).extractBasis(xAxis, yAxis, zAxis);
-    position.setFromMatrixPosition(root.matrixWorld);
+    rootInverse.getInverse(root.matrixWorld);
     root.traverse(node => {
       if (excludeInvisible && !isVisibleUpToRoot(node, root)) {
         return;
       }
       node.updateMatrices();
+      toRootSpace.multiplyMatrices(rootInverse, node.matrixWorld);
       if (node.geometry) {
         if (node.geometry.isGeometry) {
           for (let i = 0; i < node.geometry.vertices; i++) {
-            vertex
-              .copy(node.geometry.vertices[i])
-              .applyMatrix4(node.matrixWorld)
-              .sub(position);
+            vertex.copy(node.geometry.vertices[i]).applyMatrix4(toRootSpace);
             if (isNaN(vertex.x)) continue;
-            localCoords.set(xAxis.dot(vertex), yAxis.dot(vertex), zAxis.dot(vertex));
-            box.expandByPoint(localCoords);
+            box.expandByPoint(vertex);
           }
         } else if (node.geometry.isBufferGeometry && node.geometry.attributes.position) {
           const array = node.geometry.attributes.position.array;
@@ -50,17 +41,13 @@ export const computeLocalBoundingBox = (function() {
             } else {
               return;
             }
-            vertex.applyMatrix4(node.matrixWorld).sub(position);
+            vertex.applyMatrix4(toRootSpace);
             if (isNaN(vertex.x)) continue;
-            localCoords.set(xAxis.dot(vertex), yAxis.dot(vertex), zAxis.dot(vertex));
-            box.expandByPoint(localCoords);
+            box.expandByPoint(vertex);
           }
         }
       }
     });
-    scale.setFromMatrixScale(root.matrixWorld);
-    box.max.divide(scale);
-    box.min.divide(scale);
   };
 })();
 
