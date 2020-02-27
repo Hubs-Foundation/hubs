@@ -17,45 +17,42 @@ export class SuperSpawnerSystem {
     }
   }
 
-  performSpawn = (function() {
-    const box = new THREE.Box3();
-    return function performSpawn(state, grabPath, userinput, superSpawner) {
-      const data = superSpawner.data;
+  performSpawn(state, grabPath, userinput, superSpawner) {
+    const data = superSpawner.data;
 
-      const spawnedEntity = addMedia(
-        data.src,
-        data.template,
-        ObjectContentOrigins.SPAWNER,
-        null,
-        data.resolve,
-        true,
-        false,
-        data.mediaOptions
-      ).entity;
+    const spawnedEntity = addMedia(
+      data.src,
+      data.template,
+      ObjectContentOrigins.SPAWNER,
+      null,
+      data.resolve,
+      true,
+      false,
+      data.mediaOptions
+    ).entity;
 
-      superSpawner.el.object3D.getWorldPosition(spawnedEntity.object3D.position);
-      superSpawner.el.object3D.getWorldQuaternion(spawnedEntity.object3D.quaternion);
-      spawnedEntity.object3D.matrixNeedsUpdate = true;
+    superSpawner.el.object3D.getWorldPosition(spawnedEntity.object3D.position);
+    superSpawner.el.object3D.getWorldQuaternion(spawnedEntity.object3D.quaternion);
+    spawnedEntity.object3D.matrixNeedsUpdate = true;
 
-      superSpawner.el.emit("spawned-entity-created", { target: spawnedEntity });
+    superSpawner.el.emit("spawned-entity-created", { target: spawnedEntity });
 
-      state.held = spawnedEntity;
+    state.held = spawnedEntity;
 
-      superSpawner.activateCooldown();
-      state.spawning = true;
+    superSpawner.activateCooldown();
+    state.spawning = true;
 
-      spawnedEntity.addEventListener(
-        "media-loaded",
-        () => {
-          spawnedEntity.object3D.scale.copy(superSpawner.spawnedMediaScale);
-          spawnedEntity.object3D.matrixNeedsUpdate = true;
-          state.spawning = false;
-          superSpawner.el.emit("spawned-entity-loaded", { target: spawnedEntity });
-        },
-        { once: true }
-      );
-    };
-  })();
+    spawnedEntity.addEventListener(
+      "media-loaded",
+      () => {
+        spawnedEntity.object3D.scale.copy(superSpawner.spawnedMediaScale);
+        spawnedEntity.object3D.matrixNeedsUpdate = true;
+        state.spawning = false;
+        superSpawner.el.emit("spawned-entity-loaded", { target: spawnedEntity });
+      },
+      { once: true }
+    );
+  }
 
   tick() {
     const interaction = AFRAME.scenes[0].systems.interaction;
