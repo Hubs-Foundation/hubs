@@ -1,5 +1,4 @@
 import { addMedia } from "../utils/media-utils";
-import { computeObjectAABB } from "../utils/auto-box-collider";
 import { ObjectContentOrigins } from "../object-types";
 
 // WARNING: This system mutates interaction system state!
@@ -34,14 +33,7 @@ export class SuperSpawnerSystem {
         data.mediaOptions
       ).entity;
 
-      const mesh = superSpawner.el.getObject3D("mesh");
-      if (!mesh) {
-        console.warn("Tried to clone a spawner without a mesh. Will use its position instead of its mesh center.");
-        superSpawner.el.object3D.getWorldPosition(spawnedEntity.object3D.position);
-      } else {
-        computeObjectAABB(mesh, box);
-        spawnedEntity.object3D.position.addVectors(box.min, box.max).multiplyScalar(0.5);
-      }
+      superSpawner.el.object3D.getWorldPosition(spawnedEntity.object3D.position);
       superSpawner.el.object3D.getWorldQuaternion(spawnedEntity.object3D.quaternion);
       spawnedEntity.object3D.matrixNeedsUpdate = true;
 

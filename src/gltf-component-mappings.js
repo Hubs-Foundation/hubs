@@ -266,7 +266,7 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
     resolve: true,
     fileIsOwned: true,
     animate: false,
-    recenter: false
+    moveTheParentNotTheMesh: true
   });
   el.setAttribute("css-class", "interactable");
   el.setAttribute("super-spawner", {
