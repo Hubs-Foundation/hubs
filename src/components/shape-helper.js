@@ -1,5 +1,3 @@
-/* global Ammo */
-import * as threeToAmmo from "three-to-ammo";
 import { SHAPE, FIT } from "three-ammo/constants";
 
 AFRAME.registerComponent("shape-helper", {
@@ -38,6 +36,7 @@ AFRAME.registerComponent("shape-helper", {
   init: function() {
     this.system = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
     this.alive = true;
+    this.uuid = -1;
     this.system.registerShapeHelper(this);
   },
 
@@ -52,36 +51,26 @@ AFRAME.registerComponent("shape-helper", {
         this.bodyHelper = bodyEl.components["body-helper"];
       }
     }
-    if (!this.bodyHelper || !this.bodyHelper.body) {
+    if (!this.bodyHelper || this.bodyHelper.uuid === null || this.bodyHelper.uuid === undefined) {
       console.warn("body not found");
       return;
     }
-    if (this.data.fit !== FIT.MANUAL) {
+    if (this.data.fit === FIT.ALL) {
       if (!this.el.object3DMap.mesh) {
         console.error("Cannot use FIT.ALL without object3DMap.mesh");
         return;
       }
       this.mesh = this.el.object3DMap.mesh;
-      this.mesh.updateMatrices();
+      this.mesh.updateMatrices(true, true);
     }
 
-    this.shapes = threeToAmmo.createCollisionShapes(this.mesh, this.data);
-    for (let i = 0; i < this.shapes.length; i++) {
-      this.bodyHelper.body.addShape(this.shapes[i]);
-    }
+    this.uuid = this.system.addShapes(this.bodyHelper.uuid, this.mesh, this.data);
   },
 
   remove: function() {
-    if (this.shapes) {
-      for (let i = 0; i < this.shapes.length; i++) {
-        if (this.bodyHelper.body) {
-          this.bodyHelper.body.removeShape(this.shapes[i]);
-        }
-        this.shapes[i].destroy();
-        Ammo.destroy(this.shapes[i].localTransform);
-      }
+    if (this.uuid !== -1) {
+      this.system.removeShapes(this.bodyHelper.uuid, this.uuid);
     }
-    this.shapes = null;
     this.alive = false;
   }
 });

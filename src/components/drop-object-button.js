@@ -15,8 +15,10 @@ AFRAME.registerComponent("drop-object-button", {
         angularSleepingThreshold: 2.5,
         collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
       });
-      if (this.targetEl.components["body-helper"].body) {
-        this.targetEl.components["body-helper"].body.physicsBody.activate();
+
+      const physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
+      if (this.targetEl.components["body-helper"].uuid) {
+        physicsSystem.activateBody(this.targetEl.components["body-helper"].uuid);
       }
 
       // Remove drop button after using it

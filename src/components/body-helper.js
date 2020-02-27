@@ -1,5 +1,6 @@
-import { Body } from "three-ammo";
-import { ACTIVATION_STATE, TYPE } from "three-ammo/constants";
+import { CONSTANTS } from "three-ammo";
+const ACTIVATION_STATE = CONSTANTS.ACTIVATION_STATE,
+  TYPE = CONSTANTS.TYPE;
 
 const ACTIVATION_STATES = [
   ACTIVATION_STATE.ACTIVE_TAG,
@@ -34,25 +35,24 @@ AFRAME.registerComponent("body-helper", {
   init: function() {
     this.system = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
     this.alive = true;
+    this.uuid = -1;
     this.system.registerBodyHelper(this);
   },
 
   init2: function() {
-    this.body = new Body(this.data, this.el.object3D, this.system.world);
-    this.system.addBody(this.body);
+    this.el.object3D.updateMatrices();
+    this.uuid = this.system.addBody(this.el.object3D, this.data);
   },
 
   update: function(prevData) {
-    if (prevData !== null && this.body) {
-      this.body.update(this.data);
+    if (prevData !== null && this.uuid !== -1) {
+      this.system.updateBody(this.uuid, this.data);
     }
   },
 
   remove: function() {
-    if (this.body) {
-      this.system.removeBody(this.body);
-      this.body.destroy();
-      this.body = null;
+    if (this.uuid !== -1) {
+      this.system.removeBody(this.uuid);
     }
     this.alive = false;
   }
