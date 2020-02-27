@@ -23,8 +23,8 @@ export class WindowsMixedRealityControllerDevice {
     this.gamepad = gamepad;
     this.pose = new Pose();
 
-    if (gamepad.handedness) {
-      this.selector = `#player-${gamepad.handedness}-controller`;
+    if (gamepad.hand) {
+      this.selector = `#player-${gamepad.hand}-controller`;
     }
 
     this.sittingToStandingMatrix = new THREE.Matrix4().makeTranslation(0, 1.6, 0);
@@ -40,7 +40,7 @@ export class WindowsMixedRealityControllerDevice {
     }
     if (!this.gamepad || !this.gamepad.connected) return;
 
-    const path = paths.device.wmr[this.gamepad.handedness || "right"];
+    const path = paths.device.wmr[this.gamepad.hand || "right"];
 
     frame.setValueType(path.touchpad.pressed, this.gamepad.buttons[0].pressed);
     frame.setValueType(path.touchpad.touched, this.gamepad.buttons[0].touched);
@@ -64,8 +64,8 @@ export class WindowsMixedRealityControllerDevice {
     frame.setValueType(path.joystick.axisY, this.gamepad.axes[3]);
 
     if (!this.selector) {
-      if (!this.gamepad.handedness) return;
-      this.selector = `#player-${this.gamepad.handedness}-controller`;
+      if (!this.gamepad.hand) return;
+      this.selector = `#player-${this.gamepad.hand}-controller`;
     }
 
     this.rayObject = this.rayObject || document.querySelector(this.selector).object3D;
@@ -106,7 +106,7 @@ export class WindowsMixedRealityControllerDevice {
     }
 
     if (this.gamepad.hapticActuators && this.gamepad.hapticActuators[0]) {
-      frame.setValueType(paths.haptics.actuators[this.gamepad.handedness], this.gamepad.hapticActuators[0]);
+      frame.setValueType(paths.haptics.actuators[this.gamepad.hand], this.gamepad.hapticActuators[0]);
     }
   }
 }

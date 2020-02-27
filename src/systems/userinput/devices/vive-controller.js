@@ -72,7 +72,7 @@ export class ViveControllerDevice {
 
     this.pose = new Pose();
     this.rayObjectRotation = new THREE.Quaternion();
-    this.path = paths.device.vive[gamepad.handedness || "right"];
+    this.path = paths.device.vive[gamepad.hand || "right"];
     this.sittingToStandingMatrix = new THREE.Matrix4().makeTranslation(0, 1.6, 0);
     copySittingToStandingTransform(this.sittingToStandingMatrix);
 
@@ -106,9 +106,9 @@ export class ViveControllerDevice {
     });
 
     if (!this.selector) {
-      if (this.gamepad.handedness) {
-        this.path = paths.device.vive[this.gamepad.handedness];
-        this.selector = `#player-${this.gamepad.handedness}-controller`;
+      if (this.gamepad.hand) {
+        this.path = paths.device.vive[this.gamepad.hand];
+        this.selector = `#player-${this.gamepad.hand}-controller`;
         console.warn("gamepad hand eventually specified");
       } else {
         return;
@@ -141,7 +141,7 @@ export class ViveControllerDevice {
     }
 
     if (this.gamepad.hapticActuators && this.gamepad.hapticActuators[0]) {
-      frame.setValueType(paths.haptics.actuators[this.gamepad.handedness], this.gamepad.hapticActuators[0]);
+      frame.setValueType(paths.haptics.actuators[this.gamepad.hand], this.gamepad.hapticActuators[0]);
     }
   }
 }

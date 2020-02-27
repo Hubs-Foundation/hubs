@@ -47,7 +47,7 @@ export class XboxControllerDevice {
       });
 
       if (this.gamepad.hapticActuators && this.gamepad.hapticActuators[0]) {
-        frame.setValueType(paths.haptics.actuators[this.gamepad.handedness], this.gamepad.hapticActuators[0]);
+        frame.setValueType(paths.haptics.actuators[this.gamepad.hand], this.gamepad.hapticActuators[0]);
       }
     }
   }

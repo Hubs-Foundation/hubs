@@ -355,9 +355,6 @@ AFRAME.registerSystem("userinput", {
           return; // multiple connect events without a disconnect event
         }
       }
-      if (!e.gamepad.handedness) {
-        e.gamepad.handedness = e.gamepad.hand;
-      }
       // HACK Firefox Nightly bug causes corrupt gamepad names for OpenVR, so do startsWith
       if (
         e.gamepad.id.startsWith("OpenVR Gamepad") ||
@@ -409,15 +406,6 @@ AFRAME.registerSystem("userinput", {
       gamepad && gamepadConnected({ gamepad });
     }
 
-    const retrieveXRGamepads = ({ session }) => {
-      for (const inputSource of session.inputSources) {
-        inputSource.gamepad.targetRaySpace = inputSource.targetRaySpace;
-        inputSource.gamepad.primaryProfile = inputSource.profiles[0];
-        inputSource.gamepad.handedness = inputSource.handedness;
-        gamepadConnected({ gamepad: inputSource.gamepad });
-      }
-    };
-
     this.xrReferenceSpace = null;
     this.el.sceneEl.addEventListener("enter-vr", () => {
       if (window.hasNativeWebXRImplementation) {
@@ -425,8 +413,6 @@ AFRAME.registerSystem("userinput", {
         session.requestReferenceSpace("local-floor").then(referenceSpace => {
           this.xrReferenceSpace = referenceSpace;
         });
-        session.addEventListener("inputsourceschange", retrieveXRGamepads);
-        retrieveXRGamepads({ session });
       }
       updateBindingsForVRMode();
     });

@@ -169,7 +169,7 @@ AFRAME.registerComponent("scale-audio-feedback", {
 
   async init() {
     await waitForDOMContentLoaded();
-    this.camera = document.getElementById("viewing-camera").object3DMap.camera;
+    this.camera = document.getElementById("viewing-camera").object3D;
   },
 
   tick() {

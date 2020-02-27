@@ -19,7 +19,7 @@ export class GearVRControllerDevice {
     this.axisMap = [{ name: "touchpadX", axisId: 0 }, { name: "touchpadY", axisId: 1 }];
 
     this.rayObjectRotation = new THREE.Quaternion();
-    this.selector = `#player-${gamepad.handedness}-controller`;
+    this.selector = `#player-${gamepad.hand}-controller`;
     this.pose = new Pose();
     this.sittingToStandingMatrix = new THREE.Matrix4().makeTranslation(0, 1.6, 0);
     copySittingToStandingTransform(this.sittingToStandingMatrix);
@@ -61,7 +61,7 @@ export class GearVRControllerDevice {
           paths.device.gearVRController.matrix,
           this.matrix
             .compose(
-              applyArmModel(this.gamepad.pose, this.gamepad.handedness, this.headObject3D, 1.6),
+              applyArmModel(this.gamepad.pose, this.gamepad.hand, this.headObject3D, 1.6),
               this.orientation.fromArray(this.gamepad.pose.orientation),
               ONES
             )

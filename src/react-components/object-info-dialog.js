@@ -79,8 +79,8 @@ export default class ObjectInfoDialog extends Component {
     const targetMatrix = new THREE.Matrix4();
     const translation = new THREE.Matrix4();
     return function enqueueWaypointTravel() {
-      this.viewingCamera.object3DMap.camera.updateMatrices();
-      targetMatrix.copy(this.viewingCamera.object3DMap.camera.matrixWorld);
+      this.viewingCamera.object3D.updateMatrices();
+      targetMatrix.copy(this.viewingCamera.object3D.matrixWorld);
       affixToWorldUp(targetMatrix, targetMatrix);
       translation.makeTranslation(0, -1.6, 0.15);
       targetMatrix.multiply(translation);
