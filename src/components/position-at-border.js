@@ -70,6 +70,32 @@ AFRAME.registerComponent("position-at-border", {
     this.didTryToGetReady = false;
     this.tick = this.tick.bind(this);
   },
+  tryToGetReady() {
+    this.didTryToGetReady = true;
+    this.cam = document.getElementById("viewing-camera").object3D;
+    const targetEl = this.el.querySelector(this.data.target);
+    if (!targetEl) {
+      console.error(`could not find ${this.data.target} underneath element:`, this.el);
+      return;
+    }
+    if (this.data.animate) {
+      this.didRegisterWithAnimationSystem = true;
+      this.el.sceneEl.systems["hubs-systems"].menuAnimationSystem.register(this, targetEl, this.data.scale);
+    }
+    this.target = targetEl.object3D;
+    this.wasVisible = false;
+    this.previousMesh = null;
+    this.meshLocalBoundingBox = new THREE.Box3();
+    this.meshCenter = new THREE.Vector3();
+    this.meshHalfExtents = new THREE.Vector3();
+    this.meshOffsetToCenter = new THREE.Vector3();
+    this.isTargetBoundingBoxDirty = true;
+    this.targetLocalBoundingBox = new THREE.Box3();
+    this.targetCenter = new THREE.Vector3();
+    this.targetHalfExtents = new THREE.Vector3();
+    this.targetOffsetToCenter = new THREE.Vector3();
+    this.ready = true;
+  },
 
   remove() {
     if (this.didRegisterWithAnimationSystem) {
@@ -97,34 +123,12 @@ AFRAME.registerComponent("position-at-border", {
     const meshForward = new THREE.Vector3();
     const boxCorners = new THREE.Vector3();
     return function tick() {
-      if (this.didTryToGetReady && !this.ready) {
+      if (!this.didTryToGetReady) {
+        this.tryToGetReady();
         return;
       }
       if (!this.ready) {
-        this.didTryToGetReady = true;
-        this.cam = document.getElementById("viewing-camera").object3D;
-        const targetEl = this.el.querySelector(this.data.target);
-        if (!targetEl) {
-          console.error(`could not find ${this.data.target} underneath element:`, this.el);
-          return;
-        }
-        if (this.data.animate) {
-          this.didRegisterWithAnimationSystem = true;
-          this.el.sceneEl.systems["hubs-systems"].menuAnimationSystem.register(this, targetEl, this.data.scale);
-        }
-        this.target = targetEl.object3D;
-        this.wasVisible = false;
-        this.previousMesh = null;
-        this.meshLocalBoundingBox = new THREE.Box3();
-        this.meshCenter = new THREE.Vector3();
-        this.meshHalfExtents = new THREE.Vector3();
-        this.meshOffsetToCenter = new THREE.Vector3();
-        this.isTargetBoundingBoxDirty = true;
-        this.targetLocalBoundingBox = new THREE.Box3();
-        this.targetCenter = new THREE.Vector3();
-        this.targetHalfExtents = new THREE.Vector3();
-        this.targetOffsetToCenter = new THREE.Vector3();
-        this.ready = true;
+        return;
       }
       const currentMesh = this.el.getObject3D("mesh");
       if (!currentMesh) {
@@ -133,105 +137,106 @@ AFRAME.registerComponent("position-at-border", {
       const isVisible = this.target.visible;
       const isOpening = isVisible && !this.wasVisible;
       this.wasVisible = isVisible;
-      if (isOpening) {
-        if (this.isTargetBoundingBoxDirty) {
-          computeLocalBoundingBox(this.target, this.targetLocalBoundingBox, true);
-          if (this.targetLocalBoundingBox.min.x === Infinity) {
-            // May be no visible elements in the target. Nothing to do in this case
-            return;
-          }
-          this.isTargetBoundingBoxDirty = false;
-        }
-        getCurrentDataFromLocalBB(
-          this.target,
-          this.targetLocalBoundingBox,
-          this.targetCenter,
-          this.targetHalfExtents,
-          this.targetOffsetToCenter
-        );
-        const isMeshChanged = currentMesh !== this.previousMesh;
-        if (isMeshChanged) {
-          computeLocalBoundingBox(currentMesh, this.meshLocalBoundingBox, true);
-          this.previousMesh = currentMesh;
-        }
-        getCurrentDataFromLocalBB(
-          currentMesh,
-          this.meshLocalBoundingBox,
-          this.meshCenter,
-          this.meshHalfExtents,
-          this.meshOffsetToCenter
-        );
-        currentMeshRotation.extractRotation(currentMesh.matrixWorld);
-        meshForward.set(0, 0, -1).applyMatrix4(currentMeshRotation);
-        this.cam.updateMatrices();
-        cameraPosition.setFromMatrixPosition(this.cam.matrixWorld);
-        cameraRotation.extractRotation(this.cam.matrixWorld);
-        camToCenter.subVectors(cameraPosition, this.meshCenter);
-        const needsYRotate = this.data.isFlat && meshForward.dot(camToCenter) > 0;
-        const intersection = this.el.sceneEl.systems.interaction.getActiveIntersection();
-        if (this.data.isFlat) {
-          desiredCenterPoint.copy(this.meshCenter).add(
-            centerToBorder
-              .set(0, 0, this.meshHalfExtents.z + this.targetHalfExtents.z + 0.02)
-              .multiplyScalar(needsYRotate ? -1 : 1)
-              .applyMatrix4(currentMeshRotation)
-          );
-        } else if (intersection) {
-          desiredCenterPoint.copy(intersection.point);
-          desiredCenterPoint.lerpVectors(cameraPosition, desiredCenterPoint, 0.8);
-        } else {
-          const meshSphereRadius =
-            boxCorners
-              .subVectors(this.meshLocalBoundingBox.max, this.meshLocalBoundingBox.min)
-              .multiply(currentMeshScale.setFromMatrixScale(currentMesh.matrixWorld))
-              .length() * 0.5;
-          camToCenter.normalize().multiplyScalar(meshSphereRadius);
-          desiredCenterPoint.copy(this.meshCenter).add(camToCenter);
-        }
-        if (this.data.scale) {
-          camToCenter.subVectors(cameraPosition, desiredCenterPoint); //mutation on purpose
-          const distanceToCenter = camToCenter.length();
-          desiredTargetScale.setScalar(THREE.Math.clamp(0.45 * distanceToCenter, MIN_SCALE, MAX_SCALE));
-        } else {
-          desiredTargetScale.setFromMatrixScale(this.target.matrixWorld);
-        }
-        if (this.data.scale) {
-          desiredTargetPosition
-            .copy(desiredCenterPoint)
-            .sub(
-              this.targetOffsetToCenter
-                .divide(currentTargetScale.setFromMatrixScale(this.target.matrixWorld))
-                .multiply(desiredTargetScale)
-            );
-        } else {
-          desiredTargetPosition.copy(this.meshCenter).add(
-            centerToBorder
-              .set(0, 0, this.meshHalfExtents.z + this.targetHalfExtents.z + 0.02)
-              .multiplyScalar(needsYRotate ? -1 : 1)
-              .applyMatrix4(currentMeshRotation)
-          );
-        }
-        if (this.data.isFlat) {
-          desiredTargetQuaternion.setFromRotationMatrix(currentMeshRotation);
-          if (needsYRotate) {
-            desiredTargetQuaternion.multiply(ROTATE_Y);
-          }
-        } else {
-          calculateDesiredTargetQuaternion(
-            cameraPosition,
-            cameraRotation,
-            this.el.sceneEl.is("vr-mode"),
-            desiredTargetPosition,
-            desiredTargetQuaternion
-          );
-        }
-        desiredTargetTransform.compose(
-          desiredTargetPosition,
-          desiredTargetQuaternion,
-          desiredTargetScale
-        );
-        setMatrixWorld(this.target, desiredTargetTransform);
+      if (!isOpening) {
+        return;
       }
+      if (this.isTargetBoundingBoxDirty) {
+        computeLocalBoundingBox(this.target, this.targetLocalBoundingBox, true);
+        if (this.targetLocalBoundingBox.min.x === Infinity) {
+          // May be no visible elements in the target. Nothing to do in this case
+          return;
+        }
+        this.isTargetBoundingBoxDirty = false;
+      }
+      getCurrentDataFromLocalBB(
+        this.target,
+        this.targetLocalBoundingBox,
+        this.targetCenter,
+        this.targetHalfExtents,
+        this.targetOffsetToCenter
+      );
+      const isMeshChanged = currentMesh !== this.previousMesh;
+      if (isMeshChanged) {
+        computeLocalBoundingBox(currentMesh, this.meshLocalBoundingBox, true);
+        this.previousMesh = currentMesh;
+      }
+      getCurrentDataFromLocalBB(
+        currentMesh,
+        this.meshLocalBoundingBox,
+        this.meshCenter,
+        this.meshHalfExtents,
+        this.meshOffsetToCenter
+      );
+      currentMeshRotation.extractRotation(currentMesh.matrixWorld);
+      meshForward.set(0, 0, -1).applyMatrix4(currentMeshRotation);
+      this.cam.updateMatrices();
+      cameraPosition.setFromMatrixPosition(this.cam.matrixWorld);
+      cameraRotation.extractRotation(this.cam.matrixWorld);
+      camToCenter.subVectors(cameraPosition, this.meshCenter);
+      const needsYRotate = this.data.isFlat && meshForward.dot(camToCenter) > 0;
+      const intersection = this.el.sceneEl.systems.interaction.getActiveIntersection();
+      if (this.data.isFlat) {
+        desiredCenterPoint.copy(this.meshCenter).add(
+          centerToBorder
+            .set(0, 0, this.meshHalfExtents.z + this.targetHalfExtents.z + 0.02)
+            .multiplyScalar(needsYRotate ? -1 : 1)
+            .applyMatrix4(currentMeshRotation)
+        );
+      } else if (intersection) {
+        desiredCenterPoint.copy(intersection.point);
+        desiredCenterPoint.lerpVectors(cameraPosition, desiredCenterPoint, 0.8);
+      } else {
+        const meshSphereRadius =
+          boxCorners
+            .subVectors(this.meshLocalBoundingBox.max, this.meshLocalBoundingBox.min)
+            .multiply(currentMeshScale.setFromMatrixScale(currentMesh.matrixWorld))
+            .length() * 0.5;
+        camToCenter.normalize().multiplyScalar(meshSphereRadius);
+        desiredCenterPoint.copy(this.meshCenter).add(camToCenter);
+      }
+      if (this.data.scale) {
+        camToCenter.subVectors(cameraPosition, desiredCenterPoint); //mutation on purpose
+        const distanceToCenter = camToCenter.length();
+        desiredTargetScale.setScalar(THREE.Math.clamp(0.45 * distanceToCenter, MIN_SCALE, MAX_SCALE));
+      } else {
+        desiredTargetScale.setFromMatrixScale(this.target.matrixWorld);
+      }
+      if (this.data.scale) {
+        desiredTargetPosition
+          .copy(desiredCenterPoint)
+          .sub(
+            this.targetOffsetToCenter
+              .divide(currentTargetScale.setFromMatrixScale(this.target.matrixWorld))
+              .multiply(desiredTargetScale)
+          );
+      } else {
+        desiredTargetPosition.copy(this.meshCenter).add(
+          centerToBorder
+            .set(0, 0, this.meshHalfExtents.z + this.targetHalfExtents.z + 0.02)
+            .multiplyScalar(needsYRotate ? -1 : 1)
+            .applyMatrix4(currentMeshRotation)
+        );
+      }
+      if (this.data.isFlat) {
+        desiredTargetQuaternion.setFromRotationMatrix(currentMeshRotation);
+        if (needsYRotate) {
+          desiredTargetQuaternion.multiply(ROTATE_Y);
+        }
+      } else {
+        calculateDesiredTargetQuaternion(
+          cameraPosition,
+          cameraRotation,
+          this.el.sceneEl.is("vr-mode"),
+          desiredTargetPosition,
+          desiredTargetQuaternion
+        );
+      }
+      desiredTargetTransform.compose(
+        desiredTargetPosition,
+        desiredTargetQuaternion,
+        desiredTargetScale
+      );
+      setMatrixWorld(this.target, desiredTargetTransform);
     };
   })()
 });
