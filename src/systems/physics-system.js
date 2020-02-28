@@ -1,5 +1,7 @@
 import { AmmoWorker, WorkerHelpers, CONSTANTS } from "three-ammo";
 import { AmmoDebugConstants, DefaultBufferSize } from "ammo-debug-drawer";
+import configs from "../utils/configs";
+import * as ammoWasmUrl from "ammo.js/builds/ammo.wasm.wasm";
 
 const MESSAGE_TYPES = CONSTANTS.MESSAGE_TYPES,
   TYPE = CONSTANTS.TYPE,
@@ -51,7 +53,8 @@ export class PhysicsSystem {
       {
         type: MESSAGE_TYPES.INIT,
         worldConfig: WORLD_CONFIG,
-        arrayBuffer
+        arrayBuffer,
+        wasmUrl: new URL(ammoWasmUrl, configs.BASE_ASSETS_PATH || window.location).href
       },
       [arrayBuffer]
     );
