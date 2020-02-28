@@ -107,7 +107,7 @@ class Loader extends Component {
               <span className="loading-panel__powered-by__prefix">
                 <FormattedMessage id="home.powered_by_prefix" />
               </span>
-              <a href="https://github.com/mozilla/hubs-cloud">
+              <a href="https://hubs.mozilla.com/cloud">
                 <FormattedMessage id="home.powered_by_link" />
               </a>
             </div>
