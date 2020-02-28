@@ -157,38 +157,34 @@ export class PhysicsSystem {
         if (this.objectMatricesFloatArray.buffer.byteLength !== 0) {
           for (let i = 0; i < this.bodyUuids.length; i++) {
             const uuid = this.bodyUuids[i];
+            const index = this.uuidToIndex[uuid];
             const type = this.bodyOptions[uuid].type ? this.bodyOptions[uuid].type : TYPE.DYNAMIC;
             const object3D = this.object3Ds[uuid];
             if (type === TYPE.DYNAMIC) {
-              matrix.fromArray(this.objectMatricesFloatArray, this.uuidToIndex[uuid] * BUFFER_CONFIG.BODY_DATA_SIZE);
+              matrix.fromArray(this.objectMatricesFloatArray, index * BUFFER_CONFIG.BODY_DATA_SIZE);
               inverse.getInverse(object3D.parent.matrixWorld);
               transform.multiplyMatrices(inverse, matrix);
               transform.decompose(object3D.position, object3D.quaternion, scale);
             }
 
             object3D.updateMatrices();
-            this.objectMatricesFloatArray.set(
-              object3D.matrixWorld.elements,
-              this.uuidToIndex[uuid] * BUFFER_CONFIG.BODY_DATA_SIZE
-            );
+            this.objectMatricesFloatArray.set(object3D.matrixWorld.elements, index * BUFFER_CONFIG.BODY_DATA_SIZE);
 
             if (this.bodyLinearVelocities.hasOwnProperty(uuid)) {
               this.bodyLinearVelocities[uuid] = this.objectMatricesFloatArray[
-                this.uuidToIndex[uuid] * BUFFER_CONFIG.BODY_DATA_SIZE + 16
+                index * BUFFER_CONFIG.BODY_DATA_SIZE + 16
               ];
             }
             if (this.bodyAngularVelocities.hasOwnProperty(uuid)) {
               this.bodyAngularVelocities[uuid] = this.objectMatricesFloatArray[
-                this.uuidToIndex[uuid] * BUFFER_CONFIG.BODY_DATA_SIZE + 17
+                index * BUFFER_CONFIG.BODY_DATA_SIZE + 17
               ];
             }
 
             this.collisions[uuid].length = 0;
 
             for (let j = 18; j < BUFFER_CONFIG.BODY_DATA_SIZE; j++) {
-              const collidingIndex = this.objectMatricesIntArray[
-                this.uuidToIndex[uuid] * BUFFER_CONFIG.BODY_DATA_SIZE + j
-              ];
+              const collidingIndex = this.objectMatricesIntArray[index * BUFFER_CONFIG.BODY_DATA_SIZE + j];
               if (collidingIndex !== -1) {
                 this.collisions[uuid].push(this.indexToUuid[collidingIndex]);
               }
