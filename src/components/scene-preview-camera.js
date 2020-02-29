@@ -16,6 +16,7 @@ function lerp(start, end, t) {
 
 const newRot = new THREE.Quaternion();
 
+let uiRoot;
 /**
  * Nicely pans the camera for previewing a scene. There's some weirdness with this right now
  * since it ends up panning in a direction dependent upon the start camera orientation,
@@ -53,6 +54,10 @@ AFRAME.registerComponent("scene-preview-camera", {
 
   tick2: function() {
     const hubsSystems = this.el.sceneEl.systems["hubs-systems"];
+
+    uiRoot = uiRoot || document.getElementById("ui-root");
+    const watching = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("watching");
+    if (watching) return;
 
     let streamerCamera;
     if (hubsSystems) {

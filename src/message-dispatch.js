@@ -6,6 +6,7 @@ import { spawnChatMessage } from "./react-components/chat-message";
 import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "./systems/sound-effects-system";
 import ducky from "./assets/models/DuckyMesh.glb";
 
+let uiRoot;
 // Handles user-entered messages
 export default class MessageDispatch {
   constructor(scene, entryManager, hubChannel, addToPresenceLog, remountUI, mediaSearchStore) {
@@ -33,8 +34,10 @@ export default class MessageDispatch {
 
   dispatchCommand = async (command, ...args) => {
     const entered = this.scene.is("entered");
+    uiRoot = uiRoot || document.getElementById("ui-root");
+    const watching = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("watching");
 
-    if (!entered) {
+    if (!entered && !watching) {
       this.addToPresenceLog({ type: "log", body: "You must enter the room to use this command." });
       return;
     }

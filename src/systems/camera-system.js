@@ -307,7 +307,31 @@ export class CameraSystem {
 
   tick = (function() {
     const translation = new THREE.Matrix4();
+    let uiRoot;
     return function tick(scene, dt) {
+      uiRoot = uiRoot || document.getElementById("ui-root");
+      if (uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("watching")) {
+        if (this.mode !== CAMERA_MODE_FIRST_PERSON) {
+          this.mode = CAMERA_MODE_FIRST_PERSON;
+          this.viewingCamera.object3D.updateMatrices();
+          const position = new THREE.Vector3();
+          const quat = new THREE.Quaternion();
+          const scale = new THREE.Vector3();
+          this.viewingCamera.object3D.matrixWorld.decompose(position, quat, scale);
+          setMatrixWorld(
+            this.avatarRig.object3D,
+            new THREE.Matrix4().compose(
+              position.sub(new THREE.Vector3(0, 1.6, 0)),
+              quat,
+              scale
+            )
+          );
+          scene.systems["hubs-systems"].characterController.fly = true;
+          scene.systems["hubs-systems"].characterController.shouldLandWhenPossible = true;
+          this.avatarPOV.object3D.updateMatrices();
+          setMatrixWorld(this.avatarPOV.object3D, this.viewingCamera.object3D.matrixWorld);
+        }
+      }
       if (!this.enteredScene && scene.is("entered")) {
         this.enteredScene = true;
         this.mode = CAMERA_MODE_FIRST_PERSON;

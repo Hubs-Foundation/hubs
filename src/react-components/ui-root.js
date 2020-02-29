@@ -1128,6 +1128,19 @@ class UIRoot extends Component {
               >
                 <FormattedMessage id="entry.enter-room" />
               </button>
+
+              <a
+                onClick={e => {
+                  e.preventDefault();
+                  this.setState({ watching: true });
+                }}
+                className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
+              >
+                <FormattedMessage id="entry.watch-from-lobby" />
+                <div className={entryStyles.buttonSubtitle}>
+                  <FormattedMessage id="entry.watch-from-lobby-subtitle" />
+                </div>
+              </a>
             </div>
           )}
         {this.props.entryDisallowed &&
@@ -1396,7 +1409,8 @@ class UIRoot extends Component {
     const rootStyles = {
       [styles.ui]: true,
       "ui-root": true,
-      "in-modal-or-overlay": this.isInModalOrOverlay()
+      "in-modal-or-overlay": this.isInModalOrOverlay(),
+      watching: this.state.watching
     };
     const hasPush = navigator.serviceWorker && "PushManager" in window;
 
