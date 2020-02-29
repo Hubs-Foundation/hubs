@@ -83,6 +83,7 @@ export class PhysicsSystem {
       } else if (event.data.type === MESSAGE_TYPES.TRANSFER_DATA) {
         this.objectMatricesFloatArray = event.data.objectMatricesFloatArray;
         this.objectMatricesIntArray = new Int32Array(this.objectMatricesFloatArray.buffer);
+        this.stepDuration = event.data.stepDuration;
       }
     };
   }
