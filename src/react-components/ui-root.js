@@ -436,6 +436,7 @@ class UIRoot extends Component {
   };
 
   onLoadingFinished = () => {
+    console.log("Loading finished");
     this.setState({ noMoreLoadingUpdates: true });
     this.props.scene.emit("loading_finished");
     this.props.scene.addState("loaded");
@@ -1392,6 +1393,18 @@ class UIRoot extends Component {
       !preload &&
       (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) &&
       !(this.props.showSafariDialog || this.props.showWebAssemblyDialog);
+
+    if (isLoading) {
+      console.log("Loading screen shown", {
+        preload,
+        hideLoader: this.state.hideLoader,
+        didConnectToNetworkedScene: this.state.didConnectToNetworkedScene,
+        showSafariDialog: this.state.showSafariDialog,
+        showWebAssemblyDialog: this.props.showWebAssemblyDialog,
+        noMoreLoadingUpdates: this.state.noMoreLoadingUpdates,
+        showPrefs: this.state.showPrefs
+      });
+    }
 
     const rootStyles = {
       [styles.ui]: true,

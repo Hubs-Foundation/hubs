@@ -31,6 +31,7 @@ class Loader extends Component {
     this.props.scene.addEventListener(
       "environment-scene-loaded",
       () => {
+        console.log("Environment scene loaded");
         this.environmentSceneLoaded = true;
         this.tryFinishLoading();
       },
