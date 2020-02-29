@@ -265,7 +265,7 @@ AFRAME.registerComponent("media-video", {
     this.videoIsLive = null; // value null until we've determined if the video is live or not.
     this.onSnapImageLoaded = () => (this.isSnapping = false);
 
-    this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", dirs: ["forward", "back"] });
+    this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", isFlat: true });
     this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
       // If we got removed while waiting, do nothing.
       if (!this.el.parentNode) return;
