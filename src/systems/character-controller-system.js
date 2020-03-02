@@ -20,10 +20,15 @@ const calculateDisplacementToDesiredPOV = (function() {
   const translationCoordinateSpace = new THREE.Matrix4();
   const translated = new THREE.Matrix4();
   const localTranslation = new THREE.Matrix4();
-  return function calculateDisplacementToDesiredPOV(povMat4, fly, localDisplacement, displacementToDesiredPOV) {
+  return function calculateDisplacementToDesiredPOV(
+    povMat4,
+    allowVerticalMovement,
+    localDisplacement,
+    displacementToDesiredPOV
+  ) {
     localTranslation.makeTranslation(localDisplacement.x, localDisplacement.y, localDisplacement.z);
     translationCoordinateSpace.extractRotation(povMat4);
-    if (!fly) {
+    if (!allowVerticalMovement) {
       affixToWorldUp(translationCoordinateSpace, translationCoordinateSpace);
     }
     translated.copy(translationCoordinateSpace).multiply(localTranslation);
@@ -87,7 +92,8 @@ export class CharacterControllerSystem {
       targetForHead.y += this.avatarPOV.object3D.position.y;
       deltaFromHeadToTargetForHead.copy(targetForHead).sub(head);
       targetForRig.copy(rig).add(deltaFromHeadToTargetForHead);
-      this.findPositionOnNavMesh(targetForRig, targetForRig, this.avatarRig.object3D.position, true);
+      const navMeshExists = NAV_ZONE in this.scene.systems.nav.pathfinder.zones;
+      this.findPositionOnNavMesh(targetForRig, targetForRig, this.avatarRig.object3D.position, navMeshExists);
       this.avatarRig.object3D.matrixNeedsUpdate = true;
     };
   })();
@@ -110,7 +116,11 @@ export class CharacterControllerSystem {
       }
       inMat4Copy.copy(inMat4);
       rotateInPlaceAroundWorldUp(inMat4Copy, Math.PI, finalPOV);
-      if (snapToNavMesh) {
+      const navMeshExists = NAV_ZONE in this.scene.systems.nav.pathfinder.zones;
+      if (!navMeshExists && snapToNavMesh) {
+        console.warn("Tried to travel to a waypoint that wants to snap to the nav mesh, but there is no nav mesh");
+      }
+      if (navMeshExists && snapToNavMesh) {
         inPosition.setFromMatrixPosition(inMat4Copy);
         this.findPositionOnNavMesh(inPosition, inPosition, outPosition, true);
         finalPOV.setPosition(outPosition);
@@ -259,6 +269,7 @@ export class CharacterControllerSystem {
 
       newPOV.copy(snapRotatedPOV);
 
+      const navMeshExists = NAV_ZONE in this.scene.systems.nav.pathfinder.zones;
       if (!this.isMotionDisabled) {
         const playerScale = v.setFromMatrixColumn(this.avatarPOV.object3D.matrixWorld, 1).length();
         const triedToMove = this.relativeMotion.lengthSq() > 0.000001;
@@ -266,7 +277,7 @@ export class CharacterControllerSystem {
         if (triedToMove) {
           calculateDisplacementToDesiredPOV(
             snapRotatedPOV,
-            this.fly,
+            this.fly || !navMeshExists,
             this.relativeMotion.multiplyScalar(
               ((userinput.get(paths.actions.boost) ? 2 : 1) * BASE_SPEED * Math.sqrt(playerScale) * dt) / 1000
             ),
@@ -279,7 +290,7 @@ export class CharacterControllerSystem {
         }
 
         const shouldRecomputeNavGroupAndNavNode = didStopFlying || this.shouldLandWhenPossible;
-        const shouldResnapToNavMesh = shouldRecomputeNavGroupAndNavNode || triedToMove;
+        const shouldResnapToNavMesh = navMeshExists && (shouldRecomputeNavGroupAndNavNode || triedToMove);
 
         let squareDistNavMeshCorrection = 0;
 
