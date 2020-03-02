@@ -1,4 +1,4 @@
-import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
+import { computeObjectAABB, getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import {
   resolveUrl,
   getDefaultResolveQuality,
@@ -20,7 +20,7 @@ import qsTruthy from "../utils/qs_truthy";
 import loadingObjectSrc from "../assets/models/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
 import { loadModel } from "./gltf-model-plus";
-import { cloneObject3D } from "../utils/three-utils";
+import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import { SHAPE } from "three-ammo/constants";
@@ -49,6 +49,7 @@ AFRAME.registerComponent("media-loader", {
     src: { type: "string" },
     version: { type: "number", default: 1 }, // Used to force a re-resolution
     fitToBox: { default: false },
+    moveTheParentNotTheMesh: { default: false },
     resolve: { default: false },
     contentType: { default: null },
     contentSubtype: { default: null },
@@ -84,15 +85,46 @@ AFRAME.registerComponent("media-loader", {
 
   updateScale: (function() {
     const center = new THREE.Vector3();
-    return function(fitToBox) {
+    const originalMeshMatrix = new THREE.Matrix4();
+    const desiredObjectMatrix = new THREE.Matrix4();
+    const position = new THREE.Vector3();
+    const quaternion = new THREE.Quaternion();
+    const scale = new THREE.Vector3();
+    const box = new THREE.Box3();
+    return function(fitToBox, moveTheParentNotTheMesh) {
+      this.el.object3D.updateMatrices();
       const mesh = this.el.getObject3D("mesh");
-      const box = getBox(this.el, mesh);
-      const scaleCoefficient = fitToBox ? getScaleCoefficient(0.5, box) : 1;
-      mesh.scale.multiplyScalar(scaleCoefficient);
-      const { min, max } = box;
-      center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
-      mesh.position.sub(center);
-      mesh.matrixNeedsUpdate = true;
+      mesh.updateMatrices();
+      if (moveTheParentNotTheMesh) {
+        if (fitToBox) {
+          console.warn(
+            "Unexpected combination of inputs. Can fit the mesh to a box OR move the parent to the mesh, but did not expect to do both.",
+            this.el
+          );
+        }
+        // Keep the mesh exactly where it is, but move the parent transform such that it aligns with the center of the mesh's bounding box.
+        originalMeshMatrix.copy(mesh.matrixWorld);
+        computeObjectAABB(mesh, box);
+        center.addVectors(box.min, box.max).multiplyScalar(0.5);
+        this.el.object3D.matrixWorld.decompose(position, quaternion, scale);
+        desiredObjectMatrix.compose(
+          center,
+          quaternion,
+          scale
+        );
+        setMatrixWorld(this.el.object3D, desiredObjectMatrix);
+        mesh.updateMatrices();
+        setMatrixWorld(mesh, originalMeshMatrix);
+      } else {
+        // Move the mesh such that the center of its bounding box is in the same position as the parent matrix position
+        const box = getBox(this.el, mesh);
+        const scaleCoefficient = fitToBox ? getScaleCoefficient(0.5, box) : 1;
+        const { min, max } = box;
+        center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
+        mesh.scale.multiplyScalar(scaleCoefficient);
+        mesh.position.sub(center);
+        mesh.matrixNeedsUpdate = true;
+      }
     };
   })(),
 
@@ -155,7 +187,7 @@ AFRAME.registerComponent("media-loader", {
       : new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
     this.el.setObject3D("mesh", mesh);
 
-    this.updateScale(true);
+    this.updateScale(true, false);
 
     if (useFancyLoader) {
       const environmentMapComponent = this.el.sceneEl.components["environment-map"];
@@ -270,7 +302,7 @@ AFRAME.registerComponent("media-loader", {
     if (this.data.animate) {
       if (!this.animating) {
         this.animating = true;
-        if (shouldUpdateScale) this.updateScale(this.data.fitToBox);
+        if (shouldUpdateScale) this.updateScale(this.data.fitToBox, this.data.moveTheParentNotTheMesh);
         const mesh = this.el.getObject3D("mesh");
         const scale = { x: 0.001, y: 0.001, z: 0.001 };
         scale.x = mesh.scale.x < scale.x ? mesh.scale.x * 0.001 : scale.x;
@@ -279,7 +311,7 @@ AFRAME.registerComponent("media-loader", {
         addMeshScaleAnimation(mesh, scale, finish);
       }
     } else {
-      if (shouldUpdateScale) this.updateScale(this.data.fitToBox);
+      if (shouldUpdateScale) this.updateScale(this.data.fitToBox, this.data.moveTheParentNotTheMesh);
       finish();
     }
   },
