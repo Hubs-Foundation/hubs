@@ -1135,18 +1135,22 @@ class UIRoot extends Component {
                 <FormattedMessage id="entry.enter-room" />
               </button>
 
-              <a
-                onClick={e => {
-                  e.preventDefault();
-                  this.setState({ watching: true });
-                }}
-                className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
-              >
-                <FormattedMessage id="entry.watch-from-lobby" />
-                <div className={entryStyles.buttonSubtitle}>
-                  <FormattedMessage id="entry.watch-from-lobby-subtitle" />
-                </div>
-              </a>
+              {configs.feature("enable_lobby_ghosts") ? (
+                <a
+                  onClick={e => {
+                    e.preventDefault();
+                    this.setState({ watching: true });
+                  }}
+                  className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
+                >
+                  <FormattedMessage id="entry.watch-from-lobby" />
+                  <div className={entryStyles.buttonSubtitle}>
+                    <FormattedMessage id="entry.watch-from-lobby-subtitle" />
+                  </div>
+                </a>
+              ) : (
+                <div />
+              )}
             </div>
           )}
         {this.props.entryDisallowed &&
@@ -1406,8 +1410,7 @@ class UIRoot extends Component {
       [styles.ui]: true,
       "ui-root": true,
       "in-modal-or-overlay": this.isInModalOrOverlay(),
-      watching: this.state.watching,
-      hide: this.state.hide || this.props.hide
+      isGhost: configs.feature("enable_lobby_ghosts") && (this.state.watching || (this.state.hide || this.props.hide))
     };
     if (this.props.hide || this.state.hide) return <div className={classNames(rootStyles)} />;
 

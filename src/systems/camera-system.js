@@ -310,10 +310,7 @@ export class CameraSystem {
     let uiRoot;
     return function tick(scene, dt) {
       uiRoot = uiRoot || document.getElementById("ui-root");
-      const isGhost =
-        uiRoot &&
-        uiRoot.firstChild &&
-        (uiRoot.firstChild.classList.contains("watching") || uiRoot.firstChild.classList.contains("hide"));
+      const isGhost = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
       if (isGhost && this.mode !== CAMERA_MODE_FIRST_PERSON && this.mode !== CAMERA_MODE_INSPECT) {
         this.mode = CAMERA_MODE_FIRST_PERSON;
         const position = new THREE.Vector3();
