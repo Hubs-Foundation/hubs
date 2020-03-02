@@ -1410,7 +1410,8 @@ class UIRoot extends Component {
       [styles.ui]: true,
       "ui-root": true,
       "in-modal-or-overlay": this.isInModalOrOverlay(),
-      isGhost: configs.feature("enable_lobby_ghosts") && (this.state.watching || (this.state.hide || this.props.hide))
+      isGhost: configs.feature("enable_lobby_ghosts") && (this.state.watching || (this.state.hide || this.props.hide)),
+      hide: this.state.hide || this.props.hide
     };
     if (this.props.hide || this.state.hide) return <div className={classNames(rootStyles)} />;
 
