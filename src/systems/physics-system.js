@@ -19,22 +19,19 @@ export class PhysicsSystem {
 
     this.bodyHelpers = [];
     this.shapeHelpers = [];
-
     this.bodyUuids = [];
-    this.uuidToIndex = {};
+
     this.indexToUuid = {};
+
+    this.uuidToIndex = {};
     this.object3Ds = {};
-    window.object3Ds = this.object3Ds;
     this.bodyOptions = {};
     this.bodyLinearVelocities = {};
     this.bodyAngularVelocities = {};
 
-    this.shapeUuids = [];
     this.shapes = {};
 
     this.collisions = {};
-
-    this.constraints = {};
 
     this.debugRequested = false;
     this.debugEnabled = false;
@@ -162,29 +159,35 @@ export class PhysicsSystem {
             const type = this.bodyOptions[uuid].type ? this.bodyOptions[uuid].type : TYPE.DYNAMIC;
             const object3D = this.object3Ds[uuid];
             if (type === TYPE.DYNAMIC) {
-              matrix.fromArray(this.objectMatricesFloatArray, index * BUFFER_CONFIG.BODY_DATA_SIZE);
+              matrix.fromArray(
+                this.objectMatricesFloatArray,
+                index * BUFFER_CONFIG.BODY_DATA_SIZE + BUFFER_CONFIG.MATRIX_OFFSET
+              );
               inverse.getInverse(object3D.parent.matrixWorld);
               transform.multiplyMatrices(inverse, matrix);
               transform.decompose(object3D.position, object3D.quaternion, scale);
             }
 
             object3D.updateMatrices();
-            this.objectMatricesFloatArray.set(object3D.matrixWorld.elements, index * BUFFER_CONFIG.BODY_DATA_SIZE);
+            this.objectMatricesFloatArray.set(
+              object3D.matrixWorld.elements,
+              index * BUFFER_CONFIG.BODY_DATA_SIZE + BUFFER_CONFIG.MATRIX_OFFSET
+            );
 
             if (this.bodyLinearVelocities.hasOwnProperty(uuid)) {
               this.bodyLinearVelocities[uuid] = this.objectMatricesFloatArray[
-                index * BUFFER_CONFIG.BODY_DATA_SIZE + 16
+                index * BUFFER_CONFIG.BODY_DATA_SIZE + BUFFER_CONFIG.LINEAR_VELOCITY_OFFSET
               ];
             }
             if (this.bodyAngularVelocities.hasOwnProperty(uuid)) {
               this.bodyAngularVelocities[uuid] = this.objectMatricesFloatArray[
-                index * BUFFER_CONFIG.BODY_DATA_SIZE + 17
+                index * BUFFER_CONFIG.BODY_DATA_SIZE + BUFFER_CONFIG.ANGULAR_VELOCITY_OFFSET
               ];
             }
 
             this.collisions[uuid].length = 0;
 
-            for (let j = 18; j < BUFFER_CONFIG.BODY_DATA_SIZE; j++) {
+            for (let j = BUFFER_CONFIG.COLLISIONS_OFFSET; j < BUFFER_CONFIG.BODY_DATA_SIZE; j++) {
               const collidingIndex = this.objectMatricesIntArray[index * BUFFER_CONFIG.BODY_DATA_SIZE + j];
               if (collidingIndex !== -1) {
                 this.collisions[uuid].push(this.indexToUuid[collidingIndex]);
@@ -235,9 +238,12 @@ export class PhysicsSystem {
     delete this.collisions[uuid];
     delete this.bodyLinearVelocities[uuid];
     delete this.bodyAngularVelocities[uuid];
+    delete this.shapes[uuid];
     const idx = this.bodyUuids.indexOf(uuid);
     if (idx !== -1) {
       this.bodyUuids.splice(idx, 1);
+    } else {
+      console.warn(`removeBody called for uuid: ${uuid} before body was initialized.`);
     }
     this.workerHelpers.removeBody(uuid);
   }
@@ -261,6 +267,10 @@ export class PhysicsSystem {
       const idx = this.shapes[bodyUuid].indexOf(shapesUuid);
       if (idx !== -1) {
         this.shapes[bodyUuid].splice(idx, 1);
+      } else {
+        console.warn(
+          `removeShapes called for shapesUuid: ${shapesUuid} on bodyUuid: ${bodyUuid} before shapes were initialized.`
+        );
       }
     }
   }

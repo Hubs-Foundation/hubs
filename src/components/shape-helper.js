@@ -61,7 +61,7 @@ AFRAME.registerComponent("shape-helper", {
         return;
       }
       this.mesh = this.el.object3DMap.mesh;
-      this.mesh.updateMatrices(true, true);
+      this.mesh.updateMatrices();
     }
 
     this.uuid = this.system.addShapes(this.bodyHelper.uuid, this.mesh, this.data);
