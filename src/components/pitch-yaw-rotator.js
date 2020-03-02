@@ -62,17 +62,20 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
       const userinput = scene.systems.userinput;
       uiRoot = uiRoot || document.getElementById("ui-root");
       scenePreviewNode = scenePreviewNode || document.getElementById("scene-preview-node");
-      const watching = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("watching");
+      const isGhost =
+        uiRoot &&
+        uiRoot.firstChild &&
+        (uiRoot.firstChild.classList.contains("watching") || uiRoot.firstChild.classList.contains("hide"));
       const lobby = !scene.is("entered");
       const cameraDelta = userinput.get(lobby ? paths.actions.cameraDelta : paths.actions.lobbyCameraDelta);
       if (cameraDelta) {
         rotatePitchAndYaw(
-          lobby && !watching ? scenePreviewNode.object3D : this.el.object3D,
+          lobby && !isGhost ? scenePreviewNode.object3D : this.el.object3D,
           this.pendingXRotation + cameraDelta[1],
           cameraDelta[0]
         );
       } else if (this.pendingXRotation) {
-        rotatePitchAndYaw(lobby && !watching ? scenePreviewNode.object3D : this.el.object3D, this.pendingXRotation, 0);
+        rotatePitchAndYaw(lobby && !isGhost ? scenePreviewNode.object3D : this.el.object3D, this.pendingXRotation, 0);
       }
     }
     this.pendingXRotation = 0;

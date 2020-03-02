@@ -151,8 +151,11 @@ export class CharacterControllerSystem {
     let uiRoot;
     return function tick(t, dt) {
       uiRoot = uiRoot || document.getElementById("ui-root");
-      const watching = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("watching");
-      if (!watching && !this.scene.is("entered")) return;
+      const isGhost =
+        uiRoot &&
+        uiRoot.firstChild &&
+        (uiRoot.firstChild.classList.contains("watching") || uiRoot.firstChild.classList.contains("hide"));
+      if (!isGhost && !this.scene.is("entered")) return;
       const vrMode = this.scene.is("vr-mode");
       this.sfx = this.sfx || this.scene.systems["hubs-systems"].soundEffectsSystem;
       this.waypointSystem = this.waypointSystem || this.scene.systems["hubs-systems"].waypointSystem;

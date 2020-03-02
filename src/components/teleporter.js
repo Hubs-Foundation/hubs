@@ -119,6 +119,7 @@ const q = new THREE.Quaternion();
 const vecHelper = new THREE.Vector3();
 const v = new THREE.Vector3();
 
+let uiRoot;
 AFRAME.registerComponent("teleporter", {
   schema: {
     start: { type: "string" },
@@ -182,7 +183,9 @@ AFRAME.registerComponent("teleporter", {
   },
 
   tick(t, dt) {
-    if (!this.el.sceneEl.is("entered")) return;
+    uiRoot = uiRoot || document.getElementById("ui-root");
+    const watching = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("watching");
+    if (!this.el.sceneEl.is("entered") && !watching) return;
     const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
     const userinput = AFRAME.scenes[0].systems.userinput;
     const { start, confirm, speed } = this.data;

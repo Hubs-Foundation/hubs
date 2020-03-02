@@ -2,6 +2,7 @@ import { CAMERA_MODE_INSPECT } from "./camera-system.js";
 import { setMatrixWorld } from "../utils/three-utils";
 
 let viewingCamera;
+let uiRoot;
 export class ScenePreviewCameraSystem {
   constructor() {
     this.entities = [];
@@ -17,13 +18,20 @@ export class ScenePreviewCameraSystem {
 
   tick() {
     viewingCamera = viewingCamera || document.getElementById("viewing-camera");
-    if (!viewingCamera) return;
+    uiRoot = uiRoot || document.getElementById("ui-root");
+    const isGhost =
+      uiRoot &&
+      uiRoot.firstChild &&
+      (uiRoot.firstChild.classList.contains("watching") || uiRoot.firstChild.classList.contains("hide"));
+    const entered = viewingCamera && viewingCamera.sceneEl.is("entered");
     for (const el of this.entities) {
       const hubsSystems = AFRAME.scenes[0].systems["hubs-systems"];
-      if (el && (!hubsSystems || hubsSystems.cameraSystem.mode !== CAMERA_MODE_INSPECT)) {
+      if (el && (!hubsSystems || (hubsSystems.cameraSystem.mode !== CAMERA_MODE_INSPECT && !isGhost && !entered))) {
         el.components["scene-preview-camera"].tick2();
-        el.object3D.updateMatrices();
-        setMatrixWorld(viewingCamera.object3D, el.object3D.matrixWorld);
+        if (hubsSystems && viewingCamera) {
+          el.object3D.updateMatrices();
+          setMatrixWorld(viewingCamera.object3D, el.object3D.matrixWorld);
+        }
       }
     }
   }

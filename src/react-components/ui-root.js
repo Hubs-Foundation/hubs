@@ -313,7 +313,13 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.addEventListener("share_video_failed", this.onShareVideoFailed);
     this.props.scene.addEventListener("exit", this.exitEventHandler);
-    this.props.scene.addEventListener("action_exit_watch", () => this.setState({ watching: false, hide: false }));
+    this.props.scene.addEventListener("action_exit_watch", () => {
+      if (this.state.hide) {
+        this.setState({ hide: false });
+      } else {
+        this.setState({ watching: false });
+      }
+    });
     this.props.scene.addEventListener("action_toggle_ui", () => this.setState({ hide: !this.state.hide }));
 
     const scene = this.props.scene;
@@ -1396,7 +1402,14 @@ class UIRoot extends Component {
   };
 
   render() {
-    if (this.props.hide || this.state.hide) return <div />;
+    const rootStyles = {
+      [styles.ui]: true,
+      "ui-root": true,
+      "in-modal-or-overlay": this.isInModalOrOverlay(),
+      watching: this.state.watching,
+      hide: this.state.hide || this.props.hide
+    };
+    if (this.props.hide || this.state.hide) return <div className={classNames(rootStyles)} />;
 
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
     const preload = this.props.showPreload;
@@ -1406,12 +1419,6 @@ class UIRoot extends Component {
       (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) &&
       !(this.props.showSafariDialog || this.props.showWebAssemblyDialog);
 
-    const rootStyles = {
-      [styles.ui]: true,
-      "ui-root": true,
-      "in-modal-or-overlay": this.isInModalOrOverlay(),
-      watching: this.state.watching
-    };
     const hasPush = navigator.serviceWorker && "PushManager" in window;
 
     if (this.props.showOAuthDialog && !this.props.showInterstitialPrompt)

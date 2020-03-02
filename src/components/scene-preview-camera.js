@@ -56,8 +56,11 @@ AFRAME.registerComponent("scene-preview-camera", {
     const hubsSystems = this.el.sceneEl.systems["hubs-systems"];
 
     uiRoot = uiRoot || document.getElementById("ui-root");
-    const watching = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("watching");
-    if (watching) return;
+    const isGhost =
+      uiRoot &&
+      uiRoot.firstChild &&
+      (uiRoot.firstChild.classList.contains("watching") || uiRoot.firstChild.classList.contains("hide"));
+    if (isGhost) return;
 
     let streamerCamera;
     if (hubsSystems) {
