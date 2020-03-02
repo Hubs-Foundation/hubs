@@ -91,7 +91,7 @@ AFRAME.GLTFModelPlus.registerComponent(
         fit: FIT.MANUAL,
         offset: componentData.position,
         halfExtents: { x: scale.x / 2, y: scale.y / 2, z: scale.z / 2 },
-        orientation
+        orientation: { x: orientation.x, y: orientation.y, z: orientation.z, w: orientation.w }
       });
     };
   })()
