@@ -31,7 +31,7 @@ features.hide_powered_by = { category = "features", type = "boolean", name = "Hi
 features.public_rooms = { category = "features", type = "boolean", name = "Public Rooms", description = "Allow visitors to set rooms to public to feature them on the homepage." }
 features.default_room_id = { category = "features", type = "string", name = "Homepage Room ID", description = "Use the specified room in place of the homepage."}
 features.enable_spoke = { category = "features", type = "boolean", name = "Enable Scene Editor", description = "Enable Scene Editor for all visitors."}
-features.enable_lobby_ghosts = { category = "features", type = "boolean", name = "Enable Lobby Ghosts", description = "Allow people in the lobby to explore the room while remaining invisible and inaudible."}
+features.enable_lobby_ghosts = { category = "features", type = "boolean", name = "Enable Lobby Ghosts", description = "Allow people in the lobby to explore the room while remaining invisible and inaudible." }
 
 features.show_join_us_dialog = { category = "features", type = "boolean", internal = "true" }
 features.show_discord_bot_link = { category = "features", type = "boolean", internal = "true" }
