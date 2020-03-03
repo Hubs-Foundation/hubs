@@ -77,19 +77,18 @@ export default class RoomSettingsDialog extends Component {
           </span>
           <div className={styles.memberCapContainer}>
             <input
-              name="member_cap"
+              name="room_size"
               type="number"
               required
               min={0}
               max={64}
               placeholder="Member Limit"
-              value={this.state.member_cap}
+              value={this.state.room_size}
               onFocus={e => handleTextFieldFocus(e.target)}
               onBlur={() => handleTextFieldBlur()}
-              onChange={e => this.setState({ member_cap: e.target.value })}
+              onChange={e => this.setState({ room_size: e.target.value })}
               className={styles.nameField}
             />
-            {this.state.member_cap == 0 && <span>(No limit)</span>}
           </div>
           <span className={styles.subtitle}>
             <FormattedMessage id="room-settings.description-subtitle" />

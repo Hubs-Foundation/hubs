@@ -27,10 +27,6 @@ const HUB_CREATOR_PERMISSIONS = [
 const VALID_PERMISSIONS =
   HUB_CREATOR_PERMISSIONS + ["tweet", "spawn_camera", "spawn_drawing", "spawn_and_move_media", "pin_objects"];
 
-// Maximum number of people in the room/entering before users are forced to observer mode.
-// Eventually this should be moved to a room setting.
-const DEFAULT_MAX_OCCUPIED_ROOM_ENTRY_SLOTS = 24;
-
 export default class HubChannel extends EventTarget {
   constructor(store, hubId) {
     super();
@@ -68,9 +64,9 @@ export default class HubChannel extends EventTarget {
       return acc + (usingSlot ? 1 : 0);
     }, 0);
 
-    console.log(roomEntrySlotCount, hub.member_cap);
-
-    return roomEntrySlotCount < (hub.member_cap || DEFAULT_MAX_OCCUPIED_ROOM_ENTRY_SLOTS);
+    // This now exists in room settings but a default is left here to support old reticulum servers
+    const DEFAULT_ROOM_SIZE = 24;
+    return roomEntrySlotCount < (hub.room_size || DEFAULT_ROOM_SIZE);
   }
 
   // Migrates this hub channel to a new phoenix channel and presence

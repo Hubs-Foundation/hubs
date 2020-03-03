@@ -1673,7 +1673,7 @@ class UIRoot extends Component {
                     name: this.props.hub.name,
                     description: this.props.hub.description,
                     member_permissions: this.props.hub.member_permissions,
-                    member_cap: this.props.hub.member_cap,
+                    room_size: this.props.hub.room_size,
                     allow_promotion: this.props.hub.allow_promotion
                   },
                   onChange: settings => this.props.hubChannel.updateHub(settings)
