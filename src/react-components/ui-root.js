@@ -57,6 +57,7 @@ import ObjectInfoDialog from "./object-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
 import LobbyChatBox from "./lobby-chat-box.js";
+import EntryStartPanel from "./entry-start-panel.js";
 import InWorldChatBox from "./in-world-chat-box.js";
 import AvatarEditor from "./avatar-editor";
 import MicLevelWidget from "./mic-level-widget.js";
@@ -173,6 +174,7 @@ class UIRoot extends Component {
   state = {
     enterInVR: false,
     entered: false,
+    entering: false,
     dialog: null,
     showShareDialog: false,
     broadcastTipDismissed: false,
@@ -763,7 +765,7 @@ class UIRoot extends Component {
     const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
     await this.props.enterScene(this.state.mediaStream, this.state.enterInVR, muteOnEntry);
 
-    this.setState({ entered: true, showShareDialog: false });
+    this.setState({ entered: true, entering: false, showShareDialog: false });
 
     const mediaStream = this.state.mediaStream;
 
@@ -1030,6 +1032,11 @@ class UIRoot extends Component {
     );
   };
 
+  onEnteringCanceled = () => {
+    this.props.hubChannel.sendEnteringCancelledEvent();
+    this.setState({ entering: false });
+  };
+
   renderEntryStartPanel = () => {
     const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
     const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
@@ -1110,6 +1117,7 @@ class UIRoot extends Component {
                   e.preventDefault();
 
                   if (promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType) {
+                    this.setState({ entering: true });
                     this.props.hubChannel.sendEnteringEvent();
 
                     const stateValue = promptForNameAndAvatarBeforeEntry ? "profile" : "device";
@@ -1150,6 +1158,14 @@ class UIRoot extends Component {
             </div>
           </div>
         )}
+
+        {!this.state.waitingOnAudio && (
+          <EntryStartPanel
+            hubChannel={this.props.hubChannel}
+            entering={this.state.entering}
+            onEnteringCanceled={this.onEnteringCanceled}
+          />
+        )}
       </div>
     );
   };
@@ -1159,7 +1175,6 @@ class UIRoot extends Component {
       <div className={entryStyles.entryPanel}>
         <div
           onClick={() => {
-            this.props.hubChannel.sendEnteringCancelledEvent();
             this.props.history.goBack();
           }}
           className={entryStyles.back}
@@ -1249,12 +1264,6 @@ class UIRoot extends Component {
       <div className="audio-setup-panel">
         <div
           onClick={() => {
-            // If we forced a VR entry type, then we skipped the device panel
-            // and hence going back from the audio setup panel will bring you back to the lobby.
-            if (this.props.forcedVREntryType) {
-              this.props.hubChannel.sendEnteringCancelledEvent();
-            }
-
             this.props.history.goBack();
           }}
           className={entryStyles.back}
