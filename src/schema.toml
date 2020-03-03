@@ -12,9 +12,6 @@ translations.en."app-full-name" = { category = "translations", type = "string", 
 translations.en."app-twitter-user" = { category = "translations", type = "string", internal = "true" }
 translations.en."editor-name" = { category = "translations", type = "string", internal = "true" }
 
-features.permissive_rooms = { category = "features", type = "boolean", name = "Permissive Rooms", description = "Enable full content creation permissions on new rooms." }
-features.require_account_for_join = { category = "features", type = "boolean", name = "Require accounts for room access", description = "Require accounts for accessing rooms." }
-features.disable_room_creation = { category = "features", type = "boolean", name = "Disable room creation", description = "Disable creating rooms for non-administrators." }
 features.disable_sign_up = { category = "features", type = "boolean", name = "Disable account creation", description = "Prevent visitors from creating accounts. Accounts must be created by an administrator." }
 features.show_terms = { category = "features", type = "boolean", name = "Show Terms of Use", description = "Show links to the terms of use." }
 features.show_privacy = { category = "features", type = "boolean", name = "Show Privacy Notice", description = "Show links to the privacy notice." }
@@ -27,9 +24,14 @@ features.show_avatar_editor_link = { category = "features", type = "boolean", na
 features.show_avatar_pipelines_link = { category = "features", type = "boolean", name = "Show Avatar Pipelines Links", description = "Show links to avatar pipeline info." }
 features.show_model_collection_link = { category = "features", type = "boolean", name = "Show Model Collection Link", description = "Show link to a collection of models." }
 features.hide_powered_by = { category = "features", type = "boolean", name = "Hide Powered By Hubs", description = "Hides the 'Powered by Hubs Cloud' notice on the home page and loading screens." }
-
 features.public_rooms = { category = "features", type = "boolean", name = "Public Rooms", description = "Allow visitors to set rooms to public to feature them on the homepage." }
 features.default_room_id = { category = "features", type = "string", name = "Homepage Room ID", description = "Use the specified room in place of the homepage."}
+
+features.permissive_rooms = { category = "rooms", type = "boolean", name = "Permissive Rooms", description = "Enable full content creation permissions on new rooms." }
+features.disable_room_creation = { category = "rooms", type = "boolean", name = "Disable room creation", description = "Disable creating rooms for non-administrators." }
+features.require_account_for_join = { category = "rooms", type = "boolean", name = "Require accounts for room access", description = "Require accounts for accessing rooms." }
+features.default_room_size = { category = "rooms", type = "number", name = "Default room size", description = "Default room size for new rooms. This does not include users in the lobby." }
+features.max_room_size = { category = "rooms", type = "number", name = "Maximum room size", description = "Maximum room size visitors can set." }
 
 features.enable_spoke = { category = "features", type = "boolean", internal = "true" }
 features.show_join_us_dialog = { category = "features", type = "boolean", internal = "true" }

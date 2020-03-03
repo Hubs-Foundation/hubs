@@ -6,6 +6,7 @@ import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils"
 
 import styles from "../assets/stylesheets/room-settings-dialog.scss";
 import DialogContainer from "./dialog-container";
+import configs from "../utils/configs";
 
 export default class RoomSettingsDialog extends Component {
   static propTypes = {
@@ -54,6 +55,9 @@ export default class RoomSettingsDialog extends Component {
 
   render() {
     const { showRoomAccessSettings } = this.props;
+
+    const maxRoomSize = configs.feature("max_room_size");
+
     return (
       <DialogContainer title="Room Settings" {...this.props}>
         <form onSubmit={this.onSubmit} className={styles.roomSettingsForm}>
@@ -73,24 +77,6 @@ export default class RoomSettingsDialog extends Component {
             className={styles.nameField}
           />
           <span className={styles.subtitle}>
-            <FormattedMessage id="room-settings.member-limit-subtitle" />
-          </span>
-          <div className={styles.memberCapContainer}>
-            <input
-              name="room_size"
-              type="number"
-              required
-              min={0}
-              max={64}
-              placeholder="Member Limit"
-              value={this.state.room_size}
-              onFocus={e => handleTextFieldFocus(e.target)}
-              onBlur={() => handleTextFieldBlur()}
-              onChange={e => this.setState({ room_size: e.target.value })}
-              className={styles.nameField}
-            />
-          </div>
-          <span className={styles.subtitle}>
             <FormattedMessage id="room-settings.description-subtitle" />
           </span>
           <textarea
@@ -104,6 +90,24 @@ export default class RoomSettingsDialog extends Component {
             onChange={e => this.setState({ description: e.target.value })}
             className={styles.descriptionField}
           />
+          <span className={styles.subtitle}>
+            <FormattedMessage id="room-settings.room-size-subtitle" />
+          </span>
+          <div className={styles.memberCapContainer}>
+            <input
+              name="room_size"
+              type="number"
+              required
+              min={0}
+              max={maxRoomSize}
+              placeholder="Member Limit"
+              value={this.state.room_size}
+              onFocus={e => handleTextFieldFocus(e.target)}
+              onBlur={() => handleTextFieldBlur()}
+              onChange={e => this.setState({ room_size: e.target.value })}
+              className={styles.nameField}
+            />
+          </div>
           {showRoomAccessSettings && (
             <>
               <span className={styles.subtitle}>

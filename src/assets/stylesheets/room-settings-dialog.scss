@@ -13,7 +13,7 @@
   text-align: left;
   font-weight: normal;
   text-transform: uppercase;
-  width: 100%
+  width: 100%;
 }
 
 :local(.name-field) {
@@ -24,14 +24,6 @@
 :local(.member-cap-container){
   width: 100%;
   position: relative;
-  span {
-    color: var(--panel-widget-disabled-color);
-    position: absolute;
-    right: 1em;
-    line-height: 2em;
-    padding: 5px;
-    height: 2em;
-  }
 }
 
 :local(.description-field) {
