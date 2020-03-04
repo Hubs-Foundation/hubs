@@ -562,11 +562,31 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         const isOpen = hubChannel.channel.socket.connectionState() === "open";
 
         if (isOpen || reliable) {
-          if (isOpen) {
-            hubChannel.channel.push("naf", payload);
+          const hasFirstSync =
+            payload.dataType === "um" ? payload.data.d.find(r => r.isFirstSync) : payload.data.isFirstSync;
+
+          if (hasFirstSync) {
+            if (isOpen) {
+              hubChannel.channel.push("naf", payload);
+            } else {
+              // Memory is re-used, so make a copy
+              hubChannel.channel.push("naf", AFRAME.utils.clone(payload));
+            }
           } else {
-            // Memory is re-used, so make a copy
-            hubChannel.channel.push("naf", AFRAME.utils.clone(payload));
+            // Optimization: Strip isFirstSync and send payload as a string to reduce server parsing.
+            // The server will not parse messages without isFirstSync keys when sent to the nafr event.
+            //
+            // The client must assume any payload that does not have a isFirstSync key is not a first sync.
+            const nafrPayload = AFRAME.utils.clone(payload);
+            if (nafrPayload.dataType === "um") {
+              for (let i = 0; i < nafrPayload.data.d.length; i++) {
+                delete nafrPayload.data.d[i].isFirstSync;
+              }
+            } else {
+              delete nafrPayload.data.isFirstSync;
+            }
+
+            hubChannel.channel.push("nafr", { naf: JSON.stringify(nafrPayload) });
           }
         }
       };
@@ -1420,10 +1440,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error(res);
     });
 
-  hubPhxChannel.on("naf", data => {
+  const handleIncomingNAF = data => {
     if (!NAF.connection.adapter) return;
 
     NAF.connection.adapter.onData(authorizeOrSanitizeMessage(data), PHOENIX_RELIABLE_NAF);
+  };
+
+  hubPhxChannel.on("naf", data => handleIncomingNAF(data));
+  hubPhxChannel.on("nafr", ({ from_session_id, naf: unparsedData }) => {
+    // Server optimization: server passes through unparsed NAF message, we must now parse it.
+    const data = JSON.parse(unparsedData);
+    data.from_session_id = from_session_id;
+    handleIncomingNAF(data);
   });
 
   hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
