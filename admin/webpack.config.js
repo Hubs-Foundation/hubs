@@ -157,6 +157,17 @@ module.exports = (env, argv) => ({
             context: path.join(__dirname, "src")
           }
         }
+      },
+      {
+        test: /\.(wasm)$/,
+        type: "javascript/auto",
+        use: {
+          loader: "file-loader",
+          options: {
+            outputPath: "assets/wasm",
+            name: "[name]-[hash].[ext]"
+          }
+        }
       }
     ]
   },
