@@ -1,7 +1,7 @@
 /* eslint-disable */
 
-import transcoderWasmFile from "../loaders/basis_transcoder.wasm";
-import transcoderJSFile from "file-loader!../loaders/basis_transcoder.js";
+import transcoderWasmFile from "./basis_transcoder.wasm";
+import transcoderJSFile from "file-loader!./basis_transcoder.js";
 
 /**
  * @author Don McCurdy / https://www.donmccurdy.com
