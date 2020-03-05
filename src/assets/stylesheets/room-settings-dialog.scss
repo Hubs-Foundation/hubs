@@ -13,13 +13,17 @@
   text-align: left;
   font-weight: normal;
   text-transform: uppercase;
-  width: 100%
+  width: 100%;
 }
 
 :local(.name-field) {
   @extend %input-field;
   margin-bottom: 1.5em;
   margin-top: 0;
+}
+:local(.member-cap-container){
+  width: 100%;
+  position: relative;
 }
 
 :local(.description-field) {
