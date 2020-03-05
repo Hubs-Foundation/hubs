@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 import transcoderWasmFile from "./basis_transcoder.wasm";
-import transcoderJSFile from "file-loader!./basis_transcoder.js";
+import BasisWorker from "./basis_transcoder.worker.js";
 
 /**
  * @author Don McCurdy / https://www.donmccurdy.com
@@ -32,7 +32,6 @@ THREE.BasisTextureLoader = function(manager) {
   this.workerLimit = 4;
   this.workerPool = [];
   this.workerNextTaskID = 1;
-  this.workerSourceURL = "";
   this.workerConfig = {
     format: null,
     astcSupported: false,
@@ -186,13 +185,6 @@ THREE.BasisTextureLoader.prototype = Object.assign(Object.create(THREE.Loader.pr
 
   _initTranscoder: function() {
     if (!this.transcoderBinary) {
-      // Load transcoder wrapper.
-      var jsLoader = new THREE.FileLoader(this.manager);
-      jsLoader.setPath(this.transcoderPath);
-      var jsContent = new Promise((resolve, reject) => {
-        jsLoader.load(transcoderJSFile, resolve, undefined, reject);
-      });
-
       // Load transcoder WASM binary.
       var binaryLoader = new THREE.FileLoader(this.manager);
       binaryLoader.setPath(this.transcoderPath);
@@ -201,17 +193,7 @@ THREE.BasisTextureLoader.prototype = Object.assign(Object.create(THREE.Loader.pr
         binaryLoader.load(transcoderWasmFile, resolve, undefined, reject);
       });
 
-      this.transcoderPending = Promise.all([jsContent, binaryContent]).then(([jsContent, binaryContent]) => {
-        var fn = THREE.BasisTextureLoader.BasisWorker.toString();
-
-        var body = [
-          "/* basis_transcoder.js */",
-          jsContent,
-          "/* worker */",
-          fn.substring(fn.indexOf("{") + 1, fn.lastIndexOf("}"))
-        ].join("\n");
-
-        this.workerSourceURL = URL.createObjectURL(new Blob([body]));
+      this.transcoderPending = binaryContent.then(binaryContent => {
         this.transcoderBinary = binaryContent;
       });
     }
@@ -222,7 +204,7 @@ THREE.BasisTextureLoader.prototype = Object.assign(Object.create(THREE.Loader.pr
   _getWorker: function() {
     return this._initTranscoder().then(() => {
       if (this.workerPool.length < this.workerLimit) {
-        var worker = new Worker(this.workerSourceURL);
+        var worker = new BasisWorker();
 
         worker._callbacks = {};
         worker._taskCosts = {};
@@ -308,129 +290,5 @@ THREE.BasisTextureLoader.DXT_FORMAT_MAP[THREE.BasisTextureLoader.BASIS_FORMAT.cT
   THREE.BasisTextureLoader.DXT_FORMAT.COMPRESSED_RGB_S3TC_DXT1_EXT;
 THREE.BasisTextureLoader.DXT_FORMAT_MAP[THREE.BasisTextureLoader.BASIS_FORMAT.cTFBC3] =
   THREE.BasisTextureLoader.DXT_FORMAT.COMPRESSED_RGBA_S3TC_DXT5_EXT;
-
-/* WEB WORKER */
-
-THREE.BasisTextureLoader.BasisWorker = function() {
-  var config;
-  var transcoderPending;
-  var _BasisFile;
-
-  onmessage = function(e) {
-    var message = e.data;
-
-    switch (message.type) {
-      case "init":
-        config = message.config;
-        init(message.transcoderBinary);
-        break;
-
-      case "transcode":
-        transcoderPending.then(() => {
-          try {
-            var { width, height, hasAlpha, mipmaps, format } = transcode(message.buffer);
-
-            var buffers = [];
-
-            for (var i = 0; i < mipmaps.length; ++i) {
-              buffers.push(mipmaps[i].data.buffer);
-            }
-
-            if (config.returnBuffer) {
-              buffers.push(message.buffer);
-            }
-
-            self.postMessage(
-              {
-                type: "transcode",
-                id: message.id,
-                width,
-                height,
-                hasAlpha,
-                mipmaps,
-                format,
-                buffer: config.returnBuffer ? message.buffer : null
-              },
-              buffers
-            );
-          } catch (error) {
-            console.error(error);
-
-            self.postMessage({ type: "error", id: message.id, error: error.message });
-          }
-        });
-        break;
-    }
-  };
-
-  function init(wasmBinary) {
-    var BasisModule;
-    transcoderPending = new Promise(resolve => {
-      BasisModule = { wasmBinary, onRuntimeInitialized: resolve };
-      BASIS(BasisModule);
-    }).then(() => {
-      var { BasisFile, initializeBasis } = BasisModule;
-
-      _BasisFile = BasisFile;
-
-      initializeBasis();
-    });
-  }
-
-  function transcode(buffer) {
-    var basisFile = new _BasisFile(new Uint8Array(buffer));
-
-    var width = basisFile.getImageWidth(0, 0);
-    var height = basisFile.getImageHeight(0, 0);
-    var levels = basisFile.getNumLevels(0);
-    var hasAlpha = basisFile.getHasAlpha();
-
-    function cleanup() {
-      basisFile.close();
-      basisFile.delete();
-    }
-
-    if (!hasAlpha) {
-      switch (config.format) {
-        case 9: // Hardcoded: THREE.BasisTextureLoader.BASIS_FORMAT.cTFPVRTC1_4_RGBA
-          config.format = 8; // Hardcoded: THREE.BasisTextureLoader.BASIS_FORMAT.cTFPVRTC1_4_RGB;
-          break;
-        default:
-          break;
-      }
-    }
-
-    if (!width || !height || !levels) {
-      cleanup();
-      throw new Error("THREE.BasisTextureLoader:  Invalid .basis file");
-    }
-
-    if (!basisFile.startTranscoding()) {
-      cleanup();
-      throw new Error("THREE.BasisTextureLoader: .startTranscoding failed");
-    }
-
-    var mipmaps = [];
-
-    for (var mip = 0; mip < levels; mip++) {
-      var mipWidth = basisFile.getImageWidth(0, mip);
-      var mipHeight = basisFile.getImageHeight(0, mip);
-      var dst = new Uint8Array(basisFile.getImageTranscodedSizeInBytes(0, mip, config.format));
-
-      var status = basisFile.transcodeImage(dst, 0, mip, config.format, hasAlpha, 0);
-
-      if (!status) {
-        cleanup();
-        throw new Error("THREE.BasisTextureLoader: .transcodeImage failed.");
-      }
-
-      mipmaps.push({ data: dst, width: mipWidth, height: mipHeight });
-    }
-
-    cleanup();
-
-    return { width, height, hasAlpha, mipmaps, format: config.format };
-  }
-};
 
 export default THREE.BasisTextureLoader;
