@@ -89,6 +89,8 @@
     "entry.device-subtitle-vr": "Phone or PC",
     "entry.entry-disallowed": "Watch from Lobby",
     "entry.entry-disallowed-subtitle": "Room is Full",
+    "entry.watch-from-lobby": "Watch from Lobby",
+    "entry.watch-from-lobby-subtitle": "Others will not be able to see or hear you",
     "entry.cardboard": "Enter on Google Cardboard",
     "entry.daydream-prefix": "Enter on ",
     "entry.daydream-medium": "Daydream",

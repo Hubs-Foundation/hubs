@@ -158,8 +158,12 @@ export class CharacterControllerSystem {
     const waypointPosition = new THREE.Vector3();
     const v = new THREE.Vector3();
 
+    let uiRoot;
     return function tick(t, dt) {
-      if (!this.scene.is("entered")) return;
+      const entered = this.scene.is("entered");
+      uiRoot = uiRoot || document.getElementById("ui-root");
+      const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
+      if (!isGhost && !entered) return;
       const vrMode = this.scene.is("vr-mode");
       this.sfx = this.sfx || this.scene.systems["hubs-systems"].soundEffectsSystem;
       this.waypointSystem = this.waypointSystem || this.scene.systems["hubs-systems"].waypointSystem;

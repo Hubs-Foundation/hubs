@@ -318,8 +318,34 @@ export class CameraSystem {
 
   tick = (function() {
     const translation = new THREE.Matrix4();
+    let uiRoot;
     return function tick(scene, dt) {
-      if (!this.enteredScene && scene.is("entered")) {
+      const entered = scene.is("entered");
+      uiRoot = uiRoot || document.getElementById("ui-root");
+      const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
+      if (isGhost && this.mode !== CAMERA_MODE_FIRST_PERSON && this.mode !== CAMERA_MODE_INSPECT) {
+        this.mode = CAMERA_MODE_FIRST_PERSON;
+        const position = new THREE.Vector3();
+        const quat = new THREE.Quaternion();
+        const scale = new THREE.Vector3();
+        this.viewingCamera.object3D.updateMatrices();
+        this.viewingRig.object3D.updateMatrices();
+        this.viewingRig.object3D.matrixWorld.decompose(position, quat, scale);
+        position.setFromMatrixPosition(this.viewingCamera.object3D.matrixWorld);
+        position.y = position.y - 1.6;
+        setMatrixWorld(
+          this.avatarRig.object3D,
+          new THREE.Matrix4().compose(
+            position,
+            quat,
+            scale
+          )
+        );
+        scene.systems["hubs-systems"].characterController.fly = true;
+        this.avatarPOV.object3D.updateMatrices();
+        setMatrixWorld(this.avatarPOV.object3D, this.viewingCamera.object3D.matrixWorld);
+      }
+      if (!this.enteredScene && entered) {
         this.enteredScene = true;
         this.mode = CAMERA_MODE_FIRST_PERSON;
       }
@@ -434,13 +460,12 @@ export class CameraSystem {
       }
 
       if (scene.audioListener && this.avatarPOV) {
-        if (
-          (this.mode === CAMERA_MODE_FIRST_PERSON || this.mode === CAMERA_MODE_INSPECT) &&
-          scene.audioListener.parent !== this.avatarPOV.object3D
-        ) {
+        if (this.mode === CAMERA_MODE_INSPECT && scene.audioListener.parent !== this.avatarPOV.object3D) {
           this.avatarPOV.object3D.add(scene.audioListener);
         } else if (
-          (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) &&
+          (this.mode === CAMERA_MODE_FIRST_PERSON ||
+            this.mode === CAMERA_MODE_THIRD_PERSON_NEAR ||
+            this.mode === CAMERA_MODE_THIRD_PERSON_FAR) &&
           scene.audioListener.parent !== this.viewingCamera.object3D
         ) {
           this.viewingCamera.object3D.add(scene.audioListener);
