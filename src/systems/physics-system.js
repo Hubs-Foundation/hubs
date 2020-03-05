@@ -70,9 +70,13 @@ export class PhysicsSystem {
       } else if (event.data.type === MESSAGE_TYPES.BODY_READY) {
         const uuid = event.data.uuid;
         const index = event.data.index;
-        this.bodyUuids.push(uuid);
-        this.uuidToIndex[uuid] = index;
-        this.indexToUuid[index] = uuid;
+        if (this.bodyOptions[uuid]) {
+          this.bodyUuids.push(uuid);
+          this.uuidToIndex[uuid] = index;
+          this.indexToUuid[index] = uuid;
+        } else {
+          console.warn(`Body initialized for uuid: ${uuid} but already removed.`);
+        }
       } else if (event.data.type === MESSAGE_TYPES.SHAPES_READY) {
         const bodyUuid = event.data.bodyUuid;
         const shapesUuid = event.data.shapesUuid;
