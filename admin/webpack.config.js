@@ -64,6 +64,12 @@ const host = process.env.HOST_IP || defaultHostName;
 const babelConfig = JSON.parse(fs.readFileSync(path.resolve(__dirname, ".babelrc")).toString());
 
 module.exports = (env, argv) => ({
+  node: {
+    // need to specify this manually because some random lodash code will try to access
+    // Buffer on the global object if it exists, so webpack will polyfill on its behalf
+    Buffer: false,
+    fs: "empty"
+  },
   entry: {
     admin: path.join(__dirname, "src", "admin.js")
   },
