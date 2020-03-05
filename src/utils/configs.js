@@ -60,7 +60,7 @@ const isLocalDevelopment = process.env.NODE_ENV === "development";
 
 configs.feature = featureName => {
   const value = configs.APP_CONFIG.features[featureName];
-  if (typeof value === "boolean") {
+  if (typeof value === "boolean" || featureName === "enable_spoke") {
     const enableAll = isLocalDevelopment && !process.env.USE_FEATURE_CONFIG;
     const forceEnableSpoke = featureName === "enable_spoke" && isAdmin;
     return forceEnableSpoke || enableAll || value;

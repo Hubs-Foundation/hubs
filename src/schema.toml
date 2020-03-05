@@ -26,6 +26,7 @@ features.show_model_collection_link = { category = "features", type = "boolean",
 features.hide_powered_by = { category = "features", type = "boolean", name = "Hide Powered By Hubs", description = "Hides the 'Powered by Hubs Cloud' notice on the home page and loading screens." }
 features.public_rooms = { category = "features", type = "boolean", name = "Public Rooms", description = "Allow visitors to set rooms to public to feature them on the homepage." }
 features.default_room_id = { category = "features", type = "string", name = "Homepage Room ID", description = "Use the specified room in place of the homepage."}
+features.enable_spoke = { category = "features", type = "boolean", name = "Enable Scene Editor", description = "Enable Scene Editor for all visitors."}
 
 features.permissive_rooms = { category = "rooms", type = "boolean", name = "Permissive Rooms", description = "Enable full content creation permissions on new rooms." }
 features.disable_room_creation = { category = "rooms", type = "boolean", name = "Disable room creation", description = "Disable creating rooms for non-administrators." }
@@ -33,7 +34,6 @@ features.require_account_for_join = { category = "rooms", type = "boolean", name
 features.default_room_size = { category = "rooms", type = "number", name = "Default room size", description = "Default room size for new rooms. This does not include users in the lobby." }
 features.max_room_size = { category = "rooms", type = "number", name = "Maximum room size", description = "Maximum room size visitors can set." }
 
-features.enable_spoke = { category = "features", type = "boolean", internal = "true" }
 features.show_join_us_dialog = { category = "features", type = "boolean", internal = "true" }
 features.show_discord_bot_link = { category = "features", type = "boolean", internal = "true" }
 features.show_whats_new_link = { category = "features", type = "boolean", internal = "true" }

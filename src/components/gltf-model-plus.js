@@ -2,7 +2,7 @@ import nextTick from "../utils/next-tick";
 import { mapMaterials } from "../utils/material-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import MobileStandardMaterial from "../materials/MobileStandardMaterial";
-import { textureLoader } from "../utils/media-utils";
+import { textureLoader, basisTextureLoader } from "../utils/media-utils";
 import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
@@ -317,6 +317,7 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
   const loadingManager = new THREE.LoadingManager();
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
   const gltfLoader = new THREE.GLTFLoader(loadingManager);
+  gltfLoader.setBasisTextureLoader(basisTextureLoader);
 
   const parser = await new Promise((resolve, reject) => gltfLoader.createParser(gltfUrl, resolve, onProgress, reject));
 

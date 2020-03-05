@@ -3,6 +3,8 @@ import { childMatch, setMatrixWorld, calculateViewingDistance } from "../utils/t
 import { paths } from "./userinput/paths";
 import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
+import { qsGet } from "../utils/qs_truthy";
+const customFOV = qsGet("fov");
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 
 export function getInspectable(child) {
@@ -167,7 +169,7 @@ function getAudio(o) {
 
 const FALLOFF = 0.9;
 export class CameraSystem {
-  constructor(batchManagerSystem) {
+  constructor(batchManagerSystem, scene) {
     this.enableLights = localStorage.getItem("show-background-while-inspecting") === "true";
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
@@ -188,6 +190,15 @@ export class CameraSystem {
       );
       bg.layers.set(CAMERA_LAYER_INSPECT);
       this.viewingRig.object3D.add(bg);
+      if (customFOV) {
+        if (this.viewingCamera.components.camera) {
+          this.viewingCamera.setAttribute("camera", { fov: customFOV });
+        } else {
+          scene.addEventListener("camera-set-active", () => {
+            this.viewingCamera.setAttribute("camera", { fov: customFOV });
+          });
+        }
+      }
     });
   }
 

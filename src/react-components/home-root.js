@@ -282,7 +282,7 @@ class HomeRoot extends Component {
                   <span className={styles.prefix}>
                     <FormattedMessage id="home.powered_by_prefix" />
                   </span>
-                  <a className={styles.link} href="https://github.com/mozilla/hubs-cloud">
+                  <a className={styles.link} href="https://hubs.mozilla.com/cloud">
                     <FormattedMessage id="home.powered_by_link" />
                   </a>
                 </UnlessFeature>

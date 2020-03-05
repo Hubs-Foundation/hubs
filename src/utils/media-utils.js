@@ -1,11 +1,11 @@
 import { objectTypeForOriginAndContentType } from "../object-types";
-import { getReticulumFetchUrl } from "./phoenix-utils";
+import { getReticulumFetchUrl, getDirectReticulumFetchUrl } from "./phoenix-utils";
 import { ObjectContentOrigins } from "../object-types";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { validMaterials } from "../components/hoverable-visuals";
-import { proxiedUrlFor } from "../utils/media-url-utils";
+import { proxiedUrlFor, guessContentType } from "../utils/media-url-utils";
 import Linkify from "linkify-it";
 import tlds from "tlds";
 
@@ -15,6 +15,8 @@ const linkify = Linkify();
 linkify.tlds(tlds);
 
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
+const getDirectMediaAPIEndpoint = () => getDirectReticulumFetchUrl("/api/v1/media");
+
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobile();
 
@@ -59,7 +61,9 @@ export const upload = (file, desiredContentType) => {
     formData.append("desired_content_type", desiredContentType);
   }
 
-  return fetch(mediaAPIEndpoint, {
+  // To eliminate the extra hop and avoid proxy timeouts, upload files directly
+  // to a reticulum host.
+  return fetch(getDirectMediaAPIEndpoint(), {
     method: "POST",
     body: formData
   }).then(r => r.json());
@@ -195,7 +199,7 @@ export const addMedia = (
   });
   if (needsToBeUploaded) {
     // Video camera videos are converted to mp4 for compatibility
-    const desiredContentType = contentSubtype === "video-camera" ? "video/mp4" : null;
+    const desiredContentType = contentSubtype === "video-camera" ? "video/mp4" : src.type || guessContentType(src.name);
 
     upload(src, desiredContentType)
       .then(response => {
@@ -434,6 +438,31 @@ export async function createImageTexture(url, filter) {
   texture.anisotropy = 4;
 
   return texture;
+}
+
+import HubsBasisTextureLoader from "../loaders/HubsBasisTextureLoader";
+export const basisTextureLoader = new HubsBasisTextureLoader();
+
+export function createBasisTexture(url) {
+  return new Promise((resolve, reject) => {
+    basisTextureLoader.load(
+      url,
+      function(texture) {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.onUpdate = function() {
+          // Delete texture data once it has been uploaded to the GPU
+          texture.mipmaps.length = 0;
+        };
+        // texture.anisotropy = 4;
+        resolve(texture);
+      },
+      undefined,
+      function(error) {
+        console.error(error);
+        reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
+      }
+    );
+  });
 }
 
 export function addMeshScaleAnimation(mesh, initialScale, onComplete) {
