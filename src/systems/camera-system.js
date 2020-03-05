@@ -330,7 +330,6 @@ export class CameraSystem {
           )
         );
         scene.systems["hubs-systems"].characterController.fly = true;
-        scene.systems["hubs-systems"].characterController.shouldLandWhenPossible = true;
         this.avatarPOV.object3D.updateMatrices();
         setMatrixWorld(this.avatarPOV.object3D, this.viewingCamera.object3D.matrixWorld);
       }
