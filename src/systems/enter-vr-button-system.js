@@ -15,6 +15,9 @@ export class EnterVRButtonSystem {
     this.scene.components["vr-mode-ui"].enterVREl.style.display = "none";
   }
   tick() {
+    if (this.scene.is("entered")) {
+      return;
+    }
     uiRoot = uiRoot || document.getElementById("ui-root");
     const enable =
       configs.feature("enable_lobby_ghosts") &&

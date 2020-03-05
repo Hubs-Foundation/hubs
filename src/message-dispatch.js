@@ -35,9 +35,9 @@ export default class MessageDispatch {
   dispatchCommand = async (command, ...args) => {
     const entered = this.scene.is("entered");
     uiRoot = uiRoot || document.getElementById("ui-root");
-    const isGhost = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
+    const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
 
-    if (!entered && !isGhost) {
+    if (!entered && (!isGhost || command === "duck")) {
       this.addToPresenceLog({ type: "log", body: "You must enter the room to use this command." });
       return;
     }

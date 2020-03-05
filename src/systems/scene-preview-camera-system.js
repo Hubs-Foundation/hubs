@@ -19,9 +19,10 @@ export class ScenePreviewCameraSystem {
   tick() {
     viewingCamera = viewingCamera || document.getElementById("viewing-camera");
     uiRoot = uiRoot || document.getElementById("ui-root");
-    const isGhost = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
     const entered = viewingCamera && viewingCamera.sceneEl.is("entered");
-    for (const el of this.entities) {
+    const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
+    for (let i = 0; i < this.entities.length; i++) {
+      const el = this.entities[i];
       const hubsSystems = AFRAME.scenes[0].systems["hubs-systems"];
       if (el && (!hubsSystems || (hubsSystems.cameraSystem.mode !== CAMERA_MODE_INSPECT && !isGhost && !entered))) {
         el.components["scene-preview-camera"].tick2();

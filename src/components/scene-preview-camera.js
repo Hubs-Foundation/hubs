@@ -55,10 +55,6 @@ AFRAME.registerComponent("scene-preview-camera", {
   tick2: function() {
     const hubsSystems = this.el.sceneEl.systems["hubs-systems"];
 
-    uiRoot = uiRoot || document.getElementById("ui-root");
-    const isGhost = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
-    if (isGhost) return;
-
     let streamerCamera;
     if (hubsSystems) {
       hubsSystems.cameraSystem.mode = CAMERA_MODE_SCENE_PREVIEW;

@@ -184,8 +184,9 @@ AFRAME.registerComponent("teleporter", {
 
   tick(t, dt) {
     uiRoot = uiRoot || document.getElementById("ui-root");
-    const isGhost = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
-    if (!this.el.sceneEl.is("entered") && !isGhost) return;
+    const entered = this.el.sceneEl.is("entered");
+    const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
+    if (!entered && !isGhost) return;
     const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
     const userinput = AFRAME.scenes[0].systems.userinput;
     const { start, confirm, speed } = this.data;

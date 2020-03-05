@@ -309,8 +309,9 @@ export class CameraSystem {
     const translation = new THREE.Matrix4();
     let uiRoot;
     return function tick(scene, dt) {
+      const entered = scene.is("entered");
       uiRoot = uiRoot || document.getElementById("ui-root");
-      const isGhost = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
+      const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
       if (isGhost && this.mode !== CAMERA_MODE_FIRST_PERSON && this.mode !== CAMERA_MODE_INSPECT) {
         this.mode = CAMERA_MODE_FIRST_PERSON;
         const position = new THREE.Vector3();
@@ -333,7 +334,7 @@ export class CameraSystem {
         this.avatarPOV.object3D.updateMatrices();
         setMatrixWorld(this.avatarPOV.object3D, this.viewingCamera.object3D.matrixWorld);
       }
-      if (!this.enteredScene && scene.is("entered")) {
+      if (!this.enteredScene && entered) {
         this.enteredScene = true;
         this.mode = CAMERA_MODE_FIRST_PERSON;
       }
