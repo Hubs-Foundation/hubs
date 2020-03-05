@@ -16,7 +16,6 @@ function lerp(start, end, t) {
 
 const newRot = new THREE.Quaternion();
 
-let uiRoot;
 /**
  * Nicely pans the camera for previewing a scene. There's some weirdness with this right now
  * since it ends up panning in a direction dependent upon the start camera orientation,
