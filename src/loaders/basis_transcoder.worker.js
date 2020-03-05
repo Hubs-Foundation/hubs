@@ -18,3 +18,124 @@ if (typeof exports === 'object' && typeof module === 'object')
       define([], function() { return BASIS; });
     else if (typeof exports === 'object')
       exports["BASIS"] = BASIS;
+
+/* WEB WORKER */
+  var config;
+  var transcoderPending;
+  var _BasisFile;
+
+  onmessage = function(e) {
+    var message = e.data;
+
+    switch (message.type) {
+      case "init":
+        config = message.config;
+        init(message.transcoderBinary);
+        break;
+
+      case "transcode":
+        transcoderPending.then(() => {
+          try {
+            var { width, height, hasAlpha, mipmaps, format } = transcode(message.buffer);
+
+            var buffers = [];
+
+            for (var i = 0; i < mipmaps.length; ++i) {
+              buffers.push(mipmaps[i].data.buffer);
+            }
+
+            if (config.returnBuffer) {
+              buffers.push(message.buffer);
+            }
+
+            self.postMessage(
+              {
+                type: "transcode",
+                id: message.id,
+                width,
+                height,
+                hasAlpha,
+                mipmaps,
+                format,
+                buffer: config.returnBuffer ? message.buffer : null
+              },
+              buffers
+            );
+          } catch (error) {
+            console.error(error);
+
+            self.postMessage({ type: "error", id: message.id, error: error.message });
+          }
+        });
+        break;
+    }
+  };
+
+  function init(wasmBinary) {
+    var BasisModule;
+    transcoderPending = new Promise(resolve => {
+      BasisModule = { wasmBinary, onRuntimeInitialized: resolve };
+      BASIS(BasisModule);
+    }).then(() => {
+      var { BasisFile, initializeBasis } = BasisModule;
+
+      _BasisFile = BasisFile;
+
+      initializeBasis();
+    });
+  }
+
+  function transcode(buffer) {
+    var basisFile = new _BasisFile(new Uint8Array(buffer));
+
+    var width = basisFile.getImageWidth(0, 0);
+    var height = basisFile.getImageHeight(0, 0);
+    var levels = basisFile.getNumLevels(0);
+    var hasAlpha = basisFile.getHasAlpha();
+
+    function cleanup() {
+      basisFile.close();
+      basisFile.delete();
+    }
+
+    if (!hasAlpha) {
+      switch (config.format) {
+        case 9: // Hardcoded: THREE.BasisTextureLoader.BASIS_FORMAT.cTFPVRTC1_4_RGBA
+          config.format = 8; // Hardcoded: THREE.BasisTextureLoader.BASIS_FORMAT.cTFPVRTC1_4_RGB;
+          break;
+        default:
+          break;
+      }
+    }
+
+    if (!width || !height || !levels) {
+      cleanup();
+      throw new Error("THREE.BasisTextureLoader:  Invalid .basis file");
+    }
+
+    if (!basisFile.startTranscoding()) {
+      cleanup();
+      throw new Error("THREE.BasisTextureLoader: .startTranscoding failed");
+    }
+
+    var mipmaps = [];
+
+    for (var mip = 0; mip < levels; mip++) {
+      var mipWidth = basisFile.getImageWidth(0, mip);
+      var mipHeight = basisFile.getImageHeight(0, mip);
+      var dst = new Uint8Array(basisFile.getImageTranscodedSizeInBytes(0, mip, config.format));
+
+      var status = basisFile.transcodeImage(dst, 0, mip, config.format, hasAlpha, 0);
+
+      if (!status) {
+        cleanup();
+        throw new Error("THREE.BasisTextureLoader: .transcodeImage failed.");
+      }
+
+      mipmaps.push({ data: dst, width: mipWidth, height: mipHeight });
+    }
+
+    cleanup();
+
+    return { width, height, hasAlpha, mipmaps, format: config.format };
+  }
