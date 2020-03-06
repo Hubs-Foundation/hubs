@@ -39,6 +39,7 @@ const fetchContentType = url => {
 };
 
 const forceMeshBatching = qsTruthy("batchMeshes");
+const forceImageBatching = qsTruthy("batchImages");
 const disableBatching = qsTruthy("disableBatching");
 
 AFRAME.registerComponent("media-loader", {
@@ -457,7 +458,7 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
-        let batch = !disableBatching;
+        let batch = !disableBatching && forceImageBatching;
         if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
           batch = false;
         }
@@ -518,9 +519,7 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
-        let batch =
-          !disableBatching &&
-          (forceMeshBatching || (AFRAME.utils.device.isMobile() && window.APP && window.APP.quality === "low"));
+        let batch = !disableBatching && forceMeshBatching;
         if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
           batch = false;
         }

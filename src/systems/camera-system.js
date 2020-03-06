@@ -138,7 +138,7 @@ const ensureLightsAreSeenByCamera = function(o) {
 };
 const enableInspectLayer = function(o) {
   const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
-  const batch = batchManagerSystem.batchManager.batchForMesh.get(o);
+  const batch = batchManagerSystem.batchingEnabled && batchManagerSystem.batchManager.batchForMesh.get(o);
   if (batch) {
     batch.layers.enable(CAMERA_LAYER_INSPECT);
     o.layers.enable(CAMERA_LAYER_BATCH_INSPECT);
@@ -148,7 +148,7 @@ const enableInspectLayer = function(o) {
 };
 const disableInspectLayer = function(o) {
   const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
-  const batch = batchManagerSystem.batchManager.batchForMesh.get(o);
+  const batch = batchManagerSystem.batchingEnabled && batchManagerSystem.batchManager.batchForMesh.get(o);
   if (batch) {
     batch.layers.disable(CAMERA_LAYER_INSPECT);
     o.layers.disable(CAMERA_LAYER_BATCH_INSPECT);
@@ -169,12 +169,11 @@ function getAudio(o) {
 
 const FALLOFF = 0.9;
 export class CameraSystem {
-  constructor(batchManagerSystem, scene) {
+  constructor(scene) {
     this.enableLights = localStorage.getItem("show-background-while-inspecting") === "true";
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
     this.inspectZoom = 0;
-    this.batchManagerSystem = batchManagerSystem;
     this.mode = CAMERA_MODE_SCENE_PREVIEW;
     this.snapshot = { audioTransform: new THREE.Matrix4(), matrixWorld: new THREE.Matrix4() };
     this.audioListenerTargetTransform = new THREE.Matrix4();
