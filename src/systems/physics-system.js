@@ -21,7 +21,7 @@ export class PhysicsSystem {
     this.shapeHelpers = [];
     this.bodyUuids = [];
     this.indexToUuid = {};
-    this.bodies = new Map();
+    this.bodyUuidToData = new Map();
 
     this.debugRequested = false;
     this.debugEnabled = false;
@@ -60,9 +60,9 @@ export class PhysicsSystem {
       } else if (event.data.type === MESSAGE_TYPES.BODY_READY) {
         const uuid = event.data.uuid;
         const index = event.data.index;
-        if (this.bodies.has(uuid)) {
+        if (this.bodyUuidToData.has(uuid)) {
           this.bodyUuids.push(uuid);
-          this.bodies.get(uuid).index = index;
+          this.bodyUuidToData.get(uuid).index = index;
           this.indexToUuid[index] = uuid;
         } else {
           console.warn(`Body initialized for uuid: ${uuid} but body missing.`);
@@ -70,8 +70,8 @@ export class PhysicsSystem {
       } else if (event.data.type === MESSAGE_TYPES.SHAPES_READY) {
         const bodyUuid = event.data.bodyUuid;
         const shapesUuid = event.data.shapesUuid;
-        if (this.bodies.has(bodyUuid)) {
-          this.bodies.get(bodyUuid).shapes.push(shapesUuid);
+        if (this.bodyUuidToData.has(bodyUuid)) {
+          this.bodyUuidToData.get(bodyUuid).shapes.push(shapesUuid);
         } else {
           console.warn(`Shape initialized but body with uuid: ${bodyUuid} missing.`);
         }
@@ -153,7 +153,7 @@ export class PhysicsSystem {
         if (this.objectMatricesFloatArray.buffer.byteLength !== 0) {
           for (let i = 0; i < this.bodyUuids.length; i++) {
             const uuid = this.bodyUuids[i];
-            const body = this.bodies.get(uuid);
+            const body = this.bodyUuidToData.get(uuid);
             const index = body.index;
             const type = body.options.type ? body.options.type : TYPE.DYNAMIC;
             const object3D = body.object3D;
@@ -214,7 +214,7 @@ export class PhysicsSystem {
   addBody(object3D, options) {
     this.workerHelpers.addBody(this.nextBodyUuid, object3D, options);
 
-    this.bodies.set(this.nextBodyUuid, {
+    this.bodyUuidToData.set(this.nextBodyUuid, {
       object3D: object3D,
       options: options,
       collisions: [],
@@ -228,8 +228,8 @@ export class PhysicsSystem {
   }
 
   updateBody(uuid, options) {
-    if (this.bodies.has(uuid)) {
-      this.bodies.get(uuid).options = options;
+    if (this.bodyUuidToData.has(uuid)) {
+      this.bodyUuidToData.get(uuid).options = options;
       this.workerHelpers.updateBody(uuid, options);
     } else {
       console.warn(`updateBody called for uuid: ${uuid} but body missing.`);
@@ -238,9 +238,9 @@ export class PhysicsSystem {
 
   removeBody(uuid) {
     const idx = this.bodyUuids.indexOf(uuid);
-    if (this.bodies.has(uuid) && idx !== -1) {
-      delete this.indexToUuid[this.bodies.get(uuid).index];
-      this.bodies.delete(uuid);
+    if (this.bodyUuidToData.has(uuid) && idx !== -1) {
+      delete this.indexToUuid[this.bodyUuidToData.get(uuid).index];
+      this.bodyUuidToData.delete(uuid);
       this.bodyUuids.splice(idx, 1);
       this.workerHelpers.removeBody(uuid);
     } else {
@@ -254,16 +254,16 @@ export class PhysicsSystem {
       scale.setFromMatrixScale(mesh.matrixWorld);
     }
     this.workerHelpers.addShapes(bodyUuid, this.nextShapeUuid, mesh, options);
-    this.bodies.get(bodyUuid).shapes.push(this.nextShapeUuid);
+    this.bodyUuidToData.get(bodyUuid).shapes.push(this.nextShapeUuid);
     return this.nextShapeUuid++;
   }
 
   removeShapes(bodyUuid, shapesUuid) {
-    if (this.bodies.has(bodyUuid)) {
+    if (this.bodyUuidToData.has(bodyUuid)) {
       this.workerHelpers.removeShapes(bodyUuid, shapesUuid);
-      const idx = this.bodies.get(bodyUuid).shapes.indexOf(shapesUuid);
+      const idx = this.bodyUuidToData.get(bodyUuid).shapes.indexOf(shapesUuid);
       if (idx !== -1) {
-        this.bodies.get(bodyUuid).shapes.splice(idx, 1);
+        this.bodyUuidToData.get(bodyUuid).shapes.splice(idx, 1);
       } else {
         console.warn(`removeShapes called for shapesUuid: ${shapesUuid} on bodyUuid: ${bodyUuid} but shapes missing.`);
       }
@@ -295,19 +295,19 @@ export class PhysicsSystem {
   }
 
   bodyInitialized(uuid) {
-    return this.bodies.has(uuid) && this.bodies.get(uuid).index !== -1;
+    return this.bodyUuidToData.has(uuid) && this.bodyUuidToData.get(uuid).index !== -1;
   }
 
   getLinearVelocity(uuid) {
-    return this.bodies.get(uuid).linearVelocity;
+    return this.bodyUuidToData.get(uuid).linearVelocity;
   }
 
   getAngularVelocity(uuid) {
-    return this.bodies.get(uuid).angularVelocity;
+    return this.bodyUuidToData.get(uuid).angularVelocity;
   }
 
   getCollisions(uuid) {
-    return this.bodies.get(uuid).collisions;
+    return this.bodyUuidToData.get(uuid).collisions;
   }
 
   resetDynamicBody(uuid) {
