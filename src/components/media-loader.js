@@ -519,9 +519,7 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
-        let batch =
-          !disableBatching &&
-          (forceMeshBatching || (AFRAME.utils.device.isMobile() && window.APP && window.APP.quality === "low"));
+        let batch = !disableBatching && forceMeshBatching;
         if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
           batch = false;
         }
