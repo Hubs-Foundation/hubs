@@ -411,6 +411,7 @@ async function updateEnvironmentForHub(hub, entryManager) {
           { once: true }
         );
 
+        sceneEl.emit("leaving_loading_environment");
         environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
       },
       { once: true }
