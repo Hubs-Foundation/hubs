@@ -7,7 +7,7 @@ import { isTagged } from "../components/tags";
 function findHandCollisionTargetForHand(bodyHelper) {
   const physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
 
-  const handCollisions = physicsSystem.collisions[bodyHelper.uuid];
+  const handCollisions = physicsSystem.getCollisions(bodyHelper.uuid);
   if (handCollisions) {
     for (let i = 0; i < handCollisions.length; i++) {
       const object3D = physicsSystem.object3Ds[handCollisions[i]];
