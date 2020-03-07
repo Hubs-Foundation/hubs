@@ -711,7 +711,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: { value: paths.device.mouse.buttonRight },
       dest: { value: stopInspectingViaMouse },
       xform: xforms.falling,
-      priority: 101
+      priority: 300
     },
     {
       src: [stopInspectingViaMouse, stopInspectingViaKeyboardEscape, stopInspectingViaKeyboardFocusRelease],
