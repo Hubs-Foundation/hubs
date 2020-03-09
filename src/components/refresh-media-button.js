@@ -1,5 +1,38 @@
 import { SOUND_MEDIA_LOADING } from "../systems/sound-effects-system";
 
+AFRAME.registerComponent("local-refresh-media-button", {
+  init() {
+    this.onClick = async () => {
+      if (this.targetEl) {
+        this.targetEl.components["media-loader"] &&
+          this.targetEl.components["media-loader"].update(this.targetEl.components["media-loader"].data, true);
+      }
+    };
+
+    NAF.utils
+      .getNetworkedEntity(this.el)
+      .then(networkedEl => {
+        this.targetEl = networkedEl;
+        const src =
+          (this.targetEl.components["media-loader"] && this.targetEl.components["media-loader"].data.src) || "";
+        const shouldHaveLocalRefreshButton = src.indexOf("twitch.tv") !== -1 || src.indexOf("youtube") !== -1;
+        if (!shouldHaveLocalRefreshButton) {
+          this.el.parentNode.removeChild(this.el);
+        }
+      })
+      .catch(() => {
+        this.el.parentNode.removeChild(this.el);
+      });
+  },
+  play() {
+    this.el.object3D.addEventListener("interact", this.onClick);
+  },
+
+  pause() {
+    this.el.object3D.removeEventListener("interact", this.onClick);
+  }
+});
+
 AFRAME.registerComponent("refresh-media-button", {
   init() {
     this.updateVisibility = this.updateVisibility.bind(this);
