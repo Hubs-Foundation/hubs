@@ -17,9 +17,17 @@ AFRAME.registerComponent("emoji", {
   init() {
     this.data.emitEndTime = performance.now() + this.data.emitDecayTime * 1000;
     this.physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
+
+    this.emojiHud = document.querySelector("[emoji-hud]").components["emoji-hud"];
   },
 
   play() {
+    const mediaLoader = this.el.components["media-loader"];
+    if (this.emojiHud.emojiUrls.indexOf(mediaLoader.data.src) === -1) {
+      this.el.parentNode.removeChild(this.el);
+      return;
+    }
+
     const uuid = this.el.components["body-helper"].uuid;
     this.lastLinearVelocity = this.physicsSystem.getLinearVelocity(uuid);
     this.lastAngularVelocity = this.physicsSystem.getAngularVelocity(uuid);
