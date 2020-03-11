@@ -556,6 +556,7 @@ AFRAME.registerComponent("media-video", {
             this.updateHoverMenu();
 
             if (!videoWasLive && this.videoIsLive) {
+              this.el.emit("video_is_live_update", { videoIsLive: this.videoIsLive });
               // We just determined the video is live (there can be a delay due to autoplay issues, etc)
               // so catch it up to HEAD.
               if (!isFirefoxReality) {
@@ -572,6 +573,7 @@ AFRAME.registerComponent("media-video", {
         }
       } else {
         this.videoIsLive = this.video.duration === Infinity;
+        this.el.emit("video_is_live_update", { videoIsLive: this.videoIsLive });
         this.updateHoverMenu();
       }
 
