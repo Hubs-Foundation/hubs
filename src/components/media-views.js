@@ -504,7 +504,7 @@ AFRAME.registerComponent("media-video", {
       } else {
         ({ texture, audioSourceEl } = await this.createVideoTextureAudioSourceEl());
         if (getCurrentMirroredMedia() === this.el) {
-          refreshMediaMirror();
+          await refreshMediaMirror();
         }
       }
 
