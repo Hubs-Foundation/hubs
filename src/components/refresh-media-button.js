@@ -13,20 +13,21 @@ AFRAME.registerComponent("local-refresh-media-button", {
       .getNetworkedEntity(this.el)
       .then(networkedEl => {
         this.targetEl = networkedEl;
-        const src =
-          (this.targetEl.components["media-loader"] && this.targetEl.components["media-loader"].data.src) || "";
         const isNonLiveVideo =
           this.targetEl.components["media-video"] && this.targetEl.components["media-video"].videoIsLive === false;
-        const onVideoIsLiveUpdate = e => {
-          if (!e.detail.videoIsLive) {
-            this.targetEl.removeEventListener("video_is_live_update", onVideoIsLiveUpdate);
-            this.el.parentNode.removeChild(this.el);
-          }
-        };
-        this.targetEl.addEventListener("video_is_live_update", onVideoIsLiveUpdate);
+        const src =
+          (this.targetEl.components["media-loader"] && this.targetEl.components["media-loader"].data.src) || "";
         const shouldHaveLocalRefreshButton = !isNonLiveVideo && src.indexOf("twitch.tv") !== -1;
         if (!shouldHaveLocalRefreshButton) {
           this.el.parentNode.removeChild(this.el);
+        } else {
+          const onVideoIsLiveUpdate = e => {
+            if (!e.detail.videoIsLive) {
+              this.targetEl.removeEventListener("video_is_live_update", onVideoIsLiveUpdate);
+              this.el.parentNode.removeChild(this.el);
+            }
+          };
+          this.targetEl.addEventListener("video_is_live_update", onVideoIsLiveUpdate);
         }
       })
       .catch(() => {
