@@ -326,7 +326,7 @@ AFRAME.registerComponent("media-loader", {
     this.el.setAttribute("media-loader", { version: Math.floor(Date.now() / 1000) });
   },
 
-  async update(oldData) {
+  async update(oldData, forceLocalRefresh) {
     const { src, version, contentSubtype } = this.data;
     if (!src) return;
 
@@ -343,8 +343,16 @@ AFRAME.registerComponent("media-loader", {
       this.data.playSoundEffect = NAF.utils.isMine(this.networkedEl);
     }
 
+    if (forceLocalRefresh) {
+      this.el.removeAttribute("gltf-model-plus");
+      this.el.removeAttribute("media-pager");
+      this.el.removeAttribute("media-video");
+      this.el.removeAttribute("media-pdf");
+      this.el.removeAttribute("media-image");
+    }
+
     try {
-      if (srcChanged && !this.showLoaderTimeout) {
+      if ((forceLocalRefresh || srcChanged) && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
       }
 
@@ -389,7 +397,7 @@ AFRAME.registerComponent("media-loader", {
       contentType = contentType || guessContentType(canonicalUrl) || (await fetchContentType(accessibleUrl));
 
       // We don't want to emit media_resolved for index updates.
-      if (srcChanged) {
+      if (forceLocalRefresh || srcChanged) {
         this.el.emit("media_resolved", { src, raw: accessibleUrl, contentType });
       } else {
         this.el.emit("media_refreshed", { src, raw: accessibleUrl, contentType });
