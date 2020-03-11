@@ -24,8 +24,7 @@ AFRAME.registerComponent("local-refresh-media-button", {
           }
         };
         this.targetEl.addEventListener("video_is_live_update", onVideoIsLiveUpdate);
-        const shouldHaveLocalRefreshButton =
-          !isNonLiveVideo && (src.indexOf("twitch.tv") !== -1 || src.indexOf("youtube") !== -1);
+        const shouldHaveLocalRefreshButton = !isNonLiveVideo && src.indexOf("twitch.tv") !== -1;
         if (!shouldHaveLocalRefreshButton) {
           this.el.parentNode.removeChild(this.el);
         }
