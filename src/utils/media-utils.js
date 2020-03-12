@@ -27,9 +27,9 @@ export const getDefaultResolveQuality = (is360 = false) => {
   return !is360 ? (useLowerQuality ? "low" : "high") : useLowerQuality ? "low_360" : "high_360";
 };
 
-export const resolveUrl = async (url, quality = null, version = 1) => {
+export const resolveUrl = async (url, quality = null, version = 1, bustCache) => {
   const key = `${url}_${version}`;
-  if (resolveUrlCache.has(key)) return resolveUrlCache.get(key);
+  if (!bustCache && resolveUrlCache.has(key)) return resolveUrlCache.get(key);
 
   const resultPromise = fetch(mediaAPIEndpoint, {
     method: "POST",
