@@ -195,6 +195,10 @@ const inflateEntities = function(indexToEntityMap, node, templates, isRoot, mode
     node.parent.animations = node.animations;
   }
 
+  if (node.morphTargetInfluences) {
+    node.parent.morphTargetInfluences = node.morphTargetInfluences;
+  }
+
   const gltfIndex = node.userData.gltfIndex;
   if (gltfIndex !== undefined) {
     indexToEntityMap[gltfIndex] = el;
