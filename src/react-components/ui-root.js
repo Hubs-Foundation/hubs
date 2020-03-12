@@ -1603,14 +1603,15 @@ class UIRoot extends Component {
         <IntlProvider locale={lang} messages={messages}>
           <div className={classNames(rootStyles)}>
             {this.state.dialog}
-            {preload && (
-              <PreloadOverlay
-                hubName={this.props.hub.name}
-                hubScene={this.props.hub.scene}
-                baseUrl={baseUrl}
-                onLoadClicked={this.props.onPreloadLoadClicked}
-              />
-            )}
+            {preload &&
+              this.props.hub && (
+                <PreloadOverlay
+                  hubName={this.props.hub.name}
+                  hubScene={this.props.hub.scene}
+                  baseUrl={baseUrl}
+                  onLoadClicked={this.props.onPreloadLoadClicked}
+                />
+              )}
             <StateRoute
               stateKey="overlay"
               stateValue="profile"
@@ -1825,7 +1826,7 @@ class UIRoot extends Component {
                 }}
               />
             )}
-            {((!enteredOrWatching && !this.state.isObjectListExpanded && !showObjectInfo) ||
+            {((!enteredOrWatching && !this.state.isObjectListExpanded && !showObjectInfo && this.props.hub) ||
               this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
                 <PresenceLog
@@ -1837,15 +1838,16 @@ class UIRoot extends Component {
                 <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
               </div>
             )}
-            {enteredOrWatchingOrPreload && (
-              <PresenceLog
-                inRoom={true}
-                presences={this.props.presences}
-                entries={presenceLogEntries}
-                hubId={this.props.hub.hub_id}
-                history={this.props.history}
-              />
-            )}
+            {enteredOrWatchingOrPreload &&
+              this.props.hub && (
+                <PresenceLog
+                  inRoom={true}
+                  presences={this.props.presences}
+                  entries={presenceLogEntries}
+                  hubId={this.props.hub.hub_id}
+                  history={this.props.history}
+                />
+              )}
             {entered &&
               this.props.activeTips &&
               this.props.activeTips.bottom &&
