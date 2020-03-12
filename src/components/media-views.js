@@ -12,6 +12,7 @@ import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import pdfjs from "pdfjs-dist";
 import { applyPersistentSync } from "../utils/permissions-utils";
+import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
 
 // Using external CDN to reduce build size
 if (!pdfjs.GlobalWorkerOptions.workerSrc) {
@@ -139,7 +140,10 @@ function disposeTexture(texture) {
   }
 
   if (texture.hls) {
+    texture.hls.stopLoad();
+    texture.hls.detachMedia();
     texture.hls.destroy();
+    texture.hls = null;
   }
 
   texture.dispose();
@@ -499,6 +503,9 @@ AFRAME.registerComponent("media-video", {
         audioSourceEl = linkedAudioSource;
       } else {
         ({ texture, audioSourceEl } = await this.createVideoTextureAudioSourceEl());
+        if (getCurrentMirroredMedia() === this.el) {
+          await refreshMediaMirror();
+        }
       }
 
       // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
@@ -549,6 +556,7 @@ AFRAME.registerComponent("media-video", {
             this.updateHoverMenu();
 
             if (!videoWasLive && this.videoIsLive) {
+              this.el.emit("video_is_live_update", { videoIsLive: this.videoIsLive });
               // We just determined the video is live (there can be a delay due to autoplay issues, etc)
               // so catch it up to HEAD.
               if (!isFirefoxReality) {
@@ -565,6 +573,7 @@ AFRAME.registerComponent("media-video", {
         }
       } else {
         this.videoIsLive = this.video.duration === Infinity;
+        this.el.emit("video_is_live_update", { videoIsLive: this.videoIsLive });
         this.updateHoverMenu();
       }
 
@@ -856,6 +865,10 @@ AFRAME.registerComponent("media-video", {
 
   remove() {
     this.cleanUp();
+
+    if (this.mesh) {
+      this.el.removeObject3D("mesh");
+    }
 
     if (this._audioSyncInterval) {
       clearInterval(this._audioSyncInterval);
