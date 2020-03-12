@@ -17,9 +17,16 @@ AFRAME.registerSystem("auto-pixel-ratio", {
     this.deltas = [];
     this.secondsSinceMeasurementStart = 0;
     this.secondsSinceSceneVisible = 0;
+
+    this.disabledByPref = !!window.APP.store.state.preferences.disableAutoPixelRatio;
+    this.onPreferenceChange = this.onPreferenceChange.bind(this);
+    window.APP.store.addEventListener("statechanged", this.onPreferenceChange);
+  },
+  onPreferenceChange() {
+    this.disabledByPref = !!window.APP.store.state.preferences.disableAutoPixelRatio;
   },
   tick(time, delta) {
-    if (!this.enabled) return;
+    if (!this.enabled || this.disabledByPref) return;
     if (!this.el.is("visible")) return;
     if (this.secondsSinceSceneVisible < SKIP_SECONDS_AFTER_SCENE_VISIBLE) {
       this.secondsSinceSceneVisible += delta / 1000;

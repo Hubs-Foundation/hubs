@@ -80,7 +80,8 @@ export const SCHEMA = {
         disableMovement: { type: "bool" },
         disableBackwardsMovement: { type: "bool" },
         disableStrafing: { type: "bool" },
-        disableTeleporter: { type: "bool" }
+        disableTeleporter: { type: "bool" },
+        disableAutoPixelRatio: { type: "bool" }
       }
     },
 
