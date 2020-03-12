@@ -1,11 +1,13 @@
 // On high-DPI displays, measures the median FPS over time and reduces the
 // pixelRatio if the FPS drops below a threshold.
 
-const FPS_THRESHOLD = 50;
+const LOW_FPS_THRESHOLD = 20;
+const HIGH_FPS_THRESHOLD = 48;
 const SKIP_SECONDS_AFTER_SCENE_VISIBLE = 30;
 const MEASUREMENT_PERIOD_SECONDS = 5;
 const MIN_PIXEL_RATIO = 1;
-const REDUCTION_RATE = 1;
+const MAX_PIXEL_RATIO = window.devicePixelRatio;
+const CHANGE_RATE = 1;
 
 AFRAME.registerSystem("auto-pixel-ratio", {
   init() {
@@ -33,17 +35,19 @@ AFRAME.registerSystem("auto-pixel-ratio", {
       const medianDelta = this.deltas[Math.floor(this.deltas.length / 2)];
       const medianFps = 1000 / medianDelta;
 
-      if (medianFps < FPS_THRESHOLD) {
-        const newPixelRatio = this.el.renderer.getPixelRatio() - REDUCTION_RATE;
+      const currentPixelRatio = this.el.renderer.getPixelRatio();
+
+      const shouldDecrease = currentPixelRatio >= MIN_PIXEL_RATIO && medianFps < LOW_FPS_THRESHOLD;
+      const shouldIncrease = currentPixelRatio <= MAX_PIXEL_RATIO && medianFps > HIGH_FPS_THRESHOLD;
+      if (shouldDecrease || shouldIncrease) {
+        const newPixelRatio = currentPixelRatio + (CHANGE_RATE * shouldIncrease ? 1 : -1);
+
         console.info(
-          `Hubs auto-pixel-ratio: Median FPS (${medianFps.toFixed()}) was below ${FPS_THRESHOLD}. ` +
-            `Reducing pixel ratio to ${newPixelRatio}.`
+          `Hubs auto-pixel-ratio: Median FPS (${medianFps.toFixed()}) was ${
+            shouldIncrease ? `above ${HIGH_FPS_THRESHOLD}` : `below ${LOW_FPS_THRESHOLD}`
+          }. ` + `Adjusting pixel ratio to ${newPixelRatio}.`
         );
         this.el.renderer.setPixelRatio(newPixelRatio);
-
-        if (newPixelRatio <= MIN_PIXEL_RATIO) {
-          this.enabled = false;
-        }
       }
 
       // Clear deltas so that we start measuring a new median.
