@@ -2,7 +2,7 @@
 // pixelRatio if the FPS drops below a threshold.
 
 const LOW_FPS_THRESHOLD = 30;
-const HIGH_FPS_THRESHOLD = 55;
+const HIGH_FPS_THRESHOLD = 48;
 const SKIP_SECONDS_AFTER_SCENE_VISIBLE = 30;
 const MEASUREMENT_PERIOD_SECONDS = 5;
 const MIN_PIXEL_RATIO = 1;
