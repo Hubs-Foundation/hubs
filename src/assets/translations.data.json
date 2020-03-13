@@ -281,6 +281,7 @@
     "preferences.disableBackwardsMovement": "Disable backwards movement",
     "preferences.disableStrafing": "Disable strafing",
     "preferences.disableTeleporter": "Disable teleporter",
+    "preferences.disableAutoPixelRatio": "Disable automatic pixel ratio adjustments",
     "settings.return-to-vr": "Return to VR",
     "settings.change-avatar": "Set Name & Avatar",
     "settings.change-scene": "Choose a Scene",

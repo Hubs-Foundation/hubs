@@ -50,14 +50,6 @@ export default class PreferencesScreen extends Component {
     const general = [
       { key: "muteMicOnEntry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
-      {
-        key: "materialQualitySetting",
-        prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-        options: [{ value: "low", text: "Low" }, { value: "high", text: "High" }],
-        defaultString: isMobile ? "low" : "high"
-      },
       {
         key: "globalVoiceVolume",
         prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
@@ -90,6 +82,18 @@ export default class PreferencesScreen extends Component {
       { key: "enableOnScreenJoystickRight", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
     ].map(preferenceListItem);
 
+    const advanced = [
+      { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
+      {
+        key: "materialQualitySetting",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+        options: [{ value: "low", text: "Low" }, { value: "high", text: "High" }],
+        defaultString: isMobile ? "low" : "high"
+      },
+      { key: "disableAutoPixelRatio", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+      { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+    ].map(preferenceListItem);
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={classNames(styles.preferencesPanel)}>
@@ -113,6 +117,12 @@ export default class PreferencesScreen extends Component {
                 </div>
               </div>
               <div className={classNames(styles.scrollingContent)}>{touchscreen}</div>
+              <div className={classNames(styles.sectionBar)}>
+                <div className={classNames(styles.sectionTitle)}>
+                  <span>Advanced</span>
+                </div>
+              </div>
+              <div className={classNames(styles.scrollingContent)}>{advanced}</div>
             </div>
           </div>
         </div>
