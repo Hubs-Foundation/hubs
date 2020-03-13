@@ -4,10 +4,12 @@ export function showHoverEffect(el) {
   const isFrozen = el.sceneEl.is("frozen");
   const isPinned = el.components.pinnable && el.components.pinnable.data.pinned;
   const isSpawner = !!el.components["super-spawner"];
-  const isEmoji =
-    el.components["super-spawner"] && el.components["super-spawner"].data.template === "#interactable-emoji";
+  const isEmojiSpawner = isSpawner && el.components["super-spawner"].data.template === "#interactable-emoji";
+  const isEmoji = !!el.components.emoji;
   const canMove =
-    (isEmoji ? window.APP.hubChannel.can("spawn_emoji") : window.APP.hubChannel.can("spawn_and_move_media")) &&
+    (isEmoji || isEmojiSpawner
+      ? window.APP.hubChannel.can("spawn_emoji")
+      : window.APP.hubChannel.can("spawn_and_move_media")) &&
     (!isPinned || window.APP.hubChannel.can("pin_objects"));
   return (isSpawner || !isPinned || isFrozen) && canMove;
 }
@@ -19,11 +21,14 @@ export function canMove(entity) {
   const isPen = networkedTemplate === "#interactable-pen";
   const spawnerTemplate =
     entity && entity.components["super-spawner"] && entity.components["super-spawner"].data.template;
-  const isEmoji = spawnerTemplate === "#interactable-emoji";
+  const isEmojiSpawner = spawnerTemplate === "#interactable-emoji";
+  const isEmoji = !!entity.components.emoji;
   const isHoldableButton = entity.components.tags && entity.components.tags.data.holdableButton;
   return (
     isHoldableButton ||
-    ((isEmoji ? window.APP.hubChannel.can("spawn_emoji") : window.APP.hubChannel.can("spawn_and_move_media")) &&
+    ((isEmoji || isEmojiSpawner
+      ? window.APP.hubChannel.can("spawn_emoji")
+      : window.APP.hubChannel.can("spawn_and_move_media")) &&
       (!isPinned || window.APP.hubChannel.can("pin_objects")) &&
       (!isCamera || window.APP.hubChannel.can("spawn_camera")) &&
       (!isPen || window.APP.hubChannel.can("spawn_drawing")))
