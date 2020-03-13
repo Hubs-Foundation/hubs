@@ -8,9 +8,10 @@ export class SuperSpawnerSystem {
     const superSpawner = state.hovered && state.hovered.components["super-spawner"];
 
     const isPermitted =
-      superSpawner && superSpawner.data.template === "#interactable-emoji"
+      window.APP.hubChannel &&
+      (superSpawner && superSpawner.data.template === "#interactable-emoji"
         ? window.APP.hubChannel.can("spawn_emoji")
-        : window.APP.hubChannel.can("spawn_and_move_media");
+        : window.APP.hubChannel.can("spawn_and_move_media"));
 
     if (
       superSpawner &&
