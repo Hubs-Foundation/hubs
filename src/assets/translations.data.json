@@ -56,6 +56,7 @@
     "room-settings.spawn_drawing": "Create drawings",
     "room-settings.pin_objects": "Pin objects",
     "room-settings.spawn_emoji": "Create emoji",
+    "room-settings.fly": "Allow flying",
     "room-settings.access-private": "Private",
     "room-settings.access-private-subtitle": "Only those with the link can join",
     "room-settings.access-public": "Public",

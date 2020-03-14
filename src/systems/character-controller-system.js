@@ -396,4 +396,13 @@ export class CharacterControllerSystem {
     }
     return outPos;
   }
+
+  enableFly(enabled) {
+    if (enabled && window.APP.hubChannel && window.APP.hubChannel.can("fly")) {
+      this.fly = true;
+    } else {
+      this.fly = false;
+    }
+    return this.fly;
+  }
 }
