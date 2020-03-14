@@ -124,10 +124,8 @@ export class CharacterControllerSystem {
         inPosition.setFromMatrixPosition(inMat4Copy);
         this.findPositionOnNavMesh(inPosition, inPosition, outPosition, true);
         finalPOV.setPosition(outPosition);
-        translation.makeTranslation(0, getCurrentPlayerHeight(), -0.15);
-      } else {
-        translation.makeTranslation(0, 1.6, -0.15);
       }
+      translation.makeTranslation(0, getCurrentPlayerHeight(), -0.15);
       finalPOV.multiply(translation);
       if (willMaintainInitialOrientation) {
         initialOrientation.extractRotation(this.avatarPOV.object3D.matrixWorld);
