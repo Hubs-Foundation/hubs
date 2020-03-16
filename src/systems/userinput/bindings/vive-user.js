@@ -957,9 +957,9 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: { value: leftTriggerPressed2 },
-      dest: { value: lTriggerRisingGrab },
-      xform: xforms.rising,
-      priority: 1
+      dest: { value: paths.actions.leftHand.stopTeleport },
+      xform: xforms.falling,
+      priority: 2
     },
     {
       src: [lGripRisingGrab],
@@ -1402,8 +1402,8 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: { value: rightTriggerPressed2 },
-      dest: { value: rTriggerRisingGrab },
-      xform: xforms.rising,
+      dest: { value: paths.actions.rightHand.stopTeleport },
+      xform: xforms.falling,
       priority: 2
     },
     {
