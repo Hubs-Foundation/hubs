@@ -76,13 +76,13 @@ AFRAME.registerSystem("userinput-debug", {
       }
 
       console.log(userinput);
-      console.log("sorted", userinput.sortedBindings);
-      console.log("actives", userinput.actives);
-      console.log("masks", userinput.masks);
-      console.log("masked", userinput.masked);
+      console.log("sorted", JSON.parse(JSON.stringify(userinput.sortedBindings)));
+      console.log("actives", JSON.parse(JSON.stringify(userinput.actives)));
+      console.log("masks", JSON.parse(JSON.stringify(userinput.masks)));
+      console.log("masked", JSON.parse(JSON.stringify(userinput.masked)));
       console.log("devices", userinput.activeDevices);
-      console.log("activeSets", userinput.activeSets);
-      console.log("frame", userinput.frame);
+      console.log("activeSets", JSON.parse(JSON.stringify(userinput.activeSets)));
+      console.log("frame", JSON.parse(JSON.stringify(userinput.frame)));
       console.log("xformStates", userinput.xformStates);
       const { sortedBindings, actives, masked } = userinput;
       for (const i in sortedBindings) {
@@ -98,16 +98,16 @@ AFRAME.registerSystem("userinput-debug", {
             "binding: ",
             i,
             "\n",
-            sortedBindings[i],
+            JSON.parse(JSON.stringify(sortedBindings[i])),
             "\n",
             "dest: ",
-            sortedBindings[i].dest && Object.values(sortedBindings[i].dest),
+            JSON.parse(JSON.stringify(sortedBindings[i].dest && Object.values(sortedBindings[i].dest))),
             "\n",
             "active: ",
-            actives[i],
+            JSON.parse(JSON.stringify(actives[i])),
             "\n",
             "maskedBy: ",
-            masked[i],
+            JSON.parse(JSON.stringify(masked[i])),
             "\n",
             strings.join("\n"),
             "\n"
