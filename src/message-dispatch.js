@@ -52,11 +52,12 @@ export default class MessageDispatch {
     switch (command) {
       case "fly":
         if (this.scene.systems["hubs-systems"].characterController.fly) {
-          this.scene.systems["hubs-systems"].characterController.fly = false;
+          this.scene.systems["hubs-systems"].characterController.enableFly(false);
           this.addToPresenceLog({ type: "log", body: "Fly mode disabled." });
         } else {
-          this.scene.systems["hubs-systems"].characterController.fly = true;
-          this.addToPresenceLog({ type: "log", body: "Fly mode enabled." });
+          if (this.scene.systems["hubs-systems"].characterController.enableFly(true)) {
+            this.addToPresenceLog({ type: "log", body: "Fly mode enabled." });
+          }
         }
         break;
       case "grow":

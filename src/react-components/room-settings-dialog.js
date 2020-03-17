@@ -165,6 +165,8 @@ export default class RoomSettingsDialog extends Component {
             </div>
             {this.renderCheckbox("spawn_drawing")}
             {this.renderCheckbox("spawn_emoji")}
+            <div />
+            {this.renderCheckbox("fly")}
           </div>
           <button type="submit" className={styles.nextButton}>
             <FormattedMessage id="room-settings.apply" />
