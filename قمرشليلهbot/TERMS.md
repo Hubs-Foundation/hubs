@@ -1,5 +1,5 @@
 # Terms of Service for Hubs and Spoke
-
+قمرشليلهbot
 Version 3.4, Effective February 9, 2020
 
 [Hubs by Mozilla](https://hubs.mozilla.com) is a real-time communications platform for Virtual Reality, Augmented Reality, Desktop, Laptop, Mobile, or however else you browse the internet.
