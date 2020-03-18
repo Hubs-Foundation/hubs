@@ -736,8 +736,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store, hubId);
-  const availableVREntryTypes = await getAvailableVREntryTypes();
-  const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes, history);
+  const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
   const performConditionalSignIn = async (predicate, action, messageId, onFailure) => {
     if (predicate()) return action();
 
@@ -835,7 +834,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   });
 
-  remountUI({ performConditionalSignIn, embed: isEmbed, showPreload: isEmbed });
+  remountUI({
+    performConditionalSignIn,
+    embed: isEmbed,
+    showPreload: isEmbed
+  });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();
 
@@ -857,7 +860,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     return false;
   };
-
+  const availableVREntryTypesPromise = getAvailableVREntryTypes();
   scene.addEventListener("enter-vr", () => {
     if (handleEarlyVRMode()) return true;
 
@@ -869,9 +872,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.body.classList.add("vr-mode");
 
     // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
-    if ((!isMobile && !isMobileVR) || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
-      document.body.classList.add("vr-mode-stretch");
-    }
+    availableVREntryTypesPromise.then(availableVREntryTypes => {
+      if ((!isMobile && !isMobileVR) || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
+        document.body.classList.add("vr-mode-stretch");
+      }
+    });
   });
 
   handleEarlyVRMode();
@@ -1003,25 +1008,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  if (isMobileVR) {
-    remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
+  availableVREntryTypesPromise.then(async availableVREntryTypes => {
+    if (isMobileVR) {
+      remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
 
-    if (/Oculus/.test(navigator.userAgent)) {
-      // HACK - The polyfill reports Cardboard as the primary VR display on startup out ahead of
-      // Oculus Go on Oculus Browser 5.5.0 beta. This display is cached by A-Frame,
-      // so we need to resolve that and get the real VRDisplay before entering as well.
-      const displays = await navigator.getVRDisplays();
-      const vrDisplay = displays.length && displays[0];
-      AFRAME.utils.device.getVRDisplay = () => vrDisplay;
+      if (/Oculus/.test(navigator.userAgent)) {
+        // HACK - The polyfill reports Cardboard as the primary VR display on startup out ahead of
+        // Oculus Go on Oculus Browser 5.5.0 beta. This display is cached by A-Frame,
+        // so we need to resolve that and get the real VRDisplay before entering as well.
+        const displays = await navigator.getVRDisplays();
+        const vrDisplay = displays.length && displays[0];
+        AFRAME.utils.device.getVRDisplay = () => vrDisplay;
+      }
+    } else {
+      const hasVREntryDevice =
+        availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no ||
+        availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no ||
+        availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no;
+
+      remountUI({ availableVREntryTypes, forcedVREntryType: qsVREntryType || (!hasVREntryDevice ? "2d" : null) });
     }
-  } else {
-    const hasVREntryDevice =
-      availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no ||
-      availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no ||
-      availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no;
-
-    remountUI({ availableVREntryTypes, forcedVREntryType: qsVREntryType || (!hasVREntryDevice ? "2d" : null) });
-  }
+  });
 
   const environmentScene = document.querySelector("#environment-scene");
 
