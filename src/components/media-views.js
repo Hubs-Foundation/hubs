@@ -5,13 +5,14 @@ import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
 import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js/dist/hls.light.js";
-import { addAndArrangeMedia, createImageTexture } from "../utils/media-utils";
+import { addAndArrangeMedia, createImageTexture, createBasisTexture } from "../utils/media-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import pdfjs from "pdfjs-dist";
 import { applyPersistentSync } from "../utils/permissions-utils";
+import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
 
 // Using external CDN to reduce build size
 if (!pdfjs.GlobalWorkerOptions.workerSrc) {
@@ -139,7 +140,10 @@ function disposeTexture(texture) {
   }
 
   if (texture.hls) {
+    texture.hls.stopLoad();
+    texture.hls.detachMedia();
     texture.hls.destroy();
+    texture.hls = null;
   }
 
   texture.dispose();
@@ -499,6 +503,9 @@ AFRAME.registerComponent("media-video", {
         audioSourceEl = linkedAudioSource;
       } else {
         ({ texture, audioSourceEl } = await this.createVideoTextureAudioSourceEl());
+        if (getCurrentMirroredMedia() === this.el) {
+          await refreshMediaMirror();
+        }
       }
 
       // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
@@ -549,6 +556,7 @@ AFRAME.registerComponent("media-video", {
             this.updateHoverMenu();
 
             if (!videoWasLive && this.videoIsLive) {
+              this.el.emit("video_is_live_update", { videoIsLive: this.videoIsLive });
               // We just determined the video is live (there can be a delay due to autoplay issues, etc)
               // so catch it up to HEAD.
               if (!isFirefoxReality) {
@@ -565,6 +573,7 @@ AFRAME.registerComponent("media-video", {
         }
       } else {
         this.videoIsLive = this.video.duration === Infinity;
+        this.el.emit("video_is_live_update", { videoIsLive: this.videoIsLive });
         this.updateHoverMenu();
       }
 
@@ -857,6 +866,10 @@ AFRAME.registerComponent("media-video", {
   remove() {
     this.cleanUp();
 
+    if (this.mesh) {
+      this.el.removeObject3D("mesh");
+    }
+
     if (this._audioSyncInterval) {
       clearInterval(this._audioSyncInterval);
       this._audioSyncInterval = null;
@@ -949,6 +962,8 @@ AFRAME.registerComponent("media-image", {
           let promise;
           if (contentType.includes("image/gif")) {
             promise = createGIFTexture(src);
+          } else if (contentType.includes("image/basis")) {
+            promise = createBasisTexture(src);
           } else if (contentType.startsWith("image/")) {
             promise = createImageTexture(src);
           } else {
@@ -1014,7 +1029,11 @@ AFRAME.registerComponent("media-image", {
 
     // We only support transparency on gifs. Other images will support cutout as part of batching, but not alpha transparency for now
     this.mesh.material.transparent =
-      !this.data.batch || texture == errorTexture || this.data.contentType.includes("image/gif");
+      !this.data.batch ||
+      texture == errorTexture ||
+      this.data.contentType.includes("image/gif") ||
+      (texture.image && texture.image.hasAlpha);
+
     this.mesh.material.map = texture;
     this.mesh.material.needsUpdate = true;
 
@@ -1022,7 +1041,7 @@ AFRAME.registerComponent("media-image", {
       scaleToAspectRatio(this.el, ratio);
     }
 
-    if (texture !== errorTexture && this.data.batch) {
+    if (texture !== errorTexture && this.data.batch && !texture.isCompressedTexture) {
       batchManagerSystem.addObject(this.mesh);
     }
 

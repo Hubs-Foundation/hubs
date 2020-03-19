@@ -64,11 +64,14 @@ AFRAME.registerComponent("emoji-hud", {
       const width = this.data.spawnerPlatformWidth;
       const spacing = this.data.spawnerPlatformSpacing;
 
+      this.emojiUrls = [];
+
       this.spawnerEntities = [];
 
       for (let i = 0; i < emojis.length; i++) {
         const spawnerEntity = document.createElement("a-entity");
         const url = new URL(emojis[i], window.location.href).href;
+        this.emojiUrls.push(url);
         spawnerEntity.setAttribute("media-loader", { src: url });
         spawnerEntity.setAttribute("hoverable-visuals", "");
         spawnerEntity.setAttribute("scale", {
@@ -78,7 +81,10 @@ AFRAME.registerComponent("emoji-hud", {
         });
         spawnerEntity.setAttribute("is-remote-hover-target", "");
         spawnerEntity.setAttribute("tags", { isHandCollisionTarget: false });
-        spawnerEntity.setAttribute("visibility-while-frozen", { requireHoverOnNonMobile: false });
+        spawnerEntity.setAttribute("visibility-while-frozen", {
+          requireHoverOnNonMobile: false,
+          withPermission: "spawn_emoji"
+        });
         spawnerEntity.setAttribute("css-class", "interactable");
         spawnerEntity.setAttribute("body-helper", {
           mass: 0,
@@ -124,12 +130,15 @@ AFRAME.registerComponent("emoji-hud", {
 
         spawnerEntity.setAttribute("super-spawner", {
           src: url,
-          template: "#interactable-emoji-media",
+          template: "#interactable-emoji",
           spawnScale: { x: this.data.spawnedScale, y: this.data.spawnedScale, z: this.data.spawnedScale }
         });
 
         const cylinder = document.createElement("a-cylinder");
-        cylinder.setAttribute("visibility-while-frozen", { requireHoverOnNonMobile: false });
+        cylinder.setAttribute("visibility-while-frozen", {
+          requireHoverOnNonMobile: false,
+          withPermission: "spawn_emoji"
+        });
         cylinder.setAttribute("material", { opacity: 0.2, color: "#2f7fee" });
         cylinder.setAttribute("segments-height", 1);
         cylinder.setAttribute("segments-radial", 16);

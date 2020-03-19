@@ -68,7 +68,7 @@ This will allow the CSP checks to pass that are served up by Reticulum so you ca
 - `debug_log` - If `true`, enables an on-screen debug log and console. Useful for debugging on mobile devices.
 - `userinput_debug` - If `true`, enables an on-screen userinput debug status panel. Press "L" on your keyboard to show the panel.
 - `thirdPerson` - Enables experimental third person mode.
-- `fov` - Set a custom field of view in degrees (between 1 and 179) for the camera. (2D only)
+- `fov` - Set a custom field of view in degrees (between 1 and 179) for the camera. (2D only) 
 
 ## Additional Resources
 

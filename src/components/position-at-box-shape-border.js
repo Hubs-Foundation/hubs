@@ -115,6 +115,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     return function(animate, forceNewExtents) {
       if (forceNewExtents || this.mesh !== this.el.getObject3D("mesh")) {
         this.mesh = this.el.getObject3D("mesh");
+        if (!this.mesh) return;
 
         const box = getBox(this.el, this.mesh);
         this.halfExtents = box.min

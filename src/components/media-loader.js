@@ -39,6 +39,7 @@ const fetchContentType = url => {
 };
 
 const forceMeshBatching = qsTruthy("batchMeshes");
+const forceImageBatching = qsTruthy("batchImages");
 const disableBatching = qsTruthy("disableBatching");
 
 AFRAME.registerComponent("media-loader", {
@@ -325,7 +326,7 @@ AFRAME.registerComponent("media-loader", {
     this.el.setAttribute("media-loader", { version: Math.floor(Date.now() / 1000) });
   },
 
-  async update(oldData) {
+  async update(oldData, forceLocalRefresh) {
     const { src, version, contentSubtype } = this.data;
     if (!src) return;
 
@@ -342,8 +343,16 @@ AFRAME.registerComponent("media-loader", {
       this.data.playSoundEffect = NAF.utils.isMine(this.networkedEl);
     }
 
+    if (forceLocalRefresh) {
+      this.el.removeAttribute("gltf-model-plus");
+      this.el.removeAttribute("media-pager");
+      this.el.removeAttribute("media-video");
+      this.el.removeAttribute("media-pdf");
+      this.el.removeAttribute("media-image");
+    }
+
     try {
-      if (srcChanged && !this.showLoaderTimeout) {
+      if ((forceLocalRefresh || srcChanged) && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
       }
 
@@ -363,7 +372,7 @@ AFRAME.registerComponent("media-loader", {
       if (this.data.resolve && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalModelAsset) {
         const is360 = !!(this.data.mediaOptions.projection && this.data.mediaOptions.projection.startsWith("360"));
         const quality = getDefaultResolveQuality(is360);
-        const result = await resolveUrl(src, quality, version);
+        const result = await resolveUrl(src, quality, version, forceLocalRefresh);
         canonicalUrl = result.origin;
 
         // handle protocol relative urls
@@ -388,7 +397,7 @@ AFRAME.registerComponent("media-loader", {
       contentType = contentType || guessContentType(canonicalUrl) || (await fetchContentType(accessibleUrl));
 
       // We don't want to emit media_resolved for index updates.
-      if (srcChanged) {
+      if (forceLocalRefresh || srcChanged) {
         this.el.emit("media_resolved", { src, raw: accessibleUrl, contentType });
       } else {
         this.el.emit("media_refreshed", { src, raw: accessibleUrl, contentType });
@@ -457,7 +466,7 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
-        let batch = !disableBatching;
+        let batch = !disableBatching && forceImageBatching;
         if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
           batch = false;
         }
@@ -518,9 +527,7 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
-        let batch =
-          !disableBatching &&
-          (forceMeshBatching || (AFRAME.utils.device.isMobile() && window.APP && window.APP.quality === "low"));
+        let batch = !disableBatching && forceMeshBatching;
         if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
           batch = false;
         }

@@ -124,10 +124,8 @@ export class CharacterControllerSystem {
         inPosition.setFromMatrixPosition(inMat4Copy);
         this.findPositionOnNavMesh(inPosition, inPosition, outPosition, true);
         finalPOV.setPosition(outPosition);
-        translation.makeTranslation(0, getCurrentPlayerHeight(), -0.15);
-      } else {
-        translation.makeTranslation(0, 1.6, -0.15);
       }
+      translation.makeTranslation(0, getCurrentPlayerHeight(), -0.15);
       finalPOV.multiply(translation);
       if (willMaintainInitialOrientation) {
         initialOrientation.extractRotation(this.avatarPOV.object3D.matrixWorld);
@@ -158,8 +156,12 @@ export class CharacterControllerSystem {
     const waypointPosition = new THREE.Vector3();
     const v = new THREE.Vector3();
 
+    let uiRoot;
     return function tick(t, dt) {
-      if (!this.scene.is("entered")) return;
+      const entered = this.scene.is("entered");
+      uiRoot = uiRoot || document.getElementById("ui-root");
+      const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
+      if (!isGhost && !entered) return;
       const vrMode = this.scene.is("vr-mode");
       this.sfx = this.sfx || this.scene.systems["hubs-systems"].soundEffectsSystem;
       this.waypointSystem = this.waypointSystem || this.scene.systems["hubs-systems"].waypointSystem;
@@ -391,5 +393,14 @@ export class CharacterControllerSystem {
       this.navNode = pathfinder.clampStep(start, end, this.navNode, NAV_ZONE, this.navGroup, outPos);
     }
     return outPos;
+  }
+
+  enableFly(enabled) {
+    if (enabled && window.APP.hubChannel && window.APP.hubChannel.can("fly")) {
+      this.fly = true;
+    } else {
+      this.fly = false;
+    }
+    return this.fly;
   }
 }

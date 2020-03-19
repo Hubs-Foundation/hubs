@@ -6,12 +6,19 @@ export class SuperSpawnerSystem {
   maybeSpawn(state, grabPath) {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const superSpawner = state.hovered && state.hovered.components["super-spawner"];
+
+    const isPermitted =
+      window.APP.hubChannel &&
+      (superSpawner && superSpawner.data.template === "#interactable-emoji"
+        ? window.APP.hubChannel.can("spawn_emoji")
+        : window.APP.hubChannel.can("spawn_and_move_media"));
+
     if (
       superSpawner &&
       superSpawner.spawnedMediaScale &&
       !superSpawner.cooldownTimeout &&
       userinput.get(grabPath) &&
-      window.APP.hubChannel.can("spawn_and_move_media")
+      isPermitted
     ) {
       this.performSpawn(state, grabPath, userinput, superSpawner);
     }

@@ -41,7 +41,9 @@ const DISPLAY_IMAGE = new Map([
 ]);
 
 function getDisplayString(el) {
-  const url = el.components["media-loader"].data.src;
+  // Having a listed-media component does not guarantee the existence of a media-loader component,
+  // so don't crash if there isn't one.
+  const url = (el.components["media-loader"] && el.components["media-loader"].data.src) || "";
   const split = url.split("/");
   const resourceName = split[split.length - 1].split("?")[0];
   let httpIndex = -1;
@@ -94,7 +96,9 @@ export default class ObjectList extends Component {
     });
     this.updateMediaEntities = this.updateMediaEntities.bind(this);
     this.updateMediaEntities();
-    this.props.scene.addEventListener("listed_media_changed", () => this.updateMediaEntities());
+    this.props.scene.addEventListener("listed_media_changed", () => setTimeout(() => this.updateMediaEntities(), 0));
+    // HACK: The listed-media component exists before the media-loader component does, in cases where an entity is created from a network template because of an incoming message, so don't updateMediaEntities right away.
+    // Sorry in advance for the day this comment is out of date.
   }
 
   updateMediaEntities() {

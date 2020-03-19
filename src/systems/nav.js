@@ -5,6 +5,7 @@ AFRAME.registerSystem("nav", {
     this.pathfinder = new Pathfinding();
     this.mesh = null;
     this.el.addEventListener("reset_scene", this.removeNavMeshData.bind(this));
+    this.el.addEventListener("leaving_loading_environment", this.removeNavMeshData.bind(this));
   },
 
   loadMesh: function(mesh, zone) {
