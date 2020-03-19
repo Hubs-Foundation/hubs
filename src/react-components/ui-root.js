@@ -1215,7 +1215,16 @@ class UIRoot extends Component {
 
         {!this.state.waitingOnAudio ? (
           <div className={entryStyles.buttonContainer}>
-            {this.props.checkingForDeviceAvailability && <FormattedMessage id="entry.checkingForDeviceAvailability" />}
+            {this.props.checkingForDeviceAvailability && (
+              <div>
+                <div className="loader-wrap loader-mid">
+                  <div className="loader">
+                    <div className="loader-center" />
+                  </div>
+                </div>
+                <FormattedMessage id="entry.checkingForDeviceAvailability" />
+              </div>
+            )}
             {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
               <div className={entryStyles.secondary} onClick={this.enterVR}>
                 <FormattedMessage id="entry.cardboard" />
