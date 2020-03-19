@@ -873,8 +873,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.body.classList.add("vr-mode");
 
-    // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
     availableVREntryTypesPromise.then(availableVREntryTypes => {
+      // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
       if ((!isMobile && !isMobileVR) || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
         document.body.classList.add("vr-mode-stretch");
       }
