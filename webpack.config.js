@@ -167,10 +167,11 @@ module.exports = (env, argv) => ({
       },
       {
         test: /\.js$/,
-        include: [path.resolve(__dirname, "src")],
+        include: [path.resolve(__dirname, "src"), path.resolve(__dirname, "..", "src")],
         // Exclude JS assets in node_modules because they are already transformed and often big.
         exclude: [path.resolve(__dirname, "node_modules")],
-        loader: "babel-loader"
+        loader: "babel-loader",
+        options: babelConfig
       },
       {
         test: /\.(scss|css)$/,
@@ -223,6 +224,10 @@ module.exports = (env, argv) => ({
         use: { loader: "raw-loader" }
       }
     ]
+  },
+
+  resolve: {
+    modules: [path.resolve(__dirname, "node_modules"), "node_modules"]
   },
 
   optimization: {
@@ -351,7 +356,8 @@ module.exports = (env, argv) => ({
         SENTRY_DSN: process.env.SENTRY_DSN,
         GA_TRACKING_ID: process.env.GA_TRACKING_ID,
         POSTGREST_SERVER: process.env.POSTGREST_SERVER,
-        USE_FEATURE_CONFIG: process.env.USE_FEATURE_CONFIG
+        USE_FEATURE_CONFIG: process.env.USE_FEATURE_CONFIG,
+        BASE_ASSETS_PATH: process.env.BASE_ASSETS_PATH
       })
     })
   ]

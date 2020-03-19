@@ -28,6 +28,9 @@ import AuthDialog from "./auth-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
 import MediaTiles from "./media-tiles";
 
+import RoomManagementDialog from "./room-management-dialog";
+import ConferenceContent from "./conference-content";
+
 addLocaleData([...en]);
 
 const isMobile = checkIsMobile();
@@ -46,8 +49,8 @@ class HomeRoot extends Component {
     hideHero: PropTypes.bool,
     showAdmin: PropTypes.bool,
     showCreate: PropTypes.bool,
-    featuredRooms: PropTypes.array,
-    publicRoomsResult: PropTypes.object,
+    publicRooms: PropTypes.array,
+    favoritedRooms: PropTypes.array,
     showSignIn: PropTypes.bool,
     signInDestination: PropTypes.string,
     signInDestinationUrl: PropTypes.string,
@@ -209,13 +212,25 @@ class HomeRoot extends Component {
                     </a>
                   </IfFeature>
                   {this.props.showAdmin && (
-                    <a href="/admin" rel="noreferrer noopener">
-                      <i>
-                        <FontAwesomeIcon icon={faCog} />
-                      </i>
-                      &nbsp;
-                      <FormattedMessage id="home.admin" />
-                    </a>
+                    <>
+                      <a href="/admin" rel="noreferrer noopener">
+                        <i>
+                          <FontAwesomeIcon icon={faCog} />
+                        </i>
+                        &nbsp;
+                        <FormattedMessage id="home.admin" />
+                      </a>
+                      <a
+                        href="#"
+                        onClick={e => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          this.showDialog(RoomManagementDialog);
+                        }}
+                      >
+                        Room Management
+                      </a>
+                    </>
                   )}
                 </div>
               </div>
@@ -236,46 +251,7 @@ class HomeRoot extends Component {
                 )}
               </div>
             </div>
-            <div className={styles.heroContent} style={{ backgroundImage: configs.image("home_background", true) }}>
-              {!this.props.hideHero &&
-                (this.props.featuredRooms && this.props.featuredRooms.length > 0
-                  ? this.renderFeaturedRoomsHero()
-                  : this.renderNonFeaturedRoomsHero())}
-              {!this.props.hideHero && (
-                <div className={classNames(styles.heroPanel, styles.rightPanel)}>
-                  {showFTUEVideo && (
-                    <div className={styles.heroVideo}>
-                      <video playsInline muted loop autoPlay>
-                        <source src={homeVideoWebM} type="video/webm" />
-                        <source src={homeVideoMp4} type="video/mp4" />
-                      </video>
-                    </div>
-                  )}
-                  <div>
-                    <div className={styles.secondaryLink}>
-                      <a href="/link">
-                        <FormattedMessage id="home.have_code" />
-                      </a>
-                    </div>
-
-                    <IfFeature name="show_discord_bot_link">
-                      <div className={styles.secondaryLink}>
-                        <div>
-                          <FormattedMessage id="home.add_to_discord_1" />
-                        </div>
-                        <img src={discordLogoSmall} />
-                        <a href="/discord">
-                          <FormattedMessage id="home.add_to_discord_2" />
-                        </a>
-                        <div>
-                          <FormattedMessage id="home.add_to_discord_3" />
-                        </div>
-                      </div>
-                    </IfFeature>
-                  </div>
-                </div>
-              )}
-            </div>
+            <ConferenceContent publicRooms={this.props.publicRooms} favoritedRooms={this.props.favoritedRooms} />
             <div className={styles.footerContent}>
               <div className={styles.poweredBy}>
                 <UnlessFeature name="hide_powered_by">

@@ -22,7 +22,8 @@ window.APP = { store };
 
 const authChannel = new AuthChannel(store);
 let installEvent = null;
-let featuredRooms = null;
+let favoritedRooms = null;
+let publicRooms = null;
 let mountedUI = false;
 let hideHero = true;
 let showAdmin = false;
@@ -47,7 +48,8 @@ const remountUI = function() {
       hideHero={hideHero}
       showAdmin={showAdmin}
       showCreate={showCreate}
-      featuredRooms={featuredRooms}
+      favoritedRooms={favoritedRooms}
+      publicRooms={publicRooms}
       installEvent={installEvent}
     />
   );
@@ -79,20 +81,53 @@ window.addEventListener("beforeinstallprompt", e => {
   }
 });
 
+async function fetchFavoritedRooms() {
+  if (!authChannel.signedIn) {
+    favoritedRooms = [];
+    return;
+  }
+
+  const res = await fetchReticulumAuthenticated(
+    `/api/v1/media/search?source=favorites&type=rooms&user=${store.credentialsAccountId}`
+  )
+
+  favoritedRooms = res.entries;
+}
+
+async function fetchPublicRooms() {
+  let hasMore = true;
+  const results = [];
+
+  const queryParams = new URLSearchParams();
+  queryParams.set("source", "rooms");
+  queryParams.set("filter", "public");
+
+  while (hasMore) {
+
+    const res = await fetchReticulumAuthenticated(`/api/v1/media/search?${queryParams}`);
+
+    for (const entry of res.entries) {
+      if (!results.find(item => item.id === entry.id)) {
+        results.push(entry);
+      } else {
+        console.log(`Duplicate page: ${queryParams.get("cursor")} id: ${entry.id}`);
+      }
+    }
+
+    queryParams.set("cursor", res.meta.next_cursor);
+    hasMore = !!res.meta.next_cursor;
+  }
+
+  publicRooms = results;
+}
+
 // Fetch favorite + public rooms and merge, sorting by member count
 async function fetchFeaturedRooms() {
-  const [favoriteRoomsResult, publicRoomsResult] = await Promise.all([
-    authChannel.signedIn
-      ? fetchReticulumAuthenticated(
-          `/api/v1/media/search?source=favorites&type=rooms&user=${store.credentialsAccountId}`
-        )
-      : Promise.resolve({ entries: [] }),
-    fetchReticulumAuthenticated("/api/v1/media/search?source=rooms&filter=public")
+  await Promise.all([
+    fetchFavoritedRooms(),
+    fetchPublicRooms()
   ]);
 
-  const entries = [...publicRoomsResult.entries, ...favoriteRoomsResult.entries];
-  const ids = entries.map(h => h.id);
-  featuredRooms = entries.filter((h, i) => ids.lastIndexOf(h.id) === i).sort((a, b) => b.member_count - a.member_count);
   remountUI();
 }
 

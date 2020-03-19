@@ -40,6 +40,7 @@ body {
   min-height: 65px;
   height: 65px;
   display: flex;
+  color: white;
 
   @media (max-width: 768px), (max-height: 480px) {
     height: auto;

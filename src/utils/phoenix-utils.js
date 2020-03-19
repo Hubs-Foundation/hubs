@@ -206,7 +206,7 @@ export async function createAndRedirectToNewHub(name, sceneId, replace) {
   }
 
   if (isLocalClient()) {
-    url = `/hub.html?hub_id=${hub.hub_id}`;
+    url = process.env.BASE_ASSETS_PATH + `hub.html?hub_id=${hub.hub_id}`;
   }
 
   if (replace) {
