@@ -418,6 +418,7 @@ export default class SceneEntryManager {
 
       if (videoTracks.length > 0) {
         newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
+        newStream.getAudioTracks().forEach(track => mediaStream.addTrack(track));
         await NAF.connection.adapter.setLocalMediaStream(mediaStream);
         currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
 
