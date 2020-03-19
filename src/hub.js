@@ -213,7 +213,7 @@ import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
 import { warmSerializeElement } from "./utils/serialize-element";
 
-import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect";
+import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY, ONLY_SCREEN_AVAILABLE } from "./utils/vr-caps-detect";
 import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
@@ -860,6 +860,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     return false;
   };
+
+  remountUI({ availableVREntryTypes: ONLY_SCREEN_AVAILABLE, checkingForDeviceAvailability: true });
   const availableVREntryTypesPromise = getAvailableVREntryTypes();
   scene.addEventListener("enter-vr", () => {
     if (handleEarlyVRMode()) return true;
@@ -1010,7 +1012,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   availableVREntryTypesPromise.then(async availableVREntryTypes => {
     if (isMobileVR) {
-      remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
+      remountUI({ availableVREntryTypes, forcedVREntryType: "vr", checkingForDeviceAvailability: false });
 
       if (/Oculus/.test(navigator.userAgent)) {
         // HACK - The polyfill reports Cardboard as the primary VR display on startup out ahead of
@@ -1026,7 +1028,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no ||
         availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no;
 
-      remountUI({ availableVREntryTypes, forcedVREntryType: qsVREntryType || (!hasVREntryDevice ? "2d" : null) });
+      remountUI({
+        availableVREntryTypes,
+        forcedVREntryType: qsVREntryType || (!hasVREntryDevice ? "2d" : null),
+        checkingForDeviceAvailability: false
+      });
     }
   });
 
