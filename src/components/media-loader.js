@@ -22,6 +22,7 @@ import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effect
 import { loadModel } from "./gltf-model-plus";
 import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
+import configs from "../utils/configs";
 
 import { SHAPE } from "three-ammo/constants";
 
@@ -391,6 +392,15 @@ AFRAME.registerComponent("media-loader", {
 
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
       accessibleUrl = proxiedUrlFor(canonicalUrl);
+
+      accessibleUrl = accessibleUrl.replace(
+        "hubs-ieeevr-hubs-internal-net-proxy.ieeevr2020.workers.dev",
+        configs.RETICULUM_SERVER
+      );
+      accessibleUrl = accessibleUrl.replace(
+        "hubs-ieeevr-hubs-internal-net-cors-proxy.ieeevr2020.workers.dev",
+        configs.RETICULUM_SERVER
+      );
 
       // if the component creator didn't know the content type, we didn't get it from reticulum, and
       // we don't think we can infer it from the extension, we need to make a HEAD request to find it out

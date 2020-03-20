@@ -41,7 +41,10 @@ export class PhysicsSystem {
         type: MESSAGE_TYPES.INIT,
         worldConfig: WORLD_CONFIG,
         arrayBuffer,
-        wasmUrl: new URL(ammoWasmUrl, configs.BASE_ASSETS_PATH || window.location).href
+        wasmUrl: new URL(
+          ammoWasmUrl,
+          !configs.BASE_ASSETS_PATH || configs.BASE_ASSETS_PATH === "/" ? window.location : configs.BASE_ASSETS_PATH
+        ).href
       },
       [arrayBuffer]
     );
