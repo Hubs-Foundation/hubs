@@ -602,7 +602,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         .catch(connectError => {
           clearTimeout(connectionErrorTimeout);
           // hacky until we get return codes
-          const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+          const isFull = connectError.msg && connectError.msg.match(/\bfull\b/i);
           console.error(connectError);
           remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
           entryManager.exitScene();
