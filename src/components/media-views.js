@@ -866,13 +866,12 @@ AFRAME.registerComponent("media-video", {
     }
 
     if (this.audio) {
-      const audioOutputMode =
-        window.APP.store.state.preferences.audioOutputMode === "speakers" ? "speakers" : "headphones";
+      const audioOutputMode = window.APP.store.state.preferences.audioOutputMode === "panner" ? "panner" : "audio";
       if (
-        (audioOutputMode === "headphones" && this.data.audioType !== "pannernode") ||
-        (audioOutputMode === "speakers" && this.data.audioType !== "audionode")
+        (audioOutputMode === "panner" && this.data.audioType !== "pannernode") ||
+        (audioOutputMode === "audio" && this.data.audioType !== "audionode")
       ) {
-        this.data.audioType = audioOutputMode === "headphones" ? "pannernode" : "audionode";
+        this.data.audioType = audioOutputMode === "panner" ? "pannernode" : "audionode";
         this.setupAudio();
       }
     }

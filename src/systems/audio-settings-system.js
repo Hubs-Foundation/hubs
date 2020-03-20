@@ -96,13 +96,12 @@ AFRAME.registerComponent("audio-source", {
   tick: function() {
     const networkedAudioSource = this.el.components["networked-audio-source"];
     if (networkedAudioSource) {
-      const audioOutputMode =
-        window.APP.store.state.preferences.audioOutputMode === "speakers" ? "speakers" : "headphones";
+      const audioOutputMode = window.APP.store.state.preferences.audioOutputMode === "audio" ? "audio" : "panner";
       if (
-        (audioOutputMode === "headphones" && !networkedAudioSource.data.positional) ||
-        (audioOutputMode === "speakers" && networkedAudioSource.data.positional)
+        (audioOutputMode === "panner" && !networkedAudioSource.data.positional) ||
+        (audioOutputMode === "audio" && networkedAudioSource.data.positional)
       ) {
-        networkedAudioSource.data.positional = audioOutputMode === "headphones" ? true : false;
+        networkedAudioSource.data.positional = audioOutputMode === "panner" ? true : false;
         networkedAudioSource.sound.disconnect();
         networkedAudioSource.setupSound();
         const soundSource = networkedAudioSource.sound.context.createMediaStreamSource(networkedAudioSource.stream);

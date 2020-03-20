@@ -52,8 +52,8 @@ export default class PreferencesScreen extends Component {
       {
         key: "audioOutputMode",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-        options: [{ value: "headphones", text: "Headphones" }, { value: "speakers", text: "Speakers" }],
-        defaultString: "headphones"
+        options: [{ value: "panner", text: "Headphones" }, { value: "audio", text: "Speakers" }],
+        defaultString: "panner"
       },
       { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       {

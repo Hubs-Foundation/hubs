@@ -132,10 +132,9 @@ export class SoundEffectsSystem {
     const audioBuffer = this.sounds.get(sound);
     if (!audioBuffer) return null;
 
-    const audioOutputMode =
-      window.APP.store.state.preferences.audioOutputMode === "speakers" ? "speakers" : "headphones";
+    const audioOutputMode = window.APP.store.state.preferences.audioOutputMode === "audio" ? "audio" : "panner";
     const positionalAudio =
-      audioOutputMode === "headphones"
+      audioOutputMode === "panner"
         ? new THREE.PositionalAudio(this.scene.audioListener)
         : new THREE.Audio(this.scene.audioListener);
     positionalAudio.setBuffer(audioBuffer);
