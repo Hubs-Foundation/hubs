@@ -9,10 +9,12 @@ function updateMediaAudioSettings(audio, settings) {
 }
 
 function updateAvatarAudioSettings(audio, settings) {
-  audio.setDistanceModel(settings.avatarDistanceModel);
-  audio.setRolloffFactor(settings.avatarRolloffFactor);
-  audio.setRefDistance(settings.avatarRefDistance);
-  audio.setMaxDistance(settings.avatarMaxDistance);
+  if (audio.setDistanceModel) {
+    audio.setDistanceModel(settings.avatarDistanceModel);
+    audio.setRolloffFactor(settings.avatarRolloffFactor);
+    audio.setRefDistance(settings.avatarRefDistance);
+    audio.setMaxDistance(settings.avatarMaxDistance);
+  }
 }
 
 export class AudioSettingsSystem {
@@ -88,6 +90,25 @@ AFRAME.registerComponent("audio-source", {
     } else if (this.data.type === "media") {
       this.onVideoLoaded = this.onVideoLoaded.bind(this);
       this.el.addEventListener("video-loaded", this.onVideoLoaded);
+    }
+  },
+
+  tick: function() {
+    const networkedAudioSource = this.el.components["networked-audio-source"];
+    if (networkedAudioSource) {
+      const audioOutputMode =
+        window.APP.store.state.preferences.audioOutputMode === "speakers" ? "speakers" : "headphones";
+      if (
+        (audioOutputMode === "headphones" && !networkedAudioSource.data.positional) ||
+        (audioOutputMode === "speakers" && networkedAudioSource.data.positional)
+      ) {
+        networkedAudioSource.data.positional = audioOutputMode === "headphones" ? true : false;
+        networkedAudioSource.sound.disconnect();
+        networkedAudioSource.setupSound();
+        const soundSource = networkedAudioSource.sound.context.createMediaStreamSource(networkedAudioSource.stream);
+        networkedAudioSource.sound.setNodeSource(soundSource);
+        networkedAudioSource.el.emit("sound-source-set", { soundSource });
+      }
     }
   },
 

@@ -487,6 +487,33 @@ AFRAME.registerComponent("media-video", {
     return this.updateSrc(oldData);
   },
 
+  setupAudio() {
+    if (this.audio) {
+      this.audio.disconnect();
+      this.el.removeObject3D("sound");
+    }
+
+    if (this.data.audioType === "pannernode") {
+      this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+      this.setPositionalAudioProperties();
+    } else {
+      this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
+    }
+
+    this.audio.setNodeSource(this.mediaElementAudioSource);
+    this.el.setObject3D("sound", this.audio);
+  },
+
+  setPositionalAudioProperties() {
+    this.audio.setDistanceModel(this.data.distanceModel);
+    this.audio.setRolloffFactor(this.data.rolloffFactor);
+    this.audio.setRefDistance(this.data.refDistance);
+    this.audio.setMaxDistance(this.data.maxDistance);
+    this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
+    this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
+    this.audio.panner.coneOuterGain = this.data.coneOuterGain;
+  },
+
   async updateSrc(oldData) {
     const { src, linkedVideoTexture, linkedAudioSource, linkedMediaElementAudioSource } = this.data;
 
@@ -520,26 +547,10 @@ AFRAME.registerComponent("media-video", {
         // iOS video audio is broken, see: https://github.com/mozilla/hubs/issues/1797
         if (!isIOS) {
           // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
-          const mediaElementAudioSource =
+          this.mediaElementAudioSource =
             linkedMediaElementAudioSource ||
             this.el.sceneEl.audioListener.context.createMediaElementSource(audioSourceEl);
-
-          if (this.data.audioType === "pannernode") {
-            this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-            this.audio.setDistanceModel(this.data.distanceModel);
-            this.audio.setRolloffFactor(this.data.rolloffFactor);
-            this.audio.setRefDistance(this.data.refDistance);
-            this.audio.setMaxDistance(this.data.maxDistance);
-            this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
-            this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
-            this.audio.panner.coneOuterGain = this.data.coneOuterGain;
-          } else {
-            this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
-          }
-
-          this.mediaElementAudioSource = mediaElementAudioSource;
-          this.audio.setNodeSource(mediaElementAudioSource);
-          this.el.setObject3D("sound", this.audio);
+          this.setupAudio();
         }
       }
 
@@ -851,6 +862,18 @@ AFRAME.registerComponent("media-video", {
       if (now - this.lastUpdate > this.data.tickRate) {
         this.el.setAttribute("media-video", "time", this.video.currentTime);
         this.lastUpdate = now;
+      }
+    }
+
+    if (this.audio) {
+      const audioOutputMode =
+        window.APP.store.state.preferences.audioOutputMode === "speakers" ? "speakers" : "headphones";
+      if (
+        (audioOutputMode === "headphones" && this.data.audioType !== "pannernode") ||
+        (audioOutputMode === "speakers" && this.data.audioType !== "audionode")
+      ) {
+        this.data.audioType = audioOutputMode === "headphones" ? "pannernode" : "audionode";
+        this.setupAudio();
       }
     }
   },
