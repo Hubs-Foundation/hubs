@@ -20,6 +20,7 @@ import {
   Filter,
   List,
   ReferenceManyField,
+  SelectInput,
   SimpleForm,
   TextField,
   TextInput
@@ -94,7 +95,7 @@ export const AccountList = withStyles(styles)(
 
               <IdentityCreateLink />
               <BooleanField source="is_admin" />
-              <BooleanField source="disabled" />
+              <TextField source="state" />
               <EditButton />
             </Datagrid>
           </List>
@@ -112,7 +113,10 @@ export const AccountEdit = withStyles(styles)(props => {
       <SimpleForm>
         <TextField label="Account ID" source="id" />
         <BooleanInput source="is_admin" />
-        <BooleanInput source="disabled" />
+        <SelectInput
+          source="state"
+          choices={[{ id: "enabled", name: "enabled" }, { id: "disabled", name: "disabled" }]}
+        />
 
         <ReferenceManyField label="Identity" target="_account_id" reference="identities">
           <Datagrid classes={{ rowCell: classes.noBorder, thead: classes.hide }}>
