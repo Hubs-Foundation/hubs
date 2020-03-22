@@ -1559,6 +1559,13 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.noop,
       priority: 1000
     }
+  ],
+  [sets.inspecting]: [
+    {
+      src: { value: inspectButtons },
+      dest: { value: paths.actions.stopInspecting },
+      xform: xforms.falling
+    }
   ]
 });
 
@@ -1739,13 +1746,6 @@ export const viveCosmosUserBindings = addSetsToBindings({
       dest: { value: paths.actions.rightHand.scalePenTip },
       xform: xforms.scaleExp(-0.005, 5),
       priority: 1
-    }
-  ],
-  [sets.inspecting]: [
-    {
-      src: { value: inspectButtons },
-      dest: { value: paths.actions.stopInspecting },
-      xform: xforms.falling
     }
   ]
 });
