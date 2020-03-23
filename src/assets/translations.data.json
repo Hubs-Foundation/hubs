@@ -376,7 +376,7 @@
     "interstitial.prompt": "Continue",
     "feedback.prompt": "🦆 Feedback ",
     "help.prompt": "Help",
-    "help.docs_url": "https://github.com/mozilla/hubs/wiki/Hubs-Features",
+    "help.docs_url": "https://hubs.mozilla.com/docs",
     "hide-ui.prompt": "Hide All",
     "discord.primary_tagline": "Share a virtual room with your community.\nWatch videos, play with 3D objects, or just hang out.",
     "discord.secondary_tagline": "No downloads or sign up. Full VR support too.",

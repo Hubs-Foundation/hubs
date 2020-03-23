@@ -350,7 +350,7 @@ export default class SettingsMenu extends Component {
                 </button>
                 <IfFeature name="show_controls_link">
                   <a
-                    href={configs.link("controls", "https://github.com/mozilla/hubs/wiki/Hubs-Controls")}
+                    href={configs.link("controls", "https://hubs.mozilla.com/docs/hubs-controls.html")}
                     target="_blank"
                     rel="noreferrer noopener"
                   >
