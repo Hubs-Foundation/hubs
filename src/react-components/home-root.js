@@ -203,6 +203,9 @@ class HomeRoot extends Component {
                       <FormattedMessage id="editor-name" />
                     </a>
                   </IfFeature>
+                  <a href="https://hubs.mozilla.com/docs" rel="noreferrer noopener">
+                    <FormattedMessage id="home.docs_link" />
+                  </a>
                   <IfFeature name="show_cloud">
                     <a href="https://hubs.mozilla.com/cloud" rel="noreferrer noopener">
                       <FormattedMessage id="home.cloud_link" />
