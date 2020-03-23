@@ -40,7 +40,7 @@ import AvatarUrlDialog from "./avatar-url-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
 import LinkDialog from "./link-dialog.js";
-import SafariDialog from "./safari-dialog.js";
+import InAppBrowserDialog from "./in-app-browser-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
 import RoomSettingsDialog from "./room-settings-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
@@ -148,7 +148,7 @@ class UIRoot extends Component {
     signInCompleteMessageId: PropTypes.string,
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
-    showSafariDialog: PropTypes.bool,
+    showInAppBrowserDialog: PropTypes.bool,
     showWebAssemblyDialog: PropTypes.bool,
     showOAuthDialog: PropTypes.bool,
     onCloseOAuthDialog: PropTypes.func,
@@ -219,8 +219,8 @@ class UIRoot extends Component {
   constructor(props) {
     super(props);
 
-    if (props.showSafariDialog) {
-      this.state.dialog = <SafariDialog closable={false} />;
+    if (props.showInAppBrowserDialog) {
+      this.state.dialog = <InAppBrowserDialog closable={false} />;
     }
     if (props.showWebAssemblyDialog) {
       this.state.dialog = <WebAssemblyUnsupportedDialog closable={false} />;
@@ -1424,7 +1424,7 @@ class UIRoot extends Component {
     const isLoading =
       !preload &&
       (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) &&
-      !(this.props.showSafariDialog || this.props.showWebAssemblyDialog);
+      !(this.props.showInAppBrowserDialog || this.props.showWebAssemblyDialog);
 
     const hasPush = navigator.serviceWorker && "PushManager" in window;
 
@@ -2055,7 +2055,7 @@ class UIRoot extends Component {
                   isStreaming={streaming}
                   toggleStreamerMode={this.toggleStreamerMode}
                   hubChannel={this.props.hubChannel}
-                  hubScene={this.props.hub.scene}
+                  hubScene={this.props.hub && this.props.hub.scene}
                   scene={this.props.scene}
                   showAsOverlay={showSettingsAsOverlay}
                   onCloseOverlay={() => exit2DInterstitialAndEnterVR(true)}
