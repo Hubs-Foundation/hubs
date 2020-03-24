@@ -1345,6 +1345,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const permsToken = oauthFlowPermsToken || data.perms_token;
       hubChannel.setPermissionsFromToken(permsToken);
 
+      const janusHost = data.hubs[0].host;
+
       scene.addEventListener("adapter-ready", async ({ detail: adapter }) => {
         // HUGE HACK Safari does not like it if the first peer seen does not immediately
         // send audio over its media stream. Otherwise, the stream doesn't work and stays
@@ -1373,6 +1375,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         const track = stream.getAudioTracks()[0];
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
+
+        adapter.setPeerConnectionConfig({
+          iceServers: [
+            { urls: `turn:${janusHost}:443?transport=tls`, username: "user", credential: "password" },
+            { urls: "stun:stun1.l.google.com:19302" }
+          ]
+        });
+
         hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
 
         // Stop the tone after we've connected, which seems to mitigate the issue without actually
