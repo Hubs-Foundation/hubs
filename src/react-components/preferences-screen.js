@@ -49,12 +49,6 @@ export default class PreferencesScreen extends Component {
     // TODO: Add search text field and sort rows by fuzzy search
     const general = [
       { key: "muteMicOnEntry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      {
-        key: "audioOutputMode",
-        prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-        options: [{ value: "panner", text: "Headphones" }, { value: "audio", text: "Speakers" }],
-        defaultString: "panner"
-      },
       { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       {
         key: "globalVoiceVolume",
