@@ -1378,7 +1378,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         adapter.setPeerConnectionConfig({
           iceServers: [
-            { urls: `turn:${janusHost}:443?transport=tls`, username: "user", credential: "password" },
+            { urls: `turns:${janusHost}:443?transport=tcp`, username: "user", credential: "password" },
             { urls: "stun:stun1.l.google.com:19302" }
           ]
         });
