@@ -274,6 +274,7 @@ const history = routerBaseName === "/" ? createMemoryHistory() : createBrowserHi
 window.APP.history = history;
 
 const qsVREntryType = qs.get("vr_entry_type");
+const forceTurn = qs.get("force_turn");
 
 function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
@@ -1375,13 +1376,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         const track = stream.getAudioTracks()[0];
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
-
-        adapter.setPeerConnectionConfig({
+        const peerConnectionConfig = {
           iceServers: [
             { urls: `turns:${janusHost}:443?transport=tcp`, username: "user", credential: "password" },
             { urls: "stun:stun1.l.google.com:19302" }
           ]
-        });
+        };
+
+        if (forceTurn) {
+          peerConnectionConfig.iceTransportPolicy = "relay";
+        }
+
+        adapter.setPeerConnectionConfig(peerConnectionConfig);
 
         hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
 
