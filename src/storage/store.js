@@ -82,7 +82,7 @@ export const SCHEMA = {
         disableStrafing: { type: "bool" },
         disableTeleporter: { type: "bool" },
         disableAutoPixelRatio: { type: "bool" },
-        movementSpeedModifier: { type: "number" },
+        movementSpeedModifier: { type: "number" }
       }
     },
 
