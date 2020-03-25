@@ -268,7 +268,6 @@
     "commands.debug": "Toggle physics debug rendering.",
     "commands.vrstats": "Toggle stats in VR.",
     "preferences.muteMicOnEntry": "Mute microphone on entry",
-    "preferences.audioOutputMode": "Audio Output mode",
     "preferences.enableOnScreenJoystickLeft": "Enable left on-screen joystick for moving around",
     "preferences.enableOnScreenJoystickRight": "Enable right on-screen joystick for looking around",
     "preferences.onlyShowNametagsInFreeze": "Only show nametags while frozen",

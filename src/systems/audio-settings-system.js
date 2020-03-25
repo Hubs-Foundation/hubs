@@ -84,6 +84,10 @@ AFRAME.registerComponent("audio-source", {
   init() {
     this.audioSource = null;
 
+    if (window.APP.store.state.preferences.audioOutputMode === "audio") {
+      window.APP.store.state.preferences.audioOutputMode = "panner"; //hack to always reset to "panner"
+    }
+
     if (this.data.type === "avatar") {
       this.onSoundSourceSet = this.onSoundSourceSet.bind(this);
       this.el.addEventListener("sound-source-set", this.onSoundSourceSet);

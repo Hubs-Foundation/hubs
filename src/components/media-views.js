@@ -13,6 +13,7 @@ import { promisifyWorker } from "../utils/promisify-worker.js";
 import pdfjs from "pdfjs-dist";
 import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
+import { THREE } from "aframe";
 
 // Using external CDN to reduce build size
 if (!pdfjs.GlobalWorkerOptions.workerSrc) {
@@ -262,6 +263,8 @@ AFRAME.registerComponent("media-video", {
     this.changeVolumeBy = this.changeVolumeBy.bind(this);
     this.togglePlaying = this.togglePlaying.bind(this);
 
+    this.distanceBasedAttenuation = 1;
+
     this.lastUpdate = 0;
     this.videoMutedAt = 0;
     this.localSnapCount = 0;
@@ -443,7 +446,7 @@ AFRAME.registerComponent("media-video", {
     }
 
     // Volume is local, always update it
-    if (this.audio) {
+    if (this.audio && this.audioOutputMode === "panner") {
       const globalMediaVolume =
         window.APP.store.state.preferences.globalMediaVolume !== undefined
           ? window.APP.store.state.preferences.globalMediaVolume
@@ -496,9 +499,11 @@ AFRAME.registerComponent("media-video", {
     if (this.data.audioType === "pannernode") {
       this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
       this.setPositionalAudioProperties();
+      this.distanceBasedAttenuation = 1;
     } else {
       this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
     }
+    window.foo = this.audio;
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);
@@ -821,61 +826,77 @@ AFRAME.registerComponent("media-video", {
     );
   },
 
-  tick() {
-    if (!this.video) return;
+  tick: (() => {
+    const positionA = new THREE.Vector3();
+    const positionB = new THREE.Vector3();
+    return function() {
+      if (!this.video) return;
 
-    const userinput = this.el.sceneEl.systems.userinput;
-    const interaction = this.el.sceneEl.systems.interaction;
-    const volumeModRight = userinput.get(paths.actions.cursor.right.mediaVolumeMod);
-    if (interaction.state.rightRemote.hovered === this.el && volumeModRight) {
-      this.changeVolumeBy(volumeModRight);
-    }
-    const volumeModLeft = userinput.get(paths.actions.cursor.left.mediaVolumeMod);
-    if (interaction.state.leftRemote.hovered === this.el && volumeModLeft) {
-      this.changeVolumeBy(volumeModLeft);
-    }
-
-    const isHeld = interaction.isHeld(this.el);
-
-    if (this.wasHeld && !isHeld) {
-      this.localSnapCount = 0;
-    }
-
-    this.wasHeld = isHeld;
-
-    if (this.hoverMenu && this.hoverMenu.object3D.visible && !this.videoIsLive) {
-      this.timeLabel.setAttribute(
-        "text",
-        "value",
-        `${timeFmt(this.video.currentTime)} / ${timeFmt(this.video.duration)}`
-      );
-    }
-
-    // If a known non-live video is currently playing and we own it, send out time updates
-    if (
-      !this.data.videoPaused &&
-      this.videoIsLive === false &&
-      this.networkedEl &&
-      NAF.utils.isMine(this.networkedEl)
-    ) {
-      const now = performance.now();
-      if (now - this.lastUpdate > this.data.tickRate) {
-        this.el.setAttribute("media-video", "time", this.video.currentTime);
-        this.lastUpdate = now;
+      const userinput = this.el.sceneEl.systems.userinput;
+      const interaction = this.el.sceneEl.systems.interaction;
+      const volumeModRight = userinput.get(paths.actions.cursor.right.mediaVolumeMod);
+      if (interaction.state.rightRemote.hovered === this.el && volumeModRight) {
+        this.changeVolumeBy(volumeModRight);
       }
-    }
+      const volumeModLeft = userinput.get(paths.actions.cursor.left.mediaVolumeMod);
+      if (interaction.state.leftRemote.hovered === this.el && volumeModLeft) {
+        this.changeVolumeBy(volumeModLeft);
+      }
 
-    if (this.audio) {
-      const audioOutputMode = window.APP.store.state.preferences.audioOutputMode === "panner" ? "panner" : "audio";
+      const isHeld = interaction.isHeld(this.el);
+
+      if (this.wasHeld && !isHeld) {
+        this.localSnapCount = 0;
+      }
+
+      this.wasHeld = isHeld;
+
+      if (this.hoverMenu && this.hoverMenu.object3D.visible && !this.videoIsLive) {
+        this.timeLabel.setAttribute(
+          "text",
+          "value",
+          `${timeFmt(this.video.currentTime)} / ${timeFmt(this.video.duration)}`
+        );
+      }
+
+      // If a known non-live video is currently playing and we own it, send out time updates
       if (
-        (audioOutputMode === "panner" && this.data.audioType !== "pannernode") ||
-        (audioOutputMode === "audio" && this.data.audioType !== "audionode")
+        !this.data.videoPaused &&
+        this.videoIsLive === false &&
+        this.networkedEl &&
+        NAF.utils.isMine(this.networkedEl)
       ) {
-        this.data.audioType = audioOutputMode === "panner" ? "pannernode" : "audionode";
-        this.setupAudio();
+        const now = performance.now();
+        if (now - this.lastUpdate > this.data.tickRate) {
+          this.el.setAttribute("media-video", "time", this.video.currentTime);
+          this.lastUpdate = now;
+        }
       }
-    }
-  },
+
+      if (this.audio) {
+        const audioOutputMode = window.APP.store.state.preferences.audioOutputMode === "audio" ? "audio" : "panner";
+        if (
+          (audioOutputMode === "panner" && this.data.audioType !== "pannernode") ||
+          (audioOutputMode === "audio" && this.data.audioType !== "audionode")
+        ) {
+          this.data.audioType = audioOutputMode === "panner" ? "pannernode" : "audionode";
+          this.setupAudio();
+        }
+
+        if (audioOutputMode === "audio") {
+          this.el.object3D.getWorldPosition(positionA);
+          this.el.sceneEl.camera.getWorldPosition(positionB);
+          const distance = positionA.distanceTo(positionB);
+          this.distanceBasedAttenuation = Math.min(1, 10 / Math.max(1, distance * distance));
+          const globalMediaVolume =
+            window.APP.store.state.preferences.globalMediaVolume !== undefined
+              ? window.APP.store.state.preferences.globalMediaVolume
+              : 100;
+          this.audio.gain.gain.value = (globalMediaVolume / 100) * this.data.volume * this.distanceBasedAttenuation;
+        }
+      }
+    };
+  })(),
 
   cleanUp() {
     if (this.mesh && this.mesh.material) {
