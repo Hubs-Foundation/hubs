@@ -1003,11 +1003,21 @@ class UIRoot extends Component {
       );
     } else {
       const reason = this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
+      const tcpUrl = new URL(document.location.toString());
+      const tcpParams = new URLSearchParams(tcpUrl.search);
+      tcpParams.set("force_turn", true);
+      tcpUrl.search = tcpParams.toString();
+
       const exitSubtitleId = `exit.subtitle.${reason || "exited"}`;
       subtitle = (
         <div>
           <FormattedMessage id={exitSubtitleId} />
           <p />
+          {this.props.roomUnavailableReason === "connect_error" && (
+            <div>
+              You can try <a href={tcpUrl.toString()}>connecting via TCP</a>, which may work better on some networks.
+            </div>
+          )}
           {!["left", "disconnected", "scene_error"].includes(this.props.roomUnavailableReason) && (
             <div>
               You can also <a href="/">create a new room</a>
