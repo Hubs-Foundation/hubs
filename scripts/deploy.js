@@ -101,7 +101,7 @@ const getTs = (() => {
   step.text = "Preparing Deploy.";
 
   step.text = "Packaging Build.";
-  await tar.c({ sync: true, gzip: true, C: path.join(__dirname, "..", "dist"), file: "_build.tar.gz" }, ["."]);
+  tar.c({ sync: true, gzip: true, C: path.join(__dirname, "..", "dist"), file: "_build.tar.gz" }, ["."]);
   step.text = `Uploading Build ${buildEnv.BUILD_VERSION}.`;
 
   let uploadedUrl;
