@@ -10,8 +10,9 @@ function findHandCollisionTargetForHand(bodyHelper) {
   const handCollisions = physicsSystem.getCollisions(bodyHelper.uuid);
   if (handCollisions) {
     for (let i = 0; i < handCollisions.length; i++) {
-      const object3D = physicsSystem.bodyUuidToData.get(handCollisions[i]).object3D;
-      if (isTagged(object3D.el, "isHandCollisionTarget")) {
+      const bodyData = physicsSystem.bodyUuidToData.get(handCollisions[i]);
+      const object3D = bodyData && bodyData.object3D;
+      if (object3D && isTagged(object3D.el, "isHandCollisionTarget")) {
         return object3D.el;
       }
     }

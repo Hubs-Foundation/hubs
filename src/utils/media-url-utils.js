@@ -5,6 +5,7 @@ const nonCorsProxyDomains = (configs.NON_CORS_PROXY_DOMAINS || "").split(",");
 if (configs.CORS_PROXY_SERVER) {
   nonCorsProxyDomains.push(configs.CORS_PROXY_SERVER);
 }
+nonCorsProxyDomains.push(document.location.hostname);
 
 const commonKnownContentTypes = {
   gltf: "model/gltf",

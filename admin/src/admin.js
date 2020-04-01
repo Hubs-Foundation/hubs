@@ -19,7 +19,7 @@ import { AdminMenu } from "./react-components/admin-menu";
 import { SceneList, SceneEdit } from "./react-components/scenes";
 import { SceneListingList, SceneListingEdit } from "./react-components/scene-listings";
 import { AvatarList, AvatarEdit } from "./react-components/avatars";
-import { IdentityCreate, IdentityEdit } from "./react-components/identities";
+import { IdentityList, IdentityCreate, IdentityEdit } from "./react-components/identities";
 import { AvatarListingList, AvatarListingEdit } from "./react-components/avatar-listings";
 import { FeaturedSceneListingList, FeaturedSceneListingEdit } from "./react-components/featured-scene-listings";
 import { PendingSceneList } from "./react-components/pending-scenes";
@@ -140,9 +140,9 @@ class AdminUI extends Component {
           />
 
           <Resource name="accounts" list={AccountList} edit={AccountEdit} />
+          <Resource name="identities" list={IdentityList} create={IdentityCreate} edit={IdentityEdit} />
           <Resource name="scenes" list={SceneList} edit={SceneEdit} />
           <Resource name="avatars" list={AvatarList} create={IdentityCreate} edit={AvatarEdit} />
-          <Resource name="identities" create={IdentityCreate} edit={IdentityEdit} />
           <Resource name="owned_files" />
 
           <Resource name="projects" list={ProjectList} show={ProjectShow} />
