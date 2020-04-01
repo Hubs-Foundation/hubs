@@ -6,6 +6,7 @@ import pdfjs from "pdfjs-dist";
 // Read configs from global variable if available, otherwise use the process.env injected from build.
 const configs = {};
 let isAdmin = false;
+let setWorkerSrc = false;
 
 [
   "RETICULUM_SERVER",
@@ -26,8 +27,15 @@ let isAdmin = false;
 
     // Using external CDN to reduce build size
     pdfjs.GlobalWorkerOptions.workerSrc = `${configs[x]}../assets/js/pdfjs-dist@2.1.266/build/pdf.worker.js`;
+    setWorkerSrc = true;
   }
 });
+
+if (!setWorkerSrc) {
+  pdfjs.GlobalWorkerOptions.workerSrc = `${
+    process.env.BASE_ASSETS_PATH
+  }../assets/js/pdfjs-dist@2.1.266/build/pdf.worker.js`;
+}
 
 // Also include configs that reticulum injects as a script in the page head.
 
