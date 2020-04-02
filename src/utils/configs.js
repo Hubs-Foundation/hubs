@@ -56,14 +56,28 @@ if (window.APP_CONFIG) {
   };
 }
 
+const appConfigSchema = process.env.APP_CONFIG_SCHEMA;
+
 const isLocalDevelopment = process.env.NODE_ENV === "development";
 
 configs.feature = featureName => {
+  if (isLocalDevelopment && !process.env.USE_FEATURE_CONFIG) {
+    // This code will be removed in production
+    if (appConfigSchema && appConfigSchema.features && appConfigSchema.features[featureName]) {
+      const valueType = appConfigSchema.features[featureName].type;
+
+      if (valueType === "boolean") {
+        return true;
+      } else {
+        return undefined;
+      }
+    }
+  }
+
   const value = configs.APP_CONFIG.features[featureName];
   if (typeof value === "boolean" || featureName === "enable_spoke") {
-    const enableAll = isLocalDevelopment && !process.env.USE_FEATURE_CONFIG;
     const forceEnableSpoke = featureName === "enable_spoke" && isAdmin;
-    return forceEnableSpoke || enableAll || value;
+    return forceEnableSpoke || value;
   } else {
     return value;
   }
