@@ -361,13 +361,13 @@ export default class SettingsMenu extends Component {
             )}
             {!hideExtranousItems && (
               <div className={classNames([styles.bottomLinks])}>
-                <IfFeature name="show_features_link">
+                <IfFeature name="show_docs_link">
                   <a
-                    href={configs.link("features", messages["help.docs_url"])}
+                    href={configs.link("docs", "https://hubs.mozilla.com/docs")}
                     target="_blank"
                     rel="noreferrer noopener"
                   >
-                    <FormattedMessage id="settings.features" />
+                    <FormattedMessage id="settings.help" />
                   </a>
                 </IfFeature>
                 <IfFeature name="show_community_link">
