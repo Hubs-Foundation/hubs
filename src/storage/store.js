@@ -67,6 +67,7 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         muteMicOnEntry: { type: "bool" },
+        audioOutputMode: { type: "string" },
         enableOnScreenJoystickLeft: { type: "bool" },
         enableOnScreenJoystickRight: { type: "bool" },
         onlyShowNametagsInFreeze: { type: "bool" },

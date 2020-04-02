@@ -12,7 +12,17 @@ export default class ChatCommandHelp extends Component {
   };
 
   render() {
-    const commands = ["leave", "grow", "shrink", "duck", "debug", "vrstats", "scene <scene url>", "rename <new name>"];
+    const commands = [
+      "leave",
+      "grow",
+      "shrink",
+      "duck",
+      "debug",
+      "vrstats",
+      "scene <scene url>",
+      "rename <new name>",
+      "audiomode"
+    ];
 
     if (window.APP.hubChannel && window.APP.hubChannel.can("fly")) {
       commands.push("fly");
