@@ -445,7 +445,7 @@ AFRAME.registerComponent("media-video", {
     }
 
     // Volume is local, always update it
-    if (this.audio && this.audioOutputMode === "panner") {
+    if (this.audio && window.APP.store.state.preferences.audioOutputMode !== "audio") {
       const globalMediaVolume =
         window.APP.store.state.preferences.globalMediaVolume !== undefined
           ? window.APP.store.state.preferences.globalMediaVolume
