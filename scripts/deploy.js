@@ -44,6 +44,7 @@ const getTs = (() => {
   buildEnv.BUILD_VERSION = `1.0.0.${version}`;
   buildEnv.ITA_SERVER = "";
   buildEnv.POSTGREST_SERVER = "";
+  buildEnv.CONFIGURABLE_SERVICES = "janus-gateway,reticulum,hubs,spoke";
 
   const env = Object.assign(process.env, buildEnv);
 
