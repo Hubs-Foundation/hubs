@@ -24,7 +24,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
     this.objWorldPos = new THREE.Vector3();
 
     waitForDOMContentLoaded().then(() => {
-      this.cam = document.getElementById("avatar-pov-node").object3D;
+      this.cam = document.getElementById("viewing-camera").object3D;
       this.updateVisibility();
     });
 
@@ -99,8 +99,12 @@ AFRAME.registerComponent("visibility-while-frozen", {
 
     const allowed = !!(
       (!this.data.withPermission && !this.data.withoutPermission) ||
-      (this.data.withPermission && window.APP.hubChannel.canOrWillIfCreator(this.data.withPermission)) ||
-      (this.data.withoutPermission && !window.APP.hubChannel.canOrWillIfCreator(this.data.withoutPermission))
+      (this.data.withPermission &&
+        window.APP.hubChannel &&
+        window.APP.hubChannel.canOrWillIfCreator(this.data.withPermission)) ||
+      (this.data.withoutPermission &&
+        window.APP.hubChannel &&
+        !window.APP.hubChannel.canOrWillIfCreator(this.data.withoutPermission))
     );
 
     let shouldBeVisible =

@@ -5,13 +5,14 @@ import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
 import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js/dist/hls.light.js";
-import { addAndArrangeMedia, createImageTexture } from "../utils/media-utils";
+import { addAndArrangeMedia, createImageTexture, createBasisTexture } from "../utils/media-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import pdfjs from "pdfjs-dist";
 import { applyPersistentSync } from "../utils/permissions-utils";
+import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
 
 // Using external CDN to reduce build size
 if (!pdfjs.GlobalWorkerOptions.workerSrc) {
@@ -139,7 +140,10 @@ function disposeTexture(texture) {
   }
 
   if (texture.hls) {
+    texture.hls.stopLoad();
+    texture.hls.detachMedia();
     texture.hls.destroy();
+    texture.hls = null;
   }
 
   texture.dispose();
@@ -257,6 +261,8 @@ AFRAME.registerComponent("media-video", {
     this.snap = this.snap.bind(this);
     this.changeVolumeBy = this.changeVolumeBy.bind(this);
     this.togglePlaying = this.togglePlaying.bind(this);
+
+    this.distanceBasedAttenuation = 1;
 
     this.lastUpdate = 0;
     this.videoMutedAt = 0;
@@ -439,7 +445,7 @@ AFRAME.registerComponent("media-video", {
     }
 
     // Volume is local, always update it
-    if (this.audio) {
+    if (this.audio && window.APP.store.state.preferences.audioOutputMode !== "audio") {
       const globalMediaVolume =
         window.APP.store.state.preferences.globalMediaVolume !== undefined
           ? window.APP.store.state.preferences.globalMediaVolume
@@ -483,6 +489,35 @@ AFRAME.registerComponent("media-video", {
     return this.updateSrc(oldData);
   },
 
+  setupAudio() {
+    if (this.audio) {
+      this.audio.disconnect();
+      this.el.removeObject3D("sound");
+    }
+
+    if (this.data.audioType === "pannernode") {
+      this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+      this.setPositionalAudioProperties();
+      this.distanceBasedAttenuation = 1;
+    } else {
+      this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
+    }
+    window.foo = this.audio;
+
+    this.audio.setNodeSource(this.mediaElementAudioSource);
+    this.el.setObject3D("sound", this.audio);
+  },
+
+  setPositionalAudioProperties() {
+    this.audio.setDistanceModel(this.data.distanceModel);
+    this.audio.setRolloffFactor(this.data.rolloffFactor);
+    this.audio.setRefDistance(this.data.refDistance);
+    this.audio.setMaxDistance(this.data.maxDistance);
+    this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
+    this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
+    this.audio.panner.coneOuterGain = this.data.coneOuterGain;
+  },
+
   async updateSrc(oldData) {
     const { src, linkedVideoTexture, linkedAudioSource, linkedMediaElementAudioSource } = this.data;
 
@@ -499,6 +534,9 @@ AFRAME.registerComponent("media-video", {
         audioSourceEl = linkedAudioSource;
       } else {
         ({ texture, audioSourceEl } = await this.createVideoTextureAudioSourceEl());
+        if (getCurrentMirroredMedia() === this.el) {
+          await refreshMediaMirror();
+        }
       }
 
       // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
@@ -513,26 +551,10 @@ AFRAME.registerComponent("media-video", {
         // iOS video audio is broken, see: https://github.com/mozilla/hubs/issues/1797
         if (!isIOS) {
           // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
-          const mediaElementAudioSource =
+          this.mediaElementAudioSource =
             linkedMediaElementAudioSource ||
             this.el.sceneEl.audioListener.context.createMediaElementSource(audioSourceEl);
-
-          if (this.data.audioType === "pannernode") {
-            this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-            this.audio.setDistanceModel(this.data.distanceModel);
-            this.audio.setRolloffFactor(this.data.rolloffFactor);
-            this.audio.setRefDistance(this.data.refDistance);
-            this.audio.setMaxDistance(this.data.maxDistance);
-            this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
-            this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
-            this.audio.panner.coneOuterGain = this.data.coneOuterGain;
-          } else {
-            this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
-          }
-
-          this.mediaElementAudioSource = mediaElementAudioSource;
-          this.audio.setNodeSource(mediaElementAudioSource);
-          this.el.setObject3D("sound", this.audio);
+          this.setupAudio();
         }
       }
 
@@ -549,6 +571,7 @@ AFRAME.registerComponent("media-video", {
             this.updateHoverMenu();
 
             if (!videoWasLive && this.videoIsLive) {
+              this.el.emit("video_is_live_update", { videoIsLive: this.videoIsLive });
               // We just determined the video is live (there can be a delay due to autoplay issues, etc)
               // so catch it up to HEAD.
               if (!isFirefoxReality) {
@@ -565,6 +588,7 @@ AFRAME.registerComponent("media-video", {
         }
       } else {
         this.videoIsLive = this.video.duration === Infinity;
+        this.el.emit("video_is_live_update", { videoIsLive: this.videoIsLive });
         this.updateHoverMenu();
       }
 
@@ -801,50 +825,77 @@ AFRAME.registerComponent("media-video", {
     );
   },
 
-  tick() {
-    if (!this.video) return;
+  tick: (() => {
+    const positionA = new THREE.Vector3();
+    const positionB = new THREE.Vector3();
+    return function() {
+      if (!this.video) return;
 
-    const userinput = this.el.sceneEl.systems.userinput;
-    const interaction = this.el.sceneEl.systems.interaction;
-    const volumeModRight = userinput.get(paths.actions.cursor.right.mediaVolumeMod);
-    if (interaction.state.rightRemote.hovered === this.el && volumeModRight) {
-      this.changeVolumeBy(volumeModRight);
-    }
-    const volumeModLeft = userinput.get(paths.actions.cursor.left.mediaVolumeMod);
-    if (interaction.state.leftRemote.hovered === this.el && volumeModLeft) {
-      this.changeVolumeBy(volumeModLeft);
-    }
-
-    const isHeld = interaction.isHeld(this.el);
-
-    if (this.wasHeld && !isHeld) {
-      this.localSnapCount = 0;
-    }
-
-    this.wasHeld = isHeld;
-
-    if (this.hoverMenu && this.hoverMenu.object3D.visible && !this.videoIsLive) {
-      this.timeLabel.setAttribute(
-        "text",
-        "value",
-        `${timeFmt(this.video.currentTime)} / ${timeFmt(this.video.duration)}`
-      );
-    }
-
-    // If a known non-live video is currently playing and we own it, send out time updates
-    if (
-      !this.data.videoPaused &&
-      this.videoIsLive === false &&
-      this.networkedEl &&
-      NAF.utils.isMine(this.networkedEl)
-    ) {
-      const now = performance.now();
-      if (now - this.lastUpdate > this.data.tickRate) {
-        this.el.setAttribute("media-video", "time", this.video.currentTime);
-        this.lastUpdate = now;
+      const userinput = this.el.sceneEl.systems.userinput;
+      const interaction = this.el.sceneEl.systems.interaction;
+      const volumeModRight = userinput.get(paths.actions.cursor.right.mediaVolumeMod);
+      if (interaction.state.rightRemote.hovered === this.el && volumeModRight) {
+        this.changeVolumeBy(volumeModRight);
       }
-    }
-  },
+      const volumeModLeft = userinput.get(paths.actions.cursor.left.mediaVolumeMod);
+      if (interaction.state.leftRemote.hovered === this.el && volumeModLeft) {
+        this.changeVolumeBy(volumeModLeft);
+      }
+
+      const isHeld = interaction.isHeld(this.el);
+
+      if (this.wasHeld && !isHeld) {
+        this.localSnapCount = 0;
+      }
+
+      this.wasHeld = isHeld;
+
+      if (this.hoverMenu && this.hoverMenu.object3D.visible && !this.videoIsLive) {
+        this.timeLabel.setAttribute(
+          "text",
+          "value",
+          `${timeFmt(this.video.currentTime)} / ${timeFmt(this.video.duration)}`
+        );
+      }
+
+      // If a known non-live video is currently playing and we own it, send out time updates
+      if (
+        !this.data.videoPaused &&
+        this.videoIsLive === false &&
+        this.networkedEl &&
+        NAF.utils.isMine(this.networkedEl)
+      ) {
+        const now = performance.now();
+        if (now - this.lastUpdate > this.data.tickRate) {
+          this.el.setAttribute("media-video", "time", this.video.currentTime);
+          this.lastUpdate = now;
+        }
+      }
+
+      if (this.audio) {
+        const audioOutputMode = window.APP.store.state.preferences.audioOutputMode === "audio" ? "audio" : "panner";
+        if (
+          (audioOutputMode === "panner" && this.data.audioType !== "pannernode") ||
+          (audioOutputMode === "audio" && this.data.audioType !== "audionode")
+        ) {
+          this.data.audioType = audioOutputMode === "panner" ? "pannernode" : "audionode";
+          this.setupAudio();
+        }
+
+        if (audioOutputMode === "audio") {
+          this.el.object3D.getWorldPosition(positionA);
+          this.el.sceneEl.camera.getWorldPosition(positionB);
+          const distance = positionA.distanceTo(positionB);
+          this.distanceBasedAttenuation = Math.min(1, 10 / Math.max(1, distance * distance));
+          const globalMediaVolume =
+            window.APP.store.state.preferences.globalMediaVolume !== undefined
+              ? window.APP.store.state.preferences.globalMediaVolume
+              : 100;
+          this.audio.gain.gain.value = (globalMediaVolume / 100) * this.data.volume * this.distanceBasedAttenuation;
+        }
+      }
+    };
+  })(),
 
   cleanUp() {
     if (this.mesh && this.mesh.material) {
@@ -856,6 +907,10 @@ AFRAME.registerComponent("media-video", {
 
   remove() {
     this.cleanUp();
+
+    if (this.mesh) {
+      this.el.removeObject3D("mesh");
+    }
 
     if (this._audioSyncInterval) {
       clearInterval(this._audioSyncInterval);
@@ -949,6 +1004,8 @@ AFRAME.registerComponent("media-image", {
           let promise;
           if (contentType.includes("image/gif")) {
             promise = createGIFTexture(src);
+          } else if (contentType.includes("image/basis")) {
+            promise = createBasisTexture(src);
           } else if (contentType.startsWith("image/")) {
             promise = createImageTexture(src);
           } else {
@@ -1014,7 +1071,11 @@ AFRAME.registerComponent("media-image", {
 
     // We only support transparency on gifs. Other images will support cutout as part of batching, but not alpha transparency for now
     this.mesh.material.transparent =
-      !this.data.batch || texture == errorTexture || this.data.contentType.includes("image/gif");
+      !this.data.batch ||
+      texture == errorTexture ||
+      this.data.contentType.includes("image/gif") ||
+      (texture.image && texture.image.hasAlpha);
+
     this.mesh.material.map = texture;
     this.mesh.material.needsUpdate = true;
 
@@ -1022,7 +1083,7 @@ AFRAME.registerComponent("media-image", {
       scaleToAspectRatio(this.el, ratio);
     }
 
-    if (texture !== errorTexture && this.data.batch) {
+    if (texture !== errorTexture && this.data.batch && !texture.isCompressedTexture) {
       batchManagerSystem.addObject(this.mesh);
     }
 

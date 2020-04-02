@@ -14,13 +14,12 @@ AFRAME.registerComponent("loop-animation", {
 
   init() {
     this.mixerEl = findAncestorWithComponent(this.el, "animation-mixer");
+    this.currentActions = [];
 
     if (!this.mixerEl) {
       console.warn("loop-animation component could not find an animation-mixer in its ancestors.");
       return;
     }
-
-    this.updateClip();
   },
 
   update(oldData) {
@@ -29,8 +28,10 @@ AFRAME.registerComponent("loop-animation", {
         this.updateClip();
       }
 
-      if (oldData.paused !== this.data.paused && this.currentAction) {
-        this.currentAction.paused = this.data.paused;
+      if (oldData.paused !== this.data.paused) {
+        for (let i = 0; i < this.currentActions.length; i++) {
+          this.currentActions[i].paused = this.data.paused;
+        }
       }
     }
   },
@@ -43,28 +44,30 @@ AFRAME.registerComponent("loop-animation", {
       return;
     }
 
-    let clip;
-
+    let clips;
     if (clipName !== "") {
-      clip = animations.find(({ name }) => name === clipName);
+      clips = clipName.split(",").map(n => animations.find(({ name }) => name === n));
     } else {
-      clip = animations[activeClipIndex];
+      clips = [animations[activeClipIndex]];
     }
 
-    if (!clip) {
-      return;
-    }
+    if (!(clips && clips.length)) return;
 
-    const action = mixer.clipAction(clip, this.el.object3D);
-    action.enabled = true;
-    action.setLoop(THREE.LoopRepeat, Infinity).play();
-    this.currentAction = action;
+    this.currentActions.length = 0;
+
+    for (let i = 0; i < clips.length; i++) {
+      const action = mixer.clipAction(clips[i], this.el.object3D);
+      action.enabled = true;
+      action.setLoop(THREE.LoopRepeat, Infinity).play();
+      this.currentActions.push(action);
+    }
   },
 
   destroy() {
-    if (this.currentAction) {
-      this.currentAction.enabled = false;
-      this.currentAction.stop();
+    for (let i = 0; i < this.currentActions.length; i++) {
+      this.currentActions[i].enabled = false;
+      this.currentActions[i].stop();
     }
+    this.currentActions.length = 0;
   }
 });

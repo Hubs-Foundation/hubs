@@ -20,10 +20,15 @@ const calculateDisplacementToDesiredPOV = (function() {
   const translationCoordinateSpace = new THREE.Matrix4();
   const translated = new THREE.Matrix4();
   const localTranslation = new THREE.Matrix4();
-  return function calculateDisplacementToDesiredPOV(povMat4, fly, localDisplacement, displacementToDesiredPOV) {
+  return function calculateDisplacementToDesiredPOV(
+    povMat4,
+    allowVerticalMovement,
+    localDisplacement,
+    displacementToDesiredPOV
+  ) {
     localTranslation.makeTranslation(localDisplacement.x, localDisplacement.y, localDisplacement.z);
     translationCoordinateSpace.extractRotation(povMat4);
-    if (!fly) {
+    if (!allowVerticalMovement) {
       affixToWorldUp(translationCoordinateSpace, translationCoordinateSpace);
     }
     translated.copy(translationCoordinateSpace).multiply(localTranslation);
@@ -87,7 +92,8 @@ export class CharacterControllerSystem {
       targetForHead.y += this.avatarPOV.object3D.position.y;
       deltaFromHeadToTargetForHead.copy(targetForHead).sub(head);
       targetForRig.copy(rig).add(deltaFromHeadToTargetForHead);
-      this.findPositionOnNavMesh(targetForRig, targetForRig, this.avatarRig.object3D.position, true);
+      const navMeshExists = NAV_ZONE in this.scene.systems.nav.pathfinder.zones;
+      this.findPositionOnNavMesh(targetForRig, targetForRig, this.avatarRig.object3D.position, navMeshExists);
       this.avatarRig.object3D.matrixNeedsUpdate = true;
     };
   })();
@@ -110,14 +116,16 @@ export class CharacterControllerSystem {
       }
       inMat4Copy.copy(inMat4);
       rotateInPlaceAroundWorldUp(inMat4Copy, Math.PI, finalPOV);
-      if (snapToNavMesh) {
+      const navMeshExists = NAV_ZONE in this.scene.systems.nav.pathfinder.zones;
+      if (!navMeshExists && snapToNavMesh) {
+        console.warn("Tried to travel to a waypoint that wants to snap to the nav mesh, but there is no nav mesh");
+      }
+      if (navMeshExists && snapToNavMesh) {
         inPosition.setFromMatrixPosition(inMat4Copy);
         this.findPositionOnNavMesh(inPosition, inPosition, outPosition, true);
         finalPOV.setPosition(outPosition);
-        translation.makeTranslation(0, getCurrentPlayerHeight(), -0.15);
-      } else {
-        translation.makeTranslation(0, 1.6, -0.15);
       }
+      translation.makeTranslation(0, getCurrentPlayerHeight(), -0.15);
       finalPOV.multiply(translation);
       if (willMaintainInitialOrientation) {
         initialOrientation.extractRotation(this.avatarPOV.object3D.matrixWorld);
@@ -148,8 +156,12 @@ export class CharacterControllerSystem {
     const waypointPosition = new THREE.Vector3();
     const v = new THREE.Vector3();
 
+    let uiRoot;
     return function tick(t, dt) {
-      if (!this.scene.is("entered")) return;
+      const entered = this.scene.is("entered");
+      uiRoot = uiRoot || document.getElementById("ui-root");
+      const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
+      if (!isGhost && !entered) return;
       const vrMode = this.scene.is("vr-mode");
       this.sfx = this.sfx || this.scene.systems["hubs-systems"].soundEffectsSystem;
       this.waypointSystem = this.waypointSystem || this.scene.systems["hubs-systems"].waypointSystem;
@@ -259,6 +271,7 @@ export class CharacterControllerSystem {
 
       newPOV.copy(snapRotatedPOV);
 
+      const navMeshExists = NAV_ZONE in this.scene.systems.nav.pathfinder.zones;
       if (!this.isMotionDisabled) {
         const playerScale = v.setFromMatrixColumn(this.avatarPOV.object3D.matrixWorld, 1).length();
         const triedToMove = this.relativeMotion.lengthSq() > 0.000001;
@@ -266,7 +279,7 @@ export class CharacterControllerSystem {
         if (triedToMove) {
           calculateDisplacementToDesiredPOV(
             snapRotatedPOV,
-            this.fly,
+            this.fly || !navMeshExists,
             this.relativeMotion.multiplyScalar(
               ((userinput.get(paths.actions.boost) ? 2 : 1) * BASE_SPEED * Math.sqrt(playerScale) * dt) / 1000
             ),
@@ -279,7 +292,7 @@ export class CharacterControllerSystem {
         }
 
         const shouldRecomputeNavGroupAndNavNode = didStopFlying || this.shouldLandWhenPossible;
-        const shouldResnapToNavMesh = shouldRecomputeNavGroupAndNavNode || triedToMove;
+        const shouldResnapToNavMesh = navMeshExists && (shouldRecomputeNavGroupAndNavNode || triedToMove);
 
         let squareDistNavMeshCorrection = 0;
 
@@ -380,5 +393,14 @@ export class CharacterControllerSystem {
       this.navNode = pathfinder.clampStep(start, end, this.navNode, NAV_ZONE, this.navGroup, outPos);
     }
     return outPos;
+  }
+
+  enableFly(enabled) {
+    if (enabled && window.APP.hubChannel && window.APP.hubChannel.can("fly")) {
+      this.fly = true;
+    } else {
+      this.fly = false;
+    }
+    return this.fly;
   }
 }

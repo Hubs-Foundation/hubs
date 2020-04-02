@@ -1,5 +1,6 @@
 import nipplejs from "nipplejs";
 import styles from "./virtual-gamepad-controls.css";
+const HIDDEN_JOYSTICK_STYLE = `${styles.mockJoystick}__hidden`;
 
 /**
  * Instantiates 2D virtual gamepads and emits associated events.
@@ -22,27 +23,35 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
 
     this.mockJoystickContainer = document.createElement("div");
     this.mockJoystickContainer.classList.add(styles.mockJoystickContainer);
-    const leftMock = document.createElement("div");
-    leftMock.classList.add(styles.mockJoystick);
-    const leftMockSmall = document.createElement("div");
-    leftMockSmall.classList.add(styles.mockJoystick, styles.inner);
-    leftMock.appendChild(leftMockSmall);
-    this.mockJoystickContainer.appendChild(leftMock);
-    const rightMock = document.createElement("div");
-    rightMock.classList.add(styles.mockJoystick);
-    const rightMockSmall = document.createElement("div");
-    rightMockSmall.classList.add(styles.mockJoystick, styles.inner);
-    rightMock.appendChild(rightMockSmall);
-    this.mockJoystickContainer.appendChild(rightMock);
-    document.body.appendChild(this.mockJoystickContainer);
+    this.leftMock = document.createElement("div");
+    this.leftMock.classList.add(styles.mockJoystick);
+    this.leftMockSmall = document.createElement("div");
+    this.leftMockSmall.classList.add(styles.mockJoystick, styles.inner);
+    this.leftMock.appendChild(this.leftMockSmall);
+    this.mockJoystickContainer.appendChild(this.leftMock);
+    this.rightMock = document.createElement("div");
+    this.rightMock.classList.add(styles.mockJoystick);
+    this.rightMockSmall = document.createElement("div");
+    this.rightMockSmall.classList.add(styles.mockJoystick, styles.inner);
+    this.rightMock.appendChild(this.rightMockSmall);
+    this.mockJoystickContainer.appendChild(this.rightMock);
 
     this.enableLeft = window.APP.store.state.preferences.enableOnScreenJoystickLeft;
+    this.enableRight = window.APP.store.state.preferences.enableOnScreenJoystickRight;
+    if (this.enableLeft || this.enableRight) {
+      document.body.appendChild(this.mockJoystickContainer);
+    }
     if (this.enableLeft) {
       this.createLeftStick();
+    } else {
+      this.leftMock.classList.add(HIDDEN_JOYSTICK_STYLE);
+      this.leftMockSmall.classList.add(HIDDEN_JOYSTICK_STYLE);
     }
-    this.enableRight = window.APP.store.state.preferences.enableOnScreenJoystickRight;
     if (this.enableRight) {
       this.createRightStick();
+    } else {
+      this.rightMock.classList.add(HIDDEN_JOYSTICK_STYLE);
+      this.rightMockSmall.classList.add(HIDDEN_JOYSTICK_STYLE);
     }
     this.onPreferenceChange = this.onPreferenceChange.bind(this);
     window.APP.store.addEventListener("statechanged", this.onPreferenceChange);
@@ -62,9 +71,15 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   onPreferenceChange() {
     const newEnableLeft = window.APP.store.state.preferences.enableOnScreenJoystickLeft;
     const newEnableRight = window.APP.store.state.preferences.enableOnScreenJoystickRight;
+    const isChanged = this.enableLeft !== newEnableLeft || this.enableRight !== newEnableRight;
+    if (!isChanged) {
+      return;
+    }
     if (!this.enableLeft && newEnableLeft) {
       this.createLeftStick();
     } else if (this.enableLeft && !newEnableLeft) {
+      this.leftMock.classList.add(HIDDEN_JOYSTICK_STYLE);
+      this.leftMockSmall.classList.add(HIDDEN_JOYSTICK_STYLE);
       this.leftStick.destroy();
       this.leftTouchZone.parentNode.removeChild(this.leftTouchZone);
       this.leftStick = null;
@@ -73,6 +88,8 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     if (!this.enableRight && newEnableRight) {
       this.createRightStick();
     } else if (this.enableRight && !newEnableRight) {
+      this.rightMock.classList.add(HIDDEN_JOYSTICK_STYLE);
+      this.rightMockSmall.classList.add(HIDDEN_JOYSTICK_STYLE);
       this.rightStick.destroy();
       this.rightTouchZone.parentNode.removeChild(this.rightTouchZone);
       this.rightStick = null;
@@ -80,6 +97,24 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     }
     this.enableLeft = newEnableLeft;
     this.enableRight = newEnableRight;
+
+    if (this.enableLeft) {
+      this.leftMock.classList.remove(HIDDEN_JOYSTICK_STYLE);
+      this.leftMockSmall.classList.remove(HIDDEN_JOYSTICK_STYLE);
+      this.leftStick.on("start", this.onFirstInteraction);
+    }
+    if (this.enableRight) {
+      this.rightMock.classList.remove(HIDDEN_JOYSTICK_STYLE);
+      this.rightMockSmall.classList.remove(HIDDEN_JOYSTICK_STYLE);
+      this.rightStick.on("start", this.onFirstInteraction);
+    }
+    if ((this.enableLeft || this.enableRight) && !this.mockJoystickContainer.parentNode) {
+      document.body.appendChild(this.mockJoystickContainer);
+    }
+    if (!this.enableLeft && !this.enableRight) {
+      this.mockJoystickContainer.parentNode &&
+        this.mockJoystickContainer.parentNode.removeChild(this.mockJoystickContainer);
+    }
   },
 
   createRightStick() {
@@ -113,8 +148,8 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   onFirstInteraction() {
     if (this.leftStick) this.leftStick.off("start", this.onFirstInteraction);
     if (this.rightStick) this.rightStick.off("start", this.onFirstInteraction);
-    if (this.mockJoystickContainer) document.body.removeChild(this.mockJoystickContainer);
-    this.mockJoystickContainer = null;
+    this.mockJoystickContainer.parentNode &&
+      this.mockJoystickContainer.parentNode.removeChild(this.mockJoystickContainer);
   },
 
   onMoveJoystickChanged(event, joystick) {
@@ -178,7 +213,8 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   remove() {
     this.el.sceneEl.removeEventListener("entervr", this.onEnterVr);
     this.el.sceneEl.removeEventListener("exitvr", this.onExitVr);
-    document.body.removeChild(this.mockJoystickContainer);
+    this.mockJoystickContainer.parentNode &&
+      this.mockJoystickContainer.parentNode.removeChild(this.mockJoystickContainer);
     if (this.leftTouchZone) document.body.removeChild(this.leftTouchZone);
     if (this.rightTouchZone) document.body.removeChild(this.rightTouchZone);
   }

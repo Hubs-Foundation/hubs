@@ -58,7 +58,6 @@ This will allow the CSP checks to pass that are served up by Reticulum so you ca
 - `allow_idle` - Disable the idle detector timeout
 - `idle_timeout` - Idle timeout in seconds
 - `avatar_scale` - Scale your self!
-- `quality` - Either "low" or "high". Force assets to a certain quality level
 - `mobile` - Force mobile mode
 - `no_stats` - Disable performance stats
 - `vr_entry_type` - Either "2d", "vr", or "daydream". Used internally to force a VR entry type. Add "_now" to the end of the value to skip the audio check.
@@ -69,6 +68,7 @@ This will allow the CSP checks to pass that are served up by Reticulum so you ca
 - `debug_log` - If `true`, enables an on-screen debug log and console. Useful for debugging on mobile devices.
 - `userinput_debug` - If `true`, enables an on-screen userinput debug status panel. Press "L" on your keyboard to show the panel.
 - `thirdPerson` - Enables experimental third person mode.
+- `fov` - Set a custom field of view in degrees (between 1 and 179) for the camera. (2D only) 
 
 ## Additional Resources
 

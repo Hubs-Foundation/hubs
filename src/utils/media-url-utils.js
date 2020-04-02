@@ -5,6 +5,7 @@ const nonCorsProxyDomains = (configs.NON_CORS_PROXY_DOMAINS || "").split(",");
 if (configs.CORS_PROXY_SERVER) {
   nonCorsProxyDomains.push(configs.CORS_PROXY_SERVER);
 }
+nonCorsProxyDomains.push(document.location.hostname);
 
 const commonKnownContentTypes = {
   gltf: "model/gltf",
@@ -14,7 +15,8 @@ const commonKnownContentTypes = {
   jpeg: "image/jpeg",
   pdf: "application/pdf",
   mp4: "video/mp4",
-  mp3: "audio/mpeg"
+  mp3: "audio/mpeg",
+  basis: "image/basis"
 };
 
 // thanks to https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding

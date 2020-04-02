@@ -45,6 +45,8 @@ const rotatePitchAndYaw = (function() {
   };
 })();
 
+let uiRoot;
+let scenePreviewNode;
 AFRAME.registerComponent("pitch-yaw-rotator", {
   init() {
     this.pendingXRotation = 0;
@@ -58,13 +60,19 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
     if (this.on) {
       const scene = AFRAME.scenes[0];
       const userinput = scene.systems.userinput;
-      const cameraDelta = userinput.get(
-        scene.is("entered") ? paths.actions.cameraDelta : paths.actions.lobbyCameraDelta
-      );
+      uiRoot = uiRoot || document.getElementById("ui-root");
+      scenePreviewNode = scenePreviewNode || document.getElementById("scene-preview-node");
+      const lobby = !scene.is("entered");
+      const isGhost = lobby && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
+      const cameraDelta = userinput.get(lobby ? paths.actions.cameraDelta : paths.actions.lobbyCameraDelta);
       if (cameraDelta) {
-        rotatePitchAndYaw(this.el.object3D, this.pendingXRotation + cameraDelta[1], cameraDelta[0]);
+        rotatePitchAndYaw(
+          lobby && !isGhost ? scenePreviewNode.object3D : this.el.object3D,
+          this.pendingXRotation + cameraDelta[1],
+          cameraDelta[0]
+        );
       } else if (this.pendingXRotation) {
-        rotatePitchAndYaw(this.el.object3D, this.pendingXRotation, 0);
+        rotatePitchAndYaw(lobby && !isGhost ? scenePreviewNode.object3D : this.el.object3D, this.pendingXRotation, 0);
       }
     }
     this.pendingXRotation = 0;

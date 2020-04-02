@@ -25,11 +25,16 @@ export class BatchManagerSystem {
     }
 
     if (UBO_BYTE_LENGTH > gl.getParameter(gl.MAX_UNIFORM_BLOCK_SIZE)) {
-      console.warn("Insufficient MAX_UNIFORM_BLOCK_SIZE, Disabling batching");
+      console.warn("Insufficient MAX_UNIFORM_BLOCK_SIZE, Disabling batching.");
       return;
     }
 
-    this.batchingEnabled = true;
+    this.batchingEnabled = qsTruthy("forceMeshBatching") || qsTruthy("forceImageBatching");
+
+    if (!this.batchingEnabled) {
+      console.warn("Batching must be forced on with forceMeshBatching or forceImageBatching. Disabling batching.");
+      return;
+    }
 
     this.ubo = new HubsBatchRawUniformGroup(MAX_INSTANCES, this.meshToEl);
     this.batchManager = new BatchManager(scene, renderer, {
