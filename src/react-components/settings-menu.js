@@ -16,7 +16,6 @@ import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
 import configs from "../utils/configs";
-import { messages } from "../utils/i18n";
 import IfFeature from "./if-feature";
 import StateLink from "./state-link.js";
 import { resetTips } from "../systems/tips";
