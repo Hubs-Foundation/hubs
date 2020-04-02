@@ -224,7 +224,9 @@ AFRAME.registerComponent("super-spawner", {
           easing: "easeOutElastic"
         });
 
-        this.cooldownTimeout = null;
+        setTimeout(() => {
+          this.cooldownTimeout = null;
+        }, 400);
       }, this.data.spawnCooldown * 1000);
     }
   }
