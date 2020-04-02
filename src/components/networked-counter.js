@@ -54,6 +54,8 @@ AFRAME.registerComponent("networked-counter", {
     el.pause();
     // networked-interactable's remove will also call deregister, but it will happen async so we do it here as well.
     this.deregister(el);
-    el.parentNode.removeChild(el);
+    if (el.parentNode) {
+      el.parentNode.removeChild(el);
+    }
   }
 });
