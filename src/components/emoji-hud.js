@@ -181,7 +181,11 @@ AFRAME.registerComponent("emoji-hud", {
   },
 
   tick() {
-    if (this.lastSpawnTime + this.data.spawnCooldown * 1000 < performance.now()) {
+    if (
+      window.APP.hubChannel &&
+      window.APP.hubChannel.can("spawn_emoji") &&
+      this.lastSpawnTime + this.data.spawnCooldown * 1000 < performance.now()
+    ) {
       const userinput = AFRAME.scenes[0].systems.userinput;
 
       for (let i = 0; i < this.spawnEvents.length; i++) {
