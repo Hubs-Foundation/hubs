@@ -38,7 +38,9 @@ AFRAME.registerComponent("hoverable-visuals", {
         )
           return;
 
-        batchManagerSystem.meshToEl.delete(object);
+        if (batchManagerSystem.batchingEnabled) {
+          batchManagerSystem.meshToEl.delete(object);
+        }
       });
     });
 

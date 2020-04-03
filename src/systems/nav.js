@@ -3,19 +3,29 @@ const { Pathfinding } = require("three-pathfinding");
 AFRAME.registerSystem("nav", {
   init: function() {
     this.pathfinder = new Pathfinding();
+    this.mesh = null;
+    this.el.addEventListener("reset_scene", this.removeNavMeshData.bind(this));
+    this.el.addEventListener("leaving_loading_environment", this.removeNavMeshData.bind(this));
   },
 
   loadMesh: function(mesh, zone) {
-    this.el.object3D.updateMatrixWorld();
+    if (this.mesh) {
+      console.error("tried to load multiple nav meshes");
+      this.removeNavMeshData();
+    }
+    const geometry = new THREE.Geometry().fromBufferGeometry(mesh.geometry);
+    mesh.updateMatrices();
+    geometry.applyMatrix(mesh.matrixWorld);
+    this.pathfinder.setZoneData(zone, Pathfinding.createZone(geometry));
+    this.mesh = mesh;
+    this.el.sceneEl.emit("nav-mesh-loaded");
+  },
 
+  removeNavMeshData() {
     if (this.mesh && this.mesh.geometry && this.mesh.geometry.dispose) {
       this.mesh.geometry.dispose();
     }
-
-    this.mesh = mesh;
-    const geometry = new THREE.Geometry().fromBufferGeometry(mesh.geometry);
-    geometry.applyMatrix(mesh.matrixWorld);
-    this.pathfinder.setZoneData(zone, Pathfinding.createZone(geometry));
-    this.el.sceneEl.emit("nav-mesh-loaded");
+    this.mesh = null;
+    this.pathfinder.zones = {};
   }
 });

@@ -3,23 +3,28 @@ import { ObjectContentOrigins } from "../object-types";
 
 // WARNING: This system mutates interaction system state!
 export class SuperSpawnerSystem {
-  maybeSpawn(state, entity, grabPath) {
+  maybeSpawn(state, grabPath) {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const superSpawner = state.hovered && state.hovered.components["super-spawner"];
+
+    const isPermitted =
+      window.APP.hubChannel &&
+      (superSpawner && superSpawner.data.template === "#interactable-emoji"
+        ? window.APP.hubChannel.can("spawn_emoji")
+        : window.APP.hubChannel.can("spawn_and_move_media"));
+
     if (
       superSpawner &&
       superSpawner.spawnedMediaScale &&
       !superSpawner.cooldownTimeout &&
       userinput.get(grabPath) &&
-      window.APP.hubChannel.can("spawn_and_move_media")
+      isPermitted
     ) {
-      this.performSpawn(state, entity, grabPath, userinput, superSpawner);
+      this.performSpawn(state, grabPath, userinput, superSpawner);
     }
   }
 
-  performSpawn(state, entity, grabPath, userinput, superSpawner) {
-    entity.object3D.updateMatrices();
-    entity.object3D.matrix.decompose(entity.object3D.position, entity.object3D.quaternion, entity.object3D.scale);
+  performSpawn(state, grabPath, userinput, superSpawner) {
     const data = superSpawner.data;
 
     const spawnedEntity = addMedia(
@@ -59,25 +64,9 @@ export class SuperSpawnerSystem {
   tick() {
     const interaction = AFRAME.scenes[0].systems.interaction;
     if (!interaction.ready) return; //DOMContentReady workaround
-    this.maybeSpawn(
-      interaction.state.leftHand,
-      interaction.options.leftHand.entity,
-      interaction.options.leftHand.grabPath
-    );
-    this.maybeSpawn(
-      interaction.state.rightHand,
-      interaction.options.rightHand.entity,
-      interaction.options.rightHand.grabPath
-    );
-    this.maybeSpawn(
-      interaction.state.rightRemote,
-      interaction.options.rightRemote.entity,
-      interaction.options.rightRemote.grabPath
-    );
-    this.maybeSpawn(
-      interaction.state.leftRemote,
-      interaction.options.leftRemote.entity,
-      interaction.options.leftRemote.grabPath
-    );
+    this.maybeSpawn(interaction.state.leftHand, interaction.options.leftHand.grabPath);
+    this.maybeSpawn(interaction.state.rightHand, interaction.options.rightHand.grabPath);
+    this.maybeSpawn(interaction.state.rightRemote, interaction.options.rightRemote.grabPath);
+    this.maybeSpawn(interaction.state.leftRemote, interaction.options.leftRemote.grabPath);
   }
 }

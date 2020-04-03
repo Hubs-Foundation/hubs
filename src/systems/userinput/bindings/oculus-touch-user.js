@@ -793,11 +793,6 @@ export const oculusTouchUserBindings = addSetsToBindings({
     {
       src: { value: leftGripPressed2 },
       dest: { value: leftGripRisingGrab },
-      xform: xforms.rising
-    },
-    {
-      src: { value: leftTriggerPressed2 },
-      dest: { value: leftTriggerRisingGrab },
       xform: xforms.rising,
       priority: 2
     },
@@ -805,6 +800,12 @@ export const oculusTouchUserBindings = addSetsToBindings({
       src: [leftGripRisingGrab],
       dest: { value: paths.actions.leftHand.grab },
       xform: xforms.any,
+      priority: 2
+    },
+    {
+      src: { value: leftTriggerPressed2 },
+      dest: { value: paths.actions.leftHand.stopTeleport },
+      xform: xforms.falling,
       priority: 2
     }
   ],
@@ -1041,15 +1042,15 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: { value: rightTriggerPressed2 },
-      dest: { value: rightTriggerRisingGrab },
-      xform: xforms.rising,
-      priority: 2
-    },
-    {
       src: [rightGripRisingGrab],
       dest: { value: paths.actions.rightHand.grab },
       xform: xforms.any,
+      priority: 2
+    },
+    {
+      src: { value: rightTriggerPressed2 },
+      dest: { value: paths.actions.rightHand.stopTeleport },
+      xform: xforms.falling,
       priority: 2
     }
   ],

@@ -2,6 +2,7 @@
   position: absolute;
   height: 20vh;
   bottom: 0;
+  z-index: 1;
 
   /* Orientation selector fails here when keyboard pops up on shorter screens */
   @media(min-aspect-ratio: 15/9) {
@@ -46,6 +47,9 @@
   border-top-right-radius: 50%;
   border-bottom-right-radius: 50%;
   border-bottom-left-radius: 50%;
+  &__hidden {
+    background-color: transparent;
+  }
 }
 
 :local(.mockJoystick.inner) {

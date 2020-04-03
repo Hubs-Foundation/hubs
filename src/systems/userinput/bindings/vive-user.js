@@ -957,9 +957,9 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: { value: leftTriggerPressed2 },
-      dest: { value: lTriggerRisingGrab },
-      xform: xforms.rising,
-      priority: 1
+      dest: { value: paths.actions.leftHand.stopTeleport },
+      xform: xforms.falling,
+      priority: 2
     },
     {
       src: [lGripRisingGrab],
@@ -1402,8 +1402,8 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: { value: rightTriggerPressed2 },
-      dest: { value: rTriggerRisingGrab },
-      xform: xforms.rising,
+      dest: { value: paths.actions.rightHand.stopTeleport },
+      xform: xforms.falling,
       priority: 2
     },
     {
@@ -1558,6 +1558,13 @@ export const viveUserBindings = addSetsToBindings({
       dest: { value: paths.noop },
       xform: xforms.noop,
       priority: 1000
+    }
+  ],
+  [sets.inspecting]: [
+    {
+      src: { value: inspectButtons },
+      dest: { value: paths.actions.stopInspecting },
+      xform: xforms.falling
     }
   ]
 });
@@ -1739,13 +1746,6 @@ export const viveCosmosUserBindings = addSetsToBindings({
       dest: { value: paths.actions.rightHand.scalePenTip },
       xform: xforms.scaleExp(-0.005, 5),
       priority: 1
-    }
-  ],
-  [sets.inspecting]: [
-    {
-      src: { value: inspectButtons },
-      dest: { value: paths.actions.stopInspecting },
-      xform: xforms.falling
     }
   ]
 });

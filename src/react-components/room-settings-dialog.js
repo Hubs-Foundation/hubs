@@ -6,6 +6,7 @@ import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils"
 
 import styles from "../assets/stylesheets/room-settings-dialog.scss";
 import DialogContainer from "./dialog-container";
+import configs from "../utils/configs";
 
 export default class RoomSettingsDialog extends Component {
   static propTypes = {
@@ -54,6 +55,9 @@ export default class RoomSettingsDialog extends Component {
 
   render() {
     const { showRoomAccessSettings } = this.props;
+
+    const maxRoomSize = configs.feature("max_room_size");
+
     return (
       <DialogContainer title="Room Settings" {...this.props}>
         <form onSubmit={this.onSubmit} className={styles.roomSettingsForm}>
@@ -80,12 +84,30 @@ export default class RoomSettingsDialog extends Component {
             rows="5"
             autoComplete="off"
             placeholder="Room description"
-            value={this.state.description}
+            value={this.state.description || ""}
             onFocus={e => handleTextFieldFocus(e.target)}
             onBlur={() => handleTextFieldBlur()}
             onChange={e => this.setState({ description: e.target.value })}
             className={styles.descriptionField}
           />
+          <span className={styles.subtitle}>
+            <FormattedMessage id="room-settings.room-size-subtitle" />
+          </span>
+          <div className={styles.memberCapContainer}>
+            <input
+              name="room_size"
+              type="number"
+              required
+              min={0}
+              max={maxRoomSize}
+              placeholder="Member Limit"
+              value={this.state.room_size}
+              onFocus={e => handleTextFieldFocus(e.target)}
+              onBlur={() => handleTextFieldBlur()}
+              onChange={e => this.setState({ room_size: e.target.value })}
+              className={styles.nameField}
+            />
+          </div>
           {showRoomAccessSettings && (
             <>
               <span className={styles.subtitle}>
@@ -142,6 +164,9 @@ export default class RoomSettingsDialog extends Component {
               {this.renderCheckbox("pin_objects", !this.state.member_permissions.spawn_and_move_media)}
             </div>
             {this.renderCheckbox("spawn_drawing")}
+            {this.renderCheckbox("spawn_emoji")}
+            <div />
+            {this.renderCheckbox("fly")}
           </div>
           <button type="submit" className={styles.nextButton}>
             <FormattedMessage id="room-settings.apply" />

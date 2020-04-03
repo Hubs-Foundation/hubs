@@ -6,6 +6,7 @@ import { spawnChatMessage } from "./react-components/chat-message";
 import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "./systems/sound-effects-system";
 import ducky from "./assets/models/DuckyMesh.glb";
 
+let uiRoot;
 // Handles user-entered messages
 export default class MessageDispatch {
   constructor(scene, entryManager, hubChannel, addToPresenceLog, remountUI, mediaSearchStore) {
@@ -33,8 +34,10 @@ export default class MessageDispatch {
 
   dispatchCommand = async (command, ...args) => {
     const entered = this.scene.is("entered");
+    uiRoot = uiRoot || document.getElementById("ui-root");
+    const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
 
-    if (!entered) {
+    if (!entered && (!isGhost || command === "duck")) {
       this.addToPresenceLog({ type: "log", body: "You must enter the room to use this command." });
       return;
     }
@@ -49,11 +52,12 @@ export default class MessageDispatch {
     switch (command) {
       case "fly":
         if (this.scene.systems["hubs-systems"].characterController.fly) {
-          this.scene.systems["hubs-systems"].characterController.fly = false;
+          this.scene.systems["hubs-systems"].characterController.enableFly(false);
           this.addToPresenceLog({ type: "log", body: "Fly mode disabled." });
         } else {
-          this.scene.systems["hubs-systems"].characterController.fly = true;
-          this.addToPresenceLog({ type: "log", body: "Fly mode enabled." });
+          if (this.scene.systems["hubs-systems"].characterController.enableFly(true)) {
+            this.addToPresenceLog({ type: "log", body: "Fly mode enabled." });
+          }
         }
         break;
       case "grow":
@@ -136,6 +140,14 @@ export default class MessageDispatch {
           }
         }
         break;
+      case "audiomode":
+        if (window.APP.store.state.preferences.audioOutputMode !== "audio") {
+          window.APP.store.state.preferences.audioOutputMode = "audio";
+          this.log("Positional Audio disabled.");
+        } else {
+          window.APP.store.state.preferences.audioOutputMode = "panner";
+          this.log("Positional Audio enabled.");
+        }
     }
   };
 }

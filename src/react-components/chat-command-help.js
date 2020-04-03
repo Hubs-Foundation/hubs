@@ -14,15 +14,19 @@ export default class ChatCommandHelp extends Component {
   render() {
     const commands = [
       "leave",
-      "fly",
       "grow",
       "shrink",
       "duck",
       "debug",
       "vrstats",
       "scene <scene url>",
-      "rename <new name>"
+      "rename <new name>",
+      "audiomode"
     ];
+
+    if (window.APP.hubChannel && window.APP.hubChannel.can("fly")) {
+      commands.push("fly");
+    }
 
     if (qsTruthy("video_capture")) {
       commands.push("capture [stop]");
