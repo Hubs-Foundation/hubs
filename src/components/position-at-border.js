@@ -36,7 +36,7 @@ const calculateDesiredTargetQuaternion = (function() {
     cameraPosition,
     cameraRotation,
     isVR,
-    intersectionPoint,
+    vrFocalPoint,
     desiredTargetQuaternion
   ) {
     if (!isVR) {
@@ -45,7 +45,7 @@ const calculateDesiredTargetQuaternion = (function() {
         .applyMatrix4(cameraRotation)
         .normalize();
     } else {
-      back.subVectors(cameraPosition, intersectionPoint).normalize();
+      back.subVectors(cameraPosition, vrFocalPoint).normalize();
     }
     up.set(0, 1, 0);
     forward.copy(back).multiplyScalar(-1);
