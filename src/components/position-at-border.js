@@ -189,7 +189,7 @@ AFRAME.registerComponent("position-at-border", {
             .multiplyScalar(needsYRotate ? -1 : 1)
             .applyMatrix4(currentMeshRotation)
         );
-      } else if (meshSphereRadius * 1.01 > camToCenter.length()) {
+      } else if (meshSphereRadius + 2 > camToCenter.length()) {
         // Inside the bounding sphere, put it close to the intersection, or close to the camera if there is no intersection
         desiredCenterPoint.lerpVectors(
           cameraPosition,
