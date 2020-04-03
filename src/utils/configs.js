@@ -33,6 +33,10 @@ let isAdmin = false;
 
 configs.AVAILABLE_INTEGRATIONS = window.AVAILABLE_INTEGRATIONS || {};
 
+if (process.env.APP_CONFIG) {
+  window.APP_CONFIG = process.env.APP_CONFIG;
+}
+
 if (window.APP_CONFIG) {
   configs.APP_CONFIG = window.APP_CONFIG;
   const { theme } = configs.APP_CONFIG;

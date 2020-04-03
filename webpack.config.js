@@ -13,6 +13,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const TOML = require("@iarna/toml");
+const fetch = require("node-fetch");
 
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
@@ -89,10 +90,30 @@ const babelConfig = JSON.parse(
     .replace(/\/\/.+/g, "")
 );
 
-module.exports = (env, argv) => {
+module.exports = async (env, argv) => {
+  let appConfig = undefined;
   let appConfigSchema = undefined;
 
-  if (argv.mode === "development") {
+  if (process.env.USE_HUBS_CLOUD_APP_CONFIG) {
+    if (!fs.existsSync(".ret.credentials")) {
+      throw new Error("Not logged in to Hubs Cloud. Run `npm login` first.")
+    }
+
+    const { host, token } = JSON.parse(fs.readFileSync(".ret.credentials"));
+
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json"
+    };
+
+    const response = await fetch(`https://${host}/api/v1/app_configs`, { headers });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching Hubs Cloud config "${response.statusText}"`)
+    }
+
+    appConfig = await response.json();
+  } else if (argv.mode === "development") {
     const schemaPath = path.join(__dirname, "src", "schema.toml");
     const schemaString = fs.readFileSync(schemaPath).toString();
 
@@ -368,6 +389,7 @@ module.exports = (env, argv) => {
           GA_TRACKING_ID: process.env.GA_TRACKING_ID,
           POSTGREST_SERVER: process.env.POSTGREST_SERVER,
           USE_FEATURE_CONFIG: process.env.USE_FEATURE_CONFIG,
+          APP_CONFIG: appConfig,
           APP_CONFIG_SCHEMA: appConfigSchema
         })
       })
