@@ -377,9 +377,9 @@ body {
 }
 
 :local(.subscribe-text) {
-  font-size: 12pt;
-  font-weight: normal;
-  margin: 0px 0px 5px 0px;
+  font-size: 14pt;
+  font-weight: lighter;
+  margin: 0px 0px 8px 0px;
 }
 
 :local(.subscribe-button) {
@@ -390,7 +390,9 @@ body {
 :local(.email-input) {
   height: 40px;
   border-radius: 24px;
-  text-indent: 10px;
+  margin: 0px 16px 0px 0px;
+  width: 24em;
+  text-align: center;
 }
 
 .mc_field-group {

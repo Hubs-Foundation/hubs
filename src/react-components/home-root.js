@@ -288,10 +288,7 @@ class HomeRoot extends Component {
                   >
                     <div id="mc_embed_signup_scroll">
                       <div className={styles.subscribeText}>
-                        <FormattedMessage id="home.subscribe_to_mailing_list_1" />
-                      </div>
-                      <div className={styles.subscribeText}>
-                        <FormattedMessage id="home.subscribe_to_mailing_list_2" />
+                        <FormattedMessage id="home.subscribe_to_mailing_list" />
                       </div>
                       <div className={styles.subscribeBar}>
                         <div className="mc-field-group">
