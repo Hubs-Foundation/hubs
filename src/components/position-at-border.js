@@ -110,7 +110,7 @@ AFRAME.registerComponent("position-at-border", {
   tick: (function() {
     const cameraPosition = new THREE.Vector3();
     const cameraRotation = new THREE.Matrix4();
-    const camToCenter = new THREE.Vector3();
+    const centerToCamera = new THREE.Vector3();
     const intersectionToCam = new THREE.Vector3();
     const desiredCenterPoint = new THREE.Vector3();
     const desiredTargetPosition = new THREE.Vector3();
@@ -173,8 +173,8 @@ AFRAME.registerComponent("position-at-border", {
       this.cam.updateMatrices();
       cameraPosition.setFromMatrixPosition(this.cam.matrixWorld);
       cameraRotation.extractRotation(this.cam.matrixWorld);
-      camToCenter.subVectors(cameraPosition, this.meshCenter);
-      const needsYRotate = this.data.isFlat && meshForward.dot(camToCenter) > 0;
+      centerToCamera.subVectors(cameraPosition, this.meshCenter);
+      const needsYRotate = this.data.isFlat && meshForward.dot(centerToCamera) > 0;
       const intersection = this.el.sceneEl.systems.interaction.getActiveIntersection();
       const meshSphereRadius =
         boxCorners
@@ -189,7 +189,7 @@ AFRAME.registerComponent("position-at-border", {
             .multiplyScalar(needsYRotate ? -1 : 1)
             .applyMatrix4(currentMeshRotation)
         );
-      } else if (meshSphereRadius + 2 > camToCenter.length()) {
+      } else if (meshSphereRadius + 2 > centerToCamera.length()) {
         // Inside the bounding sphere, put it close to the intersection, or close to the camera if there is no intersection
         desiredCenterPoint.lerpVectors(
           cameraPosition,
@@ -198,16 +198,16 @@ AFRAME.registerComponent("position-at-border", {
         );
       } else if (intersection) {
         // Put it in the line towards the intersection, outside the bounding sphere
-        const distanceToSphere = camToCenter.length() - meshSphereRadius;
+        const distanceToSphere = centerToCamera.length() - meshSphereRadius;
         intersectionToCam.subVectors(intersection.point, cameraPosition);
         desiredCenterPoint.copy(cameraPosition).add(intersectionToCam.normalize().multiplyScalar(distanceToSphere));
       } else {
         // Put it on the bounding sphere
-        camToCenter.normalize().multiplyScalar(meshSphereRadius);
-        desiredCenterPoint.copy(this.meshCenter).add(camToCenter);
+        centerToCamera.normalize().multiplyScalar(meshSphereRadius);
+        desiredCenterPoint.copy(this.meshCenter).add(centerToCamera);
       }
       if (this.data.scale) {
-        const distanceToCenter = camToCenter.subVectors(cameraPosition, desiredCenterPoint).length();
+        const distanceToCenter = centerToCamera.subVectors(cameraPosition, desiredCenterPoint).length();
         desiredTargetScale.setScalar(THREE.Math.clamp(0.45 * distanceToCenter, MIN_SCALE, MAX_SCALE));
       } else {
         desiredTargetScale.setFromMatrixScale(this.target.matrixWorld);
