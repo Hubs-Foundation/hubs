@@ -1,5 +1,7 @@
 import { paths } from "../systems/userinput/paths";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
+import { addMedia } from "../utils/media-utils";
+import gizmoSrc from "../assets/models/gizmo.glb";
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 const AMMO_BODY_ATTRIBUTES = { type: "kinematic", collisionFilterMask: COLLISION_LAYERS.HANDS };
 
@@ -34,7 +36,8 @@ AFRAME.registerComponent("transform-button", {
       oneof: Object.values(TRANSFORM_MODE),
       default: TRANSFORM_MODE.CURSOR
     },
-    axis: { type: "vec3", default: null }
+    axis: { type: "vec3", default: null },
+    spawnTransformWidget: { default: true }
   },
   init() {
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
@@ -72,6 +75,37 @@ AFRAME.registerComponent("transform-button", {
     this.onGrabEnd = () => {
       this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];
       this.transformSystem.stopTransform();
+
+      if (this.data.spawnTransformWidget) {
+        const offset = { x: -0.25, y: 0, z: -1 };
+        const { entity, orientation } = addMedia(
+          new URL(gizmoSrc, window.location.href).href,
+          "#transform-gizmo-media",
+          31,
+          null,
+          false,
+          true,
+          true,
+          {},
+          true
+        );
+        this.targetEl.object3D.updateMatrices();
+        orientation.then(or => {
+          entity.setAttribute("offset-relative-to", {
+            target: "#avatar-pov-node",
+            offset,
+            orientation: or
+          });
+        });
+
+        entity.addEventListener(
+          "loaded",
+          () => {
+            entity.components["transform-gizmo"].targetEl = this.targetEl;
+          },
+          { once: true }
+        );
+      }
     };
   },
   play() {

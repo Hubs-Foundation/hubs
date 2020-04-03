@@ -130,6 +130,26 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add({
+    template: "#transform-gizmo-media",
+    components: [
+      {
+        component: "position",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
+      {
+        component: "rotation",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
+      },
+      {
+        component: "scale",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
+      // TODO: Optimize checking mediaOptions with requiresNetworkUpdate.
+      "media-loader"
+    ]
+  });
+
+  NAF.schemas.add({
     template: "#interactable-emoji",
     components: [
       {

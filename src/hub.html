@@ -508,6 +508,74 @@
                 </a-entity>
             </template>
 
+            <template id="transform-gizmo-media">
+                <a-entity
+                    class="interactable"
+                    body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 15;"
+                    owned-object-limiter="counter: #transform-gizmo-counter"
+                    set-unowned-body-kinematic
+                    is-remote-hover-target
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; inspectable: true;"
+                    destroy-at-extreme-distances
+                    scalable-when-grabbed
+                    floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
+                    set-yxz-order
+                    matrix-auto-update
+                    position-at-box-shape-border__freeze="target:.freeze-menu;"
+                    hoverable-visuals
+                    transform-gizmo
+
+                >
+                    <a-entity class="ui interactable-ui">
+                        <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media">
+                            <a-entity
+                                mixin="rounded-button"
+                                is-remote-hover-target
+                                tags="singleActionButton: true;"
+                                hide-when-pinned-and-forbidden="whenPinned: true"
+                                remove-networked-object-button
+                                position="0 -0.375 0.001">
+                                <a-entity
+                                    sprite="name: remove-action.png"
+                                    icon-button="image: remove-action.png; hoverImage: remove-action.png"
+                                    scale="0.165 0.165 0.165"
+                                    position="0 0 0.001"
+                                ></a-entity>
+                            </a-entity>
+                            <a-entity
+                                mixin="rounded-action-button"
+                                tags="isHoldable: true; holdableButton: true;"
+                                is-remote-hover-target
+                                transform-button="spawnTransformWidget: false;"
+                                transform-button-selector
+                                hide-when-pinned-and-forbidden
+                                position="-0.3 -0.125 0.001">
+                                <a-entity
+                                    sprite
+                                    icon-button="image: rotate-action.png; hoverImage: rotate-action.png;"
+                                    scale="0.165 0.165 0.165"
+                                    position="0 0 0.001"
+                                ></a-entity>
+                            </a-entity>
+                            <a-entity
+                                mixin="rounded-action-button"
+                                tags="isHoldable: true; holdableButton: true;"
+                                is-remote-hover-target
+                                scale-button
+                                hide-when-pinned-and-forbidden
+                                position="0.3 -0.125 0.001">
+                                <a-entity
+                                    sprite
+                                    icon-button="image: scale-action.png; hoverImage: scale-action.png"
+                                    scale="0.165 0.165 0.165"
+                                    position="0 0 0.001"
+                                ></a-entity>
+                            </a-entity>
+                        </a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
             <template id="interactable-emoji">
                 <a-entity
                     class="interactable"
@@ -1001,6 +1069,8 @@
         <a-entity id="emoji-counter" networked-counter="max: 2;"></a-entity>
 
         <a-entity id="camera-counter" networked-counter="max: 1;"></a-entity>
+
+        <a-entity id="transform-gizmo-counter" networked-counter="max: 1;"></a-entity>
 
         <a-entity id="drawing-manager" drawing-manager="penSpawner: #pen-spawner"></a-entity>
 
