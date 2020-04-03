@@ -96,7 +96,7 @@ module.exports = async (env, argv) => {
 
   if (process.env.USE_HUBS_CLOUD_APP_CONFIG) {
     if (!fs.existsSync(".ret.credentials")) {
-      throw new Error("Not logged in to Hubs Cloud. Run `npm login` first.")
+      throw new Error("Not logged in to Hubs Cloud. Run `npm login` first.");
     }
 
     const { host, token } = JSON.parse(fs.readFileSync(".ret.credentials"));
@@ -109,7 +109,7 @@ module.exports = async (env, argv) => {
     const response = await fetch(`https://${host}/api/v1/app_configs`, { headers });
 
     if (!response.ok) {
-      throw new Error(`Error fetching Hubs Cloud config "${response.statusText}"`)
+      throw new Error(`Error fetching Hubs Cloud config "${response.statusText}"`);
     }
 
     appConfig = await response.json();
