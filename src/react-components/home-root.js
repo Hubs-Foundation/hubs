@@ -276,6 +276,57 @@ class HomeRoot extends Component {
                 </div>
               )}
             </div>
+            <IfFeature name="show_newsletter_signup">
+              <div id="mc_embed_signup" className={styles.footerContent}>
+                <form
+                  action="https://mozilla.us19.list-manage.com/subscribe/post?u=a97038e0879516f7b8300d67f&amp;id=ebf17d04e4"
+                  method="post"
+                  id="mc-embedded-subscribe-form"
+                  name="mc-embedded-subscribe-form"
+                  className="validate"
+                  target="_blank"
+                  noValidate
+                >
+                  <div id="mc_embed_signup_scroll">
+                    <div className={styles.subscribeText}>
+                      <FormattedMessage id="home.subscribe_to_mailing_list_1" />
+                    </div>
+                    <div className={styles.subscribeText}>
+                      <FormattedMessage id="home.subscribe_to_mailing_list_2" />
+                    </div>
+                    <div className={styles.subscribeBar}>
+                      <div className="mc-field-group">
+                        {/* <label htmlFor="mce-EMAIL">Email Address </label> */}
+                        <input
+                          placeholder="Enter email address.."
+                          type="email"
+                          name="EMAIL"
+                          className={styles.emailInput}
+                          id="mce-EMAIL"
+                        />
+                      </div>
+                      <div id="mce-responses" className="clear">
+                        <div className="response" id="mce-error-response" style={{ display: "none" }} />
+                        <div className="response" id="mce-success-response" style={{ display: "none" }} />
+                      </div>
+                      <div style={{ position: "absolute", left: "-5000px" }} aria-hidden="true">
+                        <input type="text" name="b_a97038e0879516f7b8300d67f_ebf17d04e4" tabIndex="-1" value="" />
+                      </div>
+                      <div className="clear">
+                        <input
+                          type="submit"
+                          value="Subscribe"
+                          name="subscribe"
+                          id="mc-embedded-subscribe"
+                          className={styles.subscribeButton}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </IfFeature>
+
             <div className={styles.footerContent}>
               <div className={styles.poweredBy}>
                 <UnlessFeature name="hide_powered_by">

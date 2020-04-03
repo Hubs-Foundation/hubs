@@ -24,6 +24,7 @@ features.show_avatar_editor_link = { category = "features", type = "boolean", na
 features.show_avatar_pipelines_link = { category = "features", type = "boolean", name = "Show Avatar Pipelines Links", description = "Show links to avatar pipeline info." }
 features.show_model_collection_link = { category = "features", type = "boolean", name = "Show Model Collection Link", description = "Show link to a collection of models." }
 features.hide_powered_by = { category = "features", type = "boolean", name = "Hide Powered By Hubs", description = "Hides the 'Powered by Hubs Cloud' notice on the home page and loading screens." }
+features.show_newsletter_signup = { category = "features", type = "boolean", name = "Show Newsletter Signup Form", description = "Shows the sign up for for the mailing list on the homepage." }
 features.public_rooms = { category = "features", type = "boolean", name = "Public Rooms", description = "Allow visitors to set rooms to public to feature them on the homepage." }
 features.default_room_id = { category = "features", type = "string", name = "Homepage Room ID", description = "Use the specified room in place of the homepage."}
 features.enable_spoke = { category = "features", type = "boolean", name = "Enable Scene Editor", description = "Enable Scene Editor for all visitors."}

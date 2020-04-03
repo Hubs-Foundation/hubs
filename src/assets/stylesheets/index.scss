@@ -356,3 +356,43 @@ body {
   }
 }
 
+#mc_embed_signup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+#mc_embed_signup_scroll {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+:local(.subscribeBar) {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+:local(.subscribe-text) {
+  font-size: 12pt;
+  font-weight: normal;
+  margin: 0px 0px 5px 0px;
+}
+
+:local(.subscribe-button) {
+  @extend %action-button-secondary;
+  height: 40px;
+}
+
+:local(.email-input) {
+  height: 40px;
+  border-radius: 24px;
+  text-indent: 10px;
+}
+
+.mc_field-group {
+  justify-content: center;
+}
