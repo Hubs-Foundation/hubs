@@ -56,9 +56,7 @@ class HomeRoot extends Component {
 
   state = {
     dialog: null,
-    signedIn: null,
-    mailingListEmail: "",
-    mailingListPrivacy: false
+    signedIn: null
   };
 
   constructor(props) {
@@ -275,42 +273,6 @@ class HomeRoot extends Component {
                   </div>
                 </div>
               )}
-              <IfFeature name="show_newsletter_signup">
-                <div id="mc_embed_signup" className={styles.footerContent}>
-                  <form
-                    action="https://mozilla.us19.list-manage.com/subscribe/post?u=a97038e0879516f7b8300d67f&amp;id=ebf17d04e4"
-                    method="post"
-                    id="mc-embedded-subscribe-form"
-                    name="mc-embedded-subscribe-form"
-                  >
-                    <div id="mc_embed_signup_scroll">
-                      <div className={styles.subscribeText}>
-                        <FormattedMessage id="home.subscribe_to_mailing_list" />
-                      </div>
-                      <div className={styles.subscribeBar}>
-                        <div className="mc-field-group">
-                          <input
-                            placeholder="Enter email address.."
-                            type="email"
-                            name="EMAIL"
-                            className={styles.emailInput}
-                            id="mce-EMAIL"
-                          />
-                        </div>
-                        <div>
-                          <input
-                            type="submit"
-                            value="Subscribe"
-                            name="subscribe"
-                            id="mc-embedded-subscribe"
-                            className={styles.subscribeButton}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </IfFeature>
             </div>
 
             <div className={styles.footerContent}>
@@ -326,18 +288,19 @@ class HomeRoot extends Component {
               </div>
               <div className={styles.links}>
                 <div className={styles.top}>
-                  <IfFeature name="show_newsletter_signup">
-                    <a
-                      className={styles.link}
-                      rel="noopener noreferrer"
-                      href="https://mozilla.us19.list-manage.com/subscribe/post?u=a97038e0879516f7b8300d67f&amp;id=ebf17d04e4"
-                    >
-                      <FormattedMessage id="home.subscribe_to_mailing_list_short" />
-                    </a>
-                  </IfFeature>
                   <IfFeature name="show_join_us_dialog">
                     <a className={styles.link} rel="noopener noreferrer" href="/#/join-us">
                       <FormattedMessage id="home.join_us" />
+                    </a>
+                  </IfFeature>
+                  <IfFeature name="show_newsletter_signup">
+                    <a
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href="http://eepurl.com/gX_fH9"
+                    >
+                      <FormattedMessage id="home.subscribe_to_mailing_list" />
                     </a>
                   </IfFeature>
                   <IfFeature name="show_issue_report_link">

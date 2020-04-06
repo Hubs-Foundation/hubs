@@ -37,9 +37,19 @@ export default class SignInDialog extends Component {
     let contents;
     if (this.props.authStarted) {
       contents = (
-        <p>
-          <FormattedMessage className="preformatted" id="sign-in.auth-started" />
-        </p>
+        <div>
+          <p>
+            <FormattedMessage className="preformatted" id="sign-in.auth-started" />
+          </p>
+          <IfFeature name="show_newsletter_signup">
+            <p>
+              You can also subscribe to our{" "}
+              <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
+                mailing list
+              </a>.
+            </p>
+          </IfFeature>
+        </div>
       );
     } else if (this.props.authComplete) {
       contents = (
