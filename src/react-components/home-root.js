@@ -282,9 +282,6 @@ class HomeRoot extends Component {
                     method="post"
                     id="mc-embedded-subscribe-form"
                     name="mc-embedded-subscribe-form"
-                    className="validate"
-                    target="_blank"
-                    noValidate
                   >
                     <div id="mc_embed_signup_scroll">
                       <div className={styles.subscribeText}>
@@ -292,7 +289,6 @@ class HomeRoot extends Component {
                       </div>
                       <div className={styles.subscribeBar}>
                         <div className="mc-field-group">
-                          {/* <label htmlFor="mce-EMAIL">Email Address </label> */}
                           <input
                             placeholder="Enter email address.."
                             type="email"
@@ -301,14 +297,7 @@ class HomeRoot extends Component {
                             id="mce-EMAIL"
                           />
                         </div>
-                        <div id="mce-responses" className="clear">
-                          <div className="response" id="mce-error-response" style={{ display: "none" }} />
-                          <div className="response" id="mce-success-response" style={{ display: "none" }} />
-                        </div>
-                        <div style={{ position: "absolute", left: "-5000px" }} aria-hidden="true">
-                          <input type="text" name="b_a97038e0879516f7b8300d67f_ebf17d04e4" tabIndex="-1" value="" />
-                        </div>
-                        <div className="clear">
+                        <div>
                           <input
                             type="submit"
                             value="Subscribe"
@@ -337,6 +326,15 @@ class HomeRoot extends Component {
               </div>
               <div className={styles.links}>
                 <div className={styles.top}>
+                  <IfFeature name="show_newsletter_signup">
+                    <a
+                      className={styles.link}
+                      rel="noopener noreferrer"
+                      href="https://mozilla.us19.list-manage.com/subscribe/post?u=a97038e0879516f7b8300d67f&amp;id=ebf17d04e4"
+                    >
+                      <FormattedMessage id="home.subscribe_to_mailing_list_short" />
+                    </a>
+                  </IfFeature>
                   <IfFeature name="show_join_us_dialog">
                     <a className={styles.link} rel="noopener noreferrer" href="/#/join-us">
                       <FormattedMessage id="home.join_us" />

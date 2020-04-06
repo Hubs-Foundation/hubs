@@ -388,11 +388,9 @@ body {
 }
 
 :local(.email-input) {
-  height: 40px;
-  border-radius: 24px;
+  @extend %input-field;
   margin: 0px 16px 0px 0px;
-  width: 24em;
-  text-align: center;
+  min-width: 24em;
 }
 
 .mc_field-group {
