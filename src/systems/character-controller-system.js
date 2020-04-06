@@ -15,6 +15,7 @@ import qsTruthy from "../utils/qs_truthy";
 //import { m4String } from "../utils/pretty-print";
 const NAV_ZONE = "character";
 const qsAllowWaypointLerp = qsTruthy("waypointLerp");
+const isMobile = AFRAME.utils.device.isMobile();
 
 const calculateDisplacementToDesiredPOV = (function() {
   const translationCoordinateSpace = new THREE.Matrix4();
@@ -168,7 +169,12 @@ export class CharacterControllerSystem {
 
       if (!this.activeWaypoint && this.waypoints.length) {
         this.activeWaypoint = this.waypoints.splice(0, 1)[0];
-        this.isMotionDisabled = this.activeWaypoint.waypointComponentData.willDisableMotion;
+        // Normally, do not disable motion on touchscreens because there is no way to teleport out of it.
+        // But if motion AND teleporting is disabled, then disable motion because the waypoint author
+        // intended for the user to be stuck here.
+        this.isMotionDisabled =
+          this.activeWaypoint.waypointComponentData.willDisableMotion &&
+          (!isMobile || this.activeWaypoint.waypointComponentData.willDisableTeleporting);
         this.isTeleportingDisabled = this.activeWaypoint.waypointComponentData.willDisableTeleporting;
         this.avatarPOV.object3D.updateMatrices();
         this.waypointTravelTime =
