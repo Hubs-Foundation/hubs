@@ -13,9 +13,11 @@
     "url": "https://github.com/mozilla/hubs/issues"
   },
   "scripts": {
-    "start": "webpack-dev-server --mode=development",
+    "start": "webpack-dev-server --mode=development --env.loadAppConfig",
+    "dev": "webpack-dev-server --mode=development",
+    "local": "webpack-dev-server --mode=development --env.localDev",
     "build": "rimraf ./dist && webpack --mode=production",
-    "bundle-analyzer": "webpack-dev-server --mode=production --env.BUNDLE_ANALYZER",
+    "bundle-analyzer": "webpack-dev-server --mode=production --env.dev --env.bundleAnalyzer",
     "doc": "node ./scripts/doc/build.js",
     "prettier": "prettier --write '*.js' 'src/**/*.js'",
     "lint:js": "eslint '*.js' 'scripts/**/*.js' 'src/**/*.js'",
@@ -111,7 +113,7 @@
     "@babel/plugin-proposal-class-properties": "^7.3.3",
     "@babel/plugin-proposal-object-rest-spread": "^7.3.2",
     "@babel/polyfill": "^7.4.4",
-    "@babel/preset-env": "^7.3.1",
+    "@babel/preset-env": "^7.9.0",
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.0.0",
     "@iarna/toml": "^2.2.3",
