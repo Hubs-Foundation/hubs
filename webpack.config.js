@@ -174,8 +174,6 @@ module.exports = async (env, argv) => {
       appConfig = createDefaultAppConfig();
     }
 
-    console.log(appConfig);
-
     if (env.localDev) {
       // Local Dev Environment (npm run local)
       Object.assign(process.env, {
