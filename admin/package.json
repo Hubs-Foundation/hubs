@@ -9,7 +9,9 @@
     "url": "https://github.com/mozilla/hubs.git"
   },
   "scripts": {
-    "start": "webpack-dev-server --mode=development",
+    "start": "webpack-dev-server --mode=development --env.hubsCloudDev",
+    "dev": "webpack-dev-server --mode=development --env.dev",
+    "local": "webpack-dev-server --mode=development --env.local",
     "build": "rimraf ./dist && webpack --mode=production",
     "prettier": "prettier --write '*.js' 'src/**/*.js'",
     "lint:js": "eslint '*.js' 'src/**/*.js'",
