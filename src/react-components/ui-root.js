@@ -1117,6 +1117,22 @@ class UIRoot extends Component {
                   </div>
                 </button>
               )}
+              {configs.feature("enable_lobby_ghosts") ? (
+                <button
+                  onClick={e => {
+                    e.preventDefault();
+                    this.setState({ watching: true });
+                  }}
+                  className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
+                >
+                  <FormattedMessage id="entry.watch-from-lobby" />
+                  <div className={entryStyles.buttonSubtitle}>
+                    <FormattedMessage id="entry.watch-from-lobby-subtitle" />
+                  </div>
+                </button>
+              ) : (
+                <div />
+              )}
               <button
                 autoFocus
                 onClick={e => {
@@ -1136,23 +1152,6 @@ class UIRoot extends Component {
               >
                 <FormattedMessage id="entry.enter-room" />
               </button>
-
-              {configs.feature("enable_lobby_ghosts") ? (
-                <a
-                  onClick={e => {
-                    e.preventDefault();
-                    this.setState({ watching: true });
-                  }}
-                  className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
-                >
-                  <FormattedMessage id="entry.watch-from-lobby" />
-                  <div className={entryStyles.buttonSubtitle}>
-                    <FormattedMessage id="entry.watch-from-lobby-subtitle" />
-                  </div>
-                </a>
-              ) : (
-                <div />
-              )}
             </div>
           )}
         {this.props.entryDisallowed &&
