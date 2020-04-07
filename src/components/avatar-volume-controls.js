@@ -42,7 +42,12 @@ AFRAME.registerComponent("avatar-volume-controls", {
   },
 
   update() {
-    if (this.networkedAudioSource && window.APP.store.state.preferences.audioOutputMode === "panner") {
+    const audioOutputMode = window.APP.store.state.preferences.audioOutputMode;
+    if (
+      this.networkedAudioSource &&
+      this.networkedAudioSource.sound &&
+      (audioOutputMode === undefined || audioOutputMode === "panner")
+    ) {
       const globalVoiceVolume =
         window.APP.store.state.preferences.globalVoiceVolume !== undefined
           ? window.APP.store.state.preferences.globalVoiceVolume
@@ -65,7 +70,15 @@ AFRAME.registerComponent("avatar-volume-controls", {
     const positionA = new THREE.Vector3();
     const positionB = new THREE.Vector3();
     return function() {
-      if (this.networkedAudioSource && window.APP.store.state.preferences.audioOutputMode === "audio") {
+      if (!this.networkedAudioSource) {
+        // Walk up to Spine and then search down.
+        const source = this.el.parentNode.parentNode.querySelector("[networked-audio-source]");
+        if (!source) return;
+        this.networkedAudioSource = source.components["networked-audio-source"];
+      }
+      if (!this.networkedAudioSource) return;
+
+      if (window.APP.store.state.preferences.audioOutputMode === "audio") {
         const globalVoiceVolume =
           window.APP.store.state.preferences.globalVoiceVolume !== undefined
             ? window.APP.store.state.preferences.globalVoiceVolume
@@ -75,11 +88,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
         const distance = positionA.distanceTo(positionB);
         this.networkedAudioSource.sound.gain.gain.value =
           (globalVoiceVolume / 100) * this.data.volume * Math.min(1, 10 / Math.max(1, distance * distance));
-      } else if (!this.networkedAudioSource) {
-        // Walk up to Spine and then search down.
-        const source = this.el.parentNode.parentNode.querySelector("[networked-audio-source]");
-        if (!source) return;
-        this.networkedAudioSource = source.components["networked-audio-source"];
+      } else {
         this.update();
       }
     };
