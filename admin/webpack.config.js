@@ -71,7 +71,7 @@ module.exports = (env, argv) => {
       RETICULUM_SOCKET_SERVER: "hubs.local",
       CORS_PROXY_SERVER: "hubs-proxy.local:4000",
       NON_CORS_PROXY_DOMAINS: "hubs.local,dev.reticulum.io",
-      BASE_ASSETS_PATH: "https://hubs.local:8080/",
+      BASE_ASSETS_PATH: "https://hubs.local:8989/",
       RETICULUM_SERVER: "hubs.local:4000",
       POSTGREST_SERVER: "",
       ITA_SERVER: ""
