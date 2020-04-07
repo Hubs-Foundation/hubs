@@ -166,9 +166,11 @@ module.exports = async (env, argv) => {
 
   if (argv.mode !== "production" || env.bundleAnalyzer) {
     if (env.loadAppConfig || process.env.LOAD_APP_CONFIG) {
-      // Load and set the app config and environment variables from the remote server.
-      // A Hubs Cloud server or dev.reticulum.io can be used.
-      appConfig = await fetchAppConfigAndEnvironmentVars();
+      if (!env.localDev) {
+        // Load and set the app config and environment variables from the remote server.
+        // A Hubs Cloud server or dev.reticulum.io can be used.
+        appConfig = await fetchAppConfigAndEnvironmentVars();
+      }
     } else {
       // Use the default app config with all featured enabled.
       appConfig = createDefaultAppConfig();
