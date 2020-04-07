@@ -131,6 +131,7 @@ class UIRoot extends Component {
     linkChannel: PropTypes.object,
     hub: PropTypes.object,
     availableVREntryTypes: PropTypes.object,
+    checkingForDeviceAvailability: PropTypes.bool,
     environmentSceneLoaded: PropTypes.bool,
     entryDisallowed: PropTypes.bool,
     roomUnavailableReason: PropTypes.string,
@@ -1213,6 +1214,16 @@ class UIRoot extends Component {
 
         {!this.state.waitingOnAudio ? (
           <div className={entryStyles.buttonContainer}>
+            {this.props.checkingForDeviceAvailability && (
+              <div>
+                <div className="loader-wrap loader-mid">
+                  <div className="loader">
+                    <div className="loader-center" />
+                  </div>
+                </div>
+                <FormattedMessage id="entry.checkingForDeviceAvailability" />
+              </div>
+            )}
             {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
               <div className={entryStyles.secondary} onClick={this.enterVR}>
                 <FormattedMessage id="entry.cardboard" />
