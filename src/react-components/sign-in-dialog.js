@@ -42,12 +42,10 @@ export default class SignInDialog extends Component {
             <FormattedMessage className="preformatted" id="sign-in.auth-started" />
           </p>
           <IfFeature name="show_newsletter_signup">
-            <p>
-              You can also subscribe to our{" "}
-              <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
-                mailing list
-              </a>.
-            </p>
+            Want Hubs news sent to your inbox?{"\n"}
+            <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
+              Subscribe for updates
+            </a>.
           </IfFeature>
         </div>
       );

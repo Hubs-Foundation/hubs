@@ -20,10 +20,10 @@ export default class JoinUsDialog extends Component {
             </a>.
           </p>
           <p>
-            Prefer to stay up to date by email?{"\n"}
+            Want Hubs news sent to your inbox?{"\n"}
             <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
-              Subscribe to the newsletter.
-            </a>
+              Subscribe for updates
+            </a>.
           </p>
         </span>
       </DialogContainer>
