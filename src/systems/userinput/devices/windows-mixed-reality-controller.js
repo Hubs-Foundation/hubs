@@ -14,11 +14,9 @@ export class WindowsMixedRealityControllerDevice {
     this.rayObject = null;
     this.rayObjectRotation = new THREE.Quaternion();
 
-    if (!window.hasNativeWebXRImplementation) {
-      // wake the gamepad api up. otherwise it does not report touch controllers.
-      // in chrome it still won't unless you enter vr.
-      navigator.getVRDisplays();
-    }
+    // wake the gamepad api up. otherwise it does not report touch controllers.
+    // in chrome it still won't unless you enter vr.
+    navigator.getVRDisplays();
 
     this.gamepad = gamepad;
     this.pose = new Pose();
@@ -34,10 +32,8 @@ export class WindowsMixedRealityControllerDevice {
     this.orientation = new THREE.Quaternion();
   }
   write(frame, scene, xrReferenceSpace) {
-    if (!window.hasNativeWebXRImplementation) {
-      if (!this.gamepad) return;
-      this.gamepad = navigator.getGamepads()[this.gamepad.index];
-    }
+    if (!this.gamepad) return;
+    this.gamepad = navigator.getGamepads()[this.gamepad.index];
     if (!this.gamepad || !this.gamepad.connected) return;
 
     const path = paths.device.wmr[this.gamepad.hand || "right"];

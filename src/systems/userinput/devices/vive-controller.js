@@ -13,11 +13,9 @@ const m = new THREE.Matrix4();
 
 export class ViveControllerDevice {
   constructor(gamepad) {
-    if (!window.hasNativeWebXRImplementation) {
-      // wake the gamepad api up. otherwise it does not report touch controllers.
-      // in chrome it still won't unless you enter vr.
-      navigator.getVRDisplays();
-    }
+    // wake the gamepad api up. otherwise it does not report touch controllers.
+    // in chrome it still won't unless you enter vr.
+    navigator.getVRDisplays();
     this.gamepad = gamepad;
 
     if (this.gamepad.id === "OpenVR Cosmos") {
@@ -82,14 +80,12 @@ export class ViveControllerDevice {
   }
 
   write(frame) {
-    if (!window.hasNativeWebXRImplementation) {
-      const gamepads = navigator.getGamepads();
-      if (gamepads.length < this.gamepad.index + 1) {
-        //workaround for: https://bugzilla.mozilla.org/show_bug.cgi?id=1568076
-        return;
-      }
-      this.gamepad = gamepads[this.gamepad.index];
+    const gamepads = navigator.getGamepads();
+    if (gamepads.length < this.gamepad.index + 1) {
+      //workaround for: https://bugzilla.mozilla.org/show_bug.cgi?id=1568076
+      return;
     }
+    this.gamepad = gamepads[this.gamepad.index];
     if (!this.gamepad || !this.gamepad.connected) return;
 
     this.buttonMap.forEach(b => {

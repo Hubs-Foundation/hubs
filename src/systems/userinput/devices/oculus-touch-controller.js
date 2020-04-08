@@ -28,11 +28,9 @@ export class OculusTouchControllerDevice {
   constructor(gamepad) {
     this.rayObjectRotation = new THREE.Quaternion();
 
-    if (!window.hasNativeWebXRImplementation) {
-      // wake the gamepad api up. otherwise it does not report touch controllers.
-      // in chrome it still won't unless you enter vr.
-      navigator.getVRDisplays();
-    }
+    // wake the gamepad api up. otherwise it does not report touch controllers.
+    // in chrome it still won't unless you enter vr.
+    navigator.getVRDisplays();
 
     const buttonMaps = {
       left: leftOculusTouchButtonMap,
@@ -60,10 +58,8 @@ export class OculusTouchControllerDevice {
   }
 
   write(frame, scene, xrReferenceSpace) {
-    if (!window.hasNativeWebXRImplementation) {
-      if (!this.gamepad) return;
-      this.gamepad = navigator.getGamepads()[this.gamepad.index];
-    }
+    if (!this.gamepad) return;
+    this.gamepad = navigator.getGamepads()[this.gamepad.index];
     if (!this.gamepad || !this.gamepad.connected) return;
 
     this.buttonMap.forEach(b => {

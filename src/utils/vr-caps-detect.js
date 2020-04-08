@@ -50,9 +50,8 @@ export async function getAvailableVREntryTypes() {
   // This needs to be kept up-to-date with the latest browsers that can support VR and Hubs.
   // Checking for navigator.getVRDisplays always passes b/c of polyfill.
   const isWebVRCapableBrowser = window.hasNativeWebVRImplementation;
-  const isWebXRCapableBrowser = window.hasNativeWebXRImplementation;
 
-  const isDaydreamCapableBrowser = !!(isWebXRCapableBrowser && browser.name === "chrome" && !isSamsungBrowser);
+  const isDaydreamCapableBrowser = !!(isWebVRCapableBrowser && browser.name === "chrome" && !isSamsungBrowser);
   const isIDevice = AFRAME.utils.device.isIOS();
   const isFirefoxBrowser = browser.name === "firefox";
   const isUIWebView = typeof navigator.mediaDevices === "undefined";
@@ -67,7 +66,9 @@ export async function getAvailableVREntryTypes() {
 
   let displays = [];
   try {
-    if ((isWebVRCapableBrowser && !isWebXRCapableBrowser) || isMobile) {
+    // Skip getVRDisplays on desktop Chrome since the API is in a broken state there.
+    // See https://github.com/mozilla/hubs/issues/892
+    if (browser.name !== "chrome" || isMobile) {
       // We pull the displays on non-WebVR capable mobile browsers so we can pick up cardboard.
       displays = isWebVRCapableBrowser || isCardboardCapableBrowser ? await navigator.getVRDisplays() : [];
     }
@@ -110,7 +111,7 @@ export async function getAvailableVREntryTypes() {
       ? VR_DEVICE_AVAILABILITY.yes
       : VR_DEVICE_AVAILABILITY.no;
 
-  if (isWebVRCapableBrowser && !isWebXRCapableBrowser) {
+  if (isWebVRCapableBrowser) {
     // Generic is supported for non-blacklisted devices and presentable HMDs.
     generic = displays.find(
       d => d.capabilities.canPresent && !GENERIC_ENTRY_TYPE_DEVICE_BLACKLIST.find(r => r.test(d.displayName))
@@ -129,10 +130,6 @@ export async function getAvailableVREntryTypes() {
       // If we didn't detect daydream in a daydream capable browser, we definitely can't run daydream at all.
       daydream = VR_DEVICE_AVAILABILITY.no;
     }
-  }
-
-  if (isWebXRCapableBrowser) {
-    generic = VR_DEVICE_AVAILABILITY.yes;
   }
 
   return { screen, generic, gearvr, daydream, cardboard, safari };

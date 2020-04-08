@@ -406,16 +406,7 @@ AFRAME.registerSystem("userinput", {
       gamepad && gamepadConnected({ gamepad });
     }
 
-    this.xrReferenceSpace = null;
-    this.el.sceneEl.addEventListener("enter-vr", () => {
-      if (window.hasNativeWebXRImplementation) {
-        const session = this.el.sceneEl.xrSession;
-        session.requestReferenceSpace("local-floor").then(referenceSpace => {
-          this.xrReferenceSpace = referenceSpace;
-        });
-      }
-      updateBindingsForVRMode();
-    });
+    this.el.sceneEl.addEventListener("enter-vr", updateBindingsForVRMode);
     this.el.sceneEl.addEventListener("exit-vr", updateBindingsForVRMode);
 
     updateBindingsForVRMode();
@@ -489,7 +480,7 @@ AFRAME.registerSystem("userinput", {
     }
 
     for (let i = 0; i < this.activeDevices.items.length; i++) {
-      this.activeDevices.items[i].write(this.frame, this.el.sceneEl, this.xrReferenceSpace);
+      this.activeDevices.items[i].write(this.frame, this.el.sceneEl);
     }
 
     for (let i = 0; i < this.sortedBindings.length; i++) {
