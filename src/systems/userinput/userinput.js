@@ -480,7 +480,7 @@ AFRAME.registerSystem("userinput", {
     }
 
     for (let i = 0; i < this.activeDevices.items.length; i++) {
-      this.activeDevices.items[i].write(this.frame, this.el.sceneEl);
+      this.activeDevices.items[i].write(this.frame);
     }
 
     for (let i = 0; i < this.sortedBindings.length; i++) {

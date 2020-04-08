@@ -37,7 +37,6 @@ export class OculusGoControllerDevice {
 
     // Have to call navigator.getGamepads() in order for the gamepad object to update.
     navigator.getGamepads();
-
     if (this.gamepad.connected) {
       frame.setValueType(TOUCHPAD.axisX, this.gamepad.axes[0]);
       frame.setValueType(TOUCHPAD.axisY, this.gamepad.axes[1]);

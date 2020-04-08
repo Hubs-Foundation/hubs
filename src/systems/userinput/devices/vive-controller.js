@@ -86,7 +86,7 @@ export class ViveControllerDevice {
       return;
     }
     this.gamepad = gamepads[this.gamepad.index];
-    if (!this.gamepad || !this.gamepad.connected) return;
+    if (!this.gamepad.connected) return;
 
     this.buttonMap.forEach(b => {
       const path = this.path.button(b.name);
