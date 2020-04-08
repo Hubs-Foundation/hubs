@@ -117,6 +117,7 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.0.0",
     "@iarna/toml": "^2.2.3",
+    "acorn": "^6.4.1",
     "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
