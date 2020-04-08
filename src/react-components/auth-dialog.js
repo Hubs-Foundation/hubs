@@ -38,10 +38,12 @@ class AuthDialog extends Component {
             <div>
               <FormattedMessage className="preformatted" id="auth.verified" />
               <IfFeature name="show_newsletter_signup">
-                Want Hubs news sent to your inbox?{"\n"}
-                <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
-                  Subscribe for updates
-                </a>.
+                <p>
+                  Want Hubs news sent to your inbox?{"\n"}
+                  <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
+                    Subscribe for updates
+                  </a>.
+                </p>
               </IfFeature>
             </div>
           )}

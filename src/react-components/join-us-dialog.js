@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import DialogContainer from "./dialog-container.js";
+import IfFeature from "./if-feature";
 
 export default class JoinUsDialog extends Component {
   render() {
@@ -19,12 +20,14 @@ export default class JoinUsDialog extends Component {
               @MozillaHubs
             </a>.
           </p>
-          <p>
-            Want Hubs news sent to your inbox?{"\n"}
-            <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
-              Subscribe for updates
-            </a>.
-          </p>
+          <IfFeature name="show_newsletter_signup">
+            <p>
+              Want Hubs news sent to your inbox?{"\n"}
+              <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
+                Subscribe for updates
+              </a>.
+            </p>
+          </IfFeature>
         </span>
       </DialogContainer>
     );
