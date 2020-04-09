@@ -74,7 +74,14 @@ export default class PreferencesScreen extends Component {
       { key: "disableMovement", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "disableBackwardsMovement", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "disableStrafing", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "disableTeleporter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+      { key: "disableTeleporter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+      {
+        key: "movementSpeedModifier",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+        min: 0,
+        max: 2,
+        defaultNumber: 1
+      }
     ].map(preferenceListItem);
 
     const touchscreen = [

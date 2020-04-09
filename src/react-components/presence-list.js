@@ -165,19 +165,19 @@ export default class PresenceList extends Component {
     const occupantCount = this.props.presences ? Object.entries(this.props.presences).length : 0;
     return (
       <div>
-        <div
+        <button
           title={"Members"}
           onClick={() => {
             this.props.onExpand(!this.props.expanded);
           }}
           className={classNames({
-            [rootStyles.presenceInfo]: true,
+            [rootStyles.presenceListButton]: true,
             [rootStyles.presenceInfoSelected]: this.props.expanded
           })}
         >
           <FontAwesomeIcon icon={faUsers} />
           <span className={rootStyles.occupantCount}>{occupantCount}</span>
-        </div>
+        </button>
         {this.props.expanded && this.renderExpandedList()}
       </div>
     );

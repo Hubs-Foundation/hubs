@@ -34,7 +34,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.color = new THREE.Color(0, 0, 0);
 
     const lineGeometry = new THREE.BufferGeometry();
-    lineGeometry.addAttribute("position", new THREE.BufferAttribute(new Float32Array(2 * 3), 3));
+    lineGeometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(2 * 3), 3));
 
     this.line = new THREE.Line(
       lineGeometry,

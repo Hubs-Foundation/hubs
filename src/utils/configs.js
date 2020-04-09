@@ -1,5 +1,6 @@
 import appLogo from "../assets/images/app-logo.png";
 import companyLogo from "../assets/images/company-logo.png";
+import homeHeroBackground from "../assets/images/home-hero-background-unbranded.png";
 import sceneEditorLogo from "../assets/images/editor-logo.png";
 import pdfjs from "pdfjs-dist";
 
@@ -79,7 +80,8 @@ if (isLocalDevelopment) {
   localDevImages = {
     logo: appLogo,
     company_logo: companyLogo,
-    editor_logo: sceneEditorLogo
+    editor_logo: sceneEditorLogo,
+    home_background: homeHeroBackground
   };
 }
 
