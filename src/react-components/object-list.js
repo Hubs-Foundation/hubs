@@ -142,7 +142,7 @@ export default class ObjectList extends Component {
 
   renderExpandedList() {
     return (
-      <div className={styles.presenceList}>
+      <div className={rootStyles.objectList}>
         <div className={styles.contents}>
           <div className={styles.rows}>{this.state.mediaEntities.map(this.domForEntity.bind(this))}</div>
         </div>
@@ -153,7 +153,7 @@ export default class ObjectList extends Component {
   render() {
     return (
       <div>
-        <div
+        <button
           title={"Media"}
           onClick={() => {
             this.props.onExpand(
@@ -162,13 +162,13 @@ export default class ObjectList extends Component {
             );
           }}
           className={classNames({
-            [rootStyles.objectList]: true,
+            [rootStyles.objectListButton]: true,
             [rootStyles.presenceInfoSelected]: this.props.expanded
           })}
         >
-          <FontAwesomeIcon icon={faCubes} />
-          <span className={rootStyles.occupantCount}>{this.state.mediaEntities.length}</span>
-        </div>
+          <FontAwesomeIcon className={classNames(rootStyles.objectListSvg)} icon={faCubes} />
+          <span className={rootStyles.mediaCount}>{this.state.mediaEntities.length}</span>
+        </button>
         {this.props.expanded && this.renderExpandedList()}
       </div>
     );
