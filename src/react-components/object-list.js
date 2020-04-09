@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { FormattedMessage } from "react-intl";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import rootStyles from "../assets/stylesheets/ui-root.scss";
@@ -148,9 +149,7 @@ export default class ObjectList extends Component {
             {this.state.mediaEntities.length ? (
               this.state.mediaEntities.map(this.domForEntity.bind(this))
             ) : (
-              <div className={styles.listItem}>
-                <span>There is no media in the scene yet.</span>
-              </div>
+              <FormattedMessage id="object-info.no-media" className={styles.listItem} />
             )}
           </div>
         </div>
