@@ -171,7 +171,7 @@ export default class ObjectList extends Component {
             [rootStyles.presenceInfoSelected]: this.props.expanded
           })}
         >
-          <FontAwesomeIcon className={classNames(rootStyles.objectListSvg)} icon={faCubes} />
+          <FontAwesomeIcon icon={faCubes} />
           <span className={rootStyles.mediaCount}>{this.state.mediaEntities.length}</span>
         </button>
         {this.props.expanded && this.renderExpandedList()}
