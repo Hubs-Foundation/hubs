@@ -144,7 +144,15 @@ export default class ObjectList extends Component {
     return (
       <div className={rootStyles.objectList}>
         <div className={styles.contents}>
-          <div className={styles.rows}>{this.state.mediaEntities.map(this.domForEntity.bind(this))}</div>
+          <div className={styles.rows}>
+            {this.state.mediaEntities.length ? (
+              this.state.mediaEntities.map(this.domForEntity.bind(this))
+            ) : (
+              <div className={styles.listItem}>
+                <span>There is no media in the scene yet.</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -156,10 +164,7 @@ export default class ObjectList extends Component {
         <button
           title={"Media"}
           onClick={() => {
-            this.props.onExpand(
-              !this.props.expanded && this.state.mediaEntities.length > 0,
-              !AFRAME.utils.device.isMobileVR()
-            );
+            this.props.onExpand(!this.props.expanded, !AFRAME.utils.device.isMobileVR());
           }}
           className={classNames({
             [rootStyles.objectListButton]: true,
