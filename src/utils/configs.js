@@ -34,8 +34,6 @@ let isAdmin = false;
 
 configs.AVAILABLE_INTEGRATIONS = window.AVAILABLE_INTEGRATIONS || {};
 
-console.log(process.env.APP_CONFIG, window.APP_CONFIG);
-
 if (process.env.APP_CONFIG) {
   window.APP_CONFIG = process.env.APP_CONFIG;
 }
