@@ -71,7 +71,7 @@ export class AudioSystem {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
 
-    if (/chrome/i.test(navigator.userAgent)) {
+    if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
       enableChromeAEC(sceneEl.audioListener.gain);
     }
   }
