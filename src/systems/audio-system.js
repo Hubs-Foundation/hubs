@@ -1,4 +1,4 @@
-function enableChromeAEC(gainNode) {
+async function enableChromeAEC(gainNode) {
   /**
    *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
    *  1. grab the GainNode from the scene's THREE.AudioListener
@@ -42,23 +42,13 @@ function enableChromeAEC(gainNode) {
     outboundPeerConnection.addTrack(track, loopbackDestination.stream);
   });
 
-  outboundPeerConnection.createOffer().then(offer => {
-    outboundPeerConnection.setLocalDescription(offer).catch(onError);
+  const offer = await outboundPeerConnection.createOffer().catch(onError);
+  outboundPeerConnection.setLocalDescription(offer).catch(onError);
+  await inboundPeerConnection.setRemoteDescription(offer).catch(onError);
 
-    inboundPeerConnection
-      .setRemoteDescription(offer)
-      .then(() => {
-        inboundPeerConnection
-          .createAnswer()
-          .then(answer => {
-            inboundPeerConnection.setLocalDescription(answer).catch(onError);
-
-            outboundPeerConnection.setRemoteDescription(answer).catch(onError);
-          })
-          .catch(onError);
-      })
-      .catch(onError);
-  });
+  const answer = await inboundPeerConnection.createAnswer();
+  inboundPeerConnection.setLocalDescription(answer).catch(onError);
+  outboundPeerConnection.setRemoteDescription(answer).catch(onError);
 }
 
 export class AudioSystem {
@@ -71,7 +61,11 @@ export class AudioSystem {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
 
-    if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
+    if (
+      !AFRAME.utils.device.isMobile() &&
+      /chrome/i.test(navigator.userAgent) &&
+      !/OculusBrowser/i.test(window.navigator.userAgent)
+    ) {
       enableChromeAEC(sceneEl.audioListener.gain);
     }
   }
