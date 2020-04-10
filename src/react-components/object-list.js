@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { FormattedMessage } from "react-intl";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import rootStyles from "../assets/stylesheets/ui-root.scss";
@@ -142,9 +143,15 @@ export default class ObjectList extends Component {
 
   renderExpandedList() {
     return (
-      <div className={styles.presenceList}>
+      <div className={rootStyles.objectList}>
         <div className={styles.contents}>
-          <div className={styles.rows}>{this.state.mediaEntities.map(this.domForEntity.bind(this))}</div>
+          <div className={styles.rows}>
+            {this.state.mediaEntities.length ? (
+              this.state.mediaEntities.map(this.domForEntity.bind(this))
+            ) : (
+              <FormattedMessage id="object-info.no-media" className={styles.listItem} />
+            )}
+          </div>
         </div>
       </div>
     );
@@ -153,22 +160,19 @@ export default class ObjectList extends Component {
   render() {
     return (
       <div>
-        <div
+        <button
           title={"Media"}
           onClick={() => {
-            this.props.onExpand(
-              !this.props.expanded && this.state.mediaEntities.length > 0,
-              !AFRAME.utils.device.isMobileVR()
-            );
+            this.props.onExpand(!this.props.expanded, !AFRAME.utils.device.isMobileVR());
           }}
           className={classNames({
-            [rootStyles.objectList]: true,
+            [rootStyles.objectListButton]: true,
             [rootStyles.presenceInfoSelected]: this.props.expanded
           })}
         >
           <FontAwesomeIcon icon={faCubes} />
-          <span className={rootStyles.occupantCount}>{this.state.mediaEntities.length}</span>
-        </div>
+          <span className={rootStyles.mediaCount}>{this.state.mediaEntities.length}</span>
+        </button>
         {this.props.expanded && this.renderExpandedList()}
       </div>
     );

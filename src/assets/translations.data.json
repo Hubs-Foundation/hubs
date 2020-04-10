@@ -392,6 +392,7 @@
     "client-info.cancel": "Cancel",
     "client-info.add-owner": "Promote",
     "client-info.remove-owner": "Demote",
+    "object-info.no-media": "There is no media in the room yet",
     "object-info.remove-button": "Remove",
     "object-info.open-link": "Open Link",
     "object-info.waypoint": "Go To",
