@@ -146,8 +146,6 @@ module.exports = async (env, argv) => {
     };
   }
 
-  console.log(sdkEnabled);
-
   return {
     node: {
       // need to specify this manually because some random lodash code will try to access
