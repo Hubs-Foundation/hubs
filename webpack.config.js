@@ -125,6 +125,29 @@ module.exports = async (env, argv) => {
     }
   }
 
+  let sdkEnabled = false;
+  const babelTransformPaths = [path.resolve(__dirname, "src")];
+  let sdkAliases = {};
+
+  if (process.env.HUBS_CONFIG_PATH) {
+    const hubsConfigPath = path.resolve(__dirname, process.env.HUBS_CONFIG_PATH);
+    const hubsConfigDir = path.dirname(hubsConfigPath);
+    sdkEnabled = fs.existsSync(hubsConfigPath);
+
+    babelTransformPaths.push(hubsConfigDir);
+
+    sdkAliases = {
+      "hubs-config": hubsConfigPath,
+      hubs$: path.resolve(__dirname, "src", "sdk", "public")
+    };
+  } else {
+    sdkAliases = {
+      "hubs-config": path.resolve(__dirname, "src", "sdk", "hubs-config-stub.js")
+    };
+  }
+
+  console.log(sdkEnabled);
+
   return {
     node: {
       // need to specify this manually because some random lodash code will try to access
@@ -204,7 +227,7 @@ module.exports = async (env, argv) => {
         },
         {
           test: /\.js$/,
-          include: [path.resolve(__dirname, "src")],
+          include: babelTransformPaths,
           // Exclude JS assets in node_modules because they are already transformed and often big.
           exclude: [path.resolve(__dirname, "node_modules")],
           loader: "babel-loader"
@@ -260,6 +283,13 @@ module.exports = async (env, argv) => {
           use: { loader: "raw-loader" }
         }
       ]
+    },
+
+    resolve: {
+      alias: {
+        three: path.resolve(__dirname, "node_modules", "three"),
+        ...sdkAliases
+      }
     },
 
     optimization: {
@@ -390,7 +420,8 @@ module.exports = async (env, argv) => {
           POSTGREST_SERVER: process.env.POSTGREST_SERVER,
           USE_FEATURE_CONFIG: process.env.USE_FEATURE_CONFIG,
           APP_CONFIG: appConfig,
-          APP_CONFIG_SCHEMA: appConfigSchema
+          APP_CONFIG_SCHEMA: appConfigSchema,
+          SDK_ENABLED: sdkEnabled
         })
       })
     ]

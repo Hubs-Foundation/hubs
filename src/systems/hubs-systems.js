@@ -21,6 +21,7 @@ import { CursorPoseTrackingSystem } from "./cursor-pose-tracking";
 import { ScaleInScreenSpaceSystem } from "./scale-in-screen-space";
 import { AudioSettingsSystem } from "./audio-settings-system";
 import { EnterVRButtonSystem } from "./enter-vr-button-system";
+import { SDKSystem } from "./sdk-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -51,6 +52,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.scaleInScreenSpaceSystem = new ScaleInScreenSpaceSystem();
     this.audioSettingsSystem = new AudioSettingsSystem(this.el);
     this.enterVRButtonSystem = new EnterVRButtonSystem(this.el);
+    this.sdkSystem = new SDKSystem();
   },
 
   tick(t, dt) {
@@ -85,6 +87,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.cameraSystem.tick(this.el, dt);
     this.waypointSystem.tick(t, dt);
     this.enterVRButtonSystem.tick();
+    this.sdkSystem.tick(dt);
   },
 
   remove() {
