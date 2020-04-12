@@ -58,6 +58,8 @@ export function EntityMixin(Object3DClass) {
       this.components = [];
       this.componentsByType = new Map();
       this.tags = [];
+      this.isStatic = false;
+      this.matrixAutoUpdate = true;
     }
 
     add(entity) {
@@ -256,6 +258,47 @@ export function EntityMixin(Object3DClass) {
       }
 
       return true;
+    }
+
+    // Restore updateMatrixWorld behavior except all static entities will
+    // require the force flag to update. For environmnents without a lot of
+    // dynamic objects this still works quite well and gives developers the
+    // ThreeJS API they are used to.
+    updateMatrix() {
+      this.matrix.compose(
+        this.position,
+        this.quaternion,
+        this.scale
+      );
+      this.matrixWorldNeedsUpdate = true;
+    }
+
+    updateMatrixWorld(force) {
+      if (this.isStatic && !force) {
+        return;
+      }
+
+      if (this.matrixAutoUpdate) this.updateMatrix();
+
+      if (this.matrixWorldNeedsUpdate || force) {
+        if (this.parent === null) {
+          this.matrixWorld.copy(this.matrix);
+        } else {
+          this.matrixWorld.multiplyMatrices(this.parent.matrixWorld, this.matrix);
+        }
+
+        this.matrixWorldNeedsUpdate = false;
+
+        force = true;
+      }
+
+      // update children
+
+      const children = this.children;
+
+      for (let i = 0, l = children.length; i < l; i++) {
+        children[i].updateMatrixWorld(force);
+      }
     }
 
     clone(recursive) {

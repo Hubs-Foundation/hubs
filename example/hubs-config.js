@@ -15,7 +15,6 @@ class RotateSystem extends System {
     entities.forEach(entity => {
       const rotate = entity.getComponent(RotateComponent);
       entity.rotateOnAxis(rotate.axis, rotate.speed * (dt / 1000));
-      entity.matrixNeedsUpdate = true;
     });
   }
 }
@@ -25,6 +24,6 @@ export default function config(world) {
   world.registerSystem(RotateSystem);
 
   const entity = new MeshEntity(new BoxBufferGeometry(), new MeshBasicMaterial());
-  world.root.add(entity);
   entity.addComponent(RotateComponent);
+  world.root.add(entity);
 }
