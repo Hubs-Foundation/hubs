@@ -61,12 +61,27 @@ export class AudioSystem {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
 
-    if (
-      !AFRAME.utils.device.isMobile() &&
-      /chrome/i.test(navigator.userAgent) &&
-      !/OculusBrowser/i.test(window.navigator.userAgent)
-    ) {
-      enableChromeAEC(sceneEl.audioListener.gain);
-    }
+    /**
+     * Chrome and Safari will start Audio contexts in a "suspended" state.
+     * A user interaction (touch/mouse event) is needed in order to resume the AudioContext.
+     */
+    const ctx = THREE.AudioContext.getContext();
+    const resume = () => {
+      ctx.resume();
+
+      setTimeout(function() {
+        if (ctx.state === "running") {
+          if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
+            enableChromeAEC(sceneEl.audioListener.gain);
+          }
+
+          document.body.removeEventListener("touchend", resume, false);
+          document.body.removeEventListener("mouseup", resume, false);
+        }
+      }, 0);
+    };
+
+    document.body.addEventListener("touchend", resume, false);
+    document.body.addEventListener("mouseup", resume, false);
   }
 }
