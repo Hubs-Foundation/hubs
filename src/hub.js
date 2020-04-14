@@ -519,6 +519,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
       let newHostPollInterval = null;
 
       // When reconnecting, update the server URL if necessary
+      TODO need to fetch new TURN creds here
       adapter.setReconnectionListeners(
         () => {
           if (newHostPollInterval) return;
