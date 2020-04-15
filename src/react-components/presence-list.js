@@ -166,7 +166,8 @@ export default class PresenceList extends Component {
     return (
       <div>
         <button
-          title={"Members"}
+          title="Members"
+          aria-label={`Toggle list of ${occupantCount} member${occupantCount === 1 ? "" : "s"}`}
           onClick={() => {
             this.props.onExpand(!this.props.expanded);
           }}

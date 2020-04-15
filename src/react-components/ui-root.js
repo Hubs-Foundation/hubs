@@ -1067,13 +1067,18 @@ class UIRoot extends Component {
           ) : (
             <span>{this.props.hub.name}</span>
           )}
-          <button onClick={() => this.setState({ watching: true })} className={entryStyles.collapseButton}>
+          <button
+            aria-label="Close room entry modal"
+            onClick={() => this.setState({ watching: true })}
+            className={entryStyles.collapseButton}
+          >
             <i>
               <FontAwesomeIcon icon={faTimes} />
             </i>
           </button>
 
           <button
+            aria-label="Toggle Favorited"
             onClick={() => this.toggleFavorited()}
             className={classNames({
               [entryStyles.entryFavoriteButton]: true,

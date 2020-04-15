@@ -114,6 +114,7 @@ export default class ObjectList extends Component {
   domForEntity(el, i) {
     return (
       <button
+        aria-label="Show Object Info Modal"
         key={i}
         className={objectListStyles.rowNoMargin}
         onMouseDown={() => {
@@ -159,10 +160,12 @@ export default class ObjectList extends Component {
   }
 
   render() {
+    const numObjects = (this.state.mediaEntities && this.state.mediaEntities.length) || 0;
     return (
       <div>
         <button
-          title={"Media"}
+          title="Media"
+          aria-label={`Toggle list of ${numObjects} object${numObjects === 1 ? "" : "s"}`}
           onClick={() => {
             this.props.onExpand(!this.props.expanded, !AFRAME.utils.device.isMobileVR());
           }}
