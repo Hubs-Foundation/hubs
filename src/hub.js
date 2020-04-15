@@ -274,7 +274,6 @@ const history = routerBaseName === "/" ? createMemoryHistory() : createBrowserHi
 window.APP.history = history;
 
 const qsVREntryType = qs.get("vr_entry_type");
-const forceTurn = qs.get("force_turn");
 
 function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
@@ -315,6 +314,34 @@ function mountUI(props = {}) {
 function remountUI(props) {
   uiProps = { ...uiProps, ...props };
   mountUI(uiProps);
+}
+
+function setupPeerConnectionConfig(adapter, host, turn) {
+  console.log(turn);
+  const forceTurn = qs.get("force_turn");
+  const peerConnectionConfig = {};
+
+  if (turn && turn.enabled) {
+    const iceServers = turn.transports.map(ts => {
+      return { urls: `turns:${host}:${ts.port}?transport=tcp`, username: turn.username, credential: turn.credential };
+    });
+
+    iceServers.push({ urls: "stun:stun1.l.google.com:19302" });
+
+    peerConnectionConfig.iceServers = iceServers;
+
+    if (forceTurn) {
+      peerConnectionConfig.iceTransportPolicy = "relay";
+    }
+  } else {
+    peerConnectionConfig.iceServers = [
+      { urls: "stun:stun1.l.google.com:19302" },
+      { urls: "stun:stun2.l.google.com:19302" }
+    ];
+  }
+
+  console.log(peerConnectionConfig);
+  adapter.setPeerConnectionConfig(peerConnectionConfig);
 }
 
 async function updateEnvironmentForHub(hub, entryManager) {
@@ -519,18 +546,20 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
       let newHostPollInterval = null;
 
       // When reconnecting, update the server URL if necessary
-      TODO need to fetch new TURN creds here
       adapter.setReconnectionListeners(
         () => {
           if (newHostPollInterval) return;
 
           newHostPollInterval = setInterval(async () => {
             const currentServerURL = NAF.connection.adapter.serverUrl;
-            const newHubHost = await hubChannel.getHost();
-            const newServerURL = `wss://${newHubHost}`;
+            const { host, port, turn } = await hubChannel.getHost();
+            const newServerURL = `wss://${host}:${port}`;
+
+            setupPeerConnectionConfig(adapter, host, turn);
 
             if (currentServerURL !== newServerURL) {
-              console.log("Connecting to new Janus server " + newServerURL);
+              console.log("Connecting to new Janus server " + newServerURL + " and TURN:");
+              console.log(turn);
               scene.setAttribute("networked-scene", { serverURL: newServerURL });
               adapter.serverUrl = newServerURL;
             }
@@ -1348,6 +1377,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       hubChannel.setPermissionsFromToken(permsToken);
 
       const janusHost = data.hubs[0].host;
+      const janusTurn = data.hubs[0].turn;
 
       scene.addEventListener("adapter-ready", async ({ detail: adapter }) => {
         // HUGE HACK Safari does not like it if the first peer seen does not immediately
@@ -1377,18 +1407,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const track = stream.getAudioTracks()[0];
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
-        const peerConnectionConfig = {
-          iceServers: [
-            { urls: `turns:${janusHost}:443?transport=tcp`, username: "user", credential: "password" },
-            { urls: "stun:stun1.l.google.com:19302" }
-          ]
-        };
-
-        if (forceTurn) {
-          peerConnectionConfig.iceTransportPolicy = "relay";
-        }
-
-        adapter.setPeerConnectionConfig(peerConnectionConfig);
+        setupPeerConnectionConfig(adapter, janusHost, janusTurn);
 
         hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
 
