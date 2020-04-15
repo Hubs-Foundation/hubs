@@ -1,7 +1,7 @@
 const THREE = AFRAME.THREE;
 
 function checkFloatTextureSupport() {
-  const renderer = new THREE.WebGLRenderer();
+  const renderer = new THREE.WebGLRenderer({ forceWebVR: true });
 
   const scene = new THREE.Scene();
   const size = 2;
