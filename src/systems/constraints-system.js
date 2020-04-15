@@ -33,6 +33,7 @@ export class ConstraintsSystem {
         !state.spawning &&
         prevState.spawning &&
         state.held &&
+        !state.held.isEntity &&
         state.held.components.tags &&
         state.held.components.tags.data[constraintTag]
       ) {
@@ -54,7 +55,12 @@ export class ConstraintsSystem {
       }
       return;
     }
-    if (prevState.held && prevState.held.components.tags && prevState.held.components.tags.data[constraintTag]) {
+    if (
+      prevState.held &&
+      !prevState.held.isEntity &&
+      prevState.held.components.tags &&
+      prevState.held.components.tags.data[constraintTag]
+    ) {
       const heldEntityId = prevState.held.id;
       if (this.constraintPairs[heldEntityId] && this.constraintPairs[heldEntityId].indexOf(entityId) !== -1) {
         this.constraintPairs[heldEntityId].splice(this.constraintPairs[heldEntityId].indexOf(entityId), 1);
@@ -68,7 +74,7 @@ export class ConstraintsSystem {
         prevState.held.setAttribute("body-helper", { activationState: ACTIVATION_STATE.ACTIVE_TAG });
       }
     }
-    if (!state.spawning && state.held && state.held.components.tags.data[constraintTag]) {
+    if (!state.spawning && state.held && !state.held.isEntity && state.held.components.tags.data[constraintTag]) {
       if (!state.held.components["networked"] || NAF.utils.isMine(state.held) || NAF.utils.takeOwnership(state.held)) {
         state.held.setAttribute("body-helper", {
           type: "dynamic",

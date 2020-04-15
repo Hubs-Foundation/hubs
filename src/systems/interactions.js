@@ -26,6 +26,7 @@ const remoteHoverTargets = new Map();
 export function findRemoteHoverTarget(object3D) {
   if (!object3D) return null;
   if (notRemoteHoverTargets.get(object3D)) return null;
+  if (object3D.isEntity) return object3D;
   const target = remoteHoverTargets.get(object3D);
   return target || findRemoteHoverTarget(object3D.parent);
 }
@@ -188,7 +189,7 @@ AFRAME.registerSystem("interaction", {
   tickInteractor(options, state) {
     const userinput = AFRAME.scenes[0].systems.userinput;
     if (state.held) {
-      const networked = state.held.components["networked"];
+      const networked = !state.held.isEntity && state.held.components["networked"];
       const lostOwnership = networked && networked.data && networked.data.owner !== NAF.clientId;
       if (userinput.get(options.dropPath) || lostOwnership) {
         state.held = null;
@@ -202,15 +203,21 @@ AFRAME.registerSystem("interaction", {
       );
       if (state.hovered) {
         const entity = state.hovered;
-        const isFrozen = this.el.is("frozen");
-        const isPinned = entity.components.pinnable && entity.components.pinnable.data.pinned;
-        if (
-          isTagged(entity, "isHoldable") &&
-          userinput.get(options.grabPath) &&
-          (isFrozen || !isPinned) &&
-          canMove(entity)
-        ) {
+        const isGrabbing = userinput.get(options.grabPath);
+
+        if (entity.isEntity && isGrabbing) {
           state.held = entity;
+        } else {
+          const isFrozen = this.el.is("frozen");
+          const isPinned = entity.components.pinnable && entity.components.pinnable.data.pinned;
+          if (
+            isTagged(entity, "isHoldable") &&
+            userinput.get(options.grabPath) &&
+            (isFrozen || !isPinned) &&
+            canMove(entity)
+          ) {
+            state.held = entity;
+          }
         }
       }
     }

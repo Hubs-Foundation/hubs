@@ -87,7 +87,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.cameraSystem.tick(this.el, dt);
     this.waypointSystem.tick(t, dt);
     this.enterVRButtonSystem.tick();
-    this.sdkSystem.tick(dt);
+    this.sdkSystem.tick(dt, t);
   },
 
   remove() {

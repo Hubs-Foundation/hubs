@@ -44,13 +44,13 @@ export class HoldableButtonSystem {
     const interaction = AFRAME.scenes[0].systems.interaction;
     const held = interaction.state.rightRemote.held;
 
-    if (this.prevHeld && this.prevHeld !== held) {
+    if (this.prevHeld && this.prevHeld !== held && !this.prevHeld.isEntity) {
       this.prevHeld.object3D.dispatchEvent({
         type: "holdable-button-up",
         object3D: interaction.options.rightRemote.entity.object3D
       });
     }
-    if (held && this.prevHeld !== held) {
+    if (held && this.prevHeld !== held && !held.isEntity) {
       held.object3D.dispatchEvent({
         type: "holdable-button-down",
         object3D: interaction.options.rightRemote.entity.object3D
@@ -97,7 +97,7 @@ const hasButtonComponent = (function() {
 })();
 
 function getHoverableButton(hovered) {
-  if (!hovered) return null;
+  if (!hovered || hovered.isEntity) return null;
   if (
     hasButtonComponent(hovered.components) ||
     hovered.classList.contains("teleport-waypoint-icon") ||

@@ -1,1 +1,5 @@
-export { Component, System, EntityMixin, MeshEntity, Object3DEntity, GroupEntity, SceneEntity } from "./internal";
+export { EntityMixin } from "./EntityMixin";
+export { Component } from "./Component";
+export { System } from "./System";
+export * from "./entities";
+export * from "./components";

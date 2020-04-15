@@ -1,4 +1,5 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
+import { InteractableComponent } from "../sdk/components";
 
 const noop = function() {};
 AFRAME.registerComponent("overwrite-raycast-as-noop", {
@@ -66,6 +67,14 @@ export class CursorTargettingSystem {
       if (els[i].object3D) {
         targets.push(els[i].object3D);
       }
+    }
+
+    const entities = AFRAME.scenes[0].systems["hubs-systems"].sdkSystem.world.entitiesByComponent.get(
+      InteractableComponent
+    );
+
+    for (let i = 0; i < entities.length; i++) {
+      targets.push(entities[i]);
     }
   }
 

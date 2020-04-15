@@ -103,15 +103,17 @@ export function resolveActionSets() {
     sets.leftHandHoveringOnInteractable,
     !leftHand.held &&
       leftHand.hovered &&
-      ((leftHand.hovered.components.tags && leftHand.hovered.components.tags.data.offersHandConstraint) ||
-        leftHand.hovered.components["super-spawner"])
+      (leftHand.hovered.isEntity ||
+        ((leftHand.hovered.components.tags && leftHand.hovered.components.tags.data.offersHandConstraint) ||
+          leftHand.hovered.components["super-spawner"]))
   );
   userinput.toggleSet(
     sets.rightHandHoveringOnInteractable,
     !rightHand.held &&
       rightHand.hovered &&
-      ((rightHand.hovered.components.tags && rightHand.hovered.components.tags.data.offersHandConstraint) ||
-        rightHand.hovered.components["super-spawner"])
+      (rightHand.hovered.isEntity ||
+        ((rightHand.hovered.components.tags && rightHand.hovered.components.tags.data.offersHandConstraint) ||
+          rightHand.hovered.components["super-spawner"]))
   );
   userinput.toggleSet(
     sets.leftCursorHoveringOnInteractable,
@@ -119,9 +121,10 @@ export function resolveActionSets() {
       !leftHand.hovered &&
       !leftRemote.held &&
       leftRemote.hovered &&
-      ((leftRemote.hovered.components.tags && leftRemote.hovered.components.tags.data.offersRemoteConstraint) ||
-        (leftRemote.hovered.components.tags && leftRemote.hovered.components.tags.data.togglesHoveredActionSet) ||
-        leftRemote.hovered.components["super-spawner"])
+      (leftRemote.hovered.isEntity ||
+        ((leftRemote.hovered.components.tags && leftRemote.hovered.components.tags.data.offersRemoteConstraint) ||
+          (leftRemote.hovered.components.tags && leftRemote.hovered.components.tags.data.togglesHoveredActionSet) ||
+          leftRemote.hovered.components["super-spawner"]))
   );
   userinput.toggleSet(
     sets.rightCursorHoveringOnInteractable,
@@ -129,9 +132,10 @@ export function resolveActionSets() {
       !rightHand.hovered &&
       !rightRemote.held &&
       rightRemote.hovered &&
-      ((rightRemote.hovered.components.tags && rightRemote.hovered.components.tags.data.offersRemoteConstraint) ||
-        (rightRemote.hovered.components.tags && rightRemote.hovered.components.tags.data.togglesHoveredActionSet) ||
-        rightRemote.hovered.components["super-spawner"])
+      (rightRemote.hovered.isEntity ||
+        ((rightRemote.hovered.components.tags && rightRemote.hovered.components.tags.data.offersRemoteConstraint) ||
+          (rightRemote.hovered.components.tags && rightRemote.hovered.components.tags.data.togglesHoveredActionSet) ||
+          rightRemote.hovered.components["super-spawner"]))
   );
 
   userinput.toggleSet(

@@ -1,13 +1,13 @@
-import { World } from "../sdk/internal";
+import { HubsWorld } from "../sdk/HubsWorld";
 
 export class SDKSystem {
-  constructor() {
+  constructor(hubsSystems) {
     this.enabled = false;
 
     if (process.env.SDK_ENABLED) {
       this.enabled = true;
 
-      window.world = this.world = new World();
+      window.world = this.world = new HubsWorld(hubsSystems);
 
       // Imports the hubs config from the path supplied in process.env.HUBS_CONFIG_PATH
       const hubsConfig = require("hubs-config").default;
@@ -16,7 +16,7 @@ export class SDKSystem {
     }
   }
 
-  tick(dt) {
+  tick(dt, time) {
     if (!this.enabled) {
       return;
     }
@@ -26,10 +26,6 @@ export class SDKSystem {
       sdkRootEl.object3D.add(this.world.root);
     }
 
-    const systems = this.world.systems;
-
-    for (let i = 0; i < systems.length; i++) {
-      systems[i].update(dt);
-    }
+    this.world.update(dt, time);
   }
 }

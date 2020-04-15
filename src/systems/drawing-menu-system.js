@@ -114,12 +114,14 @@ export class DrawingMenuSystem {
     if (
       interaction.state.leftRemote &&
       interaction.state.leftRemote.hovered &&
+      !interaction.state.leftRemote.hovered.isEntity &&
       interaction.state.leftRemote.hovered.classList.contains("drawing")
     ) {
       hovered = interaction.state.leftRemote.hovered;
     } else if (
       interaction.state.rightRemote &&
       interaction.state.rightRemote.hovered &&
+      !interaction.state.rightRemote.hovered.isEntity &&
       interaction.state.rightRemote.hovered.classList.contains("drawing")
     ) {
       hovered = interaction.state.rightRemote.hovered;
