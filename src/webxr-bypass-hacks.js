@@ -9,6 +9,7 @@ chrome://flags. See https://github.com/mozilla/hubs/issues/892
 */
 if (
   !/mobile vr/i.test(navigator.userAgent) &&
+  !/oculusbrowser/i.test(navigator.userAgent) &&
   /Chrome/.test(navigator.userAgent) &&
   navigator.xr &&
   !navigator.xr.requestDevice
