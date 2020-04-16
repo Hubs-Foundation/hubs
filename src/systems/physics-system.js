@@ -12,6 +12,8 @@ const WORLD_CONFIG = {
   gravity: { x: 0, y: -9.8, z: 0 }
 };
 
+const MAX_BODIES = 512;
+
 export class PhysicsSystem {
   constructor(scene) {
     this.ammoWorker = new AmmoWorker();
@@ -32,7 +34,7 @@ export class PhysicsSystem {
     this.nextBodyUuid = 0;
     this.nextShapeUuid = 0;
 
-    const arrayBuffer = new ArrayBuffer(4 * BUFFER_CONFIG.BODY_DATA_SIZE * BUFFER_CONFIG.MAX_BODIES);
+    const arrayBuffer = new ArrayBuffer(4 * BUFFER_CONFIG.BODY_DATA_SIZE * MAX_BODIES);
     this.objectMatricesFloatArray = new Float32Array(arrayBuffer);
     this.objectMatricesIntArray = new Int32Array(arrayBuffer);
 
@@ -41,6 +43,7 @@ export class PhysicsSystem {
         type: MESSAGE_TYPES.INIT,
         worldConfig: WORLD_CONFIG,
         arrayBuffer,
+        maxBodies: MAX_BODIES,
         wasmUrl: new URL(ammoWasmUrl, configs.BASE_ASSETS_PATH || window.location).href
       },
       [arrayBuffer]
