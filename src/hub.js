@@ -317,7 +317,6 @@ function remountUI(props) {
 }
 
 function setupPeerConnectionConfig(adapter, host, turn) {
-  console.log(turn);
   const forceTurn = qs.get("force_turn");
   const peerConnectionConfig = {};
 
