@@ -66,7 +66,7 @@ async function pixelsToPNG(pixels, width, height) {
 }
 
 function blitFramebuffer(renderer, src, srcX0, srcY0, srcX1, srcY1, dest, dstX0, dstY0, dstX1, dstY1) {
-  const gl = renderer.context;
+  const gl = renderer.getContext();
 
   // Copies from one framebuffer to another. Note that at the end of this function, you need to restore
   // the original framebuffer via setRenderTarget
@@ -103,7 +103,7 @@ AFRAME.registerComponent("camera-tool", {
       format: THREE.RGBAFormat,
       minFilter: THREE.LinearFilter,
       magFilter: THREE.NearestFilter,
-      encoding: THREE.sRGBEncoding,
+      encoding: THREE.GammaEncoding,
       depth: false,
       stencil: false
     });

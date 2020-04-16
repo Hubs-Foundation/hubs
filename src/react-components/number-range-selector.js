@@ -70,6 +70,7 @@ export class NumberRangeSelector extends Component {
         >
           <input
             type="range"
+            step="0.01"
             min={this.props.min}
             max={this.props.max}
             value={this.props.currentValue}

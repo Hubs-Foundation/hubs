@@ -71,9 +71,9 @@ export default class SharedBufferGeometry {
     object3D.add(mesh);
 
     geometry.setDrawRange(0, 0);
-    geometry.addAttribute("position", new THREE.BufferAttribute(vertices, 3).setDynamic(true));
-    geometry.addAttribute("normal", new THREE.BufferAttribute(normals, 3).setDynamic(true));
-    geometry.addAttribute("color", new THREE.BufferAttribute(colors, 3).setDynamic(true));
+    geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3).setUsage(THREE.DynamicDrawUsage));
+    geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3).setUsage(THREE.DynamicDrawUsage));
+    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3).setUsage(THREE.DynamicDrawUsage));
 
     this.previous = null;
     if (this.geometries.length > 0) {

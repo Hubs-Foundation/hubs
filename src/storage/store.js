@@ -67,6 +67,7 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         muteMicOnEntry: { type: "bool" },
+        audioOutputMode: { type: "string" },
         enableOnScreenJoystickLeft: { type: "bool" },
         enableOnScreenJoystickRight: { type: "bool" },
         onlyShowNametagsInFreeze: { type: "bool" },
@@ -81,7 +82,8 @@ export const SCHEMA = {
         disableBackwardsMovement: { type: "bool" },
         disableStrafing: { type: "bool" },
         disableTeleporter: { type: "bool" },
-        disableAutoPixelRatio: { type: "bool" }
+        disableAutoPixelRatio: { type: "bool" },
+        movementSpeedModifier: { type: "number" }
       }
     },
 

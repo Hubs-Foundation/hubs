@@ -61,13 +61,7 @@ export class SoundEffectsSystem {
 
     this.audioContext = THREE.AudioContext.getContext();
     this.scene = scene;
-    this.scene.audioListener = this.scene.audioListener || new THREE.AudioListener();
-    if (this.scene.camera) {
-      this.scene.camera.add(this.scene.audioListener);
-    }
-    this.scene.addEventListener("camera-set-active", evt => {
-      evt.detail.cameraEl.getObject3D("camera").add(this.scene.audioListener);
-    });
+
     const soundsAndUrls = [
       [SOUND_HOVER_OR_GRAB, URL_TICK],
       [SOUND_THAW, URL_TICK],
@@ -132,7 +126,12 @@ export class SoundEffectsSystem {
     const audioBuffer = this.sounds.get(sound);
     if (!audioBuffer) return null;
 
-    const positionalAudio = new THREE.PositionalAudio(this.scene.audioListener).setBuffer(audioBuffer);
+    const audioOutputMode = window.APP.store.state.preferences.audioOutputMode === "audio" ? "audio" : "panner";
+    const positionalAudio =
+      audioOutputMode === "panner"
+        ? new THREE.PositionalAudio(this.scene.audioListener)
+        : new THREE.Audio(this.scene.audioListener);
+    positionalAudio.setBuffer(audioBuffer);
     positionalAudio.loop = loop;
     this.pendingPositionalAudios.push(positionalAudio);
     return positionalAudio;

@@ -16,6 +16,7 @@ features.disable_sign_up = { category = "features", type = "boolean", name = "Di
 features.show_terms = { category = "features", type = "boolean", name = "Show Terms of Use", description = "Show links to the terms of use." }
 features.show_privacy = { category = "features", type = "boolean", name = "Show Privacy Notice", description = "Show links to the privacy notice." }
 features.show_controls_link = { category = "features", type = "boolean", name = "Show Controls Links", description = "Show links to controls documentation." }
+features.show_docs_link = { category = "features", type = "boolean", name = "Show Docs Links", description = "Show links to documentation." }
 features.show_features_link = { category = "features", type = "boolean", name = "Show Features Links", description = "Show links to features documentation." }
 features.show_community_link = { category = "features", type = "boolean", name = "Show Community Links", description = "Show links to your community." }
 features.show_company_logo = { category = "features", type = "boolean", name = "Show Company Logo", description = "Show the company logo across the app." }
@@ -42,6 +43,7 @@ features.show_source_link = { category = "features", type = "boolean", internal 
 features.show_feedback_ui = { category = "features", type = "boolean", internal = "true" }
 features.show_issue_report_dialog = { category = "features", type = "boolean", internal = "true" }
 features.show_cloud = { category = "features", type = "boolean", internal = "true" }
+features.show_newsletter_signup = { category = "features", type = "boolean", internal = "true" }
 
 images.logo = { category = "images", type = "file", name = "App Logo", description = "Logo used across the app." }
 images.favicon = { category = "images", type = "file", name = "Favicon", description = "Icon for the app." }
@@ -69,6 +71,7 @@ links.privacy_notice = { category = "links", type = "string", name = "Privacy No
 links.controls = { category = "links", type = "string", name = "Controls Documentation", description = "Link to controls documentation."}
 links.features = { category = "links", type = "string", name = "Features Documentation", description = "Link to features documentation."}
 links.community = { category = "links", type = "string", name = "Community", description = "Link to your community."}
+links.docs = { category = "links", type = "string", name = "Docs", description = "Link to your documentation."}
 links.issue_report = { category = "links", type = "string", name = "Issue Report", description = "Link for reporting issues."}
 links.promotion = { category = "links", type = "string", name = "Promotion Info", description = "Link to info about promotion info and licensing."}
 links.remixing = { category = "links", type = "string", name = "Remixing Info", description = "Link to info about remixing info and licensing."}

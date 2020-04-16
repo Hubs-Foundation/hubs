@@ -1,5 +1,6 @@
 import appLogo from "../assets/images/app-logo.png";
 import companyLogo from "../assets/images/company-logo.png";
+import homeHeroBackground from "../assets/images/home-hero-background-unbranded.png";
 import sceneEditorLogo from "../assets/images/editor-logo.png";
 import pdfjs from "pdfjs-dist";
 
@@ -33,6 +34,10 @@ let isAdmin = false;
 
 configs.AVAILABLE_INTEGRATIONS = window.AVAILABLE_INTEGRATIONS || {};
 
+if (process.env.APP_CONFIG) {
+  window.APP_CONFIG = process.env.APP_CONFIG;
+}
+
 if (window.APP_CONFIG) {
   configs.APP_CONFIG = window.APP_CONFIG;
   const { theme } = configs.APP_CONFIG;
@@ -56,14 +61,28 @@ if (window.APP_CONFIG) {
   };
 }
 
+const appConfigSchema = process.env.APP_CONFIG_SCHEMA;
+
 const isLocalDevelopment = process.env.NODE_ENV === "development";
 
 configs.feature = featureName => {
+  if (isLocalDevelopment && !process.env.USE_FEATURE_CONFIG) {
+    // This code will be removed in production
+    if (appConfigSchema && appConfigSchema.features && appConfigSchema.features[featureName]) {
+      const valueType = appConfigSchema.features[featureName].type;
+
+      if (valueType === "boolean") {
+        return true;
+      } else {
+        return undefined;
+      }
+    }
+  }
+
   const value = configs.APP_CONFIG.features[featureName];
   if (typeof value === "boolean" || featureName === "enable_spoke") {
-    const enableAll = isLocalDevelopment && !process.env.USE_FEATURE_CONFIG;
     const forceEnableSpoke = featureName === "enable_spoke" && isAdmin;
-    return forceEnableSpoke || enableAll || value;
+    return forceEnableSpoke || value;
   } else {
     return value;
   }
@@ -74,7 +93,8 @@ if (isLocalDevelopment) {
   localDevImages = {
     logo: appLogo,
     company_logo: companyLogo,
-    editor_logo: sceneEditorLogo
+    editor_logo: sceneEditorLogo,
+    home_background: homeHeroBackground
   };
 }
 

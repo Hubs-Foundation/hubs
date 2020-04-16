@@ -16,7 +16,6 @@ import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
 import configs from "../utils/configs";
-import { messages } from "../utils/i18n";
 import IfFeature from "./if-feature";
 import StateLink from "./state-link.js";
 import { resetTips } from "../systems/tips";
@@ -350,7 +349,7 @@ export default class SettingsMenu extends Component {
                 </button>
                 <IfFeature name="show_controls_link">
                   <a
-                    href={configs.link("controls", "https://github.com/mozilla/hubs/wiki/Hubs-Controls")}
+                    href={configs.link("controls", "https://hubs.mozilla.com/docs/hubs-controls.html")}
                     target="_blank"
                     rel="noreferrer noopener"
                   >
@@ -361,13 +360,13 @@ export default class SettingsMenu extends Component {
             )}
             {!hideExtranousItems && (
               <div className={classNames([styles.bottomLinks])}>
-                <IfFeature name="show_features_link">
+                <IfFeature name="show_docs_link">
                   <a
-                    href={configs.link("features", messages["help.docs_url"])}
+                    href={configs.link("docs", "https://hubs.mozilla.com/docs")}
                     target="_blank"
                     rel="noreferrer noopener"
                   >
-                    <FormattedMessage id="settings.features" />
+                    <FormattedMessage id="settings.help" />
                   </a>
                 </IfFeature>
                 <IfFeature name="show_community_link">
