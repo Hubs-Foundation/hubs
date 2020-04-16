@@ -10,7 +10,7 @@ export function findComponentsInNearestAncestor(entity, componentName) {
   while (entity) {
     if (entity.components) {
       for (const c in entity.components) {
-        if (c.startsWith(componentName)) {
+        if (entity.components[c].name === componentName) {
           components.push(entity.components[c]);
         }
       }

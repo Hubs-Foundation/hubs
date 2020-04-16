@@ -5,10 +5,10 @@ const MIN_SCALE = 0.05;
 const MAX_SCALE = 4;
 const ROTATE_Y = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
 
-const getCurrentDataFromLocalBB = (function() {
+const updateFromLocalBB = (function() {
   const currentPosition = new THREE.Vector3();
   const currentScale = new THREE.Vector3();
-  return function getCurrentDataFromLocalBB(object3D, localBox, center, halfExtents, offsetToCenter) {
+  return function updateFromLocalBB(object3D, localBox, center, halfExtents, offsetToCenter) {
     object3D.updateMatrices();
     const min = localBox.min;
     const max = localBox.max;
@@ -26,13 +26,13 @@ const getCurrentDataFromLocalBB = (function() {
   };
 })();
 
-const calculateDesiredTargetQuaternion = (function() {
+const updateTargetRotationFromCamera = (function() {
   const right = new THREE.Vector3();
   const up = new THREE.Vector3();
   const back = new THREE.Vector3();
   const forward = new THREE.Vector3();
   const rotation = new THREE.Matrix4();
-  return function calculateDesiredTargetQuaternion(
+  return function updateTargetRotationFromCamera(
     cameraPosition,
     cameraRotation,
     isVR,
@@ -52,7 +52,7 @@ const calculateDesiredTargetQuaternion = (function() {
     right.crossVectors(forward, up).normalize();
     up.crossVectors(right, forward);
     rotation.makeBasis(right, up, back);
-    return desiredTargetQuaternion.setFromRotationMatrix(rotation);
+    desiredTargetQuaternion.setFromRotationMatrix(rotation);
   };
 })();
 
@@ -70,8 +70,8 @@ AFRAME.registerComponent("position-at-border", {
     this.didTryToGetReady = false;
     this.tick = this.tick.bind(this);
   },
-  tryToGetReady() {
-    this.didTryToGetReady = true;
+  doInit() {
+    this.didInit = true;
     this.cam = document.getElementById("viewing-camera").object3D;
     const targetEl = this.el.querySelector(this.data.target);
     if (!targetEl) {
@@ -124,9 +124,8 @@ AFRAME.registerComponent("position-at-border", {
     const meshForward = new THREE.Vector3();
     const boxCorners = new THREE.Vector3();
     return function tick() {
-      if (!this.didTryToGetReady) {
-        this.tryToGetReady();
-        return;
+      if (!this.didInit) {
+        this.doInit();
       }
       if (!this.ready) {
         return;
@@ -149,7 +148,7 @@ AFRAME.registerComponent("position-at-border", {
         }
         this.isTargetBoundingBoxDirty = false;
       }
-      getCurrentDataFromLocalBB(
+      updateFromLocalBB(
         this.target,
         this.targetLocalBoundingBox,
         this.targetCenter,
@@ -161,7 +160,7 @@ AFRAME.registerComponent("position-at-border", {
         computeLocalBoundingBox(currentMesh, this.meshLocalBoundingBox, true);
         this.previousMesh = currentMesh;
       }
-      getCurrentDataFromLocalBB(
+      updateFromLocalBB(
         currentMesh,
         this.meshLocalBoundingBox,
         this.meshCenter,
@@ -234,7 +233,7 @@ AFRAME.registerComponent("position-at-border", {
           desiredTargetQuaternion.multiply(ROTATE_Y);
         }
       } else {
-        calculateDesiredTargetQuaternion(
+        updateTargetRotationFromCamera(
           cameraPosition,
           cameraRotation,
           this.el.sceneEl.is("vr-mode"),

@@ -589,6 +589,9 @@ AFRAME.registerComponent("media-loader", {
         throw new Error(`Unsupported content type: ${contentType}`);
       }
     } catch (e) {
+      if (this.el.components["position-at-border__freeze"]) {
+        this.el.setAttribute("position-at-border__freeze", { isFlat: true });
+      }
       console.error("Error adding media", e);
       this.onError();
     }

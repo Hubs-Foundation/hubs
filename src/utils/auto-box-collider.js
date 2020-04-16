@@ -5,7 +5,7 @@ function isVisibleUpToRoot(node, root) {
     if (!child.visible) return false;
     child = child.parent;
   }
-  console.error(`Root ${root} is not in the hierarchy of node ${node}`);
+  console.error(`Root ${root} is not an ancestor of node ${node}`);
   return false;
 }
 
