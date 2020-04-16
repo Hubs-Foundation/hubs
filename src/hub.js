@@ -556,8 +556,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
             setupPeerConnectionConfig(adapter, host, turn);
 
             if (currentServerURL !== newServerURL) {
-              console.log("Connecting to new Janus server " + newServerURL + " and TURN:");
-              console.log(turn);
+              console.log("Connecting to new Janus server " + newServerURL);
               scene.setAttribute("networked-scene", { serverURL: newServerURL });
               adapter.serverUrl = newServerURL;
             }
