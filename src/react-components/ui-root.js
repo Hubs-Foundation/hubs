@@ -1409,6 +1409,9 @@ class UIRoot extends Component {
     if (this.state.objectInfo && this.state.objectInfo.object3D) {
       return true; // TODO: Get object info dialog to use history
     }
+    if (this.state.isObjectListExpanded) {
+      return true;
+    }
 
     return !!(
       (this.props.history &&
