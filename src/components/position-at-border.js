@@ -56,6 +56,7 @@ const updateTargetRotationFromCamera = (function() {
   };
 })();
 
+const positionAtBorderComponents = [];
 AFRAME.registerComponent("position-at-border", {
   multiple: true,
   schema: {
@@ -67,9 +68,12 @@ AFRAME.registerComponent("position-at-border", {
 
   init() {
     this.ready = false;
-    this.didTryToGetReady = false;
-    this.tick = this.tick.bind(this);
+    this.didInit = false;
+    this.tick2 = this.tick2.bind(this);
+    this.doInit = this.doInit.bind(this);
+    positionAtBorderComponents.push(this);
   },
+
   doInit() {
     this.didInit = true;
     this.cam = document.getElementById("viewing-camera").object3D;
@@ -101,13 +105,14 @@ AFRAME.registerComponent("position-at-border", {
     if (this.didRegisterWithAnimationSystem) {
       this.el.sceneEl.systems["hubs-systems"].menuAnimationSystem.unregister(this);
     }
+    positionAtBorderComponents.splice(positionAtBorderComponents.indexOf(this, 1));
   },
 
   markDirty() {
     this.isTargetBoundingBoxDirty = true;
   },
 
-  tick: (function() {
+  tick2: (function() {
     const cameraPosition = new THREE.Vector3();
     const cameraRotation = new THREE.Matrix4();
     const centerToCamera = new THREE.Vector3();
@@ -123,7 +128,7 @@ AFRAME.registerComponent("position-at-border", {
     const currentMeshScale = new THREE.Vector3();
     const meshForward = new THREE.Vector3();
     const boxCorners = new THREE.Vector3();
-    return function tick() {
+    return function tick2() {
       if (!this.didInit) {
         this.doInit();
       }
@@ -250,3 +255,12 @@ AFRAME.registerComponent("position-at-border", {
     };
   })()
 });
+
+export class PositionAtBorderSystem {
+  constructor() {}
+  tick() {
+    for (let i = 0; i < positionAtBorderComponents.length; i++) {
+      positionAtBorderComponents[i].tick2();
+    }
+  }
+}

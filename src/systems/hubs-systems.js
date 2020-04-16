@@ -1,4 +1,5 @@
 import { CursorTargettingSystem } from "./cursor-targetting-system";
+import { PositionAtBorderSystem } from "../components/position-at-border";
 import { CursorTogglingSystem } from "./cursor-toggling-system";
 import { PhysicsSystem } from "./physics-system";
 import { ConstraintsSystem } from "./constraints-system";
@@ -33,6 +34,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.interactionSfxSystem = new InteractionSfxSystem();
     this.superSpawnerSystem = new SuperSpawnerSystem();
     this.cursorTargettingSystem = new CursorTargettingSystem();
+    this.positionAtBorderSystem = new PositionAtBorderSystem();
     this.physicsSystem = new PhysicsSystem(this.el.object3D);
     this.constraintsSystem = new ConstraintsSystem(this.physicsSystem);
     this.twoPointStretchingSystem = new TwoPointStretchingSystem();
@@ -68,6 +70,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.superSpawnerSystem.tick();
     this.cursorPoseTrackingSystem.tick();
     this.cursorTargettingSystem.tick(t);
+    this.positionAtBorderSystem.tick();
     this.scaleInScreenSpaceSystem.tick();
     this.constraintsSystem.tick();
     this.twoPointStretchingSystem.tick();
