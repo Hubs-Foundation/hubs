@@ -446,6 +446,9 @@ AFRAME.registerComponent("media-loader", {
         if (this.el.components["position-at-border__freeze"]) {
           this.el.setAttribute("position-at-border__freeze", { isFlat: true });
         }
+        if (this.el.components["position-at-border__freeze-unprivileged"]) {
+          this.el.setAttribute("position-at-border__freeze-unpriveleged", { isFlat: true });
+        }
       } else if (contentType.startsWith("image/")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
@@ -483,6 +486,9 @@ AFRAME.registerComponent("media-loader", {
         if (this.el.components["position-at-border__freeze"]) {
           this.el.setAttribute("position-at-border__freeze", { isFlat: true });
         }
+        if (this.el.components["position-at-border__freeze-unprivileged"]) {
+          this.el.setAttribute("position-at-border__freeze-unpriveleged", { isFlat: true });
+        }
       } else if (contentType.startsWith("application/pdf")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
@@ -508,6 +514,9 @@ AFRAME.registerComponent("media-loader", {
 
         if (this.el.components["position-at-border__freeze"]) {
           this.el.setAttribute("position-at-border__freeze", { isFlat: true });
+        }
+        if (this.el.components["position-at-border__freeze-unprivileged"]) {
+          this.el.setAttribute("position-at-border__freeze-unpriveleged", { isFlat: true });
         }
       } else if (
         contentType.includes("application/octet-stream") ||
@@ -585,12 +594,18 @@ AFRAME.registerComponent("media-loader", {
         if (this.el.components["position-at-border__freeze"]) {
           this.el.setAttribute("position-at-border__freeze", { isFlat: true });
         }
+        if (this.el.components["position-at-border__freeze-unprivileged"]) {
+          this.el.setAttribute("position-at-border__freeze-unpriveleged", { isFlat: true });
+        }
       } else {
         throw new Error(`Unsupported content type: ${contentType}`);
       }
     } catch (e) {
       if (this.el.components["position-at-border__freeze"]) {
         this.el.setAttribute("position-at-border__freeze", { isFlat: true });
+      }
+      if (this.el.components["position-at-border__freeze-unprivileged"]) {
+        this.el.setAttribute("position-at-border__freeze-unpriveleged", { isFlat: true });
       }
       console.error("Error adding media", e);
       this.onError();
