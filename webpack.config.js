@@ -32,6 +32,7 @@ function createHTTPSConfig() {
       ],
       {
         days: 365,
+        keySize: 2048,
         algorithm: "sha256",
         extensions: [
           {
