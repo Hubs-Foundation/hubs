@@ -339,7 +339,6 @@ function setupPeerConnectionConfig(adapter, host, turn) {
     ];
   }
 
-  console.log(peerConnectionConfig);
   adapter.setPeerConnectionConfig(peerConnectionConfig);
 }
 
