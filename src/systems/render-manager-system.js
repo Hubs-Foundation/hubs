@@ -12,7 +12,7 @@ const UBO_BYTE_LENGTH = sizeofInstances(MAX_INSTANCES);
 export class BatchManagerSystem {
   constructor(scene, renderer) {
     this.meshToEl = new WeakMap();
-    const gl = renderer.context;
+    const gl = renderer.getContext();
 
     if (qsTruthy("disableBatching")) {
       console.warn("Batching disabled by user via disableBatching. Disabling batching.");

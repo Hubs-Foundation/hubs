@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
 import DialogContainer from "./dialog-container.js";
+import IfFeature from "./if-feature";
 
 class AuthDialog extends Component {
   static propTypes = {
@@ -34,7 +35,17 @@ class AuthDialog extends Component {
           ) : authOrigin === "spoke" ? (
             <FormattedMessage className="preformatted" id="auth.spoke-verified" />
           ) : (
-            <FormattedMessage className="preformatted" id="auth.verified" />
+            <div>
+              <FormattedMessage className="preformatted" id="auth.verified" />
+              <IfFeature name="show_newsletter_signup">
+                <p>
+                  Want Hubs news sent to your inbox?{"\n"}
+                  <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
+                    Subscribe for updates
+                  </a>.
+                </p>
+              </IfFeature>
+            </div>
           )}
         </DialogContainer>
       );

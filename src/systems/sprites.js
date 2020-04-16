@@ -157,21 +157,24 @@ function enableSweepingEffect(comp) {
 
 function createGeometry(maxSprites) {
   const geometry = new THREE.BufferGeometry();
-  geometry.addAttribute("a_vertices", new THREE.BufferAttribute(new Float32Array(maxSprites * 3 * 4), 3, false));
-  geometry.addAttribute(
+  // We need to use "position" as the attribute name here. It was previously "a_vertices". It seems three.js
+  // might assume that geometries have a "position" attribute in some cases,
+  // like in https://github.com/mrdoob/three.js/pull/18044
+  geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(maxSprites * 3 * 4), 3, false));
+  geometry.setAttribute(
     "a_hubs_EnableSweepingEffect",
     new THREE.BufferAttribute(new Float32Array(maxSprites * 4), 1, false)
   );
-  geometry.addAttribute(
+  geometry.setAttribute(
     "a_hubs_SweepParams",
     new THREE.BufferAttribute(new Float32Array(maxSprites * 4 * 2), 2, false)
   );
-  geometry.addAttribute("a_uvs", new THREE.BufferAttribute(new Float32Array(maxSprites * 2 * 4), 2, false));
+  geometry.setAttribute("a_uvs", new THREE.BufferAttribute(new Float32Array(maxSprites * 2 * 4), 2, false));
   const mvCols = new THREE.InterleavedBuffer(new Float32Array(maxSprites * 16 * 4), 16);
-  geometry.addAttribute("mvCol0", new THREE.InterleavedBufferAttribute(mvCols, 4, 0, false));
-  geometry.addAttribute("mvCol1", new THREE.InterleavedBufferAttribute(mvCols, 4, 4, false));
-  geometry.addAttribute("mvCol2", new THREE.InterleavedBufferAttribute(mvCols, 4, 8, false));
-  geometry.addAttribute("mvCol3", new THREE.InterleavedBufferAttribute(mvCols, 4, 12, false));
+  geometry.setAttribute("mvCol0", new THREE.InterleavedBufferAttribute(mvCols, 4, 0, false));
+  geometry.setAttribute("mvCol1", new THREE.InterleavedBufferAttribute(mvCols, 4, 4, false));
+  geometry.setAttribute("mvCol2", new THREE.InterleavedBufferAttribute(mvCols, 4, 8, false));
+  geometry.setAttribute("mvCol3", new THREE.InterleavedBufferAttribute(mvCols, 4, 12, false));
   const indices = new Array(3 * 2 * maxSprites);
   for (let i = 0; i < maxSprites; i++) {
     indices[i * 3 * 2 + 0] = i * 4 + 0;
@@ -357,7 +360,7 @@ export class SpriteSystem {
 
     this.updateUVs(sprite);
 
-    const aVertices = mesh.geometry.attributes["a_vertices"];
+    const aVertices = mesh.geometry.attributes["position"];
     aVertices.setXYZ(i * 4 + 0, -0.5, 0.5, 0);
     aVertices.setXYZ(i * 4 + 1, 0.5, 0.5, 0);
     aVertices.setXYZ(i * 4 + 2, -0.5, -0.5, 0);

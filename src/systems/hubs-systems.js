@@ -22,6 +22,7 @@ import { ScaleInScreenSpaceSystem } from "./scale-in-screen-space";
 import { MenuAnimationSystem } from "./menu-animation-system";
 import { AudioSettingsSystem } from "./audio-settings-system";
 import { EnterVRButtonSystem } from "./enter-vr-button-system";
+import { AudioSystem } from "./audio-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -40,6 +41,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverButtonSystem = new HoverButtonSystem();
     this.hoverMenuSystem = new HoverMenuSystem();
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
+    this.audioSystem = new AudioSystem(this.el);
     this.soundEffectsSystem = new SoundEffectsSystem(this.el);
     this.scenePreviewCameraSystem = new ScenePreviewCameraSystem();
     this.spriteSystem = new SpriteSystem(this.el);

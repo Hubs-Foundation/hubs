@@ -156,11 +156,9 @@ class AvatarPreview extends Component {
     this.scene && this.scene.traverse(disposeNode);
     if (this.previewRenderer) {
       this.previewRenderer.dispose();
-      this.previewRenderer.context = null;
     }
     if (this.snapshotRenderer) {
       this.snapshotRenderer.dispose();
-      this.snapshotRenderer.context = null;
     }
     if (this.controls) {
       this.controls.dispose();
