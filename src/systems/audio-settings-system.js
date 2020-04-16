@@ -1,11 +1,15 @@
 function updateMediaAudioSettings(audio, settings) {
-  audio.setDistanceModel(settings.mediaDistanceModel);
-  audio.setRolloffFactor(settings.mediaRolloffFactor);
-  audio.setRefDistance(settings.mediaRefDistance);
-  audio.setMaxDistance(settings.mediaMaxDistance);
-  audio.panner.coneInnerAngle = settings.mediaConeInnerAngle;
-  audio.panner.coneOuterAngle = settings.mediaConeOuterAngle;
-  audio.panner.coneOuterGain = settings.mediaConeOuterGain;
+  if (audio.setDistanceModel) {
+    audio.setDistanceModel(settings.mediaDistanceModel);
+    audio.setRolloffFactor(settings.mediaRolloffFactor);
+    audio.setRefDistance(settings.mediaRefDistance);
+    audio.setMaxDistance(settings.mediaMaxDistance);
+  }
+  if (audio.panner) {
+    audio.panner.coneInnerAngle = settings.mediaConeInnerAngle;
+    audio.panner.coneOuterAngle = settings.mediaConeOuterAngle;
+    audio.panner.coneOuterGain = settings.mediaConeOuterGain;
+  }
 }
 
 function updateAvatarAudioSettings(audio, settings) {
