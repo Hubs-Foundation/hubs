@@ -299,7 +299,7 @@ export default class HubChannel extends EventTarget {
       this.channel
         .push("get_host")
         .receive("ok", res => {
-          resolve(res.host);
+          resolve(res);
         })
         .receive("error", reject);
     });

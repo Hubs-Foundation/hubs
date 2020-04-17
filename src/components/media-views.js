@@ -554,6 +554,9 @@ AFRAME.registerComponent("media-video", {
           this.mediaElementAudioSource =
             linkedMediaElementAudioSource ||
             this.el.sceneEl.audioListener.context.createMediaElementSource(audioSourceEl);
+
+          const audioOutputMode = window.APP.store.state.preferences.audioOutputMode === "audio" ? "audio" : "panner";
+          this.data.audioType = audioOutputMode === "panner" ? "pannernode" : "audionode";
           this.setupAudio();
         }
       }
