@@ -114,7 +114,7 @@ export default class ObjectList extends Component {
   domForEntity(el, i) {
     return (
       <button
-        aria-label="Show Object Info Modal"
+        aria-label="Show Object Info Panel"
         key={i}
         className={objectListStyles.rowNoMargin}
         onMouseDown={() => {
