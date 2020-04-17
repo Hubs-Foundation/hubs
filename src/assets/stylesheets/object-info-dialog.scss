@@ -1,0 +1,67 @@
+@import 'shared.scss';
+
+:local(.top-bar){
+  margin: 12px 16px 8px 16px;
+}
+
+:local(.open-link){
+  display: flex;
+  align-content: center;
+  justify-content: center;
+}
+
+:local(.action-bar) {
+  display: flex;
+  margin: 16px 8px 8px 8px;
+  justify-content: space-between;
+}
+
+:local(.action-bar-item) {
+  width: 64px;
+  min-width: 64px;
+  height: 68px;
+  min-height: 68px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+:local(.no-default-button-style) {
+  padding: 0px;
+  border-style: none;
+  background-color: transparent;
+}
+
+:local(.flex){
+  display: flex;
+}
+
+:local(.image-stack){
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+:local(.stacked-image){
+  position: absolute;
+}
+
+:local(.subtitle) {
+  font-size: 12.8px;
+  font-weight: normal;
+  text-transform: uppercase;
+  color: var(--panel-subtitle-color);
+}
+
+:local(.collapse-button) {
+  color: var(--panel-widget-color);
+  position: absolute;
+  top: 12px;
+  left: 16px;
+
+  i {
+    font-size: 20px;
+  }
+}

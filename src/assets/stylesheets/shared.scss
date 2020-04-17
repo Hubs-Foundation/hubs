@@ -365,3 +365,10 @@ $favorited-color: var(--favorited-color, $duck-yellow);
   position: absolute;
   right: 7.5%;
 }
+
+:local(.link-text) {
+  @extend %default-font;
+  color: var(--link-text-color);
+  font-size: 14.4px;
+  font-weight: bold;
+}
