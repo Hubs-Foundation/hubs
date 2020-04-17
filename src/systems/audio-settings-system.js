@@ -1,18 +1,24 @@
 function updateMediaAudioSettings(audio, settings) {
-  audio.setDistanceModel(settings.mediaDistanceModel);
-  audio.setRolloffFactor(settings.mediaRolloffFactor);
-  audio.setRefDistance(settings.mediaRefDistance);
-  audio.setMaxDistance(settings.mediaMaxDistance);
-  audio.panner.coneInnerAngle = settings.mediaConeInnerAngle;
-  audio.panner.coneOuterAngle = settings.mediaConeOuterAngle;
-  audio.panner.coneOuterGain = settings.mediaConeOuterGain;
+  if (audio.setDistanceModel) {
+    audio.setDistanceModel(settings.mediaDistanceModel);
+    audio.setRolloffFactor(settings.mediaRolloffFactor);
+    audio.setRefDistance(settings.mediaRefDistance);
+    audio.setMaxDistance(settings.mediaMaxDistance);
+  }
+  if (audio.panner) {
+    audio.panner.coneInnerAngle = settings.mediaConeInnerAngle;
+    audio.panner.coneOuterAngle = settings.mediaConeOuterAngle;
+    audio.panner.coneOuterGain = settings.mediaConeOuterGain;
+  }
 }
 
 function updateAvatarAudioSettings(audio, settings) {
-  audio.setDistanceModel(settings.avatarDistanceModel);
-  audio.setRolloffFactor(settings.avatarRolloffFactor);
-  audio.setRefDistance(settings.avatarRefDistance);
-  audio.setMaxDistance(settings.avatarMaxDistance);
+  if (audio.setDistanceModel) {
+    audio.setDistanceModel(settings.avatarDistanceModel);
+    audio.setRolloffFactor(settings.avatarRolloffFactor);
+    audio.setRefDistance(settings.avatarRefDistance);
+    audio.setMaxDistance(settings.avatarMaxDistance);
+  }
 }
 
 export class AudioSettingsSystem {
@@ -37,6 +43,10 @@ export class AudioSettingsSystem {
     this.avatarAudioSources = [];
 
     this.sceneEl.addEventListener("reset_scene", this.onSceneReset);
+
+    if (window.APP.store.state.preferences.audioOutputMode === "audio") {
+      window.APP.store.state.preferences.audioOutputMode = "panner"; //hack to always reset to "panner"
+    }
   }
 
   registerMediaAudioSource(audioSource) {
@@ -88,6 +98,24 @@ AFRAME.registerComponent("audio-source", {
     } else if (this.data.type === "media") {
       this.onVideoLoaded = this.onVideoLoaded.bind(this);
       this.el.addEventListener("video-loaded", this.onVideoLoaded);
+    }
+  },
+
+  tick: function() {
+    const networkedAudioSource = this.el.components["networked-audio-source"];
+    if (networkedAudioSource) {
+      const audioOutputMode = window.APP.store.state.preferences.audioOutputMode === "audio" ? "audio" : "panner";
+      if (
+        (audioOutputMode === "panner" && !networkedAudioSource.data.positional) ||
+        (audioOutputMode === "audio" && networkedAudioSource.data.positional)
+      ) {
+        networkedAudioSource.data.positional = audioOutputMode === "panner" ? true : false;
+        networkedAudioSource.sound.disconnect();
+        networkedAudioSource.setupSound();
+        const soundSource = networkedAudioSource.sound.context.createMediaStreamSource(networkedAudioSource.stream);
+        networkedAudioSource.sound.setNodeSource(soundSource);
+        networkedAudioSource.el.emit("sound-source-set", { soundSource });
+      }
     }
   },
 

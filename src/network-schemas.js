@@ -130,7 +130,7 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add({
-    template: "#interactable-emoji-media",
+    template: "#interactable-emoji",
     components: [
       {
         component: "position",

@@ -2,7 +2,7 @@ import nextTick from "../utils/next-tick";
 import { mapMaterials } from "../utils/material-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import MobileStandardMaterial from "../materials/MobileStandardMaterial";
-import { textureLoader } from "../utils/media-utils";
+import { textureLoader, basisTextureLoader } from "../utils/media-utils";
 import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
@@ -195,6 +195,10 @@ const inflateEntities = function(indexToEntityMap, node, templates, isRoot, mode
     node.parent.animations = node.animations;
   }
 
+  if (node.morphTargetInfluences) {
+    node.parent.morphTargetInfluences = node.morphTargetInfluences;
+  }
+
   const gltfIndex = node.userData.gltfIndex;
   if (gltfIndex !== undefined) {
     indexToEntityMap[gltfIndex] = el;
@@ -317,6 +321,7 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
   const loadingManager = new THREE.LoadingManager();
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
   const gltfLoader = new THREE.GLTFLoader(loadingManager);
+  gltfLoader.setBasisTextureLoader(basisTextureLoader);
 
   const parser = await new Promise((resolve, reject) => gltfLoader.createParser(gltfUrl, resolve, onProgress, reject));
 
@@ -337,17 +342,35 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
   runMigration(version, parser.json);
 
   const materials = parser.json.materials;
+  const dependencies = [];
+
   if (materials) {
     for (let i = 0; i < materials.length; i++) {
       const material = materials[i];
 
+      if (!material.extensions) {
+        continue;
+      }
+
       if (
-        material.extensions &&
         material.extensions.MOZ_alt_materials &&
         material.extensions.MOZ_alt_materials[preferredTechnique] !== undefined
       ) {
         const altMaterialIndex = material.extensions.MOZ_alt_materials[preferredTechnique];
         materials[i] = materials[altMaterialIndex];
+      } else if (material.extensions.MOZ_lightmap) {
+        const lightmapDef = material.extensions.MOZ_lightmap;
+
+        const loadLightmap = async () => {
+          const [material, lightMap] = await Promise.all([
+            parser.getDependency("material", i),
+            parser.getDependency("texture", lightmapDef.index)
+          ]);
+
+          material.lightMap = lightMap;
+        };
+
+        dependencies.push(loadLightmap);
       }
     }
   }
@@ -366,7 +389,8 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
     }
   }
 
-  const gltf = await new Promise(parser.parse.bind(parser));
+  // Note: dependency functions need to be called after parser.parse() so that the cache isn't cleared.
+  const [gltf] = await Promise.all([new Promise(parser.parse.bind(parser)), dependencies.map(fn => fn())]);
 
   gltf.scene.traverse(object => {
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults

@@ -1,4 +1,5 @@
 @import 'shared';
+@import 'drop-menus.scss';
 
 :local(.streaming-tip) {
   position: absolute;
@@ -159,80 +160,71 @@ body.vr-mode {
 }
 
 :local(.object-list) {
+  @extend %drop-menu;
+  @media(max-width: 500px) {
+    top: 184px;
+  }
+  right: 16px;
+}
+
+
+%button-with-count {
   @extend %unselectable;
-  text-align: right;
+  pointer-events: auto;
+  cursor: pointer;
   position: absolute;
+  padding: 0px;
   z-index: 1;
-  top: 0;
-  right: 132px;
-  margin: 16px 0;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  font-size: 1.3em;
   background-color: var(--menu-background-color);
   color: var(--menu-icon-color);
   border-radius: 24px;
-  font-weight: bold;
-  padding: 8px 18px;
-  pointer-events: auto;
-  cursor: pointer;
+  border-style: none;
+  border-width: 0px;
+  svg {
+    width: 26px !important;
+    height: 26px;
+  }
+  span {
+    font-size: 22px;
+    font-weight: bold;
+    font-family: 'Open Sans', sans-serif;
+  }
+  @media(min-width: 501px) {
+    width: 90px;
+    min-width: 90px;
+    height: 44px;
+    justify-content: space-evenly;
+  }
+  @media(max-width: 500px) {
+    flex-direction: column;
+    width: 52px;
+    min-width: 52px;
+    height: 72px;
+    justify-content: center;
+  }
+}
+:local(.object-list-button) {
+  @extend %button-with-count;
 
   @media(min-width: 501px) {
-    :local(.occupant-count) {
-      margin: 0px 8px;
-    }
+    top: 16px;
+    right: 122px;
+    justify-content: space-evenly;
   }
 
   @media(max-width: 500px) {
-    flex-direction: column;
-    padding: 8px 0px;
     right: 16px;
-    top: 80px;
-    width: 52px;
-    :local(.occupant-count) {
-      margin: 0px 0px;
-    }
-    svg {
-      width: 26px !important;
-    }
+    top: 96px;
   }
 }
 
-:local(.presence-info) {
-  @extend %unselectable;
-  text-align: right;
-  position: absolute;
-  z-index: 1;
-  top: 0;
+:local(.presence-list-button) {
+  @extend %button-with-count;
+
+  top: 16px;
   right: 16px;
-  margin: 16px 0;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  font-size: 1.3em;
-  background-color: var(--menu-background-color);
-  color: var(--menu-icon-color);
-  border-radius: 24px;
-  font-weight: bold;
-  padding: 8px 18px;
-  pointer-events: auto;
-  cursor: pointer;
-
-  @media(max-width: 500px) {
-    width: 52px;
-    flex-direction: column;
-    padding: 8px 0px;
-
-    svg {
-      width: 26px !important;
-    }
-  }
-
-  :local(.occupant-count) {
-    margin: 0 12px;
-  }
-
 }
 
 :local(.presence-info-selected) {
@@ -283,7 +275,12 @@ body.vr-mode {
 :local(.choose-scene-button) {
   @extend %action-button-secondary;
   pointer-events: auto;
-  margin-top: 16px;
+  @media (max-width: 500px) {
+    margin-top: 8px;
+  }
+  @media (min-width: 501px) {
+    margin-top: 16px;
+  }
 }
 
 :local(.invite-tip) {

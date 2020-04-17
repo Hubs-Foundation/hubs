@@ -25,10 +25,9 @@ import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 const isIOS = AFRAME.utils.device.isIOS();
 
 export default class SceneEntryManager {
-  constructor(hubChannel, authChannel, availableVREntryTypes, history) {
+  constructor(hubChannel, authChannel, history) {
     this.hubChannel = hubChannel;
     this.authChannel = authChannel;
-    this.availableVREntryTypes = availableVREntryTypes;
     this.store = window.APP.store;
     this.mediaSearchStore = window.APP.mediaSearchStore;
     this.scene = document.querySelector("a-scene");
@@ -53,8 +52,6 @@ export default class SceneEntryManager {
 
   enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
     document.getElementById("viewing-camera").removeAttribute("scene-preview-camera");
-    const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
-    waypointSystem.moveToSpawnPoint();
 
     if (isDebug) {
       NAF.connection.adapter.session.options.verbose = true;
@@ -71,6 +68,9 @@ export default class SceneEntryManager {
 
       await exit2DInterstitialAndEnterVR(true);
     }
+
+    const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
+    waypointSystem.moveToSpawnPoint();
 
     if (isMobile || forceEnableTouchscreen || qsTruthy("mobile")) {
       this.avatarRig.setAttribute("virtual-gamepad-controls", {});

@@ -20,6 +20,8 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { CursorPoseTrackingSystem } from "./cursor-pose-tracking";
 import { ScaleInScreenSpaceSystem } from "./scale-in-screen-space";
 import { AudioSettingsSystem } from "./audio-settings-system";
+import { EnterVRButtonSystem } from "./enter-vr-button-system";
+import { AudioSystem } from "./audio-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -38,17 +40,19 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverButtonSystem = new HoverButtonSystem();
     this.hoverMenuSystem = new HoverMenuSystem();
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
+    this.audioSystem = new AudioSystem(this.el);
     this.soundEffectsSystem = new SoundEffectsSystem(this.el);
     this.scenePreviewCameraSystem = new ScenePreviewCameraSystem();
     this.spriteSystem = new SpriteSystem(this.el);
     this.batchManagerSystem = new BatchManagerSystem(this.el.object3D, this.el.renderer);
-    this.cameraSystem = new CameraSystem(this.batchManagerSystem);
+    this.cameraSystem = new CameraSystem(this.el);
     this.drawingMenuSystem = new DrawingMenuSystem(this.el);
     this.characterController = new CharacterControllerSystem(this.el);
     this.waypointSystem = new WaypointSystem(this.el, this.characterController);
     this.cursorPoseTrackingSystem = new CursorPoseTrackingSystem();
     this.scaleInScreenSpaceSystem = new ScaleInScreenSpaceSystem();
     this.audioSettingsSystem = new AudioSettingsSystem(this.el);
+    this.enterVRButtonSystem = new EnterVRButtonSystem(this.el);
   },
 
   tick(t, dt) {
@@ -82,6 +86,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.batchManagerSystem.tick(t);
     this.cameraSystem.tick(this.el, dt);
     this.waypointSystem.tick(t, dt);
+    this.enterVRButtonSystem.tick();
   },
 
   remove() {

@@ -126,10 +126,11 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
         const { page, perPage } = params.pagination;
         const { field, order } = params.sort;
         options.headers.set("Range-Unit", "items");
-        options.headers.set("Range", (page - 1) * perPage + "-" + (page * perPage - 1));
         options.headers.set("Prefer", "count=exact");
         const query = {
-          order: field + "." + order.toLowerCase()
+          order: field + "." + order.toLowerCase(),
+          offset: (page - 1) * perPage,
+          limit: perPage
         };
         Object.assign(query, convertFilters(params.filter));
         url = `${apiUrl}/${resource}?${queryParameters(query)}`;

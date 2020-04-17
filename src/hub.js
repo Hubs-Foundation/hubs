@@ -21,7 +21,6 @@ import "naf-janus-adapter";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
-import "./utils/audio-context-fix";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
@@ -170,10 +169,6 @@ const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
 const NOISY_OCCUPANT_COUNT = 12; // Above this # of occupants, we stop posting join/leaves/renames
 
-// Maximum number of people in the room/entering before users are forced to observer mode.
-// Eventually this should be moved to a room setting.
-const MAX_OCCUPIED_ROOM_ENTRY_SLOTS = 24;
-
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
@@ -217,7 +212,7 @@ import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
 import { warmSerializeElement } from "./utils/serialize-element";
 
-import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect";
+import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY, ONLY_SCREEN_AVAILABLE } from "./utils/vr-caps-detect";
 import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
@@ -243,7 +238,7 @@ function getPlatformUnsupportedReason() {
 }
 
 function setupLobbyCamera() {
-  const camera = document.getElementById("viewing-camera");
+  const camera = document.getElementById("scene-preview-node");
   const previewCamera = document.getElementById("environment-scene").object3D.getObjectByName("scene-preview-camera");
 
   if (previewCamera) {
@@ -320,16 +315,30 @@ function remountUI(props) {
   mountUI(uiProps);
 }
 
-async function updateUIForHub(hub) {
-  remountUI({
-    hubId: hub.hub_id,
-    hubName: hub.name,
-    hubDescription: hub.description,
-    hubMemberPermissions: hub.member_permissions,
-    hubAllowPromotion: hub.allow_promotion,
-    hubScene: hub.scene,
-    hubEntryCode: hub.entry_code
-  });
+function setupPeerConnectionConfig(adapter, host, turn) {
+  const forceTurn = qs.get("force_turn");
+  const peerConnectionConfig = {};
+
+  if (turn && turn.enabled) {
+    const iceServers = turn.transports.map(ts => {
+      return { urls: `turns:${host}:${ts.port}?transport=tcp`, username: turn.username, credential: turn.credential };
+    });
+
+    iceServers.push({ urls: "stun:stun1.l.google.com:19302" });
+
+    peerConnectionConfig.iceServers = iceServers;
+
+    if (forceTurn) {
+      peerConnectionConfig.iceTransportPolicy = "relay";
+    }
+  } else {
+    peerConnectionConfig.iceServers = [
+      { urls: "stun:stun1.l.google.com:19302" },
+      { urls: "stun:stun2.l.google.com:19302" }
+    ];
+  }
+
+  adapter.setPeerConnectionConfig(peerConnectionConfig);
 }
 
 async function updateEnvironmentForHub(hub, entryManager) {
@@ -427,6 +436,7 @@ async function updateEnvironmentForHub(hub, entryManager) {
           { once: true }
         );
 
+        sceneEl.emit("leaving_loading_environment");
         environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
       },
       { once: true }
@@ -438,6 +448,10 @@ async function updateEnvironmentForHub(hub, entryManager) {
 
     environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironment });
   }
+}
+
+async function updateUIForHub(hub, hubChannel) {
+  remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub) });
 }
 
 function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
@@ -535,8 +549,10 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
           newHostPollInterval = setInterval(async () => {
             const currentServerURL = NAF.connection.adapter.serverUrl;
-            const newHubHost = await hubChannel.getHost();
-            const newServerURL = `wss://${newHubHost}`;
+            const { host, port, turn } = await hubChannel.getHost();
+            const newServerURL = `wss://${host}:${port}`;
+
+            setupPeerConnectionConfig(adapter, host, turn);
 
             if (currentServerURL !== newServerURL) {
               console.log("Connecting to new Janus server " + newServerURL);
@@ -562,11 +578,31 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         const isOpen = hubChannel.channel.socket.connectionState() === "open";
 
         if (isOpen || reliable) {
-          if (isOpen) {
-            hubChannel.channel.push("naf", payload);
+          const hasFirstSync =
+            payload.dataType === "um" ? payload.data.d.find(r => r.isFirstSync) : payload.data.isFirstSync;
+
+          if (hasFirstSync) {
+            if (isOpen) {
+              hubChannel.channel.push("naf", payload);
+            } else {
+              // Memory is re-used, so make a copy
+              hubChannel.channel.push("naf", AFRAME.utils.clone(payload));
+            }
           } else {
-            // Memory is re-used, so make a copy
-            hubChannel.channel.push("naf", AFRAME.utils.clone(payload));
+            // Optimization: Strip isFirstSync and send payload as a string to reduce server parsing.
+            // The server will not parse messages without isFirstSync keys when sent to the nafr event.
+            //
+            // The client must assume any payload that does not have a isFirstSync key is not a first sync.
+            const nafrPayload = AFRAME.utils.clone(payload);
+            if (nafrPayload.dataType === "um") {
+              for (let i = 0; i < nafrPayload.data.d.length; i++) {
+                delete nafrPayload.data.d[i].isFirstSync;
+              }
+            } else {
+              delete nafrPayload.data.isFirstSync;
+            }
+
+            hubChannel.channel.push("nafr", { naf: JSON.stringify(nafrPayload) });
           }
         }
       };
@@ -593,7 +629,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         .catch(connectError => {
           clearTimeout(connectionErrorTimeout);
           // hacky until we get return codes
-          const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+          const isFull = connectError.msg && connectError.msg.match(/\bfull\b/i);
           console.error(connectError);
           remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
           entryManager.exitScene();
@@ -602,7 +638,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         });
     };
 
-    updateUIForHub(hub);
+    updateUIForHub(hub, hubChannel);
 
     if (!isEmbed) {
       loadEnvironmentAndConnect();
@@ -657,12 +693,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // If we are on iOS but we don't have the mediaDevices API, then we are likely in a Firefox or Chrome WebView,
-  // or a WebView preview used in apps like Twitter and Discord. So we show the dialog that tells users to open
-  // the room in the real Safari.
+  // Some apps like Twitter, Discord and Facebook on Android and iOS open links in
+  // their own embedded preview browsers.
+  //
+  // On iOS this WebView does not have a mediaDevices API at all, but in Android apps
+  // like Facebook, the browser pretends to have a mediaDevices, but never actually
+  // prompts the user for device access. So, we show a dialog that tells users to open
+  // the room in an actual browser like Safari, Chrome or Firefox.
+  //
+  // Facebook Mobile Browser on Android has a userAgent like this:
+  // Mozilla/5.0 (Linux; Android 9; SM-G950U1 Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML, like Gecko)
+  // Version/4.0 Chrome/80.0.3987.149 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/262.0.0.34.117;]
   const detectedOS = detectOS(navigator.userAgent);
-  if (detectedOS === "iOS" && !navigator.mediaDevices) {
-    remountUI({ showSafariDialog: true });
+  if ((detectedOS === "iOS" && !navigator.mediaDevices) || /\bfb_iab\b/i.test(navigator.userAgent)) {
+    remountUI({ showInAppBrowserDialog: true });
     return;
   }
 
@@ -701,6 +745,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const scene = document.querySelector("a-scene");
   scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
+  scene.renderer.debug.checkShaderErrors = false;
 
   // HACK - Trigger initial batch preparation with an invisible object
   scene
@@ -727,8 +772,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store, hubId);
-  const availableVREntryTypes = await getAvailableVREntryTypes();
-  const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes, history);
+  const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
   const performConditionalSignIn = async (predicate, action, messageId, onFailure) => {
     if (predicate()) return action();
 
@@ -826,7 +870,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   });
 
-  remountUI({ performConditionalSignIn, embed: isEmbed, showPreload: isEmbed });
+  remountUI({
+    performConditionalSignIn,
+    embed: isEmbed,
+    showPreload: isEmbed
+  });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();
 
@@ -849,6 +897,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     return false;
   };
 
+  remountUI({ availableVREntryTypes: ONLY_SCREEN_AVAILABLE, checkingForDeviceAvailability: true });
+  const availableVREntryTypesPromise = getAvailableVREntryTypes();
   scene.addEventListener("enter-vr", () => {
     if (handleEarlyVRMode()) return true;
 
@@ -859,10 +909,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.body.classList.add("vr-mode");
 
-    // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
-    if ((!isMobile && !isMobileVR) || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
-      document.body.classList.add("vr-mode-stretch");
-    }
+    availableVREntryTypesPromise.then(availableVREntryTypes => {
+      // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
+      if ((!isMobile && !isMobileVR) || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
+        document.body.classList.add("vr-mode-stretch");
+      }
+    });
   });
 
   handleEarlyVRMode();
@@ -994,25 +1046,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  if (isMobileVR) {
-    remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
+  availableVREntryTypesPromise.then(async availableVREntryTypes => {
+    if (isMobileVR) {
+      remountUI({ availableVREntryTypes, forcedVREntryType: "vr", checkingForDeviceAvailability: false });
 
-    if (/Oculus/.test(navigator.userAgent)) {
-      // HACK - The polyfill reports Cardboard as the primary VR display on startup out ahead of
-      // Oculus Go on Oculus Browser 5.5.0 beta. This display is cached by A-Frame,
-      // so we need to resolve that and get the real VRDisplay before entering as well.
-      const displays = await navigator.getVRDisplays();
-      const vrDisplay = displays.length && displays[0];
-      AFRAME.utils.device.getVRDisplay = () => vrDisplay;
+      if (/Oculus/.test(navigator.userAgent)) {
+        // HACK - The polyfill reports Cardboard as the primary VR display on startup out ahead of
+        // Oculus Go on Oculus Browser 5.5.0 beta. This display is cached by A-Frame,
+        // so we need to resolve that and get the real VRDisplay before entering as well.
+        const displays = await navigator.getVRDisplays();
+        const vrDisplay = displays.length && displays[0];
+        AFRAME.utils.device.getVRDisplay = () => vrDisplay;
+      }
+    } else {
+      const hasVREntryDevice =
+        availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no ||
+        availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no ||
+        availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no;
+
+      remountUI({
+        availableVREntryTypes,
+        forcedVREntryType: qsVREntryType || (!hasVREntryDevice ? "2d" : null),
+        checkingForDeviceAvailability: false
+      });
     }
-  } else {
-    const hasVREntryDevice =
-      availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no ||
-      availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no ||
-      availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no;
-
-    remountUI({ availableVREntryTypes, forcedVREntryType: qsVREntryType || (!hasVREntryDevice ? "2d" : null) });
-  }
+  });
 
   const environmentScene = document.querySelector("#environment-scene");
 
@@ -1191,10 +1249,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let isInitialJoin = true;
 
-  // state used to ensure we only remountUI when entry allowed changes, since otherwise we'd re-render
-  // on every presence sync.
-  let entryDisallowed = false;
-
   // We need to be able to wait for initial presence syncs across reconnects and socket migrations,
   // so we create this object in the outer scope and assign it a new promise on channel join.
   const presenceSync = {
@@ -1224,33 +1278,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           remountUI({
             sessionId: socket.params().session_id,
-            presences: presence.state
+            presences: presence.state,
+            entryDisallowed: !hubChannel.canEnterRoom(uiProps.hub)
           });
 
           const occupantCount = Object.entries(presence.state).length;
           vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
 
-          // A room entry slot is used by people in the room, or those going through the
-          // entry flow.
-          const roomEntrySlotCount = Object.values(presence.state).reduce((acc, { metas }) => {
-            const meta = metas[metas.length - 1];
-            const usingSlot = meta.presence === "room" || (meta.context && meta.context.entering);
-            return acc + (usingSlot ? 1 : 0);
-          }, 0);
-
           if (occupantCount > 1) {
             scene.addState("copresent");
           } else {
             scene.removeState("copresent");
-          }
-
-          const entryNowDisallowed =
-            roomEntrySlotCount >= MAX_OCCUPIED_ROOM_ENTRY_SLOTS && !hubChannel.canOrWillIfCreator("update_hub");
-
-          if (entryDisallowed !== entryNowDisallowed) {
-            // Optimization to prevent re-render unless entry allowed state changes.
-            entryDisallowed = entryNowDisallowed;
-            remountUI({ entryDisallowed });
           }
 
           // HACK - Set a flag on the presence object indicating if the initial sync has completed,
@@ -1348,6 +1386,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const permsToken = oauthFlowPermsToken || data.perms_token;
       hubChannel.setPermissionsFromToken(permsToken);
 
+      const janusHost = data.hubs[0].host;
+      const janusTurn = data.hubs[0].turn;
+
       scene.addEventListener("adapter-ready", async ({ detail: adapter }) => {
         // HUGE HACK Safari does not like it if the first peer seen does not immediately
         // send audio over its media stream. Otherwise, the stream doesn't work and stays
@@ -1376,6 +1417,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const track = stream.getAudioTracks()[0];
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
+        setupPeerConnectionConfig(adapter, janusHost, janusTurn);
+
         hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
 
         // Stop the tone after we've connected, which seems to mitigate the issue without actually
@@ -1420,10 +1463,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error(res);
     });
 
-  hubPhxChannel.on("naf", data => {
+  const handleIncomingNAF = data => {
     if (!NAF.connection.adapter) return;
 
     NAF.connection.adapter.onData(authorizeOrSanitizeMessage(data), PHOENIX_RELIABLE_NAF);
+  };
+
+  hubPhxChannel.on("naf", data => handleIncomingNAF(data));
+  hubPhxChannel.on("nafr", ({ from_session_id, naf: unparsedData }) => {
+    // Server optimization: server passes through unparsed NAF message, we must now parse it.
+    const data = JSON.parse(unparsedData);
+    data.from_session_id = from_session_id;
+    handleIncomingNAF(data);
   });
 
   hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
@@ -1454,7 +1505,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const hub = hubs[0];
     const userInfo = hubChannel.presence.state[session_id];
 
-    updateUIForHub(hub);
+    updateUIForHub(hub, hubChannel);
 
     if (stale_fields.includes("scene")) {
       const fader = document.getElementById("viewing-camera").components["fader"];

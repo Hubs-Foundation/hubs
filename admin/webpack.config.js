@@ -64,6 +64,9 @@ const host = process.env.HOST_IP || defaultHostName;
 const babelConfig = JSON.parse(fs.readFileSync(path.resolve(__dirname, ".babelrc")).toString());
 
 module.exports = (env, argv) => ({
+  node: {
+    fs: "empty"
+  },
   entry: {
     admin: path.join(__dirname, "src", "admin.js")
   },
@@ -155,6 +158,17 @@ module.exports = (env, argv) => ({
             name: "[path][name]-[hash].[ext]",
             // Make asset paths relative to /src
             context: path.join(__dirname, "src")
+          }
+        }
+      },
+      {
+        test: /\.(wasm)$/,
+        type: "javascript/auto",
+        use: {
+          loader: "file-loader",
+          options: {
+            outputPath: "assets/wasm",
+            name: "[name]-[hash].[ext]"
           }
         }
       }

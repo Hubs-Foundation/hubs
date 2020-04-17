@@ -42,12 +42,17 @@ AFRAME.registerComponent("avatar-volume-controls", {
   },
 
   update() {
-    if (this.audio) {
+    const audioOutputMode = window.APP.store.state.preferences.audioOutputMode;
+    if (
+      this.networkedAudioSource &&
+      this.networkedAudioSource.sound &&
+      (audioOutputMode === undefined || audioOutputMode === "panner")
+    ) {
       const globalVoiceVolume =
         window.APP.store.state.preferences.globalVoiceVolume !== undefined
           ? window.APP.store.state.preferences.globalVoiceVolume
           : 100;
-      this.audio.gain.gain.value = (globalVoiceVolume / 100) * this.data.volume;
+      this.networkedAudioSource.sound.gain.gain.value = (globalVoiceVolume / 100) * this.data.volume;
     }
   },
 
@@ -61,14 +66,31 @@ AFRAME.registerComponent("avatar-volume-controls", {
     this.volumeLabel.setAttribute("text", "value", this.data.volume === 0 ? "Muted" : VOLUME_LABELS[numBars]);
   },
 
-  tick() {
-    if (this.audio) return;
+  tick: (() => {
+    const positionA = new THREE.Vector3();
+    const positionB = new THREE.Vector3();
+    return function() {
+      if (!this.networkedAudioSource) {
+        // Walk up to Spine and then search down.
+        const source = this.el.parentNode.parentNode.querySelector("[networked-audio-source]");
+        if (!source) return;
+        this.networkedAudioSource = source.components["networked-audio-source"];
+      }
+      if (!this.networkedAudioSource) return;
 
-    // Walk up to Spine and then search down.
-    const source = this.el.parentNode.parentNode.querySelector("[networked-audio-source]");
-    if (!source) return;
-
-    this.audio = source.components["networked-audio-source"].sound;
-    this.update();
-  }
+      if (window.APP.store.state.preferences.audioOutputMode === "audio") {
+        const globalVoiceVolume =
+          window.APP.store.state.preferences.globalVoiceVolume !== undefined
+            ? window.APP.store.state.preferences.globalVoiceVolume
+            : 100;
+        this.networkedAudioSource.el.object3D.getWorldPosition(positionA);
+        this.el.sceneEl.camera.getWorldPosition(positionB);
+        const distance = positionA.distanceTo(positionB);
+        this.networkedAudioSource.sound.gain.gain.value =
+          (globalVoiceVolume / 100) * this.data.volume * Math.min(1, 10 / Math.max(1, distance * distance));
+      } else {
+        this.update();
+      }
+    };
+  })()
 });

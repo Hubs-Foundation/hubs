@@ -9,8 +9,7 @@
   pointer-events: none;
 
   &:local(.top) {
-    top: 10px;
-    height: 80px;
+    top: 16px;
   }
 
   &:local(.column) {
@@ -108,7 +107,7 @@
   }
 
   :local(.top-tip-no-hud) {
-    top: -30px;
+    top: 0px;
     width: auto;
     white-space: nowrap;
     height: 20px;

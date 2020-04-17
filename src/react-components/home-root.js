@@ -56,9 +56,7 @@ class HomeRoot extends Component {
 
   state = {
     dialog: null,
-    signedIn: null,
-    mailingListEmail: "",
-    mailingListPrivacy: false
+    signedIn: null
   };
 
   constructor(props) {
@@ -203,6 +201,11 @@ class HomeRoot extends Component {
                       <FormattedMessage id="editor-name" />
                     </a>
                   </IfFeature>
+                  <IfFeature name="show_docs_link">
+                    <a href={configs.link("docs", "https://hubs.mozilla.com/docs")} rel="noreferrer noopener">
+                      <FormattedMessage id="home.docs_link" />
+                    </a>
+                  </IfFeature>
                   <IfFeature name="show_cloud">
                     <a href="https://hubs.mozilla.com/cloud" rel="noreferrer noopener">
                       <FormattedMessage id="home.cloud_link" />
@@ -276,6 +279,7 @@ class HomeRoot extends Component {
                 </div>
               )}
             </div>
+
             <div className={styles.footerContent}>
               <div className={styles.poweredBy}>
                 <UnlessFeature name="hide_powered_by">
@@ -292,6 +296,16 @@ class HomeRoot extends Component {
                   <IfFeature name="show_join_us_dialog">
                     <a className={styles.link} rel="noopener noreferrer" href="/#/join-us">
                       <FormattedMessage id="home.join_us" />
+                    </a>
+                  </IfFeature>
+                  <IfFeature name="show_newsletter_signup">
+                    <a
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href="http://eepurl.com/gX_fH9"
+                    >
+                      <FormattedMessage id="home.subscribe_to_mailing_list" />
                     </a>
                   </IfFeature>
                   <IfFeature name="show_issue_report_link">

@@ -16,7 +16,7 @@ const RayCurve = function(numPoints, width) {
   this.uvs = new Float32Array(numPoints * 2 * 2);
   this.width = width;
 
-  this.geometry.addAttribute("position", new THREE.BufferAttribute(this.vertices, 3).setDynamic(true));
+  this.geometry.setAttribute("position", new THREE.BufferAttribute(this.vertices, 3).setUsage(THREE.DynamicDrawUsage));
 
   this.material = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -119,6 +119,7 @@ const q = new THREE.Quaternion();
 const vecHelper = new THREE.Vector3();
 const v = new THREE.Vector3();
 
+let uiRoot;
 AFRAME.registerComponent("teleporter", {
   schema: {
     start: { type: "string" },
@@ -182,7 +183,10 @@ AFRAME.registerComponent("teleporter", {
   },
 
   tick(t, dt) {
-    if (!this.el.sceneEl.is("entered")) return;
+    uiRoot = uiRoot || document.getElementById("ui-root");
+    const entered = this.el.sceneEl.is("entered");
+    const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
+    if (!entered && !isGhost) return;
     const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
     const userinput = AFRAME.scenes[0].systems.userinput;
     const { start, confirm, speed } = this.data;

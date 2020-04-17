@@ -1,6 +1,6 @@
 export default function patchThreeAllocations() {
   const renderer = AFRAME.scenes[0].renderer;
-  const gl = renderer.context;
+  const gl = renderer.getContext();
 
   // These functions in three.js uses the arguments object, which allocates.
   renderer.state.texImage2D = function(a, b, c, d, e, f, g, h, i) {

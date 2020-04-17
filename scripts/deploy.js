@@ -5,6 +5,7 @@ import ncp from "ncp";
 import tar from "tar";
 import ora from "ora";
 import FormData from "form-data";
+import path from "path";
 
 if (!existsSync(".ret.credentials")) {
   console.log("Not logged in, so cannot deploy. To log in, run npm run login.");
@@ -43,6 +44,7 @@ const getTs = (() => {
   buildEnv.BUILD_VERSION = `1.0.0.${version}`;
   buildEnv.ITA_SERVER = "";
   buildEnv.POSTGREST_SERVER = "";
+  buildEnv.CONFIGURABLE_SERVICES = "janus-gateway,reticulum,hubs,spoke";
 
   const env = Object.assign(process.env, buildEnv);
 
@@ -100,7 +102,7 @@ const getTs = (() => {
   step.text = "Preparing Deploy.";
 
   step.text = "Packaging Build.";
-  await tar.c({ gzip: true, C: "dist", file: "_build.tar.gz" }, ["."]);
+  tar.c({ sync: true, gzip: true, C: path.join(__dirname, "..", "dist"), file: "_build.tar.gz" }, ["."]);
   step.text = `Uploading Build ${buildEnv.BUILD_VERSION}.`;
 
   let uploadedUrl;

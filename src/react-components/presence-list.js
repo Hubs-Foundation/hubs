@@ -68,7 +68,9 @@ export default class PresenceList extends Component {
     const recording = meta.streaming || meta.recording;
     const icon = recording ? <FontAwesomeIcon icon={faVideo} /> : getPresenceIcon(context);
     const isBot = context && context.discord;
+    const isEntering = context && context.entering;
     const isOwner = meta.roles && meta.roles.owner;
+    const messageId = isEntering ? "presence.entering" : `presence.in_${meta.presence}`;
     const badge = isOwner && (
       <span className={styles.moderatorBadge} title="Moderator">
         &#x2605;
@@ -108,7 +110,7 @@ export default class PresenceList extends Component {
             )}
           </div>
           <div className={styles.presence}>
-            <FormattedMessage id={`presence.in_${meta.presence}`} />
+            <FormattedMessage id={messageId} />
           </div>
         </div>
       </WithHoverSound>
@@ -163,19 +165,19 @@ export default class PresenceList extends Component {
     const occupantCount = this.props.presences ? Object.entries(this.props.presences).length : 0;
     return (
       <div>
-        <div
+        <button
           title={"Members"}
           onClick={() => {
             this.props.onExpand(!this.props.expanded);
           }}
           className={classNames({
-            [rootStyles.presenceInfo]: true,
+            [rootStyles.presenceListButton]: true,
             [rootStyles.presenceInfoSelected]: this.props.expanded
           })}
         >
           <FontAwesomeIcon icon={faUsers} />
           <span className={rootStyles.occupantCount}>{occupantCount}</span>
-        </div>
+        </button>
         {this.props.expanded && this.renderExpandedList()}
       </div>
     );

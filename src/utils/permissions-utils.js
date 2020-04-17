@@ -4,8 +4,13 @@ export function showHoverEffect(el) {
   const isFrozen = el.sceneEl.is("frozen");
   const isPinned = el.components.pinnable && el.components.pinnable.data.pinned;
   const isSpawner = !!el.components["super-spawner"];
+  const isEmojiSpawner = isSpawner && el.components["super-spawner"].data.template === "#interactable-emoji";
+  const isEmoji = !!el.components.emoji;
   const canMove =
-    window.APP.hubChannel.can("spawn_and_move_media") && (!isPinned || window.APP.hubChannel.can("pin_objects"));
+    (isEmoji || isEmojiSpawner
+      ? window.APP.hubChannel.can("spawn_emoji")
+      : window.APP.hubChannel.can("spawn_and_move_media")) &&
+    (!isPinned || window.APP.hubChannel.can("pin_objects"));
   return (isSpawner || !isPinned || isFrozen) && canMove;
 }
 
@@ -14,10 +19,16 @@ export function canMove(entity) {
   const networkedTemplate = entity && entity.components.networked && entity.components.networked.data.template;
   const isCamera = networkedTemplate === "#interactable-camera";
   const isPen = networkedTemplate === "#interactable-pen";
+  const spawnerTemplate =
+    entity && entity.components["super-spawner"] && entity.components["super-spawner"].data.template;
+  const isEmojiSpawner = spawnerTemplate === "#interactable-emoji";
+  const isEmoji = !!entity.components.emoji;
   const isHoldableButton = entity.components.tags && entity.components.tags.data.holdableButton;
   return (
     isHoldableButton ||
-    (window.APP.hubChannel.can("spawn_and_move_media") &&
+    ((isEmoji || isEmojiSpawner
+      ? window.APP.hubChannel.can("spawn_emoji")
+      : window.APP.hubChannel.can("spawn_and_move_media")) &&
       (!isPinned || window.APP.hubChannel.can("pin_objects")) &&
       (!isCamera || window.APP.hubChannel.can("spawn_camera")) &&
       (!isPen || window.APP.hubChannel.can("spawn_drawing")))
@@ -85,6 +96,8 @@ function authorizeEntityManipulation(entityMetadata, sender, senderPermissions) 
     return isCreator || senderPermissions.spawn_camera;
   } else if (template.endsWith("-pen") || template.endsWith("-drawing")) {
     return isCreator || senderPermissions.spawn_drawing;
+  } else if (template.endsWith("-emoji")) {
+    return isCreator || senderPermissions.spawn_emoji;
   } else {
     return false;
   }

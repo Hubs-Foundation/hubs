@@ -5,7 +5,7 @@ import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { validMaterials } from "../components/hoverable-visuals";
-import { proxiedUrlFor } from "../utils/media-url-utils";
+import { proxiedUrlFor, guessContentType } from "../utils/media-url-utils";
 import Linkify from "linkify-it";
 import tlds from "tlds";
 
@@ -27,9 +27,9 @@ export const getDefaultResolveQuality = (is360 = false) => {
   return !is360 ? (useLowerQuality ? "low" : "high") : useLowerQuality ? "low_360" : "high_360";
 };
 
-export const resolveUrl = async (url, quality = null, version = 1) => {
+export const resolveUrl = async (url, quality = null, version = 1, bustCache) => {
   const key = `${url}_${version}`;
-  if (resolveUrlCache.has(key)) return resolveUrlCache.get(key);
+  if (!bustCache && resolveUrlCache.has(key)) return resolveUrlCache.get(key);
 
   const resultPromise = fetch(mediaAPIEndpoint, {
     method: "POST",
@@ -199,7 +199,7 @@ export const addMedia = (
   });
   if (needsToBeUploaded) {
     // Video camera videos are converted to mp4 for compatibility
-    const desiredContentType = contentSubtype === "video-camera" ? "video/mp4" : null;
+    const desiredContentType = contentSubtype === "video-camera" ? "video/mp4" : src.type || guessContentType(src.name);
 
     upload(src, desiredContentType)
       .then(response => {
@@ -278,7 +278,9 @@ export function injectCustomShaderChunks(obj) {
         return material;
 
       // Used when the object is batched
-      batchManagerSystem.meshToEl.set(object, obj.el);
+      if (batchManagerSystem.batchingEnabled) {
+        batchManagerSystem.meshToEl.set(object, obj.el);
+      }
 
       const newMaterial = material.clone();
       // This will not run if the object is never rendered unbatched, since its unbatched shader will never be compiled
@@ -438,6 +440,31 @@ export async function createImageTexture(url, filter) {
   texture.anisotropy = 4;
 
   return texture;
+}
+
+import HubsBasisTextureLoader from "../loaders/HubsBasisTextureLoader";
+export const basisTextureLoader = new HubsBasisTextureLoader();
+
+export function createBasisTexture(url) {
+  return new Promise((resolve, reject) => {
+    basisTextureLoader.load(
+      url,
+      function(texture) {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.onUpdate = function() {
+          // Delete texture data once it has been uploaded to the GPU
+          texture.mipmaps.length = 0;
+        };
+        // texture.anisotropy = 4;
+        resolve(texture);
+      },
+      undefined,
+      function(error) {
+        console.error(error);
+        reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
+      }
+    );
+  });
 }
 
 export function addMeshScaleAnimation(mesh, initialScale, onComplete) {

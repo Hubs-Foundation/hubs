@@ -4,8 +4,8 @@ export const getCurrentPlayerHeight = (function() {
   return function getCurrentPlayerHeight(world) {
     avatarPOV = avatarPOV || document.getElementById("avatar-pov-node");
     avatarRig = avatarRig || document.getElementById("avatar-rig");
-    avatarPOV.object3D.updateMatrices();
     avatarRig.object3D.updateMatrices();
+    avatarPOV.object3D.updateMatrices();
     if (world) {
       return avatarPOV.object3D.matrixWorld.elements[13] - avatarRig.object3D.matrixWorld.elements[13];
     }

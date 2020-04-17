@@ -145,6 +145,7 @@ export class WaypointSystem {
     return function onInteract() {
       this.releaseAnyOccupiedWaypoints();
       waypointComponent.el.object3D.updateMatrices();
+      this.characterController.shouldLandWhenPossible = true;
       this.characterController.enqueueWaypointTravelTo(
         waypointComponent.el.object3D.matrixWorld,
         false,
@@ -158,6 +159,7 @@ export class WaypointSystem {
       this.tryToOccupy(waypointComponent).then(didOccupy => {
         if (didOccupy) {
           waypointComponent.el.object3D.updateMatrices();
+          this.characterController.shouldLandWhenPossible = true;
           this.characterController.enqueueWaypointTravelTo(
             waypointComponent.el.object3D.matrixWorld,
             false,
@@ -307,6 +309,7 @@ export class WaypointSystem {
     if (waypointComponent) {
       this.releaseAnyOccupiedWaypoints();
       waypointComponent.el.object3D.updateMatrices();
+      this.characterController.shouldLandWhenPossible = true;
       this.characterController.enqueueWaypointTravelTo(
         waypointComponent.el.object3D.matrixWorld,
         true,
@@ -336,6 +339,7 @@ export class WaypointSystem {
             const waypointComponent = waypointComponentOrNull;
             unoccupyWaypoints(previouslyOccupiedWaypoints.filter(wp => wp !== waypointComponent));
             waypointComponent.el.object3D.updateMatrices();
+            this.characterController.shouldLandWhenPossible = true;
             this.characterController.enqueueWaypointTravelTo(
               waypointComponent.el.object3D.matrixWorld,
               true,
