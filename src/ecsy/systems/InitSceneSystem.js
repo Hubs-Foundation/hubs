@@ -1,7 +1,8 @@
 import { System } from "ecsy";
 import { Scene, Object3D, Parent, Transform } from "ecsy-three";
-import { Mesh, BoxBufferGeometry, MeshBasicMaterial } from "three";
+import { Mesh, BoxBufferGeometry, MeshBasicMaterial, Vector3, Euler } from "three";
 import { Rotating } from "../components/Rotating";
+import { MediaLoader } from "../components/MediaLoader";
 
 export class InitSceneSystem extends System {
   static queries = {
@@ -32,5 +33,14 @@ export class InitSceneSystem extends System {
       .addComponent(Transform)
       .addComponent(Parent, { value: scene })
       .addComponent(Rotating);
+
+    this.world
+      .createEntity()
+      .addComponent(MediaLoader, {
+        src:
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Firefox_Logo,_2017.svg/1200px-Firefox_Logo,_2017.svg.png"
+      })
+      .addComponent(Parent, { value: scene })
+      .addComponent(Transform, { position: new Vector3(0, 3, 0), rotation: new Euler() });
   }
 }

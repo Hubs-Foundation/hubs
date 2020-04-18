@@ -1,3 +1,3 @@
-import { Component } from "ecsy";
+import { TagComponent } from "ecsy";
 
-export class Rotating extends Component {}
+export class Rotating extends TagComponent {}

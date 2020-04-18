@@ -28,10 +28,10 @@ import { SHAPE } from "three-ammo/constants";
 let loadingObjectEnvMap;
 let loadingObject;
 
-waitForDOMContentLoaded().then(() => {
-  loadModel(loadingObjectSrc).then(gltf => {
-    loadingObject = gltf;
-  });
+export const loadingCubePromise = waitForDOMContentLoaded().then(async () => {
+  const gltf = await loadModel(loadingObjectSrc);
+  loadingObject = gltf;
+  return loadingObject;
 });
 
 const fetchContentType = url => {

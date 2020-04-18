@@ -137,6 +137,10 @@ export const guessContentType = url => {
   return commonKnownContentTypes[extension];
 };
 
+export const fetchContentType = url => {
+  return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
+};
+
 const originIsHubsServer = new Map();
 async function isHubsServer(url) {
   if (!url) return false;

@@ -36,6 +36,12 @@ export class HubsTransformSystem extends System {
         added: true,
         changed: [Scale]
       }
+    },
+    object3Ds: {
+      components: [Object3D],
+      listen: {
+        removed: true
+      }
     }
   };
 
@@ -121,6 +127,19 @@ export class HubsTransformSystem extends System {
 
       object.scale.copy(scale);
       object.matrixNeedsUpdate = true;
+    }
+
+    // Removed Objects
+    const removedObjects = this.queries.object3Ds.removed;
+
+    for (let i = 0; i < removedObjects.length; i++) {
+      const entity = removedObjects[i];
+
+      const object = entity.getRemovedComponent(Object3D).value;
+
+      if (object.parent) {
+        object.parent.remove(object);
+      }
     }
   }
 }
