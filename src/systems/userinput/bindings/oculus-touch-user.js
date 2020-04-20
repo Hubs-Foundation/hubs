@@ -810,6 +810,27 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
+  [sets.leftHandHoveringOnECSYInteractable]: [
+    {
+      src: { value: leftGripPressed2 },
+      dest: { value: leftGripRisingGrab },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: [leftGripRisingGrab],
+      dest: { value: paths.actions.leftHand.grab },
+      xform: xforms.any,
+      priority: 2
+    },
+    {
+      src: { value: leftTriggerPressed2 },
+      dest: { value: paths.actions.leftHand.stopTeleport },
+      xform: xforms.falling,
+      priority: 2
+    }
+  ],
+
   [sets.inspecting]: [
     {
       src: { value: upperButtons },
@@ -819,6 +840,14 @@ export const oculusTouchUserBindings = addSetsToBindings({
   ],
 
   [sets.leftHandHoldingInteractable]: [
+    {
+      src: { value: leftGripPressed2 },
+      dest: { value: paths.actions.leftHand.drop },
+      xform: xforms.falling
+    }
+  ],
+
+  [sets.leftHandHoldingECSYInteractable]: [
     {
       src: { value: leftGripPressed2 },
       dest: { value: paths.actions.leftHand.drop },
@@ -908,6 +937,27 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
+  [sets.rightCursorHoveringOnECSYInteractable]: [
+    {
+      src: { value: rightGripPressed2 },
+      dest: { value: rightGripRisingGrab },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: { value: rightTriggerPressed2 },
+      dest: { value: rightTriggerRisingGrab },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: [rightGripRisingGrab],
+      dest: { value: paths.actions.cursor.right.grab },
+      xform: xforms.any,
+      priority: 2
+    }
+  ],
+
   [sets.leftCursorHoveringOnInteractable]: [
     {
       src: { value: leftGripPressed2 },
@@ -931,6 +981,27 @@ export const oculusTouchUserBindings = addSetsToBindings({
       src: { value: upperButtons },
       dest: { value: paths.actions.startInspecting },
       xform: xforms.rising
+    }
+  ],
+
+  [sets.leftCursorHoveringOnECSYInteractable]: [
+    {
+      src: { value: leftGripPressed2 },
+      dest: { value: leftGripRisingGrab },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: { value: leftTriggerPressed2 },
+      dest: { value: leftTriggerRisingGrab },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: [leftGripRisingGrab],
+      dest: { value: paths.actions.cursor.left.grab },
+      xform: xforms.any,
+      priority: 2
     }
   ],
 
@@ -971,7 +1042,47 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
+  [sets.rightCursorHoldingECSYInteractable]: [
+    {
+      src: { value: rightAxis("joyY") },
+      dest: { value: paths.actions.cursor.right.modDelta },
+      xform: xforms.scale(0.1)
+    },
+    {
+      src: { value: rightGripPressed2 },
+      dest: { value: cursorDrop1 },
+      xform: xforms.falling,
+      priority: 3
+    },
+    {
+      src: [cursorDrop1, cursorDrop2],
+      dest: { value: paths.actions.cursor.right.drop },
+      xform: xforms.any,
+      priority: 2
+    }
+  ],
+
   [sets.leftCursorHoldingInteractable]: [
+    {
+      src: { value: leftAxis("joyY") },
+      dest: { value: paths.actions.cursor.left.modDelta },
+      xform: xforms.scale(0.1)
+    },
+    {
+      src: { value: leftGripPressed2 },
+      dest: { value: leftCursorDrop1 },
+      xform: xforms.falling,
+      priority: 3
+    },
+    {
+      src: [leftCursorDrop1, leftCursorDrop2],
+      dest: { value: paths.actions.cursor.left.drop },
+      xform: xforms.any,
+      priority: 2
+    }
+  ],
+
+  [sets.leftCursorHoldingECSYInteractable]: [
     {
       src: { value: leftAxis("joyY") },
       dest: { value: paths.actions.cursor.left.modDelta },
@@ -1055,6 +1166,27 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
+  [sets.rightHandHoveringOnECSYInteractable]: [
+    {
+      src: { value: rightGripPressed2 },
+      dest: { value: rightGripRisingGrab },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: [rightGripRisingGrab],
+      dest: { value: paths.actions.rightHand.grab },
+      xform: xforms.any,
+      priority: 2
+    },
+    {
+      src: { value: rightTriggerPressed2 },
+      dest: { value: paths.actions.rightHand.stopTeleport },
+      xform: xforms.falling,
+      priority: 2
+    }
+  ],
+
   [sets.rightHandHoldingInteractable]: [
     {
       src: { value: rightGripPressed2 },
@@ -1071,6 +1203,24 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 2
     }
   ],
+
+  [sets.rightHandHoldingECSYInteractable]: [
+    {
+      src: { value: rightGripPressed2 },
+      dest: {
+        value: rightHandDrop2
+      },
+      xform: xforms.falling,
+      priority: 3
+    },
+    {
+      src: [rightHandDrop2],
+      dest: { value: paths.actions.rightHand.drop },
+      xform: xforms.any,
+      priority: 2
+    }
+  ],
+
   [sets.rightHandHoveringOnPen]: [],
   [sets.rightHandHoldingPen]: [
     {

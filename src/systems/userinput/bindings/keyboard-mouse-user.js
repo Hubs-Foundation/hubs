@@ -680,6 +680,14 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       priority: 2
     }
   ],
+  [sets.rightCursorHoldingECSYInteractable]: [
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: paths.actions.cursor.right.drop },
+      xform: xforms.falling,
+      priority: 2
+    }
+  ],
   [sets.rightCursorHoldingUI]: [
     {
       src: { value: paths.device.mouse.buttonLeft },
@@ -718,6 +726,14 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.actions.startInspecting },
       xform: xforms.any,
       priority: 201
+    }
+  ],
+  [sets.rightCursorHoveringOnECSYInteractable]: [
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: paths.actions.cursor.right.grab },
+      xform: xforms.rising,
+      priority: 1
     }
   ],
   [sets.rightCursorHoveringOnVideo]: [

@@ -605,6 +605,15 @@ export const wmrUserBindings = addSetsToBindings({
       xform: xforms.rising
     }
   ],
+
+  [sets.leftHandHoveringOnECSYInteractable]: [
+    {
+      src: { value: lGripPressed },
+      dest: { value: paths.actions.leftHand.grab },
+      xform: xforms.rising
+    }
+  ],
+
   [sets.rightCursorHoveringOnInteractable]: [
     {
       src: { value: rGripPressed },
@@ -622,7 +631,34 @@ export const wmrUserBindings = addSetsToBindings({
       xform: xforms.any
     }
   ],
+
+  [sets.rightCursorHoveringOnECSYInteractable]: [
+    {
+      src: { value: rGripPressed },
+      dest: { value: rGripRising },
+      xform: xforms.rising
+    },
+    {
+      src: { value: rTriggerPressed },
+      dest: { value: rTriggerRising },
+      xform: xforms.rising
+    },
+    {
+      src: [rGripRising, rTriggerRising],
+      dest: { value: paths.actions.cursor.right.grab },
+      xform: xforms.any
+    }
+  ],
+
   [sets.rightHandHoveringOnInteractable]: [
+    {
+      src: { value: rGripPressed },
+      dest: { value: paths.actions.rightHand.grab },
+      xform: xforms.rising
+    }
+  ],
+
+  [sets.rightHandHoveringOnECSYInteractable]: [
     {
       src: { value: rGripPressed },
       dest: { value: paths.actions.rightHand.grab },
@@ -638,6 +674,7 @@ export const wmrUserBindings = addSetsToBindings({
       xform: xforms.falling
     }
   ],
+
   [sets.rightCursorHoldingInteractable]: [
     neverFrozenBinding,
     ...cursorModDeltaBindings(),
@@ -657,7 +694,37 @@ export const wmrUserBindings = addSetsToBindings({
       xform: xforms.any
     }
   ],
+
+  [sets.rightCursorHoldingECSYInteractable]: [
+    neverFrozenBinding,
+    ...cursorModDeltaBindings(),
+    {
+      src: { value: rGripPressed },
+      dest: { value: rGripFalling },
+      xform: xforms.falling
+    },
+    {
+      src: { value: rTriggerPressed },
+      dest: { value: rTriggerFalling },
+      xform: xforms.falling
+    },
+    {
+      src: [rGripFalling, rTriggerFalling],
+      dest: { value: paths.actions.cursor.right.drop },
+      xform: xforms.any
+    }
+  ],
+
   [sets.rightHandHoldingInteractable]: [
+    neverFrozenBinding,
+    {
+      src: { value: rGripPressed },
+      dest: { value: paths.actions.rightHand.drop },
+      xform: xforms.falling
+    }
+  ],
+
+  [sets.rightHandHoldingECSYInteractable]: [
     neverFrozenBinding,
     {
       src: { value: rGripPressed },

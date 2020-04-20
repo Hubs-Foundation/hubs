@@ -22,6 +22,7 @@ export class Interactor extends Component {
     this.grabEnded = false;
     this.attachedEntitiesAdded = false;
     this.attachedEntitiesRemoved = false;
+    this.hoverActionSet = null;
     this.grabStartActionPath = null;
     this.grabEndActionPath = null;
   }
@@ -79,6 +80,7 @@ export class Interactor extends Component {
     this.grabEnded = false;
     this.attachedEntitiesAdded = false;
     this.attachedEntitiesRemoved = false;
+    this.hoverActionSet = null;
     this.grabStartActionPath = null;
     this.grabEndActionPath = null;
   }

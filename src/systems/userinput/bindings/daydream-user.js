@@ -138,6 +138,7 @@ export const daydreamUserBindings = addSetsToBindings({
   ],
 
   [sets.rightCursorHoveringOnInteractable]: grabBinding,
+  [sets.rightCursorHoveringOnECSYInteractable]: grabBinding,
   [sets.rightCursorHoveringOnUI]: grabBinding,
 
   [sets.rightCursorHoveringOnVideo]: [
@@ -152,6 +153,27 @@ export const daydreamUserBindings = addSetsToBindings({
   ],
 
   [sets.rightCursorHoldingInteractable]: [
+    {
+      src: { value: touchpadFalling },
+      dest: { value: paths.actions.cursor.right.drop },
+      xform: xforms.copy
+    },
+    {
+      src: {
+        value: paths.device.daydream.axis("touchpadY"),
+        touching: paths.device.daydream.button("touchpad").touched
+      },
+      dest: { value: cursorModDelta },
+      xform: xforms.touch_axis_scroll()
+    },
+    {
+      src: { value: cursorModDelta },
+      dest: { value: paths.actions.cursor.right.modDelta },
+      xform: xforms.copy
+    }
+  ],
+
+  [sets.rightCursorHoldingECSYInteractable]: [
     {
       src: { value: touchpadFalling },
       dest: { value: paths.actions.cursor.right.drop },
