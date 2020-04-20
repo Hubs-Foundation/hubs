@@ -4,6 +4,8 @@ import { Image } from "../components/Image";
 import { Loading } from "../components/Loading";
 import { createImageTexture } from "../../utils/media-utils";
 import { Mesh, PlaneBufferGeometry, MeshBasicMaterial, DoubleSide } from "three";
+import { PhysicsShape } from "../components/PhysicsShape";
+import { SHAPE } from "three-ammo/constants";
 
 export class ImageSystem extends System {
   static queries = {
@@ -38,7 +40,10 @@ export class ImageSystem extends System {
     image.entity = this.world
       .createEntity()
       .addComponent(Parent, { value: entity })
-      .addComponent(Object3D, { value: new Mesh(geometry, material) });
+      .addComponent(Object3D, { value: new Mesh(geometry, material) })
+      .addComponent(PhysicsShape, { type: SHAPE.BOX, minHalfExtent: 0.04 });
+
+    console.log("image parent", entity);
 
     entity.removeComponent(Loading);
   }

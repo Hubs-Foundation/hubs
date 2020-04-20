@@ -4,6 +4,8 @@ import { Mesh, BoxBufferGeometry, MeshBasicMaterial, Vector3, Euler } from "thre
 import { Rotating } from "../components/Rotating";
 import { MediaLoader } from "../components/MediaLoader";
 import { Interactable } from "../components/Interactable";
+import { Grabbable } from "../components/Grabbable";
+import { PhysicsBody } from "../components/PhysicsBody";
 
 export class InitSceneSystem extends System {
   static queries = {
@@ -43,6 +45,8 @@ export class InitSceneSystem extends System {
       })
       .addComponent(Parent, { value: scene })
       .addComponent(Transform, { position: new Vector3(0, 3, 0), rotation: new Euler() })
-      .addComponent(Interactable);
+      .addComponent(Interactable)
+      .addComponent(Grabbable)
+      .addComponent(PhysicsBody);
   }
 }

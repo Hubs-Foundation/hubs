@@ -2,6 +2,7 @@ import { sets } from "./sets";
 import { isUI } from "./../interactions";
 import { CAMERA_MODE_INSPECT } from "../camera-system";
 import qsTruthy from "../../utils/qs_truthy";
+import { Interactor } from "../../ecsy/components/Interactor";
 const debugUserInput = qsTruthy("dui");
 
 let leftTeleporter, rightTeleporter;
@@ -19,26 +20,69 @@ export function resolveActionSets() {
   const userinput = AFRAME.scenes[0].systems.userinput;
   const { leftHand, rightHand, rightRemote, leftRemote } = AFRAME.scenes[0].systems.interaction.state;
 
+  const worldManager = AFRAME.scenes[0].systems["hubs-systems"].worldManager;
+  const leftCursorInteractor = worldManager.initialized
+    ? worldManager.leftCursorController.getComponent(Interactor)
+    : {};
+  const rightCursorInteractor = worldManager.initialized
+    ? worldManager.rightCursorController.getComponent(Interactor)
+    : {};
+  const leftHandInteractor = worldManager.initialized ? worldManager.leftHandController.getComponent(Interactor) : {};
+  const rightHandInteractor = worldManager.initialized ? worldManager.rightHandController.getComponent(Interactor) : {};
+
   userinput.toggleSet(sets.leftHandHoldingInteractable, leftHand.held);
   userinput.toggleSet(sets.rightHandHoldingInteractable, rightHand.held);
   userinput.toggleSet(sets.leftCursorHoldingInteractable, leftRemote.held);
   userinput.toggleSet(sets.rightCursorHoldingInteractable, rightRemote.held);
 
+  userinput.toggleSet(sets.leftHandHoldingECSYInteractable, leftHandInteractor.grabbing);
+  userinput.toggleSet(sets.rightHandHoldingECSYInteractable, rightHandInteractor.grabbing);
+  userinput.toggleSet(sets.leftCursorHoldingECSYInteractable, leftCursorInteractor.grabbing);
+  userinput.toggleSet(sets.rightCursorHoldingECSYInteractable, rightCursorInteractor.grabbing);
+
   userinput.toggleSet(
     sets.leftHandHoveringOnNothing,
-    !leftRemote.held && !leftRemote.hovered && !leftHand.held && !leftHand.hovered
+    !leftRemote.held &&
+      !leftRemote.hovered &&
+      !leftHand.held &&
+      !leftHand.hovered &&
+      !leftHandInteractor.grabbing &&
+      !leftHandInteractor.hovering &&
+      !leftCursorInteractor.grabbing &&
+      !leftCursorInteractor.hovering
   );
   userinput.toggleSet(
     sets.rightHandHoveringOnNothing,
-    !rightRemote.held && !rightRemote.hovered && !rightHand.held && !rightHand.hovered
+    !rightRemote.held &&
+      !rightRemote.hovered &&
+      !rightHand.held &&
+      !rightHand.hovered &&
+      !rightHandInteractor.grabbing &&
+      !rightHandInteractor.hovering &&
+      !rightCursorInteractor.grabbing &&
+      !rightCursorInteractor.hovering
   );
   userinput.toggleSet(
     sets.leftCursorHoveringOnNothing,
-    !leftHand.held && !leftHand.hovered && !leftRemote.held && !leftRemote.hovered
+    !leftHand.held &&
+      !leftHand.hovered &&
+      !leftRemote.held &&
+      !leftRemote.hovered &&
+      !leftHandInteractor.grabbing &&
+      !leftHandInteractor.hovering &&
+      !leftCursorInteractor.grabbing &&
+      !leftCursorInteractor.hovering
   );
   userinput.toggleSet(
     sets.rightCursorHoveringOnNothing,
-    !rightHand.held && !rightHand.hovered && !rightRemote.held && !rightRemote.hovered
+    !rightHand.held &&
+      !rightHand.hovered &&
+      !rightRemote.held &&
+      !rightRemote.hovered &&
+      !rightHandInteractor.grabbing &&
+      !rightHandInteractor.hovering &&
+      !rightCursorInteractor.grabbing &&
+      !rightCursorInteractor.hovering
   );
 
   userinput.toggleSet(
@@ -133,6 +177,11 @@ export function resolveActionSets() {
         (rightRemote.hovered.components.tags && rightRemote.hovered.components.tags.data.togglesHoveredActionSet) ||
         rightRemote.hovered.components["super-spawner"])
   );
+
+  userinput.toggleSet(sets.leftHandHoveringOnECSYInteractable, leftHandInteractor.hovering);
+  userinput.toggleSet(sets.rightHandHoveringOnECSYInteractable, rightHandInteractor.hovering);
+  userinput.toggleSet(sets.leftCursorHoveringOnECSYInteractable, leftCursorInteractor.hovering);
+  userinput.toggleSet(sets.rightCursorHoveringOnECSYInteractable, rightCursorInteractor.hovering);
 
   userinput.toggleSet(
     sets.leftHandHoveringOnVideo,

@@ -7,6 +7,26 @@ import { PhysicsBody } from "../components/PhysicsBody";
 import { Interactor } from "../components/Interactor";
 import { Raycaster } from "../components/Raycaster";
 import { ActionFrame } from "../components/ActionFrame";
+import { Grabbable } from "../components/Grabbable";
+
+function getHoverTarget(object, interactables) {
+  let curObject = object;
+
+  while (curObject) {
+    for (let j = 0; j < interactables.length; j++) {
+      const interactableEntity = interactables[j];
+      const interactableObject = interactableEntity.getComponent(Object3D).value;
+
+      if (interactableObject === curObject) {
+        return interactableEntity;
+      }
+    }
+
+    curObject = curObject.parent;
+  }
+
+  return null;
+}
 
 export class InteractionSystem extends System {
   static queries = {
@@ -24,6 +44,9 @@ export class InteractionSystem extends System {
     },
     interactables: {
       components: [Interactable, Object3D]
+    },
+    grabbables: {
+      components: [Grabbable, PhysicsBody, Object3D]
     }
   };
 
@@ -43,17 +66,15 @@ export class InteractionSystem extends System {
       interactor.grabEnded = false;
       interactor.attachedEntitiesAdded = false;
       interactor.attachedEntitiesRemoved = false;
+    }
 
-      // Process the grab actions
-      if (actionFrame.get(interactor.grabStartActionPath)) {
-        interactor.grabbing = true;
-        interactor.grabStarted = true;
-      }
+    const grabbables = this.queries.grabbables.results;
 
-      if (actionFrame.get(interactor.grabEndActionPath)) {
-        interactor.grabbing = false;
-        interactor.grabEnded = true;
-      }
+    for (let i = 0; i < grabbables.length; i++) {
+      const entity = grabbables[i];
+      const grabbable = entity.getComponent(Grabbable);
+      grabbable.grabStarted = false;
+      grabbable.grabEnded = false;
     }
 
     const raycastInteractors = this.queries.raycastInteractors.results;
@@ -62,7 +83,7 @@ export class InteractionSystem extends System {
     for (let i = 0; i < raycastInteractors.length; i++) {
       const entity = raycastInteractors[i];
 
-      const interactor = entity.getComponent(Interactor);
+      const interactor = entity.getMutableComponent(Interactor);
 
       if (!interactor.grabbing) {
         const raycastInteractor = entity.getMutableComponent(RaycastInteractor);
@@ -88,8 +109,9 @@ export class InteractionSystem extends System {
         );
 
         if (intersections.length > 0) {
-          const intersection = intersections[0];
-          interactor.hoverTarget = intersection;
+          const hoverObject = intersections[0].object;
+
+          interactor.hoverTarget = getHoverTarget(hoverObject, interactables);
 
           if (!interactor.hovering) {
             interactor.hoverStarted = true;
@@ -99,12 +121,40 @@ export class InteractionSystem extends System {
         } else {
           if (interactor.hovering) {
             interactor.hoverEnded = true;
+            interactor.hoverTarget = null;
           }
 
           interactor.hovering = false;
         }
       } else {
         interactor.hovering = false;
+      }
+    }
+
+    for (let i = 0; i < interactors.length; i++) {
+      const entity = interactors[i];
+      const interactor = entity.getComponent(Interactor);
+
+      if (interactor.hovering && actionFrame.get(interactor.grabStartActionPath)) {
+        const grabbable = interactor.hoverTarget.getComponent(Grabbable);
+        grabbable.grabStarted = true;
+        grabbable.grabbing = true;
+
+        interactor.grabbing = true;
+        interactor.grabStarted = true;
+        interactor.grabTarget = interactor.hoverTarget;
+        interactor.hoverTarget = null;
+      }
+
+      if (interactor.grabbing && actionFrame.get(interactor.grabEndActionPath)) {
+        const grabbable = interactor.grabTarget.getComponent(Grabbable);
+        grabbable.grabEnded = true;
+        grabbable.grabbing = false;
+
+        interactor.grabbing = false;
+        interactor.grabEnded = true;
+        interactor.grabTarget = null;
+        interactor.hoverTarget = interactor.grabTarget;
       }
     }
   }

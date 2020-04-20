@@ -219,6 +219,28 @@ export const xboxControllerUserBindings = addSetsToBindings({
       xform: xforms.copyIfTrue
     }
   ],
+  [sets.rightCursorHoldingECSYInteractable]: [
+    ...characterAccelerationBindings(true),
+    {
+      src: { value: button("rightTrigger").pressed },
+      dest: { value: paths.actions.cursor.right.drop },
+      xform: xforms.falling,
+      priority: 100
+    },
+    {
+      src: { value: deadzonedLeftJoystickVertical },
+      dest: { value: scaledLeftJoystickCursorDelta },
+      xform: xforms.scale(0.25)
+    },
+    {
+      src: {
+        bool: button("leftTrigger").pressed,
+        value: scaledLeftJoystickCursorDelta
+      },
+      dest: { value: paths.actions.cursor.right.modDelta },
+      xform: xforms.copyIfTrue
+    }
+  ],
   [sets.rightCursorHoveringOnUI]: [
     {
       src: { value: button("rightTrigger").pressed },
@@ -227,6 +249,15 @@ export const xboxControllerUserBindings = addSetsToBindings({
     }
   ],
   [sets.rightCursorHoveringOnInteractable]: [
+    ...characterAccelerationBindings(),
+    {
+      src: { value: button("rightTrigger").pressed },
+      dest: { value: paths.actions.cursor.right.grab },
+      xform: xforms.rising,
+      priority: 100
+    }
+  ],
+  [sets.rightCursorHoveringOnECSYInteractable]: [
     ...characterAccelerationBindings(),
     {
       src: { value: button("rightTrigger").pressed },
