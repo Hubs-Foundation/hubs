@@ -81,30 +81,55 @@ AFRAME.registerComponent("cursor-controller", {
         .length();
       this.raycaster.far = this.data.far * playerScale;
       this.raycaster.near = this.data.near * playerScale;
-
-      const interaction = AFRAME.scenes[0].systems.interaction;
-      const isGrabbing = left ? !!interaction.state.leftRemote.held : !!interaction.state.rightRemote.held;
-      if (!isGrabbing) {
-        rawIntersections.length = 0;
-        this.raycaster.ray.origin = cursorPose.position;
-        this.raycaster.ray.direction = cursorPose.direction;
-        this.raycaster.intersectObjects(
-          AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem.targets,
-          true,
-          rawIntersections
-        );
-        this.intersection = rawIntersections[0];
-        this.intersectionIsValid = !!interaction.updateCursorIntersection(this.intersection, left);
-        this.distance = this.intersectionIsValid ? this.intersection.distance : this.data.defaultDistance * playerScale;
-      }
+      this.raycaster.ray.origin = cursorPose.position;
+      this.raycaster.ray.direction = cursorPose.direction;
 
       const { cursor, minDistance, far, camera } = this.data;
 
-      const cursorModDelta =
-        userinput.get(left ? paths.actions.cursor.left.modDelta : paths.actions.cursor.right.modDelta) || 0;
-      if (isGrabbing && !userinput.activeSets.includes(left ? sets.leftCursorHoldingUI : sets.rightCursorHoldingUI)) {
-        this.distance = THREE.Math.clamp(this.distance - cursorModDelta, minDistance, far * playerScale);
+      let cursorType = "default";
+
+      if (this.forceCursorType) {
+        cursorType = this.forceCursorType;
+        this.distance = this.forceDistance || this.data.defaultDistance * playerScale;
+      } else {
+        const interaction = AFRAME.scenes[0].systems.interaction;
+        const isGrabbing = left ? !!interaction.state.leftRemote.held : !!interaction.state.rightRemote.held;
+        if (!isGrabbing) {
+          rawIntersections.length = 0;
+          this.raycaster.intersectObjects(
+            AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem.targets,
+            true,
+            rawIntersections
+          );
+          this.intersection = rawIntersections[0];
+          this.intersectionIsValid = !!interaction.updateCursorIntersection(this.intersection, left);
+          this.distance = this.intersectionIsValid
+            ? this.intersection.distance
+            : this.data.defaultDistance * playerScale;
+        }
+
+        const cursorModDelta =
+          userinput.get(left ? paths.actions.cursor.left.modDelta : paths.actions.cursor.right.modDelta) || 0;
+        if (isGrabbing && !userinput.activeSets.includes(left ? sets.leftCursorHoldingUI : sets.rightCursorHoldingUI)) {
+          this.distance = THREE.Math.clamp(this.distance - cursorModDelta, minDistance, far * playerScale);
+        }
+
+        // TODO : Check if the selected object being transformed is for this cursor!
+        const transformObjectSystem = AFRAME.scenes[0].systems["transform-selected-object"];
+
+        if (
+          transformObjectSystem.transforming &&
+          ((left && transformObjectSystem.hand.el.id === "player-left-controller") ||
+            (!left && transformObjectSystem.hand.el.id === "player-right-controller"))
+        ) {
+          cursorType = "transform";
+        } else if (this.intersectionIsValid || isGrabbing) {
+          cursorType = "highlight";
+        } else {
+          cursorType = "default";
+        }
       }
+
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);
       // The cursor will always be oriented towards the player about its Y axis, so objects held by the cursor will rotate towards the player.
       getLastWorldPosition(camera.object3D, cameraPos);
@@ -112,15 +137,9 @@ AFRAME.registerComponent("cursor-controller", {
       cursor.object3D.lookAt(cameraPos);
       cursor.object3D.matrixNeedsUpdate = true;
 
-      // TODO : Check if the selected object being transformed is for this cursor!
-      const transformObjectSystem = AFRAME.scenes[0].systems["transform-selected-object"];
-      if (
-        transformObjectSystem.transforming &&
-        ((left && transformObjectSystem.hand.el.id === "player-left-controller") ||
-          (!left && transformObjectSystem.hand.el.id === "player-right-controller"))
-      ) {
+      if (cursorType === "transform") {
         this.color.copy(TRANSFORM_COLOR_1).lerpHSL(TRANSFORM_COLOR_2, 0.5 + 0.5 * Math.sin(t / 1000.0));
-      } else if (this.intersectionIsValid || isGrabbing) {
+      } else if (cursorType === "highlight") {
         this.color.copy(HIGHLIGHT);
       } else {
         this.color.copy(NO_HIGHLIGHT);
