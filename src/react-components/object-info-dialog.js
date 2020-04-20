@@ -201,7 +201,7 @@ export default class ObjectInfoDialog extends Component {
       this.props.hubChannel &&
       this.props.hubChannel.can("spawn_and_move_media");
 
-    return window.innerWidth < 450 ? (
+    return window.innerWidth < 450 || window.innerHeight < 800 ? (
       <div className={rootStyles.uiDialog}>
         <div className={classNames({ [rootStyles.uiDialogBoxContents]: true, [rootStyles.uiInteractive]: true })}>
           <div className={objectInfoDialogStyles.topBar}>
