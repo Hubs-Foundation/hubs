@@ -11,6 +11,7 @@ To run the client, run:
 git clone https://github.com/mozilla/hubs.git
 cd hubs
 npm ci
+npm run login
 npm start
 ```
 
