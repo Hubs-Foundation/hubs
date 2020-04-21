@@ -77,7 +77,8 @@ class AvatarPreview extends Component {
 
     this.camera = new THREE.PerspectiveCamera(55, this.canvas.clientWidth / this.canvas.clientHeight, 0.1, 1000);
     this.controls = new THREE.OrbitControls(this.camera, this.canvas);
-    this.controls.enablePan = false;
+    this.controls.screenSpacePanning = true;
+    this.controls.enableKeys = true;
 
     const light = new THREE.DirectionalLight(0xf7f6ef, 1);
     light.position.set(0, 10, 10);
@@ -296,6 +297,8 @@ class AvatarPreview extends Component {
   snapshot = () => {
     return new Promise(resolve => {
       if (this.idleAnimationAction) this.idleAnimationAction.stop();
+      this.snapshotCamera.position.copy(this.camera.position);
+      this.snapshotCamera.rotation.copy(this.camera.rotation);
       this.snapshotRenderer.render(this.scene, this.snapshotCamera);
       this.snapshotCanvas.toBlob(blob => {
         if (this.idleAnimationAction) this.idleAnimationAction.play();
