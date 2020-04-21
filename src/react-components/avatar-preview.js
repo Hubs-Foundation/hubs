@@ -245,10 +245,25 @@ class AvatarPreview extends Component {
       this.idleAnimationAction = action;
     }
 
+    gltf.scene.traverse(node => {
+      // Camera in preview is pretty tight, and skinned meshes tend to have poor bounding boxes
+      if (node.isSkinnedMesh) {
+        node.frustumCulled = false;
+      }
+
+      // We delete onUpdate here to opt out of the auto texture cleanup after GPU upload.
+      if (node.material) {
+        const removeOnUpdate = p => node.material[p] && delete node.material[p].onUpdate;
+        TEXTURE_PROPS["base_map"].forEach(removeOnUpdate);
+        TEXTURE_PROPS["emissive_map"].forEach(removeOnUpdate);
+        TEXTURE_PROPS["normal_map"].forEach(removeOnUpdate);
+        TEXTURE_PROPS["orm_map"].forEach(removeOnUpdate);
+      }
+    });
+
     const { material } = this.previewMesh;
     if (material) {
-      // We delete onUpdate here to opt out of the auto texture cleanup after GPU upload.
-      const getImage = p => material[p] && delete material[p].onUpdate && material[p].image;
+      const getImage = p => material[p] && material[p].image;
       this.originalMaps = {
         base_map: TEXTURE_PROPS["base_map"].map(getImage),
         emissive_map: TEXTURE_PROPS["emissive_map"].map(getImage),
@@ -258,6 +273,7 @@ class AvatarPreview extends Component {
 
       await Promise.all([
         this.applyMaps({}, this.props), // Apply initial maps
+        // TODO apply environment map to secondary materials as well
         createDefaultEnvironmentMap().then(t => {
           this.previewMesh.material.envMap = t;
           this.previewMesh.material.needsUpdate = true;
