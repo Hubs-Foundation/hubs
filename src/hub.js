@@ -24,6 +24,7 @@ import "aframe-slice9-component";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
+import { isOnSymmetricNat } from "./utils/webrtc.js";
 import { detectOS } from "detect-browser";
 import {
   getReticulumFetchUrl,
@@ -173,6 +174,8 @@ const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isEmbed = window.self !== window.top;
+const isSymmetricNat = isOnSymmetricNat();
+
 if (isEmbed && !qs.get("embed_token")) {
   // Should be covered by X-Frame-Options, but just in case.
   throw new Error("no embed token");
@@ -315,20 +318,29 @@ function remountUI(props) {
   mountUI(uiProps);
 }
 
-function setupPeerConnectionConfig(adapter, host, turn) {
+async function setupPeerConnectionConfig(adapter, host, turn) {
   const forceTurn = qs.get("force_turn");
   const peerConnectionConfig = {};
 
   if (turn && turn.enabled) {
-    const iceServers = turn.transports.map(ts => {
-      return { urls: `turns:${host}:${ts.port}?transport=tcp`, username: turn.username, credential: turn.credential };
+    const iceServers = [];
+
+    turn.transports.forEach(ts => {
+      // Try both TURN DTLS and TCP/TLS
+      iceServers.push({ urls: `turns:${host}:${ts.port}`, username: turn.username, credential: turn.credential });
+
+      iceServers.push({
+        urls: `turns:${host}:${ts.port}?transport=tcp`,
+        username: turn.username,
+        credential: turn.credential
+      });
     });
 
     iceServers.push({ urls: "stun:stun1.l.google.com:19302" });
 
     peerConnectionConfig.iceServers = iceServers;
 
-    if (forceTurn) {
+    if (forceTurn || (await isSymmetricNat)) {
       peerConnectionConfig.iceTransportPolicy = "relay";
     }
   } else {
@@ -539,6 +551,9 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
 
+    // Wait for symmetric NAT connection before connecting so ICE is configured properly.
+    await isSymmetricNat;
+
     scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
       let newHostPollInterval = null;
 
@@ -552,7 +567,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
             const { host, port, turn } = await hubChannel.getHost();
             const newServerURL = `wss://${host}:${port}`;
 
-            setupPeerConnectionConfig(adapter, host, turn);
+            await setupPeerConnectionConfig(adapter, host, turn);
 
             if (currentServerURL !== newServerURL) {
               console.log("Connecting to new Janus server " + newServerURL);
@@ -1417,7 +1432,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const track = stream.getAudioTracks()[0];
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
-        setupPeerConnectionConfig(adapter, janusHost, janusTurn);
+        await setupPeerConnectionConfig(adapter, janusHost, janusTurn);
 
         hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
 
