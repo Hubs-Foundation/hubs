@@ -1273,6 +1273,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (isInitialJoin) {
         store.addEventListener("profilechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
 
+        const requestedOccupants = [];
+
         hubChannel.presence.onSync(() => {
           const presence = hubChannel.presence;
 
@@ -1282,13 +1284,26 @@ document.addEventListener("DOMContentLoaded", async () => {
             entryDisallowed: !hubChannel.canEnterRoom(uiProps.hub)
           });
 
-          const occupantCount = Object.entries(presence.state).length;
+          const userIds = Object.getOwnPropertyNames(presence.state);
+          const occupantCount = userIds.length;
           vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
 
           if (occupantCount > 1) {
             scene.addState("copresent");
           } else {
             scene.removeState("copresent");
+          }
+
+          if (NAF.connection.adapter) {
+            requestedOccupants.length = 0;
+            for (let i = 0; i < userIds.length; i++) {
+              const userId = userIds[i];
+              if (userId !== NAF.clientId && presence.state[userId].metas[0].presence === "room") {
+                requestedOccupants.push(userId);
+              }
+            }
+
+            NAF.connection.adapter.syncOccupants(requestedOccupants);
           }
 
           // HACK - Set a flag on the presence object indicating if the initial sync has completed,
