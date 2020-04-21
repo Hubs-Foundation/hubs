@@ -320,8 +320,17 @@ function setupPeerConnectionConfig(adapter, host, turn) {
   const peerConnectionConfig = {};
 
   if (turn && turn.enabled) {
-    const iceServers = turn.transports.map(ts => {
-      return { urls: `turns:${host}:${ts.port}?transport=tcp`, username: turn.username, credential: turn.credential };
+    const iceServers = [];
+
+    turn.transports.forEach(ts => {
+      // Try both TURN DTLS and TCP/TLS
+      iceServers.push({ urls: `turns:${host}:${ts.port}`, username: turn.username, credential: turn.credential });
+
+      iceServers.push({
+        urls: `turns:${host}:${ts.port}?transport=tcp`,
+        username: turn.username,
+        credential: turn.credential
+      });
     });
 
     iceServers.push({ urls: "stun:stun1.l.google.com:19302" });
