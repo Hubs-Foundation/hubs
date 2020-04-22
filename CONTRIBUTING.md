@@ -13,13 +13,12 @@ The following GitHub projects are part of the Hubs platform and governed by thes
 * https://github.com/mozilla/hubs-ops - operations infrastructure for Hubs
 * https://github.com/MozillaReality/hubs-discord-bot - Hubs' Discord integration
 
-
 ## Quick Start
 
 We are happy to receive contributions to the Hubs platform in a number of different ways as outlined below. Please note that all contributions are subject to approval by the project maintainers. We ask (but do not require) that those interested in contributing to Hubs consider joining the public [Hubs Discord server](https://discord.gg/wHmY4nd) to connect with the dev team, ask questions, and view discussions about work being done on the project. 
 
 ### 💻 Code Contributions
-Hubs has a client-server architecture that gives multiple users the ability to connect to a shared room on the server. If you are interested in contributing to the Hubs client, follow the instructions in the [Readme](README.md) to get started. If you want to contribute to the networking or infrastructure, consider looking at the [reticulum](https://github.com/mozilla/reticulum) or [janus](https://github.com/mozilla/janus-plugin-sfu) repositories. If you are interested in working on the code for Spoke, the 3D editor used to create custom environments for Hubs rooms, explore the [Spoke](https://github.com/mozilla/spoke) repository.
+Hubs has a client-server architecture that gives multiple users the ability to connect to a shared room on the server. If you are interested in contributing to the Hubs client, continue on to the [development workflow guide](#development-workflow) to get started. If you want to contribute to the networking or infrastructure, consider looking at the [reticulum](https://github.com/mozilla/reticulum) or [janus](https://github.com/mozilla/janus-plugin-sfu) repositories. If you are interested in working on the code for Spoke, the 3D editor used to create custom environments for Hubs rooms, explore the [Spoke](https://github.com/mozilla/spoke) repository.
 
 For more information on the inner workings of Hubs and the architectural decisions behind the project, check out [this presentation on the Mozilla Hubs Code Base](https://vimeo.com/365531296) by Engineering Lead Greg Fodor.
 
@@ -32,8 +31,6 @@ Steps to contributing code to the Hubs project:
 3. Fix the bug! Test out your changes on your local setup and let us know if you have questions or want another opinion about the fix. 
 4. Submit your PR for a code review and someone from the team will take a look and give feedback. Make sure you follow up! We'll close the PR if it seems like you've abandoned it by not responding to any questions or comments we leave in the review. If your PR adds a new feature, consider requesting the 'What's New' tag. With the 'What's New' tag, any text in the main body of the PR up to (and including) an image will be added to the [hubs website](https://hubs.mozilla.com/whats-new). Gifs are especially appreciated! [This pull request](https://github.com/mozilla/hubs/pull/1536) shows an example of how the 'What's New' tag can be used.
 5. Celebrate! 🎉 You're helping Mozilla's mission to make the web an open and accessible place for social experiences! 
-
-
 
 ### 🐛Filing Issues and Feature Requests
 Reporting bugs, feature requests, and questions that you have about the platform helps the team prioritize the work that we're doing and make Hubs better! We welcome user-submitted issues and use Github's built-in issue tracking for our bug reporting process. 
@@ -54,7 +51,7 @@ We will do our best to respond to and tag inbound issues as they are submitted i
 | P3 | Address when able after P2 bugs are fixed. Affects a small set of users inconsistently in a non-breaking way with an easy workaround. | Every so often, a standalone VR headset will show up as a mobile phone in the user list. Refreshing fixes it. |
 
 ### 🎨 3D Art
-If you are a 3D artist and want to support what we're doing with Hubs, consider creating and releasing content under a Creative Commons license or creating scenes using the [Spoke web editor](https://hubs.mozilla.com/spoke) and releasing them as remixable environments. Content with low polygon counts that are optimized to run well on the web are much appreciated! In particular, we'd love to see scenes that capture a wide range of experiences. 
+If you are a 3D artist and want to support what we're doing with Hubs, consider creating and releasing content under a Creative Commons license or creating scenes using the [Spoke scene editor](https://hubs.mozilla.com/spoke) and releasing them as remixable environments. Content with low polygon counts that are optimized to run well on the web are much appreciated! In particular, we'd love to see scenes that capture a wide range of experiences. 
 
 ### 📜 Documentation 
 Our documentation for Hubs is hosted on the [GitHub Hubs Wiki](https://github.com/mozilla/hubs/wiki) section of the project. The documentation for Spoke is hosted on the [GitHub Spoke Wiki](https://github.com/mozilla/spoke/wiki) For contributing corrections or additional pages for the Wiki, please file an issue as a suggestion in the corresponding repository with your proposed content and we will review it and add it to the wiki when all looks good! 
@@ -65,3 +62,94 @@ Hubs is currently en-US only, but if you would like to work with us on localizat
 ### 🦆 General Help
 We believe in the power of community (that's why we're building this, after all!) and know that not all forms of support will come from something outlined here. Feel free to jump into our public [Discord server](https://discord.gg/wHmY4nd) to chat with us and ask about how you can get involved!
 
+## Development Workflow
+
+Getting set up to work on the Hubs client main fork is a little different than working on a custom client for a Hubs Cloud deployment. If you're looking to set up your development environment for your own Hubs Cloud deployment see [this guide](https://hubs.mozilla.com/docs/hubs-cloud-custom-clients.html).
+
+### 0. Dependencies
+
+[Install NodeJS](https://nodejs.org) if you haven't already. We recommend version 12 or above.
+
+### 1. Setting up the Repository
+
+Clone the Hubs repository and install the npm dependencies.
+
+```bash
+git clone https://github.com/mozilla/hubs.git
+cd hubs
+npm ci
+```
+
+> Note: We recommend using `npm ci` instead of `npm install` so that you always use the versions of modules in the `package-lock.json` file.
+
+### 2. Start Webpack Dev Server
+
+There are 3 different commands for starting up the client's webpack-dev-server in different environments:
+
+#### `npm run dev`
+
+This command runs the client against the Mozilla dev cluster. If you're just doing frontend development on the main fork of Hubs, this is probably the command you should be using.
+
+> Note: When using this command, the client will use a default configuration with all features enabled.
+
+#### `npm start`
+
+This command requires you to be logged into a Hubs Cloud instance. You can login using `npm run login`, you will need an admin account on the server to be able to use this command.
+
+> Note: When using this command, the client will pull the client configuration from the Hubs Cloud instance. So you will have the same settings as you do in the admin panel.
+
+#### `npm run local`
+
+This command runs against local services. You'll use this if you are running an instance of Reticulum locally. More info on how to run Reticulum locally is located [here](https://github.com/mozilla/reticulum#run-hubs-against-a-local-reticulum-instance).
+
+> Note: When using this command, the client will use a default configuration with all features enabled.
+
+### 3. Navigate To The Client Page
+
+Once the server is running you can navigate to:
+
+https://localhost:8080
+
+> Note the client runs over https with a self-signed SSL certificate. You'll be presented with a warning the first time you open the page. You can accept the SSL certificate warning and continue onto the site.
+
+You should see the Hubs client landing page. Whenever you make a change to a file in the `hubs/src` directory, the webpage should refresh.
+
+### 4. Modifying The Code
+
+The Hubs client's code is located in the `hubs/src` directory. Hubs is written in javascript. We use Babel for transpilation and support and encourage most modern javascript features. We use Prettier for code formatting and ESLint for linting. Whenever you make a PR our continuous integration servers lint your code. Make sure you set up your editor or run `npm run lint` before you submit your code.
+
+The testing process for Hubs is mostly a manual one. You need to test your changes thoroughly in the client. You also should check that your change runs in the smoke test environment. You can access it at https://localhost:8080/hub.html?hub_id=smoke (It's a pretty weird space... headphones are recommended if you don't want to disturb your co-workers). The smoke test environment contains a variety of media that is all intended to load and run properly. If something looks broken or different with your changes, you may have a regression in your code.
+
+The Hubs team has a more in-depth testing and release process internally, but we don't have any additional testing process for external contributors at this time.
+
+### 5. High Level Project Organization
+
+```
+hubs/
+  admin/ <- The admin panel project directory
+  src/
+    assets/ <- Static assets and stylesheets, loaded by Webpack
+    components/ <- AFrame Components
+    loaders/ <- Hubs' custom Three.js loaders
+    materials/ <- Hubs' custom Three.js materials
+    react-components/ <- All of the UI components for the Hubs website, HUD, etc.
+    storage/ <- Central state stores for the user's account and media
+    systems/ <- AFrame Systems
+      userinput/ <- Files associated with the user-input system. See the userinput.md file for more details
+      hubs-systems.js <- Where we register systems of our own design pattern that are guaranteed to run in a predefined order.
+    utils/ <- Assorted modules of utility functions
+    vendor/ <- Third Party vendor code
+    workers/ <- WebWorker entry points
+    avatar.html <- Avatar Page html template
+    avatar.js <- Avatar Page js entry point
+    gltf-component-mappings.js <- Where we register custom glTF components that are inflated when loading glTF scenes, avatars, and objects.
+    hub.html <- Hub Page html template
+    hub.js <- Hub Page js entry point
+    index.html <- Landing Page html template
+    index.js <- Landing Page js entry point
+    link.html <- Short Link Page html template
+    link.js <- Link Page js entry point
+    network-schemas.js
+    scene.html <- Scene Page html template
+    scene.js <- Scene Page js entry point
+```
