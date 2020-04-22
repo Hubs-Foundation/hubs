@@ -1,54 +1,71 @@
+import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../utils/three-utils";
 import classNames from "classnames";
-import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/client-info-dialog.scss";
 import rootStyles from "../assets/stylesheets/ui-root.scss";
-import objectInfoDialogStyles from "../assets/stylesheets/object-info-dialog.scss";
+import oStyles from "../assets/stylesheets/object-info-dialog.scss";
 import { FormattedMessage } from "react-intl";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
+import { faCircle } from "@fortawesome/free-solid-svg-icons/faCircle";
+import { faMapPin } from "@fortawesome/free-solid-svg-icons/faMapPin";
+import { faTrashAlt } from "@fortawesome/free-solid-svg-icons/faTrashAlt";
+import { faStreetView } from "@fortawesome/free-solid-svg-icons/faStreetView";
+import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import { mediaSort } from "../utils/media-sorting.js";
-import circle from "../assets/images/circle.png";
-import smallCircle from "../assets/images/small-circle.png";
-import chevronLeft from "../assets/images/chevron-left.png";
-import chevronRight from "../assets/images/chevron-right.png";
-import remove from "../assets/images/remove.png";
-import unpin from "../assets/images/unpin.png";
-import pin from "../assets/images/pin.png";
-import goTo from "../assets/images/goto.png";
 
-function actionBarItem(ariaLabel, onClickHandler, backgroundImageSrc, foregroundImageSrc, messageId) {
-  return (
-    <div className={objectInfoDialogStyles.actionBarItem}>
-      <button
-        className={classNames({
-          [objectInfoDialogStyles.noDefaultButtonStyle]: true,
-          [objectInfoDialogStyles.flex]: true
-        })}
-        aria-label={ariaLabel}
-        onClick={onClickHandler}
-      >
-        <div className={objectInfoDialogStyles.imageStack}>
-          {backgroundImageSrc ? <img className={objectInfoDialogStyles.stackedImage} src={backgroundImageSrc} /> : null}
-          {foregroundImageSrc ? <img className={objectInfoDialogStyles.stackedImage} src={foregroundImageSrc} /> : null}
-        </div>
-      </button>
-      {messageId && (
-        <div className={objectInfoDialogStyles.subtitle}>
-          <FormattedMessage id={messageId} />
-        </div>
-      )}
-    </div>
-  );
+class ActionBarIcon extends Component {
+  static propTypes = {
+    icon: PropTypes.object,
+    size: PropTypes.string,
+    color: PropTypes.string
+  };
+  render() {
+    return (
+      <i className={oStyles.stackedImage}>
+        <FontAwesomeIcon icon={this.props.icon} className={classNames(this.props.size, this.props.color)} />
+      </i>
+    );
+  }
 }
 
-function actionBarItemPlaceholder(showCircle) {
-  return actionBarItem("", () => {}, showCircle ? circle : null);
+class ActionBarItem extends Component {
+  static propTypes = {
+    ariaLabel: PropTypes.string,
+    onClick: PropTypes.func,
+    messageId: PropTypes.string,
+    children: PropTypes.node.isRequired
+  };
+  render() {
+    return (
+      <div className={oStyles.actionBarItem}>
+        <button
+          className={classNames({
+            [oStyles.noDefaultButtonStyle]: true,
+            [oStyles.flex]: true
+          })}
+          aria-label={this.props.ariaLabel}
+          onClick={this.props.onClick}
+        >
+          <div className={oStyles.imageStack}>{this.props.children}</div>
+        </button>
+        {this.props.messageId && (
+          <div className={oStyles.subtitle}>
+            <FormattedMessage id={this.props.messageId} />
+          </div>
+        )}
+      </div>
+    );
+  }
+}
+
+function ActionBarItemPlaceholder() {
+  return <div className={oStyles.actionBarItem} />;
 }
 
 let uiRoot;
@@ -77,7 +94,9 @@ export default class ObjectInfoDialog extends Component {
     this.viewingCamera = document.getElementById("viewing-camera");
     this.pin = this.pin.bind(this);
     this.unpin = this.unpin.bind(this);
-    this.props.scene.addEventListener("uninspect", this.props.onClose);
+    this.props.scene.addEventListener("uninspect", () => {
+      this.props.onClose();
+    });
     const cameraSystem = this.props.scene.systems["hubs-systems"].cameraSystem;
     this.setState({ enableLights: cameraSystem.enableLights });
     this.updateMediaEntities();
@@ -204,42 +223,72 @@ export default class ObjectInfoDialog extends Component {
     return window.innerWidth < 450 || window.innerHeight < 800 ? (
       <div className={rootStyles.uiDialog}>
         <div className={classNames({ [rootStyles.uiDialogBoxContents]: true, [rootStyles.uiInteractive]: true })}>
-          <div className={objectInfoDialogStyles.topBar}>
+          <div className={oStyles.topBar}>
             <button
               aria-label={`Close object info panel`}
               autoFocus
               className={classNames({
-                [objectInfoDialogStyles.collapseButton]: true,
-                [objectInfoDialogStyles.noDefaultButtonStyle]: true
+                [oStyles.collapseButton]: true,
+                [oStyles.noDefaultButtonStyle]: true
               })}
               onClick={onClose}
             >
               <i>
-                <FontAwesomeIcon icon={faTimes} />
+                <FontAwesomeIcon className={classNames(oStyles.s24x24, oStyles.panelWidgetColor)} icon={faTimes} />
               </i>
             </button>
-            <div className={objectInfoDialogStyles.openLink}>
-              <a className={rootStyles.linkText} href={this.props.src} target="_blank" rel="noopener noreferrer">
+            <div className={oStyles.openLink}>
+              <a className={oStyles.bigLinkText} href={this.props.src} target="_blank" rel="noopener noreferrer">
                 <FormattedMessage id={`object-info.open-link`} />
               </a>
             </div>
           </div>
-          <div className={objectInfoDialogStyles.actionBar}>
-            {showNavigationButtons
-              ? actionBarItem("Previous Object", this.navigatePrev, smallCircle, chevronLeft)
-              : actionBarItemPlaceholder(false)}
-            {showGoToButton
-              ? actionBarItem("Go To", this.enqueueWaypointTravel, circle, goTo, "object-info.waypoint")
-              : actionBarItemPlaceholder(false)}
-            {showPinButton ? actionBarItem("Pin", this.pin, circle, pin, "object-info.pin-button") : null}
-            {showUnpinButton ? actionBarItem("Unpin", this.unpin, circle, unpin, "object-info.unpin-button") : null}
-            {!showPinButton && !showUnpinButton ? actionBarItemPlaceholder(false) : null}
-            {showRemoveButton
-              ? actionBarItem("Remove", this.remove.bind(this), circle, remove, "object-info.remove-button")
-              : actionBarItemPlaceholder(false)}
-            {showNavigationButtons
-              ? actionBarItem("Next Object", this.navigateNext, smallCircle, chevronRight)
-              : actionBarItemPlaceholder(false)}
+          <div className={oStyles.actionBar}>
+            {showNavigationButtons ? (
+              <ActionBarItem ariaLabel="Previous Object" onClick={this.navigatePrev}>
+                <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} />
+                <ActionBarIcon icon={faChevronLeft} size={oStyles.s16x16} color={oStyles.iconFgColor} />
+              </ActionBarItem>
+            ) : (
+              ActionBarItemPlaceholder()
+            )}
+            {showGoToButton ? (
+              <ActionBarItem ariaLabel="Go To" onClick={this.enqueueWaypointTravel} messageId="object-info.waypoint">
+                <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} />
+                <ActionBarIcon icon={faStreetView} size={oStyles.s30x30} color={oStyles.iconFgColor} />
+              </ActionBarItem>
+            ) : (
+              ActionBarItemPlaceholder()
+            )}
+            {showPinButton ? (
+              <ActionBarItem ariaLabel="Pin" onClick={this.pin} messageId="object-info.pin-button">
+                <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} />
+                <ActionBarIcon icon={faMapPin} size={oStyles.s32x32} color={oStyles.iconFgColor} />
+              </ActionBarItem>
+            ) : showUnpinButton ? (
+              <ActionBarItem ariaLabel="Unpin" onClick={this.unpin} messageId="object-info.unpin-button">
+                <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} />
+                <ActionBarIcon icon={faMapPin} size={oStyles.s32x32} color={oStyles.iconFgColor} />
+              </ActionBarItem>
+            ) : (
+              ActionBarItemPlaceholder()
+            )}
+            {showRemoveButton ? (
+              <ActionBarItem ariaLabel="Remove" onClick={this.remove.bind(this)} messageId="object-info.remove-button">
+                <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} />
+                <ActionBarIcon icon={faTrashAlt} size={oStyles.s30x30} color={oStyles.iconFgColor} />
+              </ActionBarItem>
+            ) : (
+              ActionBarItemPlaceholder()
+            )}
+            {showNavigationButtons ? (
+              <ActionBarItem ariaLabel="Next Object" onClick={this.navigateNext}>
+                <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} />
+                <ActionBarIcon icon={faChevronRight} size={oStyles.s16x16} color={oStyles.iconFgColor} />
+              </ActionBarItem>
+            ) : (
+              ActionBarItemPlaceholder()
+            )}
           </div>
         </div>
       </div>

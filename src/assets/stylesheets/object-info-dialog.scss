@@ -1,13 +1,19 @@
 @import 'shared.scss';
 
 :local(.top-bar){
-  margin: 12px 16px 8px 16px;
+  margin: 12px 16px 16px 16px;
 }
 
 :local(.open-link){
   display: flex;
   align-content: center;
   justify-content: center;
+}
+:local(.big-link-text) {
+  @extend %default-font;
+  color: var(--link-text-color);
+  font-size: 20px;
+  font-weight: bold;
 }
 
 :local(.action-bar) {
@@ -46,6 +52,54 @@
 
 :local(.stacked-image){
   position: absolute;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+:local(.stacked-icon-small){
+  width: 32px !important;
+  height: 32px !important;
+}
+
+:local(.s16x16) {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+:local(.s24x24) {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+:local(.s30x30) {
+  width: 30px !important;
+  height: 30px !important;
+}
+
+:local(.s32x32) {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+:local(.s48x48){
+  width: 48px !important;
+  height: 48px !important;
+}
+
+:local(.icon-fg-color) {
+  color: $action-label-color;
+}
+:local(.icon-bg-color){
+  color: var(--action-button-secondary-background);
+}
+:local(.panel-widget-color){
+  color: var(--panel-widget-color);
+}
+:local(.link-text-color){
+  color: var(--link-text-color);
 }
 
 :local(.subtitle) {
@@ -58,10 +112,6 @@
 :local(.collapse-button) {
   color: var(--panel-widget-color);
   position: absolute;
-  top: 12px;
+  top: 16px;
   left: 16px;
-
-  i {
-    font-size: 20px;
-  }
 }
