@@ -66,4 +66,90 @@ We believe in the power of community (that's why we're building this, after all!
 
 Getting set up to work on the Hubs client main fork is a little different than working on a custom client for a Hubs Cloud deployment. If you're looking to set up your development environment for your own Hubs Cloud deployment see [this guide](https://hubs.mozilla.com/docs/hubs-cloud-custom-clients.html).
 
+### 0. Dependencies
 
+[Install NodeJS](https://nodejs.org) if you haven't already. We recommend version 12 or above.
+
+### 1. Setting up the Repository
+
+Clone the Hubs repository and install the npm dependencies.
+
+```bash
+git clone https://github.com/mozilla/hubs.git
+cd hubs
+npm ci
+```
+
+> Note: We recommend using `npm ci` instead of `npm install` so that you always use the versions of modules in the `package-lock.json` file.
+
+### 2. Start Webpack Dev Server
+
+There are 3 different commands for starting up the client's webpack-dev-server in different environments:
+
+#### `npm run dev`
+
+This command runs the client against the Mozilla dev cluster. If you're just doing frontend development on the main fork of Hubs, this is probably the command you should be using.
+
+> Note: When using this command, the client will use a default configuration with all features enabled.
+
+#### `npm start`
+
+This command requires you to be logged into a Hubs Cloud instance. You can login using `npm run login`, you will need an admin account on the server to be able to use this command.
+
+> Note: When using this command, the client will pull the client configuration from the Hubs Cloud instance. So you will have the same settings as you do in the admin panel.
+
+#### `npm run local`
+
+This command runs against local services. You'll use this if you are running an instance of Reticulum locally. More info on how to run Reticulum locally is located [here](https://github.com/mozilla/reticulum#run-hubs-against-a-local-reticulum-instance).
+
+> Note: When using this command, the client will use a default configuration with all features enabled.
+
+### 3. Navigate To The Client Page
+
+Once the server is running you can navigate to:
+
+https://localhost:8080
+
+> Note the client runs over https with a self-signed SSL certificate. You'll be presented with a warning the first time you open the page. You can accept the SSL certificate warning and continue onto the site.
+
+You should see the Hubs client landing page. Whenever you make a change to a file in the `hubs/src` directory, the webpage should refresh.
+
+### 4. Modifying The Code
+
+The Hubs client's code is located in the `hubs/src` directory. Hubs is written in javascript. We use Babel for transpilation and support and encourage most modern javascript features. We use Prettier for code formatting and ESLint for linting. Whenever you make a PR our continuous integration servers lint your code. Make sure you set up your editor or run `npm run lint` before you submit your code.
+
+The testing process for Hubs is mostly a manual one. You need to test your changes thoroughly in the client. You also should check that your change runs in the smoke test environment. You can access it at https://localhost:8080/hub.html?hub_id=smoke (It's a pretty weird space... headphones are recommended if you don't want to disturb your co-workers). The smoke test environment contains a variety of media that is all intended to load and run properly. If something looks broken or different with your changes, you may have a regression in your code.
+
+The Hubs team has a more in-depth testing and release process internally, but we don't have any additional testing process for external contributors at this time.
+
+### 5. High Level Project Organization
+
+```
+hubs/
+  admin/ <- The admin panel project directory
+  src/
+    assets/ <- Static assets and stylesheets, loaded by Webpack
+    components/ <- AFrame Components
+    loaders/ <- Hubs' custom Three.js loaders
+    materials/ <- Hubs' custom Three.js materials
+    react-components/ <- All of the UI components for the Hubs website, HUD, etc.
+    storage/ <- Central state stores for the user's account and media
+    systems/ <- AFrame Systems
+      userinput/ <- Files associated with the user-input system. See the userinput.md file for more details
+      hubs-systems.js <- Where we register systems of our own design pattern that are guaranteed to run in a predefined order.
+    utils/ <- Assorted modules of utility functions
+    vendor/ <- Third Party vendor code
+    workers/ <- WebWorker entry points
+    avatar.html <- Avatar Page html template
+    avatar.js <- Avatar Page js entry point
+    gltf-component-mappings.js <- Where we register custom glTF components that are inflated when loading glTF scenes, avatars, and objects.
+    hub.html <- Hub Page html template
+    hub.js <- Hub Page js entry point
+    index.html <- Landing Page html template
+    index.js <- Landing Page js entry point
+    link.html <- Short Link Page html template
+    link.js <- Link Page js entry point
+    network-schemas.js
+    scene.html <- Scene Page html template
+    scene.js <- Scene Page js entry point
+```
