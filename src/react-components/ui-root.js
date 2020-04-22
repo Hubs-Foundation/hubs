@@ -276,7 +276,12 @@ class UIRoot extends Component {
   };
 
   onIdleDetected = () => {
-    if (this.props.disableAutoExitOnIdle || this.state.isStreaming) return;
+    if (
+      this.props.disableAutoExitOnIdle ||
+      this.state.isStreaming ||
+      this.props.store.state.preferences["disableIdleDetection"]
+    )
+      return;
     this.startAutoExitTimer("autoexit.idle_subtitle");
   };
 
