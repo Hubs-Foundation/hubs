@@ -1077,13 +1077,18 @@ class UIRoot extends Component {
           ) : (
             <span>{this.props.hub.name}</span>
           )}
-          <button onClick={() => this.setState({ watching: true })} className={entryStyles.collapseButton}>
+          <button
+            aria-label="Close room entry panel and spectate from lobby"
+            onClick={() => this.setState({ watching: true })}
+            className={entryStyles.collapseButton}
+          >
             <i>
               <FontAwesomeIcon icon={faTimes} />
             </i>
           </button>
 
           <button
+            aria-label="Toggle Favorited"
             onClick={() => this.toggleFavorited()}
             className={classNames({
               [entryStyles.entryFavoriteButton]: true,
@@ -2149,6 +2154,7 @@ class UIRoot extends Component {
 
                 {!streaming && (
                   <button
+                    aria-label="Toggle Favorited"
                     onClick={() => this.toggleFavorited()}
                     className={classNames({
                       [entryStyles.favorited]: this.isFavorited(),

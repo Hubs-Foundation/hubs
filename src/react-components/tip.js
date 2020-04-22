@@ -76,6 +76,7 @@ export default class Tip extends Component {
     return (
       <div className={classNames(rootStyles)}>
         <button
+          aria-label="Close"
           className={styles.tipCancel}
           onClick={() => (this.props.onClose ? this.props.onClose(tip, tipRegion) : handleTipClose(tip, tipRegion))}
         >
