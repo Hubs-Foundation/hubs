@@ -283,9 +283,9 @@
                     floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
                     set-yxz-order
                     matrix-auto-update
-                    position-at-box-shape-border__freeze="target:.freeze-menu;"
-                    position-at-box-shape-border__freeze-unprivileged="target:.freeze-unprivileged-menu;"
                     hoverable-visuals
+                    position-at-border__freeze="target:.freeze-menu"
+                    position-at-border__freeze-unprivileged="target:.freeze-unprivileged-menu"
                     listed-media
                     audio-source="type: media"
                 >
@@ -522,7 +522,7 @@
                     floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
                     set-yxz-order
                     matrix-auto-update
-                    position-at-box-shape-border__freeze="target:.freeze-menu;"
+                    position-at-border__freeze="target:.freeze-menu;"
                     hoverable-visuals
                 >
                     <a-entity
@@ -580,7 +580,7 @@
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
                     action-to-remove__pen="path: /actions/pen/remove;"
-                    position-at-box-shape-border="target:.pen-menu"
+                    position-at-border="target:.pen-menu"
                     set-yxz-order
                 >
                     <a-entity
@@ -615,7 +615,7 @@
                     owned-object-limiter="counter: #camera-counter"
                     set-unowned-body-kinematic
                     scalable-when-grabbed
-                    position-at-box-shape-border__freeze="target: .camera-menu"
+                    position-at-border="target:.camera-menu; isFlat: true"
                     set-yxz-order
                 >
                     <a-entity class="ui interactable-ui camera-snap-menu" visible-if-permitted="spawn_camera">
