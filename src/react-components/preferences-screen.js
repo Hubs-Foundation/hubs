@@ -47,7 +47,16 @@ export default class PreferencesScreen extends Component {
       );
     };
     // TODO: Add search text field and sort rows by fuzzy search
-    const general = [
+    let useThisCamera =
+      {
+        key: "useThisCamera",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+        options: [{ value: "user", text: "User-Facing" }, { value: "environment", text: "Environment" }, { value: "default", text: "Default" }],
+        defaultString: "default"
+      };
+
+    const originalGeneral = [
+      useThisCamera,
       { key: "muteMicOnEntry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
@@ -83,7 +92,24 @@ export default class PreferencesScreen extends Component {
       { key: "disableBackwardsMovement", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "disableStrafing", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "disableTeleporter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
-    ].map(preferenceListItem);
+    ];
+
+    // add camera choices to useThisCamera's options
+    navigator.mediaDevices.enumerateDevices()
+    .then(function(devices) {
+      devices.forEach(function(device) {
+        console.log(device.kind + ": " + device.label +
+                    " id = " + device.deviceId);
+        if (device.kind == "videoinput") {
+          useThisCamera.options.push({value: device.deviceId, text: device.label});
+        }
+      });
+    })
+    .catch(function(err) {
+      console.log(err.name + ": " + err.message);
+    });
+
+    const general = originalGeneral.map(preferenceListItem);
 
     const touchscreen = [
       { key: "enableOnScreenJoystickLeft", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },

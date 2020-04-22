@@ -430,13 +430,29 @@ export default class SceneEntryManager {
     };
 
     this.scene.addEventListener("action_share_camera", () => {
-      shareVideoMediaStream({
+      let constraints = {
         video: {
-          mediaSource: "camera",
           width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
           frameRate: 30
         }
-      });
+      };
+      // check preferences
+      const store = window.APP.store;
+      switch (store.state.preferences.useThisCamera) {
+      case 'user':
+        constraints.video.facingMode = "user";
+        break;
+      case 'environment':
+        constraints.video.facingMode = "environment";
+        break;
+      case 'default':
+        constraints.video.mediaSource = "camera";
+        break;
+      default:
+        constraints.video.deviceId = store.state.preferences.useThisCamera;
+        break;
+      }
+      shareVideoMediaStream(constraints);
     });
 
     this.scene.addEventListener("action_share_screen", () => {

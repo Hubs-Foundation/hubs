@@ -66,6 +66,7 @@ export const SCHEMA = {
       type: "object",
       additionalProperties: false,
       properties: {
+        useThisCamera: { type: "string" },
         muteMicOnEntry: { type: "bool" },
         enableOnScreenJoystickLeft: { type: "bool" },
         enableOnScreenJoystickRight: { type: "bool" },
