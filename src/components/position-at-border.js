@@ -77,9 +77,13 @@ AFRAME.registerComponent("position-at-border", {
   doInit() {
     this.didInit = true;
     this.cam = document.getElementById("viewing-camera").object3D;
+    if (!this.data.target){
+      console.error("No target for position-at-border on element:", this.el);
+      return;
+    }
     const targetEl = this.el.querySelector(this.data.target);
     if (!targetEl) {
-      console.error(`could not find ${this.data.target} underneath element:`, this.el);
+      console.error(`Could not find ${this.data.target} underneath element:`, this.el);
       return;
     }
     if (this.data.animate) {
