@@ -1004,10 +1004,10 @@ class UIRoot extends Component {
       );
     } else {
       const reason = this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
-      const turnUrl = new URL(document.location.toString());
-      const turnParams = new URLSearchParams(turnUrl.search);
-      turnParams.set("force_turn", true);
-      turnUrl.search = turnParams.toString();
+      const tcpUrl = new URL(document.location.toString());
+      const tcpParams = new URLSearchParams(tcpUrl.search);
+      tcpParams.set("force_tcp", true);
+      tcpUrl.search = tcpParams.toString();
 
       const exitSubtitleId = `exit.subtitle.${reason || "exited"}`;
       subtitle = (
@@ -1016,7 +1016,7 @@ class UIRoot extends Component {
           <p />
           {this.props.roomUnavailableReason === "connect_error" && (
             <div>
-              You can try <a href={turnUrl.toString()}>connecting via TURN</a>, which may work better on some networks.
+              You can try <a href={tcpUrl.toString()}>connecting via TCP</a>, which may work better on some networks.
             </div>
           )}
           {!["left", "disconnected", "scene_error"].includes(this.props.roomUnavailableReason) && (

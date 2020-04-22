@@ -317,6 +317,7 @@ function remountUI(props) {
 
 function setupPeerConnectionConfig(adapter, host, turn) {
   const forceTurn = qs.get("force_turn");
+  const forceTcp = qs.get("force_tcp");
   const peerConnectionConfig = {};
 
   if (turn && turn.enabled) {
@@ -324,7 +325,9 @@ function setupPeerConnectionConfig(adapter, host, turn) {
 
     turn.transports.forEach(ts => {
       // Try both TURN DTLS and TCP/TLS
-      iceServers.push({ urls: `turns:${host}:${ts.port}`, username: turn.username, credential: turn.credential });
+      if (!forceTcp) {
+        iceServers.push({ urls: `turns:${host}:${ts.port}`, username: turn.username, credential: turn.credential });
+      }
 
       iceServers.push({
         urls: `turns:${host}:${ts.port}?transport=tcp`,
@@ -337,7 +340,7 @@ function setupPeerConnectionConfig(adapter, host, turn) {
 
     peerConnectionConfig.iceServers = iceServers;
 
-    if (forceTurn) {
+    if (forceTurn || forceTcp) {
       peerConnectionConfig.iceTransportPolicy = "relay";
     }
   } else {
