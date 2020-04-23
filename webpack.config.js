@@ -10,6 +10,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const TOML = require("@iarna/toml");
 const fetch = require("node-fetch");
+const packageLock = require("./package-lock.json");
 
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
@@ -59,21 +60,38 @@ function createHTTPSConfig() {
   }
 }
 
-function matchRegex({ include, exclude }) {
-  return (module, chunks) => {
-    if (
-      module.nameForCondition &&
-      include.test(module.nameForCondition()) &&
-      !exclude.test(module.nameForCondition())
-    ) {
-      return true;
-    }
-    for (const chunk of chunks) {
-      if (chunk.name && include.test(chunk.name) && !exclude.test(chunk.name)) {
-        return true;
+function getModuleDependencies(moduleName) {
+  const deps = packageLock.dependencies;
+  const arr = [];
+
+  const gatherDeps = name => {
+    arr.push(path.join(__dirname, "node_modules", name) + path.sep);
+
+    const moduleDef = deps[name];
+
+    if (moduleDef && moduleDef.requires) {
+      for (const requiredModuleName in moduleDef.requires) {
+        gatherDeps(requiredModuleName);
       }
     }
-    return false;
+  };
+
+  gatherDeps(moduleName);
+
+  return arr;
+}
+
+function deepModuleDependencyTest(modulesArr) {
+  const deps = modulesArr.flatMap(getModuleDependencies);
+
+  return module => {
+    if (!module.nameForCondition) {
+      return false;
+    }
+
+    const name = module.nameForCondition();
+
+    return deps.some(depName => name.startsWith(depName));
   };
 }
 
@@ -242,6 +260,7 @@ module.exports = async (env, argv) => {
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
+      inline: !env.bundleAnalyzer,
       before: function(app) {
         // be flexible with people accessing via a local reticulum on another port
         app.use(cors({ origin: /hubs\.local(:\d*)?$/ }));
@@ -350,73 +369,95 @@ module.exports = async (env, argv) => {
 
     optimization: {
       splitChunks: {
+        maxAsyncRequests: 10,
+        maxInitialRequests: 10,
         cacheGroups: {
-          vendors: {
-            test: matchRegex({
-              include: /([\\/]node_modules[\\/]|[\\/]vendor[\\/])/,
-              exclude: /[\\/]node_modules[\\/]markdown-it[\\/]/
-            }),
-            priority: 50,
-            name: "vendor",
-            chunks: "all"
-          },
           engine: {
-            test: /([\\/]src[\\/]workers|[\\/]node_modules[\\/](aframe|cannon|three))/,
-            priority: 100,
+            test: deepModuleDependencyTest(["aframe", "three"]),
             name: "engine",
-            chunks: "all"
+            chunks: "initial",
+            priority: 40
+          },
+          frontend: {
+            test: deepModuleDependencyTest([
+              "react",
+              "react-dom",
+              "prop-types",
+              "raven-js",
+              "react-intl",
+              "classnames",
+              "react-router",
+              "@fortawesome/fontawesome-svg-core",
+              "@fortawesome/free-solid-svg-icons",
+              "@fortawesome/react-fontawesome"
+            ]),
+            name: "frontend",
+            chunks: "initial",
+            priority: 30
+          },
+          store: {
+            test: deepModuleDependencyTest(["phoenix", "jsonschema", "event-target-shim", "jwt-decode", "js-cookie"]),
+            name: "store",
+            chunks: "initial",
+            priority: 20
+          },
+          hubVendors: {
+            test: /[\\/]node_modules[\\/]/,
+            name: "hub-vendors",
+            chunks: chunk => chunk.name === "hub",
+            priority: 10
           }
         }
       }
     },
     plugins: [
       new BundleAnalyzerPlugin({
-        analyzerMode: env && env.BUNDLE_ANALYZER ? "server" : "disabled"
+        analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled"
       }),
       // Each output page needs a HTMLWebpackPlugin entry
       new HTMLWebpackPlugin({
         filename: "index.html",
         template: path.join(__dirname, "src", "index.html"),
-        chunks: ["vendor", "index"]
+        chunks: ["index"]
       }),
       new HTMLWebpackPlugin({
         filename: "hub.html",
         template: path.join(__dirname, "src", "hub.html"),
-        chunks: ["vendor", "engine", "hub"],
+        chunks: ["hub"],
         inject: "head"
       }),
       new HTMLWebpackPlugin({
         filename: "scene.html",
         template: path.join(__dirname, "src", "scene.html"),
-        chunks: ["vendor", "engine", "scene"],
+        chunks: ["scene"],
         inject: "head"
       }),
       new HTMLWebpackPlugin({
         filename: "avatar.html",
         template: path.join(__dirname, "src", "avatar.html"),
-        chunks: ["vendor", "engine", "avatar"],
+        chunks: ["avatar"],
         inject: "head"
       }),
       new HTMLWebpackPlugin({
         filename: "link.html",
         template: path.join(__dirname, "src", "link.html"),
-        chunks: ["vendor", "engine", "link"]
+        chunks: ["link"]
       }),
       new HTMLWebpackPlugin({
         filename: "discord.html",
         template: path.join(__dirname, "src", "discord.html"),
-        chunks: ["vendor", "discord"]
+        chunks: ["discord"]
       }),
       new HTMLWebpackPlugin({
         filename: "whats-new.html",
         template: path.join(__dirname, "src", "whats-new.html"),
-        chunks: ["vendor", "whats-new"],
+        chunks: ["whats-new"],
         inject: "head"
       }),
       new HTMLWebpackPlugin({
         filename: "cloud.html",
         template: path.join(__dirname, "src", "cloud.html"),
-        chunks: ["vendor", "cloud"],
+        chunks: ["cloud"],
         inject: "head"
       }),
       new CopyWebpackPlugin([
