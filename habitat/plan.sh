@@ -32,17 +32,6 @@ do_build() {
 
   npm run build
 
-  # admin
-  cd admin
-  npm ci --verbose --no-progress
-  npm rebuild node-sass # HACK sometimes node-sass build fails
-  npm rebuild node-sass # HACK sometimes node-sass build fails
-  npm rebuild node-sass # HACK sometimes node-sass build fails
-
-  npm run build
-  cp -R dist/* ../dist # it will get packaged with the rest of the stuff, below
-  cd ..
-
   mkdir -p dist/pages
   mv dist/*.html dist/pages
   mv dist/hub.service.js dist/pages
