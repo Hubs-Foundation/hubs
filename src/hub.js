@@ -1284,8 +1284,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             entryDisallowed: !hubChannel.canEnterRoom(uiProps.hub)
           });
 
-          const userIds = Object.getOwnPropertyNames(presence.state);
-          const occupantCount = userIds.length;
+          const sessionIds = Object.getOwnPropertyNames(presence.state);
+          const occupantCount = sessionIds.length;
           vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
 
           if (occupantCount > 1) {
@@ -1296,10 +1296,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           if (NAF.connection.adapter) {
             requestedOccupants.length = 0;
-            for (let i = 0; i < userIds.length; i++) {
-              const userId = userIds[i];
-              if (userId !== NAF.clientId && presence.state[userId].metas[0].presence === "room") {
-                requestedOccupants.push(userId);
+            for (let i = 0; i < sessionIds.length; i++) {
+              const sessionId = sessionIds[i];
+              if (sessionId !== NAF.clientId && presence.state[sessionId].metas[0].presence === "room") {
+                requestedOccupants.push(sessionId);
               }
             }
 
