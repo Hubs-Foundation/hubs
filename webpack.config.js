@@ -146,6 +146,7 @@ async function fetchAppConfigAndEnvironmentVars() {
 
   const { shortlink_domain, cors_proxy_server, thumbnail_server, non_cors_proxy_domains } = hubsConfigs.general;
 
+  process.env.RETICULUM_SERVER = host;
   process.env.SHORTLINK_DOMAIN = shortlink_domain;
   process.env.CORS_PROXY_SERVER = cors_proxy_server;
   process.env.THUMBNAIL_SERVER = thumbnail_server;
@@ -200,8 +201,7 @@ module.exports = async (env, argv) => {
   // In production, the environment variables are defined in CI or loaded from ita and
   // the app config is injected into the head of the page by Reticulum.
 
-  const defaultHostName = "hubs.local";
-  const host = process.env.HOST_IP || defaultHostName;
+  const host = process.env.HOST_IP || env.localDev ? "hubs.local" : "localhost";
 
   // Remove comments from .babelrc
   const babelConfig = JSON.parse(
@@ -238,7 +238,7 @@ module.exports = async (env, argv) => {
       host: "0.0.0.0",
       public: `${host}:8080`,
       useLocalIp: true,
-      allowedHosts: [host],
+      allowedHosts: [host, "hubs.local"],
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
