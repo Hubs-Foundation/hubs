@@ -2,7 +2,7 @@ AFRAME.registerComponent("hover-menu", {
   multiple: true,
   schema: {
     template: { type: "selector" },
-    dirs: { type: "array" },
+    isFlat: { default: true },
     dim: { default: true },
     withPermission: { type: "string" }
   },
@@ -31,9 +31,9 @@ AFRAME.registerComponent("hover-menu", {
         const enableRepositioning = !isMirroredMedia;
 
         if (enableRepositioning) {
-          this.el.setAttribute("position-at-box-shape-border", {
+          this.el.setAttribute("position-at-border", {
             target: ".hover-container",
-            dirs: this.data.dirs,
+            isFlat: this.data.isFlat,
             animate: false,
             scale: false
           });

@@ -150,7 +150,12 @@ export default class ObjectInfoDialog extends Component {
       <DialogContainer noOverlay={true} wide={true} {...this.props}>
         <div className={styles.roomInfo}>
           <div className={styles.titleAndClose}>
-            <button autoFocus className={entryStyles.collapseButton} onClick={onClose}>
+            <button
+              aria-label={`Close object info panel`}
+              autoFocus
+              className={entryStyles.collapseButton}
+              onClick={onClose}
+            >
               <i>
                 <FontAwesomeIcon icon={faTimes} />
               </i>
@@ -162,7 +167,7 @@ export default class ObjectInfoDialog extends Component {
           <div className={styles.actionButtonSections}>
             <div className={styles.leftActionButtons}>
               {this.state.mediaEntities.length > 1 && (
-                <button className={styles.navigationButton} onClick={this.navigatePrev}>
+                <button aria-label="Previous Object" className={styles.navigationButton} onClick={this.navigatePrev}>
                   <i>
                     <FontAwesomeIcon icon={faChevronLeft} />
                   </i>
@@ -203,7 +208,7 @@ export default class ObjectInfoDialog extends Component {
             </div>
             <div className={styles.rightActionButtons}>
               {this.state.mediaEntities.length > 1 && (
-                <button className={styles.navigationButton} onClick={this.navigateNext}>
+                <button aria-label="Next Object" className={styles.navigationButton} onClick={this.navigateNext}>
                   <i>
                     <FontAwesomeIcon icon={faChevronRight} />
                   </i>

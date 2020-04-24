@@ -72,6 +72,7 @@ export const SCHEMA = {
         enableOnScreenJoystickRight: { type: "bool" },
         onlyShowNametagsInFreeze: { type: "bool" },
         allowMultipleHubsInstances: { type: "bool" },
+        disableIdleDetection: { type: "bool" },
         maxResolutionWidth: { type: "number" },
         maxResolutionHeight: { type: "number" },
         globalVoiceVolume: { type: "number" },

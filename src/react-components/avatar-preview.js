@@ -77,7 +77,8 @@ class AvatarPreview extends Component {
 
     this.camera = new THREE.PerspectiveCamera(55, this.canvas.clientWidth / this.canvas.clientHeight, 0.1, 1000);
     this.controls = new THREE.OrbitControls(this.camera, this.canvas);
-    this.controls.enablePan = false;
+    this.controls.screenSpacePanning = true;
+    this.controls.enableKeys = true;
 
     const light = new THREE.DirectionalLight(0xf7f6ef, 1);
     light.position.set(0, 10, 10);
@@ -244,10 +245,25 @@ class AvatarPreview extends Component {
       this.idleAnimationAction = action;
     }
 
+    gltf.scene.traverse(node => {
+      // Camera in preview is pretty tight, and skinned meshes tend to have poor bounding boxes
+      if (node.isSkinnedMesh) {
+        node.frustumCulled = false;
+      }
+
+      // We delete onUpdate here to opt out of the auto texture cleanup after GPU upload.
+      if (node.material) {
+        const removeOnUpdate = p => node.material[p] && delete node.material[p].onUpdate;
+        TEXTURE_PROPS["base_map"].forEach(removeOnUpdate);
+        TEXTURE_PROPS["emissive_map"].forEach(removeOnUpdate);
+        TEXTURE_PROPS["normal_map"].forEach(removeOnUpdate);
+        TEXTURE_PROPS["orm_map"].forEach(removeOnUpdate);
+      }
+    });
+
     const { material } = this.previewMesh;
     if (material) {
-      // We delete onUpdate here to opt out of the auto texture cleanup after GPU upload.
-      const getImage = p => material[p] && delete material[p].onUpdate && material[p].image;
+      const getImage = p => material[p] && material[p].image;
       this.originalMaps = {
         base_map: TEXTURE_PROPS["base_map"].map(getImage),
         emissive_map: TEXTURE_PROPS["emissive_map"].map(getImage),
@@ -257,6 +273,7 @@ class AvatarPreview extends Component {
 
       await Promise.all([
         this.applyMaps({}, this.props), // Apply initial maps
+        // TODO apply environment map to secondary materials as well
         createDefaultEnvironmentMap().then(t => {
           this.previewMesh.material.envMap = t;
           this.previewMesh.material.needsUpdate = true;
@@ -296,6 +313,8 @@ class AvatarPreview extends Component {
   snapshot = () => {
     return new Promise(resolve => {
       if (this.idleAnimationAction) this.idleAnimationAction.stop();
+      this.snapshotCamera.position.copy(this.camera.position);
+      this.snapshotCamera.rotation.copy(this.camera.rotation);
       this.snapshotRenderer.render(this.scene, this.snapshotCamera);
       this.snapshotCanvas.toBlob(blob => {
         if (this.idleAnimationAction) this.idleAnimationAction.play();
