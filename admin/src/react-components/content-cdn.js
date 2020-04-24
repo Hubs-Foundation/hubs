@@ -40,7 +40,9 @@ const styles = withCommonStyles(() => ({
 }));
 
 const workerScript = (workerDomain, workerInstanceName, assetsDomain) => {
-  return `  const ALLOWED_ORIGINS = ["${document.location.origin}"];
+  return `  const ALLOWED_ORIGINS = ["${
+    document.location.origin
+  }", "https://localhost:8080", "https://localhost:9090", "https://hubs.local:8080", "https://hubs.local:9090"];
   const CORS_PROXY_HOST = "https://${workerInstanceName}-cors-proxy.${workerDomain}";
   const PROXY_HOST = "https://${workerInstanceName}-proxy.${workerDomain}";
   const HUB_HOST = "${document.location.origin}";
@@ -158,7 +160,9 @@ class ContentCDNComponent extends Component {
       try {
         // Need to CORS-proxy the CORS-proxy because CSP will block us otherwise!
         const res = await fetch(
-          `https://${configs.CORS_PROXY_SERVER}/https://${this.state.workerInstanceName}-proxy.${this.state.workerDomain}/hubs/pages/latest/whats-new.html`
+          `https://${configs.CORS_PROXY_SERVER}/https://${this.state.workerInstanceName}-proxy.${
+            this.state.workerDomain
+          }/hubs/pages/latest/whats-new.html`
         );
 
         if (!res.ok) {
@@ -263,14 +267,15 @@ class ContentCDNComponent extends Component {
                 Once enabled, Cloudflare will cache content, reduce latency, and reduce bandwidth used by your server.
               </Typography>
             )}
-            {this.state.provider && this.state.provider !== "arbortect" && (
-              <Typography variant="body2" gutterBottom>
-                Hubs Cloud uses bandwidth from your cloud provider to deliver content.
-                <br />
-                You can reduce your data transfer costs by switching your CDN to Cloudflare, which does not charge for
-                data transfer costs to your users.
-              </Typography>
-            )}
+            {this.state.provider &&
+              this.state.provider !== "arbortect" && (
+                <Typography variant="body2" gutterBottom>
+                  Hubs Cloud uses bandwidth from your cloud provider to deliver content.
+                  <br />
+                  You can reduce your data transfer costs by switching your CDN to Cloudflare, which does not charge for
+                  data transfer costs to your users.
+                </Typography>
+              )}
             <Typography variant="subheading" gutterBottom className={this.props.classes.section}>
               Worker Setup
             </Typography>
@@ -281,16 +286,18 @@ class ContentCDNComponent extends Component {
               </a>
               . As such, you will be using data transfer to send all 3rd party content to your users.
             </Typography>
-            {this.state.provider && this.state.provider !== "arbortect" && (
-              <Typography variant="body1" gutterBottom>
-                Additionally, you will incur data transfer costs for serving avatars, scenes, and other assets.
-              </Typography>
-            )}
-            {this.state.provider && this.state.provider !== "arbortect" && (
-              <Typography variant="body1" gutterBottom>
-                You can minimize this data transfer cost by using a Cloudflare Worker to serve this content:
-              </Typography>
-            )}
+            {this.state.provider &&
+              this.state.provider !== "arbortect" && (
+                <Typography variant="body1" gutterBottom>
+                  Additionally, you will incur data transfer costs for serving avatars, scenes, and other assets.
+                </Typography>
+              )}
+            {this.state.provider &&
+              this.state.provider !== "arbortect" && (
+                <Typography variant="body1" gutterBottom>
+                  You can minimize this data transfer cost by using a Cloudflare Worker to serve this content:
+                </Typography>
+              )}
             <Typography variant="body1" component="div" gutterBottom>
               <ol className={this.props.classes.steps}>
                 <li>
@@ -350,7 +357,9 @@ class ContentCDNComponent extends Component {
                     <li>
                       Verify your workers are working.{" "}
                       <a
-                        href={`https://${this.state.workerInstanceName}-cors-proxy.${this.state.workerDomain}/https://www.mozilla.org`}
+                        href={`https://${this.state.workerInstanceName}-cors-proxy.${
+                          this.state.workerDomain
+                        }/https://www.mozilla.org`}
                         rel="noopener noreferrer"
                         target="_blank"
                       >
@@ -358,7 +367,9 @@ class ContentCDNComponent extends Component {
                       </a>{" "}
                       should show the Mozilla homepage, and&nbsp;
                       <a
-                        href={`https://${this.state.workerInstanceName}-proxy.${this.state.workerDomain}/hubs/pages/latest/whats-new.html`}
+                        href={`https://${this.state.workerInstanceName}-proxy.${
+                          this.state.workerDomain
+                        }/hubs/pages/latest/whats-new.html`}
                         rel="noopener noreferrer"
                         target="_blank"
                       >
