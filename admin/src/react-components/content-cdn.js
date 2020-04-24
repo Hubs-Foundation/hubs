@@ -40,9 +40,7 @@ const styles = withCommonStyles(() => ({
 }));
 
 const workerScript = (workerDomain, workerInstanceName, assetsDomain) => {
-  return `  const ALLOWED_ORIGINS = ["${
-    document.location.origin
-  }", "https://localhost:8080", "https://localhost:9090", "https://hubs.local:8080", "https://hubs.local:9090"];
+  return `  const ALLOWED_ORIGINS = ["${document.location.origin}"];
   const CORS_PROXY_HOST = "https://${workerInstanceName}-cors-proxy.${workerDomain}";
   const PROXY_HOST = "https://${workerInstanceName}-proxy.${workerDomain}";
   const HUB_HOST = "${document.location.origin}";
