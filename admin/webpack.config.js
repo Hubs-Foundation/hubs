@@ -67,7 +67,6 @@ module.exports = (env, argv) => {
   if (env.local) {
     Object.assign(process.env, {
       HOST: "hubs.local",
-      CORS_PROXY_HOST: "hubs-proxy.local",
       RETICULUM_SOCKET_SERVER: "hubs.local",
       CORS_PROXY_SERVER: "hubs-proxy.local:4000",
       NON_CORS_PROXY_DOMAINS: "hubs.local,dev.reticulum.io",
