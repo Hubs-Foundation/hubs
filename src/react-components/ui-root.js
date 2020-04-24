@@ -965,7 +965,7 @@ class UIRoot extends Component {
           Sorry, this room is no longer available.
           <p />
           <IfFeature name="show_terms">
-            A room may be closed if we receive reports that it violates our{" "}
+            A room may be closed by the room owner, or if we receive reports that it violates our{" "}
             <a
               target="_blank"
               rel="noreferrer noopener"
