@@ -93,7 +93,7 @@ THREE.Object3D.prototype.applyMatrix = function() {
 };
 
 // Updates this function to use updateMatrices(). In general our code should prefer calling updateMatrices() directly,
-// patching this for compatability upstream, namely with Box3.expandToObject and Object3D.attach
+// patching this for compatibility upstream, namely with Box3.expandToObject and Object3D.attach
 THREE.Object3D.prototype.updateWorldMatrix = function(updateParents, updateChildren) {
   this.updateMatrices(false, false, !updateParents);
   if (updateChildren) {
