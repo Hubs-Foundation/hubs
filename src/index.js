@@ -21,9 +21,7 @@ const store = new Store();
 window.APP = { store };
 
 const authChannel = new AuthChannel(store);
-let installEvent = null;
 let featuredRooms = null;
-let mountedUI = false;
 let hideHero = true;
 let showAdmin = false;
 let showCreate = false;
@@ -48,7 +46,6 @@ const remountUI = function() {
       showAdmin={showAdmin}
       showCreate={showCreate}
       featuredRooms={featuredRooms}
-      installEvent={installEvent}
     />
   );
 
@@ -68,16 +65,6 @@ const remountUI = function() {
 
   ReactDOM.render(router, document.getElementById("home-root"));
 };
-
-// PWA install prompt
-window.addEventListener("beforeinstallprompt", e => {
-  e.preventDefault();
-  installEvent = e;
-
-  if (mountedUI) {
-    remountUI();
-  }
-});
 
 // Fetch favorite + public rooms and merge, sorting by member count
 async function fetchFeaturedRooms() {

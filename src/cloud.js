@@ -12,75 +12,47 @@ registerTelemetry("/cloud", "Hubs Cloud Landing Page");
 
 import en from "react-intl/locale-data/en";
 import { lang, messages } from "./utils/i18n";
+import { Page } from "./react-components/layout/Page";
 
 addLocaleData([...en]);
 const marketplaceEnterpriseListingUrl = "https://aws.amazon.com/marketplace/pp/B084WNGRRP";
 const marketplacePersonalListingUrl = "https://aws.amazon.com/marketplace/pp/B084RZH56R";
 const awsQuickStartLink = "https://hubs.mozilla.com/docs/hubs-cloud-aws-quick-start.html";
 
-class DiscordLanding extends Component {
+class HubsCloudPage extends Component {
   componentDidMount() {}
 
   render() {
     return (
-      <IntlProvider locale={lang} messages={messages}>
-        <div className={styles.ui}>
-          <div className={styles.header}>
-            <div className={styles.headerLinks}>
-              <a href="/" rel="noreferrer noopener">
-                Try Hubs
+      <Page>
+        <div className="row grey-bg">
+          <h1 className="hidden-md-up">Introducing Hubs Cloud</h1>
+          <video />
+          <div className="col center-sm-down">
+            <h1>Introducing Hubs Cloud</h1>
+            <p>
+              Hubs Cloud creates and manages all of the AWS resources needed to host your own immersive spaces from your
+              company or organization’s own account. Bring your own domain or use Route53 to create a new site, running
+              on a single EC2 instance or scaled up to multiple servers for greater system-wide concurrency. Easily
+              customize your platform with your own branding, upload your own 3D content, or select from the vast array
+              of avatars and scenes licensed under Creative Commons for the Hubs platform.{" "}
+            </p>
+            <h3 className="hidden-sm-down">Get it today on the AWS Marketplace</h3>
+            <div className="row center-sm-down">
+              <a className="btn primary large" href="#">
+                Get Hubs Cloud Personal
+              </a>
+              <a className="btn primary large" href="#">
+                Get Hubs Cloud Enterprise
               </a>
             </div>
           </div>
-          <div className={styles.content}>
-            <div className={styles.heroPane}>
-              <div className={styles.heroMessage}>
-                <div className={styles.cloudLogo}>
-                  <img src={hubsCloudLogo} />
-                </div>
-                <div className={styles.primaryTagline}>
-                  <FormattedMessage id="cloud.primary_tagline" />
-                </div>
-                <div className={styles.secondaryTagline}>
-                  <FormattedMessage id="cloud.secondary_tagline" />
-                </div>
-                <div className={styles.actionButtons}>
-                  <a href={marketplaceEnterpriseListingUrl} className={styles.downloadButton}>
-                    <div>
-                      <FormattedMessage id="cloud.call_to_action_enterprise" />
-                    </div>
-                  </a>
-                </div>
-                <div className={styles.actionButtons}>
-                  <a href={marketplacePersonalListingUrl} className={styles.downloadButton}>
-                    <div>
-                      <FormattedMessage id="cloud.call_to_action_personal" />
-                    </div>
-                  </a>
-                </div>
-                <div className={styles.docLink}>
-                  <a href={awsQuickStartLink}>
-                    <div>
-                      <FormattedMessage id="cloud.aws_quick_start" />
-                    </div>
-                  </a>
-                </div>
-              </div>
-              <div className={styles.heroSplash}>
-                <img src={hubsCloudDiagram} />
-                <div className={styles.splashTagline}>
-                  <FormattedMessage id="cloud.splash_tag" />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className={styles.bg} />
         </div>
-      </IntlProvider>
+      </Page>
     );
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  ReactDOM.render(<DiscordLanding />, document.getElementById("ui-root"));
+  ReactDOM.render(<HubsCloudPage />, document.getElementById("ui-root"));
 });

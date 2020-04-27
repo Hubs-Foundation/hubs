@@ -1,0 +1,16 @@
+:local(.page) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+:local(.main-content) {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
+
+  &:local(.noninteractive) {
+    pointer-events: none;
+  }
+}
