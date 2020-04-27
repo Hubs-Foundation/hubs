@@ -1287,6 +1287,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const requestedOccupants = [];
 
+        const requestOccupants = async (sessionIds, state) => {
+          while (!NAF.connection.isConnected()) await nextTick();
+
+          if (NAF.connection.adapter) {
+            requestedOccupants.length = 0;
+            for (let i = 0; i < sessionIds.length; i++) {
+              const sessionId = sessionIds[i];
+              if (sessionId !== NAF.clientId && state[sessionId].metas[0].presence === "room") {
+                requestedOccupants.push(sessionId);
+              }
+            }
+
+            NAF.connection.adapter.syncOccupants(requestedOccupants);
+          }
+        };
+
         hubChannel.presence.onSync(() => {
           const presence = hubChannel.presence;
 
@@ -1306,17 +1322,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             scene.removeState("copresent");
           }
 
-          if (NAF.connection.adapter) {
-            requestedOccupants.length = 0;
-            for (let i = 0; i < sessionIds.length; i++) {
-              const sessionId = sessionIds[i];
-              if (sessionId !== NAF.clientId && presence.state[sessionId].metas[0].presence === "room") {
-                requestedOccupants.push(sessionId);
-              }
-            }
-
-            NAF.connection.adapter.syncOccupants(requestedOccupants);
-          }
+          requestOccupants(sessionIds, presence.state);
 
           // HACK - Set a flag on the presence object indicating if the initial sync has completed,
           // which is used to determine if we should fire join/leave messages into the presence log.
