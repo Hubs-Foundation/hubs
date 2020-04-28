@@ -48,8 +48,7 @@ const theme = createMuiTheme({
   overrides: {
     MuiDrawer: {
       docked: {
-        background: "#222222",
-        height: "100vh"
+        background: "#222222"
       }
     }
   },
