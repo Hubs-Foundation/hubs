@@ -372,12 +372,6 @@ module.exports = async (env, argv) => {
         maxAsyncRequests: 10,
         maxInitialRequests: 10,
         cacheGroups: {
-          engine: {
-            test: deepModuleDependencyTest(["aframe", "three"]),
-            name: "engine",
-            chunks: "initial",
-            priority: 40
-          },
           frontend: {
             test: deepModuleDependencyTest([
               "react",
@@ -392,6 +386,12 @@ module.exports = async (env, argv) => {
               "@fortawesome/react-fontawesome"
             ]),
             name: "frontend",
+            chunks: "initial",
+            priority: 40
+          },
+          engine: {
+            test: deepModuleDependencyTest(["aframe", "three"]),
+            name: "engine",
             chunks: "initial",
             priority: 30
           },
