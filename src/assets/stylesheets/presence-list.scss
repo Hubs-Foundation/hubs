@@ -20,6 +20,9 @@
   flex: 1;
   white-space: nowrap;
   text-align: right;
+  p {
+    margin-left: 8px;
+  }
 }
 
 :local(.sign-in) {
