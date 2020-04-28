@@ -82,7 +82,12 @@ function getModuleDependencies(moduleName) {
 }
 
 function deepModuleDependencyTest(modulesArr) {
-  const deps = modulesArr.flatMap(getModuleDependencies);
+  const deps = [];
+
+  for (const moduleName of modulesArr) {
+    const moduleDependencies = getModuleDependencies(moduleName);
+    deps.push(...moduleDependencies);
+  }
 
   return module => {
     if (!module.nameForCondition) {
