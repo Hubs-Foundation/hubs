@@ -148,6 +148,7 @@
     "phoenix-channels": "^1.0.0",
     "prettier": "^1.7.0",
     "raw-loader": "^0.5.1",
+    "request": "^2.88.2",
     "rimraf": "^2.6.2",
     "sass-loader": "^6.0.7",
     "selfsigned": "^1.10.2",
