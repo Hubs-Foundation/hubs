@@ -302,7 +302,7 @@ class ContentCDNComponent extends Component {
                 </li>
                 <li>
                   Once you&apos;ve signed up, click Cloudflare logo to go to your <b>Home</b> tab. (
-                  <b>Do not &quot;add site&quot; to Cloudflare</b>, we only need to create workers)
+                  <b>WARNING - Do not &quot;add site&quot; to Cloudflare</b>, we only need to create workers)
                 </li>
                 <li>
                   In <b>Home</b> tab, click on <b>Workers</b> panel. You&apos;ll be asked to create a workers subdomain.
