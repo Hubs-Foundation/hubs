@@ -396,6 +396,11 @@ AFRAME.registerComponent("media-loader", {
       // we don't think we can infer it from the extension, we need to make a HEAD request to find it out
       contentType = contentType || guessContentType(canonicalUrl) || (await fetchContentType(accessibleUrl));
 
+      // Some servers treat m3u8 playlists as "audio/x-mpegurl", we always want to treat them as HLS videos
+      if (contentType === "audio/x-mpegurl") {
+        contentType = "application/vnd.apple.mpegurl";
+      }
+
       // We don't want to emit media_resolved for index updates.
       if (forceLocalRefresh || srcChanged) {
         this.el.emit("media_resolved", { src, raw: accessibleUrl, contentType });
