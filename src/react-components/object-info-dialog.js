@@ -260,7 +260,11 @@ export default class ObjectInfoDialog extends Component {
 
   buttonIndexAtTouchX(touchX, currentLeftOffset) {
     const TOTAL_WIDTH_OF_NAV_ITEMS = ICON_WIDTH * this.state.mediaEntities.length;
-    const AVAILABLE_WIDTH_FOR_NAV_ITEMS = parseInt(window.getComputedStyle(this.navAreaRef.current).width);
+    const AVAILABLE_WIDTH_FOR_NAV_ITEMS =
+      (this.navAreaRef &&
+        this.navAreaRef.current &&
+        parseInt(window.getComputedStyle(this.navAreaRef.current).width)) ||
+      window.innerWidth - 120;
     const ACTUAL_WIDTH_OF_NAV_ITEMS = Math.min(AVAILABLE_WIDTH_FOR_NAV_ITEMS, TOTAL_WIDTH_OF_NAV_ITEMS);
 
     const CENTER_PIXEL = window.innerWidth / 2;
