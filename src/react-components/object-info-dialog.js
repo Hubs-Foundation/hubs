@@ -3,7 +3,7 @@ import React, { Component } from "react";
 import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../utils/three-utils";
 import classNames from "classnames";
 import DialogContainer from "./dialog-container.js";
-import styles from "../assets/stylesheets/client-info-dialog.scss";
+import cStyles from "../assets/stylesheets/client-info-dialog.scss";
 import rootStyles from "../assets/stylesheets/ui-root.scss";
 import oStyles from "../assets/stylesheets/object-info-dialog.scss";
 import { FormattedMessage } from "react-intl";
@@ -46,7 +46,6 @@ const DISPLAY_IMAGE = new Map([
   [SORT_ORDER_MODEL, faCube]
 ]);
 
-const ARROWS_WIDTH = 60;
 const ICON_WIDTH = 60;
 const HALF_ICON_WIDTH = 60 / 2;
 
@@ -126,6 +125,7 @@ export default class ObjectInfoDialog extends Component {
     this.setState({ enableLights: cameraSystem.enableLights });
     this.updateMediaEntities();
     this.props.scene.addEventListener("listed_media_changed", () => setTimeout(() => this.updateMediaEntities(), 0));
+    this.navAreaRef = React.createRef();
   }
 
   updateMediaEntities() {
@@ -259,7 +259,7 @@ export default class ObjectInfoDialog extends Component {
 
   buttonIndexAtTouchX(touchX, currentLeftOffset) {
     const TOTAL_WIDTH_OF_NAV_ITEMS = ICON_WIDTH * this.state.mediaEntities.length;
-    const AVAILABLE_WIDTH_FOR_NAV_ITEMS = window.innerWidth - 2 * ARROWS_WIDTH;
+    const AVAILABLE_WIDTH_FOR_NAV_ITEMS = parseInt(window.getComputedStyle(this.navAreaRef.current).width);
     const ACTUAL_WIDTH_OF_NAV_ITEMS = Math.min(AVAILABLE_WIDTH_FOR_NAV_ITEMS, TOTAL_WIDTH_OF_NAV_ITEMS);
 
     const CENTER_PIXEL = window.innerWidth / 2;
@@ -299,7 +299,11 @@ export default class ObjectInfoDialog extends Component {
     showRemoveButton,
     onClose
   ) {
-    const AVAILABLE_WIDTH_FOR_NAV_ITEMS = window.innerWidth - 2 * ARROWS_WIDTH;
+    const AVAILABLE_WIDTH_FOR_NAV_ITEMS =
+      (this.navAreaRef &&
+        this.navAreaRef.current &&
+        parseInt(window.getComputedStyle(this.navAreaRef.current).width)) ||
+      window.innerWidth - 120;
     const TOTAL_WIDTH_OF_NAV_ITEMS = ICON_WIDTH * mediaEntities.length;
     const DISTANCE_TO_CENTER = -1 * HALF_ICON_WIDTH + AVAILABLE_WIDTH_FOR_NAV_ITEMS / 2;
     const willScrollContent = TOTAL_WIDTH_OF_NAV_ITEMS > AVAILABLE_WIDTH_FOR_NAV_ITEMS;
@@ -311,14 +315,14 @@ export default class ObjectInfoDialog extends Component {
       <div>
         {/* Header  */}
         <div className={classNames(oStyles.header, oStyles.floatContainer, rootStyles.uiInteractive)}>
+          <div className={classNames(oStyles.floatLeft)}>
+            {headerIcon(faTimes, oStyles.s32x32, onClose, "Close object info panel")}
+          </div>
           <div className={classNames(oStyles.floatCenter)}>
             {subtitleText(
               `${1 + targetIndex}/${this.state.mediaEntities.length}`,
               `Showing item ${1 + targetIndex} of ${this.state.mediaEntities.length}`
             )}
-          </div>
-          <div className={classNames(oStyles.floatLeft)}>
-            {headerIcon(faTimes, oStyles.s32x32, onClose, "Close object info panel")}
           </div>
           <div className={classNames(oStyles.floatRight)}>
             {headerIconLink(faExternalLinkAlt, oStyles.s44x44, this.props.src)}
@@ -334,8 +338,9 @@ export default class ObjectInfoDialog extends Component {
         {/* Bottom Panel */}
         <div className={classNames(oStyles.panel, rootStyles.uiInteractive)}>
           <div className={oStyles.navigationRow}>
-            {headerIcon(faChevronLeft, oStyles.s44x44, this.navigatePrev, "Previous Object")}
+            {showNavigationButtons && headerIcon(faChevronLeft, oStyles.s44x44, this.navigatePrev, "Previous Object")}
             <div
+              ref={this.navAreaRef}
               className={oStyles.innerNavigationRowContainer}
               style={{ justifyContent: willScrollContent ? "unset" : "center" }}
               onWheel={e => {
@@ -420,7 +425,7 @@ export default class ObjectInfoDialog extends Component {
                 })}
               </div>
             </div>
-            {headerIcon(faChevronRight, oStyles.s44x44, this.navigateNext, "Next Object")}
+            {showNavigationButtons && headerIcon(faChevronRight, oStyles.s44x44, this.navigateNext, "Next Object")}
           </div>
           {showObjectActionRow && (
             <div className={classNames(oStyles.floatContainer, oStyles.objectActionRow)}>
@@ -495,8 +500,8 @@ export default class ObjectInfoDialog extends Component {
 
     return (
       <DialogContainer noOverlay={true} wide={true} {...this.props}>
-        <div className={styles.roomInfo}>
-          <div className={styles.titleAndClose}>
+        <div className={cStyles.roomInfo}>
+          <div className={cStyles.titleAndClose}>
             <button
               aria-label={`Close object info panel`}
               autoFocus
@@ -507,21 +512,21 @@ export default class ObjectInfoDialog extends Component {
                 <FontAwesomeIcon icon={faTimes} />
               </i>
             </button>
-            <a className={styles.objectDisplayString} href={this.props.src} target="_blank" rel="noopener noreferrer">
+            <a className={cStyles.objectDisplayString} href={this.props.src} target="_blank" rel="noopener noreferrer">
               <FormattedMessage id={`object-info.open-link`} />
             </a>
           </div>
-          <div className={styles.actionButtonSections}>
-            <div className={styles.leftActionButtons}>
+          <div className={cStyles.actionButtonSections}>
+            <div className={cStyles.leftActionButtons}>
               {showNavigationButtons && (
-                <button aria-label="Previous Object" className={styles.navigationButton} onClick={this.navigatePrev}>
+                <button aria-label="Previous Object" className={cStyles.navigationButton} onClick={this.navigatePrev}>
                   <i>
                     <FontAwesomeIcon icon={faChevronLeft} />
                   </i>
                 </button>
               )}
             </div>
-            <div className={styles.primaryActionButtons}>
+            <div className={cStyles.primaryActionButtons}>
               <button onClick={this.toggleLights.bind(this)}>
                 <FormattedMessage id={`object-info.${this.state.enableLights ? "lower" : "raise"}-lights`} />
               </button>
@@ -535,20 +540,20 @@ export default class ObjectInfoDialog extends Component {
                   <FormattedMessage id="object-info.remove-button" />
                 </button>
               ) : (
-                <div className={styles.actionButtonPlaceholder} />
+                <div className={cStyles.actionButtonPlaceholder} />
               )}
               {showPinOrUnpin && (
-                <button className={pinned ? "" : styles.primaryActionButton} onClick={pinned ? this.unpin : this.pin}>
+                <button className={pinned ? "" : cStyles.primaryActionButton} onClick={pinned ? this.unpin : this.pin}>
                   <FormattedMessage id={`object-info.${pinned ? "unpin-button" : "pin-button"}`} />
                 </button>
               )}
-              <a className={styles.cancelText} href="#" onClick={onClose}>
+              <a className={cStyles.cancelText} href="#" onClick={onClose}>
                 <FormattedMessage id="client-info.cancel" />
               </a>
             </div>
-            <div className={styles.rightActionButtons}>
+            <div className={cStyles.rightActionButtons}>
               {showNavigationButtons && (
-                <button aria-label="Next Object" className={styles.navigationButton} onClick={this.navigateNext}>
+                <button aria-label="Next Object" className={cStyles.navigationButton} onClick={this.navigateNext}>
                   <i>
                     <FontAwesomeIcon icon={faChevronRight} />
                   </i>
