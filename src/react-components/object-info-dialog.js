@@ -10,15 +10,12 @@ import { FormattedMessage } from "react-intl";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
-import { faCircle } from "@fortawesome/free-solid-svg-icons/faCircle";
-import { faMapPin } from "@fortawesome/free-solid-svg-icons/faMapPin";
 import { faTrashAlt } from "@fortawesome/free-solid-svg-icons/faTrashAlt";
 import { faStreetView } from "@fortawesome/free-solid-svg-icons/faStreetView";
 import { faLightbulb } from "@fortawesome/free-solid-svg-icons/faLightbulb";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import entryStyles from "../assets/stylesheets/entry.scss";
-import { faCubes } from "@fortawesome/free-solid-svg-icons/faCubes";
 import { faCube } from "@fortawesome/free-solid-svg-icons/faCube";
 import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
 import { faMusic } from "@fortawesome/free-solid-svg-icons/faMusic";
@@ -96,55 +93,6 @@ function subtitleText(text, ariaLabel) {
       {text}
     </span>
   );
-}
-
-class ActionBarIcon extends Component {
-  static propTypes = {
-    icon: PropTypes.object,
-    size: PropTypes.string,
-    color: PropTypes.string
-  };
-  render() {
-    return (
-      <i className={oStyles.stackedImage}>
-        <FontAwesomeIcon icon={this.props.icon} className={classNames(this.props.size, this.props.color)} />
-      </i>
-    );
-  }
-}
-
-class ActionBarItem extends Component {
-  static propTypes = {
-    ariaLabel: PropTypes.string,
-    onClick: PropTypes.func,
-    messageId: PropTypes.string,
-    children: PropTypes.node.isRequired
-  };
-  render() {
-    return (
-      <div className={oStyles.actionBarItem}>
-        <button
-          className={classNames({
-            [oStyles.noDefaultButtonStyle]: true,
-            [oStyles.flex]: true
-          })}
-          aria-label={this.props.ariaLabel}
-          onClick={this.props.onClick}
-        >
-          <div className={oStyles.imageStack}>{this.props.children}</div>
-        </button>
-        {this.props.messageId && (
-          <div className={oStyles.subtitle}>
-            <FormattedMessage id={this.props.messageId} />
-          </div>
-        )}
-      </div>
-    );
-  }
-}
-
-function ActionBarItemPlaceholder() {
-  return <div className={oStyles.actionBarItem} />;
 }
 
 let uiRoot;
@@ -505,82 +453,6 @@ export default class ObjectInfoDialog extends Component {
             </div>
           )}
         </div>
-
-        {/* <div className={rootStyles.uiDialog}> */}
-        {/*   <div className={classNames({ [rootStyles.uiDialogBoxContents]: true, [rootStyles.uiInteractive]: true })}> */}
-        {/*     <div className={oStyles.topBar}> */}
-        {/*       <button */}
-        {/*         aria-label={`Close object panel info`} */}
-        {/*         autoFocus */}
-        {/*         className={classNames({ */}
-        {/*           [oStyles.collapseButton]: true, */}
-        {/*           [oStyles.noDefaultButtonStyle]: true */}
-        {/*         })} */}
-        {/*         onClick={onClose} */}
-        {/*       > */}
-        {/*         <i> */}
-        {/*           <FontAwesomeIcon className={classNames(oStyles.s24x24, oStyles.panelWidgetColor)} icon={faTimes} /> */}
-        {/*         </i> */}
-        {/*       </button> */}
-        {/*       <div className={oStyles.openLink}> */}
-        {/*         <a className={oStyles.bigLinkText} href={this.props.src} target="_blank" rel="noopener noreferrer"> */}
-        {/*           <FormattedMessage id={`object-info.open-link`} /> */}
-        {/*         </a> */}
-        {/*       </div> */}
-        {/*     </div> */}
-        {/*     <div className={oStyles.actionBar}> */}
-        {/*       {showNavigationButtons ? ( */}
-        {/*         <ActionBarItem ariaLabel="Previous Object" onClick={this.navigatePrev}> */}
-        {/*           <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} /> */}
-        {/*           <ActionBarIcon icon={faChevronLeft} size={oStyles.s16x16} color={oStyles.iconFgColor} /> */}
-        {/*         </ActionBarItem> */}
-        {/*       ) : ( */}
-        {/*         ActionBarItemPlaceholder() */}
-        {/*       )} */}
-        {/*       {showGoToButton ? ( */}
-        {/*         <ActionBarItem ariaLabel="Go To" onClick={this.enqueueWaypointTravel} messageId="object-info.waypoint"> */}
-        {/*           <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} /> */}
-        {/*           <ActionBarIcon icon={faStreetView} size={oStyles.s30x30} color={oStyles.iconFgColor} /> */}
-        {/*         </ActionBarItem> */}
-        {/*       ) : ( */}
-        {/*         ActionBarItemPlaceholder() */}
-        {/*       )} */}
-        {/*       {showPinButton ? ( */}
-        {/*         <ActionBarItem ariaLabel="Pin" onClick={this.pin} messageId="object-info.pin-button"> */}
-        {/*           <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} /> */}
-        {/*           <ActionBarIcon icon={faMapPin} size={oStyles.s32x32} color={oStyles.iconFgColor} /> */}
-        {/*         </ActionBarItem> */}
-        {/*       ) : showUnpinButton ? ( */}
-        {/*         <ActionBarItem ariaLabel="Unpin" onClick={this.unpin} messageId="object-info.unpin-button"> */}
-        {/*           <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} /> */}
-        {/*           <ActionBarIcon icon={faMapPin} size={oStyles.s32x32} color={oStyles.iconFgColor} /> */}
-        {/*         </ActionBarItem> */}
-        {/*       ) : ( */}
-        {/*         ActionBarItemPlaceholder() */}
-        {/*       )} */}
-        {/*       {showRemoveButton ? ( */}
-        {/*         <ActionBarItem */}
-        {/*           ariaLabel="Remove" */}
-        {/*           onClick={this.remove.bind(this)} */}
-        {/*           messageId="object-info.remove-button" */}
-        {/*         > */}
-        {/*           <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} /> */}
-        {/*           <ActionBarIcon icon={faTrashAlt} size={oStyles.s30x30} color={oStyles.iconFgColor} /> */}
-        {/*         </ActionBarItem> */}
-        {/*       ) : ( */}
-        {/*         ActionBarItemPlaceholder() */}
-        {/*       )} */}
-        {/*       {showNavigationButtons ? ( */}
-        {/*         <ActionBarItem ariaLabel="Next Object" onClick={this.navigateNext}> */}
-        {/*           <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} /> */}
-        {/*           <ActionBarIcon icon={faChevronRight} size={oStyles.s16x16} color={oStyles.iconFgColor} /> */}
-        {/*         </ActionBarItem> */}
-        {/*       ) : ( */}
-        {/*         ActionBarItemPlaceholder() */}
-        {/*       )} */}
-        {/*     </div> */}
-        {/*   </div> */}
-        {/* </div> */}
       </div>
     );
   }
