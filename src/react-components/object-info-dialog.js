@@ -14,10 +14,89 @@ import { faCircle } from "@fortawesome/free-solid-svg-icons/faCircle";
 import { faMapPin } from "@fortawesome/free-solid-svg-icons/faMapPin";
 import { faTrashAlt } from "@fortawesome/free-solid-svg-icons/faTrashAlt";
 import { faStreetView } from "@fortawesome/free-solid-svg-icons/faStreetView";
+import { faLightbulb } from "@fortawesome/free-solid-svg-icons/faLightbulb";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import entryStyles from "../assets/stylesheets/entry.scss";
-import { mediaSort } from "../utils/media-sorting.js";
+import { faCubes } from "@fortawesome/free-solid-svg-icons/faCubes";
+import { faCube } from "@fortawesome/free-solid-svg-icons/faCube";
+import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
+import { faMusic } from "@fortawesome/free-solid-svg-icons/faMusic";
+import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
+import { faNewspaper } from "@fortawesome/free-solid-svg-icons/faNewspaper";
+import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
+import {
+  SORT_ORDER_VIDEO,
+  SORT_ORDER_AUDIO,
+  SORT_ORDER_IMAGE,
+  SORT_ORDER_PDF,
+  SORT_ORDER_MODEL,
+  SORT_ORDER_UNIDENTIFIED,
+  mediaSortOrder,
+  mediaSort
+} from "../utils/media-sorting.js";
+
+function clamp(x, min, max) {
+  return Math.min(Math.max(x, min), max);
+}
+
+const DISPLAY_IMAGE = new Map([
+  [SORT_ORDER_VIDEO, faVideo],
+  [SORT_ORDER_AUDIO, faMusic],
+  [SORT_ORDER_IMAGE, faImage],
+  [SORT_ORDER_PDF, faNewspaper],
+  [SORT_ORDER_UNIDENTIFIED, faQuestion],
+  [SORT_ORDER_MODEL, faCube]
+]);
+
+const ARROWS_WIDTH = 60;
+const ICON_WIDTH = 60;
+const HALF_ICON_WIDTH = 60 / 2;
+
+function headerIcon(icon, size, onClick, ariaLabel) {
+  return (
+    <button aria-label={ariaLabel} className={classNames(oStyles.noDefaultButtonStyle)} onClick={onClick}>
+      <i className={oStyles.flex}>
+        <FontAwesomeIcon
+          className={classNames(size, oStyles.panelWidgetColor, oStyles.actionLabelColorOnHover)}
+          icon={icon}
+        />
+      </i>
+    </button>
+  );
+}
+function headerIconLink(icon, size, href) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer">
+      <i className={oStyles.flex}>
+        <FontAwesomeIcon
+          className={classNames(size, oStyles.panelWidgetColor, oStyles.actionLabelColorOnHover)}
+          icon={icon}
+        />
+      </i>
+    </a>
+  );
+  //    <button aria-label={ariaLabel} className={classNames(oStyles.noDefaultButtonStyle)} onClick={onClick}>
+  //    </button>
+}
+
+function actionRowIcon(icon, size, onClick) {
+  return (
+    <button className={classNames(oStyles.noDefaultButtonStyle)} onClick={onClick}>
+      <i className={oStyles.flex}>
+        <FontAwesomeIcon className={classNames(size, oStyles.actionLabelColor)} icon={icon} />
+      </i>
+    </button>
+  );
+}
+
+function subtitleText(text, ariaLabel) {
+  return (
+    <span aria-label={ariaLabel} className={oStyles.subtitleLarge}>
+      {text}
+    </span>
+  );
+}
 
 class ActionBarIcon extends Component {
   static propTypes = {
@@ -100,7 +179,7 @@ export default class ObjectInfoDialog extends Component {
     const cameraSystem = this.props.scene.systems["hubs-systems"].cameraSystem;
     this.setState({ enableLights: cameraSystem.enableLights });
     this.updateMediaEntities();
-    this.props.scene.addEventListener("listed_media_changed", () => this.updateMediaEntities());
+    this.props.scene.addEventListener("listed_media_changed", () => setTimeout(() => this.updateMediaEntities(), 0));
   }
 
   updateMediaEntities() {
@@ -171,6 +250,10 @@ export default class ObjectInfoDialog extends Component {
     this.props.onNavigated && this.props.onNavigated(mediaEntities[targetIndex]);
   }
 
+  navigateTo(el) {
+    this.props.onNavigated && this.props.onNavigated(el);
+  }
+
   remove() {
     if (this._isRemoving) return;
     this._isRemoving = true;
@@ -202,6 +285,306 @@ export default class ObjectInfoDialog extends Component {
     });
   }
 
+  navigationRowItem(entity, isSelected) {
+    return (
+      <button
+        className={classNames(oStyles.noDefaultButtonStyle, oStyles.innerNavigationRowItem)}
+        onClick={() => {
+          if (this.state.isHandlingTouchInteraction) {
+            return;
+          }
+          this.navigateTo(entity);
+        }}
+        key={`nav-row-item-${entity.object3D.uuid}`}
+      >
+        <i className={oStyles.flex}>
+          <FontAwesomeIcon
+            className={classNames(
+              oStyles.s44x44,
+              isSelected ? oStyles.actionLabelColor : oStyles.panelWidgetColor,
+              oStyles.actionLabelColorOnHover
+            )}
+            icon={DISPLAY_IMAGE.get(mediaSortOrder(entity))}
+          />
+        </i>
+      </button>
+    );
+  }
+
+  buttonIndexAtTouchX(touchX, currentLeftOffset) {
+    const TOTAL_WIDTH_OF_NAV_ITEMS = ICON_WIDTH * this.state.mediaEntities.length;
+    const AVAILABLE_WIDTH_FOR_NAV_ITEMS = window.innerWidth - 2 * ARROWS_WIDTH;
+    const ACTUAL_WIDTH_OF_NAV_ITEMS = Math.min(AVAILABLE_WIDTH_FOR_NAV_ITEMS, TOTAL_WIDTH_OF_NAV_ITEMS);
+
+    const CENTER_PIXEL = window.innerWidth / 2;
+    const FIRST_PIXEL = CENTER_PIXEL - ACTUAL_WIDTH_OF_NAV_ITEMS / 2;
+    const ICONS_ON_SCREEN = ACTUAL_WIDTH_OF_NAV_ITEMS / ICON_WIDTH;
+
+    const LEFT_OFFSET_FOR_ZEROTH_ITEM = AVAILABLE_WIDTH_FOR_NAV_ITEMS / 2 - HALF_ICON_WIDTH;
+    const LEFT_OFFSET_FOR_LAST_ITEM = LEFT_OFFSET_FOR_ZEROTH_ITEM - ICON_WIDTH * (this.state.mediaEntities.length - 1);
+    const LEFT_OFFSET_RANGE = LEFT_OFFSET_FOR_LAST_ITEM - LEFT_OFFSET_FOR_ZEROTH_ITEM;
+    const leftOffsetZeroToOne = clamp((currentLeftOffset - LEFT_OFFSET_FOR_ZEROTH_ITEM) / LEFT_OFFSET_RANGE, 0, 1);
+    const CENTER_ICON_UNFLOORED = leftOffsetZeroToOne * (this.state.mediaEntities.length - 1);
+    const FIRST_ICON_UNFLOORED = CENTER_ICON_UNFLOORED - ICONS_ON_SCREEN / 2;
+    const LAST_ICON_UNFLOORED = CENTER_ICON_UNFLOORED + ICONS_ON_SCREEN / 2;
+
+    const touchXInNavItemList = touchX - FIRST_PIXEL;
+    const touchZeroToOne = clamp((touchX - FIRST_PIXEL) / ACTUAL_WIDTH_OF_NAV_ITEMS, 0, 1);
+
+    return clamp(
+      Math.floor(
+        TOTAL_WIDTH_OF_NAV_ITEMS <= AVAILABLE_WIDTH_FOR_NAV_ITEMS
+          ? (this.state.mediaEntities.length * touchXInNavItemList) / ACTUAL_WIDTH_OF_NAV_ITEMS
+          : FIRST_ICON_UNFLOORED + touchZeroToOne * (1 + LAST_ICON_UNFLOORED - FIRST_ICON_UNFLOORED)
+      ),
+      0,
+      this.state.mediaEntities.length - 1
+    );
+  }
+
+  renderSmallScreen(
+    targetIndex,
+    selectedEl,
+    mediaEntities,
+    showNavigationButtons,
+    showGoToButton,
+    showPinButton,
+    showUnpinButton,
+    showRemoveButton,
+    onClose
+  ) {
+    const AVAILABLE_WIDTH_FOR_NAV_ITEMS = window.innerWidth - 2 * ARROWS_WIDTH;
+    const TOTAL_WIDTH_OF_NAV_ITEMS = ICON_WIDTH * mediaEntities.length;
+    const DISTANCE_TO_CENTER = -1 * HALF_ICON_WIDTH + AVAILABLE_WIDTH_FOR_NAV_ITEMS / 2;
+    const willScrollContent = TOTAL_WIDTH_OF_NAV_ITEMS > AVAILABLE_WIDTH_FOR_NAV_ITEMS;
+    const UNLOCKED_LEFT_OFFSET = this.state.currentLeftOffset;
+    const LOCKED_LEFT_OFFSET = DISTANCE_TO_CENTER - ICON_WIDTH * targetIndex;
+    const DRAG_WIDTH_PX = HALF_ICON_WIDTH;
+    const showObjectActionRow = showGoToButton || showPinButton || showUnpinButton || showRemoveButton;
+    return (
+      <div>
+        {/* Header  */}
+        <div className={classNames(oStyles.header, oStyles.floatContainer, rootStyles.uiInteractive)}>
+          <div className={classNames(oStyles.floatCenter)}>
+            {subtitleText(
+              `${1 + targetIndex}/${this.state.mediaEntities.length}`,
+              `Showing item ${1 + targetIndex} of ${this.state.mediaEntities.length}`
+            )}
+          </div>
+          <div className={classNames(oStyles.floatLeft)}>
+            {headerIcon(faTimes, oStyles.s32x32, onClose, "Close object info panel")}
+          </div>
+          <div className={classNames(oStyles.floatRight)}>
+            {headerIconLink(faExternalLinkAlt, oStyles.s44x44, this.props.src)}
+            {headerIcon(
+              faLightbulb,
+              oStyles.s44x44,
+              this.toggleLights.bind(this),
+              "Toggle rendering of the background"
+            )}
+          </div>
+        </div>
+
+        {/* Bottom Panel */}
+        <div className={classNames(oStyles.panel, rootStyles.uiInteractive)}>
+          <div className={oStyles.navigationRow}>
+            {headerIcon(faChevronLeft, oStyles.s44x44, this.navigatePrev, "Previous Object")}
+            <div
+              className={oStyles.innerNavigationRowContainer}
+              style={{ justifyContent: willScrollContent ? "unset" : "center" }}
+              onWheel={e => {
+                if (e.deltaY > 0) {
+                  this.navigate(1);
+                } else if (e.deltaY < 0) {
+                  this.navigate(-1);
+                }
+              }}
+              onTouchStart={e => {
+                const touchX = e.touches.item(0).clientX;
+                const currentLeftOffset = parseFloat(window.getComputedStyle(e.currentTarget.children[0]).left);
+                this.setState({
+                  isDragging: false,
+                  touchX,
+                  initialTouchX: touchX,
+                  currentLeftOffset,
+                  initialLeftOffset: currentLeftOffset,
+                  isHandlingTouchInteraction: true
+                });
+                if (!willScrollContent) {
+                  this.navigateTo(this.state.mediaEntities[this.buttonIndexAtTouchX(touchX, currentLeftOffset)]);
+                }
+              }}
+              onTouchMove={e => {
+                const touchX = e.touches.item(0).clientX;
+                if (!willScrollContent) {
+                  this.navigateTo(
+                    this.state.mediaEntities[this.buttonIndexAtTouchX(touchX, this.state.currentLeftOffset)]
+                  );
+                  this.setState({ touchX });
+                } else {
+                  const dX = touchX - this.state.initialTouchX;
+                  const isDragging = this.state.isDragging || Math.abs(dX) > DRAG_WIDTH_PX;
+                  if (isDragging) {
+                    const currentLeftOffset = this.state.initialLeftOffset + dX;
+
+                    this.setState({
+                      currentLeftOffset
+                    });
+
+                    const CENTER_PIXEL = window.innerWidth / 2;
+                    this.navigateTo(
+                      this.state.mediaEntities[this.buttonIndexAtTouchX(CENTER_PIXEL, currentLeftOffset)]
+                    );
+                  }
+                  this.setState({
+                    isDragging,
+                    touchX
+                  });
+                }
+              }}
+              onTouchEnd={() => {
+                const wasDragging = this.state.isDragging;
+                this.setState({ isHandlingTouchInteraction: false, isDragging: false });
+                if (!wasDragging) {
+                  this.navigateTo(
+                    this.state.mediaEntities[this.buttonIndexAtTouchX(this.state.touchX, this.state.currentLeftOffset)]
+                  );
+                }
+              }}
+            >
+              <div
+                className={oStyles.innerNavigationRow}
+                style={
+                  willScrollContent
+                    ? this.state.isDragging
+                      ? {
+                          left: `${UNLOCKED_LEFT_OFFSET}px`
+                        }
+                      : {
+                          left: `${LOCKED_LEFT_OFFSET}px`,
+                          transitionProperty: "left",
+                          transitionDuration: "0.5s",
+                          transitionTimingFunction: "ease-out"
+                        }
+                    : {}
+                }
+              >
+                {mediaEntities.map(e => {
+                  return this.navigationRowItem(e, e === selectedEl);
+                })}
+              </div>
+            </div>
+            {headerIcon(faChevronRight, oStyles.s44x44, this.navigateNext, "Next Object")}
+          </div>
+          {showObjectActionRow && (
+            <div className={classNames(oStyles.floatContainer, oStyles.objectActionRow)}>
+              {showRemoveButton && (
+                <div className={oStyles.floatLeft}>
+                  {actionRowIcon(faTrashAlt, oStyles.s44x44, this.remove.bind(this), "Remove Object")}
+                </div>
+              )}
+              {showPinButton && (
+                <div className={oStyles.floatCenter}>
+                  <button onClick={this.pin} className={oStyles.actionRowActionButton}>
+                    <FormattedMessage id={"object-info.pin-button"} />
+                  </button>
+                </div>
+              )}
+              {showUnpinButton && (
+                <div className={oStyles.floatCenter}>
+                  <button onClick={this.unpin} className={oStyles.actionRowActionButtonSecondary}>
+                    <FormattedMessage id={"object-info.unpin-button"} />
+                  </button>
+                </div>
+              )}
+              {showGoToButton && (
+                <div className={oStyles.floatRight}>
+                  {actionRowIcon(faStreetView, oStyles.s44x44, this.enqueueWaypointTravel, "Teleport to Object")}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* <div className={rootStyles.uiDialog}> */}
+        {/*   <div className={classNames({ [rootStyles.uiDialogBoxContents]: true, [rootStyles.uiInteractive]: true })}> */}
+        {/*     <div className={oStyles.topBar}> */}
+        {/*       <button */}
+        {/*         aria-label={`Close object panel info`} */}
+        {/*         autoFocus */}
+        {/*         className={classNames({ */}
+        {/*           [oStyles.collapseButton]: true, */}
+        {/*           [oStyles.noDefaultButtonStyle]: true */}
+        {/*         })} */}
+        {/*         onClick={onClose} */}
+        {/*       > */}
+        {/*         <i> */}
+        {/*           <FontAwesomeIcon className={classNames(oStyles.s24x24, oStyles.panelWidgetColor)} icon={faTimes} /> */}
+        {/*         </i> */}
+        {/*       </button> */}
+        {/*       <div className={oStyles.openLink}> */}
+        {/*         <a className={oStyles.bigLinkText} href={this.props.src} target="_blank" rel="noopener noreferrer"> */}
+        {/*           <FormattedMessage id={`object-info.open-link`} /> */}
+        {/*         </a> */}
+        {/*       </div> */}
+        {/*     </div> */}
+        {/*     <div className={oStyles.actionBar}> */}
+        {/*       {showNavigationButtons ? ( */}
+        {/*         <ActionBarItem ariaLabel="Previous Object" onClick={this.navigatePrev}> */}
+        {/*           <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} /> */}
+        {/*           <ActionBarIcon icon={faChevronLeft} size={oStyles.s16x16} color={oStyles.iconFgColor} /> */}
+        {/*         </ActionBarItem> */}
+        {/*       ) : ( */}
+        {/*         ActionBarItemPlaceholder() */}
+        {/*       )} */}
+        {/*       {showGoToButton ? ( */}
+        {/*         <ActionBarItem ariaLabel="Go To" onClick={this.enqueueWaypointTravel} messageId="object-info.waypoint"> */}
+        {/*           <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} /> */}
+        {/*           <ActionBarIcon icon={faStreetView} size={oStyles.s30x30} color={oStyles.iconFgColor} /> */}
+        {/*         </ActionBarItem> */}
+        {/*       ) : ( */}
+        {/*         ActionBarItemPlaceholder() */}
+        {/*       )} */}
+        {/*       {showPinButton ? ( */}
+        {/*         <ActionBarItem ariaLabel="Pin" onClick={this.pin} messageId="object-info.pin-button"> */}
+        {/*           <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} /> */}
+        {/*           <ActionBarIcon icon={faMapPin} size={oStyles.s32x32} color={oStyles.iconFgColor} /> */}
+        {/*         </ActionBarItem> */}
+        {/*       ) : showUnpinButton ? ( */}
+        {/*         <ActionBarItem ariaLabel="Unpin" onClick={this.unpin} messageId="object-info.unpin-button"> */}
+        {/*           <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} /> */}
+        {/*           <ActionBarIcon icon={faMapPin} size={oStyles.s32x32} color={oStyles.iconFgColor} /> */}
+        {/*         </ActionBarItem> */}
+        {/*       ) : ( */}
+        {/*         ActionBarItemPlaceholder() */}
+        {/*       )} */}
+        {/*       {showRemoveButton ? ( */}
+        {/*         <ActionBarItem */}
+        {/*           ariaLabel="Remove" */}
+        {/*           onClick={this.remove.bind(this)} */}
+        {/*           messageId="object-info.remove-button" */}
+        {/*         > */}
+        {/*           <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} /> */}
+        {/*           <ActionBarIcon icon={faTrashAlt} size={oStyles.s30x30} color={oStyles.iconFgColor} /> */}
+        {/*         </ActionBarItem> */}
+        {/*       ) : ( */}
+        {/*         ActionBarItemPlaceholder() */}
+        {/*       )} */}
+        {/*       {showNavigationButtons ? ( */}
+        {/*         <ActionBarItem ariaLabel="Next Object" onClick={this.navigateNext}> */}
+        {/*           <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} /> */}
+        {/*           <ActionBarIcon icon={faChevronRight} size={oStyles.s16x16} color={oStyles.iconFgColor} /> */}
+        {/*         </ActionBarItem> */}
+        {/*       ) : ( */}
+        {/*         ActionBarItemPlaceholder() */}
+        {/*       )} */}
+        {/*     </div> */}
+        {/*   </div> */}
+        {/* </div> */}
+      </div>
+    );
+  }
+
   render() {
     const { pinned, onClose } = this.props;
     const isStatic = this.props.el.components.tags && this.props.el.components.tags.data.isStatic;
@@ -220,79 +603,27 @@ export default class ObjectInfoDialog extends Component {
       this.props.hubChannel &&
       this.props.hubChannel.can("spawn_and_move_media");
 
-    return window.innerWidth < 450 || window.innerHeight < 800 ? (
-      <div className={rootStyles.uiDialog}>
-        <div className={classNames({ [rootStyles.uiDialogBoxContents]: true, [rootStyles.uiInteractive]: true })}>
-          <div className={oStyles.topBar}>
-            <button
-              aria-label={`Close object info panel`}
-              autoFocus
-              className={classNames({
-                [oStyles.collapseButton]: true,
-                [oStyles.noDefaultButtonStyle]: true
-              })}
-              onClick={onClose}
-            >
-              <i>
-                <FontAwesomeIcon className={classNames(oStyles.s24x24, oStyles.panelWidgetColor)} icon={faTimes} />
-              </i>
-            </button>
-            <div className={oStyles.openLink}>
-              <a className={oStyles.bigLinkText} href={this.props.src} target="_blank" rel="noopener noreferrer">
-                <FormattedMessage id={`object-info.open-link`} />
-              </a>
-            </div>
-          </div>
-          <div className={oStyles.actionBar}>
-            {showNavigationButtons ? (
-              <ActionBarItem ariaLabel="Previous Object" onClick={this.navigatePrev}>
-                <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} />
-                <ActionBarIcon icon={faChevronLeft} size={oStyles.s16x16} color={oStyles.iconFgColor} />
-              </ActionBarItem>
-            ) : (
-              ActionBarItemPlaceholder()
-            )}
-            {showGoToButton ? (
-              <ActionBarItem ariaLabel="Go To" onClick={this.enqueueWaypointTravel} messageId="object-info.waypoint">
-                <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} />
-                <ActionBarIcon icon={faStreetView} size={oStyles.s30x30} color={oStyles.iconFgColor} />
-              </ActionBarItem>
-            ) : (
-              ActionBarItemPlaceholder()
-            )}
-            {showPinButton ? (
-              <ActionBarItem ariaLabel="Pin" onClick={this.pin} messageId="object-info.pin-button">
-                <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} />
-                <ActionBarIcon icon={faMapPin} size={oStyles.s32x32} color={oStyles.iconFgColor} />
-              </ActionBarItem>
-            ) : showUnpinButton ? (
-              <ActionBarItem ariaLabel="Unpin" onClick={this.unpin} messageId="object-info.unpin-button">
-                <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} />
-                <ActionBarIcon icon={faMapPin} size={oStyles.s32x32} color={oStyles.iconFgColor} />
-              </ActionBarItem>
-            ) : (
-              ActionBarItemPlaceholder()
-            )}
-            {showRemoveButton ? (
-              <ActionBarItem ariaLabel="Remove" onClick={this.remove.bind(this)} messageId="object-info.remove-button">
-                <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} />
-                <ActionBarIcon icon={faTrashAlt} size={oStyles.s30x30} color={oStyles.iconFgColor} />
-              </ActionBarItem>
-            ) : (
-              ActionBarItemPlaceholder()
-            )}
-            {showNavigationButtons ? (
-              <ActionBarItem ariaLabel="Next Object" onClick={this.navigateNext}>
-                <ActionBarIcon icon={faCircle} size={oStyles.s48x48} color={oStyles.iconBgColor} />
-                <ActionBarIcon icon={faChevronRight} size={oStyles.s16x16} color={oStyles.iconFgColor} />
-              </ActionBarItem>
-            ) : (
-              ActionBarItemPlaceholder()
-            )}
-          </div>
-        </div>
-      </div>
-    ) : (
+    const isSmallScreen =
+      window.APP.store.state.preferences.preferMobileObjectInfoPanel ||
+      AFRAME.utils.device.isMobile() ||
+      window.innerHeight < 800;
+    if (isSmallScreen) {
+      let targetIndex = this.state.mediaEntities.indexOf(this.props.el) % this.state.mediaEntities.length;
+      targetIndex = targetIndex === -1 ? this.state.mediaEntities.length - 1 : targetIndex;
+      return this.renderSmallScreen(
+        targetIndex,
+        this.props.el,
+        this.state.mediaEntities,
+        showNavigationButtons,
+        showGoToButton,
+        showPinButton,
+        showUnpinButton,
+        showRemoveButton,
+        onClose
+      );
+    }
+
+    return (
       <DialogContainer noOverlay={true} wide={true} {...this.props}>
         <div className={styles.roomInfo}>
           <div className={styles.titleAndClose}>

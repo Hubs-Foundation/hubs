@@ -106,7 +106,10 @@ export default class ObjectList extends Component {
     // Sorry in advance for the day this comment is out of date.
   }
   componentWillUnmount() {
-    document.querySelector(".a-canvas").removeEventListener("mousedown", this.unexpand);
+    const canvas = document.querySelector(".a-canvas");
+    if (canvas) {
+      canvas.removeEventListener("mousedown", this.unexpand);
+    }
   }
 
   updateMediaEntities() {
