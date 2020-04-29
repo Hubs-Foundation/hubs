@@ -73,8 +73,6 @@ function headerIconLink(icon, size, href) {
       </i>
     </a>
   );
-  //    <button aria-label={ariaLabel} className={classNames(oStyles.noDefaultButtonStyle)} onClick={onClick}>
-  //    </button>
 }
 
 function actionRowIcon(icon, size, onClick) {

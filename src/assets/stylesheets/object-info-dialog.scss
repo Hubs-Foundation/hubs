@@ -89,7 +89,6 @@
 
 :local(.object-action-row) {
   height: 64px;
-  margin-top: 12px;
 }
 
 :local(.action-row-action-button) {
@@ -106,38 +105,6 @@
   height: 44px;
 }
 
-:local(.top-bar){
-  margin: 12px 16px 16px 16px;
-}
-
-:local(.open-link){
-  display: flex;
-  align-content: center;
-  justify-content: center;
-}
-:local(.big-link-text) {
-  @extend %default-font;
-  color: var(--link-text-color);
-  font-size: 20px;
-  font-weight: bold;
-}
-
-:local(.action-bar) {
-  display: flex;
-  margin: 16px 8px 8px 8px;
-  justify-content: space-between;
-}
-
-:local(.action-bar-item) {
-  width: 64px;
-  min-width: 64px;
-  height: 68px;
-  min-height: 68px;
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-}
-
 :local(.no-default-button-style) {
   padding: 0px;
   border-style: none;
@@ -147,38 +114,6 @@
 
 :local(.flex){
   display: flex;
-}
-
-:local(.image-stack){
-  width: 48px;
-  height: 48px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-:local(.stacked-image){
-  position: absolute;
-  width: 48px;
-  height: 48px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-:local(.s16x16) {
-  width: 16px !important;
-  height: 16px !important;
-}
-
-:local(.s24x24) {
-  width: 24px !important;
-  height: 24px !important;
-}
-
-:local(.s30x30) {
-  width: 30px !important;
-  height: 30px !important;
 }
 
 :local(.s32x32) {
@@ -191,11 +126,6 @@
   height: 44px !important;
 }
 
-:local(.s48x48){
-  width: 48px !important;
-  height: 48px !important;
-}
-
 :local(.action-label-color-on-hover){
   @media(hover: hover){
     &:hover {
@@ -203,20 +133,13 @@
     }
   }
 }
-:local(.icon-fg-color) {
-  color: $action-label-color;
-}
+
 :local(.action-label-color) {
   color: $action-label-color;
 }
-:local(.icon-bg-color){
-  color: var(--action-button-secondary-background);
-}
+
 :local(.panel-widget-color){
   color: var(--panel-widget-color);
-}
-:local(.link-text-color){
-  color: var(--link-text-color);
 }
 
 %subtitle-text {
@@ -225,18 +148,8 @@
   color: var(--panel-subtitle-color);
 
 }
+
 :local(.subtitle-large){
   @extend %subtitle-text;
   font-size: 32px;
-}
-:local(.subtitle) {
-  @extend %subtitle-text;
-  font-size: 12.8px;
-}
-
-:local(.collapse-button) {
-  color: var(--panel-widget-color);
-  position: absolute;
-  top: 16px;
-  left: 16px;
 }
