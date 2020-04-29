@@ -32,6 +32,7 @@ import {
   mediaSortOrder,
   mediaSort
 } from "../utils/media-sorting.js";
+import { getPromotionTokenForFile } from "../utils/media-utils";
 
 function clamp(x, min, max) {
   return Math.min(Math.max(x, min), max);
@@ -467,8 +468,13 @@ export default class ObjectInfoDialog extends Component {
     uiRoot = uiRoot || document.getElementById("ui-root");
     const isGhost = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
     const showGoToButton = this.props.scene.is("entered") || isGhost;
+    const { fileIsOwned, fileId } = this.props.el.components["media-loader"].data;
     const showPinOrUnpin =
-      this.props.scene.is("entered") && !isStatic && this.props.hubChannel && this.props.hubChannel.can("pin_objects");
+      this.props.scene.is("entered") &&
+      !isStatic &&
+      this.props.hubChannel &&
+      this.props.hubChannel.can("pin_objects") &&
+      !!(fileIsOwned || (fileId && getPromotionTokenForFile(fileId)));
     const showPinButton = showPinOrUnpin && !pinned;
     const showUnpinButton = showPinOrUnpin && pinned;
     const showRemoveButton =
