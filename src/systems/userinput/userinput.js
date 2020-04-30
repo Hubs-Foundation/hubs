@@ -353,14 +353,13 @@ AFRAME.registerSystem("userinput", {
       let gamepadDevice;
       for (let i = 0; i < this.activeDevices.items.length; i++) {
         const activeDevice = this.activeDevices.items[i];
-        if (activeDevice.gamepad && activeDevice.gamepad.index === e.gamepad.index) {
-          // TODO BP - Figure out how to handle input source removal correctly with WebXR when re-entering immersive mode
-          //console.warn("connected already fired for gamepad", e.gamepad);
-          //return; // multiple connect events without a disconnect event
+        if (!e.gamepad.isWebXRGamepad && activeDevice.gamepad && activeDevice.gamepad.index === e.gamepad.index) {
+          console.warn("connected already fired for gamepad", e.gamepad);
+          return; // multiple connect events without a disconnect event
         }
       }
       // HACK Firefox Nightly bug causes corrupt gamepad names for OpenVR, so do startsWith
-      if (e.gamepad.primaryProfile) {
+      if (e.gamepad.isWebXRGamepad) {
         gamepadDevice = new WebXRControllerDevice(e.gamepad);
       } else if (
         e.gamepad.id.startsWith("OpenVR Gamepad") ||
@@ -414,8 +413,8 @@ AFRAME.registerSystem("userinput", {
     }
 
     const retrieveXRGamepads = ({ session }) => {
-      if (!session.inputSources) return;
       for (const inputSource of session.inputSources) {
+        inputSource.gamepad.isWebXRGamepad = true;
         inputSource.gamepad.targetRaySpace = inputSource.targetRaySpace;
         inputSource.gamepad.primaryProfile = inputSource.profiles[0];
         inputSource.gamepad.hand = inputSource.handedness;
