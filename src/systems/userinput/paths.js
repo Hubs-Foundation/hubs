@@ -358,3 +358,20 @@ paths.device.wmr.v = name => `/vars/wmr/${name}`;
 paths.device.wmr.k = name => `/vars/wmr/keyboard/${name}`;
 paths.device.wmr.left = wmrController("left");
 paths.device.wmr.right = wmrController("right");
+
+function webXRController(side) {
+  const webXR = "/device/webxr/";
+  return {
+    pose: `${webXR}${side}/pose`,
+    matrix: `${webXR}${side}/matrix`,
+    joystick: axes(webXR, side, "joystick"),
+    trigger: button(webXR, side, "trigger"),
+    grip: button(webXR, side, "grip"),
+    a: button(webXR, side, "a"),
+    b: button(webXR, side, "b")
+  };
+}
+paths.device.webXR = {};
+paths.device.webXR.v = name => `/vars/webxr/${name}`;
+paths.device.webXR.left = webXRController("left");
+paths.device.webXR.right = webXRController("right");

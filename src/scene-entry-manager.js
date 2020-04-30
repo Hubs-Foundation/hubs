@@ -64,7 +64,7 @@ export default class SceneEntryManager {
 
       // HACK - A-Frame calls getVRDisplays at module load, we want to do it here to
       // force gamepads to become live.
-      navigator.getVRDisplays();
+      "getVRDisplays" in navigator && navigator.getVRDisplays();
 
       await exit2DInterstitialAndEnterVR(true);
     }
@@ -107,7 +107,7 @@ export default class SceneEntryManager {
 
     // Delay sending entry event telemetry until VR display is presenting.
     (async () => {
-      while (enterInVR && !(await navigator.getVRDisplays()).find(d => d.isPresenting)) {
+      while (enterInVR && !this.scene.renderer.vr.isPresenting()) {
         await nextTick();
       }
 

@@ -1,7 +1,7 @@
 /*
 HACK: Our fork of aframe will read this global in src/utils/device.js to force the WebVR codepaths.
 */
-window.forceWebVR = true;
+window.forceWebVR = !/oculusbrowser/i.test(navigator.userAgent) || "getVRDisplays" in navigator;
 
 /*
 HACK Fix a-frame's device detection in Chrome when WebXR or WebVR flags are enabled in
@@ -19,6 +19,6 @@ if (
 /*
 HACK Call getVRDisplays to force Oculus Browser to use WebVR, which in turn disables the WebXR API.
 */
-if (/Oculus/.test(navigator.userAgent)) {
+if (/oculusbrowser/i.test(navigator.userAgent) && "getVRDisplays" in navigator) {
   navigator.getVRDisplays();
 }

@@ -365,10 +365,14 @@ export class WaypointSystem {
       ) {
         elementFromTemplate.object3D.visible = this.scene.is("frozen");
         if (elementFromTemplate.object3D.visible) {
-          this.viewingCamera = this.viewingCamera || document.getElementById("viewing-camera").object3D;
+          this.viewingCamera = this.viewingCamera || document.getElementById("viewing-camera").object3DMap.camera;
           setMatrixWorld(
             elementFromTemplate.object3D,
-            calculateIconTransform(waypointComponent.el.object3D, this.viewingCamera, this.helperMat4)
+            calculateIconTransform(
+              waypointComponent.el.object3D,
+              this.viewingCamera.object3DMap.camera,
+              this.helperMat4
+            )
           );
         }
       }
