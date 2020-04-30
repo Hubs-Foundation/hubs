@@ -431,7 +431,12 @@ export class CameraSystem {
         }
         const panY = this.userinput.get(paths.actions.inspectPanY) || 0;
         if (this.userinput.get(paths.actions.resetInspectView)) {
-          moveRigSoCameraLooksAtObject(this.viewingRig.object3D, this.viewingCamera.object3DMap.camera, this.inspected, 1);
+          moveRigSoCameraLooksAtObject(
+            this.viewingRig.object3D,
+            this.viewingCamera.object3DMap.camera,
+            this.inspected,
+            1
+          );
         }
 
         if (
