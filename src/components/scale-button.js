@@ -83,7 +83,7 @@ AFRAME.registerComponent("scale-button", {
         this.viewingCamera = document.getElementById("viewing-camera").object3DMap.camera;
       }
       this.plane = e.object3D === this.leftEventer ? planeForLeftCursor : planeForRightCursor;
-      setMatrixWorld(this.plane, calculatePlaneMatrix(this.viewingCamera.object3DMap.camera, this.el.object3D));
+      setMatrixWorld(this.plane, calculatePlaneMatrix(this.viewingCamera, this.el.object3D));
       this.planeRotation.extractRotation(this.plane.matrixWorld);
       this.planeUp.set(0, 1, 0).applyMatrix4(this.planeRotation);
       this.planeRight.set(1, 0, 0).applyMatrix4(this.planeRotation);
@@ -96,7 +96,7 @@ AFRAME.registerComponent("scale-button", {
       this.initialObjectScale.setFromMatrixScale(this.objectToScale.matrixWorld);
       this.initialDistanceToObject = objectToCam
         .subVectors(
-          camPosition.setFromMatrixPosition(this.viewingCamera.object3DMap.camera.matrixWorld),
+          camPosition.setFromMatrixPosition(this.viewingCamera.matrixWorld),
           objectPosition.setFromMatrixPosition(this.el.object3D.matrixWorld)
         )
         .length();

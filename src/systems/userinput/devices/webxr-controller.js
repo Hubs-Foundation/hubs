@@ -23,30 +23,30 @@ export class WebXRControllerDevice {
     if (!referenceSpace || !this.gamepad || !this.gamepad.connected) return;
 
     const hand = this.gamepad.hand || "right";
-    const path = paths.device.webXR[hand];
+    const path = paths.device.webxr[hand];
 
-    frame.setValueType(path.trigger.pressed, this.gamepad.buttons[0].pressed);
-    frame.setValueType(path.trigger.touched, this.gamepad.buttons[0].touched);
-    frame.setValueType(path.trigger.value, this.gamepad.buttons[0].value);
+    frame.setValueType(path.button.trigger.pressed, this.gamepad.buttons[0].pressed);
+    frame.setValueType(path.button.trigger.touched, this.gamepad.buttons[0].touched);
+    frame.setValueType(path.button.trigger.value, this.gamepad.buttons[0].value);
 
-    frame.setValueType(path.grip.pressed, this.gamepad.buttons[1].pressed);
-    frame.setValueType(path.grip.touched, this.gamepad.buttons[1].touched);
-    frame.setValueType(path.grip.value, this.gamepad.buttons[1].value);
+    frame.setValueType(path.button.grip.pressed, this.gamepad.buttons[1].pressed);
+    frame.setValueType(path.button.grip.touched, this.gamepad.buttons[1].touched);
+    frame.setValueType(path.button.grip.value, this.gamepad.buttons[1].value);
 
-    frame.setValueType(path.joystick.pressed, this.gamepad.buttons[3].pressed);
-    frame.setValueType(path.joystick.touched, this.gamepad.buttons[3].touched);
-    frame.setValueType(path.joystick.value, this.gamepad.buttons[3].value);
+    frame.setValueType(path.button.thumbStick.pressed, this.gamepad.buttons[3].pressed);
+    frame.setValueType(path.button.thumbStick.touched, this.gamepad.buttons[3].touched);
+    frame.setValueType(path.button.thumbStick.value, this.gamepad.buttons[3].value);
 
-    frame.setValueType(path.a.pressed, this.gamepad.buttons[4].pressed);
-    frame.setValueType(path.a.touched, this.gamepad.buttons[4].touched);
-    frame.setValueType(path.a.value, this.gamepad.buttons[4].value);
+    frame.setValueType(path.button.a.pressed, this.gamepad.buttons[4].pressed);
+    frame.setValueType(path.button.a.touched, this.gamepad.buttons[4].touched);
+    frame.setValueType(path.button.a.value, this.gamepad.buttons[4].value);
 
-    frame.setValueType(path.b.pressed, this.gamepad.buttons[5].pressed);
-    frame.setValueType(path.b.touched, this.gamepad.buttons[5].touched);
-    frame.setValueType(path.b.value, this.gamepad.buttons[5].value);
+    frame.setValueType(path.button.b.pressed, this.gamepad.buttons[5].pressed);
+    frame.setValueType(path.button.b.touched, this.gamepad.buttons[5].touched);
+    frame.setValueType(path.button.b.value, this.gamepad.buttons[5].value);
 
-    frame.setValueType(path.joystick.axisX, this.gamepad.axes[2]);
-    frame.setValueType(path.joystick.axisY, this.gamepad.axes[3]);
+    frame.setValueType(path.axis.joyX, this.gamepad.axes[2]);
+    frame.setValueType(path.axis.joyY, this.gamepad.axes[3]);
 
     this.rayObject = this.rayObject || document.querySelector(this.selector).object3D;
     this.rayObject.updateMatrixWorld();

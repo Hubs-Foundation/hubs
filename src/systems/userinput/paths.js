@@ -359,19 +359,35 @@ paths.device.wmr.k = name => `/vars/wmr/keyboard/${name}`;
 paths.device.wmr.left = wmrController("left");
 paths.device.wmr.right = wmrController("right");
 
-function webXRController(side) {
-  const webXR = "/device/webxr/";
-  return {
-    pose: `${webXR}${side}/pose`,
-    matrix: `${webXR}${side}/matrix`,
-    joystick: axes(webXR, side, "joystick"),
-    trigger: button(webXR, side, "trigger"),
-    grip: button(webXR, side, "grip"),
-    a: button(webXR, side, "a"),
-    b: button(webXR, side, "b")
-  };
-}
-paths.device.webXR = {};
-paths.device.webXR.v = name => `/vars/webxr/${name}`;
-paths.device.webXR.left = webXRController("left");
-paths.device.webXR.right = webXRController("right");
+const webxr = "/device/webxr/";
+paths.device.webxr = {};
+paths.device.webxr.right = {
+  button: {
+    trigger: button(webxr, "right", "trigger"),
+    grip: button(webxr, "right", "grip"),
+    a: button(webxr, "right", "a"),
+    b: button(webxr, "right", "b"),
+    thumbStick: button(webxr, "right", "thumbStick")
+  },
+  axis: {
+    joyX: `${webxr}right/axis/joyX`,
+    joyY: `${webxr}right/axis/joyY`
+  },
+  pose: `${webxr}right/pose`,
+  matrix: `${webxr}right/matrix`
+};
+paths.device.webxr.left = {
+  button: {
+    trigger: button(webxr, "left", "trigger"),
+    grip: button(webxr, "left", "grip"),
+    a: button(webxr, "left", "a"),
+    b: button(webxr, "left", "b"),
+    thumbStick: button(webxr, "left", "thumbStick")
+  },
+  axis: {
+    joyX: `${webxr}left/axis/joyX`,
+    joyY: `${webxr}left/axis/joyY`
+  },
+  pose: `${webxr}left/pose`,
+  matrix: `${webxr}left/matrix`
+};
