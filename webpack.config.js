@@ -150,6 +150,7 @@ async function fetchAppConfigAndEnvironmentVars() {
   process.env.CORS_PROXY_SERVER = cors_proxy_server;
   process.env.THUMBNAIL_SERVER = thumbnail_server;
   process.env.NON_CORS_PROXY_DOMAINS = non_cors_proxy_domains + ",hubs.local";
+  process.env.RETICULUM_SERVER = host;
 
   return appConfig;
 }
