@@ -62,6 +62,7 @@
     "classnames": "^2.2.5",
     "color": "^3.1.2",
     "copy-to-clipboard": "^3.0.8",
+    "dashjs": "^3.1.0",
     "dayjs-ext": "^2.2.0",
     "deepmerge": "^2.1.1",
     "detect-browser": "^3.0.1",

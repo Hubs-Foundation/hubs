@@ -5,6 +5,7 @@ import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
 import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
+import { MediaPlayer } from "dashjs";
 import { addAndArrangeMedia, createImageTexture, createBasisTexture } from "../utils/media-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
@@ -144,6 +145,10 @@ function disposeTexture(texture) {
     texture.hls.detachMedia();
     texture.hls.destroy();
     texture.hls = null;
+  }
+
+  if (texture.dash) {
+    texture.dash.reset();
   }
 
   texture.dispose();
@@ -658,12 +663,18 @@ AFRAME.registerComponent("media-video", {
   async createVideoTextureAudioSourceEl() {
     const url = this.data.src;
     const contentType = this.data.contentType;
+    let pollTimeout;
 
     return new Promise(async (resolve, reject) => {
       if (this._audioSyncInterval) {
         clearInterval(this._audioSyncInterval);
         this._audioSyncInterval = null;
       }
+
+      const failLoad = function(e) {
+        clearTimeout(pollTimeout);
+        reject(e);
+      };
 
       const videoEl = createVideoOrAudioEl("video");
 
@@ -687,6 +698,25 @@ AFRAME.registerComponent("media-video", {
         const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
         videoEl.srcObject = new MediaStream(stream.getVideoTracks());
         // If hls.js is supported we always use it as it gives us better events
+      } else if (contentType.startsWith("application/dash")) {
+        const dashPlayer = MediaPlayer().create();
+        dashPlayer.on(MediaPlayer.events.ERROR, failLoad);
+        dashPlayer.initialize(videoEl, url);
+        dashPlayer.setTextDefaultEnabled(false);
+
+        // TODO this countinously pings to get updated time, unclear if this is actually needed, but this preserves the default behavior
+        dashPlayer.clearDefaultUTCTimingSources();
+        dashPlayer.addUTCTimingSource(
+          "urn:mpeg:dash:utc:http-xsdate:2014",
+          proxiedUrlFor("https://time.akamai.com/?iso")
+        );
+        // We can also use our own HEAD request method like we use to sync NAF
+        // dashPlayer.addUTCTimingSource("urn:mpeg:dash:utc:http-head:2014", location.href);
+
+        texture.dash = dashPlayer;
+
+        // window.d = window.d || [];
+        // window.d.push(dashPlayer);
       } else if (AFRAME.utils.material.isHLS(url, contentType)) {
         if (HLS.isSupported()) {
           const corsProxyPrefix = `https://${configs.CORS_PROXY_SERVER}/`;
@@ -730,7 +760,7 @@ AFRAME.registerComponent("media-video", {
                     hls.recoverMediaError();
                     break;
                   default:
-                    reject(event);
+                    failLoad(event);
                     return;
                 }
               }
@@ -754,20 +784,20 @@ AFRAME.registerComponent("media-video", {
           // If not, see if native support will work
         } else if (videoEl.canPlayType(contentType)) {
           videoEl.src = url;
-          videoEl.onerror = reject;
+          videoEl.onerror = failLoad;
         } else {
-          reject("HLS unsupported");
+          failLoad("HLS unsupported");
         }
       } else {
         videoEl.src = url;
-        videoEl.onerror = reject;
+        videoEl.onerror = failLoad;
 
         if (this.data.audioSrc) {
           // If there's an audio src, create an audio element to play it that we keep in sync
           // with the video while this component is active.
           audioEl = createVideoOrAudioEl("audio");
           audioEl.src = this.data.audioSrc;
-          audioEl.onerror = reject;
+          audioEl.onerror = failLoad;
 
           this._audioSyncInterval = setInterval(() => {
             if (Math.abs(audioEl.currentTime - videoEl.currentTime) >= 0.33) {
@@ -790,7 +820,7 @@ AFRAME.registerComponent("media-video", {
         if (isReady()) {
           resolve({ texture, audioSourceEl: audioEl || texture.image });
         } else {
-          setTimeout(poll, 500);
+          pollTimeout = setTimeout(poll, 500);
         }
       };
 

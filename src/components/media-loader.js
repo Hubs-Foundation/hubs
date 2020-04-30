@@ -396,6 +396,11 @@ AFRAME.registerComponent("media-loader", {
       // we don't think we can infer it from the extension, we need to make a HEAD request to find it out
       contentType = contentType || guessContentType(canonicalUrl) || (await fetchContentType(accessibleUrl));
 
+      // TODO we should probably just never return "application/octet-stream" as expectedContentType, since its not really useful
+      if (contentType === "application/octet-stream") {
+        contentType = guessContentType(canonicalUrl) || contentType;
+      }
+
       // Some servers treat m3u8 playlists as "audio/x-mpegurl", we always want to treat them as HLS videos
       if (contentType === "audio/x-mpegurl") {
         contentType = "application/vnd.apple.mpegurl";
@@ -411,6 +416,7 @@ AFRAME.registerComponent("media-loader", {
       if (
         contentType.startsWith("video/") ||
         contentType.startsWith("audio/") ||
+        contentType.startsWith("application/dash") ||
         AFRAME.utils.material.isHLS(canonicalUrl, contentType)
       ) {
         let linkedVideoTexture, linkedAudioSource, linkedMediaElementAudioSource;
