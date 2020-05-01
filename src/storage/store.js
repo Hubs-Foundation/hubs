@@ -79,6 +79,7 @@ export const SCHEMA = {
         globalMediaVolume: { type: "number" },
         snapRotationDegrees: { type: "number" },
         materialQualitySetting: { type: "string" },
+        disableSoundEffects: { type: "bool" },
         disableMovement: { type: "bool" },
         disableBackwardsMovement: { type: "bool" },
         disableStrafing: { type: "bool" },
