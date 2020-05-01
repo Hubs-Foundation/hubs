@@ -368,11 +368,7 @@ export class WaypointSystem {
           this.viewingCamera = this.viewingCamera || document.getElementById("viewing-camera").object3DMap.camera;
           setMatrixWorld(
             elementFromTemplate.object3D,
-            calculateIconTransform(
-              waypointComponent.el.object3D,
-              this.viewingCamera.object3DMap.camera,
-              this.helperMat4
-            )
+            calculateIconTransform(waypointComponent.el.object3D, this.viewingCamera, this.helperMat4)
           );
         }
       }
