@@ -1,83 +1,88 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React, { useContext } from "react";
 import { FormattedMessage } from "react-intl";
+import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import IfFeature from "../if-feature";
 import configs from "../../utils/configs";
 import maskEmail from "../../utils/mask-email";
 import styles from "./Header.scss";
+import { AuthContext } from "../auth/AuthContext";
 
-export function Header({ showAdmin, signedIn, email, onSignOut, onSignIn }) {
+export function Header() {
+  const auth = useContext(AuthContext);
+
   return (
-    <div className={styles.headerContent}>
-      <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
-        <div className={styles.links}>
-          <IfFeature name="show_whats_new_link">
-            <a href="/whats-new">
-              <FormattedMessage id="home.whats_new_link" />
-            </a>
-          </IfFeature>
-          <IfFeature name="show_source_link">
-            <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
-              <FormattedMessage id="home.source_link" />
-            </a>
-          </IfFeature>
-          <IfFeature name="show_community_link">
-            <a href={configs.link("community", "https://discord.gg/wHmY4nd")} rel="noreferrer noopener">
-              <FormattedMessage id="home.community_link" />
-            </a>
+    <header>
+      <nav>
+        <ul>
+          <li>
+            <a href="/">Home</a>
+          </li>
+          <IfFeature name="show_cloud">
+            <li>
+              <a href="https://hubs.mozilla.com/cloud">
+                <FormattedMessage id="home.cloud_link" />
+              </a>
+            </li>
           </IfFeature>
           <IfFeature name="enable_spoke">
-            <a href="/spoke" rel="noreferrer noopener">
-              <FormattedMessage id="editor-name" />
-            </a>
+            <li>
+              <a href="/spoke">
+                <FormattedMessage id="editor-name" />
+              </a>
+            </li>
           </IfFeature>
           <IfFeature name="show_docs_link">
-            <a href={configs.link("docs", "https://hubs.mozilla.com/docs")} rel="noreferrer noopener">
-              <FormattedMessage id="home.docs_link" />
-            </a>
+            <li>
+              <a href={configs.link("docs", "https://hubs.mozilla.com/docs")}>
+                <FormattedMessage id="home.docs_link" />
+              </a>
+            </li>
           </IfFeature>
-          <IfFeature name="show_cloud">
-            <a href="https://hubs.mozilla.com/cloud" rel="noreferrer noopener">
-              <FormattedMessage id="home.cloud_link" />
-            </a>
+          <IfFeature name="show_source_link">
+            <li>
+              <a href="https://github.com/mozilla/hubs">
+                <FormattedMessage id="home.source_link" />
+              </a>
+            </li>
           </IfFeature>
-          {showAdmin && (
-            <a href="/admin" rel="noreferrer noopener">
-              <i>
-                <FontAwesomeIcon icon={faCog} />
-              </i>
-              &nbsp;
-              <FormattedMessage id="home.admin" />
-            </a>
+          <IfFeature name="show_community_link">
+            <li>
+              <a href={configs.link("community", "https://discord.gg/wHmY4nd")}>
+                <FormattedMessage id="home.community_link" />
+              </a>
+            </li>
+          </IfFeature>
+          {auth.isAdmin && (
+            <li>
+              <a href="/admin" rel="noreferrer noopener">
+                <i>
+                  <FontAwesomeIcon icon={faCog} />
+                </i>
+                &nbsp;
+                <FormattedMessage id="home.admin" />
+              </a>
+            </li>
           )}
-        </div>
-      </div>
+        </ul>
+      </nav>
       <div className={styles.signIn}>
-        {signedIn ? (
+        {auth.isSignedIn ? (
           <div>
             <span>
-              <FormattedMessage id="sign-in.as" /> {maskEmail(email)}
+              <FormattedMessage id="sign-in.as" /> {maskEmail(auth.email)}
             </span>{" "}
-            <a onClick={onSignOut}>
+            <a onClick={auth.signOut}>
               <FormattedMessage id="sign-in.out" />
             </a>
           </div>
         ) : (
-          <a onClick={onSignIn}>
+          <Link to="/signin">
             <FormattedMessage id="sign-in.in" />
-          </a>
+          </Link>
         )}
       </div>
-    </div>
+    </header>
   );
 }
-
-Header.propTypes = {
-  showAdmin: PropTypes.bool,
-  signedIn: PropTypes.bool,
-  email: PropTypes.string,
-  onSignOut: PropTypes.func.isRequired,
-  onSignIn: PropTypes.func.isRequired
-};

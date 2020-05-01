@@ -266,6 +266,7 @@ module.exports = async (env, argv) => {
         "Access-Control-Allow-Origin": "*"
       },
       inline: !env.bundleAnalyzer,
+      historyApiFallback: true,
       before: function(app) {
         // Local CORS proxy
         app.all("/cors-proxy/*", (req, res) => {

@@ -1,30 +1,45 @@
 import React, { useEffect, useCallback, useState, useRef } from "react";
+import classNames from "classnames";
+import { FormattedMessage } from "react-intl";
+import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import styles from "../../assets/stylesheets/index.scss";
+import checkIsMobile from "../../utils/is-mobile";
+
+const isMobile = checkIsMobile();
 
 export function PWAButton() {
-  const pwaInstallEventRef = useRef();
-  const [pwaInstalled, setPWAInstalled] = useState();
+  const installEventRef = useRef();
+
+  const [installed, setInstalled] = useState(false);
 
   useEffect(() => {
-    window.addEventListener("beforeinstallprompt", event => {
+    const onBeforeInstallPrompt = event => {
       event.preventDefault();
-      pwaInstallEventRef.current = event;
-    });
+      installEventRef.current = event;
+    };
+
+    window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+    };
   }, []);
 
-  const onInstallPWA = useCallback(() => {
-    installEvent.prompt();
+  const onInstallPWA = useCallback(async () => {
+    installEventRef.current.prompt();
 
-    installEvent.userChoice.then(choiceResult => {
-      if (choiceResult.outcome === "accepted") {
-        this.setState({ installed: true });
-      }
-    });
-  });
+    const choiceResult = await installEventRef.current.userChoice;
+
+    if (choiceResult.outcome === "accepted") {
+      setInstalled(true);
+    }
+  }, []);
 
   return (
     <button
       className={classNames(styles.secondaryButton)}
-      style={onInstallPWA || pwaInstalled ? {} : { visibility: "hidden" }}
+      style={installEventRef.current || installed ? {} : { visibility: "hidden" }}
       onClick={onInstallPWA}
     >
       <i>
