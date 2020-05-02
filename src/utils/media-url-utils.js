@@ -16,7 +16,8 @@ const commonKnownContentTypes = {
   pdf: "application/pdf",
   mp4: "video/mp4",
   mp3: "audio/mpeg",
-  basis: "image/basis"
+  basis: "image/basis",
+  m3u8: "application/vnd.apple.mpegurl"
 };
 
 // thanks to https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding

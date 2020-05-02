@@ -64,6 +64,7 @@ AFRAME.registerComponent("scale-button", {
     this.dragVector = new THREE.Vector3();
     this.currentObjectScale = new THREE.Vector3();
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.networkedEl = networkedEl;
       this.objectToScale = networkedEl.object3D;
     });
     const camPosition = new THREE.Vector3();
@@ -73,6 +74,11 @@ AFRAME.registerComponent("scale-button", {
       if (this.isScaling || !this.objectToScale) {
         return;
       }
+
+      if (!(NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
+        return;
+      }
+
       if (!this.didGetObjectReferences) {
         this.didGetObjectReferences = true;
         this.leftEventer = document.getElementById("left-cursor").object3D;
