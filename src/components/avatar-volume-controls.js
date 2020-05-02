@@ -42,11 +42,10 @@ AFRAME.registerComponent("avatar-volume-controls", {
   },
 
   update() {
-    const audioOutputMode = window.APP.store.state.preferences.audioOutputMode;
     if (
       this.networkedAudioSource &&
       this.networkedAudioSource.sound &&
-      (audioOutputMode === undefined || audioOutputMode === "panner")
+      window.APP.store.state.preferences.audioOutputMode !== "audio"
     ) {
       const globalVoiceVolume =
         window.APP.store.state.preferences.globalVoiceVolume !== undefined

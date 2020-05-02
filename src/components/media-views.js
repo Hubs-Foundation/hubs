@@ -337,6 +337,17 @@ AFRAME.registerComponent("media-video", {
     sceneEl.addEventListener("camera-set-active", function(evt) {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
+
+    this.audioOutputModePref = window.APP.store.state.preferences.audioOutputMode;
+    window.APP.store.addEventListener("statechanged", () => {
+      const newPref = window.APP.store.state.preferences.audioOutputMode;
+      if (this.audioOutputModePref !== newPref) {
+        this.audioOutputModePref = newPref;
+        if (this.audio) {
+          this.setupAudio();
+        }
+      }
+    });
   },
 
   isMineOrLocal() {
@@ -495,14 +506,14 @@ AFRAME.registerComponent("media-video", {
       this.el.removeObject3D("sound");
     }
 
-    if (this.data.audioType === "pannernode") {
+    const disablePositionalAudio = window.APP.store.state.preferences.audioOutputMode === "audio";
+    if (!disablePositionalAudio && this.data.audioType === "pannernode") {
       this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
       this.setPositionalAudioProperties();
       this.distanceBasedAttenuation = 1;
     } else {
       this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
     }
-    window.foo = this.audio;
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);
@@ -555,8 +566,6 @@ AFRAME.registerComponent("media-video", {
             linkedMediaElementAudioSource ||
             this.el.sceneEl.audioListener.context.createMediaElementSource(audioSourceEl);
 
-          const audioOutputMode = window.APP.store.state.preferences.audioOutputMode === "audio" ? "audio" : "panner";
-          this.data.audioType = audioOutputMode === "panner" ? "pannernode" : "audionode";
           this.setupAudio();
         }
       }
@@ -876,16 +885,7 @@ AFRAME.registerComponent("media-video", {
       }
 
       if (this.audio) {
-        const audioOutputMode = window.APP.store.state.preferences.audioOutputMode === "audio" ? "audio" : "panner";
-        if (
-          (audioOutputMode === "panner" && this.data.audioType !== "pannernode") ||
-          (audioOutputMode === "audio" && this.data.audioType !== "audionode")
-        ) {
-          this.data.audioType = audioOutputMode === "panner" ? "pannernode" : "audionode";
-          this.setupAudio();
-        }
-
-        if (audioOutputMode === "audio") {
+        if (window.APP.store.state.preferences.audioOutputMode === "audio") {
           this.el.object3D.getWorldPosition(positionA);
           this.el.sceneEl.camera.getWorldPosition(positionB);
           const distance = positionA.distanceTo(positionB);

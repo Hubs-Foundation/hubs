@@ -45,7 +45,9 @@ export class AudioSettingsSystem {
     this.sceneEl.addEventListener("reset_scene", this.onSceneReset);
 
     if (window.APP.store.state.preferences.audioOutputMode === "audio") {
-      window.APP.store.state.preferences.audioOutputMode = "panner"; //hack to always reset to "panner"
+      window.APP.store.update({
+        preferences: { audioOutputMode: "panner" }
+      }); //hack to always reset to "panner"
     }
   }
 
@@ -91,6 +93,7 @@ AFRAME.registerComponent("audio-source", {
 
   init() {
     this.audioSource = null;
+    this.networkedAudioSource = null;
 
     if (this.data.type === "avatar") {
       this.onSoundSourceSet = this.onSoundSourceSet.bind(this);
@@ -99,23 +102,37 @@ AFRAME.registerComponent("audio-source", {
       this.onVideoLoaded = this.onVideoLoaded.bind(this);
       this.el.addEventListener("video-loaded", this.onVideoLoaded);
     }
+
+    this.audioOutputModePref = window.APP.store.state.preferences.audioOutputMode;
+    window.APP.store.addEventListener("statechanged", () => {
+      const newPref = window.APP.store.state.preferences.audioOutputMode;
+      if (this.audioOutputModePref !== newPref) {
+        this.audioOutputModePref = newPref;
+        if (this.networkedAudioSource) {
+          this.updateNetworkedAudioSource(this.networkedAudioSource);
+        }
+      }
+    });
+  },
+
+  updateNetworkedAudioSource(networkedAudioSource) {
+    const disablePositionalAudio = this.audioOutputModePref === "audio";
+    networkedAudioSource.data.positional = disablePositionalAudio ? false : this.originalValueOfPositional;
+    if (networkedAudioSource.sound) {
+      networkedAudioSource.sound.disconnect();
+    }
+    networkedAudioSource.setupSound();
+    const soundSource = networkedAudioSource.sound.context.createMediaStreamSource(networkedAudioSource.stream);
+    networkedAudioSource.sound.setNodeSource(soundSource);
+    networkedAudioSource.el.emit("sound-source-set", { soundSource });
   },
 
   tick: function() {
     const networkedAudioSource = this.el.components["networked-audio-source"];
-    if (networkedAudioSource) {
-      const audioOutputMode = window.APP.store.state.preferences.audioOutputMode === "audio" ? "audio" : "panner";
-      if (
-        (audioOutputMode === "panner" && !networkedAudioSource.data.positional) ||
-        (audioOutputMode === "audio" && networkedAudioSource.data.positional)
-      ) {
-        networkedAudioSource.data.positional = audioOutputMode === "panner" ? true : false;
-        networkedAudioSource.sound.disconnect();
-        networkedAudioSource.setupSound();
-        const soundSource = networkedAudioSource.sound.context.createMediaStreamSource(networkedAudioSource.stream);
-        networkedAudioSource.sound.setNodeSource(soundSource);
-        networkedAudioSource.el.emit("sound-source-set", { soundSource });
-      }
+    if (networkedAudioSource && this.networkedAudioSource !== networkedAudioSource) {
+      this.networkedAudioSource = networkedAudioSource;
+      this.originalValueOfPositional = networkedAudioSource.data.positional;
+      this.updateNetworkedAudioSource(networkedAudioSource);
     }
   },
 
