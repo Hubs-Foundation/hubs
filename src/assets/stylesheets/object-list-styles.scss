@@ -1,0 +1,39 @@
+@import 'shared';
+
+:local(.contents) {
+  background-color: var(--menu-background-color);
+  border-radius: 12px;
+  padding: 18px 0px;
+  min-width: 296px;
+  max-height: 75%;
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
+:local(.row-no-margin) {
+  width: 100%;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  font-weight: bold;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0px 0;
+  padding: 0px 16px;
+  background-color: transparent;
+  border-style: none;
+  @extend %default-font;
+  font-size: 16px;
+  &:hover{
+    background-color: $action-color-highlight;
+    color: $action-text-color;
+  }
+}
+
+:local(.icon) {
+  svg {
+    vertical-align: 0px !important;
+    width: 20px !important;
+    height: 20px !important;
+  }
+}

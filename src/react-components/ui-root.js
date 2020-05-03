@@ -276,7 +276,12 @@ class UIRoot extends Component {
   };
 
   onIdleDetected = () => {
-    if (this.props.disableAutoExitOnIdle || this.state.isStreaming) return;
+    if (
+      this.props.disableAutoExitOnIdle ||
+      this.state.isStreaming ||
+      this.props.store.state.preferences["disableIdleDetection"]
+    )
+      return;
     this.startAutoExitTimer("autoexit.idle_subtitle");
   };
 
@@ -960,7 +965,7 @@ class UIRoot extends Component {
           Sorry, this room is no longer available.
           <p />
           <IfFeature name="show_terms">
-            A room may be closed if we receive reports that it violates our{" "}
+            A room may be closed by the room owner, or if we receive reports that it violates our{" "}
             <a
               target="_blank"
               rel="noreferrer noopener"
@@ -1006,7 +1011,7 @@ class UIRoot extends Component {
       const reason = this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
       const tcpUrl = new URL(document.location.toString());
       const tcpParams = new URLSearchParams(tcpUrl.search);
-      tcpParams.set("force_turn", true);
+      tcpParams.set("force_tcp", true);
       tcpUrl.search = tcpParams.toString();
 
       const exitSubtitleId = `exit.subtitle.${reason || "exited"}`;
@@ -1077,13 +1082,18 @@ class UIRoot extends Component {
           ) : (
             <span>{this.props.hub.name}</span>
           )}
-          <button onClick={() => this.setState({ watching: true })} className={entryStyles.collapseButton}>
+          <button
+            aria-label="Close room entry panel and spectate from lobby"
+            onClick={() => this.setState({ watching: true })}
+            className={entryStyles.collapseButton}
+          >
             <i>
               <FontAwesomeIcon icon={faTimes} />
             </i>
           </button>
 
           <button
+            aria-label="Toggle Favorited"
             onClick={() => this.toggleFavorited()}
             className={classNames({
               [entryStyles.entryFavoriteButton]: true,
@@ -1418,6 +1428,9 @@ class UIRoot extends Component {
 
     if (this.state.objectInfo && this.state.objectInfo.object3D) {
       return true; // TODO: Get object info dialog to use history
+    }
+    if (this.state.isObjectListExpanded) {
+      return true;
     }
 
     return !!(
@@ -2146,6 +2159,7 @@ class UIRoot extends Component {
 
                 {!streaming && (
                   <button
+                    aria-label="Toggle Favorited"
                     onClick={() => this.toggleFavorited()}
                     className={classNames({
                       [entryStyles.favorited]: this.isFavorited(),

@@ -1,3 +1,56 @@
+function isVisibleUpToRoot(node, root) {
+  let child = node;
+  while (child) {
+    if (child === root) return true;
+    if (!child.visible) return false;
+    child = child.parent;
+  }
+  console.error(`Root ${root} is not an ancestor of node ${node}`);
+  return false;
+}
+
+export const computeLocalBoundingBox = (function() {
+  const vertex = new THREE.Vector3();
+  const rootInverse = new THREE.Matrix4();
+  const toRootSpace = new THREE.Matrix4();
+  return function computeLocalBoundingBox(root, box, excludeInvisible) {
+    box.makeEmpty();
+    root.updateMatrices();
+    rootInverse.getInverse(root.matrixWorld);
+    root.traverse(node => {
+      if (excludeInvisible && !isVisibleUpToRoot(node, root)) {
+        return;
+      }
+      node.updateMatrices();
+      toRootSpace.multiplyMatrices(rootInverse, node.matrixWorld);
+      if (node.geometry) {
+        if (node.geometry.isGeometry) {
+          for (let i = 0; i < node.geometry.vertices; i++) {
+            vertex.copy(node.geometry.vertices[i]).applyMatrix4(toRootSpace);
+            if (isNaN(vertex.x)) continue;
+            box.expandByPoint(vertex);
+          }
+        } else if (node.geometry.isBufferGeometry && node.geometry.attributes.position) {
+          const array = node.geometry.attributes.position.array;
+          const itemSize = node.geometry.attributes.position._itemSize;
+          for (let i = 0; i < node.geometry.attributes.position.count; i++) {
+            if (itemSize === 2) {
+              vertex.set(array[2 * i], array[2 * i + 1], 0);
+            } else if (itemSize === 3) {
+              vertex.fromBufferAttribute(node.geometry.attributes.position, i);
+            } else {
+              return;
+            }
+            vertex.applyMatrix4(toRootSpace);
+            if (isNaN(vertex.x)) continue;
+            box.expandByPoint(vertex);
+          }
+        }
+      }
+    });
+  };
+})();
+
 // Computes an AABB that surrounds the object in question and all of its children.
 // Note that if the children have rotations, this probably won't return the tightest
 // possible AABB -- we could return a tighter one if we examined all of the vertices
@@ -5,9 +58,13 @@
 // for to do so much work.
 export const computeObjectAABB = (function() {
   const bounds = new THREE.Box3();
-  return function(root, target) {
+  return function computeObjectAABB(root, target, excludeInvisible) {
     target.makeEmpty();
+    root.updateMatrices();
     root.traverse(node => {
+      if (excludeInvisible && !isVisibleUpToRoot(node, root)) {
+        return;
+      }
       node.updateMatrices();
       const geometry = node.geometry;
       if (geometry != null) {
@@ -32,7 +89,7 @@ export function getBox(entity, boxRoot, worldSpace) {
   boxRoot.updateMatrices(true, true);
   boxRoot.updateMatrixWorld(true);
 
-  computeObjectAABB(boxRoot, box);
+  computeObjectAABB(boxRoot, box, false);
 
   if (!box.isEmpty()) {
     if (!worldSpace) {

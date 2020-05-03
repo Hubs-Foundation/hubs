@@ -1,3 +1,4 @@
+import { findComponentsInNearestAncestor } from "../utils/scene-graph";
 AFRAME.registerComponent("camera-focus-button", {
   schema: {
     track: { default: false },
@@ -21,6 +22,8 @@ AFRAME.registerComponent("camera-focus-button", {
 
       myCamera.components["camera-tool"].focus(this.targetEl, this.data.track);
     };
+
+    this.menuPlacementRoots = findComponentsInNearestAncestor(this.el, "position-at-border");
   },
 
   tick() {
@@ -29,6 +32,9 @@ AFRAME.registerComponent("camera-focus-button", {
 
     if (isVisible !== shouldBeVisible) {
       this.el.setAttribute("visible", shouldBeVisible);
+      for (let i = 0; i < this.menuPlacementRoots.length; i++) {
+        this.menuPlacementRoots[i].markDirty();
+      }
     }
   },
 

@@ -74,7 +74,7 @@ import "./components/media-views";
 import "./components/avatar-volume-controls";
 import "./components/pinch-to-move";
 import "./components/pitch-yaw-rotator";
-import "./components/position-at-box-shape-border";
+import "./components/position-at-border";
 import "./components/pinnable";
 import "./components/pin-networked-object-button";
 import "./components/mirror-media-button";
@@ -317,18 +317,30 @@ function remountUI(props) {
 
 function setupPeerConnectionConfig(adapter, host, turn) {
   const forceTurn = qs.get("force_turn");
+  const forceTcp = qs.get("force_tcp");
   const peerConnectionConfig = {};
 
   if (turn && turn.enabled) {
-    const iceServers = turn.transports.map(ts => {
-      return { urls: `turns:${host}:${ts.port}?transport=tcp`, username: turn.username, credential: turn.credential };
+    const iceServers = [];
+
+    turn.transports.forEach(ts => {
+      // Try both TURN DTLS and TCP/TLS
+      if (!forceTcp) {
+        iceServers.push({ urls: `turns:${host}:${ts.port}`, username: turn.username, credential: turn.credential });
+      }
+
+      iceServers.push({
+        urls: `turns:${host}:${ts.port}?transport=tcp`,
+        username: turn.username,
+        credential: turn.credential
+      });
     });
 
     iceServers.push({ urls: "stun:stun1.l.google.com:19302" });
 
     peerConnectionConfig.iceServers = iceServers;
 
-    if (forceTurn) {
+    if (forceTurn || forceTcp) {
       peerConnectionConfig.iceTransportPolicy = "relay";
     }
   } else {

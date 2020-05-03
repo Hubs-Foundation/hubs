@@ -75,7 +75,7 @@
     "form-data": "^3.0.0",
     "form-urlencoded": "^2.0.4",
     "history": "^4.7.2",
-    "hls.js": "^0.12.2",
+    "hls.js": "^0.13.2",
     "js-cookie": "^2.2.0",
     "jsonschema": "^1.2.2",
     "jwt-decode": "^2.2.0",
