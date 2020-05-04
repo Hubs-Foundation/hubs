@@ -278,6 +278,7 @@
     "preferences.maxResolution": "Max Resolution (width x height in pixels)",
     "preferences.globalVoiceVolume": "Incoming Voice Volume",
     "preferences.globalMediaVolume": "Media Volume",
+    "preferences.disableSoundEffects": "Disable Sound Effects",
     "preferences.materialQualitySetting": "Material quality (requires restart)",
     "preferences.snapRotationDegrees": "Rotation per snap (in degrees)",
     "preferences.allowMultipleHubsInstances": "Disable auto-exit when multiple hubs instances are open",
