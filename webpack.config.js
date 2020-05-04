@@ -249,6 +249,8 @@ module.exports = async (env, argv) => {
       link: path.join(__dirname, "src", "link.js"),
       discord: path.join(__dirname, "src", "discord.js"),
       cloud: path.join(__dirname, "src", "cloud.js"),
+      signin: path.join(__dirname, "src", "signin.js"),
+      verify: path.join(__dirname, "src", "verify.js"),
       "whats-new": path.join(__dirname, "src", "whats-new.js")
     },
     output: {
@@ -266,7 +268,15 @@ module.exports = async (env, argv) => {
         "Access-Control-Allow-Origin": "*"
       },
       inline: !env.bundleAnalyzer,
-      historyApiFallback: true,
+      historyApiFallback: {
+        rewrites: [
+          { from: /^\/signin/, to: "/signin.html" },
+          { from: /^\/discord/, to: "/discord.html" },
+          { from: /^\/cloud/, to: "/cloud.html" },
+          { from: /^\/verify/, to: "/verify.html" },
+          { from: /^\/whats-new/, to: "/whats-new.html" }
+        ]
+      },
       before: function(app) {
         // Local CORS proxy
         app.all("/cors-proxy/*", (req, res) => {
@@ -496,6 +506,16 @@ module.exports = async (env, argv) => {
         template: path.join(__dirname, "src", "cloud.html"),
         chunks: ["cloud"],
         inject: "head"
+      }),
+      new HTMLWebpackPlugin({
+        filename: "signin.html",
+        template: path.join(__dirname, "src", "signin.html"),
+        chunks: ["signin"]
+      }),
+      new HTMLWebpackPlugin({
+        filename: "verify.html",
+        template: path.join(__dirname, "src", "verify.html"),
+        chunks: ["verify"]
       }),
       new CopyWebpackPlugin([
         {

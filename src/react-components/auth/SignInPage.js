@@ -1,6 +1,5 @@
-import React, { useCallback, useState, useReducer, useContext } from "react";
+import React, { useCallback, useState, useReducer, useContext, useEffect } from "react";
 import PropTypes from "prop-types";
-import { useLocation, Redirect } from "react-router";
 import { Page } from "../layout/Page";
 import styles from "./SignInPage.scss";
 import configs from "../../utils/configs";
@@ -148,9 +147,18 @@ WaitForVerification.propTypes = {
 };
 
 export function SignInPage() {
-  const location = useLocation();
   const qs = new URLSearchParams(location.search);
   const { step, submitEmail, cancel, email } = useSignIn();
+  const redirectUrl = qs.get("sign_in_destination_url") || "/";
+
+  useEffect(
+    () => {
+      if (step === SignInStep.complete) {
+        window.location = redirectUrl;
+      }
+    },
+    [step, redirectUrl]
+  );
 
   return (
     <Page>
@@ -158,7 +166,6 @@ export function SignInPage() {
         <SubmitEmail onSubmitEmail={submitEmail} initialEmail={email} signInReason={qs.get("sign_in_reason")} />
       )}
       {step === SignInStep.waitForVerification && <WaitForVerification onCancel={cancel} email={email} />}
-      {step === SignInStep.complete && <Redirect to={qs.get("sign_in_destination_url") || "/"} />}
     </Page>
   );
 }

@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
 import { FormattedMessage } from "react-intl";
-import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import IfFeature from "../if-feature";
@@ -21,7 +20,7 @@ export function Header() {
           </li>
           <IfFeature name="show_cloud">
             <li>
-              <a href="https://hubs.mozilla.com/cloud">
+              <a href="/cloud">
                 <FormattedMessage id="home.cloud_link" />
               </a>
             </li>
@@ -78,9 +77,9 @@ export function Header() {
             </a>
           </div>
         ) : (
-          <Link to="/signin">
+          <a href="/signin" rel="noreferrer noopener">
             <FormattedMessage id="sign-in.in" />
-          </Link>
+          </a>
         )}
       </div>
     </header>

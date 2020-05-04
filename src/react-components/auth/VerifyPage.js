@@ -1,6 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
 import PropTypes from "prop-types";
-import { useLocation } from "react-router";
 import { Page } from "../layout/Page";
 import styles from "./SignInPage.scss";
 import { Loader } from "../misc/Loader";
@@ -67,7 +66,6 @@ VerificationError.propTypes = {
 };
 
 export function VerifyPage() {
-  const location = useLocation();
   const qs = new URLSearchParams(location.search);
 
   const authParams = {
