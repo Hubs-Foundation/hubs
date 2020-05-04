@@ -714,9 +714,6 @@ AFRAME.registerComponent("media-video", {
         // dashPlayer.addUTCTimingSource("urn:mpeg:dash:utc:http-head:2014", location.href);
 
         texture.dash = dashPlayer;
-
-        // window.d = window.d || [];
-        // window.d.push(dashPlayer);
       } else if (AFRAME.utils.material.isHLS(url, contentType)) {
         if (HLS.isSupported()) {
           const corsProxyPrefix = `https://${configs.CORS_PROXY_SERVER}/`;
