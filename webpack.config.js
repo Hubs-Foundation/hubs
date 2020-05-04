@@ -113,7 +113,7 @@ function createDefaultAppConfig() {
 
 async function fetchAppConfigAndEnvironmentVars() {
   if (!fs.existsSync(".ret.credentials")) {
-    throw new Error("Not logged in to Hubs Cloud. Run `npm login` first.");
+    throw new Error("Not logged in to Hubs Cloud. Run `npm run login` first.");
   }
 
   const { host, token } = JSON.parse(fs.readFileSync(".ret.credentials"));
