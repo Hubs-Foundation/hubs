@@ -75,9 +75,9 @@ function headerIconLink(icon, size, href) {
   );
 }
 
-function actionRowIcon(icon, size, onClick) {
+function ActionRowIcon(icon, size, onClick, ariaLabel) {
   return (
-    <button className={classNames(oStyles.noDefaultButtonStyle)} onClick={onClick}>
+    <button aria-label={ariaLabel} className={classNames(oStyles.noDefaultButtonStyle)} onClick={onClick}>
       <i className={oStyles.flex}>
         <FontAwesomeIcon className={classNames(size, oStyles.actionLabelColor)} icon={icon} />
       </i>
@@ -436,7 +436,12 @@ export default class ObjectInfoDialog extends Component {
             <div className={classNames(oStyles.floatContainer, oStyles.objectActionRow)}>
               {showRemoveButton && (
                 <div className={oStyles.floatLeft}>
-                  {actionRowIcon(faTrashAlt, oStyles.s44x44, this.remove.bind(this), "Remove Object")}
+                  <ActionRowIcon
+                    icon={faTrashAlt}
+                    size={oStyles.s44x44}
+                    onClick={this.remove.bind(this)}
+                    ariaLabel={"Remove Object"}
+                  />
                 </div>
               )}
               {showPinButton && (
