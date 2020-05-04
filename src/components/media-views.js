@@ -700,6 +700,9 @@ AFRAME.registerComponent("media-video", {
         // If hls.js is supported we always use it as it gives us better events
       } else if (contentType.startsWith("application/dash")) {
         const dashPlayer = MediaPlayer().create();
+        dashPlayer.extend("RequestModifier", function() {
+          return { modifyRequestHeader: xhr => xhr, modifyRequestURL: proxiedUrlFor };
+        });
         dashPlayer.on(MediaPlayer.events.ERROR, failLoad);
         dashPlayer.initialize(videoEl, url);
         dashPlayer.setTextDefaultEnabled(false);
