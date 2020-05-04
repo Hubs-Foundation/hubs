@@ -339,7 +339,7 @@ AFRAME.registerComponent("media-video", {
     });
 
     this.audioOutputModePref = window.APP.store.state.preferences.audioOutputMode;
-    window.APP.store.addEventListener("statechanged", () => {
+    this.onPreferenceChanged = () => {
       const newPref = window.APP.store.state.preferences.audioOutputMode;
       if (this.audioOutputModePref !== newPref) {
         this.audioOutputModePref = newPref;
@@ -347,7 +347,8 @@ AFRAME.registerComponent("media-video", {
           this.setupAudio();
         }
       }
-    });
+    };
+    window.APP.store.addEventListener("statechanged", this.onPreferenceChanged);
   },
 
   isMineOrLocal() {
@@ -945,6 +946,8 @@ AFRAME.registerComponent("media-video", {
       this.seekForwardButton.object3D.removeEventListener("interact", this.seekForward);
       this.seekBackButton.object3D.removeEventListener("interact", this.seekBack);
     }
+
+    window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
   }
 });
 
