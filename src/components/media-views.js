@@ -341,11 +341,10 @@ AFRAME.registerComponent("media-video", {
     this.audioOutputModePref = window.APP.store.state.preferences.audioOutputMode;
     this.onPreferenceChanged = () => {
       const newPref = window.APP.store.state.preferences.audioOutputMode;
-      if (this.audioOutputModePref !== newPref) {
-        this.audioOutputModePref = newPref;
-        if (this.audio) {
-          this.setupAudio();
-        }
+      const shouldRecreateAudio = this.audioOutputModePref !== newPref && this.audio && this.mediaElementAudioSource;
+      this.audioOutputModePref = newPref;
+      if (shouldRecreateAudio) {
+        this.setupAudio();
       }
     };
     window.APP.store.addEventListener("statechanged", this.onPreferenceChanged);
@@ -494,11 +493,27 @@ AFRAME.registerComponent("media-video", {
   },
 
   async update(oldData) {
-    const src = this.data.src;
     this.updatePlaybackState();
 
-    if (!src || src === oldData.src) return;
-    return this.updateSrc(oldData);
+    const shouldUpdateSrc = this.data.src && this.data.src !== oldData.src;
+    if (shouldUpdateSrc) {
+      this.updateSrc(oldData);
+      return;
+    }
+    const shouldRecreateAudio =
+      !shouldUpdateSrc && this.mediaElementAudioSource && oldData.audioType !== this.data.audioType;
+    if (shouldRecreateAudio) {
+      this.setupAudio();
+      return;
+    }
+
+    const disablePositionalAudio = window.APP.store.state.preferences.audioOutputMode === "audio";
+    const shouldSetPositionalAudioProperties =
+      this.audio && this.data.audioType === "pannernode" && !disablePositionalAudio;
+    if (shouldSetPositionalAudioProperties) {
+      this.setPositionalAudioProperties();
+      return;
+    }
   },
 
   setupAudio() {
