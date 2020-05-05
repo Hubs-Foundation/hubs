@@ -110,7 +110,10 @@ AFRAME.registerComponent("audio-source", {
         (audioOutputMode === "audio" && networkedAudioSource.data.positional)
       ) {
         networkedAudioSource.data.positional = audioOutputMode === "panner" ? true : false;
-        networkedAudioSource.sound.disconnect();
+
+        if (networkedAudioSource.sound && networkedAudioSource.sound.source) {
+          networkedAudioSource.sound.disconnect();
+        }
         networkedAudioSource.setupSound();
         const soundSource = networkedAudioSource.sound.context.createMediaStreamSource(networkedAudioSource.stream);
         networkedAudioSource.sound.setNodeSource(soundSource);
