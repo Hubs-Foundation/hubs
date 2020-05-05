@@ -492,7 +492,7 @@ AFRAME.registerComponent("media-video", {
     }
   },
 
-  async update(oldData) {
+  update(oldData) {
     this.updatePlaybackState();
 
     const shouldUpdateSrc = this.data.src && this.data.src !== oldData.src;
