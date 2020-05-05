@@ -122,7 +122,7 @@ function createDefaultAppConfig() {
     // Enable all features with a boolean type
     if (categoryName === "features") {
       for (const [key, schema] of Object.entries(category)) {
-        if (key === "require_account_for_join") {
+        if (key === "require_account_for_join" || key === "disable_room_creation") {
           appConfig[categoryName][key] = false;
         } else {
           appConfig[categoryName][key] = schema.type === "boolean" ? true : null;
