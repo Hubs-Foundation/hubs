@@ -314,6 +314,10 @@ export class CameraSystem {
     const translation = new THREE.Matrix4();
     let uiRoot;
     return function tick(scene, dt) {
+      this.viewingCamera.object3DMap.camera.matrixNeedsUpdate = true;
+      this.viewingCamera.object3DMap.camera.updateMatrix();
+      this.viewingCamera.object3DMap.camera.updateMatrixWorld();
+
       const entered = scene.is("entered");
       uiRoot = uiRoot || document.getElementById("ui-root");
       const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
@@ -322,7 +326,6 @@ export class CameraSystem {
         const position = new THREE.Vector3();
         const quat = new THREE.Quaternion();
         const scale = new THREE.Vector3();
-        this.viewingCamera.object3DMap.camera.updateMatrices();
         this.viewingRig.object3D.updateMatrices();
         this.viewingRig.object3D.matrixWorld.decompose(position, quat, scale);
         position.setFromMatrixPosition(this.viewingCamera.object3DMap.camera.matrixWorld);
