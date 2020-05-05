@@ -117,10 +117,14 @@ AFRAME.registerComponent("audio-source", {
   },
 
   updateNetworkedAudioSource(networkedAudioSource) {
-    const disablePositionalAudio = this.audioOutputModePref === "audio";
-    networkedAudioSource.data.positional = disablePositionalAudio ? false : this.originalValueOfPositional;
     if (networkedAudioSource.sound) {
       networkedAudioSource.sound.disconnect();
+      networkedAudioSource.el.removeObject3D(networkedAudioSource.attrName);
+      delete networkedAudioSource.sound;
+    }
+    const disablePositionalAudio = this.audioOutputModePref === "audio";
+    if (networkedAudioSource.data.positional === disablePositionalAudio) {
+      networkedAudioSource.el.setAttribute("networked-audio-source", { positional: !disablePositionalAudio });
     }
     networkedAudioSource.setupSound();
     const soundSource = networkedAudioSource.sound.context.createMediaStreamSource(networkedAudioSource.stream);
@@ -132,7 +136,6 @@ AFRAME.registerComponent("audio-source", {
     const networkedAudioSource = this.el.components["networked-audio-source"];
     if (networkedAudioSource && this.networkedAudioSource !== networkedAudioSource) {
       this.networkedAudioSource = networkedAudioSource;
-      this.originalValueOfPositional = networkedAudioSource.data.positional;
       this.updateNetworkedAudioSource(networkedAudioSource);
     }
   },
