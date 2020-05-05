@@ -2,7 +2,7 @@ import React from "react";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 import { createAndRedirectToNewHub } from "../../utils/phoenix-utils";
-import styles from "../../assets/stylesheets/index.scss";
+import styles from "./Button.scss";
 
 export function CreateRoomButton() {
   return (

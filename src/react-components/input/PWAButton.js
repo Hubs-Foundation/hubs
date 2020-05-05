@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import styles from "../../assets/stylesheets/index.scss";
+import styles from "./Button.scss";
 import checkIsMobile from "../../utils/is-mobile";
 
 const isMobile = checkIsMobile();

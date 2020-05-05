@@ -1,5 +1,9 @@
-@import 'root-vars';
-@import 'shared';
+@import '../../assets/stylesheets/root-vars';
+@import '../../assets/stylesheets/shared';
+
+:local(.home-page) {
+  flex: 1;
+}
 
 :local(.video-container) {
   position: absolute;

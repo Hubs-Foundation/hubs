@@ -9,7 +9,7 @@ import MediaTiles from "../media-tiles";
 import { CreateRoomButton } from "../input/CreateRoomButton";
 import { PWAButton } from "../input/PWAButton";
 import { useFeaturedRooms } from "./useFeaturedRooms";
-import styles from "../../assets/stylesheets/index.scss";
+import styles from "./HomePage.scss";
 import mediaBrowserStyles from "../../assets/stylesheets/media-browser.scss";
 import discordLogoSmall from "../../assets/images/discord-logo-small.png";
 import { AuthContext } from "../auth/AuthContext";
@@ -43,7 +43,7 @@ export function HomePage() {
   const canCreateRooms = !configs.feature("disable_room_creation") || auth.isAdmin;
 
   return (
-    <Page>
+    <Page className={styles.homePage}>
       <div className={styles.heroContent} style={{ backgroundImage: configs.image("home_background", true) }}>
         <div className={styles.heroPanel}>
           <div className={styles.container}>
