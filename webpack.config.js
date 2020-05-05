@@ -11,6 +11,7 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPl
 const TOML = require("@iarna/toml");
 const fetch = require("node-fetch");
 const packageLock = require("./package-lock.json");
+const request = require("request");
 
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
@@ -167,12 +168,13 @@ async function fetchAppConfigAndEnvironmentVars() {
     throw new Error(`Error fetching Hubs Cloud config "${hubsConfigsResponse.statusText}"`);
   }
 
-  const { shortlink_domain, cors_proxy_server, thumbnail_server, non_cors_proxy_domains } = hubsConfigs.general;
+  const { shortlink_domain, thumbnail_server } = hubsConfigs.general;
 
+  process.env.RETICULUM_SERVER = host;
   process.env.SHORTLINK_DOMAIN = shortlink_domain;
-  process.env.CORS_PROXY_SERVER = cors_proxy_server;
+  process.env.CORS_PROXY_SERVER = "localhost:8080/cors-proxy";
   process.env.THUMBNAIL_SERVER = thumbnail_server;
-  process.env.NON_CORS_PROXY_DOMAINS = non_cors_proxy_domains + ",hubs.local";
+  process.env.NON_CORS_PROXY_DOMAINS = "hubs.local,localhost";
 
   return appConfig;
 }
@@ -208,7 +210,6 @@ module.exports = async (env, argv) => {
       // Local Dev Environment (npm run local)
       Object.assign(process.env, {
         HOST: "hubs.local",
-        CORS_PROXY_HOST: "hubs-proxy.local",
         RETICULUM_SOCKET_SERVER: "hubs.local",
         CORS_PROXY_SERVER: "hubs-proxy.local:4000",
         NON_CORS_PROXY_DOMAINS: "hubs.local,dev.reticulum.io",
@@ -223,8 +224,7 @@ module.exports = async (env, argv) => {
   // In production, the environment variables are defined in CI or loaded from ita and
   // the app config is injected into the head of the page by Reticulum.
 
-  const defaultHostName = "hubs.local";
-  const host = process.env.HOST_IP || defaultHostName;
+  const host = process.env.HOST_IP || env.localDev ? "hubs.local" : "localhost";
 
   // Remove comments from .babelrc
   const babelConfig = JSON.parse(
@@ -261,12 +261,43 @@ module.exports = async (env, argv) => {
       host: "0.0.0.0",
       public: `${host}:8080`,
       useLocalIp: true,
-      allowedHosts: [host],
+      allowedHosts: [host, "hubs.local"],
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
       inline: !env.bundleAnalyzer,
       before: function(app) {
+        // Local CORS proxy
+        app.all("/cors-proxy/*", (req, res) => {
+          res.header("Access-Control-Allow-Origin", "*");
+          res.header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+          res.header("Access-Control-Allow-Headers", "Range");
+          res.header(
+            "Access-Control-Expose-Headers",
+            "Accept-Ranges, Content-Encoding, Content-Length, Content-Range, Hub-Name, Hub-Entity-Type"
+          );
+          res.header("Vary", "Origin");
+          res.header("X-Content-Type-Options", "nosniff");
+
+          const redirectLocation = req.header("location");
+
+          if (redirectLocation) {
+            res.header("Location", "https://localhost:8080/cors-proxy/" + redirectLocation);
+          }
+
+          if (req.method === "OPTIONS") {
+            res.send();
+          } else {
+            const url = req.path.replace("/cors-proxy/", "");
+            request({ url, method: req.method }, error => {
+              if (error) {
+                console.error(`cors-proxy: error fetching "${url}"\n`, error);
+                return;
+              }
+            }).pipe(res);
+          }
+        });
+
         // be flexible with people accessing via a local reticulum on another port
         app.use(cors({ origin: /hubs\.local(:\d*)?$/ }));
         // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.

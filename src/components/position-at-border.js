@@ -109,7 +109,7 @@ AFRAME.registerComponent("position-at-border", {
     if (this.didRegisterWithAnimationSystem) {
       this.el.sceneEl.systems["hubs-systems"].menuAnimationSystem.unregister(this);
     }
-    positionAtBorderComponents.splice(positionAtBorderComponents.indexOf(this, 1));
+    positionAtBorderComponents.splice(positionAtBorderComponents.indexOf(this), 1);
   },
 
   markDirty() {
