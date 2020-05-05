@@ -624,6 +624,10 @@ class UIRoot extends Component {
       this.state.audioTrackClone.stop();
     }
 
+    constraints.audio.echoCancellation = true;
+    constraints.audio.noiseSuppression = true;
+    constraints.audio.autoGainControl = true;
+
     if (isFirefoxReality) {
       //workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1626081
       constraints.audio.echoCancellation =
@@ -633,14 +637,12 @@ class UIRoot extends Component {
       constraints.audio.autoGainControl =
         window.APP.store.state.preferences.disableAutoGainControl === false ? true : false;
 
-      const preferences = {
-        disableEchoCancellation: !constraints.audio.echoCancellation,
-        disableNoiseSuppression: !constraints.audio.noiseSuppression,
-        disableAutoGainControl: !constraints.audio.autoGainControl
-      };
-      console.log("preferences", preferences);
       window.APP.store.update({
-        preferences
+        preferences: {
+          disableEchoCancellation: !constraints.audio.echoCancellation,
+          disableNoiseSuppression: !constraints.audio.noiseSuppression,
+          disableAutoGainControl: !constraints.audio.autoGainControl
+        }
       });
     }
 
