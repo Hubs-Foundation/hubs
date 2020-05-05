@@ -24,7 +24,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
     this.objWorldPos = new THREE.Vector3();
 
     waitForDOMContentLoaded().then(() => {
-      this.cam = document.getElementById("viewing-camera").object3D;
+      this.cam = document.getElementById("viewing-camera").object3DMap.camera;
       this.updateVisibility();
     });
 

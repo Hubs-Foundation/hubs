@@ -76,7 +76,7 @@ AFRAME.registerComponent("position-at-border", {
 
   doInit() {
     this.didInit = true;
-    this.cam = document.getElementById("viewing-camera").object3D;
+    this.cam = document.getElementById("viewing-camera").object3DMap.camera;
     if (!this.data.target) {
       console.error("No target for position-at-border on element:", this.el);
       return;
