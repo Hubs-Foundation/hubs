@@ -1,4 +1,4 @@
-const INFO_INIT_FAILED = "Failed to initialize networked-audio-source.";
+const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
 const INFO_NO_NETWORKED_EL = "Could not find networked el.";
 const INFO_NO_OWNER = "Networked component has no owner.";
 
@@ -50,7 +50,7 @@ async function getMediaStream(el) {
   return stream;
 }
 
-AFRAME.registerComponent("networked-audio-source", {
+AFRAME.registerComponent("avatar-audio-source", {
   schema: {
     positional: { default: true },
     distanceModel: {

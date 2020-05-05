@@ -45,8 +45,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
     const positionA = new THREE.Vector3();
     const positionB = new THREE.Vector3();
     return function update() {
-      const audio =
-        this.networkedAudioSource && this.networkedAudioSource.el.getObject3D(this.networkedAudioSource.attrName);
+      const audio = this.avatarAudioSource && this.avatarAudioSource.el.getObject3D(this.avatarAudioSource.attrName);
       if (!audio) {
         return;
       }
@@ -55,7 +54,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
       const volumeModifier = (globalVoiceVolume !== undefined ? globalVoiceVolume : 100) / 100;
       let gain = volumeModifier * this.data.volume;
       if (audioOutputMode === "audio") {
-        this.networkedAudioSource.el.object3D.getWorldPosition(positionA);
+        this.avatarAudioSource.el.object3D.getWorldPosition(positionA);
         this.el.sceneEl.camera.getWorldPosition(positionB);
         const squaredDistance = positionA.distanceToSquared(positionB);
         gain = gain * Math.min(1, 10 / Math.max(1, squaredDistance));
@@ -76,14 +75,14 @@ AFRAME.registerComponent("avatar-volume-controls", {
   },
 
   tick() {
-    if (!this.networkedAudioSource && !this.searchFailed) {
+    if (!this.avatarAudioSource && !this.searchFailed) {
       // Walk up to Spine and then search down.
-      const sourceEl = this.el.parentNode.parentNode.querySelector("[networked-audio-source]");
-      if (!sourceEl || !sourceEl.components["networked-audio-source"]) {
+      const sourceEl = this.el.parentNode.parentNode.querySelector("[avatar-audio-source]");
+      if (!sourceEl || !sourceEl.components["avatar-audio-source"]) {
         this.searchFailed = true;
         return;
       }
-      this.networkedAudioSource = sourceEl.components["networked-audio-source"];
+      this.avatarAudioSource = sourceEl.components["avatar-audio-source"];
     }
 
     this.update();

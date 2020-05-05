@@ -10,8 +10,8 @@ function updateMediaAudioSettings(mediaVideo, settings) {
   });
 }
 
-function updateAvatarAudioSettings(networkedAudioSource, settings, positional) {
-  networkedAudioSource.el.setAttribute("networked-audio-source", {
+function updateAvatarAudioSettings(avatarAudioSource, settings, positional) {
+  avatarAudioSource.el.setAttribute("avatar-audio-source", {
     positional,
     distanceModel: settings.avatarDistanceModel,
     maxDistance: settings.avatarMaxDistance,
@@ -39,7 +39,7 @@ export class AudioSettingsSystem {
     };
     this.audioSettings = this.defaultSettings;
     this.mediaVideos = [];
-    this.networkedAudioSources = [];
+    this.avatarAudioSources = [];
 
     this.sceneEl.addEventListener("reset_scene", this.onSceneReset);
 
@@ -73,19 +73,19 @@ export class AudioSettingsSystem {
     this.mediaVideos.splice(this.mediaVideos.indexOf(mediaVideo), 1);
   }
 
-  registerAvatarAudioSource(networkedAudioSource) {
-    const index = this.networkedAudioSources.indexOf(networkedAudioSource);
+  registerAvatarAudioSource(avatarAudioSource) {
+    const index = this.avatarAudioSources.indexOf(avatarAudioSource);
     if (index === -1) {
-      this.networkedAudioSources.push(networkedAudioSource);
+      this.avatarAudioSources.push(avatarAudioSource);
     }
     const positional = window.APP.store.state.preferences.audioOutputMode !== "audio";
-    updateAvatarAudioSettings(networkedAudioSource, this.audioSettings, positional);
+    updateAvatarAudioSettings(avatarAudioSource, this.audioSettings, positional);
   }
 
-  unregisterAvatarAudioSource(networkedAudioSource) {
-    const index = this.networkedAudioSources.indexOf(networkedAudioSource);
+  unregisterAvatarAudioSource(avatarAudioSource) {
+    const index = this.avatarAudioSources.indexOf(avatarAudioSource);
     if (index !== -1) {
-      this.networkedAudioSources.splice(index, 1);
+      this.avatarAudioSources.splice(index, 1);
     }
   }
 
@@ -97,8 +97,8 @@ export class AudioSettingsSystem {
     }
 
     const positional = window.APP.store.state.preferences.audioOutputMode !== "audio";
-    for (const networkedAudioSource of this.networkedAudioSources) {
-      updateAvatarAudioSettings(networkedAudioSource, settings, positional);
+    for (const avatarAudioSource of this.avatarAudioSources) {
+      updateAvatarAudioSettings(avatarAudioSource, settings, positional);
     }
   }
 
