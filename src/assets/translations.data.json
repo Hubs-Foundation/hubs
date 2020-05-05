@@ -291,7 +291,7 @@
     "preferences.movementSpeedModifier": "Movement speed modifier",
     "preferences.disableAutoPixelRatio": "Disable automatic pixel ratio adjustments",
     "preferences.disableEchoCancellation": "Disable microphone echo cancellation (requires restart)",
-    "preferences.disableNoiseSupression": "Disable microphone noise supression (requires restart)",
+    "preferences.disableNoiseSuppression": "Disable microphone noise supression (requires restart)",
     "preferences.disableAutoGainControl": "Disable microphone automatic gain control (requires restart)",
     "settings.return-to-vr": "Return to VR",
     "settings.change-avatar": "Set Name & Avatar",
