@@ -28,7 +28,7 @@ export class ScenePreviewCameraSystem {
         el.components["scene-preview-camera"].tick2();
         if (hubsSystems && viewingCamera) {
           el.object3D.updateMatrices();
-          setMatrixWorld(viewingCamera.object3D, el.object3D.matrixWorld);
+          setMatrixWorld(viewingCamera.object3DMap.camera, el.object3D.matrixWorld);
         }
       }
     }

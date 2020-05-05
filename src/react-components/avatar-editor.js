@@ -462,7 +462,7 @@ export default class AvatarEditor extends Component {
                 {debug && this.textField("parent_avatar_id", "Parent Avatar ID")}
                 {debug && this.textField("parent_avatar_listing_id", "Parent Avatar Listing ID")}
                 {debug && this.textarea("description", "Description")}
-                {!!this.state.baseAvatarResults.length && this.selectListingGrid("parent_avatar_listing_id", "Model")}
+                {!this.props.avatarId && this.selectListingGrid("parent_avatar_listing_id", "Model")}
 
                 <label>Skin</label>
                 {this.mapField("base_map", "Base Map", "image/*")}
