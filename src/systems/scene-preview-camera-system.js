@@ -13,7 +13,7 @@ export class ScenePreviewCameraSystem {
   }
 
   unregister(el) {
-    this.entities.splice(this.entities.indexOf(el, 1));
+    this.entities.splice(this.entities.indexOf(el), 1);
   }
 
   tick() {
