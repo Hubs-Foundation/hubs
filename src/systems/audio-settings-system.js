@@ -55,7 +55,7 @@ export class AudioSettingsSystem {
   }
 
   unregisterMediaAudioSource(audioSource) {
-    this.mediaAudioSources.splice(this.mediaAudioSources.indexOf(audioSource, 1));
+    this.mediaAudioSources.splice(this.mediaAudioSources.indexOf(audioSource), 1);
   }
 
   registerAvatarAudioSource(audioSource) {
@@ -64,7 +64,7 @@ export class AudioSettingsSystem {
   }
 
   unregisterAvatarAudioSource(audioSource) {
-    this.avatarAudioSources.splice(this.avatarAudioSources.indexOf(audioSource, 1));
+    this.avatarAudioSources.splice(this.avatarAudioSources.indexOf(audioSource), 1);
   }
 
   updateAudioSettings(settings) {
