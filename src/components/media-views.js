@@ -1104,7 +1104,7 @@ AFRAME.registerComponent("media-image", {
       !this.data.batch ||
       texture == errorTexture ||
       this.data.contentType.includes("image/gif") ||
-      (texture.image && texture.image.hasAlpha);
+      !!(texture.image && texture.image.hasAlpha);
 
     this.mesh.material.map = texture;
     this.mesh.material.needsUpdate = true;
