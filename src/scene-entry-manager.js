@@ -91,6 +91,7 @@ export default class SceneEntryManager {
     if (isBotMode) {
       this._runBot(mediaStream);
       this.scene.addState("entered");
+      this.hubChannel.sendEnteredEvent();
       return;
     }
 

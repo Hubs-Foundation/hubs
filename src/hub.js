@@ -1285,6 +1285,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (isInitialJoin) {
         store.addEventListener("profilechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
 
+        const requestedOccupants = [];
+
+        const requestOccupants = async (sessionIds, state) => {
+          while (!NAF.connection.isConnected()) await nextTick();
+
+          if (NAF.connection.adapter) {
+            requestedOccupants.length = 0;
+            for (let i = 0; i < sessionIds.length; i++) {
+              const sessionId = sessionIds[i];
+              if (sessionId !== NAF.clientId && state[sessionId].metas[0].presence === "room") {
+                requestedOccupants.push(sessionId);
+              }
+            }
+
+            NAF.connection.adapter.syncOccupants(requestedOccupants);
+          }
+        };
+
         hubChannel.presence.onSync(() => {
           const presence = hubChannel.presence;
 
@@ -1294,7 +1312,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             entryDisallowed: !hubChannel.canEnterRoom(uiProps.hub)
           });
 
-          const occupantCount = Object.entries(presence.state).length;
+          const sessionIds = Object.getOwnPropertyNames(presence.state);
+          const occupantCount = sessionIds.length;
           vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
 
           if (occupantCount > 1) {
@@ -1302,6 +1321,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           } else {
             scene.removeState("copresent");
           }
+
+          requestOccupants(sessionIds, presence.state);
 
           // HACK - Set a flag on the presence object indicating if the initial sync has completed,
           // which is used to determine if we should fire join/leave messages into the presence log.
