@@ -63,6 +63,7 @@ AFRAME.registerComponent("networked-audio-source", {
   },
 
   init: async function() {
+    this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.registerAvatarAudioSource(this);
     const stream = await getMediaStream(this.el);
     const isRemoved = !this.el.parentNode;
     if (!stream || isRemoved) return;
@@ -84,7 +85,6 @@ AFRAME.registerComponent("networked-audio-source", {
     audio.setNodeSource(mediaStreamSource);
     this.el.emit("sound-source-set", { soundSource: mediaStreamSource });
     this.el.setObject3D(this.attrName, audio);
-    this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.registerAvatarAudioSource(this);
   },
 
   update(oldData) {
