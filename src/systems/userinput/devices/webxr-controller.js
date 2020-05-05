@@ -2,6 +2,8 @@ import { paths } from "../paths";
 import { Pose } from "../pose";
 
 const ONES = new THREE.Vector3(1, 1, 1);
+// Note these offests are specifically for the oculus touch controllers on a Quest.
+// We'll have to account for other headsets and controllers as we expand WebXR support.
 const LEFT_HAND_OFFSET = new THREE.Matrix4().makeTranslation(-0.025, -0.03, 0.12);
 const RIGHT_HAND_OFFSET = new THREE.Matrix4().makeTranslation(0.025, -0.03, 0.12);
 const m = new THREE.Matrix4();
