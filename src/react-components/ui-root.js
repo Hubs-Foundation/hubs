@@ -110,6 +110,7 @@ async function grantedMicLabels() {
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isMobilePhoneOrVR = isMobile || isMobileVR;
+const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
@@ -607,7 +608,7 @@ class UIRoot extends Component {
     if (lastUsedMicDeviceId) {
       hasAudio = await this.fetchAudioTrack({ audio: { deviceId: { ideal: lastUsedMicDeviceId } } });
     } else {
-      hasAudio = await this.fetchAudioTrack({ audio: true });
+      hasAudio = await this.fetchAudioTrack({ audio: {} });
     }
 
     await this.setupNewMediaStream();
@@ -621,6 +622,31 @@ class UIRoot extends Component {
     }
     if (this.state.audioTrackClone) {
       this.state.audioTrackClone.stop();
+    }
+
+    constraints.audio.echoCancellation =
+      window.APP.store.state.preferences.disableEchoCancellation === true ? false : true;
+    constraints.audio.noiseSuppression =
+      window.APP.store.state.preferences.disableNoiseSuppression === true ? false : true;
+    constraints.audio.autoGainControl =
+      window.APP.store.state.preferences.disableAutoGainControl === true ? false : true;
+
+    if (isFirefoxReality) {
+      //workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1626081
+      constraints.audio.echoCancellation =
+        window.APP.store.state.preferences.disableEchoCancellation === false ? true : false;
+      constraints.audio.noiseSuppression =
+        window.APP.store.state.preferences.disableNoiseSuppression === false ? true : false;
+      constraints.audio.autoGainControl =
+        window.APP.store.state.preferences.disableAutoGainControl === false ? true : false;
+
+      window.APP.store.update({
+        preferences: {
+          disableEchoCancellation: !constraints.audio.echoCancellation,
+          disableNoiseSuppression: !constraints.audio.noiseSuppression,
+          disableAutoGainControl: !constraints.audio.autoGainControl
+        }
+      });
     }
 
     try {
