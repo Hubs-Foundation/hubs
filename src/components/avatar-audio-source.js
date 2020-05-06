@@ -15,20 +15,6 @@ function createSilentAudioEl(stream) {
   return audioEl;
 }
 
-function getOrCreateAudioListenerForScene(scene) {
-  if (!scene.audioListener) {
-    // Would prefer not to have to do this, and am not sure if it's required,
-    // so adding a warning for now and hoping to remove this later.
-    console.warn("Scene did not have an audio listener. Creating one now.");
-    scene.audioListener = new THREE.AudioListener();
-    scene.camera && scene.camera.add(scene.audioListener);
-    scene.addEventListener("camera-set-active", function(evt) {
-      evt.detail.cameraEl.getObject3D("camera").add(scene.audioListener);
-    });
-  }
-  return scene.audioListener;
-}
-
 async function getMediaStream(el) {
   const networkedEl = await NAF.utils.getNetworkedEntity(el).catch(e => {
     console.error(INFO_INIT_FAILED, INFO_NO_NETWORKED_EL, e);
@@ -50,6 +36,13 @@ async function getMediaStream(el) {
   return stream;
 }
 
+function setPositionalAudioProperties(audio, settings) {
+  audio.setDistanceModel(settings.distanceModel);
+  audio.setMaxDistance(settings.maxDistance);
+  audio.setRefDistance(settings.refDistance);
+  audio.setRolloffFactor(settings.rolloffFactor);
+}
+
 AFRAME.registerComponent("avatar-audio-source", {
   schema: {
     positional: { default: true },
@@ -62,19 +55,16 @@ AFRAME.registerComponent("avatar-audio-source", {
     rolloffFactor: { default: 1 }
   },
 
-  init: async function() {
-    this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.registerAvatarAudioSource(this);
+  createAudio: async function() {
+    this.isCreatingAudio = true;
     const stream = await getMediaStream(this.el);
     const isRemoved = !this.el.parentNode;
     if (!stream || isRemoved) return;
 
-    const audioListener = getOrCreateAudioListenerForScene(this.el.sceneEl);
+    const audioListener = this.el.sceneEl.audioListener;
     const audio = this.data.positional ? new THREE.PositionalAudio(audioListener) : new THREE.Audio(audioListener);
     if (this.data.positional) {
-      audio.setDistanceModel(this.data.distanceModel);
-      audio.setMaxDistance(this.data.maxDistance);
-      audio.setRefDistance(this.data.refDistance);
-      audio.setRolloffFactor(this.data.rolloffFactor);
+      setPositionalAudioProperties(audio, this.data);
     }
 
     if (SHOULD_CREATE_SILENT_AUDIO_ELS) {
@@ -83,33 +73,41 @@ AFRAME.registerComponent("avatar-audio-source", {
 
     const mediaStreamSource = audio.context.createMediaStreamSource(stream);
     audio.setNodeSource(mediaStreamSource);
-    this.el.emit("sound-source-set", { soundSource: mediaStreamSource });
     this.el.setObject3D(this.attrName, audio);
+    this.el.emit("sound-source-set", { soundSource: mediaStreamSource });
+    this.isCreatingAudio = false;
   },
 
-  update(oldData) {
-    const audio = this.el.getObject3D(this.attrName);
-    if (!audio) return;
-
-    const shouldRecreateAudio = oldData.positional !== this.data.positional;
-    if (shouldRecreateAudio) {
-      audio.disconnect();
-      this.el.removeObject3D(this.attrName);
-      this.init();
-    } else if (this.data.positional) {
-      audio.setDistanceModel(this.data.distanceModel);
-      audio.setMaxDistance(this.data.maxDistance);
-      audio.setRefDistance(this.data.refDistance);
-      audio.setRolloffFactor(this.data.rolloffFactor);
-    }
-  },
-
-  remove: function() {
+  destroyAudio() {
     const audio = this.el.getObject3D(this.attrName);
     if (!audio) return;
 
     audio.disconnect();
     this.el.removeObject3D(this.attrName);
+  },
+
+  init() {
+    this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.registerAvatarAudioSource(this);
+    this.createAudio();
+  },
+
+  update(oldData) {
+    if (this.isCreatingAudio) return;
+
+    const audio = this.el.getObject3D(this.attrName);
+    if (!audio) return;
+
+    const shouldRecreateAudio = oldData.positional !== this.data.positional;
+    if (shouldRecreateAudio) {
+      this.destroyAudio();
+      this.createAudio();
+    } else if (this.data.positional) {
+      setPositionalAudioProperties(audio, this.data);
+    }
+  },
+
+  remove: function() {
     this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.unregisterAvatarAudioSource(this);
+    this.destroyAudio();
   }
 });
