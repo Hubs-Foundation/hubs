@@ -31,7 +31,7 @@ AFRAME.registerComponent("hud-controller", {
 
   tick() {
     const hud = this.el.object3D;
-    const head = this.data.head.object3D;
+    const head = this.data.head.object3DMap.camera;
 
     const { offset, lookCutoff, animRange, yawCutoff } = this.data;
 

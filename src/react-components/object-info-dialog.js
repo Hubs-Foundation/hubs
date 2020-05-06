@@ -50,7 +50,8 @@ const DISPLAY_IMAGE = new Map([
 const ICON_WIDTH = 60;
 const HALF_ICON_WIDTH = 60 / 2;
 
-function headerIcon(icon, size, onClick, ariaLabel) {
+function HeaderIcon(props) {
+  const { icon, size, onClick, ariaLabel } = props;
   return (
     <button aria-label={ariaLabel} className={classNames(oStyles.noDefaultButtonStyle)} onClick={onClick}>
       <i className={oStyles.flex}>
@@ -62,7 +63,15 @@ function headerIcon(icon, size, onClick, ariaLabel) {
     </button>
   );
 }
-function headerIconLink(icon, size, href) {
+HeaderIcon.propTypes = {
+  icon: PropTypes.object,
+  size: PropTypes.string,
+  onClick: PropTypes.func,
+  ariaLabel: PropTypes.string
+};
+
+function HeaderIconLink(props) {
+  const { icon, size, href } = props;
   return (
     <a href={href} target="_blank" rel="noopener noreferrer">
       <i className={oStyles.flex}>
@@ -74,8 +83,14 @@ function headerIconLink(icon, size, href) {
     </a>
   );
 }
+HeaderIconLink.propTypes = {
+  icon: PropTypes.object,
+  size: PropTypes.string,
+  href: PropTypes.string
+};
 
-function ActionRowIcon(icon, size, onClick, ariaLabel) {
+function ActionRowIcon(props) {
+  const { icon, size, onClick, ariaLabel } = props;
   return (
     <button aria-label={ariaLabel} className={classNames(oStyles.noDefaultButtonStyle)} onClick={onClick}>
       <i className={oStyles.flex}>
@@ -84,6 +99,12 @@ function ActionRowIcon(icon, size, onClick, ariaLabel) {
     </button>
   );
 }
+ActionRowIcon.propTypes = {
+  icon: PropTypes.object,
+  size: PropTypes.string,
+  onClick: PropTypes.func,
+  ariaLabel: PropTypes.string
+};
 
 function subtitleText(text, ariaLabel) {
   return (
@@ -165,8 +186,8 @@ export default class ObjectInfoDialog extends Component {
     const targetMatrix = new THREE.Matrix4();
     const translation = new THREE.Matrix4();
     return function enqueueWaypointTravel() {
-      this.viewingCamera.object3D.updateMatrices();
-      targetMatrix.copy(this.viewingCamera.object3D.matrixWorld);
+      this.viewingCamera.object3DMap.camera.updateMatrices();
+      targetMatrix.copy(this.viewingCamera.object3DMap.camera.matrixWorld);
       affixToWorldUp(targetMatrix, targetMatrix);
       translation.makeTranslation(0, -1.6, 0.15);
       targetMatrix.multiply(translation);
@@ -321,7 +342,7 @@ export default class ObjectInfoDialog extends Component {
         {/* Header  */}
         <div className={classNames(oStyles.header, oStyles.floatContainer, rootStyles.uiInteractive)}>
           <div className={classNames(oStyles.floatLeft)}>
-            {headerIcon(faTimes, oStyles.s32x32, onClose, "Close object info panel")}
+            <HeaderIcon icon={faTimes} size={oStyles.s32x32} onClick={onClose} ariaLabel={"Close object info panel"} />
           </div>
           <div className={classNames(oStyles.floatCenter)}>
             {subtitleText(
@@ -330,20 +351,27 @@ export default class ObjectInfoDialog extends Component {
             )}
           </div>
           <div className={classNames(oStyles.floatRight)}>
-            {headerIconLink(faExternalLinkAlt, oStyles.s44x44, this.props.src)}
-            {headerIcon(
-              faLightbulb,
-              oStyles.s44x44,
-              this.toggleLights.bind(this),
-              "Toggle rendering of the background"
-            )}
+            <HeaderIconLink icon={faExternalLinkAlt} size={oStyles.s44x44} src={this.props.src} />
+            <HeaderIcon
+              icon={faLightbulb}
+              size={oStyles.s44x44}
+              onClick={this.toggleLights.bind(this)}
+              ariaLabel={"Toggle rendering of the background"}
+            />
           </div>
         </div>
 
         {/* Bottom Panel */}
         <div className={classNames(oStyles.panel, rootStyles.uiInteractive)}>
           <div className={oStyles.navigationRow}>
-            {showNavigationButtons && headerIcon(faChevronLeft, oStyles.s44x44, this.navigatePrev, "Previous Object")}
+            {showNavigationButtons && (
+              <HeaderIcon
+                icon={faChevronLeft}
+                size={oStyles.s44x44}
+                onClick={this.navigatePrev}
+                ariaLabel={"Previous Object"}
+              />
+            )}
             <div
               ref={this.navAreaRef}
               className={oStyles.innerNavigationRowContainer}
@@ -430,7 +458,14 @@ export default class ObjectInfoDialog extends Component {
                 })}
               </div>
             </div>
-            {showNavigationButtons && headerIcon(faChevronRight, oStyles.s44x44, this.navigateNext, "Next Object")}
+            {showNavigationButtons && (
+              <HeaderIcon
+                icon={faChevronRight}
+                size={oStyles.s44x44}
+                onClick={this.navigateNext}
+                ariaLabel={"Next Object"}
+              />
+            )}
           </div>
           {showObjectActionRow && (
             <div className={classNames(oStyles.floatContainer, oStyles.objectActionRow)}>
@@ -459,9 +494,12 @@ export default class ObjectInfoDialog extends Component {
                 </div>
               )}
               {showGoToButton && (
-                <div className={oStyles.floatRight}>
-                  {actionRowIcon(faStreetView, oStyles.s44x44, this.enqueueWaypointTravel, "Teleport to Object")}
-                </div>
+                <ActionRowIcon
+                  icon={faStreetView}
+                  size={oStyles.s44x44}
+                  onClick={this.enqueueWaypointTravel}
+                  ariaLabel={"Teleport to Object"}
+                />
               )}
             </div>
           )}

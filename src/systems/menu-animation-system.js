@@ -7,7 +7,7 @@ export class MenuAnimationSystem {
     this.data = new Map();
     this.tick = this.tick.bind(this);
     waitForDOMContentLoaded().then(() => {
-      this.viewingCamera = document.getElementById("viewing-camera").object3D;
+      this.viewingCamera = document.getElementById("viewing-camera").object3DMap.camera;
     });
   }
   register(component, menuEl, chooseScale) {
