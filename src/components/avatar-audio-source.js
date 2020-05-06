@@ -58,6 +58,7 @@ AFRAME.registerComponent("avatar-audio-source", {
   createAudio: async function() {
     this.isCreatingAudio = true;
     const stream = await getMediaStream(this.el);
+    this.isCreatingAudio = false;
     const isRemoved = !this.el.parentNode;
     if (!stream || isRemoved) return;
 
@@ -75,7 +76,6 @@ AFRAME.registerComponent("avatar-audio-source", {
     audio.setNodeSource(mediaStreamSource);
     this.el.setObject3D(this.attrName, audio);
     this.el.emit("sound-source-set", { soundSource: mediaStreamSource });
-    this.isCreatingAudio = false;
   },
 
   destroyAudio() {
