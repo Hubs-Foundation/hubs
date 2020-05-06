@@ -106,14 +106,6 @@ ActionRowIcon.propTypes = {
   ariaLabel: PropTypes.string
 };
 
-function subtitleText(text, ariaLabel) {
-  return (
-    <span aria-label={ariaLabel} className={oStyles.subtitleLarge}>
-      {text}
-    </span>
-  );
-}
-
 let uiRoot;
 export default class ObjectInfoDialog extends Component {
   static propTypes = {
@@ -345,10 +337,12 @@ export default class ObjectInfoDialog extends Component {
             <HeaderIcon icon={faTimes} size={oStyles.s32x32} onClick={onClose} ariaLabel={"Close object info panel"} />
           </div>
           <div className={classNames(oStyles.floatCenter)}>
-            {subtitleText(
-              `${1 + targetIndex}/${this.state.mediaEntities.length}`,
-              `Showing item ${1 + targetIndex} of ${this.state.mediaEntities.length}`
-            )}
+            <span
+              aria-label={`${1 + targetIndex}/${this.state.mediaEntities.length}`}
+              className={oStyles.subtitleLarge}
+            >
+              {`Showing item ${1 + targetIndex} of ${this.state.mediaEntities.length}`}
+            </span>
           </div>
           <div className={classNames(oStyles.floatRight)}>
             <HeaderIconLink icon={faExternalLinkAlt} size={oStyles.s44x44} src={this.props.src} />
@@ -447,7 +441,7 @@ export default class ObjectInfoDialog extends Component {
                       : {
                           left: `${LOCKED_LEFT_OFFSET}px`,
                           transitionProperty: "left",
-                          transitionDuration: "0.5s",
+                          transitionDuration: "0.25s",
                           transitionTimingFunction: "ease-out"
                         }
                     : {}
