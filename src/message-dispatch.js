@@ -141,13 +141,14 @@ export default class MessageDispatch {
         }
         break;
       case "audiomode":
-        if (window.APP.store.state.preferences.audioOutputMode !== "audio") {
-          window.APP.store.state.preferences.audioOutputMode = "audio";
-          this.log("Positional Audio disabled.");
-        } else {
-          window.APP.store.state.preferences.audioOutputMode = "panner";
-          this.log("Positional Audio enabled.");
+        {
+          const shouldEnablePositionalAudio = window.APP.store.state.preferences.audioOutputMode === "audio";
+          window.APP.store.update({
+            preferences: { audioOutputMode: shouldEnablePositionalAudio ? "panner" : "audio" }
+          });
+          this.log(`Positional Audio ${shouldEnablePositionalAudio ? "enabled" : "disabled"}.`);
         }
+        break;
     }
   };
 }
