@@ -338,14 +338,14 @@ export default class ObjectInfoDialog extends Component {
           </div>
           <div className={classNames(oStyles.floatCenter)}>
             <span
-              aria-label={`${1 + targetIndex}/${this.state.mediaEntities.length}`}
+              aria-label={`Showing item ${1 + targetIndex} of ${this.state.mediaEntities.length}`}
               className={oStyles.subtitleLarge}
             >
-              {`Showing item ${1 + targetIndex} of ${this.state.mediaEntities.length}`}
+              {`${1 + targetIndex}/${this.state.mediaEntities.length}`}
             </span>
           </div>
           <div className={classNames(oStyles.floatRight)}>
-            <HeaderIconLink icon={faExternalLinkAlt} size={oStyles.s44x44} src={this.props.src} />
+            <HeaderIconLink icon={faExternalLinkAlt} size={oStyles.s44x44} href={this.props.src} />
             <HeaderIcon
               icon={faLightbulb}
               size={oStyles.s44x44}
@@ -488,12 +488,14 @@ export default class ObjectInfoDialog extends Component {
                 </div>
               )}
               {showGoToButton && (
-                <ActionRowIcon
-                  icon={faStreetView}
-                  size={oStyles.s44x44}
-                  onClick={this.enqueueWaypointTravel}
-                  ariaLabel={"Teleport to Object"}
-                />
+                <div className={oStyles.floatRight}>
+                  <ActionRowIcon
+                    icon={faStreetView}
+                    size={oStyles.s44x44}
+                    onClick={this.enqueueWaypointTravel}
+                    ariaLabel={"Teleport to Object"}
+                  />
+                </div>
               )}
             </div>
           )}
