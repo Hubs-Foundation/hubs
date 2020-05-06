@@ -624,9 +624,12 @@ class UIRoot extends Component {
       this.state.audioTrackClone.stop();
     }
 
-    constraints.audio.echoCancellation = true;
-    constraints.audio.noiseSuppression = true;
-    constraints.audio.autoGainControl = true;
+    constraints.audio.echoCancellation =
+      window.APP.store.state.preferences.disableEchoCancellation === true ? false : true;
+    constraints.audio.noiseSuppression =
+      window.APP.store.state.preferences.disableNoiseSuppression === true ? false : true;
+    constraints.audio.autoGainControl =
+      window.APP.store.state.preferences.disableAutoGainControl === true ? false : true;
 
     if (isFirefoxReality) {
       //workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1626081
