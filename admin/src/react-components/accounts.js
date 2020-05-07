@@ -76,8 +76,10 @@ export const AccountList = withStyles(styles)(
           authorization: `bearer ${window.APP.store.state.credentials.token}`
         },
         body: JSON.stringify({
-          email: this.state.emailCreateAccount || "",
-          name: this.state.identityCreateAccount || ""
+          data: {
+            email: this.state.emailCreateAccount || "",
+            name: this.state.identityCreateAccount || ""
+          }
         })
       }).then(r => r.json());
       if (result && result.data) {
