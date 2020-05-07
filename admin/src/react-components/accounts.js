@@ -76,6 +76,7 @@ export const AccountList = withStyles(styles)(
         // [{email: , name?: }, {email: , name?: }]
         data = this.state.emailCreate
           .split(";")
+          .filter(email => email !== "")
           .map(email =>
             this.state.identityCreate.length
               ? { email: email.trim(), name: this.state.identityCreate }
@@ -117,7 +118,7 @@ export const AccountList = withStyles(styles)(
               console.log(source);
               const indexOfEmail = +source.match(/\[(.*?)\]/)[1];
               console.log(indexOfEmail);
-              const email = data[indexOfEmail];
+              const email = data[indexOfEmail].email;
               console.log(email);
               prev[errorMessage] = prev[errorMessage] ? prev[errorMessage].push(email) : [email];
             }
@@ -126,7 +127,7 @@ export const AccountList = withStyles(styles)(
           console.log("errors");
           console.log(errors);
           for (const errorMessage in errors) {
-            status += errorMessage + " :\n" + errors[errorMessage];
+            status += errorMessage + " : \n\n" + errors[errorMessage].toString();
           }
           console.log("status");
           console.log(status);
@@ -159,9 +160,7 @@ export const AccountList = withStyles(styles)(
         <>
           <Card classes={{ root: classes.searchCard }}>
             <CardContent>
-              <Typography component="h2">
-                Create account(s) (separate emails with &quot;;&quot; for multiple)
-              </Typography>
+              <Typography component="h2">Create account (for multiple separate emails with &quot;;&quot;)</Typography>
               <form onSubmit={this.onCreateAccount.bind(this)}>
                 <MuiTextField
                   label="Email address(es)"
@@ -181,7 +180,11 @@ export const AccountList = withStyles(styles)(
                   <SnackbarContent message={this.state.createStatus}></SnackbarContent>
                 </Snackbar>
               </form>
-              {this.state.createErrorResults && <Typography component="p">{this.state.createErrorResults}</Typography>}
+              {this.state.createErrorResults && (
+                <Typography component="p" color="secondary" style={{ paddingTop: "20px" }}>
+                  {this.state.createErrorResults}
+                </Typography>
+              )}
             </CardContent>
           </Card>
           <Card classes={{ root: classes.searchCard }}>
