@@ -43,15 +43,15 @@ export const AccountList = withStyles(styles)(
     state = {
       emailSearch: "",
       searching: false,
-      accountSearchStatus: null,
-      emailCreateAccount: "",
-      identityCreateAccount: "",
+      searchStatus: null,
+      emailCreate: "",
+      identityCreate: "",
       creating: false,
-      accountCreateStatus: null
+      createStatus: null
     };
     async onAccountSearch(e) {
       e.preventDefault();
-      this.setState({ searching: true, accountSearchStatus: null });
+      this.setState({ searching: true, searchStatus: null });
       const result = await fetch("/api/v1/accounts/search", {
         method: "post",
         headers: {
@@ -63,12 +63,28 @@ export const AccountList = withStyles(styles)(
       if (result && result.data) {
         window.location = `#/accounts/${result.data[0].id}`;
       } else {
-        this.setState({ searching: false, accountSearchStatus: "Account not found" });
+        this.setState({ searching: false, searchStatus: "Account not found" });
       }
     }
     async onCreateAccount(e) {
       e.preventDefault();
-      this.setState({ creating: true, accountCreateStatus: null });
+      this.setState({ creating: true, createStatus: null });
+      let data = {};
+      if (this.state.emailCreate.includes(";")) {
+        // create multiple accounts using email
+        // [{email: , name?: }, {email: , name?: }]
+        data = this.state.emailCreate
+          .split(";")
+          .map(email =>
+            this.state.identityCreate.length ? { email: email, name: this.state.identityCreate } : { email }
+          );
+      } else {
+        // create single account
+        // {email: , name?: }
+        data = this.state.identityCreate.length
+          ? { email: this.state.emailCreate, name: this.state.identityCreate }
+          : { email: this.state.emailCreate };
+      }
       const result = await fetch("/api/v1/accounts", {
         method: "post",
         headers: {
@@ -76,26 +92,22 @@ export const AccountList = withStyles(styles)(
           authorization: `bearer ${window.APP.store.state.credentials.token}`
         },
         body: JSON.stringify({
-          data: {
-            email: this.state.emailCreateAccount || "",
-            name: this.state.identityCreateAccount || ""
-          }
+          data: data
         })
       }).then(r => r.json());
       if (result && result.data) {
-        // window.location = `#/accounts/${result.data[0].id}`;
         console.log(result);
-        this.setState({ creating: false, accountCreateStatus: "Account created" });
+        this.setState({ creating: false, createStatus: "Account created" });
       } else {
         console.log(result);
-        this.setState({ creating: false, accountCreateStatus: "Could not create account" });
+        this.setState({ creating: false, createStatus: "Could not create account" });
       }
     }
     render() {
       const { classes } = this.props;
 
-      console.log(this.state.emailCreateAccount);
-      console.log(this.state.identityCreateAccount);
+      console.log(this.state.emailCreate);
+      console.log(this.state.identityCreate);
 
       return (
         <>
@@ -107,17 +119,17 @@ export const AccountList = withStyles(styles)(
                   label="Email address"
                   type="email"
                   required
-                  onChange={e => this.setState({ emailCreateAccount: e.target.value })}
+                  onChange={e => this.setState({ emailCreate: e.target.value })}
                 />
                 <MuiTextField
                   label="Identity (optional)"
                   type="text"
-                  onChange={e => this.setState({ identityCreateAccount: e.target.value })}
+                  onChange={e => this.setState({ identityCreate: e.target.value })}
                 />
                 <Button onClick={this.onCreateAccount.bind(this)}>Create</Button>
                 {this.state.creating && <CircularProgress />}
-                <Snackbar open={!!this.state.accountCreateStatus} autoHideDuration={5000}>
-                  <SnackbarContent message={this.state.accountCreateStatus}></SnackbarContent>
+                <Snackbar open={!!this.state.createStatus} autoHideDuration={5000}>
+                  <SnackbarContent message={this.state.createStatus}></SnackbarContent>
                 </Snackbar>
               </form>
             </CardContent>
@@ -134,8 +146,8 @@ export const AccountList = withStyles(styles)(
                 />
                 <Button onClick={this.onAccountSearch.bind(this)}>Find</Button>
                 {this.state.searching && <CircularProgress />}
-                <Snackbar open={!!this.state.accountSearchStatus} autoHideDuration={5000}>
-                  <SnackbarContent message={this.state.accountSearchStatus}></SnackbarContent>
+                <Snackbar open={!!this.state.searchStatus} autoHideDuration={5000}>
+                  <SnackbarContent message={this.state.searchStatus}></SnackbarContent>
                 </Snackbar>
               </form>
             </CardContent>
