@@ -48,7 +48,7 @@ export const AccountList = withStyles(styles)(
       identityCreate: "",
       creating: false,
       createStatus: null,
-      createResults: ""
+      createErrorResults: ""
     };
     async onAccountSearch(e) {
       e.preventDefault();
@@ -115,7 +115,9 @@ export const AccountList = withStyles(styles)(
               console.log(errorMessage);
               const source = cur.body.errors[0].source;
               console.log(source);
-              const email = data[+source.match(/\[(.*?)\]/)];
+              const indexOfEmail = +source.match(/\[(.*?)\]/)[1];
+              console.log(indexOfEmail);
+              const email = data[indexOfEmail];
               console.log(email);
               prev[errorMessage] = prev[errorMessage] ? prev[errorMessage].push(email) : [email];
             }
@@ -128,7 +130,7 @@ export const AccountList = withStyles(styles)(
           }
           console.log("status");
           console.log(status);
-          this.setState({ creating: false, createStatus: "Errors creating accounts", createResults: status });
+          this.setState({ creating: false, createStatus: "Errors creating accounts", createErrorResults: status });
         } else {
           status = result.errors[0].detail;
           console.log("status");
@@ -153,10 +155,6 @@ export const AccountList = withStyles(styles)(
     }
     render() {
       const { classes } = this.props;
-
-      console.log(this.state.emailCreate);
-      console.log(this.state.identityCreate);
-
       return (
         <>
           <Card classes={{ root: classes.searchCard }}>
@@ -171,6 +169,7 @@ export const AccountList = withStyles(styles)(
                   required
                   onChange={e => this.setState({ emailCreate: e.target.value })}
                 />
+                <br />
                 <MuiTextField
                   label="Identity (optional)"
                   type="text"
@@ -182,7 +181,7 @@ export const AccountList = withStyles(styles)(
                   <SnackbarContent message={this.state.createStatus}></SnackbarContent>
                 </Snackbar>
               </form>
-              {this.createResults && <Typography component="p"></Typography>}
+              {this.state.createErrorResults && <Typography component="p">{this.state.createErrorResults}</Typography>}
             </CardContent>
           </Card>
           <Card classes={{ root: classes.searchCard }}>
