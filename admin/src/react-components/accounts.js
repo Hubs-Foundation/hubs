@@ -40,7 +40,15 @@ const AccountFilter = props => (
 
 export const AccountList = withStyles(styles)(
   class AccountList extends Component {
-    state = {};
+    state = {
+      emailSearch: "",
+      searching: false,
+      accountSearchStatus: null,
+      emailCreateAccount: "",
+      identityCreateAccount: "",
+      creating: false,
+      accountCreateStatus: null
+    };
     async onAccountSearch(e) {
       e.preventDefault();
       this.setState({ searching: true, accountSearchStatus: null });
@@ -50,7 +58,7 @@ export const AccountList = withStyles(styles)(
           "content-type": "application/json",
           authorization: `bearer ${window.APP.store.state.credentials.token}`
         },
-        body: JSON.stringify({ email: this.state.email || "" })
+        body: JSON.stringify({ email: this.state.emailSearch || "" })
       }).then(r => r.json());
       if (result && result.data) {
         window.location = `#/accounts/${result.data[0].id}`;
@@ -58,11 +66,55 @@ export const AccountList = withStyles(styles)(
         this.setState({ searching: false, accountSearchStatus: "Account not found" });
       }
     }
+    async onCreateAccount(e) {
+      e.preventDefault();
+      this.setState({ creating: true, accountCreateStatus: null });
+      const result = await fetch("/api/v1/accounts", {
+        method: "post",
+        headers: {
+          "content-type": "application/json",
+          authorization: `bearer ${window.APP.store.state.credentials.token}`
+        },
+        body: JSON.stringify({
+          email: this.state.emailCreateAccount || "",
+          name: this.state.identityCreateAccount || ""
+        })
+      }).then(r => r.json());
+      if (result && result.data) {
+        // window.location = `#/accounts/${result.data[0].id}`;
+        this.setState({ creating: false, accountCreateStatus: "Account created" });
+      } else {
+        this.setState({ creating: false, accountCreateStatus: "Could not create account" });
+      }
+    }
     render() {
       const { classes } = this.props;
 
       return (
         <>
+          <Card classes={{ root: classes.searchCard }}>
+            <CardContent>
+              <Typography component="h2">Create account</Typography>
+              <form onSubmit={this.onCreateAccount.bind(this)}>
+                <MuiTextField
+                  label="Email address"
+                  type="email"
+                  required
+                  onChange={e => this.setState({ emailCreateAccount: e.target.value })}
+                />
+                <MuiTextField
+                  label="Identity (optional)"
+                  type="text"
+                  onChange={e => this.setState({ identityCreateAccount: e.target.value })}
+                />
+                <Button onClick={this.onCreateAccount.bind(this)}>Create</Button>
+                {this.state.creating && <CircularProgress />}
+                <Snackbar open={!!this.state.accountCreateStatus} autoHideDuration={5000}>
+                  <SnackbarContent message={this.state.accountCreateStatus}></SnackbarContent>
+                </Snackbar>
+              </form>
+            </CardContent>
+          </Card>
           <Card classes={{ root: classes.searchCard }}>
             <CardContent>
               <Typography component="h2">Find an account with an email address</Typography>
