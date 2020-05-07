@@ -47,7 +47,8 @@ export const AccountList = withStyles(styles)(
       emailCreate: "",
       identityCreate: "",
       creating: false,
-      createStatus: null
+      createStatus: null,
+      createResults: ""
     };
     async onAccountSearch(e) {
       e.preventDefault();
@@ -76,14 +77,16 @@ export const AccountList = withStyles(styles)(
         data = this.state.emailCreate
           .split(";")
           .map(email =>
-            this.state.identityCreate.length ? { email: email, name: this.state.identityCreate } : { email }
+            this.state.identityCreate.length
+              ? { email: email.trim(), name: this.state.identityCreate }
+              : { email: email.trim() }
           );
       } else {
         // create single account
         // {email: , name?: }
         data = this.state.identityCreate.length
-          ? { email: this.state.emailCreate, name: this.state.identityCreate }
-          : { email: this.state.emailCreate };
+          ? { email: this.state.emailCreate.trim(), name: this.state.identityCreate }
+          : { email: this.state.emailCreate.trim() };
       }
       const result = await fetch("/api/v1/accounts", {
         method: "post",
@@ -96,11 +99,46 @@ export const AccountList = withStyles(styles)(
         })
       }).then(r => r.json());
       if (result && result.data) {
+        // {"data":{"login":{"email":"thetriforcegoddess@gmail.com"},"identity":{"name":"bahabah"},"id":"697762611709607972"}}
         console.log(result);
-        this.setState({ creating: false, createStatus: "Account created" });
+        this.setState({ creating: false, createStatus: `Account${result} created` });
       } else {
         console.log(result);
-        this.setState({ creating: false, createStatus: "Could not create account" });
+
+        let status = "";
+
+        if (Array.isArray(result)) {
+          const errors = result.reduce((prev, cur) => {
+            if (cur.status !== 200) {
+              const errorMessage = cur.body.errors[0].detail;
+              const source = cur.body.errors[0].source;
+              const email = data[+source.match(/\[(.*?)\]/)];
+              prev[errorMessage] = prev[errorMessage] ? prev[errorMessage].push(email) : [];
+            }
+            return prev;
+          }, {});
+          for (const errorMessage in errors) {
+            status += errorMessage + " :\n" + errors[errorMessage];
+          }
+          this.setState({ creating: false, createStatus: "Errors creating accounts", createResults: status });
+        } else {
+          status = result.errors[0].detail;
+          this.setState({ creating: false, createStatus: status });
+        }
+
+        //{"data":{"login":{"email":"thetriforcegoddess@gmail.com"},"identity":{"name":"bahabah"},"id":"697762611709607972"}}
+
+        //{"errors":[{"source":"data","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}
+
+        // [
+        //   {"status":400,"body":{"errors":[{"source":"data[0]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}},
+        //   {"status":400,"body":{"errors":[{"source":"data[1]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}}
+        // ]
+
+        // [
+        // {"status":400,"body":{"errors":[{"source":"data[0]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}},
+        // {"status":400,"body":{"errors":[{"source":"data[1]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}}
+        // ]
       }
     }
     render() {
@@ -113,10 +151,12 @@ export const AccountList = withStyles(styles)(
         <>
           <Card classes={{ root: classes.searchCard }}>
             <CardContent>
-              <Typography component="h2">Create account</Typography>
+              <Typography component="h2">
+                Create account(s) (separate emails with &quot;;&quot; for multiple)
+              </Typography>
               <form onSubmit={this.onCreateAccount.bind(this)}>
                 <MuiTextField
-                  label="Email address"
+                  label="Email address(es)"
                   type="email"
                   required
                   onChange={e => this.setState({ emailCreate: e.target.value })}
@@ -132,6 +172,7 @@ export const AccountList = withStyles(styles)(
                   <SnackbarContent message={this.state.createStatus}></SnackbarContent>
                 </Snackbar>
               </form>
+              {this.createResults && <Typography component="p"></Typography>}
             </CardContent>
           </Card>
           <Card classes={{ root: classes.searchCard }}>
