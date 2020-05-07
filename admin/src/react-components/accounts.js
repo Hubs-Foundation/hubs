@@ -101,28 +101,38 @@ export const AccountList = withStyles(styles)(
       if (result && result.data) {
         // {"data":{"login":{"email":"thetriforcegoddess@gmail.com"},"identity":{"name":"bahabah"},"id":"697762611709607972"}}
         console.log(result);
-        this.setState({ creating: false, createStatus: `Account${result} created` });
+        this.setState({ creating: false, createStatus: `Account${Array.isArray(result) ? "s" : ""} created` });
       } else {
         console.log(result);
 
         let status = "";
 
         if (Array.isArray(result)) {
+          console.log("IsArray");
           const errors = result.reduce((prev, cur) => {
             if (cur.status !== 200) {
               const errorMessage = cur.body.errors[0].detail;
+              console.log(errorMessage);
               const source = cur.body.errors[0].source;
+              console.log(source);
               const email = data[+source.match(/\[(.*?)\]/)];
-              prev[errorMessage] = prev[errorMessage] ? prev[errorMessage].push(email) : [];
+              console.log(email);
+              prev[errorMessage] = prev[errorMessage] ? prev[errorMessage].push(email) : [email];
             }
             return prev;
           }, {});
+          console.log("errors");
+          console.log(errors);
           for (const errorMessage in errors) {
             status += errorMessage + " :\n" + errors[errorMessage];
           }
+          console.log("status");
+          console.log(status);
           this.setState({ creating: false, createStatus: "Errors creating accounts", createResults: status });
         } else {
           status = result.errors[0].detail;
+          console.log("status");
+          console.log(status);
           this.setState({ creating: false, createStatus: status });
         }
 
