@@ -82,13 +82,18 @@ export const AccountList = withStyles(styles)(
       }).then(r => r.json());
       if (result && result.data) {
         // window.location = `#/accounts/${result.data[0].id}`;
+        console.log(result);
         this.setState({ creating: false, accountCreateStatus: "Account created" });
       } else {
+        console.log(result);
         this.setState({ creating: false, accountCreateStatus: "Could not create account" });
       }
     }
     render() {
       const { classes } = this.props;
+
+      console.log(this.state.emailCreateAccount);
+      console.log(this.state.identityCreateAccount);
 
       return (
         <>
@@ -123,7 +128,7 @@ export const AccountList = withStyles(styles)(
                   label="Account Email"
                   type="email"
                   required
-                  onChange={e => this.setState({ email: e.target.value })}
+                  onChange={e => this.setState({ emailSearch: e.target.value })}
                 />
                 <Button onClick={this.onAccountSearch.bind(this)}>Find</Button>
                 {this.state.searching && <CircularProgress />}
