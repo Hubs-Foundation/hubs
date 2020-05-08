@@ -116,6 +116,7 @@ export const AccountList = withStyles(styles)(
           if (results[message].emails) results[message].emails.push(email);
           else results[message].emails = [email];
         });
+        console.log(JSON.stringify(results));
         this.setState({
           creating: false,
           createStatus: isAllSuccess
@@ -169,7 +170,7 @@ export const AccountList = withStyles(styles)(
                     >
                       {message}
                     </Typography>
-                    <Typography component="p" color={"colorError"} style={{ paddingBottom: "10px" }}>
+                    <Typography component="p" color="secondary" style={{ paddingBottom: "10px" }}>
                       [ {this.state.createResults[message].emails.join(", ")} ]
                     </Typography>
                   </>
