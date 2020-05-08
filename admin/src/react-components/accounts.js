@@ -160,7 +160,7 @@ export const AccountList = withStyles(styles)(
         <>
           <Card classes={{ root: classes.searchCard }}>
             <CardContent>
-              <Typography component="h2">Create account (for multiple separate emails with &quot;;&quot;)</Typography>
+              <Typography component="h2">Create account(s) (separate emails with &quot;;&quot;)</Typography>
               <form onSubmit={this.onCreateAccount.bind(this)}>
                 <MuiTextField
                   label="Email address(es)"
@@ -188,7 +188,7 @@ export const AccountList = withStyles(styles)(
                       {message}
                     </Typography>
                     <Typography component="p" color="textSecondary" style={{ paddingBottom: "10px" }}>
-                      {this.state.createResults[message].toString()}
+                      [ {this.state.createResults[message].join(", ")} ]
                     </Typography>
                   </>
                 ))}
