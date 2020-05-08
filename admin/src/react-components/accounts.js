@@ -103,21 +103,21 @@ export const AccountList = withStyles(styles)(
       } else if (Array.isArray(result)) {
         // Multiple email accounts created
         // results = {
-        //   'successMsg': {emails: [email1, ..., email3], color: 'primary'},
-        //   'errorMsg1': {emails: [email4], color: 'error'},
-        //   'errorMsg2': {emails: [email5, email6], color: 'error'}
+        //   'successMsg': [email1, ..., email3],
+        //   'errorMsg1': [email4],
+        //   'errorMsg2': [email5, email6]
         // }
+        const results = {};
         let isAllSuccess = true;
         let hasOneSuccess = false;
-        const results = {};
         result.forEach((emailResponse, index) => {
           isAllSuccess = isAllSuccess && emailResponse.status === 200;
           hasOneSuccess = hasOneSuccess || emailResponse.status === 200;
           const message =
             emailResponse.status === 200 ? "Created accounts successfully" : emailResponse.body.errors[0].detail;
           const email = data[index].email;
-          if (results[message]) results[message].emails.push(email);
-          else results[message] = { emails: [email], color: emailResponse.status === 200 ? "primary" : "error" };
+          if (results[message]) results[message].push(email);
+          else results[message] = [email];
         });
         console.log(JSON.stringify(results));
         console.log(results);
@@ -169,13 +169,13 @@ export const AccountList = withStyles(styles)(
                   <>
                     <Typography
                       component="p"
-                      color={this.state.createResults[message].color}
+                      color={message.includes("success") ? "primary" : "error"}
                       style={{ paddingTop: "10px" }}
                     >
                       {message}
                     </Typography>
                     <Typography component="p" color="secondary" style={{ paddingBottom: "10px" }}>
-                      [ {this.state.createResults[message].emails.join(", ")} ]
+                      [ {this.state.createResults[message].join(", ")} ]
                     </Typography>
                   </>
                 ))}
