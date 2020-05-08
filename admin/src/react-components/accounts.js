@@ -66,6 +66,9 @@ export const AccountList = withStyles(styles)(
       } else {
         this.setState({ searching: false, searchStatus: "Account not found" });
       }
+      // Quickfix snackbar component does not always close
+      // Setting snackbar message to empty string closes
+      setTimeout(() => this.setState({ searchStatus: "" }), 5000);
     }
     async onCreateAccount(e) {
       e.preventDefault();
@@ -108,20 +111,24 @@ export const AccountList = withStyles(styles)(
           hasOneSuccess = hasOneSuccess || emailResponse.status === 200;
           const message =
             emailResponse.status === 200 ? "Created accounts successfully" : emailResponse.body.errors[0].detail;
+          results[message].color = emailResponse.status === 200 ? "primary" : "error";
           const email = data[index].email;
-          if (results[message]) results[message].push(email);
-          else results[message] = [email];
+          if (results[message].emails) results[message].emails.push(email);
+          else results[message].emails = [email];
         });
         this.setState({
           creating: false,
           createStatus: isAllSuccess
-            ? "Success adding accounts"
+            ? "Success adding all accounts"
             : hasOneSuccess
-            ? "Success adding accounts with errors"
-            : "Errors adding accounts",
+            ? "Success adding some accounts, Errors adding some accounts"
+            : "Errors adding all accounts",
           createResults: results
         });
       }
+      // Quickfix snackbar component does not always close
+      // Setting snackbar message to empty string closes
+      setTimeout(() => this.setState({ createStatus: "" }), 5000);
     }
     render() {
       const { classes } = this.props;
@@ -155,11 +162,11 @@ export const AccountList = withStyles(styles)(
               {this.state.createResults &&
                 Object.keys(this.state.createResults).map(message => (
                   <>
-                    <Typography component="p" color="textPrimary" style={{ paddingTop: "10px" }}>
+                    <Typography component="p" color={message.color} style={{ paddingTop: "10px" }}>
                       {message}
                     </Typography>
-                    <Typography component="p" color="textSecondary" style={{ paddingBottom: "10px" }}>
-                      [ {this.state.createResults[message].join(", ")} ]
+                    <Typography component="p" color={"colorError"} style={{ paddingBottom: "10px" }}>
+                      [ {this.state.createResults[message].emails.join(", ")} ]
                     </Typography>
                   </>
                 ))}
