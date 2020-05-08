@@ -111,6 +111,8 @@ export const AccountList = withStyles(styles)(
         let status = "";
 
         if (Array.isArray(result)) {
+          // Multiple email accounts created
+          // At least one error exists in the list
           console.log("IsArray");
           const errors = result.reduce((prev, cur) => {
             if (cur.status !== 200) {
@@ -122,19 +124,23 @@ export const AccountList = withStyles(styles)(
               console.log(indexOfEmail);
               const email = data[indexOfEmail].email;
               console.log(email);
-              prev[errorMessage] = prev[errorMessage] ? prev[errorMessage].push(email) : [email];
+              prev[errorMessage] = Array.isArray(prev[errorMessage]) ? prev[errorMessage].push(email) : [email];
             }
             return prev;
           }, {});
           console.log("errors");
           console.log(errors);
           for (const errorMessage in errors) {
-            status += errorMessage + " : \n\n" + errors[errorMessage].toString() + "\n\n";
+            console.log(errors[errorMessage]);
+            console.log(typeof errors[errorMessage] + " " + Array.isArray(errors[errorMessage]));
+            status += errorMessage + " : \n\n" + errors[errorMessage].toString() + "  \n\n";
           }
           console.log("status");
           console.log(status);
           this.setState({ creating: false, createStatus: "Errors creating accounts", createErrorResults: status });
         } else {
+          // only one account was created
+          // has an error
           status = result.errors[0].detail;
           console.log("status");
           console.log(status);
@@ -167,6 +173,7 @@ export const AccountList = withStyles(styles)(
                 <MuiTextField
                   label="Email address(es)"
                   type="email"
+                  style={{ minWidth: "300px" }}
                   required
                   onChange={e => this.setState({ emailCreate: e.target.value })}
                 />
