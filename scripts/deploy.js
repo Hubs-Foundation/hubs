@@ -59,12 +59,12 @@ const getTs = (() => {
 
   step.text = "Building Client.";
 
-  await new Promise((resolve, reject) => {
-    exec("npm ci", {}, err => {
-      if (err) reject(err);
-      resolve();
-    });
-  });
+  // await new Promise((resolve, reject) => {
+  //   exec("npm ci", {}, err => {
+  //     if (err) reject(err);
+  //     resolve();
+  //   });
+  // });
 
   await new Promise((resolve, reject) => {
     exec("npm run build", { env }, err => {
@@ -75,12 +75,12 @@ const getTs = (() => {
 
   step.text = "Building Admin Console.";
 
-  await new Promise((resolve, reject) => {
-    exec("npm ci", { cwd: "./admin" }, err => {
-      if (err) reject(err);
-      resolve();
-    });
-  });
+  // await new Promise((resolve, reject) => {
+  //   exec("npm ci", { cwd: "./admin" }, err => {
+  //     if (err) reject(err);
+  //     resolve();
+  //   });
+  // });
 
   await new Promise((resolve, reject) => {
     exec("npm run build", { cwd: "./admin", env }, err => {

@@ -38,18 +38,6 @@ const AccountFilter = props => (
   </Filter>
 );
 
-// props: color='textSecondary'|'textPrimary' message='' accounts= ''
-const CreateAccountDetails = props => (
-  <>
-    <Typography component="p" color={props.color} style={{ padding: "10px" }}>
-      {props.message}
-    </Typography>
-    <Typography component="p" color={props.color} style={{ padding: "10px" }}>
-      {props.accounts}
-    </Typography>
-  </>
-);
-
 export const AccountList = withStyles(styles)(
   class AccountList extends Component {
     state = {
@@ -118,8 +106,7 @@ export const AccountList = withStyles(styles)(
         this.setState({ creating: false, createStatus: `Account created successfully` });
       } else if (result && result.errors) {
         // one email has errors
-        status = result.errors[0].detail;
-        this.setState({ creating: false, createStatus: status });
+        this.setState({ creating: false, createStatus: result.errors[0].detail });
       } else if (Array.isArray(result)) {
         // Multiple email accounts created
         // At least one error exists in the list
@@ -131,28 +118,14 @@ export const AccountList = withStyles(styles)(
           prev[message] = Array.isArray(prev[message]) ? prev[message].push(email) : [email];
           return prev;
         }, {});
-        console.log("errors");
-        console.log(errors);
+        console.log("results");
+        console.log(results);
         this.setState({
           creating: false,
           createStatus: hasOneSuccess ? "Success adding accounts with errors" : "Errors adding accounts",
           createResults: results
         });
       }
-
-      //{"data":{"login":{"email":"thetriforcegoddess@gmail.com"},"identity":{"name":"bahabah"},"id":"697762611709607972"}}
-
-      //{"errors":[{"source":"data","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}
-
-      // [
-      //   {"status":400,"body":{"errors":[{"source":"data[0]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}},
-      //   {"status":400,"body":{"errors":[{"source":"data[1]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}}
-      // ]
-
-      // [
-      // {"status":400,"body":{"errors":[{"source":"data[0]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}},
-      // {"status":400,"body":{"errors":[{"source":"data[1]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}}
-      // ]
     }
     render() {
       const { classes } = this.props;
