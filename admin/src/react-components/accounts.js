@@ -104,6 +104,8 @@ export const AccountList = withStyles(styles)(
         console.log(result);
         this.setState({ creating: false, createStatus: `Account${Array.isArray(result) ? "s" : ""} created` });
       } else {
+        console.log("data");
+        console.log(data);
         console.log(result);
 
         let status = "";
@@ -116,7 +118,7 @@ export const AccountList = withStyles(styles)(
               console.log(errorMessage);
               const source = cur.body.errors[0].source;
               console.log(source);
-              const indexOfEmail = +source.match(/\[(.*?)\]/)[1];
+              const indexOfEmail = source.match(/\[(.*?)\]/)[1];
               console.log(indexOfEmail);
               const email = data[indexOfEmail].email;
               console.log(email);
@@ -127,7 +129,7 @@ export const AccountList = withStyles(styles)(
           console.log("errors");
           console.log(errors);
           for (const errorMessage in errors) {
-            status += errorMessage + " : \n\n" + errors[errorMessage].toString();
+            status += errorMessage + " : \n\n" + errors[errorMessage].toString() + "\n\n";
           }
           console.log("status");
           console.log(status);
@@ -181,7 +183,7 @@ export const AccountList = withStyles(styles)(
                 </Snackbar>
               </form>
               {this.state.createErrorResults && (
-                <Typography component="p" color="secondary" style={{ paddingTop: "20px" }}>
+                <Typography component="p" color="textSecondary" style={{ paddingTop: "20px" }}>
                   {this.state.createErrorResults}
                 </Typography>
               )}
