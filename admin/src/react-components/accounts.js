@@ -99,24 +99,26 @@ export const AccountList = withStyles(styles)(
         this.setState({ creating: false, createStatus: result.errors[0].detail });
       } else if (Array.isArray(result)) {
         // Multiple email accounts created
-        // At least one error exists in the list
+        // results = { 'successMsg': [email1, ..., email3], 'errorMsg1': [email4], 'errorMsg2': [email5, email6] }
+        let isAllSuccess = true;
         let hasOneSuccess = false;
-        const results = result.reduce((prev, cur, index) => {
-          hasOneSuccess = hasOneSuccess || cur.status === 200;
-          const message = cur.status === 200 ? "Created accounts successfully" : cur.body.errors[0].detail;
+        const results = {};
+        result.forEach((emailResponse, index) => {
+          isAllSuccess = isAllSuccess && emailResponse.status === 200;
+          hasOneSuccess = hasOneSuccess || emailResponse.status === 200;
+          const message =
+            emailResponse.status === 200 ? "Created accounts successfully" : emailResponse.body.errors[0].detail;
           const email = data[index].email;
-          console.log(message);
-          console.log(email);
-          console.log(prev[message]);
-          prev[message] = Array.isArray(prev[message]) ? [...prev[message], email] : [email];
-          console.log(prev[message]);
-          return prev;
-        }, {});
-        console.log("results");
-        console.log(results);
+          if (results[message]) results[message].push(email);
+          else results[message] = [email];
+        });
         this.setState({
           creating: false,
-          createStatus: hasOneSuccess ? "Success adding accounts with errors" : "Errors adding accounts",
+          createStatus: isAllSuccess
+            ? "Success adding accounts"
+            : hasOneSuccess
+            ? "Success adding accounts with errors"
+            : "Errors adding accounts",
           createResults: results
         });
       }
