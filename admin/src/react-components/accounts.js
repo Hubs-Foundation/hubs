@@ -38,6 +38,18 @@ const AccountFilter = props => (
   </Filter>
 );
 
+// props: color='textSecondary'|'textPrimary' message='' accounts= ''
+const CreateAccountDetails = props => (
+  <>
+    <Typography component="p" color={props.color} style={{ padding: "10px" }}>
+      {props.message}
+    </Typography>
+    <Typography component="p" color={props.color} style={{ padding: "10px" }}>
+      {props.accounts}
+    </Typography>
+  </>
+);
+
 export const AccountList = withStyles(styles)(
   class AccountList extends Component {
     state = {
@@ -48,7 +60,7 @@ export const AccountList = withStyles(styles)(
       identityCreate: "",
       creating: false,
       createStatus: null,
-      createErrorResults: ""
+      createResults: ""
     };
     async onAccountSearch(e) {
       e.preventDefault();
@@ -99,68 +111,48 @@ export const AccountList = withStyles(styles)(
           data: data
         })
       }).then(r => r.json());
+      console.log(data);
+      console.log(result);
       if (result && result.data) {
-        // {"data":{"login":{"email":"thetriforcegoddess@gmail.com"},"identity":{"name":"bahabah"},"id":"697762611709607972"}}
-        console.log(result);
-        this.setState({ creating: false, createStatus: `Account${Array.isArray(result) ? "s" : ""} created` });
-      } else {
-        console.log("data");
-        console.log(data);
-        console.log(result);
-
-        let status = "";
-
-        if (Array.isArray(result)) {
-          // Multiple email accounts created
-          // At least one error exists in the list
-          console.log("IsArray");
-          const errors = result.reduce((prev, cur) => {
-            if (cur.status !== 200) {
-              const errorMessage = cur.body.errors[0].detail;
-              console.log(errorMessage);
-              const source = cur.body.errors[0].source;
-              console.log(source);
-              const indexOfEmail = source.match(/\[(.*?)\]/)[1];
-              console.log(indexOfEmail);
-              const email = data[indexOfEmail].email;
-              console.log(email);
-              prev[errorMessage] = Array.isArray(prev[errorMessage]) ? prev[errorMessage].push(email) : [email];
-            }
-            return prev;
-          }, {});
-          console.log("errors");
-          console.log(errors);
-          for (const errorMessage in errors) {
-            console.log(errors[errorMessage]);
-            console.log(typeof errors[errorMessage] + " " + Array.isArray(errors[errorMessage]));
-            status += errorMessage + " : \n\n" + errors[errorMessage].toString() + "  \n\n";
-          }
-          console.log("status");
-          console.log(status);
-          this.setState({ creating: false, createStatus: "Errors creating accounts", createErrorResults: status });
-        } else {
-          // only one account was created
-          // has an error
-          status = result.errors[0].detail;
-          console.log("status");
-          console.log(status);
-          this.setState({ creating: false, createStatus: status });
-        }
-
-        //{"data":{"login":{"email":"thetriforcegoddess@gmail.com"},"identity":{"name":"bahabah"},"id":"697762611709607972"}}
-
-        //{"errors":[{"source":"data","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}
-
-        // [
-        //   {"status":400,"body":{"errors":[{"source":"data[0]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}},
-        //   {"status":400,"body":{"errors":[{"source":"data[1]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}}
-        // ]
-
-        // [
-        // {"status":400,"body":{"errors":[{"source":"data[0]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}},
-        // {"status":400,"body":{"errors":[{"source":"data[1]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}}
-        // ]
+        // one email added successfully
+        this.setState({ creating: false, createStatus: `Account created successfully` });
+      } else if (result && result.errors) {
+        // one email has errors
+        status = result.errors[0].detail;
+        this.setState({ creating: false, createStatus: status });
+      } else if (Array.isArray(result)) {
+        // Multiple email accounts created
+        // At least one error exists in the list
+        let hasOneSuccess = false;
+        const results = result.reduce((prev, cur, index) => {
+          hasOneSuccess = hasOneSuccess || cur.status === 200;
+          const message = cur.status === 200 ? "Created accounts successfully" : cur.body.errors[0].detail;
+          const email = data[index].email;
+          prev[message] = Array.isArray(prev[message]) ? prev[message].push(email) : [email];
+          return prev;
+        }, {});
+        console.log("errors");
+        console.log(errors);
+        this.setState({
+          creating: false,
+          createStatus: hasOneSuccess ? "Success adding accounts with errors" : "Errors adding accounts",
+          createResults: results
+        });
       }
+
+      //{"data":{"login":{"email":"thetriforcegoddess@gmail.com"},"identity":{"name":"bahabah"},"id":"697762611709607972"}}
+
+      //{"errors":[{"source":"data","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}
+
+      // [
+      //   {"status":400,"body":{"errors":[{"source":"data[0]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}},
+      //   {"status":400,"body":{"errors":[{"source":"data[1]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}}
+      // ]
+
+      // [
+      // {"status":400,"body":{"errors":[{"source":"data[0]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}},
+      // {"status":400,"body":{"errors":[{"source":"data[1]","detail":"Account with email already exists.","code":"RECORD_EXISTS"}]}}
+      // ]
     }
     render() {
       const { classes } = this.props;
@@ -189,11 +181,17 @@ export const AccountList = withStyles(styles)(
                   <SnackbarContent message={this.state.createStatus}></SnackbarContent>
                 </Snackbar>
               </form>
-              {this.state.createErrorResults && (
-                <Typography component="p" color="textSecondary" style={{ paddingTop: "20px" }}>
-                  {this.state.createErrorResults}
-                </Typography>
-              )}
+              {this.state.createResults &&
+                Object.keys(this.state.createResults).map(message => (
+                  <>
+                    <Typography component="p" color="textPrimary" style={{ paddingTop: "10px" }}>
+                      {message}
+                    </Typography>
+                    <Typography component="p" color="textSecondary" style={{ paddingBottom: "10px" }}>
+                      {this.state.createResults[message].toString()}
+                    </Typography>
+                  </>
+                ))}
             </CardContent>
           </Card>
           <Card classes={{ root: classes.searchCard }}>
