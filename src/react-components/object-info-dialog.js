@@ -16,15 +16,9 @@ import { faLightbulb } from "@fortawesome/free-solid-svg-icons/faLightbulb";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import entryStyles from "../assets/stylesheets/entry.scss";
-import { mediaSortOrder, mediaSort, DISPLAY_IMAGE } from "../utils/media-sorting.js";
+import { mediaSort } from "../utils/media-sorting";
 import { getPromotionTokenForFile } from "../utils/media-utils";
-
-function clamp(x, min, max) {
-  return Math.min(Math.max(x, min), max);
-}
-
-const ICON_WIDTH = 60;
-const HALF_ICON_WIDTH = 60 / 2;
+import { HorizontalScrollView } from "./horizontal-scroll-view";
 
 function HeaderIcon(props) {
   const { icon, onClick, ariaLabel, small } = props;
@@ -77,35 +71,6 @@ ActionRowIcon.propTypes = {
   ariaLabel: PropTypes.string
 };
 
-function NavigationRowItem(props) {
-  const { isHandlingTouchInteraction, entity, isSelected, navigateTo } = props;
-  return (
-    <button
-      className={classNames(oStyles.noDefaultButtonStyle, oStyles.innerNavigationRowItem)}
-      onClick={() => {
-        if (isHandlingTouchInteraction) {
-          return;
-        }
-        navigateTo(entity);
-      }}
-      key={`nav-row-item-${entity.object3D.uuid}`}
-    >
-      <i className={oStyles.flex}>
-        <FontAwesomeIcon
-          className={classNames(oStyles.navigationRowItem, { [oStyles.selected]: isSelected })}
-          icon={DISPLAY_IMAGE.get(mediaSortOrder(entity))}
-        />
-      </i>
-    </button>
-  );
-}
-NavigationRowItem.propTypes = {
-  isHandlingTouchInteraction: PropTypes.bool,
-  entity: PropTypes.object,
-  isSelected: PropTypes.bool,
-  navigateTo: PropTypes.func
-};
-
 let uiRoot;
 export default class ObjectInfoDialog extends Component {
   static propTypes = {
@@ -139,7 +104,6 @@ export default class ObjectInfoDialog extends Component {
     this.setState({ enableLights: cameraSystem.enableLights });
     this.updateMediaEntities();
     this.props.scene.addEventListener("listed_media_changed", () => setTimeout(() => this.updateMediaEntities(), 0));
-    this.navAreaRef = React.createRef();
   }
 
   updateMediaEntities() {
@@ -245,41 +209,6 @@ export default class ObjectInfoDialog extends Component {
     });
   }
 
-  buttonIndexAtTouchX(touchX, currentLeftOffset) {
-    const TOTAL_WIDTH_OF_NAV_ITEMS = ICON_WIDTH * this.state.mediaEntities.length;
-    const AVAILABLE_WIDTH_FOR_NAV_ITEMS =
-      (this.navAreaRef &&
-        this.navAreaRef.current &&
-        parseInt(window.getComputedStyle(this.navAreaRef.current).width)) ||
-      window.innerWidth - 120;
-    const ACTUAL_WIDTH_OF_NAV_ITEMS = Math.min(AVAILABLE_WIDTH_FOR_NAV_ITEMS, TOTAL_WIDTH_OF_NAV_ITEMS);
-
-    const CENTER_PIXEL = window.innerWidth / 2;
-    const FIRST_PIXEL = CENTER_PIXEL - ACTUAL_WIDTH_OF_NAV_ITEMS / 2;
-    const ICONS_ON_SCREEN = ACTUAL_WIDTH_OF_NAV_ITEMS / ICON_WIDTH;
-
-    const LEFT_OFFSET_FOR_ZEROTH_ITEM = AVAILABLE_WIDTH_FOR_NAV_ITEMS / 2 - HALF_ICON_WIDTH;
-    const LEFT_OFFSET_FOR_LAST_ITEM = LEFT_OFFSET_FOR_ZEROTH_ITEM - ICON_WIDTH * (this.state.mediaEntities.length - 1);
-    const LEFT_OFFSET_RANGE = LEFT_OFFSET_FOR_LAST_ITEM - LEFT_OFFSET_FOR_ZEROTH_ITEM;
-    const leftOffsetZeroToOne = clamp((currentLeftOffset - LEFT_OFFSET_FOR_ZEROTH_ITEM) / LEFT_OFFSET_RANGE, 0, 1);
-    const CENTER_ICON_UNFLOORED = leftOffsetZeroToOne * (this.state.mediaEntities.length - 1);
-    const FIRST_ICON_UNFLOORED = CENTER_ICON_UNFLOORED - ICONS_ON_SCREEN / 2;
-    const LAST_ICON_UNFLOORED = CENTER_ICON_UNFLOORED + ICONS_ON_SCREEN / 2;
-
-    const touchXInNavItemList = touchX - FIRST_PIXEL;
-    const touchZeroToOne = clamp((touchX - FIRST_PIXEL) / ACTUAL_WIDTH_OF_NAV_ITEMS, 0, 1);
-
-    return clamp(
-      Math.floor(
-        TOTAL_WIDTH_OF_NAV_ITEMS <= AVAILABLE_WIDTH_FOR_NAV_ITEMS
-          ? (this.state.mediaEntities.length * touchXInNavItemList) / ACTUAL_WIDTH_OF_NAV_ITEMS
-          : FIRST_ICON_UNFLOORED + touchZeroToOne * (1 + LAST_ICON_UNFLOORED - FIRST_ICON_UNFLOORED)
-      ),
-      0,
-      this.state.mediaEntities.length - 1
-    );
-  }
-
   renderSmallScreen(
     targetIndex,
     selectedEl,
@@ -291,17 +220,6 @@ export default class ObjectInfoDialog extends Component {
     showRemoveButton,
     onClose
   ) {
-    const AVAILABLE_WIDTH_FOR_NAV_ITEMS =
-      (this.navAreaRef &&
-        this.navAreaRef.current &&
-        parseInt(window.getComputedStyle(this.navAreaRef.current).width)) ||
-      window.innerWidth - 120;
-    const TOTAL_WIDTH_OF_NAV_ITEMS = ICON_WIDTH * mediaEntities.length;
-    const DISTANCE_TO_CENTER = -1 * HALF_ICON_WIDTH + AVAILABLE_WIDTH_FOR_NAV_ITEMS / 2;
-    const willScrollContent = TOTAL_WIDTH_OF_NAV_ITEMS > AVAILABLE_WIDTH_FOR_NAV_ITEMS;
-    const UNLOCKED_LEFT_OFFSET = this.state.currentLeftOffset;
-    const LOCKED_LEFT_OFFSET = DISTANCE_TO_CENTER - ICON_WIDTH * targetIndex;
-    const DRAG_WIDTH_PX = HALF_ICON_WIDTH;
     const showObjectActionRow = showGoToButton || showPinButton || showUnpinButton || showRemoveButton;
     return (
       <div>
@@ -334,10 +252,8 @@ export default class ObjectInfoDialog extends Component {
             {showNavigationButtons && (
               <HeaderIcon icon={faChevronLeft} onClick={this.navigatePrev} ariaLabel={"Previous Object"} />
             )}
-            <div
-              ref={this.navAreaRef}
-              className={oStyles.innerNavigationRowContainer}
-              style={{ justifyContent: willScrollContent ? "unset" : "center" }}
+            <HorizontalScrollView
+              selectedEl={selectedEl}
               onWheel={e => {
                 if (e.deltaY > 0) {
                   this.navigate(1);
@@ -345,89 +261,10 @@ export default class ObjectInfoDialog extends Component {
                   this.navigate(-1);
                 }
               }}
-              onTouchStart={e => {
-                const touchX = e.touches.item(0).clientX;
-                const currentLeftOffset = parseFloat(window.getComputedStyle(e.currentTarget.children[0]).left);
-                this.setState({
-                  isDragging: false,
-                  touchX,
-                  initialTouchX: touchX,
-                  currentLeftOffset,
-                  initialLeftOffset: currentLeftOffset,
-                  isHandlingTouchInteraction: true
-                });
-                if (!willScrollContent) {
-                  this.navigateTo(this.state.mediaEntities[this.buttonIndexAtTouchX(touchX, currentLeftOffset)]);
-                }
-              }}
-              onTouchMove={e => {
-                const touchX = e.touches.item(0).clientX;
-                if (!willScrollContent) {
-                  this.navigateTo(
-                    this.state.mediaEntities[this.buttonIndexAtTouchX(touchX, this.state.currentLeftOffset)]
-                  );
-                  this.setState({ touchX });
-                } else {
-                  const dX = touchX - this.state.initialTouchX;
-                  const isDragging = this.state.isDragging || Math.abs(dX) > DRAG_WIDTH_PX;
-                  if (isDragging) {
-                    const currentLeftOffset = this.state.initialLeftOffset + dX;
-
-                    this.setState({
-                      currentLeftOffset
-                    });
-
-                    const CENTER_PIXEL = window.innerWidth / 2;
-                    this.navigateTo(
-                      this.state.mediaEntities[this.buttonIndexAtTouchX(CENTER_PIXEL, currentLeftOffset)]
-                    );
-                  }
-                  this.setState({
-                    isDragging,
-                    touchX
-                  });
-                }
-              }}
-              onTouchEnd={() => {
-                const wasDragging = this.state.isDragging;
-                this.setState({ isHandlingTouchInteraction: false, isDragging: false });
-                if (!wasDragging) {
-                  this.navigateTo(
-                    this.state.mediaEntities[this.buttonIndexAtTouchX(this.state.touchX, this.state.currentLeftOffset)]
-                  );
-                }
-              }}
-            >
-              <div
-                className={oStyles.innerNavigationRow}
-                style={
-                  willScrollContent
-                    ? this.state.isDragging
-                      ? {
-                          left: `${UNLOCKED_LEFT_OFFSET}px`
-                        }
-                      : {
-                          left: `${LOCKED_LEFT_OFFSET}px`,
-                          transitionProperty: "left",
-                          transitionDuration: "0.25s",
-                          transitionTimingFunction: "ease-out"
-                        }
-                    : {}
-                }
-              >
-                {mediaEntities.map(e => {
-                  return (
-                    <NavigationRowItem
-                      isHandlingTouchInteraction={this.state.isHandlingTouchInteraction}
-                      entity={e}
-                      isSelected={e === selectedEl}
-                      navigateTo={this.navigateTo.bind(this)}
-                      key={`${e.object3D.uuid}_nav-row-item`}
-                    />
-                  );
-                })}
-              </div>
-            </div>
+              navigateTo={this.navigateTo.bind(this)}
+              mediaEntities={this.state.mediaEntities}
+              targetIndex={targetIndex}
+            />
             {showNavigationButtons && (
               <HeaderIcon icon={faChevronRight} onClick={this.navigateNext} ariaLabel={"Next Object"} />
             )}
