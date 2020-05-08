@@ -162,7 +162,11 @@ export const AccountList = withStyles(styles)(
               {this.state.createResults &&
                 Object.keys(this.state.createResults).map(message => (
                   <>
-                    <Typography component="p" color={message.color} style={{ paddingTop: "10px" }}>
+                    <Typography
+                      component="p"
+                      color={this.state.createResults[message].color}
+                      style={{ paddingTop: "10px" }}
+                    >
                       {message}
                     </Typography>
                     <Typography component="p" color={"colorError"} style={{ paddingBottom: "10px" }}>
