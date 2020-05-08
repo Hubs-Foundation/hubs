@@ -108,7 +108,7 @@ export const AccountList = withStyles(styles)(
           console.log(message);
           console.log(email);
           console.log(prev[message]);
-          prev[message] = Array.isArray(prev[message]) ? prev[message].push(email) : [email];
+          prev[message] = Array.isArray(prev[message]) ? [...prev[message], email] : [email];
           console.log(prev[message]);
           return prev;
         }, {});
