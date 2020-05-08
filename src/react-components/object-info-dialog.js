@@ -106,6 +106,35 @@ ActionRowIcon.propTypes = {
   ariaLabel: PropTypes.string
 };
 
+function NavigationRowItem(props) {
+  const { isHandlingTouchInteraction, entity, isSelected, navigateTo } = props;
+  return (
+    <button
+      className={classNames(oStyles.noDefaultButtonStyle, oStyles.innerNavigationRowItem)}
+      onClick={() => {
+        if (isHandlingTouchInteraction) {
+          return;
+        }
+        navigateTo(entity);
+      }}
+      key={`nav-row-item-${entity.object3D.uuid}`}
+    >
+      <i className={oStyles.flex}>
+        <FontAwesomeIcon
+          className={classNames(oStyles.navigationRowItem, { [oStyles.selected]: isSelected })}
+          icon={DISPLAY_IMAGE.get(mediaSortOrder(entity))}
+        />
+      </i>
+    </button>
+  );
+}
+NavigationRowItem.propTypes = {
+  isHandlingTouchInteraction: PropTypes.bool,
+  entity: PropTypes.object,
+  isSelected: PropTypes.bool,
+  navigateTo: PropTypes.func
+};
+
 let uiRoot;
 export default class ObjectInfoDialog extends Component {
   static propTypes = {
@@ -243,32 +272,6 @@ export default class ObjectInfoDialog extends Component {
 
       this._isRemoving = false;
     });
-  }
-
-  navigationRowItem(entity, isSelected) {
-    return (
-      <button
-        className={classNames(oStyles.noDefaultButtonStyle, oStyles.innerNavigationRowItem)}
-        onClick={() => {
-          if (this.state.isHandlingTouchInteraction) {
-            return;
-          }
-          this.navigateTo(entity);
-        }}
-        key={`nav-row-item-${entity.object3D.uuid}`}
-      >
-        <i className={oStyles.flex}>
-          <FontAwesomeIcon
-            className={classNames(
-              oStyles.s44x44,
-              isSelected ? oStyles.actionLabelColor : oStyles.panelWidgetColor,
-              oStyles.actionLabelColorOnHover
-            )}
-            icon={DISPLAY_IMAGE.get(mediaSortOrder(entity))}
-          />
-        </i>
-      </button>
-    );
   }
 
   buttonIndexAtTouchX(touchX, currentLeftOffset) {
@@ -448,7 +451,15 @@ export default class ObjectInfoDialog extends Component {
                 }
               >
                 {mediaEntities.map(e => {
-                  return this.navigationRowItem(e, e === selectedEl);
+                  return (
+                    <NavigationRowItem
+                      isHandlingTouchInteraction={this.state.isHandlingTouchInteraction}
+                      entity={e}
+                      isSelected={e === selectedEl}
+                      navigateTo={this.navigateTo.bind(this)}
+                      key={`${e.object3D.uuid}_nav-row-item`}
+                    />
+                  );
                 })}
               </div>
             </div>
