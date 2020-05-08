@@ -102,7 +102,11 @@ export const AccountList = withStyles(styles)(
         this.setState({ creating: false, createStatus: result.errors[0].detail });
       } else if (Array.isArray(result)) {
         // Multiple email accounts created
-        // results = { 'successMsg': [email1, ..., email3], 'errorMsg1': [email4], 'errorMsg2': [email5, email6] }
+        // results = {
+        //   'successMsg': {emails: [email1, ..., email3], color: 'primary'},
+        //   'errorMsg1': {emails: [email4], color: 'error'},
+        //   'errorMsg2': {emails: [email5, email6], color: 'error'}
+        // }
         let isAllSuccess = true;
         let hasOneSuccess = false;
         const results = {};
@@ -111,12 +115,12 @@ export const AccountList = withStyles(styles)(
           hasOneSuccess = hasOneSuccess || emailResponse.status === 200;
           const message =
             emailResponse.status === 200 ? "Created accounts successfully" : emailResponse.body.errors[0].detail;
-          results[message].color = emailResponse.status === 200 ? "primary" : "error";
           const email = data[index].email;
-          if (results[message].emails) results[message].emails.push(email);
-          else results[message].emails = [email];
+          if (results[message]) results[message].emails.push(email);
+          else results[message] = { emails: [email], color: emailResponse.status === 200 ? "primary" : "error" };
         });
         console.log(JSON.stringify(results));
+        console.log(results);
         this.setState({
           creating: false,
           createStatus: isAllSuccess
