@@ -92,8 +92,6 @@ export const AccountList = withStyles(styles)(
           data: data.length === 1 ? data[0] : data
         })
       }).then(r => r.json());
-      console.log(data);
-      console.log(result);
       if (result && result.data) {
         // one email added successfully
         this.setState({ creating: false, createStatus: `Account created successfully` });
@@ -119,8 +117,6 @@ export const AccountList = withStyles(styles)(
           if (results[message]) results[message].push(email);
           else results[message] = [email];
         });
-        console.log(JSON.stringify(results));
-        console.log(results);
         this.setState({
           creating: false,
           createStatus: isAllSuccess
