@@ -30,7 +30,6 @@ const styles = {
   hide: { display: "none" },
   noBorder: { border: "0px" },
   searchCard: { marginBottom: "5px" }
-  paddingTop: {}
 };
 
 const AccountFilter = props => (
@@ -130,7 +129,9 @@ export const AccountList = withStyles(styles)(
         <>
           <Card classes={{ root: classes.searchCard }}>
             <CardContent>
-              <Typography component="h2">Create one account or mutliple: separate emails with &quot;;&quot;)</Typography>
+              <Typography component="h2">
+                Create one account or mutliple: separate emails with &quot;;&quot;)
+              </Typography>
               <form onSubmit={this.onCreateAccount.bind(this)}>
                 <MuiTextField
                   label="Email address(es)"
