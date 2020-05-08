@@ -1,22 +1,112 @@
 @import 'shared.scss';
 
-:local(.header){
-  height: 64px;
-  background-color: var(--panel-background-color);
+:local(.no-default-button-style) {
+  padding: 0px;
+  border-style: none;
+  background-color: transparent;
+  cursor: pointer;
 }
 
-:local(.float-container) {
+:local(.flex){
+  display: flex;
+}
+
+%s44x44 {
+  width: 44px !important;
+  height: 44px !important;
+}
+
+%s32x32 {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+%action-label-color-on-hover {
+  @media(hover: hover){
+    &:hover {
+      color: $action-label-color;
+    }
+  }
+}
+
+%panel-widget-color {
+  color: var(--panel-widget-color);
+}
+
+:local(.header-icon) {
+  @extend %s44x44;
+  @extend %panel-widget-color;
+  @extend %action-label-color-on-hover;
+  &:local(.small) {
+    @extend %s32x32;
+  }
+}
+
+%action-label-color {
+  color: $action-label-color;
+}
+
+:local(.action-row-icon) {
+  @extend %s44x44;
+  @extend %action-label-color;
+}
+
+:local(.inner-navigation-row-item) {
+  margin: 0px 8px;
+}
+
+%animate-scale {
+  transition-property: transform;
+  transition-duration: 0.25s;
+  transition-timing-function: ease-out;
+}
+%scale-normal {
+  transform: scale(1);
+  @extend %animate-scale;
+}
+%scale-big {
+  transform: scale(1.25);
+  @extend %animate-scale;
+}
+
+:local(.navigation-row-item){
+  @extend %s44x44;
+  @extend %panel-widget-color;
+  @extend %action-label-color-on-hover;
+  @extend %scale-normal;
+  &:local(.selected) {
+    @extend %scale-big;
+    @extend %action-label-color;
+  }
+}
+
+%float-container{
   display: flex;
   align-items: center;
 }
 
-:local(.float-left) {
+:local(.header){
+  height: 64px;
+  background-color: var(--panel-background-color);
+  @extend %float-container;
+}
+
+%floater {
   position: absolute;
   width: 100%;
   height: 0px;
   display: flex;
-  justify-content: flex-start;
   align-items: center;
+}
+
+:local(.float-center) {
+  @extend %floater;
+  justify-content: center;
+}
+
+:local(.float-left) {
+  @extend %floater;
+  justify-content: flex-start;
   &>*:first-child {
     margin-left: 16px;
   }
@@ -26,13 +116,9 @@
 }
 
 :local(.float-right){
-  position: absolute;
-  width: 100%;
-  height: 0px;
-  display: flex;
-  flex-direction: row-reverse;
+  @extend %floater;
   justify-content: flex-start;
-  align-items: center;
+  flex-direction: row-reverse;
   &>*:first-child {
     margin-right: 16px;
   }
@@ -41,13 +127,15 @@
   }
 }
 
-:local(.float-center) {
-  position: absolute;
-  width: 100%;
-  height: 0px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+%subtitle-text {
+  font-weight: normal;
+  text-transform: uppercase;
+  color: var(--panel-subtitle-color);
+}
+
+:local(.object-counter-text){
+  @extend %subtitle-text;
+  font-size: 32px;
 }
 
 :local(.panel) {
@@ -84,120 +172,23 @@
   align-items: center;
 }
 
-:local(.inner-navigation-row-item) {
-  margin: 0px 8px;
-}
-
-%scale-normal {
-  transform: scale(1);
-  transition-property: transform;
-  transition-duration: 0.25s;
-  transition-timing-function: ease-out;
-}
-%scale-big {
-  transform: scale(1.3);
-  transition-property: transform;
-  transition-duration: 0.25s;
-  transition-timing-function: ease-out;
-}
-
-:local(.navigation-row-item){
-  @extend %s44x44;
-  @extend %panel-widget-color;
-  @extend %action-label-color-on-hover;
-  @extend %scale-normal;
-  &:local(.selected) {
-    @extend %scale-big;
-    @extend %action-label-color;
-  }
-}
-
-
 :local(.object-action-row) {
+  @extend %float-container;
   height: 64px;
+}
+
+%action-row-button {
+  min-width: 120px;
+  width: 120px;
+  height: 44px;
 }
 
 :local(.action-row-action-button) {
   @extend %action-button;
-  min-width: 120px;
-  width: 120px;
-  height: 44px;
+  @extend %action-row-button;
 }
 
 :local(.action-row-action-button-secondary) {
   @extend %action-button-secondary;
-  min-width: 120px;
-  width: 120px;
-  height: 44px;
-}
-
-:local(.no-default-button-style) {
-  padding: 0px;
-  border-style: none;
-  background-color: transparent;
-  cursor: pointer;
-}
-
-:local(.flex){
-  display: flex;
-}
-
-%s32x32 {
-  width: 32px !important;
-  height: 32px !important;
-}
-
-:local(.s32x32) {
-  @extend %s32x32;
-}
-
-%s52x52 {
-  width: 52px !important;
-  height: 52px !important;
-}
-
-%s44x44 {
-  width: 44px !important;
-  height: 44px !important;
-}
-:local(.s44x44){
-  @extend %s44x44;
-}
-
-%action-label-color-on-hover {
-  @media(hover: hover){
-    &:hover {
-      color: $action-label-color;
-    }
-  }
-}
-
-:local(.action-label-color-on-hover){
-  @extend %action-label-color-on-hover;
-}
-
-%action-label-color {
-  color: $action-label-color;
-}
-:local(.action-label-color) {
-  @extend %action-label-color;
-}
-
-%panel-widget-color {
-  color: var(--panel-widget-color);
-}
-:local(.panel-widget-color){
-  @extend %panel-widget-color;
-}
-
-%subtitle-text {
-  font-weight: normal;
-  text-transform: uppercase;
-  color: var(--panel-subtitle-color);
-
-}
-
-:local(.subtitle-large){
-  @extend %subtitle-text;
-  font-size: 32px;
+  @extend %action-row-button;
 }

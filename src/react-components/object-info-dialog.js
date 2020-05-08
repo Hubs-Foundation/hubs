@@ -27,57 +27,52 @@ const ICON_WIDTH = 60;
 const HALF_ICON_WIDTH = 60 / 2;
 
 function HeaderIcon(props) {
-  const { icon, size, onClick, ariaLabel } = props;
+  const { icon, onClick, ariaLabel, small } = props;
   return (
     <button aria-label={ariaLabel} className={classNames(oStyles.noDefaultButtonStyle)} onClick={onClick}>
       <i className={oStyles.flex}>
-        <FontAwesomeIcon
-          className={classNames(size, oStyles.panelWidgetColor, oStyles.actionLabelColorOnHover)}
-          icon={icon}
-        />
+        <FontAwesomeIcon className={classNames(oStyles.headerIcon, { [oStyles.small]: small })} icon={icon} />
       </i>
     </button>
   );
 }
 HeaderIcon.propTypes = {
   icon: PropTypes.object,
-  size: PropTypes.string,
   onClick: PropTypes.func,
-  ariaLabel: PropTypes.string
+  ariaLabel: PropTypes.string,
+  small: PropTypes.bool
+};
+HeaderIcon.defaultProps = {
+  small: false
 };
 
 function HeaderIconLink(props) {
-  const { icon, size, href } = props;
+  const { icon, href } = props;
   return (
     <a href={href} target="_blank" rel="noopener noreferrer">
       <i className={oStyles.flex}>
-        <FontAwesomeIcon
-          className={classNames(size, oStyles.panelWidgetColor, oStyles.actionLabelColorOnHover)}
-          icon={icon}
-        />
+        <FontAwesomeIcon className={oStyles.headerIcon} icon={icon} />
       </i>
     </a>
   );
 }
 HeaderIconLink.propTypes = {
   icon: PropTypes.object,
-  size: PropTypes.string,
   href: PropTypes.string
 };
 
 function ActionRowIcon(props) {
-  const { icon, size, onClick, ariaLabel } = props;
+  const { icon, onClick, ariaLabel } = props;
   return (
     <button aria-label={ariaLabel} className={classNames(oStyles.noDefaultButtonStyle)} onClick={onClick}>
       <i className={oStyles.flex}>
-        <FontAwesomeIcon className={classNames(size, oStyles.actionLabelColor)} icon={icon} />
+        <FontAwesomeIcon className={classNames(oStyles.actionRowIcon)} icon={icon} />
       </i>
     </button>
   );
 }
 ActionRowIcon.propTypes = {
   icon: PropTypes.object,
-  size: PropTypes.string,
   onClick: PropTypes.func,
   ariaLabel: PropTypes.string
 };
@@ -311,23 +306,22 @@ export default class ObjectInfoDialog extends Component {
     return (
       <div>
         {/* Header  */}
-        <div className={classNames(oStyles.header, oStyles.floatContainer, rootStyles.uiInteractive)}>
+        <div className={classNames(oStyles.header, rootStyles.uiInteractive)}>
           <div className={classNames(oStyles.floatLeft)}>
-            <HeaderIcon icon={faTimes} size={oStyles.s32x32} onClick={onClose} ariaLabel={"Close object info panel"} />
+            <HeaderIcon icon={faTimes} small={true} onClick={onClose} ariaLabel={"Close object info panel"} />
           </div>
           <div className={classNames(oStyles.floatCenter)}>
             <span
               aria-label={`Showing item ${1 + targetIndex} of ${this.state.mediaEntities.length}`}
-              className={oStyles.subtitleLarge}
+              className={oStyles.objectCounterText}
             >
               {`${1 + targetIndex}/${this.state.mediaEntities.length}`}
             </span>
           </div>
           <div className={classNames(oStyles.floatRight)}>
-            <HeaderIconLink icon={faExternalLinkAlt} size={oStyles.s44x44} href={this.props.src} />
+            <HeaderIconLink icon={faExternalLinkAlt} href={this.props.src} />
             <HeaderIcon
               icon={faLightbulb}
-              size={oStyles.s44x44}
               onClick={this.toggleLights.bind(this)}
               ariaLabel={"Toggle rendering of the background"}
             />
@@ -338,12 +332,7 @@ export default class ObjectInfoDialog extends Component {
         <div className={classNames(oStyles.panel, rootStyles.uiInteractive)}>
           <div className={oStyles.navigationRow}>
             {showNavigationButtons && (
-              <HeaderIcon
-                icon={faChevronLeft}
-                size={oStyles.s44x44}
-                onClick={this.navigatePrev}
-                ariaLabel={"Previous Object"}
-              />
+              <HeaderIcon icon={faChevronLeft} onClick={this.navigatePrev} ariaLabel={"Previous Object"} />
             )}
             <div
               ref={this.navAreaRef}
@@ -440,24 +429,14 @@ export default class ObjectInfoDialog extends Component {
               </div>
             </div>
             {showNavigationButtons && (
-              <HeaderIcon
-                icon={faChevronRight}
-                size={oStyles.s44x44}
-                onClick={this.navigateNext}
-                ariaLabel={"Next Object"}
-              />
+              <HeaderIcon icon={faChevronRight} onClick={this.navigateNext} ariaLabel={"Next Object"} />
             )}
           </div>
           {showObjectActionRow && (
-            <div className={classNames(oStyles.floatContainer, oStyles.objectActionRow)}>
+            <div className={classNames(oStyles.objectActionRow)}>
               {showRemoveButton && (
                 <div className={oStyles.floatLeft}>
-                  <ActionRowIcon
-                    icon={faTrashAlt}
-                    size={oStyles.s44x44}
-                    onClick={this.remove.bind(this)}
-                    ariaLabel={"Remove Object"}
-                  />
+                  <ActionRowIcon icon={faTrashAlt} onClick={this.remove.bind(this)} ariaLabel={"Remove Object"} />
                 </div>
               )}
               {showPinButton && (
@@ -478,7 +457,6 @@ export default class ObjectInfoDialog extends Component {
                 <div className={oStyles.floatRight}>
                   <ActionRowIcon
                     icon={faStreetView}
-                    size={oStyles.s44x44}
                     onClick={this.enqueueWaypointTravel}
                     ariaLabel={"Teleport to Object"}
                   />
