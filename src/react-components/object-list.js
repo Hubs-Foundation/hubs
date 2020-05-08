@@ -7,12 +7,6 @@ import objectListStyles from "../assets/stylesheets/object-list-styles.scss";
 import styles from "../assets/stylesheets/presence-list.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCubes } from "@fortawesome/free-solid-svg-icons/faCubes";
-import { faCube } from "@fortawesome/free-solid-svg-icons/faCube";
-import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
-import { faMusic } from "@fortawesome/free-solid-svg-icons/faMusic";
-import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
-import { faNewspaper } from "@fortawesome/free-solid-svg-icons/faNewspaper";
-import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 import {
   SORT_ORDER_VIDEO,
   SORT_ORDER_AUDIO,
@@ -21,7 +15,8 @@ import {
   SORT_ORDER_MODEL,
   SORT_ORDER_UNIDENTIFIED,
   mediaSortOrder,
-  mediaSort
+  mediaSort,
+  DISPLAY_IMAGE
 } from "../utils/media-sorting.js";
 
 const THUMBNAIL_TITLE = new Map([
@@ -31,15 +26,6 @@ const THUMBNAIL_TITLE = new Map([
   [SORT_ORDER_PDF, "PDF"],
   [SORT_ORDER_UNIDENTIFIED, "Unknown Media Type"],
   [SORT_ORDER_MODEL, "Model"]
-]);
-
-const DISPLAY_IMAGE = new Map([
-  [SORT_ORDER_VIDEO, faVideo],
-  [SORT_ORDER_AUDIO, faMusic],
-  [SORT_ORDER_IMAGE, faImage],
-  [SORT_ORDER_PDF, faNewspaper],
-  [SORT_ORDER_UNIDENTIFIED, faQuestion],
-  [SORT_ORDER_MODEL, faCube]
 ]);
 
 function getDisplayString(el) {

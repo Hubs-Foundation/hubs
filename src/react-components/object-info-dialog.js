@@ -16,36 +16,12 @@ import { faLightbulb } from "@fortawesome/free-solid-svg-icons/faLightbulb";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import entryStyles from "../assets/stylesheets/entry.scss";
-import { faCube } from "@fortawesome/free-solid-svg-icons/faCube";
-import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
-import { faMusic } from "@fortawesome/free-solid-svg-icons/faMusic";
-import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
-import { faNewspaper } from "@fortawesome/free-solid-svg-icons/faNewspaper";
-import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
-import {
-  SORT_ORDER_VIDEO,
-  SORT_ORDER_AUDIO,
-  SORT_ORDER_IMAGE,
-  SORT_ORDER_PDF,
-  SORT_ORDER_MODEL,
-  SORT_ORDER_UNIDENTIFIED,
-  mediaSortOrder,
-  mediaSort
-} from "../utils/media-sorting.js";
+import { mediaSortOrder, mediaSort, DISPLAY_IMAGE } from "../utils/media-sorting.js";
 import { getPromotionTokenForFile } from "../utils/media-utils";
 
 function clamp(x, min, max) {
   return Math.min(Math.max(x, min), max);
 }
-
-const DISPLAY_IMAGE = new Map([
-  [SORT_ORDER_VIDEO, faVideo],
-  [SORT_ORDER_AUDIO, faMusic],
-  [SORT_ORDER_IMAGE, faImage],
-  [SORT_ORDER_PDF, faNewspaper],
-  [SORT_ORDER_UNIDENTIFIED, faQuestion],
-  [SORT_ORDER_MODEL, faCube]
-]);
 
 const ICON_WIDTH = 60;
 const HALF_ICON_WIDTH = 60 / 2;
