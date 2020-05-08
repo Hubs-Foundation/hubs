@@ -72,18 +72,23 @@ export const SCHEMA = {
         enableOnScreenJoystickRight: { type: "bool" },
         onlyShowNametagsInFreeze: { type: "bool" },
         allowMultipleHubsInstances: { type: "bool" },
+        disableIdleDetection: { type: "bool" },
         maxResolutionWidth: { type: "number" },
         maxResolutionHeight: { type: "number" },
         globalVoiceVolume: { type: "number" },
         globalMediaVolume: { type: "number" },
         snapRotationDegrees: { type: "number" },
         materialQualitySetting: { type: "string" },
+        disableSoundEffects: { type: "bool" },
         disableMovement: { type: "bool" },
         disableBackwardsMovement: { type: "bool" },
         disableStrafing: { type: "bool" },
         disableTeleporter: { type: "bool" },
         disableAutoPixelRatio: { type: "bool" },
-        movementSpeedModifier: { type: "number" }
+        movementSpeedModifier: { type: "number" },
+        disableEchoCancellation: { type: "bool" },
+        disableNoiseSuppression: { type: "bool" },
+        disableAutoGainControl: { type: "bool" }
       }
     },
 

@@ -41,8 +41,7 @@
             physicallyCorrectLights: true;
             alpha: false;
             webgl2: true;
-            multiview: false;
-            forceWebVR: true;"
+            multiview: false;"
         shadow="type: pcfsoft"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
@@ -189,8 +188,7 @@
 
                         <template data-name="Head">
                             <a-entity
-                                networked-audio-source="rolloffFactor: 2.0;"
-                                audio-source="type: avatar"
+                                avatar-audio-source="rolloffFactor: 2.0;"
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
                                 body-helper="type: kinematic; collisionFilterGroup: 4; collisionFilterMask: 1;"
@@ -211,7 +209,7 @@
 
             <template id="static-media">
                 <a-entity
-                    body-helper="type: static; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 11;"
+                    body-helper="type: static; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 1;"
                 >
                 </a-entity>
             </template>
@@ -219,7 +217,7 @@
             <template id="static-controlled-media">
                 <a-entity
                     class="interactable"
-                    body-helper="type: static; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 11;"
+                    body-helper="type: static; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 1;"
                     is-remote-hover-target
                     position-at-box-shape-border__freeze="target:.freeze-menu;"
                     tags="isStatic: true; togglesHoveredActionSet: true; inspectable: true;"
@@ -284,11 +282,11 @@
                     floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
                     set-yxz-order
                     matrix-auto-update
-                    position-at-box-shape-border__freeze="target:.freeze-menu;"
-                    position-at-box-shape-border__freeze-unprivileged="target:.freeze-unprivileged-menu;"
                     hoverable-visuals
+                    position-at-border__freeze="target:.freeze-menu"
+                    position-at-border__freeze-unprivileged="target:.freeze-unprivileged-menu"
                     listed-media
-                    audio-source="type: media"
+                    use-audio-system-settings
                 >
                     <a-entity class="ui interactable-ui">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media">
@@ -523,7 +521,7 @@
                     floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
                     set-yxz-order
                     matrix-auto-update
-                    position-at-box-shape-border__freeze="target:.freeze-menu;"
+                    position-at-border__freeze="target:.freeze-menu;"
                     hoverable-visuals
                 >
                     <a-entity
@@ -581,7 +579,7 @@
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
                     action-to-remove__pen="path: /actions/pen/remove;"
-                    position-at-box-shape-border="target:.pen-menu"
+                    position-at-border="target:.pen-menu"
                     set-yxz-order
                 >
                     <a-entity
@@ -616,7 +614,7 @@
                     owned-object-limiter="counter: #camera-counter"
                     set-unowned-body-kinematic
                     scalable-when-grabbed
-                    position-at-box-shape-border__freeze="target: .camera-menu"
+                    position-at-border="target:.camera-menu; isFlat: true"
                     set-yxz-order
                 >
                     <a-entity class="ui interactable-ui camera-snap-menu" visible-if-permitted="spawn_camera">

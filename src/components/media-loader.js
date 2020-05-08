@@ -396,6 +396,16 @@ AFRAME.registerComponent("media-loader", {
       // we don't think we can infer it from the extension, we need to make a HEAD request to find it out
       contentType = contentType || guessContentType(canonicalUrl) || (await fetchContentType(accessibleUrl));
 
+      // TODO we should probably just never return "application/octet-stream" as expectedContentType, since its not really useful
+      if (contentType === "application/octet-stream") {
+        contentType = guessContentType(canonicalUrl) || contentType;
+      }
+
+      // Some servers treat m3u8 playlists as "audio/x-mpegurl", we always want to treat them as HLS videos
+      if (contentType === "audio/x-mpegurl") {
+        contentType = "application/vnd.apple.mpegurl";
+      }
+
       // We don't want to emit media_resolved for index updates.
       if (forceLocalRefresh || srcChanged) {
         this.el.emit("media_resolved", { src, raw: accessibleUrl, contentType });
@@ -406,6 +416,7 @@ AFRAME.registerComponent("media-loader", {
       if (
         contentType.startsWith("video/") ||
         contentType.startsWith("audio/") ||
+        contentType.startsWith("application/dash") ||
         AFRAME.utils.material.isHLS(canonicalUrl, contentType)
       ) {
         let linkedVideoTexture, linkedAudioSource, linkedMediaElementAudioSource;
@@ -443,8 +454,11 @@ AFRAME.registerComponent("media-loader", {
             linkedMediaElementAudioSource
           })
         );
-        if (this.el.components["position-at-box-shape-border__freeze"]) {
-          this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
+        if (this.el.components["position-at-border__freeze"]) {
+          this.el.setAttribute("position-at-border__freeze", { isFlat: true });
+        }
+        if (this.el.components["position-at-border__freeze-unprivileged"]) {
+          this.el.setAttribute("position-at-border__freeze-unprivileged", { isFlat: true });
         }
       } else if (contentType.startsWith("image/")) {
         this.el.removeAttribute("gltf-model-plus");
@@ -459,7 +473,7 @@ AFRAME.registerComponent("media-loader", {
             if (contentSubtype === "photo-camera") {
               this.el.setAttribute("hover-menu__photo", {
                 template: "#photo-hover-menu",
-                dirs: ["forward", "back"]
+                isFlat: true
               });
             }
           },
@@ -480,8 +494,11 @@ AFRAME.registerComponent("media-loader", {
           })
         );
 
-        if (this.el.components["position-at-box-shape-border__freeze"]) {
-          this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
+        if (this.el.components["position-at-border__freeze"]) {
+          this.el.setAttribute("position-at-border__freeze", { isFlat: true });
+        }
+        if (this.el.components["position-at-border__freeze-unprivileged"]) {
+          this.el.setAttribute("position-at-border__freeze-unprivileged", { isFlat: true });
         }
       } else if (contentType.startsWith("application/pdf")) {
         this.el.removeAttribute("gltf-model-plus");
@@ -506,8 +523,11 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
 
-        if (this.el.components["position-at-box-shape-border__freeze"]) {
-          this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
+        if (this.el.components["position-at-border__freeze"]) {
+          this.el.setAttribute("position-at-border__freeze", { isFlat: true });
+        }
+        if (this.el.components["position-at-border__freeze-unprivileged"]) {
+          this.el.setAttribute("position-at-border__freeze-unprivileged", { isFlat: true });
         }
       } else if (
         contentType.includes("application/octet-stream") ||
@@ -554,22 +574,22 @@ AFRAME.registerComponent("media-loader", {
             if (await isLocalHubsAvatarUrl(src)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#avatar-link-hover-menu",
-                dirs: ["forward", "back"]
+                isFlat: true
               });
             } else if ((await isHubsRoomUrl(src)) || ((await isLocalHubsSceneUrl(src)) && mayChangeScene)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#hubs-destination-hover-menu",
-                dirs: ["forward", "back"]
+                isFlat: true
               });
             } else {
-              this.el.setAttribute("hover-menu__link", { template: "#link-hover-menu", dirs: ["forward", "back"] });
+              this.el.setAttribute("hover-menu__link", { template: "#link-hover-menu", isFlat: true });
             }
             this.onMediaLoaded(SHAPE.BOX);
           },
           { once: true }
         );
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
-        let batch = !disableBatching;
+        let batch = !disableBatching && forceImageBatching;
         if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
           batch = false;
         }
@@ -582,13 +602,22 @@ AFRAME.registerComponent("media-loader", {
             batch
           })
         );
-        if (this.el.components["position-at-box-shape-border__freeze"]) {
-          this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
+        if (this.el.components["position-at-border__freeze"]) {
+          this.el.setAttribute("position-at-border__freeze", { isFlat: true });
+        }
+        if (this.el.components["position-at-border__freeze-unprivileged"]) {
+          this.el.setAttribute("position-at-border__freeze-unprivileged", { isFlat: true });
         }
       } else {
         throw new Error(`Unsupported content type: ${contentType}`);
       }
     } catch (e) {
+      if (this.el.components["position-at-border__freeze"]) {
+        this.el.setAttribute("position-at-border__freeze", { isFlat: true });
+      }
+      if (this.el.components["position-at-border__freeze-unprivileged"]) {
+        this.el.setAttribute("position-at-border__freeze-unprivileged", { isFlat: true });
+      }
       console.error("Error adding media", e);
       this.onError();
     }
@@ -607,7 +636,7 @@ AFRAME.registerComponent("media-pager", {
     this.onSnap = this.onSnap.bind(this);
     this.update = this.update.bind(this);
 
-    this.el.setAttribute("hover-menu__pager", { template: "#pager-hover-menu", dirs: ["forward", "back"] });
+    this.el.setAttribute("hover-menu__pager", { template: "#pager-hover-menu", isFlat: true });
     this.el.components["hover-menu__pager"].getHoverMenu().then(menu => {
       // If we got removed while waiting, do nothing.
       if (!this.el.parentNode) return;

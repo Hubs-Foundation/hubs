@@ -1,8 +1,4 @@
-// Variables in .env and .env.defaults will be added to process.env
 const dotenv = require("dotenv");
-dotenv.config({ path: ".env" });
-dotenv.config({ path: ".env.defaults" });
-
 const fs = require("fs");
 const path = require("path");
 const selfsigned = require("selfsigned");
@@ -14,6 +10,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const TOML = require("@iarna/toml");
 const fetch = require("node-fetch");
+const request = require("request");
 
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
@@ -32,6 +29,7 @@ function createHTTPSConfig() {
       ],
       {
         days: 365,
+        keySize: 2048,
         algorithm: "sha256",
         extensions: [
           {
@@ -62,9 +60,6 @@ function createHTTPSConfig() {
   }
 }
 
-const defaultHostName = "hubs.local";
-const host = process.env.HOST_IP || defaultHostName;
-
 function matchRegex({ include, exclude }) {
   return (module, chunks) => {
     if (
@@ -83,47 +78,138 @@ function matchRegex({ include, exclude }) {
   };
 }
 
-const babelConfig = JSON.parse(
-  fs
-    .readFileSync(path.resolve(__dirname, ".babelrc"))
-    .toString()
-    .replace(/\/\/.+/g, "")
-);
+function createDefaultAppConfig() {
+  const schemaPath = path.join(__dirname, "src", "schema.toml");
+  const schemaString = fs.readFileSync(schemaPath).toString();
 
-module.exports = async (env, argv) => {
-  let appConfig = undefined;
-  let appConfigSchema = undefined;
+  let appConfigSchema;
 
-  if (process.env.USE_HUBS_CLOUD_APP_CONFIG) {
-    if (!fs.existsSync(".ret.credentials")) {
-      throw new Error("Not logged in to Hubs Cloud. Run `npm login` first.");
-    }
+  try {
+    appConfigSchema = TOML.parse(schemaString);
+  } catch (e) {
+    console.error("Error parsing schema.toml on line " + e.line + ", column " + e.column + ": " + e.message);
+    throw e;
+  }
 
-    const { host, token } = JSON.parse(fs.readFileSync(".ret.credentials"));
+  const appConfig = {};
 
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json"
-    };
+  for (const [categoryName, category] of Object.entries(appConfigSchema)) {
+    appConfig[categoryName] = {};
 
-    const response = await fetch(`https://${host}/api/v1/app_configs`, { headers });
-
-    if (!response.ok) {
-      throw new Error(`Error fetching Hubs Cloud config "${response.statusText}"`);
-    }
-
-    appConfig = await response.json();
-  } else if (argv.mode === "development") {
-    const schemaPath = path.join(__dirname, "src", "schema.toml");
-    const schemaString = fs.readFileSync(schemaPath).toString();
-
-    try {
-      appConfigSchema = TOML.parse(schemaString);
-    } catch (e) {
-      console.error("Error parsing schema.toml on line " + e.line + ", column " + e.column + ": " + e.message);
-      throw e;
+    // Enable all features with a boolean type
+    if (categoryName === "features") {
+      for (const [key, schema] of Object.entries(category)) {
+        if (key === "require_account_for_join") {
+          appConfig[categoryName][key] = false;
+        } else {
+          appConfig[categoryName][key] = schema.type === "boolean" ? true : null;
+        }
+      }
     }
   }
+
+  return appConfig;
+}
+
+async function fetchAppConfigAndEnvironmentVars() {
+  if (!fs.existsSync(".ret.credentials")) {
+    throw new Error("Not logged in to Hubs Cloud. Run `npm run login` first.");
+  }
+
+  const { host, token } = JSON.parse(fs.readFileSync(".ret.credentials"));
+
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json"
+  };
+
+  // Load the Hubs Cloud instance's app config in development
+  const appConfigsResponse = await fetch(`https://${host}/api/v1/app_configs`, { headers });
+
+  if (!appConfigsResponse.ok) {
+    throw new Error(`Error fetching Hubs Cloud config "${appConfigsResponse.statusText}"`);
+  }
+
+  const appConfig = await appConfigsResponse.json();
+
+  // dev.reticulum.io doesn't run ita
+  if (host === "dev.reticulum.io") {
+    return appConfig;
+  }
+
+  const hubsConfigsResponse = await fetch(`https://${host}/api/ita/configs/hubs`, { headers });
+
+  const hubsConfigs = await hubsConfigsResponse.json();
+
+  if (!hubsConfigsResponse.ok) {
+    throw new Error(`Error fetching Hubs Cloud config "${hubsConfigsResponse.statusText}"`);
+  }
+
+  const { shortlink_domain, thumbnail_server } = hubsConfigs.general;
+
+  process.env.RETICULUM_SERVER = host;
+  process.env.SHORTLINK_DOMAIN = shortlink_domain;
+  process.env.CORS_PROXY_SERVER = "localhost:8080/cors-proxy";
+  process.env.THUMBNAIL_SERVER = thumbnail_server;
+  process.env.NON_CORS_PROXY_DOMAINS = "hubs.local,localhost";
+
+  return appConfig;
+}
+
+module.exports = async (env, argv) => {
+  env = env || {};
+
+  // Load environment variables from .env files.
+  // .env takes precedent over .defaults.env
+  // Previously defined environment variables are not overwritten
+  dotenv.config({ path: ".env" });
+  dotenv.config({ path: ".defaults.env" });
+
+  let appConfig = undefined;
+
+  /**
+   * Initialize the Webpack build envrionment for the provided environment.
+   */
+
+  if (argv.mode !== "production" || env.bundleAnalyzer) {
+    if (env.loadAppConfig || process.env.LOAD_APP_CONFIG) {
+      if (!env.localDev) {
+        // Load and set the app config and environment variables from the remote server.
+        // A Hubs Cloud server or dev.reticulum.io can be used.
+        appConfig = await fetchAppConfigAndEnvironmentVars();
+      }
+    } else {
+      // Use the default app config with all featured enabled.
+      appConfig = createDefaultAppConfig();
+    }
+
+    if (env.localDev) {
+      // Local Dev Environment (npm run local)
+      Object.assign(process.env, {
+        HOST: "hubs.local",
+        RETICULUM_SOCKET_SERVER: "hubs.local",
+        CORS_PROXY_SERVER: "hubs-proxy.local:4000",
+        NON_CORS_PROXY_DOMAINS: "hubs.local,dev.reticulum.io",
+        BASE_ASSETS_PATH: "https://hubs.local:8080/",
+        RETICULUM_SERVER: "hubs.local:4000",
+        POSTGREST_SERVER: "",
+        ITA_SERVER: ""
+      });
+    }
+  }
+
+  // In production, the environment variables are defined in CI or loaded from ita and
+  // the app config is injected into the head of the page by Reticulum.
+
+  const host = process.env.HOST_IP || env.localDev ? "hubs.local" : "localhost";
+
+  // Remove comments from .babelrc
+  const babelConfig = JSON.parse(
+    fs
+      .readFileSync(path.resolve(__dirname, ".babelrc"))
+      .toString()
+      .replace(/\/\/.+/g, "")
+  );
 
   return {
     node: {
@@ -152,11 +238,42 @@ module.exports = async (env, argv) => {
       host: "0.0.0.0",
       public: `${host}:8080`,
       useLocalIp: true,
-      allowedHosts: [host],
+      allowedHosts: [host, "hubs.local"],
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
       before: function(app) {
+        // Local CORS proxy
+        app.all("/cors-proxy/*", (req, res) => {
+          res.header("Access-Control-Allow-Origin", "*");
+          res.header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+          res.header("Access-Control-Allow-Headers", "Range");
+          res.header(
+            "Access-Control-Expose-Headers",
+            "Accept-Ranges, Content-Encoding, Content-Length, Content-Range, Hub-Name, Hub-Entity-Type"
+          );
+          res.header("Vary", "Origin");
+          res.header("X-Content-Type-Options", "nosniff");
+
+          const redirectLocation = req.header("location");
+
+          if (redirectLocation) {
+            res.header("Location", "https://localhost:8080/cors-proxy/" + redirectLocation);
+          }
+
+          if (req.method === "OPTIONS") {
+            res.send();
+          } else {
+            const url = req.path.replace("/cors-proxy/", "");
+            request({ url, method: req.method }, error => {
+              if (error) {
+                console.error(`cors-proxy: error fetching "${url}"\n`, error);
+                return;
+              }
+            }).pipe(res);
+          }
+        });
+
         // be flexible with people accessing via a local reticulum on another port
         app.use(cors({ origin: /hubs\.local(:\d*)?$/ }));
         // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
@@ -297,43 +414,19 @@ module.exports = async (env, argv) => {
         filename: "hub.html",
         template: path.join(__dirname, "src", "hub.html"),
         chunks: ["vendor", "engine", "hub"],
-        inject: "head",
-        meta: [
-          {
-            "http-equiv": "origin-trial",
-            "data-feature": "WebVR (For Chrome M62+)",
-            "data-expires": process.env.ORIGIN_TRIAL_EXPIRES,
-            content: process.env.ORIGIN_TRIAL_TOKEN
-          }
-        ]
+        inject: "head"
       }),
       new HTMLWebpackPlugin({
         filename: "scene.html",
         template: path.join(__dirname, "src", "scene.html"),
         chunks: ["vendor", "engine", "scene"],
-        inject: "head",
-        meta: [
-          {
-            "http-equiv": "origin-trial",
-            "data-feature": "WebVR (For Chrome M62+)",
-            "data-expires": process.env.ORIGIN_TRIAL_EXPIRES,
-            content: process.env.ORIGIN_TRIAL_TOKEN
-          }
-        ]
+        inject: "head"
       }),
       new HTMLWebpackPlugin({
         filename: "avatar.html",
         template: path.join(__dirname, "src", "avatar.html"),
         chunks: ["vendor", "engine", "avatar"],
-        inject: "head",
-        meta: [
-          {
-            "http-equiv": "origin-trial",
-            "data-feature": "WebVR (For Chrome M62+)",
-            "data-expires": process.env.ORIGIN_TRIAL_EXPIRES,
-            content: process.env.ORIGIN_TRIAL_TOKEN
-          }
-        ]
+        inject: "head"
       }),
       new HTMLWebpackPlugin({
         filename: "link.html",
@@ -388,9 +481,7 @@ module.exports = async (env, argv) => {
           SENTRY_DSN: process.env.SENTRY_DSN,
           GA_TRACKING_ID: process.env.GA_TRACKING_ID,
           POSTGREST_SERVER: process.env.POSTGREST_SERVER,
-          USE_FEATURE_CONFIG: process.env.USE_FEATURE_CONFIG,
-          APP_CONFIG: appConfig,
-          APP_CONFIG_SCHEMA: appConfigSchema
+          APP_CONFIG: appConfig
         })
       })
     ]

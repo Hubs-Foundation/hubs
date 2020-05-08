@@ -92,6 +92,19 @@ THREE.Object3D.prototype.applyMatrix = function() {
   handleMatrixModification(this);
 };
 
+// Updates this function to use updateMatrices(). In general our code should prefer calling updateMatrices() directly,
+// patching this for compatibility upstream, namely with Box3.expandToObject and Object3D.attach
+THREE.Object3D.prototype.updateWorldMatrix = function(updateParents, updateChildren) {
+  this.updateMatrices(false, false, !updateParents);
+  if (updateChildren) {
+    const children = this.children;
+    for (let i = 0, l = children.length; i < l; i++) {
+      children[i].updateMatrixWorld(false, false);
+    }
+    if (this.childrenNeedMatrixWorldUpdate) this.childrenNeedMatrixWorldUpdate = false;
+  }
+};
+
 // By the end of this function this.matrix reflects the updated local matrix
 // and this.matrixWorld reflects the updated world matrix, taking into account
 // parent matrices.
@@ -123,6 +136,7 @@ THREE.Object3D.prototype.updateMatrices = function(forceLocalUpdate, forceWorldU
     this.matrixWorldNeedsUpdate = true;
     this.cachedMatrixWorld = this.matrixWorld;
   } else if (this.matrixNeedsUpdate || this.matrixAutoUpdate || forceLocalUpdate) {
+    // updateMatrix() sets matrixWorldNeedsUpdate = true
     this.updateMatrix();
     if (this.matrixNeedsUpdate) this.matrixNeedsUpdate = false;
   }

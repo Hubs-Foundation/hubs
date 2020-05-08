@@ -1,4 +1,5 @@
 import { CursorTargettingSystem } from "./cursor-targetting-system";
+import { PositionAtBorderSystem } from "../components/position-at-border";
 import { CursorTogglingSystem } from "./cursor-toggling-system";
 import { PhysicsSystem } from "./physics-system";
 import { ConstraintsSystem } from "./constraints-system";
@@ -19,9 +20,11 @@ import { CharacterControllerSystem } from "./character-controller-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { CursorPoseTrackingSystem } from "./cursor-pose-tracking";
 import { ScaleInScreenSpaceSystem } from "./scale-in-screen-space";
+import { MenuAnimationSystem } from "./menu-animation-system";
 import { AudioSettingsSystem } from "./audio-settings-system";
 import { EnterVRButtonSystem } from "./enter-vr-button-system";
 import { WorldManager } from "../ecsy";
+import { AudioSystem } from "./audio-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -32,6 +35,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.interactionSfxSystem = new InteractionSfxSystem();
     this.superSpawnerSystem = new SuperSpawnerSystem();
     this.cursorTargettingSystem = new CursorTargettingSystem();
+    this.positionAtBorderSystem = new PositionAtBorderSystem();
     this.physicsSystem = new PhysicsSystem(this.el.object3D);
     this.constraintsSystem = new ConstraintsSystem(this.physicsSystem);
     this.twoPointStretchingSystem = new TwoPointStretchingSystem();
@@ -40,6 +44,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverButtonSystem = new HoverButtonSystem();
     this.hoverMenuSystem = new HoverMenuSystem();
     this.hapticFeedbackSystem = new HapticFeedbackSystem();
+    this.audioSystem = new AudioSystem(this.el);
     this.soundEffectsSystem = new SoundEffectsSystem(this.el);
     this.scenePreviewCameraSystem = new ScenePreviewCameraSystem();
     this.spriteSystem = new SpriteSystem(this.el);
@@ -50,6 +55,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.waypointSystem = new WaypointSystem(this.el, this.characterController);
     this.cursorPoseTrackingSystem = new CursorPoseTrackingSystem();
     this.scaleInScreenSpaceSystem = new ScaleInScreenSpaceSystem();
+    this.menuAnimationSystem = new MenuAnimationSystem();
     this.audioSettingsSystem = new AudioSettingsSystem(this.el);
     this.enterVRButtonSystem = new EnterVRButtonSystem(this.el);
     this.worldManager = new WorldManager(this.el);
@@ -66,6 +72,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.superSpawnerSystem.tick();
     this.cursorPoseTrackingSystem.tick();
     this.cursorTargettingSystem.tick(t);
+    this.positionAtBorderSystem.tick();
     this.scaleInScreenSpaceSystem.tick();
     this.constraintsSystem.tick();
     this.twoPointStretchingSystem.tick();
@@ -82,10 +89,11 @@ AFRAME.registerSystem("hubs-systems", {
     this.soundEffectsSystem.tick();
     this.scenePreviewCameraSystem.tick();
     this.physicsSystem.tick(dt);
-    this.spriteSystem.tick(t, dt);
     this.batchManagerSystem.tick(t);
     this.cameraSystem.tick(this.el, dt);
     this.waypointSystem.tick(t, dt);
+    this.menuAnimationSystem.tick(t);
+    this.spriteSystem.tick(t, dt);
     this.enterVRButtonSystem.tick();
     this.worldManager.execute(dt, t);
   },

@@ -110,6 +110,7 @@ async function grantedMicLabels() {
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isMobilePhoneOrVR = isMobile || isMobileVR;
+const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
@@ -276,7 +277,12 @@ class UIRoot extends Component {
   };
 
   onIdleDetected = () => {
-    if (this.props.disableAutoExitOnIdle || this.state.isStreaming) return;
+    if (
+      this.props.disableAutoExitOnIdle ||
+      this.state.isStreaming ||
+      this.props.store.state.preferences["disableIdleDetection"]
+    )
+      return;
     this.startAutoExitTimer("autoexit.idle_subtitle");
   };
 
@@ -602,7 +608,7 @@ class UIRoot extends Component {
     if (lastUsedMicDeviceId) {
       hasAudio = await this.fetchAudioTrack({ audio: { deviceId: { ideal: lastUsedMicDeviceId } } });
     } else {
-      hasAudio = await this.fetchAudioTrack({ audio: true });
+      hasAudio = await this.fetchAudioTrack({ audio: {} });
     }
 
     await this.setupNewMediaStream();
@@ -616,6 +622,31 @@ class UIRoot extends Component {
     }
     if (this.state.audioTrackClone) {
       this.state.audioTrackClone.stop();
+    }
+
+    constraints.audio.echoCancellation =
+      window.APP.store.state.preferences.disableEchoCancellation === true ? false : true;
+    constraints.audio.noiseSuppression =
+      window.APP.store.state.preferences.disableNoiseSuppression === true ? false : true;
+    constraints.audio.autoGainControl =
+      window.APP.store.state.preferences.disableAutoGainControl === true ? false : true;
+
+    if (isFirefoxReality) {
+      //workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1626081
+      constraints.audio.echoCancellation =
+        window.APP.store.state.preferences.disableEchoCancellation === false ? true : false;
+      constraints.audio.noiseSuppression =
+        window.APP.store.state.preferences.disableNoiseSuppression === false ? true : false;
+      constraints.audio.autoGainControl =
+        window.APP.store.state.preferences.disableAutoGainControl === false ? true : false;
+
+      window.APP.store.update({
+        preferences: {
+          disableEchoCancellation: !constraints.audio.echoCancellation,
+          disableNoiseSuppression: !constraints.audio.noiseSuppression,
+          disableAutoGainControl: !constraints.audio.autoGainControl
+        }
+      });
     }
 
     try {
@@ -960,7 +991,7 @@ class UIRoot extends Component {
           Sorry, this room is no longer available.
           <p />
           <IfFeature name="show_terms">
-            A room may be closed if we receive reports that it violates our{" "}
+            A room may be closed by the room owner, or if we receive reports that it violates our{" "}
             <a
               target="_blank"
               rel="noreferrer noopener"
@@ -1004,11 +1035,21 @@ class UIRoot extends Component {
       );
     } else {
       const reason = this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
+      const tcpUrl = new URL(document.location.toString());
+      const tcpParams = new URLSearchParams(tcpUrl.search);
+      tcpParams.set("force_tcp", true);
+      tcpUrl.search = tcpParams.toString();
+
       const exitSubtitleId = `exit.subtitle.${reason || "exited"}`;
       subtitle = (
         <div>
           <FormattedMessage id={exitSubtitleId} />
           <p />
+          {this.props.roomUnavailableReason === "connect_error" && (
+            <div>
+              You can try <a href={tcpUrl.toString()}>connecting via TCP</a>, which may work better on some networks.
+            </div>
+          )}
           {!["left", "disconnected", "scene_error"].includes(this.props.roomUnavailableReason) && (
             <div>
               You can also <a href="/">create a new room</a>
@@ -1067,13 +1108,18 @@ class UIRoot extends Component {
           ) : (
             <span>{this.props.hub.name}</span>
           )}
-          <button onClick={() => this.setState({ watching: true })} className={entryStyles.collapseButton}>
+          <button
+            aria-label="Close room entry panel and spectate from lobby"
+            onClick={() => this.setState({ watching: true })}
+            className={entryStyles.collapseButton}
+          >
             <i>
               <FontAwesomeIcon icon={faTimes} />
             </i>
           </button>
 
           <button
+            aria-label="Toggle Favorited"
             onClick={() => this.toggleFavorited()}
             className={classNames({
               [entryStyles.entryFavoriteButton]: true,
@@ -1408,6 +1454,9 @@ class UIRoot extends Component {
 
     if (this.state.objectInfo && this.state.objectInfo.object3D) {
       return true; // TODO: Get object info dialog to use history
+    }
+    if (this.state.isObjectListExpanded) {
+      return true;
     }
 
     return !!(
@@ -2136,6 +2185,7 @@ class UIRoot extends Component {
 
                 {!streaming && (
                   <button
+                    aria-label="Toggle Favorited"
                     onClick={() => this.toggleFavorited()}
                     className={classNames({
                       [entryStyles.favorited]: this.isFavorited(),

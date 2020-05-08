@@ -64,6 +64,7 @@ AFRAME.registerComponent("scale-button", {
     this.dragVector = new THREE.Vector3();
     this.currentObjectScale = new THREE.Vector3();
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.networkedEl = networkedEl;
       this.objectToScale = networkedEl.object3D;
     });
     const camPosition = new THREE.Vector3();
@@ -73,6 +74,11 @@ AFRAME.registerComponent("scale-button", {
       if (this.isScaling || !this.objectToScale) {
         return;
       }
+
+      if (!(NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
+        return;
+      }
+
       if (!this.didGetObjectReferences) {
         this.didGetObjectReferences = true;
         this.leftEventer = document.getElementById("left-cursor").object3D;
@@ -80,7 +86,7 @@ AFRAME.registerComponent("scale-button", {
         this.leftRaycaster = this.leftCursorController.components["cursor-controller"].raycaster;
         this.rightCursorController = document.getElementById("right-cursor-controller");
         this.rightRaycaster = this.rightCursorController.components["cursor-controller"].raycaster;
-        this.viewingCamera = document.getElementById("viewing-camera").object3D;
+        this.viewingCamera = document.getElementById("viewing-camera").object3DMap.camera;
       }
       this.plane = e.object3D === this.leftEventer ? planeForLeftCursor : planeForRightCursor;
       setMatrixWorld(this.plane, calculatePlaneMatrix(this.viewingCamera, this.el.object3D));
