@@ -30,6 +30,7 @@ const styles = {
   hide: { display: "none" },
   noBorder: { border: "0px" },
   searchCard: { marginBottom: "5px" }
+  paddingTop: {}
 };
 
 const AccountFilter = props => (
@@ -129,7 +130,7 @@ export const AccountList = withStyles(styles)(
         <>
           <Card classes={{ root: classes.searchCard }}>
             <CardContent>
-              <Typography component="h2">Create account(s) (separate emails with &quot;;&quot;)</Typography>
+              <Typography component="h2">Create one account or mutliple: separate emails with &quot;;&quot;)</Typography>
               <form onSubmit={this.onCreateAccount.bind(this)}>
                 <MuiTextField
                   label="Email address(es)"
@@ -146,7 +147,7 @@ export const AccountList = withStyles(styles)(
                 />
                 <Button onClick={this.onCreateAccount.bind(this)}>Create</Button>
                 {this.state.creating && <CircularProgress />}
-                <Snackbar open={!!this.state.createStatus} autoHideDuration={5000}>
+                <Snackbar open={this.state.createStatus} autoHideDuration={5000}>
                   <SnackbarContent message={this.state.createStatus}></SnackbarContent>
                 </Snackbar>
               </form>
@@ -175,7 +176,7 @@ export const AccountList = withStyles(styles)(
                 />
                 <Button onClick={this.onAccountSearch.bind(this)}>Find</Button>
                 {this.state.searching && <CircularProgress />}
-                <Snackbar open={!!this.state.searchStatus} autoHideDuration={5000}>
+                <Snackbar open={this.state.searchStatus} autoHideDuration={5000}>
                   <SnackbarContent message={this.state.searchStatus}></SnackbarContent>
                 </Snackbar>
               </form>
