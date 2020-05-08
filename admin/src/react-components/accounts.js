@@ -69,26 +69,16 @@ export const AccountList = withStyles(styles)(
     }
     async onCreateAccount(e) {
       e.preventDefault();
+      if (this.state.emailCreate.length === 0) return;
       this.setState({ creating: true, createStatus: null });
-      let data = {};
-      if (this.state.emailCreate.includes(";")) {
-        // create multiple accounts using email
-        // [{email: , name?: }, {email: , name?: }]
-        data = this.state.emailCreate
-          .split(";")
-          .filter(email => email !== "")
-          .map(email =>
-            this.state.identityCreate.length
-              ? { email: email.trim(), name: this.state.identityCreate }
-              : { email: email.trim() }
-          );
-      } else {
-        // create single account
-        // {email: , name?: }
-        data = this.state.identityCreate.length
-          ? { email: this.state.emailCreate.trim(), name: this.state.identityCreate }
-          : { email: this.state.emailCreate.trim() };
-      }
+      const data = this.state.emailCreate
+        .split(";")
+        .filter(email => email !== "")
+        .map(email =>
+          this.state.identityCreate.length
+            ? { email: email.trim(), name: this.state.identityCreate }
+            : { email: email.trim() }
+        );
       const result = await fetch("/api/v1/accounts", {
         method: "post",
         headers: {
@@ -96,7 +86,7 @@ export const AccountList = withStyles(styles)(
           authorization: `bearer ${window.APP.store.state.credentials.token}`
         },
         body: JSON.stringify({
-          data: data
+          data: data.length === 1 ? data[0] : data
         })
       }).then(r => r.json());
       console.log(data);
@@ -115,7 +105,11 @@ export const AccountList = withStyles(styles)(
           hasOneSuccess = hasOneSuccess || cur.status === 200;
           const message = cur.status === 200 ? "Created accounts successfully" : cur.body.errors[0].detail;
           const email = data[index].email;
+          console.log(message);
+          console.log(email);
+          console.log(prev[message]);
           prev[message] = Array.isArray(prev[message]) ? prev[message].push(email) : [email];
+          console.log(prev[message]);
           return prev;
         }, {});
         console.log("results");
