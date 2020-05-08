@@ -169,7 +169,7 @@ export const AccountList = withStyles(styles)(
                   <>
                     <Typography
                       component="p"
-                      color={message.includes("success") ? "primary" : "error"}
+                      color={message.includes("success") ? "textPrimary" : "error"}
                       style={{ paddingTop: "10px" }}
                     >
                       {message}
