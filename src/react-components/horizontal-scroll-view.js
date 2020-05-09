@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import oStyles from "../assets/stylesheets/object-info-dialog.scss";
-import { mediaSortOrder, DISPLAY_IMAGE } from "../utils/media-sorting";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function getWidth(ref) {
@@ -12,25 +11,6 @@ function getWidth(ref) {
 function clamp(x, min, max) {
   return Math.min(Math.max(x, min), max);
 }
-
-function NavigationRowItem(props) {
-  const { onClick, icon, isSelected } = props;
-  return (
-    <button className={classNames(oStyles.noDefaultButtonStyle, oStyles.innerNavigationRowItem)} onClick={onClick}>
-      <i className={oStyles.flex}>
-        <FontAwesomeIcon
-          className={classNames(oStyles.navigationRowItem, { [oStyles.selected]: isSelected })}
-          icon={icon}
-        />
-      </i>
-    </button>
-  );
-}
-NavigationRowItem.propTypes = {
-  onClick: PropTypes.func,
-  icon: PropTypes.object,
-  isSelected: PropTypes.bool
-};
 
 function clampToIndex(x, numItems) {
   return clamp(Math.floor(x), 0, numItems - 1);
@@ -82,10 +62,11 @@ export class HorizontalScrollView extends Component {
   static propTypes = {
     selectedEl: PropTypes.object,
     onWheel: PropTypes.func,
-    mediaEntities: PropTypes.array,
+    numItems: PropTypes.number,
     targetIndex: PropTypes.number,
     itemWidth: PropTypes.number,
-    onItemSelected: PropTypes.func
+    onItemSelected: PropTypes.func,
+    children: PropTypes.node
   };
 
   state = {
@@ -103,9 +84,8 @@ export class HorizontalScrollView extends Component {
   }
 
   render() {
-    const { itemWidth, selectedEl, onWheel, mediaEntities, targetIndex, onItemSelected } = this.props;
+    const { itemWidth, onWheel, numItems, targetIndex, onItemSelected } = this.props;
     const halfItemWidth = itemWidth / 2;
-    const numItems = mediaEntities.length;
     const widthOfAllItems = itemWidth * numItems;
     const scrollviewWidth = getWidth(this.navAreaRef);
     const contentWillScroll = widthOfAllItems > scrollviewWidth;
@@ -193,20 +173,15 @@ export class HorizontalScrollView extends Component {
               : {}
           }
         >
-          {mediaEntities.map((entity, i) => {
-            return (
-              <NavigationRowItem
-                onClick={() => {
-                  if (this.state.isHandlingTouchInteraction) {
-                    return;
-                  }
-                  onItemSelected(i);
-                }}
-                icon={DISPLAY_IMAGE.get(mediaSortOrder(entity))}
-                isSelected={entity === selectedEl}
-                key={`${entity.object3D.uuid}_nav-row-item`}
-              />
-            );
+          {React.Children.map(this.props.children, (child, index) => {
+            return React.cloneElement(child, {
+              onClick: () => {
+                if (this.state.isHandlingTouchInteraction) {
+                  return;
+                }
+                onItemSelected(index);
+              }
+            });
           })}
         </div>
       </div>

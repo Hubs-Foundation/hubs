@@ -16,9 +16,28 @@ import { faLightbulb } from "@fortawesome/free-solid-svg-icons/faLightbulb";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import entryStyles from "../assets/stylesheets/entry.scss";
-import { mediaSort } from "../utils/media-sorting";
+import { mediaSort, mediaSortOrder, DISPLAY_IMAGE } from "../utils/media-sorting";
 import { getPromotionTokenForFile } from "../utils/media-utils";
 import { HorizontalScrollView } from "./horizontal-scroll-view";
+
+export function NavigationRowItem(props) {
+  const { onClick, icon, isSelected } = props;
+  return (
+    <button className={classNames(oStyles.noDefaultButtonStyle, oStyles.innerNavigationRowItem)} onClick={onClick}>
+      <i className={oStyles.flex}>
+        <FontAwesomeIcon
+          className={classNames(oStyles.navigationRowItem, { [oStyles.selected]: isSelected })}
+          icon={icon}
+        />
+      </i>
+    </button>
+  );
+}
+NavigationRowItem.propTypes = {
+  onClick: PropTypes.func,
+  icon: PropTypes.object,
+  isSelected: PropTypes.bool
+};
 
 function HeaderIcon(props) {
   const { icon, onClick, ariaLabel, small } = props;
@@ -262,12 +281,22 @@ export default class ObjectInfoDialog extends Component {
                   this.navigate(-1);
                 }
               }}
-              mediaEntities={this.state.mediaEntities}
+              numItems={this.state.mediaEntities.length}
               targetIndex={targetIndex}
               onItemSelected={index => {
                 this.navigateTo(this.state.mediaEntities[index]);
               }}
-            />
+            >
+              {mediaEntities.map(entity => {
+                return (
+                  <NavigationRowItem
+                    icon={DISPLAY_IMAGE.get(mediaSortOrder(entity))}
+                    isSelected={entity === selectedEl}
+                    key={`${entity.object3D.uuid}_nav-row-item`}
+                  />
+                );
+              })}
+            </HorizontalScrollView>
             {showNavigationButtons && (
               <HeaderIcon icon={faChevronRight} onClick={this.navigateNext} ariaLabel={"Next Object"} />
             )}
