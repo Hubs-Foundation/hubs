@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import classNames from "classnames";
 import oStyles from "../assets/stylesheets/object-info-dialog.scss";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function getWidth(ref) {
   return (ref && ref.current && parseInt(window.getComputedStyle(ref.current).width)) || 0;
