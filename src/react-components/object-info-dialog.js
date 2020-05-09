@@ -253,6 +253,7 @@ export default class ObjectInfoDialog extends Component {
               <HeaderIcon icon={faChevronLeft} onClick={this.navigatePrev} ariaLabel={"Previous Object"} />
             )}
             <HorizontalScrollView
+              itemWidth={60}
               selectedEl={selectedEl}
               onWheel={e => {
                 if (e.deltaY > 0) {
@@ -261,9 +262,11 @@ export default class ObjectInfoDialog extends Component {
                   this.navigate(-1);
                 }
               }}
-              navigateTo={this.navigateTo.bind(this)}
               mediaEntities={this.state.mediaEntities}
               targetIndex={targetIndex}
+              onItemSelected={index => {
+                this.navigateTo(this.state.mediaEntities[index]);
+              }}
             />
             {showNavigationButtons && (
               <HeaderIcon icon={faChevronRight} onClick={this.navigateNext} ariaLabel={"Next Object"} />

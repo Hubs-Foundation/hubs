@@ -5,40 +5,27 @@ import oStyles from "../assets/stylesheets/object-info-dialog.scss";
 import { mediaSortOrder, DISPLAY_IMAGE } from "../utils/media-sorting";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-const ICON_WIDTH = 60;
-const HALF_ICON_WIDTH = 60 / 2;
-
 function clamp(x, min, max) {
   return Math.min(Math.max(x, min), max);
 }
 
 function NavigationRowItem(props) {
-  const { isHandlingTouchInteraction, entity, isSelected, navigateTo } = props;
+  const { onClick, icon, isSelected } = props;
   return (
-    <button
-      className={classNames(oStyles.noDefaultButtonStyle, oStyles.innerNavigationRowItem)}
-      onClick={() => {
-        if (isHandlingTouchInteraction) {
-          return;
-        }
-        navigateTo(entity);
-      }}
-      key={`nav-row-item-${entity.object3D.uuid}`}
-    >
+    <button className={classNames(oStyles.noDefaultButtonStyle, oStyles.innerNavigationRowItem)} onClick={onClick}>
       <i className={oStyles.flex}>
         <FontAwesomeIcon
           className={classNames(oStyles.navigationRowItem, { [oStyles.selected]: isSelected })}
-          icon={DISPLAY_IMAGE.get(mediaSortOrder(entity))}
+          icon={icon}
         />
       </i>
     </button>
   );
 }
 NavigationRowItem.propTypes = {
-  isHandlingTouchInteraction: PropTypes.bool,
-  entity: PropTypes.object,
-  isSelected: PropTypes.bool,
-  navigateTo: PropTypes.func
+  onClick: PropTypes.func,
+  icon: PropTypes.object,
+  isSelected: PropTypes.bool
 };
 
 function clampToIndex(x, numItems) {
@@ -49,46 +36,48 @@ function lerp(start, end, t) {
   return start + (end - start) * t;
 }
 
-function buttonIndexAtTouchX(navAreaRef, mediaEntities, touchX, currentLeftOffset) {
-  const TOTAL_WIDTH_OF_NAV_ITEMS = ICON_WIDTH * mediaEntities.length;
-  const AVAILABLE_WIDTH_FOR_NAV_ITEMS =
+function buttonIndexAtTouchX(navAreaRef, numItems, touchX, currentLeftOffset, itemWidth) {
+  const widthOfAllItems = itemWidth * numItems;
+  const scrollviewWidth =
     (navAreaRef && navAreaRef.current && parseInt(window.getComputedStyle(navAreaRef.current).width)) ||
     window.innerWidth - 120;
   if (!navAreaRef || !navAreaRef.current) {
     console.warn("No navAreaRef!");
   }
-  const ACTUAL_WIDTH_OF_NAV_ITEMS = Math.min(AVAILABLE_WIDTH_FOR_NAV_ITEMS, TOTAL_WIDTH_OF_NAV_ITEMS);
+  const effectiveWidth = Math.min(scrollviewWidth, widthOfAllItems);
 
   const CENTER_PIXEL = window.innerWidth / 2;
-  const FIRST_PIXEL = CENTER_PIXEL - ACTUAL_WIDTH_OF_NAV_ITEMS / 2;
-  const ICONS_ON_SCREEN = ACTUAL_WIDTH_OF_NAV_ITEMS / ICON_WIDTH;
+  const FIRST_PIXEL = CENTER_PIXEL - effectiveWidth / 2;
+  const ICONS_ON_SCREEN = effectiveWidth / itemWidth;
 
-  const LEFT_OFFSET_FOR_ZEROTH_ITEM = AVAILABLE_WIDTH_FOR_NAV_ITEMS / 2 - HALF_ICON_WIDTH;
-  const LEFT_OFFSET_FOR_LAST_ITEM = LEFT_OFFSET_FOR_ZEROTH_ITEM - ICON_WIDTH * (mediaEntities.length - 1);
+  const halfItemWidth = itemWidth / 2;
+  const LEFT_OFFSET_FOR_ZEROTH_ITEM = scrollviewWidth / 2 - halfItemWidth;
+  const LEFT_OFFSET_FOR_LAST_ITEM = LEFT_OFFSET_FOR_ZEROTH_ITEM - itemWidth * (numItems - 1);
   const LEFT_OFFSET_RANGE = LEFT_OFFSET_FOR_LAST_ITEM - LEFT_OFFSET_FOR_ZEROTH_ITEM;
   const leftOffsetZeroToOne = clamp((currentLeftOffset - LEFT_OFFSET_FOR_ZEROTH_ITEM) / LEFT_OFFSET_RANGE, 0, 1);
-  const CENTER_ICON_UNFLOORED = leftOffsetZeroToOne * (mediaEntities.length - 1);
+  const CENTER_ICON_UNFLOORED = leftOffsetZeroToOne * (numItems - 1);
   const FIRST_ICON_UNFLOORED = CENTER_ICON_UNFLOORED - ICONS_ON_SCREEN / 2;
   const LAST_ICON_UNFLOORED = CENTER_ICON_UNFLOORED + ICONS_ON_SCREEN / 2;
 
   const touchXInNavItemList = touchX - FIRST_PIXEL;
-  const touchZeroToOne = clamp((touchX - FIRST_PIXEL) / ACTUAL_WIDTH_OF_NAV_ITEMS, 0, 1);
+  const touchZeroToOne = clamp((touchX - FIRST_PIXEL) / effectiveWidth, 0, 1);
 
   const approximateIndex =
-    TOTAL_WIDTH_OF_NAV_ITEMS <= AVAILABLE_WIDTH_FOR_NAV_ITEMS
-      ? lerp(0, mediaEntities.length, touchXInNavItemList / TOTAL_WIDTH_OF_NAV_ITEMS)
+    widthOfAllItems <= scrollviewWidth
+      ? lerp(0, numItems, touchXInNavItemList / widthOfAllItems)
       : lerp(FIRST_ICON_UNFLOORED, LAST_ICON_UNFLOORED + 1, touchZeroToOne);
 
-  return clampToIndex(approximateIndex, mediaEntities.length);
+  return clampToIndex(approximateIndex, numItems);
 }
 
 export class HorizontalScrollView extends Component {
   static propTypes = {
     selectedEl: PropTypes.object,
     onWheel: PropTypes.func,
-    navigateTo: PropTypes.func,
     mediaEntities: PropTypes.array,
-    targetIndex: PropTypes.number
+    targetIndex: PropTypes.number,
+    itemWidth: PropTypes.number,
+    onItemSelected: PropTypes.func
   };
 
   state = {
@@ -105,8 +94,10 @@ export class HorizontalScrollView extends Component {
   }
 
   render() {
-    const { selectedEl, onWheel, navigateTo, mediaEntities, targetIndex } = this.props;
-    const AVAILABLE_WIDTH_FOR_NAV_ITEMS =
+    const { itemWidth, selectedEl, onWheel, mediaEntities, targetIndex, onItemSelected } = this.props;
+    const halfItemWidth = itemWidth / 2;
+    const numItems = mediaEntities.length;
+    const scrollviewWidth =
       (this.navAreaRef &&
         this.navAreaRef.current &&
         parseInt(window.getComputedStyle(this.navAreaRef.current).width)) ||
@@ -114,12 +105,12 @@ export class HorizontalScrollView extends Component {
     if (!this.navAreaRef || !this.navAreaRef.current) {
       console.warn("no nav area ref yet");
     }
-    const TOTAL_WIDTH_OF_NAV_ITEMS = ICON_WIDTH * mediaEntities.length;
-    const DISTANCE_TO_CENTER = -1 * HALF_ICON_WIDTH + AVAILABLE_WIDTH_FOR_NAV_ITEMS / 2;
-    const willScrollContent = TOTAL_WIDTH_OF_NAV_ITEMS > AVAILABLE_WIDTH_FOR_NAV_ITEMS;
+    const widthOfAllItems = itemWidth * numItems;
+    const DISTANCE_TO_CENTER = -1 * halfItemWidth + scrollviewWidth / 2;
+    const willScrollContent = widthOfAllItems > scrollviewWidth;
     const UNLOCKED_LEFT_OFFSET = this.state.currentLeftOffset;
-    const LOCKED_LEFT_OFFSET = DISTANCE_TO_CENTER - ICON_WIDTH * targetIndex;
-    const DRAG_WIDTH_PX = HALF_ICON_WIDTH;
+    const LOCKED_LEFT_OFFSET = DISTANCE_TO_CENTER - itemWidth * targetIndex;
+    const DRAG_WIDTH_PX = halfItemWidth;
 
     return (
       <div
@@ -139,14 +130,14 @@ export class HorizontalScrollView extends Component {
             isHandlingTouchInteraction: true
           });
           if (!willScrollContent) {
-            navigateTo(mediaEntities[buttonIndexAtTouchX(this.navAreaRef, mediaEntities, touchX, currentLeftOffset)]);
+            onItemSelected(buttonIndexAtTouchX(this.navAreaRef, numItems, touchX, currentLeftOffset, itemWidth));
           }
         }}
         onTouchMove={e => {
           const touchX = e.touches.item(0).clientX;
           if (!willScrollContent) {
-            navigateTo(
-              mediaEntities[buttonIndexAtTouchX(this.navAreaRef, mediaEntities, touchX, this.state.currentLeftOffset)]
+            onItemSelected(
+              buttonIndexAtTouchX(this.navAreaRef, numItems, touchX, this.state.currentLeftOffset, itemWidth)
             );
             this.setState({ touchX });
           } else {
@@ -160,8 +151,8 @@ export class HorizontalScrollView extends Component {
               });
 
               const CENTER_PIXEL = window.innerWidth / 2;
-              navigateTo(
-                mediaEntities[buttonIndexAtTouchX(this.navAreaRef, mediaEntities, CENTER_PIXEL, currentLeftOffset)]
+              onItemSelected(
+                buttonIndexAtTouchX(this.navAreaRef, numItems, CENTER_PIXEL, currentLeftOffset, itemWidth)
               );
             }
             this.setState({
@@ -174,10 +165,8 @@ export class HorizontalScrollView extends Component {
           const wasDragging = this.state.isDragging;
           this.setState({ isHandlingTouchInteraction: false, isDragging: false });
           if (!wasDragging) {
-            navigateTo(
-              mediaEntities[
-                buttonIndexAtTouchX(this.navAreaRef, mediaEntities, this.state.touchX, this.state.currentLeftOffset)
-              ]
+            onItemSelected(
+              buttonIndexAtTouchX(this.navAreaRef, numItems, this.state.touchX, this.state.currentLeftOffset, itemWidth)
             );
           }
         }}
@@ -199,14 +188,18 @@ export class HorizontalScrollView extends Component {
               : {}
           }
         >
-          {mediaEntities.map(e => {
+          {mediaEntities.map((entity, i) => {
             return (
               <NavigationRowItem
-                isHandlingTouchInteraction={this.state.isHandlingTouchInteraction}
-                entity={e}
-                isSelected={e === selectedEl}
-                navigateTo={navigateTo}
-                key={`${e.object3D.uuid}_nav-row-item`}
+                onClick={() => {
+                  if (this.state.isHandlingTouchInteraction) {
+                    return;
+                  }
+                  onItemSelected(i);
+                }}
+                icon={DISPLAY_IMAGE.get(mediaSortOrder(entity))}
+                isSelected={entity === selectedEl}
+                key={`${entity.object3D.uuid}_nav-row-item`}
               />
             );
           })}
