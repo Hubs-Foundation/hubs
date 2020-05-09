@@ -50,6 +50,10 @@ export const AccountList = withStyles(styles)(
       createStatus: null,
       createResults: ""
     };
+    componentWillUnmount() {
+      if (this.createStatusTimer) this.createStatusTimer.clearTimer();
+      if (this.searchStatusTimer) this.searchStatusTimer.clearTimer();
+    }
     async onAccountSearch(e) {
       e.preventDefault();
       this.setState({ searching: true, searchStatus: null });
@@ -68,7 +72,11 @@ export const AccountList = withStyles(styles)(
       }
       // Quickfix snackbar component does not always close
       // Setting snackbar message to empty string closes
-      setTimeout(() => this.setState({ searchStatus: "" }), 5000);
+      if (this.searchStatusTimer) this.searchStatusTimer.clearTimer();
+      this.searchStatusTimer = setTimeout(() => {
+        this.setState({ searchStatus: "" });
+        this.searchStatusTimer = null;
+      }, 5000);
     }
     async onCreateAccount(e) {
       e.preventDefault();
@@ -129,7 +137,11 @@ export const AccountList = withStyles(styles)(
       }
       // Quickfix snackbar component does not always close
       // Setting snackbar message to empty string closes
-      setTimeout(() => this.setState({ createStatus: "" }), 5000);
+      if (this.createStatusTimer) this.setStatusTimer.clearTimer();
+      this.createStatusTimer = setTimeout(() => {
+        this.setState({ createStatus: "" });
+        this.createStatusTimer = null;
+      }, 5000);
     }
     render() {
       const { classes } = this.props;
@@ -137,9 +149,7 @@ export const AccountList = withStyles(styles)(
         <>
           <Card classes={{ root: classes.searchCard }}>
             <CardContent>
-              <Typography component="h2">
-                Create one account or mutliple: separate emails with &quot;;&quot;)
-              </Typography>
+              <Typography component="h2">Create one account or mutliple: separate emails with &quot;;&quot;</Typography>
               <form onSubmit={this.onCreateAccount.bind(this)}>
                 <MuiTextField
                   label="Email address(es)"
