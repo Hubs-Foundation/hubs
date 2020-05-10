@@ -41,6 +41,7 @@ const AccountFilter = props => (
 export const AccountList = withStyles(styles)(
   class AccountList extends Component {
     state = {
+      showRefreshText: false, // list does not show new accounts on create, tell user to refresh page to see in list
       emailSearch: "",
       searching: false,
       searchStatus: null,
@@ -102,7 +103,7 @@ export const AccountList = withStyles(styles)(
       }).then(r => r.json());
       if (result && result.data) {
         // one email added successfully
-        this.setState({ creating: false, createStatus: `Account created successfully` });
+        this.setState({ showRefreshText: true, creating: false, createStatus: `Account created successfully` });
       } else if (result && result.errors) {
         // one email has errors
         this.setState({ creating: false, createStatus: result.errors[0].detail });
@@ -126,6 +127,7 @@ export const AccountList = withStyles(styles)(
           else results[message] = [email];
         });
         this.setState({
+          showRefreshText: hasOneSuccess,
           creating: false,
           createStatus: isAllSuccess
             ? "Success adding all accounts"
@@ -170,6 +172,13 @@ export const AccountList = withStyles(styles)(
                   <SnackbarContent message={this.state.createStatus}></SnackbarContent>
                 </Snackbar>
               </form>
+              {this.state.showRefreshText && (
+                <Typography component="p">
+                  {`Refresh to see new account(s) in list. ${
+                    this.state.createResults ? "(NOTE: Refresh removes success/error details below)" : ""
+                  }`}
+                </Typography>
+              )}
               {this.state.createResults &&
                 Object.keys(this.state.createResults).map(message => (
                   <>
