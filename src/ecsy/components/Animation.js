@@ -1,14 +1,9 @@
 import { Component } from "ecsy";
+import { PropTypes } from "ecsy-three";
 
 export class Animation extends Component {
-  constructor() {
-    super();
-    this.animations = [];
-    this.mixer = null;
-  }
-
-  reset() {
-    this.animations = [];
-    this.mixer = null;
-  }
+  static schema = {
+    animations: { type: PropTypes.Array },
+    mixer: { type: PropTypes.Object }
+  };
 }

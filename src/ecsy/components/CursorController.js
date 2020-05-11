@@ -1,12 +1,8 @@
 import { Component } from "ecsy";
+import { PropTypes } from "ecsy-three";
 
 export class CursorController extends Component {
-  constructor() {
-    super();
-    this.id = null;
-  }
-
-  reset() {
-    this.id = null;
-  }
+  static schema = {
+    id: { type: PropTypes.String }
+  };
 }

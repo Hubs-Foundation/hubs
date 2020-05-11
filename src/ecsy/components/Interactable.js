@@ -1,16 +1,10 @@
 import { Component } from "ecsy";
+import { PropTypes } from "ecsy-three";
 
 export class Interactable extends Component {
-  constructor() {
-    super();
-    this.hoverStarted = false;
-    this.hovering = false;
-    this.hoverEnded = false;
-  }
-
-  reset() {
-    this.hoverStarted = false;
-    this.hovering = false;
-    this.hoverEnded = false;
-  }
+  static schema = {
+    hoverStarted: { type: PropTypes.Boolean },
+    hovering: { type: PropTypes.Boolean },
+    hoverEnded: { type: PropTypes.Boolean }
+  };
 }
