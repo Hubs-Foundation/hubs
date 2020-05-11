@@ -1,12 +1,8 @@
 import { Component } from "ecsy";
+import { PropTypes } from "ecsy-three";
 
 export class LoadingCube extends Component {
-  constructor() {
-    super();
-    this.value = null;
-  }
-
-  reset() {
-    this.value = null;
-  }
+  static schema = {
+    value: { type: PropTypes.Object }
+  };
 }

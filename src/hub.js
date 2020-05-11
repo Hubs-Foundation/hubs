@@ -419,7 +419,12 @@ async function updateEnvironmentForHub(hub, entryManager) {
 
     environmentEl.addEventListener("model-error", sceneErrorHandler, { once: true });
 
-    environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
+    environmentEl.setAttribute("gltf-model-plus", {
+      src: sceneUrl,
+      useCache: false,
+      inflate: true,
+      useECSY: qsTruthy("ecsy")
+    });
     environmentScene.appendChild(environmentEl);
   } else {
     // Change environment

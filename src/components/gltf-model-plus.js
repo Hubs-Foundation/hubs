@@ -8,6 +8,8 @@ import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import { disposeNode, cloneObject3D } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import HubsBasisTextureLoader from "../loaders/HubsBasisTextureLoader";
+import qsTruthy from "../utils/qs_truthy";
+import ECSYMOZComponentsExtension from "../ecsy/ECSYMOZComponentsExtension";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -310,6 +312,7 @@ function runMigration(version, json) {
   }
 }
 
+<<<<<<< HEAD
 const loadLightmap = async (parser, materialIndex) => {
   const lightmapDef = parser.json.materials[materialIndex].extensions.MOZ_lightmap;
   const [material, lightMap] = await Promise.all([
@@ -322,6 +325,9 @@ const loadLightmap = async (parser, materialIndex) => {
 };
 
 export async function loadGLTF(src, contentType, preferredTechnique, onProgress, jsonPreprocessor) {
+=======
+export async function loadGLTF(src, contentType, preferredTechnique, onProgress, jsonPreprocessor, useECSY) {
+>>>>>>> 7ae59c3b... Update to the new ecsy API
   let gltfUrl = src;
   let fileMap;
 
@@ -334,6 +340,11 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
   const gltfLoader = new THREE.GLTFLoader(loadingManager);
   gltfLoader.setBasisTextureLoader(new HubsBasisTextureLoader(loadingManager));
+
+  if (useECSY) {
+    const world = AFRAME.scenes[0].systems["hubs-systems"].worldManager.world;
+    gltfLoader.register(parser => new ECSYMOZComponentsExtension(world, parser));
+  }
 
   const parser = await new Promise((resolve, reject) => gltfLoader.createParser(gltfUrl, resolve, onProgress, reject));
 
@@ -432,7 +443,7 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
   return gltf;
 }
 
-export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
+export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null, useECSY = false) {
   const preferredTechnique =
     window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness";
 
@@ -446,7 +457,7 @@ export async function loadModel(src, contentType = null, useCache = false, jsonP
         gltfCache.retain(src);
         return cloneGltf(gltf);
       } else {
-        const promise = loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor);
+        const promise = loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor, useECSY);
         inflightGltfs.set(src, promise);
         const gltf = await promise;
         inflightGltfs.delete(src);
@@ -455,7 +466,7 @@ export async function loadModel(src, contentType = null, useCache = false, jsonP
       }
     }
   } else {
-    return loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor);
+    return loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor, useECSY);
   }
 }
 
@@ -483,7 +494,8 @@ AFRAME.registerComponent("gltf-model-plus", {
     useCache: { default: true },
     inflate: { default: false },
     batch: { default: false },
-    modelToWorldScale: { type: "number", default: 1 }
+    modelToWorldScale: { type: "number", default: 1 },
+    useECSY: { default: false }
   },
 
   init() {
@@ -527,11 +539,16 @@ AFRAME.registerComponent("gltf-model-plus", {
           console.warn("gltf-model-plus set to an empty source, unloading inflated model.");
           this.disposeLastInflatedEl();
         }
+
+        if (this.model && this.model.isEntity) {
+          this.model.dispose();
+        }
+
         return;
       }
 
       this.el.emit("model-loading");
-      const gltf = await loadModel(src, contentType, this.data.useCache, this.jsonPreprocessor);
+      const gltf = await loadModel(src, contentType, this.data.useCache, this.jsonPreprocessor, this.data.useECSY);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
@@ -539,6 +556,10 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       // If we had inflated something already before, clean that up
       this.disposeLastInflatedEl();
+
+      if (this.model && this.model.isEntity) {
+        this.model.dispose();
+      }
 
       this.model = gltf.scene || gltf.scenes[0];
 
@@ -558,6 +579,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       let object3DToSet = this.model;
       if (
         this.data.inflate &&
+        !this.model.isEntity &&
         (this.inflatedEl = inflateEntities(
           indexToEntityMap,
           this.model,
@@ -581,6 +603,9 @@ AFRAME.registerComponent("gltf-model-plus", {
         for (const name in this.templates) {
           attachTemplate(this.el, name, this.templates[name]);
         }
+      } else if (this.model.isEntity) {
+        const world = AFRAME.scenes[0].systems["hubs-systems"].worldManager.world;
+        world.addEntity(this.model);
       }
 
       // The call to setObject3D below recursively clobbers any `el` backreferences to entities

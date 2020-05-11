@@ -1,4 +1,5 @@
 import { Component } from "ecsy";
+import { PropTypes } from "ecsy-three";
 
 /**
  * An interactor can have one hover target, one grabbed object, and many attached objects.
@@ -9,23 +10,22 @@ import { Component } from "ecsy";
  * update the grabEnded
  */
 export class Interactor extends Component {
-  constructor() {
-    super();
-    this.hoverEntity = null;
-    this.grabbedEntity = null;
-    this.attachedEntities = [];
-    this.hoverStarted = false;
-    this.hovering = false;
-    this.hoverEnded = false;
-    this.grabStarted = false;
-    this.grabbing = false;
-    this.grabEnded = false;
-    this.attachedEntitiesAdded = false;
-    this.attachedEntitiesRemoved = false;
-    this.hoverActionSet = null;
-    this.grabStartActionPath = null;
-    this.grabEndActionPath = null;
-  }
+  static schema = {
+    hoverEntity: { type: PropTypes.Object },
+    grabbedEntity: { type: PropTypes.Object },
+    attachedEntities: { type: PropTypes.Array },
+    hoverStarted: { type: PropTypes.Boolean },
+    hovering: { type: PropTypes.Boolean },
+    hoverEnded: { type: PropTypes.Boolean },
+    grabStarted: { type: PropTypes.Boolean },
+    grabbing: { type: PropTypes.Boolean },
+    grabEnded: { type: PropTypes.Boolean },
+    attachedEntitiesAdded: { type: PropTypes.Boolean },
+    attachedEntitiesRemoved: { type: PropTypes.Boolean },
+    hoverActionSet: { type: PropTypes.String },
+    grabStartActionPath: { type: PropTypes.String },
+    grabEndActionPath: { type: PropTypes.String }
+  };
 
   grab(entity) {
     if (!this.grabbedEntity) {
@@ -66,22 +66,5 @@ export class Interactor extends Component {
   detachAll() {
     this.attachedEntities.length === 0;
     this.attachedEntitiesRemoved = true;
-  }
-
-  reset() {
-    this.hoverTarget = null;
-    this.grabTarget = null;
-    this.attachedEntities.length = 0;
-    this.hoverStarted = false;
-    this.hovering = false;
-    this.hoverEnded = false;
-    this.grabStarted = false;
-    this.grabbing = false;
-    this.grabEnded = false;
-    this.attachedEntitiesAdded = false;
-    this.attachedEntitiesRemoved = false;
-    this.hoverActionSet = null;
-    this.grabStartActionPath = null;
-    this.grabEndActionPath = null;
   }
 }

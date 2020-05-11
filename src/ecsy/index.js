@@ -1,9 +1,24 @@
-import { World } from "ecsy";
-import { Object3D, Parent, ParentObject3D, Position, Rotation, Scale, Scene, Transform } from "ecsy-three";
-import { InitSceneSystem } from "./systems/InitSceneSystem";
-import { MediaLoaderSystem } from "./systems/MediaLoaderSystem";
-import { RotationSystem } from "./systems/RotationSystem";
-import { HubsTransformSystem } from "./systems/HubsTransformSystem";
+import {
+  ThreeWorld,
+  SceneEntity,
+  BoneEntity,
+  GroupEntity,
+  Object3DEntity,
+  SkinnedMeshEntity,
+  MeshEntity,
+  LineSegmentsEntity,
+  LineEntity,
+  LineLoopEntity,
+  PointsEntity,
+  PerspectiveCameraEntity,
+  OrthographicCameraEntity,
+  AmbientLightEntity,
+  DirectionalLightEntity,
+  HemisphereLightEntity,
+  PointLightEntity,
+  SpotLightEntity
+} from "ecsy-three";
+
 import { Rotating } from "./components/Rotating";
 import { Animation } from "./components/Animation";
 import { GLTFLoader } from "./components/GLTFLoader";
@@ -12,10 +27,6 @@ import { Interactable } from "./components/Interactable";
 import { Loading } from "./components/Loading";
 import { LoadingCube } from "./components/LoadingCube";
 import { MediaLoader } from "./components/MediaLoader";
-import { AnimationSystem } from "./systems/AnimationSystem";
-import { GLTFLoaderSystem } from "./systems/GLTFLoaderSystem";
-import { LoadingCubeSystem } from "./systems/LoadingCubeSystem";
-import { ImageSystem } from "./systems/ImageSystem";
 import { CursorController } from "./components/CursorController";
 import { Interactor } from "./components/Interactor";
 import { Raycaster } from "./components/Raycaster";
@@ -28,22 +39,42 @@ import { PhysicsShape } from "./components/PhysicsShape";
 import { ActionFrame } from "./components/ActionFrame";
 import { AFrameEntity } from "./components/AFrameEntity";
 import { GLTFModel } from "./components/GLTFModel";
-import { InteractionSystem } from "./systems/InteractionSystem";
-import { PhysicsSystem } from "./systems/PhysicsSystem";
+import { SpawnPoint } from "./components/SpawnPoint";
+
+import { InitSceneSystem } from "./systems/InitSceneSystem";
+import { RotationSystem } from "./systems/RotationSystem";
 
 import { paths } from "../systems/userinput/paths";
 import { sets } from "../systems/userinput/sets";
-import { CursorControllerSystem } from "./systems/CursorControllerSystem";
+
+//import { CursorControllerSystem } from "./systems/CursorControllerSystem";
 
 export class WorldManager {
   constructor(aframeScene) {
     this.aframeScene = aframeScene;
-    this.world = new World();
+    this.world = new ThreeWorld();
     this.initialized = false;
   }
 
   init() {
     this.world
+      .registerEntityType(SceneEntity)
+      .registerEntityType(BoneEntity)
+      .registerEntityType(GroupEntity)
+      .registerEntityType(Object3DEntity)
+      .registerEntityType(SkinnedMeshEntity)
+      .registerEntityType(MeshEntity)
+      .registerEntityType(LineSegmentsEntity)
+      .registerEntityType(LineEntity)
+      .registerEntityType(LineLoopEntity)
+      .registerEntityType(PointsEntity)
+      .registerEntityType(PerspectiveCameraEntity)
+      .registerEntityType(OrthographicCameraEntity)
+      .registerEntityType(AmbientLightEntity)
+      .registerEntityType(DirectionalLightEntity)
+      .registerEntityType(HemisphereLightEntity)
+      .registerEntityType(PointLightEntity)
+      .registerEntityType(SpotLightEntity)
       .registerComponent(ActionFrame)
       .registerComponent(AFrameEntity)
       .registerComponent(Animation)
@@ -58,47 +89,35 @@ export class WorldManager {
       .registerComponent(Loading)
       .registerComponent(LoadingCube)
       .registerComponent(MediaLoader)
-      .registerComponent(Object3D)
-      .registerComponent(Parent)
-      .registerComponent(ParentObject3D)
       .registerComponent(PhysicsBody)
       .registerComponent(PhysicsShape)
       .registerComponent(PhysicsInteractor)
-      .registerComponent(Position)
       .registerComponent(Raycaster)
       .registerComponent(RaycastInteractor)
       .registerComponent(Rotating)
-      .registerComponent(Rotation)
-      .registerComponent(Scale)
-      .registerComponent(Scene)
-      .registerComponent(Transform);
+      .registerComponent(SpawnPoint);
 
     this.world
-      .registerSystem(InteractionSystem)
-      .registerSystem(CursorControllerSystem)
+      // .registerSystem(InteractionSystem)
+      // .registerSystem(CursorControllerSystem)
       .registerSystem(InitSceneSystem)
-      .registerSystem(MediaLoaderSystem)
-      .registerSystem(ImageSystem)
-      .registerSystem(LoadingCubeSystem)
-      .registerSystem(GLTFLoaderSystem)
-      .registerSystem(AnimationSystem)
-      .registerSystem(RotationSystem)
-      .registerSystem(HubsTransformSystem)
-      .registerSystem(PhysicsSystem, { hubsSystem: this.aframeScene.systems["hubs-systems"].physicsSystem });
+      // .registerSystem(MediaLoaderSystem)
+      // .registerSystem(ImageSystem)
+      // .registerSystem(LoadingCubeSystem)
+      // .registerSystem(GLTFLoaderSystem)
+      // .registerSystem(AnimationSystem)
+      .registerSystem(RotationSystem);
+    // .registerSystem(PhysicsSystem, { hubsSystem: this.aframeScene.systems["hubs-systems"].physicsSystem });
 
-    this.scene = this.world
-      .createEntity()
-      .addComponent(Scene)
-      .addComponent(AFrameEntity, { value: this.aframeScene })
-      .addComponent(Object3D, { value: this.aframeScene.object3D })
-      .addComponent(ActionFrame, { value: this.aframeScene.systems["userinput"].frame });
+    this.scene = new SceneEntity(this.world); //.addComponent(ActionFrame, { value: this.aframeScene.systems["userinput"].frame });
+    this.aframeScene.object3D.add(this.scene);
+    this.world.addEntity(this.scene);
 
     const leftCursorControllerEl = document.getElementById("left-cursor-controller");
 
     this.leftCursorController = this.world
       .createEntity()
       .addComponent(AFrameEntity, { value: leftCursorControllerEl })
-      .addComponent(Object3D, { value: leftCursorControllerEl.object3D })
       .addComponent(CursorController, { id: "left" })
       .addComponent(Interactor, {
         hoverActionSet: sets.leftCursorHoveringOnECSYInteractable,
@@ -114,7 +133,6 @@ export class WorldManager {
     this.rightCursorController = this.world
       .createEntity()
       .addComponent(AFrameEntity, { value: rightCursorControllerEl })
-      .addComponent(Object3D, { value: rightCursorControllerEl.object3D })
       .addComponent(CursorController, { id: "right" })
       .addComponent(Interactor, {
         hoverActionSet: sets.rightCursorHoveringOnECSYInteractable,
@@ -130,7 +148,6 @@ export class WorldManager {
     this.leftHandController = this.world
       .createEntity()
       .addComponent(AFrameEntity, { value: leftControllerEl })
-      .addComponent(Object3D, { value: leftControllerEl.object3D })
       .addComponent(HandController, { id: "left" })
       .addComponent(Interactor, {
         hoverActionSet: sets.leftHandHoveringOnECSYInteractable,
@@ -146,7 +163,6 @@ export class WorldManager {
     this.rightHandController = this.world
       .createEntity()
       .addComponent(AFrameEntity, { value: rightControllerEl })
-      .addComponent(Object3D, { value: rightControllerEl.object3D })
       .addComponent(HandController, { id: "right" })
       .addComponent(Interactor, {
         hoverActionSet: sets.rightHandHoveringOnECSYInteractable,

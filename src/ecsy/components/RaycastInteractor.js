@@ -1,14 +1,9 @@
 import { Component } from "ecsy";
+import { PropTypes } from "ecsy-three";
 
 export class RaycastInteractor extends Component {
-  constructor() {
-    super();
-    this.targets = [];
-    this.intersections = [];
-  }
-
-  reset() {
-    this.targets.length = 0;
-    this.intersections.length = 0;
-  }
+  static schema = {
+    targets: { type: PropTypes.Array },
+    intersections: { type: PropTypes.Array }
+  };
 }

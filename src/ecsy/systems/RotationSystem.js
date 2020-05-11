@@ -1,19 +1,19 @@
 import { System } from "ecsy";
-import { Transform } from "ecsy-three";
+import { Object3DTag } from "ecsy-three";
 import { Rotating } from "../components/Rotating";
 
 export class RotationSystem extends System {
   static queries = {
     entities: {
-      components: [Rotating, Transform]
+      components: [Rotating, Object3DTag]
     }
   };
 
   execute(delta) {
     this.queries.entities.results.forEach(entity => {
-      const rotation = entity.getMutableComponent(Transform).rotation;
-      rotation.x += 0.5 * delta;
-      rotation.y += 0.1 * delta;
+      entity.rotation.x += 0.5 * delta;
+      entity.rotation.y += 0.1 * delta;
+      entity.matrixNeedsUpdate = true;
     });
   }
 }

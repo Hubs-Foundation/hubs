@@ -1,20 +1,12 @@
 import { Component } from "ecsy";
+import { PropTypes } from "ecsy-three";
 
 export class Grabbable extends Component {
-  constructor() {
-    super();
-    this.throwable = true; // Copy the velocity to the entity on drop
-    this.toggle = false; // Whether the object should stay grabbed until the grab action is true again
-    this.grabStarted = false;
-    this.grabbing = false;
-    this.grabEnded = false;
-  }
-
-  reset() {
-    this.throwable = true;
-    this.toggle = false;
-    this.grabStarted = false;
-    this.grabbing = false;
-    this.grabEnded = false;
-  }
+  static schema = {
+    throwable: { type: PropTypes.Boolean }, // Copy the velocity to the entity on drop
+    toggle: { type: PropTypes.Boolean }, // Whether the object should stay grabbed until the grab action is true again
+    grabStarted: { type: PropTypes.Boolean },
+    grabbing: { type: PropTypes.Boolean },
+    grabEnded: { type: PropTypes.Boolean }
+  };
 }
