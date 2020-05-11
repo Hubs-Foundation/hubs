@@ -4,7 +4,6 @@ import "./animation-mixer";
 import "./audio-feedback";
 import "./css-class";
 import "./directional-light";
-import "./duck";
 import "./gltf-model-plus";
 import "./heightfield";
 import "./hemisphere-light";

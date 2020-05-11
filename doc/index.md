@@ -34,7 +34,6 @@
     - [animation-mixer](#components/misc/animation-mixer)
     - [matcolor-audio-feedback](#components/misc/matcolor-audio-feedback)
     - [css-class](#components/misc/css-class)
-    - [duck](#components/misc/duck)
     - [event-repeater](#components/misc/event-repeater)
     - [loop-animation](#components/misc/loop-animation)
     - [offset-relative-to](#components/misc/offset-relative-to)
@@ -106,14 +105,6 @@ Sets an entity's color base on audioFrequencyChange events.
 Sets the CSS class on an entity.
 
 `src/components/css-class.js`
-          
-
-<a name="components/misc/duck"></a>
-#### duck
-
-Floats a duck based on its scale.
-
-`src/components/duck.js`
           
 
 <a name="components/misc/event-repeater"></a>
