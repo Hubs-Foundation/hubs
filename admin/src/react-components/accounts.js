@@ -52,8 +52,20 @@ export const AccountList = withStyles(styles)(
       createResults: ""
     };
     componentWillUnmount() {
-      if (this.createStatusTimer) this.createStatusTimer.clearTimer();
-      if (this.searchStatusTimer) this.searchStatusTimer.clearTimer();
+      this.clearCreateStatusTimer();
+      this.clearSearchStatusTimer();
+    }
+    clearCreateStatusTimer() {
+      if (this.createStatusTimer) {
+        clearTimeout(this.createStatusTimer);
+        this.createStatusTimer = null;
+      }
+    }
+    clearSearchStatusTimer() {
+      if (this.searchStatusTimer) {
+        clearTimeout(this.searchStatusTimer);
+        this.searchStatusTimer = null;
+      }
     }
     async onAccountSearch(e) {
       e.preventDefault();
@@ -73,7 +85,7 @@ export const AccountList = withStyles(styles)(
       }
       // Quickfix snackbar component does not always close
       // Setting snackbar message to empty string closes
-      if (this.searchStatusTimer) this.searchStatusTimer.clearTimer();
+      this.clearSearchStatusTimer();
       this.searchStatusTimer = setTimeout(() => {
         this.setState({ searchStatus: "" });
         this.searchStatusTimer = null;
@@ -139,7 +151,7 @@ export const AccountList = withStyles(styles)(
       }
       // Quickfix snackbar component does not always close
       // Setting snackbar message to empty string closes
-      if (this.createStatusTimer) this.setStatusTimer.clearTimer();
+      this.clearCreateStatusTimer();
       this.createStatusTimer = setTimeout(() => {
         this.setState({ createStatus: "" });
         this.createStatusTimer = null;
