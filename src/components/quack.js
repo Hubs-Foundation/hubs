@@ -1,5 +1,7 @@
 import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "../systems/sound-effects-system";
 
+const INTERACTORS = ["rightHand", "leftHand", "rightRemote", "leftRemote"];
+
 AFRAME.registerComponent("quack", {
   schema: {
     quackPercentage: { default: 1 },
@@ -7,18 +9,30 @@ AFRAME.registerComponent("quack", {
   },
 
   init: function() {
-    this._handleGrabStart = this._handleGrabStart.bind(this);
+    this.wasInteracting = false;
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEntity => {
+      this.networkedEntity = networkedEntity;
+    });
   },
 
-  play: function() {
-    this.el.object3D.addEventListener("interact", this._handleGrabStart);
+  tick: function() {
+    const interaction = AFRAME.scenes[0].systems.interaction;
+    const entity = this.networkedEntity || this.el;
+    let isInteracting = false;
+    for (let i = 0; i < INTERACTORS.length; i++) {
+      if (interaction.state[INTERACTORS[i]].held === entity) {
+        isInteracting = true;
+        if (!this.wasInteracting) {
+          this.quack();
+        }
+        break;
+      }
+    }
+
+    this.wasInteracting = isInteracting;
   },
 
-  pause: function() {
-    this.el.object3D.removeEventListener("interact", this._handleGrabStart);
-  },
-
-  _handleGrabStart: function() {
+  quack: function() {
     const rand = Math.random();
     if (rand < this.data.specialQuackPercentage) {
       this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);
