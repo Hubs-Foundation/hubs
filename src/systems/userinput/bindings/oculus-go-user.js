@@ -195,7 +195,6 @@ export default function generate3DOFTriggerBindings(device) {
     ],
 
     [sets.rightCursorHoveringOnInteractable]: [grabBinding],
-    [sets.rightCursorHoveringOnECSYInteractable]: [grabBinding],
     [sets.rightCursorHoveringOnUI]: [grabBinding],
     [sets.rightCursorHoldingUI]: [dropBinding],
     [sets.rightCursorHoveringOnVideo]: [
@@ -210,30 +209,6 @@ export default function generate3DOFTriggerBindings(device) {
     ],
 
     [sets.rightCursorHoldingInteractable]: [
-      {
-        src: {
-          value: triggerFalling
-        },
-        dest: { value: paths.actions.cursor.right.drop },
-        xform: xforms.copy,
-        priority: 200
-      },
-      {
-        src: {
-          value: touchpadY,
-          touching: touchpadButton.touched
-        },
-        dest: { value: paths.actions.cursor.right.modDelta },
-        xform: xforms.touch_axis_scroll()
-      },
-      {
-        src: { value: dpadCenterStrip },
-        priority: 200,
-        xform: xforms.noop
-      }
-    ],
-
-    [sets.rightCursorHoldingECSYInteractable]: [
       {
         src: {
           value: triggerFalling

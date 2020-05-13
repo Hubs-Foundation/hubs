@@ -1,5 +1,6 @@
 /* global NAF AFRAME */
 import { CONSTANTS } from "three-ammo";
+import { isTagged } from "../components/tags";
 const ACTIVATION_STATE = CONSTANTS.ACTIVATION_STATE;
 
 export class ConstraintsSystem {
@@ -29,13 +30,7 @@ export class ConstraintsSystem {
     if (!this.physicsSystem) return;
 
     if (prevState.held === state.held) {
-      if (
-        !state.spawning &&
-        prevState.spawning &&
-        state.held &&
-        state.held.components.tags &&
-        state.held.components.tags.data[constraintTag]
-      ) {
+      if (!state.spawning && prevState.spawning && isTagged(state.held, constraintTag)) {
         state.held.setAttribute("body-helper", {
           type: "dynamic",
           activationState: ACTIVATION_STATE.DISABLE_DEACTIVATION
@@ -54,7 +49,7 @@ export class ConstraintsSystem {
       }
       return;
     }
-    if (prevState.held && prevState.held.components.tags && prevState.held.components.tags.data[constraintTag]) {
+    if (prevState.held && isTagged(prevState.held, constraintTag)) {
       const heldEntityId = prevState.held.id;
       if (this.constraintPairs[heldEntityId] && this.constraintPairs[heldEntityId].indexOf(entityId) !== -1) {
         this.constraintPairs[heldEntityId].splice(this.constraintPairs[heldEntityId].indexOf(entityId), 1);
@@ -68,7 +63,7 @@ export class ConstraintsSystem {
         prevState.held.setAttribute("body-helper", { activationState: ACTIVATION_STATE.ACTIVE_TAG });
       }
     }
-    if (!state.spawning && state.held && state.held.components.tags.data[constraintTag]) {
+    if (!state.spawning && state.held && isTagged(state.held, constraintTag)) {
       if (!state.held.components["networked"] || NAF.utils.isMine(state.held) || NAF.utils.takeOwnership(state.held)) {
         state.held.setAttribute("body-helper", {
           type: "dynamic",
@@ -132,9 +127,9 @@ export class ConstraintsSystem {
       this.prevLeftHand.held = null;
       this.prevLeftHand.spawning = false;
     }
-    if (this.prevLeftHand.held === el) {
-      this.prevLeftHand.held = null;
-      this.prevLeftHand.spawning = false;
+    if (this.prevRightHand.held === el) {
+      this.prevRightHand.held = null;
+      this.prevRightHand.spawning = false;
     }
     if (this.prevRightRemote.held === el) {
       this.prevRightRemote.held = null;

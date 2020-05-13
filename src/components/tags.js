@@ -1,5 +1,17 @@
 export function isTagged(el, tag) {
-  return el && el.components && el.components.tags && el.components.tags.data[tag];
+  if (!el) {
+    return false;
+  }
+
+  if (el.isECSYThreeEntity) {
+    if (typeof tag === "string") {
+      return false;
+    }
+
+    return el.hasComponent(tag);
+  }
+
+  return el.components && el.components.tags && el.components.tags.data[tag];
 }
 
 AFRAME.registerComponent("tags", {

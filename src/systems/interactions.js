@@ -3,6 +3,27 @@ import { paths } from "./userinput/paths";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { canMove } from "../utils/permissions-utils";
 import { isTagged } from "../components/tags";
+import { Hoverable } from "../ecsy/components/Hoverable";
+import { Holdable } from "../ecsy/components/Holdable";
+import { InteractionState } from "../ecsy/components/InteractionState";
+
+export function isHoverableByHand(object3D) {
+  if (!object3D.isECSYThreeEntity) {
+    return false;
+  }
+
+  const hoverable = object3D.getComponent(Hoverable);
+  return hoverable && hoverable.hand;
+}
+
+export function isHoverableByRemote(object3D) {
+  if (!object3D.isECSYThreeEntity) {
+    return false;
+  }
+
+  const hoverable = object3D.getComponent(Hoverable);
+  return hoverable && hoverable.remote;
+}
 
 function findHandCollisionTargetForHand(bodyHelper) {
   const physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
@@ -12,7 +33,16 @@ function findHandCollisionTargetForHand(bodyHelper) {
     for (let i = 0; i < handCollisions.length; i++) {
       const bodyData = physicsSystem.bodyUuidToData.get(handCollisions[i]);
       const object3D = bodyData && bodyData.object3D;
-      if (object3D && isTagged(object3D.el, "isHandCollisionTarget")) {
+
+      if (!object3D) {
+        continue;
+      }
+
+      if (object3D.isECSYThreeEntity) {
+        if (isHoverableByHand(object3D)) {
+          return object3D;
+        }
+      } else if (object3D.el && isTagged(object3D.el, "isHandCollisionTarget")) {
         return object3D.el;
       }
     }
@@ -25,10 +55,12 @@ const notRemoteHoverTargets = new Map();
 const remoteHoverTargets = new Map();
 export function findRemoteHoverTarget(object3D) {
   if (!object3D) return null;
+  if (isHoverableByRemote(object3D)) return object3D;
   if (notRemoteHoverTargets.get(object3D)) return null;
   const target = remoteHoverTargets.get(object3D);
   return target || findRemoteHoverTarget(object3D.parent);
 }
+
 AFRAME.registerComponent("is-remote-hover-target", {
   init: function() {
     remoteHoverTargets.set(this.el.object3D, this.el);
@@ -52,12 +84,14 @@ export function isUI(el) {
 
 AFRAME.registerSystem("interaction", {
   updateCursorIntersection: function(intersection, left) {
+    const hoverTarget = intersection && findRemoteHoverTarget(intersection.object);
+
     if (!left) {
-      this.rightRemoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
+      this.rightRemoteHoverTarget = hoverTarget;
       return this.rightRemoteHoverTarget;
     }
 
-    this.leftRemoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
+    this.leftRemoteHoverTarget = hoverTarget;
     return this.leftRemoteHoverTarget;
   },
 
@@ -87,8 +121,8 @@ AFRAME.registerSystem("interaction", {
   },
 
   release(el) {
-    if (this.state.leftHand.held === el) {
-      this.state.leftHand.held = null;
+    if (this.state.rightHand.held === el) {
+      this.state.rightHand.held = null;
     }
     if (this.state.leftHand.hovered === el) {
       this.state.leftHand.hovered = null;
@@ -206,8 +240,14 @@ AFRAME.registerSystem("interaction", {
   tickInteractor(options, state) {
     const userinput = AFRAME.scenes[0].systems.userinput;
     if (state.held) {
-      const networked = state.held.components["networked"];
-      const lostOwnership = networked && networked.data && networked.data.owner !== NAF.clientId;
+      let lostOwnership = false;
+
+      // TODO: Support networked ownership transfer for ECSY entities
+      if (!state.held.isECSYThreeEntity) {
+        const networked = state.held.components["networked"];
+        lostOwnership = networked && networked.data && networked.data.owner !== NAF.clientId;
+      }
+
       if (userinput.get(options.dropPath) || lostOwnership) {
         state.held = null;
       }
@@ -220,41 +260,53 @@ AFRAME.registerSystem("interaction", {
       );
       if (state.hovered) {
         const entity = state.hovered;
-        const isFrozen = this.el.is("frozen");
-        const isPinned = entity.components.pinnable && entity.components.pinnable.data.pinned;
-        if (
-          isTagged(entity, "isHoldable") &&
-          userinput.get(options.grabPath) &&
-          (isFrozen || !isPinned) &&
-          canMove(entity)
-        ) {
-          state.held = entity;
+        if (entity.isECSYThreeEntity) {
+          if (entity.getComponent(Holdable) && userinput.get(options.grabPath)) {
+            state.held = entity;
+          }
+        } else {
+          const isFrozen = this.el.is("frozen");
+          const isPinned = entity.components.pinnable && entity.components.pinnable.data.pinned;
+
+          if (
+            isTagged(entity, "isHoldable") &&
+            userinput.get(options.grabPath) &&
+            (isFrozen || !isPinned) &&
+            canMove(entity)
+          ) {
+            state.held = entity;
+          }
         }
       }
     }
   },
 
   tick2() {
-    if (!this.el.is("entered")) {
-      return;
+    if (this.el.is("entered")) {
+      Object.assign(this.previousState.rightHand, this.state.rightHand);
+      Object.assign(this.previousState.rightRemote, this.state.rightRemote);
+      Object.assign(this.previousState.leftHand, this.state.leftHand);
+      Object.assign(this.previousState.leftRemote, this.state.leftRemote);
+
+      if (this.options.leftHand.entity.object3D.visible && !this.state.leftRemote.held) {
+        this.tickInteractor(this.options.leftHand, this.state.leftHand);
+      }
+      if (this.options.rightHand.entity.object3D.visible && !this.state.rightRemote.held) {
+        this.tickInteractor(this.options.rightHand, this.state.rightHand);
+      }
+      if (!this.state.rightHand.held && !this.state.rightHand.hovered) {
+        this.tickInteractor(this.options.rightRemote, this.state.rightRemote);
+      }
+      if (!this.state.leftHand.held && !this.state.leftHand.hovered) {
+        this.tickInteractor(this.options.leftRemote, this.state.leftRemote);
+      }
     }
 
-    Object.assign(this.previousState.rightHand, this.state.rightHand);
-    Object.assign(this.previousState.rightRemote, this.state.rightRemote);
-    Object.assign(this.previousState.leftHand, this.state.leftHand);
-    Object.assign(this.previousState.leftRemote, this.state.leftRemote);
+    const worldManager = AFRAME.scenes[0].systems["hubs-systems"].worldManager;
 
-    if (this.options.leftHand.entity.object3D.visible && !this.state.leftRemote.held) {
-      this.tickInteractor(this.options.leftHand, this.state.leftHand);
-    }
-    if (this.options.rightHand.entity.object3D.visible && !this.state.rightRemote.held) {
-      this.tickInteractor(this.options.rightHand, this.state.rightHand);
-    }
-    if (!this.state.rightHand.held && !this.state.rightHand.hovered) {
-      this.tickInteractor(this.options.rightRemote, this.state.rightRemote);
-    }
-    if (!this.state.leftHand.held && !this.state.leftHand.hovered) {
-      this.tickInteractor(this.options.leftRemote, this.state.leftRemote);
+    if (worldManager.scene) {
+      const interactionState = worldManager.scene.getMutableComponent(InteractionState);
+      interactionState.copy(this.state);
     }
   }
 });

@@ -21,6 +21,7 @@ AFRAME.registerComponent("overwrite-raycast-as-noop", {
 export class CursorTargettingSystem {
   constructor() {
     this.targets = [];
+    this.hoverableEntities = [];
     this.setDirty = this.setDirty.bind(this);
     this.dirty = true;
 
@@ -66,6 +67,10 @@ export class CursorTargettingSystem {
       if (els[i].object3D) {
         targets.push(els[i].object3D);
       }
+    }
+
+    for (let i = 0; i < this.hoverableEntities.length; i++) {
+      targets.push(this.hoverableEntities[i]);
     }
   }
 

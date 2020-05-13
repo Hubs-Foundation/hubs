@@ -4,8 +4,6 @@ import { touchIsAssigned, jobIsAssigned, assign, unassign, findByJob, findByTouc
 import { findRemoteHoverTarget } from "../../interactions";
 import { canMove } from "../../../utils/permissions-utils";
 
-// TODO: Make app-aware-touchscreen work with ecsy interactable component
-
 const MOVE_CURSOR_JOB = "MOVE CURSOR";
 const MOVE_CAMERA_JOB = "MOVE CAMERA";
 const FIRST_PINCHER_JOB = "FIRST PINCHER";

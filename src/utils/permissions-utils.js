@@ -1,6 +1,10 @@
 // Brief overview of client authorization can be found in the wiki:
 // https://github.com/mozilla/hubs/wiki/Hubs-authorization
 export function showHoverEffect(el) {
+  if (el.isECSYThreeEntity) {
+    return false;
+  }
+
   const isFrozen = el.sceneEl.is("frozen");
   const isPinned = el.components.pinnable && el.components.pinnable.data.pinned;
   const isSpawner = !!el.components["super-spawner"];

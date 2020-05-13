@@ -1,161 +1,96 @@
 import { System } from "ecsy";
-import { Object3D } from "ecsy-three";
-import { Interactable } from "../components/Interactable";
-import { RaycastInteractor } from "../components/RaycastInteractor";
-import { PhysicsInteractor } from "../components/PhysicsInteractor";
-import { PhysicsBody } from "../components/PhysicsBody";
-import { Interactor } from "../components/Interactor";
-import { Raycaster } from "../components/Raycaster";
-import { ActionFrame } from "../components/ActionFrame";
-import { Grabbable } from "../components/Grabbable";
+import { InteractionState } from "../components/InteractionState";
+import { Held } from "../components/Held";
+import { Hovered } from "../components/Hovered";
+import { Hoverable } from "../components/Hoverable";
 
-function getHoverTarget(object, interactables) {
-  let curObject = object;
-
-  while (curObject) {
-    for (let j = 0; j < interactables.length; j++) {
-      const interactableEntity = interactables[j];
-      const interactableObject = interactableEntity.getComponent(Object3D).value;
-
-      if (interactableObject === curObject) {
-        return interactableEntity;
-      }
-    }
-
-    curObject = curObject.parent;
-  }
-
-  return null;
-}
+const interactorNames = ["leftHand", "rightHand", "leftRemote", "rightRemote"];
 
 export class InteractionSystem extends System {
   static queries = {
-    actionFrames: {
-      components: [ActionFrame]
+    interactionStateEntities: {
+      components: [InteractionState]
     },
-    raycastInteractors: {
-      components: [Interactor, RaycastInteractor, Raycaster]
+    heldEntities: {
+      components: [Held]
     },
-    physicsInteractors: {
-      components: [Interactor, PhysicsInteractor, PhysicsBody]
+    hoveredEntities: {
+      components: [Hovered]
     },
-    interactors: {
-      components: [Interactor, Object3D]
-    },
-    interactables: {
-      components: [Interactable, Object3D]
-    },
-    grabbables: {
-      components: [Grabbable, PhysicsBody, Object3D]
+    hoverableEntities: {
+      components: [Hoverable]
     }
   };
 
   execute() {
-    const actionFrame = this.queries.actionFrames.results[0].getComponent(ActionFrame).value;
+    const interactionState = this.queries.interactionStateEntities.results[0].getComponent(InteractionState);
 
-    const interactors = this.queries.interactors.results;
+    for (let i = 0; i < interactorNames.length; i++) {
+      const interactorName = interactorNames[i];
+      const interactor = interactionState[interactorName];
 
-    for (let i = 0; i < interactors.length; i++) {
-      const entity = interactors[i];
-      const interactor = entity.getComponent(Interactor);
+      if (!interactor) {
+        continue;
+      }
 
-      // Reset the interactor state
-      interactor.hoverStarted = false;
-      interactor.hoverEnded = false;
-      interactor.grabStarted = false;
-      interactor.grabEnded = false;
-      interactor.attachedEntitiesAdded = false;
-      interactor.attachedEntitiesRemoved = false;
+      if (interactor.hovered && interactor.hovered.isECSYThreeEntity) {
+        interactor.hovered.addComponent(Hovered);
+      }
+
+      if (interactor.held && interactor.held.isECSYThreeEntity) {
+        interactor.held.addComponent(Held);
+      }
     }
 
-    const grabbables = this.queries.grabbables.results;
+    const hoveredEntities = this.queries.hoveredEntities.results;
 
-    for (let i = 0; i < grabbables.length; i++) {
-      const entity = grabbables[i];
-      const grabbable = entity.getComponent(Grabbable);
-      grabbable.grabStarted = false;
-      grabbable.grabEnded = false;
-    }
+    for (let i = hoveredEntities.length - 1; i >= 0; i--) {
+      const entity = hoveredEntities[i];
+      let released = true;
 
-    const raycastInteractors = this.queries.raycastInteractors.results;
-    const interactables = this.queries.interactables.results;
+      for (let i = 0; i < interactorNames.length; i++) {
+        const interactorName = interactorNames[i];
+        const interactor = interactionState[interactorName];
 
-    for (let i = 0; i < raycastInteractors.length; i++) {
-      const entity = raycastInteractors[i];
-
-      const interactor = entity.getMutableComponent(Interactor);
-
-      if (!interactor.grabbing) {
-        const raycastInteractor = entity.getMutableComponent(RaycastInteractor);
-
-        // Reconstruct the raycaster targets array
-        raycastInteractor.targets.length = 0;
-
-        for (let j = 0; j < interactables.length; j++) {
-          const interactableEntity = interactables[j];
-          const interactableObject = interactableEntity.getComponent(Object3D).value;
-          raycastInteractor.targets.push(interactableObject);
+        if (interactor.hovered === entity) {
+          released = false;
+          break;
         }
+      }
 
-        // Do the hover raycast
-        const raycaster = entity.getComponent(Raycaster).value;
-
-        raycastInteractor.intersections.length = 0;
-
-        const intersections = raycaster.intersectObjects(
-          raycastInteractor.targets,
-          true,
-          raycastInteractor.intersections
-        );
-
-        if (intersections.length > 0) {
-          const hoverObject = intersections[0].object;
-
-          interactor.hoverTarget = getHoverTarget(hoverObject, interactables);
-
-          if (!interactor.hovering) {
-            interactor.hoverStarted = true;
-          }
-
-          interactor.hovering = true;
-        } else {
-          if (interactor.hovering) {
-            interactor.hoverEnded = true;
-            interactor.hoverTarget = null;
-          }
-
-          interactor.hovering = false;
-        }
-      } else {
-        interactor.hovering = false;
+      if (released) {
+        entity.removeComponent(Hovered);
       }
     }
 
-    for (let i = 0; i < interactors.length; i++) {
-      const entity = interactors[i];
-      const interactor = entity.getComponent(Interactor);
+    const heldEntities = this.queries.heldEntities.results;
 
-      if (interactor.hovering && actionFrame.get(interactor.grabStartActionPath)) {
-        const grabbable = interactor.hoverTarget.getComponent(Grabbable);
-        grabbable.grabStarted = true;
-        grabbable.grabbing = true;
+    for (let i = heldEntities.length - 1; i >= 0; i--) {
+      const entity = heldEntities[i];
+      let released = true;
 
-        interactor.grabbing = true;
-        interactor.grabStarted = true;
-        interactor.grabTarget = interactor.hoverTarget;
-        interactor.hoverTarget = null;
+      for (let i = 0; i < interactorNames.length; i++) {
+        const interactorName = interactorNames[i];
+        const interactor = interactionState[interactorName];
+
+        if (interactor.held === entity) {
+          released = false;
+          break;
+        }
       }
 
-      if (interactor.grabbing && actionFrame.get(interactor.grabEndActionPath)) {
-        const grabbable = interactor.grabTarget.getComponent(Grabbable);
-        grabbable.grabEnded = true;
-        grabbable.grabbing = false;
-
-        interactor.grabbing = false;
-        interactor.grabEnded = true;
-        interactor.grabTarget = null;
-        interactor.hoverTarget = interactor.grabTarget;
+      if (released) {
+        entity.removeComponent(Held);
       }
+    }
+
+    const hoverableEntities = this.queries.hoverableEntities.results;
+    const cursorTargettingSystem = AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem;
+
+    cursorTargettingSystem.hoverableEntities.length = 0;
+
+    for (let i = 0; i < hoverableEntities.length; i++) {
+      cursorTargettingSystem.hoverableEntities.push(hoverableEntities[i]);
     }
   }
 }
