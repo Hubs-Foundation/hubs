@@ -88,25 +88,18 @@ AFRAME.registerComponent("cursor-controller", {
 
       let cursorType = "default";
 
-      if (this.forceCursorType) {
-        cursorType = this.forceCursorType;
-        this.distance = this.forceDistance || this.data.defaultDistance * playerScale;
-      } else {
-        const interaction = AFRAME.scenes[0].systems.interaction;
-        const isGrabbing = left ? !!interaction.state.leftRemote.held : !!interaction.state.rightRemote.held;
-        if (!isGrabbing) {
-          rawIntersections.length = 0;
-          this.raycaster.intersectObjects(
-            AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem.targets,
-            true,
-            rawIntersections
-          );
-          this.intersection = rawIntersections[0];
-          this.intersectionIsValid = !!interaction.updateCursorIntersection(this.intersection, left);
-          this.distance = this.intersectionIsValid
-            ? this.intersection.distance
-            : this.data.defaultDistance * playerScale;
-        }
+      const interaction = AFRAME.scenes[0].systems.interaction;
+      const isGrabbing = left ? !!interaction.state.leftRemote.held : !!interaction.state.rightRemote.held;
+      if (!isGrabbing) {
+        rawIntersections.length = 0;
+        this.raycaster.intersectObjects(
+          AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem.targets,
+          true,
+          rawIntersections
+        );
+        this.intersection = rawIntersections[0];
+        this.intersectionIsValid = !!interaction.updateCursorIntersection(this.intersection, left);
+        this.distance = this.intersectionIsValid ? this.intersection.distance : this.data.defaultDistance * playerScale;
 
         const cursorModDelta =
           userinput.get(left ? paths.actions.cursor.left.modDelta : paths.actions.cursor.right.modDelta) || 0;

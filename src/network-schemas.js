@@ -1,3 +1,5 @@
+import { Entity } from "draft-js";
+
 function registerNetworkSchemas() {
   const vectorRequiresUpdate = epsilon => {
     return () => {

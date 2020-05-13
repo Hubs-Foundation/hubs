@@ -968,35 +968,7 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.leftHandHoveringOnECSYInteractable]: [
-    {
-      src: { value: leftGripPressed2 },
-      dest: { value: lGripRisingGrab },
-      xform: xforms.rising
-    },
-    {
-      src: { value: leftTriggerPressed2 },
-      dest: { value: paths.actions.leftHand.stopTeleport },
-      xform: xforms.falling,
-      priority: 2
-    },
-    {
-      src: [lGripRisingGrab],
-      dest: { value: paths.actions.leftHand.grab },
-      xform: xforms.any
-    }
-  ],
-
   [sets.leftHandHoldingInteractable]: [
-    {
-      src: { value: leftGripPressed2 },
-      dest: { value: paths.actions.leftHand.drop },
-      xform: xforms.falling,
-      priority: 1
-    }
-  ],
-
-  [sets.leftHandHoldingECSYInteractable]: [
     {
       src: { value: leftGripPressed2 },
       dest: { value: paths.actions.leftHand.drop },
@@ -1144,25 +1116,6 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.rightCursorHoveringOnECSYInteractable]: [
-    {
-      src: { value: rightGripPressed2 },
-      dest: { value: rGripRisingGrab },
-      xform: xforms.rising
-    },
-    {
-      src: { value: rightTriggerPressed2 },
-      dest: { value: rTriggerRisingGrab },
-      xform: xforms.rising,
-      priority: 1
-    },
-    {
-      src: [rGripRisingGrab],
-      dest: { value: paths.actions.cursor.right.grab },
-      xform: xforms.any
-    }
-  ],
-
   [sets.leftCursorHoveringOnInteractable]: [
     {
       src: { value: leftGripPressed2 },
@@ -1184,25 +1137,6 @@ export const viveUserBindings = addSetsToBindings({
       src: { value: inspectButtons },
       dest: { value: paths.actions.startInspecting },
       xform: xforms.rising
-    }
-  ],
-
-  [sets.leftCursorHoveringOnECSYInteractable]: [
-    {
-      src: { value: leftGripPressed2 },
-      dest: { value: lGripRisingGrab },
-      xform: xforms.rising
-    },
-    {
-      src: { value: leftTriggerPressed2 },
-      dest: { value: lTriggerRisingGrab },
-      xform: xforms.rising,
-      priority: 1
-    },
-    {
-      src: [lGripRisingGrab],
-      dest: { value: paths.actions.cursor.left.grab },
-      xform: xforms.any
     }
   ],
 
@@ -1263,35 +1197,6 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.rightCursorHoldingECSYInteractable]: [
-    {
-      src: {
-        value: rAxis("touchY"),
-        touching: rButton("touchpad").touched
-      },
-      dest: { value: paths.actions.cursor.right.modDelta },
-      xform: xforms.touch_axis_scroll(-1)
-    },
-    {
-      src: {
-        value: rAxis("joyY")
-      },
-      dest: { value: paths.actions.cursor.right.modDelta },
-      xform: xforms.scale(-0.02)
-    },
-    {
-      src: { value: rightGripPressed2 },
-      dest: { value: rightCursorDrop1 },
-      xform: xforms.falling,
-      priority: 1
-    },
-    {
-      src: [rightCursorDrop1, rightCursorDrop2],
-      dest: { value: paths.actions.cursor.right.drop },
-      xform: xforms.any
-    }
-  ],
-
   [sets.leftCursorHoldingInteractable]: [
     {
       src: {
@@ -1325,36 +1230,6 @@ export const viveUserBindings = addSetsToBindings({
       dest: { value: ensureFrozenViaDpad },
       root: rootForFrozenOverrideWhenHolding,
       xform: xforms.always(false)
-    }
-  ],
-
-  [sets.leftCursorHoldingECSYInteractable]: [
-    {
-      src: {
-        value: lAxis("touchY"),
-        touching: lButton("touchpad").touched
-      },
-      dest: { value: paths.actions.cursor.left.modDelta },
-      xform: xforms.touch_axis_scroll(-1)
-    },
-    {
-      src: {
-        value: lAxis("joyY")
-      },
-      dest: { value: paths.actions.cursor.left.modDelta },
-      xform: xforms.scale(-0.02),
-      priority: 1
-    },
-    {
-      src: { value: leftGripPressed2 },
-      dest: { value: leftCursorDrop1 },
-      xform: xforms.falling,
-      priority: 1
-    },
-    {
-      src: [leftCursorDrop1, leftCursorDrop2],
-      dest: { value: paths.actions.cursor.left.drop },
-      xform: xforms.any
     }
   ],
 
@@ -1538,25 +1413,6 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.rightHandHoveringOnECSYInteractable]: [
-    {
-      src: { value: rightGripPressed2 },
-      dest: { value: rGripRisingGrab },
-      xform: xforms.rising
-    },
-    {
-      src: { value: rightTriggerPressed2 },
-      dest: { value: paths.actions.rightHand.stopTeleport },
-      xform: xforms.falling,
-      priority: 2
-    },
-    {
-      src: [rGripRisingGrab],
-      dest: { value: paths.actions.rightHand.grab },
-      xform: xforms.any
-    }
-  ],
-
   [sets.rightHandHoldingInteractable]: [
     {
       src: { value: rightGripPressed2 },
@@ -1569,15 +1425,6 @@ export const viveUserBindings = addSetsToBindings({
       dest: { value: ensureFrozenViaDpad },
       root: rootForFrozenOverrideWhenHolding,
       xform: xforms.always(false)
-    }
-  ],
-
-  [sets.rightHandHoldingECSYInteractable]: [
-    {
-      src: { value: rightGripPressed2 },
-      dest: { value: paths.actions.rightHand.drop },
-      xform: xforms.falling,
-      priority: 1
     }
   ],
 

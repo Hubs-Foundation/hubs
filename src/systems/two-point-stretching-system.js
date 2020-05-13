@@ -38,9 +38,10 @@ export class TwoPointStretchingSystem {
         ? interaction.options.rightHand.entity.object3D
         : interaction.options.rightRemote.entity.object3D;
       if (
-        leftStretcher !== this.previousLeftStretcher ||
-        rightStretcher !== this.previousRightStretcher ||
-        stretched !== this.stretched
+        !stretched.isECSYThreeEntity &&
+        (leftStretcher !== this.previousLeftStretcher ||
+          rightStretcher !== this.previousRightStretcher ||
+          stretched !== this.stretched)
       ) {
         this.initialStretchDistance = distanceBetweenStretchers(leftStretcher, rightStretcher);
         this.stretched = stretched;

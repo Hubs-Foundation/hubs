@@ -312,7 +312,6 @@ function runMigration(version, json) {
   }
 }
 
-<<<<<<< HEAD
 const loadLightmap = async (parser, materialIndex) => {
   const lightmapDef = parser.json.materials[materialIndex].extensions.MOZ_lightmap;
   const [material, lightMap] = await Promise.all([
@@ -324,10 +323,7 @@ const loadLightmap = async (parser, materialIndex) => {
   return lightMap;
 };
 
-export async function loadGLTF(src, contentType, preferredTechnique, onProgress, jsonPreprocessor) {
-=======
 export async function loadGLTF(src, contentType, preferredTechnique, onProgress, jsonPreprocessor, useECSY) {
->>>>>>> 7ae59c3b... Update to the new ecsy API
   let gltfUrl = src;
   let fileMap;
 
@@ -540,7 +536,7 @@ AFRAME.registerComponent("gltf-model-plus", {
           this.disposeLastInflatedEl();
         }
 
-        if (this.model && this.model.isEntity) {
+        if (this.model && this.model.isECSYThreeEntity) {
           this.model.dispose();
         }
 
@@ -557,7 +553,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       // If we had inflated something already before, clean that up
       this.disposeLastInflatedEl();
 
-      if (this.model && this.model.isEntity) {
+      if (this.model && this.model.isECSYThreeEntity) {
         this.model.dispose();
       }
 
@@ -579,7 +575,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       let object3DToSet = this.model;
       if (
         this.data.inflate &&
-        !this.model.isEntity &&
+        !this.model.isECSYThreeEntity &&
         (this.inflatedEl = inflateEntities(
           indexToEntityMap,
           this.model,
@@ -603,7 +599,7 @@ AFRAME.registerComponent("gltf-model-plus", {
         for (const name in this.templates) {
           attachTemplate(this.el, name, this.templates[name]);
         }
-      } else if (this.model.isEntity) {
+      } else if (this.model.isECSYThreeEntity) {
         const world = AFRAME.scenes[0].systems["hubs-systems"].worldManager.world;
         world.addEntity(this.model);
       }

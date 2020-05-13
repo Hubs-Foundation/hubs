@@ -44,13 +44,13 @@ export class HoldableButtonSystem {
     const interaction = AFRAME.scenes[0].systems.interaction;
     const held = interaction.state.rightRemote.held;
 
-    if (this.prevHeld && this.prevHeld !== held) {
+    if (this.prevHeld && this.prevHeld !== held && !this.prevHeld.isECSYThreeEntity) {
       this.prevHeld.object3D.dispatchEvent({
         type: "holdable-button-up",
         object3D: interaction.options.rightRemote.entity.object3D
       });
     }
-    if (held && this.prevHeld !== held) {
+    if (held && this.prevHeld !== held && !held.isECSYThreeEntity) {
       held.object3D.dispatchEvent({
         type: "holdable-button-down",
         object3D: interaction.options.rightRemote.entity.object3D
@@ -61,13 +61,13 @@ export class HoldableButtonSystem {
 
     const heldLeft = interaction.state.leftRemote.held;
 
-    if (this.prevHeldLeft && this.prevHeldLeft !== heldLeft) {
+    if (this.prevHeldLeft && this.prevHeldLeft !== heldLeft && !this.prevHeldLeft.isECSYThreeEntity) {
       this.prevHeldLeft.object3D.dispatchEvent({
         type: "holdable-button-up",
         object3D: interaction.options.leftRemote.entity.object3D
       });
     }
-    if (heldLeft && this.prevHeldLeft !== heldLeft) {
+    if (heldLeft && this.prevHeldLeft !== heldLeft && !heldLeft.isECSYThreeEntity) {
       heldLeft.object3D.dispatchEvent({
         type: "holdable-button-down",
         object3D: interaction.options.leftRemote.entity.object3D
@@ -98,6 +98,11 @@ const hasButtonComponent = (function() {
 
 function getHoverableButton(hovered) {
   if (!hovered) return null;
+
+  if (hovered.isECSYThreeEntity) {
+    return null;
+  }
+
   if (
     hasButtonComponent(hovered.components) ||
     hovered.classList.contains("teleport-waypoint-icon") ||

@@ -15,8 +15,6 @@ const calculateCursorPose = function(camera, coords, origin, direction, cursorPo
   return cursorPose;
 };
 
-// TODO: Make app-aware-mouse work with ecsy interactable component
-
 export class AppAwareMouseDevice {
   constructor() {
     this.prevButtonLeft = false;

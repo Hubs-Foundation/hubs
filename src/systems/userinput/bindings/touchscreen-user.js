@@ -16,8 +16,6 @@ const gyroCamDeltaXScaled = "vars/gyro/gyroCameraDelta/x/scaled";
 const gyroCamDeltaYScaled = "vars/gyro/gyroCameraDelta/y/scaled";
 const togglePen = "/vars/touchscreen/togglePen";
 
-// TODO: Add support for ECSY interactable
-
 export const touchscreenUserBindings = addSetsToBindings({
   [sets.global]: [
     {

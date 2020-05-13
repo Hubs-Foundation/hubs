@@ -118,6 +118,7 @@ export default class ECSYMOZComponentsExtension {
   }
 
   registerEntityInflator(componentName, inflator) {
+    π;
     this.entityInflators[componentName] = inflator;
   }
 

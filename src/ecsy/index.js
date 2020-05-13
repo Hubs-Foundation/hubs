@@ -23,31 +23,26 @@ import { Rotating } from "./components/Rotating";
 import { Animation } from "./components/Animation";
 import { GLTFLoader } from "./components/GLTFLoader";
 import { Image } from "./components/Image";
-import { Interactable } from "./components/Interactable";
 import { Loading } from "./components/Loading";
 import { LoadingCube } from "./components/LoadingCube";
 import { MediaLoader } from "./components/MediaLoader";
-import { CursorController } from "./components/CursorController";
+import { Held } from "./components/Held";
+import { Holdable } from "./components/Holdable";
+import { Hoverable } from "./components/Hoverable";
+import { Hovered } from "./components/Hovered";
+import { InteractionState } from "./components/InteractionState";
 import { Interactor } from "./components/Interactor";
-import { Raycaster } from "./components/Raycaster";
-import { Grabbable } from "./components/Grabbable";
-import { RaycastInteractor } from "./components/RaycastInteractor";
-import { HandController } from "./components/HandController";
-import { PhysicsInteractor } from "./components/PhysicsInteractor";
+import { ConstrainOnHeld } from "./components/ConstrainOnHeld";
 import { PhysicsBody } from "./components/PhysicsBody";
 import { PhysicsShape } from "./components/PhysicsShape";
-import { ActionFrame } from "./components/ActionFrame";
 import { AFrameEntity } from "./components/AFrameEntity";
 import { GLTFModel } from "./components/GLTFModel";
 import { SpawnPoint } from "./components/SpawnPoint";
 
-import { InitSceneSystem } from "./systems/InitSceneSystem";
 import { RotationSystem } from "./systems/RotationSystem";
-
-import { paths } from "../systems/userinput/paths";
-import { sets } from "../systems/userinput/sets";
-
-//import { CursorControllerSystem } from "./systems/CursorControllerSystem";
+import { InteractionSystem } from "./systems/InteractionSystem";
+import { LogInteractionStateSystem } from "./systems/LogInteractionStateSystem";
+import { BoxBufferGeometry, MeshBasicMaterial } from "three";
 
 export class WorldManager {
   constructor(aframeScene) {
@@ -75,32 +70,29 @@ export class WorldManager {
       .registerEntityType(HemisphereLightEntity)
       .registerEntityType(PointLightEntity)
       .registerEntityType(SpotLightEntity)
-      .registerComponent(ActionFrame)
       .registerComponent(AFrameEntity)
       .registerComponent(Animation)
-      .registerComponent(CursorController)
       .registerComponent(GLTFLoader)
       .registerComponent(GLTFModel)
-      .registerComponent(Grabbable)
-      .registerComponent(HandController)
       .registerComponent(Image)
-      .registerComponent(Interactable)
       .registerComponent(Interactor)
       .registerComponent(Loading)
       .registerComponent(LoadingCube)
       .registerComponent(MediaLoader)
+      .registerComponent(Held)
+      .registerComponent(Holdable)
+      .registerComponent(Hoverable)
+      .registerComponent(Hovered)
+      .registerComponent(InteractionState)
+      .registerComponent(ConstrainOnHeld)
       .registerComponent(PhysicsBody)
       .registerComponent(PhysicsShape)
-      .registerComponent(PhysicsInteractor)
-      .registerComponent(Raycaster)
-      .registerComponent(RaycastInteractor)
       .registerComponent(Rotating)
       .registerComponent(SpawnPoint);
 
     this.world
-      // .registerSystem(InteractionSystem)
-      // .registerSystem(CursorControllerSystem)
-      .registerSystem(InitSceneSystem)
+      .registerSystem(InteractionSystem)
+      .registerSystem(LogInteractionStateSystem)
       // .registerSystem(MediaLoaderSystem)
       // .registerSystem(ImageSystem)
       // .registerSystem(LoadingCubeSystem)
@@ -110,6 +102,7 @@ export class WorldManager {
     // .registerSystem(PhysicsSystem, { hubsSystem: this.aframeScene.systems["hubs-systems"].physicsSystem });
 
     this.scene = new SceneEntity(this.world); //.addComponent(ActionFrame, { value: this.aframeScene.systems["userinput"].frame });
+    this.scene.addComponent(InteractionState);
     this.aframeScene.object3D.add(this.scene);
     this.world.addEntity(this.scene);
 
@@ -118,60 +111,35 @@ export class WorldManager {
     this.leftCursorController = this.world
       .createEntity()
       .addComponent(AFrameEntity, { value: leftCursorControllerEl })
-      .addComponent(CursorController, { id: "left" })
-      .addComponent(Interactor, {
-        hoverActionSet: sets.leftCursorHoveringOnECSYInteractable,
-        grabActionSet: sets.leftCursorHoldingECSYInteractable,
-        grabStartActionPath: paths.actions.cursor.left.grab,
-        grabEndActionPath: paths.actions.cursor.left.drop
-      })
-      .addComponent(RaycastInteractor)
-      .addComponent(Raycaster, { value: leftCursorControllerEl.components["cursor-controller"].raycaster });
+      .addComponent(Interactor, { id: "leftRemote" });
 
     const rightCursorControllerEl = document.getElementById("right-cursor-controller");
 
     this.rightCursorController = this.world
       .createEntity()
       .addComponent(AFrameEntity, { value: rightCursorControllerEl })
-      .addComponent(CursorController, { id: "right" })
-      .addComponent(Interactor, {
-        hoverActionSet: sets.rightCursorHoveringOnECSYInteractable,
-        grabActionSet: sets.rightCursorHoldingECSYInteractable,
-        grabStartActionPath: paths.actions.cursor.right.grab,
-        grabEndActionPath: paths.actions.cursor.right.drop
-      })
-      .addComponent(RaycastInteractor)
-      .addComponent(Raycaster, { value: rightCursorControllerEl.components["cursor-controller"].raycaster });
+      .addComponent(Interactor, { id: "rightRemote" });
 
     const leftControllerEl = document.getElementById("player-left-controller");
 
     this.leftHandController = this.world
       .createEntity()
       .addComponent(AFrameEntity, { value: leftControllerEl })
-      .addComponent(HandController, { id: "left" })
-      .addComponent(Interactor, {
-        hoverActionSet: sets.leftHandHoveringOnECSYInteractable,
-        grabActionSet: sets.leftHandHoldingECSYInteractable,
-        grabStartActionPath: paths.actions.leftHand.grab,
-        grabEndActionPath: paths.actions.leftHand.drop
-      })
-      .addComponent(PhysicsInteractor)
-      .addComponent(PhysicsBody);
+      .addComponent(Interactor, { id: "leftHand" });
 
     const rightControllerEl = document.getElementById("player-right-controller");
 
     this.rightHandController = this.world
       .createEntity()
       .addComponent(AFrameEntity, { value: rightControllerEl })
-      .addComponent(HandController, { id: "right" })
-      .addComponent(Interactor, {
-        hoverActionSet: sets.rightHandHoveringOnECSYInteractable,
-        grabActionSet: sets.rightHandHoldingECSYInteractable,
-        grabStartActionPath: paths.actions.rightHand.grab,
-        grabEndActionPath: paths.actions.rightHand.drop
-      })
-      .addComponent(PhysicsInteractor)
-      .addComponent(PhysicsBody);
+      .addComponent(Interactor, { id: "rightHand" });
+
+    const box = this.scene
+      .add(new MeshEntity(this.world, new BoxBufferGeometry(), new MeshBasicMaterial()))
+      .addComponent(Hoverable)
+      .addComponent(Holdable);
+
+    box.position.set(0, 1, 0);
 
     this.initialized = true;
   }
