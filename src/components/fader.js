@@ -18,7 +18,6 @@ AFRAME.registerComponent("fader", {
     mesh.scale.z = 0.15;
     mesh.matrixNeedsUpdate = true;
     this.el.object3DMap.camera.add(mesh);
-
     this.mesh = mesh;
   },
 
