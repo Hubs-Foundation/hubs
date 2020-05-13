@@ -24,7 +24,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
     this.objWorldPos = new THREE.Vector3();
 
     waitForDOMContentLoaded().then(() => {
-      this.cam = document.getElementById("viewing-camera").object3DMap.camera;
+      this.cameraEl = document.getElementById("viewing-camera");
       this.updateVisibility();
     });
 
@@ -68,7 +68,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
   },
 
   updateVisibility() {
-    if (!this.cam) return;
+    if (!this.cameraEl) return;
     const isFrozen = this.el.sceneEl.is("frozen");
 
     let isWithinDistance = true;
@@ -81,7 +81,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
         this.el.object3D.updateMatrices(true, true);
       }
 
-      getLastWorldPosition(this.cam, this.camWorldPos);
+      getLastWorldPosition(this.cameraEl.object3DMap.camera, this.camWorldPos);
       this.objWorldPos.copy(this.el.object3D.position);
       this.el.object3D.localToWorld(this.objWorldPos);
 
