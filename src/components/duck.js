@@ -19,7 +19,8 @@ AFRAME.registerComponent("duck", {
   },
 
   tick: function() {
-    if (this.networkedEntity && NAF.utils.isMine(this.networkedEntity)) {
+    if (!this.networkedEntity || NAF.utils.isMine(this.networkedEntity)) {
+      const entity = this.networkedEntity || this.el;
       const currentScale = this.networkedEntity.object3D.scale.x;
       const ratio = Math.min(1, (currentScale - this.initialScale) / (this.maxScale - this.initialScale));
       const force = ratio * this.data.maxForce;
@@ -27,7 +28,7 @@ AFRAME.registerComponent("duck", {
         const angle = Math.random() * Math.PI * 2;
         const x = Math.cos(angle);
         const z = Math.sin(angle);
-        this.networkedEntity.setAttribute("body-helper", { gravity: { x: x, y: force, z: z } });
+        entity.setAttribute("body-helper", { gravity: { x, y: force, z } });
       }
     }
   }

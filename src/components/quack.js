@@ -1,7 +1,5 @@
 import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "../systems/sound-effects-system";
 
-const INTERACTORS = ["rightHand", "leftHand", "rightRemote", "leftRemote"];
-
 AFRAME.registerComponent("quack", {
   schema: {
     quackPercentage: { default: 1 },
@@ -17,16 +15,10 @@ AFRAME.registerComponent("quack", {
 
   tick: function() {
     const interaction = AFRAME.scenes[0].systems.interaction;
-    const entity = this.networkedEntity || this.el;
-    let isInteracting = false;
-    for (let i = 0; i < INTERACTORS.length; i++) {
-      if (interaction.state[INTERACTORS[i]].held === entity) {
-        isInteracting = true;
-        if (!this.wasInteracting) {
-          this.quack();
-        }
-        break;
-      }
+    const isInteracting = interaction.isHeld(this.networkedEntity || this.el);
+
+    if (isInteracting && !this.wasInteracting) {
+      this.quack();
     }
 
     this.wasInteracting = isInteracting;
