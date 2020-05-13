@@ -10,7 +10,7 @@ AFRAME.registerComponent("duck", {
   },
 
   init: function() {
-    this.initialScale = this.entity.object3D.scale.x;
+    this.initialScale = this.el.object3D.scale.x;
     this.maxScale = this.data.maxScale * this.initialScale;
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEntity => {
