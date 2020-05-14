@@ -43,8 +43,10 @@ import { RotationSystem } from "./systems/RotationSystem";
 import { InteractionSystem } from "./systems/InteractionSystem";
 import { PhysicsSystem } from "./systems/PhysicsSystem";
 import { LogInteractionStateSystem } from "./systems/LogInteractionStateSystem";
-import { BoxBufferGeometry, MeshBasicMaterial, SphereBufferGeometry } from "three";
-import { SHAPE } from "three-ammo/constants";
+import { BoxBufferGeometry, MeshBasicMaterial, SphereBufferGeometry, Vector3 } from "three";
+import { SHAPE, FIT } from "three-ammo/constants";
+import { ConstrainOnHeldSystem } from "./systems/ConstrainOnHeldSystem";
+import { PhysicsConstraint } from "./components/PhysicsConstraint";
 
 export class WorldManager {
   constructor(aframeScene) {
@@ -87,6 +89,7 @@ export class WorldManager {
       .registerComponent(Hovered)
       .registerComponent(InteractionState)
       .registerComponent(ConstrainOnHeld)
+      .registerComponent(PhysicsConstraint)
       .registerComponent(PhysicsBody)
       .registerComponent(PhysicsShape)
       .registerComponent(Rotating)
@@ -94,7 +97,8 @@ export class WorldManager {
 
     this.world
       .registerSystem(InteractionSystem)
-      .registerSystem(LogInteractionStateSystem)
+      //.registerSystem(LogInteractionStateSystem)
+      .registerSystem(ConstrainOnHeldSystem)
       // .registerSystem(MediaLoaderSystem)
       // .registerSystem(ImageSystem)
       // .registerSystem(LoadingCubeSystem)
@@ -108,70 +112,63 @@ export class WorldManager {
     this.aframeScene.object3D.add(this.scene);
     this.world.addEntity(this.scene);
 
-    const leftCursorControllerEl = document.getElementById("left-cursor-controller");
+    const leftCursorEl = document.getElementById("left-cursor");
 
-    this.leftCursorController = this.world
+    this.leftCursor = this.world
       .createEntity()
-      .addComponent(AFrameEntity, { value: leftCursorControllerEl })
-      .addComponent(Interactor, { id: "leftRemote" });
+      .addComponent(AFrameEntity, { value: leftCursorEl })
+      .addComponent(Interactor, { id: "leftRemote" })
+      .addComponent(PhysicsBody, { uuid: leftCursorEl.components["body-helper"].uuid, needsUpdate: false });
 
-    const rightCursorControllerEl = document.getElementById("right-cursor-controller");
+    this.rightCursorEl = document.getElementById("right-cursor");
 
-    this.rightCursorController = this.world
+    this.rightCursor = this.world
       .createEntity()
-      .addComponent(AFrameEntity, { value: rightCursorControllerEl })
-      .addComponent(Interactor, { id: "rightRemote" });
+      .addComponent(AFrameEntity, { value: this.rightCursorEl })
+      .addComponent(Interactor, { id: "rightRemote" })
+      .addComponent(PhysicsBody, { uuid: this.rightCursorEl.components["body-helper"].uuid, needsUpdate: false });
 
     const leftControllerEl = document.getElementById("player-left-controller");
 
     this.leftHandController = this.world
       .createEntity()
       .addComponent(AFrameEntity, { value: leftControllerEl })
-      .addComponent(Interactor, { id: "leftHand" });
+      .addComponent(Interactor, { id: "leftHand" })
+      .addComponent(PhysicsBody, { uuid: leftControllerEl.components["body-helper"].uuid, needsUpdate: false });
 
     const rightControllerEl = document.getElementById("player-right-controller");
 
     this.rightHandController = this.world
       .createEntity()
       .addComponent(AFrameEntity, { value: rightControllerEl })
-      .addComponent(Interactor, { id: "rightHand" });
+      .addComponent(Interactor, { id: "rightHand" })
+      .addComponent(PhysicsBody, { uuid: rightControllerEl.components["body-helper"].uuid, needsUpdate: false });
 
-    setTimeout(() => {
-      const box = new MeshEntity(
-        this.world,
-        new BoxBufferGeometry(),
-        new MeshBasicMaterial({ color: 0xff0000, opacity: 0.3, transparent: true })
-      )
-        .addComponent(Hoverable)
-        .addComponent(Holdable)
-        .addComponent(PhysicsBody)
-        .addComponent(PhysicsShape, { shape: SHAPE.BOX });
+    window.addEventListener("keyup", e => {
+      if (e.key === "j") {
+        const box = new MeshEntity(
+          this.world,
+          new BoxBufferGeometry(),
+          new MeshBasicMaterial({ color: 0xff0000, opacity: 0.3, transparent: true })
+        )
+          .addComponent(Hoverable)
+          .addComponent(Holdable)
+          .addComponent(PhysicsBody)
+          .addComponent(PhysicsShape, { shape: SHAPE.BOX, fit: FIT.MANUAL, halfExtents: new Vector3(0.5, 0.5, 0.5) })
+          .addComponent(ConstrainOnHeld);
 
-      box.position.set(1, 2, 0);
+        box.position.set(1, 2, 0);
 
-      this.scene.add(box);
-
-      const sphere = new MeshEntity(
-        this.world,
-        new BoxBufferGeometry(),
-        new MeshBasicMaterial({ color: 0xff0000, opacity: 0.3, transparent: true })
-      )
-        .addComponent(Hoverable)
-        .addComponent(Holdable)
-        .addComponent(PhysicsBody)
-        .addComponent(PhysicsShape, { type: SHAPE.SPHERE, sphereRadius: 1 });
-
-      sphere.position.set(3, 2, 0);
-
-      this.scene.add(sphere);
-    }, 5000);
+        this.scene.add(box);
+      }
+    });
 
     this.initialized = true;
   }
 
   execute(dt, time) {
-    // Call init after hubs-systems are initialized and DOMContentLoaded has been fired.
-    if (!this.initialized) {
+    // Call init after DOMContentLoaded has been fired, hubs-systems are initialized, and the physics-system is ready.
+    if (!this.initialized && this.aframeScene.systems["hubs-systems"].physicsSystem.ready) {
       this.init();
     }
 

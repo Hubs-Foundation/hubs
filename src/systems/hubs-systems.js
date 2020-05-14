@@ -25,8 +25,8 @@ import { ScaleInScreenSpaceSystem } from "./scale-in-screen-space";
 import { MenuAnimationSystem } from "./menu-animation-system";
 import { AudioSettingsSystem } from "./audio-settings-system";
 import { EnterVRButtonSystem } from "./enter-vr-button-system";
+import { WorldManager } from "../ecsy/WorldManager";
 import { AudioSystem } from "./audio-system";
-import { WorldManager } from "../ecsy";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {

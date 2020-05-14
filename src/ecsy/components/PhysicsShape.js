@@ -1,6 +1,6 @@
 import { Component } from "ecsy";
 import { PropTypes } from "ecsy-three";
-import { Vector3, Quaternion } from "three";
+import { Vector3, Vector4 } from "three";
 import { SHAPE, FIT } from "three-ammo/constants";
 
 export class PhysicsShape extends Component {
@@ -14,7 +14,7 @@ export class PhysicsShape extends Component {
     cylinderAxis: { type: PropTypes.String, default: "y" },
     margin: { type: PropTypes.Number, default: 0.01 },
     offset: { type: PropTypes.Vector3, default: new Vector3(0, 0, 0) },
-    orientation: { type: PropTypes.Quaternion, default: new Quaternion() },
+    orientation: { type: PropTypes.Vector4, default: new Vector4() },
     heightfieldData: { type: PropTypes.Array, default: [] },
     heightfieldDistance: { type: PropTypes.Number, default: 1 },
     includeInvisible: { type: PropTypes.Boolean, default: false },
