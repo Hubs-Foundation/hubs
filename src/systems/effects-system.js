@@ -2,8 +2,10 @@
 
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { BloomPass } from 'three/examples/jsm/postprocessing/BloomPass.js';
-import { GlitchPass } from 'three/examples/jsm/postprocessing/GlitchPass.js';
+import { CustomShader } from './effects/CustomShader.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { Vector2 } from 'three';
 
 export class EffectsSystem {
   constructor(sceneEl) {
@@ -24,15 +26,16 @@ export class EffectsSystem {
     const camera = sceneEl.camera;
 
     const composer = new EffectComposer(renderer);
-    const pass1 = new RenderPass(scene, camera);
-    const pass2 = new BloomPass(2, 25, 1, 256);
-    const pass3 = new GlitchPass();
+    var passes = [
+      new RenderPass(scene, camera),
+      // UnrealBloomPass(resolution, strength, radius, threshold)
+      new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 4.4, 0.85),
+      //new ShaderPass(CustomShader, 'tDiffuse'),
+    ];
+    console.log(CustomShader);
+    passes.slice(-1).renderToScreen = true;
 
-    pass3.renderToScreen = true;
-
-    composer.addPass(pass1);
-    //composer.addPass(pass2);
-    composer.addPass(pass3);
+    passes.forEach(pass => composer.addPass(pass))
 
     this.composer = composer;
     this.t = 0;
