@@ -217,6 +217,7 @@ export class PhysicsSystem {
   })();
 
   addBody(object3D, options) {
+    console.log("addBody", object3D);
     this.workerHelpers.addBody(this.nextBodyUuid, object3D, options);
 
     this.bodyUuidToData.set(this.nextBodyUuid, {
