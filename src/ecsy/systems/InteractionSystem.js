@@ -18,7 +18,12 @@ export class InteractionSystem extends System {
       components: [Hovered]
     },
     hoverableEntities: {
-      components: [Hoverable]
+      components: [Hoverable],
+      listen: {
+        added: true,
+        removed: true,
+        changed: true
+      }
     }
   };
 
@@ -84,13 +89,18 @@ export class InteractionSystem extends System {
       }
     }
 
-    const hoverableEntities = this.queries.hoverableEntities.results;
-    const cursorTargettingSystem = AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem;
+    if (this.queries.hoverableEntities.added.length > 0 || this.queries.hoverableEntities.removed.length > 0) {
+      const cursorTargettingSystem = AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem;
 
-    cursorTargettingSystem.hoverableEntities.length = 0;
+      const hoverableEntities = this.queries.hoverableEntities.results;
 
-    for (let i = 0; i < hoverableEntities.length; i++) {
-      cursorTargettingSystem.hoverableEntities.push(hoverableEntities[i]);
+      cursorTargettingSystem.hoverableEntities.length = 0;
+
+      for (let i = 0; i < hoverableEntities.length; i++) {
+        cursorTargettingSystem.hoverableEntities.push(hoverableEntities[i]);
+      }
+
+      cursorTargettingSystem.setDirty();
     }
   }
 }
