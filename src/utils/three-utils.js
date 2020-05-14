@@ -318,12 +318,17 @@ export const rotateInPlaceAroundWorldUp = (function() {
 })();
 
 export const childMatch = (function() {
+  const inverseParentWorld = new THREE.Matrix4();
+  const childRelativeToParent = new THREE.Matrix4();
   const childInverse = new THREE.Matrix4();
   const newParentMatrix = new THREE.Matrix4();
   // transform the parent such that its child matches the target
   return function childMatch(parent, child, target) {
+    parent.updateMatrices();
+    inverseParentWorld.getInverse(parent.matrixWorld);
     child.updateMatrices();
-    childInverse.getInverse(child.matrix);
+    childRelativeToParent.multiplyMatrices(inverseParentWorld, child.matrixWorld);
+    childInverse.getInverse(childRelativeToParent);
     newParentMatrix.multiplyMatrices(target, childInverse);
     setMatrixWorld(parent, newParentMatrix);
   };
