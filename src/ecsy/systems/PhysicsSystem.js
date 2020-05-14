@@ -1,25 +1,17 @@
 import { System } from "ecsy";
-import { Object3D, Parent } from "ecsy-three";
 import { PhysicsBody } from "../components/PhysicsBody";
 import { PhysicsShape } from "../components/PhysicsShape";
 import { FIT } from "three-to-ammo";
-import { AFrameEntity } from "../components/AFrameEntity";
 
 function getBodyEntityInAncestors(entity) {
   let curEntity = entity;
 
   while (curEntity) {
-    if (curEntity.hasComponent(PhysicsBody)) {
+    if (curEntity.isECSYThreeEntity && curEntity.hasComponent(PhysicsBody)) {
       return curEntity;
     }
 
-    const parent = curEntity.getComponent(Parent);
-
-    if (parent) {
-      curEntity = parent.value;
-    } else {
-      curEntity = null;
-    }
+    curEntity = curEntity.parent;
   }
 
   return null;
@@ -28,7 +20,7 @@ function getBodyEntityInAncestors(entity) {
 export class PhysicsSystem extends System {
   static queries = {
     physicsBodies: {
-      components: [Object3D, PhysicsBody],
+      components: [PhysicsBody],
       listen: {
         removed: true
       }
@@ -57,26 +49,15 @@ export class PhysicsSystem extends System {
     for (let i = 0; i < bodies.length; i++) {
       const entity = bodies[i];
       const body = entity.getComponent(PhysicsBody);
-      const object = entity.getComponent(Object3D).value;
 
       if (body.uuid == null) {
-        if (entity.hasComponent(AFrameEntity)) {
-          // TODO: Remove this branch.
-          const aframeEntity = entity.getComponent(AFrameEntity).value;
-          const bodyHelper = aframeEntity.components["body-helper"];
-
-          if (bodyHelper) {
-            body.uuid = bodyHelper.uuid;
-            body.needsUpdate = false;
-          }
-        } else {
-          object.updateMatrices();
-          const uuid = this.hubsSystem.addBody(object, body);
-          body.uuid = uuid;
-          body.needsUpdate = false;
-        }
+        entity.updateMatrices();
+        console.log("addBody");
+        const uuid = this.hubsSystem.addBody(entity, body);
+        body.uuid = uuid;
+        body.needsUpdate = false;
       } else if (body.needsUpdate) {
-        object.updateMatrices();
+        entity.updateMatrices();
         this.hubsSystem.updateBody(body.uuid, body);
         body.needsUpdate = false;
       }
@@ -95,26 +76,30 @@ export class PhysicsSystem extends System {
     for (let i = 0; i < shapes.length; i++) {
       const entity = shapes[i];
       const shape = entity.getComponent(PhysicsShape);
-      const object = entity.getComponent(Object3D).value;
 
       if (shape.uuid == null) {
         const bodyEntity = getBodyEntityInAncestors(entity);
+
+        if (!bodyEntity) {
+          continue;
+        }
+
         const body = bodyEntity.getComponent(PhysicsBody);
 
         if (body.uuid !== undefined) {
           if (shape.fit === FIT.ALL) {
-            if (object.isMesh) {
-              object.updateMatrices();
+            if (entity.isMesh) {
+              entity.updateMatrices();
             } else {
               console.error("Cannot use FIT.ALL when the entity's object3D is not a mesh.");
             }
           }
 
-          object.updateMatrixWorld(true);
-          const uuid = this.hubsSystem.addShapes(body.uuid, object, shape);
+          entity.updateMatrixWorld(true);
+          console.log("addShapes");
+          const uuid = this.hubsSystem.addShapes(body.uuid, entity, shape);
           shape.bodyUuid = body.uuid;
           shape.uuid = uuid;
-          console.log("add shape", body.uuid, object, shape, uuid, this.hubsSystem.bodyUuidToData.get(body.uuid));
         }
       }
     }

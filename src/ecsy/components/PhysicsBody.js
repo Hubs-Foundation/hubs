@@ -17,7 +17,7 @@ export const ACTIVATION_STATES = [
 export class PhysicsBody extends Component {
   static schema = {
     mass: { type: PropTypes.Number, default: 1 },
-    gravity: { type: PropTypes.Vector3, default: new Vector3(0, 9.8, 0) },
+    gravity: { type: PropTypes.Vector3, default: new Vector3(0, -9.8, 0) },
     linearDamping: { type: PropTypes.Number, default: 0.01 },
     angularDamping: { type: PropTypes.Number, default: 0.01 },
     linearSleepingThreshold: { type: PropTypes.Number, default: 1.6 },

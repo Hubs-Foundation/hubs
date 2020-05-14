@@ -41,8 +41,10 @@ import { SpawnPoint } from "./components/SpawnPoint";
 
 import { RotationSystem } from "./systems/RotationSystem";
 import { InteractionSystem } from "./systems/InteractionSystem";
+import { PhysicsSystem } from "./systems/PhysicsSystem";
 import { LogInteractionStateSystem } from "./systems/LogInteractionStateSystem";
-import { BoxBufferGeometry, MeshBasicMaterial } from "three";
+import { BoxBufferGeometry, MeshBasicMaterial, SphereBufferGeometry } from "three";
+import { SHAPE } from "three-ammo/constants";
 
 export class WorldManager {
   constructor(aframeScene) {
@@ -98,8 +100,8 @@ export class WorldManager {
       // .registerSystem(LoadingCubeSystem)
       // .registerSystem(GLTFLoaderSystem)
       // .registerSystem(AnimationSystem)
-      .registerSystem(RotationSystem);
-    // .registerSystem(PhysicsSystem, { hubsSystem: this.aframeScene.systems["hubs-systems"].physicsSystem });
+      .registerSystem(RotationSystem)
+      .registerSystem(PhysicsSystem, { hubsSystem: this.aframeScene.systems["hubs-systems"].physicsSystem });
 
     this.scene = new SceneEntity(this.world); //.addComponent(ActionFrame, { value: this.aframeScene.systems["userinput"].frame });
     this.scene.addComponent(InteractionState);
@@ -134,12 +136,35 @@ export class WorldManager {
       .addComponent(AFrameEntity, { value: rightControllerEl })
       .addComponent(Interactor, { id: "rightHand" });
 
-    const box = this.scene
-      .add(new MeshEntity(this.world, new BoxBufferGeometry(), new MeshBasicMaterial()))
-      .addComponent(Hoverable)
-      .addComponent(Holdable);
+    setTimeout(() => {
+      const box = new MeshEntity(
+        this.world,
+        new BoxBufferGeometry(),
+        new MeshBasicMaterial({ color: 0xff0000, opacity: 0.3, transparent: true })
+      )
+        .addComponent(Hoverable)
+        .addComponent(Holdable)
+        .addComponent(PhysicsBody)
+        .addComponent(PhysicsShape, { shape: SHAPE.BOX });
 
-    box.position.set(0, 1, 0);
+      box.position.set(1, 2, 0);
+
+      this.scene.add(box);
+
+      const sphere = new MeshEntity(
+        this.world,
+        new BoxBufferGeometry(),
+        new MeshBasicMaterial({ color: 0xff0000, opacity: 0.3, transparent: true })
+      )
+        .addComponent(Hoverable)
+        .addComponent(Holdable)
+        .addComponent(PhysicsBody)
+        .addComponent(PhysicsShape, { type: SHAPE.SPHERE, sphereRadius: 1 });
+
+      sphere.position.set(3, 2, 0);
+
+      this.scene.add(sphere);
+    }, 5000);
 
     this.initialized = true;
   }
