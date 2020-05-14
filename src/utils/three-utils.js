@@ -58,6 +58,7 @@ export function setMatrixWorld(object3D, m) {
   }
   object3D.matrixWorld.copy(m);
   if (object3D.parent) {
+    object3D.parent.updateMatrices();
     object3D.matrix = object3D.matrix.getInverse(object3D.parent.matrixWorld).multiply(object3D.matrixWorld);
   } else {
     object3D.matrix.copy(object3D.matrixWorld);
