@@ -2,7 +2,6 @@ import { sets } from "./sets";
 import { isUI, isHoverableByHand, isHoverableByRemote } from "./../interactions";
 import { CAMERA_MODE_INSPECT } from "../camera-system";
 import qsTruthy from "../../utils/qs_truthy";
-import { Interactor } from "../../ecsy/components/Interactor";
 const debugUserInput = qsTruthy("dui");
 import { isTagged } from "../../components/tags";
 
@@ -33,16 +32,6 @@ export function resolveActionSets() {
   const userinput = AFRAME.scenes[0].systems.userinput;
   const { leftHand, rightHand, rightRemote, leftRemote } = AFRAME.scenes[0].systems.interaction.state;
 
-  const worldManager = AFRAME.scenes[0].systems["hubs-systems"].worldManager;
-  const leftCursorInteractor = worldManager.initialized
-    ? worldManager.leftCursorController.getComponent(Interactor)
-    : {};
-  const rightCursorInteractor = worldManager.initialized
-    ? worldManager.rightCursorController.getComponent(Interactor)
-    : {};
-  const leftHandInteractor = worldManager.initialized ? worldManager.leftHandController.getComponent(Interactor) : {};
-  const rightHandInteractor = worldManager.initialized ? worldManager.rightHandController.getComponent(Interactor) : {};
-
   userinput.toggleSet(sets.leftHandHoldingInteractable, leftHand.held);
   userinput.toggleSet(sets.rightHandHoldingInteractable, rightHand.held);
   userinput.toggleSet(sets.leftCursorHoldingInteractable, leftRemote.held);
@@ -50,47 +39,19 @@ export function resolveActionSets() {
 
   userinput.toggleSet(
     sets.leftHandHoveringOnNothing,
-    !leftRemote.held &&
-      !leftRemote.hovered &&
-      !leftHand.held &&
-      !leftHand.hovered &&
-      !leftHandInteractor.grabbing &&
-      !leftHandInteractor.hovering &&
-      !leftCursorInteractor.grabbing &&
-      !leftCursorInteractor.hovering
+    !leftRemote.held && !leftRemote.hovered && !leftHand.held && !leftHand.hovered
   );
   userinput.toggleSet(
     sets.rightHandHoveringOnNothing,
-    !rightRemote.held &&
-      !rightRemote.hovered &&
-      !rightHand.held &&
-      !rightHand.hovered &&
-      !rightHandInteractor.grabbing &&
-      !rightHandInteractor.hovering &&
-      !rightCursorInteractor.grabbing &&
-      !rightCursorInteractor.hovering
+    !rightRemote.held && !rightRemote.hovered && !rightHand.held && !rightHand.hovered
   );
   userinput.toggleSet(
     sets.leftCursorHoveringOnNothing,
-    !leftHand.held &&
-      !leftHand.hovered &&
-      !leftRemote.held &&
-      !leftRemote.hovered &&
-      !leftHandInteractor.grabbing &&
-      !leftHandInteractor.hovering &&
-      !leftCursorInteractor.grabbing &&
-      !leftCursorInteractor.hovering
+    !leftHand.held && !leftHand.hovered && !leftRemote.held && !leftRemote.hovered
   );
   userinput.toggleSet(
     sets.rightCursorHoveringOnNothing,
-    !rightHand.held &&
-      !rightHand.hovered &&
-      !rightRemote.held &&
-      !rightRemote.hovered &&
-      !rightHandInteractor.grabbing &&
-      !rightHandInteractor.hovering &&
-      !rightCursorInteractor.grabbing &&
-      !rightCursorInteractor.hovering
+    !rightHand.held && !rightHand.hovered && !rightRemote.held && !rightRemote.hovered
   );
 
   userinput.toggleSet(
