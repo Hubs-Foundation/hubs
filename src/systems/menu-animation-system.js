@@ -7,7 +7,7 @@ export class MenuAnimationSystem {
     this.data = new Map();
     this.tick = this.tick.bind(this);
     waitForDOMContentLoaded().then(() => {
-      this.viewingCamera = document.getElementById("viewing-camera").object3DMap.camera;
+      this.viewingCameraEl = document.getElementById("viewing-camera");
     });
   }
   register(component, menuEl, chooseScale) {
@@ -32,11 +32,12 @@ export class MenuAnimationSystem {
     const menuPosition = new THREE.Vector3();
     const cameraPosition = new THREE.Vector3();
     return function tick(t) {
-      if (!this.viewingCamera) {
+      if (!this.viewingCameraEl) {
         return;
       }
-      this.viewingCamera.updateMatrices();
-      cameraPosition.setFromMatrixPosition(this.viewingCamera.matrixWorld);
+      const camera = this.viewingCameraEl.object3DMap.camera;
+      camera.updateMatrices();
+      cameraPosition.setFromMatrixPosition(camera.matrixWorld);
 
       for (let i = 0; i < this.components.length; i++) {
         const datum = this.data.get(this.components[i]);

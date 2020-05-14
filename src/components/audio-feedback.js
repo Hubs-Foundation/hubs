@@ -169,14 +169,14 @@ AFRAME.registerComponent("scale-audio-feedback", {
 
   async init() {
     await waitForDOMContentLoaded();
-    this.camera = document.getElementById("viewing-camera").object3DMap.camera;
+    this.cameraEl = document.getElementById("viewing-camera");
   },
 
   tick() {
     // TODO: come up with a cleaner way to handle this.
     // bone's are "hidden" by scaling them with bone-visibility, without this we would overwrite that.
     if (!this.el.object3D.visible) return;
-    if (!this.camera) return;
+    if (!this.cameraEl) return;
     if (!this.analyser) this.analyser = getAnalyser(this.el);
 
     const { minScale, maxScale } = this.data;
@@ -185,7 +185,7 @@ AFRAME.registerComponent("scale-audio-feedback", {
 
     const scale = getAudioFeedbackScale(
       this.el.object3D,
-      this.camera,
+      this.cameraEl.object3DMap.camera,
       minScale,
       maxScale,
       this.analyser ? this.analyser.volume : 0
