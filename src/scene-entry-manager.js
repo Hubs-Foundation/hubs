@@ -419,8 +419,7 @@ export default class SceneEntryManager {
       if (videoTracks.length > 0) {
         newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
 
-        const audioTracks = newStream ? newStream.getAudioTracks() : [];
-        if (audioTracks.length > 0) {
+        if (newStream && newStream.getAudioTracks().length > 0) {
           const audioSystem = this.scene.systems["hubs-systems"].audioSystem;
           audioSystem.addStreamToOutboundAudio("screenshare", newStream);
         }
