@@ -61,19 +61,32 @@ export class AudioSystem {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
 
+    const ctx = THREE.AudioContext.getContext();
+    this.outboundContext = new (window.AudioContext || window.webkitAudioContext)();
+    this.audioNodes = new Map();
+
     /**
      * Chrome and Safari will start Audio contexts in a "suspended" state.
      * A user interaction (touch/mouse event) is needed in order to resume the AudioContext.
      */
-    const ctx = THREE.AudioContext.getContext();
     const resume = () => {
       ctx.resume();
+      this.outboundContext.resume();
 
-      setTimeout(function() {
-        if (ctx.state === "running") {
+      setTimeout(() => {
+        if (ctx.state === "running" && this.outboundContext.state === "running") {
           if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
             enableChromeAEC(sceneEl.audioListener.gain);
           }
+
+          this.mediaStreamDestinationNode = this.outboundContext.createMediaStreamDestination();
+          this.outboundStream = this.mediaStreamDestinationNode.stream;
+          this.outboundGainNode = this.outboundContext.createGain();
+          this.outboundAnalyser = this.outboundContext.createAnalyser();
+          this.outboundAnalyser.fftSize = 32;
+          this.analyserLevels = new Uint8Array(this.outboundAnalyser.fftSize);
+          this.outboundGainNode.connect(this.outboundAnalyser);
+          this.outboundAnalyser.connect(this.mediaStreamDestinationNode);
 
           document.body.removeEventListener("touchend", resume, false);
           document.body.removeEventListener("mouseup", resume, false);
@@ -83,5 +96,26 @@ export class AudioSystem {
 
     document.body.addEventListener("touchend", resume, false);
     document.body.addEventListener("mouseup", resume, false);
+  }
+
+  addStreamToOutboundAudio(id, mediaStream) {
+    if (this.audioNodes.has(id)) {
+      this.removeStreamFromOutboundAudio(id);
+    }
+
+    const sourceNode = this.outboundContext.createMediaStreamSource(mediaStream);
+    const gainNode = this.outboundContext.createGain();
+    sourceNode.connect(gainNode);
+    gainNode.connect(this.outboundGainNode);
+    this.audioNodes.set(id, { sourceNode, gainNode });
+  }
+
+  removeStreamFromOutboundAudio(id) {
+    if (this.audioNodes.has(id)) {
+      const nodes = this.audioNodes.get(id);
+      nodes.sourceNode.disconnect();
+      nodes.gainNode.disconnect();
+      this.audioNodes.delete(id);
+    }
   }
 }

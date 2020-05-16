@@ -418,6 +418,13 @@ export default class SceneEntryManager {
 
       if (videoTracks.length > 0) {
         newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
+
+        const audioTracks = newStream ? newStream.getAudioTracks() : [];
+        if (audioTracks.length > 0) {
+          const audioSystem = this.scene.systems["hubs-systems"].audioSystem;
+          audioSystem.addStreamToOutboundAudio("screenshare", newStream);
+        }
+
         await NAF.connection.adapter.setLocalMediaStream(mediaStream);
         currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
 
@@ -468,6 +475,9 @@ export default class SceneEntryManager {
       for (const track of mediaStream.getVideoTracks()) {
         mediaStream.removeTrack(track);
       }
+
+      const audioSystem = this.scene.systems["hubs-systems"].audioSystem;
+      audioSystem.removeStreamFromOutboundAudio("screenshare");
 
       await NAF.connection.adapter.setLocalMediaStream(mediaStream);
       currentVideoShareEntity = null;
