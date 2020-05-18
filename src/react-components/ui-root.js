@@ -1610,7 +1610,10 @@ class UIRoot extends Component {
     const showBroadcastTip =
       (hasDiscordBridges || (hasEmbedPresence && !this.props.embed)) && !this.state.broadcastTipDismissed;
 
+    const showInviteButton = !showObjectInfo && !this.state.frozen && !watching && !preload;
+
     const showInviteTip =
+      !showObjectInfo &&
       !hasTopTip &&
       !entered &&
       !embed &&
@@ -1622,6 +1625,7 @@ class UIRoot extends Component {
       this.occupantCount() <= 1;
 
     const showChooseSceneButton =
+      !showObjectInfo &&
       !entered &&
       !embed &&
       !preload &&
@@ -1631,11 +1635,17 @@ class UIRoot extends Component {
       this.props.hubChannel &&
       this.props.hubChannel.canOrWillIfCreator("update_hub");
 
+    const streaming = this.state.isStreaming;
+
+    const showTopHud = enteredOrWatching && !showObjectInfo;
+    const showSettingsMenu = !streaming && !preload && !showObjectInfo;
+    const showObjectList = !showObjectInfo;
+    const showPresenceList = !showObjectInfo;
+
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
       : null;
 
-    const streaming = this.state.isStreaming;
     const streamingTip = streaming &&
       this.state.showStreamingTip && (
         <div className={classNames([styles.streamingTip])}>
@@ -1938,93 +1948,91 @@ class UIRoot extends Component {
                 <FormattedMessage id="entry.leave-room" />
               </button>
             )}
-            {!this.state.frozen &&
-              !watching &&
-              !preload && (
-                <div
-                  className={classNames({
-                    [inviteStyles.inviteContainer]: true,
-                    [inviteStyles.inviteContainerBelowHud]: entered,
-                    [inviteStyles.inviteContainerInverted]: this.state.showShareDialog
-                  })}
-                >
-                  {!embed &&
-                    !streaming && (
-                      <button
-                        className={classNames({
-                          [inviteStyles.inviteButton]: true,
-                          [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered,
-                          [inviteStyles.inviteButtonLowered]: hasTopTip
-                        })}
-                        onClick={() => this.toggleShareDialog()}
-                      >
-                        <FormattedMessage id="entry.share-button" />
-                      </button>
-                    )}
-                  {showChooseSceneButton && (
+            {showInviteButton && (
+              <div
+                className={classNames({
+                  [inviteStyles.inviteContainer]: true,
+                  [inviteStyles.inviteContainerBelowHud]: entered,
+                  [inviteStyles.inviteContainerInverted]: this.state.showShareDialog
+                })}
+              >
+                {!embed &&
+                  !streaming && (
                     <button
-                      className={classNames([styles.chooseSceneButton])}
-                      onClick={() => {
-                        this.props.performConditionalSignIn(
-                          () => this.props.hubChannel.can("update_hub"),
-                          () => {
-                            showFullScreenIfAvailable();
-                            this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
-                          },
-                          "change-scene"
-                        );
-                      }}
+                      className={classNames({
+                        [inviteStyles.inviteButton]: true,
+                        [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered,
+                        [inviteStyles.inviteButtonLowered]: hasTopTip
+                      })}
+                      onClick={() => this.toggleShareDialog()}
                     >
-                      <FormattedMessage id="entry.change-scene" />
+                      <FormattedMessage id="entry.share-button" />
                     </button>
                   )}
+                {showChooseSceneButton && (
+                  <button
+                    className={classNames([styles.chooseSceneButton])}
+                    onClick={() => {
+                      this.props.performConditionalSignIn(
+                        () => this.props.hubChannel.can("update_hub"),
+                        () => {
+                          showFullScreenIfAvailable();
+                          this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
+                        },
+                        "change-scene"
+                      );
+                    }}
+                  >
+                    <FormattedMessage id="entry.change-scene" />
+                  </button>
+                )}
 
-                  {showInviteTip && (
-                    <div className={styles.inviteTip}>
-                      <div className={styles.inviteTipAttachPoint} />
-                      <FormattedMessage id={`entry.${isMobile ? "mobile" : "desktop"}.invite-tip`} />
-                    </div>
+                {showInviteTip && (
+                  <div className={styles.inviteTip}>
+                    <div className={styles.inviteTipAttachPoint} />
+                    <FormattedMessage id={`entry.${isMobile ? "mobile" : "desktop"}.invite-tip`} />
+                  </div>
+                )}
+                {!embed &&
+                  this.occupantCount() > 1 &&
+                  !hasTopTip &&
+                  entered &&
+                  !streaming && (
+                    <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
+                      <span>
+                        {this.state.miniInviteActivated
+                          ? navigator.share
+                            ? "sharing..."
+                            : "copied!"
+                          : `${configs.SHORTLINK_DOMAIN}/` + this.props.hub.hub_id}
+                      </span>
+                    </button>
                   )}
-                  {!embed &&
-                    this.occupantCount() > 1 &&
-                    !hasTopTip &&
-                    entered &&
-                    !streaming && (
-                      <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
-                        <span>
-                          {this.state.miniInviteActivated
-                            ? navigator.share
-                              ? "sharing..."
-                              : "copied!"
-                            : `${configs.SHORTLINK_DOMAIN}/` + this.props.hub.hub_id}
-                        </span>
-                      </button>
-                    )}
-                  {embed && (
-                    <a href={baseUrl} className={inviteStyles.enterButton} target="_blank" rel="noopener noreferrer">
-                      <FormattedMessage id="entry.open-in-window" />
-                    </a>
-                  )}
-                  {this.state.showShareDialog && (
-                    <InviteDialog
-                      allowShare={!isMobileVR}
-                      entryCode={this.props.hub.entry_code}
-                      embedUrl={
-                        this.props.embedToken && !isMobilePhoneOrVR
-                          ? `${baseUrl}?embed_token=${this.props.embedToken}`
-                          : null
-                      }
-                      hasPush={hasPush}
-                      isSubscribed={
-                        this.state.isSubscribed === undefined ? this.props.initialIsSubscribed : this.state.isSubscribed
-                      }
-                      onSubscribeChanged={() => this.onSubscribeChanged()}
-                      hubId={this.props.hub.hub_id}
-                      onClose={() => this.setState({ showShareDialog: false })}
-                    />
-                  )}
-                </div>
-              )}
+                {embed && (
+                  <a href={baseUrl} className={inviteStyles.enterButton} target="_blank" rel="noopener noreferrer">
+                    <FormattedMessage id="entry.open-in-window" />
+                  </a>
+                )}
+                {this.state.showShareDialog && (
+                  <InviteDialog
+                    allowShare={!isMobileVR}
+                    entryCode={this.props.hub.entry_code}
+                    embedUrl={
+                      this.props.embedToken && !isMobilePhoneOrVR
+                        ? `${baseUrl}?embed_token=${this.props.embedToken}`
+                        : null
+                    }
+                    hasPush={hasPush}
+                    isSubscribed={
+                      this.state.isSubscribed === undefined ? this.props.initialIsSubscribed : this.state.isSubscribed
+                    }
+                    onSubscribeChanged={() => this.onSubscribeChanged()}
+                    hubId={this.props.hub.hub_id}
+                    onClose={() => this.setState({ showShareDialog: false })}
+                  />
+                )}
+              </div>
+            )}
             <StateRoute
               stateKey="overlay"
               stateValue="invite"
@@ -2068,66 +2076,69 @@ class UIRoot extends Component {
             )}
             {streamingTip}
 
-            <ObjectList
-              scene={this.props.scene}
-              onExpand={(expand, uninspect) => {
-                if (expand) {
-                  this.setState({ isPresenceListExpanded: false, isObjectListExpanded: expand });
-                } else {
-                  this.setState({ isObjectListExpanded: expand });
-                }
-
-                if (uninspect) {
-                  this.setState({ objectInfo: null });
-                  if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
-                    this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
+            {showObjectList && (
+              <ObjectList
+                scene={this.props.scene}
+                onExpand={(expand, uninspect) => {
+                  if (expand) {
+                    this.setState({ isPresenceListExpanded: false, isObjectListExpanded: expand });
+                  } else {
+                    this.setState({ isObjectListExpanded: expand });
                   }
-                }
-              }}
-              expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
-              onInspectObject={el => switchToInspectingObject(el)}
-            />
 
-            <PresenceList
-              history={this.props.history}
-              presences={this.props.presences}
-              sessionId={this.props.sessionId}
-              signedIn={this.state.signedIn}
-              email={this.props.store.state.credentials.email}
-              onSignIn={this.showSignInDialog}
-              onSignOut={this.signOut}
-              expanded={!this.state.isObjectListExpanded && this.state.isPresenceListExpanded}
-              onExpand={expand => {
-                if (expand) {
-                  this.setState({ isPresenceListExpanded: expand, isObjectListExpanded: false });
-                } else {
-                  this.setState({ isPresenceListExpanded: expand });
-                }
-              }}
-            />
+                  if (uninspect) {
+                    this.setState({ objectInfo: null });
+                    if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
+                      this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
+                    }
+                  }
+                }}
+                expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
+                onInspectObject={el => switchToInspectingObject(el)}
+              />
+            )}
 
-            {!streaming &&
-              !preload && (
-                <SettingsMenu
-                  history={this.props.history}
-                  mediaSearchStore={this.props.mediaSearchStore}
-                  isStreaming={streaming}
-                  toggleStreamerMode={this.toggleStreamerMode}
-                  hubChannel={this.props.hubChannel}
-                  hubScene={this.props.hub && this.props.hub.scene}
-                  scene={this.props.scene}
-                  showAsOverlay={showSettingsAsOverlay}
-                  onCloseOverlay={() => exit2DInterstitialAndEnterVR(true)}
-                  performConditionalSignIn={this.props.performConditionalSignIn}
-                  showNonHistoriedDialog={this.showNonHistoriedDialog}
-                  showPreferencesScreen={() => {
-                    this.setState({ showPrefs: true });
-                  }}
-                  pushHistoryState={this.pushHistoryState}
-                />
-              )}
+            {showPresenceList && (
+              <PresenceList
+                history={this.props.history}
+                presences={this.props.presences}
+                sessionId={this.props.sessionId}
+                signedIn={this.state.signedIn}
+                email={this.props.store.state.credentials.email}
+                onSignIn={this.showSignInDialog}
+                onSignOut={this.signOut}
+                expanded={!this.state.isObjectListExpanded && this.state.isPresenceListExpanded}
+                onExpand={expand => {
+                  if (expand) {
+                    this.setState({ isPresenceListExpanded: expand, isObjectListExpanded: false });
+                  } else {
+                    this.setState({ isPresenceListExpanded: expand });
+                  }
+                }}
+              />
+            )}
+
+            {showSettingsMenu && (
+              <SettingsMenu
+                history={this.props.history}
+                mediaSearchStore={this.props.mediaSearchStore}
+                isStreaming={streaming}
+                toggleStreamerMode={this.toggleStreamerMode}
+                hubChannel={this.props.hubChannel}
+                hubScene={this.props.hub && this.props.hub.scene}
+                scene={this.props.scene}
+                showAsOverlay={showSettingsAsOverlay}
+                onCloseOverlay={() => exit2DInterstitialAndEnterVR(true)}
+                performConditionalSignIn={this.props.performConditionalSignIn}
+                showNonHistoriedDialog={this.showNonHistoriedDialog}
+                showPreferencesScreen={() => {
+                  this.setState({ showPrefs: true });
+                }}
+                pushHistoryState={this.pushHistoryState}
+              />
+            )}
             {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
-            {enteredOrWatching && (
+            {showTopHud && (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
                   scene={this.props.scene}
