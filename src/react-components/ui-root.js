@@ -652,7 +652,6 @@ class UIRoot extends Component {
       const audioSystem = this.props.scene.systems["hubs-systems"].audioSystem;
       audioSystem.addStreamToOutboundAudio("microphone", newStream);
       const mediaStream = audioSystem.outboundStream;
-      // const audioTrack = mediaStream.getAudioTracks()[0];
       const audioTrack = newStream.getAudioTracks()[0];
 
       this.setState({ audioTrack, mediaStream });
