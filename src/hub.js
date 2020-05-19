@@ -36,6 +36,7 @@ import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
 import { authorizeOrSanitizeMessage } from "./utils/permissions-utils";
 import Cookies from "js-cookie";
+import "./naf-dialog-adapter";
 
 import "./components/scene-components";
 import "./components/scale-in-screen-space";
@@ -492,6 +493,10 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
   const hub = data.hubs[0];
 
+  // TODO remove
+  hub.host = "peaceful-cleric.quackstack2.net";
+  hub.port = "80";
+
   let embedToken = hub.embed_token;
 
   if (!embedToken) {
@@ -547,7 +552,8 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,
       serverURL: `wss://${hub.host}:${hub.port}`,
-      debug: !!isDebug
+      debug: !!isDebug,
+      adapter: "dialog"
     });
 
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
