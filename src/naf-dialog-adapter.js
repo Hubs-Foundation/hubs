@@ -2,21 +2,15 @@ import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
 
-const AVAILABLE_OCCUPANTS_THRESHOLD = 5;
-const MAX_SUBSCRIBE_DELAY = 5000;
-
-function randomDelay(min, max) {
-  return new Promise(resolve => {
-    const delay = Math.random() * (max - min) + min;
-    setTimeout(resolve, delay);
-  });
-}
-
+// NOTE this adapter does not properly fire the onOccupantsReceived events since those are only needed for
+// data channels, which are not yet supported. To fire that event, this class would need to keep a list of
+// occupants around and manage it.
+//
 // Used for VP9 webcam video.
-const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }];
+//const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }];
 
 // Used for VP9 desktop sharing.
-const VIDEO_SVC_ENCODINGS = [{ scalabilityMode: "S3T3", dtx: true }];
+//const VIDEO_SVC_ENCODINGS = [{ scalabilityMode: "S3T3", dtx: true }];
 
 // TODO
 // - freeze mode buffering
@@ -59,14 +53,12 @@ export default class DialogAdapter {
     this._forceTcp = false;
     this._timeOffsets = [];
     this._occupants = {};
-    this._occupantIds = {};
-    this._pendingOccupants = new Set();
-    this._availableOccupants = [];
-    this._requestedOccupants = null;
     this._micProducer = null;
     this._videoProducer = null;
     this._mediaStreams = {};
     this._localMediaStream = null;
+    this._consumers = new Map();
+    this._frozenUpdates = new Map();
   }
 
   setForceTcp(forceTcp) {
@@ -121,6 +113,101 @@ export default class DialogAdapter {
     this._protoo = new protooClient.Peer(protooTransport);
     this._protoo.on("open", () => this._joinRoom());
 
+    this._protoo.on("disconnected", () => {
+      this._closed = true;
+
+      if (this._sendTransport) {
+        this._sendTransport.close();
+        this._sendTransport = null;
+      }
+
+      if (this._recvTransport) {
+        this._recvTransport.close();
+        this._recvTransport = null;
+      }
+    });
+
+    this._protoo.on("close", () => {
+      this.close();
+    });
+
+    // eslint-disable-next-line no-unused-vars
+    this._protoo.on("request", async (request, accept, reject) => {
+      debug('proto "request" event [method:%s, data:%o]', request.method, request.data);
+
+      switch (request.method) {
+        case "newConsumer": {
+          const {
+            peerId,
+            producerId,
+            id,
+            kind,
+            rtpParameters,
+            /*type, */ appData /*, producerPaused */
+          } = request.data;
+
+          try {
+            const consumer = await this._recvTransport.consume({
+              id,
+              producerId,
+              kind,
+              rtpParameters,
+              appData: { ...appData, peerId } // Trick.
+            });
+
+            // Store in the map.
+            this._consumers.set(consumer.id, consumer);
+
+            consumer.on("transportclose", () => this.removeConsumer(consumer.id));
+
+            this.setMediaStreamTrack(peerId, consumer.track);
+
+            // We are ready. Answer the protoo request so the server will
+            // resume this Consumer (which was paused for now if video).
+            accept();
+          } catch (err) {
+            error('"newConsumer" request failed:%o', err);
+
+            throw err;
+          }
+
+          break;
+        }
+      }
+    });
+
+    this._protoo.on("notification", notification => {
+      debug('proto "notification" event [method:%s, data:%o]', notification.method, notification.data);
+
+      switch (notification.method) {
+        case "newPeer": {
+          const peer = notification.data;
+          this._onOccupantConnected(peer.id);
+
+          break;
+        }
+
+        case "peerClosed": {
+          const { peerId } = notification.data;
+          this._onOccupantDisconnected(peerId);
+
+          break;
+        }
+
+        case "consumerClosed": {
+          const { consumerId } = notification.data;
+          const consumer = this._consumers.get(consumerId);
+
+          if (!consumer) break;
+
+          consumer.close();
+          this.removeConsumer(consumer.id);
+
+          break;
+        }
+      }
+    });
+
     //this._protoo.on('open', () => this._joinRoom());
     return Promise.all([this.updateTimeOffset()]);
   }
@@ -130,6 +217,12 @@ export default class DialogAdapter {
   startStreamConnection() {}
 
   closeStreamConnection() {}
+
+  removeConsumer(consumerId) {
+    // TODO remove tracks from local media streams if needed, might not since they'll just be dead tracks.
+    this._consumers.delete(consumerId);
+  }
+
   getConnectStatus(/*clientId*/) {
     this._notImplemented("getConnectStatus");
     //return this.occupants[clientId] ? NAF.adapters.IS_CONNECTED : NAF.adapters.NOT_CONNECTED;
@@ -166,6 +259,10 @@ export default class DialogAdapter {
     this._reconnectionErrorListener = reconnectionErrorListener;
   }
 
+  syncOccupants() {
+    // Ignored
+  }
+
   notImplemented() {}
 
   async _joinRoom() {
@@ -199,7 +296,6 @@ export default class DialogAdapter {
         consuming: false,
         sctpCapabilities: undefined
       });
-      console.log(sendTransportInfo);
 
       this._sendTransport = this._mediasoupDevice.createSendTransport({
         id: sendTransportInfo.id,
@@ -272,23 +368,14 @@ export default class DialogAdapter {
           .catch(errback);
       });
 
-      const { peers } = await this._protoo.request("join", {
+      await this._protoo.request("join", {
         displayName: this._clientId,
         device: this._device,
         rtpCapabilities: this._mediasoupDevice.rtpCapabilities,
         sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined
       });
 
-      this._onOccupantsChanged(peers);
       this._connectSuccess(this._clientId);
-
-      for (let i = 0; i < peers.length; i++) {
-        const occupantId = peers[i].id;
-        if (occupantId === this._clientId) continue; // Happens during non-graceful reconnects due to zombie sessions
-        this.addAvailableOccupant(occupantId);
-      }
-
-      this.syncOccupants();
 
       if (this._localMediaStream) {
         this.createMissingProducers(this._localMediaStream);
@@ -352,6 +439,23 @@ export default class DialogAdapter {
     }
 
     this._mediaStreams[clientId] = { audio: audioStream, video: videoStream };
+  }
+
+  setMediaStreamTrack(clientId, track) {
+    const stream = new MediaStream();
+    stream.addTrack(track);
+
+    if (this._mediaStreams[clientId]) {
+      const { video, audio } = this._mediaStreams[clientId];
+
+      if (track.kind === "video") {
+        audio.getAudioTracks().forEach(track => stream.addTrack(track));
+      } else {
+        video.getVideoTracks().forEach(track => stream.addTrack(track));
+      }
+    }
+
+    this.setMediaStream(clientId, stream);
   }
 
   enableMicrophone(enabled) {
@@ -424,114 +528,6 @@ export default class DialogAdapter {
     }
   }
 
-  addAvailableOccupant(occupantId) {
-    if (this._availableOccupants.indexOf(occupantId) === -1) {
-      this._availableOccupants.push(occupantId);
-    }
-  }
-
-  removeAvailableOccupant(occupantId) {
-    const idx = this._availableOccupants.indexOf(occupantId);
-    if (idx !== -1) {
-      this._availableOccupants.splice(idx, 1);
-    }
-  }
-
-  syncOccupants(requestedOccupants) {
-    if (requestedOccupants) {
-      this._requestedOccupants = requestedOccupants;
-    }
-
-    if (!this._requestedOccupants) {
-      return;
-    }
-
-    // Add any requested, available, and non-pending occupants.
-    for (let i = 0; i < this._requestedOccupants.length; i++) {
-      const occupantId = this._requestedOccupants[i];
-      if (
-        !this._occupants[occupantId] &&
-        this._availableOccupants.indexOf(occupantId) !== -1 &&
-        !this._pendingOccupants.has(occupantId)
-      ) {
-        this.addOccupant(occupantId);
-      }
-    }
-
-    // Remove any unrequested and currently added occupants.
-    for (let j = 0; j < this._availableOccupants.length; j++) {
-      const occupantId = this._availableOccupants[j];
-      if (this._occupants[occupantId] && this._requestedOccupants.indexOf(occupantId) === -1) {
-        this.removeOccupant(occupantId);
-      }
-    }
-
-    // Call the Networked AFrame callbacks for the updated occupants list.
-    this._onOccupantsChanged(this._occupants);
-  }
-
-  async addOccupant(occupantId) {
-    this._pendingOccupants.add(occupantId);
-
-    const availableOccupantsCount = this._availableOccupants.length;
-    if (availableOccupantsCount > AVAILABLE_OCCUPANTS_THRESHOLD) {
-      await randomDelay(0, MAX_SUBSCRIBE_DELAY);
-    }
-
-    // TODO subscribe to occupant
-    /*const subscriber = await this.createSubscriber(occupantId);
-    if (subscriber) {
-      if (!this.pendingOccupants.has(occupantId)) {
-        subscriber.conn.close();
-      } else {
-        this.pendingOccupants.delete(occupantId);
-        this.occupantIds.push(occupantId);
-        this.occupants[occupantId] = subscriber;
-
-        this.setMediaStream(occupantId, subscriber.mediaStream);
-
-        // Call the Networked AFrame callbacks for the new occupant.
-        this.onOccupantConnected(occupantId);
-      }
-    }*/
-  }
-
-  removeAllOccupants() {
-    this._pendingOccupants.clear();
-    for (let i = this.occupantIds.length - 1; i >= 0; i--) {
-      this.removeOccupant(this._occupantIds[i]);
-    }
-  }
-
-  removeOccupant(occupantId) {
-    this._pendingOccupants.delete(occupantId);
-
-    if (this._occupants[occupantId]) {
-      // Close the subscriber peer connection. Which also detaches the plugin handle.
-      // TODO close subscription
-      //this._occupants[occupantId].conn.close();
-      delete this._occupants[occupantId];
-
-      this._occupantIds.splice(this._occupantIds.indexOf(occupantId), 1);
-    }
-
-    // TODO remove
-    /*if (this.mediaStreams[occupantId]) {
-      delete this.mediaStreams[occupantId];
-    }*/
-
-    // TODO deal with pending media requests
-    /*if (this.pendingMediaRequests.has(occupantId)) {
-      const msg = "The user disconnected before the media stream was resolved.";
-      this.pendingMediaRequests.get(occupantId).audio.reject(msg);
-      this.pendingMediaRequests.get(occupantId).video.reject(msg);
-      this.pendingMediaRequests.delete(occupantId);
-    }*/
-
-    // Call the Networked AFrame callbacks for the removed occupant.
-    this.onOccupantDisconnected(occupantId);
-  }
-
   toggleFreeze() {
     if (this.frozen) {
       this.unfreeze();
@@ -548,6 +544,110 @@ export default class DialogAdapter {
     this.frozen = false;
     // TODO
     //this.flushPendingUpdates();
+  }
+
+  storeMessage(message) {
+    if (message.dataType === "um") {
+      // UpdateMulti
+      for (let i = 0, l = message.data.d.length; i < l; i++) {
+        this.storeSingleMessage(message, i);
+      }
+    } else {
+      this.storeSingleMessage(message);
+    }
+  }
+
+  storeSingleMessage(message, index) {
+    const data = index !== undefined ? message.data.d[index] : message.data;
+    const dataType = message.dataType;
+
+    const networkId = data.networkId;
+
+    if (!this._frozenUpdates.has(networkId)) {
+      this._frozenUpdates.set(networkId, message);
+    } else {
+      const storedMessage = this._frozenUpdates.get(networkId);
+      const storedData =
+        storedMessage.dataType === "um" ? this.dataForUpdateMultiMessage(networkId, storedMessage) : storedMessage.data;
+
+      // Avoid updating components if the entity data received did not come from the current owner.
+      const isOutdatedMessage = data.lastOwnerTime < storedData.lastOwnerTime;
+      const isContemporaneousMessage = data.lastOwnerTime === storedData.lastOwnerTime;
+      if (isOutdatedMessage || (isContemporaneousMessage && storedData.owner > data.owner)) {
+        return;
+      }
+
+      if (dataType === "r") {
+        const createdWhileFrozen = storedData && storedData.isFirstSync;
+        if (createdWhileFrozen) {
+          // If the entity was created and deleted while frozen, don't bother conveying anything to the consumer.
+          this._frozenUpdates.delete(networkId);
+        } else {
+          // Delete messages override any other messages for this entity
+          this._frozenUpdates.set(networkId, message);
+        }
+      } else {
+        // merge in component updates
+        if (storedData.components && data.components) {
+          Object.assign(storedData.components, data.components);
+        }
+      }
+    }
+  }
+
+  onDataChannelMessage(e, source) {
+    this.onData(JSON.parse(e.data), source);
+  }
+
+  onData(message, source) {
+    if (debug.enabled) {
+      debug(`DC in: ${message}`);
+    }
+
+    if (!message.dataType) return;
+
+    message.source = source;
+
+    if (this.frozen) {
+      this.storeMessage(message);
+    } else {
+      this._onOccupantMessage(null, message.dataType, message.data, message.source);
+    }
+  }
+
+  getPendingData(networkId, message) {
+    if (!message) return null;
+
+    const data = message.dataType === "um" ? this.dataForUpdateMultiMessage(networkId, message) : message.data;
+
+    // Ignore messages relating to users who have disconnected since freezing, their entities
+    // will have aleady been removed by NAF.
+    // Note that delete messages have no "owner" so we have to check for that as well.
+    if (data.owner && !this.occupants[data.owner]) return null;
+
+    // Ignore messages from users that we may have blocked while frozen.
+    if (data.owner && this.blockedClients.has(data.owner)) return null;
+
+    return data;
+  }
+
+  // Used externally
+  getPendingDataForNetworkId(networkId) {
+    return this.getPendingData(networkId, this._frozenUpdates.get(networkId));
+  }
+
+  flushPendingUpdates() {
+    for (const [networkId, message] of this._frozenUpdates) {
+      const data = this.getPendingData(networkId, message);
+      if (!data) continue;
+
+      // Override the data type on "um" messages types, since we extract entity updates from "um" messages into
+      // individual frozenUpdates in storeSingleMessage.
+      const dataType = message.dataType === "um" ? "u" : message.dataType;
+
+      this.onOccupantMessage(null, dataType, data, message.source);
+    }
+    this._frozenUpdates.clear();
   }
 }
 
