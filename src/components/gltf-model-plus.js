@@ -353,6 +353,67 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
   }
   runMigration(version, parser.json);
 
+  const vertexShader = `
+    varying vec4 forFragColor;
+    void main() {
+      vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+      gl_Position = projectionMatrix * modelViewPosition; 
+
+      forFragColor = vec4(position.x, position.y, position.z, 1.0);
+    }
+  `
+
+  const fragmentShader = `
+    varying vec4 forFragColor;
+    void main() {
+      gl_FragColor = forFragColor;
+    }
+  `
+
+  var uniforms = {
+    time: { type: "f", value: 1.0 },
+  };
+
+  var shaderMaterial = new THREE.ShaderMaterial({
+    uniforms: uniforms,
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader
+  });
+
+  const materials = parser.json.materials;
+  const dependencies = [];
+
+  if (materials) {
+    for (let i = 0; i < materials.length; i++) {
+      const material = materials[i];
+
+      if (!material.extensions) {
+        continue;
+      }
+
+      if (
+        material.extensions.MOZ_alt_materials &&
+        material.extensions.MOZ_alt_materials[preferredTechnique] !== undefined
+      ) {
+        const altMaterialIndex = material.extensions.MOZ_alt_materials[preferredTechnique];
+        materials[i] = materials[altMaterialIndex];
+      } else if (material.extensions.MOZ_lightmap) {
+        const lightmapDef = material.extensions.MOZ_lightmap;
+
+        const loadLightmap = async () => {
+          const [material, lightMap] = await Promise.all([
+            parser.getDependency("material", i),
+            parser.getDependency("texture", lightmapDef.index)
+          ]);
+
+          material.lightMap = lightMap;
+        };
+
+        dependencies.push(loadLightmap);
+      }
+    }
+  }
+
   const nodes = parser.json.nodes;
   if (nodes) {
     for (let i = 0; i < nodes.length; i++) {
@@ -413,13 +474,21 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
 
-    object.material = mapMaterials(object, material => {
-      if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
-        return MobileStandardMaterial.fromStandardMaterial(material);
-      }
+    // TODO: add custom shaders here
+    // But how to set shader params without modifying the gltf exporter?
+    // Use Blender's 'Custom Properties'? https://github.com/KhronosGroup/glTF-Blender-Exporter/issues/15
+    console.log(object)
+    if (object.name == "Emoji_joy") {
+      object.material = shaderMaterial
+    } else {
+      object.material = mapMaterials(object, material => {
+        if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
+          return MobileStandardMaterial.fromStandardMaterial(material);
+        }
 
-      return material;
-    });
+        return material;
+      });
+    }
   });
 
   if (fileMap) {

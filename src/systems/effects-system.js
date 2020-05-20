@@ -16,7 +16,6 @@ export class EffectsSystem {
   init() {
     const sceneEl = this.sceneEl;
     if (!sceneEl.hasLoaded) {
-      console.log(sceneEl);
       sceneEl.addEventListener('loaded', this.init.bind(this));
       return;
     }
@@ -29,10 +28,9 @@ export class EffectsSystem {
     var passes = [
       new RenderPass(scene, camera),
       // UnrealBloomPass(resolution, strength, radius, threshold)
-      new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 4.4, 0.85),
+      new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.5, 4.4, 0.9),
       //new ShaderPass(CustomShader, 'tDiffuse'),
     ];
-    console.log(CustomShader);
     passes.slice(-1).renderToScreen = true;
 
     passes.forEach(pass => composer.addPass(pass))
