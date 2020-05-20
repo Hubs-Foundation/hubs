@@ -14,29 +14,20 @@ import { debug as newDebug } from "debug";
 
 // TODO
 // - freeze mode buffering
-// - selective subscribe
 // - reconnecting
 // - auth token
 // - kick
 // - block
 // - safari autoplay
-// - check for unneeded event listers
-// - properly format data for onOccupantsChanged
-// - properly remove occupants on disconnect
 // - graceful rollover logic to new server
 // - startup await on join
 // - get connect status
 // - migrate all SDP bits
-// - microphone muting
-// - screenshare start/end
-// - video start end
 // - make sure works if perms denied
 // - restartIce
 // - look into requestConsumerKeyframe
-// - remove safari hacks
 // - look into applyNetworkThrottle
 // - test turn
-// - checkout encodings in video setup
 // - remove active speaker stuff
 // - remove score stuff
 
