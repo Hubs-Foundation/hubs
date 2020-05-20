@@ -59,6 +59,7 @@ export default class DialogAdapter {
     this._localMediaStream = null;
     this._consumers = new Map();
     this._frozenUpdates = new Map();
+    this._pendingMediaRequests = new Map();
   }
 
   setForceTcp(forceTcp) {
@@ -160,11 +161,11 @@ export default class DialogAdapter {
 
             consumer.on("transportclose", () => this.removeConsumer(consumer.id));
 
-            this.setMediaStreamTrack(peerId, consumer.track);
-
             // We are ready. Answer the protoo request so the server will
             // resume this Consumer (which was paused for now if video).
             accept();
+
+            this.resolvePendingMediaRequestForTrack(peerId, consumer.track);
           } catch (err) {
             error('"newConsumer" request failed:%o', err);
 
@@ -190,6 +191,13 @@ export default class DialogAdapter {
         case "peerClosed": {
           const { peerId } = notification.data;
           this._onOccupantDisconnected(peerId);
+
+          if (this._pendingMediaRequests.has(peerId)) {
+            const msg = "The user disconnected before the media stream was resolved.";
+            this._pendingMediaRequests.get(peerId).audio.reject(msg);
+            this._pendingMediaRequests.get(peerId).video.reject(msg);
+            this._pendingMediaRequests.delete(peerId);
+          }
 
           break;
         }
@@ -218,6 +226,16 @@ export default class DialogAdapter {
 
   closeStreamConnection() {}
 
+  resolvePendingMediaRequestForTrack(clientId, track) {
+    const requests = this._pendingMediaRequests.get(clientId);
+
+    if (requests && requests[track.kind]) {
+      const resolve = requests[track.kind].resolve;
+      delete requests[track.kind];
+      resolve(new MediaStream([track]));
+    }
+  }
+
   removeConsumer(consumerId) {
     // TODO remove tracks from local media streams if needed, might not since they'll just be dead tracks.
     this._consumers.delete(consumerId);
@@ -228,12 +246,38 @@ export default class DialogAdapter {
     //return this.occupants[clientId] ? NAF.adapters.IS_CONNECTED : NAF.adapters.NOT_CONNECTED;
   }
 
-  getMediaStream(clientId, type = "audio") {
-    if (this._mediaStreams[clientId]) {
-      debug(`Already had ${type} for ${clientId}`);
-      return Promise.resolve(this._mediaStreams[clientId][type]);
+  getMediaStream(clientId, kind = "audio") {
+    let track;
+
+    if (this._clientId === clientId) {
+      if (kind === "audio" && this._micProducer) {
+        track = this._micProducer.track;
+      } else if (kind === "video" && this._videoProducer) {
+        track = this._videoProducer.track;
+      }
+    } else {
+      this._consumers.forEach(consumer => {
+        if (consumer.appData.peerId === clientId && kind == consumer.track.kind) {
+          track = consumer.track;
+        }
+      });
     }
-    // TODO promise resolution
+
+    if (track) {
+      debug(`Already had ${kind} for ${clientId}`);
+      return Promise.resolve(new MediaStream([track]));
+    } else {
+      debug(`Waiting on ${kind} for ${clientId}`);
+      if (!this._pendingMediaRequests.has(clientId)) {
+        this._pendingMediaRequests.set(clientId, {});
+      }
+
+      const requests = this._pendingMediaRequests.get(clientId);
+      const promise = new Promise((resolve, reject) => (requests[kind] = { resolve, reject }));
+      requests[kind].promise = promise;
+      promise.catch(e => console.warn(`${clientId} getMediaStream Error`, e));
+      return promise;
+    }
   }
 
   getServerTime() {
@@ -398,7 +442,9 @@ export default class DialogAdapter {
       if (track.kind === "audio") {
         // TODO multiple audio tracks?
         if (this._micProducer) {
-          this._micProducer.replaceTrack(track);
+          if (this._micProducer.track !== track) {
+            this._micProducer.replaceTrack(track);
+          }
         } else {
           this._micProducer = await this._sendTransport.produce({
             track,
@@ -407,7 +453,9 @@ export default class DialogAdapter {
         }
       } else {
         if (this._videoProducer) {
-          this._videoProducer.replaceTrack(track);
+          if (this._videoProducer.track !== track) {
+            this._videoProducer.replaceTrack(track);
+          }
         } else {
           // TODO simulcasting
           this._videoProducer = await this._sendTransport.produce({
@@ -416,46 +464,11 @@ export default class DialogAdapter {
           });
         }
       }
+
+      this.resolvePendingMediaRequestForTrack(this._clientId, track);
     });
 
-    this.setMediaStream(this._clientId, stream);
     this._localMediaStream = stream;
-  }
-
-  setMediaStream(clientId, stream) {
-    // Safari doesn't like it when you use single a mixed media stream where one of the tracks is inactive, so we
-    // split the tracks into two streams.
-    const audioStream = new MediaStream();
-    try {
-      stream.getAudioTracks().forEach(track => audioStream.addTrack(track));
-    } catch (e) {
-      console.warn(`${clientId} setMediaStream Audio Error`, e);
-    }
-    const videoStream = new MediaStream();
-    try {
-      stream.getVideoTracks().forEach(track => videoStream.addTrack(track));
-    } catch (e) {
-      console.warn(`${clientId} setMediaStream Video Error`, e);
-    }
-
-    this._mediaStreams[clientId] = { audio: audioStream, video: videoStream };
-  }
-
-  setMediaStreamTrack(clientId, track) {
-    const stream = new MediaStream();
-    stream.addTrack(track);
-
-    if (this._mediaStreams[clientId]) {
-      const { video, audio } = this._mediaStreams[clientId];
-
-      if (track.kind === "video") {
-        audio.getAudioTracks().forEach(track => stream.addTrack(track));
-      } else {
-        video.getVideoTracks().forEach(track => stream.addTrack(track));
-      }
-    }
-
-    this.setMediaStream(clientId, stream);
   }
 
   enableMicrophone(enabled) {
