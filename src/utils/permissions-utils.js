@@ -165,6 +165,11 @@ const emptyObject = {};
 export function authorizeOrSanitizeMessage(message) {
   const { dataType, from_session_id } = message;
 
+  // TODO: Actually sanitize ECSY messages
+  if (message.data.e) {
+    return message;
+  }
+
   if (dataType === "u" && message.data.isFirstSync && !message.data.persistent) {
     // The server has already authorized first sync messages that result in an instantiation.
     return message;

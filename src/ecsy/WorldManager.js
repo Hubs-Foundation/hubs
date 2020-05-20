@@ -38,15 +38,18 @@ import { PhysicsShape } from "./components/PhysicsShape";
 import { AFrameEntity } from "./components/AFrameEntity";
 import { GLTFModel } from "./components/GLTFModel";
 import { SpawnPoint } from "./components/SpawnPoint";
+import { PhysicsConstraint } from "./components/PhysicsConstraint";
+import { Networked } from "./components/Networked";
+import { NetworkingState } from "./components/NetworkingState";
+import { SceneRootTag } from "./components/SceneRootTag";
 
 import { RotationSystem } from "./systems/RotationSystem";
 import { InteractionSystem } from "./systems/InteractionSystem";
 import { PhysicsSystem } from "./systems/PhysicsSystem";
-import { LogInteractionStateSystem } from "./systems/LogInteractionStateSystem";
-import { BoxBufferGeometry, MeshBasicMaterial, SphereBufferGeometry, Vector3 } from "three";
-import { SHAPE, FIT } from "three-ammo/constants";
 import { ConstrainOnHeldSystem } from "./systems/ConstrainOnHeldSystem";
-import { PhysicsConstraint } from "./components/PhysicsConstraint";
+import { NetworkingSendSystem, NetworkingReceiveSystem } from "./systems/NetworkingSystem";
+
+import { BoxTemplate } from "./templates/BoxTemplate";
 
 export class WorldManager {
   constructor(aframeScene) {
@@ -93,9 +96,12 @@ export class WorldManager {
       .registerComponent(PhysicsBody)
       .registerComponent(PhysicsShape)
       .registerComponent(Rotating)
-      .registerComponent(SpawnPoint);
+      .registerComponent(SpawnPoint)
+      .registerComponent(Networked)
+      .registerComponent(SceneRootTag);
 
     this.world
+      .registerSystem(NetworkingReceiveSystem)
       .registerSystem(InteractionSystem)
       //.registerSystem(LogInteractionStateSystem)
       .registerSystem(ConstrainOnHeldSystem)
@@ -105,12 +111,18 @@ export class WorldManager {
       // .registerSystem(GLTFLoaderSystem)
       // .registerSystem(AnimationSystem)
       .registerSystem(RotationSystem)
-      .registerSystem(PhysicsSystem, { hubsSystem: this.aframeScene.systems["hubs-systems"].physicsSystem });
+      .registerSystem(PhysicsSystem, { hubsSystem: this.aframeScene.systems["hubs-systems"].physicsSystem })
+      .registerSystem(NetworkingSendSystem);
 
-    this.scene = new SceneEntity(this.world); //.addComponent(ActionFrame, { value: this.aframeScene.systems["userinput"].frame });
-    this.scene.addComponent(InteractionState);
+    this.scene = new SceneEntity(this.world) //.addComponent(ActionFrame, { value: this.aframeScene.systems["userinput"].frame });
+      .addComponent(InteractionState)
+      .addComponent(NetworkingState)
+      .addComponent(SceneRootTag);
+
     this.aframeScene.object3D.add(this.scene);
     this.world.addEntity(this.scene);
+
+    const networkingState = this.scene.getComponent(NetworkingState);
 
     const leftCursorEl = document.getElementById("left-cursor");
 
@@ -144,22 +156,12 @@ export class WorldManager {
       .addComponent(Interactor, { id: "rightHand" })
       .addComponent(PhysicsBody, { uuid: rightControllerEl.components["body-helper"].uuid, needsUpdate: false });
 
+    networkingState.registerTemplate(BoxTemplate);
+
     window.addEventListener("keyup", e => {
       if (e.key === "j") {
-        const box = new MeshEntity(
-          this.world,
-          new BoxBufferGeometry(),
-          new MeshBasicMaterial({ color: 0xff0000, opacity: 0.3, transparent: true })
-        )
-          .addComponent(Hoverable)
-          .addComponent(Holdable)
-          .addComponent(PhysicsBody)
-          .addComponent(PhysicsShape, { shape: SHAPE.BOX, fit: FIT.MANUAL, halfExtents: new Vector3(0.5, 0.5, 0.5) })
-          .addComponent(ConstrainOnHeld);
-
-        box.position.set(1, 2, 0);
-
-        this.scene.add(box);
+        const networkedBox = networkingState.createEntity(this.world, BoxTemplate);
+        this.scene.add(networkedBox);
       }
     });
 
