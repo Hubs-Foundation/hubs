@@ -341,6 +341,33 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
   }
   runMigration(version, parser.json);
 
+  const vertexShader = `
+    varying vec4 forFragColor;
+    void main() {
+      vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+      gl_Position = projectionMatrix * modelViewPosition; 
+
+      forFragColor = vec4(position.x, position.y, position.z, 1.0);
+    }
+  `
+
+  const fragmentShader = `
+    varying vec4 forFragColor;
+    void main() {
+      gl_FragColor = forFragColor;
+    }
+  `
+
+  var uniforms = {
+    time: { type: "f", value: 1.0 },
+  };
+
+  var shaderMaterial = new THREE.ShaderMaterial({
+    uniforms: uniforms,
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader
+  });
+
   const materials = parser.json.materials;
   const dependencies = [];
 
@@ -396,13 +423,21 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
 
-    object.material = mapMaterials(object, material => {
-      if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
-        return MobileStandardMaterial.fromStandardMaterial(material);
-      }
+    // TODO: add custom shaders here
+    // But how to set shader params without modifying the gltf exporter?
+    // Use Blender's 'Custom Properties'? https://github.com/KhronosGroup/glTF-Blender-Exporter/issues/15
+    console.log(object)
+    if (object.name == "Emoji_joy") {
+      object.material = shaderMaterial
+    } else {
+      object.material = mapMaterials(object, material => {
+        if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
+          return MobileStandardMaterial.fromStandardMaterial(material);
+        }
 
-      return material;
-    });
+        return material;
+      });
+    }
   });
 
   if (fileMap) {
