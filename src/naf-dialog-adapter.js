@@ -37,6 +37,8 @@ import { debug as newDebug } from "debug";
 // - look into applyNetworkThrottle
 // - test turn
 // - checkout encodings in video setup
+// - remove active speaker stuff
+// - remove score stuff
 
 // Based upon mediasoup-demo RoomClient
 
@@ -191,11 +193,19 @@ export default class DialogAdapter {
         case "peerClosed": {
           const { peerId } = notification.data;
           this._onOccupantDisconnected(peerId);
+          const pendingMediaRequests = this._pendingMediaRequests.get(peerId);
 
-          if (this._pendingMediaRequests.has(peerId)) {
+          if (pendingMediaRequests) {
             const msg = "The user disconnected before the media stream was resolved.";
-            this._pendingMediaRequests.get(peerId).audio.reject(msg);
-            this._pendingMediaRequests.get(peerId).video.reject(msg);
+
+            if (pendingMediaRequests.audio) {
+              pendingMediaRequests.audio.reject(msg);
+            }
+
+            if (pendingMediaRequests.video) {
+              pendingMediaRequests.video.reject(msg);
+            }
+
             this._pendingMediaRequests.delete(peerId);
           }
 
@@ -437,9 +447,13 @@ export default class DialogAdapter {
 
   createMissingProducers(stream) {
     if (!this._sendTransport) return;
+    let sawAudio = false;
+    let sawVideo = false;
 
     stream.getTracks().forEach(async track => {
       if (track.kind === "audio") {
+        sawAudio = true;
+
         // TODO multiple audio tracks?
         if (this._micProducer) {
           if (this._micProducer.track !== track) {
@@ -452,6 +466,8 @@ export default class DialogAdapter {
           });
         }
       } else {
+        sawVideo = true;
+
         if (this._videoProducer) {
           if (this._videoProducer.track !== track) {
             this._videoProducer.replaceTrack(track);
@@ -467,6 +483,18 @@ export default class DialogAdapter {
 
       this.resolvePendingMediaRequestForTrack(this._clientId, track);
     });
+
+    if (!sawAudio && this._micProducer) {
+      this._micProducer.close();
+      this._protoo.request("closeProducer", { producerId: this._micProducer.id });
+      this._micProducer = null;
+    }
+
+    if (!sawVideo && this._videoProducer) {
+      this._videoProducer.close();
+      this._protoo.request("closeProducer", { producerId: this._videoProducer.id });
+      this._videoProducer = null;
+    }
 
     this._localMediaStream = stream;
   }
