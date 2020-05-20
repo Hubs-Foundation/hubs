@@ -106,6 +106,12 @@ function authorizeEntityManipulation(entityMetadata, sender, senderPermissions) 
 function getPendingOrExistingEntityMetadata(networkId) {
   const pendingData = NAF.connection.adapter.getPendingDataForNetworkId(networkId);
 
+  if (pendingData.owner) {
+    // If owner is no longer present, give up.
+    const presenceState = window.APP.hubChannel.presence.state[pendingData.owner];
+    if (!presenceState) return;
+  }
+
   if (pendingData) {
     const { template, creator } = pendingData;
     const schema = NAF.schemas.schemaDict[template];
