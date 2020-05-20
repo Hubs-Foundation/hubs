@@ -3,16 +3,122 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
-import { IntlProvider, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
-
+import { IntlProvider, addLocaleData } from "react-intl";
 import styles from "../assets/stylesheets/preferences-screen.scss";
 import { lang, messages } from "../utils/i18n";
 import { PreferenceListItem, PREFERENCE_LIST_ITEM_TYPE } from "./preference-list-item";
 
+const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
 addLocaleData([...en]);
 
-const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
+const CATEGORY_GENERAL = 0;
+const CATEGORY_TOUCHSCREEN = 1;
+const CATEGORY_ADVANCED = 2;
+const CATEGORIES = [CATEGORY_GENERAL, CATEGORY_TOUCHSCREEN, CATEGORY_ADVANCED];
+const CATEGORY_NAMES = new Map([
+  [CATEGORY_GENERAL, "general"],
+  [CATEGORY_TOUCHSCREEN, "touchscreen"],
+  [CATEGORY_ADVANCED, "advanced"]
+]);
+
+function titleFor(categoryName) {
+  return messages[`preferences.${categoryName}`];
+}
+
+function CategoryHeader({ ariaLabel, title, onClick, selected }) {
+  return (
+    <button
+      aria-label={ariaLabel}
+      className={classNames(styles.categoryItem, { [styles.selected]: selected })}
+      onClick={onClick}
+    >
+      {title}
+    </button>
+  );
+}
+CategoryHeader.propTypes = {
+  ariaLabel: PropTypes.string,
+  title: PropTypes.string,
+  onClick: PropTypes.func,
+  selected: PropTypes.bool
+};
+function CloseButton({ onClick }) {
+  return (
+    <button
+      autoFocus
+      aria-label={messages["preferences.closeButton"]}
+      className={classNames(styles.closeButton)}
+      onClick={onClick}
+    >
+      <i className={styles.flex}>
+        <FontAwesomeIcon className={styles.icon} icon={faTimes} />
+      </i>
+    </button>
+  );
+}
+CloseButton.propTypes = {
+  onClick: PropTypes.func
+};
+
+const general = [
+  { key: "muteMicOnEntry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+  { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+  {
+    key: "globalVoiceVolume",
+    prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+    min: 0,
+    max: 200,
+    defaultNumber: 100
+  },
+  {
+    key: "globalMediaVolume",
+    prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+    min: 0,
+    max: 200,
+    defaultNumber: 100
+  },
+  { key: "disableSoundEffects", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+  {
+    key: "snapRotationDegrees",
+    prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+    min: 0,
+    max: 90,
+    defaultNumber: 45
+  },
+  { key: "disableMovement", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+  { key: "disableBackwardsMovement", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+  { key: "disableStrafing", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+  { key: "disableTeleporter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+  {
+    key: "movementSpeedModifier",
+    prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+    min: 0,
+    max: 2,
+    defaultNumber: 1
+  }
+];
+const touchscreen = [
+  { key: "enableOnScreenJoystickLeft", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+  { key: "enableOnScreenJoystickRight", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+];
+
+const advanced = [
+  { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
+  {
+    key: "materialQualitySetting",
+    prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+    options: [{ value: "low", text: "Low" }, { value: "high", text: "High" }],
+    defaultString: isMobile ? "low" : "high"
+  },
+  { key: "disableAutoPixelRatio", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+  { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+  { key: "disableIdleDetection", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+  { key: "preferMobileObjectInfoPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+  { key: "disableEchoCancellation", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+  { key: "disableNoiseSuppression", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+  { key: "disableAutoGainControl", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+];
 
 export default class PreferencesScreen extends Component {
   static propTypes = {
@@ -20,7 +126,22 @@ export default class PreferencesScreen extends Component {
     store: PropTypes.object
   };
 
-  UNSAFE_componentWillMount() {
+  state = {
+    category: CATEGORY_GENERAL
+  };
+
+  constructor(props) {
+    super();
+
+    const item = itemProps => <PreferenceListItem store={props.store} storeKey={itemProps.key} {...itemProps} />;
+    this.items = new Map([
+      [CATEGORY_GENERAL, general.map(item)],
+      [CATEGORY_TOUCHSCREEN, touchscreen.map(item)],
+      [CATEGORY_ADVANCED, advanced.map(item)]
+    ]);
+  }
+
+  componentDidMount() {
     window.APP.preferenceScreenIsVisible = true;
   }
   componentWillUnmount() {
@@ -28,115 +149,27 @@ export default class PreferencesScreen extends Component {
   }
 
   render() {
-    const preferenceListItem = props => {
-      return (
-        <PreferenceListItem
-          key={props.key}
-          store={this.props.store}
-          storeKey={props.key}
-          prefType={props.prefType}
-          min={props.min}
-          max={props.max}
-          currentValue={props.currentValue}
-          onChange={props.onChange}
-          options={props.options}
-          defaultNumber={props.defaultNumber}
-          defaultString={props.defaultString}
-          defaultBool={props.defaultBool}
-        />
-      );
-    };
-    // TODO: Add search text field and sort rows by fuzzy search
-    const general = [
-      { key: "muteMicOnEntry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      {
-        key: "globalVoiceVolume",
-        prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
-        min: 0,
-        max: 200,
-        defaultNumber: 100
-      },
-      {
-        key: "globalMediaVolume",
-        prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
-        min: 0,
-        max: 200,
-        defaultNumber: 100
-      },
-      { key: "disableSoundEffects", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      {
-        key: "snapRotationDegrees",
-        prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
-        min: 0,
-        max: 90,
-        defaultNumber: 45
-      },
-      { key: "disableMovement", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "disableBackwardsMovement", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "disableStrafing", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "disableTeleporter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      {
-        key: "movementSpeedModifier",
-        prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
-        min: 0,
-        max: 2,
-        defaultNumber: 1
-      }
-    ].map(preferenceListItem);
-
-    const touchscreen = [
-      { key: "enableOnScreenJoystickLeft", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "enableOnScreenJoystickRight", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
-    ].map(preferenceListItem);
-
-    const advanced = [
-      { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
-      {
-        key: "materialQualitySetting",
-        prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-        options: [{ value: "low", text: "Low" }, { value: "high", text: "High" }],
-        defaultString: isMobile ? "low" : "high"
-      },
-      { key: "disableAutoPixelRatio", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "disableIdleDetection", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "preferMobileObjectInfoPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "disableEchoCancellation", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "disableNoiseSuppression", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "disableAutoGainControl", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
-    ].map(preferenceListItem);
-
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={classNames(styles.preferencesPanel)}>
-          <div className={classNames(styles.panelMargin)}>
-            <button autoFocus className={classNames(styles.closeButton)} onClick={e => this.props.onClose(e)}>
-              <i>
-                <FontAwesomeIcon icon={faTimes} />
-              </i>
-            </button>
-
-            <div className={classNames(styles.contentContainer)}>
-              <div className={classNames(styles.sectionBar)}>
-                <div className={classNames(styles.sectionTitle)}>
-                  <span>General</span>
-                </div>
-              </div>
-              <div className={classNames(styles.scrollingContent)}>{general}</div>
-              <div className={classNames(styles.sectionBar)}>
-                <div className={classNames(styles.sectionTitle)}>
-                  <span>Touchscreen</span>
-                </div>
-              </div>
-              <div className={classNames(styles.scrollingContent)}>{touchscreen}</div>
-              <div className={classNames(styles.sectionBar)}>
-                <div className={classNames(styles.sectionTitle)}>
-                  <span>Advanced</span>
-                </div>
-              </div>
-              <div className={classNames(styles.scrollingContent)}>{advanced}</div>
+          <CloseButton onClick={this.props.onClose} />
+          <div className={styles.navContainer}>
+            <div className={classNames(styles.nav)}>
+              {CATEGORIES.map(category => (
+                <CategoryHeader
+                  key={`category-${category}-header`}
+                  title={titleFor(CATEGORY_NAMES.get(category))}
+                  onClick={() => {
+                    this.setState({ category });
+                  }}
+                  ariaLabel={`${messages["preferences.selectCategory"]} ${titleFor(CATEGORY_NAMES.get(category))}`}
+                  selected={category === this.state.category}
+                />
+              ))}
             </div>
+          </div>
+          <div className={classNames(styles.contentContainer)}>
+            <div className={classNames(styles.scrollingContent)}>{this.items.get(this.state.category)}</div>
           </div>
         </div>
       </IntlProvider>

@@ -365,3 +365,16 @@ $favorited-color: var(--favorited-color, $duck-yellow);
   position: absolute;
   right: 7.5%;
 }
+%s32x32 {
+  width: 32px !important;
+  height: 32px !important;
+}
+%no-default-button-style {
+  padding: 0px;
+  border-style: none;
+  background-color: transparent;
+  cursor: pointer;
+  &:focus {
+    outline: 0; // @a11y TODO: Provide user preference for showing outlines
+  }
+}

@@ -7,6 +7,41 @@ $widescreenControlsWidth: 100%;
 $widescreenBreakpoint: 600px;
 $backgroundColor: var(--full-panel-background-color);
 
+%font-nav-item {
+  font-weight: $semi-bold;
+  font-size: 20px;
+}
+%font-nav-item-selected {
+  font-weight: bold;
+}
+
+:local(.nav-container) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 64px;
+  width: 100%;
+}
+:local(.nav) {
+  display: flex;
+  justify-content: center;
+  border-bottom: 1px solid var(--panel-rule-color);
+  margin: 0px 64px;
+  width: 100%;
+}
+
+:local(.category-item){
+  @extend %font-nav-item;
+  @extend %no-default-button-style;
+  @extend %unselectable;
+  margin: 0px 24px;
+  border-bottom: 3px solid transparent;
+  &:local(.selected) {
+    @extend %font-nav-item-selected;
+    border-bottom: 3px solid $action-color;
+  }
+}
+
 :local(.max-resolution-preference-item) {
   display: flex;
   flex-flow: row;
@@ -93,31 +128,32 @@ input::-webkit-inner-spin-button {
 :local(.preferences-panel) {
   z-index: 2;
   top: 0px;
-  bottom: 0px;
   width: 100%;
   height: 100%;
   background: var(--full-panel-background-color);
   position: absolute;
   display: flex;
+  flex-flow: column;
   justify-content: center;
   align-items: center;
 }
 
-:local(.panel-margin) {
-  margin-top: 18px;
-
-  :local(.close-button) {
-    @extend %panel-widget;
-    top: 24px;
-    left: 24px;
-
-    font-size: 1.6em;
-    position: absolute;
-    z-index: 1;
-  }
+:local(.close-button) {
+  @extend %panel-widget;
+  @extend %no-default-button-style;
+  top: 16px;
+  left: 16px;
+  position: absolute;
+}
+:local(.flex){
+  display: flex;
+}
+:local(.icon){
+  @extend %s32x32;
 }
 
 :local(.content-container) {
+  margin-top: 18px;
   @extend %default-font;
   font-size: 11pt;
   overflow-y: auto;
@@ -126,7 +162,6 @@ input::-webkit-inner-spin-button {
   height: calc(100vh - 16px);
 
   @media (max-width: $widescreenBreakpoint) {
-    margin-top: 0;
     height: calc(100vh - 48px);
   }
 

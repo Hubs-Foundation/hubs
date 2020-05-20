@@ -1,10 +1,7 @@
 @import 'shared.scss';
 
-:local(.no-default-button-style) {
-  padding: 0px;
-  border-style: none;
-  background-color: transparent;
-  cursor: pointer;
+:local(.no-default-button-style){
+  @extend %no-default-button-style;
 }
 
 :local(.flex){
@@ -14,11 +11,6 @@
 %s44x44 {
   width: 44px !important;
   height: 44px !important;
-}
-
-%s32x32 {
-  width: 32px !important;
-  height: 32px !important;
 }
 
 %action-label-color-on-hover {
@@ -53,6 +45,7 @@
 
 :local(.inner-navigation-row-item) {
   margin: 0px 8px;
+  @extend %no-default-button-style;
 }
 
 %animate-scale {
