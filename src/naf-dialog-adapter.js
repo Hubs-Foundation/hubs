@@ -1,6 +1,23 @@
 import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
+
+const AVAILABLE_OCCUPANTS_THRESHOLD = 5;
+const MAX_SUBSCRIBE_DELAY = 5000;
+
+function randomDelay(min, max) {
+  return new Promise(resolve => {
+    const delay = Math.random() * (max - min) + min;
+    setTimeout(resolve, delay);
+  });
+}
+
+// Used for VP9 webcam video.
+const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }];
+
+// Used for VP9 desktop sharing.
+const VIDEO_SVC_ENCODINGS = [{ scalabilityMode: "S3T3", dtx: true }];
+
 // TODO
 // - freeze mode buffering
 // - selective subscribe
@@ -14,12 +31,24 @@ import { debug as newDebug } from "debug";
 // - properly remove occupants on disconnect
 // - graceful rollover logic to new server
 // - startup await on join
+// - get connect status
+// - migrate all SDP bits
+// - microphone muting
+// - screenshare start/end
+// - video start end
+// - make sure works if perms denied
+// - restartIce
+// - look into requestConsumerKeyframe
+// - remove safari hacks
+// - look into applyNetworkThrottle
+// - test turn
+// - checkout encodings in video setup
 
 // Based upon mediasoup-demo RoomClient
 
-const debug = newDebug("naf-mediasoup-adapter:debug");
-//const warn = newDebug("naf-mediasoup-adapter:warn");
-const error = newDebug("naf-mediasoup-adapter:error");
+const debug = newDebug("naf-dialog-adapter:debug");
+//const warn = newDebug("naf-dialog-adapter:warn");
+const error = newDebug("naf-dialog-adapter:error");
 
 const PC_PROPRIETARY_CONSTRAINTS = {
   optional: [{ googDscp: true }]
@@ -28,8 +57,16 @@ const PC_PROPRIETARY_CONSTRAINTS = {
 export default class DialogAdapter {
   constructor() {
     this._forceTcp = false;
-    this._useDataChannel = false;
     this._timeOffsets = [];
+    this._occupants = {};
+    this._occupantIds = {};
+    this._pendingOccupants = new Set();
+    this._availableOccupants = [];
+    this._requestedOccupants = null;
+    this._micProducer = null;
+    this._videoProducer = null;
+    this._mediaStreams = {};
+    this._localMediaStream = null;
   }
 
   setForceTcp(forceTcp) {
@@ -76,11 +113,9 @@ export default class DialogAdapter {
   }
 
   connect() {
-    console.log(this._serverUrl);
     const urlWithParams = new URL(this._serverUrl);
     urlWithParams.searchParams.append("roomId", this._roomId);
     urlWithParams.searchParams.append("peerId", this._clientId);
-    console.log(urlWithParams.toString());
 
     const protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
     this._protoo = new protooClient.Peer(protooTransport);
@@ -100,8 +135,12 @@ export default class DialogAdapter {
     //return this.occupants[clientId] ? NAF.adapters.IS_CONNECTED : NAF.adapters.NOT_CONNECTED;
   }
 
-  getMediaStream(/*clientId*/) {
-    this._notImplemented("getConnectStatus");
+  getMediaStream(clientId, type = "audio") {
+    if (this._mediaStreams[clientId]) {
+      debug(`Already had ${type} for ${clientId}`);
+      return Promise.resolve(this._mediaStreams[clientId][type]);
+    }
+    // TODO promise resolution
   }
 
   getServerTime() {
@@ -109,16 +148,16 @@ export default class DialogAdapter {
   }
 
   sendData(clientId, dataType, data) {
-    this._unreliableTransport(clientId, dataType, data);
+    this.unreliableTransport(clientId, dataType, data);
   }
   sendDataGuaranteed(clientId, dataType, data) {
-    this._reliableTransport(clientId, dataType, data);
+    this.reliableTransport(clientId, dataType, data);
   }
   broadcastData(dataType, data) {
-    this._unreliableTransport(undefined, dataType, data);
+    this.unreliableTransport(undefined, dataType, data);
   }
   broadcastDataGuaranteed(dataType, data) {
-    this._reliableTransport(undefined, dataType, data);
+    this.reliableTransport(undefined, dataType, data);
   }
 
   setReconnectionListeners(reconnectingListener, reconnectedListener, reconnectionErrorListener) {
@@ -158,8 +197,9 @@ export default class DialogAdapter {
         forceTcp: this._forceTcp,
         producing: true,
         consuming: false,
-        sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined
+        sctpCapabilities: undefined
       });
+      console.log(sendTransportInfo);
 
       this._sendTransport = this._mediasoupDevice.createSendTransport({
         id: sendTransportInfo.id,
@@ -201,34 +241,12 @@ export default class DialogAdapter {
         }
       });
 
-      this._sendTransport.on(
-        "producedata",
-        async ({ sctpStreamParameters, label, protocol, appData }, callback, errback) => {
-          debug('"producedata" event: [sctpStreamParameters:%o, appData:%o]', sctpStreamParameters, appData);
-
-          try {
-            // eslint-disable-next-line no-shadow
-            const { id } = await this._protoo.request("produceData", {
-              transportId: this._sendTransport.id,
-              sctpStreamParameters,
-              label,
-              protocol,
-              appData
-            });
-
-            callback({ id });
-          } catch (error) {
-            errback(error);
-          }
-        }
-      );
-
       // Create mediasoup Transport for sending (unless we don't want to consume).
       const recvTransportInfo = await this._protoo.request("createWebRtcTransport", {
         forceTcp: this._forceTcp,
         producing: false,
         consuming: true,
-        sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined
+        sctpCapabilities: undefined
       });
 
       this._recvTransport = this._mediasoupDevice.createRecvTransport({
@@ -262,6 +280,19 @@ export default class DialogAdapter {
       });
 
       this._onOccupantsChanged(peers);
+      this._connectSuccess(this._clientId);
+
+      for (let i = 0; i < peers.length; i++) {
+        const occupantId = peers[i].id;
+        if (occupantId === this._clientId) continue; // Happens during non-graceful reconnects due to zombie sessions
+        this.addAvailableOccupant(occupantId);
+      }
+
+      this.syncOccupants();
+
+      if (this._localMediaStream) {
+        this.createMissingProducers(this._localMediaStream);
+      }
     } catch (err) {
       error("_joinRoom() failed:%o", err);
 
@@ -269,7 +300,69 @@ export default class DialogAdapter {
     }
   }
 
-  setLocalMediaStream(mediaStream) {}
+  setLocalMediaStream(stream) {
+    this.createMissingProducers(stream);
+  }
+
+  createMissingProducers(stream) {
+    if (!this._sendTransport) return;
+
+    stream.getTracks().forEach(async track => {
+      if (track.kind === "audio") {
+        // TODO multiple audio tracks?
+        if (this._micProducer) {
+          this._micProducer.replaceTrack(track);
+        } else {
+          this._micProducer = await this._sendTransport.produce({
+            track,
+            codecOptions: { opusStereo: false, opusDtx: true }
+          });
+        }
+      } else {
+        if (this._videoProducer) {
+          this._videoProducer.replaceTrack(track);
+        } else {
+          // TODO simulcasting
+          this._videoProducer = await this._sendTransport.produce({
+            track,
+            codecOptions: { videoGoogleStartBitrate: 1000 }
+          });
+        }
+      }
+    });
+
+    this.setMediaStream(this._clientId, stream);
+    this._localMediaStream = stream;
+  }
+
+  setMediaStream(clientId, stream) {
+    // Safari doesn't like it when you use single a mixed media stream where one of the tracks is inactive, so we
+    // split the tracks into two streams.
+    const audioStream = new MediaStream();
+    try {
+      stream.getAudioTracks().forEach(track => audioStream.addTrack(track));
+    } catch (e) {
+      console.warn(`${clientId} setMediaStream Audio Error`, e);
+    }
+    const videoStream = new MediaStream();
+    try {
+      stream.getVideoTracks().forEach(track => videoStream.addTrack(track));
+    } catch (e) {
+      console.warn(`${clientId} setMediaStream Video Error`, e);
+    }
+
+    this._mediaStreams[clientId] = { audio: audioStream, video: videoStream };
+  }
+
+  enableMicrophone(enabled) {
+    if (this._micProducer) {
+      if (enabled) {
+        this._micProducer.resume();
+      } else {
+        this._micProducer.pause();
+      }
+    }
+  }
 
   setWebRtcOptions() {
     // Not implemented
@@ -329,6 +422,132 @@ export default class DialogAdapter {
     } else {
       this.updateTimeOffset();
     }
+  }
+
+  addAvailableOccupant(occupantId) {
+    if (this._availableOccupants.indexOf(occupantId) === -1) {
+      this._availableOccupants.push(occupantId);
+    }
+  }
+
+  removeAvailableOccupant(occupantId) {
+    const idx = this._availableOccupants.indexOf(occupantId);
+    if (idx !== -1) {
+      this._availableOccupants.splice(idx, 1);
+    }
+  }
+
+  syncOccupants(requestedOccupants) {
+    if (requestedOccupants) {
+      this._requestedOccupants = requestedOccupants;
+    }
+
+    if (!this._requestedOccupants) {
+      return;
+    }
+
+    // Add any requested, available, and non-pending occupants.
+    for (let i = 0; i < this._requestedOccupants.length; i++) {
+      const occupantId = this._requestedOccupants[i];
+      if (
+        !this._occupants[occupantId] &&
+        this._availableOccupants.indexOf(occupantId) !== -1 &&
+        !this._pendingOccupants.has(occupantId)
+      ) {
+        this.addOccupant(occupantId);
+      }
+    }
+
+    // Remove any unrequested and currently added occupants.
+    for (let j = 0; j < this._availableOccupants.length; j++) {
+      const occupantId = this._availableOccupants[j];
+      if (this._occupants[occupantId] && this._requestedOccupants.indexOf(occupantId) === -1) {
+        this.removeOccupant(occupantId);
+      }
+    }
+
+    // Call the Networked AFrame callbacks for the updated occupants list.
+    this._onOccupantsChanged(this._occupants);
+  }
+
+  async addOccupant(occupantId) {
+    this._pendingOccupants.add(occupantId);
+
+    const availableOccupantsCount = this._availableOccupants.length;
+    if (availableOccupantsCount > AVAILABLE_OCCUPANTS_THRESHOLD) {
+      await randomDelay(0, MAX_SUBSCRIBE_DELAY);
+    }
+
+    // TODO subscribe to occupant
+    /*const subscriber = await this.createSubscriber(occupantId);
+    if (subscriber) {
+      if (!this.pendingOccupants.has(occupantId)) {
+        subscriber.conn.close();
+      } else {
+        this.pendingOccupants.delete(occupantId);
+        this.occupantIds.push(occupantId);
+        this.occupants[occupantId] = subscriber;
+
+        this.setMediaStream(occupantId, subscriber.mediaStream);
+
+        // Call the Networked AFrame callbacks for the new occupant.
+        this.onOccupantConnected(occupantId);
+      }
+    }*/
+  }
+
+  removeAllOccupants() {
+    this._pendingOccupants.clear();
+    for (let i = this.occupantIds.length - 1; i >= 0; i--) {
+      this.removeOccupant(this._occupantIds[i]);
+    }
+  }
+
+  removeOccupant(occupantId) {
+    this._pendingOccupants.delete(occupantId);
+
+    if (this._occupants[occupantId]) {
+      // Close the subscriber peer connection. Which also detaches the plugin handle.
+      // TODO close subscription
+      //this._occupants[occupantId].conn.close();
+      delete this._occupants[occupantId];
+
+      this._occupantIds.splice(this._occupantIds.indexOf(occupantId), 1);
+    }
+
+    // TODO remove
+    /*if (this.mediaStreams[occupantId]) {
+      delete this.mediaStreams[occupantId];
+    }*/
+
+    // TODO deal with pending media requests
+    /*if (this.pendingMediaRequests.has(occupantId)) {
+      const msg = "The user disconnected before the media stream was resolved.";
+      this.pendingMediaRequests.get(occupantId).audio.reject(msg);
+      this.pendingMediaRequests.get(occupantId).video.reject(msg);
+      this.pendingMediaRequests.delete(occupantId);
+    }*/
+
+    // Call the Networked AFrame callbacks for the removed occupant.
+    this.onOccupantDisconnected(occupantId);
+  }
+
+  toggleFreeze() {
+    if (this.frozen) {
+      this.unfreeze();
+    } else {
+      this.freeze();
+    }
+  }
+
+  freeze() {
+    this.frozen = true;
+  }
+
+  unfreeze() {
+    this.frozen = false;
+    // TODO
+    //this.flushPendingUpdates();
   }
 }
 

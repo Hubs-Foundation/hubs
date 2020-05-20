@@ -321,6 +321,7 @@ function setupPeerConnectionConfig(adapter, host, turn) {
   const forceTurn = qs.get("force_turn");
   const forceTcp = qs.get("force_tcp");
   const peerConnectionConfig = {};
+  turn.enabled = false; // TODO remove
 
   if (turn && turn.enabled) {
     const iceServers = [];
