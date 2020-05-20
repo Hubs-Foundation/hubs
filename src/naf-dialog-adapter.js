@@ -2,6 +2,10 @@ import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
 
+function nextTick() {
+  return new Promise(resolve => setTimeout(resolve, 0));
+}
+
 // NOTE this adapter does not properly fire the onOccupantsReceived events since those are only needed for
 // data channels, which are not yet supported. To fire that event, this class would need to keep a list of
 // occupants around and manage it.
@@ -37,6 +41,7 @@ import { debug as newDebug } from "debug";
 const debug = newDebug("naf-dialog-adapter:debug");
 //const warn = newDebug("naf-dialog-adapter:warn");
 const error = newDebug("naf-dialog-adapter:error");
+const info = newDebug("naf-dialog-adapter:info");
 
 const PC_PROPRIETARY_CONSTRAINTS = {
   optional: [{ googDscp: true }]
@@ -54,6 +59,7 @@ export default class DialogAdapter {
     this._consumers = new Map();
     this._frozenUpdates = new Map();
     this._pendingMediaRequests = new Map();
+    this._initialAudioConsumerPromise = null;
   }
 
   setForceTcp(forceTcp) {
@@ -99,7 +105,7 @@ export default class DialogAdapter {
     this._onOccupantMessage = messageListener;
   }
 
-  connect() {
+  async connect() {
     const urlWithParams = new URL(this._serverUrl);
     urlWithParams.searchParams.append("roomId", this._roomId);
     urlWithParams.searchParams.append("peerId", this._clientId);
@@ -160,6 +166,15 @@ export default class DialogAdapter {
             accept();
 
             this.resolvePendingMediaRequestForTrack(peerId, consumer.track);
+
+            if (kind === "audio") {
+              const initialAudioResolver = this._initialAudioConsumerResolvers.get(peerId);
+
+              if (initialAudioResolver) {
+                initialAudioResolver();
+                this._initialAudioConsumerResolvers.delete(peerId);
+              }
+            }
           } catch (err) {
             error('"newConsumer" request failed:%o', err);
 
@@ -189,16 +204,26 @@ export default class DialogAdapter {
 
           if (pendingMediaRequests) {
             const msg = "The user disconnected before the media stream was resolved.";
+            info(msg);
 
             if (pendingMediaRequests.audio) {
-              pendingMediaRequests.audio.reject(msg);
+              pendingMediaRequests.audio.resolve(null);
             }
 
             if (pendingMediaRequests.video) {
-              pendingMediaRequests.video.reject(msg);
+              pendingMediaRequests.video.resolve(null);
             }
 
             this._pendingMediaRequests.delete(peerId);
+          }
+
+          // Resolve initial audio resolver since this person left.
+          const initialAudioResolver = this._initialAudioConsumerResolvers.get(peerId);
+
+          if (initialAudioResolver) {
+            initialAudioResolver();
+
+            this._initialAudioConsumerResolvers.delete(peerId);
           }
 
           break;
@@ -218,9 +243,13 @@ export default class DialogAdapter {
       }
     });
 
-    //this._protoo.on('open', () => this._joinRoom());
-    return Promise.all([this.updateTimeOffset()]);
+    // Need to wait for the initial audio consumer promise to be initialized
+    // based upon setInitialOccupants being called from outer code, which determines which
+    // occupants to wait on.
+    while (!this._initialAudioConsumerPromise) await nextTick();
+    await Promise.all([this.updateTimeOffset(), this._initialAudioConsumerPromise]);
   }
+
   shouldStartConnectionTo() {
     return true;
   }
@@ -235,6 +264,10 @@ export default class DialogAdapter {
       const resolve = requests[track.kind].resolve;
       delete requests[track.kind];
       resolve(new MediaStream([track]));
+    }
+
+    if (requests && Object.keys(requests).length === 0) {
+      this._pendingMediaRequests.delete(clientId);
     }
   }
 
@@ -305,8 +338,30 @@ export default class DialogAdapter {
     this._reconnectionErrorListener = reconnectionErrorListener;
   }
 
+  setInitialOccupants(occupants) {
+    if (this._initialAudioConsumerResolvers) return;
+
+    // Initial occupants are assumed to be the set of people in the room, so set up promises
+    // to resolve to ensure we can wait for audio consumers to initialize before yielding to connect.
+    const promises = [];
+
+    if (!this._initialAudioConsumerResolvers) {
+      this._initialAudioConsumerResolvers = new Map();
+
+      for (let i = 0; i < occupants.length; i++) {
+        const promise = new Promise(res => {
+          this._initialAudioConsumerResolvers.set(occupants[i], res);
+        });
+
+        promises.push(promise);
+      }
+    }
+
+    this._initialAudioConsumerPromise = Promise.all(promises);
+  }
+
   syncOccupants() {
-    // Ignored
+    // Not implemented
   }
 
   notImplemented() {}

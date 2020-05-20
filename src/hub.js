@@ -1296,17 +1296,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         const requestedOccupants = [];
 
         const requestOccupants = async (sessionIds, state) => {
+          requestedOccupants.length = 0;
+          for (let i = 0; i < sessionIds.length; i++) {
+            const sessionId = sessionIds[i];
+            if (sessionId !== NAF.clientId && state[sessionId].metas[0].presence === "room") {
+              requestedOccupants.push(sessionId);
+            }
+          }
+
+          if (!NAF.connection.isConnected()) {
+            while (!NAF.connection.adapter) await nextTick();
+
+            if (NAF.connection.adapter.setInitialOccupants) {
+              NAF.connection.adapter.setInitialOccupants(requestedOccupants);
+            }
+          }
+
           while (!NAF.connection.isConnected()) await nextTick();
 
           if (NAF.connection.adapter) {
-            requestedOccupants.length = 0;
-            for (let i = 0; i < sessionIds.length; i++) {
-              const sessionId = sessionIds[i];
-              if (sessionId !== NAF.clientId && state[sessionId].metas[0].presence === "room") {
-                requestedOccupants.push(sessionId);
-              }
-            }
-
             NAF.connection.adapter.syncOccupants(requestedOccupants);
           }
         };
