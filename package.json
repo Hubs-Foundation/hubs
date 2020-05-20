@@ -84,7 +84,7 @@
     "linkify-it": "^2.0.3",
     "markdown-it": "^8.4.2",
     "moving-average": "^1.0.0",
-    "naf-janus-adapter": "^4.0.0",
+    "naf-janus-adapter": "^4.0.1",
     "networked-aframe": "github:mozillareality/networked-aframe#master",
     "nipplejs": "github:mozillareality/nipplejs#mr-social-client/master",
     "node-ensure": "0.0.0",

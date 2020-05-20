@@ -7,18 +7,24 @@ AFRAME.registerComponent("quack", {
   },
 
   init: function() {
-    this._handleGrabStart = this._handleGrabStart.bind(this);
+    this.wasInteracting = false;
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEntity => {
+      this.networkedEntity = networkedEntity;
+    });
   },
 
-  play: function() {
-    this.el.object3D.addEventListener("interact", this._handleGrabStart);
+  tick: function() {
+    const interaction = AFRAME.scenes[0].systems.interaction;
+    const isInteracting = interaction.isHeld(this.networkedEntity || this.el);
+
+    if (isInteracting && !this.wasInteracting) {
+      this.quack();
+    }
+
+    this.wasInteracting = isInteracting;
   },
 
-  pause: function() {
-    this.el.object3D.removeEventListener("interact", this._handleGrabStart);
-  },
-
-  _handleGrabStart: function() {
+  quack: function() {
     const rand = Math.random();
     if (rand < this.data.specialQuackPercentage) {
       this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);

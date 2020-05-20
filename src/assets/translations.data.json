@@ -283,6 +283,7 @@
     "preferences.snapRotationDegrees": "Rotation per snap (in degrees)",
     "preferences.allowMultipleHubsInstances": "Disable auto-exit when multiple hubs instances are open",
     "preferences.disableIdleDetection": "Disable auto-exit when idle or backgrounded",
+    "preferences.preferMobileObjectInfoPanel": "Prefer Mobile Object Info Panel",
     "preferences.baseMovementSpeed": "Base movement speed",
     "preferences.disableMovement": "Disable movement",
     "preferences.disableBackwardsMovement": "Disable backwards movement",
