@@ -494,10 +494,6 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
   const hub = data.hubs[0];
 
-  // TODO remove
-  hub.host = "peaceful-ardent.quackstack2.net";
-  hub.port = "80";
-
   let embedToken = hub.embed_token;
 
   if (!embedToken) {

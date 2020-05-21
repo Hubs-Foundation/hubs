@@ -13,11 +13,9 @@ import { debug as newDebug } from "debug";
 //const VIDEO_SVC_ENCODINGS = [{ scalabilityMode: "S3T3", dtx: true }];
 
 // TODO
-// - make sure works if perms denied
 // - look into requestConsumerKeyframe
 // - look into applyNetworkThrottle
 // - test turn
-// - remove occupant dependency for bot mode
 // SFU todo
 // - remove active speaker stuff
 // - kick
