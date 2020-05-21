@@ -594,6 +594,40 @@ export default class DialogAdapter {
     if (this._recvTransport) this._recvTransport.close();
   }
 
+  reconnect() {
+    // Dispose of all networked entities and other resources tied to the session.
+    this.disconnect();
+
+    this.connect()
+      .then(() => {
+        this.reconnectionDelay = this.initialReconnectionDelay;
+        this.reconnectionAttempts = 0;
+
+        if (this.onReconnected) {
+          this.onReconnected();
+        }
+      })
+      .catch(error => {
+        this.reconnectionDelay += 1000;
+        this.reconnectionAttempts++;
+
+        if (this.reconnectionAttempts > this.maxReconnectionAttempts && this.onReconnectionError) {
+          return this.onReconnectionError(
+            new Error("Connection could not be reestablished, exceeded maximum number of reconnection attempts.")
+          );
+        }
+
+        console.warn("Error during reconnect, retrying.");
+        console.warn(error);
+
+        if (this.onReconnecting) {
+          this.onReconnecting(this.reconnectionDelay);
+        }
+
+        this.reconnectionTimeout = setTimeout(() => this.reconnect(), this.reconnectionDelay);
+      });
+  }
+
   async updateTimeOffset() {
     if (this.isDisconnected()) return;
 
