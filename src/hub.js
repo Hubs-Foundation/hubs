@@ -1456,7 +1456,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // other user joins. If a user is in the room and Safari user joins,
         // then Safari can fail to receive audio from a single peer (it does not seem
         // to be related to silence, but may be a factor.)
-        let track, oscillator;
+        let track, oscillator, stream;
 
         // TODO only do this for janus
         /*const ctx = THREE.AudioContext.getContext();
@@ -1492,7 +1492,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           { once: true }
         );
 
-        await adapter.setLocalMediaStream(stream);
+        if (stream) {
+          await adapter.setLocalMediaStream(stream);
+        }
       });
 
       subscriptions.setHubChannel(hubChannel);
