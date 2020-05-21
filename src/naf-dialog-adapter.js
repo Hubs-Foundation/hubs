@@ -13,7 +13,6 @@ import { debug as newDebug } from "debug";
 //const VIDEO_SVC_ENCODINGS = [{ scalabilityMode: "S3T3", dtx: true }];
 
 // TODO
-// - freeze mode buffering
 // - make sure works if perms denied
 // - look into requestConsumerKeyframe
 // - look into applyNetworkThrottle
@@ -53,7 +52,7 @@ export default class DialogAdapter {
     this._initialAudioConsumerPromise = null;
     this._initialAudioConsumerResolvers = new Map();
     this._blockedClients = new Map();
-    this._peerIds = [];
+    this.occupants = [];
   }
 
   setForceTcp(forceTcp) {
@@ -179,7 +178,7 @@ export default class DialogAdapter {
         case "newPeer": {
           const peer = notification.data;
           this._onOccupantConnected(peer.id);
-          this._peerIds.push(peer.id);
+          this.occupants.push(peer.id);
 
           break;
         }
@@ -214,7 +213,7 @@ export default class DialogAdapter {
             this._initialAudioConsumerResolvers.delete(peerId);
           }
 
-          this._peerIds = this._peerIds.filter(id => id !== peerId);
+          this.occupants = this.occupants.filter(id => id !== peerId);
 
           break;
         }
@@ -438,13 +437,13 @@ export default class DialogAdapter {
       });
 
       const audioConsumerPromises = [];
-      this._peerIds = [];
+      this.occupants = [];
 
       // Create a promise that will be resolved once we attach to all the initial consumers.
       // This will gate the connection flow until all voices will be heard.
       for (let i = 0; i < peers.length; i++) {
         const peerId = peers[i].id;
-        this._peerIds.push(peerId);
+        this.occupants.push(peerId);
         if (!peers[i].hasProducers) continue;
         audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peerId, res)));
       }
@@ -564,13 +563,13 @@ export default class DialogAdapter {
 
     this._closed = true;
 
-    for (let i = 0; i < this._peerIds.length; i++) {
-      const peerId = this._peerIds[i];
+    for (let i = 0; i < this.occupants.length; i++) {
+      const peerId = this.occupants[i];
       if (peerId === this._clientId) continue;
       this._onOccupantDisconnected(peerId);
     }
 
-    this._peerIds = [];
+    this.occupants = [];
 
     debug("disconnect()");
 
