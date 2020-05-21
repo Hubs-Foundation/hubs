@@ -14,24 +14,17 @@ import { debug as newDebug } from "debug";
 
 // TODO
 // - freeze mode buffering
-// - reconnecting
-// - auth token
-// - kick
-// - block
-// - safari autoplay
-// - graceful rollover logic to new server
-// - startup await on join
-// - get connect status
-// - migrate all SDP bits
 // - make sure works if perms denied
-// - restartIce
 // - look into requestConsumerKeyframe
 // - look into applyNetworkThrottle
 // - test turn
-// - remove active speaker stuff
-// - remove score stuff
 // - remove occupant dependency for bot mode
-// - join with initial mute not working
+// SFU todo
+// - remove active speaker stuff
+// - kick
+// - block
+// - auth token
+// - remove score stuff
 
 // Based upon mediasoup-demo RoomClient
 
@@ -59,6 +52,7 @@ export default class DialogAdapter {
     this._micEnabled = true;
     this._initialAudioConsumerPromise = null;
     this._initialAudioConsumerResolvers = new Map();
+    this._blockedClients = new Map();
     this._peerIds = [];
   }
 
@@ -269,8 +263,7 @@ export default class DialogAdapter {
   }
 
   getConnectStatus(/*clientId*/) {
-    this._notImplemented("getConnectStatus");
-    //return this.occupants[clientId] ? NAF.adapters.IS_CONNECTED : NAF.adapters.NOT_CONNECTED;
+    return this._protoo.connected ? NAF.adapters.IS_CONNECTED : NAF.adapters.NOT_CONNECTED;
   }
 
   getMediaStream(clientId, kind = "audio") {
@@ -333,8 +326,6 @@ export default class DialogAdapter {
   syncOccupants() {
     // Not implemented
   }
-
-  notImplemented() {}
 
   async _joinRoom() {
     debug("_joinRoom()");
@@ -628,6 +619,28 @@ export default class DialogAdapter {
       });
   }
 
+  kick(clientId, permsToken) {
+    // TODO send kick message to SFU
+    //return this.publisher.handle.sendMessage({ kind: "kick", room_id: this.room, user_id: clientId, token: permsToken }).then(() => {
+    document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
+    //});
+  }
+
+  block(clientId) {
+    // TODO send block message to SFU
+    //return this.publisher.handle.sendMessage({ kind: "block", whom: clientId }).then(() => {
+    this._blockedClients.set(clientId, true);
+    document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: clientId } }));
+    //});
+  }
+
+  unblock(clientId) {
+    //return this.publisher.handle.sendMessage({ kind: "unblock", whom: clientId }).then(() => {
+    this._blockedClients.delete(clientId);
+    document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: clientId } }));
+    //});
+  }
+
   async updateTimeOffset() {
     if (this.isDisconnected()) return;
 
@@ -755,7 +768,7 @@ export default class DialogAdapter {
     const data = message.dataType === "um" ? this.dataForUpdateMultiMessage(networkId, message) : message.data;
 
     // Ignore messages from users that we may have blocked while frozen.
-    if (data.owner && this.blockedClients.has(data.owner)) return null;
+    if (data.owner && this._blockedClients.has(data.owner)) return null;
 
     return data;
   }
