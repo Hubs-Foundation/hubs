@@ -594,16 +594,16 @@ export default class DialogAdapter {
         this.reconnectionDelay = this.initialReconnectionDelay;
         this.reconnectionAttempts = 0;
 
-        if (this.onReconnected) {
-          this.onReconnected();
+        if (this._reconnectedListener) {
+          this._reconnectedListener();
         }
       })
       .catch(error => {
         this.reconnectionDelay += 1000;
         this.reconnectionAttempts++;
 
-        if (this.reconnectionAttempts > this.maxReconnectionAttempts && this.onReconnectionError) {
-          return this.onReconnectionError(
+        if (this.reconnectionAttempts > this.maxReconnectionAttempts && this._reconnectionErrorListener) {
+          return this._reconnectionErrorListener(
             new Error("Connection could not be reestablished, exceeded maximum number of reconnection attempts.")
           );
         }
@@ -611,8 +611,8 @@ export default class DialogAdapter {
         console.warn("Error during reconnect, retrying.");
         console.warn(error);
 
-        if (this.onReconnecting) {
-          this.onReconnecting(this.reconnectionDelay);
+        if (this._reconnectingListener) {
+          this._reconnectingListener(this.reconnectionDelay);
         }
 
         this.reconnectionTimeout = setTimeout(() => this.reconnect(), this.reconnectionDelay);
@@ -689,8 +689,7 @@ export default class DialogAdapter {
 
   unfreeze() {
     this.frozen = false;
-    // TODO
-    //this.flushPendingUpdates();
+    this.flushPendingUpdates();
   }
 
   storeMessage(message) {
@@ -787,7 +786,7 @@ export default class DialogAdapter {
       // individual frozenUpdates in storeSingleMessage.
       const dataType = message.dataType === "um" ? "u" : message.dataType;
 
-      this.onOccupantMessage(null, dataType, data, message.source);
+      this._onOccupantMessage(null, dataType, data, message.source);
     }
     this._frozenUpdates.clear();
   }
