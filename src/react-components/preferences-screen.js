@@ -26,18 +26,18 @@ function titleFor(categoryName) {
   return messages[`preferences.${categoryName}`];
 }
 
-function CategoryHeader({ ariaLabel, title, onClick, selected }) {
+function NavItem({ ariaLabel, title, onClick, selected }) {
   return (
     <button
       aria-label={ariaLabel}
-      className={classNames(styles.categoryItem, { [styles.selected]: selected })}
+      className={classNames(styles.navItem, { [styles.selected]: selected })}
       onClick={onClick}
     >
       {title}
     </button>
   );
 }
-CategoryHeader.propTypes = {
+NavItem.propTypes = {
   ariaLabel: PropTypes.string,
   title: PropTypes.string,
   onClick: PropTypes.func,
@@ -69,6 +69,8 @@ const general = [
     prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
     min: 0,
     max: 200,
+    step: 5,
+    digits: 0,
     defaultNumber: 100
   },
   {
@@ -76,6 +78,8 @@ const general = [
     prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
     min: 0,
     max: 200,
+    step: 5,
+    digits: 0,
     defaultNumber: 100
   },
   { key: "disableSoundEffects", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
@@ -84,6 +88,8 @@ const general = [
     prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
     min: 0,
     max: 90,
+    step: 5,
+    digits: 0,
     defaultNumber: 45
   },
   { key: "disableMovement", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
@@ -95,6 +101,8 @@ const general = [
     prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
     min: 0,
     max: 2,
+    step: 0.1,
+    digits: 1,
     defaultNumber: 1
   }
 ];
@@ -156,7 +164,7 @@ export default class PreferencesScreen extends Component {
           <div className={styles.navContainer}>
             <div className={classNames(styles.nav)}>
               {CATEGORIES.map(category => (
-                <CategoryHeader
+                <NavItem
                   key={`category-${category}-header`}
                   title={titleFor(CATEGORY_NAMES.get(category))}
                   onClick={() => {

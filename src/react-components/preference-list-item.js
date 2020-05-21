@@ -4,11 +4,224 @@ import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUndo } from "@fortawesome/free-solid-svg-icons/faUndo";
-
 import styles from "../assets/stylesheets/preferences-screen.scss";
-import { waitForDOMContentLoaded } from "../utils/async-utils";
-import { SOUND_PREFERENCE_MENU_SELECT } from "../systems/sound-effects-system";
-import { NumberRangeSelector } from "./number-range-selector.js";
+
+function round(step, n) {
+  return Math.round(n / step) * step;
+}
+
+function ResetToDefaultButton({ onClick }) {
+  return (
+    <button className={classNames(styles.resetToDefaultButton)} onClick={onClick}>
+      <i className={styles.flex} title="Reset to default">
+        <FontAwesomeIcon icon={faUndo} />
+      </i>
+    </button>
+  );
+}
+ResetToDefaultButton.propTypes = {
+  onClick: PropTypes.func
+};
+
+function sanitize(s) {
+  s = s.replace(/[^0-9.]/g, "");
+  const split = s.split(".");
+  if (split.length > 1) {
+    return `${split.shift()}.${split.join("")}`;
+  } else {
+    return s;
+  }
+}
+
+export class NumberRangeSelector extends Component {
+  static propTypes = {
+    min: PropTypes.number,
+    max: PropTypes.number,
+    step: PropTypes.number,
+    digits: PropTypes.number,
+    defaultNumber: PropTypes.number,
+    store: PropTypes.object,
+    storeKey: PropTypes.string
+  };
+  state = {
+    isDragging: false,
+    displayValue: ""
+  };
+  constructor(props) {
+    super(props);
+    this.myRoot = React.createRef();
+    this.stopDragging = this.stopDragging.bind(this);
+    this.drag = this.drag.bind(this);
+  }
+
+  storeUpdated = () => {
+    this.forceUpdate();
+  };
+
+  componentDidMount() {
+    this.props.store.addEventListener("statechanged", this.storeUpdated);
+    window.addEventListener("mouseup", this.stopDragging);
+    window.addEventListener("mousemove", this.drag);
+    const currentValue =
+      this.props.store.state.preferences[this.props.storeKey] !== undefined
+        ? this.props.store.state.preferences[this.props.storeKey]
+        : this.props.defaultNumber;
+    this.setState({ displayValue: currentValue.toFixed(this.props.digits) });
+  }
+  componentWillUnmount() {
+    window.removeEventListener("mouseup", this.stopDragging);
+    window.removeEventListener("mousemove", this.drag);
+    this.props.store.removeEventListener("statechanged", this.storeUpdated);
+  }
+
+  stopDragging() {
+    this.setState({ isDragging: false });
+  }
+
+  drag(e) {
+    if (!this.state.isDragging) return;
+    const t = Math.max(0, Math.min((e.clientX - this.myRoot.current.offsetLeft) / this.myRoot.current.clientWidth, 1));
+    const num = round(this.props.step, this.props.min + t * (this.props.max - this.props.min));
+    this.setState({ displayValue: num.toFixed(this.props.digits) });
+    this.props.store.update({
+      preferences: { [this.props.storeKey]: num }
+    });
+  }
+
+  render() {
+    const currentValue =
+      this.props.store.state.preferences[this.props.storeKey] !== undefined
+        ? this.props.store.state.preferences[this.props.storeKey]
+        : this.props.defaultNumber;
+
+    return (
+      <div className={classNames(styles.numberWithRange)}>
+        <div className={classNames(styles.numberInNumberWithRange)}>
+          <input
+            type="text"
+            value={this.state.displayValue}
+            onClick={e => {
+              //e.preventDefault();
+              e.target.focus();
+              e.target.select();
+            }}
+            onBlur={() => {
+              if (this.props.store.state.preferences[this.props.storeKey] === undefined) {
+                this.setState({ displayValue: this.props.defaultNumber });
+              }
+            }}
+            onChange={e => {
+              const sanitizedInput = sanitize(e.target.value);
+              this.setState({ displayValue: sanitizedInput });
+              const numberOrReset = isNaN(parseFloat(sanitizedInput)) ? undefined : parseFloat(sanitizedInput);
+              this.props.store.update({
+                preferences: { [this.props.storeKey]: numberOrReset }
+              });
+            }}
+          />
+        </div>
+        <div
+          ref={this.myRoot}
+          className={classNames(styles.rangeSlider)}
+          onMouseDown={e => {
+            e.preventDefault();
+            this.setState({ isDragging: true });
+            const t = Math.max(
+              0,
+              Math.min((e.clientX - this.myRoot.current.offsetLeft) / this.myRoot.current.clientWidth, 1)
+            );
+            const num = round(this.props.step, this.props.min + t * (this.props.max - this.props.min));
+            this.setState({ displayValue: num.toFixed(this.props.digits) });
+            this.props.store.update({
+              preferences: { [this.props.storeKey]: num }
+            });
+          }}
+        >
+          <input
+            type="range"
+            step={this.props.step}
+            min={this.props.min}
+            max={this.props.max}
+            value={currentValue}
+            onChange={e => {
+              const num = round(e.target.value);
+              this.setState({ displayValue: num.toFixed(this.props.digits) });
+              this.props.store.update({
+                preferences: { [this.props.storeKey]: num }
+              });
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+}
+
+function BooleanPreference({ store, storeKey, defaultBool }) {
+  const storedPref = store.state.preferences[storeKey];
+  const value = storedPref === undefined ? defaultBool : storedPref;
+  return (
+    <div className={classNames(styles.checkbox)}>
+      <input
+        tabIndex="0"
+        type="checkbox"
+        checked={value}
+        onChange={() => {
+          store.update({ preferences: { [storeKey]: !store.state.preferences[storeKey] } });
+        }}
+      />
+    </div>
+  );
+}
+BooleanPreference.propTypes = {
+  store: PropTypes.object,
+  storeKey: PropTypes.string,
+  defaultBool: PropTypes.bool
+};
+
+class Dropdown extends React.Component {
+  static propTypes = {
+    options: PropTypes.array,
+    defaultString: PropTypes.string,
+    store: PropTypes.object,
+    storeKey: PropTypes.string
+  };
+
+  constructor(props) {
+    super();
+    this.options = props.options.map((o, i) => {
+      const opts = {};
+      const key = `option_${props.storeKey}_${i}`;
+      return (
+        <option key={key} value={o.value} {...opts}>
+          {o.text}
+        </option>
+      );
+    });
+  }
+
+  render() {
+    const storedPref = this.props.store.state.preferences[this.props.storeKey];
+    return (
+      <div className={styles.dropdown}>
+        <select
+          value={storedPref === undefined || storedPref === "" ? this.props.defaultString : storedPref}
+          tabIndex="0"
+          onChange={e => {
+            this.props.store.update({ preferences: { [this.props.storeKey]: e.target.value } });
+          }}
+        >
+          {this.options}
+        </select>
+        <img
+          className={styles.dropdownArrow}
+          src="../assets/images/dropdown_arrow.png"
+          srcSet="../assets/images/dropdown_arrow@2x.png 2x"
+        />
+      </div>
+    );
+  }
+}
 
 export const PREFERENCE_LIST_ITEM_TYPE = {
   CHECK_BOX: 1,
@@ -80,22 +293,15 @@ export class PreferenceListItem extends Component {
     prefType: PropTypes.number,
     min: PropTypes.number,
     max: PropTypes.number,
+    step: PropTypes.number,
     onChange: PropTypes.func,
     options: PropTypes.array,
     defaultNumber: PropTypes.number,
     defaultString: PropTypes.string,
     defaultBool: PropTypes.bool
   };
-  state = {
-    hovered: false,
-    selectHovered: false
-  };
-  UNSAFE_componentWillMount() {
-    this.renderControls = this.renderControls.bind(this);
+  componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
-    waitForDOMContentLoaded().then(() => {
-      this.sfx = AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem;
-    });
   }
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
@@ -106,87 +312,37 @@ export class PreferenceListItem extends Component {
   };
 
   renderControls() {
-    let options;
-    let storedPref;
     switch (this.props.prefType) {
-      case PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX:
-        storedPref = this.props.store.state.preferences[this.props.storeKey];
+      case PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX: {
         return (
-          <div className={classNames(styles.checkbox)}>
-            <input
-              tabIndex="0"
-              type="checkbox"
-              checked={storedPref === undefined ? this.props.defaultBool : storedPref}
-              onChange={() => {
-                this.props.store.update({
-                  preferences: { [this.props.storeKey]: !this.props.store.state.preferences[this.props.storeKey] }
-                });
-              }}
-            />
-          </div>
+          <BooleanPreference
+            store={this.props.store}
+            storeKey={this.props.storeKey}
+            defaultBool={this.props.defaultBool}
+          />
         );
+      }
       case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
         return <MaxResolutionPreferenceItem store={this.props.store} />;
-      case PREFERENCE_LIST_ITEM_TYPE.SELECT:
-        options = this.props.options.map((o, i) => {
-          const opts = {};
-          const storedPref = this.props.store.state.preferences[this.props.storeKey];
-          if (
-            o.value === storedPref ||
-            ((storedPref === undefined || storedPref === "") && o.value === this.props.defaultString)
-          ) {
-            opts.selected = "selected";
-          }
-
-          return (
-            <option key={`${this.props.storeKey}_${i}`} value={o.value} {...opts}>
-              {o.text}
-            </option>
-          );
-        });
+      case PREFERENCE_LIST_ITEM_TYPE.SELECT: {
         return (
-          <div className={styles.dropdown}>
-            <select
-              tabIndex="0"
-              className={classNames({
-                [styles.hovered]: this.state.hovered,
-                [styles.selectHovered]: this.state.selectHovered
-              })}
-              onMouseEnter={() => {
-                this.setState({ selectHovered: true });
-              }}
-              onMouseLeave={() => {
-                this.setState({ selectHovered: false });
-              }}
-              onChange={e => {
-                this.props.store.update({ preferences: { [this.props.storeKey]: e.target.value } });
-              }}
-            >
-              {options}
-            </select>
-            <img
-              className={styles.dropdownArrow}
-              src="../assets/images/dropdown_arrow.png"
-              srcSet="../assets/images/dropdown_arrow@2x.png 2x"
-            />
-          </div>
+          <Dropdown
+            options={this.props.options}
+            defaultString={this.props.defaultString}
+            store={this.props.store}
+            storeKey={this.props.storeKey}
+          />
         );
+      }
       case PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE:
         return (
           <NumberRangeSelector
             min={this.props.min}
             max={this.props.max}
-            currentValue={
-              this.props.store.state.preferences[this.props.storeKey] !== undefined
-                ? this.props.store.state.preferences[this.props.storeKey]
-                : this.props.defaultNumber
-            }
-            onChange={(value, playSound) => {
-              this.props.store.update({
-                preferences: { [this.props.storeKey]: Number.parseFloat(value) }
-              });
-              playSound && this.sfx && this.sfx.playSoundOneShot(SOUND_PREFERENCE_MENU_SELECT);
-            }}
+            step={this.props.step}
+            store={this.props.store}
+            storeKey={this.props.storeKey}
+            defaultNumber={this.props.defaultNumber}
           />
         );
       default:
@@ -200,16 +356,11 @@ export class PreferenceListItem extends Component {
     return (
       <div
         className={classNames(
-          { [styles.hovered]: this.state.hovered },
-          styles.preferenceListItem,
-          !isCheckbox && styles.preferenceListNonCheckbox
+          {
+            [styles.preferenceListNonCheckbox]: !isCheckbox
+          },
+          styles.preferenceListItem
         )}
-        onMouseEnter={() => {
-          this.setState({ hovered: true });
-        }}
-        onMouseLeave={() => {
-          this.setState({ hovered: false });
-        }}
       >
         <div className={classNames(styles.checkboxMargin)}>
           {isCheckbox ? this.renderControls() : <span>&nbsp;</span>}
@@ -219,8 +370,7 @@ export class PreferenceListItem extends Component {
         </div>
         <div className={classNames(styles.part, styles.right)}>
           {!isCheckbox && this.renderControls()}
-          <button
-            className={classNames(styles.resetToDefaultButton)}
+          <ResetToDefaultButton
             onClick={() => {
               switch (this.props.prefType) {
                 case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
@@ -237,11 +387,7 @@ export class PreferenceListItem extends Component {
               }
               this.forceUpdate();
             }}
-          >
-            <i title="Reset to default">
-              <FontAwesomeIcon icon={faUndo} />
-            </i>
-          </button>
+          />
         </div>
       </div>
     );
