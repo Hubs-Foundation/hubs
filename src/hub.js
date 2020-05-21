@@ -17,14 +17,14 @@ patchWebGLRenderingContext();
 
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
-import "naf-janus-adapter";
+import { JanusAdapter } from "naf-janus-adapter";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
-import { detectOS } from "detect-browser";
+import { detectOS, detect } from "detect-browser";
 import {
   getReticulumFetchUrl,
   getReticulumMeta,
@@ -730,6 +730,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
+  const browser = detect();
+  // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
+  // safari when initializing it later.
+  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+      remountUI({ showSafariMicDialog: true });
+      return;
+    }
+  }
+
   const defaultRoomId = configs.feature("default_room_id");
 
   const hubId =
@@ -1430,7 +1442,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       scene.addEventListener("adapter-ready", async ({ detail: adapter }) => {
         // HUGE HACK Safari does not like it if the first peer seen does not immediately
         // send audio over its media stream. Otherwise, the stream doesn't work and stays
-        // silent. (Though subsequent peers work fine.)
+        // silent. (Though subsequent peers work fine.) This only affects naf janus adapter
+        // not mediasoup.
         //
         // This hooks up a simple audio pipeline to push a short tone over the WebRTC
         // media stream as its created to mitigate this Safari bug.
@@ -1443,16 +1456,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         // other user joins. If a user is in the room and Safari user joins,
         // then Safari can fail to receive audio from a single peer (it does not seem
         // to be related to silence, but may be a factor.)
-        /*const ctx = THREE.AudioContext.getContext();
-        const oscillator = ctx.createOscillator();
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.01, ctx.currentTime);
-        const dest = ctx.createMediaStreamDestination();
-        oscillator.connect(gain);
-        gain.connect(dest);
-        oscillator.start();
-        const stream = dest.stream;
-        const track = stream.getAudioTracks()[0];*/
+        let track, oscillator;
+
+        if (adapter instanceof JanusAdapter) {
+          const ctx = THREE.AudioContext.getContext();
+          const oscillator = ctx.createOscillator();
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.01, ctx.currentTime);
+          const dest = ctx.createMediaStreamDestination();
+          oscillator.connect(gain);
+          gain.connect(dest);
+          oscillator.start();
+          const stream = dest.stream;
+          const track = stream.getAudioTracks()[0];
+        }
+
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
         setupPeerConnectionConfig(adapter, janusHost, janusTurn);
@@ -1461,19 +1479,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Stop the tone after we've connected, which seems to mitigate the issue without actually
         // having to keep this playing and using bandwidth.
-        /*scene.addEventListener(
+        scene.addEventListener(
           "didConnectToNetworkedScene",
           () => {
-            oscillator.stop();
-            track.enabled = false;
+            if (oscillator) {
+              oscillator.stop();
+            }
+
+            if (track) {
+              track.enabled = false;
+            }
           },
           { once: true }
         );
 
-        await adapter.setLocalMediaStream(stream);*/
+        await adapter.setLocalMediaStream(stream);
       });
-      subscriptions.setHubChannel(hubChannel);
 
+      subscriptions.setHubChannel(hubChannel);
       subscriptions.setSubscribed(data.subscriptions.web_push);
 
       remountUI({
