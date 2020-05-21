@@ -1458,18 +1458,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         // to be related to silence, but may be a factor.)
         let track, oscillator;
 
-        if (adapter instanceof JanusAdapter) {
-          const ctx = THREE.AudioContext.getContext();
-          const oscillator = ctx.createOscillator();
-          const gain = ctx.createGain();
-          gain.gain.setValueAtTime(0.01, ctx.currentTime);
-          const dest = ctx.createMediaStreamDestination();
-          oscillator.connect(gain);
-          gain.connect(dest);
-          oscillator.start();
-          const stream = dest.stream;
-          const track = stream.getAudioTracks()[0];
-        }
+        // TODO only do this for janus
+        /*const ctx = THREE.AudioContext.getContext();
+        oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.01, ctx.currentTime);
+        const dest = ctx.createMediaStreamDestination();
+        oscillator.connect(gain);
+        gain.connect(dest);
+        oscillator.start();
+        const stream = dest.stream;
+        track = stream.getAudioTracks()[0];*/
 
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
