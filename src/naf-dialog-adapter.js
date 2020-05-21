@@ -2,10 +2,6 @@ import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
 
-function nextTick() {
-  return new Promise(resolve => setTimeout(resolve, 0));
-}
-
 // NOTE this adapter does not properly fire the onOccupantsReceived events since those are only needed for
 // data channels, which are not yet supported. To fire that event, this class would need to keep a list of
 // occupants around and manage it.
@@ -60,8 +56,9 @@ export default class DialogAdapter {
     this._consumers = new Map();
     this._frozenUpdates = new Map();
     this._pendingMediaRequests = new Map();
-    this._initialAudioConsumerPromise = null;
     this._micEnabled = true;
+    this._initialAudioConsumerPromise = null;
+    this._initialAudioConsumerResolvers = new Map();
   }
 
   setForceTcp(forceTcp) {
@@ -114,7 +111,13 @@ export default class DialogAdapter {
 
     const protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
     this._protoo = new protooClient.Peer(protooTransport);
-    this._protoo.on("open", () => this._joinRoom());
+
+    await new Promise(res => {
+      this._protoo.on("open", async () => {
+        await this._joinRoom();
+        res();
+      });
+    });
 
     this._protoo.on("disconnected", () => {
       this._closed = true;
@@ -245,10 +248,6 @@ export default class DialogAdapter {
       }
     });
 
-    // Need to wait for the initial audio consumer promise to be initialized
-    // based upon setInitialOccupants being called from outer code, which determines which
-    // occupants to wait on.
-    while (!this._initialAudioConsumerPromise) await nextTick();
     await Promise.all([this.updateTimeOffset(), this._initialAudioConsumerPromise]);
   }
 
@@ -338,28 +337,6 @@ export default class DialogAdapter {
     this._reconnectingListener = reconnectingListener;
     this._reconnectedListener = reconnectedListener;
     this._reconnectionErrorListener = reconnectionErrorListener;
-  }
-
-  setInitialOccupants(occupants) {
-    if (this._initialAudioConsumerResolvers) return;
-
-    // Initial occupants are assumed to be the set of people in the room, so set up promises
-    // to resolve to ensure we can wait for audio consumers to initialize before yielding to connect.
-    const promises = [];
-
-    if (!this._initialAudioConsumerResolvers) {
-      this._initialAudioConsumerResolvers = new Map();
-
-      for (let i = 0; i < occupants.length; i++) {
-        const promise = new Promise(res => {
-          this._initialAudioConsumerResolvers.set(occupants[i], res);
-        });
-
-        promises.push(promise);
-      }
-    }
-
-    this._initialAudioConsumerPromise = Promise.all(promises);
   }
 
   syncOccupants() {
@@ -471,14 +448,25 @@ export default class DialogAdapter {
           .catch(errback);
       });
 
-      await this._protoo.request("join", {
+      const { peers } = await this._protoo.request("join", {
         displayName: this._clientId,
         device: this._device,
         rtpCapabilities: this._mediasoupDevice.rtpCapabilities,
         sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined
       });
 
+      const promises = [];
+
+      for (let i = 0; i < peers.length; i++) {
+        const { id, hasProducers } = peers[i];
+        if (!hasProducers) continue;
+
+        const promise = new Promise(res => this._initialAudioConsumerResolvers.set(id, res));
+        promises.push(promise);
+      }
+
       this._connectSuccess(this._clientId);
+      this._initialAudioConsumerPromise = Promise.all(promises);
 
       if (this._localMediaStream) {
         this.createMissingProducers(this._localMediaStream);
@@ -613,12 +601,12 @@ export default class DialogAdapter {
     this.serverTimeRequests++;
 
     if (this.serverTimeRequests <= 10) {
-      this.timeOffsets.push(timeOffset);
+      this._timeOffsets.push(timeOffset);
     } else {
-      this.timeOffsets[this.serverTimeRequests % 10] = timeOffset;
+      this._timeOffsets[this.serverTimeRequests % 10] = timeOffset;
     }
 
-    this.avgTimeOffset = this.timeOffsets.reduce((acc, offset) => (acc += offset), 0) / this.timeOffsets.length;
+    this.avgTimeOffset = this._timeOffsets.reduce((acc, offset) => (acc += offset), 0) / this._timeOffsets.length;
 
     if (this.serverTimeRequests > 10) {
       debug(`new server time offset: ${this.avgTimeOffset}ms`);

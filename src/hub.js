@@ -1304,19 +1304,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
           }
 
-          if (!NAF.connection.isConnected()) {
-            while (!NAF.connection.adapter) await nextTick();
-
-            if (NAF.connection.adapter.setInitialOccupants) {
-              NAF.connection.adapter.setInitialOccupants(requestedOccupants);
-            }
-          }
-
           while (!NAF.connection.isConnected()) await nextTick();
-
-          if (NAF.connection.adapter) {
-            NAF.connection.adapter.syncOccupants(requestedOccupants);
-          }
+          NAF.connection.adapter.syncOccupants(requestedOccupants);
         };
 
         hubChannel.presence.onSync(() => {
