@@ -455,18 +455,17 @@ export default class DialogAdapter {
         sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined
       });
 
-      const promises = [];
+      const audioConsumerPromises = [];
 
+      // Create a promise that will be resolved once we attach to all the initial consumers.
+      // This will gate the connection flow until all voices will be heard.
       for (let i = 0; i < peers.length; i++) {
-        const { id, hasProducers } = peers[i];
-        if (!hasProducers) continue;
-
-        const promise = new Promise(res => this._initialAudioConsumerResolvers.set(id, res));
-        promises.push(promise);
+        if (!peers[i].hasProducers) continue;
+        audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peers[i].id, res)));
       }
 
       this._connectSuccess(this._clientId);
-      this._initialAudioConsumerPromise = Promise.all(promises);
+      this._initialAudioConsumerPromise = Promise.all(audioConsumerPromises);
 
       if (this._localMediaStream) {
         this.createMissingProducers(this._localMediaStream);
