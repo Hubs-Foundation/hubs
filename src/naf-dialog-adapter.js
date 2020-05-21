@@ -52,7 +52,7 @@ export default class DialogAdapter {
     this._initialAudioConsumerPromise = null;
     this._initialAudioConsumerResolvers = new Map();
     this._blockedClients = new Map();
-    this.occupants = [];
+    this.occupants = []; // This is a public field
   }
 
   setForceTcp(forceTcp) {
