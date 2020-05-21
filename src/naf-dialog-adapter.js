@@ -255,7 +255,6 @@ export default class DialogAdapter {
   }
 
   removeConsumer(consumerId) {
-    // TODO remove tracks from local media streams if needed, might not since they'll just be dead tracks.
     this._consumers.delete(consumerId);
   }
 
@@ -333,20 +332,6 @@ export default class DialogAdapter {
       const routerRtpCapabilities = await this._protoo.request("getRouterRtpCapabilities");
 
       await this._mediasoupDevice.load({ routerRtpCapabilities });
-
-      // NOTE: Stuff to play remote audios due to browsers' new autoplay policy.
-      //
-      // Just get access to the mic and DO NOT close the mic track for a while.
-      // Super hack!
-      // TODO only do this on safari?
-      /*{
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const audioTrack = stream.getAudioTracks()[0];
-
-        audioTrack.enabled = false;
-
-        setTimeout(() => audioTrack.stop(), 120000);
-      }*/
 
       // Create mediasoup Transport for sending (unless we don't want to produce).
       const sendTransportInfo = await this._protoo.request("createWebRtcTransport", {
