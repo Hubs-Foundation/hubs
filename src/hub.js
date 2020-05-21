@@ -321,7 +321,6 @@ function setupPeerConnectionConfig(adapter, host, turn) {
   const forceTurn = qs.get("force_turn");
   const forceTcp = qs.get("force_tcp");
   const peerConnectionConfig = {};
-  turn.enabled = false; // TODO remove
 
   if (turn && turn.enabled) {
     const iceServers = [];
@@ -493,6 +492,10 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   }
 
   const hub = data.hubs[0];
+
+  // TODO remove
+  hub.host = "peaceful-ardent.quackstack2.net";
+  hub.port = "80";
 
   let embedToken = hub.embed_token;
 

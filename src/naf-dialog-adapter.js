@@ -557,7 +557,7 @@ export default class DialogAdapter {
     debug("disconnect()");
 
     // Close protoo Peer, though may already be closed if this is happening due to websocket breakdown
-    if (this._protoo.connected) {
+    if (this._protoo && this._protoo.connected) {
       this._protoo.close();
     }
 
