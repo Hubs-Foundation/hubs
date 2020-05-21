@@ -35,6 +35,7 @@ function nextTick() {
 // - remove active speaker stuff
 // - remove score stuff
 // - remove occupant dependency for bot mode
+// - join with initial mute not working
 
 // Based upon mediasoup-demo RoomClient
 
@@ -60,6 +61,7 @@ export default class DialogAdapter {
     this._frozenUpdates = new Map();
     this._pendingMediaRequests = new Map();
     this._initialAudioConsumerPromise = null;
+    this._micEnabled = true;
   }
 
   setForceTcp(forceTcp) {
@@ -507,10 +509,18 @@ export default class DialogAdapter {
             this._micProducer.replaceTrack(track);
           }
         } else {
+          if (!this._micEnabled) {
+            track.enabled = false;
+          }
+
           this._micProducer = await this._sendTransport.produce({
             track,
             codecOptions: { opusStereo: false, opusDtx: true }
           });
+
+          if (!this._micEnabled) {
+            this._micProducer.pause();
+          }
         }
       } else {
         sawVideo = true;
@@ -554,6 +564,8 @@ export default class DialogAdapter {
         this._micProducer.pause();
       }
     }
+
+    this._micEnabled = enabled;
   }
 
   setWebRtcOptions() {
