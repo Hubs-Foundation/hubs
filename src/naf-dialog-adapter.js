@@ -59,6 +59,7 @@ export default class DialogAdapter {
     this._micEnabled = true;
     this._initialAudioConsumerPromise = null;
     this._initialAudioConsumerResolvers = new Map();
+    this._peerIds = [];
   }
 
   setForceTcp(forceTcp) {
@@ -114,28 +115,14 @@ export default class DialogAdapter {
 
     await new Promise(res => {
       this._protoo.on("open", async () => {
+        this._closed = false;
         await this._joinRoom();
         res();
       });
     });
 
-    this._protoo.on("disconnected", () => {
-      this._closed = true;
-
-      if (this._sendTransport) {
-        this._sendTransport.close();
-        this._sendTransport = null;
-      }
-
-      if (this._recvTransport) {
-        this._recvTransport.close();
-        this._recvTransport = null;
-      }
-    });
-
-    this._protoo.on("close", () => {
-      this.close();
-    });
+    this._protoo.on("disconnected", () => this.disconnect());
+    this._protoo.on("close", () => this.disconnect());
 
     // eslint-disable-next-line no-unused-vars
     this._protoo.on("request", async (request, accept, reject) => {
@@ -198,6 +185,7 @@ export default class DialogAdapter {
         case "newPeer": {
           const peer = notification.data;
           this._onOccupantConnected(peer.id);
+          this._peerIds.push(peer.id);
 
           break;
         }
@@ -205,6 +193,7 @@ export default class DialogAdapter {
         case "peerClosed": {
           const { peerId } = notification.data;
           this._onOccupantDisconnected(peerId);
+
           const pendingMediaRequests = this._pendingMediaRequests.get(peerId);
 
           if (pendingMediaRequests) {
@@ -230,6 +219,8 @@ export default class DialogAdapter {
 
             this._initialAudioConsumerResolvers.delete(peerId);
           }
+
+          this._peerIds = this._peerIds.filter(id => id !== peerId);
 
           break;
         }
@@ -456,12 +447,15 @@ export default class DialogAdapter {
       });
 
       const audioConsumerPromises = [];
+      this._peerIds = [];
 
       // Create a promise that will be resolved once we attach to all the initial consumers.
       // This will gate the connection flow until all voices will be heard.
       for (let i = 0; i < peers.length; i++) {
+        const peerId = peers[i].id;
+        this._peerIds.push(peerId);
         if (!peers[i].hasProducers) continue;
-        audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peers[i].id, res)));
+        audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peerId, res)));
       }
 
       this._connectSuccess(this._clientId);
@@ -493,6 +487,7 @@ export default class DialogAdapter {
         // TODO multiple audio tracks?
         if (this._micProducer) {
           if (this._micProducer.track !== track) {
+            this._micProducer.track.stop();
             this._micProducer.replaceTrack(track);
           }
         } else {
@@ -500,10 +495,14 @@ export default class DialogAdapter {
             track.enabled = false;
           }
 
+          // stopTracks = false because otherwise the track will end during a temporary disconnect
           this._micProducer = await this._sendTransport.produce({
             track,
+            stopTracks: false,
             codecOptions: { opusStereo: false, opusDtx: true }
           });
+
+          this._micProducer.on("transportclose", () => (this._micProducer = null));
 
           if (!this._micEnabled) {
             this._micProducer.pause();
@@ -514,14 +513,20 @@ export default class DialogAdapter {
 
         if (this._videoProducer) {
           if (this._videoProducer.track !== track) {
+            this._videoProducer.track.stop();
             this._videoProducer.replaceTrack(track);
           }
         } else {
           // TODO simulcasting
+
+          // stopTracks = false because otherwise the track will end during a temporary disconnect
           this._videoProducer = await this._sendTransport.produce({
             track,
+            stopTracks: false,
             codecOptions: { videoGoogleStartBitrate: 1000 }
           });
+
+          this._videoProducer.on("transportclose", () => (this._videoProducer = null));
         }
       }
 
@@ -568,17 +573,25 @@ export default class DialogAdapter {
 
     this._closed = true;
 
-    debug("close()");
+    for (let i = 0; i < this._peerIds.length; i++) {
+      const peerId = this._peerIds[i];
+      if (peerId === this._clientId) continue;
+      this._onOccupantDisconnected(peerId);
+    }
 
-    // Close protoo Peer
-    this._protoo.close();
+    this._peerIds = [];
+
+    debug("disconnect()");
+
+    // Close protoo Peer, though may already be closed if this is happening due to websocket breakdown
+    if (this._protoo.connected) {
+      this._protoo.close();
+    }
 
     // Close mediasoup Transports.
     if (this._sendTransport) this._sendTransport.close();
 
     if (this._recvTransport) this._recvTransport.close();
-
-    // TODO call removeOccupant on all the occupants
   }
 
   async updateTimeOffset() {
