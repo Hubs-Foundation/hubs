@@ -238,19 +238,11 @@ AFRAME.registerComponent("personal-space-invader", {
     }
 
     this.disabled = true;
-    this.updateBoneVisibility();
   },
 
   enable() {
     this.disabled = false;
     this.applyInvasionToMesh(this.invading);
-    this.updateBoneVisibility();
-  },
-
-  updateBoneVisibility() {
-    // HACK, bone visibility typically takes a tick to update, but since we want to be able
-    // to have enable() and disable() be reflected this frame, we need to do it immediately.
-    this.el.components["bone-visibility"] && this.el.components["bone-visibility"].tick();
   },
 
   applyInvasionToMesh(invading) {
