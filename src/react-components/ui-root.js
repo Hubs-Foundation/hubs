@@ -620,9 +620,6 @@ class UIRoot extends Component {
     if (this.state.audioTrack) {
       this.state.audioTrack.stop();
     }
-    if (this.state.audioTrackClone) {
-      this.state.audioTrackClone.stop();
-    }
 
     constraints.audio.echoCancellation =
       window.APP.store.state.preferences.disableEchoCancellation === true ? false : true;
@@ -650,9 +647,14 @@ class UIRoot extends Component {
     }
 
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      const audioTrack = mediaStream.getAudioTracks()[0];
-      this.setState({ audioTrack });
+      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      const audioSystem = this.props.scene.systems["hubs-systems"].audioSystem;
+      audioSystem.addStreamToOutboundAudio("microphone", newStream);
+      const mediaStream = audioSystem.outboundStream;
+      const audioTrack = newStream.getAudioTracks()[0];
+
+      this.setState({ audioTrack, mediaStream });
 
       if (/Oculus/.test(navigator.userAgent)) {
         // HACK Oculus Browser 6 seems to randomly end the microphone audio stream. This re-creates it.
@@ -662,23 +664,15 @@ class UIRoot extends Component {
             "Oculus Browser 6 bug hit: Audio stream track ended without calling stop. Recreating audio stream."
           );
 
-          const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-          const audioTrack = mediaStream.getAudioTracks()[0];
-          const audioTrackClone = audioTrack.clone();
+          const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+          const audioTrack = newStream.getAudioTracks()[0];
 
-          await NAF.connection.adapter.setLocalMediaStream(mediaStream);
+          audioSystem.addStreamToOutboundAudio("microphone", newStream);
 
-          if (this.props.scene.is("muted")) {
-            console.warn("re-muting microphone");
-            NAF.connection.adapter.enableMicrophone(false);
-            audioTrack.enabled = false;
-          }
+          this.setState({ audioTrack });
 
-          this.setState({ mediaStream, audioTrack, audioTrackClone });
+          this.props.scene.emit("local-media-stream-created");
 
-          const mediaStreamForMicAnalysis = new MediaStream();
-          mediaStreamForMicAnalysis.addTrack(audioTrackClone);
-          this.props.scene.emit("local-media-stream-created", { mediaStream: mediaStreamForMicAnalysis });
           audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
         };
 
@@ -688,31 +682,23 @@ class UIRoot extends Component {
       return true;
     } catch (e) {
       // Error fetching audio track, most likely a permission denial.
+      console.error("Error during getUserMedia: ", e);
       this.setState({ audioTrack: null });
       return false;
     }
   };
 
   setupNewMediaStream = async () => {
-    const mediaStream = new MediaStream();
-
     await this.fetchMicDevices();
 
     // we should definitely have an audioTrack at this point unless they denied mic access
-    if (this.state.audioTrack) {
-      mediaStream.addTrack(this.state.audioTrack);
-      const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForMediaStream(mediaStream));
+    if (this.state.mediaStream) {
+      const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForMediaStream(this.state.mediaStream));
       if (micDeviceId) {
         this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
       }
-      const mediaStreamForMicAnalysis = new MediaStream();
-      const audioTrackClone = this.state.audioTrack.clone();
-      this.setState({ audioTrackClone });
-      mediaStreamForMicAnalysis.addTrack(audioTrackClone);
-      this.props.scene.emit("local-media-stream-created", { mediaStream: mediaStreamForMicAnalysis });
+      this.props.scene.emit("local-media-stream-created");
     }
-
-    this.setState({ mediaStream });
   };
 
   onMicGrantButton = async () => {
