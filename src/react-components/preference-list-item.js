@@ -32,6 +32,10 @@ function sanitize(s) {
     return s;
   }
 }
+function countSignificantDigits(s) {
+  const split = s.split("."); // Assume input is sanitized.
+  return (split.length > 1 && split[1].length) || 0; // Significant means however many digits the user typed after the dot, even if they typed a 0
+}
 
 export class NumberRangeSelector extends Component {
   static propTypes = {
@@ -44,19 +48,30 @@ export class NumberRangeSelector extends Component {
     storeKey: PropTypes.string
   };
   state = {
+    isFocused: false,
     isDragging: false,
-    displayValue: ""
+    displayValue: "",
+    digitsFromUser: 0
   };
   constructor(props) {
     super(props);
     this.myRoot = React.createRef();
     this.stopDragging = this.stopDragging.bind(this);
     this.drag = this.drag.bind(this);
+    this.storeUpdated = this.storeUpdated.bind(this);
   }
 
-  storeUpdated = () => {
+  storeUpdated() {
+    if (!this.state.isFocused) {
+      const currentValue =
+        this.props.store.state.preferences[this.props.storeKey] !== undefined
+          ? this.props.store.state.preferences[this.props.storeKey]
+          : this.props.defaultNumber;
+      const digits = Math.max(this.state.digitsFromUser, this.props.digits);
+      this.setState({ displayValue: currentValue.toFixed(digits) });
+    }
     this.forceUpdate();
-  };
+  }
 
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
@@ -107,12 +122,17 @@ export class NumberRangeSelector extends Component {
             }}
             onBlur={() => {
               if (this.props.store.state.preferences[this.props.storeKey] === undefined) {
-                this.setState({ displayValue: this.props.defaultNumber });
+                this.setState({ displayValue: this.props.defaultNumber, isFocused: false });
+              } else {
+                this.setState({ isFocused: false });
               }
+            }}
+            onFocus={() => {
+              this.setState({ isFocused: true });
             }}
             onChange={e => {
               const sanitizedInput = sanitize(e.target.value);
-              this.setState({ displayValue: sanitizedInput });
+              this.setState({ displayValue: sanitizedInput, digitsFromUser: countSignificantDigits(sanitizedInput) });
               const numberOrReset = isNaN(parseFloat(sanitizedInput)) ? undefined : parseFloat(sanitizedInput);
               this.props.store.update({
                 preferences: { [this.props.storeKey]: numberOrReset }
@@ -125,7 +145,7 @@ export class NumberRangeSelector extends Component {
           className={classNames(styles.rangeSlider)}
           onMouseDown={e => {
             e.preventDefault();
-            this.setState({ isDragging: true });
+            this.setState({ isDragging: true, digitsFromUser: 0 });
             const t = Math.max(
               0,
               Math.min((e.clientX - this.myRoot.current.offsetLeft) / this.myRoot.current.clientWidth, 1)
@@ -145,9 +165,9 @@ export class NumberRangeSelector extends Component {
             value={currentValue}
             onChange={e => {
               const num = round(e.target.value);
-              this.setState({ displayValue: num.toFixed(this.props.digits) });
+              this.setState({ displayValue: num.toFixed(this.props.digits), digitsFromUser: 0 });
               this.props.store.update({
-                preferences: { [this.props.storeKey]: num }
+                preferences: { [this.props.storeKey]: parseFloat(num.toFixed(this.props.digits)) }
               });
             }}
           />
@@ -293,6 +313,7 @@ export class PreferenceListItem extends Component {
     prefType: PropTypes.number,
     min: PropTypes.number,
     max: PropTypes.number,
+    digits: PropTypes.number,
     step: PropTypes.number,
     onChange: PropTypes.func,
     options: PropTypes.array,
@@ -339,6 +360,7 @@ export class PreferenceListItem extends Component {
           <NumberRangeSelector
             min={this.props.min}
             max={this.props.max}
+            digits={this.props.digits}
             step={this.props.step}
             store={this.props.store}
             storeKey={this.props.storeKey}
