@@ -293,6 +293,7 @@
     "preferences.disableEchoCancellation": "Disable microphone echo cancellation (requires restart)",
     "preferences.disableNoiseSuppression": "Disable microphone noise supression (requires restart)",
     "preferences.disableAutoGainControl": "Disable microphone automatic gain control (requires restart)",
+    "preferences.invertTouchscreenCameraMove": "Invert direction of camera movement for touchscreens",
     "settings.return-to-vr": "Return to VR",
     "settings.change-avatar": "Set Name & Avatar",
     "settings.change-scene": "Choose a Scene",

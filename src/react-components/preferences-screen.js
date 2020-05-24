@@ -86,6 +86,7 @@ export default class PreferencesScreen extends Component {
     ].map(preferenceListItem);
 
     const touchscreen = [
+      { key: "invertTouchscreenCameraMove", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "enableOnScreenJoystickLeft", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "enableOnScreenJoystickRight", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
     ].map(preferenceListItem);
