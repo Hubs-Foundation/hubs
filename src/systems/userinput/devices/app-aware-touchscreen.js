@@ -176,13 +176,13 @@ export class AppAwareTouchscreenDevice {
         );
         break;
       case MOVE_CAMERA_JOB:
-		if (window.APP.store.state.preferences.invertTouchscreenCameraMove) {
-        	assignment.delta[0] += touch.clientX - assignment.clientX;
-        	assignment.delta[1] += touch.clientY - assignment.clientY;
-		} else {
+	if (window.APP.store.state.preferences.invertTouchscreenCameraMove) {
+            assignment.delta[0] += touch.clientX - assignment.clientX;
+            assignment.delta[1] += touch.clientY - assignment.clientY;
+	} else {
             assignment.delta[0] -= touch.clientX - assignment.clientX;
             assignment.delta[1] -= touch.clientY - assignment.clientY;
-		}
+	}
         assignment.clientX = touch.clientX;
         assignment.clientY = touch.clientY;
         break;
