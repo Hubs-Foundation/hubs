@@ -601,9 +601,9 @@
     "audio.subtitle-desktop": "确认HMD（头戴式显示器）扬声器输出",
     "audio.subtitle-mobile": "建议配带耳机",
     "audio.enter-now": "现在进入",
-    "audio.hmd-mic-warning": "你的HMD（头戴式显示器）"话筒没有选中
+    "audio.hmd-mic-warning": "你的HMD（头戴式显示器）话筒没有选中",
     "audio.grant-title": "授权话筒",
-    "audio.grant-subtitle": "授权的话筒可以被其他人听见,
+    "audio.grant-subtitle": "授权的话筒可以被其他人听见",
     "audio.granted-title": "已授权话筒",
     "audio.granted-subtitle": "你可以在游戏中静音",
     "audio.granted-next": "接下来",
