@@ -1,4 +1,4 @@
-{
+﻿{
   "en": {
     "app-name": "App",
     "editor-name": "Scene Editor",
@@ -457,7 +457,7 @@
     "sign-in.mute-user-complete": "你已经登陆。",
     "sign-in.kick-user": "只有登陆才可以把他人踢出房间。",
     "sign-in.kick-user-complete": "你已经登陆。",
-    "sign-in.add-owner": "只有登陆才可以指定主持人。,
+    "sign-in.add-owner": "只有登陆才可以指定主持人。",
     "sign-in.add-owner-complete": "你已经登陆。",
     "sign-in.remove-owner": "只有登陆才可以指定主持人。",
     "sign-in.remove-owner-complete": "你已经登陆。",
