@@ -1,6 +1,8 @@
+// Post-processing 'negative' effect
+
 import { Color } from "three";
 
-var CustomShader = {
+var NegativeScreenShader = {
 
 	uniforms: {
 		tDiffuse: { value: null },
@@ -26,4 +28,4 @@ var CustomShader = {
 	`
 };
 
-export { CustomShader }
+export { NegativeScreenShader }

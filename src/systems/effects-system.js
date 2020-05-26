@@ -1,8 +1,11 @@
+// Used for screen-space effect shaders
+// and also handles updating uniforms (time, resolution) for all shaders
+
 // Adapted from https://gist.github.com/donmccurdy/31560945d5723737e6c656a2974ab628
 
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { CustomShader } from './effects/CustomShader.js';
+import { NegativeScreenShader } from '../shaders/NegativeScreenShader.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { Vector2 } from 'three';
@@ -29,7 +32,7 @@ export class EffectsSystem {
       new RenderPass(scene, camera),
       // UnrealBloomPass(resolution, strength, radius, threshold)
       new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.5, 4.4, 0.9),
-      //new ShaderPass(CustomShader, 'tDiffuse'),
+      //new ShaderPass(NegativeScreenShader, 'tDiffuse'),
     ];
     passes.slice(-1).renderToScreen = true;
 
@@ -39,12 +42,30 @@ export class EffectsSystem {
     this.t = 0;
     this.dt = 0;
 
+    this.shaders = [];
+
     this.bind();
+
+    window.addEventListener('resize', this.onWindowResize, false );
+  }
+
+  onWindowResize( event ) {
+    this.shaders.forEach(shader => {
+      //console.log(shader)
+      shader.uniforms.resolution.value.x = window.innerWidth;
+      shader.uniforms.resolution.value.y = window.innerHeight;
+    })
   }
 
   tick(t, dt) {
     this.t = t;
     this.dt = dt;
+
+    // update shaders
+    this.shaders.forEach(shader => {
+      //console.log(shader)
+      shader.uniforms.time.value = t;  
+    })
   }
 
   /**
@@ -66,5 +87,11 @@ export class EffectsSystem {
         isDigest = false;
       }
     };
+  }
+
+  registerShader(shader) {
+    shader.uniforms.resolution.value = new THREE.Vector2(window.innerWidth, window.innerHeight);
+    
+    this.shaders.push(shader)
   }
 }
