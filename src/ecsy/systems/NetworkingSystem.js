@@ -14,8 +14,9 @@ const originalDataChannelSubs = {
 const messageQueues = {
   removeEntity: [],
   updateEntity: [],
-  outgoingFirstSyncs: [],
-  outgoingUpdates: []
+  outgoingClientSyncs: [],
+  outgoingFullSyncs: [],
+  outgoingPartialUpdates: []
 };
 
 const onMessageReceived = (_fromClientId, dataType, data, _source) => {
@@ -54,6 +55,22 @@ dataChannelSubs.um = handler;
 dataChannelSubs.u = handler;
 dataChannelSubs.r = handler;
 
+function takeOwnership(entity) {
+  const networked = entity.getMutableComponent(Networked);
+  const owner = networked.owner;
+  const lastOwnerTime = networked.lastOwnerTime;
+  const now = NAF.connection.getServerTime();
+
+  if (owner && owner !== NAF.clientId && lastOwnerTime < now) {
+    networked.lastOwnerTime = now;
+    networked.owner = NAF.clientId;
+    networked.needsFullSync = true;
+    return true;
+  }
+
+  return false;
+}
+
 export class NetworkingReceiveSystem extends System {
   static queries = {
     networkingState: {
@@ -65,6 +82,21 @@ export class NetworkingReceiveSystem extends System {
     sceneRootEntities: {
       components: [SceneRootTag]
     }
+  };
+
+  constructor(world, params) {
+    super(world, params);
+
+    // TODO: Systems need a dispose method where we remove these event listeners
+    document.body.addEventListener("clientDisconnected", this.onClientDisconnected);
+
+    this.disconnectedClients = [];
+  }
+
+  onClientDisconnected = event => {
+    const clientId = event.detail.clientId;
+    this.disconnectedClients.push(clientId);
+    console.log("client disconnected", clientId);
   };
 
   execute() {
@@ -109,7 +141,8 @@ export class NetworkingReceiveSystem extends System {
       const entity = networkingState.entities[networkId];
 
       if (entity) {
-        const template = networkingState.templates[entity.template];
+        const networked = entity.getComponent(Networked);
+        const template = networkingState.templates[networked.template];
         template.disposeEntity(entity);
         delete networkingState.entities[networkId];
       } else {
@@ -117,7 +150,28 @@ export class NetworkingReceiveSystem extends System {
       }
     }
 
-    // TODO: Handle disconnect and reconnect send/destroy entities
+    const networkedEntities = this.queries.networkedEntities.results;
+
+    for (let i = networkedEntities.length - 1; i >= 0; i--) {
+      const entity = networkedEntities[i];
+      const networked = entity.getComponent(Networked);
+
+      for (let i = 0; i < this.disconnectedClients.length; i++) {
+        const clientId = this.disconnectedClients[i];
+
+        if (networked.creator === clientId) {
+          const persist = networked.persistent && (networked.owner === NAF.clientId || takeOwnership(networked));
+
+          console.log("removing entity after disconnect", clientId, persist);
+
+          if (!persist) {
+            const template = networkingState.templates[networked.template];
+            template.disposeEntity(entity);
+            delete networkingState.entities[networked.networkId];
+          }
+        }
+      }
+    }
   }
 }
 
@@ -132,6 +186,23 @@ export class NetworkingSendSystem extends System {
         removed: true
       }
     }
+  };
+
+  constructor(world, params) {
+    super(world, params);
+
+    // TODO: Systems need a dispose method where we remove these event listeners
+    document.body.addEventListener("clientConnected", this.onClientConnected);
+    document.body.addEventListener("clientDisconnected", this.onClientDisconnected);
+
+    this.connectedClients = [];
+    this.disconnectedClients = [];
+    this.entitiesToRemove = [];
+  }
+
+  onClientConnected = event => {
+    const clientId = event.detail.clientId;
+    this.connectedClients.push(clientId);
   };
 
   execute(_dt, time) {
@@ -160,18 +231,28 @@ export class NetworkingSendSystem extends System {
 
       const networkId = networked.networkId;
 
-      let lastSentData;
-      let isFirstSync;
+      let isFirstSync = false;
+      let isFullSync = false;
 
       if (!networkingState.entities[networkId]) {
         isFirstSync = true;
+        isFullSync = true;
         networkingState.entities[networkId] = entity;
+      }
+
+      if (networked.needsFullSync) {
+        isFullSync = true;
+      }
+
+      let lastSentData;
+
+      if (isFullSync) {
         lastSentData = networkingState.lastSentData[networkId] = {};
       } else {
         lastSentData = networkingState.lastSentData[networkId];
       }
 
-      // Gather the updated data for the entity. For the first sync this should include all data.
+      // Gather the updated data for the entity. For the first sync or full syncs this should include all data.
       // data will be undefined if there is no update.
       const data = template.gatherEntityData(entity, lastSentData);
 
@@ -186,38 +267,78 @@ export class NetworkingSendSystem extends System {
           data
         };
 
-        if (isFirstSync) {
-          messageQueues.outgoingFirstSyncs.push(message);
+        if (isFullSync) {
+          console.log("sending full sync");
+          messageQueues.outgoingFullSyncs.push(message);
         } else {
-          messageQueues.outgoingUpdates.push(message);
+          console.log("sending partial update");
+          messageQueues.outgoingPartialUpdates.push(message);
         }
 
         // Note: We only do a shallow copy of the data into the lastSentData. Keep your data flat.
         Object.assign(networkingState.lastSentData[networkId], data);
       }
+
+      if (!isFullSync) {
+        for (let i = 0; i < this.connectedClients.length; i++) {
+          const clientId = this.connectedClients[i];
+          // Avoid re-gathering data by using last sent data
+          const data = networkingState.lastSentData[networkId];
+
+          console.log("outgoing client sync");
+
+          messageQueues.outgoingClientSyncs.push({
+            targetClientId: clientId,
+            data: {
+              networkId,
+              creator: networked.creator,
+              owner: networked.owner,
+              template: templateId,
+              persistent: false,
+              isFirstSync,
+              data
+            }
+          });
+        }
+      }
+    }
+
+    for (let i = 0; i < this.entitiesToRemove.length; i++) {
+      this.entitiesToRemove[i].dispose();
     }
 
     const removedNetworkedEntities = this.queries.networkedEntities.removed;
 
     for (let i = removedNetworkedEntities.length - 1; i >= 0; i--) {
       const entity = removedNetworkedEntities[i];
-      const { networkId } = entity.getRemovedComponent(Networked);
+      const { networkId, owner } = entity.getRemovedComponent(Networked);
       delete networkingState.entities[networkId];
-      NAF.connection.broadcastData("r", { networkId, e: true });
-    }
 
-    if (messageQueues.outgoingFirstSyncs.length > 0) {
-      while (messageQueues.outgoingFirstSyncs.length > 0) {
-        const message = messageQueues.outgoingFirstSyncs.shift();
-        message.e = true;
-        NAF.connection.broadcastData("u", message);
+      if (owner === NAF.clientId) {
+        NAF.connection.broadcastData("r", { networkId, e: true });
       }
     }
 
-    if (messageQueues.outgoingUpdates.length > 0 && time - networkingState.lastUpdate > NAF.options.updateRate) {
-      NAF.connection.broadcastData("um", { d: messageQueues.outgoingUpdates, e: true });
-      networkingState.lastUpdate = time;
-      messageQueues.outgoingUpdates.length = 0;
+    while (messageQueues.outgoingClientSyncs > 0) {
+      const message = messageQueues.outgoingFullSyncs.shift();
+      message.data.e = true;
+      NAF.connection.sendDataGuaranteed(message.targetClientId, "u", message.data);
     }
+
+    while (messageQueues.outgoingFullSyncs.length > 0) {
+      const message = messageQueues.outgoingFullSyncs.shift();
+      message.e = true;
+      NAF.connection.broadcastData("u", message);
+    }
+
+    if (messageQueues.outgoingPartialUpdates.length > 0 && time - networkingState.lastUpdate > NAF.options.updateRate) {
+      NAF.connection.broadcastData("um", { d: messageQueues.outgoingPartialUpdates, e: true });
+      networkingState.lastUpdate = time;
+      messageQueues.outgoingPartialUpdates.length = 0;
+    }
+
+    this.connectedClients.length = 0;
+    this.disconnectedClients.length = 0;
+    this.entitiesToRemove.length = 0;
   }
 }
