@@ -98,6 +98,7 @@ export class WorldManager {
       .registerComponent(Rotating)
       .registerComponent(SpawnPoint)
       .registerComponent(Networked)
+      .registerComponent(NetworkingState)
       .registerComponent(SceneRootTag);
 
     this.world
