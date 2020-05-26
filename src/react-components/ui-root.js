@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
@@ -360,11 +360,16 @@ class UIRoot extends Component {
       }
     });
 
-    if (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now")) {
+    // HACK
+    // Skip the entry dialog and jump straight in
+    // (This will break for VR: TODO should be an easy fix if we want VR support)
+    this.forcedVREntryType = "2d_now";
+
+    if (this.forcedVREntryType && this.forcedVREntryType.endsWith("_now")) {
       this.props.scene.addEventListener(
         "loading_finished",
         () => {
-          setTimeout(() => this.handleForceEntry(), 1000);
+          this.handleForceEntry();
         },
         { once: true }
       );
@@ -501,13 +506,13 @@ class UIRoot extends Component {
   };
 
   handleForceEntry = () => {
-    if (!this.props.forcedVREntryType) return;
+    if (!this.forcedVREntryType) return;
 
-    if (this.props.forcedVREntryType.startsWith("daydream")) {
+    if (this.forcedVREntryType.startsWith("daydream")) {
       this.enterDaydream();
-    } else if (this.props.forcedVREntryType.startsWith("vr")) {
+    } else if (this.forcedVREntryType.startsWith("vr")) {
       this.enterVR();
-    } else if (this.props.forcedVREntryType.startsWith("2d")) {
+    } else if (this.forcedVREntryType.startsWith("2d")) {
       this.enter2D();
     }
   };
@@ -582,7 +587,7 @@ class UIRoot extends Component {
   };
 
   enterVR = async () => {
-    if (this.props.forcedVREntryType || this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.maybe) {
+    if (this.forcedVREntryType || this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.maybe) {
       await this.performDirectEntryFlow(true);
     } else {
       this.pushHistoryState("modal", "webvr");
@@ -704,7 +709,7 @@ class UIRoot extends Component {
   };
 
   beginOrSkipAudioSetup = () => {
-    const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
+    const skipAudioSetup = this.forcedVREntryType && this.forcedVREntryType.endsWith("_now");
 
     if (skipAudioSetup) {
       this.onAudioReadyButton();
@@ -1159,7 +1164,7 @@ class UIRoot extends Component {
                 onClick={e => {
                   e.preventDefault();
 
-                  if (promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType) {
+                  if (promptForNameAndAvatarBeforeEntry || !this.forcedVREntryType) {
                     this.setState({ entering: true });
                     this.props.hubChannel.sendEnteringEvent();
 
@@ -1631,6 +1636,9 @@ class UIRoot extends Component {
     const streamer = getCurrentStreamer();
     const streamerName = streamer && streamer.displayName;
 
+    // Strip out the UI completely.
+    return <Fragment></Fragment>;
+    // Not used:
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
@@ -1716,7 +1724,7 @@ class UIRoot extends Component {
                   {...props}
                   displayNameOverride={displayNameOverride}
                   finished={() => {
-                    if (this.props.forcedVREntryType) {
+                    if (this.forcedVREntryType) {
                       this.pushHistoryState();
                       this.handleForceEntry();
                     } else {
