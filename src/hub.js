@@ -284,6 +284,7 @@ function mountUI(props = {}) {
     (scene.systems.userinput.activeSets.includes(userinputSets.rightCursorHoldingPen) ||
       scene.systems.userinput.activeSets.includes(userinputSets.leftCursorHoldingPen));
   const hasActiveCamera = scene && !!scene.systems["camera-tools"].getMyCamera();
+
   const forcedVREntryType = qsVREntryType;
 
   ReactDOM.render(
