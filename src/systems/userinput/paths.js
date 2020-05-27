@@ -365,11 +365,14 @@ paths.device.webxr.right = {
   button: {
     trigger: button(webxr, "right", "trigger"),
     grip: button(webxr, "right", "grip"),
+    touchpad: button(webxr, "right", "touchpad"),
     a: button(webxr, "right", "a"),
     b: button(webxr, "right", "b"),
     thumbStick: button(webxr, "right", "thumbStick")
   },
   axis: {
+    touchpadX: `${webxr}right/axis/touchpadX`,
+    touchpadY: `${webxr}right/axis/touchpadY`,
     joyX: `${webxr}right/axis/joyX`,
     joyY: `${webxr}right/axis/joyY`
   },
@@ -380,11 +383,14 @@ paths.device.webxr.left = {
   button: {
     trigger: button(webxr, "left", "trigger"),
     grip: button(webxr, "left", "grip"),
+    touchpad: button(webxr, "left", "touchpad"),
     a: button(webxr, "left", "a"),
     b: button(webxr, "left", "b"),
     thumbStick: button(webxr, "left", "thumbStick")
   },
   axis: {
+    touchpadX: `${webxr}left/axis/touchpadX`,
+    touchpadY: `${webxr}left/axis/touchpadY`,
     joyX: `${webxr}left/axis/joyX`,
     joyY: `${webxr}left/axis/joyY`
   },
