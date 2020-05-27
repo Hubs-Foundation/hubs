@@ -1,5 +1,7 @@
 @import 'shared.scss';
 
+$fontSize: 20px;
+
 %full-screen-panel {
   position: fixed;
   top: 0px;
@@ -34,7 +36,7 @@
 
 %font-nav-item {
   font-weight: $semi-bold;
-  font-size: 20px;
+  font-size: $fontSize;
 }
 %font-nav-item-selected {
   font-weight: bold;
@@ -113,7 +115,7 @@ input::-webkit-inner-spin-button {
 }
 :local(.preference-label){
   @extend %default-font;
-  font-size: 20px;
+  font-size: $fontSize;
   font-weight: 600;
   flex-grow: 1;
 }
@@ -183,15 +185,19 @@ input::-webkit-inner-spin-button {
 :local(.dropdown) {
   @extend %dropdown;
   select {
+    font-size: $fontSize;
     @extend %dropdown-select;
   }
+}
+:local(.dropdown-arrow){
+  @extend %dropdown-arrow;
 }
 
 input[type=text],input[type=number] {
   cursor: pointer;
   @extend %default-input-field;
   line-height: 30px;
-  font-size: 20px;
+  font-size: $fontSize;
   text-align: center;
   width: 100px;
   height: 38px;

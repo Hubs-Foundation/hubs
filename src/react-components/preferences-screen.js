@@ -224,47 +224,59 @@ BooleanPreference.propTypes = {
   defaultBool: PropTypes.bool
 };
 
-class Dropdown extends React.Component {
+class Select extends React.Component {
+  static propTypes = {
+    children: PropTypes.node.isRequired,
+    value: PropTypes.string,
+    onChange: PropTypes.func
+  };
+
+  render() {
+    return (
+      <div className={styles.dropdown}>
+        <select value={this.props.value} tabIndex="0" onChange={this.props.onChange}>
+          {this.props.children}
+        </select>
+        <img
+          alt="dropdown arrow"
+          className={styles.dropdownArrow}
+          src="../assets/images/dropdown_arrow.png"
+          srcSet="../assets/images/dropdown_arrow@2x.png 2x"
+        />
+      </div>
+    );
+  }
+}
+
+class PreferenceSelect extends React.Component {
   static propTypes = {
     options: PropTypes.array,
     defaultString: PropTypes.string,
     store: PropTypes.object,
     storeKey: PropTypes.string
   };
-
   constructor(props) {
     super();
-    this.options = props.options.map((o, i) => {
-      const opts = {};
-      const key = `option_${props.storeKey}_${i}`;
-      //TODO: Aria label?
+    this.options = props.options.map(({ text, value }, i) => {
       return (
-        <option key={key} value={o.value} {...opts}>
-          {o.text}
+        <option key={`option_${props.storeKey}_${i}`} value={value}>
+          {text}
         </option>
       );
     });
   }
-
   render() {
     const storedPref = this.props.store.state.preferences[this.props.storeKey];
+    const value = storedPref === undefined || storedPref === "" ? this.props.defaultString : storedPref;
     return (
-      <div className={styles.dropdown}>
-        <select
-          value={storedPref === undefined || storedPref === "" ? this.props.defaultString : storedPref}
-          tabIndex="0"
-          onChange={e => {
-            this.props.store.update({ preferences: { [this.props.storeKey]: e.target.value } });
-          }}
-        >
-          {this.options}
-        </select>
-        <img
-          className={styles.dropdownArrow}
-          src="../assets/images/dropdown_arrow.png"
-          srcSet="../assets/images/dropdown_arrow@2x.png 2x"
-        />
-      </div>
+      <Select
+        value={value}
+        onChange={e => {
+          this.props.store.update({ preferences: { [this.props.storeKey]: e.target.value } });
+        }}
+      >
+        {this.options}
+      </Select>
     );
   }
 }
@@ -520,7 +532,7 @@ const advanced = [
   { key: "disableAutoGainControl", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
 ];
 
-function Control(itemProps, store) {
+function createControl(itemProps, store) {
   const storeKey = itemProps.key;
   const props = { store, storeKey, ...itemProps };
   switch (props.prefType) {
@@ -530,13 +542,24 @@ function Control(itemProps, store) {
     case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
       return <MaxResolutionPreferenceItem {...props} />;
     case PREFERENCE_LIST_ITEM_TYPE.SELECT: {
-      return <Dropdown {...props} />;
+      return <PreferenceSelect {...props} />;
     }
     case PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE:
       return <NumberRangeSelector {...props} />;
     default:
       return <div />;
   }
+}
+
+function createItem(itemProps, store) {
+  return (
+    <PreferenceListItem
+      control={createControl(itemProps, store)}
+      store={store}
+      storeKey={itemProps.key}
+      {...itemProps}
+    />
+  );
 }
 
 export default class PreferencesScreen extends Component {
@@ -550,17 +573,11 @@ export default class PreferencesScreen extends Component {
   };
 
   constructor(props) {
-    // TODO: This component remounts and clears the category state. We should either avoid remounting or persist the category somewhere besides state.
+    // TODO: When this component is recreated it clears its state.
+    // This happens several times as the page is loading.
+    // We should either avoid remounting or persist the category somewhere besides state.
     super();
-
-    const item = itemProps => (
-      <PreferenceListItem
-        control={Control(itemProps, props.store)}
-        store={props.store}
-        storeKey={itemProps.key}
-        {...itemProps}
-      />
-    );
+    const item = itemProps => createItem(itemProps, props.store);
     this.items = new Map([
       [CATEGORY_GENERAL, general.map(item)],
       [CATEGORY_TOUCHSCREEN, touchscreen.map(item)],
