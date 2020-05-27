@@ -109,6 +109,10 @@ export default class ObjectInfoDialog extends Component {
   };
 
   componentDidMount() {
+    this.onresize = () => {
+      this.forceUpdate();
+    };
+    window.addEventListener("resize", this.onresize);
     this.updateMediaEntities = this.updateMediaEntities.bind(this);
     this.navigateNext = this.navigateNext.bind(this);
     this.navigatePrev = this.navigatePrev.bind(this);
@@ -123,6 +127,10 @@ export default class ObjectInfoDialog extends Component {
     this.setState({ enableLights: cameraSystem.enableLights });
     this.updateMediaEntities();
     this.props.scene.addEventListener("listed_media_changed", () => setTimeout(() => this.updateMediaEntities(), 0));
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.onresize);
   }
 
   updateMediaEntities() {

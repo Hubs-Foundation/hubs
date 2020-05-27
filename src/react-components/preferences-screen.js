@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faUndo } from "@fortawesome/free-solid-svg-icons/faUndo";
 import en from "react-intl/locale-data/en";
-import { FormattedMessage, IntlProvider, addLocaleData } from "react-intl";
+import { IntlProvider, addLocaleData } from "react-intl";
 import styles from "../assets/stylesheets/preferences-screen.scss";
 import { lang, messages } from "../utils/i18n";
 
@@ -18,9 +18,14 @@ function round(step, n) {
 
 function ResetToDefaultButton({ onClick }) {
   return (
-    <button className={classNames(styles.resetToDefaultButton)} onClick={onClick}>
-      <i className={styles.flex} title="Reset to default">
-        <FontAwesomeIcon icon={faUndo} />
+    <button
+      className={styles.noDefaultButtonStyle}
+      title={messages["preferences.resetToDefault"]}
+      aria-label={messages["preferences.resetToDefault"]}
+      onClick={onClick}
+    >
+      <i className={styles.flex}>
+        <FontAwesomeIcon className={classNames(styles.resetToDefaultButton)} icon={faUndo} />
       </i>
     </button>
   );
@@ -28,6 +33,9 @@ function ResetToDefaultButton({ onClick }) {
 ResetToDefaultButton.propTypes = {
   onClick: PropTypes.func
 };
+function ResetToDefaultButtonPlaceholder() {
+  return <div className={styles.resetToDefaultButtonPlaceholder} />;
+}
 
 function sanitize(s) {
   s = s.replace(/[^0-9.]/g, "");
@@ -178,7 +186,7 @@ export class NumberRangeSelector extends Component {
             max={this.props.max}
             value={currentValue}
             onChange={e => {
-              const num = round(e.target.value);
+              const num = round(this.props.step, parseFloat(e.target.value));
               this.setState({ displayValue: num.toFixed(this.props.digits), digitsFromUser: 0 });
               this.props.store.update({
                 preferences: { [this.props.storeKey]: parseFloat(num.toFixed(this.props.digits)) }
@@ -191,20 +199,23 @@ export class NumberRangeSelector extends Component {
   }
 }
 
+function CheckboxPlaceholder() {
+  return <div className={styles.checkboxPlaceholder} />;
+}
 function BooleanPreference({ store, storeKey, defaultBool }) {
   const storedPref = store.state.preferences[storeKey];
   const value = storedPref === undefined ? defaultBool : storedPref;
   return (
-    <div className={classNames(styles.checkbox)}>
-      <input // TODO AriaLabel
-        tabIndex="0"
-        type="checkbox"
-        checked={value}
-        onChange={() => {
-          store.update({ preferences: { [storeKey]: !store.state.preferences[storeKey] } });
-        }}
-      />
-    </div>
+    <input
+      title={messages["preferences.resetToDefault"]}
+      aria-label={messages["preferences.resetToDefault"]}
+      tabIndex="0"
+      type="checkbox"
+      checked={value}
+      onChange={() => {
+        store.update({ preferences: { [storeKey]: !store.state.preferences[storeKey] } });
+      }}
+    />
   );
 }
 BooleanPreference.propTypes = {
@@ -326,15 +337,7 @@ export class PreferenceListItem extends Component {
     store: PropTypes.object,
     storeKey: PropTypes.string,
     prefType: PropTypes.number,
-    min: PropTypes.number,
-    max: PropTypes.number,
-    digits: PropTypes.number,
-    step: PropTypes.number,
-    onChange: PropTypes.func,
-    options: PropTypes.array,
-    defaultNumber: PropTypes.number,
-    defaultString: PropTypes.string,
-    defaultBool: PropTypes.bool
+    control: PropTypes.node.isRequired
   };
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
@@ -347,85 +350,55 @@ export class PreferenceListItem extends Component {
     this.forceUpdate();
   };
 
-  renderControls() {
-    switch (this.props.prefType) {
-      case PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX: {
-        return (
-          <BooleanPreference
-            store={this.props.store}
-            storeKey={this.props.storeKey}
-            defaultBool={this.props.defaultBool}
-          />
-        );
-      }
-      case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
-        return <MaxResolutionPreferenceItem store={this.props.store} />;
-      case PREFERENCE_LIST_ITEM_TYPE.SELECT: {
-        return (
-          <Dropdown
-            options={this.props.options}
-            defaultString={this.props.defaultString}
-            store={this.props.store}
-            storeKey={this.props.storeKey}
-          />
-        );
-      }
-      case PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE:
-        return (
-          <NumberRangeSelector
-            min={this.props.min}
-            max={this.props.max}
-            digits={this.props.digits}
-            step={this.props.step}
-            store={this.props.store}
-            storeKey={this.props.storeKey}
-            defaultNumber={this.props.defaultNumber}
-          />
-        );
-      default:
-        return <div />;
-    }
-  }
-
   render() {
     const isCheckbox = this.props.prefType === PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
-
+    const control = this.props.control;
+    const isSmallScreen = window.innerWidth < 600;
+    const label = <span className={styles.preferenceLabel}>{messages[`preferences.${this.props.storeKey}`]}</span>;
+    const hasPref =
+      this.props.store.state.preferences[this.props.storeKey] !== undefined ||
+      (this.props.prefType === PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION &&
+        (this.props.store.state.preferences.maxResolutionWidth !== undefined ||
+          this.props.store.state.preferences.maxResolutionHeight !== undefined));
+    const resetToDefault = hasPref ? (
+      <ResetToDefaultButton
+        onClick={() => {
+          switch (this.props.prefType) {
+            case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
+              this.props.store.update({
+                preferences: {
+                  maxResolutionWidth: undefined,
+                  maxResolutionHeight: undefined
+                }
+              });
+              break;
+            default:
+              this.props.store.update({ preferences: { [this.props.storeKey]: undefined } });
+              break;
+          }
+          this.forceUpdate();
+        }}
+      />
+    ) : (
+      <ResetToDefaultButtonPlaceholder />
+    );
+    if (!isCheckbox && isSmallScreen) {
+      return (
+        <div className={styles.vertical}>
+          {label}
+          <div className={styles.controlWithDefault}>
+            {control}
+            {resetToDefault}
+          </div>
+        </div>
+      );
+    }
     return (
-      <div
-        className={classNames(
-          {
-            [styles.preferenceListNonCheckbox]: !isCheckbox
-          },
-          styles.preferenceListItem
-        )}
-      >
-        <div className={classNames(styles.checkboxMargin)}>
-          {isCheckbox ? this.renderControls() : <span>&nbsp;</span>}
-        </div>
-        <div className={classNames(styles.part, styles.left, styles.label)}>
-          <FormattedMessage id={`preferences.${this.props.storeKey}`} />
-        </div>
-        <div className={classNames(styles.part, styles.right)}>
-          {!isCheckbox && this.renderControls()}
-          <ResetToDefaultButton
-            onClick={() => {
-              switch (this.props.prefType) {
-                case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
-                  this.props.store.update({
-                    preferences: {
-                      maxResolutionWidth: undefined,
-                      maxResolutionHeight: undefined
-                    }
-                  });
-                  break;
-                default:
-                  this.props.store.update({ preferences: { [this.props.storeKey]: undefined } });
-                  break;
-              }
-              this.forceUpdate();
-            }}
-          />
-        </div>
+      <div className={styles.horizontal}>
+        {isCheckbox ? control : <CheckboxPlaceholder />}
+        {label}
+        {!isCheckbox && control}
+        {resetToDefault}
       </div>
     );
   }
@@ -547,6 +520,25 @@ const advanced = [
   { key: "disableAutoGainControl", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
 ];
 
+function Control(itemProps, store) {
+  const storeKey = itemProps.key;
+  const props = { store, storeKey, ...itemProps };
+  switch (props.prefType) {
+    case PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX: {
+      return <BooleanPreference {...props} />;
+    }
+    case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
+      return <MaxResolutionPreferenceItem {...props} />;
+    case PREFERENCE_LIST_ITEM_TYPE.SELECT: {
+      return <Dropdown {...props} />;
+    }
+    case PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE:
+      return <NumberRangeSelector {...props} />;
+    default:
+      return <div />;
+  }
+}
+
 export default class PreferencesScreen extends Component {
   static propTypes = {
     onClose: PropTypes.func,
@@ -558,9 +550,17 @@ export default class PreferencesScreen extends Component {
   };
 
   constructor(props) {
+    // TODO: This component remounts and clears the category state. We should either avoid remounting or persist the category somewhere besides state.
     super();
 
-    const item = itemProps => <PreferenceListItem store={props.store} storeKey={itemProps.key} {...itemProps} />;
+    const item = itemProps => (
+      <PreferenceListItem
+        control={Control(itemProps, props.store)}
+        store={props.store}
+        storeKey={itemProps.key}
+        {...itemProps}
+      />
+    );
     this.items = new Map([
       [CATEGORY_GENERAL, general.map(item)],
       [CATEGORY_TOUCHSCREEN, touchscreen.map(item)],
@@ -570,9 +570,14 @@ export default class PreferencesScreen extends Component {
 
   componentDidMount() {
     window.APP.preferenceScreenIsVisible = true;
+    this.onresize = () => {
+      this.forceUpdate();
+    };
+    window.addEventListener("resize", this.onresize);
   }
   componentWillUnmount() {
     window.APP.preferenceScreenIsVisible = false;
+    window.removeEventListener("resize", this.onresize);
   }
 
   render() {
@@ -595,8 +600,8 @@ export default class PreferencesScreen extends Component {
               ))}
             </div>
           </div>
-          <div className={classNames(styles.contentContainer)}>
-            <div className={classNames(styles.scrollingContent)}>{this.items.get(this.state.category)}</div>
+          <div className={styles.contentContainer}>
+            <div className={styles.scrollingContent}>{this.items.get(this.state.category)}</div>
           </div>
         </div>
       </IntlProvider>

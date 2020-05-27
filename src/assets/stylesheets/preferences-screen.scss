@@ -1,11 +1,20 @@
 @import 'shared.scss';
 
-$smallScreenWidth : 475px;
-$itemHeight : 3.0rem;
-$hoverFontSize: 1.6rem;
-$widescreenControlsWidth: 100%;
-$widescreenBreakpoint: 600px;
-$backgroundColor: var(--full-panel-background-color);
+%full-screen-panel {
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  background: var(--full-panel-background-color);
+}
+
+:local(.preferences-panel) {
+  @extend %full-screen-panel;
+  z-index: 2;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
 
 :local(.nav-container) {
   display: flex;
@@ -49,14 +58,6 @@ $backgroundColor: var(--full-panel-background-color);
   flex-flow: row;
   align-items: center;
   justify-content: center;
-
-  input {
-    @extend %input-field;
-    width: 6em;
-    font-size: 11pt;
-    text-align: center;
-    height: 38px;
-  }
 }
 
 input[type='number'] {
@@ -68,74 +69,53 @@ input::-webkit-inner-spin-button {
   -webkit-appearance: none;
 }
 
-:local(.preference-list-non-checkbox){
-  @media (max-width: $widescreenBreakpoint) {
-    flex-direction: column;
-  }
-}
-
-:local(.preference-list-item){
+%preference-list-item {
   display: flex;
   align-items: center;
-  margin: 12px 0;
-
-  :local(.part) {
-    display: flex;
-    flex-flow: column;
-    justify-content: space-around;
-    @media( min-width:$smallScreenWidth+1 ) {
-      justify-content: space-around;
-    }
-    @media( max-width:$smallScreenWidth ) {
-      text-align: center;
-      justify-content: center;
-      align-items: center;
-    }
-  }
-  :local(.checkbox-margin) {
-    margin-right: 8px;
-    width: 48px;
-  }
-  :local(.left) {
-    flex: 1;
-    @media( min-width:$smallScreenWidth+1 ) {
-      margin-inline-end: 1rem;
-    }
-    @media( max-width:$smallScreenWidth ) {
-      margin-inline-end: 0rem;
-    }
-  }
-  :local(.right) {
-    display: flex;
-    flex-flow: row;
-  }
-  :local(.dropdown) {
-    @extend %dropdown;
-    select {
-      @extend %dropdown-select;
-      font-size: 11pt;
-      font-weight: normal;
-      height: 38px;
-      padding-left: 1em;
-      padding-right: 2.5em;
-      cursor: pointer;
-    }
-    :local(.dropdownArrow) {
-      @extend %dropdown-arrow;
-      right: 0.9em;
-    }
+  width: 100%;
+  margin-bottom: 20px;
+  &:last-child {
+    margin-bottom: 0px;
   }
 }
-
-:local(.preferences-panel) {
-  z-index: 2;
-  top: 0px;
-  width: 100%;
-  height: 100%;
-  background: var(--full-panel-background-color);
-  position: absolute;
-  display: flex;
+:local(.horizontal) {
+  @extend %preference-list-item;
+  justify-content: space-between;
+  &>*:first-child {
+    margin-left: 16px !important;
+    margin-right: 16px !important;
+  }
+  &>* {
+    margin-right: 16px !important;
+  }
+}
+:local(.vertical) {
+  @extend %preference-list-item;
   flex-flow: column;
+  justify-content: center;
+  &>*{
+    margin: 0px 16px !important;
+  }
+}
+:local(.control-with-default) {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-right: 0px;
+  &>*:first-child {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+  &>* {
+    margin-right: 16px;
+  }
+}
+:local(.preference-label){
+  @extend %default-font;
+  font-size: 20px;
+  font-weight: 600;
+  flex-grow: 1;
 }
 
 :local(.close-button) {
@@ -144,6 +124,19 @@ input::-webkit-inner-spin-button {
   top: 16px;
   left: 16px;
   position: absolute;
+}
+%reset-to-default-button-size {
+  @extend %s30x30;
+}
+:local(.reset-to-default-button) {
+  cursor: pointer;
+  @extend %no-default-button-style;
+  @extend %reset-to-default-button-size;
+  @extend %panel-widget-color;
+  @extend %action-label-color-on-hover;
+}
+:local(.reset-to-default-button-placeholder){
+  @extend %reset-to-default-button-size;
 }
 :local(.flex){
   display: flex;
@@ -154,99 +147,59 @@ input::-webkit-inner-spin-button {
 
 :local(.content-container) {
   margin-top: 18px;
-  @extend %default-font;
-  font-size: 11pt;
   overflow-y: auto;
-  font-weight: bold;
-  box-sizing: border-box;
-  height: calc(100vh - 16px);
   display: flex;
   justify-content: center;
+  max-width: 100%;
+}
 
-  @media (max-width: $widescreenBreakpoint) {
-    height: calc(100vh - 48px);
-  }
+%checkbox-size {
+  @extend %s36x36;
+}
 
-  :local(.scrolling-content) {
-    display: flex;
-    flex-flow: column;
-    max-width: 800px;
-  }
-  :local(.section-bar) {
-    width: 100%;
-    display: flex;
-    flex-flow: row;
-    justify-content: center;
-    align-items: center;
-  }
-  :local(.section-title) {
-    width: 90%;
-    display: flex;
-    flex-flow: row;
-    justify-content: flex-start;
-
-    @media (max-width: $widescreenBreakpoint) {
-      justify-content: center;
-    }
-
-    align-items: center;
-    color: var(--menu-header-text-color);
-    font-weight: normal;
-    text-transform: uppercase;
-    margin: 12px 0;
-  }
+:local(.checkbox-placeholder){
+  @extend %checkbox-size;
+}
+:local(.scrolling-content) {
+  display: flex;
+  flex-flow: column;
+  width: 800px;
+  max-width: 100%;
 
   input[type=checkbox] {
     cursor: pointer;
-    @extend %checkbox;
+    @extend %default-checkbox;
+    @extend %checkbox-size;
   }
   input[type=checkbox]:checked {
-    @extend %checkbox-checked;
+    @extend %default-checkbox-checked;
+    &::after {
+      @extend %s24x24;
+    }
+  }
+
+}
+
+:local(.dropdown) {
+  @extend %dropdown;
+  select {
+    @extend %dropdown-select;
   }
 }
 
-:local(.checkbox) {
-  display: flex;
-  align-items: center;
-  justify-content: end;
-}
-
-:local(.row) {
-  width: 90%;
-  display: flex;
-  flex-flow: row;
-  align-items: center;
-}
-:local(.row-name) {
-  display: flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: space-around;
-  width: 50%;
-  text-align: end;
-  margin-inline-end: 1rem;
-}
-
-:local(.reset-to-default-button){
-  background: transparent;
-  border: none;
-  font-size: medium;
-  padding: 0px 0px 0px 12px;
+input[type=text],input[type=number] {
   cursor: pointer;
-  appearance: none;
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  outline-style: none;
+  @extend %default-input-field;
+  line-height: 30px;
+  font-size: 20px;
+  text-align: center;
+  width: 100px;
+  height: 38px;
 }
 
 :local(.number-with-range){
   display: flex;
   flex-flow: row;
-  width: $widescreenControlsWidth;
-  @media( max-width:$smallScreenWidth ) {
-    width: 100%;
-    justify-content: center;
-  }
   justify-content: flex-start;
   align-items: center;
 
@@ -255,14 +208,6 @@ input::-webkit-inner-spin-button {
     justify-content: center;
     cursor: pointer;
 
-    input[type=text] {
-      @extend %input-field;
-      font-size: 11pt;
-      text-align: center;
-      cursor: pointer;
-      width: 6em;
-      height: 38px;
-    }
   }
   :local(.range-slider) {
     display: flex;
@@ -422,3 +367,4 @@ $ie-bottom-track-color: $track-color !default;
     }
   }
 }
+

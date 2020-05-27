@@ -1,28 +1,7 @@
 @import 'shared.scss';
 
-:local(.no-default-button-style){
-  @extend %no-default-button-style;
-}
-
 :local(.flex){
   display: flex;
-}
-
-%s44x44 {
-  width: 44px !important;
-  height: 44px !important;
-}
-
-%action-label-color-on-hover {
-  @media(hover: hover){
-    &:hover {
-      color: $action-label-color;
-    }
-  }
-}
-
-%panel-widget-color {
-  color: var(--panel-widget-color);
 }
 
 :local(.header-icon) {
@@ -32,10 +11,6 @@
   &:local(.small) {
     @extend %s32x32;
   }
-}
-
-%action-label-color {
-  color: $action-label-color;
 }
 
 :local(.action-row-icon) {
