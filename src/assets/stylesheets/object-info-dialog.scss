@@ -95,12 +95,6 @@
   }
 }
 
-%subtitle-text {
-  font-weight: normal;
-  text-transform: uppercase;
-  color: var(--panel-subtitle-color);
-}
-
 :local(.object-counter-text){
   @extend %subtitle-text;
   font-size: 32px;

@@ -425,3 +425,8 @@ $favorited-color: var(--favorited-color, $duck-yellow);
     }
   }
 }
+%subtitle-text {
+  font-weight: normal;
+  text-transform: uppercase;
+  color: var(--panel-subtitle-color);
+}
