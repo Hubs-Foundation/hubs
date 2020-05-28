@@ -454,47 +454,71 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "index.html",
         template: path.join(__dirname, "src", "index.html"),
-        chunks: ["index"]
+        chunks: ["index"],
+        minify: {
+          removeComments: false
+        }
       }),
       new HTMLWebpackPlugin({
         filename: "hub.html",
         template: path.join(__dirname, "src", "hub.html"),
         chunks: ["hub"],
-        inject: "head"
+        inject: "head",
+        minify: {
+          removeComments: false
+        }
       }),
       new HTMLWebpackPlugin({
         filename: "scene.html",
         template: path.join(__dirname, "src", "scene.html"),
         chunks: ["scene"],
-        inject: "head"
+        inject: "head",
+        minify: {
+          removeComments: false
+        }
       }),
       new HTMLWebpackPlugin({
         filename: "avatar.html",
         template: path.join(__dirname, "src", "avatar.html"),
         chunks: ["avatar"],
-        inject: "head"
+        inject: "head",
+        minify: {
+          removeComments: false
+        }
       }),
       new HTMLWebpackPlugin({
         filename: "link.html",
         template: path.join(__dirname, "src", "link.html"),
-        chunks: ["link"]
+        chunks: ["link"],
+        minify: {
+          removeComments: false
+        }
       }),
       new HTMLWebpackPlugin({
         filename: "discord.html",
         template: path.join(__dirname, "src", "discord.html"),
-        chunks: ["discord"]
+        chunks: ["discord"],
+        minify: {
+          removeComments: false
+        }
       }),
       new HTMLWebpackPlugin({
         filename: "whats-new.html",
         template: path.join(__dirname, "src", "whats-new.html"),
         chunks: ["whats-new"],
-        inject: "head"
+        inject: "head",
+        minify: {
+          removeComments: false
+        }
       }),
       new HTMLWebpackPlugin({
         filename: "cloud.html",
         template: path.join(__dirname, "src", "cloud.html"),
         chunks: ["cloud"],
-        inject: "head"
+        inject: "head",
+        minify: {
+          removeComments: false
+        }
       }),
       new CopyWebpackPlugin([
         {
