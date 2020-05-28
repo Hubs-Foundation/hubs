@@ -3,8 +3,6 @@ import { sets } from "../sets";
 import { xforms } from "./xforms";
 import { addSetsToBindings } from "./utils";
 
-const name = "/webxr/var/";
-
 const leftButton = paths.device.webxr.left.button;
 const leftAxis = paths.device.webxr.left.axis;
 const leftPose = paths.device.webxr.left.pose;
@@ -12,46 +10,40 @@ const rightButton = paths.device.webxr.right.button;
 const rightAxis = paths.device.webxr.right.axis;
 const rightPose = paths.device.webxr.right.pose;
 
-const wakeLeft = `${name}left/wake`;
-const wakeRight = `${name}right/wake`;
-const leftJoyXDeadzoned = `${name}left/joy/x/deadzoned`;
-const leftJoyYDeadzoned = `${name}left/joy/y/deadzoned`;
-const scaledLeftJoyX = `${name}left/scaledJoyX`;
-const scaledLeftJoyY = `${name}left/scaledJoyY`;
-const cursorDrop2 = `${name}right/cursorDrop2`;
-const cursorDrop1 = `${name}right/cursorDrop1`;
-const leftCursorDrop2 = `${name}left/cursorDrop2`;
-const leftCursorDrop1 = `${name}left/cursorDrop1`;
-const rightHandDrop2 = `${name}right/rightHandDrop2`;
-const rightGripRisingGrab = `${name}right/grip/RisingGrab`;
-const rightTriggerRisingGrab = `${name}right/trigger/RisingGrab`;
-const leftGripRisingGrab = `${name}left/grip/RisingGrab`;
-const leftTriggerRisingGrab = `${name}left/trigger/RisingGrab`;
-const rightDpadNorth = `${name}rightDpad/north`;
-const rightDpadSouth = `${name}rightDpad/south`;
-const rightDpadEast = `${name}rightDpad/east`;
-const rightDpadWest = `${name}rightDpad/west`;
-const rightDpadCenter = `${name}rightDpad/center`;
-const rightJoy = `${name}right/joy`;
-const rightJoyY1 = `${name}right/joyY1`;
-const rightJoyY2 = `${name}right/joyY2`;
-const rightJoyYDeadzoned = `${name}right/joy/y/deadzoned`;
-const leftDpadNorth = `${name}leftDpad/north`;
-const leftDpadSouth = `${name}leftDpad/south`;
-const leftDpadEast = `${name}leftDpad/east`;
-const leftDpadWest = `${name}leftDpad/west`;
-const leftDpadCenter = `${name}leftDpad/center`;
-const leftJoy = `${name}left/joy`;
-const characterAcceleration = "/var/webxr/nonNormalizedCharacterAcceleration";
-const rightBoost = "/var/right-webxr/boost";
-const leftBoost = "/var/left-webxr/boost";
-
-const lowerButtons = `${name}buttons/lower`;
-const upperButtons = `${name}buttons/upper`;
-
-const v = s => {
-  return "/webxr-user-vars/" + s;
-};
+const v = path => "/webxr/var/" + path;
+const wakeLeft = v("left/wake");
+const wakeRight = v("right/wake");
+const leftJoyXDeadzoned = v("left/joy/x/deadzoned");
+const leftJoyYDeadzoned = v("left/joy/y/deadzoned");
+const scaledLeftJoyX = v("left/scaledJoyX");
+const scaledLeftJoyY = v("left/scaledJoyY");
+const cursorDrop1 = v("right/cursorDrop1");
+const cursorDrop2 = v("right/cursorDrop2");
+const cursorDrop3 = v("right/cursorDrop3");
+const leftCursorDrop2 = v("left/cursorDrop2");
+const leftCursorDrop1 = v("left/cursorDrop1");
+const rightHandDrop2 = v("right/rightHandDrop2");
+const rightGripRisingGrab = v("right/grip/RisingGrab");
+const leftGripRisingGrab = v("left/grip/RisingGrab");
+const rightDpadNorth = v("rightDpad/north");
+const rightDpadSouth = v("rightDpad/south");
+const rightDpadEast = v("rightDpad/east");
+const rightDpadWest = v("rightDpad/west");
+const rightDpadCenter = v("rightDpad/center");
+const rightJoy = v("right/joy");
+const rightJoyY1 = v("right/joyY1");
+const rightJoyYDeadzoned = v("right/joy/y/deadzoned");
+const leftDpadNorth = v("leftDpad/north");
+const leftDpadSouth = v("leftDpad/south");
+const leftDpadEast = v("leftDpad/east");
+const leftDpadWest = v("leftDpad/west");
+const leftDpadCenter = v("leftDpad/center");
+const leftJoy = v("left/joy");
+const characterAcceleration = v("nonNormalizedCharacterAcceleration");
+const rightBoost = v("right/boost");
+const leftBoost = v("left/boost");
+const lowerButtons = v("buttons/lower");
+const upperButtons = v("buttons/upper");
 const leftGripPressed1 = v("leftGripPressed1");
 const leftGripPressed2 = v("leftGripPressed2");
 const rightGripPressed1 = v("rightGripPressed1");
@@ -60,6 +52,21 @@ const leftTriggerPressed1 = v("leftTriggerPressed1");
 const leftTriggerPressed2 = v("leftTriggerPressed2");
 const rightTriggerPressed1 = v("rightTriggerPressed1");
 const rightTriggerPressed2 = v("rightTriggerPressed2");
+const touchpad = v("touchpad");
+const touchpadRising = v("touchpad/rising");
+const dpadNorth = v("dpadNorth");
+const dpadSouth = v("dpadSouth");
+const dpadEast = v("dpadEast");
+const dpadWest = v("dpadWest");
+const dpadCenter = v("dpadCenter");
+const dpadCenterStrip = v("dpadCenterStrip");
+const snapRotateRight1 = v("snapRotateRight1");
+const snapRotateRight2 = v("snapRotateRight2");
+const snapRotateLeft1 = v("snapRotateLeft1");
+const snapRotateLeft2 = v("snapRotateLeft2");
+const centerStripPressed = v("centerStripPressed");
+const touchpadReleased = v("touchpadReleased");
+const lowerButtonsReleased = v("lowerButtonsReleased");
 
 export const webXRUserBindings = addSetsToBindings({
   [sets.global]: [
@@ -168,11 +175,6 @@ export const webXRUserBindings = addSetsToBindings({
       xform: xforms.copy
     },
     {
-      src: { value: rightAxis.joyY },
-      dest: { value: rightJoyY2 },
-      xform: xforms.copy
-    },
-    {
       src: {
         x: rightAxis.joyX,
         y: rightJoyY1
@@ -206,16 +208,6 @@ export const webXRUserBindings = addSetsToBindings({
       src: [leftButton.b.pressed, rightButton.b.pressed],
       dest: { value: upperButtons },
       xform: xforms.any
-    },
-    {
-      src: { value: lowerButtons },
-      dest: { value: paths.actions.ensureFrozen },
-      xform: xforms.copy
-    },
-    {
-      src: { value: lowerButtons },
-      dest: { value: paths.actions.thaw },
-      xform: xforms.falling
     },
     {
       src: { value: rightDpadWest },
@@ -332,6 +324,103 @@ export const webXRUserBindings = addSetsToBindings({
       src: { value: wakeRight },
       dest: { value: paths.actions.cursor.right.wake },
       xform: xforms.rising
+    },
+    {
+      src: {
+        x: rightAxis.touchpadX,
+        y: rightAxis.touchpadY
+      },
+      dest: { value: touchpad },
+      xform: xforms.compose_vec2
+    },
+    {
+      src: {
+        value: touchpad
+      },
+      dest: {
+        north: dpadNorth,
+        south: dpadSouth,
+        east: dpadEast,
+        west: dpadWest,
+        center: dpadCenter
+      },
+      xform: xforms.vec2dpad(0.3)
+    },
+    {
+      src: [dpadNorth, dpadCenter, dpadSouth],
+      dest: { value: dpadCenterStrip },
+      xform: xforms.any
+    },
+    {
+      src: {
+        value: dpadCenterStrip,
+        bool: rightButton.touchpad.pressed
+      },
+      dest: { value: centerStripPressed },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: [centerStripPressed, lowerButtons],
+      dest: { value: paths.actions.ensureFrozen },
+      xform: xforms.any
+    },
+    {
+      src: { value: rightButton.touchpad.pressed },
+      dest: { value: touchpadReleased },
+      xform: xforms.falling
+    },
+    {
+      src: { value: lowerButtons },
+      dest: { value: lowerButtonsReleased },
+      xform: xforms.falling
+    },
+    {
+      src: [touchpadReleased, lowerButtonsReleased],
+      dest: { value: paths.actions.thaw },
+      xform: xforms.any
+    },
+    {
+      src: { value: rightButton.touchpad.pressed },
+      dest: { value: touchpadRising },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        value: dpadEast,
+        bool: touchpadRising
+      },
+      dest: { value: snapRotateRight1 },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: {
+        value: dpadWest,
+        bool: touchpadRising
+      },
+      dest: { value: snapRotateLeft1 },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: rightDpadEast },
+      dest: { value: snapRotateRight2 },
+      xform: xforms.rising,
+      priority: 1
+    },
+    {
+      src: { value: rightDpadWest },
+      dest: { value: snapRotateLeft2 },
+      xform: xforms.rising,
+      priority: 1
+    },
+    {
+      src: [snapRotateRight1, snapRotateRight2],
+      dest: { value: paths.actions.snapRotateRight },
+      xform: xforms.any
+    },
+    {
+      src: [snapRotateLeft1, snapRotateLeft2],
+      dest: { value: paths.actions.snapRotateLeft },
+      xform: xforms.any
     }
   ],
 
@@ -487,13 +576,7 @@ export const webXRUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: { value: rightTriggerPressed2 },
-      dest: { value: rightTriggerRisingGrab },
-      xform: xforms.rising,
-      priority: 2
-    },
-    {
-      src: [rightGripRisingGrab],
+      src: [rightGripRisingGrab, rightTriggerPressed2],
       dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.any,
       priority: 2
@@ -509,12 +592,6 @@ export const webXRUserBindings = addSetsToBindings({
     {
       src: { value: leftGripPressed2 },
       dest: { value: leftGripRisingGrab },
-      xform: xforms.rising,
-      priority: 2
-    },
-    {
-      src: { value: leftTriggerPressed2 },
-      dest: { value: leftTriggerRisingGrab },
       xform: xforms.rising,
       priority: 2
     },
@@ -561,7 +638,13 @@ export const webXRUserBindings = addSetsToBindings({
       priority: 3
     },
     {
-      src: [cursorDrop1, cursorDrop2],
+      src: { value: rightTriggerPressed2 },
+      dest: { value: cursorDrop3 },
+      xform: xforms.falling,
+      priority: 4
+    },
+    {
+      src: [cursorDrop1, cursorDrop2, cursorDrop3],
       dest: { value: paths.actions.cursor.right.drop },
       xform: xforms.any,
       priority: 2
@@ -746,8 +829,8 @@ export const webXRUserBindings = addSetsToBindings({
   [sets.rightCursorHoldingCamera]: [
     {
       src: { value: rightTriggerPressed2 },
-      dest: { value: paths.actions.cursor.right.takeSnapshot },
-      xform: xforms.copy,
+      dest: { value: cursorDrop3 },
+      xform: xforms.falling,
       priority: 4
     }
   ],

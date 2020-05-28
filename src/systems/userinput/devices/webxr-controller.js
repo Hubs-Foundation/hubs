@@ -35,18 +35,32 @@ export class WebXRControllerDevice {
     frame.setValueType(path.button.grip.touched, this.gamepad.buttons[1].touched);
     frame.setValueType(path.button.grip.value, this.gamepad.buttons[1].value);
 
-    frame.setValueType(path.button.thumbStick.pressed, this.gamepad.buttons[3].pressed);
-    frame.setValueType(path.button.thumbStick.touched, this.gamepad.buttons[3].touched);
-    frame.setValueType(path.button.thumbStick.value, this.gamepad.buttons[3].value);
+    if (this.gamepad.buttons[2]) {
+      frame.setValueType(path.button.touchpad.pressed, this.gamepad.buttons[2].pressed);
+      frame.setValueType(path.button.touchpad.touched, this.gamepad.buttons[2].touched);
+      frame.setValueType(path.button.touchpad.value, this.gamepad.buttons[2].value);
+    }
 
-    frame.setValueType(path.button.a.pressed, this.gamepad.buttons[4].pressed);
-    frame.setValueType(path.button.a.touched, this.gamepad.buttons[4].touched);
-    frame.setValueType(path.button.a.value, this.gamepad.buttons[4].value);
+    if (this.gamepad.buttons[3]) {
+      frame.setValueType(path.button.thumbStick.pressed, this.gamepad.buttons[3].pressed);
+      frame.setValueType(path.button.thumbStick.touched, this.gamepad.buttons[3].touched);
+      frame.setValueType(path.button.thumbStick.value, this.gamepad.buttons[3].value);
+    }
 
-    frame.setValueType(path.button.b.pressed, this.gamepad.buttons[5].pressed);
-    frame.setValueType(path.button.b.touched, this.gamepad.buttons[5].touched);
-    frame.setValueType(path.button.b.value, this.gamepad.buttons[5].value);
+    if (this.gamepad.buttons[4]) {
+      frame.setValueType(path.button.a.pressed, this.gamepad.buttons[4].pressed);
+      frame.setValueType(path.button.a.touched, this.gamepad.buttons[4].touched);
+      frame.setValueType(path.button.a.value, this.gamepad.buttons[4].value);
+    }
 
+    if (this.gamepad.buttons[5]) {
+      frame.setValueType(path.button.b.pressed, this.gamepad.buttons[5].pressed);
+      frame.setValueType(path.button.b.touched, this.gamepad.buttons[5].touched);
+      frame.setValueType(path.button.b.value, this.gamepad.buttons[5].value);
+    }
+
+    frame.setValueType(path.axis.touchpadX, this.gamepad.axes[0]);
+    frame.setValueType(path.axis.touchpadY, this.gamepad.axes[1]);
     frame.setValueType(path.axis.joyX, this.gamepad.axes[2]);
     frame.setValueType(path.axis.joyY, this.gamepad.axes[3]);
 
