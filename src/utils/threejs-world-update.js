@@ -4,6 +4,17 @@ const oneScale = new THREE.Vector3(1, 1, 1);
 const identity = new THREE.Matrix4();
 identity.identity();
 
+/**
+With this patch you must make sure to follow these rules or very strange things will happen.
+- If you modify a transform value (position, rotation, scale) you MUST set matrixNeedsUpdate
+- If you manually modify an objects matrix you MUST set matrixIsModified and decompose() to the objects components (applyMatrix and updateMatrix handle this for you)
+- If you want to directly read an objects matrixWorld you MUST call updateMatricies(). (getWorldPosition, getWorldOrientation and getWorldScale handle this for you)
+- If you want to directly read an objects matrix you MUST call updateMatrix()
+- Note updateMatrix, updateMatrixWorld, updateWorldMatrix, matrixNeedsUpdate, matrixWorldNeedsUpdate, 
+  matrixIsModified are all different things, most of which already exist in ThreeJS but some which have been added, 
+  double check you are using the one you intend to. 
+*/
+
 // Patch animation system
 const bindingSetters = THREE.PropertyBinding.prototype.SetterByBindingTypeAndVersioning;
 const Versioning = THREE.PropertyBinding.prototype.Versioning;

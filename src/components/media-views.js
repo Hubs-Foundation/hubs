@@ -346,6 +346,17 @@ AFRAME.registerComponent("media-video", {
     sceneEl.addEventListener("camera-set-active", function(evt) {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
+
+    this.audioOutputModePref = window.APP.store.state.preferences.audioOutputMode;
+    this.onPreferenceChanged = () => {
+      const newPref = window.APP.store.state.preferences.audioOutputMode;
+      const shouldRecreateAudio = this.audioOutputModePref !== newPref && this.audio && this.mediaElementAudioSource;
+      this.audioOutputModePref = newPref;
+      if (shouldRecreateAudio) {
+        this.setupAudio();
+      }
+    };
+    window.APP.store.addEventListener("statechanged", this.onPreferenceChanged);
   },
 
   isMineOrLocal() {
@@ -490,12 +501,28 @@ AFRAME.registerComponent("media-video", {
     }
   },
 
-  async update(oldData) {
-    const src = this.data.src;
+  update(oldData) {
     this.updatePlaybackState();
 
-    if (!src || src === oldData.src) return;
-    return this.updateSrc(oldData);
+    const shouldUpdateSrc = this.data.src && this.data.src !== oldData.src;
+    if (shouldUpdateSrc) {
+      this.updateSrc(oldData);
+      return;
+    }
+    const shouldRecreateAudio =
+      !shouldUpdateSrc && this.mediaElementAudioSource && oldData.audioType !== this.data.audioType;
+    if (shouldRecreateAudio) {
+      this.setupAudio();
+      return;
+    }
+
+    const disablePositionalAudio = window.APP.store.state.preferences.audioOutputMode === "audio";
+    const shouldSetPositionalAudioProperties =
+      this.audio && this.data.audioType === "pannernode" && !disablePositionalAudio;
+    if (shouldSetPositionalAudioProperties) {
+      this.setPositionalAudioProperties();
+      return;
+    }
   },
 
   setupAudio() {
@@ -504,14 +531,14 @@ AFRAME.registerComponent("media-video", {
       this.el.removeObject3D("sound");
     }
 
-    if (this.data.audioType === "pannernode") {
+    const disablePositionalAudio = window.APP.store.state.preferences.audioOutputMode === "audio";
+    if (!disablePositionalAudio && this.data.audioType === "pannernode") {
       this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
       this.setPositionalAudioProperties();
       this.distanceBasedAttenuation = 1;
     } else {
       this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
     }
-    window.foo = this.audio;
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);
@@ -564,8 +591,6 @@ AFRAME.registerComponent("media-video", {
             linkedMediaElementAudioSource ||
             this.el.sceneEl.audioListener.context.createMediaElementSource(audioSourceEl);
 
-          const audioOutputMode = window.APP.store.state.preferences.audioOutputMode === "audio" ? "audio" : "panner";
-          this.data.audioType = audioOutputMode === "panner" ? "pannernode" : "audionode";
           this.setupAudio();
         }
       }
@@ -910,16 +935,7 @@ AFRAME.registerComponent("media-video", {
       }
 
       if (this.audio) {
-        const audioOutputMode = window.APP.store.state.preferences.audioOutputMode === "audio" ? "audio" : "panner";
-        if (
-          (audioOutputMode === "panner" && this.data.audioType !== "pannernode") ||
-          (audioOutputMode === "audio" && this.data.audioType !== "audionode")
-        ) {
-          this.data.audioType = audioOutputMode === "panner" ? "pannernode" : "audionode";
-          this.setupAudio();
-        }
-
-        if (audioOutputMode === "audio") {
+        if (window.APP.store.state.preferences.audioOutputMode === "audio") {
           this.el.object3D.getWorldPosition(positionA);
           this.el.sceneEl.camera.getWorldPosition(positionB);
           const distance = positionA.distanceTo(positionB);
@@ -979,6 +995,8 @@ AFRAME.registerComponent("media-video", {
       this.seekForwardButton.object3D.removeEventListener("interact", this.seekForward);
       this.seekBackButton.object3D.removeEventListener("interact", this.seekBack);
     }
+
+    window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
   }
 });
 
@@ -1111,7 +1129,7 @@ AFRAME.registerComponent("media-image", {
       !this.data.batch ||
       texture == errorTexture ||
       this.data.contentType.includes("image/gif") ||
-      (texture.image && texture.image.hasAlpha);
+      !!(texture.image && texture.image.hasAlpha);
 
     this.mesh.material.map = texture;
     this.mesh.material.needsUpdate = true;

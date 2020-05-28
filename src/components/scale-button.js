@@ -86,7 +86,7 @@ AFRAME.registerComponent("scale-button", {
         this.leftRaycaster = this.leftCursorController.components["cursor-controller"].raycaster;
         this.rightCursorController = document.getElementById("right-cursor-controller");
         this.rightRaycaster = this.rightCursorController.components["cursor-controller"].raycaster;
-        this.viewingCamera = document.getElementById("viewing-camera").object3D;
+        this.viewingCamera = document.getElementById("viewing-camera").object3DMap.camera;
       }
       this.plane = e.object3D === this.leftEventer ? planeForLeftCursor : planeForRightCursor;
       setMatrixWorld(this.plane, calculatePlaneMatrix(this.viewingCamera, this.el.object3D));

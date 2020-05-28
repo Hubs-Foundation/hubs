@@ -11,6 +11,7 @@ import { OculusTouchControllerDevice } from "./devices/oculus-touch-controller";
 import { DaydreamControllerDevice } from "./devices/daydream-controller";
 import { ViveControllerDevice } from "./devices/vive-controller";
 import { WindowsMixedRealityControllerDevice } from "./devices/windows-mixed-reality-controller";
+import { WebXRControllerDevice } from "./devices/webxr-controller";
 import { GyroDevice } from "./devices/gyro";
 
 import { AppAwareMouseDevice } from "./devices/app-aware-mouse";
@@ -20,6 +21,7 @@ import { keyboardMouseUserBindings } from "./bindings/keyboard-mouse-user";
 import { touchscreenUserBindings } from "./bindings/touchscreen-user";
 import { keyboardDebuggingBindings } from "./bindings/keyboard-debugging";
 import { oculusTouchUserBindings } from "./bindings/oculus-touch-user";
+import { webXRUserBindings } from "./bindings/webxr-user";
 import {
   viveUserBindings,
   viveWandUserBindings,
@@ -265,6 +267,7 @@ AFRAME.registerSystem("userinput", {
     vrGamepadMappings.set(OculusGoControllerDevice, oculusGoUserBindings);
     vrGamepadMappings.set(GearVRControllerDevice, gearVRControllerUserBindings);
     vrGamepadMappings.set(DaydreamControllerDevice, daydreamUserBindings);
+    vrGamepadMappings.set(WebXRControllerDevice, webXRUserBindings);
 
     const nonVRGamepadMappings = new Map();
     nonVRGamepadMappings.set(XboxControllerDevice, xboxControllerUserBindings);
@@ -350,13 +353,15 @@ AFRAME.registerSystem("userinput", {
       let gamepadDevice;
       for (let i = 0; i < this.activeDevices.items.length; i++) {
         const activeDevice = this.activeDevices.items[i];
-        if (activeDevice.gamepad && activeDevice.gamepad.index === e.gamepad.index) {
+        if (!e.gamepad.isWebXRGamepad && activeDevice.gamepad && activeDevice.gamepad.index === e.gamepad.index) {
           console.warn("connected already fired for gamepad", e.gamepad);
           return; // multiple connect events without a disconnect event
         }
       }
-      // HACK Firefox Nightly bug causes corrupt gamepad names for OpenVR, so do startsWith
-      if (
+      if (e.gamepad.isWebXRGamepad) {
+        gamepadDevice = new WebXRControllerDevice(e.gamepad);
+      } else if (
+        // HACK Firefox Nightly bug causes corrupt gamepad names for OpenVR, so do startsWith
         e.gamepad.id.startsWith("OpenVR Gamepad") ||
         e.gamepad.id.startsWith("OpenVR Knuckles") ||
         e.gamepad.id === "HTC Vive Focus Plus Controller" ||
@@ -407,7 +412,27 @@ AFRAME.registerSystem("userinput", {
       gamepad && gamepadConnected({ gamepad });
     }
 
-    this.el.sceneEl.addEventListener("enter-vr", updateBindingsForVRMode);
+    const retrieveXRGamepads = ({ session }) => {
+      for (const inputSource of session.inputSources) {
+        inputSource.gamepad.isWebXRGamepad = true;
+        inputSource.gamepad.targetRaySpace = inputSource.targetRaySpace;
+        inputSource.gamepad.primaryProfile = inputSource.profiles[0];
+        inputSource.gamepad.hand = inputSource.handedness;
+        gamepadConnected(inputSource);
+      }
+    };
+
+    this.el.sceneEl.addEventListener("enter-vr", () => {
+      const { xrSession } = this.el.sceneEl;
+      if (xrSession) {
+        xrSession.addEventListener("inputsourceschange", retrieveXRGamepads);
+        xrSession.requestReferenceSpace("local-floor").then(referenceSpace => {
+          this.xrReferenceSpace = referenceSpace;
+        });
+        retrieveXRGamepads({ session: xrSession });
+      }
+      updateBindingsForVRMode();
+    });
     this.el.sceneEl.addEventListener("exit-vr", updateBindingsForVRMode);
 
     updateBindingsForVRMode();
@@ -481,7 +506,7 @@ AFRAME.registerSystem("userinput", {
     }
 
     for (let i = 0; i < this.activeDevices.items.length; i++) {
-      this.activeDevices.items[i].write(this.frame);
+      this.activeDevices.items[i].write(this.frame, this.el.sceneEl, this.xrReferenceSpace);
     }
 
     for (let i = 0; i < this.sortedBindings.length; i++) {
