@@ -1,23 +1,4 @@
-import {
-  ThreeWorld,
-  SceneEntity,
-  BoneEntity,
-  GroupEntity,
-  Object3DEntity,
-  SkinnedMeshEntity,
-  MeshEntity,
-  LineSegmentsEntity,
-  LineEntity,
-  LineLoopEntity,
-  PointsEntity,
-  PerspectiveCameraEntity,
-  OrthographicCameraEntity,
-  AmbientLightEntity,
-  DirectionalLightEntity,
-  HemisphereLightEntity,
-  PointLightEntity,
-  SpotLightEntity
-} from "ecsy-three";
+import { ECSYThreeWorld, registerDefaultComponents, Object3DComponent } from "ecsy-three";
 
 import { Rotating } from "./components/Rotating";
 import { Animation } from "./components/Animation";
@@ -54,29 +35,14 @@ import { BoxTemplate } from "./templates/BoxTemplate";
 export class WorldManager {
   constructor(aframeScene) {
     this.aframeScene = aframeScene;
-    this.world = new ThreeWorld();
+    this.world = new ECSYThreeWorld();
     this.initialized = false;
   }
 
   init() {
+    registerDefaultComponents(this.world);
+
     this.world
-      .registerEntityType(SceneEntity)
-      .registerEntityType(BoneEntity)
-      .registerEntityType(GroupEntity)
-      .registerEntityType(Object3DEntity)
-      .registerEntityType(SkinnedMeshEntity)
-      .registerEntityType(MeshEntity)
-      .registerEntityType(LineSegmentsEntity)
-      .registerEntityType(LineEntity)
-      .registerEntityType(LineLoopEntity)
-      .registerEntityType(PointsEntity)
-      .registerEntityType(PerspectiveCameraEntity)
-      .registerEntityType(OrthographicCameraEntity)
-      .registerEntityType(AmbientLightEntity)
-      .registerEntityType(DirectionalLightEntity)
-      .registerEntityType(HemisphereLightEntity)
-      .registerEntityType(PointLightEntity)
-      .registerEntityType(SpotLightEntity)
       .registerComponent(AFrameEntity)
       .registerComponent(Animation)
       .registerComponent(GLTFLoader)
@@ -115,13 +81,12 @@ export class WorldManager {
       .registerSystem(PhysicsSystem, { hubsSystem: this.aframeScene.systems["hubs-systems"].physicsSystem })
       .registerSystem(NetworkingSendSystem);
 
-    this.scene = new SceneEntity(this.world) //.addComponent(ActionFrame, { value: this.aframeScene.systems["userinput"].frame });
+    this.scene = this.world
+      .createEntity()
+      .addObject3DComponents(this.aframeScene.object3D)
       .addComponent(InteractionState)
       .addComponent(NetworkingState)
       .addComponent(SceneRootTag);
-
-    this.aframeScene.object3D.add(this.scene);
-    this.world.addEntity(this.scene);
 
     const networkingState = this.scene.getComponent(NetworkingState);
 
@@ -162,7 +127,7 @@ export class WorldManager {
     window.addEventListener("keyup", e => {
       if (e.key === "j") {
         const networkedBox = networkingState.createEntity(this.world, BoxTemplate);
-        this.scene.add(networkedBox);
+        this.scene.getComponent(Object3DComponent).value.add(networkedBox.getComponent(Object3DComponent).value);
       }
     });
 

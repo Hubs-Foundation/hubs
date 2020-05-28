@@ -268,10 +268,10 @@ export class NetworkingSendSystem extends System {
         };
 
         if (isFullSync) {
-          console.log("sending full sync");
+          // console.log("sending full sync");
           messageQueues.outgoingFullSyncs.push(message);
         } else {
-          console.log("sending partial update");
+          // console.log("sending partial update");
           messageQueues.outgoingPartialUpdates.push(message);
         }
 

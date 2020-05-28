@@ -1,7 +1,7 @@
 // Brief overview of client authorization can be found in the wiki:
 // https://github.com/mozilla/hubs/wiki/Hubs-authorization
 export function showHoverEffect(el) {
-  if (el.isECSYThreeEntity) {
+  if (el.isECSYEntity) {
     return false;
   }
 

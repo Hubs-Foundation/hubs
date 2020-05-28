@@ -10,7 +10,7 @@ export function hasAFrameComponent(entity, componentName) {
     return false;
   }
 
-  if (entity.isECSYThreeEntity) {
+  if (entity.isECSYEntity) {
     return false;
   }
 

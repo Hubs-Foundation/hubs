@@ -3,7 +3,7 @@ export function isTagged(el, tag) {
     return false;
   }
 
-  if (el.isECSYThreeEntity) {
+  if (el.isECSYEntity) {
     if (typeof tag === "string") {
       return false;
     }

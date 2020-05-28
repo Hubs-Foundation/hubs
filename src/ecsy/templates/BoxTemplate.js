@@ -1,5 +1,4 @@
 import { BoxBufferGeometry, MeshBasicMaterial, Vector3 } from "three";
-import { MeshEntity } from "ecsy-three";
 import { SHAPE, FIT } from "three-ammo/constants";
 import { NetworkTemplate, gatherPosition, gatherRotation, updatePosition, updateRotation } from "./NetworkTemplate";
 import { Holdable } from "../components/Holdable";
@@ -12,11 +11,14 @@ export class BoxTemplate extends NetworkTemplate {
   static id = "box";
 
   createLocalEntity(world) {
-    return new MeshEntity(
-      world,
-      new BoxBufferGeometry(),
-      new MeshBasicMaterial({ color: 0xff0000, opacity: 0.3, transparent: true })
-    )
+    return world
+      .createEntity()
+      .addObject3DComponents(
+        new THREE.Mesh(
+          new BoxBufferGeometry(),
+          new MeshBasicMaterial({ color: 0xff0000, opacity: 0.3, transparent: true })
+        )
+      )
       .addComponent(Hoverable)
       .addComponent(Holdable)
       .addComponent(PhysicsBody)
@@ -25,11 +27,14 @@ export class BoxTemplate extends NetworkTemplate {
   }
 
   createRemoteEntity(world) {
-    return new MeshEntity(
-      world,
-      new BoxBufferGeometry(),
-      new MeshBasicMaterial({ color: 0xff0000, opacity: 0.3, transparent: true })
-    );
+    return world
+      .createEntity()
+      .addObject3DComponents(
+        new THREE.Mesh(
+          new BoxBufferGeometry(),
+          new MeshBasicMaterial({ color: 0xff0000, opacity: 0.3, transparent: true })
+        )
+      );
   }
 
   gatherEntityData(entity, lastSentData) {

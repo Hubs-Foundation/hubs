@@ -13,6 +13,7 @@ export class SingleActionButtonSystem {
     const hovered = interaction.state.rightRemote.hovered;
     if (
       hovered &&
+      !hovered.isECSYEntity &&
       userinput.get(interaction.options.rightRemote.grabPath) &&
       hovered.components.tags &&
       hovered.components.tags.data.singleActionButton
@@ -44,13 +45,13 @@ export class HoldableButtonSystem {
     const interaction = AFRAME.scenes[0].systems.interaction;
     const held = interaction.state.rightRemote.held;
 
-    if (this.prevHeld && this.prevHeld !== held && !this.prevHeld.isECSYThreeEntity) {
+    if (this.prevHeld && this.prevHeld !== held && !this.prevHeld.isECSYEntity) {
       this.prevHeld.object3D.dispatchEvent({
         type: "holdable-button-up",
         object3D: interaction.options.rightRemote.entity.object3D
       });
     }
-    if (held && this.prevHeld !== held && !held.isECSYThreeEntity) {
+    if (held && this.prevHeld !== held && !held.isECSYEntity) {
       held.object3D.dispatchEvent({
         type: "holdable-button-down",
         object3D: interaction.options.rightRemote.entity.object3D
@@ -61,13 +62,13 @@ export class HoldableButtonSystem {
 
     const heldLeft = interaction.state.leftRemote.held;
 
-    if (this.prevHeldLeft && this.prevHeldLeft !== heldLeft && !this.prevHeldLeft.isECSYThreeEntity) {
+    if (this.prevHeldLeft && this.prevHeldLeft !== heldLeft && !this.prevHeldLeft.isECSYEntity) {
       this.prevHeldLeft.object3D.dispatchEvent({
         type: "holdable-button-up",
         object3D: interaction.options.leftRemote.entity.object3D
       });
     }
-    if (heldLeft && this.prevHeldLeft !== heldLeft && !heldLeft.isECSYThreeEntity) {
+    if (heldLeft && this.prevHeldLeft !== heldLeft && !heldLeft.isECSYEntity) {
       heldLeft.object3D.dispatchEvent({
         type: "holdable-button-down",
         object3D: interaction.options.leftRemote.entity.object3D
@@ -99,7 +100,7 @@ const hasButtonComponent = (function() {
 function getHoverableButton(hovered) {
   if (!hovered) return null;
 
-  if (hovered.isECSYThreeEntity) {
+  if (hovered.isECSYEntity) {
     return null;
   }
 

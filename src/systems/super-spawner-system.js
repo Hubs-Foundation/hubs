@@ -5,7 +5,7 @@ import { ObjectContentOrigins } from "../object-types";
 export class SuperSpawnerSystem {
   maybeSpawn(state, grabPath) {
     const userinput = AFRAME.scenes[0].systems.userinput;
-    const superSpawner = state.hovered && state.hovered.components["super-spawner"];
+    const superSpawner = state.hovered && !state.hovered.isECSYEntity && state.hovered.components["super-spawner"];
 
     const isPermitted =
       window.APP.hubChannel &&

@@ -7,21 +7,21 @@ import { Hoverable } from "../ecsy/components/Hoverable";
 import { Holdable } from "../ecsy/components/Holdable";
 import { InteractionState } from "../ecsy/components/InteractionState";
 
-export function isHoverableByHand(object3D) {
-  if (!object3D.isECSYThreeEntity) {
+export function isHoverableByHand(entity) {
+  if (!entity.isECSYEntity) {
     return false;
   }
 
-  const hoverable = object3D.getComponent(Hoverable);
+  const hoverable = entity.getComponent(Hoverable);
   return hoverable && hoverable.hand;
 }
 
-export function isHoverableByRemote(object3D) {
-  if (!object3D.isECSYThreeEntity) {
+export function isHoverableByRemote(entity) {
+  if (!entity.isECSYEntity) {
     return false;
   }
 
-  const hoverable = object3D.getComponent(Hoverable);
+  const hoverable = entity.getComponent(Hoverable);
   return hoverable && hoverable.remote;
 }
 
@@ -38,9 +38,9 @@ function findHandCollisionTargetForHand(bodyHelper) {
         continue;
       }
 
-      if (object3D.isECSYThreeEntity) {
-        if (isHoverableByHand(object3D)) {
-          return object3D;
+      if (object3D.entity) {
+        if (isHoverableByHand(object3D.entity)) {
+          return object3D.entity;
         }
       } else if (object3D.el && isTagged(object3D.el, "isHandCollisionTarget")) {
         return object3D.el;
@@ -55,7 +55,7 @@ const notRemoteHoverTargets = new Map();
 const remoteHoverTargets = new Map();
 export function findRemoteHoverTarget(object3D) {
   if (!object3D) return null;
-  if (isHoverableByRemote(object3D)) return object3D;
+  if (object3D.entity && isHoverableByRemote(object3D.entity)) return object3D.entity;
   if (notRemoteHoverTargets.get(object3D)) return null;
   const target = remoteHoverTargets.get(object3D);
   return target || findRemoteHoverTarget(object3D.parent);
@@ -243,7 +243,7 @@ AFRAME.registerSystem("interaction", {
       let lostOwnership = false;
 
       // TODO: Support networked ownership transfer for ECSY entities
-      if (!state.held.isECSYThreeEntity) {
+      if (!state.held.isECSYEntity) {
         const networked = state.held.components["networked"];
         lostOwnership = networked && networked.data && networked.data.owner !== NAF.clientId;
       }
@@ -260,8 +260,9 @@ AFRAME.registerSystem("interaction", {
       );
       if (state.hovered) {
         const entity = state.hovered;
-        if (entity.isECSYThreeEntity) {
+        if (entity.isECSYEntity) {
           if (entity.getComponent(Holdable) && userinput.get(options.grabPath)) {
+            console.log("hold", entity);
             state.held = entity;
           }
         } else {

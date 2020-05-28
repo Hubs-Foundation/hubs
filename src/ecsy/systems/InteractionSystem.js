@@ -1,4 +1,5 @@
 import { System } from "ecsy";
+import { Object3DComponent } from "ecsy-three";
 import { InteractionState } from "../components/InteractionState";
 import { Held } from "../components/Held";
 import { Hovered } from "../components/Hovered";
@@ -12,13 +13,13 @@ export class InteractionSystem extends System {
       components: [InteractionState]
     },
     heldEntities: {
-      components: [Held]
+      components: [Object3DComponent, Held]
     },
     hoveredEntities: {
-      components: [Hovered]
+      components: [Object3DComponent, Hovered]
     },
     hoverableEntities: {
-      components: [Hoverable],
+      components: [Object3DComponent, Hoverable],
       listen: {
         added: true,
         removed: true,
@@ -38,11 +39,13 @@ export class InteractionSystem extends System {
         continue;
       }
 
-      if (interactor.hovered && interactor.hovered.isECSYThreeEntity) {
+      const { hovered, held } = interactor;
+
+      if (hovered && hovered.isECSYEntity && !hovered.hasComponent(Hovered)) {
         interactor.hovered.addComponent(Hovered);
       }
 
-      if (interactor.held && interactor.held.isECSYThreeEntity) {
+      if (held && held.isECSYEntity && !hovered.hasComponent(Held)) {
         interactor.held.addComponent(Held);
       }
     }
@@ -94,10 +97,10 @@ export class InteractionSystem extends System {
 
       const hoverableEntities = this.queries.hoverableEntities.results;
 
-      cursorTargettingSystem.hoverableEntities.length = 0;
+      cursorTargettingSystem.hoverableECSYEntities.length = 0;
 
       for (let i = 0; i < hoverableEntities.length; i++) {
-        cursorTargettingSystem.hoverableEntities.push(hoverableEntities[i]);
+        cursorTargettingSystem.hoverableECSYEntities.push(hoverableEntities[i]);
       }
 
       cursorTargettingSystem.setDirty();

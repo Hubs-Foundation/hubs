@@ -1,4 +1,5 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
+import { Object3DComponent } from "ecsy-three";
 
 const noop = function() {};
 AFRAME.registerComponent("overwrite-raycast-as-noop", {
@@ -21,7 +22,7 @@ AFRAME.registerComponent("overwrite-raycast-as-noop", {
 export class CursorTargettingSystem {
   constructor() {
     this.targets = [];
-    this.hoverableEntities = [];
+    this.hoverableECSYEntities = [];
     this.setDirty = this.setDirty.bind(this);
     this.dirty = true;
 
@@ -69,8 +70,8 @@ export class CursorTargettingSystem {
       }
     }
 
-    for (let i = 0; i < this.hoverableEntities.length; i++) {
-      targets.push(this.hoverableEntities[i]);
+    for (let i = 0; i < this.hoverableECSYEntities.length; i++) {
+      targets.push(this.hoverableECSYEntities[i].getComponent(Object3DComponent).value);
     }
   }
 

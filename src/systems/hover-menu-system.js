@@ -11,7 +11,7 @@ function getSpecificHoverMenu(el) {
 }
 
 function findHoverMenu(hovered) {
-  if (!hovered) return null;
+  if (!hovered || hovered.isECSYEntity) return null;
   const hoverMenu = getSpecificHoverMenu(hovered);
   if (hoverMenu) {
     return hoverMenu;

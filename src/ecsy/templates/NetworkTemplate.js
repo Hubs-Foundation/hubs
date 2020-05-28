@@ -1,4 +1,5 @@
 import { Networked } from "../components/Networked";
+import { Object3DComponent } from "ecsy-three";
 
 function almostEqualVec3(curVec, prevArr, epsilon) {
   return (
@@ -21,15 +22,15 @@ export function gatherVector3(nextData, lastSentData, value, destKey) {
 }
 
 export function gatherPosition(nextData, lastSentData, entity, destKey = "position") {
-  return gatherVector3(nextData, lastSentData, entity.position, destKey);
+  return gatherVector3(nextData, lastSentData, entity.getComponent(Object3DComponent).value.position, destKey);
 }
 
 export function gatherRotation(nextData, lastSentData, entity, destKey = "rotation") {
-  return gatherVector3(nextData, lastSentData, entity.rotation, destKey);
+  return gatherVector3(nextData, lastSentData, entity.getComponent(Object3DComponent).value.rotation, destKey);
 }
 
 export function gatherScale(nextData, lastSentData, entity, destKey = "scale") {
-  return gatherVector3(nextData, lastSentData, entity.scale, destKey);
+  return gatherVector3(nextData, lastSentData, entity.getComponent(Object3DComponent).value.scale, destKey);
 }
 
 export function updateVector3(target, data, srcKey) {
