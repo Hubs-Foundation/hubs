@@ -1,6 +1,6 @@
 @import 'shared.scss';
 
-$fontSize: 20px;
+$fontSize: 16px;
 
 %full-screen-panel {
   position: fixed;
@@ -80,6 +80,44 @@ input::-webkit-inner-spin-button {
     margin-bottom: 0px;
   }
 }
+:local(.list-item) {
+  margin: 0px 16px 16px 16px;
+  &:last-child {
+    margin: 0px 16px 0px 16px;
+  }
+}
+:local(.column){
+  display: flex;
+  flex-flow: column;
+}
+%row {
+  display: flex;
+  align-items: center;
+  &>*{
+    margin-right: 12px;
+  }
+  &>*:last-child {
+    margin-right: 0px;
+  }
+}
+%row-right {
+  justify-self: flex-end;
+  margin-left: auto;
+}
+%row-center {
+  justify-self: center;
+  margin-left: auto;
+}
+:local(.row) {
+  @extend %row;
+}
+:local(.row-right) {
+  @extend %row-right;
+}
+:local(.row-center){
+  @extend %row-center;
+}
+
 :local(.horizontal) {
   @extend %preference-list-item;
   justify-content: space-between;
@@ -210,7 +248,7 @@ input[type=text],input[type=number] {
   line-height: 30px;
   font-size: $fontSize;
   text-align: center;
-  width: 100px;
+  width: 60px;
   height: 38px;
 }
 
@@ -231,7 +269,6 @@ input[type=text],input[type=number] {
     align-items: center;
     justify-content: center;
     max-height: 2.5rem;
-    min-width: 200px;
     padding: 0px 0px 0px 12px;
   }
 }

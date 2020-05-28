@@ -344,6 +344,12 @@ export class MaxResolutionPreferenceItem extends Component {
     );
   }
 }
+function ListItem({ children }) {
+  return <div className={styles.listItem}>{children}</div>;
+}
+ListItem.propTypes = {
+  children: PropTypes.node.isRequired
+};
 export class PreferenceListItem extends Component {
   static propTypes = {
     store: PropTypes.object,
@@ -394,24 +400,41 @@ export class PreferenceListItem extends Component {
     ) : (
       <ResetToDefaultButtonPlaceholder />
     );
-    if (!isCheckbox && isSmallScreen) {
+    if (isCheckbox) {
       return (
-        <div className={styles.vertical}>
-          {label}
-          <div className={styles.controlWithDefault}>
+        <ListItem>
+          <div className={styles.row}>
             {control}
-            {resetToDefault}
+            {label}
+            <div className={styles.rowRight}>{resetToDefault}</div>
           </div>
-        </div>
+        </ListItem>
+      );
+    } else if (isSmallScreen) {
+      return (
+        <ListItem>
+          <div className={styles.column}>
+            <div className={styles.row}>
+              {<CheckboxPlaceholder />}
+              {label}
+            </div>
+            <div className={styles.row}>
+              <div className={styles.rowCenter}>{control}</div>
+              <div className={styles.rowRight}>{resetToDefault}</div>
+            </div>
+          </div>
+        </ListItem>
       );
     }
     return (
-      <div className={styles.horizontal}>
-        {isCheckbox ? control : <CheckboxPlaceholder />}
-        {label}
-        {!isCheckbox && control}
-        {resetToDefault}
-      </div>
+      <ListItem>
+        <div className={styles.row}>
+          {<CheckboxPlaceholder />}
+          {label}
+          <div className={styles.rowRight}>{control}</div>
+          <div className={styles.rowRight}>{resetToDefault}</div>
+        </div>
+      </ListItem>
     );
   }
 }
@@ -590,6 +613,31 @@ Section.propTypes = {
   items: PropTypes.node.isRequired
 };
 
+class Nav extends Component {
+  constructor() {
+    super();
+    this.ref = React.createRef();
+  }
+  componentDidMount() {
+    this.width = parseFloat(getComputedStyle(this.ref.current).width);
+    //TODO: Scroll nav horizontally
+  }
+  render() {
+    const { children } = this.props;
+    return (
+      <div className={styles.navContainer}>
+        <div ref={this.ref} className={classNames(styles.nav)}>
+          {children}
+        </div>
+      </div>
+    );
+  }
+}
+Nav.propTypes = {
+  children: PropTypes.node.isRequired,
+  selected: PropTypes.number
+};
+
 export default class PreferencesScreen extends Component {
   static propTypes = {
     onClose: PropTypes.func,
@@ -646,21 +694,19 @@ export default class PreferencesScreen extends Component {
       <IntlProvider locale={lang} messages={messages}>
         <div className={classNames(styles.preferencesPanel)}>
           <CloseButton onClick={this.props.onClose} />
-          <div className={styles.navContainer}>
-            <div className={classNames(styles.nav)}>
-              {TOP_LEVEL_CATEGORIES.map(category => (
-                <NavItem
-                  key={`category-${category}-header`}
-                  title={CATEGORY_NAMES.get(category)}
-                  onClick={() => {
-                    this.setState({ category });
-                  }}
-                  ariaLabel={`${messages["preferences.selectCategory"]} ${CATEGORY_NAMES.get(category)}`}
-                  selected={category === this.state.category}
-                />
-              ))}
-            </div>
-          </div>
+          <Nav selected={this.state.category}>
+            {TOP_LEVEL_CATEGORIES.map(category => (
+              <NavItem
+                key={`category-${category}-header`}
+                title={CATEGORY_NAMES.get(category)}
+                onClick={() => {
+                  this.setState({ category });
+                }}
+                ariaLabel={`${messages["preferences.selectCategory"]} ${CATEGORY_NAMES.get(category)}`}
+                selected={category === this.state.category}
+              />
+            ))}
+          </Nav>
           <div className={styles.contentContainer}>
             <div className={styles.scrollingContent}>{this.sections.get(this.state.category).map(Section)}</div>
           </div>

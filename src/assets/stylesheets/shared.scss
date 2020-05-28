@@ -234,8 +234,6 @@ $favorited-color: var(--favorited-color, $duck-yellow);
   border: 1px solid var(--text-field-border-color);
   background-color: var(--text-field-background-color);
   border-radius: 6px;
-  margin: 0px;
-  padding: 0px;
   position: relative;
   display: flex;
   align-items: center;
@@ -426,6 +424,7 @@ $favorited-color: var(--favorited-color, $duck-yellow);
   }
 }
 %subtitle-text {
+  @extend %default-font;
   font-weight: normal;
   text-transform: uppercase;
   color: var(--panel-subtitle-color);

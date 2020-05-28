@@ -273,7 +273,7 @@
     "commands.audiomode": "(experimental) Toggle positional audio.",
     "preferences.category_audio": "Audio",
     "preferences.category_controls": "Controls",
-    "preferences.category_misc": "Miscellaneous",
+    "preferences.category_misc": "Misc",
     "preferences.category_movement": "Movement",
     "preferences.category_touchscreen": "Touchscreen",
     "preferences.closeButton": "Close Preferences Menu",
