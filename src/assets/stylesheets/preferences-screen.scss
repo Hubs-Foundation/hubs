@@ -22,7 +22,6 @@ $fontSize: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 64px;
   width: 100%;
 }
 
@@ -118,6 +117,17 @@ input::-webkit-inner-spin-button {
   @extend %row-center;
 }
 
+%warn-icon-size {
+  @extend %s36x36;
+}
+:local(.warn-icon-placeholder){
+  @extend %warn-icon-size;
+}
+:local(.warn-icon){
+  @extend %warn-icon-size;
+  color: menu-icon-color;
+}
+
 :local(.horizontal) {
   @extend %preference-list-item;
   justify-content: space-between;
@@ -160,9 +170,36 @@ input::-webkit-inner-spin-button {
 :local(.close-button) {
   @extend %panel-widget;
   @extend %no-default-button-style;
-  top: 16px;
-  left: 16px;
+  margin: 16px auto 16px 16px;
+}
+:local(.refresh-prompt) {
+  @extend %default-font;
+  font-size: $fontSize;
+  text-align: center;
+}
+:local(.toast){
+  width: 100%;
+  max-width: 600px;
+  z-index: 10;
   position: absolute;
+  bottom: 0px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  border-radius: 16px 16px 0px 0px;
+  background-color: var(--tile-background-color);
+  &>* {
+    margin: 16px 16px 0px 16px;
+  }
+  &>*:last-child {
+    margin: 16px;
+  }
+}
+:local(.refresh-now-button){
+  @extend %action-button;
+  @extend %action-row-button;
+  width: 180px;
+  min-width: 180px;
 }
 %reset-to-default-button-size {
   @extend %s30x30;

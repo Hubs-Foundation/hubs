@@ -429,3 +429,8 @@ $favorited-color: var(--favorited-color, $duck-yellow);
   text-transform: uppercase;
   color: var(--panel-subtitle-color);
 }
+%action-row-button {
+  min-width: 120px;
+  width: 120px;
+  height: 44px;
+}

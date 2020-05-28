@@ -4,8 +4,9 @@ import classNames from "classnames";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faUndo } from "@fortawesome/free-solid-svg-icons/faUndo";
+import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons/faExclamationTriangle";
 import en from "react-intl/locale-data/en";
-import { IntlProvider, addLocaleData } from "react-intl";
+import { FormattedMessage, IntlProvider, addLocaleData } from "react-intl";
 import styles from "../assets/stylesheets/preferences-screen.scss";
 import { lang, messages } from "../utils/i18n";
 
@@ -14,6 +15,14 @@ addLocaleData([...en]);
 
 function round(step, n) {
   return Math.round(n / step) * step;
+}
+
+function WarnIcon() {
+  return (
+    <i className={styles.flex}>
+      <FontAwesomeIcon className={styles.warnIcon} icon={faExclamationTriangle} />
+    </i>
+  );
 }
 
 function ResetToDefaultButton({ onClick }) {
@@ -67,7 +76,8 @@ export class NumberRangeSelector extends Component {
     digits: PropTypes.number,
     defaultNumber: PropTypes.number,
     store: PropTypes.object,
-    storeKey: PropTypes.string
+    storeKey: PropTypes.string,
+    setValue: PropTypes.func
   };
   state = {
     isFocused: false,
@@ -120,9 +130,7 @@ export class NumberRangeSelector extends Component {
     const t = Math.max(0, Math.min((e.clientX - this.myRoot.current.offsetLeft) / this.myRoot.current.clientWidth, 1));
     const num = round(this.props.step, this.props.min + t * (this.props.max - this.props.min));
     this.setState({ displayValue: num.toFixed(this.props.digits) });
-    this.props.store.update({
-      preferences: { [this.props.storeKey]: num }
-    });
+    this.props.setValue(num);
   }
 
   render() {
@@ -156,9 +164,7 @@ export class NumberRangeSelector extends Component {
               const sanitizedInput = sanitize(e.target.value);
               this.setState({ displayValue: sanitizedInput, digitsFromUser: countDigits(sanitizedInput) });
               const numberOrReset = isNaN(parseFloat(sanitizedInput)) ? undefined : parseFloat(sanitizedInput);
-              this.props.store.update({
-                preferences: { [this.props.storeKey]: numberOrReset }
-              });
+              this.props.setValue(numberOrReset);
             }}
           />
         </div>
@@ -174,9 +180,7 @@ export class NumberRangeSelector extends Component {
             );
             const num = round(this.props.step, this.props.min + t * (this.props.max - this.props.min));
             this.setState({ displayValue: num.toFixed(this.props.digits) });
-            this.props.store.update({
-              preferences: { [this.props.storeKey]: num }
-            });
+            this.props.setValue(num);
           }}
         >
           <input
@@ -188,9 +192,7 @@ export class NumberRangeSelector extends Component {
             onChange={e => {
               const num = round(this.props.step, parseFloat(e.target.value));
               this.setState({ displayValue: num.toFixed(this.props.digits), digitsFromUser: 0 });
-              this.props.store.update({
-                preferences: { [this.props.storeKey]: parseFloat(num.toFixed(this.props.digits)) }
-              });
+              this.props.setValue(parseFloat(num.toFixed(this.props.digits)));
             }}
           />
         </div>
@@ -202,18 +204,16 @@ export class NumberRangeSelector extends Component {
 function CheckboxPlaceholder() {
   return <div className={styles.checkboxPlaceholder} />;
 }
-function BooleanPreference({ store, storeKey, defaultBool }) {
+function BooleanPreference({ store, storeKey, defaultBool, setValue }) {
   const storedPref = store.state.preferences[storeKey];
   const value = storedPref === undefined ? defaultBool : storedPref;
   return (
     <input
-      title={messages["preferences.resetToDefault"]}
-      aria-label={messages["preferences.resetToDefault"]}
       tabIndex="0"
       type="checkbox"
       checked={value}
       onChange={() => {
-        store.update({ preferences: { [storeKey]: !store.state.preferences[storeKey] } });
+        setValue(!value);
       }}
     />
   );
@@ -221,7 +221,8 @@ function BooleanPreference({ store, storeKey, defaultBool }) {
 BooleanPreference.propTypes = {
   store: PropTypes.object,
   storeKey: PropTypes.string,
-  defaultBool: PropTypes.bool
+  defaultBool: PropTypes.bool,
+  setValue: PropTypes.func
 };
 
 class Select extends React.Component {
@@ -253,7 +254,8 @@ class PreferenceSelect extends React.Component {
     options: PropTypes.array,
     defaultString: PropTypes.string,
     store: PropTypes.object,
-    storeKey: PropTypes.string
+    storeKey: PropTypes.string,
+    setValue: PropTypes.func
   };
   constructor(props) {
     super();
@@ -272,7 +274,7 @@ class PreferenceSelect extends React.Component {
       <Select
         value={value}
         onChange={e => {
-          this.props.store.update({ preferences: { [this.props.storeKey]: e.target.value } });
+          this.props.setValue(e.target.value);
         }}
       >
         {this.options}
@@ -355,6 +357,7 @@ export class PreferenceListItem extends Component {
     store: PropTypes.object,
     storeKey: PropTypes.string,
     prefType: PropTypes.number,
+    setValue: PropTypes.func,
     control: PropTypes.node.isRequired
   };
   componentDidMount() {
@@ -391,7 +394,7 @@ export class PreferenceListItem extends Component {
               });
               break;
             default:
-              this.props.store.update({ preferences: { [this.props.storeKey]: undefined } });
+              this.props.setValue(undefined);
               break;
           }
           this.forceUpdate();
@@ -546,9 +549,24 @@ const DEFINITIONS = new Map([
         defaultNumber: 100
       },
       { key: "disableSoundEffects", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "disableEchoCancellation", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "disableNoiseSuppression", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "disableAutoGainControl", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+      {
+        key: "disableEchoCancellation",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+        defaultBool: false,
+        promptForRefresh: true
+      },
+      {
+        key: "disableNoiseSuppression",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+        defaultBool: false,
+        promptForRefresh: true
+      },
+      {
+        key: "disableAutoGainControl",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+        defaultBool: false,
+        promptForRefresh: true
+      }
     ]
   ],
   [
@@ -560,7 +578,8 @@ const DEFINITIONS = new Map([
         key: "materialQualitySetting",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
         options: [{ value: "low", text: "Low" }, { value: "high", text: "High" }],
-        defaultString: isMobile ? "low" : "high"
+        defaultString: isMobile ? "low" : "high",
+        promptForRefresh: true
       },
       { key: "disableAutoPixelRatio", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
@@ -572,7 +591,14 @@ const DEFINITIONS = new Map([
 
 function createControl(itemProps, store) {
   const storeKey = itemProps.key;
-  const props = { store, storeKey, ...itemProps };
+  const setValue = v => {
+    if (itemProps.promptForRefresh) {
+      store.update({ preferences: { [storeKey]: v, shouldPromptForRefresh: true } });
+    } else {
+      store.update({ preferences: { [storeKey]: v } });
+    }
+  };
+  const props = { store, storeKey, setValue, ...itemProps };
   switch (props.prefType) {
     case PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX: {
       return <BooleanPreference {...props} />;
@@ -590,11 +616,19 @@ function createControl(itemProps, store) {
 }
 
 function createItem(itemProps, store) {
+  const setValue = v => {
+    if (itemProps.promptForRefresh) {
+      store.update({ preferences: { [itemProps.key]: v, shouldPromptForRefresh: true } });
+    } else {
+      store.update({ preferences: { [itemProps.key]: v } });
+    }
+  };
   return (
     <PreferenceListItem
       control={createControl(itemProps, store)}
       store={store}
       storeKey={itemProps.key}
+      setValue={setValue}
       {...itemProps}
     />
   );
@@ -614,21 +648,11 @@ Section.propTypes = {
 };
 
 class Nav extends Component {
-  constructor() {
-    super();
-    this.ref = React.createRef();
-  }
-  componentDidMount() {
-    this.width = parseFloat(getComputedStyle(this.ref.current).width);
-    //TODO: Scroll nav horizontally
-  }
   render() {
     const { children } = this.props;
     return (
       <div className={styles.navContainer}>
-        <div ref={this.ref} className={classNames(styles.nav)}>
-          {children}
-        </div>
+        <div className={classNames(styles.nav)}>{children}</div>
       </div>
     );
   }
@@ -638,6 +662,40 @@ Nav.propTypes = {
   selected: PropTypes.number
 };
 
+class RefreshPrompt extends React.Component {
+  static propTypes = {
+    reportHeight: PropTypes.func
+  };
+  constructor() {
+    super();
+    this.ref = React.createRef();
+  }
+  componentDidMount() {
+    this.props.reportHeight(window.getComputedStyle(this.ref.current).height);
+  }
+
+  render() {
+    return (
+      <div ref={this.ref} className={styles.toast}>
+        <div className={styles.row}>
+          <WarnIcon />
+          <div className={styles.refreshPrompt}>{messages["preferences.promptForRefresh"]}</div>
+          <div className={styles.warnIconPlaceholder} />
+        </div>
+        <button
+          className={styles.refreshNowButton}
+          onClick={() => {
+            const href = location.href;
+            location.href = href;
+          }}
+        >
+          <FormattedMessage id={"preferences.refreshNow"} />
+        </button>
+      </div>
+    );
+  }
+}
+
 export default class PreferencesScreen extends Component {
   static propTypes = {
     onClose: PropTypes.func,
@@ -645,7 +703,8 @@ export default class PreferencesScreen extends Component {
   };
 
   state = {
-    category: CATEGORY_AUDIO
+    category: CATEGORY_AUDIO,
+    toastHeight: "150px"
   };
 
   constructor(props) {
@@ -675,24 +734,37 @@ export default class PreferencesScreen extends Component {
       ],
       [CATEGORY_MISC, [{ items: items.get(CATEGORY_MISC) }]]
     ]);
+    this.onresize = () => {
+      this.forceUpdate();
+    };
+    this.storeUpdated = () => {
+      this.forceUpdate();
+    };
   }
 
   componentDidMount() {
     window.APP.preferenceScreenIsVisible = true;
-    this.onresize = () => {
-      this.forceUpdate();
-    };
     window.addEventListener("resize", this.onresize);
+    this.props.store.addEventListener("statechanged", this.storeUpdated);
   }
   componentWillUnmount() {
     window.APP.preferenceScreenIsVisible = false;
     window.removeEventListener("resize", this.onresize);
+    this.props.store.removeEventListener("statechanged", this.storeUpdated);
   }
 
   render() {
+    const shouldPromptForRefresh = !!this.props.store.state.preferences.shouldPromptForRefresh;
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={classNames(styles.preferencesPanel)}>
+          {shouldPromptForRefresh && (
+            <RefreshPrompt
+              reportHeight={toastHeight => {
+                this.setState({ toastHeight });
+              }}
+            />
+          )}
           <CloseButton onClick={this.props.onClose} />
           <Nav selected={this.state.category}>
             {TOP_LEVEL_CATEGORIES.map(category => (
@@ -708,7 +780,17 @@ export default class PreferencesScreen extends Component {
             ))}
           </Nav>
           <div className={styles.contentContainer}>
-            <div className={styles.scrollingContent}>{this.sections.get(this.state.category).map(Section)}</div>
+            <div className={styles.scrollingContent}>
+              {this.sections.get(this.state.category).map(Section)}
+              {shouldPromptForRefresh && (
+                <div
+                  style={{
+                    width: "100%",
+                    minHeight: `${this.state.toastHeight}`
+                  }}
+                />
+              )}
+            </div>
           </div>
         </div>
       </IntlProvider>
