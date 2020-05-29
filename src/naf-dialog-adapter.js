@@ -624,7 +624,6 @@ export default class DialogAdapter {
         token: permsToken
       })
       .then(() => {
-        console.log("kick!");
         document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
       });
   }
