@@ -227,6 +227,20 @@ export default class DialogAdapter {
 
           break;
         }
+
+        case "peerBlocked": {
+          const { peerId } = notification.data;
+          document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: peerId } }));
+
+          break;
+        }
+
+        case "peerUnblocked": {
+          const { peerId } = notification.data;
+          document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: peerId } }));
+
+          break;
+        }
       }
     });
 
@@ -416,7 +430,8 @@ export default class DialogAdapter {
         displayName: this._clientId,
         device: this._device,
         rtpCapabilities: this._mediasoupDevice.rtpCapabilities,
-        sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined
+        sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined,
+        token: this._joinToken
       });
 
       const audioConsumerPromises = [];
@@ -602,25 +617,30 @@ export default class DialogAdapter {
   }
 
   kick(clientId, permsToken) {
-    // TODO send kick message to SFU
-    //return this.publisher.handle.sendMessage({ kind: "kick", room_id: this.room, user_id: clientId, token: permsToken }).then(() => {
-    document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
-    //});
+    return this._protoo
+      .request("kick", {
+        room_id: this.room,
+        user_id: clientId,
+        token: permsToken
+      })
+      .then(() => {
+        console.log("kick!");
+        document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
+      });
   }
 
   block(clientId) {
-    // TODO send block message to SFU
-    //return this.publisher.handle.sendMessage({ kind: "block", whom: clientId }).then(() => {
-    this._blockedClients.set(clientId, true);
-    document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: clientId } }));
-    //});
+    return this._protoo.request("block", { whom: clientId }).then(() => {
+      this._blockedClients.set(clientId, true);
+      document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: clientId } }));
+    });
   }
 
   unblock(clientId) {
-    //return this.publisher.handle.sendMessage({ kind: "unblock", whom: clientId }).then(() => {
-    this._blockedClients.delete(clientId);
-    document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: clientId } }));
-    //});
+    return this._protoo.request("unblock", { whom: clientId }).then(() => {
+      this._blockedClients.delete(clientId);
+      document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: clientId } }));
+    });
   }
 
   async updateTimeOffset() {
