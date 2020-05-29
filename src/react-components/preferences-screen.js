@@ -373,7 +373,6 @@ export class PreferenceListItem extends Component {
 
   render() {
     const isCheckbox = this.props.prefType === PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
-    const control = this.props.control;
     const isSmallScreen = window.innerWidth < 600;
     const label = <span className={styles.preferenceLabel}>{messages[`preferences.${this.props.storeKey}`]}</span>;
     const hasPref =
@@ -407,7 +406,7 @@ export class PreferenceListItem extends Component {
       return (
         <ListItem>
           <div className={styles.row}>
-            {control}
+            {this.props.control}
             {label}
             <div className={styles.rowRight}>{resetToDefault}</div>
           </div>
@@ -422,7 +421,7 @@ export class PreferenceListItem extends Component {
               {label}
             </div>
             <div className={styles.row}>
-              <div className={styles.rowCenter}>{control}</div>
+              <div className={styles.rowCenter}>{this.props.control}</div>
               <div className={styles.rowRight}>{resetToDefault}</div>
             </div>
           </div>
@@ -434,7 +433,7 @@ export class PreferenceListItem extends Component {
         <div className={styles.row}>
           {<CheckboxPlaceholder />}
           {label}
-          <div className={styles.rowRight}>{control}</div>
+          <div className={styles.rowRight}>{this.props.control}</div>
           <div className={styles.rowRight}>{resetToDefault}</div>
         </div>
       </ListItem>
@@ -589,31 +588,22 @@ const DEFINITIONS = new Map([
   ]
 ]);
 
-function createControl(itemProps, store) {
-  const storeKey = itemProps.key;
-  const setValue = v => {
-    if (itemProps.promptForRefresh) {
-      store.update({ preferences: { [storeKey]: v, shouldPromptForRefresh: true } });
-    } else {
-      store.update({ preferences: { [storeKey]: v } });
-    }
-  };
-  const props = { store, storeKey, setValue, ...itemProps };
-  switch (props.prefType) {
-    case PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX: {
-      return <BooleanPreference {...props} />;
-    }
-    case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
-      return <MaxResolutionPreferenceItem {...props} />;
-    case PREFERENCE_LIST_ITEM_TYPE.SELECT: {
-      return <PreferenceSelect {...props} />;
-    }
-    case PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE:
-      return <NumberRangeSelector {...props} />;
-    default:
-      return <div />;
-  }
+const controlType = new Map([
+  [PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, BooleanPreference],
+  [PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION, MaxResolutionPreferenceItem],
+  [PREFERENCE_LIST_ITEM_TYPE.SELECT, PreferenceSelect],
+  [PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE, NumberRangeSelector]
+]);
+
+function Control({ itemProps, store, setValue }) {
+  const ControlType = controlType.get(itemProps.prefType);
+  return <ControlType {...{ store, storeKey: itemProps.key, setValue, ...itemProps }} />;
 }
+Control.propTypes = {
+  itemProps: PropTypes.object,
+  store: PropTypes.object,
+  setValue: PropTypes.func
+};
 
 function createItem(itemProps, store) {
   const setValue = v => {
@@ -625,7 +615,7 @@ function createItem(itemProps, store) {
   };
   return (
     <PreferenceListItem
-      control={createControl(itemProps, store)}
+      control={<Control itemProps={itemProps} store={store} setValue={setValue} />}
       store={store}
       storeKey={itemProps.key}
       setValue={setValue}
