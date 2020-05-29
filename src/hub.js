@@ -341,6 +341,7 @@ function setupPeerConnectionConfig(adapter, host, turn) {
     iceServers.push({ urls: "stun:stun1.l.google.com:19302" });
 
     peerConnectionConfig.iceServers = iceServers;
+    peerConnectionConfig.iceTransportPolicy = "all";
 
     if (forceTurn || forceTcp) {
       peerConnectionConfig.iceTransportPolicy = "relay";
@@ -492,11 +493,6 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   }
 
   const hub = data.hubs[0];
-
-  // TODO remove
-  hub.host = "peaceful-ardent.quackstack2.net";
-  hub.port = "80";
-
   let embedToken = hub.embed_token;
 
   if (!embedToken) {
@@ -547,13 +543,24 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     objectsScene.appendChild(objectsEl);
   }
 
+  // TODO Remove this once transition completed.
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   const connectToScene = async () => {
+    let adapter = "janus";
+
+    try {
+      // Meta endpoint exists only on dialog
+      await fetch(`https://${hub.host}:${hub.port}/meta`);
+      adapter = "dialog";
+    } catch (e) {
+      // Ignore, set to janus.
+    }
+
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,
       serverURL: `wss://${hub.host}:${hub.port}`,
       debug: !!isDebug,
-      adapter: "dialog"
+      adapter
     });
 
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();

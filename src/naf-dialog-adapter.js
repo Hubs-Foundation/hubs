@@ -69,6 +69,10 @@ export default class DialogAdapter {
     if (peerConnectionConfig.iceServers) {
       this._iceServers = peerConnectionConfig.iceServers;
     }
+
+    if (peerConnectionConfig.iceTransportPolicy) {
+      this._iceTransportPolicy = peerConnectionConfig.iceTransportPolicy;
+    }
   }
 
   setApp() {}
@@ -348,6 +352,7 @@ export default class DialogAdapter {
         dtlsParameters: sendTransportInfo.dtlsParameters,
         sctpParameters: sendTransportInfo.sctpParameters,
         iceServers: this._iceServers,
+        iceTransportPolicy: this._iceTransportPolicy,
         proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS
       });
 
