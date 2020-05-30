@@ -17,7 +17,7 @@ patchWebGLRenderingContext();
 
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
-import { JanusAdapter } from "naf-janus-adapter";
+import "naf-janus-adapter";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
@@ -1464,17 +1464,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         // to be related to silence, but may be a factor.)
         let track, oscillator, stream;
 
-        // TODO only do this for janus
-        /*const ctx = THREE.AudioContext.getContext();
-        oscillator = ctx.createOscillator();
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.01, ctx.currentTime);
-        const dest = ctx.createMediaStreamDestination();
-        oscillator.connect(gain);
-        gain.connect(dest);
-        oscillator.start();
-        const stream = dest.stream;
-        track = stream.getAudioTracks()[0];*/
+        console.log(adapter);
+
+        // TODO remove after dialog
+        if (adapter.type !== "dialog") {
+          console.log("using janus");
+          const ctx = THREE.AudioContext.getContext();
+          oscillator = ctx.createOscillator();
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.01, ctx.currentTime);
+          const dest = ctx.createMediaStreamDestination();
+          oscillator.connect(gain);
+          gain.connect(dest);
+          oscillator.start();
+          const stream = dest.stream;
+          track = stream.getAudioTracks()[0];
+        }
 
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);

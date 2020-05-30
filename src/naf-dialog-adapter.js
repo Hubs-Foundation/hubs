@@ -15,12 +15,8 @@ import { debug as newDebug } from "debug";
 // TODO
 // - look into requestConsumerKeyframe
 // - look into applyNetworkThrottle
-// - test turn
 // SFU todo
 // - remove active speaker stuff
-// - kick
-// - block
-// - auth token
 // - remove score stuff
 
 // Based upon mediasoup-demo RoomClient
@@ -51,6 +47,7 @@ export default class DialogAdapter {
     this._initialAudioConsumerResolvers = new Map();
     this._serverTimeRequests = 0;
     this._blockedClients = new Map();
+    this.type = "dialog";
     this.occupants = []; // This is a public field
   }
 
