@@ -1232,8 +1232,6 @@ AFRAME.registerComponent("media-pdf", {
       this.renderTask = null;
 
       if (src !== this.data.src || index !== this.data.index) return;
-
-      this.currentPageTextureIsRetained = true;
     } catch (e) {
       console.error("Error loading PDF", this.data.src, e);
       texture = errorTexture;
