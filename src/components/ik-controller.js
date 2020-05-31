@@ -67,7 +67,8 @@ AFRAME.registerComponent("ik-controller", {
     leftHand: { type: "string", default: "LeftHand" },
     rightHand: { type: "string", default: "RightHand" },
     chest: { type: "string", default: "Spine" },
-    rotationSpeed: { default: 5 },
+    rotationSpeed: { default: 8 },
+    maxLerpAngle: { default: 90 * THREE.Math.DEG2RAD },
     alwaysUpdate: { type: "boolean", default: false }
   },
 
@@ -221,12 +222,19 @@ AFRAME.registerComponent("ik-controller", {
       cameraYQuaternion.setFromEuler(cameraYRotation);
 
       if (this._hadFirstTick) {
-        Quaternion.slerp(
-          avatar.quaternion,
-          cameraYQuaternion,
-          avatar.quaternion,
-          (this.data.rotationSpeed * dt) / 1000
+        const yDelta = Math.abs(
+          Math.atan2(Math.sin(cameraYRotation.y - avatar.rotation.y), Math.cos(cameraYRotation.y - avatar.rotation.y))
         );
+        if (yDelta > this.data.maxLerpAngle) {
+          avatar.quaternion.copy(cameraYQuaternion);
+        } else {
+          Quaternion.slerp(
+            avatar.quaternion,
+            cameraYQuaternion,
+            avatar.quaternion,
+            (this.data.rotationSpeed * dt) / 1000
+          );
+        }
       } else {
         avatar.quaternion.copy(cameraYQuaternion);
       }
@@ -257,7 +265,7 @@ AFRAME.registerComponent("ik-controller", {
     if (!this._hadFirstTick) {
       // Ensure the avatar is not shown until we've done our first IK step, to prevent seeing mis-oriented/t-pose pose or our own avatar at the wrong place.
       this.ikRoot.el.object3D.visible = true;
-      this._hasFirstTick = true;
+      this._hadFirstTick = true;
     }
   },
 
