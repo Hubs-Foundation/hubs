@@ -1466,7 +1466,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // TODO remove after dialog
         if (adapter.type !== "dialog") {
-          console.log("using janus");
+          console.log("Using Janus SFU");
           const ctx = THREE.AudioContext.getContext();
           oscillator = ctx.createOscillator();
           const gain = ctx.createGain();
