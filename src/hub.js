@@ -683,14 +683,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     }
   };
 
-  if (!isBotMode) {
-    objectsEl.addEventListener("model-loaded", async el => {
-      if (el.target !== objectsEl) return;
-      connectToScene();
-    });
-  } else {
-    connectToScene();
-  }
+  connectToScene();
 }
 
 async function runBotMode(scene, entryManager) {
