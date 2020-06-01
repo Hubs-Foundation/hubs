@@ -5,7 +5,11 @@ import styles from "./Loader.scss";
 export function Loader({ message }) {
   return (
     <>
-      <div className={styles.loader} />
+      <div className={styles.loader}>
+        <div />
+        <div />
+        <div />
+      </div>
       {message && <div className={styles.loaderText}>{message}</div>}
     </>
   );
