@@ -537,11 +537,15 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   const objectsScene = document.querySelector("#objects-scene");
   const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
   const objectsEl = document.createElement("a-entity");
-  objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
 
-  if (!isBotMode) {
-    objectsScene.appendChild(objectsEl);
-  }
+  scene.addEventListener("adapter-ready", () => {
+    // Append objects once adapter is ready since ownership may be taken.
+    objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
+
+    if (!isBotMode) {
+      objectsScene.appendChild(objectsEl);
+    }
+  });
 
   // TODO Remove this once transition completed.
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
