@@ -12,54 +12,65 @@ const VerificationStep = {
   error: "error"
 };
 
-function useVerify(authParams) {
+function useVerify() {
   const [step, setStep] = useState(VerificationStep.verifying);
   const [error, setError] = useState();
   const auth = useContext(AuthContext);
 
-  useEffect(
-    () => {
-      const verifyAsync = async () => {
-        try {
-          await auth.verify(authParams);
-          setStep(VerificationStep.complete);
-        } catch (error) {
-          setStep(VerificationStep.error);
-          setError(error);
-        }
-      };
+  useEffect(() => {
+    const verifyAsync = async () => {
+      try {
+        const qs = new URLSearchParams(location.search);
 
-      verifyAsync();
-    },
-    [authParams, auth]
-  );
+        const authParams = {
+          topic: qs.get("auth_topic"),
+          token: qs.get("auth_token"),
+          origin: qs.get("auth_origin"),
+          payload: qs.get("auth_payload")
+        };
+
+        await auth.verify(authParams);
+        setStep(VerificationStep.complete);
+      } catch (error) {
+        setStep(VerificationStep.error);
+        setError(error);
+      }
+    };
+
+    verifyAsync();
+  }, []);
 
   return { step, error };
 }
 
 function EmailVerifying() {
-  <div className={styles.signInContainer}>
-    <h1>Email Verifying</h1>
-    <Loader />
-  </div>;
+  return (
+    <div className={styles.signInContainer}>
+      <h1>Email Verifying</h1>
+      <Loader />
+    </div>
+  );
 }
 
-function EmailVerified({ origin }) {
-  <div className={styles.signInContainer}>
-    <h1>Verification Complete</h1>
-    <b>Please close this browser window and return to {origin}.</b>
-  </div>;
-}
+function EmailVerified() {
+  const qs = new URLSearchParams(location.search);
+  const origin = qs.get("auth_origin");
 
-EmailVerified.propTypes = {
-  origin: PropTypes.string
-};
+  return (
+    <div className={styles.signInContainer}>
+      <h1>Verification Complete</h1>
+      <b>Please close this browser window and return to {origin}.</b>
+    </div>
+  );
+}
 
 function VerificationError({ error }) {
-  <div className={styles.signInContainer}>
-    <h1>Error Verifying Email</h1>
-    <b>{error.message || "Unknown Error"}</b>
-  </div>;
+  return (
+    <div className={styles.signInContainer}>
+      <h1>Error Verifying Email</h1>
+      <b>{(error && error.message) || "Unknown Error"}</b>
+    </div>
+  );
 }
 
 VerificationError.propTypes = {
@@ -67,21 +78,12 @@ VerificationError.propTypes = {
 };
 
 export function VerifyPage() {
-  const qs = new URLSearchParams(location.search);
-
-  const authParams = {
-    topic: qs.get("auth_topic"),
-    token: qs.get("auth_token"),
-    origin: qs.get("auth_origin"),
-    payload: qs.get("auth_payload")
-  };
-
-  const { step, error } = useVerify(authParams);
+  const { step, error } = useVerify();
 
   return (
     <Page style={{ backgroundImage: configs.image("home_background", true), backgroundSize: "cover" }}>
       {step === VerificationStep.verifying && <EmailVerifying />}
-      {step === VerificationStep.complete && <EmailVerified origin={authParams.origin} />}
+      {step === VerificationStep.complete && <EmailVerified />}
       {step === VerificationStep.error && <VerificationError error={error} />}
     </Page>
   );
