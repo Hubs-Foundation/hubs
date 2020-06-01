@@ -19,7 +19,7 @@ export class ScaleInScreenSpaceSystem {
         const component = this.components[i];
         // TODO: This calculates the distance to the viewing camera, the correct distance might be to the viewing plane.
         // This seemed accurate enough in my testing.
-        const distance = Math.sqrt(squareDistanceBetween(component.el.object3D, this.viewingCamera.object3D));
+        const distance = Math.sqrt(squareDistanceBetween(component.el.object3D, this.viewingCamera.object3DMap.camera));
         if (distance < MIN_DISTANCE) {
           component.el.object3D.scale.set(0.00001, 0.000001, 0.00001);
         } else {

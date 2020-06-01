@@ -74,6 +74,7 @@ export default class MessageDispatch {
         for (let i = scales.length - 1; i >= 0; i--) {
           if (curScale.x > scales[i]) {
             avatarRig.object3D.scale.set(scales[i], scales[i], scales[i]);
+            avatarRig.object3D.matrixNeedsUpdate = true;
             break;
           }
         }
@@ -141,13 +142,14 @@ export default class MessageDispatch {
         }
         break;
       case "audiomode":
-        if (window.APP.store.state.preferences.audioOutputMode !== "audio") {
-          window.APP.store.state.preferences.audioOutputMode = "audio";
-          this.log("Positional Audio disabled.");
-        } else {
-          window.APP.store.state.preferences.audioOutputMode = "panner";
-          this.log("Positional Audio enabled.");
+        {
+          const shouldEnablePositionalAudio = window.APP.store.state.preferences.audioOutputMode === "audio";
+          window.APP.store.update({
+            preferences: { audioOutputMode: shouldEnablePositionalAudio ? "panner" : "audio" }
+          });
+          this.log(`Positional Audio ${shouldEnablePositionalAudio ? "enabled" : "disabled"}.`);
         }
+        break;
     }
   };
 }

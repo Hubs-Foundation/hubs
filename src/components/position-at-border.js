@@ -76,7 +76,7 @@ AFRAME.registerComponent("position-at-border", {
 
   doInit() {
     this.didInit = true;
-    this.cam = document.getElementById("viewing-camera").object3D;
+    this.cam = document.getElementById("viewing-camera").object3DMap.camera;
     if (!this.data.target) {
       console.error("No target for position-at-border on element:", this.el);
       return;
@@ -109,7 +109,7 @@ AFRAME.registerComponent("position-at-border", {
     if (this.didRegisterWithAnimationSystem) {
       this.el.sceneEl.systems["hubs-systems"].menuAnimationSystem.unregister(this);
     }
-    positionAtBorderComponents.splice(positionAtBorderComponents.indexOf(this, 1));
+    positionAtBorderComponents.splice(positionAtBorderComponents.indexOf(this), 1);
   },
 
   markDirty() {

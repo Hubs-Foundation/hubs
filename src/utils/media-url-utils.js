@@ -16,7 +16,9 @@ const commonKnownContentTypes = {
   pdf: "application/pdf",
   mp4: "video/mp4",
   mp3: "audio/mpeg",
-  basis: "image/basis"
+  basis: "image/basis",
+  m3u8: "application/vnd.apple.mpegurl",
+  mpd: "application/dash+xml"
 };
 
 // thanks to https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
@@ -98,7 +100,7 @@ export function getAbsoluteHref(baseUrl, relativeUrl) {
 
 export const getCustomGLTFParserURLResolver = gltfUrl => url => {
   if (typeof url !== "string" || url === "") return "";
-  if (/^(https?:)?\/\//i.test(url)) return url;
+  if (/^(https?:)?\/\//i.test(url)) return proxiedUrlFor(url);
   if (/^data:.*,.*$/i.test(url)) return url;
   if (/^blob:.*$/i.test(url)) return url;
 

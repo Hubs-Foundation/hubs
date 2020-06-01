@@ -396,6 +396,16 @@ AFRAME.registerComponent("media-loader", {
       // we don't think we can infer it from the extension, we need to make a HEAD request to find it out
       contentType = contentType || guessContentType(canonicalUrl) || (await fetchContentType(accessibleUrl));
 
+      // TODO we should probably just never return "application/octet-stream" as expectedContentType, since its not really useful
+      if (contentType === "application/octet-stream") {
+        contentType = guessContentType(canonicalUrl) || contentType;
+      }
+
+      // Some servers treat m3u8 playlists as "audio/x-mpegurl", we always want to treat them as HLS videos
+      if (contentType === "audio/x-mpegurl") {
+        contentType = "application/vnd.apple.mpegurl";
+      }
+
       // We don't want to emit media_resolved for index updates.
       if (forceLocalRefresh || srcChanged) {
         this.el.emit("media_resolved", { src, raw: accessibleUrl, contentType });
@@ -406,6 +416,7 @@ AFRAME.registerComponent("media-loader", {
       if (
         contentType.startsWith("video/") ||
         contentType.startsWith("audio/") ||
+        contentType.startsWith("application/dash") ||
         AFRAME.utils.material.isHLS(canonicalUrl, contentType)
       ) {
         let linkedVideoTexture, linkedAudioSource, linkedMediaElementAudioSource;
@@ -578,7 +589,7 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
-        let batch = !disableBatching;
+        let batch = !disableBatching && forceImageBatching;
         if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
           batch = false;
         }

@@ -9,6 +9,7 @@ import { loadGLTF } from "../components/gltf-model-plus";
 import { disposeNode, findNode } from "../utils/three-utils";
 import { ensureAvatarMaterial, MAT_NAME } from "../utils/avatar-utils";
 import { createImageBitmap, disposeImageBitmap } from "../utils/image-bitmap-utils";
+import { proxiedUrlFor } from "../utils/media-url-utils";
 import styles from "../assets/stylesheets/avatar-preview.scss";
 
 const TEXTURE_PROPS = {
@@ -189,7 +190,8 @@ class AvatarPreview extends Component {
 
   async loadCurrentAvatarGltfUrl() {
     const newLoadId = ++this.loadId;
-    const gltf = await this.loadPreviewAvatar(this.props.avatarGltfUrl);
+    const url = proxiedUrlFor(this.props.avatarGltfUrl);
+    const gltf = await this.loadPreviewAvatar(url);
     // If we had started loading another avatar while we were loading this one, throw this one away
     if (newLoadId !== this.loadId) return;
     if (gltf && this.props.onGltfLoaded) this.props.onGltfLoaded(gltf);

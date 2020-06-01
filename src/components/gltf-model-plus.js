@@ -2,11 +2,12 @@ import nextTick from "../utils/next-tick";
 import { mapMaterials } from "../utils/material-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import MobileStandardMaterial from "../materials/MobileStandardMaterial";
-import { textureLoader, basisTextureLoader } from "../utils/media-utils";
 import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import { disposeNode, cloneObject3D } from "../utils/three-utils";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
+import HubsBasisTextureLoader from "../loaders/HubsBasisTextureLoader";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -321,11 +322,11 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
   const loadingManager = new THREE.LoadingManager();
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
   const gltfLoader = new THREE.GLTFLoader(loadingManager);
-  gltfLoader.setBasisTextureLoader(basisTextureLoader);
+  gltfLoader.setBasisTextureLoader(new HubsBasisTextureLoader(loadingManager));
 
   const parser = await new Promise((resolve, reject) => gltfLoader.createParser(gltfUrl, resolve, onProgress, reject));
 
-  parser.textureLoader = textureLoader;
+  parser.textureLoader = new HubsTextureLoader(loadingManager);
 
   if (jsonPreprocessor) {
     parser.json = jsonPreprocessor(parser.json);

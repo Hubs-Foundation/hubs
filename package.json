@@ -62,6 +62,7 @@
     "classnames": "^2.2.5",
     "color": "^3.1.2",
     "copy-to-clipboard": "^3.0.8",
+    "dashjs": "^3.1.0",
     "dayjs-ext": "^2.2.0",
     "deepmerge": "^2.1.1",
     "detect-browser": "^3.0.1",
@@ -75,7 +76,7 @@
     "form-data": "^3.0.0",
     "form-urlencoded": "^2.0.4",
     "history": "^4.7.2",
-    "hls.js": "^0.12.2",
+    "hls.js": "^0.13.2",
     "js-cookie": "^2.2.0",
     "jsonschema": "^1.2.2",
     "jwt-decode": "^2.2.0",
@@ -83,7 +84,7 @@
     "linkify-it": "^2.0.3",
     "markdown-it": "^8.4.2",
     "moving-average": "^1.0.0",
-    "naf-janus-adapter": "^3.0.20",
+    "naf-janus-adapter": "^4.0.1",
     "networked-aframe": "github:mozillareality/networked-aframe#master",
     "nipplejs": "github:mozillareality/nipplejs#mr-social-client/master",
     "node-ensure": "0.0.0",
@@ -168,5 +169,8 @@
     "webpack-cli": "^3.2.3",
     "webpack-dev-server": "^3.1.14",
     "worker-loader": "^2.0.0"
+  },
+  "optionalDependencies": {
+    "fsevents": "^2.1.3"
   }
 }

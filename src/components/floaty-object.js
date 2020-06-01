@@ -26,7 +26,6 @@ AFRAME.registerComponent("floaty-object", {
   init() {
     this.onGrab = this.onGrab.bind(this);
     this.onRelease = this.onRelease.bind(this);
-    this.physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
   },
 
   tick() {
@@ -44,14 +43,15 @@ AFRAME.registerComponent("floaty-object", {
     }
 
     if (!isHeld && this._makeStaticWhenAtRest) {
+      const physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
       const isMine = this.el.components.networked && NAF.utils.isMine(this.el);
       const linearThreshold = this.bodyHelper.data.linearSleepingThreshold;
       const angularThreshold = this.bodyHelper.data.angularSleepingThreshold;
       const uuid = this.bodyHelper.uuid;
       const isAtRest =
-        this.physicsSystem.bodyInitialized(uuid) &&
-        this.physicsSystem.getLinearVelocity(uuid) < linearThreshold &&
-        this.physicsSystem.getAngularVelocity(uuid) < angularThreshold;
+        physicsSystem.bodyInitialized(uuid) &&
+        physicsSystem.getLinearVelocity(uuid) < linearThreshold &&
+        physicsSystem.getAngularVelocity(uuid) < angularThreshold;
 
       if (isAtRest && isMine) {
         this.el.setAttribute("body-helper", { type: "kinematic" });
@@ -87,10 +87,10 @@ AFRAME.registerComponent("floaty-object", {
   onRelease() {
     if (this.data.modifyGravityOnRelease) {
       const uuid = this.bodyHelper.uuid;
+      const physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
       if (
         this.data.gravitySpeedLimit === 0 ||
-        (this.physicsSystem.bodyInitialized(uuid) &&
-          this.physicsSystem.getLinearVelocity(uuid) < this.data.gravitySpeedLimit)
+        (physicsSystem.bodyInitialized(uuid) && physicsSystem.getLinearVelocity(uuid) < this.data.gravitySpeedLimit)
       ) {
         this.el.setAttribute("body-helper", {
           gravity: { x: 0, y: 0, z: 0 },

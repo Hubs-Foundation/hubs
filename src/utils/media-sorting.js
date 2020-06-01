@@ -1,3 +1,10 @@
+import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
+import { faMusic } from "@fortawesome/free-solid-svg-icons/faMusic";
+import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
+import { faNewspaper } from "@fortawesome/free-solid-svg-icons/faNewspaper";
+import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
+import { faCube } from "@fortawesome/free-solid-svg-icons/faCube";
+
 export const SORT_ORDER_VIDEO = 0;
 export const SORT_ORDER_AUDIO = 1;
 export const SORT_ORDER_IMAGE = 2;
@@ -19,3 +26,12 @@ export function mediaSortOrder(el) {
 export function mediaSort(el1, el2) {
   return mediaSortOrder(el1) - mediaSortOrder(el2);
 }
+
+export const DISPLAY_IMAGE = new Map([
+  [SORT_ORDER_VIDEO, faVideo],
+  [SORT_ORDER_AUDIO, faMusic],
+  [SORT_ORDER_IMAGE, faImage],
+  [SORT_ORDER_PDF, faNewspaper],
+  [SORT_ORDER_UNIDENTIFIED, faQuestion],
+  [SORT_ORDER_MODEL, faCube]
+]);

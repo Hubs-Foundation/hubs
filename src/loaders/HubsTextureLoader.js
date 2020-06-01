@@ -32,12 +32,12 @@ export default class HubsTextureLoader {
     imageLoader.setCrossOrigin(this.crossOrigin);
     imageLoader.setPath(this.path);
 
-    const cacheKey = this.manager.resolveURL(src);
+    const resolvedUrl = this.manager.resolveURL(src);
 
-    texture.image = await loadAsync(imageLoader, src, onProgress);
+    texture.image = await loadAsync(imageLoader, resolvedUrl, onProgress);
 
     // Image was just added to cache before this function gets called, disable caching by immediatly removing it
-    THREE.Cache.remove(cacheKey);
+    THREE.Cache.remove(resolvedUrl);
 
     texture.needsUpdate = true;
 
