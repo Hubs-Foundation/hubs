@@ -161,7 +161,7 @@ export function SignInPage() {
   );
 
   return (
-    <Page>
+    <Page style={{ backgroundImage: configs.image("home_background", true), backgroundSize: "cover" }}>
       {step === SignInStep.submit && (
         <SubmitEmail onSubmitEmail={submitEmail} initialEmail={email} signInReason={qs.get("sign_in_reason")} />
       )}

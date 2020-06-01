@@ -4,17 +4,16 @@ import "./Page.scss";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 
-export function Page({ children, className }) {
+export function Page({ children, ...rest }) {
   return (
     <>
       <Header />
-      <main className={className}>{children}</main>
+      <main {...rest}>{children}</main>
       <Footer />
     </>
   );
 }
 
 Page.propTypes = {
-  className: PropTypes.string,
   children: PropTypes.node
 };

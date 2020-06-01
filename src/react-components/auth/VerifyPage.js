@@ -4,6 +4,7 @@ import { Page } from "../layout/Page";
 import styles from "./SignInPage.scss";
 import { Loader } from "../misc/Loader";
 import { AuthContext } from "../auth/AuthContext";
+import configs from "../../utils/configs";
 
 const VerificationStep = {
   verifying: "verifying",
@@ -78,7 +79,7 @@ export function VerifyPage() {
   const { step, error } = useVerify(authParams);
 
   return (
-    <Page>
+    <Page style={{ backgroundImage: configs.image("home_background", true), backgroundSize: "cover" }}>
       {step === VerificationStep.verifying && <EmailVerifying />}
       {step === VerificationStep.complete && <EmailVerified origin={authParams.origin} />}
       {step === VerificationStep.error && <VerificationError error={error} />}
