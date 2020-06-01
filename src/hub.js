@@ -1464,8 +1464,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         // to be related to silence, but may be a factor.)
         let track, oscillator, stream;
 
-        console.log(adapter);
-
         // TODO remove after dialog
         if (adapter.type !== "dialog") {
           console.log("using janus");
