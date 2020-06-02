@@ -46,6 +46,7 @@ export default class DialogAdapter {
     this._initialAudioConsumerPromise = null;
     this._initialAudioConsumerResolvers = new Map();
     this._serverTimeRequests = 0;
+    this._avgTimeOffset = 0;
     this._blockedClients = new Map();
     this.type = "dialog";
     this.occupants = []; // This is a public field
@@ -669,10 +670,10 @@ export default class DialogAdapter {
       this._timeOffsets[this._serverTimeRequests % 10] = timeOffset;
     }
 
-    this.avgTimeOffset = this._timeOffsets.reduce((acc, offset) => (acc += offset), 0) / this._timeOffsets.length;
+    this._avgTimeOffset = this._timeOffsets.reduce((acc, offset) => (acc += offset), 0) / this._timeOffsets.length;
 
     if (this._serverTimeRequests > 10) {
-      debug(`new server time offset: ${this.avgTimeOffset}ms`);
+      debug(`new server time offset: ${this._avgTimeOffset}ms`);
       setTimeout(() => this.updateTimeOffset(), 5 * 60 * 1000); // Sync clock every 5 minutes.
     } else {
       this.updateTimeOffset();
