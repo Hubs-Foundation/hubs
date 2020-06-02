@@ -35,20 +35,25 @@ async function enableChromeAEC(gainNode) {
     audioEl.srcObject = e.streams[0];
   });
 
-  gainNode.disconnect();
-  gainNode.connect(loopbackDestination);
+  try {
+    //The following should never fail, but just in case, we won't disconnect/reconnect the gainNode unless all of this succeeds
+    loopbackDestination.stream.getTracks().forEach(track => {
+      outboundPeerConnection.addTrack(track, loopbackDestination.stream);
+    });
 
-  loopbackDestination.stream.getTracks().forEach(track => {
-    outboundPeerConnection.addTrack(track, loopbackDestination.stream);
-  });
+    const offer = await outboundPeerConnection.createOffer();
+    outboundPeerConnection.setLocalDescription(offer);
+    await inboundPeerConnection.setRemoteDescription(offer);
 
-  const offer = await outboundPeerConnection.createOffer().catch(onError);
-  outboundPeerConnection.setLocalDescription(offer).catch(onError);
-  await inboundPeerConnection.setRemoteDescription(offer).catch(onError);
+    const answer = await inboundPeerConnection.createAnswer();
+    inboundPeerConnection.setLocalDescription(answer);
+    outboundPeerConnection.setRemoteDescription(answer);
 
-  const answer = await inboundPeerConnection.createAnswer();
-  inboundPeerConnection.setLocalDescription(answer).catch(onError);
-  outboundPeerConnection.setRemoteDescription(answer).catch(onError);
+    gainNode.disconnect();
+    gainNode.connect(loopbackDestination);
+  } catch (e) {
+    onError(e);
+  }
 }
 
 export class AudioSystem {
@@ -57,20 +62,30 @@ export class AudioSystem {
     if (sceneEl.camera) {
       sceneEl.camera.add(sceneEl.audioListener);
     }
-    sceneEl.addEventListener("camera-set-active", evt => {
+    sceneEl.addEventListener("camera-set- active", evt => {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
+
+    this.audioContext = THREE.AudioContext.getContext();
+    this.audioNodes = new Map();
+    this.mediaStreamDestinationNode = this.audioContext.createMediaStreamDestination();
+    this.outboundStream = this.mediaStreamDestinationNode.stream;
+    this.outboundGainNode = this.audioContext.createGain();
+    this.outboundAnalyser = this.audioContext.createAnalyser();
+    this.outboundAnalyser.fftSize = 32;
+    this.analyserLevels = new Uint8Array(this.outboundAnalyser.fftSize);
+    this.outboundGainNode.connect(this.outboundAnalyser);
+    this.outboundAnalyser.connect(this.mediaStreamDestinationNode);
 
     /**
      * Chrome and Safari will start Audio contexts in a "suspended" state.
      * A user interaction (touch/mouse event) is needed in order to resume the AudioContext.
      */
-    const ctx = THREE.AudioContext.getContext();
     const resume = () => {
-      ctx.resume();
+      this.audioContext.resume();
 
-      setTimeout(function() {
-        if (ctx.state === "running") {
+      setTimeout(() => {
+        if (this.audioContext.state === "running") {
           if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
             enableChromeAEC(sceneEl.audioListener.gain);
           }
@@ -83,5 +98,26 @@ export class AudioSystem {
 
     document.body.addEventListener("touchend", resume, false);
     document.body.addEventListener("mouseup", resume, false);
+  }
+
+  addStreamToOutboundAudio(id, mediaStream) {
+    if (this.audioNodes.has(id)) {
+      this.removeStreamFromOutboundAudio(id);
+    }
+
+    const sourceNode = this.audioContext.createMediaStreamSource(mediaStream);
+    const gainNode = this.audioContext.createGain();
+    sourceNode.connect(gainNode);
+    gainNode.connect(this.outboundGainNode);
+    this.audioNodes.set(id, { sourceNode, gainNode });
+  }
+
+  removeStreamFromOutboundAudio(id) {
+    if (this.audioNodes.has(id)) {
+      const nodes = this.audioNodes.get(id);
+      nodes.sourceNode.disconnect();
+      nodes.gainNode.disconnect();
+      this.audioNodes.delete(id);
+    }
   }
 }

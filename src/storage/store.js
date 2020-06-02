@@ -73,6 +73,7 @@ export const SCHEMA = {
         onlyShowNametagsInFreeze: { type: "bool" },
         allowMultipleHubsInstances: { type: "bool" },
         disableIdleDetection: { type: "bool" },
+        preferMobileObjectInfoPanel: { type: "bool" },
         maxResolutionWidth: { type: "number" },
         maxResolutionHeight: { type: "number" },
         globalVoiceVolume: { type: "number" },
