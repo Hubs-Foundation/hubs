@@ -53,6 +53,17 @@ const HAND_ROTATIONS = {
   right: new Matrix4().makeRotationFromEuler(new Euler(-Math.PI / 2, -Math.PI / 2, 0))
 };
 
+const angleOnXZPlaneBetweenMatrixRotations = (function() {
+  const XZ_PLANE_NORMAL = new THREE.Vector3(0, -1, 0);
+  const v1 = new THREE.Vector3();
+  const v2 = new THREE.Vector3();
+  return function angleOnXZPlaneBetweenMatrixRotations(matrixA, matrixB) {
+    v1.setFromMatrixColumn(matrixA, 2).projectOnPlane(XZ_PLANE_NORMAL);
+    v2.setFromMatrixColumn(matrixB, 2).projectOnPlane(XZ_PLANE_NORMAL);
+    return v1.angleTo(v2);
+  };
+})();
+
 /**
  * Performs IK on a hip-rooted skeleton to align the hip, head and hands with camera and controller inputs.
  * @namespace avatar
@@ -214,6 +225,7 @@ AFRAME.registerComponent("ik-controller", {
       // frustum culling errors since three.js does not take into account skinning when
       // computing frustum culling sphere bounds.
       avatar.position.setFromMatrixPosition(headTransform).add(invHipsToHeadVector);
+      avatar.matrixNeedsUpdate = true;
 
       // Animate the hip rotation to follow the Y rotation of the camera with some damping.
       cameraYRotation.setFromRotationMatrix(cameraForward, "YXZ");
@@ -222,9 +234,11 @@ AFRAME.registerComponent("ik-controller", {
       cameraYQuaternion.setFromEuler(cameraYRotation);
 
       if (this._hadFirstTick) {
-        const yDelta = Math.abs(
-          Math.atan2(Math.sin(cameraYRotation.y - avatar.rotation.y), Math.cos(cameraYRotation.y - avatar.rotation.y))
-        );
+        camera.object3D.updateMatrices();
+        avatar.updateMatrices();
+        // Note: Camera faces down -Z, avatar faces down +Z
+        const yDelta = Math.PI - angleOnXZPlaneBetweenMatrixRotations(camera.object3D.matrixWorld, avatar.matrixWorld);
+
         if (yDelta > this.data.maxLerpAngle) {
           avatar.quaternion.copy(cameraYQuaternion);
         } else {
