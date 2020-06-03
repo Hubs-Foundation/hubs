@@ -12,6 +12,16 @@ if (!existsSync(".ret.credentials")) {
   process.exit(0);
 }
 
+const args = process.argv.slice(2);
+
+let hubsConfigPath;
+
+if (args.length > 0) {
+  hubsConfigPath = args[0];
+  hubsConfigPath = hubsConfigPath.trim(hubsConfigPath);
+  hubsConfigPath = path.resolve(process.cwd(), hubsConfigPath);
+}
+
 const { host, token } = JSON.parse(readFileSync(".ret.credentials"));
 console.log(`Deploying to ${host}.`);
 const step = ora({ indent: 2 }).start();
@@ -67,7 +77,13 @@ const getTs = (() => {
   });
 
   await new Promise((resolve, reject) => {
-    exec("npm run build", { env }, err => {
+    const buildArgs = [];
+
+    if (hubsConfigPath) {
+      buildArgs.push("--", "--env.hubsConfig", hubsConfigPath);
+    }
+
+    exec(`npm run build${buildArgs.join(" ")}`, { env }, err => {
       if (err) reject(err);
       resolve();
     });

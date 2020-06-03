@@ -1,8 +1,8 @@
 {
-  "name": "hubs",
-  "version": "0.0.1",
+  "name": "hubs-sdk",
+  "version": "0.1.0",
   "description": "Duck-themed multi-user virtual spaces in WebVR.",
-  "main": "src/index.js",
+  "main": "src/sdk.js",
   "license": "MPL-2.0",
   "homepage": "https://github.com/mozilla/hubs#readme",
   "repository": {
@@ -11,6 +11,9 @@
   },
   "bugs": {
     "url": "https://github.com/mozilla/hubs/issues"
+  },
+  "bin": {
+    "hubs": "./bin/hubs.js"
   },
   "scripts": {
     "start": "webpack-dev-server --mode=development --env.loadAppConfig",
@@ -61,7 +64,9 @@
     "buffered-interpolation": "^0.2.5",
     "classnames": "^2.2.5",
     "color": "^3.1.2",
+    "commander": "^5.1.0",
     "copy-to-clipboard": "^3.0.8",
+    "cross-spawn": "^7.0.3",
     "dashjs": "^3.1.0",
     "dayjs-ext": "^2.2.0",
     "deepmerge": "^2.1.1",
