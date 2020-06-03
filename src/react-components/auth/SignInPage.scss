@@ -26,7 +26,6 @@ main {
 
   button {
     @extend %action-button;
-    display: inline;
   }
 
   :local(.terms) {
