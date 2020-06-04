@@ -197,11 +197,11 @@
                         </template>
 
                         <template data-name="LeftHand">
-                            <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
+                            <a-entity personal-space-invader="radius: 0.1" bone-visibility="updateWhileInvisible: true;"></a-entity>
                         </template>
 
                         <template data-name="RightHand">
-                            <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
+                            <a-entity personal-space-invader="radius: 0.1" bone-visibility="updateWhileInvisible: true;"></a-entity>
                         </template>
                     </a-entity>
                 </a-entity>
@@ -1223,11 +1223,11 @@
                 </template>
 
                 <template data-name="LeftHand">
-                    <a-entity bone-visibility hover-visuals="hand: left;"></a-entity>
+                    <a-entity bone-visibility="updateWhileInvisible: true;" hover-visuals="hand: left;"></a-entity>
                 </template>
 
                 <template data-name="RightHand">
-                    <a-entity bone-visibility hover-visuals="hand: right;"></a-entity>
+                    <a-entity bone-visibility="updateWhileInvisible: true;" hover-visuals="hand: right;"></a-entity>
                 </template>
 
             </a-entity>
