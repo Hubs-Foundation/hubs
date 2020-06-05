@@ -317,6 +317,7 @@ const loadLightmap = async (parser, materialIndex) => {
     parser.getDependency("texture", lightmapDef.index)
   ]);
   material.lightMap = lightMap;
+  material.lightMapIntensity = lightmapDef.intensity !== undefined ? lightmapDef.intensity : 1;
   return lightMap;
 };
 
