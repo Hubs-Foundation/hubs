@@ -396,7 +396,7 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
     parser.getDependencies("camera"),
     Promise.all(extensionDeps)
   ]);
-  var gltf = {
+  const gltf = {
     scene: scenes[parser.json.scene || 0],
     scenes,
     animations,
