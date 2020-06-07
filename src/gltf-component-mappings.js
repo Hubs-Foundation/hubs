@@ -22,7 +22,10 @@ function registerRootSceneComponent(componentName) {
 registerRootSceneComponent("fog");
 registerRootSceneComponent("background");
 
-AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
+AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
+  el.setAttribute("duck", "");
+  el.setAttribute("quack", { quackPercentage: 0.1 });
+});
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
 AFRAME.GLTFModelPlus.registerComponent("sound", "sound");
 AFRAME.GLTFModelPlus.registerComponent("css-class", "css-class");

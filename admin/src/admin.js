@@ -49,7 +49,7 @@ const theme = createMuiTheme({
     MuiDrawer: {
       docked: {
         background: "#222222",
-        height: "100vh"
+        minHeight: "100vh"
       }
     }
   },

@@ -333,7 +333,7 @@ export default class Sky extends Object3D {
     const theta = Math.PI * (this._inclination - 0.5);
     const phi = 2 * Math.PI * (this._azimuth - 0.5);
 
-    const distance = this._distance;
+    const distance = Math.min(1000, this._distance);
 
     const x = distance * Math.cos(phi);
     const y = distance * Math.sin(phi) * Math.sin(theta);
