@@ -3,21 +3,44 @@
  * @namespace avatar
  * @component bone-visibility
  */
-AFRAME.registerComponent("bone-visibility", {
+
+const HIDDEN_SCALE = 0.00000001;
+
+const components = [];
+export class BoneVisibilitySystem {
   tick() {
-    const { visible } = this.el.object3D;
+    for (let i = 0; i < components.length; i++) {
+      const cmp = components[i];
+      const obj = cmp.el.object3D;
+      const { visible, scale } = obj;
+      const { updateWhileInvisible } = cmp.data;
+      if (visible !== cmp.lastVisible || updateWhileInvisible) {
+        if (visible && (scale.x !== 1 || scale.y !== 1 || scale.z !== 1)) {
+          scale.setScalar(1);
+          obj.matrixNeedsUpdate = true;
+        } else if (!visible && (scale.x !== HIDDEN_SCALE || scale.y !== HIDDEN_SCALE || scale.z !== HIDDEN_SCALE)) {
+          scale.setScalar(HIDDEN_SCALE);
+          obj.matrixNeedsUpdate = true;
+        }
 
-    if (this.lastVisible !== visible) {
-      if (visible) {
-        this.el.object3D.scale.set(1, 1, 1);
-      } else {
-        // Three.js doesn't like updating matrices with 0 scale, so we set it to a near zero number.
-        this.el.object3D.scale.set(0.00000001, 0.00000001, 0.00000001);
+        // Normally this object being invisible would cause it not to get updated even though the matrixNeedsUpdate flag is set, force it
+        if (updateWhileInvisible && obj.matrixNeedsUpdate) {
+          obj.updateMatrixWorld(true, true);
+        }
       }
-
-      this.lastVisible = visible;
-      this.el.object3D.updateMatrices(true, true);
-      this.el.object3D.updateMatrixWorld(true, true);
+      cmp.lastVisible = visible;
     }
+  }
+}
+
+AFRAME.registerComponent("bone-visibility", {
+  schema: {
+    updateWhileInvisible: { type: "boolean", default: false }
+  },
+  play() {
+    components.push(this);
+  },
+  pause() {
+    components.splice(components.indexOf(this), 1);
   }
 });

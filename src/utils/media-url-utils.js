@@ -100,7 +100,7 @@ export function getAbsoluteHref(baseUrl, relativeUrl) {
 
 export const getCustomGLTFParserURLResolver = gltfUrl => url => {
   if (typeof url !== "string" || url === "") return "";
-  if (/^(https?:)?\/\//i.test(url)) return url;
+  if (/^(https?:)?\/\//i.test(url)) return proxiedUrlFor(url);
   if (/^data:.*,.*$/i.test(url)) return url;
   if (/^blob:.*$/i.test(url)) return url;
 

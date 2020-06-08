@@ -1,0 +1,150 @@
+@import 'shared.scss';
+
+:local(.flex){
+  display: flex;
+}
+
+:local(.header-icon) {
+  @extend %s44x44;
+  @extend %panel-widget-color;
+  @extend %action-label-color-on-hover;
+  &:local(.small) {
+    @extend %s32x32;
+  }
+}
+
+:local(.action-row-icon) {
+  @extend %s44x44;
+  @extend %action-label-color;
+}
+
+:local(.inner-navigation-row-item) {
+  margin: 0px 8px;
+  @extend %no-default-button-style;
+}
+
+%animate-scale {
+  transition-property: transform;
+  transition-duration: 0.25s;
+  transition-timing-function: ease-out;
+}
+%scale-normal {
+  transform: scale(1);
+  @extend %animate-scale;
+}
+%scale-big {
+  transform: scale(1.25);
+  @extend %animate-scale;
+}
+
+:local(.navigation-row-item){
+  @extend %s44x44;
+  @extend %panel-widget-color;
+  @extend %action-label-color-on-hover;
+  @extend %scale-normal;
+  &:local(.selected) {
+    @extend %scale-big;
+    @extend %action-label-color;
+  }
+}
+
+%float-container{
+  display: flex;
+  align-items: center;
+}
+
+:local(.header){
+  height: 64px;
+  background-color: var(--panel-background-color);
+  @extend %float-container;
+}
+
+%floater {
+  position: absolute;
+  width: 100%;
+  height: 0px;
+  display: flex;
+  align-items: center;
+}
+
+:local(.float-center) {
+  @extend %floater;
+  justify-content: center;
+}
+
+:local(.float-left) {
+  @extend %floater;
+  justify-content: flex-start;
+  &>*:first-child {
+    margin-left: 16px;
+  }
+  &>* {
+    margin-right: 16px;
+  }
+}
+
+:local(.float-right){
+  @extend %floater;
+  justify-content: flex-start;
+  flex-direction: row-reverse;
+  &>*:first-child {
+    margin-right: 16px;
+  }
+  &>* {
+    margin-left: 16px;
+  }
+}
+
+:local(.object-counter-text){
+  @extend %subtitle-text;
+  font-size: 32px;
+}
+
+:local(.panel) {
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  border-radius: 18px 18px 0 0;
+  display: flex;
+  flex-flow: column;
+  background-color: var(--panel-background-color);
+  z-index: 10;
+}
+
+:local(.navigation-row){
+  height: 80px;
+  margin: 0px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+:local(.inner-navigation-row-container){
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  overflow: hidden;
+  height: 60px;
+}
+
+:local(.inner-navigation-row){
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+:local(.object-action-row) {
+  @extend %float-container;
+  height: 64px;
+}
+
+:local(.action-row-action-button) {
+  @extend %action-button;
+  @extend %action-row-button;
+}
+
+:local(.action-row-action-button-secondary) {
+  @extend %action-button-secondary;
+  @extend %action-row-button;
+}

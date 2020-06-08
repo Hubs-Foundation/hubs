@@ -624,11 +624,15 @@ AFRAME.registerComponent("camera-tool", {
         }
 
         const bubbleSystem = this.el.sceneEl.systems["personal-space-bubble"];
+        const boneVisibilitySystem = this.el.sceneEl.systems["hubs-systems"].boneVisibilitySystem;
 
         if (bubbleSystem) {
           for (let i = 0, l = bubbleSystem.invaders.length; i < l; i++) {
             bubbleSystem.invaders[i].disable();
           }
+          // HACK, bone visibility typically takes a tick to update, but since we want to be able
+          // to have enable() and disable() be reflected this frame, we need to do it immediately.
+          boneVisibilitySystem.tick();
         }
 
         const tmpVRFlag = renderer.vr.enabled;
@@ -678,6 +682,9 @@ AFRAME.registerComponent("camera-tool", {
           for (let i = 0, l = bubbleSystem.invaders.length; i < l; i++) {
             bubbleSystem.invaders[i].enable();
           }
+          // HACK, bone visibility typically takes a tick to update, but since we want to be able
+          // to have enable() and disable() be reflected this frame, we need to do it immediately.
+          boneVisibilitySystem.tick();
         }
 
         this.lastUpdate = now;
