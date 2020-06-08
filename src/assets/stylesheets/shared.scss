@@ -48,6 +48,14 @@ $favorited-color: var(--favorited-color, $duck-yellow);
   margin: 0;
 }
 
+%default-input-field {
+  @extend %rounded-border;
+  @extend %default-font;
+  color: var(--text-field-text-color);
+  padding: 0px;
+  margin: 0px;
+}
+
 %input-field {
   @extend %rounded-border;
   @extend %default-font;
@@ -218,6 +226,28 @@ $favorited-color: var(--favorited-color, $duck-yellow);
   outline-style: none;
 }
 
+%default-checkbox {
+  cursor: pointer;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--text-field-border-color);
+  background-color: var(--text-field-background-color);
+  border-radius: 6px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+%default-checkbox-checked{
+  &::after {
+    content: ' ';
+    position: absolute;
+    background: $action-color;
+    border-radius: 6px;
+  }
+}
+
 %checkbox {
   cursor: pointer;
   appearance: none;
@@ -295,25 +325,6 @@ $favorited-color: var(--favorited-color, $duck-yellow);
   }
 }
 
-%fa-icon-button-icon {
-  background: var(--icon-button-background-color);
-  width: 40px !important;
-  height: 40px;
-  border: 3px solid var(--icon-button-border-color);
-  border-radius: 40px;
-  display: inline-block;
-  font-size: 22px;
-  vertical-align: sub;
-  line-height: 42px;
-  svg {
-    margin-right: 2px;
-  }
-}
-
-%fa-icon-button-text {
-  margin-left: 16px;
-}
-
 %panel-widget {
   cursor: pointer;
   color: var(--panel-widget-color);
@@ -364,4 +375,62 @@ $favorited-color: var(--favorited-color, $duck-yellow);
   pointer-events: none;
   position: absolute;
   right: 7.5%;
+}
+%s24x24 {
+  width: 24px !important;
+  height: 24px !important;
+}
+%s30x30 {
+  width: 30px !important;
+  height: 30px !important;
+}
+%s32x32 {
+  width: 32px !important;
+  height: 32px !important;
+}
+%s36x36 {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px;
+  min-height: 36px;
+}
+%s44x44 {
+  width: 44px !important;
+  height: 44px !important;
+}
+%no-default-button-style {
+  padding: 0px;
+  border-style: none;
+  background-color: transparent;
+  cursor: pointer;
+  &:focus {
+    outline: 0; // @a11y TODO: Provide user preference for showing outlines
+  }
+}
+:local(.no-default-button-style){
+  @extend %no-default-button-style;
+}
+%panel-widget-color {
+  color: var(--panel-widget-color);
+}
+%action-label-color {
+  color: $action-label-color;
+}
+%action-label-color-on-hover {
+  @media(hover: hover){
+    &:hover {
+      color: $action-label-color;
+    }
+  }
+}
+%subtitle-text {
+  @extend %default-font;
+  font-weight: normal;
+  text-transform: uppercase;
+  color: var(--panel-subtitle-color);
+}
+%action-row-button {
+  min-width: 120px;
+  width: 120px;
+  height: 44px;
 }

@@ -66,6 +66,7 @@ export const SCHEMA = {
       type: "object",
       additionalProperties: false,
       properties: {
+        shouldPromptForRefresh: { type: "bool" },
         muteMicOnEntry: { type: "bool" },
         audioOutputMode: { type: "string" },
         enableOnScreenJoystickLeft: { type: "bool" },
