@@ -46,7 +46,7 @@ export class EffectsSystem {
 
     this.bind();
 
-    window.addEventListener('resize', this.onWindowResize, false );
+    window.addEventListener('resize', this.onWindowResize.bind(this), false );
   }
 
   onWindowResize( event ) {
