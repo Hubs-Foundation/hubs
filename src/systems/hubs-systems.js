@@ -24,6 +24,7 @@ import { MenuAnimationSystem } from "./menu-animation-system";
 import { AudioSettingsSystem } from "./audio-settings-system";
 import { EnterVRButtonSystem } from "./enter-vr-button-system";
 import { AudioSystem } from "./audio-system";
+import { EffectsSystem } from "./effects-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -57,6 +58,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.menuAnimationSystem = new MenuAnimationSystem();
     this.audioSettingsSystem = new AudioSettingsSystem(this.el);
     this.enterVRButtonSystem = new EnterVRButtonSystem(this.el);
+    this.effectsSystem = new EffectsSystem(this.sceneEl);
   },
 
   tick(t, dt) {
@@ -93,6 +95,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.menuAnimationSystem.tick(t);
     this.spriteSystem.tick(t, dt);
     this.enterVRButtonSystem.tick();
+    this.effectsSystem.tick(t,dt);
   },
 
   remove() {

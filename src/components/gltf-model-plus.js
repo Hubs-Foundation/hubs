@@ -8,6 +8,9 @@ import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import { disposeNode, cloneObject3D } from "../utils/three-utils";
 
+import { Glassy } from '../shaders/Glassy.js';
+import { ShinyShader } from '../shaders/ShinyShader.js';
+
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 class GLTFCache {
@@ -309,7 +312,7 @@ function runMigration(version, json) {
   }
 }
 
-export async function loadGLTF(src, contentType, preferredTechnique, onProgress, jsonPreprocessor) {
+export async function loadGLTF(src, contentType, preferredTechnique, onProgress, jsonPreprocessor, sceneEl) {
   let gltfUrl = src;
   let fileMap;
 
@@ -396,13 +399,23 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
 
-    object.material = mapMaterials(object, material => {
-      if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
-        return MobileStandardMaterial.fromStandardMaterial(material);
-      }
+    // TODO: add custom shaders here
+    // But how to set shader params without modifying the gltf exporter?
+    // Use Blender's 'Custom Properties'? https://github.com/KhronosGroup/glTF-Blender-Exporter/issues/15
+    console.log(object)
+    if (object.name == "TheRiverMesh") {
+      sceneEl.systems["hubs-systems"].effectsSystem.registerShader(Glassy)
+      var shaderMaterial = new THREE.ShaderMaterial(Glassy);
+      object.material = shaderMaterial
+    } else {
+      object.material = mapMaterials(object, material => {
+        if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
+          return MobileStandardMaterial.fromStandardMaterial(material);
+        }
 
-      return material;
-    });
+        return material;
+      });
+    }
   });
 
   if (fileMap) {
@@ -415,7 +428,7 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
   return gltf;
 }
 
-export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
+export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null, sceneEl = null) {
   const preferredTechnique =
     window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness";
 
@@ -429,7 +442,7 @@ export async function loadModel(src, contentType = null, useCache = false, jsonP
         gltfCache.retain(src);
         return cloneGltf(gltf);
       } else {
-        const promise = loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor);
+        const promise = loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor, sceneEl);
         inflightGltfs.set(src, promise);
         const gltf = await promise;
         inflightGltfs.delete(src);
@@ -438,7 +451,7 @@ export async function loadModel(src, contentType = null, useCache = false, jsonP
       }
     }
   } else {
-    return loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor);
+    return loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor, sceneEl);
   }
 }
 
@@ -514,7 +527,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       }
 
       this.el.emit("model-loading");
-      const gltf = await loadModel(src, contentType, this.data.useCache, this.jsonPreprocessor);
+      const gltf = await loadModel(src, contentType, this.data.useCache, this.jsonPreprocessor, this.el.sceneEl);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
