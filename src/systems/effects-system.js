@@ -8,7 +8,10 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { NegativeScreenShader } from '../shaders/NegativeScreenShader.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import { Vector2 } from 'three';
+import { GammaCorrectionShader } from 'three/examples/jsm/shaders/GammaCorrectionShader.js';
+import { AdaptiveToneMappingPass } from 'three/examples/jsm/postprocessing/AdaptiveToneMappingPass.js';
+import { Vector2, NoToneMapping } from 'three';
+
 
 export class EffectsSystem {
   constructor(sceneEl) {
@@ -25,13 +28,27 @@ export class EffectsSystem {
 
     const scene = sceneEl.object3D;
     const renderer = sceneEl.renderer;
+    renderer.toneMapping = NoToneMapping;
     const camera = sceneEl.camera;
 
-    const composer = new EffectComposer(renderer);
+    var targetParams = {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      format: THREE.RGBAFormat,
+      type: THREE.FloatType,
+      stencilBuffer: false
+    };
+
+    var renderTarget = new THREE.WebGLRenderTarget(1024, 1024, targetParams );
+    renderTarget.texture.name = 'EffectComposer.rt1';
+    const composer = new EffectComposer(renderer, renderTarget);
+
     var passes = [
       new RenderPass(scene, camera),
       // UnrealBloomPass(resolution, strength, radius, threshold)
-      new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.5, 4.4, 0.9),
+      new UnrealBloomPass(new THREE.Vector2(1024, 1024), 1.6, 3.0, 0.9),
+      new AdaptiveToneMappingPass(false, 1024),
+      new ShaderPass(GammaCorrectionShader),
       //new ShaderPass(NegativeScreenShader, 'tDiffuse'),
     ];
     passes.slice(-1).renderToScreen = true;
