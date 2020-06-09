@@ -15,7 +15,7 @@ var Glassy = {
     void main() {
       vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
       gl_Position = projectionMatrix * modelViewPosition; 
-      fragCoord = position.xz;
+      fragCoord = position.xy;
     }
   `,
 
@@ -209,7 +209,6 @@ var Glassy = {
 
 
     void main(){
-      // Screen coordinates.
       vec2 u = fragCoord; // (fragCoord - resolution.xy*.5)/resolution.y;
       
       float time2 = time*0.001;
