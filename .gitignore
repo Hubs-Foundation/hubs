@@ -59,6 +59,7 @@ typings/
 
 # Ignore dist folder with webpack build output
 dist/
+hubs-client/dist
 
 .DS_Store
 
