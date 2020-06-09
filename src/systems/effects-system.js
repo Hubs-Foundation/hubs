@@ -46,7 +46,7 @@ export class EffectsSystem {
     var passes = [
       new RenderPass(scene, camera),
       // UnrealBloomPass(resolution, strength, radius, threshold)
-      new UnrealBloomPass(new THREE.Vector2(1024, 1024), 1.6, 3.0, 0.9),
+      new UnrealBloomPass(new THREE.Vector2(1024, 1024), 1.3, 1.0, 0.8),
       new AdaptiveToneMappingPass(false, 1024),
       new ShaderPass(GammaCorrectionShader),
       //new ShaderPass(NegativeScreenShader, 'tDiffuse'),
