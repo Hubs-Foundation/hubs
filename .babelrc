@@ -26,6 +26,7 @@
     }]
   ],
   "plugins": [
+    "@babel/plugin-syntax-dynamic-import",
     [ "react-intl", { "messagesDir": "./public/messages", "enforceDescriptions": false } ],
     "transform-react-jsx-img-import",
     "@babel/proposal-class-properties",

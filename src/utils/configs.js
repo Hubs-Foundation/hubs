@@ -95,4 +95,31 @@ configs.setIsAdmin = _isAdmin => {
 };
 configs.isAdmin = () => isAdmin;
 
+configs.hasPlugin = key => {
+  return configs.APP_CONFIG && configs.APP_CONFIG.plugins && configs.APP_CONFIG.plugins[key];
+};
+
+configs.importPlugin = async key => {
+  const exports = {};
+  const plugins = configs.APP_CONFIG && configs.APP_CONFIG.plugins && configs.APP_CONFIG.plugins[key];
+
+  const dependencies = plugins.map(plugin => {
+    if (plugin.type !== "js") {
+      return Promise.resolve();
+    }
+
+    return import(/* webpackIgnore: true */ new URL(plugin.url, window.location).href).then(result => {
+      if (plugin.options && plugin.options.globalVar) {
+        Object.assign(exports, window[plugin.options.globalVar]);
+      } else {
+        Object.assign(exports, result);
+      }
+    });
+  });
+
+  await Promise.all(dependencies);
+
+  return exports;
+};
+
 export default configs;
