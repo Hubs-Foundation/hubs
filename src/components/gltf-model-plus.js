@@ -402,7 +402,7 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
     // TODO: add custom shaders here
     // But how to set shader params without modifying the gltf exporter?
     // Use Blender's 'Custom Properties'? https://github.com/KhronosGroup/glTF-Blender-Exporter/issues/15
-    console.log(object)
+    // console.log(object)
     if (object.name == "Suzanne") {
       sceneEl.systems["hubs-systems"].effectsSystem.registerShader(Glassy)
       var shaderMaterial = new THREE.ShaderMaterial(Glassy);
