@@ -35,7 +35,10 @@ async function main() {
   if (configs.hasPlugin("home-page")) {
     window.React = React;
     const plugin = await configs.importPlugin("home-page");
-    component = plugin.HomePage;
+
+    if (plugin.HomePage) {
+      component = plugin.HomePage;
+    }
   }
 
   ReactDOM.render(<Root component={component} />, document.getElementById("ui-root"));
