@@ -46,6 +46,8 @@ export function navigateToClientInfo(history, clientId) {
 
 export default class PresenceList extends Component {
   static propTypes = {
+    hubChannel: PropTypes.object,
+    performConditionalSignIn: PropTypes.func,
     presences: PropTypes.object,
     history: PropTypes.object,
     sessionId: PropTypes.string,
@@ -59,6 +61,22 @@ export default class PresenceList extends Component {
 
   navigateToClientInfo = clientId => {
     navigateToClientInfo(this.props.history, clientId);
+  };
+
+  muteAllClicked = () => {
+    const { presences, hubChannel, performConditionalSignIn } = this.props;
+    for (const [clientId, presence] of Object.entries(presences)) {
+      if (clientId !== this.props.sessionId) {
+        const meta = presence.metas[0];
+        if (meta.presence === "room" && meta.roles && !meta.roles.owner) {
+          performConditionalSignIn(
+            () => hubChannel.can("mute_users"),
+            async () => await hubChannel.mute(clientId),
+            "mute-user"
+          );
+        }
+      }
+    }
   };
 
   domForPresence = ([sessionId, data]) => {
@@ -128,10 +146,21 @@ export default class PresenceList extends Component {
   }
 
   renderExpandedList() {
+    const meta = this.props.presences[this.props.sessionId].metas[0];
+    const owner = meta.roles && meta.roles.owner;
+    const muteAll = owner && (
+      <div className={styles.muteAll}>
+        <button title="Mute All" onClick={this.muteAllClicked.bind(this)} className={styles.muteButton}>
+          <FormattedMessage id="presence.mute_all" />
+        </button>
+      </div>
+    );
+
     return (
       <div className={styles.presenceList}>
         <div className={styles.attachPoint} />
         <div className={styles.contents}>
+          {muteAll}
           <div className={styles.rows}>
             {Object.entries(this.props.presences || {})
               .filter(([k]) => k === this.props.sessionId)

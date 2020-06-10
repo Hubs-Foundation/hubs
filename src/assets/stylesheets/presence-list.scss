@@ -79,3 +79,16 @@
   margin-left: 4px;
   text-decoration: none;
 }
+
+
+:local(.mute-all) {
+  border-bottom: 1px solid var(--panel-rule-color);
+  padding-bottom: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+:local(.mute-button) {
+  @extend %action-button;
+  pointer-events: auto;
+}
