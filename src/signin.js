@@ -4,11 +4,11 @@ import { IntlProvider } from "react-intl";
 import registerTelemetry from "./telemetry";
 import Store from "./storage/store";
 import "./utils/theme";
-import { HomePage } from "./react-components/home/HomePage";
 import { lang, messages } from "./utils/i18n";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
+import { SignInPage } from "./react-components/auth/SignInPage";
 
-registerTelemetry("/home", "Hubs Home Page");
+registerTelemetry("/signin", "Hubs Sign In Page");
 
 const store = new Store();
 window.APP = { store };
@@ -17,7 +17,7 @@ function Root() {
   return (
     <IntlProvider locale={lang} messages={messages}>
       <AuthContextProvider store={store}>
-        <HomePage />
+        <SignInPage />
       </AuthContextProvider>
     </IntlProvider>
   );
