@@ -7,7 +7,8 @@ AFRAME.registerComponent("uv-scroll", {
     speed: { type: "vec2", default: { x: 0, y: 0 } }
   },
   tick(_t, dt) {
-    const material = this.el.getObject3D("mesh") && this.el.getObject3D("mesh").material;
+    const mesh = this.el.getObject3D("mesh") || this.el.getObject3D("skinnedmesh");
+    const material = mesh && mesh.material;
     if (!material || !material.map) return;
     material.map.offset.addScaledVector(this.data.speed, dt / 1000);
   }
