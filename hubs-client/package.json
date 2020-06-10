@@ -1,6 +1,6 @@
 {
   "name": "hubs-client",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Pre-built Hubs client",
   "license": "MPL-2.0",
   "homepage": "https://github.com/mozilla/hubs#readme",
