@@ -20,7 +20,7 @@ import {
 import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { pushHistoryState } from "./utils/history";
-import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
+// import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 
 const isIOS = AFRAME.utils.device.isIOS();
 
@@ -86,7 +86,8 @@ export default class SceneEntryManager {
 
     this._spawnAvatar();
 
-    this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_ENTER_SCENE);
+    // CASPIAN: removed sound entry ~ can replace with our own
+    // this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_ENTER_SCENE);
 
     if (isBotMode) {
       this._runBot(mediaStream);
