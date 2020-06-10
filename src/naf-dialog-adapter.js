@@ -445,6 +445,7 @@ export default class DialogAdapter {
       // This will gate the connection flow until all voices will be heard.
       for (let i = 0; i < peers.length; i++) {
         const peerId = peers[i].id;
+        this._onOccupantConnected(peerId);
         this.occupants.push(peerId);
         if (!peers[i].hasProducers) continue;
         audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peerId, res)));
