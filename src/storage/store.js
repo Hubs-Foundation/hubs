@@ -69,6 +69,7 @@ export const SCHEMA = {
         shouldPromptForRefresh: { type: "bool" },
         muteMicOnEntry: { type: "bool" },
         audioOutputMode: { type: "string" },
+        invertTouchscreenCameraMove: { type: "bool" },
         enableOnScreenJoystickLeft: { type: "bool" },
         enableOnScreenJoystickRight: { type: "bool" },
         onlyShowNametagsInFreeze: { type: "bool" },
