@@ -27,7 +27,11 @@ window.PropTypes = PropTypes;
 window.ClassNames = ClassNames;
 
 window.Hubs = {
-  configs,
+  config: {
+    feature: configs.feature,
+    image: configs.image,
+    link: configs.link
+  },
   PhoenixUtils,
   React: {
     Common: {
