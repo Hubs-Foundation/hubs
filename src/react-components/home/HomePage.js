@@ -1,6 +1,5 @@
-import React, { useContext, useEffect } from "react";
-import { FormattedMessage, addLocaleData } from "react-intl";
-import en from "react-intl/locale-data/en";
+import React, { useContext } from "react";
+import { FormattedMessage } from "react-intl";
 import classNames from "classnames";
 import configs from "../../utils/configs";
 import IfFeature from "../if-feature";
@@ -13,32 +12,12 @@ import styles from "./HomePage.scss";
 import mediaBrowserStyles from "../../assets/stylesheets/media-browser.scss";
 import discordLogoSmall from "../../assets/images/discord-logo-small.png";
 import { AuthContext } from "../auth/AuthContext";
-import { createAndRedirectToNewHub } from "../../utils/phoenix-utils";
-
-addLocaleData([...en]);
+import { useHomePageRedirect } from "./useHomePageRedirect";
 
 export function HomePage() {
+  useHomePageRedirect();
   const featuredRooms = useFeaturedRooms();
   const auth = useContext(AuthContext);
-
-  useEffect(() => {
-    const qs = new URLSearchParams(location.search);
-
-    // Support legacy sign in urls.
-    if (qs.has("sign_in")) {
-      const redirectUrl = new URL("/signin", window.location);
-      redirectUrl.search = location.search;
-      window.location = redirectUrl;
-    } else if (qs.has("auth_topic")) {
-      const redirectUrl = new URL("/verify", window.location);
-      redirectUrl.search = location.search;
-      window.location = redirectUrl;
-    }
-
-    if (qs.has("new")) {
-      createAndRedirectToNewHub(null, null, true);
-    }
-  }, []);
 
   const canCreateRooms = !configs.feature("disable_room_creation") || auth.isAdmin;
 
