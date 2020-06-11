@@ -10,7 +10,7 @@ import { lang, messages } from "./utils/i18n";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
 import configs from "./utils/configs";
 import en from "react-intl/locale-data/en";
-import "./sdk/landing-page-globals";
+import { initSDKContext } from "./sdk/landing-page-globals";
 
 addLocaleData([...en]);
 registerTelemetry("/home", "Hubs Home Page");
@@ -36,6 +36,7 @@ async function main() {
   let component = HomePage;
 
   if (configs.hasPlugin("home-page")) {
+    initSDKContext(store);
     const plugin = await configs.importPlugin("home-page");
 
     if (plugin.HomePage) {

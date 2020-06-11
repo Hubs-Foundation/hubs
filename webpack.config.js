@@ -221,11 +221,6 @@ module.exports = async (env, argv) => {
     }
   }
 
-  // In production, the environment variables are defined in CI or loaded from ita and
-  // the app config is injected into the head of the page by Reticulum.
-
-  const host = process.env.HOST_IP || env.localDev || env.remoteDev ? "hubs.local" : "localhost";
-
   // Remove comments from .babelrc
   const babelConfig = JSON.parse(
     fs
@@ -234,7 +229,84 @@ module.exports = async (env, argv) => {
       .replace(/\/\/.+/g, "")
   );
 
-  return {
+  let pluginWebpackConfig;
+
+  if (env.hubsConfig) {
+    const hubsConfigPath = path.resolve(process.cwd(), env.hubsConfig);
+    const basePath = path.dirname(hubsConfigPath);
+    const hubsConfig = require(hubsConfigPath);
+    const pluginEntries = {};
+
+    if (hubsConfig.plugins) {
+      appConfig.plugins = {};
+
+      for (const key in hubsConfig.plugins) {
+        appConfig.plugins[key] = [];
+
+        hubsConfig.plugins[key].forEach(({ name, path: pluginPath }) => {
+          appConfig.plugins[key].push({
+            type: "js",
+            url: `/${name}.plugin.js`,
+            options: {
+              globalVar: `HubsPlugin_${name}`
+            }
+          });
+
+          pluginEntries[name] = path.resolve(basePath, pluginPath);
+        });
+      }
+
+      pluginWebpackConfig = {
+        entry: pluginEntries,
+        module: {
+          rules: [
+            {
+              test: /\.(js)$/,
+              exclude: /node_modules/,
+              use: {
+                loader: "babel-loader",
+                options: babelConfig
+              }
+            },
+            {
+              test: /\.css$/i,
+              use: [
+                "style-loader",
+                {
+                  loader: "css-loader",
+                  options: {
+                    modules: true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        output: {
+          path: path.resolve(__dirname, "dist"),
+          filename: "[name].plugin.js",
+          library: "HubsPlugin_[name]",
+          libraryTarget: "umd"
+        },
+        devtool: argv.mode === "production" ? "source-map" : "eval-source-map",
+        externals: {
+          react: "React",
+          "react-dom": "ReactDOM",
+          "react-intl": "ReactIntl",
+          "prop-types": "PropTypes",
+          classnames: "ClassNames",
+          hubs: "Hubs"
+        }
+      };
+    }
+  }
+
+  // In production, the environment variables are defined in CI or loaded from ita and
+  // the app config is injected into the head of the page by Reticulum.
+
+  const host = process.env.HOST_IP || env.localDev || env.remoteDev ? "hubs.local" : "localhost";
+
+  const hubsWebpackConfig = {
     node: {
       // need to specify this manually because some random lodash code will try to access
       // Buffer on the global object if it exists, so webpack will polyfill on its behalf
@@ -577,4 +649,10 @@ module.exports = async (env, argv) => {
       })
     ]
   };
+
+  if (pluginWebpackConfig) {
+    return [hubsWebpackConfig, pluginWebpackConfig];
+  } else {
+    return hubsWebpackConfig;
+  }
 };

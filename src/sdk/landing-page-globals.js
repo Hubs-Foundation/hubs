@@ -17,42 +17,44 @@ import HomePageStyles from "../react-components/home/HomePage.scss";
 import MediaBrowserStyles from "../assets/stylesheets/media-browser.scss";
 import discordLogoSmall from "../assets/images/discord-logo-small.png";
 import { AuthContext } from "../react-components/auth/AuthContext";
-import * as PhoenixUtils from "../utils/phoenix-utils";
 import { useHomePageRedirect } from "../react-components/home/useHomePageRedirect";
+import { Reticulum } from "./Reticulum";
 
-window.React = React;
-window.ReactDOM = ReactDOM;
-window.ReactIntl = ReactIntl;
-window.PropTypes = PropTypes;
-window.ClassNames = ClassNames;
+export function initSDKContext(store) {
+  window.React = React;
+  window.ReactDOM = ReactDOM;
+  window.ReactIntl = ReactIntl;
+  window.PropTypes = PropTypes;
+  window.ClassNames = ClassNames;
 
-window.Hubs = {
-  config: {
-    feature: configs.feature,
-    image: configs.image,
-    link: configs.link
-  },
-  PhoenixUtils,
-  React: {
-    Common: {
-      PageStyles,
-      Header,
-      Footer,
-      Page,
-      IfFeature,
-      AuthContext
+  window.Hubs = {
+    config: {
+      feature: configs.feature,
+      image: configs.image,
+      link: configs.link
     },
-    Media: {
-      Tiles: MediaTiles,
-      Styles: MediaBrowserStyles
-    },
-    HomePage: {
-      PWAButton,
-      CreateRoomButton,
-      useFeaturedRooms,
-      useHomePageRedirect,
-      Styles: HomePageStyles,
-      discordLogoSmall
+    reticulum: new Reticulum(store),
+    React: {
+      Common: {
+        PageStyles,
+        Header,
+        Footer,
+        Page,
+        IfFeature,
+        AuthContext
+      },
+      Media: {
+        Tiles: MediaTiles,
+        Styles: MediaBrowserStyles
+      },
+      HomePage: {
+        PWAButton,
+        CreateRoomButton,
+        useFeaturedRooms,
+        useHomePageRedirect,
+        Styles: HomePageStyles,
+        discordLogoSmall
+      }
     }
-  }
-};
+  };
+}
