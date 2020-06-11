@@ -75,16 +75,6 @@ function Header() {
 function Footer() {
   return (
     <footer>
-      <div className={styles.poweredBy}>
-        <UnlessFeature name="hide_powered_by">
-          <span className={styles.prefix}>
-            <FormattedMessage id="home.powered_by_prefix" />
-          </span>
-          <a className={styles.link} href="https://hubs.mozilla.com/cloud">
-            <FormattedMessage id="home.powered_by_link" />
-          </a>
-        </UnlessFeature>
-      </div>
       <nav>
         <ul>
           <IfFeature name="show_terms">
