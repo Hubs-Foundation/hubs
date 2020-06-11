@@ -12,7 +12,6 @@ import {
 } from "../utils/three-utils";
 import { getCurrentPlayerHeight } from "../utils/get-current-player-height";
 import qsTruthy from "../utils/qs_truthy";
-//import { m4String } from "../utils/pretty-print";
 const NAV_ZONE = "character";
 const qsAllowWaypointLerp = qsTruthy("waypointLerp");
 const isMobile = AFRAME.utils.device.isMobile();
@@ -43,7 +42,7 @@ const calculateDisplacementToDesiredPOV = (function() {
  * @namespace avatar
  */
 const SNAP_ROTATION_RADIAN = THREE.Math.DEG2RAD * 45;
-const BASE_SPEED = 3.2; //TODO: in what units?
+const BASE_SPEED = 6.2; //TODO: in what units?
 export class CharacterControllerSystem {
   constructor(scene) {
     this.scene = scene;
