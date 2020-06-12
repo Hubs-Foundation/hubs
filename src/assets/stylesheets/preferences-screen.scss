@@ -16,6 +16,25 @@ $fontSize: 16px;
   display: flex;
   flex-flow: column;
   align-items: center;
+
+  input[type='number'] {
+    -moz-appearance:textfield;
+  }
+
+  input[type=text],input[type=number] {
+    cursor: pointer;
+    @extend %default-input-field;
+    line-height: 30px;
+    font-size: $fontSize;
+    text-align: center;
+    width: 60px;
+    height: 38px;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
 }
 
 :local(.nav-container) {
@@ -59,15 +78,6 @@ $fontSize: 16px;
   flex-flow: row;
   align-items: center;
   justify-content: center;
-}
-
-input[type='number'] {
-  -moz-appearance:textfield;
-}
-
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
 }
 
 %preference-list-item {
@@ -277,16 +287,6 @@ input::-webkit-inner-spin-button {
 }
 :local(.dropdown-arrow){
   @extend %dropdown-arrow;
-}
-
-input[type=text],input[type=number] {
-  cursor: pointer;
-  @extend %default-input-field;
-  line-height: 30px;
-  font-size: $fontSize;
-  text-align: center;
-  width: 60px;
-  height: 38px;
 }
 
 :local(.number-with-range){
