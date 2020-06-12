@@ -2094,7 +2094,6 @@ class UIRoot extends Component {
             {showPresenceList && (
               <PresenceList
                 hubChannel={this.props.hubChannel}
-                performConditionalSignIn={this.props.performConditionalSignIn}
                 microphonePresences={this.props.microphonePresences}
                 history={this.props.history}
                 presences={this.props.presences}

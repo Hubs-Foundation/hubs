@@ -60,7 +60,6 @@ export function navigateToClientInfo(history, clientId) {
 export default class PresenceList extends Component {
   static propTypes = {
     hubChannel: PropTypes.object,
-    performConditionalSignIn: PropTypes.func,
     microphonePresences: PropTypes.object,
     presences: PropTypes.object,
     history: PropTypes.object,
@@ -78,12 +77,8 @@ export default class PresenceList extends Component {
   };
 
   mute = clientId => {
-    const { hubChannel, performConditionalSignIn } = this.props;
-    performConditionalSignIn(
-      () => hubChannel.can("mute_users"),
-      async () => await hubChannel.mute(clientId),
-      "mute-user"
-    );
+    const { hubChannel } = this.props;
+    hubChannel.mute(clientId);
   };
 
   muteAll = () => {
@@ -117,7 +112,8 @@ export default class PresenceList extends Component {
     const micState =
       microphonePresence && meta.presence === "room" ? getMicrophonePresenceIcon(microphonePresence) : "";
     const micIconStyles = [microphonePresence && microphonePresence.muted ? styles.iconRed : styles.icon];
-    if (sessionId !== this.props.sessionId && microphonePresence && !microphonePresence.muted) {
+    const canMuteUsers = this.props.hubChannel.can("mute_users");
+    if (canMuteUsers && sessionId !== this.props.sessionId && microphonePresence && !microphonePresence.muted) {
       micIconStyles.push(styles.iconButton);
     }
 
@@ -127,7 +123,7 @@ export default class PresenceList extends Component {
           <div className={styles.icon}>
             <i>{icon}</i>
           </div>
-          <div className={classNames(micIconStyles)} onClick={() => this.mute(sessionId)}>
+          <div className={classNames(micIconStyles)} onClick={() => (canMuteUsers ? this.mute(sessionId) : null)}>
             <i>{micState}</i>
           </div>
           <div
