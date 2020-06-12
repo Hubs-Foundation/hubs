@@ -472,7 +472,7 @@ function resolveAsset(src) {
 
 /**
  * Loads a GLTF model, optionally recursively "inflates" the child nodes of a model into a-entities and sets
- * whitelisted components on them if defined in the node's extras.
+ * allowed components on them if defined in the node's extras.
  * @namespace gltf
  * @component gltf-model-plus
  */

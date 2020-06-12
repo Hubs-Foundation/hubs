@@ -1,5 +1,5 @@
 // These controls are removed from the controller entities so that motion-capture-replayer is in full control of them.
-const controlsBlacklist = [
+const disallowedControls = [
   "tracked-controls",
   "hand-controls2",
   "vive-controls",
@@ -58,7 +58,7 @@ AFRAME.registerComponent("avatar-replay", {
   },
 
   _setupController: function(controller) {
-    controlsBlacklist.forEach(controlsComponent => controller.removeAttribute(controlsComponent));
+    disallowedControls.forEach(controlsComponent => controller.removeAttribute(controlsComponent));
     controller.setAttribute("visible", true);
     controller.setAttribute("motion-capture-replayer", { loop: true });
   }
