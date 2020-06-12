@@ -1,9 +1,15 @@
 import { generateHubName } from "../utils/name-generation";
 import { getReticulumFetchUrl, isLocalClient } from "../utils/phoenix-utils";
+import configs from "../utils/configs";
 
-export class Reticulum {
+export class SDK {
   constructor(store) {
     this.store = store;
+    this.config = {
+      feature: configs.feature,
+      image: configs.image,
+      link: configs.link
+    };
   }
 
   isAuthenticated() {
@@ -14,12 +20,8 @@ export class Reticulum {
     return this.store.state && this.store.state.credentials.token;
   }
 
-  async postJSON(url, payload, { headers, ...options } = {}) {
-    if (!this.isAuthenticated()) {
-      throw new Error("Not Authenticated");
-    }
-
-    const createUrl = getReticulumFetchUrl(url);
+  async postJSON(path, payload, { headers, ...options } = {}) {
+    const createUrl = getReticulumFetchUrl(path);
 
     const response = await fetch(createUrl, {
       body: JSON.stringify(payload),
@@ -36,12 +38,12 @@ export class Reticulum {
     return json;
   }
 
-  async postJSONAuthenticated(url, payload, { headers, ...options } = {}) {
+  async postJSONAuthenticated(path, payload, { headers, ...options } = {}) {
     if (!this.isAuthenticated()) {
       throw new Error("Not Authenticated");
     }
 
-    return this.postJSON(url, payload, {
+    return this.postJSON(path, payload, {
       headers: {
         authorization: `bearer ${this.getAuthToken()}`,
         ...headers
