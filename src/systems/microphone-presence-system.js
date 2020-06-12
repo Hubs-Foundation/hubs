@@ -52,7 +52,7 @@ export class MicrophonePresenceSystem {
         }
       }
 
-      this.remountUI({ microphonePresences });
+      if (this.remountUI) this.remountUI({ microphonePresences });
     }
   }
 }
