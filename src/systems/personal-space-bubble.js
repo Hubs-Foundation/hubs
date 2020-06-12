@@ -151,26 +151,12 @@ function createSphereGizmo(radius) {
   return line;
 }
 
-// TODO: we need to come up with a more generic way of doing this as this is very specific to our avatars.
-/**
- * Specifies a mesh associated with an invader.
- * @namespace avatar/personal-space-bubble
- * @component space-invader-mesh
- */
-AFRAME.registerComponent("space-invader-mesh", {
-  schema: {
-    meshName: { type: "string" }
-  },
-  update() {
-    this.targetMesh = this.el.object3D.getObjectByName(this.data.meshName);
-  }
-});
-
 function findInvaderMesh(entity) {
-  while (entity && !(entity.components && entity.components["space-invader-mesh"])) {
+  while (entity && !(entity.components && entity.components["gltf-model-plus"])) {
     entity = entity.parentNode;
   }
-  return entity && entity.components["space-invader-mesh"].targetMesh;
+  // TODO this assumes a single skinned mesh, should be some way for avatar to override this
+  return entity && entity.object3D.getObjectByProperty("type", "SkinnedMesh");
 }
 
 const DEBUG_OBJ = "psb-debug";
@@ -238,19 +224,11 @@ AFRAME.registerComponent("personal-space-invader", {
     }
 
     this.disabled = true;
-    this.updateBoneVisibility();
   },
 
   enable() {
     this.disabled = false;
     this.applyInvasionToMesh(this.invading);
-    this.updateBoneVisibility();
-  },
-
-  updateBoneVisibility() {
-    // HACK, bone visibility typically takes a tick to update, but since we want to be able
-    // to have enable() and disable() be reflected this frame, we need to do it immediately.
-    this.el.components["bone-visibility"] && this.el.components["bone-visibility"].tick();
   },
 
   applyInvasionToMesh(invading) {

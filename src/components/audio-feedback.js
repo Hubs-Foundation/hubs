@@ -53,7 +53,6 @@ AFRAME.registerComponent("networked-audio-analyser", {
   async init() {
     this.volume = 0;
     this.prevVolume = 0;
-    this.loudest = 0;
 
     this._updateAnalysis = this._updateAnalysis.bind(this);
     this._runScheduledWork = this._runScheduledWork.bind(this);
@@ -124,7 +123,6 @@ function getAnalyser(el) {
 AFRAME.registerSystem("local-audio-analyser", {
   init() {
     this.volume = 0;
-    this.loudest = 0;
     this.prevVolume = 0;
 
     this.el.addEventListener("local-media-stream-created", () => {

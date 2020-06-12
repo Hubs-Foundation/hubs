@@ -1,229 +1,297 @@
 @import 'shared.scss';
 
-$smallScreenWidth : 475px;
-$itemHeight : 3.0rem;
-$hoverFontSize: 1.6rem;
-$widescreenControlsWidth: 100%;
-$widescreenBreakpoint: 600px;
-$backgroundColor: var(--full-panel-background-color);
+$fontSize: 16px;
+
+%full-screen-panel {
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  background: var(--full-panel-background-color);
+}
+
+:local(.preferences-panel) {
+  @extend %full-screen-panel;
+  z-index: 2;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+
+  input[type='number'] {
+    -moz-appearance:textfield;
+  }
+
+  input[type=text],input[type=number] {
+    cursor: pointer;
+    @extend %default-input-field;
+    line-height: 30px;
+    font-size: $fontSize;
+    text-align: center;
+    width: 60px;
+    height: 38px;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+}
+
+:local(.nav-container) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+:local(.nav) {
+  display: flex;
+  justify-content: center;
+  border-bottom: 1px solid var(--panel-rule-color);
+  margin: 0px 16px;
+  width: 100%;
+}
+
+%font-nav-item {
+  font-weight: $semi-bold;
+  font-size: $fontSize;
+}
+%font-nav-item-selected {
+  font-weight: bold;
+}
+
+:local(.nav-item){
+  @extend %default-font;
+  @extend %font-nav-item;
+  @extend %no-default-button-style;
+  @extend %unselectable;
+  margin: 0px 24px;
+  border-bottom: 3px solid transparent;
+  &:local(.selected) {
+    @extend %font-nav-item-selected;
+    border-bottom: 3px solid $action-color;
+  }
+}
 
 :local(.max-resolution-preference-item) {
   display: flex;
   flex-flow: row;
   align-items: center;
   justify-content: center;
-
-  input {
-    @extend %input-field;
-    width: 6em;
-    font-size: 11pt;
-    text-align: center;
-    height: 38px;
-  }
 }
 
-input[type='number'] {
-  -moz-appearance:textfield;
-}
-
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-}
-
-:local(.preference-list-non-checkbox){
-  @media (max-width: $widescreenBreakpoint) {
-    flex-direction: column;
-  }
-}
-
-:local(.preference-list-item){
+%preference-list-item {
   display: flex;
   align-items: center;
-  margin: 12px 0;
-
-  :local(.part) {
-    display: flex;
-    flex-flow: column;
-    justify-content: space-around;
-    @media( min-width:$smallScreenWidth+1 ) {
-      justify-content: space-around;
-    }
-    @media( max-width:$smallScreenWidth ) {
-      text-align: center;
-      justify-content: center;
-      align-items: center;
-    }
-  }
-  :local(.checkbox-margin) {
-    margin-right: 8px;
-    width: 48px;
-  }
-  :local(.left) {
-    flex: 1;
-    @media( min-width:$smallScreenWidth+1 ) {
-      margin-inline-end: 1rem;
-    }
-    @media( max-width:$smallScreenWidth ) {
-      margin-inline-end: 0rem;
-    }
-  }
-  :local(.right) {
-    display: flex;
-    flex-flow: row;
-  }
-  :local(.dropdown) {
-    @extend %dropdown;
-    select {
-      @extend %dropdown-select;
-      font-size: 11pt;
-      font-weight: normal;
-      height: 38px;
-      padding-left: 1em;
-      padding-right: 2.5em;
-      cursor: pointer;
-    }
-    :local(.dropdownArrow) {
-      @extend %dropdown-arrow;
-      right: 0.9em;
-    }
-  }
-}
-
-:local(.preferences-panel) {
-  z-index: 2;
-  top: 0px;
-  bottom: 0px;
   width: 100%;
-  height: 100%;
-  background: var(--full-panel-background-color);
-  position: absolute;
+  margin-bottom: 24px;
+  &:last-child {
+    margin-bottom: 0px;
+  }
+}
+:local(.list-item) {
+  margin: 0px 16px 16px 16px;
+  &:last-child {
+    margin: 0px 16px 0px 16px;
+  }
+}
+:local(.column){
   display: flex;
-  justify-content: center;
+  flex-flow: column;
+}
+%row {
+  display: flex;
   align-items: center;
+  &>*{
+    margin-right: 12px;
+  }
+  &>*:last-child {
+    margin-right: 0px;
+  }
+}
+%row-right {
+  justify-self: flex-end;
+  margin-left: auto;
+}
+%row-center {
+  justify-self: center;
+  margin-left: auto;
+}
+:local(.row) {
+  @extend %row;
+}
+:local(.row-right) {
+  @extend %row-right;
+}
+:local(.row-center){
+  @extend %row-center;
 }
 
-:local(.panel-margin) {
-  margin-top: 18px;
+%warn-icon-size {
+  @extend %s36x36;
+}
+:local(.warn-icon-placeholder){
+  @extend %warn-icon-size;
+}
+:local(.warn-icon){
+  @extend %warn-icon-size;
+  color: menu-icon-color;
+}
 
-  :local(.close-button) {
-    @extend %panel-widget;
-    top: 24px;
-    left: 24px;
-
-    font-size: 1.6em;
-    position: absolute;
-    z-index: 1;
+:local(.horizontal) {
+  @extend %preference-list-item;
+  justify-content: space-between;
+  &>*:first-child {
+    margin-left: 16px !important;
+    margin-right: 16px !important;
   }
+  &>* {
+    margin-right: 16px !important;
+  }
+}
+:local(.vertical) {
+  @extend %preference-list-item;
+  flex-flow: column;
+  justify-content: center;
+  &>*{
+    margin: 0px 16px !important;
+  }
+}
+:local(.control-with-default) {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-right: 0px;
+  &>*:first-child {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+  &>* {
+    margin-right: 16px;
+  }
+}
+:local(.preference-label){
+  @extend %default-font;
+  font-size: $fontSize;
+  font-weight: 600;
+  flex-grow: 1;
+}
+
+:local(.close-button) {
+  @extend %panel-widget;
+  @extend %no-default-button-style;
+  margin: 16px auto 16px 16px;
+}
+:local(.refresh-prompt) {
+  @extend %default-font;
+  font-size: $fontSize;
+  text-align: center;
+}
+:local(.toast){
+  width: 100%;
+  max-width: 600px;
+  z-index: 10;
+  position: absolute;
+  bottom: 0px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  border-radius: 16px 16px 0px 0px;
+  background-color: var(--tile-background-color);
+  &>* {
+    margin: 16px 16px 0px 16px;
+  }
+  &>*:last-child {
+    margin: 16px;
+  }
+}
+:local(.refresh-now-button){
+  @extend %action-button;
+  @extend %action-row-button;
+  width: 180px;
+  min-width: 180px;
+}
+%reset-to-default-button-size {
+  @extend %s30x30;
+}
+:local(.reset-to-default-button) {
+  cursor: pointer;
+  @extend %no-default-button-style;
+  @extend %reset-to-default-button-size;
+  @extend %panel-widget-color;
+  @extend %action-label-color-on-hover;
+}
+:local(.reset-to-default-button-placeholder){
+  @extend %reset-to-default-button-size;
+}
+:local(.flex){
+  display: flex;
+}
+:local(.icon){
+  @extend %s32x32;
 }
 
 :local(.content-container) {
-  @extend %default-font;
-  font-size: 11pt;
+  margin-top: 16px;
   overflow-y: auto;
-  font-weight: bold;
-  box-sizing: border-box;
-  height: calc(100vh - 16px);
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+}
 
-  @media (max-width: $widescreenBreakpoint) {
-    margin-top: 0;
-    height: calc(100vh - 48px);
-  }
+%checkbox-size {
+  @extend %s36x36;
+}
 
-  :local(.scrolling-content) {
-    display: flex;
-    flex-flow: column;
-    max-width: 80%;
-    padding-left: 10%;
-  }
-  :local(.section-bar) {
-    width: 100%;
-    display: flex;
-    flex-flow: row;
-    justify-content: center;
-    align-items: center;
-  }
-  :local(.section-title) {
-    width: 90%;
-    display: flex;
-    flex-flow: row;
-    justify-content: flex-start;
-
-    @media (max-width: $widescreenBreakpoint) {
-      justify-content: center;
-    }
-
-    align-items: center;
-    color: var(--menu-header-text-color);
-    font-weight: normal;
-    text-transform: uppercase;
-    margin: 12px 0;
-  }
+:local(.checkbox-placeholder){
+  @extend %checkbox-size;
+}
+:local(.scrolling-content) {
+  display: flex;
+  flex-flow: column;
+  width: 800px;
+  max-width: 100%;
 
   input[type=checkbox] {
     cursor: pointer;
-    @extend %checkbox;
+    @extend %default-checkbox;
+    @extend %checkbox-size;
   }
   input[type=checkbox]:checked {
-    @extend %checkbox-checked;
+    @extend %default-checkbox-checked;
+    &::after {
+      @extend %s24x24;
+    }
   }
 }
 
-:local(.checkbox) {
-  display: flex;
-  align-items: center;
-  justify-content: end;
+:local(.section) {
+  margin: 0px 0px 16px 0px;
+  &:last-child {
+    margin: 0px;
+  }
 }
 
-:local(.row) {
-  width: 90%;
-  display: flex;
-  flex-flow: row;
-  align-items: center;
-}
-:local(.row-name) {
-  display: flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: space-around;
-  width: 50%;
-  text-align: end;
-  margin-inline-end: 1rem;
+:local(.section-title){
+  @extend %subtitle-text;
+  margin: 0px 0px 16px 16px;
+  font-size: $fontSize;
 }
 
-:local(.reset-to-default-button){
-  background: transparent;
-  border: none;
-  font-size: medium;
-  padding: 0px 0px 0px 12px;
-  cursor: pointer;
-  appearance: none;
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  outline-style: none;
+:local(.dropdown) {
+  @extend %dropdown;
+  select {
+    font-size: $fontSize;
+    @extend %dropdown-select;
+  }
+}
+:local(.dropdown-arrow){
+  @extend %dropdown-arrow;
 }
 
-:local(.prev-option-scale) {
-  height: 2rem;
-}
-:local(.next-option-scale) {
-  height: 2rem;
-}
-
-:local(.prev-option-hovered-scale) {
-  height: 2.2rem;
-}
-:local(.next-option-hovered-scale) {
-  height: 2.2rem;
-}
 :local(.number-with-range){
   display: flex;
   flex-flow: row;
-  width: $widescreenControlsWidth;
-  @media( max-width:$smallScreenWidth ) {
-    width: 100%;
-    justify-content: center;
-  }
   justify-content: flex-start;
   align-items: center;
 
@@ -232,21 +300,12 @@ input::-webkit-inner-spin-button {
     justify-content: center;
     cursor: pointer;
 
-    input[type=text] {
-      @extend %input-field;
-      font-size: 11pt;
-      text-align: center;
-      cursor: pointer;
-      width: 6em;
-      height: 38px;
-    }
   }
   :local(.range-slider) {
     display: flex;
     align-items: center;
     justify-content: center;
     max-height: 2.5rem;
-    min-width: 200px;
     padding: 0px 0px 0px 12px;
   }
 }
@@ -399,3 +458,4 @@ $ie-bottom-track-color: $track-color !default;
     }
   }
 }
+

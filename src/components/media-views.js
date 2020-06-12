@@ -15,10 +15,14 @@ import pdfjs from "pdfjs-dist";
 import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
 
-// Using external CDN to reduce build size
-if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+if (process.env.NODE_ENV === "production") {
+  // Using external CDN to reduce build size
   pdfjs.GlobalWorkerOptions.workerSrc =
     "https://assets-prod.reticulum.io/assets/js/pdfjs-dist@2.1.266/build/pdf.worker.js";
+} else {
+  pdfjs.GlobalWorkerOptions.workerSrc = `${
+    configs.BASE_ASSETS_PATH
+  }../assets/js/pdfjs-dist@2.1.266/build/pdf.worker.js`;
 }
 
 const ONCE_TRUE = { once: true };
@@ -1228,8 +1232,6 @@ AFRAME.registerComponent("media-pdf", {
       this.renderTask = null;
 
       if (src !== this.data.src || index !== this.data.index) return;
-
-      this.currentPageTextureIsRetained = true;
     } catch (e) {
       console.error("Error loading PDF", this.data.src, e);
       texture = errorTexture;

@@ -198,5 +198,21 @@ export const xforms = {
       state[1] = v2[1];
     }
     return state;
+  },
+  invert_vec2_if_preference(preference) {
+    return function invert_vec2_if_preference(frame, src, dest) {
+      const vec2 = frame.get(src.value);
+      if (vec2) {
+        const invert =
+          window.APP &&
+          window.APP.store &&
+          window.APP.store.state &&
+          window.APP.store.state.preferences &&
+          (window.APP.store.state.preferences[preference] ||
+            window.APP.store.state.preferences[preference] === undefined);
+        const oneOrMinusOne = invert ? -1 : 1;
+        frame.setVector2(dest.value, vec2[0] * oneOrMinusOne, vec2[1] * oneOrMinusOne);
+      }
+    };
   }
 };

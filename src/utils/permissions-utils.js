@@ -107,6 +107,12 @@ function getPendingOrExistingEntityMetadata(networkId) {
   const pendingData = NAF.connection.adapter.getPendingDataForNetworkId(networkId);
 
   if (pendingData) {
+    if (pendingData.owner) {
+      // If owner is no longer present, give up.
+      const presenceState = window.APP.hubChannel.presence.state[pendingData.owner];
+      if (!presenceState) return;
+    }
+
     const { template, creator } = pendingData;
     const schema = NAF.schemas.schemaDict[template];
     const pinnableComponent = pendingData.components[indexForComponent("pinnable", schema)];

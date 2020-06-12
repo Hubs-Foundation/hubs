@@ -14,7 +14,7 @@
   },
   "scripts": {
     "start": "webpack-dev-server --mode=development --env.loadAppConfig",
-    "dev": "webpack-dev-server --mode=development",
+    "dev": "webpack-dev-server --mode=development --env.remoteDev",
     "local": "webpack-dev-server --mode=development --env.localDev",
     "build": "rimraf ./dist && webpack --mode=production",
     "bundle-analyzer": "webpack-dev-server --mode=production --env.dev --env.bundleAnalyzer",
@@ -101,7 +101,7 @@
     "react-router-dom": "^4.3.1",
     "screenfull": "^4.0.1",
     "three": "github:mozillareality/three.js#hubs/master",
-    "three-ammo": "github:infinitelee/three-ammo#master",
+    "three-ammo": "^1.0.11",
     "three-bmfont-text": "github:mozillareality/three-bmfont-text#hubs/master",
     "three-mesh-bvh": "^0.1.2",
     "three-pathfinding": "github:MozillaReality/three-pathfinding#hubs/master2",
@@ -137,10 +137,11 @@
     "fast-plural-rules": "0.0.3",
     "file-loader": "^1.1.10",
     "html-loader": "^0.5.5",
-    "html-webpack-plugin": "^3.1.0",
+    "html-webpack-plugin": "^4.2.0",
     "htmlhint": "^0.11.0",
     "jsdom": "^15.1.1",
     "localstorage-memory": "^1.0.3",
+    "mediasoup-client": "github:versatica/mediasoup-client#v3",
     "mini-css-extract-plugin": "^0.8.0",
     "ncp": "^2.0.0",
     "node-fetch": "^2.6.0",
@@ -148,6 +149,7 @@
     "ora": "^4.0.2",
     "phoenix-channels": "^1.0.0",
     "prettier": "^1.7.0",
+    "protoo-client": "^4.0.4",
     "raw-loader": "^0.5.1",
     "request": "^2.88.2",
     "rimraf": "^2.6.2",
@@ -167,5 +169,8 @@
     "webpack-cli": "^3.2.3",
     "webpack-dev-server": "^3.1.14",
     "worker-loader": "^2.0.0"
+  },
+  "optionalDependencies": {
+    "fsevents": "^2.1.3"
   }
 }

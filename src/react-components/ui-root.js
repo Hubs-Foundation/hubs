@@ -50,6 +50,7 @@ import WebAssemblyUnsupportedDialog from "./webassembly-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import FeedbackDialog from "./feedback-dialog.js";
 import HelpDialog from "./help-dialog.js";
+import SafariMicDialog from "./safari-mic-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
@@ -150,6 +151,7 @@ class UIRoot extends Component {
     signInCompleteMessageId: PropTypes.string,
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
+    showSafariMicDialog: PropTypes.bool,
     showInAppBrowserDialog: PropTypes.bool,
     showWebAssemblyDialog: PropTypes.bool,
     showOAuthDialog: PropTypes.bool,
@@ -226,6 +228,9 @@ class UIRoot extends Component {
     }
     if (props.showWebAssemblyDialog) {
       this.state.dialog = <WebAssemblyUnsupportedDialog closable={false} />;
+    }
+    if (props.showSafariMicDialog) {
+      this.state.dialog = <SafariMicDialog closable={false} />;
     }
 
     props.mediaSearchStore.setHistory(props.history);
@@ -1469,7 +1474,8 @@ class UIRoot extends Component {
     const isLoading =
       !preload &&
       (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) &&
-      !(this.props.showInAppBrowserDialog || this.props.showWebAssemblyDialog);
+      !(this.props.showInAppBrowserDialog || this.props.showWebAssemblyDialog) &&
+      !this.props.showSafariMicDialog;
 
     const hasPush = navigator.serviceWorker && "PushManager" in window;
 

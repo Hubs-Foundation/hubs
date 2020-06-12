@@ -18,7 +18,6 @@
     - [player-info](#components/avatar/player-info)
     - [spawn-controller](#components/avatar/spawn-controller)
   - [avatar/personal-space-bubble](#components/avatar/personal-space-bubble)
-    - [space-invader-mesh](#components/avatar/personal-space-bubble/space-invader-mesh)
     - [personal-space-invader](#components/avatar/personal-space-bubble/personal-space-invader)
     - [personal-space-bubble](#components/avatar/personal-space-bubble/personal-space-bubble)
   - [environment](#components/environment)
@@ -471,14 +470,6 @@ Toggle the isPlaying state of a component based on app mode
 
 <a name="components/avatar/personal-space-bubble"></a>
 ### avatar/personal-space-bubble
-      
-<a name="components/avatar/personal-space-bubble/space-invader-mesh"></a>
-#### space-invader-mesh
-
-Specifies a mesh associated with an invader.
-
-`src/systems/personal-space-bubble.js`
-          
 
 <a name="components/avatar/personal-space-bubble/personal-space-invader"></a>
 #### personal-space-invader
