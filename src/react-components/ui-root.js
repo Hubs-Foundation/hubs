@@ -172,7 +172,8 @@ class UIRoot extends Component {
     onPreloadLoadClicked: PropTypes.func,
     embed: PropTypes.bool,
     embedToken: PropTypes.string,
-    onLoaded: PropTypes.func
+    onLoaded: PropTypes.func,
+    microphonePresences: PropTypes.object
   };
 
   state = {
@@ -2094,6 +2095,7 @@ class UIRoot extends Component {
               <PresenceList
                 hubChannel={this.props.hubChannel}
                 performConditionalSignIn={this.props.performConditionalSignIn}
+                microphonePresences={this.props.microphonePresences}
                 history={this.props.history}
                 presences={this.props.presences}
                 sessionId={this.props.sessionId}

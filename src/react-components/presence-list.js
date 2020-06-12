@@ -20,6 +20,9 @@ import { faMobileAlt } from "@fortawesome/free-solid-svg-icons/faMobileAlt";
 import { pushHistoryPath, withSlug } from "../utils/history";
 import { hasReticulumServer } from "../utils/phoenix-utils";
 import { InlineSVG } from "./svgi";
+import { faVolumeMute } from "@fortawesome/free-solid-svg-icons/faVolumeMute";
+import { faVolumeOff } from "@fortawesome/free-solid-svg-icons/faVolumeOff";
+import { faVolumeUp } from "@fortawesome/free-solid-svg-icons/faVolumeUp";
 
 function getPresenceIcon(ctx) {
   if (ctx && ctx.hmd) {
@@ -30,6 +33,16 @@ function getPresenceIcon(ctx) {
     return <InlineSVG src={discordIcon} />;
   } else {
     return <FontAwesomeIcon icon={faDesktop} />;
+  }
+}
+
+function getMicrophonePresenceIcon(microphonePresence) {
+  if (microphonePresence.muted) {
+    return <FontAwesomeIcon icon={faVolumeMute} />;
+  } else if (microphonePresence.talking) {
+    return <FontAwesomeIcon icon={faVolumeUp} />;
+  } else {
+    return <FontAwesomeIcon icon={faVolumeOff} />;
   }
 }
 
@@ -48,6 +61,7 @@ export default class PresenceList extends Component {
   static propTypes = {
     hubChannel: PropTypes.object,
     performConditionalSignIn: PropTypes.func,
+    microphonePresences: PropTypes.object,
     presences: PropTypes.object,
     history: PropTypes.object,
     sessionId: PropTypes.string,
@@ -63,17 +77,22 @@ export default class PresenceList extends Component {
     navigateToClientInfo(this.props.history, clientId);
   };
 
-  muteAllClicked = () => {
-    const { presences, hubChannel, performConditionalSignIn } = this.props;
+  mute = clientId => {
+    const { hubChannel, performConditionalSignIn } = this.props;
+    performConditionalSignIn(
+      () => hubChannel.can("mute_users"),
+      async () => await hubChannel.mute(clientId),
+      "mute-user"
+    );
+  };
+
+  muteAll = () => {
+    const { presences } = this.props;
     for (const [clientId, presence] of Object.entries(presences)) {
       if (clientId !== this.props.sessionId) {
         const meta = presence.metas[0];
         if (meta.presence === "room" && meta.roles && !meta.roles.owner) {
-          performConditionalSignIn(
-            () => hubChannel.can("mute_users"),
-            async () => await hubChannel.mute(clientId),
-            "mute-user"
-          );
+          this.mute(clientId);
         }
       }
     }
@@ -94,12 +113,22 @@ export default class PresenceList extends Component {
         &#x2605;
       </span>
     );
+    const microphonePresence = this.props.microphonePresences[sessionId];
+    const micState =
+      microphonePresence && meta.presence === "room" ? getMicrophonePresenceIcon(microphonePresence) : "";
+    const micIconStyles = [microphonePresence && microphonePresence.muted ? styles.iconRed : styles.icon];
+    if (sessionId !== this.props.sessionId && microphonePresence && !microphonePresence.muted) {
+      micIconStyles.push(styles.iconButton);
+    }
 
     return (
       <WithHoverSound key={sessionId}>
         <div className={styles.row}>
           <div className={styles.icon}>
             <i>{icon}</i>
+          </div>
+          <div className={classNames(micIconStyles)} onClick={() => this.mute(sessionId)}>
+            <i>{micState}</i>
           </div>
           <div
             className={classNames({
@@ -150,7 +179,7 @@ export default class PresenceList extends Component {
     const owner = meta.roles && meta.roles.owner;
     const muteAll = owner && (
       <div className={styles.muteAll}>
-        <button title="Mute All" onClick={this.muteAllClicked.bind(this)} className={styles.muteButton}>
+        <button title="Mute All" onClick={this.muteAll} className={styles.muteButton}>
           <FormattedMessage id="presence.mute_all" />
         </button>
       </div>

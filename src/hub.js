@@ -791,6 +791,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
     physicsSystem.setDebug(isDebug || physicsSystem.debug);
+    scene.systems["hubs-systems"].microphonePresenceSystem.remountUI = remountUI;
     patchThreeAllocations();
   };
 

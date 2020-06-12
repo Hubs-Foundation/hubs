@@ -42,7 +42,7 @@
   }
 }
 
-:local(.icon) {
+%icon {
   width: 24px;
   height: 24px;
   position: relative;
@@ -54,6 +54,19 @@
     width: 24px;
     height: 24px;
   }
+}
+
+:local(.icon) {
+  @extend %icon;
+}
+
+:local(.icon-red) {
+  @extend %icon;
+  color: $action-color;
+}
+
+:local(.icon-button) {
+  cursor: pointer;
 }
 
 :local(.self) {
