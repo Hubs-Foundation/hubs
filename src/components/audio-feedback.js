@@ -45,9 +45,6 @@ function updateVolume(component) {
   component.prevVolume = component.volume;
 }
 
-window.heardClientIds = new Set();
-window.audioAnalyzers = [];
-
 /**
  * Updates a `volume` property based on a networked audio source
  * @namespace avatar

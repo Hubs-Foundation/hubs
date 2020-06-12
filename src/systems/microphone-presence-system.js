@@ -21,7 +21,7 @@ export class MicrophonePresenceSystem {
         !window.APP.hubChannel.presence ||
         !this.remountUI
       ) {
-        return null;
+        return;
       }
 
       const microphonePresences = {};

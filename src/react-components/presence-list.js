@@ -77,12 +77,11 @@ export default class PresenceList extends Component {
   };
 
   mute = clientId => {
-    const { hubChannel } = this.props;
-    hubChannel.mute(clientId);
+    this.props.hubChannel.mute(clientId);
   };
 
   muteAll = () => {
-    const { presences } = this.props;
+    const presences = this.props.presences;
     for (const [clientId, presence] of Object.entries(presences)) {
       if (clientId !== this.props.sessionId) {
         const meta = presence.metas[0];
@@ -111,11 +110,10 @@ export default class PresenceList extends Component {
     const microphonePresence = this.props.microphonePresences[sessionId];
     const micState =
       microphonePresence && meta.presence === "room" ? getMicrophonePresenceIcon(microphonePresence) : "";
-    const micIconStyles = [microphonePresence && microphonePresence.muted ? styles.iconRed : styles.icon];
     const canMuteUsers = this.props.hubChannel.can("mute_users");
-    if (canMuteUsers && sessionId !== this.props.sessionId && microphonePresence && !microphonePresence.muted) {
-      micIconStyles.push(styles.iconButton);
-    }
+    const isMe = sessionId === this.props.sessionId;
+    const muted = microphonePresence && microphonePresence.muted;
+    const canMuteIndividual = canMuteUsers && !isMe && microphonePresence && !microphonePresence.muted;
 
     return (
       <WithHoverSound key={sessionId}>
@@ -123,7 +121,14 @@ export default class PresenceList extends Component {
           <div className={styles.icon}>
             <i>{icon}</i>
           </div>
-          <div className={classNames(micIconStyles)} onClick={() => (canMuteUsers ? this.mute(sessionId) : null)}>
+          <div
+            className={classNames({
+              [styles.iconRed]: muted,
+              [styles.icon]: !muted,
+              [styles.iconButton]: canMuteIndividual
+            })}
+            onClick={() => (canMuteUsers ? this.mute(sessionId) : null)}
+          >
             <i>{micState}</i>
           </div>
           <div
