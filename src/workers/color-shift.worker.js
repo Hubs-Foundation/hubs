@@ -12,7 +12,7 @@ function getColorShifter(type, color) {
 
   // Goal of this algorithm is to take a ctx pointing to a spritesheet
   // that has a single saturated color, and convert it to another.
-  return async d => {
+  return d => {
     // Assumes saturated color is very un-greyscale
     const isGreyscale = (() => {
       const isClose = (x, y) => Math.abs(x - y) < 5;
@@ -51,7 +51,7 @@ function getColorShifter(type, color) {
   };
 }
 
-self.onmessage = async msg => {
-  const result = await getColorShifter(msg.data.type, msg.data.color)(new Uint8ClampedArray(msg.data.payload));
+self.onmessage = msg => {
+  const result = getColorShifter(msg.data.type, msg.data.color)(new Uint8ClampedArray(msg.data.payload));
   self.postMessage({ id: msg.data.id, result });
 };
