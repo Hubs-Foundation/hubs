@@ -172,8 +172,7 @@ class UIRoot extends Component {
     onPreloadLoadClicked: PropTypes.func,
     embed: PropTypes.bool,
     embedToken: PropTypes.string,
-    onLoaded: PropTypes.func,
-    microphonePresences: PropTypes.object
+    onLoaded: PropTypes.func
   };
 
   state = {
@@ -2094,7 +2093,6 @@ class UIRoot extends Component {
             {showPresenceList && (
               <PresenceList
                 hubChannel={this.props.hubChannel}
-                microphonePresences={this.props.microphonePresences}
                 history={this.props.history}
                 presences={this.props.presences}
                 sessionId={this.props.sessionId}

@@ -1,4 +1,5 @@
 import configs from "../utils/configs";
+import { getMicrophonePresences } from "../utils/microphone-presence";
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
@@ -23,6 +24,8 @@ import { InlineSVG } from "./svgi";
 import { faVolumeMute } from "@fortawesome/free-solid-svg-icons/faVolumeMute";
 import { faVolumeOff } from "@fortawesome/free-solid-svg-icons/faVolumeOff";
 import { faVolumeUp } from "@fortawesome/free-solid-svg-icons/faVolumeUp";
+
+const MIC_PRESENCE_UPDATE_FREQUENCY = 500;
 
 function getPresenceIcon(ctx) {
   if (ctx && ctx.hmd) {
@@ -60,7 +63,6 @@ export function navigateToClientInfo(history, clientId) {
 export default class PresenceList extends Component {
   static propTypes = {
     hubChannel: PropTypes.object,
-    microphonePresences: PropTypes.object,
     presences: PropTypes.object,
     history: PropTypes.object,
     sessionId: PropTypes.string,
@@ -70,6 +72,14 @@ export default class PresenceList extends Component {
     onSignOut: PropTypes.func,
     expanded: PropTypes.bool,
     onExpand: PropTypes.func
+  };
+
+  updateMicrophoneState = () => {
+    if (this.props.expanded) {
+      const microphonePresences = getMicrophonePresences(AFRAME.scenes[0]);
+      this.setState({ microphonePresences });
+    }
+    this.timeout = setTimeout(this.updateMicrophoneState, MIC_PRESENCE_UPDATE_FREQUENCY);
   };
 
   navigateToClientInfo = clientId => {
@@ -107,7 +117,8 @@ export default class PresenceList extends Component {
         &#x2605;
       </span>
     );
-    const microphonePresence = this.props.microphonePresences[sessionId];
+    const microphonePresence =
+      this.state && this.state.microphonePresences && this.state.microphonePresences.get(sessionId);
     const micState =
       microphonePresence && meta.presence === "room" ? getMicrophonePresenceIcon(microphonePresence) : "";
     const canMuteUsers = this.props.hubChannel.can("mute_users");
@@ -166,6 +177,7 @@ export default class PresenceList extends Component {
   };
 
   componentDidMount() {
+    this.updateMicrophoneState();
     document.querySelector(".a-canvas").addEventListener(
       "mouseup",
       () => {
@@ -173,6 +185,10 @@ export default class PresenceList extends Component {
       },
       { once: true }
     );
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.timeout);
   }
 
   renderExpandedList() {

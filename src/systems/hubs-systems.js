@@ -26,7 +26,6 @@ import { MenuAnimationSystem } from "./menu-animation-system";
 import { AudioSettingsSystem } from "./audio-settings-system";
 import { EnterVRButtonSystem } from "./enter-vr-button-system";
 import { AudioSystem } from "./audio-system";
-import { MicrophonePresenceSystem } from "./microphone-presence-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -62,7 +61,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.enterVRButtonSystem = new EnterVRButtonSystem(this.el);
     this.animationMixerSystem = new AnimationMixerSystem();
     this.boneVisibilitySystem = new BoneVisibilitySystem();
-    this.microphonePresenceSystem = new MicrophonePresenceSystem(this.el);
   },
 
   tick(t, dt) {
@@ -103,7 +101,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.menuAnimationSystem.tick(t);
     this.spriteSystem.tick(t, dt);
     this.enterVRButtonSystem.tick();
-    this.microphonePresenceSystem.tick(dt);
 
     // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
     this.boneVisibilitySystem.tick();
