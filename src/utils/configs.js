@@ -129,14 +129,15 @@ configs.loadPlugins = async hook => {
 
   if (pluginManifests) {
     for (const manifestUrl of pluginManifests) {
-      const response = await fetch(manifestUrl);
+      const absoluteManifestUrl = new URL(manifestUrl, window.location).href;
+      const response = await fetch(absoluteManifestUrl);
       const pluginManifest = await response.json();
       const files = pluginManifest.hooks[hook];
 
       if (files) {
         for (const file of files) {
           if (file.type === "js") {
-            scripts.push(import(/* webpackIgnore: true */ new URL(file.url, manifestUrl)));
+            scripts.push(import(/* webpackIgnore: true */ new URL(file.url, absoluteManifestUrl).href));
           }
         }
       }
