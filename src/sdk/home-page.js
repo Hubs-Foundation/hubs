@@ -1,19 +1,17 @@
-import "./react";
-import * as Common from "./react/common";
-import * as Media from "./react/media";
-import * as HomePage from "./react/home-page";
-import { SDK } from "./SDK";
+import { CreateRoomButton } from "../react-components/input/CreateRoomButton";
+import { PWAButton } from "../react-components/input/PWAButton";
+import { useFeaturedRooms } from "../react-components/home/useFeaturedRooms";
+import PageStyles from "../react-components/home/HomePage.scss";
+import discordLogoSmall from "../assets/images/discord-logo-small.png";
+import { useHomePageRedirect } from "../react-components/home/useHomePageRedirect";
 
-export function initSDKContext(store) {
-  const sdk = new SDK(store);
-
-  Object.assign(sdk, {
-    React: {
-      Common,
-      Media,
-      HomePage
-    }
-  });
-
-  window.Hubs = sdk;
+export default function init() {
+  window.Hubs.homePage = {
+    CreateRoomButton,
+    PWAButton,
+    useFeaturedRooms,
+    PageStyles,
+    discordLogoSmall,
+    useHomePageRedirect
+  };
 }

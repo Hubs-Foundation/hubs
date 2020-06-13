@@ -2,7 +2,7 @@ import { generateHubName } from "../utils/name-generation";
 import { getReticulumFetchUrl, isLocalClient } from "../utils/phoenix-utils";
 import configs from "../utils/configs";
 
-export class SDK {
+class SDK {
   constructor(store) {
     this.store = store;
     this.config = {
@@ -10,6 +10,10 @@ export class SDK {
       image: configs.image,
       link: configs.link
     };
+  }
+
+  registerPlugin(hook, exports) {
+    configs.registerPlugin(hook, exports);
   }
 
   isAuthenticated() {
@@ -99,4 +103,8 @@ export class SDK {
 
     return response;
   }
+}
+
+export default function init(store) {
+  window.Hubs.core = new SDK(store);
 }

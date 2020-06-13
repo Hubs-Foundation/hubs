@@ -10,7 +10,10 @@ import { lang, messages } from "./utils/i18n";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
 import configs from "./utils/configs";
 import en from "react-intl/locale-data/en";
-import { initSDKContext } from "./sdk/home-page";
+import initCore from "./sdk/core";
+import initReact from "./sdk/react";
+import initHomePage from "./sdk/home-page";
+import initMediaBrowser from "./sdk/media-browser";
 
 addLocaleData([...en]);
 registerTelemetry("/home", "Hubs Home Page");
@@ -35,16 +38,17 @@ Root.propTypes = {
 async function main() {
   let component = HomePage;
 
-  if (configs.hasPlugin("home-page")) {
-    initSDKContext(store);
+  // TODO: in the future load these dynamically using the plugins dependencies array
+  window.Hubs = {};
+  initCore(store);
+  initReact();
+  initHomePage();
+  initMediaBrowser();
 
-    console.log(window.Hubs);
+  const plugins = await configs.loadPlugins("home-page");
 
-    const plugin = await configs.importPlugin("home-page");
-
-    if (plugin.HomePage) {
-      component = plugin.HomePage;
-    }
+  if (plugins.HomePage) {
+    component = plugins.HomePage;
   }
 
   ReactDOM.render(<Root component={component} />, document.getElementById("ui-root"));

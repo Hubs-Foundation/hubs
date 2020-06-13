@@ -95,31 +95,57 @@ configs.setIsAdmin = _isAdmin => {
 };
 configs.isAdmin = () => isAdmin;
 
-configs.hasPlugin = key => {
-  return configs.APP_CONFIG && configs.APP_CONFIG.plugins && configs.APP_CONFIG.plugins[key];
+configs.hasPlugins = hook => {
+  return configs.APP_CONFIG && configs.APP_CONFIG.plugins && configs.APP_CONFIG.plugins[hook];
 };
 
-configs.importPlugin = async key => {
-  const exports = {};
-  const plugins = configs.APP_CONFIG && configs.APP_CONFIG.plugins && configs.APP_CONFIG.plugins[key];
+configs.registeredPlugins = {};
 
-  const dependencies = plugins.map(plugin => {
-    if (plugin.type !== "js") {
-      return Promise.resolve();
-    }
+configs.registerPlugin = (hook, exports) => {
+  if (!configs.registeredPlugins[hook]) {
+    configs.registeredPlugins[hook] = {};
+  }
+  Object.assign(configs.registeredPlugins[hook] || {}, exports);
+};
 
-    return import(/* webpackIgnore: true */ new URL(plugin.url, window.location).href).then(result => {
-      if (plugin.options && plugin.options.globalVar) {
-        Object.assign(exports, window[plugin.options.globalVar]);
-      } else {
-        Object.assign(exports, result);
+configs.loadPlugins = async hook => {
+  const plugins = configs.APP_CONFIG && configs.APP_CONFIG.plugins && configs.APP_CONFIG.plugins[hook];
+  const pluginManifests = configs.APP_CONFIG && configs.APP_CONFIG.pluginManifests;
+
+  if (!plugins && !pluginManifests) {
+    return {};
+  }
+
+  const scripts = [];
+
+  if (plugins) {
+    for (const file of plugins) {
+      // TODO: In the future we can dynamically load dependencies here.
+      if (file.type === "js") {
+        scripts.push(import(/* webpackIgnore: true */ new URL(file.url, window.location)));
       }
-    });
-  });
+    }
+  }
 
-  await Promise.all(dependencies);
+  if (pluginManifests) {
+    for (const manifestUrl of pluginManifests) {
+      const response = await fetch(manifestUrl);
+      const pluginManifest = await response.json();
+      const files = pluginManifest.hooks[hook];
 
-  return exports;
+      if (files) {
+        for (const file of files) {
+          if (file.type === "js") {
+            scripts.push(import(/* webpackIgnore: true */ new URL(file.url, manifestUrl)));
+          }
+        }
+      }
+    }
+  }
+
+  await Promise.all(scripts);
+
+  return configs.registeredPlugins[hook] || {};
 };
 
 export default configs;
