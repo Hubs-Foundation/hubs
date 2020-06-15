@@ -2,7 +2,7 @@ import React from "react";
 import { FormattedMessage } from "react-intl";
 import IfFeature from "../if-feature";
 import UnlessFeature from "../unless-feature";
-import configs from "../../utils/configs";
+import Hubs from "@hubs/core";
 import styles from "./Footer.scss";
 
 export function Footer() {
@@ -32,7 +32,7 @@ export function Footer() {
               <a
                 target="_blank"
                 rel="noopener noreferrer"
-                href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+                href={Hubs.config.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
               >
                 <FormattedMessage id="home.terms_of_use" />
               </a>
@@ -44,7 +44,7 @@ export function Footer() {
                 className={styles.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+                href={Hubs.config.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
               >
                 <FormattedMessage id="home.privacy_notice" />
               </a>
@@ -52,7 +52,7 @@ export function Footer() {
           </IfFeature>
           <IfFeature name="show_company_logo">
             <li>
-              <img className={styles.companyLogo} src={configs.image("company_logo")} />
+              <img className={styles.companyLogo} src={Hubs.config.image("company_logo")} />
             </li>
           </IfFeature>
         </ul>

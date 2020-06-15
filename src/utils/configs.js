@@ -90,11 +90,6 @@ configs.link = (linkName, defaultValue) => {
   return (configs.APP_CONFIG && configs.APP_CONFIG.links && configs.APP_CONFIG.links[linkName]) || defaultValue;
 };
 
-configs.setIsAdmin = _isAdmin => {
-  isAdmin = _isAdmin;
-};
-configs.isAdmin = () => isAdmin;
-
 configs.hasPlugins = hook => {
   return configs.APP_CONFIG && configs.APP_CONFIG.plugins && configs.APP_CONFIG.plugins[hook];
 };

@@ -3,10 +3,11 @@ import { getReticulumFetchUrl, isLocalClient, connectToReticulum } from "../util
 import jwtDecode from "jwt-decode";
 import AuthChannel from "../utils/auth-channel";
 import configs from "../utils/configs";
+import Store from "../storage/store";
 
-export class SDK {
-  constructor(store) {
-    this.store = store;
+class SDK {
+  constructor() {
+    this.store = new Store();
     this.config = {
       feature: configs.feature,
       image: configs.image,
@@ -38,7 +39,6 @@ export class SDK {
       });
     });
 
-    configs.setIsAdmin(perms.postgrest_role === "ret_admin");
     this.store.update({ credentials: { isAdmin: perms.postgrest_role === "ret_admin" } });
   }
 
@@ -52,26 +52,6 @@ export class SDK {
   async signOut() {
     this.store.update({ credentials: { token: null, email: null, isAdmin: false } });
     await this.store.resetToRandomDefaultAvatar();
-  }
-
-  isAuthenticated() {
-    return !!this.getAuthToken();
-  }
-
-  isAdmin() {
-    return this.store.state.credentials.isAdmin;
-  }
-
-  getEmail() {
-    return this.store.state.credentials.email;
-  }
-
-  getAccountId() {
-    return this.store.credentialsAccountId;
-  }
-
-  getAuthToken() {
-    return this.store.state && this.store.state.credentials.token;
   }
 
   async fetchJSON(path, { headers, ...options } = {}) {
@@ -91,13 +71,13 @@ export class SDK {
   }
 
   async fetchJSONAuthenticated(path, { headers, ...options } = {}) {
-    if (!this.isAuthenticated()) {
+    if (!this.store.isAuthenticated()) {
       throw new Error("Not Authenticated");
     }
 
     return this.fetchJSON(path, {
       headers: {
-        authorization: `bearer ${this.getAuthToken()}`,
+        authorization: `bearer ${this.store.getAuthToken()}`,
         ...headers
       },
       ...options
@@ -130,7 +110,7 @@ export class SDK {
 
     let response;
 
-    if (this.isAuthenticated()) {
+    if (this.store.isAuthenticated()) {
       response = await this.postJSONAuthenticated("/api/v1/hubs", payload);
 
       if (response.error === "invalid_token") {
@@ -179,7 +159,7 @@ export class SDK {
 
     const path = `/api/v1/media/search?${searchParams}`;
 
-    if (this.isAuthenticated()) {
+    if (this.store.isAuthenticated()) {
       return this.fetchJSONAuthenticated(path);
     } else {
       return this.fetchJSON(path);
@@ -191,7 +171,7 @@ export class SDK {
   }
 
   async getFavoriteRooms(cursor = 0) {
-    if (!this.isAuthenticated()) {
+    if (!this.store.isAuthenticated()) {
       throw new Error("Requires authentication.");
     }
 
@@ -205,3 +185,13 @@ export class SDK {
     );
   }
 }
+
+const sdk = new SDK();
+
+if (window.Hubs) {
+  window.Hubs.core = sdk;
+} else {
+  window.Hubs = { core: sdk };
+}
+
+export default sdk;

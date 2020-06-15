@@ -325,4 +325,24 @@ export default class Store extends EventTarget {
 
     return finalState;
   }
+
+  isAuthenticated() {
+    return !!this.getAuthToken();
+  }
+
+  isAdmin() {
+    return this.state.credentials.isAdmin;
+  }
+
+  getEmail() {
+    return this.state.credentials.email;
+  }
+
+  getAccountId() {
+    return this.credentialsAccountId;
+  }
+
+  getAuthToken() {
+    return this.state && this.state.credentials.token;
+  }
 }

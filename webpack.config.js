@@ -422,6 +422,13 @@ module.exports = async (env, argv) => {
       ]
     },
 
+    resolve: {
+      // Prepare to use the @hubs packages internally using this alias.
+      alias: {
+        "@hubs": path.join(__dirname, "src", "@hubs")
+      }
+    },
+
     optimization: {
       splitChunks: {
         maxAsyncRequests: 10,

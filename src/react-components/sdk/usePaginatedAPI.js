@@ -1,6 +1,8 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 export function usePaginatedAPI(apiCallback) {
+  const curApiCallback = useRef(apiCallback);
+
   const [state, setState] = useState({
     isLoading: true,
     hasMore: false,
@@ -11,8 +13,32 @@ export function usePaginatedAPI(apiCallback) {
     nextCursor: undefined
   });
 
+  const [internalState, setInternalState] = useState({ cursor: 0 });
+
+  const loadMore = useCallback(
+    () => {
+      if (state.nextCursor && !state.isLoading) {
+        setState(curState => ({
+          ...curState,
+          cursor: state.nextCursor,
+          nextCursor: undefined,
+          isLoading: true,
+          hasMore: false,
+          error: undefined
+        }));
+
+        setInternalState({ cursor: state.nextCursor });
+      }
+    },
+    [state.nextCursor, state.isLoading]
+  );
+
   useEffect(
     () => {
+      if (curApiCallback.current === apiCallback) {
+        return;
+      }
+
       setState({
         isLoading: true,
         hasMore: false,
@@ -22,23 +48,25 @@ export function usePaginatedAPI(apiCallback) {
         cursor: 0,
         nextCursor: undefined
       });
+
+      curApiCallback.current = apiCallback;
+
+      setInternalState({ cursor: 0 });
     },
     [apiCallback]
   );
 
-  const loadMore = useCallback(
-    () => {
-      if (state.nextCursor && !state.isLoading) {
-        setState(curState => ({ ...curState, cursor: curState.nextCursor, nextCursor: undefined }));
-      }
-    },
-    [state.nextCursor, state.isLoading]
-  );
-
   useEffect(
     () => {
-      apiCallback(state.cursor)
+      const caller = curApiCallback.current;
+
+      curApiCallback
+        .current(internalState.cursor)
         .then(response => {
+          if (curApiCallback.current !== caller) {
+            return;
+          }
+
           setState(curState => ({
             ...curState,
             isLoading: false,
@@ -50,6 +78,10 @@ export function usePaginatedAPI(apiCallback) {
           }));
         })
         .catch(error => {
+          if (curApiCallback.current !== caller) {
+            return;
+          }
+
           setState(curState => ({
             ...curState,
             isLoading: false,
@@ -59,15 +91,8 @@ export function usePaginatedAPI(apiCallback) {
             error
           }));
         });
-
-      setState(curState => ({
-        ...curState,
-        isLoading: true,
-        hasMore: false,
-        error: undefined
-      }));
     },
-    [state.cursor, apiCallback]
+    [internalState]
   );
 
   return { ...state, loadMore };

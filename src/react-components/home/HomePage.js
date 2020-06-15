@@ -1,23 +1,20 @@
 import React from "react";
 import { FormattedMessage } from "react-intl";
 import classNames from "classnames";
-import configs from "../../utils/configs";
-import IfFeature from "../if-feature";
-import { Page } from "../layout/Page";
-import MediaTiles from "../media-tiles";
-import { CreateRoomButton } from "../input/CreateRoomButton";
-import { PWAButton } from "../input/PWAButton";
-import { useFavoriteRooms } from "../sdk/useFavoriteRooms";
-import { usePublicRooms } from "../sdk/usePublicRooms";
-import styles from "./HomePage.scss";
-import mediaBrowserStyles from "../../assets/stylesheets/media-browser.scss";
-import discordLogoSmall from "../../assets/images/discord-logo-small.png";
-import { useStore } from "../store/useStore";
-import { useHomePageRedirect } from "./useHomePageRedirect";
+import Hubs from "@hubs/core";
+import { Page, IfFeature, useStoreStateChange, useFavoriteRooms, usePublicRooms } from "@hubs/react";
+import { MediaTiles, styles as mediaBrowserStyles } from "@hubs/media-browser";
+import {
+  PWAButton,
+  CreateRoomButton,
+  useHomePageRedirect,
+  PageStyles as styles,
+  discordLogoSmall
+} from "@hubs/home-page";
 
 export function HomePage() {
   useHomePageRedirect();
-  const store = useStore();
+  const { store } = useStoreStateChange();
 
   const { results: favoriteRooms } = useFavoriteRooms();
   const { results: publicRooms } = usePublicRooms();
@@ -26,15 +23,15 @@ export function HomePage() {
     (a, b) => b.member_count - a.member_count
   );
 
-  const canCreateRooms = !configs.feature("disable_room_creation") || store.state.credentials.isAdmin;
+  const canCreateRooms = !Hubs.config.feature("disable_room_creation") || store.isAdmin();
 
   return (
     <Page className={styles.homePage}>
-      <div className={styles.heroContent} style={{ backgroundImage: configs.image("home_background", true) }}>
+      <div className={styles.heroContent} style={{ backgroundImage: Hubs.config.image("home_background", true) }}>
         <div className={styles.heroPanel}>
           <div className={styles.container}>
             <div className={classNames([styles.logo, styles.logoMargin])}>
-              <img src={configs.image("logo")} />
+              <img src={Hubs.config.image("logo")} />
             </div>
             {featuredRooms.length === 0 && (
               <div className={styles.blurb}>

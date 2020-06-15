@@ -3,15 +3,13 @@ import { FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import IfFeature from "../if-feature";
-import configs from "../../utils/configs";
 import maskEmail from "../../utils/mask-email";
 import styles from "./Header.scss";
-import { useStore } from "../store/useStore";
-import { useSDK } from "../sdk/useSDK";
+import Hubs from "@hubs/core";
+import { useStoreStateChange } from "../store/useStoreStateChange";
 
 export function Header() {
-  const sdk = useSDK();
-  useStore(); // Re-render when the store changes
+  const { store } = useStoreStateChange();
 
   return (
     <header>
@@ -36,7 +34,7 @@ export function Header() {
           </IfFeature>
           <IfFeature name="show_docs_link">
             <li>
-              <a href={configs.link("docs", "https://hubs.mozilla.com/docs")}>
+              <a href={Hubs.config.link("docs", "https://hubs.mozilla.com/docs")}>
                 <FormattedMessage id="home.docs_link" />
               </a>
             </li>
@@ -50,12 +48,12 @@ export function Header() {
           </IfFeature>
           <IfFeature name="show_community_link">
             <li>
-              <a href={configs.link("community", "https://discord.gg/wHmY4nd")}>
+              <a href={Hubs.config.link("community", "https://discord.gg/wHmY4nd")}>
                 <FormattedMessage id="home.community_link" />
               </a>
             </li>
           </IfFeature>
-          {sdk.isAdmin() && (
+          {store.isAdmin() && (
             <li>
               <a href="/admin" rel="noreferrer noopener">
                 <i>
@@ -69,12 +67,12 @@ export function Header() {
         </ul>
       </nav>
       <div className={styles.signIn}>
-        {sdk.isAuthenticated() ? (
+        {store.isAuthenticated() ? (
           <div>
             <span>
-              <FormattedMessage id="sign-in.as" /> {maskEmail(sdk.getEmail())}
+              <FormattedMessage id="sign-in.as" /> {maskEmail(store.getEmail())}
             </span>{" "}
-            <a onClick={() => sdk.signOut()}>
+            <a href="#" onClick={() => Hubs.signOut()}>
               <FormattedMessage id="sign-in.out" />
             </a>
           </div>

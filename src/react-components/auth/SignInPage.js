@@ -1,11 +1,10 @@
-import React, { useCallback, useState, useReducer, useContext, useEffect } from "react";
+import React, { useCallback, useState, useReducer, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Page } from "../layout/Page";
 import styles from "./SignInPage.scss";
-import configs from "../../utils/configs";
 import IfFeature from "../if-feature";
 import { FormattedMessage } from "react-intl";
-import { SDKContext } from "../sdk/SDKContext";
+import Hubs from "@hubs/core";
 
 const SignInStep = {
   submit: "submit",
@@ -36,18 +35,14 @@ function loginReducer(state, action) {
 }
 
 function useSignIn() {
-  const sdk = useContext(SDKContext);
   const [state, dispatch] = useReducer(loginReducer, initialSignInState);
 
-  const submitEmail = useCallback(
-    email => {
-      sdk.signIn(email).then(() => {
-        dispatch({ type: SignInAction.verificationReceived });
-      });
-      dispatch({ type: SignInAction.submitEmail, email });
-    },
-    [sdk]
-  );
+  const submitEmail = useCallback(email => {
+    Hubs.signIn(email).then(() => {
+      dispatch({ type: SignInAction.verificationReceived });
+    });
+    dispatch({ type: SignInAction.submitEmail, email });
+  }, []);
 
   const cancel = useCallback(() => {
     dispatch({ type: SignInAction.cancel });
@@ -84,24 +79,24 @@ function SubmitEmail({ onSubmitEmail, initialEmail }) {
         onChange={e => setEmail(e.target.value)}
         placeholder="example@example.com"
       />
-      {(configs.feature("show_terms") || configs.feature("show_privacy")) && (
+      {(Hubs.config.feature("show_terms") || Hubs.config.feature("show_privacy")) && (
         <b className={styles.terms}>
           By proceeding, you agree to the{" "}
           <IfFeature name="show_terms">
             <a
               rel="noopener noreferrer"
               target="_blank"
-              href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+              href={Hubs.config.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
             >
               terms of use
             </a>{" "}
           </IfFeature>
-          {configs.feature("show_terms") && configs.feature("show_privacy") && "and "}
+          {Hubs.config.feature("show_terms") && Hubs.config.feature("show_privacy") && "and "}
           <IfFeature name="show_privacy">
             <a
               rel="noopener noreferrer"
               target="_blank"
-              href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+              href={Hubs.config.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
             >
               privacy notice
             </a>
@@ -161,7 +156,7 @@ export function SignInPage() {
   );
 
   return (
-    <Page style={{ backgroundImage: configs.image("home_background", true), backgroundSize: "cover" }}>
+    <Page style={{ backgroundImage: Hubs.config.image("home_background", true), backgroundSize: "cover" }}>
       {step === SignInStep.submit && (
         <SubmitEmail onSubmitEmail={submitEmail} initialEmail={email} signInReason={qs.get("sign_in_reason")} />
       )}

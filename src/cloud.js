@@ -7,10 +7,7 @@ import { IntlProvider, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import { lang, messages } from "./utils/i18n";
 import { Page } from "./react-components/layout/Page";
-import Store from "./storage/store";
 import registerTelemetry from "./telemetry";
-import { SDK } from "./sdk/SDK";
-import { SDKContext } from "./react-components/sdk/SDKContext";
 
 registerTelemetry("/cloud", "Hubs Cloud Landing Page");
 
@@ -84,16 +81,10 @@ function HubsCloudPage() {
   );
 }
 
-const store = new Store();
-window.APP = { store };
-const sdk = new SDK(store);
-
 function Root() {
   return (
     <IntlProvider locale={lang} messages={messages}>
-      <SDKContext.Provider value={sdk}>
-        <HubsCloudPage />
-      </SDKContext.Provider>
+      <HubsCloudPage />
     </IntlProvider>
   );
 }

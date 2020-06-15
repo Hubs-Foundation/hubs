@@ -1,10 +1,9 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Page } from "../layout/Page";
 import styles from "./SignInPage.scss";
 import { Loader } from "../misc/Loader";
-import configs from "../../utils/configs";
-import { SDKContext } from "../sdk/SDKContext";
+import Hubs from "@hubs/core";
 
 const VerificationStep = {
   verifying: "verifying",
@@ -15,33 +14,29 @@ const VerificationStep = {
 function useVerify() {
   const [step, setStep] = useState(VerificationStep.verifying);
   const [error, setError] = useState();
-  const sdk = useContext(SDKContext);
 
-  useEffect(
-    () => {
-      const verifyAsync = async () => {
-        try {
-          const qs = new URLSearchParams(location.search);
+  useEffect(() => {
+    const verifyAsync = async () => {
+      try {
+        const qs = new URLSearchParams(location.search);
 
-          const authParams = {
-            topic: qs.get("auth_topic"),
-            token: qs.get("auth_token"),
-            origin: qs.get("auth_origin"),
-            payload: qs.get("auth_payload")
-          };
+        const authParams = {
+          topic: qs.get("auth_topic"),
+          token: qs.get("auth_token"),
+          origin: qs.get("auth_origin"),
+          payload: qs.get("auth_payload")
+        };
 
-          await sdk.verify(authParams);
-          setStep(VerificationStep.complete);
-        } catch (error) {
-          setStep(VerificationStep.error);
-          setError(error);
-        }
-      };
+        await Hubs.verify(authParams);
+        setStep(VerificationStep.complete);
+      } catch (error) {
+        setStep(VerificationStep.error);
+        setError(error);
+      }
+    };
 
-      verifyAsync();
-    },
-    [sdk]
-  );
+    verifyAsync();
+  }, []);
 
   return { step, error };
 }
@@ -84,7 +79,7 @@ export function VerifyPage() {
   const { step, error } = useVerify();
 
   return (
-    <Page style={{ backgroundImage: configs.image("home_background", true), backgroundSize: "cover" }}>
+    <Page style={{ backgroundImage: Hubs.config.image("home_background", true), backgroundSize: "cover" }}>
       {step === VerificationStep.verifying && <EmailVerifying />}
       {step === VerificationStep.complete && <EmailVerified />}
       {step === VerificationStep.error && <VerificationError error={error} />}
