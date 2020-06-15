@@ -15,7 +15,10 @@ import pdfjs from "pdfjs-dist";
 import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
 
-pdfjs.GlobalWorkerOptions.workerSrc = `${configs.BASE_ASSETS_PATH}../assets/js/pdfjs-dist@2.1.266/build/pdf.worker.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "../assets/js/pdfjs-dist@2.1.266/build/pdf.worker.js",
+  configs.BASE_ASSETS_PATH || window.location
+);
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
