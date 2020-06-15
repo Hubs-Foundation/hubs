@@ -12,18 +12,11 @@ import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import pdfjs from "pdfjs-dist";
+import pdfWorkerUrl from "!!url-loader!pdfjs-dist/build/pdf.worker.js";
 import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
 
-if (process.env.NODE_ENV === "production") {
-  // Using external CDN to reduce build size
-  pdfjs.GlobalWorkerOptions.workerSrc =
-    "https://assets-prod.reticulum.io/assets/js/pdfjs-dist@2.1.266/build/pdf.worker.js";
-} else {
-  pdfjs.GlobalWorkerOptions.workerSrc = `${
-    configs.BASE_ASSETS_PATH
-  }../assets/js/pdfjs-dist@2.1.266/build/pdf.worker.js`;
-}
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
