@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import { FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
@@ -6,10 +6,12 @@ import IfFeature from "../if-feature";
 import configs from "../../utils/configs";
 import maskEmail from "../../utils/mask-email";
 import styles from "./Header.scss";
-import { AuthContext } from "../auth/AuthContext";
+import { useStore } from "../store/useStore";
+import { useSDK } from "../sdk/useSDK";
 
 export function Header() {
-  const auth = useContext(AuthContext);
+  const sdk = useSDK();
+  useStore(); // Re-render when the store changes
 
   return (
     <header>
@@ -53,7 +55,7 @@ export function Header() {
               </a>
             </li>
           </IfFeature>
-          {auth.isAdmin && (
+          {sdk.isAdmin() && (
             <li>
               <a href="/admin" rel="noreferrer noopener">
                 <i>
@@ -67,12 +69,12 @@ export function Header() {
         </ul>
       </nav>
       <div className={styles.signIn}>
-        {auth.isSignedIn ? (
+        {sdk.isAuthenticated() ? (
           <div>
             <span>
-              <FormattedMessage id="sign-in.as" /> {maskEmail(auth.email)}
+              <FormattedMessage id="sign-in.as" /> {maskEmail(sdk.getEmail())}
             </span>{" "}
-            <a onClick={auth.signOut}>
+            <a onClick={() => sdk.signOut()}>
               <FormattedMessage id="sign-in.out" />
             </a>
           </div>

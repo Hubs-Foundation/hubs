@@ -7,9 +7,10 @@ import Store from "./storage/store";
 import "./utils/theme";
 import { HomePage } from "./react-components/home/HomePage";
 import { lang, messages } from "./utils/i18n";
-import { AuthContextProvider } from "./react-components/auth/AuthContext";
+import { SDKContext } from "./react-components/sdk/SDKContext";
 import configs from "./utils/configs";
 import en from "react-intl/locale-data/en";
+import { SDK } from "./sdk/SDK";
 import initCore from "./sdk/core";
 import initReact from "./sdk/react";
 import initHomePage from "./sdk/home-page";
@@ -20,13 +21,14 @@ registerTelemetry("/home", "Hubs Home Page");
 
 const store = new Store();
 window.APP = { store };
+const sdk = new SDK(store);
 
 function Root({ component: HomePageComponent }) {
   return (
     <IntlProvider locale={lang} messages={messages}>
-      <AuthContextProvider store={store}>
+      <SDKContext.Provider value={sdk}>
         <HomePageComponent />
-      </AuthContextProvider>
+      </SDKContext.Provider>
     </IntlProvider>
   );
 }

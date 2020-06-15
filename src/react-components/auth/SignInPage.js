@@ -5,7 +5,7 @@ import styles from "./SignInPage.scss";
 import configs from "../../utils/configs";
 import IfFeature from "../if-feature";
 import { FormattedMessage } from "react-intl";
-import { AuthContext } from "../auth/AuthContext";
+import { SDKContext } from "../sdk/SDKContext";
 
 const SignInStep = {
   submit: "submit",
@@ -36,17 +36,17 @@ function loginReducer(state, action) {
 }
 
 function useSignIn() {
-  const auth = useContext(AuthContext);
+  const sdk = useContext(SDKContext);
   const [state, dispatch] = useReducer(loginReducer, initialSignInState);
 
   const submitEmail = useCallback(
     email => {
-      auth.signIn(email).then(() => {
+      sdk.signIn(email).then(() => {
         dispatch({ type: SignInAction.verificationReceived });
       });
       dispatch({ type: SignInAction.submitEmail, email });
     },
-    [auth]
+    [sdk]
   );
 
   const cancel = useCallback(() => {

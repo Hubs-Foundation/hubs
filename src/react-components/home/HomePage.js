@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import { FormattedMessage } from "react-intl";
 import classNames from "classnames";
 import configs from "../../utils/configs";
@@ -7,19 +7,26 @@ import { Page } from "../layout/Page";
 import MediaTiles from "../media-tiles";
 import { CreateRoomButton } from "../input/CreateRoomButton";
 import { PWAButton } from "../input/PWAButton";
-import { useFeaturedRooms } from "./useFeaturedRooms";
+import { useFavoriteRooms } from "../sdk/useFavoriteRooms";
+import { usePublicRooms } from "../sdk/usePublicRooms";
 import styles from "./HomePage.scss";
 import mediaBrowserStyles from "../../assets/stylesheets/media-browser.scss";
 import discordLogoSmall from "../../assets/images/discord-logo-small.png";
-import { AuthContext } from "../auth/AuthContext";
+import { useStore } from "../store/useStore";
 import { useHomePageRedirect } from "./useHomePageRedirect";
 
 export function HomePage() {
   useHomePageRedirect();
-  const featuredRooms = useFeaturedRooms();
-  const auth = useContext(AuthContext);
+  const store = useStore();
 
-  const canCreateRooms = !configs.feature("disable_room_creation") || auth.isAdmin;
+  const { results: favoriteRooms } = useFavoriteRooms();
+  const { results: publicRooms } = usePublicRooms();
+
+  const featuredRooms = Array.from(new Set([...favoriteRooms, ...publicRooms])).sort(
+    (a, b) => b.member_count - a.member_count
+  );
+
+  const canCreateRooms = !configs.feature("disable_room_creation") || store.state.credentials.isAdmin;
 
   return (
     <Page className={styles.homePage}>

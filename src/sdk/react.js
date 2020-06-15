@@ -8,7 +8,10 @@ import { Page } from "../react-components/layout/Page";
 import { Header } from "../react-components/layout/Header";
 import { Footer } from "../react-components/layout/Footer";
 import PageStyles from "../react-components/layout/Page.scss";
-import { AuthContext } from "../react-components/auth/AuthContext";
+import { SDKContext } from "../react-components/sdk/SDKContext";
+import { useStore } from "../react-components/store/useStore";
+import { useFavoriteRooms } from "../react-components/sdk/useFavoriteRooms";
+import { usePublicRooms } from "../react-components/sdk/usePublicRooms";
 
 export default function init() {
   window.React = React;
@@ -22,6 +25,9 @@ export default function init() {
     Header,
     Footer,
     PageStyles,
-    AuthContext
+    SDKContext,
+    useStore,
+    useFavoriteRooms,
+    usePublicRooms
   };
 }

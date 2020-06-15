@@ -5,20 +5,22 @@ import registerTelemetry from "./telemetry";
 import Store from "./storage/store";
 import "./utils/theme";
 import { lang, messages } from "./utils/i18n";
-import { AuthContextProvider } from "./react-components/auth/AuthContext";
+import { SDK } from "./sdk/SDK";
+import { SDKContext } from "./react-components/sdk/SDKContext";
 import { VerifyPage } from "./react-components/auth/VerifyPage";
 
 registerTelemetry("/verify", "Hubs Verify Email Page");
 
 const store = new Store();
 window.APP = { store };
+const sdk = new SDK(store);
 
 function Root() {
   return (
     <IntlProvider locale={lang} messages={messages}>
-      <AuthContextProvider store={store}>
+      <SDKContext.Provider value={sdk}>
         <VerifyPage />
-      </AuthContextProvider>
+      </SDKContext.Provider>
     </IntlProvider>
   );
 }
