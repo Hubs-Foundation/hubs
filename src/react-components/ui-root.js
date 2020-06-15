@@ -2092,6 +2092,7 @@ class UIRoot extends Component {
 
             {showPresenceList && (
               <PresenceList
+                hubChannel={this.props.hubChannel}
                 history={this.props.history}
                 presences={this.props.presences}
                 sessionId={this.props.sessionId}

@@ -1,6 +1,7 @@
 import { findAncestorWithComponent } from "../utils/scene-graph";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { easeOutQuadratic } from "../utils/easing";
+import { registerComponentInstance, deregisterComponentInstance } from "../utils/component-utils";
 
 // This computation is expensive, so we run on at most one avatar per frame, including quiet avatars.
 // However if we detect an avatar is seen speaking (its volume is above DISABLE_AT_VOLUME_THRESHOLD)
@@ -64,9 +65,13 @@ AFRAME.registerComponent("networked-audio-analyser", {
       this.levels = new Uint8Array(this.analyser.fftSize);
       event.detail.soundSource.connect(this.analyser);
     });
+
+    this.playerSessionId = findAncestorWithComponent(this.el, "player-info").components["player-info"].playerSessionId;
+    registerComponentInstance(this, "networked-audio-analyser");
   },
 
   remove: function() {
+    deregisterComponentInstance(this, "networked-audio-analyser");
     this.el.sceneEl.systems["frame-scheduler"].unschedule(this._runScheduledWork, "audio-analyser");
   },
 

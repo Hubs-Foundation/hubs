@@ -205,6 +205,7 @@
     "presence.in_lobby": "Lobby",
     "presence.entering": "Entering Room",
     "presence.in_room": "In Room",
+    "presence.mute_all": "Mute All",
     "home.create_a_room": "Create a Room",
     "home.desktop.add_pwa": "Install Desktop App",
     "home.mobile.add_pwa": "Add to Home Screen",
