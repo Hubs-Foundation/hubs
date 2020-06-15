@@ -418,6 +418,7 @@
     "tweet-dialog.close": "close",
     "oauth-dialog.sign-in.twitter": "Connect to Twitter",
     "oauth-dialog.sign-in.discord": "Sign in to Discord",
+    "oauth-dialog.sign-in.slack": "Sign in to Slack",
     "oauth-dialog.message.twitter": "Connect to Twitter to send tweets from %app-name%.",
     "cloud.primary_tagline": "Hubs Cloud deploys server infrastructure for private,\ncollaborative 3D rooms that can be accessed on your\ndesktop, mobile phone, or VR headset.",
     "cloud.secondary_tagline": "Get it today on the AWS Marketplace.",
