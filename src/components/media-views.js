@@ -15,15 +15,18 @@ import pdfjs from "pdfjs-dist";
 import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
 
-if (process.env.NODE_ENV === "production") {
-  // Using external CDN to reduce build size
-  pdfjs.GlobalWorkerOptions.workerSrc =
-    "https://assets-prod.reticulum.io/assets/js/pdfjs-dist@2.1.266/build/pdf.worker.js";
-} else {
-  pdfjs.GlobalWorkerOptions.workerSrc = `${
-    configs.BASE_ASSETS_PATH
-  }../assets/js/pdfjs-dist@2.1.266/build/pdf.worker.js`;
-}
+/**
+ * Warning! This require statement is fragile!
+ *
+ * How it works:
+ * require -> require the file after all import statements have been called, particularly the configs.js import which modifies __webpack_public_path__
+ * !! -> don't run any other loaders
+ * file-loader -> make webpack move the file into the dist directory and return the file path
+ * outputPath -> where to put the file
+ * name -> how to name the file
+ * Then the path to the worker script
+ */
+pdfjs.GlobalWorkerOptions.workerSrc = require("!!file-loader?outputPath=assets/js&name=[name]-[hash].js!pdfjs-dist/build/pdf.worker.min.js");
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
