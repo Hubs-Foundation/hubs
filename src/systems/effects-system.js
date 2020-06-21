@@ -8,10 +8,11 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { NegativeScreenShader } from '../shaders/NegativeScreenShader.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import { GammaCorrectionShader } from 'three/examples/jsm/shaders/GammaCorrectionShader.js';
+import { GammaCorrectionShader } from '../shaders/GammaCorrectionShader.js';
 import { AdaptiveToneMappingPass } from 'three/examples/jsm/postprocessing/AdaptiveToneMappingPass.js';
 import { Vector2, NoToneMapping } from 'three';
 
+import ShaderFrogRuntime from '../ShaderRuntime.js';
 
 export class EffectsSystem {
   constructor(sceneEl) {
@@ -26,30 +27,35 @@ export class EffectsSystem {
       return;
     }
 
+
     const scene = sceneEl.object3D;
     const renderer = sceneEl.renderer;
-    renderer.toneMapping = NoToneMapping;
+    // renderer.toneMapping = NoToneMapping;
     const camera = sceneEl.camera;
 
     var targetParams = {
-      minFilter: THREE.LinearFilter,
-      magFilter: THREE.LinearFilter,
-      format: THREE.RGBAFormat,
+      minFilter: THREE.NearestFilter,
+      magFilter: THREE.LinearMipmapLinearFilter,
+      format: THREE.RGBFormat,
       type: THREE.FloatType,
       stencilBuffer: false
     };
 
     var renderTarget = new THREE.WebGLRenderTarget(1024, 1024, targetParams );
     renderTarget.texture.name = 'EffectComposer.rt1';
-    const composer = new EffectComposer(renderer, renderTarget);
+    const composer = new EffectComposer(renderer); // renderTarget
 
     var passes = [
       new RenderPass(scene, camera),
       // UnrealBloomPass(resolution, strength, radius, threshold)
-      new UnrealBloomPass(new THREE.Vector2(1024, 1024), 1.3, 1.0, 0.8),
-      new AdaptiveToneMappingPass(false, 1024),
-      new ShaderPass(GammaCorrectionShader),
-      //new ShaderPass(NegativeScreenShader, 'tDiffuse'),
+      new UnrealBloomPass(new THREE.Vector2(128, 128), 1.3, 1.0, 0.8),
+
+      new ShaderPass(GammaCorrectionShader(1.2)),
+      // (1.2 seems to balance out the desaturating effect of UnrealBloomPass)
+
+      // AdaptiveToneMappingPass(adaptive, resolution)
+      // new AdaptiveToneMappingPass(false, 128),
+      // new ShaderPass(NegativeScreenShader, 'tDiffuse'),
     ];
     passes.slice(-1).renderToScreen = true;
 
@@ -64,11 +70,14 @@ export class EffectsSystem {
     this.bind();
 
     window.addEventListener('resize', this.onWindowResize.bind(this), false );
+
+    // Setup ShaderFrog
+    this.shaderFrog = new ShaderFrogRuntime();
+    this.shaderFrog.registerCamera( camera );
   }
 
   onWindowResize( event ) {
     this.shaders.forEach(shader => {
-      //console.log(shader)
       shader.uniforms.resolution.value.x = window.innerWidth;
       shader.uniforms.resolution.value.y = window.innerHeight;
     })
@@ -80,9 +89,10 @@ export class EffectsSystem {
 
     // update shaders
     this.shaders.forEach(shader => {
-      //console.log(shader)
       shader.uniforms.time.value = t;  
     })
+
+    this.shaderFrog.updateShaders(t/1000.0);
   }
 
   /**
@@ -108,7 +118,16 @@ export class EffectsSystem {
 
   registerShader(shader) {
     shader.uniforms.resolution.value = new THREE.Vector2(window.innerWidth, window.innerHeight);
-    
     this.shaders.push(shader)
+  }
+
+  registerShaderFrogShader(shader) {
+    var material;
+    const shaderFrog = this.shaderFrog;
+    shaderFrog.addShader(shader, function( shaderData ) {
+      // Get the Three.js material you can assign to your objects
+      material = shaderFrog.get(shaderData.name);
+    });
+    return material;
   }
 }
