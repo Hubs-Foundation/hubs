@@ -11,6 +11,31 @@ import HubsBasisTextureLoader from "../loaders/HubsBasisTextureLoader";
 
 import { Glassy } from '../shaders/Glassy.js';
 import { ShinyShader } from '../shaders/ShinyShader.js';
+import { Jelly } from '../shaders/ShaderFrog/Jelly.js'
+import { Neurons } from '../shaders/ShaderFrog/Neurons.js'
+
+
+const registerRegularShader = (shader) => ((effectsSystem) => {
+  effectsSystem.registerShader(shader);
+  return new THREE.ShaderMaterial(shader);
+});
+
+const registerShaderFrogShader = (shader) => ((effectsSystem) => {
+  return effectsSystem.registerShaderFrogShader(shader);
+});
+
+const shaders = [
+  registerRegularShader(Glassy),
+  registerRegularShader(ShinyShader),
+  registerShaderFrogShader(Jelly),
+  registerShaderFrogShader(Neurons),
+];
+
+function randint(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -446,26 +471,35 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
   // this is likely a noop since the whole parser will get GCed
   parser.cache.removeAll();
 
+  const effectsSystem = sceneEl && sceneEl.systems["hubs-systems"].effectsSystem;
+
+  const qs = new URLSearchParams(location.search);
   gltf.scene.traverse(object => {
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
+
 
     // TODO: add custom shaders here
     // But how to set shader params without modifying the gltf exporter?
     // Use Blender's 'Custom Properties'? https://github.com/KhronosGroup/glTF-Blender-Exporter/issues/15
     // console.log(object)
-    if (object.name == "Suzanne") {
-      sceneEl.systems["hubs-systems"].effectsSystem.registerShader(Glassy)
-      var shaderMaterial = new THREE.ShaderMaterial(Glassy);
-      object.material = shaderMaterial
-    } else {
-      object.material = mapMaterials(object, material => {
-        if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
-          return MobileStandardMaterial.fromStandardMaterial(material);
-        }
+    if (effectsSystem) {
+      if (qs.get('shader_party') || object.name == "Suzanne") {
+        // effectsSystem.registerShader(Glassy)
+        // var shaderMaterial = new THREE.ShaderMaterial(Glassy);
+        // object.material = shaderMaterial
+        // debugger;
 
-        return material;
-      });
+        object.material = shaders[randint(0,shaders.length-1)](effectsSystem);
+      } else {
+        object.material = mapMaterials(object, material => {
+          if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
+            return MobileStandardMaterial.fromStandardMaterial(material);
+          }
+
+          return material;
+        });
+      }
     }
   });
 
