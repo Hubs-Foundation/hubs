@@ -339,12 +339,7 @@ module.exports = async (env, argv) => {
           }
         },
         {
-          // Load src/support.js and its dependencies with a babel config that supports older browsers.
-          test: [
-            path.resolve(__dirname, "src", "utils", "configs.js"),
-            //path.resolve(__dirname, "src", "utils", "i18n.js"),
-            path.resolve(__dirname, "src", "support.js")
-          ],
+          test: [path.resolve(__dirname, "src", "utils", "configs.js"), path.resolve(__dirname, "src", "support.js")],
           loader: "babel-loader",
           options: legacyBabelConfig
         },
