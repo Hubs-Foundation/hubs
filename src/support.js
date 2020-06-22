@@ -59,7 +59,10 @@ class Support extends React.Component {
   state = { showDetails: false, copyText: "copy" };
   toggleDetails = e => {
     e.preventDefault();
-    this.setState(state => (state.showDetails = !state.showDetails));
+    this.setState(state => {
+      state.showDetails = !state.showDetails;
+      return state;
+    });
   };
   onCopyClicked = e => {
     e.preventDefault();
