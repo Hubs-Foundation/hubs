@@ -714,8 +714,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const detectedOS = detectOS(navigator.userAgent);
   const browser = detect();
-  // HACK - it seems if we don't initialize the mic track up-front, voices can drop out
-  // on Safari when initializing it later.
+  // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
+  // safari when initializing it later.
   if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
