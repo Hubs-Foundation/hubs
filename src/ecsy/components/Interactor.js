@@ -1,8 +1,7 @@
-import { Component } from "ecsy";
-import { PropTypes } from "ecsy-three";
+import { Types, Component } from "ecsy";
 
 export class Interactor extends Component {
   static schema = {
-    id: { type: PropTypes.String }
+    id: { type: Types.String }
   };
 }

@@ -1,11 +1,10 @@
-import { Component } from "ecsy";
-import { PropTypes } from "ecsy-three";
+import { Types, Component } from "ecsy";
 
 export class InteractionState extends Component {
   static schema = {
-    leftHand: { type: PropTypes.Object },
-    rightHand: { type: PropTypes.Object },
-    leftRemote: { type: PropTypes.Object },
-    rightRemote: { type: PropTypes.Object }
+    leftHand: { type: Types.Object },
+    rightHand: { type: Types.Object },
+    leftRemote: { type: Types.Object },
+    rightRemote: { type: Types.Object }
   };
 }

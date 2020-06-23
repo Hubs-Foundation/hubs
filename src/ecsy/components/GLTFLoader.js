@@ -1,5 +1,4 @@
-import { Component } from "ecsy";
-import { PropTypes } from "ecsy-three";
+import { Types, Component } from "ecsy";
 
 export const GLTFAnimations = {
   Loop: "loop"
@@ -7,7 +6,7 @@ export const GLTFAnimations = {
 
 export class GLTFLoader extends Component {
   static schema = {
-    src: { type: PropTypes.String },
-    playAnimations: { type: PropTypes.String, default: null }
+    src: { type: Types.String },
+    playAnimations: { type: Types.String, default: null }
   };
 }

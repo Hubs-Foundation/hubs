@@ -13,7 +13,7 @@ export class BoxTemplate extends NetworkTemplate {
   createLocalEntity(world) {
     return world
       .createEntity()
-      .addObject3DComponents(
+      .addObject3DComponent(
         new THREE.Mesh(
           new BoxBufferGeometry(),
           new MeshBasicMaterial({ color: 0xff0000, opacity: 0.3, transparent: true })
@@ -29,7 +29,7 @@ export class BoxTemplate extends NetworkTemplate {
   createRemoteEntity(world) {
     return world
       .createEntity()
-      .addObject3DComponents(
+      .addObject3DComponent(
         new THREE.Mesh(
           new BoxBufferGeometry(),
           new MeshBasicMaterial({ color: 0xff0000, opacity: 0.3, transparent: true })

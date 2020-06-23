@@ -1,9 +1,9 @@
 import { Component } from "ecsy";
-import { PropTypes } from "ecsy-three";
+import { Types } from "ecsy";
 
 export class MediaLoader extends Component {
   static schema = {
-    src: { type: PropTypes.String },
-    contentType: { type: PropTypes.String, default: null }
+    src: { type: Types.String },
+    contentType: { type: Types.String, default: null }
   };
 }

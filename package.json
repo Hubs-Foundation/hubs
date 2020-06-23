@@ -73,7 +73,7 @@
     "draft-js-linkify-plugin": "^2.0.1",
     "draft-js-plugins-editor": "^2.1.1",
     "ecsy": "git+https://github.com/MozillaReality/ecsy.git#dev",
-    "ecsy-three": "git+https://github.com/MozillaReality/ecsy-three.git#simple-entity-api",
+    "ecsy-three": "git+https://github.com/MozillaReality/ecsy-three.git#schema",
     "event-target-shim": "^3.0.1",
     "form-data": "^3.0.0",
     "form-urlencoded": "^2.0.4",

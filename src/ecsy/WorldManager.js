@@ -1,4 +1,4 @@
-import { ECSYThreeWorld, registerDefaultComponents, Object3DComponent } from "ecsy-three";
+import { ECSYThreeWorld, initialize, Object3DComponent } from "ecsy-three";
 
 import { Rotating } from "./components/Rotating";
 import { Animation } from "./components/Animation";
@@ -40,7 +40,7 @@ export class WorldManager {
   }
 
   init() {
-    registerDefaultComponents(this.world);
+    initialize(this.world, { defaults: false });
 
     this.world
       .registerComponent(AFrameEntity)
@@ -83,7 +83,7 @@ export class WorldManager {
 
     this.scene = this.world
       .createEntity()
-      .addObject3DComponents(this.aframeScene.object3D)
+      .addObject3DComponent(this.aframeScene.object3D)
       .addComponent(InteractionState)
       .addComponent(NetworkingState)
       .addComponent(SceneRootTag);

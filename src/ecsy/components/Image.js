@@ -1,9 +1,8 @@
-import { Component } from "ecsy";
-import { PropTypes } from "ecsy-three";
+import { Types, Component } from "ecsy";
 
 export class Image extends Component {
   static schema = {
-    src: { type: PropTypes.String },
-    contentType: { type: PropTypes.String, default: null }
+    src: { type: Types.String },
+    contentType: { type: Types.String, default: null }
   };
 }

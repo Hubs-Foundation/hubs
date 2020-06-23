@@ -1,8 +1,7 @@
-import { Component } from "ecsy";
-import { PropTypes } from "ecsy-three";
+import { Types, Component } from "ecsy";
 
 export class AFrameEntity extends Component {
   static schema = {
-    value: { type: PropTypes.Object }
+    value: { type: Types.Object }
   };
 }

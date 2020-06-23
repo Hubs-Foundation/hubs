@@ -1,12 +1,11 @@
-import { Component } from "ecsy";
-import { PropTypes } from "ecsy-three";
+import { Types, Component } from "ecsy";
 
 export class NetworkingState extends Component {
   static schema = {
-    lastUpdate: { type: PropTypes.Number },
-    entities: { type: PropTypes.Object, default: {} },
-    templates: { type: PropTypes.Object, default: {} },
-    lastSentData: { type: PropTypes.Object, default: {} }
+    lastUpdate: { type: Types.Number },
+    entities: { type: Types.Object, default: {} },
+    templates: { type: Types.Object, default: {} },
+    lastSentData: { type: Types.Object, default: {} }
   };
 
   registerTemplate(Template) {

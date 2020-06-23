@@ -1,13 +1,12 @@
-import { Component } from "ecsy";
-import { PropTypes } from "ecsy-three";
+import { Types, Component } from "ecsy";
 
 export class Networked extends Component {
   static schema = {
-    networkId: { type: PropTypes.String },
-    owner: { type: PropTypes.String },
-    creator: { type: PropTypes.String },
-    template: { type: PropTypes.Object },
-    attachTemplateToLocal: { type: PropTypes.Boolean, default: true },
-    persistent: { type: PropTypes.Boolean }
+    networkId: { type: Types.String },
+    owner: { type: Types.String },
+    creator: { type: Types.String },
+    template: { type: Types.Object },
+    attachTemplateToLocal: { type: Types.Boolean, default: true },
+    persistent: { type: Types.Boolean }
   };
 }
