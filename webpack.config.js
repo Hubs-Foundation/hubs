@@ -339,7 +339,11 @@ module.exports = async (env, argv) => {
           }
         },
         {
-          test: [path.resolve(__dirname, "src", "utils", "configs.js"), path.resolve(__dirname, "src", "support.js")],
+          test: [
+            path.resolve(__dirname, "src", "utils", "configs.js"),
+            path.resolve(__dirname, "src", "utils", "i18n.js"),
+            path.resolve(__dirname, "src", "support.js")
+          ],
           loader: "babel-loader",
           options: legacyBabelConfig
         },
