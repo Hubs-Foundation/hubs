@@ -43,6 +43,8 @@ export default class SceneEntryManager {
     this.whenSceneLoaded(() => {
       this.rightCursorController.components["cursor-controller"].enabled = false;
       this.leftCursorController.components["cursor-controller"].enabled = false;
+
+      this._setupBlocking();
     });
   };
 
@@ -77,7 +79,6 @@ export default class SceneEntryManager {
     }
 
     this._setupPlayerRig();
-    this._setupBlocking();
     this._setupKicking();
     this._setupMedia(mediaStream);
     this._setupCamera();
