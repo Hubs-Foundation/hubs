@@ -442,7 +442,9 @@
     "support.update-browser": "Please try switching or updating to a newer browser",
     "support.copy": "copy",
     "support.copied": "copied!",
-    "support.details": "details"
+    "support.details": "details",
+    "support.supported": "supported",
+    "support.unsupported": "unsupported"
   },
    "cn-zh": {
     "app-name": "App",

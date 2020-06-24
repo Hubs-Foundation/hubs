@@ -37,6 +37,7 @@
 
 :local(.logo) {
   max-width: 250px;
+  filter: drop-shadow(0 0 4px #888);
 }
 
 :local(.details) {
