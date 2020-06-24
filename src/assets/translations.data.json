@@ -435,7 +435,14 @@
     "cloud.call_to_action_personal": "Get Hubs Cloud Personal",
     "cloud.call_to_action_enterprise": "Get Hubs Cloud Enterprise",
     "cloud.aws_quick_start": "Quick Start Guide",
-    "cloud.splash_tag": "Configurable infrastructure for your own Hubs stack"
+    "cloud.splash_tag": "Configurable infrastructure for your own Hubs stack",
+    "support.missing-features": "Your browser is missing required features.",
+    "support.in-app-browser-ios": "Copy and paste this link directly into Safari",
+    "support.in-app-browser-android": "Copy and paste this link directly into Chrome or Firefox",
+    "support.update-browser": "Please try switching or updating to a newer browser",
+    "support.copy": "copy",
+    "support.copied": "copied!",
+    "support.details": "details"
   },
    "cn-zh": {
     "app-name": "App",
