@@ -1,4 +1,7 @@
+import { _Entity } from "ecsy";
 import { ECSYThreeWorld, initialize, Object3DComponent } from "ecsy-three";
+
+_Entity.prototype.isECSYEntity = true;
 
 import { Rotating } from "./components/Rotating";
 import { Animation } from "./components/Animation";
