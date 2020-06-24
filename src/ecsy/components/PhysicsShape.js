@@ -1,5 +1,6 @@
 import { Types, Component } from "ecsy";
 import { ThreeTypes } from "ecsy-three";
+import { HubsTypes } from "../types";
 import { Vector3, Vector4 } from "three";
 import { SHAPE, FIT } from "three-ammo/constants";
 
@@ -32,7 +33,7 @@ export class PhysicsShape extends Component {
     cylinderAxis: { type: Types.String, default: "y" },
     margin: { type: Types.Number, default: 0.01 },
     offset: { type: ThreeTypes.Vector3Type, default: new Vector3(0, 0, 0) },
-    orientation: { type: ThreeTypes.Vector4Type, default: new Vector4() },
+    orientation: { type: HubsTypes.Vector4Type, default: new Vector4() },
     heightfieldData: { type: Types.Array, default: [] },
     heightfieldDistance: { type: Types.Number, default: 1 },
     includeInvisible: { type: Types.Boolean, default: false },

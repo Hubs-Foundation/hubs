@@ -1,5 +1,5 @@
 import { _Entity } from "ecsy";
-import { ECSYThreeWorld, initialize, Object3DComponent } from "ecsy-three";
+import { ECSYThreeWorld, Object3DComponent, SceneTagComponent, CameraTagComponent, MeshTagComponent } from "ecsy-three";
 
 _Entity.prototype.isECSYEntity = true;
 
@@ -43,7 +43,12 @@ export class WorldManager {
   }
 
   init() {
-    initialize(this.world, { defaults: false });
+    // ecsy-three builtins
+    this.world
+      .registerComponent(Object3DComponent)
+      .registerComponent(SceneTagComponent)
+      .registerComponent(CameraTagComponent)
+      .registerComponent(MeshTagComponent);
 
     this.world
       .registerComponent(AFrameEntity)
