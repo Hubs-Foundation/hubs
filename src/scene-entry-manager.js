@@ -50,6 +50,47 @@ export default class SceneEntryManager {
     return this._entered;
   };
 
+  loadAssetFromURL = (url, position) => {
+    var el = document.createElement("a-entity");
+    AFRAME.scenes[0].appendChild(el);
+    console.log("TEST");
+    el.setAttribute("media-loader", { src: url, fitToBox: false, resolve: true });
+    el.setAttribute("networked", { template: "#interactable-media" });
+    el.setAttribute("position", position);
+    return el;
+  };
+
+  spawnDesk_Top = (url, position, newId) => {
+    // Spawn the desk and position it
+    var newDesk = this.loadAssetFromURL(url, position);
+
+    //Make it not movable by mouse
+    // newDesk.removeAttribute("draggable");
+    // newDesk.removeAttribute("hoverable-visuals");
+    // newDesk.removeAttribute("is-remote-hover-target");
+
+    var current_objects = AFRAME.scenes[0].querySelectorAll("[id]");
+    for (let current_object of current_objects) {
+      if (current_object.id == newId) {
+        console.log("CAN'T HAVE TWO OBJECTS WITH SAME ID");
+        newDesk.remove();
+        return null;
+      }
+    }
+    newDesk.id = newId;
+
+    (async () => {
+      while (newDesk.hasLoaded == false) {
+        await nextTick();
+      }
+      newDesk.removeAttribute("draggable");
+      newDesk.removeAttribute("hoverable-visuals");
+      newDesk.removeAttribute("is-remote-hover-target");
+    })();
+
+    return newDesk;
+  };
+
   enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
     document.getElementById("viewing-camera").removeAttribute("scene-preview-camera");
 
@@ -125,6 +166,11 @@ export default class SceneEntryManager {
     if (muteOnEntry) {
       this.scene.emit("action_mute");
     }
+
+    var deskUrl = "https://uploads-prod.reticulum.io/files/37c0c4b2-6689-4a81-9022-2db4b55bcb93.glb";
+    var newID = "TESTDESK_1";
+    var floaty_objects = AFRAME.scenes[0].querySelectorAll("[id]");
+    var desk = this.spawnDesk_Top(deskUrl, "1 1 3", newID);
   };
 
   whenSceneLoaded = callback => {

@@ -4,7 +4,7 @@ import MobileStandardMaterial from "../../materials/MobileStandardMaterial";
 function almostEquals(epsilon, u, v) {
   return Math.abs(u.x - v.x) < epsilon && Math.abs(u.y - v.y) < epsilon && Math.abs(u.z - v.z) < epsilon;
 }
-
+//color: { type: "color", default: "#FF0033" }
 AFRAME.registerComponent("pen-laser", {
   schema: {
     color: { type: "color", default: "#FF0033" },
