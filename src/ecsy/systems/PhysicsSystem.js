@@ -61,23 +61,25 @@ export class PhysicsSystem extends System {
 
       if (body.uuid == null) {
         obj.updateMatrices();
-        const uuid = this.hubsSystem.addBody(obj, body);
+
+        const uuid = this.hubsSystem.addBody(obj, body.toObject());
+        const data = this.hubsSystem.bodyUuidToData.get(uuid);
+
         body.uuid = uuid;
+        body.collisions = data.collisions;
+        body.shapes = data.shapes;
         body.needsUpdate = false;
       } else if (body.needsUpdate) {
-        obj.updateMatrices();
-        this.hubsSystem.updateBody(body.uuid, body);
+        this.hubsSystem.updateBody(body.uuid, body.toObject());
         body.needsUpdate = false;
       }
 
       const data = this.hubsSystem.bodyUuidToData.get(body.uuid);
 
       if (data) {
-        body.collisions = data.collisions;
         body.linearVelocity = data.linearVelocity;
         body.angularVelocity = data.angularVelocity;
         body.index = data.index;
-        body.shapes = data.shapes;
       }
     }
 
@@ -107,7 +109,7 @@ export class PhysicsSystem extends System {
           }
 
           obj.updateMatrixWorld(true);
-          const uuid = this.hubsSystem.addShapes(body.uuid, obj, shape);
+          const uuid = this.hubsSystem.addShapes(body.uuid, obj, shape.toObject());
           shape.bodyUuid = body.uuid;
           shape.uuid = uuid;
         }
@@ -132,7 +134,7 @@ export class PhysicsSystem extends System {
         if (body && targetBody && body.uuid != null && targetBody.uuid != null) {
           body.type = TYPE.DYNAMIC;
           body.activationState = ACTIVATION_STATE.DISABLE_DEACTIVATION;
-          this.hubsSystem.updateBody(body.uuid, body);
+          this.hubsSystem.updateBody(body.uuid, body.toObject());
           body.needsUpdate = false;
           this.hubsSystem.addConstraint(entity.id, body.uuid, targetBody.uuid, {});
           constraint.uuid = entity.id;

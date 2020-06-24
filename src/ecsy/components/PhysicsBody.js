@@ -15,6 +15,31 @@ export const ACTIVATION_STATES = [
 ];
 
 export class PhysicsBody extends Component {
+  toObject(obj = {}) {
+    obj.mass = this.mass;
+    obj.gravity = this.gravity;
+    obj.linearDamping = this.linearDamping;
+    obj.angularDamping = this.angularDamping;
+    obj.linearSleepingThreshold = this.linearSleepingThreshold;
+    obj.angularSleepingThreshold = this.angularSleepingThreshold;
+    obj.angularFactor = this.angularFactor;
+    obj.activationState = this.activationState;
+    obj.type = this.type;
+    obj.emitCollisionEvents = this.emitCollisionEvents;
+    obj.disableCollision = this.disableCollision;
+    obj.collisionFilterGroup = this.collisionFilterGroup;
+    obj.collisionFilterMask = this.collisionFilterMask;
+    obj.scaleAutoUpdate = this.scaleAutoUpdate;
+    obj.collisions = this.collisions;
+    obj.linearVelocity = this.linearVelocity;
+    obj.angularVelocity = this.linearVelocity;
+    obj.index = this.index;
+    obj.shapes = this.shapes;
+    obj.needsUpdate = this.needsUpdate;
+    obj.uuid = this.uuid;
+    return obj;
+  }
+
   static schema = {
     mass: { type: Types.Number, default: 1 },
     gravity: { type: ThreeTypes.Vector3Type, default: new Vector3(0, -9.8, 0) },

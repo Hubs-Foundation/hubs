@@ -4,6 +4,24 @@ import { Vector3, Vector4 } from "three";
 import { SHAPE, FIT } from "three-ammo/constants";
 
 export class PhysicsShape extends Component {
+  toObject(obj = {}) {
+    obj.type = this.type;
+    obj.fit = this.fit;
+    obj.halfExtents = this.halfExtents;
+    obj.minHalfExtent = this.minHalfExtent;
+    obj.maxHalfExtent = this.maxHalfExtent;
+    obj.sphereRadius = this.sphereRadius;
+    obj.cylinderAxis = this.cylinderAxis;
+    obj.margin = this.margin;
+    obj.offset = this.offset;
+    obj.orientation = this.orientation;
+    obj.heightfieldData = this.heightfieldData;
+    obj.heightfieldDistance = this.heightfieldDistance;
+    obj.includeInvisible = this.includeInvisible;
+    obj.uuid = this.uuid;
+    obj.bodyUuid = this.bodyUuid;
+    return obj;
+  }
   static schema = {
     type: { type: Types.String, default: SHAPE.BOX },
     fit: { type: Types.String, default: FIT.ALL },
