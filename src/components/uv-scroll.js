@@ -11,5 +11,10 @@ AFRAME.registerComponent("uv-scroll", {
     const material = mesh && mesh.material;
     if (!material || !material.map) return;
     material.map.offset.addScaledVector(this.data.speed, dt / 1000);
+
+    // TODO this should be handled by MobileStandardMaterial itself
+    if (material.isMobileStandardMaterial) {
+      material.refreshUniforms();
+    }
   }
 });
