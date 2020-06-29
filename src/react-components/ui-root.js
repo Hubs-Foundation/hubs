@@ -2243,7 +2243,7 @@ class UIRoot extends Component {
                   )}
                 </div>
               )}
-            </div>}
+            </div>
           </IntlProvider>)}
         </ReactAudioContext.Provider>
       );
