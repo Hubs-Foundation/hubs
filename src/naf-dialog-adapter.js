@@ -49,7 +49,6 @@ export default class DialogAdapter {
     this._avgTimeOffset = 0;
     this._blockedClients = new Map();
     this.type = "dialog";
-    this.occupantIds = [];
     this.occupants = {}; // This is a public field
   }
 
@@ -180,7 +179,6 @@ export default class DialogAdapter {
         case "newPeer": {
           const peer = notification.data;
           this._onOccupantConnected(peer.id);
-          this.occupantIds.push(peer.id);
           this.occupants[peer.id] = peer;
 
           if (this._onOccupantsChanged) {
@@ -220,7 +218,6 @@ export default class DialogAdapter {
             this._initialAudioConsumerResolvers.delete(peerId);
           }
 
-          this.occupantIds = this.occupantsIds.filter(id => id !== peerId);
           delete this.occupants[peerId];
 
           if (this._onOccupantsChanged) {
@@ -450,7 +447,6 @@ export default class DialogAdapter {
       });
 
       const audioConsumerPromises = [];
-      this.occupantIds = [];
       this.occupants = {};
 
       // Create a promise that will be resolved once we attach to all the initial consumers.
@@ -458,7 +454,6 @@ export default class DialogAdapter {
       for (let i = 0; i < peers.length; i++) {
         const peerId = peers[i].id;
         this._onOccupantConnected(peerId);
-        this.occupantIds.push(peerId);
         this.occupants[peerId] = peers[i];
         if (!peers[i].hasProducers) continue;
         audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peerId, res)));
@@ -583,13 +578,13 @@ export default class DialogAdapter {
 
     this._closed = true;
 
-    for (let i = 0; i < this.occupantIds.length; i++) {
-      const peerId = this.occupantIds[i];
+    const occupantIds = Object.keys(this.occupants);
+    for (let i = 0; i < occupantIds.length; i++) {
+      const peerId = occupantIds[i];
       if (peerId === this._clientId) continue;
       this._onOccupantDisconnected(peerId);
     }
 
-    this.occupantIds = [];
     this.occupants = {};
 
     if (this._onOccupantsChanged) {
