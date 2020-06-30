@@ -181,6 +181,10 @@ export default class DialogAdapter {
           this._onOccupantConnected(peer.id);
           this.occupants.push(peer.id);
 
+          if (this._onOccupantsChanged) {
+            this._onOccupantsChanged(this.occupants);
+          }
+
           break;
         }
 
@@ -215,6 +219,10 @@ export default class DialogAdapter {
           }
 
           this.occupants = this.occupants.filter(id => id !== peerId);
+
+          if (this._onOccupantsChanged) {
+            this._onOccupantsChanged(this.occupants);
+          }
 
           break;
         }
@@ -454,6 +462,10 @@ export default class DialogAdapter {
       this._connectSuccess(this._clientId);
       this._initialAudioConsumerPromise = Promise.all(audioConsumerPromises);
 
+      if (this._onOccupantsChanged) {
+        this._onOccupantsChanged(this.occupants);
+      }
+
       if (this._localMediaStream) {
         this.createMissingProducers(this._localMediaStream);
       }
@@ -573,6 +585,10 @@ export default class DialogAdapter {
     }
 
     this.occupants = [];
+
+    if (this._onOccupantsChanged) {
+      this._onOccupantsChanged(this.occupants);
+    }
 
     debug("disconnect()");
 
