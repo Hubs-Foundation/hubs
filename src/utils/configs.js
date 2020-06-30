@@ -45,7 +45,7 @@ if (window.APP_CONFIG) {
     }
     const style = document.createElement("style");
     style.innerHTML = `:root{${colorVars.join("\n")}}`;
-    document.head.prepend(style);
+    document.head.insertBefore(style, document.head.firstChild);
   }
 
   if (!configs.APP_CONFIG.features) {

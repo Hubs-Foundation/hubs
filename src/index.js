@@ -39,7 +39,7 @@ async function main() {
     component = plugins.HomePage;
   }
 
-  ReactDOM.render(<Root component={component} />, document.getElementById("ui-root"));
+  ReactDOM.render(<Root component={component} />, document.getElementById("home-page"));
 }
 
 main().catch(console.error);

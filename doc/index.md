@@ -347,7 +347,7 @@ Instantiates GLTF models as specified in a bundle JSON.
 <a name="components/gltf/gltf-model-plus"></a>
 #### gltf-model-plus
 
-Loads a GLTF model, optionally recursively "inflates" the child nodes of a model into a-entities and sets whitelisted components on them if defined in the node's extras.
+Loads a GLTF model, optionally recursively "inflates" the child nodes of a model into a-entities and sets allowed components on them if defined in the node's extras.
 
 `src/components/gltf-model-plus.js`
           

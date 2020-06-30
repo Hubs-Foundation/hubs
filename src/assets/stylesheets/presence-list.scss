@@ -42,7 +42,7 @@
   }
 }
 
-:local(.icon) {
+%icon {
   width: 24px;
   height: 24px;
   position: relative;
@@ -54,6 +54,19 @@
     width: 24px;
     height: 24px;
   }
+}
+
+:local(.icon) {
+  @extend %icon;
+}
+
+:local(.icon-red) {
+  @extend %icon;
+  color: $action-color;
+}
+
+:local(.icon-button) {
+  cursor: pointer;
 }
 
 :local(.self) {
@@ -78,4 +91,17 @@
   color: $action-label-color;
   margin-left: 4px;
   text-decoration: none;
+}
+
+
+:local(.mute-all) {
+  border-bottom: 1px solid var(--panel-rule-color);
+  padding-bottom: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+:local(.mute-button) {
+  @extend %action-button;
+  pointer-events: auto;
 }

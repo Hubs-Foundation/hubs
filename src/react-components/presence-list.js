@@ -1,4 +1,5 @@
 import configs from "../utils/configs";
+import { getMicrophonePresences } from "../utils/microphone-presence";
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
@@ -20,6 +21,11 @@ import { faMobileAlt } from "@fortawesome/free-solid-svg-icons/faMobileAlt";
 import { pushHistoryPath, withSlug } from "../utils/history";
 import { hasReticulumServer } from "../utils/phoenix-utils";
 import { InlineSVG } from "./svgi";
+import { faVolumeMute } from "@fortawesome/free-solid-svg-icons/faVolumeMute";
+import { faVolumeOff } from "@fortawesome/free-solid-svg-icons/faVolumeOff";
+import { faVolumeUp } from "@fortawesome/free-solid-svg-icons/faVolumeUp";
+
+const MIC_PRESENCE_UPDATE_FREQUENCY = 500;
 
 function getPresenceIcon(ctx) {
   if (ctx && ctx.hmd) {
@@ -30,6 +36,16 @@ function getPresenceIcon(ctx) {
     return <InlineSVG src={discordIcon} />;
   } else {
     return <FontAwesomeIcon icon={faDesktop} />;
+  }
+}
+
+function getMicrophonePresenceIcon(microphonePresence) {
+  if (microphonePresence.muted) {
+    return <FontAwesomeIcon icon={faVolumeMute} />;
+  } else if (microphonePresence.talking) {
+    return <FontAwesomeIcon icon={faVolumeUp} />;
+  } else {
+    return <FontAwesomeIcon icon={faVolumeOff} />;
   }
 }
 
@@ -46,6 +62,7 @@ export function navigateToClientInfo(history, clientId) {
 
 export default class PresenceList extends Component {
   static propTypes = {
+    hubChannel: PropTypes.object,
     presences: PropTypes.object,
     history: PropTypes.object,
     sessionId: PropTypes.string,
@@ -57,8 +74,32 @@ export default class PresenceList extends Component {
     onExpand: PropTypes.func
   };
 
+  updateMicrophoneState = () => {
+    if (this.props.expanded) {
+      const microphonePresences = getMicrophonePresences(AFRAME.scenes[0]);
+      this.setState({ microphonePresences });
+    }
+    this.timeout = setTimeout(this.updateMicrophoneState, MIC_PRESENCE_UPDATE_FREQUENCY);
+  };
+
   navigateToClientInfo = clientId => {
     navigateToClientInfo(this.props.history, clientId);
+  };
+
+  mute = clientId => {
+    this.props.hubChannel.mute(clientId);
+  };
+
+  muteAll = () => {
+    const presences = this.props.presences;
+    for (const [clientId, presence] of Object.entries(presences)) {
+      if (clientId !== this.props.sessionId) {
+        const meta = presence.metas[0];
+        if (meta.presence === "room" && meta.roles && !meta.roles.owner) {
+          this.mute(clientId);
+        }
+      }
+    }
   };
 
   domForPresence = ([sessionId, data]) => {
@@ -76,12 +117,30 @@ export default class PresenceList extends Component {
         &#x2605;
       </span>
     );
+    const microphonePresence =
+      this.state && this.state.microphonePresences && this.state.microphonePresences.get(sessionId);
+    const micState =
+      microphonePresence && meta.presence === "room" ? getMicrophonePresenceIcon(microphonePresence) : "";
+    const canMuteUsers = this.props.hubChannel.can("mute_users");
+    const isMe = sessionId === this.props.sessionId;
+    const muted = microphonePresence && microphonePresence.muted;
+    const canMuteIndividual = canMuteUsers && !isMe && microphonePresence && !microphonePresence.muted;
 
     return (
       <WithHoverSound key={sessionId}>
         <div className={styles.row}>
           <div className={styles.icon}>
             <i>{icon}</i>
+          </div>
+          <div
+            className={classNames({
+              [styles.iconRed]: muted,
+              [styles.icon]: !muted,
+              [styles.iconButton]: canMuteIndividual
+            })}
+            onClick={() => (canMuteUsers ? this.mute(sessionId) : null)}
+          >
+            <i>{micState}</i>
           </div>
           <div
             className={classNames({
@@ -118,6 +177,7 @@ export default class PresenceList extends Component {
   };
 
   componentDidMount() {
+    this.updateMicrophoneState();
     document.querySelector(".a-canvas").addEventListener(
       "mouseup",
       () => {
@@ -127,11 +187,26 @@ export default class PresenceList extends Component {
     );
   }
 
+  componentWillUnmount() {
+    clearTimeout(this.timeout);
+  }
+
   renderExpandedList() {
+    const meta = this.props.presences[this.props.sessionId].metas[0];
+    const owner = meta.roles && meta.roles.owner;
+    const muteAll = owner && (
+      <div className={styles.muteAll}>
+        <button title="Mute All" onClick={this.muteAll} className={styles.muteButton}>
+          <FormattedMessage id="presence.mute_all" />
+        </button>
+      </div>
+    );
+
     return (
       <div className={styles.presenceList}>
         <div className={styles.attachPoint} />
         <div className={styles.contents}>
+          {muteAll}
           <div className={styles.rows}>
             {Object.entries(this.props.presences || {})
               .filter(([k]) => k === this.props.sessionId)

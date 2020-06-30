@@ -205,6 +205,7 @@
     "presence.in_lobby": "Lobby",
     "presence.entering": "Entering Room",
     "presence.in_room": "In Room",
+    "presence.mute_all": "Mute All",
     "home.create_a_room": "Create a Room",
     "home.desktop.add_pwa": "Install Desktop App",
     "home.mobile.add_pwa": "Add to Home Screen",
@@ -296,6 +297,7 @@
     "preferences.movementSpeedModifier": "Movement speed modifier",
     "preferences.enableOnScreenJoystickLeft": "Enable left on-screen joystick for moving around",
     "preferences.enableOnScreenJoystickRight": "Enable right on-screen joystick for looking around",
+    "preferences.invertTouchscreenCameraMove": "Invert direction of camera movement for touchscreens",
     "preferences.onlyShowNametagsInFreeze": "Only show nametags while frozen",
     "preferences.maxResolution": "Max Resolution",
     "preferences.materialQualitySetting": "Material quality",
@@ -433,7 +435,16 @@
     "cloud.call_to_action_personal": "Get Hubs Cloud Personal",
     "cloud.call_to_action_enterprise": "Get Hubs Cloud Enterprise",
     "cloud.aws_quick_start": "Quick Start Guide",
-    "cloud.splash_tag": "Configurable infrastructure for your own Hubs stack"
+    "cloud.splash_tag": "Configurable infrastructure for your own Hubs stack",
+    "support.missing-features": "Your browser is missing required features.",
+    "support.in-app-browser-ios": "Copy and paste this link directly into Safari",
+    "support.in-app-browser-android": "Copy and paste this link directly into Chrome or Firefox",
+    "support.update-browser": "Please try switching or updating to a newer browser",
+    "support.copy": "copy",
+    "support.copied": "copied!",
+    "support.details": "details",
+    "support.supported": "supported",
+    "support.unsupported": "unsupported"
   },
    "cn-zh": {
     "app-name": "App",
