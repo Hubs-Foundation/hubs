@@ -6,7 +6,7 @@
   box-sizing: border-box;
 }
 
-html, body, #ui-root {
+html, body, #ui-root, .home-root {
   margin: 0;
   height:100%;
 }
@@ -17,7 +17,7 @@ body {
   color: var(--home-text-color);
 }
 
-#ui-root {
+#ui-root, .home-root {
   display:flex; 
   flex-direction:column;
 }
