@@ -5,6 +5,10 @@ import AuthChannel from "../utils/auth-channel";
 import configs from "../utils/configs";
 import Store from "../storage/store";
 
+function getLocalRoomUrl(hubId) {
+  return new URL(`/hub.html?hub_id=${entry.id}`, window.location).href;
+}
+
 class SDK {
   constructor() {
     this.store = new Store();
@@ -142,7 +146,7 @@ class SDK {
     }
 
     if (isLocalClient()) {
-      response.url = new URL(`/hub.html?hub_id=${response.hub_id}`, window.location).href;
+      response.url = getLocalRoomUrl(response.hub_id);
     }
 
     return response;
@@ -167,7 +171,15 @@ class SDK {
   }
 
   async getPublicRooms(cursor = 0) {
-    return this.searchMedia({ source: "rooms", filter: "public" }, cursor);
+    const response = await this.searchMedia({ source: "rooms", filter: "public" }, cursor);
+
+    if (isLocalClient()) {
+      response.entries.forEach(entry => {
+        entry.url = getLocalRoomUrl(entry.id);
+      });
+    }
+
+    return response;
   }
 
   async getFavoriteRooms(cursor = 0) {
@@ -175,7 +187,7 @@ class SDK {
       throw new Error("Requires authentication.");
     }
 
-    return this.searchMedia(
+    const response = await this.searchMedia(
       {
         source: "favorites",
         type: "rooms",
@@ -183,6 +195,14 @@ class SDK {
       },
       cursor
     );
+
+    if (isLocalClient()) {
+      response.entries.forEach(entry => {
+        entry.url = getLocalRoomUrl(entry.id);
+      });
+    }
+
+    return response;
   }
 }
 
