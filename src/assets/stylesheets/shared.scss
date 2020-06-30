@@ -30,7 +30,7 @@ $favorited-color: var(--favorited-color, $duck-yellow);
 }
 
 %glass-icon {
-  -webkit-filter: drop-shadow( 0px 0px 3px #606060 ); 
+  -webkit-filter: drop-shadow( 0px 0px 3px #606060 );
   filter: drop-shadow( 0px 0px 3px #606060 );
 }
 
@@ -198,6 +198,11 @@ $favorited-color: var(--favorited-color, $duck-yellow);
 %discord-action-button {
   @extend %action-button;
   background-color: var(--discord-action-color);
+}
+
+%slack-action-button {
+  @extend %action-button;
+  background-color: var(--slack-action-color);
 }
 
 %twitter-action-button {
