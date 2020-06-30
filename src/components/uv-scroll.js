@@ -2,7 +2,7 @@ const textureToData = new Map();
 const registeredTextures = [];
 
 export class UVScrollSystem {
-  tick(_t, dt) {
+  tick(dt) {
     for (let i = 0; i < registeredTextures.length; i++) {
       const map = registeredTextures[i];
       const { offset, instances } = textureToData.get(map);
@@ -43,7 +43,6 @@ AFRAME.registerComponent("uv-scroll", {
     const mesh = this.el.getObject3D("mesh") || this.el.getObject3D("skinnedmesh");
     const material = mesh && mesh.material;
     if (material) {
-      const offset = new THREE.Vector2();
       // We store mesh here instead of the material directly because we end up swapping out the material in injectCustomShaderChunks.
       // We need material in the first place because of MobileStandardMaterial
       const instance = { component: this, mesh };
@@ -53,7 +52,7 @@ AFRAME.registerComponent("uv-scroll", {
 
       if (!textureToData.has(material.map)) {
         textureToData.set(material.map, {
-          offset,
+          offset: new THREE.Vector2(),
           instances: [instance]
         });
         registeredTextures.push(material.map);
@@ -64,16 +63,17 @@ AFRAME.registerComponent("uv-scroll", {
         textureToData.get(material.map).instances.push(instance);
       }
     }
-    // }, 0);
   },
 
   pause() {
-    const instances = textureToData.get(this.map).instances;
-    instances.splice(instances.indexOf(this.instance), 1);
-    // If this was the last uv-scroll component for a given texture
-    if (!instances.length) {
-      textureToData.delete(this.map);
-      registeredTextures.splice(registeredTextures.indexOf(this.map), 1);
+    if (this.map) {
+      const instances = textureToData.get(this.map).instances;
+      instances.splice(instances.indexOf(this.instance), 1);
+      // If this was the last uv-scroll component for a given texture
+      if (!instances.length) {
+        textureToData.delete(this.map);
+        registeredTextures.splice(registeredTextures.indexOf(this.map), 1);
+      }
     }
   }
 });

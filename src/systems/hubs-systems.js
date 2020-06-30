@@ -103,7 +103,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.menuAnimationSystem.tick(t);
     this.spriteSystem.tick(t, dt);
     this.enterVRButtonSystem.tick();
-    this.uvScrollSystem.tick(t, dt);
+    this.uvScrollSystem.tick(dt);
 
     // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
     this.boneVisibilitySystem.tick();
