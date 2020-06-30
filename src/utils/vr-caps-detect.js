@@ -18,9 +18,9 @@ function isMaybeDaydreamCompatibleDevice(ua) {
   return /\WAndroid\W/.test(ua);
 }
 
-// Blacklist of VR device name regex matchers that we do not want to consider as valid VR devices
+// Disallowed list of VR device name regex matchers that we do not want to consider as valid VR devices
 // that can be entered into as a "generic" entry flow.
-const GENERIC_ENTRY_TYPE_DEVICE_BLACKLIST = [/cardboard/i];
+const GENERIC_ENTRY_TYPE_DISALLOWED_DEVICES = [/cardboard/i];
 
 // Tries to determine VR entry compatibility regardless of the current browser.
 //
@@ -112,9 +112,9 @@ export async function getAvailableVREntryTypes() {
       : VR_DEVICE_AVAILABILITY.no;
 
   if (isWebVRCapableBrowser) {
-    // Generic is supported for non-blacklisted devices and presentable HMDs.
+    // Generic is supported for allowed devices and presentable HMDs.
     generic = displays.find(
-      d => d.capabilities.canPresent && !GENERIC_ENTRY_TYPE_DEVICE_BLACKLIST.find(r => r.test(d.displayName))
+      d => d.capabilities.canPresent && !GENERIC_ENTRY_TYPE_DISALLOWED_DEVICES.find(r => r.test(d.displayName))
     )
       ? VR_DEVICE_AVAILABILITY.yes
       : VR_DEVICE_AVAILABILITY.no;

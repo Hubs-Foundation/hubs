@@ -53,7 +53,7 @@ export default class SceneEntryManager {
   enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
     document.getElementById("viewing-camera").removeAttribute("scene-preview-camera");
 
-    if (isDebug) {
+    if (isDebug && NAF.connection.adapter.session) {
       NAF.connection.adapter.session.options.verbose = true;
     }
 
@@ -477,6 +477,7 @@ export default class SceneEntryManager {
       }
 
       for (const track of mediaStream.getVideoTracks()) {
+        track.stop(); // Stop video track to remove the "Stop screen sharing" bar right away.
         mediaStream.removeTrack(track);
       }
 

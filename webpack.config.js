@@ -224,15 +224,16 @@ module.exports = async (env, argv) => {
   // In production, the environment variables are defined in CI or loaded from ita and
   // the app config is injected into the head of the page by Reticulum.
 
-  const host = process.env.HOST_IP || env.localDev ? "hubs.local" : "localhost";
+  const host = process.env.HOST_IP || env.localDev || env.remoteDev ? "hubs.local" : "localhost";
 
-  // Remove comments from .babelrc
-  const babelConfig = JSON.parse(
-    fs
-      .readFileSync(path.resolve(__dirname, ".babelrc"))
-      .toString()
-      .replace(/\/\/.+/g, "")
-  );
+  const legacyBabelConfig = {
+    presets: ["@babel/react", ["@babel/env", { targets: { ie: 11 } }]],
+    plugins: [
+      "@babel/proposal-class-properties",
+      "@babel/proposal-object-rest-spread",
+      "@babel/plugin-transform-async-to-generator"
+    ]
+  };
 
   return {
     node: {
@@ -242,6 +243,7 @@ module.exports = async (env, argv) => {
       fs: "empty"
     },
     entry: {
+      support: path.join(__dirname, "src", "support.js"),
       index: path.join(__dirname, "src", "index.js"),
       hub: path.join(__dirname, "src", "hub.js"),
       scene: path.join(__dirname, "src", "scene.js"),
@@ -348,11 +350,13 @@ module.exports = async (env, argv) => {
           }
         },
         {
-          // We reference the sources of some libraries directly, and they use async/await,
-          // so we have to run it through babel in order to support the Samsung browser on Oculus Go.
-          test: [path.resolve(__dirname, "node_modules/naf-janus-adapter")],
+          test: [
+            path.resolve(__dirname, "src", "utils", "configs.js"),
+            path.resolve(__dirname, "src", "utils", "i18n.js"),
+            path.resolve(__dirname, "src", "support.js")
+          ],
           loader: "babel-loader",
-          options: babelConfig
+          options: legacyBabelConfig
         },
         {
           test: /\.js$/,
@@ -465,7 +469,8 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "index.html",
         template: path.join(__dirname, "src", "index.html"),
-        chunks: ["index"],
+        chunks: ["support", "index"],
+        chunksSortMode: "manual",
         minify: {
           removeComments: false
         }
@@ -473,7 +478,8 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "hub.html",
         template: path.join(__dirname, "src", "hub.html"),
-        chunks: ["hub"],
+        chunks: ["support", "hub"],
+        chunksSortMode: "manual",
         inject: "head",
         minify: {
           removeComments: false
@@ -482,7 +488,8 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "scene.html",
         template: path.join(__dirname, "src", "scene.html"),
-        chunks: ["scene"],
+        chunks: ["support", "scene"],
+        chunksSortMode: "manual",
         inject: "head",
         minify: {
           removeComments: false
@@ -491,7 +498,8 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "avatar.html",
         template: path.join(__dirname, "src", "avatar.html"),
-        chunks: ["avatar"],
+        chunks: ["support", "avatar"],
+        chunksSortMode: "manual",
         inject: "head",
         minify: {
           removeComments: false
@@ -500,7 +508,8 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "link.html",
         template: path.join(__dirname, "src", "link.html"),
-        chunks: ["link"],
+        chunks: ["support", "link"],
+        chunksSortMode: "manual",
         minify: {
           removeComments: false
         }

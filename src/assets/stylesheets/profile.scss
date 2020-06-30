@@ -19,7 +19,8 @@
   }
 
   :local(.logo) {
-    width: 150px;
+    max-width: 150px;
+    max-height: 64px;
     position: absolute;
     right: 32px;
     bottom: 32px;
