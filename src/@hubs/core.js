@@ -6,7 +6,7 @@ import configs from "../utils/configs";
 import Store from "../storage/store";
 
 function getLocalRoomUrl(hubId) {
-  return new URL(`/hub.html?hub_id=${entry.id}`, window.location).href;
+  return new URL(`/hub.html?hub_id=${hubId}`, window.location).href;
 }
 
 class SDK {
