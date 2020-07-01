@@ -1015,9 +1015,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({ roomUnavailableReason: "left" });
   });
 
-  scene.addEventListener("camera_toggled", () => remountUI({}));
-
-  scene.addEventListener("camera_removed", () => remountUI({}));
+  const updateCameraUI = function(e) {
+    if (e.detail !== "camera") return;
+    remountUI({});
+  };
+  scene.addEventListener("stateadded", updateCameraUI);
+  scene.addEventListener("stateremoved", updateCameraUI);
 
   scene.addEventListener("hub_closed", () => {
     scene.exitVR();
