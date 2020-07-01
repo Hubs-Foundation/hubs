@@ -446,9 +446,7 @@ module.exports = async (env, argv) => {
               "raven-js",
               "react-intl",
               "classnames",
-              "react-router",
               "@fortawesome/fontawesome-svg-core",
-              "@fortawesome/free-solid-svg-icons",
               "@fortawesome/react-fontawesome"
             ]),
             name: "frontend",
