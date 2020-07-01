@@ -6,6 +6,8 @@ import _PageStyles from "../react-components/layout/Page.scss";
 import { useStoreStateChange as _useStoreStateChange } from "../react-components/store/useStoreStateChange";
 import { useFavoriteRooms as _useFavoriteRooms } from "../react-components/sdk/useFavoriteRooms";
 import { usePublicRooms as _usePublicRooms } from "../react-components/sdk/usePublicRooms";
+import { useInstallPWA as _useInstallPWA } from "../react-components/sdk/useInstallPWA";
+import { useCreateAndRedirectToRoom as _useCreateAndRedirectToRoom } from "../react-components/sdk/useCreateAndRedirectToRoom";
 
 const react = {
   IfFeature: _IfFeature,
@@ -15,7 +17,9 @@ const react = {
   PageStyles: _PageStyles,
   useStoreStateChange: _useStoreStateChange,
   useFavoriteRooms: _useFavoriteRooms,
-  usePublicRooms: _usePublicRooms
+  usePublicRooms: _usePublicRooms,
+  useInstallPWA: _useInstallPWA,
+  useCreateAndRedirectToRoom: _useCreateAndRedirectToRoom
 };
 
 if (window.Hubs) {
@@ -32,3 +36,5 @@ export const PageStyles = _PageStyles;
 export const useStoreStateChange = _useStoreStateChange;
 export const useFavoriteRooms = _useFavoriteRooms;
 export const usePublicRooms = _usePublicRooms;
+export const useInstallPWA = _useInstallPWA;
+export const useCreateAndRedirectToRoom = _useCreateAndRedirectToRoom;

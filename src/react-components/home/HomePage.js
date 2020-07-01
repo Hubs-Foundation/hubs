@@ -4,16 +4,9 @@ import classNames from "classnames";
 import Hubs from "@hubs/core";
 import { Page, IfFeature, useStoreStateChange, useFavoriteRooms, usePublicRooms } from "@hubs/react";
 import { MediaTiles, styles as mediaBrowserStyles } from "@hubs/media-browser";
-import {
-  PWAButton,
-  CreateRoomButton,
-  useHomePageRedirect,
-  PageStyles as styles,
-  discordLogoSmall
-} from "@hubs/home-page";
+import { PWAButton, CreateRoomButton, PageStyles as styles, discordLogoSmall } from "@hubs/home-page";
 
 export function HomePage() {
-  useHomePageRedirect();
   const { store } = useStoreStateChange();
 
   const { results: favoriteRooms } = useFavoriteRooms();
