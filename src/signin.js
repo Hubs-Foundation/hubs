@@ -6,6 +6,7 @@ import "./utils/theme";
 import { lang, messages } from "./utils/i18n";
 import Hubs from "@hubs/core";
 import { SignInPage } from "./react-components/auth/SignInPage";
+import "./assets/stylesheets/globals.scss";
 
 registerTelemetry("/signin", "Hubs Sign In Page");
 

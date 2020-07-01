@@ -6,6 +6,7 @@ import "./utils/theme";
 import { lang, messages } from "./utils/i18n";
 import Hubs from "@hubs/core";
 import { VerifyPage } from "./react-components/auth/VerifyPage";
+import "./assets/stylesheets/globals.scss";
 
 registerTelemetry("/verify", "Hubs Verify Email Page");
 
