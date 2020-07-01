@@ -175,7 +175,8 @@ These steps are what's necessary to enable development on your device
     Lists all connected devices. The -l flag will list device specific details, one of which should be: `model:Quest`
     
     `adb -s model:Quest reverse tcp:8080 tcp:8080`
-    This command routes all port 8080 requests from the Quest device to port 8080 on your local web server
+    `adb reverse tcp:8080 tcp:8080`
+    This command routes all port 8080 requests from the Quest device to port 8080 on your local web server. The first one is if you want to do things wirelessly, while the second is a quicker (albeit tethered) solution that is less prone to the error below.
 
     If you encounter the following error:
     adb: error: more than one device/emulator
