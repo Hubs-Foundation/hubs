@@ -447,17 +447,17 @@ export default class SceneEntryManager {
 
       // check preferences
       const store = window.APP.store;
-      const preferedCamera = store.state.preferences.preferedCamera;
-      switch (preferedCamera) {
+      const preferredCamera = store.state.preferences.preferredCamera;
+      switch (preferredCamera) {
         case "default":
           constraints.video.mediaSource = "camera";
           break;
         case "user":
         case "environment":
-          constraints.video.facingMode = preferedCamera;
+          constraints.video.facingMode = preferredCamera;
           break;
         default:
-          constraints.video.deviceId = preferedCamera;
+          constraints.video.deviceId = preferredCamera;
           break;
       }
       shareVideoMediaStream(constraints);

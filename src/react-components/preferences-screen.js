@@ -490,8 +490,8 @@ CloseButton.propTypes = {
   onClick: PropTypes.func
 };
 
-const preferedCamera = {
-  key: "preferedCamera",
+const preferredCamera = {
+  key: "preferredCamera",
   prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
   options: [
     { value: "user", text: "User-Facing" },
@@ -585,7 +585,7 @@ const DEFINITIONS = new Map([
     [
       { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
-      preferedCamera,
+      preferredCamera,
       {
         key: "materialQualitySetting",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
@@ -601,14 +601,14 @@ const DEFINITIONS = new Map([
   ]
 ]);
 
-// add camera choices to preferedCamera's options
+// add camera choices to preferredCamera's options
 navigator.mediaDevices
   .enumerateDevices()
   .then(function(devices) {
     devices.forEach(function(device) {
       if (device.kind == "videoinput") {
         const shortId = device.deviceId.substr(0, 9);
-        preferedCamera.options.push({
+        preferredCamera.options.push({
           value: device.deviceId,
           text: device.label || `Camera (${shortId})`
         });
