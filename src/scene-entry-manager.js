@@ -437,7 +437,7 @@ export default class SceneEntryManager {
     };
 
     this.scene.addEventListener("action_share_camera", () => {
-      let constraints = {
+      const constraints = {
         video: {
           width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
           frameRate: 30
