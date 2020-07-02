@@ -282,6 +282,7 @@
     "preferences.category_misc": "Misc",
     "preferences.category_movement": "Movement",
     "preferences.category_touchscreen": "Touchscreen",
+    "preferences.preferredCamera": "Preferred camera",
     "preferences.muteMicOnEntry": "Mute microphone on entry",
     "preferences.globalVoiceVolume": "Incoming Voice Volume",
     "preferences.globalMediaVolume": "Media Volume",

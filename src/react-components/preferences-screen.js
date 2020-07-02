@@ -490,6 +490,17 @@ CloseButton.propTypes = {
   onClick: PropTypes.func
 };
 
+const preferredCamera = {
+  key: "preferredCamera",
+  prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+  options: [
+    { value: "user", text: "User-Facing" },
+    { value: "environment", text: "Environment" },
+    { value: "default", text: "Default" }
+  ],
+  defaultString: "default"
+};
+
 const DEFINITIONS = new Map([
   [
     CATEGORY_TOUCHSCREEN,
@@ -574,6 +585,7 @@ const DEFINITIONS = new Map([
     [
       { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
+      preferredCamera,
       {
         key: "materialQualitySetting",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
@@ -588,6 +600,24 @@ const DEFINITIONS = new Map([
     ]
   ]
 ]);
+
+// add camera choices to preferredCamera's options
+navigator.mediaDevices
+  .enumerateDevices()
+  .then(function(devices) {
+    devices.forEach(function(device) {
+      if (device.kind == "videoinput") {
+        const shortId = device.deviceId.substr(0, 9);
+        preferredCamera.options.push({
+          value: device.deviceId,
+          text: device.label || `Camera (${shortId})`
+        });
+      }
+    });
+  })
+  .catch(function(err) {
+    console.log(err.name + ": " + err.message);
+  });
 
 const controlType = new Map([
   [PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, BooleanPreference],
