@@ -204,7 +204,9 @@ async function mediaInflator(el, componentName, componentData, components) {
     });
   }
 
-  const mediaOptions = {};
+  const mediaOptions = {
+    transparent: componentData.transparent
+  };
 
   if (componentName === "video" || componentName === "image") {
     mediaOptions.projection = componentData.projection;
