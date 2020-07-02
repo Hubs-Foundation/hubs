@@ -437,14 +437,30 @@ export default class SceneEntryManager {
     };
 
     this.scene.addEventListener("action_share_camera", () => {
-      shareVideoMediaStream({
+      let constraints = {
         video: {
-          mediaSource: "camera",
           width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
           frameRate: 30
         }
         //TODO: Capture audio from camera?
-      });
+      };
+
+      // check preferences
+      const store = window.APP.store;
+      const preferedCamera = store.state.preferences.preferedCamera;
+      switch (preferedCamera) {
+        case "default":
+          constraints.video.mediaSource = "camera";
+          break;
+        case "user":
+        case "environment":
+          constraints.video.facingMode = preferedCamera;
+          break;
+        default:
+          constraints.video.deviceId = preferedCamera;
+          break;
+      }
+      shareVideoMediaStream(constraints);
     });
 
     this.scene.addEventListener("action_share_screen", () => {
