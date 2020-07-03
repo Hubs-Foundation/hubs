@@ -1010,7 +1010,8 @@ AFRAME.registerComponent("media-image", {
     projection: { type: "string", default: "flat" },
     contentType: { type: "string" },
     batch: { default: false },
-    transparent: { default: undefined }
+    transparencyMode: { type: "string", default: undefined },
+    alphaCutoff: { type: "number" }
   },
 
   remove() {
@@ -1128,12 +1129,30 @@ AFRAME.registerComponent("media-image", {
       this.el.setObject3D("mesh", this.mesh);
     }
 
-    // if transparency setting isnt explicitly defined, default to on for all non batched things, gifs, and basis textures with alpha
-    this.mesh.material.transparent =
-      texture == errorTexture ||
-      (this.data.transparent === undefined
-        ? !this.data.batch || this.data.contentType.includes("image/gif") || !!(texture.image && texture.image.hasAlpha)
-        : this.data.transparent);
+    if (texture == errorTexture) {
+      this.mesh.material.transparent = true;
+    } else {
+      // if transparency setting isnt explicitly defined, default to on for all non batched things, gifs, and basis textures with alpha
+      switch (this.data.transparencyMode) {
+        case "none":
+          this.mesh.material.transparent = false;
+          break;
+        case "alpha":
+          this.mesh.material.transparent = true;
+          this.mesh.material.alphaTest = 0;
+          break;
+        case "cutout":
+          this.mesh.material.transparent = false;
+          this.mesh.material.alphaTest = this.data.alphaCutoff;
+          break;
+        default:
+          this.mesh.material.transparent =
+            !this.data.batch ||
+            this.data.contentType.includes("image/gif") ||
+            !!(texture.image && texture.image.hasAlpha);
+          this.mesh.material.alphaTest = 0;
+      }
+    }
 
     this.mesh.material.map = texture;
     this.mesh.material.needsUpdate = true;

@@ -204,12 +204,12 @@ async function mediaInflator(el, componentName, componentData, components) {
     });
   }
 
-  const mediaOptions = {
-    transparent: componentData.transparent
-  };
+  const mediaOptions = {};
 
   if (componentName === "video" || componentName === "image") {
     mediaOptions.projection = componentData.projection;
+    mediaOptions.transparencyMode = componentData.transparencyMode;
+    mediaOptions.alphaCutoff = componentData.alphaCutoff;
   }
 
   if (componentName === "video" || componentName === "audio") {
