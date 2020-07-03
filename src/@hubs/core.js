@@ -1,5 +1,6 @@
 import { generateHubName } from "../utils/name-generation";
 import { getReticulumFetchUrl, isLocalClient, connectToReticulum } from "../utils/phoenix-utils";
+import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import jwtDecode from "jwt-decode";
 import AuthChannel from "../utils/auth-channel";
 import configs from "../utils/configs";
@@ -203,6 +204,10 @@ class SDK {
     }
 
     return response;
+  }
+
+  getThumbnailForUrl(url, width, height) {
+    return scaledThumbnailUrlFor(url, width, height);
   }
 }
 

@@ -1,0 +1,53 @@
+import React from "react";
+import PropTypes from "prop-types";
+import styles from "./RoomTile.scss";
+import Hubs from "@hubs/core";
+import { FormattedMessage } from "react-intl";
+import dayjs from "dayjs-ext";
+import relativeTime from "dayjs-ext/plugin/relativeTime";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
+import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
+
+dayjs.extend(relativeTime);
+
+export function RoomTile({ room, thumbnailWidth, thumbnailHeight, ...rest }) {
+  const thumbnailUrl = Hubs.getThumbnailForUrl(room.images.preview.url, thumbnailWidth, thumbnailHeight);
+  console.log(room);
+  return (
+    <a
+      className={styles.roomTile}
+      href={room.url}
+      rel="noreferrer noopener"
+      style={{ width: thumbnailWidth }}
+      {...rest}
+    >
+      <div className={styles.thumbnailContainer}>
+        <img src={thumbnailUrl} alt={room.name} width={thumbnailWidth} height={thumbnailHeight} />
+        {room.favorited && <FontAwesomeIcon className={styles.favoriteIcon} icon={faStar} />}
+        <div className={styles.memberCount}>
+          <FontAwesomeIcon icon={faUsers} /> <span>{room.member_count}</span>
+        </div>
+      </div>
+      <div className={styles.roomInfo}>
+        <h3>{room.name}</h3>
+        {room.last_activated_at && (
+          <small>
+            <FormattedMessage id="media-browser.hub.joined-prefix" /> {dayjs(room.last_activated_at).fromNow()}
+          </small>
+        )}
+      </div>
+    </a>
+  );
+}
+
+RoomTile.propTypes = {
+  room: PropTypes.object,
+  thumbnailWidth: PropTypes.number,
+  thumbnailHeight: PropTypes.number
+};
+
+RoomTile.defaultProps = {
+  thumbnailWidth: 355,
+  thumbnailHeight: 200
+};

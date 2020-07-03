@@ -1,0 +1,11 @@
+@import '../../assets/stylesheets/shared';
+
+:local(.media-grid) {
+  display: grid;
+  grid-gap: 20px;
+  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(355px, 1fr));
+  padding: 20px;
+  justify-items: center;
+  justify-content: space-evenly;
+}
