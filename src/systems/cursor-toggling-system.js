@@ -49,6 +49,7 @@ export class CursorTogglingSystem {
       }
     }
 
+
     const inspectingInVR = interaction.el.systems["hubs-systems"].cameraSystem.inspected; // && this.el.sceneEl.is("vr-mode");
     const shouldEnableLeftRemote =
       !inspectingInVR &&
@@ -56,7 +57,7 @@ export class CursorTogglingSystem {
         scene,
         leftHand,
         leftRemote,
-        this.leftHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting,
+        (this.leftHandTeleporter && this.leftHandTeleporter.isTeleporting) || (this.gazeTeleporter && this.gazeTeleporter.isTeleporting),
         this.wakeLeft
       );
     const isMobile = AFRAME.utils.device.isMobile();
@@ -68,7 +69,7 @@ export class CursorTogglingSystem {
           scene,
           rightHand,
           rightRemote,
-          this.rightHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting,
+          (this.rightHandTeleporter && this.leftHandTeleporter.isTeleporting) || (this.gazeTeleporter && this.gazeTeleporter.isTeleporting),
           this.wakeRight
         ));
 
