@@ -382,35 +382,21 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
   runMigration(version, parser.json);
 
   const materials = parser.json.materials;
-  const dependencies = [];
-
+  const extensionDeps = [];
   if (materials) {
     for (let i = 0; i < materials.length; i++) {
-      const material = materials[i];
+      const materialNode = materials[i];
 
-      if (!material.extensions) {
-        continue;
-      }
+      if (!materialNode.extensions) continue;
 
       if (
-        material.extensions.MOZ_alt_materials &&
-        material.extensions.MOZ_alt_materials[preferredTechnique] !== undefined
+        materialNode.extensions.MOZ_alt_materials &&
+        materialNode.extensions.MOZ_alt_materials[preferredTechnique] !== undefined
       ) {
-        const altMaterialIndex = material.extensions.MOZ_alt_materials[preferredTechnique];
+        const altMaterialIndex = materialNode.extensions.MOZ_alt_materials[preferredTechnique];
         materials[i] = materials[altMaterialIndex];
-      } else if (material.extensions.MOZ_lightmap) {
-        const lightmapDef = material.extensions.MOZ_lightmap;
-
-        const loadLightmap = async () => {
-          const [material, lightMap] = await Promise.all([
-            parser.getDependency("material", i),
-            parser.getDependency("texture", lightmapDef.index)
-          ]);
-
-          material.lightMap = lightMap;
-        };
-
-        dependencies.push(loadLightmap);
+      } else if (materialNode.extensions.MOZ_lightmap) {
+        extensionDeps.push(loadLightmap(parser, i));
       }
     }
   }
@@ -430,26 +416,6 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
 
   // Mark the special nodes/meshes in json for efficient parse, all json manipulation should happen before this point
   parser.markDefs();
-
-  const materials = parser.json.materials;
-  const extensionDeps = [];
-  if (materials) {
-    for (let i = 0; i < materials.length; i++) {
-      const materialNode = materials[i];
-
-      if (!materialNode.extensions) continue;
-
-      if (
-        materialNode.extensions.MOZ_alt_materials &&
-        materialNode.extensions.MOZ_alt_materials[preferredTechnique] !== undefined
-      ) {
-        const altMaterialIndex = materialNode.extensions.MOZ_alt_materials[preferredTechnique];
-        materials[i] = materials[altMaterialIndex];
-      } else if (materialNode.extensions.MOZ_lightmap) {
-        extensionDeps.push(loadLightmap(parser, i));
-      }
-    }
-  }
 
   // Note this is being done in place of parser.parse() which we now no longer call. This gives us more control over the order of execution.
   const [scenes, animations, cameras] = await Promise.all([
