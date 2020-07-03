@@ -37,6 +37,34 @@ function randint(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+import { Glassy } from '../shaders/Glassy.js';
+import { ShinyShader } from '../shaders/ShinyShader.js';
+import { Jelly } from '../shaders/ShaderFrog/Jelly.js'
+import { Neurons } from '../shaders/ShaderFrog/Neurons.js'
+
+
+const registerRegularShader = (shader) => ((effectsSystem) => {
+  effectsSystem.registerShader(shader);
+  return new THREE.ShaderMaterial(shader);
+});
+
+const registerShaderFrogShader = (shader) => ((effectsSystem) => {
+  return effectsSystem.registerShaderFrogShader(shader);
+});
+
+const shaders = [
+  registerRegularShader(Glassy),
+  registerRegularShader(ShinyShader),
+  registerShaderFrogShader(Jelly),
+  registerShaderFrogShader(Neurons),
+];
+
+function randint(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 class GLTFCache {
@@ -338,6 +366,7 @@ function runMigration(version, json) {
   }
 }
 
+<<<<<<< HEAD
 const loadLightmap = async (parser, materialIndex) => {
   const lightmapDef = parser.json.materials[materialIndex].extensions.MOZ_lightmap;
   const [material, lightMap] = await Promise.all([
@@ -349,6 +378,8 @@ const loadLightmap = async (parser, materialIndex) => {
   return lightMap;
 };
 
+=======
+>>>>>>> e5e79496bb3f133bf58e4251919d2b6d97c36b34
 export async function loadGLTF(src, contentType, preferredTechnique, onProgress, jsonPreprocessor, sceneEl) {
   let gltfUrl = src;
   let fileMap;
