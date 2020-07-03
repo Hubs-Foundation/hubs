@@ -366,7 +366,6 @@ function runMigration(version, json) {
   }
 }
 
-<<<<<<< HEAD
 const loadLightmap = async (parser, materialIndex) => {
   const lightmapDef = parser.json.materials[materialIndex].extensions.MOZ_lightmap;
   const [material, lightMap] = await Promise.all([
@@ -378,8 +377,6 @@ const loadLightmap = async (parser, materialIndex) => {
   return lightMap;
 };
 
-=======
->>>>>>> e5e79496bb3f133bf58e4251919d2b6d97c36b34
 export async function loadGLTF(src, contentType, preferredTechnique, onProgress, jsonPreprocessor, sceneEl) {
   let gltfUrl = src;
   let fileMap;
