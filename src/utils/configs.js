@@ -5,7 +5,6 @@ import sceneEditorLogo from "../assets/images/editor-logo.png";
 
 // Read configs from global variable if available, otherwise use the process.env injected from build.
 const configs = {};
-let isAdmin = false;
 
 [
   "RETICULUM_SERVER",
