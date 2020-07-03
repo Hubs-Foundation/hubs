@@ -9,7 +9,6 @@ import { lang, messages } from "./utils/i18n";
 import configs from "./utils/configs";
 import en from "react-intl/locale-data/en";
 import "./assets/stylesheets/globals.scss";
-import "@hubs/npm-externals";
 import Hubs from "@hubs/core";
 import "@hubs/react";
 import "@hubs/home-page";
