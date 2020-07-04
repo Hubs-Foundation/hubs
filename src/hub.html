@@ -33,7 +33,7 @@
         capture-system
         listed-media
         local-audio-analyser
-        class="grab-cursor"
+        class="no-cursor"
         renderer="
             antialias: true;
             colorManagement: true;
@@ -1014,8 +1014,8 @@
 
         <a-sphere
             id="right-cursor"
-            material="shader: flat; depthTest: false; opacity:0.9;"
-            radius="0.02"
+            material="shader: flat; depthTest: false; opacity:0.0;"
+            radius="0.0000001"
             segments-width="9"
             segments-height="9"
             body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
@@ -1033,8 +1033,8 @@
 
         <a-sphere
             id="left-cursor"
-            material="shader: flat; depthTest: false; opacity:0.9;"
-            radius="0.02"
+            material="shader: flat; depthTest: false; opacity:0.0;"
+            radius="0.0000001"
             segments-width="9"
             segments-height="9"
             body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"

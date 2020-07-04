@@ -245,7 +245,7 @@ AFRAME.registerSystem("userinput", {
     const forceEnableTouchscreen = hackyMobileSafariTest();
 
     if (!(isMobile || isMobileVR || forceEnableTouchscreen)) {
-      this.activeDevices.add(new MouseDevice());
+      this.activeDevices.add(new MouseDevice(true)); // enable pointer lock
       this.activeDevices.add(new AppAwareMouseDevice());
       this.activeDevices.add(new KeyboardDevice());
     } else if (!isMobileVR || forceEnableTouchscreen) {

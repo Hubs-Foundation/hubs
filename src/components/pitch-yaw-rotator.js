@@ -1,5 +1,7 @@
 import { paths } from "../systems/userinput/paths";
 
+const ROTATION_SPEED = 0.8;
+
 const rotatePitchAndYaw = (function() {
   const opq = new THREE.Quaternion();
   const owq = new THREE.Quaternion();
@@ -68,8 +70,8 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
       if (cameraDelta) {
         rotatePitchAndYaw(
           lobby && !isGhost ? scenePreviewNode.object3D : this.el.object3D,
-          this.pendingXRotation + cameraDelta[1],
-          cameraDelta[0]
+          this.pendingXRotation + cameraDelta[1]*ROTATION_SPEED,
+          cameraDelta[0]*ROTATION_SPEED
         );
       } else if (this.pendingXRotation) {
         rotatePitchAndYaw(lobby && !isGhost ? scenePreviewNode.object3D : this.el.object3D, this.pendingXRotation, 0);

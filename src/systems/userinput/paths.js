@@ -137,6 +137,7 @@ paths.device = {};
 paths.device.mouse = {};
 paths.device.mouse.coords = "/device/mouse/coords";
 paths.device.mouse.movementXY = "/device/mouse/movementXY";
+paths.device.mouse.pointerLocked = "/device/mouse/pointerLocked";
 paths.device.mouse.buttonLeft = "/device/mouse/buttonLeft";
 paths.device.mouse.buttonRight = "/device/mouse/buttonRight";
 paths.device.mouse.buttonMiddle = "/device/mouse/buttonMiddle";

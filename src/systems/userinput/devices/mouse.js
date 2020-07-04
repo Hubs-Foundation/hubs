@@ -20,7 +20,7 @@ const isInModal = (() => {
 })();
 
 export class MouseDevice {
-  constructor() {
+  constructor(pointerLock) {
     this.events = [];
     this.coords = [0, 0]; // normalized screenspace coordinates in [(-1, 1), (-1, 1)]
     this.movementXY = [0, 0]; // deltas
@@ -29,8 +29,11 @@ export class MouseDevice {
     this.buttonMiddle = false;
     this.wheel = 0; // delta
 
+    this.isPointerLocked = false;
+
     const queueEvent = this.events.push.bind(this.events);
     const canvas = document.querySelector("canvas");
+    this.canvas = canvas;
     canvas.addEventListener("contextmenu", e => {
       if (e.button === 2) {
         e.preventDefault();
@@ -40,6 +43,19 @@ export class MouseDevice {
     });
     ["mousedown", "wheel"].map(x => canvas.addEventListener(x, queueEvent, { passive: false }));
     ["mousemove", "mouseup"].map(x => window.addEventListener(x, queueEvent, { passive: false }));
+
+    canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
+
+    document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
+
+    if (pointerLock) {
+      canvas.onclick = function() {
+        canvas.requestPointerLock();
+      };
+    }
+
+    document.addEventListener('pointerlockchange', this.lockChangeAlert.bind(this), false);
+    document.addEventListener('mozpointerlockchange', this.lockChangeAlert.bind(this), false);
 
     document.addEventListener(
       "wheel",
@@ -64,8 +80,8 @@ export class MouseDevice {
     const right = event.button === 2;
     this.coords[0] = (event.clientX / window.innerWidth) * 2 - 1;
     this.coords[1] = -(event.clientY / window.innerHeight) * 2 + 1;
-    this.movementXY[0] += event.movementX;
-    this.movementXY[1] += event.movementY;
+    this.movementXY[0] += (event.movementX / window.innerWidth) * 2;
+    this.movementXY[1] += -(event.movementY / window.innerHeight) * 2;
     if (event.type === "mousedown" && left) {
       this.mouseDownLeftThisFrame = true;
       this.buttonLeft = true;
@@ -92,6 +108,16 @@ export class MouseDevice {
       this.buttonMiddle = false;
     }
     return true;
+  }
+
+  lockChangeAlert() {
+    const canvas = this.canvas;
+    if (document.pointerLockElement === canvas ||
+        document.mozPointerLockElement === canvas) {
+      this.isPointerLocked = true;
+    } else {
+      this.isPointerLocked = false;
+    }
   }
 
   write(frame) {
@@ -123,6 +149,7 @@ export class MouseDevice {
     frame.setValueType(paths.device.mouse.buttonRight, this.buttonRight);
     frame.setValueType(paths.device.mouse.buttonMiddle, this.buttonMiddle);
     frame.setValueType(paths.device.mouse.wheel, this.wheel);
+    frame.setValueType(paths.device.mouse.pointerLocked, this.isPointerLocked);
   }
 }
 

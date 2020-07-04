@@ -163,35 +163,40 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.right.pose },
       xform: xforms.copy
     },
+
+    // [darwin] Use movementX/Y as the delta instead of computing it from coords,
+    // because coords are not provided when the cursor is locked.
     {
       src: { value: paths.device.mouse.coords },
       dest: { value: "/var/mouseCoordsDelta" },
       xform: xforms.diff_vec2
     },
     {
-      src: { value: "/var/mouseCoordsDelta" },
-      dest: { x: "/var/mouseCoordsX", y: "/var/mouseCoordsY" },
+      // src: { value: "/var/mouseCoordsDelta" },
+      src: { value: paths.device.mouse.movementXY },
+      dest: { x: "/var/mouseMovementX", y: "/var/mouseMovementY" },
       xform: xforms.split_vec2
     },
     {
-      src: { value: "/var/mouseCoordsX" },
-      dest: { value: "/var/mouseCoordsXScaled" },
+      src: { value: "/var/mouseMovementX" },
+      dest: { value: "/var/mouseMovementXScaled" },
       xform: xforms.scale(-Math.PI)
     },
     {
-      src: { value: "/var/mouseCoordsY" },
-      dest: { value: "/var/mouseCoordsYScaled" },
+      src: { value: "/var/mouseMovementY" },
+      dest: { value: "/var/mouseMovementYScaled" },
       xform: xforms.scale((2 * Math.PI) / 3)
     },
     {
-      src: { x: "/var/mouseCoordsXScaled", y: "/var/mouseCoordsYScaled" },
+      src: { x: "/var/mouseMovementXScaled", y: "/var/mouseMovementYScaled" },
       dest: { value: "/var/actions/cameraDelta" },
       xform: xforms.compose_vec2
     },
     {
       src: {
         value: "/var/actions/cameraDelta",
-        bool: paths.device.smartMouse.shouldMoveCamera
+        bool: paths.device.mouse.pointerLocked // [darwin] only move camera when pointer is locked
+        // bool: paths.device.smartMouse.shouldMoveCamera
       },
       dest: { value: paths.actions.cameraDelta },
       xform: xforms.copyVec2IfTrue
