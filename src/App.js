@@ -1,11 +1,11 @@
-import Store from "./storage/store";
+import store from "./storage/store";
 import MediaSearchStore from "./storage/media-search-store";
 
 export class App {
   constructor() {
     this.scene = null;
     this.quality = "low";
-    this.store = new Store();
+    this.store = store;
     this.mediaSearchStore = new MediaSearchStore();
   }
 

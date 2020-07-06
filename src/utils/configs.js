@@ -2,6 +2,7 @@ import appLogo from "../assets/images/app-logo.png";
 import companyLogo from "../assets/images/company-logo.png";
 import homeHeroBackground from "../assets/images/home-hero-background-unbranded.png";
 import sceneEditorLogo from "../assets/images/editor-logo.png";
+import store from "../storage/store";
 
 // Read configs from global variable if available, otherwise use the process.env injected from build.
 const configs = {};
@@ -61,7 +62,7 @@ const isLocalDevelopment = process.env.NODE_ENV === "development";
 configs.feature = featureName => {
   const value = configs.APP_CONFIG && configs.APP_CONFIG.features && configs.APP_CONFIG.features[featureName];
   if (typeof value === "boolean" || featureName === "enable_spoke") {
-    const forceEnableSpoke = featureName === "enable_spoke" && isAdmin;
+    const forceEnableSpoke = featureName === "enable_spoke" && store.isAdmin();
     return forceEnableSpoke || value;
   } else {
     return value;

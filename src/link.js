@@ -9,11 +9,9 @@ import registerTelemetry from "./telemetry";
 import LinkRoot from "./react-components/link-root";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
-import Store from "./storage/store";
+import store from "./storage/store";
 
 registerTelemetry("/link", "Hubs Device Link");
-
-const store = new Store();
 
 const linkChannel = new LinkChannel(store);
 

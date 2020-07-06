@@ -175,7 +175,7 @@ export const SCHEMA = {
   additionalProperties: false
 };
 
-export default class Store extends EventTarget {
+class Store extends EventTarget {
   constructor() {
     super();
 
@@ -347,3 +347,5 @@ export default class Store extends EventTarget {
     return this.state && this.state.credentials.token;
   }
 }
+
+export default new Store();

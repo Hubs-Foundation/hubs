@@ -2,7 +2,7 @@ import { Socket } from "phoenix";
 import { generateHubName } from "../utils/name-generation";
 import configs from "../utils/configs";
 
-import Store from "../storage/store";
+import store from "../storage/store";
 
 export function hasReticulumServer() {
   return !!configs.RETICULUM_SERVER;
@@ -133,7 +133,7 @@ export function getLandingPageForPhoto(photoUrl) {
 }
 
 export function fetchReticulumAuthenticated(url, method = "GET", payload) {
-  const { token } = window.APP.store.state.credentials;
+  const { token } = store.state.credentials;
   const retUrl = getReticulumFetchUrl(url);
   const params = {
     headers: { "content-type": "application/json" },
@@ -165,7 +165,7 @@ export async function createAndRedirectToNewHub(name, sceneId, replace) {
   }
 
   const headers = { "content-type": "application/json" };
-  const store = new Store();
+
   if (store.state && store.state.credentials.token) {
     headers.authorization = `bearer ${store.state.credentials.token}`;
   }

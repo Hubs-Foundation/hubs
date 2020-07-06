@@ -4,7 +4,7 @@ import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import jwtDecode from "jwt-decode";
 import AuthChannel from "../utils/auth-channel";
 import configs from "../utils/configs";
-import Store from "../storage/store";
+import store from "../storage/store";
 
 function getLocalRoomUrl(hubId) {
   return new URL(`/hub.html?hub_id=${hubId}`, window.location).href;
@@ -12,7 +12,7 @@ function getLocalRoomUrl(hubId) {
 
 class SDK {
   constructor() {
-    this.store = new Store();
+    this.store = store;
     this.config = {
       feature: configs.feature,
       image: configs.image,
