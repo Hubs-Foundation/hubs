@@ -1,5 +1,10 @@
 import { useEffect, useCallback, useState, useRef } from "react";
 
+const supported =
+  "relList" in HTMLLinkElement.prototype &&
+  document.createElement("link").relList.supports("manifest") &&
+  "onbeforeinstallprompt" in window;
+
 export function useInstallPWA() {
   const installEventRef = useRef();
 
@@ -28,5 +33,5 @@ export function useInstallPWA() {
     }
   }, []);
 
-  return [installed, installPWA];
+  return { supported, installed, installPWA };
 }
