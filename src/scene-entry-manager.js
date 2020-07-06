@@ -126,6 +126,12 @@ export default class SceneEntryManager {
     if (muteOnEntry) {
       this.scene.emit("action_mute");
     }
+
+    // [darwin] Adding effects to the renderer too early seems to cause
+    // color issues. So we only do it once we enter the scene
+    // (Don't know why - even binding at the start of this enterScene method is too early.
+    //  Is some other system messing with the renderer too?)
+    this.scene.systems['hubs-systems'].effectsSystem.bind();
   };
 
   whenSceneLoaded = callback => {

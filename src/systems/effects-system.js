@@ -1,16 +1,19 @@
 // Used for screen-space effect shaders
-// and also handles updating uniforms (time, resolution) for all shaders
+// and also handles updating uniforms (time, resolution) for surface shaders
+// + ShaderFrog integration
 
 // Adapted from https://gist.github.com/donmccurdy/31560945d5723737e6c656a2974ab628
 
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { NegativeScreenShader } from '../shaders/NegativeScreenShader.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { UnrealBloomPass } from '../shaders/FixedUnrealBloomPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { GammaCorrectionShader } from '../shaders/GammaCorrectionShader.js';
 import { AdaptiveToneMappingPass } from 'three/examples/jsm/postprocessing/AdaptiveToneMappingPass.js';
 import { Vector2, NoToneMapping } from 'three';
+
+import { qsGet } from "../utils/qs_truthy";
 
 import ShaderFrogRuntime from '../ShaderRuntime.js';
 
@@ -27,37 +30,33 @@ export class EffectsSystem {
       return;
     }
 
-
     const scene = sceneEl.object3D;
     const renderer = sceneEl.renderer;
-    // renderer.toneMapping = NoToneMapping;
     const camera = sceneEl.camera;
 
-    var targetParams = {
-      minFilter: THREE.NearestFilter,
-      magFilter: THREE.LinearMipmapLinearFilter,
-      format: THREE.RGBFormat,
-      type: THREE.FloatType,
-      stencilBuffer: false
-    };
+    // var targetParams = {
+    //   minFilter: THREE.NearestFilter,
+    //   magFilter: THREE.LinearMipmapLinearFilter,
+    //   format: THREE.RGBAFormat,
+    //   type: THREE.FloatType,
+    //   stencil: false
+    // };
+    // var renderTarget = new THREE.WebGLRenderTarget(1024, 1024, targetParams);
+    // renderTarget.texture.name = 'EffectComposer.rt1';
+    // const composer = new EffectComposer(renderer, renderTarget);
 
-    var renderTarget = new THREE.WebGLRenderTarget(1024, 1024, targetParams );
-    renderTarget.texture.name = 'EffectComposer.rt1';
-    const composer = new EffectComposer(renderer); // renderTarget
+    const composer = new EffectComposer(renderer);
 
     var passes = [
       new RenderPass(scene, camera),
       // UnrealBloomPass(resolution, strength, radius, threshold)
       new UnrealBloomPass(new THREE.Vector2(128, 128), 1.3, 1.0, 0.8),
 
-      new ShaderPass(GammaCorrectionShader(1.2)),
-      // (1.2 seems to balance out the desaturating effect of UnrealBloomPass)
+      // new ShaderPass(GammaCorrectionShader(1.2)),
 
-      // AdaptiveToneMappingPass(adaptive, resolution)
-      // new AdaptiveToneMappingPass(false, 128),
       // new ShaderPass(NegativeScreenShader, 'tDiffuse'),
     ];
-    passes.slice(-1).renderToScreen = true;
+    passes.slice(-1)[0].renderToScreen = true;
 
     passes.forEach(pass => composer.addPass(pass))
 
@@ -67,7 +66,7 @@ export class EffectsSystem {
 
     this.shaders = [];
 
-    this.bind();
+    // this.bind(); // this is too early, messes up the colors for some reason
 
     window.addEventListener('resize', this.onWindowResize.bind(this), false );
 
@@ -100,20 +99,23 @@ export class EffectsSystem {
   * (This is the hacky bit.)
   */
   bind () {
-    const renderer = this.sceneEl.renderer;
-    const render = renderer.render;
-    const system = this;
-    let isDigest = false;
+    if (!this.bound) {
+      const renderer = this.sceneEl.renderer;
+      const render = renderer.render;
+      const system = this;
+      let isDigest = false;
 
-    renderer.render = function () {
-      if (isDigest) {
-        render.apply(this, arguments);
-      } else {
-        isDigest = true;
-        system.composer.render(system.dt);
-        isDigest = false;
-      }
-    };
+      renderer.render = function () {
+        if (isDigest) {
+          render.apply(this, arguments);
+        } else {
+          isDigest = true;
+          system.composer.render(system.dt);
+          isDigest = false;
+        }
+      };
+      this.bound=true;
+    }
   }
 
   registerShader(shader) {
