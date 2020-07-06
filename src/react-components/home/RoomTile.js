@@ -11,7 +11,11 @@ import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
 dayjs.extend(relativeTime);
 
-export function RoomTile({ room, thumbnailWidth, thumbnailHeight, ...rest }) {
+// TODO: Don't hardcode this or make MediaGrid pull from a single set of constants.
+const thumbnailWidth = 355;
+const thumbnailHeight = 200;
+
+export function RoomTile({ room, ...rest }) {
   const thumbnailUrl = Hubs.getThumbnailForUrl(room.images.preview.url, thumbnailWidth, thumbnailHeight);
   console.log(room);
   return (
@@ -42,12 +46,5 @@ export function RoomTile({ room, thumbnailWidth, thumbnailHeight, ...rest }) {
 }
 
 RoomTile.propTypes = {
-  room: PropTypes.object,
-  thumbnailWidth: PropTypes.number,
-  thumbnailHeight: PropTypes.number
-};
-
-RoomTile.defaultProps = {
-  thumbnailWidth: 355,
-  thumbnailHeight: 200
+  room: PropTypes.object
 };
