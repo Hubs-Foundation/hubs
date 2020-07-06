@@ -6,10 +6,10 @@ import IfFeature from "../if-feature";
 import maskEmail from "../../utils/mask-email";
 import styles from "./Header.scss";
 import Hubs from "@hubs/core";
-import { useStoreStateChange } from "../store/useStoreStateChange";
+import { useStore } from "../store/useStore";
 
 export function Header() {
-  const { store } = useStoreStateChange();
+  const { store } = useStore();
 
   return (
     <header>

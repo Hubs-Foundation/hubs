@@ -2,11 +2,11 @@ import React from "react";
 import { FormattedMessage } from "react-intl";
 import classNames from "classnames";
 import Hubs from "@hubs/core";
-import { Page, IfFeature, useStoreStateChange, useFavoriteRooms, usePublicRooms } from "@hubs/react";
+import { Page, IfFeature, useStore, useFavoriteRooms, usePublicRooms } from "@hubs/react";
 import { PWAButton, CreateRoomButton, styles, discordLogoUrl, MediaGrid, RoomTile } from "@hubs/home-page";
 
 export function HomePage() {
-  const { store } = useStoreStateChange();
+  const { store } = useStore();
 
   const { results: favoriteRooms } = useFavoriteRooms();
   const { results: publicRooms } = usePublicRooms();

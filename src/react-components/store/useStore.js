@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Hubs from "@hubs/core";
 
 // Causes a re-render whenever the store state changes.
-export function useStoreStateChange() {
+export function useStore() {
   const [state, forceUpdate] = useState({ store: Hubs.store });
 
   useEffect(
