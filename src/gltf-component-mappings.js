@@ -208,7 +208,7 @@ async function mediaInflator(el, componentName, componentData, components) {
 
   if (componentName === "video" || componentName === "image") {
     mediaOptions.projection = componentData.projection;
-    mediaOptions.transparencyMode = componentData.transparencyMode;
+    mediaOptions.alphaMode = componentData.alphaMode;
     mediaOptions.alphaCutoff = componentData.alphaCutoff;
   }
 

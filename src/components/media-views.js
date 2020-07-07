@@ -1010,7 +1010,7 @@ AFRAME.registerComponent("media-image", {
     projection: { type: "string", default: "flat" },
     contentType: { type: "string" },
     batch: { default: false },
-    transparencyMode: { type: "string", default: undefined },
+    alphaMode: { type: "string", default: undefined },
     alphaCutoff: { type: "number" }
   },
 
@@ -1133,15 +1133,15 @@ AFRAME.registerComponent("media-image", {
       this.mesh.material.transparent = true;
     } else {
       // if transparency setting isnt explicitly defined, default to on for all non batched things, gifs, and basis textures with alpha
-      switch (this.data.transparencyMode) {
-        case "none":
+      switch (this.data.alphaMode) {
+        case "opaque":
           this.mesh.material.transparent = false;
           break;
-        case "alpha":
+        case "blend":
           this.mesh.material.transparent = true;
           this.mesh.material.alphaTest = 0;
           break;
-        case "cutout":
+        case "mask":
           this.mesh.material.transparent = false;
           this.mesh.material.alphaTest = this.data.alphaCutoff;
           break;
