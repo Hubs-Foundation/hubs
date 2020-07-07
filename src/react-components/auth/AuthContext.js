@@ -14,13 +14,29 @@ async function checkIsAdmin(socket, store) {
   const retPhxChannel = socket.channel("ret", { hub_id: "index", token: store.state.credentials.token });
 
   const perms = await new Promise(resolve => {
-    retPhxChannel.join().receive("ok", () => {
-      retPhxChannel.push("refresh_perms_token").receive("ok", ({ perms_token }) => {
-        const perms = jwtDecode(perms_token);
-        retPhxChannel.leave();
-        resolve(perms);
+    retPhxChannel
+      .join()
+      .receive("ok", () => {
+        retPhxChannel
+          .push("refresh_perms_token")
+          .receive("ok", ({ perms_token }) => {
+            const perms = jwtDecode(perms_token);
+            retPhxChannel.leave();
+            resolve(perms);
+          })
+          .receive("error", error => {
+            console.error("Error sending refresh_perms_token message", error);
+          })
+          .receive("timeout", () => {
+            console.error("Sending refresh_perms_token timed out");
+          });
+      })
+      .receive("error", error => {
+        console.error("Error joining Phoenix Channel", error);
+      })
+      .receive("timeout", () => {
+        console.error("Phoenix Channel join timed out");
       });
-    });
   });
 
   const isAdmin = perms.postgrest_role === "ret_admin";
@@ -88,15 +104,7 @@ export function AuthContextProvider({ children, store }) {
 
       store.addEventListener("statechanged", onStoreChanged);
 
-      return () => {
-        store.removeEventListener("statechanged", onStoreChanged);
-      };
-    },
-    [store, setContext]
-  );
-
-  useEffect(
-    () => {
+      // Check if the user is an admin on page load
       const runAsync = async () => {
         if (store.state.credentials && store.state.credentials.token) {
           const socket = await connectToReticulum();
@@ -114,14 +122,19 @@ export function AuthContextProvider({ children, store }) {
           console.error(error);
           setContext(state => ({ ...state, initialized: true, isAdmin: false }));
         });
+
+      return () => {
+        store.removeEventListener("statechanged", onStoreChanged);
+      };
     },
-    [store]
+    [store, setContext]
   );
 
   if (context.initialized) {
     return <AuthContext.Provider value={context}>{children}</AuthContext.Provider>;
   }
 
+  // Render nothing until we know if the user is signed in and is an admin or not
   return null;
 }
 
