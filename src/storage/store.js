@@ -32,8 +32,7 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         token: { type: ["null", "string"] },
-        email: { type: ["null", "string"] },
-        isAdmin: { type: "boolean" }
+        email: { type: ["null", "string"] }
       }
     },
 

@@ -72,7 +72,7 @@ export function Header() {
             <span>
               <FormattedMessage id="sign-in.as" /> {maskEmail(auth.email)}
             </span>{" "}
-            <a onClick={auth.signOut}>
+            <a href="#" onClick={auth.signOut}>
               <FormattedMessage id="sign-in.out" />
             </a>
           </div>

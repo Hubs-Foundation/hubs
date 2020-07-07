@@ -9,6 +9,27 @@ import { connectToReticulum } from "../../utils/phoenix-utils";
 
 export const AuthContext = createContext();
 
+async function checkIsAdmin(socket, store) {
+  // TODO: Doing all of this just to determine if the user is an admin seems unnecessary. The auth callback should have the isAdmin flag.
+  const retPhxChannel = socket.channel("ret", { hub_id: "index", token: store.state.credentials.token });
+
+  const perms = await new Promise(resolve => {
+    retPhxChannel.join().receive("ok", () => {
+      retPhxChannel.push("refresh_perms_token").receive("ok", ({ perms_token }) => {
+        const perms = jwtDecode(perms_token);
+        retPhxChannel.leave();
+        resolve(perms);
+      });
+    });
+  });
+
+  const isAdmin = perms.postgrest_role === "ret_admin";
+
+  configs.setIsAdmin(isAdmin);
+
+  return isAdmin;
+}
+
 export function AuthContextProvider({ children, store }) {
   const signIn = useCallback(
     async email => {
@@ -17,22 +38,7 @@ export function AuthContextProvider({ children, store }) {
       authChannel.setSocket(socket);
       const { authComplete } = await authChannel.startAuthentication(email);
       await authComplete;
-
-      // TODO: Doing all of this just to determine if the user is an admin seems unnecessary. The auth callback should have the isAdmin flag.
-      const retPhxChannel = socket.channel("ret", { hub_id: "index", token: store.state.credentials.token });
-
-      const perms = await new Promise(resolve => {
-        retPhxChannel.join().receive("ok", () => {
-          retPhxChannel.push("refresh_perms_token").receive("ok", ({ perms_token }) => {
-            const perms = jwtDecode(perms_token);
-            retPhxChannel.leave();
-            resolve(perms);
-          });
-        });
-      });
-
-      configs.setIsAdmin(perms.postgrest_role === "ret_admin");
-      store.update({ credentials: { isAdmin: perms.postgrest_role === "ret_admin" } });
+      await checkIsAdmin(socket, store);
     },
     [store]
   );
@@ -49,16 +55,18 @@ export function AuthContextProvider({ children, store }) {
 
   const signOut = useCallback(
     async () => {
-      store.update({ credentials: { token: null, email: null, isAdmin: false } });
+      configs.setIsAdmin(false);
+      store.update({ credentials: { token: null, email: null } });
       await store.resetToRandomDefaultAvatar();
     },
     [store]
   );
 
   const [context, setContext] = useState({
-    isSignedIn: !!store.state.credentials.token,
-    isAdmin: store.state.credentials.isAdmin,
-    email: store.state.credentials.email,
+    initialized: false,
+    isSignedIn: !!store.state.credentials && store.state.credentials.token,
+    isAdmin: configs.isAdmin(),
+    email: store.state.credentials && store.state.credentials.email,
     userId: store.credentialsAccountId,
     signIn,
     verify,
@@ -71,9 +79,9 @@ export function AuthContextProvider({ children, store }) {
       const onStoreChanged = () => {
         setContext(state => ({
           ...state,
-          isSignedIn: !!store.credentials,
-          isAdmin: store.isAdmin,
-          email: store.credentials && store.credentials.email,
+          isSignedIn: !!store.state.credentials && store.state.credentials.token,
+          isAdmin: configs.isAdmin(),
+          email: store.state.credentials && store.state.credentials.email,
           userId: store.credentialsAccountId
         }));
       };
@@ -87,7 +95,34 @@ export function AuthContextProvider({ children, store }) {
     [store, setContext]
   );
 
-  return <AuthContext.Provider value={context}>{children}</AuthContext.Provider>;
+  useEffect(
+    () => {
+      const runAsync = async () => {
+        if (store.state.credentials && store.state.credentials.token) {
+          const socket = await connectToReticulum();
+          return checkIsAdmin(socket, store);
+        }
+
+        return false;
+      };
+
+      runAsync()
+        .then(isAdmin => {
+          setContext(state => ({ ...state, initialized: true, isAdmin }));
+        })
+        .catch(error => {
+          console.error(error);
+          setContext(state => ({ ...state, initialized: true, isAdmin: false }));
+        });
+    },
+    [store]
+  );
+
+  if (context.initialized) {
+    return <AuthContext.Provider value={context}>{children}</AuthContext.Provider>;
+  }
+
+  return null;
 }
 
 AuthContextProvider.propTypes = {
