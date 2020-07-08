@@ -169,6 +169,8 @@ export const AccountList = withStyles(styles)(
         }, 6000);
       }
       render() {
+        // refreshView() is only needed in onCreateAccounts()
+        // eslint-disable-next-line no-unused-vars
         const { classes, refreshView, ...other } = this.props;
         return (
           <>
