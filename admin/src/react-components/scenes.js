@@ -27,7 +27,7 @@ const SceneFilter = props => (
 
 export const SceneEdit = props => (
   <Edit {...props}>
-    <SimpleForm toolbar={ToolbarWithoutDelete}>
+    <SimpleForm toolbar={<ToolbarWithoutDelete />}>
       <TextInput source="name" />
       <SelectInput
         label="Status"

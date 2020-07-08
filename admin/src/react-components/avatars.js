@@ -35,7 +35,7 @@ const AvatarFilter = props => (
 
 export const AvatarEdit = props => (
   <Edit {...props}>
-    <SimpleForm toolbar={ToolbarWithoutDelete}>
+    <SimpleForm toolbar={<ToolbarWithoutDelete />}>
       <TextInput source="name" />
       <TextInput source="description" />
       <TextInput source="attributions" />
