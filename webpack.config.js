@@ -543,12 +543,18 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "signin.html",
         template: path.join(__dirname, "src", "signin.html"),
-        chunks: ["signin"]
+        chunks: ["signin"],
+        minify: {
+          removeComments: false
+        }
       }),
       new HTMLWebpackPlugin({
         filename: "verify.html",
         template: path.join(__dirname, "src", "verify.html"),
-        chunks: ["verify"]
+        chunks: ["verify"],
+        minify: {
+          removeComments: false
+        }
       }),
       new CopyWebpackPlugin([
         {
