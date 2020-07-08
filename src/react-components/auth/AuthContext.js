@@ -116,11 +116,11 @@ export function AuthContextProvider({ children, store }) {
 
       runAsync()
         .then(isAdmin => {
-          setContext(state => ({ ...state, initialized: true, isAdmin }));
+          setContext(state => ({ ...state, isAdmin }));
         })
         .catch(error => {
           console.error(error);
-          setContext(state => ({ ...state, initialized: true, isAdmin: false }));
+          setContext(state => ({ ...state, isAdmin: false }));
         });
 
       return () => {
@@ -130,12 +130,7 @@ export function AuthContextProvider({ children, store }) {
     [store, setContext]
   );
 
-  if (context.initialized) {
-    return <AuthContext.Provider value={context}>{children}</AuthContext.Provider>;
-  }
-
-  // Render nothing until we know if the user is signed in and is an admin or not
-  return null;
+  return <AuthContext.Provider value={context}>{children}</AuthContext.Provider>;
 }
 
 AuthContextProvider.propTypes = {
