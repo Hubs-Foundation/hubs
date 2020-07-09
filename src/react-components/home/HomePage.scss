@@ -65,10 +65,7 @@
 
     :local(.logo) {
       max-width: 250px;
-
       align-self: flex-start;
-      margin-left: -25px;
-      margin-bottom: -12px;
 
       @media (max-width: 768px) {
         align-self: auto;
@@ -79,9 +76,11 @@
         height: auto;
       }
     }
+
     :local(.logo-margin) {
       margin: 24px 0;
     }
+
     :local(.blurb) {
       white-space: pre-wrap;
       font-size: 18pt;
