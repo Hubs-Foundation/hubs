@@ -1,172 +1,87 @@
-@import '../../assets/stylesheets/root-vars';
 @import '../../assets/stylesheets/shared';
 
 :local(.home-page) {
   flex: 1;
-}
-
-:local(.video-container) {
-  position: absolute;
-  z-index: -1;
-  top: 0px;
-  left: 0px;
-  bottom: 0px;
-  right: 0px;
-  overflow: hidden;
   background-size: cover;
-  background-repeat: no-repeat;
-  background-position: 50% 50%;
-  background-image: none;
+  padding: 1.5em;
 }
 
-:local(.background-video) {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  min-width: 100%;
-  min-height: 100%;
-  z-index: -1;
-  overflow: hidden;
-  opacity: 0.3;
-}
-
-:local(.hero-content) {
+:local(.app-info) {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  position: relative;
-  flex: 1;
-  background-size: cover;
-  padding: 1.5em;
+  align-items: center;
+  padding: 0;
+  margin-top: 36px;
+}
 
-  @media (max-width: 768px), (max-height: 480px) {
-    padding: 0;
-    padding-bottom: 64px;
-    order: -1;
+:local(.app-description) {
+  white-space: pre-wrap;
+  align-self: auto;
+  font-size: 14pt;
+  text-align: center;
+  margin: 0.5em 0;
+  margin-bottom: 1em;
+
+  @media (min-width: $breakpoint-lg) {
+    font-size: 18pt;
+    align-self: flex-start;
+    text-align: start;
+  }
+}
+
+:local(.logo-container) {
+  max-width: 250px;
+  align-self: auto;
+  margin: 24px 0;
+
+  @media (min-width: $breakpoint-lg) {
+    align-self: flex-start;
   }
 
-  :local(.container) {
+  img {
+    width: 100%;
+    height: auto;
+  }
+}
+
+:local(.center-logo) {
+  align-self: auto;
+}
+
+:local(.cta-buttons) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 150px;
+}
+
+:local(.featured-rooms) {
+  width: 100%;
+}
+
+:local(.secondary-links) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: var(--home-header-link-color);
+
+  & > * {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
-    padding: 0;
-    margin-top: 36px;
-
-    @media (max-width: 768px) {
-      width: 80%;
-    }
-
-    @media (max-height: 480px) {
-      padding: 1em;
-      padding-bottom: 0;
-    }
-
-    :local(.logo) {
-      max-width: 250px;
-
-      align-self: flex-start;
-      margin-left: -25px;
-      margin-bottom: -12px;
-
-      @media (max-width: 768px) {
-        align-self: auto;
-      }
-
-      img {
-        width: 100%;
-        height: auto;
-      }
-    }
-    :local(.logo-margin) {
-      margin: 24px 0;
-    }
-    :local(.blurb) {
-      white-space: pre-wrap;
-      font-size: 18pt;
-      margin: 0.5em 0;
-      margin-bottom: 1em;
-      align-self: flex-start;
-
-      @media (max-width: 768px) {
-        align-self: auto;
-        font-size: 14pt;
-        text-align: center;
-      }
-    }
-  }
-  :local(.hero-panel) {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 2em 0;
-  }
-  :local(.cta-buttons) {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 150px;
-    :local(.primary-button) {
-      @extend %big-action-button;
-    }
-    :local(.cta-button) {
-      font-size: 14pt;
-      width: 19em;
-      margin-right: 1em;
-
-      @media (max-width: 380px) {
-        width: 18em;
-      }
-    }
-    :local(.secondary-button) {
-      @extend %action-button-secondary;
-      display: flex;
-      flex-direction: row;
-      width: 250px;
-      margin-top: 18px;
-      margin-bottom: 18px;
-      padding-right: 20px;
-
-      i {
-        margin-right: 16px;
-      }
-    }
-  }
-  :local(.rightPanel) {
-    flex: 0;
-  }
-  :local(.hero-video) {
-    flex: 1;
-    display: flex;
-    :local(video) {
-      width: 100%;
-    }
-  }
-  :local(.have-code) {
-    justify-content: flex-end;
-    font-size: 14pt;
-    margin-top: -2em;
-  }
-  :local(.secondary-link) {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    color: var(--home-header-link-color);
     margin-top: 8px;
+  }
 
-    img {
-      width: 24px;
-      height: 24px;
-    }
+  img {
+    width: 24px;
+    height: 24px;
+  }
 
-    a { 
-      color: var(--home-header-link-color);
-      margin-right: 4px;
-      margin-left: 2px;
-    }
+  a { 
+    color: var(--home-header-link-color);
+    margin-right: 4px;
+    margin-left: 2px;
   }
 }
