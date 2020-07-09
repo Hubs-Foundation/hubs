@@ -10,19 +10,18 @@ import { useInstallPWA } from "./useInstallPWA";
 const isMobile = checkIsMobile();
 
 export function PWAButton() {
-  const { supported, installed, installPWA } = useInstallPWA();
+  const [pwaAvailable, installPWA] = useInstallPWA();
 
   return (
     <>
-      {supported &&
-        !installed && (
-          <button className={classNames(styles.secondaryButton)} onClick={installPWA}>
-            <i>
-              <FontAwesomeIcon icon={faPlus} />
-            </i>
-            <FormattedMessage id={`home.${isMobile ? "mobile" : "desktop"}.add_pwa`} />
-          </button>
-        )}
+      {pwaAvailable && (
+        <button className={classNames(styles.secondaryButton)} onClick={installPWA}>
+          <i>
+            <FontAwesomeIcon icon={faPlus} />
+          </i>
+          <FormattedMessage id={`home.${isMobile ? "mobile" : "desktop"}.add_pwa`} />
+        </button>
+      )}
     </>
   );
 }
