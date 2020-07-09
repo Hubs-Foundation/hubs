@@ -47,7 +47,7 @@ export function HomePage() {
       <div className={styles.heroContent} style={{ backgroundImage: configs.image("home_background", true) }}>
         <div className={styles.heroPanel}>
           <div className={styles.container}>
-            <div className={classNames([styles.logo, styles.logoMargin])}>
+            <div className={classNames(styles.logo, { [styles.logoMargin]: featuredRooms.length > 0 })}>
               <img src={configs.image("logo")} />
             </div>
             {featuredRooms.length === 0 && (
