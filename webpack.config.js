@@ -251,17 +251,17 @@ module.exports = async (env, argv) => {
       fs: "empty"
     },
     entry: {
-      support: path.join(__dirname, "src", "support.js"),
-      index: path.join(__dirname, "src", "index.js"),
-      hub: path.join(__dirname, "src", "hub.js"),
-      scene: path.join(__dirname, "src", "scene.js"),
-      avatar: path.join(__dirname, "src", "avatar.js"),
-      link: path.join(__dirname, "src", "link.js"),
-      discord: path.join(__dirname, "src", "discord.js"),
-      cloud: path.join(__dirname, "src", "cloud.js"),
-      signin: path.join(__dirname, "src", "signin.js"),
-      verify: path.join(__dirname, "src", "verify.js"),
-      "whats-new": path.join(__dirname, "src", "whats-new.js")
+      support: ["@babel/polyfill", path.join(__dirname, "src", "support.js")],
+      index: ["@babel/polyfill", path.join(__dirname, "src", "index.js")],
+      hub: ["@babel/polyfill", path.join(__dirname, "src", "hub.js")],
+      scene: ["@babel/polyfill", path.join(__dirname, "src", "scene.js")],
+      avatar: ["@babel/polyfill", path.join(__dirname, "src", "avatar.js")],
+      link: ["@babel/polyfill", path.join(__dirname, "src", "link.js")],
+      discord: ["@babel/polyfill", path.join(__dirname, "src", "discord.js")],
+      cloud: ["@babel/polyfill", path.join(__dirname, "src", "cloud.js")],
+      signin: ["@babel/polyfill", path.join(__dirname, "src", "signin.js")],
+      verify: ["@babel/polyfill", path.join(__dirname, "src", "verify.js")],
+      "whats-new": ["@babel/polyfill", path.join(__dirname, "src", "whats-new.js")]
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",

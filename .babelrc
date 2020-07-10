@@ -2,6 +2,7 @@
   "presets": [
     "@babel/react",
     ["@babel/env", {
+      "exclude": ["transform-regenerator"],
       "targets": {
         "browsers": [
           "last 2 major versions",
@@ -19,14 +20,19 @@
           // No WebGL or WebRTC support
           "not op_mini all"
         ]
-      }
+      },
+      // false = do not polyfill stuff unneccessarily
+      "useBuiltIns": false
     }]
   ],
   "plugins": [
     [ "react-intl", { "messagesDir": "./public/messages", "enforceDescriptions": false } ],
     "transform-react-jsx-img-import",
-    ["@babel/proposal-class-properties", { "loose": true } ],
+    "@babel/proposal-class-properties",
+    "@babel/proposal-object-rest-spread",
     "@babel/plugin-proposal-export-namespace-from",
-    [ "@babel/plugin-transform-runtime", { "regenerator": true } ]
+    // Samsung Internet on the Oculus Go version is stuck at version 5.2, which is a 
+    // Chromium 51, as of this writing. It needs babel to transpile async/await.
+    "@babel/plugin-transform-async-to-generator"
   ]
 }
