@@ -8,7 +8,9 @@ console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
 import initialBatchImage from "./assets/images/warning_icon.png";
-import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
+//import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
+import loadingEnvironment from "./assets/models/PortalRoom.glb";
+
 
 import "aframe";
 import "./utils/logging";
@@ -370,12 +372,12 @@ async function updateEnvironmentForHub(hub, entryManager) {
   const environmentScene = document.querySelector("#environment-scene");
   const sceneEl = document.querySelector("a-scene");
 
-  if (hub.scene) {
-    isLegacyBundle = false;
-    sceneUrl = hub.scene.model_url;
-  } else if (hub.scene === null) {
+  if (qsTruthy("default_scene") || hub.scene === null) {
     // delisted/removed scene
     sceneUrl = loadingEnvironment;
+  } else if (hub.scene) {
+    isLegacyBundle = false;
+    sceneUrl = hub.scene.model_url;
   } else {
     const defaultSpaceTopic = hub.topics[0];
     const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");

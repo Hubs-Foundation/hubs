@@ -22,6 +22,10 @@ function registerRootSceneComponent(componentName) {
 registerRootSceneComponent("fog");
 registerRootSceneComponent("background");
 
+AFRAME.GLTFModelPlus.registerComponent("portal", "portal", (el, componentName, componentData) => {
+  el.setAttribute("portal", {"targetRoom": componentData});
+});
+
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
   el.setAttribute("duck", "");
   el.setAttribute("quack", { quackPercentage: 0.1 });

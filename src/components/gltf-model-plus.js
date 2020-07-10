@@ -133,7 +133,7 @@ function cloneGltf(gltf) {
 }
 
 function getHubsComponents(node) {
-  const hubsComponents =
+  var hubsComponents =
     node.userData.gltfExtensions &&
     (node.userData.gltfExtensions.MOZ_hubs_components || node.userData.gltfExtensions.HUBS_components);
 
@@ -141,7 +141,10 @@ function getHubsComponents(node) {
   // updated to match Spoke output.
   const legacyComponents = node.userData.components;
 
-  return hubsComponents || legacyComponents;
+  hubsComponents = hubsComponents || legacyComponents;
+
+  const dr33mComponents = Object.assign({}, hubsComponents, node.userData)
+  return dr33mComponents;
 }
 
 /// Walks the tree of three.js objects starting at the given node, using the GLTF data

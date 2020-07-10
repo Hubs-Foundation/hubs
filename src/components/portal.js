@@ -8,7 +8,8 @@ AFRAME.registerComponent("portal", {
   schema: {
     colliders: { type: "selectorAll", default: "#avatar-pov-node" },
     size: { type: "vec3", default: { x: 1, y: 1, z: 1 } },
-    target: { type: "selector" },
+    targetRoom: { type: "string", default: null },
+    targetPos: { type: "vec3", default: null },
   },
   init() {
     this.boundingBox = new THREE.Box3();
@@ -34,6 +35,13 @@ AFRAME.registerComponent("portal", {
 
       if (isColliding && !collidingLastFrame) {
         console.log("enter!")
+        if (this.data.target) {
+          console.log(this.data.targetRoom);
+          // map targetRoom to a URL using global mapping
+          // location.href = url
+        } else if (this.data.targetPos) {
+          // TODO: move to targetPos
+        }
       } else if (!isColliding && collidingLastFrame) {
         console.log("exit!")
       }
