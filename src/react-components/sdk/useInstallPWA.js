@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useState, useRef } from "react";
 
-const supported =
+const browserSupport =
   "relList" in HTMLLinkElement.prototype &&
   document.createElement("link").relList.supports("manifest") &&
   "onbeforeinstallprompt" in window;
@@ -8,12 +8,14 @@ const supported =
 export function useInstallPWA() {
   const installEventRef = useRef();
 
+  const [available, setAvailable] = useState(false);
   const [installed, setInstalled] = useState(false);
 
   useEffect(() => {
     const onBeforeInstallPrompt = event => {
       event.preventDefault();
       installEventRef.current = event;
+      setAvailable(true);
     };
 
     window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
@@ -33,5 +35,5 @@ export function useInstallPWA() {
     }
   }, []);
 
-  return { supported, installed, installPWA };
+  return [browserSupport && available && !installed, installPWA];
 }

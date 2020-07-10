@@ -78,11 +78,19 @@ VerificationError.propTypes = {
 export function VerifyPage() {
   const { step, error } = useVerify();
 
+  let content;
+
+  if (step === VerificationStep.error) {
+    content = <VerificationError error={error} />;
+  } else if (step === VerificationStep.complete) {
+    content = <EmailVerified />;
+  } else {
+    content = <EmailVerifying />;
+  }
+
   return (
     <Page style={{ backgroundImage: Hubs.config.image("home_background", true), backgroundSize: "cover" }}>
-      {step === VerificationStep.verifying && <EmailVerifying />}
-      {step === VerificationStep.complete && <EmailVerified />}
-      {step === VerificationStep.error && <VerificationError error={error} />}
+      {content}
     </Page>
   );
 }

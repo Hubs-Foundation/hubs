@@ -157,10 +157,11 @@ export function SignInPage() {
 
   return (
     <Page style={{ backgroundImage: Hubs.config.image("home_background", true), backgroundSize: "cover" }}>
-      {step === SignInStep.submit && (
+      {step === SignInStep.submit ? (
         <SubmitEmail onSubmitEmail={submitEmail} initialEmail={email} signInReason={qs.get("sign_in_reason")} />
+      ) : (
+        <WaitForVerification onCancel={cancel} email={email} />
       )}
-      {step === SignInStep.waitForVerification && <WaitForVerification onCancel={cancel} email={email} />}
     </Page>
   );
 }

@@ -1,6 +1,7 @@
 import React from "react";
 import { SceneLink, OwnedFileImage, OwnedFileSizeField } from "./fields";
 import { FeatureSceneListingButton } from "./feature-listing-buttons";
+import { ToolbarWithoutDelete } from "./toolbar-without-delete";
 
 import {
   List,
@@ -28,7 +29,7 @@ const SceneListingFilter = props => (
 
 export const SceneListingEdit = props => (
   <Edit {...props}>
-    <SimpleForm>
+    <SimpleForm toolbar={<ToolbarWithoutDelete />}>
       <TextInput source="name" />
       <ArrayInput source="tags.tags" defaultValue={[]}>
         <SimpleFormIterator>

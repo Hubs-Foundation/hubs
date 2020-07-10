@@ -33,7 +33,6 @@
 :local(.logo-container) {
   max-width: 250px;
   align-self: auto;
-  margin: 24px 0;
 
   @media (min-width: $breakpoint-lg) {
     align-self: flex-start;
@@ -47,6 +46,7 @@
 
 :local(.center-logo) {
   align-self: auto;
+  margin: 24px 0;
 }
 
 :local(.cta-buttons) {

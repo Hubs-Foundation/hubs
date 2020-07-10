@@ -17,7 +17,7 @@ const thumbnailHeight = 200;
 
 export function RoomTile({ room, ...rest }) {
   const thumbnailUrl = Hubs.getThumbnailForUrl(room.images.preview.url, thumbnailWidth, thumbnailHeight);
-  console.log(room);
+
   return (
     <a
       className={styles.roomTile}
