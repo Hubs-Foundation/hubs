@@ -143,6 +143,7 @@ function getHubsComponents(node) {
 
   hubsComponents = hubsComponents || legacyComponents;
 
+  // console.log(node)
   const dr33mComponents = Object.assign({}, hubsComponents, node.userData)
   return dr33mComponents;
 }
@@ -442,11 +443,11 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
 
   const effectsSystem = sceneEl && sceneEl.systems["hubs-systems"].effectsSystem;
 
+
   const qs = new URLSearchParams(location.search);
   gltf.scene.traverse(object => {
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
-
 
     // TODO: add custom shaders here
     // But how to set shader params without modifying the gltf exporter?

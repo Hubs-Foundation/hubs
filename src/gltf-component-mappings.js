@@ -5,17 +5,20 @@ const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 
 function registerRootSceneComponent(componentName) {
   AFRAME.GLTFModelPlus.registerComponent(componentName, componentName, (el, componentName, componentData) => {
-    const sceneEl = AFRAME.scenes[0];
+    if (!el.classList.contains("DefaultAvatar")) {
+      // (Avatar "background" property sometimes seems to override the one set on the scene)
+      const sceneEl = AFRAME.scenes[0];
 
-    sceneEl.setAttribute(componentName, componentData);
+      sceneEl.setAttribute(componentName, componentData);
 
-    sceneEl.addEventListener(
-      "reset_scene",
-      () => {
-        sceneEl.removeAttribute(componentName);
-      },
-      { once: true }
-    );
+      sceneEl.addEventListener(
+        "reset_scene",
+        () => {
+          sceneEl.removeAttribute(componentName);
+        },
+        { once: true }
+      );
+    }
   });
 }
 
@@ -23,7 +26,7 @@ registerRootSceneComponent("fog");
 registerRootSceneComponent("background");
 
 AFRAME.GLTFModelPlus.registerComponent("portal", "portal", (el, componentName, componentData) => {
-  el.setAttribute("portal", {"targetRoom": componentData});
+  el.setAttribute("portal", {"targetRoom": componentData, "padding": -1.5});
 });
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
