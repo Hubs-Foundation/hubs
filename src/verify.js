@@ -7,6 +7,7 @@ import "./utils/theme";
 import { lang, messages } from "./utils/i18n";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
 import { VerifyPage } from "./react-components/auth/VerifyPage";
+import "./assets/stylesheets/globals.scss";
 
 registerTelemetry("/verify", "Hubs Verify Email Page");
 
