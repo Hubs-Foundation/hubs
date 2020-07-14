@@ -1,9 +1,8 @@
 import React from "react";
-import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import styles from "./Button.scss";
+import { Button } from "../input/Button";
 import checkIsMobile from "../../utils/is-mobile";
 import { useInstallPWA } from "./useInstallPWA";
 
@@ -15,12 +14,12 @@ export function PWAButton() {
   return (
     <>
       {pwaAvailable && (
-        <button className={classNames(styles.secondaryButton)} onClick={installPWA}>
+        <Button secondary onClick={installPWA}>
           <i>
             <FontAwesomeIcon icon={faPlus} />
           </i>
           <FormattedMessage id={`home.${isMobile ? "mobile" : "desktop"}.add_pwa`} />
-        </button>
+        </Button>
       )}
     </>
   );
