@@ -30,7 +30,11 @@ export default class SignInDialog extends Component {
   onSubmit = e => {
     e.preventDefault();
     e.stopPropagation();
-    this.props.onSignIn(this.state.email);
+    if (email.split('@')[1] !== 'hva.nl') {
+          window.alert('Please login with your hva mail');
+          return;
+    }
+          this.props.onSignIn(this.state.email);
   };
 
   render() {
