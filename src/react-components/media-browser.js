@@ -75,6 +75,7 @@ const DEFAULT_FACETS = {
   scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }]
 };
 
+// TODO: Migrate to use MediaGrid and media specific components like RoomTile
 class MediaBrowser extends Component {
   static propTypes = {
     mediaSearchStore: PropTypes.object,
