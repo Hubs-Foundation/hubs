@@ -5,7 +5,6 @@ import { AuthContext } from "../auth/AuthContext";
 
 export function useFavoriteRooms() {
   const auth = useContext(AuthContext); // Re-render when you log in/out.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const getMoreRooms = useCallback(
     cursor => {
       if (auth.userId) {

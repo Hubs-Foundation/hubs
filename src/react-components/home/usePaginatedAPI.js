@@ -17,22 +17,26 @@ export function usePaginatedAPI(apiCallback) {
 
   const loadMore = useCallback(
     () => {
-      if (state.nextCursor && !state.isLoading) {
-        setState(curState => ({
-          ...curState,
-          cursor: state.nextCursor,
-          nextCursor: undefined,
-          isLoading: true,
-          hasMore: false,
-          error: undefined
-        }));
-
-        setInternalState({ cursor: state.nextCursor });
+      if (!state.nextCursor || state.isLoading) {
+        console.warn("Can't load more results while results are already loading.");
+        return;
       }
+
+      setState(curState => ({
+        ...curState,
+        cursor: state.nextCursor,
+        nextCursor: undefined,
+        isLoading: true,
+        hasMore: false,
+        error: undefined
+      }));
+
+      setInternalState({ cursor: state.nextCursor });
     },
     [state.nextCursor, state.isLoading]
   );
 
+  // Reset pagination state when paging callback changes
   useEffect(
     () => {
       if (curApiCallback.current === apiCallback) {
