@@ -5,7 +5,6 @@ import classNames from "classnames";
 import configs from "../../utils/configs";
 import IfFeature from "../if-feature";
 import { Page } from "../layout/Page";
-import MediaTiles from "../media-tiles";
 import { CreateRoomButton } from "../input/CreateRoomButton";
 import { PWAButton } from "../input/PWAButton";
 import { useFeaturedRooms } from "./useFeaturedRooms";
@@ -13,7 +12,8 @@ import styles from "./HomePage.scss";
 import discordLogoUrl from "../../assets/images/discord-logo-small.png";
 import { AuthContext } from "../auth/AuthContext";
 import { createAndRedirectToNewHub } from "../../utils/phoenix-utils";
-import mediaBrowserStyles from "../../assets/stylesheets/media-browser.scss";
+import { MediaGrid } from "./MediaGrid";
+import { RoomTile } from "./RoomTile";
 
 addLocaleData([...en]);
 
@@ -72,11 +72,7 @@ export function HomePage() {
       </section>
       {featuredRooms.length > 0 && (
         <section className={styles.featuredRooms}>
-          <section className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
-            <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-              <MediaTiles entries={featuredRooms} urlSource="favorites" />
-            </div>
-          </section>
+          <MediaGrid>{featuredRooms.map(room => <RoomTile key={room.id} room={room} />)}</MediaGrid>
         </section>
       )}
       <section>
