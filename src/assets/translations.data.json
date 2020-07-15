@@ -109,7 +109,7 @@
     "entry.notify_me": "Notify me when others arrive",
     "entry.mute-on-entry": "Mute my microphone",
     "profile.save": "Accept",
-    "profile.display_name.validation_warning": "Alphanumerics and hyphens. At least 3 characters, no more than 32",
+    "profile.display_name.validation_warning": "Alphanumerics, hyphens, underscores and tildas. At least 3 characters, no more than 32",
     "profile.header": "Name & Avatar",
     "profile.terms_of_use": "Terms of Use",
     "profile.privacy_notice": "Privacy Notice",
@@ -255,7 +255,7 @@
     "invite.enter_via_modal": "Others may enter via ",
     "invite.tweet": "tweet",
     "invite.and_enter_code": " code:",
-    "invite.duration_of_code" : "new code every 72 hours",
+    "invite.duration_of_code": "new code every 72 hours",
     "invite.or_visit": "Share room link:",
     "invite.or_visit_modal": "or by visiting permalink",
     "invite.embed": "or embed on a page",
@@ -448,7 +448,7 @@
     "support.supported": "supported",
     "support.unsupported": "unsupported"
   },
-   "cn-zh": {
+  "cn-zh": {
     "app-name": "App",
     "editor-name": "Scene Editor",
     "contact-email": "app@company.com",
@@ -703,7 +703,7 @@
     "invite.enter_via_modal": "其他人可以进入通过 ",
     "invite.tweet": "tweet",
     "invite.and_enter_code": " 号码:",
-    "invite.duration_of_code" : "每72小时产生一次新号码",
+    "invite.duration_of_code": "每72小时产生一次新号码",
     "invite.or_visit": "分享房间链接:",
     "invite.or_visit_modal": "或是通过永久链接访问",
     "invite.embed": "或是嵌入到网页里",
