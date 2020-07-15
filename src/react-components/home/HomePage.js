@@ -7,7 +7,8 @@ import IfFeature from "../if-feature";
 import { Page } from "../layout/Page";
 import { CreateRoomButton } from "./CreateRoomButton";
 import { PWAButton } from "./PWAButton";
-import { useFeaturedRooms } from "./useFeaturedRooms";
+import { useFavoriteRooms } from "./useFavoriteRooms";
+import { usePublicRooms } from "./usePublicRooms";
 import styles from "./HomePage.scss";
 import discordLogoUrl from "../../assets/images/discord-logo-small.png";
 import { AuthContext } from "../auth/AuthContext";
@@ -18,8 +19,14 @@ import { RoomTile } from "./RoomTile";
 addLocaleData([...en]);
 
 export function HomePage() {
-  const featuredRooms = useFeaturedRooms();
   const auth = useContext(AuthContext);
+
+  const { results: favoriteRooms } = useFavoriteRooms();
+  const { results: publicRooms } = usePublicRooms();
+
+  const featuredRooms = Array.from(new Set([...favoriteRooms, ...publicRooms])).sort(
+    (a, b) => b.member_count - a.member_count
+  );
 
   useEffect(() => {
     const qs = new URLSearchParams(location.search);
