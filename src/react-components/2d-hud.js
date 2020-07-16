@@ -17,6 +17,8 @@ import PenIcon from "../assets/images/pen.svgi";
 import PenIconActive from "../assets/images/pen_active.svgi";
 import CameraIcon from "../assets/images/camera.svgi";
 import CameraIconActive from "../assets/images/camera_active.svgi";
+import SpatialIcon from "../assets/images/spatial.svgi";
+import SpatialIconActive from "../assets/images/spatial_active.svgi";
 import Mic0 from "../assets/images/mic-0.svgi";
 import Mic1 from "../assets/images/mic-1.svgi";
 import Mic2 from "../assets/images/mic-2.svgi";
@@ -60,6 +62,7 @@ class TopHUD extends Component {
     onToggleMute: PropTypes.func,
     onSpawnPen: PropTypes.func,
     onSpawnCamera: PropTypes.func,
+    onSpatialAudio: PropTypes.func,
     onShareVideo: PropTypes.func,
     onEndShareVideo: PropTypes.func,
     onShareVideoNotCapable: PropTypes.func,
@@ -74,6 +77,7 @@ class TopHUD extends Component {
     lastActiveMediaSource: null,
     micLevel: 0,
     cameraDisabled: false,
+    onAudioMode: false,
     penDisabled: false,
     mediaDisabled: false
   };
@@ -98,6 +102,13 @@ class TopHUD extends Component {
     if (this.micUpdateInterval) {
       clearInterval(this.micUpdateInterval);
     }
+    // Start cm3d
+    this.micUpdateInterval = setInterval(() => {
+      this.setState({
+        onAudioMode: window.APP.store.state.preferences.audioOutputMode === "audio"
+      });
+    }, 50);
+    // End cm3d
     this.micUpdateInterval = setInterval(() => {
       const volume = this.props.scene.systems["local-audio-analyser"].volume;
       max = Math.max(volume, max);
@@ -319,6 +330,20 @@ class TopHUD extends Component {
                 src={this.props.hasActiveCamera ? CameraIconActive : CameraIcon}
               />
             </div>
+            {/*Start cm3d*/}
+            <div
+                className={cx(styles.iconButton, {
+                  [styles.disabled]: this.state.cameraDisabled
+                })}
+                title={`Spatial Audio${this.state.onAudioMode ? " Disabled" : ""}`}
+                onClick={this.props.onSpatialAudio}
+            >
+              <InlineSVG
+                  className={cx(styles.iconButtonIcon)}
+                  src={this.state.onAudioMode ? SpatialIcon : SpatialIconActive}
+              />
+            </div>
+            {/*End cm3d*/}
           </div>
         )}
       </div>

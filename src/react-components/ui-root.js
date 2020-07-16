@@ -119,6 +119,7 @@ class UIRoot extends Component {
   willCompileAndUploadMaterials = false;
 
   static propTypes = {
+    spatialAudio: PropTypes.bool,
     enterScene: PropTypes.func,
     exitScene: PropTypes.func,
     onSendMessage: PropTypes.func,
@@ -2150,6 +2151,7 @@ class UIRoot extends Component {
                   onToggleMute={this.toggleMute}
                   onSpawnPen={this.spawnPen}
                   onSpawnCamera={() => this.props.scene.emit("action_toggle_camera")}
+                  onSpatialAudio={() => this.props.scene.emit("action_toggle_spatialAudio")}
                   onShareVideo={this.shareVideo}
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
