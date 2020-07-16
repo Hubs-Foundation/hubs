@@ -98,6 +98,14 @@ export function generateRandomName() {
   return `${chooseRandom(names)}-${Math.floor(10000 + Math.random() * 10000)}`;
 }
 
+// Start cm3d
+export function generateEmailName(email) {
+  let playerName = email.split("@")[0];
+  playerName = playerName.replace(".", " ");
+  return playerName;
+}
+// End cm3d
+
 export async function fetchRandomDefaultAvatarId() {
   const defaultAvatarEndpoint = "/api/v1/media/search?filter=default&source=avatar_listings";
   const defaultAvatars = (await fetchReticulumAuthenticated(defaultAvatarEndpoint)).entries;
