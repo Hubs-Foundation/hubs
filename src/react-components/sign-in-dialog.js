@@ -31,9 +31,9 @@ export default class SignInDialog extends Component {
     e.preventDefault();
     e.stopPropagation();
     // Check if the email provided is one of the HvA
-    if (this.state.email.split('@')[1] !== 'hva.nl') {
-          window.alert('Please login with your hva mail');
-          return;
+    if (this.state.email.split("@")[1] !== "hva.nl") {
+      window.alert("Please login with your hva mail");
+      return;
     }
     this.props.onSignIn(this.state.email);
   };

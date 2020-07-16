@@ -8,7 +8,7 @@ const STORE_STATE_CACHE_KEY = Symbol();
 const OAUTH_FLOW_CREDENTIALS_KEY = "ret-oauth-flow-account-credentials";
 const validator = new Validator();
 import { EventTarget } from "event-target-shim";
-import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identity.js";
+import { fetchRandomDefaultAvatarId, generateRandomName, generateEmailName } from "../utils/identity.js";
 
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
@@ -232,11 +232,17 @@ export default class Store extends EventTarget {
         profile: { avatarId: await fetchRandomDefaultAvatarId(), ...(this.state.profile || {}) }
       });
     }
-
-    // Regenerate name to encourage users to change it.
+    //Start cm3d
     if (!this.state.activity.hasChangedName) {
-      this.update({ profile: { displayName: generateRandomName() } });
+      if (this.state.credentials.email === null) {
+        // Regenerate name to encourage users to change it.
+        this.update({ profile: { displayName: generateRandomName() } });
+      } else {
+        // Get the users email and parse it to a readable user name
+        this.update({ profile: { displayName: generateEmailName(this.state.credentials.email) } });
+      }
     }
+    //End cm3d
   };
 
   resetToRandomDefaultAvatar = async () => {
