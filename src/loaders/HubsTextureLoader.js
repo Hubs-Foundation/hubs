@@ -3,10 +3,9 @@ function loadAsync(loader, url, onProgress) {
 }
 
 export default class HubsTextureLoader {
-  static crossOrigin = "anonymous";
-
   constructor(manager = THREE.DefaultLoadingManager) {
     this.manager = manager;
+    this.crossOrigin = "anonymous";
   }
 
   load(url, onLoad, onProgress, onError) {
