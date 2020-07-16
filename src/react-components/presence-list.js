@@ -95,7 +95,7 @@ export default class PresenceList extends Component {
     for (const [clientId, presence] of Object.entries(presences)) {
       if (clientId !== this.props.sessionId) {
         const meta = presence.metas[0];
-        if (meta.presence === "room" && meta.roles && !meta.roles.owner) {
+        if (meta.presence === "room" && meta.permissions && !meta.permissions.mute_users) {
           this.mute(clientId);
         }
       }
@@ -192,9 +192,8 @@ export default class PresenceList extends Component {
   }
 
   renderExpandedList() {
-    const meta = this.props.presences[this.props.sessionId].metas[0];
-    const owner = meta.roles && meta.roles.owner;
-    const muteAll = owner && (
+    const canMuteUsers = this.props.hubChannel.can("mute_users");
+    const muteAll = canMuteUsers && (
       <div className={styles.muteAll}>
         <button title="Mute All" onClick={this.muteAll} className={styles.muteButton}>
           <FormattedMessage id="presence.mute_all" />
