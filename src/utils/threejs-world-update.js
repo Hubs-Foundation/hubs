@@ -8,7 +8,12 @@ identity.identity();
 With this patch you must make sure to follow these rules or very strange things will happen.
 - If you modify an object's position, rotation, quaternion, or scale you MUST set matrixNeedsUpdate.
 - If you modify an object's matrix you MUST decompose() back onto its position, quaternion and scale and you MUST set matrixWorldNeedsUpdate (or matrixNeedsUpdate, but the former is more correct). (applyMatrix() and updateMatrix() handle this for you)
-- If you modify an object's matrixWorld you MUST make sure it has previously been modified so that it is not using its parent matrix as its own, you MUST update its local matrix and you MUST update its position/quaternion/scale. (setMatrixWorld() handles this for you)
+- If you modify an object's matrixWorld
+-- you MUST make sure it has previously been modified so that it is not using its parent matrix as its own,
+-- you MUST update its local matrix
+-- you MUST update its position/quaternion/scale.
+-- you MUST set childrenNeedMatrixWorldUpdate
+-- (setMatrixWorld() handles all of this for you)
 - Before you read an object's matrix you MUST call updateMatrix() or updateMatrices().
 - Before you read an object's matrixWorld you MUST call updateMatrices(). (getWorldPosition, getWorldOrientation and getWorldScale handle this for you)
 - Do not set matrixIsModified yourself. You could accidentally overwrite parent matrices.
