@@ -1,13 +1,10 @@
 // modified from trigger-volume.js
 
+import getRoomMetadata from "../room-metadata";
+
 // const sizeVec = new THREE.Vector3();
 const boundingSphereWorldPositionVec = new THREE.Vector3();
 const colliderWorldPositionVec = new THREE.Vector3();
-
-const roomMapping = window.ROOM_MAPPING || {
-  "room2": "/J99QnJf/room-2",
-  "room3": "/fcWA7EE/room-3",
-}
 
 AFRAME.registerComponent("portal", {
   schema: {
@@ -33,7 +30,6 @@ AFRAME.registerComponent("portal", {
     mesh.geometry.computeBoundingSphere();
     boundingSphereWorldPositionVec.add(mesh.geometry.boundingSphere.center);
     this.boundingSphere.set(boundingSphereWorldPositionVec, mesh.geometry.boundingSphere.radius + this.data.padding)
-
   },
   tick() {
     const colliders = this.data.colliders;
@@ -49,13 +45,12 @@ AFRAME.registerComponent("portal", {
       if (isColliding && !collidingLastFrame) {
         // enter
         if (this.data.targetRoom) {
-          const url = roomMapping[this.data.targetRoom];
-          if (url) {
-            location.href = url
+          const targetUrl = getRoomMetadata(this.data.targetRoom).url
+          if (targetUrl) {
+            location.href = targetUrl
           } else {
-            console.error("invalid portal targetRoom:",this.data.targetRoom);
+            console.error("invalid portal targetRoom:", this.data.targetRoom);
           }
-          // console.log(url);
         } else if (this.data.targetPos) {
           // TODO: move to targetPos
         }

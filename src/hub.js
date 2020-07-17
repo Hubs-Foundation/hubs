@@ -221,6 +221,7 @@ import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY, ONLY_SCREEN_AVAILABLE
 import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
+import getHubId from "./utils/hub-id";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -751,11 +752,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const defaultRoomId = configs.feature("default_room_id");
 
-  const hubId =
-    qs.get("hub_id") ||
-    (document.location.pathname === "/" && defaultRoomId
-      ? defaultRoomId
-      : document.location.pathname.substring(1).split("/")[0]);
+  const hubId = getHubId();
   console.log(`Hub ID: ${hubId}`);
 
   if (!defaultRoomId) {

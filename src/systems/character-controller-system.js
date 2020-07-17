@@ -1,6 +1,7 @@
 import { paths } from "./userinput/paths";
 import { SOUND_SNAP_ROTATE, SOUND_WAYPOINT_START, SOUND_WAYPOINT_END } from "./sound-effects-system";
 import { easeOutQuadratic } from "../utils/easing";
+import getRoomMetadata from "../room-metadata";
 import { getPooledMatrix4, freePooledMatrix4 } from "../utils/mat4-pool";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import {
@@ -42,11 +43,13 @@ const calculateDisplacementToDesiredPOV = (function() {
  * @namespace avatar
  */
 const SNAP_ROTATION_RADIAN = THREE.Math.DEG2RAD * 45;
-const BASE_SPEED = 6.2; //TODO: in what units?
 export class CharacterControllerSystem {
   constructor(scene) {
     this.scene = scene;
-    this.fly = false;
+    // this.fly = false;
+    this.fly = getRoomMetadata().flyMode || false;
+    this.baseSpeed = getRoomMetadata().baseSpeed || 6.2; //TODO: in what units?
+
     this.shouldLandWhenPossible = false;
     this.waypoints = [];
     this.waypointTravelStartTime = 0;
@@ -223,10 +226,12 @@ export class CharacterControllerSystem {
 
       const userinput = AFRAME.scenes[0].systems.userinput;
       const wasFlying = this.fly;
-      if (userinput.get(paths.actions.toggleFly)) {
-        this.shouldLandWhenPossible = false;
-        this.avatarRig.messageDispatch.dispatch("/fly"); // TODO: Separate the logic about displaying the message from toggling the fly state in such a way that it is clear that this.fly will be toggled here
-      }
+
+      // [darwin] disable fly-mode toggle
+      // if (userinput.get(paths.actions.toggleFly)) {
+      //   this.shouldLandWhenPossible = false;
+      //   this.avatarRig.messageDispatch.dispatch("/fly"); // TODO: Separate the logic about displaying the message from toggling the fly state in such a way that it is clear that this.fly will be toggled here
+      // }
       const didStopFlying = wasFlying && !this.fly;
       if (!this.fly && this.shouldLandWhenPossible) {
         this.shouldLandWhenPossible = false;
@@ -289,7 +294,7 @@ export class CharacterControllerSystem {
             this.relativeMotion.multiplyScalar(
               ((userinput.get(paths.actions.boost) ? 2 : 1) *
                 speedModifier *
-                BASE_SPEED *
+                this.baseSpeed *
                 Math.sqrt(playerScale) *
                 dt) /
                 1000

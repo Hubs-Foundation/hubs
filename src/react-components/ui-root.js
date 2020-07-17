@@ -71,6 +71,7 @@ import SettingsMenu from "./settings-menu.js";
 import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
 import { SpectatingLabel } from "./spectating-label";
+import getRoomMetadata from "../room-metadata";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
 
@@ -2229,6 +2230,8 @@ class UIRoot extends Component {
       );
     }
 
+    const streamUrl = getRoomMetadata().streamUrl || "https://str33m.dr33mphaz3r.com/stream"
+
     return <Fragment>
       <audio
         id="music-player"
@@ -2239,7 +2242,7 @@ class UIRoot extends Component {
           var audio = document.querySelector("#music-player");
           audio.volume = qsGet("stream_volume") || '1.0';
         }}
-        src="https://str33m.dr33mphaz3r.com/stream" />
+        src={streamUrl} />
       {uiRootHtml}
     </Fragment>
   }
