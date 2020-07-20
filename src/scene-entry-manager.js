@@ -523,7 +523,6 @@ export default class SceneEntryManager {
           window.APP.store.update({
             preferences: { audioOutputMode: shouldEnablePositionalAudio ? "panner" : "audio" }
           });
-          window.APP.hubChannel.sendMessage(`Positional Audio ${shouldEnablePositionalAudio ? "enabled" : "disabled"}.`, "log");
         }
     )
   };
