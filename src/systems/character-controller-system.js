@@ -240,23 +240,24 @@ export class CharacterControllerSystem {
         this.navNode = null;
       }
       const preferences = window.APP.store.state.preferences;
-      const snapRotateLeft = userinput.get(paths.actions.snapRotateLeft);
-      const snapRotateRight = userinput.get(paths.actions.snapRotateRight);
-      if (snapRotateLeft) {
-        this.dXZ +=
-          preferences.snapRotationDegrees === undefined
-            ? SNAP_ROTATION_RADIAN
-            : (preferences.snapRotationDegrees * Math.PI) / 180;
-      }
-      if (snapRotateRight) {
-        this.dXZ -=
-          preferences.snapRotationDegrees === undefined
-            ? SNAP_ROTATION_RADIAN
-            : (preferences.snapRotationDegrees * Math.PI) / 180;
-      }
-      if (snapRotateLeft || snapRotateRight) {
-        this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
-      }
+      // [darwin] disable snap rotation
+      // const snapRotateLeft = userinput.get(paths.actions.snapRotateLeft);
+      // const snapRotateRight = userinput.get(paths.actions.snapRotateRight);
+      // if (snapRotateLeft) {
+      //   this.dXZ +=
+      //     preferences.snapRotationDegrees === undefined
+      //       ? SNAP_ROTATION_RADIAN
+      //       : (preferences.snapRotationDegrees * Math.PI) / 180;
+      // }
+      // if (snapRotateRight) {
+      //   this.dXZ -=
+      //     preferences.snapRotationDegrees === undefined
+      //       ? SNAP_ROTATION_RADIAN
+      //       : (preferences.snapRotationDegrees * Math.PI) / 180;
+      // }
+      // if (snapRotateLeft || snapRotateRight) {
+      //   this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
+      // }
       const characterAcceleration = userinput.get(paths.actions.characterAcceleration);
       if (characterAcceleration) {
         const zCharacterAcceleration = -1 * characterAcceleration[1];
