@@ -14,6 +14,8 @@ import { promisifyWorker } from "../utils/promisify-worker.js";
 import pdfjs from "pdfjs-dist";
 import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
+import { detect } from "detect-browser";
+import semver from "semver";
 
 /**
  * Warning! This require statement is fragile!
@@ -585,10 +587,9 @@ AFRAME.registerComponent("media-video", {
       }
 
       this.mediaElementAudioSource = null;
-
       if (!src.startsWith("hubs://")) {
-        // iOS video audio is broken, see: https://github.com/mozilla/hubs/issues/1797
-        if (!isIOS) {
+        // iOS video audio is broken on ios safari < 13.1.2, see: https://github.com/mozilla/hubs/issues/1797
+        if (!isIOS || semver.satisfies(detect().version, ">=13.1.2")) {
           // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
           this.mediaElementAudioSource =
             linkedMediaElementAudioSource ||
