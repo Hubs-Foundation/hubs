@@ -1,6 +1,5 @@
 import nipplejs from "nipplejs";
 import styles from "./virtual-gamepad-controls.css";
-const HIDDEN_JOYSTICK_STYLE = `${styles.mockJoystick}__hidden`;
 
 /**
  * Instantiates 2D virtual gamepads and emits associated events.
@@ -44,14 +43,14 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     if (this.enableLeft) {
       this.createLeftStick();
     } else {
-      this.leftMock.classList.add(HIDDEN_JOYSTICK_STYLE);
-      this.leftMockSmall.classList.add(HIDDEN_JOYSTICK_STYLE);
+      this.leftMock.classList.add(styles.hidden);
+      this.leftMockSmall.classList.add(styles.hidden);
     }
     if (this.enableRight) {
       this.createRightStick();
     } else {
-      this.rightMock.classList.add(HIDDEN_JOYSTICK_STYLE);
-      this.rightMockSmall.classList.add(HIDDEN_JOYSTICK_STYLE);
+      this.rightMock.classList.add(styles.hidden);
+      this.rightMockSmall.classList.add(styles.hidden);
     }
     this.onPreferenceChange = this.onPreferenceChange.bind(this);
     window.APP.store.addEventListener("statechanged", this.onPreferenceChange);
