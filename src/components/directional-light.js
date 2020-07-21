@@ -29,6 +29,7 @@ AFRAME.registerComponent("directional-light", {
     }
 
     resizeShadowCameraFrustum(this.light, this.el.sceneEl.object3D);
+    this.el.sceneEl.renderer.shadowMap.needsUpdate = true;
   },
 
   update(prevData) {
