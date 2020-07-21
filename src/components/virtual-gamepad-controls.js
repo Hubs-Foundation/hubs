@@ -77,8 +77,8 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     if (!this.enableLeft && newEnableLeft) {
       this.createLeftStick();
     } else if (this.enableLeft && !newEnableLeft) {
-      this.leftMock.classList.add(HIDDEN_JOYSTICK_STYLE);
-      this.leftMockSmall.classList.add(HIDDEN_JOYSTICK_STYLE);
+      this.leftMock.classList.add(styles.hidden);
+      this.leftMockSmall.classList.add(styles.hidden);
       this.leftStick.destroy();
       this.leftTouchZone.parentNode.removeChild(this.leftTouchZone);
       this.leftStick = null;
@@ -87,8 +87,8 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     if (!this.enableRight && newEnableRight) {
       this.createRightStick();
     } else if (this.enableRight && !newEnableRight) {
-      this.rightMock.classList.add(HIDDEN_JOYSTICK_STYLE);
-      this.rightMockSmall.classList.add(HIDDEN_JOYSTICK_STYLE);
+      this.rightMock.classList.add(styles.hidden);
+      this.rightMockSmall.classList.add(styles.hidden);
       this.rightStick.destroy();
       this.rightTouchZone.parentNode.removeChild(this.rightTouchZone);
       this.rightStick = null;
@@ -98,13 +98,13 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.enableRight = newEnableRight;
 
     if (this.enableLeft) {
-      this.leftMock.classList.remove(HIDDEN_JOYSTICK_STYLE);
-      this.leftMockSmall.classList.remove(HIDDEN_JOYSTICK_STYLE);
+      this.leftMock.classList.remove(styles.hidden);
+      this.leftMockSmall.classList.remove(styles.hidden);
       this.leftStick.on("start", this.onFirstInteraction);
     }
     if (this.enableRight) {
-      this.rightMock.classList.remove(HIDDEN_JOYSTICK_STYLE);
-      this.rightMockSmall.classList.remove(HIDDEN_JOYSTICK_STYLE);
+      this.rightMock.classList.remove(styles.hidden);
+      this.rightMockSmall.classList.remove(styles.hidden);
       this.rightStick.on("start", this.onFirstInteraction);
     }
     if ((this.enableLeft || this.enableRight) && !this.mockJoystickContainer.parentNode) {
