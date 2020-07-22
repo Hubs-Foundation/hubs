@@ -163,14 +163,14 @@ body {
     }
 
     :local(.logo) {
-      max-width: 250px;
+      max-width: 500px;
 
-      align-self: flex-start;
+      align-self: center;
       margin-left: -25px;
       margin-bottom: -12px;
 
       @media (max-width: 768px) {
-        align-self: auto;
+        align-self: center;
       }
 
       img {
@@ -186,10 +186,10 @@ body {
       font-size: 18pt;
       margin: 0.5em 0;
       margin-bottom: 1em;
-      align-self: flex-start;
+      align-self: center;
 
       @media (max-width: 768px) {
-        align-self: auto;
+        align-self: center;
         font-size: 14pt;
         text-align: center;
       }
