@@ -1,4 +1,5 @@
 import resizeShadowCameraFrustum from "../utils/resizeShadowCameraFrustum";
+import { BoxBufferGeometry } from "three";
 
 AFRAME.registerComponent("directional-light", {
   schema: {
@@ -24,10 +25,6 @@ AFRAME.registerComponent("directional-light", {
   },
 
   onEnvironmentSceneLoaded() {
-    if (window.APP && window.APP.quality === "low") {
-      return;
-    }
-
     resizeShadowCameraFrustum(this.light, this.el.sceneEl.object3D);
     this.el.sceneEl.renderer.shadowMap.needsUpdate = true;
   },
@@ -49,19 +46,26 @@ AFRAME.registerComponent("directional-light", {
       light.castShadow = this.data.castShadow;
     }
 
-    if (this.data.shadowBias !== prevData.shadowBias) {
-      light.shadow.bias = this.data.shadowBias;
-    }
+    // if (this.data.shadowBias !== prevData.shadowBias) {
+    //   light.shadow.bias = this.data.shadowBias;
+    // }
 
-    if (this.data.shadowRadius !== prevData.shadowRadius) {
-      light.shadow.radius = this.data.shadowRadius;
-    }
+    // if (this.data.shadowRadius !== prevData.shadowRadius) {
+    //   light.shadow.radius = this.data.shadowRadius;
+    // }
+
+    light.shadow.radius = 1;
+    light.shadow.bias = -0.0002;
 
     const [width, height] = this.data.shadowMapResolution;
-    const [prevWidth, prevHeight] = prevData.shadowMapResolution ? prevData.shadowMapResolution : [512, 512];
+    const [prevWidth, prevHeight] = prevData.shadowMapResolution ? prevData.shadowMapResolution : [1024, 1024];
 
     if (width !== prevWidth || height !== prevHeight) {
-      light.shadow.mapSize.set(width, height);
+      if (APP.quality === "low") {
+        light.shadow.mapSize.set(Math.min(width, 1024), Math.min(height, 1024));
+      } else {
+        light.shadow.mapSize.set(width, height);
+      }
 
       if (light.shadow.map) {
         light.shadow.map.dispose();

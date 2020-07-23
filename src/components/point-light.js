@@ -11,6 +11,10 @@ AFRAME.registerComponent("point-light", {
   },
 
   init() {
+    if (APP.quality === "low") {
+      return;
+    }
+
     const el = this.el;
     this.light = new THREE.PointLight();
     this.light.shadow.camera.matrixAutoUpdate = true;
@@ -20,6 +24,10 @@ AFRAME.registerComponent("point-light", {
   },
 
   update(prevData) {
+    if (APP.quality === "low") {
+      return;
+    }
+
     const light = this.light;
 
     if (this.data.color !== prevData.color) {

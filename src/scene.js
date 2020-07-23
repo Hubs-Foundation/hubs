@@ -63,9 +63,6 @@ const onReady = async () => {
   const sceneId = qs.get("scene_id") || document.location.pathname.substring(1).split("/")[1];
   console.log(`Scene ID: ${sceneId}`);
 
-  // Disable shadows on low quality
-  scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" });
-
   let uiProps = { sceneId: sceneId };
 
   mountUI(scene);

@@ -13,6 +13,10 @@ AFRAME.registerComponent("spot-light", {
   },
 
   init() {
+    if (APP.quality === "low") {
+      return;
+    }
+
     const el = this.el;
     this.light = new THREE.SpotLight();
     this.light.position.set(0, 0, 0);
@@ -25,6 +29,10 @@ AFRAME.registerComponent("spot-light", {
   },
 
   update(prevData) {
+    if (APP.quality === "low") {
+      return;
+    }
+
     const light = this.light;
 
     if (this.data.color !== prevData.color) {
