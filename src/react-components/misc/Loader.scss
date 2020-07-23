@@ -1,0 +1,52 @@
+:local(.loader) {
+  display: inline-block;
+  position: relative;
+  width: 40px;
+  height: 80px;
+
+  div {
+    display: inline-block;
+    position: absolute;
+    left: 8px;
+    width: 0.6em;
+    background: var(--loading-spinner-color);
+    animation: loading 1s ease-in-out infinite;
+    border-radius: 5px;
+  }
+
+  div:nth-child(1) {
+    left: 0.2em;
+    animation-delay: -0.32s;
+  }
+
+  div:nth-child(2) {
+    left: 1em;
+    animation-delay: -0.16s;
+  }
+
+  div:nth-child(3) {
+    left: 1.8em;
+    animation-delay: 0;
+  }
+}
+
+@keyframes loading {
+  0%,
+  80%,
+  100% {
+    top: 24px;
+    height: 2em;
+  }
+
+  40% {
+    top: 8px;
+    height: 3.5em;
+  }
+}
+
+:local(.loading-text) {
+  font-weight: normal;
+  font-size: 0.8em;
+  color: var(--loading-text-color);
+  margin-top: 0;
+}

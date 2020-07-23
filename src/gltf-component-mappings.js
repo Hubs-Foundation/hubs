@@ -208,6 +208,8 @@ async function mediaInflator(el, componentName, componentData, components) {
 
   if (componentName === "video" || componentName === "image") {
     mediaOptions.projection = componentData.projection;
+    mediaOptions.alphaMode = componentData.alphaMode;
+    mediaOptions.alphaCutoff = componentData.alphaCutoff;
   }
 
   if (componentName === "video" || componentName === "audio") {

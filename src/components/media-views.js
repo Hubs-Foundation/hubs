@@ -1009,7 +1009,9 @@ AFRAME.registerComponent("media-image", {
     version: { type: "number" },
     projection: { type: "string", default: "flat" },
     contentType: { type: "string" },
-    batch: { default: false }
+    batch: { default: false },
+    alphaMode: { type: "string", default: undefined },
+    alphaCutoff: { type: "number" }
   },
 
   remove() {
@@ -1127,12 +1129,30 @@ AFRAME.registerComponent("media-image", {
       this.el.setObject3D("mesh", this.mesh);
     }
 
-    // We only support transparency on gifs. Other images will support cutout as part of batching, but not alpha transparency for now
-    this.mesh.material.transparent =
-      !this.data.batch ||
-      texture == errorTexture ||
-      this.data.contentType.includes("image/gif") ||
-      !!(texture.image && texture.image.hasAlpha);
+    if (texture == errorTexture) {
+      this.mesh.material.transparent = true;
+    } else {
+      // if transparency setting isnt explicitly defined, default to on for all non batched things, gifs, and basis textures with alpha
+      switch (this.data.alphaMode) {
+        case "opaque":
+          this.mesh.material.transparent = false;
+          break;
+        case "blend":
+          this.mesh.material.transparent = true;
+          this.mesh.material.alphaTest = 0;
+          break;
+        case "mask":
+          this.mesh.material.transparent = false;
+          this.mesh.material.alphaTest = this.data.alphaCutoff;
+          break;
+        default:
+          this.mesh.material.transparent =
+            !this.data.batch ||
+            this.data.contentType.includes("image/gif") ||
+            !!(texture.image && texture.image.hasAlpha);
+          this.mesh.material.alphaTest = 0;
+      }
+    }
 
     this.mesh.material.map = texture;
     this.mesh.material.needsUpdate = true;

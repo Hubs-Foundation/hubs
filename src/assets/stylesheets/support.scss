@@ -1,0 +1,48 @@
+:local(.support-main) {
+  font-family: 'Open Sans', sans-serif;
+  z-index: 10000;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: #444;
+  color: white;
+  display: flex;
+  justify-content: center;
+  padding-top: 5em;
+}
+
+:local(.support-content) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  a {
+    font-size: smaller;
+    color: white;
+  }
+  input {
+    width: 15em;
+    font-size: 12pt;
+    padding: 0.4em;
+    border-radius: 10px;
+    border: none;
+  }
+  a.copy-link {
+    margin-left: 0.5em;
+    font-size: 12pt;
+  }
+}
+
+:local(.logo) {
+  max-width: 250px;
+  filter: drop-shadow(0 0 4px #888);
+}
+
+:local(.details) {
+  text-align: left;
+  tr td:first-child {
+    padding-right: 1em;
+  }
+}

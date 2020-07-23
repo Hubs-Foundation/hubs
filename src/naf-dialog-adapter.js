@@ -49,7 +49,7 @@ export default class DialogAdapter {
     this._avgTimeOffset = 0;
     this._blockedClients = new Map();
     this.type = "dialog";
-    this.occupants = []; // This is a public field
+    this.occupants = {}; // This is a public field
   }
 
   setForceTcp(forceTcp) {
@@ -179,7 +179,11 @@ export default class DialogAdapter {
         case "newPeer": {
           const peer = notification.data;
           this._onOccupantConnected(peer.id);
-          this.occupants.push(peer.id);
+          this.occupants[peer.id] = peer;
+
+          if (this._onOccupantsChanged) {
+            this._onOccupantsChanged(this.occupants);
+          }
 
           break;
         }
@@ -214,7 +218,11 @@ export default class DialogAdapter {
             this._initialAudioConsumerResolvers.delete(peerId);
           }
 
-          this.occupants = this.occupants.filter(id => id !== peerId);
+          delete this.occupants[peerId];
+
+          if (this._onOccupantsChanged) {
+            this._onOccupantsChanged(this.occupants);
+          }
 
           break;
         }
@@ -439,20 +447,24 @@ export default class DialogAdapter {
       });
 
       const audioConsumerPromises = [];
-      this.occupants = [];
+      this.occupants = {};
 
       // Create a promise that will be resolved once we attach to all the initial consumers.
       // This will gate the connection flow until all voices will be heard.
       for (let i = 0; i < peers.length; i++) {
         const peerId = peers[i].id;
         this._onOccupantConnected(peerId);
-        this.occupants.push(peerId);
+        this.occupants[peerId] = peers[i];
         if (!peers[i].hasProducers) continue;
         audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peerId, res)));
       }
 
       this._connectSuccess(this._clientId);
       this._initialAudioConsumerPromise = Promise.all(audioConsumerPromises);
+
+      if (this._onOccupantsChanged) {
+        this._onOccupantsChanged(this.occupants);
+      }
 
       if (this._localMediaStream) {
         this.createMissingProducers(this._localMediaStream);
@@ -566,13 +578,18 @@ export default class DialogAdapter {
 
     this._closed = true;
 
-    for (let i = 0; i < this.occupants.length; i++) {
-      const peerId = this.occupants[i];
+    const occupantIds = Object.keys(this.occupants);
+    for (let i = 0; i < occupantIds.length; i++) {
+      const peerId = occupantIds[i];
       if (peerId === this._clientId) continue;
       this._onOccupantDisconnected(peerId);
     }
 
-    this.occupants = [];
+    this.occupants = {};
+
+    if (this._onOccupantsChanged) {
+      this._onOccupantsChanged(this.occupants);
+    }
 
     debug("disconnect()");
 
