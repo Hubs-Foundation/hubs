@@ -1,6 +1,7 @@
 import getHubId from "./utils/hub-id";
 
 const roomMapping = window.ROOM_MAPPING || {
+  "room1": "/EJY4miE/room-1",
   "room2": "/XRfKSWB/room-2",
   "room3": "/fcWA7EE/room-3",
   "lobby": "/3maDzA9/lobby",
@@ -8,18 +9,19 @@ const roomMapping = window.ROOM_MAPPING || {
 
 var roomMetadata = {
   "room1": { // Tianyi's room
-    streamUrl: "https://str33m.dr33mphaz3r.com/stream"
+    streamUrl: "https://str33m.dr33mphaz3r.com/room1"
   },
   "room2": { // Kynan's room
-    streamUrl: "https://str33m.dr33mphaz3r.com/stream"
+    streamUrl: "https://str33m.dr33mphaz3r.com/room2"
   },
   "room3": { // Henry's room
     baseSpeed: 100,
     flyMode: true,
-    streamUrl: "https://str33m.dr33mphaz3r.com/stream"
+    streamUrl: "https://str33m.dr33mphaz3r.com/room3"
   },
   "lobby": {
-    streamUrl: "https://str33m.dr33mphaz3r.com/stream"
+    streamVolume: 0.6,
+    streamUrl: "https://str33m.dr33mphaz3r.com/lobby"
   }
 }
 
