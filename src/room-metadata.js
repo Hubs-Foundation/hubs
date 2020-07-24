@@ -39,5 +39,5 @@ export default function getRoomMetadata(roomKey) {
     const hubId = getHubId();
     roomKey = hubIdToRoomKey[hubId]
   }
-  return roomMetadata[roomKey]
+  return roomMetadata[roomKey] || {}
 }
