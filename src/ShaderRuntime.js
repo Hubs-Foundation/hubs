@@ -171,6 +171,11 @@ ShaderRuntime.prototype = {
 
         let newData = clone( config ),
             uniform;
+
+        const imageLoader = new THREE.TextureLoader();
+        //allow cross origin loading
+        imageLoader.crossOrigin = '';
+
         newData.fragmentShader = config.fragment;
         newData.vertexShader = config.vertex;
         delete newData.fragment;
@@ -180,7 +185,7 @@ ShaderRuntime.prototype = {
             uniform = newData.uniforms[ uniformName ];
 
             if (uniform.glslType == "sampler2D" && typeof uniform.value === "string") {
-                uniform.value = THREE.ImageUtils.loadTexture( uniform.value );
+                uniform.value = imageLoader.load( uniform.value );
             }
             if( uniform.value === null ) {
                 newData.uniforms[ uniformName ].value = this.getUmap( uniform.glslType );

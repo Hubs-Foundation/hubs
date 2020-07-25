@@ -35,8 +35,8 @@ var Liquifier = {
     varying vec2 vUv2;
 
     void main() {
-        float xWaveAmp = 0.02;
-
+        float waveAmp = 0.01;
+        float wavelength = 0.02;
         vec2 vuv = vec2(vUv.x, 1.0 - vUv.y);
         vec3 color = vec3(texture2D(tex, vuv));
         vec3 outcolor=color;
@@ -44,9 +44,9 @@ var Liquifier = {
         float t = time * 0.2;
         float v = t; // + (vuv.x + vuv.y);
 
-        vec2 uv0 = vec2(vUv.x + sin(t*2.0+vuv.y*10.0)*xWaveAmp, vuv.y);
+        vec2 uv0 = vec2(vUv.x + sin(t*5.0+vuv.y/wavelength)*waveAmp, vuv.y);
         vec3 color0 = vec3(texture2D(tex, uv0));
-        vec2 Uv2 = vec2(color0.r+v, color0.g+v)*0.9;
+        vec2 Uv2 = vec2(color0.b+v, color0.g+v)*0.9;
         Uv2 = mod(Uv2, vec2(1.0, 1.0));
         color1 = vec3(texture2D(tex, Uv2));
 
@@ -58,7 +58,7 @@ var Liquifier = {
         // outcolor.g = (val.x*color1.g)+(val.y*color1.b)+(val.z*color1.r);
         // outcolor.b = (val.x*color1.b)+(val.y*color1.r)+(val.z*color1.g);
 
-        float p = 0.4;
+        float p = 0.5;
         gl_FragColor = vec4( p*color1 + (1.0-p)*color0, 1.0 );
         // gl_FragColor = vec4( color0, 1.0 );
     }

@@ -19,6 +19,10 @@ import room1Preview from "../assets/textures/room1_1.png";
 import room2Preview from "../assets/textures/room2_1.png";
 import room3Preview from "../assets/textures/room3_1.png";
 
+const imageLoader = new THREE.TextureLoader();
+//allow cross origin loading
+imageLoader.crossOrigin = '';
+
 const setUniforms = (material, uniforms) => {
   if (uniforms) {
     for (var key in uniforms) {
@@ -480,19 +484,19 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
         // object.material = shaderMaterial
         // debugger;
         let register, shader;
-        [register, shader] = shaders[randint(0,shaders.length-1)](effectsSystem);
+        [register, shader] = shaders[randint(0,shaders.length-1)];
         object.material = register(shader, effectsSystem);
       } else if (object.name == "Portal1") {
         object.material = registerShaderFrogShader(Liquifier, effectsSystem, {
-          "tex": THREE.ImageUtils.loadTexture(room1Preview)
+          "tex": imageLoader.load(room1Preview)
         });
       } else if (object.name == "Portal2") {
         object.material = registerShaderFrogShader(Liquifier, effectsSystem, {
-          "tex": THREE.ImageUtils.loadTexture(room2Preview)
+          "tex": imageLoader.load(room2Preview)
         });
       } else if (object.name == "Portal3") {
         object.material = registerShaderFrogShader(Liquifier, effectsSystem, {
-          "tex": THREE.ImageUtils.loadTexture(room3Preview)
+          "tex": imageLoader.load(room3Preview)
         });
       } else {
         object.material = mapMaterials(object, material => {
