@@ -15,8 +15,9 @@ var roomMetadata = {
     streamUrl: "https://str33m.dr33mphaz3r.com/room2"
   },
   "room3": { // Henry's room
-    baseSpeed: 100,
+    baseSpeed: 150,
     flyMode: true,
+    freeRotation: true,
     streamUrl: "https://str33m.dr33mphaz3r.com/room3"
   },
   "lobby": {

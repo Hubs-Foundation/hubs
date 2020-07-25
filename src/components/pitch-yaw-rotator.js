@@ -1,4 +1,5 @@
 import { paths } from "../systems/userinput/paths";
+import getRoomMetadata from "../room-metadata";
 
 const ROTATION_SPEED = 0.8;
 
@@ -47,6 +48,34 @@ const rotatePitchAndYaw = (function() {
   };
 })();
 
+const rotateFree = (function() {
+  const oq = new THREE.Quaternion();
+  const xq = new THREE.Quaternion();
+  const yq = new THREE.Quaternion();
+  const q = new THREE.Quaternion();
+  const right = new THREE.Vector3();
+  const up = new THREE.Vector3();
+
+  return function rotateFree(o, x, y) {
+    o.updateMatrices();
+    oq.copy(o.quaternion);
+
+    right.set(1, 0, 0).applyQuaternion(oq);
+    up.set(0, 1, 0).applyQuaternion(oq);
+
+    xq.setFromAxisAngle(right, x);
+    yq.setFromAxisAngle(up, y);
+
+    q.copy(oq)
+      .premultiply(xq)
+      .premultiply(yq);
+
+    o.quaternion.copy(q);
+    o.matrixNeedsUpdate = true;
+    o.updateMatrices();
+  };
+})();
+
 let uiRoot;
 let scenePreviewNode;
 AFRAME.registerComponent("pitch-yaw-rotator", {
@@ -56,6 +85,8 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
       this.pendingXRotation += e.detail;
     });
     this.on = true;
+
+    this.rotate = (getRoomMetadata().freeRotation == true) ? rotateFree : rotatePitchAndYaw;
   },
 
   tick() {
@@ -68,13 +99,13 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
       const isGhost = lobby && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
       const cameraDelta = userinput.get(lobby ? paths.actions.lobbyCameraDelta : paths.actions.cameraDelta);
       if (cameraDelta) {
-        rotatePitchAndYaw(
+        this.rotate(
           lobby && !isGhost ? scenePreviewNode.object3D : this.el.object3D,
           this.pendingXRotation + cameraDelta[1]*ROTATION_SPEED,
           cameraDelta[0]*ROTATION_SPEED
         );
       } else if (this.pendingXRotation) {
-        rotatePitchAndYaw(lobby && !isGhost ? scenePreviewNode.object3D : this.el.object3D, this.pendingXRotation, 0);
+        this.rotate(lobby && !isGhost ? scenePreviewNode.object3D : this.el.object3D, this.pendingXRotation, 0);
       }
     }
     this.pendingXRotation = 0;
