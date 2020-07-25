@@ -269,7 +269,8 @@ class UIRoot extends Component {
           if (!this.props.isBotMode) {
             try {
               this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
-            } catch {
+            } catch (e) {
+              console.error(e)
               this.exit("scene_error"); // https://github.com/mozilla/hubs/issues/1950
             }
           }
@@ -2231,7 +2232,7 @@ class UIRoot extends Component {
     }
 
     const streamUrl = getRoomMetadata().streamUrl || "https://str33m.dr33mphaz3r.com/stream"
-
+    const streamVolume = qsGet("stream_volume") || getRoomMetadata().streamVolume || "1.0"
     return <Fragment>
       <audio
         id="music-player"
@@ -2240,7 +2241,7 @@ class UIRoot extends Component {
         onCanPlay={() => {this.onMusicCanPlay()}}
         onLoadedData={() => {
           var audio = document.querySelector("#music-player");
-          audio.volume = qsGet("stream_volume") || '1.0';
+          audio.volume = streamVolume;
         }}
         src={streamUrl} />
       {uiRootHtml}

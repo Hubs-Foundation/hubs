@@ -13,22 +13,40 @@ import { Glassy } from '../shaders/Glassy.js';
 import { ShinyShader } from '../shaders/ShinyShader.js';
 import { Jelly } from '../shaders/ShaderFrog/Jelly.js'
 import { Neurons } from '../shaders/ShaderFrog/Neurons.js'
+import { Liquifier } from '../shaders/ShaderFrog/Liquifier.js'
 
+import room1Preview from "../assets/textures/room1_1.png";
+import room2Preview from "../assets/textures/room2_1.png";
+import room3Preview from "../assets/textures/room3_1.png";
 
-const registerRegularShader = (shader) => ((effectsSystem) => {
+const setUniforms = (material, uniforms) => {
+  if (uniforms) {
+    for (var key in uniforms) {
+      material.uniforms[key].value = uniforms[key];
+    }
+  }
+}
+const registerRegularShader = (srcShader, effectsSystem, uniforms) => {
+  var shader = JSON.parse(JSON.stringify(srcShader)) // deep copy to prevent shared uniforms
   effectsSystem.registerShader(shader);
-  return new THREE.ShaderMaterial(shader);
-});
+  var mat = new THREE.ShaderMaterial(shader);
+  setUniforms(mat, uniforms);
+  return mat;
+};
 
-const registerShaderFrogShader = (shader) => ((effectsSystem) => {
-  return effectsSystem.registerShaderFrogShader(shader);
-});
+const registerShaderFrogShader = (srcShader, effectsSystem, uniforms) => {
+  var shader = JSON.parse(JSON.stringify(srcShader)) // deep copy to prevent shared uniforms
+  shader.name = shader.name+Math.random().toString(); // Prevent ShaderFrog from linking with shaders with the same name
+  var mat = effectsSystem.registerShaderFrogShader(shader);
+  setUniforms(mat, uniforms)
+  return mat;
+};
 
 const shaders = [
-  registerRegularShader(Glassy),
-  registerRegularShader(ShinyShader),
-  registerShaderFrogShader(Jelly),
-  registerShaderFrogShader(Neurons),
+  [registerRegularShader, Glassy],
+  [registerRegularShader, ShinyShader],
+  [registerShaderFrogShader, Jelly],
+  [registerShaderFrogShader, Neurons],
 ];
 
 function randint(min, max) {
@@ -454,13 +472,28 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
     // Use Blender's 'Custom Properties'? https://github.com/KhronosGroup/glTF-Blender-Exporter/issues/15
     // console.log(object)
     if (effectsSystem) {
+      // This is not the nicest of way of doing this (we should add a GLTF component mapping),
+      // but it's the easiest
       if (qs.get('shader_party') || object.name == "Suzanne") {
         // effectsSystem.registerShader(Glassy)
         // var shaderMaterial = new THREE.ShaderMaterial(Glassy);
         // object.material = shaderMaterial
         // debugger;
-
-        object.material = shaders[randint(0,shaders.length-1)](effectsSystem);
+        let register, shader;
+        [register, shader] = shaders[randint(0,shaders.length-1)](effectsSystem);
+        object.material = register(shader, effectsSystem);
+      } else if (object.name == "Portal1") {
+        object.material = registerShaderFrogShader(Liquifier, effectsSystem, {
+          "tex": THREE.ImageUtils.loadTexture(room1Preview)
+        });
+      } else if (object.name == "Portal2") {
+        object.material = registerShaderFrogShader(Liquifier, effectsSystem, {
+          "tex": THREE.ImageUtils.loadTexture(room2Preview)
+        });
+      } else if (object.name == "Portal3") {
+        object.material = registerShaderFrogShader(Liquifier, effectsSystem, {
+          "tex": THREE.ImageUtils.loadTexture(room3Preview)
+        });
       } else {
         object.material = mapMaterials(object, material => {
           if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
