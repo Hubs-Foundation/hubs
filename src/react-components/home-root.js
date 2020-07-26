@@ -343,11 +343,11 @@ class HomeRoot extends Component {
           <div className={styles.logo}>
             <img src={configs.image("logo")} />
           </div>
-          <div className={styles.blurb}> <FormattedMessage id="app-description" />
+          <div className={styles.blurb}><FormattedMessage id="app-description" />
           </div>
         </div>
         <div className={styles.ctaButtons}>
-          {this.renderEnterButton()}
+          {this.state.signedIn && this.renderEnterButton()}
           {this.renderPwaButton()}
         </div>
       </div>
