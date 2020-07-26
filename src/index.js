@@ -26,7 +26,6 @@ let featuredRooms = null;
 let mountedUI = false;
 let hideHero = true;
 let showAdmin = false;
-let showCreate = false;
 
 const remountUI = function() {
   mountedUI = true;
@@ -46,7 +45,6 @@ const remountUI = function() {
       signInReason={qs.get("sign_in_reason")}
       hideHero={hideHero}
       showAdmin={showAdmin}
-      showCreate={showCreate}
       featuredRooms={featuredRooms}
       installEvent={installEvent}
     />
@@ -121,7 +119,6 @@ async function fetchFeaturedRooms() {
         showAdmin = true;
       }
 
-      showCreate = !!perms.create_hub;
       remountUI();
 
       retPhxChannel.leave();
