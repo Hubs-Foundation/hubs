@@ -6,14 +6,12 @@ import en from "react-intl/locale-data/en";
 
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
-import UnlessFeature from "./unless-feature";
 import { lang, messages } from "../utils/i18n";
 import { playVideoWithStopOnBlur } from "../utils/video-utils.js";
 import homeVideoWebM from "../assets/video/home.webm";
 import homeVideoMp4 from "../assets/video/home.mp4";
-import discordLogoSmall from "../assets/images/discord-logo-small.png";
 import classNames from "classnames";
-import { isLocalClient, createAndRedirectToNewHub, connectToReticulum } from "../utils/phoenix-utils";
+import { isLocalClient, connectToReticulum } from "../utils/phoenix-utils";
 import maskEmail from "../utils/mask-email";
 import checkIsMobile from "../utils/is-mobile";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
@@ -27,6 +25,8 @@ import styles from "../assets/stylesheets/index.scss";
 import AuthDialog from "./auth-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
 import MediaTiles from "./media-tiles";
+
+import getRoomMetadata from "../room-metadata";
 
 addLocaleData([...en]);
 
@@ -45,7 +45,6 @@ class HomeRoot extends Component {
     installEvent: PropTypes.object,
     hideHero: PropTypes.bool,
     showAdmin: PropTypes.bool,
-    showCreate: PropTypes.bool,
     featuredRooms: PropTypes.array,
     publicRoomsResult: PropTypes.object,
     showSignIn: PropTypes.bool,
@@ -196,11 +195,6 @@ class HomeRoot extends Component {
                       <FormattedMessage id="home.community_link" />
                     </a>
                   </IfFeature>
-                  <IfFeature name="enable_spoke">
-                    <a href="/spoke" rel="noreferrer noopener">
-                      <FormattedMessage id="editor-name" />
-                    </a>
-                  </IfFeature>
                   <IfFeature name="show_docs_link">
                     <a href={configs.link("docs", "https://hubs.mozilla.com/docs")} rel="noreferrer noopener">
                       <FormattedMessage id="home.docs_link" />
@@ -240,44 +234,7 @@ class HomeRoot extends Component {
               </div>
             </div>
             <div className={styles.heroContent} style={{ backgroundImage: configs.image("home_background", true) }}>
-              {!this.props.hideHero &&
-                (this.props.featuredRooms && this.props.featuredRooms.length > 0
-                  ? this.renderFeaturedRoomsHero()
-                  : this.renderNonFeaturedRoomsHero())}
-              {!this.props.hideHero && (
-                <div className={classNames(styles.heroPanel, styles.rightPanel)}>
-                  {showFTUEVideo && (
-                    <div className={styles.heroVideo}>
-                      <video playsInline muted loop autoPlay>
-                        <source src={homeVideoWebM} type="video/webm" />
-                        <source src={homeVideoMp4} type="video/mp4" />
-                      </video>
-                    </div>
-                  )}
-                  <div>
-                    <div className={styles.secondaryLink}>
-                      <a href="/link">
-                        <FormattedMessage id="home.have_code" />
-                      </a>
-                    </div>
-
-                    <IfFeature name="show_discord_bot_link">
-                      <div className={styles.secondaryLink}>
-                        <div>
-                          <FormattedMessage id="home.add_to_discord_1" />
-                        </div>
-                        <img src={discordLogoSmall} />
-                        <a href="/discord">
-                          <FormattedMessage id="home.add_to_discord_2" />
-                        </a>
-                        <div>
-                          <FormattedMessage id="home.add_to_discord_3" />
-                        </div>
-                      </div>
-                    </IfFeature>
-                  </div>
-                </div>
-              )}
+              { this.renderBody() }
             </div>
 
             <div className={styles.footerContent}>
@@ -286,16 +243,6 @@ class HomeRoot extends Component {
                   <IfFeature name="show_join_us_dialog">
                     <a className={styles.link} rel="noopener noreferrer" href="/#/join-us">
                       <FormattedMessage id="home.join_us" />
-                    </a>
-                  </IfFeature>
-                  <IfFeature name="show_newsletter_signup">
-                    <a
-                      className={styles.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href="http://eepurl.com/gX_fH9"
-                    >
-                      <FormattedMessage id="home.subscribe_to_mailing_list" />
                     </a>
                   </IfFeature>
                   <IfFeature name="show_issue_report_link">
@@ -370,60 +317,37 @@ class HomeRoot extends Component {
     );
   }
 
-  renderCreateButton() {
+  renderEnterButton() {
     return (
       <button
         className={classNames(styles.primaryButton, styles.ctaButton)}
         onClick={e => {
           e.preventDefault();
-          createAndRedirectToNewHub(null, null, false);
+          const targetUrl = getRoomMetadata('lobby').url
+          if (targetUrl) {
+            location.href = targetUrl
+          } else {
+            console.error("invalid portal targetRoom:", this.data.targetRoom);
+          }
         }}
       >
-        <FormattedMessage id="home.create_a_room" />
+        <FormattedMessage id="home.enter" />
       </button>
     );
   }
 
-  renderFeaturedRoomsHero() {
-    return [
-      <div className={styles.heroPanel} key={1}>
-        <div className={styles.container}>
-          <div className={classNames([styles.logo, styles.logoMargin])}>
-            <img src={configs.image("logo")} />
-          </div>
-        </div>
-        <div className={styles.ctaButtons}>
-          {this.props.showCreate && this.renderCreateButton()}
-          {this.renderPwaButton()}
-        </div>
-      </div>,
-      <div className={styles.heroPanel} key={2}>
-        <div className={classNames([mediaBrowserStyles.mediaBrowser, mediaBrowserStyles.mediaBrowserInline])}>
-          <div className={classNames([mediaBrowserStyles.box, mediaBrowserStyles.darkened])}>
-            <MediaTiles
-              entries={this.props.featuredRooms}
-              handleEntryInfoClicked={this.showRoomInfo}
-              urlSource="favorites"
-            />
-          </div>
-        </div>
-      </div>
-    ];
-  }
-
-  renderNonFeaturedRoomsHero() {
+  renderBody() {
     return (
       <div className={styles.heroPanel}>
         <div className={styles.container}>
           <div className={styles.logo}>
             <img src={configs.image("logo")} />
           </div>
-          <div className={styles.blurb}>
-            <FormattedMessage id="app-description" />
+          <div className={styles.blurb}><FormattedMessage id="app-description" />
           </div>
         </div>
         <div className={styles.ctaButtons}>
-          {this.props.showCreate && this.renderCreateButton()}
+          {this.state.signedIn && this.renderEnterButton()}
           {this.renderPwaButton()}
         </div>
       </div>

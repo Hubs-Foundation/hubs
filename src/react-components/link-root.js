@@ -282,11 +282,6 @@ class LinkRoot extends Component {
                 </div>
               )}
             </div>
-            <div className={styles.createLink}>
-              <a href="/">
-                <FormattedMessage id="link.create_a_room" />
-              </a>
-            </div>
           </div>
         </div>
       </IntlProvider>
