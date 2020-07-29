@@ -777,7 +777,7 @@ AFRAME.registerComponent("media-video", {
                   u = buildAbsoluteURL(baseUrl, u.startsWith("/") ? u : `/${u}`);
                 }
 
-                xhr.open("GET", proxiedUrlFor(u));
+                xhr.open("GET", proxiedUrlFor(u), true);
               }
             });
 
