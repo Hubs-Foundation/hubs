@@ -22,6 +22,7 @@ function traverseAnimationTargets(rootObject, animations, callback) {
 export class ShadowSystem {
   constructor(sceneEl) {
     this.needsUpdate = false;
+    this.dynamicShadowsEnabled = window.APP.store.state.preferences.enableDynamicShadows;
     this.sceneEl = sceneEl;
     this.onEnvironmentSceneLoaded = this.onEnvironmentSceneLoaded.bind(this);
     this.sceneEl.addEventListener("environment-scene-loaded", this.onEnvironmentSceneLoaded);
@@ -29,6 +30,7 @@ export class ShadowSystem {
 
   onEnvironmentSceneLoaded() {
     this.needsUpdate = true;
+    this.sceneEl.renderer.shadowMap.autoUpdate = this.dynamicShadowsEnabled;
   }
 
   tick() {
@@ -52,13 +54,15 @@ export class ShadowSystem {
       return;
     }
 
-    // Recompute the shadowmap when the environment changes.
-    traverseAnimationTargets(environmentObject3D, environmentObject3D.animations, animatedNode => {
-      animatedNode.traverse(child => {
-        child.castShadow = false;
-        child.receiveShadow = false;
+    if (!this.dynamicShadowsEnabled) {
+      // Recompute the shadowmap when the environment changes.
+      traverseAnimationTargets(environmentObject3D, environmentObject3D.animations, animatedNode => {
+        animatedNode.traverse(child => {
+          child.castShadow = false;
+          child.receiveShadow = false;
+        });
       });
-    });
+    }
 
     environmentObject3D.updateMatrixWorld(true, true);
 

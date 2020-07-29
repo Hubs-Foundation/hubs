@@ -302,6 +302,7 @@
     "preferences.onlyShowNametagsInFreeze": "Only show nametags while frozen",
     "preferences.maxResolution": "Max Resolution",
     "preferences.materialQualitySetting": "Material quality",
+    "preferences.enableDynamicShadows": "Enable Dynamic Shadows",
     "preferences.disableAutoPixelRatio": "Disable automatic pixel ratio adjustments",
     "preferences.allowMultipleHubsInstances": "Disable auto-exit when multiple hubs instances are open",
     "preferences.disableIdleDetection": "Disable auto-exit when idle or backgrounded",
