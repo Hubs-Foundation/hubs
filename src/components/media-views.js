@@ -657,19 +657,18 @@ AFRAME.registerComponent("media-video", {
       this.el.setObject3D("mesh", this.mesh);
     }
 
-    if (this.data.contentType.startsWith("audio/")) {
+    if (!texture.isVideoTexture) {
       this.mesh.material.map = audioIconTexture;
     } else {
       this.mesh.material.map = texture;
+      if (projection === "flat") {
+        scaleToAspectRatio(
+          this.el,
+          (texture.image.videoHeight || texture.image.height) / (texture.image.videoWidth || texture.image.width)
+        );
+      }
     }
     this.mesh.material.needsUpdate = true;
-
-    if (projection === "flat" && !this.data.contentType.startsWith("audio/")) {
-      scaleToAspectRatio(
-        this.el,
-        (texture.image.videoHeight || texture.image.height) / (texture.image.videoWidth || texture.image.width)
-      );
-    }
 
     this.updatePlaybackState(true);
 
@@ -691,7 +690,10 @@ AFRAME.registerComponent("media-video", {
         this._audioSyncInterval = null;
       }
 
+      let resolved = false;
       const failLoad = function(e) {
+        if (resolved) return;
+        resolved = true;
         clearTimeout(pollTimeout);
         reject(e);
       };
@@ -708,8 +710,21 @@ AFRAME.registerComponent("media-video", {
         texture = new THREE.VideoTexture(videoEl);
         texture.minFilter = THREE.LinearFilter;
         texture.encoding = THREE.sRGBEncoding;
-        isReady = () =>
-          (texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width);
+
+        isReady = () => {
+          if (texture.hls && texture.hls.streamController.audioOnly) {
+            audioEl = videoEl;
+            const hls = texture.hls;
+            texture = new THREE.Texture();
+            texture.image = videoEl;
+            texture.hls = hls;
+            return true;
+          } else {
+            const ready =
+              (texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width);
+            return ready;
+          }
+        };
       }
 
       // Set src on video to begin loading.
@@ -825,6 +840,7 @@ AFRAME.registerComponent("media-video", {
       // and also sometimes in Chrome it seems.
       const poll = () => {
         if (isReady()) {
+          resolved = true;
           resolve({ texture, audioSourceEl: audioEl || texture.image });
         } else {
           pollTimeout = setTimeout(poll, 500);
@@ -929,10 +945,8 @@ AFRAME.registerComponent("media-video", {
   })(),
 
   cleanUp() {
-    if (this.mesh && this.mesh.material) {
-      if (!this.data.linkedVideoTexture) {
-        disposeTexture(this.mesh.material.map);
-      }
+    if (this.videoTexture && !this.data.linkedVideoTexture) {
+      disposeTexture(this.videoTexture);
     }
   },
 
