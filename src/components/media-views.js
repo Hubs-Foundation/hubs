@@ -35,9 +35,6 @@ const TYPE_IMG_PNG = { type: "image/png" };
 const parseGIF = promisifyWorker(new GIFWorker());
 
 const isIOS = AFRAME.utils.device.isIOS();
-const isMobileVR = AFRAME.utils.device.isMobileVR();
-const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
-const HLS_TIMEOUT = 10000; // HLS can sometimes fail, we re-try after this duration
 const audioIconTexture = new THREE.TextureLoader().load(audioIcon);
 
 export const VOLUME_LABELS = [];
@@ -789,20 +786,6 @@ AFRAME.registerComponent("media-video", {
           };
 
           setupHls();
-
-          // Sometimes for weird streams HLS fails to initialize.
-          const setupInterval = setInterval(() => {
-            // Stop retrying if the src changed.
-            const isNoLongerSrc = this.data.src !== url;
-
-            if (isReady() || isNoLongerSrc) {
-              clearInterval(setupInterval);
-            } else {
-              console.warn("HLS failed to read video, trying again");
-              setupHls();
-            }
-          }, HLS_TIMEOUT);
-          // If not, see if native support will work
         } else if (videoEl.canPlayType(contentType)) {
           videoEl.src = url;
           videoEl.onerror = failLoad;
