@@ -17,6 +17,8 @@ import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-uti
 import { detect } from "detect-browser";
 import semver from "semver";
 
+import qsTruthy from "../utils/qs_truthy";
+
 /**
  * Warning! This require statement is fragile!
  *
@@ -748,6 +750,7 @@ AFRAME.registerComponent("media-video", {
             }
 
             const hls = new HLS({
+              debug: qsTruthy("hlsDebug"),
               xhrSetup: (xhr, u) => {
                 if (u.startsWith(corsProxyPrefix)) {
                   u = u.substring(corsProxyPrefix.length);
