@@ -605,31 +605,19 @@ AFRAME.registerComponent("media-video", {
       this.video.addEventListener("play", this.onPauseStateChange);
 
       if (texture.hls) {
-        const updateLiveState = () => {
+        const updateHLSLiveState = () => {
           if (texture.hls.currentLevel >= 0) {
-            const videoWasLive = !!this.videoIsLive;
             this.videoIsLive = texture.hls.levels[texture.hls.currentLevel].details.live;
             this.updateHoverMenu();
-
-            if (!videoWasLive && this.videoIsLive) {
-              this.el.emit("video_is_live_update", { videoIsLive: this.videoIsLive });
-              // We just determined the video is live (there can be a delay due to autoplay issues, etc)
-              // so catch it up to HEAD.
-              if (!isFirefoxReality) {
-                // HACK this causes live streams to freeze in FxR due to https://github.com/MozillaReality/FirefoxReality/issues/1602, TODO remove once 1.4 ships
-                this.video.currentTime = this.video.duration - 0.01;
-              }
-            }
           }
         };
-        texture.hls.on(HLS.Events.LEVEL_LOADED, updateLiveState);
-        texture.hls.on(HLS.Events.LEVEL_SWITCHED, updateLiveState);
+        texture.hls.on(HLS.Events.LEVEL_LOADED, updateHLSLiveState);
+        texture.hls.on(HLS.Events.LEVEL_SWITCHED, updateHLSLiveState);
         if (texture.hls.currentLevel >= 0) {
-          updateLiveState();
+          updateHLSLiveState();
         }
       } else {
         this.videoIsLive = this.video.duration === Infinity;
-        this.el.emit("video_is_live_update", { videoIsLive: this.videoIsLive });
         this.updateHoverMenu();
       }
 
