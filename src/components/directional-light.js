@@ -63,6 +63,5 @@ AFRAME.registerComponent("directional-light", {
 
   remove: function() {
     this.el.removeObject3D("directional-light");
-    this.el.sceneEl.removeEventListener("environment-scene-loaded", this.onEnvironmentSceneLoaded);
   }
 });

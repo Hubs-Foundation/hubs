@@ -28,7 +28,8 @@ export class ShadowSystem {
     this.sceneEl.addEventListener("environment-scene-loaded", this.onEnvironmentSceneLoaded);
   }
 
-  onEnvironmentSceneLoaded() {
+  onEnvironmentSceneLoaded({ detail: scene }) {
+    this.environmentObject3D = scene;
     this.needsUpdate = true;
     this.sceneEl.renderer.shadowMap.autoUpdate = this.dynamicShadowsEnabled;
   }
@@ -42,13 +43,7 @@ export class ShadowSystem {
       return;
     }
 
-    const environmentEl = document.getElementById("environment-scene").childNodes[0];
-
-    if (!environmentEl) {
-      return;
-    }
-
-    const environmentObject3D = environmentEl.getObject3D("mesh");
+    const environmentObject3D = this.environmentObject3D;
 
     if (!environmentObject3D) {
       return;
