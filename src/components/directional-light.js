@@ -19,17 +19,6 @@ AFRAME.registerComponent("directional-light", {
     this.el.setObject3D("directional-light", this.light);
     this.el.sceneEl.systems.light.registerLight(el);
     this.rendererSystem = this.el.sceneEl.systems.renderer;
-    this.onEnvironmentSceneLoaded = this.onEnvironmentSceneLoaded.bind(this);
-    this.el.sceneEl.addEventListener("environment-scene-loaded", this.onEnvironmentSceneLoaded);
-  },
-
-  onEnvironmentSceneLoaded() {
-    if (window.APP && window.APP.quality === "low") {
-      return;
-    }
-
-    resizeShadowCameraFrustum(this.light, this.el.sceneEl.object3D);
-    this.el.sceneEl.renderer.shadowMap.needsUpdate = true;
   },
 
   update(prevData) {

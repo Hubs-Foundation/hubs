@@ -53,7 +53,7 @@ export default function resizeShadowCameraFrustum(light, scene) {
   verts[6].set(max.x, max.y, min.z);
   verts[7].set(max.x, max.y, max.z);
 
-  inverseLightMatrixWorld.getInverse(light.shadow.camera.matrixWorld);
+  inverseLightMatrixWorld.getInverse(light.matrixWorld);
 
   for (let i = 0; i < verts.length; i++) {
     verts[i].applyMatrix4(inverseLightMatrixWorld);
