@@ -5,6 +5,7 @@ import { FormattedMessage } from "react-intl";
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/sign-in-dialog.scss";
+
 import DialogContainer from "./dialog-container";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 
@@ -37,23 +38,27 @@ export default class SignInDialog extends Component {
     let contents;
     if (this.props.authStarted) {
       contents = (
-        <div>
+        <div
+          style={{
+            fontFamily: "steps-monomono_thin",
+            color: "#98A600"
+          }}
+        >
           <p>
             <FormattedMessage className="preformatted" id="sign-in.auth-started" />
           </p>
-          <IfFeature name="show_newsletter_signup">
-            <p>
-              Want Hubs news sent to your inbox?{"\n"}
-              <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
-                Subscribe for updates
-              </a>.
-            </p>
-          </IfFeature>
         </div>
       );
     } else if (this.props.authComplete) {
       contents = (
-        <div className={styles.signInComplete}>
+        <div
+          className={styles.signInComplete}
+          style={{
+            fontFamily: "steps-monomono_thin",
+
+            color: "#98A600"
+          }}
+        >
           <p>{this.props.message}</p>
           <button onClick={this.props.onContinue} className={styles.continueButton}>
             {this.props.continueText}
@@ -62,18 +67,40 @@ export default class SignInDialog extends Component {
       );
     } else {
       contents = (
-        <form onSubmit={this.onSubmit} className={styles.signInForm}>
-          <span>{this.props.message}</span>
+        <form
+          onSubmit={this.onSubmit}
+          className={styles.signInForm}
+          style={{
+            fontFamily: "steps-monomono_thin",
+            color: "#667000"
+          }}
+        >
+          <span
+            style={{
+              fontSize: "25px",
+              textTransform: "uppercase",
+              borderRadius: "none"
+            }}
+          >
+            {this.props.message}
+          </span>
           <input
             name="email"
             type="email"
             required
-            placeholder="Your email address"
+            placeholder="your email address"
             value={this.state.email}
             onFocus={e => handleTextFieldFocus(e.target)}
             onBlur={() => handleTextFieldBlur()}
             onChange={e => this.setState({ email: e.target.value })}
             className={styles.emailField}
+            style={{
+              border: "1px solid #667000",
+              background: "transparent",
+              fontFamily: "steps-monomono_thin",
+              color: "#667000",
+              textAlign: "center"
+            }}
           />
           {(configs.feature("show_terms") || configs.feature("show_privacy")) && (
             <p className={styles.terms}>

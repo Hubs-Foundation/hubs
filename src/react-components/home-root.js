@@ -17,10 +17,17 @@ import checkIsMobile from "../utils/is-mobile";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import mediaBrowserStyles from "../assets/stylesheets/media-browser.scss";
+import fonts from "../assets/fonts/stylesheet.css";
+
+import splashWebm from "../assets/video/splash.webm";
 import AuthChannel from "../utils/auth-channel";
 import RoomInfoDialog from "./room-info-dialog.js";
 
 import styles from "../assets/stylesheets/index.scss";
+
+import aug20Image from "../assets/images/aug20.png";
+import loginButton from "../assets/images/login-button.png";
+import logoutButton from "../assets/images/logout-button.png";
 
 import AuthDialog from "./auth-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
@@ -175,68 +182,46 @@ class HomeRoot extends Component {
 
     return (
       <IntlProvider locale={lang} messages={messages}>
-        <div className={styles.home}>
+        <div
+          className={styles.home}
+          style={
+            {
+              /* backgroundImage: configs.image("home_bg", true) */
+            }
+          }
+        >
+          <div
+            style={{
+              position: "fixed",
+              top: "0",
+              right: "0",
+              bottom: "0",
+              left: "0",
+              overflow: "hidden",
+              zIndex: "-100"
+            }}
+          >
+            <video
+              playsInline
+              loop
+              autoPlay
+              muted
+              style={{
+                position: "absolute",
+                top: "0",
+                left: "0",
+                width: "100%",
+                height: "100%",
+                minWidth: "100vw",
+                minHeight: "100vh",
+                transform: "scale(1.2, 1.2)"
+              }}
+            >
+              <source src={splashWebm} type="video/webm" />
+            </video>
+          </div>
           <div className={mainContentClassNames}>
-            <div className={styles.headerContent}>
-              <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
-                <div className={styles.links}>
-                  <IfFeature name="show_whats_new_link">
-                    <a href="/whats-new">
-                      <FormattedMessage id="home.whats_new_link" />
-                    </a>
-                  </IfFeature>
-                  <IfFeature name="show_source_link">
-                    <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
-                      <FormattedMessage id="home.source_link" />
-                    </a>
-                  </IfFeature>
-                  <IfFeature name="show_community_link">
-                    <a href={configs.link("community", "https://discord.gg/wHmY4nd")} rel="noreferrer noopener">
-                      <FormattedMessage id="home.community_link" />
-                    </a>
-                  </IfFeature>
-                  <IfFeature name="show_docs_link">
-                    <a href={configs.link("docs", "https://hubs.mozilla.com/docs")} rel="noreferrer noopener">
-                      <FormattedMessage id="home.docs_link" />
-                    </a>
-                  </IfFeature>
-                  <IfFeature name="show_cloud">
-                    <a href="https://hubs.mozilla.com/cloud" rel="noreferrer noopener">
-                      <FormattedMessage id="home.cloud_link" />
-                    </a>
-                  </IfFeature>
-                  {this.props.showAdmin && (
-                    <a href="/admin" rel="noreferrer noopener">
-                      <i>
-                        <FontAwesomeIcon icon={faCog} />
-                      </i>
-                      &nbsp;
-                      <FormattedMessage id="home.admin" />
-                    </a>
-                  )}
-                </div>
-              </div>
-              <div className={styles.signIn}>
-                {this.state.signedIn ? (
-                  <div>
-                    <span>
-                      <FormattedMessage id="sign-in.as" /> {maskEmail(this.state.email)}
-                    </span>{" "}
-                    <a onClick={this.onLinkClicked(this.signOut)}>
-                      <FormattedMessage id="sign-in.out" />
-                    </a>
-                  </div>
-                ) : (
-                  <a onClick={this.onLinkClicked(this.showSignInDialog)}>
-                    <FormattedMessage id="sign-in.in" />
-                  </a>
-                )}
-              </div>
-            </div>
-            <div className={styles.heroContent} style={{ backgroundImage: configs.image("home_background", true) }}>
-              { this.renderBody() }
-            </div>
-
+            <div className={styles.heroContent}>{this.renderBody()}</div>
             <div className={styles.footerContent}>
               <div className={styles.links}>
                 <div className={styles.top}>
@@ -317,21 +302,105 @@ class HomeRoot extends Component {
     );
   }
 
+  renderSignInInfo() {
+    return (
+      <div
+        style={{
+          fontFamily: "steps-monomono_thin",
+          color: "#667000",
+          textTransform: "lowercase",
+          maxWidth: "240px",
+          textAlign: "right",
+          marginTop: "24px",
+          marginRight: "20px"
+        }}
+      >
+        <span>
+          <FormattedMessage id="sign-in.as" /> {this.state.email}
+        </span>{" "}
+      </div>
+    );
+  }
+
   renderEnterButton() {
+    // <a onClick={this.onLinkClicked(this.showSignInDialog)}></a>
+    // <a onClick={this.onLinkClicked(this.signOut)}>
+
     return (
       <button
-        className={classNames(styles.primaryButton, styles.ctaButton)}
+        style={{
+          border: "none",
+          background: "none",
+          padding: "0",
+          margin: "0"
+        }}
         onClick={e => {
           e.preventDefault();
-          const targetUrl = getRoomMetadata('lobby').url
+          const targetUrl = getRoomMetadata("lobby").url;
           if (targetUrl) {
-            location.href = targetUrl
+            location.href = targetUrl;
           } else {
             console.error("invalid portal targetRoom:", this.data.targetRoom);
           }
         }}
       >
-        <FormattedMessage id="home.enter" />
+        <img
+          style={{
+            maxWidth: "200px"
+          }}
+          src={loginButton}
+        />
+      </button>
+    );
+  }
+
+  renderSignInDialog() {
+    // <a onClick={}></a>
+    // <a onClick={this.onLinkClicked(this.signOut)}>
+
+    return (
+      <button
+        style={{
+          border: "none",
+          background: "none",
+          padding: "0",
+          margin: "0",
+          cursor: "pointer"
+        }}
+        onClick={this.onLinkClicked(this.showSignInDialog)}
+      >
+        <img
+          style={{
+            maxWidth: "200px"
+          }}
+          src={loginButton}
+        />
+      </button>
+    );
+  }
+
+  renderSignOutDialog() {
+    // <a onClick={}></a>
+    // <a onClick={this.onLinkClicked(this.signOut)}>
+
+    return (
+      <button
+        style={{
+          border: "none",
+          background: "none",
+          padding: "0",
+          margin: "0",
+          cursor: "pointer"
+        }}
+        onClick={this.onLinkClicked(this.signOut)}
+      >
+        <img
+          style={{
+            maxWidth: "200px",
+            marginRight: "-25px"
+          }}
+          src={logoutButton}
+        />
       </button>
     );
   }
@@ -340,15 +409,30 @@ class HomeRoot extends Component {
     return (
       <div className={styles.heroPanel}>
         <div className={styles.container}>
-          <div className={styles.logo}>
-            <img src={configs.image("logo")} />
-          </div>
-          <div className={styles.blurb}><FormattedMessage id="app-description" />
-          </div>
+          <img
+            src={configs.image("home_logo")}
+            style={{
+              maxWidth: "400px",
+              animation: "logo-rotate 4s linear infinite"
+            }}
+          />
+          <img src={aug20Image} />
         </div>
         <div className={styles.ctaButtons}>
-          {this.state.signedIn && this.renderEnterButton()}
-          {this.renderPwaButton()}
+          <div
+            style={{
+              position: "absolute",
+              top: "32px",
+              right: "16px",
+              display: "flex",
+              alignItems: "flex-end",
+              flexDirection: "column"
+            }}
+          >
+            {!this.state.signedIn && this.renderSignInDialog()}
+            {this.state.signedIn && this.renderSignOutDialog()}
+            {this.state.signedIn && this.renderSignInInfo()}
+          </div>
         </div>
       </div>
     );

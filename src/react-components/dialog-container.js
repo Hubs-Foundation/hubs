@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import configs from "../utils/configs";
+import modalButton from "../assets/images/modal-button.png";
 
 export default class DialogContainer extends Component {
   static propTypes = {
@@ -75,13 +77,40 @@ export default class DialogContainer extends Component {
               {this.props.closable &&
                 this.props.onClose &&
                 !this.props.noOverlay && (
-                  <button className="dialog__box__contents__close" onClick={() => this.props.onClose()}>
-                    <i>
-                      <FontAwesomeIcon icon={faTimes} />
-                    </i>
+                  <button
+                    className="dialog__box__contents__close"
+                    onClick={() => this.props.onClose()}
+                    style={{
+                      padding: "0"
+                    }}
+                  >
+                    <img
+                      src={modalButton}
+                      style={{
+                        width: "24px",
+                        height: "24px"
+                      }}
+                    />
                   </button>
                 )}
-              {this.props.title && <div className="dialog__box__contents__title">{this.props.title}</div>}
+              {/* {this.props.title && <div className="dialog__box__contents__title" style={{
+        fontFamily: "steps-monomono_thin",
+        color: "#667000",
+        textTransform: "uppercase"
+              }}>{this.props.title}</div>} */}
+              <div
+                style={{
+                  textAlign: "center",
+                  width: "100%"
+                }}
+              >
+                <img
+                  src={configs.image("home_logo")}
+                  style={{
+                    maxWidth: "200px"
+                  }}
+                />
+              </div>
               <div className="dialog__box__contents__body">{this.props.children}</div>
               <div className="dialog__box__contents__button-container" />
             </div>
