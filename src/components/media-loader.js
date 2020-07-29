@@ -402,7 +402,7 @@ AFRAME.registerComponent("media-loader", {
       }
 
       // Some servers treat m3u8 playlists as "audio/x-mpegurl", we always want to treat them as HLS videos
-      if (contentType === "audio/x-mpegurl") {
+      if (contentType === "audio/x-mpegurl" || contentType === "audio/mpegurl") {
         contentType = "application/vnd.apple.mpegurl";
       }
 
