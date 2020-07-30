@@ -143,9 +143,15 @@ export default class HubChannel extends EventTarget {
     // This is fairly hacky, but gets the # of initial occupants
     let initialOccupantCount = 0;
 
-    if (NAF.connection.adapter && NAF.connection.adapter.publisher) {
-      initialOccupantCount = NAF.connection.adapter.publisher.initialOccupants.length;
+    if (NAF.connection.adapter && NAF.connection.adapter.occupants) {
+      console.log(NAF);
+      // Count number of people inside the room as avatars
+      // Does not count lobby users
+      // I enter room, will be 0
+      initialOccupantCount = Object.keys(NAF.connection.adapter.occupants).length;
     }
+    console.log("initialOccupantCount: " + initialOccupantCount);
+    console.log(initialOccupantCount);
 
     const entryTimingFlags = this.getEntryTimingFlags();
 
