@@ -126,10 +126,7 @@ export class ShadowSystem {
       }
     });
 
-    // The bots will not have a renderer defined, so skip updating the shadow map
-    if (this.sceneEl.renderer) {
-      this.sceneEl.renderer.shadowMap.needsUpdate = true;
-    }
+    this.sceneEl.renderer.shadowMap.needsUpdate = true;
 
     this.needsUpdate = false;
   }
