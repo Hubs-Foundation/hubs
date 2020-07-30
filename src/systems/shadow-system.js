@@ -1,23 +1,5 @@
 import resizeShadowCameraFrustum from "../utils/resizeShadowCameraFrustum";
-
-function traverseAnimationTargets(rootObject, animations, callback) {
-  if (animations && animations.length > 0) {
-    for (const animation of animations) {
-      for (const track of animation.tracks) {
-        const { nodeName } = THREE.PropertyBinding.parseTrackName(track.name);
-        let animatedNode = rootObject.getObjectByProperty("uuid", nodeName);
-
-        if (!animatedNode) {
-          animatedNode = rootObject.getObjectByName(nodeName);
-        }
-
-        if (animatedNode) {
-          callback(animatedNode);
-        }
-      }
-    }
-  }
-}
+import { traverseAnimationTargets } from "../utils/three-utils";
 
 export class ShadowSystem {
   constructor(sceneEl) {
@@ -28,29 +10,20 @@ export class ShadowSystem {
     this.sceneEl.addEventListener("environment-scene-loaded", this.onEnvironmentSceneLoaded);
   }
 
-  onEnvironmentSceneLoaded({ detail: scene }) {
-    this.environmentObject3D = scene;
+  onEnvironmentSceneLoaded({ detail: environmentObject3D }) {
+    this.environmentObject3D = environmentObject3D;
     this.needsUpdate = true;
     this.sceneEl.renderer.shadowMap.autoUpdate = this.dynamicShadowsEnabled;
   }
 
   tick() {
-    if (!this.needsUpdate) {
-      return;
-    }
-
-    if (window.APP && window.APP.quality === "low") {
-      return;
-    }
-
     const environmentObject3D = this.environmentObject3D;
 
-    if (!environmentObject3D) {
+    if (!this.needsUpdate || (window.APP && window.APP.quality === "low") || !environmentObject3D) {
       return;
     }
 
     if (!this.dynamicShadowsEnabled) {
-      // Recompute the shadowmap when the environment changes.
       traverseAnimationTargets(environmentObject3D, environmentObject3D.animations, animatedNode => {
         animatedNode.traverse(child => {
           child.castShadow = false;

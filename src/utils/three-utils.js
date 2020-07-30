@@ -334,3 +334,22 @@ export const childMatch = (function() {
     setMatrixWorld(parent, newParentMatrix);
   };
 })();
+
+export function traverseAnimationTargets(rootObject, animations, callback) {
+  if (animations && animations.length > 0) {
+    for (const animation of animations) {
+      for (const track of animation.tracks) {
+        const { nodeName } = THREE.PropertyBinding.parseTrackName(track.name);
+        let animatedNode = rootObject.getObjectByProperty("uuid", nodeName);
+
+        if (!animatedNode) {
+          animatedNode = rootObject.getObjectByName(nodeName);
+        }
+
+        if (animatedNode) {
+          callback(animatedNode);
+        }
+      }
+    }
+  }
+}
