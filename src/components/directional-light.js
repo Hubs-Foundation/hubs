@@ -1,5 +1,3 @@
-import resizeShadowCameraFrustum from "../utils/resizeShadowCameraFrustum";
-
 AFRAME.registerComponent("directional-light", {
   schema: {
     color: { type: "color" },
