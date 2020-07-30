@@ -474,10 +474,12 @@ AFRAME.registerComponent("skybox", {
     const environmentMapComponent = this.el.sceneEl.components["environment-map"];
     const renderer = this.el.sceneEl.renderer;
 
-    if (environmentMapComponent && !isBotMode && APP.quality !== "low") {
+    const quality = window.APP.store.state.preferences.materialQualitySetting;
+
+    if (environmentMapComponent && !isBotMode && quality === "high") {
       const envMap = this.sky.generateEnvironmentMap(renderer);
       environmentMapComponent.updateEnvironmentMap(envMap);
-    } else if (APP.quality === "low") {
+    } else if (quality === "medium") {
       this.el.setObject3D("ambient-light", new THREE.AmbientLight(0xffffff, 0.3));
       this.el.setObject3D("light-probe", this.sky.generateLightProbe(renderer));
     }

@@ -183,14 +183,6 @@ if (isEmbed && !qs.get("embed_token")) {
 }
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
-window.APP.quality =
-  window.APP.store.state.preferences.materialQualitySetting === "low"
-    ? "low"
-    : window.APP.store.state.preferences.materialQualitySetting === "high"
-      ? "high"
-      : isMobile || isMobileVR
-        ? "low"
-        : "high";
 
 import "./components/owned-object-limiter";
 import "./components/owned-object-cleanup-timeout";
@@ -759,7 +751,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const scene = document.querySelector("a-scene");
-  scene.renderer.debug.checkShaderErrors = false;
+  scene.renderer.debug.checkShaderErrors = true;
 
   // HACK - Trigger initial batch preparation with an invisible object
   scene

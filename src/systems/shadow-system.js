@@ -39,7 +39,7 @@ export class ShadowSystem {
       return;
     }
 
-    if (window.APP && window.APP.quality === "low") {
+    if (window.APP.store.state.preferences.materialQualitySetting === "low") {
       return;
     }
 

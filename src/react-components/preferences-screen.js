@@ -589,7 +589,7 @@ const DEFINITIONS = new Map([
       {
         key: "materialQualitySetting",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-        options: [{ value: "low", text: "Low" }, { value: "high", text: "High" }],
+        options: [{ value: "low", text: "Low" }, { value: "medium", text: "Medium" }, { value: "high", text: "High" }],
         defaultString: isMobile ? "low" : "high",
         promptForRefresh: true
       },
