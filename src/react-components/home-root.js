@@ -346,9 +346,9 @@ class HomeRoot extends Component {
       >
         <img
           style={{
-            maxWidth: "200px"
+            maxWidth: "120px"
           }}
-          src={loginButton}
+          src={aug20Image}
         />
       </button>
     );
@@ -416,7 +416,7 @@ class HomeRoot extends Component {
               animation: "logo-rotate 4s linear infinite"
             }}
           />
-          <img src={aug20Image} />
+          {this.renderEnterButton()}
         </div>
         <div className={styles.ctaButtons}>
           <div
