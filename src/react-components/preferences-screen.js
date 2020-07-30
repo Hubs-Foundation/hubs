@@ -593,6 +593,12 @@ const DEFINITIONS = new Map([
         defaultString: isMobile ? "low" : "high",
         promptForRefresh: true
       },
+      {
+        key: "enableDynamicShadows",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+        defaultBool: false,
+        promptForRefresh: true
+      },
       { key: "disableAutoPixelRatio", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "disableIdleDetection", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
