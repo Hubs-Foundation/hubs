@@ -150,6 +150,20 @@ export default class MessageDispatch {
           this.log(`Positional Audio ${shouldEnablePositionalAudio ? "enabled" : "disabled"}.`);
         }
         break;
+      case "rolloff":
+        if (args.length === 1) {
+          const factor = Number(args[0]);
+          if (!isNaN(factor)) {
+            window.APP.store.update({
+              preferences: { globalRolloffFactor: factor }
+            });
+          } else {
+            this.log("rolloff command needs a valid number parameter.");
+          }
+        } else {
+          this.log("rolloff command needs one parameter.");
+        }
+        break;
     }
   };
 }

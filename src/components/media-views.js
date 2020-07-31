@@ -943,12 +943,15 @@ AFRAME.registerComponent("media-video", {
           this.el.object3D.getWorldPosition(positionA);
           this.el.sceneEl.camera.getWorldPosition(positionB);
           const distance = positionA.distanceTo(positionB);
+          const globalRolloffFactor = window.APP.store.state.preferences.globalRolloffFactor;
           this.distanceBasedAttenuation = Math.min(1, 10 / Math.max(1, distance * distance));
           const globalMediaVolume =
             window.APP.store.state.preferences.globalMediaVolume !== undefined
               ? window.APP.store.state.preferences.globalMediaVolume
               : 100;
-          this.audio.gain.gain.value = (globalMediaVolume / 100) * this.data.volume * this.distanceBasedAttenuation;
+          // Assumes globalRolloffFactor is in (1.0, 0.0) range
+          this.audio.gain.gain.value = (globalMediaVolume / 100) * this.data.volume
+            * (1.0 + globalRolloffFactor * (this.distanceBasedAttenuation - 1.0));
         }
       }
     };
