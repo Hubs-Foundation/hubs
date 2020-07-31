@@ -42,6 +42,47 @@ export function convertStandardMaterial(source, quality) {
     material.emissiveMap = source.emissiveMap;
     material.emissiveIntensity = source.emissiveIntensity;
 
+    material.normalMapType = source.normalMapType;
+    material.normalMap = source.normalMap;
+    material.normalScale.copy(source.normalScale);
+
+    material.onBeforeCompile = shader => {
+      shader.vertexShader = shader.vertexShader.replace(
+        "varying vec3 vNormal;",
+        `varying vec3 vNormal;
+        #ifdef USE_TANGENT
+          varying vec3 vTangent;
+          varying vec3 vBitangent;
+        #endif
+        `
+      );
+      shader.vertexShader = shader.vertexShader.replace(
+        "vNormal = normalize( transformedNormal );",
+        `vNormal = normalize( transformedNormal );
+        
+          #ifdef USE_TANGENT
+        
+            vTangent = normalize( transformedTangent );
+            vBitangent = normalize( cross( vNormal, vTangent ) * tangent.w );
+        
+          #endif
+        `
+      );
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <lights_phong_pars_fragment>",
+        `#include <lights_phong_pars_fragment>
+        #ifndef FLAT_SHADED
+
+          #ifdef USE_TANGENT
+            varying vec3 vTangent;
+            varying vec3 vBitangent;
+          #endif
+
+        #endif
+        `
+      );
+    };
+
     material.bumpMap = source.bumpMap;
     material.bumpScale = source.bumpScale;
 
