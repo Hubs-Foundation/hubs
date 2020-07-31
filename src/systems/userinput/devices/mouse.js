@@ -7,17 +7,14 @@ const modeMod = {
   [WheelEvent.DOM_DELTA_PAGE]: 2
 };
 
-const isInModal = (() => {
-  let uiRoot = null;
-
-  return function() {
-    if (!uiRoot) {
-      uiRoot = document.querySelector(".ui-root");
-    }
-
-    return uiRoot && uiRoot.classList.contains("in-modal-or-overlay");
-  };
-})();
+function isInModal() {
+  // Performing a querySelector on each wheel event is not desired,
+  // but we can't simply cache the .ui-root element because it can be destroyed
+  // and recreated on full-screen takeovers (e.g. showing the preference screen)
+  // TODO: Tech debt. Find better way to handle this state that is available in react.
+  const uiRoot = document.querySelector(".ui-root");
+  return (uiRoot && uiRoot.classList.contains("in-modal-or-overlay")) || window.APP.preferenceScreenIsVisible;
+}
 
 export class MouseDevice {
   constructor() {
@@ -45,7 +42,7 @@ export class MouseDevice {
       "wheel",
       e => {
         // Do not capture wheel events if they are being sent to an modal/overlay
-        if (!isInModal() && !window.APP.preferenceScreenIsVisible) {
+        if (!isInModal()) {
           e.preventDefault();
         }
       },
