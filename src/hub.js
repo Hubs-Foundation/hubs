@@ -685,7 +685,14 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
 async function runBotMode(scene, entryManager) {
   const noop = () => {};
-  scene.renderer = { setAnimationLoop: noop, render: noop, shadowMap: {} };
+  const alwaysFalse = () => false;
+  scene.renderer = {
+    setAnimationLoop: noop,
+    render: noop,
+    shadowMap: {},
+    vr: { isPresenting: alwaysFalse },
+    setSize: noop
+  };
 
   while (!NAF.connection.isConnected()) await nextTick();
   entryManager.enterSceneWhenLoaded(new MediaStream(), false);

@@ -22,7 +22,10 @@ function log(...objs) {
 }
 
 (async () => {
-  const browser = await puppeteer.launch({ ignoreHTTPSErrors: true });
+  const browser = await puppeteer.launch({
+    ignoreHTTPSErrors: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--ignore-gpu-blacklist", "--ignore-certificate-errors"]
+  });
   const page = await browser.newPage();
   await page.setBypassCSP(true);
   page.on("console", msg => log("PAGE: ", msg.text()));
