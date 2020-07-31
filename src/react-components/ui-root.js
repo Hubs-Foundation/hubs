@@ -1052,6 +1052,16 @@ class UIRoot extends Component {
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>
+          <button
+            aria-label="Close room entry panel and spectate from lobby"
+            onClick={() => this.setState({ watching: true })}
+            className={entryStyles.collapseButton}
+          >
+            <i>
+              <FontAwesomeIcon icon={faTimes} />
+            </i>
+          </button>
+
           {this.props.hubChannel.canOrWillIfCreator("update_hub") ? (
             <button
               className={entryStyles.renameButton}
@@ -1068,15 +1078,6 @@ class UIRoot extends Component {
           ) : (
             <span>{this.props.hub.name}</span>
           )}
-          <button
-            aria-label="Close room entry panel and spectate from lobby"
-            onClick={() => this.setState({ watching: true })}
-            className={entryStyles.collapseButton}
-          >
-            <i>
-              <FontAwesomeIcon icon={faTimes} />
-            </i>
-          </button>
 
           <button
             aria-label="Toggle Favorited"
