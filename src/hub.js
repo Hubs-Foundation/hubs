@@ -758,7 +758,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const scene = document.querySelector("a-scene");
-  scene.renderer.debug.checkShaderErrors = true;
+  scene.renderer.debug.checkShaderErrors = false;
 
   // HACK - Trigger initial batch preparation with an invisible object
   scene
