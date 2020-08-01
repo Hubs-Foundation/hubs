@@ -15,6 +15,11 @@ import URL_TACK from "../assets/sfx/tack.mp3";
 import URL_MEDIA_LOADED from "../assets/sfx/A_bendUp.mp3";
 import URL_MEDIA_LOADING from "../assets/sfx/suspense.mp3";
 import URL_SPAWN_EMOJI from "../assets/sfx/emoji.mp3";
+import URL_FART_0 from "../assets/sfx/241000__dsisstudios__short-fart-01.wav";
+import URL_FART_1 from "../assets/sfx/402628__inspectorj__whoopee-cushion-long-a.wav";
+import URL_FART_2 from "../assets/sfx/80389__ifartinurgeneraldirection__nice-fart-1.wav";
+import URL_FART_3 from "../assets/sfx/324453__katavlogsyt__small-fart.wav";
+import URL_MEOW from "../assets/sfx/333916__lextrack__cat-meowing.mp3";
 import { setMatrixWorld } from "../utils/three-utils";
 
 let soundEnum = 0;
@@ -43,6 +48,13 @@ export const SOUND_MEDIA_LOADED = soundEnum++;
 export const SOUND_CAMERA_TOOL_COUNTDOWN = soundEnum++;
 export const SOUND_PREFERENCE_MENU_HOVER = soundEnum++;
 export const SOUND_SPAWN_EMOJI = soundEnum++;
+export const SOUND_FART_0 = soundEnum++;
+export const SOUND_FART_1 = soundEnum++;
+export const SOUND_FART_2 = soundEnum++;
+export const SOUND_FART_3 = soundEnum++;
+export const SOUND_MEOW = soundEnum++;
+
+export const FART_SOUNDS = [SOUND_FART_0, SOUND_FART_1, SOUND_FART_2, SOUND_FART_3];
 
 // Safari doesn't support the promise form of decodeAudioData, so we polyfill it.
 function decodeAudioData(audioContext, arrayBuffer) {
@@ -86,7 +98,12 @@ export class SoundEffectsSystem {
       [SOUND_MEDIA_LOADING, URL_MEDIA_LOADING],
       [SOUND_MEDIA_LOADED, URL_MEDIA_LOADED],
       [SOUND_PREFERENCE_MENU_HOVER, URL_FREEZE],
-      [SOUND_SPAWN_EMOJI, URL_SPAWN_EMOJI]
+      [SOUND_SPAWN_EMOJI, URL_SPAWN_EMOJI],
+      [SOUND_FART_0, URL_FART_0],
+      [SOUND_FART_1, URL_FART_1],
+      [SOUND_FART_2, URL_FART_2],
+      [SOUND_FART_3, URL_FART_3],
+      [SOUND_MEOW, URL_MEOW]
     ];
     const loading = new Map();
     const load = url => {

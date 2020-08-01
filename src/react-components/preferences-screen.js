@@ -446,13 +446,14 @@ const CATEGORY_CONTROLS = 1;
 const CATEGORY_MISC = 2;
 const CATEGORY_MOVEMENT = 3;
 const CATEGORY_TOUCHSCREEN = 4;
-const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_CONTROLS, CATEGORY_MISC];
+const CATEGORY_SILLINESS = 5;
 const CATEGORY_NAMES = new Map([
   [CATEGORY_AUDIO, messages[`preferences.category_audio`]],
   [CATEGORY_CONTROLS, messages["preferences.category_controls"]],
   [CATEGORY_MISC, messages["preferences.category_misc"]],
   [CATEGORY_MOVEMENT, messages["preferences.category_movement"]],
-  [CATEGORY_TOUCHSCREEN, messages["preferences.category_touchscreen"]]
+  [CATEGORY_TOUCHSCREEN, messages["preferences.category_touchscreen"]],
+  [CATEGORY_SILLINESS, messages["preferences.category_silliness"]]
 ]);
 
 function NavItem({ ariaLabel, title, onClick, selected }) {
@@ -602,7 +603,15 @@ const DEFINITIONS = new Map([
       { key: "disableAutoPixelRatio", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "disableIdleDetection", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "preferMobileObjectInfoPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+      { key: "preferMobileObjectInfoPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+      { key: "showSillyPreferences", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+    ]
+  ],
+  [
+    CATEGORY_SILLINESS,
+    [
+      { key: "enableFartCommand", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+      { key: "enableCatCommand", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
     ]
   ]
 ]);
@@ -759,7 +768,8 @@ export default class PreferencesScreen extends Component {
           }
         ]
       ],
-      [CATEGORY_MISC, [{ items: items.get(CATEGORY_MISC) }]]
+      [CATEGORY_MISC, [{ items: items.get(CATEGORY_MISC) }]],
+      [CATEGORY_SILLINESS, [{ items: items.get(CATEGORY_SILLINESS) }]]
     ]);
     this.onresize = () => {
       this.forceUpdate();
@@ -782,6 +792,10 @@ export default class PreferencesScreen extends Component {
 
   render() {
     const shouldPromptForRefresh = !!this.props.store.state.preferences.shouldPromptForRefresh;
+    const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_CONTROLS, CATEGORY_MISC];
+    if (this.props.store.state.preferences.showSillyPreferences) {
+      TOP_LEVEL_CATEGORIES.push(CATEGORY_SILLINESS);
+    }
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={classNames(styles.preferencesPanel)}>

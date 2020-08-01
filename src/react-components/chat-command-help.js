@@ -32,6 +32,13 @@ export default class ChatCommandHelp extends Component {
       commands.push("capture [stop]");
     }
 
+    if (window.APP.store.state.preferences.enableFartCommand) {
+      commands.push("fart");
+    }
+    if (window.APP.store.state.preferences.enableCatCommand) {
+      commands.push("cat");
+    }
+
     return (
       <div className={classNames({ [styles.commandHelp]: true, [styles.commandHelpOnTop]: this.props.onTop })}>
         {commands.map(

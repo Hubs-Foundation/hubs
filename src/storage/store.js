@@ -93,7 +93,10 @@ export const SCHEMA = {
         movementSpeedModifier: { type: "number" },
         disableEchoCancellation: { type: "bool" },
         disableNoiseSuppression: { type: "bool" },
-        disableAutoGainControl: { type: "bool" }
+        disableAutoGainControl: { type: "bool" },
+        showSillyPreferences: { type: "bool" },
+        enableFartCommand: { type: "bool" },
+        enableCatCommand: { type: "bool" }
       }
     },
 

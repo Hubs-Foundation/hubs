@@ -1,11 +1,13 @@
 import "./utils/configs";
 import { getAbsoluteHref } from "./utils/media-url-utils";
 import { isValidSceneUrl } from "./utils/scene-url-utils";
+import { addMedia } from "./utils/media-utils";
 import { messages } from "./utils/i18n";
 import { spawnChatMessage } from "./react-components/chat-message";
-import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "./systems/sound-effects-system";
+import { SOUND_QUACK, SOUND_SPECIAL_QUACK, FART_SOUNDS, SOUND_MEOW } from "./systems/sound-effects-system";
 import ducky from "./assets/models/DuckyMesh.glb";
-
+const URL_CAT = "https://sketchfab.com/3d-models/cat-murdered-soul-suspect-836312def1b84e588866500a2bf79f0f";
+const URL_POOP = "https://sketchfab.com/3d-models/emoji-poop-printable-0bc1b140fc0a44dbb9e321e677b3559a";
 let uiRoot;
 // Handles user-entered messages
 export default class MessageDispatch {
@@ -148,6 +150,24 @@ export default class MessageDispatch {
             preferences: { audioOutputMode: shouldEnablePositionalAudio ? "panner" : "audio" }
           });
           this.log(`Positional Audio ${shouldEnablePositionalAudio ? "enabled" : "disabled"}.`);
+        }
+        break;
+      case "fart":
+        {
+          if (!window.APP.store.state.preferences.enableFartCommand) return;
+          this.scene.emit("add_media", URL_POOP);
+          spawnChatMessage(":poop:");
+          this.scene.systems["hubs-systems"].fartSystem.toot();
+          const sound = FART_SOUNDS[Math.floor(Math.random() * FART_SOUNDS.length)];
+          this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(sound);
+        }
+        break;
+      case "cat":
+        {
+          if (!window.APP.store.state.preferences.enableCatCommand) return;
+          this.scene.emit("add_media", URL_CAT);
+          spawnChatMessage(":cat:");
+          this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_MEOW);
         }
         break;
     }
