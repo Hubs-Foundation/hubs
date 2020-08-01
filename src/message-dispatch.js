@@ -1,7 +1,6 @@
 import "./utils/configs";
 import { getAbsoluteHref } from "./utils/media-url-utils";
 import { isValidSceneUrl } from "./utils/scene-url-utils";
-import { addMedia } from "./utils/media-utils";
 import { messages } from "./utils/i18n";
 import { spawnChatMessage } from "./react-components/chat-message";
 import { SOUND_QUACK, SOUND_SPECIAL_QUACK, FART_SOUNDS, SOUND_MEOW } from "./systems/sound-effects-system";
