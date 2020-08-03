@@ -22,7 +22,7 @@ export default class ChatCommandHelp extends Component {
       "scene <scene url>",
       "rename <new name>",
       "audiomode",
-      "rolloff <factor>"
+      "audioRolloff <factor>"
     ];
 
     if (window.APP.hubChannel && window.APP.hubChannel.can("fly")) {

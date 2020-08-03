@@ -150,7 +150,7 @@ export default class MessageDispatch {
           this.log(`Positional Audio ${shouldEnablePositionalAudio ? "enabled" : "disabled"}.`);
         }
         break;
-      case "rolloff":
+      case "audioRolloff":
         if (args.length === 1) {
           const factor = Number(args[0]);
           if (!isNaN(factor)) {
@@ -158,10 +158,10 @@ export default class MessageDispatch {
               preferences: { globalRolloffFactor: factor }
             });
           } else {
-            this.log("rolloff command needs a valid number parameter.");
+            this.log("audioRolloff command needs a valid number parameter.");
           }
         } else {
-          this.log("rolloff command needs one parameter.");
+          this.log("audioRolloff command needs one parameter.");
         }
         break;
     }
