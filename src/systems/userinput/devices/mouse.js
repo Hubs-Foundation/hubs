@@ -7,15 +7,15 @@ const modeMod = {
   [WheelEvent.DOM_DELTA_PAGE]: 2
 };
 
-const isInModal = (() => {
-  let uiRoot = null;
-
-  return function() {
-    if (!uiRoot) {
-      uiRoot = document.querySelector(".ui-root");
-    }
-
-    return uiRoot && uiRoot.classList.contains("in-modal-or-overlay");
+const isInModal = (function() {
+  let uiRoot;
+  return function isInModal() {
+    // TODO: Tech debt. Find better way to handle this state that is available in react.
+    uiRoot = uiRoot || document.getElementById("ui-root");
+    return (
+      (uiRoot && uiRoot.children[0] && uiRoot.children[0].classList.contains("in-modal-or-overlay")) ||
+      window.APP.preferenceScreenIsVisible
+    );
   };
 })();
 
@@ -45,7 +45,7 @@ export class MouseDevice {
       "wheel",
       e => {
         // Do not capture wheel events if they are being sent to an modal/overlay
-        if (!isInModal() && !window.APP.preferenceScreenIsVisible) {
+        if (!isInModal()) {
           e.preventDefault();
         }
       },
