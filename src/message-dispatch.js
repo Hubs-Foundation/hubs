@@ -155,7 +155,8 @@ export default class MessageDispatch {
           const factor = Number(args[0]);
           if (!isNaN(factor)) {
             window.APP.store.update({
-              preferences: { globalRolloffFactor: factor }
+              // Factor must be equal to or greater than 0.0
+              preferences: { globalRolloffFactor: Math.max(0.0, factor) }
             });
           } else {
             this.log("audioRolloff command needs a valid number parameter.");

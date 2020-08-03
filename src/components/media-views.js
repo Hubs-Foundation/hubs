@@ -949,9 +949,9 @@ AFRAME.registerComponent("media-video", {
             window.APP.store.state.preferences.globalMediaVolume !== undefined
               ? window.APP.store.state.preferences.globalMediaVolume
               : 100;
-          // Assumes globalRolloffFactor is in (1.0, 0.0) range
+          // Clamp globalRolloffFactor to [0.0, 1.0]
           this.audio.gain.gain.value = (globalMediaVolume / 100) * this.data.volume
-            * (1.0 + globalRolloffFactor * (this.distanceBasedAttenuation - 1.0));
+            * (1.0 + Math.max(0.0, Math.min(1.0, globalRolloffFactor)) * (this.distanceBasedAttenuation - 1.0));
         }
       }
     };
