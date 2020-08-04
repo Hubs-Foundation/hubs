@@ -23,6 +23,8 @@
 </head>
 
 <body>
+    <div id="support-root"></div>
+
     <a-scene
         loading-screen="enabled: false"
         renderer="
@@ -32,7 +34,8 @@
             physicallyCorrectLights: true;
             colorManagement: true;
             alpha: false;"
-        shadow="type: pcfsoft"
+        shadow="type: pcfsoft;autoUpdate: false"
+        light="defaultLightsEnabled: false"
         environment-map
     >
         <a-entity

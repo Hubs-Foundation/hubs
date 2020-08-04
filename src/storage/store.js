@@ -67,6 +67,7 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         shouldPromptForRefresh: { type: "bool" },
+        preferredCamera: { type: "string" },
         muteMicOnEntry: { type: "bool" },
         audioOutputMode: { type: "string" },
         invertTouchscreenCameraMove: { type: "bool" },
@@ -82,6 +83,7 @@ export const SCHEMA = {
         globalMediaVolume: { type: "number" },
         snapRotationDegrees: { type: "number" },
         materialQualitySetting: { type: "string" },
+        enableDynamicShadows: { type: "bool" },
         disableSoundEffects: { type: "bool" },
         disableMovement: { type: "bool" },
         disableBackwardsMovement: { type: "bool" },

@@ -27,6 +27,8 @@
 </head>
 
 <body>
+    <div id="support-root"></div>
+
     <a-scene
         loading-screen="enabled: false"
         hubs-systems
@@ -42,7 +44,7 @@
             alpha: false;
             webgl2: true;
             multiview: false;"
-        shadow="type: pcfsoft"
+        shadow="type: pcfsoft;autoUpdate: false"
         networked-scene="audio: true; debug: true; connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         action-to-event__mute="path: /actions/muteMic; event: action_mute;"

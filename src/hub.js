@@ -159,6 +159,7 @@ import { SOUND_CHAT_MESSAGE } from "./systems/sound-effects-system";
 import "./gltf-component-mappings";
 
 import { App } from "./App";
+import { platformUnsupported } from "./support";
 
 window.APP = new App();
 window.APP.RENDER_ORDER = {
@@ -234,11 +235,6 @@ if (!isBotMode && !isTelemetryDisabled) {
 
 disableiOSZoom();
 detectConcurrentLoad();
-
-function getPlatformUnsupportedReason() {
-  if (typeof RTCDataChannelEvent === "undefined") return "no_data_channels";
-  return null;
-}
 
 function setupLobbyCamera() {
   const camera = document.getElementById("scene-preview-node");
@@ -689,7 +685,14 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
 async function runBotMode(scene, entryManager) {
   const noop = () => {};
-  scene.renderer = { setAnimationLoop: noop, render: noop };
+  const alwaysFalse = () => false;
+  scene.renderer = {
+    setAnimationLoop: noop,
+    render: noop,
+    shadowMap: {},
+    vr: { isPresenting: alwaysFalse },
+    setSize: noop
+  };
 
   while (!NAF.connection.isConnected()) await nextTick();
   entryManager.enterSceneWhenLoaded(new MediaStream(), false);
@@ -712,28 +715,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   warmSerializeElement();
 
-  if (!window.WebAssembly) {
-    remountUI({ showWebAssemblyDialog: true });
+  if (platformUnsupported()) {
     return;
   }
 
-  // Some apps like Twitter, Discord and Facebook on Android and iOS open links in
-  // their own embedded preview browsers.
-  //
-  // On iOS this WebView does not have a mediaDevices API at all, but in Android apps
-  // like Facebook, the browser pretends to have a mediaDevices, but never actually
-  // prompts the user for device access. So, we show a dialog that tells users to open
-  // the room in an actual browser like Safari, Chrome or Firefox.
-  //
-  // Facebook Mobile Browser on Android has a userAgent like this:
-  // Mozilla/5.0 (Linux; Android 9; SM-G950U1 Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML, like Gecko)
-  // Version/4.0 Chrome/80.0.3987.149 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/262.0.0.34.117;]
   const detectedOS = detectOS(navigator.userAgent);
-  if ((detectedOS === "iOS" && !navigator.mediaDevices) || /\bfb_iab\b/i.test(navigator.userAgent)) {
-    remountUI({ showInAppBrowserDialog: true });
-    return;
-  }
-
   const browser = detect();
   // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
   // safari when initializing it later.
@@ -780,7 +766,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const scene = document.querySelector("a-scene");
-  scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
   scene.renderer.debug.checkShaderErrors = false;
 
   // HACK - Trigger initial batch preparation with an invisible object
@@ -1036,9 +1021,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({ roomUnavailableReason: "left" });
   });
 
-  scene.addEventListener("camera_toggled", () => remountUI({}));
-
-  scene.addEventListener("camera_removed", () => remountUI({}));
+  const updateCameraUI = function(e) {
+    if (e.detail !== "camera") return;
+    remountUI({});
+  };
+  scene.addEventListener("stateadded", updateCameraUI);
+  scene.addEventListener("stateremoved", updateCameraUI);
 
   scene.addEventListener("hub_closed", () => {
     scene.exitVR();
@@ -1048,14 +1036,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   scene.addEventListener("action_camera_recording_started", () => hubChannel.beginRecording());
   scene.addEventListener("action_camera_recording_ended", () => hubChannel.endRecording());
-
-  const platformUnsupportedReason = getPlatformUnsupportedReason();
-
-  if (platformUnsupportedReason) {
-    remountUI({ platformUnsupportedReason });
-    entryManager.exitScene();
-    return;
-  }
 
   if (qs.get("required_version") && process.env.BUILD_VERSION) {
     const buildNumber = process.env.BUILD_VERSION.split(" ", 1)[0]; // e.g. "123 (abcd5678)"
@@ -1121,14 +1101,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   environmentScene.addEventListener("model-loaded", onFirstEnvironmentLoad);
 
-  environmentScene.addEventListener("model-loaded", () => {
+  environmentScene.addEventListener("model-loaded", ({ detail: { model } }) => {
     if (!scene.is("entered")) {
       setupLobbyCamera();
     }
 
     // This will be run every time the environment is changed (including the first load.)
     remountUI({ environmentSceneLoaded: true });
-    scene.emit("environment-scene-loaded");
+    scene.emit("environment-scene-loaded", model);
 
     // Re-bind the teleporter controls collision meshes in case the scene changed.
     document.querySelectorAll("a-entity[teleporter]").forEach(x => x.components["teleporter"].queryCollisionEntities());

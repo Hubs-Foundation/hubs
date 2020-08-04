@@ -14,6 +14,8 @@ import { promisifyWorker } from "../utils/promisify-worker.js";
 import pdfjs from "pdfjs-dist";
 import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
+import { detect } from "detect-browser";
+import semver from "semver";
 
 /**
  * Warning! This require statement is fragile!
@@ -585,10 +587,9 @@ AFRAME.registerComponent("media-video", {
       }
 
       this.mediaElementAudioSource = null;
-
       if (!src.startsWith("hubs://")) {
-        // iOS video audio is broken, see: https://github.com/mozilla/hubs/issues/1797
-        if (!isIOS) {
+        // iOS video audio is broken on ios safari < 13.1.2, see: https://github.com/mozilla/hubs/issues/1797
+        if (!isIOS || semver.satisfies(detect().version, ">=13.1.2")) {
           // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
           this.mediaElementAudioSource =
             linkedMediaElementAudioSource ||
@@ -1009,7 +1010,9 @@ AFRAME.registerComponent("media-image", {
     version: { type: "number" },
     projection: { type: "string", default: "flat" },
     contentType: { type: "string" },
-    batch: { default: false }
+    batch: { default: false },
+    alphaMode: { type: "string", default: undefined },
+    alphaCutoff: { type: "number" }
   },
 
   remove() {
@@ -1127,12 +1130,30 @@ AFRAME.registerComponent("media-image", {
       this.el.setObject3D("mesh", this.mesh);
     }
 
-    // We only support transparency on gifs. Other images will support cutout as part of batching, but not alpha transparency for now
-    this.mesh.material.transparent =
-      !this.data.batch ||
-      texture == errorTexture ||
-      this.data.contentType.includes("image/gif") ||
-      !!(texture.image && texture.image.hasAlpha);
+    if (texture == errorTexture) {
+      this.mesh.material.transparent = true;
+    } else {
+      // if transparency setting isnt explicitly defined, default to on for all non batched things, gifs, and basis textures with alpha
+      switch (this.data.alphaMode) {
+        case "opaque":
+          this.mesh.material.transparent = false;
+          break;
+        case "blend":
+          this.mesh.material.transparent = true;
+          this.mesh.material.alphaTest = 0;
+          break;
+        case "mask":
+          this.mesh.material.transparent = false;
+          this.mesh.material.alphaTest = this.data.alphaCutoff;
+          break;
+        default:
+          this.mesh.material.transparent =
+            !this.data.batch ||
+            this.data.contentType.includes("image/gif") ||
+            !!(texture.image && texture.image.hasAlpha);
+          this.mesh.material.alphaTest = 0;
+      }
+    }
 
     this.mesh.material.map = texture;
     this.mesh.material.needsUpdate = true;
