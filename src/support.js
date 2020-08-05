@@ -8,9 +8,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import copy from "copy-to-clipboard";
 import { detectOS } from "detect-browser";
-import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
-import en from "react-intl/locale-data/en";
-addLocaleData([...en]);
+import { IntlProvider, FormattedMessage } from "react-intl";
 
 import styles from "./assets/stylesheets/support.scss";
 import configs from "./utils/configs";

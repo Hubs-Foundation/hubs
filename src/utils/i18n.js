@@ -1,10 +1,42 @@
 import configs from "./configs";
 import localeData from "../assets/translations.data.json";
 
-const navigatorLang = ((navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage)
-  .toLowerCase()
-  .split(/[_-]+/)[0];
-export const lang = (localeData[navigatorLang] && navigatorLang) || "en";
+function getLocales() {
+  if (navigator.languages) {
+    return navigator.languages;
+  }
+  if (navigator.language) {
+    return [navigator.language];
+  }
+  if (navigator.userLanguage) {
+    return [navigator.userLanguage];
+  }
+}
+
+function getLang(locale) {
+  // some locales require fallbacks in case of possible duplicated listings e.g. zh and zh-cn
+  if (localeData[locale]) {
+    const fallbackLang = localeData[locale];
+    if (typeof fallbackLang === "string" && localeData[fallbackLang]) {
+      return fallbackLang;
+    } else {
+      return locale;
+    }
+  }
+  return null;
+}
+
+function getLangFromLocales(locales) {
+  for (let i = 0; i < locales.length; i++) {
+    const lang = getLang(locales[i].toLowerCase());
+    if (lang) {
+      return lang;
+    }
+  }
+}
+
+const locales = getLocales();
+export const lang = getLangFromLocales(locales) || "en";
 
 const _messages = localeData[lang] || localeData.en;
 

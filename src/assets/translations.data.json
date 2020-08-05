@@ -166,7 +166,7 @@
     "media-browser.create-avatar": "Create Avatar",
     "media-browser.create-scene": "Create Scene with %editor-name%",
     "media-browser.hub.joined-prefix": "Joined ",
-    "media-browser.hub.joined-prefix": "Visited ",
+    "media-browser.hub.visited-prefix": "Visited ",
     "media-browser.similar-to-facet": "Similar to: \"{name}\"",
     "audio.title": "Audio Setup",
     "audio.talk_to_test": "talk",
@@ -449,7 +449,7 @@
     "support.supported": "supported",
     "support.unsupported": "unsupported"
   },
-   "cn-zh": {
+   "zh": {
     "app-name": "App",
     "editor-name": "Scene Editor",
     "contact-email": "app@company.com",
@@ -616,7 +616,7 @@
     "media-browser.create-avatar": "新建头像",
     "media-browser.create-scene": "通过 %editor-name%新建场景",
     "media-browser.hub.joined-prefix": "已加入 ",
-    "media-browser.hub.joined-prefix": "已访问",
+    "media-browser.hub.visited-prefix": "已访问",
     "media-browser.similar-to-facet": "与: \"{name}\"一样",
     "audio.title": "语音设置",
     "audio.talk_to_test": "谈话",
@@ -875,5 +875,6 @@
     "cloud.call_to_action_enterprise": "获得企业 Hubs Cloud",
     "cloud.aws_quick_start": "快速开始指南",
     "cloud.splash_tag": "为你自己的 Hubs stack可配置的基础设施"
-  }
+  },
+  "zh-cn": "zh"
 }

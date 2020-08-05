@@ -10,12 +10,10 @@ import ReactDOM from "react-dom";
 import React from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
-import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
-import en from "react-intl/locale-data/en";
+import { IntlProvider, FormattedMessage } from "react-intl";
 
 import configs from "./utils/configs";
 import { lang, messages } from "./utils/i18n";
-addLocaleData([...en]);
 
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 disableiOSZoom();

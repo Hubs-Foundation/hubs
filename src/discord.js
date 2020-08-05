@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 import React, { Component } from "react";
 import "./utils/configs";
-import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
+import { IntlProvider, FormattedMessage } from "react-intl";
 import styles from "./assets/stylesheets/discord.scss";
 import discordBotLogo from "./assets/images/discord-bot-logo.png";
 import discordBotVideoMP4 from "./assets/video/discord.mp4";
@@ -11,10 +11,8 @@ import registerTelemetry from "./telemetry";
 
 registerTelemetry("/discord", "Discord Landing Page");
 
-import en from "react-intl/locale-data/en";
 import { lang, messages } from "./utils/i18n";
 
-addLocaleData([...en]);
 const inviteUrl = "https://forms.gle/GGPgarSuY5WaTNCT8";
 
 class DiscordLanding extends Component {
