@@ -50,6 +50,10 @@ export function isUI(el) {
   return isTagged(el, "singleActionButton") || isTagged(el, "holdableButton");
 }
 
+function identityFn(o) {
+  return o;
+}
+
 AFRAME.registerSystem("interaction", {
   updateCursorIntersection: function(intersection, left) {
     if (!left) {
@@ -68,12 +72,12 @@ AFRAME.registerSystem("interaction", {
     );
   },
 
-  isHoldingAnything() {
+  isHoldingAnything(pred = identityFn) {
     return !!(
-      this.state.leftHand.held ||
-      this.state.rightHand.held ||
-      this.state.rightRemote.held ||
-      this.state.leftRemote.held
+      pred(this.state.leftHand.held) ||
+      pred(this.state.rightHand.held) ||
+      pred(this.state.rightRemote.held) ||
+      pred(this.state.leftRemote.held)
     );
   },
 
