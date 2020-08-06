@@ -58,8 +58,9 @@ AFRAME.registerComponent("avatar-volume-controls", {
         this.el.sceneEl.camera.getWorldPosition(positionB);
         const squaredDistance = positionA.distanceToSquared(positionB);
         const distanceBasedAttenuation = Math.min(1, 10 / Math.max(1, squaredDistance));
-        // Clamp globalRolloffFactor to [0.0, 1.0]
-        gain = gain * (1.0 + Math.max(0.0, Math.min(1.0, globalRolloffFactor)) *
+        const rolloffFactor = globalRolloffFactor !== undefined ? globalRolloffFactor : 1.0;
+        // Clamp rolloffFactor to [0.0, 1.0]
+        gain = gain * (1.0 + Math.max(0.0, Math.min(1.0, rolloffFactor)) *
           (distanceBasedAttenuation - 1.0));
       }
 
