@@ -154,15 +154,17 @@ export default class MessageDispatch {
         if (args.length === 1) {
           const factor = Number(args[0]);
           if (!isNaN(factor)) {
+            // Factor must be equal to or greater than 0.0
+            const effectiveFactor = Math.max(0.0, factor);
             window.APP.store.update({
-              // Factor must be equal to or greater than 0.0
-              preferences: { globalRolloffFactor: Math.max(0.0, factor) }
+              preferences: { globalRolloffFactor: effectiveFactor }
             });
+            this.log(`audioRolloff factor is set to ${effectiveFactor}.`);
           } else {
             this.log("audioRolloff command needs a valid number parameter.");
           }
         } else {
-          this.log("audioRolloff command needs one parameter.");
+          this.log("audioRolloff command needs a number between 0 [no rolloff] and Infinity for poisitional audio or 1 for non-positional audio. 1 is default.");
         }
         break;
     }
