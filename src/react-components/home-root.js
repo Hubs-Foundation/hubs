@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import PropTypes from "prop-types";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -27,6 +27,9 @@ import styles from "../assets/stylesheets/index.scss";
 
 import aug20Image from "../assets/images/aug20.png";
 import loginButton from "../assets/images/login-button.png";
+import enterButton from "../assets/images/enter-button.gif";
+import enterButtonHover from "../assets/images/enter-button-hover.gif";
+
 import logoutButton from "../assets/images/logout-button.png";
 
 import AuthDialog from "./auth-dialog.js";
@@ -38,6 +41,44 @@ import getRoomMetadata from "../room-metadata";
 addLocaleData([...en]);
 
 const isMobile = checkIsMobile();
+
+const EnterButton = props => {
+  const [isShown, setIsShown] = useState(null);
+
+  // <a onClick={this.onLinkClicked(this.showSignInDialog)}></a>
+  // <a onClick={this.onLinkClicked(this.signOut)}>
+
+  return (
+    <button
+      onMouseEnter={() => setIsShown(true)}
+      onMouseLeave={() => setIsShown(false)}
+      style={{
+        border: "none",
+        background: "none",
+        padding: "0",
+        margin: "0",
+        cursor: "pointer"
+      }}
+      onClick={e => {
+        e.preventDefault();
+        const targetUrl = getRoomMetadata("lobby").url;
+        if (targetUrl) {
+          location.href = targetUrl;
+        } else {
+          console.error("invalid portal targetRoom:", this.data.targetRoom);
+        }
+      }}
+    >
+      <img
+        style={{
+          maxWidth: "120px",
+          mixBlendMode: "lighten"
+        }}
+        src={isShown ? enterButtonHover : enterButton}
+      />
+    </button>
+  );
+};
 
 class HomeRoot extends Component {
   static propTypes = {
@@ -322,35 +363,17 @@ class HomeRoot extends Component {
     );
   }
 
-  renderEnterButton() {
+  renderAug20Button() {
     // <a onClick={this.onLinkClicked(this.showSignInDialog)}></a>
     // <a onClick={this.onLinkClicked(this.signOut)}>
 
     return (
-      <button
+      <img
         style={{
-          border: "none",
-          background: "none",
-          padding: "0",
-          margin: "0"
+          maxWidth: "120px"
         }}
-        onClick={e => {
-          e.preventDefault();
-          const targetUrl = getRoomMetadata("lobby").url;
-          if (targetUrl) {
-            location.href = targetUrl;
-          } else {
-            console.error("invalid portal targetRoom:", this.data.targetRoom);
-          }
-        }}
-      >
-        <img
-          style={{
-            maxWidth: "120px"
-          }}
-          src={aug20Image}
-        />
-      </button>
+        src={aug20Image}
+      />
     );
   }
 
@@ -416,7 +439,8 @@ class HomeRoot extends Component {
               animation: "logo-rotate 4s linear infinite"
             }}
           />
-          {this.renderEnterButton()}
+          {!this.state.signedIn && this.renderAug20Button()}
+          {this.state.signedIn && <EnterButton />}
         </div>
         <div className={styles.ctaButtons}>
           <div
