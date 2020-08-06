@@ -21,7 +21,7 @@ $favorited-color: var(--favorited-color, $duck-yellow);
 }
 
 %default-font {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'steps-monomono_thin', Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
 }
 
 %glass-text {
@@ -49,7 +49,6 @@ $favorited-color: var(--favorited-color, $duck-yellow);
 }
 
 %default-input-field {
-  @extend %rounded-border;
   @extend %default-font;
   color: var(--text-field-text-color);
   padding: 0px;
@@ -57,7 +56,6 @@ $favorited-color: var(--favorited-color, $duck-yellow);
 }
 
 %input-field {
-  @extend %rounded-border;
   @extend %default-font;
   color: var(--text-field-text-color);
   font-size: 1.2em;
@@ -67,6 +65,12 @@ $favorited-color: var(--favorited-color, $duck-yellow);
   padding-right: 1.25em;
   margin: 0.5em 0;
   width: 100%;
+
+  &:focus {
+    border: none;
+    box-shadow: 0 0 3pt 2pt white;
+    outline: none;
+  }
 }
 
 %input-textarea {

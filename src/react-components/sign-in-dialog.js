@@ -1,6 +1,13 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
+
+import loginButton from "../assets/images/login-button.png";
+import loginButtonHover from "../assets/images/login-button-hover.png";
+
+import loginButtonWebp from "../assets/images/login-button.webp";
+import loginButtonHoverWebp from "../assets/images/login-button-hover.webp";
+
 
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
@@ -8,6 +15,49 @@ import styles from "../assets/stylesheets/sign-in-dialog.scss";
 
 import DialogContainer from "./dialog-container";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
+
+const LoginButton = (otherProps) => {
+  const [isShown, setIsShown] = useState(false);
+
+  return (
+    <button
+      onMouseEnter={() => setIsShown(true)}
+      onMouseLeave={() => setIsShown(false)}
+
+      style={{
+        border: "none",
+        background: "none",
+        padding: "0",
+        margin: "0",
+        cursor: "pointer"
+      }}
+      {...otherProps}
+    >
+      {isShown ? <picture >
+        <source srcSet={loginButtonHoverWebp} type="image/webp" />
+
+        <img
+
+          style={{
+            maxWidth: "120px"
+          }}
+          src={loginButtonHover}
+        />
+      </picture> : <picture >
+          <source srcSet={loginButtonWebp} type="image/webp" />
+
+          <img
+
+            style={{
+              maxWidth: "120px"
+            }}
+            src={loginButton}
+          />
+        </picture>}
+    </button>
+  );
+};
+
 
 export default class SignInDialog extends Component {
   static propTypes = {
@@ -40,7 +90,6 @@ export default class SignInDialog extends Component {
       contents = (
         <div
           style={{
-            fontFamily: "steps-monomono_thin",
             color: "#98A600"
           }}
         >
@@ -54,8 +103,6 @@ export default class SignInDialog extends Component {
         <div
           className={styles.signInComplete}
           style={{
-            fontFamily: "steps-monomono_thin",
-
             color: "#98A600"
           }}
         >
@@ -71,7 +118,6 @@ export default class SignInDialog extends Component {
           onSubmit={this.onSubmit}
           className={styles.signInForm}
           style={{
-            fontFamily: "steps-monomono_thin",
             color: "#667000"
           }}
         >
@@ -97,7 +143,6 @@ export default class SignInDialog extends Component {
             style={{
               border: "1px solid #667000",
               background: "transparent",
-              fontFamily: "steps-monomono_thin",
               color: "#667000",
               textAlign: "center"
             }}
@@ -109,6 +154,9 @@ export default class SignInDialog extends Component {
                 <a
                   rel="noopener noreferrer"
                   target="_blank"
+                  style={{
+                    color: "#667000"
+                  }}
                   href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
                 >
                   terms of use
@@ -119,6 +167,10 @@ export default class SignInDialog extends Component {
                 <a
                   rel="noopener noreferrer"
                   target="_blank"
+
+                  style={{
+                    color: "#667000"
+                  }}
                   href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
                 >
                   privacy notice
@@ -126,9 +178,7 @@ export default class SignInDialog extends Component {
               </IfFeature>.
             </p>
           )}
-          <button type="submit" className={styles.nextButton}>
-            next
-          </button>
+          <LoginButton type="submit" />
         </form>
       );
     }

@@ -5,6 +5,10 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import configs from "../utils/configs";
 import modalButton from "../assets/images/modal-button.png";
+import modalBg from "../assets/images/modal-bg.png";
+
+import logoImage from "../assets/images/logo.png";
+import logoImageWebp from "../assets/images/logo.webp";
 
 export default class DialogContainer extends Component {
   static propTypes = {
@@ -64,6 +68,7 @@ export default class DialogContainer extends Component {
             this.props.noOverlay ? "dialog__no-pointer-events" : "dialog__dark-background",
             this.props.noOverlay ? "dialog__align-end" : ""
           )}
+
           onClick={this.onContainerClicked}
         >
           <div className={`dialog__box ${this.props.wide ? "dialog__wide" : ""} `}>
@@ -73,6 +78,13 @@ export default class DialogContainer extends Component {
                 this.props.allowOverflow ? "dialog__box__contents-overflow" : null,
                 this.props.additionalClass
               )}
+
+        style={{
+          background: `url(${modalBg})`,
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "auto"
+        
+        }}
             >
               {this.props.closable &&
                 this.props.onClose &&
@@ -93,23 +105,23 @@ export default class DialogContainer extends Component {
                     />
                   </button>
                 )}
-              {/* {this.props.title && <div className="dialog__box__contents__title" style={{
-        fontFamily: "steps-monomono_thin",
-        color: "#667000",
-        textTransform: "uppercase"
-              }}>{this.props.title}</div>} */}
               <div
                 style={{
                   textAlign: "center",
                   width: "100%"
                 }}
               >
-                <img
-                  src={configs.image("home_logo")}
-                  style={{
-                    maxWidth: "200px"
-                  }}
-                />
+          <picture>
+          <source srcSet={logoImageWebp} type="image/webp"/>
+
+          <img
+            src={logoImage}
+            style={{
+              maxWidth: "200px",
+              animation: "logo-rotate 12s linear infinite"
+            }}
+          />
+          </picture>
               </div>
               <div className="dialog__box__contents__body">{this.props.children}</div>
               <div className="dialog__box__contents__button-container" />

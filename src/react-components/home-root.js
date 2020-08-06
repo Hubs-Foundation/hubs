@@ -19,18 +19,29 @@ import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import mediaBrowserStyles from "../assets/stylesheets/media-browser.scss";
 import fonts from "../assets/fonts/stylesheet.css";
 
-import splashWebm from "../assets/video/splash.webm";
+import splashWebm from "../assets/video/splash2.webm";
 import AuthChannel from "../utils/auth-channel";
 import RoomInfoDialog from "./room-info-dialog.js";
 
 import styles from "../assets/stylesheets/index.scss";
 
-import aug20Image from "../assets/images/aug20.png";
+import aug20Image from "../assets/images/aug22.gif";
 import loginButton from "../assets/images/login-button.png";
+import loginButtonWebp from "../assets/images/login-button.webp";
+import loginButtonHover from "../assets/images/login-button-hover.png";
+import loginButtonHoverWebp from "../assets/images/login-button-hover.webp";
+
+import logoImage from "../assets/images/logo.png";
+import logoImageWebp from "../assets/images/logo.webp";
+
 import enterButton from "../assets/images/enter-button.gif";
 import enterButtonHover from "../assets/images/enter-button-hover.gif";
 
 import logoutButton from "../assets/images/logout-button.png";
+import logoutButtonWebp from "../assets/images/logout-button.webp";
+
+import logoutButtonHover from "../assets/images/logout-button-hover.png";
+import logoutButtonHoverWebp from "../assets/images/logout-button-hover.webp";
 
 import AuthDialog from "./auth-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
@@ -42,8 +53,95 @@ addLocaleData([...en]);
 
 const isMobile = checkIsMobile();
 
+const LogoutButton = ({ onLinkClicked }) => {
+  const [isShown, setIsShown] = useState(false);
+
+  return (
+    <button
+      onMouseEnter={() => setIsShown(true)}
+      onMouseLeave={() => setIsShown(false)}
+
+      style={{
+        border: "none",
+        background: "none",
+        padding: "0",
+        margin: "0",
+        cursor: "pointer"
+      }}
+      onClick={onLinkClicked}
+    >
+            {isShown ? <picture >
+        <source srcSet={logoutButtonHoverWebp} type="image/webp" />
+
+        <img
+
+          style={{
+            maxWidth: "200px",
+            marginRight: "-25px"
+          }}
+          src={logoutButtonHover}
+        />
+      </picture> : <picture >
+          <source srcSet={logoutButtonWebp} type="image/webp" />
+
+          <img
+
+            style={{
+              maxWidth: "200px",
+              marginRight: "-25px"
+            }}
+            src={logoutButton}
+          />
+        </picture>}
+    </button>
+
+  );
+};
+
+const LoginButton = ({ onLinkClicked }) => {
+  const [isShown, setIsShown] = useState(false);
+
+  return (
+    <button
+      onMouseEnter={() => setIsShown(true)}
+      onMouseLeave={() => setIsShown(false)}
+
+      style={{
+        border: "none",
+        background: "none",
+        padding: "0",
+        margin: "0",
+        cursor: "pointer"
+      }}
+      onClick={onLinkClicked}
+    >
+      {isShown ? <picture >
+        <source srcSet={loginButtonHoverWebp} type="image/webp" />
+
+        <img
+
+          style={{
+            maxWidth: "200px"
+          }}
+          src={loginButtonHover}
+        />
+      </picture> : <picture >
+          <source srcSet={loginButtonWebp} type="image/webp" />
+
+          <img
+
+            style={{
+              maxWidth: "200px"
+            }}
+            src={loginButton}
+          />
+        </picture>}
+    </button>
+  );
+};
+
 const EnterButton = props => {
-  const [isShown, setIsShown] = useState(null);
+  const [isShown, setIsShown] = useState(false);
 
   // <a onClick={this.onLinkClicked(this.showSignInDialog)}></a>
   // <a onClick={this.onLinkClicked(this.signOut)}>
@@ -57,7 +155,7 @@ const EnterButton = props => {
         background: "none",
         padding: "0",
         margin: "0",
-        cursor: "pointer"
+        cursor: "pointer",
       }}
       onClick={e => {
         e.preventDefault();
@@ -263,56 +361,6 @@ class HomeRoot extends Component {
           </div>
           <div className={mainContentClassNames}>
             <div className={styles.heroContent}>{this.renderBody()}</div>
-            <div className={styles.footerContent}>
-              <div className={styles.links}>
-                <div className={styles.top}>
-                  <IfFeature name="show_join_us_dialog">
-                    <a className={styles.link} rel="noopener noreferrer" href="/#/join-us">
-                      <FormattedMessage id="home.join_us" />
-                    </a>
-                  </IfFeature>
-                  <IfFeature name="show_issue_report_link">
-                    {configs.feature("show_issue_report_dialog") ? (
-                      <a className={styles.link} rel="noopener noreferrer" href="/#/report">
-                        <FormattedMessage id="home.report_issue" />
-                      </a>
-                    ) : (
-                      <a
-                        className={styles.link}
-                        href={configs.link("issue_report", "/#/report")}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                      >
-                        <FormattedMessage id="settings.report" />
-                      </a>
-                    )}
-                  </IfFeature>
-                  <IfFeature name="show_terms">
-                    <a
-                      className={styles.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
-                    >
-                      <FormattedMessage id="home.terms_of_use" />
-                    </a>
-                  </IfFeature>
-                  <IfFeature name="show_privacy">
-                    <a
-                      className={styles.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
-                    >
-                      <FormattedMessage id="home.privacy_notice" />
-                    </a>
-                  </IfFeature>
-                  <IfFeature name="show_company_logo">
-                    <img className={styles.companyLogo} src={configs.image("company_logo")} />
-                  </IfFeature>
-                </div>
-              </div>
-            </div>
           </div>
           {this.state.dialog}
         </div>
@@ -347,7 +395,6 @@ class HomeRoot extends Component {
     return (
       <div
         style={{
-          fontFamily: "steps-monomono_thin",
           color: "#667000",
           textTransform: "lowercase",
           maxWidth: "240px",
@@ -370,7 +417,8 @@ class HomeRoot extends Component {
     return (
       <img
         style={{
-          maxWidth: "120px"
+          maxWidth: "200px",
+          mixBlendMode: "lighten"
         }}
         src={aug20Image}
       />
@@ -382,23 +430,9 @@ class HomeRoot extends Component {
     // <a onClick={this.onLinkClicked(this.signOut)}>
 
     return (
-      <button
-        style={{
-          border: "none",
-          background: "none",
-          padding: "0",
-          margin: "0",
-          cursor: "pointer"
-        }}
-        onClick={this.onLinkClicked(this.showSignInDialog)}
-      >
-        <img
-          style={{
-            maxWidth: "200px"
-          }}
-          src={loginButton}
-        />
-      </button>
+      <LoginButton
+        onLinkClicked={
+          this.onLinkClicked(this.showSignInDialog)} />
     );
   }
 
@@ -407,24 +441,9 @@ class HomeRoot extends Component {
     // <a onClick={this.onLinkClicked(this.signOut)}>
 
     return (
-      <button
-        style={{
-          border: "none",
-          background: "none",
-          padding: "0",
-          margin: "0",
-          cursor: "pointer"
-        }}
-        onClick={this.onLinkClicked(this.signOut)}
-      >
-        <img
-          style={{
-            maxWidth: "200px",
-            marginRight: "-25px"
-          }}
-          src={logoutButton}
-        />
-      </button>
+      <LogoutButton
+        onLinkClicked={
+          this.onLinkClicked(this.signOut)} />
     );
   }
 
@@ -432,15 +451,21 @@ class HomeRoot extends Component {
     return (
       <div className={styles.heroPanel}>
         <div className={styles.container}>
-          <img
-            src={configs.image("home_logo")}
-            style={{
-              maxWidth: "400px",
-              animation: "logo-rotate 4s linear infinite"
-            }}
-          />
+          <picture>
+            <source srcSet={logoImageWebp} type="image/webp" />
+
+            <img
+              src={logoImage}
+              style={{
+                maxWidth: "450px",
+                animation: "logo-rotate 12s linear infinite"
+              }}
+            />
+          </picture>
           {!this.state.signedIn && this.renderAug20Button()}
-          {this.state.signedIn && <EnterButton />}
+          {this.state.signedIn && <div style={{
+            marginLeft: "225px" // half of maxWidth above
+          }}><EnterButton /></div>}
         </div>
         <div className={styles.ctaButtons}>
           <div
