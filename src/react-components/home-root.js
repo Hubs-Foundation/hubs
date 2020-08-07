@@ -18,6 +18,7 @@ import mediaBrowserStyles from "../assets/stylesheets/media-browser.scss";
 import fonts from "../assets/fonts/stylesheet.css";
 import backgroundAudio from "../assets/gorloj-nagrume.mp3";
 import splashWebm from "../assets/video/splash2.webm";
+import splashMp4 from "../assets/video/splash2.mp4";
 import AuthChannel from "../utils/auth-channel";
 import RoomInfoDialog from "./room-info-dialog.js";
 
@@ -363,6 +364,7 @@ class HomeRoot extends Component {
                 transform: "scale(1.2, 1.2)"
               }}
             >
+              <source src={splashMp4} type="video/mp4" />
               <source src={splashWebm} type="video/webm" />
             </video>
           </div>
