@@ -2,6 +2,7 @@ import { CursorTargettingSystem } from "./cursor-targetting-system";
 import { PositionAtBorderSystem } from "../components/position-at-border";
 import { BoneVisibilitySystem } from "../components/bone-visibility";
 import { AnimationMixerSystem } from "../components/animation-mixer";
+import { UVScrollSystem } from "../components/uv-scroll";
 import { CursorTogglingSystem } from "./cursor-toggling-system";
 import { PhysicsSystem } from "./physics-system";
 import { ConstraintsSystem } from "./constraints-system";
@@ -62,6 +63,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.enterVRButtonSystem = new EnterVRButtonSystem(this.el);
     this.animationMixerSystem = new AnimationMixerSystem();
     this.boneVisibilitySystem = new BoneVisibilitySystem();
+    this.uvScrollSystem = new UVScrollSystem();
     this.effectsSystem = new EffectsSystem(this.sceneEl);
   },
 
@@ -103,6 +105,8 @@ AFRAME.registerSystem("hubs-systems", {
     this.menuAnimationSystem.tick(t);
     this.spriteSystem.tick(t, dt);
     this.enterVRButtonSystem.tick();
+    this.uvScrollSystem.tick(dt);
+
     this.effectsSystem.tick(t,dt);
     // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
     this.boneVisibilitySystem.tick();

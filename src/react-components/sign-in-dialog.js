@@ -94,7 +94,7 @@ export default class SignInDialog extends Component {
           }}
         >
           <p>
-            <FormattedMessage className="preformatted" id="sign-in.auth-started" />
+            <FormattedMessage className="preformatted" id="sign-in.auth-started" value={{ email: this.state.email }} />
           </p>
         </div>
       );

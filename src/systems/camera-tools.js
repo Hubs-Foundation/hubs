@@ -31,7 +31,7 @@ AFRAME.registerSystem("camera-tools", {
   },
 
   deregister(el) {
-    this.cameraEls = this.cameraEls.filter(c => c !== el);
+    this.cameraEls.splice(this.cameraEls.indexOf(el), 1);
     el.removeEventListener("ownership-changed", this.updateMyCamera);
     this.updateMyCamera();
   },
@@ -51,10 +51,16 @@ AFRAME.registerSystem("camera-tools", {
   },
 
   updateMyCamera() {
-    if (!this.cameraEls) {
+    if (!this.cameraEls.length) {
       this.myCamera = null;
     } else {
       this.myCamera = this.cameraEls.find(NAF.utils.isMine);
+    }
+
+    if (this.myCamera) {
+      this.sceneEl.addState("camera");
+    } else {
+      this.sceneEl.removeState("camera");
     }
   },
 

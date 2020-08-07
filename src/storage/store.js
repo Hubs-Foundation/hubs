@@ -67,6 +67,7 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         shouldPromptForRefresh: { type: "bool" },
+        preferredCamera: { type: "string" },
         muteMicOnEntry: { type: "bool" },
         audioOutputMode: { type: "string" },
         invertTouchscreenCameraMove: { type: "bool" },
