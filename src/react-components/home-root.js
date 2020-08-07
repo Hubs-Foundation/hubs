@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import en from "react-intl/locale-data/en";
-
+import queryString from "query-string";
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
 import { lang, messages } from "../utils/i18n";
@@ -18,7 +18,7 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import mediaBrowserStyles from "../assets/stylesheets/media-browser.scss";
 import fonts from "../assets/fonts/stylesheet.css";
-
+import backgroundAudio from "../assets/gorloj-nagrume.mp3";
 import splashWebm from "../assets/video/splash2.webm";
 import AuthChannel from "../utils/auth-channel";
 import RoomInfoDialog from "./room-info-dialog.js";
@@ -52,6 +52,15 @@ import getRoomMetadata from "../room-metadata";
 addLocaleData([...en]);
 
 const isMobile = checkIsMobile();
+
+const queryArgs = queryString.parse(window.location.search);
+console.log(queryArgs);
+let showLogin = false;
+
+if(queryArgs["login"]) {
+  showLogin = true;
+}
+
 
 const LogoutButton = ({ onLinkClicked }) => {
   const [isShown, setIsShown] = useState(false);
@@ -451,14 +460,16 @@ class HomeRoot extends Component {
     return (
       <div className={styles.heroPanel}>
         <div className={styles.container}>
+        <audio loop autoPlay>
+  <source src={backgroundAudio} type="audio/mpeg"/>
+</audio>
           <picture>
             <source srcSet={logoImageWebp} type="image/webp" />
-
             <img
               src={logoImage}
               style={{
-                maxWidth: "450px",
-                animation: "logo-rotate 12s linear infinite"
+                maxWidth: "750px",
+                animation: "logo-rotate 5s linear infinite"
               }}
             />
           </picture>
@@ -478,7 +489,7 @@ class HomeRoot extends Component {
               flexDirection: "column"
             }}
           >
-            {!this.state.signedIn && this.renderSignInDialog()}
+            {!this.state.signedIn && showLogin && this.renderSignInDialog()}
             {this.state.signedIn && this.renderSignOutDialog()}
             {this.state.signedIn && this.renderSignInInfo()}
           </div>
