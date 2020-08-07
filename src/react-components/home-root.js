@@ -8,8 +8,6 @@ import configs from "../utils/configs";
 import IfFeature from "./if-feature";
 import { lang, messages } from "../utils/i18n";
 import { playVideoWithStopOnBlur } from "../utils/video-utils.js";
-import homeVideoWebM from "../assets/video/home.webm";
-import homeVideoMp4 from "../assets/video/home.mp4";
 import classNames from "classnames";
 import { isLocalClient, connectToReticulum } from "../utils/phoenix-utils";
 import maskEmail from "../utils/mask-email";
