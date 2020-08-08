@@ -44,6 +44,20 @@
   }
 }
 
+.video-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100vw;
+  min-height: 100vh;
+  transform: scale(1.2, 1.2);
+}
+
+@media only screen and (max-width: 600px) {
+  .video-container {
+    transform: scale(2, 2);
+  }
+}
 
 :local(.center-logo) {
   align-self: auto;
@@ -87,3 +101,4 @@
     margin-left: 2px;
   }
 }
+
