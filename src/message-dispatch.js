@@ -150,6 +150,15 @@ export default class MessageDispatch {
           this.log(`Positional Audio ${shouldEnablePositionalAudio ? "enabled" : "disabled"}.`);
         }
         break;
+      case "audioNormalization":
+        {
+          const shouldEnableAudioNormalization = !window.APP.store.state.preferences.audioNormalization;
+          window.APP.store.update({
+            preferences: { audioNormalization: shouldEnableAudioNormalization }
+          });
+          this.log(`Audio normalization is ${shouldEnableAudioNormalization ? "enabled" : "disabled"}.`);
+        }
+        break;
     }
   };
 }
