@@ -146,14 +146,7 @@ export class WaypointSystem {
 
   teleportToWaypoint(iconEl, waypointComponent) {
     return function onInteract() {
-      this.releaseAnyOccupiedWaypoints();
-      waypointComponent.el.object3D.updateMatrices();
-      this.characterController.shouldLandWhenPossible = true;
-      this.characterController.enqueueWaypointTravelTo(
-        waypointComponent.el.object3D.matrixWorld,
-        false,
-        waypointComponent.data
-      );
+      this.moveToWaypoint(waypointComponent, false);
     }.bind(this);
   }
   tryTeleportToOccupiableWaypoint(iconEl, waypointComponent) {
@@ -307,20 +300,20 @@ export class WaypointSystem {
     }
     return this.nextMoveToSpawn;
   }
-  moveToWaypoint(waypointComponent) {
+  moveToWaypoint(waypointComponent, instant) {
     this.releaseAnyOccupiedWaypoints();
     waypointComponent.el.object3D.updateMatrices();
     this.characterController.shouldLandWhenPossible = true;
     this.characterController.enqueueWaypointTravelTo(
       waypointComponent.el.object3D.matrixWorld,
-      true,
+      instant,
       waypointComponent.data
     );
   }
   moveToUnoccupiableSpawnPoint() {
     const waypointComponent = this.getUnoccupiableSpawnPoint();
     if (waypointComponent) {
-      this.moveToWaypoint(waypointComponent);
+      this.moveToWaypoint(waypointComponent, true);
     }
     return waypointComponent;
   }
@@ -333,12 +326,12 @@ export class WaypointSystem {
     const hashUpdated = window.location.hash !== "" && this.previousWaypointHash !== window.location.hash;
 
     if (hashUpdated && this.initialSpawnHappened) {
-      this.previousWaypointHash = window.location.hash;
       const waypointName = window.location.hash.replace("#", "");
       const waypoint = this.ready.find(c => c.el.className === waypointName);
       if (waypoint) {
-        this.moveToWaypoint(waypoint);
+        this.moveToWaypoint(waypoint, true);
       }
+      this.previousWaypointHash = window.location.hash;
     }
 
     if (!this.currentMoveToSpawn && this.nextMoveToSpawn) {
