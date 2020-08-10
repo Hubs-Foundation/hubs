@@ -6,7 +6,8 @@ admin.initializeApp();
 import Stripe from 'stripe';
 
 import fetch from 'node-fetch'
-import retry from 'async-retry'
+
+import * as retry from 'async-retry'
 
 import * as express from 'express';
 import * as cors from 'cors';
@@ -119,9 +120,9 @@ app.post('/search', async (req, res) => {
 
 // Generate a payment intent
 app.post('/payment/intents', async (req, res) => {
-  const paymentIntentParams : Stripe.PaymentIntent.PaymentIntentCreateParams = req.body;
+  const paymentIntentParams : Stripe.PaymentIntentCreateParams = req.body;
 
-  const paymentIntent = await stripe.paymentIntents.create(...paymentIntentParams);
+  const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams);
 
   res.send(paymentIntent);
 });
