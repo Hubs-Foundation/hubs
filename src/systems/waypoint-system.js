@@ -306,7 +306,7 @@ export class WaypointSystem {
     this.characterController.shouldLandWhenPossible = true;
     this.characterController.enqueueWaypointTravelTo(
       waypointComponent.el.object3D.matrixWorld,
-      instant,
+      !window.APP.store.state.preferences.animateWaypointTransitions || instant,
       waypointComponent.data
     );
   }
