@@ -53,12 +53,20 @@ AFRAME.registerComponent("in-world-hud", {
     this.onInviteClick = () => {
       this.el.emit("action_invite");
     };
+
+    this.onHubUpdated = () => {
+      if (window.APP.hub) {
+        this.inviteBtn.object3D.visible = window.APP.hub.entry_mode !== "invite";
+      }
+    };
+    this.onHubUpdated();
   },
 
   play() {
     this.el.sceneEl.addEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.addEventListener("stateremoved", this.onStateChange);
     this.el.sceneEl.systems.permissions.onPermissionsUpdated(this.updateButtonStates);
+    this.el.sceneEl.addEventListener("hub_updated", this.onHubUpdated);
     this.updateButtonStates();
 
     this.mic.object3D.addEventListener("interact", this.onMicClick);
@@ -72,6 +80,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.removeEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateChange);
     window.APP.hubChannel.removeEventListener("permissions_updated", this.updateButtonStates);
+    this.el.sceneEl.removeEventListener("hub_updated", this.onHubUpdated);
 
     this.mic.object3D.removeEventListener("interact", this.onMicClick);
     this.spawn.object3D.removeEventListener("interact", this.onSpawnClick);

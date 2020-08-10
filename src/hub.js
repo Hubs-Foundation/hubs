@@ -665,7 +665,9 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         });
     };
 
+    window.APP.hub = hub;
     updateUIForHub(hub, hubChannel);
+    scene.emit("hub_updated");
 
     if (!isEmbed) {
       loadEnvironmentAndConnect();
@@ -1160,7 +1162,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       context: {
         mobile: isMobile || isMobileVR,
         embed: isEmbed
-      }
+      },
+      hub_invite_id: qs.get("hub_invite_id")
     };
 
     if (isMobileVR) {
@@ -1548,6 +1551,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const hub = hubs[0];
     const userInfo = hubChannel.presence.state[session_id];
 
+    window.APP.hub = hub;
     updateUIForHub(hub, hubChannel);
 
     if (stale_fields.includes("scene")) {
@@ -1592,6 +1596,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (hub.entry_mode === "deny") {
       scene.emit("hub_closed");
     }
+
+    scene.emit("hub_updated");
   });
 
   hubPhxChannel.on("permissions_updated", () => hubChannel.fetchPermissions());
