@@ -307,7 +307,7 @@ export class WaypointSystem {
     }
     return this.nextMoveToSpawn;
   }
-  occupySpawnPoint(waypointComponent) {
+  moveToWaypoint(waypointComponent) {
     this.releaseAnyOccupiedWaypoints();
     waypointComponent.el.object3D.updateMatrices();
     this.characterController.shouldLandWhenPossible = true;
@@ -320,7 +320,7 @@ export class WaypointSystem {
   moveToUnoccupiableSpawnPoint() {
     const waypointComponent = this.getUnoccupiableSpawnPoint();
     if (waypointComponent) {
-      this.occupySpawnPoint(waypointComponent);
+      this.moveToWaypoint(waypointComponent);
     }
     return waypointComponent;
   }
@@ -334,19 +334,14 @@ export class WaypointSystem {
 
     if (hashUpdated && this.initialSpawnHappened) {
       this.previousWaypointHash = window.location.hash;
-      const spawnPointName = window.location.hash.replace("#", "");
-      const spawnPoint = this.ready.find(c => c.el.className === spawnPointName);
-      if (spawnPoint) {
-        this.occupySpawnPoint(spawnPoint);
-        this.currentMoveToSpawn = null;
-        this.currentMoveToSpawnResolve = null;
-        this.nextMoveToSpawn = null;
-        this.nextMoveToSpawnResolve = null;
+      const waypointName = window.location.hash.replace("#", "");
+      const waypoint = this.ready.find(c => c.el.className === waypointName);
+      if (waypoint) {
+        this.moveToWaypoint(waypoint);
       }
     }
 
     if (!this.currentMoveToSpawn && this.nextMoveToSpawn) {
-      this.initialSpawnHappened = true;
       this.mightNeedRespawn = false;
       this.currentMoveToSpawn = this.nextMoveToSpawn;
       this.currentMoveToSpawnResolve = this.nextMoveToSpawnResolve;
@@ -372,6 +367,7 @@ export class WaypointSystem {
           } else if (waypointComponentOrNull === null) {
             resolvedWaypointOrNull = this.moveToUnoccupiableSpawnPoint();
           }
+          this.initialSpawnHappened = true;
           this.currentMoveToSpawnResolve(resolvedWaypointOrNull);
           this.currentMoveToSpawn = null;
           this.currentMoveToSpawnResolve = null;
