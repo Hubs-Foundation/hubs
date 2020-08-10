@@ -329,7 +329,7 @@ export class WaypointSystem {
       const waypointName = window.location.hash.replace("#", "");
       const waypoint = this.ready.find(c => c.el.className === waypointName);
       if (waypoint) {
-        this.moveToWaypoint(waypoint, true);
+        this.moveToWaypoint(waypoint, this.previousWaypointHash === null);
       }
       this.previousWaypointHash = window.location.hash;
     }
