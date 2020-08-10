@@ -20,12 +20,15 @@ import {
 
 import { v4 as uuidv4 } from 'uuid';
 
-
 const {
-  stripe_key: STRIPE_KEY = 'pk_stripe',
-  stripe_wh_secret: STRIPE_WH_SECRET = 'wh_stripe',
-  dr33m_secret: DR33M_SECRET = 'super_secret',
-  dr33m_admin_id: DR33M_ADMIN_ID = '1234',
+  stripe: {
+    key: STRIPE_KEY = 'pk_stripe',
+    wh_secret: STRIPE_WH_SECRET = 'wh_stripe',
+  },
+  dr33m: {
+    secret: DR33M_SECRET = 'super_secret',
+    admin_id: DR33M_ADMIN_ID = '1234',
+  }
 } = functions.config()
 
 const stripe = new Stripe(STRIPE_KEY, { apiVersion: '2020-03-02' });
@@ -62,7 +65,10 @@ const lookup = async (email : string) => {
     body: JSON.stringify({ email })
   });
 
-  if (!res.ok) return null
+  if (!res.ok) {
+    console.error(await res.text())
+    return null
+  }
 
   const data = await res.json()
 
