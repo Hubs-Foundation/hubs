@@ -327,7 +327,7 @@ export class WaypointSystem {
 
     if (hashUpdated && this.initialSpawnHappened) {
       const waypointName = window.location.hash.replace("#", "");
-      const waypoint = this.ready.find(c => c.el.className === waypointName);
+      const waypoint = this.ready.find(c => c.el.object3D.name === waypointName);
       if (waypoint) {
         this.moveToWaypoint(waypoint, this.previousWaypointHash === null);
       }
