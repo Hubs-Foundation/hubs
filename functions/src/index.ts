@@ -13,6 +13,7 @@ import * as express from 'express';
 import * as cors from 'cors';
 
 import {addMonths, subSeconds, getUnixTime} from 'date-fns'
+
 import {
   sign,
   // verify
@@ -172,7 +173,7 @@ app.post('/payment/webhook', async (req, res) => {
       }
 
       console.log('Account Creation Success:', { createdUser })
-      
+
       break;
     case 'payment_intent.payment_failed':
       // const message = intent.last_payment_error && intent.last_payment_error.message
