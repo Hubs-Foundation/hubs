@@ -13,7 +13,7 @@ class AudioNormalizer {
     // To analyse volume, 32 fftsize may be good enough
     this.analyser.fftSize = 32;
     this.gain = audio.context.createGain();
-    this.data = new Uint8Array(this.analyser.frequencyBinCount);
+    this.timeData = new Uint8Array(this.analyser.frequencyBinCount);
     this.volumes = [];
     this.volumeSum = 0;
     // Hacks. THREE.Audio connects audio nodes when source is set.
@@ -38,31 +38,31 @@ class AudioNormalizer {
     // Adjusts volume in "a rule of the thumb" way
     // Any better algorithm?
 
-    this.analyser.getByteFrequencyData(this.data);
-    // Regards the average of the frequency data as volume.
+    // Regards the RMS of time-domain data as volume.
     // Is this a right approach?
-    const volume = this.data.reduce((sum, num) => sum + num) / this.analyser.frequencyBinCount;
-    // Regards volume under certain threshold as "not speaking".
-    // I'm not sure if 40.0 is an appropriate threshold.
-    if (volume >= 40.0) {
+    this.analyser.getByteTimeDomainData(this.timeData);
+    const squareSum = this.timeData.reduce((sum, num) => sum + Math.pow(num - 128, 2), 0);
+    const volume = Math.sqrt(squareSum / this.analyser.frequencyBinCount);
+
+    // Regards volume under certain threshold as "not speaking" and skips.
+    // I'm not sure if 0.4 is an appropriate threshold.
+    if (volume >= 0.4) {
       this.volumeSum += volume;
       this.volumes.push(volume);
       // Sees only recent volume history because there is a chance
       // that a speaker changes their master input volume.
-      // I'm not sure if 600 ia an appropriate number.
+      // I'm not sure if 600 is an appropriate number.
       while (this.volumes.length > 600) {
         this.volumeSum -= this.volumes.shift();
       }
       // Adjusts volume after getting many enough volume history.
       // I'm not sure if 60 is an appropriate number.
       if (this.volumes.length >= 60) {
-        // This adjusting is very "a rule of the thumb".
-        // Calculates the volume average from the volume history
-        // and adjusts gain by using the ratio of the certain number / average.
-        // Math.pow(_, 5) is a kind of magic because it seems that volume away from
-        // the certain number needs a bigger correction.
+        const averageVolume = this.volumeSum / this.volumes.length;
+        // I'm not sure if baseVolume 4.0 is an appropriate number.
+        const baseVolume = 4.0;
         this.gain.gain.setTargetAtTime(
-          Math.pow(80 / (this.volumeSum / this.volumes.length), 5),
+          baseVolume / averageVolume,
           this.audio.context.currentTime, 0.01);
       }
     }
