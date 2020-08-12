@@ -1,6 +1,7 @@
 import React from "react";
 import { SceneLink, OwnedFileImage, OwnedFileSizeField } from "./fields";
 import { ApproveSceneButton } from "./approve-buttons";
+import { ToolbarWithoutDelete } from "./toolbar-without-delete";
 
 import {
   List,
@@ -26,7 +27,7 @@ const SceneFilter = props => (
 
 export const SceneEdit = props => (
   <Edit {...props}>
-    <SimpleForm>
+    <SimpleForm toolbar={<ToolbarWithoutDelete />}>
       <TextInput source="name" />
       <SelectInput
         label="Status"

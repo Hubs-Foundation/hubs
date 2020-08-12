@@ -13,6 +13,7 @@
   --discord-action-color: #7289DA;
   --discord-secondary-text-color: #{$grey-text};
   --discord-secondary-action-color: #{$darker-grey};
+  --slack-action-color: #611F69;
   --hud-panel-background: rgba(79, 79, 79, 0.45);
   --hud-dropdown-background-color: rgba(72, 72, 72, 0.2);
   --hud-dropdown-border-color: rgba(72, 72, 72, 0.3);
@@ -54,7 +55,7 @@
   --panel-overlay-background-color: rgba(0,0,0,0.85);
   --overlay-button-background-color: white;
   --overlay-button-icon-color: #{$darkest-grey}; // favorite button
-  --action-button-secondary-icon: #{$dark-grey}; // eg avatar upload button 
+  --action-button-secondary-icon: #{$dark-grey}; // eg avatar upload button
   --full-panel-background-color: rgba(255, 255, 255, 0.98);
   --menu-background-color: white;
   --menu-link-color: black;
@@ -92,7 +93,7 @@
   --home-footer-background-color: white;
   --home-header-link-color: black;
   --home-footer-text-color: black;
-  --home-footer-link-color: #{$dark-grey};
+  --home-footer-link-color: #676767;
   --home-text-color: black;
   --home-media-panel-background-color: rgba(255, 255, 255, 0.6);
   --link-background-color: white;
@@ -145,7 +146,7 @@
   --overlay-button-background-color: rgba(50, 50, 50, 0.95);
   --overlay-button-icon-color: #{$light-grey}; // favorite button
   --unfavorited-color: #{$dark-grey};
-  --action-button-secondary-icon: #{$off-white}; // eg avatar upload button 
+  --action-button-secondary-icon: #{$off-white}; // eg avatar upload button
   --full-panel-background-color: rgba(32, 32, 32, 0.98);
   --menu-background-color: #{$darkest-grey-transparent};
   --menu-link-color: #{$off-white};
