@@ -4,8 +4,6 @@ import "./utils/configs";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import styles from "./assets/stylesheets/discord.scss";
 import discordBotLogo from "./assets/images/discord-bot-logo.png";
-import discordBotVideoMP4 from "./assets/video/discord.mp4";
-import discordBotVideoWebM from "./assets/video/discord.webm";
 
 import registerTelemetry from "./telemetry";
 
@@ -55,10 +53,6 @@ class DiscordLanding extends Component {
                 </div>
               </div>
               <div className={styles.heroSplash}>
-                <video playsInline loop autoPlay muted>
-                  <source src={discordBotVideoMP4} type="video/mp4" />
-                  <source src={discordBotVideoWebM} type="video/webm" />
-                </video>
                 <div className={styles.splashTagline}>
                   <FormattedMessage id="discord.splash_tag" />
                 </div>

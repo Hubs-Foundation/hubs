@@ -11,6 +11,9 @@
 
 :local(.next-button), :local(.continue-button) {
   @extend %action-button;
+  background: #000000;
+  color: #667000;
+  border: none;
 }
 
 :local(.terms) {

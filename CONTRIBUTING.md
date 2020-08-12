@@ -153,3 +153,46 @@ hubs/
     scene.html <- Scene Page html template
     scene.js <- Scene Page js entry point
 ```
+### 6. Testing on an HMD
+
+The simplest way to test on an HMD is to use `npm run dev` from Step 2 above while having 8080 port traffic on your device point to you local dev instance's port 8080. In order to do that, you'll need to do a few things that will vary per device. 
+
+### Oculus Quest
+
+These steps are what's necessary to enable development on your device
+
+1. Setup the Quest device for development.
+    https://developer.oculus.com/documentation/native/android/mobile-device-setup/
+    (Join or create an organization then enable Developer Mode)
+
+2. Configure the Quest device, via adb (Android Debug Bridge), to route port 8080 requests to the local webserver (that `npm run dev` starts up).
+    https://developer.android.com/studio/command-line/adb
+    (Detailed instructions are there for setting up wired and wireless connections)
+
+    Useful commands during this process
+    ----------------------------------
+    `adb devices -l`
+    Lists all connected devices. The -l flag will list device specific details, one of which should be: `model:Quest`
+    
+    `adb -s model:Quest reverse tcp:8080 tcp:8080`
+    `adb reverse tcp:8080 tcp:8080`
+    This command routes all port 8080 requests from the Quest device to port 8080 on your local web server. The first one is if you want to do things wirelessly, while the second is a quicker (albeit tethered) solution that is less prone to the error below.
+
+    If you encounter the following error:
+    adb: error: more than one device/emulator
+
+    Try killing and restarting adb with the following commands:
+     `adb kill-server`
+     `adb start-server`
+    Then retry the reverse command above again
+
+3. Open a browser on the Quest device and test.
+    Go to the following url: `https://localhost:8080` in the Oculus broswer or Firefox Reality browser
+
+    > Note the client runs over https with a self-signed SSL certificate. You'll be presented with a warning the first time you open the page. You can accept the SSL certificate warning and continue onto the site.
+
+4. You should see the Hubs index page, the same one you see in a browser on your development machine.
+
+### Other Devices
+
+Please feel free to contribute setup instructions for additional devices.
