@@ -3,7 +3,7 @@ import { addDays, addHours, addMilliseconds, subMilliseconds, getUnixTime } from
 import { mapValues } from "lodash";
 import { duration } from "moment";
 
-const stream_config = `
+const stream_config = window.PLAYLIST || `
 lobby:
   shift: 0 # optional second shift key
   tracks:
@@ -46,8 +46,11 @@ const parseTrackDurations = ({ tracks, ...meta }) => {
 
 const lineup = mapValues(jsyaml.load(stream_config), parseTrackDurations);
 
-const playing = (playlist, time = new Date()) => {
-  const { tracks, shift = 0 } = playlist;
+// Who is currently playing
+export const playing = (room, time = new Date()) => {
+  if (!lineup[room]) return null;
+
+  const { tracks, shift = 0 } = lineup[room];
 
   const runtime_reducer = (sum, { length }) => {
     return sum + length;
@@ -69,13 +72,15 @@ const playing = (playlist, time = new Date()) => {
   return { track, offset };
 };
 
-// returns {room-name: [artist-key: time]}
-const set_times = (playlist, from = new Date(), until = addDays(new Date(), 1)) => {
+// Creates a list of tracks, with their `start` time merged.
+export const setTimes = (room, from = new Date(), until = addDays(new Date(), 1)) => {
+  if (!lineup[room]) return null;
+
   // Super inefficient lol, i'm tired
   let time = from;
   const list = [];
   while (getUnixTime(time) < getUnixTime(until)) {
-    const { track, offset } = playing(playlist, time);
+    const { track, offset } = playing(room, time);
     const { length } = track;
     const start = subMilliseconds(time, offset);
     time = addMilliseconds(time, length);
@@ -84,7 +89,3 @@ const set_times = (playlist, from = new Date(), until = addDays(new Date(), 1)) 
 
   return list;
 };
-
-console.log(playing(lineup.room1));
-console.log(playing(lineup.room1, addHours(new Date(), 2)));
-console.log(set_times(lineup.room1));
