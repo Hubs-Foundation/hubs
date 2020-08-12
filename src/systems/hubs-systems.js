@@ -63,8 +63,8 @@ AFRAME.registerSystem("hubs-systems", {
     this.enterVRButtonSystem = new EnterVRButtonSystem(this.el);
     this.animationMixerSystem = new AnimationMixerSystem();
     this.boneVisibilitySystem = new BoneVisibilitySystem();
-    this.effectsSystem = new EffectsSystem(this.sceneEl);
     this.uvScrollSystem = new UVScrollSystem();
+    this.effectsSystem = new EffectsSystem(this.sceneEl);
   },
 
   tick(t, dt) {
@@ -106,11 +106,17 @@ AFRAME.registerSystem("hubs-systems", {
     this.spriteSystem.tick(t, dt);
     this.enterVRButtonSystem.tick();
 <<<<<<< HEAD
+<<<<<<< HEAD
     this.effectsSystem.tick(t,dt);
 =======
     this.uvScrollSystem.tick(dt);
 
 >>>>>>> origin/hubs-cloud
+=======
+    this.uvScrollSystem.tick(dt);
+
+    this.effectsSystem.tick(t,dt);
+>>>>>>> 0aacf4bb5a8bfd8581937961fbc0be0eb9a36354
     // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
     this.boneVisibilitySystem.tick();
   },
