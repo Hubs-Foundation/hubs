@@ -1,13 +1,7 @@
-import * as jsyaml from 'js-yaml'
-import {
-  addDays,
-  addMilliseconds,
-  subMilliseconds,
-  getUnixTime,
-} from 'date-fns'
-
-import { mapValues } from 'lodash'
-import { duration } from 'moment'
+import * as jsyaml from "js-yaml";
+import { addDays, addHours, addMilliseconds, subMilliseconds, getUnixTime } from "date-fns";
+import { mapValues } from "lodash";
+import { duration } from "moment";
 
 const stream_config = `
 lobby:
@@ -43,55 +37,54 @@ room3:
     - artist: synergetix
       title: synergetix
       length: 01:00:19
-`
+`;
 
 const parseTrackDurations = ({ tracks, ...meta }) => {
-  const converted = tracks.map(({ length, ...rest }) => ({ length: duration(length).asMilliseconds(), ...rest }))
-  return { tracks: converted, ...meta }
-}
+  const converted = tracks.map(({ length, ...rest }) => ({ length: duration(length).asMilliseconds(), ...rest }));
+  return { tracks: converted, ...meta };
+};
 
-const lineup = mapValues(jsyaml.load(stream_config), parseTrackDurations)
+const lineup = mapValues(jsyaml.load(stream_config), parseTrackDurations);
 
 const playing = (playlist, time = new Date()) => {
-  const { tracks, shift = 0 } = playlist
+  const { tracks, shift = 0 } = playlist;
 
   const runtime_reducer = (sum, { length }) => {
-    return(sum + length)
-  }
+    return sum + length;
+  };
 
-  const runtime = tracks.reduce(runtime_reducer, 0)
+  const runtime = tracks.reduce(runtime_reducer, 0);
 
-  let offset = (getUnixTime(time) + shift * 1e3) % runtime
-
+  let offset = ((getUnixTime(time) + shift) * 1e3) % runtime;
 
   const track = tracks.find(({ length }) => {
     if (offset < length) {
-      return true
+      return true;
     } else {
       offset -= length;
-      return false
+      return false;
     }
-  })
+  });
 
-  return { track, offset }
-}
+  return { track, offset };
+};
 
 // returns {room-name: [artist-key: time]}
 const set_times = (playlist, from = new Date(), until = addDays(new Date(), 1)) => {
   // Super inefficient lol, i'm tired
-  let time = from
-  const list = []
-  while (time < until) {
-    console.log({time})
-    const { track, offset } = playing(playlist, time)
-    const { length } = track
-    const start = subMilliseconds(time, offset)
-    time = addMilliseconds(time, length - offset)
-    list.push({ time, ...track })
+  let time = from;
+  const list = [];
+  while (getUnixTime(time) < getUnixTime(until)) {
+    const { track, offset } = playing(playlist, time);
+    const { length } = track;
+    const start = subMilliseconds(time, offset);
+    time = addMilliseconds(time, length);
+    list.push({ start, ...track });
   }
 
   return list;
-}
+};
 
-playing(lineup['room1'])
-set_times(lineup['room1'])
+console.log(playing(lineup.room1));
+console.log(playing(lineup.room1, addHours(new Date(), 2)));
+console.log(set_times(lineup.room1));
