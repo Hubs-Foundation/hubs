@@ -17,6 +17,8 @@ import backgroundAudio from "../../assets/gorloj-nagrume.mp3";
 import splashWebm from "../../assets/video/splash2.webm";
 import splashMp4 from "../../assets/video/splash2.mp4";
 import aug20Image from "../../assets/images/aug22.gif";
+import aug20ImageWebp from "../../assets/images/aug22.webp";
+
 import loginButton from "../../assets/images/login-button.png";
 import loginButtonWebp from "../../assets/images/login-button.webp";
 import loginButtonHover from "../../assets/images/login-button-hover.png";
@@ -262,7 +264,7 @@ export function HomePage() {
                 maxWidth: "750px",
                 animation: "logo-rotate 5s linear infinite",
 
-        mixBlendMode: "normal",
+                mixBlendMode: "normal",
               }}
             />
           </picture>
@@ -274,14 +276,16 @@ export function HomePage() {
             alignItems: "flex-end",
             width: "100%"
           }}>
-            {!auth.isSignedIn && <img
-              style={{
-                maxWidth: "200px",
-                mixBlendMode: "lighten",
-                clipPath: "inset(91px 17px 88px 27px)"
-              }}
-              src={aug20Image}
-            />
+            {!auth.isSignedIn &&
+              <picture>
+                <source srcset={aug20ImageWebp} type="image/webp" />
+                <source srcset={aug20Image} type="image/gif" />
+                <img src={aug20ImageWebp} style={{
+                  maxWidth: "200px",
+                  mixBlendMode: "lighten",
+                  clipPath: "inset(91px 17px 88px 27px)"
+                }} />
+              </picture>
             }
           </div>
         </div>
