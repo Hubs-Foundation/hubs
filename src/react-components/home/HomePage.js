@@ -14,30 +14,54 @@ import queryString from "querystring";
 import SignInDialog from "../sign-in-dialog.js";
 
 import backgroundAudio from "../../assets/gorloj-nagrume.mp3";
-import splashWebm from "../../assets/video/splash2.webm";
-import splashMp4 from "../../assets/video/splash2.mp4";
-import aug20Image from "../../assets/images/aug22.gif";
-import aug20ImageWebp from "../../assets/images/aug22.webp";
+// import splashWebm from "../../assets/video/splash2.webm";
+// import splashMp4 from "../../assets/video/splash2.mp4";
+// import aug20Image from "../../assets/images/aug22.gif";
+// import aug20ImageWebp from "../../assets/images/aug22.webp";
 
-import loginButton from "../../assets/images/login-button.png";
-import loginButtonWebp from "../../assets/images/login-button.webp";
-import loginButtonHover from "../../assets/images/login-button-hover.png";
-import loginButtonHoverWebp from "../../assets/images/login-button-hover.webp";
+// import loginButton from "../../assets/images/login-button.png";
+// import loginButtonWebp from "../../assets/images/login-button.webp";
+// import loginButtonHover from "../../assets/images/login-button-hover.png";
+// import loginButtonHoverWebp from "../../assets/images/login-button-hover.webp";
 
-import logoImage from "../../assets/images/logo.png";
-import logoImageWebp from "../../assets/images/logo.webp";
+// import logoImage from "../../assets/images/logo.png";
+// import logoImageWebp from "../../assets/images/logo.webp";
 
-import enterButton from "../../assets/images/enter-button.gif";
-import enterButtonHover from "../../assets/images/enter-button-hover.gif";
+// import enterButton from "../../assets/images/enter-button.gif";
+// import enterButtonHover from "../../assets/images/enter-button-hover.gif";
 
-import logoutButton from "../../assets/images/logout-button.png";
-import logoutButtonWebp from "../../assets/images/logout-button.webp";
+// import logoutButton from "../../assets/images/logout-button.png";
+// import logoutButtonWebp from "../../assets/images/logout-button.webp";
 
-import logoutButtonHover from "../../assets/images/logout-button-hover.png";
-import logoutButtonHoverWebp from "../../assets/images/logout-button-hover.webp";
+// import logoutButtonHover from "../../assets/images/logout-button-hover.png";
+// import logoutButtonHoverWebp from "../../assets/images/logout-button-hover.webp";
+
 import getRoomMetadata from "../../room-metadata";
 
 import qsTruthy from "../../utils/qs_truthy";
+
+const splashMp4 = "https://str33m.dr33mphaz3r.net/static-assets/splash2.mp4";
+const splashWebm = "https://str33m.dr33mphaz3r.net/static-assets/splash2.webm";
+
+const aug20Image = "https://str33m.dr33mphaz3r.net/static-assets/aug22.gif";
+const aug20ImageWebp = "https://str33m.dr33mphaz3r.net/static-assets/aug22.webp";
+
+const loginButton = "https://str33m.dr33mphaz3r.net/static-assets/login-button.png";
+const loginButtonWebp = "https://str33m.dr33mphaz3r.net/static-assets/login-button.webp";
+const loginButtonHover = "https://str33m.dr33mphaz3r.net/static-assets/login-button-hover.png";
+const loginButtonHoverWebp = "https://str33m.dr33mphaz3r.net/static-assets/login-button-hover.webp";
+
+const logoImage = "https://str33m.dr33mphaz3r.net/static-assets/logo.png";
+const logoImageWebp = "https://str33m.dr33mphaz3r.net/static-assets/logo.webp";
+
+const enterButton = "https://str33m.dr33mphaz3r.net/static-assets/enter-button.gif";
+const enterButtonHover = "https://str33m.dr33mphaz3r.net/static-assets/enter-button-hover.gif";
+
+const logoutButton = "https://str33m.dr33mphaz3r.net/static-assets/logout-button.png";
+const logoutButtonWebp = "https://str33m.dr33mphaz3r.net/static-assets/logout-button.webp";
+
+const logoutButtonHover = "https://str33m.dr33mphaz3r.net/static-assets/logout-button-hover.png";
+const logoutButtonHoverWebp = "https://str33m.dr33mphaz3r.net/static-assets/logout-button-hover.webp";
 
 addLocaleData([...en]);
 
