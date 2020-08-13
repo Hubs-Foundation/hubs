@@ -378,6 +378,8 @@ class UIRoot extends Component {
     }
 
     this.playerRig = scene.querySelector("#avatar-rig");
+
+    this.dontWaitForMusic = true
   }
 
   UNSAFE_componentWillMount() {
@@ -453,7 +455,7 @@ class UIRoot extends Component {
   onLoadingFinished = () => {
     this.setState({sceneIsLoaded: true})
     // scene is finished loading, if music is also ready then we are ready to go
-    if (this.state.musicIsReady) {
+    if (this.dontWaitForMusic || this.state.musicIsReady) {
       this.setLoaded();
     }
   }
@@ -1530,8 +1532,6 @@ class UIRoot extends Component {
       uiRootHtml = this.renderBotMode();
     }
     else {
-
-
       const embed = this.props.embed;
       const entered = this.state.entered;
       const watching = this.state.watching;
