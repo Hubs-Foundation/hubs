@@ -152,11 +152,24 @@ export default class MessageDispatch {
         break;
       case "audioNormalization":
         {
-          const shouldEnableAudioNormalization = !window.APP.store.state.preferences.audioNormalization;
-          window.APP.store.update({
-            preferences: { audioNormalization: shouldEnableAudioNormalization }
-          });
-          this.log(`Audio normalization is ${shouldEnableAudioNormalization ? "enabled" : "disabled"}.`);
+          if (args.length === 1) {
+            const factor = Number(args[0]);
+            if (!isNaN(factor)) {
+              const effectiveFactor = Math.max(0.0, Math.min(255.0, factor));
+              window.APP.store.update({
+                preferences: { audioNormalization: effectiveFactor }
+              });
+              if (factor) {
+                this.log(`audioNormalization factor is set to ${effectiveFactor}.`);
+              } else {
+                this.log("audioNormalization is disabled.");
+              }
+            } else {
+              this.log("audioNormalization command needs a valid number parameter.");
+            }
+          } else {
+            this.log("audioNormalization command needs a base volume number between 0 [no normalization] and 255. Default is 0. Recommended value is 4 if you enable.");
+          }
         }
         break;
     }

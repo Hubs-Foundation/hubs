@@ -40,13 +40,15 @@ class AudioNormalizer {
 
     // Regards the RMS of time-domain data as volume.
     // Is this a right approach?
+    // Using the RMS of frequency-domain data would be another option.
     this.analyser.getByteTimeDomainData(this.timeData);
     const squareSum = this.timeData.reduce((sum, num) => sum + Math.pow(num - 128, 2), 0);
     const volume = Math.sqrt(squareSum / this.analyser.frequencyBinCount);
+    const baseVolume = window.APP.store.state.preferences.audioNormalization;
 
     // Regards volume under certain threshold as "not speaking" and skips.
     // I'm not sure if 0.4 is an appropriate threshold.
-    if (volume >= 0.4) {
+    if (volume >= Math.min(0.4, baseVolume)) {
       this.volumeSum += volume;
       this.volumes.push(volume);
       // Sees only recent volume history because there is a chance
@@ -59,8 +61,6 @@ class AudioNormalizer {
       // I'm not sure if 60 is an appropriate number.
       if (this.volumes.length >= 60) {
         const averageVolume = this.volumeSum / this.volumes.length;
-        // I'm not sure if baseVolume 4.0 is an appropriate number.
-        const baseVolume = 4.0;
         this.gain.gain.setTargetAtTime(
           baseVolume / averageVolume,
           this.audio.context.currentTime, 0.01);
