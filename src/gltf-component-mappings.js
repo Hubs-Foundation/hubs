@@ -3,6 +3,17 @@ import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 
+var css2obj = (str) => {
+  return JSON.parse(str
+    .replace(/(\w*:)/g, '$1"')  //create json format
+    .replace(/[;]/g, '";')
+    .replace(/(\'{2,})/g, '"')
+    .replace(/;/g, ',')
+    .replace(/(['"])?([a-zA-Z0-9_-]+)(['"])?:/g, '"$2": ')
+    .replace(/,\s*\}/,'}')
+    .trim());
+}
+
 function registerRootSceneComponent(componentName) {
   AFRAME.GLTFModelPlus.registerComponent(componentName, componentName, (el, componentName, componentData) => {
     if (!el.classList.contains("DefaultAvatar")) {
@@ -26,7 +37,13 @@ registerRootSceneComponent("fog");
 registerRootSceneComponent("background");
 
 AFRAME.GLTFModelPlus.registerComponent("portal", "portal", (el, componentName, componentData) => {
-  el.setAttribute("portal", {"targetRoom": componentData, "padding": -1.5});
+  if (componentData.includes(':')) { //css style multi-attribute
+    componentData = css2obj(componentData);
+  } else {
+    // old version with just the targetRoom
+    componentData = {targetRoom: componentData, padding: -1.5};
+  }
+  el.setAttribute("portal", componentData);
 });
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
