@@ -379,6 +379,8 @@ class UIRoot extends Component {
     }
 
     this.playerRig = scene.querySelector("#avatar-rig");
+
+    this.dontWaitForMusic = true
   }
 
   UNSAFE_componentWillMount() {
@@ -454,7 +456,7 @@ class UIRoot extends Component {
   onLoadingFinished = () => {
     this.setState({sceneIsLoaded: true})
     // scene is finished loading, if music is also ready then we are ready to go
-    if (this.state.musicIsReady) {
+    if (this.dontWaitForMusic || this.state.musicIsReady) {
       this.setLoaded();
     }
   };
@@ -1522,53 +1524,24 @@ class UIRoot extends Component {
         />
       );
     }
-
-    if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();
-    if (this.props.isBotMode) return this.renderBotMode();
-
-    const embed = this.props.embed;
-    const entered = this.state.entered;
-    const watching = this.state.watching;
-    const enteredOrWatching = entered || watching;
-    const enteredOrWatchingOrPreload = entered || watching || preload;
-    const baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
-    const inEntryFlow = !!(
-      this.props.history &&
-      this.props.history.location.state &&
-      this.props.history.location.state.entry_step
-    );
-
-    const shouldShowUI = qsGet("show_ui");
-
-    const entryDialog =
-      shouldShowUI &&
-      this.props.availableVREntryTypes &&
-      !preload &&
-      (this.isWaitingForAutoExit() ? (
-        <AutoExitWarning
-          message={this.state.autoExitMessage}
-          secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
-          onCancel={this.endAutoExitTimer}
-        />
-      ) : (
-        <div className={entryStyles.entryDialog}>
-          <StateRoute stateKey="entry_step" stateValue="device" history={this.props.history}>
-            {this.renderDevicePanel()}
-          </StateRoute>
-          <StateRoute stateKey="entry_step" stateValue="mic_grant" history={this.props.history}>
-            {this.renderMicPanel(false)}
-          </StateRoute>
-          <StateRoute stateKey="entry_step" stateValue="mic_granted" history={this.props.history}>
-            {this.renderMicPanel(true)}
-          </StateRoute>
-          <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
-            {this.renderAudioSetupPanel()}
-          </StateRoute>
-          <StateRoute stateKey="entry_step" stateValue="" history={this.props.history}>
-            {this.renderEntryStartPanel()}
-          </StateRoute>
-        </div>
-      ));
+    else if (this.props.showInterstitialPrompt) {
+      uiRootHtml = this.renderInterstitialPrompt();
+    }
+    else if (this.props.isBotMode) {
+      uiRootHtml = this.renderBotMode();
+    }
+    else {
+      const embed = this.props.embed;
+      const entered = this.state.entered;
+      const watching = this.state.watching;
+      const enteredOrWatching = entered || watching;
+      const enteredOrWatchingOrPreload = entered || watching || preload;
+      const baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
+      const inEntryFlow = !!(
+        this.props.history &&
+        this.props.history.location.state &&
+        this.props.history.location.state.entry_step
+      );
 
     const dialogBoxContentsClassNames = classNames({
       [styles.uiInteractive]: !this.isInModalOrOverlay(),

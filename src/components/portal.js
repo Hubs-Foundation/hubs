@@ -11,20 +11,17 @@ AFRAME.registerComponent("portal", {
     colliders: { type: "selectorAll", default: "#avatar-pov-node" },
     padding: { type: "float", default: 0.01 },
     targetRoom: { type: "string", default: null },
+    targetUrl: { type: "string", default: null },
     targetPos: { type: "vec3", default: null },
+    targetObj: { type: "string", default: null },
   },
   init() {
     this.boundingSphere = new THREE.Sphere();
     this.collidingLastFrame = {};
+
+    this.characterController = this.el.sceneEl.systems["hubs-systems"].characterController;
   },
   update() {
-    // this.el.object3D.getWorldPosition(boundingBoxWorldPositionVec);
-    // sizeVec.copy(this.data.size);
-    // this.boundingBox.setFromCenterAndSize(boundingBoxWorldPositionVec, sizeVec);
-
-    // this.boundingBox.setFromObject(this.el.object3D);
-    // this.boundingBox.expandByScalar(this.data.padding);
-
     const mesh = this.el.getObject3D('mesh');
     mesh.getWorldPosition(boundingSphereWorldPositionVec);
     mesh.geometry.computeBoundingSphere();
@@ -44,15 +41,33 @@ AFRAME.registerComponent("portal", {
 
       if (isColliding && !collidingLastFrame) {
         // enter
+        var targetUrl;
         if (this.data.targetRoom) {
-          const targetUrl = getRoomMetadata(this.data.targetRoom).url
-          if (targetUrl) {
-            location.href = targetUrl
-          } else {
+          targetUrl = getRoomMetadata(this.data.targetRoom).url
+          if (!targetUrl) {
             console.error("invalid portal targetRoom:", this.data.targetRoom);
           }
-        } else if (this.data.targetPos) {
-          // TODO: move to targetPos
+        } else if (this.data.targetUrl) {
+          targetUrl = this.data.targetUrl;
+        }
+        if (targetUrl) {
+          location.href = targetUrl;
+        } else {
+          var targetPos;
+          if (this.data.targetObj) {
+            const el = document.querySelector("."+this.data.targetObj);
+            if (!el || !el.object3D) {
+              console.error("invalid targetObj", this.data.targetObj);
+            } else {
+              targetPos = el.object3D.position; // TODO should probably use getWorldPosition
+            }
+          } else if (this.data.targetPos) {
+            targetPos = this.data.targetPos
+          }
+          if (targetPos) {
+            // move player to targetPos
+            this.characterController.teleportTo(targetPos)
+          }
         }
       } else if (!isColliding && collidingLastFrame) {
         // exit

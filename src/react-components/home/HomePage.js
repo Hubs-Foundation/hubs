@@ -35,15 +35,11 @@ import logoutButtonHover from "../../assets/images/logout-button-hover.png";
 import logoutButtonHoverWebp from "../../assets/images/logout-button-hover.webp";
 import getRoomMetadata from "../../room-metadata";
 
-import qsTruthy, { qsGet } from "../../utils/qs_truthy";
+import qsTruthy from "../../utils/qs_truthy";
 
 addLocaleData([...en]);
 
-let showLogin = false;
-
-if (qsTruthy("login")) {
-  showLogin = true;
-}
+const showLogin = qsTruthy("login");
 
 const LogoutButton = ({ onLinkClicked }) => {
   const [isShown, setIsShown] = useState(false);
