@@ -35,18 +35,15 @@ import logoutButtonHover from "../../assets/images/logout-button-hover.png";
 import logoutButtonHoverWebp from "../../assets/images/logout-button-hover.webp";
 import getRoomMetadata from "../../room-metadata";
 
+import qsTruthy, { qsGet } from "../../utils/qs_truthy";
 
 addLocaleData([...en]);
 
-
-const queryArgs = queryString.parse(window.location.search);
 let showLogin = false;
 
-// queryString is including the ? now lol.. investigate later
-if (queryArgs["login"] || queryArgs["?login"]) {
+if (qsTruthy("login")) {
   showLogin = true;
 }
-
 
 const LogoutButton = ({ onLinkClicked }) => {
   const [isShown, setIsShown] = useState(false);
