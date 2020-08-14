@@ -2,8 +2,11 @@ import * as jsyaml from "js-yaml";
 import { addDays, addHours, addMilliseconds, subMilliseconds, getUnixTime } from "date-fns";
 import { mapValues } from "lodash";
 import { duration } from "moment";
+import getHubId from "./utils/hub-id";
 
-const stream_config = window.PLAYLIST || `
+const stream_config =
+  window.PLAYLIST ||
+  `
 lobby:
   shift: 0 # optional second shift key
   tracks:
@@ -21,6 +24,18 @@ room1:
     - artist: K.L. Mai
       title: KL-Mai
       length: 00:41:37
+    - artist: Mija Healey
+      title: Mija-Healey
+      length: 01:17:11
+    - artist: Nar
+      title: Nar
+      length: 00:53:17
+    - artist: Spekki Webu
+      title: Spekki-Webu
+      length: 01:05:55
+    - artist: Vox Supreme
+      title: Vox-Supreme
+      length: 01:18:17
 room2:
   tracks:
     - artist: Altjira
@@ -29,6 +44,12 @@ room2:
     - artist: DBR
       title: DBR
       length: 01:31:40
+    - artist: Factor XIII
+      title: Factor-XIII
+      length: 01:16:03
+    - artist: Ham Laosethakul
+      title: Ham-Laosethakul
+      length: 02:28:06
 room3:
   tracks:
     - artist: nicha 'n' hooch
@@ -47,16 +68,16 @@ const parseTrackDurations = ({ tracks, ...meta }) => {
 const lineup = mapValues(jsyaml.load(stream_config), parseTrackDurations);
 
 // Who is currently playing
-export const playing = (room, time = new Date()) => {
+export const playing = (room = getHubId(), time = new Date()) => {
   if (!lineup[room]) return null;
 
   const { tracks, shift = 0 } = lineup[room];
 
-  const runtime_reducer = (sum, { length }) => {
+  const runtimeReducer = (sum, { length }) => {
     return sum + length;
   };
 
-  const runtime = tracks.reduce(runtime_reducer, 0);
+  const runtime = tracks.reduce(runtimeReducer, 0);
 
   let offset = ((getUnixTime(time) + shift) * 1e3) % runtime;
 
@@ -69,11 +90,11 @@ export const playing = (room, time = new Date()) => {
     }
   });
 
-  return { track, offset };
+  return { ...track, offset };
 };
 
 // Creates a list of tracks, with their `start` time merged.
-export const setTimes = (room, from = new Date(), until = addDays(new Date(), 1)) => {
+export const setTimes = (room = getHubId(), from = new Date(), until = addDays(new Date(), 1)) => {
   if (!lineup[room]) return null;
 
   // Super inefficient lol, i'm tired

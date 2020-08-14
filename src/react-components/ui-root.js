@@ -79,6 +79,7 @@ import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+
 import qsTruthy, { qsGet } from "../utils/qs_truthy";
 import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
@@ -169,6 +170,7 @@ class UIRoot extends Component {
     embed: PropTypes.bool,
     embedToken: PropTypes.string,
     onLoaded: PropTypes.func
+
   };
 
   state = {
@@ -2188,17 +2190,35 @@ class UIRoot extends Component {
 
     const streamUrl = getRoomMetadata().streamUrl || "https://str33m.dr33mphaz3r.com/stream"
     const streamVolume = qsGet("stream_volume") || getRoomMetadata().streamVolume || "1.0"
+
+    const initialTrack = playing()
+
+    const roomAudioPlayer = ({volume, initialTrack}) => {
+      const [track, setTrack] = useState(initialTrack)
+
+      const { offset, title } = track
+
+      return (<Fragment>
+        <audio
+          id="music-player"
+          hidden
+          ref={this.musicPlayer}
+          onCanPlay={() => {this.onMusicCanPlay()}}
+          onEnded={() => setTrack(playing())}
+          currentTime={offset}
+          onLoadedData={() => {
+            var audio = document.querySelector("#music-player");
+            audio.volume = volume;
+          }}
+        />
+          <source src={{`${title}.mp3`}} type="audio/mpeg"></source>
+          <source src={{`${title}.ogg`}} type="audio/ogg"></source>
+        </audio>
+      </Fragment>)
+    }
+
     return <Fragment>
-      <audio
-        id="music-player"
-        hidden
-        ref={this.musicPlayer}
-        onCanPlay={() => {this.onMusicCanPlay()}}
-        onLoadedData={() => {
-          var audio = document.querySelector("#music-player");
-          audio.volume = streamVolume;
-        }}
-        src={streamUrl} />
+      {roomAudioPlayer({volume: streamVolume, initialTrack})}
       {uiRootHtml}
     </Fragment>
   }
