@@ -2193,10 +2193,14 @@ class UIRoot extends Component {
 
     const initialTrack = playing()
 
-    const roomAudioPlayer = ({volume, initialTrack}) => {
+    const roomAudioPlayer = ({volume, initialTrack, token}) => {
       const [track, setTrack] = useState(initialTrack)
 
       const { offset, title } = track
+
+      const ASSET_BASE = 'https://str33m.dr33mphaz3r.net'
+      const tokenArg = token ? `?token=${token}` : ''
+      const srcPath = (ext) => `${ASSET_BASE}/${title}.${ext}${tokenArg}`
 
       return (<Fragment>
         <audio
@@ -2211,14 +2215,14 @@ class UIRoot extends Component {
             audio.volume = volume;
           }}
         />
-          <source src={{`${title}.mp3`}} type="audio/mpeg"></source>
-          <source src={{`${title}.ogg`}} type="audio/ogg"></source>
+          <source src={{srcPath("mp3")}} type="audio/mpeg"></source>
+          <source src={{srcPath("ogg")}} type="audio/ogg"></source>
         </audio>
       </Fragment>)
     }
 
     return <Fragment>
-      {roomAudioPlayer({volume: streamVolume, initialTrack})}
+      {roomAudioPlayer({token: this.store.credentials.token, volume: streamVolume, initialTrack})}
       {uiRootHtml}
     </Fragment>
   }
