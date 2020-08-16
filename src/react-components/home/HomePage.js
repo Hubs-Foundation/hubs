@@ -74,7 +74,6 @@ const LogoutButton = ({ onLinkClicked }) => {
     <button
       onMouseEnter={() => setIsShown(true)}
       onMouseLeave={() => setIsShown(false)}
-
       style={{
         border: "none",
         background: "none",
@@ -84,31 +83,32 @@ const LogoutButton = ({ onLinkClicked }) => {
       }}
       onClick={onLinkClicked}
     >
-      {isShown ? <picture >
-        <source srcSet={logoutButtonHoverWebp} type="image/webp" />
+      {isShown ? (
+        <picture>
+          <source srcSet={logoutButtonHoverWebp} type="image/webp" />
 
-        <img
-
-          style={{
-            maxWidth: "200px",
-            marginRight: "-25px"
-          }}
-          src={logoutButtonHover}
-        />
-      </picture> : <picture >
+          <img
+            style={{
+              maxWidth: "200px",
+              marginRight: "-25px"
+            }}
+            src={logoutButtonHover}
+          />
+        </picture>
+      ) : (
+        <picture>
           <source srcSet={logoutButtonWebp} type="image/webp" />
 
           <img
-
             style={{
               maxWidth: "200px",
               marginRight: "-25px"
             }}
             src={logoutButton}
           />
-        </picture>}
+        </picture>
+      )}
     </button>
-
   );
 };
 
@@ -121,7 +121,6 @@ const LoginButton = ({ onLinkClicked }) => {
       rel="noreferrer noopener"
       onMouseEnter={() => setIsShown(true)}
       onMouseLeave={() => setIsShown(false)}
-
       style={{
         border: "none",
         background: "none",
@@ -130,27 +129,29 @@ const LoginButton = ({ onLinkClicked }) => {
         cursor: "pointer"
       }}
     >
-      {isShown ? <picture >
-        <source srcSet={loginButtonHoverWebp} type="image/webp" />
+      {isShown ? (
+        <picture>
+          <source srcSet={loginButtonHoverWebp} type="image/webp" />
 
-        <img
-
-          style={{
-            maxWidth: "200px"
-          }}
-          src={loginButtonHover}
-        />
-      </picture> : <picture >
+          <img
+            style={{
+              maxWidth: "200px"
+            }}
+            src={loginButtonHover}
+          />
+        </picture>
+      ) : (
+        <picture>
           <source srcSet={loginButtonWebp} type="image/webp" />
 
           <img
-
             style={{
               maxWidth: "200px"
             }}
             src={loginButton}
           />
-        </picture>}
+        </picture>
+      )}
     </a>
   );
 };
@@ -170,7 +171,7 @@ const EnterButton = props => {
         background: "none",
         padding: "0",
         margin: "0",
-        cursor: "pointer",
+        cursor: "pointer"
       }}
       onClick={e => {
         e.preventDefault();
@@ -196,12 +197,14 @@ const EnterButton = props => {
 export function HomePage() {
   const auth = useContext(AuthContext);
 
+  /*
   const { results: favoriteRooms } = useFavoriteRooms();
   const { results: publicRooms } = usePublicRooms();
 
   const featuredRooms = Array.from(new Set([...favoriteRooms, ...publicRooms])).sort(
     (a, b) => b.member_count - a.member_count
   );
+  */
 
   useEffect(() => {
     const qs = new URLSearchParams(location.search);
@@ -225,20 +228,19 @@ export function HomePage() {
   const canCreateRooms = !configs.feature("disable_room_creation") || auth.isAdmin;
 
   // const pageStyle = { backgroundImage: configs.image("home_background", true) };
+
   const pageStyle = {
     display: "flex",
-    alignItems: "center",
+    alignItems: "center"
   };
 
+  /*
   const logoUrl = configs.image("logo");
-
   const showDescription = featuredRooms.length === 0;
-
   const logoStyles = classNames(styles.logoContainer, {
     [styles.centerLogo]: !showDescription
   });
-
-  console.log(auth);
+  */
 
   return (
     <Page className={styles.homePage} style={pageStyle}>
@@ -253,31 +255,29 @@ export function HomePage() {
           zIndex: "-100"
         }}
       >
-        <video
-          playsInline
-          loop
-          autoPlay
-          muted
-          className="video-container"
-        >
+        <video playsInline loop autoPlay muted className="video-container">
           <source src={splashMp4} type="video/mp4" />
           <source src={splashWebm} type="video/webm" />
         </video>
       </div>
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        flex: "1",
-        zIndex: "1",
-      }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          flex: "1",
+          zIndex: "1"
+        }}
+      >
         <audio loop autoPlay>
           <source src={backgroundAudio} type="audio/mpeg" />
         </audio>
-        <div style={{
-          position: "relative",
-        }}>
+        <div
+          style={{
+            position: "relative"
+          }}
+        >
           <picture>
             <source srcSet={logoImageWebp} type="image/webp" />
             <img
@@ -287,7 +287,7 @@ export function HomePage() {
                 maxWidth: "750px",
                 animation: "logo-rotate 5s linear infinite",
 
-                mixBlendMode: "normal",
+                mixBlendMode: "normal"
               }}
             />
           </picture>
@@ -312,10 +312,16 @@ export function HomePage() {
             }
           </div> */}
         </div>
-        {auth.isSignedIn && <div style={{
-          marginLeft: "225px", // half of maxWidth above
-          mixBlendMode: "lighten"
-        }}><EnterButton /></div>}
+        {auth.isSignedIn && (
+          <div
+            style={{
+              marginLeft: "225px", // half of maxWidth above
+              mixBlendMode: "lighten"
+            }}
+          >
+            <EnterButton />
+          </div>
+        )}
       </div>
       <div className={styles.ctaButtons}>
         <div
@@ -328,24 +334,24 @@ export function HomePage() {
             flexDirection: "column"
           }}
         >
-          {!auth.isSignedIn && showLogin && <LoginButton
-            onLinkClicked={auth.showSignInDialog} />}
-          {auth.isSignedIn && <LogoutButton
-            onLinkClicked={auth.signOut} />}
-          {auth.isSignedIn && <div
-            style={{
-              color: "#667000",
-              textTransform: "lowercase",
-              maxWidth: "240px",
-              textAlign: "right",
-              marginTop: "24px",
-              marginRight: "20px"
-            }}
-          >
-            <span>
-              <FormattedMessage id="sign-in.as" /> {auth.email}
-            </span>{" "}
-          </div>}
+          {!auth.isSignedIn && showLogin && <LoginButton onLinkClicked={auth.showSignInDialog} />}
+          {auth.isSignedIn && <LogoutButton onLinkClicked={auth.signOut} />}
+          {auth.isSignedIn && (
+            <div
+              style={{
+                color: "#667000",
+                textTransform: "lowercase",
+                maxWidth: "240px",
+                textAlign: "right",
+                marginTop: "24px",
+                marginRight: "20px"
+              }}
+            >
+              <span>
+                <FormattedMessage id="sign-in.as" /> {auth.email}
+              </span>{" "}
+            </div>
+          )}
         </div>
       </div>
       {/* <SignInDialog
