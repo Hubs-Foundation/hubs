@@ -51,8 +51,8 @@ const loginButtonWebp = "https://str33m.dr33mphaz3r.net/static-assets/login-butt
 const loginButtonHover = "https://str33m.dr33mphaz3r.net/static-assets/login-button-hover.png";
 const loginButtonHoverWebp = "https://str33m.dr33mphaz3r.net/static-assets/login-button-hover.webp";
 
-const logoImage = "https://str33m.dr33mphaz3r.net/static-assets/logo.png";
-const logoImageWebp = "https://str33m.dr33mphaz3r.net/static-assets/logo.webp";
+const logoImage = "https://str33m.dr33mphaz3r.net/static-assets/LineUptrial05h.png";
+const logoImageWebp = "https://str33m.dr33mphaz3r.net/static-assets/LineUptrial05h.webp";
 
 const enterButton = "https://str33m.dr33mphaz3r.net/static-assets/enter-button.gif";
 const enterButtonHover = "https://str33m.dr33mphaz3r.net/static-assets/enter-button-hover.gif";
@@ -271,7 +271,6 @@ export function HomePage() {
         justifyContent: "center",
         flex: "1",
         zIndex: "1",
-        marginTop: "-150px"
       }}>
         <audio loop autoPlay>
           <source src={backgroundAudio} type="audio/mpeg" />
@@ -292,7 +291,7 @@ export function HomePage() {
               }}
             />
           </picture>
-          <div style={{
+          {/* <div style={{
             position: "absolute",
             bottom: "-180px",
             display: "flex",
@@ -311,7 +310,7 @@ export function HomePage() {
                 }} />
               </picture>
             }
-          </div>
+          </div> */}
         </div>
         {auth.isSignedIn && <div style={{
           marginLeft: "225px", // half of maxWidth above
