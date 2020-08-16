@@ -1,4 +1,6 @@
 import appLogo from "../assets/images/app-logo.png";
+import homeLogo from "../assets/images/logo.png";
+import homeBg from "../assets/images/home-bg.png";
 import companyLogo from "../assets/images/company-logo.png";
 import homeHeroBackground from "../assets/images/home-hero-background-unbranded.png";
 import sceneEditorLogo from "../assets/images/editor-logo.png";
@@ -45,7 +47,7 @@ if (window.APP_CONFIG) {
     }
     const style = document.createElement("style");
     style.innerHTML = `:root{${colorVars.join("\n")}}`;
-    document.head.prepend(style);
+    document.head.insertBefore(style, document.head.firstChild);
   }
 
   if (!configs.APP_CONFIG.features) {
@@ -75,7 +77,9 @@ if (isLocalDevelopment) {
     logo: appLogo,
     company_logo: companyLogo,
     editor_logo: sceneEditorLogo,
-    home_background: homeHeroBackground
+    home_background: homeHeroBackground,
+    home_logo: homeLogo,
+    home_bg: homeBg
   };
 }
 

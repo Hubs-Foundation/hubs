@@ -26,6 +26,9 @@
 :local(.oauth-discord-button) {
   @extend %discord-action-button;
 }
+:local(.oauth-slack-button) {
+  @extend %slack-action-button;
+}
 :local(.twitter-message) {
   margin: 24px 36px 0 36px;
 }

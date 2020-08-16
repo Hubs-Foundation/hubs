@@ -1,0 +1,21 @@
+version: '3.7'
+services:
+  nginx:
+    image: ubergarm/openresty-nginx-jwt
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ./nginx.conf:/nginx.conf:Z
+      - ./bearer.lua:/bearer.lua:Z
+      - ./mixes:/www:Z
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot

@@ -10,6 +10,7 @@ import Typography from "@material-ui/core/Typography";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Snackbar from "@material-ui/core/Snackbar";
 import SnackbarContent from "@material-ui/core/SnackbarContent";
+import { ToolbarWithoutDelete } from "./toolbar-without-delete";
 
 import {
   BooleanField,
@@ -168,10 +169,12 @@ export const AccountList = withStyles(styles)(
         }, 6000);
       }
       render() {
-        const { classes } = this.props;
+        // refreshView() is only needed in onCreateAccounts()
+        // eslint-disable-next-line no-unused-vars
+        const { classes, refreshView, ...other } = this.props;
         return (
           <>
-            <Card classes={{ root: classes.searchCard }}>
+            <Card className={classes.searchCard}>
               <CardContent>
                 <Typography component="h2">
                   <b>Create one or multiple accounts with (optional) identities</b>
@@ -213,7 +216,7 @@ export const AccountList = withStyles(styles)(
                   ))}
               </CardContent>
             </Card>
-            <Card classes={{ root: classes.searchCard }}>
+            <Card className={classes.searchCard}>
               <CardContent>
                 <Typography component="h2">Find an account with an email address</Typography>
                 <form onSubmit={this.onAccountSearch.bind(this)}>
@@ -231,7 +234,7 @@ export const AccountList = withStyles(styles)(
                 </form>
               </CardContent>
             </Card>
-            <List {...this.props} filters={<AccountFilter />}>
+            <List {...other} filters={<AccountFilter />}>
               <Datagrid>
                 <TextField source="id" />
                 <DateField source="inserted_at" />
@@ -257,11 +260,11 @@ export const AccountList = withStyles(styles)(
 );
 
 export const AccountEdit = withStyles(styles)(props => {
-  const { classes } = props;
+  const { classes, ...other } = props;
 
   return (
-    <Edit {...props}>
-      <SimpleForm>
+    <Edit {...other}>
+      <SimpleForm toolbar={<ToolbarWithoutDelete />}>
         <TextField label="Account ID" source="id" />
         <BooleanInput source="is_admin" />
         <SelectInput

@@ -1,0 +1,35 @@
+@import '../../assets/stylesheets/shared';
+
+main {
+  display: flex;
+  background-color: #F3F3F3;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+:local(.sign-in-container) {
+  @extend %centered-flex-column;
+  background-color: white;
+  border-radius: 4px;
+  width: 480px;
+  padding: 2em;
+
+  h1 {
+    margin-top: 0;
+  }
+
+  input {
+    @extend %input-field;
+    margin: 1.5em 0 0.5em 0;
+  }
+
+  button {
+    @extend %action-button;
+  }
+
+  :local(.terms) {
+    font-size: 7pt;
+    margin-bottom: 32px;
+  }
+}
