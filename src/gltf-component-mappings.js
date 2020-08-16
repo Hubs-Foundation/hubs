@@ -4,14 +4,15 @@ import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 
 var css2obj = (str) => {
-  return JSON.parse(str
+  return JSON.parse('{'+str
     .replace(/(\w*:)/g, '$1"')  //create json format
     .replace(/[;]/g, '";')
     .replace(/(\'{2,})/g, '"')
-    .replace(/;/g, ',')
+    .replace(/;(?!$)/g, ',')
+    .replace(/;/g, '')
     .replace(/(['"])?([a-zA-Z0-9_-]+)(['"])?:/g, '"$2": ')
     .replace(/,\s*\}/,'}')
-    .trim());
+    .trim()+'}');
 }
 
 import { Glassy } from './shaders/Glassy.js';
@@ -43,27 +44,33 @@ const setUniforms = (material, uniforms) => {
   }
 }
 
-const registerShaderFrogShader = (srcShader, effectsSystem, uniforms) => {
-  var shader = JSON.parse(JSON.stringify(srcShader)) // deep copy to prevent shared uniforms
-  shader.name = shader.name+Math.random().toString(); // Prevent ShaderFrog from linking with shaders with the same name
-  var mat = effectsSystem.registerShaderFrogShader(shader);
-  setUniforms(mat, uniforms)
-  return mat;
-};
-
-const registerRegularShader = (srcShader, effectsSystem, uniforms) => {
-  var shader = JSON.parse(JSON.stringify(srcShader)) // deep copy to prevent shared uniforms
-  effectsSystem.registerShader(shader);
-  var mat = new THREE.ShaderMaterial(shader);
-  setUniforms(mat, uniforms);
-  return mat;
-};
-
-AFRAME.GLTFModelPlus.registerComponent("cube1_prop", "cube1_prop", (el, componentName, componentData) => {
+const registerShaderFrogShader = (srcShader, uniforms) => {
   const sceneEl = AFRAME.scenes[0];
   const effectsSystem = sceneEl && sceneEl.systems["hubs-systems"].effectsSystem;
   if (effectsSystem) {
-    el.object3D.children[0].material = registerRegularShader(Flame, effectsSystem, {});
+    var shader = JSON.parse(JSON.stringify(srcShader)) // deep copy to prevent shared uniforms
+    shader.name = shader.name+Math.random().toString(); // Prevent ShaderFrog from linking with shaders with the same name
+    var mat = effectsSystem.registerShaderFrogShader(shader);
+    setUniforms(mat, uniforms)
+    return mat;
+  }
+};
+
+const registerRegularShader = (srcShader, uniforms) => {
+  const sceneEl = AFRAME.scenes[0];
+  const effectsSystem = sceneEl && sceneEl.systems["hubs-systems"].effectsSystem;
+  if (effectsSystem) {
+    var shader = JSON.parse(JSON.stringify(srcShader)) // deep copy to prevent shared uniforms
+    effectsSystem.registerShader(shader);
+    var mat = new THREE.ShaderMaterial(shader);
+    setUniforms(mat, uniforms);
+    return mat;
+  }
+};
+
+AFRAME.GLTFModelPlus.registerComponent("cube1_prop", "cube1_prop", (el, componentName, componentData) => {
+  if (effectsSystem) {
+    el.object3D.children[0].material = registerRegularShader(Flame, {});
     el.object3D.children[0].material.transparent = true;
   }
 });
@@ -98,7 +105,7 @@ AFRAME.GLTFModelPlus.registerComponent("portal", "portal", (el, componentName, c
     componentData = {targetRoom: componentData, padding: -1.5};
   }
   if (componentData.targetRoom) {
-    el.object3D.children[0].material = registerShaderFrogShader(Liquifier, effectsSystem, {
+    el.object3D.children[0].material = registerShaderFrogShader(Liquifier, {
       "tex": imageLoader.load(roomPreviews[componentData.targetRoom])
     });
   }
