@@ -327,7 +327,7 @@ module.exports = async (env, argv) => {
     performance: {
       // Ignore media and sourcemaps when warning about file size.
       assetFilter(assetFilename) {
-        return !/\.(map|png|jpg|gif|glb|webm|webp)$/.test(assetFilename);
+        return !/\.(map|png|jpg|gif|glb|mp3|webm|webp)$/.test(assetFilename);
       }
     },
     module: {

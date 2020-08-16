@@ -78,7 +78,9 @@ class Support extends React.Component {
     const allSupported = platformSupport.every(s => s.supported);
     const inAppBrowser = isInAppBrowser();
 
-    if (allSupported && !inAppBrowser) return null;
+    if (allSupported) return null;
+    // Strip the check for embedded application browser (for those ig/messenger clix)
+    // if (allSupported && !inAppBrowser) return null;
 
     const detectedOS = detectOS(navigator.userAgent);
 
