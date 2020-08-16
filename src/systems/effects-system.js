@@ -121,7 +121,9 @@ export class EffectsSystem {
   }
 
   registerShader(shader) {
-    shader.uniforms.resolution.value = new THREE.Vector2(window.innerWidth, window.innerHeight);
+    if (shader.uniforms.resolution) {
+      shader.uniforms.resolution.value = new THREE.Vector2(window.innerWidth, window.innerHeight);
+    }
     this.shaders.push(shader)
   }
 

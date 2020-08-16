@@ -14,6 +14,60 @@ var css2obj = (str) => {
     .trim());
 }
 
+import { Glassy } from './shaders/Glassy.js';
+import { ShinyShader } from './shaders/ShinyShader.js';
+import { Flame } from './shaders/Flame.js'
+import { Jelly } from './shaders/ShaderFrog/Jelly.js'
+import { Neurons } from './shaders/ShaderFrog/Neurons.js'
+import { Liquifier } from './shaders/ShaderFrog/Liquifier.js'
+
+import room1Preview from "./assets/textures/room1_1.png";
+import room2Preview from "./assets/textures/room2_1.png";
+import room3Preview from "./assets/textures/room3_1.png";
+
+const roomPreviews = {
+  'room1': room1Preview,
+  'room2': room2Preview,
+  'room3': room3Preview,
+}
+
+const imageLoader = new THREE.TextureLoader();
+//allow cross origin loading
+imageLoader.crossOrigin = '';
+
+const setUniforms = (material, uniforms) => {
+  if (uniforms) {
+    for (var key in uniforms) {
+      material.uniforms[key].value = uniforms[key];
+    }
+  }
+}
+
+const registerShaderFrogShader = (srcShader, effectsSystem, uniforms) => {
+  var shader = JSON.parse(JSON.stringify(srcShader)) // deep copy to prevent shared uniforms
+  shader.name = shader.name+Math.random().toString(); // Prevent ShaderFrog from linking with shaders with the same name
+  var mat = effectsSystem.registerShaderFrogShader(shader);
+  setUniforms(mat, uniforms)
+  return mat;
+};
+
+const registerRegularShader = (srcShader, effectsSystem, uniforms) => {
+  var shader = JSON.parse(JSON.stringify(srcShader)) // deep copy to prevent shared uniforms
+  effectsSystem.registerShader(shader);
+  var mat = new THREE.ShaderMaterial(shader);
+  setUniforms(mat, uniforms);
+  return mat;
+};
+
+AFRAME.GLTFModelPlus.registerComponent("cube1_prop", "cube1_prop", (el, componentName, componentData) => {
+  const sceneEl = AFRAME.scenes[0];
+  const effectsSystem = sceneEl && sceneEl.systems["hubs-systems"].effectsSystem;
+  if (effectsSystem) {
+    el.object3D.children[0].material = registerRegularShader(Flame, effectsSystem, {});
+    el.object3D.children[0].material.transparent = true;
+  }
+});
+
 function registerRootSceneComponent(componentName) {
   AFRAME.GLTFModelPlus.registerComponent(componentName, componentName, (el, componentName, componentData) => {
     if (!el.classList.contains("DefaultAvatar")) {
@@ -42,6 +96,11 @@ AFRAME.GLTFModelPlus.registerComponent("portal", "portal", (el, componentName, c
   } else {
     // old version with just the targetRoom
     componentData = {targetRoom: componentData, padding: -1.5};
+  }
+  if (componentData.targetRoom) {
+    el.object3D.children[0].material = registerShaderFrogShader(Liquifier, effectsSystem, {
+      "tex": imageLoader.load(roomPreviews[componentData.targetRoom])
+    });
   }
   el.setAttribute("portal", componentData);
 });
