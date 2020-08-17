@@ -1,6 +1,8 @@
 #!/bin/bash
 
-domains=(mix3s.dr33mphaz3r.net)
+set -eo pipefail
+
+domains=(str33m.dr33mphaz3r.net)
 rsa_key_size=4096
 data_path="./certbot"
 email="dr33mphaz3r@gmail.com"
