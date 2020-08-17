@@ -1,7 +1,7 @@
 import React from "react";
 import { FormattedMessage } from "react-intl";
 import { createAndRedirectToNewHub } from "../../utils/phoenix-utils";
-import { Button } from "../input/Button";
+import { Button } from "./Button";
 
 export function CreateRoomButton() {
   return (

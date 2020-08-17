@@ -1,31 +1,88 @@
+@import '../styles/theme';
 
-@import '../../assets/stylesheets/root-vars';
-@import '../../assets/stylesheets/shared';
-
-:local(.primary-button) {
-  @extend %big-action-button;
+:local(.button) {
+  height: 48px;
+  min-width: 156px;
+  font-weight: 700;
+  font-size: 12px;
+  border-radius: 8px;
+  border-width: 0;
 }
 
-:local(.cta-button) {
-  font-size: 14pt;
-  width: 19em;
-  margin-right: 1em;
+:local(.basic) {
+  color: $darkgrey;
+  border: 1px solid $darkgrey;
 
-  @media (max-width: 380px) {
-    width: 18em;
+  &:hover {
+    background-color: $white-hover;
+  }
+
+  &:active {
+    background-color: $white-pressed;
   }
 }
 
-:local(.secondary-button) {
-  @extend %action-button-secondary;
-  display: flex;
-  flex-direction: row;
-  width: 250px;
-  margin-top: 18px;
-  margin-bottom: 18px;
-  padding-right: 20px;
+:local(.accept) {
+  color: $white;
+  background-color: $green;
 
-  i {
-    margin-right: 16px;
+  &:hover {
+    background-color: $green-hover;
+  }
+
+  &:active {
+    background-color: $green-pressed;
+  }
+}
+
+:local(.cancel) {
+  color: $white;
+  background-color: $red;
+
+  &:hover {
+    background-color: $red-hover;
+  }
+
+  &:active {
+    background-color: $red-pressed;
+  }
+}
+
+:local(.blue) {
+  color: $white;
+  background-color: $blue;
+
+  &:hover {
+    background-color: $blue-hover;
+  }
+
+  &:active {
+    background-color: $blue-pressed;
+  }
+}
+
+:local(.orange) {
+  color: $white;
+  background-color: $orange;
+
+  &:hover {
+    background-color: $orange-hover;
+  }
+
+  &:active {
+    background-color: $orange-pressed;
+  }
+}
+
+:local(.purple) {
+  color: $white;
+  background-color: $purple;
+
+  &:hover {
+    background-color: $purple-hover;
+  }
+
+  &:active {
+    background-color: $purple-pressed;
   }
 }

@@ -28,7 +28,7 @@
   "plugins": [
     [ "react-intl", { "messagesDir": "./public/messages", "enforceDescriptions": false } ],
     "transform-react-jsx-img-import",
-    "@babel/proposal-class-properties",
+    ["@babel/proposal-class-properties", { "loose": true }],
     "@babel/proposal-object-rest-spread",
     // Samsung Internet on the Oculus Go version is stuck at version 5.2, which is a 
     // Chromium 51, as of this writing. It needs babel to transpile async/await.

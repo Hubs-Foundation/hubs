@@ -1,25 +1,15 @@
 import React from "react";
-import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./Button.scss";
 
-export function Button({ primary, secondary, cta, children, ...rest }) {
-  const className = classNames({
-    [styles.primaryButton]: primary,
-    [styles.secondaryButton]: secondary,
-    [styles.ctaButton]: cta
-  });
-
+export function Button({ preset, className, children, ...rest }) {
   return (
-    <button className={className} {...rest}>
+    <button className={classNames(styles.button, styles[preset], className)} {...rest}>
       {children}
     </button>
   );
 }
 
-Button.propTypes = {
-  primary: PropTypes.bool,
-  secondary: PropTypes.bool,
-  cta: PropTypes.bool,
-  children: PropTypes.node
+Button.defaultProps = {
+  preset: "basic"
 };

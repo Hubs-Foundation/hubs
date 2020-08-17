@@ -2,7 +2,7 @@ import React from "react";
 import { FormattedMessage } from "react-intl";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button } from "../input/Button";
+import { Button } from "./Button";
 import checkIsMobile from "../../utils/is-mobile";
 import { useInstallPWA } from "./useInstallPWA";
 
