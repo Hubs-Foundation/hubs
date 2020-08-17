@@ -808,11 +808,6 @@ class UIRoot extends Component {
     });
   };
 
-  showShareDialog = () => {
-    this.props.store.update({ activity: { hasOpenedShare: true } });
-    this.setState({ showShareDialog: true });
-  };
-
   toggleShareDialog = async () => {
     this.props.store.update({ activity: { hasOpenedShare: true } });
     this.setState({ showShareDialog: !this.state.showShareDialog });
@@ -1568,7 +1563,8 @@ class UIRoot extends Component {
     const showBroadcastTip =
       (hasDiscordBridges || (hasEmbedPresence && !this.props.embed)) && !this.state.broadcastTipDismissed;
 
-    const showInviteButton = !showObjectInfo && !this.state.frozen && !watching && !preload;
+    const inviteEntryMode = this.props.hub.entry_mode === "invite";
+    const showInviteButton = !showObjectInfo && !this.state.frozen && !watching && !preload && !inviteEntryMode;
 
     const showInviteTip =
       !showObjectInfo &&
@@ -1730,15 +1726,17 @@ class UIRoot extends Component {
               history={this.props.history}
               render={() =>
                 this.renderDialog(RoomSettingsDialog, {
-                  showRoomAccessSettings: this.props.hubChannel.can("update_hub_promotion"),
+                  showPublicRoomSetting: this.props.hubChannel.can("update_hub_promotion"),
                   initialSettings: {
                     name: this.props.hub.name,
                     description: this.props.hub.description,
                     member_permissions: this.props.hub.member_permissions,
                     room_size: this.props.hub.room_size,
-                    allow_promotion: this.props.hub.allow_promotion
+                    allow_promotion: this.props.hub.allow_promotion,
+                    entry_mode: this.props.hub.entry_mode
                   },
-                  onChange: settings => this.props.hubChannel.updateHub(settings)
+                  onChange: settings => this.props.hubChannel.updateHub(settings),
+                  hubChannel: this.props.hubChannel
                 })
               }
             />
