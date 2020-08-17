@@ -4,7 +4,7 @@ import { IntlProvider, FormattedMessage } from "react-intl";
 import UnlessFeature from "./unless-feature";
 
 import configs from "../utils/configs";
-import { lang, messages } from "../utils/i18n";
+import { getLocale, getMessages } from "../utils/i18n";
 import loaderStyles from "../assets/stylesheets/loader.scss";
 
 class Loader extends Component {
@@ -99,7 +99,7 @@ class Loader extends Component {
       </h4>
     );
     return (
-      <IntlProvider locale={lang} messages={messages}>
+      <IntlProvider locale={getLocale()} messages={getMessages()}>
         <div className="loading-panel">
           <img className="loading-panel__logo" src={configs.image("logo")} />
           <UnlessFeature name="hide_powered_by">

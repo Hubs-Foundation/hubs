@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import { messages } from "../utils/i18n";
+import { getMessages } from "../utils/i18n";
 import DialogContainer from "./dialog-container.js";
 
 export default class WebRTCScreenshareUnsupportedDialog extends Component {
@@ -11,7 +11,7 @@ export default class WebRTCScreenshareUnsupportedDialog extends Component {
           <p>
             Your browser doesn&apos;t seem to support screen sharing.
             <br />
-            To share your screen in ${messages["app-name"]}, you can use Firefox.
+            To share your screen in ${getMessages()["app-name"]}, you can use Firefox.
           </p>
           <a
             className="info-dialog--action-button"

@@ -14,7 +14,7 @@ import { faEllipsisH } from "@fortawesome/free-solid-svg-icons/faEllipsisH";
 import { faCodeBranch } from "@fortawesome/free-solid-svg-icons/faCodeBranch";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 
-import { lang, messages } from "../utils/i18n";
+import { getLocale, getMessages } from "../utils/i18n";
 
 class SceneUI extends Component {
   static propTypes = {
@@ -64,7 +64,7 @@ class SceneUI extends Component {
   render() {
     if (this.props.unavailable) {
       return (
-        <IntlProvider locale={lang} messages={messages}>
+        <IntlProvider locale={getLocale()} messages={getMessages()}>
           <div className={styles.ui}>
             <div className={styles.unavailable}>
               <div>
@@ -79,7 +79,7 @@ class SceneUI extends Component {
     const { sceneAllowRemixing, isOwner, sceneProjectId, parentScene, sceneId } = this.props;
 
     const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
-    const tweetText = `${this.props.sceneName} in ${messages["share-hashtag"]}`;
+    const tweetText = `${this.props.sceneName} in ${getMessages()["share-hashtag"]}`;
     const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(sceneUrl)}&text=${encodeURIComponent(
       tweetText
     )}`;
@@ -141,7 +141,7 @@ class SceneUI extends Component {
     }
 
     return (
-      <IntlProvider locale={lang} messages={messages}>
+      <IntlProvider locale={getLocale()} messages={getMessages()}>
         <div className={styles.ui}>
           <div
             className={classNames({

@@ -4,7 +4,7 @@ import "./utils/configs";
 import styles from "./assets/stylesheets/cloud.scss";
 import classNames from "classnames";
 import { IntlProvider } from "react-intl";
-import { lang, messages } from "./utils/i18n";
+import { getLocale, getMessages } from "./utils/i18n";
 import { Page } from "./react-components/layout/Page";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
 import Store from "./storage/store";
@@ -86,7 +86,7 @@ window.APP = { store };
 
 function Root() {
   return (
-    <IntlProvider locale={lang} messages={messages}>
+    <IntlProvider locale={getLocale()} messages={getMessages()}>
       <AuthContextProvider store={store}>
         <HubsCloudPage />
       </AuthContextProvider>

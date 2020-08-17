@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { IntlProvider, FormattedMessage } from "react-intl";
 
 import configs from "../utils/configs";
-import { lang, messages } from "../utils/i18n";
+import { getLocale, getMessages } from "../utils/i18n";
 import classNames from "classnames";
 import styles from "../assets/stylesheets/link.scss";
 import { disableiOSZoom } from "../utils/disable-ios-zoom";
@@ -157,7 +157,7 @@ class LinkRoot extends Component {
     // Note we use type "tel" for the input due to https://bugzilla.mozilla.org/show_bug.cgi?id=1005603
 
     return (
-      <IntlProvider locale={lang} messages={messages}>
+      <IntlProvider locale={getLocale()} messages={getMessages()}>
         <div className={styles.link}>
           <div className={styles.linkContents}>
             <a className={styles.logo} href="/">

@@ -15,6 +15,9 @@ import { createAndRedirectToNewHub } from "../../utils/phoenix-utils";
 import { MediaGrid } from "./MediaGrid";
 import { RoomTile } from "./RoomTile";
 
+import { IntlProvider } from "react-intl";
+import { getLocale, getMessages } from "../../utils/i18n";
+
 export function HomePage() {
   const auth = useContext(AuthContext);
 
@@ -57,45 +60,47 @@ export function HomePage() {
   });
 
   return (
-    <Page className={styles.homePage} style={pageStyle}>
-      <section>
-        <div className={styles.appInfo}>
-          <div className={logoStyles}>
-            <img src={logoUrl} />
-          </div>
-          {showDescription && (
-            <div className={styles.appDescription}>
-              <FormattedMessage id="app-description" />
+    <IntlProvider locale={getLocale()} messages={getMessages()}>
+      <Page className={styles.homePage} style={pageStyle}>
+        <section>
+          <div className={styles.appInfo}>
+            <div className={logoStyles}>
+              <img src={logoUrl} />
             </div>
-          )}
-        </div>
-        <div className={styles.ctaButtons}>
-          {canCreateRooms && <CreateRoomButton />}
-          <PWAButton />
-        </div>
-      </section>
-      {featuredRooms.length > 0 && (
-        <section className={styles.featuredRooms}>
-          <MediaGrid>{featuredRooms.map(room => <RoomTile key={room.id} room={room} />)}</MediaGrid>
-        </section>
-      )}
-      <section>
-        <div className={styles.secondaryLinks}>
-          <a href="/link">
-            <FormattedMessage id="home.have_code" />
-          </a>
-          <div>
-            <IfFeature name="show_discord_bot_link">
-              <FormattedMessage id="home.add_to_discord_1" />
-              <img src={discordLogoUrl} />
-              <a href="/discord">
-                <FormattedMessage id="home.add_to_discord_2" />
-              </a>
-              <FormattedMessage id="home.add_to_discord_3" />
-            </IfFeature>
+            {showDescription && (
+              <div className={styles.appDescription}>
+                <FormattedMessage id="app-description" />
+              </div>
+            )}
           </div>
-        </div>
-      </section>
-    </Page>
+          <div className={styles.ctaButtons}>
+            {canCreateRooms && <CreateRoomButton />}
+            <PWAButton />
+          </div>
+        </section>
+        {featuredRooms.length > 0 && (
+          <section className={styles.featuredRooms}>
+            <MediaGrid>{featuredRooms.map(room => <RoomTile key={room.id} room={room} />)}</MediaGrid>
+          </section>
+        )}
+        <section>
+          <div className={styles.secondaryLinks}>
+            <a href="/link">
+              <FormattedMessage id="home.have_code" />
+            </a>
+            <div>
+              <IfFeature name="show_discord_bot_link">
+                <FormattedMessage id="home.add_to_discord_1" />
+                <img src={discordLogoUrl} />
+                <a href="/discord">
+                  <FormattedMessage id="home.add_to_discord_2" />
+                </a>
+                <FormattedMessage id="home.add_to_discord_3" />
+              </IfFeature>
+            </div>
+          </div>
+        </section>
+      </Page>
+    </IntlProvider>
   );
 }

@@ -11,7 +11,7 @@ import registerTelemetry from "./telemetry";
 
 registerTelemetry("/discord", "Discord Landing Page");
 
-import { lang, messages } from "./utils/i18n";
+import { getLocale, getMessages } from "./utils/i18n";
 
 const inviteUrl = "https://forms.gle/GGPgarSuY5WaTNCT8";
 
@@ -20,7 +20,7 @@ class DiscordLanding extends Component {
 
   render() {
     return (
-      <IntlProvider locale={lang} messages={messages}>
+      <IntlProvider locale={getLocale()} messages={getMessages()}>
         <div className={styles.ui}>
           <div className={styles.header}>
             <div className={styles.headerLinks}>

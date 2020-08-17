@@ -1,5 +1,9 @@
+import "@babel/polyfill";
 import configs from "./configs";
-import localeData from "../assets/translations.data.json";
+import { FALLBACK_LOCALES } from "../assets/locales/locale_config";
+import defaultLocaleData from "../assets/locales/en.json";
+
+const DEFAULT_LOCALE = "en";
 
 function getLocales() {
   if (navigator.languages) {
@@ -13,55 +17,70 @@ function getLocales() {
   }
 }
 
-function getLang(locale) {
-  // some locales require fallbacks in case of possible duplicated listings e.g. zh and zh-cn
-  if (localeData[locale]) {
-    const fallbackLang = localeData[locale];
-    if (typeof fallbackLang === "string" && localeData[fallbackLang]) {
-      return fallbackLang;
-    } else {
-      return locale;
-    }
-  }
-  return null;
-}
-
-function getLangFromLocales(locales) {
-  for (let i = 0; i < locales.length; i++) {
-    const lang = getLang(locales[i].toLowerCase());
-    if (lang) {
-      return lang;
-    }
-  }
-}
-
 const locales = getLocales();
-export const lang = getLangFromLocales(locales) || "en";
 
-const _messages = localeData[lang] || localeData.en;
+let _locale = DEFAULT_LOCALE;
+let _messages = defaultLocaleData;
 
-if (configs.APP_CONFIG && configs.APP_CONFIG.translations && configs.APP_CONFIG.translations[lang]) {
-  const configTranslations = configs.APP_CONFIG.translations[lang];
-  for (const messageKey in configTranslations) {
-    if (!configTranslations.hasOwnProperty(messageKey)) continue;
-    if (!configTranslations[messageKey]) continue;
-    _messages[messageKey] = configTranslations[messageKey];
+(async () => {
+  for (let i = 0; i < locales.length; i++) {
+    const locale = locales[i].toLowerCase();
+    if (locale === DEFAULT_LOCALE) {
+      break;
+    }
+    try {
+      const { default: localeData } = await import(`../assets/locales/${locale}.json`);
+      _locale = locale;
+      _messages = localeData;
+      break;
+    } catch (e) {
+      //locale file not found, try a fallback if available
+      if (FALLBACK_LOCALES[locale]) {
+        locales.push(FALLBACK_LOCALES[locale]);
+      }
+    }
   }
-}
+})();
 
-const entries = [];
-for (const key in _messages) {
-  if (!_messages.hasOwnProperty(key)) continue;
-  entries.push([key, _messages[key]]);
-}
+export const getLocale = () => {
+  return _locale;
+};
 
-export const messages = entries
-  .map(([key, message]) => [
-    key,
-    // Replace nested message keys (e.g. %app-name%) with their messages.
-    message.replace(/%([\w-.]+)%/i, (_match, subkey) => _messages[subkey])
-  ])
-  .reduce((acc, entry) => {
-    acc[entry[0]] = entry[1];
-    return acc;
-  }, {});
+export const getMessages = (() => {
+  const cachedMessages = new Map();
+  return () => {
+    if (cachedMessages.has(_locale)) {
+      return cachedMessages.get(_locale);
+    }
+
+    // Swap in translations specified via the admin panel
+    if (configs.APP_CONFIG && configs.APP_CONFIG.translations && configs.APP_CONFIG.translations[_locale]) {
+      const configTranslations = configs.APP_CONFIG.translations[_locale];
+      for (const messageKey in configTranslations) {
+        if (!configTranslations.hasOwnProperty(messageKey)) continue;
+        if (!configTranslations[messageKey]) continue;
+        _messages[messageKey] = configTranslations[messageKey];
+      }
+    }
+
+    const entries = [];
+    for (const key in _messages) {
+      if (!_messages.hasOwnProperty(key)) continue;
+      entries.push([key, _messages[key]]);
+    }
+
+    const messages = entries
+      .map(([key, message]) => [
+        key,
+        // Replace nested message keys (e.g. %app-name%) with their messages.
+        message.replace(/%([\w-.]+)%/i, (_match, subkey) => _messages[subkey])
+      ])
+      .reduce((acc, entry) => {
+        acc[entry[0]] = entry[1];
+        return acc;
+      }, {});
+
+    cachedMessages.set(_locale, messages);
+    return messages;
+  };
+})();

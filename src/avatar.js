@@ -13,7 +13,7 @@ import classNames from "classnames";
 import { IntlProvider, FormattedMessage } from "react-intl";
 
 import configs from "./utils/configs";
-import { lang, messages } from "./utils/i18n";
+import { getLocale, getMessages } from "./utils/i18n";
 
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 disableiOSZoom();
@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const avatarId = qs.get("avatar_id") || document.location.pathname.substring(1).split("/")[1];
   console.log(`Avatar ID: ${avatarId}`);
   ReactDOM.render(
-    <IntlProvider locale={lang} messages={messages}>
+    <IntlProvider locale={getLocale()} messages={getMessages()}>
       <AvatarUI avatarId={avatarId} store={window.APP.store} />
     </IntlProvider>,
     document.getElementById("ui-root")

@@ -4,7 +4,7 @@ import { IntlProvider } from "react-intl";
 import registerTelemetry from "./telemetry";
 import Store from "./storage/store";
 import "./utils/theme";
-import { lang, messages } from "./utils/i18n";
+import { getLocale, getMessages } from "./utils/i18n";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
 import { SignInPage } from "./react-components/auth/SignInPage";
 import "./assets/stylesheets/globals.scss";
@@ -16,7 +16,7 @@ window.APP = { store };
 
 function Root() {
   return (
-    <IntlProvider locale={lang} messages={messages}>
+    <IntlProvider locale={getLocale()} messages={getMessages()}>
       <AuthContextProvider store={store}>
         <SignInPage />
       </AuthContextProvider>

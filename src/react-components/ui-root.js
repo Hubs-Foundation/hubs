@@ -26,7 +26,7 @@ import { getPresenceProfileForSession, discordBridgesForPresences } from "../uti
 import { getClientInfoClientId } from "./client-info-dialog";
 import { getCurrentStreamer } from "../utils/component-utils";
 
-import { lang, messages } from "../utils/i18n";
+import { getLocale, getMessages } from "../utils/i18n";
 import Loader from "./loader";
 import AutoExitWarning from "./auto-exit-warning";
 import { TwoDEntryButton, GenericEntryButton, DaydreamEntryButton } from "./entry-buttons.js";
@@ -392,7 +392,7 @@ class UIRoot extends Component {
     } = this.props;
 
     this.showNonHistoriedDialog(SignInDialog, {
-      message: messages[signInMessageId],
+      message: getMessages()[signInMessageId],
       onSignIn: async email => {
         const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
 
@@ -403,8 +403,8 @@ class UIRoot extends Component {
         this.setState({ signedIn: true });
         this.showNonHistoriedDialog(SignInDialog, {
           authComplete: true,
-          message: messages[signInCompleteMessageId],
-          continueText: messages[signInContinueTextId],
+          message: getMessages()[signInCompleteMessageId],
+          continueText: getMessages()[signInContinueTextId],
           onClose: onContinueAfterSignIn,
           onContinue: onContinueAfterSignIn
         });
@@ -864,7 +864,7 @@ class UIRoot extends Component {
 
   showSignInDialog = () => {
     this.showNonHistoriedDialog(SignInDialog, {
-      message: messages["sign-in.prompt"],
+      message: getMessages()["sign-in.prompt"],
       onSignIn: async email => {
         const { authComplete } = await this.props.authChannel.startAuthentication(email, this.props.hubChannel);
 
@@ -949,7 +949,7 @@ class UIRoot extends Component {
 
   renderInterstitialPrompt = () => {
     return (
-      <IntlProvider locale={lang} messages={messages}>
+      <IntlProvider locale={getLocale()} messages={getMessages()}>
         <div className={styles.interstitial} onClick={() => this.props.onInterstitialPromptClicked()}>
           <div>
             <FormattedMessage id="interstitial.prompt" />
@@ -979,7 +979,7 @@ class UIRoot extends Component {
             .<br />
           </IfFeature>
           If you have questions, contact us at{" "}
-          <a href={`mailto:${messages["contact-email"]}`}>
+          <a href={`mailto:${getMessages()["contact-email"]}`}>
             <FormattedMessage id="contact-email" />
           </a>
           .<p />
@@ -1018,7 +1018,7 @@ class UIRoot extends Component {
     }
 
     return (
-      <IntlProvider locale={lang} messages={messages}>
+      <IntlProvider locale={getLocale()} messages={getMessages()}>
         <div className="exited-panel">
           <img className="exited-panel__logo" src={configs.image("logo")} />
           <div className="exited-panel__subtitle">{subtitle}</div>
@@ -1444,7 +1444,7 @@ class UIRoot extends Component {
 
     if (this.props.showOAuthDialog && !this.props.showInterstitialPrompt)
       return (
-        <IntlProvider locale={lang} messages={messages}>
+        <IntlProvider locale={getLocale()} messages={getMessages()}>
           <div className={classNames(rootStyles)}>
             <OAuthDialog onClose={this.props.onCloseOAuthDialog} oauthInfo={this.props.oauthInfo} />
           </div>
@@ -1624,7 +1624,7 @@ class UIRoot extends Component {
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
-        <IntlProvider locale={lang} messages={messages}>
+        <IntlProvider locale={getLocale()} messages={getMessages()}>
           <div className={classNames(rootStyles)}>
             {this.state.dialog}
             {preload &&
