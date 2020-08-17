@@ -56,7 +56,7 @@ function isInAppBrowser() {
 }
 
 export function platformUnsupported() {
-  return getPlatformSupport().some(s => !s.supported) || isInAppBrowser();
+  return getPlatformSupport().some(s => !s.supported); // || isInAppBrowser();
 }
 
 class Support extends React.Component {
@@ -76,7 +76,7 @@ class Support extends React.Component {
   render() {
     const platformSupport = getPlatformSupport();
     const allSupported = platformSupport.every(s => s.supported);
-    const inAppBrowser = isInAppBrowser();
+    // const inAppBrowser = isInAppBrowser();
 
     if (allSupported) return null;
     // Strip the check for embedded application browser (for those ig/messenger clix)
