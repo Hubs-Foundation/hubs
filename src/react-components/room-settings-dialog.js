@@ -13,8 +13,7 @@ export default class RoomSettingsDialog extends Component {
   static propTypes = {
     initialSettings: PropTypes.object,
     onChange: PropTypes.func,
-    onFetchInvite: PropTypes.func,
-    onRevokeInvite: PropTypes.func,
+    hubChannel: PropTypes.object,
     onClose: PropTypes.func,
     showPublicRoomSetting: PropTypes.bool
   };
@@ -37,7 +36,7 @@ export default class RoomSettingsDialog extends Component {
     const newEntryMode = e.target.value;
     if (newEntryMode === "invite") {
       this.setState({ fetchingInvite: true });
-      const result = await this.props.onFetchInvite();
+      const result = await this.props.hubChannel.fetchInvite();
       this.setState({ fetchingInvite: false, hubInviteId: result.hub_invite_id });
     }
     this.setState({ entry_mode: newEntryMode });
@@ -45,14 +44,14 @@ export default class RoomSettingsDialog extends Component {
 
   onRevokeInvite = async () => {
     this.setState({ fetchingInvite: true });
-    const result = await this.props.onRevokeInvite(this.state.hubInviteId);
+    const result = await this.props.hubChannel.revokeInvite(this.state.hubInviteId);
     this.setState({ fetchingInvite: false, hubInviteId: result.hub_invite_id, confirmRevoke: false });
   };
 
   async componentDidMount() {
     if (this.state.entry_mode === "invite") {
       this.setState({ fetchingInvite: true });
-      const result = await this.props.onFetchInvite();
+      const result = await this.props.hubChannel.fetchInvite();
       this.setState({ fetchingInvite: false, hubInviteId: result.hub_invite_id });
     }
   }
@@ -151,10 +150,10 @@ export default class RoomSettingsDialog extends Component {
               />
               <div className={styles.radioText}>
                 <span className={styles.radioTitle}>
-                  <FormattedMessage id="room-settings.access-private" />
+                  <FormattedMessage id="room-settings.access-shared-link" />
                 </span>
                 <span className={styles.radioText}>
-                  <FormattedMessage id="room-settings.access-private-subtitle" />
+                  <FormattedMessage id="room-settings.access-shared-link-subtitle" />
                 </span>
               </div>
             </label>

@@ -1736,8 +1736,7 @@ class UIRoot extends Component {
                     entry_mode: this.props.hub.entry_mode
                   },
                   onChange: settings => this.props.hubChannel.updateHub(settings),
-                  onFetchInvite: () => this.props.hubChannel.fetchInvite(),
-                  onRevokeInvite: invite => this.props.hubChannel.revokeInvite(invite)
+                  hubChannel: this.props.hubChannel
                 })
               }
             />
