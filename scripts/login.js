@@ -4,6 +4,9 @@ import Store from "../src/storage/store";
 import AuthChannel from "../src/utils/auth-channel";
 import configs from "../src/utils/configs.js";
 import { Socket } from "phoenix-channels";
+
+import chalk from "chalk";
+
 import { writeFileSync } from "fs";
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -11,12 +14,9 @@ const rl = readline.createInterface({ input: process.stdin, output: process.stdo
 const ask = q => new Promise(res => rl.question(q, res));
 
 (async () => {
-  console.log("Logging into Hubs Cloud.\n");
-  const host = await ask("Host (eg hubs.mozilla.com): ");
-  if (!host) {
-    console.log("Invalid host.");
-    process.exit(1);
-  }
+  console.log(chalk.red.bold("\nc̥̣̟̣͖̼ö͔̱̗̼̦̻̊ͬ̐m̜̞̠ͥ̑̃̏ͣͩͬm͔̼̝̹͇e͖̖͌̇̚n̜͖̠̂ͯc͖͉ͅe̫͉͚͉̤ͮ͐ͫ ͇͈̰͙͓̜̠ͭ̊.͇̭̯͇͎̥͊̆ͅ.̺̖̮̖̬̪̔̓ͦͤ͛͒.̋ ̺̪̬̝͈̺d̩̪̎̏ͥ̾r̬̎3͍̮͚̟̠͆̈̽3͖̘͖̒̽̐ͥ̉͗̚m̃͌ḯ̘̖̻̟̩ͧ̀n͔ͨͮ̍̊g̈́̔\n\n"));
+
+  const host = "dr33mphaz3r.net"
 
   const url = `https://${host}/api/v1/meta`;
   try {
@@ -37,7 +37,7 @@ const ask = q => new Promise(res => rl.question(q, res));
   const socket = await connectToReticulum(false, null, Socket);
   const store = new Store();
 
-  const email = await ask("Your admin account email (eg admin@yoursite.com): ");
+  const email = await ask("admin email: ");
   console.log(`Logging into ${host} as ${email}. Click on the link in your email to continue.`);
   const authChannel = new AuthChannel(store);
   authChannel.setSocket(socket);

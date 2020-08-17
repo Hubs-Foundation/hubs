@@ -9,56 +9,6 @@ import { disposeNode, cloneObject3D } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import HubsBasisTextureLoader from "../loaders/HubsBasisTextureLoader";
 
-import { Glassy } from '../shaders/Glassy.js';
-import { ShinyShader } from '../shaders/ShinyShader.js';
-import { Jelly } from '../shaders/ShaderFrog/Jelly.js'
-import { Neurons } from '../shaders/ShaderFrog/Neurons.js'
-import { Liquifier } from '../shaders/ShaderFrog/Liquifier.js'
-
-import room1Preview from "../assets/textures/room1_1.png";
-import room2Preview from "../assets/textures/room2_1.png";
-import room3Preview from "../assets/textures/room3_1.png";
-
-const imageLoader = new THREE.TextureLoader();
-//allow cross origin loading
-imageLoader.crossOrigin = '';
-
-const setUniforms = (material, uniforms) => {
-  if (uniforms) {
-    for (var key in uniforms) {
-      material.uniforms[key].value = uniforms[key];
-    }
-  }
-}
-const registerRegularShader = (srcShader, effectsSystem, uniforms) => {
-  var shader = JSON.parse(JSON.stringify(srcShader)) // deep copy to prevent shared uniforms
-  effectsSystem.registerShader(shader);
-  var mat = new THREE.ShaderMaterial(shader);
-  setUniforms(mat, uniforms);
-  return mat;
-};
-
-const registerShaderFrogShader = (srcShader, effectsSystem, uniforms) => {
-  var shader = JSON.parse(JSON.stringify(srcShader)) // deep copy to prevent shared uniforms
-  shader.name = shader.name+Math.random().toString(); // Prevent ShaderFrog from linking with shaders with the same name
-  var mat = effectsSystem.registerShaderFrogShader(shader);
-  setUniforms(mat, uniforms)
-  return mat;
-};
-
-const shaders = [
-  [registerRegularShader, Glassy],
-  [registerRegularShader, ShinyShader],
-  [registerShaderFrogShader, Jelly],
-  [registerShaderFrogShader, Neurons],
-];
-
-function randint(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 class GLTFCache {
@@ -471,43 +421,12 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
 
-    // TODO: add custom shaders here
-    // But how to set shader params without modifying the gltf exporter?
-    // Use Blender's 'Custom Properties'? https://github.com/KhronosGroup/glTF-Blender-Exporter/issues/15
-    // console.log(object)
-    if (effectsSystem) {
-      // This is not the nicest of way of doing this (we should add a GLTF component mapping),
-      // but it's the easiest
-      if (qs.get('shader_party') || object.name == "Suzanne") {
-        // effectsSystem.registerShader(Glassy)
-        // var shaderMaterial = new THREE.ShaderMaterial(Glassy);
-        // object.material = shaderMaterial
-        // debugger;
-        let register, shader;
-        [register, shader] = shaders[randint(0,shaders.length-1)];
-        object.material = register(shader, effectsSystem);
-      } else if (object.name == "Portal1") {
-        object.material = registerShaderFrogShader(Liquifier, effectsSystem, {
-          "tex": imageLoader.load(room1Preview)
-        });
-      } else if (object.name == "Portal2") {
-        object.material = registerShaderFrogShader(Liquifier, effectsSystem, {
-          "tex": imageLoader.load(room2Preview)
-        });
-      } else if (object.name == "Portal3") {
-        object.material = registerShaderFrogShader(Liquifier, effectsSystem, {
-          "tex": imageLoader.load(room3Preview)
-        });
-      } else {
-        object.material = mapMaterials(object, material => {
-          if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
-            return MobileStandardMaterial.fromStandardMaterial(material);
-          }
-
-          return material;
-        });
+    object.material = mapMaterials(object, material => {
+      if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
+        return MobileStandardMaterial.fromStandardMaterial(material);
       }
-    }
+      return material;
+    });
   });
 
   if (fileMap) {
