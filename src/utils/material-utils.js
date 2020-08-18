@@ -93,6 +93,7 @@ class HubsMeshBasicMaterial extends THREE.MeshBasicMaterial {
   }
 
   onBeforeCompile = shader => {
+    // This patch to the MeshBasicMaterial adds support for emissive maps.
     shader.uniforms.emissive = this._emissive;
     shader.uniforms.emissiveIntensity = this._emissiveIntensity;
     shader.uniforms.emissiveMap = this._emissiveMap;
@@ -171,6 +172,7 @@ class HubsMeshPhongMaterial extends THREE.MeshPhongMaterial {
   }
 
   onBeforeCompile = shader => {
+    // This patch to MeshPhongMaterial adds support for tangent space normal maps.
     shader.vertexShader = shader.vertexShader.replace(
       "varying vec3 vNormal;",
       `varying vec3 vNormal;
