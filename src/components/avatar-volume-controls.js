@@ -61,9 +61,7 @@ class AudioNormalizer {
       // I'm not sure if 60 is an appropriate number.
       if (this.volumes.length >= 60) {
         const averageVolume = this.volumeSum / this.volumes.length;
-        this.gain.gain.setTargetAtTime(
-          baseVolume / averageVolume,
-          this.audio.context.currentTime, 0.01);
+        this.gain.gain.setTargetAtTime(baseVolume / averageVolume, this.audio.context.currentTime, 0.01);
       }
     }
   }
@@ -120,7 +118,8 @@ AFRAME.registerComponent("avatar-volume-controls", {
       if (!this.normalizer) {
         this.normalizer = new AudioNormalizer(audio);
         this.avatarAudioSource.el.addEventListener("sound-source-set", () => {
-          const audio = this.avatarAudioSource && this.avatarAudioSource.el.getObject3D(this.avatarAudioSource.attrName);
+          const audio =
+            this.avatarAudioSource && this.avatarAudioSource.el.getObject3D(this.avatarAudioSource.attrName);
           if (audio) {
             this.normalizer = new AudioNormalizer(audio);
           }

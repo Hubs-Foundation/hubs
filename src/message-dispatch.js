@@ -168,7 +168,9 @@ export default class MessageDispatch {
               this.log("audioNormalization command needs a valid number parameter.");
             }
           } else {
-            this.log("audioNormalization command needs a base volume number between 0 [no normalization] and 255. Default is 0. Recommended value is 4 if you enable.");
+            this.log(
+              "audioNormalization command needs a base volume number between 0 [no normalization] and 255. Default is 0. Recommended value is 4 if you enable."
+            );
           }
         }
         break;
