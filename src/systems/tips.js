@@ -188,7 +188,8 @@ const VALIDATORS = {
       return FINISH;
     return VALID;
   },
-  invite: function(userinput, scene) {
+  invite: function(userinput, scene, _mediaCounter, _store, hub) {
+    if (hub && hub.entry_mode === "invite") return INVALID;
     if (userinput.activeSets.includes(sets.rightCursorHoldingPen)) return INVALID;
     if (userinput.activeSets.includes(sets.rightCursorHoldingCamera)) return INVALID;
     if (userinput.activeSets.includes(sets.rightCursorHoldingInteractable)) return INVALID;
@@ -381,7 +382,7 @@ AFRAME.registerSystem("tips", {
         continue;
       }
 
-      switch (VALIDATORS[tip](this._userinput, this.el, this._mediaCounter, window.APP.store)) {
+      switch (VALIDATORS[tip](this._userinput, this.el, this._mediaCounter, window.APP.store, window.APP.hub)) {
         case FINISH:
           markTipFinished(tip);
           break;
