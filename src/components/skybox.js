@@ -356,6 +356,7 @@ export default class Sky extends Object3D {
     renderer.vr.enabled = vrEnabled;
     pmremGenerator.dispose();
     pmremCubeUVPacker.dispose();
+    cubeCamera.renderTarget.dispose();
     return pmremCubeUVPacker.CubeUVRenderTarget.texture;
   }
 
@@ -373,7 +374,9 @@ export default class Sky extends Object3D {
     skyScene.add(this.sky);
     cubeCamera.update(renderer, skyScene);
     this.add(this.sky);
-    return THREE.LightProbeGenerator.fromRenderTargetCube(renderer, cubeCamera.renderTarget);
+    const lightProbe = THREE.LightProbeGenerator.fromRenderTargetCube(renderer, cubeCamera.renderTarget);
+    cubeCamera.renderTarget.dispose();
+    return lightProbe;
   }
 
   copy(source, recursive = true) {
