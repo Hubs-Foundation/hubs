@@ -18,13 +18,113 @@ export function mapMaterials(object3D, fn) {
   }
 }
 
-export function convertStandardMaterial(source, quality) {
-  if (!source.isMeshStandardMaterial) {
-    return source;
+// HubsMeshBasicMaterial exists because we need to be able to set the emissiveMap in the avatar preview.
+// It also allows the material to be properly copied/cloned.
+class HubsMeshBasicMaterial extends THREE.MeshBasicMaterial {
+  static fromMeshStandardMaterial(source) {
+    const material = new HubsMeshBasicMaterial();
+
+    THREE.Material.prototype.copy.call(material, source);
+
+    material.color.copy(source.color);
+
+    material.emissive.copy(source.emissive);
+    material.emissiveIntensity = source.emissiveIntensity;
+    material.emissiveMap = source.emissiveMap;
+
+    material.map = source.map;
+
+    material.lightMap = source.lightMap;
+    material.lightMapIntensity = source.lightMapIntensity;
+
+    material.aoMap = source.aoMap;
+    material.aoMapIntensity = source.aoMapIntensity;
+
+    material.alphaMap = source.alphaMap;
+
+    material.wireframe = source.wireframe;
+    material.wireframeLinewidth = source.wireframeLinewidth;
+    material.wireframeLinecap = source.wireframeLinecap;
+    material.wireframeLinejoin = source.wireframeLinejoin;
+
+    material.skinning = source.skinning;
+    material.morphTargets = source.morphTargets;
+
+    return material;
   }
 
-  if (quality === "medium") {
-    const material = new THREE.MeshPhongMaterial();
+  constructor({ emissive, emissiveMap, emissiveIntensity, ...rest } = {}) {
+    super(rest);
+    this._emissive = { value: emissive || new THREE.Color() };
+    this._emissiveIntensity = { value: emissiveIntensity === undefined ? 1 : emissiveIntensity };
+    this._emissiveMap = { value: emissiveMap };
+  }
+
+  get emissive() {
+    return this._emissive.value;
+  }
+
+  set emissive(emissive) {
+    this._emissive.value = emissive;
+  }
+
+  get emissiveIntensity() {
+    return this._emissiveIntensity.value;
+  }
+
+  set emissiveIntensity(emissiveIntensity) {
+    this._emissiveIntensity.value = emissiveIntensity;
+  }
+
+  get emissiveMap() {
+    return this._emissiveMap.value;
+  }
+
+  set emissiveMap(emissiveMap) {
+    this._emissiveMap.value = emissiveMap;
+  }
+
+  copy(source) {
+    super.copy(source);
+    this.emissive.copy(source.emissive);
+    this.emissiveIntensity = source.emissiveIntensity;
+    this.emissiveMap = source.emissiveMap;
+    return this;
+  }
+
+  onBeforeCompile = shader => {
+    shader.uniforms.emissive = this._emissive;
+    shader.uniforms.emissiveIntensity = this._emissiveIntensity;
+    shader.uniforms.emissiveMap = this._emissiveMap;
+    shader.fragmentShader = shader.fragmentShader.replace(
+      "#include <lightmap_pars_fragment>",
+      `#include <lightmap_pars_fragment>
+      uniform vec3 emissive;
+      uniform sampler2D emissiveMap;
+      `
+    );
+    shader.fragmentShader = shader.fragmentShader.replace(
+      "#include <envmap_fragment>",
+      `#include <envmap_fragment>
+      vec3 totalEmissiveRadiance = emissive;
+
+      vec4 emissiveColor = vec4(0.0, 0.0, 0.0, 0.0);
+
+      #ifdef USE_UV
+        emissiveColor = texture2D( emissiveMap, vUv );
+      #endif
+
+      emissiveColor.rgb = emissiveMapTexelToLinear( emissiveColor ).rgb;
+      totalEmissiveRadiance *= emissiveColor.rgb;
+      outgoingLight += totalEmissiveRadiance;
+      `
+    );
+  };
+}
+
+class HubsMeshPhongMaterial extends THREE.MeshPhongMaterial {
+  static fromMeshStandardMaterial(source) {
+    const material = new HubsMeshPhongMaterial();
 
     THREE.Material.prototype.copy.call(material, source);
 
@@ -45,43 +145,6 @@ export function convertStandardMaterial(source, quality) {
     material.normalMapType = source.normalMapType;
     material.normalMap = source.normalMap;
     material.normalScale.copy(source.normalScale);
-
-    material.onBeforeCompile = shader => {
-      shader.vertexShader = shader.vertexShader.replace(
-        "varying vec3 vNormal;",
-        `varying vec3 vNormal;
-        #ifdef USE_TANGENT
-          varying vec3 vTangent;
-          varying vec3 vBitangent;
-        #endif
-        `
-      );
-      shader.vertexShader = shader.vertexShader.replace(
-        "vNormal = normalize( transformedNormal );",
-        `vNormal = normalize( transformedNormal );
-        
-          #ifdef USE_TANGENT
-        
-            vTangent = normalize( transformedTangent );
-            vBitangent = normalize( cross( vNormal, vTangent ) * tangent.w );
-        
-          #endif
-        `
-      );
-      shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <lights_phong_pars_fragment>",
-        `#include <lights_phong_pars_fragment>
-        #ifndef FLAT_SHADED
-
-          #ifdef USE_TANGENT
-            varying vec3 vTangent;
-            varying vec3 vBitangent;
-          #endif
-
-        #endif
-        `
-      );
-    };
 
     material.bumpMap = source.bumpMap;
     material.bumpScale = source.bumpScale;
@@ -105,61 +168,55 @@ export function convertStandardMaterial(source, quality) {
     material.morphNormals = source.morphNormals;
 
     return material;
-  } else if (quality === "low") {
-    const material = new THREE.MeshBasicMaterial();
+  }
 
-    THREE.Material.prototype.copy.call(material, source);
+  onBeforeCompile = shader => {
+    shader.vertexShader = shader.vertexShader.replace(
+      "varying vec3 vNormal;",
+      `varying vec3 vNormal;
+      #ifdef USE_TANGENT
+        varying vec3 vTangent;
+        varying vec3 vBitangent;
+      #endif
+      `
+    );
+    shader.vertexShader = shader.vertexShader.replace(
+      "vNormal = normalize( transformedNormal );",
+      `vNormal = normalize( transformedNormal );
+      
+        #ifdef USE_TANGENT
+      
+          vTangent = normalize( transformedTangent );
+          vBitangent = normalize( cross( vNormal, vTangent ) * tangent.w );
+      
+        #endif
+      `
+    );
+    shader.fragmentShader = shader.fragmentShader.replace(
+      "#include <lights_phong_pars_fragment>",
+      `#include <lights_phong_pars_fragment>
+      #ifndef FLAT_SHADED
 
-    material.color.copy(source.color);
-
-    material.onBeforeCompile = shader => {
-      shader.uniforms.emissive = { value: source.emissive };
-      shader.uniforms.emissiveIntensity = { value: source.emissiveIntensity };
-      shader.uniforms.emissiveMap = { value: source.emissiveMap };
-      shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <lightmap_pars_fragment>",
-        `#include <lightmap_pars_fragment>
-        uniform vec3 emissive;
-        uniform sampler2D emissiveMap;
-        `
-      );
-      shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <envmap_fragment>",
-        `#include <envmap_fragment>
-        vec3 totalEmissiveRadiance = emissive;
-
-        vec4 emissiveColor = vec4(0.0, 0.0, 0.0, 0.0);
-
-        #ifdef USE_UV
-          emissiveColor = texture2D( emissiveMap, vUv );
+        #ifdef USE_TANGENT
+          varying vec3 vTangent;
+          varying vec3 vBitangent;
         #endif
 
-        emissiveColor.rgb = emissiveMapTexelToLinear( emissiveColor ).rgb;
-        totalEmissiveRadiance *= emissiveColor.rgb;
-        outgoingLight += totalEmissiveRadiance;
-        `
-      );
-    };
+      #endif
+      `
+    );
+  };
+}
 
-    material.map = source.map;
+export function convertStandardMaterial(source, quality) {
+  if (!source.isMeshStandardMaterial) {
+    return source;
+  }
 
-    material.lightMap = source.lightMap;
-    material.lightMapIntensity = source.lightMapIntensity;
-
-    material.aoMap = source.aoMap;
-    material.aoMapIntensity = source.aoMapIntensity;
-
-    material.alphaMap = source.alphaMap;
-
-    material.wireframe = source.wireframe;
-    material.wireframeLinewidth = source.wireframeLinewidth;
-    material.wireframeLinecap = source.wireframeLinecap;
-    material.wireframeLinejoin = source.wireframeLinejoin;
-
-    material.skinning = source.skinning;
-    material.morphTargets = source.morphTargets;
-
-    return material;
+  if (quality === "medium") {
+    return HubsMeshPhongMaterial.fromMeshStandardMaterial(source);
+  } else if (quality === "low") {
+    return HubsMeshBasicMaterial.fromMeshStandardMaterial(source);
   }
 
   return source;

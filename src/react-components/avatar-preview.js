@@ -272,14 +272,22 @@ class AvatarPreview extends Component {
         orm_map: TEXTURE_PROPS["orm_map"].map(getImage)
       };
 
-      await Promise.all([
-        this.applyMaps({}, this.props), // Apply initial maps
-        // TODO apply environment map to secondary materials as well
-        createDefaultEnvironmentMap().then(t => {
-          this.previewMesh.material.envMap = t;
-          this.previewMesh.material.needsUpdate = true;
-        })
-      ]);
+      const dependencies = [
+        this.applyMaps({}, this.props) // Apply initial maps
+      ];
+
+      // Low and medium quality materials don't use environment maps
+      if (window.APP.store.state.preferences.materialQualitySetting === "high") {
+        dependencies.push(
+          // TODO apply environment map to secondary materials as well
+          createDefaultEnvironmentMap().then(t => {
+            this.previewMesh.material.envMap = t;
+            this.previewMesh.material.needsUpdate = true;
+          })
+        );
+      }
+
+      await Promise.all(dependencies);
     } else {
       this.originalMaps = {};
     }
@@ -294,6 +302,20 @@ class AvatarPreview extends Component {
     this.imageBitmaps[name] = image;
     TEXTURE_PROPS[name].forEach(prop => {
       const texture = this.previewMesh.material[prop];
+
+      // Low quality materials are missing normal maps
+      if (prop === "normalMap" && window.APP.store.state.preferences.materialQualitySetting === "low") {
+        return;
+      }
+
+      // Medium Quality materials are missing metalness and roughness maps
+      if (
+        (prop === "roughnessMap" || prop === "metalnessMap") &&
+        window.APP.store.state.preferences.materialQualitySetting !== "high"
+      ) {
+        return;
+      }
+
       texture.image = image;
       texture.needsUpdate = true;
     });
@@ -306,8 +328,11 @@ class AvatarPreview extends Component {
     delete this.imageBitmaps[name];
     this.originalMaps[name].forEach((bm, i) => {
       const texture = this.previewMesh.material[TEXTURE_PROPS[name][i]];
-      texture.image = bm;
-      texture.needsUpdate = true;
+
+      if (texture) {
+        texture.image = bm;
+        texture.needsUpdate = true;
+      }
     });
   };
 
