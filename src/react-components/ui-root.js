@@ -1,4 +1,5 @@
 import React, { Component, Fragment, useState } from "react";
+import { findIndex } from "lodash";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
@@ -71,8 +72,8 @@ import TwoDHUD from "./2d-hud";
 import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
-import getRoomMetadata from "../room-metadata";
-import { playing } from "../playlist";
+import { getRoomMetadata, roomName } from "../room-metadata";
+import { playing, roomPlaylist } from "../playlist";
 
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
@@ -1030,8 +1031,7 @@ export default class UIRoot extends Component {
           .<p />
           <IfFeature name="show_source_link">
             If you&apos;d like to run your own server, Hubs&apos;s source code is available on{" "}
-            <a href="https://github.com/mozilla/hubs">GitHub</a>
-            .
+            <a href="https://github.com/mozilla/hubs">GitHub</a>.
           </IfFeature>
         </div>
       );
@@ -1054,8 +1054,7 @@ export default class UIRoot extends Component {
           )}
           {!["left", "disconnected", "scene_error"].includes(this.props.roomUnavailableReason) && (
             <div>
-              You can also <a href="/">create a new room</a>
-              .
+              You can also <a href="/">create a new room</a>.
             </div>
           )}
         </div>
@@ -1147,79 +1146,75 @@ export default class UIRoot extends Component {
           />
         </div>
 
-        {!this.state.waitingOnMic &&
-          !this.props.entryDisallowed && (
-            <div className={entryStyles.buttonContainer}>
-              {!isMobileVR && (
-                <button
-                  onClick={e => {
-                    e.preventDefault();
-                    this.attemptLink();
-                  }}
-                  className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
-                >
-                  <FormattedMessage id="entry.device-medium" />
-                  <div className={entryStyles.buttonSubtitle}>
-                    <FormattedMessage
-                      id={isMobile ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"}
-                    />
-                  </div>
-                </button>
-              )}
-              {configs.feature("enable_lobby_ghosts") ? (
-                <button
-                  onClick={e => {
-                    e.preventDefault();
-                    this.setState({ watching: true });
-                  }}
-                  className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
-                >
-                  <FormattedMessage id="entry.watch-from-lobby" />
-                  <div className={entryStyles.buttonSubtitle}>
-                    <FormattedMessage id="entry.watch-from-lobby-subtitle" />
-                  </div>
-                </button>
-              ) : (
-                <div />
-              )}
+        {!this.state.waitingOnMic && !this.props.entryDisallowed && (
+          <div className={entryStyles.buttonContainer}>
+            {!isMobileVR && (
               <button
-                autoFocus
                 onClick={e => {
                   e.preventDefault();
-
-                  if (promptForNameAndAvatarBeforeEntry || !this.forcedVREntryType) {
-                    this.setState({ entering: true });
-                    this.props.hubChannel.sendEnteringEvent();
-
-                    const stateValue = promptForNameAndAvatarBeforeEntry ? "profile" : "device";
-                    this.pushHistoryState("entry_step", stateValue);
-                  } else {
-                    this.handleForceEntry();
-                  }
+                  this.attemptLink();
                 }}
-                className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
+                className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
               >
-                <FormattedMessage id="entry.enter-room" />
+                <FormattedMessage id="entry.device-medium" />
+                <div className={entryStyles.buttonSubtitle}>
+                  <FormattedMessage id={isMobile ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"} />
+                </div>
               </button>
-            </div>
-          )}
-        {this.props.entryDisallowed &&
-          !this.state.waitingOnMic && (
-            <div className={entryStyles.buttonContainer}>
-              <a
+            )}
+            {configs.feature("enable_lobby_ghosts") ? (
+              <button
                 onClick={e => {
                   e.preventDefault();
                   this.setState({ watching: true });
                 }}
                 className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
               >
-                <FormattedMessage id="entry.entry-disallowed" />
+                <FormattedMessage id="entry.watch-from-lobby" />
                 <div className={entryStyles.buttonSubtitle}>
-                  <FormattedMessage id="entry.entry-disallowed-subtitle" />
+                  <FormattedMessage id="entry.watch-from-lobby-subtitle" />
                 </div>
-              </a>
-            </div>
-          )}
+              </button>
+            ) : (
+              <div />
+            )}
+            <button
+              autoFocus
+              onClick={e => {
+                e.preventDefault();
+
+                if (promptForNameAndAvatarBeforeEntry || !this.forcedVREntryType) {
+                  this.setState({ entering: true });
+                  this.props.hubChannel.sendEnteringEvent();
+
+                  const stateValue = promptForNameAndAvatarBeforeEntry ? "profile" : "device";
+                  this.pushHistoryState("entry_step", stateValue);
+                } else {
+                  this.handleForceEntry();
+                }
+              }}
+              className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
+            >
+              <FormattedMessage id="entry.enter-room" />
+            </button>
+          </div>
+        )}
+        {this.props.entryDisallowed && !this.state.waitingOnMic && (
+          <div className={entryStyles.buttonContainer}>
+            <a
+              onClick={e => {
+                e.preventDefault();
+                this.setState({ watching: true });
+              }}
+              className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
+            >
+              <FormattedMessage id="entry.entry-disallowed" />
+              <div className={entryStyles.buttonSubtitle}>
+                <FormattedMessage id="entry.entry-disallowed-subtitle" />
+              </div>
+            </a>
+          </div>
+        )}
         {this.state.waitingOnMic && (
           <div>
             <div className="loader-wrap loader-mid">
@@ -1474,7 +1469,7 @@ export default class UIRoot extends Component {
       [styles.ui]: true,
       "ui-root": true,
       "in-modal-or-overlay": this.isInModalOrOverlay(),
-      isGhost: configs.feature("enable_lobby_ghosts") && (this.state.watching || (this.state.hide || this.props.hide)),
+      isGhost: configs.feature("enable_lobby_ghosts") && (this.state.watching || this.state.hide || this.props.hide),
       hide: this.state.hide || this.props.hide
     };
     if (this.props.hide || this.state.hide) return <div className={classNames(rootStyles)} />;
@@ -1619,23 +1614,22 @@ export default class UIRoot extends Component {
         ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
         : null;
 
-      const streamingTip = streaming &&
-        this.state.showStreamingTip && (
-          <div className={classNames([styles.streamingTip])}>
-            <div className={classNames([styles.streamingTipAttachPoint])} />
-            <button
-              title="Dismiss"
-              className={styles.streamingTipClose}
-              onClick={() => this.setState({ showStreamingTip: false })}
-            >
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
+      const streamingTip = streaming && this.state.showStreamingTip && (
+        <div className={classNames([styles.streamingTip])}>
+          <div className={classNames([styles.streamingTipAttachPoint])} />
+          <button
+            title="Dismiss"
+            className={styles.streamingTipClose}
+            onClick={() => this.setState({ showStreamingTip: false })}
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
 
-            <div className={styles.streamingTipMessage}>
-              <FormattedMessage id="tips.streaming" />
-            </div>
+          <div className={styles.streamingTipMessage}>
+            <FormattedMessage id="tips.streaming" />
           </div>
-        );
+        </div>
+      );
 
       const streamer = getCurrentStreamer();
       const streamerName = streamer && streamer.displayName;
@@ -1645,15 +1639,14 @@ export default class UIRoot extends Component {
           <IntlProvider locale={lang} messages={messages}>
             <div className={classNames(rootStyles)}>
               {this.state.dialog}
-              {preload &&
-                this.props.hub && (
-                  <PreloadOverlay
-                    hubName={this.props.hub.name}
-                    hubScene={this.props.hub.scene}
-                    baseUrl={baseUrl}
-                    onLoadClicked={this.props.onPreloadLoadClicked}
-                  />
-                )}
+              {preload && this.props.hub && (
+                <PreloadOverlay
+                  hubName={this.props.hub.name}
+                  hubScene={this.props.hub.scene}
+                  baseUrl={baseUrl}
+                  onLoadClicked={this.props.onPreloadLoadClicked}
+                />
+              )}
               <StateRoute
                 stateKey="overlay"
                 stateValue="profile"
@@ -1882,16 +1875,15 @@ export default class UIRoot extends Component {
                   {/*<div className={dialogBoxContentsClassNames}>{entryDialog}</div> */}
                 </div>
               )}
-              {enteredOrWatchingOrPreload &&
-                this.props.hub && (
-                  <PresenceLog
-                    inRoom={true}
-                    presences={this.props.presences}
-                    entries={presenceLogEntries}
-                    hubId={this.props.hub.hub_id}
-                    history={this.props.history}
-                  />
-                )}
+              {enteredOrWatchingOrPreload && this.props.hub && (
+                <PresenceLog
+                  inRoom={true}
+                  presences={this.props.presences}
+                  entries={presenceLogEntries}
+                  hubId={this.props.hub.hub_id}
+                  history={this.props.history}
+                />
+              )}
               {entered &&
                 this.props.activeTips &&
                 this.props.activeTips.bottom &&
@@ -1899,25 +1891,22 @@ export default class UIRoot extends Component {
                 !showBroadcastTip && (
                   <Tip tip={this.props.activeTips.bottom} tipRegion="bottom" pushHistoryState={this.pushHistoryState} />
                 )}
-              {enteredOrWatchingOrPreload &&
-                showBroadcastTip && (
-                  <Tip
-                    tip={hasDiscordBridges ? "discord" : "embed"}
-                    broadcastTarget={discordSnippet}
-                    onClose={() => this.confirmBroadcastedRoom()}
-                  />
-                )}
-              {enteredOrWatchingOrPreload &&
-                !this.state.objectInfo &&
-                !this.state.frozen && (
-                  <InWorldChatBox
-                    discordBridges={discordBridges}
-                    onSendMessage={this.sendMessage}
-                    onObjectCreated={this.createObject}
-                    enableSpawning={entered}
-                    history={this.props.history}
-                  />
-                )}
+              {enteredOrWatchingOrPreload && showBroadcastTip && (
+                <Tip
+                  tip={hasDiscordBridges ? "discord" : "embed"}
+                  broadcastTarget={discordSnippet}
+                  onClose={() => this.confirmBroadcastedRoom()}
+                />
+              )}
+              {enteredOrWatchingOrPreload && !this.state.objectInfo && !this.state.frozen && (
+                <InWorldChatBox
+                  discordBridges={discordBridges}
+                  onSendMessage={this.sendMessage}
+                  onObjectCreated={this.createObject}
+                  enableSpawning={entered}
+                  history={this.props.history}
+                />
+              )}
               {this.state.frozen && (
                 <button className={styles.leaveButton} onClick={() => this.exit("left")}>
                   <FormattedMessage id="entry.leave-room" />
@@ -1931,19 +1920,18 @@ export default class UIRoot extends Component {
                     [inviteStyles.inviteContainerInverted]: this.state.showShareDialog
                   })}
                 >
-                  {!embed &&
-                    !streaming && (
-                      <button
-                        className={classNames({
-                          [inviteStyles.inviteButton]: true,
-                          [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered,
-                          [inviteStyles.inviteButtonLowered]: hasTopTip
-                        })}
-                        onClick={() => this.toggleShareDialog()}
-                      >
-                        <FormattedMessage id="entry.share-button" />
-                      </button>
-                    )}
+                  {!embed && !streaming && (
+                    <button
+                      className={classNames({
+                        [inviteStyles.inviteButton]: true,
+                        [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered,
+                        [inviteStyles.inviteButtonLowered]: hasTopTip
+                      })}
+                      onClick={() => this.toggleShareDialog()}
+                    >
+                      <FormattedMessage id="entry.share-button" />
+                    </button>
+                  )}
                   {showChooseSceneButton && (
                     <button
                       className={classNames([styles.chooseSceneButton])}
@@ -1968,21 +1956,17 @@ export default class UIRoot extends Component {
                       <FormattedMessage id={`entry.${isMobile ? "mobile" : "desktop"}.invite-tip`} />
                     </div>
                   )}
-                  {!embed &&
-                    this.occupantCount() > 1 &&
-                    !hasTopTip &&
-                    entered &&
-                    !streaming && (
-                      <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
-                        <span>
-                          {this.state.miniInviteActivated
-                            ? navigator.share
-                              ? "sharing..."
-                              : "copied!"
-                            : `${configs.SHORTLINK_DOMAIN}/` + this.props.hub.hub_id}
-                        </span>
-                      </button>
-                    )}
+                  {!embed && this.occupantCount() > 1 && !hasTopTip && entered && !streaming && (
+                    <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
+                      <span>
+                        {this.state.miniInviteActivated
+                          ? navigator.share
+                            ? "sharing..."
+                            : "copied!"
+                          : `${configs.SHORTLINK_DOMAIN}/` + this.props.hub.hub_id}
+                      </span>
+                    </button>
+                  )}
                   {embed && (
                     <a href={baseUrl} className={inviteStyles.enterButton} target="_blank" rel="noopener noreferrer">
                       <FormattedMessage id="entry.open-in-window" />
@@ -2159,16 +2143,15 @@ export default class UIRoot extends Component {
                       </button>
                     </div>
                   )}
-                  {!watching &&
-                    !streaming && (
-                      <IfFeature name="show_feedback_ui">
-                        <div className={styles.nagCornerButton}>
-                          <button onClick={() => this.pushHistoryState("modal", "feedback")}>
-                            <FormattedMessage id="feedback.prompt" />
-                          </button>
-                        </div>
-                      </IfFeature>
-                    )}
+                  {!watching && !streaming && (
+                    <IfFeature name="show_feedback_ui">
+                      <div className={styles.nagCornerButton}>
+                        <button onClick={() => this.pushHistoryState("modal", "feedback")}>
+                          <FormattedMessage id="feedback.prompt" />
+                        </button>
+                      </div>
+                    </IfFeature>
+                  )}
 
                   {!streaming && (
                     <button
@@ -2195,16 +2178,27 @@ export default class UIRoot extends Component {
 
       const streamVolume = qsGet("stream_volume") || getRoomMetadata().streamVolume || "1.0";
 
-      const initialTrack = playing();
+      const { title: initialTitle, offset: initialOffset } = playing();
 
-      const RoomAudioPlayer = ({ volume, initialTrack, token }) => {
-        const [track, setTrack] = useState(initialTrack);
+      // Rotate array to start with currently playing track
+      const startWith = (arr, predicate) => {
+        const startIndex = findIndex(arr, predicate);
+        return startIndex < 0 ? [...arr] : [...arr.slice(startIndex), ...arr.slice(0, startIndex)];
+      };
 
-        const { offset, title } = track;
+      const playlist = startWith(roomPlaylist(), ({ title }) => title == initialTitle);
+
+      const RoomAudioPlayer = ({ volume, room, initialOffset, playlist, token }) => {
+        const [track, setTrack] = useState(playlist[0]);
+        const [offset, setOffset] = useState(initialOffset);
+
+        const { title } = track;
+
+        const nextTrack = track => playlist[(playlist.indexOf(track) + 1) % playlist.length];
 
         const ASSET_BASE = "https://str33m.dr33mphaz3r.net";
         const tokenArg = token ? `?token=${token}` : "";
-        const srcPath = ext => `${ASSET_BASE}/${title}.${ext}${tokenArg}`;
+        const srcPath = ext => `${ASSET_BASE}/${room}/${title}.${ext}${tokenArg}&t=${offset}`;
 
         return (
           <Fragment>
@@ -2215,8 +2209,7 @@ export default class UIRoot extends Component {
               onCanPlay={() => {
                 this.onMusicCanPlay();
               }}
-              onEnded={() => setTrack(playing())}
-              currentTime={offset}
+              onEnded={() => setTrack(nextTrack(track)) && setOffset(0)}
               onLoadedData={() => {
                 const audio = document.querySelector("#music-player");
                 audio.volume = volume;
@@ -2234,7 +2227,9 @@ export default class UIRoot extends Component {
           <RoomAudioPlayer
             token={this.props.store.state.credentials.token}
             volume={streamVolume}
-            initialTrack={initialTrack}
+            initialOffset={initialOffset}
+            playlist={playlist}
+            room={roomName()}
           />
           {uiRootHtml}
         </Fragment>

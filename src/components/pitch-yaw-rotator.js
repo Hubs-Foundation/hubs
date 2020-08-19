@@ -1,5 +1,5 @@
 import { paths } from "../systems/userinput/paths";
-import getRoomMetadata from "../room-metadata";
+import { getRoomMetadata } from "../room-metadata";
 
 const ROTATION_SPEED = 0.8;
 
@@ -86,7 +86,7 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
     });
     this.on = true;
 
-    this.rotate = (getRoomMetadata().freeRotation == true) ? rotateFree : rotatePitchAndYaw;
+    this.rotate = getRoomMetadata().freeRotation == true ? rotateFree : rotatePitchAndYaw;
   },
 
   tick() {
@@ -101,8 +101,8 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
       if (cameraDelta) {
         this.rotate(
           lobby && !isGhost ? scenePreviewNode.object3D : this.el.object3D,
-          this.pendingXRotation + cameraDelta[1]*ROTATION_SPEED,
-          cameraDelta[0]*ROTATION_SPEED
+          this.pendingXRotation + cameraDelta[1] * ROTATION_SPEED,
+          cameraDelta[0] * ROTATION_SPEED
         );
       } else if (this.pendingXRotation) {
         this.rotate(lobby && !isGhost ? scenePreviewNode.object3D : this.el.object3D, this.pendingXRotation, 0);

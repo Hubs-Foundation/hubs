@@ -20,11 +20,14 @@ import { debug as newDebug } from "debug";
 // - remove score stuff
 
 // Based upon mediasoup-demo RoomClient
+// const debug = newDebug("naf-dialog-adapter:debug");
+// const warn = newDebug("naf-dialog-adapter:warn");
+// const error = newDebug("naf-dialog-adapter:error");
+// const info = newDebug("naf-dialog-adapter:info");
 
-const debug = newDebug("naf-dialog-adapter:debug");
-//const warn = newDebug("naf-dialog-adapter:warn");
-const error = newDebug("naf-dialog-adapter:error");
-const info = newDebug("naf-dialog-adapter:info");
+const debug = console.log;
+const error = console.log;
+const info = console.log;
 
 const PC_PROPRIETARY_CONSTRAINTS = {
   optional: [{ googDscp: true }]
@@ -377,19 +380,22 @@ export default class DialogAdapter {
         proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS
       });
 
-      this._sendTransport.on("connect", (
-        { dtlsParameters },
-        callback,
-        errback // eslint-disable-line no-shadow
-      ) => {
-        this._protoo
-          .request("connectWebRtcTransport", {
-            transportId: this._sendTransport.id,
-            dtlsParameters
-          })
-          .then(callback)
-          .catch(errback);
-      });
+      this._sendTransport.on(
+        "connect",
+        (
+          { dtlsParameters },
+          callback,
+          errback // eslint-disable-line no-shadow
+        ) => {
+          this._protoo
+            .request("connectWebRtcTransport", {
+              transportId: this._sendTransport.id,
+              dtlsParameters
+            })
+            .then(callback)
+            .catch(errback);
+        }
+      );
 
       this._sendTransport.on("produce", async ({ kind, rtpParameters, appData }, callback, errback) => {
         try {
@@ -424,19 +430,22 @@ export default class DialogAdapter {
         iceServers: this._iceServers
       });
 
-      this._recvTransport.on("connect", (
-        { dtlsParameters },
-        callback,
-        errback // eslint-disable-line no-shadow
-      ) => {
-        this._protoo
-          .request("connectWebRtcTransport", {
-            transportId: this._recvTransport.id,
-            dtlsParameters
-          })
-          .then(callback)
-          .catch(errback);
-      });
+      this._recvTransport.on(
+        "connect",
+        (
+          { dtlsParameters },
+          callback,
+          errback // eslint-disable-line no-shadow
+        ) => {
+          this._protoo
+            .request("connectWebRtcTransport", {
+              transportId: this._recvTransport.id,
+              dtlsParameters
+            })
+            .then(callback)
+            .catch(errback);
+        }
+      );
 
       const { peers } = await this._protoo.request("join", {
         displayName: this._clientId,

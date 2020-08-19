@@ -1,7 +1,7 @@
 import { paths } from "./userinput/paths";
 import { SOUND_SNAP_ROTATE, SOUND_WAYPOINT_START, SOUND_WAYPOINT_END } from "./sound-effects-system";
 import { easeOutQuadratic } from "../utils/easing";
-import getRoomMetadata from "../room-metadata";
+import { getRoomMetadata } from "../room-metadata";
 import { getPooledMatrix4, freePooledMatrix4 } from "../utils/mat4-pool";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import {
@@ -269,8 +269,8 @@ export class CharacterControllerSystem {
             (preferences.disableMovement
               ? 0
               : preferences.disableBackwardsMovement
-                ? Math.min(0, zCharacterAcceleration)
-                : zCharacterAcceleration)
+              ? Math.min(0, zCharacterAcceleration)
+              : zCharacterAcceleration)
         );
       }
       const lerpC = vrMode ? 0 : 0.85; // TODO: To support drifting ("ice skating"), motion needs to keep initial direction
@@ -335,7 +335,7 @@ export class CharacterControllerSystem {
         if (!this.activeWaypoint && this.shouldUnoccupyWaypointsOnceMoving && triedToMove) {
           this.shouldUnoccupyWaypointsOnceMoving = false;
           this.waypointSystem.releaseAnyOccupiedWaypoints();
-          if (this.fly && this.shouldLandWhenPossible && (shouldResnapToNavMesh && squareDistNavMeshCorrection < 3)) {
+          if (this.fly && this.shouldLandWhenPossible && shouldResnapToNavMesh && squareDistNavMeshCorrection < 3) {
             newPOV.setPosition(navMeshSnappedPOVPosition);
             this.shouldLandWhenPossible = false;
             this.fly = false;

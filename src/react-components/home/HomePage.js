@@ -14,6 +14,7 @@ import queryString from "querystring";
 import SignInDialog from "../sign-in-dialog.js";
 
 import backgroundAudio from "../../assets/gorloj-nagrume.mp3";
+
 // import splashWebm from "../../assets/video/splash2.webm";
 // import splashMp4 from "../../assets/video/splash2.mp4";
 // import aug20Image from "../../assets/images/aug22.gif";
@@ -36,7 +37,7 @@ import backgroundAudio from "../../assets/gorloj-nagrume.mp3";
 // import logoutButtonHover from "../../assets/images/logout-button-hover.png";
 // import logoutButtonHoverWebp from "../../assets/images/logout-button-hover.webp";
 
-import getRoomMetadata from "../../room-metadata";
+import { getRoomMetadata } from "../../room-metadata";
 
 import qsTruthy from "../../utils/qs_truthy";
 
@@ -265,12 +266,7 @@ export function HomePage() {
           alignItems: "center",
           justifyContent: "center",
           flex: "1",
-<<<<<<< HEAD
-          zIndex: "1",
-          marginTop: "-150px"
-=======
           zIndex: "1"
->>>>>>> live
         }}
       >
         <audio loop autoPlay>
@@ -294,29 +290,6 @@ export function HomePage() {
               }}
             />
           </picture>
-<<<<<<< HEAD
-          <div
-            style={{
-              position: "absolute",
-              bottom: "-180px",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "flex-end",
-              width: "100%"
-            }}
-          >
-            {!auth.isSignedIn && (
-              <img
-                style={{
-                  maxWidth: "200px",
-                  mixBlendMode: "lighten",
-                  clipPath: "inset(91px 17px 88px 27px)"
-                }}
-                src={aug20Image}
-              />
-            )}
-          </div>
-=======
           {/* <div style={{
             position: "absolute",
             bottom: "-180px",
@@ -337,7 +310,6 @@ export function HomePage() {
               </picture>
             }
           </div> */}
->>>>>>> live
         </div>
         {auth.isSignedIn && (
           <div
