@@ -306,6 +306,7 @@
   "preferences.enableOnScreenJoystickRight": "Enable right on-screen joystick for looking around",
   "preferences.invertTouchscreenCameraMove": "Invert direction of camera movement for touchscreens",
   "preferences.onlyShowNametagsInFreeze": "Only show nametags while frozen",
+  "preferences.animateWaypointTransitions": "Animate waypoint transitions",
   "preferences.maxResolution": "Max Resolution",
   "preferences.materialQualitySetting": "Material quality",
   "preferences.enableDynamicShadows": "Enable Dynamic Shadows",

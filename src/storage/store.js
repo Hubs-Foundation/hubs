@@ -74,6 +74,7 @@ export const SCHEMA = {
         enableOnScreenJoystickLeft: { type: "bool" },
         enableOnScreenJoystickRight: { type: "bool" },
         onlyShowNametagsInFreeze: { type: "bool" },
+        animateWaypointTransitions: { type: "bool" },
         allowMultipleHubsInstances: { type: "bool" },
         disableIdleDetection: { type: "bool" },
         preferMobileObjectInfoPanel: { type: "bool" },

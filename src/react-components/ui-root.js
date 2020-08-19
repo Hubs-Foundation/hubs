@@ -1560,7 +1560,7 @@ class UIRoot extends Component {
     const showBroadcastTip =
       (hasDiscordBridges || (hasEmbedPresence && !this.props.embed)) && !this.state.broadcastTipDismissed;
 
-    const inviteEntryMode = this.props.hub.entry_mode === "invite";
+    const inviteEntryMode = this.props.hub && this.props.hub.entry_mode === "invite";
     const showInviteButton = !showObjectInfo && !this.state.frozen && !watching && !preload && !inviteEntryMode;
 
     const showInviteTip =
