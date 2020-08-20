@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./Button.scss";
 
+export const presets = ["basic", "accept", "cancel", "red", "orange", "green", "blue", "purple"];
+
 export function Button({ preset, className, children, ...rest }) {
   return (
     <button className={classNames(styles.button, styles[preset], className)} {...rest}>
@@ -12,7 +14,7 @@ export function Button({ preset, className, children, ...rest }) {
 }
 
 Button.propTypes = {
-  preset: PropTypes.string,
+  preset: PropTypes.oneOf(presets),
   className: PropTypes.string,
   children: PropTypes.node
 };

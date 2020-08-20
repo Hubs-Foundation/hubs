@@ -128,6 +128,7 @@
     "@storybook/addon-essentials": "^6.0.12",
     "@storybook/addon-links": "^6.0.12",
     "@storybook/react": "^6.0.12",
+    "@svgr/webpack": "^5.4.0",
     "acorn": "^6.4.1",
     "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",

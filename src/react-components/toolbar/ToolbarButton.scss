@@ -1,0 +1,481 @@
+@import '../styles/theme';
+
+:local(.toolbarButton) {
+  border: none;
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  label {
+    color: black;
+    margin-top: 8px;
+    margin-bottom: 3px;
+  }
+
+  &:hover {
+    label {
+      color: $black-hover;
+    }
+  }
+
+  &:active {
+    label {
+      color: $black-pressed;
+    }
+  }
+}
+
+:local(.iconContainer) {
+  border-radius: 9999px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid $transparent;
+  background-color: $transparent;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: white;
+    }
+
+    *[fill=\#000] {
+      fill: white;
+    }
+  }
+}
+
+:local(.basic) {
+  :local(.iconContainer) {
+    border-color: $darkgrey;
+
+    svg {
+      *[stroke=\#000] {
+        stroke: #000;
+      }
+  
+      *[fill=\#000] {
+        fill: #000;
+      }
+    }
+  }  
+
+  &:hover :local(.iconContainer) {
+    border-color: transparent;
+    background-color: $white-hover;
+  }
+
+  &:active :local(.iconContainer) {
+    border-color: transparent;
+    background-color: $white-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.iconContainer) {
+      border-color: transparent;
+      background-color: $lightgrey;
+    }
+
+    label {
+      color: $darkgrey;
+    }
+
+    &:hover {
+      :local(.iconContainer) {
+        background-color: $lightgrey-hover;
+      }
+
+      label {
+        color: $darkgrey-hover;
+      }
+    }
+  
+    &:active {
+      :local(.iconContainer) {
+        background-color: $lightgrey-pressed;
+      }
+
+      label {
+        color: $darkgrey-pressed;
+      }
+    }
+  }
+}
+
+:local(.accept), :local(.green) {
+  :local(.iconContainer) {
+    background-color: $green;
+  }  
+
+  &:hover :local(.iconContainer) {
+    background-color: $green-hover;
+  }
+
+  &:active :local(.iconContainer) {
+    background-color: $green-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.iconContainer) {
+      border-color: $green;
+      background-color: transparent;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: $green;
+        }
+    
+        *[fill=\#000] {
+          fill: $green;
+        }
+      }
+    }
+
+    label {
+      color: $green;
+    }
+
+    &:hover {
+      :local(.iconContainer) {
+        border-color: $green-hover;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: $green-hover;
+          }
+      
+          *[fill=\#000] {
+            fill: $green-hover;
+          }
+        }
+      }
+
+      label {
+        color: $green-hover;
+      }
+    }
+  
+    &:active {
+      :local(.iconContainer) {
+        border-color: $green-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: $green-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: $green-pressed;
+          }
+        }
+      }
+
+      label {
+        color: $green-pressed;
+      }
+    }
+  }
+}
+
+:local(.cancel), :local(.red) {
+  :local(.iconContainer) {
+    background-color: $red;
+  }  
+
+  &:hover :local(.iconContainer) {
+    background-color: $red-hover;
+  }
+
+  &:active :local(.iconContainer) {
+    background-color: $red-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.iconContainer) {
+      border-color: $red;
+      background-color: transparent;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: $red;
+        }
+    
+        *[fill=\#000] {
+          fill: $red;
+        }
+      }
+    }
+
+    label {
+      color: $red;
+    }
+
+    &:hover {
+      :local(.iconContainer) {
+        border-color: $red-hover;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: $red-hover;
+          }
+      
+          *[fill=\#000] {
+            fill: $red-hover;
+          }
+        }
+      }
+
+      label {
+        color: $red-hover;
+      }
+    }
+  
+    &:active {
+      :local(.iconContainer) {
+        border-color: $red-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: $red-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: $red-pressed;
+          }
+        }
+      }
+
+      label {
+        color: $red-pressed;
+      }
+    }
+  }
+}
+
+:local(.blue) {
+  :local(.iconContainer) {
+    background-color: $blue;
+  }  
+
+  &:hover :local(.iconContainer) {
+    background-color: $blue-hover;
+  }
+
+  &:active :local(.iconContainer) {
+    background-color: $blue-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.iconContainer) {
+      border-color: $blue;
+      background-color: transparent;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: $blue;
+        }
+    
+        *[fill=\#000] {
+          fill: $blue;
+        }
+      }
+    }
+
+    label {
+      color: $blue;
+    }
+
+    &:hover {
+      :local(.iconContainer) {
+        border-color: $blue-hover;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: $blue-hover;
+          }
+      
+          *[fill=\#000] {
+            fill: $blue-hover;
+          }
+        }
+      }
+
+      label {
+        color: $blue-hover;
+      }
+    }
+  
+    &:active {
+      :local(.iconContainer) {
+        border-color: $blue-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: $blue-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: $blue-pressed;
+          }
+        }
+      }
+
+      label {
+        color: $blue-pressed;
+      }
+    }
+  }
+}
+
+
+:local(.orange) {
+  :local(.iconContainer) {
+    background-color: $orange;
+  }  
+
+  &:hover :local(.iconContainer) {
+    background-color: $orange-hover;
+  }
+
+  &:active :local(.iconContainer) {
+    background-color: $orange-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.iconContainer) {
+      border-color: $orange;
+      background-color: transparent;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: $orange;
+        }
+    
+        *[fill=\#000] {
+          fill: $orange;
+        }
+      }
+    }
+
+    label {
+      color: $orange;
+    }
+
+    &:hover {
+      :local(.iconContainer) {
+        border-color: $orange-hover;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: $orange-hover;
+          }
+      
+          *[fill=\#000] {
+            fill: $orange-hover;
+          }
+        }
+      }
+
+      label {
+        color: $orange-hover;
+      }
+    }
+  
+    &:active {
+      :local(.iconContainer) {
+        border-color: $orange-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: $orange-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: $orange-pressed;
+          }
+        }
+      }
+
+      label {
+        color: $orange-pressed;
+      }
+    }
+  }
+}
+
+:local(.purple) {
+  :local(.iconContainer) {
+    background-color: $purple;
+  }  
+
+  &:hover :local(.iconContainer) {
+    background-color: $purple-hover;
+  }
+
+  &:active :local(.iconContainer) {
+    background-color: $purple-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.iconContainer) {
+      border-color: $purple;
+      background-color: transparent;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: $purple;
+        }
+    
+        *[fill=\#000] {
+          fill: $purple;
+        }
+      }
+    }
+
+    label {
+      color: $purple;
+    }
+
+    &:hover {
+      :local(.iconContainer) {
+        border-color: $purple-hover;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: $purple-hover;
+          }
+      
+          *[fill=\#000] {
+            fill: $purple-hover;
+          }
+        }
+      }
+
+      label {
+        color: $purple-hover;
+      }
+    }
+  
+    &:active {
+      :local(.iconContainer) {
+        border-color: $purple-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: $purple-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: $purple-pressed;
+          }
+        }
+      }
+
+      label {
+        color: $purple-pressed;
+      }
+    }
+  }
+}

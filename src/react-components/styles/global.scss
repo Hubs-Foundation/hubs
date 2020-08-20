@@ -1,11 +1,13 @@
 
 @import "~normalize.css";
+@import "./theme.scss";
 
 /**
  * https://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/
  */
 html {
   box-sizing: border-box;
+  line-height: 1;
 }
 
 *, *:before, *:after {
@@ -157,4 +159,9 @@ img,
 video {
   max-width: 100%;
   height: auto;
+}
+
+label {
+  font-size: $font-size-small;
+  font-weight: $font-weight-bold;
 }
