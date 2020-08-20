@@ -34,9 +34,6 @@ import { App } from "./App";
 window.APP = new App();
 
 const qs = new URLSearchParams(location.search);
-const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
-
-window.APP.quality = window.APP.store.state.preferences.materialQualitySetting || (isMobile ? "low" : "high");
 
 import "./components/event-repeater";
 
