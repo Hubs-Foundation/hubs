@@ -190,6 +190,7 @@ class TopHUD extends Component {
             ? "Stop sharing"
             : `Share ${capitalize(primaryVideoShareType)}${this.state.mediaDisabled ? " Disabled" : ""}`
         }
+        role="button"
         onClick={this.state.mediaDisabled ? noop : maybeHandlePrimaryShare}
         onMouseOver={this.state.mediaDisabled ? noop : showExtrasOnHover}
       >
@@ -231,7 +232,7 @@ class TopHUD extends Component {
     const tipDivForType = (type, cancelFunc) => (
       <div className={cx(styles.topTip)}>
         {cancelFunc && (
-          <button className={styles.tipCancel} onClick={cancelFunc}>
+          <button className={styles.tipCancel} aria-label="close" onClick={cancelFunc}>
             <i>
               <FontAwesomeIcon icon={faTimes} />
             </i>
@@ -247,7 +248,7 @@ class TopHUD extends Component {
     if (this.props.watching) {
       tip = (
         <div className={cx([styles.topTip, styles.topTipNoHud])}>
-          <button className={styles.tipCancel} onClick={() => this.props.onWatchEnded()}>
+          <button className={styles.tipCancel} aria-label="close" onClick={() => this.props.onWatchEnded()}>
             <i>
               <FontAwesomeIcon icon={faTimes} />
             </i>
@@ -280,6 +281,7 @@ class TopHUD extends Component {
             <div
               className={cx(styles.iconButton)}
               title={this.props.muted ? "Unmute Mic" : "Mute Mic"}
+              role="button"
               onClick={this.props.onToggleMute}
             >
               <InlineSVG className={cx(styles.iconButtonIcon)} src={micIcon} />
@@ -289,6 +291,7 @@ class TopHUD extends Component {
                 [styles.disabled]: this.state.mediaDisabled
               })}
               title={`Create${this.state.mediaDisabled ? " Disabled" : ""}`}
+              role="button"
               onClick={
                 this.state.mediaDisabled ? noop : () => this.props.mediaSearchStore.sourceNavigateToDefaultSource()
               }
@@ -300,6 +303,7 @@ class TopHUD extends Component {
                 [styles.disabled]: this.state.penDisabled
               })}
               title={`Pen${this.state.penDisabled ? " Disabled" : ""}`}
+              role="button"
               onClick={this.state.penDisabled ? noop : this.props.onSpawnPen}
             >
               <InlineSVG
@@ -312,6 +316,7 @@ class TopHUD extends Component {
                 [styles.disabled]: this.state.cameraDisabled
               })}
               title={`Camera${this.state.cameraDisabled ? " Disabled" : ""}`}
+              role="button"
               onClick={this.state.cameraDisabled ? noop : this.props.onSpawnCamera}
             >
               <InlineSVG
