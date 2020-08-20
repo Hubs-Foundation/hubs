@@ -230,7 +230,14 @@ export default class UIRoot extends Component {
 
     props.mediaSearchStore.setHistory(props.history);
 
-    this.musicPlayer = React.createRef();
+    this.musicPlayer = null;
+    this.setMusicPlayerRef = element => { this.musicPlayer = element };
+    this.playMusic = () => {
+      if (this.musicPlayer) {
+        console.log("got player ref")
+        this.musicPlayer.play()
+      } else console.log("no player ref :*(")
+    }
 
     // An exit handler that discards event arguments and can be cleaned up.
     this.exitEventHandler = () => this.exit();
@@ -825,7 +832,8 @@ export default class UIRoot extends Component {
     this.setState({ entered: true, entering: false, showShareDialog: false });
 
     // music should be ready by this point, start playing
-    this.musicPlayer.current.play();
+    // if (this.musicPlayer.current) this.musicPlayer.current.play();
+    this.playMusic()
 
     const mediaStream = this.state.mediaStream;
 
@@ -2215,7 +2223,7 @@ export default class UIRoot extends Component {
 
     const playlist = startWith(roomPlaylist(), ({ title }) => title == initialTitle);
 
-    const RoomAudioPlayer = ({ volume, room, initialOffset, playlist, token }) => {
+    const RoomAudioPlayer = ({ volume, room, initialOffset, playlist, token, setPlayerRef, onMusicCanPlay}) => {
       // const [currentTrack, setCurrentTrack] = useState({ track: playlist[0], offset: initialOffset });
       const [currentTrack, setCurrentTrack] = useState({ track: null, offset: null });
 
@@ -2240,9 +2248,9 @@ export default class UIRoot extends Component {
           <audio
             id="music-player"
             hidden
-            ref={this.musicPlayer}
+            ref={setPlayerRef}
             onCanPlay={() => {
-              this.onMusicCanPlay();
+              onMusicCanPlay();
             }}
             onEnded={() => setCurrentTrack({ track: nextTrack(track), offset: 0 })}
             onLoadedData={() => {
@@ -2260,11 +2268,13 @@ export default class UIRoot extends Component {
       return (
         <Fragment>
           <RoomAudioPlayer
+            setPlayerRef={this.setMusicPlayerRef}
             token={this.props.store.state.credentials.token}
             volume={streamVolume}
             initialOffset={initialOffset}
             playlist={playlist}
             room={roomName()}
+            onMusicCanPlay={this.onMusicCanPlay}
           />
           {uiRootHtml}
         </Fragment>
