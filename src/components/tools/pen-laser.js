@@ -1,5 +1,5 @@
 const InterpolationBuffer = require("buffered-interpolation");
-import { convertStandardMaterial } from "../../utils/material-utils";
+import MobileStandardMaterial from "../../materials/MobileStandardMaterial";
 
 function almostEquals(epsilon, u, v) {
   return Math.abs(u.x - v.x) < epsilon && Math.abs(u.y - v.y) < epsilon && Math.abs(u.z - v.z) < epsilon;
@@ -17,8 +17,9 @@ AFRAME.registerComponent("pen-laser", {
 
   init() {
     let material = new THREE.MeshStandardMaterial({ color: "red", opacity: 0.5, transparent: true, visible: true });
-    const quality = window.APP.store.state.preferences.materialQualitySetting;
-    material = convertStandardMaterial(material, quality);
+    if (window.APP && window.APP.quality === "low") {
+      material = MobileStandardMaterial.fromStandardMaterial(material);
+    }
 
     const tipMaterial = material.clone();
 

@@ -7,7 +7,7 @@ import {
   SOUND_PEN_CHANGE_COLOR
 } from "../../systems/sound-effects-system";
 import { waitForDOMContentLoaded } from "../../utils/async-utils";
-import { convertStandardMaterial } from "../../utils/material-utils";
+import MobileStandardMaterial from "../../materials/MobileStandardMaterial";
 
 const pathsMap = {
   "player-right-controller": {
@@ -131,9 +131,9 @@ AFRAME.registerComponent("pen", {
     this.dirty = true;
 
     let material = new THREE.MeshStandardMaterial();
-    const quality = window.APP.store.state.preferences.materialQualitySetting;
-    material = convertStandardMaterial(material, quality);
-
+    if (window.APP && window.APP.quality === "low") {
+      material = MobileStandardMaterial.fromStandardMaterial(material);
+    }
     this.penTip = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 16, 12), material);
     this.penTip.scale.setScalar(this.data.radius / this.el.parentEl.object3D.scale.x);
     this.penTip.matrixNeedsUpdate = true;
