@@ -12,6 +12,7 @@
 :local(.basic) {
   color: $darkgrey;
   border: 1px solid $darkgrey;
+  background-color: $transparent;
 
   &:hover {
     background-color: $white-hover;

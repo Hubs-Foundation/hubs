@@ -12,18 +12,6 @@
     margin-top: 8px;
     margin-bottom: 3px;
   }
-
-  &:hover {
-    label {
-      color: $black-hover;
-    }
-  }
-
-  &:active {
-    label {
-      color: $black-pressed;
-    }
-  }
 }
 
 :local(.iconContainer) {
@@ -63,12 +51,12 @@
   }  
 
   &:hover :local(.iconContainer) {
-    border-color: transparent;
+    border-color: $white-hover;
     background-color: $white-hover;
   }
 
   &:active :local(.iconContainer) {
-    border-color: transparent;
+    border-color: $white-pressed;
     background-color: $white-pressed;
   }
 
@@ -86,19 +74,11 @@
       :local(.iconContainer) {
         background-color: $lightgrey-hover;
       }
-
-      label {
-        color: $darkgrey-hover;
-      }
     }
   
     &:active {
       :local(.iconContainer) {
         background-color: $lightgrey-pressed;
-      }
-
-      label {
-        color: $darkgrey-pressed;
       }
     }
   }
@@ -151,10 +131,6 @@
           }
         }
       }
-
-      label {
-        color: $green-hover;
-      }
     }
   
     &:active {
@@ -170,10 +146,6 @@
             fill: $green-pressed;
           }
         }
-      }
-
-      label {
-        color: $green-pressed;
       }
     }
   }
@@ -226,10 +198,6 @@
           }
         }
       }
-
-      label {
-        color: $red-hover;
-      }
     }
   
     &:active {
@@ -245,10 +213,6 @@
             fill: $red-pressed;
           }
         }
-      }
-
-      label {
-        color: $red-pressed;
       }
     }
   }
@@ -301,10 +265,6 @@
           }
         }
       }
-
-      label {
-        color: $blue-hover;
-      }
     }
   
     &:active {
@@ -320,10 +280,6 @@
             fill: $blue-pressed;
           }
         }
-      }
-
-      label {
-        color: $blue-pressed;
       }
     }
   }
@@ -377,10 +333,6 @@
           }
         }
       }
-
-      label {
-        color: $orange-hover;
-      }
     }
   
     &:active {
@@ -396,10 +348,6 @@
             fill: $orange-pressed;
           }
         }
-      }
-
-      label {
-        color: $orange-pressed;
       }
     }
   }
@@ -452,10 +400,6 @@
           }
         }
       }
-
-      label {
-        color: $purple-hover;
-      }
     }
   
     &:active {
@@ -471,10 +415,6 @@
             fill: $purple-pressed;
           }
         }
-      }
-
-      label {
-        color: $purple-pressed;
       }
     }
   }
