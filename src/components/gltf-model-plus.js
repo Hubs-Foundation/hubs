@@ -405,7 +405,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   gltf.scene.traverse(object => {
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
-    const materialQuality = window.APP.store.state.preferences.materialQualitySetting;
+    const materialQuality = window.APP.store.materialQualitySetting;
     object.material = mapMaterials(object, material => convertStandardMaterial(material, materialQuality));
   });
 

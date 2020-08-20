@@ -277,7 +277,7 @@ class AvatarPreview extends Component {
       ];
 
       // Low and medium quality materials don't use environment maps
-      if (window.APP.store.state.preferences.materialQualitySetting === "high") {
+      if (window.APP.store.materialQualitySetting === "high") {
         dependencies.push(
           // TODO apply environment map to secondary materials as well
           createDefaultEnvironmentMap().then(t => {
@@ -304,15 +304,12 @@ class AvatarPreview extends Component {
       const texture = this.previewMesh.material[prop];
 
       // Low quality materials are missing normal maps
-      if (prop === "normalMap" && window.APP.store.state.preferences.materialQualitySetting === "low") {
+      if (prop === "normalMap" && window.APP.store.materialQualitySetting === "low") {
         return;
       }
 
       // Medium Quality materials are missing metalness and roughness maps
-      if (
-        (prop === "roughnessMap" || prop === "metalnessMap") &&
-        window.APP.store.state.preferences.materialQualitySetting !== "high"
-      ) {
+      if ((prop === "roughnessMap" || prop === "metalnessMap") && window.APP.store.materialQualitySetting !== "high") {
         return;
       }
 

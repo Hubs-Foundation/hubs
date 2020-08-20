@@ -328,4 +328,19 @@ export default class Store extends EventTarget {
 
     return finalState;
   }
+
+  get materialQualitySetting() {
+    if (this.state.preferences.materialQualitySetting) {
+      return this.state.preferences.materialQualitySetting;
+    }
+
+    const isMobile = AFRAME.utils.device.isMobile();
+    const isMobileVR = AFRAME.utils.device.isMobileVR();
+
+    if (isMobile || isMobileVR) {
+      return "low";
+    }
+
+    return "high";
+  }
 }
