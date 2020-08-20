@@ -1,4 +1,4 @@
-import React, { Component, Fragment, useState } from "react";
+import React, { Component, Fragment, useState, useEffect } from "react";
 import { findIndex } from "lodash";
 import PropTypes from "prop-types";
 import classNames from "classnames";
@@ -373,7 +373,6 @@ export default class UIRoot extends Component {
       this.props.scene.addEventListener(
         "loading_finished",
         () => {
-          //setTimeout(() => this.handleForceEntry(), 1000);
           this.handleForceEntry();
         },
         { once: true }
@@ -382,7 +381,7 @@ export default class UIRoot extends Component {
 
     this.playerRig = scene.querySelector("#avatar-rig");
 
-    this.dontWaitForMusic = true;
+    this.dontWaitForMusic = true
   }
 
   UNSAFE_componentWillMount() {
@@ -1146,75 +1145,77 @@ export default class UIRoot extends Component {
           />
         </div>
 
-        {!this.state.waitingOnMic && !this.props.entryDisallowed && (
-          <div className={entryStyles.buttonContainer}>
-            {!isMobileVR && (
+        {!this.state.waitingOnMic &&
+          !this.props.entryDisallowed && (
+            <div className={entryStyles.buttonContainer}>
+              {!isMobileVR && (
+                <button
+                  onClick={e => {
+                    e.preventDefault();
+                    this.attemptLink();
+                  }}
+                  className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
+                >
+                  <FormattedMessage id="entry.device-medium" />
+                  <div className={entryStyles.buttonSubtitle}>
+                    <FormattedMessage id={isMobile ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"} />
+                  </div>
+                </button>
+              )}
+              {configs.feature("enable_lobby_ghosts") ? (
+                <button
+                  onClick={e => {
+                    e.preventDefault();
+                    this.setState({ watching: true });
+                  }}
+                  className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
+                >
+                  <FormattedMessage id="entry.watch-from-lobby" />
+                  <div className={entryStyles.buttonSubtitle}>
+                    <FormattedMessage id="entry.watch-from-lobby-subtitle" />
+                  </div>
+                </button>
+              ) : (
+                <div />
+              )}
               <button
+                autoFocus
                 onClick={e => {
                   e.preventDefault();
-                  this.attemptLink();
+
+                  if (promptForNameAndAvatarBeforeEntry || !this.forcedVREntryType) {
+                    this.setState({ entering: true });
+                    this.props.hubChannel.sendEnteringEvent();
+
+                    const stateValue = promptForNameAndAvatarBeforeEntry ? "profile" : "device";
+                    this.pushHistoryState("entry_step", stateValue);
+                  } else {
+                    this.handleForceEntry();
+                  }
                 }}
-                className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
+                className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
               >
-                <FormattedMessage id="entry.device-medium" />
-                <div className={entryStyles.buttonSubtitle}>
-                  <FormattedMessage id={isMobile ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"} />
-                </div>
+                <FormattedMessage id="entry.enter-room" />
               </button>
-            )}
-            {configs.feature("enable_lobby_ghosts") ? (
-              <button
+            </div>
+          )}
+        {this.props.entryDisallowed &&
+          !this.state.waitingOnMic && (
+            <div className={entryStyles.buttonContainer}>
+              <a
                 onClick={e => {
                   e.preventDefault();
                   this.setState({ watching: true });
                 }}
                 className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
               >
-                <FormattedMessage id="entry.watch-from-lobby" />
+                <FormattedMessage id="entry.entry-disallowed" />
                 <div className={entryStyles.buttonSubtitle}>
-                  <FormattedMessage id="entry.watch-from-lobby-subtitle" />
+                  <FormattedMessage id="entry.entry-disallowed-subtitle" />
                 </div>
-              </button>
-            ) : (
-              <div />
-            )}
-            <button
-              autoFocus
-              onClick={e => {
-                e.preventDefault();
-
-                if (promptForNameAndAvatarBeforeEntry || !this.forcedVREntryType) {
-                  this.setState({ entering: true });
-                  this.props.hubChannel.sendEnteringEvent();
-
-                  const stateValue = promptForNameAndAvatarBeforeEntry ? "profile" : "device";
-                  this.pushHistoryState("entry_step", stateValue);
-                } else {
-                  this.handleForceEntry();
-                }
-              }}
-              className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
-            >
-              <FormattedMessage id="entry.enter-room" />
-            </button>
-          </div>
-        )}
-        {this.props.entryDisallowed && !this.state.waitingOnMic && (
-          <div className={entryStyles.buttonContainer}>
-            <a
-              onClick={e => {
-                e.preventDefault();
-                this.setState({ watching: true });
-              }}
-              className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
-            >
-              <FormattedMessage id="entry.entry-disallowed" />
-              <div className={entryStyles.buttonSubtitle}>
-                <FormattedMessage id="entry.entry-disallowed-subtitle" />
-              </div>
-            </a>
-          </div>
-        )}
+              </a>
+            </div>
+          )}
         {this.state.waitingOnMic && (
           <div>
             <div className="loader-wrap loader-mid">
@@ -1482,7 +1483,7 @@ export default class UIRoot extends Component {
 
     const hasPush = navigator.serviceWorker && "PushManager" in window;
 
-    let uiRootHtml;
+    var uiRootHtml;
 
     if (this.props.showOAuthDialog && !this.props.showInterstitialPrompt)
       uiRootHtml = (
@@ -1492,8 +1493,10 @@ export default class UIRoot extends Component {
           </div>
         </IntlProvider>
       );
-    if (isExited) uiRootHtml = this.renderExitedPane();
-    if (isLoading && this.state.showPrefs) {
+    else if (isExited) {
+      uiRootHtml = this.renderExitedPane();
+    }
+    else if (isLoading && this.state.showPrefs) {
       uiRootHtml = (
         <div>
           <Loader
@@ -1510,12 +1513,12 @@ export default class UIRoot extends Component {
         </div>
       );
     }
-    if (isLoading) {
+    else if (isLoading) {
       uiRootHtml = (
         <Loader scene={this.props.scene} finished={this.state.noMoreLoadingUpdates} onLoaded={this.onLoadingFinished} />
       );
     }
-    if (this.state.showPrefs) {
+    else if (this.state.showPrefs) {
       uiRootHtml = (
         <PreferencesScreen
           onClose={() => {
@@ -1524,11 +1527,14 @@ export default class UIRoot extends Component {
           store={this.props.store}
         />
       );
-    } else if (this.props.showInterstitialPrompt) {
+    }
+    else if (this.props.showInterstitialPrompt) {
       uiRootHtml = this.renderInterstitialPrompt();
-    } else if (this.props.isBotMode) {
+    }
+    else if (this.props.isBotMode) {
       uiRootHtml = this.renderBotMode();
-    } else {
+    }
+    else {
       const embed = this.props.embed;
       const entered = this.state.entered;
       const watching = this.state.watching;
@@ -1540,6 +1546,36 @@ export default class UIRoot extends Component {
         this.props.history.location.state &&
         this.props.history.location.state.entry_step
       );
+
+      const entryDialog =
+        this.props.availableVREntryTypes &&
+        !preload &&
+        (this.isWaitingForAutoExit() ? (
+          <AutoExitWarning
+            message={this.state.autoExitMessage}
+            secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
+            onCancel={this.endAutoExitTimer}
+          />
+        ) : (
+          <div className={entryStyles.entryDialog}>
+            <StateRoute stateKey="entry_step" stateValue="device" history={this.props.history}>
+              {this.renderDevicePanel()}
+            </StateRoute>
+            <StateRoute stateKey="entry_step" stateValue="mic_grant" history={this.props.history}>
+              {this.renderMicPanel(false)}
+            </StateRoute>
+            <StateRoute stateKey="entry_step" stateValue="mic_granted" history={this.props.history}>
+              {this.renderMicPanel(true)}
+            </StateRoute>
+            <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
+              {this.renderAudioSetupPanel()}
+            </StateRoute>
+            <StateRoute stateKey="entry_step" stateValue="" history={this.props.history}>
+              {this.renderEntryStartPanel()}
+            </StateRoute>
+          </div>
+        ));
+
 
       const dialogBoxContentsClassNames = classNames({
         [styles.uiInteractive]: !this.isInModalOrOverlay(),
@@ -1614,39 +1650,42 @@ export default class UIRoot extends Component {
         ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
         : null;
 
-      const streamingTip = streaming && this.state.showStreamingTip && (
-        <div className={classNames([styles.streamingTip])}>
-          <div className={classNames([styles.streamingTipAttachPoint])} />
-          <button
-            title="Dismiss"
-            className={styles.streamingTipClose}
-            onClick={() => this.setState({ showStreamingTip: false })}
-          >
-            <FontAwesomeIcon icon={faTimes} />
-          </button>
+      const streamingTip = streaming &&
+        this.state.showStreamingTip && (
+          <div className={classNames([styles.streamingTip])}>
+            <div className={classNames([styles.streamingTipAttachPoint])} />
+            <button
+              title="Dismiss"
+              className={styles.streamingTipClose}
+              onClick={() => this.setState({ showStreamingTip: false })}
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
 
-          <div className={styles.streamingTipMessage}>
-            <FormattedMessage id="tips.streaming" />
+            <div className={styles.streamingTipMessage}>
+              <FormattedMessage id="tips.streaming" />
+            </div>
           </div>
-        </div>
-      );
+        );
 
       const streamer = getCurrentStreamer();
       const streamerName = streamer && streamer.displayName;
 
-      uiRootHtml = this.shouldShowUI() && (
+      uiRootHtml = (
         <ReactAudioContext.Provider value={this.state.audioContext}>
+          {this.shouldShowUI() && (
           <IntlProvider locale={lang} messages={messages}>
             <div className={classNames(rootStyles)}>
               {this.state.dialog}
-              {preload && this.props.hub && (
-                <PreloadOverlay
-                  hubName={this.props.hub.name}
-                  hubScene={this.props.hub.scene}
-                  baseUrl={baseUrl}
-                  onLoadClicked={this.props.onPreloadLoadClicked}
-                />
-              )}
+              {preload &&
+                this.props.hub && (
+                  <PreloadOverlay
+                    hubName={this.props.hub.name}
+                    hubScene={this.props.hub.scene}
+                    baseUrl={baseUrl}
+                    onLoadClicked={this.props.onPreloadLoadClicked}
+                  />
+                )}
               <StateRoute
                 stateKey="overlay"
                 stateValue="profile"
@@ -1831,9 +1870,7 @@ export default class UIRoot extends Component {
                 stateKey="modal"
                 stateValue="tweet"
                 history={this.props.history}
-                render={() =>
-                  this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog })
-                }
+                render={() => this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog }) }
               />
               {showClientInfo && (
                 <ClientInfoDialog
@@ -1872,18 +1909,19 @@ export default class UIRoot extends Component {
                     hubId={this.props.hub.hub_id}
                     history={this.props.history}
                   />
-                  {/*<div className={dialogBoxContentsClassNames}>{entryDialog}</div> */}
+                  <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
                 </div>
               )}
-              {enteredOrWatchingOrPreload && this.props.hub && (
-                <PresenceLog
-                  inRoom={true}
-                  presences={this.props.presences}
-                  entries={presenceLogEntries}
-                  hubId={this.props.hub.hub_id}
-                  history={this.props.history}
-                />
-              )}
+              {enteredOrWatchingOrPreload &&
+                this.props.hub && (
+                  <PresenceLog
+                    inRoom={true}
+                    presences={this.props.presences}
+                    entries={presenceLogEntries}
+                    hubId={this.props.hub.hub_id}
+                    history={this.props.history}
+                  />
+                )}
               {entered &&
                 this.props.activeTips &&
                 this.props.activeTips.bottom &&
@@ -1891,22 +1929,25 @@ export default class UIRoot extends Component {
                 !showBroadcastTip && (
                   <Tip tip={this.props.activeTips.bottom} tipRegion="bottom" pushHistoryState={this.pushHistoryState} />
                 )}
-              {enteredOrWatchingOrPreload && showBroadcastTip && (
-                <Tip
-                  tip={hasDiscordBridges ? "discord" : "embed"}
-                  broadcastTarget={discordSnippet}
-                  onClose={() => this.confirmBroadcastedRoom()}
-                />
-              )}
-              {enteredOrWatchingOrPreload && !this.state.objectInfo && !this.state.frozen && (
-                <InWorldChatBox
-                  discordBridges={discordBridges}
-                  onSendMessage={this.sendMessage}
-                  onObjectCreated={this.createObject}
-                  enableSpawning={entered}
-                  history={this.props.history}
-                />
-              )}
+              {enteredOrWatchingOrPreload &&
+                showBroadcastTip && (
+                  <Tip
+                    tip={hasDiscordBridges ? "discord" : "embed"}
+                    broadcastTarget={discordSnippet}
+                    onClose={() => this.confirmBroadcastedRoom()}
+                  />
+                )}
+              {enteredOrWatchingOrPreload &&
+                !this.state.objectInfo &&
+                !this.state.frozen && (
+                  <InWorldChatBox
+                    discordBridges={discordBridges}
+                    onSendMessage={this.sendMessage}
+                    onObjectCreated={this.createObject}
+                    enableSpawning={entered}
+                    history={this.props.history}
+                  />
+                )}
               {this.state.frozen && (
                 <button className={styles.leaveButton} onClick={() => this.exit("left")}>
                   <FormattedMessage id="entry.leave-room" />
@@ -1920,18 +1961,19 @@ export default class UIRoot extends Component {
                     [inviteStyles.inviteContainerInverted]: this.state.showShareDialog
                   })}
                 >
-                  {!embed && !streaming && (
-                    <button
-                      className={classNames({
-                        [inviteStyles.inviteButton]: true,
-                        [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered,
-                        [inviteStyles.inviteButtonLowered]: hasTopTip
-                      })}
-                      onClick={() => this.toggleShareDialog()}
-                    >
-                      <FormattedMessage id="entry.share-button" />
-                    </button>
-                  )}
+                  {!embed &&
+                    !streaming && (
+                      <button
+                        className={classNames({
+                          [inviteStyles.inviteButton]: true,
+                          [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered,
+                          [inviteStyles.inviteButtonLowered]: hasTopTip
+                        })}
+                        onClick={() => this.toggleShareDialog()}
+                      >
+                        <FormattedMessage id="entry.share-button" />
+                      </button>
+                    )}
                   {showChooseSceneButton && (
                     <button
                       className={classNames([styles.chooseSceneButton])}
@@ -1956,17 +1998,21 @@ export default class UIRoot extends Component {
                       <FormattedMessage id={`entry.${isMobile ? "mobile" : "desktop"}.invite-tip`} />
                     </div>
                   )}
-                  {!embed && this.occupantCount() > 1 && !hasTopTip && entered && !streaming && (
-                    <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
-                      <span>
-                        {this.state.miniInviteActivated
-                          ? navigator.share
-                            ? "sharing..."
-                            : "copied!"
-                          : `${configs.SHORTLINK_DOMAIN}/` + this.props.hub.hub_id}
-                      </span>
-                    </button>
-                  )}
+                  {!embed &&
+                    this.occupantCount() > 1 &&
+                    !hasTopTip &&
+                    entered &&
+                    !streaming && (
+                      <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
+                        <span>
+                          {this.state.miniInviteActivated
+                            ? navigator.share
+                              ? "sharing..."
+                              : "copied!"
+                            : `${configs.SHORTLINK_DOMAIN}/` + this.props.hub.hub_id}
+                        </span>
+                      </button>
+                    )}
                   {embed && (
                     <a href={baseUrl} className={inviteStyles.enterButton} target="_blank" rel="noopener noreferrer">
                       <FormattedMessage id="entry.open-in-window" />
@@ -2033,29 +2079,6 @@ export default class UIRoot extends Component {
                   <FontAwesomeIcon icon={faTimes} />
                 </button>
               )}
-              {streamingTip}
-
-              {showObjectList && (
-                <ObjectList
-                  scene={this.props.scene}
-                  onExpand={(expand, uninspect) => {
-                    if (expand) {
-                      this.setState({ isPresenceListExpanded: false, isObjectListExpanded: expand });
-                    } else {
-                      this.setState({ isObjectListExpanded: expand });
-                    }
-
-                    if (uninspect) {
-                      this.setState({ objectInfo: null });
-                      if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
-                        this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
-                      }
-                    }
-                  }}
-                  expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
-                  onInspectObject={el => switchToInspectingObject(el)}
-                />
-              )}
 
               {showPresenceList && (
                 <PresenceList
@@ -2075,6 +2098,8 @@ export default class UIRoot extends Component {
                       this.setState({ isPresenceListExpanded: expand });
                     }
                   }}
+                  expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
+                  onInspectObject={el => switchToInspectingObject(el)}
                 />
               )}
 
@@ -2143,15 +2168,16 @@ export default class UIRoot extends Component {
                       </button>
                     </div>
                   )}
-                  {!watching && !streaming && (
-                    <IfFeature name="show_feedback_ui">
-                      <div className={styles.nagCornerButton}>
-                        <button onClick={() => this.pushHistoryState("modal", "feedback")}>
-                          <FormattedMessage id="feedback.prompt" />
-                        </button>
-                      </div>
-                    </IfFeature>
-                  )}
+                  {!watching &&
+                    !streaming && (
+                      <IfFeature name="show_feedback_ui">
+                        <div className={styles.nagCornerButton}>
+                          <button onClick={() => this.pushHistoryState("modal", "feedback")}>
+                            <FormattedMessage id="feedback.prompt" />
+                          </button>
+                        </div>
+                      </IfFeature>
+                    )}
 
                   {!streaming && (
                     <button
@@ -2170,58 +2196,66 @@ export default class UIRoot extends Component {
                 </div>
               )}
             </div>
-          </IntlProvider>
+          </IntlProvider>)}
         </ReactAudioContext.Provider>
       );
+    }
 
-      // const streamUrl = getRoomMetadata().streamUrl || "https://str33m.dr33mphaz3r.com/stream";
+    // const streamUrl = getRoomMetadata().streamUrl || "https://str33m.dr33mphaz3r.com/stream";
 
-      const streamVolume = qsGet("stream_volume") || getRoomMetadata().streamVolume || "1.0";
+    const streamVolume = qsGet("stream_volume") || getRoomMetadata().streamVolume || "1.0";
 
-      const { title: initialTitle, offset: initialOffset } = playing();
+    const { title: initialTitle, offset: initialOffset } = playing();
 
-      // Rotate array to start with currently playing track
-      const startWith = (arr, predicate) => {
-        const startIndex = findIndex(arr, predicate);
-        return startIndex < 0 ? [...arr] : [...arr.slice(startIndex), ...arr.slice(0, startIndex)];
-      };
+    // Rotate array to start with currently playing track
+    const startWith = (arr, predicate) => {
+      const startIndex = findIndex(arr, predicate);
+      return startIndex < 0 ? [...arr] : [...arr.slice(startIndex), ...arr.slice(0, startIndex)];
+    };
 
-      const playlist = startWith(roomPlaylist(), ({ title }) => title == initialTitle);
+    const playlist = startWith(roomPlaylist(), ({ title }) => title == initialTitle);
 
-      const RoomAudioPlayer = ({ volume, room, initialOffset, playlist, token }) => {
-        const [currentTrack, setCurrentTrack] = useState({ track: playlist[0], offset: initialOffset });
+    const RoomAudioPlayer = ({ volume, room, initialOffset, playlist, token }) => {
+      // const [currentTrack, setCurrentTrack] = useState({ track: playlist[0], offset: initialOffset });
+      const [currentTrack, setCurrentTrack] = useState({ track: null, offset: null });
 
-        const { offset, track } = currentTrack;
+      useEffect(() => {
+        setCurrentTrack({ track: playlist[0], offset: initialOffset });
+      }, []);
 
-        const nextTrack = track => playlist[(playlist.indexOf(track) + 1) % playlist.length];
+      const { offset, track } = currentTrack;
 
-        const ASSET_BASE = "https://str33m.dr33mphaz3r.net";
-        const tokenArg = token ? `?token=${token}` : "";
-        const srcPath = ext => `${ASSET_BASE}/${room}/${track.title}.${ext}${tokenArg}#t=${offset / 1e3}`;
+      if (track === null) return null;
 
-        console.log({ ...offset, t: offset / 1e3 });
+      const nextTrack = track => playlist[(playlist.indexOf(track) + 1) % playlist.length];
 
-        return (
-          <Fragment>
-            <audio
-              id="music-player"
-              hidden
-              ref={this.musicPlayer}
-              onCanPlay={() => {
-                this.onMusicCanPlay();
-              }}
-              onEnded={() => setCurrentTrack({ track: nextTrack(track), offset: 0 })}
-              onLoadedData={() => {
-                const audio = document.querySelector("#music-player");
-                audio.volume = volume;
-              }}
-            >
-              <source src={srcPath("mp3")} type="audio/mpeg" />
-              <source src={srcPath("ogg")} type="audio/ogg" />
-            </audio>
-          </Fragment>
-        );
-      };
+      const ASSET_BASE = "https://str33m.dr33mphaz3r.net";
+      const tokenArg = token ? `?token=${token}` : "";
+      const srcPath = ext => `${ASSET_BASE}/${room}/${track.title}.${ext}${tokenArg}#t=${offset / 1e3}`;
+
+      console.log({ ...offset, t: offset / 1e3 });
+
+      return (
+        <Fragment>
+          <audio
+            id="music-player"
+            hidden
+            ref={this.musicPlayer}
+            onCanPlay={() => {
+              this.onMusicCanPlay();
+            }}
+            onEnded={() => setCurrentTrack({ track: nextTrack(track), offset: 0 })}
+            onLoadedData={() => {
+              const audio = document.querySelector("#music-player");
+              audio.volume = volume;
+            }}
+          >
+            <source src={srcPath("mp3")} type="audio/mpeg" />
+            <source src={srcPath("ogg")} type="audio/ogg" />
+          </audio>
+        </Fragment>
+      );
+    };
 
       return (
         <Fragment>
@@ -2235,6 +2269,5 @@ export default class UIRoot extends Component {
           {uiRootHtml}
         </Fragment>
       );
-    }
   }
 }
