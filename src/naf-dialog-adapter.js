@@ -25,9 +25,10 @@ import { debug as newDebug } from "debug";
 // const error = newDebug("naf-dialog-adapter:error");
 // const info = newDebug("naf-dialog-adapter:info");
 
-const debug = console.log;
-const error = console.log;
-const info = console.log;
+const debug = console.debug;
+const warn =  console.warn;
+const error = console.error;
+const info =  console.log;
 
 const PC_PROPRIETARY_CONSTRAINTS = {
   optional: [{ googDscp: true }]

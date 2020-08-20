@@ -25,11 +25,13 @@ import { Liquifier } from './shaders/ShaderFrog/Liquifier.js'
 import room1Preview from "./assets/textures/room1_1.png";
 import room2Preview from "./assets/textures/room2_1.png";
 import room3Preview from "./assets/textures/room3_1.png";
+import lobbyPreview from "./assets/textures/lobby_1.png";
 
 const roomPreviews = {
   'room1': room1Preview,
   'room2': room2Preview,
   'room3': room3Preview,
+  'lobby': lobbyPreview
 }
 
 const imageLoader = new THREE.TextureLoader();
