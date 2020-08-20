@@ -2189,16 +2189,17 @@ export default class UIRoot extends Component {
       const playlist = startWith(roomPlaylist(), ({ title }) => title == initialTitle);
 
       const RoomAudioPlayer = ({ volume, room, initialOffset, playlist, token }) => {
-        const [track, setTrack] = useState(playlist[0]);
-        const [offset, setOffset] = useState(initialOffset);
+        const [currentTrack, setCurrentTrack] = useState({ track: playlist[0], offset: initialOffset });
 
-        const { title } = track;
+        const { offset, track } = currentTrack;
 
         const nextTrack = track => playlist[(playlist.indexOf(track) + 1) % playlist.length];
 
         const ASSET_BASE = "https://str33m.dr33mphaz3r.net";
         const tokenArg = token ? `?token=${token}` : "";
-        const srcPath = ext => `${ASSET_BASE}/${room}/${title}.${ext}${tokenArg}&t=${offset}`;
+        const srcPath = ext => `${ASSET_BASE}/${room}/${track.title}.${ext}${tokenArg}#t=${offset / 1e3}`;
+
+        console.log({ ...offset, t: offset / 1e3 });
 
         return (
           <Fragment>
@@ -2209,7 +2210,7 @@ export default class UIRoot extends Component {
               onCanPlay={() => {
                 this.onMusicCanPlay();
               }}
-              onEnded={() => setTrack(nextTrack(track)) && setOffset(0)}
+              onEnded={() => setCurrentTrack({ track: nextTrack(track), offset: 0 })}
               onLoadedData={() => {
                 const audio = document.querySelector("#music-player");
                 audio.volume = volume;
