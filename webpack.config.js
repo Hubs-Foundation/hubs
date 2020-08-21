@@ -203,7 +203,7 @@ module.exports = async (env, argv) => {
       }
     } else {
       if (!env.localDev) {
-        // Use the default app config with all featured enabled.
+        // Use the default app config with all features enabled.
         appConfig = createDefaultAppConfig();
       }
     }
