@@ -421,10 +421,16 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
 
+
     object.material = mapMaterials(object, material => {
       if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
         return MobileStandardMaterial.fromStandardMaterial(material);
       }
+
+      // [darwin] Fix issue with blacked out transparency
+      material.alphaTest=0.9;
+      material.needsUpdate=true;
+
       return material;
     });
   });
