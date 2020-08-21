@@ -111,6 +111,7 @@ AFRAME.GLTFModelPlus.registerComponent("portal", "portal", (el, componentName, c
       "tex": imageLoader.load(roomPreviews[componentData.targetRoom])
     });
   }
+  componentData['padding'] = -0.15 // not sure why i set these all to -1.5 in the glb lol
   el.setAttribute("portal", componentData);
 });
 
