@@ -10,7 +10,7 @@ export default {
 export const AllButtons = ({ selected }) => (
   <>
     {presets.map(preset => (
-      <Button preset={preset} selected={selected}>
+      <Button key={preset} preset={preset} selected={selected}>
         {preset}
       </Button>
     ))}

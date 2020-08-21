@@ -22,7 +22,9 @@ export default {
 
 export const AllButtons = ({ selected }) => (
   <>
-    {presets.map(preset => <ToolbarButton icon={<ShareIcon />} label={preset} preset={preset} selected={selected} />)}
+    {presets.map(preset => (
+      <ToolbarButton key={preset} icon={<ShareIcon />} label={preset} preset={preset} selected={selected} />
+    ))}
   </>
 );
 
