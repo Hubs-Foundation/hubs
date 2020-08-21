@@ -117,7 +117,7 @@ const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
 
-const RoomAudioPlayer = React.forwardRef(({ volume, room, initialOffset, playlist, token, setPlayerRef, onMusicCanPlay}, ref) => {
+const RoomAudioPlayer = React.forwardRef(({ volume, room, initialOffset, playlist, token, onMusicCanPlay}, ref) => {
   // const [currentTrack, setCurrentTrack] = useState({ track: playlist[0], offset: initialOffset });
   const [currentTrack, setCurrentTrack] = useState({ track: null, offset: null });
 
