@@ -162,7 +162,7 @@ class AdminUI extends Component {
 }
 
 import { IntlProvider } from "react-intl";
-import { getLocale, getMessages } from "./utils/i18n";
+import { lang, messages } from "./utils/i18n";
 
 const mountUI = async (retPhxChannel, customRoutes, layout) => {
   let dataProvider;
@@ -196,7 +196,7 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
   };
 
   ReactDOM.render(
-    <IntlProvider locale={getLocale()} messages={getMessages()}>
+    <IntlProvider locale={lang} messages={messages}>
       <AdminUI
         dataProvider={dataProvider}
         authProvider={authProvider}
