@@ -92,7 +92,7 @@ export default class InviteDialog extends Component {
             )}
         </div>
         <WithHoverSound>
-          <button className={styles.close} onClick={() => this.props.onClose()}>
+          <button className={styles.close} title="close" onClick={() => this.props.onClose()}>
             <i>
               <FontAwesomeIcon icon={faTimes} />
             </i>
