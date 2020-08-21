@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
-import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
-import en from "react-intl/locale-data/en";
+import { FormattedMessage } from "react-intl";
+import { WrappedIntlProvider } from "./wrapped-intl-provider";
 import screenfull from "screenfull";
 
 import configs from "../utils/configs";
@@ -27,7 +27,7 @@ import { getPresenceProfileForSession, discordBridgesForPresences } from "../uti
 import { getClientInfoClientId } from "./client-info-dialog";
 import { getCurrentStreamer } from "../utils/component-utils";
 
-import { lang, messages } from "../utils/i18n";
+import { getMessages } from "../utils/i18n";
 import Loader from "./loader";
 import AutoExitWarning from "./auto-exit-warning";
 import { TwoDEntryButton, GenericEntryButton, DaydreamEntryButton } from "./entry-buttons.js";
@@ -81,8 +81,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import qsTruthy from "../utils/qs_truthy";
 import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
-
-addLocaleData([...en]);
 
 // This is a list of regexes that match the microphone labels of HMDs.
 //
@@ -395,7 +393,7 @@ class UIRoot extends Component {
     } = this.props;
 
     this.showNonHistoriedDialog(SignInDialog, {
-      message: messages[signInMessageId],
+      message: getMessages()[signInMessageId],
       onSignIn: async email => {
         const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
 
@@ -406,8 +404,8 @@ class UIRoot extends Component {
         this.setState({ signedIn: true });
         this.showNonHistoriedDialog(SignInDialog, {
           authComplete: true,
-          message: messages[signInCompleteMessageId],
-          continueText: messages[signInContinueTextId],
+          message: getMessages()[signInCompleteMessageId],
+          continueText: getMessages()[signInContinueTextId],
           onClose: onContinueAfterSignIn,
           onContinue: onContinueAfterSignIn
         });
@@ -862,7 +860,7 @@ class UIRoot extends Component {
 
   showSignInDialog = () => {
     this.showNonHistoriedDialog(SignInDialog, {
-      message: messages["sign-in.prompt"],
+      message: getMessages()["sign-in.prompt"],
       onSignIn: async email => {
         const { authComplete } = await this.props.authChannel.startAuthentication(email, this.props.hubChannel);
 
@@ -947,13 +945,13 @@ class UIRoot extends Component {
 
   renderInterstitialPrompt = () => {
     return (
-      <IntlProvider locale={lang} messages={messages}>
+      <WrappedIntlProvider>
         <div className={styles.interstitial} onClick={() => this.props.onInterstitialPromptClicked()}>
           <div>
             <FormattedMessage id="interstitial.prompt" />
           </div>
         </div>
-      </IntlProvider>
+      </WrappedIntlProvider>
     );
   };
 
@@ -977,7 +975,7 @@ class UIRoot extends Component {
             .<br />
           </IfFeature>
           If you have questions, contact us at{" "}
-          <a href={`mailto:${messages["contact-email"]}`}>
+          <a href={`mailto:${getMessages()["contact-email"]}`}>
             <FormattedMessage id="contact-email" />
           </a>
           .<p />
@@ -1016,12 +1014,12 @@ class UIRoot extends Component {
     }
 
     return (
-      <IntlProvider locale={lang} messages={messages}>
+      <WrappedIntlProvider>
         <div className="exited-panel">
           <img className="exited-panel__logo" src={configs.image("logo")} />
           <div className="exited-panel__subtitle">{subtitle}</div>
         </div>
-      </IntlProvider>
+      </WrappedIntlProvider>
     );
   };
 
@@ -1442,11 +1440,11 @@ class UIRoot extends Component {
 
     if (this.props.showOAuthDialog && !this.props.showInterstitialPrompt)
       return (
-        <IntlProvider locale={lang} messages={messages}>
+        <WrappedIntlProvider>
           <div className={classNames(rootStyles)}>
             <OAuthDialog onClose={this.props.onCloseOAuthDialog} oauthInfo={this.props.oauthInfo} />
           </div>
-        </IntlProvider>
+        </WrappedIntlProvider>
       );
     if (isExited) return this.renderExitedPane();
     if (isLoading && this.state.showPrefs) {
@@ -1623,7 +1621,7 @@ class UIRoot extends Component {
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
-        <IntlProvider locale={lang} messages={messages}>
+        <WrappedIntlProvider>
           <div className={classNames(rootStyles)}>
             {this.state.dialog}
             {preload &&
@@ -2168,7 +2166,7 @@ class UIRoot extends Component {
               </div>
             )}
           </div>
-        </IntlProvider>
+        </WrappedIntlProvider>
       </ReactAudioContext.Provider>
     );
   }
