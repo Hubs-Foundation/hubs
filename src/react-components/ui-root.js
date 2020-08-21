@@ -116,6 +116,49 @@ const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
+
+const RoomAudioPlayer = React.forwardRef(({ volume, room, initialOffset, playlist, token, setPlayerRef, onMusicCanPlay}, ref) => {
+  // const [currentTrack, setCurrentTrack] = useState({ track: playlist[0], offset: initialOffset });
+  const [currentTrack, setCurrentTrack] = useState({ track: null, offset: null });
+
+  useEffect(() => {
+    setCurrentTrack({ track: playlist[0], offset: initialOffset });
+  }, []);
+
+  const { offset, track } = currentTrack;
+
+  if (track === null) return null;
+
+  const nextTrack = track => playlist[(playlist.indexOf(track) + 1) % playlist.length];
+
+  const ASSET_BASE = "https://str33m.dr33mphaz3r.net";
+  const tokenArg = token ? `?token=${token}` : "";
+  const srcPath = ext => `${ASSET_BASE}/${room}/${track.title}.${ext}${tokenArg}#t=${offset / 1e3}`;
+
+  // console.log({ ...offset, t: offset / 1e3 });
+
+  return (
+    <Fragment>
+      <audio
+        id="music-player"
+        hidden
+        ref={ref}
+        onCanPlay={() => {
+          onMusicCanPlay();
+        }}
+        onEnded={() => setCurrentTrack({ track: nextTrack(track), offset: 0 })}
+        onLoadedData={() => {
+          const audio = document.querySelector("#music-player");
+          audio.volume = volume;
+        }}
+      >
+        <source src={srcPath("mp3")} type="audio/mpeg" />
+        <source src={srcPath("ogg")} type="audio/ogg" />
+      </audio>
+    </Fragment>
+  );
+});
+
 export default class UIRoot extends Component {
   willCompileAndUploadMaterials = false;
 
@@ -230,14 +273,7 @@ export default class UIRoot extends Component {
 
     props.mediaSearchStore.setHistory(props.history);
 
-    this.musicPlayer = null;
-    this.setMusicPlayerRef = element => { this.musicPlayer = element };
-    this.playMusic = () => {
-      if (this.musicPlayer) {
-        console.log("got player ref")
-        this.musicPlayer.play()
-      } else console.log("no player ref :*(")
-    }
+    this.musicPlayerRef = React.createRef();
 
     // An exit handler that discards event arguments and can be cleaned up.
     this.exitEventHandler = () => this.exit();
@@ -832,8 +868,11 @@ export default class UIRoot extends Component {
     this.setState({ entered: true, entering: false, showShareDialog: false });
 
     // music should be ready by this point, start playing
-    // if (this.musicPlayer.current) this.musicPlayer.current.play();
-    this.playMusic()
+    if (this.musicPlayerRef.current) {
+      this.musicPlayerRef.current.play();
+    } else {
+      console.error("no ref :*(")
+    }
 
     const mediaStream = this.state.mediaStream;
 
@@ -2223,61 +2262,19 @@ export default class UIRoot extends Component {
 
     const playlist = startWith(roomPlaylist(), ({ title }) => title == initialTitle);
 
-    const RoomAudioPlayer = ({ volume, room, initialOffset, playlist, token, setPlayerRef, onMusicCanPlay}) => {
-      // const [currentTrack, setCurrentTrack] = useState({ track: playlist[0], offset: initialOffset });
-      const [currentTrack, setCurrentTrack] = useState({ track: null, offset: null });
-
-      useEffect(() => {
-        setCurrentTrack({ track: playlist[0], offset: initialOffset });
-      }, []);
-
-      const { offset, track } = currentTrack;
-
-      if (track === null) return null;
-
-      const nextTrack = track => playlist[(playlist.indexOf(track) + 1) % playlist.length];
-
-      const ASSET_BASE = "https://str33m.dr33mphaz3r.net";
-      const tokenArg = token ? `?token=${token}` : "";
-      const srcPath = ext => `${ASSET_BASE}/${room}/${track.title}.${ext}${tokenArg}#t=${offset / 1e3}`;
-
-      console.log({ ...offset, t: offset / 1e3 });
-
-      return (
-        <Fragment>
-          <audio
-            id="music-player"
-            hidden
-            ref={setPlayerRef}
-            onCanPlay={() => {
-              onMusicCanPlay();
-            }}
-            onEnded={() => setCurrentTrack({ track: nextTrack(track), offset: 0 })}
-            onLoadedData={() => {
-              const audio = document.querySelector("#music-player");
-              audio.volume = volume;
-            }}
-          >
-            <source src={srcPath("mp3")} type="audio/mpeg" />
-            <source src={srcPath("ogg")} type="audio/ogg" />
-          </audio>
-        </Fragment>
-      );
-    };
-
-      return (
-        <Fragment>
-          <RoomAudioPlayer
-            setPlayerRef={this.setMusicPlayerRef}
-            token={this.props.store.state.credentials.token}
-            volume={streamVolume}
-            initialOffset={initialOffset}
-            playlist={playlist}
-            room={roomName()}
-            onMusicCanPlay={this.onMusicCanPlay}
-          />
-          {uiRootHtml}
-        </Fragment>
-      );
+    return (
+      <Fragment>
+        <RoomAudioPlayer
+          ref={this.musicPlayerRef}
+          token={this.props.store.state.credentials.token}
+          volume={streamVolume}
+          initialOffset={initialOffset}
+          playlist={playlist}
+          room={roomName()}
+          onMusicCanPlay={this.onMusicCanPlay}
+        />
+        {uiRootHtml}
+      </Fragment>
+    );
   }
 }
