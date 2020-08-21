@@ -1,10 +1,10 @@
 import getHubId from "./utils/hub-id";
 
 const roomMapping = window.ROOM_MAPPING || {
-  "room1": "/EJY4miE/room-1",
-  "room2": "/XRfKSWB/room-2",
-  "room3": "/fcWA7EE/room-3",
-  "lobby": "/3maDzA9/lobby",
+  "room1": "/EJY4miE/t3kn0-sw4mp",
+  "room2": "/XRfKSWB/psyb3r-dung30n",
+  "room3": "/fcWA7EE/c3r3br4l-v0rt3x",
+  "lobby": "/3maDzA9/dr33m-pl4z4",
 };
 
 var roomMetadata = {
