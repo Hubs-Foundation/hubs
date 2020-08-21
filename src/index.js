@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import registerTelemetry from "./telemetry";
 import Store from "./storage/store";
 import "./utils/theme";
@@ -14,9 +15,11 @@ window.APP = { store };
 
 function Root() {
   return (
-    <AuthContextProvider store={store}>
-      <HomePage />
-    </AuthContextProvider>
+    <WrappedIntlProvider>
+      <AuthContextProvider store={store}>
+        <HomePage />
+      </AuthContextProvider>
+    </WrappedIntlProvider>
   );
 }
 

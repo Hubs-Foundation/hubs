@@ -5,9 +5,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faUndo } from "@fortawesome/free-solid-svg-icons/faUndo";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons/faExclamationTriangle";
-import { FormattedMessage, IntlProvider } from "react-intl";
+import { FormattedMessage } from "react-intl";
+import { WrappedIntlProvider } from "./wrapped-intl-provider";
 import styles from "../assets/stylesheets/preferences-screen.scss";
-import { getLocale, getMessages } from "../utils/i18n";
+import { getMessages } from "../utils/i18n";
 
 const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
 
@@ -782,7 +783,7 @@ export default class PreferencesScreen extends Component {
   render() {
     const shouldPromptForRefresh = !!this.props.store.state.preferences.shouldPromptForRefresh;
     return (
-      <IntlProvider locale={getLocale()} messages={getMessages()}>
+      <WrappedIntlProvider>
         <div className={classNames(styles.preferencesPanel)}>
           {shouldPromptForRefresh && (
             <RefreshPrompt
@@ -819,7 +820,7 @@ export default class PreferencesScreen extends Component {
             </div>
           </div>
         </div>
-      </IntlProvider>
+      </WrappedIntlProvider>
     );
   }
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { IntlProvider } from "react-intl";
+import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import registerTelemetry from "./telemetry";
 import Store from "./storage/store";
 import "./utils/theme";
@@ -16,11 +16,11 @@ window.APP = { store };
 
 function Root() {
   return (
-    <IntlProvider locale={getLocale()} messages={getMessages()}>
+    <WrappedIntlProvider locale={getLocale()} messages={getMessages()}>
       <AuthContextProvider store={store}>
         <SignInPage />
       </AuthContextProvider>
-    </IntlProvider>
+    </WrappedIntlProvider>
   );
 }
 

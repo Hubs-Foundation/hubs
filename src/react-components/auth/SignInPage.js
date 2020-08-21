@@ -74,8 +74,12 @@ function SubmitEmail({ onSubmitEmail, initialEmail }) {
 
   return (
     <form onSubmit={onSubmitForm} className={styles.signInContainer}>
-      <h1>Sign In</h1>
-      <b>Sign in to pin objects in rooms.</b>
+      <h1>
+        <FormattedMessage id="sign-in.in" />
+      </h1>
+      <b>
+        <FormattedMessage id="sign-in.prompt" />
+      </b>
       <input
         name="email"
         type="email"

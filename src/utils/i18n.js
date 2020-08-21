@@ -32,6 +32,7 @@ let _messages = defaultLocaleData;
       const { default: localeData } = await import(`../assets/locales/${locale}.json`);
       _locale = locale;
       _messages = localeData;
+      document.body.dispatchEvent(new CustomEvent("locale-updated", { detail: { locale } }));
       break;
     } catch (e) {
       //locale file not found, try a fallback if available
