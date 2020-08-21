@@ -1,6 +1,6 @@
 
+@use "./theme.scss";
 @import "~normalize.css";
-@import "./theme.scss";
 
 /**
  * https://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/
@@ -73,6 +73,7 @@ textarea {
 button,
 [role="button"] {
   cursor: pointer;
+  user-select: none;
 }
 
 table {
@@ -162,6 +163,12 @@ video {
 }
 
 label {
-  font-size: $font-size-small;
-  font-weight: $font-weight-bold;
+  font-size: theme.$font-size-small;
+  font-weight: theme.$font-weight-bold;
+}
+
+body:not(:global(.keyboard-user)) {
+  :focus {
+    outline: none;
+  }
 }

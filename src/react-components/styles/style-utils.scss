@@ -1,0 +1,18 @@
+@use './theme';
+
+:local(.hide-md) {
+  display: inherit !important;
+
+  @media (min-width: theme.$breakpoint-md) {
+    display: none !important;
+  }
+}
+
+:local(.show-md) {
+  display: none !important;
+
+  @media (min-width: theme.$breakpoint-md) {
+    display: inherit !important;
+  }
+}
+

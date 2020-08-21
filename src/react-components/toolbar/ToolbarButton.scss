@@ -1,6 +1,6 @@
-@import '../styles/theme';
+@use '../styles/theme';
 
-:local(.toolbarButton) {
+:local(.toolbar-button) {
   border: none;
   background-color: transparent;
   display: flex;
@@ -8,36 +8,41 @@
   align-items: center;
 
   label {
+    cursor: pointer;
     color: black;
     margin-top: 8px;
     margin-bottom: 3px;
   }
 }
 
-:local(.iconContainer) {
+:local(.icon-container) {
   border-radius: 9999px;
   width: 48px;
   height: 48px;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid $transparent;
-  background-color: $transparent;
+  border: 1px solid theme.$transparent;
+  background-color: theme.$transparent;
+
+  transition: background-color 0.1s ease-in-out, border-color 0.1s ease-in-out;
 
   svg {
     *[stroke=\#000] {
       stroke: white;
+      transition: stroke 0.1s ease-in-out;
     }
 
     *[fill=\#000] {
       fill: white;
+      transition: fill 0.1s ease-in-out;
     }
   }
 }
 
-:local(.basic) {
-  :local(.iconContainer) {
-    border-color: $darkgrey;
+:local(.basic), :local(.transparent) {
+  :local(.icon-container) {
+    border-color: theme.$lightgrey;
 
     svg {
       *[stroke=\#000] {
@@ -50,100 +55,104 @@
     }
   }  
 
-  &:hover :local(.iconContainer) {
-    border-color: $white-hover;
-    background-color: $white-hover;
+  &:hover :local(.icon-container) {
+    border-color: theme.$white-hover;
+    background-color: theme.$white-hover;
   }
 
-  &:active :local(.iconContainer) {
-    border-color: $white-pressed;
-    background-color: $white-pressed;
+  &:active :local(.icon-container) {
+    border-color: theme.$white-pressed;
+    background-color: theme.$white-pressed;
   }
 
   &:local(.selected) {
-    :local(.iconContainer) {
+    :local(.icon-container) {
       border-color: transparent;
-      background-color: $lightgrey;
+      background-color: theme.$lightgrey;
     }
 
     label {
-      color: $darkgrey;
+      color: theme.$darkgrey;
     }
 
     &:hover {
-      :local(.iconContainer) {
-        background-color: $lightgrey-hover;
+      :local(.icon-container) {
+        background-color: theme.$lightgrey-hover;
       }
     }
   
     &:active {
-      :local(.iconContainer) {
-        background-color: $lightgrey-pressed;
+      :local(.icon-container) {
+        background-color: theme.$lightgrey-pressed;
       }
     }
   }
 }
 
+:local(.transparent) :local(.icon-container) {
+  border-color: theme.$transparent;
+}
+
 :local(.accept), :local(.green) {
-  :local(.iconContainer) {
-    background-color: $green;
+  :local(.icon-container) {
+    background-color: theme.$green;
   }  
 
-  &:hover :local(.iconContainer) {
-    background-color: $green-hover;
+  &:hover :local(.icon-container) {
+    background-color: theme.$green-hover;
   }
 
-  &:active :local(.iconContainer) {
-    background-color: $green-pressed;
+  &:active :local(.icon-container) {
+    background-color: theme.$green-pressed;
   }
 
   &:local(.selected) {
-    :local(.iconContainer) {
-      border-color: $green;
+    :local(.icon-container) {
+      border-color: theme.$green;
       background-color: transparent;
 
       svg {
         *[stroke=\#000] {
-          stroke: $green;
+          stroke: theme.$green;
         }
     
         *[fill=\#000] {
-          fill: $green;
+          fill: theme.$green;
         }
       }
     }
 
     label {
-      color: $green;
+      color: theme.$green;
     }
 
     &:hover {
-      :local(.iconContainer) {
-        border-color: $green-hover;
+      :local(.icon-container) {
+        border-color: theme.$green-hover;
 
         svg {
           *[stroke=\#000] {
-            stroke: $green-hover;
+            stroke: theme.$green-hover;
           }
       
           *[fill=\#000] {
-            fill: $green-hover;
+            fill: theme.$green-hover;
           }
         }
       }
     }
   
     &:active {
-      :local(.iconContainer) {
-        border-color: $green-pressed;
+      :local(.icon-container) {
+        border-color: theme.$green-pressed;
 
         svg {
           *[stroke=\#000] {
-            stroke: $green-pressed;
+            stroke: theme.$green-pressed;
           }
       
           *[fill=\#000] {
-            fill: $green-pressed;
+            fill: theme.$green-pressed;
           }
         }
       }
@@ -152,65 +161,65 @@
 }
 
 :local(.cancel), :local(.red) {
-  :local(.iconContainer) {
-    background-color: $red;
+  :local(.icon-container) {
+    background-color: theme.$red;
   }  
 
-  &:hover :local(.iconContainer) {
-    background-color: $red-hover;
+  &:hover :local(.icon-container) {
+    background-color: theme.$red-hover;
   }
 
-  &:active :local(.iconContainer) {
-    background-color: $red-pressed;
+  &:active :local(.icon-container) {
+    background-color: theme.$red-pressed;
   }
 
   &:local(.selected) {
-    :local(.iconContainer) {
-      border-color: $red;
+    :local(.icon-container) {
+      border-color: theme.$red;
       background-color: transparent;
 
       svg {
         *[stroke=\#000] {
-          stroke: $red;
+          stroke: theme.$red;
         }
     
         *[fill=\#000] {
-          fill: $red;
+          fill: theme.$red;
         }
       }
     }
 
     label {
-      color: $red;
+      color: theme.$red;
     }
 
     &:hover {
-      :local(.iconContainer) {
-        border-color: $red-hover;
+      :local(.icon-container) {
+        border-color: theme.$red-hover;
 
         svg {
           *[stroke=\#000] {
-            stroke: $red-hover;
+            stroke: theme.$red-hover;
           }
       
           *[fill=\#000] {
-            fill: $red-hover;
+            fill: theme.$red-hover;
           }
         }
       }
     }
   
     &:active {
-      :local(.iconContainer) {
-        border-color: $red-pressed;
+      :local(.icon-container) {
+        border-color: theme.$red-pressed;
 
         svg {
           *[stroke=\#000] {
-            stroke: $red-pressed;
+            stroke: theme.$red-pressed;
           }
       
           *[fill=\#000] {
-            fill: $red-pressed;
+            fill: theme.$red-pressed;
           }
         }
       }
@@ -219,65 +228,65 @@
 }
 
 :local(.blue) {
-  :local(.iconContainer) {
-    background-color: $blue;
+  :local(.icon-container) {
+    background-color: theme.$blue;
   }  
 
-  &:hover :local(.iconContainer) {
-    background-color: $blue-hover;
+  &:hover :local(.icon-container) {
+    background-color: theme.$blue-hover;
   }
 
-  &:active :local(.iconContainer) {
-    background-color: $blue-pressed;
+  &:active :local(.icon-container) {
+    background-color: theme.$blue-pressed;
   }
 
   &:local(.selected) {
-    :local(.iconContainer) {
-      border-color: $blue;
+    :local(.icon-container) {
+      border-color: theme.$blue;
       background-color: transparent;
 
       svg {
         *[stroke=\#000] {
-          stroke: $blue;
+          stroke: theme.$blue;
         }
     
         *[fill=\#000] {
-          fill: $blue;
+          fill: theme.$blue;
         }
       }
     }
 
     label {
-      color: $blue;
+      color: theme.$blue;
     }
 
     &:hover {
-      :local(.iconContainer) {
-        border-color: $blue-hover;
+      :local(.icon-container) {
+        border-color: theme.$blue-hover;
 
         svg {
           *[stroke=\#000] {
-            stroke: $blue-hover;
+            stroke: theme.$blue-hover;
           }
       
           *[fill=\#000] {
-            fill: $blue-hover;
+            fill: theme.$blue-hover;
           }
         }
       }
     }
   
     &:active {
-      :local(.iconContainer) {
-        border-color: $blue-pressed;
+      :local(.icon-container) {
+        border-color: theme.$blue-pressed;
 
         svg {
           *[stroke=\#000] {
-            stroke: $blue-pressed;
+            stroke: theme.$blue-pressed;
           }
       
           *[fill=\#000] {
-            fill: $blue-pressed;
+            fill: theme.$blue-pressed;
           }
         }
       }
@@ -287,65 +296,65 @@
 
 
 :local(.orange) {
-  :local(.iconContainer) {
-    background-color: $orange;
+  :local(.icon-container) {
+    background-color: theme.$orange;
   }  
 
-  &:hover :local(.iconContainer) {
-    background-color: $orange-hover;
+  &:hover :local(.icon-container) {
+    background-color: theme.$orange-hover;
   }
 
-  &:active :local(.iconContainer) {
-    background-color: $orange-pressed;
+  &:active :local(.icon-container) {
+    background-color: theme.$orange-pressed;
   }
 
   &:local(.selected) {
-    :local(.iconContainer) {
-      border-color: $orange;
+    :local(.icon-container) {
+      border-color: theme.$orange;
       background-color: transparent;
 
       svg {
         *[stroke=\#000] {
-          stroke: $orange;
+          stroke: theme.$orange;
         }
     
         *[fill=\#000] {
-          fill: $orange;
+          fill: theme.$orange;
         }
       }
     }
 
     label {
-      color: $orange;
+      color: theme.$orange;
     }
 
     &:hover {
-      :local(.iconContainer) {
-        border-color: $orange-hover;
+      :local(.icon-container) {
+        border-color: theme.$orange-hover;
 
         svg {
           *[stroke=\#000] {
-            stroke: $orange-hover;
+            stroke: theme.$orange-hover;
           }
       
           *[fill=\#000] {
-            fill: $orange-hover;
+            fill: theme.$orange-hover;
           }
         }
       }
     }
   
     &:active {
-      :local(.iconContainer) {
-        border-color: $orange-pressed;
+      :local(.icon-container) {
+        border-color: theme.$orange-pressed;
 
         svg {
           *[stroke=\#000] {
-            stroke: $orange-pressed;
+            stroke: theme.$orange-pressed;
           }
       
           *[fill=\#000] {
-            fill: $orange-pressed;
+            fill: theme.$orange-pressed;
           }
         }
       }
@@ -354,65 +363,65 @@
 }
 
 :local(.purple) {
-  :local(.iconContainer) {
-    background-color: $purple;
+  :local(.icon-container) {
+    background-color: theme.$purple;
   }  
 
-  &:hover :local(.iconContainer) {
-    background-color: $purple-hover;
+  &:hover :local(.icon-container) {
+    background-color: theme.$purple-hover;
   }
 
-  &:active :local(.iconContainer) {
-    background-color: $purple-pressed;
+  &:active :local(.icon-container) {
+    background-color: theme.$purple-pressed;
   }
 
   &:local(.selected) {
-    :local(.iconContainer) {
-      border-color: $purple;
+    :local(.icon-container) {
+      border-color: theme.$purple;
       background-color: transparent;
 
       svg {
         *[stroke=\#000] {
-          stroke: $purple;
+          stroke: theme.$purple;
         }
     
         *[fill=\#000] {
-          fill: $purple;
+          fill: theme.$purple;
         }
       }
     }
 
     label {
-      color: $purple;
+      color: theme.$purple;
     }
 
     &:hover {
-      :local(.iconContainer) {
-        border-color: $purple-hover;
+      :local(.icon-container) {
+        border-color: theme.$purple-hover;
 
         svg {
           *[stroke=\#000] {
-            stroke: $purple-hover;
+            stroke: theme.$purple-hover;
           }
       
           *[fill=\#000] {
-            fill: $purple-hover;
+            fill: theme.$purple-hover;
           }
         }
       }
     }
   
     &:active {
-      :local(.iconContainer) {
-        border-color: $purple-pressed;
+      :local(.icon-container) {
+        border-color: theme.$purple-pressed;
 
         svg {
           *[stroke=\#000] {
-            stroke: $purple-pressed;
+            stroke: theme.$purple-pressed;
           }
       
           *[fill=\#000] {
-            fill: $purple-pressed;
+            fill: theme.$purple-pressed;
           }
         }
       }

@@ -1,4 +1,4 @@
-@import '../styles/theme';
+@use '../styles/theme';
 
 :local(.button) {
   height: 48px;
@@ -7,83 +7,84 @@
   font-size: 12px;
   border-radius: 8px;
   border-width: 0;
+  transition: background-color 0.1s ease-in-out;
 }
 
 :local(.basic) {
-  color: $darkgrey;
-  border: 1px solid $darkgrey;
-  background-color: $transparent;
+  color: theme.$darkgrey;
+  border: 1px solid theme.$darkgrey;
+  background-color: theme.$transparent;
 
   &:hover {
-    background-color: $white-hover;
+    background-color: theme.$white-hover;
   }
 
   &:active {
-    background-color: $white-pressed;
+    background-color: theme.$white-pressed;
   }
 }
 
 :local(.accept), :local(.green) {
-  color: $white;
-  background-color: $green;
+  color: theme.$white;
+  background-color: theme.$green;
 
   &:hover {
-    background-color: $green-hover;
+    background-color: theme.$green-hover;
   }
 
   &:active {
-    background-color: $green-pressed;
+    background-color: theme.$green-pressed;
   }
 }
 
 :local(.cancel), :local(.red) {
-  color: $white;
-  background-color: $red;
+  color: theme.$white;
+  background-color: theme.$red;
 
   &:hover {
-    background-color: $red-hover;
+    background-color: theme.$red-hover;
   }
 
   &:active {
-    background-color: $red-pressed;
+    background-color: theme.$red-pressed;
   }
 }
 
 :local(.blue) {
-  color: $white;
-  background-color: $blue;
+  color: theme.$white;
+  background-color: theme.$blue;
 
   &:hover {
-    background-color: $blue-hover;
+    background-color: theme.$blue-hover;
   }
 
   &:active {
-    background-color: $blue-pressed;
+    background-color: theme.$blue-pressed;
   }
 }
 
 :local(.orange) {
-  color: $white;
-  background-color: $orange;
+  color: theme.$white;
+  background-color: theme.$orange;
 
   &:hover {
-    background-color: $orange-hover;
+    background-color: theme.$orange-hover;
   }
 
   &:active {
-    background-color: $orange-pressed;
+    background-color: theme.$orange-pressed;
   }
 }
 
 :local(.purple) {
-  color: $white;
-  background-color: $purple;
+  color: theme.$white;
+  background-color: theme.$purple;
 
   &:hover {
-    background-color: $purple-hover;
+    background-color: theme.$purple-hover;
   }
 
   &:active {
-    background-color: $purple-pressed;
+    background-color: theme.$purple-pressed;
   }
 }

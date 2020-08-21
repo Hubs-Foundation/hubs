@@ -13,7 +13,8 @@ module.exports = {
           options: {
             importLoaders: "1",
             localIdentName: "[name]__[local]___[hash:base64:5]",
-            modules: true
+            modules: true,
+            camelCase: true
           }
         },
         "sass-loader"
