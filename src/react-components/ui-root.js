@@ -1547,7 +1547,12 @@ export default class UIRoot extends Component {
 
   renderAudioPlayer = () => {
     const streamVolume = this.state.volume;
-    const { title: initialTitle, offset: initialOffset } = currentlyPlaying();
+    const playingNow = currentlyPlaying();
+    if (!playingNow) {
+      console.warn('Could not fetch current track from server for this room')
+      return null;
+    }
+    const { title: initialTitle, offset: initialOffset } = playingNow;
 
     // Rotate array to start with currently playing track
     const startWith = (arr, predicate) => {
