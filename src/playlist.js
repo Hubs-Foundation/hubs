@@ -71,7 +71,7 @@ const lineup = mapValues(jsyaml.load(stream_config), parseTrackDurations);
 export const roomPlaylist = (room = roomName()) => lineup[room].tracks;
 
 // Who is currently playing
-export const playing = (room = roomName(), time = new Date()) => {
+export const currentlyPlaying = (room = roomName(), time = new Date()) => {
   if (!lineup[room]) return null;
 
   const { tracks, shift = 0 } = lineup[room];
@@ -104,7 +104,7 @@ export const setTimes = (room = roomName(), from = new Date(), until = addDays(n
   let time = from;
   const list = [];
   while (getUnixTime(time) < getUnixTime(until)) {
-    const { track, offset } = playing(room, time);
+    const { track, offset } = currentlyPlaying(room, time);
     const { length } = track;
     const start = subMilliseconds(time, offset);
     time = addMilliseconds(time, length);

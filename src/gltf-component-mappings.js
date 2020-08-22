@@ -35,6 +35,7 @@ const roomPreviews = {
 }
 
 const imageLoader = new THREE.TextureLoader();
+
 //allow cross origin loading
 imageLoader.crossOrigin = '';
 
@@ -46,7 +47,7 @@ const setUniforms = (material, uniforms) => {
   }
 }
 
-const registerShaderFrogShader = (srcShader, uniforms) => {
+export const registerShaderFrogShader = (srcShader, uniforms) => {
   const sceneEl = AFRAME.scenes[0];
   const effectsSystem = sceneEl && sceneEl.systems["hubs-systems"].effectsSystem;
   if (effectsSystem) {
@@ -58,7 +59,7 @@ const registerShaderFrogShader = (srcShader, uniforms) => {
   }
 };
 
-const registerRegularShader = (srcShader, uniforms) => {
+export const registerRegularShader = (srcShader, uniforms) => {
   const sceneEl = AFRAME.scenes[0];
   const effectsSystem = sceneEl && sceneEl.systems["hubs-systems"].effectsSystem;
   if (effectsSystem) {

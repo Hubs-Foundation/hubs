@@ -74,7 +74,7 @@ import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
 import { getRoomMetadata, roomName } from "../room-metadata";
-import { playing, roomPlaylist } from "../playlist";
+import { currentlyPlaying, roomPlaylist } from "../playlist";
 
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
@@ -257,7 +257,7 @@ export default class UIRoot extends Component {
     frozen: false,
 
     playing: false,
-    volume: qsGet("stream_volume") || getRoomMetadata().streamVolume || .95,
+    volume: parseFloat(qsGet("stream_volume")) || getRoomMetadata().streamVolume || .95,
 
     exited: false,
 
@@ -1521,7 +1521,11 @@ export default class UIRoot extends Component {
 
   renderVolumeSlider = () => {
     return (
-      <div className='volume'>
+      <div className={classNames({
+        [styles.ui]: true,
+        "ui-root": true,
+        "in-modal-or-overlay": true,
+        })}>
           <label>
             Volume:
             <span className='slider-container'>
@@ -1543,7 +1547,8 @@ export default class UIRoot extends Component {
 
   renderAudioPlayer = () => {
     const streamVolume = this.state.volume;
-    const { title: initialTitle, offset: initialOffset } = playing();
+    const { title: initialTitle, offset: initialOffset } = currentlyPlaying();
+
     // Rotate array to start with currently playing track
     const startWith = (arr, predicate) => {
       const startIndex = findIndex(arr, predicate);
@@ -2304,7 +2309,7 @@ export default class UIRoot extends Component {
       <Fragment>
         {uiRootHtml}
         {this.renderAudioPlayer()}
-        {this.renderVolumeSlider()}
+        {/*this.renderVolumeSlider()*/}
       </Fragment>
     );
   }
