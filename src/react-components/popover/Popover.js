@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 // Note react-popper-2 is just an alias to react-popper@2.2.3 because storybook is depending on an old version.
 // https://github.com/storybookjs/storybook/issues/10982
 import { usePopper } from "react-popper-2";
@@ -26,6 +26,30 @@ export function Popover({ content: Content, children, title, placement, initiall
   const fullscreen = breakpoint === "sm";
   const closePopover = useCallback(() => setVisible(false), [setVisible]);
   const togglePopover = useCallback(() => setVisible(visible => !visible), [setVisible]);
+
+  useEffect(
+    () => {
+      const onClick = e => {
+        if (
+          (referenceElement && referenceElement.contains(e.target)) ||
+          (popperElement && popperElement.contains(e.target))
+        ) {
+          return;
+        }
+
+        setVisible(false);
+      };
+
+      if (visible) {
+        window.addEventListener("click", onClick);
+      }
+
+      return () => {
+        window.removeEventListener("click", onClick);
+      };
+    },
+    [visible, popperElement, referenceElement]
+  );
 
   return (
     <>
