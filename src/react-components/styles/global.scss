@@ -172,3 +172,43 @@ body:not(:global(.keyboard-user)) {
     outline: none;
   }
 }
+
+/**
+ * Breakpoint definitions for use wuth react-use-css-breakpoints
+ * https://github.com/matthewhall/react-use-css-breakpoints
+ */
+body::before {
+  content: "sm";
+  display: none;
+}
+
+@media (min-width: theme.$breakpoint-md) {
+  body::before {
+    content: "md";
+  }
+}
+
+@media (min-width: theme.$breakpoint-lg) {
+  body::before {
+    content: "lg";
+  }
+}
+
+@media (min-width: theme.$breakpoint-xl) {
+  body::before {
+    content: "xl";
+  }
+}
+
+@media (min-width: theme.$breakpoint-xxl) {
+  body::before {
+    content: "xxl";
+  }
+}
+
+// TODO: Add the rest of the base typography styles
+
+h5 {
+  font-size: theme.$font-size-small;
+  font-weight: theme.$font-weight-bold;
+}

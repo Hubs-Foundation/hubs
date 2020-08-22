@@ -1,13 +1,14 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./ToolbarButton.scss";
 
 export const presets = ["basic", "transparent", "accept", "cancel", "red", "orange", "green", "blue", "purple"];
 
-export function ToolbarButton({ preset, className, icon, label, selected, ...rest }) {
+export const ToolbarButton = forwardRef(({ preset, className, icon, label, selected, ...rest }, ref) => {
   return (
     <button
+      ref={ref}
       className={classNames(styles.toolbarButton, styles[preset], { [styles.selected]: selected }, className)}
       {...rest}
     >
@@ -17,7 +18,7 @@ export function ToolbarButton({ preset, className, icon, label, selected, ...res
       <label>{label}</label>
     </button>
   );
-}
+});
 
 ToolbarButton.propTypes = {
   icon: PropTypes.node,
