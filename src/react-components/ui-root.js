@@ -23,6 +23,7 @@ import {
   navigateToPriorPage,
   sluglessPath
 } from "../utils/history";
+
 import StateRoute from "./state-route.js";
 import { getPresenceProfileForSession, discordBridgesForPresences } from "../utils/phoenix-utils";
 import { getClientInfoClientId } from "./client-info-dialog";
@@ -83,7 +84,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import qsTruthy, { qsGet } from "../utils/qs_truthy";
 import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
+
+import ReactHowler from 'react-howler'
+
+
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
+
 
 addLocaleData([...en]);
 
@@ -116,18 +122,19 @@ const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
-
 const RoomAudioPlayer = React.forwardRef(({ volume, room, initialOffset, playlist, token, onMusicCanPlay}, ref) => {
   // const [currentTrack, setCurrentTrack] = useState({ track: playlist[0], offset: initialOffset });
   const [currentTrack, setCurrentTrack] = useState({ track: null, offset: null });
 
   useEffect(() => {
-    setCurrentTrack({ track: playlist[0], offset: initialOffset });
+    setCurrentTrack({ track: playlist[0], offset: initialOffset, initialized: false });
   }, []);
 
   const { offset, track } = currentTrack;
 
   if (track === null) return null;
+
+  console.info(`track: ${JSON.stringify(track)}`)
 
   const nextTrack = track => playlist[(playlist.indexOf(track) + 1) % playlist.length];
 
@@ -138,24 +145,19 @@ const RoomAudioPlayer = React.forwardRef(({ volume, room, initialOffset, playlis
   // console.log({ ...offset, t: offset / 1e3 });
 
   return (
-    <Fragment>
-      <audio
-        id="music-player"
-        hidden
-        ref={ref}
-        onCanPlay={() => {
-          onMusicCanPlay();
-        }}
-        onEnded={() => setCurrentTrack({ track: nextTrack(track), offset: 0 })}
-        onLoadedData={() => {
-          const audio = document.querySelector("#music-player");
-          audio.volume = volume;
-        }}
-      >
-        <source src={srcPath("mp3")} type="audio/mpeg" />
-        <source src={srcPath("ogg")} type="audio/ogg" />
-      </audio>
-    </Fragment>
+    <ReactHowler
+      ref={ref}
+      html5={true}
+      preload={true}
+      src={["ogg","mp3"] .map(srcPath)}
+      onLoad={onMusicCanPlay}
+      onEnd={() => {
+        const next = nextTrack(track)
+        console.info(`starting next track: ${ JSON.stringify(next) }`)
+        setCurrentTrack({ track: next, offset: 0 })
+      }}
+      volume={volume}
+    />
   );
 });
 
@@ -2268,7 +2270,8 @@ export default class UIRoot extends Component {
           ref={this.musicPlayerRef}
           token={this.props.store.state.credentials.token}
           volume={streamVolume}
-          initialOffset={initialOffset}
+          // initialOffset={initialOffset}
+          initialOffset={2160000}
           playlist={playlist}
           room={roomName()}
           onMusicCanPlay={this.onMusicCanPlay}
