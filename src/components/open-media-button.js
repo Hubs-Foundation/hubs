@@ -25,7 +25,12 @@ AFRAME.registerComponent("open-media-button", {
           } else if ((await isLocalHubsSceneUrl(src)) && mayChangeScene) {
             label = "use scene";
           } else if (await isHubsRoomUrl(src)) {
-            label = "visit room";
+            const url = new URL(this.src);
+            if (url.hash && window.location.pathname == url.pathname) {
+              label = `goto: ${url.hash}`;
+            } else {
+              label = "visit room";
+            }
           }
         }
         this.label.setAttribute("text", "value", label);
@@ -47,8 +52,13 @@ AFRAME.registerComponent("open-media-button", {
       } else if ((await isLocalHubsSceneUrl(this.src)) && mayChangeScene) {
         this.el.sceneEl.emit("scene_media_selected", this.src);
       } else if (await isHubsRoomUrl(this.src)) {
-        await exitImmersive();
-        location.href = this.src;
+        const url = new URL(this.src);
+        if (url.hash && window.location.pathname == url.pathname) {
+          window.location.hash = url.hash;
+        } else {
+          await exitImmersive();
+          location.href = this.src;
+        }
       } else {
         await exitImmersive();
         window.open(this.src);
