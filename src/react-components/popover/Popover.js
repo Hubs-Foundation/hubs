@@ -51,6 +51,21 @@ export function Popover({ content: Content, children, title, placement, initiall
     [visible, popperElement, referenceElement]
   );
 
+  useEffect(
+    () => {
+      if (visible && fullscreen) {
+        document.body.classList.add(styles.fullscreenBody);
+      } else {
+        document.body.classList.remove(styles.fullscreenBody);
+      }
+
+      return () => {
+        document.body.classList.remove(styles.fullscreenBody);
+      };
+    },
+    [fullscreen, visible]
+  );
+
   return (
     <>
       {children({

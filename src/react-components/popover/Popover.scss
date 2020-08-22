@@ -70,16 +70,22 @@
 }
 
 :local(.fullscreen) {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
   right: 0;
-  width: 100vw;
-  height: 100vh;
   border-radius: 0;
 
   :local(.header) {
     border-bottom: 1px solid theme.$lightgrey;
   }
+
+  :local(.content) {
+    overflow-y: auto;
+  }
+}
+
+:local(.fullscreen-body) {
+  overflow: hidden;
 }
