@@ -122,7 +122,7 @@ const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
-const RoomAudioPlayer = React.forwardRef(({ volume, room, initialOffset, playlist, token, onMusicCanPlay}, ref) => {
+const RoomAudioPlayer = React.forwardRef(({ volume, playing, room, initialOffset, playlist, token, onMusicCanPlay}, ref) => {
   // const [currentTrack, setCurrentTrack] = useState({ track: playlist[0], offset: initialOffset });
   const [currentTrack, setCurrentTrack] = useState({ track: null, offset: null });
 
@@ -130,7 +130,7 @@ const RoomAudioPlayer = React.forwardRef(({ volume, room, initialOffset, playlis
     setCurrentTrack({ track: playlist[0], offset: initialOffset, initialized: false });
   }, []);
 
-  const { offset, track } = currentTrack;
+  const { offset, track, initialized } = currentTrack;
 
   if (track === null) return null;
 
@@ -142,15 +142,17 @@ const RoomAudioPlayer = React.forwardRef(({ volume, room, initialOffset, playlis
   const tokenArg = token ? `?token=${token}` : "";
   const srcPath = ext => `${ASSET_BASE}/${room}/${track.title}.${ext}${tokenArg}#t=${offset / 1e3}`;
 
-  // console.log({ ...offset, t: offset / 1e3 });
-
   return (
     <ReactHowler
       ref={ref}
       html5={true}
       preload={true}
-      src={["ogg","mp3"] .map(srcPath)}
-      onLoad={onMusicCanPlay}
+      playing={playing}
+      src={["ogg","mp3"].map(srcPath)}
+      onLoad={() => {
+        ref.current.seek(offset / 1e3)
+        if(initialized) onMusicCanPlay()
+      }}
       onEnd={() => {
         const next = nextTrack(track)
         console.info(`starting next track: ${ JSON.stringify(next) }`)
@@ -253,6 +255,9 @@ export default class UIRoot extends Component {
 
     muted: false,
     frozen: false,
+
+    playing: false,
+    volume: qsGet("stream_volume") || getRoomMetadata().streamVolume || .95,
 
     exited: false,
 
@@ -871,7 +876,7 @@ export default class UIRoot extends Component {
 
     // music should be ready by this point, start playing
     if (this.musicPlayerRef.current) {
-      this.musicPlayerRef.current.play();
+      this.setState({playing: true})
     } else {
       console.error("no ref :*(")
     }
@@ -1513,6 +1518,51 @@ export default class UIRoot extends Component {
       this.state.dialog
     );
   };
+
+  renderVolumeSlider = () => {
+    return (
+      <div className='volume'>
+          <label>
+            Volume:
+            <span className='slider-container'>
+              <input
+                type='range'
+                min='0'
+                max='1'
+                step='.05'
+                value={this.state.volume}
+                onChange={e => this.setState({ volume: parseFloat(e.target.value) })}
+                style={{ verticalAlign: 'bottom' }}
+              />
+            </span>
+            {this.state.volume.toFixed(2)}
+          </label>
+      </div>
+    )
+  }
+
+  renderAudioPlayer = () => {
+    const streamVolume = this.state.volume;
+    const { title: initialTitle, offset: initialOffset } = playing();
+    // Rotate array to start with currently playing track
+    const startWith = (arr, predicate) => {
+      const startIndex = findIndex(arr, predicate);
+      return startIndex < 0 ? [...arr] : [...arr.slice(startIndex), ...arr.slice(0, startIndex)];
+    };
+
+    const playlist = startWith(roomPlaylist(), ({ title }) => title == initialTitle);
+
+    return <RoomAudioPlayer
+      ref={this.musicPlayerRef}
+      token={this.props.store.state.credentials.token}
+      volume={this.state.volume}
+      playing={this.state.playing}
+      initialOffset={initialOffset}
+      playlist={playlist}
+      room={roomName()}
+      onMusicCanPlay={this.onMusicCanPlay}
+    />
+  }
 
   render() {
     const rootStyles = {
@@ -2250,33 +2300,11 @@ export default class UIRoot extends Component {
       );
     }
 
-    // const streamUrl = getRoomMetadata().streamUrl || "https://str33m.dr33mphaz3r.com/stream";
-
-    const streamVolume = qsGet("stream_volume") || getRoomMetadata().streamVolume || "1.0";
-
-    const { title: initialTitle, offset: initialOffset } = playing();
-
-    // Rotate array to start with currently playing track
-    const startWith = (arr, predicate) => {
-      const startIndex = findIndex(arr, predicate);
-      return startIndex < 0 ? [...arr] : [...arr.slice(startIndex), ...arr.slice(0, startIndex)];
-    };
-
-    const playlist = startWith(roomPlaylist(), ({ title }) => title == initialTitle);
-
     return (
       <Fragment>
-        <RoomAudioPlayer
-          ref={this.musicPlayerRef}
-          token={this.props.store.state.credentials.token}
-          volume={streamVolume}
-          // initialOffset={initialOffset}
-          initialOffset={2160000}
-          playlist={playlist}
-          room={roomName()}
-          onMusicCanPlay={this.onMusicCanPlay}
-        />
         {uiRootHtml}
+        {this.renderAudioPlayer()}
+        {this.renderVolumeSlider()}
       </Fragment>
     );
   }
