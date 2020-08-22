@@ -147,7 +147,7 @@ export default class AvatarEditor extends Component {
       });
     }
 
-    this.inputFiles.thumbnail = new File([await this.preview.getWrappedInstance().snapshot()], "thumbnail.png", {
+    this.inputFiles.thumbnail = new File([await this.preview.snapshot()], "thumbnail.png", {
       type: "image/png"
     });
 
