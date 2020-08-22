@@ -8,6 +8,7 @@
 html, body, #ui-root, .home-root {
   margin: 0;
   height:100%;
+  overscroll-behavior: none;
 }
 
 body {
