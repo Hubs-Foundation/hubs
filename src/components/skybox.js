@@ -1,5 +1,8 @@
 import "three/examples/js/pmrem/PMREMGenerator";
 import "three/examples/js/pmrem/PMREMCubeUVPacker";
+
+import { Room3Shader, registerRegularShader } from "../gltf-component-mappings"
+
 import qsTruthy from "../utils/qs_truthy";
 const isBotMode = qsTruthy("bot");
 

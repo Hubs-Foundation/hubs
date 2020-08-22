@@ -21,11 +21,14 @@ import { Flame } from './shaders/Flame.js'
 import { Jelly } from './shaders/ShaderFrog/Jelly.js'
 import { Neurons } from './shaders/ShaderFrog/Neurons.js'
 import { Liquifier } from './shaders/ShaderFrog/Liquifier.js'
+import { Room3Shader } from './shaders/Room3Shader.js'
 
 import room1Preview from "./assets/textures/room1_1.png";
 import room2Preview from "./assets/textures/room2_1.png";
 import room3Preview from "./assets/textures/room3_1.png";
 import lobbyPreview from "./assets/textures/lobby_1.png";
+
+export { Glassy, ShinyShader, Flame, Jelly, Neurons, Liquifier, Room3Shader }
 
 const roomPreviews = {
   'room1': room1Preview,
@@ -83,6 +86,8 @@ function registerRootSceneComponent(componentName) {
     if (!el.classList.contains("DefaultAvatar")) {
       // (Avatar "background" property sometimes seems to override the one set on the scene)
       const sceneEl = AFRAME.scenes[0];
+
+      el.object3D.children[0].material = registerRegularShader(Room3Shader, {});
 
       sceneEl.setAttribute(componentName, componentData);
 
