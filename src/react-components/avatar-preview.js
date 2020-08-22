@@ -373,4 +373,4 @@ class AvatarPreview extends Component {
   }
 }
 
-export default injectIntl(AvatarPreview, { withRef: true });
+export default injectIntl(AvatarPreview, { forwardRef: true });
