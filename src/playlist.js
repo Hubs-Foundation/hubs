@@ -3,7 +3,7 @@ import { addDays, addHours, addMilliseconds, subMilliseconds, getUnixTime } from
 import { mapValues } from "lodash";
 import { duration } from "moment";
 // import getHubId from "./utils/hub-id";
-import { roomName } from "./room-metadata";
+import { currentRoomKey } from "./room-metadata";
 
 const stream_config =
   window.PLAYLIST ||
@@ -68,10 +68,10 @@ const parseTrackDurations = ({ tracks, ...meta }) => {
 
 const lineup = mapValues(jsyaml.load(stream_config), parseTrackDurations);
 
-export const roomPlaylist = (room = roomName()) => lineup[room].tracks;
+export const roomPlaylist = (room = currentRoomKey()) => lineup[room].tracks;
 
 // Who is currently playing
-export const currentlyPlaying = (room = roomName(), time = new Date()) => {
+export const currentlyPlaying = (room = currentRoomKey(), time = new Date()) => {
   if (!lineup[room]) return null;
 
   const { tracks, shift = 0 } = lineup[room];
@@ -97,7 +97,7 @@ export const currentlyPlaying = (room = roomName(), time = new Date()) => {
 };
 
 // Creates a list of tracks, with their `start` time merged.
-export const setTimes = (room = roomName(), from = new Date(), until = addDays(new Date(), 1)) => {
+export const setTimes = (room = currentRoomKey(), from = new Date(), until = addDays(new Date(), 1)) => {
   if (!lineup[room]) return null;
 
   // Super inefficient lol, i'm tired

@@ -25,7 +25,8 @@ var roomMetadata = {
   },
   lobby: {
     streamVolume: 0.6,
-    streamUrl: "https://str33m.dr33mphaz3r.com/lobby"
+    streamUrl: "https://str33m.dr33mphaz3r.com/lobby",
+    requireLogin: false,
   }
 };
 
@@ -33,7 +34,7 @@ for (var key in roomMapping) {
   roomMetadata[key].url = roomMapping[key];
 }
 
-export const roomName = (id = getHubId()) => hubIdToRoomKey[id];
+export const currentRoomKey = (id = getHubId()) => hubIdToRoomKey[id];
 
 var hubIdToRoomKey = {};
 
@@ -45,7 +46,7 @@ for (var key in roomMapping) {
 
 export function getRoomMetadata(roomKey) {
   if (!roomKey) {
-    roomKey = roomName();
+    roomKey = currentRoomKey();
   }
   return roomMetadata[roomKey] || {};
 }

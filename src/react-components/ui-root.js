@@ -73,7 +73,7 @@ import TwoDHUD from "./2d-hud";
 import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
-import { getRoomMetadata, roomName } from "../room-metadata";
+import { getRoomMetadata, currentRoomKey } from "../room-metadata";
 import { currentlyPlaying, roomPlaylist } from "../playlist";
 
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
@@ -83,6 +83,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import qsTruthy, { qsGet } from "../utils/qs_truthy";
+import { redirectIfNotAuthorized } from "../access-control";
 import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 
 import ReactHowler from 'react-howler'
@@ -413,6 +414,9 @@ export default class UIRoot extends Component {
         }
       }
     });
+
+    // If not logged in, redirect to homescreen
+    redirectIfNotAuthorized()
 
     // HACK
     // Skip the entry dialog and jump straight in
@@ -1569,7 +1573,7 @@ export default class UIRoot extends Component {
       playing={this.state.playing}
       initialOffset={initialOffset}
       playlist={playlist}
-      room={roomName()}
+      room={currentRoomKey()}
       onMusicCanPlay={this.onMusicCanPlay}
     />
   }

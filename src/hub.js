@@ -788,6 +788,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store, hubId);
   const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
+
+  window.APP.hubChannel = hubChannel;
+  window.dispatchEvent(new CustomEvent("hub_channel_ready"));
+
   const performConditionalSignIn = async (predicate, action, messageId, onFailure) => {
     if (predicate()) return action();
 
@@ -896,8 +900,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const linkChannel = new LinkChannel(store);
 
   window.APP.scene = scene;
-  window.APP.hubChannel = hubChannel;
-  window.dispatchEvent(new CustomEvent("hub_channel_ready"));
 
   const handleEarlyVRMode = () => {
     // If VR headset is activated, refreshing page will fire vrdisplayactivate

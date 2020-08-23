@@ -1,6 +1,7 @@
 // modified from trigger-volume.js
 
 import { getRoomMetadata } from "../room-metadata";
+import { redirectIfNotAuthorized } from "../access-control";
 
 // const sizeVec = new THREE.Vector3();
 const boundingSphereWorldPositionVec = new THREE.Vector3();
@@ -43,9 +44,11 @@ AFRAME.registerComponent("portal", {
         // enter
         var targetUrl;
         if (this.data.targetRoom) {
-          targetUrl = getRoomMetadata(this.data.targetRoom).url;
-          if (!targetUrl) {
-            console.error("invalid portal targetRoom:", this.data.targetRoom);
+          if (!redirectIfNotAuthorized(this.data.targetRoom)) {
+            targetUrl = getRoomMetadata(this.data.targetRoom).url;
+            if (!targetUrl) {
+              console.error("invalid portal targetRoom:", this.data.targetRoom);
+            }
           }
         } else if (this.data.targetUrl) {
           targetUrl = this.data.targetUrl;
