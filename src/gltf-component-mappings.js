@@ -87,8 +87,6 @@ function registerRootSceneComponent(componentName) {
       // (Avatar "background" property sometimes seems to override the one set on the scene)
       const sceneEl = AFRAME.scenes[0];
 
-      el.object3D.children[0].material = registerRegularShader(Room3Shader, {});
-
       sceneEl.setAttribute(componentName, componentData);
 
       sceneEl.addEventListener(
