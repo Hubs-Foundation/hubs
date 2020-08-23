@@ -699,6 +699,10 @@ export default class UIRoot extends Component {
   };
 
   fetchAudioTrack = async constraints => {
+    if (!getRoomMetadata().enableMicrophone) { // disable mic by default
+      return false;
+    }
+
     if (this.state.audioTrack) {
       this.state.audioTrack.stop();
     }

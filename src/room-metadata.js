@@ -22,12 +22,12 @@ var roomMetadata = {
     flyMode: true,
     freeRotation: true,
     streamUrl: "https://str33m.dr33mphaz3r.com/room3",
-    requireLogin: false
   },
   lobby: {
     streamVolume: 0.6,
     streamUrl: "https://str33m.dr33mphaz3r.com/lobby",
     requireLogin: false,
+    enableMicrophone: true
   }
 };
 
