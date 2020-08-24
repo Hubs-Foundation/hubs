@@ -27,7 +27,7 @@ AFRAME.registerComponent("open-media-button", {
           } else if (await isHubsRoomUrl(src)) {
             const url = new URL(this.src);
             if (url.hash && window.location.pathname == url.pathname) {
-              label = `goto: ${url.hash}`;
+              label = url.hash.replace("#", "");
             } else {
               label = "visit room";
             }
