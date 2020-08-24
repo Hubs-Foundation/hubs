@@ -2,12 +2,15 @@
 
 :local(.button) {
   height: 48px;
+  width: min-content;
   min-width: 156px;
   font-weight: 700;
   font-size: 12px;
   border-radius: 8px;
   border-width: 0;
   transition: background-color 0.1s ease-in-out;
+  white-space: nowrap;
+  padding: 0 24px;
 }
 
 :local(.basic) {
@@ -87,6 +90,13 @@
   &:active {
     background-color: theme.$purple-pressed;
   }
+}
+
+:local(.button):disabled {
+  border-color: transparent;
+  cursor: not-allowed;
+  color: theme.$darkgrey;
+  background-color: theme.$lightgrey;
 }
 
 :global(body.keyboard-user) :local(.button):focus {
