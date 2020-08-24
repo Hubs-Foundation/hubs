@@ -17,6 +17,8 @@
   }
 
   &:disabled {
+    cursor: not-allowed;
+    color: theme.$darkgrey;
     background-color: theme.$lightgrey;
   }
 }
