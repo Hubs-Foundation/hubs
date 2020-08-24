@@ -12,6 +12,7 @@ export const All = () => (
     <TextInput />
     <TextInput placeholder="Placeholder Text" />
     <TextInput value="Example Text" />
+    <TextInput value="Invalid Text" invalid />
     <TextInput value="Disabled Text" disabled />
     <TextInput placeholder="Disabled Placeholder Text" disabled />
   </div>

@@ -1,5 +1,11 @@
 @use "../styles/theme";
 
+:local(.input-wrapper) {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 :local(.text-input) {
   height: 40px;
   border: 1px solid theme.$darkgrey;
@@ -20,5 +26,23 @@
     cursor: not-allowed;
     color: theme.$darkgrey;
     background-color: theme.$lightgrey;
+  }
+
+  &:local(.invalid) {
+    padding-right: 32px;
+    border-color: theme.$red !important;
+  }
+}
+
+:local(.invalid-icon) {
+  position: absolute;
+  right: 8px;
+
+  *[fill=\#000] {
+    stroke: theme.$red;
+  }
+
+  *[stroke=\#000] {
+    stroke: theme.$red;
   }
 }
