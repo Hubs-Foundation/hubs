@@ -327,7 +327,8 @@ AFRAME.registerComponent("media-loader", {
   },
 
   async update(oldData, forceLocalRefresh) {
-    const { src, version, contentSubtype } = this.data;
+    const { version, contentSubtype } = this.data;
+    let src = this.data.src;
     if (!src) return;
 
     const srcChanged = oldData.src !== src;
@@ -354,6 +355,11 @@ AFRAME.registerComponent("media-loader", {
     try {
       if ((forceLocalRefresh || srcChanged) && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
+      }
+
+      //check if url is an anchor hash e.g. #Spawn_Point_1
+      if (src.charAt(0) === "#") {
+        src = `${window.location.origin}${window.location.pathname}${src}`;
       }
 
       let canonicalUrl = src;

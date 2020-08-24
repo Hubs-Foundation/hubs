@@ -27,7 +27,7 @@ AFRAME.registerComponent("open-media-button", {
           } else if (await isHubsRoomUrl(src)) {
             const url = new URL(this.src);
             if (url.hash && window.location.pathname == url.pathname) {
-              label = url.hash.replace("#", "");
+              label = "go to";
             } else {
               label = "visit room";
             }
@@ -52,13 +52,8 @@ AFRAME.registerComponent("open-media-button", {
       } else if ((await isLocalHubsSceneUrl(this.src)) && mayChangeScene) {
         this.el.sceneEl.emit("scene_media_selected", this.src);
       } else if (await isHubsRoomUrl(this.src)) {
-        const url = new URL(this.src);
-        if (url.hash && window.location.pathname == url.pathname) {
-          window.location.hash = url.hash;
-        } else {
-          await exitImmersive();
-          location.href = this.src;
-        }
+        await exitImmersive();
+        location.href = this.src;
       } else {
         await exitImmersive();
         window.open(this.src);
