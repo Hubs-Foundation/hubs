@@ -1,0 +1,22 @@
+@use "../styles/theme";
+
+:local(.text-input) {
+  height: 40px;
+  border: 1px solid theme.$darkgrey;
+  border-radius: theme.$border-radius-regular;
+  color: theme.$black;
+  width: 100%;
+  padding-left: 8px;
+  vertical-align: middle;
+  
+  &:focus {
+    outline: none;
+    border-width: 3px;
+    border-color: theme.$blue;
+    padding-left: 6px;
+  }
+
+  &:disabled {
+    background-color: theme.$lightgrey;
+  }
+}

@@ -217,3 +217,7 @@ h5 {
   font-size: theme.$font-size-small;
   font-weight: theme.$font-weight-bold;
 }
+
+input::placeholder {
+  color: theme.$darkgrey;
+}
