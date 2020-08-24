@@ -9,12 +9,13 @@ export default {
 
 export const All = () => (
   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-    <TextInput />
-    <TextInput placeholder="Placeholder Text" />
-    <TextInput value="Example Text" />
-    <TextInput value="Invalid Text" invalid />
-    <TextInput value="Disabled Text" disabled />
-    <TextInput placeholder="Disabled Placeholder Text" disabled />
+    <TextInput id="default" />
+    <TextInput id="placeholder" placeholder="Placeholder Text" />
+    <TextInput id="value" value="Example Text" />
+    <TextInput id="invalid" value="Invalid Text" invalid />
+    <TextInput id="disabled" value="Disabled Text" disabled />
+    <TextInput id="disabledPlaceholder" placeholder="Disabled Placeholder Text" disabled />
+    <TextInput id="withLabel" placeholder="Labeled Input" label="With Label" />
   </div>
 );
 

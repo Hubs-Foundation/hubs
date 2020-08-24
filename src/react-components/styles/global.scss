@@ -163,7 +163,7 @@ video {
 }
 
 label {
-  font-size: theme.$font-size-small;
+  font-size: theme.$font-size-sm;
   font-weight: theme.$font-weight-bold;
 }
 
@@ -214,7 +214,7 @@ body::before {
 // TODO: Add the rest of the base typography styles
 
 h5 {
-  font-size: theme.$font-size-small;
+  font-size: theme.$font-size-sm;
   font-weight: theme.$font-weight-bold;
 }
 

@@ -1,42 +1,71 @@
 @use "../styles/theme";
 
-:local(.input-wrapper) {
-  position: relative;
+:local(.input-field) {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  width: 100%;
+
+  label {
+    font-size: theme.$font-size-xs;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: theme.$grey;
+  }
 }
 
-:local(.text-input) {
+:local(.input-wrapper) {
+  position: relative;
   height: 40px;
   border: 1px solid theme.$darkgrey;
   border-radius: theme.$border-radius-regular;
   color: theme.$black;
+
+  &:focus-within  {
+    border-width: 3px;
+    border-color: theme.$blue;
+
+    :local(.text-input) {
+      padding-left: 6px;
+    }
+
+    :local(.invalid-icon) {
+      right: 6px;
+    }
+  }
+}
+
+:local(.disabled) {
+  cursor: not-allowed;
+  color: theme.$darkgrey;
+  background-color: theme.$lightgrey;
+}
+
+:local(.invalid) {
+  border-color: theme.$red !important;
+
+  :local(.text-input) {
+    padding-right: 36px;
+  }
+}
+
+:local(.text-input) {
   width: 100%;
+  height: 100%;
+  border: none;
+  background-color: transparent;
   padding-left: 8px;
   vertical-align: middle;
   
   &:focus {
     outline: none;
-    border-width: 3px;
-    border-color: theme.$blue;
-    padding-left: 6px;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    color: theme.$darkgrey;
-    background-color: theme.$lightgrey;
-  }
-
-  &:local(.invalid) {
-    padding-right: 32px;
-    border-color: theme.$red !important;
   }
 }
 
 :local(.invalid-icon) {
   position: absolute;
   right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
 
   *[fill=\#000] {
     stroke: theme.$red;

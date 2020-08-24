@@ -5,17 +5,39 @@ import styles from "./TextInput.scss";
 import { ReactComponent as WarningIcon } from "../icons/Warning.svg";
 
 export const TextInput = memo(
-  forwardRef(({ className, invalid, ...rest }, ref) => {
+  forwardRef(({ id, disabled, invalid, label, hideLabel, className, ...rest }, ref) => {
     return (
-      <div className={styles.inputWrapper}>
-        <input className={classNames(styles.textInput, { [styles.invalid]: invalid }, className)} {...rest} ref={ref} />
-        {invalid && <WarningIcon className={styles.invalidIcon} />}
+      <div className={styles.inputField}>
+        {label && (
+          <label className={classNames(hideLabel)} htmlFor={id}>
+            {label}
+          </label>
+        )}
+        <div
+          className={classNames(
+            styles.inputWrapper,
+            { [styles.invalid]: invalid, [styles.disabled]: disabled },
+            className
+          )}
+        >
+          <input id={id} className={styles.textInput} disabled={disabled} {...rest} ref={ref} />
+          {invalid && <WarningIcon className={styles.invalidIcon} />}
+        </div>
       </div>
     );
   })
 );
 
 TextInput.propTypes = {
+  id: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
   invalid: PropTypes.bool,
-  className: PropTypes.string
+  label: PropTypes.string,
+  hideLabel: PropTypes.bool,
+  className: PropTypes.string,
+  onChange: PropTypes.func
+};
+
+TextInput.defaultProps = {
+  onChange: () => {}
 };
