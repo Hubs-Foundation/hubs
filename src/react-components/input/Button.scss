@@ -88,3 +88,8 @@
     background-color: theme.$purple-pressed;
   }
 }
+
+:global(body.keyboard-user) :local(.button):focus {
+  outline: none;
+  border: 3px solid theme.$black;
+}

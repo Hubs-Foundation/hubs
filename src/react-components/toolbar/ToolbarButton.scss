@@ -428,3 +428,7 @@
     }
   }
 }
+
+:global(body.keyboard-user) :local(.toolbar-button):focus {
+  outline: 3px solid theme.$black;
+}
