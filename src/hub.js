@@ -1553,6 +1553,57 @@ document.addEventListener("DOMContentLoaded", async () => {
     addToPresenceLog(incomingMessage);
   });
 
+  hubPhxChannel.on("hub_refresh_by_api", ({ hubs, stale_fields }) => {
+    const hub = hubs[0];
+    window.APP.hub = hub;
+    updateUIForHub(hub, hubChannel);
+
+    if (stale_fields.includes("scene")) {
+      const fader = document.getElementById("viewing-camera").components["fader"];
+
+      fader.fadeOut().then(() => {
+        scene.emit("reset_scene");
+        updateEnvironmentForHub(hub, entryManager);
+      });
+
+      addToPresenceLog({
+        type: "scene_changed",
+        name: "Admin API",
+        sceneName: hub.scene ? hub.scene.name : "a custom URL"
+      });
+    }
+
+    if (stale_fields.includes("member_permissions")) {
+      hubChannel.fetchPermissions();
+    }
+
+    if (stale_fields.includes("name")) {
+      const titleParts = document.title.split(" | "); // Assumes title has | trailing site name
+      titleParts[0] = hub.name;
+      document.title = titleParts.join(" | ");
+
+      // Re-write the slug in the browser history
+      const pathParts = history.location.pathname.split("/");
+      const oldSlug = pathParts[1];
+      const { search, state } = history.location;
+      const pathname = history.location.pathname.replace(`/${oldSlug}`, `/${hub.slug}`);
+
+      history.replace({ pathname, search, state });
+
+      addToPresenceLog({
+        type: "hub_name_changed",
+        name: "Admin API",
+        hubName: hub.name
+      });
+    }
+
+    if (hub.entry_mode === "deny") {
+      scene.emit("hub_closed");
+    }
+
+    scene.emit("hub_updated", { hub });
+  });
+
   hubPhxChannel.on("hub_refresh", ({ session_id, hubs, stale_fields }) => {
     const hub = hubs[0];
     const userInfo = hubChannel.presence.state[session_id];
