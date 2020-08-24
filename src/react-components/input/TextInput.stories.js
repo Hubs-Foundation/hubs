@@ -3,11 +3,11 @@ import { withDesign } from "storybook-addon-designs";
 import { TextInput } from "./TextInput";
 
 export default {
-  title: "Input",
+  title: "TextInput",
   decorators: [withDesign]
 };
 
-export const Text = () => (
+export const All = () => (
   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
     <TextInput />
     <TextInput placeholder="Placeholder Text" />
@@ -17,7 +17,7 @@ export const Text = () => (
   </div>
 );
 
-Text.parameters = {
+All.parameters = {
   design: {
     type: "figma",
     url: "https://www.figma.com/file/Xag5qaEgYs3KzXvoxx5m8y/Hubs-Redesign?node-id=68%3A7094"
