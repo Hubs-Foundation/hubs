@@ -36,7 +36,11 @@ function ${componentName}(${props}) {
 }
 
 ${componentName}.defaultProps = {
-  color: "#000"
+  color: "#000",
+  title: "${componentName.name
+    .match(/[A-Z][a-z]+/g)
+    .slice(1)
+    .join(" ")}"
 };
 
 ${exports}

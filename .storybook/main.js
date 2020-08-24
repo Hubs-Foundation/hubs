@@ -30,6 +30,7 @@ module.exports = {
         {
           loader: "@svgr/webpack",
           options: {
+            titleProp: true,
             replaceAttrValues: { "#000": "{props.color}" },
             template: require("../src/react-components/icons/IconTemplate")
           }
