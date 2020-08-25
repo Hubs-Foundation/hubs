@@ -5,6 +5,7 @@ export const SvgToggleButton = ({ onToggle, active, normalProps, activeProps, st
 
   return (
     <image
+      draggable={false}
       onClick={() => {
         setToggle(!toggle);
         onToggle(!toggle);
@@ -22,6 +23,7 @@ export const SvgHoverButton = ({ normalProps, hoverProps, style, ...otherProps }
 
   return (
     <image
+      draggable={false}
       onMouseEnter={() => setIsShown(true)}
       onMouseLeave={() => setIsShown(false)}
       style={{

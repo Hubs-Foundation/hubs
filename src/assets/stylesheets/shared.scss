@@ -27,6 +27,13 @@ $breakpoint-xxl: 1600px; // Extra Large Desktops
   user-select: none;
 }
 
+%undraggable {
+  -moz-user-drag: none;
+  -webkit-user-drag: none;
+  -ms-user-drag: none;
+  user-drag: none;
+}
+
 .squiggle:hover{
 	border-bottom: 1px dotted #000;
 }

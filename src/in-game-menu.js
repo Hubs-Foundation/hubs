@@ -2,6 +2,8 @@ import React, { useState } from "react";
 
 import { SvgHoverButton, SvgToggleButton } from "./utils/svg-helpers";
 
+import styles from "./assets/stylesheets/shared.scss";
+
 import Backplate from "./assets/menu/Backplate.png";
 import HomeExit from "./assets/menu/Home_Exit.png";
 import HomeExitHover from "./assets/menu/Home_Exit_Hover.png";
@@ -33,8 +35,6 @@ const Slider = ({ volume, onVolumeChange, style, ...otherProps }) => {
 
   const { offset, dragging } = dragState;
 
-  const sliderRef = React.createRef();
-
   const startDrag = () => setDragState({ dragging: true });
 
   const endDrag = () => {
@@ -43,7 +43,7 @@ const Slider = ({ volume, onVolumeChange, style, ...otherProps }) => {
   };
 
   const drag = e => {
-    console.info(JSON.stringify(e));
+    if (dragging) console.info(JSON.stringify(e));
   };
 
   return (
@@ -52,6 +52,7 @@ const Slider = ({ volume, onVolumeChange, style, ...otherProps }) => {
       onMouseMove={drag}
       onMouseUp={endDrag}
       onMouseLeave={endDrag}
+      draggable={false}
       style={{
         cursor: "move",
         ...style
@@ -109,10 +110,17 @@ export const Menu = ({
         activeProps={{ x: "1044", y: "134", width: "726", height: "727", href: MenuOpen }}
       />
 
-
       {!hidden && (
         <>
-          <image x={218} y={486} width={1461} height={3828} href={Backplate} />
+          <image
+            style={{ "pointer-events": "none" }}
+            draggable={false}
+            x={218}
+            y={486}
+            width={1461}
+            height={3828}
+            href={Backplate}
+          />
 
           <WatchToggle watching={watching} onToggle={onWatchToggle} />
 

@@ -167,7 +167,6 @@ body.vr-mode {
   right: 16px;
 }
 
-
 %button-with-count {
   @extend %unselectable;
   pointer-events: auto;
@@ -255,8 +254,12 @@ body.vr-mode {
 
 :local(.game-menu) {
   @extend %unselectable;
+  @extend %undraggable;
   text-align: right;
+  top: 0;
+  left: 0;
   position: absolute;
+  pointer-events: none;
   z-index: 1;
   top: 0;
   right: 1em;

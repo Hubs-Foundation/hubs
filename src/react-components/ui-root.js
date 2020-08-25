@@ -269,7 +269,7 @@ export default class UIRoot extends Component {
 
     exited: false,
 
-    hide: false,
+    hide: true,
 
     showHubsUI: configs.isAdmin && qsTruthy("show_ui"),
 
@@ -336,10 +336,6 @@ export default class UIRoot extends Component {
     }
   }
 
-  shouldShowHubsUI = () => {
-
-  }
-
   onConcurrentLoad = () => {
     if (qsTruthy("allow_multi") || this.props.store.state.preferences["allowMultipleHubsInstances"]) return;
     this.startAutoExitTimer("autoexit.concurrent_subtitle");
@@ -361,9 +357,9 @@ export default class UIRoot extends Component {
     }
   };
 
-  setMenuFocus = (on) => {
-    setPointerLock(on);
-    this.setState({ hide: !on});
+  setMenuFocus = (toggle) => {
+    setPointerLock(!toggle);
+    this.setState({ hide: !toggle});
   }
 
   componentDidMount() {
@@ -404,7 +400,7 @@ export default class UIRoot extends Component {
 
     this.props.scene.addEventListener("action_toggle_ui", () => {
       console.info({hide: this.state.hide})
-      this.setMenuFocus(!this.state.hide)
+      this.setMenuFocus(this.state.hide)
     });
 
     const scene = this.props.scene;
@@ -550,6 +546,7 @@ export default class UIRoot extends Component {
     this.props.scene.emit("loading_finished");
     this.props.scene.addState("loaded");
 
+    setPointerLock(true);
     if (this.props.onLoaded) {
       this.props.onLoaded();
     }
@@ -897,6 +894,8 @@ export default class UIRoot extends Component {
     await this.props.enterScene(this.state.mediaStream, this.state.enterInVR, muteOnEntry);
 
     this.setState({ entered: true, entering: false, showShareDialog: false });
+
+    setPointerLock(true)
 
     // music should be ready by this point, start playing
     if (this.musicPlayerRef.current) {
@@ -1297,7 +1296,7 @@ export default class UIRoot extends Component {
         {this.state.waitingOnMic && (
           <div>
             <div className={entryStyles.name}>
-              Waiting for <a className={"squiggle"} style={{color: "white"}} href="https://jasmineguffond.bandcamp.com/album/microphone-permission">microphone permission</a>
+              Waiting for <a style={{color: "white"}} href="https://jasmineguffond.bandcamp.com/album/microphone-permission">microphone permission</a>
             </div>
             <div className="loader-wrap loader-mid">
               <div className="loader">
@@ -1603,7 +1602,6 @@ export default class UIRoot extends Component {
 
   render() {
     const menuStyles = {
-      [styles.ui]: true,
       "ui-root": true,
       "in-modal-or-overlay": this.isInModalOrOverlay(),
       isGhost: configs.feature("enable_lobby_ghosts") && (this.state.watching || this.state.hide || this.props.hide),
@@ -1611,6 +1609,7 @@ export default class UIRoot extends Component {
 
     const rootStyles = {
       hide: !this.state.showHubsUI || this.state.hide,
+      [styles.ui]: true,
       ...menuStyles
     };
 
@@ -1689,6 +1688,7 @@ export default class UIRoot extends Component {
             onMenuToggle={toggle => this.setMenuFocus(toggle)}
             watching={this.state.watching}
             onWatchToggle={toggle => this.setState({ watching: toggle })}
+            onHome={() => window.location.href="/"}
           />
         </div>
       );
