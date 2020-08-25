@@ -34,6 +34,7 @@ export class MouseDevice {
     const queueEvent = this.events.push.bind(this.events);
     const canvas = document.querySelector("canvas");
     this.canvas = canvas;
+
     canvas.addEventListener("contextmenu", e => {
       if (e.button === 2) {
         e.preventDefault();
@@ -41,6 +42,7 @@ export class MouseDevice {
         return false;
       }
     });
+
     ["mousedown", "wheel"].map(x => canvas.addEventListener(x, queueEvent, { passive: false }));
     ["mousemove", "mouseup"].map(x => window.addEventListener(x, queueEvent, { passive: false }));
 
@@ -50,9 +52,17 @@ export class MouseDevice {
 
     if (pointerLock) {
       canvas.onclick = function() {
+        canvas.dispatchEvent(new Event('action_hide_ui'))
         canvas.requestPointerLock();
       };
     }
+
+    document.addEventListener('action_pointerlock',(e) => {
+      console.log(`event data: ${JSON.stringify(e.detail)}`)
+      console.log(JSON.stringify(e))
+      if (e.detail.lock) canvas.requestPointerLock()
+      else document.exitPointerLock()
+    }, false);
 
     document.addEventListener('pointerlockchange', this.lockChangeAlert.bind(this), false);
     document.addEventListener('mozpointerlockchange', this.lockChangeAlert.bind(this), false);

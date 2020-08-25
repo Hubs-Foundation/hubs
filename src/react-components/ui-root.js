@@ -31,7 +31,7 @@ import { getCurrentStreamer } from "../utils/component-utils";
 
 import { lang, messages } from "../utils/i18n";
 import Loader from "./loader";
-// import AutoExitWarning from "./auto-exit-warning";
+import AutoExitWarning from "./auto-exit-warning";
 import { TwoDEntryButton, GenericEntryButton, DaydreamEntryButton } from "./entry-buttons.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowser from "./media-browser";
@@ -86,11 +86,11 @@ import qsTruthy, { qsGet } from "../utils/qs_truthy";
 import { redirectIfNotAuthorized } from "../access-control";
 import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 
-import ReactHowler from 'react-howler'
+import { Menu } from "../in-game-menu";
 
+import ReactHowler from "react-howler";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
-
 
 addLocaleData([...en]);
 
@@ -122,6 +122,12 @@ const isMobilePhoneOrVR = isMobile || isMobileVR;
 const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
+
+const setPointerLock = (lock) => {
+  console.info(`lock: ${lock}`)
+  const event = new CustomEvent('action_pointerlock', { detail: { lock: lock } });
+  document.dispatchEvent(event)
+}
 
 const RoomAudioPlayer = React.forwardRef(({ volume, playing, room, initialOffset, playlist, token, onMusicCanPlay}, ref) => {
   // const [currentTrack, setCurrentTrack] = useState({ track: playlist[0], offset: initialOffset });
@@ -214,6 +220,7 @@ export default class UIRoot extends Component {
     onInterstitialPromptClicked: PropTypes.func,
     performConditionalSignIn: PropTypes.func,
     hide: PropTypes.bool,
+    showHubsUI: PropTypes.bool,
     showPreload: PropTypes.bool,
     onPreloadLoadClicked: PropTypes.func,
     embed: PropTypes.bool,
@@ -261,6 +268,10 @@ export default class UIRoot extends Component {
     volume: parseFloat(qsGet("stream_volume")) || getRoomMetadata().streamVolume || .95,
 
     exited: false,
+
+    hide: false,
+
+    showHubsUI: configs.isAdmin && qsTruthy("show_ui"),
 
     signedIn: false,
     videoShareMediaSource: null,
@@ -325,6 +336,10 @@ export default class UIRoot extends Component {
     }
   }
 
+  shouldShowHubsUI = () => {
+
+  }
+
   onConcurrentLoad = () => {
     if (qsTruthy("allow_multi") || this.props.store.state.preferences["allowMultipleHubsInstances"]) return;
     this.startAutoExitTimer("autoexit.concurrent_subtitle");
@@ -377,7 +392,16 @@ export default class UIRoot extends Component {
         this.setState({ watching: false });
       }
     });
-    this.props.scene.addEventListener("action_toggle_ui", () => this.setState({ hide: !this.state.hide }));
+
+    document.addEventListener("action_hide_ui", () => {
+      this.setState({ hide: true });
+    });
+
+    this.props.scene.addEventListener("action_toggle_ui", () => {
+      console.info({hide: this.state.hide})
+      setPointerLock(this.state.hide);
+      this.setState({ hide: !this.state.hide });
+    });
 
     const scene = this.props.scene;
 
@@ -408,15 +432,12 @@ export default class UIRoot extends Component {
       audioContext: {
         playSound: sound => {
           scene.emit(sound);
-        },
-        onMouseLeave: () => {
-          //          scene.emit("play_sound-hud_mouse_leave");
         }
       }
     });
 
     // If not logged in, redirect to homescreen
-    redirectIfNotAuthorized()
+    redirectIfNotAuthorized();
 
     // HACK
     // Skip the entry dialog and jump straight in
@@ -434,7 +455,6 @@ export default class UIRoot extends Component {
     }
 
     this.playerRig = scene.querySelector("#avatar-rig");
-
     this.dontWaitForMusic = true
   }
 
@@ -504,6 +524,7 @@ export default class UIRoot extends Component {
     );
   };
 
+
   isFavorited = () => {
     return this.state.isFavorited !== undefined ? this.state.isFavorited : this.props.initialIsFavorited;
   };
@@ -511,17 +532,13 @@ export default class UIRoot extends Component {
   onLoadingFinished = () => {
     this.setState({ sceneIsLoaded: true });
     // scene is finished loading, if music is also ready then we are ready to go
-    if (this.dontWaitForMusic || this.state.musicIsReady) {
-      this.setLoaded();
-    }
+    if (this.dontWaitForMusic || this.state.musicIsReady) this.setLoaded();
   };
 
   onMusicCanPlay = async () => {
     this.setState({ musicIsReady: true });
     // music loaded, if scene is also ready, let's go
-    if (this.state.sceneIsLoaded) {
-      this.setLoaded();
-    }
+    if (this.state.sceneIsLoaded) this.setLoaded();
   };
 
   setLoaded = () => {
@@ -852,11 +869,6 @@ export default class UIRoot extends Component {
 
   selectedMicDeviceId = () => {
     return this.micDeviceIdForMicLabel(this.selectedMicLabel());
-  };
-
-  shouldShowUI = () => {
-    // TODO: Use this to toggle between the eye menu and the settings pane
-    return qsTruthy("show_ui");
   };
 
   shouldShowFullScreen = () => {
@@ -1280,6 +1292,9 @@ export default class UIRoot extends Component {
           )}
         {this.state.waitingOnMic && (
           <div>
+            <div className={entryStyles.name}>
+              Waiting for <a className={"squiggle"} style={{color: "white"}} href="https://jasmineguffond.bandcamp.com/album/microphone-permission">microphone permission</a>
+            </div>
             <div className="loader-wrap loader-mid">
               <div className="loader">
                 <div className="loader-center" />
@@ -1583,14 +1598,17 @@ export default class UIRoot extends Component {
   }
 
   render() {
-    const rootStyles = {
+    const menuStyles = {
       [styles.ui]: true,
       "ui-root": true,
       "in-modal-or-overlay": this.isInModalOrOverlay(),
       isGhost: configs.feature("enable_lobby_ghosts") && (this.state.watching || this.state.hide || this.props.hide),
-      hide: this.state.hide || this.props.hide
+    }
+
+    const rootStyles = {
+      hide: !this.state.showHubsUI || this.state.hide,
+      ...menuStyles
     };
-    if (this.props.hide || this.state.hide) return <div className={classNames(rootStyles)} />;
 
     const isExited = this.state.exited || this.props.roomUnavailableReason;
     const preload = this.props.showPreload;
@@ -1600,9 +1618,9 @@ export default class UIRoot extends Component {
 
     const hasPush = navigator.serviceWorker && "PushManager" in window;
 
-    var uiRootHtml;
+    let uiRootHtml;
 
-    if (this.props.showOAuthDialog && !this.props.showInterstitialPrompt)
+    if (this.props.showOAuthDialog && !this.props.showInterstitialPrompt) {
       uiRootHtml = (
         <IntlProvider locale={lang} messages={messages}>
           <div className={classNames(rootStyles)}>
@@ -1610,6 +1628,7 @@ export default class UIRoot extends Component {
           </div>
         </IntlProvider>
       );
+    }
     else if (isExited) {
       uiRootHtml = this.renderExitedPane();
     }
@@ -1650,6 +1669,23 @@ export default class UIRoot extends Component {
     }
     else if (this.props.isBotMode) {
       uiRootHtml = this.renderBotMode();
+    }
+    else if (!this.state.showHubsUI) {
+      uiRootHtml = (
+        <div className={classNames([menuStyles, styles.gameMenu])}>
+          <Menu
+            style={{
+              transform: `scale(${0.8})`,
+              position: "absolute",
+              //  right: 10,
+              // top: 0,
+            }}
+            volume={this.state.volume}
+            onVolumeChange={v => this.setState({ volume: v })}
+            hidden={this.state.hide}
+          />
+        </div>
+      );
     }
     else {
       const embed = this.props.embed;
@@ -1790,7 +1826,6 @@ export default class UIRoot extends Component {
 
       uiRootHtml = (
         <ReactAudioContext.Provider value={this.state.audioContext}>
-          {this.shouldShowUI() && (
           <IntlProvider locale={lang} messages={messages}>
             <div className={classNames(rootStyles)}>
               {this.state.dialog}
@@ -2313,7 +2348,7 @@ export default class UIRoot extends Component {
                 </div>
               )}
             </div>
-          </IntlProvider>)}
+          </IntlProvider>
         </ReactAudioContext.Provider>
       );
     }
@@ -2322,7 +2357,6 @@ export default class UIRoot extends Component {
       <Fragment>
         {uiRootHtml}
         {this.renderAudioPlayer()}
-        {/*this.renderVolumeSlider()*/}
       </Fragment>
     );
   }

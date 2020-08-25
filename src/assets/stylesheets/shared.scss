@@ -27,6 +27,10 @@ $breakpoint-xxl: 1600px; // Extra Large Desktops
   user-select: none;
 }
 
+.squiggle:hover{
+	border-bottom: 1px dotted #000;
+}
+
 %default-font {
   font-family: 'steps-monomono_thin', Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
 }

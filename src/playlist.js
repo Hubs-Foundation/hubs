@@ -42,7 +42,7 @@ room2:
     - artist: Altjira
       title: Altjira
       length: 01:43:52
-    - artist: DBR
+    - artist: "DBR [hybrid]"
       title: DBR
       length: 01:31:40
     - artist: Factor XIII
@@ -53,7 +53,7 @@ room2:
       length: 02:28:06
 room3:
   tracks:
-    - artist: nicha 'n' hooch
+    - artist: "nicha 'n' hooch"
       title: nicha-n-hooch
       length: 01:37:42
     - artist: synergetix

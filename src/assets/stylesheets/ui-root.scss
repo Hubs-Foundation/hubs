@@ -253,6 +253,23 @@ body.vr-mode {
   border: none;
 }
 
+:local(.game-menu) {
+  @extend %unselectable;
+  text-align: right;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 1em;
+  margin: 1em 0;
+  display: flex;
+  align-items: right;
+  justify-content: center;
+  font-weight: bold;
+  padding: 10px 12px;
+  pointer-events: auto;
+  border: none;
+}
+
 :local(.camera-mode-exit-button) {
   padding: 10px 14px;
 }

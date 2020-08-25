@@ -82,6 +82,7 @@
     "jsonschema": "^1.2.2",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^2.2.0",
+    "keycode": "^2.2.0",
     "lib-hubs": "github:mozillareality/lib-hubs#master",
     "linkify-it": "^2.0.3",
     "lodash": "^4.17.19",

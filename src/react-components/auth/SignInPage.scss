@@ -2,15 +2,29 @@
 
 main {
   display: flex;
-  background-color: #F3F3F3;
   height: 100%;
   justify-content: center;
   align-items: center;
 }
 
+.video-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100vw;
+  min-height: 100vh;
+  transform: scale(1.2, 1.2);
+}
+
+@media only screen and (max-width: 600px) {
+  .video-container {
+    transform: scale(2, 2);
+  }
+}
+
 :local(.sign-in-container) {
   @extend %centered-flex-column;
-  background-color: white;
+  background-color: var(--panel-background-color);
   border-radius: 4px;
   width: 480px;
   padding: 2em;
@@ -33,3 +47,4 @@ main {
     margin-bottom: 32px;
   }
 }
+

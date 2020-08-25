@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import styles from "./Loader.scss";
+import Spinger from "../../assets/spinger.gif"
 
 export function Loader({ message }) {
   return (

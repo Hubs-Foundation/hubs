@@ -15,28 +15,6 @@ import SignInDialog from "../sign-in-dialog.js";
 
 import backgroundAudio from "../../assets/gorloj-nagrume.mp3";
 
-// import splashWebm from "../../assets/video/splash2.webm";
-// import splashMp4 from "../../assets/video/splash2.mp4";
-// import aug20Image from "../../assets/images/aug22.gif";
-// import aug20ImageWebp from "../../assets/images/aug22.webp";
-
-// import loginButton from "../../assets/images/login-button.png";
-// import loginButtonWebp from "../../assets/images/login-button.webp";
-// import loginButtonHover from "../../assets/images/login-button-hover.png";
-// import loginButtonHoverWebp from "../../assets/images/login-button-hover.webp";
-
-// import logoImage from "../../assets/images/logo.png";
-// import logoImageWebp from "../../assets/images/logo.webp";
-
-// import enterButton from "../../assets/images/enter-button.gif";
-// import enterButtonHover from "../../assets/images/enter-button-hover.gif";
-
-// import logoutButton from "../../assets/images/logout-button.png";
-// import logoutButtonWebp from "../../assets/images/logout-button.webp";
-
-// import logoutButtonHover from "../../assets/images/logout-button-hover.png";
-// import logoutButtonHoverWebp from "../../assets/images/logout-button-hover.webp";
-
 import { getRoomMetadata } from "../../room-metadata";
 
 import qsTruthy from "../../utils/qs_truthy";
@@ -195,6 +173,32 @@ const EnterButton = props => {
   );
 };
 
+export const BackgroundVideo = ({ audio = false }) => {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: "0",
+        right: "0",
+        bottom: "0",
+        left: "0",
+        overflow: "hidden",
+        zIndex: "-1000"
+      }}
+    >
+      <video playsInline loop autoPlay muted className="video-container">
+        <source src={splashMp4} type="video/mp4" />
+        <source src={splashWebm} type="video/webm" />
+      </video>
+      {audio && (
+        <audio loop autoPlay>
+          <source src={backgroundAudio} type="audio/mpeg" />
+        </audio>
+      )}
+    </div>
+  )
+}
+
 export function HomePage() {
   const auth = useContext(AuthContext);
 
@@ -243,22 +247,7 @@ export function HomePage() {
 
   return (
     <Page className={styles.homePage} style={pageStyle}>
-      <div
-        style={{
-          position: "fixed",
-          top: "0",
-          right: "0",
-          bottom: "0",
-          left: "0",
-          overflow: "hidden",
-          zIndex: "-100"
-        }}
-      >
-        <video playsInline loop autoPlay muted className="video-container">
-          <source src={splashMp4} type="video/mp4" />
-          <source src={splashWebm} type="video/webm" />
-        </video>
-      </div>
+      <BackgroundVideo audio={true}/>
       <div
         style={{
           display: "flex",
@@ -269,9 +258,6 @@ export function HomePage() {
           zIndex: "1"
         }}
       >
-        <audio loop autoPlay>
-          <source src={backgroundAudio} type="audio/mpeg" />
-        </audio>
         <div
           style={{
             position: "relative"

@@ -6,6 +6,7 @@ import configs from "../../utils/configs";
 import IfFeature from "../if-feature";
 import { FormattedMessage } from "react-intl";
 import { AuthContext } from "../auth/AuthContext";
+import { BackgroundVideo } from "../home/HomePage";
 
 const SignInStep = {
   submit: "submit",
@@ -128,14 +129,6 @@ function WaitForVerification({ email, onCancel }) {
       <p>
         <FormattedMessage id="sign-in.auth-started" values={{ email }} />
       </p>
-      <IfFeature name="show_newsletter_signup">
-        <p>
-          Want Hubs news sent to your inbox?{"\n"}
-          <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
-            Subscribe for updates
-          </a>.
-        </p>
-      </IfFeature>
       <button onClick={onCancel}>cancel</button>
     </div>
   );
@@ -161,7 +154,8 @@ export function SignInPage() {
   );
 
   return (
-    <Page style={{ backgroundImage: configs.image("home_background", true), backgroundSize: "cover" }}>
+    <Page>
+      <BackgroundVideo/>
       {step === SignInStep.submit ? (
         <SubmitEmail onSubmitEmail={submitEmail} initialEmail={email} signInReason={qs.get("sign_in_reason")} />
       ) : (

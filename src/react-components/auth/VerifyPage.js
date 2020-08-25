@@ -6,6 +6,8 @@ import { Loader } from "../misc/Loader";
 import { AuthContext } from "../auth/AuthContext";
 import configs from "../../utils/configs";
 
+import { BackgroundVideo } from "../home/HomePage"
+
 const VerificationStep = {
   verifying: "verifying",
   complete: "complete",
@@ -91,6 +93,9 @@ export function VerifyPage() {
   }
 
   return (
-    <Page style={{ backgroundImage: configs.image("home_background", true), backgroundSize: "cover" }}>{content}</Page>
+    <Page>
+      <BackgroundVideo />
+      {content}
+    </Page>
   );
 }

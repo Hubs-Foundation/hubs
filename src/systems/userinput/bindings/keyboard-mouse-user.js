@@ -97,13 +97,16 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.actions.snapRotateLeft },
       xform: xforms.rising
     },
+    /*
+    // Dr33m: we don't support user enable fly
     {
       src: { value: paths.device.keyboard.key("g") },
       dest: { value: paths.actions.toggleFly },
       xform: xforms.rising
     },
+    */
     {
-      src: { value: paths.device.keyboard.key("`") },
+      src: { value: paths.device.keyboard.key("q") },
       dest: { value: paths.actions.toggleUI },
       xform: xforms.rising
     },
