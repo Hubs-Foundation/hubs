@@ -57,7 +57,7 @@ const Slider = ({ volume, onVolumeChange, style, ...otherProps }) => {
         ...style
       }}
       x={offset}
-      y={2387}
+      y={2280}
       width={217}
       height={217}
       href={SliderEye}
@@ -67,13 +67,13 @@ const Slider = ({ volume, onVolumeChange, style, ...otherProps }) => {
 };
 
 const WatchToggle = ({ watching, onToggle }) => {
-  const baseProps = { y: "2291", width: "217", height: "217", href: SliderEye };
+  const baseProps = { y: "2771", width: "217", height: "217", href: SliderEye };
   return (
     <SvgToggleButton
       active={watching}
       onToggle={onToggle}
-      normalProps={{ x: "291", ...baseProps }}
-      activeProps={{ x: "546", ...baseProps }}
+      normalProps={{ x: "756", ...baseProps }}
+      activeProps={{ x: "520", ...baseProps }}
     />
   );
 };
@@ -109,11 +109,12 @@ export const Menu = ({
         activeProps={{ x: "1044", y: "134", width: "726", height: "727", href: MenuOpen }}
       />
 
-      <WatchToggle watching={watching} onToggle={onWatchToggle} />
 
       {!hidden && (
-        <g>
+        <>
           <image x={218} y={486} width={1461} height={3828} href={Backplate} />
+
+          <WatchToggle watching={watching} onToggle={onWatchToggle} />
 
           <Slider volume={volume} onVolumeChange={onVolumeChange} />
 
@@ -153,7 +154,7 @@ export const Menu = ({
             hoverProps={{ x: "1178", y: "3605", width: "281", height: "281", href: Room3ButtonHover }}
             normalProps={{ x: "1191", y: "3620", width: "251", height: "251", href: Room3Button }}
           />
-        </g>
+        </>
       )}
     </svg>
   );
