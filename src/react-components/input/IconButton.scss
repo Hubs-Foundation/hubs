@@ -34,5 +34,11 @@
 }
 
 :local(.input-group):focus-within :local(.icon-button) {
-  padding-right: 14px;
+  &:first-child {
+    padding-left: 14px;
+  }
+
+  &:last-child {
+    padding-right: 14px;
+  }
 }

@@ -14,12 +14,10 @@
     border-width: 3px;
     border-color: theme.$blue;
 
-    :local(.text-input) {
-      padding-left: 6px;
-    }
-
-    :local(.invalid-icon) {
-      right: 6px;
+    :local(.input-wrapper):first-child {
+      :local(.text-input) {
+        padding-left: 6px;
+      }
     }
   }
 }

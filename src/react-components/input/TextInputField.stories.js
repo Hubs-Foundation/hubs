@@ -31,6 +31,16 @@ export const All = () => (
       }
       afterInput={<Button preset="accept">Copy</Button>}
     />
+    <TextInputField
+      label="Room Link"
+      value="https://hubs.link/123456"
+      description={
+        <>
+          Expires after 24 hours <a href="#">Learn More</a>
+        </>
+      }
+      beforeInput={<Button preset="accept">Copy</Button>}
+    />
     <TextInputField placeholder="Type a message..." afterInput={<Button>Send</Button>} />
     <TextInputField
       placeholder="Type a message..."
@@ -50,6 +60,16 @@ export const All = () => (
       value="Cat"
       invalid
       afterInput={
+        <IconButton>
+          <WandIcon />
+        </IconButton>
+      }
+      error="Network error. Please try again."
+    />
+    <TextInputField
+      value="Cat"
+      invalid
+      beforeInput={
         <IconButton>
           <WandIcon />
         </IconButton>
