@@ -1,42 +1,16 @@
-import React, { useCallback, useContext } from "react";
+import React, { useContext } from "react";
 import styles from "./InvitePopover.scss";
-import { TextInputField } from "../input/TextInputField";
-import { Button } from "../input/Button";
 import { RoomContext } from "./RoomContext";
+import { CopyableTextInputField } from "../input/CopyableTextInputField";
 
 export function InvitePopover() {
   const { url, code, embed } = useContext(RoomContext);
-  const copyToClipboard = useCallback(e => console.log(e.target.value));
 
   return (
     <div className={styles.invitePopover}>
-      <TextInputField
-        label="Room Link"
-        value={url}
-        afterInput={
-          <Button preset="green" value={url} onClick={copyToClipboard}>
-            Copy
-          </Button>
-        }
-      />
-      <TextInputField
-        label="Room Code"
-        value={code}
-        afterInput={
-          <Button preset="blue" value={url} onClick={copyToClipboard}>
-            Copy
-          </Button>
-        }
-      />
-      <TextInputField
-        label="Embed Code"
-        value={embed}
-        afterInput={
-          <Button preset="purple" value={url} onClick={copyToClipboard}>
-            Copy
-          </Button>
-        }
-      />
+      <CopyableTextInputField label="Room Link" value={url} buttonPreset="green" />
+      <CopyableTextInputField label="Room Code" value={code} buttonPreset="blue" />
+      <CopyableTextInputField label="Embed Code" value={embed} buttonPreset="purple" />
     </div>
   );
 }
