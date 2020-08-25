@@ -9,7 +9,7 @@ AFRAME.registerComponent("local-refresh-media-button", {
         if (c["media-video"] && c["media-video"].videoTexture && c["media-video"].videoTexture.hls) {
           c["media-video"].videoTexture.hls.recoverMediaError();
         } else if (c["media-loader"]) {
-          // Otherwise fall back to hard resolve-level refresh which should work for any meida
+          // Otherwise fall back to hard resolve-level refresh which should work for any media
           c["media-loader"].update(c["media-loader"].data, true);
         }
       }
