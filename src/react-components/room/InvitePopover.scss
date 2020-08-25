@@ -1,0 +1,13 @@
+@use "../styles/theme.scss";
+
+:local(.invite-popover) {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+  width: 100%;
+
+  @media(min-width: theme.$breakpoint-md) {
+    padding: 8px 16px 24px 16px;
+    width: 272px;
+  }
+}

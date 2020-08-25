@@ -1,0 +1,33 @@
+@use "../styles/theme.scss";
+
+:local(.room-layout) {
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+  grid-template-columns:
+    [main] auto
+    [sidebar] minmax(auto, min-content);
+  
+  grid-template-rows: 
+    [viewport] auto
+    [toolbar] min-content;
+  
+  background-color: theme.$grey;
+  overflow: hidden;
+}
+
+:local(.main) {
+  grid-column-start: main;
+}
+
+:local(.sidebar) {
+  grid-column-start: sidebar;
+}
+
+:local(.viewport) {
+  grid-row-start: viewport;
+}
+
+:local(.toolbar) {
+  grid-row-start: toolbar;
+}

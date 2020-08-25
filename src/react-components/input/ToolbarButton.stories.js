@@ -10,7 +10,7 @@ import { ReactComponent as LeaveIcon } from "../icons/Leave.svg";
 import { ReactComponent as MoreIcon } from "../icons/More.svg";
 import { ToolbarButton, presets } from "./ToolbarButton";
 import styleUtils from "../styles/style-utils.scss";
-import { Toolbar } from "./Toolbar";
+import { Toolbar } from "../layout/Toolbar";
 
 export default {
   title: "Toolbar",

@@ -32,7 +32,12 @@ module.exports = {
           options: {
             titleProp: true,
             replaceAttrValues: { "#000": "{props.color}" },
-            template: require("../src/react-components/icons/IconTemplate")
+            template: require("../src/react-components/icons/IconTemplate"),
+            svgoConfig: {
+              plugins: {
+                removeViewBox: false
+              }
+            }
           }
         },
         "url-loader"
