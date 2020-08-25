@@ -1,11 +1,9 @@
-import React, { useContext } from "react";
+import React from "react";
+import PropTypes from "prop-types";
 import styles from "./InvitePopover.scss";
-import { RoomContext } from "./RoomContext";
 import { CopyableTextInputField } from "../input/CopyableTextInputField";
 
-export function InvitePopover() {
-  const { url, code, embed } = useContext(RoomContext);
-
+export function InvitePopover({ url, code, embed }) {
   return (
     <div className={styles.invitePopover}>
       <CopyableTextInputField label="Room Link" value={url} buttonPreset="green" />
@@ -14,3 +12,9 @@ export function InvitePopover() {
     </div>
   );
 }
+
+InvitePopover.propTypes = {
+  url: PropTypes.string.isRequired,
+  code: PropTypes.string.isRequired,
+  embed: PropTypes.string.isRequired
+};

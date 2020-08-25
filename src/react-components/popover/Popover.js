@@ -100,7 +100,11 @@ export function Popover({
               <h5>{title}</h5>
             </div>
             <div className={styles.content}>
-              {typeof Content === "function" ? <Content closePopover={closePopover} /> : Content}
+              {typeof Content === "function" ? (
+                <Content fullscreen={fullscreen} closePopover={closePopover} />
+              ) : (
+                Content
+              )}
             </div>
             {!fullscreen && (
               <div ref={setArrowElement} className={styles.arrow} style={arrowStyles}>

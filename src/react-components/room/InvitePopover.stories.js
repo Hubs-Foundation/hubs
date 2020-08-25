@@ -4,13 +4,12 @@ import { ToolbarButton } from "../input/ToolbarButton";
 import { RoomLayout } from "../layout/RoomLayout";
 import { ReactComponent as InviteIcon } from "../icons/Invite.svg";
 import { InvitePopover } from "./InvitePopover";
-import { RoomContext } from "./RoomContext";
 
 export default {
   title: "InvitePopover"
 };
 
-const roomContextMock = {
+const room = {
   url: "hubs.link/oggNnrN",
   code: "478816",
   embed:
@@ -18,23 +17,27 @@ const roomContextMock = {
 };
 
 export const Base = () => (
-  <RoomContext.Provider value={roomContextMock}>
-    <RoomLayout
-      toolbarCenter={
-        <Popover title="Invite" content={InvitePopover} placement="top" offsetDistance={28} initiallyVisible>
-          {({ togglePopover, popoverVisible, triggerRef }) => (
-            <ToolbarButton
-              ref={triggerRef}
-              icon={<InviteIcon />}
-              selected={popoverVisible}
-              onClick={togglePopover}
-              label="Invite"
-            />
-          )}
-        </Popover>
-      }
-    />
-  </RoomContext.Provider>
+  <RoomLayout
+    toolbarCenter={
+      <Popover
+        title="Invite"
+        content={() => <InvitePopover url={room.url} code={room.code} embed={room.embed} />}
+        placement="top"
+        offsetDistance={28}
+        initiallyVisible
+      >
+        {({ togglePopover, popoverVisible, triggerRef }) => (
+          <ToolbarButton
+            ref={triggerRef}
+            icon={<InviteIcon />}
+            selected={popoverVisible}
+            onClick={togglePopover}
+            label="Invite"
+          />
+        )}
+      </Popover>
+    }
+  />
 );
 
 Base.parameters = {
