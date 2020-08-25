@@ -1685,8 +1685,10 @@ export default class UIRoot extends Component {
             }}
             volume={this.state.volume}
             onVolumeChange={v => this.setState({ volume: v })}
-            onToggle={state => this.setMenuFocus(state)}
             hidden={this.state.hide}
+            onMenuToggle={toggle => this.setMenuFocus(toggle)}
+            watching={this.state.watching}
+            onWatchToggle={toggle => this.setState({ watching: toggle })}
           />
         </div>
       );

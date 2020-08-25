@@ -33,6 +33,8 @@ const Slider = ({ volume, onVolumeChange, style, ...otherProps }) => {
 
   const { offset, dragging } = dragState;
 
+  const sliderRef = React.createRef();
+
   const startDrag = () => setDragState({ dragging: true });
 
   const endDrag = () => {
@@ -41,8 +43,7 @@ const Slider = ({ volume, onVolumeChange, style, ...otherProps }) => {
   };
 
   const drag = e => {
-    console.log(self.getScreenCTM())
-    // console.info(JSON.stringify(e));
+    console.info(JSON.stringify(e));
   };
 
   return (
@@ -65,10 +66,24 @@ const Slider = ({ volume, onVolumeChange, style, ...otherProps }) => {
   );
 };
 
+const WatchToggle = ({ watching, onToggle }) => {
+  const baseProps = { y: "2291", width: "217", height: "217", href: SliderEye };
+  return (
+    <SvgToggleButton
+      active={watching}
+      onToggle={onToggle}
+      normalProps={{ x: "291", ...baseProps }}
+      activeProps={{ x: "546", ...baseProps }}
+    />
+  );
+};
+
 export const Menu = ({
+  watching = false,
   hidden = true,
   volume = 0.9,
-  onToggle,
+  onWatchToggle,
+  onMenuToggle,
   onVolumeChange,
   onReport,
   onHome,
@@ -84,16 +99,19 @@ export const Menu = ({
       width={1865}
       height={4689}
       style={{
-        ...style,
+        ...style
       }}
     >
       <SvgToggleButton
         active={!hidden}
-        onToggle={onToggle} //{{toggle => setMenuState({ hidden: !toggle )}
+        onToggle={onMenuToggle}
         normalProps={{ x: "1034", y: "132", width: "738", height: "734", href: MenuClosed }}
         activeProps={{ x: "1044", y: "134", width: "726", height: "727", href: MenuOpen }}
       />
-      {true && (
+
+      <WatchToggle watching={watching} onToggle={onWatchToggle} />
+
+      {!hidden && (
         <g>
           <image x={218} y={486} width={1461} height={3828} href={Backplate} />
 
