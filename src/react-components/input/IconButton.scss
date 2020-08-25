@@ -1,0 +1,38 @@
+@use '../styles/theme';
+
+:local(.icon-button) {
+  background: transparent;
+  border: none;
+
+  &:hover {
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$blue-hover;
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$blue-hover;
+      }
+    }
+  }
+
+  &:active {
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$blue-pressed;
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$blue-pressed;
+      }
+    }
+  }
+}
+
+:local(.input-group) :local(.icon-button) {
+  padding: 0 16px;
+}
+
+:local(.input-group):focus-within :local(.icon-button) {
+  padding-right: 14px;
+}

@@ -104,3 +104,18 @@
   outline: none;
   border: 3px solid theme.$black;
 }
+
+:local(.input-group) :local(.button) {
+  height: 100%;
+  border-radius: 0;
+  min-width: auto;
+  padding: 0 16px;
+
+  &:local(.basic) {
+    border-width: 0 0 0 1px;
+  }
+}
+
+:local(.input-group):focus-within :local(.button) {
+  padding-right: 14px;
+}

@@ -1,6 +1,9 @@
 import React from "react";
 import { withDesign } from "storybook-addon-designs";
 import { TextInputField } from "./TextInputField";
+import { Button } from "./Button";
+import { ReactComponent as WandIcon } from "../icons/Wand.svg";
+import { IconButton } from "./IconButton";
 
 export default {
   title: "TextInputField",
@@ -26,6 +29,32 @@ export const All = () => (
           Expires after 24 hours <a href="#">Learn More</a>
         </>
       }
+      afterInput={<Button preset="accept">Copy</Button>}
+    />
+    <TextInputField placeholder="Type a message..." afterInput={<Button>Send</Button>} />
+    <TextInputField
+      placeholder="Type a message..."
+      afterInput={<Button>Send</Button>}
+      invalid
+      error="Error sending message."
+    />
+    <TextInputField
+      placeholder="Search..."
+      afterInput={
+        <IconButton>
+          <WandIcon />
+        </IconButton>
+      }
+    />
+    <TextInputField
+      value="Cat"
+      invalid
+      afterInput={
+        <IconButton>
+          <WandIcon />
+        </IconButton>
+      }
+      error="Network error. Please try again."
     />
   </div>
 );

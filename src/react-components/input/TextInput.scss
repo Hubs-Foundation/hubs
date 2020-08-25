@@ -1,11 +1,14 @@
 @use "../styles/theme";
 
-:local(.input-wrapper) {
+:local(.outer-wrapper) {
+  display: flex;
+  align-items: center;
   position: relative;
   height: 40px;
   border: 1px solid theme.$darkgrey;
   border-radius: theme.$border-radius-regular;
   color: theme.$black;
+  overflow: hidden;
 
   &:focus-within  {
     border-width: 3px;
@@ -21,6 +24,11 @@
   }
 }
 
+:local(.input-wrapper) {
+  flex: 1;
+  height: 100%;
+}
+
 :local(.disabled) {
   cursor: not-allowed;
   color: theme.$darkgrey;
@@ -29,15 +37,11 @@
 
 :local(.invalid) {
   border-color: theme.$red !important;
-
-  :local(.text-input) {
-    padding-right: 36px;
-  }
 }
 
 :local(.text-input) {
-  width: 100%;
   height: 100%;
+  width: 100%;
   border: none;
   background-color: transparent;
   padding-left: 8px;
@@ -49,10 +53,7 @@
 }
 
 :local(.invalid-icon) {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
+  margin: 0 8px;
 
   *[fill=\#000] {
     stroke: theme.$red;
