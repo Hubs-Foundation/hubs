@@ -17,7 +17,8 @@ export function Popover({
   placement,
   offsetSkidding,
   offsetDistance,
-  initiallyVisible
+  initiallyVisible,
+  disableFullscreen
 }) {
   const [visible, setVisible] = useState(initiallyVisible);
   const [referenceElement, setReferenceElement] = useState(null);
@@ -34,7 +35,7 @@ export function Popover({
     ]
   });
   const breakpoint = useCssBreakpoints();
-  const fullscreen = breakpoint === "sm";
+  const fullscreen = !disableFullscreen && breakpoint === "sm";
   const closePopover = useCallback(() => setVisible(false), [setVisible]);
   const togglePopover = useCallback(() => setVisible(visible => !visible), [setVisible]);
 
@@ -118,7 +119,8 @@ Popover.propTypes = {
   placement: PropTypes.string,
   title: PropTypes.string.isRequired,
   children: PropTypes.func.isRequired,
-  content: PropTypes.oneOfType([PropTypes.func, PropTypes.node])
+  content: PropTypes.oneOfType([PropTypes.func, PropTypes.node]),
+  disableFullscreen: PropTypes.bool
 };
 
 Popover.defaultProps = {
