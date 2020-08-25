@@ -1,5 +1,15 @@
 @use "../styles/theme.scss";
 
 :local(.share-popover) {
+  display: flex;
+  justify-content: center;
   padding-bottom: 8px;
+
+  & > * {
+    margin-right: 16px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
 }

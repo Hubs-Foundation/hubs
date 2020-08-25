@@ -1,10 +1,17 @@
 @use "../styles/theme.scss";
 
 :local(.invite-popover) {
-  display: grid;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
   padding: 16px;
-  width: 100%;
+
+  & > * {
+    margin-bottom: 16px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 
   @media(min-width: theme.$breakpoint-md) {
     padding: 8px 16px 16px 16px;

@@ -1,0 +1,14 @@
+@use "../styles/theme.scss";
+
+:local(.place-popover) {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  justify-items: center;
+  gap: 16px;
+  padding: 16px;
+
+  @media(min-width: theme.$breakpoint-md) {
+    max-width: 224px;
+    padding-top: 0;
+  }
+}
