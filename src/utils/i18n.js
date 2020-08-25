@@ -2,8 +2,11 @@ import "@babel/polyfill";
 import configs from "./configs";
 import { FALLBACK_LOCALES } from "../assets/locales/locale_config";
 import defaultLocaleData from "../assets/locales/en.json";
+import Store from "../storage/store";
 
 const DEFAULT_LOCALE = "en";
+
+const store = new Store();
 
 function getLocales() {
   if (navigator.languages) {
@@ -18,6 +21,10 @@ function getLocales() {
 }
 
 const locales = getLocales();
+
+if (store.state.preferences.locale && store.state.preferences.locale !== "browser") {
+  locales.unshift(store.state.preferences.locale);
+}
 
 let _locale = DEFAULT_LOCALE;
 let _messages = defaultLocaleData;

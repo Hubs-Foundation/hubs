@@ -305,6 +305,8 @@
   "preferences.enableOnScreenJoystickLeft": "允许使用屏幕上左侧的操纵杆四处走动",
   "preferences.enableOnScreenJoystickRight": "允许使用屏幕上右侧的操纵杆四处走动",
   "preferences.invertTouchscreenCameraMove": "Invert direction of camera movement for touchscreens",
+  "preferences.browserDefault": "Browser Default",
+  "preferences.locale": "Language",
   "preferences.onlyShowNametagsInFreeze": "当停止不动时只显示用户标签",
   "preferences.animateWaypointTransitions": "Animate waypoint transitions",
   "preferences.maxResolution": "最大分辨率 (宽 x 高 以像素为单位)",

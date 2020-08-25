@@ -9,6 +9,7 @@ import { FormattedMessage } from "react-intl";
 import { WrappedIntlProvider } from "./wrapped-intl-provider";
 import styles from "../assets/stylesheets/preferences-screen.scss";
 import { getMessages } from "../utils/i18n";
+import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
 
 const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
 
@@ -500,6 +501,11 @@ const preferredCamera = {
   defaultString: "default"
 };
 
+const availableLocales = [{ value: "browser", text: getMessages()["preferences.browserDefault"] }];
+for (const locale in AVAILABLE_LOCALES) {
+  availableLocales.push({ value: locale, text: AVAILABLE_LOCALES[locale] });
+}
+
 const DEFINITIONS = new Map([
   [
     CATEGORY_TOUCHSCREEN,
@@ -582,6 +588,13 @@ const DEFINITIONS = new Map([
   [
     CATEGORY_MISC,
     [
+      {
+        key: "locale",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+        options: availableLocales,
+        defaultString: "browser",
+        promptForRefresh: true
+      },
       { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
       preferredCamera,
