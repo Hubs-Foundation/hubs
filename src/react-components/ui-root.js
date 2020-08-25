@@ -361,6 +361,11 @@ export default class UIRoot extends Component {
     }
   };
 
+  setMenuFocus = (on) => {
+    setPointerLock(on);
+    this.setState({ hide: !on});
+  }
+
   componentDidMount() {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     window.addEventListener("idle_detected", this.onIdleDetected);
@@ -399,8 +404,7 @@ export default class UIRoot extends Component {
 
     this.props.scene.addEventListener("action_toggle_ui", () => {
       console.info({hide: this.state.hide})
-      setPointerLock(this.state.hide);
-      this.setState({ hide: !this.state.hide });
+      this.setMenuFocus(!this.state.hide)
     });
 
     const scene = this.props.scene;
@@ -1675,13 +1679,13 @@ export default class UIRoot extends Component {
         <div className={classNames([menuStyles, styles.gameMenu])}>
           <Menu
             style={{
-              transform: `scale(${0.8})`,
+              transform: `scale(${0.2})`,
+              'transform-origin': "72% 0%",
               position: "absolute",
-              //  right: 10,
-              // top: 0,
             }}
             volume={this.state.volume}
             onVolumeChange={v => this.setState({ volume: v })}
+            onToggle={state => this.setMenuFocus(state)}
             hidden={this.state.hide}
           />
         </div>

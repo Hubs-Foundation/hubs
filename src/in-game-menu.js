@@ -27,19 +27,22 @@ const Slider = ({ volume, onVolumeChange, style, ...otherProps }) => {
   const constrain = (min, max, x) => Math.max(min, Math.min(x, max));
 
   const sliderVolumeToX = v => constrain(sliderLeftOffset, sliderRightOffset, sliderLeftOffset + sliderWidth * v);
-  const sliderXToVolume = x => constrain(0, 1, (x - sliderLeftOffset) / width);
+  const sliderXToVolume = x => constrain(0, 1, (x - sliderLeftOffset) / sliderWidth);
 
   const [dragState, setDragState] = useState({ offset: sliderVolumeToX(volume), dragging: false });
 
   const { offset, dragging } = dragState;
 
   const startDrag = () => setDragState({ dragging: true });
+
   const endDrag = () => {
     setDragState({ dragging: false });
     // TODO: fire volume callback with normalised volume
   };
+
   const drag = e => {
-    console.info(JSON.stringify(e));
+    console.log(self.getScreenCTM())
+    // console.info(JSON.stringify(e));
   };
 
   return (
@@ -49,8 +52,8 @@ const Slider = ({ volume, onVolumeChange, style, ...otherProps }) => {
       onMouseUp={endDrag}
       onMouseLeave={endDrag}
       style={{
-        ...style,
-        cursor: "move"
+        cursor: "move",
+        ...style
       }}
       x={offset}
       y={2387}
@@ -65,6 +68,7 @@ const Slider = ({ volume, onVolumeChange, style, ...otherProps }) => {
 export const Menu = ({
   hidden = true,
   volume = 0.9,
+  onToggle,
   onVolumeChange,
   onReport,
   onHome,
@@ -75,11 +79,6 @@ export const Menu = ({
   style,
   ...otherProps
 }) => {
-  const [menuState, setMenuState] = useState({
-    hidden,
-    volume: volume
-  });
-
   return (
     <svg
       width={1865}
@@ -89,8 +88,8 @@ export const Menu = ({
       }}
     >
       <SvgToggleButton
-        active={true/*!hidden*/}
-        onToggle={toggle => setMenuState({ hidden: !toggle })}
+        active={!hidden}
+        onToggle={onToggle} //{{toggle => setMenuState({ hidden: !toggle )}
         normalProps={{ x: "1034", y: "132", width: "738", height: "734", href: MenuClosed }}
         activeProps={{ x: "1044", y: "134", width: "726", height: "727", href: MenuOpen }}
       />
