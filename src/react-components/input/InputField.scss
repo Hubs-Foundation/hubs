@@ -1,0 +1,22 @@
+@use "../styles/theme";
+
+:local(.label) {
+  margin-bottom: 8px;
+  color: theme.$grey;
+}
+
+:local(.input-field) {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+:local(.error) {
+  margin-top: 8px;
+  color: theme.$red;
+}
+
+:local(.info) {
+  margin-top: 8px;
+  color: theme.$grey;
+}

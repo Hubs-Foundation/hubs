@@ -1,18 +1,5 @@
 @use "../styles/theme";
 
-:local(.input-field) {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-
-  label {
-    font-size: theme.$font-size-xs;
-    font-weight: bold;
-    margin-bottom: 8px;
-    color: theme.$grey;
-  }
-}
-
 :local(.input-wrapper) {
   position: relative;
   height: 40px;

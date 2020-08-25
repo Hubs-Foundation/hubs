@@ -218,6 +218,23 @@ h5 {
   font-weight: theme.$font-weight-bold;
 }
 
+label, small {
+  font-size: theme.$font-size-xs;
+  font-weight: theme.$font-weight-bold;
+}
+
+a {
+  color: theme.$blue;
+
+  &:hover {
+    color: theme.$blue-hover;
+  }
+
+  &:active {
+    color: theme.$blue-pressed;
+  }
+}
+
 input::placeholder {
   color: theme.$darkgrey;
 }
