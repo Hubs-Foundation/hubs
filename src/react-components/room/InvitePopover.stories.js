@@ -1,9 +1,6 @@
 import React from "react";
-import { Popover } from "../popover/Popover";
-import { ToolbarButton } from "../input/ToolbarButton";
 import { RoomLayout } from "../layout/RoomLayout";
-import { ReactComponent as InviteIcon } from "../icons/Invite.svg";
-import { InvitePopover } from "./InvitePopover";
+import { InvitePopoverButton } from "./InvitePopover";
 
 export default {
   title: "InvitePopover"
@@ -17,27 +14,7 @@ const room = {
 };
 
 export const Base = () => (
-  <RoomLayout
-    toolbarCenter={
-      <Popover
-        title="Invite"
-        content={() => <InvitePopover url={room.url} code={room.code} embed={room.embed} />}
-        placement="top"
-        offsetDistance={28}
-        initiallyVisible
-      >
-        {({ togglePopover, popoverVisible, triggerRef }) => (
-          <ToolbarButton
-            ref={triggerRef}
-            icon={<InviteIcon />}
-            selected={popoverVisible}
-            onClick={togglePopover}
-            label="Invite"
-          />
-        )}
-      </Popover>
-    }
-  />
+  <RoomLayout toolbarCenter={<InvitePopoverButton url={room.url} code={room.code} embed={room.embed} />} />
 );
 
 Base.parameters = {

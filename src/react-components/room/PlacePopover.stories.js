@@ -1,6 +1,4 @@
 import React from "react";
-import { Popover } from "../popover/Popover";
-import { ToolbarButton } from "../input/ToolbarButton";
 import { RoomLayout } from "../layout/RoomLayout";
 import { ReactComponent as PenIcon } from "../icons/Pen.svg";
 import { ReactComponent as CameraIcon } from "../icons/Camera.svg";
@@ -11,7 +9,7 @@ import { ReactComponent as ObjectIcon } from "../icons/Object.svg";
 import { ReactComponent as AvatarIcon } from "../icons/Avatar.svg";
 import { ReactComponent as SceneIcon } from "../icons/Scene.svg";
 import { ReactComponent as UploadIcon } from "../icons/Upload.svg";
-import { ButtonGridPopover } from "../popover/ButtonGridPopover";
+import { PlacePopoverButton } from "./PlacePopover";
 
 export default {
   title: "PlacePopover"
@@ -30,28 +28,7 @@ const items = [
 ];
 
 export const Base = () => (
-  <RoomLayout
-    toolbarCenter={
-      <Popover
-        title="Place"
-        content={props => <ButtonGridPopover items={items} onSelect={item => console.log(item)} {...props} />}
-        placement="top"
-        offsetDistance={28}
-        initiallyVisible
-      >
-        {({ togglePopover, popoverVisible, triggerRef }) => (
-          <ToolbarButton
-            ref={triggerRef}
-            icon={<ObjectIcon />}
-            selected={popoverVisible}
-            onClick={togglePopover}
-            label="Place"
-            preset="green"
-          />
-        )}
-      </Popover>
-    }
-  />
+  <RoomLayout toolbarCenter={<PlacePopoverButton items={items} onSelect={item => console.log(item)} />} />
 );
 
 Base.parameters = {
