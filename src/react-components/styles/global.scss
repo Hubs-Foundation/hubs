@@ -173,6 +173,12 @@ body:not(:global(.keyboard-user)) {
   }
 }
 
+:global(.keyboard-user) {
+  :focus {
+    outline: 3px solid theme.$black;
+  }
+}
+
 /* We want svg icons to have title elements for screen readers, but we don't need to show their tooltips when they are inside buttons */
 button svg {
   pointer-events: none;

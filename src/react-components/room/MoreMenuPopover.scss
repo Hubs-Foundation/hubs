@@ -51,7 +51,7 @@
     }
   }
 
-  &:hover, &:active {
+  &:hover, &:active, :global(body.keyboard-user) &:focus {
     color: theme.$white;
     font-weight: theme.$font-weight-bold;
 
@@ -66,7 +66,7 @@
     }
   }
 
-  &:hover {
+  &:hover, &:focus {
     background-color: theme.$blue-hover;
   }
 
@@ -78,22 +78,4 @@
 button:local(.more-menu-item-target) {
   background: transparent;
   border: none; 
-}
-
-:global(body.keyboard-user) :local(.more-menu-item-target):focus {
-  color: theme.$white;
-  font-weight: theme.$font-weight-bold;
-
-  svg {
-    *[stroke=\#000] {
-      stroke: theme.$white;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$white;
-    }
-  }
-
-  background-color: theme.$blue;
-  outline: 3px solid theme.$black;
 }

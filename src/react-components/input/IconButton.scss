@@ -27,6 +27,14 @@
       }
     }
   }
+
+  &:focus {
+    outline: 0;
+
+    svg {
+      outline: 3px solid theme.$black;
+    }
+  }
 }
 
 :local(.input-group) :local(.icon-button) {
@@ -42,3 +50,4 @@
     padding-right: 14px;
   }
 }
+

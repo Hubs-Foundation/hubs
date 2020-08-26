@@ -125,3 +125,11 @@
     padding-right: 14px;
   }
 }
+
+:global(.keyboard-user) :local(.input-group) :local(.button):focus {
+  padding: 0 11px;
+
+  &:first-child {
+    margin-right: 2px;
+  }
+}
