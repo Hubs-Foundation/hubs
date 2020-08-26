@@ -6,6 +6,11 @@ import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as ObjectIcon } from "../icons/Object.svg";
 
 export function PlacePopoverButton({ items, onSelect }) {
+  // The button is removed if you can't place anything.
+  if (items.length === 0) {
+    return undefined;
+  }
+
   return (
     <Popover
       title="Place"

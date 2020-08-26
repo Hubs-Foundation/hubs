@@ -20,3 +20,24 @@ export const Base = () => (
 Base.parameters = {
   layout: "fullscreen"
 };
+
+export const Mobile = () => (
+  <RoomLayout toolbarCenter={<SharePopoverButton items={[items[0]]} onSelect={item => console.log(item)} />} />
+);
+
+Mobile.parameters = {
+  layout: "fullscreen"
+};
+
+const activeItems = [
+  { id: "camera", icon: VideoIcon, color: "purple", label: "Camera", active: true },
+  { id: "screen", icon: DesktopIcon, color: "purple", label: "Screen" }
+];
+
+export const Active = () => (
+  <RoomLayout toolbarCenter={<SharePopoverButton items={activeItems} onSelect={item => console.log(item)} />} />
+);
+
+Active.parameters = {
+  layout: "fullscreen"
+};

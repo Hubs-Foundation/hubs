@@ -5,7 +5,9 @@ import styles from "./ToolbarButton.scss";
 
 export const presets = ["basic", "transparent", "accept", "cancel", "red", "orange", "green", "blue", "purple"];
 
-export const ToolbarButton = forwardRef(({ preset, className, icon, label, selected, ...rest }, ref) => {
+export const statusColors = ["red", "orange", "green"];
+
+export const ToolbarButton = forwardRef(({ preset, className, icon, label, selected, statusColor, ...rest }, ref) => {
   return (
     <button
       ref={ref}
@@ -14,6 +16,7 @@ export const ToolbarButton = forwardRef(({ preset, className, icon, label, selec
     >
       <div className={styles.iconContainer} aria-hidden="true">
         {icon}
+        {statusColor && <div className={classNames(styles.statusIndicator, styles["status-" + statusColor])} />}
       </div>
       <label>{label}</label>
     </button>
@@ -25,6 +28,7 @@ ToolbarButton.propTypes = {
   label: PropTypes.string,
   selected: PropTypes.bool,
   preset: PropTypes.oneOf(presets),
+  statusColor: PropTypes.oneOf(statusColors),
   className: PropTypes.string
 };
 
