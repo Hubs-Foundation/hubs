@@ -66,12 +66,18 @@
     }
   }
 
-  &:hover, &:focus {
+  &:hover, :global(body.keyboard-user) &:focus {
     background-color: theme.$blue-hover;
   }
 
   &:active {
     background-color: theme.$blue-pressed;
+  }
+
+  :global(body.keyboard-user) &:focus {
+    outline: 0;
+    border: 3px solid theme.$black;
+    padding: 0 14px;
   }
 }
 
