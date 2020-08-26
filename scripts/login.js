@@ -37,7 +37,8 @@ const ask = q => new Promise(res => rl.question(q, res));
   const socket = await connectToReticulum(false, null, Socket);
   const store = new Store();
 
-  const email = await ask("admin email: ");
+  const email = process.env.DR33M_EMAIL || await ask("admin email: ");
+
   console.log(`Logging into ${host} as ${email}. Click on the link in your email to continue.`);
   const authChannel = new AuthChannel(store);
   authChannel.setSocket(socket);
