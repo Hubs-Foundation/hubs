@@ -52,12 +52,20 @@ export function Popover({
         setVisible(false);
       };
 
+      const onKeyDown = e => {
+        if (e.key === "Escape") {
+          setVisible(false);
+        }
+      };
+
       if (visible) {
         window.addEventListener("click", onClick);
+        window.addEventListener("keydown", onKeyDown);
       }
 
       return () => {
         window.removeEventListener("click", onClick);
+        window.removeEventListener("keydown", onKeyDown);
       };
     },
     [visible, popperElement, referenceElement]
