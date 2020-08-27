@@ -132,4 +132,8 @@
   &:first-child {
     margin-right: 2px;
   }
+
+  &:last-child {
+    margin-left: 3px;
+  }
 }

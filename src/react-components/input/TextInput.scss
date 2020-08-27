@@ -53,6 +53,10 @@
 :local(.invalid-icon) {
   margin: 0 8px;
 
+  :local(.outer-wrapper):focus-within &:last-child {
+    margin-right: 6px;
+  }
+
   *[fill=\#000] {
     stroke: theme.$red;
   }
