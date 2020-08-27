@@ -21,6 +21,7 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         displayName: { type: "string", pattern: "^[A-Za-z0-9 -]{3,32}$" },
+        identityName: { type: "string", pattern: "^[A-Za-z0-9 -]{1,64}$" },
         avatarId: { type: "string" },
         // personalAvatarId is obsolete, but we need it here for backwards compatibility.
         personalAvatarId: { type: "string" }
