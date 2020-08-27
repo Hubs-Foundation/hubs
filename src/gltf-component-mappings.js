@@ -314,7 +314,7 @@ async function mediaInflator(el, componentName, componentData, components) {
     mediaOptions.volume = componentData.volume;
     mediaOptions.loop = componentData.loop;
     mediaOptions.audioType = componentData.audioType;
-    mediaOptions.hidePlaybackControls = !isControlled;
+    mediaOptions.hidePlaybackControls = true; // !isControlled;
 
     if (componentData.audioType === "pannernode") {
       mediaOptions.distanceModel = componentData.distanceModel;

@@ -12,7 +12,7 @@
     <link rel="manifest" href="/manifest.webmanifest">
     <!-- iOS (for "Add to Homescreen") -->
     <meta name="mobile-web-app-capable" content="yes">
-    <title>Room | App by Company</title>
+    <title>dr33mphrasi3r</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700" rel="stylesheet">
     <!-- Google Analytics -->
     <!-- NOTE GA tracking is disabled by default. You'll need to set the GA_TRACKING_ID build variable to enable it. -->
@@ -803,7 +803,7 @@
             <template id="video-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
                     <a-entity
-                        is-remote-hover-target
+                        visible="false"
                         tags="singleActionButton: true; isHoverMenuChild: true;"
                         sprite
                         icon-button="image: snap.png; hoverImage: snap-hover.png; activeImage: snap.png; activeHoverImage: snap-hover.png"
@@ -812,13 +812,13 @@
                         position="0 0.225 0"
                         class="video-snap-button"
                     ></a-entity>
-                    <a-entity mixin="rounded-twitter-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" tweet-media-button visibility-on-content-types="contentTypes: video/mp4; contentSubtype: video-camera; visible: true;" position="0 0.285 0.001">
+                    <a-entity visible="false" mixin="rounded-twitter-text-action-button ui" tags="singleActionButton: true; isHoverMenuChild: true;" tweet-media-button visibility-on-content-types="contentTypes: video/mp4; contentSubtype: video-camera; visible: true;" position="0 0.285 0.001">
                         <a-entity text="value:tweet; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
-                    <a-entity class="video-time-label" text="value: 0; anchor: center; align: center; color: #aaa;" text-raycast-hack position="0 -0.24 0" scale="0.75 0.75 0.75"></a-entity>
-                    <a-entity class="video-volume-label" text="value: 0%; anchor: center; align: center; color: #ccc; letterSpacing: 4;" text-raycast-hack position="0.0 0.14 0.0015" scale="1.25 1.25 1.25"></a-entity>
+                    <a-entity visible="false" class="video-time-label" text="value: 0; anchor: center; align: center; color: #aaa;" text-raycast-hack position="0 -0.24 0" scale="0.75 0.75 0.75"></a-entity>
+                    <a-entity visible="false"  class="video-volume-label" text="value: 0%; anchor: center; align: center; color: #ccc; letterSpacing: 4;" text-raycast-hack position="0.0 0.14 0.0015" scale="1.25 1.25 1.25"></a-entity>
                     <a-entity
-                        is-remote-hover-target
+                        visible="false"
                         tags="singleActionButton: true; isHoverMenuChild: true;"
                         sprite
                         icon-button="image: volume_down.png; hoverImage: volume_down-hover.png;"
@@ -827,7 +827,7 @@
                         class="ui video-volume-down-button"
                     ></a-entity>
                     <a-entity
-                        is-remote-hover-target
+                        visible="false"
                         tags="singleActionButton: true; isHoverMenuChild: true;"
                         sprite
                         icon-button="image: volume_up.png; hoverImage: volume_up-hover.png;"
@@ -837,7 +837,6 @@
                     ></a-entity>
                     <a-entity class="video-playback">
                         <a-entity
-                            is-remote-hover-target
                             tags="singleActionButton: true; isHoverMenuChild: true;"
                             sprite
                             icon-button="image: seek_back.png; hoverImage: seek_back-hover.png;"
@@ -847,7 +846,6 @@
                             visible="false"
                         ></a-entity>
                         <a-entity
-                            is-remote-hover-target
                             tags="singleActionButton: true; isHoverMenuChild: true;"
                             sprite
                             icon-button="image: pause.png; hoverImage: pause-hover.png; activeImage: play.png; activeHoverImage: play-hover.png"
@@ -857,7 +855,6 @@
                             visible="false"
                         ></a-entity>
                         <a-entity
-                            is-remote-hover-target
                             tags="singleActionButton: true; isHoverMenuChild: true;"
                             sprite
                             icon-button="image: seek_fwd.png; hoverImage: seek_fwd-hover.png;"

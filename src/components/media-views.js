@@ -243,7 +243,7 @@ AFRAME.registerComponent("media-video", {
     volume: { type: "number", default: 0.5 },
     loop: { type: "boolean", default: true },
     audioType: { type: "string", default: "pannernode" },
-    hidePlaybackControls: { type: "boolean", default: false },
+    hidePlaybackControls: { type: "boolean", default: true },
     distanceModel: { type: "string", default: "inverse" },
     rolloffFactor: { type: "number", default: 1 },
     refDistance: { type: "number", default: 1 },
@@ -863,6 +863,17 @@ AFRAME.registerComponent("media-video", {
   updateHoverMenu() {
     if (!this.hoverMenu) return;
 
+    this.playbackControls.object3D.visible = false;
+    this.timeLabel.object3D.visible = false;
+    this.snapButton.object3D.visible = false;
+    this.seekForwardButton.object3D.visible = false;
+    this.playPauseButton.object3D.visible = false;
+    this.seekForwardButton.object3D.visible = false;
+    this.seekBackButton.object3D.visible = false;
+
+    /*
+    if (!this.hoverMenu) return;
+
     const pinnableElement = this.el.components["media-loader"].data.linkedEl || this.el;
     const isPinned = pinnableElement.components.pinnable && pinnableElement.components.pinnable.data.pinned;
     this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
@@ -880,14 +891,17 @@ AFRAME.registerComponent("media-video", {
     if (this.videoIsLive) {
       this.timeLabel.setAttribute("text", "value", "LIVE");
     }
+    */
   },
 
   updateVolumeLabel() {
+    /*
     this.volumeLabel.setAttribute(
       "text",
       "value",
       this.data.volume === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(this.data.volume / 0.05)]
     );
+    */
   },
 
   tick: (() => {

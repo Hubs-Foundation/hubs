@@ -65,6 +65,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
   })(),
 
   updateVolumeLabel() {
+    /*
     const numBars = Math.min(
       VOLUME_LABELS.length - 1,
       this.data.volume <= 1.001
@@ -72,6 +73,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
         : Math.floor(VOLUME_LABELS.length / 2 + (this.data.volume - 1) / BIG_STEP)
     );
     this.volumeLabel.setAttribute("text", "value", this.data.volume === 0 ? "Muted" : VOLUME_LABELS[numBars]);
+    */
   },
 
   tick() {

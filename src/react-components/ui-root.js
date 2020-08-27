@@ -226,7 +226,9 @@ export default class UIRoot extends Component {
     onPreloadLoadClicked: PropTypes.func,
     embed: PropTypes.bool,
     embedToken: PropTypes.string,
-    onLoaded: PropTypes.func
+    onLoaded: PropTypes.func,
+
+    spectating: PropTypes.bool,
   };
 
   state = {
