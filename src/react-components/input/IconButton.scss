@@ -28,7 +28,7 @@
     }
   }
 
-  &:focus {
+  :global(.keyboard-user) &:focus {
     outline: 0;
 
     svg {
