@@ -1,0 +1,11 @@
+@use "../styles/theme.scss";
+
+:local(.copy-button) {
+  // Use content box so we can dynamically adjust the content size separately from the padding/margin
+  box-sizing: content-box;
+}
+
+:global(.keyboard-user) :local(.copy-button):focus {
+  // Because the height of the box no longer includes the border we need to subtract the border width from the height when focused.
+  height: calc(100% - #{theme.$outline-width * 2});
+}
