@@ -10,14 +10,16 @@ import fetch from 'node-fetch'
 import * as retry from 'async-retry'
 
 import * as express from 'express';
+
 import * as cors from 'cors';
 
-import {addMonths, subSeconds, getUnixTime} from 'date-fns'
+import { addMonths, subSeconds, getUnixTime } from 'date-fns'
 
 import {
   sign,
-  // verify
 } from 'jsonwebtoken'
+
+import * as jwtMiddleware from 'express-jwt'
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -34,14 +36,27 @@ const {
 
 const stripe = new Stripe(STRIPE_KEY, { apiVersion: '2020-03-02' });
 
+const db = admin.firestore()
+
 const app = express();
+
+interface Token {
+  aud: string
+  iss: string
+  exp: number
+  iat: number
+  nbf: number
+  jti: string
+  sub: string
+  typ: string
+}
 
 const createJWT = () => {
   const issuedAt = new Date()
   const expireAt = addMonths(issuedAt, 12)
   const notBefore = subSeconds(issuedAt, 1)
 
-  const payload = {
+  const payload: Token = {
     aud: 'ret',
     iss: 'ret',
     exp: getUnixTime(expireAt),
@@ -52,14 +67,14 @@ const createJWT = () => {
     typ: 'access',
   }
 
-  return sign(payload, DR33M_SECRET, {algorithm: 'HS512'})
+  return sign(payload, DR33M_SECRET, { algorithm: 'HS512' })
 }
 
 const HUBS_API_BASE = 'https://dr33mphaz3r.net/api/v1';
 const HUBS_AUTH_HEADER = { 'Authorization': `Bearer ${createJWT()}` }
 
 // `null` if not present
-const lookup = async (email : string) => {
+const lookup = async (email: string) => {
   const res = await fetch(`${HUBS_API_BASE}/accounts/search`, {
     method: 'POST',
     headers: { ...HUBS_AUTH_HEADER, 'Content-Type': 'application/json' },
@@ -73,16 +88,16 @@ const lookup = async (email : string) => {
 
   const data = await res.json()
 
-  const {data: [{ identity: { name }, id }]} = data
+  const { data: [{ identity: { name }, id }] } = data
 
-  return {email, name, id}
+  return { email, name, id }
 }
 
-const createAccount = async ({ email, name } : User) => {
+const createAccount = async ({ email, name }: User) => {
   const res = await fetch(`${HUBS_API_BASE}/accounts`, {
     method: 'POST',
     headers: { ...HUBS_AUTH_HEADER, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ data: { email, name }})
+    body: JSON.stringify({ data: { email, name } })
   });
 
   return res.ok ? lookup(email) : null
@@ -107,10 +122,12 @@ const updateAccount = async (email : string, name : string) => {
 */
 
 
-app.use(cors({ origin: true }));
+app.use(cors({ origin: true }))
 
 // dr33mphaz3r
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+const DOOFSTICKS = 'doofsticks'
 
 app.post('/search', async (req, res) => {
   const { email } = req.body
@@ -120,6 +137,24 @@ app.post('/search', async (req, res) => {
     res.send(user)
   else
     res.sendStatus(404)
+});
+
+const validateToken = jwtMiddleware({ secret: DR33M_SECRET, algorithms: ['HS512'] })
+
+app.get('/doofsticks', validateToken, async (req: any, res) => {
+  const userId = req.user.sub
+  const document = await db.collection(DOOFSTICKS).doc(userId).get()
+
+  document.exists ? res.send(document.data()) : res.sendStatus(404)
+})
+
+app.post('/doofsticks', validateToken, async (req: any, res) => {
+  const userId = req.user.sub
+  const { message } = req.body
+
+  await db.collection(DOOFSTICKS).doc(userId).set({ message })
+
+  res.sendStatus(200)
 })
 
 // Stripe
@@ -127,7 +162,7 @@ app.post('/search', async (req, res) => {
 
 // Generate a payment intent
 app.post('/payment/intents', async (req, res) => {
-  const paymentIntentParams : Stripe.PaymentIntentCreateParams = req.body;
+  const paymentIntentParams: Stripe.PaymentIntentCreateParams = req.body;
 
   const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams);
 
@@ -147,7 +182,7 @@ app.post('/payment/webhook', async (req, res) => {
     return
   }
 
-  console.log({event})
+  console.log({ event })
 
   const intent = event.data.object
 
@@ -161,13 +196,13 @@ app.post('/payment/webhook', async (req, res) => {
 
       let createdUser
 
-      try  {
-        createdUser = await retry(async () => { 
+      try {
+        createdUser = await retry(async () => {
           const created = await createAccount(user)
-          if (!created) throw new Error(`Failed to create user : ${ user }`)
+          if (!created) throw new Error(`Failed to create user : ${user}`)
           return created
         }, { retries: 5 })
-      } catch(e) {
+      } catch (e) {
         res.status(500).send('Failed to create user after successful payment').end()
         return
       }
@@ -185,18 +220,18 @@ app.post('/payment/webhook', async (req, res) => {
 });
 
 interface User {
-  email : string
-  name : string
+  email: string
+  name: string
 }
 
-const parseSuccess = (intent : any) => {
+const parseSuccess = (intent: any) => {
   const {
     charges: {
-      data: [{ metadata: { email, name }}]
+      data: [{ metadata: { email, name } }]
     }
-  } : { charges: { data: {metadata: User}[]}} = intent
+  }: { charges: { data: { metadata: User }[] } } = intent
 
-  return {email, name}
+  return { email, name }
 }
 
 export const dr33mphaz3r = functions.https.onRequest(app);
