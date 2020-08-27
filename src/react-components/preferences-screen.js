@@ -355,9 +355,8 @@ export class PreferenceListItem extends Component {
   static propTypes = {
     store: PropTypes.object,
     storeKey: PropTypes.string,
-    prefType: PropTypes.number,
     setValue: PropTypes.func,
-    control: PropTypes.node.isRequired
+    itemProps: PropTypes.object
   };
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
@@ -371,18 +370,18 @@ export class PreferenceListItem extends Component {
   };
 
   render() {
-    const isCheckbox = this.props.prefType === PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
+    const isCheckbox = this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
     const isSmallScreen = window.innerWidth < 600;
     const label = <span className={styles.preferenceLabel}>{getMessages()[`preferences.${this.props.storeKey}`]}</span>;
     const hasPref =
       this.props.store.state.preferences[this.props.storeKey] !== undefined ||
-      (this.props.prefType === PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION &&
+      (this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION &&
         (this.props.store.state.preferences.maxResolutionWidth !== undefined ||
           this.props.store.state.preferences.maxResolutionHeight !== undefined));
     const resetToDefault = hasPref ? (
       <ResetToDefaultButton
         onClick={() => {
-          switch (this.props.prefType) {
+          switch (this.props.itemProps.prefType) {
             case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
               this.props.store.update({
                 preferences: {
@@ -405,7 +404,7 @@ export class PreferenceListItem extends Component {
       return (
         <ListItem>
           <div className={styles.row}>
-            {this.props.control}
+            <Control itemProps={this.props.itemProps} store={this.props.store} setValue={this.props.setValue} />
             {label}
             <div className={styles.rowRight}>{resetToDefault}</div>
           </div>
@@ -420,7 +419,9 @@ export class PreferenceListItem extends Component {
               {label}
             </div>
             <div className={styles.row}>
-              <div className={styles.rowCenter}>{this.props.control}</div>
+              <div className={styles.rowCenter}>
+                <Control itemProps={this.props.itemProps} store={this.props.store} setValue={this.props.setValue} />
+              </div>
               <div className={styles.rowRight}>{resetToDefault}</div>
             </div>
           </div>
@@ -432,7 +433,9 @@ export class PreferenceListItem extends Component {
         <div className={styles.row}>
           {<CheckboxPlaceholder />}
           {label}
-          <div className={styles.rowRight}>{this.props.control}</div>
+          <div className={styles.rowRight}>
+            <Control itemProps={this.props.itemProps} store={this.props.store} setValue={this.props.setValue} />
+          </div>
           <div className={styles.rowRight}>{resetToDefault}</div>
         </div>
       </ListItem>
@@ -652,11 +655,11 @@ function createItem(itemProps, store) {
   };
   return (
     <PreferenceListItem
-      control={<Control itemProps={itemProps} store={store} setValue={setValue} />}
+      key={itemProps.key}
+      itemProps={itemProps}
       store={store}
       storeKey={itemProps.key}
       setValue={setValue}
-      {...itemProps}
     />
   );
 }
