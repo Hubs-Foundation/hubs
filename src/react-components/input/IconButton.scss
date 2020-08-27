@@ -2,7 +2,8 @@
 
 :local(.icon-button) {
   background: transparent;
-  border: none;
+  border-width: 0;
+  border-color: transparent;
 
   &:hover {
     svg {
@@ -27,27 +28,4 @@
       }
     }
   }
-
-  :global(.keyboard-user) &:focus {
-    outline: 0;
-
-    svg {
-      outline: 3px solid theme.$black;
-    }
-  }
 }
-
-:local(.input-group) :local(.icon-button) {
-  padding: 0 16px;
-}
-
-:local(.input-group):focus-within :local(.icon-button) {
-  &:first-child {
-    padding-left: 14px;
-  }
-
-  &:last-child {
-    padding-right: 14px;
-  }
-}
-

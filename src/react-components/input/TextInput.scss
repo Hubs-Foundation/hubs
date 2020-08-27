@@ -13,12 +13,41 @@ $input-height: 40px;
   overflow: hidden;
 
   &:focus-within  {
-    border-width: 3px;
     border-color: theme.$blue;
+    box-shadow: 0 0 0 2px theme.$blue;
+  }
 
-    :local(.input-wrapper):first-child {
-      :local(.text-input) {
-        padding-left: 6px;
+  button {
+    height: 100%;
+    border-radius: 0;
+    min-width: auto;
+    padding: 0 16px;
+    border-width: 0;
+
+    &:first-child {
+      border-right-width: 1px;
+    }
+
+    &:last-child {
+      border-left-width: 1px;
+    }
+    
+
+    :global(.keyboard-user) &:focus {
+      border-width: 0;
+
+      &:first-child {
+        margin-right: 1px;
+        box-shadow: inset 0 0 0 3px theme.$black, -1px 0 0 2px theme.$black;
+        border-top-left-radius: theme.$border-radius-regular;
+        border-bottom-left-radius: theme.$border-radius-regular;
+      }
+  
+      &:last-child {
+        margin-left: 1px;
+        box-shadow: inset 0 0 0 3px theme.$black, 1px 0 0 2px theme.$black;
+        border-top-right-radius: theme.$border-radius-regular;
+        border-bottom-right-radius: theme.$border-radius-regular;
       }
     }
   }
@@ -37,6 +66,10 @@ $input-height: 40px;
 
 :local(.invalid) {
   border-color: theme.$red !important;
+
+  &:focus-within  {
+    box-shadow: 0 0 0 2px theme.$red;
+  }
 }
 
 :local(.text-input) {
@@ -46,18 +79,14 @@ $input-height: 40px;
   background-color: transparent;
   padding-left: 8px;
   line-height: calc(#{$input-height} - 2px);
-  
+
   &:focus {
-    outline: none;
+    box-shadow: none;
   }
 }
 
 :local(.invalid-icon) {
   margin: 0 8px;
-
-  :local(.outer-wrapper):focus-within &:last-child {
-    margin-right: 6px;
-  }
 
   *[fill=\#000] {
     stroke: theme.$red;
