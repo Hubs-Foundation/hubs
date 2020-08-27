@@ -20,50 +20,44 @@ import Room2ButtonHover from "./assets/menu/Room_2_Button_Hover.png";
 import Room3Button from "./assets/menu/Room_3_Button.png";
 import Room3ButtonHover from "./assets/menu/Room_3_Button_Hover.png";
 import SliderEye from "./assets/menu/Slider.png";
+import { minBy } from "lodash";
 
 const Slider = ({ volume, onVolumeChange, style, ...otherProps }) => {
+  const notches = [0, 25, 50, 75, 100];
+  const boxWidth = 190;
   const sliderLeftOffset = 479;
-  const sliderRightOffset = 1424;
-  const sliderWidth = sliderRightOffset - sliderLeftOffset;
 
-  const constrain = (min, max, x) => Math.max(min, Math.min(x, max));
+  const sliderVolumeToX = v => sliderLeftOffset + notches.indexOf(v) * boxWidth;
+  const wrapToNotch = v => minBy(notches, notch => Math.abs(notch - v));
 
-  const sliderVolumeToX = v => constrain(sliderLeftOffset, sliderRightOffset, sliderLeftOffset + sliderWidth * v);
-  const sliderXToVolume = x => constrain(0, 1, (x - sliderLeftOffset) / sliderWidth);
+  const [offset, setOffset] = useState(sliderVolumeToX(wrapToNotch(volume * 100)));
 
-  const [dragState, setDragState] = useState({ offset: sliderVolumeToX(volume), dragging: false });
-
-  const { offset, dragging } = dragState;
-
-  const startDrag = () => setDragState({ dragging: true });
-
-  const endDrag = () => {
-    setDragState({ dragging: false });
-    // TODO: fire volume callback with normalised volume
+  const selectVolume = value => {
+    onVolumeChange(value / 100);
+    setOffset(sliderVolumeToX(value));
   };
 
-  const drag = e => {
-    if (dragging) console.info(JSON.stringify(e));
-  };
-
-  return (
-    <image
-      onMouseDown={startDrag}
-      onMouseMove={drag}
-      onMouseUp={endDrag}
-      onMouseLeave={endDrag}
-      draggable={false}
+  const ClickBox = value => (
+    <rect
       style={{
-        cursor: "move",
+        cursor: "pointer",
         ...style
       }}
-      x={offset}
-      y={2280}
-      width={217}
-      height={217}
-      href={SliderEye}
-      {...otherProps}
+      key={value}
+      id={value}
+      onClick={() => selectVolume(value)}
+      x={sliderVolumeToX(value)}
+      y={2351}
+      width={190}
+      height={70}
     />
+  );
+
+  return (
+    <>
+      {notches.map(ClickBox)}
+      <image x={offset} y={2280} width={217} height={217} href={SliderEye} {...otherProps} />
+    </>
   );
 };
 
@@ -99,6 +93,7 @@ export const Menu = ({
     <svg
       width={1865}
       height={4689}
+      draggable={"false"}
       style={{
         ...style
       }}
@@ -135,14 +130,14 @@ export const Menu = ({
           <SvgHoverButton
             id="HomeExit"
             onClick={onHome}
-            normalProps={{ x: "1032", y: "3981", width: "339", height: "478", href: HomeExit }}
-            hoverProps={{ x: "1022", y: "3974", width: "353", height: "490", href: HomeExitHover }}
+            normalProps={{ x: "1032", y: "3981", width: "336", height: "475", href: HomeExit }}
+            hoverProps={{ x: "1022", y: "3974", width: "353", height: "491", href: HomeExitHover }}
           />
           <SvgHoverButton
             id="LobbyExit"
             onClick={onLobby}
-            normalProps={{ x: "526", y: "3986", width: "336", height: "475", href: LobbyExit }}
-            hoverProps={{ x: "518", y: "3974", width: "347", height: "491", href: LobbyExitHover }}
+            normalProps={{ x: "460", y: "3965", width: "475", height: "475", href: LobbyExit }}
+            hoverProps={{ x: "518", y: "3974", width: "353", height: "491", href: LobbyExitHover }}
           />
           <SvgHoverButton
             id="Room1Button"

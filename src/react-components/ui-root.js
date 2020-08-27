@@ -244,6 +244,7 @@ export default class UIRoot extends Component {
     noMoreLoadingUpdates: false,
     hideLoader: false,
     showPrefs: false,
+
     watching: false,
     isStreaming: false,
     showStreamingTip: false,
@@ -267,6 +268,8 @@ export default class UIRoot extends Component {
 
     playing: false,
     volume: parseFloat(qsGet("stream_volume")) || getRoomMetadata().streamVolume || .95,
+
+    showReport: false,
 
     exited: false,
 
