@@ -1,9 +1,12 @@
-import appLogo from "../assets/images/app-logo.png";
-import homeLogo from "../assets/images/logo.png";
+import logo from "../assets/images/logo.png";
 import homeBg from "../assets/images/home-bg.png";
-import companyLogo from "../assets/images/company-logo.png";
+
 import homeHeroBackground from "../assets/images/home-hero-background-unbranded.png";
-import sceneEditorLogo from "../assets/images/editor-logo.png";
+
+const homeLogo = logo;
+const companyLogo = logo;
+const sceneEditorLogo = logo;
+const appLogo = logo;
 
 // Read configs from global variable if available, otherwise use the process.env injected from build.
 const configs = {};

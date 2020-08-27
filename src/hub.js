@@ -1021,6 +1021,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (e.detail !== "camera") return;
     remountUI({});
   };
+
   scene.addEventListener("stateadded", updateCameraUI);
   scene.addEventListener("stateremoved", updateCameraUI);
 

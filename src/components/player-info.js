@@ -112,6 +112,7 @@ AFRAME.registerComponent("player-info", {
 
     this.updateDisplayNameFromPresenceMeta(e.detail);
   },
+
   updateDisplayNameFromPresenceMeta(presenceMeta) {
     this.displayName = presenceMeta.profile.displayName;
     this.identityName = presenceMeta.profile.identityName;
@@ -119,6 +120,7 @@ AFRAME.registerComponent("player-info", {
     this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
     this.applyDisplayName();
   },
+
   applyDisplayName() {
     const store = window.APP.store;
 

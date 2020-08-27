@@ -73,7 +73,7 @@ import TwoDHUD from "./2d-hud";
 import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
-import { getRoomMetadata, currentRoomKey } from "../room-metadata";
+import { getRoomMetadata, currentRoomKey, getRoomURL } from "../room-metadata";
 import { currentlyPlaying, roomPlaylist } from "../playlist";
 
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
@@ -121,54 +121,55 @@ const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isMobilePhoneOrVR = isMobile || isMobileVR;
 const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 
-const AUTO_EXIT_TIMER_SECONDS = 10;
+const AUTO_EXIT_TIMER_SECONDS = 60 * 3;
 
-const setPointerLock = (lock) => {
-  console.info(`lock: ${lock}`)
-  const event = new CustomEvent('action_pointerlock', { detail: { lock: lock } });
-  document.dispatchEvent(event)
-}
+const setPointerLock = lock => {
+  console.info(`lock: ${lock}`);
+  const event = new CustomEvent("action_pointerlock", { detail: { lock: lock } });
+  document.dispatchEvent(event);
+};
 
-const RoomAudioPlayer = React.forwardRef(({ volume, playing, room, initialOffset, playlist, token, onMusicCanPlay}, ref) => {
-  // const [currentTrack, setCurrentTrack] = useState({ track: playlist[0], offset: initialOffset });
-  const [currentTrack, setCurrentTrack] = useState({ track: null, offset: null });
+const RoomAudioPlayer = React.forwardRef(
+  ({ volume, playing, room, initialOffset, playlist, token, onMusicCanPlay }, ref) => {
+    const [currentTrack, setCurrentTrack] = useState({ track: null, offset: null });
 
-  useEffect(() => {
-    setCurrentTrack({ track: playlist[0], offset: initialOffset, initialized: false });
-  }, []);
+    useEffect(() => {
+      setCurrentTrack({ track: playlist[0], offset: initialOffset, initialized: false });
+    }, []);
 
-  const { offset, track, initialized } = currentTrack;
+    const { offset, track, initialized } = currentTrack;
 
-  if (track === null) return null;
+    if (track === null) return null;
 
-  console.info(`track: ${JSON.stringify(track)}`)
+    console.info(`track: ${JSON.stringify(track)}`);
 
-  const nextTrack = track => playlist[(playlist.indexOf(track) + 1) % playlist.length];
+    const nextTrack = track => playlist[(playlist.indexOf(track) + 1) % playlist.length];
 
-  const ASSET_BASE = "https://str33m.dr33mphaz3r.net";
-  const tokenArg = token ? `?token=${token}` : "";
-  const srcPath = ext => `${ASSET_BASE}/${room}/${track.title}.${ext}${tokenArg}#t=${offset / 1e3}`;
+    const ASSET_BASE = "https://str33m.dr33mphaz3r.net";
+    const tokenArg = token ? `?token=${token}` : "";
+    const srcPath = ext => `${ASSET_BASE}/${room}/${track.title}.${ext}${tokenArg}#t=${offset / 1e3}`;
 
-  return (
-    <ReactHowler
-      ref={ref}
-      html5={true}
-      preload={true}
-      playing={playing}
-      src={["ogg","mp3"].map(srcPath)}
-      onLoad={() => {
-        ref.current.seek(offset / 1e3)
-        if(initialized) onMusicCanPlay()
-      }}
-      onEnd={() => {
-        const next = nextTrack(track)
-        console.info(`starting next track: ${ JSON.stringify(next) }`)
-        setCurrentTrack({ track: next, offset: 0 })
-      }}
-      volume={volume}
-    />
-  );
-});
+    return (
+      <ReactHowler
+        ref={ref}
+        html5={true}
+        preload={true}
+        playing={playing}
+        src={["ogg", "mp3"].map(srcPath)}
+        onLoad={() => {
+          ref.current.seek(offset / 1e3);
+          if (initialized) onMusicCanPlay();
+        }}
+        onEnd={() => {
+          const next = nextTrack(track);
+          console.info(`starting next track: ${JSON.stringify(next)}`);
+          setCurrentTrack({ track: next, offset: 0 });
+        }}
+        volume={volume}
+      />
+    );
+  }
+);
 
 export default class UIRoot extends Component {
   willCompileAndUploadMaterials = false;
@@ -895,13 +896,12 @@ export default class UIRoot extends Component {
 
     this.setState({ entered: true, entering: false, showShareDialog: false });
 
-    setPointerLock(true)
+    // Grab pointer once music is playing
+    setPointerLock(true);
 
     // music should be ready by this point, start playing
     if (this.musicPlayerRef.current) {
-      this.setState({playing: true})
-    } else {
-      console.error("no ref :*(")
+      this.setState({ playing: true });
     }
 
     const mediaStream = this.state.mediaStream;
@@ -1222,8 +1222,7 @@ export default class UIRoot extends Component {
           />
         </div>
 
-        {!this.state.waitingOnMic &&
-          !this.props.entryDisallowed && (
+        {!this.state.waitingOnMic && !this.props.entryDisallowed && (
             <div className={entryStyles.buttonContainer}>
               {!isMobileVR && (
                 <button
@@ -1545,32 +1544,6 @@ export default class UIRoot extends Component {
     );
   };
 
-  renderVolumeSlider = () => {
-    return (
-      <div className={classNames({
-        [styles.ui]: true,
-        "ui-root": true,
-        "in-modal-or-overlay": true,
-        })}>
-          <label>
-            Volume:
-            <span className='slider-container'>
-              <input
-                type='range'
-                min='0'
-                max='1'
-                step='.05'
-                value={this.state.volume}
-                onChange={e => this.setState({ volume: parseFloat(e.target.value) })}
-                style={{ verticalAlign: 'bottom' }}
-              />
-            </span>
-            {this.state.volume.toFixed(2)}
-          </label>
-      </div>
-    )
-  }
-
   renderAudioPlayer = () => {
     const streamVolume = this.state.volume;
     const playingNow = currentlyPlaying();
@@ -1674,21 +1647,40 @@ export default class UIRoot extends Component {
       uiRootHtml = this.renderBotMode();
     }
     else if (!this.state.showHubsUI) {
+
+      const navigateToRoom = room => (window.location.href = getRoomURL(room));
+
       uiRootHtml = (
         <div className={classNames([menuStyles, styles.gameMenu])}>
+          {this.state.showReport &&
+            this.renderDialog(FeedbackDialog, { onClose: () => this.setState({ showReport: false }) })}
           <Menu
             style={{
               transform: `scale(${0.2})`,
-              'transform-origin': "72% 0%",
-              position: "absolute",
+              "transform-origin": "72% 0%",
+              position: "absolute"
             }}
             volume={this.state.volume}
             onVolumeChange={v => this.setState({ volume: v })}
             hidden={this.state.hide}
             onMenuToggle={toggle => this.setMenuFocus(toggle)}
             watching={this.state.watching}
-            onWatchToggle={toggle => this.setState({ watching: toggle })}
-            onHome={() => window.location.href="/"}
+            onWatchToggle={toggle => {
+              console.info({ toggle });
+              this.setState({ watching: toggle, entered: !toggle });
+              // if(toggle) this.exit("watch")
+              if (toggle && this.props.exitScene) {
+                this.props.exitScene("spectate");
+              } else if (!toggle && !this.state.entered) {
+                this.handleForceEntry();
+              }
+            }}
+            onHome={() => (window.location.href = "/")}
+            onReport={() => this.setState({ showReport: true })}
+            onLobby={() => navigateToRoom("lobby")}
+            onRoom1={() => navigateToRoom("room1")}
+            onRoom2={() => navigateToRoom("room2")}
+            onRoom3={() => navigateToRoom("room3")}
           />
         </div>
       );

@@ -113,7 +113,7 @@ export const Menu = ({
       {!hidden && (
         <>
           <image
-            style={{ "pointer-events": "none" }}
+            style={{ pointerEvents: "none" }}
             draggable={false}
             x={218}
             y={486}

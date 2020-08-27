@@ -1,6 +1,6 @@
 // modified from trigger-volume.js
 
-import { getRoomMetadata } from "../room-metadata";
+import { getRoomMetadata, getRoomURL } from "../room-metadata";
 import { redirectIfNotAuthorized } from "../access-control";
 
 // const sizeVec = new THREE.Vector3();
@@ -45,7 +45,7 @@ AFRAME.registerComponent("portal", {
         var targetUrl;
         if (this.data.targetRoom) {
           if (!redirectIfNotAuthorized(this.data.targetRoom)) {
-            targetUrl = getRoomMetadata(this.data.targetRoom).url;
+            targetUrl = getRoomURL(this.data.targetRoom);
             if (!targetUrl) {
               console.error("invalid portal targetRoom:", this.data.targetRoom);
             }

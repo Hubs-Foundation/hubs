@@ -1,20 +1,18 @@
 import React, { useState } from "react";
 
 export const SvgToggleButton = ({ onToggle, active, normalProps, activeProps, style, ...otherProps }) => {
-  const [toggle, setToggle] = useState(active);
 
   return (
     <image
-      draggable={false}
+      draggable={"false"}
       onClick={() => {
-        setToggle(!toggle);
-        onToggle(!toggle);
+        onToggle(!active);
       }}
       style={{
         ...style,
         cursor: "pointer"
       }}
-      {...toggle ? activeProps : normalProps}
+      {...(active ? activeProps : normalProps)}
       {...otherProps}
       />
   ) };
@@ -23,7 +21,7 @@ export const SvgHoverButton = ({ normalProps, hoverProps, style, ...otherProps }
 
   return (
     <image
-      draggable={false}
+      draggable={"false"}
       onMouseEnter={() => setIsShown(true)}
       onMouseLeave={() => setIsShown(false)}
       style={{
