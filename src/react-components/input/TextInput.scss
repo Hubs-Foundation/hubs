@@ -1,10 +1,12 @@
 @use "../styles/theme";
 
+$input-height: 40px;
+
 :local(.outer-wrapper) {
   display: flex;
   align-items: center;
   position: relative;
-  height: 40px;
+  height: $input-height;
   border: 1px solid theme.$darkgrey;
   border-radius: theme.$border-radius-regular;
   color: theme.$black;
@@ -43,7 +45,7 @@
   border: none;
   background-color: transparent;
   padding-left: 8px;
-  vertical-align: middle;
+  line-height: calc(#{$input-height} - 2px);
   
   &:focus {
     outline: none;
