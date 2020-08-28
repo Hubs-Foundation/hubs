@@ -42,9 +42,9 @@ const paneWidth = 1865;
 const paneHeight = 4689;
 
 export const Menu = ({
-  watching = false,
-  hidden = true,
-  muted = true,
+  watching,
+  hidden,
+  muted,
   volume = 0.9,
   name,
   onMenuToggle,
@@ -76,7 +76,7 @@ export const Menu = ({
     const baseProps = { y: "2771", width: "217", height: "217", href: SliderEye };
     return (
       <SvgToggleButton
-        active={watching}
+        active={!watching}
         onToggle={onToggle}
         normalProps={{ x: "756", ...baseProps }}
         activeProps={{ x: "520", ...baseProps }}
@@ -84,7 +84,7 @@ export const Menu = ({
     );
   };
 
-  const MuteButton = (muted, onMuteToggle) => {
+  const MuteButton = ({muted, onMuteToggle}) => {
     const mutePosition = {
       x: 1120,
       y: 2752,
@@ -148,6 +148,7 @@ export const Menu = ({
               />
 
               <WatchToggle watching={watching} onToggle={onWatchToggle} />
+
               <MuteButton muted={muted} onMuteToggle={onMuteToggle} />
 
               <Slider href={SliderEye} volume={volume} onVolumeChange={onVolumeChange} />

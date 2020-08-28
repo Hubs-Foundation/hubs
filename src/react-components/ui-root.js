@@ -1689,7 +1689,7 @@ export default class UIRoot extends Component {
             this.renderDialog(FeedbackDialog, { onClose: () => this.setState({ showReport: false }) })}
           <Menu
             muted={this.state.muted}
-            onMuteToggle={v => this.setState({ muted: v })}
+            onMuteToggle={this.toggleMute}
             volume={this.state.volume}
             onVolumeChange={v => this.setState({ volume: v })}
             hidden={this.state.hide}
