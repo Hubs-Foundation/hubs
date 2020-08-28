@@ -64,7 +64,6 @@ const interval = window.setInterval(() => {
       setLocale();
     });
   }
-  console.log("POLL");
 }, 100);
 
 export const getLocale = () => {
