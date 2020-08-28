@@ -109,10 +109,10 @@ export const Menu = ({
       id="menu-container"
       style={{
         transform: `scale(${(svgScale * SVG_WIDTH) / vw})`,
-        transformOrigin: "top right",
+        transformOrigin: "top",
         position: "fixed",
-        top: 0,
-        right: 0,
+        // top: 0,
+        // right: 0,
         width: "30%",
         height: "100%"
       }}
@@ -124,7 +124,7 @@ export const Menu = ({
           draggable={"false"}
           style={{
             transform: "scale(0.4)",
-            transformOrigin: "top right",
+            transformOrigin: "top left",
             ...style
           }}
         >
