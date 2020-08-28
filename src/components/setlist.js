@@ -26,6 +26,9 @@ AFRAME.registerComponent("setlist", {
     var timeListStr = "";
 
     for (let {artist, start} of setTimes) {
+      if (artist == "~~~dr33m~~~dr33m~~~dr33m~~~") {
+        continue;
+      }
       const artistStrRaw = artist.toUpperCase();
       const artistStrLines = wrap.lines(artistStrRaw, {width: artistWrapCount});
 
