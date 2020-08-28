@@ -3,6 +3,8 @@ import { SvgHoverButton, SvgToggleButton } from "../utils/svg-helpers";
 import { TextForm } from "./text-form";
 import { Slider } from "./slider";
 
+import DialogContainer from "../react-components/dialog-container";
+
 import { SCHEMA } from "../storage/store";
 
 import { handleTextFieldBlur, handleTextFieldFocus } from "../utils/focus-utils";
@@ -18,7 +20,6 @@ import MenuClosed from "../assets/menu/Menu_Closed.png";
 import MenuOpen from "../assets/menu/Menu_Open_Eyeball.png";
 import Report from "../assets/menu/Report.png";
 import SliderEye from "../assets/menu/Slider.png";
-
 import ReportHover from "../assets/menu/Report_Hover.png";
 import Room1Button from "../assets/menu/Room_1_Button.png";
 import Room1ButtonHover from "../assets/menu/Room_1_Button_Hover.png";
@@ -27,23 +28,13 @@ import Room2ButtonHover from "../assets/menu/Room_2_Button_Hover.png";
 import Room3Button from "../assets/menu/Room_3_Button.png";
 import Room3ButtonHover from "../assets/menu/Room_3_Button_Hover.png";
 
+import BlankButton from "../assets/menu/Button.png";
+import BlankButtonHover from "../assets/menu/Button_Hover.png";
+
 import MicrophoneOff from "../assets/menu/MicrophoneOff.png";
 import MicrophoneOffHover from "../assets/menu/MicrophoneOff_Hover.png";
 import MicrophoneOn from "../assets/menu/MicrophoneOn.png";
 import MicrophoneOnHover from "../assets/menu/MicrophoneOn.png";
-
-const nameX = 500;
-const nameY = 1110;
-const nameWidth = 915;
-const nameHeight = 153;
-
-const doofstickX = 269;
-const doofstickY = 975;
-const doofstickWidth = 915;
-const doofstickHeight = 550;
-
-const paneWidth = 1865;
-const paneHeight = 4689;
 
 export const Menu = ({
   watching,
@@ -69,6 +60,7 @@ export const Menu = ({
 }) => {
   // let vw = 1920; //, vh
   const [vw, setVw] = useState(1920);
+  const [inModal, setInModal] = useState(false);
 
   useEffect(() => {
     setVw(Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0));
@@ -113,34 +105,16 @@ export const Menu = ({
     );
   };
 
-  const textStyle = {
-    background: "white",
-    color: "black",
-    width: "100%",
-    height: "100%",
-  }
-
   return (
-    <div
-      id="menu-container"
-      style={{
-        transform: `scale(${(svgScale * SVG_WIDTH) / vw})`,
-        transformOrigin: "top",
-        position: "fixed",
-        // top: 0,
-        // right: 0,
-        width: "30%",
-        height: "100%"
-      }}
-    >
-      <div id="svg-container" style={{ position: "absolute", top: 0, right: 0, width: "100%", height: "100%" }}>
+    <>
+      <div id="svg-container" style={{ position: "fixed", top: 0, right: 0, height: "100%" }}>
         <svg
           width={SVG_WIDTH}
           height={4689}
           draggable={"false"}
           style={{
-            transform: "scale(0.4)",
-            transformOrigin: "top left",
+            transform: `scale(${(0.12 * SVG_WIDTH) / vw})`,
+            transformOrigin: "right top",
             ...style
           }}
         >
@@ -162,12 +136,20 @@ export const Menu = ({
                 height={3828}
                 href={Backplate}
               />
+              {}
 
               <WatchToggle watching={watching} onToggle={onWatchToggle} />
 
               <MuteButton muted={muted} onMuteToggle={onMuteToggle} />
 
               <Slider href={SliderEye} volume={volume} onVolumeChange={onVolumeChange} />
+
+              <SvgHoverButton
+                id="Edit"
+                onClick={() => setInModal(true)}
+                normalProps={{ x: "478", y: "3248", width: "938", height: "461", href: BlankButton }}
+                hoverProps={{ x: "478", y: "3248", width: "938", height: "461", href: BlankButtonHover }}
+              />
 
               <SvgHoverButton
                 id="Report"
@@ -199,6 +181,7 @@ export const Menu = ({
                 hoverProps={{ x: "826", y: "3609", width: "281", height: "280", href: Room2ButtonHover }}
                 normalProps={{ x: "839", y: "3623", width: "251", height: "251", href: Room2Button }}
               />
+
               <SvgHoverButton
                 id="Room3Button"
                 onClick={onRoom3}
@@ -210,47 +193,34 @@ export const Menu = ({
         </svg>
       </div>
 
-      {!hidden && (
-        <>
-          <div id="name-input-container" style={{ position: "absolute" }}>
-            <TextForm
-              style={textStyle}
-              id={"menu-name-input"}
-              value={name}
-              onValueChange={onNameChange}
-              x={nameX}
-              y={nameY}
-              width={nameWidth}
-              height={nameHeight}
-              minLength={1}
-              maxLength={64}
-              spellCheck="false"
-              pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
-              onFocus={e => handleTextFieldFocus(e.target)}
-              onBlur={() => handleTextFieldBlur()}
-            />
-          </div>
-
-          <div id="doofstick-input-container" style={{ position: "absolute" }}>
-            <TextForm
-              style={textStyle}
-              id={"menu-doofstick-input"}
-              value={doofstick}
-              onValueChange={onDoofstickChange}
-              x={doofstickX}
-              y={doofstickY}
-              width={doofstickWidth}
-              height={doofstickHeight}
-              minLength={0}
-              maxLength={120}
-              spellCheck="false"
-              pattern={"^[A-Za-z0-9 -]{0,120}$"}
-              onFocus={e => handleTextFieldFocus(e.target)}
-              onBlur={() => handleTextFieldBlur()}
-            />
-          </div>
-        </>
+      {!hidden && inModal && (
+        <DialogContainer wide={true} title={"3dit dr33m"} onClose={() => setInModal(false)}>
+          <span>nam3</span>
+          <TextForm
+            id={"menu-name-input"}
+            value={name}
+            onValueChange={onNameChange}
+            minLength={1}
+            maxLength={64}
+            spellCheck="false"
+            pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
+            onFocus={e => handleTextFieldFocus(e.target)}
+            onBlur={() => handleTextFieldBlur()}
+          />
+          <span>D00F571C</span>
+          <TextForm
+            id={"menu-doofstick-input"}
+            value={doofstick}
+            onValueChange={onDoofstickChange}
+            minLength={0}
+            maxLength={120}
+            spellCheck="false"
+            pattern={"^[A-Za-z0-9 -]{0,120}$"}
+            onFocus={e => handleTextFieldFocus(e.target)}
+            onBlur={() => handleTextFieldBlur()}
+          />
+        </DialogContainer>
       )}
-    </div>
+    </>
   );
 };
