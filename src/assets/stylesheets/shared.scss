@@ -20,6 +20,20 @@ $breakpoint-lg: 992px; // Desktops
 $breakpoint-xl: 1200px; // Large Desktops
 $breakpoint-xxl: 1600px; // Extra Large Desktops
 
+.glow {
+  color: rgb(157, 203, 141);
+  animation: glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 5px rgb(157, 203, 141), 0 0 10px rgb(171, 216, 155), 0 0 15px rgb(146, 193, 130), 0 0 20px rgb(110, 159, 96), 0 0 25px rgb(73, 124, 58), 0 0 30px rgb(63, 112, 47), 0 0 35px rgb(61, 94, 52);
+  }
+  to {
+    text-shadow: 0 0 10px rgb(157, 203, 141), 0 0 20px rgb(171, 216, 155), 0 0 40px rgb(146, 193, 130), 0 0 50px rgb(110, 159, 96), 0 0 60px rgb(73, 124, 58), 0 0 70px rgb(63, 112, 47);
+  }
+}
+
 %unselectable  {
   -moz-user-select: none;
   -webkit-user-select: none;

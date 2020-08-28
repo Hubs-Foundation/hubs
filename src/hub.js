@@ -11,6 +11,8 @@ import initialBatchImage from "./assets/images/warning_icon.png";
 //import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 import loadingEnvironment from "./assets/models/PortalRoom.glb";
 
+import { redirectIfNotAuthorized } from "./access-control"
+
 
 import "aframe";
 import "./utils/logging";
@@ -697,11 +699,9 @@ async function runBotMode(scene, entryManager) {
 
 function checkForAccountRequired() {
   // If the app requires an account to join a room, redirect to the sign in page.
-  if (!configs.feature("require_account_for_join")) return;
+  // if (!configs.feature("require_account_for_join")) return;
   if (store.state.credentials && store.state.credentials.token) return;
-  document.location = `/?sign_in&sign_in_destination=hub&sign_in_destination_url=${encodeURIComponent(
-    document.location.toString()
-  )}`;
+  redirectIfNotAuthorized()
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
