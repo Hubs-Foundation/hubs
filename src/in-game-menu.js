@@ -149,16 +149,38 @@ export const Menu = ({
   style,
   ...otherProps
 }) => {
+  // let vw = 1920; //, vh
+  const [vw, setVw] = useState(1920);
+
+  useEffect(() => {
+    setVw(Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0));
+    // vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
+  }, []);
+
+  const svgScale = 0.2;
+  const SVG_WIDTH = 1865;
+
   return (
-    <div id="menu-container" style={{ position: "fixed", top: 0, right: 0, width: "30%", height: "100%" }}>
+    <div
+      id="menu-container"
+      style={{
+        transform: `scale(${(svgScale * SVG_WIDTH) / vw})`,
+        transformOrigin: "top right",
+        position: "fixed",
+        top: 0,
+        right: 0,
+        width: "30%",
+        height: "100%"
+      }}
+    >
       <div id="svg-container" style={{ position: "absolute", top: 0, right: 0, width: "100%", height: "100%" }}>
         <svg
-          width={1865}
+          width={SVG_WIDTH}
           height={4689}
           draggable={"false"}
           style={{
-            transform: `scale(${0.1})`,
-            transformOrigin: "0% 0%",
+            // transform: `scale(${0.1})`,
+            transformOrigin: "top right",
             ...style
           }}
         >
