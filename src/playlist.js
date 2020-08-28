@@ -241,14 +241,14 @@ export const currentlyPlaying = (room = currentRoomKey(), time = new Date()) => 
 };
 
 // Creates a list of tracks, with their `start` time merged.
-export const setTimes = (room = currentRoomKey(), from = new Date(), until = addDays(new Date(), 1)) => {
+export const getSetTimes = (room = currentRoomKey(), from = new Date(), until = addDays(new Date(), 1)) => {
   if (!lineup[room]) return null;
 
   // Super inefficient lol, i'm tired
   let time = from;
   const list = [];
   while (getUnixTime(time) < getUnixTime(until)) {
-    const { track, offset } = currentlyPlaying(room, time);
+    const { offset, ...track } = currentlyPlaying(room, time);
     const { length } = track;
     const start = subMilliseconds(time, offset);
     time = addMilliseconds(time, length);

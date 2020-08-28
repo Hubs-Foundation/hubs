@@ -84,10 +84,18 @@ function loadTexture(src) {
   });
 }
 
+
+import perpetuaJson from "../assets/fonts/PerpetuaTitlingMTLight2-msdf.json";
+import perpetuaPng from "../assets/fonts/PerpetuaTitlingMTLight2.png";
+
 const FONTS = {
   roboto: {
     json: loadFont("https://cdn.aframe.io/fonts/Roboto-msdf.json"),
     texture: loadTexture("https://cdn.aframe.io/fonts/Roboto-msdf.png")
+  },
+  perpetua: {
+    json: perpetuaJson, // Json is already automatically loaded
+    texture: loadTexture(perpetuaPng)
   }
 };
 
