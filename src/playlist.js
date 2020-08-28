@@ -31,12 +31,13 @@ room1:
     - artist: Nar
       title: Nar
       length: 00:53:17
-    - artist: Spekki Webu
-      title: Spekki-Webu
-      length: 01:05:55
-    - artist: Vox Supreme
-      title: Vox-Supreme
-      length: 01:18:17
+    - artist: D-grade x durin's bane
+      title: Nar
+      length: 00:53:17
+    - artist: Thick owens pres. the coretaker
+      title: Thick owens
+      length: 00:53:17
+      
 room2:
   tracks:
     - artist: Altjira
@@ -97,14 +98,14 @@ export const currentlyPlaying = (room = currentRoomKey(), time = new Date()) => 
 };
 
 // Creates a list of tracks, with their `start` time merged.
-export const setTimes = (room = currentRoomKey(), from = new Date(), until = addDays(new Date(), 1)) => {
+export const getSetTimes = (room = currentRoomKey(), from = new Date(), until = addDays(new Date(), 1)) => {
   if (!lineup[room]) return null;
 
   // Super inefficient lol, i'm tired
   let time = from;
   const list = [];
   while (getUnixTime(time) < getUnixTime(until)) {
-    const { track, offset } = currentlyPlaying(room, time);
+    const { offset, ...track } = currentlyPlaying(room, time);
     const { length } = track;
     const start = subMilliseconds(time, offset);
     time = addMilliseconds(time, length);
