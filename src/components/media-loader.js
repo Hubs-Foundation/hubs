@@ -359,7 +359,7 @@ AFRAME.registerComponent("media-loader", {
 
       //check if url is an anchor hash e.g. #Spawn_Point_1
       if (src.charAt(0) === "#") {
-        src = this.data.src = `${window.location.origin}${window.location.pathname}${src}`;
+        src = this.data.src = `${window.location.origin}${window.location.pathname}${window.location.search}${src}`;
       }
 
       let canonicalUrl = src;
