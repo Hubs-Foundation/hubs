@@ -362,9 +362,11 @@ export class PreferenceListItem extends Component {
   };
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
+    document.body.addEventListener("locale-updated", this.storeUpdated);
   }
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
+    document.body.removeEventListener("locale-updated", this.storeUpdated);
   }
 
   storeUpdated = () => {
@@ -592,8 +594,7 @@ const DEFINITIONS = new Map([
         key: "locale",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
         options: availableLocales,
-        defaultString: "browser",
-        promptForRefresh: true
+        defaultString: "browser"
       },
       { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },

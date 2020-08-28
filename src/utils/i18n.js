@@ -1,16 +1,12 @@
-import "@babel/polyfill";
 import configs from "./configs";
-import { FALLBACK_LOCALES } from "../assets/locales/locale_config";
+import { AVAILABLE_LOCALES, FALLBACK_LOCALES } from "../assets/locales/locale_config";
 import defaultLocaleData from "../assets/locales/en.json";
-import Store from "../storage/store";
 
 const DEFAULT_LOCALE = "en";
 
-const store = new Store();
-
 function getLocales() {
   if (navigator.languages) {
-    return navigator.languages;
+    return [...navigator.languages];
   }
   if (navigator.language) {
     return [navigator.language];
@@ -20,35 +16,55 @@ function getLocales() {
   }
 }
 
-const locales = getLocales();
-
-if (store.state.preferences.locale && store.state.preferences.locale !== "browser") {
-  locales.unshift(store.state.preferences.locale);
-}
-
 let _locale = DEFAULT_LOCALE;
 let _messages = defaultLocaleData;
 
-(async () => {
+function setLocale() {
+  const locales = getLocales();
+
+  const store = window.APP.store;
+
+  if (store.state.preferences.locale && store.state.preferences.locale !== "browser") {
+    locales.unshift(store.state.preferences.locale);
+  }
+
+  let locale = DEFAULT_LOCALE;
   for (let i = 0; i < locales.length; i++) {
-    const locale = locales[i].toLowerCase();
-    if (locale === DEFAULT_LOCALE) {
-      break;
+    locale = locales[i].toLowerCase();
+
+    if (!AVAILABLE_LOCALES[locale]) {
+      if (FALLBACK_LOCALES[locale]) {
+        locale = FALLBACK_LOCALES[locale];
+        break;
+      } else {
+        continue;
+      }
     }
-    try {
-      const { default: localeData } = await import(`../assets/locales/${locale}.json`);
+    break;
+  }
+
+  if (locale === DEFAULT_LOCALE) {
+    _locale = locale;
+    _messages = defaultLocaleData;
+    document.body.dispatchEvent(new CustomEvent("locale-updated"));
+  } else {
+    import(`../assets/locales/${locale}.json`).then(({ default: localeData }) => {
       _locale = locale;
       _messages = localeData;
       document.body.dispatchEvent(new CustomEvent("locale-updated"));
-      break;
-    } catch (e) {
-      //locale file not found, try a fallback if available
-      if (FALLBACK_LOCALES[locale]) {
-        locales.push(FALLBACK_LOCALES[locale]);
-      }
-    }
+    });
   }
-})();
+}
+
+const interval = window.setInterval(() => {
+  if (window.APP && window.APP.store) {
+    window.clearInterval(interval);
+    setLocale();
+    window.APP.store.addEventListener("statechanged", () => {
+      setLocale();
+    });
+  }
+}, 100);
 
 export const getLocale = () => {
   return _locale;
