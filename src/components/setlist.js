@@ -1,4 +1,5 @@
 import { getRoomMetadata } from "../room-metadata";
+import { deburr } from 'lodash'
 import { getSetTimes } from "../playlist";
 import { format } from "date-fns";
 import wrap from "word-wrapper";
@@ -29,7 +30,7 @@ AFRAME.registerComponent("setlist", {
       if (artist == "~~~dr33m~~~dr33m~~~dr33m~~~") {
         continue;
       }
-      const artistStrRaw = artist.toUpperCase();
+      const artistStrRaw = deburr(artist.toUpperCase());
       const artistStrLines = wrap.lines(artistStrRaw, {width: artistWrapCount});
 
       if (lineCount + artistStrLines.length < maxLines) {

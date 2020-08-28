@@ -23,14 +23,15 @@ $breakpoint-xxl: 1600px; // Extra Large Desktops
 .glow {
   color: rgb(157, 203, 141);
   animation: glow 1s ease-in-out infinite alternate;
+  font-size: 6em;
 }
 
 @keyframes glow {
   from {
-    text-shadow: 0 0 5px rgb(157, 203, 141), 0 0 10px rgb(171, 216, 155), 0 0 15px rgb(146, 193, 130), 0 0 20px rgb(110, 159, 96), 0 0 25px rgb(73, 124, 58), 0 0 30px rgb(63, 112, 47), 0 0 35px rgb(61, 94, 52);
+    text-shadow: 0 0 0.3em rgb(157, 203, 141), 0 0 0.5em rgb(171, 216, 155), 0 0 1em rgb(146, 193, 130), 0 0 1.3em rgb(110, 159, 96), 0 0 1.5em rgb(73, 124, 58), 0 0 2em rgb(63, 112, 47), 0 0 2.3em rgb(61, 94, 52);
   }
   to {
-    text-shadow: 0 0 10px rgb(157, 203, 141), 0 0 20px rgb(171, 216, 155), 0 0 40px rgb(146, 193, 130), 0 0 50px rgb(110, 159, 96), 0 0 60px rgb(73, 124, 58), 0 0 70px rgb(63, 112, 47);
+    text-shadow: 0 0 0.5em rgb(157, 203, 141), 0 0 1.3em rgb(171, 216, 155), 0 0 2.5em rgb(146, 193, 130), 0 0 3.3em rgb(110, 159, 96);
   }
 }
 

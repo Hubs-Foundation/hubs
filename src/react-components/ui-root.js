@@ -129,16 +129,17 @@ const setPointerLock = lock => {
   document.dispatchEvent(event);
 };
 
-const Playing = ({ artist, ...otherProps }) =>
+const Playing = ({ artist, hidden, ...otherProps }) =>
+  !hidden &&
   artist &&
   !artist.includes("dr33m") && (
-    <marquee direction={"up"} className={"glowing"} {...otherProps}>
-      {artist}
+    <marquee direction={"right"} className={"glow"} {...otherProps}>
+      {(artist + '  ~  ')*10}
     </marquee>
   );
 
 const RoomAudioPlayer = React.forwardRef(
-  ({ volume, playing, room, initialOffset, playlist, token, onMusicCanPlay, onTrackChange }, ref) => {
+  ({ volume, hidden, playing, room, initialOffset, playlist, token, onMusicCanPlay, onTrackChange }, ref) => {
 
     const [currentTrack, setCurrentTrack] = useState({ track: null, offset: null });
 
@@ -163,10 +164,12 @@ const RoomAudioPlayer = React.forwardRef(
       <>
         <Playing
           artist={track.artist}
+          hidden={hidden}
           style={{
             position: "fixed",
             bottom: 0,
-            width: "100%"
+            font: "stasmic"
+            width: "100%",
           }}
         />
         <ReactHowler
@@ -1595,6 +1598,7 @@ export default class UIRoot extends Component {
     return (
       <RoomAudioPlayer
         ref={this.musicPlayerRef}
+        hidden={this.state.hidden}
         token={this.props.store.state.credentials.token}
         volume={this.state.volume}
         playing={this.state.playing}
@@ -1680,7 +1684,6 @@ export default class UIRoot extends Component {
       uiRootHtml = this.renderBotMode();
     }
     else if (!this.state.showHubsUI) {
-
       const navigateToRoom = room => (window.location.href = getRoomURL(room));
 
       uiRootHtml = (

@@ -1,6 +1,7 @@
 import getHubId from "./utils/hub-id";
 
 export const LOBBY_SCENE_ID = window.LOBBY_SID || "bWGEEsK";
+export const ENABLE_LOAD_BALANCING = !!window.ENABLE_LOAD_BALANCING;
 export const lobbyIDs = window.LOBBY_IDS || ["3maDzA9", "Ek5qYcd", "zNYKYnv", "ApXo7Y3", "QETdxTw", "oQLA4Sx"];
 export const inLobby = (id = getHubId()) => lobbyIDs.includes(id);
 
@@ -14,18 +15,21 @@ const roomMapping = window.ROOM_MAPPING || {
 const roomMetadata = {
   room1: {
     // Tianyi's room
+    requireLogin: true,
   },
   room2: {
     // Kynan's room
+    requireLogin: true,
   },
   room3: {
     // Henry's room
+    requireLogin: true,
     baseSpeed: 19,
     flyMode: true,
     freeRotation: true
   },
   lobby: {
-    streamVolume: 0.6,
+    streamVolume: 0.5,
     requireLogin: false,
     enableMicrophone: true
   }
@@ -43,12 +47,12 @@ for (const key in roomMapping) {
   hubIdToRoomKey[hubId] = key;
 }
 
+lobbyIDs.forEach(lobbyID => (hubIdToRoomKey[lobbyID] = "lobby"));
+
 export const currentRoomKey = (id = getHubId()) => hubIdToRoomKey[id];
 
 export function getRoomMetadata(roomKey) {
-  if (!roomKey) {
-    roomKey = currentRoomKey();
-  }
+  if (!roomKey) roomKey = currentRoomKey();
   return roomMetadata[roomKey] || {};
 }
 
