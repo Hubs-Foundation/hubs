@@ -6,7 +6,7 @@ const DEFAULT_LOCALE = "en";
 const cachedMessages = new Map();
 
 let _locale = DEFAULT_LOCALE;
-let _messages = defaultLocaleData;
+let _localeData = defaultLocaleData;
 
 function findLocale() {
   const locales = (() => {
@@ -43,18 +43,20 @@ function findLocale() {
 }
 
 function updateLocale() {
-  _locale = findLocale();
+  const locale = findLocale();
 
-  if (_locale === DEFAULT_LOCALE) {
-    _messages = defaultLocaleData;
+  if (locale === DEFAULT_LOCALE) {
+    _locale = locale;
+    _localeData = defaultLocaleData;
     document.body.dispatchEvent(new CustomEvent("locale-updated"));
   } else {
-    if (cachedMessages.has(_locale)) {
-      _messages = cachedMessages.get(_locale);
+    if (cachedMessages.has(locale)) {
+      _locale = locale;
+      document.body.dispatchEvent(new CustomEvent("locale-updated"));
     } else {
-      import(`../assets/locales/${_locale}.json`).then(({ default: localeData }) => {
-        cachedMessages[_locale] = localeData;
-        _messages = localeData;
+      import(`../assets/locales/${locale}.json`).then(({ default: localeData }) => {
+        _locale = locale;
+        _localeData = localeData;
         document.body.dispatchEvent(new CustomEvent("locale-updated"));
       });
     }
@@ -86,21 +88,21 @@ export const getMessages = () => {
     for (const messageKey in configTranslations) {
       if (!configTranslations.hasOwnProperty(messageKey)) continue;
       if (!configTranslations[messageKey]) continue;
-      _messages[messageKey] = configTranslations[messageKey];
+      _localeData[messageKey] = configTranslations[messageKey];
     }
   }
 
   const entries = [];
-  for (const key in _messages) {
-    if (!_messages.hasOwnProperty(key)) continue;
-    entries.push([key, _messages[key]]);
+  for (const key in _localeData) {
+    if (!_localeData.hasOwnProperty(key)) continue;
+    entries.push([key, _localeData[key]]);
   }
 
   const messages = entries
     .map(([key, message]) => [
       key,
       // Replace nested message keys (e.g. %app-name%) with their messages.
-      message.replace(/%([\w-.]+)%/i, (_match, subkey) => _messages[subkey])
+      message.replace(/%([\w-.]+)%/i, (_match, subkey) => _localeData[subkey])
     ])
     .reduce((acc, entry) => {
       acc[entry[0]] = entry[1];
