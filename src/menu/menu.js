@@ -123,7 +123,7 @@ export const Menu = ({
           height={4689}
           draggable={"false"}
           style={{
-            // transform: `scale(${0.1})`,
+            transform: "scale(0.4)",
             transformOrigin: "top right",
             ...style
           }}
