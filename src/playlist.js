@@ -16,49 +16,193 @@ lobby:
       length: 00:36:56
 room1:
   tracks:
-    - artist: Artemis
-      title: Artemis
-      length: 01:17:54
-    - artist: DJ Marcelle
-      title: DJ-Marcelle
-      length: 00:30:00
-    - artist: K.L. Mai
-      title: KL-Mai
-      length: 00:41:37
-    - artist: Mija Healey
-      title: Mija-Healey
-      length: 01:17:11
-    - artist: Nar
-      title: Nar
-      length: 00:53:17
-    - artist: Spekki Webu
-      title: Spekki-Webu
-      length: 01:05:55
-    - artist: Vox Supreme
-      title: Vox-Supreme
-      length: 01:18:17
+    - artist: "DJ Marcelle"
+      title: "DJ-Marcelle"
+      length: "00:30:00"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
+
+    - artist: "Vox Supreme"
+      title: "Vox-Supreme"
+      length: "01:18:17"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
+
+    - artist: "K.L. Mai"
+      title: "KL-Mai"
+      length: "00:41:37"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
+
+    - artist: "Artemis"
+      title: "Artemis"
+      length: "01:17:54"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-2"
+      length: "00:00:10"
+
+    - artist: "pyruvicac.id"
+      title: "Pyruvic-Acid"
+      length: "01:10:53"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
+
+    - artist: "Nar"
+      title: "Nar"
+      length: "00:53:17"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
+
+    - artist: "Mija Healey"
+      title: "Mija-Healey"
+      length: "01:17:11"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
+
+    - artist: "Spekki Webu"
+      title: "Spekki-Webu"
+      length: "01:05:55"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
+
 room2:
   tracks:
-    - artist: Altjira
-      title: Altjira
-      length: 01:43:52
-    - artist: "DBR [hybrid]"
-      title: DBR
-      length: 01:31:40
-    - artist: Factor XIII
-      title: Factor-XIII
-      length: 01:16:03
-    - artist: Ham Laosethakul
-      title: Ham-Laosethakul
-      length: 02:28:06
+    - artist: "Woody92"
+      title: "woody92"
+      length: "01:06:09"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
+
+    - artist: "Ham Laosethakul"
+      title: "Ham-Laosethakul"
+      length: "02:28:07"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-2"
+      length: "00:00:10"
+
+    - artist: "Altjira"
+      title: "Altjira"
+      length: "01:43:53"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
+
+    - artist: "Kia"
+      title: "Kia"
+      length: "01:06:42"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-2"
+      length: "00:00:10"
+
+    - artist: "DBR"
+      title: "DBR"
+      length: "01:31:41"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
+
+    - artist: "Harold"
+      title: "Harold"
+      length: "01:28:43"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
+
+    - artist: "Factor XIII"
+      title: "Factor-XIII"
+      length: "01:16:04"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
+
 room3:
   tracks:
-    - artist: "nicha 'n' hooch"
-      title: nicha-n-hooch
-      length: 01:37:42
-    - artist: synergetix
-      title: synergetix
-      length: 01:00:19
+    - artist: "Bartolomé"
+      title: "Bartolome"
+      length: "00:47:23"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
+
+    - artist: "S1m0nc3ll0"
+      title: "s1m0nc3ll0"
+      length: "01:02:28"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
+
+    - artist: "Meuko! Meuko!"
+      title: "meuko-meuko"
+      length: "00:32:23"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-2"
+      length: "00:00:10"
+
+    - artist: "!luuli"
+      title: "luuli"
+      length: "02:24:41"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-2"
+      length: "00:00:10"
+
+    - artist: "Synergetix [live]"
+      title: "synergetix"
+      length: "00:50:01"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-2"
+      length: "00:00:10"
+
+    - artist: "Nicha’N’Hooch"
+      title: "nicha-n-hooch"
+      length: "01:37:42"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-2"
+      length: "00:00:10"
+
+    - artist: "D-Grade x Durin’s Bane"
+      title: "D-Grade-Durins-Bane"
+      length: "01:15:58"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
+
+    - artist: "Thick Owens pres. The Coretaker"
+      title: "Thick-Owens-pres-The-Coretaker"
+      length: "01:10:27"
+
+    - artist: "~~~dr33m~~~dr33m~~~dr33m~~~"
+      title: "dr33m-1"
+      length: "00:00:11"
 `;
 
 const parseTrackDurations = ({ tracks, ...meta }) => {
