@@ -3,6 +3,10 @@ import { SvgHoverButton, SvgToggleButton } from "../utils/svg-helpers";
 import { TextForm } from "./text-form";
 import { Slider } from "./slider";
 
+import { SCHEMA } from "../storage/store";
+
+import { handleTextFieldBlur, handleTextFieldFocus } from "../utils/focus-utils";
+
 import { inLobby } from "../room-metadata";
 
 import Backplate from "../assets/menu/Backplate.png";
@@ -47,9 +51,11 @@ export const Menu = ({
   muted,
   volume = 0.9,
   name,
+  doofstick,
   onMenuToggle,
   onMuteToggle,
   onNameChange,
+  onDoofstickChange,
   onWatchToggle,
   onVolumeChange,
   onReport,
@@ -84,7 +90,7 @@ export const Menu = ({
     );
   };
 
-  const MuteButton = ({muted, onMuteToggle}) => {
+  const MuteButton = ({ muted, onMuteToggle }) => {
     const mutePosition = {
       x: 1120,
       y: 2752,
@@ -92,17 +98,27 @@ export const Menu = ({
       height: 238
     };
 
-    return inLobby() && !watching && (
-      <SvgToggleButton
-        active={muted}
-        onToggle={onMuteToggle}
-        activeProps={{ ...mutePosition, href: MicrophoneOff }}
-        activeHoverProps={{ ...mutePosition, href: MicrophoneOffHover }}
-        normalProps={{ ...mutePosition, href: MicrophoneOn }}
-        normalHoverProps={{ ...mutePosition, href: MicrophoneOnHover }}
-      />
+    return (
+      inLobby() &&
+      !watching && (
+        <SvgToggleButton
+          active={muted}
+          onToggle={onMuteToggle}
+          activeProps={{ ...mutePosition, href: MicrophoneOff }}
+          activeHoverProps={{ ...mutePosition, href: MicrophoneOffHover }}
+          normalProps={{ ...mutePosition, href: MicrophoneOn }}
+          normalHoverProps={{ ...mutePosition, href: MicrophoneOnHover }}
+        />
+      )
     );
   };
+
+  const textStyle = {
+    background: "white",
+    color: "black",
+    width: "100%",
+    height: "100%",
+  }
 
   return (
     <div
@@ -195,18 +211,45 @@ export const Menu = ({
       </div>
 
       {!hidden && (
-        <div id="input-container" style={{ width: "100%", height: "100%", position: "absolute" }}>
-          <TextForm
-            value={name}
-            onValueChange={onNameChange}
-            x={nameX}
-            y={nameY}
-            width={nameWidth}
-            height={nameHeight}
-            minLength={1}
-            maxLength={64}
-          />
-        </div>
+        <>
+          <div id="name-input-container" style={{ position: "absolute" }}>
+            <TextForm
+              style={textStyle}
+              id={"menu-name-input"}
+              value={name}
+              onValueChange={onNameChange}
+              x={nameX}
+              y={nameY}
+              width={nameWidth}
+              height={nameHeight}
+              minLength={1}
+              maxLength={64}
+              spellCheck="false"
+              pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
+              onFocus={e => handleTextFieldFocus(e.target)}
+              onBlur={() => handleTextFieldBlur()}
+            />
+          </div>
+
+          <div id="doofstick-input-container" style={{ position: "absolute" }}>
+            <TextForm
+              style={textStyle}
+              id={"menu-doofstick-input"}
+              value={doofstick}
+              onValueChange={onDoofstickChange}
+              x={doofstickX}
+              y={doofstickY}
+              width={doofstickWidth}
+              height={doofstickHeight}
+              minLength={0}
+              maxLength={120}
+              spellCheck="false"
+              pattern={"^[A-Za-z0-9 -]{0,120}$"}
+              onFocus={e => handleTextFieldFocus(e.target)}
+              onBlur={() => handleTextFieldBlur()}
+            />
+          </div>
+        </>
       )}
     </div>
   );

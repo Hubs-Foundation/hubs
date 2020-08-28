@@ -168,7 +168,7 @@ const RoomAudioPlayer = React.forwardRef(
           style={{
             position: "fixed",
             bottom: 0,
-            font: "stasmic"
+            font: "stasmic",
             width: "100%",
           }}
         />
