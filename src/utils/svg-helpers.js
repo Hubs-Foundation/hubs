@@ -1,6 +1,23 @@
 import React, { useState } from "react";
 
-export const SvgToggleButton = ({ onToggle, active, normalProps, activeProps, style, ...otherProps }) => {
+export const SvgToggleButton = ({
+  onToggle,
+  active,
+  normalProps,
+  normalHoverProps,
+  activeProps,
+  activeHoverProps,
+  style,
+  ...otherProps
+}) => {
+  const [hover, setHover] = useState(false);
+
+  const stateProps = (activated, hovered) => {
+    const unhoveredProps = activated ? activeProps : normalProps;
+    if (activeHoverProps && normalHoverProps)
+      return hovered ? (activated ? activeHoverProps : normalHoverProps) : unhoveredProps;
+    else return unhoveredProps;
+  };
 
   return (
     <image
@@ -8,14 +25,18 @@ export const SvgToggleButton = ({ onToggle, active, normalProps, activeProps, st
       onClick={() => {
         onToggle(!active);
       }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
       style={{
         ...style,
         cursor: "pointer"
       }}
-      {...(active ? activeProps : normalProps)}
+      {...stateProps(active, hover)}
       {...otherProps}
-      />
-  ) };
+    />
+  );
+};
+
 export const SvgHoverButton = ({ normalProps, hoverProps, style, ...otherProps }) => {
   const [isShown, setIsShown] = useState(false);
 
@@ -28,7 +49,8 @@ export const SvgHoverButton = ({ normalProps, hoverProps, style, ...otherProps }
         ...style,
         cursor: "pointer"
       }}
-      {...isShown ? hoverProps : normalProps}
+      {...(isShown ? hoverProps : normalProps)}
       {...otherProps}
-      />
-  ) };
+    />
+  );
+};

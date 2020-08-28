@@ -1280,8 +1280,12 @@ export default class UIRoot extends Component {
               </button>
             </div>
           )}
-        {this.props.entryDisallowed &&
+        {(this.props.entryDisallowed || this.props.spectating) &&
           !this.state.waitingOnMic && (
+            // TODO: Mount UI here
+            // - add callback to toggle spectating state and allow entry
+            // - if we're exiting, reload the page
+            // TODO: Set shader for view
             <div className={entryStyles.buttonContainer}>
               <a
                 onClick={e => {
