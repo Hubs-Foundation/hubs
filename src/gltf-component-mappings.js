@@ -119,6 +119,8 @@ AFRAME.GLTFModelPlus.registerComponent("portal", "portal", (el, componentName, c
   el.setAttribute("portal", componentData);
 });
 
+AFRAME.GLTFModelPlus.registerComponent("setlist", "setlist");
+
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
   el.setAttribute("duck", "");
   el.setAttribute("quack", { quackPercentage: 0.1 });

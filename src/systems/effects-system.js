@@ -52,7 +52,7 @@ export class EffectsSystem {
       new RenderPass(scene, camera),
       new ShaderPass(AdjustColorShader(0.0, 1.1, 1.2)), // brightness, contrast, saturation
       // UnrealBloomPass(resolution, strength, radius, threshold)
-      new UnrealBloomPass(new THREE.Vector2(128, 128), 1.3, 1.0, 0.8),
+      new UnrealBloomPass(new THREE.Vector2(128, 128), 1.1, 0.8, 0.9),
 
       // new ShaderPass(GammaCorrectionShader(1.2)),
 

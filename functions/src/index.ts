@@ -11,15 +11,19 @@ import * as retry from 'async-retry'
 
 import * as express from 'express';
 
+import { Request } from 'express'
+
 import * as cors from 'cors';
 
 import { addMonths, subSeconds, getUnixTime } from 'date-fns'
 
 import {
   sign,
+  // verify,
+   decode,
 } from 'jsonwebtoken'
 
-import * as jwtMiddleware from 'express-jwt'
+// import * as jwtMiddleware from 'express-jwt'
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -139,22 +143,44 @@ app.post('/search', async (req, res) => {
     res.sendStatus(404)
 });
 
-const validateToken = jwtMiddleware({ secret: DR33M_SECRET, algorithms: ['HS512'] })
+// const validateToken = jwtMiddleware({ secret: DR33M_SECRET, algorithms: ['HS512'] })
 
-app.get('/doofsticks', validateToken, async (req: any, res) => {
-  const userId = req.user.sub
-  const document = await db.collection(DOOFSTICKS).doc(userId).get()
+const parseAndExtractUser = (req: Request) => {
+  try {
+    const token = (req.headers.authorization as string).split(' ')[1]
+    // 3ast3r 3gg
+    // const payload: Token = verify(token, DR33M_SECRET, { algorithms: ['HS512'] }) as Token
+    const payload: Token = decode(token) as Token
+    return payload.sub
+  } catch (error) {
+    console.error({ error });
+    return null;
+  }
+}
 
-  document.exists ? res.send(document.data()) : res.sendStatus(404)
+app.get('/doofsticks', async (req: Request, res) => {
+  const userId = parseAndExtractUser(req)
+  if (!userId) {
+    res.sendStatus(401)
+  } else {
+    const document = await db.collection(DOOFSTICKS).doc(userId).get()
+    document.exists ? res.send(document.data()) : res.sendStatus(404)
+  }
 })
 
-app.post('/doofsticks', validateToken, async (req: any, res) => {
-  const userId = req.user.sub
-  const { message } = req.body
+app.post('/doofsticks', async (req: Request, res) => {
+  const userId = parseAndExtractUser(req)
 
-  await db.collection(DOOFSTICKS).doc(userId).set({ message })
+  if (!userId) {
+    res.sendStatus(401)
+  } else {
 
-  res.sendStatus(200)
+    const { message } = req.body
+
+    await db.collection(DOOFSTICKS).doc(userId).set({ message })
+
+    res.sendStatus(200)
+  }
 })
 
 // Stripe
