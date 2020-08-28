@@ -15,7 +15,7 @@ AFRAME.registerComponent("setlist", {
 
     const maxLines = 15;
 
-    const totalWrapCount = 20; // Increasing this decreases the size of the text
+    const totalWrapCount = 25; // Increasing this decreases the size of the text
     const artistWrapCount = 15; // To stop the artist column overlapping with the time column
 
     // get set times based on playlist info
