@@ -276,3 +276,29 @@ export function discordBridgesForPresences(presences) {
   }
   return channels;
 }
+
+export async function fetchPublicRooms() {
+  let hasMore = true;
+  const results = [];
+
+  const queryParams = new URLSearchParams();
+  queryParams.set("source", "rooms");
+  queryParams.set("filter", "public");
+
+  while (hasMore) {
+    const res = await fetchReticulumAuthenticated(`/api/v1/media/search?${queryParams}`);
+
+    for (const entry of res.entries) {
+      if (!results.find(item => item.id === entry.id)) {
+        results.push(entry);
+      } else {
+        console.log(`Duplicate page: ${queryParams.get("cursor")} id: ${entry.id}`);
+      }
+    }
+
+    queryParams.set("cursor", res.meta.next_cursor);
+    hasMore = !!res.meta.next_cursor;
+  }
+
+  return results;
+}
