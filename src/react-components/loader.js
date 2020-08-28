@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { IntlProvider, FormattedMessage } from "react-intl";
 
+import LoadingBackground from "../assets/loading.png"
+
 import configs from "../utils/configs";
 import { lang, messages } from "../utils/i18n";
 import loaderStyles from "../assets/stylesheets/loader.scss";
@@ -100,7 +102,7 @@ class Loader extends Component {
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="loading-panel">
-          <img className="loading-panel__logo" src={configs.image("logo")} />
+          <img className="loading-panel__logo" src={LoadingBackground} />
 
           {this.props.finished ? nomore : usual}
 

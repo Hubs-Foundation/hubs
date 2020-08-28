@@ -114,7 +114,7 @@ room2:
       title: "dr33m-2"
       length: "00:00:10"
 
-    - artist: "DBR"
+    - artist: "DBR [hybrid]"
       title: "DBR"
       length: "01:31:41"
 
