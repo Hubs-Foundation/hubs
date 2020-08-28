@@ -86,7 +86,7 @@ import qsTruthy, { qsGet } from "../utils/qs_truthy";
 import { redirectIfNotAuthorized } from "../access-control";
 import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 
-import { Menu } from "../in-game-menu";
+import { Menu } from "../menu/menu";
 
 import ReactHowler from "react-howler";
 
@@ -129,8 +129,17 @@ const setPointerLock = lock => {
   document.dispatchEvent(event);
 };
 
+const Playing = ({ artist, ...otherProps }) =>
+  artist &&
+  !artist.includes("dr33m") && (
+    <marquee direction={"up"} className={"glowing"} {...otherProps}>
+      {artist}
+    </marquee>
+  );
+
 const RoomAudioPlayer = React.forwardRef(
-  ({ volume, playing, room, initialOffset, playlist, token, onMusicCanPlay }, ref) => {
+  ({ volume, playing, room, initialOffset, playlist, token, onMusicCanPlay, onTrackChange }, ref) => {
+
     const [currentTrack, setCurrentTrack] = useState({ track: null, offset: null });
 
     useEffect(() => {
@@ -149,24 +158,35 @@ const RoomAudioPlayer = React.forwardRef(
     const tokenArg = token ? `?token=${token}` : "";
     const srcPath = ext => `${ASSET_BASE}/${room}/${track.title}.${ext}${tokenArg}#t=${offset / 1e3}`;
 
+
     return (
-      <ReactHowler
-        ref={ref}
-        html5={true}
-        preload={true}
-        playing={playing}
-        src={["ogg", "mp3"].map(srcPath)}
-        onLoad={() => {
-          ref.current.seek(offset / 1e3);
-          if (initialized) onMusicCanPlay();
-        }}
-        onEnd={() => {
-          const next = nextTrack(track);
-          console.info(`starting next track: ${JSON.stringify(next)}`);
-          setCurrentTrack({ track: next, offset: 0 });
-        }}
-        volume={volume}
-      />
+      <>
+        <Playing
+          artist={track.artist}
+          style={{
+            position: "fixed",
+            bottom: 0,
+            width: "100%"
+          }}
+        />
+        <ReactHowler
+          ref={ref}
+          html5={true}
+          preload={true}
+          playing={playing}
+          src={["ogg", "mp3"].map(srcPath)}
+          onLoad={() => {
+            ref.current.seek(offset / 1e3);
+            if (initialized) onMusicCanPlay();
+          }}
+          onEnd={() => {
+            const next = nextTrack(track);
+            console.info(`starting next track: ${JSON.stringify(next)}`);
+            setCurrentTrack({ track: next, offset: 0 });
+          }}
+          volume={volume}
+        />
+      </>
     );
   }
 );
@@ -265,7 +285,7 @@ export default class UIRoot extends Component {
     autoExitMessage: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
-    muted: false,
+    muted: true,
     frozen: false,
 
     playing: false,
@@ -1556,11 +1576,13 @@ export default class UIRoot extends Component {
   renderAudioPlayer = () => {
     const streamVolume = this.state.volume;
     const playingNow = currentlyPlaying();
+
     if (!playingNow) {
       console.warn('Could not fetch current track from server for this room')
       return null;
     }
-    const { title: initialTitle, offset: initialOffset } = playingNow;
+
+    const { title: initialTitle, offset: initialOffset, artist } = playingNow;
 
     // Rotate array to start with currently playing track
     const startWith = (arr, predicate) => {
@@ -1570,16 +1592,18 @@ export default class UIRoot extends Component {
 
     const playlist = startWith(roomPlaylist(), ({ title }) => title == initialTitle);
 
-    return <RoomAudioPlayer
-      ref={this.musicPlayerRef}
-      token={this.props.store.state.credentials.token}
-      volume={this.state.volume}
-      playing={this.state.playing}
-      initialOffset={initialOffset}
-      playlist={playlist}
-      room={currentRoomKey()}
-      onMusicCanPlay={this.onMusicCanPlay}
-    />
+    return (
+      <RoomAudioPlayer
+        ref={this.musicPlayerRef}
+        token={this.props.store.state.credentials.token}
+        volume={this.state.volume}
+        playing={this.state.playing}
+        initialOffset={initialOffset}
+        playlist={playlist}
+        room={currentRoomKey()}
+        onMusicCanPlay={this.onMusicCanPlay}
+      />
+    );
   }
 
   render() {
@@ -1664,11 +1688,8 @@ export default class UIRoot extends Component {
           {this.state.showReport &&
             this.renderDialog(FeedbackDialog, { onClose: () => this.setState({ showReport: false }) })}
           <Menu
-            style={{
-              transform: `scale(${0.2})`,
-              "transform-origin": "72% 0%",
-              position: "absolute"
-            }}
+            muted={this.state.muted}
+            onMuteToggle={v => this.setState({ muted: v })}
             volume={this.state.volume}
             onVolumeChange={v => this.setState({ volume: v })}
             hidden={this.state.hide}

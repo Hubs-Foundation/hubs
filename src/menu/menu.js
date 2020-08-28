@@ -1,26 +1,32 @@
 import React, { useState, useEffect } from "react";
-import { debounce, minBy } from "lodash";
+import { SvgHoverButton, SvgToggleButton } from "../utils/svg-helpers";
+import { TextForm } from "./text-form";
+import { Slider } from "./slider";
 
-import { SvgHoverButton, SvgToggleButton } from "./utils/svg-helpers";
+import { inLobby } from "../room-metadata";
 
-import styles from "./assets/stylesheets/shared.scss";
+import Backplate from "../assets/menu/Backplate.png";
+import HomeExit from "../assets/menu/Home_Exit.png";
+import HomeExitHover from "../assets/menu/Home_Exit_Hover.png";
+import LobbyExit from "../assets/menu/Lobby_Exit.png";
+import LobbyExitHover from "../assets/menu/Lobby_Exit_Hover.png";
+import MenuClosed from "../assets/menu/Menu_Closed.png";
+import MenuOpen from "../assets/menu/Menu_Open_Eyeball.png";
+import Report from "../assets/menu/Report.png";
+import SliderEye from "../assets/menu/Slider.png";
 
-import Backplate from "./assets/menu/Backplate.png";
-import HomeExit from "./assets/menu/Home_Exit.png";
-import HomeExitHover from "./assets/menu/Home_Exit_Hover.png";
-import LobbyExit from "./assets/menu/Lobby_Exit.png";
-import LobbyExitHover from "./assets/menu/Lobby_Exit_Hover.png";
-import MenuClosed from "./assets/menu/Menu_Closed.png";
-import MenuOpen from "./assets/menu/Menu_Open_Eyeball.png";
-import Report from "./assets/menu/Report.png";
-import ReportHover from "./assets/menu/Report_Hover.png";
-import Room1Button from "./assets/menu/Room_1_Button.png";
-import Room1ButtonHover from "./assets/menu/Room_1_Button_Hover.png";
-import Room2Button from "./assets/menu/Room_2_Button.png";
-import Room2ButtonHover from "./assets/menu/Room_2_Button_Hover.png";
-import Room3Button from "./assets/menu/Room_3_Button.png";
-import Room3ButtonHover from "./assets/menu/Room_3_Button_Hover.png";
-import SliderEye from "./assets/menu/Slider.png";
+import ReportHover from "../assets/menu/Report_Hover.png";
+import Room1Button from "../assets/menu/Room_1_Button.png";
+import Room1ButtonHover from "../assets/menu/Room_1_Button_Hover.png";
+import Room2Button from "../assets/menu/Room_2_Button.png";
+import Room2ButtonHover from "../assets/menu/Room_2_Button_Hover.png";
+import Room3Button from "../assets/menu/Room_3_Button.png";
+import Room3ButtonHover from "../assets/menu/Room_3_Button_Hover.png";
+
+import MicrophoneOff from "../assets/menu/MicrophoneOff.png";
+import MicrophoneOffHover from "../assets/menu/MicrophoneOff_Hover.png";
+import MicrophoneOn from "../assets/menu/MicrophoneOn.png";
+import MicrophoneOnHover from "../assets/menu/MicrophoneOn.png";
 
 const nameX = 500;
 const nameY = 1110;
@@ -35,110 +41,16 @@ const doofstickHeight = 550;
 const paneWidth = 1865;
 const paneHeight = 4689;
 
-const mutePosition = {
-  x: 1120,
-  y: 2752,
-  width: 238,
-  height: 238
-};
-
-const TextForm = ({ value, onValueChange, style, ...otherProps }) => {
-  const inputRef = React.createRef();
-  const stopPropagation = e => e.stopPropagation();
-
-  useEffect(() => {
-    const capturedRef = inputRef.current;
-    const intercepted = ["keydown", "keypress", "keyup"];
-    intercepted.forEach(i => capturedRef.addEventListener(i, stopPropagation));
-    return () => intercepted.forEach(i => capturedRef.removeEventListener(i, stopPropagation));
-  });
-
-  const bounced = debounce(async update => onValueChange(update), 2e3, { trailing: true, maxWait: 5e3 });
-
-  return (
-    <input
-      ref={inputRef}
-      type={"text"}
-      style={{
-        color: "white",
-        fontSize: "5em",
-        fontFamily: "perpertua-titling",
-        background: "transparent",
-        border: "none",
-        ...style
-      }}
-      placeholder={value}
-      onChange={({ target }) => {
-        bounced(target.value);
-      }}
-      onSubmit={event => {
-        bounced(event.target.value);
-        event.preventDefault();
-      }}
-      {...otherProps}
-    />
-  );
-};
-
-const Slider = ({ volume, onVolumeChange, style, ...otherProps }) => {
-  const notches = [0, 25, 50, 75, 100];
-  const boxWidth = 190;
-  const sliderLeftOffset = 479;
-
-  const sliderVolumeToX = v => sliderLeftOffset + notches.indexOf(v) * boxWidth;
-  const wrapToNotch = v => minBy(notches, notch => Math.abs(notch - v));
-
-  const [offset, setOffset] = useState(sliderVolumeToX(wrapToNotch(volume * 100)));
-
-  const selectVolume = value => {
-    onVolumeChange(value / 100);
-    setOffset(sliderVolumeToX(value));
-  };
-
-  const ClickBox = value => (
-    <rect
-      style={{
-        cursor: "pointer",
-        ...style
-      }}
-      key={value}
-      id={value}
-      onClick={() => selectVolume(value)}
-      x={sliderVolumeToX(value)}
-      y={2351}
-      width={190}
-      height={70}
-    />
-  );
-
-  return (
-    <>
-      {notches.map(ClickBox)}
-      <image x={offset} y={2280} width={217} height={217} href={SliderEye} {...otherProps} />
-    </>
-  );
-};
-
-const WatchToggle = ({ watching, onToggle }) => {
-  const baseProps = { y: "2771", width: "217", height: "217", href: SliderEye };
-  return (
-    <SvgToggleButton
-      active={watching}
-      onToggle={onToggle}
-      normalProps={{ x: "756", ...baseProps }}
-      activeProps={{ x: "520", ...baseProps }}
-    />
-  );
-};
-
 export const Menu = ({
   watching = false,
   hidden = true,
+  muted = true,
   volume = 0.9,
   name,
+  onMenuToggle,
+  onMuteToggle,
   onNameChange,
   onWatchToggle,
-  onMenuToggle,
   onVolumeChange,
   onReport,
   onHome,
@@ -159,6 +71,38 @@ export const Menu = ({
 
   const svgScale = 0.2;
   const SVG_WIDTH = 1865;
+
+  const WatchToggle = ({ watching, onToggle }) => {
+    const baseProps = { y: "2771", width: "217", height: "217", href: SliderEye };
+    return (
+      <SvgToggleButton
+        active={watching}
+        onToggle={onToggle}
+        normalProps={{ x: "756", ...baseProps }}
+        activeProps={{ x: "520", ...baseProps }}
+      />
+    );
+  };
+
+  const MuteButton = (muted, onMuteToggle) => {
+    const mutePosition = {
+      x: 1120,
+      y: 2752,
+      width: 238,
+      height: 238
+    };
+
+    return inLobby() && !watching && (
+      <SvgToggleButton
+        active={muted}
+        onToggle={onMuteToggle}
+        activeProps={{ ...mutePosition, href: MicrophoneOff }}
+        activeHoverProps={{ ...mutePosition, href: MicrophoneOffHover }}
+        normalProps={{ ...mutePosition, href: MicrophoneOn }}
+        normalHoverProps={{ ...mutePosition, href: MicrophoneOnHover }}
+      />
+    );
+  };
 
   return (
     <div
@@ -204,8 +148,9 @@ export const Menu = ({
               />
 
               <WatchToggle watching={watching} onToggle={onWatchToggle} />
+              <MuteButton muted={muted} onMuteToggle={onMuteToggle} />
 
-              <Slider volume={volume} onVolumeChange={onVolumeChange} />
+              <Slider href={SliderEye} volume={volume} onVolumeChange={onVolumeChange} />
 
               <SvgHoverButton
                 id="Report"

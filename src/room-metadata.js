@@ -31,19 +31,19 @@ const roomMetadata = {
   }
 };
 
-for (var key in roomMapping) {
+for (const key in roomMapping) {
   roomMetadata[key].url = roomMapping[key];
 }
 
-export const currentRoomKey = (id = getHubId()) => hubIdToRoomKey[id];
-
 const hubIdToRoomKey = {};
 
-for (var key in roomMapping) {
-  var url = roomMapping[key];
-  var hubId = url.split("/")[1];
+for (const key in roomMapping) {
+  const url = roomMapping[key];
+  const hubId = url.split("/")[1];
   hubIdToRoomKey[hubId] = key;
 }
+
+export const currentRoomKey = (id = getHubId()) => hubIdToRoomKey[id];
 
 export function getRoomMetadata(roomKey) {
   if (!roomKey) {
@@ -53,10 +53,10 @@ export function getRoomMetadata(roomKey) {
 }
 
 export const bestLobby = () => {
-  return `/${lobbyIDs[0]}/dr33m-pl4z4`;
-}
+  return `/${lobbyIDs[0]}/hypnik_crypt333`;
+};
 
 export const getRoomURL = roomKey => {
   if (!roomKey) roomKey = currentRoomKey();
   return roomKey == "lobby" ? bestLobby() : getRoomMetadata(roomKey).url;
-}
+};
