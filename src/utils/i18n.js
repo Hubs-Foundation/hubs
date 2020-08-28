@@ -6,7 +6,7 @@ const DEFAULT_LOCALE = "en";
 
 function getLocales() {
   if (navigator.languages) {
-    return [...navigator.languages];
+    return navigator.languages;
   }
   if (navigator.language) {
     return [navigator.language];
@@ -64,6 +64,7 @@ const interval = window.setInterval(() => {
       setLocale();
     });
   }
+  console.log("POLL");
 }, 100);
 
 export const getLocale = () => {
