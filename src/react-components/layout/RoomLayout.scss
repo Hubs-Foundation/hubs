@@ -14,6 +14,7 @@
   
   background-color: theme.$grey;
   overflow: hidden;
+  position: relative;
 }
 
 :local(.main) {
@@ -30,4 +31,13 @@
 
 :local(.toolbar) {
   grid-row-start: toolbar;
+}
+
+:local(.modal-container) {
+  grid-column: main;
+  grid-row: viewport;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
