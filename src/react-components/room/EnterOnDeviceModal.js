@@ -16,6 +16,8 @@ export function EnterOnDeviceModal({
   onBack,
   ...rest
 }) {
+  const codeCharacters = code.split("");
+
   return (
     <Modal
       title="Enter on Device"
@@ -34,10 +36,11 @@ export function EnterOnDeviceModal({
       <div className={styles.shortUrlContainer}>{shortUrl}</div>
       <p>Then, enter this one-time code:</p>
       <div className={styles.codeContainer}>
-        <div className={styles.codeLetter}>{code[0]}</div>
-        <div className={styles.codeLetter}>{code[1]}</div>
-        <div className={styles.codeLetter}>{code[2]}</div>
-        <div className={styles.codeLetter}>{code[3]}</div>
+        {codeCharacters.map((char, i) => (
+          <div key={i} className={styles.codeLetter}>
+            {char}
+          </div>
+        ))}
       </div>
       <small>Your account and avatar will be transferred to the device.</small>
       <small>Keep this page open to use this code.</small>
