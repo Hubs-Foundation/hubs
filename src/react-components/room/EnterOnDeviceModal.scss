@@ -29,6 +29,7 @@
   }
 
   hr {
+    position: relative;
     width: 90%;
     border: none;
     border-bottom: 1px solid theme.$grey;
@@ -42,7 +43,8 @@
       color: theme.$black;
       font-size: theme.$font-size-sm;
       font-weight: theme.$font-weight-bold;
-      top: -10px;
+      position: absolute;
+      transform: translateY(-50%);
     }
   }
 
