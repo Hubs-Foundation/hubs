@@ -34,7 +34,7 @@
 :local(.basic), :local(.transparent) {
   color: theme.$darkgrey;
   border: 1px solid theme.$darkgrey;
-  background-color: theme.$transparent;
+  background-color: theme.$white;
 
   svg {
     *[stroke=\#000] {
@@ -57,6 +57,7 @@
 
 :local(.transparent) {
   border-color: theme.$transparent;
+  background-color: theme.$transparent;
 }
 
 :local(.accept), :local(.green) {
