@@ -23,6 +23,7 @@ $input-height: 40px;
     min-width: auto;
     padding: 0 16px;
     border-width: 0;
+    min-height: auto;
 
     &:first-child {
       border-right-width: 1px;

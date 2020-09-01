@@ -1,6 +1,7 @@
 @use "../styles/theme.scss";
 
 :local(.modal) {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: max-content;
@@ -20,7 +21,7 @@
   height: 48px;
   border-bottom: 1px solid theme.$lightgrey;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 
   h1 {
     font-size: theme.$font-size-sm;
@@ -28,9 +29,37 @@
   }
 }
 
+:local(.before-title) {
+  position: absolute;
+  left: 0;
+}
+
+:local(.after-title) {
+  position: absolute;
+  right: 0;
+}
+
 :local(.content) {
   min-height: 200px;
   display: flex;
   flex: 1;
   flex-direction: column;
+}
+
+:local(.sm-fullscreen) {
+  @media(max-width: theme.$breakpoint-md - 1) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    border-width: 0;
+    border-radius: 0;
+    margin: 0;
+    width: 100%;
+
+    :local(.content) {
+      overflow-y: auto;
+    }
+  }
 }

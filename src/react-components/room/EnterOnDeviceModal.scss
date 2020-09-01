@@ -1,0 +1,79 @@
+@use "../styles/theme.scss";
+
+:local(.content) {
+  align-items: center;
+  padding: 24px 8px;
+  text-align: center;
+
+  & > * {
+    margin-bottom: 16px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  h1 {
+    font-weight: theme.$font-weight-bold; 
+  }
+
+  p {
+    font-size: theme.$font-size-sm;
+    font-weight: theme.$font-weight-medium;
+  }
+
+  small {
+    font-size: theme.$font-size-xs;
+    font-weight: theme.$font-weight-regular;
+    margin-bottom: 8px;
+  }
+
+  hr {
+    width: 90%;
+    border: none;
+    border-bottom: 1px solid theme.$grey;
+    margin: 16px 0;
+
+    &:after {
+      background: theme.$white;
+      content: attr(data-or-text);
+      padding: 0 4px;
+      position: relative;
+      color: theme.$black;
+      font-size: theme.$font-size-sm;
+      font-weight: theme.$font-weight-bold;
+      top: -10px;
+    }
+  }
+
+  :local(.code-container) {
+    display: flex;
+
+    & > * {
+      margin-right: 8px;
+  
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  }
+
+  :local(.short-url-container), :local(.code-letter) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 64px;
+    border-radius: 12px;
+    border: 1px solid theme.$darkgrey;
+    font-size: 32px;
+    font-weight: theme.$font-weight-regular;
+  }
+
+  :local(.short-url-container) {
+    width: 204px;
+  }
+
+  :local(.code-letter) {
+    width: 40px;
+  }
+}
