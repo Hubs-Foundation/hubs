@@ -1,11 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "../modal/Modal";
+import { Sidebar } from "../sidebar/Sidebar";
 import { ReactComponent as ChevronBackIcon } from "../icons/ChevronBack.svg";
 import { IconButton } from "../input/IconButton";
 import { AvatarSettingsContent } from "./AvatarSettingsContent";
 
-export function AvatarSetupModal({
+export function AvatarSettingsSidebar({
   className,
   displayName,
   onChangeDisplayName,
@@ -16,8 +16,8 @@ export function AvatarSetupModal({
   ...rest
 }) {
   return (
-    <Modal
-      title="Avatar Setup"
+    <Sidebar
+      title="Avatar Settings"
       beforeTitle={
         <IconButton onClick={onBack}>
           <ChevronBackIcon />
@@ -34,11 +34,11 @@ export function AvatarSetupModal({
         onChangeAvatar={onChangeAvatar}
         onAccept={onAccept}
       />
-    </Modal>
+    </Sidebar>
   );
 }
 
-AvatarSetupModal.propTypes = {
+AvatarSettingsSidebar.propTypes = {
   className: PropTypes.string,
   displayName: PropTypes.string,
   onChangeDisplayName: PropTypes.func,

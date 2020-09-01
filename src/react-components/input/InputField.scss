@@ -3,13 +3,14 @@
 :local(.label) {
   margin-bottom: 8px;
   color: theme.$grey;
+  align-self: flex-start;
 }
 
 :local(.input-field) {
   display: flex;
   flex-direction: column;
   width: 100%;
-  align-items: flex-start;
+  max-width: 300px;
 }
 
 :local(.error) {
