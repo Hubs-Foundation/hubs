@@ -68,7 +68,7 @@ AFRAME.registerComponent("networked-drawing", {
     // maxLines + 1 because a line can be currently drawing while at maxLines.
     // Multiply by 1/3 (0.333) because 3 floats per vertex (x, y, z).
     const maxBufferSize = Math.round(this.data.maxPointsPerLine * 20 * (this.data.maxLines + 1) * 0.333);
-    this.sharedBufferGeometryManager.addSharedBuffer(0, material, THREE.TriangleStripDrawMode, maxBufferSize);
+    this.sharedBufferGeometryManager.addSharedBuffer(0, material, THREE.TrianglesDrawMode, maxBufferSize);
 
     this.lastPoint = new THREE.Vector3();
 
@@ -176,13 +176,7 @@ AFRAME.registerComponent("networked-drawing", {
   async serializeDrawing() {
     const exporter = new GLTFExporter();
 
-    const material = new THREE.MeshStandardMaterial({
-      vertexColors: THREE.VertexColors
-    });
-    const geometry = this.convertToTriangles(this.sharedBuffer.current);
-    const mesh = new THREE.Mesh(geometry, material);
-
-    mesh.userData.gltfExtensions = {
+    this.drawing.userData.gltfExtensions = {
       MOZ_hubs_components: {
         version: 4,
         "networked-drawing-buffer": { buffer: this.networkBuffer }
@@ -190,7 +184,7 @@ AFRAME.registerComponent("networked-drawing", {
     };
 
     const glb = await new Promise(resolve => {
-      exporter.parse(mesh, resolve, {
+      exporter.parse(this.drawing, resolve, {
         binary: true,
         includeCustomExtensions: true
       });
@@ -216,65 +210,6 @@ AFRAME.registerComponent("networked-drawing", {
 
     entity.object3D.position.addVectors(min, max).multiplyScalar(0.5);
     entity.object3D.matrixNeedsUpdate = true;
-  },
-
-  convertToTriangles(originalGeometry) {
-    const geometry = new THREE.BufferGeometry();
-
-    const { start, count } = originalGeometry.drawRange;
-
-    const originalPositions = originalGeometry.getAttribute("position");
-    const originalColors = originalGeometry.getAttribute("color");
-    const originalNormals = originalGeometry.getAttribute("normal");
-
-    const length = count * 3;
-    const positions = new Float32Array(length);
-    const colors = new Float32Array(length);
-    const normals = new Float32Array(length);
-    const indices = [];
-
-    let index = 0;
-    let order = 0;
-
-    const copy = i => {
-      colors[index] = originalColors.getX(i);
-      normals[index] = originalNormals.getX(i);
-      positions[index] = originalPositions.getX(i);
-      index++;
-      colors[index] = originalColors.getY(i);
-      normals[index] = originalNormals.getY(i);
-      positions[index] = originalPositions.getY(i);
-      index++;
-      colors[index] = originalColors.getZ(i);
-      normals[index] = originalNormals.getZ(i);
-      positions[index] = originalPositions.getZ(i);
-      index++;
-    };
-
-    for (let i = start; i < count - 2; i++) {
-      const i2 = i + 1 + order;
-      const i3 = i + 2 - order;
-
-      if (i === 0) {
-        copy(i);
-        copy(i2);
-        copy(i3);
-      } else if (i2 > i3) {
-        copy(i2);
-      } else {
-        copy(i3);
-      }
-
-      indices.push(i, i2, i3);
-      order = (order + 1) % 2;
-    }
-
-    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-    geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
-    geometry.setIndex(indices);
-
-    return geometry;
   },
 
   deserializeDrawing: (() => {
@@ -510,19 +445,6 @@ AFRAME.registerComponent("networked-drawing", {
       if (!this.lineStarted) {
         this._generateSegments(this.lastSegments, position, direction, normal, this.radius * radiusMultiplier);
 
-        if (this.networkBufferHistory.length === 0) {
-          //start with CW faceculling order
-          this._addDegenerateTriangle();
-        } else {
-          //only do the following if the sharedBuffer is not empty
-          this._restartPrimitive();
-          this._addDegenerateTriangle();
-          if (this.segments % 2 === 0) {
-            //flip faceculling order if even numbered segments
-            this._addDegenerateTriangle();
-          }
-        }
-
         //get normal for tip of cap
         capNormal.copy(direction).negate();
         //get normals for rim of cap
@@ -530,11 +452,7 @@ AFRAME.registerComponent("networked-drawing", {
           this.lastSegments[i].normal.add(capNormal).multiplyScalar(0.5);
         }
 
-        this._drawCap(this.lastPoint, this.lastSegments, capNormal);
-        if (this.segments % 2 !== 0) {
-          //flip faceculling order if odd numbered segments
-          this._addDegenerateTriangle();
-        }
+        this._drawStartCap(this.lastPoint, this.lastSegments, capNormal);
 
         this.lineStarted = true;
       } else {
@@ -542,7 +460,7 @@ AFRAME.registerComponent("networked-drawing", {
         this._drawCylinder();
 
         if (this.currentPointCount > this.data.maxPointsPerLine) {
-          this._drawEndCap(position, direction);
+          this._drawProjectedEndCap(position, direction);
           this._endLine();
         }
       }
@@ -592,20 +510,19 @@ AFRAME.registerComponent("networked-drawing", {
     } else if (this.lineStarted && this.drawStarted) {
       this._addToNetworkBuffer(position, direction, normal);
       this._draw(position, direction, normal);
-      this._drawEndCap(position, direction);
+      this._drawProjectedEndCap(position, direction);
     }
     this._endLine();
   },
 
-  _drawEndCap: (() => {
+  _drawProjectedEndCap: (() => {
     const projectedDirection = new THREE.Vector3();
     const projectedPoint = new THREE.Vector3();
     return function(position, direction) {
       if (this.lineStarted && this.drawStarted) {
         projectedDirection.copy(direction).multiplyScalar(this.radius);
         projectedPoint.copy(position).add(projectedDirection);
-        this._addDegenerateTriangle(); //flip faceculling order before drawing end-cap
-        this._drawCap(projectedPoint, this.lastSegments, direction);
+        this._drawEndCap(projectedPoint, this.lastSegments, direction);
       }
     };
   })(),
@@ -671,9 +588,14 @@ AFRAME.registerComponent("networked-drawing", {
       this.currentSegments[i].normal.add(this.lastSegments[i].normal).multiplyScalar(0.5);
     }
 
-    for (let i = 0; i != this.segments + 1; i++) {
-      this._addVertex(this.lastSegments[i % this.segments]);
-      this._addVertex(this.currentSegments[i % this.segments]);
+    for (let i = 0; i < this.segments; i++) {
+      this._addVertex(this.currentSegments[i]);
+      this._addVertex(this.lastSegments[i]);
+      this._addVertex(this.currentSegments[(i + 1) % this.segments]);
+
+      this._addVertex(this.lastSegments[i]);
+      this._addVertex(this.lastSegments[(i + 1) % this.segments]);
+      this._addVertex(this.currentSegments[(i + 1) % this.segments]);
     }
 
     for (let i = 0; i < this.segments; i++) {
@@ -707,29 +629,24 @@ AFRAME.registerComponent("networked-drawing", {
       projectedDirection.copy(down).multiplyScalar(this.radius * 0.75);
       projectedPoint.copy(position).add(projectedDirection);
 
-      this._addDegenerateTriangle(); //discarded
-      this._drawCap(projectedPoint, this.lastSegments, down);
+      this._drawEndCap(projectedPoint, this.lastSegments, down);
     };
   })(),
 
-  //draw a cap to start/end a line
-  _drawCap(point, segments, normal) {
-    let segmentIndex = 0;
-    for (let i = 0; i < this.segments * 2 - (this.segments % 2); i++) {
-      if ((i - 2) % 4 === 0) {
-        this._addVertex({ position: point, normal: normal });
-      } else {
-        this._addVertex(segments[segmentIndex % this.segments]);
-        if ((i + 1) % 5 !== 0) {
-          ++segmentIndex;
-        }
-      }
+  _drawStartCap(point, segments, normal) {
+    for (let i = 0; i < this.segments; i++) {
+      this._addVertex({ position: point, normal: normal });
+      this._addVertex(segments[(i + 1) % this.segments]);
+      this._addVertex(segments[i]);
     }
   },
 
-  _restartPrimitive() {
-    this.sharedBuffer.restartPrimitive();
-    ++this.vertexCount;
+  _drawEndCap(point, segments, normal) {
+    for (let i = 0; i < this.segments; i++) {
+      this._addVertex({ position: point, normal: normal });
+      this._addVertex(segments[i]);
+      this._addVertex(segments[(i + 1) % this.segments]);
+    }
   },
 
   _updateBuffer() {
@@ -750,10 +667,6 @@ AFRAME.registerComponent("networked-drawing", {
 
     ++this.sharedBuffer.idx.uv;
     ++this.vertexCount;
-  },
-
-  _addDegenerateTriangle() {
-    this._addVertex(this.lastSegments[0]);
   },
 
   //calculate the segments for a given point

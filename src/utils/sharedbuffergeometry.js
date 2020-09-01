@@ -10,19 +10,6 @@ export default class SharedBufferGeometry {
     this.addBuffer();
   }
 
-  restartPrimitive() {
-    if (this.idx.position >= this.current.attributes.position.count) {
-      console.error("maxBufferSize limit exceeded");
-    } else if (this.idx.position !== 0) {
-      let prev = (this.idx.position - 1) * 3;
-      const position = this.current.attributes.position.array;
-      this.addVertex(position[prev++], position[prev++], position[prev++]);
-
-      this.idx.color++;
-      this.idx.normal++;
-    }
-  }
-
   remove(prevIdx, idx) {
     // Loop through all the attributes: position, color, normal,...
     if (this.idx.position > idx.position) {
