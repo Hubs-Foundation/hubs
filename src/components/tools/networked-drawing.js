@@ -736,7 +736,7 @@ AFRAME.registerComponent("deserialize-drawing-button", {
       if (drawingManager.drawing) {
         drawingManager.drawing.serializeDrawing().then(() => {
           drawingManager.drawing.el.parentEl.removeChild(drawingManager.drawing.el);
-          drawingManager.destroyDrawing();
+          drawingManager.destroyDrawing(drawingManager.drawing);
 
           drawingManager.createDrawing().then(finishDrawing);
         });
