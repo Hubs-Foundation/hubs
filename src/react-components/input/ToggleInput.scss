@@ -1,0 +1,52 @@
+@use "../styles/theme.scss";
+
+:local(.toggle-input) {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  input {
+    opacity: 0;
+  }
+
+  &:focus-within :local(.track) {
+    border-color: theme.$blue;
+    box-shadow: 0 0 0 3px theme.$blue;
+  }
+}
+
+:local(.disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+:local(.label) {
+  margin-right: 16px;
+  font-size: 12px;
+  background-color: transparent;
+}
+
+:local(.track) {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border: 1px solid theme.$lightgrey;
+  border-radius: 44px; 
+}
+
+:local(.button) {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 20px;
+  height: 20px;
+  border-radius: 20px;
+  background-color: theme.$grey;
+}
+
+:local(.on) :local(.button) {
+  left: auto;
+  right: 1px;
+  background-color: theme.$blue;
+}
+
