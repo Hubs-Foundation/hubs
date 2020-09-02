@@ -29,7 +29,7 @@ AFRAME.registerComponent("networked-drawing", {
   schema: {
     segments: { default: 8 }, //the number of "sides" the procedural tube should have
     defaultRadius: { default: 0.01 }, //the radius of the procedural tube
-    maxDrawTimeout: { default: 600000 }, //the maximum time a drawn line will live
+    maxDrawTimeout: { default: 5000 }, //the maximum time a drawn line will live
     maxLines: { default: 50 }, //how many lines can persist before lines older than minDrawTime are removed
     maxPointsPerLine: { default: 250 } //the max number of points a single line can have
   },
@@ -334,10 +334,6 @@ AFRAME.registerComponent("networked-drawing", {
       const drawTime = this.networkBufferHistory[0].time;
       if (length > this.data.maxLines || drawTime + this.data.maxDrawTimeout <= time) {
         const datum = this.networkBufferHistory[0];
-        if (length > 1) {
-          datum.idxLength += 2 - (this.segments % 2); //account for extra verts added for degenerate triangles
-          this.networkBufferHistory[1].idxLength -= 2 - (this.segments % 2);
-        }
         this.idx.position = datum.idxLength;
         this.idx.uv = datum.idxLength;
         this.idx.normal = datum.idxLength;
@@ -485,11 +481,10 @@ AFRAME.registerComponent("networked-drawing", {
       this.idx.normal = 0;
       this.idx.color = 0;
       if (length > 1) {
-        datum.idxLength += 1 - (this.segments % 2); //account for extra verts added for degenerate triangles
-        this.idx.position = this.sharedBuffer.idx.position - datum.idxLength;
-        this.idx.uv = this.sharedBuffer.idx.uv - datum.idxLength;
-        this.idx.normal = this.sharedBuffer.idx.normal - datum.idxLength;
-        this.idx.color = this.sharedBuffer.idx.color - datum.idxLength;
+        this.idx.position = this.sharedBuffer.idx.position - datum.idxLength - 1;
+        this.idx.uv = this.sharedBuffer.idx.uv - datum.idxLength - 1;
+        this.idx.normal = this.sharedBuffer.idx.normal - datum.idxLength - 1;
+        this.idx.color = this.sharedBuffer.idx.color - datum.idxLength - 1;
       }
       this.sharedBuffer.remove(this.idx, this.sharedBuffer.idx);
       if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
@@ -642,6 +637,7 @@ AFRAME.registerComponent("networked-drawing", {
   },
 
   _drawEndCap(point, segments, normal) {
+    //different order from _drawStartCap to maintain ccw winding order
     for (let i = 0; i < this.segments; i++) {
       this._addVertex({ position: point, normal: normal });
       this._addVertex(segments[i]);
