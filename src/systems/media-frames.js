@@ -50,7 +50,7 @@ function getCapturableObjectCollidingWithBody(physicsSystem, mediaType, bodyUUID
 }
 
 const components = [];
-export class MediaTargetZonesSystem {
+export class MediaFramesSystem {
   constructor(physicsSystem, interactionSystem) {
     this.physicsSystem = physicsSystem;
     this.interactionSystem = interactionSystem;
