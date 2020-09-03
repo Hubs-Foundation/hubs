@@ -75,7 +75,7 @@ class SystemEditorComponent extends Component {
 
           {this.state.reticulumMeta &&
             this.state.adminInfo &&
-            (needsAvatars || needsScenes || isInSESSandbox || exceededStorageQuota) && (
+            (needsAvatars || needsScenes || isInSESSandbox || exceededStorageQuota || !isUsingCloudflare) && (
               <List>
                 {isInSESSandbox && (
                   <ListItem>
