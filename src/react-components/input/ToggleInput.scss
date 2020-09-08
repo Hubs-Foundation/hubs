@@ -11,7 +11,7 @@
 
   &:focus-within :local(.track) {
     border-color: theme.$blue;
-    box-shadow: 0 0 0 3px theme.$blue;
+    box-shadow: 0 0 0 2px theme.$blue;
   }
 }
 

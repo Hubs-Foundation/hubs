@@ -1,0 +1,33 @@
+@use "../styles/theme.scss";
+
+:local(.content) {
+  align-items: center;
+  padding: 24px 8px;
+  text-align: center;
+
+  & > * {
+    margin-bottom: 16px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  p {
+    font-size: theme.$font-size-sm;
+    font-weight: theme.$font-weight-medium;
+    line-height: 1.2;
+  }
+}
+
+:local(.audio-check-container) {
+  display: flex;
+
+  svg {
+    stroke-width: 0.75;
+  }
+
+  & > :first-child {
+    margin-right: 24px;
+  }
+}
