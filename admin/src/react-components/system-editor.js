@@ -22,7 +22,7 @@ import withCommonStyles from "../utils/with-common-styles";
 import { getAdminInfo, getEditableConfig } from "../utils/ita";
 
 // Send quota to use as heuristic for checking if in SES sandbox
-// https://forums.aws.amazson.com/thread.jspa?threadID=61090
+// https://forums.aws.amazon.com/thread.jspa?threadID=61090
 const MAX_AWS_SES_QUOTA_FOR_SANDBOX = 200;
 
 const styles = withCommonStyles(() => ({}));
