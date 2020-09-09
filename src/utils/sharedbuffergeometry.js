@@ -1,7 +1,6 @@
 export default class SharedBufferGeometry {
-  constructor(material, primitiveMode, maxBufferSize) {
+  constructor(material, maxBufferSize) {
     this.material = material;
-    this.primitiveMode = primitiveMode;
 
     this.maxBufferSize = maxBufferSize;
     this.geometries = [];
@@ -53,8 +52,6 @@ export default class SharedBufferGeometry {
     const indices = new Uint32Array(this.maxBufferSize * 3);
 
     const mesh = new THREE.Mesh(geometry, this.material);
-
-    mesh.drawMode = this.primitiveMode;
 
     mesh.frustumCulled = false;
     mesh.vertices = vertices;

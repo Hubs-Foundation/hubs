@@ -68,7 +68,7 @@ AFRAME.registerComponent("networked-drawing", {
     // maxLines + 1 because a line can be currently drawing while at maxLines.
     // Multiply by 1/3 (0.333) because 3 floats per vertex (x, y, z).
     const maxBufferSize = Math.round(this.data.maxPointsPerLine * 20 * (this.data.maxLines + 1) * 0.333);
-    this.sharedBufferGeometryManager.addSharedBuffer(0, material, THREE.TrianglesDrawMode, maxBufferSize);
+    this.sharedBufferGeometryManager.addSharedBuffer(0, material, maxBufferSize);
 
     this.lastPoint = new THREE.Vector3();
 
