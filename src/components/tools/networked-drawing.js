@@ -174,10 +174,34 @@ AFRAME.registerComponent("networked-drawing", {
     this._deleteExpiredLines(t);
   },
 
+  cloneMesh(sharedBufferGeometry) {
+    const originalGeometry = sharedBufferGeometry.current;
+    const idx = sharedBufferGeometry.idx;
+    const geometry = new THREE.BufferGeometry();
+
+    const positions = originalGeometry.getAttribute("position").array.subarray(0, idx.position * 3);
+    const colors = originalGeometry.getAttribute("color").array.subarray(0, idx.color * 3);
+    const normals = originalGeometry.getAttribute("normal").array.subarray(0, idx.normal * 3);
+    const indices = originalGeometry.index.array.subarray(0, idx.index);
+
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
+    geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+
+    const material = new THREE.MeshStandardMaterial({
+      vertexColors: THREE.VertexColors
+    });
+    return new THREE.Mesh(geometry, material);
+  },
+
   async serializeDrawing() {
     const exporter = new GLTFExporter();
 
-    this.drawing.userData.gltfExtensions = {
+    //mesh needs to be cloned before exporting to get rid of excess geometry information
+    const mesh = this.cloneMesh(this.sharedBuffer);
+
+    mesh.userData.gltfExtensions = {
       MOZ_hubs_components: {
         version: 4,
         "networked-drawing-buffer": { buffer: this.networkBuffer }
@@ -185,7 +209,7 @@ AFRAME.registerComponent("networked-drawing", {
     };
 
     const glb = await new Promise(resolve => {
-      exporter.parse(this.drawing, resolve, {
+      exporter.parse(mesh, resolve, {
         binary: true,
         includeCustomExtensions: true
       });
@@ -201,9 +225,8 @@ AFRAME.registerComponent("networked-drawing", {
     const max = new THREE.Vector3(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
     const temp = new THREE.Vector3();
 
-    const { start, count } = this.sharedBuffer.current.drawRange;
     const attribute = this.sharedBuffer.current.attributes.position;
-    for (let i = start; i < count; i++) {
+    for (let i = 0; i < this.sharedBuffer.idx.position; i++) {
       temp.set(attribute.getX(i), attribute.getY(i), attribute.getZ(i));
       min.min(temp);
       max.max(temp);
