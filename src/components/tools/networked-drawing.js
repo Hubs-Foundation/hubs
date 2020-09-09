@@ -98,6 +98,7 @@ AFRAME.registerComponent("networked-drawing", {
     this.prevIdx = Object.assign({}, this.sharedBuffer.idx);
     this.idx = Object.assign({}, this.sharedBuffer.idx);
     this.vertexCount = 0; //number of vertices added for current line (used for line deletion).
+    this.indexCount = 0; //number of indexes added for current line (used for line deletion);
     this.networkBufferCount = 0; //number of items added to networkBuffer for current line (used for line deletion).
     this.currentPointCount = 0; //number of points added for current line (used for maxPointsPerLine).
     this.invalidPointRead = false; //flag flipped if we read a bad point anywhere during this line
@@ -334,10 +335,10 @@ AFRAME.registerComponent("networked-drawing", {
       const drawTime = this.networkBufferHistory[0].time;
       if (length > this.data.maxLines || drawTime + this.data.maxDrawTimeout <= time) {
         const datum = this.networkBufferHistory[0];
-        this.idx.position = datum.idxLength;
-        this.idx.uv = datum.idxLength;
-        this.idx.normal = datum.idxLength;
-        this.idx.color = datum.idxLength;
+        this.idx.position = datum.vertexCount;
+        this.idx.normal = datum.vertexCount;
+        this.idx.color = datum.vertexCount;
+        this.idx.index = datum.indexCount;
         this.sharedBuffer.remove(this.prevIdx, this.idx);
         this.networkBufferHistory.shift();
         if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
@@ -477,14 +478,14 @@ AFRAME.registerComponent("networked-drawing", {
     if (length > 0) {
       const datum = this.networkBufferHistory.pop();
       this.idx.position = 0;
-      this.idx.uv = 0;
       this.idx.normal = 0;
       this.idx.color = 0;
+      this.idx.index = 0;
       if (length > 1) {
-        this.idx.position = this.sharedBuffer.idx.position - datum.idxLength - 1;
-        this.idx.uv = this.sharedBuffer.idx.uv - datum.idxLength - 1;
-        this.idx.normal = this.sharedBuffer.idx.normal - datum.idxLength - 1;
-        this.idx.color = this.sharedBuffer.idx.color - datum.idxLength - 1;
+        this.idx.position = this.sharedBuffer.idx.position - datum.vertexCount - 1;
+        this.idx.normal = this.sharedBuffer.idx.normal - datum.vertexCount - 1;
+        this.idx.color = this.sharedBuffer.idx.color - datum.vertexCount - 1;
+        this.idx.index = this.sharedBuffer.idx.index - datum.indexCount - 1;
       }
       this.sharedBuffer.remove(this.idx, this.sharedBuffer.idx);
       if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
@@ -529,11 +530,13 @@ AFRAME.registerComponent("networked-drawing", {
 
     const datum = {
       networkBufferCount: this.networkBufferCount,
-      idxLength: this.vertexCount - 1,
+      vertexCount: this.vertexCount - 1,
+      indexCount: this.indexCount - 1,
       time: this.el.sceneEl.clock.elapsedTime * 1000
     };
     this.networkBufferHistory.push(datum);
     this.vertexCount = 0;
+    this.indexCount = 0;
     this.networkBufferCount = 0;
     this.currentPointCount = 0;
     this.lineStarted = false;
@@ -585,12 +588,18 @@ AFRAME.registerComponent("networked-drawing", {
 
     for (let i = 0; i < this.segments; i++) {
       this._addVertex(this.currentSegments[i]);
-      this._addVertex(this.lastSegments[i]);
-      this._addVertex(this.currentSegments[(i + 1) % this.segments]);
+    }
 
-      this._addVertex(this.lastSegments[i]);
-      this._addVertex(this.lastSegments[(i + 1) % this.segments]);
-      this._addVertex(this.currentSegments[(i + 1) % this.segments]);
+    const bufferVertexCount = this.sharedBuffer.idx.position;
+
+    for (let i = 0; i < this.segments; i++) {
+      const a = bufferVertexCount - (this.segments + (this.segments - i));
+      const b = i + 1 < this.segments ? a + 1 : bufferVertexCount - 2 * this.segments;
+      const c = bufferVertexCount - (this.segments - i);
+      const d = i + 1 < this.segments ? c + 1 : bufferVertexCount - this.segments;
+
+      this._addIndex(c, a, b);
+      this._addIndex(c, b, d);
     }
 
     for (let i = 0; i < this.segments; i++) {
@@ -629,19 +638,30 @@ AFRAME.registerComponent("networked-drawing", {
   })(),
 
   _drawStartCap(point, segments, normal) {
+    this._addVertex({ position: point, normal: normal });
+
     for (let i = 0; i < this.segments; i++) {
-      this._addVertex({ position: point, normal: normal });
-      this._addVertex(segments[(i + 1) % this.segments]);
       this._addVertex(segments[i]);
+    }
+
+    const bufferVertexCount = this.sharedBuffer.idx.position;
+    const a = bufferVertexCount - this.segments - 1;
+    for (let i = 0; i < this.segments; i++) {
+      const b = bufferVertexCount - (this.segments - i);
+      const c = i + 1 < this.segments ? b + 1 : bufferVertexCount - this.segments;
+      this._addIndex(a, c, b);
     }
   },
 
   _drawEndCap(point, segments, normal) {
-    //different order from _drawStartCap to maintain ccw winding order
+    this._addVertex({ position: point, normal: normal });
+
+    const bufferVertexCount = this.sharedBuffer.idx.position;
+    const a = bufferVertexCount - 1;
     for (let i = 0; i < this.segments; i++) {
-      this._addVertex({ position: point, normal: normal });
-      this._addVertex(segments[i]);
-      this._addVertex(segments[(i + 1) % this.segments]);
+      const b = bufferVertexCount - (this.segments - i) - 1;
+      const c = i + 1 < this.segments ? b + 1 : bufferVertexCount - this.segments - 1;
+      this._addIndex(a, b, c);
     }
   },
 
@@ -661,8 +681,12 @@ AFRAME.registerComponent("networked-drawing", {
       ++this.sharedBuffer.idx.normal;
     }
 
-    ++this.sharedBuffer.idx.uv;
     ++this.vertexCount;
+  },
+
+  _addIndex(a, b, c) {
+    this.sharedBuffer.addIndex(a, b, c);
+    this.indexCount += 3;
   },
 
   //calculate the segments for a given point
