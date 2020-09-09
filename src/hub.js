@@ -183,14 +183,6 @@ if (isEmbed && !qs.get("embed_token")) {
 }
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
-window.APP.quality =
-  window.APP.store.state.preferences.materialQualitySetting === "low"
-    ? "low"
-    : window.APP.store.state.preferences.materialQualitySetting === "high"
-      ? "high"
-      : isMobile || isMobileVR
-        ? "low"
-        : "high";
 
 import "./components/owned-object-limiter";
 import "./components/owned-object-cleanup-timeout";
@@ -665,7 +657,9 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         });
     };
 
+    window.APP.hub = hub;
     updateUIForHub(hub, hubChannel);
+    scene.emit("hub_updated", { hub });
 
     if (!isEmbed) {
       loadEnvironmentAndConnect();
@@ -685,7 +679,14 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
 async function runBotMode(scene, entryManager) {
   const noop = () => {};
-  scene.renderer = { setAnimationLoop: noop, render: noop };
+  const alwaysFalse = () => false;
+  scene.renderer = {
+    setAnimationLoop: noop,
+    render: noop,
+    shadowMap: {},
+    vr: { isPresenting: alwaysFalse },
+    setSize: noop
+  };
 
   while (!NAF.connection.isConnected()) await nextTick();
   entryManager.enterSceneWhenLoaded(new MediaStream(), false);
@@ -759,7 +760,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const scene = document.querySelector("a-scene");
-  scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
   scene.renderer.debug.checkShaderErrors = false;
 
   // HACK - Trigger initial batch preparation with an invisible object
@@ -1095,14 +1095,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   environmentScene.addEventListener("model-loaded", onFirstEnvironmentLoad);
 
-  environmentScene.addEventListener("model-loaded", () => {
+  environmentScene.addEventListener("model-loaded", ({ detail: { model } }) => {
     if (!scene.is("entered")) {
       setupLobbyCamera();
     }
 
     // This will be run every time the environment is changed (including the first load.)
     remountUI({ environmentSceneLoaded: true });
-    scene.emit("environment-scene-loaded");
+    scene.emit("environment-scene-loaded", model);
 
     // Re-bind the teleporter controls collision meshes in case the scene changed.
     document.querySelectorAll("a-entity[teleporter]").forEach(x => x.components["teleporter"].queryCollisionEntities());
@@ -1160,7 +1160,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       context: {
         mobile: isMobile || isMobileVR,
         embed: isEmbed
-      }
+      },
+      hub_invite_id: qs.get("hub_invite_id")
     };
 
     if (isMobileVR) {
@@ -1548,6 +1549,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const hub = hubs[0];
     const userInfo = hubChannel.presence.state[session_id];
 
+    window.APP.hub = hub;
     updateUIForHub(hub, hubChannel);
 
     if (stale_fields.includes("scene")) {
@@ -1592,6 +1594,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (hub.entry_mode === "deny") {
       scene.emit("hub_closed");
     }
+
+    scene.emit("hub_updated", { hub });
   });
 
   hubPhxChannel.on("permissions_updated", () => hubChannel.fetchPermissions());

@@ -1,4 +1,5 @@
-const boundingBox = new THREE.Box3();
+import { traverseAnimationTargets } from "../utils/three-utils";
+
 const frustumBox = new THREE.Box3();
 const inverseLightMatrixWorld = new THREE.Matrix4();
 const tempBox = new THREE.Box3();
@@ -16,13 +17,13 @@ const verts = [
   new THREE.Vector3()
 ];
 
-export default function resizeShadowCameraFrustum(light, scene) {
-  // Reset bounding box
-  frustumBox.makeEmpty();
+function computeShadowCameraBoundingBox(object3D, boundingBox = new THREE.Box3()) {
   boundingBox.makeEmpty();
 
+  object3D.updateMatrixWorld();
+
   // Grow the extents of boundingBox for every geometry in the scene that has castShadow set to true.
-  scene.traverse(node => {
+  object3D.traverse(node => {
     const geometry = node.geometry;
 
     if (geometry && node.castShadow) {
@@ -39,6 +40,15 @@ export default function resizeShadowCameraFrustum(light, scene) {
     }
   });
 
+  tempBox.makeEmpty();
+
+  return boundingBox;
+}
+
+function resizeShadowCameraFrustum(light, boundingBox) {
+  // Reset bounding box
+  frustumBox.makeEmpty();
+
   // Transform the resulting bounding box from world space to light space.
   // Construct a new bounding box in light space that contains the corners of the bounding box in world space.
   const min = boundingBox.min;
@@ -53,7 +63,8 @@ export default function resizeShadowCameraFrustum(light, scene) {
   verts[6].set(max.x, max.y, min.z);
   verts[7].set(max.x, max.y, max.z);
 
-  inverseLightMatrixWorld.getInverse(light.shadow.camera.matrixWorld);
+  light.updateMatrices();
+  inverseLightMatrixWorld.getInverse(light.matrixWorld);
 
   for (let i = 0; i < verts.length; i++) {
     verts[i].applyMatrix4(inverseLightMatrixWorld);
@@ -73,4 +84,50 @@ export default function resizeShadowCameraFrustum(light, scene) {
   camera.near = frustumBox.min.z + NEAR_CLIPPING_PLANE;
   camera.far = frustumBox.max.z + FAR_CLIPPING_PLANE;
   camera.updateProjectionMatrix();
+}
+
+export class ShadowSystem {
+  constructor(sceneEl) {
+    this.needsUpdate = false;
+    this.dynamicShadowsEnabled = window.APP.store.state.preferences.enableDynamicShadows;
+    this.sceneEl = sceneEl;
+    this.onEnvironmentSceneLoaded = this.onEnvironmentSceneLoaded.bind(this);
+    this.sceneEl.addEventListener("environment-scene-loaded", this.onEnvironmentSceneLoaded);
+    this.shadowCameraBoundingBox = new THREE.Box3();
+  }
+
+  onEnvironmentSceneLoaded({ detail: environmentObject3D }) {
+    this.environmentObject3D = environmentObject3D;
+    this.needsUpdate = true;
+    this.sceneEl.renderer.shadowMap.autoUpdate = this.dynamicShadowsEnabled;
+  }
+
+  tick() {
+    const environmentObject3D = this.environmentObject3D;
+
+    if (!this.needsUpdate || window.APP.store.materialQualitySetting === "low" || !environmentObject3D) {
+      return;
+    }
+
+    if (!this.dynamicShadowsEnabled) {
+      traverseAnimationTargets(environmentObject3D, environmentObject3D.animations, animatedNode => {
+        animatedNode.traverse(child => {
+          child.castShadow = false;
+          child.receiveShadow = false;
+        });
+      });
+    }
+
+    computeShadowCameraBoundingBox(environmentObject3D, this.shadowCameraBoundingBox);
+
+    environmentObject3D.traverse(object3D => {
+      if (object3D.isDirectionalLight) {
+        resizeShadowCameraFrustum(object3D, this.shadowCameraBoundingBox);
+      }
+    });
+
+    this.sceneEl.renderer.shadowMap.needsUpdate = true;
+
+    this.needsUpdate = false;
+  }
 }

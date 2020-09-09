@@ -2,8 +2,9 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 import { FormattedMessage } from "react-intl";
-import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 
+import { hubUrl } from "../utils/phoenix-utils";
+import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import styles from "../assets/stylesheets/room-settings-dialog.scss";
 import DialogContainer from "./dialog-container";
 import configs from "../utils/configs";
@@ -12,13 +13,16 @@ export default class RoomSettingsDialog extends Component {
   static propTypes = {
     initialSettings: PropTypes.object,
     onChange: PropTypes.func,
+    hubChannel: PropTypes.object,
     onClose: PropTypes.func,
-    showRoomAccessSettings: PropTypes.bool
+    showPublicRoomSetting: PropTypes.bool
   };
 
   constructor(props) {
     super(props);
     this.state = props.initialSettings;
+    this.state.fetchingInvite = false;
+    this.state.confirmRevoke = false;
   }
 
   onSubmit = e => {
@@ -28,10 +32,29 @@ export default class RoomSettingsDialog extends Component {
     this.props.onClose();
   };
 
-  onRoomAccessSettingsChange = e =>
-    this.setState({
-      allow_promotion: e.target.value === "public"
-    });
+  onRoomAccessSettingsChange = async e => {
+    const newEntryMode = e.target.value;
+    if (newEntryMode === "invite") {
+      this.setState({ fetchingInvite: true });
+      const result = await this.props.hubChannel.fetchInvite();
+      this.setState({ fetchingInvite: false, hubInviteId: result.hub_invite_id });
+    }
+    this.setState({ entry_mode: newEntryMode });
+  };
+
+  onRevokeInvite = async () => {
+    this.setState({ fetchingInvite: true });
+    const result = await this.props.hubChannel.revokeInvite(this.state.hubInviteId);
+    this.setState({ fetchingInvite: false, hubInviteId: result.hub_invite_id, confirmRevoke: false });
+  };
+
+  async componentDidMount() {
+    if (this.state.entry_mode === "invite") {
+      this.setState({ fetchingInvite: true });
+      const result = await this.props.hubChannel.fetchInvite();
+      this.setState({ fetchingInvite: false, hubInviteId: result.hub_invite_id });
+    }
+  }
 
   renderCheckbox(member_permission, disabled, onChange) {
     return (
@@ -53,8 +76,14 @@ export default class RoomSettingsDialog extends Component {
     );
   }
 
+  inviteUrl() {
+    const url = hubUrl();
+    url.searchParams.set("hub_invite_id", this.state.hubInviteId);
+    return url.toString();
+  }
+
   render() {
-    const { showRoomAccessSettings } = this.props;
+    const { showPublicRoomSetting } = this.props;
 
     const maxRoomSize = configs.feature("max_room_size");
 
@@ -108,43 +137,92 @@ export default class RoomSettingsDialog extends Component {
               className={styles.nameField}
             />
           </div>
-          {showRoomAccessSettings && (
-            <>
-              <span className={styles.subtitle}>
-                <FormattedMessage id="room-settings.room-access-subtitle" />
-              </span>
-              <div className={styles.selectContainer}>
-                <label>
-                  <input
-                    type="radio"
-                    value="private"
-                    checked={!this.state.allow_promotion}
-                    onChange={this.onRoomAccessSettingsChange}
-                  />
-                  <div>
-                    <FormattedMessage id="room-settings.access-private" />
-                    <span>
-                      <FormattedMessage id="room-settings.access-private-subtitle" />
-                    </span>
-                  </div>
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    value="public"
-                    checked={this.state.allow_promotion}
-                    onChange={this.onRoomAccessSettingsChange}
-                  />
-                  <div>
-                    <FormattedMessage id="room-settings.access-public" />
-                    <span>
-                      <FormattedMessage id="room-settings.access-public-subtitle" />
-                    </span>
-                  </div>
-                </label>
+          <span className={styles.subtitle}>
+            <FormattedMessage id="room-settings.room-access-subtitle" />
+          </span>
+          <div className={styles.selectContainer}>
+            <label>
+              <input
+                type="radio"
+                value="allow"
+                checked={this.state.entry_mode === "allow"}
+                onChange={this.onRoomAccessSettingsChange}
+              />
+              <div className={styles.radioText}>
+                <span className={styles.radioTitle}>
+                  <FormattedMessage id="room-settings.access-shared-link" />
+                </span>
+                <span className={styles.radioText}>
+                  <FormattedMessage id="room-settings.access-shared-link-subtitle" />
+                </span>
               </div>
-            </>
-          )}
+            </label>
+            <label>
+              <input
+                type="radio"
+                value="invite"
+                checked={this.state.entry_mode === "invite"}
+                onChange={this.onRoomAccessSettingsChange}
+              />
+              <div className={styles.radioText}>
+                <span className={styles.radioTitle}>
+                  <FormattedMessage id="room-settings.access-invite" />
+                </span>
+                <span className={styles.radioText}>
+                  <FormattedMessage id="room-settings.access-invite-subtitle" />
+                </span>
+                {this.state.entry_mode === "invite" && (
+                  <div className={styles.inviteLink}>
+                    <span>Invite link:</span>{" "}
+                    {this.state.fetchingInvite ? (
+                      <span>...</span>
+                    ) : (
+                      <>
+                        <a href={this.inviteUrl()} className="link">
+                          {this.state.hubInviteId}
+                        </a>{" "}
+                        <span className="revoke">
+                          {this.state.confirmRevoke ? (
+                            <>
+                              <FormattedMessage id="room-settings.revoke-confirm" />{" "}
+                              <a onClick={this.onRevokeInvite}>
+                                <FormattedMessage id="room-settings.revoke-confirm-yes" />
+                              </a>{" "}
+                              /{" "}
+                              <a onClick={() => this.setState({ confirmRevoke: false })}>
+                                <FormattedMessage id="room-settings.revoke-confirm-no" />
+                              </a>
+                            </>
+                          ) : (
+                            <a onClick={() => this.setState({ confirmRevoke: true })}>
+                              <FormattedMessage id="room-settings.revoke" />
+                            </a>
+                          )}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            </label>
+            {showPublicRoomSetting && (
+              <label>
+                <input
+                  type="checkbox"
+                  checked={this.state.allow_promotion}
+                  onChange={e => this.setState({ allow_promotion: e.target.checked })}
+                />
+                <div className={styles.radioText}>
+                  <span className={styles.radioTitle}>
+                    <FormattedMessage id="room-settings.access-public" />
+                  </span>
+                  <span className={styles.radioText}>
+                    <FormattedMessage id="room-settings.access-public-subtitle" />
+                  </span>
+                </div>
+              </label>
+            )}
+          </div>
           <span className={styles.subtitle}>
             <FormattedMessage id="room-settings.permissions-subtitle" />
           </span>

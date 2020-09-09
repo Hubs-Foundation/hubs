@@ -1,6 +1,7 @@
 function getSpecificHoverMenu(el) {
   return (
     el &&
+    el.components &&
     (el.components["hover-menu"] ||
       el.components["hover-menu__video"] ||
       el.components["hover-menu__pager"] ||
@@ -20,7 +21,7 @@ function findHoverMenu(hovered) {
     return null;
   }
   let el = hovered.parentNode;
-  while (!getSpecificHoverMenu(el)) {
+  while (el && !getSpecificHoverMenu(el)) {
     el = el.parentNode;
   }
   return getSpecificHoverMenu(el);

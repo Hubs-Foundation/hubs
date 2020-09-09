@@ -13,19 +13,6 @@ export class UVScrollSystem {
       const increment = component.data.increment;
       map.offset.x = increment.x ? offset.x - (offset.x % increment.x) : offset.x;
       map.offset.y = increment.y ? offset.y - (offset.y % increment.y) : offset.y;
-
-      // TODO this should be handled by MobileStandardMaterial itself
-      let matrixUpdated = false;
-      for (let j = 0; j < instances.length; j++) {
-        const mesh = instances[j].mesh;
-        if (mesh.material.isMobileStandardMaterial) {
-          if (!matrixUpdated) {
-            map.updateMatrix();
-            matrixUpdated = true;
-          }
-          mesh.material.uniforms.uvTransform.value.copy(map.matrix);
-        }
-      }
     }
   }
 }

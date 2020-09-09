@@ -25,7 +25,12 @@ AFRAME.registerComponent("open-media-button", {
           } else if ((await isLocalHubsSceneUrl(src)) && mayChangeScene) {
             label = "use scene";
           } else if (await isHubsRoomUrl(src)) {
-            label = "visit room";
+            const url = new URL(this.src);
+            if (url.hash && window.location.pathname === url.pathname) {
+              label = "go to";
+            } else {
+              label = "visit room";
+            }
           }
         }
         this.label.setAttribute("text", "value", label);

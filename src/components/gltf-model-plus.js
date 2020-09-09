@@ -1,7 +1,6 @@
 import nextTick from "../utils/next-tick";
-import { mapMaterials } from "../utils/material-utils";
+import { mapMaterials, convertStandardMaterial } from "../utils/material-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
-import MobileStandardMaterial from "../materials/MobileStandardMaterial";
 import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
@@ -321,7 +320,7 @@ const loadLightmap = async (parser, materialIndex) => {
   return lightMap;
 };
 
-export async function loadGLTF(src, contentType, preferredTechnique, onProgress, jsonPreprocessor) {
+export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   let gltfUrl = src;
   let fileMap;
 
@@ -377,13 +376,7 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
 
       if (!materialNode.extensions) continue;
 
-      if (
-        materialNode.extensions.MOZ_alt_materials &&
-        materialNode.extensions.MOZ_alt_materials[preferredTechnique] !== undefined
-      ) {
-        const altMaterialIndex = materialNode.extensions.MOZ_alt_materials[preferredTechnique];
-        materials[i] = materials[altMaterialIndex];
-      } else if (materialNode.extensions.MOZ_lightmap) {
+      if (materialNode.extensions.MOZ_lightmap) {
         extensionDeps.push(loadLightmap(parser, i));
       }
     }
@@ -412,14 +405,8 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
   gltf.scene.traverse(object => {
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
-
-    object.material = mapMaterials(object, material => {
-      if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
-        return MobileStandardMaterial.fromStandardMaterial(material);
-      }
-
-      return material;
-    });
+    const materialQuality = window.APP.store.materialQualitySetting;
+    object.material = mapMaterials(object, material => convertStandardMaterial(material, materialQuality));
   });
 
   if (fileMap) {
@@ -433,9 +420,6 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
 }
 
 export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
-  const preferredTechnique =
-    window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness";
-
   if (useCache) {
     if (gltfCache.has(src)) {
       gltfCache.retain(src);
@@ -446,7 +430,7 @@ export async function loadModel(src, contentType = null, useCache = false, jsonP
         gltfCache.retain(src);
         return cloneGltf(gltf);
       } else {
-        const promise = loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor);
+        const promise = loadGLTF(src, contentType, null, jsonPreprocessor);
         inflightGltfs.set(src, promise);
         const gltf = await promise;
         inflightGltfs.delete(src);
@@ -455,7 +439,7 @@ export async function loadModel(src, contentType = null, useCache = false, jsonP
       }
     }
   } else {
-    return loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor);
+    return loadGLTF(src, contentType, null, jsonPreprocessor);
   }
 }
 
@@ -611,7 +595,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       rewires.forEach(f => f());
 
       object3DToSet.visible = true;
-      this.el.emit("model-loaded", { format: "gltf", model: this.model });
+      this.el.emit("model-loaded", { format: "gltf", model: object3DToSet });
     } catch (e) {
       gltfCache.release(src);
       console.error("Failed to load glTF model", e, this);

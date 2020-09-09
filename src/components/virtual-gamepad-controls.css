@@ -47,9 +47,10 @@
   border-top-right-radius: 50%;
   border-bottom-right-radius: 50%;
   border-bottom-left-radius: 50%;
-  &__hidden {
-    background-color: transparent;
-  }
+}
+
+:local(.hidden) {
+  background-color: transparent;
 }
 
 :local(.mockJoystick.inner) {
