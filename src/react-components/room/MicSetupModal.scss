@@ -23,8 +23,8 @@
 :local(.audio-check-container) {
   display: flex;
 
-  svg {
-    stroke-width: 0.75;
+  svg path {
+    stroke-width: 1;
   }
 
   & > :first-child {
