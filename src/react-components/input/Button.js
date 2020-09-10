@@ -1,25 +1,26 @@
-import React from "react";
+import React, { forwardRef, memo } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./Button.scss";
 
-export function Button({ primary, secondary, cta, children, ...rest }) {
-  const className = classNames({
-    [styles.primaryButton]: primary,
-    [styles.secondaryButton]: secondary,
-    [styles.ctaButton]: cta
-  });
+export const presets = ["transparent", "basic", "accept", "cancel", "red", "orange", "green", "blue", "purple"];
 
-  return (
-    <button className={className} {...rest}>
-      {children}
-    </button>
-  );
-}
+export const Button = memo(
+  forwardRef(({ preset, className, children, ...rest }, ref) => {
+    return (
+      <button className={classNames(styles.button, styles[preset], className)} {...rest} ref={ref}>
+        {children}
+      </button>
+    );
+  })
+);
 
 Button.propTypes = {
-  primary: PropTypes.bool,
-  secondary: PropTypes.bool,
-  cta: PropTypes.bool,
+  preset: PropTypes.oneOf(presets),
+  className: PropTypes.string,
   children: PropTypes.node
+};
+
+Button.defaultProps = {
+  preset: "basic"
 };
