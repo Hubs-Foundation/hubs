@@ -1,88 +1,138 @@
-@import '../styles/theme';
+@use '../styles/theme';
 
 :local(.button) {
   height: 48px;
+  min-height: 48px;
+  width: min-content;
   min-width: 156px;
   font-weight: 700;
   font-size: 12px;
   border-radius: 8px;
   border-width: 0;
-}
+  border-color: transparent;
+  transition: background-color 0.1s ease-in-out;
+  white-space: nowrap;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-:local(.basic) {
-  color: $darkgrey;
-  border: 1px solid $darkgrey;
+  svg {
+    flex-shrink: 0;
+    margin-right: 8px;
 
-  &:hover {
-    background-color: $white-hover;
-  }
+    *[stroke=\#000] {
+      stroke: theme.$white;
+    }
 
-  &:active {
-    background-color: $white-pressed;
-  }
-}
-
-:local(.accept) {
-  color: $white;
-  background-color: $green;
-
-  &:hover {
-    background-color: $green-hover;
-  }
-
-  &:active {
-    background-color: $green-pressed;
+    *[fill=\#000] {
+      fill: theme.$white;
+    }
   }
 }
 
-:local(.cancel) {
-  color: $white;
-  background-color: $red;
+:local(.basic), :local(.transparent) {
+  color: theme.$darkgrey;
+  border: 1px solid theme.$darkgrey;
+  background-color: theme.$white;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$darkgrey;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$darkgrey;
+    }
+  }
 
   &:hover {
-    background-color: $red-hover;
+    background-color: theme.$white-hover;
   }
 
   &:active {
-    background-color: $red-pressed;
+    background-color: theme.$white-pressed;
+  }
+}
+
+:local(.transparent) {
+  border-color: theme.$transparent;
+  background-color: theme.$transparent;
+}
+
+:local(.accept), :local(.green) {
+  color: theme.$white;
+  background-color: theme.$green;
+
+  &:hover {
+    background-color: theme.$green-hover;
+  }
+
+  &:active {
+    background-color: theme.$green-pressed;
+  }
+}
+
+:local(.cancel), :local(.red) {
+  color: theme.$white;
+  background-color: theme.$red;
+
+  &:hover {
+    background-color: theme.$red-hover;
+  }
+
+  &:active {
+    background-color: theme.$red-pressed;
   }
 }
 
 :local(.blue) {
-  color: $white;
-  background-color: $blue;
+  color: theme.$white;
+  background-color: theme.$blue;
 
   &:hover {
-    background-color: $blue-hover;
+    background-color: theme.$blue-hover;
   }
 
   &:active {
-    background-color: $blue-pressed;
+    background-color: theme.$blue-pressed;
   }
 }
 
 :local(.orange) {
-  color: $white;
-  background-color: $orange;
+  color: theme.$white;
+  background-color: theme.$orange;
 
   &:hover {
-    background-color: $orange-hover;
+    background-color: theme.$orange-hover;
   }
 
   &:active {
-    background-color: $orange-pressed;
+    background-color: theme.$orange-pressed;
   }
 }
 
 :local(.purple) {
-  color: $white;
-  background-color: $purple;
+  color: theme.$white;
+  background-color: theme.$purple;
 
   &:hover {
-    background-color: $purple-hover;
+    background-color: theme.$purple-hover;
   }
 
   &:active {
-    background-color: $purple-pressed;
+    background-color: theme.$purple-pressed;
   }
+}
+
+:local(.button):disabled {
+  border-color: transparent;
+  cursor: not-allowed;
+  color: theme.$darkgrey;
+  opacity: 0.7;
+  background-color: theme.$lightgrey;
+}
+
+:global(.keyboard-user) :local(.button):focus {
+  border-color: transparent;
 }

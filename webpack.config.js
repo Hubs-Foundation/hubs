@@ -383,6 +383,21 @@ module.exports = async (env, argv) => {
           ]
         },
         {
+          test: /\.svg$/,
+          include: [path.resolve(__dirname, "src", "react-components")],
+          use: [
+            {
+              loader: "@svgr/webpack",
+              options: {
+                titleProp: true,
+                replaceAttrValues: { "#000": "{props.color}" },
+                template: require("./src/react-components/icons/IconTemplate")
+              }
+            },
+            "url-loader"
+          ]
+        },
+        {
           test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm)$/,
           use: {
             loader: "file-loader",
