@@ -2,21 +2,49 @@
 
 :local(.button) {
   height: 48px;
+  min-height: 48px;
   width: min-content;
   min-width: 156px;
   font-weight: 700;
   font-size: 12px;
   border-radius: 8px;
   border-width: 0;
+  border-color: transparent;
   transition: background-color 0.1s ease-in-out;
   white-space: nowrap;
   padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    flex-shrink: 0;
+    margin-right: 8px;
+
+    *[stroke=\#000] {
+      stroke: theme.$white;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$white;
+    }
+  }
 }
 
-:local(.basic) {
+:local(.basic), :local(.transparent) {
   color: theme.$darkgrey;
   border: 1px solid theme.$darkgrey;
-  background-color: theme.$transparent;
+  background-color: theme.$white;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$darkgrey;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$darkgrey;
+    }
+  }
 
   &:hover {
     background-color: theme.$white-hover;
@@ -25,6 +53,11 @@
   &:active {
     background-color: theme.$white-pressed;
   }
+}
+
+:local(.transparent) {
+  border-color: theme.$transparent;
+  background-color: theme.$transparent;
 }
 
 :local(.accept), :local(.green) {
@@ -100,28 +133,6 @@
   background-color: theme.$lightgrey;
 }
 
-:global(body.keyboard-user) :local(.button):focus {
-  outline: none;
-  border: 3px solid theme.$black;
-}
-
-:local(.input-group) :local(.button) {
-  height: 100%;
-  border-radius: 0;
-  min-width: auto;
-  padding: 0 16px;
-
-  &:local(.basic) {
-    border-width: 0 0 0 1px;
-  }
-}
-
-:local(.input-group):focus-within :local(.button) {
-  &:first-child {
-    padding-left: 14px;
-  }
-
-  &:last-child {
-    padding-right: 14px;
-  }
+:global(.keyboard-user) :local(.button):focus {
+  border-color: transparent;
 }

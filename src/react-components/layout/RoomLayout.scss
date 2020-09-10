@@ -1,0 +1,58 @@
+@use "../styles/theme.scss";
+
+:local(.room-layout) {
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+  grid-template-columns:
+    [main] auto
+    [sidebar] minmax(auto, min-content);
+  
+  grid-template-rows: 
+    [viewport] auto
+    [toolbar] min-content;
+  
+  background-color: theme.$grey;
+  overflow: hidden;
+  position: relative;
+}
+
+:local(.main) {
+  grid-column-start: main;
+}
+
+:local(.sidebar) {
+  grid-column-start: sidebar;
+  background-color: theme.$white;
+  height: 100%;
+  width: 450px;
+
+  @media(max-width: theme.$breakpoint-md - 1) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: 0;
+    width: 100%;
+    z-index: 100;
+  }
+}
+
+:local(.viewport) {
+  grid-row-start: viewport;
+}
+
+:local(.toolbar) {
+  grid-row-start: toolbar;
+  grid-column-end: -1;
+}
+
+:local(.modal-container) {
+  grid-column: main;
+  grid-row: viewport;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

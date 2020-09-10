@@ -10,7 +10,7 @@ import { ReactComponent as LeaveIcon } from "../icons/Leave.svg";
 import { ReactComponent as MoreIcon } from "../icons/More.svg";
 import { ToolbarButton, presets } from "./ToolbarButton";
 import styleUtils from "../styles/style-utils.scss";
-import { Toolbar } from "./Toolbar";
+import { Toolbar } from "../layout/Toolbar";
 
 export default {
   title: "Toolbar",
@@ -25,6 +25,8 @@ export const AllButtons = ({ selected }) => (
     {presets.map(preset => (
       <ToolbarButton key={preset} icon={<ShareIcon />} label={preset} preset={preset} selected={selected} />
     ))}
+    <ToolbarButton icon={<ShareIcon />} label="Share" preset="purple" statusColor="red" />
+    <ToolbarButton icon={<MicrophoneIcon />} label="Voice" statusColor="green" />
   </>
 );
 
