@@ -1,0 +1,6 @@
+@use "../styles/theme.scss";
+
+:local(.copy-button) {
+  // Use content box so we can dynamically adjust the content size separately from the padding/margin
+  box-sizing: content-box;
+}

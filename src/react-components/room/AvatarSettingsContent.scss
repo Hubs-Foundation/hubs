@@ -1,0 +1,31 @@
+@use "../styles/theme.scss";
+
+:local(.content) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  text-align: center;
+
+  & > * {
+    margin-bottom: 16px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+
+:local(.avatar-preview-container) {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  align-items: center;
+
+  button {
+    position: absolute;
+    bottom: 0;
+    margin-bottom: 8px;
+  }
+}
