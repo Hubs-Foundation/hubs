@@ -2,6 +2,7 @@
 
 :local(.button) {
   height: 48px;
+  min-height: 48px;
   width: min-content;
   min-width: 156px;
   font-weight: 700;
@@ -33,7 +34,7 @@
 :local(.basic), :local(.transparent) {
   color: theme.$darkgrey;
   border: 1px solid theme.$darkgrey;
-  background-color: theme.$transparent;
+  background-color: theme.$white;
 
   svg {
     *[stroke=\#000] {
@@ -56,6 +57,7 @@
 
 :local(.transparent) {
   border-color: theme.$transparent;
+  background-color: theme.$transparent;
 }
 
 :local(.accept), :local(.green) {

@@ -1,19 +1,10 @@
 @use "../styles/theme.scss";
 
-:local(.modal) {
+:local(.sidebar) {
   position: relative;
   display: flex;
   flex-direction: column;
-  height: max-content;
-  background-color: theme.$white;
-  border: 1px solid theme.$lightgrey;
-  border-radius: theme.$border-radius-regular;
-  margin: 24px;
-  width: 204px;
-
-  @media (min-width: theme.$breakpoint-md) {
-    width: 360px;
-  }
+  height: 100%;
 }
 
 :local(.header) {
@@ -40,26 +31,11 @@
 }
 
 :local(.content) {
-  min-height: 200px;
   display: flex;
   flex: 1;
   flex-direction: column;
-}
 
-:local(.sm-fullscreen) {
   @media(max-width: theme.$breakpoint-md - 1) {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    border-width: 0;
-    border-radius: 0;
-    margin: 0;
-    width: 100%;
-
-    :local(.content) {
-      overflow-y: auto;
-    }
+    overflow-y: auto;
   }
 }

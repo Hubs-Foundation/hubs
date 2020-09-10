@@ -1,11 +1,25 @@
 @use '../styles/theme';
 
 :local(.icon-button) {
+  display: flex;
+  align-items: center;
   background: transparent;
   border-width: 0;
   border-color: transparent;
+  font-size: theme.$font-size-xs;
+  font-weight: theme.$font-weight-bold;
+
+  & > * {
+    margin-right: 4px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
 
   &:hover {
+    color: theme.$blue-hover;
+
     svg {
       *[stroke=\#000] {
         stroke: theme.$blue-hover;
@@ -18,6 +32,8 @@
   }
 
   &:active {
+    color: theme.$blue-pressed;
+
     svg {
       *[stroke=\#000] {
         stroke: theme.$blue-pressed;

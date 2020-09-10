@@ -3,8 +3,6 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { RoomEntryModal } from "./RoomEntryModal";
 import logoSrc from "../../assets/images/app-logo.png";
 
-console.log(logoSrc);
-
 export default {
   title: "RoomEntryModal"
 };

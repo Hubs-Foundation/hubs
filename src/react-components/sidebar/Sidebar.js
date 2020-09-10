@@ -1,11 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
-import styles from "./Modal.scss";
+import styles from "./Sidebar.scss";
 
-export function Modal({ title, beforeTitle, afterTitle, children, contentClassName, className, disableFullscreen }) {
+export function Sidebar({ title, beforeTitle, afterTitle, children, contentClassName, className }) {
   return (
-    <div className={classNames(styles.modal, { [styles.smFullscreen]: !disableFullscreen }, className)}>
+    <div className={classNames(styles.sidebar, className)}>
       {(title || beforeTitle || afterTitle) && (
         <div className={styles.header}>
           <div className={styles.beforeTitle}>{beforeTitle}</div>
@@ -18,7 +18,7 @@ export function Modal({ title, beforeTitle, afterTitle, children, contentClassNa
   );
 }
 
-Modal.propTypes = {
+Sidebar.propTypes = {
   title: PropTypes.string,
   beforeTitle: PropTypes.node,
   afterTitle: PropTypes.node,

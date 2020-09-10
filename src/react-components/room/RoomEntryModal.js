@@ -24,7 +24,12 @@ export function RoomEntryModal({
 }) {
   const breakpoint = useCssBreakpoints();
   return (
-    <Modal className={classNames(styles.roomEntryModal, className)} contentClassName={styles.content} {...rest}>
+    <Modal
+      className={classNames(styles.roomEntryModal, className)}
+      contentClassName={styles.content}
+      disableFullscreen
+      {...rest}
+    >
       {breakpoint !== "sm" && (
         <div className={styles.logoContainer}>
           <img src={logoSrc} alt={appName} />
