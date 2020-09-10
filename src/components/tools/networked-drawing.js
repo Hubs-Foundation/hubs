@@ -7,8 +7,8 @@
  */
 
 import SharedBufferGeometryManager from "../../utils/sharedbuffergeometrymanager";
-import MobileStandardMaterial from "../../materials/MobileStandardMaterial";
 import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
+import { convertStandardMaterial } from "../../utils/material-utils";
 import { addMedia, addMeshScaleAnimation } from "../../utils/media-utils";
 import { ObjectContentOrigins } from "../../object-types";
 import { SOUND_PEN_START_DRAW } from "../../systems/sound-effects-system";
@@ -59,9 +59,9 @@ AFRAME.registerComponent("networked-drawing", {
     this.segments = this.data.segments;
 
     let material = new THREE.MeshStandardMaterial(options);
-    if (window.APP && window.APP.quality === "low") {
-      material = MobileStandardMaterial.fromStandardMaterial(material);
-    }
+
+    const quality = window.APP.store.materialQualitySetting;
+    material = convertStandardMaterial(material, quality);
 
     this.sharedBufferGeometryManager = new SharedBufferGeometryManager();
     // NOTE: 20 is approximate for how many floats per point are added.

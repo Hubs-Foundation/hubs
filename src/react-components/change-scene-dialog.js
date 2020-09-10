@@ -7,7 +7,7 @@ import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/change-scene-dialog.scss";
 import DialogContainer from "./dialog-container.js";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
-import { messages } from "../utils/i18n";
+import { getMessages } from "../utils/i18n";
 import { isValidSceneUrl } from "../utils/scene-url-utils";
 
 export default class ChangeSceneDialog extends Component {
@@ -34,7 +34,7 @@ export default class ChangeSceneDialog extends Component {
     urlInput.setCustomValidity("");
 
     this.urlValidationPromise = new Promise(async resolve => {
-      urlInput.setCustomValidity((await isValidSceneUrl(url.trim())) ? "" : messages["invalid-scene-url"]);
+      urlInput.setCustomValidity((await isValidSceneUrl(url.trim())) ? "" : getMessages()["invalid-scene-url"]);
       resolve();
     });
   };

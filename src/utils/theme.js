@@ -1,5 +1,5 @@
 import { waitForDOMContentLoaded } from "./async-utils";
-import "./configs";
+import configs from "./configs";
 
 // Node these should be synchronized with the top of shared.scss
 const DEFAULT_ACTION_COLOR = "#FF3464";
@@ -18,14 +18,14 @@ const DEFAULT_COLORS = {
 };
 
 function getThemeColor(name) {
-  if (window.APP_CONFIG && window.APP_CONFIG.theme && window.APP_CONFIG.theme[name])
-    return window.APP_CONFIG.theme[name];
+  if (configs.APP_CONFIG && configs.APP_CONFIG.theme && configs.APP_CONFIG.theme[name])
+    return configs.APP_CONFIG.theme[name];
 
   return DEFAULT_COLORS[name];
 }
 
 waitForDOMContentLoaded().then(() => {
-  if (window.APP_CONFIG && window.APP_CONFIG.theme && window.APP_CONFIG.theme["dark-theme"]) {
+  if (configs.APP_CONFIG && configs.APP_CONFIG.theme && configs.APP_CONFIG.theme["dark-theme"]) {
     document.body.classList.add("dark-theme");
   } else {
     document.body.classList.add("light-theme");

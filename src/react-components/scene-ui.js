@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
-import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
-import en from "react-intl/locale-data/en";
-
+import { FormattedMessage } from "react-intl";
+import { WrappedIntlProvider } from "./wrapped-intl-provider";
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/scene-ui.scss";
@@ -15,9 +14,7 @@ import { faEllipsisH } from "@fortawesome/free-solid-svg-icons/faEllipsisH";
 import { faCodeBranch } from "@fortawesome/free-solid-svg-icons/faCodeBranch";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 
-import { lang, messages } from "../utils/i18n";
-
-addLocaleData([...en]);
+import { getMessages } from "../utils/i18n";
 
 class SceneUI extends Component {
   static propTypes = {
@@ -67,7 +64,7 @@ class SceneUI extends Component {
   render() {
     if (this.props.unavailable) {
       return (
-        <IntlProvider locale={lang} messages={messages}>
+        <WrappedIntlProvider>
           <div className={styles.ui}>
             <div className={styles.unavailable}>
               <div>
@@ -75,14 +72,14 @@ class SceneUI extends Component {
               </div>
             </div>
           </div>
-        </IntlProvider>
+        </WrappedIntlProvider>
       );
     }
 
     const { sceneAllowRemixing, isOwner, sceneProjectId, parentScene, sceneId } = this.props;
 
     const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
-    const tweetText = `${this.props.sceneName} in ${messages["share-hashtag"]}`;
+    const tweetText = `${this.props.sceneName} in ${getMessages()["share-hashtag"]}`;
     const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(sceneUrl)}&text=${encodeURIComponent(
       tweetText
     )}`;
@@ -144,7 +141,7 @@ class SceneUI extends Component {
     }
 
     return (
-      <IntlProvider locale={lang} messages={messages}>
+      <WrappedIntlProvider>
         <div className={styles.ui}>
           <div
             className={classNames({
@@ -239,7 +236,7 @@ class SceneUI extends Component {
             />
           )}
         </div>
-      </IntlProvider>
+      </WrappedIntlProvider>
     );
   }
 }

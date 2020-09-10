@@ -46,6 +46,7 @@ class StateLink extends React.Component {
         target={target}
         className={className}
         title={title}
+        role="button"
         onClick={event => this.handleClick(event, this.props.history)}
         href="#"
         ref={innerRef}

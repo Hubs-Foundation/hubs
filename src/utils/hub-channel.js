@@ -224,6 +224,16 @@ export default class HubChannel extends EventTarget {
     this.channel.push("update_hub", settings);
   };
 
+  fetchInvite = () => {
+    return new Promise(resolve => this.channel.push("fetch_invite", {}).receive("ok", resolve));
+  };
+
+  revokeInvite = hubInviteId => {
+    return new Promise(resolve =>
+      this.channel.push("revoke_invite", { hub_invite_id: hubInviteId }).receive("ok", resolve)
+    );
+  };
+
   closeHub = () => {
     if (!this._permissions.close_hub) return "unauthorized";
     this.channel.push("close_hub", {});

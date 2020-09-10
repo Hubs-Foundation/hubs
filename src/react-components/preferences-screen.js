@@ -5,13 +5,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faUndo } from "@fortawesome/free-solid-svg-icons/faUndo";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons/faExclamationTriangle";
-import en from "react-intl/locale-data/en";
-import { FormattedMessage, IntlProvider, addLocaleData } from "react-intl";
+import { FormattedMessage } from "react-intl";
+import { WrappedIntlProvider } from "./wrapped-intl-provider";
 import styles from "../assets/stylesheets/preferences-screen.scss";
-import { lang, messages } from "../utils/i18n";
+import { getMessages } from "../utils/i18n";
+import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
 
 const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
-addLocaleData([...en]);
 
 function round(step, n) {
   return Math.round(n / step) * step;
@@ -29,8 +29,8 @@ function ResetToDefaultButton({ onClick }) {
   return (
     <button
       className={styles.noDefaultButtonStyle}
-      title={messages["preferences.resetToDefault"]}
-      aria-label={messages["preferences.resetToDefault"]}
+      title={getMessages()["preferences.resetToDefault"]}
+      aria-label={getMessages()["preferences.resetToDefault"]}
       onClick={onClick}
     >
       <i className={styles.flex}>
@@ -356,15 +356,16 @@ export class PreferenceListItem extends Component {
   static propTypes = {
     store: PropTypes.object,
     storeKey: PropTypes.string,
-    prefType: PropTypes.number,
     setValue: PropTypes.func,
-    control: PropTypes.node.isRequired
+    itemProps: PropTypes.object
   };
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
+    document.body.addEventListener("locale-updated", this.storeUpdated);
   }
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
+    document.body.removeEventListener("locale-updated", this.storeUpdated);
   }
 
   storeUpdated = () => {
@@ -372,18 +373,18 @@ export class PreferenceListItem extends Component {
   };
 
   render() {
-    const isCheckbox = this.props.prefType === PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
+    const isCheckbox = this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
     const isSmallScreen = window.innerWidth < 600;
-    const label = <span className={styles.preferenceLabel}>{messages[`preferences.${this.props.storeKey}`]}</span>;
+    const label = <span className={styles.preferenceLabel}>{getMessages()[`preferences.${this.props.storeKey}`]}</span>;
     const hasPref =
       this.props.store.state.preferences[this.props.storeKey] !== undefined ||
-      (this.props.prefType === PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION &&
+      (this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION &&
         (this.props.store.state.preferences.maxResolutionWidth !== undefined ||
           this.props.store.state.preferences.maxResolutionHeight !== undefined));
     const resetToDefault = hasPref ? (
       <ResetToDefaultButton
         onClick={() => {
-          switch (this.props.prefType) {
+          switch (this.props.itemProps.prefType) {
             case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
               this.props.store.update({
                 preferences: {
@@ -406,7 +407,7 @@ export class PreferenceListItem extends Component {
       return (
         <ListItem>
           <div className={styles.row}>
-            {this.props.control}
+            <Control itemProps={this.props.itemProps} store={this.props.store} setValue={this.props.setValue} />
             {label}
             <div className={styles.rowRight}>{resetToDefault}</div>
           </div>
@@ -421,7 +422,9 @@ export class PreferenceListItem extends Component {
               {label}
             </div>
             <div className={styles.row}>
-              <div className={styles.rowCenter}>{this.props.control}</div>
+              <div className={styles.rowCenter}>
+                <Control itemProps={this.props.itemProps} store={this.props.store} setValue={this.props.setValue} />
+              </div>
               <div className={styles.rowRight}>{resetToDefault}</div>
             </div>
           </div>
@@ -433,7 +436,9 @@ export class PreferenceListItem extends Component {
         <div className={styles.row}>
           {<CheckboxPlaceholder />}
           {label}
-          <div className={styles.rowRight}>{this.props.control}</div>
+          <div className={styles.rowRight}>
+            <Control itemProps={this.props.itemProps} store={this.props.store} setValue={this.props.setValue} />
+          </div>
           <div className={styles.rowRight}>{resetToDefault}</div>
         </div>
       </ListItem>
@@ -448,11 +453,11 @@ const CATEGORY_MOVEMENT = 3;
 const CATEGORY_TOUCHSCREEN = 4;
 const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_CONTROLS, CATEGORY_MISC];
 const CATEGORY_NAMES = new Map([
-  [CATEGORY_AUDIO, messages[`preferences.category_audio`]],
-  [CATEGORY_CONTROLS, messages["preferences.category_controls"]],
-  [CATEGORY_MISC, messages["preferences.category_misc"]],
-  [CATEGORY_MOVEMENT, messages["preferences.category_movement"]],
-  [CATEGORY_TOUCHSCREEN, messages["preferences.category_touchscreen"]]
+  [CATEGORY_AUDIO, getMessages()[`preferences.category_audio`]],
+  [CATEGORY_CONTROLS, getMessages()["preferences.category_controls"]],
+  [CATEGORY_MISC, getMessages()["preferences.category_misc"]],
+  [CATEGORY_MOVEMENT, getMessages()["preferences.category_movement"]],
+  [CATEGORY_TOUCHSCREEN, getMessages()["preferences.category_touchscreen"]]
 ]);
 
 function NavItem({ ariaLabel, title, onClick, selected }) {
@@ -476,7 +481,7 @@ function CloseButton({ onClick }) {
   return (
     <button
       autoFocus
-      aria-label={messages["preferences.closeButton"]}
+      aria-label={getMessages()["preferences.closeButton"]}
       className={classNames(styles.closeButton)}
       onClick={onClick}
     >
@@ -500,6 +505,11 @@ const preferredCamera = {
   ],
   defaultString: "default"
 };
+
+const availableLocales = [{ value: "browser", text: getMessages()["preferences.browserDefault"] }];
+for (const locale in AVAILABLE_LOCALES) {
+  availableLocales.push({ value: locale, text: AVAILABLE_LOCALES[locale] });
+}
 
 const DEFINITIONS = new Map([
   [
@@ -583,13 +593,19 @@ const DEFINITIONS = new Map([
   [
     CATEGORY_MISC,
     [
+      {
+        key: "locale",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+        options: availableLocales,
+        defaultString: "browser"
+      },
       { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
       preferredCamera,
       {
         key: "materialQualitySetting",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-        options: [{ value: "low", text: "Low" }, { value: "high", text: "High" }],
+        options: [{ value: "low", text: "Low" }, { value: "medium", text: "Medium" }, { value: "high", text: "High" }],
         defaultString: isMobile ? "low" : "high",
         promptForRefresh: true
       },
@@ -602,7 +618,8 @@ const DEFINITIONS = new Map([
       { key: "disableAutoPixelRatio", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
       { key: "disableIdleDetection", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-      { key: "preferMobileObjectInfoPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+      { key: "preferMobileObjectInfoPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+      { key: "animateWaypointTransitions", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true }
     ]
   ]
 ]);
@@ -652,11 +669,11 @@ function createItem(itemProps, store) {
   };
   return (
     <PreferenceListItem
-      control={<Control itemProps={itemProps} store={store} setValue={setValue} />}
+      key={itemProps.key}
+      itemProps={itemProps}
       store={store}
       storeKey={itemProps.key}
       setValue={setValue}
-      {...itemProps}
     />
   );
 }
@@ -706,7 +723,7 @@ class RefreshPrompt extends React.Component {
       <div ref={this.ref} className={styles.toast}>
         <div className={styles.row}>
           <WarnIcon />
-          <div className={styles.refreshPrompt}>{messages["preferences.promptForRefresh"]}</div>
+          <div className={styles.refreshPrompt}>{getMessages()["preferences.promptForRefresh"]}</div>
           <div className={styles.warnIconPlaceholder} />
         </div>
         <button
@@ -783,7 +800,7 @@ export default class PreferencesScreen extends Component {
   render() {
     const shouldPromptForRefresh = !!this.props.store.state.preferences.shouldPromptForRefresh;
     return (
-      <IntlProvider locale={lang} messages={messages}>
+      <WrappedIntlProvider>
         <div className={classNames(styles.preferencesPanel)}>
           {shouldPromptForRefresh && (
             <RefreshPrompt
@@ -801,7 +818,7 @@ export default class PreferencesScreen extends Component {
                 onClick={() => {
                   this.setState({ category });
                 }}
-                ariaLabel={`${messages["preferences.selectCategory"]} ${CATEGORY_NAMES.get(category)}`}
+                ariaLabel={`${getMessages()["preferences.selectCategory"]} ${CATEGORY_NAMES.get(category)}`}
                 selected={category === this.state.category}
               />
             ))}
@@ -820,7 +837,7 @@ export default class PreferencesScreen extends Component {
             </div>
           </div>
         </div>
-      </IntlProvider>
+      </WrappedIntlProvider>
     );
   }
 }

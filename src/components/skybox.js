@@ -1,5 +1,6 @@
 import "three/examples/js/pmrem/PMREMGenerator";
 import "three/examples/js/pmrem/PMREMCubeUVPacker";
+import "three/examples/js/lights/LightProbeGenerator";
 import qsTruthy from "../utils/qs_truthy";
 const isBotMode = qsTruthy("bot");
 
@@ -248,10 +249,6 @@ export default class Sky extends Object3D {
       fog: true
     });
 
-    this.skyScene = new Scene();
-    this.cubeCamera = new CubeCamera(1, 100000, 512);
-    this.skyScene.add(this.cubeCamera);
-
     this.sky = new Mesh(Sky._geometry, material);
     this.sky.name = "Sky";
     this.add(this.sky);
@@ -344,19 +341,42 @@ export default class Sky extends Object3D {
   }
 
   generateEnvironmentMap(renderer) {
-    this.skyScene.add(this.sky);
-    this.cubeCamera.update(renderer, this.skyScene);
+    const skyScene = new Scene();
+    const cubeCamera = new CubeCamera(1, 100000, 512);
+    skyScene.add(cubeCamera);
+    skyScene.add(this.sky);
+    cubeCamera.update(renderer, skyScene);
     this.add(this.sky);
     const vrEnabled = renderer.vr.enabled;
     renderer.vr.enabled = false;
-    const pmremGenerator = new PMREMGenerator(this.cubeCamera.renderTarget.texture);
+    const pmremGenerator = new PMREMGenerator(cubeCamera.renderTarget.texture);
     pmremGenerator.update(renderer);
     const pmremCubeUVPacker = new PMREMCubeUVPacker(pmremGenerator.cubeLods);
     pmremCubeUVPacker.update(renderer);
     renderer.vr.enabled = vrEnabled;
     pmremGenerator.dispose();
     pmremCubeUVPacker.dispose();
+    cubeCamera.renderTarget.dispose();
     return pmremCubeUVPacker.CubeUVRenderTarget.texture;
+  }
+
+  generateLightProbe(renderer) {
+    const skyScene = new Scene();
+    skyScene.add(this.sky);
+
+    const cubeCamera = new THREE.CubeCamera(1, 100000, 512, {
+      format: THREE.RGBAFormat,
+      magFilter: THREE.LinearFilter,
+      minFilter: THREE.LinearFilter
+    });
+    cubeCamera.renderTarget.texture.encoding = THREE.sRGBEncoding;
+    skyScene.add(cubeCamera);
+    skyScene.add(this.sky);
+    cubeCamera.update(renderer, skyScene);
+    this.add(this.sky);
+    const lightProbe = THREE.LightProbeGenerator.fromRenderTargetCube(renderer, cubeCamera.renderTarget);
+    cubeCamera.renderTarget.dispose();
+    return lightProbe;
   }
 
   copy(source, recursive = true) {
@@ -401,7 +421,6 @@ AFRAME.registerComponent("skybox", {
 
   init() {
     this.sky = new Sky();
-    this.sky.cubeCamera.children.forEach(o => (o.matrixNeedsUpdate = true));
     this.el.setObject3D("mesh", this.sky);
 
     this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
@@ -456,11 +475,20 @@ AFRAME.registerComponent("skybox", {
 
   updateEnvironmentMap() {
     const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+    const renderer = this.el.sceneEl.renderer;
 
-    if (environmentMapComponent && !isBotMode) {
-      const renderer = this.el.sceneEl.renderer;
+    const quality = window.APP.store.materialQualitySetting;
+
+    if (environmentMapComponent && !isBotMode && quality === "high") {
       const envMap = this.sky.generateEnvironmentMap(renderer);
       environmentMapComponent.updateEnvironmentMap(envMap);
+    } else if (quality === "medium") {
+      // This extra ambient light is here to normalize lighting with the MeshStandardMaterial.
+      // Without it, objects are significantly darker in brighter environments.
+      // It's kept to a low value to not wash out objects in very dark environments.
+      // This is a hack, but the results are much better than they are without it.
+      this.el.setObject3D("ambient-light", new THREE.AmbientLight(0xffffff, 0.3));
+      this.el.setObject3D("light-probe", this.sky.generateLightProbe(renderer));
     }
   },
 

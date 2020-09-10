@@ -7,7 +7,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import configs from "../utils/configs";
 
-import { messages } from "../utils/i18n";
+import { getMessages } from "../utils/i18n";
 import { share, canShare } from "../utils/share";
 
 import { WithHoverSound } from "./wrap-with-audio";
@@ -39,7 +39,7 @@ export default class InviteDialog extends Component {
 
   shareClicked = url => {
     this.setState({ shareButtonActive: true });
-    share({ url, title: `Join me now in ${messages["share-hashtag"]}!` }).then(() => {
+    share({ url, title: `Join me now in ${getMessages()["share-hashtag"]}!` }).then(() => {
       this.setState({ shareButtonActive: false });
     });
   };
@@ -92,7 +92,7 @@ export default class InviteDialog extends Component {
             )}
         </div>
         <WithHoverSound>
-          <button className={styles.close} onClick={() => this.props.onClose()}>
+          <button className={styles.close} title="close" onClick={() => this.props.onClose()}>
             <i>
               <FontAwesomeIcon icon={faTimes} />
             </i>
