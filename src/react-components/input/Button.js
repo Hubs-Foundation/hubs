@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./Button.scss";
 
-export const presets = ["basic", "accept", "cancel", "red", "orange", "green", "blue", "purple"];
+export const presets = ["transparent", "basic", "accept", "cancel", "red", "orange", "green", "blue", "purple"];
 
 export const Button = memo(
   forwardRef(({ preset, className, children, ...rest }, ref) => {

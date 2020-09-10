@@ -1,10 +1,11 @@
 @use "../styles/theme.scss";
 
-:local(.invite-popover) {
+:local(.content) {
   display: flex;
   flex-direction: column;
-  padding: 16px;
   align-items: center;
+  padding: 24px;
+  text-align: center;
 
   & > * {
     margin-bottom: 16px;
@@ -12,10 +13,5 @@
     &:last-child {
       margin-bottom: 0;
     }
-  }
-
-  @media(min-width: theme.$breakpoint-md) {
-    padding-top: 8px;
-    width: 272px;
   }
 }

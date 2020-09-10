@@ -167,10 +167,12 @@ label {
   font-weight: theme.$font-weight-bold;
 }
 
-body:not(:global(.keyboard-user)) {
-  :focus {
-    outline: none;
-  }
+body :focus {
+  outline: none;
+}
+
+:global(.keyboard-user) :focus {
+  box-shadow: 0 0 0 3px theme.$black;
 }
 
 /* We want svg icons to have title elements for screen readers, but we don't need to show their tooltips when they are inside buttons */

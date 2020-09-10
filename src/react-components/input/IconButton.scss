@@ -1,10 +1,25 @@
 @use '../styles/theme';
 
 :local(.icon-button) {
+  display: flex;
+  align-items: center;
   background: transparent;
-  border: none;
+  border-width: 0;
+  border-color: transparent;
+  font-size: theme.$font-size-xs;
+  font-weight: theme.$font-weight-bold;
+
+  & > * {
+    margin-right: 4px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
 
   &:hover {
+    color: theme.$blue-hover;
+
     svg {
       *[stroke=\#000] {
         stroke: theme.$blue-hover;
@@ -17,6 +32,8 @@
   }
 
   &:active {
+    color: theme.$blue-pressed;
+
     svg {
       *[stroke=\#000] {
         stroke: theme.$blue-pressed;
@@ -26,19 +43,5 @@
         fill: theme.$blue-pressed;
       }
     }
-  }
-}
-
-:local(.input-group) :local(.icon-button) {
-  padding: 0 16px;
-}
-
-:local(.input-group):focus-within :local(.icon-button) {
-  &:first-child {
-    padding-left: 14px;
-  }
-
-  &:last-child {
-    padding-right: 14px;
   }
 }
