@@ -1,6 +1,6 @@
 import React from "react";
 import { Popover } from "./Popover";
-import { ToolbarButton } from "../toolbar/ToolbarButton";
+import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as InviteIcon } from "../icons/Invite.svg";
 
 export default {
@@ -37,7 +37,7 @@ const containerStyles = {
   padding: "200px"
 };
 
-export const Base = args => (
+export const All = args => (
   <div style={containerStyles}>
     <Popover title="Invite" content={<div style={{ padding: "8px" }}>Content</div>} initiallyVisible {...args}>
       {({ togglePopover, popoverVisible, triggerRef }) => (
@@ -53,10 +53,10 @@ export const Base = args => (
   </div>
 );
 
-Base.parameters = {
+All.parameters = {
   layout: "fullscreen"
 };
 
-Base.args = {
+All.args = {
   placement: "auto"
 };

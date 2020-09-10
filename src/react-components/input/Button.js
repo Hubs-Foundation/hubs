@@ -1,17 +1,19 @@
-import React from "react";
+import React, { forwardRef, memo } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./Button.scss";
 
-export const presets = ["basic", "accept", "cancel", "red", "orange", "green", "blue", "purple"];
+export const presets = ["transparent", "basic", "accept", "cancel", "red", "orange", "green", "blue", "purple"];
 
-export function Button({ preset, className, children, ...rest }) {
-  return (
-    <button className={classNames(styles.button, styles[preset], className)} {...rest}>
-      {children}
-    </button>
-  );
-}
+export const Button = memo(
+  forwardRef(({ preset, className, children, ...rest }, ref) => {
+    return (
+      <button className={classNames(styles.button, styles[preset], className)} {...rest} ref={ref}>
+        {children}
+      </button>
+    );
+  })
+);
 
 Button.propTypes = {
   preset: PropTypes.oneOf(presets),

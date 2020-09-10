@@ -10,7 +10,16 @@ import classNames from "classnames";
 import { ReactComponent as CloseIcon } from "../icons/Close.svg";
 import { ReactComponent as PopoverArrow } from "./PopoverArrow.svg";
 
-export function Popover({ content: Content, children, title, placement, initiallyVisible }) {
+export function Popover({
+  content: Content,
+  children,
+  title,
+  placement,
+  offsetSkidding,
+  offsetDistance,
+  initiallyVisible,
+  disableFullscreen
+}) {
   const [visible, setVisible] = useState(initiallyVisible);
   const [referenceElement, setReferenceElement] = useState(null);
   const [popperElement, setPopperElement] = useState(null);
@@ -20,10 +29,13 @@ export function Popover({ content: Content, children, title, placement, initiall
     attributes
   } = usePopper(referenceElement, popperElement, {
     placement,
-    modifiers: [{ name: "arrow", options: { element: arrowElement } }, { name: "offset", options: { offset: [0, 16] } }]
+    modifiers: [
+      { name: "arrow", options: { element: arrowElement } }, // https://popper.js.org/docs/v2/modifiers/arrow/
+      { name: "offset", options: { offset: [offsetSkidding, offsetDistance] } } // https://popper.js.org/docs/v2/modifiers/offset/
+    ]
   });
   const breakpoint = useCssBreakpoints();
-  const fullscreen = breakpoint === "sm";
+  const fullscreen = !disableFullscreen && breakpoint === "sm";
   const closePopover = useCallback(() => setVisible(false), [setVisible]);
   const togglePopover = useCallback(() => setVisible(visible => !visible), [setVisible]);
 
@@ -40,12 +52,20 @@ export function Popover({ content: Content, children, title, placement, initiall
         setVisible(false);
       };
 
+      const onKeyDown = e => {
+        if (e.key === "Escape") {
+          setVisible(false);
+        }
+      };
+
       if (visible) {
         window.addEventListener("click", onClick);
+        window.addEventListener("keydown", onKeyDown);
       }
 
       return () => {
         window.removeEventListener("click", onClick);
+        window.removeEventListener("keydown", onKeyDown);
       };
     },
     [visible, popperElement, referenceElement]
@@ -83,12 +103,16 @@ export function Popover({ content: Content, children, title, placement, initiall
           >
             <div className={styles.header}>
               <button onClick={closePopover}>
-                <CloseIcon />
+                <CloseIcon width={16} height={16} />
               </button>
               <h5>{title}</h5>
             </div>
             <div className={styles.content}>
-              {typeof Content === "function" ? <Content closePopover={closePopover} /> : Content}
+              {typeof Content === "function" ? (
+                <Content fullscreen={fullscreen} closePopover={closePopover} />
+              ) : (
+                Content
+              )}
             </div>
             {!fullscreen && (
               <div ref={setArrowElement} className={styles.arrow} style={arrowStyles}>
@@ -107,10 +131,13 @@ Popover.propTypes = {
   placement: PropTypes.string,
   title: PropTypes.string.isRequired,
   children: PropTypes.func.isRequired,
-  content: PropTypes.oneOfType([PropTypes.func, PropTypes.node])
+  content: PropTypes.oneOfType([PropTypes.func, PropTypes.node]),
+  disableFullscreen: PropTypes.bool
 };
 
 Popover.defaultProps = {
   initiallyVisible: false,
-  placement: "auto"
+  placement: "auto",
+  offsetSkidding: 0,
+  offsetDistance: 8
 };

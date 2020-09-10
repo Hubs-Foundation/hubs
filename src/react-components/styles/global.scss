@@ -163,14 +163,21 @@ video {
 }
 
 label {
-  font-size: theme.$font-size-small;
+  font-size: theme.$font-size-sm;
   font-weight: theme.$font-weight-bold;
 }
 
-body:not(:global(.keyboard-user)) {
-  :focus {
-    outline: none;
-  }
+body :focus {
+  outline: none;
+}
+
+:global(.keyboard-user) :focus {
+  box-shadow: 0 0 0 3px theme.$black;
+}
+
+/* We want svg icons to have title elements for screen readers, but we don't need to show their tooltips when they are inside buttons */
+button svg {
+  pointer-events: none;
 }
 
 /**
@@ -209,6 +216,27 @@ body::before {
 // TODO: Add the rest of the base typography styles
 
 h5 {
-  font-size: theme.$font-size-small;
+  font-size: theme.$font-size-sm;
   font-weight: theme.$font-weight-bold;
+}
+
+label, small {
+  font-size: theme.$font-size-xs;
+  font-weight: theme.$font-weight-bold;
+}
+
+a {
+  color: theme.$blue;
+
+  &:hover {
+    color: theme.$blue-hover;
+  }
+
+  &:active {
+    color: theme.$blue-pressed;
+  }
+}
+
+input::placeholder {
+  color: theme.$darkgrey;
 }

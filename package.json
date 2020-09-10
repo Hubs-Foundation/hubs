@@ -114,6 +114,7 @@
     "three-mesh-bvh": "^0.1.2",
     "three-pathfinding": "github:MozillaReality/three-pathfinding#hubs/master2",
     "three-to-ammo": "github:infinitelee/three-to-ammo",
+    "use-clipboard-copy": "^0.1.2",
     "uuid": "^3.2.1",
     "webrtc-adapter": "^6.0.2",
     "zip-loader": "^1.1.0"

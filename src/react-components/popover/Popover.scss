@@ -8,31 +8,55 @@
   border: 1px solid theme.$lightgrey;
   min-width: 160px;
 
-  &[data-popper-placement^=bottom] :local(.arrow) {
-    margin-top: -9px;
+  &[data-popper-placement^=bottom] {
+    :local(.content) {
+      padding-top: 8px;
+    }
 
-    svg {
-      transform: rotate(180deg);
+    :local(.arrow) {
+      margin-top: -9px;
+
+      svg {
+        transform: rotate(180deg);
+      }
     }
   }
 
-  &[data-popper-placement^=top] :local(.arrow) {
-    bottom: -9px;
-  }
+  &[data-popper-placement^=top] {
+    :local(.content) {
+      padding-bottom: 8px;
+    }
 
-  &[data-popper-placement^=right] :local(.arrow) {
-    left: -16px;
-
-    svg {
-      transform: rotate(90deg);
+    :local(.arrow) {
+      bottom: -9px;
     }
   }
 
-  &[data-popper-placement^=left] :local(.arrow) {
-    right: -16px;
+  &[data-popper-placement^=right] {
+    :local(.content) {
+      padding-left: 8px;
+    }
 
-    svg {
-      transform: rotate(270deg);
+    :local(.arrow) {
+      left: -16px;
+  
+      svg {
+        transform: rotate(90deg);
+      }
+    }
+  }
+
+  &[data-popper-placement^=left] {
+    :local(.content) {
+      padding-right: 8px;
+    }
+
+    :local(.arrow) {
+      right: -16px;
+
+      svg {
+        transform: rotate(270deg);
+      }
     }
   }
 }
@@ -75,6 +99,7 @@
   left: 0;
   bottom: 0;
   right: 0;
+  border-width: 0;
   border-radius: 0;
 
   :local(.header) {
@@ -82,6 +107,7 @@
   }
 
   :local(.content) {
+    padding: 0;
     overflow-y: auto;
   }
 }
