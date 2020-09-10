@@ -65,18 +65,20 @@ export function SelectInputField({
           <span>{selectedItemLabel !== undefined ? selectedItemLabel : "Select..."}</span>
           <CaretDownIcon />
         </button>
-        <ul {...getMenuProps()} className={styles.dropdown}>
-          {isOpen &&
-            options.map((item, index) => (
-              <li
-                className={classNames(styles.dropdownItem, { [styles.highlightedItem]: highlightedIndex === index })}
-                key={getItemId(item)}
-                {...getItemProps({ item, index })}
-              >
-                {getItemLabel(item)}
-              </li>
-            ))}
-        </ul>
+        {options.length > 0 && (
+          <ul {...getMenuProps()} className={styles.dropdown}>
+            {isOpen &&
+              options.map((item, index) => (
+                <li
+                  className={classNames(styles.dropdownItem, { [styles.highlightedItem]: highlightedIndex === index })}
+                  key={getItemId(item)}
+                  {...getItemProps({ item, index })}
+                >
+                  {getItemLabel(item)}
+                </li>
+              ))}
+          </ul>
+        )}
       </div>
     </InputField>
   );
