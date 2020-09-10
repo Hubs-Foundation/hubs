@@ -25,6 +25,8 @@ export const AllButtons = ({ selected }) => (
     {presets.map(preset => (
       <ToolbarButton key={preset} icon={<ShareIcon />} label={preset} preset={preset} selected={selected} />
     ))}
+    <ToolbarButton icon={<ShareIcon />} label="Share" preset="purple" statusColor="red" />
+    <ToolbarButton icon={<MicrophoneIcon />} label="Voice" statusColor="green" />
   </>
 );
 

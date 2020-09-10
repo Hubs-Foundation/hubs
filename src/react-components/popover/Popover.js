@@ -17,7 +17,8 @@ export function Popover({
   placement,
   offsetSkidding,
   offsetDistance,
-  initiallyVisible
+  initiallyVisible,
+  disableFullscreen
 }) {
   const [visible, setVisible] = useState(initiallyVisible);
   const [referenceElement, setReferenceElement] = useState(null);
@@ -34,7 +35,7 @@ export function Popover({
     ]
   });
   const breakpoint = useCssBreakpoints();
-  const fullscreen = breakpoint === "sm";
+  const fullscreen = !disableFullscreen && breakpoint === "sm";
   const closePopover = useCallback(() => setVisible(false), [setVisible]);
   const togglePopover = useCallback(() => setVisible(visible => !visible), [setVisible]);
 
@@ -51,12 +52,20 @@ export function Popover({
         setVisible(false);
       };
 
+      const onKeyDown = e => {
+        if (e.key === "Escape") {
+          setVisible(false);
+        }
+      };
+
       if (visible) {
         window.addEventListener("click", onClick);
+        window.addEventListener("keydown", onKeyDown);
       }
 
       return () => {
         window.removeEventListener("click", onClick);
+        window.removeEventListener("keydown", onKeyDown);
       };
     },
     [visible, popperElement, referenceElement]
@@ -99,7 +108,11 @@ export function Popover({
               <h5>{title}</h5>
             </div>
             <div className={styles.content}>
-              {typeof Content === "function" ? <Content closePopover={closePopover} /> : Content}
+              {typeof Content === "function" ? (
+                <Content fullscreen={fullscreen} closePopover={closePopover} />
+              ) : (
+                Content
+              )}
             </div>
             {!fullscreen && (
               <div ref={setArrowElement} className={styles.arrow} style={arrowStyles}>
@@ -118,7 +131,8 @@ Popover.propTypes = {
   placement: PropTypes.string,
   title: PropTypes.string.isRequired,
   children: PropTypes.func.isRequired,
-  content: PropTypes.oneOfType([PropTypes.func, PropTypes.node])
+  content: PropTypes.oneOfType([PropTypes.func, PropTypes.node]),
+  disableFullscreen: PropTypes.bool
 };
 
 Popover.defaultProps = {

@@ -1,0 +1,41 @@
+@use "../styles/theme.scss";
+
+:local(.sidebar) {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+:local(.header) {
+  display: flex;
+  height: 48px;
+  border-bottom: 1px solid theme.$lightgrey;
+  align-items: center;
+  justify-content: center;
+
+  h1 {
+    font-size: theme.$font-size-sm;
+    font-weight: theme.$font-weight-bold;
+  }
+}
+
+:local(.before-title) {
+  position: absolute;
+  left: 0;
+}
+
+:local(.after-title) {
+  position: absolute;
+  right: 0;
+}
+
+:local(.content) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  @media(max-width: theme.$breakpoint-md - 1) {
+    overflow-y: auto;
+  }
+}

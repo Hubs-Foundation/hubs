@@ -1,11 +1,12 @@
-import React, { useContext } from "react";
+import React from "react";
+import PropTypes from "prop-types";
 import styles from "./InvitePopover.scss";
-import { RoomContext } from "./RoomContext";
 import { CopyableTextInputField } from "../input/CopyableTextInputField";
+import { Popover } from "../popover/Popover";
+import { ToolbarButton } from "../input/ToolbarButton";
+import { ReactComponent as InviteIcon } from "../icons/Invite.svg";
 
-export function InvitePopover() {
-  const { url, code, embed } = useContext(RoomContext);
-
+function InvitePopoverContent({ url, code, embed }) {
   return (
     <div className={styles.invitePopover}>
       <CopyableTextInputField label="Room Link" value={url} buttonPreset="green" />
@@ -14,3 +15,35 @@ export function InvitePopover() {
     </div>
   );
 }
+
+InvitePopoverContent.propTypes = {
+  url: PropTypes.string.isRequired,
+  code: PropTypes.string.isRequired,
+  embed: PropTypes.string.isRequired
+};
+
+export function InvitePopoverButton({ url, code, embed }) {
+  return (
+    <Popover
+      title="Invite"
+      content={() => <InvitePopoverContent url={url} code={code} embed={embed} />}
+      placement="top"
+      offsetDistance={28}
+      initiallyVisible
+    >
+      {({ togglePopover, popoverVisible, triggerRef }) => (
+        <ToolbarButton
+          ref={triggerRef}
+          icon={<InviteIcon />}
+          selected={popoverVisible}
+          onClick={togglePopover}
+          label="Invite"
+        />
+      )}
+    </Popover>
+  );
+}
+
+InvitePopoverButton.propTypes = {
+  ...InvitePopoverContent.propTypes
+};
