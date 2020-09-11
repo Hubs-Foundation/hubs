@@ -370,7 +370,11 @@ class MediaBrowser extends Component {
                     </IfFeature>
                     {configs.feature("enable_spoke") && configs.feature("show_issue_report_link") && "|"}
                     <IfFeature name="show_issue_report_link">
-                      <a target="_blank" rel="noopener noreferrer" href={configs.link("issue_report", "/#/report")}>
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")}
+                      >
                         <FormattedMessage id="media-browser.report_issue" />
                       </a>
                     </IfFeature>
