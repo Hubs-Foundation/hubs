@@ -41,6 +41,11 @@
   }
 }
 
+:local(.large) :local(.icon-container) {
+  width: 96px;
+  height: 96px;
+}
+
 :local(.basic), :local(.transparent) {
   :local(.icon-container) {
     border-color: theme.$lightgrey;

@@ -69,6 +69,7 @@
     "dayjs-ext": "^2.2.0",
     "deepmerge": "^2.1.1",
     "detect-browser": "^3.0.1",
+    "downshift": "^6.0.5",
     "draft-js": "^0.10.5",
     "draft-js-counter-plugin": "^2.0.1",
     "draft-js-emoji-plugin": "^2.1.1",

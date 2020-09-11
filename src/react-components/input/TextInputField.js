@@ -7,9 +7,10 @@ import { useId } from "./useId";
 export const TextInputField = memo(
   forwardRef(({ className, error, description, inputClassName, label, ...rest }, ref) => {
     const id = useId();
+    const labelId = useId();
 
     return (
-      <InputField id={id} className={className} label={label} error={error} description={description}>
+      <InputField id={labelId} htmlFor={id} className={className} label={label} error={error} description={description}>
         <TextInput id={id} ref={ref} className={inputClassName} {...rest} />
       </InputField>
     );

@@ -3,11 +3,11 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./InputField.scss";
 
-export const InputField = memo(({ id, label, error, description, className, children, ...rest }) => {
+export const InputField = memo(({ id, htmlFor, label, error, description, className, children, ...rest }) => {
   return (
     <div className={classNames(styles.inputField, className)} {...rest}>
       {label && (
-        <label className={styles.label} htmlFor={id}>
+        <label id={id} className={styles.label} htmlFor={htmlFor}>
           {label}
         </label>
       )}
