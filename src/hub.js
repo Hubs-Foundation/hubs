@@ -6,7 +6,6 @@ import "./utils/debug-log";
 
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
-import "./assets/stylesheets/hub.scss";
 import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 
@@ -121,7 +120,6 @@ import React from "react";
 import { Router, Route } from "react-router-dom";
 import { createBrowserHistory, createMemoryHistory } from "history";
 import { pushHistoryState } from "./utils/history";
-import UIRoot from "./react-components/ui-root";
 import AuthChannel from "./utils/auth-channel";
 import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
@@ -212,6 +210,7 @@ import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY, ONLY_SCREEN_AVAILABLE
 import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
+import { RoomUI } from "./react-components/room/RoomUI";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -280,7 +279,7 @@ function mountUI(props = {}) {
     <Router history={history}>
       <Route
         render={routeProps => (
-          <UIRoot
+          <RoomUI
             {...{
               scene,
               isBotMode,
