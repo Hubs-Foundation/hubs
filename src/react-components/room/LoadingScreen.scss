@@ -1,0 +1,78 @@
+@use "../styles/theme.scss";
+
+:local(.loading-screen) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  background: radial-gradient(50% 50% at 50% 50%, #FFFFFF 0%, #EEEEEE 100%);
+
+  font-size: theme.$font-size-sm;
+
+  @media(min-width: theme.$breakpoint-md) {
+    font-size: theme.$font-size-md;
+  }
+}
+
+:local(.center) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  & > * {
+    margin-bottom: 24px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+:local(.logo) {
+  max-width: 260px;
+  max-height: 140px;
+}
+
+:local(.spinner) {
+  animation: rotate 3s infinite linear;
+
+  *[stroke=\#000] {
+    stroke: theme.$blue;
+  }
+
+  *[fill=\#000] {
+    fill: theme.$blue;
+  }
+
+  @keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+  }
+}
+
+:local(.bottom) {
+  position: absolute;
+  bottom: 10%;
+  margin: 0 24px;
+  text-align: center;
+
+  h3 {
+    font-weight: theme.$font-weight-bold;
+  }
+
+  & > * {
+    margin-bottom: 16px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
