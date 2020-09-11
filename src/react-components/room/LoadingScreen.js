@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import styles from "./LoadingScreen.scss";
 import { ReactComponent as Spinner } from "../misc/Spinner.svg";
 
-export function LoadingScreen({ logoSrc, message, tip }) {
+export function LoadingScreen({ logoSrc, message, bottomHeader, bottomMessage }) {
   return (
     <div className={styles.loadingScreen}>
       <div className={styles.center}>
@@ -12,8 +12,8 @@ export function LoadingScreen({ logoSrc, message, tip }) {
         <p>{message}</p>
       </div>
       <div className={styles.bottom}>
-        <h3>Tip:</h3>
-        <p>{tip}</p>
+        <h3>{bottomHeader}</h3>
+        <p>{bottomMessage}</p>
       </div>
     </div>
   );
@@ -21,6 +21,7 @@ export function LoadingScreen({ logoSrc, message, tip }) {
 
 LoadingScreen.propTypes = {
   logoSrc: PropTypes.string,
-  message: PropTypes.string,
-  tip: PropTypes.string
+  message: PropTypes.node,
+  bottomHeader: PropTypes.node,
+  bottomMessage: PropTypes.node
 };
