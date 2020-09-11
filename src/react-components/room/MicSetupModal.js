@@ -14,6 +14,8 @@ import { SelectInputField } from "../input/SelectInputField";
 import { ToggleInput } from "../input/ToggleInput";
 import { ToolbarButton } from "../input/ToolbarButton";
 
+const micButtonDiameter = 96;
+
 export function MicSetupModal({
   className,
   onPromptMicrophone,
@@ -21,6 +23,7 @@ export function MicSetupModal({
   microphoneOptions,
   onChangeMicrophone,
   microphoneEnabled,
+  micLevel,
   soundPlaying,
   microphoneMuted,
   onChangeMicrophoneMuted,
@@ -52,15 +55,54 @@ export function MicSetupModal({
             )
           }
           label={microphoneEnabled ? "Talk to Test Microphone" : "Microphone Disabled"}
-          className={styles.largeToolbarButton}
+          className={classNames(styles.largeToolbarButton, styles.micButton)}
+          iconContainerClassName={styles.micButtonContainer}
           onClick={onPromptMicrophone}
           disabled={microphoneEnabled}
           large
-        />
+        >
+          <div
+            className={styles.micLevelIcon}
+            style={{
+              clip: `rect(${micButtonDiameter -
+                Math.floor(micLevel * micButtonDiameter)}px, ${micButtonDiameter}px, ${micButtonDiameter}px, 0px)`
+            }}
+          >
+            {microphoneEnabled ? (
+              <MicrophoneIcon className={styles.clippedIcon} width={48} height={48} />
+            ) : (
+              <MicrophoneMutedIcon className={styles.clippedIcon} width={48} height={48} />
+            )}
+          </div>
+          <div
+            className={styles.micLevel}
+            style={{
+              clip: `rect(${micButtonDiameter -
+                Math.floor(micLevel * micButtonDiameter)}px, ${micButtonDiameter}px, ${micButtonDiameter}px, 0px)`
+            }}
+          >
+            <svg
+              width={micButtonDiameter}
+              height={micButtonDiameter}
+              viewBox={`0 0 ${micButtonDiameter} ${micButtonDiameter}`}
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx={micButtonDiameter / 2}
+                cy={micButtonDiameter / 2}
+                r={micButtonDiameter / 2}
+                fill="currentColor"
+                fillOpacity="0.8"
+              />
+            </svg>
+          </div>
+        </ToolbarButton>
         <ToolbarButton
           icon={soundPlaying ? <VolumeHighIcon width={48} height={48} /> : <VolumeOffIcon width={48} height={48} />}
           label="Click to Test Audio"
-          className={classNames(styles.largeToolbarButton, { [styles.soundPlaying]: soundPlaying })}
+          preset={soundPlaying && "blue"}
+          className={styles.largeToolbarButton}
           large
         />
       </div>
@@ -81,6 +123,7 @@ export function MicSetupModal({
 MicSetupModal.propTypes = {
   className: PropTypes.string,
   soundPlaying: PropTypes.bool,
+  micLevel: PropTypes.number,
   microphoneEnabled: PropTypes.bool,
   microphoneMuted: PropTypes.bool,
   onChangeMicrophoneMuted: PropTypes.func,
@@ -90,4 +133,8 @@ MicSetupModal.propTypes = {
   onPromptMicrophone: PropTypes.func,
   onEnterRoom: PropTypes.func,
   onBack: PropTypes.func
+};
+
+MicSetupModal.defaultProps = {
+  micLevel: 0
 };

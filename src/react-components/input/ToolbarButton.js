@@ -8,7 +8,10 @@ export const presets = ["basic", "transparent", "accept", "cancel", "red", "oran
 export const statusColors = ["red", "orange", "green"];
 
 export const ToolbarButton = forwardRef(
-  ({ preset, className, icon, label, selected, large, statusColor, ...rest }, ref) => {
+  (
+    { preset, className, iconContainerClassName, children, icon, label, selected, large, statusColor, ...rest },
+    ref
+  ) => {
     return (
       <button
         ref={ref}
@@ -20,9 +23,10 @@ export const ToolbarButton = forwardRef(
         )}
         {...rest}
       >
-        <div className={styles.iconContainer} aria-hidden="true">
+        <div className={classNames(styles.iconContainer, iconContainerClassName)} aria-hidden="true">
           {icon}
           {statusColor && <div className={classNames(styles.statusIndicator, styles["status-" + statusColor])} />}
+          {children}
         </div>
         <label>{label}</label>
       </button>
@@ -37,7 +41,9 @@ ToolbarButton.propTypes = {
   preset: PropTypes.oneOf(presets),
   statusColor: PropTypes.oneOf(statusColors),
   large: PropTypes.bool,
-  className: PropTypes.string
+  className: PropTypes.string,
+  iconContainerClassName: PropTypes.string,
+  children: PropTypes.node
 };
 
 ToolbarButton.defaultProps = {
