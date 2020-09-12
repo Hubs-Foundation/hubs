@@ -541,7 +541,7 @@ AFRAME.registerComponent("networked-drawing", {
       if (this.lineStarted && this.drawStarted) {
         projectedDirection.copy(direction).multiplyScalar(this.radius);
         projectedPoint.copy(position).add(projectedDirection);
-        this._drawEndCap(projectedPoint, this.lastSegments, direction);
+        this._drawEndCap(projectedPoint, direction);
       }
     };
   })(),
@@ -656,7 +656,7 @@ AFRAME.registerComponent("networked-drawing", {
       projectedDirection.copy(down).multiplyScalar(this.radius * 0.75);
       projectedPoint.copy(position).add(projectedDirection);
 
-      this._drawEndCap(projectedPoint, this.lastSegments, down);
+      this._drawEndCap(projectedPoint, down);
     };
   })(),
 
@@ -676,7 +676,7 @@ AFRAME.registerComponent("networked-drawing", {
     }
   },
 
-  _drawEndCap(point, segments, normal) {
+  _drawEndCap(point, normal) {
     this._addVertex({ position: point, normal: normal });
 
     const bufferVertexCount = this.sharedBuffer.idx.position;
