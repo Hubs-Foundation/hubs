@@ -51,11 +51,6 @@
       position: relative;
       background-color: var(--full-panel-background-color);
 
-
-      @media (max-width: 801px) {
-        padding: 5px;
-      }
-
       &__title {
         @extend %top-title;
         margin-bottom: 20px;
