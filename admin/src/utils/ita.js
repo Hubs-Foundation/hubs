@@ -109,7 +109,12 @@ function getSchemas() {
 }
 
 function getAdminInfo() {
-  return fetchWithAuth(getEndpoint("admin-info")).then(resp => resp.json());
+  return fetchWithAuth(getEndpoint("admin-info"))
+    .then(resp => {
+      if (resp.status === 200) return resp.json();
+      else return resp;
+    })
+    .catch(e => console.log(e));
 }
 
 function getEditableConfig(service) {
