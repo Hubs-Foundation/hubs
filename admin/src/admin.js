@@ -84,7 +84,6 @@ class AdminUI extends Component {
     if (process.env.NODE_ENV !== "development" || qs.get("idle_timeout")) detectIdle();
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);
-    console.log("inside did mount");
     const adminInfo = await getAdminInfo();
     // Unauthorized account
     if (adminInfo.status === 401) this.setState({ isAdmin: false });
