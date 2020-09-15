@@ -90,6 +90,15 @@ AFRAME.registerSystem("interaction", {
     );
   },
 
+  wasReleasedThisFrame(el) {
+    return (
+      (this.previousState.leftHand.held === el && !this.state.leftHand.held) ||
+      (this.previousState.rightHand.held === el && !this.state.rightHand.held) ||
+      (this.previousState.rightRemote.held === el && !this.state.rightRemote.held) ||
+      (this.previousState.leftRemote.held === el && !this.state.leftRemote.held)
+    );
+  },
+
   release(el) {
     if (this.state.leftHand.held === el) {
       this.state.leftHand.held = null;

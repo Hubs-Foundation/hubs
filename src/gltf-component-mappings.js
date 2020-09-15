@@ -150,12 +150,11 @@ AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentNam
 
 AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, componentName, componentData, components) => {
   console.log(componentData, components, componentName);
-  el.setAttribute("body-helper", {
-    type: "kinematic",
-    disableCollision: true,
-    collisionFilterGroup: COLLISION_LAYERS.MEDIA_FRAMES,
-    collisionFilterMask: COLLISION_LAYERS.INTERACTABLES,
-    activationState: "disable_deactivation"
+  el.setAttribute("networked", {
+    template: "#interactable-media-frame",
+    owner: "scene",
+    persistent: true,
+    networkId: components.networked.id
   });
   el.setAttribute("shape-helper", {
     type: "box",
@@ -175,7 +174,7 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
       template: "#interactable-media",
       owner: "scene",
       persistent: true,
-      networkId: componentData.id
+      networkId: components.networked.id
     });
   }
 
