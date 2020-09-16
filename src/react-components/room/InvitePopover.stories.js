@@ -14,7 +14,9 @@ const room = {
 };
 
 export const Base = () => (
-  <RoomLayout toolbarCenter={<InvitePopoverButton url={room.url} code={room.code} embed={room.embed} />} />
+  <RoomLayout
+    toolbarCenter={<InvitePopoverButton url={room.url} code={room.code} embed={room.embed} initiallyVisible />}
+  />
 );
 
 Base.parameters = {

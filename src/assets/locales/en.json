@@ -398,6 +398,8 @@
   "loader.connected": "Connected.",
   "loader.object": "object",
   "loader.objects": "objects",
+  "loading-screen.default": "Loading scene...",
+  "loading-screen.loading-objects": "Loading objects {loadedCount}/{objectCount}",
   "change-scene-dialog.change-scene": "Change Scene",
   "change-scene-dialog.create-in-spoke": "Or, create a new scene using %editor-name%.",
   "change-scene-dialog.new-spoke-project": "Launch %editor-name%",

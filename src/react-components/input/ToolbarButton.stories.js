@@ -68,7 +68,6 @@ RoomToolbar.parameters = {
 
 export const EntryToolbar = () => (
   <Toolbar
-    alwaysShowLeft
     left={<ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" />}
     center={
       <>

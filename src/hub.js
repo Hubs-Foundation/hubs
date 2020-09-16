@@ -23,7 +23,6 @@ import "aframe-slice9-component";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
-import { detectOS, detect } from "detect-browser";
 import {
   getReticulumFetchUrl,
   getReticulumMeta,
@@ -211,6 +210,7 @@ import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
 import { RoomUI } from "./react-components/room/RoomUI";
+import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -276,26 +276,28 @@ function mountUI(props = {}) {
   const forcedVREntryType = qsVREntryType;
 
   ReactDOM.render(
-    <Router history={history}>
-      <Route
-        render={routeProps => (
-          <RoomUI
-            {...{
-              scene,
-              isBotMode,
-              disableAutoExitOnIdle,
-              forcedVREntryType,
-              store,
-              mediaSearchStore,
-              isCursorHoldingPen,
-              hasActiveCamera,
-              ...props,
-              ...routeProps
-            }}
-          />
-        )}
-      />
-    </Router>,
+    <WrappedIntlProvider>
+      <Router history={history}>
+        <Route
+          render={routeProps => (
+            <RoomUI
+              {...{
+                scene,
+                isBotMode,
+                disableAutoExitOnIdle,
+                forcedVREntryType,
+                store,
+                mediaSearchStore,
+                isCursorHoldingPen,
+                hasActiveCamera,
+                ...props,
+                ...routeProps
+              }}
+            />
+          )}
+        />
+      </Router>
+    </WrappedIntlProvider>,
     document.getElementById("ui-root")
   );
 }
@@ -710,19 +712,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (platformUnsupported()) {
     return;
-  }
-
-  const detectedOS = detectOS(navigator.userAgent);
-  const browser = detect();
-  // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
-  // safari when initializing it later.
-  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
-    try {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (e) {
-      remountUI({ showSafariMicDialog: true });
-      return;
-    }
   }
 
   const defaultRoomId = configs.feature("default_room_id");

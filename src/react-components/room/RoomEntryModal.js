@@ -65,7 +65,7 @@ export function RoomEntryModal({
 RoomEntryModal.propTypes = {
   appName: PropTypes.string,
   logoSrc: PropTypes.string,
-  className: PropTypes.className,
+  className: PropTypes.string,
   roomName: PropTypes.string.isRequired,
   onJoinRoom: PropTypes.func,
   onEnterOnDevice: PropTypes.func,

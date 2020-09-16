@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import classNames from "classnames";
 import { Modal } from "../modal/Modal";
 import { Button } from "../input/Button";
 import { ReactComponent as VRIcon } from "../icons/VR.svg";
@@ -10,14 +11,13 @@ import { IconButton } from "../input/IconButton";
 export function EnterOnDeviceModal({
   className,
   shortUrl,
+  loadingCode,
   code,
   headsetConnected,
   onEnterOnConnectedHeadset,
   onBack,
   ...rest
 }) {
-  const codeCharacters = code.split("");
-
   return (
     <Modal
       title="Enter on Device"
@@ -28,31 +28,37 @@ export function EnterOnDeviceModal({
         </IconButton>
       }
       className={className}
-      contentClassName={styles.content}
+      contentClassName={classNames(styles.content, { [styles.loadingCode]: loadingCode })}
       {...rest}
     >
-      <h1>Enter on Wireless Headset / Phone</h1>
-      <p>{"In your device's web browser, go to:"}</p>
-      <div className={styles.shortUrlContainer}>{shortUrl}</div>
-      <p>Then, enter this one-time code:</p>
-      <div className={styles.codeContainer}>
-        {codeCharacters.map((char, i) => (
-          <div key={i} className={styles.codeLetter}>
-            {char}
-          </div>
-        ))}
-      </div>
-      <small>Your account and avatar will be transferred to the device.</small>
-      <small>Keep this page open to use this code.</small>
-      {headsetConnected && (
+      {loadingCode ? (
+        <h1>Generating join code...</h1>
+      ) : (
         <>
-          <hr data-or-text="or" />
-          <h1>Enter on Connected Headset</h1>
-          <p>You have a VR headset connected to this device.</p>
-          <Button preset="purple" onClick={onEnterOnConnectedHeadset}>
-            <VRIcon />
-            <span>Enter in VR</span>
-          </Button>
+          <h1>Enter on Wireless Headset / Phone</h1>
+          <p>{"In your device's web browser, go to:"}</p>
+          <div className={styles.shortUrlContainer}>{shortUrl}</div>
+          <p>Then, enter this one-time code:</p>
+          <div className={styles.codeContainer}>
+            {code.split("").map((char, i) => (
+              <div key={i} className={styles.codeLetter}>
+                {char}
+              </div>
+            ))}
+          </div>
+          <small>Your account and avatar will be transferred to the device.</small>
+          <small>Keep this page open to use this code.</small>
+          {headsetConnected && (
+            <>
+              <hr data-or-text="or" />
+              <h1>Enter on Connected Headset</h1>
+              <p>You have a VR headset connected to this device.</p>
+              <Button preset="purple" onClick={onEnterOnConnectedHeadset}>
+                <VRIcon />
+                <span>Enter in VR</span>
+              </Button>
+            </>
+          )}
         </>
       )}
     </Modal>
@@ -62,6 +68,7 @@ export function EnterOnDeviceModal({
 EnterOnDeviceModal.propTypes = {
   className: PropTypes.string,
   shortUrl: PropTypes.string.isRequired,
+  loadingCode: PropTypes.bool,
   code: PropTypes.string.isRequired,
   headsetConnected: PropTypes.bool,
   onEnterOnConnectedHeadset: PropTypes.func,

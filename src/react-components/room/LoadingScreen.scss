@@ -1,6 +1,7 @@
 @use "../styles/theme.scss";
 
 :local(.loading-screen) {
+  pointer-events: auto;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -33,6 +34,9 @@
 }
 
 :local(.logo) {
+  // Keep arbitrary-sized logos from making the page jump on load
+  position: absolute;
+  transform: translateY(calc(-100% - 20px));
   max-width: 260px;
   max-height: 140px;
 }
