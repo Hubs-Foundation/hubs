@@ -174,7 +174,7 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
       template: "#interactable-media",
       owner: "scene",
       persistent: true,
-      networkId: components.networked.id
+      networkId: componentData.id
     });
   }
 
