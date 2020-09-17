@@ -162,6 +162,22 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add({
+    template: "#interactable-media-frame",
+    components: [
+      {
+        component: "media-frame",
+        property: "targetId"
+      },
+      {
+        component: "media-frame",
+        property: "originalTargetScale"
+      }
+    ],
+    // TODO we probably want media frames to support permissioning of some form
+    nonAuthorizedComponents: ["media-frame"]
+  });
+
+  NAF.schemas.add({
     template: "#static-media",
     components: [
       // TODO: Optimize checking mediaOptions with requiresNetworkUpdate.
