@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useReducer } from "react";
 import PropTypes from "prop-types";
 import { RoomLayout } from "../layout/RoomLayout";
 import { ReactComponent as ChatIcon } from "../icons/Chat.svg";
@@ -11,8 +11,31 @@ import { MicPermissionsModal } from "./MicPermissionsModal";
 import { EnterOnDeviceUI } from "./EnterOnDeviceUI";
 import { InvitePopoverButton } from "./InvitePopover";
 
+function reducer(state, action) {
+  switch (action.type) {
+    case "join-room":
+      return { activeModalId: "mic-permissions", entryMode: "screen" };
+    case "enter-on-device":
+      return { activeModalId: "enter-on-device" };
+    case "enter-on-device-back":
+      return { activeModalId: "room-entry" };
+    case "mic-permissions-back":
+      if (state.entryMode === "2d") {
+        return { activeModalId: "room-entry" };
+      } else {
+        return { activeModalId: "enter-on-device" };
+      }
+    case "connected-on-device":
+      return { activeModalId: "room-entry" };
+    case "enter-on-connected-headset":
+      return { activeModalId: "mic-permissions", entryMode: "headset" };
+  }
+}
+
 export function RoomEntryUI({ hub, linkChannel, onEnter }) {
-  const [activeModalId, setActiveModalId] = useState("room-entry");
+  const [{ activeModalId }, dispatch] = useReducer(reducer, {
+    activeModalId: "room-entry"
+  });
 
   // TODO: Move to Hub class
   const shortLink = `https://${configs.SHORTLINK_DOMAIN}/${hub.hub_id}`;
@@ -27,14 +50,21 @@ export function RoomEntryUI({ hub, linkChannel, onEnter }) {
       <RoomEntryModal
         logoSrc={configs.image("logo")}
         roomName={hub.name}
-        onJoinRoom={() => setActiveModalId("mic-permissions")}
-        onEnterOnDevice={() => setActiveModalId("enter-on-device")}
+        onJoinRoom={() => dispatch({ type: "join-room" })}
+        onEnterOnDevice={() => dispatch({ type: "enter-on-device" })}
       />
     );
   } else if (activeModalId === "mic-permissions") {
-    activeModal = <MicPermissionsModal onBack={() => setActiveModalId("room-entry")} />;
+    activeModal = <MicPermissionsModal onBack={() => dispatch({ type: "mic-permissions-back" })} />;
   } else if (activeModalId === "enter-on-device") {
-    activeModal = <EnterOnDeviceUI linkChannel={linkChannel} onBack={() => setActiveModalId("room-entry")} />;
+    activeModal = (
+      <EnterOnDeviceUI
+        linkChannel={linkChannel}
+        onBack={() => dispatch({ type: "enter-on-device-back" })}
+        onConnectedOnDevice={() => dispatch({ type: "connected-on-device" })}
+        onEnterOnConnectedHeadset={() => dispatch({ type: "enter-on-connected-headset" })}
+      />
+    );
   }
 
   return (

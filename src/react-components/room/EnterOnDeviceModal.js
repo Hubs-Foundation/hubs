@@ -14,6 +14,7 @@ export function EnterOnDeviceModal({
   loadingCode,
   code,
   headsetConnected,
+  unsupportedBrowser,
   onEnterOnConnectedHeadset,
   onBack,
   ...rest
@@ -52,11 +53,28 @@ export function EnterOnDeviceModal({
             <>
               <hr data-or-text="or" />
               <h1>Enter on Connected Headset</h1>
-              <p>You have a VR headset connected to this device.</p>
-              <Button preset="purple" onClick={onEnterOnConnectedHeadset}>
-                <VRIcon />
-                <span>Enter in VR</span>
-              </Button>
+              {unsupportedBrowser ? (
+                <>
+                  <p>{"WebVR isn't supported in this browser, to enter with Oculus or SteamVR, use Firefox."}</p>
+                  <Button
+                    as="a"
+                    preset="orange"
+                    href="https://www.mozilla.org/firefox/"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    <span>Download Firefox</span>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <p>You have a VR headset connected to this device.</p>
+                  <Button preset="purple" onClick={onEnterOnConnectedHeadset}>
+                    <VRIcon />
+                    <span>Enter in VR</span>
+                  </Button>
+                </>
+              )}
             </>
           )}
         </>
@@ -71,6 +89,7 @@ EnterOnDeviceModal.propTypes = {
   loadingCode: PropTypes.bool,
   code: PropTypes.string.isRequired,
   headsetConnected: PropTypes.bool,
+  unsupportedBrowser: PropTypes.bool,
   onEnterOnConnectedHeadset: PropTypes.func,
   onBack: PropTypes.func
 };

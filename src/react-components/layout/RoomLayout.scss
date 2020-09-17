@@ -48,6 +48,7 @@
   grid-row-start: toolbar;
   grid-column-end: -1;
   pointer-events: auto;
+  z-index: 0;
 }
 
 :local(.modal-container) {
@@ -57,6 +58,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1;
 
   & > * {
     pointer-events: auto;

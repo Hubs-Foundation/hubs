@@ -6,21 +6,25 @@ import styles from "./Button.scss";
 export const presets = ["transparent", "basic", "accept", "cancel", "red", "orange", "green", "blue", "purple"];
 
 export const Button = memo(
-  forwardRef(({ preset, className, children, ...rest }, ref) => {
+  forwardRef(({ as, preset, className, children, ...rest }, ref) => {
+    const ButtonComponent = as;
+
     return (
-      <button className={classNames(styles.button, styles[preset], className)} {...rest} ref={ref}>
+      <ButtonComponent className={classNames(styles.button, styles[preset], className)} {...rest} ref={ref}>
         {children}
-      </button>
+      </ButtonComponent>
     );
   })
 );
 
 Button.propTypes = {
+  as: PropTypes.elementType,
   preset: PropTypes.oneOf(presets),
   className: PropTypes.string,
   children: PropTypes.node
 };
 
 Button.defaultProps = {
+  as: "button",
   preset: "basic"
 };
