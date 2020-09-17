@@ -76,7 +76,7 @@ export class MediaFramesSystem {
         // frame full
         guideMesh.material.uniforms.color.value.set(FULL_COLOR);
         frame.hidePreview();
-        let capturedEl = document.getElementById(frame.data.targetId);
+        const capturedEl = document.getElementById(frame.data.targetId);
         if (capturedEl) {
           if (NAF.utils.isMine(capturedEl)) {
             if (this.interactionSystem.isHeld(capturedEl)) {
@@ -201,7 +201,7 @@ AFRAME.registerComponent("media-frame", {
 
     // Ownership race, whoever owns the old object needs to take care of "ejecting" it
     if (oldData.targetId !== "empty" && oldData.tergetId !== this.data.targetId) {
-      let capturedEl = document.getElementById(oldData.targetId);
+      const capturedEl = document.getElementById(oldData.targetId);
       if (capturedEl && NAF.utils.isMine(capturedEl)) {
         capturedEl.object3D.translateZ(this.data.bounds.z);
         capturedEl.object3D.scale.copy(oldData.originalTargetScale);
@@ -277,7 +277,7 @@ AFRAME.registerComponent("media-frame", {
 
   release() {
     if (NAF.utils.isMine(this.el) || NAF.utils.takeOwnership(this.el)) {
-      let capturedEl = document.getElementById(this.data.targetId);
+      const capturedEl = document.getElementById(this.data.targetId);
 
       this.el.setAttribute("media-frame", {
         targetId: "empty"
