@@ -1,8 +1,8 @@
-import { isTagged, setTag } from "../components/tags";
 import { MediaType } from "../utils/media-utils";
 import { TEXTURES_FLIP_Y } from "../loaders/HubsTextureLoader";
 import { applyPersistentSync } from "../utils/permissions-utils";
 
+// TODO better handling for 3d objects
 function scaleForAspectFit(containerSize, itemSize) {
   return Math.min(containerSize.x / itemSize.x, containerSize.y / itemSize.y);
 }
@@ -28,31 +28,9 @@ const isCapturableByType = {
   }
 };
 
-function getCapturableEntityCollidingWithBody(physicsSystem, mediaType, bodyUUID) {
-  const collisions = physicsSystem.getCollisions(bodyUUID);
-  for (let i = 0; i < collisions.length; i++) {
-    const bodyData = physicsSystem.bodyUuidToData.get(collisions[i]);
-    const mediaObjectEl = bodyData && bodyData.object3D && bodyData.object3D.el;
-    if (isCapturableByType[mediaType](mediaObjectEl)) {
-      return mediaObjectEl;
-    }
-  }
-  return null;
-}
-
-function isColliding(physicsSystem, entityA, entityB) {
-  const bodyAUUID = entityA.components["body-helper"].uuid;
-  const bodyBUUID = entityB.components["body-helper"].uuid;
-
-  // TODO would be nice to fix the timing so we don't need to check this
-  if (!(physicsSystem.bodyInitialized(bodyAUUID) && physicsSystem.bodyInitialized(bodyBUUID))) return false;
-
-  const collisions = physicsSystem.getCollisions(bodyAUUID);
-  for (let i = 0; i < collisions.length; i++) {
-    if (collisions[i] === bodyBUUID) return true;
-  }
-  return false;
-}
+const EMPTY_COLOR = 0x6fc0fd;
+const HOVER_COLOR = 0x2f80ed;
+const FULL_COLOR = 0x808080;
 
 const components = [];
 export class MediaFramesSystem {
@@ -69,32 +47,25 @@ export class MediaFramesSystem {
       // TODO would be nice to fix the timing so we don't need to check this
       if (!this.physicsSystem.bodyInitialized(bodyUUID)) continue;
 
-      const previewMesh = zone.el.getObject3D("preview");
-      const guideMesh = zone.el.getObject3D("guide");
-
-      guideMesh.visible = true; //this.interactionSystem.isHoldingAnything(isCapturableByType[zone.data.mediaType]);
       const holdingSomethingCapturable = this.interactionSystem.isHoldingAnything(
         isCapturableByType[zone.data.mediaType]
       );
 
-      // guideMesh.material.uniforms.color.value.set(0x6fc0fd);
-      // guideMesh.material.uniforms.color.value.set(0x2f80ed);
-      // guideMesh.material.uniforms.color.value.set(0x00ff00);
-      // guideMesh.material.uniforms.color.value.set(0x808080);
+      const guideMesh = zone.el.getObject3D("guide");
+      guideMesh.visible = holdingSomethingCapturable;
 
       if (zone.data.targetId === "empty") {
         // zone empty
-        guideMesh.material.uniforms.color.value.set(holdingSomethingCapturable ? 0xff00ff : 0xffffff);
-        const capturableEl = getCapturableEntityCollidingWithBody(this.physicsSystem, zone.data.mediaType, bodyUUID);
+        guideMesh.material.uniforms.color.value.set(EMPTY_COLOR);
+        const capturableEl = this.getCapturableEntityCollidingWithBody(zone.data.mediaType, bodyUUID);
         if (capturableEl && NAF.utils.isMine(capturableEl)) {
           // capturable object I own is colliding with an empty zone
           if (this.interactionSystem.isHeld(capturableEl)) {
             // held object I own colliding with an empty zone, show preview
-            guideMesh.material.uniforms.color.value.set(0x00ff00);
+            guideMesh.material.uniforms.color.value.set(HOVER_COLOR);
             zone.showPreview(capturableEl);
           } else {
             // non-held object I own colliding with an empty zone, capture
-            guideMesh.material.uniforms.color.value.set(0x0000ff);
             zone.capture(capturableEl);
           }
         } else {
@@ -103,17 +74,18 @@ export class MediaFramesSystem {
         }
       } else {
         // zone full
-        guideMesh.material.uniforms.color.value.set(0xff0000);
+        guideMesh.material.uniforms.color.value.set(FULL_COLOR);
         zone.hidePreview();
         let capturedEl = document.getElementById(zone.data.targetId);
         if (capturedEl) {
           if (NAF.utils.isMine(capturedEl)) {
             if (this.interactionSystem.isHeld(capturedEl)) {
-              if (!isColliding(this.physicsSystem, zone.el, capturedEl)) {
+              if (!this.isColliding(zone.el, capturedEl)) {
                 // holding the captured object and its no longer colliding, releasee it
                 zone.release();
               } else {
-                // holding within bounds, do nothing
+                // holding within bounds
+                guideMesh.material.uniforms.color.value.set(HOVER_COLOR);
               }
             } else if (zone.data.snapToCenter && this.interactionSystem.wasReleasedThisFrame(capturedEl)) {
               // released in bounds, re-snap
@@ -127,6 +99,28 @@ export class MediaFramesSystem {
       }
     }
   }
+
+  getCapturableEntityCollidingWithBody(mediaType, bodyUUID) {
+    const collisions = this.physicsSystem.getCollisions(bodyUUID);
+    for (let i = 0; i < collisions.length; i++) {
+      const bodyData = this.physicsSystem.bodyUuidToData.get(collisions[i]);
+      const mediaObjectEl = bodyData && bodyData.object3D && bodyData.object3D.el;
+      if (isCapturableByType[mediaType](mediaObjectEl)) {
+        return mediaObjectEl;
+      }
+    }
+    return null;
+  }
+
+  isColliding(entityA, entityB) {
+    const bodyAUUID = entityA.components["body-helper"].uuid;
+    const bodyBUUID = entityB.components["body-helper"].uuid;
+    return (
+      this.physicsSystem.bodyInitialized(bodyAUUID) &&
+      this.physicsSystem.bodyInitialized(bodyBUUID) &&
+      this.physicsSystem.getCollisions(bodyAUUID).indexOf(bodyBUUID) !== -1
+    );
+  }
 }
 
 AFRAME.registerComponent("media-frame", {
@@ -134,6 +128,7 @@ AFRAME.registerComponent("media-frame", {
     bounds: { default: new THREE.Vector3(1, 1, 1) },
     mediaType: { default: MediaType.ALL_2D, oneOf: Object.values(MediaType) },
     snapToCenter: { default: true },
+    debug: { default: false },
 
     targetId: { default: "empty" },
     originalTargetScale: { default: new THREE.Vector3(1, 1, 1) }
@@ -190,33 +185,20 @@ AFRAME.registerComponent("media-frame", {
     const previewMesh = new THREE.Mesh(geometry, previewMaterial);
     previewMesh.visible = false;
     this.el.setObject3D("preview", previewMesh);
-
-    // NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-    //   this.networkedEl = networkedEl;
-    //   if (NAF.utils.getNetworkOwner(networkedEl) === "scene") {
-    //     setTimeout(() => {
-    //       if (NAF.utils.getNetworkOwner(networkedEl) === "scene") {
-    //         console.log("taking ownership of zone", this.el.id, this.el === networkedEl);
-    //         NAF.utils.takeOwnership(networkedEl);
-    //       }
-    //     }, 2000 + Math.floor(Math.random() * 2000));
-    //   }
-    // });
   },
 
   update(oldData) {
     // TODO we may want to support dynamic bounds updates, but its currently
-    // a pain since the physics system is pretty runtime shape modifications
+    // a pain since runtime shape modifications have lots of issues
 
-    // TODO handle change from non empty to non empty meaning ownership race happened
-    // whoever owned oldData.targetId should handle moving it out and scaling it back down
+    if (this.data.debug) {
+      console.log(
+        `${this.el.id}: ${oldData.targetId}(${JSON.stringify(oldData.originalTargetScale)}) -> ${
+          this.data.targetId
+        }(${JSON.stringify(this.data.originalTargetScale)})`
+      );
+    }
 
-    // console.log(JSON.stringify(oldData, null, 4), JSON.stringify(this.data, null, 4));
-    console.log(
-      `${this.el.id}: ${oldData.targetId}(${JSON.stringify(oldData.originalTargetScale)}) -> ${
-        this.data.targetId
-      }(${JSON.stringify(this.data.originalTargetScale)})`
-    );
     // Ownership race, whoever owns the old object needs to take care of "ejecting" it
     if (oldData.targetId !== "empty" && oldData.tergetId !== this.data.targetId) {
       let capturedEl = document.getElementById(oldData.targetId);
@@ -250,10 +232,11 @@ AFRAME.registerComponent("media-frame", {
     previewMesh.material.map = srcMesh.material.map;
     previewMesh.material.needsUpdate = true;
 
-    // Preview mesh UVs are set to accomidate textureLoader default, but video textures don't match this
-    previewMesh.scale.y *= TEXTURES_FLIP_Y !== previewMesh.material.map.flipY ? -1 : 1;
     previewMesh.scale.copy(srcMesh.scale);
     previewMesh.scale.multiplyScalar(scaleForAspectFit(this.data.bounds, srcMesh.scale));
+    // Preview mesh UVs are set to accomidate textureLoader default, but video textures don't match this
+    previewMesh.scale.y *= TEXTURES_FLIP_Y !== previewMesh.material.map.flipY ? -1 : 1;
+
     previewMesh.matrixNeedsUpdate = true;
     previewMesh.visible = true;
   },
@@ -274,7 +257,6 @@ AFRAME.registerComponent("media-frame", {
 
   capture(capturableEntity) {
     if (NAF.utils.isMine(this.el) || NAF.utils.takeOwnership(this.el)) {
-      console.log("capturing object in zone", capturableEntity.id);
       this.el.setAttribute("media-frame", {
         targetId: capturableEntity.id,
         originalTargetScale: new THREE.Vector3().copy(capturableEntity.object3D.scale)
@@ -289,13 +271,12 @@ AFRAME.registerComponent("media-frame", {
       this.hidePreview();
     } else {
       // TODO what do we do about this state? should evenetually resolve itself as it will try again next frame...
-      console.error("failed to take ownership");
+      console.error("failed to take ownership of zone");
     }
   },
 
   release() {
     if (NAF.utils.isMine(this.el) || NAF.utils.takeOwnership(this.el)) {
-      console.log("relaese object");
       let capturedEl = document.getElementById(this.data.targetId);
 
       this.el.setAttribute("media-frame", {
@@ -308,7 +289,7 @@ AFRAME.registerComponent("media-frame", {
         capturedEl.components["floaty-object"].setLocked(false);
       }
     } else {
-      console.error("failed to take ownership");
+      console.error("failed to take ownership of zone");
     }
   }
 });
