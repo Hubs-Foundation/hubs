@@ -8,7 +8,7 @@ import styleUtils from "../styles/style-utils.scss";
 import configs from "../../utils/configs";
 import { RoomEntryModal } from "./RoomEntryModal";
 import { MicPermissionsModal } from "./MicPermissionsModal";
-import { EnterOnDeviceUI } from "./EnterOnDeviceUI";
+import { EnterOnDeviceContainer } from "./EnterOnDeviceContainer";
 import { InvitePopoverButton } from "./InvitePopover";
 
 function reducer(state, action) {
@@ -32,7 +32,7 @@ function reducer(state, action) {
   }
 }
 
-export function RoomEntryUI({ hub, linkChannel, onEnter }) {
+export function RoomEntryContainer({ hub, linkChannel, onEnter }) {
   const [{ activeModalId }, dispatch] = useReducer(reducer, {
     activeModalId: "room-entry"
   });
@@ -58,7 +58,7 @@ export function RoomEntryUI({ hub, linkChannel, onEnter }) {
     activeModal = <MicPermissionsModal onBack={() => dispatch({ type: "mic-permissions-back" })} />;
   } else if (activeModalId === "enter-on-device") {
     activeModal = (
-      <EnterOnDeviceUI
+      <EnterOnDeviceContainer
         linkChannel={linkChannel}
         onBack={() => dispatch({ type: "enter-on-device-back" })}
         onConnectedOnDevice={() => dispatch({ type: "connected-on-device" })}
@@ -82,7 +82,7 @@ export function RoomEntryUI({ hub, linkChannel, onEnter }) {
   );
 }
 
-RoomEntryUI.propTypes = {
+RoomEntryContainer.propTypes = {
   hub: PropTypes.shape({
     name: PropTypes.string.isRequired
   }),

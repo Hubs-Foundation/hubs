@@ -209,7 +209,7 @@ import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY, ONLY_SCREEN_AVAILABLE
 import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
-import { RoomUI } from "./react-components/room/RoomUI";
+import { RoomContainer } from "./react-components/room/RoomContainer";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
@@ -280,7 +280,7 @@ function mountUI(props = {}) {
       <Router history={history}>
         <Route
           render={routeProps => (
-            <RoomUI
+            <RoomContainer
               {...{
                 scene,
                 isBotMode,
