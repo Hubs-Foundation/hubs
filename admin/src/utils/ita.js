@@ -112,9 +112,9 @@ function getAdminInfo() {
   return fetchWithAuth(getEndpoint("admin-info"))
     .then(resp => {
       if (resp.status === 200) return resp.json();
-      else return resp;
+      else return { error: true, code: resp.status };
     })
-    .catch(e => console.log(e));
+    .catch(e => console.error(e));
 }
 
 function getEditableConfig(service) {

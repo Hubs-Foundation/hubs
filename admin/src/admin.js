@@ -86,7 +86,7 @@ class AdminUI extends Component {
     window.addEventListener("activity_detected", this.onActivityDetected);
     const adminInfo = await getAdminInfo();
     // Unauthorized account
-    if (adminInfo.status === 401) this.setState({ isAdmin: false });
+    if (adminInfo.error && adminInfo.code === 401) this.setState({ isAdmin: false });
   }
 
   componentWillUnmount() {
