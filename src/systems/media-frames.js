@@ -41,60 +41,60 @@ export class MediaFramesSystem {
 
   tick() {
     for (let i = 0; i < components.length; i++) {
-      const zone = components[i];
+      const frame = components[i];
 
-      const bodyUUID = zone.el.components["body-helper"].uuid;
+      const bodyUUID = frame.el.components["body-helper"].uuid;
       // TODO would be nice to fix the timing so we don't need to check this
       if (!this.physicsSystem.bodyInitialized(bodyUUID)) continue;
 
       const holdingSomethingCapturable = this.interactionSystem.isHoldingAnything(
-        isCapturableByType[zone.data.mediaType]
+        isCapturableByType[frame.data.mediaType]
       );
 
-      const guideMesh = zone.el.getObject3D("guide");
+      const guideMesh = frame.el.getObject3D("guide");
       guideMesh.visible = holdingSomethingCapturable;
 
-      if (zone.data.targetId === "empty") {
-        // zone empty
+      if (frame.data.targetId === "empty") {
+        // frame empty
         guideMesh.material.uniforms.color.value.set(EMPTY_COLOR);
-        const capturableEl = this.getCapturableEntityCollidingWithBody(zone.data.mediaType, bodyUUID);
+        const capturableEl = this.getCapturableEntityCollidingWithBody(frame.data.mediaType, bodyUUID);
         if (capturableEl && NAF.utils.isMine(capturableEl)) {
-          // capturable object I own is colliding with an empty zone
+          // capturable object I own is colliding with an empty frame
           if (this.interactionSystem.isHeld(capturableEl)) {
-            // held object I own colliding with an empty zone, show preview
+            // held object I own colliding with an empty frame, show preview
             guideMesh.material.uniforms.color.value.set(HOVER_COLOR);
-            zone.showPreview(capturableEl);
+            frame.showPreview(capturableEl);
           } else {
-            // non-held object I own colliding with an empty zone, capture
-            zone.capture(capturableEl);
+            // non-held object I own colliding with an empty frame, capture
+            frame.capture(capturableEl);
           }
         } else {
-          // no capturable object I own is colliding with this empty zone, hide preview
-          zone.hidePreview();
+          // no capturable object I own is colliding with this empty frame, hide preview
+          frame.hidePreview();
         }
       } else {
-        // zone full
+        // frame full
         guideMesh.material.uniforms.color.value.set(FULL_COLOR);
-        zone.hidePreview();
-        let capturedEl = document.getElementById(zone.data.targetId);
+        frame.hidePreview();
+        let capturedEl = document.getElementById(frame.data.targetId);
         if (capturedEl) {
           if (NAF.utils.isMine(capturedEl)) {
             if (this.interactionSystem.isHeld(capturedEl)) {
-              if (!this.isColliding(zone.el, capturedEl)) {
+              if (!this.isColliding(frame.el, capturedEl)) {
                 // holding the captured object and its no longer colliding, releasee it
-                zone.release();
+                frame.release();
               } else {
                 // holding within bounds
                 guideMesh.material.uniforms.color.value.set(HOVER_COLOR);
               }
-            } else if (zone.data.snapToCenter && this.interactionSystem.wasReleasedThisFrame(capturedEl)) {
+            } else if (frame.data.snapToCenter && this.interactionSystem.wasReleasedThisFrame(capturedEl)) {
               // released in bounds, re-snap
-              zone.snapObject(capturedEl);
+              frame.snapObject(capturedEl);
             }
           }
         } else {
           // captured object was removed
-          zone.release();
+          frame.release();
         }
       }
     }
@@ -271,7 +271,7 @@ AFRAME.registerComponent("media-frame", {
       this.hidePreview();
     } else {
       // TODO what do we do about this state? should evenetually resolve itself as it will try again next frame...
-      console.error("failed to take ownership of zone");
+      console.error("failed to take ownership of media frame");
     }
   },
 
@@ -289,7 +289,7 @@ AFRAME.registerComponent("media-frame", {
         capturedEl.components["floaty-object"].setLocked(false);
       }
     } else {
-      console.error("failed to take ownership of zone");
+      console.error("failed to take ownership of media frame");
     }
   }
 });
