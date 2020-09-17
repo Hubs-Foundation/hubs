@@ -249,6 +249,7 @@ AFRAME.registerComponent("media-frame", {
   },
 
   snapObject(capturedEl) {
+    // TODO this assumes media frames are all in world space
     capturedEl.object3D.position.copy(this.el.object3D.position);
     capturedEl.object3D.rotation.copy(this.el.object3D.rotation);
     capturedEl.object3D.matrixNeedsUpdate = true;
@@ -261,6 +262,7 @@ AFRAME.registerComponent("media-frame", {
         targetId: capturableEntity.id,
         originalTargetScale: new THREE.Vector3().copy(capturableEntity.object3D.scale)
       });
+      // TODO this assumes media frames are all in world space
       capturableEntity.object3D.position.copy(this.el.object3D.position);
       capturableEntity.object3D.rotation.copy(this.el.object3D.rotation);
       capturableEntity.object3D.scale.setScalar(
