@@ -149,7 +149,6 @@ AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentNam
 });
 
 AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, componentName, componentData, components) => {
-  console.log(componentData, components, componentName);
   el.setAttribute("networked", {
     template: "#interactable-media-frame",
     owner: "scene",

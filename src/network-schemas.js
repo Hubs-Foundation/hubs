@@ -172,8 +172,8 @@ function registerNetworkSchemas() {
         component: "media-frame",
         property: "originalTargetScale"
       }
-      // "pinnable",
     ],
+    // TODO we probably want media frames to support permissioning of some form
     nonAuthorizedComponents: ["media-frame"]
   });
 
