@@ -217,6 +217,16 @@ AFRAME.registerComponent("media-frame", {
         this.data.targetId
       }(${JSON.stringify(this.data.originalTargetScale)})`
     );
+    // Ownership race, whoever owns the old object needs to take care of "ejecting" it
+    if (oldData.targetId !== "empty" && oldData.tergetId !== this.data.targetId) {
+      let capturedEl = document.getElementById(oldData.targetId);
+      if (capturedEl && NAF.utils.isMine(capturedEl)) {
+        capturedEl.object3D.translateZ(this.data.bounds.z);
+        capturedEl.object3D.scale.copy(oldData.originalTargetScale);
+        capturedEl.object3D.matrixNeedsUpdate = true;
+        capturedEl.components["floaty-object"].setLocked(false);
+      }
+    }
   },
 
   play() {
