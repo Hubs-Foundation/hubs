@@ -286,7 +286,6 @@ class MediaBrowser extends Component {
     const meta = this.state.result && this.state.result.meta;
     const hasNext = !!(meta && meta.next_cursor);
     const hasPrevious = searchParams.get("cursor");
-    const page = (meta && meta.page) || 0;
     const apiSource = (meta && meta.source) || null;
     const isVariableWidth = ["bing_images", "tenor"].includes(apiSource);
 
@@ -451,7 +450,6 @@ class MediaBrowser extends Component {
               entries={entries}
               hasNext={hasNext}
               hasPrevious={hasPrevious}
-              page={page}
               isVariableWidth={isVariableWidth}
               history={this.props.history}
               urlSource={urlSource}

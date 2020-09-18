@@ -40,7 +40,6 @@ class MediaTiles extends Component {
     hasNext: PropTypes.bool,
     hasPrevious: PropTypes.bool,
     isVariableWidth: PropTypes.bool,
-    page: PropTypes.number,
     history: PropTypes.object,
     urlSource: PropTypes.string,
     handleEntryClicked: PropTypes.func,
@@ -66,7 +65,7 @@ class MediaTiles extends Component {
   };
 
   render() {
-    const { urlSource, hasNext, hasPrevious, page, isVariableWidth } = this.props;
+    const { urlSource, hasNext, hasPrevious, isVariableWidth } = this.props;
     const entries = this.props.entries || [];
     const [createTileWidth, createTileHeight] = this.getTileDimensions(false, urlSource === "avatars");
 
@@ -120,7 +119,6 @@ class MediaTiles extends Component {
               >
                 <FontAwesomeIcon icon={faAngleLeft} />
               </a>
-              <div className={styles.pageNumber}>{page}</div>
               <a
                 className={classNames({ [styles.nextPage]: true, [styles.pagerButtonDisabled]: !hasNext })}
                 onClick={() => this.props.handlePager(1)}

@@ -486,14 +486,6 @@
         font-weight: bold;
       }
 
-      :local(.page-number) {
-        font-size: 1.2em;
-        font-weight: bold;
-        text-align: center;
-        color: var(--panel-subtext-link-color);
-        margin: 12px;
-      }
-
       :local(.pager-button-disabled) {
         pointer-events: none;
         background-color: var(--panel-subtext-disabled-color);
