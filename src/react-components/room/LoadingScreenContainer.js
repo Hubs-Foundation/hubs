@@ -21,7 +21,7 @@ const infoMessages = [
   }
 ];
 
-export function RoomLoadingContainer({ onLoaded, scene }) {
+export function LoadingScreenContainer({ onLoaded, scene }) {
   const { loading, message } = useRoomLoadingState(scene);
 
   useEffect(
@@ -36,7 +36,7 @@ export function RoomLoadingContainer({ onLoaded, scene }) {
   return <LoadingScreen logoSrc={configs.image("logo")} message={message} infoMessages={infoMessages} />;
 }
 
-RoomLoadingContainer.propTypes = {
+LoadingScreenContainer.propTypes = {
   scene: PropTypes.object.isRequired,
   onLoaded: PropTypes.func.isRequired
 };

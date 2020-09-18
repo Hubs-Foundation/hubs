@@ -4,7 +4,7 @@ import configs from "../../utils/configs";
 import { EnterOnDeviceModal } from "./EnterOnDeviceModal";
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "../../utils/vr-caps-detect";
 
-export function EnterOnDeviceContainer({ linkChannel, onBack, onConnectedOnDevice, onEnterOnConnectedHeadset }) {
+export function EnterOnDeviceModalContainer({ linkChannel, onBack, onConnectedOnDevice, onEnterOnConnectedHeadset }) {
   const [{ loading, code, headsetConnected, unsupportedBrowser }, setState] = useState({ loading: true, code: null });
 
   useEffect(
@@ -49,7 +49,7 @@ export function EnterOnDeviceContainer({ linkChannel, onBack, onConnectedOnDevic
   );
 }
 
-EnterOnDeviceContainer.propTypes = {
+EnterOnDeviceModalContainer.propTypes = {
   linkChannel: PropTypes.object.isRequired,
   onBack: PropTypes.func.isRequired,
   onConnectedOnDevice: PropTypes.func.isRequired,

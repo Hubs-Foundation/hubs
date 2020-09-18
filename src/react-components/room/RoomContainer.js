@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useAccessibleOutlineStyle } from "../input/useAccessibleOutlineStyle";
-import { RoomLoadingContainer } from "./RoomLoadingContainer";
-import { RoomEntryContainer } from "./RoomEntryContainer";
-import { InRoomContainer } from "./InRoomContainer";
+import { LoadingScreenContainer } from "./LoadingScreenContainer";
+import { RoomEntryModalContainer } from "./RoomEntryModalContainer";
+import { RoomUIContainer } from "./RoomUIContainer";
 import "../styles/global.scss";
 import "./RoomContainer.scss";
 
@@ -27,12 +27,12 @@ export function RoomContainer({ scene, hub, linkChannel }) {
   const [screen, setScreen] = useState("room-loading-ui");
 
   if (screen === "room-loading-ui") {
-    return <RoomLoadingContainer scene={scene} onLoaded={() => setScreen("room-entry-ui")} />;
+    return <LoadingScreenContainer scene={scene} onLoaded={() => setScreen("room-entry-ui")} />;
   } else if (screen === "room-entry-ui") {
-    return <RoomEntryContainer linkChannel={linkChannel} hub={hub} onEnter={() => setScreen("in-room-ui")} />;
+    return <RoomEntryModalContainer linkChannel={linkChannel} hub={hub} onEnter={() => setScreen("in-room-ui")} />;
   }
 
-  return <InRoomContainer />;
+  return <RoomUIContainer />;
 }
 
 RoomContainer.propTypes = {
