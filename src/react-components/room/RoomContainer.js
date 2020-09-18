@@ -7,7 +7,7 @@ import { RoomUIContainer } from "./RoomUIContainer";
 import "../styles/global.scss";
 import "./RoomContainer.scss";
 
-export function RoomContainer({ scene, hub, linkChannel }) {
+export function RoomContainer({ scene, hub, linkChannel, store }) {
   useAccessibleOutlineStyle();
 
   useEffect(() => {
@@ -29,13 +29,21 @@ export function RoomContainer({ scene, hub, linkChannel }) {
   if (screen === "room-loading-ui") {
     return <LoadingScreenContainer scene={scene} onLoaded={() => setScreen("room-entry-ui")} />;
   } else if (screen === "room-entry-ui") {
-    return <RoomEntryModalContainer linkChannel={linkChannel} hub={hub} onEnter={() => setScreen("in-room-ui")} />;
+    return (
+      <RoomEntryModalContainer
+        store={store}
+        linkChannel={linkChannel}
+        hub={hub}
+        onEnter={() => setScreen("in-room-ui")}
+      />
+    );
   }
 
   return <RoomUIContainer />;
 }
 
 RoomContainer.propTypes = {
+  store: PropTypes.object,
   linkChannel: PropTypes.object,
   scene: PropTypes.object.isRequired,
   hub: PropTypes.object

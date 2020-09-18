@@ -10,29 +10,39 @@ import { RoomEntryModal } from "./RoomEntryModal";
 import { MicPermissionsModalContainer } from "./MicPermissionsModalContainer";
 import { EnterOnDeviceModalContainer } from "./EnterOnDeviceModalContainer";
 import { InvitePopoverContainer } from "./InvitePopoverContainer";
+import { MicSetupModal } from "./MicSetupModal";
 
 function reducer(state, action) {
   switch (action.type) {
     case "join-room":
-      return { activeModalId: "mic-permissions", entryMode: "screen" };
+      return { ...state, activeModalId: "mic-permissions", entryMode: "screen" };
     case "enter-on-device":
-      return { activeModalId: "enter-on-device" };
+      return { ...state, activeModalId: "enter-on-device" };
     case "enter-on-device-back":
-      return { activeModalId: "room-entry" };
-    case "mic-permissions-back":
-      if (state.entryMode === "2d") {
-        return { activeModalId: "room-entry" };
-      } else {
-        return { activeModalId: "enter-on-device" };
-      }
+      return { ...state, activeModalId: "room-entry" };
     case "connected-on-device":
-      return { activeModalId: "room-entry" };
+      return { ...state, activeModalId: "room-entry" };
     case "enter-on-connected-headset":
-      return { activeModalId: "mic-permissions", entryMode: "headset" };
+      return { ...state, activeModalId: "mic-permissions", entryMode: "headset" };
+    case "mic-permissions-back":
+      if (state.entryMode === "screen") {
+        return { ...state, activeModalId: "room-entry" };
+      } else {
+        return { ...state, activeModalId: "enter-on-device" };
+      }
+    case "mic-access-granted":
+    case "mic-access-denied":
+      return { ...state, activeModalId: "mic-setup" };
+    case "mic-setup-back":
+      if (state.entryMode === "screen") {
+        return { ...state, activeModalId: "room-entry" };
+      } else {
+        return { ...state, activeModalId: "enter-on-device" };
+      }
   }
 }
 
-export function RoomEntryModalContainer({ hub, linkChannel, onEnter }) {
+export function RoomEntryModalContainer({ hub, store, linkChannel, onEnter }) {
   const [{ activeModalId }, dispatch] = useReducer(reducer, {
     activeModalId: "room-entry"
   });
@@ -49,8 +59,6 @@ export function RoomEntryModalContainer({ hub, linkChannel, onEnter }) {
         onEnterOnDevice={() => dispatch({ type: "enter-on-device" })}
       />
     );
-  } else if (activeModalId === "mic-permissions") {
-    activeModal = <MicPermissionsModalContainer onBack={() => dispatch({ type: "mic-permissions-back" })} />;
   } else if (activeModalId === "enter-on-device") {
     activeModal = (
       <EnterOnDeviceModalContainer
@@ -60,6 +68,17 @@ export function RoomEntryModalContainer({ hub, linkChannel, onEnter }) {
         onEnterOnConnectedHeadset={() => dispatch({ type: "enter-on-connected-headset" })}
       />
     );
+  } else if (activeModalId === "mic-permissions") {
+    activeModal = (
+      <MicPermissionsModalContainer
+        store={store}
+        onBack={() => dispatch({ type: "mic-permissions-back" })}
+        onMicrophoneAccessGranted={() => dispatch({ type: "mic-access-granted" })}
+        onMicrophoneAccessDenied={() => dispatch({ type: "mic-access-denied" })}
+      />
+    );
+  } else if (activeModalId === "mic-setup") {
+    activeModal = <MicSetupModal onBack={() => dispatch({ type: "mic-setup-back" })} />;
   }
 
   return (
@@ -78,6 +97,7 @@ export function RoomEntryModalContainer({ hub, linkChannel, onEnter }) {
 }
 
 RoomEntryModalContainer.propTypes = {
+  store: PropTypes.object,
   hub: PropTypes.shape({
     name: PropTypes.string.isRequired
   }),

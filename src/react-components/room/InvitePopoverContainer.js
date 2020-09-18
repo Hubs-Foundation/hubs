@@ -8,8 +8,9 @@ export function InvitePopoverContainer({ hub, ...rest }) {
   const shortLink = `https://${configs.SHORTLINK_DOMAIN}/${hub.hub_id}`;
   const embedUrl = `${location.protocol}//${location.host}${location.pathname}?embed_token=${hub.embed_token}`;
   const embedText = `<iframe src="${embedUrl}" style="width: 1024px; height: 768px;" allow="microphone; camera; vr; speaker;"></iframe>`;
+  const code = hub.entry_code.toString();
 
-  return <InvitePopoverButton url={shortLink} code={hub.entry_code} embed={embedText} {...rest} />;
+  return <InvitePopoverButton url={shortLink} code={code} embed={embedText} {...rest} />;
 }
 
 InvitePopoverContainer.propTypes = {
