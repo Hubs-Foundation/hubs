@@ -76,6 +76,7 @@ import { LoadingScreenContainer } from "./room/LoadingScreenContainer";
 
 import "./styles/global.scss";
 import "./room/RoomContainer.scss";
+import { RoomLayout } from "./layout/RoomLayout";
 import { useAccessibleOutlineStyle } from "./input/useAccessibleOutlineStyle";
 import { RoomEntryModal } from "./room/RoomEntryModal";
 import { EnterOnDeviceModal } from "./room/EnterOnDeviceModal";
@@ -590,8 +591,6 @@ class UIRoot extends Component {
     let hasAudio = false;
     const { lastUsedMicDeviceId } = this.props.store.state.settings;
 
-    console.log("setMediaStreamToDefault");
-
     // Try to fetch last used mic, if there was one.
     if (lastUsedMicDeviceId) {
       hasAudio = await this.fetchAudioTrack({ audio: { deviceId: { ideal: lastUsedMicDeviceId } } });
@@ -692,7 +691,6 @@ class UIRoot extends Component {
   onRequestMicPermission = async () => {
     // TODO: Show an error state if getting the microphone permissions fails
     await this.setMediaStreamToDefault();
-
     this.beginOrSkipAudioSetup();
   };
 
@@ -1228,7 +1226,7 @@ class UIRoot extends Component {
           onCancel={this.endAutoExitTimer}
         />
       ) : (
-        <div className={entryStyles.entryDialog}>
+        <>
           <StateRoute stateKey="entry_step" stateValue="device" history={this.props.history}>
             {this.renderDevicePanel()}
           </StateRoute>
@@ -1241,14 +1239,8 @@ class UIRoot extends Component {
           <StateRoute stateKey="entry_step" stateValue="" history={this.props.history}>
             {this.renderEntryStartPanel()}
           </StateRoute>
-        </div>
+        </>
       ));
-
-    const dialogBoxContentsClassNames = classNames({
-      [styles.uiInteractive]: !this.isInModalOrOverlay(),
-      [styles.uiDialogBoxContents]: true,
-      [styles.backgrounded]: this.isInModalOrOverlay()
-    });
 
     // MobileVR browsers always show settings panel as an overlay when exiting immersive mode.
     const showSettingsAsOverlay = entered && isMobileVR;
@@ -1571,15 +1563,17 @@ class UIRoot extends Component {
           )}
           {((!enteredOrWatching && !this.state.isObjectListExpanded && !showObjectInfo && this.props.hub) ||
             this.isWaitingForAutoExit()) && (
-            <div className={styles.uiDialog}>
-              <PresenceLog
-                entries={presenceLogEntries}
-                presences={this.props.presences}
-                hubId={this.props.hub.hub_id}
-                history={this.props.history}
-              />
-              <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
-            </div>
+            <RoomLayout
+              viewport={
+                <PresenceLog
+                  entries={presenceLogEntries}
+                  presences={this.props.presences}
+                  hubId={this.props.hub.hub_id}
+                  history={this.props.history}
+                />
+              }
+              modal={entryDialog}
+            />
           )}
           {enteredOrWatchingOrPreload &&
             this.props.hub && (

@@ -14,6 +14,7 @@ export function RoomLayout({
   toolbarRight,
   toolbarClassName,
   modal,
+  viewport,
   ...rest
 }) {
   return (
@@ -26,7 +27,7 @@ export function RoomLayout({
         center={toolbarCenter}
         right={toolbarRight}
       />
-      <div className={classNames(styles.main, styles.viewport, viewportClassName)} />
+      <div className={classNames(styles.main, styles.viewport, viewportClassName)}>{viewport}</div>
     </div>
   );
 }
@@ -40,5 +41,6 @@ RoomLayout.propTypes = {
   toolbarCenter: PropTypes.node,
   toolbarRight: PropTypes.node,
   toolbarClassName: PropTypes.string,
-  modal: PropTypes.node
+  modal: PropTypes.node,
+  viewport: PropTypes.node
 };
