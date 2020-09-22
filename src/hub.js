@@ -6,6 +6,7 @@ import "./utils/debug-log";
 
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
+import "./assets/stylesheets/hub.scss";
 import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 
@@ -22,6 +23,7 @@ import "webrtc-adapter";
 import "aframe-slice9-component";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
+import { detectOS, detect } from "detect-browser";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import {
   getReticulumFetchUrl,
@@ -119,6 +121,7 @@ import React from "react";
 import { Router, Route } from "react-router-dom";
 import { createBrowserHistory, createMemoryHistory } from "history";
 import { pushHistoryState } from "./utils/history";
+import UIRoot from "./react-components/ui-root";
 import AuthChannel from "./utils/auth-channel";
 import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
@@ -209,7 +212,6 @@ import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY, ONLY_SCREEN_AVAILABLE
 import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
-import { RoomContainer } from "./react-components/room/RoomContainer";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
@@ -280,7 +282,7 @@ function mountUI(props = {}) {
       <Router history={history}>
         <Route
           render={routeProps => (
-            <RoomContainer
+            <UIRoot
               {...{
                 scene,
                 isBotMode,
@@ -712,6 +714,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (platformUnsupported()) {
     return;
+  }
+
+  const detectedOS = detectOS(navigator.userAgent);
+  const browser = detect();
+  // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
+  // safari when initializing it later.
+  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+      remountUI({ showSafariMicDialog: true });
+      return;
+    }
   }
 
   const defaultRoomId = configs.feature("default_room_id");
