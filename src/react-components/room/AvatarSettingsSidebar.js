@@ -5,16 +5,7 @@ import { ReactComponent as ChevronBackIcon } from "../icons/ChevronBack.svg";
 import { IconButton } from "../input/IconButton";
 import { AvatarSettingsContent } from "./AvatarSettingsContent";
 
-export function AvatarSettingsSidebar({
-  className,
-  displayName,
-  onChangeDisplayName,
-  avatarPreviewCanvasRef,
-  onChangeAvatar,
-  onAccept,
-  onBack,
-  ...rest
-}) {
+export function AvatarSettingsSidebar({ className, onBack, ...rest }) {
   return (
     <Sidebar
       title="Avatar Settings"
@@ -25,25 +16,13 @@ export function AvatarSettingsSidebar({
         </IconButton>
       }
       className={className}
-      {...rest}
     >
-      <AvatarSettingsContent
-        displayName={displayName}
-        onChangeDisplayName={onChangeDisplayName}
-        avatarPreviewCanvasRef={avatarPreviewCanvasRef}
-        onChangeAvatar={onChangeAvatar}
-        onAccept={onAccept}
-      />
+      <AvatarSettingsContent {...rest} />
     </Sidebar>
   );
 }
 
 AvatarSettingsSidebar.propTypes = {
   className: PropTypes.string,
-  displayName: PropTypes.string,
-  onChangeDisplayName: PropTypes.func,
-  avatarPreviewCanvasRef: PropTypes.object,
-  onChangeAvatar: PropTypes.func,
-  onAccept: PropTypes.func,
   onBack: PropTypes.func
 };

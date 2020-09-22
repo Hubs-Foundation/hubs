@@ -1214,6 +1214,9 @@ class UIRoot extends Component {
       this.props.history.location.state &&
       this.props.history.location.state.entry_step
     );
+    const displayNameOverride = this.props.hubIsBound
+      ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
+      : null;
 
     const entryDialog =
       this.props.availableVREntryTypes &&
@@ -1235,6 +1238,32 @@ class UIRoot extends Component {
           <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
             {this.renderAudioSetupPanel()}
           </StateRoute>
+          <StateRoute
+            stateKey="entry_step"
+            stateValue="profile"
+            history={this.props.history}
+            render={props => (
+              <ProfileEntryPanel
+                {...props}
+                containerType="modal"
+                displayNameOverride={displayNameOverride}
+                finished={() => {
+                  console.log("finished");
+                  if (this.props.forcedVREntryType) {
+                    this.pushHistoryState();
+                    this.handleForceEntry();
+                  } else {
+                    this.onRequestMicPermission();
+                    this.pushHistoryState("entry_step", "mic_grant");
+                  }
+                }}
+                onClose={() => this.pushHistoryState()}
+                store={this.props.store}
+                mediaSearchStore={this.props.mediaSearchStore}
+                avatarId={props.location.state.detail && props.location.state.detail.avatarId}
+              />
+            )}
+          />
           <StateRoute stateKey="entry_step" stateValue="" history={this.props.history}>
             {this.renderEntryStartPanel()}
           </StateRoute>
@@ -1304,10 +1333,6 @@ class UIRoot extends Component {
     const showSettingsMenu = !streaming && !preload && !showObjectInfo;
     const showObjectList = !showObjectInfo;
     const showPresenceList = !showObjectInfo;
-
-    const displayNameOverride = this.props.hubIsBound
-      ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
-      : null;
 
     const streamingTip = streaming &&
       this.state.showStreamingTip && (
@@ -1405,30 +1430,6 @@ class UIRoot extends Component {
               performConditionalSignIn={this.props.performConditionalSignIn}
             />
           )}
-          <StateRoute
-            stateKey="entry_step"
-            stateValue="profile"
-            history={this.props.history}
-            render={props => (
-              <ProfileEntryPanel
-                {...props}
-                displayNameOverride={displayNameOverride}
-                finished={() => {
-                  if (this.props.forcedVREntryType) {
-                    this.pushHistoryState();
-                    this.handleForceEntry();
-                  } else {
-                    this.onRequestMicPermission();
-                    this.pushHistoryState("entry_step", "mic_grant");
-                  }
-                }}
-                onClose={() => this.pushHistoryState()}
-                store={this.props.store}
-                mediaSearchStore={this.props.mediaSearchStore}
-                avatarId={props.location.state.detail && props.location.state.detail.avatarId}
-              />
-            )}
-          />
           <StateRoute
             stateKey="modal"
             stateValue="room_settings"
