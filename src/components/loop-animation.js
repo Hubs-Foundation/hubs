@@ -9,7 +9,8 @@ AFRAME.registerComponent("loop-animation", {
     paused: { type: "boolean", default: false },
     /* DEPRECATED: Use activeClipIndex instead since animation names are not unique */
     clip: { type: "string", default: "" },
-    activeClipIndex: { type: "int", default: 0 }
+    activeClipIndex: { type: "int", default: 0 },
+    activeClipIndices: { type: "array" }
   },
 
   init() {
@@ -46,11 +47,11 @@ AFRAME.registerComponent("loop-animation", {
     }
 
     let clips = [];
-    if (activeClipIndices) {
+    if (activeClipIndices && activeClipIndices.length > 0) {
       // Support for Spoke->Hubs activeClipIndices struct
       clips = activeClipIndices.map(index => animations[index]);
     } else {
-      // Support for old Spoke->Hobs { clipName, activeClipIndex } struct. Still used for Blender imports.
+      // Support for old Spoke->Hubs { clipName, activeClipIndex } struct. Still used for Blender imports.
       if (clipName !== "") {
         clips = clipName.split(",").map(n => animations.find(({ name }) => name === n));
       } else {
