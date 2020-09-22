@@ -81,6 +81,7 @@ import { RoomEntryModal } from "./room/RoomEntryModal";
 import { EnterOnDeviceModal } from "./room/EnterOnDeviceModal";
 import { MicPermissionsModal } from "./room/MicPermissionsModal";
 import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
+import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1573,6 +1574,7 @@ class UIRoot extends Component {
                 />
               }
               modal={entryDialog}
+              toolbarLeft={<InvitePopoverContainer hub={this.props.hub} />}
             />
           )}
           {enteredOrWatchingOrPreload &&
@@ -1624,19 +1626,6 @@ class UIRoot extends Component {
                 [inviteStyles.inviteContainerInverted]: this.state.showShareDialog
               })}
             >
-              {!embed &&
-                !streaming && (
-                  <button
-                    className={classNames({
-                      [inviteStyles.inviteButton]: true,
-                      [inviteStyles.hideSmallScreens]: this.occupantCount() > 1 && entered,
-                      [inviteStyles.inviteButtonLowered]: hasTopTip
-                    })}
-                    onClick={() => this.toggleShareDialog()}
-                  >
-                    <FormattedMessage id="entry.share-button" />
-                  </button>
-                )}
               {showChooseSceneButton && (
                 <button
                   className={classNames([styles.chooseSceneButton])}

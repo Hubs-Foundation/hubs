@@ -27,7 +27,7 @@ export function InvitePopoverButton({ url, code, embed, initiallyVisible, ...res
     <Popover
       title="Invite"
       content={() => <InvitePopoverContent url={url} code={code} embed={embed} />}
-      placement="top"
+      placement="top-start"
       offsetDistance={28}
       initiallyVisible={initiallyVisible}
     >
