@@ -51,7 +51,6 @@ import ClientInfoDialog from "./client-info-dialog.js";
 import ObjectInfoDialog from "./object-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
-import LobbyChatBox from "./lobby-chat-box.js";
 import EntryStartPanel from "./entry-start-panel.js";
 import InWorldChatBox from "./in-world-chat-box.js";
 import AvatarEditor from "./avatar-editor";
@@ -83,6 +82,7 @@ import "./room/RoomContainer.scss";
 import { useAccessibleOutlineStyle } from "./input/useAccessibleOutlineStyle";
 import { RoomEntryModal } from "./room/RoomEntryModal";
 import { EnterOnDeviceModal } from "./room/EnterOnDeviceModal";
+import { MicPermissionsModal } from "./room/MicPermissionsModal";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -559,6 +559,7 @@ class UIRoot extends Component {
       await this.setMediaStreamToDefault();
       this.beginOrSkipAudioSetup();
     } else {
+      this.onRequestMicPermission();
       this.pushHistoryState("entry_step", "mic_grant");
     }
 
@@ -590,6 +591,8 @@ class UIRoot extends Component {
   setMediaStreamToDefault = async () => {
     let hasAudio = false;
     const { lastUsedMicDeviceId } = this.props.store.state.settings;
+
+    console.log("setMediaStreamToDefault");
 
     // Try to fetch last used mic, if there was one.
     if (lastUsedMicDeviceId) {
@@ -688,18 +691,11 @@ class UIRoot extends Component {
     }
   };
 
-  onMicGrantButton = async () => {
-    if (this.props.location.state && this.props.location.state.entry_step === "mic_grant") {
-      const { hasAudio } = await this.setMediaStreamToDefault();
+  onRequestMicPermission = async () => {
+    // TODO: Show an error state if getting the microphone permissions fails
+    await this.setMediaStreamToDefault();
 
-      if (hasAudio) {
-        this.pushHistoryState("entry_step", "mic_granted");
-      } else {
-        this.beginOrSkipAudioSetup();
-      }
-    } else {
-      this.beginOrSkipAudioSetup();
-    }
+    this.beginOrSkipAudioSetup();
   };
 
   beginOrSkipAudioSetup = () => {
@@ -1102,42 +1098,8 @@ class UIRoot extends Component {
     );
   };
 
-  renderMicPanel = granted => {
-    return (
-      <div className="mic-grant-panel">
-        <div onClick={() => this.props.history.goBack()} className={entryStyles.back}>
-          <i>
-            <FontAwesomeIcon icon={faArrowLeft} />
-          </i>
-          <FormattedMessage id="entry.back" />
-        </div>
-
-        <div className="mic-grant-panel__grant-container">
-          <div className="mic-grant-panel__title">
-            <FormattedMessage id={granted ? "audio.granted-title" : "audio.grant-title"} />
-          </div>
-          <div className="mic-grant-panel__subtitle">
-            <FormattedMessage id={granted ? "audio.granted-subtitle" : "audio.grant-subtitle"} />
-          </div>
-          <div className="mic-grant-panel__button-container">
-            {granted ? (
-              <button autoFocus className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
-              </button>
-            ) : (
-              <button autoFocus className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
-              </button>
-            )}
-          </div>
-          <div className="mic-grant-panel__next-container">
-            <button autoFocus className={classNames("mic-grant-panel__next")} onClick={this.onMicGrantButton}>
-              <FormattedMessage id="audio.granted-next" />
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+  renderMicPanel = () => {
+    return <MicPermissionsModal onBack={() => this.props.history.goBack()} />;
   };
 
   renderAudioSetupPanel = () => {
@@ -1352,10 +1314,7 @@ class UIRoot extends Component {
             {this.renderDevicePanel()}
           </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="mic_grant" history={this.props.history}>
-            {this.renderMicPanel(false)}
-          </StateRoute>
-          <StateRoute stateKey="entry_step" stateValue="mic_granted" history={this.props.history}>
-            {this.renderMicPanel(true)}
+            {this.renderMicPanel()}
           </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
             {this.renderAudioSetupPanel()}
@@ -1549,7 +1508,8 @@ class UIRoot extends Component {
                     this.pushHistoryState();
                     this.handleForceEntry();
                   } else {
-                    this.pushHistoryState("entry_step", "device");
+                    this.onRequestMicPermission();
+                    this.pushHistoryState("entry_step", "mic_grant");
                   }
                 }}
                 onClose={() => this.pushHistoryState()}
