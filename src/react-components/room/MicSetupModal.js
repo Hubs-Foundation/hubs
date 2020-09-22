@@ -25,6 +25,7 @@ export function MicSetupModal({
   microphoneEnabled,
   micLevel,
   soundPlaying,
+  onPlaySound,
   microphoneMuted,
   onChangeMicrophoneMuted,
   onEnterRoom,
@@ -101,8 +102,9 @@ export function MicSetupModal({
         <ToolbarButton
           icon={soundPlaying ? <VolumeHighIcon width={48} height={48} /> : <VolumeOffIcon width={48} height={48} />}
           label="Click to Test Audio"
-          preset={soundPlaying && "blue"}
+          preset={soundPlaying ? "blue" : "basic"}
           className={styles.largeToolbarButton}
+          onClick={onPlaySound}
           large
         />
       </div>
@@ -123,6 +125,7 @@ export function MicSetupModal({
 MicSetupModal.propTypes = {
   className: PropTypes.string,
   soundPlaying: PropTypes.bool,
+  onPlaySound: PropTypes.func,
   micLevel: PropTypes.number,
   microphoneEnabled: PropTypes.bool,
   microphoneMuted: PropTypes.bool,

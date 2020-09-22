@@ -15,7 +15,7 @@ function getSelectedItem(value, options) {
 }
 
 function getItemId(item) {
-  return typeof item === "object" ? item.id : item;
+  return typeof item === "object" ? item.value : item;
 }
 
 function getItemLabel(item) {

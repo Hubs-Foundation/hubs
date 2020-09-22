@@ -54,9 +54,7 @@ import TweetDialog from "./tweet-dialog.js";
 import EntryStartPanel from "./entry-start-panel.js";
 import InWorldChatBox from "./in-world-chat-box.js";
 import AvatarEditor from "./avatar-editor";
-import MicLevelWidget from "./mic-level-widget.js";
 import PreferencesScreen from "./preferences-screen.js";
-import OutputLevelWidget from "./output-level-widget.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import ObjectList from "./object-list.js";
@@ -70,7 +68,6 @@ import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-in
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import qsTruthy from "../utils/qs_truthy";
@@ -83,6 +80,7 @@ import { useAccessibleOutlineStyle } from "./input/useAccessibleOutlineStyle";
 import { RoomEntryModal } from "./room/RoomEntryModal";
 import { EnterOnDeviceModal } from "./room/EnterOnDeviceModal";
 import { MicPermissionsModal } from "./room/MicPermissionsModal";
+import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -582,8 +580,8 @@ class UIRoot extends Component {
     await this.performDirectEntryFlow(true);
   };
 
-  micDeviceChanged = async ev => {
-    const constraints = { audio: { deviceId: { exact: [ev.target.value] } } };
+  micDeviceChanged = async deviceId => {
+    const constraints = { audio: { deviceId: { exact: [deviceId] } } };
     await this.fetchAudioTrack(constraints);
     await this.setupNewMediaStream();
   };
@@ -715,7 +713,7 @@ class UIRoot extends Component {
           {
             micDevices: mediaDevices
               .filter(d => d.kind === "audioinput")
-              .map(d => ({ deviceId: d.deviceId, label: d.label }))
+              .map(d => ({ value: d.deviceId, label: d.label }))
           },
           resolve
         );
@@ -744,7 +742,7 @@ class UIRoot extends Component {
   };
 
   micDeviceIdForMicLabel = label => {
-    return this.state.micDevices.filter(d => d.label === label).map(d => d.deviceId)[0];
+    return this.state.micDevices.filter(d => d.label === label).map(d => d.value)[0];
   };
 
   selectedMicDeviceId = () => {
@@ -1103,99 +1101,20 @@ class UIRoot extends Component {
   };
 
   renderAudioSetupPanel = () => {
-    const subtitleId = isMobilePhoneOrVR ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
+    // TODO: Show HMD mic not chosen warning
     return (
-      <div className="audio-setup-panel">
-        <div
-          onClick={() => {
-            this.props.history.goBack();
-          }}
-          className={entryStyles.back}
-        >
-          <i>
-            <FontAwesomeIcon icon={faArrowLeft} />
-          </i>
-          <FormattedMessage id="entry.back" />
-        </div>
-
-        <div>
-          <div className="audio-setup-panel__title">
-            <FormattedMessage id="audio.title" />
-          </div>
-          <div className="audio-setup-panel__subtitle">
-            {(isMobilePhoneOrVR || this.state.enterInVR) && <FormattedMessage id={subtitleId} />}
-          </div>
-          <div className="audio-setup-panel__levels">
-            <MicLevelWidget
-              scene={this.props.scene}
-              hasAudioTrack={!!this.state.audioTrack}
-              muteOnEntry={muteOnEntry}
-            />
-            <OutputLevelWidget />
-          </div>
-          {this.state.audioTrack && this.state.micDevices.length > 1 ? (
-            <div className="audio-setup-panel__device-chooser">
-              <select
-                className="audio-setup-panel__device-chooser__dropdown"
-                value={this.selectedMicDeviceId()}
-                onChange={this.micDeviceChanged}
-              >
-                {this.state.micDevices.map(d => (
-                  <option key={d.deviceId} value={d.deviceId}>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    {d.label}
-                  </option>
-                ))}
-              </select>
-              <img
-                className="audio-setup-panel__device-chooser__mic-icon"
-                src="../assets/images/mic_small.png"
-                srcSet="../assets/images/mic_small@2x.png 2x"
-              />
-              <img
-                className="audio-setup-panel__device-chooser__dropdown-arrow"
-                src="../assets/images/dropdown_arrow.png"
-                srcSet="../assets/images/dropdown_arrow@2x.png 2x"
-              />
-            </div>
-          ) : (
-            <div />
-          )}
-          {this.shouldShowHmdMicWarning() && (
-            <div className="audio-setup-panel__hmd-mic-warning">
-              <img
-                src="../assets/images/warning_icon.png"
-                srcSet="../assets/images/warning_icon@2x.png 2x"
-                className="audio-setup-panel__hmd-mic-warning__icon"
-              />
-              <span className="audio-setup-panel__hmd-mic-warning__label">
-                <FormattedMessage id="audio.hmd-mic-warning" />
-              </span>
-            </div>
-          )}
-        </div>
-        <div className="audio-setup-panel__mute-container">
-          <input
-            id="mute-on-entry"
-            type="checkbox"
-            onChange={() =>
-              this.props.store.update({
-                preferences: { muteMicOnEntry: !this.props.store.state.preferences["muteMicOnEntry"] }
-              })
-            }
-            checked={this.props.store.state.preferences["muteMicOnEntry"] || false}
-          />
-          <label htmlFor="mute-on-entry">
-            <FormattedMessage id="entry.mute-on-entry" />
-          </label>
-        </div>
-        <div className="audio-setup-panel__enter-button-container">
-          <button autoFocus className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
-            <FormattedMessage id="audio.enter-now" />
-          </button>
-        </div>
-      </div>
+      <MicSetupModalContainer
+        scene={this.props.scene}
+        selectedMicrophone={this.selectedMicDeviceId()}
+        microphoneOptions={this.state.micDevices}
+        onChangeMicrophone={this.micDeviceChanged}
+        microphoneEnabled={!!this.state.audioTrack}
+        microphoneMuted={muteOnEntry}
+        onChangeMicrophoneMuted={() => this.props.store.update({ preferences: { muteMicOnEntry: !muteOnEntry } })}
+        onEnterRoom={this.onAudioReadyButton}
+        onBack={() => this.props.history.goBack()}
+      />
     );
   };
 
