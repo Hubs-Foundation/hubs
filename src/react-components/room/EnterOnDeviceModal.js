@@ -87,7 +87,7 @@ EnterOnDeviceModal.propTypes = {
   className: PropTypes.string,
   shortUrl: PropTypes.string.isRequired,
   loadingCode: PropTypes.bool,
-  code: PropTypes.string.isRequired,
+  code: PropTypes.string,
   headsetConnected: PropTypes.bool,
   unsupportedBrowser: PropTypes.bool,
   onEnterOnConnectedHeadset: PropTypes.func,

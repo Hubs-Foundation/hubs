@@ -28,7 +28,6 @@ import { getCurrentStreamer } from "../utils/component-utils";
 
 import { getMessages } from "../utils/i18n";
 import AutoExitWarning from "./auto-exit-warning";
-import { TwoDEntryButton, GenericEntryButton, DaydreamEntryButton } from "./entry-buttons.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowser from "./media-browser";
 
@@ -37,7 +36,6 @@ import ChangeSceneDialog from "./change-scene-dialog.js";
 import AvatarUrlDialog from "./avatar-url-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
-import LinkDialog from "./link-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
 import RoomSettingsDialog from "./room-settings-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
@@ -83,6 +81,8 @@ import { LoadingScreenContainer } from "./room/LoadingScreenContainer";
 import "./styles/global.scss";
 import "./room/RoomContainer.scss";
 import { useAccessibleOutlineStyle } from "./input/useAccessibleOutlineStyle";
+import { RoomEntryModal } from "./room/RoomEntryModal";
+import { EnterOnDeviceModal } from "./room/EnterOnDeviceModal";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -792,7 +792,7 @@ class UIRoot extends Component {
   };
 
   attemptLink = async () => {
-    this.pushHistoryState("overlay", "link");
+    this.pushHistoryState("entry_step", "device");
     const { code, cancel, onFinished } = await this.props.linkChannel.generateCode();
     this.setState({ linkCode: code, linkCodeCancel: cancel });
     onFinished.then(() => {
@@ -1033,145 +1033,41 @@ class UIRoot extends Component {
     const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
     const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
 
+    // TODO: use appName from admin panel.
+    // TODO: What does onEnteringCanceled do?
     return (
-      <div className={entryStyles.entryPanel}>
-        <div className={entryStyles.name}>
-          {this.props.hubChannel.canOrWillIfCreator("update_hub") ? (
-            <button
-              className={entryStyles.renameButton}
-              onClick={() =>
-                this.props.performConditionalSignIn(
-                  () => this.props.hubChannel.can("update_hub"),
-                  () => this.pushHistoryState("modal", "room_settings"),
-                  "room-settings"
-                )
-              }
-            >
-              {this.props.hub.name}
-            </button>
-          ) : (
-            <span>{this.props.hub.name}</span>
-          )}
-          <button
-            aria-label="Close room entry panel and spectate from lobby"
-            onClick={() => this.setState({ watching: true })}
-            className={entryStyles.collapseButton}
-          >
-            <i>
-              <FontAwesomeIcon icon={faTimes} />
-            </i>
-          </button>
+      <>
+        <RoomEntryModal
+          appName="Hubs by Mozilla"
+          logoSrc={configs.image("logo")}
+          roomName={this.props.hub.name}
+          showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}
+          onJoinRoom={() => {
+            if (promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType) {
+              this.setState({ entering: true });
+              this.props.hubChannel.sendEnteringEvent();
 
-          <button
-            aria-label="Toggle Favorited"
-            onClick={() => this.toggleFavorited()}
-            className={classNames({
-              [entryStyles.entryFavoriteButton]: true,
-              [entryStyles.favoriteButton]: true,
-              [entryStyles.favorited]: this.isFavorited()
-            })}
-          >
-            <i title="Favorite">
-              <FontAwesomeIcon icon={faStar} />
-            </i>
-          </button>
-        </div>
-
-        <div className={entryStyles.roomSubtitle}>
-          <FormattedMessage id="entry.lobby" />
-        </div>
-
-        <div className={entryStyles.center}>
-          <LobbyChatBox
-            occupantCount={this.occupantCount()}
-            discordBridges={this.discordBridges()}
-            onSendMessage={this.sendMessage}
-          />
-        </div>
-
-        {!this.state.waitingOnAudio &&
-          !this.props.entryDisallowed && (
-            <div className={entryStyles.buttonContainer}>
-              {!isMobileVR && (
-                <button
-                  onClick={e => {
-                    e.preventDefault();
-                    this.attemptLink();
-                  }}
-                  className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
-                >
-                  <FormattedMessage id="entry.device-medium" />
-                  <div className={entryStyles.buttonSubtitle}>
-                    <FormattedMessage
-                      id={isMobile ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"}
-                    />
-                  </div>
-                </button>
-              )}
-              {configs.feature("enable_lobby_ghosts") ? (
-                <button
-                  onClick={e => {
-                    e.preventDefault();
-                    this.setState({ watching: true });
-                  }}
-                  className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
-                >
-                  <FormattedMessage id="entry.watch-from-lobby" />
-                  <div className={entryStyles.buttonSubtitle}>
-                    <FormattedMessage id="entry.watch-from-lobby-subtitle" />
-                  </div>
-                </button>
-              ) : (
-                <div />
-              )}
-              <button
-                autoFocus
-                onClick={e => {
-                  e.preventDefault();
-
-                  if (promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType) {
-                    this.setState({ entering: true });
-                    this.props.hubChannel.sendEnteringEvent();
-
-                    const stateValue = promptForNameAndAvatarBeforeEntry ? "profile" : "device";
-                    this.pushHistoryState("entry_step", stateValue);
-                  } else {
-                    this.handleForceEntry();
-                  }
-                }}
-                className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
-              >
-                <FormattedMessage id="entry.enter-room" />
-              </button>
-            </div>
-          )}
-        {this.props.entryDisallowed &&
-          !this.state.waitingOnAudio && (
-            <div className={entryStyles.buttonContainer}>
-              <a
-                onClick={e => {
-                  e.preventDefault();
-                  this.setState({ watching: true });
-                }}
-                className={classNames([entryStyles.secondaryActionButton, entryStyles.wideButton])}
-              >
-                <FormattedMessage id="entry.entry-disallowed" />
-                <div className={entryStyles.buttonSubtitle}>
-                  <FormattedMessage id="entry.entry-disallowed-subtitle" />
-                </div>
-              </a>
-            </div>
-          )}
-        {this.state.waitingOnAudio && (
-          <div>
-            <div className="loader-wrap loader-mid">
-              <div className="loader">
-                <div className="loader-center" />
-              </div>
-            </div>
-          </div>
-        )}
-
+              const stateValue = promptForNameAndAvatarBeforeEntry ? "profile" : "device";
+              this.pushHistoryState("entry_step", stateValue);
+            } else {
+              this.handleForceEntry();
+            }
+          }}
+          showEnterOndevice={!this.state.waitingOnAudio && !this.props.entryDisallowed && !isMobileVR}
+          onEnterOnDevice={() => this.attemptLink()}
+          showSpectate={
+            !this.state.waitingOnAudio && !this.props.entryDisallowed && configs.feature("enable_lobby_ghosts")
+          }
+          onSpectate={() => this.setState({ watching: true })}
+          showOptions={this.props.hubChannel.canOrWillIfCreator("update_hub")}
+          onOptions={() => {
+            this.props.performConditionalSignIn(
+              () => this.props.hubChannel.can("update_hub"),
+              () => this.pushHistoryState("modal", "room_settings"),
+              "room-settings"
+            );
+          }}
+        />
         {!this.state.waitingOnAudio && (
           <EntryStartPanel
             hubChannel={this.props.hubChannel}
@@ -1179,66 +1075,30 @@ class UIRoot extends Component {
             onEnteringCanceled={this.onEnteringCanceled}
           />
         )}
-      </div>
+      </>
     );
   };
 
   renderDevicePanel = () => {
     return (
-      <div className={entryStyles.entryPanel}>
-        <div
-          onClick={() => {
-            this.props.history.goBack();
-          }}
-          className={entryStyles.back}
-        >
-          <i>
-            <FontAwesomeIcon icon={faArrowLeft} />
-          </i>
-          <FormattedMessage id="entry.back" />
-        </div>
-
-        <div className={entryStyles.title}>
-          <FormattedMessage id="entry.choose-device" />
-        </div>
-
-        {!this.state.waitingOnAudio ? (
-          <div className={entryStyles.buttonContainer}>
-            {this.props.checkingForDeviceAvailability && (
-              <div>
-                <div className="loader-wrap loader-mid">
-                  <div className="loader">
-                    <div className="loader-center" />
-                  </div>
-                </div>
-                <FormattedMessage id="entry.checkingForDeviceAvailability" />
-              </div>
-            )}
-            {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
-              <div className={entryStyles.secondary} onClick={this.enterVR}>
-                <FormattedMessage id="entry.cardboard" />
-              </div>
-            )}
-            {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
-              <GenericEntryButton secondary={true} onClick={this.enterVR} />
-            )}
-            {this.props.availableVREntryTypes.daydream === VR_DEVICE_AVAILABILITY.yes && (
-              <DaydreamEntryButton secondary={true} onClick={this.enterDaydream} subtitle={null} />
-            )}
-            {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
-              <TwoDEntryButton autoFocus={true} onClick={this.enter2D} />
-            )}
-          </div>
-        ) : (
-          <div className={entryStyles.audioLoader}>
-            <div className="loader-wrap loader-mid">
-              <div className="loader">
-                <div className="loader-center" />
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      <EnterOnDeviceModal
+        shortUrl={configs.SHORTLINK_DOMAIN}
+        loadingCode={!this.state.linkCode}
+        code={this.state.linkCode}
+        headsetConnected={this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no}
+        unsupportedBrowser={this.props.availableVREntryTypes.generic === VR_DEVICE_AVAILABILITY.maybe}
+        onEnterOnConnectedHeadset={() => {
+          // TODO: This is bad. linkCodeCancel should be tied to component lifecycle not these callback methods.
+          this.state.linkCodeCancel();
+          this.setState({ linkCode: null, linkCodeCancel: null });
+          this.enterVR();
+        }}
+        onBack={() => {
+          this.state.linkCodeCancel();
+          this.setState({ linkCode: null, linkCodeCancel: null });
+          this.props.history.goBack();
+        }}
+      />
     );
   };
 
@@ -1981,21 +1841,6 @@ class UIRoot extends Component {
                 onClose={() => {
                   this.props.history.goBack();
                   exit2DInterstitialAndEnterVR();
-                }}
-              />
-            )}
-          />
-          <StateRoute
-            stateKey="overlay"
-            stateValue="link"
-            history={this.props.history}
-            render={() => (
-              <LinkDialog
-                linkCode={this.state.linkCode}
-                onClose={() => {
-                  this.state.linkCodeCancel();
-                  this.setState({ linkCode: null, linkCodeCancel: null });
-                  this.props.history.goBack();
                 }}
               />
             )}
