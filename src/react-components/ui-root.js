@@ -75,7 +75,6 @@ import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 import { LoadingScreenContainer } from "./room/LoadingScreenContainer";
 
 import "./styles/global.scss";
-import "./room/RoomContainer.scss";
 import { RoomLayout } from "./layout/RoomLayout";
 import { useAccessibleOutlineStyle } from "./input/useAccessibleOutlineStyle";
 import { RoomEntryModal } from "./room/RoomEntryModal";

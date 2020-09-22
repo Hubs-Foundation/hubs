@@ -23,8 +23,8 @@ import "webrtc-adapter";
 import "aframe-slice9-component";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
-import { detectOS, detect } from "detect-browser";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
+import { detectOS, detect } from "detect-browser";
 import {
   getReticulumFetchUrl,
   getReticulumMeta,
