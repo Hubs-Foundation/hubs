@@ -26,7 +26,7 @@
     }]
   ],
   "plugins": [
-    [ "react-intl", { "messagesDir": "./public/messages", "enforceDescriptions": false } ],
+    [ "react-intl", { "messagesDir": "./dist/messages", "enforceDescriptions": false } ],
     "transform-react-jsx-img-import",
     ["@babel/proposal-class-properties", { "loose": true }],
     "@babel/proposal-object-rest-spread",
